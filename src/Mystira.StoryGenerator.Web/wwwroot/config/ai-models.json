@@ -1,0 +1,27 @@
+{
+  "defaultModelId": "gpt-4.1",
+  "models": [
+    {
+      "id": "gpt-4.1",
+      "displayName": "GPT-4.1",
+      "provider": "azure-openai",
+      "deployment": "gpt-4.1",
+      "defaultMaxTokens": 2000,
+      "defaultTemperature": 0.7,
+      "maxTokensLimit": 4000,
+      "minTemperature": 0.0,
+      "maxTemperature": 1.0
+    },
+    {
+      "id": "gpt-5-nano",
+      "displayName": "GPT-5 Nano",
+      "provider": "azure-openai",
+      "deployment": "gpt-5-nano",
+      "defaultMaxTokens": 1200,
+      "defaultTemperature": 0.65,
+      "maxTokensLimit": 4000,
+      "minTemperature": 0.0,
+      "maxTemperature": 1.0
+    }
+  ]
+}

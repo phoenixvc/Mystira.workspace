@@ -1,0 +1,164 @@
+@using Mystira.StoryGenerator.Contracts
+
+<div class="panel h-full flex flex-col">
+    <div class="panel-header flex items-center justify-between">
+        <h2 class="text-lg font-semibold">@(CurrentChat?.Title ?? "New Story Generation")</h2>
+        @if (CurrentChat != null)
+        {
+            <div class="flex items-center space-x-2">
+                <span class="text-sm text-gray-500">@CurrentChat.Messages?.Count messages</span>
+                <button class="text-gray-400 hover:text-gray-600" @onclick="OnClearChat">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                    </svg>
+                </button>
+            </div>
+        }
+    </div>
+    
+    <div class="flex-1 flex flex-col overflow-hidden">
+        <!-- Chat Messages Area -->
+        <div class="flex-1 p-4 overflow-y-auto space-y-4" id="chat-messages">
+            @if (CurrentChat?.Messages?.Any() == true)
+            {
+                @foreach (var message in CurrentChat.Messages)
+                {
+                    <div class="@GetMessageClasses(message.Role)">
+                        <div class="@GetMessageBubbleClasses(message.Role)">
+                            <div class="text-xs text-gray-500 mb-1">@message.Role.ToUpperInvariant()</div>
+                            <div class="text-sm whitespace-pre-wrap">@message.Content</div>
+                            <div class="text-xs text-gray-400 mt-2">@message.Timestamp.ToString("HH:mm")</div>
+                        </div>
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="text-center text-gray-500 mt-16">
+                    <svg class="mx-auto h-16 w-16 text-gray-300 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                              d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                    <p class="text-lg font-medium mb-2">Generate Your Story</p>
+                    <p class="text-sm text-gray-400 max-w-sm mx-auto">
+                        Start by typing your story idea, characters, or setting below. 
+                        Our AI will help you create an amazing narrative.
+                    </p>
+                </div>
+            }
+            
+            @if (IsTyping)
+            {
+                <div class="flex items-start space-x-3">
+                    <div class="flex-shrink-0 w-8 h-8 bg-primary-500 rounded-full flex items-center justify-center">
+                        <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M10 2L3 7v11c0 .6.4 1 1 1h3v-7h6v7h3c.6 0 1-.4 1-1V7l-7-5z"/>
+                        </svg>
+                    </div>
+                    <div class="bg-gray-100 rounded-lg p-3 max-w-xs">
+                        <div class="flex space-x-1">
+                            <div class="w-2 h-2 bg-gray-500 rounded-full animate-bounce"></div>
+                            <div class="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
+                            <div class="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+        
+        <!-- Input Area -->
+        <div class="border-t border-gray-200 p-4">
+            <div class="flex space-x-3">
+                <textarea @bind="MessageText" 
+                         @onkeypress="HandleKeyPress"
+                         placeholder="Describe your story idea, characters, setting, or ask for help..."
+                         class="flex-1 resize-none border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                         rows="3"
+                         disabled="@IsTyping"></textarea>
+                <div class="flex flex-col space-y-2">
+                    <button @onclick="SendMessage" 
+                           disabled="@(IsTyping || string.IsNullOrWhiteSpace(MessageText))"
+                           class="bg-primary-600 text-white p-2 rounded-lg hover:bg-primary-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
+                        </svg>
+                    </button>
+                    <button @onclick="GenerateRandomPrompt"
+                           disabled="@IsTyping"
+                           class="bg-gray-600 text-white p-2 rounded-lg hover:bg-gray-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+                           title="Random prompt">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public StoryGeneratorChatHistory? CurrentChat { get; set; }
+    [Parameter] public bool IsTyping { get; set; }
+    [Parameter] public EventCallback<string> OnSendMessage { get; set; }
+    [Parameter] public EventCallback OnClearChat { get; set; }
+    
+    private string MessageText { get; set; } = string.Empty;
+    
+    private readonly string[] RandomPrompts = new[]
+    {
+        "A young wizard discovers an ancient spellbook in their grandmother's attic",
+        "In a world where dragons run delivery services, one dragon loses the most important package",
+        "A detective who can speak to ghosts investigates a mystery in a haunted mansion",
+        "Two rival kingdoms must work together when an alien threat appears",
+        "A time traveler gets stuck in medieval times and must find a way home",
+        "A magical library where books come to life needs a new guardian",
+        "Pirates discover a map to a floating island made entirely of clouds",
+        "A robot learns to dream and starts having visions of the future"
+    };
+
+    private async Task SendMessage()
+    {
+        if (string.IsNullOrWhiteSpace(MessageText) || IsTyping) return;
+        
+        var message = MessageText;
+        MessageText = string.Empty;
+        
+        await OnSendMessage.InvokeAsync(message);
+    }
+    
+    private async Task HandleKeyPress(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter" && !e.ShiftKey)
+        {
+            await SendMessage();
+        }
+    }
+    
+    private void GenerateRandomPrompt()
+    {
+        var random = new Random();
+        MessageText = RandomPrompts[random.Next(RandomPrompts.Length)];
+    }
+    
+    private string GetMessageClasses(string role)
+    {
+        return role?.ToLower() switch
+        {
+            "user" => "flex justify-end",
+            "assistant" => "flex justify-start",
+            _ => "flex justify-start"
+        };
+    }
+    
+    private string GetMessageBubbleClasses(string role)
+    {
+        return role?.ToLower() switch
+        {
+            "user" => "bg-primary-600 text-white rounded-lg p-3 max-w-sm",
+            "assistant" => "bg-gray-100 text-gray-900 rounded-lg p-3 max-w-lg",
+            _ => "bg-gray-100 text-gray-900 rounded-lg p-3 max-w-lg"
+        };
+    }
+
+}

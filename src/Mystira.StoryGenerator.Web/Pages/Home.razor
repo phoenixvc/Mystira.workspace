@@ -1,0 +1,67 @@
+@page "/home"
+
+<PageTitle>Home</PageTitle>
+
+<div class="home-container">
+   <div class="hero-section">
+       <h1>Welcome to Mystira Story Generator</h1>
+       <p>Create engaging, interactive stories powered by AI</p>
+       <a href="/story-generator" class="btn btn-primary">
+           <i class="btn-icon">✨</i>
+           Start Creating
+       </a>
+   </div>
+</div>
+
+<style>
+   .home-container {
+       height: 100vh;
+       display: flex;
+       align-items: center;
+       justify-content: center;
+       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+       color: white;
+       text-align: center;
+   }
+
+   .hero-section h1 {
+       font-size: 2.5rem;
+       margin-bottom: 1rem;
+       font-weight: 700;
+   }
+
+   .hero-section p {
+       font-size: 1.25rem;
+       margin-bottom: 2rem;
+       opacity: 0.9;
+   }
+
+   .btn {
+       padding: 1rem 2rem;
+       border: none;
+       border-radius: 1rem;
+       font-weight: 600;
+       cursor: pointer;
+       display: inline-flex;
+       align-items: center;
+       gap: 0.5rem;
+       transition: transform 0.2s, box-shadow 0.2s;
+       text-decoration: none;
+       font-size: 1.125rem;
+   }
+
+   .btn-primary {
+       background: white;
+       color: #667eea;
+       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+   }
+
+   .btn-primary:hover {
+       transform: translateY(-2px);
+       box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+   }
+
+   .btn-icon {
+       font-size: 20px;
+   }
+</style>

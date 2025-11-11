@@ -1,0 +1,29 @@
+@page "/"
+@page "/story-generator"
+@using Mystira.StoryGenerator.Web.Components.Chat
+
+<PageTitle>Mystira Story Generator</PageTitle>
+
+<div class="app-layout">
+    <SessionSidebar />
+    <EnhancedChatContainer />
+</div>
+
+<style>
+    .app-layout {
+        display: flex;
+        height: 100vh;
+        overflow: hidden;
+    }
+
+    @@media (max-width: 768px) {
+        .app-layout {
+            flex-direction: column;
+        }
+        
+        .app-layout :deep(.session-sidebar) {
+            width: 100%;
+            height: 200px;
+        }
+    }
+</style>

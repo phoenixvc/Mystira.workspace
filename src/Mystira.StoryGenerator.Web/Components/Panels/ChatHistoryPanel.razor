@@ -1,0 +1,65 @@
+@using Mystira.StoryGenerator.Contracts
+
+<div class="panel h-full flex flex-col">
+    <div class="panel-header">
+        <h2 class="text-lg font-semibold">Chat History</h2>
+    </div>
+    <div class="panel-content flex-1 overflow-y-auto">
+        @if (ChatHistories?.Any() == true)
+        {
+            <div class="space-y-3">
+                @foreach (var chat in ChatHistories)
+                {
+                    <div class="p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors flex items-start justify-between">
+                        <div class="flex-1 cursor-pointer" @onclick="() => OnChatSelected.InvokeAsync(chat)">
+                            <h3 class="font-medium text-sm text-gray-900 truncate">@chat.Title</h3>
+                            <p class="text-xs text-gray-500 mt-1">@chat.CreatedAt.ToString("MMM dd, yyyy HH:mm")</p>
+                            <p class="text-xs text-gray-600 mt-1 line-clamp-2">@chat.Messages?.LastOrDefault()?.Content</p>
+                        </div>
+                        <button class="ml-2 text-gray-400 hover:text-red-600" title="Delete chat" @onclick:stopPropagation @onclick="() => OnDeleteChat.InvokeAsync(chat.Id)">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                            </svg>
+                        </button>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="text-center text-gray-500 mt-8">
+                <svg class="mx-auto h-12 w-12 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                          d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-3.582 8-8 8a8.955 8.955 0 01-3.274-.606l-4.404 2.202a.75.75 0 01-.954-.95l2.1-4.2c-.65-1.115-1.042-2.41-1.042-3.796C5.5 7.582 9.082 4 13.5 4S21.5 7.582 21.5 12z" />
+                </svg>
+                @if (!string.IsNullOrWhiteSpace(SearchQuery))
+                {
+                    <p class="mt-2 text-sm">No matches found for "@SearchQuery"</p>
+                    <p class="text-xs text-gray-400 mt-1">Try a different search term or clear the search.</p>
+                }
+                else
+                {
+                    <p class="mt-2 text-sm">No chat history yet</p>
+                    <p class="text-xs text-gray-400 mt-1">Start a conversation to see it here</p>
+                }
+            </div>
+        }
+    </div>
+    <div class="p-4 border-t border-gray-200">
+        <button class="w-full bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition-colors text-sm font-medium"
+                @onclick="OnNewChatClicked">
+            <svg class="inline w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+            </svg>
+            New Chat
+        </button>
+    </div>
+</div>
+
+@code {
+    [Parameter] public IEnumerable<StoryGeneratorChatHistory>? ChatHistories { get; set; }
+    [Parameter] public EventCallback<StoryGeneratorChatHistory> OnChatSelected { get; set; }
+    [Parameter] public EventCallback OnNewChatClicked { get; set; }
+    [Parameter] public EventCallback<string> OnDeleteChat { get; set; }
+    [Parameter] public string? SearchQuery { get; set; }
+}

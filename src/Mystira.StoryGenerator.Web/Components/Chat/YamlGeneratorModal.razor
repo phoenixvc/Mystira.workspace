@@ -1,0 +1,590 @@
+@using Mystira.StoryGenerator.Contracts.Chat
+@using Mystira.StoryGenerator.Contracts.Stories
+@using Mystira.StoryGenerator.Web.Services
+@using Mystira.StoryGenerator.Web.Components
+@inject IChatSessionService ChatService
+@inject IStoryApiService StoryApi
+
+<div class="modal-overlay" @onclick="Close">
+    <div class="modal-content yaml-modal" @onclick:stopPropagation>
+        <div class="modal-header">
+            <h4>Generate YAML Story Structure</h4>
+            <button class="btn-close" @onclick="Close">×</button>
+        </div>
+
+        <div class="modal-body">
+            @if (isGenerating)
+            {
+                <div class="generating-state">
+                    <div class="spinner"></div>
+                    <p>Generating YAML structure from your conversation...</p>
+                </div>
+            }
+            else if (!string.IsNullOrEmpty(generatedYaml))
+            {
+                <div class="yaml-result">
+                    <div class="result-header">
+                        <h5>Generated YAML Structure</h5>
+                        <button class="btn btn-copy" @onclick="CopyToClipboard">
+                            <i class="copy-icon">📋</i>
+                            Copy
+                        </button>
+                    </div>
+                    <div class="yaml-content">
+                        <pre><code>@generatedYaml</code></pre>
+                    </div>
+
+                    <!-- Validation Results -->
+                    <ValidationResults StoryContent="@generatedYaml"
+                                     Format="yaml"
+                                     OnValidationComplete="@OnValidationComplete" />
+                </div>
+            }
+            else
+            {
+                <div class="generate-prompt">
+                    <p>This will analyze your conversation and generate a structured YAML file for your story.</p>
+                    <p class="note">The YAML will include character definitions, scenes, and narrative structure based on your chat history.</p>
+                </div>
+            }
+        </div>
+
+        <div class="modal-footer">
+            @if (!isGenerating && string.IsNullOrEmpty(generatedYaml))
+            {
+                <button class="btn btn-cancel" @onclick="Close">Cancel</button>
+                <button class="btn btn-primary" @onclick="GenerateYaml">Generate YAML</button>
+            }
+            else if (!string.IsNullOrEmpty(generatedYaml))
+            {
+                <button class="btn btn-secondary" @onclick="RegenerateYaml">Regenerate</button>
+                @if (validationResponse != null && !isValid)
+                {
+                    <button class="btn btn-warning" @onclick="SaveYaml" title="Story has validation errors">
+                        ⚠️ Save with Errors
+                    </button>
+                }
+                else
+                {
+                    <button class="btn btn-success" @onclick="SaveYaml">
+                        @if (validationResponse != null && isValid)
+                        {
+                            <span>✅ Save Valid Story</span>
+                        }
+                        else
+                        {
+                            <span>Save to Session</span>
+                        }
+                    </button>
+                }
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public ChatSession Session { get; set; } = null!;
+    [Parameter] public EventCallback OnClose { get; set; }
+
+    private const string DefaultProvider = "azure-openai";
+    private const string StoryGenerationModelId = "story-gpt4o";
+
+    private bool isGenerating = false;
+    private string generatedYaml = string.Empty;
+    private ValidationResponse? validationResponse;
+    private bool isValid = true;
+
+    private async Task GenerateYaml()
+    {
+        if (Session == null || Session.Messages.Count == 0)
+            return;
+
+        isGenerating = true;
+        StateHasChanged();
+
+        try
+        {
+            var request = new GenerateYamlStoryRequest
+            {
+                Title = string.IsNullOrWhiteSpace(Session?.Title) ? "The Whispering Swamp" : Session!.Title,
+                Difficulty = "Medium",
+                SessionLength = "Medium",
+                AgeGroup = "10-12",
+                MinimumAge = 10,
+                CoreAxes = new List<string> { "honesty", "bravery" },
+                Archetypes = new List<string> { "explorer", "rogue", "mystic" },
+                Tags = new List<string> { "mystery", "swamp", "adventure" },
+                MinScenes = 6,
+                MaxScenes = 12
+            };
+
+            var result = await StoryApi.GenerateYamlStoryAsync(request);
+            if (result.Success)
+            {
+                generatedYaml = result.Yaml;
+            }
+            else
+            {
+                // Fallback: show an informative error and keep mock for demo
+                generatedYaml = $"# Generation failed: {result.Error}\n# Please check LLM configuration.\n" + GenerateMockYaml();
+            }
+        }
+        catch (Exception ex)
+        {
+            // Handle error
+            Console.WriteLine($"Error generating YAML: {ex.Message}");
+        }
+        finally
+        {
+            isGenerating = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task RegenerateYaml()
+    {
+        generatedYaml = string.Empty;
+        await GenerateYaml();
+    }
+
+    private async Task SaveYaml()
+    {
+        if (!string.IsNullOrEmpty(generatedYaml))
+        {
+            await ChatService.SaveYamlSnapshotAsync(generatedYaml);
+
+            var summary = BuildYamlSummaryMessage(generatedYaml);
+            var systemMessage = new MystiraChatMessage
+            {
+                MessageType = ChatMessageType.System,
+                Content = summary,
+                Timestamp = DateTime.UtcNow
+            };
+
+            await ChatService.AddMessageAsync(systemMessage);
+        }
+
+        await Close();
+    }
+
+    private async Task CopyToClipboard()
+    {
+        // In a real implementation, you'd use JS interop to copy to clipboard
+        // For now, we'll just simulate it
+        await Task.Delay(100);
+    }
+
+    private async Task Close()
+    {
+        await OnClose.InvokeAsync();
+    }
+
+    private async Task OnValidationComplete(ValidationResponse response)
+    {
+        validationResponse = response;
+        isValid = response.IsValid;
+        StateHasChanged();
+    }
+
+    private string BuildYamlSummaryMessage(string yaml)
+    {
+        var (totalScenes, totalPaths, choiceScenes, rollScenes, narrativeScenes) = SummarizeYaml(yaml);
+        return $"Summary: {totalScenes} scenes • {totalPaths} possible paths • {choiceScenes} choice scenes • {rollScenes} roll scenes • {narrativeScenes} narrative scenes.\nIf you'd like any changes, describe what to modify (for example: 'Make scene 2 a roll scene with DC 12', 'Add a new branch from scene_2', or 'Rename scene_3').";
+    }
+
+    private (int totalScenes, int totalPaths, int choiceScenes, int rollScenes, int narrativeScenes) SummarizeYaml(string yaml)
+    {
+        int totalScenes = 0, choiceScenes = 0, rollScenes = 0, narrativeScenes = 0, totalPaths = 0;
+        bool inScenes = false;
+        bool inChoices = false;
+        bool inBranches = false;
+
+        foreach (var rawLine in yaml.Split('\n'))
+        {
+            var line = rawLine.Trim();
+            if (string.IsNullOrWhiteSpace(line) || line.StartsWith("#")) continue;
+
+            if (line.StartsWith("scenes:"))
+            {
+                inScenes = true;
+                inChoices = false;
+                inBranches = false;
+                continue;
+            }
+
+            if (inScenes && line.StartsWith("- id:"))
+            {
+                totalScenes++;
+                inChoices = false;
+                inBranches = false;
+                continue;
+            }
+
+            if (inScenes && line.StartsWith("type:"))
+            {
+                var typeVal = line.Substring("type:".Length).Trim().Trim('"');
+                var t = typeVal.ToLowerInvariant();
+                if (t.Contains("choice") || t.Contains("decision") || t.Contains("branch")) choiceScenes++;
+                else if (t.Contains("roll") || t.Contains("skill")) rollScenes++;
+                else if (t.Contains("narrative") || t.Contains("story")) narrativeScenes++;
+                continue;
+            }
+
+            if (inScenes && (line.StartsWith("choices:") || line.StartsWith("branches:")))
+            {
+                inChoices = line.StartsWith("choices:");
+                inBranches = line.StartsWith("branches:");
+                continue;
+            }
+
+            if ((inChoices || inBranches) && line.StartsWith("- "))
+            {
+                totalPaths++;
+            }
+        }
+
+        if (totalPaths == 0)
+        {
+            foreach (var rawLine in yaml.Split('\n'))
+            {
+                var line = rawLine.Trim();
+                if (line.StartsWith("- from:")) totalPaths++;
+            }
+        }
+
+        return (totalScenes, totalPaths, choiceScenes, rollScenes, narrativeScenes);
+    }
+
+    private string GenerateMockYaml()
+    {
+        // Generate a sample YAML based on the conversation
+        var userMessages = Session.Messages.Where(m => m.MessageType == ChatMessageType.User).ToList();
+        var storyTheme = userMessages.Count > 0 ? userMessages.First().Content : "Adventure";
+
+        return $@"# Mystira Story: {Session.Title}
+# Generated on {DateTime.Now:yyyy-MM-dd HH:mm:ss}
+
+story:
+  title: ""{Session.Title}""
+  theme: ""{ExtractTheme(storyTheme)}""
+  target_age: ""8-12""
+  estimated_duration: ""30-45 minutes""
+
+characters:
+  - name: ""Hero""
+    type: ""player""
+    description: ""A brave young adventurer""
+    attributes:
+      courage: 8
+      wisdom: 6
+      magic: 4
+
+  - name: ""Wise Mentor""
+    type: ""npc""
+    description: ""An experienced guide""
+    role: ""helper""
+
+settings:
+  - name: ""Enchanted Forest""
+    description: ""A magical woodland filled with mysteries""
+    mood: ""mysterious""
+
+  - name: ""Crystal Cave""
+    description: ""A sparkling underground chamber""
+    mood: ""wondrous""
+
+scenes:
+  - id: ""opening""
+    title: ""The Journey Begins""
+    type: ""narrative""
+    setting: ""Enchanted Forest""
+    description: ""Our hero enters the magical realm...""
+
+  - id: ""first_challenge""
+    title: ""The Riddle of the Trees""
+    type: ""decision""
+    setting: ""Enchanted Forest""
+    description: ""Ancient trees whisper a riddle...""
+    branches:
+      - choice: ""Listen carefully""
+        outcome: ""wisdom_path""
+      - choice: ""Use magic""
+        outcome: ""magic_path""
+
+  - id: ""discovery""
+    title: ""The Crystal's Secret""
+    type: ""narrative""
+    setting: ""Crystal Cave""
+    description: ""A powerful crystal reveals its magic...""
+
+story_flow:
+  start: ""opening""
+  paths:
+    - from: ""opening""
+      to: ""first_challenge""
+    - from: ""first_challenge""
+      to: ""discovery""
+      conditions: [""any""]
+
+game_mechanics:
+  dice_rolls: true
+  skill_checks: true
+  inventory_system: false
+";
+    }
+
+    private string ExtractTheme(string firstMessage)
+    {
+        var themes = new Dictionary<string, string[]>
+        {
+            ["Adventure"] = new[] { "adventure", "journey", "quest", "explore" },
+            ["Mystery"] = new[] { "mystery", "secret", "hidden", "solve", "clue" },
+            ["Magic"] = new[] { "magic", "spell", "wizard", "enchant", "mystical" },
+            ["Friendship"] = new[] { "friend", "team", "together", "help", "support" }
+        };
+
+        var message = firstMessage.ToLower();
+        foreach (var theme in themes)
+        {
+            if (theme.Value.Any(keyword => message.Contains(keyword)))
+                return theme.Key;
+        }
+
+        return "Adventure";
+    }
+}
+
+<style>
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+    }
+
+    .modal-content {
+        background: white;
+        border-radius: 1rem;
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        max-width: 90%;
+        width: 100%;
+        max-height: 90vh;
+    }
+    .yaml-modal {
+        width: 90vw;
+        max-width: 800px;
+        max-height: 90vh;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1.5rem 1.5rem 0 1.5rem;
+        border-bottom: 1px solid #e5e7eb;
+        margin-bottom: 1.5rem;
+    }
+
+    .modal-header h4 {
+        margin: 0;
+        color: #1f2937;
+    }
+
+    .btn-close {
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        cursor: pointer;
+        color: #6b7280;
+        padding: 0;
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 0.5rem;
+        transition: background-color 0.2s;
+    }
+
+    .btn-close:hover {
+        background: #f3f4f6;
+        color: #374151;
+    }
+
+    .modal-body {
+        flex: 1;
+        padding: 0 1.5rem;
+        overflow-y: auto;
+    }
+
+    .generating-state {
+        text-align: center;
+        padding: 3rem 1rem;
+        color: #6b7280;
+    }
+
+    .spinner {
+        width: 40px;
+        height: 40px;
+        border: 4px solid #e5e7eb;
+        border-top: 4px solid #3b82f6;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 1rem auto;
+    }
+
+    @@keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    .yaml-result {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+    }
+
+    .result-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+
+    .result-header h5 {
+        margin: 0;
+        color: #1f2937;
+    }
+
+    .btn-copy {
+        padding: 0.5rem 1rem;
+        background: #f3f4f6;
+        border: 1px solid #d1d5db;
+        border-radius: 0.5rem;
+        color: #374151;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+        font-size: 0.875rem;
+        transition: background-color 0.2s;
+    }
+
+    .btn-copy:hover {
+        background: #e5e7eb;
+    }
+
+    .yaml-content {
+        flex: 1;
+        overflow-y: auto;
+        border: 1px solid #d1d5db;
+        border-radius: 0.5rem;
+        max-height: 400px;
+    }
+
+    .yaml-content pre {
+        margin: 0;
+        padding: 1rem;
+        font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+        font-size: 0.875rem;
+        line-height: 1.5;
+        color: #1f2937;
+        background: #f9fafb;
+        overflow-x: auto;
+    }
+
+    .generate-prompt {
+        text-align: center;
+        padding: 2rem 1rem;
+        color: #6b7280;
+    }
+
+    .generate-prompt p {
+        margin-bottom: 1rem;
+    }
+
+    .note {
+        font-size: 0.875rem;
+        opacity: 0.8;
+    }
+
+    .modal-footer {
+        padding: 1.5rem 1.5rem 1.5rem 1.5rem;
+        border-top: 1px solid #e5e7eb;
+        display: flex;
+        gap: 0.75rem;
+        justify-content: flex-end;
+        margin-top: 1.5rem;
+    }
+
+    .btn {
+        padding: 0.75rem 1.5rem;
+        border-radius: 0.5rem;
+        font-weight: 500;
+        cursor: pointer;
+        border: 1px solid transparent;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+
+    .btn-cancel {
+        background: #f3f4f6;
+        color: #374151;
+        border-color: #d1d5db;
+    }
+
+    .btn-cancel:hover {
+        background: #e5e7eb;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    }
+
+    .btn-secondary {
+        background: #6b7280;
+        color: white;
+    }
+
+    .btn-secondary:hover {
+        background: #4b5563;
+    }
+
+    .btn-success {
+        background: #10b981;
+        color: white;
+    }
+
+    .btn-success:hover {
+        background: #059669;
+    }
+
+    .btn-warning {
+        background: #f59e0b;
+        color: white;
+    }
+
+    .btn-warning:hover {
+        background: #d97706;
+    }
+
+    .copy-icon {
+        font-size: 14px;
+    }
+</style>

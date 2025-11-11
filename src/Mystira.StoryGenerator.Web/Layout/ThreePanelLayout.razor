@@ -1,0 +1,2170 @@
+@using Microsoft.AspNetCore.Components
+@using Mystira.StoryGenerator.Web.Components.Panels
+@using System.Linq
+@using Mystira.StoryGenerator.Web.Models
+@using Mystira.StoryGenerator.Web.Services
+@using Mystira.StoryGenerator.Contracts.Chat
+@using Mystira.StoryGenerator.Contracts.Stories
+@using Microsoft.AspNetCore.Components.Forms
+@inherits LayoutComponentBase
+@implements IDisposable
+@inject IStoryApiService ApiService
+@inject Blazored.LocalStorage.ILocalStorageService LocalStorage
+@inject IJSRuntime JSRuntime
+@inject IAiModelSettingsService ModelSettingsService
+@inject IYamlImportService YamlImportService
+@inject ILogger<ThreePanelLayout> Logger
+
+<div class="h-screen bg-gray-100 flex flex-col">
+    <!-- Header -->
+    <header class="bg-white border-b border-gray-200 px-6 py-4 flex-shrink-0">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-4">
+                <h1 class="text-2xl font-bold text-gray-900">Mystira Story Generator</h1>
+                <span class="bg-primary-100 text-primary-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
+                    Beta
+                </span>
+            </div>
+            <div class="flex items-center space-x-4">
+                <button class="text-gray-500 hover:text-gray-700 transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    </svg>
+                </button>
+                <button class="text-gray-500 hover:text-gray-700 transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </button>
+                <button type="button"
+                        class="inline-flex items-center gap-2 rounded-lg border border-gray-200 px-3 py-1.5 text-sm font-medium text-gray-600 transition-colors hover:border-primary-300 hover:text-primary-600"
+                        @onclick="OpenSettingsModal">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-1.14 1.95-1.14 2.25 0a1.125 1.125 0 001.76.62c.96-.64 2.2.6 1.56 1.56a1.125 1.125 0 00.62 1.76c1.14.3 1.14 1.95 0 2.25a1.125 1.125 0 00-.62 1.76c.64.96-.6 2.2-1.56 1.56a1.125 1.125 0 00-1.76.62c-.3 1.14-1.95 1.14-2.25 0a1.125 1.125 0 00-1.76-.62c-.96.64-2.2-.6-1.56-1.56a1.125 1.125 0 00-.62-1.76c-1.14-.3-1.14-1.95 0-2.25a1.125 1.125 0 00.62-1.76c-.64-.96.6-2.2 1.56-1.56.68.45 1.58.08 1.76-.62z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    </svg>
+                    <span class="hidden sm:inline">AI Settings</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 flex overflow-hidden">
+        <!-- Mobile Menu Toggle (Hidden on desktop) -->
+        <div class="lg:hidden fixed top-4 left-4 z-50">
+            <button @onclick="ToggleMobileMenu"
+                    class="bg-white p-2 rounded-lg shadow-lg border border-gray-200">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                </svg>
+            </button>
+        </div>
+
+        <!-- Three Panel Layout -->
+        <div id="panel-container" class="w-full flex">
+            <!-- Left Panel - Chat History and Tools (30%) -->
+            <div id="panel-left" class="panel border-r border-gray-200 bg-gray-50" style="width:@($"{leftWidth}%")">
+                <div class="flex flex-col h-full">
+                    <div class="p-3 bg-white border-b">
+                         <div class="flex flex-col gap-3">
+                             <div class="flex items-center justify-between gap-2">
+                                 <span class="text-xs font-semibold uppercase tracking-wide text-gray-500">Random Adventures</span>
+                                 <div class="relative">
+                                     <button type="button"
+                                             class="text-gray-500 hover:text-gray-700 p-1 rounded hover:bg-gray-100 transition-colors"
+                                             @onclick="ToggleImportMenu"
+                                             title="Import YAML story">
+                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                                         </svg>
+                                     </button>
+                                     @if (showImportMenu)
+                                     {
+                                         <div class="absolute top-8 right-0 bg-white border border-gray-200 rounded-md shadow-lg z-10 min-w-[160px]">
+                                             <button type="button"
+                                                     class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
+                                                     @onclick="ImportFromClipboard">
+                                                 <span>📋</span>
+                                                 <span>From Clipboard</span>
+                                             </button>
+                                             <button type="button"
+                                                     class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2 border-t border-gray-200"
+                                                     @onclick="TriggerFileInput">
+                                                 <span>📁</span>
+                                                 <span>From File</span>
+                                             </button>
+                                         </div>
+                                     }
+                                 </div>
+                             </div>
+                             <div class="flex flex-col gap-2">
+                                 @foreach (var option in difficultyOptions)
+                                 {
+                                     <button type="button"
+                                             class="@($"difficulty-button difficulty-{option.Key}")"
+                                             @onclick="async () => await HandleRandomizeStory(option.Key)">
+                                         <span class="difficulty-icon">
+                                             @((MarkupString)option.IconSvg)
+                                         </span>
+                                         <span class="difficulty-text">
+                                             <span class="difficulty-label">@option.ButtonHeading</span>
+                                             <span class="difficulty-meta">@option.ButtonDescription</span>
+                                         </span>
+                                         <span class="difficulty-pill">@option.DifficultyDisplay</span>
+                                     </button>
+                                 }
+                             </div>
+                         </div>
+                         <div class="mt-2">
+                             <input class="w-full border border-gray-300 rounded-md px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                    placeholder="Fuzzy search chats..."
+                                    @bind="searchQuery"
+                                    @bind:event="oninput" />
+                         </div>
+                     </div>
+
+                    <InputFile OnChange="HandleFileSelect" hidden @ref="fileInput" accept=".yaml,.yml" />
+                    <div class="flex-1 overflow-hidden">
+                        <ChatHistoryPanel ChatHistories="@GetFilteredChatHistories()"
+                                        OnChatSelected="@HandleChatSelected"
+                                        OnNewChatClicked="@HandleNewChat"
+                                        OnDeleteChat="@HandleDeleteChat"
+                                        SearchQuery="@searchQuery" />
+                    </div>
+                </div>
+            </div>
+            <div id="resizer-left" class="resizer-x" title="Drag to resize"></div>
+
+            <!-- Center Panel - Active Chat (40%) -->
+            <div id="panel-center" class="panel bg-white" style="width:@($"{centerWidth}%")">
+                <ActiveChatPanel CurrentChat="@CurrentChat"
+                               IsTyping="@IsTyping"
+                               OnSendMessage="@HandleSendMessage"
+                               OnClearChat="@HandleClearChat" />
+            </div>
+            <div id="resizer-right" class="resizer-x" title="Drag to resize"></div>
+
+            <!-- Right Panel - YAML Preview (30%) -->
+            <div id="panel-right" class="panel border-l border-gray-200 bg-gray-50" style="width:@($"{rightWidth}%")">
+                <YamlPreviewPanel YamlContent="@YamlContent"
+                                ValidationResult="@ValidationResult"
+                                OnYamlCopied="@HandleYamlCopied"
+                                OnYamlSaved="@HandleYamlSaved"
+                                OnValidateRequested="@HandleValidateYaml"
+                                SyntaxColors="@yamlPreviewTheme" />
+            </div>
+        </div>
+
+        <style>
+            .resizer-x { width: 6px; cursor: col-resize; background-color: #e5e7eb; }
+            .resizer-x:hover { background-color: #cbd5e1; }
+            .panel { height: 100%; overflow: hidden; flex-shrink: 0; }
+            .difficulty-button {
+                display: flex;
+                align-items: center;
+                width: 100%;
+                gap: 0.75rem;
+                padding: 0.85rem 0.95rem;
+                border-radius: 0.75rem;
+                border: 1px solid transparent;
+                color: #ffffff;
+                font-weight: 600;
+                cursor: pointer;
+                transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
+            }
+            .difficulty-button:hover {
+                transform: translateY(-1px);
+                box-shadow: 0 12px 22px rgba(15, 23, 42, 0.18);
+                filter: brightness(1.03);
+            }
+            .difficulty-button:focus {
+                outline: none;
+                box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.35);
+            }
+            .difficulty-button .difficulty-icon {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: 2.75rem;
+                height: 2.75rem;
+                border-radius: 9999px;
+                background-color: rgba(255, 255, 255, 0.18);
+            }
+            .difficulty-button .difficulty-icon svg {
+                width: 1.5rem;
+                height: 1.5rem;
+            }
+            .difficulty-button .difficulty-text {
+                display: flex;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.2rem;
+            }
+            .difficulty-button .difficulty-label {
+                font-size: 0.95rem;
+                line-height: 1.2;
+            }
+            .difficulty-button .difficulty-meta {
+                font-size: 0.75rem;
+                font-weight: 500;
+                opacity: 0.9;
+            }
+            .difficulty-button .difficulty-pill {
+                margin-left: auto;
+                padding: 0.3rem 0.65rem;
+                border-radius: 9999px;
+                font-size: 0.7rem;
+                letter-spacing: 0.08em;
+                text-transform: uppercase;
+                font-weight: 700;
+                border: 1px solid rgba(255, 255, 255, 0.35);
+                background-color: rgba(255, 255, 255, 0.18);
+            }
+            .difficulty-button.difficulty-easy {
+                background-image: linear-gradient(135deg, #34d399, #059669);
+                border-color: rgba(16, 185, 129, 0.9);
+            }
+            .difficulty-button.difficulty-easy .difficulty-icon {
+                background-color: rgba(16, 185, 129, 0.35);
+            }
+            .difficulty-button.difficulty-easy .difficulty-pill {
+                background-color: rgba(6, 95, 70, 0.45);
+                border-color: rgba(167, 243, 208, 0.4);
+            }
+            .difficulty-button.difficulty-medium {
+                background-image: linear-gradient(135deg, #60a5fa, #2563eb);
+                border-color: rgba(37, 99, 235, 0.9);
+            }
+            .difficulty-button.difficulty-medium .difficulty-icon {
+                background-color: rgba(37, 99, 235, 0.35);
+            }
+            .difficulty-button.difficulty-medium .difficulty-pill {
+                background-color: rgba(30, 64, 175, 0.45);
+                border-color: rgba(191, 219, 254, 0.45);
+            }
+            .difficulty-button.difficulty-hard {
+                background-image: linear-gradient(135deg, #f97316, #ea580c);
+                border-color: rgba(234, 88, 12, 0.85);
+            }
+            .difficulty-button.difficulty-hard .difficulty-icon {
+                background-color: rgba(234, 88, 12, 0.35);
+            }
+            .difficulty-button.difficulty-hard .difficulty-pill {
+                background-color: rgba(154, 52, 18, 0.45);
+                border-color: rgba(254, 215, 170, 0.45);
+            }
+        </style>
+
+        <!-- Mobile Overlay -->
+        @if (showMobileMenu)
+        {
+            <div class="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-40" @onclick="CloseMobileMenu"></div>
+        }
+    </main>
+
+    @if (!string.IsNullOrWhiteSpace(copyFeedbackMessage))
+    {
+        <div class="fixed bottom-6 right-6 z-50">
+            <div class="@GetCopyToastClasses()">
+                @if (copyFeedbackSuccess)
+                {
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                }
+                else
+                {
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                }
+                <span>@copyFeedbackMessage</span>
+            </div>
+        </div>
+    }
+
+    @if (showSettingsModal)
+    {
+
+        <div class="absolute inset-0 bg-black bg-opacity-50" @onclick="CloseSettingsModal"></div>
+
+        <div class="relative z-50 w-full max-w-xl px-4" @onclick:stopPropagation>
+            <div class="mx-auto overflow-hidden rounded-xl bg-white shadow-2xl">
+                <div class="flex items-center justify-between border-b border-gray-200 px-6 py-4">
+                    <h2 class="text-lg font-semibold text-gray-900">AI Model Settings</h2>
+                    <button type="button" class="text-gray-400 transition-colors hover:text-gray-600" @onclick="CloseSettingsModal">
+                        <span class="sr-only">Close</span>
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+                <div class="space-y-5 px-6 py-5">
+                    <div class="space-y-2">
+                        <label class="text-sm font-medium text-gray-700" for="model-select">Model</label>
+                        <select id="model-select"
+                                class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                value="@selectedModelId"
+                                @onchange="HandleModelChanged">
+                            @if (availableModels.Any())
+                            {
+                                foreach (var model in availableModels)
+                                {
+                                    <option value="@model.Id">@model.DisplayName (@model.Provider)</option>
+                                }
+                            }
+                            else
+                            {
+                                <option value="" disabled>Loading models…</option>
+                            }
+                        </select>
+                        @if (!string.IsNullOrWhiteSpace(selectedModelDefinition?.Description))
+                        {
+                            <p class="text-sm text-gray-500">@selectedModelDefinition!.Description</p>
+                        }
+                    </div>
+                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                        <div class="space-y-2">
+                            <label class="text-sm font-medium text-gray-700" for="tokens-input">Max Tokens</label>
+                            <input id="tokens-input"
+                                   type="number"
+                                   class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                   min="@GetMinTokens()"
+                                   max="@GetMaxTokens()"
+                                   @bind-value="selectedMaxTokens"
+                                   @bind-value:event="oninput" />
+                            <p class="text-xs text-gray-500">Allowed: @GetMinTokens() - @GetMaxTokens()</p>
+                        </div>
+                        <div class="space-y-2">
+                            <label class="text-sm font-medium text-gray-700" for="temperature-input">Temperature</label>
+                            <input id="temperature-input"
+                                   type="number"
+                                   step="0.05"
+                                   class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                   min="@GetMinTemperature()"
+                                   max="@GetMaxTemperature()"
+                                   @bind-value="selectedTemperature"
+                                   @bind-value:event="oninput" />
+                            <p class="text-xs text-gray-500">Allowed: @GetMinTemperature().ToString("0.00") - @GetMaxTemperature().ToString("0.00")</p>
+                        </div>
+                    </div>
+                    @if (!string.IsNullOrEmpty(settingsError))
+                    {
+                        <div class="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+                            @settingsError
+                        </div>
+                    }
+                </div>
+                <div class="flex items-center justify-end gap-3 border-t border-gray-200 bg-gray-50 px-6 py-4">
+                    <button type="button" class="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100" @onclick="CloseSettingsModal">Cancel</button>
+                    <button type="button"
+                            class="inline-flex items-center gap-2 rounded-lg bg-primary-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-primary-700 disabled:cursor-not-allowed disabled:opacity-60"
+                            @onclick="SaveSettingsAsync"
+                            disabled="@isSavingSettings">
+                        @if (isSavingSettings)
+                        {
+                            <svg class="h-4 w-4 animate-spin" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+                            </svg>
+                        }
+                        <span>Save</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    }
+
+    @if (showImportResult)
+    {
+        <div class="absolute inset-0 bg-black bg-opacity-50" @onclick="CloseImportResult"></div>
+
+        <div class="relative z-50 w-full max-w-xl px-4" @onclick:stopPropagation>
+            <div class="mx-auto overflow-hidden rounded-xl bg-white shadow-2xl">
+                <div class="flex items-center justify-between border-b border-gray-200 px-6 py-4">
+                    <h2 class="text-lg font-semibold text-gray-900">
+                        @(importResult?.IsValid == true ? "✅ Story Imported" : "❌ Import Failed")
+                    </h2>
+                    <button type="button" class="text-gray-400 transition-colors hover:text-gray-600" @onclick="CloseImportResult">
+                        <span class="sr-only">Close</span>
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+                <div class="space-y-5 px-6 py-5">
+                    @if (importResult?.IsValid == true)
+                    {
+                        <div class="whitespace-pre-wrap text-sm text-gray-700 leading-relaxed">
+                            @((MarkupString)(importResult.Summary ?? ""))
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+                            @importResult?.ErrorMessage
+                        </div>
+                    }
+                </div>
+                <div class="flex items-center justify-end gap-3 border-t border-gray-200 bg-gray-50 px-6 py-4">
+                    <button type="button" class="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100" @onclick="CloseImportResult">Close</button>
+                    @if (importResult?.IsValid == true)
+                    {
+                        <button type="button"
+                                class="inline-flex items-center gap-2 rounded-lg bg-primary-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-primary-700"
+                                @onclick="ConfirmImport">
+                            <span>Continue to Chat</span>
+                        </button>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private record DifficultyOption(
+        string Key,
+        string DifficultyDisplay,
+        string ButtonHeading,
+        string ButtonDescription,
+        string SessionLengthLabel,
+        string SessionLengthDetails,
+        int MinScenes,
+        int MaxScenes,
+        string TitlePrefix,
+        string IconSvg);
+
+    private readonly List<DifficultyOption> difficultyOptions = new()
+    {
+        new DifficultyOption(
+            Key: "easy",
+            DifficultyDisplay: "Easy",
+            ButtonHeading: "Easy Quest",
+            ButtonDescription: "Quick warm-up • 8-12 scenes",
+            SessionLengthLabel: "Quick Quest",
+            SessionLengthDetails: "~5 mins",
+            MinScenes: 8,
+            MaxScenes: 121,
+            TitlePrefix: "Easy Quest",
+            IconSvg: """<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m0 13.5V21M4.75 12H3m18 0h-1.75M5.636 5.636 4.5 4.5m14.864 14.864 1.136 1.136M18.364 5.636 19.5 4.5M5.636 18.364 4.5 19.5M8.25 12a3.75 3.75 0 016.75-2m-6.75 0a3.75 3.75 0 006.75 2m-6.75 0H7.5m6.75 0h1.5" /></svg>""")
+        ,
+        new DifficultyOption(
+            Key: "medium",
+            DifficultyDisplay: "Medium",
+            ButtonHeading: "Heroic Journey",
+            ButtonDescription: "Balanced challenge • 20-40 scenes",
+            SessionLengthLabel: "Standard Session",
+            SessionLengthDetails: "~15 mins",
+            MinScenes: 20,
+            MaxScenes: 40,
+            TitlePrefix: "Heroic Journey",
+            IconSvg: """<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 5.25l-9-3-9 3v6.75a12 12 0 009 11.25 12 12 0 009-11.25V5.25z" /></svg>""")
+        ,
+        new DifficultyOption(
+            Key: "hard",
+            DifficultyDisplay: "Hard",
+            ButtonHeading: "Epic Saga",
+            ButtonDescription: "Deep narrative • 80-120 scenes",
+            SessionLengthLabel: "Extended Session",
+            SessionLengthDetails: "30+ mins",
+            MinScenes: 80,
+            MaxScenes: 120,
+            TitlePrefix: "Epic Saga",
+            IconSvg: """<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 9.75a3.75 3.75 0 11-6 3 3.75 3.75 0 00-5.25 3.5A7.5 7.5 0 1018 12.75c0 .94-.18 1.84-.5 2.67" /></svg>""")
+    };
+
+    private readonly Dictionary<string, DifficultyOption> difficultyLookup;
+    // Tracks the most recent randomized proposal per chat so users can confirm later
+    private readonly Dictionary<string, GenerateYamlStoryRequest> pendingProposalsByChatId = new();
+
+    public ThreePanelLayout()
+    {
+        difficultyLookup = difficultyOptions.ToDictionary(option => option.Key, StringComparer.OrdinalIgnoreCase);
+    }
+
+    private double leftWidth = 30;
+    private double centerWidth = 40;
+    private double rightWidth = 30;
+    private bool _resizersInitialized = false;
+
+    // Mobile menu state
+    private bool showMobileMenu = false;
+    private bool showSettingsModal;
+
+    // Data properties
+    private List<StoryGeneratorChatHistory> ChatHistories = new();
+    private StoryGeneratorChatHistory? CurrentChat;
+    private bool IsTyping = false;
+    private string? YamlContent;
+    private YamlValidationResult? ValidationResult;
+
+    // UI state
+    private string searchQuery = string.Empty;
+    private string? copyFeedbackMessage;
+    private bool copyFeedbackSuccess;
+    private System.Threading.CancellationTokenSource? copyFeedbackCts;
+    private readonly TimeSpan copyFeedbackDuration = TimeSpan.FromSeconds(4);
+
+    // Import state
+    private bool showImportMenu = false;
+    private bool showImportResult = false;
+    private YamlImportResult? importResult;
+    private InputFile fileInput;
+
+    private const string ChatsStorageKey = "mystira_story_generator_chats";
+
+    private readonly YamlSyntaxColorScheme yamlPreviewTheme = YamlSyntaxColorScheme.Default with
+    {
+        BackgroundColor = "#0f172a",
+        ForegroundColor = "#e2e8f0",
+        KeyColor = "#38bdf8",
+        ValueColor = "#e2e8f0",
+        StringColor = "#facc15",
+        NumberColor = "#f97316",
+        BooleanColor = "#22d3ee",
+        NullColor = "#f87171",
+        CommentColor = "#94a3b8",
+        IndicatorColor = "#a855f7",
+        AnchorColor = "#34d399",
+        TagColor = "#f472b6",
+        SeparatorColor = "#f59e0b",
+        BorderColor = "rgba(148, 163, 184, 0.35)",
+        HighlightBackgroundColor = "rgba(250, 204, 21, 0.35)",
+        HighlightForegroundColor = "#0f172a",
+        HighlightActiveBackgroundColor = "rgba(234, 179, 8, 0.62)",
+        HighlightActiveForegroundColor = "#0f172a",
+        HighlightActiveBorderColor = "rgba(234, 179, 8, 0.9)"
+    };
+
+    private static readonly EffectiveAiModelSettings FallbackModelSettings = AiModelDefaults.CreateEffectiveSettings();
+    private bool modelSettingsInitialized;
+    private List<AiModelDefinition> availableModels = new() { FallbackModelSettings.Definition };
+    private EffectiveAiModelSettings currentModelSettings = FallbackModelSettings;
+    private AiModelDefinition? selectedModelDefinition = FallbackModelSettings.Definition;
+    private string selectedModelId = FallbackModelSettings.ModelId;
+    private int selectedMaxTokens = FallbackModelSettings.MaxTokens;
+    private double selectedTemperature = FallbackModelSettings.Temperature;
+    private bool isSavingSettings;
+    private string? settingsError;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var saved = await LocalStorage.GetItemAsync<List<StoryGeneratorChatHistory>>(ChatsStorageKey);
+            ChatHistories = saved ?? new List<StoryGeneratorChatHistory>();
+            CurrentChat = ChatHistories.FirstOrDefault();
+            YamlContent = CurrentChat?.YamlSnapshot;
+        }
+        catch
+        {
+            ChatHistories = new List<StoryGeneratorChatHistory>();
+        }
+
+        await EnsureModelSettingsAsync();
+
+        await base.OnInitializedAsync();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && !_resizersInitialized)
+        {
+            try
+            {
+                await JSRuntime.InvokeVoidAsync("mystiraPanels.init", new {
+                    containerId = "panel-container",
+                    leftId = "panel-left",
+                    centerId = "panel-center",
+                    rightId = "panel-right",
+                    leftResizerId = "resizer-left",
+                    rightResizerId = "resizer-right",
+                    mins = new { left = 15, center = 25, right = 20 }
+                });
+                _resizersInitialized = true;
+            }
+            catch { }
+        }
+    }
+
+    private void ToggleMobileMenu()
+    {
+        showMobileMenu = !showMobileMenu;
+    }
+
+    private void CloseMobileMenu()
+    {
+        showMobileMenu = false;
+    }
+
+    private string GetLeftPanelClasses()
+    {
+        return showMobileMenu
+            ? "w-80 h-full fixed left-0 top-0 z-50 lg:relative lg:w-[15%] lg:flex-shrink-0"
+            : "hidden lg:block lg:w-[15%] lg:flex-shrink-0 h-full";
+    }
+
+    private string GetCenterPanelClasses()
+    {
+        return "w-full lg:w-[35%] lg:flex-shrink-0 h-full";
+    }
+
+    private string GetRightPanelClasses()
+    {
+        return "hidden lg:block lg:w-[50%] lg:flex-shrink-0 h-full";
+    }
+
+    private async Task EnsureModelSettingsAsync()
+    {
+        if (modelSettingsInitialized)
+        {
+            return;
+        }
+
+        try
+        {
+            await ModelSettingsService.InitializeAsync();
+            var models = await ModelSettingsService.GetAvailableModelsAsync();
+            availableModels = models.OrderBy(m => m.DisplayName).ToList();
+
+            await RefreshModelSettingsAsync();
+
+            ModelSettingsService.SettingsChanged += HandleModelSettingsChanged;
+        }
+        catch
+        {
+            availableModels = new List<AiModelDefinition> { currentModelSettings.Definition };
+        }
+        finally
+        {
+            modelSettingsInitialized = true;
+        }
+    }
+
+    private async Task RefreshModelSettingsAsync(bool reloadOptions = false)
+    {
+        if (reloadOptions)
+        {
+            var models = await ModelSettingsService.GetAvailableModelsAsync();
+            availableModels = models.OrderBy(m => m.DisplayName).ToList();
+        }
+
+        currentModelSettings = await ModelSettingsService.GetEffectiveSettingsAsync();
+        selectedModelDefinition = currentModelSettings.Definition;
+        selectedModelId = currentModelSettings.ModelId;
+        selectedMaxTokens = currentModelSettings.MaxTokens;
+        selectedTemperature = Math.Round(currentModelSettings.Temperature, 2);
+    }
+
+    private async Task<EffectiveAiModelSettings> GetSettingsAsync()
+    {
+        await EnsureModelSettingsAsync();
+        return currentModelSettings;
+    }
+
+    private async Task OpenSettingsModal()
+    {
+        await EnsureModelSettingsAsync();
+        settingsError = null;
+        isSavingSettings = false;
+        selectedModelDefinition = currentModelSettings.Definition;
+        selectedModelId = currentModelSettings.ModelId;
+        selectedMaxTokens = currentModelSettings.MaxTokens;
+        selectedTemperature = Math.Round(currentModelSettings.Temperature, 2);
+        showSettingsModal = true;
+    }
+
+    private void CloseSettingsModal()
+    {
+        showSettingsModal = false;
+        settingsError = null;
+        isSavingSettings = false;
+    }
+
+    private void HandleModelChanged(ChangeEventArgs e)
+    {
+        var modelId = e.Value?.ToString() ?? string.Empty;
+        var definition = availableModels.FirstOrDefault(m => string.Equals(m.Id, modelId, StringComparison.OrdinalIgnoreCase))
+                         ?? availableModels.FirstOrDefault()
+                         ?? currentModelSettings.Definition;
+
+        selectedModelId = definition.Id;
+        selectedModelDefinition = definition;
+        selectedMaxTokens = definition.DefaultMaxTokens;
+        selectedTemperature = Math.Round(definition.DefaultTemperature, 2);
+        settingsError = null;
+    }
+
+    private async Task SaveSettingsAsync()
+    {
+        if (selectedModelDefinition == null)
+        {
+            settingsError = "Select a model before saving.";
+            return;
+        }
+
+        var minTokens = GetMinTokens();
+        var maxTokens = GetMaxTokens();
+        var desiredTokens = selectedMaxTokens <= 0 ? selectedModelDefinition.DefaultMaxTokens : selectedMaxTokens;
+
+        if (desiredTokens < minTokens || desiredTokens > maxTokens)
+        {
+            settingsError = $"Max tokens must be between {minTokens} and {maxTokens}.";
+            return;
+        }
+
+        var minTemp = GetMinTemperature();
+        var maxTemp = GetMaxTemperature();
+        var desiredTemperature = double.IsNaN(selectedTemperature) ? selectedModelDefinition.DefaultTemperature : selectedTemperature;
+
+        if (desiredTemperature < minTemp || desiredTemperature > maxTemp)
+        {
+            settingsError = $"Temperature must be between {minTemp:0.00} and {maxTemp:0.00}.";
+            return;
+        }
+
+        isSavingSettings = true;
+        try
+        {
+            await ModelSettingsService.UpdateSelectionAsync(selectedModelDefinition.Id, desiredTokens, desiredTemperature);
+            await RefreshModelSettingsAsync();
+            showSettingsModal = false;
+            settingsError = null;
+        }
+        finally
+        {
+            isSavingSettings = false;
+        }
+    }
+
+    private int GetMinTokens()
+    {
+        var definition = selectedModelDefinition ?? currentModelSettings.Definition;
+        return definition.MinTokens.HasValue && definition.MinTokens.Value > 0 ? definition.MinTokens.Value : 1;
+    }
+
+    private int GetMaxTokens()
+    {
+        var definition = selectedModelDefinition ?? currentModelSettings.Definition;
+        if (definition.MaxTokensLimit.HasValue && definition.MaxTokensLimit.Value > 0)
+        {
+            return definition.MaxTokensLimit.Value;
+        }
+
+        return Math.Max(definition.DefaultMaxTokens, GetMinTokens());
+    }
+
+    private double GetMinTemperature()
+    {
+        var definition = selectedModelDefinition ?? currentModelSettings.Definition;
+        return definition.MinTemperature ?? 0.0;
+    }
+
+    private double GetMaxTemperature()
+    {
+        var definition = selectedModelDefinition ?? currentModelSettings.Definition;
+        return definition.MaxTemperature ?? 2.0;
+    }
+
+    private int ClampTokensForCurrentModel(int value)
+    {
+        var definition = currentModelSettings.Definition;
+        var min = definition.MinTokens.HasValue && definition.MinTokens.Value > 0 ? definition.MinTokens.Value : 1;
+        var max = definition.MaxTokensLimit.HasValue && definition.MaxTokensLimit.Value > 0
+            ? Math.Max(definition.MaxTokensLimit.Value, min)
+            : Math.Max(definition.DefaultMaxTokens, min);
+
+        if (value <= 0)
+        {
+            value = definition.DefaultMaxTokens;
+        }
+
+        return Math.Clamp(value, min, max);
+    }
+
+    private double ClampTemperatureForCurrentModel(double value)
+    {
+        var definition = currentModelSettings.Definition;
+        var min = definition.MinTemperature ?? 0.0;
+        var max = definition.MaxTemperature ?? 2.0;
+        if (double.IsNaN(value) || double.IsInfinity(value))
+        {
+            value = definition.DefaultTemperature;
+        }
+        return Math.Clamp(value, min, max);
+    }
+
+    private async void HandleModelSettingsChanged(object? sender, EventArgs e)
+    {
+        await InvokeAsync(async () =>
+        {
+            await RefreshModelSettingsAsync();
+            StateHasChanged();
+        });
+    }
+
+    private async Task HandleChatSelected(StoryGeneratorChatHistory chat)
+    {
+        CurrentChat = chat;
+        YamlContent = CurrentChat?.YamlSnapshot;
+        CloseMobileMenu();
+        StateHasChanged();
+    }
+
+    private async Task HandleDeleteChat(string chatId)
+    {
+        var chat = ChatHistories.FirstOrDefault(c => c.Id == chatId);
+        if (chat != null)
+        {
+            ChatHistories.Remove(chat);
+            pendingProposalsByChatId.Remove(chatId);
+            if (CurrentChat?.Id == chatId)
+            {
+                CurrentChat = ChatHistories.FirstOrDefault();
+                YamlContent = CurrentChat?.YamlSnapshot;
+                ValidationResult = null;
+            }
+            await SaveChatsAsync();
+            StateHasChanged();
+        }
+    }
+
+    private async Task HandleNewChat()
+    {
+        CurrentChat = new StoryGeneratorChatHistory
+        {
+            Id = Guid.NewGuid().ToString(),
+            Title = "New Story",
+            CreatedAt = DateTime.Now,
+            Messages = new List<StoryGeneratorChatMessage>()
+        };
+
+        // Add a welcome system message
+        CurrentChat.Messages.Add(new StoryGeneratorChatMessage
+        {
+            Role = "system",
+            Content = "Welcome to Mystira Story Generator! Describe your idea and I'll gather the required parameters.",
+            Timestamp = DateTime.Now
+        });
+
+        ChatHistories.Insert(0, CurrentChat);
+        await SaveChatsAsync();
+        CloseMobileMenu();
+        StateHasChanged();
+
+        // Optionally kick off the setup flow with an initial prompt
+        IsTyping = true;
+        StateHasChanged();
+        try
+        {
+            var settings = await GetSettingsAsync();
+            var temperature = ClampTemperatureForCurrentModel(settings.Temperature);
+            var maxTokens = ClampTokensForCurrentModel(settings.MaxTokens);
+
+            var req = new ChatCompletionRequest
+            {
+                Provider = settings.Provider,
+                ModelId = settings.ModelId,
+                Model = settings.Deployment,
+                Temperature = temperature,
+                MaxTokens = maxTokens,
+                Messages = new List<MystiraChatMessage>
+                {
+                    new MystiraChatMessage { MessageType = ChatMessageType.User, Content = "I'd like to generate a new story. Please start gathering the required parameters." }
+                }
+            };
+
+            var resp = await ApiService.SetupStoryAsync(req);
+            if (resp.Success && !string.IsNullOrWhiteSpace(resp.Content))
+            {
+                CurrentChat.Messages.Add(new StoryGeneratorChatMessage
+                {
+                    Role = "assistant",
+                    Content = resp.Content,
+                    Timestamp = DateTime.Now
+                });
+            }
+            else if (!string.IsNullOrWhiteSpace(resp.Error))
+            {
+                CurrentChat.Messages.Add(new StoryGeneratorChatMessage
+                {
+                    Role = "assistant",
+                    Content = $"Error starting setup: {resp.Error}",
+                    Timestamp = DateTime.Now
+                });
+            }
+            await SaveChatsAsync();
+        }
+        catch (Exception ex)
+        {
+            CurrentChat.Messages.Add(new StoryGeneratorChatMessage
+            {
+                Role = "assistant",
+                Content = $"Failed to start setup: {ex.Message}",
+                Timestamp = DateTime.Now
+            });
+            await SaveChatsAsync();
+        }
+        finally
+        {
+            IsTyping = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task HandleRandomizeStory(string difficultyKey)
+    {
+        if (!difficultyLookup.TryGetValue(difficultyKey, out var difficulty))
+        {
+            return;
+        }
+
+        IsTyping = true;
+        StateHasChanged();
+
+        StoryGeneratorChatHistory? chat = null;
+
+        try
+        {
+            chat = await CreateFreshChatForDifficultyAsync(difficulty);
+            StateHasChanged();
+
+            var settings = await GetSettingsAsync();
+
+            var request = new RandomStoryParametersRequest
+            {
+                Provider = settings.Provider,
+                ModelId = settings.ModelId,
+                Model = settings.Deployment,
+                Difficulty = difficulty.DifficultyDisplay,
+                SessionLength = difficulty.SessionLengthLabel,
+                MinScenes = difficulty.MinScenes,
+                MaxScenes = difficulty.MaxScenes
+            };
+
+            var response = await ApiService.RandomizeStoryParametersAsync(request);
+            if (response.Success)
+            {
+                var difficultyLabel = string.IsNullOrWhiteSpace(response.Difficulty)
+                    ? difficulty.DifficultyDisplay
+                    : response.Difficulty;
+
+                var sessionLabel = string.IsNullOrWhiteSpace(response.SessionLength)
+                    ? difficulty.SessionLengthLabel
+                    : response.SessionLength;
+
+                var summary = BuildRandomProposalSummary(response, difficultyLabel, sessionLabel, difficulty);
+
+                chat!.Messages.Add(new StoryGeneratorChatMessage
+                {
+                    Role = "assistant",
+                    Content = summary,
+                    Timestamp = DateTime.Now
+                });
+
+                var pending = new GenerateYamlStoryRequest
+                {
+                    Provider = !string.IsNullOrWhiteSpace(response.Provider) ? response.Provider : settings.Provider,
+                    ModelId = !string.IsNullOrWhiteSpace(response.ModelId) ? response.ModelId : settings.ModelId,
+                    Model = !string.IsNullOrWhiteSpace(response.Model) ? response.Model : settings.Deployment,
+                    Title = !string.IsNullOrWhiteSpace(response.Title) ? response.Title : chat.Title,
+                    Difficulty = difficultyLabel,
+                    SessionLength = sessionLabel,
+                    AgeGroup = response.AgeGroup,
+                    MinimumAge = response.MinimumAge,
+                    CoreAxes = response.CoreAxes ?? new List<string>(),
+                    Archetypes = response.Archetypes ?? new List<string>(),
+                    Tags = response.Tags,
+                    Tone = response.Tone,
+                    MinScenes = response.MinScenes > 0 ? response.MinScenes : difficulty.MinScenes,
+                    MaxScenes = response.MaxScenes > 0 ? response.MaxScenes : difficulty.MaxScenes,
+                    CharacterCount = response.CharacterCount
+                };
+
+                pendingProposalsByChatId[chat.Id] = pending;
+
+                if (!string.IsNullOrWhiteSpace(response.Title))
+                {
+                    chat.Title = response.Title;
+                }
+
+                await SaveChatsAsync();
+            }
+            else
+            {
+                var errorMessage = response.Error ?? "Randomization failed";
+                chat!.Messages.Add(new StoryGeneratorChatMessage
+                {
+                    Role = "assistant",
+                    Content = $"Unable to generate random story parameters: {errorMessage}",
+                    Timestamp = DateTime.Now
+                });
+                await SaveChatsAsync();
+            }
+        }
+        catch (Exception ex)
+        {
+            var targetChat = chat ?? CurrentChat;
+            if (targetChat != null)
+            {
+                targetChat.Messages.Add(new StoryGeneratorChatMessage
+                {
+                    Role = "assistant",
+                    Content = $"Randomization error: {ex.Message}",
+                    Timestamp = DateTime.Now
+                });
+                await SaveChatsAsync();
+            }
+        }
+        finally
+        {
+            IsTyping = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task<StoryGeneratorChatHistory> CreateFreshChatForDifficultyAsync(DifficultyOption difficulty)
+    {
+        var timestamp = DateTime.Now;
+
+        var chat = new StoryGeneratorChatHistory
+        {
+            Id = Guid.NewGuid().ToString(),
+            Title = BuildDefaultRandomChatTitle(difficulty, timestamp),
+            CreatedAt = timestamp,
+            Messages = new List<StoryGeneratorChatMessage>()
+        };
+
+        chat.Messages.Add(new StoryGeneratorChatMessage
+        {
+            Role = "assistant",
+            Content = BuildDifficultyIntroMessage(difficulty),
+            Timestamp = timestamp
+        });
+
+        ChatHistories.Insert(0, chat);
+        CurrentChat = chat;
+        YamlContent = null;
+        ValidationResult = null;
+        pendingProposalsByChatId.Remove(chat.Id);
+
+        CloseMobileMenu();
+        await SaveChatsAsync();
+
+        return chat;
+    }
+
+    private static string BuildDefaultRandomChatTitle(DifficultyOption difficulty, DateTime timestamp)
+    {
+        return $"{difficulty.TitlePrefix} ({timestamp:MMM d})";
+    }
+
+    private static string BuildDifficultyIntroMessage(DifficultyOption difficulty)
+    {
+        return $"🎯 {difficulty.DifficultyDisplay} adventure selected!\n\nI'm assembling a {difficulty.SessionLengthLabel} ({difficulty.SessionLengthDetails}) with {difficulty.MinScenes}-{difficulty.MaxScenes} scenes. Gathering inspiration now...";
+    }
+
+    private string BuildRandomProposalSummary(RandomStoryParametersResponse response, string difficultyLabel, string sessionLabel, DifficultyOption difficulty)
+    {
+        var title = !string.IsNullOrWhiteSpace(response.Title) ? response.Title : $"{difficulty.TitlePrefix} Adventure";
+        var sessionDetails = string.IsNullOrWhiteSpace(difficulty.SessionLengthDetails)
+            ? sessionLabel
+            : $"{sessionLabel} ({difficulty.SessionLengthDetails})";
+        var minScenes = response.MinScenes > 0 ? response.MinScenes : difficulty.MinScenes;
+        var maxScenes = response.MaxScenes > 0 ? response.MaxScenes : difficulty.MaxScenes;
+        var ageSummary = !string.IsNullOrWhiteSpace(response.AgeGroup)
+            ? $"{response.AgeGroup} (min age {response.MinimumAge})"
+            : (response.MinimumAge > 0 ? $"Minimum age {response.MinimumAge}+" : "All ages");
+        var coreAxes = response.CoreAxes != null && response.CoreAxes.Any()
+            ? string.Join(", ", response.CoreAxes)
+            : "Curated during YAML generation";
+        var archetypes = response.Archetypes != null && response.Archetypes.Any()
+            ? string.Join(", ", response.Archetypes)
+            : "AI selected";
+        var tags = response.Tags != null && response.Tags.Any()
+            ? string.Join(", ", response.Tags)
+            : "Surprise me";
+        var tone = !string.IsNullOrWhiteSpace(response.Tone) ? response.Tone : "To be discovered";
+        var characterSummary = response.CharacterCount > 0
+            ? response.CharacterCount.ToString()
+            : "Auto-determined";
+        var description = !string.IsNullOrWhiteSpace(response.Description)
+            ? response.Description
+            : "I'll craft a fresh synopsis tailored to these parameters.";
+
+        return $"🎲 {difficultyLabel} Random Adventure Proposal\n\n" +
+               $"• Title: {title}\n" +
+               $"• Difficulty: {difficultyLabel}\n" +
+               $"• Session Length: {sessionDetails}\n" +
+               $"• Age Group: {ageSummary}\n" +
+               $"• Core Axes: {coreAxes}\n" +
+               $"• Archetypes: {archetypes}\n" +
+               $"• Character Count: {characterSummary}\n" +
+               $"• Scenes: {minScenes}-{maxScenes}\n" +
+               $"• Tags: {tags}\n" +
+               $"• Tone: {tone}\n\n" +
+               $"Description: {description}\n\n" +
+               "Reply 'yes' to confirm and generate the YAML story with these parameters.";
+    }
+
+    private async Task HandleSendMessage(string message)
+    {
+        if (CurrentChat == null)
+        {
+            await HandleNewChat();
+        }
+
+        // Add user message
+        CurrentChat!.Messages.Add(new StoryGeneratorChatMessage
+        {
+            Role = "user",
+            Content = message,
+            Timestamp = DateTime.Now
+        });
+        await SaveChatsAsync();
+
+        // Set typing indicator
+        IsTyping = true;
+        StateHasChanged();
+
+        // If a randomized proposal is pending, handle user confirmation without calling the LLM
+        if (CurrentChat != null && pendingProposalsByChatId.TryGetValue(CurrentChat.Id, out var pending) && IsProceedMessage(message))
+        {
+            var chatId = CurrentChat.Id;
+            try
+            {
+                CurrentChat!.Messages.Add(new StoryGeneratorChatMessage
+                {
+                    Role = "system",
+                    Content = "Generating YAML from the proposed parameters...",
+                    Timestamp = DateTime.Now
+                });
+                StateHasChanged();
+
+                var settings = await GetSettingsAsync();
+                pending.Provider = settings.Provider;
+                if (string.IsNullOrWhiteSpace(pending.ModelId))
+                {
+                    pending.ModelId = settings.ModelId;
+                }
+                if (string.IsNullOrWhiteSpace(pending.Model))
+                {
+                    pending.Model = settings.Deployment;
+                }
+
+                var result = await ApiService.GenerateYamlStoryAsync(pending);
+                if (result.Success && !string.IsNullOrWhiteSpace(result.Yaml))
+                {
+                    YamlContent = result.Yaml;
+                    CurrentChat!.YamlSnapshot = result.Yaml;
+                    await SaveChatsAsync();
+
+                    var validation = await ApiService.ValidateStoryAsync(result.Yaml, "yaml");
+                    ValidationResult = MapValidation(validation);
+
+                    var summary = BuildYamlSummaryMessage(result.Yaml);
+                    CurrentChat!.Messages.Add(new StoryGeneratorChatMessage
+                    {
+                        Role = "system",
+                        Content = validation.IsValid
+                            ? $"YAML generated successfully. {summary}"
+                            : $"YAML generated but has issues. {BuildValidationSummary(validation)}",
+                        Timestamp = DateTime.Now
+                    });
+                    await SaveChatsAsync();
+                }
+                else
+                {
+                    var emsg = result.Error ?? "YAML generation failed";
+                    CurrentChat!.Messages.Add(new StoryGeneratorChatMessage
+                    {
+                        Role = "assistant",
+                        Content = $"YAML generation failed: {emsg}",
+                        Timestamp = DateTime.Now
+                    });
+                    await SaveChatsAsync();
+                }
+            }
+            finally
+            {
+                pendingProposalsByChatId.Remove(chatId);
+                IsTyping = false;
+                StateHasChanged();
+            }
+            return;
+        }
+
+        try
+        {
+            // Build chat completion request using conversation history
+            var messages = MapToContractMessages(CurrentChat);
+            if (ShouldIncludeYamlContext(message) && !string.IsNullOrWhiteSpace(YamlContent))
+            {
+                messages.Add(new MystiraChatMessage
+                {
+                    MessageType = ChatMessageType.System,
+                    Content = $"CURRENT_YAML:\n```yaml\n{YamlContent}\n```",
+                    Timestamp = DateTime.UtcNow
+                });
+            }
+
+            var settings = await GetSettingsAsync();
+            var temperature = ClampTemperatureForCurrentModel(settings.Temperature);
+            var maxTokens = ClampTokensForCurrentModel(settings.MaxTokens);
+
+            var request = new ChatCompletionRequest
+            {
+                Provider = settings.Provider,
+                ModelId = settings.ModelId,
+                Model = settings.Deployment,
+                Temperature = temperature,
+                MaxTokens = maxTokens,
+                Messages = messages
+            };
+
+            // Call setup endpoint to continue parameter collection
+            var response = await ApiService.SetupStoryAsync(request);
+
+            if (response.Success && !string.IsNullOrWhiteSpace(response.Content))
+            {
+                var content = response.Content;
+
+                // If YAML already exists and the assistant returned an updated YAML block, apply it without displaying in chat
+                if (!string.IsNullOrWhiteSpace(YamlContent) && TryExtractYamlCodeBlock(content, out var updatedYaml))
+                {
+                    YamlContent = updatedYaml;
+                    if (CurrentChat != null)
+                    {
+                        CurrentChat.YamlSnapshot = updatedYaml;
+                        await SaveChatsAsync();
+                    }
+
+                    // Validate updated YAML
+                    var validation = await ApiService.ValidateStoryAsync(updatedYaml, "yaml");
+                    ValidationResult = MapValidation(validation);
+
+                    // Add concise system message
+                    CurrentChat!.Messages.Add(new StoryGeneratorChatMessage
+                    {
+                        Role = "system",
+                        Content = validation.IsValid
+                            ? $"YAML updated and validated successfully. {BuildYamlSummaryMessage(updatedYaml)}"
+                            : $"YAML updated but validation failed. Issues: {BuildValidationSummary(validation)}",
+                        Timestamp = DateTime.Now
+                    });
+                    await SaveChatsAsync();
+                }
+                else
+                {
+                    // Add assistant response normally
+                    CurrentChat.Messages.Add(new StoryGeneratorChatMessage
+                    {
+                        Role = "assistant",
+                        Content = content,
+                        Timestamp = DateTime.Now
+                    });
+                    await SaveChatsAsync();
+                }
+
+                // Update title if it's a new chat
+                if (CurrentChat.Title == "New Story")
+                {
+                    CurrentChat.Title = message.Length > 30 ? message[..30] + "..." : message;
+                    await SaveChatsAsync();
+                }
+
+                // If parameters are complete, generate YAML and validate
+                var generated = await TryGenerateYamlFromParamsAsync(content);
+                if (generated)
+                {
+                    // Validate YAML content via API
+                    if (!string.IsNullOrWhiteSpace(YamlContent))
+                    {
+                        ValidationResult = null;
+                        StateHasChanged();
+
+                        var validation = await ApiService.ValidateStoryAsync(YamlContent, "yaml");
+                        ValidationResult = MapValidation(validation);
+
+                        if (!validation.IsValid)
+                        {
+                            // Inform user and retry generation with validation feedback
+                            CurrentChat!.Messages.Add(new StoryGeneratorChatMessage
+                            {
+                                Role = "system",
+                                Content = $"Generated YAML did not pass validation. Retrying with fixes. Issues: {BuildValidationSummary(validation)}",
+                                Timestamp = DateTime.Now
+                            });
+                            await SaveChatsAsync();
+
+                            var fixedYaml = await RetryFixYamlAsync(YamlContent, validation);
+                            if (!string.IsNullOrWhiteSpace(fixedYaml))
+                            {
+                                YamlContent = fixedYaml;
+                                CurrentChat.YamlSnapshot = fixedYaml;
+                                await SaveChatsAsync();
+
+                                var revalidation = await ApiService.ValidateStoryAsync(fixedYaml, "yaml");
+                                ValidationResult = MapValidation(revalidation);
+
+                                // Add a concise system message instead of dumping YAML in chat
+                                var summary = BuildYamlSummaryMessage(fixedYaml);
+                                CurrentChat!.Messages.Add(new StoryGeneratorChatMessage
+                                {
+                                    Role = "system",
+                                    Content = revalidation.IsValid
+                                        ? $"YAML regenerated and validated successfully. {summary}"
+                                        : $"YAML regenerated but still has issues. {BuildValidationSummary(revalidation)}",
+                                    Timestamp = DateTime.Now
+                                });
+                                await SaveChatsAsync();
+                            }
+                        }
+                    }
+                }
+            }
+            else
+            {
+                var err = response.Error ?? "Failed to get response from AI";
+                CurrentChat.Messages.Add(new StoryGeneratorChatMessage
+                {
+                    Role = "assistant",
+                    Content = $"Error: {err}",
+                    Timestamp = DateTime.Now
+                });
+                await SaveChatsAsync();
+            }
+        }
+        catch (Exception ex)
+        {
+            CurrentChat!.Messages.Add(new StoryGeneratorChatMessage
+            {
+                Role = "assistant",
+                Content = $"An error occurred: {ex.Message}",
+                Timestamp = DateTime.Now
+            });
+            await SaveChatsAsync();
+        }
+        finally
+        {
+            IsTyping = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task HandleClearChat()
+    {
+        if (CurrentChat != null)
+        {
+            CurrentChat.Messages.Clear();
+            YamlContent = null;
+            CurrentChat.YamlSnapshot = null;
+            ValidationResult = null;
+            pendingProposalsByChatId.Remove(CurrentChat.Id);
+            await SaveChatsAsync();
+            StateHasChanged();
+        }
+    }
+
+    private async Task HandleYamlCopied(YamlCopyResult result)
+    {
+        copyFeedbackCts?.Cancel();
+        copyFeedbackCts?.Dispose();
+        var currentCts = new System.Threading.CancellationTokenSource();
+        copyFeedbackCts = currentCts;
+
+        copyFeedbackMessage = result.Message;
+        copyFeedbackSuccess = result.Success;
+        await InvokeAsync(StateHasChanged);
+
+        try
+        {
+            await Task.Delay(copyFeedbackDuration, currentCts.Token);
+            if (!currentCts.IsCancellationRequested && copyFeedbackCts == currentCts)
+            {
+                copyFeedbackMessage = null;
+                await InvokeAsync(StateHasChanged);
+            }
+        }
+        catch (TaskCanceledException)
+        {
+            // Swallow cancellation when a new notification arrives or the component disposes
+        }
+    }
+
+    private string GetCopyToastClasses()
+    {
+        var baseClass = "flex items-center gap-2 rounded-lg px-4 py-3 shadow-xl text-sm font-medium";
+        return copyFeedbackSuccess
+            ? baseClass + " bg-green-600 text-white"
+            : baseClass + " bg-red-600 text-white";
+    }
+
+    private async Task HandleYamlSaved(string updatedYaml)
+    {
+        YamlContent = updatedYaml;
+        if (CurrentChat != null)
+        {
+            CurrentChat.YamlSnapshot = updatedYaml;
+            CurrentChat.Messages.Add(new StoryGeneratorChatMessage
+            {
+                Role = "system",
+                Content = "YAML has been updated. I will use this as context for requested modifications.",
+                Timestamp = DateTime.Now
+            });
+            await SaveChatsAsync();
+        }
+
+        // Validate YAML after saving edits
+        ValidationResult = null;
+        StateHasChanged();
+        try
+        {
+            var validation = await ApiService.ValidateStoryAsync(updatedYaml, "yaml");
+            ValidationResult = MapValidation(validation);
+        }
+        catch
+        {
+            // Ignore validation exceptions in UI flow; ValidationResults component handles errors as well
+        }
+        finally
+        {
+            StateHasChanged();
+        }
+    }
+
+    private async Task HandleValidateYaml()
+    {
+        if (string.IsNullOrWhiteSpace(YamlContent)) return;
+        ValidationResult = null;
+        StateHasChanged();
+        try
+        {
+            var validation = await ApiService.ValidateStoryAsync(YamlContent, "yaml");
+            ValidationResult = MapValidation(validation);
+        }
+        catch
+        {
+            // Swallow validation UI errors
+        }
+        finally
+        {
+            StateHasChanged();
+        }
+    }
+
+    private async Task SaveChatsAsync()
+    {
+        await LocalStorage.SetItemAsync(ChatsStorageKey, ChatHistories);
+    }
+
+    private IEnumerable<StoryGeneratorChatHistory> GetFilteredChatHistories()
+    {
+        if (string.IsNullOrWhiteSpace(searchQuery)) return ChatHistories;
+        var q = searchQuery.Trim();
+        return ChatHistories.Where(c => MatchesChat(c, q)).ToList();
+    }
+
+    private bool MatchesChat(StoryGeneratorChatHistory chat, string query)
+    {
+        if (FuzzyMatch(chat.Title, query)) return true;
+        // Search last few messages for fuzzy match
+        foreach (var m in chat.Messages.AsEnumerable().Reverse().Take(5))
+        {
+            if (FuzzyMatch(m.Content, query)) return true;
+        }
+        return false;
+    }
+
+    private static bool IsProceedMessage(string input)
+    {
+        if (string.IsNullOrWhiteSpace(input)) return false;
+        var t = input.Trim().ToLowerInvariant();
+        return t == "yes" || t == "y" || t.Contains("proceed") || t.Contains("generate") || t.Contains("go ahead") || t.Contains("continue");
+    }
+
+    private static readonly char[] SearchSeparators = " \t\r\n,.;:-_/\\|()[]{}\"'!?@#$%^&*+=".ToCharArray();
+
+    private bool FuzzyMatch(string? source, string query)
+    {
+        if (string.IsNullOrWhiteSpace(source) || string.IsNullOrWhiteSpace(query))
+        {
+            return false;
+        }
+
+        var normalizedSource = source.ToLowerInvariant();
+        var terms = query.ToLowerInvariant().Split(SearchSeparators, StringSplitOptions.RemoveEmptyEntries);
+        if (terms.Length == 0)
+        {
+            return false;
+        }
+
+        var tokens = normalizedSource.Split(SearchSeparators, StringSplitOptions.RemoveEmptyEntries);
+        if (tokens.Length == 0)
+        {
+            tokens = new[] { normalizedSource };
+        }
+
+        foreach (var term in terms)
+        {
+            if (normalizedSource.Contains(term))
+            {
+                continue;
+            }
+
+            var matched = false;
+            foreach (var token in tokens)
+            {
+                if (token.Contains(term) || Similarity(token, term) >= 0.72)
+                {
+                    matched = true;
+                    break;
+                }
+            }
+
+            if (!matched)
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private static int LevenshteinDistance(string s, string t)
+    {
+        if (string.IsNullOrEmpty(s)) return t.Length;
+        if (string.IsNullOrEmpty(t)) return s.Length;
+        var d = new int[s.Length + 1, t.Length + 1];
+        for (int i = 0; i <= s.Length; i++) d[i, 0] = i;
+        for (int j = 0; j <= t.Length; j++) d[0, j] = j;
+        for (int i = 1; i <= s.Length; i++)
+        {
+            for (int j = 1; j <= t.Length; j++)
+            {
+                var cost = char.ToLowerInvariant(s[i - 1]) == char.ToLowerInvariant(t[j - 1]) ? 0 : 1;
+                d[i, j] = Math.Min(
+                    Math.Min(d[i - 1, j] + 1, d[i, j - 1] + 1),
+                    d[i - 1, j - 1] + cost);
+            }
+        }
+        return d[s.Length, t.Length];
+    }
+
+    private static double Similarity(string a, string b)
+    {
+        var maxLen = Math.Max(a.Length, b.Length);
+        if (maxLen == 0) return 1.0;
+        var dist = LevenshteinDistance(a, b);
+        return 1.0 - (double)dist / maxLen;
+    }
+
+    private bool ShouldIncludeYamlContext(string input)
+    {
+        if (string.IsNullOrWhiteSpace(input) || string.IsNullOrWhiteSpace(YamlContent)) return false;
+        var text = input.ToLowerInvariant();
+        var keywords = new[] { "yaml", "scene", "scenes", "choice", "choices", "roll", "narrative", "branch", "branches", "path", "paths", "edit", "update", "change", "modify" };
+        return keywords.Any(k => text.Contains(k));
+    }
+
+    private string BuildYamlSummaryMessage(string yaml)
+    {
+        var (totalScenes, totalPaths, choiceScenes, rollScenes, narrativeScenes) = SummarizeYaml(yaml);
+        return $"Summary: {totalScenes} scenes • {totalPaths} possible paths • {choiceScenes} choice scenes • {rollScenes} roll scenes • {narrativeScenes} narrative scenes.\nIf you'd like any changes, describe what to modify (for example: 'Make scene 2 a roll scene with DC 12', 'Add a new branch from scene_2', or 'Rename scene_3').";
+    }
+
+    private (int totalScenes, int totalPaths, int choiceScenes, int rollScenes, int narrativeScenes) SummarizeYaml(string yaml)
+    {
+        int totalScenes = 0, choiceScenes = 0, rollScenes = 0, narrativeScenes = 0, totalPaths = 0;
+        bool inScenes = false;
+        bool inChoices = false;
+        bool inBranches = false;
+
+        foreach (var rawLine in yaml.Split('\n'))
+        {
+            var line = rawLine.Trim();
+            if (string.IsNullOrWhiteSpace(line) || line.StartsWith("#")) continue;
+
+            if (line.StartsWith("scenes:"))
+            {
+                inScenes = true;
+                inChoices = false;
+                inBranches = false;
+                continue;
+            }
+
+            if (inScenes && line.StartsWith("- id:"))
+            {
+                totalScenes++;
+                inChoices = false;
+                inBranches = false;
+                continue;
+            }
+
+            if (inScenes && line.StartsWith("type:"))
+            {
+                var typeVal = line.Substring("type:".Length).Trim().Trim('"');
+                var t = typeVal.ToLowerInvariant();
+                if (t.Contains("choice") || t.Contains("decision") || t.Contains("branch")) choiceScenes++;
+                else if (t.Contains("roll") || t.Contains("skill")) rollScenes++;
+                else if (t.Contains("narrative") || t.Contains("story")) narrativeScenes++;
+                continue;
+            }
+
+            if (inScenes && (line.StartsWith("choices:") || line.StartsWith("branches:")))
+            {
+                inChoices = line.StartsWith("choices:");
+                inBranches = line.StartsWith("branches:");
+                continue;
+            }
+
+            if ((inChoices || inBranches) && line.StartsWith("- "))
+            {
+                totalPaths++;
+            }
+        }
+
+        // Fallback: if no explicit choices counted, try to detect transitions in story_flow
+        if (totalPaths == 0)
+        {
+            foreach (var rawLine in yaml.Split('\n'))
+            {
+                var line = rawLine.Trim();
+                if (line.StartsWith("- from:") || line.StartsWith("- to:"))
+                {
+                    if (line.StartsWith("- from:")) totalPaths++;
+                }
+            }
+        }
+
+        return (totalScenes, totalPaths, choiceScenes, rollScenes, narrativeScenes);
+    }
+
+    private string GenerateYamlContent(StoryGeneratorChatHistory chat)
+    {
+        var title = chat.Title;
+        var userMessages = chat.Messages.Where(m => m.Role == "user").ToList();
+        var firstMessage = userMessages.FirstOrDefault()?.Content ?? "An exciting adventure awaits";
+        var timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+
+        var sb = new System.Text.StringBuilder();
+        sb.AppendLine($"title: \"{title}\"");
+        sb.AppendLine("description: \"Generated story scenario based on user input\"");
+        sb.AppendLine("author: \"Mystira Story Generator\"");
+        sb.AppendLine("version: \"1.0\"");
+        sb.AppendLine("type: \"Adventure\"");
+        sb.AppendLine();
+        sb.AppendLine("story:");
+        sb.AppendLine($"  opening: \"Welcome to your adventure: {title}\"");
+        sb.AppendLine($"  premise: \"{firstMessage}\"");
+        sb.AppendLine();
+        sb.AppendLine("characters:");
+        sb.AppendLine("  - name: \"Hero\"");
+        sb.AppendLine("    description: \"The main protagonist of the story\"");
+        sb.AppendLine("    role: \"Player Character\"");
+        sb.AppendLine("  ");
+        sb.AppendLine("  - name: \"Guide\"");
+        sb.AppendLine("    description: \"A wise mentor figure\"");
+        sb.AppendLine("    role: \"NPC\"");
+        sb.AppendLine();
+        sb.AppendLine("scenes:");
+        sb.AppendLine("  - id: \"scene_1\"");
+        sb.AppendLine("    title: \"The Beginning\"");
+        sb.AppendLine("    description: \"The adventure starts here\"");
+        sb.AppendLine("    type: \"narrative\"");
+        sb.AppendLine("    content: \"Your journey begins...\"");
+        sb.AppendLine("    ");
+        sb.AppendLine("  - id: \"scene_2\"");
+        sb.AppendLine("    title: \"First Challenge\"");
+        sb.AppendLine("    description: \"The first obstacle to overcome\"");
+        sb.AppendLine("    type: \"choice\"");
+        sb.AppendLine("    content: \"You encounter your first challenge...\"");
+        sb.AppendLine("    choices:");
+        sb.AppendLine("      - text: \"Face it head on\"");
+        sb.AppendLine("        next_scene: \"scene_3\"");
+        sb.AppendLine("      - text: \"Look for another way\"");
+        sb.AppendLine("        next_scene: \"scene_4\"");
+        sb.AppendLine("  ");
+        sb.AppendLine("  - id: \"scene_3\"");
+        sb.AppendLine("    title: \"Direct Approach\"");
+        sb.AppendLine("    description: \"Results of the direct approach\"");
+        sb.AppendLine("    type: \"narrative\"");
+        sb.AppendLine("    content: \"You chose to face the challenge directly...\"");
+        sb.AppendLine("    ");
+        sb.AppendLine("  - id: \"scene_4\"");
+        sb.AppendLine("    title: \"Alternative Path\"");
+        sb.AppendLine("    description: \"Results of the alternative approach\"");
+        sb.AppendLine("    type: \"narrative\"");
+        sb.AppendLine("    content: \"You found another way...\"");
+        sb.AppendLine();
+        sb.AppendLine("tags:");
+        sb.AppendLine("  - adventure");
+        sb.AppendLine("  - generated");
+        sb.AppendLine("  - interactive");
+        sb.AppendLine();
+        sb.AppendLine("metadata:");
+        sb.AppendLine($"  generated_at: \"{timestamp}\"");
+        sb.AppendLine("  source: \"Mystira Story Generator\"");
+        sb.AppendLine($"  message_count: {chat.Messages.Count}");
+
+        return sb.ToString();
+    }
+
+    private List<MystiraChatMessage> MapToContractMessages(StoryGeneratorChatHistory chat)
+    {
+        var list = new List<MystiraChatMessage>();
+        foreach (var m in chat.Messages)
+        {
+            var type = m.Role?.ToLower() switch
+            {
+                "user" => ChatMessageType.User,
+                "assistant" => ChatMessageType.AI,
+                "system" => ChatMessageType.System,
+                _ => ChatMessageType.User
+            };
+
+            list.Add(new MystiraChatMessage
+            {
+                MessageType = type,
+                Content = m.Content,
+                Timestamp = m.Timestamp
+            });
+        }
+        return list;
+    }
+
+    private async Task<bool> TryGenerateYamlFromParamsAsync(string aiContent)
+    {
+        try
+        {
+            const string marker = "PARAMS_JSON:";
+            var idx = aiContent.IndexOf(marker, StringComparison.OrdinalIgnoreCase);
+            if (idx < 0)
+            {
+                return false;
+            }
+
+            var json = aiContent.Substring(idx + marker.Length).Trim();
+            json = StripCodeFences(json);
+
+            var options = new System.Text.Json.JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            };
+
+            var payload = System.Text.Json.JsonSerializer.Deserialize<ParameterPayload>(json, options);
+            if (payload == null)
+            {
+                return false;
+            }
+
+            if (string.IsNullOrWhiteSpace(payload.title) ||
+                string.IsNullOrWhiteSpace(payload.difficulty) ||
+                string.IsNullOrWhiteSpace(payload.session_length) ||
+                string.IsNullOrWhiteSpace(payload.age_group) ||
+                payload.minimum_age <= 0 ||
+                payload.core_axes == null || payload.core_axes.Count == 0 ||
+                payload.archetypes == null || payload.archetypes.Count == 0)
+            {
+                return false;
+            }
+
+            var minScenes = payload.min_scenes > 0 ? payload.min_scenes : 6;
+            var maxScenes = payload.max_scenes >= minScenes ? payload.max_scenes : Math.Max(12, minScenes + 1);
+
+            var settings = await GetSettingsAsync();
+
+            var request = new GenerateYamlStoryRequest
+            {
+                Provider = settings.Provider,
+                ModelId = settings.ModelId,
+                Model = settings.Deployment,
+                Title = payload.title,
+                Difficulty = NormalizeDifficulty(payload.difficulty),
+                SessionLength = NormalizeSessionLength(payload.session_length),
+                AgeGroup = payload.age_group,
+                MinimumAge = payload.minimum_age,
+                CoreAxes = payload.core_axes,
+                Archetypes = payload.archetypes,
+                Tags = payload.tags ?? new List<string>(),
+                Tone = payload.tone,
+                MinScenes = minScenes,
+                MaxScenes = maxScenes,
+                CharacterCount = payload.character_count > 0 ? payload.character_count : (payload.archetypes?.Count ?? 0)
+            };
+
+            // Inform user we're generating YAML
+            CurrentChat!.Messages.Add(new StoryGeneratorChatMessage
+            {
+                Role = "system",
+                Content = "All parameters received. Generating YAML story...",
+                Timestamp = DateTime.Now
+            });
+            StateHasChanged();
+
+            var result = await ApiService.GenerateYamlStoryAsync(request);
+            if (result.Success && !string.IsNullOrWhiteSpace(result.Yaml))
+            {
+                YamlContent = result.Yaml;
+                if (CurrentChat != null)
+                {
+                    CurrentChat.YamlSnapshot = YamlContent;
+                    var summary = BuildYamlSummaryMessage(YamlContent);
+                    CurrentChat.Messages.Add(new StoryGeneratorChatMessage
+                    {
+                        Role = "system",
+                        Content = summary,
+                        Timestamp = DateTime.Now
+                    });
+                    await SaveChatsAsync();
+                }
+                return true;
+            }
+            else
+            {
+                var emsg = result.Error ?? "YAML generation failed";
+                CurrentChat!.Messages.Add(new StoryGeneratorChatMessage
+                {
+                    Role = "assistant",
+                    Content = $"YAML generation failed: {emsg}",
+                    Timestamp = DateTime.Now
+                });
+                await SaveChatsAsync();
+                StateHasChanged();
+            }
+        }
+        catch (Exception ex)
+        {
+            CurrentChat!.Messages.Add(new StoryGeneratorChatMessage
+            {
+                Role = "assistant",
+                Content = $"Error during YAML generation: {ex.Message}",
+                Timestamp = DateTime.Now
+            });
+            await SaveChatsAsync();
+        }
+
+        return false;
+    }
+
+    private static string NormalizeDifficulty(string difficulty)
+    {
+        var d = (difficulty ?? string.Empty).Trim().ToLowerInvariant();
+        return d switch
+        {
+            "easy" => "Easy",
+            "medium" or "moderate" => "Medium",
+            "hard" => "Hard",
+            _ => "Medium"
+        };
+    }
+
+    private static string NormalizeSessionLength(string length)
+    {
+        var l = (length ?? string.Empty).Trim().ToLowerInvariant();
+        return l switch
+        {
+            "short" => "Short",
+            "medium" or "moderate" => "Medium",
+            "long" => "Long",
+            _ => "Medium"
+        };
+    }
+
+    private static string StripCodeFences(string input)
+    {
+        var s = input.Trim();
+        if (s.StartsWith("```"))
+        {
+            s = s.TrimStart('`');
+            var newlineIndex = s.IndexOf('\n');
+            if (newlineIndex > -1)
+            {
+                s = s.Substring(newlineIndex + 1);
+            }
+        }
+        if (s.EndsWith("```") && s.LastIndexOf("```", StringComparison.Ordinal) >= 0)
+        {
+            s = s.Substring(0, s.LastIndexOf("```", StringComparison.Ordinal));
+        }
+        return s.Trim();
+    }
+
+    private static YamlValidationResult MapValidation(ValidationResponse response)
+    {
+        var result = new YamlValidationResult
+        {
+            IsValid = response.IsValid,
+            Errors = new List<string>()
+        };
+
+        foreach (var e in response.Errors)
+        {
+            result.Errors.Add($"Error at {e.Path}: {e.Message}");
+        }
+        foreach (var w in response.Warnings)
+        {
+            result.Errors.Add($"Warning at {w.Path}: {w.Message}");
+        }
+        foreach (var s in response.Suggestions)
+        {
+            result.Errors.Add($"Suggestion at {s.Path}: {s.Message}");
+        }
+
+        return result;
+    }
+
+    private static string BuildValidationSummary(ValidationResponse validation)
+    {
+        if (validation == null) return "(no details)";
+        var parts = new List<string>();
+        foreach (var e in validation.Errors.Take(5))
+        {
+            parts.Add($"{e.Path}: {e.Message}");
+        }
+        return parts.Count == 0 ? "No specific error details available" : string.Join("; ", parts);
+    }
+
+    private static bool TryExtractYamlCodeBlock(string content, out string yaml)
+    {
+        yaml = string.Empty;
+        if (string.IsNullOrWhiteSpace(content)) return false;
+
+        var start = content.IndexOf("```", StringComparison.Ordinal);
+        if (start < 0) return false;
+
+        var langEnd = content.IndexOf('\n', start + 3);
+        if (langEnd < 0) return false;
+
+        var fenceLabel = content.Substring(start + 3, langEnd - (start + 3)).Trim().ToLowerInvariant();
+        var end = content.IndexOf("```", langEnd + 1, StringComparison.Ordinal);
+        if (end < 0) return false;
+
+        var code = content.Substring(langEnd + 1, end - (langEnd + 1));
+        if (fenceLabel == "yaml" || fenceLabel == "yml" || fenceLabel == string.Empty)
+        {
+            yaml = code.Trim();
+            return !string.IsNullOrWhiteSpace(yaml);
+        }
+        return false;
+    }
+
+    private async Task<string?> RetryFixYamlAsync(string currentYaml, ValidationResponse validation)
+    {
+        try
+        {
+            if (CurrentChat == null) return null;
+
+            var messages = MapToContractMessages(CurrentChat);
+            messages.Add(new MystiraChatMessage
+            {
+                MessageType = ChatMessageType.System,
+                Content = $"CURRENT_YAML:\n```yaml\n{currentYaml}\n```",
+                Timestamp = DateTime.UtcNow
+            });
+
+            var issueList = string.Join("\n", validation.Errors.Select(e => $"- {e.Path}: {e.Message}"));
+            messages.Add(new MystiraChatMessage
+            {
+                MessageType = ChatMessageType.User,
+                Content = $"The YAML above failed validation. Please regenerate a corrected YAML that fixes these issues while preserving IDs and structure where possible. Return only a single fenced YAML block. Issues:\n{issueList}",
+                Timestamp = DateTime.UtcNow
+            });
+
+            var settings = await GetSettingsAsync();
+            var fixTemperature = ClampTemperatureForCurrentModel(Math.Min(settings.Temperature, 0.6));
+            var maxTokens = ClampTokensForCurrentModel(settings.MaxTokens);
+
+            var request = new ChatCompletionRequest
+            {
+                Provider = settings.Provider,
+                ModelId = settings.ModelId,
+                Model = settings.Deployment,
+                Temperature = fixTemperature,
+                MaxTokens = maxTokens,
+                Messages = messages
+            };
+
+            var resp = await ApiService.SetupStoryAsync(request);
+            if (resp.Success && !string.IsNullOrWhiteSpace(resp.Content) && TryExtractYamlCodeBlock(resp.Content, out var fixedYaml))
+            {
+                return fixedYaml;
+            }
+        }
+        catch
+        {
+            // Ignore and return null on failure
+        }
+        return null;
+    }
+
+    public void Dispose()
+    {
+        ModelSettingsService.SettingsChanged -= HandleModelSettingsChanged;
+        if (copyFeedbackCts != null)
+        {
+            copyFeedbackCts.Cancel();
+            copyFeedbackCts.Dispose();
+            copyFeedbackCts = null;
+        }
+    }
+
+    private void ToggleImportMenu()
+    {
+        showImportMenu = !showImportMenu;
+        StateHasChanged();
+    }
+
+    private async Task ImportFromClipboard()
+    {
+        try
+        {
+            showImportMenu = false;
+            var result = await JSRuntime.InvokeAsync<dynamic>("mystiraClipboard.readText");
+
+            if (result != null && (bool)result["success"] == true)
+            {
+                var yamlContent = (string?)result["text"];
+                if (yamlContent != null)
+                {
+                    importResult = await YamlImportService.ImportYamlAsync(yamlContent);
+                }
+                else
+                {
+                    importResult = new YamlImportResult
+                    {
+                        IsValid = false,
+                        ErrorMessage = "Clipboard content is empty"
+                    };
+                }
+            }
+            else
+            {
+                importResult = new YamlImportResult
+                {
+                    IsValid = false,
+                    ErrorMessage = "Unable to read clipboard. Please check permissions or try importing from file."
+                };
+            }
+
+            showImportResult = true;
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error importing from clipboard");
+            importResult = new YamlImportResult
+            {
+                IsValid = false,
+                ErrorMessage = $"Error reading clipboard: {ex.Message}"
+            };
+            showImportResult = true;
+            StateHasChanged();
+        }
+    }
+
+    private async Task TriggerFileInput()
+    {
+        showImportMenu = false;
+        //await fileInput.FocusAsync();
+        await JSRuntime.InvokeVoidAsync("eval", $"document.querySelector('input[type=\"file\"]').click()");
+    }
+
+    private async Task HandleFileSelect(InputFileChangeEventArgs e)
+    {
+        try
+        {
+            // Access the file through the event argument
+            var file = e.File;
+
+            // Read the file content
+            using var streamReader = new StreamReader(file.OpenReadStream());
+            string yamlContent = await streamReader.ReadToEndAsync();
+
+            importResult = await YamlImportService.ImportYamlAsync(yamlContent);
+            showImportResult = true;
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error importing from file");
+            importResult = new YamlImportResult
+            {
+                IsValid = false,
+                ErrorMessage = $"Error reading file: {ex.Message}"
+            };
+            showImportResult = true;
+            StateHasChanged();
+        }
+    }
+
+    private async Task ConfirmImport()
+    {
+        if (importResult?.IsValid != true || string.IsNullOrEmpty(importResult.YamlContent))
+            return;
+
+        try
+        {
+            var newChat = new StoryGeneratorChatHistory
+            {
+                Id = Guid.NewGuid().ToString(),
+                Title = "Imported Story",
+                CreatedAt = DateTime.UtcNow,
+                Messages = new List<StoryGeneratorChatMessage>()
+            };
+
+            var systemMessage = new StoryGeneratorChatMessage
+            {
+                Role = "system",
+                Content = importResult.Summary ?? "Story imported successfully",
+                Timestamp = DateTime.UtcNow
+            };
+            newChat.Messages.Add(systemMessage);
+
+            ChatHistories.Insert(0, newChat);
+            CurrentChat = newChat;
+            YamlContent = importResult.YamlContent;
+            await SaveChatsAsync();
+
+            CloseImportResult();
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error creating session from import");
+            importResult = new YamlImportResult
+            {
+                IsValid = false,
+                ErrorMessage = $"Error creating session: {ex.Message}"
+            };
+            StateHasChanged();
+        }
+    }
+
+    private void CloseImportResult()
+    {
+        showImportResult = false;
+        importResult = null;
+        StateHasChanged();
+    }
+
+    private class ParameterPayload
+    {
+        public string title { get; set; } = string.Empty;
+        public string? theme { get; set; }
+        public string difficulty { get; set; } = string.Empty;
+        public string session_length { get; set; } = string.Empty;
+        public string age_group { get; set; } = string.Empty;
+        public int minimum_age { get; set; }
+        public List<string> core_axes { get; set; } = new();
+        public List<string> archetypes { get; set; } = new();
+        public int min_scenes { get; set; } = 6;
+        public int max_scenes { get; set; } = 12;
+        public List<string>? tags { get; set; }
+        public string? tone { get; set; }
+        public int character_count { get; set; } = 0;
+    }
+}

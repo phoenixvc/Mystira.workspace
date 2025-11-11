@@ -1,0 +1,16 @@
+{
+  "name": "mystira-storygenerator-web",
+  "version": "1.0.0",
+  "description": "TailwindCSS build for Mystira StoryGenerator Web",
+  "private": true,
+  "scripts": {
+    "build-css": "tailwindcss -i ./Styles/input.css -o ./wwwroot/css/app.css",
+    "build-css:watch": "tailwindcss -i ./Styles/input.css -o ./wwwroot/css/app.css --watch",
+    "build-css:prod": "tailwindcss -i ./Styles/input.css -o ./wwwroot/css/app.css --minify"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.0",
+    "postcss": "^8.4.32",
+    "autoprefixer": "^10.4.16"
+  }
+}

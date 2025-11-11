@@ -1,0 +1,82 @@
+title: "The Enchanted Forest Adventure"
+description: "A magical journey through an enchanted forest where young heroes must help woodland creatures solve their problems using wisdom, courage, and friendship."
+tags:
+  - adventure
+  - magic
+  - friendship
+  - problem-solving
+difficulty: "Medium"
+session_length: "Medium"
+age_group: "6-9"
+minimum_age: 6
+core_axes:
+  - heroism
+  - friendship
+  - wisdom
+archetypes:
+  - hero
+  - helper
+  - wise_guide
+characters:
+  - name: "Lily the Young Explorer"
+    role: "protagonist"
+    archetype: "curious_explorer"
+    species: "human"
+    age: 8
+    traits:
+      - brave
+      - curious
+      - kind
+    backstory: "A young girl from the village who loves exploring nature and helping others. She discovered her ability to talk to forest animals during her last adventure."
+  - name: "Whiskers the Wise Rabbit"
+    role: "mentor"
+    archetype: "wise_guide"
+    species: "rabbit"
+    age: 25
+    traits:
+      - wise
+      - patient
+      - gentle
+    backstory: "An ancient rabbit who has lived in the enchanted forest for many seasons. He knows all the forest secrets and helps young adventurers find their way."
+  - name: "Sparkle the Fairy"
+    role: "helper"
+    archetype: "magical_helper"
+    species: "fairy"
+    age: 100
+    traits:
+      - magical
+      - playful
+      - helpful
+    backstory: "A forest fairy who protects the magical creatures. She can provide hints and magical assistance when heroes show true kindness."
+scenes:
+  - id: "forest_entrance"
+    title: "Entering the Enchanted Forest"
+    type: "narrative"
+    description: "Lily arrives at the edge of the enchanted forest. Sunbeams dance through the leaves, and she can hear gentle rustling sounds. The air sparkles with magic dust."
+  - id: "meet_whiskers"
+    title: "Meeting Whiskers"
+    type: "choice"
+    description: "A wise-looking rabbit with silver whiskers hops onto the path. He seems to be waiting for something. His eyes twinkle with ancient knowledge."
+    branches:
+      - choice: "Approach the rabbit gently and say hello"
+        outcome: "friendly_greeting"
+      - choice: "Offer the rabbit some berries from your pouch"
+        outcome: "kind_gesture"
+      - choice: "Ask if the rabbit needs help"
+        outcome: "helpful_approach"
+  - id: "first_challenge"
+    title: "The Lost Baby Birds"
+    type: "roll"
+    difficulty: "Easy"
+    description: "Three baby birds have fallen from their nest high in an oak tree. They chirp sadly while their mother circles above, unable to help them herself."
+    branches:
+      - choice: "Try to climb the tree carefully"
+        outcome: "climbing_solution"
+      - choice: "Look for a fallen branch to help"
+        outcome: "tool_solution"
+      - choice: "Ask Sparkle the Fairy for magical help"
+        outcome: "magical_solution"
+  - id: "resolution"
+    title: "Heroes of the Forest"
+    type: "narrative"
+    description: "Thanks to Lily's kindness and bravery, the baby birds are safe in their nest. The forest animals gather to thank her, and Sparkle grants her the title of 'Forest Friend'. Whiskers promises she will always be welcome in the enchanted forest."

@@ -1,0 +1,82 @@
+@using Mystira.StoryGenerator.Contracts.Chat
+
+<div class="message user-message">
+    <div class="message-header">
+        <div class="message-avatar user-avatar">
+            <i class="user-icon">👤</i>
+        </div>
+        <div class="message-info">
+            <span class="message-sender">You</span>
+            <span class="message-timestamp">@Message.Timestamp.ToString("HH:mm")</span>
+        </div>
+    </div>
+    <div class="message-content user-content">
+        @Message.Content
+    </div>
+</div>
+
+@code {
+    [Parameter] public Mystira.StoryGenerator.Contracts.Chat.MystiraChatMessage Message { get; set; } = null!;
+}
+
+<style>
+    .user-message {
+        margin: 1rem 0;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        max-width: 80%;
+        margin-left: auto;
+    }
+
+    .message-header {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 0.25rem;
+        flex-direction: row-reverse;
+    }
+
+    .user-avatar {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .user-icon {
+        font-size: 16px;
+        color: white;
+    }
+
+    .message-info {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 0.125rem;
+    }
+
+    .message-sender {
+        font-weight: 600;
+        color: #374151;
+        font-size: 0.875rem;
+    }
+
+    .message-timestamp {
+        font-size: 0.75rem;
+        color: #6b7280;
+    }
+
+    .user-content {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 0.75rem 1rem;
+        border-radius: 1rem 1rem 0.25rem 1rem;
+        box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+        max-width: 100%;
+        word-wrap: break-word;
+    }
+</style>

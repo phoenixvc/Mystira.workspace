@@ -1,0 +1,1257 @@
+@using System.Net
+@using System.Globalization
+@using System.Text
+@using Mystira.StoryGenerator.Contracts
+@using Mystira.StoryGenerator.Web.Models
+@inject IJSRuntime JS
+
+<div class="panel h-full flex flex-col yaml-preview-theme"
+     style="@GetThemeCssVariables()">
+    <div class="panel-header flex items-center justify-between">
+        <h2 class="text-lg font-semibold">YAML Preview</h2>
+        <div class="flex items-center space-x-2">
+            @if (!string.IsNullOrEmpty(YamlContent))
+            {
+                @if (!isEditing)
+                {
+                    <button type="button"
+                            @onclick="StartEditing"
+                            class="text-sm text-blue-600 hover:text-blue-800 font-medium transition-colors">
+                        <svg class="inline w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5h2m2 0h2a2 2 0 012 2v2m0 2v2m0 2v2a2 2 0 01-2 2h-2m-2 0h-2m-2 0H7a2 2 0 01-2-2v-2m0-2V9m0-2V5a2 2 0 012-2h2m2 0h2" />
+                        </svg>
+                        Edit
+                    </button>
+                }
+                else
+                {
+                    <button type="button"
+                            @onclick="SaveEdit"
+                            class="text-sm text-green-600 hover:text-green-800 font-medium transition-colors">
+                        <svg class="inline w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                        Save
+                    </button>
+                    <button type="button"
+                            @onclick="CancelEdit"
+                            class="text-sm text-gray-600 hover:text-gray-800 font-medium transition-colors">
+                        <svg class="inline w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                        Cancel
+                    </button>
+                }
+                <button type="button"
+                        @onclick="CopyToClipboard"
+                        class="text-sm text-primary-600 hover:text-primary-800 font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-60"
+                        disabled="@(!HasActiveYaml())">
+                    <svg class="inline w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                    </svg>
+                    Copy
+                </button>
+                <button type="button"
+                        @onclick="DownloadYaml"
+                        class="text-sm text-green-600 hover:text-green-800 font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-60"
+                        disabled="@(!HasActiveYaml())">
+                    <svg class="inline w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                    Download
+                </button>
+                <button type="button"
+                        @onclick="ValidateYaml"
+                        class="text-sm text-purple-600 hover:text-purple-800 font-medium transition-colors"
+                        disabled="@string.IsNullOrEmpty(YamlContent)">
+                    <svg class="inline w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Validate
+                </button>
+            }
+        </div>
+    </div>
+
+    <div class="flex-1 overflow-hidden flex flex-col">
+        @if (!string.IsNullOrEmpty(YamlContent))
+        {
+            <div class="border-b border-gray-200 bg-white px-4 py-3">
+                <div class="flex flex-wrap items-center gap-3">
+                    <div class="flex items-center gap-2 flex-1 min-w-[12rem]">
+                        <div class="relative flex-1">
+                            <span class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M10.5 18a7.5 7.5 0 110-15 7.5 7.5 0 010 15z" />
+                                </svg>
+                            </span>
+                            <input type="text"
+                                   class="w-full rounded-md border border-gray-300 bg-white py-2 pl-9 pr-3 text-sm text-gray-700 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                   placeholder="Search YAML..."
+                                   @bind-value="SearchQuery"
+                                   @bind-value:event="oninput"
+                                   autocomplete="off" />
+                        </div>
+                        <div class="text-xs text-gray-500 whitespace-nowrap">
+                            @if (!string.IsNullOrWhiteSpace(searchQuery))
+                            {
+                                if (matches.Count > 0 && activeMatchIndex >= 0)
+                                {
+                                    <span>@(activeMatchIndex + 1) of @matches.Count</span>
+                                }
+                                else
+                                {
+                                    <span>No matches</span>
+                                }
+                            }
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button type="button"
+                                class="inline-flex items-center rounded-md border border-gray-300 bg-white px-2.5 py-1.5 text-xs font-medium text-gray-600 transition-colors hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50"
+                                @onclick="GoToPreviousMatch"
+                                disabled="@(!CanNavigateMatches())">
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                            </svg>
+                        </button>
+                        <button type="button"
+                                class="inline-flex items-center rounded-md border border-gray-300 bg-white px-2.5 py-1.5 text-xs font-medium text-gray-600 transition-colors hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50"
+                                @onclick="GoToNextMatch"
+                                disabled="@(!CanNavigateMatches())">
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                            </svg>
+                        </button>
+                    </div>
+                    <label class="flex items-center gap-2 text-sm text-gray-600">
+                        <input type="checkbox"
+                               class="h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                               @bind="wrapText" />
+                        <span>Wrap text</span>
+                    </label>
+                </div>
+                @if (matchLimitExceeded)
+                {
+                    <div class="mt-2 flex items-center gap-2 text-xs text-amber-600">
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M4.318 4.318a12 12 0 0115.364 0 12 12 0 010 15.364 12 12 0 01-15.364 0 12 12 0 010-15.364z" />
+                        </svg>
+                        <span>Showing first @MaxTrackedMatches matches</span>
+                    </div>
+                }
+            </div>
+
+            <div class="flex-1 overflow-hidden flex flex-col">
+                <div class="flex-1 p-4 overflow-y-auto" @ref="previewScrollRef">
+                    @if (isEditing)
+                    {
+                        <textarea @key="isEditing"
+                                  @bind-value="EditBuffer"
+                                  @bind-value:event="oninput"
+                                  class="w-full h-full yaml-preview-surface yaml-preview-editor p-4 rounded-lg text-sm overflow-auto font-mono leading-relaxed focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none"
+                                  wrap="@GetTextareaWrapMode()"
+                                  @ref="textareaRef"></textarea>
+                    }
+                    else
+                    {
+                        <pre class="@GetPreviewClasses()" tabindex="0">@GetHighlightedPreviewMarkup()</pre>
+                    }
+                </div>
+
+                <div class="border-t border-gray-200 p-3">
+                    @if (ValidationResult != null)
+                    {
+                        @if (ValidationResult.IsValid)
+                        {
+                            <div class="flex items-center text-green-700 bg-green-50 p-2 rounded-lg">
+                                <svg class="w-5 h-5 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                                </svg>
+                                <div>
+                                    <div class="font-medium">Valid YAML Structure</div>
+                                    <div class="text-sm">Ready for Mystira scenario import</div>
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="text-red-700 bg-red-50 p-2 rounded-lg">
+                                <div class="flex items-start">
+                                    <svg class="w-5 h-5 mr-2 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+                                    </svg>
+                                    <div class="flex-1">
+                                        <div class="font-medium">Validation Issues Found</div>
+                                        @foreach (var error in ValidationResult.Errors)
+                                        {
+                                            <div class="text-sm mt-1">• @error</div>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="flex items-center text-gray-600 bg-gray-100 p-2 rounded-lg">
+                            <svg class="w-5 h-5 mr-2 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5" />
+                            </svg>
+                            <div>
+                                <div class="font-medium">Not validated yet</div>
+                                <div class="text-sm">Click Validate to check structure and format</div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="flex-1 flex items-center justify-center p-8">
+                <div class="text-center text-gray-500">
+                    <svg class="mx-auto h-16 w-16 text-gray-300 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    <p class="text-lg font-medium mb-2">No YAML Generated Yet</p>
+                    <p class="text-sm text-gray-400 max-w-sm mx-auto">
+                        Start a conversation to generate a story scenario.
+                        The YAML structure will appear here for preview and download.
+                    </p>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter] public string? YamlContent { get; set; }
+    [Parameter] public YamlValidationResult? ValidationResult { get; set; }
+    [Parameter] public EventCallback<YamlCopyResult> OnYamlCopied { get; set; }
+    [Parameter] public EventCallback<string> OnYamlSaved { get; set; }
+    [Parameter] public EventCallback OnValidateRequested { get; set; }
+    [Parameter] public YamlSyntaxColorScheme? SyntaxColors { get; set; }
+
+    private bool isEditing = false;
+    private string editBuffer = string.Empty;
+    private string lastYamlSnapshot = string.Empty;
+    private string searchQuery = string.Empty;
+    private List<TextMatch> matches = new();
+    private int activeMatchIndex = -1;
+    private bool matchLimitExceeded;
+    private bool wrapText;
+    private bool requestScrollToActiveMatch;
+    private ElementReference previewScrollRef;
+    private ElementReference textareaRef;
+
+    private const int MaxTrackedMatches = 500;
+
+    private YamlSyntaxColorScheme ActiveTheme => SyntaxColors ?? YamlSyntaxColorScheme.Default;
+
+    protected override void OnParametersSet()
+    {
+        var incoming = YamlContent ?? string.Empty;
+        if (!isEditing && !string.Equals(incoming, lastYamlSnapshot, StringComparison.Ordinal))
+        {
+            lastYamlSnapshot = incoming;
+            editBuffer = incoming;
+            UpdateSearchMatches(resetActiveIndex: false, preserveCurrentPosition: true);
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (requestScrollToActiveMatch)
+        {
+            requestScrollToActiveMatch = false;
+            if (activeMatchIndex >= 0 && activeMatchIndex < matches.Count)
+            {
+                var match = matches[activeMatchIndex];
+                try
+                {
+                    if (isEditing)
+                    {
+                        await JS.InvokeVoidAsync("mystiraYamlPreview.selectTextareaRange", textareaRef, match.Start, match.Length);
+                    }
+                    else
+                    {
+                        await JS.InvokeVoidAsync("mystiraYamlPreview.scrollToMatch", previewScrollRef, activeMatchIndex);
+                    }
+                }
+                catch
+                {
+                    // Ignore JS interop failures; UI still usable without scroll assistance
+                }
+            }
+        }
+
+        await base.OnAfterRenderAsync(firstRender);
+    }
+
+    private string EditBuffer
+    {
+        get => editBuffer;
+        set
+        {
+            var normalized = value ?? string.Empty;
+            if (editBuffer == normalized)
+            {
+                return;
+            }
+
+            editBuffer = normalized;
+            if (isEditing && !string.IsNullOrWhiteSpace(searchQuery))
+            {
+                UpdateSearchMatches(resetActiveIndex: false, preserveCurrentPosition: false);
+            }
+        }
+    }
+
+    private string SearchQuery
+    {
+        get => searchQuery;
+        set
+        {
+            var normalized = value ?? string.Empty;
+            if (searchQuery == normalized)
+            {
+                return;
+            }
+
+            searchQuery = normalized;
+            UpdateSearchMatches(resetActiveIndex: true, preserveCurrentPosition: false);
+        }
+    }
+
+    private bool HasActiveYaml() => !string.IsNullOrEmpty(GetActiveYamlContent());
+
+    private string GetActiveYamlContent()
+    {
+        return isEditing ? editBuffer : (YamlContent ?? string.Empty);
+    }
+
+    private void StartEditing()
+    {
+        if (string.IsNullOrEmpty(YamlContent))
+        {
+            return;
+        }
+
+        isEditing = true;
+        EditBuffer = YamlContent;
+        lastYamlSnapshot = YamlContent;
+        UpdateSearchMatches(resetActiveIndex: false, preserveCurrentPosition: true);
+        requestScrollToActiveMatch = matches.Count > 0;
+    }
+
+    private async Task SaveEdit()
+    {
+        if (!isEditing)
+        {
+            return;
+        }
+
+        isEditing = false;
+        var updated = EditBuffer;
+        YamlContent = updated;
+        lastYamlSnapshot = updated;
+        UpdateSearchMatches(resetActiveIndex: false, preserveCurrentPosition: true);
+        requestScrollToActiveMatch = matches.Count > 0;
+
+        if (OnYamlSaved.HasDelegate)
+        {
+            await OnYamlSaved.InvokeAsync(updated);
+        }
+    }
+
+    private void CancelEdit()
+    {
+        isEditing = false;
+        EditBuffer = YamlContent ?? string.Empty;
+        UpdateSearchMatches(resetActiveIndex: false, preserveCurrentPosition: true);
+        requestScrollToActiveMatch = matches.Count > 0;
+    }
+
+    private async Task CopyToClipboard()
+    {
+        var content = GetActiveYamlContent();
+        if (string.IsNullOrEmpty(content))
+        {
+            if (OnYamlCopied.HasDelegate)
+            {
+                await OnYamlCopied.InvokeAsync(new YamlCopyResult(false, "There is no YAML to copy yet."));
+            }
+            return;
+        }
+
+        try
+        {
+            var success = await JS.InvokeAsync<bool>("mystiraClipboard.copyText", content);
+            if (OnYamlCopied.HasDelegate)
+            {
+                var message = success
+                    ? "YAML copied to clipboard."
+                    : "Unable to copy YAML. Check clipboard permissions.";
+                await OnYamlCopied.InvokeAsync(new YamlCopyResult(success, message));
+            }
+        }
+        catch (Microsoft.JSInterop.JSException ex)
+        {
+            if (OnYamlCopied.HasDelegate)
+            {
+                await OnYamlCopied.InvokeAsync(new YamlCopyResult(false, $"Clipboard copy failed: {ex.Message}"));
+            }
+        }
+        catch
+        {
+            if (OnYamlCopied.HasDelegate)
+            {
+                await OnYamlCopied.InvokeAsync(new YamlCopyResult(false, "Clipboard copy failed."));
+            }
+        }
+    }
+
+    private async Task DownloadYaml()
+    {
+        var content = GetActiveYamlContent();
+        if (string.IsNullOrEmpty(content))
+        {
+            return;
+        }
+
+        var fileName = $"mystira_story_{DateTime.UtcNow:yyyyMMdd_HHmmss}.yaml";
+        await JS.InvokeVoidAsync("downloadFile", fileName, content);
+    }
+
+    private async Task ValidateYaml()
+    {
+        if (OnValidateRequested.HasDelegate)
+        {
+            await OnValidateRequested.InvokeAsync();
+        }
+    }
+
+    private void GoToNextMatch()
+    {
+        if (matches.Count == 0)
+        {
+            return;
+        }
+
+        var nextIndex = activeMatchIndex;
+        if (nextIndex < 0)
+        {
+            nextIndex = 0;
+        }
+        else
+        {
+            nextIndex = (nextIndex + 1) % matches.Count;
+        }
+
+        ActivateMatch(nextIndex);
+    }
+
+    private void GoToPreviousMatch()
+    {
+        if (matches.Count == 0)
+        {
+            return;
+        }
+
+        var prevIndex = activeMatchIndex;
+        if (prevIndex < 0)
+        {
+            prevIndex = matches.Count - 1;
+        }
+        else
+        {
+            prevIndex = (prevIndex - 1 + matches.Count) % matches.Count;
+        }
+
+        ActivateMatch(prevIndex);
+    }
+
+    private void ActivateMatch(int index)
+    {
+        if (matches.Count == 0)
+        {
+            activeMatchIndex = -1;
+            return;
+        }
+
+        activeMatchIndex = Math.Clamp(index, 0, matches.Count - 1);
+        requestScrollToActiveMatch = true;
+    }
+
+    private void UpdateSearchMatches(bool resetActiveIndex, bool preserveCurrentPosition)
+    {
+        var hasQuery = !string.IsNullOrWhiteSpace(searchQuery);
+        if (!hasQuery)
+        {
+            matchLimitExceeded = false;
+            matches = new List<TextMatch>();
+            activeMatchIndex = -1;
+            return;
+        }
+
+        var content = GetSearchSource();
+        if (string.IsNullOrEmpty(content))
+        {
+            matchLimitExceeded = false;
+            matches = new List<TextMatch>();
+            activeMatchIndex = -1;
+            return;
+        }
+
+        var previousMatches = matches;
+        int? previousStart = null;
+        if (!resetActiveIndex && preserveCurrentPosition && activeMatchIndex >= 0 && activeMatchIndex < previousMatches.Count)
+        {
+            previousStart = previousMatches[activeMatchIndex].Start;
+        }
+
+        matches = CalculateMatches(content, searchQuery, out var limitHit);
+        matchLimitExceeded = limitHit;
+
+        if (matches.Count == 0)
+        {
+            activeMatchIndex = -1;
+            return;
+        }
+
+        if (resetActiveIndex || previousStart is null)
+        {
+            activeMatchIndex = 0;
+        }
+        else
+        {
+            var preservedIndex = matches.FindIndex(m => m.Start >= previousStart.Value);
+            activeMatchIndex = preservedIndex >= 0 ? preservedIndex : matches.Count - 1;
+        }
+
+        requestScrollToActiveMatch = true;
+    }
+
+    private string GetSearchSource()
+    {
+        if (isEditing)
+        {
+            return editBuffer;
+        }
+
+        return YamlContent ?? string.Empty;
+    }
+
+    private bool CanNavigateMatches()
+    {
+        return matches.Count > 0 && !string.IsNullOrWhiteSpace(searchQuery);
+    }
+
+    private string GetTextareaWrapMode() => wrapText ? "soft" : "off";
+
+    private string GetThemeCssVariables()
+    {
+        var theme = ActiveTheme;
+        var builder = new StringBuilder(320);
+        AppendCssVariable(builder, "--yaml-background-color", theme.BackgroundColor);
+        AppendCssVariable(builder, "--yaml-foreground-color", theme.ForegroundColor);
+        AppendCssVariable(builder, "--yaml-key-color", theme.KeyColor);
+        AppendCssVariable(builder, "--yaml-value-color", theme.ValueColor);
+        AppendCssVariable(builder, "--yaml-string-color", theme.StringColor);
+        AppendCssVariable(builder, "--yaml-number-color", theme.NumberColor);
+        AppendCssVariable(builder, "--yaml-boolean-color", theme.BooleanColor);
+        AppendCssVariable(builder, "--yaml-null-color", theme.NullColor);
+        AppendCssVariable(builder, "--yaml-comment-color", theme.CommentColor);
+        AppendCssVariable(builder, "--yaml-indicator-color", theme.IndicatorColor);
+        AppendCssVariable(builder, "--yaml-anchor-color", theme.AnchorColor);
+        AppendCssVariable(builder, "--yaml-tag-color", theme.TagColor);
+        AppendCssVariable(builder, "--yaml-separator-color", theme.SeparatorColor);
+        AppendCssVariable(builder, "--yaml-border-color", theme.BorderColor);
+        AppendCssVariable(builder, "--yaml-highlight-background", theme.HighlightBackgroundColor);
+        AppendCssVariable(builder, "--yaml-highlight-foreground", theme.HighlightForegroundColor);
+        AppendCssVariable(builder, "--yaml-highlight-active-background", theme.HighlightActiveBackgroundColor);
+        AppendCssVariable(builder, "--yaml-highlight-active-foreground", theme.HighlightActiveForegroundColor);
+        AppendCssVariable(builder, "--yaml-highlight-active-border", theme.HighlightActiveBorderColor);
+        return builder.ToString();
+    }
+
+    private static void AppendCssVariable(StringBuilder builder, string name, string value)
+    {
+        if (string.IsNullOrWhiteSpace(name) || string.IsNullOrWhiteSpace(value))
+        {
+            return;
+        }
+
+        builder.Append(name).Append(':').Append(value).Append(';');
+    }
+
+    private string GetPreviewClasses()
+    {
+        var builder = new StringBuilder("yaml-preview-surface yaml-preview-code p-4 rounded-lg text-sm font-mono leading-relaxed");
+        builder.Append(wrapText ? " whitespace-pre-wrap break-words" : " whitespace-pre");
+        builder.Append(wrapText ? " overflow-x-hidden" : " overflow-x-auto");
+        return builder.ToString();
+    }
+
+    private MarkupString GetHighlightedPreviewMarkup()
+    {
+        var content = YamlContent ?? string.Empty;
+        if (string.IsNullOrEmpty(content))
+        {
+            return new MarkupString();
+        }
+
+        var tokens = TokenizeYaml(content);
+        if (tokens.Count == 0)
+        {
+            return new MarkupString(WebUtility.HtmlEncode(content));
+        }
+
+        var segments = CreateOutputSegments(content.Length, tokens, matches, activeMatchIndex);
+        if (segments.Count == 0)
+        {
+            return new MarkupString(WebUtility.HtmlEncode(content));
+        }
+
+        var sb = new StringBuilder(content.Length + segments.Count * 32);
+
+        foreach (var segment in segments)
+        {
+            if (segment.Length <= 0)
+            {
+                continue;
+            }
+
+            var slice = content.Substring(segment.Start, segment.Length);
+
+            if (!segment.IsMatch && segment.Kind == YamlTokenKind.Newline)
+            {
+                sb.Append(slice);
+                continue;
+            }
+
+            var encoded = WebUtility.HtmlEncode(slice);
+            if (!segment.IsMatch && segment.Kind == YamlTokenKind.Whitespace)
+            {
+                sb.Append(encoded);
+                continue;
+            }
+
+            var classes = new List<string> { "yaml-token" };
+            var tokenClass = GetTokenCssClass(segment.Kind);
+            if (!string.IsNullOrWhiteSpace(tokenClass))
+            {
+                classes.Add(tokenClass);
+            }
+
+            if (segment.IsMatch)
+            {
+                classes.Add("yaml-highlight-match");
+                if (segment.IsActive)
+                {
+                    classes.Add("yaml-highlight-active");
+                }
+            }
+
+            sb.Append("<span class=\"").Append(string.Join(' ', classes)).Append("\"");
+            if (segment.IsMatch)
+            {
+                sb.Append(" data-match-index=\"").Append(segment.MatchIndex).Append("\"");
+            }
+            sb.Append(">").Append(encoded).Append("</span>");
+        }
+
+        return new MarkupString(sb.ToString());
+    }
+
+    private static List<TextMatch> CalculateMatches(string source, string query, out bool limitExceeded)
+    {
+        var results = new List<TextMatch>();
+        limitExceeded = false;
+
+        if (string.IsNullOrEmpty(source) || string.IsNullOrWhiteSpace(query))
+        {
+            return results;
+        }
+
+        var comparison = StringComparison.OrdinalIgnoreCase;
+        var searchIndex = 0;
+        var increment = Math.Max(1, query.Length);
+
+        while (searchIndex <= source.Length - query.Length)
+        {
+            var foundIndex = source.IndexOf(query, searchIndex, comparison);
+            if (foundIndex < 0)
+            {
+                break;
+            }
+
+            results.Add(new TextMatch(foundIndex, query.Length));
+            if (results.Count >= MaxTrackedMatches)
+            {
+                limitExceeded = true;
+                break;
+            }
+
+            searchIndex = foundIndex + increment;
+        }
+
+        return results;
+    }
+
+    private static List<YamlToken> TokenizeYaml(string content)
+    {
+        var tokens = new List<YamlToken>();
+        if (string.IsNullOrEmpty(content))
+        {
+            return tokens;
+        }
+
+        var index = 0;
+        var length = content.Length;
+
+        while (index < length)
+        {
+            var lineEnd = index;
+            while (lineEnd < length && content[lineEnd] != '\n' && content[lineEnd] != '\r')
+            {
+                lineEnd++;
+            }
+
+            var lineLength = lineEnd - index;
+            if (lineLength > 0)
+            {
+                var lineTokens = TokenizeLine(content, index, lineLength);
+                if (lineTokens.Count > 0)
+                {
+                    tokens.AddRange(lineTokens);
+                }
+            }
+
+            if (lineEnd < length)
+            {
+                if (content[lineEnd] == '\r' && lineEnd + 1 < length && content[lineEnd + 1] == '\n')
+                {
+                    tokens.Add(new YamlToken(YamlTokenKind.Newline, lineEnd, 2));
+                    index = lineEnd + 2;
+                }
+                else
+                {
+                    tokens.Add(new YamlToken(YamlTokenKind.Newline, lineEnd, 1));
+                    index = lineEnd + 1;
+                }
+            }
+            else
+            {
+                index = lineEnd;
+            }
+        }
+
+        return tokens;
+    }
+
+    private static List<YamlToken> TokenizeLine(string content, int lineStart, int lineLength)
+    {
+        var tokens = new List<YamlToken>();
+        if (lineLength <= 0)
+        {
+            return tokens;
+        }
+
+        var cursor = 0;
+        var absoluteEnd = lineStart + lineLength;
+
+        var indentStart = cursor;
+        while (cursor < lineLength)
+        {
+            var ch = content[lineStart + cursor];
+            if (ch != ' ' && ch != '\t')
+            {
+                break;
+            }
+            cursor++;
+        }
+
+        if (cursor > indentStart)
+        {
+            tokens.Add(new YamlToken(YamlTokenKind.Whitespace, lineStart + indentStart, cursor - indentStart));
+        }
+
+        if (cursor >= lineLength)
+        {
+            return tokens;
+        }
+
+        var commentIndex = FindCommentIndex(content, lineStart + cursor, absoluteEnd);
+
+        if (content[lineStart + cursor] == '-' && (cursor + 1 == lineLength || char.IsWhiteSpace(content[lineStart + cursor + 1])))
+        {
+            tokens.Add(new YamlToken(YamlTokenKind.Indicator, lineStart + cursor, 1));
+            cursor++;
+
+            var whitespaceStart = cursor;
+            while (cursor < lineLength && content[lineStart + cursor] == ' ')
+            {
+                cursor++;
+            }
+
+            if (cursor > whitespaceStart)
+            {
+                tokens.Add(new YamlToken(YamlTokenKind.Whitespace, lineStart + whitespaceStart, cursor - whitespaceStart));
+            }
+        }
+
+        if (commentIndex == lineStart + cursor && content[commentIndex] == '#')
+        {
+            tokens.Add(new YamlToken(YamlTokenKind.Comment, commentIndex, absoluteEnd - commentIndex));
+            return tokens;
+        }
+
+        var colonIndex = FindKeySeparatorIndex(content, lineStart + cursor, absoluteEnd, commentIndex);
+
+        if (colonIndex >= 0)
+        {
+            var keyEnd = colonIndex;
+            while (keyEnd > lineStart + cursor && content[keyEnd - 1] == ' ')
+            {
+                keyEnd--;
+            }
+
+            if (keyEnd > lineStart + cursor)
+            {
+                tokens.Add(new YamlToken(YamlTokenKind.Key, lineStart + cursor, keyEnd - (lineStart + cursor)));
+            }
+
+            if (keyEnd < colonIndex)
+            {
+                tokens.Add(new YamlToken(YamlTokenKind.Whitespace, keyEnd, colonIndex - keyEnd));
+            }
+
+            tokens.Add(new YamlToken(YamlTokenKind.Separator, colonIndex, 1));
+
+            var valueStart = colonIndex + 1;
+            while (valueStart < absoluteEnd && content[valueStart] == ' ')
+            {
+                valueStart++;
+            }
+
+            if (valueStart > colonIndex + 1)
+            {
+                tokens.Add(new YamlToken(YamlTokenKind.Whitespace, colonIndex + 1, valueStart - (colonIndex + 1)));
+            }
+
+            var valueEnd = commentIndex >= 0 ? commentIndex : absoluteEnd;
+            var trimmedValueEnd = valueEnd;
+            while (trimmedValueEnd > valueStart && content[trimmedValueEnd - 1] == ' ')
+            {
+                trimmedValueEnd--;
+            }
+
+            if (trimmedValueEnd > valueStart)
+            {
+                var kind = ClassifyValueToken(content, valueStart, trimmedValueEnd);
+                tokens.Add(new YamlToken(kind, valueStart, trimmedValueEnd - valueStart));
+            }
+
+            if (valueEnd > trimmedValueEnd)
+            {
+                tokens.Add(new YamlToken(YamlTokenKind.Whitespace, trimmedValueEnd, valueEnd - trimmedValueEnd));
+            }
+
+            if (commentIndex >= 0)
+            {
+                tokens.Add(new YamlToken(YamlTokenKind.Comment, commentIndex, absoluteEnd - commentIndex));
+            }
+
+            return tokens;
+        }
+
+        var plainEnd = commentIndex >= 0 ? commentIndex : absoluteEnd;
+        if (plainEnd > lineStart + cursor)
+        {
+            var kind = ClassifyValueToken(content, lineStart + cursor, plainEnd);
+            tokens.Add(new YamlToken(kind, lineStart + cursor, plainEnd - (lineStart + cursor)));
+        }
+
+        if (commentIndex >= 0)
+        {
+            tokens.Add(new YamlToken(YamlTokenKind.Comment, commentIndex, absoluteEnd - commentIndex));
+        }
+
+        return tokens;
+    }
+
+    private static int FindCommentIndex(string content, int startInclusive, int endExclusive)
+    {
+        var inSingle = false;
+        var inDouble = false;
+
+        for (var i = startInclusive; i < endExclusive; i++)
+        {
+            var ch = content[i];
+            if (ch == '"' && !inSingle && !IsEscaped(content, i))
+            {
+                inDouble = !inDouble;
+            }
+            else if (ch == '\'' && !inDouble && !IsEscaped(content, i))
+            {
+                inSingle = !inSingle;
+            }
+            else if (ch == '#' && !inSingle && !inDouble)
+            {
+                return i;
+            }
+        }
+
+        return -1;
+    }
+
+    private static int FindKeySeparatorIndex(string content, int startInclusive, int endExclusive, int commentIndex)
+    {
+        var inSingle = false;
+        var inDouble = false;
+        var limit = commentIndex >= 0 ? Math.Min(commentIndex, endExclusive) : endExclusive;
+
+        for (var i = startInclusive; i < limit; i++)
+        {
+            var ch = content[i];
+            if (ch == '"' && !inSingle && !IsEscaped(content, i))
+            {
+                inDouble = !inDouble;
+            }
+            else if (ch == '\'' && !inDouble && !IsEscaped(content, i))
+            {
+                inSingle = !inSingle;
+            }
+            else if (ch == ':' && !inSingle && !inDouble)
+            {
+                return i;
+            }
+        }
+
+        return -1;
+    }
+
+    private static bool IsEscaped(string content, int index)
+    {
+        var backslashCount = 0;
+        var cursor = index - 1;
+        while (cursor >= 0 && content[cursor] == '\\')
+        {
+            backslashCount++;
+            cursor--;
+        }
+
+        return backslashCount % 2 == 1;
+    }
+
+    private static YamlTokenKind ClassifyValueToken(string content, int startInclusive, int endExclusive)
+    {
+        if (endExclusive <= startInclusive)
+        {
+            return YamlTokenKind.Value;
+        }
+
+        var raw = content.Substring(startInclusive, endExclusive - startInclusive);
+        var trimmed = raw.Trim();
+
+        if (trimmed.Length == 0)
+        {
+            return YamlTokenKind.Value;
+        }
+
+        var first = trimmed[0];
+        var last = trimmed[^1];
+
+        if ((first == '"' && last == '"' && trimmed.Length >= 2) ||
+            (first == '\'' && last == '\'' && trimmed.Length >= 2))
+        {
+            return YamlTokenKind.String;
+        }
+
+        if (first == '|' || first == '>')
+        {
+            return YamlTokenKind.BlockIndicator;
+        }
+
+        if (first == '&')
+        {
+            return YamlTokenKind.Anchor;
+        }
+
+        if (first == '*')
+        {
+            return YamlTokenKind.Alias;
+        }
+
+        if (first == '!')
+        {
+            return YamlTokenKind.Tag;
+        }
+
+        if (bool.TryParse(trimmed, out _))
+        {
+            return YamlTokenKind.Boolean;
+        }
+
+        if (trimmed.Equals("null", StringComparison.OrdinalIgnoreCase) || trimmed == "~")
+        {
+            return YamlTokenKind.Null;
+        }
+
+        if (double.TryParse(trimmed, NumberStyles.Float, CultureInfo.InvariantCulture, out _))
+        {
+            return YamlTokenKind.Number;
+        }
+
+        return YamlTokenKind.Value;
+    }
+
+    private static List<OutputSegment> CreateOutputSegments(int contentLength, IReadOnlyList<YamlToken> tokens, IReadOnlyList<TextMatch> matchList, int activeMatchIndex)
+    {
+        var segments = new List<OutputSegment>();
+        if (contentLength <= 0)
+        {
+            return segments;
+        }
+
+        var breakpoints = new SortedSet<int> { 0, contentLength };
+
+        foreach (var token in tokens)
+        {
+            if (token.Length <= 0)
+            {
+                continue;
+            }
+
+            breakpoints.Add(Math.Clamp(token.Start, 0, contentLength));
+            breakpoints.Add(Math.Clamp(token.End, 0, contentLength));
+        }
+
+        for (var i = 0; i < matchList.Count; i++)
+        {
+            var match = matchList[i];
+            if (match.Length <= 0)
+            {
+                continue;
+            }
+
+            var start = Math.Clamp(match.Start, 0, contentLength);
+            var end = Math.Clamp(match.Start + match.Length, 0, contentLength);
+            if (end <= start)
+            {
+                continue;
+            }
+
+            breakpoints.Add(start);
+            breakpoints.Add(end);
+        }
+
+        var ordered = breakpoints.ToArray();
+        Array.Sort(ordered);
+
+        var tokenIndex = 0;
+        var matchIndex = 0;
+
+        for (var i = 0; i < ordered.Length - 1; i++)
+        {
+            var start = ordered[i];
+            var end = ordered[i + 1];
+            if (end <= start)
+            {
+                continue;
+            }
+
+            while (tokenIndex < tokens.Count && start >= tokens[tokenIndex].End)
+            {
+                tokenIndex++;
+            }
+
+            var kind = YamlTokenKind.Plain;
+            if (tokenIndex < tokens.Count)
+            {
+                var token = tokens[tokenIndex];
+                if (start >= token.Start && start < token.End)
+                {
+                    kind = token.Kind;
+                }
+            }
+
+            while (matchIndex < matchList.Count && start >= matchList[matchIndex].Start + matchList[matchIndex].Length)
+            {
+                matchIndex++;
+            }
+
+            var isMatch = false;
+            var isActive = false;
+            var matchId = -1;
+            if (matchIndex < matchList.Count)
+            {
+                var match = matchList[matchIndex];
+                var matchStart = Math.Clamp(match.Start, 0, contentLength);
+                var matchEnd = Math.Clamp(match.Start + match.Length, 0, contentLength);
+                if (start >= matchStart && start < matchEnd)
+                {
+                    isMatch = true;
+                    isActive = matchIndex == activeMatchIndex;
+                    matchId = matchIndex;
+                }
+            }
+
+            segments.Add(new OutputSegment(start, end - start, kind, isMatch, isActive, matchId));
+        }
+
+        return segments;
+    }
+
+    private static string? GetTokenCssClass(YamlTokenKind kind) => kind switch
+    {
+        YamlTokenKind.Key => "yaml-token-key",
+        YamlTokenKind.Separator => "yaml-token-separator",
+        YamlTokenKind.String => "yaml-token-string",
+        YamlTokenKind.Number => "yaml-token-number",
+        YamlTokenKind.Boolean => "yaml-token-boolean",
+        YamlTokenKind.Null => "yaml-token-null",
+        YamlTokenKind.Comment => "yaml-token-comment",
+        YamlTokenKind.Indicator => "yaml-token-indicator",
+        YamlTokenKind.BlockIndicator => "yaml-token-block",
+        YamlTokenKind.Anchor => "yaml-token-anchor",
+        YamlTokenKind.Alias => "yaml-token-alias",
+        YamlTokenKind.Tag => "yaml-token-tag",
+        YamlTokenKind.Value => "yaml-token-value",
+        YamlTokenKind.Plain => "yaml-token-plain",
+        YamlTokenKind.Whitespace => "yaml-token-whitespace",
+        YamlTokenKind.Newline => "yaml-token-newline",
+        _ => "yaml-token-plain"
+    };
+
+    private enum YamlTokenKind
+    {
+        Whitespace,
+        Indicator,
+        Key,
+        Separator,
+        String,
+        Number,
+        Boolean,
+        Null,
+        Comment,
+        Value,
+        Anchor,
+        Alias,
+        Tag,
+        BlockIndicator,
+        Plain,
+        Newline
+    }
+
+    private readonly record struct YamlToken(YamlTokenKind Kind, int Start, int Length)
+    {
+        public int End => Start + Length;
+    }
+
+    private readonly record struct OutputSegment(int Start, int Length, YamlTokenKind Kind, bool IsMatch, bool IsActive, int MatchIndex)
+    {
+        public int End => Start + Length;
+    }
+
+    private readonly record struct TextMatch(int Start, int Length);
+}
+
+<style>
+    .yaml-preview-theme .yaml-preview-surface {
+        background-color: var(--yaml-background-color, #111827);
+        color: var(--yaml-foreground-color, #e5e7eb);
+    }
+
+    .yaml-preview-theme .yaml-preview-code {
+        border: 1px solid var(--yaml-border-color, rgba(148, 163, 184, 0.35));
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.02);
+    }
+
+    .yaml-preview-theme .yaml-preview-editor {
+        background-color: var(--yaml-background-color, #111827);
+        border: 1px solid var(--yaml-border-color, rgba(148, 163, 184, 0.35));
+        color: var(--yaml-foreground-color, #e5e7eb);
+    }
+
+    .yaml-preview-theme .yaml-preview-editor::placeholder {
+        color: rgba(226, 232, 240, 0.5);
+    }
+
+    .yaml-preview-theme .yaml-token {
+        display: inline;
+        white-space: inherit;
+        transition: color 0.12s ease, background-color 0.12s ease, box-shadow 0.12s ease;
+    }
+
+    .yaml-preview-theme .yaml-token-key {
+        color: var(--yaml-key-color, #93c5fd);
+        font-weight: 600;
+    }
+
+    .yaml-preview-theme .yaml-token-separator {
+        color: var(--yaml-separator-color, #fbbf24);
+        font-weight: 600;
+    }
+
+    .yaml-preview-theme .yaml-token-value,
+    .yaml-preview-theme .yaml-token-plain {
+        color: var(--yaml-value-color, #e5e7eb);
+    }
+
+    .yaml-preview-theme .yaml-token-string {
+        color: var(--yaml-string-color, #fde68a);
+    }
+
+    .yaml-preview-theme .yaml-token-number {
+        color: var(--yaml-number-color, #fcd34d);
+    }
+
+    .yaml-preview-theme .yaml-token-boolean {
+        color: var(--yaml-boolean-color, #38bdf8);
+    }
+
+    .yaml-preview-theme .yaml-token-null {
+        color: var(--yaml-null-color, #fca5a5);
+    }
+
+    .yaml-preview-theme .yaml-token-comment {
+        color: var(--yaml-comment-color, #94a3b8);
+        font-style: italic;
+    }
+
+    .yaml-preview-theme .yaml-token-indicator,
+    .yaml-preview-theme .yaml-token-block {
+        color: var(--yaml-indicator-color, #a855f7);
+    }
+
+    .yaml-preview-theme .yaml-token-anchor,
+    .yaml-preview-theme .yaml-token-alias {
+        color: var(--yaml-anchor-color, #34d399);
+    }
+
+    .yaml-preview-theme .yaml-token-tag {
+        color: var(--yaml-tag-color, #f472b6);
+    }
+
+    .yaml-preview-theme .yaml-token-whitespace,
+    .yaml-preview-theme .yaml-token-newline {
+        color: inherit;
+    }
+
+    .yaml-preview-theme .yaml-highlight-match {
+        background-color: var(--yaml-highlight-background, rgba(250, 204, 21, 0.35));
+        color: var(--yaml-highlight-foreground, inherit);
+        border-radius: 0.125rem;
+        padding: 0 0.15rem;
+    }
+
+    .yaml-preview-theme .yaml-highlight-active {
+        background-color: var(--yaml-highlight-active-background, rgba(234, 179, 8, 0.55));
+        color: var(--yaml-highlight-active-foreground, inherit);
+        box-shadow: 0 0 0 1px var(--yaml-highlight-active-border, rgba(202, 138, 4, 0.5));
+    }
+</style>

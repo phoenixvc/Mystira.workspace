@@ -1,0 +1,50 @@
+@using Mystira.StoryGenerator.Contracts.Chat
+
+<div class="message system-message">
+    <div class="system-content">
+        <i class="system-icon">ℹ️</i>
+        <span class="system-text">@Message.Content</span>
+        <span class="system-timestamp">@Message.Timestamp.ToString("HH:mm")</span>
+    </div>
+</div>
+
+@code {
+    [Parameter] public Mystira.StoryGenerator.Contracts.Chat.MystiraChatMessage Message { get; set; } = null!;
+}
+
+<style>
+    .system-message {
+        margin: 0.5rem 0;
+        display: flex;
+        justify-content: center;
+    }
+
+    .system-content {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: #fef3c7;
+        color: #92400e;
+        padding: 0.5rem 1rem;
+        border-radius: 1rem;
+        font-size: 0.875rem;
+        border: 1px solid #fcd34d;
+        max-width: 90%;
+    }
+
+    .system-icon {
+        font-size: 14px;
+        flex-shrink: 0;
+    }
+
+    .system-text {
+        flex: 1;
+        text-align: center;
+    }
+
+    .system-timestamp {
+        font-size: 0.75rem;
+        color: #a16207;
+        flex-shrink: 0;
+    }
+</style>

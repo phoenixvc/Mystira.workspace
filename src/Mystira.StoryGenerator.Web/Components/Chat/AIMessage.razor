@@ -1,0 +1,109 @@
+@using Mystira.StoryGenerator.Contracts.Chat
+
+<div class="message ai-message">
+    <div class="message-header">
+        <div class="message-avatar ai-avatar">
+            <i class="ai-icon">🧙‍♂️</i>
+        </div>
+        <div class="message-info">
+            <span class="message-sender">Mystira AI</span>
+            <span class="message-timestamp">@Message.Timestamp.ToString("HH:mm")</span>
+        </div>
+    </div>
+    <div class="message-content ai-content">
+        @((MarkupString)FormatContent(Message.Content))
+    </div>
+</div>
+
+@code {
+    [Parameter] public Mystira.StoryGenerator.Contracts.Chat.MystiraChatMessage Message { get; set; } = null!;
+
+    private string FormatContent(string content)
+    {
+        if (string.IsNullOrEmpty(content))
+            return string.Empty;
+
+        // Simple markdown-like formatting
+        content = content.Replace("**", "<strong>", StringComparison.OrdinalIgnoreCase);
+        content = content.Replace("**", "</strong>", StringComparison.OrdinalIgnoreCase);
+        content = content.Replace("*", "<em>", StringComparison.OrdinalIgnoreCase);
+        content = content.Replace("*", "</em>", StringComparison.OrdinalIgnoreCase);
+        
+        // Convert line breaks to HTML
+        content = content.Replace("\n", "<br>", StringComparison.OrdinalIgnoreCase);
+        
+        return content;
+    }
+}
+
+<style>
+    .ai-message {
+        margin: 1rem 0;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        max-width: 80%;
+        margin-right: auto;
+    }
+
+    .message-header {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 0.25rem;
+    }
+
+    .ai-avatar {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .ai-icon {
+        font-size: 16px;
+        color: white;
+    }
+
+    .message-info {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.125rem;
+    }
+
+    .message-sender {
+        font-weight: 600;
+        color: #374151;
+        font-size: 0.875rem;
+    }
+
+    .message-timestamp {
+        font-size: 0.75rem;
+        color: #6b7280;
+    }
+
+    .ai-content {
+        background: #f9fafb;
+        border: 1px solid #e5e7eb;
+        color: #374151;
+        padding: 0.75rem 1rem;
+        border-radius: 1rem 1rem 1rem 0.25rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        max-width: 100%;
+        word-wrap: break-word;
+        line-height: 1.6;
+    }
+
+    .ai-content strong {
+        color: #1f2937;
+    }
+
+    .ai-content em {
+        color: #6b7280;
+        font-style: italic;
+    }
+</style>
