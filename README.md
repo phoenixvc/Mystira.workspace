@@ -49,10 +49,45 @@ The web application will use the configured HttpClient base address to communica
 - `GET /health` – ASP.NET Core health check endpoint.
 - `POST /stories/preview` – Placeholder endpoint that echoes the request using shared contracts.
 
+## Project Structure
+
+```
+Mystira.StoryGenerator/
+├── src/                    # Source code
+│   ├── Mystira.StoryGenerator.Api/        # ASP.NET Core API
+│   ├── Mystira.StoryGenerator.Web/        # Blazor WebAssembly frontend
+│   ├── Mystira.StoryGenerator.Contracts/  # Shared contracts
+│   └── Mystira.StoryGenerator.Console/    # Console application
+├── tests/                  # Unit and integration tests
+│   └── Mystira.StoryGenerator.Api.Tests/
+├── docs/                   # Documentation
+│   ├── AI_PROVIDER_INTEGRATION.md
+│   ├── IMPLEMENTATION_SUMMARY.md
+│   ├── SCHEMA_VALIDATION_IMPLEMENTATION.md
+│   ├── YAML_IMPORT_FEATURE.md
+│   └── test-yaml-import.md
+├── test-data/             # Test files and scripts
+│   ├── test-story.yaml
+│   ├── test-story-invalid.yaml
+│   └── test-import-feature.sh
+├── build.sh               # Build script for bash
+└── build.ps1              # Build script for PowerShell
+```
+
+## Documentation
+
+Detailed implementation documentation is available in the `docs/` directory:
+
+- **[AI Provider Integration](docs/AI_PROVIDER_INTEGRATION.md)** – Integration with Azure AI Foundry and Google Gemini
+- **[Implementation Summary](docs/IMPLEMENTATION_SUMMARY.md)** – Overview of key features
+- **[Schema Validation](docs/SCHEMA_VALIDATION_IMPLEMENTATION.md)** – Story YAML validation details
+- **[YAML Import Feature](docs/YAML_IMPORT_FEATURE.md)** – Import stories from YAML files
+
 ## Scripts
 
 - `build.sh` – restores and builds the solution for bash environments.
 - `build.ps1` – restores and builds the solution for PowerShell environments.
+- `test-data/test-import-feature.sh` – test script for YAML import functionality.
 
 ## Next Steps
 

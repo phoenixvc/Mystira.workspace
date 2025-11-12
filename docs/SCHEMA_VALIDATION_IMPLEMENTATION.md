@@ -122,10 +122,10 @@ curl -k -X POST https://localhost:5001/api/stories/validate \
 ## 🚀 Usage Examples
 
 ### Valid Story Structure
-See `test-story.yaml` - Complete story with all required fields and proper structure.
+See `test-data/test-story.yaml` - Complete story with all required fields and proper structure.
 
 ### Invalid Story Structure  
-See `test-story-invalid.yaml` - Demonstrates various validation errors.
+See `test-data/test-story-invalid.yaml` - Demonstrates various validation errors.
 
 ## 📋 Development Commands
 
