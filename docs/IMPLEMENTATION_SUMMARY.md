@@ -93,9 +93,9 @@
 7. User can retry with corrected YAML
 
 ### Testing Resources
-- **Test File**: `/home/engine/project/Mystira.StoryGenerator/test-story.yaml` (valid example)
-- **Documentation**: `/home/engine/project/Mystira.StoryGenerator/test-yaml-import.md`
-- **Test Script**: `/home/engine/project/Mystira.StoryGenerator/test-import-feature.sh`
+- **Test File**: `test-data/test-story.yaml` (valid example)
+- **Documentation**: `docs/test-yaml-import.md`
+- **Test Script**: `test-data/test-import-feature.sh`
 
 ### Browser Compatibility
 - Uses modern clipboard API (supported in all current browsers)

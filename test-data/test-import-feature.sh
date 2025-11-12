@@ -4,9 +4,12 @@
 echo "=== YAML Import Feature Test ==="
 echo
 
+# Get the repository root directory (parent of test-data)
+REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+cd "$REPO_ROOT"
+
 # Check if the project builds successfully
 echo "1. Building the project..."
-cd /home/engine/project/Mystira.StoryGenerator
 dotnet build src/Mystira.StoryGenerator.Web
 
 if [ $? -eq 0 ]; then
@@ -18,13 +21,13 @@ fi
 
 echo
 echo "2. Validating test YAML file..."
-if [ -f "test-story.yaml" ]; then
+if [ -f "test-data/test-story.yaml" ]; then
     echo "✅ Test YAML file exists"
     
     # Check if it has basic required fields
-    if grep -q "title:" test-story.yaml && \
-       grep -q "difficulty:" test-story.yaml && \
-       grep -q "scenes:" test-story.yaml; then
+    if grep -q "title:" test-data/test-story.yaml && \
+       grep -q "difficulty:" test-data/test-story.yaml && \
+       grep -q "scenes:" test-data/test-story.yaml; then
         echo "✅ Test YAML has required structure"
     else
         echo "❌ Test YAML missing required fields"
@@ -74,4 +77,4 @@ echo "1. Start the web application: dotnet run --project src/Mystira.StoryGenera
 echo "2. Start the API: dotnet run --project src/Mystira.StoryGenerator.Api"
 echo "3. Open the web app in browser"
 echo "4. Click 'Import from Clipboard' or 'Import from File'"
-echo "5. Test with the test-story.yaml file"
+echo "5. Test with the test-data/test-story.yaml file"
