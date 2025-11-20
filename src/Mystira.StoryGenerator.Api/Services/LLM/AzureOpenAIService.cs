@@ -78,7 +78,7 @@ public class AzureOpenAIService : ILLMService
     }
 
     // Exposed for unit testing to validate option construction when a JsonSchemaFormat is provided.
-    internal static ChatCompletionOptions? BuildOptions(ChatCompletionRequest request, ILogger logger)
+    public static ChatCompletionOptions? BuildOptions(ChatCompletionRequest request, ILogger logger)
     {
         if (request.JsonSchemaFormat is not null &&
             !string.IsNullOrWhiteSpace(request.JsonSchemaFormat.SchemaJson))

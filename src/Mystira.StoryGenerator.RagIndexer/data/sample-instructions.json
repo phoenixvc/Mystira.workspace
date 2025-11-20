@@ -1,0 +1,31 @@
+{
+  "dataset": "mystira_school_age_story_template",
+  "version": "1.0",
+  "chunks": [
+    {
+      "chunk_id": "core_story_requirements",
+      "section": "1.1",
+      "title": "Core Story Requirements",
+      "content": "Stories must include a minimum level of interactivity and dice-based uncertainty. Each story needs at least five decision scenes and must ensure every character gets both an Action Choice and a Challenge Roll. Along any complete narrative path from start to ending, roughly a quarter of scenes must be roll-based. Choice- and roll-based branches cannot lead to the same next scene, and stories must support multiple possible endings.",
+      "keywords": [
+        "story_design",
+        "interactivity",
+        "roll_scenes",
+        "branching_rules",
+        "multiple_endings"
+      ]
+    },
+    {
+      "chunk_id": "educational_goals_overview",
+      "section": "1.2",
+      "title": "Educational Goals Overview",
+      "content": "Each adventure must intentionally foster social and emotional growth, cognitive skills, and moral reasoning. Social-emotional goals include building competence, empathy, and emotional regulation. Cognitive goals emphasize concrete logic, executive functions like working memory and flexibility, and encouragement of creative thinking. Moral goals focus on fairness, integrity, consequences of actions, and themes like community care and responsibility.",
+      "keywords": [
+        "educational_design",
+        "social_emotional_learning",
+        "cognitive_skills",
+        "moral_development"
+      ]
+    }
+  ]
+}
