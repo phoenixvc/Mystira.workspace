@@ -59,13 +59,91 @@ public class AzureAISearchService : IAzureAISearchService
         {
             Fields = new List<SearchField>()
             {
+                // Primary Key
+                new SimpleField("id", SearchFieldDataType.String) { IsKey = true },
+
+                // Content
+                new SearchField("content", SearchFieldDataType.String) 
+                { 
+                    IsSearchable = true, 
+                    IsFilterable = false,
+                    AnalyzerName = "standard.lucene"
+                },
+
+                new SearchField("title", SearchFieldDataType.String) 
+                { 
+                    IsSearchable = true, 
+                    IsFilterable = true 
+                },
+
+                // Instruction categorization
+                new SimpleField("category", SearchFieldDataType.String) 
+                { 
+                    IsFilterable = true, 
+                    IsFacetable = true 
+                },
+                
+                new SimpleField("subcategory", SearchFieldDataType.String) 
+                { 
+                    IsFilterable = true, 
+                    IsFacetable = true 
+                },
+
+                // Priority and importance
+                new SimpleField("priority", SearchFieldDataType.String) 
+                { 
+                    IsFilterable = true, 
+                    IsFacetable = true 
+                },
+
+                new SimpleField("isMandatory", SearchFieldDataType.Boolean) 
+                { 
+                    IsFilterable = true 
+                },
+
+                // Context and relationships
+                new SearchField("examples", SearchFieldDataType.String) 
+                { 
+                    IsFilterable = false 
+                },
+
+                new SimpleField("tags", SearchFieldDataType.Collection(SearchFieldDataType.String)) 
+                { 
+                    IsFilterable = true, 
+                    IsFacetable = true 
+                },
+
+                // Metadata
+                new SimpleField("source", SearchFieldDataType.String) 
+                { 
+                    IsFilterable = true 
+                },
+                
+                new SimpleField("version", SearchFieldDataType.String) 
+                { 
+                    IsFilterable = true 
+                },
+
+                // Timestamps
+                new SimpleField("createdAt", SearchFieldDataType.DateTimeOffset) 
+                { 
+                    IsFilterable = true, 
+                    IsSortable = true 
+                },
+                
+                new SimpleField("updatedAt", SearchFieldDataType.DateTimeOffset) 
+                { 
+                    IsFilterable = true, 
+                    IsSortable = true 
+                },
+
+                // Legacy fields for backward compatibility
                 new SimpleField("chunk_id", SearchFieldDataType.String) { IsKey = true },
-                new SearchField("content", SearchFieldDataType.String) { IsSearchable = true, IsFilterable = false },
-                new SearchField("title", SearchFieldDataType.String) { IsSearchable = true, IsFilterable = true },
                 new SearchField("section", SearchFieldDataType.String) { IsSearchable = true, IsFilterable = true },
-                new SearchField("dataset", SearchFieldDataType.String) { IsFilterable = true, IsFacetable = true },
-                new SearchField("version", SearchFieldDataType.String) { IsFilterable = true },
+                new SimpleField("dataset", SearchFieldDataType.String) { IsFilterable = true, IsFacetable = true },
                 new SearchField("keywords", SearchFieldDataType.Collection(SearchFieldDataType.String)) { IsFilterable = true, IsFacetable = true },
+
+                // Vector field
                 new SearchField("embedding", SearchFieldDataType.Collection(SearchFieldDataType.Single)) 
                 { 
                     IsSearchable = true, 
@@ -106,13 +184,40 @@ public class AzureAISearchService : IAzureAISearchService
     {
         return new SearchDocument
         {
-            ["chunk_id"] = chunk.ChunkId,
+            // Primary Key
+            ["id"] = chunk.ChunkId,
+            
+            // Content
             ["content"] = chunk.Content,
             ["title"] = chunk.Title,
+            
+            // Instruction categorization
+            ["category"] = chunk.Category,
+            ["subcategory"] = chunk.Subcategory,
+            ["instructionType"] = chunk.InstructionType,
+            ["priority"] = chunk.Priority,
+            ["isMandatory"] = chunk.IsMandatory,
+            ["examples"] = chunk.Examples,
+            ["tags"] = chunk.Tags,
+            
+            // Context and relationships
+            ["section"] = chunk.Section,
+            ["keywords"] = chunk.Keywords,
+            
+            // Metadata
+            ["source"] = chunk.Source,
+            ["version"] = chunk.Version,
+            ["createdAt"] = chunk.CreatedAt,
+            ["updatedAt"] = chunk.UpdatedAt,
+            
+            // Legacy fields for backward compatibility
+            ["chunk_id"] = chunk.ChunkId,
             ["section"] = chunk.Section,
             ["dataset"] = dataset,
             ["version"] = version,
             ["keywords"] = chunk.Keywords,
+            
+            // Vector embedding
             ["embedding"] = embedding
         };
     }
