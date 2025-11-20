@@ -9,6 +9,10 @@ This console application implements the indexing phase for Retrieval Augmented G
 - Stores chunks with embeddings in Azure AI Search
 - Supports dataset versioning (deletes old versions before indexing)
 - Configurable through appsettings.json
+- Built with SOLID principles and DRY practices
+- Comprehensive error handling and retry policies
+- Dependency injection and service factory pattern
+- Structured logging and monitoring
 
 ## Configuration
 
