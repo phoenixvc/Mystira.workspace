@@ -13,12 +13,14 @@ public class StoryValidationService : IStoryValidationService
 {
     private readonly JsonSchema? _schema;
     private readonly AiSettings _settings;
+    private readonly IStorySchemaProvider _schemaProvider;
     private readonly ILogger<StoryValidationService> _logger;
 
-    public StoryValidationService(ILogger<StoryValidationService> logger, IOptions<AiSettings> aiOptions)
+    public StoryValidationService(ILogger<StoryValidationService> logger, IOptions<AiSettings> aiOptions, IStorySchemaProvider schemaProvider)
     {
         _logger = logger;
         _settings = aiOptions.Value;
+        _schemaProvider = schemaProvider;
         _schema = LoadSchema();
     }
 
@@ -252,19 +254,12 @@ public class StoryValidationService : IStoryValidationService
     {
         try
         {
-            var configuredPath = _settings.AzureOpenAI.SchemaValidation.SchemaPath;
-            var schemaPath = string.IsNullOrWhiteSpace(configuredPath)
-                ? Path.Combine(AppContext.BaseDirectory, "config", "story-schema.json")
-                : (Path.IsPathRooted(configuredPath)
-                    ? configuredPath
-                    : Path.Combine(AppContext.BaseDirectory, configuredPath));
-            if (!File.Exists(schemaPath))
+            var schemaContent = _schemaProvider.GetSchemaJsonAsync().Result;
+            if (string.IsNullOrWhiteSpace(schemaContent))
             {
-                _logger.LogError($"Schema file not found at: {schemaPath}");
+                _logger.LogError("Story schema content is empty or missing");
                 return null;
             }
-
-            var schemaContent = File.ReadAllText(schemaPath);
             return JsonSchema.FromJsonAsync(schemaContent).Result;
         }
         catch (Exception ex)

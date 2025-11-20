@@ -24,6 +24,9 @@ builder.Services.AddScoped<ILLMService, AzureOpenAIService>();
 builder.Services.AddScoped<ILLMService, GoogleGeminiService>();
 builder.Services.AddScoped<ILLMServiceFactory, LLMServiceFactory>();
 
+// Story schema provider abstraction
+builder.Services.AddScoped<IStorySchemaProvider, FileStorySchemaProvider>();
+
 var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? Array.Empty<string>();
 
 builder.Services.AddCors(options =>

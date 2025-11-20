@@ -5,6 +5,7 @@ using Newtonsoft.Json.Linq;
 using Mystira.StoryGenerator.Domain.Stories;
 using Microsoft.Extensions.Options;
 using Mystira.StoryGenerator.Contracts.Configuration;
+using Mystira.StoryGenerator.Api.Services;
 
 namespace Mystira.StoryGenerator.Api.Controllers;
 
@@ -14,11 +15,13 @@ public class SchemaController : ControllerBase
 {
     private readonly ILogger<SchemaController> _logger;
     private readonly AiSettings _settings;
+    private readonly IStorySchemaProvider _schemaProvider;
 
-    public SchemaController(ILogger<SchemaController> logger, IOptions<AiSettings> aiOptions)
+    public SchemaController(ILogger<SchemaController> logger, IOptions<AiSettings> aiOptions, IStorySchemaProvider schemaProvider)
     {
         _logger = logger;
         _settings = aiOptions.Value;
+        _schemaProvider = schemaProvider;
     }
 
     [HttpGet("story")] // returns the file-based schema used for validating payloads
@@ -26,18 +29,11 @@ public class SchemaController : ControllerBase
     {
         try
         {
-            var configuredPath = _settings.AzureOpenAI.SchemaValidation.SchemaPath;
-            var schemaPath = string.IsNullOrWhiteSpace(configuredPath)
-                ? Path.Combine(AppContext.BaseDirectory, "config", "story-schema.json")
-                : (Path.IsPathRooted(configuredPath)
-                    ? configuredPath
-                    : Path.Combine(AppContext.BaseDirectory, configuredPath));
-            if (!System.IO.File.Exists(schemaPath))
+            var json = await _schemaProvider.GetSchemaJsonAsync();
+            if (string.IsNullOrWhiteSpace(json))
             {
                 return NotFound(new { error = "Schema file not found." });
             }
-
-            var json = await System.IO.File.ReadAllTextAsync(schemaPath);
             return Content(json, "application/json");
         }
         catch (Exception ex)
@@ -69,18 +65,11 @@ public class SchemaController : ControllerBase
     {
         try
         {
-            var configuredPath = _settings.AzureOpenAI.SchemaValidation.SchemaPath;
-            var schemaPath = string.IsNullOrWhiteSpace(configuredPath)
-                ? Path.Combine(AppContext.BaseDirectory, "config", "story-schema.json")
-                : (Path.IsPathRooted(configuredPath)
-                    ? configuredPath
-                    : Path.Combine(AppContext.BaseDirectory, configuredPath));
-            if (!System.IO.File.Exists(schemaPath))
+            var fileJson = await _schemaProvider.GetSchemaJsonAsync();
+            if (string.IsNullOrWhiteSpace(fileJson))
             {
                 return NotFound(new { error = "Schema file not found." });
             }
-
-            var fileJson = await System.IO.File.ReadAllTextAsync(schemaPath);
             var generated = JsonSchema.FromType<Scenario>();
             var generatedJson = generated.ToJson();
 

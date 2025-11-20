@@ -14,15 +14,18 @@ public class StoryGenerationService : IStoryGenerationService
 {
     private readonly ILLMServiceFactory _llmFactory;
     private readonly AiSettings _settings;
+    private readonly IStorySchemaProvider _schemaProvider;
     private readonly ILogger<StoryGenerationService> _logger;
 
     public StoryGenerationService(
         ILLMServiceFactory llmFactory,
         IOptions<AiSettings> aiOptions,
+        IStorySchemaProvider schemaProvider,
         ILogger<StoryGenerationService> logger)
     {
         _llmFactory = llmFactory;
         _settings = aiOptions.Value;
+        _schemaProvider = schemaProvider;
         _logger = logger;
     }
 
@@ -244,20 +247,14 @@ CRITICAL VALIDATION RULES:
     {
         try
         {
-            var configuredPath = _settings.AzureOpenAI.SchemaValidation.SchemaPath;
-            string schemaPath = string.IsNullOrWhiteSpace(configuredPath)
-                ? Path.Combine(AppContext.BaseDirectory, "config", "story-schema.json")
-                : (Path.IsPathRooted(configuredPath)
-                    ? configuredPath
-                    : Path.Combine(AppContext.BaseDirectory, configuredPath));
-            if (File.Exists(schemaPath))
+            var json = _schemaProvider.GetSchemaJsonAsync().Result;
+            if (!string.IsNullOrWhiteSpace(json))
             {
-                var json = File.ReadAllText(schemaPath);
                 return new JsonSchemaResponseFormat
                 {
                     FormatName = "mystira-story-generated",
                     SchemaJson = json,
-                    IsStrict = _settings.AzureOpenAI.SchemaValidation.IsSchemaValidationStrict
+                    IsStrict = _schemaProvider.IsStrict
                 };
             }
         }

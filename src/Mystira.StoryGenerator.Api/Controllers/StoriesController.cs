@@ -17,18 +17,21 @@ public class StoriesController : ControllerBase
     private readonly IStoryGenerationService _generationService;
     private readonly ILLMServiceFactory _llmFactory;
     private readonly AiSettings _aiSettings;
+    private readonly IStorySchemaProvider _schemaProvider;
     private readonly ILogger<StoriesController> _logger;
 
     public StoriesController(
         IStoryValidationService validationService,
         IStoryGenerationService generationService,
         ILLMServiceFactory llmFactory,
+        IStorySchemaProvider schemaProvider,
         IOptions<AiSettings> aiOptions,
         ILogger<StoriesController> logger)
     {
         _validationService = validationService;
         _generationService = generationService;
         _llmFactory = llmFactory;
+        _schemaProvider = schemaProvider;
         _aiSettings = aiOptions.Value;
         _logger = logger;
     }
@@ -135,26 +138,20 @@ public class StoriesController : ControllerBase
             JsonSchemaResponseFormat? schemaFormat = null;
             try
             {
-                var configuredPath = _aiSettings.AzureOpenAI.SchemaValidation.SchemaPath;
-                var schemaPath = string.IsNullOrWhiteSpace(configuredPath)
-                    ? Path.Combine(AppContext.BaseDirectory, "config", "story-schema.json")
-                    : (Path.IsPathRooted(configuredPath)
-                        ? configuredPath
-                        : Path.Combine(AppContext.BaseDirectory, configuredPath));
-                if (System.IO.File.Exists(schemaPath))
+                var jsonSchema = await _schemaProvider.GetSchemaJsonAsync(cancellationToken);
+                if (!string.IsNullOrWhiteSpace(jsonSchema))
                 {
-                    var jsonSchema = await System.IO.File.ReadAllTextAsync(schemaPath, cancellationToken);
                     schemaFormat = new JsonSchemaResponseFormat
                     {
                         FormatName = "mystira-story-setup",
-                        SchemaJson = jsonSchema,
-                        IsStrict = _aiSettings.AzureOpenAI.SchemaValidation.IsSchemaValidationStrict
+                        SchemaJson = jsonSchema!,
+                        IsStrict = _schemaProvider.IsStrict
                     };
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, "Failed to load story-schema.json for schema-constrained output; continuing without schema.");
+                _logger.LogWarning(ex, "Failed to load story schema for schema-constrained output; continuing without schema.");
             }
 
             var chatRequest = new ChatCompletionRequest
