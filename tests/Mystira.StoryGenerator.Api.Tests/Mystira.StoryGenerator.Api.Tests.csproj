@@ -23,6 +23,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Mystira.StoryGenerator.Api\Mystira.StoryGenerator.Api.csproj" />
+    <ProjectReference Include="..\..\src\Mystira.StoryGenerator.Web\Mystira.StoryGenerator.Web.csproj" />
   </ItemGroup>
 
 </Project>

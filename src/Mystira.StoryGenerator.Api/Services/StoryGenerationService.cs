@@ -113,7 +113,14 @@ Output must be a single JSON object using the following keys:
 - title, description, tags, difficulty, session_length, age_group, minimum_age, core_axes, archetypes
 - characters: array of character entries with id, name, optional image/audio URLs, and metadata (role, archetype, species, age, traits, backstory)
 - scenes: each with id, title, type, description, optional media, choices/branches or roll_requirements, and optional echo_log, compass_change, echo_reveal_references
-Only output a single valid JSON object—no commentary, markdown, or code fences.";
+Only output a single valid JSON object—no commentary, markdown, or code fences.
+
+CRITICAL VALIDATION RULES:
+    - if scene type is roll, the difficulty and branches fields are required
+    - if scene type is choice, the branches field is required
+    - if scene type is narrative, the next_scene field is required
+    - if scene type is special, the next_scene field is required and must be null
+";
     }
 
     private static List<MystiraChatMessage> BuildMessages(GenerateJsonStoryRequest request)
