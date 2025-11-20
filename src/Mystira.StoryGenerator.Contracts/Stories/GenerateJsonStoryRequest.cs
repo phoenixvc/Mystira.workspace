@@ -1,6 +1,6 @@
 namespace Mystira.StoryGenerator.Contracts.Stories;
 
-public class GenerateYamlStoryRequest
+public class GenerateJsonStoryRequest
 {
     public string? Provider { get; set; }
     public string? ModelId { get; set; }

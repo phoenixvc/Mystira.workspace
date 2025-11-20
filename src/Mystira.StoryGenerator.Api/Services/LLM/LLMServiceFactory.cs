@@ -65,10 +65,8 @@ public class LLMServiceFactory : ILLMServiceFactory
                 _logger.LogDebug("Found available service for provider: {Provider}", providerName);
                 return service;
             }
-            else
-            {
-                _logger.LogWarning("Service for provider {Provider} is not properly configured", providerName);
-            }
+
+            _logger.LogWarning("Service for provider {Provider} is not properly configured", providerName);
         }
         else
         {
@@ -89,7 +87,7 @@ public class LLMServiceFactory : ILLMServiceFactory
         var service = GetService(_settings.DefaultProvider);
         if (service == null)
         {
-            _logger.LogWarning("Default provider {Provider} is not available, trying to find any available service", 
+            _logger.LogWarning("Default provider {Provider} is not available, trying to find any available service",
                 _settings.DefaultProvider);
 
             // Fallback to first available service

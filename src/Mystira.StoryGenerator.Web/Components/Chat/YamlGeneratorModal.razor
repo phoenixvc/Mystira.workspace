@@ -104,7 +104,7 @@
 
         try
         {
-            var request = new GenerateYamlStoryRequest
+            var request = new GenerateJsonStoryRequest
             {
                 Title = string.IsNullOrWhiteSpace(Session?.Title) ? "The Whispering Swamp" : Session!.Title,
                 Difficulty = "Medium",
@@ -118,10 +118,11 @@
                 MaxScenes = 12
             };
 
-            var result = await StoryApi.GenerateYamlStoryAsync(request);
+            var result = await StoryApi.GenerateJsonStoryAsync(request);
             if (result.Success)
             {
-                generatedYaml = result.Yaml;
+                // Backend returns JSON; convert to YAML for display
+                generatedYaml = JsonYamlConverter.ToYaml(result.Json);
             }
             else
             {

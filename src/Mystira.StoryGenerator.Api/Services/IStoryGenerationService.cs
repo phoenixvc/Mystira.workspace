@@ -4,5 +4,5 @@ namespace Mystira.StoryGenerator.Api.Services;
 
 public interface IStoryGenerationService
 {
-    Task<GenerateYamlStoryResponse> GenerateYamlStoryAsync(GenerateYamlStoryRequest request, CancellationToken cancellationToken = default);
+    Task<GenerateJsonStoryResponse> GenerateJsonStoryAsync(GenerateJsonStoryRequest request, CancellationToken cancellationToken = default);
 }

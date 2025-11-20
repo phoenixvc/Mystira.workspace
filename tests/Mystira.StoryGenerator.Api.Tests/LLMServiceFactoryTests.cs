@@ -13,6 +13,25 @@ public class LLMServiceFactoryTests
     private readonly Mock<IOptions<AiSettings>> _optionsMock;
     private readonly AiSettings _aiSettings;
 
+    public LLMServiceFactoryTests()
+    {
+        _loggerMock = new Mock<ILogger<LLMServiceFactory>>();
+        _optionsMock = new Mock<IOptions<AiSettings>>();
+
+        _aiSettings = new AiSettings
+        {
+            DefaultProvider = "azure-openai",
+            AzureOpenAI = new AzureOpenAISettings
+            {
+                Endpoint = "https://test.openai.azure.com",
+                ApiKey = "test-key",
+                DeploymentName = "test-deployment"
+            }
+        };
+
+        _optionsMock.Setup(x => x.Value).Returns(_aiSettings);
+    }
+
     [Fact]
     public void GetService_WithValidProvider_ReturnsService()
     {

@@ -54,6 +54,15 @@ public class ChatController : ControllerBase
                 });
             }
 
+            if (request.Provider == null)
+            {
+                return BadRequest(new ChatCompletionResponse
+                {
+                    Success = false,
+                    Error = "Provider is required"
+                });
+            }
+
             var llmService = _llmServiceFactory.GetService(request.Provider);
 
             if (llmService == null)
@@ -72,7 +81,8 @@ public class ChatController : ControllerBase
             request.ModelId = resolvedModelName;
             request.Model = resolvedModelName;
 
-            if (request.Temperature is var configuredTemp && Math.Abs(request.Temperature - _aiSettings.DefaultTemperature) < 0.0001)
+            if (request.Temperature is var configuredTemp &&
+                Math.Abs(request.Temperature - _aiSettings.DefaultTemperature) < 0.0001)
             {
                 request.Temperature = configuredTemp;
             }
@@ -82,7 +92,8 @@ public class ChatController : ControllerBase
                 request.MaxTokens = Math.Max(request.MaxTokens, configuredMax);
             }
 
-            _logger.LogInformation("Processing chat completion request with provider: {Provider}, modelId: {ModelId}, model: {Model}",
+            _logger.LogInformation(
+                "Processing chat completion request with provider: {Provider}, modelId: {ModelId}, model: {Model}",
                 llmService.ProviderName, resolvedModelName, resolvedModelName);
 
             // Call the LLM service
@@ -109,7 +120,8 @@ public class ChatController : ControllerBase
                 return StatusCode(502, response);
             }
 
-            _logger.LogInformation("Chat completion successful. Provider: {Provider}, Model: {Model}, ModelId: {ModelId}, Tokens: {Tokens}",
+            _logger.LogInformation(
+                "Chat completion successful. Provider: {Provider}, Model: {Model}, ModelId: {ModelId}, Tokens: {Tokens}",
                 response.Provider, response.Model, response.ModelId, response.Usage?.TotalTokens ?? 0);
 
             return Ok(response);

@@ -4,6 +4,7 @@ using Microsoft.Extensions.Options;
 using Mystira.StoryGenerator.Api.Extensions;
 using Mystira.StoryGenerator.Contracts.Chat;
 using Mystira.StoryGenerator.Contracts.Configuration;
+using OpenAI.Chat;
 
 namespace Mystira.StoryGenerator.Api.Services.LLM;
 
@@ -46,7 +47,13 @@ public class AzureOpenAIService : ILLMService
             var chatClient = azureClient.GetChatClient(_settings.AzureOpenAI.DeploymentName);
 
             var messages = request.ToOpenAiChatMessages();
-            var azureResponse = await chatClient.CompleteChatAsync(messages, cancellationToken: cancellationToken);
+
+            var options = BuildOptions(request, _logger);
+
+            var azureResponse = await chatClient.CompleteChatAsync(
+                messages,
+                options: options,
+                cancellationToken: cancellationToken);
             var response = azureResponse.Value;
 
             return new ChatCompletionResponse
@@ -68,6 +75,35 @@ public class AzureOpenAIService : ILLMService
             _logger.LogError(ex, "Error calling Azure OpenAI API");
             return CreateErrorResponse($"Azure OpenAI service error: {ex.Message}");
         }
+    }
+
+    // Exposed for unit testing to validate option construction when a JsonSchemaFormat is provided.
+    internal static ChatCompletionOptions? BuildOptions(ChatCompletionRequest request, ILogger logger)
+    {
+        if (request.JsonSchemaFormat is not null &&
+            !string.IsNullOrWhiteSpace(request.JsonSchemaFormat.SchemaJson))
+        {
+            try
+            {
+                return new ChatCompletionOptions
+                {
+                    ResponseFormat = ChatResponseFormat.CreateJsonSchemaFormat(
+                        jsonSchemaFormatName: string.IsNullOrWhiteSpace(request.JsonSchemaFormat.FormatName)
+                            ? "mystira-json"
+                            : request.JsonSchemaFormat.FormatName,
+                        jsonSchema: BinaryData.FromString(request.JsonSchemaFormat.SchemaJson),
+                        jsonSchemaIsStrict: request.JsonSchemaFormat.IsStrict
+                    )
+                };
+            }
+            catch (Exception ex)
+            {
+                logger.LogWarning(ex, "Failed to configure JSON schema response format. Falling back to default response format.");
+                return null;
+            }
+        }
+
+        return null;
     }
 
     private static ChatCompletionResponse CreateErrorResponse(string error)

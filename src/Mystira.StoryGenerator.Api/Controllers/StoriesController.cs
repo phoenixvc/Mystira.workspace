@@ -102,7 +102,7 @@ public class StoriesController : ControllerBase
                 });
             }
 
-            var setupPrompt = @"You are the Mystira Story Generator Orchestrator. Your job is to help the user create a YAML-formatted branching adventure story for young players.
+            var setupPrompt = @"You are the Mystira Story Generator Orchestrator. Your job is to help the user create a JSON-formatted branching adventure story for young players.
 
     Conversation flow requirements:
     1. When the user signals they want to start a new Mystira story, immediately ask for a short description or theme. Ask this in a single concise question and wait for their reply.
@@ -112,7 +112,7 @@ public class StoriesController : ControllerBase
     5. Only when the user clearly confirms (phrases like ""generate"", ""regenerate"", ""looks good"", ""yes"", ""ready"") that you should proceed may you produce the final payload.
     6. When you produce the final payload you may acknowledge their confirmation, then output exactly one line in this format with no extra commentary before or after it:
     PARAMS_JSON: {""title"": ""..."", ""difficulty"": ""..."", ""session_length"": ""..."", ""age_group"": ""..."", ""minimum_age"": 10, ""core_axes"": [""..."", ""...""], ""archetypes"": [""..."", ""...""], ""character_count"": 4, ""min_scenes"": 6, ""max_scenes"": 12, ""tags"": [""..."", ""...""], ""tone"": ""..."", ""description"": ""...""}
-    7. After you output PARAMS_JSON, stop and wait silently for the system to generate YAML.
+    7. After you output PARAMS_JSON, stop and wait silently for the system to generate JSON.
 
     Required parameters:
     - Title (or infer from the theme; keep it concise)
@@ -128,9 +128,34 @@ public class StoriesController : ControllerBase
     General rules:
     - Stay positive, concise, and age-appropriate.
     - Reuse the previously confirmed parameter values unless the user changes them.
-    - Never generate YAML or mention YAML creation until PARAMS_JSON has been emitted.
     - Treat ""generate"" and ""regenerate"" the same—both mean produce the final payload.
     - Keep follow-up questions minimal; only ask for clarification when absolutely necessary.";
+
+            // Try to load the JSON Schema and configure schema-constrained output for providers that support it (Azure OpenAI)
+            JsonSchemaResponseFormat? schemaFormat = null;
+            try
+            {
+                var configuredPath = _aiSettings.AzureOpenAI.SchemaValidation.SchemaPath;
+                var schemaPath = string.IsNullOrWhiteSpace(configuredPath)
+                    ? Path.Combine(AppContext.BaseDirectory, "config", "story-schema.json")
+                    : (Path.IsPathRooted(configuredPath)
+                        ? configuredPath
+                        : Path.Combine(AppContext.BaseDirectory, configuredPath));
+                if (System.IO.File.Exists(schemaPath))
+                {
+                    var jsonSchema = await System.IO.File.ReadAllTextAsync(schemaPath, cancellationToken);
+                    schemaFormat = new JsonSchemaResponseFormat
+                    {
+                        FormatName = "mystira-story-setup",
+                        SchemaJson = jsonSchema,
+                        IsStrict = _aiSettings.AzureOpenAI.SchemaValidation.IsSchemaValidationStrict
+                    };
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to load story-schema.json for schema-constrained output; continuing without schema.");
+            }
 
             var chatRequest = new ChatCompletionRequest
             {
@@ -139,7 +164,8 @@ public class StoriesController : ControllerBase
                 Temperature = _aiSettings.DefaultTemperature,
                 MaxTokens = Math.Max(1000, _aiSettings.DefaultMaxTokens),
                 Messages = request.Messages,
-                SystemPrompt = setupPrompt
+                SystemPrompt = setupPrompt,
+                JsonSchemaFormat = schemaFormat
             };
 
             var response = await service.CompleteAsync(chatRequest, cancellationToken);
@@ -314,13 +340,13 @@ Ensure content is culturally sensitive and age-appropriate.";
     }
 
     [HttpPost("generate")]
-    public async Task<ActionResult<GenerateYamlStoryResponse>> GenerateYamlStory([FromBody] GenerateYamlStoryRequest request, CancellationToken cancellationToken)
+    public async Task<ActionResult<GenerateJsonStoryResponse>> GenerateJsonStory([FromBody] GenerateJsonStoryRequest request, CancellationToken cancellationToken)
     {
         try
         {
             if (string.IsNullOrWhiteSpace(request.Title))
             {
-                return BadRequest(new GenerateYamlStoryResponse
+                return BadRequest(new GenerateJsonStoryResponse
                 {
                     Success = false,
                     Error = "Title is required"
@@ -329,14 +355,14 @@ Ensure content is culturally sensitive and age-appropriate.";
 
             if (request.MinScenes <= 0 || request.MaxScenes < request.MinScenes)
             {
-                return BadRequest(new GenerateYamlStoryResponse
+                return BadRequest(new GenerateJsonStoryResponse
                 {
                     Success = false,
                     Error = "Invalid scene count range"
                 });
             }
 
-            var result = await _generationService.GenerateYamlStoryAsync(request, cancellationToken);
+            var result = await _generationService.GenerateJsonStoryAsync(request, cancellationToken);
             if (!result.Success)
             {
                 return StatusCode(502, result);
@@ -346,7 +372,7 @@ Ensure content is culturally sensitive and age-appropriate.";
         }
         catch (OperationCanceledException)
         {
-            return StatusCode(499, new GenerateYamlStoryResponse
+            return StatusCode(499, new GenerateJsonStoryResponse
             {
                 Success = false,
                 Error = "Request was cancelled"
@@ -354,8 +380,8 @@ Ensure content is culturally sensitive and age-appropriate.";
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error generating YAML story");
-            return StatusCode(500, new GenerateYamlStoryResponse
+            _logger.LogError(ex, "Error generating JSON story");
+            return StatusCode(500, new GenerateJsonStoryResponse
             {
                 Success = false,
                 Error = "An unexpected error occurred"

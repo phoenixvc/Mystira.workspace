@@ -54,6 +54,8 @@ public class ChatCompletionResponse
     /// </summary>
     [JsonPropertyName("error")]
     public string? Error { get; set; }
+
+
 }
 
 /// <summary>

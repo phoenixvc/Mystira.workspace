@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "Mystira Story Schema",
-  "description": "Validation schema for Mystira story YAML/JSON payloads",
+  "description": "Validation schema for Mystira story JSON payloads",
   "type": "object",
   "additionalProperties": false,
   "required": [

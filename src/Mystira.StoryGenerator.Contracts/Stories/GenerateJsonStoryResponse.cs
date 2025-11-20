@@ -1,9 +1,10 @@
 namespace Mystira.StoryGenerator.Contracts.Stories;
 
-public class GenerateYamlStoryResponse
+public class GenerateJsonStoryResponse
 {
     public bool Success { get; set; }
-    public string Yaml { get; set; } = string.Empty;
+    // The backend now generates JSON. UI is responsible for converting JSON to YAML for display.
+    public string Json { get; set; } = string.Empty;
     public string Provider { get; set; } = string.Empty;
     public string Model { get; set; } = string.Empty;
     public string? ModelId { get; set; }

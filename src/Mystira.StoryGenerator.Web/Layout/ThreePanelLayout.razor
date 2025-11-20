@@ -478,7 +478,7 @@
 
     private readonly Dictionary<string, DifficultyOption> difficultyLookup;
     // Tracks the most recent randomized proposal per chat so users can confirm later
-    private readonly Dictionary<string, GenerateYamlStoryRequest> pendingProposalsByChatId = new();
+    private readonly Dictionary<string, GenerateJsonStoryRequest> pendingProposalsByChatId = new();
 
     public ThreePanelLayout()
     {
@@ -965,7 +965,7 @@
                     Timestamp = DateTime.Now
                 });
 
-                var pending = new GenerateYamlStoryRequest
+                var pending = new GenerateJsonStoryRequest
                 {
                     Provider = !string.IsNullOrWhiteSpace(response.Provider) ? response.Provider : settings.Provider,
                     ModelId = !string.IsNullOrWhiteSpace(response.ModelId) ? response.ModelId : settings.ModelId,
@@ -1155,17 +1155,18 @@
                     pending.Model = settings.Deployment;
                 }
 
-                var result = await ApiService.GenerateYamlStoryAsync(pending);
-                if (result.Success && !string.IsNullOrWhiteSpace(result.Yaml))
+                var result = await ApiService.GenerateJsonStoryAsync(pending);
+                if (result.Success && !string.IsNullOrWhiteSpace(result.Json))
                 {
-                    YamlContent = result.Yaml;
-                    CurrentChat!.YamlSnapshot = result.Yaml;
+                    var generatedYaml = JsonYamlConverter.ToYaml(result.Json);
+                    YamlContent = generatedYaml;
+                    CurrentChat!.YamlSnapshot = generatedYaml;
                     await SaveChatsAsync();
 
-                    var validation = await ApiService.ValidateStoryAsync(result.Yaml, "yaml");
+                    var validation = await ApiService.ValidateStoryAsync(generatedYaml, "yaml");
                     ValidationResult = MapValidation(validation);
 
-                    var summary = BuildYamlSummaryMessage(result.Yaml);
+                    var summary = BuildYamlSummaryMessage(generatedYaml);
                     CurrentChat!.Messages.Add(new StoryGeneratorChatMessage
                     {
                         Role = "system",
@@ -1777,7 +1778,7 @@
 
             var settings = await GetSettingsAsync();
 
-            var request = new GenerateYamlStoryRequest
+            var request = new GenerateJsonStoryRequest
             {
                 Provider = settings.Provider,
                 ModelId = settings.ModelId,
@@ -1805,10 +1806,10 @@
             });
             StateHasChanged();
 
-            var result = await ApiService.GenerateYamlStoryAsync(request);
-            if (result.Success && !string.IsNullOrWhiteSpace(result.Yaml))
+            var result = await ApiService.GenerateJsonStoryAsync(request);
+            if (result.Success && !string.IsNullOrWhiteSpace(result.Json))
             {
-                YamlContent = result.Yaml;
+                YamlContent = JsonYamlConverter.ToYaml(result.Json);
                 if (CurrentChat != null)
                 {
                     CurrentChat.YamlSnapshot = YamlContent;

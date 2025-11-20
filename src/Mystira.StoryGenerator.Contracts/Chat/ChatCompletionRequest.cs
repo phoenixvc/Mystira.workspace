@@ -54,4 +54,41 @@ public class ChatCompletionRequest
     /// </summary>
     [JsonPropertyName("system_prompt")]
     public string? SystemPrompt { get; set; }
+
+    /// <summary>
+    /// Optional: When provided and supported by the provider, requests the model to format output
+    /// according to the given JSON Schema using the provider's native response format feature.
+    /// Currently supported by Azure OpenAI in this solution.
+    /// </summary>
+    [JsonPropertyName("json_schema_format")]
+    public JsonSchemaResponseFormat? JsonSchemaFormat { get; set; }
+
+    /// <summary>
+    /// Whether the schema should be enforced strictly by the provider, if supported.
+    /// </summary>
+    public bool? IsSchemaValidationStrict { get; set; }
+}
+
+/// <summary>
+/// Describes a JSON Schema response format request for providers that support schema-constrained output.
+/// </summary>
+public class JsonSchemaResponseFormat
+{
+    /// <summary>
+    /// A short, descriptive name for the schema format. Used by some providers to label the format.
+    /// </summary>
+    [JsonPropertyName("format_name")]
+    public string FormatName { get; set; } = "mystira-json";
+
+    /// <summary>
+    /// The JSON Schema as a raw JSON string.
+    /// </summary>
+    [JsonPropertyName("schema_json")]
+    public string SchemaJson { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Whether the schema should be enforced strictly by the provider, if supported.
+    /// </summary>
+    [JsonPropertyName("is_strict")]
+    public bool IsStrict { get; set; } = true;
 }

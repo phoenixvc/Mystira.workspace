@@ -17,6 +17,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Mystira.StoryGenerator.Contracts\Mystira.StoryGenerator.Contracts.csproj" />
+    <ProjectReference Include="..\Mystira.StoryGenerator.Domain\Mystira.StoryGenerator.Domain.csproj" />
   </ItemGroup>
 
   <ItemGroup>

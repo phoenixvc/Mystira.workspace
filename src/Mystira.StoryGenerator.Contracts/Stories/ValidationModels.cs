@@ -3,7 +3,7 @@ namespace Mystira.StoryGenerator.Contracts.Stories;
 public class ValidateStoryRequest
 {
     public string StoryContent { get; set; } = string.Empty;
-    public string Format { get; set; } = "yaml"; // "yaml" or "json"
+    public string Format { get; set; } = "json"; // "json" or "yaml" (deprecated yaml)
 }
 
 public class ValidationResponse

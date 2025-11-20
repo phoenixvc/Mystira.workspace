@@ -20,7 +20,7 @@ public class StoryApiService : IStoryApiService
         };
     }
 
-    public async Task<ValidationResponse> ValidateStoryAsync(string storyContent, string format = "yaml")
+    public async Task<ValidationResponse> ValidateStoryAsync(string storyContent, string format = "json")
     {
         try
         {
@@ -74,7 +74,7 @@ public class StoryApiService : IStoryApiService
         }
     }
 
-    public async Task<GenerateYamlStoryResponse> GenerateYamlStoryAsync(GenerateYamlStoryRequest request)
+    public async Task<GenerateJsonStoryResponse> GenerateJsonStoryAsync(GenerateJsonStoryRequest request)
     {
         try
         {
@@ -89,11 +89,11 @@ public class StoryApiService : IStoryApiService
 
             if (response.IsSuccessStatusCode)
             {
-                var result = JsonSerializer.Deserialize<GenerateYamlStoryResponse>(responseJson, _jsonOptions);
-                return result ?? new GenerateYamlStoryResponse { Success = false, Error = "Empty response" };
+                var result = JsonSerializer.Deserialize<GenerateJsonStoryResponse>(responseJson, _jsonOptions);
+                return result ?? new GenerateJsonStoryResponse { Success = false, Error = "Empty response" };
             }
 
-            return new GenerateYamlStoryResponse
+            return new GenerateJsonStoryResponse
             {
                 Success = false,
                 Error = $"API request failed: {response.StatusCode} - {responseJson}"
@@ -101,7 +101,7 @@ public class StoryApiService : IStoryApiService
         }
         catch (Exception ex)
         {
-            return new GenerateYamlStoryResponse
+            return new GenerateJsonStoryResponse
             {
                 Success = false,
                 Error = $"Failed to connect to generation service: {ex.Message}"

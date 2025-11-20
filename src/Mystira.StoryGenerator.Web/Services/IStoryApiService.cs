@@ -6,7 +6,7 @@ namespace Mystira.StoryGenerator.Web.Services;
 public interface IStoryApiService
 {
     Task<ValidationResponse> ValidateStoryAsync(string storyContent, string format = "yaml");
-    Task<GenerateYamlStoryResponse> GenerateYamlStoryAsync(GenerateYamlStoryRequest request);
+    Task<GenerateJsonStoryResponse> GenerateJsonStoryAsync(GenerateJsonStoryRequest request);
     Task<ChatCompletionResponse> SetupStoryAsync(ChatCompletionRequest request);
     Task<RandomStoryParametersResponse> RandomizeStoryParametersAsync(RandomStoryParametersRequest request);
 }

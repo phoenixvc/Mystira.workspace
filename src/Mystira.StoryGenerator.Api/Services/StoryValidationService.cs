@@ -4,17 +4,21 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
+using Microsoft.Extensions.Options;
+using Mystira.StoryGenerator.Contracts.Configuration;
 
 namespace Mystira.StoryGenerator.Api.Services;
 
 public class StoryValidationService : IStoryValidationService
 {
     private readonly JsonSchema? _schema;
+    private readonly AiSettings _settings;
     private readonly ILogger<StoryValidationService> _logger;
 
-    public StoryValidationService(ILogger<StoryValidationService> logger)
+    public StoryValidationService(ILogger<StoryValidationService> logger, IOptions<AiSettings> aiOptions)
     {
         _logger = logger;
+        _settings = aiOptions.Value;
         _schema = LoadSchema();
     }
 
@@ -248,7 +252,12 @@ public class StoryValidationService : IStoryValidationService
     {
         try
         {
-            var schemaPath = Path.Combine(AppContext.BaseDirectory, "config", "story-schema.json");
+            var configuredPath = _settings.AzureOpenAI.SchemaValidation.SchemaPath;
+            var schemaPath = string.IsNullOrWhiteSpace(configuredPath)
+                ? Path.Combine(AppContext.BaseDirectory, "config", "story-schema.json")
+                : (Path.IsPathRooted(configuredPath)
+                    ? configuredPath
+                    : Path.Combine(AppContext.BaseDirectory, configuredPath));
             if (!File.Exists(schemaPath))
             {
                 _logger.LogError($"Schema file not found at: {schemaPath}");
@@ -274,7 +283,6 @@ public class StoryValidationService : IStoryValidationService
 
         try
         {
-            // Parse YAML and convert to JSON
             var deserializer = new DeserializerBuilder()
                 .WithNamingConvention(UnderscoredNamingConvention.Instance)
                 .Build();

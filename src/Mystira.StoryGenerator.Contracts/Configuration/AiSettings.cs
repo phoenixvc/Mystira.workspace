@@ -29,6 +29,8 @@ public class AzureOpenAISettings
 
     [Required]
     public string DeploymentName { get; set; } = string.Empty;
+
+    public SchemaValidationSettings SchemaValidation { get; set; } = new();
 }
 
 public class GoogleGeminiSettings
@@ -38,4 +40,17 @@ public class GoogleGeminiSettings
 
     [Required]
     public string Model { get; set; } = "gemini-pro";
+}
+
+public class SchemaValidationSettings
+{
+    /// <summary>
+    /// Path to the JSON schema file used for story generation/validation. Can be relative to the app base directory.
+    /// </summary>
+    public string? SchemaPath { get; set; }
+
+    /// <summary>
+    /// Whether schema validation/response formatting should be strict when supported by the provider.
+    /// </summary>
+    public bool IsSchemaValidationStrict { get; set; } = false;
 }
