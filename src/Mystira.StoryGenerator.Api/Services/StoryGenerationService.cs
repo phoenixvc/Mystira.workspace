@@ -197,8 +197,8 @@ CRITICAL VALIDATION RULES:
         {
             QueryText = queryText,
             Categories = new[] { "story_generation" },
-            InstructionTypes = new[] { "story_generation" },
-            TopK = 6
+            InstructionTypes = new[] { "requirements" },
+            TopK = 8
         };
 
         return _instructionBlockService.BuildInstructionBlockAsync(context, cancellationToken);

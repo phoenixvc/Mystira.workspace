@@ -3,26 +3,34 @@ namespace Mystira.StoryGenerator.Contracts.Configuration;
 public class InstructionSearchSettings
 {
     public const string SectionName = "InstructionSearch";
-
     public string? Endpoint { get; set; }
     public string? ApiKey { get; set; }
     public string? IndexName { get; set; }
-    public string VectorFieldName { get; set; } = "contentVector";
+    public string EmbeddingFieldName { get; set; } = "embedding";
     public string IdFieldName { get; set; } = "id";
-    public string ContentFieldName { get; set; } = "chunk";
+    public string ContentFieldName { get; set; } = "content";
+    public string? TitleFieldName { get; set; } = "title";
     public string CategoryFieldName { get; set; } = "category";
+    public string? SubcategoryFieldName { get; set; } = "subcategory";
     public bool IsCategoryFieldCollection { get; set; }
-    public string InstructionTypeFieldName { get; set; } = "instruction_type";
+    public string InstructionTypeFieldName { get; set; } = "instructionType";
     public bool IsInstructionTypeFieldCollection { get; set; }
-    public string MandatoryFieldName { get; set; } = "is_mandatory";
-    public string OrderFieldName { get; set; } = "order";
+    public string MandatoryFieldName { get; set; } = "isMandatory";
     public string TagsFieldName { get; set; } = "tags";
-    public int DefaultTopK { get; set; } = 6;
-    public int MandatoryChunkLimit { get; set; } = 12;
+    public string? PriorityFieldName { get; set; } = "priority";
+    public string? SourceFieldName { get; set; } = "source";
+    public string? VersionFieldName { get; set; } = "version";
+    public string? CreatedAtFieldName { get; set; } = "createdAt";
+    public string? UpdatedAtFieldName { get; set; } = "updatedAt";
+    public string? SectionFieldName { get; set; } = "section";
+    public string? DatasetFieldName { get; set; } = "dataset";
+    public string? KeywordsFieldName { get; set; } = "keywords";
+    public int DefaultTopK { get; set; } = 5;
+    public int MandatoryChunkLimit { get; set; } = 15;
 
     public bool IsConfigured =>
         !string.IsNullOrWhiteSpace(Endpoint) &&
         !string.IsNullOrWhiteSpace(ApiKey) &&
         !string.IsNullOrWhiteSpace(IndexName) &&
-        !string.IsNullOrWhiteSpace(VectorFieldName);
+        !string.IsNullOrWhiteSpace(EmbeddingFieldName);
 }

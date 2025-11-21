@@ -194,8 +194,8 @@ public class ChatController : ControllerBase
         {
             QueryText = builder.ToString(),
             Categories = new[] { "story_generation", "validation" },
-            InstructionTypes = new[] { "story_generation", "validation" },
-            TopK = 4
+            InstructionTypes = new[] { "requirements", "guidelines" },
+            TopK = 8
         };
 
         return await _instructionBlockService.BuildInstructionBlockAsync(context, cancellationToken);

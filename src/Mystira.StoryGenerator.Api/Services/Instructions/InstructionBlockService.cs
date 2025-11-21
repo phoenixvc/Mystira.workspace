@@ -124,7 +124,7 @@ public sealed class InstructionBlockService : IInstructionBlockService
             var vectorQuery = new VectorizedQuery(queryVector.AsMemory())
             {
                 KNearestNeighborsCount = top,
-                Fields = { _searchSettings.VectorFieldName }
+                Fields = { _searchSettings.EmbeddingFieldName }
             };
 
             var options = new SearchOptions
@@ -269,11 +269,20 @@ public sealed class InstructionBlockService : IInstructionBlockService
         {
             Id = ReadString(document, _searchSettings.IdFieldName),
             Content = ReadString(document, _searchSettings.ContentFieldName),
+            Title = ReadString(document, _searchSettings.TitleFieldName),
             Category = ReadString(document, _searchSettings.CategoryFieldName),
+            Subcategory = ReadString(document, _searchSettings.SubcategoryFieldName),
             InstructionType = ReadString(document, _searchSettings.InstructionTypeFieldName),
             IsMandatory = ReadBool(document, _searchSettings.MandatoryFieldName),
-            Order = ReadNullableInt(document, _searchSettings.OrderFieldName),
-            Tags = ReadStringList(document, _searchSettings.TagsFieldName)
+            Priority = ReadNullableInt(document, _searchSettings.PriorityFieldName),
+            Tags = ReadStringList(document, _searchSettings.TagsFieldName),
+            Source = ReadString(document, _searchSettings.SourceFieldName),
+            Version = ReadString(document, _searchSettings.VersionFieldName),
+            CreatedAt = ReadDateTimeOffset(document, _searchSettings.CreatedAtFieldName),
+            UpdatedAt = ReadDateTimeOffset(document, _searchSettings.UpdatedAtFieldName),
+            Section = ReadString(document, _searchSettings.SectionFieldName),
+            Dataset = ReadString(document, _searchSettings.DatasetFieldName),
+            Keywords = ReadStringList(document, _searchSettings.KeywordsFieldName)
         };
 
         return chunk;
@@ -366,16 +375,58 @@ public sealed class InstructionBlockService : IInstructionBlockService
         return Array.Empty<string>();
     }
 
+    private static DateTimeOffset? ReadDateTimeOffset(SearchDocument document, string? fieldName)
+    {
+        if (string.IsNullOrWhiteSpace(fieldName))
+        {
+            return null;
+        }
+
+        if (!document.TryGetValue(fieldName, out var value) || value is null)
+        {
+            return null;
+        }
+
+        switch (value)
+        {
+            case DateTimeOffset dto:
+                return dto;
+            case DateTime dt:
+                return new DateTimeOffset(dt);
+            case string s when !string.IsNullOrWhiteSpace(s):
+                if (DateTimeOffset.TryParse(s, out var parsedDto))
+                {
+                    return parsedDto;
+                }
+                if (DateTime.TryParse(s, out var parsedDt))
+                {
+                    return new DateTimeOffset(parsedDt);
+                }
+                return null;
+            default:
+                return null;
+        }
+    }
+
     private void ApplySelect(SearchOptions options)
     {
         var fields = new[]
         {
             _searchSettings.IdFieldName,
             _searchSettings.ContentFieldName,
+            _searchSettings.TitleFieldName,
             _searchSettings.CategoryFieldName,
+            _searchSettings.SubcategoryFieldName,
             _searchSettings.InstructionTypeFieldName,
             _searchSettings.MandatoryFieldName,
-            _searchSettings.OrderFieldName,
+            _searchSettings.PriorityFieldName,
+            _searchSettings.SourceFieldName,
+            _searchSettings.VersionFieldName,
+            _searchSettings.CreatedAtFieldName,
+            _searchSettings.UpdatedAtFieldName,
+            _searchSettings.SectionFieldName,
+            _searchSettings.DatasetFieldName,
+            _searchSettings.KeywordsFieldName,
             _searchSettings.TagsFieldName
         };
 
