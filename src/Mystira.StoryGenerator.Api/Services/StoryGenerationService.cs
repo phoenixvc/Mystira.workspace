@@ -3,6 +3,7 @@ using System.Text;
 using System.Text.Json;
 using Microsoft.Extensions.Options;
 using Mystira.StoryGenerator.Api.Services.Instructions;
+using Mystira.StoryGenerator.Api.Services.Intent;
 using Mystira.StoryGenerator.Api.Services.LLM;
 using Mystira.StoryGenerator.Contracts.Chat;
 using Mystira.StoryGenerator.Contracts.Configuration;
@@ -16,6 +17,7 @@ public class StoryGenerationService : IStoryGenerationService
     private readonly AiSettings _settings;
     private readonly IStorySchemaProvider _schemaProvider;
     private readonly IInstructionBlockService _instructionBlockService;
+    private readonly IIntentRouterService _intentRouterService;
     private readonly ILogger<StoryGenerationService> _logger;
 
     public StoryGenerationService(
@@ -23,12 +25,14 @@ public class StoryGenerationService : IStoryGenerationService
         IOptions<AiSettings> aiOptions,
         IStorySchemaProvider schemaProvider,
         IInstructionBlockService instructionBlockService,
+        IIntentRouterService intentRouterService,
         ILogger<StoryGenerationService> logger)
     {
         _llmFactory = llmFactory;
         _settings = aiOptions.Value;
         _schemaProvider = schemaProvider;
         _instructionBlockService = instructionBlockService;
+        _intentRouterService = intentRouterService;
         _logger = logger;
     }
 
@@ -185,23 +189,42 @@ CRITICAL VALIDATION RULES:
         return messages;
     }
 
-    private Task<string?> ResolveInstructionBlockAsync(GenerateJsonStoryRequest request, CancellationToken cancellationToken)
+    private async Task<string?> ResolveInstructionBlockAsync(GenerateJsonStoryRequest request, CancellationToken cancellationToken)
     {
         var queryText = BuildStoryGenerationSearchQuery(request);
         if (string.IsNullOrWhiteSpace(queryText))
         {
-            return Task.FromResult<string?>(null);
+            return null;
+        }
+
+        var categories = new[] { "story_generation" };
+        var instructionTypes = new[] { "requirements" };
+
+        var intentClassification = await _intentRouterService.ClassifyIntentAsync(queryText, cancellationToken);
+        if (intentClassification != null)
+        {
+            _logger.LogInformation(
+                "Intent classified for story generation: category={Category}, instructionType={InstructionType}",
+                intentClassification.Category,
+                intentClassification.InstructionType);
+            
+            categories = new[] { intentClassification.Category };
+            instructionTypes = new[] { intentClassification.InstructionType };
+        }
+        else
+        {
+            _logger.LogDebug("Using default categories and instruction types for story generation RAG query");
         }
 
         var context = new InstructionSearchContext
         {
             QueryText = queryText,
-            Categories = new[] { "story_generation" },
-            InstructionTypes = new[] { "requirements" },
+            Categories = categories,
+            InstructionTypes = instructionTypes,
             TopK = 8
         };
 
-        return _instructionBlockService.BuildInstructionBlockAsync(context, cancellationToken);
+        return await _instructionBlockService.BuildInstructionBlockAsync(context, cancellationToken);
     }
 
     private static string BuildStoryGenerationSearchQuery(GenerateJsonStoryRequest request)

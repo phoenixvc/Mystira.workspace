@@ -17,6 +17,7 @@ public class AiSettings
 
     public AzureOpenAISettings AzureOpenAI { get; set; } = new();
     public GoogleGeminiSettings GoogleGemini { get; set; } = new();
+    public IntentRouterSettings IntentRouter { get; set; } = new();
 }
 
 public class AzureOpenAISettings
