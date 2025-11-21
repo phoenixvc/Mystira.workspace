@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using Microsoft.Extensions.Options;
 using Mystira.StoryGenerator.Api.Services.Instructions;
+using Mystira.StoryGenerator.Api.Services.Intent;
 using Mystira.StoryGenerator.Api.Services.LLM;
 using Mystira.StoryGenerator.Contracts.Chat;
 using Mystira.StoryGenerator.Contracts.Configuration;
@@ -20,13 +21,20 @@ public class ChatController : ControllerBase
     private readonly ILLMServiceFactory _llmServiceFactory;
     private readonly AiSettings _aiSettings;
     private readonly IInstructionBlockService _instructionBlockService;
+    private readonly IIntentRouterService _intentRouterService;
     private readonly ILogger<ChatController> _logger;
 
-    public ChatController(ILLMServiceFactory llmServiceFactory, IOptions<AiSettings> aiOptions, IInstructionBlockService instructionBlockService, ILogger<ChatController> logger)
+    public ChatController(
+        ILLMServiceFactory llmServiceFactory,
+        IOptions<AiSettings> aiOptions,
+        IInstructionBlockService instructionBlockService,
+        IIntentRouterService intentRouterService,
+        ILogger<ChatController> logger)
     {
         _llmServiceFactory = llmServiceFactory;
         _aiSettings = aiOptions.Value;
         _instructionBlockService = instructionBlockService;
+        _intentRouterService = intentRouterService;
         _logger = logger;
     }
 
@@ -190,11 +198,32 @@ public class ChatController : ControllerBase
             builder.AppendLine("SystemPrompt: " + request.SystemPrompt);
         }
 
+        var queryText = builder.ToString();
+
+        var categories = new[] { "story_generation", "validation" };
+        var instructionTypes = new[] { "requirements", "guidelines" };
+
+        var intentClassification = await _intentRouterService.ClassifyIntentAsync(queryText, cancellationToken);
+        if (intentClassification != null)
+        {
+            _logger.LogInformation(
+                "Intent classified: category={Category}, instructionType={InstructionType}",
+                intentClassification.Categories,
+                intentClassification.InstructionTypes);
+
+            categories = intentClassification.Categories;
+            instructionTypes = intentClassification.InstructionTypes;
+        }
+        else
+        {
+            _logger.LogDebug("Using default categories and instruction types for RAG query");
+        }
+
         var context = new InstructionSearchContext
         {
-            QueryText = builder.ToString(),
-            Categories = new[] { "story_generation", "validation" },
-            InstructionTypes = new[] { "requirements", "guidelines" },
+            QueryText = queryText,
+            Categories = categories,
+            InstructionTypes = instructionTypes,
             TopK = 8
         };
 

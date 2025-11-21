@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Options;
 using Mystira.StoryGenerator.Api.Services;
 using Mystira.StoryGenerator.Api.Services.Instructions;
+using Mystira.StoryGenerator.Api.Services.Intent;
 using Mystira.StoryGenerator.Api.Services.LLM;
 using Mystira.StoryGenerator.Contracts.Configuration;
 using Mystira.StoryGenerator.Contracts.Stories;
@@ -54,6 +55,7 @@ builder.Services.AddHealthChecks();
 
 // Register services
 builder.Services.AddScoped<IInstructionBlockService, InstructionBlockService>();
+builder.Services.AddScoped<IIntentRouterService, IntentRouterService>();
 builder.Services.AddScoped<IStoryValidationService, StoryValidationService>();
 builder.Services.AddScoped<IStoryGenerationService, StoryGenerationService>();
 
