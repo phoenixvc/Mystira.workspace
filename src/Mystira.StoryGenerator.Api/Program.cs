@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Options;
 using Mystira.StoryGenerator.Api.Services;
+using Mystira.StoryGenerator.Api.Services.Instructions;
 using Mystira.StoryGenerator.Api.Services.LLM;
 using Mystira.StoryGenerator.Contracts.Configuration;
 using Mystira.StoryGenerator.Contracts.Stories;
@@ -14,6 +15,9 @@ builder.Services.AddOptions<AiSettings>()
     .Bind(builder.Configuration.GetSection(AiSettings.SectionName))
     .ValidateDataAnnotations()
     .ValidateOnStart();
+
+builder.Services.AddOptions<InstructionSearchSettings>()
+    .Bind(builder.Configuration.GetSection(InstructionSearchSettings.SectionName));
 
 // Register HttpClient for LLM services
 builder.Services.AddHttpClient<AzureOpenAIService>();
@@ -49,6 +53,7 @@ builder.Services.AddCors(options =>
 builder.Services.AddHealthChecks();
 
 // Register services
+builder.Services.AddScoped<IInstructionBlockService, InstructionBlockService>();
 builder.Services.AddScoped<IStoryValidationService, StoryValidationService>();
 builder.Services.AddScoped<IStoryGenerationService, StoryGenerationService>();
 

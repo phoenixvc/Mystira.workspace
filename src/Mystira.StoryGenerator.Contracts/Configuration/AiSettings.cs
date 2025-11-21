@@ -30,6 +30,11 @@ public class AzureOpenAISettings
     [Required]
     public string DeploymentName { get; set; } = string.Empty;
 
+    /// <summary>
+    /// Optional embedding deployment used for semantic search queries.
+    /// </summary>
+    public string? EmbeddingDeploymentName { get; set; }
+
     public SchemaValidationSettings SchemaValidation { get; set; } = new();
 }
 
