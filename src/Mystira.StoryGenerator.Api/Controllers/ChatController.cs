@@ -1,6 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
+using System.Text;
 using Microsoft.Extensions.Options;
+using Mystira.StoryGenerator.Api.Services.Instructions;
 using Mystira.StoryGenerator.Api.Services.LLM;
 using Mystira.StoryGenerator.Contracts.Chat;
 using Mystira.StoryGenerator.Contracts.Configuration;
@@ -16,12 +19,14 @@ public class ChatController : ControllerBase
 {
     private readonly ILLMServiceFactory _llmServiceFactory;
     private readonly AiSettings _aiSettings;
+    private readonly IInstructionBlockService _instructionBlockService;
     private readonly ILogger<ChatController> _logger;
 
-    public ChatController(ILLMServiceFactory llmServiceFactory, IOptions<AiSettings> aiOptions, ILogger<ChatController> logger)
+    public ChatController(ILLMServiceFactory llmServiceFactory, IOptions<AiSettings> aiOptions, IInstructionBlockService instructionBlockService, ILogger<ChatController> logger)
     {
         _llmServiceFactory = llmServiceFactory;
         _aiSettings = aiOptions.Value;
+        _instructionBlockService = instructionBlockService;
         _logger = logger;
     }
 
@@ -72,6 +77,17 @@ public class ChatController : ControllerBase
                 {
                     Success = false,
                     Error = "No LLM services are currently available"
+                });
+            }
+
+            var instructionBlock = await ResolveInstructionBlockAsync(request, cancellationToken);
+            if (!string.IsNullOrWhiteSpace(instructionBlock))
+            {
+                request.Messages.Insert(0, new MystiraChatMessage
+                {
+                    MessageType = ChatMessageType.System,
+                    Content = instructionBlock,
+                    Timestamp = DateTime.UtcNow
                 });
             }
 
@@ -144,6 +160,45 @@ public class ChatController : ControllerBase
                 Error = "An unexpected error occurred"
             });
         }
+    }
+
+    private async Task<string?> ResolveInstructionBlockAsync(ChatCompletionRequest request, CancellationToken cancellationToken)
+    {
+        if (request.Messages == null || request.Messages.Count == 0)
+        {
+            return null;
+        }
+
+        var userMessages = request.Messages
+            .Where(message => message.MessageType == ChatMessageType.User)
+            .TakeLast(4)
+            .ToList();
+
+        if (userMessages.Count == 0)
+        {
+            return null;
+        }
+
+        var builder = new StringBuilder();
+        foreach (var message in userMessages)
+        {
+            builder.AppendLine(message.Content);
+        }
+
+        if (!string.IsNullOrWhiteSpace(request.SystemPrompt))
+        {
+            builder.AppendLine("SystemPrompt: " + request.SystemPrompt);
+        }
+
+        var context = new InstructionSearchContext
+        {
+            QueryText = builder.ToString(),
+            Categories = new[] { "story_generation", "validation" },
+            InstructionTypes = new[] { "story_generation", "validation" },
+            TopK = 4
+        };
+
+        return await _instructionBlockService.BuildInstructionBlockAsync(context, cancellationToken);
     }
 
     /// <summary>

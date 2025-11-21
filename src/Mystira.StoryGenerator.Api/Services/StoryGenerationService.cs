@@ -1,8 +1,8 @@
 
 using System.Text;
 using System.Text.Json;
-using System.IO;
 using Microsoft.Extensions.Options;
+using Mystira.StoryGenerator.Api.Services.Instructions;
 using Mystira.StoryGenerator.Api.Services.LLM;
 using Mystira.StoryGenerator.Contracts.Chat;
 using Mystira.StoryGenerator.Contracts.Configuration;
@@ -15,17 +15,20 @@ public class StoryGenerationService : IStoryGenerationService
     private readonly ILLMServiceFactory _llmFactory;
     private readonly AiSettings _settings;
     private readonly IStorySchemaProvider _schemaProvider;
+    private readonly IInstructionBlockService _instructionBlockService;
     private readonly ILogger<StoryGenerationService> _logger;
 
     public StoryGenerationService(
         ILLMServiceFactory llmFactory,
         IOptions<AiSettings> aiOptions,
         IStorySchemaProvider schemaProvider,
+        IInstructionBlockService instructionBlockService,
         ILogger<StoryGenerationService> logger)
     {
         _llmFactory = llmFactory;
         _settings = aiOptions.Value;
         _schemaProvider = schemaProvider;
+        _instructionBlockService = instructionBlockService;
         _logger = logger;
     }
 
@@ -52,7 +55,8 @@ public class StoryGenerationService : IStoryGenerationService
             var maxTokens = Math.Max(1200, _settings.DefaultMaxTokens);
 
             var systemPrompt = BuildSystemPrompt();
-            var messages = BuildMessages(request);
+            var instructionBlock = await ResolveInstructionBlockAsync(request, cancellationToken);
+            var messages = BuildMessages(request, instructionBlock);
 
             var chatRequest = new ChatCompletionRequest
             {
@@ -126,7 +130,7 @@ CRITICAL VALIDATION RULES:
 ";
     }
 
-    private static List<MystiraChatMessage> BuildMessages(GenerateJsonStoryRequest request)
+    private static List<MystiraChatMessage> BuildMessages(GenerateJsonStoryRequest request, string? instructionBlock)
     {
         var messages = new List<MystiraChatMessage>();
 
@@ -137,6 +141,15 @@ CRITICAL VALIDATION RULES:
             MessageType = ChatMessageType.AI,
             Content = "Example output (for structure only; do not copy content, follow structure and keys):\n\n" + exampleJson
         });
+
+        if (!string.IsNullOrWhiteSpace(instructionBlock))
+        {
+            messages.Add(new MystiraChatMessage
+            {
+                MessageType = ChatMessageType.System,
+                Content = instructionBlock
+            });
+        }
 
         var instruction = BuildInstructionPrompt(request);
         messages.Add(new MystiraChatMessage
@@ -170,6 +183,59 @@ CRITICAL VALIDATION RULES:
         });
 
         return messages;
+    }
+
+    private Task<string?> ResolveInstructionBlockAsync(GenerateJsonStoryRequest request, CancellationToken cancellationToken)
+    {
+        var queryText = BuildStoryGenerationSearchQuery(request);
+        if (string.IsNullOrWhiteSpace(queryText))
+        {
+            return Task.FromResult<string?>(null);
+        }
+
+        var context = new InstructionSearchContext
+        {
+            QueryText = queryText,
+            Categories = new[] { "story_generation" },
+            InstructionTypes = new[] { "story_generation" },
+            TopK = 6
+        };
+
+        return _instructionBlockService.BuildInstructionBlockAsync(context, cancellationToken);
+    }
+
+    private static string BuildStoryGenerationSearchQuery(GenerateJsonStoryRequest request)
+    {
+        var sb = new StringBuilder();
+        sb.AppendLine($"Title: {request.Title}");
+        sb.AppendLine($"Difficulty: {request.Difficulty}");
+        sb.AppendLine($"Session Length: {request.SessionLength}");
+        sb.AppendLine($"Age Group: {request.AgeGroup}");
+        sb.AppendLine($"Minimum Age: {request.MinimumAge}");
+        sb.AppendLine($"Scene Range: {request.MinScenes}-{request.MaxScenes}");
+        sb.AppendLine($"Character Count: {request.CharacterCount}");
+
+        if (!string.IsNullOrWhiteSpace(request.Tone))
+        {
+            sb.AppendLine($"Tone: {request.Tone}");
+        }
+
+        if (request.Tags is { Count: > 0 })
+        {
+            sb.AppendLine("Tags: " + string.Join(", ", request.Tags));
+        }
+
+        if (request.CoreAxes.Count > 0)
+        {
+            sb.AppendLine("Core Axes: " + string.Join(", ", request.CoreAxes));
+        }
+
+        if (request.Archetypes.Count > 0)
+        {
+            sb.AppendLine("Archetypes: " + string.Join(", ", request.Archetypes));
+        }
+
+        return sb.ToString();
     }
 
     private static string BuildInstructionPrompt(GenerateJsonStoryRequest request)
