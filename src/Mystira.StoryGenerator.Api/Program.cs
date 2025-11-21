@@ -1,3 +1,4 @@
+using MediatR;
 using Microsoft.Extensions.Options;
 using Mystira.StoryGenerator.Api.Services;
 using Mystira.StoryGenerator.Api.Services.Instructions;
@@ -11,6 +12,9 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddMediatR(cfg => 
+    cfg.RegisterServicesFromAssemblyContaining(typeof(Mystira.StoryGenerator.Application.Handlers.Stories.GenerateStoryCommandHandler)));
 
 builder.Services.AddOptions<AiSettings>()
     .Bind(builder.Configuration.GetSection(AiSettings.SectionName))
@@ -56,6 +60,7 @@ builder.Services.AddHealthChecks();
 // Register services
 builder.Services.AddScoped<IInstructionBlockService, InstructionBlockService>();
 builder.Services.AddScoped<IIntentRouterService, IntentRouterService>();
+builder.Services.AddScoped<ICommandIntentRouter, CommandIntentRouter>();
 builder.Services.AddScoped<IStoryValidationService, StoryValidationService>();
 builder.Services.AddScoped<IStoryGenerationService, StoryGenerationService>();
 
