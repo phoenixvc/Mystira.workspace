@@ -18,14 +18,14 @@ public class AzureAISearchService : IAzureAISearchService
     private readonly IRetryPolicyService _retryPolicy;
 
     public AzureAISearchService(
-        AzureAISearchSettings settings, 
+        AzureAISearchSettings settings,
         ILoggerService logger,
         IRetryPolicyService retryPolicy)
     {
         _indexName = settings.IndexName;
         _logger = logger;
         _retryPolicy = retryPolicy;
-        
+
         var credentials = new AzureKeyCredential(settings.ApiKey);
         _indexClient = new SearchIndexClient(new Uri(settings.Endpoint), credentials);
         _searchClient = new SearchClient(new Uri(settings.Endpoint), _indexName, credentials);
@@ -44,7 +44,7 @@ public class AzureAISearchService : IAzureAISearchService
             catch (RequestFailedException ex) when (ex.Status == 404)
             {
                 _logger.LogInfo($"Creating index '{_indexName}'...");
-                
+
                 var index = CreateSearchIndexDefinition();
                 await _indexClient.CreateIndexAsync(index);
                 _logger.LogInfo($"Index '{_indexName}' created successfully.");
@@ -63,90 +63,96 @@ public class AzureAISearchService : IAzureAISearchService
                 new SimpleField("id", SearchFieldDataType.String) { IsKey = true },
 
                 // Content
-                new SearchField("content", SearchFieldDataType.String) 
-                { 
-                    IsSearchable = true, 
+                new SearchField("content", SearchFieldDataType.String)
+                {
+                    IsSearchable = true,
                     IsFilterable = false,
                     AnalyzerName = "standard.lucene"
                 },
 
-                new SearchField("title", SearchFieldDataType.String) 
-                { 
-                    IsSearchable = true, 
-                    IsFilterable = true 
+                new SearchField("title", SearchFieldDataType.String)
+                {
+                    IsSearchable = true,
+                    IsFilterable = true
                 },
 
                 // Instruction categorization
-                new SimpleField("category", SearchFieldDataType.String) 
-                { 
-                    IsFilterable = true, 
-                    IsFacetable = true 
+                new SimpleField("category", SearchFieldDataType.String)
+                {
+                    IsFilterable = true,
+                    IsFacetable = true
                 },
-                
-                new SimpleField("subcategory", SearchFieldDataType.String) 
-                { 
-                    IsFilterable = true, 
-                    IsFacetable = true 
+
+                new SimpleField("subcategory", SearchFieldDataType.String)
+                {
+                    IsFilterable = true,
+                    IsFacetable = true
+                },
+
+                // Instruction type (missing before)
+                new SimpleField("instructionType", SearchFieldDataType.String)
+                {
+                    IsFilterable = true,
+                    IsFacetable = true
                 },
 
                 // Priority and importance
-                new SimpleField("priority", SearchFieldDataType.String) 
-                { 
-                    IsFilterable = true, 
-                    IsFacetable = true 
+                new SimpleField("priority", SearchFieldDataType.String)
+                {
+                    IsFilterable = true,
+                    IsFacetable = true
                 },
 
-                new SimpleField("isMandatory", SearchFieldDataType.Boolean) 
-                { 
-                    IsFilterable = true 
+                new SimpleField("isMandatory", SearchFieldDataType.Boolean)
+                {
+                    IsFilterable = true
                 },
 
                 // Context and relationships
-                new SearchField("examples", SearchFieldDataType.String) 
-                { 
-                    IsFilterable = false 
+                new SearchField("examples", SearchFieldDataType.String)
+                {
+                    IsFilterable = false
                 },
 
-                new SimpleField("tags", SearchFieldDataType.Collection(SearchFieldDataType.String)) 
-                { 
-                    IsFilterable = true, 
-                    IsFacetable = true 
+                new SimpleField("tags", SearchFieldDataType.Collection(SearchFieldDataType.String))
+                {
+                    IsFilterable = true,
+                    IsFacetable = true
                 },
 
                 // Metadata
-                new SimpleField("source", SearchFieldDataType.String) 
-                { 
-                    IsFilterable = true 
+                new SimpleField("source", SearchFieldDataType.String)
+                {
+                    IsFilterable = true
                 },
-                
-                new SimpleField("version", SearchFieldDataType.String) 
-                { 
-                    IsFilterable = true 
+
+                new SimpleField("version", SearchFieldDataType.String)
+                {
+                    IsFilterable = true
                 },
 
                 // Timestamps
-                new SimpleField("createdAt", SearchFieldDataType.DateTimeOffset) 
-                { 
-                    IsFilterable = true, 
-                    IsSortable = true 
-                },
-                
-                new SimpleField("updatedAt", SearchFieldDataType.DateTimeOffset) 
-                { 
-                    IsFilterable = true, 
-                    IsSortable = true 
+                new SimpleField("createdAt", SearchFieldDataType.DateTimeOffset)
+                {
+                    IsFilterable = true,
+                    IsSortable = true
                 },
 
-                // Legacy fields for backward compatibility
-                new SimpleField("chunk_id", SearchFieldDataType.String) { IsKey = true },
+                new SimpleField("updatedAt", SearchFieldDataType.DateTimeOffset)
+                {
+                    IsFilterable = true,
+                    IsSortable = true
+                },
+
+                // Additional metadata and filterable fields
                 new SearchField("section", SearchFieldDataType.String) { IsSearchable = true, IsFilterable = true },
                 new SimpleField("dataset", SearchFieldDataType.String) { IsFilterable = true, IsFacetable = true },
                 new SearchField("keywords", SearchFieldDataType.Collection(SearchFieldDataType.String)) { IsFilterable = true, IsFacetable = true },
 
                 // Vector field
-                new SearchField("embedding", SearchFieldDataType.Collection(SearchFieldDataType.Single)) 
-                { 
-                    IsSearchable = true, 
+                new SearchField("embedding", SearchFieldDataType.Collection(SearchFieldDataType.Single))
+                {
+                    IsSearchable = true,
                     IsFilterable = false,
                     VectorSearchDimensions = 1536, // OpenAI ada-002 dimensions
                     VectorSearchProfileName = "my-vector-config"
@@ -154,11 +160,11 @@ public class AzureAISearchService : IAzureAISearchService
             },
             VectorSearch = new VectorSearch
             {
-                Algorithms = 
+                Algorithms =
                 {
                     new HnswAlgorithmConfiguration("my-hnsw-config")
                 },
-                Profiles = 
+                Profiles =
                 {
                     new VectorSearchProfile("my-vector-config", "my-hnsw-config")
                 }
@@ -168,6 +174,17 @@ public class AzureAISearchService : IAzureAISearchService
 
     public async Task IndexChunkAsync(InstructionChunk chunk, string dataset, string version, IReadOnlyList<float> embedding)
     {
+        // Guard clauses outside of retry to keep generic result type consistent
+        if (embedding == null || embedding.Count == 0)
+        {
+            _logger.LogWarning($"Embedding missing for chunk '{chunk.ChunkId}'. Skipping index.");
+            return;
+        }
+        if (embedding.Count != 1536)
+        {
+            _logger.LogWarning($"Unexpected embedding dimensions {embedding.Count} for chunk '{chunk.ChunkId}'. Expected 1536. Proceeding to index.");
+        }
+
         await _retryPolicy.ExecuteWithRetryAsync(async () =>
         {
             var document = CreateSearchDocument(chunk, dataset, version, embedding);
@@ -175,7 +192,7 @@ public class AzureAISearchService : IAzureAISearchService
 
             var response = await _searchClient.IndexDocumentsAsync(batch);
             _logger.LogInfo($"Indexed chunk '{chunk.ChunkId}': {response.Value.Results.First().Succeeded}");
-            
+
             return response;
         }, $"IndexChunkAsync({chunk.ChunkId})");
     }
@@ -186,11 +203,11 @@ public class AzureAISearchService : IAzureAISearchService
         {
             // Primary Key
             ["id"] = chunk.ChunkId,
-            
+
             // Content
             ["content"] = chunk.Content,
             ["title"] = chunk.Title,
-            
+
             // Instruction categorization
             ["category"] = chunk.Category,
             ["subcategory"] = chunk.Subcategory,
@@ -199,24 +216,20 @@ public class AzureAISearchService : IAzureAISearchService
             ["isMandatory"] = chunk.IsMandatory,
             ["examples"] = chunk.Examples,
             ["tags"] = chunk.Tags,
-            
+
             // Context and relationships
             ["section"] = chunk.Section,
             ["keywords"] = chunk.Keywords,
-            
+
             // Metadata
             ["source"] = chunk.Source,
-            ["version"] = chunk.Version,
+            ["version"] = version,
             ["createdAt"] = chunk.CreatedAt,
             ["updatedAt"] = chunk.UpdatedAt,
-            
-            // Legacy fields for backward compatibility
-            ["chunk_id"] = chunk.ChunkId,
-            ["section"] = chunk.Section,
+
+            // Dataset scope
             ["dataset"] = dataset,
-            ["version"] = version,
-            ["keywords"] = chunk.Keywords,
-            
+
             // Vector embedding
             ["embedding"] = embedding
         };
@@ -226,7 +239,7 @@ public class AzureAISearchService : IAzureAISearchService
     {
         return new IndexDocumentsBatch<SearchDocument>
         {
-            Actions = 
+            Actions =
             {
                 IndexDocumentsAction.Upload(document)
             }
@@ -237,11 +250,34 @@ public class AzureAISearchService : IAzureAISearchService
     {
         await _retryPolicy.ExecuteWithRetryAsync(async () =>
         {
-            var filter = $"dataset eq '{dataset}' and version eq '{version}'";
-            var response = await _searchClient.DeleteDocumentsAsync(filter);
-            _logger.LogInfo($"Deleted {response.Value.Results.Count} documents from dataset '{dataset}' version '{version}'");
-            
-            return response;
+            int deleted = 0;
+            var options = new SearchOptions
+            {
+                Filter = $"dataset eq '{dataset}' and version eq '{version}'",
+                Size = 1000
+            };
+            options.Select.Add("id");
+
+            // Execute a search to get documents to delete
+            var searchResponse = await _searchClient.SearchAsync<SearchDocument>("*", options);
+
+            // Iterate over results pages
+            await foreach (var result in searchResponse.Value.GetResultsAsync())
+            {
+                var key = result.Document["id"]?.ToString();
+                if (string.IsNullOrEmpty(key)) continue;
+
+                var batch = new IndexDocumentsBatch<SearchDocument>
+                {
+                    Actions = { IndexDocumentsAction.Delete(new SearchDocument { ["id"] = key! }) }
+                };
+
+                var resp = await _searchClient.IndexDocumentsAsync(batch);
+                deleted += resp.Value.Results.Count(x => x.Succeeded);
+            }
+
+            _logger.LogInfo($"Deleted {deleted} documents from dataset '{dataset}' version '{version}'");
+            return deleted;
         }, $"DeleteDatasetAsync({dataset}, {version})");
     }
 }

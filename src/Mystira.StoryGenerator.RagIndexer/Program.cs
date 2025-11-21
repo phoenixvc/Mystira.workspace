@@ -18,7 +18,7 @@ class Program
 
             // Validate command line arguments
             var jsonFilePath = ValidateArguments(args);
-            
+
             // Load and validate request data
             var indexRequest = await LoadIndexRequestAsync(jsonFilePath);
 
@@ -61,23 +61,30 @@ class Program
     {
         if (string.IsNullOrWhiteSpace(settings.AzureAISearch.Endpoint))
             throw new InvalidOperationException("Azure AI Search endpoint is required.");
-        
+
         if (string.IsNullOrWhiteSpace(settings.AzureAISearch.ApiKey))
             throw new InvalidOperationException("Azure AI Search API key is required.");
-        
+
         if (string.IsNullOrWhiteSpace(settings.AzureOpenAIEmbedding.Endpoint))
             throw new InvalidOperationException("Azure OpenAI endpoint is required.");
-        
+
         if (string.IsNullOrWhiteSpace(settings.AzureOpenAIEmbedding.ApiKey))
             throw new InvalidOperationException("Azure OpenAI API key is required.");
     }
 
     private static string ValidateArguments(string[] args)
     {
+        // Show help if requested
+        if (args.Length == 1 && IsHelpFlag(args[0]))
+        {
+            PrintUsage();
+            Environment.Exit(0);
+        }
+
+        // No arguments: show usage and exit with error
         if (args.Length < 1)
         {
-            Console.WriteLine("Usage: Mystira.StoryGenerator.RagIndexer <json-file-path>");
-            Console.WriteLine("Example: Mystira.StoryGenerator.RagIndexer ./data/instructions.json");
+            PrintUsage();
             Environment.Exit(1);
         }
 
@@ -89,6 +96,33 @@ class Program
         }
 
         return jsonFilePath;
+    }
+
+    private static bool IsHelpFlag(string arg)
+    {
+        var a = arg?.Trim().ToLowerInvariant();
+        return a == "-h" || a == "--help" || a == "/?" || a == "-?" || a == "/h";
+    }
+
+    private static void PrintUsage()
+    {
+        var exeName = AppDomain.CurrentDomain.FriendlyName;
+        Console.WriteLine("Mystira Story Generator - RAG Indexer");
+        Console.WriteLine();
+        Console.WriteLine($"Usage: {exeName} <json-file-path>");
+        Console.WriteLine();
+        Console.WriteLine("Arguments:");
+        Console.WriteLine("  <json-file-path>   Path to a JSON file describing the dataset and chunks to index.");
+        Console.WriteLine();
+        Console.WriteLine("Options:");
+        Console.WriteLine("  -h, --help, /?, -?  Show this help and exit.");
+        Console.WriteLine();
+        Console.WriteLine("Examples:");
+        Console.WriteLine($"  {exeName} .\\data\\sample_instructions_6-9.json");
+        Console.WriteLine();
+        Console.WriteLine("Notes:");
+        Console.WriteLine("  • Configure Azure AI Search and Azure OpenAI settings in appsettings.json under 'RagIndexer'.");
+        Console.WriteLine("  • Sample data is available in the 'data' folder of this project.");
     }
 
     private static async Task<RagIndexRequest> LoadIndexRequestAsync(string jsonFilePath)

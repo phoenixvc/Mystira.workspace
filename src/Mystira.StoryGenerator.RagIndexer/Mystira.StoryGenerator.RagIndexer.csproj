@@ -22,4 +22,14 @@
    <ProjectReference Include="..\Mystira.StoryGenerator.Contracts\Mystira.StoryGenerator.Contracts.csproj" />
  </ItemGroup>
 
+ <ItemGroup>
+   <None Remove="appsettings.json" />
+   <Content Include="appsettings.json">
+     <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+   </Content>
+   <None Update="data\sample_instructions_6-9.json">
+     <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+   </None>
+ </ItemGroup>
+
 </Project>
