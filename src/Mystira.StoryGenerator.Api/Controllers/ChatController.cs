@@ -25,8 +25,8 @@ public class ChatController : ControllerBase
     private readonly ILogger<ChatController> _logger;
 
     public ChatController(
-        ILLMServiceFactory llmServiceFactory, 
-        IOptions<AiSettings> aiOptions, 
+        ILLMServiceFactory llmServiceFactory,
+        IOptions<AiSettings> aiOptions,
         IInstructionBlockService instructionBlockService,
         IIntentRouterService intentRouterService,
         ILogger<ChatController> logger)
@@ -199,7 +199,7 @@ public class ChatController : ControllerBase
         }
 
         var queryText = builder.ToString();
-        
+
         var categories = new[] { "story_generation", "validation" };
         var instructionTypes = new[] { "requirements", "guidelines" };
 
@@ -208,11 +208,11 @@ public class ChatController : ControllerBase
         {
             _logger.LogInformation(
                 "Intent classified: category={Category}, instructionType={InstructionType}",
-                intentClassification.Category,
-                intentClassification.InstructionType);
-            
-            categories = new[] { intentClassification.Category };
-            instructionTypes = new[] { intentClassification.InstructionType };
+                intentClassification.Categories,
+                intentClassification.InstructionTypes);
+
+            categories = intentClassification.Categories;
+            instructionTypes = intentClassification.InstructionTypes;
         }
         else
         {

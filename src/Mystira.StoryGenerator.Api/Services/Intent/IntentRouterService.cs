@@ -13,33 +13,48 @@ public class IntentRouterService : IIntentRouterService
     private readonly ILLMServiceFactory _llmServiceFactory;
     private readonly ILogger<IntentRouterService> _logger;
 
-    private const string ClassificationPrompt = @"You are the Mystira RAG intent classifier.
+    private const string ClassificationPrompt = @"
+You are the Mystira RAG intent classifier.
 Given a single user instruction, map it to:
 
-category (one of: story_generation | validation | autofix | summarization | config | safety | meta)
+categories (one or more of: story_generation | validation | autofix | summarization | config | safety | meta)
 
-instructionType (one of: story_generate_initial | story_generate_refine | story_validate | story_autofix | story_summarize | config_view | config_update | help | schema_docs | safety_policy | requirements | guidelines)
+instructionTypes (one or more of: story_generate_initial | story_generate_refine | story_validate | story_autofix | story_summarize | config_view | config_update | help | schema_docs | safety_policy | requirements | guidelines)
+
+Most of the time, a single category and a single instructionType is enough.
+Only return multiple values if the instruction clearly spans multiple operations
+(e.g., “generate a story and then summarize it”).
 
 Return ONLY a JSON object with the following format, no additional text:
 {
-  ""category"": ""<category>"",
-  ""instructionType"": ""<instructionType>""
+  ""categories"": [""<category1>"", ""<category2>""],
+  ""instructionTypes"": [""<instructionType1>"", ""<instructionType2>""]
 }
+
+Rules:
+- ""categories"" MUST contain at least one allowed value.
+- ""instructionTypes"" MUST contain at least one allowed value.
+- If the intent is clearly focused on one operation, return arrays of length 1.
+- If unsure between two closely related options, you MAY include both.
 
 Examples:
 User: ""Create a new story about a knight""
-Response: {""category"": ""story_generation"", ""instructionType"": ""story_generate_initial""}
+Response: {""categories"": [""story_generation""], ""instructionTypes"": [""story_generate_initial""]}
 
-User: ""Validate my YAML""
-Response: {""category"": ""validation"", ""instructionType"": ""story_validate""}
+User: ""Validate my JSON""
+Response: {""categories"": [""validation""], ""instructionTypes"": [""story_validate""]}
 
 User: ""What are the requirements for story generation?""
-Response: {""category"": ""story_generation"", ""instructionType"": ""requirements""}
+Response: {""categories"": [""story_generation""], ""instructionTypes"": [""requirements""]}
 
 User: ""Show me the config""
-Response: {""category"": ""config"", ""instructionType"": ""config_view""}
+Response: {""categories"": [""config""], ""instructionTypes"": [""config_view""]}
 
-Now classify this user instruction:";
+User: ""Generate a new story and then summarize it""
+Response: {""categories"": [""story_generation"", ""summarization""], ""instructionTypes"": [""story_generate_initial"", ""story_summarize""]}
+
+Now classify this user instruction:
+";
 
     public IntentRouterService(
         IOptions<AiSettings> aiOptions,
@@ -98,7 +113,7 @@ Now classify this user instruction:";
                 }
             };
 
-            _logger.LogInformation("Calling intent router with provider {Provider}, model {Model}", 
+            _logger.LogInformation("Calling intent router with provider {Provider}, model {Model}",
                 _settings.Provider, _settings.ModelId);
 
             var response = await llmService.CompleteAsync(request, cancellationToken);
@@ -125,7 +140,7 @@ Now classify this user instruction:";
         try
         {
             var cleanedJson = ExtractJsonFromResponse(jsonContent);
-            
+
             var options = new JsonSerializerOptions
             {
                 PropertyNameCaseInsensitive = true,
@@ -134,16 +149,18 @@ Now classify this user instruction:";
 
             var classification = JsonSerializer.Deserialize<IntentClassification>(cleanedJson, options);
 
-            if (classification == null || 
-                string.IsNullOrWhiteSpace(classification.Category) || 
-                string.IsNullOrWhiteSpace(classification.InstructionType))
+            if (classification == null ||
+                classification.Categories.Length == 0 ||
+                classification.Categories[0] == string.Empty ||
+                classification.InstructionTypes.Length == 0 ||
+                classification.InstructionTypes[0] == string.Empty)
             {
                 _logger.LogWarning("Parsed classification is incomplete");
                 return null;
             }
 
-            _logger.LogInformation("Successfully classified intent: category={Category}, instructionType={InstructionType}", 
-                classification.Category, classification.InstructionType);
+            _logger.LogInformation("Successfully classified intent: category={Category}, instructionType={InstructionType}",
+                classification.Categories, classification.InstructionTypes);
 
             return classification;
         }
@@ -157,15 +174,15 @@ Now classify this user instruction:";
     private static string ExtractJsonFromResponse(string content)
     {
         var trimmed = content.Trim();
-        
+
         var jsonStart = trimmed.IndexOf('{');
         var jsonEnd = trimmed.LastIndexOf('}');
-        
+
         if (jsonStart >= 0 && jsonEnd > jsonStart)
         {
             return trimmed.Substring(jsonStart, jsonEnd - jsonStart + 1);
         }
-        
+
         return trimmed;
     }
 }

@@ -191,7 +191,7 @@ CRITICAL VALIDATION RULES:
 
     private async Task<string?> ResolveInstructionBlockAsync(GenerateJsonStoryRequest request, CancellationToken cancellationToken)
     {
-        var queryText = BuildStoryGenerationSearchQuery(request);
+        var queryText = "Generate a story ensuring that you include relevant requirements and guidelines, with the following parameters:\n\n" + BuildStoryGenerationSearchQuery(request);
         if (string.IsNullOrWhiteSpace(queryText))
         {
             return null;
@@ -205,11 +205,11 @@ CRITICAL VALIDATION RULES:
         {
             _logger.LogInformation(
                 "Intent classified for story generation: category={Category}, instructionType={InstructionType}",
-                intentClassification.Category,
-                intentClassification.InstructionType);
-            
-            categories = new[] { intentClassification.Category };
-            instructionTypes = new[] { intentClassification.InstructionType };
+                intentClassification.Categories,
+                intentClassification.InstructionTypes);
+
+            categories = intentClassification.Categories;
+            instructionTypes = intentClassification.InstructionTypes;
         }
         else
         {

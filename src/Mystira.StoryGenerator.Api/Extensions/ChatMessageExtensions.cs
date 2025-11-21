@@ -24,8 +24,9 @@ public static class ChatMessageExtensions
         var messages =
             request
                 .Messages
-                .Select(x => x.ToOpenAiChatMessage())
-                .Append(ChatMessage.CreateSystemMessage(request.SystemPrompt));
+                .Select(x => x.ToOpenAiChatMessage());
+        if (request.SystemPrompt is not null)
+            messages = messages.Append(ChatMessage.CreateSystemMessage(request.SystemPrompt));
         return messages;
     }
 }
