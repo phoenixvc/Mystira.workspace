@@ -6,7 +6,7 @@ namespace Mystira.StoryGenerator.Llm.Services.Instructions;
 /// Adapter to expose the API InstructionBlockService via the Domain IInstructionBlockService interface.
 /// Maps between slightly different InstructionSearchContext shapes.
 /// </summary>
-public class InstructionBlockAdapter : Mystira.StoryGenerator.Domain.Services.IInstructionBlockService
+public class InstructionBlockAdapter : IInstructionBlockService
 {
     private readonly IInstructionBlockService _inner;
 
