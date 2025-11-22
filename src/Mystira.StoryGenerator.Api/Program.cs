@@ -34,7 +34,6 @@ builder.Services.AddScoped<ILLMServiceFactory, LLMServiceFactory>();
 
 // Story schema provider abstraction (also implements Domain interface)
 builder.Services.AddScoped<IStorySchemaProvider, FileStorySchemaProvider>();
-builder.Services.AddScoped<IStorySchemaProvider>(sp => sp.GetRequiredService<IStorySchemaProvider>());
 // Story validation service (Domain interface) implemented in Application layer
 builder.Services.AddScoped<IStoryValidationService, StoryValidationService>();
 

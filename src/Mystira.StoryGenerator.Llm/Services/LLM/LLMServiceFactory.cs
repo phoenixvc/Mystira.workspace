@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Logging;
+using Mystira.StoryGenerator.Contracts.Chat;
 using Mystira.StoryGenerator.Contracts.Configuration;
 using Mystira.StoryGenerator.Domain.Services;
 
@@ -101,7 +102,8 @@ public class LLMServiceFactory : ILLMServiceFactory
         private readonly ILLMService _inner;
         public LlmServiceAdapter(ILLMService inner) => _inner = inner;
         public string ProviderName => _inner.ProviderName;
-        public Task<Contracts.Chat.ChatCompletionResponse> CompleteAsync(Contracts.Chat.ChatCompletionRequest request, CancellationToken cancellationToken = default)
+        public Task<ChatCompletionResponse> CompleteAsync(ChatCompletionRequest request, CancellationToken cancellationToken = default)
             => _inner.CompleteAsync(request, cancellationToken);
+        public bool IsAvailable() => _inner.IsAvailable();
     }
 }
