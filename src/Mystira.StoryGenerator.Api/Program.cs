@@ -61,7 +61,7 @@ builder.Services.AddHealthChecks();
 // Register services
 builder.Services.AddScoped<IInstructionBlockService, InstructionBlockService>();
 // Register Intent router implementation from Llm project for Domain interface
-builder.Services.AddScoped<IIntentRouterService, IntentRouterService>();
+builder.Services.AddScoped<IIntentRouterService, StoryIntentClassifier>();
 builder.Services.AddScoped<ICommandIntentRouter, CommandIntentRouter>();
 
 var app = builder.Build();

@@ -3,11 +3,6 @@ using Mystira.StoryGenerator.Domain.Commands.Stories;
 
 namespace Mystira.StoryGenerator.Llm.Services.Intent;
 
-public interface ICommandIntentRouter
-{
-    Task<object?> RouteIntentToCommandAsync(string userQuery, object? context = null, CancellationToken cancellationToken = default);
-}
-
 public class CommandIntentRouter : ICommandIntentRouter
 {
     private readonly Mystira.StoryGenerator.Domain.Services.IIntentRouterService _intentRouter;
@@ -52,5 +47,23 @@ public class CommandIntentRouter : ICommandIntentRouter
             "story_summarize" => context as SummarizeStoryCommand,
             _ => null
         };
+    }
+
+    public async Task<string?> DetectPrimaryInstructionTypeAsync(string userQuery, CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrWhiteSpace(userQuery))
+        {
+            _logger.LogWarning("DetectPrimaryInstructionTypeAsync called with empty query");
+            return null;
+        }
+
+        var classification = await _intentRouter.ClassifyIntentAsync(userQuery, cancellationToken);
+        if (classification == null || classification.InstructionTypes.Length == 0)
+        {
+            _logger.LogWarning("Intent classification returned no instruction types for query: {Query}", userQuery);
+            return null;
+        }
+
+        return classification.InstructionTypes[0];
     }
 }

@@ -1073,7 +1073,7 @@
             : (response.MinimumAge > 0 ? $"Minimum age {response.MinimumAge}+" : "All ages");
         var coreAxes = response.CoreAxes != null && response.CoreAxes.Any()
             ? string.Join(", ", response.CoreAxes)
-            : "Curated during YAML generation";
+            : "Curated during generation";
         var archetypes = response.Archetypes != null && response.Archetypes.Any()
             ? string.Join(", ", response.Archetypes)
             : "AI selected";
@@ -1100,7 +1100,7 @@
                $"• Tags: {tags}\n" +
                $"• Tone: {tone}\n\n" +
                $"Description: {description}\n\n" +
-               "Reply 'yes' to confirm and generate the YAML story with these parameters.";
+               "Reply 'yes' to confirm and generate the story with these parameters.";
     }
 
     private async Task HandleSendMessage(string message)
@@ -1132,7 +1132,7 @@
                 CurrentChat!.Messages.Add(new StoryGeneratorChatMessage
                 {
                     Role = "system",
-                    Content = "Generating YAML from the proposed parameters...",
+                    Content = "Generating story from the proposed parameters...",
                     Timestamp = DateTime.Now
                 });
                 StateHasChanged();
@@ -1164,19 +1164,19 @@
                     {
                         Role = "system",
                         Content = validation.IsValid
-                            ? $"YAML generated successfully. {summary}"
-                            : $"YAML generated but has issues. {BuildValidationSummary(validation)}",
+                            ? $"Story generated successfully. {summary}"
+                            : $"Story generated but has issues. {BuildValidationSummary(validation)}",
                         Timestamp = DateTime.Now
                     });
                     await SaveChatsAsync();
                 }
                 else
                 {
-                    var emsg = result.Error ?? "YAML generation failed";
+                    var emsg = result.Error ?? "Story generation failed";
                     CurrentChat!.Messages.Add(new StoryGeneratorChatMessage
                     {
                         Role = "assistant",
-                        Content = $"YAML generation failed: {emsg}",
+                        Content = $"Story generation failed: {emsg}",
                         Timestamp = DateTime.Now
                     });
                     await SaveChatsAsync();
@@ -1197,10 +1197,11 @@
             var messages = MapToContractMessages(CurrentChat);
             if (ShouldIncludeYamlContext(message) && !string.IsNullOrWhiteSpace(YamlContent))
             {
+                var currentJson = JsonYamlConverter.ToJson(YamlContent);
                 messages.Add(new MystiraChatMessage
                 {
                     MessageType = ChatMessageType.System,
-                    Content = $"CURRENT_YAML:\n```yaml\n{YamlContent}\n```",
+                    Content = $"CURRENT_JSON:\n```json\n{currentJson}\n```",
                     Timestamp = DateTime.UtcNow
                 });
             }
@@ -1219,15 +1220,45 @@
                 Messages = messages
             };
 
-            // Call setup endpoint to continue parameter collection
-            var response = await ApiService.SetupStoryAsync(request);
+            // Route subsequent turns to chat orchestration endpoint (not setup)
+            var response = await ApiService.CompleteChatAsync(request);
 
             if (response.Success && !string.IsNullOrWhiteSpace(response.Content))
             {
                 var content = response.Content;
 
+                // If the assistant returned a JSON block representing a story, convert to YAML and apply without displaying JSON in chat
+                if (TryExtractJsonCodeBlock(content, out var updatedJson))
+                {
+                    var convertedYaml = JsonYamlConverter.ToYaml(updatedJson);
+                    if (!string.IsNullOrWhiteSpace(convertedYaml))
+                    {
+                        YamlContent = convertedYaml;
+                        if (CurrentChat != null)
+                        {
+                            CurrentChat.YamlSnapshot = convertedYaml;
+                            await SaveChatsAsync();
+                        }
+
+                        // Validate updated YAML
+                        var validation = await ApiService.ValidateStoryAsync(convertedYaml, "yaml");
+                        ValidationResult = MapValidation(validation);
+
+                        // Add concise system message summarizing the update
+                        CurrentChat!.Messages.Add(new StoryGeneratorChatMessage
+                        {
+                            Role = "system",
+                            Content = validation.IsValid
+                                ? $"Story updated from JSON and validated successfully. {BuildYamlSummaryMessage(convertedYaml)}"
+                                : $"Story updated from JSON but validation failed. Issues: {BuildValidationSummary(validation)}",
+                            Timestamp = DateTime.Now
+                        });
+                        await SaveChatsAsync();
+                        // Do not show the original assistant content (which contained JSON) in chat
+                    }
+                }
                 // If YAML already exists and the assistant returned an updated YAML block, apply it without displaying in chat
-                if (!string.IsNullOrWhiteSpace(YamlContent) && TryExtractYamlCodeBlock(content, out var updatedYaml))
+                else if (!string.IsNullOrWhiteSpace(YamlContent) && TryExtractYamlCodeBlock(content, out var updatedYaml))
                 {
                     YamlContent = updatedYaml;
                     if (CurrentChat != null)
@@ -1245,19 +1276,21 @@
                     {
                         Role = "system",
                         Content = validation.IsValid
-                            ? $"YAML updated and validated successfully. {BuildYamlSummaryMessage(updatedYaml)}"
-                            : $"YAML updated but validation failed. Issues: {BuildValidationSummary(validation)}",
+                            ? $"Story updated and validated successfully. {BuildYamlSummaryMessage(updatedYaml)}"
+                            : $"Story updated but validation failed. Issues: {BuildValidationSummary(validation)}",
                         Timestamp = DateTime.Now
                     });
                     await SaveChatsAsync();
                 }
                 else
                 {
+                    // Strip any JSON code blocks from assistant content before displaying (chat should never contain JSON)
+                    var sanitized = RemoveJsonCodeBlocks(content);
                     // Add assistant response normally
                     CurrentChat.Messages.Add(new StoryGeneratorChatMessage
                     {
                         Role = "assistant",
-                        Content = content,
+                        Content = sanitized,
                         Timestamp = DateTime.Now
                     });
                     await SaveChatsAsync();
@@ -1289,7 +1322,7 @@
                             CurrentChat!.Messages.Add(new StoryGeneratorChatMessage
                             {
                                 Role = "system",
-                                Content = $"Generated YAML did not pass validation. Retrying with fixes. Issues: {BuildValidationSummary(validation)}",
+                                Content = $"Generated story did not pass validation. Retrying with fixes. Issues: {BuildValidationSummary(validation)}",
                                 Timestamp = DateTime.Now
                             });
                             await SaveChatsAsync();
@@ -1310,8 +1343,8 @@
                                 {
                                     Role = "system",
                                     Content = revalidation.IsValid
-                                        ? $"YAML regenerated and validated successfully. {summary}"
-                                        : $"YAML regenerated but still has issues. {BuildValidationSummary(revalidation)}",
+                                        ? $"Story regenerated and validated successfully. {summary}"
+                                        : $"Story regenerated but still has issues. {BuildValidationSummary(revalidation)}",
                                     Timestamp = DateTime.Now
                                 });
                                 await SaveChatsAsync();
@@ -1406,7 +1439,7 @@
             CurrentChat.Messages.Add(new StoryGeneratorChatMessage
             {
                 Role = "system",
-                Content = "YAML has been updated. I will use this as context for requested modifications.",
+                Content = "Story has been updated. I will use this as context for requested modifications.",
                 Timestamp = DateTime.Now
             });
             await SaveChatsAsync();
@@ -1794,7 +1827,7 @@
             CurrentChat!.Messages.Add(new StoryGeneratorChatMessage
             {
                 Role = "system",
-                Content = "All parameters received. Generating YAML story...",
+                Content = "All parameters received. Generating story...",
                 Timestamp = DateTime.Now
             });
             StateHasChanged();
@@ -1835,7 +1868,7 @@
             CurrentChat!.Messages.Add(new StoryGeneratorChatMessage
             {
                 Role = "assistant",
-                Content = $"Error during YAML generation: {ex.Message}",
+                Content = $"Error during Story generation: {ex.Message}",
                 Timestamp = DateTime.Now
             });
             await SaveChatsAsync();
@@ -1953,10 +1986,11 @@
             if (CurrentChat == null) return null;
 
             var messages = MapToContractMessages(CurrentChat);
+            var currentJson = JsonYamlConverter.ToJson(currentYaml);
             messages.Add(new MystiraChatMessage
             {
                 MessageType = ChatMessageType.System,
-                Content = $"CURRENT_YAML:\n```yaml\n{currentYaml}\n```",
+                Content = $"CURRENT_JSON:\n```json\n{currentJson}\n```",
                 Timestamp = DateTime.UtcNow
             });
 
@@ -1964,7 +1998,7 @@
             messages.Add(new MystiraChatMessage
             {
                 MessageType = ChatMessageType.User,
-                Content = $"The YAML above failed validation. Please regenerate a corrected YAML that fixes these issues while preserving IDs and structure where possible. Return only a single fenced YAML block. Issues:\n{issueList}",
+                Content = $"Using the CURRENT_JSON context above, the story failed validation. Please regenerate a corrected JSON that fixes these issues while preserving IDs and structure where possible. Return only a JSON block. Issues:\n{issueList}",
                 Timestamp = DateTime.UtcNow
             });
 
@@ -1982,10 +2016,15 @@
                 Messages = messages
             };
 
-            var resp = await ApiService.SetupStoryAsync(request);
-            if (resp.Success && !string.IsNullOrWhiteSpace(resp.Content) && TryExtractYamlCodeBlock(resp.Content, out var fixedYaml))
+            // Use chat orchestration for fix attempts; expect JSON block back which we then convert to YAML
+            var resp = await ApiService.CompleteChatAsync(request);
+            if (resp.Success && !string.IsNullOrWhiteSpace(resp.Content))
             {
-                return fixedYaml;
+                if (TryExtractJsonCodeBlock(resp.Content, out var fixedJson))
+                {
+                    var yaml = JsonYamlConverter.ToYaml(fixedJson);
+                    return string.IsNullOrWhiteSpace(yaml) ? null : yaml;
+                }
             }
         }
         catch
@@ -1993,6 +2032,62 @@
             // Ignore and return null on failure
         }
         return null;
+    }
+
+    // Detect a fenced JSON code block and return its inner JSON
+    private static bool TryExtractJsonCodeBlock(string content, out string json)
+    {
+        json = string.Empty;
+        if (string.IsNullOrWhiteSpace(content)) return false;
+
+        var idx = 0;
+        while (idx < content.Length)
+        {
+            var start = content.IndexOf("```", idx, StringComparison.Ordinal);
+            if (start < 0) break;
+            var langEnd = content.IndexOf('\n', start + 3);
+            if (langEnd < 0) break;
+
+            var fenceLabel = content.Substring(start + 3, langEnd - (start + 3)).Trim().ToLowerInvariant();
+            var end = content.IndexOf("```", langEnd + 1, StringComparison.Ordinal);
+            if (end < 0) break;
+
+            var code = content.Substring(langEnd + 1, end - (langEnd + 1));
+            if (fenceLabel == "json")
+            {
+                json = code.Trim();
+                return !string.IsNullOrWhiteSpace(json);
+            }
+            idx = end + 3;
+        }
+        return false;
+    }
+
+    // Remove any fenced JSON code blocks (and any leading CURRENT_JSON lines) from assistant content before displaying in chat
+    private static string RemoveJsonCodeBlocks(string content)
+    {
+        if (string.IsNullOrEmpty(content)) return content;
+
+        // Remove CURRENT_JSON label lines preceding code fences
+        var sanitized = content.Replace("CURRENT_JSON:", string.Empty, StringComparison.OrdinalIgnoreCase);
+
+        // Remove all ```json ... ``` blocks
+        int startIdx;
+        while ((startIdx = sanitized.IndexOf("```json", StringComparison.OrdinalIgnoreCase)) >= 0)
+        {
+            var endIdx = sanitized.IndexOf("```", startIdx + 7, StringComparison.Ordinal);
+            if (endIdx < 0)
+            {
+                // No closing fence; remove from start to end
+                sanitized = sanitized.Remove(startIdx);
+                break;
+            }
+            var length = (endIdx + 3) - startIdx;
+            sanitized = sanitized.Remove(startIdx, length);
+        }
+
+        // Trim excess whitespace left by removals
+        return sanitized.Trim();
     }
 
     public void Dispose()

@@ -8,5 +8,7 @@ public interface IStoryApiService
     Task<ValidationResponse> ValidateStoryAsync(string storyContent, string format = "yaml");
     Task<GenerateJsonStoryResponse> GenerateJsonStoryAsync(GenerateJsonStoryRequest request);
     Task<ChatCompletionResponse> SetupStoryAsync(ChatCompletionRequest request);
+    // Route regular chat turns to the chat orchestration endpoint
+    Task<ChatCompletionResponse> CompleteChatAsync(ChatCompletionRequest request);
     Task<RandomStoryParametersResponse> RandomizeStoryParametersAsync(RandomStoryParametersRequest request);
 }
