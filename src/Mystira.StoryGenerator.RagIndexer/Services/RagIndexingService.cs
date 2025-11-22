@@ -1,4 +1,3 @@
-using Mystira.StoryGenerator.RagIndexer.Configuration;
 using Mystira.StoryGenerator.RagIndexer.Interfaces;
 using Mystira.StoryGenerator.RagIndexer.Models;
 

@@ -9,7 +9,6 @@
   <ItemGroup>
     <PackageReference Include="Azure.AI.OpenAI" Version="2.5.0-beta.1" />
     <PackageReference Include="Azure.Identity" Version="1.17.0" />
-    <PackageReference Include="Azure.Search.Documents" Version="11.6.0" />
     <PackageReference Include="MediatR" Version="12.1.1" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.21" />
     <PackageReference Include="NJsonSchema" Version="11.5.1" />
@@ -21,12 +20,17 @@
     <ProjectReference Include="..\Mystira.StoryGenerator.Application\Mystira.StoryGenerator.Application.csproj" />
     <ProjectReference Include="..\Mystira.StoryGenerator.Contracts\Mystira.StoryGenerator.Contracts.csproj" />
     <ProjectReference Include="..\Mystira.StoryGenerator.Domain\Mystira.StoryGenerator.Domain.csproj" />
+    <ProjectReference Include="..\Mystira.StoryGenerator.Llm\Mystira.StoryGenerator.Llm.csproj" />
   </ItemGroup>
 
   <ItemGroup>
     <None Include="config\story-schema.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Services\" />
   </ItemGroup>
 
 </Project>

@@ -1,4 +1,6 @@
-namespace Mystira.StoryGenerator.Api.Services.Instructions;
+﻿using Mystira.StoryGenerator.Domain.Services;
+
+namespace Mystira.StoryGenerator.Llm.Services.Instructions;
 
 public interface IInstructionBlockService
 {

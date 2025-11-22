@@ -1,8 +1,6 @@
 @using System.Net
 @using System.Globalization
 @using System.Text
-@using Mystira.StoryGenerator.Contracts
-@using Mystira.StoryGenerator.Web.Models
 @inject IJSRuntime JS
 
 <div class="panel h-full flex flex-col yaml-preview-theme"
@@ -397,7 +395,7 @@
                 await OnYamlCopied.InvokeAsync(new YamlCopyResult(success, message));
             }
         }
-        catch (Microsoft.JSInterop.JSException ex)
+        catch (JSException ex)
         {
             if (OnYamlCopied.HasDelegate)
             {

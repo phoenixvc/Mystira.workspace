@@ -1,11 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
 using System.Text;
 using Microsoft.Extensions.Options;
-using Mystira.StoryGenerator.Api.Services.Instructions;
-using Mystira.StoryGenerator.Api.Services.Intent;
-using Mystira.StoryGenerator.Api.Services.LLM;
+using Mystira.StoryGenerator.Domain.Services;
 using Mystira.StoryGenerator.Contracts.Chat;
 using Mystira.StoryGenerator.Contracts.Configuration;
 
@@ -239,13 +236,13 @@ public class ChatController : ControllerBase
     {
         try
         {
-            var availableServices = _llmServiceFactory.GetAvailableServices().ToList();
+            var providers = new List<object>();
 
-            var providers = availableServices.Select(s => new
+            var defaultService = _llmServiceFactory.GetDefaultService();
+            if (defaultService != null)
             {
-                Name = s.ProviderName,
-                Available = s.IsAvailable()
-            }).ToList();
+                providers.Add(new { Name = defaultService.ProviderName, Available = true });
+            }
 
             return Ok(new
             {

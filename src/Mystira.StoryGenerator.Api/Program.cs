@@ -1,10 +1,11 @@
 using Microsoft.Extensions.Options;
 using Mystira.StoryGenerator.Api.Services;
-using Mystira.StoryGenerator.Api.Services.Instructions;
-using Mystira.StoryGenerator.Api.Services.Intent;
-using Mystira.StoryGenerator.Api.Services.LLM;
+using Mystira.StoryGenerator.Llm.Services.Intent;
 using Mystira.StoryGenerator.Contracts.Configuration;
 using Mystira.StoryGenerator.Contracts.Stories;
+using Mystira.StoryGenerator.Domain.Services;
+using Mystira.StoryGenerator.Llm.Services.Instructions;
+using IInstructionBlockService = Mystira.StoryGenerator.Llm.Services.Instructions.IInstructionBlockService;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,15 +24,19 @@ builder.Services.AddOptions<AiSettings>()
 builder.Services.AddOptions<InstructionSearchSettings>()
     .Bind(builder.Configuration.GetSection(InstructionSearchSettings.SectionName));
 
-// Register HttpClient for LLM services
-builder.Services.AddHttpClient<AzureOpenAIService>();
+// Register HttpClient for LLM services (moved to Llm project)
+builder.Services.AddHttpClient<Mystira.StoryGenerator.Llm.Services.LLM.AzureOpenAIService>();
 
-// Register LLM services
-builder.Services.AddScoped<ILLMService, AzureOpenAIService>();
-builder.Services.AddScoped<ILLMServiceFactory, LLMServiceFactory>();
+// Register LLM services (in Llm project) and expose Domain interfaces
+builder.Services.AddScoped<Mystira.StoryGenerator.Llm.Services.LLM.ILLMService, Mystira.StoryGenerator.Llm.Services.LLM.AzureOpenAIService>();
+builder.Services.AddScoped<ILLMService>(sp => (ILLMService)sp.GetRequiredService<Mystira.StoryGenerator.Llm.Services.LLM.ILLMService>());
+builder.Services.AddScoped<ILLMServiceFactory, Mystira.StoryGenerator.Llm.Services.LLM.LLMServiceFactory>();
 
-// Story schema provider abstraction
+// Story schema provider abstraction (also implements Domain interface)
 builder.Services.AddScoped<IStorySchemaProvider, FileStorySchemaProvider>();
+builder.Services.AddScoped<IStorySchemaProvider>(sp => (IStorySchemaProvider)sp.GetRequiredService<IStorySchemaProvider>());
+// Story validation service (Domain interface)
+builder.Services.AddScoped<IStoryValidationService, StoryValidationService>();
 
 var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? Array.Empty<string>();
 
@@ -56,6 +61,9 @@ builder.Services.AddHealthChecks();
 
 // Register services
 builder.Services.AddScoped<IInstructionBlockService, InstructionBlockService>();
+// Adapter to provide Domain IInstructionBlockService
+builder.Services.AddScoped<Mystira.StoryGenerator.Domain.Services.IInstructionBlockService, InstructionBlockAdapter>();
+// Register Intent router implementation from Llm project for Domain interface
 builder.Services.AddScoped<IIntentRouterService, IntentRouterService>();
 builder.Services.AddScoped<ICommandIntentRouter, CommandIntentRouter>();
 

@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using NJsonSchema;
-using NJsonSchema.Generation;
 using Newtonsoft.Json.Linq;
 using Mystira.StoryGenerator.Domain.Stories;
 using Microsoft.Extensions.Options;

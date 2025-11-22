@@ -1,5 +1,3 @@
-@using Mystira.StoryGenerator.Contracts.Chat
-
 <div class="message system-message">
     <div class="system-content">
         <i class="system-icon">ℹ️</i>
@@ -9,7 +7,7 @@
 </div>
 
 @code {
-    [Parameter] public Mystira.StoryGenerator.Contracts.Chat.MystiraChatMessage Message { get; set; } = null!;
+    [Parameter] public MystiraChatMessage Message { get; set; } = null!;
 }
 
 <style>

@@ -1,8 +1,6 @@
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
-using Mystira.StoryGenerator.Api.Services;
-using Mystira.StoryGenerator.Api.Services.LLM;
 using Mystira.StoryGenerator.Contracts.Chat;
 using Mystira.StoryGenerator.Contracts.Configuration;
 using Mystira.StoryGenerator.Contracts.Stories;
@@ -16,17 +14,17 @@ namespace Mystira.StoryGenerator.Api.Controllers;
 public class StoriesController : ControllerBase
 {
     private readonly IMediator _mediator;
-    private readonly IStoryValidationService _validationService;
-    private readonly ILLMServiceFactory _llmFactory;
+    private readonly Mystira.StoryGenerator.Domain.Services.IStoryValidationService _validationService;
+    private readonly Mystira.StoryGenerator.Domain.Services.ILLMServiceFactory _llmFactory;
     private readonly AiSettings _aiSettings;
-    private readonly IStorySchemaProvider _schemaProvider;
+    private readonly Services.IStorySchemaProvider _schemaProvider;
     private readonly ILogger<StoriesController> _logger;
 
     public StoriesController(
         IMediator mediator,
-        IStoryValidationService validationService,
-        ILLMServiceFactory llmFactory,
-        IStorySchemaProvider schemaProvider,
+        Mystira.StoryGenerator.Domain.Services.IStoryValidationService validationService,
+        Mystira.StoryGenerator.Domain.Services.ILLMServiceFactory llmFactory,
+        Services.IStorySchemaProvider schemaProvider,
         IOptions<AiSettings> aiOptions,
         ILogger<StoriesController> logger)
     {

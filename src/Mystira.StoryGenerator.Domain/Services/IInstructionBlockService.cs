@@ -10,5 +10,5 @@ public class InstructionSearchContext
     public string QueryText { get; set; } = string.Empty;
     public string[] Categories { get; set; } = Array.Empty<string>();
     public string[] InstructionTypes { get; set; } = Array.Empty<string>();
-    public int TopK { get; set; } = 8;
+    public int? TopK { get; set; }
 }

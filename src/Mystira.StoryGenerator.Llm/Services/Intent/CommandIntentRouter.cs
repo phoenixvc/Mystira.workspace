@@ -1,10 +1,7 @@
-using MediatR;
-using Mystira.StoryGenerator.Contracts.Chat;
-using Mystira.StoryGenerator.Contracts.Intent;
-using Mystira.StoryGenerator.Contracts.Stories;
+using Microsoft.Extensions.Logging;
 using Mystira.StoryGenerator.Domain.Commands.Stories;
 
-namespace Mystira.StoryGenerator.Api.Services.Intent;
+namespace Mystira.StoryGenerator.Llm.Services.Intent;
 
 public interface ICommandIntentRouter
 {
@@ -13,11 +10,11 @@ public interface ICommandIntentRouter
 
 public class CommandIntentRouter : ICommandIntentRouter
 {
-    private readonly IIntentRouterService _intentRouter;
+    private readonly Mystira.StoryGenerator.Domain.Services.IIntentRouterService _intentRouter;
     private readonly ILogger<CommandIntentRouter> _logger;
 
     public CommandIntentRouter(
-        IIntentRouterService intentRouter,
+        Mystira.StoryGenerator.Domain.Services.IIntentRouterService intentRouter,
         ILogger<CommandIntentRouter> logger)
     {
         _intentRouter = intentRouter;
@@ -40,7 +37,7 @@ public class CommandIntentRouter : ICommandIntentRouter
         }
 
         var instructionType = classification.InstructionTypes[0];
-        
+
         _logger.LogInformation(
             "Routing intent to command: category={Category}, instructionType={InstructionType}",
             classification.Categories[0],

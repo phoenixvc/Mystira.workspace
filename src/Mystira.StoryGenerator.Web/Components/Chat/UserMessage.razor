@@ -1,5 +1,3 @@
-@using Mystira.StoryGenerator.Contracts.Chat
-
 <div class="message user-message">
     <div class="message-header">
         <div class="message-avatar user-avatar">
@@ -16,7 +14,7 @@
 </div>
 
 @code {
-    [Parameter] public Mystira.StoryGenerator.Contracts.Chat.MystiraChatMessage Message { get; set; } = null!;
+    [Parameter] public MystiraChatMessage Message { get; set; } = null!;
 }
 
 <style>
