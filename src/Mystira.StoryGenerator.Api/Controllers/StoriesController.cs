@@ -338,57 +338,6 @@ Ensure content is culturally sensitive and age-appropriate.";
         }
     }
 
-    [HttpPost("generate")]
-    public async Task<ActionResult<GenerateJsonStoryResponse>> GenerateJsonStory([FromBody] GenerateJsonStoryRequest request, CancellationToken cancellationToken)
-    {
-        try
-        {
-            if (string.IsNullOrWhiteSpace(request.Title))
-            {
-                return BadRequest(new GenerateJsonStoryResponse
-                {
-                    Success = false,
-                    Error = "Title is required"
-                });
-            }
-
-            if (request.MinScenes <= 0 || request.MaxScenes < request.MinScenes)
-            {
-                return BadRequest(new GenerateJsonStoryResponse
-                {
-                    Success = false,
-                    Error = "Invalid scene count range"
-                });
-            }
-
-            var command = new GenerateStoryCommand(request);
-            var result = await _mediator.Send(command, cancellationToken);
-            if (!result.Success)
-            {
-                return StatusCode(502, result);
-            }
-
-            return Ok(result);
-        }
-        catch (OperationCanceledException)
-        {
-            return StatusCode(499, new GenerateJsonStoryResponse
-            {
-                Success = false,
-                Error = "Request was cancelled"
-            });
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error generating JSON story");
-            return StatusCode(500, new GenerateJsonStoryResponse
-            {
-                Success = false,
-                Error = "An unexpected error occurred"
-            });
-        }
-    }
-
     private static string NormalizeDifficulty(string difficulty)
     {
         var d = (difficulty ?? string.Empty).Trim().ToLowerInvariant();

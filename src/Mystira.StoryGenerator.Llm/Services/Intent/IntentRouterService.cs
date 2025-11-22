@@ -4,14 +4,15 @@ using Microsoft.Extensions.Logging;
 using Mystira.StoryGenerator.Contracts.Chat;
 using Mystira.StoryGenerator.Contracts.Configuration;
 using Mystira.StoryGenerator.Contracts.Intent;
+using Mystira.StoryGenerator.Domain.Services;
 
 namespace Mystira.StoryGenerator.Llm.Services.Intent;
 
-public class IntentRouterService : Mystira.StoryGenerator.Domain.Services.IIntentRouterService
+public class StoryIntentClassifier : IIntentRouterService
 {
     private readonly IntentRouterSettings _settings;
-    private readonly Mystira.StoryGenerator.Domain.Services.ILLMServiceFactory _llmServiceFactory;
-    private readonly ILogger<IntentRouterService> _logger;
+    private readonly ILLMServiceFactory _llmServiceFactory;
+    private readonly ILogger<StoryIntentClassifier> _logger;
 
     private const string ClassificationPrompt = @"
 You are the Mystira RAG intent classifier.
@@ -56,10 +57,10 @@ Response: {""categories"": [""story_generation"", ""summarization""], ""instruct
 Now classify this user instruction:
 ";
 
-    public IntentRouterService(
+    public StoryIntentClassifier(
         IOptions<AiSettings> aiOptions,
-        Mystira.StoryGenerator.Domain.Services.ILLMServiceFactory llmServiceFactory,
-        ILogger<IntentRouterService> logger)
+        ILLMServiceFactory llmServiceFactory,
+        ILogger<StoryIntentClassifier> logger)
     {
         _settings = aiOptions.Value.IntentRouter;
         _llmServiceFactory = llmServiceFactory;

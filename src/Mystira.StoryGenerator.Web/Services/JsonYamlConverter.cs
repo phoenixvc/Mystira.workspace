@@ -1,6 +1,8 @@
 ﻿using System.Text.Json;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
+using YamlDotNet.Core;
+using YamlDotNet.Core.Events;
 
 namespace Mystira.StoryGenerator.Web.Services;
 
@@ -75,6 +77,70 @@ public static class JsonYamlConverter
                 return null;
             default:
                 return null;
+        }
+    }
+
+    public static string ToJson(string? yaml)
+    {
+        if (string.IsNullOrWhiteSpace(yaml)) return string.Empty;
+        try
+        {
+            var deserializer = new DeserializerBuilder()
+                .WithNamingConvention(UnderscoredNamingConvention.Instance)
+                .Build();
+
+            var yamlObject = deserializer.Deserialize<object?>(yaml);
+            var jsonReady = ConvertYamlObject(yamlObject);
+            var options = new JsonSerializerOptions
+            {
+                WriteIndented = false,
+                PropertyNamingPolicy = null
+            };
+            return JsonSerializer.Serialize(jsonReady, options);
+        }
+        catch
+        {
+            // On failure, return the original string to avoid breaking the caller
+            return yaml!;
+        }
+    }
+
+    private static object? ConvertYamlObject(object? obj)
+    {
+        switch (obj)
+        {
+            case null:
+                return null;
+            case IDictionary<object, object> dict:
+            {
+                var result = new Dictionary<string, object?>();
+                foreach (var kvp in dict)
+                {
+                    var key = kvp.Key?.ToString() ?? string.Empty;
+                    result[key] = ConvertYamlObject(kvp.Value);
+                }
+                return result;
+            }
+            case IDictionary<string, object?> sdict:
+            {
+                var result = new Dictionary<string, object?>();
+                foreach (var kvp in sdict)
+                {
+                    result[kvp.Key] = ConvertYamlObject(kvp.Value);
+                }
+                return result;
+            }
+            case IEnumerable<object?> list:
+            {
+                var res = new List<object?>();
+                foreach (var item in list)
+                {
+                    res.Add(ConvertYamlObject(item));
+                }
+                return res;
+            }
+            default:
+                return obj;
         }
     }
 }
