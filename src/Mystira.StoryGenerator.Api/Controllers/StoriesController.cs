@@ -6,6 +6,7 @@ using Mystira.StoryGenerator.Contracts.Configuration;
 using Mystira.StoryGenerator.Contracts.Stories;
 using Mystira.StoryGenerator.Domain.Commands.Stories;
 using System.Text.Json;
+using Mystira.StoryGenerator.Domain.Services;
 
 namespace Mystira.StoryGenerator.Api.Controllers;
 
@@ -14,17 +15,17 @@ namespace Mystira.StoryGenerator.Api.Controllers;
 public class StoriesController : ControllerBase
 {
     private readonly IMediator _mediator;
-    private readonly Mystira.StoryGenerator.Domain.Services.IStoryValidationService _validationService;
-    private readonly Mystira.StoryGenerator.Domain.Services.ILLMServiceFactory _llmFactory;
+    private readonly IStoryValidationService _validationService;
+    private readonly ILLMServiceFactory _llmFactory;
     private readonly AiSettings _aiSettings;
-    private readonly Services.IStorySchemaProvider _schemaProvider;
+    private readonly IStorySchemaProvider _schemaProvider;
     private readonly ILogger<StoriesController> _logger;
 
     public StoriesController(
         IMediator mediator,
-        Mystira.StoryGenerator.Domain.Services.IStoryValidationService validationService,
-        Mystira.StoryGenerator.Domain.Services.ILLMServiceFactory llmFactory,
-        Services.IStorySchemaProvider schemaProvider,
+        IStoryValidationService validationService,
+        ILLMServiceFactory llmFactory,
+        IStorySchemaProvider schemaProvider,
         IOptions<AiSettings> aiOptions,
         ILogger<StoriesController> logger)
     {
