@@ -1,3 +1,5 @@
+@using Mystira.StoryGenerator.Web.Components
+
 <div class="message ai-message">
     <div class="message-header">
         <div class="message-avatar ai-avatar">
@@ -9,29 +11,12 @@
         </div>
     </div>
     <div class="message-content ai-content">
-        @((MarkupString)FormatContent(Message.Content))
+        <MarkdownRenderer Content="@(Message.Content ?? string.Empty)" />
     </div>
 </div>
 
 @code {
     [Parameter] public MystiraChatMessage Message { get; set; } = null!;
-
-    private string FormatContent(string content)
-    {
-        if (string.IsNullOrEmpty(content))
-            return string.Empty;
-
-        // Simple markdown-like formatting
-        content = content.Replace("**", "<strong>", StringComparison.OrdinalIgnoreCase);
-        content = content.Replace("**", "</strong>", StringComparison.OrdinalIgnoreCase);
-        content = content.Replace("*", "<em>", StringComparison.OrdinalIgnoreCase);
-        content = content.Replace("*", "</em>", StringComparison.OrdinalIgnoreCase);
-        
-        // Convert line breaks to HTML
-        content = content.Replace("\n", "<br>", StringComparison.OrdinalIgnoreCase);
-        
-        return content;
-    }
 }
 
 <style>

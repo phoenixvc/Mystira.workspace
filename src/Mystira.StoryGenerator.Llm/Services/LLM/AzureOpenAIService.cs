@@ -1,11 +1,11 @@
-﻿using System.ClientModel;
+using System.ClientModel;
 using Azure.AI.OpenAI;
 using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Logging;
 using Mystira.StoryGenerator.Contracts.Chat;
 using Mystira.StoryGenerator.Contracts.Configuration;
 using Mystira.StoryGenerator.Domain.Services;
-using Mystira.StoryGenerator.Llm.Extensions;
+using Mystira.StoryGenerator.Contracts.Extensions;
 using OpenAI.Chat;
 
 namespace Mystira.StoryGenerator.Llm.Services.LLM;

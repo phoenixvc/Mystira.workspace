@@ -1,0 +1,166 @@
+@using Markdig
+@implements IDisposable
+
+<div class="markdown-content">
+    @((MarkupString)ConvertToHtml(Content))
+</div>
+
+@code {
+    [Parameter] public string? Content { get; set; }
+
+    private static string ConvertToHtml(string? markdown)
+    {
+        if (string.IsNullOrEmpty(markdown))
+            return string.Empty;
+
+        // Configure the pipeline with common extensions
+        var pipeline = new MarkdownPipelineBuilder()
+            .UseAdvancedExtensions()
+            .Build();
+
+        // Convert markdown to HTML
+        var html = Markdown.ToHtml(markdown, pipeline);
+
+        return html;
+    }
+
+    public void Dispose()
+    {
+        // Cleanup if needed
+    }
+}
+
+<style>
+    .markdown-content {
+        line-height: 1.6;
+        word-wrap: break-word;
+    }
+
+    /* Headings */
+    .markdown-content h1 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-top: 1rem;
+        margin-bottom: 0.5rem;
+        color: #111827;
+    }
+
+    .markdown-content h2 {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin-top: 1rem;
+        margin-bottom: 0.5rem;
+        color: #111827;
+    }
+
+    .markdown-content h3 {
+        font-size: 1.125rem;
+        font-weight: 600;
+        margin-top: 0.75rem;
+        margin-bottom: 0.25rem;
+        color: #111827;
+    }
+
+    .markdown-content h4, .markdown-content h5, .markdown-content h6 {
+        font-size: 1rem;
+        font-weight: 600;
+        margin-top: 0.75rem;
+        margin-bottom: 0.25rem;
+        color: #374151;
+    }
+
+    /* Paragraphs */
+    .markdown-content p {
+        margin: 0.5rem 0;
+    }
+
+    /* Lists */
+    .markdown-content ul, .markdown-content ol {
+        margin: 0.5rem 0;
+        padding-left: 1.5rem;
+    }
+
+    .markdown-content li {
+        margin: 0.25rem 0;
+    }
+
+    /* Blockquotes */
+    .markdown-content blockquote {
+        border-left: 4px solid #d1d5db;
+        padding-left: 1rem;
+        margin: 1rem 0;
+        font-style: italic;
+        color: #6b7280;
+    }
+
+    /* Code */
+    .markdown-content code {
+        background-color: #f3f4f6;
+        padding: 0.125rem 0.25rem;
+        border-radius: 0.25rem;
+        font-family: 'Courier New', monospace;
+        font-size: 0.875rem;
+        color: #ef4444;
+    }
+
+    .markdown-content pre {
+        background-color: #1f2937;
+        color: #f9fafb;
+        padding: 1rem;
+        border-radius: 0.5rem;
+        overflow-x: auto;
+        margin: 1rem 0;
+    }
+
+    .markdown-content pre code {
+        background-color: transparent;
+        color: inherit;
+        padding: 0;
+    }
+
+    /* Tables */
+    .markdown-content table {
+        border-collapse: collapse;
+        width: 100%;
+        margin: 1rem 0;
+    }
+
+    .markdown-content th, .markdown-content td {
+        border: 1px solid #e5e7eb;
+        padding: 0.5rem;
+        text-align: left;
+    }
+
+    .markdown-content th {
+        background-color: #f9fafb;
+        font-weight: 600;
+    }
+
+    /* Links */
+    .markdown-content a {
+        color: #3b82f6;
+        text-decoration: underline;
+    }
+
+    .markdown-content a:hover {
+        color: #2563eb;
+    }
+
+    /* Strong and emphasis */
+    .markdown-content strong {
+        font-weight: 600;
+        color: #111827;
+    }
+
+    .markdown-content em {
+        font-style: italic;
+        color: #6b7280;
+    }
+
+    /* Horizontal rules */
+    .markdown-content hr {
+        border: none;
+        border-top: 1px solid #e5e7eb;
+        margin: 2rem 0;
+    }
+</style>

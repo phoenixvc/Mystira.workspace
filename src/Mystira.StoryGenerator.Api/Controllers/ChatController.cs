@@ -5,6 +5,7 @@ using Microsoft.Extensions.Options;
 using Mystira.StoryGenerator.Domain.Services;
 using Mystira.StoryGenerator.Contracts.Chat;
 using Mystira.StoryGenerator.Contracts.Configuration;
+using Mystira.StoryGenerator.Contracts.Extensions;
 using Mystira.StoryGenerator.Domain.Commands.Stories;
 using Mystira.StoryGenerator.Llm.Services.Intent;
 using MediatR;

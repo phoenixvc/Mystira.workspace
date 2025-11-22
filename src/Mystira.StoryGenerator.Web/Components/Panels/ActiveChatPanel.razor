@@ -1,3 +1,5 @@
+@using Mystira.StoryGenerator.Web.Components
+
 <div class="panel h-full flex flex-col">
     <div class="panel-header flex items-center justify-between">
         <h2 class="text-lg font-semibold">@(CurrentChat?.Title ?? "New Story Generation")</h2>
@@ -23,8 +25,17 @@
                 {
                     <div class="@GetMessageClasses(message.Role)">
                         <div class="@GetMessageBubbleClasses(message.Role)">
-                            <div class="text-xs text-gray-500 mb-1">@message.Role.ToUpperInvariant()</div>
-                            <div class="text-sm whitespace-pre-wrap">@message.Content</div>
+                            <div class="text-xs text-gray-500 mb-1">@(message.Role?.ToUpperInvariant() ?? "UNKNOWN")</div>
+                            @if (message.Role?.ToLower() == "assistant")
+                            {
+                                <div class="text-sm">
+                                    <MarkdownRenderer Content="@(message.Content ?? string.Empty)" />
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="text-sm whitespace-pre-wrap">@message.Content</div>
+                            }
                             <div class="text-xs text-gray-400 mt-2">@message.Timestamp.ToString("HH:mm")</div>
                         </div>
                     </div>
@@ -139,7 +150,7 @@
         MessageText = RandomPrompts[random.Next(RandomPrompts.Length)];
     }
     
-    private string GetMessageClasses(string role)
+    private string GetMessageClasses(string? role)
     {
         return role?.ToLower() switch
         {
@@ -149,7 +160,7 @@
         };
     }
     
-    private string GetMessageBubbleClasses(string role)
+    private string GetMessageBubbleClasses(string? role)
     {
         return role?.ToLower() switch
         {
