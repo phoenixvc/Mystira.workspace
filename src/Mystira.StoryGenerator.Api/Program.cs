@@ -63,6 +63,8 @@ builder.Services.AddScoped<IInstructionBlockService, InstructionBlockService>();
 // Register Intent router implementation from Llm project for Domain interface
 builder.Services.AddScoped<IIntentRouterService, StoryIntentClassifier>();
 builder.Services.AddScoped<ICommandIntentRouter, CommandIntentRouter>();
+// Register Chat Orchestration Service
+builder.Services.AddScoped<IChatOrchestrationService, ChatOrchestrationService>();
 
 var app = builder.Build();
 
