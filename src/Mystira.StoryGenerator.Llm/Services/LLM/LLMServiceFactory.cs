@@ -1,38 +1,18 @@
-using Microsoft.Extensions.Options;
+﻿using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Logging;
+using Mystira.StoryGenerator.Contracts.Chat;
 using Mystira.StoryGenerator.Contracts.Configuration;
+using Mystira.StoryGenerator.Domain.Services;
 
-namespace Mystira.StoryGenerator.Api.Services.LLM;
-
-/// <summary>
-/// Factory for creating LLM service instances based on provider name
-/// </summary>
-public interface ILLMServiceFactory
-{
-    /// <summary>
-    /// Get an LLM service instance for the specified provider
-    /// </summary>
-    /// <param name="providerName">The provider name (e.g., "azure-openai", "google-gemini")</param>
-    /// <returns>The LLM service instance, or null if not found</returns>
-    ILLMService? GetService(string providerName);
-
-    /// <summary>
-    /// Get the default LLM service based on configuration
-    /// </summary>
-    /// <returns>The default LLM service instance</returns>
-    ILLMService? GetDefaultService();
-
-    /// <summary>
-    /// Get all available LLM services
-    /// </summary>
-    /// <returns>Collection of all available LLM services</returns>
-    IEnumerable<ILLMService> GetAvailableServices();
-}
+namespace Mystira.StoryGenerator.Llm.Services.LLM;
 
 /// <summary>
-/// Implementation of LLM service factory
+/// Implementation of LLM service factory (moved from API to LLM project)
 /// </summary>
 public class LLMServiceFactory : ILLMServiceFactory
 {
+    // Keep a reference to LLM-project ILLMService implementations to use IsAvailable(),
+    // while exposing Domain-level interfaces to consumers.
     private readonly Dictionary<string, ILLMService> _services;
     private readonly AiSettings _settings;
     private readonly ILogger<LLMServiceFactory> _logger;
@@ -42,7 +22,7 @@ public class LLMServiceFactory : ILLMServiceFactory
         IOptions<AiSettings> options,
         ILogger<LLMServiceFactory> logger)
     {
-        _services = services.ToDictionary(s => s.ProviderName, s => s);
+        _services = services.ToDictionary(s => s.ProviderName.ToLowerInvariant(), s => s);
         _settings = options.Value;
         _logger = logger;
 
@@ -63,7 +43,7 @@ public class LLMServiceFactory : ILLMServiceFactory
             if (service.IsAvailable())
             {
                 _logger.LogDebug("Found available service for provider: {Provider}", providerName);
-                return service;
+                return Adapt(service);
             }
 
             _logger.LogWarning("Service for provider {Provider} is not properly configured", providerName);
@@ -103,6 +83,27 @@ public class LLMServiceFactory : ILLMServiceFactory
 
     public IEnumerable<ILLMService> GetAvailableServices()
     {
-        return _services.Values.Where(s => s.IsAvailable());
+        return _services.Values.Where(s => s.IsAvailable())
+            .Select(Adapt);
+    }
+
+    private static ILLMService Adapt(ILLMService service)
+    {
+        if (service is ILLMService domain)
+        {
+            return domain;
+        }
+
+        return new LlmServiceAdapter(service);
+    }
+
+    private sealed class LlmServiceAdapter : ILLMService
+    {
+        private readonly ILLMService _inner;
+        public LlmServiceAdapter(ILLMService inner) => _inner = inner;
+        public string ProviderName => _inner.ProviderName;
+        public Task<ChatCompletionResponse> CompleteAsync(ChatCompletionRequest request, CancellationToken cancellationToken = default)
+            => _inner.CompleteAsync(request, cancellationToken);
+        public bool IsAvailable() => _inner.IsAvailable();
     }
 }

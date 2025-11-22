@@ -1,6 +1,15 @@
 using Mystira.StoryGenerator.Contracts.Chat;
 
-namespace Mystira.StoryGenerator.Api.Services.LLM;
+namespace Mystira.StoryGenerator.Domain.Services;
+
+/// <summary>
+/// Factory for LLM service instances
+/// </summary>
+public interface ILLMServiceFactory
+{
+    ILLMService? GetService(string providerName);
+    ILLMService? GetDefaultService();
+}
 
 /// <summary>
 /// Interface for Large Language Model providers

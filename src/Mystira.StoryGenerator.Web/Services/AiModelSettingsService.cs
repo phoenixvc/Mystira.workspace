@@ -1,14 +1,7 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http;
 using System.Net.Http.Json;
 using System.Text.Json;
-using System.Threading;
-using System.Threading.Tasks;
 using Blazored.LocalStorage;
 using Microsoft.AspNetCore.Components;
-using Microsoft.Extensions.Logging;
 using Mystira.StoryGenerator.Web.Models;
 
 namespace Mystira.StoryGenerator.Web.Services;

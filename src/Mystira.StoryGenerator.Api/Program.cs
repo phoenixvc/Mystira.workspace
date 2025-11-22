@@ -1,16 +1,21 @@
 using Microsoft.Extensions.Options;
 using Mystira.StoryGenerator.Api.Services;
-using Mystira.StoryGenerator.Api.Services.Instructions;
-using Mystira.StoryGenerator.Api.Services.Intent;
-using Mystira.StoryGenerator.Api.Services.LLM;
+using Mystira.StoryGenerator.Llm.Services.Intent;
 using Mystira.StoryGenerator.Contracts.Configuration;
 using Mystira.StoryGenerator.Contracts.Stories;
+using Mystira.StoryGenerator.Domain.Services;
+using Mystira.StoryGenerator.Llm.Services;
+using Mystira.StoryGenerator.Llm.Services.Instructions;
+using Mystira.StoryGenerator.Llm.Services.LLM;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddMediatR(cfg =>
+    cfg.RegisterServicesFromAssemblyContaining(typeof(Mystira.StoryGenerator.Application.Handlers.Stories.GenerateStoryCommandHandler)));
 
 builder.Services.AddOptions<AiSettings>()
     .Bind(builder.Configuration.GetSection(AiSettings.SectionName))
@@ -20,17 +25,17 @@ builder.Services.AddOptions<AiSettings>()
 builder.Services.AddOptions<InstructionSearchSettings>()
     .Bind(builder.Configuration.GetSection(InstructionSearchSettings.SectionName));
 
-// Register HttpClient for LLM services
+// Register HttpClient for LLM services (moved to Llm project)
 builder.Services.AddHttpClient<AzureOpenAIService>();
-builder.Services.AddHttpClient<GoogleGeminiService>();
 
-// Register LLM services
+// Register LLM services (in Llm project) and expose Domain interfaces
 builder.Services.AddScoped<ILLMService, AzureOpenAIService>();
-builder.Services.AddScoped<ILLMService, GoogleGeminiService>();
 builder.Services.AddScoped<ILLMServiceFactory, LLMServiceFactory>();
 
-// Story schema provider abstraction
+// Story schema provider abstraction (also implements Domain interface)
 builder.Services.AddScoped<IStorySchemaProvider, FileStorySchemaProvider>();
+// Story validation service (Domain interface) implemented in Application layer
+builder.Services.AddScoped<IStoryValidationService, StoryValidationService>();
 
 var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? Array.Empty<string>();
 
@@ -55,9 +60,9 @@ builder.Services.AddHealthChecks();
 
 // Register services
 builder.Services.AddScoped<IInstructionBlockService, InstructionBlockService>();
+// Register Intent router implementation from Llm project for Domain interface
 builder.Services.AddScoped<IIntentRouterService, IntentRouterService>();
-builder.Services.AddScoped<IStoryValidationService, StoryValidationService>();
-builder.Services.AddScoped<IStoryGenerationService, StoryGenerationService>();
+builder.Services.AddScoped<ICommandIntentRouter, CommandIntentRouter>();
 
 var app = builder.Build();
 

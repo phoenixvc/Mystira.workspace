@@ -1,11 +1,12 @@
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
-using Mystira.StoryGenerator.Api.Services;
-using Mystira.StoryGenerator.Api.Services.LLM;
 using Mystira.StoryGenerator.Contracts.Chat;
 using Mystira.StoryGenerator.Contracts.Configuration;
 using Mystira.StoryGenerator.Contracts.Stories;
+using Mystira.StoryGenerator.Domain.Commands.Stories;
 using System.Text.Json;
+using Mystira.StoryGenerator.Domain.Services;
 
 namespace Mystira.StoryGenerator.Api.Controllers;
 
@@ -13,23 +14,23 @@ namespace Mystira.StoryGenerator.Api.Controllers;
 [Route("api/[controller]")]
 public class StoriesController : ControllerBase
 {
+    private readonly IMediator _mediator;
     private readonly IStoryValidationService _validationService;
-    private readonly IStoryGenerationService _generationService;
     private readonly ILLMServiceFactory _llmFactory;
     private readonly AiSettings _aiSettings;
     private readonly IStorySchemaProvider _schemaProvider;
     private readonly ILogger<StoriesController> _logger;
 
     public StoriesController(
+        IMediator mediator,
         IStoryValidationService validationService,
-        IStoryGenerationService generationService,
         ILLMServiceFactory llmFactory,
         IStorySchemaProvider schemaProvider,
         IOptions<AiSettings> aiOptions,
         ILogger<StoriesController> logger)
     {
+        _mediator = mediator;
         _validationService = validationService;
-        _generationService = generationService;
         _llmFactory = llmFactory;
         _schemaProvider = schemaProvider;
         _aiSettings = aiOptions.Value;
@@ -37,7 +38,7 @@ public class StoriesController : ControllerBase
     }
 
     [HttpPost("validate")]
-    public async Task<ActionResult<ValidationResponse>> ValidateStory([FromBody] ValidateStoryRequest request)
+    public async Task<ActionResult<ValidationResponse>> ValidateStory([FromBody] ValidateStoryRequest request, CancellationToken cancellationToken)
     {
         try
         {
@@ -57,7 +58,8 @@ public class StoriesController : ControllerBase
                 });
             }
 
-            var result = await _validationService.ValidateStoryAsync(request);
+            var command = new ValidateStoryCommand(request);
+            var result = await _mediator.Send(command, cancellationToken);
             return Ok(result);
         }
         catch (Exception ex)
@@ -359,7 +361,8 @@ Ensure content is culturally sensitive and age-appropriate.";
                 });
             }
 
-            var result = await _generationService.GenerateJsonStoryAsync(request, cancellationToken);
+            var command = new GenerateStoryCommand(request);
+            var result = await _mediator.Send(command, cancellationToken);
             if (!result.Success)
             {
                 return StatusCode(502, result);

@@ -1,13 +1,9 @@
-﻿using Mystira.StoryGenerator.Contracts.Configuration;
+﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Mystira.StoryGenerator.Contracts.Configuration;
+using Mystira.StoryGenerator.Domain.Services;
 
 namespace Mystira.StoryGenerator.Api.Services;
-
-public interface IStorySchemaProvider
-{
-    Task<string?> GetSchemaJsonAsync(CancellationToken cancellationToken = default);
-    bool IsStrict { get; }
-}
 
 /// <summary>
 /// Default file-based implementation that reads the schema from the configured path.

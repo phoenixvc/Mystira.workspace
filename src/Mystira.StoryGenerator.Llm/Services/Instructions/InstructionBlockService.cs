@@ -1,15 +1,16 @@
 using System.ClientModel;
-using System.Linq;
 using System.Text;
 using Azure;
 using Azure.AI.OpenAI;
 using Azure.Search.Documents;
 using Azure.Search.Documents.Models;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Mystira.StoryGenerator.Contracts.Configuration;
+using Mystira.StoryGenerator.Domain.Services;
 using OpenAI.Embeddings;
 
-namespace Mystira.StoryGenerator.Api.Services.Instructions;
+namespace Mystira.StoryGenerator.Llm.Services.Instructions;
 
 public sealed class InstructionBlockService : IInstructionBlockService
 {
@@ -57,6 +58,8 @@ public sealed class InstructionBlockService : IInstructionBlockService
             }
         }
     }
+
+    // Domain adapter not implemented here; adapter class handles mapping between domain and API contexts.
 
     public async Task<string?> BuildInstructionBlockAsync(InstructionSearchContext context, CancellationToken cancellationToken = default)
     {
@@ -200,7 +203,7 @@ public sealed class InstructionBlockService : IInstructionBlockService
     {
         var filters = new List<string>();
 
-        if (context.Categories?.Count > 0)
+        if (context?.Categories is { Length: > 0 })
         {
             var clause = BuildFieldFilter(_searchSettings.CategoryFieldName, context.Categories, _searchSettings.IsCategoryFieldCollection);
             if (!string.IsNullOrWhiteSpace(clause))
@@ -209,7 +212,7 @@ public sealed class InstructionBlockService : IInstructionBlockService
             }
         }
 
-        if (context.InstructionTypes?.Count > 0)
+        if (context.InstructionTypes?.Length > 0)
         {
             var clause = BuildFieldFilter(_searchSettings.InstructionTypeFieldName, context.InstructionTypes, _searchSettings.IsInstructionTypeFieldCollection);
             if (!string.IsNullOrWhiteSpace(clause))

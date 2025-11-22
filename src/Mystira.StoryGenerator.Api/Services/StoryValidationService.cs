@@ -1,4 +1,4 @@
-using NJsonSchema;
+﻿using NJsonSchema;
 using Mystira.StoryGenerator.Contracts.Stories;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -6,8 +6,10 @@ using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 using Microsoft.Extensions.Options;
 using Mystira.StoryGenerator.Contracts.Configuration;
+using Mystira.StoryGenerator.Domain.Services;
+using Microsoft.Extensions.Logging;
 
-namespace Mystira.StoryGenerator.Api.Services;
+namespace Mystira.StoryGenerator.Llm.Services;
 
 public class StoryValidationService : IStoryValidationService
 {
@@ -22,15 +24,6 @@ public class StoryValidationService : IStoryValidationService
         _settings = aiOptions.Value;
         _schemaProvider = schemaProvider;
         _schema = LoadSchema();
-    }
-
-    public async Task<ValidationResponse> ValidateStoryAsync(string content, string format = "yaml")
-    {
-        return await ValidateStoryAsync(new ValidateStoryRequest
-        {
-            StoryContent = content,
-            Format = format
-        });
     }
 
     public async Task<ValidationResponse> ValidateStoryAsync(ValidateStoryRequest request)
@@ -118,22 +111,13 @@ public class StoryValidationService : IStoryValidationService
         return response;
     }
 
-    /// <summary>
-    /// Enforces JSON schema types on a Dictionary, converting values to match the expected schema types.
-    /// Particularly useful for ensuring numeric fields are properly typed.
-    /// </summary>
-    /// <param name="dictionary">The Dictionary to process</param>
-    /// <param name="schema">The schema to enforce</param>
-    /// <returns>The processed Dictionary with correct types</returns>
     private Dictionary<object, object> EnforceSchemaTypes(Dictionary<object, object> dictionary, JsonSchema schema)
     {
         if (schema == null || dictionary == null)
             return dictionary;
 
-        // Create a copy to work with
         var result = new Dictionary<object, object>(dictionary);
 
-        // Process properties based on schema
         if (schema.Properties != null)
         {
             foreach (var property in schema.Properties)
@@ -143,7 +127,6 @@ public class StoryValidationService : IStoryValidationService
 
                 if (result.TryGetValue(propertyName, out var value))
                 {
-                    // Handle integers - enforce numeric type for integer schema fields
                     if (propertySchema.Type.HasFlag(JsonObjectType.Integer))
                     {
                         if (value is string stringValue && int.TryParse(stringValue, out var intValue))
@@ -159,8 +142,6 @@ public class StoryValidationService : IStoryValidationService
                             result[propertyName] = (int)floatValue;
                         }
                     }
-
-                    // Handle numbers (float/double/decimal)
                     else if (propertySchema.Type.HasFlag(JsonObjectType.Number))
                     {
                         if (value is string stringValue &&
@@ -169,8 +150,6 @@ public class StoryValidationService : IStoryValidationService
                             result[propertyName] = numValue;
                         }
                     }
-
-                    // Handle boolean values
                     else if (propertySchema.Type.HasFlag(JsonObjectType.Boolean))
                     {
                         if (value is string stringValue)
@@ -183,18 +162,15 @@ public class StoryValidationService : IStoryValidationService
                         }
                     }
 
-                    // Recursively process nested dictionaries
                     if (value is Dictionary<object, object> nestedDict && propertySchema.Properties != null)
                     {
                         result[propertyName] = EnforceSchemaTypes(nestedDict, propertySchema);
                     }
 
-                    // Process array items
                     if (value is List<object> list)
                     {
                         var newList = new List<object>();
 
-                        // Check if we have item schema and it contains properties or has a defined type
                         var hasItemSchema = propertySchema.Item != null &&
                                            (propertySchema.Item.Properties?.Count > 0 ||
                                             propertySchema.Item.Type != JsonObjectType.None);
@@ -203,12 +179,10 @@ public class StoryValidationService : IStoryValidationService
                         {
                             if (item is Dictionary<object, object> dictItem && hasItemSchema)
                             {
-                                // Only try to process if we have a valid schema with properties
                                 newList.Add(EnforceSchemaTypes(dictItem, propertySchema.Item));
                             }
                             else if (propertySchema.Item != null && item is string strItem)
                             {
-                                // Handle simple typed array items (strings that should be numbers or booleans)
                                 if (propertySchema.Item.Type.HasFlag(JsonObjectType.Integer) &&
                                     int.TryParse(strItem, out var intValue))
                                 {
@@ -236,7 +210,6 @@ public class StoryValidationService : IStoryValidationService
                             }
                             else
                             {
-                                // Keep the original item if we can't/don't need to process it
                                 newList.Add(item);
                             }
                         }
@@ -248,7 +221,6 @@ public class StoryValidationService : IStoryValidationService
 
         return result;
     }
-
 
     private JsonSchema? LoadSchema()
     {
@@ -288,7 +260,7 @@ public class StoryValidationService : IStoryValidationService
                 return string.Empty;
             }
 
-            yamlObject = EnforceSchemaTypes(yamlObject, _schema);;
+            yamlObject = EnforceSchemaTypes(yamlObject, _schema);
 
             return JsonConvert.SerializeObject(yamlObject, Formatting.Indented);
         }
@@ -301,7 +273,6 @@ public class StoryValidationService : IStoryValidationService
 
     private async Task AddWarningsAndSuggestions(JObject storyObject, ValidationResponse response)
     {
-        // Check for missing optional but recommended fields
         if (storyObject["difficulty"] == null)
         {
             response.Suggestions.Add(new ValidationSuggestion
@@ -324,7 +295,6 @@ public class StoryValidationService : IStoryValidationService
             });
         }
 
-        // Check for scenes without descriptions
         var scenes = storyObject["scenes"] as JArray;
         if (scenes != null)
         {
@@ -333,7 +303,6 @@ public class StoryValidationService : IStoryValidationService
                 var scene = scenes[i] as JObject;
                 if (scene != null)
                 {
-                    // Check roll scenes have difficulty and branches
                     var sceneType = scene["type"]?.ToString();
                     if (sceneType == "roll")
                     {
@@ -355,7 +324,6 @@ public class StoryValidationService : IStoryValidationService
                         }
                     }
 
-                    // Check choice scenes have branches
                     if (sceneType == "choice" && scene["branches"] == null)
                     {
                         response.Warnings.Add(new ValidationIssue
@@ -365,7 +333,6 @@ public class StoryValidationService : IStoryValidationService
                         });
                     }
 
-                    // Check description length
                     var description = scene["description"]?.ToString();
                     if (!string.IsNullOrEmpty(description) && description.Length < 10)
                     {
@@ -379,7 +346,6 @@ public class StoryValidationService : IStoryValidationService
             }
         }
 
-        // Check character completeness
         var characters = storyObject["characters"] as JArray;
         if (characters != null)
         {
@@ -413,7 +379,6 @@ public class StoryValidationService : IStoryValidationService
             }
         }
 
-        // Check tag diversity
         var tags = storyObject["tags"] as JArray;
         if (tags != null && tags.Count < 2)
         {

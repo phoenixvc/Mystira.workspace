@@ -1,32 +1,32 @@
-
 using System.Text;
 using System.Text.Json;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Mystira.StoryGenerator.Api.Services.Instructions;
-using Mystira.StoryGenerator.Api.Services.Intent;
-using Mystira.StoryGenerator.Api.Services.LLM;
 using Mystira.StoryGenerator.Contracts.Chat;
 using Mystira.StoryGenerator.Contracts.Configuration;
 using Mystira.StoryGenerator.Contracts.Stories;
+using Mystira.StoryGenerator.Domain.Commands;
+using Mystira.StoryGenerator.Domain.Commands.Stories;
+using Mystira.StoryGenerator.Domain.Services;
 
-namespace Mystira.StoryGenerator.Api.Services;
+namespace Mystira.StoryGenerator.Application.Handlers.Stories;
 
-public class StoryGenerationService : IStoryGenerationService
+public class GenerateStoryCommandHandler : ICommandHandler<GenerateStoryCommand, GenerateJsonStoryResponse>
 {
     private readonly ILLMServiceFactory _llmFactory;
     private readonly AiSettings _settings;
     private readonly IStorySchemaProvider _schemaProvider;
     private readonly IInstructionBlockService _instructionBlockService;
     private readonly IIntentRouterService _intentRouterService;
-    private readonly ILogger<StoryGenerationService> _logger;
+    private readonly ILogger<GenerateStoryCommandHandler> _logger;
 
-    public StoryGenerationService(
+    public GenerateStoryCommandHandler(
         ILLMServiceFactory llmFactory,
         IOptions<AiSettings> aiOptions,
         IStorySchemaProvider schemaProvider,
         IInstructionBlockService instructionBlockService,
         IIntentRouterService intentRouterService,
-        ILogger<StoryGenerationService> logger)
+        ILogger<GenerateStoryCommandHandler> logger)
     {
         _llmFactory = llmFactory;
         _settings = aiOptions.Value;
@@ -36,10 +36,11 @@ public class StoryGenerationService : IStoryGenerationService
         _logger = logger;
     }
 
-    public async Task<GenerateJsonStoryResponse> GenerateJsonStoryAsync(GenerateJsonStoryRequest request, CancellationToken cancellationToken = default)
+    public async Task<GenerateJsonStoryResponse> Handle(GenerateStoryCommand command, CancellationToken cancellationToken)
     {
         try
         {
+            var request = command.Request;
             var service = !string.IsNullOrWhiteSpace(request.Provider)
                 ? _llmFactory.GetService(request.Provider!)
                 : _llmFactory.GetDefaultService();
@@ -138,7 +139,6 @@ CRITICAL VALIDATION RULES:
     {
         var messages = new List<MystiraChatMessage>();
 
-        // Few-shot example in JSON (structure only)
         var exampleJson = GetShortExampleJson();
         messages.Add(new MystiraChatMessage
         {
@@ -162,7 +162,6 @@ CRITICAL VALIDATION RULES:
             Content = instruction
         });
 
-        // Context JSON payload with selected parameters
         var payload = new
         {
             title = request.Title,

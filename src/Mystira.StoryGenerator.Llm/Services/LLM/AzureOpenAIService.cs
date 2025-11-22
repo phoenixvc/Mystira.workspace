@@ -1,12 +1,14 @@
-using System.ClientModel;
+﻿using System.ClientModel;
 using Azure.AI.OpenAI;
 using Microsoft.Extensions.Options;
-using Mystira.StoryGenerator.Api.Extensions;
+using Microsoft.Extensions.Logging;
 using Mystira.StoryGenerator.Contracts.Chat;
 using Mystira.StoryGenerator.Contracts.Configuration;
+using Mystira.StoryGenerator.Domain.Services;
+using Mystira.StoryGenerator.Llm.Extensions;
 using OpenAI.Chat;
 
-namespace Mystira.StoryGenerator.Api.Services.LLM;
+namespace Mystira.StoryGenerator.Llm.Services.LLM;
 
 /// <summary>
 /// Azure OpenAI implementation of ILLMService

@@ -1,16 +1,16 @@
-using System.Text.Json;
+﻿using System.Text.Json;
 using Microsoft.Extensions.Options;
-using Mystira.StoryGenerator.Api.Services.LLM;
+using Microsoft.Extensions.Logging;
 using Mystira.StoryGenerator.Contracts.Chat;
 using Mystira.StoryGenerator.Contracts.Configuration;
 using Mystira.StoryGenerator.Contracts.Intent;
 
-namespace Mystira.StoryGenerator.Api.Services.Intent;
+namespace Mystira.StoryGenerator.Llm.Services.Intent;
 
-public class IntentRouterService : IIntentRouterService
+public class IntentRouterService : Mystira.StoryGenerator.Domain.Services.IIntentRouterService
 {
     private readonly IntentRouterSettings _settings;
-    private readonly ILLMServiceFactory _llmServiceFactory;
+    private readonly Mystira.StoryGenerator.Domain.Services.ILLMServiceFactory _llmServiceFactory;
     private readonly ILogger<IntentRouterService> _logger;
 
     private const string ClassificationPrompt = @"
@@ -27,7 +27,7 @@ Only return multiple values if the instruction clearly spans multiple operations
 
 Return ONLY a JSON object with the following format, no additional text:
 {
-  ""categories"": [""<category1>"", ""<category2>""],
+  ""categories"": [""<category1>"", ""<category2>""] ,
   ""instructionTypes"": [""<instructionType1>"", ""<instructionType2>""]
 }
 
@@ -58,7 +58,7 @@ Now classify this user instruction:
 
     public IntentRouterService(
         IOptions<AiSettings> aiOptions,
-        ILLMServiceFactory llmServiceFactory,
+        Mystira.StoryGenerator.Domain.Services.ILLMServiceFactory llmServiceFactory,
         ILogger<IntentRouterService> logger)
     {
         _settings = aiOptions.Value.IntentRouter;

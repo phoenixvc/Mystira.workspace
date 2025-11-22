@@ -1,6 +1,6 @@
 using Mystira.StoryGenerator.Contracts.Intent;
 
-namespace Mystira.StoryGenerator.Api.Services.Intent;
+namespace Mystira.StoryGenerator.Domain.Services;
 
 public interface IIntentRouterService
 {

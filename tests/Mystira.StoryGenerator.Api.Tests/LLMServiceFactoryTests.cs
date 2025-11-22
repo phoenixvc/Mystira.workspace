@@ -1,9 +1,9 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Moq;
-using Mystira.StoryGenerator.Api.Services.LLM;
 using Mystira.StoryGenerator.Contracts.Configuration;
-using Xunit;
+using Mystira.StoryGenerator.Domain.Services;
+using Mystira.StoryGenerator.Llm.Services.LLM;
 
 namespace Mystira.StoryGenerator.Api.Tests;
 

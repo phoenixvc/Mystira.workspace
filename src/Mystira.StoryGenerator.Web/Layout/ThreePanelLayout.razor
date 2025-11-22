@@ -1,11 +1,5 @@
-@using Microsoft.AspNetCore.Components
-@using Mystira.StoryGenerator.Web.Components.Panels
 @using System.Linq
-@using Mystira.StoryGenerator.Web.Models
-@using Mystira.StoryGenerator.Web.Services
-@using Mystira.StoryGenerator.Contracts.Chat
 @using Mystira.StoryGenerator.Contracts.Stories
-@using Microsoft.AspNetCore.Components.Forms
 @inherits LayoutComponentBase
 @implements IDisposable
 @inject IStoryApiService ApiService
@@ -125,7 +119,7 @@
                          </div>
                      </div>
 
-                    <InputFile OnChange="HandleFileSelect" hidden @ref="fileInput" accept=".yaml,.yml" />
+                    <InputFile OnChange="HandleFileSelect" hidden accept=".yaml,.yml" />
                     <div class="flex-1 overflow-hidden">
                         <ChatHistoryPanel ChatHistories="@GetFilteredChatHistories()"
                                         OnChatSelected="@HandleChatSelected"
@@ -505,14 +499,13 @@
     private string searchQuery = string.Empty;
     private string? copyFeedbackMessage;
     private bool copyFeedbackSuccess;
-    private System.Threading.CancellationTokenSource? copyFeedbackCts;
+    private CancellationTokenSource? copyFeedbackCts;
     private readonly TimeSpan copyFeedbackDuration = TimeSpan.FromSeconds(4);
 
     // Import state
     private bool showImportMenu = false;
     private bool showImportResult = false;
     private YamlImportResult? importResult;
-    private InputFile fileInput;
 
     private const string ChatsStorageKey = "mystira_story_generator_chats";
 
@@ -1374,7 +1367,7 @@
     {
         copyFeedbackCts?.Cancel();
         copyFeedbackCts?.Dispose();
-        var currentCts = new System.Threading.CancellationTokenSource();
+        var currentCts = new CancellationTokenSource();
         copyFeedbackCts = currentCts;
 
         copyFeedbackMessage = result.Message;
@@ -2070,7 +2063,6 @@
     private async Task TriggerFileInput()
     {
         showImportMenu = false;
-        //await fileInput.FocusAsync();
         await JSRuntime.InvokeVoidAsync("eval", $"document.querySelector('input[type=\"file\"]').click()");
     }
 

@@ -1,11 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using NJsonSchema;
-using NJsonSchema.Generation;
 using Newtonsoft.Json.Linq;
 using Mystira.StoryGenerator.Domain.Stories;
 using Microsoft.Extensions.Options;
 using Mystira.StoryGenerator.Contracts.Configuration;
 using Mystira.StoryGenerator.Api.Services;
+using Mystira.StoryGenerator.Domain.Services;
 
 namespace Mystira.StoryGenerator.Api.Controllers;
 
