@@ -3,6 +3,10 @@ using Mystira.StoryGenerator.Contracts.Stories;
 
 namespace Mystira.StoryGenerator.Contracts.Chat;
 
+/// <summary>
+/// Structured response for chat orchestration. Either contains a handler result
+/// or a clarification prompt asking the user for more context/parameters.
+/// </summary>
 public class ChatOrchestrationResponse
 {
     [JsonPropertyName("success")]
@@ -11,7 +15,7 @@ public class ChatOrchestrationResponse
     [JsonPropertyName("error")]
     public string? Error { get; set; }
 
-    [JsonPropertyName("requiresClarification")]
+    [JsonPropertyName("requires_clarification")]
     public bool RequiresClarification { get; set; }
 
     [JsonPropertyName("prompt")]
@@ -25,4 +29,3 @@ public class ChatOrchestrationResponse
 
     [JsonPropertyName("result")]
     public object? Result { get; set; }
-}
