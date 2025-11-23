@@ -17,7 +17,7 @@ public class GenerateStoryCommandHandler : ICommandHandler<GenerateStoryCommand,
     private readonly AiSettings _settings;
     private readonly IStorySchemaProvider _schemaProvider;
     private readonly IInstructionBlockService _instructionBlockService;
-    private readonly IIntentRouterService _intentRouterService;
+    private readonly IIntentClassificationService _intentClassificationService;
     private readonly ILogger<GenerateStoryCommandHandler> _logger;
 
     public GenerateStoryCommandHandler(
@@ -25,14 +25,14 @@ public class GenerateStoryCommandHandler : ICommandHandler<GenerateStoryCommand,
         IOptions<AiSettings> aiOptions,
         IStorySchemaProvider schemaProvider,
         IInstructionBlockService instructionBlockService,
-        IIntentRouterService intentRouterService,
+        IIntentClassificationService intentClassificationService,
         ILogger<GenerateStoryCommandHandler> logger)
     {
         _llmFactory = llmFactory;
         _settings = aiOptions.Value;
         _schemaProvider = schemaProvider;
         _instructionBlockService = instructionBlockService;
-        _intentRouterService = intentRouterService;
+        _intentClassificationService = intentClassificationService;
         _logger = logger;
     }
 
@@ -41,6 +41,7 @@ public class GenerateStoryCommandHandler : ICommandHandler<GenerateStoryCommand,
         try
         {
             var request = command.Request;
+            var userQuery = command.UserQuery;
             var service = !string.IsNullOrWhiteSpace(request.Provider)
                 ? _llmFactory.GetService(request.Provider!)
                 : _llmFactory.GetDefaultService();
@@ -61,7 +62,7 @@ public class GenerateStoryCommandHandler : ICommandHandler<GenerateStoryCommand,
 
             var systemPrompt = BuildSystemPrompt();
             var instructionBlock = await ResolveInstructionBlockAsync(request, cancellationToken);
-            var messages = BuildMessages(request, instructionBlock);
+            var messages = BuildMessages(request, userQuery, instructionBlock);
 
             var chatRequest = new ChatCompletionRequest
             {
@@ -135,7 +136,8 @@ CRITICAL VALIDATION RULES:
 ";
     }
 
-    private static List<MystiraChatMessage> BuildMessages(GenerateJsonStoryRequest request, string? instructionBlock)
+    private static List<MystiraChatMessage> BuildMessages(GenerateJsonStoryRequest request, string? userQuery,
+        string? instructionBlock)
     {
         var messages = new List<MystiraChatMessage>();
 
@@ -182,7 +184,13 @@ CRITICAL VALIDATION RULES:
         messages.Add(new MystiraChatMessage
         {
             MessageType = ChatMessageType.User,
-            Content = "Context parameters (use these exactly):\n" + jsonPayload
+            Content = "Context parameters:\n" + jsonPayload
+        });
+
+        messages.Add(new MystiraChatMessage
+        {
+            MessageType = ChatMessageType.User,
+            Content = userQuery ?? string.Empty
         });
 
         return messages;
@@ -199,7 +207,7 @@ CRITICAL VALIDATION RULES:
         var categories = new[] { "story_generation" };
         var instructionTypes = new[] { "requirements" };
 
-        var intentClassification = await _intentRouterService.ClassifyIntentAsync(queryText, cancellationToken);
+        var intentClassification = await _intentClassificationService.ClassifyIntentAsync(queryText, cancellationToken);
         if (intentClassification != null)
         {
             _logger.LogInformation(

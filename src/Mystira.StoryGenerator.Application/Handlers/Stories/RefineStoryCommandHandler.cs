@@ -52,7 +52,7 @@ public class RefineStoryCommandHandler : ICommandHandler<RefineStoryCommand, Gen
             var maxTokens = Math.Max(1200, _settings.DefaultMaxTokens);
 
             var systemPrompt = BuildRefinementSystemPrompt();
-            var messages = BuildRefinementMessages(command.RefinementPrompt);
+            var messages = BuildRefinementMessages(command.RefinementPrompt, command.CurrentStory);
 
             var chatRequest = new ChatCompletionRequest
             {
@@ -124,10 +124,17 @@ Output must be a single valid JSON object.
 ";
     }
 
-    private static List<MystiraChatMessage> BuildRefinementMessages(string refinementPrompt)
+    private static List<MystiraChatMessage> BuildRefinementMessages(string refinementPrompt,
+        StorySnapshot? commandCurrentStory)
     {
         var messages = new List<MystiraChatMessage>
         {
+            new MystiraChatMessage
+            {
+                MessageType = ChatMessageType.User,
+                Content = "Current JSON story:\n" + commandCurrentStory?.Content,
+                Timestamp = DateTime.UtcNow
+            },
             new MystiraChatMessage
             {
                 MessageType = ChatMessageType.User,

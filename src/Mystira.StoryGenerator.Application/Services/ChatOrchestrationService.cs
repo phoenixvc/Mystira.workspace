@@ -1,13 +1,12 @@
 using System.Text;
-using Microsoft.Extensions.Logging;
 using MediatR;
+using Microsoft.Extensions.Logging;
 using Mystira.StoryGenerator.Contracts.Chat;
-using Mystira.StoryGenerator.Contracts.Intent;
 using Mystira.StoryGenerator.Contracts.Stories;
 using Mystira.StoryGenerator.Domain.Commands.Stories;
-using Mystira.StoryGenerator.Llm.Services.Intent;
+using Mystira.StoryGenerator.Domain.Services;
 
-namespace Mystira.StoryGenerator.Domain.Services;
+namespace Mystira.StoryGenerator.Application.Services;
 
 /// <summary>
 /// Implementation of chat orchestration service that coordinates intent classification,
@@ -19,7 +18,7 @@ public class ChatOrchestrationService : IChatOrchestrationService
     private readonly IMediator _mediator;
     private readonly ILLMServiceFactory _llmServiceFactory;
     private readonly IInstructionBlockService _instructionBlockService;
-    private readonly IIntentRouterService _intentRouterService;
+    private readonly IIntentClassificationService _intentClassificationService;
     private readonly ILogger<ChatOrchestrationService> _logger;
 
     public ChatOrchestrationService(
@@ -27,14 +26,14 @@ public class ChatOrchestrationService : IChatOrchestrationService
         IMediator mediator,
         ILLMServiceFactory llmServiceFactory,
         IInstructionBlockService instructionBlockService,
-        IIntentRouterService intentRouterService,
+        IIntentClassificationService intentClassificationService,
         ILogger<ChatOrchestrationService> logger)
     {
         _commandIntentRouter = commandIntentRouter;
         _mediator = mediator;
         _llmServiceFactory = llmServiceFactory;
         _instructionBlockService = instructionBlockService;
-        _intentRouterService = intentRouterService;
+        _intentClassificationService = intentClassificationService;
         _logger = logger;
     }
 
@@ -44,10 +43,10 @@ public class ChatOrchestrationService : IChatOrchestrationService
         {
             // Extract the latest user message for intent classification
             var latestUserMessage = context.LatestUserMessage;
-            
+
             // Detect intent using existing classifier
             var instructionType = await _commandIntentRouter.DetectPrimaryInstructionTypeAsync(latestUserMessage, cancellationToken);
-            
+
             if (string.IsNullOrWhiteSpace(instructionType))
             {
                 return new ChatOrchestrationResponse
@@ -60,7 +59,7 @@ public class ChatOrchestrationService : IChatOrchestrationService
 
             // Route to appropriate command based on instruction type
             var commandResult = await RouteToCommandAsync(instructionType, context, cancellationToken);
-            
+
             if (commandResult.RequiresClarification)
             {
                 return commandResult;
@@ -133,7 +132,7 @@ public class ChatOrchestrationService : IChatOrchestrationService
     {
         // Use lightweight LLM call to check for missing parameters
         var missingParameters = await CheckForMissingStoryParametersAsync(userMessage, context, cancellationToken);
-        
+
         if (missingParameters.Count > 0)
         {
             var sb = new StringBuilder();
@@ -164,7 +163,7 @@ public class ChatOrchestrationService : IChatOrchestrationService
 
         var command = new GenerateStoryCommand(request, userMessage);
         var result = await _mediator.Send(command, cancellationToken);
-        
+
         return new ChatOrchestrationResponse
         {
             Success = result.Success,
@@ -200,9 +199,9 @@ public class ChatOrchestrationService : IChatOrchestrationService
             Model = context.Model
         };
 
-        var command = new RefineStoryCommand(request, userMessage, userMessage);
+        var command = new RefineStoryCommand(request, userMessage, userMessage, context.CurrentStory);
         var result = await _mediator.Send(command, cancellationToken);
-        
+
         return new ChatOrchestrationResponse
         {
             Success = result.Success,
@@ -236,7 +235,7 @@ public class ChatOrchestrationService : IChatOrchestrationService
 
         var command = new ValidateStoryCommand(request, userMessage);
         var result = await _mediator.Send(command, cancellationToken);
-        
+
         return new ChatOrchestrationResponse
         {
             Success = true,
@@ -263,7 +262,7 @@ public class ChatOrchestrationService : IChatOrchestrationService
 
         var command = new AutoFixStoryJsonCommand(storyContent, context.Provider, context.Model, userMessage);
         var result = await _mediator.Send(command, cancellationToken);
-        
+
         return new ChatOrchestrationResponse
         {
             Success = result.Success,
@@ -291,7 +290,7 @@ public class ChatOrchestrationService : IChatOrchestrationService
 
         var command = new SummarizeStoryCommand(storyContent, context.Provider, context.Model, userMessage);
         var result = await _mediator.Send(command, cancellationToken);
-        
+
         return new ChatOrchestrationResponse
         {
             Success = result.Success,
@@ -308,13 +307,13 @@ public class ChatOrchestrationService : IChatOrchestrationService
         var service = !string.IsNullOrWhiteSpace(context.Provider)
             ? _llmServiceFactory.GetService(context.Provider!)
             : _llmServiceFactory.GetDefaultService();
-            
+
         if (service is null)
         {
-            return new ChatOrchestrationResponse 
-            { 
-                Success = false, 
-                Error = "No LLM services are currently available" 
+            return new ChatOrchestrationResponse
+            {
+                Success = false,
+                Error = "No LLM services are currently available"
             };
         }
 
@@ -347,10 +346,10 @@ public class ChatOrchestrationService : IChatOrchestrationService
         var response = await service.CompleteAsync(request, cancellationToken);
         if (!response.Success)
         {
-            return new ChatOrchestrationResponse 
-            { 
-                Success = false, 
-                Error = response.Error 
+            return new ChatOrchestrationResponse
+            {
+                Success = false,
+                Error = response.Error
             };
         }
 
@@ -396,7 +395,7 @@ public class ChatOrchestrationService : IChatOrchestrationService
         var categories = new[] { "story_generation", "validation" };
         var instructionTypes = new[] { "requirements", "guidelines" };
 
-        var intentClassification = await _intentRouterService.ClassifyIntentAsync(queryText, cancellationToken);
+        var intentClassification = await _intentClassificationService.ClassifyIntentAsync(queryText, cancellationToken);
         if (intentClassification != null)
         {
             _logger.LogInformation(
@@ -429,46 +428,45 @@ public class ChatOrchestrationService : IChatOrchestrationService
         var service = !string.IsNullOrWhiteSpace(context.Provider)
             ? _llmServiceFactory.GetService(context.Provider!)
             : _llmServiceFactory.GetDefaultService();
-            
+
         if (service is null)
         {
             return new List<string> { "title", "agegroup", "minScenes", "maxScenes" };
         }
 
         // Build a lightweight request to check for missing parameters
+        var messages = new List<MystiraChatMessage>
+        {
+            new()
+            {
+                MessageType = ChatMessageType.System,
+                Content =
+                    @"You are a parameter extraction assistant. Analyze the user's request for story generation and identify which required parameters are missing.
+
+Required parameters for story generation:
+- title: The story title
+- ageGroup: Age group (must be one of: 1-2, 3-5, 6-9, 10-12, 13-18)
+- minScenes: Minimum number of scenes (must be > 0)
+- maxScenes: Maximum number of scenes (must be >= minScenes)
+
+Respond with ONLY a JSON array of missing required parameter names (using exactly these names).
+If no required parameters are missing, respond with an empty array: [].
+Do not include optional parameters like difficulty, sessionLength, etc.
+Example responses:
+[""title"", ""ageGroup""]
+[]
+[""minScenes"", ""maxScenes""]",
+                Timestamp = DateTime.UtcNow
+            }
+        };
+        messages.AddRange(context.Messages);
+
         var parameterCheckRequest = new ChatCompletionRequest
         {
             Provider = context.Provider,
             ModelId = context.ModelId,
             Model = context.Model,
-            Messages = new List<MystiraChatMessage>
-            {
-                new()
-                {
-                    MessageType = ChatMessageType.System,
-                    Content = @"You are a parameter extraction assistant. Analyze the user's request for story generation and identify which required parameters are missing.
-
-Required parameters for story generation:
-- title: The story title
-- agegroup: Age group (must be one of: 1-2, 3-5, 6-9, 10-12, 13-18)
-- minScenes: Minimum number of scenes (must be > 0)
-- maxScenes: Maximum number of scenes (must be >= minScenes)
-
-Respond with ONLY a JSON array of missing required parameter names. If no required parameters are missing, respond with an empty array: [].
-Do not include optional parameters like difficulty, session_length, etc.
-Example responses:
-[""title"", ""agegroup""]
-[]
-[""minScenes"", ""maxScenes""]",
-                    Timestamp = DateTime.UtcNow
-                },
-                new()
-                {
-                    MessageType = ChatMessageType.User,
-                    Content = userMessage,
-                    Timestamp = DateTime.UtcNow
-                }
-            },
+            Messages = messages,
             Temperature = 0.1, // Low temperature for consistent extraction
             MaxTokens = 100 // Short response for parameter checking
         };
@@ -476,17 +474,17 @@ Example responses:
         var response = await service.CompleteAsync(parameterCheckRequest, cancellationToken);
         if (!response.Success || string.IsNullOrWhiteSpace(response.Content))
         {
-            return new List<string> { "title", "agegroup", "minScenes", "maxScenes" };
+            return new List<string> { "title", "ageGroup", "minScenes", "maxScenes" };
         }
 
         try
         {
             // Parse the JSON response
-            var missingParams = System.Text.Json.JsonSerializer.Deserialize<List<string>>(response.Content!, new System.Text.Json.JsonSerializerOptions 
-            { 
-                PropertyNameCaseInsensitive = true 
+            var missingParams = System.Text.Json.JsonSerializer.Deserialize<List<string>>(response.Content!, new System.Text.Json.JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
             });
-            
+
             return missingParams ?? new List<string> { "title", "agegroup", "minScenes", "maxScenes" };
         }
         catch
@@ -498,12 +496,15 @@ Example responses:
 
     private static string? ExtractStoryFromContext(ChatContext context)
     {
-        // Look for story content in the conversation
-        // This is a simplified implementation - you might need more sophisticated extraction
-        var messageWithStory = context.Messages.LastOrDefault(m => 
-            m.MessageType == ChatMessageType.User && 
+        // If there is a current story, use that
+        if (context.CurrentStory != null)
+            return context.CurrentStory.Content;
+
+        // Else, look for story content in the conversation
+        var messageWithStory = context.Messages.LastOrDefault(m =>
+            m.MessageType == ChatMessageType.User &&
             (m.Content?.Contains('{') == true || m.Content?.Length > 500));
-        
+
         return messageWithStory?.Content;
     }
 }

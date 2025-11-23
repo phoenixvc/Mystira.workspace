@@ -1,15 +1,14 @@
-﻿using NJsonSchema;
+﻿using Microsoft.Extensions.Options;
+using Mystira.StoryGenerator.Contracts.Configuration;
 using Mystira.StoryGenerator.Contracts.Stories;
+using Mystira.StoryGenerator.Domain.Services;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using NJsonSchema;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
-using Microsoft.Extensions.Options;
-using Mystira.StoryGenerator.Contracts.Configuration;
-using Mystira.StoryGenerator.Domain.Services;
-using Microsoft.Extensions.Logging;
 
-namespace Mystira.StoryGenerator.Llm.Services;
+namespace Mystira.StoryGenerator.Api.Services;
 
 public class StoryValidationService : IStoryValidationService
 {
