@@ -66,10 +66,10 @@ public class ChatOrchestrationService : IChatOrchestrationService
                 return commandResult;
             }
 
-            // If no specific command was handled, fallback to LLM completion
+            // If no specific command was handled, use free-form text handler
             if (commandResult.Result == null)
             {
-                return await HandleFallbackCompletionAsync(instructionType, context, cancellationToken);
+                return await HandleFreeFormTextAsync(instructionType, context, cancellationToken);
             }
 
             return commandResult;
@@ -131,15 +131,17 @@ public class ChatOrchestrationService : IChatOrchestrationService
 
     private async Task<ChatOrchestrationResponse> HandleGenerateStoryAsync(string userMessage, ChatContext context, CancellationToken cancellationToken)
     {
-        var (maybeReq, missing) = TryParseGenerateRequest(userMessage);
-        if (maybeReq is null || missing.Count > 0)
+        // Use lightweight LLM call to check for missing parameters
+        var missingParameters = await CheckForMissingStoryParametersAsync(userMessage, context, cancellationToken);
+        
+        if (missingParameters.Count > 0)
         {
             var sb = new StringBuilder();
             sb.AppendLine("To generate a story, please provide:");
-            if (missing.Contains("title")) sb.AppendLine("- title (e.g., 'The Brave Explorer')");
-            if (missing.Contains("age_group")) sb.AppendLine("- agegroup (i.e., 1-2, 3-5, 6-9, 10-12, 13-18)");
-            if (missing.Contains("minScenes")) sb.AppendLine("- minScenes (e.g., 6)");
-            if (missing.Contains("maxScenes")) sb.AppendLine("- maxScenes (e.g., 12)");
+            foreach (var param in missingParameters)
+            {
+                sb.AppendLine($"- {param}");
+            }
             sb.AppendLine("Optional: difficulty, session_length, minimum_age, core_axes, archetypes, character_count, tags, tone, description");
 
             return new ChatOrchestrationResponse
@@ -152,7 +154,15 @@ public class ChatOrchestrationService : IChatOrchestrationService
             };
         }
 
-        var command = new GenerateStoryCommand(maybeReq, userMessage);
+        // Create a basic request with the user message - the handler will extract and validate parameters
+        var request = new GenerateJsonStoryRequest
+        {
+            Provider = context.Provider,
+            ModelId = context.ModelId,
+            Model = context.Model
+        };
+
+        var command = new GenerateStoryCommand(request, userMessage);
         var result = await _mediator.Send(command, cancellationToken);
         
         return new ChatOrchestrationResponse
@@ -292,7 +302,7 @@ public class ChatOrchestrationService : IChatOrchestrationService
         };
     }
 
-    private async Task<ChatOrchestrationResponse> HandleFallbackCompletionAsync(string instructionType, ChatContext context, CancellationToken cancellationToken)
+    private async Task<ChatOrchestrationResponse> HandleFreeFormTextAsync(string instructionType, ChatContext context, CancellationToken cancellationToken)
     {
         // Get appropriate LLM service
         var service = !string.IsNullOrWhiteSpace(context.Provider)
@@ -413,32 +423,77 @@ public class ChatOrchestrationService : IChatOrchestrationService
         return await _instructionBlockService.BuildInstructionBlockAsync(searchContext, cancellationToken);
     }
 
-    private static (GenerateJsonStoryRequest? req, HashSet<string> missing) TryParseGenerateRequest(string text)
+    private async Task<List<string>> CheckForMissingStoryParametersAsync(string userMessage, ChatContext context, CancellationToken cancellationToken)
     {
-        var missing = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "title", "minScenes", "maxScenes", "agegroup" };
-        if (string.IsNullOrWhiteSpace(text)) return (null, missing);
-
-        var start = text.IndexOf('{');
-        var end = text.LastIndexOf('}');
-        if (start >= 0 && end > start)
+        // Get appropriate LLM service for parameter checking
+        var service = !string.IsNullOrWhiteSpace(context.Provider)
+            ? _llmServiceFactory.GetService(context.Provider!)
+            : _llmServiceFactory.GetDefaultService();
+            
+        if (service is null)
         {
-            var json = text.Substring(start, end - start + 1);
-            try
-            {
-                var opts = new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-                var req = System.Text.Json.JsonSerializer.Deserialize<GenerateJsonStoryRequest>(json, opts);
-                if (req != null)
-                {
-                    if (!string.IsNullOrWhiteSpace(req.Title)) missing.Remove("title");
-                    if (!string.IsNullOrWhiteSpace(req.AgeGroup)) missing.Remove("AgeGroup");
-                    if (req.MinScenes > 0) missing.Remove("minScenes");
-                    if (req.MaxScenes >= req.MinScenes && req.MaxScenes > 0) missing.Remove("maxScenes");
-                    return (req, missing);
-                }
-            }
-            catch { }
+            return new List<string> { "title", "agegroup", "minScenes", "maxScenes" };
         }
-        return (null, missing);
+
+        // Build a lightweight request to check for missing parameters
+        var parameterCheckRequest = new ChatCompletionRequest
+        {
+            Provider = context.Provider,
+            ModelId = context.ModelId,
+            Model = context.Model,
+            Messages = new List<MystiraChatMessage>
+            {
+                new()
+                {
+                    MessageType = ChatMessageType.System,
+                    Content = @"You are a parameter extraction assistant. Analyze the user's request for story generation and identify which required parameters are missing.
+
+Required parameters for story generation:
+- title: The story title
+- agegroup: Age group (must be one of: 1-2, 3-5, 6-9, 10-12, 13-18)
+- minScenes: Minimum number of scenes (must be > 0)
+- maxScenes: Maximum number of scenes (must be >= minScenes)
+
+Respond with ONLY a JSON array of missing required parameter names. If no required parameters are missing, respond with an empty array: [].
+Do not include optional parameters like difficulty, session_length, etc.
+Example responses:
+[""title"", ""agegroup""]
+[]
+[""minScenes"", ""maxScenes""]",
+                    Timestamp = DateTime.UtcNow
+                },
+                new()
+                {
+                    MessageType = ChatMessageType.User,
+                    Content = userMessage,
+                    Timestamp = DateTime.UtcNow
+                }
+            },
+            Temperature = 0.1, // Low temperature for consistent extraction
+            MaxTokens = 100 // Short response for parameter checking
+        };
+
+        var response = await service.CompleteAsync(parameterCheckRequest, cancellationToken);
+        if (!response.Success || string.IsNullOrWhiteSpace(response.Content))
+        {
+            return new List<string> { "title", "agegroup", "minScenes", "maxScenes" };
+        }
+
+        try
+        {
+            // Parse the JSON response
+            var missingParams = System.Text.Json.JsonSerializer.Deserialize<List<string>>(response.Content!, new System.Text.Json.JsonSerializerOptions 
+            { 
+                PropertyNameCaseInsensitive = true 
+            });
+            
+            return missingParams ?? new List<string> { "title", "agegroup", "minScenes", "maxScenes" };
+        }
+        catch
+        {
+            // If parsing fails, assume all parameters are missing
+            return new List<string> { "title", "agegroup", "minScenes", "maxScenes" };
+        }
     }
 
     private static string? ExtractStoryFromContext(ChatContext context)

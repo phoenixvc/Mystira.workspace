@@ -82,15 +82,61 @@ public class ChatOrchestrationServiceTests
     }
 
     [Fact]
+    public async Task CompleteAsync_WithMissingParameters_ReturnsClarificationResponse()
+    {
+        // Arrange
+        var incompleteRequest = "Generate a story for me";
+
+        var context = new ChatContext
+        {
+            Messages = new List<MystiraChatMessage>
+            {
+                new() { MessageType = ChatMessageType.User, Content = incompleteRequest }
+            }
+        };
+
+        _mockCommandIntentRouter
+            .Setup(x => x.DetectPrimaryInstructionTypeAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync("story_generate_initial");
+
+        // Mock the LLM service for parameter checking
+        var mockLlmService = new Mock<ILLMService>();
+        mockLlmService.Setup(x => x.ProviderName).Returns("test-llm");
+        mockLlmService.Setup(x => x.IsAvailable()).Returns(true);
+        
+        var parameterCheckResponse = new ChatCompletionResponse
+        {
+            Success = true,
+            Content = @"[""title"", ""agegroup""]", // Missing title and agegroup
+            Provider = "test-llm"
+        };
+        
+        mockLlmService
+            .Setup(x => x.CompleteAsync(It.Is<ChatCompletionRequest>(r => 
+                r.MaxTokens == 100 && r.Temperature == 0.1), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(parameterCheckResponse);
+
+        _mockLlmServiceFactory
+            .Setup(x => x.GetDefaultService())
+            .Returns(mockLlmService.Object);
+
+        // Act
+        var result = await _service.CompleteAsync(context, CancellationToken.None);
+
+        // Assert
+        Assert.True(result.Success);
+        Assert.True(result.RequiresClarification);
+        Assert.Equal("story_generate_initial", result.Intent);
+        Assert.Equal("GenerateStoryCommand", result.Handler);
+        Assert.Contains("title", result.Prompt);
+        Assert.Contains("agegroup", result.Prompt);
+    }
+
+    [Fact]
     public async Task CompleteAsync_WithValidGenerateStoryIntent_ReturnsSuccessResponse()
     {
         // Arrange
-        var storyRequest = @"{
-            ""title"": ""Test Story"",
-            ""agegroup"": ""6-9"",
-            ""minScenes"": 6,
-            ""maxScenes"": 12
-        }";
+        var storyRequest = "Generate a story called 'Test Story' for kids aged 6-9 with 6 to 12 scenes";
 
         var context = new ChatContext
         {
@@ -104,14 +150,35 @@ public class ChatOrchestrationServiceTests
             .Setup(x => x.DetectPrimaryInstructionTypeAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync("story_generate_initial");
 
-        var mockResponse = new GenerateJsonStoryResponse
+        // Mock the LLM service for parameter checking
+        var mockLlmService = new Mock<ILLMService>();
+        mockLlmService.Setup(x => x.ProviderName).Returns("test-llm");
+        mockLlmService.Setup(x => x.IsAvailable()).Returns(true);
+        
+        var parameterCheckResponse = new ChatCompletionResponse
+        {
+            Success = true,
+            Content = "[]", // No missing parameters
+            Provider = "test-llm"
+        };
+        
+        mockLlmService
+            .Setup(x => x.CompleteAsync(It.Is<ChatCompletionRequest>(r => 
+                r.MaxTokens == 100 && r.Temperature == 0.1), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(parameterCheckResponse);
+
+        _mockLlmServiceFactory
+            .Setup(x => x.GetDefaultService())
+            .Returns(mockLlmService.Object);
+
+        var mockStoryResponse = new GenerateJsonStoryResponse
         {
             Success = true,
             Json = @"{""title"": ""Generated Story"", ""scenes"": []}"
         };
         _mockMediator
             .Setup(x => x.Send(It.IsAny<GenerateStoryCommand>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(mockResponse);
+            .ReturnsAsync(mockStoryResponse);
 
         // Act
         var result = await _service.CompleteAsync(context, CancellationToken.None);
