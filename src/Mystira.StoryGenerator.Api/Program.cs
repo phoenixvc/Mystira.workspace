@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Options;
 using Mystira.StoryGenerator.Api.Services;
+using Mystira.StoryGenerator.Application.Services;
 using Mystira.StoryGenerator.Llm.Services.Intent;
 using Mystira.StoryGenerator.Contracts.Configuration;
 using Mystira.StoryGenerator.Contracts.Stories;
@@ -61,7 +62,7 @@ builder.Services.AddHealthChecks();
 // Register services
 builder.Services.AddScoped<IInstructionBlockService, InstructionBlockService>();
 // Register Intent router implementation from Llm project for Domain interface
-builder.Services.AddScoped<IIntentRouterService, StoryIntentClassifier>();
+builder.Services.AddScoped<IIntentClassificationService, StoryIntentClassifier>();
 builder.Services.AddScoped<ICommandIntentRouter, CommandIntentRouter>();
 // Register Chat Orchestration Service
 builder.Services.AddScoped<IChatOrchestrationService, ChatOrchestrationService>();

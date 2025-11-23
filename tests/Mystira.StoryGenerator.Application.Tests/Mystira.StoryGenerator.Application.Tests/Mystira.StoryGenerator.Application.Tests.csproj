@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\..\src\Mystira.StoryGenerator.Application\Mystira.StoryGenerator.Application.csproj" />
+      <ProjectReference Include="..\..\..\src\Mystira.StoryGenerator.Contracts\Mystira.StoryGenerator.Contracts.csproj" />
+      <ProjectReference Include="..\..\..\src\Mystira.StoryGenerator.Domain\Mystira.StoryGenerator.Domain.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Moq" Version="4.20.69" />
+      <PackageReference Include="xunit.assert" Version="2.6.1" />
+      <PackageReference Include="xunit.extensibility.core" Version="2.6.1" />
+    </ItemGroup>
+
+</Project>

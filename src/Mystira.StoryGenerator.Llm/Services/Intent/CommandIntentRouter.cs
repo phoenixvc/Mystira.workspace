@@ -1,18 +1,19 @@
 using Microsoft.Extensions.Logging;
 using Mystira.StoryGenerator.Domain.Commands.Stories;
+using Mystira.StoryGenerator.Domain.Services;
 
 namespace Mystira.StoryGenerator.Llm.Services.Intent;
 
 public class CommandIntentRouter : ICommandIntentRouter
 {
-    private readonly Mystira.StoryGenerator.Domain.Services.IIntentRouterService _intentRouter;
+    private readonly IIntentClassificationService _intentClassification;
     private readonly ILogger<CommandIntentRouter> _logger;
 
     public CommandIntentRouter(
-        Mystira.StoryGenerator.Domain.Services.IIntentRouterService intentRouter,
+        IIntentClassificationService intentClassification,
         ILogger<CommandIntentRouter> logger)
     {
-        _intentRouter = intentRouter;
+        _intentClassification = intentClassification;
         _logger = logger;
     }
 
@@ -24,7 +25,7 @@ public class CommandIntentRouter : ICommandIntentRouter
             return null;
         }
 
-        var classification = await _intentRouter.ClassifyIntentAsync(userQuery, cancellationToken);
+        var classification = await _intentClassification.ClassifyIntentAsync(userQuery, cancellationToken);
         if (classification == null || classification.InstructionTypes.Length == 0)
         {
             _logger.LogWarning("Intent classification returned no instruction types for query: {Query}", userQuery);
@@ -57,7 +58,7 @@ public class CommandIntentRouter : ICommandIntentRouter
             return null;
         }
 
-        var classification = await _intentRouter.ClassifyIntentAsync(userQuery, cancellationToken);
+        var classification = await _intentClassification.ClassifyIntentAsync(userQuery, cancellationToken);
         if (classification == null || classification.InstructionTypes.Length == 0)
         {
             _logger.LogWarning("Intent classification returned no instruction types for query: {Query}", userQuery);

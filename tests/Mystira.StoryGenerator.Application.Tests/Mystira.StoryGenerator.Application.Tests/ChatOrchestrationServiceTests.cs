@@ -1,14 +1,14 @@
-using Microsoft.Extensions.Logging;
 using MediatR;
+using Microsoft.Extensions.Logging;
 using Moq;
-using Xunit;
+using Mystira.StoryGenerator.Application.Services;
 using Mystira.StoryGenerator.Contracts.Chat;
 using Mystira.StoryGenerator.Contracts.Stories;
-using Mystira.StoryGenerator.Domain.Services;
 using Mystira.StoryGenerator.Domain.Commands.Stories;
-using Mystira.StoryGenerator.Llm.Services.Intent;
+using Mystira.StoryGenerator.Domain.Services;
+using Xunit;
 
-namespace Mystira.StoryGenerator.Domain.Tests.Services;
+namespace Mystira.StoryGenerator.Application.Tests;
 
 public class ChatOrchestrationServiceTests
 {
@@ -16,7 +16,7 @@ public class ChatOrchestrationServiceTests
     private readonly Mock<IMediator> _mockMediator;
     private readonly Mock<ILLMServiceFactory> _mockLlmServiceFactory;
     private readonly Mock<IInstructionBlockService> _mockInstructionBlockService;
-    private readonly Mock<IIntentRouterService> _mockIntentRouterService;
+    private readonly Mock<IIntentClassificationService> _mockIntentRouterService;
     private readonly Mock<ILogger<ChatOrchestrationService>> _mockLogger;
     private readonly ChatOrchestrationService _service;
 
@@ -26,7 +26,7 @@ public class ChatOrchestrationServiceTests
         _mockMediator = new Mock<IMediator>();
         _mockLlmServiceFactory = new Mock<ILLMServiceFactory>();
         _mockInstructionBlockService = new Mock<IInstructionBlockService>();
-        _mockIntentRouterService = new Mock<IIntentRouterService>();
+        _mockIntentRouterService = new Mock<IIntentClassificationService>();
         _mockLogger = new Mock<ILogger<ChatOrchestrationService>>();
 
         _service = new ChatOrchestrationService(
@@ -103,16 +103,16 @@ public class ChatOrchestrationServiceTests
         var mockLlmService = new Mock<ILLMService>();
         mockLlmService.Setup(x => x.ProviderName).Returns("test-llm");
         mockLlmService.Setup(x => x.IsAvailable()).Returns(true);
-        
+
         var parameterCheckResponse = new ChatCompletionResponse
         {
             Success = true,
             Content = @"[""title"", ""agegroup""]", // Missing title and agegroup
             Provider = "test-llm"
         };
-        
+
         mockLlmService
-            .Setup(x => x.CompleteAsync(It.Is<ChatCompletionRequest>(r => 
+            .Setup(x => x.CompleteAsync(It.Is<ChatCompletionRequest>(r =>
                 r.MaxTokens == 100 && r.Temperature == 0.1), It.IsAny<CancellationToken>()))
             .ReturnsAsync(parameterCheckResponse);
 
@@ -154,16 +154,16 @@ public class ChatOrchestrationServiceTests
         var mockLlmService = new Mock<ILLMService>();
         mockLlmService.Setup(x => x.ProviderName).Returns("test-llm");
         mockLlmService.Setup(x => x.IsAvailable()).Returns(true);
-        
+
         var parameterCheckResponse = new ChatCompletionResponse
         {
             Success = true,
             Content = "[]", // No missing parameters
             Provider = "test-llm"
         };
-        
+
         mockLlmService
-            .Setup(x => x.CompleteAsync(It.Is<ChatCompletionRequest>(r => 
+            .Setup(x => x.CompleteAsync(It.Is<ChatCompletionRequest>(r =>
                 r.MaxTokens == 100 && r.Temperature == 0.1), It.IsAny<CancellationToken>()))
             .ReturnsAsync(parameterCheckResponse);
 

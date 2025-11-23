@@ -1,5 +1,4 @@
 @using System.Linq
-@using Mystira.StoryGenerator.Contracts.Chat
 @using Mystira.StoryGenerator.Contracts.Stories
 @inherits LayoutComponentBase
 @implements IDisposable
@@ -2252,7 +2251,7 @@
         {
             StoryId = CurrentChat.Id,
             StoryVersion = 1,
-            Content = YamlContent
+            Content = JsonYamlConverter.ToJson(YamlContent)
         };
     }
 
