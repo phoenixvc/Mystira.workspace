@@ -1,4 +1,5 @@
 @using System.Linq
+@using Mystira.StoryGenerator.Contracts.Chat
 @using Mystira.StoryGenerator.Contracts.Stories
 @inherits LayoutComponentBase
 @implements IDisposable
@@ -1217,7 +1218,8 @@
                 Model = settings.Deployment,
                 Temperature = temperature,
                 MaxTokens = maxTokens,
-                Messages = messages
+                Messages = messages,
+                CurrentStory = BuildStorySnapshot()
             };
 
             // Route subsequent turns to chat orchestration endpoint (not setup)
@@ -2239,20 +2241,35 @@
         StateHasChanged();
     }
 
-    private class ParameterPayload
+    private StorySnapshot? BuildStorySnapshot()
     {
-        public string title { get; set; } = string.Empty;
-        public string? theme { get; set; }
-        public string difficulty { get; set; } = string.Empty;
-        public string session_length { get; set; } = string.Empty;
-        public string age_group { get; set; } = string.Empty;
-        public int minimum_age { get; set; }
-        public List<string> core_axes { get; set; } = new();
-        public List<string> archetypes { get; set; } = new();
-        public int min_scenes { get; set; } = 6;
-        public int max_scenes { get; set; } = 12;
-        public List<string>? tags { get; set; }
-        public string? tone { get; set; }
-        public int character_count { get; set; } = 0;
+        if (CurrentChat == null || string.IsNullOrWhiteSpace(YamlContent))
+        {
+            return null;
+        }
+
+        return new StorySnapshot
+        {
+            StoryId = CurrentChat.Id,
+            StoryVersion = 1,
+            Content = YamlContent
+        };
     }
-}
+
+     private class ParameterPayload
+     {
+         public string title { get; set; } = string.Empty;
+         public string? theme { get; set; }
+         public string difficulty { get; set; } = string.Empty;
+         public string session_length { get; set; } = string.Empty;
+         public string age_group { get; set; } = string.Empty;
+         public int minimum_age { get; set; }
+         public List<string> core_axes { get; set; } = new();
+         public List<string> archetypes { get; set; } = new();
+         public int min_scenes { get; set; } = 6;
+         public int max_scenes { get; set; } = 12;
+         public List<string>? tags { get; set; }
+         public string? tone { get; set; }
+         public int character_count { get; set; } = 0;
+     }
+    }

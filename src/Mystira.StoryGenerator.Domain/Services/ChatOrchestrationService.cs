@@ -498,12 +498,18 @@ Example responses:
 
     private static string? ExtractStoryFromContext(ChatContext context)
     {
-        // Look for story content in the conversation
+        // Prefer story snapshot if available
+        if (!string.IsNullOrWhiteSpace(context.CurrentStory?.Content))
+        {
+            return context.CurrentStory.Content;
+        }
+
+        // Fallback: Look for story content in the conversation
         // This is a simplified implementation - you might need more sophisticated extraction
-        var messageWithStory = context.Messages.LastOrDefault(m => 
-            m.MessageType == ChatMessageType.User && 
+        var messageWithStory = context.Messages.LastOrDefault(m =>
+            m.MessageType == ChatMessageType.User &&
             (m.Content?.Contains('{') == true || m.Content?.Length > 500));
-        
+
         return messageWithStory?.Content;
     }
 }
