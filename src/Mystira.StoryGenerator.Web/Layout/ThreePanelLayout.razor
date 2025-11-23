@@ -2041,6 +2041,32 @@
         json = string.Empty;
         if (string.IsNullOrWhiteSpace(content)) return false;
 
+        // Normalize and attempt to handle raw JSON payloads (no code fences)
+        // Some providers return a plain JSON object/array as the entire message content.
+        // Also strip any leading label like "CURRENT_JSON:" that may precede the payload.
+        var trimmed = content.Trim();
+        if (trimmed.StartsWith("CURRENT_JSON:", StringComparison.OrdinalIgnoreCase))
+        {
+            trimmed = trimmed.Substring("CURRENT_JSON:".Length).Trim();
+        }
+
+        // If the whole content appears to be JSON, validate and return it.
+        if ((trimmed.StartsWith("{") && trimmed.EndsWith("}")) ||
+            (trimmed.StartsWith("[") && trimmed.EndsWith("]")))
+        {
+            try
+            {
+                // Validate JSON; if it parses, accept it as-is
+                using var _ = System.Text.Json.JsonDocument.Parse(trimmed);
+                json = trimmed;
+                return true;
+            }
+            catch
+            {
+                // Not valid raw JSON; fall through to fenced block detection
+            }
+        }
+
         var idx = 0;
         while (idx < content.Length)
         {
@@ -2054,10 +2080,34 @@
             if (end < 0) break;
 
             var code = content.Substring(langEnd + 1, end - (langEnd + 1));
-            if (fenceLabel == "json")
+            // Accept explicit json labels (json/jsonc), or unlabeled blocks that parse as JSON
+            var isJsonLabeled = fenceLabel == "json" || fenceLabel.StartsWith("json");
+            if (isJsonLabeled)
             {
-                json = code.Trim();
-                return !string.IsNullOrWhiteSpace(json);
+                var candidate = code.Trim();
+                if (!string.IsNullOrWhiteSpace(candidate))
+                {
+                    json = candidate;
+                    return true;
+                }
+            }
+            else
+            {
+                // If no label, try to parse code as JSON to be tolerant of providers omitting the language tag
+                var candidate = code.Trim();
+                if (!string.IsNullOrWhiteSpace(candidate))
+                {
+                    try
+                    {
+                        using var _ = System.Text.Json.JsonDocument.Parse(candidate);
+                        json = candidate;
+                        return true;
+                    }
+                    catch
+                    {
+                        // Not JSON; continue scanning
+                    }
+                }
             }
             idx = end + 3;
         }

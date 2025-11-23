@@ -215,6 +215,11 @@ public class StoryApiService : IStoryApiService
                             {
                                 contentText = messageProp.GetString();
                             }
+                            // Handle orchestration.Result objects that look like: { success: true, json: "{...}" }
+                            else if (root.TryGetProperty("json", out var jsonProp) && jsonProp.ValueKind == JsonValueKind.String)
+                            {
+                                contentText = jsonProp.GetString();
+                            }
                             else if (root.TryGetProperty("messages", out var messagesProp) && messagesProp.ValueKind == JsonValueKind.Array)
                             {
                                 foreach (var item in messagesProp.EnumerateArray())
