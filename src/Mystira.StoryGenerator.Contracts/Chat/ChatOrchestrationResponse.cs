@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+using System.Text.Json.Serialization;
+using Mystira.StoryGenerator.Contracts.Stories;
 
 namespace Mystira.StoryGenerator.Contracts.Chat;
 
@@ -10,6 +11,9 @@ public class ChatOrchestrationResponse
 {
     [JsonPropertyName("success")]
     public bool Success { get; set; }
+
+    [JsonPropertyName("error")]
+    public string? Error { get; set; }
 
     [JsonPropertyName("requires_clarification")]
     public bool RequiresClarification { get; set; }
@@ -25,7 +29,3 @@ public class ChatOrchestrationResponse
 
     [JsonPropertyName("result")]
     public object? Result { get; set; }
-
-    [JsonPropertyName("error")]
-    public string? Error { get; set; }
-}
