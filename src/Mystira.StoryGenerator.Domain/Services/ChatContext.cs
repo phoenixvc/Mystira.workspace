@@ -13,6 +13,11 @@ public class ChatContext
     public List<MystiraChatMessage> Messages { get; set; } = new();
 
     /// <summary>
+    /// Optional snapshot of the current story being worked on
+    /// </summary>
+    public StorySnapshot? CurrentStory { get; set; }
+
+    /// <summary>
     /// Selected AI provider
     /// </summary>
     public string? Provider { get; set; }

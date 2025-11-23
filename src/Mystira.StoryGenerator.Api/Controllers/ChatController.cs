@@ -68,6 +68,7 @@ public class ChatController : ControllerBase
             var chatContext = new ChatContext
             {
                 Messages = request.Messages,
+                CurrentStory = request.CurrentStory,
                 Provider = request.Provider,
                 ModelId = request.ModelId,
                 Model = request.Model,

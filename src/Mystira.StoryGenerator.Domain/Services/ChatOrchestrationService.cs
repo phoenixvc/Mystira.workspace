@@ -200,7 +200,7 @@ public class ChatOrchestrationService : IChatOrchestrationService
             Model = context.Model
         };
 
-        var command = new RefineStoryCommand(request, userMessage, userMessage);
+        var command = new RefineStoryCommand(request, userMessage, userMessage, context.CurrentStory);
         var result = await _mediator.Send(command, cancellationToken);
         
         return new ChatOrchestrationResponse
@@ -234,7 +234,7 @@ public class ChatOrchestrationService : IChatOrchestrationService
             Format = "json"
         };
 
-        var command = new ValidateStoryCommand(request, userMessage);
+        var command = new ValidateStoryCommand(request, userMessage, context.CurrentStory);
         var result = await _mediator.Send(command, cancellationToken);
         
         return new ChatOrchestrationResponse
@@ -261,7 +261,7 @@ public class ChatOrchestrationService : IChatOrchestrationService
             };
         }
 
-        var command = new AutoFixStoryJsonCommand(storyContent, context.Provider, context.Model, userMessage);
+        var command = new AutoFixStoryJsonCommand(storyContent, context.Provider, context.Model, userMessage, context.CurrentStory);
         var result = await _mediator.Send(command, cancellationToken);
         
         return new ChatOrchestrationResponse

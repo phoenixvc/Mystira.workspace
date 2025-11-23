@@ -67,6 +67,12 @@ public class ChatCompletionRequest
     /// Whether the schema should be enforced strictly by the provider, if supported.
     /// </summary>
     public bool? IsSchemaValidationStrict { get; set; }
+
+    /// <summary>
+    /// Optional snapshot of the current story being worked on
+    /// </summary>
+    [JsonPropertyName("current_story")]
+    public StorySnapshot? CurrentStory { get; set; }
 }
 
 /// <summary>
