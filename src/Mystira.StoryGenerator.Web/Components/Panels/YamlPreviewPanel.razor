@@ -21,7 +21,7 @@
                                title="Select version to view">
                            @foreach (var snapshot in YamlSnapshots.OrderByDescending(s => s.Version))
                            {
-                               <option value="@snapshot.Version">v@snapshot.Version</option>
+                               <option value="@snapshot.Version">v@(snapshot.Version)</option>
                            }
                        </select>
                        <span class="text-xs text-gray-500">(@CurrentVersion/@YamlSnapshots.Count)</span>
@@ -51,7 +51,7 @@
                            {
                                @if (snapshot.Version != CurrentVersion)
                                {
-                                   <option value="@snapshot.Version">v@snapshot.Version</option>
+                                   <option value="@snapshot.Version">v@(snapshot.Version)</option>
                                }
                            }
                        </select>
@@ -480,6 +480,7 @@
        {
            diffCompareVersion = null;
            showDiffView = false;
+           CurrentVersion = version;
            StateHasChanged();
            if (OnVersionSelected.HasDelegate)
            {
