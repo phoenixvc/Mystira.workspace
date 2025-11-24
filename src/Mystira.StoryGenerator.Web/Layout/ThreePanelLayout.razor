@@ -498,6 +498,7 @@
     private bool IsTyping = false;
     private string? YamlContent;
     private YamlValidationResult? ValidationResult;
+    private int currentViewedVersion = 1;
 
     // UI state
     private string searchQuery = string.Empty;
@@ -555,6 +556,9 @@
             ChatHistories = saved ?? new List<StoryGeneratorChatHistory>();
             CurrentChat = ChatHistories.FirstOrDefault();
             YamlContent = CurrentChat?.YamlSnapshot;
+            currentViewedVersion = CurrentChat?.YamlSnapshots.Count > 0
+               ? CurrentChat.YamlSnapshots.Max(s => s.Version)
+               : 1;
         }
         catch
         {
@@ -805,10 +809,13 @@
 
     private async Task HandleChatSelected(StoryGeneratorChatHistory chat)
     {
-        CurrentChat = chat;
-        YamlContent = CurrentChat?.YamlSnapshot;
-        CloseMobileMenu();
-        StateHasChanged();
+       CurrentChat = chat;
+       YamlContent = CurrentChat?.YamlSnapshot;
+       currentViewedVersion = CurrentChat?.YamlSnapshots.Count > 0
+           ? CurrentChat.YamlSnapshots.Max(s => s.Version)
+           : 1;
+       CloseMobileMenu();
+       StateHasChanged();
     }
 
     private async Task HandleDeleteChat(string chatId)
@@ -831,26 +838,27 @@
 
     private async Task HandleNewChat()
     {
-        CurrentChat = new StoryGeneratorChatHistory
-        {
-            Id = Guid.NewGuid().ToString(),
-            Title = "New Story",
-            CreatedAt = DateTime.Now,
-            Messages = new List<StoryGeneratorChatMessage>()
-        };
+       CurrentChat = new StoryGeneratorChatHistory
+       {
+           Id = Guid.NewGuid().ToString(),
+           Title = "New Story",
+           CreatedAt = DateTime.Now,
+           Messages = new List<StoryGeneratorChatMessage>()
+       };
 
-        // Add a welcome system message
-        CurrentChat.Messages.Add(new StoryGeneratorChatMessage
-        {
-            Role = "system",
-            Content = "Welcome to Mystira Story Generator! Describe your idea and I'll gather the required parameters.",
-            Timestamp = DateTime.Now
-        });
+       // Add a welcome system message
+       CurrentChat.Messages.Add(new StoryGeneratorChatMessage
+       {
+           Role = "system",
+           Content = "Welcome to Mystira Story Generator! Describe your idea and I'll gather the required parameters.",
+           Timestamp = DateTime.Now
+       });
 
-        ChatHistories.Insert(0, CurrentChat);
-        await SaveChatsAsync();
-        CloseMobileMenu();
-        StateHasChanged();
+       currentViewedVersion = 1;
+       ChatHistories.Insert(0, CurrentChat);
+       await SaveChatsAsync();
+       CloseMobileMenu();
+       StateHasChanged();
 
         // Optionally kick off the setup flow with an initial prompt
         IsTyping = true;
@@ -1549,35 +1557,34 @@
 
     private int GetCurrentVersion()
     {
-        if (CurrentChat?.YamlSnapshots == null || CurrentChat.YamlSnapshots.Count == 0)
-            return 1;
-        return CurrentChat.YamlSnapshots.Max(s => s.Version);
+       return currentViewedVersion;
     }
 
     private async Task HandleVersionSelected(int version)
     {
-        if (CurrentChat?.YamlSnapshots == null)
-            return;
-        
-        var snapshot = CurrentChat.YamlSnapshots.FirstOrDefault(s => s.Version == version);
-        if (snapshot != null)
-        {
-            YamlContent = snapshot.Content;
-            StateHasChanged();
-            try
-            {
-                var validation = await ApiService.ValidateStoryAsync(YamlContent, "yaml");
-                ValidationResult = MapValidation(validation);
-            }
-            catch
-            {
-                // Ignore validation errors
-            }
-            finally
-            {
-                StateHasChanged();
-            }
-        }
+       if (CurrentChat?.YamlSnapshots == null)
+           return;
+
+       var snapshot = CurrentChat.YamlSnapshots.FirstOrDefault(s => s.Version == version);
+       if (snapshot != null)
+       {
+           currentViewedVersion = version;
+           YamlContent = snapshot.Content;
+           StateHasChanged();
+           try
+           {
+               var validation = await ApiService.ValidateStoryAsync(YamlContent, "yaml");
+               ValidationResult = MapValidation(validation);
+           }
+           catch
+           {
+               // Ignore validation errors
+           }
+           finally
+           {
+               StateHasChanged();
+           }
+       }
     }
 
     private async Task SaveChatsAsync()
@@ -2374,6 +2381,7 @@
             ChatHistories.Insert(0, newChat);
             CurrentChat = newChat;
             YamlContent = importResult.YamlContent;
+            currentViewedVersion = 1;
 
             // Create initial snapshot for imported story
             newChat.YamlSnapshots.Add(new YamlSnapshot
