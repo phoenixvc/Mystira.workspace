@@ -1,5 +1,6 @@
 @using System.Linq
 @using Mystira.StoryGenerator.Contracts.Stories
+@using Mystira.StoryGenerator.Web.Models
 @inherits LayoutComponentBase
 @implements IDisposable
 @inject IStoryApiService ApiService
@@ -148,13 +149,16 @@
             </div>
 
             <!-- Right Panel - YAML Preview (50%) -->
-            <div id="panel-right" class="panel border-l border-gray-200 bg-gray-50">
-                <YamlPreviewPanel YamlContent="@YamlContent"
-                                ValidationResult="@ValidationResult"
-                                OnYamlCopied="@HandleYamlCopied"
-                                OnYamlSaved="@HandleYamlSaved"
-                                OnValidateRequested="@HandleValidateYaml"
-                                SyntaxColors="@yamlPreviewTheme" />
+            <div id="panel-right" class="panel border-l border-gray-200 bg-gray-50" style="width:@($"{rightWidth}%")">
+               <YamlPreviewPanel YamlContent="@YamlContent"
+                               ValidationResult="@ValidationResult"
+                               OnYamlCopied="@HandleYamlCopied"
+                               OnYamlSaved="@HandleYamlSaved"
+                               OnValidateRequested="@HandleValidateYaml"
+                               SyntaxColors="@yamlPreviewTheme"
+                               YamlSnapshots="@(CurrentChat?.YamlSnapshots ?? new())"
+                               CurrentVersion="@GetCurrentVersion()"
+                               OnVersionSelected="@HandleVersionSelected" />
             </div>
         </div>
 
@@ -494,6 +498,7 @@
     private bool IsTyping = false;
     private string? YamlContent;
     private YamlValidationResult? ValidationResult;
+    private int currentViewedVersion = 1;
 
     // UI state
     private string searchQuery = string.Empty;
@@ -511,25 +516,25 @@
 
     private readonly YamlSyntaxColorScheme yamlPreviewTheme = YamlSyntaxColorScheme.Default with
     {
-        BackgroundColor = "#0f172a",
-        ForegroundColor = "#e2e8f0",
-        KeyColor = "#38bdf8",
-        ValueColor = "#e2e8f0",
-        StringColor = "#facc15",
-        NumberColor = "#f97316",
-        BooleanColor = "#22d3ee",
-        NullColor = "#f87171",
-        CommentColor = "#94a3b8",
-        IndicatorColor = "#a855f7",
-        AnchorColor = "#34d399",
-        TagColor = "#f472b6",
-        SeparatorColor = "#f59e0b",
-        BorderColor = "rgba(148, 163, 184, 0.35)",
-        HighlightBackgroundColor = "rgba(250, 204, 21, 0.35)",
-        HighlightForegroundColor = "#0f172a",
-        HighlightActiveBackgroundColor = "rgba(234, 179, 8, 0.62)",
-        HighlightActiveForegroundColor = "#0f172a",
-        HighlightActiveBorderColor = "rgba(234, 179, 8, 0.9)"
+        BackgroundColor = "#ffffff",
+        ForegroundColor = "#1f2937",
+        KeyColor = "#0369a1",
+        ValueColor = "#1f2937",
+        StringColor = "#b45309",
+        NumberColor = "#dc2626",
+        BooleanColor = "#0891b2",
+        NullColor = "#e11d48",
+        CommentColor = "#6b7280",
+        IndicatorColor = "#7c3aed",
+        AnchorColor = "#059669",
+        TagColor = "#be185d",
+        SeparatorColor = "#ea580c",
+        BorderColor = "rgba(209, 213, 219, 0.6)",
+        HighlightBackgroundColor = "rgba(251, 191, 36, 0.25)",
+        HighlightForegroundColor = "#1f2937",
+        HighlightActiveBackgroundColor = "rgba(251, 146, 60, 0.4)",
+        HighlightActiveForegroundColor = "#1f2937",
+        HighlightActiveBorderColor = "rgba(234, 88, 12, 0.7)"
     };
 
     private static readonly EffectiveAiModelSettings FallbackModelSettings = AiModelDefaults.CreateEffectiveSettings();
@@ -551,6 +556,9 @@
             ChatHistories = saved ?? new List<StoryGeneratorChatHistory>();
             CurrentChat = ChatHistories.FirstOrDefault();
             YamlContent = CurrentChat?.YamlSnapshot;
+            currentViewedVersion = CurrentChat?.YamlSnapshots.Count > 0
+               ? CurrentChat.YamlSnapshots.Max(s => s.Version)
+               : 1;
         }
         catch
         {
@@ -759,9 +767,13 @@
 
     private async Task HandleChatSelected(StoryGeneratorChatHistory chat)
     {
-        CurrentChat = chat;
-        YamlContent = CurrentChat?.YamlSnapshot;
-        StateHasChanged();
+       CurrentChat = chat;
+       YamlContent = CurrentChat?.YamlSnapshot;
+       currentViewedVersion = CurrentChat?.YamlSnapshots.Count > 0
+           ? CurrentChat.YamlSnapshots.Max(s => s.Version)
+           : 1;
+       CloseMobileMenu();
+       StateHasChanged();
     }
 
     private async Task HandleDeleteChat(string chatId)
@@ -784,25 +796,27 @@
 
     private async Task HandleNewChat()
     {
-        CurrentChat = new StoryGeneratorChatHistory
-        {
-            Id = Guid.NewGuid().ToString(),
-            Title = "New Story",
-            CreatedAt = DateTime.Now,
-            Messages = new List<StoryGeneratorChatMessage>()
-        };
+       CurrentChat = new StoryGeneratorChatHistory
+       {
+           Id = Guid.NewGuid().ToString(),
+           Title = "New Story",
+           CreatedAt = DateTime.Now,
+           Messages = new List<StoryGeneratorChatMessage>()
+       };
 
-        // Add a welcome system message
-        CurrentChat.Messages.Add(new StoryGeneratorChatMessage
-        {
-            Role = "system",
-            Content = "Welcome to Mystira Story Generator! Describe your idea and I'll gather the required parameters.",
-            Timestamp = DateTime.Now
-        });
+       // Add a welcome system message
+       CurrentChat.Messages.Add(new StoryGeneratorChatMessage
+       {
+           Role = "system",
+           Content = "Welcome to Mystira Story Generator! Describe your idea and I'll gather the required parameters.",
+           Timestamp = DateTime.Now
+       });
 
-        ChatHistories.Insert(0, CurrentChat);
-        await SaveChatsAsync();
-        StateHasChanged();
+       currentViewedVersion = 1;
+       ChatHistories.Insert(0, CurrentChat);
+       await SaveChatsAsync();
+       CloseMobileMenu();
+       StateHasChanged();
 
         // Optionally kick off the setup flow with an initial prompt
         IsTyping = true;
@@ -1109,6 +1123,29 @@
                     var generatedYaml = JsonYamlConverter.ToYaml(result.Json);
                     YamlContent = generatedYaml;
                     CurrentChat!.YamlSnapshot = generatedYaml;
+                    
+                    // Create initial snapshot if this is the first generation
+                    if (CurrentChat.YamlSnapshots.Count == 0)
+                    {
+                        CurrentChat.YamlSnapshots.Add(new YamlSnapshot
+                        {
+                            Version = 1,
+                            Content = generatedYaml,
+                            CreatedAt = DateTime.UtcNow
+                        });
+                    }
+                    else
+                    {
+                        // Or create a new version if updating
+                        var nextVersion = CurrentChat.YamlSnapshots.Max(s => s.Version) + 1;
+                        CurrentChat.YamlSnapshots.Add(new YamlSnapshot
+                        {
+                            Version = nextVersion,
+                            Content = generatedYaml,
+                            CreatedAt = DateTime.UtcNow
+                        });
+                    }
+                    
                     await SaveChatsAsync();
 
                     var validation = await ApiService.ValidateStoryAsync(generatedYaml, "yaml");
@@ -1193,6 +1230,18 @@
                         if (CurrentChat != null)
                         {
                             CurrentChat.YamlSnapshot = convertedYaml;
+                            
+                            // Create a new version snapshot when YAML is updated
+                            var nextVersion = CurrentChat.YamlSnapshots.Count == 0 
+                                ? 1 
+                                : CurrentChat.YamlSnapshots.Max(s => s.Version) + 1;
+                            CurrentChat.YamlSnapshots.Add(new YamlSnapshot
+                            {
+                                Version = nextVersion,
+                                Content = convertedYaml,
+                                CreatedAt = DateTime.UtcNow
+                            });
+                            
                             await SaveChatsAsync();
                         }
 
@@ -1288,6 +1337,18 @@
                             {
                                 YamlContent = fixedYaml;
                                 CurrentChat.YamlSnapshot = fixedYaml;
+                                
+                                // Create a new version snapshot when YAML is fixed
+                                var nextVersion = CurrentChat.YamlSnapshots.Count == 0 
+                                    ? 1 
+                                    : CurrentChat.YamlSnapshots.Max(s => s.Version) + 1;
+                                CurrentChat.YamlSnapshots.Add(new YamlSnapshot
+                                {
+                                    Version = nextVersion,
+                                    Content = fixedYaml,
+                                    CreatedAt = DateTime.UtcNow
+                                });
+                                
                                 await SaveChatsAsync();
 
                                 var revalidation = await ApiService.ValidateStoryAsync(fixedYaml, "yaml");
@@ -1392,6 +1453,18 @@
         if (CurrentChat != null)
         {
             CurrentChat.YamlSnapshot = updatedYaml;
+            
+            // Create a new snapshot version
+            var nextVersion = CurrentChat.YamlSnapshots.Count == 0 
+                ? 1 
+                : CurrentChat.YamlSnapshots.Max(s => s.Version) + 1;
+            CurrentChat.YamlSnapshots.Add(new YamlSnapshot
+            {
+                Version = nextVersion,
+                Content = updatedYaml,
+                CreatedAt = DateTime.UtcNow
+            });
+            
             CurrentChat.Messages.Add(new StoryGeneratorChatMessage
             {
                 Role = "system",
@@ -1437,6 +1510,38 @@
         {
             StateHasChanged();
         }
+    }
+
+    private int GetCurrentVersion()
+    {
+       return currentViewedVersion;
+    }
+
+    private async Task HandleVersionSelected(int version)
+    {
+       if (CurrentChat?.YamlSnapshots == null)
+           return;
+
+       var snapshot = CurrentChat.YamlSnapshots.FirstOrDefault(s => s.Version == version);
+       if (snapshot != null)
+       {
+           currentViewedVersion = version;
+           YamlContent = snapshot.Content;
+           StateHasChanged();
+           try
+           {
+               var validation = await ApiService.ValidateStoryAsync(YamlContent, "yaml");
+               ValidationResult = MapValidation(validation);
+           }
+           catch
+           {
+               // Ignore validation errors
+           }
+           finally
+           {
+               StateHasChanged();
+           }
+       }
     }
 
     private async Task SaveChatsAsync()
@@ -1795,6 +1900,18 @@
                 if (CurrentChat != null)
                 {
                     CurrentChat.YamlSnapshot = YamlContent;
+                    
+                    // Create initial snapshot if this is the first generation
+                    if (CurrentChat.YamlSnapshots.Count == 0)
+                    {
+                        CurrentChat.YamlSnapshots.Add(new YamlSnapshot
+                        {
+                            Version = 1,
+                            Content = YamlContent,
+                            CreatedAt = DateTime.UtcNow
+                        });
+                    }
+                    
                     var summary = BuildYamlSummaryMessage(YamlContent);
                     CurrentChat.Messages.Add(new StoryGeneratorChatMessage
                     {
@@ -2221,6 +2338,17 @@
             ChatHistories.Insert(0, newChat);
             CurrentChat = newChat;
             YamlContent = importResult.YamlContent;
+            currentViewedVersion = 1;
+
+            // Create initial snapshot for imported story
+            newChat.YamlSnapshots.Add(new YamlSnapshot
+            {
+                Version = 1,
+                Content = importResult.YamlContent,
+                CreatedAt = DateTime.UtcNow
+            });
+            newChat.YamlSnapshot = importResult.YamlContent;
+
             await SaveChatsAsync();
 
             CloseImportResult();

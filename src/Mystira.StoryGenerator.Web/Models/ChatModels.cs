@@ -7,6 +7,14 @@ public class StoryGeneratorChatHistory
     public DateTime CreatedAt { get; set; } = DateTime.Now;
     public List<StoryGeneratorChatMessage> Messages { get; set; } = new();
     public string? YamlSnapshot { get; set; }
+    public List<YamlSnapshot> YamlSnapshots { get; set; } = new();
+}
+
+public class YamlSnapshot
+{
+    public int Version { get; set; }
+    public string Content { get; set; } = string.Empty;
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 }
 
 public class StoryGeneratorChatMessage
