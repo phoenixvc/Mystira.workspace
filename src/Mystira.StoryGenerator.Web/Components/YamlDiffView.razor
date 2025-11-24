@@ -1,0 +1,137 @@
+@using DiffPlex
+@using DiffPlex.DiffBuilder
+@using DiffPlex.DiffBuilder.Model
+
+<div class="yaml-diff-container">
+    @if (string.IsNullOrEmpty(OldContent) && string.IsNullOrEmpty(NewContent))
+    {
+        <div class="flex items-center justify-center p-8 text-gray-500">
+            <p>No content to compare</p>
+        </div>
+    }
+    else
+    {
+        <div class="yaml-diff-view">
+            @if (diffLines != null && diffLines.Count > 0)
+            {
+                <div class="overflow-y-auto" style="max-height: 600px;">
+                    <table class="w-full text-sm font-mono">
+                        <tbody>
+                            @foreach (var (index, line) in diffLines.Select((l, i) => (i, l)))
+                            {
+                                <tr class="@GetDiffLineClasses(line)">
+                                    <td class="w-12 text-right px-2 py-1 text-gray-400 select-none bg-gray-50">
+                                        @if (line.Type != DiffChangeType.Imaginary)
+                                        {
+                                            @(index + 1)
+                                        }
+                                    </td>
+                                    <td class="px-3 py-1 whitespace-pre-wrap break-words">
+                                        @if (line.Type == DiffChangeType.Added)
+                                        {
+                                            <span class="text-green-700">+</span>
+                                        }
+                                        else if (line.Type == DiffChangeType.Deleted)
+                                        {
+                                            <span class="text-red-700">-</span>
+                                        }
+                                        else if (line.Type == DiffChangeType.Imaginary)
+                                        {
+                                            <span class="text-gray-300"> </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-gray-400"> </span>
+                                        }
+                                    </td>
+                                    <td class="px-2 py-1 whitespace-pre-wrap break-words flex-1">
+                                        @line.Text
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public string? OldContent { get; set; }
+
+    [Parameter]
+    public string? NewContent { get; set; }
+
+    private List<DiffLine> diffLines = new();
+
+    protected override void OnParametersSet()
+    {
+        GenerateDiff();
+    }
+
+    private void GenerateDiff()
+    {
+        diffLines.Clear();
+
+        var oldText = OldContent ?? string.Empty;
+        var newText = NewContent ?? string.Empty;
+
+        if (string.Equals(oldText, newText, StringComparison.Ordinal))
+        {
+            // No difference
+            return;
+        }
+
+        var differ = new InlineDiffBuilder(new Differ());
+        var diff = differ.BuildDiffModel(oldText, newText);
+
+        if (diff?.Lines != null)
+        {
+            diffLines = diff.Lines.ToList();
+        }
+    }
+
+    private string GetDiffLineClasses(DiffLine line)
+    {
+        return line.Type switch
+        {
+            DiffChangeType.Added => "bg-green-50 hover:bg-green-100",
+            DiffChangeType.Deleted => "bg-red-50 hover:bg-red-100",
+            DiffChangeType.Imaginary => "bg-gray-100",
+            _ => "bg-white hover:bg-gray-50"
+        };
+    }
+}
+
+<style>
+    .yaml-diff-container {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        background-color: white;
+        border: 1px solid rgba(209, 213, 219, 0.6);
+        border-radius: 0.5rem;
+    }
+
+    .yaml-diff-view {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+        overflow: hidden;
+    }
+
+    .yaml-diff-view table {
+        border-collapse: collapse;
+    }
+
+    .yaml-diff-view tbody tr {
+        border-bottom: 1px solid rgba(209, 213, 219, 0.3);
+        transition: background-color 0.15s ease;
+    }
+
+    .yaml-diff-view tbody tr:last-child {
+        border-bottom: none;
+    }
+</style>
