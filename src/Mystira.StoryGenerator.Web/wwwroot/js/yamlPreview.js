@@ -58,7 +58,26 @@
         });
     };
 
+    const syncScroll = (previewContainer, lineNumbersContainer) => {
+        if (!previewContainer || !lineNumbersContainer) {
+            return;
+        }
+
+        const preElement = previewContainer.querySelector('pre');
+        if (!preElement) {
+            return;
+        }
+
+        const syncScrollHandler = () => {
+            lineNumbersContainer.scrollTop = preElement.scrollTop;
+        };
+
+        preElement.addEventListener('scroll', syncScrollHandler);
+        return () => preElement.removeEventListener('scroll', syncScrollHandler);
+    };
+
     window.mystiraYamlPreview = window.mystiraYamlPreview || {};
     window.mystiraYamlPreview.scrollToMatch = scrollToMatch;
     window.mystiraYamlPreview.selectTextareaRange = selectTextareaRange;
+    window.syncScroll = syncScroll;
 })();

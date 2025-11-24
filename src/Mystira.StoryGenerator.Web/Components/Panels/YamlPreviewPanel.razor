@@ -9,30 +9,37 @@
      style="@GetThemeCssVariables()">
     <div class="panel-header flex flex-col">
         <div class="flex items-center justify-between">
-            <div class="flex items-center gap-3">
+            <div class="flex items-center gap-4">
                 <h2 class="text-lg font-semibold">YAML Preview</h2>
                 @if (YamlSnapshots.Count > 0)
+                {
+                    <div class="flex items-center gap-3 bg-gray-50 px-3 py-2 rounded-lg border border-gray-200">
+                        <span class="text-xs font-semibold text-gray-600">Version:</span>
+                        <span class="text-sm font-medium text-blue-700">@CurrentVersion</span>
+                        <span class="text-xs text-gray-500">of @YamlSnapshots.Count</span>
+                    </div>
+                }
+                @if (YamlSnapshots.Count > 1)
                 {
                     <div class="flex items-center gap-2">
                         <select class="text-sm border border-gray-300 rounded px-2 py-1"
                                 @onchange="HandleVersionChange"
-                                value="@CurrentVersion.ToString()">
+                                value="@CurrentVersion.ToString()"
+                                title="Select a version to view">
                             @foreach (var snapshot in YamlSnapshots.OrderByDescending(s => s.Version))
                             {
-                                <option value="@snapshot.Version">Version @snapshot.Version (@snapshot.CreatedAt:g)</option>
+                                <option value="@snapshot.Version">v@snapshot.Version</option>
                             }
                         </select>
-                        @if (YamlSnapshots.Count > 1)
-                        {
-                            <button type="button"
-                                    @onclick="ToggleDiffView"
-                                    class="text-sm text-indigo-600 hover:text-indigo-800 font-medium transition-colors">
-                                <svg class="inline w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-                                </svg>
-                                @(showDiffView ? "View" : "Diff")
-                            </button>
-                        }
+                        <button type="button"
+                                @onclick="ToggleDiffView"
+                                class="text-sm text-indigo-600 hover:text-indigo-800 font-medium transition-colors flex items-center gap-1"
+                                title="Compare with previous version">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                            </svg>
+                            @(showDiffView ? "Hide Diff" : "Show Diff")
+                        </button>
                     </div>
                 }
             </div>
@@ -191,28 +198,31 @@
             else
             {
                 <div class="flex-1 overflow-hidden flex flex-col">
-                    <div class="flex-1 overflow-y-auto flex" @ref="previewScrollRef">
-                        @if (isEditing)
-                        {
+                    @if (isEditing)
+                    {
+                        <div class="flex-1 overflow-hidden">
                             <textarea @key="isEditing"
                                       @bind-value="EditBuffer"
                                       @bind-value:event="oninput"
                                       class="w-full h-full yaml-preview-surface yaml-preview-editor p-4 rounded-lg text-sm overflow-auto font-mono leading-relaxed focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none"
                                       wrap="@GetTextareaWrapMode()"
                                       @ref="textareaRef"></textarea>
-                        }
-                        else
-                        {
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="flex-1 overflow-hidden flex" @ref="previewScrollRef">
                             <div class="flex-shrink-0 w-12 bg-gray-100 text-right pr-3 pl-2 text-gray-500 text-xs border-r border-gray-200 select-none"
-                                 style="font-family: 'Courier New', monospace; line-height: 1.5;">
+                                 style="font-family: 'Courier New', monospace; line-height: 1.5rem; overflow-y: auto; overflow-x: hidden;"
+                                 @ref="lineNumbersRef">
                                 @foreach (var lineNum in GetLineNumbers())
                                 {
-                                    <div style="height: 1.5rem; display: flex; align-items: center; justify-content: flex-end;">@lineNum</div>
+                                    <div style="height: 1.5rem; display: flex; align-items: center; justify-content: flex-end; padding-right: 0.25rem;">@lineNum</div>
                                 }
                             </div>
                             <pre class="@GetPreviewClasses()" tabindex="0">@GetHighlightedPreviewMarkup()</pre>
-                        }
-                    </div>
+                        </div>
+                    }
 
                 <div class="border-t border-gray-200 p-3">
                     @if (ValidationResult != null)
@@ -305,6 +315,7 @@
     private bool requestScrollToActiveMatch;
     private ElementReference previewScrollRef;
     private ElementReference textareaRef;
+    private ElementReference lineNumbersRef;
     private bool showDiffView = false;
     private int? diffCompareVersion;
 
@@ -325,31 +336,43 @@
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (requestScrollToActiveMatch)
-        {
-            requestScrollToActiveMatch = false;
-            if (activeMatchIndex >= 0 && activeMatchIndex < matches.Count)
-            {
-                var match = matches[activeMatchIndex];
-                try
-                {
-                    if (isEditing)
-                    {
-                        await JS.InvokeVoidAsync("mystiraYamlPreview.selectTextareaRange", textareaRef, match.Start, match.Length);
-                    }
-                    else
-                    {
-                        await JS.InvokeVoidAsync("mystiraYamlPreview.scrollToMatch", previewScrollRef, activeMatchIndex);
-                    }
-                }
-                catch
-                {
-                    // Ignore JS interop failures; UI still usable without scroll assistance
-                }
-            }
-        }
+       if (firstRender || !isEditing)
+       {
+           try
+           {
+               await JS.InvokeVoidAsync("syncScroll", previewScrollRef, lineNumbersRef);
+           }
+           catch
+           {
+               // Ignore JS interop failures
+           }
+       }
 
-        await base.OnAfterRenderAsync(firstRender);
+       if (requestScrollToActiveMatch)
+       {
+           requestScrollToActiveMatch = false;
+           if (activeMatchIndex >= 0 && activeMatchIndex < matches.Count)
+           {
+               var match = matches[activeMatchIndex];
+               try
+               {
+                   if (isEditing)
+                   {
+                       await JS.InvokeVoidAsync("mystiraYamlPreview.selectTextareaRange", textareaRef, match.Start, match.Length);
+                   }
+                   else
+                   {
+                       await JS.InvokeVoidAsync("mystiraYamlPreview.scrollToMatch", previewScrollRef, activeMatchIndex);
+                   }
+               }
+               catch
+               {
+                   // Ignore JS interop failures; UI still usable without scroll assistance
+               }
+           }
+       }
+
+       await base.OnAfterRenderAsync(firstRender);
     }
 
     private string EditBuffer
@@ -489,6 +512,21 @@
 
         var lineCount = content.Count(c => c == '\n') + 1;
         return Enumerable.Range(1, lineCount);
+    }
+
+    private async Task SyncLineNumberScroll(WheelEventArgs e)
+    {
+        if (previewScrollRef.Context != null && lineNumbersRef.Context != null)
+        {
+            try
+            {
+                await JS.InvokeVoidAsync("syncScroll", previewScrollRef, lineNumbersRef);
+            }
+            catch
+            {
+                // Ignore JS interop failures
+            }
+        }
     }
 
     private async Task CopyToClipboard()
