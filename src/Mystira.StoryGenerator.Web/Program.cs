@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Mystira.StoryGenerator.Web;
 using Mystira.StoryGenerator.Web.Services;
+using Syncfusion.Blazor;
+using Syncfusion.Licensing;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
@@ -10,8 +12,18 @@ builder.RootComponents.Add<HeadOutlet>("head::after");
 
 builder.Services.AddSingleton(builder.Configuration);
 
+// Register Syncfusion license
+var syncfusionLicenseKey = builder.Configuration["Syncfusion:LicenseKey"];
+if (!string.IsNullOrWhiteSpace(syncfusionLicenseKey))
+{
+    SyncfusionLicenseProvider.RegisterLicense(syncfusionLicenseKey);
+}
+
 // Add Blazored LocalStorage
 builder.Services.AddBlazoredLocalStorage();
+
+// Add Syncfusion Blazor services
+builder.Services.AddSyncfusionBlazor();
 
 // Add Chat Session Service
 builder.Services.AddScoped<IChatSessionService, ChatSessionService>();

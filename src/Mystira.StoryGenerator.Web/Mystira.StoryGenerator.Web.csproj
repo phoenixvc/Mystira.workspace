@@ -12,6 +12,7 @@
     <PackageReference Include="Markdig" Version="0.37.0" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="8.0.21" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="8.0.21" PrivateAssets="all" />
+    <PackageReference Include="Syncfusion.Blazor.Navigations" Version="27.1.48" />
     <PackageReference Include="YamlDotNet" Version="16.3.0" />
   </ItemGroup>
 
