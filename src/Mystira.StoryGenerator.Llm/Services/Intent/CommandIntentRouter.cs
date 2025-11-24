@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using Mystira.StoryGenerator.Domain.Commands.Chat;
 using Mystira.StoryGenerator.Domain.Commands.Stories;
 using Mystira.StoryGenerator.Domain.Services;
 
@@ -46,6 +47,11 @@ public class CommandIntentRouter : ICommandIntentRouter
             "story_validate" => context as ValidateStoryCommand,
             "story_autofix" => context as AutoFixStoryJsonCommand,
             "story_summarize" => context as SummarizeStoryCommand,
+            "help" => context as HelpCommand,
+            "schema_docs" => context as SchemaDocsCommand,
+            "safety_policy" => context as SafetyPolicyCommand,
+            "requirements" => context as RequirementsCommand,
+            "guidelines" => context as GuidelinesCommand,
             _ => null
         };
     }
