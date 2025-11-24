@@ -14,6 +14,14 @@
     <header class="bg-white border-b border-gray-200 px-6 py-4 flex-shrink-0">
         <div class="flex items-center justify-between">
             <div class="flex items-center space-x-4">
+                <button type="button"
+                        class="inline-flex items-center justify-center w-10 h-10 rounded-lg border border-gray-200 text-gray-600 transition-colors hover:border-primary-300 hover:text-primary-600"
+                        @onclick="ToggleSidebar"
+                        aria-label="Toggle sidebar">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                    </svg>
+                </button>
                 <h1 class="text-2xl font-bold text-gray-900">Mystira Story Generator</h1>
                 <span class="bg-primary-100 text-primary-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
                     Beta
@@ -45,22 +53,21 @@
     </header>
 
     <!-- Main Content Area -->
-    <main class="flex-1 flex overflow-hidden">
-        <!-- Mobile Menu Toggle (Hidden on desktop) -->
-        <div class="lg:hidden fixed top-4 left-4 z-50">
-            <button @onclick="ToggleMobileMenu"
-                    class="bg-white p-2 rounded-lg shadow-lg border border-gray-200">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-                </svg>
-            </button>
-        </div>
-
-        <!-- Three Panel Layout -->
-        <div id="panel-container" class="w-full flex">
-            <!-- Left Panel - Chat History and Tools (30%) -->
-            <div id="panel-left" class="panel border-r border-gray-200 bg-gray-50" style="width:@($"{leftWidth}%")">
-                <div class="flex flex-col h-full">
+    <main class="flex-1 flex overflow-hidden relative">
+        <!-- Syncfusion Sidebar - Left Panel -->
+        <SfSidebar @ref="sidebarRef"
+                   Width="320px"
+                   DockSize="64px"
+                   EnableDock="true"
+                   Type="SidebarType.Push"
+                   Position="SidebarPosition.Left"
+                   ShowBackdrop="true"
+                   EnablePersistence="true"
+                   MediaQuery="(min-width: 1024px)"
+                   Target=".sidebar-main-content"
+                   @bind-IsOpen="sidebarIsOpen">
+            <ChildContent>
+                <div class="flex flex-col h-full bg-gray-50 border-r border-gray-200">
                     <div class="p-3 bg-white border-b">
                          <div class="flex flex-col gap-3">
                              <div class="flex items-center justify-between gap-2">
@@ -128,20 +135,21 @@
                                         SearchQuery="@searchQuery" />
                     </div>
                 </div>
-            </div>
-            <div id="resizer-left" class="resizer-x" title="Drag to resize"></div>
+            </ChildContent>
+        </SfSidebar>
 
-            <!-- Center Panel - Active Chat (40%) -->
-            <div id="panel-center" class="panel bg-white" style="width:@($"{centerWidth}%")">
+        <!-- Center & Right Panels (50%/50%) -->
+        <div class="sidebar-main-content flex flex-1 overflow-hidden">
+            <!-- Center Panel - Active Chat (50%) -->
+            <div id="panel-center" class="panel bg-white">
                 <ActiveChatPanel CurrentChat="@CurrentChat"
                                IsTyping="@IsTyping"
                                OnSendMessage="@HandleSendMessage"
                                OnClearChat="@HandleClearChat" />
             </div>
-            <div id="resizer-right" class="resizer-x" title="Drag to resize"></div>
 
-            <!-- Right Panel - YAML Preview (30%) -->
-            <div id="panel-right" class="panel border-l border-gray-200 bg-gray-50" style="width:@($"{rightWidth}%")">
+            <!-- Right Panel - YAML Preview (50%) -->
+            <div id="panel-right" class="panel border-l border-gray-200 bg-gray-50">
                 <YamlPreviewPanel YamlContent="@YamlContent"
                                 ValidationResult="@ValidationResult"
                                 OnYamlCopied="@HandleYamlCopied"
@@ -152,9 +160,12 @@
         </div>
 
         <style>
-            .resizer-x { width: 6px; cursor: col-resize; background-color: #e5e7eb; }
-            .resizer-x:hover { background-color: #cbd5e1; }
-            .panel { height: 100%; overflow: hidden; flex-shrink: 0; }
+            .panel {
+                height: 100%;
+                overflow: hidden;
+                flex: 1 1 50%;
+                min-width: 0;
+            }
             .difficulty-button {
                 display: flex;
                 align-items: center;
@@ -250,12 +261,6 @@
                 border-color: rgba(254, 215, 170, 0.45);
             }
         </style>
-
-        <!-- Mobile Overlay -->
-        @if (showMobileMenu)
-        {
-            <div class="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-40" @onclick="CloseMobileMenu"></div>
-        }
     </main>
 
     @if (!string.IsNullOrWhiteSpace(copyFeedbackMessage))
@@ -479,13 +484,9 @@
         difficultyLookup = difficultyOptions.ToDictionary(option => option.Key, StringComparer.OrdinalIgnoreCase);
     }
 
-    private double leftWidth = 30;
-    private double centerWidth = 40;
-    private double rightWidth = 30;
-    private bool _resizersInitialized = false;
-
-    // Mobile menu state
-    private bool showMobileMenu = false;
+    // Sidebar state
+    private SfSidebar? sidebarRef;
+    private bool sidebarIsOpen = true;
     private bool showSettingsModal;
 
     // Data properties
@@ -562,52 +563,9 @@
         await base.OnInitializedAsync();
     }
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
+    private void ToggleSidebar()
     {
-        if (firstRender && !_resizersInitialized)
-        {
-            try
-            {
-                await JSRuntime.InvokeVoidAsync("mystiraPanels.init", new {
-                    containerId = "panel-container",
-                    leftId = "panel-left",
-                    centerId = "panel-center",
-                    rightId = "panel-right",
-                    leftResizerId = "resizer-left",
-                    rightResizerId = "resizer-right",
-                    mins = new { left = 15, center = 25, right = 20 }
-                });
-                _resizersInitialized = true;
-            }
-            catch { }
-        }
-    }
-
-    private void ToggleMobileMenu()
-    {
-        showMobileMenu = !showMobileMenu;
-    }
-
-    private void CloseMobileMenu()
-    {
-        showMobileMenu = false;
-    }
-
-    private string GetLeftPanelClasses()
-    {
-        return showMobileMenu
-            ? "w-80 h-full fixed left-0 top-0 z-50 lg:relative lg:w-[15%] lg:flex-shrink-0"
-            : "hidden lg:block lg:w-[15%] lg:flex-shrink-0 h-full";
-    }
-
-    private string GetCenterPanelClasses()
-    {
-        return "w-full lg:w-[35%] lg:flex-shrink-0 h-full";
-    }
-
-    private string GetRightPanelClasses()
-    {
-        return "hidden lg:block lg:w-[50%] lg:flex-shrink-0 h-full";
+        sidebarIsOpen = !sidebarIsOpen;
     }
 
     private async Task EnsureModelSettingsAsync()
@@ -803,7 +761,6 @@
     {
         CurrentChat = chat;
         YamlContent = CurrentChat?.YamlSnapshot;
-        CloseMobileMenu();
         StateHasChanged();
     }
 
@@ -845,7 +802,6 @@
 
         ChatHistories.Insert(0, CurrentChat);
         await SaveChatsAsync();
-        CloseMobileMenu();
         StateHasChanged();
 
         // Optionally kick off the setup flow with an initial prompt
@@ -1044,7 +1000,6 @@
         ValidationResult = null;
         pendingProposalsByChatId.Remove(chat.Id);
 
-        CloseMobileMenu();
         await SaveChatsAsync();
 
         return chat;

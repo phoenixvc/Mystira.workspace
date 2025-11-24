@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Mystira.StoryGenerator.Web;
 using Mystira.StoryGenerator.Web.Services;
+using Syncfusion.Blazor;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
@@ -12,6 +13,9 @@ builder.Services.AddSingleton(builder.Configuration);
 
 // Add Blazored LocalStorage
 builder.Services.AddBlazoredLocalStorage();
+
+// Add Syncfusion Blazor services
+builder.Services.AddSyncfusionBlazor();
 
 // Add Chat Session Service
 builder.Services.AddScoped<IChatSessionService, ChatSessionService>();
