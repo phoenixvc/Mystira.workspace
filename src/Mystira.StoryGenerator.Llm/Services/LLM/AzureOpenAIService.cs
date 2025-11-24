@@ -40,22 +40,42 @@ public class AzureOpenAIService : ILLMService
             return Enumerable.Empty<ChatModelInfo>();
         }
 
-        // For Azure OpenAI, we return the configured deployment as the available model
-        // In a real implementation, you might call the Azure OpenAI API to list available deployments
-        var model = new ChatModelInfo
+        // Return models from the deployments list in configuration
+        // If no deployments are configured, fall back to the legacy single deployment
+        var deployments = _settings.AzureOpenAI.Deployments;
+        if (deployments == null || !deployments.Any())
         {
-            Id = _settings.AzureOpenAI.DeploymentName,
-            DisplayName = GetDisplayNameForDeployment(_settings.AzureOpenAI.DeploymentName),
-            Description = "Azure OpenAI GPT model deployment",
-            MaxTokens = 4096,
-            DefaultTemperature = 0.7,
+            // Fallback to legacy single deployment configuration
+            var model = new ChatModelInfo
+            {
+                Id = _settings.AzureOpenAI.DeploymentName,
+                DisplayName = GetDisplayNameForDeployment(_settings.AzureOpenAI.DeploymentName),
+                Description = "Azure OpenAI GPT model deployment",
+                MaxTokens = 4096,
+                DefaultTemperature = 0.7,
+                MinTemperature = 0.0,
+                MaxTemperature = 2.0,
+                SupportsJsonSchema = true,
+                Capabilities = new List<string> { "chat", "json-schema", "story-generation" }
+            };
+            return new List<ChatModelInfo> { model };
+        }
+
+        // Convert configured deployments to ChatModelInfo objects
+        var models = deployments.Select(deployment => new ChatModelInfo
+        {
+            Id = deployment.Name,
+            DisplayName = deployment.DisplayName,
+            Description = $"Azure OpenAI {deployment.DisplayName} deployment",
+            MaxTokens = deployment.MaxTokens,
+            DefaultTemperature = deployment.DefaultTemperature,
             MinTemperature = 0.0,
             MaxTemperature = 2.0,
-            SupportsJsonSchema = true, // Azure OpenAI supports JSON schema response formatting
-            Capabilities = new List<string> { "chat", "json-schema", "story-generation" }
-        };
+            SupportsJsonSchema = deployment.SupportsJsonSchema,
+            Capabilities = deployment.Capabilities ?? new List<string> { "chat", "story-generation" }
+        });
 
-        return new List<ChatModelInfo> { model };
+        return models;
     }
 
     private static string GetDisplayNameForDeployment(string deploymentName)

@@ -22,7 +22,28 @@ public class AzureOpenAIServiceTests
             {
                 Endpoint = "https://test.openai.azure.com",
                 ApiKey = "test-key",
-                DeploymentName = "gpt-4"
+                DeploymentName = "gpt-4",
+                Deployments = new List<AzureOpenAIDeployment>
+                {
+                    new()
+                    {
+                        Name = "gpt-4",
+                        DisplayName = "GPT-4",
+                        MaxTokens = 4096,
+                        DefaultTemperature = 0.7,
+                        SupportsJsonSchema = true,
+                        Capabilities = new List<string> { "chat", "json-schema", "story-generation" }
+                    },
+                    new()
+                    {
+                        Name = "gpt-35-turbo",
+                        DisplayName = "GPT-3.5 Turbo",
+                        MaxTokens = 4096,
+                        DefaultTemperature = 0.7,
+                        SupportsJsonSchema = false,
+                        Capabilities = new List<string> { "chat", "story-generation" }
+                    }
+                }
             }
         };
 
@@ -57,9 +78,37 @@ public class AzureOpenAIServiceTests
     }
 
     [Fact]
-    public void GetAvailableModels_WithValidSettings_ReturnsModel()
+    public void GetAvailableModels_WithValidSettings_ReturnsModels()
     {
         // Arrange
+        var service = new AzureOpenAIService(_optionsMock.Object, _loggerMock.Object);
+
+        // Act
+        var result = service.GetAvailableModels().ToList();
+
+        // Assert
+        Assert.Equal(2, result.Count);
+        
+        var gpt4Model = result.FirstOrDefault(m => m.Id == "gpt-4");
+        Assert.NotNull(gpt4Model);
+        Assert.Equal("GPT-4", gpt4Model.DisplayName);
+        Assert.True(gpt4Model.SupportsJsonSchema);
+        Assert.Contains("chat", gpt4Model.Capabilities);
+        Assert.Contains("json-schema", gpt4Model.Capabilities);
+
+        var gpt35Model = result.FirstOrDefault(m => m.Id == "gpt-35-turbo");
+        Assert.NotNull(gpt35Model);
+        Assert.Equal("GPT-3.5 Turbo", gpt35Model.DisplayName);
+        Assert.False(gpt35Model.SupportsJsonSchema);
+        Assert.Contains("chat", gpt35Model.Capabilities);
+        Assert.DoesNotContain("json-schema", gpt35Model.Capabilities);
+    }
+
+    [Fact]
+    public void GetAvailableModels_WithEmptyDeployments_FallsBackToLegacy()
+    {
+        // Arrange
+        _aiSettings.AzureOpenAI.Deployments = new List<AzureOpenAIDeployment>();
         var service = new AzureOpenAIService(_optionsMock.Object, _loggerMock.Object);
 
         // Act

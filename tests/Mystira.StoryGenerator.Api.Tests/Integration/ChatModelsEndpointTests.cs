@@ -95,7 +95,7 @@ public class ChatModelsEndpointTests : IClassFixture<WebApplicationFactory<Progr
     }
 
     [Fact]
-    public async Task GetModels_WithMultipleProviders_ReturnsAllProviders()
+    public async Task GetModels_WithMultipleDeployments_ReturnsAllDeployments()
     {
         // Arrange
         var mockFactory = new Mock<ILLMServiceFactory>();
@@ -104,19 +104,13 @@ public class ChatModelsEndpointTests : IClassFixture<WebApplicationFactory<Progr
         {
             new()
             {
-                Provider = "provider-1",
+                Provider = "azure-openai",
                 Available = true,
                 Models = new List<ChatModelInfo>
                 {
-                    new() { Id = "model-1", DisplayName = "Model 1" },
-                    new() { Id = "model-2", DisplayName = "Model 2" }
+                    new() { Id = "model-1", DisplayName = "Model 1", MaxTokens = 1000 },
+                    new() { Id = "model-2", DisplayName = "Model 2", MaxTokens = 2000 }
                 }
-            },
-            new()
-            {
-                Provider = "provider-2",
-                Available = false,
-                Models = new List<ChatModelInfo>()
             }
         };
         
@@ -140,17 +134,22 @@ public class ChatModelsEndpointTests : IClassFixture<WebApplicationFactory<Progr
         var result = JsonSerializer.Deserialize<ChatModelsResponse>(content, _jsonOptions);
         
         Assert.NotNull(result);
-        Assert.Equal(2, result.Providers.Count);
-        Assert.Equal(2, result.TotalModels); // Only count models from available providers
+        Assert.Single(result.Providers);
+        Assert.Equal(2, result.TotalModels); // Both models from single provider
         
-        var provider1 = result.Providers.FirstOrDefault(p => p.Provider == "provider-1");
-        Assert.NotNull(provider1);
-        Assert.True(provider1.Available);
-        Assert.Equal(2, provider1.Models.Count);
+        var provider = result.Providers.FirstOrDefault(p => p.Provider == "azure-openai");
+        Assert.NotNull(provider);
+        Assert.True(provider.Available);
+        Assert.Equal(2, provider.Models.Count);
         
-        var provider2 = result.Providers.FirstOrDefault(p => p.Provider == "provider-2");
-        Assert.NotNull(provider2);
-        Assert.False(provider2.Available);
-        Assert.Empty(provider2.Models);
+        var model1 = provider.Models.FirstOrDefault(m => m.Id == "model-1");
+        Assert.NotNull(model1);
+        Assert.Equal("Model 1", model1.DisplayName);
+        Assert.Equal(1000, model1.MaxTokens);
+        
+        var model2 = provider.Models.FirstOrDefault(m => m.Id == "model-2");
+        Assert.NotNull(model2);
+        Assert.Equal("Model 2", model2.DisplayName);
+        Assert.Equal(2000, model2.MaxTokens);
     }
 }

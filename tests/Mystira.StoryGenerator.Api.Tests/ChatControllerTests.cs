@@ -44,14 +44,15 @@ public class ChatControllerTests
                         DisplayName = "GPT-4",
                         MaxTokens = 4096,
                         DefaultTemperature = 0.7
+                    },
+                    new()
+                    {
+                        Id = "gpt-35-turbo",
+                        DisplayName = "GPT-3.5 Turbo",
+                        MaxTokens = 4096,
+                        DefaultTemperature = 0.7
                     }
                 }
-            },
-            new()
-            {
-                Provider = "google-gemini",
-                Available = false,
-                Models = new List<ChatModelInfo>()
             }
         };
 
@@ -64,19 +65,15 @@ public class ChatControllerTests
         var okResult = Assert.IsType<OkObjectResult>(result.Result);
         var response = Assert.IsType<ChatModelsResponse>(okResult.Value);
         
-        Assert.Equal(2, response.Providers.Count);
-        Assert.Equal(1, response.TotalModels);
+        Assert.Single(response.Providers);
+        Assert.Equal(2, response.TotalModels);
         
         var azureProvider = response.Providers.FirstOrDefault(p => p.Provider == "azure-openai");
         Assert.NotNull(azureProvider);
         Assert.True(azureProvider.Available);
-        Assert.Single(azureProvider.Models);
+        Assert.Equal(2, azureProvider.Models.Count);
         Assert.Equal("gpt-4", azureProvider.Models[0].Id);
-        
-        var geminiProvider = response.Providers.FirstOrDefault(p => p.Provider == "google-gemini");
-        Assert.NotNull(geminiProvider);
-        Assert.False(geminiProvider.Available);
-        Assert.Empty(geminiProvider.Models);
+        Assert.Equal("gpt-35-turbo", azureProvider.Models[1].Id);
     }
 
     [Fact]

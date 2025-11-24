@@ -142,7 +142,7 @@ public class LLMServiceFactoryTests
     [Fact]
     public void GetAvailableModels_ReturnsModelsFromAllProviders()
     {
-        var azureModel = new ChatModelInfo
+        var azureModel1 = new ChatModelInfo
         {
             Id = "gpt-4",
             DisplayName = "GPT-4",
@@ -150,41 +150,31 @@ public class LLMServiceFactoryTests
             DefaultTemperature = 0.7
         };
 
-        var geminiModel = new ChatModelInfo
+        var azureModel2 = new ChatModelInfo
         {
-            Id = "gemini-pro",
-            DisplayName = "Gemini Pro",
-            MaxTokens = 8192,
+            Id = "gpt-35-turbo",
+            DisplayName = "GPT-3.5 Turbo",
+            MaxTokens = 4096,
             DefaultTemperature = 0.7
         };
 
         var mockService1 = new Mock<ILLMService>();
         mockService1.Setup(x => x.ProviderName).Returns("azure-openai");
         mockService1.Setup(x => x.IsAvailable()).Returns(true);
-        mockService1.Setup(x => x.GetAvailableModels()).Returns(new List<ChatModelInfo> { azureModel });
+        mockService1.Setup(x => x.GetAvailableModels()).Returns(new List<ChatModelInfo> { azureModel1, azureModel2 });
 
-        var mockService2 = new Mock<ILLMService>();
-        mockService2.Setup(x => x.ProviderName).Returns("google-gemini");
-        mockService2.Setup(x => x.IsAvailable()).Returns(true);
-        mockService2.Setup(x => x.GetAvailableModels()).Returns(new List<ChatModelInfo> { geminiModel });
-
-        var services = new List<ILLMService> { mockService1.Object, mockService2.Object };
+        var services = new List<ILLMService> { mockService1.Object };
         var factory = new LLMServiceFactory(services, _optionsMock.Object, _loggerMock.Object);
 
         var result = factory.GetAvailableModels().ToList();
 
-        Assert.Equal(2, result.Count);
+        Assert.Single(result);
         
         var azureProvider = result.FirstOrDefault(p => p.Provider == "azure-openai");
         Assert.NotNull(azureProvider);
         Assert.True(azureProvider.Available);
-        Assert.Single(azureProvider.Models);
+        Assert.Equal(2, azureProvider.Models.Count);
         Assert.Equal("gpt-4", azureProvider.Models[0].Id);
-
-        var geminiProvider = result.FirstOrDefault(p => p.Provider == "google-gemini");
-        Assert.NotNull(geminiProvider);
-        Assert.True(geminiProvider.Available);
-        Assert.Single(geminiProvider.Models);
-        Assert.Equal("gemini-pro", geminiProvider.Models[0].Id);
+        Assert.Equal("gpt-35-turbo", azureProvider.Models[1].Id);
     }
 }

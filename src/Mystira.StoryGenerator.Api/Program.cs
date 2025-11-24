@@ -28,11 +28,9 @@ builder.Services.AddOptions<InstructionSearchSettings>()
 
 // Register HttpClient for LLM services (moved to Llm project)
 builder.Services.AddHttpClient<AzureOpenAIService>();
-builder.Services.AddHttpClient<GoogleGeminiService>();
 
 // Register LLM services (in Llm project) and expose Domain interfaces
 builder.Services.AddScoped<ILLMService, AzureOpenAIService>();
-builder.Services.AddScoped<ILLMService, GoogleGeminiService>();
 builder.Services.AddScoped<ILLMServiceFactory, LLMServiceFactory>();
 
 // Story schema provider abstraction (also implements Domain interface)

@@ -1,6 +1,5 @@
-@implements IDisposable
 @inject IChatService ChatService
-@inject IDynamicModelService DynamicModelService
+@inject IAiModelSettingsService ModelSettingsService
 @inject ILogger<ProviderSettings> Logger
 
 <div class="provider-settings">
@@ -42,9 +41,9 @@
                 <option value="@model.Id">@model.DisplayName</option>
             }
         </select>
-        @if (!string.IsNullOrEmpty(SelectedModel))
+        @if (string.IsNullOrEmpty(SelectedModel))
         {
-            var modelInfo = GetModelInfo(SelectedModel);
+            var modelInfo = availableModels.FirstOrDefault(m => m.Id.Equals(SelectedModel, StringComparison.OrdinalIgnoreCase));
             if (modelInfo != null)
             {
                 <small class="form-text text-muted">@modelInfo.Description</small>
