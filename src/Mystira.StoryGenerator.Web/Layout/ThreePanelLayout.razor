@@ -149,7 +149,7 @@
             </div>
 
             <!-- Right Panel - YAML Preview (50%) -->
-            <div id="panel-right" class="panel border-l border-gray-200 bg-gray-50" style="width:@($"{rightWidth}%")">
+            <div id="panel-right" class="panel border-l border-gray-200 bg-gray-50" style="width:@(RightPanelWidth)%">
                <YamlPreviewPanel YamlContent="@YamlContent"
                                ValidationResult="@ValidationResult"
                                OnYamlCopied="@HandleYamlCopied"
@@ -159,7 +159,7 @@
                                YamlSnapshots="@(CurrentChat?.YamlSnapshots ?? new())"
                                CurrentVersion="@GetCurrentVersion()"
                                OnVersionSelected="@HandleVersionSelected" />
-            </div>
+           </div>
         </div>
 
         <style>
@@ -507,6 +507,10 @@
     private CancellationTokenSource? copyFeedbackCts;
     private readonly TimeSpan copyFeedbackDuration = TimeSpan.FromSeconds(4);
 
+    // Right panel layout state (percentage width)
+    private int RightPanelWidth { get; set; } = 50;
+    private string RightPanelInlineStyle => $"width:{Math.Clamp(RightPanelWidth, 0, 100)}%;";
+
     // Import state
     private bool showImportMenu = false;
     private bool showImportResult = false;
@@ -574,6 +578,15 @@
     {
         sidebarIsOpen = !sidebarIsOpen;
         await InvokeAsync(StateHasChanged);
+    }
+
+    private void CloseMobileMenu()
+    {
+        // Close the sidebar on mobile/new chat selection
+        sidebarIsOpen = false;
+        // Also ensure any small pop menus are closed
+        showImportMenu = false;
+        // No need to InvokeAsync here; callers trigger StateHasChanged after actions
     }
 
     private async Task EnsureModelSettingsAsync()
@@ -1123,7 +1136,7 @@
                     var generatedYaml = JsonYamlConverter.ToYaml(result.Json);
                     YamlContent = generatedYaml;
                     CurrentChat!.YamlSnapshot = generatedYaml;
-                    
+
                     // Create initial snapshot if this is the first generation
                     if (CurrentChat.YamlSnapshots.Count == 0)
                     {
@@ -1145,7 +1158,7 @@
                             CreatedAt = DateTime.UtcNow
                         });
                     }
-                    
+
                     await SaveChatsAsync();
 
                     var validation = await ApiService.ValidateStoryAsync(generatedYaml, "yaml");
@@ -1230,10 +1243,10 @@
                         if (CurrentChat != null)
                         {
                             CurrentChat.YamlSnapshot = convertedYaml;
-                            
+
                             // Create a new version snapshot when YAML is updated
-                            var nextVersion = CurrentChat.YamlSnapshots.Count == 0 
-                                ? 1 
+                            var nextVersion = CurrentChat.YamlSnapshots.Count == 0
+                                ? 1
                                 : CurrentChat.YamlSnapshots.Max(s => s.Version) + 1;
                             CurrentChat.YamlSnapshots.Add(new YamlSnapshot
                             {
@@ -1241,7 +1254,7 @@
                                 Content = convertedYaml,
                                 CreatedAt = DateTime.UtcNow
                             });
-                            
+
                             await SaveChatsAsync();
                         }
 
@@ -1337,10 +1350,10 @@
                             {
                                 YamlContent = fixedYaml;
                                 CurrentChat.YamlSnapshot = fixedYaml;
-                                
+
                                 // Create a new version snapshot when YAML is fixed
-                                var nextVersion = CurrentChat.YamlSnapshots.Count == 0 
-                                    ? 1 
+                                var nextVersion = CurrentChat.YamlSnapshots.Count == 0
+                                    ? 1
                                     : CurrentChat.YamlSnapshots.Max(s => s.Version) + 1;
                                 CurrentChat.YamlSnapshots.Add(new YamlSnapshot
                                 {
@@ -1348,7 +1361,7 @@
                                     Content = fixedYaml,
                                     CreatedAt = DateTime.UtcNow
                                 });
-                                
+
                                 await SaveChatsAsync();
 
                                 var revalidation = await ApiService.ValidateStoryAsync(fixedYaml, "yaml");
@@ -1453,10 +1466,10 @@
         if (CurrentChat != null)
         {
             CurrentChat.YamlSnapshot = updatedYaml;
-            
+
             // Create a new snapshot version
-            var nextVersion = CurrentChat.YamlSnapshots.Count == 0 
-                ? 1 
+            var nextVersion = CurrentChat.YamlSnapshots.Count == 0
+                ? 1
                 : CurrentChat.YamlSnapshots.Max(s => s.Version) + 1;
             CurrentChat.YamlSnapshots.Add(new YamlSnapshot
             {
@@ -1464,7 +1477,7 @@
                 Content = updatedYaml,
                 CreatedAt = DateTime.UtcNow
             });
-            
+
             CurrentChat.Messages.Add(new StoryGeneratorChatMessage
             {
                 Role = "system",
@@ -1900,7 +1913,7 @@
                 if (CurrentChat != null)
                 {
                     CurrentChat.YamlSnapshot = YamlContent;
-                    
+
                     // Create initial snapshot if this is the first generation
                     if (CurrentChat.YamlSnapshots.Count == 0)
                     {
@@ -1911,7 +1924,7 @@
                             CreatedAt = DateTime.UtcNow
                         });
                     }
-                    
+
                     var summary = BuildYamlSummaryMessage(YamlContent);
                     CurrentChat.Messages.Add(new StoryGeneratorChatMessage
                     {
