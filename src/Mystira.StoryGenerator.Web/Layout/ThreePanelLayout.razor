@@ -59,6 +59,8 @@
                    Width="320px"
                    Type="SidebarType.Push"
                    Position="SidebarPosition.Left"
+                   DockSize="80px"
+                   EnableDock="false"
                    ShowBackdrop="false"
                    MediaQuery="(min-width: 1024px)"
                    Target=".sidebar-main-content"
@@ -483,7 +485,7 @@
 
     // Sidebar state
     private SfSidebar? sidebarRef;
-    private bool sidebarIsOpen = true;
+    private bool sidebarIsOpen = false;
     private bool showSettingsModal;
 
     // Data properties
