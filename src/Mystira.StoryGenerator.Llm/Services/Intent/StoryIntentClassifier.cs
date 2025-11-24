@@ -1,4 +1,4 @@
-﻿using System.Text.Json;
+using System.Text.Json;
 using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Logging;
 using Mystira.StoryGenerator.Contracts.Chat;
@@ -167,7 +167,8 @@ Now classify this user instruction:
 
         try
         {
-            var llmService = _llmServiceFactory.GetService(_settings.Provider!);
+            var deploymentNameOrModelId = _settings.DeploymentName ?? _settings.ModelId;
+            var llmService = _llmServiceFactory.GetService(_settings.Provider!, deploymentNameOrModelId);
             if (llmService == null)
             {
                 _logger.LogWarning("LLM provider {Provider} not available for intent routing", _settings.Provider);
@@ -178,7 +179,7 @@ Now classify this user instruction:
             {
                 Provider = _settings.Provider,
                 ModelId = _settings.ModelId,
-                Model = _settings.ModelId,
+                Model = deploymentNameOrModelId,
                 Temperature = _settings.Temperature,
                 MaxTokens = _settings.MaxTokens,
                 Messages = new List<MystiraChatMessage>

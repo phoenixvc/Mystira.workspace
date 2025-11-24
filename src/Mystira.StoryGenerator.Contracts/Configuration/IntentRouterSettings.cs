@@ -10,6 +10,8 @@ public class IntentRouterSettings
 
     public string? Provider { get; set; }
 
+    public string? DeploymentName { get; set; }
+
     public string? ModelId { get; set; }
 
     [Range(0, 1)]

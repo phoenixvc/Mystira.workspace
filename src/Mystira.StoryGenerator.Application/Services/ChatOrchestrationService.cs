@@ -305,7 +305,7 @@ public class ChatOrchestrationService : IChatOrchestrationService
     {
         // Get appropriate LLM service
         var service = !string.IsNullOrWhiteSpace(context.Provider)
-            ? _llmServiceFactory.GetService(context.Provider!)
+            ? _llmServiceFactory.GetService(context.Provider!, context.Model)
             : _llmServiceFactory.GetDefaultService();
 
         if (service is null)
@@ -426,7 +426,7 @@ public class ChatOrchestrationService : IChatOrchestrationService
     {
         // Get appropriate LLM service for parameter checking
         var service = !string.IsNullOrWhiteSpace(context.Provider)
-            ? _llmServiceFactory.GetService(context.Provider!)
+            ? _llmServiceFactory.GetService(context.Provider!, context.Model)
             : _llmServiceFactory.GetDefaultService();
 
         if (service is null)

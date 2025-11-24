@@ -17,13 +17,20 @@ public class AzureOpenAIService : ILLMService
 {
     private readonly AiSettings _settings;
     private readonly ILogger<AzureOpenAIService> _logger;
+    private string? _deploymentNameOrModelId;
 
     public string ProviderName => "azure-openai";
+    public string? DeploymentNameOrModelId => _deploymentNameOrModelId;
 
     public AzureOpenAIService(IOptions<AiSettings> options, ILogger<AzureOpenAIService> logger)
     {
         _settings = options.Value;
         _logger = logger;
+    }
+    
+    internal void SetDeploymentNameOrModelId(string? deploymentNameOrModelId)
+    {
+        _deploymentNameOrModelId = deploymentNameOrModelId;
     }
 
     public bool IsAvailable()
@@ -39,6 +46,9 @@ public class AzureOpenAIService : ILLMService
 
         try
         {
+            // Determine which deployment to use
+            var deploymentName = ResolveDeploymentName(request);
+
             var azureClient = new AzureOpenAIClient(
                 new Uri(_settings.AzureOpenAI.Endpoint),
                 new ApiKeyCredential(_settings.AzureOpenAI.ApiKey),
@@ -46,7 +56,7 @@ public class AzureOpenAIService : ILLMService
                 {
                     NetworkTimeout = new TimeSpan(0, 0, 3, 0)
                 });
-            var chatClient = azureClient.GetChatClient(_settings.AzureOpenAI.DeploymentName);
+            var chatClient = azureClient.GetChatClient(deploymentName);
 
             var messages = request.ToOpenAiChatMessages();
 
@@ -61,7 +71,7 @@ public class AzureOpenAIService : ILLMService
             return new ChatCompletionResponse
             {
                 Content = response?.Content?.FirstOrDefault()?.Text ?? string.Empty,
-                Model = response?.Model ?? _settings.AzureOpenAI.DeploymentName,
+                Model = response?.Model ?? deploymentName,
                 Provider = ProviderName,
                 Usage = response?.Usage != null ? new ChatCompletionUsage
                 {
@@ -77,6 +87,38 @@ public class AzureOpenAIService : ILLMService
             _logger.LogError(ex, "Error calling Azure OpenAI API");
             return CreateErrorResponse($"Azure OpenAI service error: {ex.Message}");
         }
+    }
+
+    private string ResolveDeploymentName(ChatCompletionRequest request)
+    {
+        // Priority order:
+        // 1. Model from request (if provided and valid)
+        // 2. Stored deployment name/model from adapter (if set)
+        // 3. Default deployment name from settings
+
+        if (!string.IsNullOrWhiteSpace(request.Model))
+        {
+            // Check if it's in the deployments dictionary
+            if (_settings.AzureOpenAI.Deployments.TryGetValue(request.Model, out var deployment))
+            {
+                return deployment;
+            }
+            // If not in dictionary, use it directly (it's already the deployment name)
+            return request.Model;
+        }
+
+        if (!string.IsNullOrWhiteSpace(_deploymentNameOrModelId))
+        {
+            // Check if it's in the deployments dictionary
+            if (_settings.AzureOpenAI.Deployments.TryGetValue(_deploymentNameOrModelId, out var deployment))
+            {
+                return deployment;
+            }
+            // If not in dictionary, use it directly
+            return _deploymentNameOrModelId;
+        }
+
+        return _settings.AzureOpenAI.DeploymentName;
     }
 
     // Exposed for unit testing to validate option construction when a JsonSchemaFormat is provided.

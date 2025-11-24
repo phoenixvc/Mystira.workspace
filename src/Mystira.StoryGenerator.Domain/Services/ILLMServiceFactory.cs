@@ -7,7 +7,14 @@ namespace Mystira.StoryGenerator.Domain.Services;
 /// </summary>
 public interface ILLMServiceFactory
 {
-    ILLMService? GetService(string providerName);
+    /// <summary>
+    /// Get an LLM service by provider name, with optional deployment name/model ID override.
+    /// </summary>
+    /// <param name="providerName">The provider name (e.g., "azure-openai")</param>
+    /// <param name="deploymentNameOrModelId">Optional deployment name or model ID to use for this provider</param>
+    /// <returns>An LLM service instance, or null if not available</returns>
+    ILLMService? GetService(string providerName, string? deploymentNameOrModelId = null);
+    
     ILLMService? GetDefaultService();
 }
 
@@ -20,6 +27,11 @@ public interface ILLMService
     /// The name of the provider (e.g., "azure-openai", "google-gemini")
     /// </summary>
     string ProviderName { get; }
+
+    /// <summary>
+    /// Optional deployment name or model ID being used by this service instance
+    /// </summary>
+    string? DeploymentNameOrModelId { get; }
 
     /// <summary>
     /// Generate a chat completion using this LLM provider
