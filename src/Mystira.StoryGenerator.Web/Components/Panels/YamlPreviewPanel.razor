@@ -1,13 +1,64 @@
 @using System.Net
 @using System.Globalization
 @using System.Text
+@using System.Linq
+@using Mystira.StoryGenerator.Web.Models
 @inject IJSRuntime JS
 
 <div class="panel h-full flex flex-col yaml-preview-theme"
      style="@GetThemeCssVariables()">
-    <div class="panel-header flex items-center justify-between">
-        <h2 class="text-lg font-semibold">YAML Preview</h2>
-        <div class="flex items-center space-x-2">
+    <div class="panel-header flex flex-col">
+        <div class="flex items-center justify-between">
+           <div class="flex items-center gap-3">
+               <h2 class="text-lg font-semibold">YAML Preview</h2>
+               @if (YamlSnapshots.Count > 0)
+               {
+                   <div class="flex items-center gap-2">
+                       <span class="text-xs font-semibold text-gray-600">View:</span>
+                       <select class="text-xs border border-gray-300 rounded px-2 py-1"
+                               @onchange="HandleVersionChange"
+                               value="@CurrentVersion.ToString()"
+                               title="Select version to view">
+                           @foreach (var snapshot in YamlSnapshots.OrderByDescending(s => s.Version))
+                           {
+                               <option value="@snapshot.Version">v@(snapshot.Version)</option>
+                           }
+                       </select>
+                       <span class="text-xs text-gray-500">(@CurrentVersion/@YamlSnapshots.Count)</span>
+                   </div>
+               }
+           </div>
+           <div class="flex items-center gap-2">
+               @if (YamlSnapshots.Count > 1)
+               {
+                   <button type="button"
+                           @onclick="ToggleDiffView"
+                           class="text-sm text-indigo-600 hover:text-indigo-800 font-medium transition-colors flex items-center gap-1"
+                           title="Compare versions">
+                       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                       </svg>
+                       @(showDiffView ? "Hide Diff" : "Show Diff")
+                   </button>
+                   @if (showDiffView)
+                   {
+                       <span class="text-xs text-gray-600">Compare to:</span>
+                       <select class="text-xs border border-gray-300 rounded px-2 py-1"
+                               @onchange="HandleDiffVersionChange"
+                               value="@(diffCompareVersion?.ToString() ?? GetDefaultDiffVersion().ToString())"
+                               title="Select version to compare against">
+                           @foreach (var snapshot in YamlSnapshots.OrderByDescending(s => s.Version))
+                           {
+                               @if (snapshot.Version != CurrentVersion)
+                               {
+                                   <option value="@snapshot.Version">v@(snapshot.Version)</option>
+                               }
+                           }
+                       </select>
+                   }
+               }
+           </div>
+            <div class="flex items-center space-x-2">
             @if (!string.IsNullOrEmpty(YamlContent))
             {
                 @if (!isEditing)
@@ -68,6 +119,7 @@
                     Validate
                 </button>
             }
+            </div>
         </div>
     </div>
 
@@ -140,22 +192,52 @@
                 }
             </div>
 
-            <div class="flex-1 overflow-hidden flex flex-col">
-                <div class="flex-1 p-4 overflow-y-auto" @ref="previewScrollRef">
+            @if (showDiffView && YamlSnapshots.Count > 1 && diffCompareVersion.HasValue)
+            {
+                <div class="flex-1 overflow-hidden flex flex-col p-4">
+                    <div class="mb-3 flex items-center gap-2 text-sm text-gray-600">
+                        <span>Comparing Version @diffCompareVersion with Current Version</span>
+                        <button type="button"
+                                @onclick="CloseDiffView"
+                                class="text-xs text-gray-500 hover:text-gray-700">
+                            ✕
+                        </button>
+                    </div>
+                    @{
+                        var oldVersion = YamlSnapshots.FirstOrDefault(s => s.Version == diffCompareVersion);
+                        var newVersion = YamlSnapshots.FirstOrDefault(s => s.Version == CurrentVersion);
+                    }
+                    <YamlDiffView OldContent="@oldVersion?.Content" NewContent="@newVersion?.Content" />
+                </div>
+            }
+            else
+            {
+                <div class="flex-1 overflow-hidden flex flex-col">
                     @if (isEditing)
                     {
-                        <textarea @key="isEditing"
-                                  @bind-value="EditBuffer"
-                                  @bind-value:event="oninput"
-                                  class="w-full h-full yaml-preview-surface yaml-preview-editor p-4 rounded-lg text-sm overflow-auto font-mono leading-relaxed focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none"
-                                  wrap="@GetTextareaWrapMode()"
-                                  @ref="textareaRef"></textarea>
+                        <div class="flex-1 overflow-hidden">
+                            <textarea @key="isEditing"
+                                      @bind-value="EditBuffer"
+                                      @bind-value:event="oninput"
+                                      class="w-full h-full yaml-preview-surface yaml-preview-editor p-4 rounded-lg text-sm overflow-auto font-mono leading-relaxed focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none"
+                                      wrap="@GetTextareaWrapMode()"
+                                      @ref="textareaRef"></textarea>
+                        </div>
                     }
                     else
                     {
-                        <pre class="@GetPreviewClasses()" tabindex="0">@GetHighlightedPreviewMarkup()</pre>
+                        <div class="flex-1 overflow-hidden flex">
+                            <div class="flex-shrink-0 w-12 bg-gray-100 text-right pr-3 pl-2 text-gray-500 text-xs border-r border-gray-200 select-none overflow-hidden"
+                                 style="font-family: 'Courier New', monospace; line-height: 1.5rem;"
+                                 @ref="lineNumbersRef">
+                                @foreach (var lineNum in GetLineNumbers())
+                                {
+                                    <div style="height: 1.5rem; display: flex; align-items: center; justify-content: flex-end; padding-right: 0.25rem;">@lineNum</div>
+                                }
+                            </div>
+                            <pre class="@GetPreviewClasses()" tabindex="0" @ref="previewScrollRef">@GetHighlightedPreviewMarkup()</pre>
+                        </div>
                     }
-                </div>
 
                 <div class="border-t border-gray-200 p-3">
                     @if (ValidationResult != null)
@@ -203,7 +285,8 @@
                         </div>
                     }
                 </div>
-            </div>
+                </div>
+            }
         }
         else
         {
@@ -231,6 +314,10 @@
     [Parameter] public EventCallback<string> OnYamlSaved { get; set; }
     [Parameter] public EventCallback OnValidateRequested { get; set; }
     [Parameter] public YamlSyntaxColorScheme? SyntaxColors { get; set; }
+    [Parameter] public List<YamlSnapshot> YamlSnapshots { get; set; } = new();
+    [Parameter] public EventCallback<int> OnVersionSelected { get; set; }
+    [Parameter] public int CurrentVersion { get; set; } = 1;
+    [Parameter] public EventCallback<(int oldVersion, int newVersion)> OnDiffRequested { get; set; }
 
     private bool isEditing = false;
     private string editBuffer = string.Empty;
@@ -243,6 +330,9 @@
     private bool requestScrollToActiveMatch;
     private ElementReference previewScrollRef;
     private ElementReference textareaRef;
+    private ElementReference lineNumbersRef;
+    private bool showDiffView = false;
+    private int? diffCompareVersion;
 
     private const int MaxTrackedMatches = 500;
 
@@ -261,31 +351,43 @@
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (requestScrollToActiveMatch)
-        {
-            requestScrollToActiveMatch = false;
-            if (activeMatchIndex >= 0 && activeMatchIndex < matches.Count)
-            {
-                var match = matches[activeMatchIndex];
-                try
-                {
-                    if (isEditing)
-                    {
-                        await JS.InvokeVoidAsync("mystiraYamlPreview.selectTextareaRange", textareaRef, match.Start, match.Length);
-                    }
-                    else
-                    {
-                        await JS.InvokeVoidAsync("mystiraYamlPreview.scrollToMatch", previewScrollRef, activeMatchIndex);
-                    }
-                }
-                catch
-                {
-                    // Ignore JS interop failures; UI still usable without scroll assistance
-                }
-            }
-        }
+       if (firstRender || !isEditing)
+       {
+           try
+           {
+               await JS.InvokeVoidAsync("syncScroll", previewScrollRef, lineNumbersRef);
+           }
+           catch
+           {
+               // Ignore JS interop failures
+           }
+       }
 
-        await base.OnAfterRenderAsync(firstRender);
+       if (requestScrollToActiveMatch)
+       {
+           requestScrollToActiveMatch = false;
+           if (activeMatchIndex >= 0 && activeMatchIndex < matches.Count)
+           {
+               var match = matches[activeMatchIndex];
+               try
+               {
+                   if (isEditing)
+                   {
+                       await JS.InvokeVoidAsync("mystiraYamlPreview.selectTextareaRange", textareaRef, match.Start, match.Length);
+                   }
+                   else
+                   {
+                       await JS.InvokeVoidAsync("mystiraYamlPreview.scrollToMatch", previewScrollRef, activeMatchIndex);
+                   }
+               }
+               catch
+               {
+                   // Ignore JS interop failures; UI still usable without scroll assistance
+               }
+           }
+       }
+
+       await base.OnAfterRenderAsync(firstRender);
     }
 
     private string EditBuffer
@@ -370,6 +472,98 @@
         EditBuffer = YamlContent ?? string.Empty;
         UpdateSearchMatches(resetActiveIndex: false, preserveCurrentPosition: true);
         requestScrollToActiveMatch = matches.Count > 0;
+    }
+
+    private async Task HandleVersionChange(ChangeEventArgs e)
+    {
+       if (int.TryParse(e.Value?.ToString(), out var version))
+       {
+           diffCompareVersion = null;
+           showDiffView = false;
+           CurrentVersion = version;
+           StateHasChanged();
+           if (OnVersionSelected.HasDelegate)
+           {
+               await OnVersionSelected.InvokeAsync(version);
+           }
+       }
+    }
+
+    private void HandleDiffVersionChange(ChangeEventArgs e)
+    {
+       if (int.TryParse(e.Value?.ToString(), out var version))
+       {
+           diffCompareVersion = version;
+       }
+    }
+
+    private int GetDefaultDiffVersion()
+    {
+       if (YamlSnapshots.Count < 2)
+           return CurrentVersion;
+
+       var previousVersion = YamlSnapshots
+           .Where(s => s.Version < CurrentVersion)
+           .OrderByDescending(s => s.Version)
+           .FirstOrDefault();
+
+       return previousVersion?.Version ?? YamlSnapshots.Min(s => s.Version);
+    }
+
+    private void ToggleDiffView()
+    {
+        if (YamlSnapshots.Count <= 1)
+        {
+            return;
+        }
+
+        if (showDiffView)
+        {
+            showDiffView = false;
+            diffCompareVersion = null;
+        }
+        else
+        {
+            showDiffView = true;
+            var previousVersion = YamlSnapshots
+                .Where(s => s.Version < CurrentVersion)
+                .OrderByDescending(s => s.Version)
+                .FirstOrDefault();
+            diffCompareVersion = previousVersion?.Version ?? YamlSnapshots.Min(s => s.Version);
+        }
+    }
+
+    private void CloseDiffView()
+    {
+        showDiffView = false;
+        diffCompareVersion = null;
+    }
+
+    private IEnumerable<int> GetLineNumbers()
+    {
+        var content = YamlContent ?? string.Empty;
+        if (string.IsNullOrEmpty(content))
+        {
+            return Enumerable.Empty<int>();
+        }
+
+        var lineCount = content.Count(c => c == '\n') + 1;
+        return Enumerable.Range(1, lineCount);
+    }
+
+    private async Task SyncLineNumberScroll(WheelEventArgs e)
+    {
+        if (previewScrollRef.Context != null && lineNumbersRef.Context != null)
+        {
+            try
+            {
+                await JS.InvokeVoidAsync("syncScroll", previewScrollRef, lineNumbersRef);
+            }
+            catch
+            {
+                // Ignore JS interop failures
+            }
+        }
     }
 
     private async Task CopyToClipboard()
@@ -587,10 +781,10 @@
 
     private string GetPreviewClasses()
     {
-        var builder = new StringBuilder("yaml-preview-surface yaml-preview-code p-4 rounded-lg text-sm font-mono leading-relaxed");
-        builder.Append(wrapText ? " whitespace-pre-wrap break-words" : " whitespace-pre");
-        builder.Append(wrapText ? " overflow-x-hidden" : " overflow-x-auto");
-        return builder.ToString();
+      var builder = new StringBuilder("yaml-preview-surface yaml-preview-code p-4 text-sm font-mono leading-relaxed flex-1 overflow-y-auto");
+      builder.Append(wrapText ? " whitespace-pre-wrap break-words" : " whitespace-pre");
+      builder.Append(wrapText ? " overflow-x-hidden" : " overflow-x-auto");
+      return builder.ToString();
     }
 
     private MarkupString GetHighlightedPreviewMarkup()
@@ -1160,19 +1354,19 @@
 
 <style>
     .yaml-preview-theme .yaml-preview-surface {
-        background-color: var(--yaml-background-color, #111827);
-        color: var(--yaml-foreground-color, #e5e7eb);
+        background-color: var(--yaml-background-color, #ffffff);
+        color: var(--yaml-foreground-color, #1f2937);
     }
 
     .yaml-preview-theme .yaml-preview-code {
-        border: 1px solid var(--yaml-border-color, rgba(148, 163, 184, 0.35));
-        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.02);
+        border: 1px solid var(--yaml-border-color, rgba(209, 213, 219, 0.6));
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
     }
 
     .yaml-preview-theme .yaml-preview-editor {
-        background-color: var(--yaml-background-color, #111827);
-        border: 1px solid var(--yaml-border-color, rgba(148, 163, 184, 0.35));
-        color: var(--yaml-foreground-color, #e5e7eb);
+        background-color: var(--yaml-background-color, #ffffff);
+        border: 1px solid var(--yaml-border-color, rgba(209, 213, 219, 0.6));
+        color: var(--yaml-foreground-color, #1f2937);
     }
 
     .yaml-preview-theme .yaml-preview-editor::placeholder {
@@ -1186,53 +1380,53 @@
     }
 
     .yaml-preview-theme .yaml-token-key {
-        color: var(--yaml-key-color, #93c5fd);
+        color: var(--yaml-key-color, #0369a1);
         font-weight: 600;
     }
 
     .yaml-preview-theme .yaml-token-separator {
-        color: var(--yaml-separator-color, #fbbf24);
+        color: var(--yaml-separator-color, #ea580c);
         font-weight: 600;
     }
 
     .yaml-preview-theme .yaml-token-value,
     .yaml-preview-theme .yaml-token-plain {
-        color: var(--yaml-value-color, #e5e7eb);
+        color: var(--yaml-value-color, #1f2937);
     }
 
     .yaml-preview-theme .yaml-token-string {
-        color: var(--yaml-string-color, #fde68a);
+        color: var(--yaml-string-color, #b45309);
     }
 
     .yaml-preview-theme .yaml-token-number {
-        color: var(--yaml-number-color, #fcd34d);
+        color: var(--yaml-number-color, #dc2626);
     }
 
     .yaml-preview-theme .yaml-token-boolean {
-        color: var(--yaml-boolean-color, #38bdf8);
+        color: var(--yaml-boolean-color, #0891b2);
     }
 
     .yaml-preview-theme .yaml-token-null {
-        color: var(--yaml-null-color, #fca5a5);
+        color: var(--yaml-null-color, #e11d48);
     }
 
     .yaml-preview-theme .yaml-token-comment {
-        color: var(--yaml-comment-color, #94a3b8);
+        color: var(--yaml-comment-color, #6b7280);
         font-style: italic;
     }
 
     .yaml-preview-theme .yaml-token-indicator,
     .yaml-preview-theme .yaml-token-block {
-        color: var(--yaml-indicator-color, #a855f7);
+        color: var(--yaml-indicator-color, #7c3aed);
     }
 
     .yaml-preview-theme .yaml-token-anchor,
     .yaml-preview-theme .yaml-token-alias {
-        color: var(--yaml-anchor-color, #34d399);
+        color: var(--yaml-anchor-color, #059669);
     }
 
     .yaml-preview-theme .yaml-token-tag {
-        color: var(--yaml-tag-color, #f472b6);
+        color: var(--yaml-tag-color, #be185d);
     }
 
     .yaml-preview-theme .yaml-token-whitespace,

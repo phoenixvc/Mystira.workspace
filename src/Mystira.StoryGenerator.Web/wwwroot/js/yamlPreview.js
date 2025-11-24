@@ -58,7 +58,27 @@
         });
     };
 
+    const syncScroll = (preElement, lineNumbersContainer) => {
+        if (!preElement || !lineNumbersContainer) {
+            return;
+        }
+
+        // preElement is now the pre element itself
+        const syncScrollHandler = () => {
+            lineNumbersContainer.scrollTop = preElement.scrollTop;
+        };
+
+        // Add scroll listener to the pre element
+        preElement.addEventListener('scroll', syncScrollHandler, false);
+        
+        // Return cleanup function
+        return () => {
+            preElement.removeEventListener('scroll', syncScrollHandler, false);
+        };
+    };
+
     window.mystiraYamlPreview = window.mystiraYamlPreview || {};
     window.mystiraYamlPreview.scrollToMatch = scrollToMatch;
     window.mystiraYamlPreview.selectTextareaRange = selectTextareaRange;
+    window.syncScroll = syncScroll;
 })();
