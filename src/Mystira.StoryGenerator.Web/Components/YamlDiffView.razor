@@ -12,30 +12,30 @@
     else
     {
         <div class="yaml-diff-view">
-            @if (diffLines != null && diffLines.Count > 0)
+            @if (diffPieces != null && diffPieces.Count > 0)
             {
                 <div class="overflow-y-auto" style="max-height: 600px;">
                     <table class="w-full text-sm font-mono">
                         <tbody>
-                            @foreach (var (index, line) in diffLines.Select((l, i) => (i, l)))
+                            @foreach (var (index, piece) in diffPieces.Select((p, i) => (i, p)))
                             {
-                                <tr class="@GetDiffLineClasses(line)">
+                                <tr class="@GetDiffLineClasses(piece)">
                                     <td class="w-12 text-right px-2 py-1 text-gray-400 select-none bg-gray-50">
-                                        @if (line.Type != DiffChangeType.Imaginary)
+                                        @if (piece.Type != ChangeType.Imaginary)
                                         {
                                             @(index + 1)
                                         }
                                     </td>
                                     <td class="px-3 py-1 whitespace-pre-wrap break-words">
-                                        @if (line.Type == DiffChangeType.Added)
+                                        @if (piece.Type == ChangeType.Inserted)
                                         {
                                             <span class="text-green-700">+</span>
                                         }
-                                        else if (line.Type == DiffChangeType.Deleted)
+                                        else if (piece.Type == ChangeType.Deleted)
                                         {
                                             <span class="text-red-700">-</span>
                                         }
-                                        else if (line.Type == DiffChangeType.Imaginary)
+                                        else if (piece.Type == ChangeType.Imaginary)
                                         {
                                             <span class="text-gray-300"> </span>
                                         }
@@ -45,7 +45,7 @@
                                         }
                                     </td>
                                     <td class="px-2 py-1 whitespace-pre-wrap break-words flex-1">
-                                        @line.Text
+                                        @piece.Text
                                     </td>
                                 </tr>
                             }
@@ -64,7 +64,7 @@
     [Parameter]
     public string? NewContent { get; set; }
 
-    private List<DiffLine> diffLines = new();
+    private List<DiffPiece> diffPieces = new();
 
     protected override void OnParametersSet()
     {
@@ -73,7 +73,7 @@
 
     private void GenerateDiff()
     {
-        diffLines.Clear();
+        diffPieces.Clear();
 
         var oldText = OldContent ?? string.Empty;
         var newText = NewContent ?? string.Empty;
@@ -89,17 +89,17 @@
 
         if (diff?.Lines != null)
         {
-            diffLines = diff.Lines.ToList();
+            diffPieces = diff.Lines.ToList();
         }
     }
 
-    private string GetDiffLineClasses(DiffLine line)
+    private string GetDiffLineClasses(DiffPiece piece)
     {
-        return line.Type switch
+        return piece.Type switch
         {
-            DiffChangeType.Added => "bg-green-50 hover:bg-green-100",
-            DiffChangeType.Deleted => "bg-red-50 hover:bg-red-100",
-            DiffChangeType.Imaginary => "bg-gray-100",
+            ChangeType.Inserted => "bg-green-50 hover:bg-green-100",
+            ChangeType.Deleted => "bg-red-50 hover:bg-red-100",
+            ChangeType.Imaginary => "bg-gray-100",
             _ => "bg-white hover:bg-gray-50"
         };
     }
