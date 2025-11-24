@@ -25,7 +25,7 @@ dotnet build Mystira.StoryGenerator.sln
 
 The API project reads AI configuration from `appsettings.json` under the `Ai` section. Replace the placeholder API key and model configuration with your provider details. CORS allowed origins can be configured in the `Cors:AllowedOrigins` array.
 
-The WebAssembly project reads the API base URL from `wwwroot/appsettings.json`. Update `Api:BaseUrl` to point to the running API instance.
+The WebAssembly project reads the API base URL from `wwwroot/appsettings.json`. Update `Api:BaseUrl` to point to the running API instance. If you have a Syncfusion license key, set it under `Syncfusion:LicenseKey` in the same file so the sidebar components run without a trial watermark.
 
 ### Running the Projects
 

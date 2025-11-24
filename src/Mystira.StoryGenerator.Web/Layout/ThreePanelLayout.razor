@@ -635,7 +635,7 @@
         isSavingSettings = false;
     }
 
-    private void HandleModelChanged(ChangeEventArgs e)
+    private void HandleModelChanged(Microsoft.AspNetCore.Components.ChangeEventArgs e)
     {
         var modelId = e.Value?.ToString() ?? string.Empty;
         var definition = availableModels.FirstOrDefault(m => string.Equals(m.Id, modelId, StringComparison.OrdinalIgnoreCase))
@@ -748,7 +748,7 @@
         return Math.Clamp(value, min, max);
     }
 
-    private async void HandleModelSettingsChanged(object? sender, EventArgs e)
+    private async void HandleModelSettingsChanged(object? sender, System.EventArgs e)
     {
         await InvokeAsync(async () =>
         {
