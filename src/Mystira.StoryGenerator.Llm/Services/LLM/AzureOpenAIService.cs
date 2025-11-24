@@ -27,7 +27,7 @@ public class AzureOpenAIService : ILLMService
         _settings = options.Value;
         _logger = logger;
     }
-    
+
     internal void SetDeploymentNameOrModelId(string? deploymentNameOrModelId)
     {
         _deploymentNameOrModelId = deploymentNameOrModelId;
@@ -71,7 +71,7 @@ public class AzureOpenAIService : ILLMService
             return new ChatCompletionResponse
             {
                 Content = response?.Content?.FirstOrDefault()?.Text ?? string.Empty,
-                Model = response?.Model ?? deploymentName,
+                Model = deploymentName,
                 Provider = ProviderName,
                 Usage = response?.Usage != null ? new ChatCompletionUsage
                 {
