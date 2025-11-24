@@ -2,6 +2,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Moq;
 using Mystira.StoryGenerator.Contracts.Configuration;
+using Mystira.StoryGenerator.Contracts.Chat;
 using Mystira.StoryGenerator.Domain.Services;
 using Mystira.StoryGenerator.Llm.Services.LLM;
 
@@ -136,5 +137,54 @@ public class LLMServiceFactoryTests
 
         Assert.Single(result);
         Assert.Equal("azure-openai", result[0].ProviderName);
+    }
+
+    [Fact]
+    public void GetAvailableModels_ReturnsModelsFromAllProviders()
+    {
+        var azureModel = new ChatModelInfo
+        {
+            Id = "gpt-4",
+            DisplayName = "GPT-4",
+            MaxTokens = 4096,
+            DefaultTemperature = 0.7
+        };
+
+        var geminiModel = new ChatModelInfo
+        {
+            Id = "gemini-pro",
+            DisplayName = "Gemini Pro",
+            MaxTokens = 8192,
+            DefaultTemperature = 0.7
+        };
+
+        var mockService1 = new Mock<ILLMService>();
+        mockService1.Setup(x => x.ProviderName).Returns("azure-openai");
+        mockService1.Setup(x => x.IsAvailable()).Returns(true);
+        mockService1.Setup(x => x.GetAvailableModels()).Returns(new List<ChatModelInfo> { azureModel });
+
+        var mockService2 = new Mock<ILLMService>();
+        mockService2.Setup(x => x.ProviderName).Returns("google-gemini");
+        mockService2.Setup(x => x.IsAvailable()).Returns(true);
+        mockService2.Setup(x => x.GetAvailableModels()).Returns(new List<ChatModelInfo> { geminiModel });
+
+        var services = new List<ILLMService> { mockService1.Object, mockService2.Object };
+        var factory = new LLMServiceFactory(services, _optionsMock.Object, _loggerMock.Object);
+
+        var result = factory.GetAvailableModels().ToList();
+
+        Assert.Equal(2, result.Count);
+        
+        var azureProvider = result.FirstOrDefault(p => p.Provider == "azure-openai");
+        Assert.NotNull(azureProvider);
+        Assert.True(azureProvider.Available);
+        Assert.Single(azureProvider.Models);
+        Assert.Equal("gpt-4", azureProvider.Models[0].Id);
+
+        var geminiProvider = result.FirstOrDefault(p => p.Provider == "google-gemini");
+        Assert.NotNull(geminiProvider);
+        Assert.True(geminiProvider.Available);
+        Assert.Single(geminiProvider.Models);
+        Assert.Equal("gemini-pro", geminiProvider.Models[0].Id);
     }
 }

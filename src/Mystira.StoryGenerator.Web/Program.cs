@@ -34,6 +34,9 @@ builder.Services.AddScoped<IStoryApiService, StoryApiService>();
 // Add AI model settings service
 builder.Services.AddScoped<IAiModelSettingsService, AiModelSettingsService>();
 
+// Add Dynamic Model Service
+builder.Services.AddScoped<IDynamicModelService, DynamicModelService>();
+
 // Add Chat Completion Service
 builder.Services.AddScoped<IChatService, ChatService>();
 

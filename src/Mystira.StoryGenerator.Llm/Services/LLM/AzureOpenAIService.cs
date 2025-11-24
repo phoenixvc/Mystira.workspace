@@ -33,6 +33,43 @@ public class AzureOpenAIService : ILLMService
                !string.IsNullOrWhiteSpace(_settings.AzureOpenAI.DeploymentName);
     }
 
+    public IEnumerable<ChatModelInfo> GetAvailableModels()
+    {
+        if (!IsAvailable())
+        {
+            return Enumerable.Empty<ChatModelInfo>();
+        }
+
+        // For Azure OpenAI, we return the configured deployment as the available model
+        // In a real implementation, you might call the Azure OpenAI API to list available deployments
+        var model = new ChatModelInfo
+        {
+            Id = _settings.AzureOpenAI.DeploymentName,
+            DisplayName = GetDisplayNameForDeployment(_settings.AzureOpenAI.DeploymentName),
+            Description = "Azure OpenAI GPT model deployment",
+            MaxTokens = 4096,
+            DefaultTemperature = 0.7,
+            MinTemperature = 0.0,
+            MaxTemperature = 2.0,
+            SupportsJsonSchema = true, // Azure OpenAI supports JSON schema response formatting
+            Capabilities = new List<string> { "chat", "json-schema", "story-generation" }
+        };
+
+        return new List<ChatModelInfo> { model };
+    }
+
+    private static string GetDisplayNameForDeployment(string deploymentName)
+    {
+        // Convert deployment name to a more user-friendly display name
+        return deploymentName.ToLowerInvariant() switch
+        {
+            var name when name.Contains("gpt-4") => "GPT-4",
+            var name when name.Contains("gpt-3.5") => "GPT-3.5 Turbo",
+            var name when name.Contains("gpt-35") => "GPT-3.5 Turbo",
+            _ => deploymentName
+        };
+    }
+
     public async Task<ChatCompletionResponse> CompleteAsync(ChatCompletionRequest request, CancellationToken cancellationToken = default)
     {
         if (!IsAvailable()) return CreateErrorResponse("Azure OpenAI service is not properly configured");

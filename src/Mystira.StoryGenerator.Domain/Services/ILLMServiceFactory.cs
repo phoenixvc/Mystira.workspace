@@ -9,6 +9,7 @@ public interface ILLMServiceFactory
 {
     ILLMService? GetService(string providerName);
     ILLMService? GetDefaultService();
+    IEnumerable<ProviderModels> GetAvailableModels();
 }
 
 /// <summary>
@@ -34,4 +35,10 @@ public interface ILLMService
     /// </summary>
     /// <returns>True if the provider is available</returns>
     bool IsAvailable();
+
+    /// <summary>
+    /// Get the list of available models for this provider
+    /// </summary>
+    /// <returns>List of available models</returns>
+    IEnumerable<ChatModelInfo> GetAvailableModels();
 }

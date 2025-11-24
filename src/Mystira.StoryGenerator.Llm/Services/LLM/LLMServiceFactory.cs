@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Logging;
 using Mystira.StoryGenerator.Contracts.Chat;
 using Mystira.StoryGenerator.Contracts.Configuration;
@@ -87,6 +87,26 @@ public class LLMServiceFactory : ILLMServiceFactory
             .Select(Adapt);
     }
 
+    public IEnumerable<ProviderModels> GetAvailableModels()
+    {
+        var providerModels = new List<ProviderModels>();
+
+        foreach (var service in _services.Values)
+        {
+            var isAvailable = service.IsAvailable();
+            var models = isAvailable ? service.GetAvailableModels() : Enumerable.Empty<ChatModelInfo>();
+
+            providerModels.Add(new ProviderModels
+            {
+                Provider = service.ProviderName,
+                Available = isAvailable,
+                Models = models.ToList()
+            });
+        }
+
+        return providerModels;
+    }
+
     private static ILLMService Adapt(ILLMService service)
     {
         if (service is ILLMService domain)
@@ -105,5 +125,6 @@ public class LLMServiceFactory : ILLMServiceFactory
         public Task<ChatCompletionResponse> CompleteAsync(ChatCompletionRequest request, CancellationToken cancellationToken = default)
             => _inner.CompleteAsync(request, cancellationToken);
         public bool IsAvailable() => _inner.IsAvailable();
+        public IEnumerable<ChatModelInfo> GetAvailableModels() => _inner.GetAvailableModels();
     }
 }
