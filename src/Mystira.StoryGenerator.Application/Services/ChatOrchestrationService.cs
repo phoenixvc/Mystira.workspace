@@ -3,6 +3,7 @@ using MediatR;
 using Microsoft.Extensions.Logging;
 using Mystira.StoryGenerator.Contracts.Chat;
 using Mystira.StoryGenerator.Contracts.Stories;
+using Mystira.StoryGenerator.Domain.Commands.Chat;
 using Mystira.StoryGenerator.Domain.Commands.Stories;
 using Mystira.StoryGenerator.Domain.Services;
 
@@ -17,23 +18,17 @@ public class ChatOrchestrationService : IChatOrchestrationService
     private readonly ICommandIntentRouter _commandIntentRouter;
     private readonly IMediator _mediator;
     private readonly ILLMServiceFactory _llmServiceFactory;
-    private readonly IInstructionBlockService _instructionBlockService;
-    private readonly IIntentClassificationService _intentClassificationService;
     private readonly ILogger<ChatOrchestrationService> _logger;
 
     public ChatOrchestrationService(
         ICommandIntentRouter commandIntentRouter,
         IMediator mediator,
         ILLMServiceFactory llmServiceFactory,
-        IInstructionBlockService instructionBlockService,
-        IIntentClassificationService intentClassificationService,
         ILogger<ChatOrchestrationService> logger)
     {
         _commandIntentRouter = commandIntentRouter;
         _mediator = mediator;
         _llmServiceFactory = llmServiceFactory;
-        _instructionBlockService = instructionBlockService;
-        _intentClassificationService = intentClassificationService;
         _logger = logger;
     }
 
@@ -60,7 +55,7 @@ public class ChatOrchestrationService : IChatOrchestrationService
             // Route to appropriate command based on instruction type
             var commandResult = await RouteToCommandAsync(instructionType, context, cancellationToken);
 
-            if (commandResult.RequiresClarification)
+            if (commandResult.RequiresClarification || !commandResult.Success)
             {
                 return commandResult;
             }
@@ -68,7 +63,7 @@ public class ChatOrchestrationService : IChatOrchestrationService
             // If no specific command was handled, use free-form text handler
             if (commandResult.Result == null)
             {
-                return await HandleFreeFormTextAsync(instructionType, context, cancellationToken);
+                return await HandleFreeTextCommandAsync(instructionType, context, cancellationToken);
             }
 
             return commandResult;
@@ -106,6 +101,21 @@ public class ChatOrchestrationService : IChatOrchestrationService
 
                 case "story_summarize":
                     return await HandleSummarizeStoryAsync(latestUserMessage, context, cancellationToken);
+
+                case "help":
+                    return await HandleHelpCommandAsync(instructionType, latestUserMessage, cancellationToken);
+
+                case "schema_docs":
+                    return await HandleSchemaDocsCommandAsync(instructionType, latestUserMessage, context, cancellationToken);
+
+                case "safety_policy":
+                    return await HandleSafetyPolicyCommandAsync(instructionType, latestUserMessage, context, cancellationToken);
+
+                case "requirements":
+                    return await HandleRequirementsCommandAsync(instructionType, latestUserMessage, context, cancellationToken);
+
+                case "guidelines":
+                    return await HandleGuidelinesCommandAsync(instructionType, latestUserMessage, context, cancellationToken);
 
                 default:
                     // Return empty response to trigger fallback
@@ -301,7 +311,7 @@ public class ChatOrchestrationService : IChatOrchestrationService
         };
     }
 
-    private async Task<ChatOrchestrationResponse> HandleFreeFormTextAsync(string instructionType, ChatContext context, CancellationToken cancellationToken)
+    private async Task<ChatOrchestrationResponse> HandleHelpCommandAsync(string instructionType, string userMessage, CancellationToken cancellationToken)
     {
         // Get appropriate LLM service
         var service = !string.IsNullOrWhiteSpace(context.Provider)
@@ -316,110 +326,92 @@ public class ChatOrchestrationService : IChatOrchestrationService
                 Error = "No LLM services are currently available"
             };
         }
-
-        // Build chat completion request from context
-        var request = new ChatCompletionRequest
-        {
-            Provider = context.Provider,
-            ModelId = context.ModelId,
-            Model = context.Model,
-            Messages = context.Messages,
-            Temperature = context.Temperature,
-            MaxTokens = context.MaxTokens,
-            SystemPrompt = context.SystemPrompt,
-            JsonSchemaFormat = context.JsonSchemaFormat,
-            IsSchemaValidationStrict = context.IsSchemaValidationStrict
-        };
-
-        // Add instruction block if available
-        var instructionBlock = await ResolveInstructionBlockAsync(request, cancellationToken);
-        if (!string.IsNullOrWhiteSpace(instructionBlock))
-        {
-            request.Messages.Insert(0, new MystiraChatMessage
-            {
-                MessageType = ChatMessageType.System,
-                Content = instructionBlock,
-                Timestamp = DateTime.UtcNow
-            });
-        }
-
-        var response = await service.CompleteAsync(request, cancellationToken);
-        if (!response.Success)
-        {
-            return new ChatOrchestrationResponse
-            {
-                Success = false,
-                Error = response.Error
-            };
-        }
+        var command = new HelpCommand(userMessage);
+        var result = await _mediator.Send(command, cancellationToken);
 
         return new ChatOrchestrationResponse
         {
-            Success = true,
-            RequiresClarification = false,
+            Success = result.Success,
             Intent = instructionType,
-            Result = response
+            Handler = nameof(HelpCommand),
+            Result = result,
+            Error = result.Success ? null : result.Error
         };
     }
 
-    private async Task<string?> ResolveInstructionBlockAsync(ChatCompletionRequest request, CancellationToken cancellationToken)
+    private async Task<ChatOrchestrationResponse> HandleSchemaDocsCommandAsync(string instructionType, string userMessage, ChatContext context, CancellationToken cancellationToken)
     {
-        if (request.Messages == null || request.Messages.Count == 0)
+        var command = new SchemaDocsCommand(context, userMessage);
+        var result = await _mediator.Send(command, cancellationToken);
+
+        return new ChatOrchestrationResponse
         {
-            return null;
-        }
-
-        var userMessages = request.Messages
-            .Where(message => message.MessageType == ChatMessageType.User)
-            .TakeLast(4)
-            .ToList();
-
-        if (userMessages.Count == 0)
-        {
-            return null;
-        }
-
-        var builder = new StringBuilder();
-        foreach (var message in userMessages)
-        {
-            builder.AppendLine(message.Content);
-        }
-
-        if (!string.IsNullOrWhiteSpace(request.SystemPrompt))
-        {
-            builder.AppendLine("SystemPrompt: " + request.SystemPrompt);
-        }
-
-        var queryText = builder.ToString();
-
-        var categories = new[] { "story_generation", "validation" };
-        var instructionTypes = new[] { "requirements", "guidelines" };
-
-        var intentClassification = await _intentClassificationService.ClassifyIntentAsync(queryText, cancellationToken);
-        if (intentClassification != null)
-        {
-            _logger.LogInformation(
-                "Intent classified: category={Category}, instructionType={InstructionType}",
-                intentClassification.Categories,
-                intentClassification.InstructionTypes);
-
-            categories = intentClassification.Categories;
-            instructionTypes = intentClassification.InstructionTypes;
-        }
-        else
-        {
-            _logger.LogDebug("Using default categories and instruction types for RAG query");
-        }
-
-        var searchContext = new InstructionSearchContext
-        {
-            QueryText = queryText,
-            Categories = categories,
-            InstructionTypes = instructionTypes,
-            TopK = 8
+            Success = result.Success,
+            Intent = instructionType,
+            Handler = nameof(SchemaDocsCommand),
+            Result = result,
+            Error = result.Success ? null : result.Error
         };
+    }
 
-        return await _instructionBlockService.BuildInstructionBlockAsync(searchContext, cancellationToken);
+    private async Task<ChatOrchestrationResponse> HandleSafetyPolicyCommandAsync(string instructionType, string userMessage, ChatContext context, CancellationToken cancellationToken)
+    {
+        var command = new SafetyPolicyCommand(context, userMessage);
+        var result = await _mediator.Send(command, cancellationToken);
+
+        return new ChatOrchestrationResponse
+        {
+            Success = result.Success,
+            Intent = instructionType,
+            Handler = nameof(SafetyPolicyCommand),
+            Result = result,
+            Error = result.Success ? null : result.Error
+        };
+    }
+
+    private async Task<ChatOrchestrationResponse> HandleRequirementsCommandAsync(string instructionType, string userMessage, ChatContext context, CancellationToken cancellationToken)
+    {
+        var command = new RequirementsCommand(context, userMessage);
+        var result = await _mediator.Send(command, cancellationToken);
+
+        return new ChatOrchestrationResponse
+        {
+            Success = result.Success,
+            Intent = instructionType,
+            Handler = nameof(RequirementsCommand),
+            Result = result,
+            Error = result.Success ? null : result.Error
+        };
+    }
+
+    private async Task<ChatOrchestrationResponse> HandleGuidelinesCommandAsync(string instructionType, string userMessage, ChatContext context, CancellationToken cancellationToken)
+    {
+        var command = new GuidelinesCommand(context, userMessage);
+        var result = await _mediator.Send(command, cancellationToken);
+
+        return new ChatOrchestrationResponse
+        {
+            Success = result.Success,
+            Intent = instructionType,
+            Handler = nameof(GuidelinesCommand),
+            Result = result,
+            Error = result.Success ? null : result.Error
+        };
+    }
+
+    private async Task<ChatOrchestrationResponse> HandleFreeTextCommandAsync(string instructionType, ChatContext context, CancellationToken cancellationToken)
+    {
+        var command = new FreeTextCommand(context, instructionType);
+        var result = await _mediator.Send(command, cancellationToken);
+
+        return new ChatOrchestrationResponse
+        {
+            Success = result.Success,
+            Intent = instructionType,
+            Handler = nameof(FreeTextCommand),
+            Result = result,
+            Error = result.Success ? null : result.Error
+        };
     }
 
     private async Task<List<string>> CheckForMissingStoryParametersAsync(string userMessage, ChatContext context, CancellationToken cancellationToken)

@@ -114,18 +114,6 @@ User: ""Give me guidelines for writing a Mystira story for 6–9 year olds""
 Response:
 {""categories"": [""story_generation""], ""instructionTypes"": [""guidelines""]}
 
-User: ""Show me the current config""
-Response:
-{""categories"": [""config""], ""instructionTypes"": [""config_view""]}
-
-User: ""Change the model to Gemini""
-Response:
-{""categories"": [""config""], ""instructionTypes"": [""config_update""]}
-
-User: ""Explain the fields in the Mystira story JSON schema""
-Response:
-{""categories"": [""meta""], ""instructionTypes"": [""schema_docs""]}
-
 User: ""What are the safety rules for content?""
 Response:
 {""categories"": [""safety""], ""instructionTypes"": [""safety_policy""]}

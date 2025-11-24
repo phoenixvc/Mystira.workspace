@@ -4,6 +4,7 @@ using Moq;
 using Mystira.StoryGenerator.Application.Services;
 using Mystira.StoryGenerator.Contracts.Chat;
 using Mystira.StoryGenerator.Contracts.Stories;
+using Mystira.StoryGenerator.Domain.Commands.Chat;
 using Mystira.StoryGenerator.Domain.Commands.Stories;
 using Mystira.StoryGenerator.Domain.Services;
 using Xunit;
@@ -15,8 +16,6 @@ public class ChatOrchestrationServiceTests
     private readonly Mock<ICommandIntentRouter> _mockCommandIntentRouter;
     private readonly Mock<IMediator> _mockMediator;
     private readonly Mock<ILLMServiceFactory> _mockLlmServiceFactory;
-    private readonly Mock<IInstructionBlockService> _mockInstructionBlockService;
-    private readonly Mock<IIntentClassificationService> _mockIntentRouterService;
     private readonly Mock<ILogger<ChatOrchestrationService>> _mockLogger;
     private readonly ChatOrchestrationService _service;
 
@@ -25,16 +24,12 @@ public class ChatOrchestrationServiceTests
         _mockCommandIntentRouter = new Mock<ICommandIntentRouter>();
         _mockMediator = new Mock<IMediator>();
         _mockLlmServiceFactory = new Mock<ILLMServiceFactory>();
-        _mockInstructionBlockService = new Mock<IInstructionBlockService>();
-        _mockIntentRouterService = new Mock<IIntentClassificationService>();
         _mockLogger = new Mock<ILogger<ChatOrchestrationService>>();
 
         _service = new ChatOrchestrationService(
             _mockCommandIntentRouter.Object,
             _mockMediator.Object,
             _mockLlmServiceFactory.Object,
-            _mockInstructionBlockService.Object,
-            _mockIntentRouterService.Object,
             _mockLogger.Object);
     }
 
@@ -191,5 +186,63 @@ public class ChatOrchestrationServiceTests
         Assert.Equal("story_generate_initial", result.Intent);
         Assert.Equal("GenerateStoryCommand", result.Handler);
         Assert.NotNull(result.Result);
+    }
+
+    [Fact]
+    public async Task CompleteAsync_WithHelpIntent_RoutesToHelpCommand()
+    {
+        var context = new ChatContext
+        {
+            Messages = new List<MystiraChatMessage>
+            {
+                new() { MessageType = ChatMessageType.User, Content = "What can you do?" }
+            }
+        };
+
+        _mockCommandIntentRouter
+            .Setup(x => x.DetectPrimaryInstructionTypeAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync("help");
+
+        var helpResponse = new ChatCompletionResponse { Success = true, Content = "Help details" };
+
+        _mockMediator
+            .Setup(x => x.Send(It.IsAny<HelpCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(helpResponse);
+
+        var result = await _service.CompleteAsync(context, CancellationToken.None);
+
+        Assert.True(result.Success);
+        Assert.Equal("help", result.Intent);
+        Assert.Equal("HelpCommand", result.Handler);
+        Assert.Same(helpResponse, result.Result);
+    }
+
+    [Fact]
+    public async Task CompleteAsync_WithUnknownIntent_UsesFreeTextCommand()
+    {
+        var context = new ChatContext
+        {
+            Messages = new List<MystiraChatMessage>
+            {
+                new() { MessageType = ChatMessageType.User, Content = "Just chatting" }
+            }
+        };
+
+        _mockCommandIntentRouter
+            .Setup(x => x.DetectPrimaryInstructionTypeAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync("chit_chat");
+
+        var fallbackResponse = new ChatCompletionResponse { Success = true, Content = "fallback" };
+
+        _mockMediator
+            .Setup(x => x.Send(It.IsAny<FreeTextCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(fallbackResponse);
+
+        var result = await _service.CompleteAsync(context, CancellationToken.None);
+
+        Assert.True(result.Success);
+        Assert.Equal("chit_chat", result.Intent);
+        Assert.Equal("FreeTextCommand", result.Handler);
+        Assert.Same(fallbackResponse, result.Result);
     }
 }
