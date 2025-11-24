@@ -6,7 +6,7 @@ namespace Mystira.StoryGenerator.Application.Handlers.Chat;
 
 internal static class ChatContextSummaryBuilder
 {
-    public static string BuildContextSummary(ChatContext context, int storyCharacterLimit = 1800, int recentUserMessages = 3)
+    public static string BuildContextSummary(ChatContext context, int storyCharacterLimit = 10000, int recentUserMessages = 3)
     {
         if (context == null)
         {
