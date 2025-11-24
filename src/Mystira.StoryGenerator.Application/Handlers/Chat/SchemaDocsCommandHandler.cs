@@ -9,7 +9,7 @@ namespace Mystira.StoryGenerator.Application.Handlers.Chat;
 
 public class SchemaDocsCommandHandler : ICommandHandler<SchemaDocsCommand, ChatCompletionResponse>
 {
-    private const int SchemaSnippetLimit = 8000;
+    private const int SchemaSnippetLimit = 10000;
 
     private readonly ILLMServiceFactory _llmFactory;
     private readonly IInstructionBlockService _instructionBlockService;

@@ -22,7 +22,7 @@ public class HelpCommandHandler : ICommandHandler<HelpCommand, ChatCompletionRes
     private static string BuildHelpMessage(string? userQuery)
     {
         var sb = new StringBuilder();
-        sb.AppendLine("👋 I'm Mystira, your branching-story co-author. I can:");
+        sb.AppendLine("👋 I'm Mystira's Story Generator, your branching-story co-author. I can:");
         sb.AppendLine();
         sb.AppendLine("Core story operations:");
         sb.AppendLine("• GenerateStory – create a brand-new JSON adventure that follows the Mystira schema");
