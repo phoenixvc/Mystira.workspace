@@ -2,7 +2,6 @@
 @using System.Globalization
 @using System.Text
 @using System.Linq
-@using Mystira.StoryGenerator.Web.Models
 @inject IJSRuntime JS
 
 <div class="panel h-full flex flex-col yaml-preview-theme"
@@ -27,8 +26,6 @@
                        <span class="text-xs text-gray-500">(@CurrentVersion/@YamlSnapshots.Count)</span>
                    </div>
                }
-           </div>
-           <div class="flex items-center gap-2">
                @if (YamlSnapshots.Count > 1)
                {
                    <button type="button"
