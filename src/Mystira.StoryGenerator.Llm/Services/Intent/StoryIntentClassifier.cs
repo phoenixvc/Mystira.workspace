@@ -35,12 +35,12 @@ instructionTypes (one or more of):
 - help                    → general help about what you can do, how to use the system
 - schema_docs             → questions about fields, schema structure, allowed values
 - safety_policy           → questions about safety, age-appropriateness, content limitations
-- requirements            → “what are the requirements” / “what must a story do”
-- guidelines              → “what are the guidelines” / best practices, suggestions
+- requirements            → “what are the requirements” / “what must a story do” / “include requirements”
+- guidelines              → “what are the guidelines” / best practices, suggestions / “include guidelines”
 
-Most of the time, a single category and a single instructionType is enough.
-Only return multiple values if the instruction CLEARLY spans multiple operations
-(e.g., “generate a story and then summarize it”).
+There should generally only be one category. Only select more than one if you are absolutely sure.
+More than one instructionTypes may often apply; for example, the user might ask to both generate and validate, or
+refine while satisfying requirements.
 
 Return ONLY a JSON object with the following format, no additional text:
 {
@@ -56,7 +56,7 @@ Rules:
   (e.g., generate + summarize, validate + autofix).
 - If the user is only asking a question ABOUT the system (requirements, schema, config, safety),
   do NOT use story_generate_initial/refine/validate/autofix; instead use:
-  - requirements, guidelines, schema_docs, config_view/config_update, or safety_policy as appropriate.
+  - requirements, guidelines, schema_docs, or safety_policy as appropriate.
 - If unsure between two closely related options, choose the ONE that best matches the primary action.
 
 Heuristics:
@@ -81,6 +81,11 @@ Response:
 User: ""Generate a scary forest adventure story for an 8-year-old""
 Response:
 {""categories"": [""story_generation""], ""instructionTypes"": [""story_generate_initial""]}
+
+
+User: ""Generate a story ensuring that you include relevant requirements and guidelines""
+Response:
+{""categories"": [""story_generation""], ""instructionTypes"": [""story_generate_initial"", ""requirements"", ""guidelines""]}
 
 User: ""Update this story to be less scary but keep the same characters""
 Response:

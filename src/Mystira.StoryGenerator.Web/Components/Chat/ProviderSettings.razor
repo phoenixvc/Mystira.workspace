@@ -52,23 +52,7 @@
         }
     </div>
 
-    <div class="form-group">
-        <label for="model-id-input">Model Id:</label>
-        <input id="model-id-input" type="text" class="form-control" @bind="ModelId"
-               placeholder="Configured model id (e.g., story-gpt4o)" />
-        <small class="form-text text-muted">
-            Use when referencing a model configured on the server (Ai:Models).
-        </small>
-    </div>
-
-    <div class="form-group">
-        <label for="model-input">Model:</label>
-        <input id="model-input" type="text" class="form-control" @bind="Model"
-               placeholder="Leave empty to use default" />
-        <small class="form-text text-muted">
-            Examples: gpt-4o, gpt-4o-mini, gemini-pro
-        </small>
-    </div>
+    <!-- Removed free-form Model Id and Model text inputs to avoid confusion; selection is via dropdown only -->
 
     <div class="row">
         <div class="col-md-6">
@@ -161,33 +145,10 @@
                  var modelInfo = GetModelInfo(value);
                  if (modelInfo != null)
                  {
-                     Model = modelInfo.Id;
                      Temperature = modelInfo.DefaultTemperature;
                      MaxTokens = modelInfo.MaxTokens;
                  }
              }
-             NotifySettingsChanged();
-         }
-     }
-
-     private string _modelId = string.Empty;
-     private string ModelId
-     {
-         get => _modelId;
-         set
-         {
-             _modelId = value;
-             NotifySettingsChanged();
-         }
-     }
-
-     private string _model = string.Empty;
-     private string Model
-     {
-         get => _model;
-         set
-         {
-             _model = value;
              NotifySettingsChanged();
          }
      }
@@ -251,7 +212,6 @@
              if (shouldApply)
              {
                  _selectedModel = CurrentModel.Id;
-                 _model = CurrentModel.Deployment ?? CurrentModel.Id;
                  _temperature = CurrentTemperature;
                  _maxTokens = CurrentMaxTokens;
                  _selectedProvider = CurrentModel.Provider ?? string.Empty;
@@ -355,8 +315,7 @@
             var settings = new ProviderConfiguration
             {
                 Provider = SelectedProvider,
-                ModelId = ModelId,
-                Model = Model,
+                Model = _selectedModel,
                 Temperature = Temperature,
                 MaxTokens = MaxTokens,
                 SystemPrompt = SystemPrompt
@@ -464,8 +423,6 @@
     // Public read-only accessors to expose current component state
     public string GetSelectedProvider() => _selectedProvider;
     public string GetSelectedModel() => _selectedModel;
-    public string GetModelId() => _modelId;
-    public string GetModel() => _model;
     public double GetTemperature() => _temperature;
     public int GetMaxTokens() => _maxTokens;
     public string GetSystemPrompt() => _systemPrompt;
@@ -474,8 +431,7 @@
     public ProviderConfiguration GetCurrentConfiguration() => new ProviderConfiguration
     {
         Provider = _selectedProvider,
-        ModelId = _modelId,
-        Model = _model,
+        Model = _selectedModel,
         Temperature = _temperature,
         MaxTokens = _maxTokens,
         SystemPrompt = _systemPrompt
@@ -484,7 +440,6 @@
     public class ProviderConfiguration
     {
         public string Provider { get; set; } = string.Empty;
-        public string ModelId { get; set; } = string.Empty;
         public string Model { get; set; } = string.Empty;
         public double Temperature { get; set; } = 0.7;
         public int MaxTokens { get; set; } = 1000;
