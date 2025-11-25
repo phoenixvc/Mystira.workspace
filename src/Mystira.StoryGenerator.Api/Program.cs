@@ -27,7 +27,11 @@ builder.Services.AddOptions<InstructionSearchSettings>()
     .Bind(builder.Configuration.GetSection(InstructionSearchSettings.SectionName));
 
 // Register HttpClient for LLM services (moved to Llm project)
-builder.Services.AddHttpClient<AzureOpenAIService>();
+// Increase default timeout to 180 seconds to avoid premature cancellations on long-running LLM calls
+builder.Services.AddHttpClient<AzureOpenAIService>(client =>
+{
+    client.Timeout = TimeSpan.FromSeconds(180);
+});
 
 // Register LLM services (in Llm project) and expose Domain interfaces
 builder.Services.AddScoped<ILLMService, AzureOpenAIService>();
@@ -101,3 +105,6 @@ app.MapPost("/stories/preview", (GenerateStoryRequest request, IOptions<AiSettin
    .WithOpenApi();
 
 app.Run();
+
+// Expose Program for integration testing with WebApplicationFactory
+public partial class Program { }

@@ -16,7 +16,8 @@ public class ChatModelsEndpointTests : IClassFixture<WebApplicationFactory<Progr
     private readonly WebApplicationFactory<Program> _factory;
     private readonly JsonSerializerOptions _jsonOptions = new() { PropertyNameCaseInsensitive = true };
 
-    internal ChatModelsEndpointTests(WebApplicationFactory<Program> factory)
+    // xUnit requires the test class constructor used for fixtures to be public.
+    public ChatModelsEndpointTests(WebApplicationFactory<Program> factory)
     {
         _factory = factory;
     }

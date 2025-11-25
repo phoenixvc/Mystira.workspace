@@ -51,7 +51,7 @@ public class ChatService : IChatService
     {
         _httpClient = httpClient;
         _logger = logger;
-        
+
         _jsonOptions = new JsonSerializerOptions
         {
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
@@ -115,9 +115,12 @@ public class ChatService : IChatService
         {
             _logger.LogDebug("Sending chat completion request to provider: {Provider}", request.Provider);
 
-            var response = await _httpClient.PostAsJsonAsync("/api/chat/complete", request, _jsonOptions);
+            // Ensure long-running LLM requests have enough time to complete
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(180));
 
-            var content = await response.Content.ReadAsStringAsync();
+            var response = await _httpClient.PostAsJsonAsync("/api/chat/complete", request, _jsonOptions, cts.Token);
+
+            var content = await response.Content.ReadAsStringAsync(cts.Token);
             var result = JsonSerializer.Deserialize<ChatCompletionResponse>(content, _jsonOptions);
 
             if (result == null)
