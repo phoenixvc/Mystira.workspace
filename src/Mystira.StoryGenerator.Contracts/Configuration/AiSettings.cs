@@ -31,13 +31,6 @@ public class AzureOpenAISettings
     public string DeploymentName { get; set; } = string.Empty;
 
     /// <summary>
-    /// Optional dictionary of deployments available for this provider.
-    /// Maps deployment names to their actual deployment names (e.g., "gpt-4.1" -> "gpt-4.1", "gpt-5" -> "gpt-5").
-    /// If not provided, falls back to DeploymentName.
-    /// </summary>
-    public Dictionary<string, string> Deployments { get; set; } = new();
-
-    /// <summary>
     /// Optional embedding deployment used for semantic search queries.
     /// </summary>
     public string? EmbeddingDeploymentName { get; set; }

@@ -16,7 +16,7 @@ public class ChatModelsEndpointTests : IClassFixture<WebApplicationFactory<Progr
     private readonly WebApplicationFactory<Program> _factory;
     private readonly JsonSerializerOptions _jsonOptions = new() { PropertyNameCaseInsensitive = true };
 
-    public ChatModelsEndpointTests(WebApplicationFactory<Program> factory)
+    internal ChatModelsEndpointTests(WebApplicationFactory<Program> factory)
     {
         _factory = factory;
     }
@@ -32,10 +32,10 @@ public class ChatModelsEndpointTests : IClassFixture<WebApplicationFactory<Progr
 
         // Assert
         response.EnsureSuccessStatusCode();
-        
+
         var content = await response.Content.ReadAsStringAsync();
         var result = JsonSerializer.Deserialize<ChatModelsResponse>(content, _jsonOptions);
-        
+
         Assert.NotNull(result);
         Assert.NotNull(result.Providers);
         Assert.True(result.TotalModels >= 0);
@@ -46,7 +46,7 @@ public class ChatModelsEndpointTests : IClassFixture<WebApplicationFactory<Progr
     {
         // Arrange
         var mockFactory = new Mock<ILLMServiceFactory>();
-        
+
         var providerModels = new List<ProviderModels>
         {
             new()
@@ -65,7 +65,7 @@ public class ChatModelsEndpointTests : IClassFixture<WebApplicationFactory<Progr
                 }
             }
         };
-        
+
         mockFactory.Setup(x => x.GetAvailableModels()).Returns(providerModels);
 
         var client = _factory.WithWebHostBuilder(builder =>
@@ -81,10 +81,10 @@ public class ChatModelsEndpointTests : IClassFixture<WebApplicationFactory<Progr
 
         // Assert
         response.EnsureSuccessStatusCode();
-        
+
         var content = await response.Content.ReadAsStringAsync();
         var result = JsonSerializer.Deserialize<ChatModelsResponse>(content, _jsonOptions);
-        
+
         Assert.NotNull(result);
         Assert.Single(result.Providers);
         Assert.Equal("test-provider", result.Providers[0].Provider);
@@ -99,7 +99,7 @@ public class ChatModelsEndpointTests : IClassFixture<WebApplicationFactory<Progr
     {
         // Arrange
         var mockFactory = new Mock<ILLMServiceFactory>();
-        
+
         var providerModels = new List<ProviderModels>
         {
             new()
@@ -113,7 +113,7 @@ public class ChatModelsEndpointTests : IClassFixture<WebApplicationFactory<Progr
                 }
             }
         };
-        
+
         mockFactory.Setup(x => x.GetAvailableModels()).Returns(providerModels);
 
         var client = _factory.WithWebHostBuilder(builder =>
@@ -129,24 +129,24 @@ public class ChatModelsEndpointTests : IClassFixture<WebApplicationFactory<Progr
 
         // Assert
         response.EnsureSuccessStatusCode();
-        
+
         var content = await response.Content.ReadAsStringAsync();
         var result = JsonSerializer.Deserialize<ChatModelsResponse>(content, _jsonOptions);
-        
+
         Assert.NotNull(result);
         Assert.Single(result.Providers);
         Assert.Equal(2, result.TotalModels); // Both models from single provider
-        
+
         var provider = result.Providers.FirstOrDefault(p => p.Provider == "azure-openai");
         Assert.NotNull(provider);
         Assert.True(provider.Available);
         Assert.Equal(2, provider.Models.Count);
-        
+
         var model1 = provider.Models.FirstOrDefault(m => m.Id == "model-1");
         Assert.NotNull(model1);
         Assert.Equal("Model 1", model1.DisplayName);
         Assert.Equal(1000, model1.MaxTokens);
-        
+
         var model2 = provider.Models.FirstOrDefault(m => m.Id == "model-2");
         Assert.NotNull(model2);
         Assert.Equal("Model 2", model2.DisplayName);

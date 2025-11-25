@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Moq;
+using Mystira.StoryGenerator.Api.Controllers;
 using Mystira.StoryGenerator.Contracts.Chat;
 using Mystira.StoryGenerator.Domain.Services;
 using Xunit;
@@ -19,7 +20,7 @@ public class ChatControllerTests
         _chatOrchestrationMock = new Mock<IChatOrchestrationService>();
         _llmFactoryMock = new Mock<ILLMServiceFactory>();
         _loggerMock = new Mock<ILogger<ChatController>>();
-        
+
         _controller = new ChatController(
             _chatOrchestrationMock.Object,
             _llmFactoryMock.Object,
@@ -64,10 +65,10 @@ public class ChatControllerTests
         // Assert
         var okResult = Assert.IsType<OkObjectResult>(result.Result);
         var response = Assert.IsType<ChatModelsResponse>(okResult.Value);
-        
+
         Assert.Single(response.Providers);
         Assert.Equal(2, response.TotalModels);
-        
+
         var azureProvider = response.Providers.FirstOrDefault(p => p.Provider == "azure-openai");
         Assert.NotNull(azureProvider);
         Assert.True(azureProvider.Available);
@@ -89,7 +90,7 @@ public class ChatControllerTests
         // Assert
         var objectResult = Assert.IsType<ObjectResult>(result.Result);
         Assert.Equal(500, objectResult.StatusCode);
-        
+
         var response = Assert.IsType<ChatModelsResponse>(objectResult.Value);
         Assert.Empty(response.Providers);
         Assert.Equal(0, response.TotalModels);

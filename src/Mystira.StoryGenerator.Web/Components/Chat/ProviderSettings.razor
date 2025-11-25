@@ -1,3 +1,4 @@
+@using Mystira.StoryGenerator.Web.Models
 @inject IChatService ChatService
 @inject IAiModelSettingsService ModelSettingsService
 @inject ILogger<ProviderSettings> Logger
@@ -118,112 +119,129 @@
 </div>
 
 @code {
-    [Parameter] public EventCallback<ProviderConfiguration> OnSettingsChanged { get; set; }
+     [Parameter] public EventCallback<ProviderConfiguration> OnSettingsChanged { get; set; }
+     [Parameter] public AiModelDefinition? CurrentModel { get; set; }
+     [Parameter] public int CurrentMaxTokens { get; set; } = 1000;
+     [Parameter] public double CurrentTemperature { get; set; } = 0.7;
 
-    private List<ProviderInfo> availableProviders = new();
-    private List<ProviderModels> availableProviderModels = new();
-    private bool isLoading = true;
-    private string errorMessage = string.Empty;
+     private List<ProviderInfo> availableProviders = new();
+     private List<ProviderModels> availableProviderModels = new();
+     private bool isLoading = true;
+     private string errorMessage = string.Empty;
 
-    private string _selectedProvider = string.Empty;
-    private string SelectedProvider
-    {
-        get => _selectedProvider;
-        set
-        {
-            var changed = _selectedProvider != value;
-            _selectedProvider = value;
-            if (changed)
-            {
-                // Clear selected model when provider changes
-                _selectedModel = string.Empty;
-            }
-            NotifySettingsChanged();
-        }
-    }
+     private string _selectedProvider = string.Empty;
+     private string SelectedProvider
+     {
+         get => _selectedProvider;
+         set
+         {
+             var changed = _selectedProvider != value;
+             _selectedProvider = value;
+             if (changed)
+             {
+                 // Clear selected model when provider changes
+                 _selectedModel = string.Empty;
+             }
+             NotifySettingsChanged();
+         }
+     }
 
-    private string _selectedModel = string.Empty;
-    private string SelectedModel
-    {
-        get => _selectedModel;
-        set
-        {
-            _selectedModel = value;
-            // Auto-populate the Model field when a model is selected
-            if (!string.IsNullOrEmpty(value))
-            {
-                var modelInfo = GetModelInfo(value);
-                if (modelInfo != null)
-                {
-                    Model = modelInfo.Id;
-                    Temperature = modelInfo.DefaultTemperature;
-                    MaxTokens = modelInfo.MaxTokens;
-                }
-            }
-            NotifySettingsChanged();
-        }
-    }
+     private string _selectedModel = string.Empty;
+     private string SelectedModel
+     {
+         get => _selectedModel;
+         set
+         {
+             _selectedModel = value;
+             // Auto-populate the Model field when a model is selected
+             if (!string.IsNullOrEmpty(value))
+             {
+                 var modelInfo = GetModelInfo(value);
+                 if (modelInfo != null)
+                 {
+                     Model = modelInfo.Id;
+                     Temperature = modelInfo.DefaultTemperature;
+                     MaxTokens = modelInfo.MaxTokens;
+                 }
+             }
+             NotifySettingsChanged();
+         }
+     }
 
-    private string _modelId = string.Empty;
-    private string ModelId
-    {
-        get => _modelId;
-        set
-        {
-            _modelId = value;
-            NotifySettingsChanged();
-        }
-    }
+     private string _modelId = string.Empty;
+     private string ModelId
+     {
+         get => _modelId;
+         set
+         {
+             _modelId = value;
+             NotifySettingsChanged();
+         }
+     }
 
-    private string _model = string.Empty;
-    private string Model
-    {
-        get => _model;
-        set
-        {
-            _model = value;
-            NotifySettingsChanged();
-        }
-    }
+     private string _model = string.Empty;
+     private string Model
+     {
+         get => _model;
+         set
+         {
+             _model = value;
+             NotifySettingsChanged();
+         }
+     }
 
-    private double _temperature = 0.7;
-    private double Temperature
-    {
-        get => _temperature;
-        set
-        {
-            _temperature = value;
-            NotifySettingsChanged();
-        }
-    }
+     private double _temperature = 0.7;
+     private double Temperature
+     {
+         get => _temperature;
+         set
+         {
+             _temperature = value;
+             NotifySettingsChanged();
+         }
+     }
 
-    private int _maxTokens = 1000;
-    private int MaxTokens
-    {
-        get => _maxTokens;
-        set
-        {
-            _maxTokens = value;
-            NotifySettingsChanged();
-        }
-    }
+     private int _maxTokens = 1000;
+     private int MaxTokens
+     {
+         get => _maxTokens;
+         set
+         {
+             _maxTokens = value;
+             NotifySettingsChanged();
+         }
+     }
 
-    private string _systemPrompt = string.Empty;
-    private string SystemPrompt
-    {
-        get => _systemPrompt;
-        set
-        {
-            _systemPrompt = value;
-            NotifySettingsChanged();
-        }
-    }
+     private string _systemPrompt = string.Empty;
+     private string SystemPrompt
+     {
+         get => _systemPrompt;
+         set
+         {
+             _systemPrompt = value;
+             NotifySettingsChanged();
+         }
+     }
 
-    protected override async Task OnInitializedAsync()
-    {
-        await LoadProvidersAsync();
-        await LoadModelsAsync();
-    }
+     protected override async Task OnInitializedAsync()
+     {
+         await LoadProvidersAsync();
+         await LoadModelsAsync();
+     }
+
+     protected override async Task OnParametersSetAsync()
+     {
+         // Initialize form with current model settings when parameters are passed
+         if (CurrentModel != null)
+         {
+             _selectedModel = CurrentModel.Id;
+             _model = CurrentModel.Deployment ?? CurrentModel.Id;
+             _temperature = CurrentTemperature;
+             _maxTokens = CurrentMaxTokens;
+             _selectedProvider = CurrentModel.Provider ?? string.Empty;
+             StateHasChanged();
+         }
+     }
 
     // No dynamic subscription needed; models are loaded on demand via ChatService
 

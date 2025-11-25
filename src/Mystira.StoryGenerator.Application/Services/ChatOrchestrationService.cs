@@ -103,7 +103,7 @@ public class ChatOrchestrationService : IChatOrchestrationService
                     return await HandleSummarizeStoryAsync(latestUserMessage, context, cancellationToken);
 
                 case "help":
-                    return await HandleHelpCommandAsync(instructionType, latestUserMessage, cancellationToken);
+                    return await HandleHelpCommandAsync(instructionType, latestUserMessage, context, cancellationToken);
 
                 case "schema_docs":
                     return await HandleSchemaDocsCommandAsync(instructionType, latestUserMessage, context, cancellationToken);
@@ -311,7 +311,8 @@ public class ChatOrchestrationService : IChatOrchestrationService
         };
     }
 
-    private async Task<ChatOrchestrationResponse> HandleHelpCommandAsync(string instructionType, string userMessage, CancellationToken cancellationToken)
+    private async Task<ChatOrchestrationResponse> HandleHelpCommandAsync(string instructionType, string userMessage,
+        ChatContext context, CancellationToken cancellationToken)
     {
         // Get appropriate LLM service
         var service = !string.IsNullOrWhiteSpace(context.Provider)
