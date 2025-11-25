@@ -149,29 +149,11 @@ public class AzureOpenAIService : ILLMService
     private string ResolveDeploymentName(ChatCompletionRequest request)
     {
         // Priority order:
-        // 1. Model from request (if provided and valid)
-        // 2. Stored deployment name/model from adapter (if set)
-        // 3. Default deployment name from settings
-
-        if (!string.IsNullOrWhiteSpace(request.Model))
-        {
-            // Check if it's in the deployments dictionary
-            if (_settings.AzureOpenAI.Deployments.TryGetValue(request.Model, out var deployment))
-            {
-                return deployment;
-            }
-            // If not in dictionary, use it directly (it's already the deployment name)
-            return request.Model;
-        }
+        // 1. Stored deployment name
+        // 2. Default deployment name from settings
 
         if (!string.IsNullOrWhiteSpace(_deploymentNameOrModelId))
         {
-            // Check if it's in the deployments dictionary
-            if (_settings.AzureOpenAI.Deployments.TryGetValue(_deploymentNameOrModelId, out var deployment))
-            {
-                return deployment;
-            }
-            // If not in dictionary, use it directly
             return _deploymentNameOrModelId;
         }
 
