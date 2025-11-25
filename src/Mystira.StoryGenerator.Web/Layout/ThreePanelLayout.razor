@@ -646,10 +646,10 @@
         // Prefer values selected in ProviderSettings component
         var config = providerSettingsRef?.GetCurrentConfiguration();
 
-        // Resolve model id from provider settings with proper priority:
+        // Resolve model id from provider settings with proper priority and allow dynamic values:
         // 1) Selected model from the dropdown (real model id)
         // 2) Free-form Model field
-        // 3) Previously selected definition
+        // 3) Previously selected id
         string? modelId = null;
         var selectedModelFromChild = providerSettingsRef?.GetSelectedModel();
         if (!string.IsNullOrWhiteSpace(selectedModelFromChild))
@@ -662,14 +662,10 @@
         }
         else
         {
-            modelId = selectedModelDefinition?.Id;
+            modelId = selectedModelId;
         }
 
-        var definition = availableModels.FirstOrDefault(m => string.Equals(m.Id, modelId, StringComparison.OrdinalIgnoreCase))
-                         ?? selectedModelDefinition
-                         ?? currentModelSettings.Definition;
-
-        if (definition == null)
+        if (string.IsNullOrWhiteSpace(modelId))
         {
             settingsError = "Select a model before saving.";
             return;
@@ -682,7 +678,7 @@
         isSavingSettings = true;
         try
         {
-            await ModelSettingsService.UpdateSelectionAsync(definition.Id, desiredTokens, desiredTemperature);
+            await ModelSettingsService.UpdateSelectionAsync(modelId, desiredTokens, desiredTemperature);
             await RefreshModelSettingsAsync();
             showSettingsModal = false;
             settingsError = null;

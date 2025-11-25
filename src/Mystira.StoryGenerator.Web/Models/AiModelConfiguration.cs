@@ -86,18 +86,6 @@ public static class AiModelDefaults
                     DefaultTemperature = 0.7,
                     MinTemperature = 0.0,
                     MaxTemperature = 1.0
-                },
-                new()
-                {
-                    Id = "gpt-5-nano",
-                    DisplayName = "GPT-5 Nano",
-                    Provider = DefaultProvider,
-                    Deployment = "gpt-5-nano",
-                    DefaultMaxTokens = 1200,
-                    MaxTokensLimit = 4000,
-                    DefaultTemperature = 0.65,
-                    MinTemperature = 0.0,
-                    MaxTemperature = 1.0
                 }
             }
         };

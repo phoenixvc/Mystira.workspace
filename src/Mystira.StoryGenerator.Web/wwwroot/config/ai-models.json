@@ -11,17 +11,6 @@
       "maxTokensLimit": 4000,
       "minTemperature": 0.0,
       "maxTemperature": 1.0
-    },
-    {
-      "id": "gpt-5-nano",
-      "displayName": "GPT-5 Nano",
-      "provider": "azure-openai",
-      "deployment": "gpt-5-nano",
-      "defaultMaxTokens": 1200,
-      "defaultTemperature": 0.65,
-      "maxTokensLimit": 4000,
-      "minTemperature": 0.0,
-      "maxTemperature": 1.0
     }
   ]
 }
