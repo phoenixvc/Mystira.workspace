@@ -82,7 +82,7 @@ public static class AiModelDefaults
                     Provider = DefaultProvider,
                     Deployment = "gpt-4.1",
                     DefaultMaxTokens = 2000,
-                    MaxTokensLimit = 4000,
+                    MaxTokensLimit = 12000,
                     DefaultTemperature = 0.7,
                     MinTemperature = 0.0,
                     MaxTemperature = 1.0

@@ -194,7 +194,7 @@
             {
                 <div class="flex-1 overflow-hidden flex flex-col p-4">
                     <div class="mb-3 flex items-center gap-2 text-sm text-gray-600">
-                        <span>Comparing Version @diffCompareVersion with Current Version</span>
+                        <span>Comparing Version @diffCompareVersion with Version @CurrentVersion</span>
                         <button type="button"
                                 @onclick="CloseDiffView"
                                 class="text-xs text-gray-500 hover:text-gray-700">
@@ -338,6 +338,27 @@
 
     protected override void OnParametersSet()
     {
+        // Keep the displayed YAML content in sync with the selected version.
+        // If the parent provided snapshots and a CurrentVersion, prefer the snapshot's content
+        // so the UI always shows the YAML for the selected version without requiring an extra toggle.
+        if (YamlSnapshots is { Count: > 0 })
+        {
+            // If CurrentVersion is not found among snapshots (e.g., initial load), default to the latest version
+            if (!YamlSnapshots.Any(s => s.Version == CurrentVersion))
+            {
+                var latest = YamlSnapshots.Max(s => s.Version);
+                CurrentVersion = latest;
+            }
+
+            var selected = YamlSnapshots.FirstOrDefault(s => s.Version == CurrentVersion);
+            if (selected != null && !string.Equals(selected.Content, YamlContent, StringComparison.Ordinal))
+            {
+                // Update local parameter value to reflect the selected version's content
+                // (safe here: this component already mutates YamlContent on SaveEdit)
+                YamlContent = selected.Content;
+            }
+        }
+
         var incoming = YamlContent ?? string.Empty;
         if (!isEditing && !string.Equals(incoming, lastYamlSnapshot, StringComparison.Ordinal))
         {
@@ -479,6 +500,12 @@
            diffCompareVersion = null;
            showDiffView = false;
            CurrentVersion = version;
+           // Immediately reflect the selected version's content in the preview to avoid UI desync
+           var snapshot = YamlSnapshots.FirstOrDefault(s => s.Version == version);
+           if (snapshot != null)
+           {
+               YamlContent = snapshot.Content;
+           }
            StateHasChanged();
            if (OnVersionSelected.HasDelegate)
            {
@@ -497,15 +524,27 @@
 
     private int GetDefaultDiffVersion()
     {
+       // Need at least two versions to compare
        if (YamlSnapshots.Count < 2)
            return CurrentVersion;
 
+       // Prefer the nearest previous version
        var previousVersion = YamlSnapshots
            .Where(s => s.Version < CurrentVersion)
            .OrderByDescending(s => s.Version)
-           .FirstOrDefault();
+           .FirstOrDefault()?.Version;
 
-       return previousVersion?.Version ?? YamlSnapshots.Min(s => s.Version);
+       if (previousVersion.HasValue)
+           return previousVersion.Value;
+
+       // If there is no previous version (we're at the earliest), pick the nearest next version
+       var nextVersion = YamlSnapshots
+           .Where(s => s.Version > CurrentVersion)
+           .OrderBy(s => s.Version)
+           .FirstOrDefault()?.Version;
+
+       // Fallback to current (should not happen because Count >= 2), but keeps function total
+       return nextVersion ?? CurrentVersion;
     }
 
     private void ToggleDiffView()
@@ -523,11 +562,25 @@
         else
         {
             showDiffView = true;
+            // Initialize the comparison target to a valid, different version
             var previousVersion = YamlSnapshots
                 .Where(s => s.Version < CurrentVersion)
                 .OrderByDescending(s => s.Version)
-                .FirstOrDefault();
-            diffCompareVersion = previousVersion?.Version ?? YamlSnapshots.Min(s => s.Version);
+                .FirstOrDefault()?.Version;
+
+            if (previousVersion.HasValue)
+            {
+                diffCompareVersion = previousVersion.Value;
+            }
+            else
+            {
+                var nextVersion = YamlSnapshots
+                    .Where(s => s.Version > CurrentVersion)
+                    .OrderBy(s => s.Version)
+                    .FirstOrDefault()?.Version;
+
+                diffCompareVersion = nextVersion;
+            }
         }
     }
 

@@ -170,37 +170,7 @@ public class YamlImportService : IYamlImportService
     private string GenerateSummary(Dictionary<string, object> data)
     {
         var summary = new System.Text.StringBuilder();
-        summary.AppendLine("📖 **Story Imported Successfully**\n");
-
-        // Add title
-        if (data.TryGetValue("title", out var title))
-        {
-            summary.AppendLine($"**Title:** {title}");
-        }
-
-        // Add description
-        if (data.TryGetValue("description", out var description))
-        {
-            summary.AppendLine($"**Description:** {description}");
-        }
-
-        // Add difficulty if present
-        if (data.TryGetValue("difficulty", out var difficulty))
-        {
-            summary.AppendLine($"**Difficulty:** {difficulty}");
-        }
-
-        // Add age group if present
-        if (data.TryGetValue("age_group", out var ageGroup))
-        {
-            summary.AppendLine($"**Age Group:** {ageGroup}");
-        }
-
-        // Add session length if present
-        if (data.TryGetValue("session_length", out var sessionLength))
-        {
-            summary.AppendLine($"**Session Length:** {sessionLength}");
-        }
+        summary.AppendLine("Story Imported Successfully");
 
         return summary.ToString();
     }
