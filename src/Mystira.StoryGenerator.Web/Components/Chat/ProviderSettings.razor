@@ -1,4 +1,5 @@
 @inject IChatService ChatService
+@inject IAiModelSettingsService ModelSettingsService
 @inject ILogger<ProviderSettings> Logger
 
 <div class="provider-settings">
@@ -32,6 +33,25 @@
     </div>
 
     <div class="form-group">
+        <label for="model-select">Model:</label>
+        <select id="model-select" class="form-control" @bind="SelectedModel" disabled="@string.IsNullOrEmpty(SelectedProvider)">
+            <option value="">-- Select Model --</option>
+            @foreach (var model in GetAvailableModelsForProvider(SelectedProvider))
+            {
+                <option value="@model.Id">@model.DisplayName</option>
+            }
+        </select>
+        @if (!string.IsNullOrEmpty(SelectedModel))
+        {
+            var modelInfo = GetModelInfo(SelectedModel);
+            if (modelInfo != null && !string.IsNullOrWhiteSpace(modelInfo.Description))
+            {
+                <small class="form-text text-muted">@modelInfo.Description</small>
+            }
+        }
+    </div>
+
+    <div class="form-group">
         <label for="model-id-input">Model Id:</label>
         <input id="model-id-input" type="text" class="form-control" @bind="ModelId"
                placeholder="Configured model id (e.g., story-gpt4o)" />
@@ -42,7 +62,7 @@
 
     <div class="form-group">
         <label for="model-input">Model:</label>
-        <input id="model-input" type="text" class="form-control" @bind="Model" 
+        <input id="model-input" type="text" class="form-control" @bind="Model"
                placeholder="Leave empty to use default" />
         <small class="form-text text-muted">
             Examples: gpt-4o, gpt-4o-mini, gemini-pro
@@ -53,7 +73,7 @@
         <div class="col-md-6">
             <div class="form-group">
                 <label for="temperature-input">Temperature: <span class="temperature-value">@Temperature.ToString("F1")</span></label>
-                <input id="temperature-input" type="range" class="form-range" min="0" max="2" step="0.1" 
+                <input id="temperature-input" type="range" class="form-range" min="0" max="2" step="0.1"
                        @bind="Temperature" />
                 <div class="range-labels">
                     <small>Focused (0.0)</small>
@@ -64,7 +84,7 @@
         <div class="col-md-6">
             <div class="form-group">
                 <label for="max-tokens-input">Max Tokens:</label>
-                <input id="max-tokens-input" type="number" class="form-control" min="1" max="4096" 
+                <input id="max-tokens-input" type="number" class="form-control" min="1" max="4096"
                        @bind="MaxTokens" />
                 <small class="form-text text-muted">1 - 4096</small>
             </div>
@@ -101,18 +121,47 @@
     [Parameter] public EventCallback<ProviderConfiguration> OnSettingsChanged { get; set; }
 
     private List<ProviderInfo> availableProviders = new();
+    private List<ProviderModels> availableProviderModels = new();
     private bool isLoading = true;
     private string errorMessage = string.Empty;
 
     private string _selectedProvider = string.Empty;
-    private string SelectedProvider 
-    { 
-        get => _selectedProvider; 
-        set 
-        { 
+    private string SelectedProvider
+    {
+        get => _selectedProvider;
+        set
+        {
+            var changed = _selectedProvider != value;
             _selectedProvider = value;
+            if (changed)
+            {
+                // Clear selected model when provider changes
+                _selectedModel = string.Empty;
+            }
             NotifySettingsChanged();
-        } 
+        }
+    }
+
+    private string _selectedModel = string.Empty;
+    private string SelectedModel
+    {
+        get => _selectedModel;
+        set
+        {
+            _selectedModel = value;
+            // Auto-populate the Model field when a model is selected
+            if (!string.IsNullOrEmpty(value))
+            {
+                var modelInfo = GetModelInfo(value);
+                if (modelInfo != null)
+                {
+                    Model = modelInfo.Id;
+                    Temperature = modelInfo.DefaultTemperature;
+                    MaxTokens = modelInfo.MaxTokens;
+                }
+            }
+            NotifySettingsChanged();
+        }
     }
 
     private string _modelId = string.Empty;
@@ -127,53 +176,56 @@
     }
 
     private string _model = string.Empty;
-    private string Model 
-    { 
-        get => _model; 
-        set 
-        { 
+    private string Model
+    {
+        get => _model;
+        set
+        {
             _model = value;
             NotifySettingsChanged();
-        } 
+        }
     }
 
     private double _temperature = 0.7;
-    private double Temperature 
-    { 
-        get => _temperature; 
-        set 
-        { 
+    private double Temperature
+    {
+        get => _temperature;
+        set
+        {
             _temperature = value;
             NotifySettingsChanged();
-        } 
+        }
     }
 
     private int _maxTokens = 1000;
-    private int MaxTokens 
-    { 
-        get => _maxTokens; 
-        set 
-        { 
+    private int MaxTokens
+    {
+        get => _maxTokens;
+        set
+        {
             _maxTokens = value;
             NotifySettingsChanged();
-        } 
+        }
     }
 
     private string _systemPrompt = string.Empty;
-    private string SystemPrompt 
-    { 
-        get => _systemPrompt; 
-        set 
-        { 
+    private string SystemPrompt
+    {
+        get => _systemPrompt;
+        set
+        {
             _systemPrompt = value;
             NotifySettingsChanged();
-        } 
+        }
     }
 
     protected override async Task OnInitializedAsync()
     {
         await LoadProvidersAsync();
+        await LoadModelsAsync();
     }
+
+    // No dynamic subscription needed; models are loaded on demand via ChatService
 
     private async Task LoadProvidersAsync()
     {
@@ -183,7 +235,7 @@
             StateHasChanged();
 
             availableProviders = await ChatService.GetProvidersAsync();
-            
+
             // Auto-select first available provider if none selected
             if (string.IsNullOrEmpty(SelectedProvider) && availableProviders.Any(p => p.Available))
             {
@@ -204,9 +256,58 @@
         }
     }
 
+    private async Task LoadModelsAsync()
+    {
+        try
+        {
+            var modelsResponse = await ChatService.GetModelsAsync();
+            availableProviderModels = modelsResponse.Providers.ToList();
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Failed to load models");
+            errorMessage = "Failed to load available models. Please check your connection.";
+        }
+    }
+
     private async Task RefreshProviders()
     {
         await LoadProvidersAsync();
+        await LoadModelsAsync();
+    }
+
+    private void OnProviderChanged()
+    {
+        // handled implicitly by SelectedProvider setter
+    }
+
+    private void OnModelChanged()
+    {
+        // handled implicitly by SelectedModel setter
+    }
+
+    private IEnumerable<ChatModelInfo> GetAvailableModelsForProvider(string providerName)
+    {
+        if (string.IsNullOrEmpty(providerName))
+        {
+            return Enumerable.Empty<ChatModelInfo>();
+        }
+
+        var providerModels = availableProviderModels.FirstOrDefault(p => p.Provider.Equals(providerName, StringComparison.OrdinalIgnoreCase));
+        return providerModels?.Models ?? Enumerable.Empty<ChatModelInfo>();
+    }
+
+    private ChatModelInfo? GetModelInfo(string modelId)
+    {
+        if (string.IsNullOrEmpty(modelId))
+        {
+            return null;
+        }
+
+        return availableProviderModels
+            .SelectMany(p => p.Models)
+            .FirstOrDefault(m => m.Id.Equals(modelId, StringComparison.OrdinalIgnoreCase));
     }
 
     private async Task NotifySettingsChanged()

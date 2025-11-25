@@ -16,6 +16,12 @@ public interface IChatService
     Task<List<ProviderInfo>> GetProvidersAsync();
 
     /// <summary>
+    /// Get available chat models per provider
+    /// </summary>
+    /// <returns>List of available models grouped by provider</returns>
+    Task<ChatModelsResponse> GetModelsAsync();
+
+    /// <summary>
     /// Generate a chat completion
     /// </summary>
     /// <param name="request">The chat completion request</param>
@@ -71,6 +77,35 @@ public class ChatService : IChatService
         {
             _logger.LogError(ex, "Error fetching providers");
             return new List<ProviderInfo>();
+        }
+    }
+
+    public async Task<ChatModelsResponse> GetModelsAsync()
+    {
+        try
+        {
+            _logger.LogDebug("Fetching available models");
+
+            var response = await _httpClient.GetAsync("/api/chat/models");
+            response.EnsureSuccessStatusCode();
+
+            var content = await response.Content.ReadAsStringAsync();
+            var result = JsonSerializer.Deserialize<ChatModelsResponse>(content, _jsonOptions);
+
+            return result ?? new ChatModelsResponse
+            {
+                Providers = new List<ProviderModels>(),
+                TotalModels = 0
+            };
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error fetching models");
+            return new ChatModelsResponse
+            {
+                Providers = new List<ProviderModels>(),
+                TotalModels = 0
+            };
         }
     }
 

@@ -16,7 +16,6 @@ public class AiSettings
     public int DefaultMaxTokens { get; set; } = 1000;
 
     public AzureOpenAISettings AzureOpenAI { get; set; } = new();
-    public GoogleGeminiSettings GoogleGemini { get; set; } = new();
     public IntentRouterSettings IntentRouter { get; set; } = new();
 }
 
@@ -43,16 +42,44 @@ public class AzureOpenAISettings
     /// </summary>
     public string? EmbeddingDeploymentName { get; set; }
 
+    /// <summary>
+    /// List of available deployments for this Azure OpenAI resource
+    /// </summary>
+    public List<AzureOpenAIDeployment> Deployments { get; set; } = new();
+
     public SchemaValidationSettings SchemaValidation { get; set; } = new();
 }
 
-public class GoogleGeminiSettings
+/// <summary>
+/// Represents an Azure OpenAI deployment configuration
+/// </summary>
+public class AzureOpenAIDeployment
 {
     [Required]
-    public string ApiKey { get; set; } = string.Empty;
+    public string Name { get; set; } = string.Empty;
 
     [Required]
-    public string Model { get; set; } = "gemini-pro";
+    public string DisplayName { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Maximum number of tokens supported by this deployment
+    /// </summary>
+    public int MaxTokens { get; set; } = 4096;
+
+    /// <summary>
+    /// Default temperature recommended for this deployment
+    /// </summary>
+    public double DefaultTemperature { get; set; } = 0.7;
+
+    /// <summary>
+    /// Whether this deployment supports JSON schema response formatting
+    /// </summary>
+    public bool SupportsJsonSchema { get; set; } = true;
+
+    /// <summary>
+    /// Model capabilities for this deployment
+    /// </summary>
+    public List<string> Capabilities { get; set; } = new();
 }
 
 public class SchemaValidationSettings

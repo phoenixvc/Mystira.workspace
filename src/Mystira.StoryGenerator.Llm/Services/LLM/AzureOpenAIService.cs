@@ -40,6 +40,63 @@ public class AzureOpenAIService : ILLMService
                !string.IsNullOrWhiteSpace(_settings.AzureOpenAI.DeploymentName);
     }
 
+    public IEnumerable<ChatModelInfo> GetAvailableModels()
+    {
+        if (!IsAvailable())
+        {
+            return Enumerable.Empty<ChatModelInfo>();
+        }
+
+        // Return models from the deployments list in configuration
+        // If no deployments are configured, fall back to the legacy single deployment
+        var deployments = _settings.AzureOpenAI.Deployments;
+        if (deployments == null || !deployments.Any())
+        {
+            // Fallback to legacy single deployment configuration
+            var model = new ChatModelInfo
+            {
+                Id = _settings.AzureOpenAI.DeploymentName,
+                DisplayName = GetDisplayNameForDeployment(_settings.AzureOpenAI.DeploymentName),
+                Description = "Azure OpenAI GPT model deployment",
+                MaxTokens = 4096,
+                DefaultTemperature = 0.7,
+                MinTemperature = 0.0,
+                MaxTemperature = 2.0,
+                SupportsJsonSchema = true,
+                Capabilities = new List<string> { "chat", "json-schema", "story-generation" }
+            };
+            return new List<ChatModelInfo> { model };
+        }
+
+        // Convert configured deployments to ChatModelInfo objects
+        var models = deployments.Select(deployment => new ChatModelInfo
+        {
+            Id = deployment.Name,
+            DisplayName = deployment.DisplayName,
+            Description = $"Azure OpenAI {deployment.DisplayName} deployment",
+            MaxTokens = deployment.MaxTokens,
+            DefaultTemperature = deployment.DefaultTemperature,
+            MinTemperature = 0.0,
+            MaxTemperature = 2.0,
+            SupportsJsonSchema = deployment.SupportsJsonSchema,
+            Capabilities = deployment.Capabilities ?? new List<string> { "chat", "story-generation" }
+        });
+
+        return models;
+    }
+
+    private static string GetDisplayNameForDeployment(string deploymentName)
+    {
+        // Convert deployment name to a more user-friendly display name
+        return deploymentName.ToLowerInvariant() switch
+        {
+            var name when name.Contains("gpt-4") => "GPT-4",
+            var name when name.Contains("gpt-3.5") => "GPT-3.5 Turbo",
+            var name when name.Contains("gpt-35") => "GPT-3.5 Turbo",
+            _ => deploymentName
+        };
+    }
+
     public async Task<ChatCompletionResponse> CompleteAsync(ChatCompletionRequest request, CancellationToken cancellationToken = default)
     {
         if (!IsAvailable()) return CreateErrorResponse("Azure OpenAI service is not properly configured");

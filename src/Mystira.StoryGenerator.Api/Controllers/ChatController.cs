@@ -124,4 +124,33 @@ public class ChatController : ControllerBase
             return StatusCode(500, new { Error = "Failed to get provider information" });
         }
     }
+
+    /// <summary>
+    /// Get available chat models per provider
+    /// </summary>
+    /// <returns>List of available models grouped by provider</returns>
+    [HttpGet("models")]
+    public ActionResult<ChatModelsResponse> GetModels()
+    {
+        try
+        {
+            var providerModels = _llmServiceFactory.GetAvailableModels().ToList();
+            var totalModels = providerModels.Sum(p => p.Models.Count);
+
+            return Ok(new ChatModelsResponse
+            {
+                Providers = providerModels,
+                TotalModels = totalModels
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting model information");
+            return StatusCode(500, new ChatModelsResponse
+            {
+                Providers = new List<ProviderModels>(),
+                TotalModels = 0
+            });
+        }
+    }
 }

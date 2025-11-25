@@ -88,6 +88,26 @@ public class LLMServiceFactory : ILLMServiceFactory
             .Select(s => Adapt(s, null));
     }
 
+    public IEnumerable<ProviderModels> GetAvailableModels()
+    {
+        var providerModels = new List<ProviderModels>();
+
+        foreach (var service in _services.Values)
+        {
+            var isAvailable = service.IsAvailable();
+            var models = isAvailable ? service.GetAvailableModels() : Enumerable.Empty<ChatModelInfo>();
+
+            providerModels.Add(new ProviderModels
+            {
+                Provider = service.ProviderName,
+                Available = isAvailable,
+                Models = models.ToList()
+            });
+        }
+
+        return providerModels;
+    }
+
     private static ILLMService Adapt(ILLMService service, string? deploymentNameOrModelId = null)
     {
         // For Azure OpenAI services, set the deployment name on the actual service instance
@@ -117,5 +137,6 @@ public class LLMServiceFactory : ILLMServiceFactory
             => _inner.CompleteAsync(request, cancellationToken);
         
         public bool IsAvailable() => _inner.IsAvailable();
+        public IEnumerable<ChatModelInfo> GetAvailableModels() => _inner.GetAvailableModels();
     }
 }

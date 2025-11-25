@@ -2,6 +2,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Moq;
 using Mystira.StoryGenerator.Contracts.Configuration;
+using Mystira.StoryGenerator.Contracts.Chat;
 using Mystira.StoryGenerator.Domain.Services;
 using Mystira.StoryGenerator.Llm.Services.LLM;
 
@@ -145,5 +146,44 @@ public class LLMServiceFactoryTests
 
         Assert.Single(result);
         Assert.Equal("azure-openai", result[0].ProviderName);
+    }
+
+    [Fact]
+    public void GetAvailableModels_ReturnsModelsFromAllProviders()
+    {
+        var azureModel1 = new ChatModelInfo
+        {
+            Id = "gpt-4",
+            DisplayName = "GPT-4",
+            MaxTokens = 4096,
+            DefaultTemperature = 0.7
+        };
+
+        var azureModel2 = new ChatModelInfo
+        {
+            Id = "gpt-35-turbo",
+            DisplayName = "GPT-3.5 Turbo",
+            MaxTokens = 4096,
+            DefaultTemperature = 0.7
+        };
+
+        var mockService1 = new Mock<ILLMService>();
+        mockService1.Setup(x => x.ProviderName).Returns("azure-openai");
+        mockService1.Setup(x => x.IsAvailable()).Returns(true);
+        mockService1.Setup(x => x.GetAvailableModels()).Returns(new List<ChatModelInfo> { azureModel1, azureModel2 });
+
+        var services = new List<ILLMService> { mockService1.Object };
+        var factory = new LLMServiceFactory(services, _optionsMock.Object, _loggerMock.Object);
+
+        var result = factory.GetAvailableModels().ToList();
+
+        Assert.Single(result);
+        
+        var azureProvider = result.FirstOrDefault(p => p.Provider == "azure-openai");
+        Assert.NotNull(azureProvider);
+        Assert.True(azureProvider.Available);
+        Assert.Equal(2, azureProvider.Models.Count);
+        Assert.Equal("gpt-4", azureProvider.Models[0].Id);
+        Assert.Equal("gpt-35-turbo", azureProvider.Models[1].Id);
     }
 }
