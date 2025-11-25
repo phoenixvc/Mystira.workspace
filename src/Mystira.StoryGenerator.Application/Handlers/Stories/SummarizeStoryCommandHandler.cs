@@ -29,7 +29,7 @@ public class SummarizeStoryCommandHandler : ICommandHandler<SummarizeStoryComman
         try
         {
             var service = !string.IsNullOrWhiteSpace(command.Provider)
-                ? _llmFactory.GetService(command.Provider!)
+                ? _llmFactory.GetService(command.Provider!, command.Model)
                 : _llmFactory.GetDefaultService();
 
             if (service is null)

@@ -97,6 +97,7 @@ public class ChatOrchestrationServiceTests
         // Mock the LLM service for parameter checking
         var mockLlmService = new Mock<ILLMService>();
         mockLlmService.Setup(x => x.ProviderName).Returns("test-llm");
+        mockLlmService.Setup(x => x.DeploymentNameOrModelId).Returns((string?)null);
         mockLlmService.Setup(x => x.IsAvailable()).Returns(true);
 
         var parameterCheckResponse = new ChatCompletionResponse
@@ -142,20 +143,21 @@ public class ChatOrchestrationServiceTests
         };
 
         _mockCommandIntentRouter
-            .Setup(x => x.DetectPrimaryInstructionTypeAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync("story_generate_initial");
+             .Setup(x => x.DetectPrimaryInstructionTypeAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+             .ReturnsAsync("story_generate_initial");
 
-        // Mock the LLM service for parameter checking
-        var mockLlmService = new Mock<ILLMService>();
-        mockLlmService.Setup(x => x.ProviderName).Returns("test-llm");
-        mockLlmService.Setup(x => x.IsAvailable()).Returns(true);
+         // Mock the LLM service for parameter checking
+         var mockLlmService = new Mock<ILLMService>();
+         mockLlmService.Setup(x => x.ProviderName).Returns("test-llm");
+         mockLlmService.Setup(x => x.DeploymentNameOrModelId).Returns((string?)null);
+         mockLlmService.Setup(x => x.IsAvailable()).Returns(true);
 
-        var parameterCheckResponse = new ChatCompletionResponse
-        {
-            Success = true,
-            Content = "[]", // No missing parameters
-            Provider = "test-llm"
-        };
+         var parameterCheckResponse = new ChatCompletionResponse
+         {
+             Success = true,
+             Content = "[]", // No missing parameters
+             Provider = "test-llm"
+         };
 
         mockLlmService
             .Setup(x => x.CompleteAsync(It.Is<ChatCompletionRequest>(r =>

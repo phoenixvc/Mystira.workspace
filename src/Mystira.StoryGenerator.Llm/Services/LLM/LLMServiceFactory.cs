@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Logging;
 using Mystira.StoryGenerator.Contracts.Chat;
 using Mystira.StoryGenerator.Contracts.Configuration;
@@ -30,7 +30,7 @@ public class LLMServiceFactory : ILLMServiceFactory
             _services.Count, string.Join(", ", _services.Keys));
     }
 
-    public ILLMService? GetService(string providerName)
+    public ILLMService? GetService(string providerName, string? deploymentNameOrModelId = null)
     {
         if (string.IsNullOrWhiteSpace(providerName))
         {
@@ -42,8 +42,9 @@ public class LLMServiceFactory : ILLMServiceFactory
         {
             if (service.IsAvailable())
             {
-                _logger.LogDebug("Found available service for provider: {Provider}", providerName);
-                return Adapt(service);
+                _logger.LogDebug("Found available service for provider: {Provider} with deployment/model: {DeploymentOrModel}", 
+                    providerName, deploymentNameOrModelId ?? "default");
+                return Adapt(service, deploymentNameOrModelId);
             }
 
             _logger.LogWarning("Service for provider {Provider} is not properly configured", providerName);
@@ -84,26 +85,37 @@ public class LLMServiceFactory : ILLMServiceFactory
     public IEnumerable<ILLMService> GetAvailableServices()
     {
         return _services.Values.Where(s => s.IsAvailable())
-            .Select(Adapt);
+            .Select(s => Adapt(s, null));
     }
 
-    private static ILLMService Adapt(ILLMService service)
+    private static ILLMService Adapt(ILLMService service, string? deploymentNameOrModelId = null)
     {
-        if (service is ILLMService domain)
+        // For Azure OpenAI services, set the deployment name on the actual service instance
+        if (service is AzureOpenAIService azureService && !string.IsNullOrWhiteSpace(deploymentNameOrModelId))
         {
-            return domain;
+            azureService.SetDeploymentNameOrModelId(deploymentNameOrModelId);
         }
 
-        return new LlmServiceAdapter(service);
+        return new LlmServiceAdapter(service, deploymentNameOrModelId);
     }
 
     private sealed class LlmServiceAdapter : ILLMService
     {
         private readonly ILLMService _inner;
-        public LlmServiceAdapter(ILLMService inner) => _inner = inner;
+        private readonly string? _deploymentNameOrModelId;
+        
+        public LlmServiceAdapter(ILLMService inner, string? deploymentNameOrModelId = null)
+        {
+            _inner = inner;
+            _deploymentNameOrModelId = deploymentNameOrModelId;
+        }
+        
         public string ProviderName => _inner.ProviderName;
+        public string? DeploymentNameOrModelId => _deploymentNameOrModelId ?? _inner.DeploymentNameOrModelId;
+        
         public Task<ChatCompletionResponse> CompleteAsync(ChatCompletionRequest request, CancellationToken cancellationToken = default)
             => _inner.CompleteAsync(request, cancellationToken);
+        
         public bool IsAvailable() => _inner.IsAvailable();
     }
 }
