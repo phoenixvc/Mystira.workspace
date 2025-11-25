@@ -101,7 +101,7 @@ public class AiModelSettingsService : IAiModelSettingsService
     public async Task<EffectiveAiModelSettings> GetEffectiveSettingsAsync()
     {
         await InitializeAsync();
-        var definition = ResolveModel(_selection.ModelId) ?? AiModelDefaults.ResolveDefaultModel(_configuration);
+        var definition = ResolveModel(_selection.ModelId) ?? CreateSyntheticDefinition(_selection.ModelId);
 
         var normalizedSelection = new AiModelSelection
         {
@@ -122,7 +122,7 @@ public class AiModelSettingsService : IAiModelSettingsService
     public async Task UpdateSelectionAsync(string modelId, int maxTokens, double temperature)
     {
         await InitializeAsync();
-        var definition = ResolveModel(modelId) ?? AiModelDefaults.ResolveDefaultModel(_configuration);
+        var definition = ResolveModel(modelId) ?? CreateSyntheticDefinition(modelId);
 
         var updatedSelection = new AiModelSelection
         {
@@ -236,12 +236,7 @@ public class AiModelSettingsService : IAiModelSettingsService
             return false;
         }
 
-        var definition = ResolveModel(selection.ModelId);
-        if (definition == null)
-        {
-            normalized = default!;
-            return false;
-        }
+        var definition = ResolveModel(selection.ModelId) ?? CreateSyntheticDefinition(selection.ModelId);
 
         normalized = new AiModelSelection
         {
@@ -366,6 +361,30 @@ public class AiModelSettingsService : IAiModelSettingsService
             MinTemperature = minTemperature,
             MaxTemperature = maxTemperature,
             Description = definition.Description
+        };
+    }
+
+    private AiModelDefinition CreateSyntheticDefinition(string? modelId)
+    {
+        // When the selected model isn't part of the static config, synthesize a definition
+        // using sensible defaults based on the current default model. This allows dynamic
+        // models discovered at runtime to be persisted and used consistently.
+        var baseDef = AiModelDefaults.ResolveDefaultModel(_configuration);
+        var id = string.IsNullOrWhiteSpace(modelId) ? baseDef.Id : modelId;
+
+        return new AiModelDefinition
+        {
+            Id = id,
+            DisplayName = string.IsNullOrWhiteSpace(modelId) ? baseDef.DisplayName : modelId,
+            Provider = string.IsNullOrWhiteSpace(baseDef.Provider) ? AiModelDefaults.DefaultProvider : baseDef.Provider,
+            Deployment = id,
+            DefaultMaxTokens = baseDef.DefaultMaxTokens,
+            MaxTokensLimit = baseDef.MaxTokensLimit,
+            MinTokens = baseDef.MinTokens,
+            DefaultTemperature = baseDef.DefaultTemperature,
+            MinTemperature = baseDef.MinTemperature,
+            MaxTemperature = baseDef.MaxTemperature,
+            Description = baseDef.Description
         };
     }
 

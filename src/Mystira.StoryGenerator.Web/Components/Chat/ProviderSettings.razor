@@ -52,23 +52,7 @@
         }
     </div>
 
-    <div class="form-group">
-        <label for="model-id-input">Model Id:</label>
-        <input id="model-id-input" type="text" class="form-control" @bind="ModelId"
-               placeholder="Configured model id (e.g., story-gpt4o)" />
-        <small class="form-text text-muted">
-            Use when referencing a model configured on the server (Ai:Models).
-        </small>
-    </div>
-
-    <div class="form-group">
-        <label for="model-input">Model:</label>
-        <input id="model-input" type="text" class="form-control" @bind="Model"
-               placeholder="Leave empty to use default" />
-        <small class="form-text text-muted">
-            Examples: gpt-4o, gpt-4o-mini, gemini-pro
-        </small>
-    </div>
+    <!-- Removed free-form Model Id and Model text inputs to avoid confusion; selection is via dropdown only -->
 
     <div class="row">
         <div class="col-md-6">
@@ -120,6 +104,8 @@
 
 @code {
      [Parameter] public EventCallback<ProviderConfiguration> OnSettingsChanged { get; set; }
+     // Incremented by parent each time the settings modal is opened to re-apply incoming values
+     [Parameter] public int OpenVersion { get; set; }
      [Parameter] public AiModelDefinition? CurrentModel { get; set; }
      [Parameter] public int CurrentMaxTokens { get; set; } = 1000;
      [Parameter] public double CurrentTemperature { get; set; } = 0.7;
@@ -159,33 +145,10 @@
                  var modelInfo = GetModelInfo(value);
                  if (modelInfo != null)
                  {
-                     Model = modelInfo.Id;
                      Temperature = modelInfo.DefaultTemperature;
                      MaxTokens = modelInfo.MaxTokens;
                  }
              }
-             NotifySettingsChanged();
-         }
-     }
-
-     private string _modelId = string.Empty;
-     private string ModelId
-     {
-         get => _modelId;
-         set
-         {
-             _modelId = value;
-             NotifySettingsChanged();
-         }
-     }
-
-     private string _model = string.Empty;
-     private string Model
-     {
-         get => _model;
-         set
-         {
-             _model = value;
              NotifySettingsChanged();
          }
      }
@@ -229,17 +192,34 @@
          await LoadModelsAsync();
      }
 
+     // Track whether we've already applied incoming parameters to avoid overwriting user edits on re-render
+     private bool _initializedFromParameters;
+     private AiModelDefinition? _lastAppliedModel;
+     private int _appliedOpenVersion;
+
      protected override async Task OnParametersSetAsync()
      {
-         // Initialize form with current model settings when parameters are passed
+         // Only apply incoming parameters when:
+         //  - first-time initialization, or
+         //  - the provided CurrentModel has changed (by Id) compared to what was applied last time.
          if (CurrentModel != null)
          {
-             _selectedModel = CurrentModel.Id;
-             _model = CurrentModel.Deployment ?? CurrentModel.Id;
-             _temperature = CurrentTemperature;
-             _maxTokens = CurrentMaxTokens;
-             _selectedProvider = CurrentModel.Provider ?? string.Empty;
-             StateHasChanged();
+             var shouldApply = !_initializedFromParameters
+                                || _lastAppliedModel == null
+                                || !string.Equals(_lastAppliedModel.Id, CurrentModel.Id, StringComparison.OrdinalIgnoreCase)
+                                || OpenVersion != _appliedOpenVersion; // reapply when modal is reopened
+
+             if (shouldApply)
+             {
+                 _selectedModel = CurrentModel.Id;
+                 _temperature = CurrentTemperature;
+                 _maxTokens = CurrentMaxTokens;
+                 _selectedProvider = CurrentModel.Provider ?? string.Empty;
+                 _lastAppliedModel = CurrentModel;
+                 _initializedFromParameters = true;
+                 _appliedOpenVersion = OpenVersion;
+                 StateHasChanged();
+             }
          }
      }
 
@@ -335,8 +315,7 @@
             var settings = new ProviderConfiguration
             {
                 Provider = SelectedProvider,
-                ModelId = ModelId,
-                Model = Model,
+                Model = _selectedModel,
                 Temperature = Temperature,
                 MaxTokens = MaxTokens,
                 SystemPrompt = SystemPrompt
@@ -441,10 +420,26 @@
 </style>
 
 @code {
+    // Public read-only accessors to expose current component state
+    public string GetSelectedProvider() => _selectedProvider;
+    public string GetSelectedModel() => _selectedModel;
+    public double GetTemperature() => _temperature;
+    public int GetMaxTokens() => _maxTokens;
+    public string GetSystemPrompt() => _systemPrompt;
+
+    // Aggregate accessor for convenience
+    public ProviderConfiguration GetCurrentConfiguration() => new ProviderConfiguration
+    {
+        Provider = _selectedProvider,
+        Model = _selectedModel,
+        Temperature = _temperature,
+        MaxTokens = _maxTokens,
+        SystemPrompt = _systemPrompt
+    };
+
     public class ProviderConfiguration
     {
         public string Provider { get; set; } = string.Empty;
-        public string ModelId { get; set; } = string.Empty;
         public string Model { get; set; } = string.Empty;
         public double Temperature { get; set; } = 0.7;
         public int MaxTokens { get; set; } = 1000;

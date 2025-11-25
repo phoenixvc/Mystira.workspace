@@ -168,7 +168,7 @@ public class ChatOrchestrationService : IChatOrchestrationService
         {
             Provider = context.Provider,
             ModelId = context.ModelId,
-            Model = context.Model
+            Model = context.Model,
         };
 
         var command = new GenerateStoryCommand(request, userMessage);
