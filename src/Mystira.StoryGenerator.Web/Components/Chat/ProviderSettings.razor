@@ -120,6 +120,8 @@
 
 @code {
      [Parameter] public EventCallback<ProviderConfiguration> OnSettingsChanged { get; set; }
+     // Incremented by parent each time the settings modal is opened to re-apply incoming values
+     [Parameter] public int OpenVersion { get; set; }
      [Parameter] public AiModelDefinition? CurrentModel { get; set; }
      [Parameter] public int CurrentMaxTokens { get; set; } = 1000;
      [Parameter] public double CurrentTemperature { get; set; } = 0.7;
@@ -229,17 +231,35 @@
          await LoadModelsAsync();
      }
 
+     // Track whether we've already applied incoming parameters to avoid overwriting user edits on re-render
+     private bool _initializedFromParameters;
+     private AiModelDefinition? _lastAppliedModel;
+     private int _appliedOpenVersion;
+
      protected override async Task OnParametersSetAsync()
      {
-         // Initialize form with current model settings when parameters are passed
+         // Only apply incoming parameters when:
+         //  - first-time initialization, or
+         //  - the provided CurrentModel has changed (by Id) compared to what was applied last time.
          if (CurrentModel != null)
          {
-             _selectedModel = CurrentModel.Id;
-             _model = CurrentModel.Deployment ?? CurrentModel.Id;
-             _temperature = CurrentTemperature;
-             _maxTokens = CurrentMaxTokens;
-             _selectedProvider = CurrentModel.Provider ?? string.Empty;
-             StateHasChanged();
+             var shouldApply = !_initializedFromParameters
+                                || _lastAppliedModel == null
+                                || !string.Equals(_lastAppliedModel.Id, CurrentModel.Id, StringComparison.OrdinalIgnoreCase)
+                                || OpenVersion != _appliedOpenVersion; // reapply when modal is reopened
+
+             if (shouldApply)
+             {
+                 _selectedModel = CurrentModel.Id;
+                 _model = CurrentModel.Deployment ?? CurrentModel.Id;
+                 _temperature = CurrentTemperature;
+                 _maxTokens = CurrentMaxTokens;
+                 _selectedProvider = CurrentModel.Provider ?? string.Empty;
+                 _lastAppliedModel = CurrentModel;
+                 _initializedFromParameters = true;
+                 _appliedOpenVersion = OpenVersion;
+                 StateHasChanged();
+             }
          }
      }
 
@@ -441,6 +461,26 @@
 </style>
 
 @code {
+    // Public read-only accessors to expose current component state
+    public string GetSelectedProvider() => _selectedProvider;
+    public string GetSelectedModel() => _selectedModel;
+    public string GetModelId() => _modelId;
+    public string GetModel() => _model;
+    public double GetTemperature() => _temperature;
+    public int GetMaxTokens() => _maxTokens;
+    public string GetSystemPrompt() => _systemPrompt;
+
+    // Aggregate accessor for convenience
+    public ProviderConfiguration GetCurrentConfiguration() => new ProviderConfiguration
+    {
+        Provider = _selectedProvider,
+        ModelId = _modelId,
+        Model = _model,
+        Temperature = _temperature,
+        MaxTokens = _maxTokens,
+        SystemPrompt = _systemPrompt
+    };
+
     public class ProviderConfiguration
     {
         public string Provider { get; set; } = string.Empty;
