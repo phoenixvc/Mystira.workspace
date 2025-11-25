@@ -95,7 +95,7 @@ public class StoriesController : ControllerBase
             }
 
             var service = !string.IsNullOrWhiteSpace(request.Provider)
-                ? _llmFactory.GetService(request.Provider!)
+                ? _llmFactory.GetService(request.Provider!, request.Model)
                 : _llmFactory.GetDefaultService();
 
             if (service == null)
@@ -200,7 +200,7 @@ public class StoriesController : ControllerBase
         try
         {
             var service = !string.IsNullOrWhiteSpace(request.Provider)
-                ? _llmFactory.GetService(request.Provider!)
+                ? _llmFactory.GetService(request.Provider!, request.Model)
                 : _llmFactory.GetDefaultService();
 
             if (service == null)

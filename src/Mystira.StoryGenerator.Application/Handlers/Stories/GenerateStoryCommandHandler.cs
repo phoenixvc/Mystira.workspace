@@ -43,7 +43,7 @@ public class GenerateStoryCommandHandler : ICommandHandler<GenerateStoryCommand,
             var request = command.Request;
             var userQuery = command.UserQuery;
             var service = !string.IsNullOrWhiteSpace(request.Provider)
-                ? _llmFactory.GetService(request.Provider!)
+                ? _llmFactory.GetService(request.Provider!, request.Model)
                 : _llmFactory.GetDefaultService();
 
             if (service is null)

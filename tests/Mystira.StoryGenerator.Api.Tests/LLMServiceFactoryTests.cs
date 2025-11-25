@@ -38,10 +38,12 @@ public class LLMServiceFactoryTests
     {
         var mockService1 = new Mock<ILLMService>();
         mockService1.Setup(x => x.ProviderName).Returns("azure-openai");
+        mockService1.Setup(x => x.DeploymentNameOrModelId).Returns((string?)null);
         mockService1.Setup(x => x.IsAvailable()).Returns(true);
 
         var mockService2 = new Mock<ILLMService>();
         mockService2.Setup(x => x.ProviderName).Returns("google-gemini");
+        mockService2.Setup(x => x.DeploymentNameOrModelId).Returns((string?)null);
         mockService2.Setup(x => x.IsAvailable()).Returns(true);
 
         var services = new List<ILLMService> { mockService1.Object, mockService2.Object };
@@ -58,6 +60,7 @@ public class LLMServiceFactoryTests
     {
         var mockService = new Mock<ILLMService>();
         mockService.Setup(x => x.ProviderName).Returns("azure-openai");
+        mockService.Setup(x => x.DeploymentNameOrModelId).Returns((string?)null);
         mockService.Setup(x => x.IsAvailable()).Returns(true);
 
         var services = new List<ILLMService> { mockService.Object };
@@ -73,6 +76,7 @@ public class LLMServiceFactoryTests
     {
         var mockService = new Mock<ILLMService>();
         mockService.Setup(x => x.ProviderName).Returns("azure-openai");
+        mockService.Setup(x => x.DeploymentNameOrModelId).Returns((string?)null);
         mockService.Setup(x => x.IsAvailable()).Returns(false);
 
         var services = new List<ILLMService> { mockService.Object };
@@ -88,6 +92,7 @@ public class LLMServiceFactoryTests
     {
         var mockService = new Mock<ILLMService>();
         mockService.Setup(x => x.ProviderName).Returns("azure-openai");
+        mockService.Setup(x => x.DeploymentNameOrModelId).Returns((string?)null);
         mockService.Setup(x => x.IsAvailable()).Returns(true);
 
         var services = new List<ILLMService> { mockService.Object };
@@ -104,10 +109,12 @@ public class LLMServiceFactoryTests
     {
         var mockService1 = new Mock<ILLMService>();
         mockService1.Setup(x => x.ProviderName).Returns("azure-openai");
+        mockService1.Setup(x => x.DeploymentNameOrModelId).Returns((string?)null);
         mockService1.Setup(x => x.IsAvailable()).Returns(false);
 
         var mockService2 = new Mock<ILLMService>();
         mockService2.Setup(x => x.ProviderName).Returns("google-gemini");
+        mockService2.Setup(x => x.DeploymentNameOrModelId).Returns((string?)null);
         mockService2.Setup(x => x.IsAvailable()).Returns(true);
 
         var services = new List<ILLMService> { mockService1.Object, mockService2.Object };
@@ -124,10 +131,12 @@ public class LLMServiceFactoryTests
     {
         var mockService1 = new Mock<ILLMService>();
         mockService1.Setup(x => x.ProviderName).Returns("azure-openai");
+        mockService1.Setup(x => x.DeploymentNameOrModelId).Returns((string?)null);
         mockService1.Setup(x => x.IsAvailable()).Returns(true);
 
         var mockService2 = new Mock<ILLMService>();
         mockService2.Setup(x => x.ProviderName).Returns("google-gemini");
+        mockService2.Setup(x => x.DeploymentNameOrModelId).Returns((string?)null);
         mockService2.Setup(x => x.IsAvailable()).Returns(false);
 
         var services = new List<ILLMService> { mockService1.Object, mockService2.Object };

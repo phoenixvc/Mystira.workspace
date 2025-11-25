@@ -33,7 +33,7 @@ public class AutoFixStoryJsonCommandHandler : ICommandHandler<AutoFixStoryJsonCo
         try
         {
             var service = !string.IsNullOrWhiteSpace(command.Provider)
-                ? _llmFactory.GetService(command.Provider!)
+                ? _llmFactory.GetService(command.Provider!, command.Model)
                 : _llmFactory.GetDefaultService();
 
             if (service is null)

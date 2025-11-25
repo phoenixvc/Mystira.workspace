@@ -313,6 +313,19 @@ public class ChatOrchestrationService : IChatOrchestrationService
 
     private async Task<ChatOrchestrationResponse> HandleHelpCommandAsync(string instructionType, string userMessage, CancellationToken cancellationToken)
     {
+        // Get appropriate LLM service
+        var service = !string.IsNullOrWhiteSpace(context.Provider)
+            ? _llmServiceFactory.GetService(context.Provider!, context.Model)
+            : _llmServiceFactory.GetDefaultService();
+
+        if (service is null)
+        {
+            return new ChatOrchestrationResponse
+            {
+                Success = false,
+                Error = "No LLM services are currently available"
+            };
+        }
         var command = new HelpCommand(userMessage);
         var result = await _mediator.Send(command, cancellationToken);
 
@@ -405,7 +418,7 @@ public class ChatOrchestrationService : IChatOrchestrationService
     {
         // Get appropriate LLM service for parameter checking
         var service = !string.IsNullOrWhiteSpace(context.Provider)
-            ? _llmServiceFactory.GetService(context.Provider!)
+            ? _llmServiceFactory.GetService(context.Provider!, context.Model)
             : _llmServiceFactory.GetDefaultService();
 
         if (service is null)
