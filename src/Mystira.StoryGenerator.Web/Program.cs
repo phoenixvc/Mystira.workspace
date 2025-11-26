@@ -50,7 +50,12 @@ builder.Services.AddScoped(sp =>
         apiBaseUrl = builder.HostEnvironment.BaseAddress;
     }
 
-    return new HttpClient { BaseAddress = new Uri(apiBaseUrl) };
+    // Ensure long-running API calls (LLM operations) are not cut off by the default 100s timeout
+    return new HttpClient
+    {
+        BaseAddress = new Uri(apiBaseUrl),
+        Timeout = TimeSpan.FromSeconds(180)
+    };
 });
 
 await builder.Build().RunAsync();

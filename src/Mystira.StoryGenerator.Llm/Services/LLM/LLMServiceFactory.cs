@@ -42,7 +42,7 @@ public class LLMServiceFactory : ILLMServiceFactory
         {
             if (service.IsAvailable())
             {
-                _logger.LogDebug("Found available service for provider: {Provider} with deployment/model: {DeploymentOrModel}", 
+                _logger.LogDebug("Found available service for provider: {Provider} with deployment/model: {DeploymentOrModel}",
                     providerName, deploymentNameOrModelId ?? "default");
                 return Adapt(service, deploymentNameOrModelId);
             }
@@ -123,19 +123,19 @@ public class LLMServiceFactory : ILLMServiceFactory
     {
         private readonly ILLMService _inner;
         private readonly string? _deploymentNameOrModelId;
-        
+
         public LlmServiceAdapter(ILLMService inner, string? deploymentNameOrModelId = null)
         {
             _inner = inner;
             _deploymentNameOrModelId = deploymentNameOrModelId;
         }
-        
+
         public string ProviderName => _inner.ProviderName;
         public string? DeploymentNameOrModelId => _deploymentNameOrModelId ?? _inner.DeploymentNameOrModelId;
-        
+
         public Task<ChatCompletionResponse> CompleteAsync(ChatCompletionRequest request, CancellationToken cancellationToken = default)
             => _inner.CompleteAsync(request, cancellationToken);
-        
+
         public bool IsAvailable() => _inner.IsAvailable();
         public IEnumerable<ChatModelInfo> GetAvailableModels() => _inner.GetAvailableModels();
     }

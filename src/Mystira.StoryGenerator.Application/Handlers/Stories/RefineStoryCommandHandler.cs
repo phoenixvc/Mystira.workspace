@@ -187,6 +187,9 @@ Output Format
     •	Output exactly one final JSON object.
     •	No explanations, commentary, markdown, or code fences.
     •	The JSON must be syntactically valid and ready to parse.
+    •   Character restrictions:
+        - Never output control characters in the Unicode ranges U+0000–U+001F or U+007F–U+009F, except for standard whitespace characters: newline (\n), carriage return (\r), and tab (\t).
+        - Use normal printable characters only. If you need quotes, use "" and ' instead of any special control codes.
 ";
     }
 
