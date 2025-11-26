@@ -221,6 +221,9 @@ FINAL OUTPUT RULES
     •	No extra top-level keys.
     •	No markdown, comments, or code fences.
     •	Return a single valid JSON object that fully respects all constraints.
+    •   Character restrictions:
+        o Never output control characters in the Unicode ranges U+0000–U+001F or U+007F–U+009F, except for standard whitespace characters: newline (\n), carriage return (\r), and tab (\t).
+        o Use normal printable characters only. If you need quotes, use "" and ' instead of any special control codes.
 ";
     }
 

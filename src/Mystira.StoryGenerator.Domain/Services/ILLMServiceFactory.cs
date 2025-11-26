@@ -14,7 +14,6 @@ public interface ILLMServiceFactory
     /// <param name="deploymentNameOrModelId">Optional deployment name or model ID to use for this provider</param>
     /// <returns>An LLM service instance, or null if not available</returns>
     ILLMService? GetService(string providerName, string? deploymentNameOrModelId = null);
-    
     ILLMService? GetDefaultService();
     IEnumerable<ProviderModels> GetAvailableModels();
 }

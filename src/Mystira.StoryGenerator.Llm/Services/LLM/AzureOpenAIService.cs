@@ -1,4 +1,6 @@
 using System.ClientModel;
+using System.Globalization;
+using System.Text;
 using Azure.AI.OpenAI;
 using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Logging;
@@ -125,9 +127,13 @@ public class AzureOpenAIService : ILLMService
                 cancellationToken: cancellationToken);
             var response = azureResponse.Value;
 
+            var content = response?.Content?.FirstOrDefault()?.Text ?? string.Empty;
+
+            var cleanContent = Sanitize(content);
+
             return new ChatCompletionResponse
             {
-                Content = response?.Content?.FirstOrDefault()?.Text ?? string.Empty,
+                Content = cleanContent ?? string.Empty,
                 Model = deploymentName,
                 Provider = ProviderName,
                 Usage = response?.Usage != null ? new ChatCompletionUsage
@@ -138,6 +144,26 @@ public class AzureOpenAIService : ILLMService
                 } : null,
                 Success = true
             };
+
+            string? Sanitize(string? input)
+            {
+                if (input == null) return null;
+
+                var sb = new StringBuilder(input.Length);
+                foreach (var ch in input)
+                {
+                    var cat = Char.GetUnicodeCategory(ch);
+                    var isControl = cat == UnicodeCategory.Control;
+
+                    // Keep common whitespace controls, drop everything else
+                    if (isControl && ch != '\n' && ch != '\r' && ch != '\t')
+                        continue;
+
+                    sb.Append(ch);
+                }
+
+                return sb.ToString();
+            }
         }
         catch (Exception ex)
         {
