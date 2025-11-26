@@ -44,19 +44,19 @@ public class SchemaController : ControllerBase
     }
 
     [HttpGet("generated")] // returns the schema generated from our C# Scenario class
-    public async Task<IActionResult> GetGeneratedSchema()
+    public Task<IActionResult> GetGeneratedSchema()
     {
         try
         {
             // NJsonSchema v11 supports static generation via FromType<T>
             var schema = JsonSchema.FromType<Scenario>();
             var json = schema.ToJson();
-            return Content(json, "application/json");
+            return Task.FromResult<IActionResult>(Content(json, "application/json"));
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error generating schema from Scenario type");
-            return StatusCode(500, new { error = "Failed to generate schema." });
+            return Task.FromResult<IActionResult>(StatusCode(500, new { error = "Failed to generate schema." }));
         }
     }
 
