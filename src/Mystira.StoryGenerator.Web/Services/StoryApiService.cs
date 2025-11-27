@@ -96,7 +96,7 @@ public class StoryApiService : IStoryApiService
             var json = JsonSerializer.Serialize(chatRequest, _jsonOptions);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(180));
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(300));
 
             var response = await _httpClient.PostAsync("api/chat/complete", content, cts.Token);
             var responseJson = await response.Content.ReadAsStringAsync(cts.Token);
@@ -162,7 +162,7 @@ public class StoryApiService : IStoryApiService
             var json = JsonSerializer.Serialize(request, _jsonOptions);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(180));
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(300));
             var response = await _httpClient.PostAsync("api/chat/complete", content, cts.Token);
             var responseJson = await response.Content.ReadAsStringAsync(cts.Token);
 

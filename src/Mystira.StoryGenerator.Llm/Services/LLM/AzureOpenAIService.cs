@@ -152,7 +152,7 @@ public class AzureOpenAIService : ILLMService
                 var sb = new StringBuilder(input.Length);
                 foreach (var ch in input)
                 {
-                    var cat = Char.GetUnicodeCategory(ch);
+                    var cat = char.GetUnicodeCategory(ch);
                     var isControl = cat == UnicodeCategory.Control;
 
                     // Keep common whitespace controls, drop everything else
