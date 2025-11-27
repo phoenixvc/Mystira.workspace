@@ -27,10 +27,10 @@ builder.Services.AddOptions<InstructionSearchSettings>()
     .Bind(builder.Configuration.GetSection(InstructionSearchSettings.SectionName));
 
 // Register HttpClient for LLM services (moved to Llm project)
-// Increase default timeout to 180 seconds to avoid premature cancellations on long-running LLM calls
+// Increase default timeout to 300 seconds to avoid premature cancellations on long-running LLM calls
 builder.Services.AddHttpClient<AzureOpenAIService>(client =>
 {
-    client.Timeout = TimeSpan.FromSeconds(180);
+    client.Timeout = TimeSpan.FromSeconds(300);
 });
 
 // Register LLM services (in Llm project) and expose Domain interfaces

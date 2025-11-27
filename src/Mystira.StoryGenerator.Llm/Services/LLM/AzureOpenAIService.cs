@@ -93,6 +93,9 @@ public class AzureOpenAIService : ILLMService
         return deploymentName.ToLowerInvariant() switch
         {
             var name when name.Contains("gpt-4") => "GPT-4",
+            var name when name.Contains("gpt-5.1") => "GPT-5.1",
+            var name when name.Contains("gpt-5-nano") => "GPT-5-Nano",
+            var name when name.Contains("claude-sonnet-4-5") => "Claude-Sonnet-4.5",
             var name when name.Contains("gpt-3.5") => "GPT-3.5 Turbo",
             var name when name.Contains("gpt-35") => "GPT-3.5 Turbo",
             _ => deploymentName
@@ -152,7 +155,7 @@ public class AzureOpenAIService : ILLMService
                 var sb = new StringBuilder(input.Length);
                 foreach (var ch in input)
                 {
-                    var cat = Char.GetUnicodeCategory(ch);
+                    var cat = char.GetUnicodeCategory(ch);
                     var isControl = cat == UnicodeCategory.Control;
 
                     // Keep common whitespace controls, drop everything else
@@ -175,14 +178,19 @@ public class AzureOpenAIService : ILLMService
     private string ResolveDeploymentName(ChatCompletionRequest request)
     {
         // Priority order:
-        // 1. Stored deployment name
-        // 2. Default deployment name from settings
+        // 1. Deployment name specified in request
+        // 2. Stored deployment name
+        // 3. Default deployment name from settings
 
-        if (!string.IsNullOrWhiteSpace(_deploymentNameOrModelId))
+        if (!string.IsNullOrEmpty(request.Model))
         {
-            return _deploymentNameOrModelId;
+            _deploymentNameOrModelId = request.Model;
+            return request.Model;
         }
 
+        if (!string.IsNullOrWhiteSpace(_deploymentNameOrModelId)) return _deploymentNameOrModelId;
+
+        _deploymentNameOrModelId = _settings.AzureOpenAI.DeploymentName;
         return _settings.AzureOpenAI.DeploymentName;
     }
 

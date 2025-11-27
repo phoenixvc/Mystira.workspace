@@ -116,7 +116,7 @@ public class ChatService : IChatService
             _logger.LogDebug("Sending chat completion request to provider: {Provider}", request.Provider);
 
             // Ensure long-running LLM requests have enough time to complete
-            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(180));
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(300));
 
             var response = await _httpClient.PostAsJsonAsync("/api/chat/complete", request, _jsonOptions, cts.Token);
 
