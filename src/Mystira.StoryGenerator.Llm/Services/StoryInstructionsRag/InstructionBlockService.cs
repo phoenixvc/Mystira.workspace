@@ -10,7 +10,7 @@ using Mystira.StoryGenerator.Contracts.Configuration;
 using Mystira.StoryGenerator.Domain.Services;
 using OpenAI.Embeddings;
 
-namespace Mystira.StoryGenerator.Llm.Services.Instructions;
+namespace Mystira.StoryGenerator.Llm.Services.StoryInstructionsRag;
 
 public sealed class InstructionBlockService : IInstructionBlockService
 {

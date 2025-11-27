@@ -46,7 +46,7 @@ public class ChatModelsEndpointTests : IClassFixture<WebApplicationFactory<Progr
     public async Task GetModels_WithMockServices_ReturnsExpectedStructure()
     {
         // Arrange
-        var mockFactory = new Mock<ILLMServiceFactory>();
+        var mockFactory = new Mock<ILlmServiceFactory>();
 
         var providerModels = new List<ProviderModels>
         {
@@ -99,7 +99,7 @@ public class ChatModelsEndpointTests : IClassFixture<WebApplicationFactory<Progr
     public async Task GetModels_WithMultipleDeployments_ReturnsAllDeployments()
     {
         // Arrange
-        var mockFactory = new Mock<ILLMServiceFactory>();
+        var mockFactory = new Mock<ILlmServiceFactory>();
 
         var providerModels = new List<ProviderModels>
         {

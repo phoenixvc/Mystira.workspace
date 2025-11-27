@@ -15,18 +15,18 @@ namespace Mystira.StoryGenerator.Application.Services;
 /// </summary>
 public class ChatOrchestrationService : IChatOrchestrationService
 {
-    private readonly ICommandIntentRouter _commandIntentRouter;
+    private readonly ICommandRouter _commandRouter;
     private readonly IMediator _mediator;
-    private readonly ILLMServiceFactory _llmServiceFactory;
+    private readonly ILlmServiceFactory _llmServiceFactory;
     private readonly ILogger<ChatOrchestrationService> _logger;
 
     public ChatOrchestrationService(
-        ICommandIntentRouter commandIntentRouter,
+        ICommandRouter commandRouter,
         IMediator mediator,
-        ILLMServiceFactory llmServiceFactory,
+        ILlmServiceFactory llmServiceFactory,
         ILogger<ChatOrchestrationService> logger)
     {
-        _commandIntentRouter = commandIntentRouter;
+        _commandRouter = commandRouter;
         _mediator = mediator;
         _llmServiceFactory = llmServiceFactory;
         _logger = logger;
@@ -40,7 +40,7 @@ public class ChatOrchestrationService : IChatOrchestrationService
             var latestUserMessage = context.LatestUserMessage;
 
             // Detect intent using existing classifier
-            var instructionType = await _commandIntentRouter.DetectPrimaryInstructionTypeAsync(latestUserMessage, cancellationToken);
+            var instructionType = await _commandRouter.DetectPrimaryInstructionTypeAsync(latestUserMessage, cancellationToken);
 
             if (string.IsNullOrWhiteSpace(instructionType))
             {

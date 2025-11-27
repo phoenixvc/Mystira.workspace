@@ -17,6 +17,7 @@ public class AiSettings
 
     public AzureOpenAISettings AzureOpenAI { get; set; } = new();
     public IntentRouterSettings IntentRouter { get; set; } = new();
+    public EntityClassifierSettings EntityClassifier { get; set; } = new();
 }
 
 public class AzureOpenAISettings
@@ -86,4 +87,34 @@ public class SchemaValidationSettings
     /// Whether schema validation/response formatting should be strict when supported by the provider.
     /// </summary>
     public bool IsSchemaValidationStrict { get; set; } = false;
+}
+
+/// <summary>
+/// Settings for the LLM-based entity classifier
+/// </summary>
+public class EntityClassifierSettings
+{
+    public const string SectionName = "EntityClassifier";
+
+    public bool Enabled { get; set; } = true;
+
+    public string? Provider { get; set; }
+        = null; // e.g., "azure-openai"
+
+    public string? DeploymentName { get; set; }
+        = null; // e.g., specific deployment/model name
+
+    public string? ModelId { get; set; }
+        = null; // logical model id
+
+    [Range(0, 1)]
+    public double Temperature { get; set; } = 0.1;
+
+    [Range(1, 1000)]
+    public int MaxTokens { get; set; } = 200;
+
+    public bool IsConfigured =>
+        Enabled &&
+        !string.IsNullOrWhiteSpace(Provider) &&
+        !string.IsNullOrWhiteSpace(DeploymentName);
 }

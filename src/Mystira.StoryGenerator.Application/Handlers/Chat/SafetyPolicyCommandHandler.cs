@@ -17,12 +17,12 @@ public class SafetyPolicyCommandHandler : ICommandHandler<SafetyPolicyCommand, C
 - Highlight fairness, kindness, accountability, and inclusion; never punch down at any group.
 - Final scenes should leave the player encouraged, supported, and empowered.";
 
-    private readonly ILLMServiceFactory _llmFactory;
+    private readonly ILlmServiceFactory _llmFactory;
     private readonly IInstructionBlockService _instructionBlockService;
     private readonly ILogger<SafetyPolicyCommandHandler> _logger;
 
     public SafetyPolicyCommandHandler(
-        ILLMServiceFactory llmFactory,
+        ILlmServiceFactory llmFactory,
         IInstructionBlockService instructionBlockService,
         ILogger<SafetyPolicyCommandHandler> logger)
     {

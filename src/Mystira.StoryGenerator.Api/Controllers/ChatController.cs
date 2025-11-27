@@ -1,13 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
-using Microsoft.Extensions.Logging;
 using Mystira.StoryGenerator.Domain.Services;
 using Mystira.StoryGenerator.Contracts.Chat;
-using Mystira.StoryGenerator.Contracts.Configuration;
-using Mystira.StoryGenerator.Contracts.Extensions;
-using Mystira.StoryGenerator.Domain.Commands.Stories;
-using Mystira.StoryGenerator.Llm.Services.Intent;
-using MediatR;
 
 namespace Mystira.StoryGenerator.Api.Controllers;
 
@@ -19,12 +13,12 @@ namespace Mystira.StoryGenerator.Api.Controllers;
 public class ChatController : ControllerBase
 {
     private readonly IChatOrchestrationService _chatOrchestrationService;
-    private readonly ILLMServiceFactory _llmServiceFactory;
+    private readonly ILlmServiceFactory _llmServiceFactory;
     private readonly ILogger<ChatController> _logger;
 
     public ChatController(
         IChatOrchestrationService chatOrchestrationService,
-        ILLMServiceFactory llmServiceFactory,
+        ILlmServiceFactory llmServiceFactory,
         ILogger<ChatController> logger)
     {
         _chatOrchestrationService = chatOrchestrationService;
@@ -81,7 +75,7 @@ public class ChatController : ControllerBase
 
             // Delegate to orchestration service
             var response = await _chatOrchestrationService.CompleteAsync(chatContext, cancellationToken);
-            
+
             return Ok(response);
         }
         catch (OperationCanceledException)

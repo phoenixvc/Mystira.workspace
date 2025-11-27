@@ -1,18 +1,18 @@
 using System.Text.Json;
-using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Mystira.StoryGenerator.Contracts.Chat;
 using Mystira.StoryGenerator.Contracts.Configuration;
 using Mystira.StoryGenerator.Contracts.Intent;
 using Mystira.StoryGenerator.Domain.Services;
 
-namespace Mystira.StoryGenerator.Llm.Services.Intent;
+namespace Mystira.StoryGenerator.Llm.Services.StoryIntentClassification;
 
-public class StoryIntentClassifier : IIntentClassificationService
+public class StoryLlmIntentClassifier : ILlmIntentClassificationService
 {
     private readonly IntentRouterSettings _settings;
-    private readonly ILLMServiceFactory _llmServiceFactory;
-    private readonly ILogger<StoryIntentClassifier> _logger;
+    private readonly ILlmServiceFactory _llmServiceFactory;
+    private readonly ILogger<StoryLlmIntentClassifier> _logger;
 
     private const string ClassificationPrompt = @"
 You are the Mystira RAG intent classifier.
@@ -134,19 +134,19 @@ Response:
 Now classify this user instruction:
 ";
 
-    public StoryIntentClassifier(
+    public StoryLlmIntentClassifier(
         IOptions<AiSettings> aiOptions,
-        ILLMServiceFactory llmServiceFactory,
-        ILogger<StoryIntentClassifier> logger)
+        ILlmServiceFactory llmServiceFactory,
+        ILogger<StoryLlmIntentClassifier> logger)
     {
         _settings = aiOptions.Value.IntentRouter;
         _llmServiceFactory = llmServiceFactory;
         _logger = logger;
     }
 
-    public async Task<IntentClassification?> ClassifyIntentAsync(string userQuery, CancellationToken cancellationToken = default)
+    public async Task<IntentClassification?> ClassifyAsync(string sceneContent, CancellationToken cancellationToken = default)
     {
-        if (string.IsNullOrWhiteSpace(userQuery))
+        if (string.IsNullOrWhiteSpace(sceneContent))
         {
             _logger.LogWarning("Intent classification requested with empty query");
             return null;
@@ -154,7 +154,7 @@ Now classify this user instruction:
 
         if (!_settings.IsConfigured)
         {
-            _logger.LogDebug("Intent router is not configured, skipping classification");
+            _logger.LogDebug("Intent classifier is not configured, skipping classification");
             return null;
         }
 
@@ -186,7 +186,7 @@ Now classify this user instruction:
                     new MystiraChatMessage
                     {
                         MessageType = ChatMessageType.User,
-                        Content = userQuery,
+                        Content = sceneContent,
                         Timestamp = DateTime.UtcNow
                     }
                 }

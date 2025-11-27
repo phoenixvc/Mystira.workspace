@@ -13,26 +13,26 @@ namespace Mystira.StoryGenerator.Application.Handlers.Stories;
 
 public class GenerateStoryCommandHandler : ICommandHandler<GenerateStoryCommand, GenerateJsonStoryResponse>
 {
-    private readonly ILLMServiceFactory _llmFactory;
+    private readonly ILlmServiceFactory _llmFactory;
     private readonly AiSettings _settings;
     private readonly IStorySchemaProvider _schemaProvider;
     private readonly IInstructionBlockService _instructionBlockService;
-    private readonly IIntentClassificationService _intentClassificationService;
+    private readonly ILlmIntentClassificationService _llmIntentClassificationService;
     private readonly ILogger<GenerateStoryCommandHandler> _logger;
 
     public GenerateStoryCommandHandler(
-        ILLMServiceFactory llmFactory,
+        ILlmServiceFactory llmFactory,
         IOptions<AiSettings> aiOptions,
         IStorySchemaProvider schemaProvider,
         IInstructionBlockService instructionBlockService,
-        IIntentClassificationService intentClassificationService,
+        ILlmIntentClassificationService llmIntentClassificationService,
         ILogger<GenerateStoryCommandHandler> logger)
     {
         _llmFactory = llmFactory;
         _settings = aiOptions.Value;
         _schemaProvider = schemaProvider;
         _instructionBlockService = instructionBlockService;
-        _intentClassificationService = intentClassificationService;
+        _llmIntentClassificationService = llmIntentClassificationService;
         _logger = logger;
     }
 
@@ -286,7 +286,7 @@ FINAL OUTPUT RULES
         var categories = new[] { "story_generation" };
         var instructionTypes = new[] { "story_generate_initial" };
 
-        var intentClassification = await _intentClassificationService.ClassifyIntentAsync(queryText, cancellationToken);
+        var intentClassification = await _llmIntentClassificationService.ClassifyAsync(queryText, cancellationToken);
         if (intentClassification != null)
         {
             _logger.LogInformation(

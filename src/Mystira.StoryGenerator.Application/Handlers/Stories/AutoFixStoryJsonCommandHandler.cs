@@ -11,13 +11,13 @@ namespace Mystira.StoryGenerator.Application.Handlers.Stories;
 
 public class AutoFixStoryJsonCommandHandler : ICommandHandler<AutoFixStoryJsonCommand, GenerateJsonStoryResponse>
 {
-    private readonly ILLMServiceFactory _llmFactory;
+    private readonly ILlmServiceFactory _llmFactory;
     private readonly AiSettings _settings;
     private readonly IStorySchemaProvider _schemaProvider;
     private readonly ILogger<AutoFixStoryJsonCommandHandler> _logger;
 
     public AutoFixStoryJsonCommandHandler(
-        ILLMServiceFactory llmFactory,
+        ILlmServiceFactory llmFactory,
         IOptions<AiSettings> aiOptions,
         IStorySchemaProvider schemaProvider,
         ILogger<AutoFixStoryJsonCommandHandler> logger)

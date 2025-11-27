@@ -1,4 +1,4 @@
-﻿namespace Mystira.StoryGenerator.Llm.Services.Instructions;
+﻿namespace Mystira.StoryGenerator.Llm.Services.StoryInstructionsRag;
 
 public class InstructionChunk
 {

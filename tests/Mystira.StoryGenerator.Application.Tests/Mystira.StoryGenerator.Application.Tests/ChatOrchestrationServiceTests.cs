@@ -13,17 +13,17 @@ namespace Mystira.StoryGenerator.Application.Tests;
 
 public class ChatOrchestrationServiceTests
 {
-    private readonly Mock<ICommandIntentRouter> _mockCommandIntentRouter;
+    private readonly Mock<ICommandRouter> _mockCommandIntentRouter;
     private readonly Mock<IMediator> _mockMediator;
-    private readonly Mock<ILLMServiceFactory> _mockLlmServiceFactory;
+    private readonly Mock<ILlmServiceFactory> _mockLlmServiceFactory;
     private readonly Mock<ILogger<ChatOrchestrationService>> _mockLogger;
     private readonly ChatOrchestrationService _service;
 
     public ChatOrchestrationServiceTests()
     {
-        _mockCommandIntentRouter = new Mock<ICommandIntentRouter>();
+        _mockCommandIntentRouter = new Mock<ICommandRouter>();
         _mockMediator = new Mock<IMediator>();
-        _mockLlmServiceFactory = new Mock<ILLMServiceFactory>();
+        _mockLlmServiceFactory = new Mock<ILlmServiceFactory>();
         _mockLogger = new Mock<ILogger<ChatOrchestrationService>>();
 
         _service = new ChatOrchestrationService(

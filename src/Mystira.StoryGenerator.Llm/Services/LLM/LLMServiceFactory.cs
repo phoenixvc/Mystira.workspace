@@ -9,7 +9,7 @@ namespace Mystira.StoryGenerator.Llm.Services.LLM;
 /// <summary>
 /// Implementation of LLM service factory (moved from API to LLM project)
 /// </summary>
-public class LLMServiceFactory : ILLMServiceFactory
+public class LLMServiceFactory : ILlmServiceFactory
 {
     // Keep a reference to LLM-project ILLMService implementations to use IsAvailable(),
     // while exposing Domain-level interfaces to consumers.
@@ -84,8 +84,33 @@ public class LLMServiceFactory : ILLMServiceFactory
 
     public IEnumerable<ILLMService> GetAvailableServices()
     {
-        return _services.Values.Where(s => s.IsAvailable())
-            .Select(s => Adapt(s, null));
+        var result = new List<ILLMService>();
+
+        foreach (var service in _services.Values)
+        {
+            if (!service.IsAvailable())
+            {
+                continue;
+            }
+
+            // Prefer enumerating all available models (e.g., all Azure OpenAI deployments)
+            var models = service.GetAvailableModels()?.ToList() ?? [];
+            if (models.Count > 0)
+            {
+                foreach (var model in models)
+                {
+                    // Create an adapted instance pinned to this model/deployment
+                    result.Add(Adapt(service, model.Id));
+                }
+            }
+            else
+            {
+                // Fallback: return a single instance without a specific deployment override
+                result.Add(Adapt(service, null));
+            }
+        }
+
+        return result;
     }
 
     public IEnumerable<ProviderModels> GetAvailableModels()
