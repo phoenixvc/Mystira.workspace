@@ -42,7 +42,7 @@ public class SafetyPolicyCommandHandler : ICommandHandler<SafetyPolicyCommand, C
                 return Failure("No LLM services are currently available for safety guidance.");
             }
 
-            var ragBlock = await ResolveInstructionBlockAsync(command.UserQuery, cancellationToken);
+            var ragBlock = await ResolveInstructionBlockAsync(command.UserQuery, context, cancellationToken);
             var contextSummary = ChatContextSummaryBuilder.BuildContextSummary(context);
             var messages = new List<MystiraChatMessage>();
 
@@ -112,21 +112,53 @@ public class SafetyPolicyCommandHandler : ICommandHandler<SafetyPolicyCommand, C
             : _llmFactory.GetDefaultService();
     }
 
-    private async Task<string?> ResolveInstructionBlockAsync(string? userQuery, CancellationToken cancellationToken)
+    private async Task<string?> ResolveInstructionBlockAsync(string? userQuery, ChatContext context, CancellationToken cancellationToken)
     {
         var query = string.IsNullOrWhiteSpace(userQuery)
             ? "Mystira safety policy overview"
             : userQuery!;
+
+        var ageGroup = context?.CurrentStory?.AgeGroup ?? ExtractAgeGroupFromContext(context);
 
         var searchContext = new InstructionSearchContext
         {
             QueryText = query,
             Categories = new[] { "safety", "story_generation" },
             InstructionTypes = new[] { "safety_policy" },
-            TopK = 6
+            TopK = 6,
+            AgeGroup = ageGroup
         };
 
         return await _instructionBlockService.BuildInstructionBlockAsync(searchContext, cancellationToken);
+    }
+
+    private static string? ExtractAgeGroupFromContext(ChatContext? context)
+    {
+        if (context?.CurrentStory == null)
+            return null;
+        
+        return ExtractAgeGroupFromJson(context.CurrentStory.Content);
+    }
+
+    private static string? ExtractAgeGroupFromJson(string? jsonContent)
+    {
+        if (string.IsNullOrWhiteSpace(jsonContent))
+            return null;
+
+        try
+        {
+            var json = System.Text.Json.JsonDocument.Parse(jsonContent);
+            if (json.RootElement.TryGetProperty("age_group", out var ageGroupElement))
+            {
+                return ageGroupElement.GetString();
+            }
+        }
+        catch
+        {
+            // If parsing fails, return null and let the system use default index
+        }
+
+        return null;
     }
 
     private static string BuildSafetyPrompt(string? userQuery)

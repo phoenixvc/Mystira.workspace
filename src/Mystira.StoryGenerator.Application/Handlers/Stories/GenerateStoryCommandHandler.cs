@@ -285,6 +285,7 @@ FINAL OUTPUT RULES
 
         var categories = new[] { "story_generation" };
         var instructionTypes = new[] { "story_generate_initial" };
+        var ageGroup = request.Request?.AgeGroup;
 
         var intentClassification = await _intentClassificationService.ClassifyIntentAsync(queryText, cancellationToken);
         if (intentClassification != null)
@@ -307,7 +308,8 @@ FINAL OUTPUT RULES
             QueryText = queryText,
             Categories = categories,
             InstructionTypes = instructionTypes,
-            TopK = 8
+            TopK = 8,
+            AgeGroup = ageGroup
         };
 
         return await _instructionBlockService.BuildInstructionBlockAsync(context, cancellationToken);

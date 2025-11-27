@@ -24,7 +24,14 @@ Update `appsettings.json` with your Azure service details:
     "AzureAISearch": {
       "Endpoint": "https://your-search-service.search.windows.net",
       "IndexName": "mystira-instructions",
-      "ApiKey": "your-search-api-key"
+      "ApiKey": "your-search-api-key",
+      "AgeGroupIndexMapping": {
+        "1-2": "mystira-instructions-1-2",
+        "3-5": "mystira-instructions-3-5",
+        "6-9": "mystira-instructions-6-9",
+        "10-12": "mystira-instructions-10-12",
+        "13-18": "mystira-instructions-13-18"
+      }
     },
     "AzureOpenAIEmbedding": {
       "Endpoint": "https://your-openai-resource.openai.azure.com/",
@@ -35,15 +42,31 @@ Update `appsettings.json` with your Azure service details:
 }
 ```
 
+### Age Group Support
+
+The indexer now supports indexing instructions for multiple age groups. Each age group has a dedicated index:
+- `1-2`: Toddler stories
+- `3-5`: Preschool stories
+- `6-9`: School-age stories
+- `10-12`: Preteen stories
+- `13-18`: Teen stories
+
 ## Usage
 
 ```bash
 dotnet run -- <json-file-path>
 ```
 
-Example:
+Examples:
 ```bash
-dotnet run -- ./data/sample-instructions.json
+# Index instructions for school-age (6-9)
+dotnet run -- ./data/sample_instructions_6-9.json
+
+# Index instructions for preschool (3-5)
+dotnet run -- ./data/sample_instructions_3-5.json
+
+# Index instructions for preteen (10-12)
+dotnet run -- ./data/sample_instructions_10-12.json
 ```
 
 ## JSON Input Format
@@ -54,6 +77,7 @@ The input JSON should follow this structure:
 {
   "dataset": "dataset_name",
   "version": "1.0",
+  "ageGroup": "6-9",
   "chunks": [
     {
       "chunk_id": "unique_id",

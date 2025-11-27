@@ -120,6 +120,7 @@ public class FreeTextCommandHandler : ICommandHandler<FreeTextCommand, ChatCompl
         var instructionTypes = !string.IsNullOrWhiteSpace(intent)
             ? new[] { intent! }
             : new[] { "guidelines" };
+        var ageGroup = context?.CurrentStory?.AgeGroup ?? ExtractAgeGroupFromContext(context);
 
         var classification = await _intentClassificationService.ClassifyIntentAsync(queryText, cancellationToken);
         if (classification != null)
@@ -134,10 +135,40 @@ public class FreeTextCommandHandler : ICommandHandler<FreeTextCommand, ChatCompl
             QueryText = queryText,
             Categories = categories,
             InstructionTypes = instructionTypes,
-            TopK = 8
+            TopK = 8,
+            AgeGroup = ageGroup
         };
 
         return await _instructionBlockService.BuildInstructionBlockAsync(searchContext, cancellationToken);
+    }
+
+    private static string? ExtractAgeGroupFromContext(ChatContext? context)
+    {
+        if (context?.CurrentStory == null)
+            return null;
+        
+        return ExtractAgeGroupFromJson(context.CurrentStory.Content);
+    }
+
+    private static string? ExtractAgeGroupFromJson(string? jsonContent)
+    {
+        if (string.IsNullOrWhiteSpace(jsonContent))
+            return null;
+
+        try
+        {
+            var json = System.Text.Json.JsonDocument.Parse(jsonContent);
+            if (json.RootElement.TryGetProperty("age_group", out var ageGroupElement))
+            {
+                return ageGroupElement.GetString();
+            }
+        }
+        catch
+        {
+            // If parsing fails, return null and let the system use default index
+        }
+
+        return null;
     }
 
     private static string BuildSystemPrompt(string? intent, string? existingPrompt)

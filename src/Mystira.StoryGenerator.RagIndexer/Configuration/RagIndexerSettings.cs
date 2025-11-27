@@ -23,6 +23,8 @@ public class AzureAISearchSettings
 
     [Required]
     public string ApiKey { get; set; } = string.Empty;
+
+    public Dictionary<string, string> AgeGroupIndexMapping { get; set; } = new();
 }
 
 public class AzureOpenAIEmbeddingSettings

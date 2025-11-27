@@ -10,6 +10,9 @@ public class RagIndexRequest
     [JsonPropertyName("version")]
     public string Version { get; set; } = string.Empty;
 
+    [JsonPropertyName("ageGroup")]
+    public string? AgeGroup { get; set; }
+
     [JsonPropertyName("chunks")]
     public List<InstructionChunk> Chunks { get; set; } = new();
 }

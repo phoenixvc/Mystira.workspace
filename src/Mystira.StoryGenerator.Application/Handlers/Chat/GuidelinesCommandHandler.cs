@@ -35,7 +35,7 @@ public class GuidelinesCommandHandler : ICommandHandler<GuidelinesCommand, ChatC
             }
 
             var contextSummary = ChatContextSummaryBuilder.BuildContextSummary(context);
-            var ragBlock = await ResolveInstructionBlockAsync(command.UserQuery, contextSummary, cancellationToken);
+            var ragBlock = await ResolveInstructionBlockAsync(command.UserQuery, contextSummary, context, cancellationToken);
             var messages = new List<MystiraChatMessage>();
 
             if (!string.IsNullOrWhiteSpace(ragBlock))
@@ -97,7 +97,7 @@ public class GuidelinesCommandHandler : ICommandHandler<GuidelinesCommand, ChatC
             : _llmFactory.GetDefaultService();
     }
 
-    private async Task<string?> ResolveInstructionBlockAsync(string? userQuery, string contextSummary, CancellationToken cancellationToken)
+    private async Task<string?> ResolveInstructionBlockAsync(string? userQuery, string contextSummary, ChatContext context, CancellationToken cancellationToken)
     {
         var builder = new StringBuilder();
         if (!string.IsNullOrWhiteSpace(userQuery))
@@ -111,16 +111,47 @@ public class GuidelinesCommandHandler : ICommandHandler<GuidelinesCommand, ChatC
         }
 
         var queryText = builder.Length > 0 ? builder.ToString() : "Mystira story writing guidelines";
+        var ageGroup = context?.CurrentStory?.AgeGroup ?? ExtractAgeGroupFromContext(context);
 
         var searchContext = new InstructionSearchContext
         {
             QueryText = queryText,
             Categories = new[] { "story_generation" },
             InstructionTypes = new[] { "guidelines" },
-            TopK = 6
+            TopK = 6,
+            AgeGroup = ageGroup
         };
 
         return await _instructionBlockService.BuildInstructionBlockAsync(searchContext, cancellationToken);
+    }
+
+    private static string? ExtractAgeGroupFromContext(ChatContext? context)
+    {
+        if (context?.CurrentStory == null)
+            return null;
+        
+        return ExtractAgeGroupFromJson(context.CurrentStory.Content);
+    }
+
+    private static string? ExtractAgeGroupFromJson(string? jsonContent)
+    {
+        if (string.IsNullOrWhiteSpace(jsonContent))
+            return null;
+
+        try
+        {
+            var json = System.Text.Json.JsonDocument.Parse(jsonContent);
+            if (json.RootElement.TryGetProperty("age_group", out var ageGroupElement))
+            {
+                return ageGroupElement.GetString();
+            }
+        }
+        catch
+        {
+            // If parsing fails, return null and let the system use default index
+        }
+
+        return null;
     }
 
     private static string BuildGuidelinesPrompt(string? userQuery)

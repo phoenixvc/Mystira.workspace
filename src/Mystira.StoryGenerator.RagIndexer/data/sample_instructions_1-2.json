@@ -1,0 +1,35 @@
+{
+  "dataset": "mystira_toddler_story_template",
+  "version": "1.0",
+  "ageGroup": "1-2",
+  "chunks": [
+    {
+      "chunk_id": "toddler_core_requirements",
+      "section": "1.1",
+      "title": "Toddler Core Story Requirements",
+      "content": "Stories for ages 1-2 should be very short with simple, concrete actions. Use only 3-5 scenes maximum. Include familiar characters and objects from toddler experience. Avoid complex branching - keep choices simple and visual. Use bright, engaging language with repetition and rhythm. Each scene should focus on one simple action or emotion. Interactions should be limited to 1-2 options per choice.",
+      "category": "story_generation",
+      "subcategory": "core_story_rules",
+      "instructionType": "requirements",
+      "priority": "high",
+      "isMandatory": true,
+      "examples": "Simple stories about eating, playing, sleeping; familiar animals doing simple actions",
+      "tags": ["toddler_design", "simple_narrative", "repetition"],
+      "keywords": ["toddler_design", "simple_narrative", "repetition"]
+    },
+    {
+      "chunk_id": "toddler_safety",
+      "section": "2.1",
+      "title": "Toddler Safety and Emotional Comfort",
+      "content": "All stories must be emotionally safe with no scary moments. Avoid loud noises, sudden changes, or confusing transitions. Use calming, reassuring tone. Show caregivers present and helpful. No conflict, competition, or negative emotions. Focus on comfort, exploration, and joy.",
+      "category": "safety",
+      "subcategory": "emotional_safety",
+      "instructionType": "safety_policy",
+      "priority": "high",
+      "isMandatory": true,
+      "examples": "Stories about warm hugs, playing with soft toys, gentle exploration",
+      "tags": ["safety", "comfort", "emotional_safety"],
+      "keywords": ["safety", "comfort", "emotional_safety"]
+    }
+  ]
+}
