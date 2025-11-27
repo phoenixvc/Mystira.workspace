@@ -12,8 +12,8 @@ public class AiSettings
     [Range(0, 2)]
     public double DefaultTemperature { get; set; } = 0.7;
 
-    [Range(1, 12000)]
-    public int DefaultMaxTokens { get; set; } = 1000;
+    [Range(1, 25000)]
+    public int DefaultMaxTokens { get; set; } = 25000;
 
     public AzureOpenAISettings AzureOpenAI { get; set; } = new();
     public IntentRouterSettings IntentRouter { get; set; } = new();
