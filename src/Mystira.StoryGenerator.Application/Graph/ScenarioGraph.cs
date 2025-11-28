@@ -47,10 +47,10 @@ public sealed class ScenarioGraph : IScenarioGraph
             var sb = new StringBuilder();
             foreach (var edge in path)
             {
-                sb.AppendLine(edge.From.Description);
+                sb.AppendLine($"Scene {edge.From.Id}: " + edge.From.Description);
                 if (edge.From.Type is SceneType.Choice or SceneType.Roll) sb.AppendLine("Answer: " + edge.Label);
             }
-            sb.AppendLine(path[^1].To.Description);
+            sb.AppendLine($"Scene {path[^1].To.Id}: " + path[^1].To.Description);
             paths.Add(sb.ToString());
         }
 

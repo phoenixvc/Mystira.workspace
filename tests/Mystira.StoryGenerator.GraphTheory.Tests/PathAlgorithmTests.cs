@@ -1,4 +1,3 @@
-using Mystira.StoryGenerator.Application.Extensions;
 using Mystira.StoryGenerator.Application.Graph;
 using Mystira.StoryGenerator.Application.Services;
 using Mystira.StoryGenerator.Domain.Services;
