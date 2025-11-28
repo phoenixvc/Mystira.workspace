@@ -40,6 +40,8 @@ builder.Services.AddScoped<ILlmServiceFactory, LLMServiceFactory>();
 builder.Services.AddScoped<IStorySchemaProvider, FileStorySchemaProvider>();
 // Story validation service (Domain interface) implemented in Application layer
 builder.Services.AddScoped<IStoryValidationService, StoryValidationService>();
+// Scenario factory for creating Domain scenarios from JSON or YAML content
+builder.Services.AddScoped<IScenarioFactory, ScenarioFactory>();
 
 var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? Array.Empty<string>();
 
