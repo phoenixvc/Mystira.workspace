@@ -25,11 +25,11 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\..\src\Mystira.StoryGenerator.Application\Mystira.StoryGenerator.Application.csproj" />
       <ProjectReference Include="..\..\src\Mystira.StoryGenerator.GraphTheory\Mystira.StoryGenerator.GraphTheory.csproj" />
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="test_data\" />
       <Content Include="test_data\**\*">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </Content>

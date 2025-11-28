@@ -1,4 +1,3 @@
-using System.Linq;
 using System.Text;
 using Microsoft.Extensions.Logging;
 using Mystira.StoryGenerator.Contracts.Chat;

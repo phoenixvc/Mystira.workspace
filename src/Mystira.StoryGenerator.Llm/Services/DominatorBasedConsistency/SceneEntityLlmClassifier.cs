@@ -4,9 +4,7 @@ using Mystira.StoryGenerator.Contracts.Chat;
 using Mystira.StoryGenerator.Contracts.Configuration;
 using Mystira.StoryGenerator.Contracts.Entities;
 using Mystira.StoryGenerator.Domain.Services;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using System.Linq;
 
 namespace Mystira.StoryGenerator.Llm.Services.DominatorBasedConsistency;
 

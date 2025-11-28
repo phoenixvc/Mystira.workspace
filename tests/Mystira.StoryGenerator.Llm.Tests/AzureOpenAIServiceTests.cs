@@ -3,7 +3,6 @@ using Microsoft.Extensions.Options;
 using Moq;
 using Mystira.StoryGenerator.Contracts.Configuration;
 using Mystira.StoryGenerator.Llm.Services.LLM;
-using Xunit;
 
 namespace Mystira.StoryGenerator.Llm.Tests;
 

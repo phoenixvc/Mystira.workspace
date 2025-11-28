@@ -1,10 +1,6 @@
-using System.Net.Http.Json;
 using System.Text.Json;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
-using Xunit;
-using Mystira.StoryGenerator.Api;
-using Microsoft.Extensions.Logging;
 using Moq;
 using Mystira.StoryGenerator.Domain.Services;
 using Mystira.StoryGenerator.Contracts.Chat;

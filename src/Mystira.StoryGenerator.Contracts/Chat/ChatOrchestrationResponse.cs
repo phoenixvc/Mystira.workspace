@@ -1,5 +1,4 @@
 ﻿using System.Text.Json.Serialization;
-using Mystira.StoryGenerator.Contracts.Stories;
 
 namespace Mystira.StoryGenerator.Contracts.Chat;
 

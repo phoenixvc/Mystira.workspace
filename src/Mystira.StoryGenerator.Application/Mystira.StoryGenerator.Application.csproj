@@ -16,6 +16,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Mystira.StoryGenerator.Contracts\Mystira.StoryGenerator.Contracts.csproj" />
     <ProjectReference Include="..\Mystira.StoryGenerator.Domain\Mystira.StoryGenerator.Domain.csproj" />
+    <ProjectReference Include="..\Mystira.StoryGenerator.GraphTheory\Mystira.StoryGenerator.GraphTheory.csproj" />
   </ItemGroup>
 
 </Project>

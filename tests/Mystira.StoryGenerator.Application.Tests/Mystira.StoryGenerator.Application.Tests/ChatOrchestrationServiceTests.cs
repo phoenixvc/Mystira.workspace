@@ -7,7 +7,6 @@ using Mystira.StoryGenerator.Contracts.Stories;
 using Mystira.StoryGenerator.Domain.Commands.Chat;
 using Mystira.StoryGenerator.Domain.Commands.Stories;
 using Mystira.StoryGenerator.Domain.Services;
-using Xunit;
 
 namespace Mystira.StoryGenerator.Application.Tests;
 

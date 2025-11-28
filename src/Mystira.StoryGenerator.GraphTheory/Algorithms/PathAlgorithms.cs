@@ -63,42 +63,51 @@ public static class PathAlgorithms
         isTerminal ??= node => graph.OutDegree(node) == 0;
 
         var path = new List<TNode>();
-        var stack = new Stack<(TNode Node, int ChildIndex)>();
+        var stack = new Stack<(TNode Node, IEnumerator<TNode> Succ, int Depth)>();
 
+        // Initialize with root
         path.Add(start);
-        stack.Push((start, 0));
+        var rootSucc = graph.GetSuccessors(start).GetEnumerator();
+        stack.Push((start, rootSucc, depth: 0));
 
         while (stack.Count > 0)
         {
-            var (node, _) = stack.Pop();
+            var (node, succEnum, depth) = stack.Peek();
 
-            // Fix path length to match stack depth+1
-            while (path.Count > stack.Count + 1)
+            bool depthLimitReached = maxDepth.HasValue && depth >= maxDepth.Value;
+            bool isTerm = depthLimitReached || isTerminal(node);
+
+            if (isTerm)
+            {
+                // Current node is terminal (or depth limit): emit current path.
+                yield return path.ToArray();
+
+                // Backtrack
+                stack.Pop();
+                succEnum.Dispose();
                 path.RemoveAt(path.Count - 1);
 
-            path[path.Count - 1] = node;
-
-            if (isTerminal(node) || (maxDepth.HasValue && path.Count >= maxDepth.Value))
-            {
-                yield return path.ToArray();
                 continue;
             }
 
-            var successors = graph.GetSuccessors(node).ToArray();
-            if (successors.Length == 0)
+            // Try to advance to the next successor
+            if (!succEnum.MoveNext())
             {
-                yield return path.ToArray();
+                // No more successors: just backtrack without emitting; this node is not terminal.
+                stack.Pop();
+                succEnum.Dispose();
+                path.RemoveAt(path.Count - 1);
                 continue;
             }
 
-            // Push children in reverse to preserve natural order
-            for (int i = successors.Length - 1; i >= 0; i--)
-            {
-                var child = successors[i];
-                path.Add(child);
-                stack.Push((child, 0));
-            }
+            // Go deeper to the child
+            var child = succEnum.Current;
+            path.Add(child);
+            var childSucc = graph.GetSuccessors(child).GetEnumerator();
+            stack.Push((child, childSucc, depth + 1));
         }
+
+        yield break;
     }
 
     /// <summary>
@@ -123,11 +132,11 @@ public static class PathAlgorithms
         where TNode : notnull
     {
         if (paths.Count == 0)
-            return Array.Empty<IReadOnlyList<TNode>>();
+            return [];
 
         // How much of each path we ultimately keep (prefix length).
         var keepLength = new int[paths.Count];
-        for (int i = 0; i < paths.Count; i++)
+        for (var i = 0; i < paths.Count; i++)
         {
             keepLength[i] = paths[i].Count;
         }
@@ -135,15 +144,16 @@ public static class PathAlgorithms
         var trieRoot = new TrieNode<TNode>();
 
         // Process each path once, from end to start.
-        for (int p = 0; p < paths.Count; p++)
+        for (var p = 0; p < paths.Count; p++)
         {
             var path = paths[p];
-            int L = path.Count;
+            var l = path.Count;
 
             var node = trieRoot;
+            var matchedDepth = 0; // how many symbols of the suffix have matched so far (from the end)
 
             // Walk suffixes backwards: path[i..L)
-            for (int i = L - 1; i >= 0; i--)
+            for (var i = l - 1; i >= 0; i--)
             {
                 var symbol = path[i];
 
@@ -154,6 +164,7 @@ public static class PathAlgorithms
                 }
 
                 node = child;
+                matchedDepth++;
 
                 if (node.OwnerPathIndex == -1)
                 {
@@ -163,11 +174,15 @@ public static class PathAlgorithms
                 else if (node.OwnerPathIndex != p)
                 {
                     // This suffix is already owned by another path.
-                    // We can cut current path before this suffix.
-                    var newLen = i + 1; // include join node at i
-                    if (newLen < keepLength[p])
+                    // Only truncate if we've matched at least two symbols of the suffix
+                    // (i.e., there is an actual shared tail, not just the starting node).
+                    if (matchedDepth >= 2)
                     {
-                        keepLength[p] = newLen;
+                        var newLen = i + 1; // include join node at i
+                        if (newLen < keepLength[p])
+                        {
+                            keepLength[p] = newLen;
+                        }
                     }
                 }
             }
@@ -177,16 +192,16 @@ public static class PathAlgorithms
         var result = new List<IReadOnlyList<TNode>>();
         var seenPrefixes = new HashSet<PrefixKey<TNode>>();
 
-        for (int p = 0; p < paths.Count; p++)
+        for (var p = 0; p < paths.Count; p++)
         {
             var original = paths[p];
-            int len = keepLength[p];
+            var len = keepLength[p];
 
             if (len <= 0)
                 continue;
 
             var prefix = new TNode[len];
-            for (int i = 0; i < len; i++)
+            for (var i = 0; i < len; i++)
                 prefix[i] = original[i];
 
             var key = new PrefixKey<TNode>(prefix);
@@ -197,6 +212,151 @@ public static class PathAlgorithms
         }
 
         return new ReadOnlyCollection<IReadOnlyList<TNode>>(result);
+    }
+
+    /// <summary>
+    /// <para>
+    /// Enumerates all root→terminal paths in the given directed graph,
+    /// compresses them by factoring out shared suffixes, and returns the
+    /// compressed paths as lists of edges.
+    /// </para>
+    /// <para>
+    /// Behavior:
+    /// </para>
+    /// <para>
+    /// 1. All root→terminal node paths starting at <paramref name="root"/>
+    ///    are enumerated using
+    ///    <see cref="PathAlgorithms.EnumeratePaths{TNode, TEdgeLabel}(DirectedGraph{TNode, TEdgeLabel}, TNode, System.Func{TNode, bool}?, int?)"/>.
+    /// </para>
+    /// <para>
+    /// 2. These node paths are compressed with
+    ///    <see cref="CompressBySharedSuffixes{TNode}(IReadOnlyList{IReadOnlyList{TNode}})"/>,
+    ///    which:
+    ///    - Keeps one path carrying each shared suffix in full,
+    ///    - Truncates other paths that share that suffix just before it begins.
+    /// </para>
+    /// <para>
+    /// 3. Each compressed node path is converted back into a path of
+    ///    <see cref="Edge{TNode, TEdgeLabel}"/> instances using the original
+    ///    <paramref name="graph"/>.
+    /// </para>
+    /// <para>
+    /// The number of returned edge paths always matches the number of
+    /// compressed node paths produced in step 2.
+    /// </para>
+    /// </summary>
+    /// <typeparam name="TNode">
+    /// <para>
+    /// The node identifier type (for example <see cref="string"/> or a
+    /// record type such as <see cref="FrontierMergedGraph.SceneStateNode{TSceneId, TStateSig}"/>).
+    /// </para>
+    /// </typeparam>
+    /// <typeparam name="TEdgeLabel">
+    /// <para>
+    /// The type of labels attached to edges in the graph.
+    /// </para>
+    /// </typeparam>
+    /// <param name="graph">
+    /// <para>
+    /// The directed graph whose paths are to be compressed.
+    /// </para>
+    /// </param>
+    /// <param name="root">
+    /// <para>
+    /// The root node from which root→terminal paths are enumerated.
+    /// </para>
+    /// </param>
+    /// <param name="isTerminal">
+    /// <para>
+    /// Optional predicate that determines whether a node is considered
+    /// terminal. If omitted, any node with no outgoing edges is treated as
+    /// terminal.
+    /// </para>
+    /// </param>
+    /// <param name="maxDepth">
+    /// <para>
+    /// Optional maximum depth for path enumeration. If provided, paths are
+    /// truncated at this length and treated as terminal at that point.
+    /// </para>
+    /// </param>
+    /// <returns>
+    /// <para>
+    /// A read-only list of compressed paths, where each path is represented
+    /// as a list of <see cref="Edge{TNode, TEdgeLabel}"/> from the root to
+    /// its terminal node (or to the truncation depth).
+    /// </para>
+    /// </returns>
+    /// <exception cref="InvalidOperationException">
+    /// <para>
+    /// Thrown if, for any adjacent pair of nodes in a compressed node path,
+    /// there is no matching edge in <paramref name="graph"/> whose
+    /// <see cref="Edge{TNode, TEdgeLabel}.From"/> and
+    /// <see cref="Edge{TNode, TEdgeLabel}.To"/> correspond to that pair.
+    /// </para>
+    /// </exception>
+    public static IReadOnlyList<IReadOnlyList<Edge<TNode, TEdgeLabel>>> CompressGraphPathsToEdgePaths<TNode, TEdgeLabel>(
+        this DirectedGraph<TNode, TEdgeLabel> graph,
+        TNode root,
+        Func<TNode, bool>? isTerminal = null,
+        int? maxDepth = null)
+        where TNode : notnull
+    {
+        isTerminal ??= node => graph.OutDegree(node) == 0;
+
+        // 1) Enumerate all root→terminal paths as node sequences.
+        var allNodePaths = graph
+            .EnumeratePaths(
+                start: root,
+                isTerminal: isTerminal,
+                maxDepth: maxDepth)
+            .ToList();
+
+        // 2) Compress node paths by shared suffixes.
+        var compressedNodePaths = CompressBySharedSuffixes(allNodePaths);
+
+        // 3) Convert each compressed node path into a list of edges.
+        var result = new List<IReadOnlyList<Edge<TNode, TEdgeLabel>>>(compressedNodePaths.Count);
+
+        foreach (var nodePath in compressedNodePaths)
+        {
+            if (nodePath.Count < 2)
+            {
+                // No edges in this path (singleton root, or degenerate).
+                result.Add(Array.Empty<Edge<TNode, TEdgeLabel>>());
+                continue;
+            }
+
+            var edgePath = new List<Edge<TNode, TEdgeLabel>>(nodePath.Count - 1);
+
+            for (var i = 0; i < nodePath.Count - 1; i++)
+            {
+                var from = nodePath[i];
+                var to   = nodePath[i + 1];
+
+                Edge<TNode, TEdgeLabel>? chosen = null;
+
+                foreach (var e in graph.GetOutgoingEdges(from))
+                {
+                    if (EqualityComparer<TNode>.Default.Equals(e.To, to))
+                    {
+                        chosen = e;
+                        break; // assume at most one edge per (from,to)
+                    }
+                }
+
+                if (chosen is null)
+                {
+                    throw new InvalidOperationException(
+                        $"No edge found from '{from}' to '{to}' when reconstructing edge path.");
+                }
+
+                edgePath.Add(chosen);
+            }
+
+            result.Add(edgePath);
+        }
+
+        return new ReadOnlyCollection<IReadOnlyList<Edge<TNode, TEdgeLabel>>>(result);
     }
 
     private sealed class TrieNode<TNode>
@@ -222,7 +382,7 @@ public static class PathAlgorithms
             if (_nodes == null || other._nodes == null) return false;
             if (_nodes.Length != other._nodes.Length) return false;
             var cmp = EqualityComparer<TNode>.Default;
-            for (int i = 0; i < _nodes.Length; i++)
+            for (var i = 0; i < _nodes.Length; i++)
             {
                 if (!cmp.Equals(_nodes[i], other._nodes[i]))
                     return false;
@@ -239,7 +399,7 @@ public static class PathAlgorithms
             if (_nodes == null) return 0;
             unchecked
             {
-                int hash = 17;
+                var hash = 17;
                 var cmp = EqualityComparer<TNode>.Default;
                 foreach (var n in _nodes)
                 {

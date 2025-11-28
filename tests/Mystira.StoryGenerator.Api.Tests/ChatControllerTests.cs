@@ -4,7 +4,6 @@ using Moq;
 using Mystira.StoryGenerator.Api.Controllers;
 using Mystira.StoryGenerator.Contracts.Chat;
 using Mystira.StoryGenerator.Domain.Services;
-using Xunit;
 
 namespace Mystira.StoryGenerator.Api.Tests;
 

@@ -32,7 +32,7 @@ public class ScenarioFactoryTests
         Assert.Equal("Desc", scenario.Description);
         Assert.Equal(2, scenario.Scenes.Count);
         Assert.Equal("scene_1_start", scenario.Scenes[0].Id);
-        Assert.Equal("scene_2", scenario.Scenes[0].NextScene);
+        Assert.Equal("scene_2", scenario.Scenes[0].NextSceneId);
     }
 
     [Fact]
@@ -83,6 +83,6 @@ public class ScenarioFactoryTests
         Assert.Equal("Desc", scenario.Description);
         Assert.Equal(2, scenario.Scenes.Count);
         Assert.Equal("scene_1_start", scenario.Scenes[0].Id);
-        Assert.Equal("scene_2", scenario.Scenes[0].NextScene);
+        Assert.Equal("scene_2", scenario.Scenes[0].NextSceneId);
     }
 }

@@ -1,16 +1,10 @@
-﻿using System;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Moq;
 using Mystira.StoryGenerator.Contracts.Chat;
 using Mystira.StoryGenerator.Contracts.Configuration;
-using Mystira.StoryGenerator.Contracts.Entities;
 using Mystira.StoryGenerator.Domain.Services;
 using Mystira.StoryGenerator.Llm.Services.DominatorBasedConsistency;
-using Xunit;
 
 namespace Mystira.StoryGenerator.Llm.Tests;
 

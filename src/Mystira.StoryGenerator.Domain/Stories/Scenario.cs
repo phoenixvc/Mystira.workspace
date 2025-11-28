@@ -5,158 +5,124 @@ namespace Mystira.StoryGenerator.Domain.Stories;
 
 public class Scenario
 {
-    [JsonPropertyName("title")]
-    [Required]
-    public string Title { get; set; } = string.Empty;
-
-    [JsonPropertyName("description")]
-    [Required]
-    public string Description { get; set; } = string.Empty;
-
-    [JsonPropertyName("tags")]
-    public List<string> Tags { get; set; } = new();
-
-    [JsonPropertyName("difficulty")]
-    public string Difficulty { get; set; } = string.Empty; // Easy | Medium | Hard
-
-    [JsonPropertyName("session_length")]
-    public string SessionLength { get; set; } = string.Empty; // Short | Medium | Long
-
-    [JsonPropertyName("age_group")]
-    public string AgeGroup { get; set; } = string.Empty; // e.g., "6-9"
-
-    [JsonPropertyName("minimum_age")]
-    public int MinimumAge { get; set; }
-
-    [JsonPropertyName("core_axes")]
-    public List<string> CoreAxes { get; set; } = new();
-
-    [JsonPropertyName("archetypes")]
-    public List<string> Archetypes { get; set; } = new();
-
-    [JsonPropertyName("characters")]
-    public List<Character> Characters { get; set; } = new();
-
-    [JsonPropertyName("scenes")]
-    public List<Scene> Scenes { get; set; } = new();
-}
-
-public class Character
-{
-    [JsonPropertyName("id")]
-    [Required]
     public string Id { get; set; } = string.Empty;
-
-    [JsonPropertyName("name")]
-    [Required]
-    public string Name { get; set; } = string.Empty;
-
-    [JsonPropertyName("image")]
-    public string? Image { get; set; }
-
-    [JsonPropertyName("audio")]
-    public string? Audio { get; set; }
-
-    [JsonPropertyName("metadata")]
-    public CharacterMetadata Metadata { get; set; } = new();
+    public string Title { get; set; } = string.Empty;
+    public string Description { get; set; } = string.Empty;
+    public List<string> Tags { get; set; } = new();
+    public DifficultyLevel Difficulty { get; set; }
+    public SessionLength SessionLength { get; set; }
+    public List<string> Archetypes { get; set; } = new();
+    public string AgeGroup { get; set; } = string.Empty;
+    public int MinimumAge { get; set; }
+    public List<string> CoreAxes { get; set; } = new();
+    public List<ScenarioCharacter> Characters { get; set; } = new();
+    public List<Scene> Scenes { get; set; } = new();
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 }
 
-public class CharacterMetadata
+public class ScenarioCharacter
 {
-    [JsonPropertyName("role")]
+    public string Id { get; set; } = string.Empty;
+    public string Name { get; set; } = string.Empty;
+    public string? Image { get; set; }
+    public string? Audio { get; set; }
+    public ScenarioCharacterMetadata Metadata { get; set; } = new();
+}
+
+public class ScenarioCharacterMetadata
+{
     public List<string> Role { get; set; } = new();
-
-    [JsonPropertyName("archetype")]
     public List<string> Archetype { get; set; } = new();
-
-    [JsonPropertyName("species")]
     public string Species { get; set; } = string.Empty;
-
-    [JsonPropertyName("age")]
     public int Age { get; set; }
-
-    [JsonPropertyName("traits")]
     public List<string> Traits { get; set; } = new();
-
-    [JsonPropertyName("backstory")]
     public string Backstory { get; set; } = string.Empty;
 }
 
 public class Scene
 {
-    [JsonPropertyName("id")]
     [Required]
     public string Id { get; set; } = string.Empty;
-
-    [JsonPropertyName("title")]
     [Required]
     public string Title { get; set; } = string.Empty;
-
-    [JsonPropertyName("type")]
     [Required]
-    public string Type { get; set; } = string.Empty; // narrative | choice | roll | special
-
-    [JsonPropertyName("description")]
+    public SceneType Type { get; set; }
     [Required]
     public string Description { get; set; } = string.Empty;
-
-    [JsonPropertyName("next_scene")]
-    public string? NextScene { get; set; }
-
-    [JsonPropertyName("difficulty")]
-    public double? Difficulty { get; set; } // for roll scenes
-
-    [JsonPropertyName("media")]
-    public SceneMedia? Media { get; set; }
-
-    [JsonPropertyName("choices")]
-    public List<Choice>? Choices { get; set; }
-
-    [JsonPropertyName("roll_requirements")]
-    public List<RollRequirement>? RollRequirements { get; set; }
+    public string? NextSceneId { get; set; }
+    public MediaReferences? Media { get; set; }
+    public List<Branch> Branches { get; set; } = new();
+    public List<EchoReveal> EchoReveals { get; set; } = new();
+    public int? Difficulty { get; set; }
 }
 
-public class SceneMedia
+public class Branch
 {
-    [JsonPropertyName("image")]
+    public string Choice { get; set; } = string.Empty;
+    public string NextSceneId { get; set; } = string.Empty;
+    public EchoLog? EchoLog { get; set; }
+    public CompassChange? CompassChange { get; set; }
+}
+
+public class MediaReferences
+{
     public string? Image { get; set; }
-
-    [JsonPropertyName("audio")]
     public string? Audio { get; set; }
-
-    [JsonPropertyName("video")]
     public string? Video { get; set; }
 }
 
-public class Choice
+public class EchoLog
 {
-    [JsonPropertyName("prompt")]
-    public string Prompt { get; set; } = string.Empty;
-
-    [JsonPropertyName("options")]
-    public List<ChoiceOption> Options { get; set; } = new();
+    public string EchoType { get; set; } = string.Empty;
+    public string Description { get; set; } = string.Empty;
+    public double Strength { get; set; }
+    public DateTime Timestamp { get; set; } = DateTime.UtcNow;
 }
 
-public class ChoiceOption
+public class CompassChange
 {
-    [JsonPropertyName("text")]
-    public string Text { get; set; } = string.Empty;
-
-    [JsonPropertyName("next_scene")]
-    public string? NextScene { get; set; }
+    public string Axis { get; set; } = string.Empty;
+    public double Delta { get; set; }
+    public string? DevelopmentalLink { get; set; }
 }
 
-public class RollRequirement
+public class EchoReveal
 {
-    [JsonPropertyName("attribute")]
-    public string Attribute { get; set; } = string.Empty;
+    public string EchoType { get; set; } = string.Empty;
+    public double MinStrength { get; set; }
+    public string TriggerSceneId { get; set; } = string.Empty;
+    public int? MaxAgeScenes { get; set; }
+    public string? RevealMechanic { get; set; }
+    public bool? Required { get; set; }
+}
 
-    [JsonPropertyName("target")]
-    public int Target { get; set; }
+public class CompassTracking
+{
+    public string Axis { get; set; } = string.Empty;
+    public double CurrentValue { get; set; } = 0.0;
+    public double StartingValue { get; set; } = 0.0;
+    public List<CompassChange> History { get; set; } = new();
+    public DateTime LastUpdated { get; set; } = DateTime.UtcNow;
+}
 
-    [JsonPropertyName("success")]
-    public string? SuccessNextScene { get; set; }
+public enum DifficultyLevel
+{
+    Easy,
+    Medium,
+    Hard
+}
 
-    [JsonPropertyName("failure")]
-    public string? FailureNextScene { get; set; }
+public enum SessionLength
+{
+    Short,
+    Medium,
+    Long
+}
+
+public enum SceneType
+{
+    Narrative = 0,
+    Choice = 1,
+    Roll = 2,
+    Special = 3
 }
