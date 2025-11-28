@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+using Mystira.StoryGenerator.Domain.Graph;
 
 namespace Mystira.StoryGenerator.GraphTheory.Graph;
 
@@ -25,11 +26,11 @@ namespace Mystira.StoryGenerator.GraphTheory.Graph;
 /// or a placeholder type if no label content is required.
 /// </para>
 /// </typeparam>
-public sealed class DirectedGraph<TNode, TEdgeLabel>
+public sealed class DirectedGraph<TNode, TEdgeLabel> : IDirectedGraph<TNode, TEdgeLabel>
     where TNode : notnull
 {
-    private readonly IReadOnlyDictionary<TNode, IReadOnlyList<Edge<TNode, TEdgeLabel>>> _outgoing;
-    private readonly IReadOnlyDictionary<TNode, IReadOnlyList<Edge<TNode, TEdgeLabel>>> _incoming;
+    private readonly IReadOnlyDictionary<TNode, IReadOnlyList<IEdge<TNode, TEdgeLabel>>> _outgoing;
+    private readonly IReadOnlyDictionary<TNode, IReadOnlyList<IEdge<TNode, TEdgeLabel>>> _incoming;
 
     /// <summary>
     /// <para>
@@ -43,13 +44,13 @@ public sealed class DirectedGraph<TNode, TEdgeLabel>
     /// All directed edges present in the graph.
     /// </para>
     /// </summary>
-    public IReadOnlyCollection<Edge<TNode, TEdgeLabel>> Edges { get; }
+    public IReadOnlyCollection<IEdge<TNode, TEdgeLabel>> Edges { get; }
 
     private DirectedGraph(
         IReadOnlyCollection<TNode> nodes,
-        IReadOnlyCollection<Edge<TNode, TEdgeLabel>> edges,
-        IReadOnlyDictionary<TNode, IReadOnlyList<Edge<TNode, TEdgeLabel>>> outgoing,
-        IReadOnlyDictionary<TNode, IReadOnlyList<Edge<TNode, TEdgeLabel>>> incoming)
+        IReadOnlyCollection<IEdge<TNode, TEdgeLabel>> edges,
+        IReadOnlyDictionary<TNode, IReadOnlyList<IEdge<TNode, TEdgeLabel>>> outgoing,
+        IReadOnlyDictionary<TNode, IReadOnlyList<IEdge<TNode, TEdgeLabel>>> incoming)
     {
         Nodes = nodes;
         Edges = edges;
@@ -120,13 +121,13 @@ public sealed class DirectedGraph<TNode, TEdgeLabel>
         }
 
         // Build adjacency dictionaries
-        var outgoing = new Dictionary<TNode, List<Edge<TNode, TEdgeLabel>>>(comparer);
-        var incoming = new Dictionary<TNode, List<Edge<TNode, TEdgeLabel>>>(comparer);
+        var outgoing = new Dictionary<TNode, List<IEdge<TNode, TEdgeLabel>>>(comparer);
+        var incoming = new Dictionary<TNode, List<IEdge<TNode, TEdgeLabel>>>(comparer);
 
         foreach (var n in nodeSet)
         {
-            outgoing[n] = new List<Edge<TNode, TEdgeLabel>>();
-            incoming[n] = new List<Edge<TNode, TEdgeLabel>>();
+            outgoing[n] = new List<IEdge<TNode, TEdgeLabel>>();
+            incoming[n] = new List<IEdge<TNode, TEdgeLabel>>();
         }
 
         foreach (var e in edgeList)
@@ -137,16 +138,16 @@ public sealed class DirectedGraph<TNode, TEdgeLabel>
 
         // Wrap in read-only
         var roNodes = new ReadOnlyCollection<TNode>(nodeSet.ToList());
-        var roEdges = new ReadOnlyCollection<Edge<TNode, TEdgeLabel>>(edgeList);
+        var roEdges = new ReadOnlyCollection<IEdge<TNode, TEdgeLabel>>(edgeList.Cast<IEdge<TNode, TEdgeLabel>>().ToList());
 
         var roOutgoing = outgoing.ToDictionary(
             kvp => kvp.Key,
-            kvp => (IReadOnlyList<Edge<TNode, TEdgeLabel>>)new ReadOnlyCollection<Edge<TNode, TEdgeLabel>>(kvp.Value),
+            kvp => (IReadOnlyList<IEdge<TNode, TEdgeLabel>>)new ReadOnlyCollection<IEdge<TNode, TEdgeLabel>>(kvp.Value),
             comparer);
 
         var roIncoming = incoming.ToDictionary(
             kvp => kvp.Key,
-            kvp => (IReadOnlyList<Edge<TNode, TEdgeLabel>>)new ReadOnlyCollection<Edge<TNode, TEdgeLabel>>(kvp.Value),
+            kvp => (IReadOnlyList<IEdge<TNode, TEdgeLabel>>)new ReadOnlyCollection<IEdge<TNode, TEdgeLabel>>(kvp.Value),
             comparer);
 
         return new DirectedGraph<TNode, TEdgeLabel>(
@@ -175,10 +176,10 @@ public sealed class DirectedGraph<TNode, TEdgeLabel>
     /// equals <paramref name="node"/>.
     /// </para>
     /// </returns>
-    public IReadOnlyList<Edge<TNode, TEdgeLabel>> GetOutgoingEdges(TNode node)
+    public IReadOnlyList<IEdge<TNode, TEdgeLabel>> GetOutgoingEdges(TNode node)
         => _outgoing.TryGetValue(node, out var list)
             ? list
-            : Array.Empty<Edge<TNode, TEdgeLabel>>();
+            : Array.Empty<IEdge<TNode, TEdgeLabel>>();
 
     /// <summary>
     /// <para>
@@ -199,10 +200,10 @@ public sealed class DirectedGraph<TNode, TEdgeLabel>
     /// equals <paramref name="node"/>.
     /// </para>
     /// </returns>
-    public IReadOnlyList<Edge<TNode, TEdgeLabel>> GetIncomingEdges(TNode node)
+    public IReadOnlyList<IEdge<TNode, TEdgeLabel>> GetIncomingEdges(TNode node)
         => _incoming.TryGetValue(node, out var list)
             ? list
-            : Array.Empty<Edge<TNode, TEdgeLabel>>();
+            : Array.Empty<IEdge<TNode, TEdgeLabel>>();
 
     /// <summary>
     /// <para>

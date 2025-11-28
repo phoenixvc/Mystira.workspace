@@ -1,4 +1,6 @@
-﻿namespace Mystira.StoryGenerator.GraphTheory.Graph;
+﻿using Mystira.StoryGenerator.Domain.Graph;
+
+namespace Mystira.StoryGenerator.GraphTheory.Graph;
 
 /// <summary>
 /// <para>
@@ -22,4 +24,4 @@
 /// roll outcome, or a simple unit type).
 /// </para>
 /// </typeparam>
-public sealed record Edge<TNode, TEdgeLabel>(TNode From, TNode To, TEdgeLabel Label);
+public sealed record Edge<TNode, TEdgeLabel>(TNode From, TNode To, TEdgeLabel Label) : IEdge<TNode, TEdgeLabel>;

@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+using Mystira.StoryGenerator.Domain.Graph;
 using Mystira.StoryGenerator.GraphTheory.Graph;
 
 namespace Mystira.StoryGenerator.GraphTheory.Algorithms;
@@ -54,7 +55,7 @@ public static class PathAlgorithms
     /// </para>
     /// </returns>
     public static IEnumerable<IReadOnlyList<TNode>> EnumeratePaths<TNode, TEdgeLabel>(
-        this DirectedGraph<TNode, TEdgeLabel> graph,
+        this IDirectedGraph<TNode, TEdgeLabel> graph,
         TNode start,
         Func<TNode, bool>? isTerminal = null,
         int? maxDepth = null)
@@ -294,8 +295,8 @@ public static class PathAlgorithms
     /// <see cref="Edge{TNode, TEdgeLabel}.To"/> correspond to that pair.
     /// </para>
     /// </exception>
-    public static IReadOnlyList<IReadOnlyList<Edge<TNode, TEdgeLabel>>> CompressGraphPathsToEdgePaths<TNode, TEdgeLabel>(
-        this DirectedGraph<TNode, TEdgeLabel> graph,
+    public static IReadOnlyList<IReadOnlyList<IEdge<TNode, TEdgeLabel>>> CompressGraphPathsToEdgePaths<TNode, TEdgeLabel>(
+        this IDirectedGraph<TNode, TEdgeLabel> graph,
         TNode root,
         Func<TNode, bool>? isTerminal = null,
         int? maxDepth = null)
@@ -315,25 +316,25 @@ public static class PathAlgorithms
         var compressedNodePaths = CompressBySharedSuffixes(allNodePaths);
 
         // 3) Convert each compressed node path into a list of edges.
-        var result = new List<IReadOnlyList<Edge<TNode, TEdgeLabel>>>(compressedNodePaths.Count);
+        var result = new List<IReadOnlyList<IEdge<TNode, TEdgeLabel>>>(compressedNodePaths.Count);
 
         foreach (var nodePath in compressedNodePaths)
         {
             if (nodePath.Count < 2)
             {
                 // No edges in this path (singleton root, or degenerate).
-                result.Add(Array.Empty<Edge<TNode, TEdgeLabel>>());
+                result.Add(Array.Empty<IEdge<TNode, TEdgeLabel>>());
                 continue;
             }
 
-            var edgePath = new List<Edge<TNode, TEdgeLabel>>(nodePath.Count - 1);
+            var edgePath = new List<IEdge<TNode, TEdgeLabel>>(nodePath.Count - 1);
 
             for (var i = 0; i < nodePath.Count - 1; i++)
             {
                 var from = nodePath[i];
                 var to   = nodePath[i + 1];
 
-                Edge<TNode, TEdgeLabel>? chosen = null;
+                IEdge<TNode, TEdgeLabel>? chosen = null;
 
                 foreach (var e in graph.GetOutgoingEdges(from))
                 {
@@ -356,7 +357,29 @@ public static class PathAlgorithms
             result.Add(edgePath);
         }
 
-        return new ReadOnlyCollection<IReadOnlyList<Edge<TNode, TEdgeLabel>>>(result);
+        return new ReadOnlyCollection<IReadOnlyList<IEdge<TNode, TEdgeLabel>>>(result);
+    }
+
+    // Backwards-compat overloads delegating to interface-based APIs
+    public static IEnumerable<IReadOnlyList<TNode>> EnumeratePaths<TNode, TEdgeLabel>(
+        this DirectedGraph<TNode, TEdgeLabel> graph,
+        TNode start,
+        Func<TNode, bool>? isTerminal = null,
+        int? maxDepth = null)
+        where TNode : notnull
+        => EnumeratePaths<TNode, TEdgeLabel>((IDirectedGraph<TNode, TEdgeLabel>)graph, start, isTerminal, maxDepth);
+
+    public static IReadOnlyList<IReadOnlyList<Edge<TNode, TEdgeLabel>>> CompressGraphPathsToEdgePaths<TNode, TEdgeLabel>(
+        this DirectedGraph<TNode, TEdgeLabel> graph,
+        TNode root,
+        Func<TNode, bool>? isTerminal = null,
+        int? maxDepth = null)
+        where TNode : notnull
+    {
+        var paths = CompressGraphPathsToEdgePaths<TNode, TEdgeLabel>((IDirectedGraph<TNode, TEdgeLabel>)graph, root, isTerminal, maxDepth);
+        // cast back to concrete Edge list for backward compatibility
+        return new ReadOnlyCollection<IReadOnlyList<Edge<TNode, TEdgeLabel>>>(
+            paths.Select(list => (IReadOnlyList<Edge<TNode, TEdgeLabel>>)list.Cast<Edge<TNode, TEdgeLabel>>().ToList()).ToList());
     }
 
     private sealed class TrieNode<TNode>

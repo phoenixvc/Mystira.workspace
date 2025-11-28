@@ -1,6 +1,8 @@
 using Mystira.StoryGenerator.Application.Extensions;
+using Mystira.StoryGenerator.Application.Graph;
 using Mystira.StoryGenerator.Application.Services;
 using Mystira.StoryGenerator.Domain.Services;
+using Mystira.StoryGenerator.Domain.Stories;
 using Mystira.StoryGenerator.GraphTheory.Algorithms;
 using Mystira.StoryGenerator.GraphTheory.Graph;
 
@@ -119,7 +121,7 @@ public class PathAlgorithmTests
             var scenario = await new ScenarioFactory()
                 .CreateFromContentAsync(yaml, ScenarioContentFormat.Yaml);
 
-            var graph = scenario.ToGraph();
+            var graph = ScenarioGraph.FromScenario(scenario);
             Assert.NotNull(graph);
 
             var roots = graph.Roots().ToArray();
@@ -127,9 +129,7 @@ public class PathAlgorithmTests
             var startingScene = roots[0];
 
             // 3) Compress
-            var compressed = PathAlgorithms.CompressGraphPathsToEdgePaths(
-                graph,
-                startingScene,
+            var compressed = graph.CompressGraphPathsToEdgePaths(startingScene,
                 scene => scene.IsFinalScene());
 
             // Compression should not increase the number of paths
