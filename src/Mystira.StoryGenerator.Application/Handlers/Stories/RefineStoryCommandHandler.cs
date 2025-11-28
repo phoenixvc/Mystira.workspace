@@ -14,7 +14,7 @@ public class RefineStoryCommandHandler : ICommandHandler<RefineStoryCommand, Gen
     private readonly ILlmServiceFactory _llmFactory;
     private readonly AiSettings _settings;
     private readonly IStorySchemaProvider _schemaProvider;
-    private readonly ILlmIntentClassificationService _llmIntentClassificationService;
+    private readonly ILlmIntentLlmClassificationService _llmIntentLlmClassificationService;
     private readonly IInstructionBlockService _instructionBlockService;
     private readonly ILogger<RefineStoryCommandHandler> _logger;
 
@@ -22,14 +22,14 @@ public class RefineStoryCommandHandler : ICommandHandler<RefineStoryCommand, Gen
         ILlmServiceFactory llmFactory,
         IOptions<AiSettings> aiOptions,
         IStorySchemaProvider schemaProvider,
-        ILlmIntentClassificationService llmIntentClassificationService,
+        ILlmIntentLlmClassificationService llmIntentLlmClassificationService,
         IInstructionBlockService instructionBlockService,
         ILogger<RefineStoryCommandHandler> logger)
     {
         _llmFactory = llmFactory;
         _settings = aiOptions.Value;
         _schemaProvider = schemaProvider;
-        _llmIntentClassificationService = llmIntentClassificationService;
+        _llmIntentLlmClassificationService = llmIntentLlmClassificationService;
         _instructionBlockService = instructionBlockService;
         _logger = logger;
     }
@@ -233,7 +233,7 @@ Output Format
         var categories = new[] { "story_generation", "story_refinement" };
         var instructionTypes = new[] { "requirements" };
 
-        var intentClassification = await _llmIntentClassificationService.ClassifyAsync(queryText, cancellationToken);
+        var intentClassification = await _llmIntentLlmClassificationService.ClassifyAsync(queryText, cancellationToken);
         if (intentClassification != null)
         {
             _logger.LogInformation(

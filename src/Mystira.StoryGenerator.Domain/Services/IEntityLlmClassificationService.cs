@@ -2,7 +2,7 @@
 
 namespace Mystira.StoryGenerator.Domain.Services;
 
-public interface IEntityClassificationService : IClassificationService<EntityClassification?>
+public interface IEntityLlmClassificationService : ILlmClassificationService<EntityClassification?>
 {
 
 }

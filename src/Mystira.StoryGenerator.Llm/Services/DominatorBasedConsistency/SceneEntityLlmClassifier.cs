@@ -12,7 +12,7 @@ namespace Mystira.StoryGenerator.Llm.Services.DominatorBasedConsistency;
 /// LLM-based scene entity classifier. Uses Azure OpenAI to perform entity classification, i.e.,
 /// extract and classify all entities introduced within a scene of an interactive branching story.
 /// </summary>
-public class SceneEntityLlmClassifier : IEntityClassificationService
+public class SceneEntityLlmClassifier : IEntityLlmClassificationService
 {
     private readonly EntityClassifierSettings _settings;
     private readonly ILlmServiceFactory _llmServiceFactory;

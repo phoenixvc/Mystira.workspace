@@ -8,11 +8,11 @@ using Mystira.StoryGenerator.Domain.Services;
 
 namespace Mystira.StoryGenerator.Llm.Services.StoryIntentClassification;
 
-public class StoryLlmIntentClassifier : ILlmIntentClassificationService
+public class StoryLlmIntentLlmClassifier : ILlmIntentLlmClassificationService
 {
     private readonly IntentRouterSettings _settings;
     private readonly ILlmServiceFactory _llmServiceFactory;
-    private readonly ILogger<StoryLlmIntentClassifier> _logger;
+    private readonly ILogger<StoryLlmIntentLlmClassifier> _logger;
 
     private const string ClassificationPrompt = @"
 You are the Mystira RAG intent classifier.
@@ -134,10 +134,10 @@ Response:
 Now classify this user instruction:
 ";
 
-    public StoryLlmIntentClassifier(
+    public StoryLlmIntentLlmClassifier(
         IOptions<AiSettings> aiOptions,
         ILlmServiceFactory llmServiceFactory,
-        ILogger<StoryLlmIntentClassifier> logger)
+        ILogger<StoryLlmIntentLlmClassifier> logger)
     {
         _settings = aiOptions.Value.IntentRouter;
         _llmServiceFactory = llmServiceFactory;

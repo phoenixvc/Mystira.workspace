@@ -16,7 +16,7 @@ public class GenerateStoryCommandHandler : ICommandHandler<GenerateStoryCommand,
     private readonly AiSettings _settings;
     private readonly IStorySchemaProvider _schemaProvider;
     private readonly IInstructionBlockService _instructionBlockService;
-    private readonly ILlmIntentClassificationService _llmIntentClassificationService;
+    private readonly ILlmIntentLlmClassificationService _llmIntentLlmClassificationService;
     private readonly ILogger<GenerateStoryCommandHandler> _logger;
 
     public GenerateStoryCommandHandler(
@@ -24,14 +24,14 @@ public class GenerateStoryCommandHandler : ICommandHandler<GenerateStoryCommand,
         IOptions<AiSettings> aiOptions,
         IStorySchemaProvider schemaProvider,
         IInstructionBlockService instructionBlockService,
-        ILlmIntentClassificationService llmIntentClassificationService,
+        ILlmIntentLlmClassificationService llmIntentLlmClassificationService,
         ILogger<GenerateStoryCommandHandler> logger)
     {
         _llmFactory = llmFactory;
         _settings = aiOptions.Value;
         _schemaProvider = schemaProvider;
         _instructionBlockService = instructionBlockService;
-        _llmIntentClassificationService = llmIntentClassificationService;
+        _llmIntentLlmClassificationService = llmIntentLlmClassificationService;
         _logger = logger;
     }
 
@@ -285,7 +285,7 @@ FINAL OUTPUT RULES
         var categories = new[] { "story_generation" };
         var instructionTypes = new[] { "story_generate_initial" };
 
-        var intentClassification = await _llmIntentClassificationService.ClassifyAsync(queryText, cancellationToken);
+        var intentClassification = await _llmIntentLlmClassificationService.ClassifyAsync(queryText, cancellationToken);
         if (intentClassification != null)
         {
             _logger.LogInformation(

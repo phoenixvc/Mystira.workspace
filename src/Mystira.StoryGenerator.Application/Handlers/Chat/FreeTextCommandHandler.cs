@@ -11,18 +11,18 @@ public class FreeTextCommandHandler : ICommandHandler<FreeTextCommand, ChatCompl
 {
     private readonly ILlmServiceFactory _llmFactory;
     private readonly IInstructionBlockService _instructionBlockService;
-    private readonly ILlmIntentClassificationService _llmIntentClassificationService;
+    private readonly ILlmIntentLlmClassificationService _llmIntentLlmClassificationService;
     private readonly ILogger<FreeTextCommandHandler> _logger;
 
     public FreeTextCommandHandler(
         ILlmServiceFactory llmFactory,
         IInstructionBlockService instructionBlockService,
-        ILlmIntentClassificationService llmIntentClassificationService,
+        ILlmIntentLlmClassificationService llmIntentLlmClassificationService,
         ILogger<FreeTextCommandHandler> logger)
     {
         _llmFactory = llmFactory;
         _instructionBlockService = instructionBlockService;
-        _llmIntentClassificationService = llmIntentClassificationService;
+        _llmIntentLlmClassificationService = llmIntentLlmClassificationService;
         _logger = logger;
     }
 
@@ -120,7 +120,7 @@ public class FreeTextCommandHandler : ICommandHandler<FreeTextCommand, ChatCompl
             ? new[] { intent! }
             : new[] { "guidelines" };
 
-        var classification = await _llmIntentClassificationService.ClassifyAsync(queryText, cancellationToken);
+        var classification = await _llmIntentLlmClassificationService.ClassifyAsync(queryText, cancellationToken);
         if (classification != null)
         {
             _logger.LogInformation("Intent classified for free-text handler: {Categories} / {Types}", classification.Categories, classification.InstructionTypes);

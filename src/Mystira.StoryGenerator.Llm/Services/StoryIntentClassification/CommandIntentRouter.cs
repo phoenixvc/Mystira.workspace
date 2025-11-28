@@ -5,14 +5,14 @@ namespace Mystira.StoryGenerator.Llm.Services.StoryIntentClassification;
 
 public class CommandIntentRouter : ICommandRouter
 {
-    private readonly ILlmIntentClassificationService _llmIntentClassification;
+    private readonly ILlmIntentLlmClassificationService _llmIntentLlmClassification;
     private readonly ILogger<CommandIntentRouter> _logger;
 
     public CommandIntentRouter(
-        ILlmIntentClassificationService llmIntentClassification,
+        ILlmIntentLlmClassificationService llmIntentLlmClassification,
         ILogger<CommandIntentRouter> logger)
     {
-        _llmIntentClassification = llmIntentClassification;
+        _llmIntentLlmClassification = llmIntentLlmClassification;
         _logger = logger;
     }
 
@@ -24,7 +24,7 @@ public class CommandIntentRouter : ICommandRouter
             return null;
         }
 
-        var classification = await _llmIntentClassification.ClassifyAsync(userQuery, cancellationToken);
+        var classification = await _llmIntentLlmClassification.ClassifyAsync(userQuery, cancellationToken);
         if (classification == null || classification.InstructionTypes.Length == 0)
         {
             _logger.LogWarning("Intent classification returned no instruction types for query: {Query}", userQuery);

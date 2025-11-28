@@ -3,6 +3,6 @@ using Mystira.StoryGenerator.Contracts.Intent;
 namespace Mystira.StoryGenerator.Domain.Services;
 
 
-public interface ILlmIntentClassificationService : IClassificationService<IntentClassification?>
+public interface ILlmIntentLlmClassificationService : ILlmClassificationService<IntentClassification?>
 {
 }
