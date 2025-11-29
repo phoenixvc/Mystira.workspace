@@ -170,6 +170,14 @@ For each potential problem, check:
         This includes cases where something is already treated as known, owned, lost, or missing
         (for example, characters talk about “the lantern”, “our map”, “the berries” as if they
         already exist) without any earlier mention or introduction.
+    o   Any header listing ""the characters"" may only list the main or player-controlled
+        characters. The story is allowed to introduce additional supporting characters
+        (like NPCs) later by name. Do not treat supporting characters as errors just
+        because they are not in the initial list.
+    o   Any clear earlier mention of a named character on this path (even if they
+        are not physically present yet, such as “Barney saw Tiffany the turtle…”
+        or “we need to find Tiffany”) counts as an introduction. Do not flag later
+        scenes that refer to that same named character as unintroduced-entity errors.
     o   Treat mentions inside dialogue the same as narration: if a character talks about an entity
         as if it already exists, that still requires a prior introduction on this path.
     o	Entity disappears and reappears without explanation (e.g., a character “was left behind” but is suddenly present).
