@@ -115,6 +115,10 @@ You will be given a sequence of scenes and answers in this format:
     o	Scene <scene_id>: <scene text>
 •	If the scene is a choice (including choices that are framed as rolls), it is immediately followed by a line starting with:
     o	Answer: <what the player chose or how they decided to proceed>
+•   Some scenes describe a test such as ""roll N or higher to achieve X"" or ""you need N or higher to do Y"".
+    These lines describe the condition for success, not a guaranteed outcome. The actual outcome on this path
+    is determined by the corresponding Answer line and by which follow-up scene appears (for example, a
+    -success or -failure scene).
 
 Example fragment (you may see many lines like this, always in chronological order):
 Scene scene_1_start: The sun dappled through the leaves of Whispering Woods. Archimedes the owl hooted from his branch...
@@ -199,6 +203,22 @@ For each potential problem, check:
     o   A character asserts a specific explanation, cause, or identity as if it were a fact (for example,
         “it must be X”, “so this means Y happened”) even though the story has not provided enough clues or world
         information on this path to reasonably support that conclusion. Treat this as a causal_consistency issue.
+    o When a scene describes a test like ""roll N or higher to do X"", treat this as
+      describing the success condition only. The branch you see on this path may be
+      either success or failure. Use the Answer line and the following scenes to
+      infer which branch you are on:
+       If the Answer implies success (for example, ""It worked"", ""We did it"") then
+        the next scenes should describe the successful outcome X or something
+        compatible with it.
+       If the Answer implies failure or a negative outcome (for example, ""It
+        didn’t work"", ""He got angry"", ""We failed""), then the next scenes should
+        describe a failure consequence, which can reasonably differ from X and may
+        even be the opposite of X.
+    o Do not flag an inconsistency just because the outcome is negative or messy.
+      Only flag a causal_consistency issue if the narrative outcome clearly
+      contradicts the branch implied by the Answer line (for example, the Answer
+      indicates success but the next scene clearly describes a failure, or
+      vice versa).
 5.	Other notable concerns
     o	Anything else that, while not “impossible,” may confuse a child or undermine the story’s coherence (e.g., sudden scene that feels out of order, missing explanation for a key transition).
 ________________________________________

@@ -1,12 +1,12 @@
-﻿using Mystira.StoryGenerator.Domain.Stories;
+﻿using Mystira.StoryGenerator.Contracts.Stories;
+using Mystira.StoryGenerator.Domain.Stories;
 
 namespace Mystira.StoryGenerator.Domain.Graph;
 
 /// <summary>
-/// Marker interface for scenario graphs over Scene nodes with string edge labels.
-/// Concrete implementation should live outside Domain (e.g., in Application).
+/// Graph representing a scenario
 /// </summary>
 public interface IScenarioGraph : IDirectedGraph<Scene, string>
 {
-    IEnumerable<string> GetCompressedPaths();
+    IEnumerable<ScenarioPath> GetCompressedPaths();
 }

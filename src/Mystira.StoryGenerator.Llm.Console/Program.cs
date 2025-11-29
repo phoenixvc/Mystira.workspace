@@ -3,6 +3,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Mystira.StoryGenerator.Contracts.Configuration;
+using Mystira.StoryGenerator.Application.Graph;
+using Mystira.StoryGenerator.Application.Services;
 using Mystira.StoryGenerator.Domain.Services;
 using Mystira.StoryGenerator.Llm.Services.DominatorBasedConsistency;
 using Mystira.StoryGenerator.Llm.Services.LLM;
@@ -29,10 +31,45 @@ builder.Services.AddSingleton<ILlmServiceFactory, LLMServiceFactory>();
 // Entity classifier and consistency evaluator
 builder.Services.AddSingleton<SceneEntityLlmClassifier>();
 builder.Services.AddSingleton<ScenarioConsistencyLlmEvaluator>();
+// Scenario factory for loading scenarios from YAML/JSON in console tool
+builder.Services.AddSingleton<IScenarioFactory, ScenarioFactory>();
 
 var host = builder.Build();
 
 var logger = host.Services.GetRequiredService<ILoggerFactory>().CreateLogger("Mystira.Llm.Console");
+
+// Optional CLI: model deployment name to use (default: gpt-5.1)
+// Flags: --model, -m, --deployment, --deployment-name
+string deploymentArg = "gpt-5.1";
+int modelIdx = Array.FindIndex(args, a =>
+    a.Equals("--model", StringComparison.OrdinalIgnoreCase) ||
+    a.Equals("-m", StringComparison.OrdinalIgnoreCase) ||
+    a.Equals("--deployment", StringComparison.OrdinalIgnoreCase) ||
+    a.Equals("--deployment-name", StringComparison.OrdinalIgnoreCase));
+if (modelIdx >= 0 && (modelIdx + 1) < args.Length)
+{
+    var val = args[modelIdx + 1];
+    if (!string.IsNullOrWhiteSpace(val))
+    {
+        deploymentArg = val.Trim();
+    }
+}
+
+// Apply the chosen deployment/model name to AiSettings so downstream services use it
+try
+{
+    var opts = host.Services.GetRequiredService<Microsoft.Extensions.Options.IOptions<Mystira.StoryGenerator.Contracts.Configuration.AiSettings>>();
+    var s = opts.Value;
+    // Set deployment across relevant consumers
+    s.AzureOpenAI.DeploymentName = deploymentArg;
+    s.EntityClassifier.DeploymentName = deploymentArg;
+    s.ConsistencyEvaluator.DeploymentName = deploymentArg;
+    logger.LogInformation("Using model deployment: {Deployment}", deploymentArg);
+}
+catch (Exception ex)
+{
+    logger.LogWarning(ex, "Failed to apply model deployment argument; proceeding with existing configuration.");
+}
 
 // CLI: --test-entity-classifier (legacy) or --test-event-classifier
 if (args.Any(a => a.Equals("--test-entity-classifier", StringComparison.OrdinalIgnoreCase)
@@ -50,9 +87,20 @@ if (args.Any(a => a.Equals("--test-consistency", StringComparison.OrdinalIgnoreC
     return exitCode;
 }
 
+// CLI: --consistency-file <path> [--format yaml|json]
+int fileArgIndex = Array.FindIndex(args, a => a.Equals("--consistency-file", StringComparison.OrdinalIgnoreCase)
+                                       || a.Equals("consistency-file", StringComparison.OrdinalIgnoreCase));
+if (fileArgIndex >= 0)
+{
+    var exitCode = await Mystira.StoryGenerator.Llm.Console.Tests.ConsistencyFileRunner.RunAsync(host.Services, logger, args);
+    return exitCode;
+}
+
 // Default help
 logger.LogInformation("Mystira.StoryGenerator.Llm.Console");
 logger.LogInformation("Usage:");
 logger.LogInformation("  --test-entity-classifier   Alias for --test-event-classifier");
 logger.LogInformation("  --test-consistency         Runs ScenarioConsistencyLlmEvaluator examples and prints assessment & issues");
+logger.LogInformation("  --consistency-file <path> [--format yaml|json]   Evaluate consistency over each compressed path of the given scenario file");
+logger.LogInformation("  --model|-m <deployment>    Model deployment to use (default: gpt-5.1)");
 return 0;

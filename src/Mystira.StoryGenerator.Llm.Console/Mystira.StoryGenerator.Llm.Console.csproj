@@ -11,6 +11,7 @@
         <ProjectReference Include="..\Mystira.StoryGenerator.Llm\Mystira.StoryGenerator.Llm.csproj" />
         <ProjectReference Include="..\Mystira.StoryGenerator.Contracts\Mystira.StoryGenerator.Contracts.csproj" />
         <ProjectReference Include="..\Mystira.StoryGenerator.Domain\Mystira.StoryGenerator.Domain.csproj" />
+        <ProjectReference Include="..\Mystira.StoryGenerator.Application\Mystira.StoryGenerator.Application.csproj" />
     </ItemGroup>
 
     <ItemGroup>

@@ -124,7 +124,13 @@ Scene ending: Mira nodded cheerfully.",
                     }
                     else
                     {
-                        llmJson = System.Text.Json.JsonSerializer.Serialize(result, new System.Text.Json.JsonSerializerOptions { WriteIndented = true });
+                        llmJson = System.Text.Json.JsonSerializer.Serialize(
+                            result,
+                            new System.Text.Json.JsonSerializerOptions
+                            {
+                                WriteIndented = true,
+                                Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+                            });
                     }
 
                     // Output scenario text and LLM output as separate paragraphs

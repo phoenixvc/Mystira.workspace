@@ -1,5 +1,6 @@
 using System.Text;
 using Mystira.StoryGenerator.Application.Extensions;
+using Mystira.StoryGenerator.Contracts.Stories;
 using Mystira.StoryGenerator.Domain.Graph;
 using Mystira.StoryGenerator.Domain.Stories;
 using Mystira.StoryGenerator.GraphTheory.Algorithms;
@@ -9,6 +10,7 @@ namespace Mystira.StoryGenerator.Application.Graph;
 
 public sealed class ScenarioGraph : IScenarioGraph
 {
+    private static Scenario _scenario;
     private readonly DirectedGraph<Scene, string> _inner;
 
     private ScenarioGraph(DirectedGraph<Scene, string> inner)
@@ -17,7 +19,10 @@ public sealed class ScenarioGraph : IScenarioGraph
     }
 
     public static ScenarioGraph FromScenario(Scenario scenario)
-        => new ScenarioGraph(scenario.ToGraph());
+    {
+        _scenario = scenario ?? throw new ArgumentNullException(nameof(scenario));
+        return new ScenarioGraph(scenario.ToGraph());
+    }
 
     public IReadOnlyCollection<Scene> Nodes => _inner.Nodes;
     public IReadOnlyCollection<IEdge<Scene, string>> Edges => _inner.Edges;
@@ -30,7 +35,7 @@ public sealed class ScenarioGraph : IScenarioGraph
     public int InDegree(Scene node) => _inner.InDegree(node);
     public IEnumerable<Scene> Roots() => _inner.Roots();
     public IEnumerable<Scene> Terminals() => _inner.Terminals();
-    public IEnumerable<string> GetCompressedPaths()
+    public IEnumerable<ScenarioPath> GetCompressedPaths()
     {
         var roots = Roots().ToArray();
         var root = roots.Length switch
@@ -41,19 +46,34 @@ public sealed class ScenarioGraph : IScenarioGraph
         };
 
         var compressedPaths = this.CompressGraphPathsToEdgePaths(root, scene => scene.IsFinalScene());
-        var paths = new List<string>();
+        var paths = new List<ScenarioPath>();
         foreach (var path in compressedPaths)
         {
             var sb = new StringBuilder();
+            // Introduce the characters in the first line
+            sb.AppendLine(GetCharactersString());
             foreach (var edge in path)
             {
+                // Add scene id: description, and an answer if it was a choice or roll scene
                 sb.AppendLine($"Scene {edge.From.Id}: " + edge.From.Description);
                 if (edge.From.Type is SceneType.Choice or SceneType.Roll) sb.AppendLine("Answer: " + edge.Label);
             }
+            // Include the final scene
             sb.AppendLine($"Scene {path[^1].To.Id}: " + path[^1].To.Description);
-            paths.Add(sb.ToString());
+
+            var story = sb.ToString();
+            var sceneIds = new List<string> { root.Id };
+            sceneIds.AddRange(path.Select(e => e.To.Id));
+
+            paths.Add(new ScenarioPath(sceneIds, story));
         }
 
         return paths;
+    }
+
+    private string GetCharactersString()
+    {
+        return "The characters who take part in this adventure are: " +
+               string.Join(",", _scenario.Characters.Select(x => x.Name));
     }
 }
