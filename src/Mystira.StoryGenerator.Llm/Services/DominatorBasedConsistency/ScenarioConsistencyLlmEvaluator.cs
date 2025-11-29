@@ -219,6 +219,11 @@ For each potential problem, check:
       contradicts the branch implied by the Answer line (for example, the Answer
       indicates success but the next scene clearly describes a failure, or
       vice versa).
+    o If the path ends at a choice or roll-style scene with no Answer line, and there
+      is no further narrative that depends on the outcome of that choice, do not
+      consider this an inconsistency. It may simply indicate that this branch ends
+      at a decision point during path exploration, not that the story itself is
+      incomplete.
 5.	Other notable concerns
     o	Anything else that, while not “impossible,” may confuse a child or undermine the story’s coherence (e.g., sudden scene that feels out of order, missing explanation for a key transition).
 ________________________________________
@@ -267,6 +272,13 @@ ________________________________________
 •	Treat each Answer: line as part of the actual history of this branch (the choice that was made).
 •	Do not assume knowledge of other branches; only evaluate the given path.
 •	Output strictly valid JSON, with double-quoted keys and string values, and no trailing commas.
+•   Some paths you receive may end at a choice or roll-style scene without an
+    Answer line because path enumeration stopped early (for example, due to
+    frontier merging or partial graph exploration). Do not treat the absence of an
+    Answer or follow-up scene as a story inconsistency by itself. Only flag a
+    missing Answer if the story text on this specific path implies that an Answer
+    was actually provided within the story (for example, a narrative referencing a
+    result that never appears).
 ";
     }
 
