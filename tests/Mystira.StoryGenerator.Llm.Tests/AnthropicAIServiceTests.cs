@@ -150,4 +150,55 @@ public class AnthropicAIServiceTests
 
         Assert.Equal("anthropic", service.ProviderName);
     }
+
+    [Fact]
+    public void ResolveEndpoint_WithModelSpecificEndpoint_ReturnsModelEndpoint()
+    {
+        var modelEndpoint = "https://custom-anthropic-endpoint.com";
+        _aiSettings.Anthropic.Models[0].Endpoint = modelEndpoint;
+        var service = new AnthropicAIService(_optionsMock.Object, _loggerMock.Object);
+
+        var result = typeof(AnthropicAIService)
+            .GetMethod("ResolveEndpoint", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+            ?.Invoke(service, new object[] { "claude-3-5-sonnet-20241022" });
+
+        Assert.Equal(modelEndpoint, result);
+    }
+
+    [Fact]
+    public void ResolveEndpoint_WithoutModelSpecificEndpoint_ReturnsEmpty()
+    {
+        _aiSettings.Anthropic.Models[0].Endpoint = null;
+        var service = new AnthropicAIService(_optionsMock.Object, _loggerMock.Object);
+
+        var result = typeof(AnthropicAIService)
+            .GetMethod("ResolveEndpoint", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+            ?.Invoke(service, new object[] { "claude-3-5-sonnet-20241022" });
+
+        Assert.Equal(string.Empty, result);
+    }
+
+    [Fact]
+    public void ResolveEndpoint_WithUnknownModel_ReturnsEmpty()
+    {
+        var service = new AnthropicAIService(_optionsMock.Object, _loggerMock.Object);
+
+        var result = typeof(AnthropicAIService)
+            .GetMethod("ResolveEndpoint", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+            ?.Invoke(service, new object[] { "unknown-model" });
+
+        Assert.Equal(string.Empty, result);
+    }
+
+    [Fact]
+    public void ResolveEndpoint_WithNullModelName_ReturnsEmpty()
+    {
+        var service = new AnthropicAIService(_optionsMock.Object, _loggerMock.Object);
+
+        var result = typeof(AnthropicAIService)
+            .GetMethod("ResolveEndpoint", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+            ?.Invoke(service, new object[] { null });
+
+        Assert.Equal(string.Empty, result);
+    }
 }

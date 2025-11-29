@@ -116,6 +116,12 @@ public class AnthropicModel
     public string DisplayName { get; set; } = string.Empty;
 
     /// <summary>
+    /// Optional endpoint URL for Anthropic API requests for this model.
+    /// If not specified, uses the default Anthropic API endpoint.
+    /// </summary>
+    public string? Endpoint { get; set; }
+
+    /// <summary>
     /// Maximum number of tokens supported by this model
     /// </summary>
     public int MaxTokens { get; set; } = 4096;
