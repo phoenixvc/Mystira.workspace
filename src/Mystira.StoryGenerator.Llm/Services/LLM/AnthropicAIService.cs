@@ -104,17 +104,26 @@ public class AnthropicAIService : ILLMService
             var client = new AnthropicClient(new ClientOptions
             {
                 APIKey = _settings.Anthropic.ApiKey,
-                BaseUrl = new Uri(""),
+                BaseUrl = new Uri("https://dev-swe-ai-mystira-stor-resource.services.ai.azure.com/anthropic"),
                 Timeout = TimeSpan.FromSeconds(300)
             });
 
             var messages = new List<MessageParam>();
             foreach (var msg in request.Messages)
             {
+                // Anthropic Messages API expects content as a list of content blocks
+                var contentBlocks = new List<ContentBlockParam>
+                {
+                    new TextBlockParam
+                    {
+                        Text = msg.Content
+                    }
+                };
+
                 messages.Add(new MessageParam
                 {
                     Role = msg.MessageType == ChatMessageType.User ? "user" : "assistant",
-                    Content = msg.Content
+                    Content = contentBlocks
                 });
             }
 
@@ -126,7 +135,13 @@ public class AnthropicAIService : ILLMService
                 MaxTokens = request.MaxTokens,
                 Temperature = (float)request.Temperature,
                 Messages = messages,
-                System = string.IsNullOrWhiteSpace(systemPrompt) ? null : systemPrompt
+                // Anthropic expects `System` as a SystemModel with content blocks
+                System = string.IsNullOrWhiteSpace(systemPrompt)
+                    ? null
+                    : new SystemModel(new List<TextBlockParam>
+                    {
+                        new TextBlockParam { Text = systemPrompt }
+                    })
             }, cancellationToken: cancellationToken);
 
             var content = ExtractTextContent(response.Content);
@@ -191,11 +206,16 @@ public class AnthropicAIService : ILLMService
         if (contentBlocks == null)
             return string.Empty;
 
-        var textContent = contentBlocks
-            .OfType<TextBlock>()
-            .FirstOrDefault();
+        var first = contentBlocks.FirstOrDefault();
+        if (first == null)
+            return string.Empty;
 
-        return textContent?.Text ?? string.Empty;
+        // Anthropic SDK uses a wrapper ContentBlock with a Value that holds the concrete block
+        // type (e.g., TextBlock). We only support text blocks here.
+        if (first.Value is TextBlock tb)
+            return tb.Text ?? string.Empty;
+
+        throw new NotSupportedException($"Unsupported content block type: {first.Value?.GetType().Name ?? first.GetType().Name}");
     }
 
     private static ChatCompletionResponse CreateErrorResponse(string error)
