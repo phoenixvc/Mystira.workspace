@@ -111,8 +111,11 @@ public class AzureOpenAIService : ILLMService
             // Determine which deployment to use
             var deploymentName = ResolveDeploymentName(request);
 
+            // Resolve the endpoint for the deployment
+            var endpoint = ResolveEndpoint(deploymentName);
+
             var azureClient = new AzureOpenAIClient(
-                new Uri(_settings.AzureOpenAI.Endpoint),
+                new Uri(endpoint),
                 new ApiKeyCredential(_settings.AzureOpenAI.ApiKey),
                 new AzureOpenAIClientOptions
                 {
@@ -192,6 +195,24 @@ public class AzureOpenAIService : ILLMService
 
         _deploymentNameOrModelId = _settings.AzureOpenAI.DeploymentName;
         return _settings.AzureOpenAI.DeploymentName;
+    }
+
+    private string ResolveEndpoint(string deploymentName)
+    {
+        // Priority order:
+        // 1. Endpoint configured for the specific deployment
+        // 2. Default endpoint from settings
+
+        if (!string.IsNullOrWhiteSpace(deploymentName) && _settings.AzureOpenAI.Deployments != null)
+        {
+            var deployment = _settings.AzureOpenAI.Deployments.FirstOrDefault(d => d.Name == deploymentName);
+            if (deployment != null && !string.IsNullOrWhiteSpace(deployment.Endpoint))
+            {
+                return deployment.Endpoint;
+            }
+        }
+
+        return _settings.AzureOpenAI.Endpoint;
     }
 
     // Exposed for unit testing to validate option construction when a JsonSchemaFormat is provided.

@@ -9,7 +9,7 @@ namespace Mystira.StoryGenerator.Llm.Services.DominatorBasedConsistency;
 
 public class ScenarioConsistencyLlmEvaluator : ILlmConsistencyEvaluator
 {
-    private readonly EntityClassifierSettings _settings;
+    private readonly ConsistencyEvaluatorSettings _settings;
     private readonly ILlmServiceFactory _llmServiceFactory;
     private readonly ILogger<ScenarioConsistencyLlmEvaluator> _logger;
 
@@ -18,7 +18,7 @@ public class ScenarioConsistencyLlmEvaluator : ILlmConsistencyEvaluator
         ILlmServiceFactory llmServiceFactory,
         ILogger<ScenarioConsistencyLlmEvaluator> logger)
     {
-        _settings = aiOptions.Value.EntityClassifier;
+        _settings = aiOptions.Value.ConsistencyEvaluator;
         _llmServiceFactory = llmServiceFactory;
         _logger = logger;
     }
@@ -45,7 +45,7 @@ public class ScenarioConsistencyLlmEvaluator : ILlmConsistencyEvaluator
 
             if (service == null)
             {
-                _logger.LogDebug("Entity classifier is not configured, skipping classification");
+                _logger.LogDebug("Consistency evaluator service is not available, skipping evaluation");
                 return default;
             }
 
@@ -81,7 +81,7 @@ public class ScenarioConsistencyLlmEvaluator : ILlmConsistencyEvaluator
             var content = response.Content;
             if (string.IsNullOrWhiteSpace(content))
             {
-                _logger.LogWarning("Entity classification failed: empty response");
+                _logger.LogWarning("Consistency evaluation failed: empty response");
                 return default;
             }
 
@@ -98,7 +98,7 @@ public class ScenarioConsistencyLlmEvaluator : ILlmConsistencyEvaluator
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error during scene entity classification");
+            _logger.LogError(ex, "Error during scenario consistency evaluation");
             return default;
         }
     }

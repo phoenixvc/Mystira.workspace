@@ -157,4 +157,67 @@ public class AzureOpenAIServiceTests
         Assert.Single(result);
         Assert.Equal(expectedDisplayName, result[0].DisplayName);
     }
+
+    [Fact]
+    public void ResolveEndpoint_WithDeploymentSpecificEndpoint_ReturnsDeploymentEndpoint()
+    {
+        // Arrange
+        var deploymentEndpoint = "https://specific-deployment.openai.azure.com/";
+        _aiSettings.AzureOpenAI.Deployments[0].Endpoint = deploymentEndpoint;
+        var service = new AzureOpenAIService(_optionsMock.Object, _loggerMock.Object);
+
+        // Act
+        var result = typeof(AzureOpenAIService)
+            .GetMethod("ResolveEndpoint", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+            ?.Invoke(service, new object[] { "gpt-4" });
+
+        // Assert
+        Assert.Equal(deploymentEndpoint, result);
+    }
+
+    [Fact]
+    public void ResolveEndpoint_WithoutDeploymentSpecificEndpoint_ReturnsDefaultEndpoint()
+    {
+        // Arrange
+        _aiSettings.AzureOpenAI.Deployments[0].Endpoint = null;
+        var service = new AzureOpenAIService(_optionsMock.Object, _loggerMock.Object);
+
+        // Act
+        var result = typeof(AzureOpenAIService)
+            .GetMethod("ResolveEndpoint", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+            ?.Invoke(service, new object[] { "gpt-4" });
+
+        // Assert
+        Assert.Equal(_aiSettings.AzureOpenAI.Endpoint, result);
+    }
+
+    [Fact]
+    public void ResolveEndpoint_WithUnknownDeployment_ReturnsDefaultEndpoint()
+    {
+        // Arrange
+        var service = new AzureOpenAIService(_optionsMock.Object, _loggerMock.Object);
+
+        // Act
+        var result = typeof(AzureOpenAIService)
+            .GetMethod("ResolveEndpoint", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+            ?.Invoke(service, new object[] { "unknown-deployment" });
+
+        // Assert
+        Assert.Equal(_aiSettings.AzureOpenAI.Endpoint, result);
+    }
+
+    [Fact]
+    public void ResolveEndpoint_WithNullDeploymentName_ReturnsDefaultEndpoint()
+    {
+        // Arrange
+        var service = new AzureOpenAIService(_optionsMock.Object, _loggerMock.Object);
+
+        // Act
+        var result = typeof(AzureOpenAIService)
+            .GetMethod("ResolveEndpoint", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+            ?.Invoke(service, new object[] { null });
+
+        // Assert
+        Assert.Equal(_aiSettings.AzureOpenAI.Endpoint, result);
+    }
 }
