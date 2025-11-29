@@ -94,19 +94,26 @@ public class AnthropicAIService : ILLMService
     }
 
     public async Task<ChatCompletionResponse> CompleteAsync(ChatCompletionRequest request, CancellationToken cancellationToken = default)
-    {
-        if (!IsAvailable()) return CreateErrorResponse("Anthropic service is not properly configured");
+       {
+           if (!IsAvailable()) return CreateErrorResponse("Anthropic service is not properly configured");
 
-        try
-        {
-            var modelName = ResolveModelName(request);
+           try
+           {
+               var modelName = ResolveModelName(request);
+               var endpoint = ResolveEndpoint(modelName);
 
-            var client = new AnthropicClient(new ClientOptions
-            {
-                APIKey = _settings.Anthropic.ApiKey,
-                BaseUrl = new Uri(""),
-                Timeout = TimeSpan.FromSeconds(300)
-            });
+               var clientOptions = new ClientOptions
+               {
+                   APIKey = _settings.Anthropic.ApiKey,
+                   Timeout = TimeSpan.FromSeconds(300)
+               };
+
+               if (!string.IsNullOrWhiteSpace(endpoint))
+               {
+                   clientOptions.BaseUrl = new Uri(endpoint);
+               }
+
+               var client = new AnthropicClient(clientOptions);
 
             var messages = new List<MessageParam>();
             foreach (var msg in request.Messages)
@@ -184,6 +191,20 @@ public class AnthropicAIService : ILLMService
 
         _modelNameOrId = _settings.Anthropic.ModelName;
         return _settings.Anthropic.ModelName;
+    }
+
+    private string ResolveEndpoint(string modelName)
+    {
+        if (!string.IsNullOrWhiteSpace(modelName) && _settings.Anthropic.Models != null)
+        {
+            var model = _settings.Anthropic.Models.FirstOrDefault(m => m.Name == modelName);
+            if (model != null && !string.IsNullOrWhiteSpace(model.Endpoint))
+            {
+                return model.Endpoint;
+            }
+        }
+
+        return string.Empty;
     }
 
     private static string ExtractTextContent(IEnumerable<ContentBlock>? contentBlocks)
