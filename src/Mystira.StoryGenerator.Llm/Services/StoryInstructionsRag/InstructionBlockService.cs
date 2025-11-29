@@ -212,7 +212,7 @@ public sealed class InstructionBlockService : IInstructionBlockService
             }
         }
 
-        if (context.InstructionTypes?.Length > 0)
+        if (context?.InstructionTypes?.Length > 0)
         {
             var clause = BuildFieldFilter(_searchSettings.InstructionTypeFieldName, context.InstructionTypes, _searchSettings.IsInstructionTypeFieldCollection);
             if (!string.IsNullOrWhiteSpace(clause))

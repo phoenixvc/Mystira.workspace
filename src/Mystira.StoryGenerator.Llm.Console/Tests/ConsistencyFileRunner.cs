@@ -117,6 +117,7 @@ internal static class ConsistencyFileRunner
                     results[localIndex] = new StoryConsistencyEvaluation
                     {
                         Path = pathStr,
+                        PathContent = p.Story,
                         Result = result
                     };
                 }
@@ -128,6 +129,7 @@ internal static class ConsistencyFileRunner
                     results[localIndex] = new StoryConsistencyEvaluation
                     {
                         Path = string.Join(" -> ", p.SceneIds),
+                        PathContent = p.Story,
                         Result = null
                     };
                 }

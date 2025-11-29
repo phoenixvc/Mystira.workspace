@@ -14,6 +14,12 @@ public class StoryConsistencyEvaluation
     public string Path { get; set; } = string.Empty;
 
     /// <summary>
+    /// The full story content for this path (the concatenated scene texts and chosen answers).
+    /// </summary>
+    [JsonPropertyName("path_content")]
+    public string PathContent { get; set; } = string.Empty;
+
+    /// <summary>
     /// The LLM-produced consistency evaluation result for this path.
     /// </summary>
     [JsonPropertyName("result")]
