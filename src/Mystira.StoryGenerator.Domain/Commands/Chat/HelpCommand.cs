@@ -1,5 +1,4 @@
 using Mystira.StoryGenerator.Contracts.Chat;
-using Mystira.StoryGenerator.Domain.Commands;
 
 namespace Mystira.StoryGenerator.Domain.Commands.Chat;
 

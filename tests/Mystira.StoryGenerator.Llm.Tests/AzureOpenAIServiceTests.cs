@@ -1,7 +1,8 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Moq;
 using Mystira.StoryGenerator.Contracts.Configuration;
-using Xunit;
+using Mystira.StoryGenerator.Llm.Services.LLM;
 
 namespace Mystira.StoryGenerator.Llm.Tests;
 
@@ -88,7 +89,7 @@ public class AzureOpenAIServiceTests
 
         // Assert
         Assert.Equal(2, result.Count);
-        
+
         var gpt4Model = result.FirstOrDefault(m => m.Id == "gpt-4");
         Assert.NotNull(gpt4Model);
         Assert.Equal("GPT-4", gpt4Model.DisplayName);

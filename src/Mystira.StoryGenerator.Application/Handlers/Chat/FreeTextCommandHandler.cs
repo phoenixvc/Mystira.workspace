@@ -1,4 +1,3 @@
-using System.Linq;
 using System.Text;
 using Microsoft.Extensions.Logging;
 using Mystira.StoryGenerator.Contracts.Chat;
@@ -10,20 +9,20 @@ namespace Mystira.StoryGenerator.Application.Handlers.Chat;
 
 public class FreeTextCommandHandler : ICommandHandler<FreeTextCommand, ChatCompletionResponse>
 {
-    private readonly ILLMServiceFactory _llmFactory;
+    private readonly ILlmServiceFactory _llmFactory;
     private readonly IInstructionBlockService _instructionBlockService;
-    private readonly IIntentClassificationService _intentClassificationService;
+    private readonly ILlmIntentLlmClassificationService _llmIntentLlmClassificationService;
     private readonly ILogger<FreeTextCommandHandler> _logger;
 
     public FreeTextCommandHandler(
-        ILLMServiceFactory llmFactory,
+        ILlmServiceFactory llmFactory,
         IInstructionBlockService instructionBlockService,
-        IIntentClassificationService intentClassificationService,
+        ILlmIntentLlmClassificationService llmIntentLlmClassificationService,
         ILogger<FreeTextCommandHandler> logger)
     {
         _llmFactory = llmFactory;
         _instructionBlockService = instructionBlockService;
-        _intentClassificationService = intentClassificationService;
+        _llmIntentLlmClassificationService = llmIntentLlmClassificationService;
         _logger = logger;
     }
 
@@ -121,7 +120,7 @@ public class FreeTextCommandHandler : ICommandHandler<FreeTextCommand, ChatCompl
             ? new[] { intent! }
             : new[] { "guidelines" };
 
-        var classification = await _intentClassificationService.ClassifyIntentAsync(queryText, cancellationToken);
+        var classification = await _llmIntentLlmClassificationService.ClassifyAsync(queryText, cancellationToken);
         if (classification != null)
         {
             _logger.LogInformation("Intent classified for free-text handler: {Categories} / {Types}", classification.Categories, classification.InstructionTypes);

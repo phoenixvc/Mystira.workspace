@@ -10,7 +10,7 @@ using Mystira.StoryGenerator.Contracts.Configuration;
 using Mystira.StoryGenerator.Domain.Services;
 using OpenAI.Embeddings;
 
-namespace Mystira.StoryGenerator.Llm.Services.Instructions;
+namespace Mystira.StoryGenerator.Llm.Services.StoryInstructionsRag;
 
 public sealed class InstructionBlockService : IInstructionBlockService
 {
@@ -212,7 +212,7 @@ public sealed class InstructionBlockService : IInstructionBlockService
             }
         }
 
-        if (context.InstructionTypes?.Length > 0)
+        if (context?.InstructionTypes?.Length > 0)
         {
             var clause = BuildFieldFilter(_searchSettings.InstructionTypeFieldName, context.InstructionTypes, _searchSettings.IsInstructionTypeFieldCollection);
             if (!string.IsNullOrWhiteSpace(clause))

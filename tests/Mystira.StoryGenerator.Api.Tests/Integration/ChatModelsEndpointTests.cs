@@ -1,10 +1,6 @@
-using System.Net.Http.Json;
 using System.Text.Json;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
-using Xunit;
-using Mystira.StoryGenerator.Api;
-using Microsoft.Extensions.Logging;
 using Moq;
 using Mystira.StoryGenerator.Domain.Services;
 using Mystira.StoryGenerator.Contracts.Chat;
@@ -46,7 +42,7 @@ public class ChatModelsEndpointTests : IClassFixture<WebApplicationFactory<Progr
     public async Task GetModels_WithMockServices_ReturnsExpectedStructure()
     {
         // Arrange
-        var mockFactory = new Mock<ILLMServiceFactory>();
+        var mockFactory = new Mock<ILlmServiceFactory>();
 
         var providerModels = new List<ProviderModels>
         {
@@ -99,7 +95,7 @@ public class ChatModelsEndpointTests : IClassFixture<WebApplicationFactory<Progr
     public async Task GetModels_WithMultipleDeployments_ReturnsAllDeployments()
     {
         // Arrange
-        var mockFactory = new Mock<ILLMServiceFactory>();
+        var mockFactory = new Mock<ILlmServiceFactory>();
 
         var providerModels = new List<ProviderModels>
         {

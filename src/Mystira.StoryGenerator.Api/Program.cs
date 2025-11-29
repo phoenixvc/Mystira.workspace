@@ -1,13 +1,12 @@
 using Microsoft.Extensions.Options;
 using Mystira.StoryGenerator.Api.Services;
 using Mystira.StoryGenerator.Application.Services;
-using Mystira.StoryGenerator.Llm.Services.Intent;
 using Mystira.StoryGenerator.Contracts.Configuration;
 using Mystira.StoryGenerator.Contracts.Stories;
 using Mystira.StoryGenerator.Domain.Services;
-using Mystira.StoryGenerator.Llm.Services;
-using Mystira.StoryGenerator.Llm.Services.Instructions;
 using Mystira.StoryGenerator.Llm.Services.LLM;
+using Mystira.StoryGenerator.Llm.Services.StoryInstructionsRag;
+using Mystira.StoryGenerator.Llm.Services.StoryIntentClassification;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -35,12 +34,14 @@ builder.Services.AddHttpClient<AzureOpenAIService>(client =>
 
 // Register LLM services (in Llm project) and expose Domain interfaces
 builder.Services.AddScoped<ILLMService, AzureOpenAIService>();
-builder.Services.AddScoped<ILLMServiceFactory, LLMServiceFactory>();
+builder.Services.AddScoped<ILlmServiceFactory, LLMServiceFactory>();
 
 // Story schema provider abstraction (also implements Domain interface)
 builder.Services.AddScoped<IStorySchemaProvider, FileStorySchemaProvider>();
 // Story validation service (Domain interface) implemented in Application layer
 builder.Services.AddScoped<IStoryValidationService, StoryValidationService>();
+// Scenario factory for creating Domain scenarios from JSON or YAML content
+builder.Services.AddScoped<IScenarioFactory, ScenarioFactory>();
 
 var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? Array.Empty<string>();
 
@@ -66,8 +67,8 @@ builder.Services.AddHealthChecks();
 // Register services
 builder.Services.AddScoped<IInstructionBlockService, InstructionBlockService>();
 // Register Intent router implementation from Llm project for Domain interface
-builder.Services.AddScoped<IIntentClassificationService, StoryIntentClassifier>();
-builder.Services.AddScoped<ICommandIntentRouter, CommandIntentRouter>();
+builder.Services.AddScoped<ILlmIntentLlmClassificationService, StoryLlmIntentLlmClassifier>();
+builder.Services.AddScoped<ICommandRouter, CommandIntentRouter>();
 // Register Chat Orchestration Service
 builder.Services.AddScoped<IChatOrchestrationService, ChatOrchestrationService>();
 
@@ -107,4 +108,7 @@ app.MapPost("/stories/preview", (GenerateStoryRequest request, IOptions<AiSettin
 app.Run();
 
 // Expose Program for integration testing with WebApplicationFactory
-public partial class Program { }
+namespace Mystira.StoryGenerator.Api
+{
+    public partial class Program { }
+}

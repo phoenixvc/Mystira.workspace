@@ -1,8 +1,6 @@
 ﻿using System.Text.Json;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
-using YamlDotNet.Core;
-using YamlDotNet.Core.Events;
 
 namespace Mystira.StoryGenerator.Web.Services;
 

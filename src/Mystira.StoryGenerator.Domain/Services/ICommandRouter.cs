@@ -1,6 +1,6 @@
 ﻿namespace Mystira.StoryGenerator.Domain.Services;
 
-public interface ICommandIntentRouter
+public interface ICommandRouter
 {
     Task<string?> DetectPrimaryInstructionTypeAsync(string userQuery, CancellationToken cancellationToken = default);
 }

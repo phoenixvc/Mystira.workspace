@@ -9,12 +9,12 @@ namespace Mystira.StoryGenerator.Application.Handlers.Chat;
 
 public class GuidelinesCommandHandler : ICommandHandler<GuidelinesCommand, ChatCompletionResponse>
 {
-    private readonly ILLMServiceFactory _llmFactory;
+    private readonly ILlmServiceFactory _llmFactory;
     private readonly IInstructionBlockService _instructionBlockService;
     private readonly ILogger<GuidelinesCommandHandler> _logger;
 
     public GuidelinesCommandHandler(
-        ILLMServiceFactory llmFactory,
+        ILlmServiceFactory llmFactory,
         IInstructionBlockService instructionBlockService,
         ILogger<GuidelinesCommandHandler> logger)
     {
