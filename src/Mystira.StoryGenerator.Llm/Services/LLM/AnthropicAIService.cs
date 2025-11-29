@@ -1,5 +1,7 @@
 using System.Globalization;
 using System.Text;
+using Anthropic.Core;
+using Anthropic.Models.Messages;
 using global::Anthropic;
 using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Logging;
@@ -83,7 +85,7 @@ public class AnthropicAIService : ILLMService
     {
         return modelName.ToLowerInvariant() switch
         {
-            var name when name.Contains("claude-3-5-sonnet") => "Claude 3.5 Sonnet",
+            var name when name.Contains("claude-sonnet-4-5") => "Claude Sonnet 4.5",
             var name when name.Contains("claude-3-opus") => "Claude 3 Opus",
             var name when name.Contains("claude-3-sonnet") => "Claude 3 Sonnet",
             var name when name.Contains("claude-3-haiku") => "Claude 3 Haiku",
@@ -99,7 +101,12 @@ public class AnthropicAIService : ILLMService
         {
             var modelName = ResolveModelName(request);
 
-            var client = new Anthropic.Anthropic(apiKey: _settings.Anthropic.ApiKey);
+            var client = new AnthropicClient(new ClientOptions
+            {
+                APIKey = _settings.Anthropic.ApiKey,
+                BaseUrl = new Uri(""),
+                Timeout = TimeSpan.FromSeconds(300)
+            });
 
             var messages = new List<MessageParam>();
             foreach (var msg in request.Messages)
@@ -113,7 +120,7 @@ public class AnthropicAIService : ILLMService
 
             var systemPrompt = request.SystemPrompt ?? string.Empty;
 
-            var response = await client.Messages.CreateAsync(new MessageCreateParams
+            var response = await client.Messages.Create(new MessageCreateParams
             {
                 Model = modelName,
                 MaxTokens = request.MaxTokens,
@@ -132,9 +139,9 @@ public class AnthropicAIService : ILLMService
                 Provider = ProviderName,
                 Usage = response.Usage != null ? new ChatCompletionUsage
                 {
-                    PromptTokens = response.Usage.InputTokens,
-                    CompletionTokens = response.Usage.OutputTokens,
-                    TotalTokens = response.Usage.InputTokens + response.Usage.OutputTokens
+                    PromptTokens = (int)response.Usage.InputTokens,
+                    CompletionTokens = (int)response.Usage.OutputTokens,
+                    TotalTokens = (int)(response.Usage.InputTokens + response.Usage.OutputTokens)
                 } : null,
                 Success = true
             };
