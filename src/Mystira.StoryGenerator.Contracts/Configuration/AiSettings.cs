@@ -57,6 +57,12 @@ public class AzureOpenAIDeployment
     public string DisplayName { get; set; } = string.Empty;
 
     /// <summary>
+    /// Optional Azure OpenAI endpoint for this deployment.
+    /// If not specified, falls back to the default endpoint in AzureOpenAISettings.
+    /// </summary>
+    public string? Endpoint { get; set; }
+
+    /// <summary>
     /// Maximum number of tokens supported by this deployment
     /// </summary>
     public int MaxTokens { get; set; } = 4096;
