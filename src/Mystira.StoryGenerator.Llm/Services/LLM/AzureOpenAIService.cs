@@ -116,7 +116,7 @@ public class AzureOpenAIService : ILLMService
                 new ApiKeyCredential(_settings.AzureOpenAI.ApiKey),
                 new AzureOpenAIClientOptions
                 {
-                    NetworkTimeout = new TimeSpan(0, 0, 3, 0)
+                    NetworkTimeout = new TimeSpan(0, 0, 5, 0)
                 });
             var chatClient = azureClient.GetChatClient(deploymentName);
 

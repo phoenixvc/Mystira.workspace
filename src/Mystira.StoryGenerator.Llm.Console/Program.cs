@@ -2,10 +2,11 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Mystira.StoryGenerator.Contracts.Configuration;
-using Mystira.StoryGenerator.Application.Graph;
+using Microsoft.Extensions.Options;
 using Mystira.StoryGenerator.Application.Services;
+using Mystira.StoryGenerator.Contracts.Configuration;
 using Mystira.StoryGenerator.Domain.Services;
+using Mystira.StoryGenerator.Llm.Console.Tests;
 using Mystira.StoryGenerator.Llm.Services.DominatorBasedConsistency;
 using Mystira.StoryGenerator.Llm.Services.LLM;
 
@@ -40,7 +41,7 @@ var logger = host.Services.GetRequiredService<ILoggerFactory>().CreateLogger("My
 
 // Optional CLI: model deployment name to use (default: gpt-5.1)
 // Flags: --model, -m, --deployment, --deployment-name
-string deploymentArg = "gpt-5.1";
+string deploymentArg = "";
 int modelIdx = Array.FindIndex(args, a =>
     a.Equals("--model", StringComparison.OrdinalIgnoreCase) ||
     a.Equals("-m", StringComparison.OrdinalIgnoreCase) ||
@@ -56,26 +57,29 @@ if (modelIdx >= 0 && (modelIdx + 1) < args.Length)
 }
 
 // Apply the chosen deployment/model name to AiSettings so downstream services use it
-try
+if (!string.IsNullOrEmpty(deploymentArg))
 {
-    var opts = host.Services.GetRequiredService<Microsoft.Extensions.Options.IOptions<Mystira.StoryGenerator.Contracts.Configuration.AiSettings>>();
-    var s = opts.Value;
-    // Set deployment across relevant consumers
-    s.AzureOpenAI.DeploymentName = deploymentArg;
-    s.EntityClassifier.DeploymentName = deploymentArg;
-    s.ConsistencyEvaluator.DeploymentName = deploymentArg;
-    logger.LogInformation("Using model deployment: {Deployment}", deploymentArg);
-}
-catch (Exception ex)
-{
-    logger.LogWarning(ex, "Failed to apply model deployment argument; proceeding with existing configuration.");
+    try
+    {
+        var opts = host.Services.GetRequiredService<IOptions<AiSettings>>();
+        var s = opts.Value;
+        // Set deployment across relevant consumers
+        s.AzureOpenAI.DeploymentName = deploymentArg;
+        s.EntityClassifier.DeploymentName = deploymentArg;
+        s.ConsistencyEvaluator.DeploymentName = deploymentArg;
+        logger.LogInformation("Using model deployment: {Deployment}", deploymentArg);
+    }
+    catch (Exception ex)
+    {
+        logger.LogWarning(ex, "Failed to apply model deployment argument; proceeding with existing configuration.");
+    }
 }
 
 // CLI: --test-entity-classifier (legacy) or --test-event-classifier
 if (args.Any(a => a.Equals("--test-entity-classifier", StringComparison.OrdinalIgnoreCase)
                || a.Equals("test-entity-classifier", StringComparison.OrdinalIgnoreCase)))
 {
-    var exitCode = await Mystira.StoryGenerator.Llm.Console.Tests.EventClassificationConsoleTests.RunAsync(host.Services, logger);
+    var exitCode = await EventClassificationConsoleTests.RunAsync(host.Services, logger);
     return exitCode;
 }
 
@@ -83,7 +87,7 @@ if (args.Any(a => a.Equals("--test-entity-classifier", StringComparison.OrdinalI
 if (args.Any(a => a.Equals("--test-consistency", StringComparison.OrdinalIgnoreCase)
                || a.Equals("test-consistency", StringComparison.OrdinalIgnoreCase)))
 {
-    var exitCode = await Mystira.StoryGenerator.Llm.Console.Tests.ConsistencyConsoleTests.RunAsync(host.Services, logger);
+    var exitCode = await ConsistencyConsoleTests.RunAsync(host.Services, logger);
     return exitCode;
 }
 
@@ -92,7 +96,7 @@ int fileArgIndex = Array.FindIndex(args, a => a.Equals("--consistency-file", Str
                                        || a.Equals("consistency-file", StringComparison.OrdinalIgnoreCase));
 if (fileArgIndex >= 0)
 {
-    var exitCode = await Mystira.StoryGenerator.Llm.Console.Tests.ConsistencyFileRunner.RunAsync(host.Services, logger, args);
+    var exitCode = await ConsistencyFileRunner.RunAsync(host.Services, logger, args);
     return exitCode;
 }
 
