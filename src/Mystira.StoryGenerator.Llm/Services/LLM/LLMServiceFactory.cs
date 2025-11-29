@@ -141,6 +141,12 @@ public class LLMServiceFactory : ILlmServiceFactory
             azureService.SetDeploymentNameOrModelId(deploymentNameOrModelId);
         }
 
+        // For Anthropic services, set the model name on the actual service instance
+        if (service is AnthropicAIService anthropicService && !string.IsNullOrWhiteSpace(deploymentNameOrModelId))
+        {
+            anthropicService.SetModelNameOrId(deploymentNameOrModelId);
+        }
+
         return new LlmServiceAdapter(service, deploymentNameOrModelId);
     }
 

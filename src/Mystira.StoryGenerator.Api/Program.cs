@@ -32,8 +32,14 @@ builder.Services.AddHttpClient<AzureOpenAIService>(client =>
     client.Timeout = TimeSpan.FromSeconds(300);
 });
 
+builder.Services.AddHttpClient<AnthropicAIService>(client =>
+{
+    client.Timeout = TimeSpan.FromSeconds(300);
+});
+
 // Register LLM services (in Llm project) and expose Domain interfaces
 builder.Services.AddScoped<ILLMService, AzureOpenAIService>();
+builder.Services.AddScoped<ILLMService, AnthropicAIService>();
 builder.Services.AddScoped<ILlmServiceFactory, LLMServiceFactory>();
 
 // Story schema provider abstraction (also implements Domain interface)

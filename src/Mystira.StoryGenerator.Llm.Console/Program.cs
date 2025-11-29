@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -27,6 +27,7 @@ builder.Services.Configure<AiSettings>(builder.Configuration.GetSection(AiSettin
 
 // LLM services
 builder.Services.AddSingleton<ILLMService, AzureOpenAIService>();
+builder.Services.AddSingleton<ILLMService, AnthropicAIService>();
 builder.Services.AddSingleton<ILlmServiceFactory, LLMServiceFactory>();
 
 // Entity classifier and consistency evaluator

@@ -16,6 +16,7 @@ public class AiSettings
     public int DefaultMaxTokens { get; set; } = 25000;
 
     public AzureOpenAISettings AzureOpenAI { get; set; } = new();
+    public AnthropicSettings Anthropic { get; set; } = new();
     public IntentRouterSettings IntentRouter { get; set; } = new();
     public EntityClassifierSettings EntityClassifier { get; set; } = new();
     public ConsistencyEvaluatorSettings ConsistencyEvaluator { get; set; } = new();
@@ -79,6 +80,58 @@ public class AzureOpenAIDeployment
 
     /// <summary>
     /// Model capabilities for this deployment
+    /// </summary>
+    public List<string> Capabilities { get; set; } = new();
+}
+
+public class AnthropicSettings
+{
+    /// <summary>
+    /// API key for Anthropic Claude API
+    /// </summary>
+    [Required]
+    public string ApiKey { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Default model name to use (e.g., "claude-3-5-sonnet-20241022")
+    /// </summary>
+    [Required]
+    public string ModelName { get; set; } = string.Empty;
+
+    /// <summary>
+    /// List of available Anthropic models
+    /// </summary>
+    public List<AnthropicModel> Models { get; set; } = new();
+}
+
+/// <summary>
+/// Represents an Anthropic model configuration
+/// </summary>
+public class AnthropicModel
+{
+    [Required]
+    public string Name { get; set; } = string.Empty;
+
+    [Required]
+    public string DisplayName { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Maximum number of tokens supported by this model
+    /// </summary>
+    public int MaxTokens { get; set; } = 4096;
+
+    /// <summary>
+    /// Default temperature recommended for this model
+    /// </summary>
+    public double DefaultTemperature { get; set; } = 0.7;
+
+    /// <summary>
+    /// Whether this model supports JSON mode output
+    /// </summary>
+    public bool SupportsJsonMode { get; set; } = true;
+
+    /// <summary>
+    /// Model capabilities
     /// </summary>
     public List<string> Capabilities { get; set; } = new();
 }
