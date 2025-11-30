@@ -11,4 +11,5 @@ public class InstructionSearchContext
     public string[] Categories { get; set; } = Array.Empty<string>();
     public string[] InstructionTypes { get; set; } = Array.Empty<string>();
     public int? TopK { get; set; }
+    public string? AgeGroup { get; set; }
 }

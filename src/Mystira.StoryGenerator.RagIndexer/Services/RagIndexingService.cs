@@ -22,30 +22,34 @@ public class RagIndexingService : IRagIndexingService
     public async Task IndexDatasetAsync(RagIndexRequest request)
     {
         _logger.LogInfo($"Starting indexing for dataset: {request.Dataset} v{request.Version}");
+        if (!string.IsNullOrWhiteSpace(request.AgeGroup))
+        {
+            _logger.LogInfo($"Age group: {request.AgeGroup}");
+        }
         _logger.LogInfo($"Found {request.Chunks.Count} chunks to process");
 
         // Ensure index exists
-        await _searchService.EnsureIndexExistsAsync();
+        await _searchService.EnsureIndexExistsAsync(request.AgeGroup);
 
         // Delete existing documents for this dataset/version combination
         _logger.LogInfo($"Removing existing documents for dataset '{request.Dataset}' version '{request.Version}'");
-        await _searchService.DeleteDatasetAsync(request.Dataset, request.Version);
+        await _searchService.DeleteDatasetAsync(request.Dataset, request.Version, request.AgeGroup);
 
         // Process each chunk
-        var results = await ProcessChunksAsync(request.Chunks, request.Dataset, request.Version);
+        var results = await ProcessChunksAsync(request.Chunks, request.Dataset, request.Version, request.AgeGroup);
         
         LogResults(results);
     }
 
     private async Task<(int successCount, int errorCount)> ProcessChunksAsync(
-        List<InstructionChunk> chunks, string dataset, string version)
+        List<InstructionChunk> chunks, string dataset, string version, string? ageGroup = null)
     {
         int successCount = 0;
         int errorCount = 0;
 
         foreach (var chunk in chunks)
         {
-            var result = await ProcessChunkAsync(chunk, dataset, version);
+            var result = await ProcessChunkAsync(chunk, dataset, version, ageGroup);
             if (result)
             {
                 successCount++;
@@ -59,7 +63,7 @@ public class RagIndexingService : IRagIndexingService
         return (successCount, errorCount);
     }
 
-    private async Task<bool> ProcessChunkAsync(InstructionChunk chunk, string dataset, string version)
+    private async Task<bool> ProcessChunkAsync(InstructionChunk chunk, string dataset, string version, string? ageGroup = null)
     {
         try
         {
@@ -69,7 +73,7 @@ public class RagIndexingService : IRagIndexingService
             var embedding = await _embeddingService.GenerateEmbeddingAsync(chunk.Content);
 
             // Index the chunk with its embedding
-            await _searchService.IndexChunkAsync(chunk, dataset, version, embedding);
+            await _searchService.IndexChunkAsync(chunk, dataset, version, embedding, ageGroup);
             
             _logger.LogInfo($"Successfully indexed chunk: {chunk.ChunkId}");
             return true;

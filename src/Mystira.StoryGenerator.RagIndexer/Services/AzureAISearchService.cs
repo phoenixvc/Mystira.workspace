@@ -12,8 +12,9 @@ namespace Mystira.StoryGenerator.RagIndexer.Services;
 public class AzureAISearchService : IAzureAISearchService
 {
     private readonly SearchIndexClient _indexClient;
-    private readonly SearchClient _searchClient;
-    private readonly string _indexName;
+    private readonly Dictionary<string, SearchClient> _searchClientsByIndex;
+    private readonly string _defaultIndexName;
+    private readonly AzureAISearchSettings _settings;
     private readonly ILoggerService _logger;
     private readonly IRetryPolicyService _retryPolicy;
 
@@ -22,40 +23,83 @@ public class AzureAISearchService : IAzureAISearchService
         ILoggerService logger,
         IRetryPolicyService retryPolicy)
     {
-        _indexName = settings.IndexName;
+        _defaultIndexName = settings.IndexName;
+        _settings = settings;
         _logger = logger;
         _retryPolicy = retryPolicy;
+        _searchClientsByIndex = new Dictionary<string, SearchClient>();
 
         var credentials = new AzureKeyCredential(settings.ApiKey);
         _indexClient = new SearchIndexClient(new Uri(settings.Endpoint), credentials);
-        _searchClient = new SearchClient(new Uri(settings.Endpoint), _indexName, credentials);
+        
+        // Initialize search clients for all configured indexes
+        var indexNames = new HashSet<string> { _defaultIndexName };
+        foreach (var indexName in settings.AgeGroupIndexMapping.Values)
+        {
+            if (!string.IsNullOrWhiteSpace(indexName))
+            {
+                indexNames.Add(indexName);
+            }
+        }
+
+        foreach (var indexName in indexNames)
+        {
+            _searchClientsByIndex[indexName] = new SearchClient(new Uri(settings.Endpoint), indexName, credentials);
+        }
     }
 
-    public async Task EnsureIndexExistsAsync()
+    private string ResolveIndexName(string? ageGroup)
     {
+        if (string.IsNullOrWhiteSpace(ageGroup))
+        {
+            return _defaultIndexName;
+        }
+
+        if (_settings.AgeGroupIndexMapping.TryGetValue(ageGroup, out var indexName))
+        {
+            return indexName;
+        }
+
+        return _defaultIndexName;
+    }
+
+    private SearchClient GetSearchClient(string indexName)
+    {
+        if (_searchClientsByIndex.TryGetValue(indexName, out var client))
+        {
+            return client;
+        }
+
+        // Fallback to default if not found
+        return _searchClientsByIndex[_defaultIndexName];
+    }
+
+    public async Task EnsureIndexExistsAsync(string? ageGroup = null)
+    {
+        var indexName = ResolveIndexName(ageGroup);
         await _retryPolicy.ExecuteWithRetryAsync(async () =>
         {
             try
             {
-                await _indexClient.GetIndexAsync(_indexName);
-                _logger.LogInfo($"Index '{_indexName}' already exists.");
+                await _indexClient.GetIndexAsync(indexName);
+                _logger.LogInfo($"Index '{indexName}' already exists.");
                 return true;
             }
             catch (RequestFailedException ex) when (ex.Status == 404)
             {
-                _logger.LogInfo($"Creating index '{_indexName}'...");
+                _logger.LogInfo($"Creating index '{indexName}'...");
 
-                var index = CreateSearchIndexDefinition();
+                var index = CreateSearchIndexDefinition(indexName);
                 await _indexClient.CreateIndexAsync(index);
-                _logger.LogInfo($"Index '{_indexName}' created successfully.");
+                _logger.LogInfo($"Index '{indexName}' created successfully.");
                 return true;
             }
         }, "EnsureIndexExistsAsync");
     }
 
-    private SearchIndex CreateSearchIndexDefinition()
+    private SearchIndex CreateSearchIndexDefinition(string indexName)
     {
-        return new SearchIndex(_indexName)
+        return new SearchIndex(indexName)
         {
             Fields = new List<SearchField>()
             {
@@ -172,7 +216,7 @@ public class AzureAISearchService : IAzureAISearchService
         };
     }
 
-    public async Task IndexChunkAsync(InstructionChunk chunk, string dataset, string version, IReadOnlyList<float> embedding)
+    public async Task IndexChunkAsync(InstructionChunk chunk, string dataset, string version, IReadOnlyList<float> embedding, string? ageGroup = null)
     {
         // Guard clauses outside of retry to keep generic result type consistent
         if (embedding == null || embedding.Count == 0)
@@ -185,13 +229,16 @@ public class AzureAISearchService : IAzureAISearchService
             _logger.LogWarning($"Unexpected embedding dimensions {embedding.Count} for chunk '{chunk.ChunkId}'. Expected 1536. Proceeding to index.");
         }
 
+        var indexName = ResolveIndexName(ageGroup);
+        var searchClient = GetSearchClient(indexName);
+
         await _retryPolicy.ExecuteWithRetryAsync(async () =>
         {
             var document = CreateSearchDocument(chunk, dataset, version, embedding);
             var batch = CreateIndexBatch(document);
 
-            var response = await _searchClient.IndexDocumentsAsync(batch);
-            _logger.LogInfo($"Indexed chunk '{chunk.ChunkId}': {response.Value.Results.First().Succeeded}");
+            var response = await searchClient.IndexDocumentsAsync(batch);
+            _logger.LogInfo($"Indexed chunk '{chunk.ChunkId}' into '{indexName}': {response.Value.Results.First().Succeeded}");
 
             return response;
         }, $"IndexChunkAsync({chunk.ChunkId})");
@@ -246,8 +293,11 @@ public class AzureAISearchService : IAzureAISearchService
         };
     }
 
-    public async Task DeleteDatasetAsync(string dataset, string version)
+    public async Task DeleteDatasetAsync(string dataset, string version, string? ageGroup = null)
     {
+        var indexName = ResolveIndexName(ageGroup);
+        var searchClient = GetSearchClient(indexName);
+
         await _retryPolicy.ExecuteWithRetryAsync(async () =>
         {
             int deleted = 0;
@@ -259,7 +309,7 @@ public class AzureAISearchService : IAzureAISearchService
             options.Select.Add("id");
 
             // Execute a search to get documents to delete
-            var searchResponse = await _searchClient.SearchAsync<SearchDocument>("*", options);
+            var searchResponse = await searchClient.SearchAsync<SearchDocument>("*", options);
 
             // Iterate over results pages
             await foreach (var result in searchResponse.Value.GetResultsAsync())
@@ -272,11 +322,11 @@ public class AzureAISearchService : IAzureAISearchService
                     Actions = { IndexDocumentsAction.Delete(new SearchDocument { ["id"] = key! }) }
                 };
 
-                var resp = await _searchClient.IndexDocumentsAsync(batch);
+                var resp = await searchClient.IndexDocumentsAsync(batch);
                 deleted += resp.Value.Results.Count(x => x.Succeeded);
             }
 
-            _logger.LogInfo($"Deleted {deleted} documents from dataset '{dataset}' version '{version}'");
+            _logger.LogInfo($"Deleted {deleted} documents from dataset '{dataset}' version '{version}' in index '{indexName}'");
             return deleted;
         }, $"DeleteDatasetAsync({dataset}, {version})");
     }

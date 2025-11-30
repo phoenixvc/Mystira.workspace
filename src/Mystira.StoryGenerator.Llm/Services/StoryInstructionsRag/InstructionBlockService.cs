@@ -15,9 +15,9 @@ namespace Mystira.StoryGenerator.Llm.Services.StoryInstructionsRag;
 public sealed class InstructionBlockService : IInstructionBlockService
 {
     private readonly InstructionSearchSettings _searchSettings;
-    private readonly SearchClient? _searchClient;
     private readonly EmbeddingClient? _embeddingClient;
     private readonly ILogger<InstructionBlockService> _logger;
+    private readonly Dictionary<string, SearchClient> _searchClientsByIndex = new();
 
     public InstructionBlockService(
         IOptions<InstructionSearchSettings> searchOptions,
@@ -31,14 +31,11 @@ public sealed class InstructionBlockService : IInstructionBlockService
         {
             try
             {
-                _searchClient = new SearchClient(
-                    new Uri(_searchSettings.Endpoint!),
-                    _searchSettings.IndexName!,
-                    new AzureKeyCredential(_searchSettings.ApiKey!));
+                InitializeSearchClients();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Failed to initialize Azure AI Search client");
+                _logger.LogError(ex, "Failed to initialize Azure AI Search clients");
             }
         }
 
@@ -59,37 +56,77 @@ public sealed class InstructionBlockService : IInstructionBlockService
         }
     }
 
+    private void InitializeSearchClients()
+    {
+        var indexNames = new HashSet<string>();
+
+        if (!string.IsNullOrWhiteSpace(_searchSettings.IndexName))
+        {
+            indexNames.Add(_searchSettings.IndexName);
+        }
+
+        foreach (var indexName in _searchSettings.AgeGroupIndexMapping.Values)
+        {
+            if (!string.IsNullOrWhiteSpace(indexName))
+            {
+                indexNames.Add(indexName);
+            }
+        }
+
+        foreach (var indexName in indexNames)
+        {
+            try
+            {
+                var searchClient = new SearchClient(
+                    new Uri(_searchSettings.Endpoint!),
+                    indexName,
+                    new AzureKeyCredential(_searchSettings.ApiKey!));
+                _searchClientsByIndex[indexName] = searchClient;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to initialize Azure AI Search client for index {IndexName}", indexName);
+            }
+        }
+    }
+
+    private SearchClient? GetSearchClient(string? indexName)
+    {
+        if (string.IsNullOrWhiteSpace(indexName))
+        {
+            return null;
+        }
+
+        _searchClientsByIndex.TryGetValue(indexName, out var client);
+        return client;
+    }
+
     // Domain adapter not implemented here; adapter class handles mapping between domain and API contexts.
 
-    public async Task<string?> BuildInstructionBlockAsync(InstructionSearchContext context, CancellationToken cancellationToken = default)
+    public async Task<string?> BuildInstructionBlockAsync(InstructionSearchContext? context, CancellationToken cancellationToken = default)
     {
         if (context is null || string.IsNullOrWhiteSpace(context.QueryText))
         {
             return null;
         }
 
-        if (_searchClient is null || _embeddingClient is null)
+        var resolvedIndexName = _searchSettings.ResolveIndexName(context.AgeGroup);
+        var searchClient = GetSearchClient(resolvedIndexName);
+        if (searchClient is null || _embeddingClient is null)
         {
-            _logger.LogDebug("Instruction search is disabled because search or embedding clients are not configured.");
+            _logger.LogDebug("Instruction search is disabled because search or embedding clients are not configured for age group {AgeGroup}.", context.AgeGroup);
             return null;
         }
 
         var queryVector = await GenerateEmbeddingAsync(context.QueryText, cancellationToken);
         if (queryVector is null)
-        {
             return null;
-        }
 
-        var vectorChunks = await ExecuteVectorSearchAsync(queryVector, context, cancellationToken);
-        var mandatoryChunks = await FetchMandatoryChunksAsync(context, cancellationToken);
+        var vectorChunks = await ExecuteVectorSearchAsync(queryVector, context, searchClient, cancellationToken);
+        var mandatoryChunks = await FetchMandatoryChunksAsync(context, searchClient, cancellationToken);
         var mergedChunks = MergeChunks(vectorChunks, mandatoryChunks);
 
-        if (mergedChunks.Count == 0)
-        {
-            return null;
-        }
-
-        return BuildInstructionBlock(mergedChunks);
+        return mergedChunks.Count == 0 ? null : BuildInstructionBlock(mergedChunks);
     }
 
     private async Task<float[]?> GenerateEmbeddingAsync(string query, CancellationToken cancellationToken)
@@ -113,10 +150,10 @@ public sealed class InstructionBlockService : IInstructionBlockService
         }
     }
 
-    private async Task<List<InstructionChunk>> ExecuteVectorSearchAsync(float[] queryVector, InstructionSearchContext context, CancellationToken cancellationToken)
+    private async Task<List<InstructionChunk>> ExecuteVectorSearchAsync(float[] queryVector, InstructionSearchContext context, SearchClient searchClient, CancellationToken cancellationToken)
     {
         var results = new List<InstructionChunk>();
-        if (_searchClient is null)
+        if (searchClient is null)
         {
             return results;
         }
@@ -144,7 +181,7 @@ public sealed class InstructionBlockService : IInstructionBlockService
 
             ApplySelect(options);
 
-            var response = await _searchClient.SearchAsync<SearchDocument>("*", options, cancellationToken);
+            var response = await searchClient.SearchAsync<SearchDocument>("*", options, cancellationToken);
             await foreach (var result in response.Value.GetResultsAsync())
             {
                 var chunk = MapToInstructionChunk(result.Document);
@@ -160,10 +197,10 @@ public sealed class InstructionBlockService : IInstructionBlockService
         return results;
     }
 
-    private async Task<List<InstructionChunk>> FetchMandatoryChunksAsync(InstructionSearchContext context, CancellationToken cancellationToken)
+    private async Task<List<InstructionChunk>> FetchMandatoryChunksAsync(InstructionSearchContext context, SearchClient searchClient, CancellationToken cancellationToken)
     {
         var results = new List<InstructionChunk>();
-        if (_searchClient is null)
+        if (searchClient is null)
         {
             return results;
         }
@@ -183,7 +220,7 @@ public sealed class InstructionBlockService : IInstructionBlockService
 
             ApplySelect(options);
 
-            var response = await _searchClient.SearchAsync<SearchDocument>("*", options, cancellationToken);
+            var response = await searchClient.SearchAsync<SearchDocument>("*", options, cancellationToken);
             await foreach (var result in response.Value.GetResultsAsync())
             {
                 var chunk = MapToInstructionChunk(result.Document);

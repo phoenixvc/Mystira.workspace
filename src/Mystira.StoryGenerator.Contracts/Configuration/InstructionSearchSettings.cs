@@ -6,6 +6,7 @@ public class InstructionSearchSettings
     public string? Endpoint { get; set; }
     public string? ApiKey { get; set; }
     public string? IndexName { get; set; }
+    public Dictionary<string, string> AgeGroupIndexMapping { get; set; } = new();
     public string EmbeddingFieldName { get; set; } = "embedding";
     public string IdFieldName { get; set; } = "id";
     public string ContentFieldName { get; set; } = "content";
@@ -31,6 +32,21 @@ public class InstructionSearchSettings
     public bool IsConfigured =>
         !string.IsNullOrWhiteSpace(Endpoint) &&
         !string.IsNullOrWhiteSpace(ApiKey) &&
-        !string.IsNullOrWhiteSpace(IndexName) &&
+        (!string.IsNullOrWhiteSpace(IndexName) || AgeGroupIndexMapping.Count > 0) &&
         !string.IsNullOrWhiteSpace(EmbeddingFieldName);
+
+    public string? ResolveIndexName(string? ageGroup)
+    {
+        if (string.IsNullOrWhiteSpace(ageGroup))
+        {
+            return IndexName;
+        }
+
+        if (AgeGroupIndexMapping.TryGetValue(ageGroup, out var indexName))
+        {
+            return indexName;
+        }
+
+        return IndexName;
+    }
 }

@@ -19,8 +19,4 @@
     <ProjectReference Include="..\Mystira.StoryGenerator.GraphTheory\Mystira.StoryGenerator.GraphTheory.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Helpers\" />
-  </ItemGroup>
-
 </Project>

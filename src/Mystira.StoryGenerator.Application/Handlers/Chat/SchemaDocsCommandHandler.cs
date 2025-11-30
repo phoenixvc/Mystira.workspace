@@ -45,7 +45,7 @@ public class SchemaDocsCommandHandler : ICommandHandler<SchemaDocsCommand, ChatC
                 return Failure("The Mystira story schema could not be loaded. Please verify the schema configuration.");
             }
 
-            var instructionBlock = await ResolveInstructionBlockAsync(command.UserQuery, cancellationToken);
+            var instructionBlock = await ResolveInstructionBlockAsync(command.UserQuery, context, cancellationToken);
             var messages = new List<MystiraChatMessage>();
 
             if (!string.IsNullOrWhiteSpace(instructionBlock))
@@ -105,22 +105,54 @@ public class SchemaDocsCommandHandler : ICommandHandler<SchemaDocsCommand, ChatC
             : _llmFactory.GetDefaultService();
     }
 
-    private async Task<string?> ResolveInstructionBlockAsync(string? userQuery, CancellationToken cancellationToken)
+    private async Task<string?> ResolveInstructionBlockAsync(string? userQuery, ChatContext context, CancellationToken cancellationToken)
     {
         if (string.IsNullOrWhiteSpace(userQuery))
         {
             return null;
         }
 
+        var ageGroup = context?.CurrentStory?.AgeGroup ?? ExtractAgeGroupFromContext(context);
+
         var searchContext = new InstructionSearchContext
         {
             QueryText = userQuery,
             Categories = new[] { "meta", "story_generation" },
             InstructionTypes = new[] { "schema_docs" },
-            TopK = 6
+            TopK = 6,
+            AgeGroup = ageGroup
         };
 
         return await _instructionBlockService.BuildInstructionBlockAsync(searchContext, cancellationToken);
+    }
+
+    private static string? ExtractAgeGroupFromContext(ChatContext? context)
+    {
+        if (context?.CurrentStory == null)
+            return null;
+        
+        return ExtractAgeGroupFromJson(context.CurrentStory.Content);
+    }
+
+    private static string? ExtractAgeGroupFromJson(string? jsonContent)
+    {
+        if (string.IsNullOrWhiteSpace(jsonContent))
+            return null;
+
+        try
+        {
+            var json = System.Text.Json.JsonDocument.Parse(jsonContent);
+            if (json.RootElement.TryGetProperty("age_group", out var ageGroupElement))
+            {
+                return ageGroupElement.GetString();
+            }
+        }
+        catch
+        {
+            // If parsing fails, return null and let the system use default index
+        }
+
+        return null;
     }
 
     private static string BuildSchemaExcerpt(string schemaJson)
