@@ -1,5 +1,4 @@
 ﻿using Mystira.StoryGenerator.Application.Scenarios;
-using Mystira.StoryGenerator.Application.Services;
 using Mystira.StoryGenerator.Domain.Services;
 
 namespace Mystira.StoryGenerator.Application.Tests;

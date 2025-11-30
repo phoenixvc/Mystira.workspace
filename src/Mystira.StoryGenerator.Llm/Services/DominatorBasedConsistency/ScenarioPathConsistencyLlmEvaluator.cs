@@ -7,25 +7,25 @@ using System.Text.Json;
 
 namespace Mystira.StoryGenerator.Llm.Services.DominatorBasedConsistency;
 
-public class ScenarioConsistencyLlmEvaluator : ILlmConsistencyEvaluator
+public class ScenarioPathConsistencyLlmEvaluator : ILlmConsistencyEvaluator
 {
     private readonly ConsistencyEvaluatorSettings _settings;
     private readonly ILlmServiceFactory _llmServiceFactory;
-    private readonly ILogger<ScenarioConsistencyLlmEvaluator> _logger;
+    private readonly ILogger<ScenarioPathConsistencyLlmEvaluator> _logger;
 
-    public ScenarioConsistencyLlmEvaluator(
+    public ScenarioPathConsistencyLlmEvaluator(
         IOptions<AiSettings> aiOptions,
         ILlmServiceFactory llmServiceFactory,
-        ILogger<ScenarioConsistencyLlmEvaluator> logger)
+        ILogger<ScenarioPathConsistencyLlmEvaluator> logger)
     {
         _settings = aiOptions.Value.ConsistencyEvaluator;
         _llmServiceFactory = llmServiceFactory;
         _logger = logger;
     }
 
-    public async Task<ConsistencyEvaluationResult?> EvaluateConsistencyAsync(string scenarioContent, CancellationToken cancellationToken = default)
+    public async Task<ConsistencyEvaluationResult?> EvaluateConsistencyAsync(string scenarioPathContent, CancellationToken cancellationToken = default)
     {
-        if (string.IsNullOrWhiteSpace(scenarioContent))
+        if (string.IsNullOrWhiteSpace(scenarioPathContent))
         {
             _logger.LogWarning("Consistency evaluation requested with empty content");
             return default;
@@ -71,7 +71,7 @@ public class ScenarioConsistencyLlmEvaluator : ILlmConsistencyEvaluator
                     new MystiraChatMessage
                     {
                         MessageType = ChatMessageType.User,
-                        Content = scenarioContent,
+                        Content = scenarioPathContent,
                         Timestamp = DateTime.UtcNow
                     }
                 ]

@@ -1,7 +1,6 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.DependencyInjection;
 using Mystira.StoryGenerator.Application.Scenarios;
-using Mystira.StoryGenerator.Application.Services;
 using Mystira.StoryGenerator.Domain.Services;
 using Mystira.StoryGenerator.Llm.Services.DominatorBasedConsistency;
 
@@ -52,7 +51,7 @@ internal static class ConsistencyFileRunner
         }
 
         var factory = services.GetRequiredService<IScenarioFactory>();
-        var evaluator = services.GetRequiredService<ScenarioConsistencyLlmEvaluator>();
+        var evaluator = services.GetRequiredService<ScenarioPathConsistencyLlmEvaluator>();
 
         var content = await File.ReadAllTextAsync(path);
         var scenario = await factory.CreateFromContentAsync(content, format);

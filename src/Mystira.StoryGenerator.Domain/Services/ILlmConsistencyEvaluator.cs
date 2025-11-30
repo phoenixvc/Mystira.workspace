@@ -2,5 +2,5 @@
 
 public interface ILlmConsistencyEvaluator
 {
-    Task<ConsistencyEvaluationResult?> EvaluateConsistencyAsync(string scenarioContent, CancellationToken cancellationToken = default);
+    Task<ConsistencyEvaluationResult?> EvaluateConsistencyAsync(string scenarioPathContent, CancellationToken cancellationToken = default);
 }
