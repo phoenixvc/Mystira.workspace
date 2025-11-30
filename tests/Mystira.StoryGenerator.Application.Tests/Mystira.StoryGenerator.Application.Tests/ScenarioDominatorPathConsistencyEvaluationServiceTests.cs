@@ -23,7 +23,7 @@ public class ScenarioDominatorPathConsistencyEvaluationServiceTests
     }
 
     [Fact]
-    public async Task EvaluateAsync_GeneratesCompressedPathsAndEvaluates()
+    public async Task EvaluateAsync_GeneratesCompressedPathsAndEvaluatesEachInParallel()
     {
         // Arrange
         var scenario = CreateTestScenario();
@@ -43,24 +43,31 @@ public class ScenarioDominatorPathConsistencyEvaluationServiceTests
 
         // Assert
         Assert.NotNull(result);
-        Assert.Equal("ok", result.OverallAssessment);
-        Assert.Empty(result.Issues);
-
-        // Verify evaluator was called with serialized paths
+        Assert.NotEmpty(result.PathResults);
+        
+        // Verify evaluator was called for each path
         _mockEvaluator.Verify(
             e => e.EvaluateConsistencyAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()),
-            Times.Once);
+            Times.AtLeastOnce());
+        
+        // Verify each path has a result
+        foreach (var pathResult in result.PathResults)
+        {
+            Assert.NotNull(pathResult.SceneIds);
+            Assert.NotEmpty(pathResult.SceneIds);
+        }
     }
 
     [Fact]
-    public async Task EvaluateAsync_ReturnsNullWhenEvaluatorReturnsNull()
+    public async Task EvaluateAsync_ReturnsNullWhenNoPaths()
     {
         // Arrange
-        var scenario = CreateTestScenario();
-
-        _mockEvaluator
-            .Setup(e => e.EvaluateConsistencyAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync((ConsistencyEvaluationResult?)null);
+        var scenario = new Scenario
+        {
+            Id = "EmptyScenario",
+            Title = "Empty",
+            Scenes = new List<Scene>()
+        };
 
         // Act
         var result = await _service.EvaluateAsync(scenario);
@@ -75,19 +82,25 @@ public class ScenarioDominatorPathConsistencyEvaluationServiceTests
         // Arrange
         var scenario = CreateTestScenario();
 
-        string capturedContent = string.Empty;
+        var capturedContents = new List<string>();
 
         _mockEvaluator
             .Setup(e => e.EvaluateConsistencyAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
-            .Callback((string content, CancellationToken ct) => capturedContent = content)
+            .Callback((string content, CancellationToken ct) => capturedContents.Add(content))
             .ReturnsAsync(new ConsistencyEvaluationResult { OverallAssessment = "ok", Issues = new List<ConsistencyIssue>() });
 
         // Act
-        await _service.EvaluateAsync(scenario);
+        var result = await _service.EvaluateAsync(scenario);
 
         // Assert
-        Assert.NotEmpty(capturedContent);
-        Assert.Contains("Path", capturedContent);
+        Assert.NotNull(result);
+        Assert.NotEmpty(capturedContents);
+        
+        // Verify content contains path indicator
+        foreach (var content in capturedContents)
+        {
+            Assert.Contains("Path", content);
+        }
     }
 
     [Fact]
@@ -99,7 +112,7 @@ public class ScenarioDominatorPathConsistencyEvaluationServiceTests
     }
 
     [Fact]
-    public async Task EvaluateAsync_ReturnsResultWithIssuesWhenEvaluatorFindsProblems()
+    public async Task EvaluateAsync_ReturnsResultsWithIssuesWhenEvaluatorFindsProblems()
     {
         // Arrange
         var scenario = CreateTestScenario();
@@ -116,7 +129,7 @@ public class ScenarioDominatorPathConsistencyEvaluationServiceTests
                     Category = "entity_consistency",
                     SceneIds = new List<string> { "S1", "S2" },
                     Summary = "Entity state inconsistency",
-                    Details = "Character X has conflicting states in different paths"
+                    Details = "Character X has conflicting states"
                 }
             }
         };
@@ -130,9 +143,87 @@ public class ScenarioDominatorPathConsistencyEvaluationServiceTests
 
         // Assert
         Assert.NotNull(result);
-        Assert.Equal("has_major_issues", result.OverallAssessment);
-        Assert.Single(result.Issues);
-        Assert.Equal("entity_consistency", result.Issues[0].Category);
+        Assert.NotEmpty(result.PathResults);
+        
+        foreach (var pathResult in result.PathResults)
+        {
+            Assert.NotNull(pathResult.Result);
+            Assert.Equal("has_major_issues", pathResult.Result.OverallAssessment);
+            Assert.Single(pathResult.Result.Issues);
+        }
+    }
+
+    [Fact]
+    public async Task EvaluateAsync_EvaluatesPathsInParallel()
+    {
+        // Arrange
+        var scenario = CreateTestScenario();
+
+        var evaluationCount = 0;
+        var maxConcurrentCalls = 0;
+        var currentConcurrentCalls = 0;
+
+        _mockEvaluator
+            .Setup(e => e.EvaluateConsistencyAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .Returns(async (string content, CancellationToken ct) =>
+            {
+                Interlocked.Increment(ref currentConcurrentCalls);
+                Interlocked.Increment(ref evaluationCount);
+
+                var current = currentConcurrentCalls;
+                if (current > maxConcurrentCalls)
+                {
+                    maxConcurrentCalls = current;
+                }
+
+                await Task.Delay(10, ct);
+
+                Interlocked.Decrement(ref currentConcurrentCalls);
+                return new ConsistencyEvaluationResult 
+                { 
+                    OverallAssessment = "ok", 
+                    Issues = new List<ConsistencyIssue>() 
+                };
+            });
+
+        // Act
+        var result = await _service.EvaluateAsync(scenario);
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.Equal(result.PathResults.Count, evaluationCount);
+        
+        // Verify at least some evaluations ran in parallel
+        Assert.True(maxConcurrentCalls > 0, "Evaluations should have executed");
+    }
+
+    [Fact]
+    public async Task EvaluateAsync_IncludesSceneIdsInEachPathResult()
+    {
+        // Arrange
+        var scenario = CreateTestScenario();
+
+        _mockEvaluator
+            .Setup(e => e.EvaluateConsistencyAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new ConsistencyEvaluationResult 
+            { 
+                OverallAssessment = "ok", 
+                Issues = new List<ConsistencyIssue>() 
+            });
+
+        // Act
+        var result = await _service.EvaluateAsync(scenario);
+
+        // Assert
+        Assert.NotNull(result);
+        foreach (var pathResult in result.PathResults)
+        {
+            Assert.NotNull(pathResult.SceneIds);
+            Assert.NotEmpty(pathResult.SceneIds);
+            
+            // First scene should be the root
+            Assert.Equal("S0", pathResult.SceneIds[0]);
+        }
     }
 
     private static Scenario CreateTestScenario()

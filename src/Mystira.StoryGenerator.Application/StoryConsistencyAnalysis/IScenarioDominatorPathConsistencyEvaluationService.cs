@@ -1,4 +1,3 @@
-using Mystira.StoryGenerator.Domain.Services;
 using Mystira.StoryGenerator.Domain.Stories;
 
 namespace Mystira.StoryGenerator.Application.StoryConsistencyAnalysis;
@@ -10,7 +9,8 @@ namespace Mystira.StoryGenerator.Application.StoryConsistencyAnalysis;
 /// The service:
 /// 1. Constructs the scenario graph from the scenario
 /// 2. Generates dominator-based compressed paths
-/// 3. Uses LLM to evaluate consistency across these paths
+/// 3. Evaluates consistency for each path in parallel using LLM
+/// 4. Returns detailed per-path results
 /// </summary>
 public interface IScenarioDominatorPathConsistencyEvaluationService
 {
@@ -18,17 +18,17 @@ public interface IScenarioDominatorPathConsistencyEvaluationService
     /// Evaluates path consistency in a scenario by:
     /// 1. Constructing the scenario graph
     /// 2. Generating dominator-based compressed paths
-    /// 3. Using LLM to evaluate consistency across these paths
+    /// 3. Evaluating consistency for each path independently in parallel
     ///
-    /// Returns overall assessment and detailed consistency issues if any.
+    /// Returns detailed per-path assessment and consistency issues.
     /// </summary>
     /// <param name="scenario">The scenario to evaluate for path consistency.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>
-    /// A consistency evaluation result containing overall assessment and detailed issues.
+    /// A consistency evaluation results object containing per-path consistency assessments.
     /// May return null if evaluation is not configured or failed gracefully.
     /// </returns>
-    Task<ConsistencyEvaluationResult?> EvaluateAsync(
+    Task<ConsistencyEvaluationResults?> EvaluateAsync(
         Scenario scenario,
         CancellationToken cancellationToken = default);
 }

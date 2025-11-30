@@ -9,10 +9,10 @@ namespace Mystira.StoryGenerator.Application.StoryConsistencyAnalysis;
 /// </summary>
 public sealed record ScenarioConsistencyEvaluationResult(
     /// <summary>
-    /// Result from the path-based consistency evaluation using LLM on compressed paths.
+    /// Results from the path-based consistency evaluation using LLM on each compressed path.
     /// May be null if evaluation is not configured or failed gracefully.
     /// </summary>
-    ConsistencyEvaluationResult? PathConsistencyResult,
+    ConsistencyEvaluationResults? PathConsistencyResults,
 
     /// <summary>
     /// Result from entity introduction validation including LLM-based entity classification.
@@ -68,5 +68,34 @@ public sealed record SceneEntityClassificationData(
     /// Entities removed or forgotten in this scene.
     /// </summary>
     IReadOnlyList<SceneEntity> RemovedEntities)
+{
+}
+
+/// <summary>
+/// Results from path-based consistency evaluation across multiple compressed paths.
+/// Each path is evaluated independently in parallel.
+/// </summary>
+public sealed record ConsistencyEvaluationResults(
+    /// <summary>
+    /// Collection of per-path consistency evaluation results.
+    /// Each result contains the scene IDs for that path and its consistency assessment.
+    /// </summary>
+    IReadOnlyList<PathConsistencyEvaluationResult> PathResults)
+{
+}
+
+/// <summary>
+/// Consistency evaluation result for a single compressed path.
+/// </summary>
+public sealed record PathConsistencyEvaluationResult(
+    /// <summary>
+    /// The sequence of scene IDs that make up this path.
+    /// </summary>
+    IReadOnlyList<string> SceneIds,
+
+    /// <summary>
+    /// The consistency evaluation result for this path.
+    /// </summary>
+    ConsistencyEvaluationResult? Result)
 {
 }

@@ -8,7 +8,7 @@ namespace Mystira.StoryGenerator.Application.StoryConsistencyAnalysis;
 
 /// <summary>
 /// Implementation of dominator-based path consistency evaluation service that evaluates
-/// consistency across compressed scenario paths using LLM analysis.
+/// consistency across compressed scenario paths using LLM analysis, in parallel.
 /// </summary>
 public class ScenarioDominatorPathConsistencyEvaluationService : IScenarioDominatorPathConsistencyEvaluationService
 {
@@ -23,7 +23,7 @@ public class ScenarioDominatorPathConsistencyEvaluationService : IScenarioDomina
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
-    public async Task<ConsistencyEvaluationResult?> EvaluateAsync(
+    public async Task<ConsistencyEvaluationResults?> EvaluateAsync(
         Scenario scenario,
         CancellationToken cancellationToken = default)
     {
@@ -37,29 +37,29 @@ public class ScenarioDominatorPathConsistencyEvaluationService : IScenarioDomina
             var graph = ScenarioGraph.FromScenario(scenario);
 
             // Get compressed paths based on dominators
-            var compressedPaths = graph.GetCompressedPaths().ToArray();
+            var compressedPaths = graph.GetCompressedPaths().ToList();
 
-            _logger.LogDebug("Generated {PathCount} compressed paths for scenario {ScenarioId}", compressedPaths.Count(), scenario.Id);
+            _logger.LogDebug("Generated {PathCount} compressed paths for scenario {ScenarioId}", compressedPaths.Count, scenario.Id);
 
-            // Serialize paths to content for LLM evaluation
-            var scenarioPathContent = SerializePathsToContent(compressedPaths);
-
-            // Evaluate consistency on these paths
-            var result = await _consistencyEvaluator.EvaluateConsistencyAsync(scenarioPathContent, cancellationToken);
-
-            if (result != null)
+            if (compressedPaths.Count == 0)
             {
-                _logger.LogInformation(
-                    "Path consistency evaluation completed for scenario {ScenarioId} with assessment: {Assessment}",
-                    scenario.Id,
-                    result.OverallAssessment);
-            }
-            else
-            {
-                _logger.LogDebug("Path consistency evaluation returned no result for scenario {ScenarioId}", scenario.Id);
+                _logger.LogWarning("No paths generated for scenario {ScenarioId}", scenario.Id);
+                return null;
             }
 
-            return result;
+            // Evaluate each path in parallel
+            var evaluationTasks = compressedPaths
+                .Select((path, index) => EvaluatePathAsync(path, index + 1, cancellationToken))
+                .ToList();
+
+            var pathResults = await Task.WhenAll(evaluationTasks);
+
+            _logger.LogInformation(
+                "Path consistency evaluation completed for scenario {ScenarioId}. Evaluated {PathCount} paths",
+                scenario.Id,
+                pathResults.Length);
+
+            return new ConsistencyEvaluationResults(pathResults);
         }
         catch (Exception ex)
         {
@@ -69,18 +69,50 @@ public class ScenarioDominatorPathConsistencyEvaluationService : IScenarioDomina
     }
 
     /// <summary>
-    /// Serializes compressed scenario paths to content suitable for LLM evaluation.
+    /// Evaluates consistency for a single compressed path.
     /// </summary>
-    private static string SerializePathsToContent(IEnumerable<ScenarioPath> paths)
+    private async Task<PathConsistencyEvaluationResult> EvaluatePathAsync(
+        ScenarioPath path,
+        int pathIndex,
+        CancellationToken cancellationToken)
     {
-        var pathList = paths.ToList();
-
-        if (pathList.Count == 0)
+        try
         {
-            return "No paths found in scenario";
-        }
+            _logger.LogDebug("Evaluating consistency for path {PathIndex} with {SceneCount} scenes", 
+                pathIndex, path.SceneIds.Count);
 
-        // Combine all paths with a separator
-        return string.Join("\n---PATH SEPARATOR---\n", pathList.Select((p, i) => $"Path {i + 1}:\n{p.Story}"));
+            // Serialize this single path to content for LLM evaluation
+            var pathContent = SerializePathContent(path, pathIndex);
+
+            // Evaluate consistency on this path
+            var result = await _consistencyEvaluator.EvaluateConsistencyAsync(pathContent, cancellationToken);
+
+            if (result != null)
+            {
+                _logger.LogDebug(
+                    "Path {PathIndex} consistency evaluation completed with assessment: {Assessment}",
+                    pathIndex,
+                    result.OverallAssessment);
+            }
+            else
+            {
+                _logger.LogDebug("Path {PathIndex} consistency evaluation returned no result", pathIndex);
+            }
+
+            return new PathConsistencyEvaluationResult(path.SceneIds, result);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Failed to evaluate consistency for path {PathIndex}", pathIndex);
+            return new PathConsistencyEvaluationResult(path.SceneIds, null);
+        }
+    }
+
+    /// <summary>
+    /// Serializes a single scenario path to content suitable for LLM evaluation.
+    /// </summary>
+    private static string SerializePathContent(ScenarioPath path, int pathIndex)
+    {
+        return $"Path {pathIndex}:\n{path.Story}";
     }
 }

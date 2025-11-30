@@ -41,18 +41,18 @@ public class ScenarioConsistencyEvaluationService : IScenarioConsistencyEvaluati
             await Task.WhenAll(entityEvaluationTask, pathEvaluationTask);
 
             var entityIntroductionResult = await entityEvaluationTask;
-            var pathConsistencyResult = await pathEvaluationTask;
+            var pathConsistencyResults = await pathEvaluationTask;
 
-            var isSuccessful = pathConsistencyResult != null || entityIntroductionResult != null;
+            var isSuccessful = pathConsistencyResults != null || entityIntroductionResult != null;
 
             _logger.LogInformation(
                 "Scenario consistency evaluation completed for {ScenarioId}. PathConsistency: {PathConsistencyPresent}, EntityIntroduction: {EntityIntroductionPresent}",
                 scenario.Id,
-                pathConsistencyResult != null,
+                pathConsistencyResults != null,
                 entityIntroductionResult != null);
 
             return new ScenarioConsistencyEvaluationResult(
-                pathConsistencyResult,
+                pathConsistencyResults,
                 entityIntroductionResult,
                 isSuccessful);
         }
