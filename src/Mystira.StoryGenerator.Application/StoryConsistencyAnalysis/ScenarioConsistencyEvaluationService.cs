@@ -2,12 +2,14 @@ using Microsoft.Extensions.Logging;
 using Mystira.StoryGenerator.Application.Scenarios;
 using Mystira.StoryGenerator.Contracts.Entities;
 using Mystira.StoryGenerator.Domain.Services;
+using Mystira.StoryGenerator.Domain.Stories;
 
 namespace Mystira.StoryGenerator.Application.StoryConsistencyAnalysis;
 
 /// <summary>
 /// Implementation of scenario consistency evaluation service that orchestrates
-/// parallel execution of path consistency checks and entity introduction validation.
+/// parallel execution of scene entity classification, path consistency checks,
+/// and entity introduction validation.
 /// </summary>
 public class ScenarioConsistencyEvaluationService : IScenarioConsistencyEvaluationService
 {
@@ -28,29 +30,34 @@ public class ScenarioConsistencyEvaluationService : IScenarioConsistencyEvaluati
     public async Task<ScenarioConsistencyEvaluationResult> EvaluateAsync(
         ScenarioGraph graph,
         string scenarioPathContent,
-        Func<Scene, IEnumerable<SceneEntity>> getIntroduced,
-        Func<Scene, IEnumerable<SceneEntity>> getRemoved,
-        Func<Scene, IEnumerable<SceneEntity>> getUsed,
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(graph);
         ArgumentNullException.ThrowIfNull(scenarioPathContent);
-        ArgumentNullException.ThrowIfNull(getIntroduced);
-        ArgumentNullException.ThrowIfNull(getRemoved);
-        ArgumentNullException.ThrowIfNull(getUsed);
 
         try
         {
             _logger.LogInformation("Starting parallel scenario consistency evaluation");
 
-            // Execute both evaluations in parallel
+            // Step 1: Classify all scenes in parallel
+            var classificationTask = ClassifyScenesAsync(graph, cancellationToken);
+
+            // Step 2: Evaluate path consistency in parallel with classification
             var pathConsistencyTask = EvaluatePathConsistencyAsync(scenarioPathContent, cancellationToken);
-            var entityIntroductionTask = ValidateEntityIntroductionAsync(graph, getIntroduced, getRemoved, getUsed, cancellationToken);
 
-            await Task.WhenAll(pathConsistencyTask, entityIntroductionTask);
+            // Wait for both to complete
+            await Task.WhenAll(classificationTask, pathConsistencyTask);
 
+            var sceneClassifications = await classificationTask;
             var pathConsistencyResult = await pathConsistencyTask;
-            var entityIntroductionResult = await entityIntroductionTask;
+
+            _logger.LogDebug("Scene classifications and path consistency evaluation completed");
+
+            // Step 3: Validate entity introduction violations using the classifications
+            var entityIntroductionResult = await ValidateEntityIntroductionAsync(
+                graph,
+                sceneClassifications,
+                cancellationToken);
 
             var isSuccessful = pathConsistencyResult != null || entityIntroductionResult != null;
 
@@ -105,19 +112,32 @@ public class ScenarioConsistencyEvaluationService : IScenarioConsistencyEvaluati
     }
 
     /// <summary>
-    /// Validates entity introduction violations using graph-theoretic data-flow analysis.
-    /// Also performs LLM-based entity classification to extract scene entities.
+    /// Validates entity introduction violations using the LLM-based scene classifications.
+    /// Uses graph-theoretic data-flow analysis combined with classified entity data.
     /// </summary>
     private async Task<EntityIntroductionEvaluationResult?> ValidateEntityIntroductionAsync(
         ScenarioGraph graph,
-        Func<Scene, IEnumerable<SceneEntity>> getIntroduced,
-        Func<Scene, IEnumerable<SceneEntity>> getRemoved,
-        Func<Scene, IEnumerable<SceneEntity>> getUsed,
+        IReadOnlyDictionary<string, SceneEntityClassificationData> sceneClassifications,
         CancellationToken cancellationToken)
     {
         try
         {
-            _logger.LogDebug("Starting entity introduction validation");
+            _logger.LogDebug("Starting entity introduction validation with {ClassificationCount} scene classifications", 
+                sceneClassifications.Count);
+
+            // Create lookup functions that use the classified data
+            Func<Scene, IEnumerable<SceneEntity>> getIntroduced = scene =>
+                sceneClassifications.TryGetValue(scene.Id, out var data)
+                    ? data.IntroducedEntities
+                    : Enumerable.Empty<SceneEntity>();
+
+            Func<Scene, IEnumerable<SceneEntity>> getRemoved = scene =>
+                sceneClassifications.TryGetValue(scene.Id, out var data)
+                    ? data.RemovedEntities
+                    : Enumerable.Empty<SceneEntity>();
+
+            Func<Scene, IEnumerable<SceneEntity>> getUsed = scene =>
+                ExtractUsedEntitiesFromScene(scene, sceneClassifications);
 
             // Run data-flow analysis to find violations
             var violations = ScenarioEntityIntroductionValidator.FindIntroductionViolations(
@@ -127,9 +147,6 @@ public class ScenarioConsistencyEvaluationService : IScenarioConsistencyEvaluati
                 getUsed);
 
             _logger.LogDebug("Entity introduction analysis found {ViolationCount} violations", violations.Count);
-
-            // Classify entities in each scene using LLM (in parallel)
-            var sceneClassifications = await ClassifyScenesAsync(graph, cancellationToken);
 
             return new EntityIntroductionEvaluationResult(
                 violations,
@@ -214,6 +231,41 @@ public class ScenarioConsistencyEvaluationService : IScenarioConsistencyEvaluati
     }
 
     /// <summary>
+    /// Extracts entities that are used/referenced in a scene.
+    /// Uses the classified entities as a source of truth - any entity that appears in the scene
+    /// but wasn't introduced or removed in the same scene is considered "used".
+    /// </summary>
+    private static IEnumerable<SceneEntity> ExtractUsedEntitiesFromScene(
+        Scene scene,
+        IReadOnlyDictionary<string, SceneEntityClassificationData> sceneClassifications)
+    {
+        // Combine the scene's text content
+        var sceneText = $"{scene.Title} {scene.Description}".ToLowerInvariant();
+
+        // Get all entities mentioned across all scenes' classifications
+        var allEntities = new HashSet<SceneEntity>(new SceneEntityComparer());
+        foreach (var classification in sceneClassifications.Values)
+        {
+            foreach (var entity in classification.IntroducedEntities)
+                allEntities.Add(entity);
+            foreach (var entity in classification.RemovedEntities)
+                allEntities.Add(entity);
+        }
+
+        // Find which entities are mentioned in this scene's text
+        var usedEntities = new List<SceneEntity>();
+        foreach (var entity in allEntities)
+        {
+            if (sceneText.Contains(entity.Name.ToLowerInvariant()))
+            {
+                usedEntities.Add(entity);
+            }
+        }
+
+        return usedEntities;
+    }
+
+    /// <summary>
     /// Serializes a scene to a string format suitable for LLM entity classification.
     /// </summary>
     private static string SerializeSceneContent(Scene scene)
@@ -222,5 +274,31 @@ public class ScenarioConsistencyEvaluationService : IScenarioConsistencyEvaluati
 Title: {scene.Title}
 Type: {scene.Type}
 Description: {scene.Description}";
+    }
+
+    /// <summary>
+    /// Equality comparer for SceneEntity based on Type and Name (case-insensitive).
+    /// </summary>
+    private sealed class SceneEntityComparer : IEqualityComparer<SceneEntity>
+    {
+        public bool Equals(SceneEntity? x, SceneEntity? y)
+        {
+            if (ReferenceEquals(x, y)) return true;
+            if (x is null || y is null) return false;
+
+            return x.Type == y.Type &&
+                   string.Equals(x.Name, y.Name, StringComparison.OrdinalIgnoreCase);
+        }
+
+        public int GetHashCode(SceneEntity obj)
+        {
+            unchecked
+            {
+                int hash = 17;
+                hash = hash * 31 + obj.Type.GetHashCode();
+                hash = hash * 31 + StringComparer.OrdinalIgnoreCase.GetHashCode(obj.Name);
+                return hash;
+            }
+        }
     }
 }

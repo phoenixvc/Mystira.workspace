@@ -10,11 +10,16 @@ Implemented `ScenarioConsistencyEvaluationService` in the `Mystira.StoryGenerato
 #### 1. **IScenarioConsistencyEvaluationService** (Interface)
 - **Location**: `src/Mystira.StoryGenerator.Application/StoryConsistencyAnalysis/IScenarioConsistencyEvaluationService.cs`
 - **Purpose**: Defines contract for scenario consistency evaluation
-- **Key Method**: `EvaluateAsync(ScenarioGraph, string, Func<Scene, IEnumerable<SceneEntity>>...)`
+- **Key Method**: `EvaluateAsync(ScenarioGraph, string, CancellationToken)`
+  - Takes only the scenario graph and path content
+  - Internally classifies all scenes and validates entities
 
 #### 2. **ScenarioConsistencyEvaluationService** (Implementation)
 - **Location**: `src/Mystira.StoryGenerator.Application/StoryConsistencyAnalysis/ScenarioConsistencyEvaluationService.cs`
-- **Purpose**: Orchestrates parallel execution of two validations
+- **Purpose**: Orchestrates parallel execution of three operations:
+  1. Scene entity classification (all scenes in parallel)
+  2. Path consistency evaluation
+  3. Entity introduction validation using classifications
 - **Dependencies**:
   - `ILlmConsistencyEvaluator` (injected)
   - `IEntityLlmClassificationService` (injected)
@@ -22,7 +27,20 @@ Implemented `ScenarioConsistencyEvaluationService` in the `Mystira.StoryGenerato
 
 ### Validation Pipelines
 
-#### Pipeline 1: Path Consistency Evaluation
+#### Pipeline 1: Scene Entity Classification (Parallel)
+```
+ScenarioGraph.Nodes 
+    → (parallel) IEntityLlmClassificationService.ClassifyAsync() per scene
+    → IReadOnlyDictionary<sceneId, SceneEntityClassificationData>
+```
+
+**Configuration**: `appsettings.json:Ai:EntityClassifier`
+- Uses `SceneEntityLlmClassifier` (from Llm project)
+- Extracts introduced, removed entities and time delta per scene
+- All scene classifications run in parallel via `Task.WhenAll`
+- Gracefully handles null classifications from individual scenes
+
+#### Pipeline 2: Path Consistency Evaluation
 ```
 scenarioPathContent 
     → ILlmConsistencyEvaluator.EvaluateConsistencyAsync()
@@ -34,37 +52,47 @@ scenarioPathContent
 - Evaluates dominator-based compressed scenario paths
 - Returns overall assessment (ok, has_minor_issues, has_major_issues, broken)
 - Returns detailed consistency issues with severity levels
+- Runs in parallel with scene classification
 
-#### Pipeline 2: Entity Introduction Validation
+#### Pipeline 3: Entity Introduction Validation
 ```
-ScenarioGraph 
+Classifications (from Pipeline 1)
+    + ScenarioGraph
     → ScenarioEntityIntroductionValidator.FindIntroductionViolations()
     → IReadOnlyList<EntityIntroductionViolation>
-    ↓
-ScenarioGraph.Nodes 
-    → (parallel) IEntityLlmClassificationService.ClassifyAsync() per scene
-    → IReadOnlyDictionary<sceneId, SceneEntityClassificationData>
 ```
 
-**Configuration**: `appsettings.json:Ai:EntityClassifier`
-- Uses graph-theoretic data-flow analysis for violation detection
-- Uses `SceneEntityLlmClassifier` (from Llm project) for entity classification
-- Extracts introduced, removed, and time delta data per scene
-- Runs classification in parallel across all scenes
+**Process**:
+1. Uses classifications from Pipeline 1 to get introduced/removed entities
+2. Extracts "used" entities by matching entity names in scene text
+3. Runs graph-theoretic data-flow analysis to detect violations
+4. Runs sequentially after Pipelines 1 and 2 complete
 
 ### Parallel Execution Model
 ```csharp
-// Both tasks start immediately
-var pathConsistencyTask = EvaluatePathConsistencyAsync(...);
-var entityIntroductionTask = ValidateEntityIntroductionAsync(...);
+// Step 1: Classification and path consistency run in parallel
+var classificationTask = ClassifyScenesAsync(graph, cancellationToken);
+var pathConsistencyTask = EvaluatePathConsistencyAsync(scenarioPathContent, cancellationToken);
 
-// Wait for both to complete
-await Task.WhenAll(pathConsistencyTask, entityIntroductionTask);
+// Wait for both parallel operations
+await Task.WhenAll(classificationTask, pathConsistencyTask);
 
-// Results collected after parallel execution
-var pathResult = await pathConsistencyTask;
-var entityResult = await entityIntroductionTask;
+// Step 2: Entity validation uses classification results
+var sceneClassifications = await classificationTask;
+var entityIntroductionResult = await ValidateEntityIntroductionAsync(graph, sceneClassifications, cancellationToken);
+
+// Step 3: Combine all results
+var result = new ScenarioConsistencyEvaluationResult(
+    pathConsistencyResult,
+    entityIntroductionResult,
+    isSuccessful);
 ```
+
+**Key Points**:
+- Pipelines 1 (classification) and 2 (path consistency) execute concurrently
+- Pipeline 3 (entity validation) runs after 1 completes (requires classification results)
+- Within Pipeline 1, all scenes are classified in parallel
+- Failures in individual classifications don't block others
 
 ## Result Data Structures
 
@@ -133,21 +161,23 @@ Log messages include:
 - **Location**: `tests/Mystira.StoryGenerator.Application.Tests/Mystira.StoryGenerator.Application.Tests/ScenarioConsistencyEvaluationServiceTests.cs`
 - **Framework**: xUnit with Moq mocking
 - **Coverage**:
-  - ✅ Parallel execution of both validations
+  - ✅ Parallel execution of classification and path consistency
+  - ✅ Per-scene classification in parallel
   - ✅ Partial results when one evaluation fails
   - ✅ Handling of null results from both evaluators
   - ✅ Entity introduction violation detection
-  - ✅ Scene classification in parallel
   - ✅ Null parameter validation
   - ✅ Exception handling and recovery
+  - ✅ Scene-specific classification mocking
 
 ### Test Cases
-1. `EvaluateAsync_ExecutesBothValidationsInParallel` - Verifies parallel execution
-2. `EvaluateAsync_ReturnsSuccessfulResultWhenBothEvaluationsReturnNull` - Handles graceful null
-3. `EvaluateAsync_ReturnsPartialResultWhenOneEvaluationFails` - Partial results
-4. `EvaluateAsync_FindsEntityIntroductionViolations` - Violation detection
-5. `EvaluateAsync_ThrowsWhenGraphIsNull` - Parameter validation
-6. `EvaluateAsync_ThrowsWhenScenarioPathContentIsNull` - Parameter validation
+1. `EvaluateAsync_ExecutesBothClassificationAndPathConsistencyInParallel` - Verifies parallel execution of classification and path consistency
+2. `EvaluateAsync_ReturnsSuccessfulResultWhenBothEvaluationsReturnNull` - Handles graceful null returns
+3. `EvaluateAsync_ReturnsPartialResultWhenOneEvaluationFails` - Partial results when one pipeline fails
+4. `EvaluateAsync_FindsEntityIntroductionViolations` - Violation detection with mocked per-scene classifications
+5. `EvaluateAsync_ThrowsWhenGraphIsNull` - Graph parameter validation
+6. `EvaluateAsync_ThrowsWhenScenarioPathContentIsNull` - Path content parameter validation
+7. `EvaluateAsync_ClassifiesAllScenesInParallel` - Verifies concurrent execution of scene classifications using interlocked counters
 
 ## Configuration
 
@@ -191,28 +221,54 @@ public class MyService
 
     public async Task EvaluateStoryAsync(Scenario scenario, CancellationToken ct)
     {
+        // Create graph from scenario
         var graph = ScenarioGraph.FromScenario(scenario);
+        
+        // Get compressed paths for path consistency evaluation
         var paths = graph.GetCompressedPaths();
         var pathContent = SerializePathsToContent(paths);
 
-        var result = await _evaluationService.EvaluateAsync(
-            graph,
-            pathContent,
-            scene => ExtractIntroducedEntities(scene),
-            scene => ExtractRemovedEntities(scene),
-            scene => ExtractUsedEntities(scene),
-            ct);
+        // Evaluate scenario consistency - internally:
+        // 1. Classifies all scenes in parallel
+        // 2. Evaluates path consistency in parallel with classification
+        // 3. Validates entity introductions using classification results
+        var result = await _evaluationService.EvaluateAsync(graph, pathContent, ct);
 
         if (result.PathConsistencyResult != null)
         {
             Console.WriteLine($"Path Consistency: {result.PathConsistencyResult.OverallAssessment}");
+            
+            foreach (var issue in result.PathConsistencyResult.Issues)
+            {
+                Console.WriteLine($"  Issue: {issue.Summary} (Severity: {issue.Severity})");
+            }
         }
 
         if (result.EntityIntroductionResult != null)
         {
             var violations = result.EntityIntroductionResult.Violations;
             Console.WriteLine($"Entity Introduction Violations: {violations.Count}");
+            
+            foreach (var violation in violations)
+            {
+                Console.WriteLine($"  Scene {violation.SceneId}: {violation.Entity.Name} used before introduction");
+            }
+
+            // Access per-scene classifications
+            foreach (var (sceneId, classification) in result.EntityIntroductionResult.SceneClassifications)
+            {
+                Console.WriteLine($"Scene {sceneId}: {classification.IntroducedEntities.Count} introduced, " +
+                    $"{classification.RemovedEntities.Count} removed, Time delta: {classification.TimeDelta}");
+            }
         }
+
+        Console.WriteLine($"Overall Success: {result.IsSuccessful}");
+    }
+
+    private string SerializePathsToContent(IEnumerable<ScenarioPath> paths)
+    {
+        // Serialize paths for LLM evaluation
+        return string.Join("\n---\n", paths.Select(p => p.Story));
     }
 }
 ```
