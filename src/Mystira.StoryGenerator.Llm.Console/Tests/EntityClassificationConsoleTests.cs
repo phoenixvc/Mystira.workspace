@@ -5,7 +5,7 @@ using Mystira.StoryGenerator.Llm.Services.DominatorBasedConsistency;
 
 namespace Mystira.StoryGenerator.Llm.Console.Tests;
 
-internal static class EventClassificationConsoleTests
+internal static class EntityClassificationConsoleTests
 {
     public static async Task<int> RunAsync(IServiceProvider services, ILogger logger)
     {

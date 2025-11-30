@@ -1,8 +1,9 @@
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Mystira.StoryGenerator.Application.Scenarios;
 using Mystira.StoryGenerator.Application.Services;
 using Mystira.StoryGenerator.Contracts.Configuration;
 using Mystira.StoryGenerator.Domain.Services;
@@ -112,7 +113,7 @@ if (!string.IsNullOrEmpty(providerArg) || !string.IsNullOrEmpty(deploymentArg))
 if (args.Any(a => a.Equals("--test-entity-classifier", StringComparison.OrdinalIgnoreCase)
                || a.Equals("test-entity-classifier", StringComparison.OrdinalIgnoreCase)))
 {
-    var exitCode = await EventClassificationConsoleTests.RunAsync(host.Services, logger);
+    var exitCode = await EntityClassificationConsoleTests.RunAsync(host.Services, logger);
     return exitCode;
 }
 

@@ -1,7 +1,7 @@
 using Mystira.StoryGenerator.Domain.Stories;
 using Mystira.StoryGenerator.GraphTheory.Graph;
 
-namespace Mystira.StoryGenerator.Application.Extensions;
+namespace Mystira.StoryGenerator.Application.Scenarios;
 
 public static class ScenarioExtensions
 {

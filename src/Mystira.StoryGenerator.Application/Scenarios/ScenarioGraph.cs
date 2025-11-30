@@ -1,12 +1,11 @@
 using System.Text;
-using Mystira.StoryGenerator.Application.Extensions;
 using Mystira.StoryGenerator.Contracts.Stories;
 using Mystira.StoryGenerator.Domain.Graph;
 using Mystira.StoryGenerator.Domain.Stories;
 using Mystira.StoryGenerator.GraphTheory.Algorithms;
 using Mystira.StoryGenerator.GraphTheory.Graph;
 
-namespace Mystira.StoryGenerator.Application.Graph;
+namespace Mystira.StoryGenerator.Application.Scenarios;
 
 public sealed class ScenarioGraph : IScenarioGraph
 {
