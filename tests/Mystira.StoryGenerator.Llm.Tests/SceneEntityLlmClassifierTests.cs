@@ -147,10 +147,10 @@ public class SceneEntityLlmClassifierTests
 
         // Assert
         Assert.NotNull(result);
-        Assert.NotNull(result!.Entities);
-        Assert.Equal(2, result.Entities.Length);
-        Assert.Contains(result.Entities, e => e.Name == "Alice");
-        Assert.Contains(result.Entities, e => e.Name == "Market" || e.Name == "Grand Market");
+        Assert.NotNull(result!.IntroducedEntities);
+        Assert.Equal(2, result.IntroducedEntities.Length);
+        Assert.Contains(result.IntroducedEntities, e => e.Name == "Alice");
+        Assert.Contains(result.IntroducedEntities, e => e.Name == "Market" || e.Name == "Grand Market");
     }
 
     [Fact]
@@ -173,7 +173,7 @@ public class SceneEntityLlmClassifierTests
 
         // Assert
         Assert.NotNull(result);
-        Assert.Single(result!.Entities);
+        Assert.Single(result!.IntroducedEntities);
         factoryMock.VerifyAll();
         llmServiceMock.VerifyAll();
     }

@@ -51,8 +51,8 @@ public class ScenarioEntityIntroductionValidatorTests
         var graph = ScenarioGraph.FromScenario(scenario);
 
         // Entities used in the test
-        var mira = new SceneEntity { Type = SceneEntityType.Character, Name = "Mira" };
-        var oldRurik = new SceneEntity { Type = SceneEntityType.Character, Name = "Old Rurik" };
+        var mira = new SceneEntity { Type = SceneEntityType.Character, Name = "Mira", IsProperNoun = true, Confidence = Confidence.Medium };
+        var oldRurik = new SceneEntity { Type = SceneEntityType.Character, Name = "Old Rurik", IsProperNoun = true, Confidence = Confidence.Medium };
 
         // Introduced/Removed/Used delegates
         IEnumerable<SceneEntity> GetIntroduced(Scene scene)
@@ -90,6 +90,74 @@ public class ScenarioEntityIntroductionValidatorTests
         var v = violations[0];
         Assert.Equal("S2", v.SceneId);
         Assert.Equal("Old Rurik", v.Entity.Name);
+        Assert.Equal(SceneEntityType.Character, v.Entity.Type);
+    }
+
+    [Fact]
+    public void ScenarioEntityIntroductionValidator_RemovalHandledCorrectly()
+    {
+        // Arrange: Linear scenario S0 -> S1 -> S2
+        var s0 = new Scene
+        {
+            Id = "S0",
+            Title = "Start",
+            Type = SceneType.Narrative,
+            Description = "Introduce Mira."
+        };
+
+        var s1 = new Scene
+        {
+            Id = "S1",
+            Title = "Middle",
+            Type = SceneType.Narrative,
+            Description = "Mira departs forever.",
+            NextSceneId = "S2"
+        };
+
+        var s2 = new Scene
+        {
+            Id = "S2",
+            Title = "End",
+            Type = SceneType.Narrative,
+            Description = "Mentions Mira after removal.",
+        };
+
+        // Wire branches: S0 -> S1, S1 -> S2
+        s0.NextSceneId = "S1";
+
+        var scenario = new Scenario
+        {
+            Id = "RemovalScenario",
+            Title = "Removal",
+            Scenes = new List<Scene> { s0, s1, s2 }
+        };
+
+        var graph = ScenarioGraph.FromScenario(scenario);
+
+        var mira = new SceneEntity { Type = SceneEntityType.Character, Name = "Mira", IsProperNoun = true, Confidence = Confidence.Medium };
+
+        IEnumerable<SceneEntity> GetIntroduced(Scene scene)
+            => scene.Id == "S0" ? new[] { mira } : Array.Empty<SceneEntity>();
+
+        IEnumerable<SceneEntity> GetRemoved(Scene scene)
+            => scene.Id == "S1" ? new[] { mira } : Array.Empty<SceneEntity>();
+
+        IEnumerable<SceneEntity> GetUsed(Scene scene)
+            => scene.Id == "S2" ? new[] { mira } : Array.Empty<SceneEntity>();
+
+        // Act
+        var violations = ScenarioEntityIntroductionValidator.FindIntroductionViolations(
+            graph,
+            GetIntroduced,
+            GetRemoved,
+            GetUsed);
+
+        // Assert: one violation at S2 because Mira was removed at S1
+        Assert.NotNull(violations);
+        Assert.Single(violations);
+        var v = violations[0];
+        Assert.Equal("S2", v.SceneId);
+        Assert.Equal("Mira", v.Entity.Name);
         Assert.Equal(SceneEntityType.Character, v.Entity.Type);
     }
 }

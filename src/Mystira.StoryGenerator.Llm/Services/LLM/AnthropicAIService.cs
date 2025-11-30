@@ -68,7 +68,7 @@ public class AnthropicAIService : ILLMService
             return new List<ChatModelInfo> { model };
         }
 
-        // If a configured model name is provided, prefer returning only that specific model.
+        // If a configured model name is provided, return only that specific model when possible
         if (!string.IsNullOrWhiteSpace(configuredName))
         {
             var selected = models.FirstOrDefault(m => string.Equals(m.Name, configuredName, StringComparison.OrdinalIgnoreCase));

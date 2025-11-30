@@ -82,7 +82,7 @@ public class ScenarioEntityConsistencyEvaluationService : IScenarioEntityConsist
                     : Enumerable.Empty<SceneEntity>();
 
             Func<Scene, IEnumerable<SceneEntity>> getUsed = scene =>
-                ExtractUsedEntitiesFromScene(scene, sceneClassifications);
+                ExtractUsedEntitiesFromScene(scene, sceneClassifications, getRemoved);
 
             // Run data-flow analysis to find violations
             var violations = ScenarioEntityIntroductionValidator.FindIntroductionViolations(
@@ -109,6 +109,7 @@ public class ScenarioEntityConsistencyEvaluationService : IScenarioEntityConsist
     /// <summary>
     /// Classifies entities in all scenes of the scenario using the entity classifier.
     /// Classification tasks are executed in parallel.
+    /// Returns a dictionary mapping scene IDs to classification results.
     /// </summary>
     private async Task<IReadOnlyDictionary<string, SceneEntityClassificationData>> ClassifyScenesAsync(
         ScenarioGraph graph,
@@ -182,9 +183,9 @@ public class ScenarioEntityConsistencyEvaluationService : IScenarioEntityConsist
     /// Uses the classified entities as a source of truth - any entity that appears in the scene
     /// but wasn't introduced or removed in the same scene is considered "used".
     /// </summary>
-    private static IEnumerable<SceneEntity> ExtractUsedEntitiesFromScene(
-        Scene scene,
-        IReadOnlyDictionary<string, SceneEntityClassificationData> sceneClassifications)
+    private static IEnumerable<SceneEntity> ExtractUsedEntitiesFromScene(Scene scene,
+        IReadOnlyDictionary<string, SceneEntityClassificationData> sceneClassifications,
+        Func<Scene, IEnumerable<SceneEntity>> getRemoved)
     {
         // Combine the scene's text content
         var sceneText = $"{scene.Title} {scene.Description}".ToLowerInvariant();
@@ -199,14 +200,18 @@ public class ScenarioEntityConsistencyEvaluationService : IScenarioEntityConsist
                 allEntities.Add(entity);
         }
 
+        var removedEntities = getRemoved(scene).ToArray();
         // Find which entities are mentioned in this scene's text
         var usedEntities = new List<SceneEntity>();
         foreach (var entity in allEntities)
         {
+            // If the entity was removed in this scene, it's not used'
+            var wasRemoved = removedEntities.Any(e => e.Type == entity.Type && e.Name == entity.Name);
+            if (wasRemoved)
+                continue;
+            // Otherwise, check if the entity name appears in the scene text
             if (sceneText.Contains(entity.Name.ToLowerInvariant()))
-            {
                 usedEntities.Add(entity);
-            }
         }
 
         return usedEntities;

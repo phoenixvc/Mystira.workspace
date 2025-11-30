@@ -5,7 +5,7 @@ using Mystira.StoryGenerator.Llm.Services.DominatorBasedConsistency;
 
 namespace Mystira.StoryGenerator.Llm.Console.Tests;
 
-internal static class EntityClassificationConsoleTests
+internal static class EntityClassificationTests
 {
     public static async Task<int> RunAsync(IServiceProvider services, ILogger logger)
     {
@@ -102,7 +102,7 @@ internal static class EntityClassificationConsoleTests
                 try
                 {
                     var result = await classifier.ClassifyAsync(scene);
-                    var actual = result?.Entities ?? [];
+                    var actual = result?.IntroducedEntities ?? Array.Empty<SceneEntity>();
 
                     // If classifier returned no entities, this is only a failure when we expected some.
                     if (actual.Length == 0)

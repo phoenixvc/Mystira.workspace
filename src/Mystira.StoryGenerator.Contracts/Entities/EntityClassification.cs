@@ -13,9 +13,4 @@ public class EntityClassification
 
     [JsonPropertyName("removed_entities")]
     public SceneEntity[] RemovedEntities { get; set; } = [];
-
-    // Backward-compat field: some callers still expect a flat list
-    // of entities. We keep it and generally populate it with
-    // IntroducedEntities in the classifier.
-    public SceneEntity[] Entities { get; set; } = [];
 }

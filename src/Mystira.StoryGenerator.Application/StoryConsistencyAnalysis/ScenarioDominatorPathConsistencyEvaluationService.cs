@@ -78,11 +78,12 @@ public class ScenarioDominatorPathConsistencyEvaluationService : IScenarioDomina
     {
         try
         {
-            _logger.LogDebug("Evaluating consistency for path {PathIndex} with {SceneCount} scenes", 
-                pathIndex, path.SceneIds.Count);
+            _logger.LogDebug("Evaluating consistency for path {PathIndex} with {SceneCount} scenes",
+                pathIndex, path.SceneIds.Length);
 
-            // Serialize this single path to content for LLM evaluation
-            var pathContent = SerializePathContent(path, pathIndex);
+            // Serialize this single path to content for LLM evaluation, include a path header for clarity
+            var pathHeader = $"Path: {string.Join(" -> ", path.SceneIds)}\n";
+            var pathContent = pathHeader + path.Story;
 
             // Evaluate consistency on this path
             var result = await _consistencyEvaluator.EvaluateConsistencyAsync(pathContent, cancellationToken);
@@ -106,13 +107,5 @@ public class ScenarioDominatorPathConsistencyEvaluationService : IScenarioDomina
             _logger.LogWarning(ex, "Failed to evaluate consistency for path {PathIndex}", pathIndex);
             return new PathConsistencyEvaluationResult(path.SceneIds, null);
         }
-    }
-
-    /// <summary>
-    /// Serializes a single scenario path to content suitable for LLM evaluation.
-    /// </summary>
-    private static string SerializePathContent(ScenarioPath path, int pathIndex)
-    {
-        return $"Path {pathIndex}:\n{path.Story}";
     }
 }

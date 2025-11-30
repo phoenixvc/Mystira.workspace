@@ -33,8 +33,7 @@ public class ScenarioEntityConsistencyEvaluationServiceTests
         {
             TimeDelta = "none",
             IntroducedEntities = new[] { new SceneEntity { Type = SceneEntityType.Character, Name = "TestChar" } },
-            RemovedEntities = Array.Empty<SceneEntity>(),
-            Entities = Array.Empty<SceneEntity>()
+            RemovedEntities = Array.Empty<SceneEntity>()
         };
 
         _mockClassifier
@@ -92,8 +91,7 @@ public class ScenarioEntityConsistencyEvaluationServiceTests
                     {
                         TimeDelta = "none",
                         IntroducedEntities = new[] { mira },
-                        RemovedEntities = Array.Empty<SceneEntity>(),
-                        Entities = new[] { mira }
+                        RemovedEntities = Array.Empty<SceneEntity>()
                     });
                 }
 
@@ -101,8 +99,7 @@ public class ScenarioEntityConsistencyEvaluationServiceTests
                 {
                     TimeDelta = "none",
                     IntroducedEntities = Array.Empty<SceneEntity>(),
-                    RemovedEntities = Array.Empty<SceneEntity>(),
-                    Entities = Array.Empty<SceneEntity>()
+                    RemovedEntities = Array.Empty<SceneEntity>()
                 });
             });
 
@@ -136,8 +133,7 @@ public class ScenarioEntityConsistencyEvaluationServiceTests
         {
             TimeDelta = "none",
             IntroducedEntities = Array.Empty<SceneEntity>(),
-            RemovedEntities = Array.Empty<SceneEntity>(),
-            Entities = Array.Empty<SceneEntity>()
+            RemovedEntities = Array.Empty<SceneEntity>()
         };
 
         _mockClassifier

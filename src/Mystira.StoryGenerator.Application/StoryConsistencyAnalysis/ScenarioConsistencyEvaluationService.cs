@@ -1,5 +1,4 @@
 using Microsoft.Extensions.Logging;
-using Mystira.StoryGenerator.Domain.Services;
 using Mystira.StoryGenerator.Domain.Stories;
 
 namespace Mystira.StoryGenerator.Application.StoryConsistencyAnalysis;

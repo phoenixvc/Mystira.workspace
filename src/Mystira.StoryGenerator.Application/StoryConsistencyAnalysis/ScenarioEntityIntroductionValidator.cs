@@ -17,6 +17,34 @@ namespace Mystira.StoryGenerator.Application.StoryConsistencyAnalysis
     public static class ScenarioEntityIntroductionValidator
     {
         /// <summary>
+        /// Lightweight filtered entity used by the data-flow engine. Contains only the
+        /// identifying fields we track (Type + Name) and ignores transient attributes.
+        /// </summary>
+        private sealed record FilteredSceneEntity(SceneEntityType Type, string Name);
+
+        /// <summary>
+        /// Filter predicate: we only track entities that are Locations, Characters or Items,
+        /// are proper nouns, and have at least medium confidence.
+        /// </summary>
+        private static bool ShouldProcess(SceneEntity e)
+        {
+            if (e is null) return false;
+
+            // a) Type is Location, Character or Item
+            var allowedType = e.Type is SceneEntityType.Location or SceneEntityType.Character or SceneEntityType.Item;
+            if (!allowedType) return false;
+
+            // b) Proper noun
+            if (!e.IsProperNoun) return false;
+
+            // c) Confidence is medium or high
+            return e.Confidence is Confidence.Medium or Confidence.High;
+        }
+
+        private static FilteredSceneEntity ToFiltered(SceneEntity e)
+            => new(e.Type, e.Name);
+
+        /// <summary>
         /// Represents a "used before introduced" violation:
         /// an entity that is used in a scene but is not present
         /// in the "must-have-been introduced" set for that scene.
@@ -31,11 +59,11 @@ namespace Mystira.StoryGenerator.Application.StoryConsistencyAnalysis
         /// and <see cref="SceneEntity.Name"/> match (case-insensitive).
         /// This is used by the data-flow analysis to track presence/absence.
         /// </summary>
-        private sealed class SceneEntityComparer : IEqualityComparer<SceneEntity>
+        private sealed class FilteredSceneEntityComparer : IEqualityComparer<FilteredSceneEntity>
         {
-            public static readonly SceneEntityComparer Instance = new();
+            public static readonly FilteredSceneEntityComparer Instance = new();
 
-            public bool Equals(SceneEntity? x, SceneEntity? y)
+            public bool Equals(FilteredSceneEntity? x, FilteredSceneEntity? y)
             {
                 if (ReferenceEquals(x, y)) return true;
                 if (x is null || y is null) return false;
@@ -44,7 +72,7 @@ namespace Mystira.StoryGenerator.Application.StoryConsistencyAnalysis
                        string.Equals(x.Name, y.Name, StringComparison.OrdinalIgnoreCase);
             }
 
-            public int GetHashCode(SceneEntity obj)
+            public int GetHashCode(FilteredSceneEntity obj)
             {
                 unchecked
                 {
@@ -110,7 +138,7 @@ namespace Mystira.StoryGenerator.Application.StoryConsistencyAnalysis
                 _ => throw new ArgumentOutOfRangeException()
             };
 
-            // 1) Build DataFlowNode<SceneEntity> dictionary from ScenarioGraph
+            // 1) Build DataFlowNode<FilteredSceneEntity> dictionary from ScenarioGraph
             var nodeMap = BuildDataFlowNodes(graph, getIntroduced, getRemoved);
 
             // 2) Run generic must-analysis with explicit type argument
@@ -128,8 +156,17 @@ namespace Mystira.StoryGenerator.Application.StoryConsistencyAnalysis
                 var usedEntities = getUsed(scene);
 
                 foreach (var used in usedEntities)
-                    // Contains() respects our SceneEntityComparer via the HashSet setup.
-                    if (!mustForScene.Contains(used)) violations.Add(new SceneReferenceViolation(scene.Id, used));
+                {
+                    if (!ShouldProcess(used))
+                        continue;
+
+                    var filtered = ToFiltered(used);
+                    // Contains() respects our FilteredSceneEntityComparer via the HashSet setup.
+                    if (!mustForScene.Contains(filtered))
+                    {
+                        violations.Add(new SceneReferenceViolation(scene.Id, used));
+                    }
+                }
             }
 
             return violations;
@@ -140,27 +177,31 @@ namespace Mystira.StoryGenerator.Application.StoryConsistencyAnalysis
         /// in the <see cref="ScenarioGraph"/>, wiring predecessor/successor ids and
         /// attaching introduced/removed <see cref="SceneEntity"/> sets.
         /// </summary>
-        private static IReadOnlyDictionary<string, DataFlowNode<SceneEntity>> BuildDataFlowNodes(
+        private static IReadOnlyDictionary<string, DataFlowNode<FilteredSceneEntity>> BuildDataFlowNodes(
             ScenarioGraph graph,
             Func<Scene, IEnumerable<SceneEntity>> getIntroduced,
             Func<Scene, IEnumerable<SceneEntity>> getRemoved)
         {
-            var dict = new Dictionary<string, DataFlowNode<SceneEntity>>();
+            var dict = new Dictionary<string, DataFlowNode<FilteredSceneEntity>>();
 
             foreach (var scene in graph.Nodes)
             {
                 var predecessors = graph.GetPredecessors(scene).Select(s => s.Id);
                 var successors   = graph.GetSuccessors(scene).Select(s => s.Id);
 
-                var introduced = new HashSet<SceneEntity>(
-                    getIntroduced(scene),
-                    SceneEntityComparer.Instance);
+                var introduced = new HashSet<FilteredSceneEntity>(
+                    getIntroduced(scene)
+                        .Where(ShouldProcess)
+                        .Select(ToFiltered),
+                    FilteredSceneEntityComparer.Instance);
 
-                var removed = new HashSet<SceneEntity>(
-                    getRemoved(scene),
-                    SceneEntityComparer.Instance);
+                var removed = new HashSet<FilteredSceneEntity>(
+                    getRemoved(scene)
+                        .Where(ShouldProcess)
+                        .Select(ToFiltered),
+                    FilteredSceneEntityComparer.Instance);
 
-                dict[scene.Id] = new DataFlowNode<SceneEntity>(
+                dict[scene.Id] = new DataFlowNode<FilteredSceneEntity>(
                     scene.Id,
                     predecessors,
                     successors,

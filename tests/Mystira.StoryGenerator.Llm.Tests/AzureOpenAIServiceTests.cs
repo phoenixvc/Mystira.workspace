@@ -79,7 +79,7 @@ public class AzureOpenAIServiceTests
     }
 
     [Fact]
-    public void GetAvailableModels_WithValidSettings_ReturnsModels()
+    public void GetAvailableModels_WithValidSettings_ReturnsSelectedModel()
     {
         // Arrange
         var service = new AzureOpenAIService(_optionsMock.Object, _loggerMock.Object);
@@ -88,21 +88,13 @@ public class AzureOpenAIServiceTests
         var result = service.GetAvailableModels().ToList();
 
         // Assert
-        Assert.Equal(2, result.Count);
-
-        var gpt4Model = result.FirstOrDefault(m => m.Id == "gpt-4");
-        Assert.NotNull(gpt4Model);
+        Assert.Single(result);
+        var gpt4Model = result[0];
+        Assert.Equal("gpt-4", gpt4Model.Id);
         Assert.Equal("GPT-4", gpt4Model.DisplayName);
         Assert.True(gpt4Model.SupportsJsonSchema);
         Assert.Contains("chat", gpt4Model.Capabilities);
         Assert.Contains("json-schema", gpt4Model.Capabilities);
-
-        var gpt35Model = result.FirstOrDefault(m => m.Id == "gpt-35-turbo");
-        Assert.NotNull(gpt35Model);
-        Assert.Equal("GPT-3.5 Turbo", gpt35Model.DisplayName);
-        Assert.False(gpt35Model.SupportsJsonSchema);
-        Assert.Contains("chat", gpt35Model.Capabilities);
-        Assert.DoesNotContain("json-schema", gpt35Model.Capabilities);
     }
 
     [Fact]
