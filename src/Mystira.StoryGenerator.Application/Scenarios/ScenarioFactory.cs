@@ -5,7 +5,7 @@ using Mystira.StoryGenerator.Domain.Stories;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 
-namespace Mystira.StoryGenerator.Application.Services;
+namespace Mystira.StoryGenerator.Application.Scenarios;
 
 /// <summary>
 /// Application-layer implementation for creating Scenarios from JSON or YAML.

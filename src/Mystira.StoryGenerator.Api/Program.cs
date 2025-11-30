@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Options;
 using Mystira.StoryGenerator.Api.Services;
+using Mystira.StoryGenerator.Application.Scenarios;
 using Mystira.StoryGenerator.Application.Services;
 using Mystira.StoryGenerator.Contracts.Configuration;
 using Mystira.StoryGenerator.Contracts.Stories;
