@@ -1,38 +1,29 @@
-using Mystira.StoryGenerator.Application.Scenarios;
+using Mystira.StoryGenerator.Domain.Stories;
 
 namespace Mystira.StoryGenerator.Application.StoryConsistencyAnalysis;
 
 /// <summary>
-/// Service that orchestrates scenario consistency evaluation using parallel execution.
-/// Combines path-based consistency checking with entity introduction validation.
+/// Orchestrator service that evaluates overall scenario consistency by combining
+/// entity consistency and path consistency evaluations in parallel.
 /// 
-/// The service internally:
-/// 1. Classifies all scenes using the LLM entity classifier to extract introduced/removed entities and time deltas
-/// 2. Runs path-based consistency evaluation on compressed paths
-/// 3. Validates entity introduction violations using the classified entities
+/// The service delegates to specialized services:
+/// 1. IScenarioEntityConsistencyEvaluationService - for entity validation
+/// 2. IScenarioDominatorPathConsistencyEvaluationService - for path consistency
 /// </summary>
 public interface IScenarioConsistencyEvaluationService
 {
     /// <summary>
-    /// Evaluates scenario consistency in parallel by:
-    /// 1. Classifying all scenes via LLM to extract entity introductions, removals, and time deltas
-    /// 2. Running path-based consistency evaluation on compressed paths
-    /// 3. Validating entity introduction violations in the scenario
+    /// Evaluates overall scenario consistency by running entity and path consistency
+    /// evaluations in parallel.
     ///
-    /// All three operations run concurrently where possible using Task.WhenAll.
+    /// Both evaluations run concurrently using Task.WhenAll.
     /// </summary>
-    /// <param name="graph">The scenario graph to evaluate.</param>
-    /// <param name="scenarioPathContent">
-    /// Serialized content of the compressed/dominator-based scenario paths
-    /// (used for path consistency evaluation).
-    /// </param>
+    /// <param name="scenario">The scenario to evaluate for complete consistency.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>
-    /// A complete evaluation result containing both path consistency
-    /// and entity introduction findings, with detailed per-scene classifications.
+    /// A complete evaluation result containing both path consistency and entity introduction findings.
     /// </returns>
     Task<ScenarioConsistencyEvaluationResult> EvaluateAsync(
-        ScenarioGraph graph,
-        string scenarioPathContent,
+        Scenario scenario,
         CancellationToken cancellationToken = default);
 }

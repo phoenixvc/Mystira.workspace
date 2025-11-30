@@ -1,50 +1,97 @@
 # Scenario Consistency Evaluation Service Implementation
 
 ## Overview
-Implemented `ScenarioConsistencyEvaluationService` in the `Mystira.StoryGenerator.Application.StoryConsistencyAnalysis` namespace with parallel execution of two validation mechanisms.
+Implemented a three-service architecture in the `Mystira.StoryGenerator.Application.StoryConsistencyAnalysis` namespace:
+1. **IScenarioEntityConsistencyEvaluationService** - Evaluates entity consistency
+2. **IScenarioDominatorPathConsistencyEvaluationService** - Evaluates path consistency  
+3. **IScenarioConsistencyEvaluationService** - Orchestrator that runs both in parallel
+
+All services take a `Scenario` as input and manage their own graph construction and path generation internally.
 
 ## Architecture
 
 ### Core Components
 
-#### 1. **IScenarioConsistencyEvaluationService** (Interface)
-- **Location**: `src/Mystira.StoryGenerator.Application/StoryConsistencyAnalysis/IScenarioConsistencyEvaluationService.cs`
-- **Purpose**: Defines contract for scenario consistency evaluation
-- **Key Method**: `EvaluateAsync(ScenarioGraph, string, CancellationToken)`
-  - Takes only the scenario graph and path content
-  - Internally classifies all scenes and validates entities
+#### 1. **IScenarioEntityConsistencyEvaluationService** (Interface)
+- **Location**: `src/Mystira.StoryGenerator.Application/StoryConsistencyAnalysis/IScenarioEntityConsistencyEvaluationService.cs`
+- **Purpose**: Defines contract for entity consistency evaluation
+- **Key Method**: `EvaluateAsync(Scenario, CancellationToken)`
+  - Takes only the scenario
+  - Internally constructs ScenarioGraph and classifies entities
+  - Returns `EntityIntroductionEvaluationResult?`
 
-#### 2. **ScenarioConsistencyEvaluationService** (Implementation)
-- **Location**: `src/Mystira.StoryGenerator.Application/StoryConsistencyAnalysis/ScenarioConsistencyEvaluationService.cs`
-- **Purpose**: Orchestrates parallel execution of three operations:
-  1. Scene entity classification (all scenes in parallel)
-  2. Path consistency evaluation
-  3. Entity introduction validation using classifications
+#### 2. **ScenarioEntityConsistencyEvaluationService** (Implementation)
+- **Location**: `src/Mystira.StoryGenerator.Application/StoryConsistencyAnalysis/ScenarioEntityConsistencyEvaluationService.cs`
+- **Purpose**: Evaluates entity consistency within a scenario
+- **Process**:
+  1. Builds ScenarioGraph from Scenario
+  2. Classifies all scenes in parallel using LLM
+  3. Validates entity introduction violations using graph-theoretic data-flow analysis
+- **Dependencies**:
+  - `IEntityLlmClassificationService` (injected)
+  - `ILogger<ScenarioEntityConsistencyEvaluationService>` (injected)
+
+#### 3. **IScenarioDominatorPathConsistencyEvaluationService** (Interface)
+- **Location**: `src/Mystira.StoryGenerator.Application/StoryConsistencyAnalysis/IScenarioDominatorPathConsistencyEvaluationService.cs`
+- **Purpose**: Defines contract for path consistency evaluation
+- **Key Method**: `EvaluateAsync(Scenario, CancellationToken)`
+  - Takes only the scenario
+  - Internally constructs ScenarioGraph and gets compressed paths
+  - Returns `ConsistencyEvaluationResult?`
+
+#### 4. **ScenarioDominatorPathConsistencyEvaluationService** (Implementation)
+- **Location**: `src/Mystira.StoryGenerator.Application/StoryConsistencyAnalysis/ScenarioDominatorPathConsistencyEvaluationService.cs`
+- **Purpose**: Evaluates path consistency on compressed scenario paths
+- **Process**:
+  1. Builds ScenarioGraph from Scenario
+  2. Generates dominator-based compressed paths via `GetCompressedPaths()`
+  3. Serializes paths to content string
+  4. Uses LLM to evaluate consistency
 - **Dependencies**:
   - `ILlmConsistencyEvaluator` (injected)
-  - `IEntityLlmClassificationService` (injected)
+  - `ILogger<ScenarioDominatorPathConsistencyEvaluationService>` (injected)
+
+#### 5. **IScenarioConsistencyEvaluationService** (Orchestrator Interface)
+- **Location**: `src/Mystira.StoryGenerator.Application/StoryConsistencyAnalysis/IScenarioConsistencyEvaluationService.cs`
+- **Purpose**: Orchestrates complete scenario consistency evaluation
+- **Key Method**: `EvaluateAsync(Scenario, CancellationToken)`
+  - Takes only the scenario
+  - Runs both entity and path consistency evaluations in parallel
+
+#### 6. **ScenarioConsistencyEvaluationService** (Orchestrator Implementation)
+- **Location**: `src/Mystira.StoryGenerator.Application/StoryConsistencyAnalysis/ScenarioConsistencyEvaluationService.cs`
+- **Purpose**: Orchestrates parallel execution of entity and path consistency evaluations
+- **Dependencies**:
+  - `IScenarioEntityConsistencyEvaluationService` (injected)
+  - `IScenarioDominatorPathConsistencyEvaluationService` (injected)
   - `ILogger<ScenarioConsistencyEvaluationService>` (injected)
 
-### Validation Pipelines
+### Execution Flow
 
-#### Pipeline 1: Scene Entity Classification (Parallel)
+#### Entity Consistency Service Flow
 ```
-ScenarioGraph.Nodes 
-    → (parallel) IEntityLlmClassificationService.ClassifyAsync() per scene
-    → IReadOnlyDictionary<sceneId, SceneEntityClassificationData>
+Scenario 
+    → Build ScenarioGraph
+    → (parallel) ClassifyAsync() for each scene
+    → Create lookup functions from classifications
+    → Run ScenarioEntityIntroductionValidator.FindIntroductionViolations()
+    → Return EntityIntroductionEvaluationResult
 ```
 
 **Configuration**: `appsettings.json:Ai:EntityClassifier`
 - Uses `SceneEntityLlmClassifier` (from Llm project)
-- Extracts introduced, removed entities and time delta per scene
 - All scene classifications run in parallel via `Task.WhenAll`
 - Gracefully handles null classifications from individual scenes
+- Graph-theoretic data-flow analysis finds violations
 
-#### Pipeline 2: Path Consistency Evaluation
+#### Path Consistency Service Flow
 ```
-scenarioPathContent 
-    → ILlmConsistencyEvaluator.EvaluateConsistencyAsync()
-    → ConsistencyEvaluationResult?
+Scenario 
+    → Build ScenarioGraph
+    → Call GetCompressedPaths() to generate dominator-based paths
+    → Serialize paths to content string
+    → Call ILlmConsistencyEvaluator.EvaluateConsistencyAsync()
+    → Return ConsistencyEvaluationResult
 ```
 
 **Configuration**: `appsettings.json:Ai:ConsistencyEvaluator`
@@ -52,47 +99,34 @@ scenarioPathContent
 - Evaluates dominator-based compressed scenario paths
 - Returns overall assessment (ok, has_minor_issues, has_major_issues, broken)
 - Returns detailed consistency issues with severity levels
-- Runs in parallel with scene classification
 
-#### Pipeline 3: Entity Introduction Validation
-```
-Classifications (from Pipeline 1)
-    + ScenarioGraph
-    → ScenarioEntityIntroductionValidator.FindIntroductionViolations()
-    → IReadOnlyList<EntityIntroductionViolation>
-```
-
-**Process**:
-1. Uses classifications from Pipeline 1 to get introduced/removed entities
-2. Extracts "used" entities by matching entity names in scene text
-3. Runs graph-theoretic data-flow analysis to detect violations
-4. Runs sequentially after Pipelines 1 and 2 complete
-
-### Parallel Execution Model
+#### Orchestrator Parallel Execution Model
 ```csharp
-// Step 1: Classification and path consistency run in parallel
-var classificationTask = ClassifyScenesAsync(graph, cancellationToken);
-var pathConsistencyTask = EvaluatePathConsistencyAsync(scenarioPathContent, cancellationToken);
+// Both services run in parallel on the same Scenario
+var entityEvaluationTask = _entityEvaluationService.EvaluateAsync(scenario, cancellationToken);
+var pathEvaluationTask = _pathEvaluationService.EvaluateAsync(scenario, cancellationToken);
 
-// Wait for both parallel operations
-await Task.WhenAll(classificationTask, pathConsistencyTask);
+// Wait for both to complete
+await Task.WhenAll(entityEvaluationTask, pathEvaluationTask);
 
-// Step 2: Entity validation uses classification results
-var sceneClassifications = await classificationTask;
-var entityIntroductionResult = await ValidateEntityIntroductionAsync(graph, sceneClassifications, cancellationToken);
+// Collect results
+var entityIntroductionResult = await entityEvaluationTask;
+var pathConsistencyResult = await pathEvaluationTask;
 
-// Step 3: Combine all results
+// Combine results
 var result = new ScenarioConsistencyEvaluationResult(
     pathConsistencyResult,
     entityIntroductionResult,
     isSuccessful);
 ```
 
-**Key Points**:
-- Pipelines 1 (classification) and 2 (path consistency) execute concurrently
-- Pipeline 3 (entity validation) runs after 1 completes (requires classification results)
-- Within Pipeline 1, all scenes are classified in parallel
-- Failures in individual classifications don't block others
+**Key Benefits**:
+- Each service is independent and can be used separately
+- Both specialized services run in parallel at orchestrator level
+- Within entity service, all scene classifications run in parallel
+- Each service manages its own ScenarioGraph construction
+- No redundant graph construction or path generation
+- Clear separation of concerns
 
 ## Result Data Structures
 
@@ -209,35 +243,88 @@ Log messages include:
 
 ## Usage Example
 
+### Using Individual Services
 ```csharp
-public class MyService
+public class EntityValidationService
 {
-    private readonly IScenarioConsistencyEvaluationService _evaluationService;
+    private readonly IScenarioEntityConsistencyEvaluationService _entityService;
 
-    public MyService(IScenarioConsistencyEvaluationService evaluationService)
+    public EntityValidationService(IScenarioEntityConsistencyEvaluationService entityService)
     {
-        _evaluationService = evaluationService;
+        _entityService = entityService;
     }
 
-    public async Task EvaluateStoryAsync(Scenario scenario, CancellationToken ct)
+    public async Task ValidateEntitiesAsync(Scenario scenario, CancellationToken ct)
     {
-        // Create graph from scenario
-        var graph = ScenarioGraph.FromScenario(scenario);
-        
-        // Get compressed paths for path consistency evaluation
-        var paths = graph.GetCompressedPaths();
-        var pathContent = SerializePathsToContent(paths);
+        // Service internally builds graph and classifies entities
+        var result = await _entityService.EvaluateAsync(scenario, ct);
 
-        // Evaluate scenario consistency - internally:
-        // 1. Classifies all scenes in parallel
-        // 2. Evaluates path consistency in parallel with classification
-        // 3. Validates entity introductions using classification results
-        var result = await _evaluationService.EvaluateAsync(graph, pathContent, ct);
+        if (result != null)
+        {
+            Console.WriteLine($"Entity Introduction Violations: {result.Violations.Count}");
+            
+            foreach (var violation in result.Violations)
+            {
+                Console.WriteLine($"  Scene {violation.SceneId}: {violation.Entity.Name} used before introduction");
+            }
+
+            foreach (var (sceneId, classification) in result.SceneClassifications)
+            {
+                Console.WriteLine($"Scene {sceneId}: {classification.IntroducedEntities.Count} introduced, " +
+                    $"Time delta: {classification.TimeDelta}");
+            }
+        }
+    }
+}
+
+public class PathValidationService
+{
+    private readonly IScenarioDominatorPathConsistencyEvaluationService _pathService;
+
+    public PathValidationService(IScenarioDominatorPathConsistencyEvaluationService pathService)
+    {
+        _pathService = pathService;
+    }
+
+    public async Task ValidatePathsAsync(Scenario scenario, CancellationToken ct)
+    {
+        // Service internally builds graph and generates compressed paths
+        var result = await _pathService.EvaluateAsync(scenario, ct);
+
+        if (result != null)
+        {
+            Console.WriteLine($"Path Consistency: {result.OverallAssessment}");
+            
+            foreach (var issue in result.Issues)
+            {
+                Console.WriteLine($"  Issue: {issue.Summary} (Severity: {issue.Severity})");
+            }
+        }
+    }
+}
+```
+
+### Using the Orchestrator Service
+```csharp
+public class CompleteConsistencyService
+{
+    private readonly IScenarioConsistencyEvaluationService _consistencyService;
+
+    public CompleteConsistencyService(IScenarioConsistencyEvaluationService consistencyService)
+    {
+        _consistencyService = consistencyService;
+    }
+
+    public async Task EvaluateCompleteConsistencyAsync(Scenario scenario, CancellationToken ct)
+    {
+        // Orchestrator runs both entity and path evaluations in parallel
+        var result = await _consistencyService.EvaluateAsync(scenario, ct);
+
+        Console.WriteLine($"Overall Success: {result.IsSuccessful}");
 
         if (result.PathConsistencyResult != null)
         {
-            Console.WriteLine($"Path Consistency: {result.PathConsistencyResult.OverallAssessment}");
-            
+            Console.WriteLine($"\nPath Consistency: {result.PathConsistencyResult.OverallAssessment}");
             foreach (var issue in result.PathConsistencyResult.Issues)
             {
                 Console.WriteLine($"  Issue: {issue.Summary} (Severity: {issue.Severity})");
@@ -246,29 +333,12 @@ public class MyService
 
         if (result.EntityIntroductionResult != null)
         {
-            var violations = result.EntityIntroductionResult.Violations;
-            Console.WriteLine($"Entity Introduction Violations: {violations.Count}");
-            
-            foreach (var violation in violations)
+            Console.WriteLine($"\nEntity Introduction Violations: {result.EntityIntroductionResult.Violations.Count}");
+            foreach (var violation in result.EntityIntroductionResult.Violations)
             {
                 Console.WriteLine($"  Scene {violation.SceneId}: {violation.Entity.Name} used before introduction");
             }
-
-            // Access per-scene classifications
-            foreach (var (sceneId, classification) in result.EntityIntroductionResult.SceneClassifications)
-            {
-                Console.WriteLine($"Scene {sceneId}: {classification.IntroducedEntities.Count} introduced, " +
-                    $"{classification.RemovedEntities.Count} removed, Time delta: {classification.TimeDelta}");
-            }
         }
-
-        Console.WriteLine($"Overall Success: {result.IsSuccessful}");
-    }
-
-    private string SerializePathsToContent(IEnumerable<ScenarioPath> paths)
-    {
-        // Serialize paths for LLM evaluation
-        return string.Join("\n---\n", paths.Select(p => p.Story));
     }
 }
 ```
@@ -276,24 +346,50 @@ public class MyService
 ## Files Created/Modified
 
 ### Created Files
-1. `src/Mystira.StoryGenerator.Application/StoryConsistencyAnalysis/IScenarioConsistencyEvaluationService.cs`
-2. `src/Mystira.StoryGenerator.Application/StoryConsistencyAnalysis/ScenarioConsistencyEvaluationService.cs`
-3. `src/Mystira.StoryGenerator.Application/StoryConsistencyAnalysis/ScenarioConsistencyEvaluationResult.cs`
-4. `tests/Mystira.StoryGenerator.Application.Tests/Mystira.StoryGenerator.Application.Tests/ScenarioConsistencyEvaluationServiceTests.cs`
+1. `src/Mystira.StoryGenerator.Application/StoryConsistencyAnalysis/IScenarioEntityConsistencyEvaluationService.cs`
+2. `src/Mystira.StoryGenerator.Application/StoryConsistencyAnalysis/ScenarioEntityConsistencyEvaluationService.cs`
+3. `src/Mystira.StoryGenerator.Application/StoryConsistencyAnalysis/IScenarioDominatorPathConsistencyEvaluationService.cs`
+4. `src/Mystira.StoryGenerator.Application/StoryConsistencyAnalysis/ScenarioDominatorPathConsistencyEvaluationService.cs`
+5. `src/Mystira.StoryGenerator.Application/StoryConsistencyAnalysis/IScenarioConsistencyEvaluationService.cs`
+6. `src/Mystira.StoryGenerator.Application/StoryConsistencyAnalysis/ScenarioConsistencyEvaluationService.cs`
+7. `src/Mystira.StoryGenerator.Application/StoryConsistencyAnalysis/ScenarioConsistencyEvaluationResult.cs`
+8. `tests/Mystira.StoryGenerator.Application.Tests/Mystira.StoryGenerator.Application.Tests/ScenarioEntityConsistencyEvaluationServiceTests.cs`
+9. `tests/Mystira.StoryGenerator.Application.Tests/Mystira.StoryGenerator.Application.Tests/ScenarioDominatorPathConsistencyEvaluationServiceTests.cs`
+10. `tests/Mystira.StoryGenerator.Application.Tests/Mystira.StoryGenerator.Application.Tests/ScenarioConsistencyEvaluationServiceTests.cs`
 
 ### Modified Files
-1. `src/Mystira.StoryGenerator.Api/Program.cs` - Added service registrations
+1. `src/Mystira.StoryGenerator.Api/Program.cs` - Added service registrations for all three services
 
 ## Performance Considerations
 
-- **Parallelization**: Both validation pipelines execute concurrently via `Task.WhenAll`
-- **Scene Classification Parallelization**: All scene classifications run in parallel
+- **Orchestrator-Level Parallelization**: Entity and path consistency services run concurrently
+- **Scene Classification Parallelization**: All scene classifications run in parallel within entity service
+- **Path Generation**: Only performed once per service call (no redundancy)
 - **Graceful Degradation**: Failures in individual scenes don't fail entire classification
 - **Timeout Management**: Uses configurable cancellation tokens propagated through the call chain
+- **Single Scenario Per Call**: No graph construction redundancy since both services receive same scenario
+
+## Design Patterns
+
+### Single Responsibility Principle
+- Each service has a single, well-defined responsibility
+- Entity service focuses on entity validation
+- Path service focuses on path consistency
+- Orchestrator focuses on coordination
+
+### Dependency Injection
+- All services are registered in DI container
+- Can be injected individually or via orchestrator
+- Loose coupling between services
+
+### Immutable Results
+- All result types are immutable records for thread safety
+- Results can be safely shared across async contexts
 
 ## Notes
 
 - Scene serialization uses Title, Type, and Description fields (extensible as needed)
-- Classification results are cached per scene in a dictionary for efficient access
-- Service maintains no state between calls (stateless design)
+- Each service builds its own ScenarioGraph to avoid shared state
+- Services maintain no state between calls (stateless design)
 - All result types are immutable records for thread safety
+- Services use dependency injection for testability

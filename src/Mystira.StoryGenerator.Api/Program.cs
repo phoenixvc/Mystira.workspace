@@ -84,6 +84,8 @@ builder.Services.AddScoped<IChatOrchestrationService, ChatOrchestrationService>(
 // Register consistency evaluation services
 builder.Services.AddScoped<ILlmConsistencyEvaluator, ScenarioPathConsistencyLlmEvaluator>();
 builder.Services.AddScoped<IEntityLlmClassificationService, SceneEntityLlmClassifier>();
+builder.Services.AddScoped<IScenarioEntityConsistencyEvaluationService, ScenarioEntityConsistencyEvaluationService>();
+builder.Services.AddScoped<IScenarioDominatorPathConsistencyEvaluationService, ScenarioDominatorPathConsistencyEvaluationService>();
 builder.Services.AddScoped<IScenarioConsistencyEvaluationService, ScenarioConsistencyEvaluationService>();
 
 var app = builder.Build();
