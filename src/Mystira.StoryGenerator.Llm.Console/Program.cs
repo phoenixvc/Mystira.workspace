@@ -9,6 +9,7 @@ using Mystira.StoryGenerator.Domain.Services;
 using Mystira.StoryGenerator.Llm.Console.Tests;
 using Mystira.StoryGenerator.Llm.Services.DominatorBasedConsistency;
 using Mystira.StoryGenerator.Llm.Services.LLM;
+using Mystira.StoryGenerator.Application.StoryConsistencyAnalysis;
 
 var builder = Host.CreateApplicationBuilder(args);
 
@@ -32,7 +33,10 @@ builder.Services.AddSingleton<ILlmServiceFactory, LLMServiceFactory>();
 
 // Entity classifier and consistency evaluator
 builder.Services.AddSingleton<SceneEntityLlmClassifier>();
-builder.Services.AddSingleton<ScenarioPathConsistencyLlmEvaluator>();
+builder.Services.AddSingleton<IEntityLlmClassificationService, SceneEntityLlmClassifier>();
+builder.Services.AddSingleton<ILlmConsistencyEvaluator, ScenarioPathConsistencyLlmEvaluator>();
+builder.Services.AddScoped<IScenarioDominatorPathConsistencyEvaluationService, ScenarioDominatorPathConsistencyEvaluationService>();
+builder.Services.AddScoped<IScenarioEntityConsistencyEvaluationService, ScenarioEntityConsistencyEvaluationService>();
 // Scenario factory for loading scenarios from YAML/JSON in console tool
 builder.Services.AddSingleton<IScenarioFactory, ScenarioFactory>();
 
@@ -112,33 +116,44 @@ if (!string.IsNullOrEmpty(providerArg) || !string.IsNullOrEmpty(deploymentArg))
 if (args.Any(a => a.Equals("--test-entity-classifier", StringComparison.OrdinalIgnoreCase)
                || a.Equals("test-entity-classifier", StringComparison.OrdinalIgnoreCase)))
 {
-    var exitCode = await EntityClassificationConsoleTests.RunAsync(host.Services, logger);
+    var exitCode = await EntityClassificationTests.RunAsync(host.Services, logger);
     return exitCode;
 }
 
-// CLI: --test-consistency
-if (args.Any(a => a.Equals("--test-consistency", StringComparison.OrdinalIgnoreCase)
-               || a.Equals("test-consistency", StringComparison.OrdinalIgnoreCase)))
+// CLI: --test-dominator-path-consistency
+if (args.Any(a => a.Equals("--test-dominator-path-consistency", StringComparison.OrdinalIgnoreCase)
+               || a.Equals("test-dominator-path-consistency", StringComparison.OrdinalIgnoreCase)))
 {
-    var exitCode = await ConsistencyConsoleTests.RunAsync(host.Services, logger);
+    var exitCode = await DominatorPathConsistencyTests.RunAsync(host.Services, logger);
     return exitCode;
 }
 
-// CLI: --consistency-file <path> [--format yaml|json]
-int fileArgIndex = Array.FindIndex(args, a => a.Equals("--consistency-file", StringComparison.OrdinalIgnoreCase)
-                                       || a.Equals("consistency-file", StringComparison.OrdinalIgnoreCase));
+// CLI: --dominator-path-consistency-file <path> [--format yaml|json]
+int fileArgIndex = Array.FindIndex(args, a => a.Equals("--dominator-path-consistency-file", StringComparison.OrdinalIgnoreCase)
+                                       || a.Equals("dominator-path-consistency-file", StringComparison.OrdinalIgnoreCase));
 if (fileArgIndex >= 0)
 {
-    var exitCode = await ConsistencyFileRunner.RunAsync(host.Services, logger, args);
+    var exitCode = await DominatorPathConsistencyFileRunner.RunAsync(host.Services, logger, args);
+    return exitCode;
+}
+
+// CLI: --entity-consistency-file [<path>]  Evaluate entity introduction consistency for a scenario file
+// If no path is provided, defaults to test_data/Test-Story-UnintroducedEntities.yaml
+int entityConsistencyIdx = Array.FindIndex(args, a => a.Equals("--entity-consistency-file", StringComparison.OrdinalIgnoreCase)
+                                                 || a.Equals("entity-consistency-file", StringComparison.OrdinalIgnoreCase));
+if (entityConsistencyIdx >= 0)
+{
+    var exitCode = await EntityConsistencyFileRunner.RunAsync(host.Services, logger, args);
     return exitCode;
 }
 
 // Default help
 logger.LogInformation("Mystira.StoryGenerator.Llm.Console");
 logger.LogInformation("Usage:");
-logger.LogInformation("  --test-entity-classifier   Alias for --test-event-classifier");
-logger.LogInformation("  --test-consistency         Runs ScenarioConsistencyLlmEvaluator examples and prints assessment & issues");
-logger.LogInformation("  --consistency-file <path> [--format yaml|json]   Evaluate consistency over each compressed path of the given scenario file");
+logger.LogInformation("  --test-entity-classifier   Runs entity classification tests and prints results");
+logger.LogInformation("  --test-dominator-path-consistency         Runs ScenarioDominatorPathConsistencyEvaluationService examples and prints assessment & issues");
+logger.LogInformation("  --dominator-path-consistency-file <path> [--format yaml|json]   Evaluate consistency over each compressed path of the given scenario file");
 logger.LogInformation("  --provider|-p <name>       LLM provider to use (e.g., azure-openai, anthropic)");
 logger.LogInformation("  --model|-m <deployment>    Model deployment to use (e.g., gpt-4o, claude-sonnet-4-5)");
+logger.LogInformation("  --entity-consistency-file [<path>]  Evaluate entity reference consistency across scenario; default file: test_data/Test-Story-UnintroducedEntities.yaml");
 return 0;

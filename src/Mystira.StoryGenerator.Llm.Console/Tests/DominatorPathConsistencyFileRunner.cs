@@ -1,28 +1,28 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.DependencyInjection;
 using Mystira.StoryGenerator.Application.Scenarios;
+using Mystira.StoryGenerator.Application.StoryConsistencyAnalysis;
 using Mystira.StoryGenerator.Domain.Services;
-using Mystira.StoryGenerator.Llm.Services.DominatorBasedConsistency;
 
 namespace Mystira.StoryGenerator.Llm.Console.Tests;
 
-internal static class ConsistencyFileRunner
+internal static class DominatorPathConsistencyFileRunner
 {
     public static async Task<int> RunAsync(IServiceProvider services, ILogger logger, string[] args)
     {
-        // CLI: --consistency-file <path> [--format yaml|json]
-        int fileArgIndex = Array.FindIndex(args, a => a.Equals("--consistency-file", StringComparison.OrdinalIgnoreCase)
-                                               || a.Equals("consistency-file", StringComparison.OrdinalIgnoreCase));
+        // CLI: --dominator-path-consistency-file <path> [--format yaml|json]
+        int fileArgIndex = Array.FindIndex(args, a => a.Equals("--dominator-path-consistency-file", StringComparison.OrdinalIgnoreCase)
+                                               || a.Equals("dominator-path-consistency-file", StringComparison.OrdinalIgnoreCase));
         if (fileArgIndex < 0)
         {
-            logger.LogError("--consistency-file flag not found");
+            logger.LogError("--dominator-path-consistency-file flag not found");
             return 2;
         }
 
         var path = (fileArgIndex + 1) < args.Length ? args[fileArgIndex + 1] : null;
         if (string.IsNullOrWhiteSpace(path))
         {
-            logger.LogError("--consistency-file requires a file path argument.");
+            logger.LogError("--dominator-path-consistency-file requires a file path argument.");
             return 2;
         }
 
@@ -51,7 +51,7 @@ internal static class ConsistencyFileRunner
         }
 
         var factory = services.GetRequiredService<IScenarioFactory>();
-        var evaluator = services.GetRequiredService<ScenarioPathConsistencyLlmEvaluator>();
+        var domService = services.GetRequiredService<IScenarioDominatorPathConsistencyEvaluationService>();
 
         var content = await File.ReadAllTextAsync(path);
         var scenario = await factory.CreateFromContentAsync(content, format);
@@ -77,71 +77,50 @@ internal static class ConsistencyFileRunner
             outPath = Path.Combine(dir, $"{nameNoExt}.consistency.{stamp}.json");
         }
 
-        // Parallel evaluation with progress reporting
-        var results = new StoryConsistencyEvaluation[paths.Count];
-        int processed = 0;
-        int total = paths.Count;
-        var degree = Math.Max(2, Math.Min(Environment.ProcessorCount, 8));
-        using var gate = new SemaphoreSlim(degree, degree);
-        var tasks = new List<Task>();
+        // Build a lookup from SceneIds signature to story text to enrich output later
+        var storyBySceneIds = paths.ToDictionary(
+            p => string.Join("|", p.SceneIds),
+            p => p.Story);
 
-        for (int i = 0; i < paths.Count; i++)
+        // Delegate path evaluation to the dominator path consistency service
+        var pathResults = await domService.EvaluateAsync(scenario);
+
+        // Prepare final results array for file output
+        var results = new List<StoryConsistencyEvaluation>();
+        if (pathResults?.PathResults != null)
         {
-            var localIndex = i; // capture
-            await gate.WaitAsync();
-            tasks.Add(Task.Run(async () =>
+            int idx = 0;
+            foreach (var pr in pathResults.PathResults)
             {
-                try
+                idx++;
+                var pathStr = string.Join(" -> ", pr.SceneIds);
+                logger.LogInformation("\n[{Index}] Path: {PathStr}", idx, pathStr);
+
+                var key = string.Join("|", pr.SceneIds);
+                storyBySceneIds.TryGetValue(key, out var story);
+                story ??= "<story content unavailable>";
+                logger.LogInformation("[{Index}] Scenario Text\n{Story}\n", idx, story);
+
+                var resultJson = pr.Result == null
+                    ? "<no result>"
+                    : System.Text.Json.JsonSerializer.Serialize(
+                        pr.Result,
+                        new System.Text.Json.JsonSerializerOptions
+                        {
+                            WriteIndented = true,
+                            Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+                        });
+
+                logger.LogInformation("[{Index}] LLM Output (JSON)\n{Json}\n", idx, resultJson);
+
+                results.Add(new StoryConsistencyEvaluation
                 {
-                    var p = paths[localIndex];
-                    var pathStr = string.Join(" -> ", p.SceneIds);
-
-                    // Output scenario and LLM result paragraphs
-                    logger.LogInformation("\n[{Index}] Path: {PathStr}", localIndex + 1, pathStr);
-                    logger.LogInformation("[{Index}] Scenario Text\n{Story}\n", localIndex + 1, p.Story);
-
-                    var result = await evaluator.EvaluateConsistencyAsync(p.Story);
-                    string resultJson = result == null
-                        ? "<no result>"
-                        : System.Text.Json.JsonSerializer.Serialize(
-                            result,
-                            new System.Text.Json.JsonSerializerOptions
-                            {
-                                WriteIndented = true,
-                                Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
-                            });
-
-                    logger.LogInformation("[{Index}] LLM Output (JSON)\n{Json}\n", localIndex + 1, resultJson);
-
-                    results[localIndex] = new StoryConsistencyEvaluation
-                    {
-                        Path = pathStr,
-                        PathContent = p.Story,
-                        Result = result
-                    };
-                }
-                catch (Exception ex)
-                {
-                    logger.LogError(ex, "[{Index}] Exception while evaluating path", localIndex + 1);
-                    // Still record an empty result to keep array aligned
-                    var p = paths[localIndex];
-                    results[localIndex] = new StoryConsistencyEvaluation
-                    {
-                        Path = string.Join(" -> ", p.SceneIds),
-                        PathContent = p.Story,
-                        Result = null
-                    };
-                }
-                finally
-                {
-                    var done = Interlocked.Increment(ref processed);
-                    logger.LogInformation("Progress: {Done}/{Total} paths processed", done, total);
-                    gate.Release();
-                }
-            }));
+                    Path = pathStr,
+                    PathContent = story,
+                    Result = pr.Result
+                });
+            }
         }
-
-        await Task.WhenAll(tasks);
 
         // Write JSON results to file
         try

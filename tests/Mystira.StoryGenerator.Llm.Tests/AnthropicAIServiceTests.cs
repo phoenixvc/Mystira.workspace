@@ -83,24 +83,18 @@ public class AnthropicAIServiceTests
     }
 
     [Fact]
-    public void GetAvailableModels_WithValidSettings_ReturnsModels()
+    public void GetAvailableModels_WithValidSettings_ReturnsSelectedModel()
     {
         var service = new AnthropicAIService(_optionsMock.Object, _loggerMock.Object);
 
         var result = service.GetAvailableModels().ToList();
 
-        Assert.Equal(2, result.Count);
-
-        var sonnetModel = result.FirstOrDefault(m => m.Id == "claude-3-5-sonnet-20241022");
-        Assert.NotNull(sonnetModel);
+        Assert.Single(result);
+        var sonnetModel = result[0];
+        Assert.Equal("claude-3-5-sonnet-20241022", sonnetModel.Id);
         Assert.Equal("Claude 3.5 Sonnet", sonnetModel.DisplayName);
         Assert.True(sonnetModel.SupportsJsonSchema);
         Assert.Contains("chat", sonnetModel.Capabilities);
-
-        var opusModel = result.FirstOrDefault(m => m.Id == "claude-3-opus-20250219");
-        Assert.NotNull(opusModel);
-        Assert.Equal("Claude 3 Opus", opusModel.DisplayName);
-        Assert.True(opusModel.SupportsJsonSchema);
     }
 
     [Fact]

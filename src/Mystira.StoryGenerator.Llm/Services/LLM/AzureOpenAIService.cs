@@ -70,8 +70,51 @@ public class AzureOpenAIService : ILLMService
             return new List<ChatModelInfo> { model };
         }
 
-        // Convert configured deployments to ChatModelInfo objects
-        var models = deployments.Select(deployment => new ChatModelInfo
+        var configuredName = _settings.AzureOpenAI.DeploymentName;
+
+        // If a specific deployment is configured, prefer returning only that one
+        if (!string.IsNullOrWhiteSpace(configuredName))
+        {
+            var selected = deployments.FirstOrDefault(d => string.Equals(d.Name, configuredName, StringComparison.OrdinalIgnoreCase));
+            if (selected != null)
+            {
+                return new[]
+                {
+                    new ChatModelInfo
+                    {
+                        Id = selected.Name,
+                        DisplayName = selected.DisplayName,
+                        Description = $"Azure OpenAI {selected.DisplayName} deployment",
+                        MaxTokens = selected.MaxTokens,
+                        DefaultTemperature = selected.DefaultTemperature,
+                        MinTemperature = 0.0,
+                        MaxTemperature = 2.0,
+                        SupportsJsonSchema = selected.SupportsJsonSchema,
+                        Capabilities = selected.Capabilities ?? new List<string> { "chat", "story-generation" }
+                    }
+                };
+            }
+
+            // Not found in list: return a synthetic single entry
+            return new[]
+            {
+                new ChatModelInfo
+                {
+                    Id = configuredName,
+                    DisplayName = GetDisplayNameForDeployment(configuredName),
+                    Description = "Azure OpenAI GPT model deployment",
+                    MaxTokens = 4096,
+                    DefaultTemperature = 0.7,
+                    MinTemperature = 0.0,
+                    MaxTemperature = 2.0,
+                    SupportsJsonSchema = true,
+                    Capabilities = new List<string> { "chat", "json-schema", "story-generation" }
+                }
+            };
+        }
+
+        // No specific configured deployment: return all configured entries
+        return deployments.Select(deployment => new ChatModelInfo
         {
             Id = deployment.Name,
             DisplayName = deployment.DisplayName,
@@ -83,8 +126,6 @@ public class AzureOpenAIService : ILLMService
             SupportsJsonSchema = deployment.SupportsJsonSchema,
             Capabilities = deployment.Capabilities ?? new List<string> { "chat", "story-generation" }
         });
-
-        return models;
     }
 
     private static string GetDisplayNameForDeployment(string deploymentName)

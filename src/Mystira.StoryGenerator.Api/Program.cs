@@ -2,9 +2,11 @@ using Microsoft.Extensions.Options;
 using Mystira.StoryGenerator.Api.Services;
 using Mystira.StoryGenerator.Application.Scenarios;
 using Mystira.StoryGenerator.Application.Services;
+using Mystira.StoryGenerator.Application.StoryConsistencyAnalysis;
 using Mystira.StoryGenerator.Contracts.Configuration;
 using Mystira.StoryGenerator.Contracts.Stories;
 using Mystira.StoryGenerator.Domain.Services;
+using Mystira.StoryGenerator.Llm.Services.DominatorBasedConsistency;
 using Mystira.StoryGenerator.Llm.Services.LLM;
 using Mystira.StoryGenerator.Llm.Services.StoryInstructionsRag;
 using Mystira.StoryGenerator.Llm.Services.StoryIntentClassification;
@@ -78,6 +80,13 @@ builder.Services.AddScoped<ILlmIntentLlmClassificationService, StoryLlmIntentLlm
 builder.Services.AddScoped<ICommandRouter, CommandIntentRouter>();
 // Register Chat Orchestration Service
 builder.Services.AddScoped<IChatOrchestrationService, ChatOrchestrationService>();
+
+// Register consistency evaluation services
+builder.Services.AddScoped<ILlmConsistencyEvaluator, ScenarioPathConsistencyLlmEvaluator>();
+builder.Services.AddScoped<IEntityLlmClassificationService, SceneEntityLlmClassifier>();
+builder.Services.AddScoped<IScenarioEntityConsistencyEvaluationService, ScenarioEntityConsistencyEvaluationService>();
+builder.Services.AddScoped<IScenarioDominatorPathConsistencyEvaluationService, ScenarioDominatorPathConsistencyEvaluationService>();
+builder.Services.AddScoped<IScenarioConsistencyEvaluationService, ScenarioConsistencyEvaluationService>();
 
 var app = builder.Build();
 

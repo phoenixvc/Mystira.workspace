@@ -17,12 +17,6 @@ public enum SceneEntityType
     Character,
 
     /// <summary>
-    /// Non-character animals or monsters appearing without personhood
-    /// </summary>
-    [JsonPropertyName("creature")]
-    Creature,
-
-    /// <summary>
     /// physical objects, tools, weapons, artifacts, etc.
     /// </summary>
     [JsonPropertyName("item")]
@@ -32,30 +26,5 @@ public enum SceneEntityType
     /// Abstract ideas (fear, honesty, courage, chaos, magic, time)
     /// </summary>
     [JsonPropertyName("concept")]
-    Concept,
-
-    /// <summary>
-    /// Actions or happenings treated as objects (e.g., “the Great Festival”)
-    /// </summary>
-    [JsonPropertyName("event")]
-    Event,
-
-    /// <summary>
-    /// Groups, guilds, councils, teams
-    /// </summary>
-    [JsonPropertyName("Organization")]
-    Organization,
-
-    /// <summary>
-    /// Powers or learned skills (“shadow magic”, “lockpicking”)
-    /// </summary>
-    [JsonPropertyName("Ability")]
-    Ability,
-
-
-    /// <summary>
-    /// Emotional or physical states (“fatigue”, “excitement”)
-    /// </summary>
-    [JsonPropertyName("Condition")]
-    Condition
+    Concept
 }

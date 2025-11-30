@@ -93,7 +93,9 @@ public class SceneEntityLlmClassifier : IEntityLlmClassificationService
             // Normalize and parse flexible JSON formats from LLM
             var normalized = NormalizeToPureJson(content);
             var classification = ParseEntityClassification(normalized);
-            if (classification == null || classification.Entities.Length == 0)
+            if (classification == null ||
+                ((classification.IntroducedEntities == null || classification.IntroducedEntities.Length == 0) &&
+                 (classification.RemovedEntities == null || classification.RemovedEntities.Length == 0)))
             {
                 _logger.LogWarning("Entity classification response did not contain recognizable entities payload");
                 return null;
@@ -133,9 +135,13 @@ Include an entity only if:
 •	It is plausibly relevant to the ongoing narrative (not just generic background clutter).
 Typical inclusions:
 Characters:
-•	Named people/creatures: Alice, Captain Reyes, The Shadow King
+•	Named people/creatures: Alice, Captain Reyes, The Shadow King, Sam the squirrel
+    (store the entity name as ""Sam"", not ""Sam the squirrel"").
 •	Title + name: Captain Reyes, Lord Harren, Professor Willow
 •	Personified non-humans with names: Whiskers the Cat, Blaze the Dragon
+•   When a named character is followed by a generic type/species/title in the same phrase
+    (e.g., ""Patty the panther"", ""Kelvin the knight""), treat this as a single Character entity
+    and set name to the proper-name portion only (""Patty"", ""Kelvin"").*
 Locations:
 •	Proper places: Grand Market, Tower of Dawn, Rivermoor, Crystal Forest
 •	Distinct in-world sites: Whispering Docks, Hall of Echoes
@@ -161,6 +167,9 @@ e.g., The Endless Rain, The Red Storm.
 •	Generic emotions or vague ideas: fear, hope, courage when used as generic descriptors only and not as distinct, driving forces in the scene.
 •	Verbs, actions, or descriptions: running, battle, music, glow
 •	Purely descriptive phrases that are not stable entities: the old wooden bridge (unless it behaves like a named, recurring landmark such as Old Wooden Bridge on a map).
+Do NOT create a separate entity for the generic role/species when it appears as part of a
+named phrase (e.g., do not add a separate ""panda"" entity in ""Peter the panda""; only output
+the Character entity ""Peter"").*
 If no valid entities are found, introduced_entities and removed_entities must both be empty arrays.
 ________________________________________
 4. Proper Nouns vs. Non-Proper Nouns
@@ -591,7 +600,7 @@ Here, Old Rurik is both introduced and effectively removed in the same scene bec
                                   .Where(e => e != null)
                                   .Cast<SceneEntity>()
                                   .ToArray();
-                return new EntityClassification { Entities = entities, IntroducedEntities = entities, RemovedEntities = [], TimeDelta = "none" };
+                return new EntityClassification { IntroducedEntities = entities, RemovedEntities = [], TimeDelta = "none" };
             }
 
             var root = JObject.Parse(json);
@@ -616,8 +625,6 @@ Here, Old Rurik is both introduced and effectively removed in the same scene bec
                     TimeDelta = string.IsNullOrWhiteSpace(timeDelta) ? "none" : timeDelta,
                     IntroducedEntities = introduced,
                     RemovedEntities = removed,
-                    // Back-compat: Entities mirrors IntroducedEntities
-                    Entities = introduced
                 };
             }
 
@@ -629,7 +636,7 @@ Here, Old Rurik is both introduced and effectively removed in the same scene bec
                                    .Where(e => e != null)
                                    .Cast<SceneEntity>()
                                    .ToArray();
-                return new EntityClassification { Entities = entities, IntroducedEntities = entities, RemovedEntities = [], TimeDelta = "none" };
+                return new EntityClassification { IntroducedEntities = entities, RemovedEntities = [], TimeDelta = "none" };
             }
 
             // As a fallback, attempt direct mapping

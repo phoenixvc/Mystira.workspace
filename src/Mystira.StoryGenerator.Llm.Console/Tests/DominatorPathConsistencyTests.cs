@@ -4,7 +4,7 @@ using Mystira.StoryGenerator.Llm.Services.DominatorBasedConsistency;
 
 namespace Mystira.StoryGenerator.Llm.Console.Tests;
 
-internal static class ConsistencyConsoleTests
+internal static class DominatorPathConsistencyTests
 {
     public static async Task<int> RunAsync(IServiceProvider services, ILogger logger)
     {
