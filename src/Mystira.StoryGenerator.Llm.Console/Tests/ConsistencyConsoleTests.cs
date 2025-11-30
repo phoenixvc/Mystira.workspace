@@ -8,7 +8,7 @@ internal static class ConsistencyConsoleTests
 {
     public static async Task<int> RunAsync(IServiceProvider services, ILogger logger)
     {
-        var evaluator = services.GetRequiredService<ScenarioConsistencyLlmEvaluator>();
+        var evaluator = services.GetRequiredService<ScenarioPathConsistencyLlmEvaluator>();
 
         // Test inputs as specified in the issue description
         var cases = new List<(string name, string content, bool expectOk)> {
