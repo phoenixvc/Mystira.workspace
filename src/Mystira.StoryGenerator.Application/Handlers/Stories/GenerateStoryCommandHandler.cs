@@ -1,4 +1,3 @@
-using System.Text;
 using System.Text.Json;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -13,26 +12,26 @@ namespace Mystira.StoryGenerator.Application.Handlers.Stories;
 
 public class GenerateStoryCommandHandler : ICommandHandler<GenerateStoryCommand, GenerateJsonStoryResponse>
 {
-    private readonly ILLMServiceFactory _llmFactory;
+    private readonly ILlmServiceFactory _llmFactory;
     private readonly AiSettings _settings;
     private readonly IStorySchemaProvider _schemaProvider;
     private readonly IInstructionBlockService _instructionBlockService;
-    private readonly IIntentClassificationService _intentClassificationService;
+    private readonly ILlmIntentLlmClassificationService _llmIntentLlmClassificationService;
     private readonly ILogger<GenerateStoryCommandHandler> _logger;
 
     public GenerateStoryCommandHandler(
-        ILLMServiceFactory llmFactory,
+        ILlmServiceFactory llmFactory,
         IOptions<AiSettings> aiOptions,
         IStorySchemaProvider schemaProvider,
         IInstructionBlockService instructionBlockService,
-        IIntentClassificationService intentClassificationService,
+        ILlmIntentLlmClassificationService llmIntentLlmClassificationService,
         ILogger<GenerateStoryCommandHandler> logger)
     {
         _llmFactory = llmFactory;
         _settings = aiOptions.Value;
         _schemaProvider = schemaProvider;
         _instructionBlockService = instructionBlockService;
-        _intentClassificationService = intentClassificationService;
+        _llmIntentLlmClassificationService = llmIntentLlmClassificationService;
         _logger = logger;
     }
 
@@ -287,7 +286,7 @@ FINAL OUTPUT RULES
         var instructionTypes = new[] { "story_generate_initial" };
         var ageGroup = request.Request?.AgeGroup;
 
-        var intentClassification = await _intentClassificationService.ClassifyIntentAsync(queryText, cancellationToken);
+        var intentClassification = await _llmIntentLlmClassificationService.ClassifyAsync(queryText, cancellationToken);
         if (intentClassification != null)
         {
             _logger.LogInformation(

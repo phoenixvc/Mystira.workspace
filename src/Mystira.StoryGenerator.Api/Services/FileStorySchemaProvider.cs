@@ -1,5 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
+﻿using Microsoft.Extensions.Options;
 using Mystira.StoryGenerator.Contracts.Configuration;
 using Mystira.StoryGenerator.Domain.Services;
 

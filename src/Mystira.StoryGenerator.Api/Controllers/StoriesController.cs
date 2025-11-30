@@ -16,7 +16,7 @@ public class StoriesController : ControllerBase
 {
     private readonly IMediator _mediator;
     private readonly IStoryValidationService _validationService;
-    private readonly ILLMServiceFactory _llmFactory;
+    private readonly ILlmServiceFactory _llmFactory;
     private readonly AiSettings _aiSettings;
     private readonly IStorySchemaProvider _schemaProvider;
     private readonly ILogger<StoriesController> _logger;
@@ -24,7 +24,7 @@ public class StoriesController : ControllerBase
     public StoriesController(
         IMediator mediator,
         IStoryValidationService validationService,
-        ILLMServiceFactory llmFactory,
+        ILlmServiceFactory llmFactory,
         IStorySchemaProvider schemaProvider,
         IOptions<AiSettings> aiOptions,
         ILogger<StoriesController> logger)

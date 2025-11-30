@@ -4,21 +4,20 @@ using Moq;
 using Mystira.StoryGenerator.Api.Controllers;
 using Mystira.StoryGenerator.Contracts.Chat;
 using Mystira.StoryGenerator.Domain.Services;
-using Xunit;
 
 namespace Mystira.StoryGenerator.Api.Tests;
 
 public class ChatControllerTests
 {
     private readonly Mock<IChatOrchestrationService> _chatOrchestrationMock;
-    private readonly Mock<ILLMServiceFactory> _llmFactoryMock;
+    private readonly Mock<ILlmServiceFactory> _llmFactoryMock;
     private readonly Mock<ILogger<ChatController>> _loggerMock;
     private readonly ChatController _controller;
 
     public ChatControllerTests()
     {
         _chatOrchestrationMock = new Mock<IChatOrchestrationService>();
-        _llmFactoryMock = new Mock<ILLMServiceFactory>();
+        _llmFactoryMock = new Mock<ILlmServiceFactory>();
         _loggerMock = new Mock<ILogger<ChatController>>();
 
         _controller = new ChatController(

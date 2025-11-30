@@ -5,7 +5,7 @@ namespace Mystira.StoryGenerator.Domain.Services;
 /// <summary>
 /// Factory for LLM service instances
 /// </summary>
-public interface ILLMServiceFactory
+public interface ILlmServiceFactory
 {
     /// <summary>
     /// Get an LLM service by provider name, with optional deployment name/model ID override.

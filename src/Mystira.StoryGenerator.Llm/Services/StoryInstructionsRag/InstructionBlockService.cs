@@ -10,7 +10,7 @@ using Mystira.StoryGenerator.Contracts.Configuration;
 using Mystira.StoryGenerator.Domain.Services;
 using OpenAI.Embeddings;
 
-namespace Mystira.StoryGenerator.Llm.Services.Instructions;
+namespace Mystira.StoryGenerator.Llm.Services.StoryInstructionsRag;
 
 public sealed class InstructionBlockService : IInstructionBlockService
 {
@@ -103,7 +103,7 @@ public sealed class InstructionBlockService : IInstructionBlockService
 
     // Domain adapter not implemented here; adapter class handles mapping between domain and API contexts.
 
-    public async Task<string?> BuildInstructionBlockAsync(InstructionSearchContext context, CancellationToken cancellationToken = default)
+    public async Task<string?> BuildInstructionBlockAsync(InstructionSearchContext? context, CancellationToken cancellationToken = default)
     {
         if (context is null || string.IsNullOrWhiteSpace(context.QueryText))
         {
@@ -120,20 +120,13 @@ public sealed class InstructionBlockService : IInstructionBlockService
 
         var queryVector = await GenerateEmbeddingAsync(context.QueryText, cancellationToken);
         if (queryVector is null)
-        {
             return null;
-        }
 
         var vectorChunks = await ExecuteVectorSearchAsync(queryVector, context, searchClient, cancellationToken);
         var mandatoryChunks = await FetchMandatoryChunksAsync(context, searchClient, cancellationToken);
         var mergedChunks = MergeChunks(vectorChunks, mandatoryChunks);
 
-        if (mergedChunks.Count == 0)
-        {
-            return null;
-        }
-
-        return BuildInstructionBlock(mergedChunks);
+        return mergedChunks.Count == 0 ? null : BuildInstructionBlock(mergedChunks);
     }
 
     private async Task<float[]?> GenerateEmbeddingAsync(string query, CancellationToken cancellationToken)
@@ -256,7 +249,7 @@ public sealed class InstructionBlockService : IInstructionBlockService
             }
         }
 
-        if (context.InstructionTypes?.Length > 0)
+        if (context?.InstructionTypes?.Length > 0)
         {
             var clause = BuildFieldFilter(_searchSettings.InstructionTypeFieldName, context.InstructionTypes, _searchSettings.IsInstructionTypeFieldCollection);
             if (!string.IsNullOrWhiteSpace(clause))

@@ -11,13 +11,13 @@ public class SchemaDocsCommandHandler : ICommandHandler<SchemaDocsCommand, ChatC
 {
     private const int SchemaSnippetLimit = 10000;
 
-    private readonly ILLMServiceFactory _llmFactory;
+    private readonly ILlmServiceFactory _llmFactory;
     private readonly IInstructionBlockService _instructionBlockService;
     private readonly IStorySchemaProvider _schemaProvider;
     private readonly ILogger<SchemaDocsCommandHandler> _logger;
 
     public SchemaDocsCommandHandler(
-        ILLMServiceFactory llmFactory,
+        ILlmServiceFactory llmFactory,
         IInstructionBlockService instructionBlockService,
         IStorySchemaProvider schemaProvider,
         ILogger<SchemaDocsCommandHandler> logger)

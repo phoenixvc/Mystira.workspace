@@ -10,12 +10,12 @@ namespace Mystira.StoryGenerator.Application.Handlers.Stories;
 
 public class SummarizeStoryCommandHandler : ICommandHandler<SummarizeStoryCommand, ChatCompletionResponse>
 {
-    private readonly ILLMServiceFactory _llmFactory;
+    private readonly ILlmServiceFactory _llmFactory;
     private readonly AiSettings _settings;
     private readonly ILogger<SummarizeStoryCommandHandler> _logger;
 
     public SummarizeStoryCommandHandler(
-        ILLMServiceFactory llmFactory,
+        ILlmServiceFactory llmFactory,
         IOptions<AiSettings> aiOptions,
         ILogger<SummarizeStoryCommandHandler> logger)
     {

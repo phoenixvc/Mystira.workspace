@@ -1,6 +1,6 @@
 ﻿using Mystira.StoryGenerator.Domain.Services;
 
-namespace Mystira.StoryGenerator.Llm.Services.Instructions;
+namespace Mystira.StoryGenerator.Llm.Services.StoryInstructionsRag;
 
 /// <summary>
 /// Adapter to expose the API InstructionBlockService via the Domain IInstructionBlockService interface.

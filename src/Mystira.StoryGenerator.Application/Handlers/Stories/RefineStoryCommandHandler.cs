@@ -11,25 +11,25 @@ namespace Mystira.StoryGenerator.Application.Handlers.Stories;
 
 public class RefineStoryCommandHandler : ICommandHandler<RefineStoryCommand, GenerateJsonStoryResponse>
 {
-    private readonly ILLMServiceFactory _llmFactory;
+    private readonly ILlmServiceFactory _llmFactory;
     private readonly AiSettings _settings;
     private readonly IStorySchemaProvider _schemaProvider;
-    private readonly IIntentClassificationService _intentClassificationService;
+    private readonly ILlmIntentLlmClassificationService _llmIntentLlmClassificationService;
     private readonly IInstructionBlockService _instructionBlockService;
     private readonly ILogger<RefineStoryCommandHandler> _logger;
 
     public RefineStoryCommandHandler(
-        ILLMServiceFactory llmFactory,
+        ILlmServiceFactory llmFactory,
         IOptions<AiSettings> aiOptions,
         IStorySchemaProvider schemaProvider,
-        IIntentClassificationService intentClassificationService,
+        ILlmIntentLlmClassificationService llmIntentLlmClassificationService,
         IInstructionBlockService instructionBlockService,
         ILogger<RefineStoryCommandHandler> logger)
     {
         _llmFactory = llmFactory;
         _settings = aiOptions.Value;
         _schemaProvider = schemaProvider;
-        _intentClassificationService = intentClassificationService;
+        _llmIntentLlmClassificationService = llmIntentLlmClassificationService;
         _instructionBlockService = instructionBlockService;
         _logger = logger;
     }
@@ -233,12 +233,13 @@ Output Format
         var categories = new[] { "story_generation", "story_refinement" };
         var instructionTypes = new[] { "requirements" };
         var ageGroup = request.Request?.AgeGroup;
+        if (string.IsNullOrEmpty(ageGroup)) ageGroup = request.CurrentStory?.AgeGroup;
 
-        var intentClassification = await _intentClassificationService.ClassifyIntentAsync(queryText, cancellationToken);
+        var intentClassification = await _llmIntentLlmClassificationService.ClassifyAsync(queryText, cancellationToken);
         if (intentClassification != null)
         {
             _logger.LogInformation(
-                "Intent classified for story generation: category={Category}, instructionType={InstructionType}",
+                "Intent classified for story refinement: category={Category}, instructionType={InstructionType}",
                 intentClassification.Categories,
                 intentClassification.InstructionTypes);
 
