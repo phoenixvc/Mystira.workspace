@@ -35,7 +35,7 @@ public sealed record EntityIntroductionEvaluationResult(
     /// <summary>
     /// List of violations where entities are used before being introduced.
     /// </summary>
-    IReadOnlyList<EntityIntroductionViolation> Violations,
+    IReadOnlyList<ScenarioEntityIntroductionValidator.SceneReferenceViolation> Violations,
 
     /// <summary>
     /// Map of scene IDs to their classified entities (introduced, removed, used).

@@ -33,7 +33,7 @@ public class ScenarioConsistencyEvaluationServiceTests
         var scenario = CreateTestScenario();
 
         var entityResult = new EntityIntroductionEvaluationResult(
-            new List<EntityIntroductionViolation>(),
+            new List<ScenarioEntityIntroductionValidator.SceneReferenceViolation>(),
             new Dictionary<string, SceneEntityClassificationData>());
 
         var pathResult = new ConsistencyEvaluationResult
@@ -76,7 +76,7 @@ public class ScenarioConsistencyEvaluationServiceTests
         var scenario = CreateTestScenario();
 
         var entityResult = new EntityIntroductionEvaluationResult(
-            new List<EntityIntroductionViolation>(),
+            new List<ScenarioEntityIntroductionValidator.SceneReferenceViolation>(),
             new Dictionary<string, SceneEntityClassificationData>());
 
         var pathResult = new ConsistencyEvaluationResult
@@ -108,7 +108,7 @@ public class ScenarioConsistencyEvaluationServiceTests
         var scenario = CreateTestScenario();
 
         var entityResult = new EntityIntroductionEvaluationResult(
-            new List<EntityIntroductionViolation>(),
+            new List<ScenarioEntityIntroductionValidator.SceneReferenceViolation>(),
             new Dictionary<string, SceneEntityClassificationData>());
 
         _mockEntityService
@@ -168,7 +168,7 @@ public class ScenarioConsistencyEvaluationServiceTests
         _mockEntityService
             .Setup(s => s.EvaluateAsync(It.IsAny<Scenario>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new EntityIntroductionEvaluationResult(
-                new List<EntityIntroductionViolation>(),
+                new List<ScenarioEntityIntroductionValidator.SceneReferenceViolation>(),
                 new Dictionary<string, SceneEntityClassificationData>()));
 
         _mockPathService

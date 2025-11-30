@@ -101,7 +101,7 @@ public class ScenarioEntityConsistencyEvaluationService : IScenarioEntityConsist
         {
             _logger.LogWarning(ex, "Entity introduction validation failed, returning empty result");
             return new EntityIntroductionEvaluationResult(
-                new List<EntityIntroductionViolation>(),
+                new List<ScenarioEntityIntroductionValidator.SceneReferenceViolation>(),
                 sceneClassifications);
         }
     }

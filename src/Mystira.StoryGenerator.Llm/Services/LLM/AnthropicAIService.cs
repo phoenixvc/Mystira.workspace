@@ -48,12 +48,15 @@ public class AnthropicAIService : ILLMService
         }
 
         var models = _settings.Anthropic.Models;
+        var configuredName = _settings.Anthropic.ModelName;
+
+        // If no models list configured, fall back to a single synthetic entry for the configured model name
         if (models == null || !models.Any())
         {
             var model = new ChatModelInfo
             {
-                Id = _settings.Anthropic.ModelName,
-                DisplayName = GetDisplayNameForModel(_settings.Anthropic.ModelName),
+                Id = configuredName,
+                DisplayName = GetDisplayNameForModel(configuredName),
                 Description = "Anthropic Claude model",
                 MaxTokens = 4096,
                 DefaultTemperature = 0.7,
@@ -65,7 +68,49 @@ public class AnthropicAIService : ILLMService
             return new List<ChatModelInfo> { model };
         }
 
-        var chatModels = models.Select(m => new ChatModelInfo
+        // If a configured model name is provided, prefer returning only that specific model.
+        if (!string.IsNullOrWhiteSpace(configuredName))
+        {
+            var selected = models.FirstOrDefault(m => string.Equals(m.Name, configuredName, StringComparison.OrdinalIgnoreCase));
+            if (selected != null)
+            {
+                return new[]
+                {
+                    new ChatModelInfo
+                    {
+                        Id = selected.Name,
+                        DisplayName = selected.DisplayName,
+                        Description = $"Anthropic {selected.DisplayName} model",
+                        MaxTokens = selected.MaxTokens,
+                        DefaultTemperature = selected.DefaultTemperature,
+                        MinTemperature = 0.0,
+                        MaxTemperature = 1.0,
+                        SupportsJsonSchema = selected.SupportsJsonMode,
+                        Capabilities = selected.Capabilities ?? new List<string> { "chat", "story-generation" }
+                    }
+                };
+            }
+
+            // Not in list: return a synthetic single entry with a mapped friendly name
+            return new[]
+            {
+                new ChatModelInfo
+                {
+                    Id = configuredName,
+                    DisplayName = GetDisplayNameForModel(configuredName),
+                    Description = "Anthropic Claude model",
+                    MaxTokens = 4096,
+                    DefaultTemperature = 0.7,
+                    MinTemperature = 0.0,
+                    MaxTemperature = 1.0,
+                    SupportsJsonSchema = false,
+                    Capabilities = new List<string> { "chat", "story-generation" }
+                }
+            };
+        }
+
+        // No specific configured model: return all configured entries
+        return models.Select(m => new ChatModelInfo
         {
             Id = m.Name,
             DisplayName = m.DisplayName,
@@ -77,14 +122,14 @@ public class AnthropicAIService : ILLMService
             SupportsJsonSchema = m.SupportsJsonMode,
             Capabilities = m.Capabilities ?? new List<string> { "chat", "story-generation" }
         });
-
-        return chatModels;
     }
 
     private static string GetDisplayNameForModel(string modelName)
     {
         return modelName.ToLowerInvariant() switch
         {
+            // Common Anthropic model ids mapping to friendly names
+            var name when name.Contains("claude-3-5-sonnet") => "Claude 3.5 Sonnet",
             var name when name.Contains("claude-sonnet-4-5") => "Claude Sonnet 4.5",
             var name when name.Contains("claude-3-opus") => "Claude 3 Opus",
             var name when name.Contains("claude-3-sonnet") => "Claude 3 Sonnet",
@@ -199,6 +244,18 @@ public class AnthropicAIService : ILLMService
 
         _modelNameOrId = _settings.Anthropic.ModelName;
         return _settings.Anthropic.ModelName;
+    }
+
+    // Returns a model-specific endpoint if configured; otherwise empty string.
+    private string ResolveEndpoint(string? modelName)
+    {
+        if (string.IsNullOrWhiteSpace(modelName)) return string.Empty;
+
+        var models = _settings.Anthropic.Models;
+        if (models == null || models.Count == 0) return string.Empty;
+
+        var match = models.FirstOrDefault(m => string.Equals(m.Name, modelName, StringComparison.OrdinalIgnoreCase));
+        return match?.Endpoint ?? string.Empty;
     }
 
     private static string ExtractTextContent(IEnumerable<ContentBlock>? contentBlocks)

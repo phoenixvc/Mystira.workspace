@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Logging;
 using Mystira.StoryGenerator.Application.Scenarios;
+using Mystira.StoryGenerator.Contracts.Stories;
 using Mystira.StoryGenerator.Domain.Services;
 using Mystira.StoryGenerator.Domain.Stories;
 
@@ -36,7 +37,7 @@ public class ScenarioDominatorPathConsistencyEvaluationService : IScenarioDomina
             var graph = ScenarioGraph.FromScenario(scenario);
 
             // Get compressed paths based on dominators
-            var compressedPaths = graph.GetCompressedPaths();
+            var compressedPaths = graph.GetCompressedPaths().ToArray();
 
             _logger.LogDebug("Generated {PathCount} compressed paths for scenario {ScenarioId}", compressedPaths.Count(), scenario.Id);
 
