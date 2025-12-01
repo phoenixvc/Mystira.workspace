@@ -1,5 +1,6 @@
 using System.Text;
 using Mystira.StoryGenerator.Contracts.Stories;
+using Mystira.StoryGenerator.Contracts.StoryConsistency;
 using Mystira.StoryGenerator.Domain.Graph;
 using Mystira.StoryGenerator.Domain.Stories;
 using Mystira.StoryGenerator.GraphTheory.Algorithms;

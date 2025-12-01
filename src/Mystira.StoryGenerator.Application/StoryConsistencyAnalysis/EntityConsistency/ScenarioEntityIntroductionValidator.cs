@@ -1,9 +1,10 @@
 ﻿using Mystira.StoryGenerator.Application.Scenarios;
 using Mystira.StoryGenerator.Contracts.Entities;
+using Mystira.StoryGenerator.Contracts.StoryConsistency;
 using Mystira.StoryGenerator.Domain.Stories;
 using Mystira.StoryGenerator.GraphTheory.DataFlowAnalysis;
 
-namespace Mystira.StoryGenerator.Application.StoryConsistencyAnalysis
+namespace Mystira.StoryGenerator.Application.StoryConsistencyAnalysis.EntityConsistency
 {
     /// <summary>
     /// Validates that all entities used in each scene have been introduced

@@ -1,5 +1,6 @@
 ﻿using Mystira.StoryGenerator.Application.Scenarios;
 using Mystira.StoryGenerator.Application.StoryConsistencyAnalysis;
+using Mystira.StoryGenerator.Application.StoryConsistencyAnalysis.EntityConsistency;
 using Mystira.StoryGenerator.Contracts.Entities;
 using Mystira.StoryGenerator.Domain.Stories;
 

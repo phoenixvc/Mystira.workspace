@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Options;
 using Mystira.StoryGenerator.Contracts.Chat;
 using Mystira.StoryGenerator.Contracts.Configuration;
+using Mystira.StoryGenerator.Contracts.StoryConsistency;
 using Mystira.StoryGenerator.Domain.Services;
 using Mystira.StoryGenerator.Domain.Stories;
 using Newtonsoft.Json;

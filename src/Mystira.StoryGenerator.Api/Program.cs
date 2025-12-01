@@ -3,6 +3,7 @@ using Mystira.StoryGenerator.Api.Services;
 using Mystira.StoryGenerator.Application.Scenarios;
 using Mystira.StoryGenerator.Application.Services;
 using Mystira.StoryGenerator.Application.StoryConsistencyAnalysis;
+using Mystira.StoryGenerator.Application.StoryConsistencyAnalysis.Legacy;
 using Mystira.StoryGenerator.Contracts.Configuration;
 using Mystira.StoryGenerator.Contracts.Stories;
 using Mystira.StoryGenerator.Domain.Services;

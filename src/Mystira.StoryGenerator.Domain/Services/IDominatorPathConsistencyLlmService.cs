@@ -1,4 +1,6 @@
-﻿namespace Mystira.StoryGenerator.Domain.Services;
+﻿using Mystira.StoryGenerator.Contracts.StoryConsistency;
+
+namespace Mystira.StoryGenerator.Domain.Services;
 
 public interface IDominatorPathConsistencyLlmService
 {

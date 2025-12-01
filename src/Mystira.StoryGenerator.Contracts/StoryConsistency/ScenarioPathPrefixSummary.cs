@@ -1,7 +1,7 @@
 using System.Text.Json.Serialization;
 using Mystira.StoryGenerator.Contracts.Entities;
 
-namespace Mystira.StoryGenerator.Domain.Services;
+namespace Mystira.StoryGenerator.Contracts.StoryConsistency;
 
 public sealed class ScenarioPathPrefixSummary
 {

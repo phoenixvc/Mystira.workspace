@@ -20,7 +20,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="StoryConsistencyAnalysis\EntityConsistency\" />
+    <Folder Include="StoryConsistencyAnalysis\PrefixSummary\" />
   </ItemGroup>
 
 </Project>

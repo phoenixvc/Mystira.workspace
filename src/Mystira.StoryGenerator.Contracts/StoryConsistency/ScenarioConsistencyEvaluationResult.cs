@@ -1,7 +1,6 @@
 using Mystira.StoryGenerator.Contracts.Entities;
-using Mystira.StoryGenerator.Domain.Services;
 
-namespace Mystira.StoryGenerator.Application.StoryConsistencyAnalysis;
+namespace Mystira.StoryGenerator.Contracts.StoryConsistency;
 
 /// <summary>
 /// Contains the result of a complete scenario consistency evaluation,

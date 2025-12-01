@@ -4,6 +4,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Mystira.StoryGenerator.Application.Scenarios;
+using Mystira.StoryGenerator.Application.Services;
 using Mystira.StoryGenerator.Contracts.Configuration;
 using Mystira.StoryGenerator.Domain.Services;
 using Mystira.StoryGenerator.Llm.Console.Tests;

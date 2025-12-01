@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Mystira.StoryGenerator.Contracts.Chat;
 using Mystira.StoryGenerator.Contracts.Configuration;
+using Mystira.StoryGenerator.Contracts.StoryConsistency;
 using Mystira.StoryGenerator.Domain.Services;
 
 namespace Mystira.StoryGenerator.Llm.Services.ConsistencyEvaluators;

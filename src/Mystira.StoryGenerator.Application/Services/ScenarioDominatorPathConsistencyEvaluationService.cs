@@ -1,10 +1,10 @@
 using Microsoft.Extensions.Logging;
 using Mystira.StoryGenerator.Application.Scenarios;
-using Mystira.StoryGenerator.Contracts.Stories;
+using Mystira.StoryGenerator.Contracts.StoryConsistency;
 using Mystira.StoryGenerator.Domain.Services;
 using Mystira.StoryGenerator.Domain.Stories;
 
-namespace Mystira.StoryGenerator.Application.StoryConsistencyAnalysis;
+namespace Mystira.StoryGenerator.Application.Services;
 
 /// <summary>
 /// Implementation of dominator-based path consistency evaluation service that evaluates

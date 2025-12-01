@@ -1,3 +1,4 @@
+using Mystira.StoryGenerator.Contracts.StoryConsistency;
 using Mystira.StoryGenerator.Domain.Stories;
 
 namespace Mystira.StoryGenerator.Domain.Services;
