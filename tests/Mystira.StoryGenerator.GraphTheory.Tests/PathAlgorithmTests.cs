@@ -11,34 +11,52 @@ public class PathAlgorithmTests
     [Fact]
     public void CompressBySharedSuffixes_ReturnsCorrectlyCompressedPaths()
     {
-        var simpleGraphPaths = new List<IReadOnlyList<string>>
+        var graphPaths = new List<IReadOnlyList<string>>
         {
             new[] { "v1", "v2", "v4", "v5" }, // p1
             new[] { "v1", "v3", "v4", "v5" }  // p2
         };
 
-        var compressed = PathAlgorithms.CompressBySharedSuffixes(simpleGraphPaths);
+        var compressed = PathAlgorithms.CompressBySharedSuffixes(graphPaths);
         Assert.Equal(2, compressed.Count);
         Assert.Equal(["v1", "v2", "v4", "v5"], compressed[0]);
         Assert.Equal(["v1", "v3", "v4"], compressed[1]);
 
-        var complexGraphPaths = new List<IReadOnlyList<string>>
+        graphPaths = new List<IReadOnlyList<string>>
         {
             new[] { "v1", "v2", "v5" }, // p1
             new[] { "v1", "v3", "v5" },  // p2
-            new[] { "v1", "v3", "v6", "v7" }, //p3
-            new[] { "v1", "v3", "v6", "v8" }, //p4
-            new[] { "v1", "v4", "v6", "v7" }, //p5
-            new[] { "v1", "v4", "v6", "v8" }, //p6
+            new[] { "v1", "v3", "v6", "v7" }, // p3
+            new[] { "v1", "v3", "v6", "v8" }, // p4
+            new[] { "v1", "v4", "v6", "v7" }, // p5
+            new[] { "v1", "v4", "v6", "v8" }, // p6
         };
 
-        compressed = PathAlgorithms.CompressBySharedSuffixes(complexGraphPaths);
+        compressed = PathAlgorithms.CompressBySharedSuffixes(graphPaths);
         Assert.Equal(5, compressed.Count);
         Assert.Equal(["v1", "v2", "v5"], compressed[0]);
         Assert.Equal(["v1", "v3", "v5"], compressed[1]);
         Assert.Equal(["v1", "v3", "v6", "v7"], compressed[2]);
         Assert.Equal(["v1", "v3", "v6", "v8"], compressed[3]);
         Assert.Equal(["v1", "v4", "v6"], compressed[4]);
+
+        graphPaths = new List<IReadOnlyList<string>>
+        {
+            new[] { "v1", "v2", "v4", "v7", "v9", "v10" }, // p1
+            new[] { "v1", "v2", "v5", "v7", "v9", "v10" }, // p2
+            new[] { "v1", "v2", "v5", "v8", "v9", "v10" }, // p3
+            new[] { "v1", "v3", "v5", "v8", "v9", "v10" }, // p4
+            new[] { "v1", "v3", "v5", "v8", "v9", "v10" }, // p5
+            new[] { "v1", "v3", "v6", "v8", "v9", "v10" }, // p6
+        };
+
+        compressed = PathAlgorithms.CompressBySharedSuffixes(graphPaths);
+        Assert.Equal(5, compressed.Count);
+        Assert.Equal(["v1", "v2", "v4", "v7", "v9", "v10"], compressed[0]);
+        Assert.Equal(["v1", "v2", "v5", "v7"], compressed[1]);
+        Assert.Equal(["v1", "v2", "v5", "v8", "v9"], compressed[2]);
+        Assert.Equal(["v1", "v3", "v5"], compressed[3]);
+        Assert.Equal(["v1", "v3", "v6", "v8"], compressed[4]);
     }
 
     [Fact]
