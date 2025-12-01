@@ -21,6 +21,7 @@ public class AiSettings
     public EntityClassifierSettings EntityClassifier { get; set; } = new();
     public PrefixSummarySettings PrefixSummary { get; set; } = new();
     public ConsistencyEvaluatorSettings ConsistencyEvaluator { get; set; } = new();
+    public SemanticRoleLabellingSettings SemanticRoleLabellingSettings { get; set; } = new();
 }
 
 public class AzureOpenAISettings
@@ -217,6 +218,36 @@ public class ConsistencyEvaluatorSettings
 /// Settings for the LLM-based prefix summary engine
 /// </summary>
 public class PrefixSummarySettings
+{
+    public const string SectionName = "PrefixSummary";
+
+    public bool Enabled { get; set; } = true;
+
+    public string? Provider { get; set; }
+        = null; // e.g., "azure-openai"
+
+    public string? DeploymentName { get; set; }
+        = null; // e.g., specific deployment/model name
+
+    public string? ModelId { get; set; }
+        = null; // logical model id
+
+    [Range(0, 2)]
+    public double Temperature { get; set; } = 0.1;
+
+    [Range(1, 1000)]
+    public int MaxTokens { get; set; } = 200;
+
+    public bool IsConfigured =>
+        Enabled &&
+        !string.IsNullOrWhiteSpace(Provider) &&
+        !string.IsNullOrWhiteSpace(DeploymentName);
+}
+
+/// <summary>
+/// Settings for the LLM-based SRL
+/// </summary>
+public class SemanticRoleLabellingSettings
 {
     public const string SectionName = "PrefixSummary";
 
