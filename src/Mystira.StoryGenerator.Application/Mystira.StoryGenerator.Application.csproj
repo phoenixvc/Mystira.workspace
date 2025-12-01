@@ -19,4 +19,8 @@
     <ProjectReference Include="..\Mystira.StoryGenerator.GraphTheory\Mystira.StoryGenerator.GraphTheory.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="StoryConsistencyAnalysis\EntityConsistency\" />
+  </ItemGroup>
+
 </Project>

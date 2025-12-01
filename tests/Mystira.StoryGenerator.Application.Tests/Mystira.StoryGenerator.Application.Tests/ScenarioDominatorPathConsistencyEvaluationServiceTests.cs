@@ -8,13 +8,13 @@ namespace Mystira.StoryGenerator.Application.Tests;
 
 public class ScenarioDominatorPathConsistencyEvaluationServiceTests
 {
-    private readonly Mock<ILlmConsistencyEvaluator> _mockEvaluator;
+    private readonly Mock<IDominatorPathConsistencyLlmService> _mockEvaluator;
     private readonly Mock<ILogger<ScenarioDominatorPathConsistencyEvaluationService>> _mockLogger;
     private readonly ScenarioDominatorPathConsistencyEvaluationService _service;
 
     public ScenarioDominatorPathConsistencyEvaluationServiceTests()
     {
-        _mockEvaluator = new Mock<ILlmConsistencyEvaluator>();
+        _mockEvaluator = new Mock<IDominatorPathConsistencyLlmService>();
         _mockLogger = new Mock<ILogger<ScenarioDominatorPathConsistencyEvaluationService>>();
 
         _service = new ScenarioDominatorPathConsistencyEvaluationService(

@@ -1,6 +1,6 @@
 ﻿namespace Mystira.StoryGenerator.Domain.Services;
 
-public interface ILlmConsistencyEvaluator
+public interface IDominatorPathConsistencyLlmService
 {
     Task<ConsistencyEvaluationResult?> EvaluateConsistencyAsync(string scenarioPathContent, CancellationToken cancellationToken = default);
 }

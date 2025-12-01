@@ -45,15 +45,6 @@ namespace Mystira.StoryGenerator.Application.StoryConsistencyAnalysis
             => new(e.Type, e.Name);
 
         /// <summary>
-        /// Represents a "used before introduced" violation:
-        /// an entity that is used in a scene but is not present
-        /// in the "must-have-been introduced" set for that scene.
-        /// </summary>
-        public sealed record SceneReferenceViolation(
-            string SceneId,
-            SceneEntity Entity);
-
-        /// <summary>
         /// An equality comparer for <see cref="SceneEntity"/> that
         /// treats entities as equal if their <see cref="SceneEntity.Type"/>
         /// and <see cref="SceneEntity.Name"/> match (case-insensitive).

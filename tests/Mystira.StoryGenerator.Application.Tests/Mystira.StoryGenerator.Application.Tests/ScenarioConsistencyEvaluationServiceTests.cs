@@ -32,7 +32,7 @@ public class ScenarioConsistencyEvaluationServiceTests
         var scenario = CreateTestScenario();
 
         var entityResult = new EntityIntroductionEvaluationResult(
-            new List<ScenarioEntityIntroductionValidator.SceneReferenceViolation>(),
+            new List<SceneReferenceViolation>(),
             new Dictionary<string, SceneEntityClassificationData>());
 
         var pathResults = new ConsistencyEvaluationResults(
@@ -77,7 +77,7 @@ public class ScenarioConsistencyEvaluationServiceTests
         var scenario = CreateTestScenario();
 
         var entityResult = new EntityIntroductionEvaluationResult(
-            new List<ScenarioEntityIntroductionValidator.SceneReferenceViolation>(),
+            new List<SceneReferenceViolation>(),
             new Dictionary<string, SceneEntityClassificationData>());
 
         var pathResults = new ConsistencyEvaluationResults(
@@ -113,7 +113,7 @@ public class ScenarioConsistencyEvaluationServiceTests
         var scenario = CreateTestScenario();
 
         var entityResult = new EntityIntroductionEvaluationResult(
-            new List<ScenarioEntityIntroductionValidator.SceneReferenceViolation>(),
+            new List<SceneReferenceViolation>(),
             new Dictionary<string, SceneEntityClassificationData>());
 
         _mockEntityService
@@ -173,7 +173,7 @@ public class ScenarioConsistencyEvaluationServiceTests
         _mockEntityService
             .Setup(s => s.EvaluateAsync(It.IsAny<Scenario>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new EntityIntroductionEvaluationResult(
-                new List<ScenarioEntityIntroductionValidator.SceneReferenceViolation>(),
+                new List<SceneReferenceViolation>(),
                 new Dictionary<string, SceneEntityClassificationData>()));
 
         _mockPathService
@@ -215,7 +215,7 @@ public class ScenarioConsistencyEvaluationServiceTests
             });
 
         var entityResult = new EntityIntroductionEvaluationResult(
-            new List<ScenarioEntityIntroductionValidator.SceneReferenceViolation>(),
+            new List<SceneReferenceViolation>(),
             new Dictionary<string, SceneEntityClassificationData>());
 
         _mockEntityService

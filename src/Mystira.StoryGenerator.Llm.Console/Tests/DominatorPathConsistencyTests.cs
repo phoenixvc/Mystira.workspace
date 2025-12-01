@@ -1,6 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Mystira.StoryGenerator.Llm.Services.DominatorBasedConsistency;
+using Mystira.StoryGenerator.Llm.Services.ConsistencyEvaluators;
 
 namespace Mystira.StoryGenerator.Llm.Console.Tests;
 
@@ -8,7 +8,7 @@ internal static class DominatorPathConsistencyTests
 {
     public static async Task<int> RunAsync(IServiceProvider services, ILogger logger)
     {
-        var evaluator = services.GetRequiredService<ScenarioPathConsistencyLlmEvaluator>();
+        var evaluator = services.GetRequiredService<DominatorPathConsistencyLlmService>();
 
         // Test inputs as specified in the issue description
         var cases = new List<(string name, string content, bool expectOk)> {

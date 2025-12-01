@@ -35,7 +35,7 @@ public sealed record EntityIntroductionEvaluationResult(
     /// <summary>
     /// List of violations where entities are used before being introduced.
     /// </summary>
-    IReadOnlyList<ScenarioEntityIntroductionValidator.SceneReferenceViolation> Violations,
+    IReadOnlyList<SceneReferenceViolation> Violations,
 
     /// <summary>
     /// Map of scene IDs to their classified entities (introduced, removed, used).
@@ -99,3 +99,12 @@ public sealed record PathConsistencyEvaluationResult(
     ConsistencyEvaluationResult? Result)
 {
 }
+
+/// <summary>
+/// Represents a "used before introduced" violation:
+/// an entity that is used in a scene but is not present
+/// in the "must-have-been introduced" set for that scene.
+/// </summary>
+public sealed record SceneReferenceViolation(
+    string SceneId,
+    SceneEntity Entity);

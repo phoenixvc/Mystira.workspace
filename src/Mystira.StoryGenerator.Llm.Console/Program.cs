@@ -7,9 +7,9 @@ using Mystira.StoryGenerator.Application.Scenarios;
 using Mystira.StoryGenerator.Contracts.Configuration;
 using Mystira.StoryGenerator.Domain.Services;
 using Mystira.StoryGenerator.Llm.Console.Tests;
-using Mystira.StoryGenerator.Llm.Services.DominatorBasedConsistency;
 using Mystira.StoryGenerator.Llm.Services.LLM;
 using Mystira.StoryGenerator.Application.StoryConsistencyAnalysis;
+using Mystira.StoryGenerator.Llm.Services.ConsistencyEvaluators;
 
 var builder = Host.CreateApplicationBuilder(args);
 
@@ -32,9 +32,9 @@ builder.Services.AddSingleton<ILLMService, AnthropicAIService>();
 builder.Services.AddSingleton<ILlmServiceFactory, LLMServiceFactory>();
 
 // Entity classifier and consistency evaluator
-builder.Services.AddSingleton<SceneEntityLlmClassifier>();
-builder.Services.AddSingleton<IEntityLlmClassificationService, SceneEntityLlmClassifier>();
-builder.Services.AddSingleton<ILlmConsistencyEvaluator, ScenarioPathConsistencyLlmEvaluator>();
+builder.Services.AddSingleton<SceneEntityLlmClassifierService>();
+builder.Services.AddSingleton<IEntityLlmClassificationService, SceneEntityLlmClassifierService>();
+builder.Services.AddSingleton<IDominatorPathConsistencyLlmService, DominatorPathConsistencyLlmService>();
 builder.Services.AddScoped<IScenarioDominatorPathConsistencyEvaluationService, ScenarioDominatorPathConsistencyEvaluationService>();
 builder.Services.AddScoped<IScenarioEntityConsistencyEvaluationService, ScenarioEntityConsistencyEvaluationService>();
 // Scenario factory for loading scenarios from YAML/JSON in console tool

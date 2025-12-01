@@ -12,14 +12,14 @@ namespace Mystira.StoryGenerator.Application.StoryConsistencyAnalysis;
 /// </summary>
 public class ScenarioDominatorPathConsistencyEvaluationService : IScenarioDominatorPathConsistencyEvaluationService
 {
-    private readonly ILlmConsistencyEvaluator _consistencyEvaluator;
+    private readonly IDominatorPathConsistencyLlmService _service;
     private readonly ILogger<ScenarioDominatorPathConsistencyEvaluationService> _logger;
 
     public ScenarioDominatorPathConsistencyEvaluationService(
-        ILlmConsistencyEvaluator consistencyEvaluator,
+        IDominatorPathConsistencyLlmService service,
         ILogger<ScenarioDominatorPathConsistencyEvaluationService> logger)
     {
-        _consistencyEvaluator = consistencyEvaluator ?? throw new ArgumentNullException(nameof(consistencyEvaluator));
+        _service = service ?? throw new ArgumentNullException(nameof(service));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
@@ -86,7 +86,7 @@ public class ScenarioDominatorPathConsistencyEvaluationService : IScenarioDomina
             var pathContent = pathHeader + path.Story;
 
             // Evaluate consistency on this path
-            var result = await _consistencyEvaluator.EvaluateConsistencyAsync(pathContent, cancellationToken);
+            var result = await _service.EvaluateConsistencyAsync(pathContent, cancellationToken);
 
             if (result != null)
             {
