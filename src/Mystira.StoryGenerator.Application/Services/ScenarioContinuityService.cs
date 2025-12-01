@@ -1,11 +1,12 @@
 ﻿using Mystira.StoryGenerator.Application.StoryConsistencyAnalysis.ContinuityAnalyzer;
 using Mystira.StoryGenerator.Application.StoryConsistencyAnalysis.PrefixSummary;
+using Mystira.StoryGenerator.Contracts.StoryConsistency;
 using Mystira.StoryGenerator.Domain.Services;
 using Mystira.StoryGenerator.Domain.Stories;
 
 namespace Mystira.StoryGenerator.Application.Services;
 
-public sealed class StoryContinuityService
+public sealed class StoryContinuityService : IStoryContinuityService
 {
     private readonly IPrefixSummaryService _prefixSummaryService;
     private readonly IScenarioSrlAnalysisService _srlService;

@@ -1,4 +1,4 @@
-namespace Mystira.StoryGenerator.Application.StoryConsistencyAnalysis.ContinuityAnalyzer;
+namespace Mystira.StoryGenerator.Contracts.StoryConsistency;
 
 public sealed class EntityContinuityIssue
 {

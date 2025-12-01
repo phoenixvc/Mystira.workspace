@@ -3,10 +3,9 @@ using Mystira.StoryGenerator.Domain.Stories;
 
 namespace Mystira.StoryGenerator.Domain.Services;
 
-public interface IScenarioSrlAnalysisService
+public interface IStoryContinuityService
 {
-    Task<IReadOnlyDictionary<string, SemanticRoleLabellingClassification>> ClassifyScenarioAsync(
+    Task<IReadOnlyList<EntityContinuityIssue>> AnalyzeAsync(
         Scenario scenario,
-        IReadOnlyList<ScenarioPathPrefixSummary> prefixSummaries,
         CancellationToken cancellationToken = default);
 }
