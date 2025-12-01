@@ -177,12 +177,32 @@ public static class PathAlgorithms
                     // This suffix is already owned by another path.
                     // Only truncate if we've matched at least two symbols of the suffix
                     // (i.e., there is an actual shared tail, not just the starting node).
-                    if (matchedDepth >= 2)
+                    // Additionally, do NOT truncate when the entire path matches (duplicate path):
+                    // in that case we let the duplicate be removed by prefix de-duplication later.
+                    if (matchedDepth >= 2 && matchedDepth < l)
                     {
-                        var newLen = i + 1; // include join node at i
-                        if (newLen < keepLength[p])
+                        // If the owner path shares the same prefix up to this join point,
+                        // then the two paths are identical up to here, and the remainder
+                        // (the suffix) is also identical. In that case, do not truncate;
+                        // the duplicate will be removed by prefix de-duplication later.
+                        var ownerIdx = node.OwnerPathIndex;
+                        bool samePrefixUpToJoin = true;
+                        for (var k = 0; k <= i; k++)
                         {
-                            keepLength[p] = newLen;
+                            if (!EqualityComparer<TNode>.Default.Equals(paths[p][k], paths[ownerIdx][k]))
+                            {
+                                samePrefixUpToJoin = false;
+                                break;
+                            }
+                        }
+
+                        if (!samePrefixUpToJoin)
+                        {
+                            var newLen = i + 1; // include join node at i
+                            if (newLen < keepLength[p])
+                            {
+                                keepLength[p] = newLen;
+                            }
                         }
                     }
                 }
