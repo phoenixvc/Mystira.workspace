@@ -77,18 +77,22 @@ public class WebStoryContinuityService
 
         var filtered = issues;
 
-        // Filter by confidence
+        // Filter by confidence (case-insensitive, null-safe)
         if (filter.IncludedConfidences.Length > 0)
         {
-            var confidences = filter.IncludedConfidences.Select(c => c.ToLowerInvariant()).ToHashSet();
-            filtered = filtered.Where(i => confidences.Contains(i.Confidence)).ToList();
+            var confidences = new HashSet<string>(filter.IncludedConfidences, StringComparer.OrdinalIgnoreCase);
+            filtered = filtered
+                .Where(i => confidences.Contains(i.Confidence ?? string.Empty))
+                .ToList();
         }
 
-        // Filter by entity type
+        // Filter by entity type (case-insensitive, null-safe)
         if (filter.IncludedEntityTypes.Length > 0)
         {
-            var types = filter.IncludedEntityTypes.Select(t => t.ToLowerInvariant()).ToHashSet();
-            filtered = filtered.Where(i => types.Contains(i.EntityType)).ToList();
+            var types = new HashSet<string>(filter.IncludedEntityTypes, StringComparer.OrdinalIgnoreCase);
+            filtered = filtered
+                .Where(i => types.Contains(i.EntityType ?? string.Empty))
+                .ToList();
         }
 
         // Filter by pronouns
