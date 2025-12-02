@@ -21,7 +21,6 @@ public sealed class StoryContinuityService : IStoryContinuityService
 
     public async Task<IReadOnlyList<EntityContinuityIssue>> AnalyzeAsync(
         Scenario scenario,
-        Func<SrlEntityClassification, bool>? includeEntityFilter = null,
         CancellationToken cancellationToken = default)
     {
         // 1) Heavyweight pass: prefix summaries across compressed paths
@@ -57,8 +56,7 @@ public sealed class StoryContinuityService : IStoryContinuityService
         // 4) Glue: compare SRL vs. must-active and emit issues
         var issues = EntityContinuityAnalyzer.FindIssues(
             mustActiveByScene,
-            srlByScene,
-            includeEntityFilter);
+            srlByScene);
 
         return issues;
     }

@@ -29,15 +29,8 @@ internal static class StoryContinuityFileRunner
             var continuityService = services.GetRequiredService<IStoryContinuityService>();
 
             string[] includedConfidences = ["medium", "high"];
-            string[] includedEntityTypes = ["character", "location", "item"]; //"character", "location", "item", "concept"
+            string[] includedEntityTypes = ["character", "location", "item"]; // "character", "location", "item", "concept"
             bool pronounsOnly = true;
-            var includeEntity = new Func<SrlEntityClassification, bool>(classification =>
-            {
-                if (!includedConfidences.Contains(classification.Confidence)) return false;
-                if (!includedEntityTypes.Contains(classification.Type)) return false;
-                if (pronounsOnly) return false;
-                return true;
-            });
 
             string defaultPath = Path.Combine("test_data", "Test-Story-UnintroducedEntities-Small.yaml");
             string path = (flagIdx + 1) < args.Length && !args[flagIdx + 1].StartsWith("--")
@@ -68,7 +61,13 @@ internal static class StoryContinuityFileRunner
 
             logger.LogInformation("Story continuity: Running analysis...");
             var swAnalysis = Stopwatch.StartNew();
-            var issues = await continuityService.AnalyzeAsync(scenario, includeEntity);
+            var issues = await continuityService.AnalyzeAsync(scenario);
+            // Post-processing filter on issues
+            issues = Mystira.StoryGenerator.Application.StoryConsistencyAnalysis.ContinuityAnalyzer.EntityContinuityIssueFiltering
+                .Filter(issues,
+                    confidences: includedConfidences,
+                    entityTypes: includedEntityTypes,
+                    pronounsOnly: pronounsOnly);
             swAnalysis.Stop();
             logger.LogInformation("Story continuity: Analysis completed in {ElapsedMs} ms", swAnalysis.ElapsedMilliseconds);
 

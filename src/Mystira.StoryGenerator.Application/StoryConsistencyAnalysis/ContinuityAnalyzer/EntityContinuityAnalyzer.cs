@@ -23,8 +23,7 @@ public static class EntityContinuityAnalyzer
     /// </summary>
     public static IReadOnlyList<EntityContinuityIssue> FindIssues(
         IReadOnlyDictionary<string, HashSet<string>> mustActiveByScene,
-        IReadOnlyDictionary<string, SemanticRoleLabellingClassification> srlByScene,
-        Func<SrlEntityClassification, bool>? filter)
+        IReadOnlyDictionary<string, SemanticRoleLabellingClassification> srlByScene)
     {
         var issues = new List<EntityContinuityIssue>();
 
@@ -37,10 +36,6 @@ public static class EntityContinuityAnalyzer
             {
                 // skip entities not actually present
                 if (!entity.PresentInScene)
-                    continue;
-
-                // fitler entities if needed
-                if (filter != null && !filter(entity))
                     continue;
 
                 var name = entity.Name?.Trim();
@@ -61,7 +56,11 @@ public static class EntityContinuityAnalyzer
                         IssueType = EntityContinuityIssueType.UsedButNotGuaranteedIntroduced,
                         Detail = $"Entity '{name}' is treated as already-known in this scene, " +
                                  "but is not guaranteed to be active on all prefixes leading here.",
-                        EvidenceSpan = entity.EvidenceSpan
+                        EvidenceSpan = entity.EvidenceSpan,
+                        // Map SRL fields for post-processing
+                        IsPronoun = !entity.IsProperNoun,
+                        Confidence = entity.Confidence,
+                        SemanticRoles = entity.SemanticRoles ?? new List<string>()
                     });
                 }
 
@@ -77,7 +76,10 @@ public static class EntityContinuityAnalyzer
                         IssueType = EntityContinuityIssueType.ReintroducedButAlreadyGuaranteed,
                         Detail = $"Entity '{name}' is marked as newly introduced here, " +
                                  "but prefix summaries say it must already be active on all paths.",
-                        EvidenceSpan = entity.EvidenceSpan
+                        EvidenceSpan = entity.EvidenceSpan,
+                        IsPronoun = !entity.IsProperNoun,
+                        Confidence = entity.Confidence,
+                        SemanticRoles = entity.SemanticRoles ?? new List<string>()
                     });
                 }
 
@@ -97,7 +99,10 @@ public static class EntityContinuityAnalyzer
                         Detail = $"Entity '{name}' is marked as newly introduced in this scene, but the local wording " +
                                  "treats it as if the audience already knows them. This suggests the entity should have " +
                                  "been introduced earlier on this branch.",
-                        EvidenceSpan = entity.EvidenceSpan
+                        EvidenceSpan = entity.EvidenceSpan,
+                        IsPronoun = !entity.IsProperNoun,
+                        Confidence = entity.Confidence,
+                        SemanticRoles = entity.SemanticRoles ?? new List<string>()
                     });
                 }
 
@@ -115,7 +120,10 @@ public static class EntityContinuityAnalyzer
                         Detail = $"Entity '{name}' is marked as newly introduced in this scene, but the local wording " +
                                  "is ambiguous about whether the audience already knows them. This might suggest the " +
                                  "entity should have been introduced earlier on this branch.",
-                        EvidenceSpan = entity.EvidenceSpan
+                        EvidenceSpan = entity.EvidenceSpan,
+                        IsPronoun = !entity.IsProperNoun,
+                        Confidence = entity.Confidence,
+                        SemanticRoles = entity.SemanticRoles ?? new List<string>()
                     });
                 }
 
@@ -131,7 +139,10 @@ public static class EntityContinuityAnalyzer
                         IssueType = EntityContinuityIssueType.RemovedButNotGuaranteedPresent,
                         Detail = $"Entity '{name}' is removed here, but prefix summaries do not " +
                                  "guarantee that it was present on all paths.",
-                        EvidenceSpan = entity.EvidenceSpan
+                        EvidenceSpan = entity.EvidenceSpan,
+                        IsPronoun = !entity.IsProperNoun,
+                        Confidence = entity.Confidence,
+                        SemanticRoles = entity.SemanticRoles ?? new List<string>()
                     });
                 }
             }
