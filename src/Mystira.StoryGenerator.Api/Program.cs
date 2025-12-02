@@ -88,6 +88,9 @@ builder.Services.AddScoped<IScenarioEntityConsistencyEvaluationService, Scenario
 builder.Services.AddScoped<IScenarioDominatorPathConsistencyEvaluationService, ScenarioDominatorPathConsistencyEvaluationService>();
 builder.Services.AddScoped<IScenarioConsistencyEvaluationService, ScenarioConsistencyEvaluationService>();
 
+// Register story continuity service
+builder.Services.AddScoped<IStoryContinuityService, StoryContinuityService>();
+
 var app = builder.Build();
 
 app.UseCors("AllowFrontend");

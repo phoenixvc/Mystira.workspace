@@ -1,0 +1,595 @@
+@page "/story-continuity"
+@using Mystira.StoryGenerator.Contracts.Stories
+@using Mystira.StoryGenerator.Domain.Stories
+@using Mystira.StoryGenerator.Web.Services
+@inject WebStoryContinuityService ContinuityService
+@inject ILogger<StoryContinuity> Logger
+
+<PageTitle>Story Continuity Analyzer</PageTitle>
+
+<div class="continuity-container">
+    <h1>Story Continuity Analyzer</h1>
+    
+    <div class="controls-section">
+        <h2>Provider Configuration</h2>
+        
+        <div class="provider-config">
+            <div class="config-group">
+                <label>Prefix Summary Provider:</label>
+                <input type="text" @bind="prefixSummaryProvider" placeholder="Provider name" />
+                <input type="text" @bind="prefixSummaryModel" placeholder="Model name" />
+            </div>
+            
+            <div class="config-group">
+                <label>Semantic Role Labelling Provider:</label>
+                <input type="text" @bind="semanticRoleProvider" placeholder="Provider name" />
+                <input type="text" @bind="semanticRoleModel" placeholder="Model name" />
+            </div>
+        </div>
+
+        <h2>Filters</h2>
+        
+        <div class="filters-section">
+            <div class="filter-group">
+                <label>Confidence Levels:</label>
+                <div class="checkbox-group">
+                    <label>
+                        <input type="checkbox" @onchange="@((bool value) => UpdateConfidenceFilter("high", value))" />
+                        High
+                    </label>
+                    <label>
+                        <input type="checkbox" @onchange="@((bool value) => UpdateConfidenceFilter("medium", value))" />
+                        Medium
+                    </label>
+                    <label>
+                        <input type="checkbox" @onchange="@((bool value) => UpdateConfidenceFilter("low", value))" />
+                        Low
+                    </label>
+                </div>
+            </div>
+
+            <div class="filter-group">
+                <label>Entity Types:</label>
+                <div class="checkbox-group">
+                    <label>
+                        <input type="checkbox" @onchange="@((bool value) => UpdateEntityTypeFilter("character", value))" />
+                        Character
+                    </label>
+                    <label>
+                        <input type="checkbox" @onchange="@((bool value) => UpdateEntityTypeFilter("location", value))" />
+                        Location
+                    </label>
+                    <label>
+                        <input type="checkbox" @onchange="@((bool value) => UpdateEntityTypeFilter("item", value))" />
+                        Item
+                    </label>
+                    <label>
+                        <input type="checkbox" @onchange="@((bool value) => UpdateEntityTypeFilter("concept", value))" />
+                        Concept
+                    </label>
+                </div>
+            </div>
+
+            <div class="filter-group">
+                <label>
+                    <input type="checkbox" @bind="pronounsOnlyFilter" />
+                    Pronouns Only
+                </label>
+            </div>
+        </div>
+
+        <div class="action-buttons">
+            <button @onclick="AnalyzeContinuity" disabled="@isAnalyzing">
+                @if (isAnalyzing)
+                {
+                    <span>Analyzing...</span>
+                }
+                else
+                {
+                    <span>Analyze Story</span>
+                }
+            </button>
+        </div>
+
+        @if (!string.IsNullOrEmpty(evaluationError))
+        {
+            <div class="error-message">
+                <p>@evaluationError</p>
+            </div>
+        }
+    </div>
+
+    @if (filteredIssues != null && filteredIssues.Count > 0)
+    {
+        <div class="results-section">
+            <h2>Continuity Issues (@filteredIssues.Count)</h2>
+            
+            <div class="issues-grid">
+                @foreach (var issue in filteredIssues)
+                {
+                    <div class="issue-card">
+                        <div class="card-header">
+                            <h3>@issue.EntityName</h3>
+                            <span class="badge @GetIssueBadgeClass(issue.IssueType)">@issue.IssueType</span>
+                        </div>
+                        
+                        <div class="card-body">
+                            <div class="issue-details">
+                                <p><strong>Scene:</strong> @issue.SceneId</p>
+                                <p><strong>Entity Type:</strong> @issue.EntityType</p>
+                                <p><strong>Confidence:</strong> <span class="confidence @GetConfidenceClass(issue.Confidence)">@issue.Confidence</span></p>
+                                @if (issue.IsPronoun)
+                                {
+                                    <p><strong>Is Pronoun:</strong> Yes</p>
+                                }
+                                @if (issue.SemanticRoles != null && issue.SemanticRoles.Length > 0)
+                                {
+                                    <p><strong>Semantic Roles:</strong> @string.Join(", ", issue.SemanticRoles)</p>
+                                }
+                            </div>
+                            
+                            <div class="issue-description">
+                                <p>@issue.Detail</p>
+                            </div>
+                            
+                            @if (!string.IsNullOrEmpty(issue.EvidenceSpan))
+                            {
+                                <div class="evidence">
+                                    <p><strong>Evidence:</strong> <em>@issue.EvidenceSpan</em></p>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+    else if (evaluationCompleted && (filteredIssues == null || filteredIssues.Count == 0))
+    {
+        <div class="success-message">
+            <p>No continuity issues found!</p>
+        </div>
+    }
+</div>
+
+@code {
+    private string prefixSummaryProvider = string.Empty;
+    private string prefixSummaryModel = string.Empty;
+    private string semanticRoleProvider = string.Empty;
+    private string semanticRoleModel = string.Empty;
+
+    private HashSet<string> selectedConfidences = new();
+    private HashSet<string> selectedEntityTypes = new();
+    private bool pronounsOnlyFilter = false;
+
+    private List<StoryContinuityIssue>? filteredIssues;
+    private bool isAnalyzing = false;
+    private bool evaluationCompleted = false;
+    private string evaluationError = string.Empty;
+
+    private void UpdateConfidenceFilter(string confidence, bool isSelected)
+    {
+        if (isSelected)
+            selectedConfidences.Add(confidence);
+        else
+            selectedConfidences.Remove(confidence);
+        
+        ApplyFilters();
+    }
+
+    private void UpdateEntityTypeFilter(string entityType, bool isSelected)
+    {
+        if (isSelected)
+            selectedEntityTypes.Add(entityType);
+        else
+            selectedEntityTypes.Remove(entityType);
+        
+        ApplyFilters();
+    }
+
+    private async Task AnalyzeContinuity()
+    {
+        isAnalyzing = true;
+        evaluationError = string.Empty;
+        evaluationCompleted = false;
+
+        try
+        {
+            // Create a sample scenario for demonstration
+            var scenario = CreateSampleScenario();
+
+            var request = new EvaluateStoryContinuityRequest
+            {
+                Scenario = scenario,
+                PrefixSummaryProvider = string.IsNullOrEmpty(prefixSummaryProvider) ? null : prefixSummaryProvider,
+                PrefixSummaryModel = string.IsNullOrEmpty(prefixSummaryModel) ? null : prefixSummaryModel,
+                SemanticRoleProvider = string.IsNullOrEmpty(semanticRoleProvider) ? null : semanticRoleProvider,
+                SemanticRoleModel = string.IsNullOrEmpty(semanticRoleModel) ? null : semanticRoleModel
+            };
+
+            var result = await ContinuityService.EvaluateAsync(request);
+
+            if (result.Success)
+            {
+                filteredIssues = result.Issues;
+                ApplyFilters();
+                evaluationCompleted = true;
+            }
+            else
+            {
+                evaluationError = result.Error ?? "Unknown error occurred";
+                Logger.LogError("Continuity evaluation failed: {Error}", evaluationError);
+            }
+        }
+        catch (Exception ex)
+        {
+            evaluationError = $"Error: {ex.Message}";
+            Logger.LogError(ex, "Exception during continuity evaluation");
+        }
+        finally
+        {
+            isAnalyzing = false;
+        }
+    }
+
+    private void ApplyFilters()
+    {
+        if (filteredIssues == null)
+            return;
+
+        var filter = new StoryContinuityIssueFilter
+        {
+            IncludedConfidences = selectedConfidences.ToArray(),
+            IncludedEntityTypes = selectedEntityTypes.ToArray(),
+            PronounsOnly = pronounsOnlyFilter
+        };
+
+        filteredIssues = ContinuityService.ApplyFilters(filteredIssues, filter);
+        StateHasChanged();
+    }
+
+    private Scenario CreateSampleScenario()
+    {
+        // Create a sample scenario for demonstration
+        return new Scenario
+        {
+            Id = "sample_story",
+            Title = "Sample Story",
+            Description = "A sample story for continuity analysis",
+            Scenes = new List<Scene>
+            {
+                new Scene
+                {
+                    Id = "scene_1",
+                    Title = "Introduction",
+                    Type = SceneType.Narrative,
+                    Description = "A character named Crow appears"
+                },
+                new Scene
+                {
+                    Id = "scene_2",
+                    Title = "Development",
+                    Type = SceneType.Narrative,
+                    Description = "The crow steals something"
+                }
+            }
+        };
+    }
+
+    private string GetIssueBadgeClass(string issueType)
+    {
+        return issueType switch
+        {
+            "reintroducedButAlreadyGuaranteed" => "badge-reintroduced",
+            "usedButNotGuaranteedIntroduced" => "badge-not-introduced",
+            _ => "badge-default"
+        };
+    }
+
+    private string GetConfidenceClass(string confidence)
+    {
+        return confidence.ToLowerInvariant() switch
+        {
+            "high" => "confidence-high",
+            "medium" => "confidence-medium",
+            "low" => "confidence-low",
+            _ => ""
+        };
+    }
+}
+
+<style>
+    .continuity-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 2rem;
+        background: white;
+    }
+
+    h1 {
+        font-size: 2rem;
+        margin-bottom: 2rem;
+        color: #333;
+    }
+
+    h2 {
+        font-size: 1.3rem;
+        margin-top: 1.5rem;
+        margin-bottom: 1rem;
+        color: #555;
+        border-bottom: 2px solid #667eea;
+        padding-bottom: 0.5rem;
+    }
+
+    .controls-section {
+        background: #f8f9fa;
+        padding: 2rem;
+        border-radius: 8px;
+        margin-bottom: 2rem;
+    }
+
+    .provider-config {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .config-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .config-group label {
+        font-weight: 600;
+        color: #555;
+    }
+
+    .config-group input {
+        padding: 0.5rem;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 0.9rem;
+    }
+
+    .filters-section {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .filter-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .filter-group label {
+        font-weight: 600;
+        color: #555;
+    }
+
+    .checkbox-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .checkbox-group label {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-weight: normal;
+        cursor: pointer;
+    }
+
+    .checkbox-group input[type="checkbox"] {
+        cursor: pointer;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 1rem;
+        margin-top: 1.5rem;
+    }
+
+    .action-buttons button {
+        padding: 0.75rem 1.5rem;
+        background: #667eea;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        font-weight: 600;
+        cursor: pointer;
+        font-size: 1rem;
+        transition: background 0.3s;
+    }
+
+    .action-buttons button:hover:not(:disabled) {
+        background: #5568d3;
+    }
+
+    .action-buttons button:disabled {
+        background: #ccc;
+        cursor: not-allowed;
+    }
+
+    .error-message {
+        background: #fee;
+        color: #c33;
+        padding: 1rem;
+        border-radius: 4px;
+        border-left: 4px solid #c33;
+        margin-top: 1rem;
+    }
+
+    .success-message {
+        background: #efe;
+        color: #3c3;
+        padding: 1rem;
+        border-radius: 4px;
+        border-left: 4px solid #3c3;
+        margin-top: 1rem;
+    }
+
+    .results-section {
+        margin-top: 2rem;
+    }
+
+    .issues-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+        gap: 1.5rem;
+        margin-top: 1.5rem;
+    }
+
+    .issue-card {
+        background: white;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        transition: box-shadow 0.3s;
+    }
+
+    .issue-card:hover {
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+
+    .card-header {
+        background: #f8f9fa;
+        padding: 1rem;
+        border-bottom: 1px solid #ddd;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .card-header h3 {
+        margin: 0;
+        font-size: 1.1rem;
+        color: #333;
+        word-break: break-word;
+    }
+
+    .badge {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    .badge-reintroduced {
+        background: #ffd700;
+        color: #333;
+    }
+
+    .badge-not-introduced {
+        background: #ff6b6b;
+        color: white;
+    }
+
+    .badge-default {
+        background: #ccc;
+        color: #333;
+    }
+
+    .card-body {
+        padding: 1rem;
+    }
+
+    .issue-details {
+        margin-bottom: 1rem;
+    }
+
+    .issue-details p {
+        margin: 0.5rem 0;
+        font-size: 0.9rem;
+        color: #555;
+    }
+
+    .confidence {
+        padding: 0.2rem 0.5rem;
+        border-radius: 4px;
+        font-weight: 600;
+    }
+
+    .confidence-high {
+        background: #d4edda;
+        color: #155724;
+    }
+
+    .confidence-medium {
+        background: #fff3cd;
+        color: #856404;
+    }
+
+    .confidence-low {
+        background: #f8d7da;
+        color: #721c24;
+    }
+
+    .issue-description {
+        margin: 1rem 0;
+        padding: 0.75rem;
+        background: #f8f9fa;
+        border-left: 3px solid #667eea;
+        border-radius: 4px;
+    }
+
+    .issue-description p {
+        margin: 0;
+        color: #333;
+        line-height: 1.5;
+    }
+
+    .evidence {
+        margin-top: 1rem;
+        padding: 0.75rem;
+        background: #f0f0f0;
+        border-radius: 4px;
+        font-size: 0.9rem;
+    }
+
+    .evidence p {
+        margin: 0;
+        color: #555;
+    }
+
+    .evidence em {
+        color: #667eea;
+        font-style: italic;
+    }
+
+    @media (max-width: 1024px) {
+        .provider-config {
+            grid-template-columns: 1fr;
+        }
+
+        .filters-section {
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .issues-grid {
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        }
+    }
+
+    @media (max-width: 768px) {
+        .continuity-container {
+            padding: 1rem;
+        }
+
+        .filters-section {
+            grid-template-columns: 1fr;
+        }
+
+        .issues-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>

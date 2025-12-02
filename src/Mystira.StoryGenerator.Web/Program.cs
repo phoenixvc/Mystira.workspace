@@ -40,6 +40,9 @@ builder.Services.AddScoped<IChatService, ChatService>();
 // Add YAML Import Service
 builder.Services.AddScoped<IYamlImportService, YamlImportService>();
 
+// Add Story Continuity Service
+builder.Services.AddScoped<WebStoryContinuityService>();
+
 builder.Services.AddScoped(sp =>
 {
     var configuration = sp.GetRequiredService<IConfiguration>();
