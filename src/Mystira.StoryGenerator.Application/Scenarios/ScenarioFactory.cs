@@ -77,7 +77,9 @@ public class ScenarioFactory : IScenarioFactory
         [JsonPropertyName("session_length")] public string? SessionLength { get; set; }
         [JsonPropertyName("archetypes")] public List<string>? Archetypes { get; set; }
         [JsonPropertyName("age_group")] public string AgeGroup { get; set; } = string.Empty;
-        [JsonPropertyName("minimum_age")] public int MinimumAge { get; set; }
+        [JsonPropertyName("minimum_age")]
+        [JsonNumberHandling(JsonNumberHandling.AllowReadingFromString)]
+        public int MinimumAge { get; set; }
         [JsonPropertyName("core_axes")] public List<string>? CoreAxes { get; set; }
         [JsonPropertyName("characters")] public List<CharacterDto>? Characters { get; set; }
         [JsonPropertyName("scenes")] public List<SceneDto>? Scenes { get; set; }
@@ -98,7 +100,9 @@ public class ScenarioFactory : IScenarioFactory
         [JsonPropertyName("role")] public List<string>? Role { get; set; }
         [JsonPropertyName("archetype")] public List<string>? Archetype { get; set; }
         [JsonPropertyName("species")] public string? Species { get; set; }
-        [JsonPropertyName("age")] public int? Age { get; set; }
+        [JsonPropertyName("age")]
+        [JsonNumberHandling(JsonNumberHandling.AllowReadingFromString)]
+        public int? Age { get; set; }
         [JsonPropertyName("traits")] public List<string>? Traits { get; set; }
         [JsonPropertyName("backstory")] public string? Backstory { get; set; }
     }
@@ -113,7 +117,9 @@ public class ScenarioFactory : IScenarioFactory
         [JsonPropertyName("media")] public MediaDto? Media { get; set; }
         [JsonPropertyName("branches")] public List<BranchDto>? Branches { get; set; }
         [JsonPropertyName("echo_reveals")] public List<EchoRevealDto>? EchoReveals { get; set; }
-        [JsonPropertyName("difficulty")] public int? Difficulty { get; set; }
+        [JsonPropertyName("difficulty")]
+        [JsonNumberHandling(JsonNumberHandling.AllowReadingFromString)]
+        public int? Difficulty { get; set; }
     }
 
     private sealed class MediaDto
@@ -135,23 +141,31 @@ public class ScenarioFactory : IScenarioFactory
     {
         [JsonPropertyName("echo_type")] public string? EchoType { get; set; }
         [JsonPropertyName("description")] public string? Description { get; set; }
-        [JsonPropertyName("strength")] public double? Strength { get; set; }
+        [JsonPropertyName("strength")]
+        [JsonNumberHandling(JsonNumberHandling.AllowReadingFromString)]
+        public double? Strength { get; set; }
         [JsonPropertyName("timestamp")] public DateTime? Timestamp { get; set; }
     }
 
     private sealed class CompassChangeDto
     {
         [JsonPropertyName("axis")] public string? Axis { get; set; }
-        [JsonPropertyName("delta")] public double? Delta { get; set; }
+        [JsonPropertyName("delta")]
+        [JsonNumberHandling(JsonNumberHandling.AllowReadingFromString)]
+        public double? Delta { get; set; }
         [JsonPropertyName("developmental_link")] public string? DevelopmentalLink { get; set; }
     }
 
     private sealed class EchoRevealDto
     {
         [JsonPropertyName("echo_type")] public string? EchoType { get; set; }
-        [JsonPropertyName("min_strength")] public double? MinStrength { get; set; }
+        [JsonPropertyName("min_strength")]
+        [JsonNumberHandling(JsonNumberHandling.AllowReadingFromString)]
+        public double? MinStrength { get; set; }
         [JsonPropertyName("trigger_scene_id")] public string? TriggerSceneId { get; set; }
-        [JsonPropertyName("max_age_scenes")] public int? MaxAgeScenes { get; set; }
+        [JsonPropertyName("max_age_scenes")]
+        [JsonNumberHandling(JsonNumberHandling.AllowReadingFromString)]
+        public int? MaxAgeScenes { get; set; }
         [JsonPropertyName("reveal_mechanic")] public string? RevealMechanic { get; set; }
         [JsonPropertyName("required")] public bool? Required { get; set; }
     }
