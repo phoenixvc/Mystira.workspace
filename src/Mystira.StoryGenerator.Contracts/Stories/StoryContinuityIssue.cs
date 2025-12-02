@@ -1,3 +1,5 @@
+using Mystira.StoryGenerator.Domain.Stories;
+
 namespace Mystira.StoryGenerator.Contracts.Stories;
 
 /// <summary>
