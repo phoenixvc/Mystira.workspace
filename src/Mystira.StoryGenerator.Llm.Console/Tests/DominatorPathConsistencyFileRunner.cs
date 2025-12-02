@@ -1,7 +1,6 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.DependencyInjection;
 using Mystira.StoryGenerator.Application.Scenarios;
-using Mystira.StoryGenerator.Application.StoryConsistencyAnalysis;
 using Mystira.StoryGenerator.Domain.Services;
 
 namespace Mystira.StoryGenerator.Llm.Console.Tests;

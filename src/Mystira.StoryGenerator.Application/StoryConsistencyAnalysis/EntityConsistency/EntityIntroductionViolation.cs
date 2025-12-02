@@ -1,6 +1,6 @@
 ﻿using Mystira.StoryGenerator.Contracts.Entities;
 
-namespace Mystira.StoryGenerator.Application.StoryConsistencyAnalysis;
+namespace Mystira.StoryGenerator.Application.StoryConsistencyAnalysis.EntityConsistency;
 
 /// <summary>
 /// Helper record for reporting where an entity is used without being

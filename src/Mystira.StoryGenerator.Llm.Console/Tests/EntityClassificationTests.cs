@@ -1,7 +1,7 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.DependencyInjection;
 using Mystira.StoryGenerator.Contracts.Entities;
-using Mystira.StoryGenerator.Llm.Services.DominatorBasedConsistency;
+using Mystira.StoryGenerator.Llm.Services.ConsistencyEvaluators;
 
 namespace Mystira.StoryGenerator.Llm.Console.Tests;
 
@@ -9,7 +9,7 @@ internal static class EntityClassificationTests
 {
     public static async Task<int> RunAsync(IServiceProvider services, ILogger logger)
     {
-        var classifier = services.GetRequiredService<SceneEntityLlmClassifier>();
+        var classifier = services.GetRequiredService<SceneEntityLlmClassifierService>();
 
         // Event-centric sample scenes with expected entities (strict: name, type, isProper)
         var tests = new Dictionary<string, SceneEntity[]> {

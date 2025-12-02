@@ -1,10 +1,12 @@
 using Microsoft.Extensions.Logging;
 using Mystira.StoryGenerator.Application.Scenarios;
+using Mystira.StoryGenerator.Application.StoryConsistencyAnalysis.EntityConsistency;
 using Mystira.StoryGenerator.Contracts.Entities;
+using Mystira.StoryGenerator.Contracts.StoryConsistency;
 using Mystira.StoryGenerator.Domain.Services;
 using Mystira.StoryGenerator.Domain.Stories;
 
-namespace Mystira.StoryGenerator.Application.StoryConsistencyAnalysis;
+namespace Mystira.StoryGenerator.Application.Services;
 
 /// <summary>
 /// Implementation of scenario entity consistency evaluation service that orchestrates
@@ -101,7 +103,7 @@ public class ScenarioEntityConsistencyEvaluationService : IScenarioEntityConsist
         {
             _logger.LogWarning(ex, "Entity introduction validation failed, returning empty result");
             return new EntityIntroductionEvaluationResult(
-                new List<ScenarioEntityIntroductionValidator.SceneReferenceViolation>(),
+                new List<SceneReferenceViolation>(),
                 sceneClassifications);
         }
     }

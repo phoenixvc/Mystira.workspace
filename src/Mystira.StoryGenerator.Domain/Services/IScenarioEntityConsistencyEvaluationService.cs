@@ -1,6 +1,7 @@
+using Mystira.StoryGenerator.Contracts.StoryConsistency;
 using Mystira.StoryGenerator.Domain.Stories;
 
-namespace Mystira.StoryGenerator.Application.StoryConsistencyAnalysis;
+namespace Mystira.StoryGenerator.Domain.Services;
 
 /// <summary>
 /// Service that evaluates entity consistency within a scenario using LLM-based classification

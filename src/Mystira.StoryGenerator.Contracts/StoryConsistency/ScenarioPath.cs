@@ -1,4 +1,4 @@
-namespace Mystira.StoryGenerator.Contracts.Stories;
+namespace Mystira.StoryGenerator.Contracts.StoryConsistency;
 
 /// <summary>
 /// Represents a compressed path in the scenario graph corresponding to a path taken by the player. It gives

@@ -27,7 +27,13 @@
       <None Update="appsettings.Development.json">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>
-      <None Update="test_data\Test-Story-UnintroducedEntities.yaml">
+      <None Update="test_data\Test-Story-UnintroducedEntities-Small.yaml">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Update="test_data\Test-Story-UnintroducedEntities-Minimal.yaml">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Update="test_data\Test-Story-UnintroducedEntities-Extensive.yaml">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>
     </ItemGroup>

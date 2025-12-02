@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace Mystira.StoryGenerator.Domain.Services;
+namespace Mystira.StoryGenerator.Contracts.StoryConsistency;
 
 public class ConsistencyEvaluationResult
 {

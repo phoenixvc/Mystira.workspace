@@ -1,7 +1,9 @@
 using Microsoft.Extensions.Logging;
+using Mystira.StoryGenerator.Contracts.StoryConsistency;
+using Mystira.StoryGenerator.Domain.Services;
 using Mystira.StoryGenerator.Domain.Stories;
 
-namespace Mystira.StoryGenerator.Application.StoryConsistencyAnalysis;
+namespace Mystira.StoryGenerator.Application.StoryConsistencyAnalysis.Legacy;
 
 /// <summary>
 /// Orchestrator service that evaluates overall scenario consistency by combining

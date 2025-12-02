@@ -6,22 +6,22 @@ using Mystira.StoryGenerator.Contracts.Entities;
 using Mystira.StoryGenerator.Domain.Services;
 using Newtonsoft.Json.Linq;
 
-namespace Mystira.StoryGenerator.Llm.Services.DominatorBasedConsistency;
+namespace Mystira.StoryGenerator.Llm.Services.ConsistencyEvaluators;
 
 /// <summary>
 /// LLM-based scene entity classifier. Uses Azure OpenAI to perform entity classification, i.e.,
 /// extract and classify all entities introduced within a scene of an interactive branching story.
 /// </summary>
-public class SceneEntityLlmClassifier : IEntityLlmClassificationService
+public class SceneEntityLlmClassifierService : IEntityLlmClassificationService
 {
     private readonly EntityClassifierSettings _settings;
     private readonly ILlmServiceFactory _llmServiceFactory;
-    private readonly ILogger<SceneEntityLlmClassifier> _logger;
+    private readonly ILogger<SceneEntityLlmClassifierService> _logger;
 
-    public SceneEntityLlmClassifier(
+    public SceneEntityLlmClassifierService(
         IOptions<AiSettings> aiOptions,
         ILlmServiceFactory llmServiceFactory,
-        ILogger<SceneEntityLlmClassifier> logger)
+        ILogger<SceneEntityLlmClassifierService> logger)
     {
         _settings = aiOptions.Value.EntityClassifier;
         _llmServiceFactory = llmServiceFactory;
