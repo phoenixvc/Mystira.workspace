@@ -8,10 +8,11 @@ public interface IChatSessionService
 {
     ChatSession? CurrentSession { get; }
     IReadOnlyList<SessionMetadata> SessionHistory { get; }
-    
+
     event Action<ChatSession?> CurrentSessionChanged;
     event Action<IReadOnlyList<SessionMetadata>> SessionHistoryChanged;
-    
+
+    Task EnsureInitializedAsync();
     Task<ChatSession> CreateNewSessionAsync(string? title = null);
     Task LoadSessionAsync(string sessionId);
     Task AddMessageAsync(MystiraChatMessage message);
@@ -25,30 +26,47 @@ public interface IChatSessionService
 public class ChatSessionService : IChatSessionService
 {
     private readonly ILocalStorageService _localStorage;
-    
+
     private const string SessionsKey = "mystira_chat_sessions";
     private const string CurrentSessionKey = "mystira_current_session_id";
-    
+
     private ChatSession? _currentSession;
     private List<SessionMetadata> _sessionHistory = new();
+    private Task? _initializationTask;
 
     public ChatSession? CurrentSession => _currentSession;
     public IReadOnlyList<SessionMetadata> SessionHistory => _sessionHistory;
-    
+
     public event Action<ChatSession?>? CurrentSessionChanged;
     public event Action<IReadOnlyList<SessionMetadata>>? SessionHistoryChanged;
 
     public ChatSessionService(ILocalStorageService localStorage)
     {
         _localStorage = localStorage;
-        _ = InitializeAsync();
+        _initializationTask = InitializeAsync();
     }
+
+    /// <summary>
+    /// Ensures the service has finished initial loading of session history and last session.
+    /// </summary>
+    public Task EnsureInitializedAsync() => _initializationTask ?? Task.CompletedTask;
 
     private async Task InitializeAsync()
     {
         // Load session history
         await LoadSessionHistoryAsync();
-        
+
+        // If no sessions found using the new storage scheme, attempt a one-time
+        // migration from the legacy storage key used by older builds.
+        if (_sessionHistory.Count == 0)
+        {
+            var migrated = await MigrateLegacyChatsAsync();
+            if (migrated)
+            {
+                await LoadSessionHistoryAsync();
+            }
+        }
+
         // Try to restore last session
         var currentSessionId = await _localStorage.GetItemAsStringAsync(CurrentSessionKey);
         if (!string.IsNullOrEmpty(currentSessionId))
@@ -62,6 +80,159 @@ public class ChatSessionService : IChatSessionService
                 // If loading fails, clear the stored session ID
                 await _localStorage.RemoveItemAsync(CurrentSessionKey);
             }
+        }
+        else if (_sessionHistory.Count > 0)
+        {
+            // If we still don't have a current session id, pick the most recent session,
+            // preferring one that has a YAML snapshot.
+            var candidate = _sessionHistory
+                .OrderByDescending(s => s.UpdatedAt)
+                .ThenByDescending(s => s.HasYamlSnapshot)
+                .FirstOrDefault();
+
+            if (candidate != null)
+            {
+                try
+                {
+                    await LoadSessionAsync(candidate.Id);
+                }
+                catch
+                {
+                    // ignore; user can select another session manually
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    /// Migrates chats stored in the legacy localStorage key "mystira_story_generator_chats"
+    /// into the new per-session storage scheme used by <see cref="ChatSessionService"/>.
+    /// Returns true if any sessions were migrated.
+    /// </summary>
+    private async Task<bool> MigrateLegacyChatsAsync()
+    {
+        try
+        {
+            const string legacyKey = "mystira_story_generator_chats";
+            var legacyJson = await _localStorage.GetItemAsStringAsync(legacyKey);
+            if (string.IsNullOrWhiteSpace(legacyJson))
+                return false;
+
+            using var doc = JsonDocument.Parse(legacyJson);
+            if (doc.RootElement.ValueKind != JsonValueKind.Array)
+                return false;
+
+            var migratedAny = false;
+            ChatSession? mostRecentWithSnapshot = null;
+            DateTime mostRecentUpdatedAt = DateTime.MinValue;
+
+            foreach (var item in doc.RootElement.EnumerateArray())
+            {
+                try
+                {
+                    var session = new ChatSession();
+
+                    if (item.TryGetProperty("Id", out var idProp) && idProp.ValueKind == JsonValueKind.String)
+                        session.Id = idProp.GetString() ?? session.Id;
+
+                    if (item.TryGetProperty("Title", out var titleProp) && titleProp.ValueKind == JsonValueKind.String)
+                        session.Title = titleProp.GetString() ?? session.Title;
+
+                    if (item.TryGetProperty("CreatedAt", out var createdProp) && createdProp.ValueKind == JsonValueKind.String
+                        && DateTime.TryParse(createdProp.GetString(), out var createdAt))
+                        session.CreatedAt = createdAt;
+
+                    // UpdatedAt might be missing – fall back to CreatedAt or now
+                    if (item.TryGetProperty("UpdatedAt", out var updatedProp) && updatedProp.ValueKind == JsonValueKind.String
+                        && DateTime.TryParse(updatedProp.GetString(), out var updatedAt))
+                        session.UpdatedAt = updatedAt;
+                    else
+                        session.UpdatedAt = session.CreatedAt != default ? session.CreatedAt : DateTime.UtcNow;
+
+                    if (item.TryGetProperty("YamlSnapshot", out var yamlProp) && yamlProp.ValueKind == JsonValueKind.String)
+                        session.YamlSnapshot = yamlProp.GetString();
+
+                    // Messages are optional and schema may differ; try a minimal best-effort mapping
+                    if (item.TryGetProperty("Messages", out var msgsProp) && msgsProp.ValueKind == JsonValueKind.Array)
+                    {
+                        foreach (var m in msgsProp.EnumerateArray())
+                        {
+                            try
+                            {
+                                // The legacy shape used Role/Content/Timestamp. Map to MystiraChatMessage.
+                                string role = "user";
+                                if (m.TryGetProperty("Role", out var roleProp) && roleProp.ValueKind == JsonValueKind.String)
+                                    role = roleProp.GetString() ?? "user";
+
+                                var msg = new MystiraChatMessage
+                                {
+                                    // If legacy role was "assistant", map to User for compatibility
+                                    MessageType = role.Equals("system", StringComparison.OrdinalIgnoreCase)
+                                        ? ChatMessageType.System
+                                        : ChatMessageType.User,
+                                    Content = (m.TryGetProperty("Content", out var contentProp) && contentProp.ValueKind == JsonValueKind.String)
+                                        ? (contentProp.GetString() ?? string.Empty)
+                                        : string.Empty,
+                                    Timestamp = (m.TryGetProperty("Timestamp", out var tsProp) && tsProp.ValueKind == JsonValueKind.String
+                                                 && DateTime.TryParse(tsProp.GetString(), out var ts))
+                                        ? ts
+                                        : DateTime.UtcNow
+                                };
+
+                                session.Messages.Add(msg);
+                            }
+                            catch
+                            {
+                                // Ignore malformed message entries
+                            }
+                        }
+                    }
+
+                    await SaveSessionAsync(session);
+                    migratedAny = true;
+
+                    // track most recent with snapshot
+                    if (!string.IsNullOrWhiteSpace(session.YamlSnapshot) && session.UpdatedAt >= mostRecentUpdatedAt)
+                    {
+                        mostRecentUpdatedAt = session.UpdatedAt;
+                        mostRecentWithSnapshot = session;
+                    }
+                }
+                catch
+                {
+                    // Skip malformed legacy entries
+                }
+            }
+
+            if (migratedAny)
+            {
+                // Set current session to the most recent with snapshot, or any most recent
+                if (mostRecentWithSnapshot != null)
+                {
+                    await _localStorage.SetItemAsStringAsync(CurrentSessionKey, mostRecentWithSnapshot.Id);
+                }
+                else
+                {
+                    // As a fallback, pick the most recent session by UpdatedAt among all migrated ones
+                    // Reload history to determine that
+                    await LoadSessionHistoryAsync();
+                    var candidate = _sessionHistory
+                        .OrderByDescending(s => s.UpdatedAt)
+                        .FirstOrDefault();
+                    if (candidate != null)
+                    {
+                        await _localStorage.SetItemAsStringAsync(CurrentSessionKey, candidate.Id);
+                    }
+                }
+
+                return true;
+            }
+
+            return false;
+        }
+        catch
+        {
+            return false;
         }
     }
 
@@ -95,7 +266,7 @@ public class ChatSessionService : IChatSessionService
 
         // Save session
         await SaveSessionAsync(session);
-        
+
         // Update current session
         _currentSession = session;
         await _localStorage.SetItemAsStringAsync(CurrentSessionKey, session.Id);
@@ -111,7 +282,7 @@ public class ChatSessionService : IChatSessionService
     {
         var sessionKey = $"{SessionsKey}_{sessionId}";
         var sessionJson = await _localStorage.GetItemAsStringAsync(sessionKey);
-        
+
         if (string.IsNullOrEmpty(sessionJson))
         {
             throw new InvalidOperationException($"Session {sessionId} not found.");
@@ -140,7 +311,7 @@ public class ChatSessionService : IChatSessionService
 
         await SaveSessionAsync(_currentSession);
         await LoadSessionHistoryAsync(); // Refresh history with updated timestamp
-        
+
         CurrentSessionChanged?.Invoke(_currentSession);
     }
 
@@ -148,7 +319,7 @@ public class ChatSessionService : IChatSessionService
     {
         var sessionKey = $"{SessionsKey}_{sessionId}";
         var sessionJson = await _localStorage.GetItemAsStringAsync(sessionKey);
-        
+
         if (string.IsNullOrEmpty(sessionJson))
         {
             return;
@@ -201,7 +372,7 @@ public class ChatSessionService : IChatSessionService
 
         await SaveSessionAsync(_currentSession);
         await LoadSessionHistoryAsync(); // Refresh history
-        
+
         CurrentSessionChanged?.Invoke(_currentSession);
     }
 
@@ -288,11 +459,11 @@ public class ChatSessionService : IChatSessionService
     {
         var adjectives = new[] { "Epic", "Mysterious", "Magical", "Ancient", "Legendary", "Heroic", "Mystical", "Enchanted" };
         var nouns = new[] { "Quest", "Adventure", "Journey", "Tale", "Story", "Legend", "Chronicle", "Saga" };
-        
+
         var random = new Random();
         var adjective = adjectives[random.Next(adjectives.Length)];
         var noun = nouns[random.Next(nouns.Length)];
-        
+
         return $"{adjective} {noun}";
     }
 }

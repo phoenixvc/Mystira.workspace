@@ -8,6 +8,7 @@
 @inject IAiModelSettingsService ModelSettingsService
 @inject IYamlImportService YamlImportService
 @inject ILogger<ThreePanelLayout> Logger
+@inject Mystira.StoryGenerator.Web.Services.IChatSessionService ChatSessionService
 
 <style>
     /* Ensure the settings button is clearly visible regardless of Tailwind/theme availability */
@@ -38,6 +39,13 @@
                 <span class="bg-primary-100 text-primary-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
                     Alpha
                 </span>
+                <!-- Top navigation link to Story Continuity page -->
+                <NavLink class="text-sm font-medium text-gray-600 hover:text-gray-900 px-3 py-1 rounded hover:bg-gray-100"
+                         href="/story-continuity"
+                         Match="NavLinkMatch.Prefix"
+                         title="Open Story Continuity Analyzer">
+                    Story Continuity
+                </NavLink>
             </div>
             <div class="flex items-center space-x-4">
                 <button class="text-gray-500 hover:text-gray-700 transition-colors">
@@ -61,6 +69,11 @@
             </div>
         </div>
     </header>
+
+    <!-- Routed page content slot -->
+    <div class="route-body-container">
+        @Body
+    </div>
 
     <!-- Main Content Area -->
     <main class="flex-1 flex overflow-hidden relative">
@@ -765,6 +778,24 @@
            : 1;
        CloseMobileMenu();
        StateHasChanged();
+
+       // Sync selected chat to the shared ChatSessionService so other pages (e.g., Story Continuity)
+       // can access CurrentSession and its snapshot.
+       try
+       {
+           if (!string.IsNullOrWhiteSpace(chat?.Id))
+           {
+               await ChatSessionService.LoadSessionAsync(chat.Id);
+               if (!string.IsNullOrWhiteSpace(chat?.YamlSnapshot))
+               {
+                   await ChatSessionService.SaveYamlSnapshotAsync(chat.YamlSnapshot);
+               }
+           }
+       }
+       catch (Exception ex)
+       {
+           Logger.LogWarning(ex, "Failed to sync selected chat to ChatSessionService");
+       }
     }
 
     private async Task HandleDeleteChat(string chatId)
@@ -1463,6 +1494,19 @@
                 Timestamp = DateTime.Now
             });
             await SaveChatsAsync();
+        }
+
+        // Persist snapshot to ChatSessionService for global availability.
+        try
+        {
+            if (!string.IsNullOrWhiteSpace(updatedYaml))
+            {
+                await ChatSessionService.SaveYamlSnapshotAsync(updatedYaml);
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.LogWarning(ex, "Failed to save YAML snapshot via ChatSessionService");
         }
 
         // Validate YAML after saving edits

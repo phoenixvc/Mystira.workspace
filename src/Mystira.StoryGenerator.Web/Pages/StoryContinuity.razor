@@ -1,0 +1,854 @@
+@page "/story-continuity"
+@using Mystira.StoryGenerator.Web.Models
+@using Mystira.StoryGenerator.Contracts.Chat
+@inject WebStoryContinuityService ContinuityService
+@inject ILogger<StoryContinuity> Logger
+@inject IAiModelSettingsService ModelSettingsService
+@inject IChatSessionService ChatSessionService
+
+<PageTitle>Story Continuity Analyzer</PageTitle>
+
+<div class="continuity-container">
+    <div class="page-header">
+        <h1>Story Continuity Analyzer</h1>
+        <NavLink class="back-link" href="/story-generator" title="Back to Home">← Back</NavLink>
+    </div>
+
+    <div class="controls-section">
+        <h2>Provider Configuration</h2>
+
+        <div class="provider-config">
+            <div class="config-group">
+                <label>Prefix Summary Provider:</label>
+                <select class="provider-select" @bind="prefixSummaryProvider" @bind:event="onchange">
+                    @foreach (var p in providerOptions)
+                    {
+                        <option value="@p">@p</option>
+                    }
+                </select>
+                <select class="model-select" @bind="prefixSummaryModel" @bind:event="onchange">
+                    @foreach (var m in GetModelsForProvider(prefixSummaryProvider))
+                    {
+                        <option value="@m.Id">@m.DisplayName (@m.Deployment)</option>
+                    }
+                </select>
+            </div>
+
+            <div class="config-group">
+                <label>Semantic Role Labelling Provider:</label>
+                <select class="provider-select" @bind="semanticRoleProvider" @bind:event="onchange">
+                    @foreach (var p in providerOptions)
+                    {
+                        <option value="@p">@p</option>
+                    }
+                </select>
+                <select class="model-select" @bind="semanticRoleModel" @bind:event="onchange">
+                    @foreach (var m in GetModelsForProvider(semanticRoleProvider))
+                    {
+                        <option value="@m.Id">@m.DisplayName (@m.Deployment)</option>
+                    }
+                </select>
+            </div>
+        </div>
+
+        <h2>Filters</h2>
+
+        <div class="filters-section">
+            <div class="filter-group">
+                <label>Confidence Levels:</label>
+                <div class="checkbox-group">
+                    <label>
+                        <input type="checkbox" @bind="ConfidenceHigh" />
+                        High
+                    </label>
+                    <label>
+                        <input type="checkbox" @bind="ConfidenceMedium" />
+                        Medium
+                    </label>
+                    <label>
+                        <input type="checkbox" @bind="ConfidenceLow" />
+                        Low
+                    </label>
+                </div>
+            </div>
+
+            <div class="filter-group">
+                <label>Entity Types:</label>
+                <div class="checkbox-group">
+                    <label>
+                        <input type="checkbox" @bind="EntityCharacter" />
+                        Character
+                    </label>
+                    <label>
+                        <input type="checkbox" @bind="EntityLocation" />
+                        Location
+                    </label>
+                    <label>
+                        <input type="checkbox" @bind="EntityItem" />
+                        Item
+                    </label>
+                    <label>
+                        <input type="checkbox" @bind="EntityConcept" />
+                        Concept
+                    </label>
+                </div>
+            </div>
+
+            <div class="filter-group">
+                <label>
+                    <input type="checkbox" @bind="PronounsOnly" />
+                    Pronouns Only
+                </label>
+            </div>
+        </div>
+
+        <div class="action-buttons">
+            <button @onclick="AnalyzeContinuity" disabled="@isAnalyzing">
+                @if (isAnalyzing)
+                {
+                    <span>Analyzing...</span>
+                }
+                else
+                {
+                    <span>Analyze Story</span>
+                }
+            </button>
+        </div>
+
+        @if (!string.IsNullOrEmpty(evaluationError))
+        {
+            <div class="error-message">
+                <p>@evaluationError</p>
+            </div>
+        }
+    </div>
+
+    @if (filteredIssues != null && filteredIssues.Count > 0)
+    {
+        <div class="results-section">
+            <h2>Continuity Issues (@filteredIssues.Count)</h2>
+
+            <div class="issues-grid">
+                @foreach (var issue in filteredIssues)
+                {
+                    <div class="issue-card">
+                        <div class="card-header">
+                            <h3>@issue.EntityName</h3>
+                            <span class="badge @GetIssueBadgeClass(issue.IssueType)">@issue.IssueType</span>
+                        </div>
+
+                        <div class="card-body">
+                            <div class="issue-details">
+                                <p><strong>Scene:</strong> @issue.SceneId</p>
+                                <p><strong>Entity Type:</strong> @issue.EntityType</p>
+                                <p><strong>Confidence:</strong> <span class="confidence @GetConfidenceClass(issue.Confidence)">@issue.Confidence</span></p>
+                                @if (issue.IsPronoun)
+                                {
+                                    <p><strong>Is Pronoun:</strong> Yes</p>
+                                }
+                                @if (issue.SemanticRoles != null && issue.SemanticRoles.Length > 0)
+                                {
+                                    <p><strong>Semantic Roles:</strong> @string.Join(", ", issue.SemanticRoles)</p>
+                                }
+                            </div>
+
+                            <div class="issue-description">
+                                <p>@issue.Detail</p>
+                            </div>
+
+                            @if (!string.IsNullOrEmpty(issue.EvidenceSpan))
+                            {
+                                <div class="evidence">
+                                    <p><strong>Evidence:</strong> <em>@issue.EvidenceSpan</em></p>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+    else if (evaluationCompleted && (filteredIssues == null || filteredIssues.Count == 0))
+    {
+        <div class="success-message">
+            <p>No continuity issues found!</p>
+        </div>
+    }
+</div>
+
+@code {
+    // Bound checkbox helpers -> map to internal filter sets
+    private bool ConfidenceHigh
+    {
+        get => selectedConfidences.Contains("high");
+        set => UpdateConfidenceFilter("high", value);
+    }
+
+    private bool ConfidenceMedium
+    {
+        get => selectedConfidences.Contains("medium");
+        set => UpdateConfidenceFilter("medium", value);
+    }
+
+    private bool ConfidenceLow
+    {
+        get => selectedConfidences.Contains("low");
+        set => UpdateConfidenceFilter("low", value);
+    }
+
+    private bool EntityCharacter
+    {
+        get => selectedEntityTypes.Contains("character");
+        set => UpdateEntityTypeFilter("character", value);
+    }
+
+    private bool EntityLocation
+    {
+        get => selectedEntityTypes.Contains("location");
+        set => UpdateEntityTypeFilter("location", value);
+    }
+
+    private bool EntityItem
+    {
+        get => selectedEntityTypes.Contains("item");
+        set => UpdateEntityTypeFilter("item", value);
+    }
+
+    private bool EntityConcept
+    {
+        get => selectedEntityTypes.Contains("concept");
+        set => UpdateEntityTypeFilter("concept", value);
+    }
+
+    // Ensure filter re-application when PronounsOnly is toggled
+    private bool _pronounsOnly;
+    private bool PronounsOnly
+    {
+        get => _pronounsOnly;
+        set
+        {
+            _pronounsOnly = value;
+            ApplyFilters();
+        }
+    }
+
+    // Provider/Model dropdown state
+    private List<AiModelDefinition> allModels = new();
+    private List<string> providerOptions = new();
+
+    private string _prefixSummaryProvider = string.Empty;
+    private string _prefixSummaryModel = string.Empty;
+    private string _semanticRoleProvider = string.Empty;
+    private string _semanticRoleModel = string.Empty;
+
+    private string prefixSummaryProvider
+    {
+        get => _prefixSummaryProvider;
+        set
+        {
+            if (!string.Equals(_prefixSummaryProvider, value, StringComparison.Ordinal))
+            {
+                _prefixSummaryProvider = value ?? string.Empty;
+                EnsureValidPrefixModel();
+            }
+        }
+    }
+
+    private string prefixSummaryModel
+    {
+        get => _prefixSummaryModel;
+        set => _prefixSummaryModel = value ?? string.Empty;
+    }
+
+    private string semanticRoleProvider
+    {
+        get => _semanticRoleProvider;
+        set
+        {
+            if (!string.Equals(_semanticRoleProvider, value, StringComparison.Ordinal))
+            {
+                _semanticRoleProvider = value ?? string.Empty;
+                EnsureValidSrlModel();
+            }
+        }
+    }
+
+    private string semanticRoleModel
+    {
+        get => _semanticRoleModel;
+        set => _semanticRoleModel = value ?? string.Empty;
+    }
+
+    private HashSet<string> selectedConfidences = new();
+    private HashSet<string> selectedEntityTypes = new();
+
+    private List<StoryContinuityIssue>? filteredIssues;
+    private bool isAnalyzing = false;
+    private bool evaluationCompleted = false;
+    private string evaluationError = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Ensure chat session service is fully initialized before we access sessions/history
+        await ChatSessionService.EnsureInitializedAsync();
+
+        // Load available providers/models from settings service (with cache/fallback)
+        await ModelSettingsService.InitializeAsync();
+        var models = await ModelSettingsService.GetAvailableModelsAsync();
+        allModels = models.ToList();
+        providerOptions = allModels
+            .Select(m => m.Provider)
+            .Where(p => !string.IsNullOrWhiteSpace(p))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .OrderBy(p => p)
+            .ToList();
+
+        // Defaults: first provider and its first model
+        if (string.IsNullOrWhiteSpace(prefixSummaryProvider))
+            prefixSummaryProvider = providerOptions.FirstOrDefault() ?? string.Empty;
+        EnsureValidPrefixModel();
+
+        if (string.IsNullOrWhiteSpace(semanticRoleProvider))
+            semanticRoleProvider = providerOptions.FirstOrDefault() ?? string.Empty;
+        EnsureValidSrlModel();
+
+        // Initialize filter defaults
+        // By default tick all confidence and entity type checkboxes; PronounsOnly remains false
+        if (selectedConfidences.Count == 0)
+        {
+            selectedConfidences = new HashSet<string>(new[] { "high", "medium" }, StringComparer.OrdinalIgnoreCase);
+        }
+
+        if (selectedEntityTypes.Count == 0)
+        {
+            selectedEntityTypes = new HashSet<string>(new[] { "character", "location", "item" }, StringComparer.OrdinalIgnoreCase);
+        }
+
+        _pronounsOnly = true;
+    }
+
+    private IEnumerable<AiModelDefinition> GetModelsForProvider(string provider)
+    {
+        if (string.IsNullOrWhiteSpace(provider)) return Enumerable.Empty<AiModelDefinition>();
+        return allModels.Where(m => string.Equals(m.Provider, provider, StringComparison.OrdinalIgnoreCase));
+    }
+
+    private void EnsureValidPrefixModel()
+    {
+        var models = GetModelsForProvider(prefixSummaryProvider).ToList();
+        if (models.Count == 0)
+        {
+            prefixSummaryModel = string.Empty;
+            return;
+        }
+        if (string.IsNullOrWhiteSpace(prefixSummaryModel) || !models.Any(m => string.Equals(m.Id, prefixSummaryModel, StringComparison.Ordinal)))
+        {
+            prefixSummaryModel = models.First().Id;
+        }
+    }
+
+    private void EnsureValidSrlModel()
+    {
+        var models = GetModelsForProvider(semanticRoleProvider).ToList();
+        if (models.Count == 0)
+        {
+            semanticRoleModel = string.Empty;
+            return;
+        }
+        if (string.IsNullOrWhiteSpace(semanticRoleModel) || !models.Any(m => string.Equals(m.Id, semanticRoleModel, StringComparison.Ordinal)))
+        {
+            semanticRoleModel = models.First().Id;
+        }
+    }
+
+    private void UpdateConfidenceFilter(string confidence, bool isSelected)
+    {
+        if (isSelected)
+            selectedConfidences.Add(confidence);
+        else
+            selectedConfidences.Remove(confidence);
+
+        ApplyFilters();
+    }
+
+    private void UpdateEntityTypeFilter(string entityType, bool isSelected)
+    {
+        if (isSelected)
+            selectedEntityTypes.Add(entityType);
+        else
+            selectedEntityTypes.Remove(entityType);
+
+        ApplyFilters();
+    }
+
+    private async Task AnalyzeContinuity()
+    {
+        isAnalyzing = true;
+        evaluationError = string.Empty;
+        evaluationCompleted = false;
+
+        try
+        {
+            // Make sure the session service has finished initializing
+            await ChatSessionService.EnsureInitializedAsync();
+            // Ensure we have an active session with a snapshot
+            var ensured = await EnsureActiveSessionWithSnapshotAsync();
+            var session = ChatSessionService.CurrentSession;
+            if (!ensured || session == null || string.IsNullOrWhiteSpace(session.YamlSnapshot))
+            {
+                evaluationError = "No active chat with a story snapshot was found. Open or import a story in the chat, then try Analyze again.";
+                return;
+            }
+
+            var storyJson = JsonYamlConverter.ToJson(session.YamlSnapshot);
+
+            var snapshot = new StorySnapshot
+            {
+                StoryId = session.Id,
+                StoryVersion = Math.Max(1, session.Messages?.Count ?? 1),
+                Content = storyJson
+            };
+
+            var request = new EvaluateStoryContinuityRequest
+            {
+                CurrentStory = snapshot,
+                PrefixSummaryProvider = string.IsNullOrEmpty(prefixSummaryProvider) ? null : prefixSummaryProvider,
+                PrefixSummaryModel = string.IsNullOrEmpty(prefixSummaryModel) ? null : prefixSummaryModel,
+                SemanticRoleProvider = string.IsNullOrEmpty(semanticRoleProvider) ? null : semanticRoleProvider,
+                SemanticRoleModel = string.IsNullOrEmpty(semanticRoleModel) ? null : semanticRoleModel
+            };
+
+            var result = await ContinuityService.EvaluateAsync(request);
+
+            if (result.Success)
+            {
+                filteredIssues = result.Issues;
+                ApplyFilters();
+                evaluationCompleted = true;
+            }
+            else
+            {
+                evaluationError = result.Error ?? "Unknown error occurred";
+                Logger.LogError("Continuity evaluation failed: {Error}", evaluationError);
+            }
+        }
+        catch (Exception ex)
+        {
+            evaluationError = $"Error: {ex.Message}";
+            Logger.LogError(ex, "Exception during continuity evaluation");
+        }
+        finally
+        {
+            isAnalyzing = false;
+        }
+    }
+
+    // Try to make sure CurrentSession has a YAML snapshot available (handles history navigation cases)
+    private async Task<bool> EnsureActiveSessionWithSnapshotAsync()
+    {
+        var session = ChatSessionService.CurrentSession;
+        if (session != null && !string.IsNullOrWhiteSpace(session.YamlSnapshot))
+            return true;
+
+        try
+        {
+            var history = await ChatSessionService.GetSessionHistoryAsync();
+            var candidate = history
+                .OrderByDescending(h => h.UpdatedAt)
+                .FirstOrDefault(h => h.HasYamlSnapshot);
+
+            if (candidate != null)
+            {
+                await ChatSessionService.LoadSessionAsync(candidate.Id);
+                session = ChatSessionService.CurrentSession;
+                return session != null && !string.IsNullOrWhiteSpace(session.YamlSnapshot);
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.LogWarning(ex, "Failed to ensure active session with snapshot");
+        }
+
+        return false;
+    }
+
+    private void ApplyFilters()
+    {
+        if (filteredIssues == null)
+            return;
+
+        var filter = new StoryContinuityIssueFilter
+        {
+            IncludedConfidences = selectedConfidences.ToArray(),
+            IncludedEntityTypes = selectedEntityTypes.ToArray(),
+            PronounsOnly = PronounsOnly
+        };
+
+        filteredIssues = ContinuityService.ApplyFilters(filteredIssues, filter);
+        StateHasChanged();
+    }
+
+    private Scenario CreateSampleScenario()
+    {
+        // Create a sample scenario for demonstration
+        return new Scenario
+        {
+            Id = "sample_story",
+            Title = "Sample Story",
+            Description = "A sample story for continuity analysis",
+            Scenes = new List<Scene>
+            {
+                new Scene
+                {
+                    Id = "scene_1",
+                    Title = "Introduction",
+                    Type = SceneType.Narrative,
+                    Description = "A character named Crow appears"
+                },
+                new Scene
+                {
+                    Id = "scene_2",
+                    Title = "Development",
+                    Type = SceneType.Narrative,
+                    Description = "The crow steals something"
+                }
+            }
+        };
+    }
+
+    private string GetIssueBadgeClass(string issueType)
+    {
+        return issueType switch
+        {
+            "reintroducedButAlreadyGuaranteed" => "badge-reintroduced",
+            "usedButNotGuaranteedIntroduced" => "badge-not-introduced",
+            _ => "badge-default"
+        };
+    }
+
+    private string GetConfidenceClass(string confidence)
+    {
+        return confidence.ToLowerInvariant() switch
+        {
+            "high" => "confidence-high",
+            "medium" => "confidence-medium",
+            "low" => "confidence-low",
+            _ => ""
+        };
+    }
+}
+
+<style>
+    .continuity-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 2rem;
+        background: white;
+    }
+
+    h1 {
+        font-size: 2rem;
+        margin-bottom: 2rem;
+        color: #333;
+    }
+
+    h2 {
+        font-size: 1.3rem;
+        margin-top: 1.5rem;
+        margin-bottom: 1rem;
+        color: #555;
+        border-bottom: 2px solid #667eea;
+        padding-bottom: 0.5rem;
+    }
+
+    .controls-section {
+        background: #f8f9fa;
+        padding: 2rem;
+        border-radius: 8px;
+        margin-bottom: 2rem;
+    }
+
+    .provider-config {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .config-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .config-group label {
+        font-weight: 600;
+        color: #555;
+    }
+
+    .config-group input {
+        padding: 0.5rem;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 0.9rem;
+    }
+
+    .filters-section {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .filter-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .filter-group label {
+        font-weight: 600;
+        color: #555;
+    }
+
+    .checkbox-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .checkbox-group label {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-weight: normal;
+        cursor: pointer;
+    }
+
+    .checkbox-group input[type="checkbox"] {
+        cursor: pointer;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 1rem;
+        margin-top: 1.5rem;
+    }
+
+    .action-buttons button {
+        padding: 0.75rem 1.5rem;
+        background: #667eea;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        font-weight: 600;
+        cursor: pointer;
+        font-size: 1rem;
+        transition: background 0.3s;
+    }
+
+    .action-buttons button:hover:not(:disabled) {
+        background: #5568d3;
+    }
+
+    .action-buttons button:disabled {
+        background: #ccc;
+        cursor: not-allowed;
+    }
+
+    .error-message {
+        background: #fee;
+        color: #c33;
+        padding: 1rem;
+        border-radius: 4px;
+        border-left: 4px solid #c33;
+        margin-top: 1rem;
+    }
+
+    .success-message {
+        background: #efe;
+        color: #3c3;
+        padding: 1rem;
+        border-radius: 4px;
+        border-left: 4px solid #3c3;
+        margin-top: 1rem;
+    }
+
+    .results-section {
+        margin-top: 2rem;
+    }
+
+    /* Page header with back link */
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1rem;
+    }
+    .back-link {
+        font-size: 0.9rem;
+        color: #2563eb;
+        text-decoration: none;
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+    }
+    .back-link:hover {
+        background: #eef2ff;
+        text-decoration: none;
+    }
+
+    .issues-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+        gap: 1.5rem;
+        margin-top: 1.5rem;
+    }
+
+    .issue-card {
+        background: white;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        transition: box-shadow 0.3s;
+    }
+
+    .issue-card:hover {
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+
+    .card-header {
+        background: #f8f9fa;
+        padding: 1rem;
+        border-bottom: 1px solid #ddd;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .card-header h3 {
+        margin: 0;
+        font-size: 1.1rem;
+        color: #333;
+        word-break: break-word;
+    }
+
+    .badge {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    .badge-reintroduced {
+        background: #ffd700;
+        color: #333;
+    }
+
+    .badge-not-introduced {
+        background: #ff6b6b;
+        color: white;
+    }
+
+    .badge-default {
+        background: #ccc;
+        color: #333;
+    }
+
+    .card-body {
+        padding: 1rem;
+    }
+
+    .issue-details {
+        margin-bottom: 1rem;
+    }
+
+    .issue-details p {
+        margin: 0.5rem 0;
+        font-size: 0.9rem;
+        color: #555;
+    }
+
+    .confidence {
+        padding: 0.2rem 0.5rem;
+        border-radius: 4px;
+        font-weight: 600;
+    }
+
+    .confidence-high {
+        background: #d4edda;
+        color: #155724;
+    }
+
+    .confidence-medium {
+        background: #fff3cd;
+        color: #856404;
+    }
+
+    .confidence-low {
+        background: #f8d7da;
+        color: #721c24;
+    }
+
+    .issue-description {
+        margin: 1rem 0;
+        padding: 0.75rem;
+        background: #f8f9fa;
+        border-left: 3px solid #667eea;
+        border-radius: 4px;
+    }
+
+    .issue-description p {
+        margin: 0;
+        color: #333;
+        line-height: 1.5;
+    }
+
+    .evidence {
+        margin-top: 1rem;
+        padding: 0.75rem;
+        background: #f0f0f0;
+        border-radius: 4px;
+        font-size: 0.9rem;
+    }
+
+    .evidence p {
+        margin: 0;
+        color: #555;
+    }
+
+    .evidence em {
+        color: #667eea;
+        font-style: italic;
+    }
+
+    @@media (max-width: 1024px) {
+        .provider-config {
+            grid-template-columns: 1fr;
+        }
+
+        .filters-section {
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .issues-grid {
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        }
+    }
+
+    @@media (max-width: 768px) {
+        .continuity-container {
+            padding: 1rem;
+        }
+
+        .filters-section {
+            grid-template-columns: 1fr;
+        }
+
+        .issues-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
