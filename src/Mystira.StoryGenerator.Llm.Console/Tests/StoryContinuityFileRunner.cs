@@ -2,6 +2,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Mystira.StoryGenerator.Contracts.StoryConsistency;
 using Mystira.StoryGenerator.Domain.Services;
+using System.Diagnostics;
 
 namespace Mystira.StoryGenerator.Llm.Console.Tests;
 
@@ -25,9 +26,20 @@ internal static class StoryContinuityFileRunner
             }
 
             var factory = services.GetRequiredService<IScenarioFactory>();
-            var svc = services.GetRequiredService<IStoryContinuityService>();
+            var continuityService = services.GetRequiredService<IStoryContinuityService>();
 
-            string defaultPath = Path.Combine("test_data", "Test-Story-UnintroducedEntities.yaml");
+            string[] includedConfidences = ["medium", "high"];
+            string[] includedEntityTypes = ["character", "location", "item"]; //"character", "location", "item", "concept"
+            bool pronounsOnly = true;
+            var includeEntity = new Func<SrlEntityClassification, bool>(classification =>
+            {
+                if (!includedConfidences.Contains(classification.Confidence)) return false;
+                if (!includedEntityTypes.Contains(classification.Type)) return false;
+                if (pronounsOnly) return false;
+                return true;
+            });
+
+            string defaultPath = Path.Combine("test_data", "Test-Story-UnintroducedEntities-Small.yaml");
             string path = (flagIdx + 1) < args.Length && !args[flagIdx + 1].StartsWith("--")
                 ? args[flagIdx + 1]
                 : defaultPath;
@@ -45,12 +57,20 @@ internal static class StoryContinuityFileRunner
                 _ => ScenarioContentFormat.Yaml
             };
 
+            var swTotal = Stopwatch.StartNew();
             logger.LogInformation("Story continuity: Loading scenario from {Path}", path);
+
+            var swLoad = Stopwatch.StartNew();
             var content = await File.ReadAllTextAsync(path);
             var scenario = await factory.CreateFromContentAsync(content, format);
+            swLoad.Stop();
+            logger.LogInformation("Story continuity: Loaded scenario in {ElapsedMs} ms", swLoad.ElapsedMilliseconds);
 
             logger.LogInformation("Story continuity: Running analysis...");
-            var issues = await svc.AnalyzeAsync(scenario);
+            var swAnalysis = Stopwatch.StartNew();
+            var issues = await continuityService.AnalyzeAsync(scenario, includeEntity);
+            swAnalysis.Stop();
+            logger.LogInformation("Story continuity: Analysis completed in {ElapsedMs} ms", swAnalysis.ElapsedMilliseconds);
 
             issues ??= Array.Empty<EntityContinuityIssue>();
 
@@ -72,6 +92,9 @@ internal static class StoryContinuityFileRunner
             jsonOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter(System.Text.Json.JsonNamingPolicy.CamelCase));
             var json = System.Text.Json.JsonSerializer.Serialize(issues, jsonOptions);
             System.Console.WriteLine(json);
+
+            swTotal.Stop();
+            logger.LogInformation("Story continuity: End-to-end duration {ElapsedMs} ms", swTotal.ElapsedMilliseconds);
 
             return 0;
         }

@@ -21,6 +21,7 @@ public sealed class StoryContinuityService : IStoryContinuityService
 
     public async Task<IReadOnlyList<EntityContinuityIssue>> AnalyzeAsync(
         Scenario scenario,
+        Func<SrlEntityClassification, bool>? includeEntityFilter = null,
         CancellationToken cancellationToken = default)
     {
         // 1) Heavyweight pass: prefix summaries across compressed paths
@@ -37,18 +38,31 @@ public sealed class StoryContinuityService : IStoryContinuityService
                 scenario, prefixSummaries, cancellationToken)
             .ConfigureAwait(false);
 
-        // Index SRL results by scene id
-        var srlByScene = srlResults.ToDictionary(
-            r => r.Value.SceneId,
-            r => r.Value,
-            StringComparer.Ordinal);
+        // Index SRL results by scene id and de-duplicate individual entity
+        // classifications within each scene by (Name, Type)
+        var srlByScene = srlResults
+            .ToDictionary(
+                kvp => kvp.Value.SceneId,
+                kvp =>
+                {
+                    var cls = kvp.Value ?? new SemanticRoleLabellingClassification { SceneId = kvp.Key };
+                    var list = cls.EntityClassifications ?? new List<SrlEntityClassification>();
+                    cls.EntityClassifications = list
+                        .Distinct(SrlEntityClassificationComparer.Instance)
+                        .ToList();
+                    return cls;
+                },
+                StringComparer.Ordinal);
 
         // 4) Glue: compare SRL vs. must-active and emit issues
         var issues = EntityContinuityAnalyzer.FindIssues(
             mustActiveByScene,
-            srlByScene);
+            srlByScene,
+            includeEntityFilter);
 
         return issues;
     }
 }
 
+// Note: Entity-level de-duplication is applied inside each
+// SemanticRoleLabellingClassification using SrlEntityClassificationComparer.

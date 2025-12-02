@@ -7,5 +7,6 @@ public interface IStoryContinuityService
 {
     Task<IReadOnlyList<EntityContinuityIssue>> AnalyzeAsync(
         Scenario scenario,
+        Func<SrlEntityClassification, bool>? includeEntityFilter = null,
         CancellationToken cancellationToken = default);
 }

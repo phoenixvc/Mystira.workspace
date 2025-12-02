@@ -1,6 +1,8 @@
 ﻿using Mystira.StoryGenerator.Contracts.Entities;
 using Mystira.StoryGenerator.Contracts.StoryConsistency;
 
+namespace Mystira.StoryGenerator.Application.StoryConsistencyAnalysis.PrefixSummary;
+
 public static class PrefixSummaryAggregator
 {
     public static PrefixAggregateResult AggregatePerScenePresence(

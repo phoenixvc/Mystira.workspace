@@ -25,6 +25,8 @@ builder.Logging.AddConsole();
 
 // Options
 builder.Services.Configure<AiSettings>(builder.Configuration.GetSection(AiSettings.SectionName));
+// LLM per-minute rate limits (per service)
+builder.Services.Configure<LlmRateLimitOptions>(builder.Configuration.GetSection(LlmRateLimitOptions.SectionName));
 
 // LLM services
 builder.Services.AddSingleton<ILLMService, AzureOpenAIService>();

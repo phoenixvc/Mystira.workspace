@@ -25,6 +25,11 @@ builder.Services.AddOptions<AiSettings>()
     .ValidateDataAnnotations()
     .ValidateOnStart();
 
+builder.Services.AddOptions<LlmRateLimitOptions>()
+    .Bind(builder.Configuration.GetSection(LlmRateLimitOptions.SectionName))
+    .ValidateDataAnnotations()
+    .ValidateOnStart();
+
 builder.Services.AddOptions<InstructionSearchSettings>()
     .Bind(builder.Configuration.GetSection(InstructionSearchSettings.SectionName));
 

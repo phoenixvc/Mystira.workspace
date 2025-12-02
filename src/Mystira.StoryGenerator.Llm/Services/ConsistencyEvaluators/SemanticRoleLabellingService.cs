@@ -146,7 +146,7 @@ You will receive a single JSON object with this structure:
   ""known_removed_entities"": [
     { ""name"": ""Old Tower"", ""type"": ""location"" }
   ],
-  ""candidate_entities"": [
+    ""candidate_entities"": [
     { ""name"": ""Alice"", ""type"": ""character"" },
     { ""name"": ""Bob"", ""type"": ""character"" },
     { ""name"": ""Grand Market"", ""type"": ""location"" },
@@ -167,77 +167,38 @@ For each entity in candidate_entities, decide:
     4.	Whether the scene locally removes it (dies, destroyed, given away, departs “for good”, etc.).
     5. How the scene's wording treats the entity (local_usage_style).
     6. Overall confidence and a short evidence span.
+    7. Whether the entity is used as a proper noun (is_proper_noun) in the local wording of this scene.
 You are doing local classification: only this scene’s text plus the provided known_active / known_removed context.
 ________________________________________
 3. Local Introduction / Removal Status
-Use these labels for introduction_status:
-    •	""new""
-        o	The entity appears in this scene and is not in known_active_entities or known_removed_entities.
-        o  	The scene clearly brings it into the story: meets, sees, finds, arrives at, is described for the first time, etc.
-    •	""reintroduced""
-        o	The entity appears in this scene and is present in known_removed_entities (previously gone) but is now back in focus, seen again, returned, rebuilt, revived, etc.
-    •	""already_known""
-        o	The entity appears in this scene and is present in known_active_entities.
-        o	This is a normal continued use, not a (re)introduction.
-    •	""not_present""
-        o	The entity does not appear in this scene at all (no mention, no obvious pronoun or description clearly referring to it).
-Use these labels for removal_status:
-•	""removed""
-    o	This scene clearly removes the entity from the current story state:
-        	character dies or departs “for good”
-        	item is destroyed, lost irretrievably, given away with a strong sense of finality
-        	location or concept is shattered, ended, sealed away permanently
-•	""not_removed""
-    o	The scene does not clearly remove the entity.
-If the text is ambiguous about permanence, you may still use ""removed"" with ""confidence"": ""medium"" or ""low"", but never mark removal on weak or speculative hints.
+...
 ________________________________________
 4. Local Usage Style (Very Important)
-
-For each entity that appears in the scene, you must also classify how the scene's wording
-treats that entity, independent of known_active_entities:
-
-Use local_usage_style as one of:
-  • ""clear_introduction""
-      - The scene explicitly introduces or presents the entity to the audience:
-        ""a lynx named Larry"", ""they met Larry for the first time"", ""this is Larry"",
-        ""Larry the lynx appeared from behind the rock"", etc.
-      - It reads like the audience is seeing this entity for the first time.
-  • ""already_known_style""
-      - The scene uses the entity as if the audience is already familiar with them:
-        just the name (""Larry takes a nap.""), pronouns (""he yawns again""), or
-        references that assume prior knowledge (""as usual, Larry was late"").
-      - There is no explanatory phrase that would help a new reader understand who/what this is.
-  • ""ambiguous""
-      - The wording could be read either as an introduction or as a normal mention,
-        and you are not confident which it is.
-
-This local_usage_style is about the *narrative feel* of the line, NOT the global story state.
-Even if known_active_entities does not contain the entity, the scene can still have
-local_usage_style = ""already_known_style"" if it reads like a casual, non-intro use.
+...
 ________________________________________
 5. Semantic Roles
-For each entity that is present in the scene, assign zero or more semantic roles that describe how it participates in the main actions. Use this controlled vocabulary:
-    •	""agent"" – the doer of an action (“Alice opens the door.”)
-    •	""patient"" – the entity acted upon (“Bob drops the lantern.”)
-    •	""experiencer"" – the feeler or perceiver (“Fear grips Leo.” / “Leo hears the drums.”)
-    •	""stimulus"" – what causes an experience (“The drums terrify Leo.”)
-    •	""owner"" / ""possessor"" – entity that owns or holds something (“Nia clutches the map.”)
-    •	""item"" – item being held, used, moved, traded, etc. (“Nia clutches the map.”)
-    •	""location"" – where the action is happening (“At the Grand Market, …”)
-    •	""source"" – where something comes from (“They flee from the Old Tower.”)
-    •	""goal"" – destination or target (“They march toward Rivermoor.”)
-    •	""instrument"" – tool used for an action (“With the Silver Key, she unlocks the gate.”)
-    •	""group"" – crowd or group acting together if the entity is a faction/organization.
-You should choose roles that are clearly supported by the text. If no role fits confidently, use an empty list [].
+...
 ________________________________________
 6. Confidence
-Use:
-    •	""high"" – explicit, unambiguous mention and role.
-    •	""medium"" – clearly present, but role / introduction / removal has some ambiguity.
-    •	""low"" – vague, metaphorical, or heavily inferred.
-confidence is for the overall classification of that entity in this scene.
+...
 ________________________________________
-7. Output Format
+7. Proper Noun Flag (is_proper_noun)
+
+For each entity, you must also provide a boolean is_proper_noun:
+
+  • is_proper_noun = true
+      - The entity is used as a specific named entity (a proper noun) in this scene.
+      - Typical signs: capitalized name used as a unique label (""Larry"", ""Alice"", ""Grand Market"", ""Sunpeak Mountain"").
+      - Phrases like ""a lynx named Larry"" clearly indicate a proper name.
+
+  • is_proper_noun = false
+      - The entity is only referred to generically (""the lynx"", ""a castle"", ""the market"", ""a tower"")
+        without a unique, name-like usage.
+      - Use false as well when the entity is not present in the scene (present_in_scene = false).
+
+This flag is about *how the entity is referred to in this scene’s wording*, not about whether the entity is globally important.
+________________________________________
+8. Output Format
 Always return a JSON object with:
     •	""scene_id"" – copied from input.
     •	""entity_classifications"" – array of per-entity objects.
@@ -249,6 +210,7 @@ Each entity object must have exactly:
     •	""removal_status"" (string) – ""removed"" or ""not_removed""
     •	""semantic_roles"" (array of strings from the allowed list)
     •   ""local_usage_style"": ""clear_introduction"", ""already_known_style"", ""ambiguous""
+    •   ""is_proper_noun"" (boolean) – whether the entity is used as a proper noun in this scene.
     •	""confidence"" (string) – ""high"", ""medium"", or ""low""
     •	""evidence_span"" (string) – a short quote or phrase from the scene that best supports your decision. Use """" if the entity is not present.
 No extra fields. No explanations. No comments.
@@ -263,6 +225,8 @@ Example output shape:
       ""introduction_status"": ""already_known"",
       ""removal_status"": ""not_removed"",
       ""semantic_roles"": [""agent""],
+      ""local_usage_style"": ""already_known_style"",
+      ""is_proper_noun"": true,
       ""confidence"": ""high"",
       ""evidence_span"": ""Alice steps into the Grand Market""
     },
@@ -273,6 +237,8 @@ Example output shape:
       ""introduction_status"": ""new"",
       ""removal_status"": ""not_removed"",
       ""semantic_roles"": [""agent""],
+      ""local_usage_style"": ""clear_introduction"",
+      ""is_proper_noun"": true,
       ""confidence"": ""medium"",
       ""evidence_span"": ""spots Bob arguing with a merchant""
     },
@@ -283,6 +249,8 @@ Example output shape:
       ""introduction_status"": ""already_known"",
       ""removal_status"": ""not_removed"",
       ""semantic_roles"": [""location""],
+      ""local_usage_style"": ""already_known_style"",
+      ""is_proper_noun"": true,
       ""confidence"": ""high"",
       ""evidence_span"": ""steps into the Grand Market""
     },
@@ -293,6 +261,8 @@ Example output shape:
       ""introduction_status"": ""not_present"",
       ""removal_status"": ""not_removed"",
       ""semantic_roles"": [],
+      ""local_usage_style"": ""ambiguous"",
+      ""is_proper_noun"": false,
       ""confidence"": ""high"",
       ""evidence_span"": """"
     }
@@ -338,6 +308,7 @@ Remember:
         ""removal_status"",
         ""semantic_roles"",
         ""local_usage_style"",
+        ""is_proper_noun"",
         ""confidence"",
         ""evidence_span""
       ],
@@ -384,6 +355,10 @@ Remember:
         ""local_usage_style"": {
           ""type"": ""string"",
           ""enum"": [""clear_introduction"", ""already_known_style"", ""ambiguous""]
+        },
+        ""is_proper_noun"": {
+          ""type"": ""boolean"",
+          ""description"": ""True if the entity is used as a specific named entity (proper noun) in this scene text.""
         },
         ""confidence"": {
           ""type"": ""string"",

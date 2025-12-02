@@ -57,18 +57,9 @@ public sealed class ScenarioPathPrefixSummary
     private static SceneEntity MapToSceneEntity(PrefixSummaryEntity e) => new()
     {
         Name = e.CanonicalName,
-        Type = ParseType(e.Type),
+        Type = e.Type,
         IsProperNoun = e.IsProperNoun,
         Confidence = Confidence.Unknown
-    };
-
-    private static SceneEntityType ParseType(string type) => (type ?? string.Empty).Trim().ToLowerInvariant() switch
-    {
-        "character" => SceneEntityType.Character,
-        "location" => SceneEntityType.Location,
-        "item" => SceneEntityType.Item,
-        "concept" => SceneEntityType.Concept,
-        _ => SceneEntityType.Concept
     };
 }
 
@@ -83,7 +74,7 @@ public sealed class PrefixSummaryEntity
 
     /// <summary> "character" | "location" | "item" | "concept" </summary>
     [JsonProperty("type")]
-    public string Type { get; set; } = string.Empty;
+    public SceneEntityType Type { get; set; }
 
     [JsonProperty("is_proper_noun")]
     public bool IsProperNoun { get; set; }

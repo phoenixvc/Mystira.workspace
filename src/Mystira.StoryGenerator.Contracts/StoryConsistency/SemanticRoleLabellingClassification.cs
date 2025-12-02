@@ -47,12 +47,17 @@ public sealed class SrlEntityClassification
     [JsonProperty("semantic_roles")]
     public List<string> SemanticRoles { get; set; } = new();
 
-
     /// <summary>
     /// Whether the text represents "clear_introduction", "already_known_style", "ambiguous"
     /// </summary>
     [JsonProperty("local_usage_style")]
     public string LocalUsageStyle { get; set; } = string.Empty;
+
+    /// <summary>
+    /// True if this entity is used as a specific named entity (proper noun) in this scene text.
+    /// </summary>
+    [JsonProperty("is_proper_noun")]
+    public bool IsProperNoun { get; set; }
 
     /// <summary>
     /// One of: "high", "medium", "low".

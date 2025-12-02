@@ -1,0 +1,1073 @@
+﻿title: The Mystery of the Missing Glow-Berries
+description: Four friends from Whispering Woods discover the special Glow-Berries are gone! They must work together, follow clues, and learn about fairness and empathy to solve the mystery.
+tags:
+  - mystery
+  - animals
+  - friendship
+  - social_awareness
+  - empathy
+difficulty: Hard
+session_length: Long
+age_group: 6-9
+minimum_age: 6
+archetypes:
+  - the_innovator
+  - the_architect
+  - the_pathfinder
+  - the_steward
+core_axes:
+  - Empathy & Perspective-Taking
+  - Demonstrating Empathy and Compassion
+  - Recognizing Situational Demands and Opportunities
+characters:
+  - id: archimedes
+    name: Archimedes
+    image: image-owl-archimedes-younger-kids-doid-2bd183dc
+    audio:
+    metadata:
+      role:
+        - Thinker
+        - Logic Builder
+        - Truth Finder
+      archetype:
+        - the_innovator
+      species: Owl
+      age: 12
+      traits:
+        - wise
+        - logical
+        - calm
+        - observant
+      backstory: From high branches, Archimedes maps moonlit patterns, sharing insight only when it guides minds toward kinder truths.
+  - id: nutmeg
+    name: Nutmeg
+    image: image-squirrel-nutmeg-younger-kids-doid-e37f8b01
+    audio:
+    metadata:
+      role:
+        - Resource Guard
+        - Planner
+        - Cautious Scout
+      archetype:
+        - the_architect
+      species: Squirrel
+      image:
+      audio:
+      age: 5
+      traits:
+        - energetic
+        - organized
+        - cautious
+        - excitable
+      backstory: Nutmeg's twitchy curiosity uncovers hidden paths, though his desire to secure his surroundings sometimes makes him anxious about the unknown.
+
+  - id: jinx
+    name: Jinx
+    image: image-fox-jinx-younger-kids-doid-7d42bef0
+    audio:
+    metadata:
+      role:
+        - Bold Striker
+        - Risk Taker
+        - First-to-Try
+      archetype:
+        - the_pathfinder
+      species: Fox
+      age: 7
+      traits:
+        - brave
+        - impulsive
+        - energetic
+        - confident
+      backstory: Jinx dashes into the unknown first, often leaping before he looks, turning danger into shared adventure.
+  - id: maple
+    name: Maple
+    image: image-bear-maple-younger-kids-doid-4d3306a6
+    audio:
+    metadata:
+      role:
+        - Peacemaker
+        - Emotion Mender
+        - Quiet Leader
+      archetype:
+        - the_steward
+      species: Bear
+      image:
+      audio:
+      age: 8
+      traits:
+        - kind-hearted
+        - patient
+        - gentle
+        - fair-minded
+      backstory: Raised by forest keepers, Maple learned that calm words steady storm-tossed tempers; he prioritizes group harmony above all else.
+scenes:
+  - id: scene_1_start
+    type: narrative
+    title: The Empty Bush
+    description: The sun dappled through the leaves of Whispering Woods. Archimedes the owl hooted from his branch, ready for a tasty Glow-Berry. But the bush where the sweetest, brightest berries grew was empty! 'Hoo-hoo!' he called. 'The Glow-Berries are all gone!'
+    next_scene: scene_2_nutmegs_clue
+    media:
+      video: video-scene1start-doid-a1913d52
+  - id: scene_2_nutmegs_clue
+    type: narrative
+    title: Nutmeg's Clue
+    description: Nutmeg the squirrel hurried down a nearby tree. 'Gone? That's nutty! I saw someone big and grumpy stomping around here this morning. He was sniffing the berry bush!'
+    next_scene: scene_3_focus_choice_archimedes
+    media:
+      image: image-scene2nutmegsclue-doid-6dce1f7a
+  - id: scene_3_focus_choice_archimedes
+    type: choice
+    title: What Should We Do First? (Focus Choice)
+    description: Jinx is eager to start the hunt, his ears flicking with excitement. 'A mystery!' he says. But Nutmeg looks very flustered about what he saw. **[c:Archimedes] playing Archimedes, you have a difficult choice. Do you stop to comfort your worried friend, or do you start searching the ground immediately?**
+    branches:
+      - choice: Comfort Nutmeg first so he feels safe to remember.
+        next_scene: scene_3a_ask_witness
+        compass_change:
+          axis: Recognizing Situational Demands and Opportunities
+          delta: 0.8
+          developmental_link: 2.1.2 Social Skills (Social Awareness & Relationship Skills)
+        echo_log:
+          echo_type: the_steward
+          description: The player prioritized the social demand (calming a friend) over the immediate task.
+          strength: 1
+      - choice: Search the ground immediately to catch the trail before it fades.
+        next_scene: scene_3b_search_for_tracks
+        compass_change:
+          axis: Recognizing Situational Demands and Opportunities
+          delta: 0.8
+          developmental_link: 2.1.2 Social Skills (Social Awareness & Relationship Skills)
+        echo_log:
+          echo_type: the_innovator
+          description: The player prioritized the logical demand (preserving evidence) over the social cue.
+          strength: 1
+    media:
+      image: image-scene3focuschoicereasoning-doid-7af87965
+  - id: scene_3a_ask_witness
+    type: narrative
+    title: A Flustered Friend
+    description: Archimedes turns to Nutmeg gently. 'Tell us everything you remember,' he asks gently. Nutmeg tries to think, but his tail starts twitching wildly. 'He was... he was so big!' he says, looking very flustered. Maple sees his friend is struggling and steps closer to help.
+    next_scene: roll_1_calm_witness
+    media:
+      image: image-scene3aaskwitness-doid-f185f6b9
+  - id: scene_3b_search_for_tracks
+    type: narrative
+    title: Searching the Scene
+    description: Archimedes decides the mission must come first. 'We need to find the trail before it fades!' he says. Jinx gets down low, sniffing the soft dirt around the bush for any tracks.
+    next_scene: roll_2_investigate
+    media:
+      image: image-scene3bsearchfortracks-doid-213d2cb1
+  - id: roll_1_calm_witness
+    type: roll
+    title: A Gentle Voice
+    description: Maple speaks in a low, soothing rumble. **[c:Maple] playing Maple, roll a 9 or higher to help Nutmeg take a deep breath and feel safe.**
+    difficulty: 9
+    branches:
+      - choice: It worked!
+        next_scene: scene_calm_witness_success
+      - choice: He's still too scared!
+        next_scene: scene_calm_witness_failure
+    media:
+      image: image-roll1calmwitness-doid-1539965d
+  - id: roll_2_investigate
+    type: roll
+    title: Searching for Tracks
+    description: 'Jinx looks for tracks in soft dirt. **[c: Jinx] playing Jinx, roll to see if you can spot a clear trail. You need an 8 or higher.**'
+    difficulty: 8
+    branches:
+      - choice: Aha, tracks!
+        next_scene: scene_investigate_success
+      - choice: Just a bunch of smudges.
+        next_scene: scene_investigate_failure
+  - id: scene_calm_witness_success
+    type: narrative
+    title: A Clear Memory
+    description: Maple's calm voice works. Nutmeg takes a deep breath and says, 'He had big paws, brown fur, and a very, very grumpy face.' The clues point to Grumble the bear.
+    next_scene: scene_choice_approach_with_witness_clue
+  - id: scene_calm_witness_failure
+    type: narrative
+    title: A Confusing Clue
+    description: Nutmeg is still hopping around nervously. He tries to speak, but the words come out too fast! 'It was... big! And fuzzy! And stompy!' he says. Archimedes nods wisely. 'The biggest, grumpiest animal who lives near here is Grumble the bear. Maybe we should ask *him*.'
+    next_scene: scene_choice_approach_with_no_clue
+  - id: scene_investigate_success
+    type: narrative
+    title: Bear Prints!
+    description: Jinx's sharp eyes spot them. 'Big paw prints in the soft dirt! And they look like... bear prints!' The tracks lead toward the den of Grumble the bear.
+    next_scene: scene_choice_approach_with_track_clue
+    media:
+      image: image-sceneinvestigatesuccess-doid-15b61dc4
+  - id: scene_investigate_failure
+    type: narrative
+    title: Messy Tracks
+    description: The ground is a mess of dirt and leaves. 'I see some smudges,' Jinx says, 'but I can't tell who made them.' With no clear trail to follow, Maple suggests a new plan. 'Grumble the bear lives nearby,' he says. 'He might be the only one who saw something. We should ask him.'
+    next_scene: scene_choice_approach_with_no_clue
+  - id: scene_choice_approach_with_witness_clue
+    type: choice
+    title: The Suspect (Micro-Choice)
+    description: The friends have a strong clue pointing to Grumble. **[c:Jinx] playing as Jinx, you are leading the way. How do you want to approach the den?**
+    branches:
+      - choice: March over and accuse Grumble right away!
+        next_scene: scene_narrative_accuse_from_witness
+        compass_change:
+          axis: Empathy & Perspective-Taking
+          delta: -0.2
+          developmental_link: 2.1.2 Social Skills (Social Awareness & Relationship Skills)
+        echo_log:
+          echo_type: the_leaper
+          description: The player chose to accuse without considering the suspect's perspective first.
+          strength: -1
+      - choice: Approach cautiously and ask him politely first.
+        next_scene: scene_narrative_ask_from_witness
+        compass_change:
+          axis: Empathy & Perspective-Taking
+          delta: 0.2
+          developmental_link: 2.1.2 Social Skills (Social Awareness & Relationship Skills)
+        echo_log:
+          echo_type: the_steward
+          description: The player chose to seek perspective before judging.
+          strength: 1
+  - id: scene_choice_approach_with_track_clue
+    type: choice
+    title: The Suspect (Micro-Choice)
+    description: The tracks seem to lead right to Grumble's den. **[c:Jinx] playing as Jinx, you are leading the way. How do you want to approach the den?**
+    branches:
+      - choice: Follow the tracks and accuse Grumble!
+        next_scene: scene_narrative_accuse_from_tracks
+        compass_change:
+          axis: Empathy & Perspective-Taking
+          delta: -0.2
+          developmental_link: 2.1.2 Social Skills (Social Awareness & Relationship Skills)
+        echo_log:
+          echo_type: the_leaper
+          description: The player chose to accuse without considering the suspect's perspective first.
+          strength: -1
+      - choice: Be careful and ask him politely what happened.
+        next_scene: scene_narrative_ask_from_tracks
+        compass_change:
+          axis: Empathy & Perspective-Taking
+          delta: 0.2
+          developmental_link: 2.1.2 Social Skills (Social Awareness & Relationship Skills)
+        echo_log:
+          echo_type: the_steward
+          description: The player chose to seek perspective before judging.
+          strength: 1
+    media:
+      image: image-scenechoiceapproachwithtrackclue-doid-85a44ecd
+  - id: scene_choice_approach_with_no_clue
+    type: choice
+    title: A Grumpy Neighbor (Micro-Choice)
+    description: With no solid clues, the friends must talk to Grumble. **[c:Jinx] playing as Jinx, you are leading the way. How do you want to approach the den?**
+    branches:
+      - choice: Go and boldly demand to know what he saw.
+        next_scene: scene_narrative_accuse_with_no_clue
+        compass_change:
+          axis: Empathy & Perspective-Taking
+          delta: -0.2
+          developmental_link: 2.1.2 Social Skills (Social Awareness & Relationship Skills)
+        echo_log:
+          echo_type: the_leaper
+          description: The player chose to accuse without considering the suspect's perspective first.
+          strength: -1
+      - choice: Go and politely ask if he saw anything.
+        next_scene: scene_narrative_ask_with_no_clue
+        compass_change:
+          axis: Empathy & Perspective-Taking
+          delta: 0.2
+          developmental_link: 2.1.2 Social Skills (Social Awareness & Relationship Skills)
+        echo_log:
+          echo_type: the_steward
+          description: The player chose to seek perspective before judging.
+          strength: 1
+  - id: scene_narrative_accuse_from_witness
+    type: narrative
+    title: Marching to Accuse
+    description: Believing Nutmeg's description, the friends march to Grumble's den. Jinx whispers, 'Okay, I'll shout at him to come out!'
+    next_scene: roll_3a_confront
+    media:
+      image: image-scenenarrativeaccusefromwitness-doid-17fc99cc
+  - id: scene_narrative_ask_from_witness
+    type: narrative
+    title: A Moment of Thought
+    description: Jinx stops himself. 'Wait,' he says. 'If we just shout, he'll only get angrier.' He turns to Maple. 'You are the best at talking to grumpy folks. Can you ask him nicely?' Maple nods. 'I'll try my best.'
+    next_scene: roll_3b_polite_from_witness
+    media:
+      image: image-scenenarrativeaskfromwitness-doid-6ec33260
+  - id: scene_narrative_accuse_from_tracks
+    type: narrative
+    title: Following the Trail
+    description: '''The tracks end at Grumble''s den. ''This is it!'' Jinx says. ''I''ll get him out here and we''ll get the truth!'''
+    next_scene: roll_3a_confront
+    media:
+      image: image-scenenarrativeaccusefromtracks-doid-17fc99cc
+  - id: scene_narrative_ask_from_tracks
+    type: narrative
+    title: A Cautious Approach
+    description: Jinx looks at the tracks and shakes his head. 'We can't just barge in,' he decides. 'Maple, you go. He might listen to another bear.' Maple nods calmly. 'Good idea. I will be very polite.'
+    next_scene: roll_3b_polite_from_tracks
+    media:
+      image: image-scenenarrativeaskfromtracks-doid-6ec33260
+  - id: scene_narrative_accuse_with_no_clue
+    type: narrative
+    title: A Bold Demand
+    description: Jinx decides a loud approach is best. 'He has to tell us what he saw!' he declares as they reach the den.
+    next_scene: roll_3a_confront
+    media:
+      image: image-scenenarrativeaccusewithnoclue-doid-17fc99cc
+  - id: scene_narrative_ask_with_no_clue
+    type: narrative
+    title: A Kind Question
+    description: Jinx realizes they don't have any proof. 'We can't accuse him if we aren't sure,' he says. 'Maple, you ask him. Keep it friendly!' Maple smiles. 'A kind question is always a good start.'
+    next_scene: roll_3b_polite_from_witness
+    media:
+      image: image-scenenarrativeaskwithnoclue-doid-6ec33260
+  - id: roll_3a_confront
+    type: roll
+    title: Confronting Grumble
+    description: Jinx shouts at Grumble's den. **[c:Jinx] playing Jinx, roll an 11 or higher to get his attention without making him furious.**
+    difficulty: 14
+    branches:
+      - choice: It worked! He's coming out!
+        next_scene: scene_confront_success
+      - choice: Uh oh... that just made him angrier!
+        next_scene: scene_confront_failure
+  - id: roll_3b_polite_from_witness
+    type: roll
+    title: A Polite Question
+    description: Maple bravely steps forward. **[c:Maple] playing Maple, roll an 8 or higher to convince Grumble to talk.**
+    difficulty: 8
+    branches:
+      - choice: I think it's working...
+        next_scene: scene_polite_success_from_witness
+      - choice: He's ignoring us.
+        next_scene: scene_polite_failure_A
+  - id: roll_3b_polite_from_tracks
+    type: roll
+    title: A Polite Question
+    description: Maple bravely steps forward. **[c:Maple] playing Maple, roll an 8 or higher to convince Grumble to talk.**
+    difficulty: 8
+    branches:
+      - choice: I think it's working...
+        next_scene: scene_polite_success_from_tracks
+      - choice: He's ignoring us.
+        next_scene: scene_polite_failure_B
+  - id: scene_confront_success
+    type: narrative
+    title: The Accusation
+    description: Grumble pokes his head out, looking annoyed. Jinx steps forward. 'The Glow-Berries are gone, and we think you took them!'
+    next_scene: scene_grumbles_denial
+    media:
+      image: image-sceneconfrontsuccess-doid-06237a9e
+  - id: scene_confront_failure
+    type: narrative
+    title: A Loud Roar
+    description: 'Grumble answers with loud ROAR: ''GO AWAY! YOU''RE DISTURBING MY NAP!'' He refuses to come out. Their bold approach failed.'
+    next_scene: scene_dead_end_after_confront_fail
+    media:
+      image: image-sceneconfrontfailure-doid-85a44ecd
+      audio: audio-sceneconfrontfailure-doid-5d0ae420
+  - id: scene_polite_success_from_witness
+    type: narrative
+    title: Grumble's Clue
+    description: Grumble peeks out. 'Hmmph. I didn't take any berries. But I did see little Shelly the turtle rolling something glowing towards the Mossy Log that crosses the Babbling Creek.'
+    next_scene: scene_contradiction_intro
+    media:
+      image: image-scenepolitesuccessfromwitness-doid-45445eed
+  - id: scene_polite_success_from_tracks
+    type: narrative
+    title: Grumble's Clue
+    description: Grumble peeks out. 'Hmmph. I didn't take any berries. But I did see little Shelly the turtle rolling something glowing towards the Mossy Log that crosses the Babbling Creek.'
+    next_scene: scene_puzzle_out_tracks_vs_witness
+    media:
+      image: image-scenepolitesuccessfromtracks-doid-45445eed
+  - id: scene_polite_failure_A
+    type: narrative
+    title: No Help Here
+    description: Grumble grunts from inside his den. 'Not now. Busy.' He doesn't come out. Maple nods calmly. 'He is just too busy to talk,' he says. 'We were right to be polite, but we will have to find another way.'
+    next_scene: scene_dead_end_after_polite_fail
+    media:
+      image: image-scenepolitefailurea-doid-85a44ecd
+      audio: audio-scenepolitefailurea-doid-f49927dc
+  - id: scene_polite_failure_B
+    type: narrative
+    title: No Help Here
+    description: Grumble grunts from inside his den. 'Not now. Busy.' He doesn't come out. Maple nods calmly. 'He is just too busy to talk,' he says. 'We were right to be polite, but we will have to find another way.'
+    next_scene: scene_dead_end_after_polite_fail
+    media:
+      image: image-scenepolitefailureb-doid-85a44ecd
+      audio: audio-scenepolitefailureb-doid-f49927dc
+  - id: scene_grumbles_denial
+    type: narrative
+    title: Grumble's Alibi
+    description: Grumble seems confused. He holds up two huge paws covered in sticky honeycomb. 'Glow-Berries? I've been getting this honeycomb all morning. Look at this mess!' The friends feel silly for accusing him.
+    next_scene: roll_4_sincere_apology
+    media:
+      image: image-scenegrumblesdenial-doid-80590662
+  - id: scene_dead_end_after_confront_fail
+    type: narrative
+    title: Back to the Start
+    description: With Grumble too angry to talk, the friends have no choice but to return to the empty bush to search for clues one last time.
+    next_scene: roll_5a_perception_after_anger
+  - id: scene_dead_end_after_polite_fail
+    type: narrative
+    title: Back to Square One
+    description: With Grumble unwilling to help, the friends are back where they started. They decide to search the area around the bush one more time.
+    next_scene: roll_5b_perception_after_refusal
+    media:
+      image: image-scenedeadendafterpolitefail-doid-9463676d
+  - id: scene_contradiction_intro
+    type: narrative
+    title: A Puzzle
+    description: The friends huddle together. 'This is strange,' Jinx whispers. 'Nutmeg was sure he saw a big bear, but Grumble says he saw a turtle.'
+    next_scene: scene_puzzle_out_clues
+  - id: scene_puzzle_out_clues
+    type: narrative
+    title: A Theory
+    description: '''Wait!'' Archimedes hooted softly. ''What if it''s not *who* is right, but *when* they were right? Maybe the stomper came this morning, but Shelly took the berries this afternoon!'''
+    next_scene: scene_nutmeg_confirms
+  - id: scene_nutmeg_confirms
+    type: narrative
+    title: A Realization
+    description: Maple turned to Nutmeg. 'When exactly did you see the stomper?' Nutmeg's eyes went wide. 'It was early this morning! And Archimedes is right—the berries were still on the bush then!' Jinx nodded. 'So Nutmeg saw Grumble in the morning, and Grumble saw Shelly in the afternoon! Let's go to the Mossy Log!'
+    next_scene: scene_journey_to_log_with_goal
+  - id: scene_puzzle_out_tracks_vs_witness
+    type: narrative
+    title: Tracks vs. Testimony
+    description: '"This is confusing," says Jinx. "The tracks we found are from a bear. But Grumble says he saw a turtle. How can both be right?" Archimedes hooted thoughtfully. "Maybe they are. The tracks could have been made this morning when the berries were still here, and Shelly the turtle could have taken them later in the day. The clues might not be from the same time!"'
+    next_scene: scene_journey_to_log_with_goal
+  - id: roll_4_sincere_apology
+    type: roll
+    title: A Sincere Apology
+    description: Maple steps forward to apologize for the false accusation. **[c:Maple] playing Maple, roll a 10 or higher to show you're truly sorry.**
+    difficulty: 10
+    branches:
+      - choice: He accepted our apology!
+        next_scene: scene_apology_success
+      - choice: He's still too grumpy!
+        next_scene: scene_apology_failure
+    media:
+      image: image-roll4sincereapology-doid-e2a3c509
+  - id: roll_5a_perception_after_anger
+    type: roll
+    title: Searching for a Faint Trail
+    description: Back at the bush, Archimedes flies to a high branch, scanning the ground for anything they missed. **[c:Archimedes] playing Archimedes, roll a 12 or higher to spot the tiny details!**
+    difficulty: 12
+    branches:
+      - choice: Hoo-hoo! I see something!
+        next_scene: scene_perception_success_A
+      - choice: Hmm, nothing but leaves.
+        next_scene: scene_perception_failure_A
+    media:
+      image: image-roll5aperceptionafteranger-doid-3d176895
+  - id: roll_5b_perception_after_refusal
+    type: roll
+    title: Searching for a Faint Trail
+    description: Back at the bush, Archimedes flies to a high branch, scanning the ground for anything they missed. **[c:Archimedes] playing Archimedes, roll a 12 or higher to spot the tiny details!**
+    difficulty: 12
+    branches:
+      - choice: Hoo-hoo! I see something!
+        next_scene: scene_perception_success_B
+      - choice: Hmm, nothing but leaves.
+        next_scene: scene_last_hope
+    media:
+      image: image-roll5bperceptionafterrefusal-doid-3d176895
+  - id: scene_journey_to_log_with_goal
+    type: narrative
+    title: A New Plan
+    description: '''Okay team,'' says Maple. ''We need to find Shelly at the Mossy Log!'' ''To the Babbling Creek!'' Jinx adds, and the friends set off.'
+    next_scene: scene_approach_creek_A
+  - id: scene_apology_success
+    type: narrative
+    title: Apology Accepted
+    description: Grumble huffed, but a tiny smile appeared. 'Fine. I did see Shelly the turtle heading to the Mossy Log that crosses the Babbling Creek.' The friends thank him and set off with their new clue.
+    next_scene: scene_journey_to_log_with_goal
+    media:
+      image: image-sceneapologysuccess-doid-282fd4af
+  - id: scene_apology_failure
+    type: narrative
+    title: Apology Rejected
+    description: '''Sorry isn''t good enough!'' Grumble snorts and retreats into his den. The apology failed.'
+    next_scene: scene_choice_after_failed_apology
+    media:
+      image: image-sceneapologyfailure-doid-85a44ecd
+  - id: scene_perception_success_A
+    type: narrative
+    title: A Tiny Clue!
+    description: From his high branch, Archimedes hoots, 'Hoo-hoo, look there!' He points to a faint, shiny trail leading away from the bush.
+    next_scene: scene_approach_creek_B
+    media:
+      image: image-sceneperceptionsuccessa-doid-4c88278e
+  - id: scene_perception_failure_A
+    type: narrative
+    title: Nowhere Left to Look
+    description: The friends search and search, but find nothing. They've run out of ideas. Because they were unkind to Grumble, they missed their only other clue, and the trail has gone cold.
+    next_scene: ending_3_unsolved
+  - id: scene_perception_success_B
+    type: narrative
+    title: A Tiny Clue!
+    description: Just as he's about to give up, Archimedes spots it! He points to a faint, shiny trail on the ground.
+    next_scene: scene_approach_creek_B
+    media:
+      image: image-sceneperceptionsuccessb-doid-4c88278e
+  - id: scene_last_hope
+    type: narrative
+    title: A Last Hope
+    description: The friends search and search, but find nothing. Shoulders slumping, they are about to give up when Nutmeg suddenly says, 'Wait! Look!' He points to a faint, shiny trail on the ground they had all missed.
+    next_scene: scene_approach_creek_B
+    media:
+      image: image-scenelasthope-doid-f9afe4d9
+  - id: scene_choice_after_failed_apology
+    type: choice
+    title: Amends or Abandon?
+    description: Grumble has retreated into his den, still angry. Maple, your apology didn't work. As the group's peacemaker, what's your next move? [c:Maple] playing Maple, you decide.
+    branches:
+      - choice: Leave a basket of pretty forest treasures at his door to show you're truly sorry.
+        next_scene: narrative_gift
+        compass_change:
+          axis: Demonstrating Empathy and Compassion
+          delta: 0.8
+          developmental_link: 2.1.2 Social Skills (Social Awareness & Relationship Skills)
+        echo_log:
+          echo_type: the_steward
+          description: The player moved from understanding to action by leaving a gift.
+          strength: 1
+      - choice: Give up on him and search for clues on your own.
+        next_scene: scene_dead_end_after_apology_fail
+        compass_change:
+          axis: Demonstrating Empathy and Compassion
+          delta: -0.5
+          developmental_link: 2.1.2 Social Skills (Social Awareness & Relationship Skills)
+        echo_log:
+          echo_type: the_conflict_avoider
+          description: The player gave up on repairing the relationship.
+          strength: -1
+  - id: scene_approach_creek_A
+    type: narrative
+    title: Journey to the Mossy Log
+    description: Knowing where to go, the friends head directly to the Babbling Creek. They see the giant, ancient log stretching across the water, providing a slippery bridge to the other side.
+    next_scene: roll_6a_creek_crossing
+    media:
+      image: image-sceneapproachcreeka-doid-a1d7e678
+  - id: scene_approach_creek_B
+    type: narrative
+    title: Following a Mysterious Trail
+    description: It's their only clue. The friends follow the faint, shiny trail through the woods until they arrive at the edge of the Babbling Creek and a giant, mossy log.
+    next_scene: roll_6b_creek_crossing
+    media:
+      image: image-sceneapproachcreekb-doid-a1d7e678
+  - id: narrative_gift
+    type: narrative
+    title: A Thoughtful Gift
+    description: The friends decide a real apology needs to be more than words. Maple gathers some bright, colourful wildflowers. Jinx finds the fluffiest moss to make a small bed, and Nutmeg carefully arranges a collection of perfect, shapely pinecones on top. They leave the little basket of forest treasures at Grumble's door. It's a kind gesture that shows they are truly sorry. Feeling they've done the right thing, the friends return to the bush to search again.
+    next_scene: roll_5c_perception_after_gift
+    media:
+      image: image-narrativegift-doid-bbbabecd
+  - id: scene_dead_end_after_apology_fail
+    type: narrative
+    title: A Last Resort
+    description: With Grumble still angry, the friends head back to the empty bush to search for clues one last time.
+    next_scene: roll_5c_perception_after_gift
+  - id: roll_5c_perception_after_gift
+    type: roll
+    title: Searching for a Faint Trail
+    description: Back at the bush, Archimedes flies to a high branch, scanning the ground for anything they missed. **[c:Archimedes] playing Archimedes, roll a 12 or higher to spot the tiny details!**
+    difficulty: 12
+    branches:
+      - choice: Hoo-hoo! I see something!
+        next_scene: scene_perception_success_C
+      - choice: Hmm, nothing but leaves.
+        next_scene: scene_last_hope
+    media:
+      image: image-roll5cperceptionaftergift-doid-3d176895
+  - id: roll_6a_creek_crossing
+    type: roll
+    title: The Slippery Log
+    description: The friends must cross the slippery Mossy Log. Maple, being the biggest, goes last. **[c:Maple] playing Maple, roll a 12 or higher to cross carefully!**
+    difficulty: 12
+    branches:
+      - choice: Slow and steady...
+        next_scene: scene_creek_crossing_success_A
+      - choice: Woah, slippery moss!
+        next_scene: scene_creek_crossing_failure_A
+    media:
+      image: image-roll6acreekcrossing-doid-4250275d
+  - id: roll_6b_creek_crossing
+    type: roll
+    title: The Slippery Log
+    description: The friends must cross the slippery Mossy Log. Maple, being the biggest, goes last. **[c:Maple] playing Maple, roll a 12 or higher to cross carefully!**
+    difficulty: 12
+    branches:
+      - choice: Slow and steady...
+        next_scene: scene_creek_crossing_success_B
+      - choice: Woah, slippery moss!
+        next_scene: scene_creek_crossing_failure_B
+    media:
+      image: image-roll6bcreekcrossing-doid-4250275d
+  - id: scene_perception_success_C
+    type: narrative
+    title: A Tiny Clue!
+    description: Archimedes points his wing to a faint, shiny trail on the ground. It's a new lead!
+    next_scene: scene_approach_creek_B
+    media:
+      image: image-sceneperceptionsuccessc-doid-3d176895
+  - id: scene_creek_crossing_success_A
+    type: narrative
+    title: Safely Across
+    description: All the friends make it safely across the creek. 'Okay, Grumble said Shelly came this way,' whispers Jinx. 'Where should we look?' Archimedes, perched on a high branch, holds up a wing. 'Hush!' he hooted softly. 'Just ahead, behind those big rocks. I can see a soft, warm glow. That must be where she is. We should approach quietly so we don't frighten her.'
+    next_scene: roll_7_stealth
+    media:
+      image: image-scenecreekcrossingsuccessa-doid-04c66d4f
+  - id: scene_creek_crossing_failure_A
+    type: narrative
+    title: A Big Splash!
+    description: Maple slips on the wet moss and falls into the shallow creek with a loud SPLASH! The noise echoes through the quiet woods.
+    next_scene: scene_startled_shelly
+    media:
+      image: image-scenecreekcrossingfailurea-doid-25de4e2d
+      audio: audio-scenecreekcrossingfailurea-doid-24f26fc6
+  - id: scene_creek_crossing_success_B
+    type: narrative
+    title: Safely Across
+    description: With slow and steady steps, everyone makes it to the other side. The shiny trail seems to vanish on the damp moss. 'Where did it go?' whispers Jinx. Archimedes, perched on a high branch, holds up a wing. 'Shhh!' he hooted softly. 'Over there, behind those big rocks. I see a faint, warm light pulsing. Let's get a closer look, but very quietly.'
+    next_scene: roll_7_stealth
+    media:
+      image: image-scenecreekcrossingsuccessb-doid-04c66d4f
+  - id: scene_creek_crossing_failure_B
+    type: narrative
+    title: A Big Splash!
+    description: Maple's paw slips on a wet patch of moss! He windmills his arms and falls into the shallow creek with a loud SPLASH!
+    next_scene: scene_startled_shelly
+    media:
+      image: image-scenecreekcrossingfailureb-doid-25de4e2d
+      audio: audio-scenecreekcrossingfailureb-doid-24f26fc6
+  - id: roll_7_stealth
+    type: roll
+    title: Sneaking Up
+    description: The friends try to move silently toward the mysterious light. **[c:Archimedes] playing Archimedes, roll for a silent approach! A 10 or higher is needed.**
+    difficulty: 10
+    branches:
+      - choice: Let's be sneaky...
+        next_scene: scene_12_focus_choice_jinx
+      - choice: '''*CRUNCH!* Oh no!'''
+        next_scene: scene_stealth_failure
+  - id: scene_startled_shelly
+    type: narrative
+    title: A Frightened Friend
+    description: The loud splash startles a small turtle on the mossy bank, who quickly pulls its head and legs into its shell. Next to the turtle is a pile of the missing Glow-Berries.
+    next_scene: scene_a_gentle_approach
+    media:
+      image: image-scenestartledshelly-doid-31ab080a
+  - id: scene_stealth_failure
+    type: narrative
+    title: SNAP!
+    description: '''*SNAP!* Jinx steps on a dry twig! Startled, a small turtle pulls its head into its shell. Beside her is a pile of the missing Glow-Berries.'''
+    next_scene: scene_a_gentle_approach
+    media:
+      image: image-scenestealthfailure-doid-31ab080a
+  - id: scene_a_gentle_approach
+    type: narrative
+    title: A Gentle Approach
+    description: The friends freeze, watching the terrified turtle. Jinx, who was about to dash forward, stops himself. He holds up a paw to quiet the others. 'Wait,' he whispers. 'My usual noisy approach won't work here. We'll scare her away for good. I... I have to try being gentle.'
+    next_scene: roll_8_coax_shelly
+  - id: roll_8_coax_shelly
+    type: roll
+    title: Earning Trust
+    description: Jinx takes a slow, careful step forward, keeping his voice soft and low. **[c:Jinx] playing Jinx, roll an 11 or higher to show the scared turtle you are a friend.**
+    difficulty: 11
+    branches:
+      - choice: Please come out, we're friends...
+        next_scene: scene_coax_shelly_success
+      - choice: Oh no, she's still too frightened.
+        next_scene: scene_coax_shelly_failure
+  - id: scene_12_focus_choice_jinx
+    type: choice
+    title: A Sad Discovery (Focus Choice)
+    description: '**[c:Jinx] playing Jinx, you have a difficult choice. Do you ask the sad turtle if she is okay, or do you grab the berries before they get lost?**'
+    branches:
+      - choice: Ask Shelly gently if she is okay to build trust.
+        next_scene: scene_gentle_question
+        compass_change:
+          axis: Empathy & Perspective-Taking
+          delta: 0.8
+          developmental_link: 2.1.2 Social Skills (Social Awareness & Relationship Skills)
+        echo_log:
+          echo_type: the_steward
+          description: The player chose a gentle, empathetic approach, prioritizing the other character's feelings.
+          strength: 1
+      - choice: Take charge and secure the berries so they aren't lost.
+        next_scene: scene_demanding_question
+        compass_change:
+          axis: Empathy & Perspective-Taking
+          delta: 0.8
+          developmental_link: 2.1.2 Social Skills (Social Awareness & Relationship Skills)
+        echo_log:
+          echo_type: the_vanguard
+          description: The player prioritized the mission goal (recovering the item).
+          strength: 1
+    media:
+      image: image-scene12focuschoiceempathy-doid-8ecc2d0b
+  - id: scene_coax_shelly_success
+    type: narrative
+    title: Shelly Peeks Out
+    description: After a few moments of Jinx's soft, reassuring words, Shelly slowly peeks her head out. She sees their kind faces and realizes they are friends.
+    next_scene: scene_gentle_question
+    media:
+      image: image-scenecoaxshellysuccess-doid-40796a0b
+  - id: scene_coax_shelly_failure
+    type: narrative
+    title: The Long Wait
+    description: Despite their kind words, Shelly is too scared to come out. As they wait, a mischievous crow swoops down, snags a berry, and flies off! The sudden surprise makes Shelly peek out. 'Is it safe?' she asks.
+    next_scene: scene_reassure_shelly_after_crow
+    media:
+      image: image-scenecoaxshellyfailure-doid-880018d3
+  - id: scene_reassure_shelly_after_crow
+    type: narrative
+    title: A Cautious Question
+    description: Maple nods gently. 'Yes, it's safe now. The crow is gone.' He looks sadly at the spot where the stolen berry used to be. 'We're sorry he took one. You seem very worried about these berries. Are you alright?'
+    next_scene: scene_shellys_story_messy
+    media:
+      image: image-scenereassureshellyaftercrow-doid-711e2e53
+  - id: scene_gentle_question
+    type: narrative
+    title: A Kind Inquiry
+    description: Maple takes a slow step closer. 'Excuse me, Shelly?' he says softly. 'Are you alright?' Shelly looks up, and the friends can see how tired and worried she is. 'No,' she says quietly. 'I'm having a lot of trouble.'
+    next_scene: scene_connecting_to_berries
+    media:
+      image: image-scenegentlequestion-doid-711e2e53
+  - id: scene_connecting_to_berries
+    type: narrative
+    title: A Gentle Question
+    description: Jinx looks from Shelly's sad face to the pile of berries. He asks gently, 'Is... is your trouble because of these Glow-Berries?'
+    next_scene: scene_shellys_story_clean
+  - id: scene_demanding_question
+    type: narrative
+    title: A Scared Turtle
+    description: Jinx dashes toward the pile. 'I'LL KEEP THESE SAFE!' he shouts. But his voice is so loud that it startles Shelly. She jumps back in surprise, accidentally knocking the berries into the water before Jinx can reach them.
+    next_scene: ending_2_lesson
+    media:
+      image: image-scenedemandingquestion-doid-95bdd142
+  - id: scene_shellys_story_messy
+    type: narrative
+    title: Shelly's Story
+    description: At Maple's kind question, Shelly explains her story. 'My friend, Timothy Mouse, has the Chilly-Shakes, and I had to get the berries to help him.' The friends feel bad for her and offer to help carry the rest of the berries, minus the one the crow stole.
+    next_scene: scene_understanding_shelly
+    media:
+      image: image-sceneshellysstorymessy-doid-adfc7304
+  - id: scene_shellys_story_clean
+    type: narrative
+    title: Shelly's Full Story
+    description: Shelly nods sadly and begins to tell them the whole story. 'They're for my friend, Timothy Mouse. He has the Chilly-Shakes, and the Elder says only the warmth and light from a big pile of Glow-Berries can make him feel better. His burrow is so cold and dark...'
+    next_scene: scene_understanding_shelly
+    media:
+      image: image-sceneshellysstoryclean-doid-adfc7304
+  - id: scene_understanding_shelly
+    type: narrative
+    title: A Realization
+    description: '''Oh,'' Maple whispered to his friends. ''Now I understand. She took the berries to help someone.'''
+    next_scene: scene_offering_help
+  - id: scene_offering_help
+    type: narrative
+    title: An Offer of Help
+    description: Maple turns back to Shelly. 'That's a very kind thing to do for Timothy,' he says gently. 'It looks like you have a lot to carry. Can we help you?'
+    next_scene: scene_shelly_accepts_help
+  - id: scene_shelly_accepts_help
+    type: narrative
+    title: A Friend in Need
+    description: Shelly lets out a big, happy sigh. 'Oh, thank you!' she says. 'I am too slow to roll them all by myself. If we are quick, we can get there before it gets dark!'
+    next_scene: scene_focus_choice_nutmeg
+  - id: scene_focus_choice_nutmeg
+    type: choice
+    title: The Architect's Dilemma (Focus Choice)
+    description: Nutmeg looks closely at the berries on the ground. They are covered in mud and dirt, which is blocking their magical glow! He worries they won't be bright enough to warm up Timothy. **[c:Nutmeg] playing Nutmeg, you want the light to be strong. Do you stop to polish the berries so they shine brightly, or do you hurry to the burrow?**
+    branches:
+      - choice: Wipe the mud off every berry so they glow perfectly!
+        next_scene: scene_nutmeg_plan_secure
+        compass_change:
+          axis: Recognizing Situational Demands and Opportunities
+          delta: 0.8
+          developmental_link: 2.1.2 Social Skills (Social Awareness & Relationship Skills)
+        echo_log:
+          echo_type: the_architect
+          description: The player prioritized quality and efficiency over speed.
+          strength: 1
+      - choice: Rush them to the burrow now because Timothy is sick!
+        next_scene: scene_nutmeg_plan_rush
+        compass_change:
+          axis: Recognizing Situational Demands and Opportunities
+          delta: 0.8
+          developmental_link: 2.1.2 Social Skills (Social Awareness & Relationship Skills)
+        echo_log:
+          echo_type: the_steward
+          description: The player prioritized the emotional need (helping the sick friend) over perfection.
+          strength: 1
+  - id: scene_nutmeg_plan_secure
+    type: narrative
+    title: Making them Shine
+    description: Nutmeg decides they need the brightest light possible. 'The mud is blocking the glow!' he says. He grabs a soft leaf and starts rubbing the dirt off the berries.
+    next_scene: roll_9a_nutmeg_clean
+  - id: scene_nutmeg_plan_rush
+    type: narrative
+    title: We Have to Hurry!
+    description: Nutmeg thinks of Shelly's sick friend. 'Timothy is freezing!' he says. He decides there is no time to clean the berries. 'Forget the mud!' he tells the team. 'Take them, dirt and all!'
+    next_scene: roll_9b_nutmeg_gather
+  - id: roll_9a_nutmeg_clean
+    type: roll
+    title: Restoring the Light
+    description: Nutmeg tries to wipe the mud off the berries. **[c:Nutmeg] playing Nutmeg, roll an 8 or higher to make them glow brightly!**
+    difficulty: 8
+    branches:
+      - choice: They are glowing brightly!
+        next_scene: scene_nutmeg_clean_success
+      - choice: The mud is stuck!
+        next_scene: scene_nutmeg_clean_struggle
+  - id: roll_9b_nutmeg_gather
+    type: roll
+    title: A Slippery Start
+    description: The berries are covered in slick mud! Nutmeg tries to scoop up the first batch to hand to the team. **[c:Nutmeg] playing Nutmeg, roll an 8 or higher to grab them without them slipping away!**
+    difficulty: 8
+    branches:
+      - choice: Got them!
+        next_scene: scene_nutmeg_gather_success
+      - choice: Whoops, slippery!
+        next_scene: scene_nutmeg_gather_struggle
+  - id: scene_nutmeg_clean_success
+    type: narrative
+    title: A Warm Glow
+    description: Nutmeg works fast! He wipes away the mud, and the berries instantly glow brighter and warmer. 'Okay,' he says. 'They are ready to help Timothy. Let's move!'
+    next_scene: roll_9_teamwork
+  - id: scene_nutmeg_clean_struggle
+    type: narrative
+    title: A Gritty Job
+    description: The mud is dried on tight! Nutmeg scrubs hard, but some of the berries are still a bit dim and dirty. 'This is taking too long!' he says. 'We just have to go!'
+    next_scene: roll_9_teamwork
+  - id: scene_nutmeg_gather_success
+    type: narrative
+    title: Moving Fast
+    description: Nutmeg gets a good grip! He scoops up a big armful of muddy berries. 'Here they come!' he says. They are ready to move down the line.
+    next_scene: roll_9_teamwork
+  - id: scene_nutmeg_gather_struggle
+    type: narrative
+    title: A Messy Scramble
+    description: It is like holding wet soap! The berries keep popping out of Nutmeg's paws. 'Whoops!' he says. 'Get ready, they are slippery!'
+    next_scene: roll_9_teamwork
+  - id: roll_9_teamwork
+    type: roll
+    title: Teamwork Challenge
+    description: Jinx steps up. 'Okay team, the berries are ready,' he says. 'Let's form a passing line to get them into the burrow!' **[c:Jinx] playing Jinx, roll a 13 or higher to organize the team!**
+    difficulty: 13
+    branches:
+      - choice: Let's make a berry-line!
+        next_scene: scene_teamwork_success
+      - choice: Whoops! Dropped one!
+        next_scene: scene_teamwork_failure
+    media:
+      image: image-roll9teamwork-doid-1c71e31b
+  - id: scene_teamwork_success
+    type: narrative
+    title: Perfect Teamwork
+    description: Jinx's plan was brilliant! They formed a perfect line, passing the berries carefully from one friend to the next until they all were safely piled at the burrow's entrance.
+    next_scene: scene_entering_burrow_clean
+  - id: scene_teamwork_failure
+    type: narrative
+    title: A Sticky Mess
+    description: It's harder than it looks! One berry slips from Maple's paws and gets squashed on the path, leaving a sticky mess. They manage to get the rest to the entrance.
+    next_scene: scene_entering_burrow_messy
+    media:
+      image: image-sceneteamworkfailure-doid-5f80efc8
+  - id: scene_entering_burrow_messy
+    type: narrative
+    title: Helping First
+    description: Even though they made a bit of a mess, the friends knew helping Timothy was the most important thing. 'We can worry about the path later,' whispered Maple. They hurried into the burrow.
+    next_scene: scene_timothys_burrow_messy
+  - id: scene_entering_burrow_clean
+    type: narrative
+    title: Entering the Burrow
+    description: With the berries safely gathered, Shelly gives a grateful smile. 'He's just inside.' The friends nod and follow her quietly into the dark opening.
+    next_scene: scene_timothys_burrow_clean
+    media:
+      image: image-sceneenteringburrowclean-doid-32f0a189
+  - id: scene_timothys_burrow_clean
+    type: narrative
+    title: Timothy's Burrow
+    description: Inside the tiny, dark burrow, the friends help Shelly place the Glow-Berries in nooks all around the room. As the last berry is placed, a soft, warm glow fills the space. A little mouse sits up in his bed, his eyes wide with wonder. He blinked in the warm light, and a shiver that was shaking him seemed to slow down. A tiny smile appeared on his face.
+    next_scene: scene_visiting_with_timothy_clean
+    media:
+      image: image-scenetimothysburrowclean-doid-27d274b2
+  - id: scene_timothys_burrow_messy
+    type: narrative
+    title: Timothy's Burrow
+    description: Inside the tiny, dark burrow, the friends help Shelly place the Glow-Berries in nooks all around the room. As the last berry is placed, a soft, warm glow fills the space. A little mouse sits up in his bed, his eyes wide with wonder. He blinked in the warm light, and a shiver that was shaking him seemed to slow down. A tiny smile appeared on his face.
+    next_scene: scene_visiting_with_timothy_messy
+    media:
+      image: image-scenetimothysburrowmessy-doid-27d274b2
+  - id: scene_visiting_with_timothy_clean
+    type: narrative
+    title: A Cheerful Visit
+    description: '''Thank you!'' Timothy says, his voice already a little stronger. The friends could see the warmth from the berries was helping his Chilly-Shakes. They introduced themselves and decided to sit with him for a little while, sharing stories. Nutmeg tells a joke that makes Timothy giggle, and the whole burrow feels cheerful.'
+    next_scene: scene_leaving_quietly_perfect
+    media:
+      image: image-scenevisitingwithtimothyclean-doid-5f1b5e77
+  - id: scene_visiting_with_timothy_messy
+    type: narrative
+    title: A Cheerful Visit
+    description: '''Thank you!'' Timothy says, his voice already a little stronger. The friends could see the warmth from the berries was helping his Chilly-Shakes. They introduced themselves and decided to sit with him for a little while, sharing stories. Nutmeg tells a joke that makes Timothy giggle, and the whole burrow feels cheerful.'
+    next_scene: scene_leaving_quietly_messy
+    media:
+      image: image-scenevisitingwithtimothymessy-doid-5f1b5e77
+  - id: scene_leaving_quietly_perfect
+    type: narrative
+    title: Saying Goodbye
+    description: All the fun and happy chatter soon made Timothy let out a big, wide yawn. Seeing their new friend was getting sleepy after all the excitement, the friends knew it was time to go. As he snuggled down to drift off to a peaceful sleep, they quietly tiptoed out of the burrow.
+    next_scene: scene_shellys_gratitude_perfect
+    media:
+      image: image-sceneleavingquietlyperfect-doid-9785f029
+  - id: scene_leaving_quietly_messy
+    type: narrative
+    title: Saying Goodbye
+    description: All the fun and Happy chatter soon made Timothy let out a big, wide yawn. Seeing their new friend was getting sleepy after all the excitement, the friends knew it was time to go. As he snuggled down to drift off to a peaceful sleep, they quietly tiptoed out of the burrow.
+    next_scene: scene_remembering_the_mess
+    media:
+      image: image-sceneleavingquietlymessy-doid-9785f029
+  - id: scene_shellys_gratitude_perfect
+    type: narrative
+    title: Shelly's Gratitude
+    description: Back in the cool forest air, Shelly turns to them with a huge, happy smile. 'I couldn't have done it without you,' she says, her voice full of gratitude. 'You didn't just bring the light; you brought friendship. Please, come with me. I have something to thank you.'
+    next_scene: ending_1_good
+    media:
+      image: image-sceneshellysgratitudeperfect-doid-a3f66d53
+  - id: scene_remembering_the_mess
+    type: narrative
+    title: Remembering the Mess
+    description: Back in the cool forest air, Shelly gives them a grateful smile. 'Thank you again for everything,' she says. Just then, Maple points with his paw. 'Oh dear!' he says. 'We forgot about the mess we made on the path!'
+    next_scene: scene_13_focus_choice_maple
+    media:
+      image: image-scenerememberingthemess-doid-b8d69940
+  - id: scene_13_focus_choice_maple
+    type: choice
+    title: A Sticky Situation (Focus Choice)
+    description: The friends all look at the sticky patch of goo on the forest floor. **[c:Maple] playing Maple, everyone is looking to you. What is the right thing to do?**
+    branches:
+      - choice: Clean it up now! It's our responsibility to leave the forest safe.
+        next_scene: scene_cleaning_up
+        compass_change:
+          axis: Demonstrating Empathy and Compassion
+          delta: 0.8
+          developmental_link: 2.1.2 Social Skills (Social Awareness & Relationship Skills)
+        echo_log:
+          echo_type: the_steward
+          description: The player moved from understanding to action (compassion) to protect others.
+          strength: 1
+      - choice: Just cover it with leaves and hurry to see the reward.
+        next_scene: scene_leaving_the_mess
+        compass_change:
+          axis: Demonstrating Empathy and Compassion
+          delta: 0.8
+          developmental_link: 2.1.2 Social Skills (Social Awareness & Relationship Skills)
+        echo_log:
+          echo_type: the_innovator
+          description: The player prioritized efficiency and the goal over community care.
+          strength: 1
+    media:
+      image: image-scene13focuschoiceaccountability-doid-6a1668b4
+  - id: scene_cleaning_up
+    type: narrative
+    title: A Responsible Team
+    description: The friends go back. They work together, using leaves and water to clean up the sticky goo until the path is spotless. Shelly watches with a warm, grateful smile.
+    next_scene: ending_1b_clean
+    media:
+      image: image-scenecleaningup-doid-42b31aef
+  - id: scene_leaving_the_mess
+    type: narrative
+    title: An Irresponsible Choice
+    description: Jinx shrugs. 'I guess so.' Shelly, happy that Timothy is feeling better, says, 'That's okay. I still want to thank you for helping Timothy. Please, follow me.'
+    next_scene: scene_dirty_creature
+    media:
+      image: image-sceneleavingthemess-doid-a3f66d53
+  - id: scene_dirty_creature
+    type: narrative
+    title: A Sticky Consequence
+    description: As they walk with Shelly toward the river, they pass by the sticky mess they left on the path. Just then, a tiny baby bunny hops by. It doesn't see the goo and runs right through it! Its fluffy white tail and little paws are now all covered in sticky berry juice. The bunny stops and tries to clean itself, looking very unhappy.
+    next_scene: scene_choice_help_bunny
+    media:
+      image: image-scenedirtycreature-doid-17821e6a
+  - id: scene_choice_help_bunny
+    type: choice
+    title: Help the Bunny? (Micro-Choice)
+    description: Maple looks at the unhappy bunny, then at the messy path. 'This is our fault,' he says quietly. **[c:Maple] playing as Maple, the little bunny looks very sad. What should the group do?**
+    branches:
+      - choice: Take the bunny to the river to help it get clean.
+        next_scene: scene_helping_bunny
+        compass_change:
+          axis: Empathy & Perspective-Taking
+          delta: 0.2
+          developmental_link: 2.1.2 Social Skills (Social Awareness & Relationship Skills)
+        echo_log:
+          echo_type: the_steward
+          description: The player demonstrated compassion by helping the bunny.
+          strength: 1
+      - choice: It's just a little goo, let's keep going.
+        next_scene: scene_ignoring_bunny
+        compass_change:
+          axis: Empathy & Perspective-Taking
+          delta: -0.2
+          developmental_link: 2.1.2 Social Skills (Social Awareness & Relationship Skills)
+        echo_log:
+          echo_type: the_conflict_avoider
+          description: The player ignored the suffering of another.
+          strength: -1
+    media:
+      image: image-scenechoicehelpbunny-doid-7dbdf000
+  - id: scene_helping_bunny
+    type: narrative
+    title: A Kind Act
+    description: The friends all agree. 'Of course we'll help!' says Maple. He gently picks up the little bunny and the friends carry it with them to the river, where they help it wash the sticky goo from its paws and tail. The clean bunny gives a happy little hop and scurries away.
+    next_scene: ending_1d_redemption
+    media:
+      image: image-scenehelpingbunny-doid-caa07a82
+  - id: scene_ignoring_bunny
+    type: narrative
+    title: Leaving It Behind
+    description: Before the friends can decide what to do, Shelly, who is so happy about Timothy, says, 'Come on, my thank-you gift is just over here!' Eager to see the reward, the friends follow her, leaving the unhappy bunny and the sticky mess behind.
+    next_scene: ending_1c_messy
+    media:
+      image: image-sceneignoringbunny-doid-a3f66d53
+  - id: ending_1_good
+    type: special
+    title: 'Ending: The Shimmering Stone (Perfect)'
+    description: |-
+      Shelly reaches into the water and pulls out a beautiful stone that shimmers with its own inner light.
+
+      "This is for you," she says. "For being so kind, brave, and responsible. You saved my friend. Please take this to remember the wonderful friend you are."
+
+      In the end, you did more than solve a mystery. You brought warmth and light to a friend in need, discovering that the greatest treasure is a kind and caring heart.
+    media:
+      video: video-ending1good-doid-8c92bcec
+  - id: ending_1b_clean
+    type: special
+    title: 'Ending: The Shimmering Stone (Responsible)'
+    description: '''You follow Shelly to the riverbank. She reaches into the water and pulls out a magnificent magical stone that shimmers with its own inner light. ''This is for you,'' she says. ''Not just for helping my friend, but for being responsible enough to fix your mistake together. You are truly good friends.'' You helped a friend and learned the importance of cleaning up after yourselves.'
+    media:
+      video: video-ending1bclean-doid-8c92bcec
+  - id: ending_1d_redemption
+    type: special
+    title: 'Ending: The Smooth River Stone'
+    description: '''You follow Shelly to the river. She picks up a beautiful green stone from the riverbed. ''Thank you for helping the little bunny,'' she says kindly. ''It''s a good reminder that it''s never too late to do the right thing.'' She gives you the stone, and the friends feel good, but Maple can''t help but think about the sticky mess still on the path.'
+    media:
+      video: video-ending1dredemption-doid-37e8ab30
+  - id: ending_1c_messy
+    type: special
+    title: 'Ending: The Simple Grey Stone'
+    description: '''You follow Shelly to the river. She finds a lovely, simple grey stone and holds it out. "I wanted you to have something for your kindness to Timothy," she says. As Maple holds the simple stone, it feels a little heavy in his paw. He can''t help but think of the sticky path and the unhappy little bunny. The friends were happy they helped Timothy, but Maple knew they had left a problem behind for someone else.'
+    media:
+      video: video-ending1cmessy-doid-c9163004
+  - id: ending_2_lesson
+    type: special
+    title: 'Ending: A Lesson in Kindness'
+    description: The friends watch the last berry float away. Jinx’s ears droop. 'I made a mistake,' he admits. 'I cared more about grabbing the berries than I did about Shelly's feelings.' Maple puts a friendly paw on his shoulder. 'It is okay,' he says. 'We learned something big today. Being kind is always more important than winning the mission.'
+    media:
+      video: video-ending2lesson-doid-4319dd00
+  - id: ending_3_unsolved
+    type: special
+    title: 'Ending: The Unsolved Mystery'
+    description: 'The sun sets, and the friends are tired with no more clues. They never found out what happened to the Glow-Berries. They learned an important lesson: sometimes, even with your best efforts, a mystery can be too tricky. A single missed clue can mean the difference between solving the puzzle and the trail going cold.'
+    media:
+      video: video-ending3unsolved-doid-11d64c07

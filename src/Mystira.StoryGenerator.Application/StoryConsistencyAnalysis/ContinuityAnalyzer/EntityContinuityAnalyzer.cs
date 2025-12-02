@@ -23,7 +23,8 @@ public static class EntityContinuityAnalyzer
     /// </summary>
     public static IReadOnlyList<EntityContinuityIssue> FindIssues(
         IReadOnlyDictionary<string, HashSet<string>> mustActiveByScene,
-        IReadOnlyDictionary<string, SemanticRoleLabellingClassification> srlByScene)
+        IReadOnlyDictionary<string, SemanticRoleLabellingClassification> srlByScene,
+        Func<SrlEntityClassification, bool>? filter)
     {
         var issues = new List<EntityContinuityIssue>();
 
@@ -34,8 +35,13 @@ public static class EntityContinuityAnalyzer
 
             foreach (var entity in srlResult.EntityClassifications)
             {
+                // skip entities not actually present
                 if (!entity.PresentInScene)
-                    continue; // skip entities not actually present
+                    continue;
+
+                // fitler entities if needed
+                if (filter != null && !filter(entity))
+                    continue;
 
                 var name = entity.Name?.Trim();
                 if (string.IsNullOrWhiteSpace(name))
