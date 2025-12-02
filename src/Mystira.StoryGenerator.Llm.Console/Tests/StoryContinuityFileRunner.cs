@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using Mystira.StoryGenerator.Contracts.StoryConsistency;
 using Mystira.StoryGenerator.Domain.Services;
 using System.Diagnostics;
+using System.Text.Encodings.Web;
 
 namespace Mystira.StoryGenerator.Llm.Console.Tests;
 
@@ -63,7 +64,7 @@ internal static class StoryContinuityFileRunner
             var swAnalysis = Stopwatch.StartNew();
             var issues = await continuityService.AnalyzeAsync(scenario);
             // Post-processing filter on issues
-            issues = Mystira.StoryGenerator.Application.StoryConsistencyAnalysis.ContinuityAnalyzer.EntityContinuityIssueFiltering
+            issues = Application.StoryConsistencyAnalysis.ContinuityAnalyzer.EntityContinuityIssueFiltering
                 .Filter(issues,
                     confidences: includedConfidences,
                     entityTypes: includedEntityTypes,
@@ -88,6 +89,8 @@ internal static class StoryContinuityFileRunner
 
             // Dump JSON array of issues to stdout for automation
             var jsonOptions = new System.Text.Json.JsonSerializerOptions { WriteIndented = true };
+            // Prevent escaping of common ASCII characters like the apostrophe (\u0027)
+            jsonOptions.Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping;
             jsonOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter(System.Text.Json.JsonNamingPolicy.CamelCase));
             var json = System.Text.Json.JsonSerializer.Serialize(issues, jsonOptions);
             System.Console.WriteLine(json);

@@ -171,16 +171,115 @@ For each entity in candidate_entities, decide:
 You are doing local classification: only this scene’s text plus the provided known_active / known_removed context.
 ________________________________________
 3. Local Introduction / Removal Status
-...
+Use the following rules:
+present_in_scene = false → introduction_status = ""not_present""
+If the entity does not appear in the scene text (no mention, no pronoun, no implied reference), then:
+    •	introduction_status = ""not_present""
+    •	removal_status = ""not_removed""
+This applies even if the entity appears in known_active_entities.
+________________________________________
+If the entity appears in the scene text:
+introduction_status = ""new""
+Use this when:
+    •	The entity is not in known_active_entities
+and
+    •	The scene clearly brings it into the story for the first time:
+        o	meeting for the first time
+        o	arriving
+        o	discovering
+        o	being described as newly noticed
+        o	seeing someone/something unexpectedly
+This includes cases like:
+    •	“He sees a lynx resting on a branch.” → new (if Larry wasn’t previously active)
+    •	“A turtle watches quietly from the log.” → new (for “turtle”)
+________________________________________
+introduction_status = ""already_known""
+Use this when:
+    •	The entity appears
+and
+    •	The entity is listed in known_active_entities
+This means the story already considers the entity known/relevant.
+Examples:
+    •	“Alice steps into the Grand Market.”
+    •	“Bob nods at Alice.”
+________________________________________
+introduction_status = ""reintroduced""
+Use this only when:
+    •	The entity appears in the scene
+and
+    •	It is present in known_removed_entities
+and
+    •	The scene clearly indicates a return:
+        o	comes back
+        o	returns to the group
+        o	rebuilt/restored
+        o	revived
+        o	reappears
+________________________________________
+Removal Status
+removal_status = ""removed""
+Use when the scene makes the entity permanently or decisively gone, such as:
+    •	Death
+    •	Object destroyed
+    •	Lost for good
+    •	Leaves permanently (“goes home and won’t join again”, “sent away for good”)
+removal_status = ""not_removed""
+Use in all other cases.
 ________________________________________
 4. Local Usage Style (Very Important)
-...
+This describes how the wording treats the entity in this scene.
+Use exactly one of:
+""clear_introduction""
+Choose this when:
+    •	The wording presents the entity as if new to the reader/player.
+    •	There is descriptive scaffolding, e.g.:
+        o	“a lynx named Larry”
+        o	“a sad turtle sitting by the rocks”
+        o	“a large bear emerges from the cave”
+        o	“the old tower rises before them”
+This can be used even if the entity is in fact already-known, because this field captures style, not truth.
+________________________________________
+""already_known_style""
+Choose this when:
+    •	The scene refers to the entity in familiar terms without descriptive introduction.
+    •	The tone presumes the audience already knows them.
+Examples:
+    •	“Larry sits up.”
+    •	“Maple nods.”
+    •	“Grand Market bustles with noise.”
+________________________________________
+""ambiguous""
+Use when:
+    •	The phrasing is neutral and does not strongly imply familiarity or introduction.
+    •	Or the entity does not appear.
+Examples:
+    •	No mention.
+    •	Subtle or unclear references.
 ________________________________________
 5. Semantic Roles
-...
+Use these SRL-style labels when applicable.
+Allowed role strings:
+    •	""agent"" — acting / doing something
+    •	""patient"" — receiving action
+    •	""experiencer"" — feeling / perceiving something
+    •	""theme"" — entity moved, transferred, discussed
+    •	""instrument"" — tool enabling action
+    •	""location"" — place where events occur
+    •	""source"" — where something comes from
+    •	""goal"" — where something moves toward
+    •	""possessor"" — owner / holder
+    •	""recipient"" — receives an item or message
+    •	""attribute"" — entity described by properties
+    •	""co_agent"" — acts jointly with another character
+    •	""other"" — special cases that don’t fit the above
+If the entity is not present:
+    •	semantic_roles = []
 ________________________________________
 6. Confidence
-...
+Label with:
+    •	""high"" — clear textual evidence; classification is obvious
+    •	""medium"" — some ambiguity; inference required
+    •	""low"" — weak evidence; guesswork
 ________________________________________
 7. Proper Noun Flag (is_proper_noun)
 
