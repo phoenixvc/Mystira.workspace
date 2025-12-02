@@ -2,7 +2,7 @@ using System.Globalization;
 using System.Text;
 using Anthropic.Core;
 using Anthropic.Models.Messages;
-using global::Anthropic;
+using Anthropic;
 using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Logging;
 using Mystira.StoryGenerator.Contracts.Chat;

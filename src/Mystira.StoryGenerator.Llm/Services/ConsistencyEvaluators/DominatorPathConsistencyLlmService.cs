@@ -1,22 +1,28 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using System.Text.Json;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Mystira.StoryGenerator.Contracts.Chat;
 using Mystira.StoryGenerator.Contracts.Configuration;
+using Mystira.StoryGenerator.Contracts.StoryConsistency;
 using Mystira.StoryGenerator.Domain.Services;
-using System.Text.Json;
 
-namespace Mystira.StoryGenerator.Llm.Services.DominatorBasedConsistency;
+namespace Mystira.StoryGenerator.Llm.Services.ConsistencyEvaluators;
 
-public class ScenarioPathConsistencyLlmEvaluator : ILlmConsistencyEvaluator
+/// <summary>
+/// Consistency evaluator service that uses the Mystira Story Logic & Consistency Evaluator LLM on a set of dominator
+/// paths, generated from compressed front-merged paths (dominator paths are the shortest paths that connect all
+/// frontier nodes in the graph).
+/// </summary>
+public class DominatorPathConsistencyLlmService : IDominatorPathConsistencyLlmService
 {
     private readonly ConsistencyEvaluatorSettings _settings;
     private readonly ILlmServiceFactory _llmServiceFactory;
-    private readonly ILogger<ScenarioPathConsistencyLlmEvaluator> _logger;
+    private readonly ILogger<DominatorPathConsistencyLlmService> _logger;
 
-    public ScenarioPathConsistencyLlmEvaluator(
+    public DominatorPathConsistencyLlmService(
         IOptions<AiSettings> aiOptions,
         ILlmServiceFactory llmServiceFactory,
-        ILogger<ScenarioPathConsistencyLlmEvaluator> logger)
+        ILogger<DominatorPathConsistencyLlmService> logger)
     {
         _settings = aiOptions.Value.ConsistencyEvaluator;
         _llmServiceFactory = llmServiceFactory;

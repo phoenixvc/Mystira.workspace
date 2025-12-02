@@ -81,7 +81,7 @@ public class ChatControllerTests
     {
         // Arrange
         _llmFactoryMock.Setup(x => x.GetAvailableModels())
-            .Throws(new System.Exception("Test exception"));
+            .Throws(new Exception("Test exception"));
 
         // Act
         var result = _controller.GetModels();

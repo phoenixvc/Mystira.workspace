@@ -4,12 +4,15 @@ namespace Mystira.StoryGenerator.Contracts.Entities;
 
 public enum Confidence
 {
+    [JsonPropertyName("unknown")]
+    Unknown,
+
     [JsonPropertyName("low")]
-    Low, 
-    
+    Low,
+
     [JsonPropertyName("medium")]
-    Medium, 
-    
+    Medium,
+
     [JsonPropertyName("high")]
     High
 }

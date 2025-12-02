@@ -1,9 +1,10 @@
 ﻿using Mystira.StoryGenerator.Application.Scenarios;
 using Mystira.StoryGenerator.Contracts.Entities;
+using Mystira.StoryGenerator.Contracts.StoryConsistency;
 using Mystira.StoryGenerator.Domain.Stories;
 using Mystira.StoryGenerator.GraphTheory.DataFlowAnalysis;
 
-namespace Mystira.StoryGenerator.Application.StoryConsistencyAnalysis
+namespace Mystira.StoryGenerator.Application.StoryConsistencyAnalysis.EntityConsistency
 {
     /// <summary>
     /// Validates that all entities used in each scene have been introduced
@@ -43,15 +44,6 @@ namespace Mystira.StoryGenerator.Application.StoryConsistencyAnalysis
 
         private static FilteredSceneEntity ToFiltered(SceneEntity e)
             => new(e.Type, e.Name);
-
-        /// <summary>
-        /// Represents a "used before introduced" violation:
-        /// an entity that is used in a scene but is not present
-        /// in the "must-have-been introduced" set for that scene.
-        /// </summary>
-        public sealed record SceneReferenceViolation(
-            string SceneId,
-            SceneEntity Entity);
 
         /// <summary>
         /// An equality comparer for <see cref="SceneEntity"/> that

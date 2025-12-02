@@ -4,11 +4,11 @@ using Moq;
 using Mystira.StoryGenerator.Contracts.Chat;
 using Mystira.StoryGenerator.Contracts.Configuration;
 using Mystira.StoryGenerator.Domain.Services;
-using Mystira.StoryGenerator.Llm.Services.DominatorBasedConsistency;
+using Mystira.StoryGenerator.Llm.Services.ConsistencyEvaluators;
 
 namespace Mystira.StoryGenerator.Llm.Tests;
 
-public class SceneEntityLlmClassifierTests
+public class SceneEntityLlmClassifierServiceTests
 {
     private static AiSettings CreateSettings(
         bool enabled = true,
@@ -33,7 +33,7 @@ public class SceneEntityLlmClassifierTests
         };
     }
 
-    private static SceneEntityLlmClassifier CreateSut(
+    private static SceneEntityLlmClassifierService CreateSut(
         AiSettings settings,
         out Mock<ILlmServiceFactory> factoryMock,
         out Mock<ILLMService> llmServiceMock)
@@ -42,9 +42,9 @@ public class SceneEntityLlmClassifierTests
         llmServiceMock = new Mock<ILLMService>(MockBehavior.Strict);
 
         var options = Mock.Of<IOptions<AiSettings>>(o => o.Value == settings);
-        var logger = new Mock<ILogger<SceneEntityLlmClassifier>>();
+        var logger = new Mock<ILogger<SceneEntityLlmClassifierService>>();
 
-        return new SceneEntityLlmClassifier(options, factoryMock.Object, logger.Object);
+        return new SceneEntityLlmClassifierService(options, factoryMock.Object, logger.Object);
     }
 
     [Fact]
