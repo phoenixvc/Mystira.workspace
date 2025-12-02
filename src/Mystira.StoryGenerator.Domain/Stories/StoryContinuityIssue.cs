@@ -64,6 +64,12 @@ public class EvaluateStoryContinuityRequest
     public Scenario Scenario { get; set; } = new();
 
     /// <summary>
+    /// Optional current chat story snapshot. If provided, the API will prefer parsing the
+    /// scenario from <c>CurrentStory.Content</c> (expected to be JSON) and ignore <see cref="Scenario"/>.
+    /// </summary>
+    public Mystira.StoryGenerator.Contracts.Chat.StorySnapshot? CurrentStory { get; set; }
+
+    /// <summary>
     /// LLM provider for the prefix summary service (optional).
     /// </summary>
     public string? PrefixSummaryProvider { get; set; }

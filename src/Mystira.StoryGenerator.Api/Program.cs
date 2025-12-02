@@ -46,9 +46,10 @@ builder.Services.AddHttpClient<AnthropicAIService>(client =>
 });
 
 // Register LLM services (in Llm project) and expose Domain interfaces
-builder.Services.AddScoped<ILLMService, AzureOpenAIService>();
-builder.Services.AddScoped<ILLMService, AnthropicAIService>();
-builder.Services.AddScoped<ILlmServiceFactory, LLMServiceFactory>();
+// Note: LLM factory is used by singleton LLM consumers, so keep these as singletons
+builder.Services.AddSingleton<ILLMService, AzureOpenAIService>();
+builder.Services.AddSingleton<ILLMService, AnthropicAIService>();
+builder.Services.AddSingleton<ILlmServiceFactory, LLMServiceFactory>();
 
 // Story schema provider abstraction (also implements Domain interface)
 builder.Services.AddScoped<IStorySchemaProvider, FileStorySchemaProvider>();
@@ -95,6 +96,12 @@ builder.Services.AddScoped<IScenarioConsistencyEvaluationService, ScenarioConsis
 
 // Register story continuity service
 builder.Services.AddScoped<IStoryContinuityService, StoryContinuityService>();
+
+// Register Story Continuity dependencies (prefix summaries + SRL pipeline)
+builder.Services.AddScoped<IPrefixSummaryService, ScenarioPrefixSummaryService>();
+builder.Services.AddScoped<IScenarioSrlAnalysisService, ScenarioSrlAnalysisService>();
+builder.Services.AddSingleton<IPrefixSummaryLlmService, PrefixSummaryLlmService>();
+builder.Services.AddSingleton<ISemanticRoleLabellingLlmService, SemanticRoleLabellingLlmService>();
 
 var app = builder.Build();
 

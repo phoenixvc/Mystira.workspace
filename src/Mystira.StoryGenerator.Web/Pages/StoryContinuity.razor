@@ -1,48 +1,72 @@
 @page "/story-continuity"
-@using Mystira.StoryGenerator.Contracts.Stories
-@using Mystira.StoryGenerator.Domain.Stories
-@using Mystira.StoryGenerator.Web.Services
+@using Mystira.StoryGenerator.Web.Models
+@using Mystira.StoryGenerator.Contracts.Chat
 @inject WebStoryContinuityService ContinuityService
 @inject ILogger<StoryContinuity> Logger
+@inject IAiModelSettingsService ModelSettingsService
+@inject IChatSessionService ChatSessionService
 
 <PageTitle>Story Continuity Analyzer</PageTitle>
 
 <div class="continuity-container">
-    <h1>Story Continuity Analyzer</h1>
-    
+    <div class="page-header">
+        <h1>Story Continuity Analyzer</h1>
+        <NavLink class="back-link" href="/story-generator" title="Back to Home">← Back</NavLink>
+    </div>
+
     <div class="controls-section">
         <h2>Provider Configuration</h2>
-        
+
         <div class="provider-config">
             <div class="config-group">
                 <label>Prefix Summary Provider:</label>
-                <input type="text" @bind="prefixSummaryProvider" placeholder="Provider name" />
-                <input type="text" @bind="prefixSummaryModel" placeholder="Model name" />
+                <select class="provider-select" @bind="prefixSummaryProvider" @bind:event="onchange">
+                    @foreach (var p in providerOptions)
+                    {
+                        <option value="@p">@p</option>
+                    }
+                </select>
+                <select class="model-select" @bind="prefixSummaryModel" @bind:event="onchange">
+                    @foreach (var m in GetModelsForProvider(prefixSummaryProvider))
+                    {
+                        <option value="@m.Id">@m.DisplayName (@m.Deployment)</option>
+                    }
+                </select>
             </div>
-            
+
             <div class="config-group">
                 <label>Semantic Role Labelling Provider:</label>
-                <input type="text" @bind="semanticRoleProvider" placeholder="Provider name" />
-                <input type="text" @bind="semanticRoleModel" placeholder="Model name" />
+                <select class="provider-select" @bind="semanticRoleProvider" @bind:event="onchange">
+                    @foreach (var p in providerOptions)
+                    {
+                        <option value="@p">@p</option>
+                    }
+                </select>
+                <select class="model-select" @bind="semanticRoleModel" @bind:event="onchange">
+                    @foreach (var m in GetModelsForProvider(semanticRoleProvider))
+                    {
+                        <option value="@m.Id">@m.DisplayName (@m.Deployment)</option>
+                    }
+                </select>
             </div>
         </div>
 
         <h2>Filters</h2>
-        
+
         <div class="filters-section">
             <div class="filter-group">
                 <label>Confidence Levels:</label>
                 <div class="checkbox-group">
                     <label>
-                        <input type="checkbox" @onchange="@((bool value) => UpdateConfidenceFilter("high", value))" />
+                        <input type="checkbox" @bind="ConfidenceHigh" />
                         High
                     </label>
                     <label>
-                        <input type="checkbox" @onchange="@((bool value) => UpdateConfidenceFilter("medium", value))" />
+                        <input type="checkbox" @bind="ConfidenceMedium" />
                         Medium
                     </label>
                     <label>
-                        <input type="checkbox" @onchange="@((bool value) => UpdateConfidenceFilter("low", value))" />
+                        <input type="checkbox" @bind="ConfidenceLow" />
                         Low
                     </label>
                 </div>
@@ -52,19 +76,19 @@
                 <label>Entity Types:</label>
                 <div class="checkbox-group">
                     <label>
-                        <input type="checkbox" @onchange="@((bool value) => UpdateEntityTypeFilter("character", value))" />
+                        <input type="checkbox" @bind="EntityCharacter" />
                         Character
                     </label>
                     <label>
-                        <input type="checkbox" @onchange="@((bool value) => UpdateEntityTypeFilter("location", value))" />
+                        <input type="checkbox" @bind="EntityLocation" />
                         Location
                     </label>
                     <label>
-                        <input type="checkbox" @onchange="@((bool value) => UpdateEntityTypeFilter("item", value))" />
+                        <input type="checkbox" @bind="EntityItem" />
                         Item
                     </label>
                     <label>
-                        <input type="checkbox" @onchange="@((bool value) => UpdateEntityTypeFilter("concept", value))" />
+                        <input type="checkbox" @bind="EntityConcept" />
                         Concept
                     </label>
                 </div>
@@ -72,7 +96,7 @@
 
             <div class="filter-group">
                 <label>
-                    <input type="checkbox" @bind="pronounsOnlyFilter" />
+                    <input type="checkbox" @bind="PronounsOnly" />
                     Pronouns Only
                 </label>
             </div>
@@ -103,7 +127,7 @@
     {
         <div class="results-section">
             <h2>Continuity Issues (@filteredIssues.Count)</h2>
-            
+
             <div class="issues-grid">
                 @foreach (var issue in filteredIssues)
                 {
@@ -112,7 +136,7 @@
                             <h3>@issue.EntityName</h3>
                             <span class="badge @GetIssueBadgeClass(issue.IssueType)">@issue.IssueType</span>
                         </div>
-                        
+
                         <div class="card-body">
                             <div class="issue-details">
                                 <p><strong>Scene:</strong> @issue.SceneId</p>
@@ -127,11 +151,11 @@
                                     <p><strong>Semantic Roles:</strong> @string.Join(", ", issue.SemanticRoles)</p>
                                 }
                             </div>
-                            
+
                             <div class="issue-description">
                                 <p>@issue.Detail</p>
                             </div>
-                            
+
                             @if (!string.IsNullOrEmpty(issue.EvidenceSpan))
                             {
                                 <div class="evidence">
@@ -153,19 +177,189 @@
 </div>
 
 @code {
-    private string prefixSummaryProvider = string.Empty;
-    private string prefixSummaryModel = string.Empty;
-    private string semanticRoleProvider = string.Empty;
-    private string semanticRoleModel = string.Empty;
+    // Bound checkbox helpers -> map to internal filter sets
+    private bool ConfidenceHigh
+    {
+        get => selectedConfidences.Contains("high");
+        set => UpdateConfidenceFilter("high", value);
+    }
+
+    private bool ConfidenceMedium
+    {
+        get => selectedConfidences.Contains("medium");
+        set => UpdateConfidenceFilter("medium", value);
+    }
+
+    private bool ConfidenceLow
+    {
+        get => selectedConfidences.Contains("low");
+        set => UpdateConfidenceFilter("low", value);
+    }
+
+    private bool EntityCharacter
+    {
+        get => selectedEntityTypes.Contains("character");
+        set => UpdateEntityTypeFilter("character", value);
+    }
+
+    private bool EntityLocation
+    {
+        get => selectedEntityTypes.Contains("location");
+        set => UpdateEntityTypeFilter("location", value);
+    }
+
+    private bool EntityItem
+    {
+        get => selectedEntityTypes.Contains("item");
+        set => UpdateEntityTypeFilter("item", value);
+    }
+
+    private bool EntityConcept
+    {
+        get => selectedEntityTypes.Contains("concept");
+        set => UpdateEntityTypeFilter("concept", value);
+    }
+
+    // Ensure filter re-application when PronounsOnly is toggled
+    private bool _pronounsOnly;
+    private bool PronounsOnly
+    {
+        get => _pronounsOnly;
+        set
+        {
+            _pronounsOnly = value;
+            ApplyFilters();
+        }
+    }
+
+    // Provider/Model dropdown state
+    private List<AiModelDefinition> allModels = new();
+    private List<string> providerOptions = new();
+
+    private string _prefixSummaryProvider = string.Empty;
+    private string _prefixSummaryModel = string.Empty;
+    private string _semanticRoleProvider = string.Empty;
+    private string _semanticRoleModel = string.Empty;
+
+    private string prefixSummaryProvider
+    {
+        get => _prefixSummaryProvider;
+        set
+        {
+            if (!string.Equals(_prefixSummaryProvider, value, StringComparison.Ordinal))
+            {
+                _prefixSummaryProvider = value ?? string.Empty;
+                EnsureValidPrefixModel();
+            }
+        }
+    }
+
+    private string prefixSummaryModel
+    {
+        get => _prefixSummaryModel;
+        set => _prefixSummaryModel = value ?? string.Empty;
+    }
+
+    private string semanticRoleProvider
+    {
+        get => _semanticRoleProvider;
+        set
+        {
+            if (!string.Equals(_semanticRoleProvider, value, StringComparison.Ordinal))
+            {
+                _semanticRoleProvider = value ?? string.Empty;
+                EnsureValidSrlModel();
+            }
+        }
+    }
+
+    private string semanticRoleModel
+    {
+        get => _semanticRoleModel;
+        set => _semanticRoleModel = value ?? string.Empty;
+    }
 
     private HashSet<string> selectedConfidences = new();
     private HashSet<string> selectedEntityTypes = new();
-    private bool pronounsOnlyFilter = false;
 
     private List<StoryContinuityIssue>? filteredIssues;
     private bool isAnalyzing = false;
     private bool evaluationCompleted = false;
     private string evaluationError = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Ensure chat session service is fully initialized before we access sessions/history
+        await ChatSessionService.EnsureInitializedAsync();
+
+        // Load available providers/models from settings service (with cache/fallback)
+        await ModelSettingsService.InitializeAsync();
+        var models = await ModelSettingsService.GetAvailableModelsAsync();
+        allModels = models.ToList();
+        providerOptions = allModels
+            .Select(m => m.Provider)
+            .Where(p => !string.IsNullOrWhiteSpace(p))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .OrderBy(p => p)
+            .ToList();
+
+        // Defaults: first provider and its first model
+        if (string.IsNullOrWhiteSpace(prefixSummaryProvider))
+            prefixSummaryProvider = providerOptions.FirstOrDefault() ?? string.Empty;
+        EnsureValidPrefixModel();
+
+        if (string.IsNullOrWhiteSpace(semanticRoleProvider))
+            semanticRoleProvider = providerOptions.FirstOrDefault() ?? string.Empty;
+        EnsureValidSrlModel();
+
+        // Initialize filter defaults
+        // By default tick all confidence and entity type checkboxes; PronounsOnly remains false
+        if (selectedConfidences.Count == 0)
+        {
+            selectedConfidences = new HashSet<string>(new[] { "high", "medium" }, StringComparer.OrdinalIgnoreCase);
+        }
+
+        if (selectedEntityTypes.Count == 0)
+        {
+            selectedEntityTypes = new HashSet<string>(new[] { "character", "location", "item" }, StringComparer.OrdinalIgnoreCase);
+        }
+
+        _pronounsOnly = true;
+    }
+
+    private IEnumerable<AiModelDefinition> GetModelsForProvider(string provider)
+    {
+        if (string.IsNullOrWhiteSpace(provider)) return Enumerable.Empty<AiModelDefinition>();
+        return allModels.Where(m => string.Equals(m.Provider, provider, StringComparison.OrdinalIgnoreCase));
+    }
+
+    private void EnsureValidPrefixModel()
+    {
+        var models = GetModelsForProvider(prefixSummaryProvider).ToList();
+        if (models.Count == 0)
+        {
+            prefixSummaryModel = string.Empty;
+            return;
+        }
+        if (string.IsNullOrWhiteSpace(prefixSummaryModel) || !models.Any(m => string.Equals(m.Id, prefixSummaryModel, StringComparison.Ordinal)))
+        {
+            prefixSummaryModel = models.First().Id;
+        }
+    }
+
+    private void EnsureValidSrlModel()
+    {
+        var models = GetModelsForProvider(semanticRoleProvider).ToList();
+        if (models.Count == 0)
+        {
+            semanticRoleModel = string.Empty;
+            return;
+        }
+        if (string.IsNullOrWhiteSpace(semanticRoleModel) || !models.Any(m => string.Equals(m.Id, semanticRoleModel, StringComparison.Ordinal)))
+        {
+            semanticRoleModel = models.First().Id;
+        }
+    }
 
     private void UpdateConfidenceFilter(string confidence, bool isSelected)
     {
@@ -173,7 +367,7 @@
             selectedConfidences.Add(confidence);
         else
             selectedConfidences.Remove(confidence);
-        
+
         ApplyFilters();
     }
 
@@ -183,7 +377,7 @@
             selectedEntityTypes.Add(entityType);
         else
             selectedEntityTypes.Remove(entityType);
-        
+
         ApplyFilters();
     }
 
@@ -195,12 +389,29 @@
 
         try
         {
-            // Create a sample scenario for demonstration
-            var scenario = CreateSampleScenario();
+            // Make sure the session service has finished initializing
+            await ChatSessionService.EnsureInitializedAsync();
+            // Ensure we have an active session with a snapshot
+            var ensured = await EnsureActiveSessionWithSnapshotAsync();
+            var session = ChatSessionService.CurrentSession;
+            if (!ensured || session == null || string.IsNullOrWhiteSpace(session.YamlSnapshot))
+            {
+                evaluationError = "No active chat with a story snapshot was found. Open or import a story in the chat, then try Analyze again.";
+                return;
+            }
+
+            var storyJson = JsonYamlConverter.ToJson(session.YamlSnapshot);
+
+            var snapshot = new StorySnapshot
+            {
+                StoryId = session.Id,
+                StoryVersion = Math.Max(1, session.Messages?.Count ?? 1),
+                Content = storyJson
+            };
 
             var request = new EvaluateStoryContinuityRequest
             {
-                Scenario = scenario,
+                CurrentStory = snapshot,
                 PrefixSummaryProvider = string.IsNullOrEmpty(prefixSummaryProvider) ? null : prefixSummaryProvider,
                 PrefixSummaryModel = string.IsNullOrEmpty(prefixSummaryModel) ? null : prefixSummaryModel,
                 SemanticRoleProvider = string.IsNullOrEmpty(semanticRoleProvider) ? null : semanticRoleProvider,
@@ -232,6 +443,35 @@
         }
     }
 
+    // Try to make sure CurrentSession has a YAML snapshot available (handles history navigation cases)
+    private async Task<bool> EnsureActiveSessionWithSnapshotAsync()
+    {
+        var session = ChatSessionService.CurrentSession;
+        if (session != null && !string.IsNullOrWhiteSpace(session.YamlSnapshot))
+            return true;
+
+        try
+        {
+            var history = await ChatSessionService.GetSessionHistoryAsync();
+            var candidate = history
+                .OrderByDescending(h => h.UpdatedAt)
+                .FirstOrDefault(h => h.HasYamlSnapshot);
+
+            if (candidate != null)
+            {
+                await ChatSessionService.LoadSessionAsync(candidate.Id);
+                session = ChatSessionService.CurrentSession;
+                return session != null && !string.IsNullOrWhiteSpace(session.YamlSnapshot);
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.LogWarning(ex, "Failed to ensure active session with snapshot");
+        }
+
+        return false;
+    }
+
     private void ApplyFilters()
     {
         if (filteredIssues == null)
@@ -241,7 +481,7 @@
         {
             IncludedConfidences = selectedConfidences.ToArray(),
             IncludedEntityTypes = selectedEntityTypes.ToArray(),
-            PronounsOnly = pronounsOnlyFilter
+            PronounsOnly = PronounsOnly
         };
 
         filteredIssues = ContinuityService.ApplyFilters(filteredIssues, filter);
@@ -438,6 +678,25 @@
         margin-top: 2rem;
     }
 
+    /* Page header with back link */
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1rem;
+    }
+    .back-link {
+        font-size: 0.9rem;
+        color: #2563eb;
+        text-decoration: none;
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+    }
+    .back-link:hover {
+        background: #eef2ff;
+        text-decoration: none;
+    }
+
     .issues-grid {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
@@ -565,7 +824,7 @@
         font-style: italic;
     }
 
-    @media (max-width: 1024px) {
+    @@media (max-width: 1024px) {
         .provider-config {
             grid-template-columns: 1fr;
         }
@@ -579,7 +838,7 @@
         }
     }
 
-    @media (max-width: 768px) {
+    @@media (max-width: 768px) {
         .continuity-container {
             padding: 1rem;
         }

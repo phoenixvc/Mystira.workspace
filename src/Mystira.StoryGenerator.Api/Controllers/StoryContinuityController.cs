@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
-using Mystira.StoryGenerator.Application.Services;
 using Mystira.StoryGenerator.Contracts.Stories;
+using Mystira.StoryGenerator.Domain.Services;
+using Mystira.StoryGenerator.Domain.Stories;
 
 namespace Mystira.StoryGenerator.Api.Controllers;
 
@@ -13,12 +14,15 @@ public class StoryContinuityController : ControllerBase
 {
     private readonly IStoryContinuityService _storyContinuityService;
     private readonly ILogger<StoryContinuityController> _logger;
+    private readonly IScenarioFactory _scenarioFactory;
 
     public StoryContinuityController(
         IStoryContinuityService storyContinuityService,
+        IScenarioFactory scenarioFactory,
         ILogger<StoryContinuityController> logger)
     {
         _storyContinuityService = storyContinuityService ?? throw new ArgumentNullException(nameof(storyContinuityService));
+        _scenarioFactory = scenarioFactory ?? throw new ArgumentNullException(nameof(scenarioFactory));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
@@ -32,19 +36,41 @@ public class StoryContinuityController : ControllerBase
     {
         try
         {
-            if (request?.Scenario == null)
+            if (request == null)
             {
                 return BadRequest(new EvaluateStoryContinuityResponse
                 {
                     Success = false,
                     Issues = [],
-                    Error = "Scenario is required"
+                    Error = "Request body is required"
                 });
             }
 
-            _logger.LogInformation("Evaluating story continuity for scenario {ScenarioId}", request.Scenario.Id);
+            // Prefer the current chat story snapshot JSON if provided
+            Scenario? scenario = null;
+            var snapshotJson = request.CurrentStory?.Content;
+            if (!string.IsNullOrWhiteSpace(snapshotJson))
+            {
+                scenario = await _scenarioFactory.CreateFromContentAsync(snapshotJson!, ScenarioContentFormat.Json, cancellationToken);
+            }
+            else if (request.Scenario != null)
+            {
+                scenario = request.Scenario;
+            }
 
-            var result = await _storyContinuityService.EvaluateAsync(request.Scenario, cancellationToken);
+            if (scenario == null)
+            {
+                return BadRequest(new EvaluateStoryContinuityResponse
+                {
+                    Success = false,
+                    Issues = [],
+                    Error = "Either CurrentStory.Content (JSON) or Scenario must be provided"
+                });
+            }
+
+            _logger.LogInformation("Evaluating story continuity for scenario {ScenarioId}", scenario.Id);
+
+            var result = await _storyContinuityService.AnalyzeAsync(scenario, cancellationToken);
 
             return Ok(result);
         }
