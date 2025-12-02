@@ -30,9 +30,16 @@ public class PrefixSummaryLlmService : IPrefixSummaryLlmService
 
     public async Task<ScenarioPathPrefixSummary?> SummarizeAsync(IEnumerable<Scene> scenePath, CancellationToken cancellationToken = default)
     {
-        var path = scenePath.ToArray();
+        // NB: we compute prefix summary on the state before the last scene in the path, so we need to remove it from the path.
+        // i.e., if we had path v1 -> v3 -> v4, and we are computing prefix summary for v4, we want to use v1 -> v3 as the prefix.
+        var scenePathArray = scenePath.ToArray();
+        // The prefix scene id is the scene subsequent to the last scene in the prefix.
+        var prefixSceneId = scenePathArray.Last().Id;
+        if (scenePathArray.Length < 2)
+            return null;
+        var prefix = scenePathArray.ToArray().Take(scenePathArray.Length - 1).ToArray();
 
-        if (!path.Any())
+        if (!prefix.Any())
         {
             _logger.LogWarning("Prefix summary requested with empty scene path");
             return null;
@@ -78,7 +85,7 @@ public class PrefixSummaryLlmService : IPrefixSummaryLlmService
                     new MystiraChatMessage
                     {
                         MessageType = ChatMessageType.User,
-                        Content = GetUserPrompt(path),
+                        Content = GetUserPrompt(prefix),
                         Timestamp = DateTime.UtcNow
                     }
                 ],
@@ -94,6 +101,7 @@ public class PrefixSummaryLlmService : IPrefixSummaryLlmService
             }
 
             var summary = JsonConvert.DeserializeObject<ScenarioPathPrefixSummary>(content);
+            if (summary != null) summary.PrefixSceneId = prefixSceneId;
             return summary;
         }
         catch (Exception ex)
@@ -142,6 +150,10 @@ Example input (schema only):
 You must treat this as the entire story so far along one path (a front-merged prefix).
 ________________________________________
 2. Task
+You are not allowed to assume that any entities exist unless they appear in the
+prefix_scenes text. If an entity does not appear in the text of this prefix,
+you must act as if it does not exist.
+
 From all scenes in prefix_scenes, you must:
     1.	Identify story-relevant entities accumulated over the prefix.
     2.	For each entity, summarize:
@@ -153,18 +165,22 @@ From all scenes in prefix_scenes, you must:
 You are not judging style or quality; you are building a state snapshot that later checks can use to detect inconsistencies.
 ________________________________________
 3. What counts as an entity
-Use the same entity notions as other Mystira tools:
+- Use the same entity notions as other Mystira tools:
     •	character – people, creatures, named personified beings
     •	location – places, regions, buildings, landmarks
     •	item – concrete objects that matter to the story (kept, carried, used, sought)
     •	concept – organizations, factions, events, rituals, laws, oaths, abstract forces/ideals that are clearly important
-Follow the same inclusion/exclusion rules as usual:
+- Follow the same inclusion/exclusion rules as usual:
     •	Include named / clearly distinct / story-relevant entities that can be referenced later.
     •	Do not include generic background clutter (tables, doors, generic rain, generic fear, etc.).
     •	When a named character is followed by a generic type/species/title (e.g., “Patty the panther”), treat as one character entity with name ""Patty"" (not ""Patty the panther"" and not ""panther"" as a separate entity).
+- IMPORTANT: You must only create entities that are explicitly mentioned in the prefix_scenes descriptions you receive
+  for this single call. Do NOT invent characters, items, locations, or concepts that are not clearly present in this prefix.
+- You must NOT reuse entities from earlier calls, other branches, or your own prior guesses. Every call is independent;
+  pretend you know nothing beyond the current prefix_scenes text.
 ________________________________________
 4. Entity Status & Knowledge
-For each entity, you must estimate:
+- For each entity, you must estimate:
     •	status_at_end – one of:
         o	""active"" – still present/relevant in the story context at the end of the prefix.
         o	""absent_but_known"" – not physically present in the final scene, but clearly still exists and is known/remembered.
@@ -172,9 +188,13 @@ For each entity, you must estimate:
         o	""unclear"" – unclear whether it remains relevant or not.
     •	first_scene_id – the id of the first scene in which this entity is clearly introduced.
     •	last_mention_scene_id – the id of the last scene in the prefix where the entity is clearly mentioned or implied.
-You should also track who knows about what, when clearly implied:
+- You should also track who knows about what, when clearly implied:
     •	known_by – array of character names that clearly know of or have interacted with this entity by the end of the prefix.
         o	For characters themselves, known_by usually includes the character and any other characters who have clearly met or interacted with them.
+- first_scene_id must be the id of the earliest scene in prefix_scenes where the entity is clearly mentioned in the
+  description text.
+- introduction_evidence must quote or tightly paraphrase the exact phrase or sentence from that scene that proves the
+  entity exists. If you cannot find such a phrase in prefix_scenes, you MUST NOT include that entity at all.
 ________________________________________
 5. Time Summary for the Prefix
 You must estimate the overall time span covered by the entire prefix:
@@ -225,6 +245,10 @@ Input to the Prefix Summary Engine
 }
 Expected Output JSON
 {
+  ""prefix_scene_ids"": [""scene_start"", ""scene_village_gate"", ""scene_forest_path""],
+  ""prefix_summary"": ""Alex has left his cottage in Brindlebrook and met Bob at the village gate to begin their journey.
+Together they are now travelling along a forest path toward the distant Crystal Pass, which they can see but have not yet reached.
+The story so far covers only the early stages of their trip, with both friends active and focused on reaching the pass."",
   ""prefix_time_span"": ""short"",
   ""entities"": [
     {
@@ -337,10 +361,10 @@ Expected Output JSON
             ""type"": ""string"",
             ""description"": ""Entity’s narrative status at the end of the prefix."",
             ""enum"": [
-              ""active"",          // present and relevant
-              ""removed"",         // destroyed / gone / dead / permanently left
-              ""unknown"",         // unclear or not specified
-              ""background_only""  // exists but not central
+              ""active"",
+              ""removed"",
+              ""unknown"",
+              ""background_only""
             ]
           },
           ""status_confidence"": {
@@ -391,19 +415,28 @@ Expected Output JSON
           ""type"",
           ""is_proper_noun"",
           ""first_introduced_scene_id"",
+          ""introduction_evidence"",
           ""introduction_confidence"",
           ""status_at_end"",
           ""status_confidence"",
           ""known_to_player_party"",
-          ""knowledge_confidence""
+          ""knowledge_confidence"",
+          ""role_tags"",
+          ""notes""
         ],
         ""additionalProperties"": false
       }
     }
   },
-  ""required"": [""prefix_scene_ids"", ""entities""],
+  ""required"": [
+    ""prefix_scene_ids"",
+    ""prefix_summary"",
+    ""time_span"",
+    ""entities""
+  ],
   ""additionalProperties"": false
 }
+
 ";
     }
 

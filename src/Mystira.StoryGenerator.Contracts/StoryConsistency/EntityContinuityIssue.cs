@@ -14,5 +14,7 @@ public enum EntityContinuityIssueType
 {
     UsedButNotGuaranteedIntroduced,
     ReintroducedButAlreadyGuaranteed,
-    RemovedButNotGuaranteedPresent
+    RemovedButNotGuaranteedPresent,
+    NewButUsedAsKnown,
+    NewButAmbiguousUsage
 }

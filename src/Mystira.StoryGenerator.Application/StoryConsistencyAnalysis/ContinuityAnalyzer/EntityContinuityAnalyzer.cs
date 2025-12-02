@@ -75,7 +75,45 @@ public static class EntityContinuityAnalyzer
                     });
                 }
 
-                // 3. Removed but not guaranteed present
+                // 3. New but used as known
+                var isNew = entity.IntroductionStatus.Equals("new", StringComparison.OrdinalIgnoreCase);
+                var usageStyle = entity.LocalUsageStyle; // "clear_introduction" | "already_known_style" | "ambiguous"
+                if (isNew
+                    && !isGuaranteedActive
+                    && string.Equals(usageStyle, "already_known_style", StringComparison.OrdinalIgnoreCase))
+                {
+                    issues.Add(new EntityContinuityIssue
+                    {
+                        SceneId = sceneId,
+                        EntityName = name,
+                        EntityType = entity.Type,
+                        IssueType = EntityContinuityIssueType.NewButUsedAsKnown,
+                        Detail = $"Entity '{name}' is marked as newly introduced in this scene, but the local wording " +
+                                 "treats it as if the audience already knows them. This suggests the entity should have " +
+                                 "been introduced earlier on this branch.",
+                        EvidenceSpan = entity.EvidenceSpan
+                    });
+                }
+
+                // 4. New but local usage is ambiguous
+                if (isNew
+                    && !isGuaranteedActive
+                    && string.Equals(usageStyle, "ambiguous", StringComparison.OrdinalIgnoreCase))
+                {
+                    issues.Add(new EntityContinuityIssue
+                    {
+                        SceneId = sceneId,
+                        EntityName = name,
+                        EntityType = entity.Type,
+                        IssueType = EntityContinuityIssueType.NewButAmbiguousUsage,
+                        Detail = $"Entity '{name}' is marked as newly introduced in this scene, but the local wording " +
+                                 "is ambiguous about whether the audience already knows them. This might suggest the " +
+                                 "entity should have been introduced earlier on this branch.",
+                        EvidenceSpan = entity.EvidenceSpan
+                    });
+                }
+
+                // 5. Removed but not guaranteed present
                 if (entity.RemovalStatus.Equals("removed", StringComparison.OrdinalIgnoreCase)
                     && !isGuaranteedActive)
                 {

@@ -24,7 +24,7 @@ public class SemanticRoleLabellingLlmService : ISemanticRoleLabellingLlmService
         ILlmServiceFactory llmServiceFactory,
         ILogger<SemanticRoleLabellingLlmService> logger)
     {
-        _settings = aiOptions.Value.SemanticRoleLabellingSettings;
+        _settings = aiOptions.Value.SemanticRoleLabelling;
         _llmServiceFactory = llmServiceFactory;
         _logger = logger;
     }
@@ -165,7 +165,8 @@ For each entity in candidate_entities, decide:
     2.	What semantic roles it plays in the scene (SRL-style).
     3.	Whether the scene locally introduces it (first clear appearance or re-entry into the story).
     4.	Whether the scene locally removes it (dies, destroyed, given away, departs “for good”, etc.).
-    5.	Overall confidence and a short evidence span.
+    5. How the scene's wording treats the entity (local_usage_style).
+    6. Overall confidence and a short evidence span.
 You are doing local classification: only this scene’s text plus the provided known_active / known_removed context.
 ________________________________________
 3. Local Introduction / Removal Status
@@ -190,7 +191,31 @@ Use these labels for removal_status:
     o	The scene does not clearly remove the entity.
 If the text is ambiguous about permanence, you may still use ""removed"" with ""confidence"": ""medium"" or ""low"", but never mark removal on weak or speculative hints.
 ________________________________________
-4. Semantic Roles
+4. Local Usage Style (Very Important)
+
+For each entity that appears in the scene, you must also classify how the scene's wording
+treats that entity, independent of known_active_entities:
+
+Use local_usage_style as one of:
+  • ""clear_introduction""
+      - The scene explicitly introduces or presents the entity to the audience:
+        ""a lynx named Larry"", ""they met Larry for the first time"", ""this is Larry"",
+        ""Larry the lynx appeared from behind the rock"", etc.
+      - It reads like the audience is seeing this entity for the first time.
+  • ""already_known_style""
+      - The scene uses the entity as if the audience is already familiar with them:
+        just the name (""Larry takes a nap.""), pronouns (""he yawns again""), or
+        references that assume prior knowledge (""as usual, Larry was late"").
+      - There is no explanatory phrase that would help a new reader understand who/what this is.
+  • ""ambiguous""
+      - The wording could be read either as an introduction or as a normal mention,
+        and you are not confident which it is.
+
+This local_usage_style is about the *narrative feel* of the line, NOT the global story state.
+Even if known_active_entities does not contain the entity, the scene can still have
+local_usage_style = ""already_known_style"" if it reads like a casual, non-intro use.
+________________________________________
+5. Semantic Roles
 For each entity that is present in the scene, assign zero or more semantic roles that describe how it participates in the main actions. Use this controlled vocabulary:
     •	""agent"" – the doer of an action (“Alice opens the door.”)
     •	""patient"" – the entity acted upon (“Bob drops the lantern.”)
@@ -205,14 +230,14 @@ For each entity that is present in the scene, assign zero or more semantic roles
     •	""group"" – crowd or group acting together if the entity is a faction/organization.
 You should choose roles that are clearly supported by the text. If no role fits confidently, use an empty list [].
 ________________________________________
-5. Confidence
+6. Confidence
 Use:
     •	""high"" – explicit, unambiguous mention and role.
     •	""medium"" – clearly present, but role / introduction / removal has some ambiguity.
     •	""low"" – vague, metaphorical, or heavily inferred.
 confidence is for the overall classification of that entity in this scene.
 ________________________________________
-6. Output Format
+7. Output Format
 Always return a JSON object with:
     •	""scene_id"" – copied from input.
     •	""entity_classifications"" – array of per-entity objects.
@@ -223,6 +248,7 @@ Each entity object must have exactly:
     •	""introduction_status"" (string) – ""new"", ""reintroduced"", ""already_known"", ""not_present""
     •	""removal_status"" (string) – ""removed"" or ""not_removed""
     •	""semantic_roles"" (array of strings from the allowed list)
+    •   ""local_usage_style"": ""clear_introduction"", ""already_known_style"", ""ambiguous""
     •	""confidence"" (string) – ""high"", ""medium"", or ""low""
     •	""evidence_span"" (string) – a short quote or phrase from the scene that best supports your decision. Use """" if the entity is not present.
 No extra fields. No explanations. No comments.
@@ -311,6 +337,7 @@ Remember:
         ""introduction_status"",
         ""removal_status"",
         ""semantic_roles"",
+        ""local_usage_style"",
         ""confidence"",
         ""evidence_span""
       ],
@@ -332,9 +359,10 @@ Remember:
           ""type"": ""string"",
           ""description"": ""How this scene treats the entity's narrative introduction."",
           ""enum"": [
-            ""new"",           /* clearly introduced for the first time here */
-            ""already_known"", /* assumed known from earlier scenes/prefix summary */
-            ""not_present""    /* not present in this scene, but in global entity list */
+            ""new"",
+            ""reintroduced"",
+            ""already_known"",
+            ""not_present""
           ]
         },
         ""removal_status"": {
@@ -352,6 +380,10 @@ Remember:
             ""type"": ""string"",
             ""description"": ""Role labels such as 'agent', 'patient', 'experiencer', 'stimulus', 'location', 'goal', etc.""
           }
+        },
+        ""local_usage_style"": {
+          ""type"": ""string"",
+          ""enum"": [""clear_introduction"", ""already_known_style"", ""ambiguous""]
         },
         ""confidence"": {
           ""type"": ""string"",

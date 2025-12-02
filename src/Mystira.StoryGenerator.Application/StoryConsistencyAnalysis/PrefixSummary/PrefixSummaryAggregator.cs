@@ -1,34 +1,9 @@
 ﻿using Mystira.StoryGenerator.Contracts.Entities;
 using Mystira.StoryGenerator.Contracts.StoryConsistency;
 
-namespace Mystira.StoryGenerator.Application.StoryConsistencyAnalysis.PrefixSummary;
-
 public static class PrefixSummaryAggregator
 {
-    /// <summary>
-    /// From a collection of prefix summaries, computes for each scene the set of
-    /// entities that are definitely present at that scene across all branches
-    /// that reach it.
-    ///
-    /// For a scene v:
-    ///   must[v] = ⋂ { DefinitelyPresentEntities(prefix) | prefix ends at v }
-    ///
-    /// I.e. an entity is in must[v] iff every prefix that ends at v says
-    /// it is definitely present at the end of that prefix.
-    /// </summary>
-    /// <param name="prefixSummaries">
-    /// Sequence of prefix summaries, each ending at some scene
-    /// (the last element of PathSceneIds).
-    /// </param>
-    /// <param name="entityComparer">
-    /// Optional equality comparer for SceneEntity; if null, default comparer is used.
-    /// You probably want a comparer that keys on (Name, Type, IsProperNoun).
-    /// </param>
-    /// <returns>
-    /// Dictionary mapping sceneId -> set of entities that are
-    /// definitely present at that scene across all merged branches.
-    /// </returns>
-    public static Dictionary<string, HashSet<SceneEntity>> ComputeMustActivePerScene(
+    public static PrefixAggregateResult AggregatePerScenePresence(
         IEnumerable<ScenarioPathPrefixSummary> prefixSummaries,
         IEqualityComparer<SceneEntity>? entityComparer = null)
     {
@@ -36,65 +11,59 @@ public static class PrefixSummaryAggregator
 
         entityComparer ??= EqualityComparer<SceneEntity>.Default;
 
-        var perSceneMust = new Dictionary<string, HashSet<SceneEntity>>();
+        // For each sceneId we track:
+        // - unionAll: ⋃ P_i
+        // - interAll: ⋂ P_i
+        var unionAll = new Dictionary<string, HashSet<SceneEntity>>(StringComparer.Ordinal);
+        var interAll = new Dictionary<string, HashSet<SceneEntity>>(StringComparer.Ordinal);
 
         foreach (var pathSummary in prefixSummaries)
         {
-            if (pathSummary.PathSceneIds.Count == 0)
-                continue; // or throw, depending on how strict you want to be
-
-            var sceneId = pathSummary.PathSceneIds[^1];
-
-            // This branch's "definitely present" set at the scene
-            var branchSet = new HashSet<SceneEntity>(
-                pathSummary.DefinitelyPresentEntities,
-                entityComparer
-            );
-
-            if (!perSceneMust.TryGetValue(sceneId, out var acc))
-            {
-                // First time we see this scene: initialize with this branch's set
-                perSceneMust[sceneId] = branchSet;
-            }
-            else
-            {
-                // Subsequent branches: intersect with what we already had
-                acc.IntersectWith(branchSet);
-            }
-        }
-
-        return perSceneMust;
-    }
-
-    public static Dictionary<string, HashSet<SceneEntity>> BuildPerSceneMaybePresent(
-        IEnumerable<ScenarioPathPrefixSummary> prefixSummaries,
-        IEqualityComparer<SceneEntity>? entityComparer = null)
-    {
-        entityComparer ??= EqualityComparer<SceneEntity>.Default;
-
-        var perSceneMaybe = new Dictionary<string, HashSet<SceneEntity>>(StringComparer.Ordinal);
-
-        foreach (var pathSummary in prefixSummaries)
-        {
-            if (pathSummary.PathSceneIds.Count == 0)
+            if (pathSummary.PrefixSceneIds.Count == 0)
                 continue;
 
-            var sceneId = pathSummary.PathSceneIds.Last();
+            var sceneId = pathSummary.PrefixSceneId;
 
-            if (!perSceneMaybe.TryGetValue(sceneId, out var acc))
+            // P_i = DefinitelyPresent ∪ MaybePresent for this prefix
+            var presentThisPrefix = new HashSet<SceneEntity>(entityComparer);
+            presentThisPrefix.UnionWith(pathSummary.DefinitelyPresentEntities);
+            presentThisPrefix.UnionWith(pathSummary.MaybePresentEntities);
+
+            if (!unionAll.TryGetValue(sceneId, out var unionSet))
             {
-                acc = new HashSet<SceneEntity>(pathSummary.MaybePresentEntities ?? Enumerable.Empty<SceneEntity>(),
-                    entityComparer);
-                perSceneMaybe[sceneId] = acc;
+                unionSet = new HashSet<SceneEntity>(presentThisPrefix, entityComparer);
+                unionAll[sceneId] = unionSet;
+
+                var interSet = new HashSet<SceneEntity>(presentThisPrefix, entityComparer);
+                interAll[sceneId] = interSet;
             }
             else
             {
-                // Union: anything that is maybe-present in any prefix is maybe-present at this scene.
-                acc.UnionWith(pathSummary.MaybePresentEntities);
+                unionSet.UnionWith(presentThisPrefix);
+                interAll[sceneId].IntersectWith(presentThisPrefix);
             }
         }
 
-        return perSceneMaybe;
+        // Now derive must + maybe from unionAll / interAll
+        var must = new Dictionary<string, HashSet<SceneEntity>>(StringComparer.Ordinal);
+        var maybe = new Dictionary<string, HashSet<SceneEntity>>(StringComparer.Ordinal);
+
+        foreach (var kvp in unionAll)
+        {
+            var sceneId = kvp.Key;
+            var unionSet = kvp.Value;
+            var interSet = interAll[sceneId];
+
+            // must = intersection (entities present on all prefixes)
+            must[sceneId] = new HashSet<SceneEntity>(interSet, entityComparer);
+
+            // maybe = union \ must (entities present on some but not all prefixes)
+            var maybeSet = new HashSet<SceneEntity>(unionSet, entityComparer);
+            maybeSet.ExceptWith(interSet);
+            maybe[sceneId] = maybeSet;
+        }
+
+        return new PrefixAggregateResult(must, maybe);
     }
 
     public static Dictionary<string, HashSet<SceneEntity>> BuildPerSceneDefinitelyAbsent(
@@ -104,42 +73,58 @@ public static class PrefixSummaryAggregator
         entityComparer ??= EqualityComparer<SceneEntity>.Default;
 
         var perSceneAbsent = new Dictionary<string, HashSet<SceneEntity>>(StringComparer.Ordinal);
-        var perSceneIsFirst = new HashSet<string>(StringComparer.Ordinal);
+        var firstSeen = new HashSet<string>(StringComparer.Ordinal);
 
         foreach (var pathSummary in prefixSummaries)
         {
-            if (pathSummary.PathSceneIds.Count == 0)
+            if (pathSummary.PrefixSceneIds.Count == 0)
                 continue;
 
-            var sceneId = pathSummary.PathSceneIds.Last();
+            var sceneId = pathSummary.PrefixSceneId;
 
             if (!perSceneAbsent.TryGetValue(sceneId, out var acc))
             {
-                // First time we see this scene: initialize with current definitely-absent set
-                acc = new HashSet<SceneEntity>(pathSummary.DefinitelyAbsentEntities,
+                acc = new HashSet<SceneEntity>(
+                    pathSummary.DefinitelyAbsentEntities,
                     entityComparer);
+
                 perSceneAbsent[sceneId] = acc;
-                perSceneIsFirst.Add(sceneId);
+                firstSeen.Add(sceneId);
             }
             else
             {
-                // Intersection: to be "definitely absent" at this scene,
-                // the entity must be marked definitely-absent in every prefix ending here.
-                var current = new HashSet<SceneEntity>(pathSummary.DefinitelyAbsentEntities ?? Enumerable.Empty<SceneEntity>(),
+                var current = new HashSet<SceneEntity>(
+                    pathSummary.DefinitelyAbsentEntities,
                     entityComparer);
 
-                if (perSceneIsFirst.Contains(sceneId))
+                if (firstSeen.Contains(sceneId))
                 {
-                    perSceneIsFirst.Remove(sceneId);
+                    firstSeen.Remove(sceneId);
                     acc.IntersectWith(current);
                 }
                 else
-                {
                     acc.IntersectWith(current);
-                }
             }
         }
 
         return perSceneAbsent;
     }
+
+    public static Dictionary<string, HashSet<SceneEntity>> ComputeMustActivePerScene(
+        IEnumerable<ScenarioPathPrefixSummary> prefixSummaries,
+        IEqualityComparer<SceneEntity>? entityComparer = null)
+    {
+        return AggregatePerScenePresence(prefixSummaries, entityComparer).MustActivePerScene;
+    }
+
+    public static Dictionary<string, HashSet<SceneEntity>> ComputeMaybeActivePerScene(
+        IEnumerable<ScenarioPathPrefixSummary> prefixSummaries,
+        IEqualityComparer<SceneEntity>? entityComparer = null)
+    {
+        return AggregatePerScenePresence(prefixSummaries, entityComparer).MaybePresentPerScene;
+    }
 }
+
+public sealed record PrefixAggregateResult(
+    Dictionary<string, HashSet<SceneEntity>> MustActivePerScene,
+    Dictionary<string, HashSet<SceneEntity>> MaybePresentPerScene);

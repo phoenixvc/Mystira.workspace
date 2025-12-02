@@ -1,5 +1,4 @@
 ﻿using Mystira.StoryGenerator.Application.Scenarios;
-using Mystira.StoryGenerator.Application.StoryConsistencyAnalysis.PrefixSummary;
 using Mystira.StoryGenerator.Contracts.Entities;
 using Mystira.StoryGenerator.Contracts.StoryConsistency;
 using Mystira.StoryGenerator.Domain.Services;
@@ -28,10 +27,9 @@ public sealed class ScenarioSrlAnalysisService : IScenarioSrlAnalysisService
         var scenesById = graph.Nodes.ToDictionary(s => s.Id, s => s);
 
         // 2. Derive per-scene must/may active & removed from prefix summaries
-        //    (these helper methods depend on your exact PrefixSummary shape)
         var mustActive = PrefixSummaryAggregator.ComputeMustActivePerScene(prefixSummaries, new SceneEntityComparer());
         var mustRemoved = PrefixSummaryAggregator.BuildPerSceneDefinitelyAbsent(prefixSummaries, new SceneEntityComparer());
-        var mayActive  = PrefixSummaryAggregator.BuildPerSceneMaybePresent(prefixSummaries, new SceneEntityComparer());
+        var mayActive  = PrefixSummaryAggregator.ComputeMaybeActivePerScene(prefixSummaries, new SceneEntityComparer());
 
         var results = new Dictionary<string, SemanticRoleLabellingClassification>();
 
@@ -40,9 +38,9 @@ public sealed class ScenarioSrlAnalysisService : IScenarioSrlAnalysisService
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            mustActive.TryGetValue(scene.Id,  out var knownActive);
+            mustActive.TryGetValue(scene.Id, out var knownActive);
             mustRemoved.TryGetValue(scene.Id, out var knownRemoved);
-            mayActive.TryGetValue(scene.Id,   out var mayActiveSet);
+            mayActive.TryGetValue(scene.Id, out var mayActiveSet);
 
             knownActive   ??= new HashSet<SceneEntity>();
             knownRemoved  ??= new HashSet<SceneEntity>();

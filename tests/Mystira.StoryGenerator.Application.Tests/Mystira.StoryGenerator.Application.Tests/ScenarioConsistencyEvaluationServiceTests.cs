@@ -1,6 +1,5 @@
 using Microsoft.Extensions.Logging;
 using Moq;
-using Mystira.StoryGenerator.Application.StoryConsistencyAnalysis;
 using Mystira.StoryGenerator.Application.StoryConsistencyAnalysis.Legacy;
 using Mystira.StoryGenerator.Contracts.StoryConsistency;
 using Mystira.StoryGenerator.Domain.Services;

@@ -9,7 +9,6 @@ using Mystira.StoryGenerator.Contracts.Configuration;
 using Mystira.StoryGenerator.Domain.Services;
 using Mystira.StoryGenerator.Llm.Console.Tests;
 using Mystira.StoryGenerator.Llm.Services.LLM;
-using Mystira.StoryGenerator.Application.StoryConsistencyAnalysis;
 using Mystira.StoryGenerator.Llm.Services.ConsistencyEvaluators;
 
 var builder = Host.CreateApplicationBuilder(args);
@@ -38,6 +37,12 @@ builder.Services.AddSingleton<IEntityLlmClassificationService, SceneEntityLlmCla
 builder.Services.AddSingleton<IDominatorPathConsistencyLlmService, DominatorPathConsistencyLlmService>();
 builder.Services.AddScoped<IScenarioDominatorPathConsistencyEvaluationService, ScenarioDominatorPathConsistencyEvaluationService>();
 builder.Services.AddScoped<IScenarioEntityConsistencyEvaluationService, ScenarioEntityConsistencyEvaluationService>();
+// Story continuity analysis services (prefix summary + SRL + continuity glue)
+builder.Services.AddScoped<IStoryContinuityService, StoryContinuityService>();
+builder.Services.AddScoped<IPrefixSummaryService, ScenarioPrefixSummaryService>();
+builder.Services.AddScoped<IScenarioSrlAnalysisService, ScenarioSrlAnalysisService>();
+builder.Services.AddSingleton<IPrefixSummaryLlmService, PrefixSummaryLlmService>();
+builder.Services.AddSingleton<ISemanticRoleLabellingLlmService, SemanticRoleLabellingLlmService>();
 // Scenario factory for loading scenarios from YAML/JSON in console tool
 builder.Services.AddSingleton<IScenarioFactory, ScenarioFactory>();
 
@@ -148,6 +153,16 @@ if (entityConsistencyIdx >= 0)
     return exitCode;
 }
 
+// CLI: --story-continuity-file [<path>]  Run full story continuity analysis over a scenario file
+// If no path is provided, defaults to test_data/Test-Story-UnintroducedEntities.yaml
+int storyContinuityIdx = Array.FindIndex(args, a => a.Equals("--story-continuity-file", StringComparison.OrdinalIgnoreCase)
+                                               || a.Equals("story-continuity-file", StringComparison.OrdinalIgnoreCase));
+if (storyContinuityIdx >= 0)
+{
+    var exitCode = await StoryContinuityFileRunner.RunAsync(host.Services, logger, args);
+    return exitCode;
+}
+
 // Default help
 logger.LogInformation("Mystira.StoryGenerator.Llm.Console");
 logger.LogInformation("Usage:");
@@ -157,4 +172,5 @@ logger.LogInformation("  --dominator-path-consistency-file <path> [--format yaml
 logger.LogInformation("  --provider|-p <name>       LLM provider to use (e.g., azure-openai, anthropic)");
 logger.LogInformation("  --model|-m <deployment>    Model deployment to use (e.g., gpt-4o, claude-sonnet-4-5)");
 logger.LogInformation("  --entity-consistency-file [<path>]  Evaluate entity reference consistency across scenario; default file: test_data/Test-Story-UnintroducedEntities.yaml");
+logger.LogInformation("  --story-continuity-file [<path>]   Run full continuity analysis (prefix summaries + SRL) over a scenario file; default file: test_data/Test-Story-UnintroducedEntities.yaml");
 return 0;

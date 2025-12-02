@@ -1,5 +1,4 @@
 using System.Text;
-using Mystira.StoryGenerator.Contracts.Stories;
 using Mystira.StoryGenerator.Contracts.StoryConsistency;
 using Mystira.StoryGenerator.Domain.Graph;
 using Mystira.StoryGenerator.Domain.Stories;
@@ -10,7 +9,7 @@ namespace Mystira.StoryGenerator.Application.Scenarios;
 
 public sealed class ScenarioGraph : IScenarioGraph
 {
-    private static Scenario _scenario;
+    private static Scenario? _scenario;
     private readonly DirectedGraph<Scene, string> _inner;
 
     private ScenarioGraph(DirectedGraph<Scene, string> inner)

@@ -37,20 +37,21 @@ public class ScenarioPrefixSummaryService : IPrefixSummaryService
             var sceneIds = compressedPath.SceneIds; // assuming your ScenarioPath exposes this
             var orderedScenes = sceneIds.Select(id => scenesById[id]).ToList();
 
-            // 4. Generate *prefixes* along this path
+            // 4. Generate *prefixes* along this path in parallel
+            var tasks = new List<Task<ScenarioPathPrefixSummary?>>();
             for (var prefixLength = 1; prefixLength <= orderedScenes.Count; prefixLength++)
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
-                var prefixScenes = orderedScenes.Take(prefixLength);
+                // Materialize to avoid deferred execution issues when running in parallel
+                var prefixScenes = orderedScenes.Take(prefixLength).ToList();
+                tasks.Add(_llm.SummarizeAsync(prefixScenes, cancellationToken));
+            }
 
-                var summary = await _llm
-                    .SummarizeAsync(prefixScenes, cancellationToken)
-                    .ConfigureAwait(false);
-
-                if (summary is null)
-                    continue;
-
+            var summaries = await Task.WhenAll(tasks).ConfigureAwait(false);
+            foreach (var summary in summaries)
+            {
+                if (summary is null) continue;
                 results.Add(summary);
             }
         }

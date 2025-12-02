@@ -19,7 +19,7 @@ public static class PrefixSummaryMerger
 
         foreach (var summary in prefixSummaries)
         {
-            var sceneId = summary.PathSceneIds.Last();
+            var sceneId = summary.PrefixSceneId;
 
             var activeNames = summary.DefinitelyPresentEntities
                 .Select(e => e.Name.Trim())

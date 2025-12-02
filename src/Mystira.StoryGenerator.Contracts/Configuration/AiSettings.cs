@@ -21,7 +21,7 @@ public class AiSettings
     public EntityClassifierSettings EntityClassifier { get; set; } = new();
     public PrefixSummarySettings PrefixSummary { get; set; } = new();
     public ConsistencyEvaluatorSettings ConsistencyEvaluator { get; set; } = new();
-    public SemanticRoleLabellingSettings SemanticRoleLabellingSettings { get; set; } = new();
+    public SemanticRoleLabellingSettings SemanticRoleLabelling { get; set; } = new();
 }
 
 public class AzureOpenAISettings
