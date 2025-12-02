@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Mystira.StoryGenerator.Contracts.Stories;
+using Mystira.StoryGenerator.Contracts.StoryConsistency;
 using Mystira.StoryGenerator.Domain.Services;
 using Mystira.StoryGenerator.Domain.Stories;
 
@@ -70,9 +71,32 @@ public class StoryContinuityController : ControllerBase
 
             _logger.LogInformation("Evaluating story continuity for scenario {ScenarioId}", scenario.Id);
 
-            var result = await _storyContinuityService.AnalyzeAsync(scenario, cancellationToken);
+            var issues = await _storyContinuityService.AnalyzeAsync(scenario, cancellationToken);
 
-            return Ok(result);
+            // Map analysis issues (EntityContinuityIssue) to API contract issues (StoryContinuityIssue)
+            var mappedIssues = (issues ?? Array.Empty<EntityContinuityIssue>())
+                .Select(i => new StoryContinuityIssue
+                {
+                    SceneId = i.SceneId,
+                    EntityName = i.EntityName,
+                    EntityType = i.EntityType,
+                    IssueType = i.IssueType.ToString(),
+                    Detail = i.Detail,
+                    EvidenceSpan = i.EvidenceSpan ?? string.Empty,
+                    IsPronoun = i.IsPronoun,
+                    Confidence = i.Confidence,
+                    SemanticRoles = i.SemanticRoles.ToArray()
+                })
+                .ToList();
+
+            var response = new EvaluateStoryContinuityResponse
+            {
+                Success = true,
+                Issues = mappedIssues,
+                Error = null
+            };
+
+            return Ok(response);
         }
         catch (Exception ex)
         {
