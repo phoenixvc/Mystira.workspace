@@ -1,0 +1,685 @@
+@page "/scenario-dominator-path-analysis"
+@using Mystira.StoryGenerator.Web.Models
+@using Mystira.StoryGenerator.Contracts.Chat
+@using System.Text
+@using System.Linq
+@inject WebScenarioDominatorPathAnalysisService AnalysisService
+@inject ILogger<ScenarioDominatorPathAnalysis> Logger
+@inject IChatSessionService ChatSessionService
+@inject IAiModelSettingsService ModelSettingsService
+
+<PageTitle>Scenario Dominator Path Analysis</PageTitle>
+
+<div class="path-analysis-container">
+    <div class="page-header">
+        <h1>Scenario Dominator Path Analysis</h1>
+        <NavLink class="back-link" href="/story-generator" title="Back to Home">← Back</NavLink>
+    </div>
+
+    <div class="controls-section">
+        <div class="action-buttons">
+            <button @onclick="AnalyzePath" disabled="@isAnalyzing">
+                @if (isAnalyzing)
+                {
+                    <span>Analyzing...</span>
+                }
+                else
+                {
+                    <span>Analyze Story Paths</span>
+                }
+            </button>
+        </div>
+
+        <!-- Provider / Model selection -->
+        <div class="model-selects">
+            <div class="select-group">
+                <label for="providerSelect">Provider</label>
+                <select id="providerSelect" @bind="selectedProvider">
+                    @foreach (var p in providerOptions)
+                    {
+                        <option value="@p">@p</option>
+                    }
+                </select>
+            </div>
+            <div class="select-group">
+                <label for="modelSelect">Model</label>
+                <select id="modelSelect" @bind="selectedModel">
+                    @foreach (var m in GetModelsForProvider(selectedProvider))
+                    {
+                        <option value="@m.Id">@m.DisplayName (@m.Id)</option>
+                    }
+                </select>
+            </div>
+        </div>
+
+        @if (!string.IsNullOrEmpty(evaluationError))
+        {
+            <div class="error-message">
+                <p>@evaluationError</p>
+            </div>
+        }
+    </div>
+
+    @if (pathResults != null && pathResults.Count > 0)
+    {
+        <div class="results-section">
+            <div class="results-header">
+                <h2>Path Analysis Results (@pathResults.Count @(pathResults.Count == 1 ? "path" : "paths"))</h2>
+                <button class="export-button" @onclick="ExportToCsv" title="Export all results to CSV">
+                    <span>📥 Export to CSV</span>
+                </button>
+            </div>
+
+            <div class="paths-grid">
+                @foreach (var pathResult in pathResults)
+                {
+                    <div class="path-card">
+                        <div class="card-header">
+                            <h3 class="path-title">Path</h3>
+                            @if (pathResult.Result != null && !string.IsNullOrEmpty(pathResult.Result.OverallAssessment))
+                            {
+                                <span class="assessment-badge @GetAssessmentClass(pathResult.Result.OverallAssessment)">
+                                    @FormatAssessment(pathResult.Result.OverallAssessment)
+                                </span>
+                            }
+                        </div>
+
+                        <div class="card-body">
+                            <div class="path-sequence">
+                                <p><strong>Path:</strong></p>
+                                <div class="path-nodes">
+                                    @foreach (var part in pathResult.Path.Split(" -> "))
+                                    {
+                                        <span class="path-node">@part</span>
+                                    }
+                                </div>
+                            </div>
+
+                            @if (pathResult.Result?.Issues != null && pathResult.Result.Issues.Count > 0)
+                            {
+                                <div class="issues-list">
+                                    <h4>Issues (@pathResult.Result.Issues.Count)</h4>
+                                    @foreach (var issue in pathResult.Result.Issues)
+                                    {
+                                        <div class="issue-item">
+                                            <div class="issue-header">
+                                                <span class="severity-badge @GetSeverityClass(issue.Severity)">@issue.Severity</span>
+                                                <span class="category-badge">@issue.Category</span>
+                                            </div>
+
+                                            <div class="issue-summary">
+                                                <p><strong>Summary:</strong> @issue.Summary</p>
+                                            </div>
+
+                                            @if (!string.IsNullOrEmpty(issue.SuggestedFix))
+                                            {
+                                                <div class="issue-fix">
+                                                    <p><strong>Suggested Fix:</strong></p>
+                                                    <p>@issue.SuggestedFix</p>
+                                                </div>
+                                            }
+
+                                            @if (issue.SceneIds != null && issue.SceneIds.Count > 0)
+                                            {
+                                                <div class="issue-scenes">
+                                                    <p><strong>Scenes:</strong> @string.Join(", ", issue.SceneIds)</p>
+                                                </div>
+                                            }
+                                        </div>
+                                    }
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="no-issues">
+                                    <p>✓ No issues found in this path</p>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+    else if (evaluationCompleted && (pathResults == null || pathResults.Count == 0))
+    {
+        <div class="success-message">
+            <p>Analysis completed. No paths were generated or analyzed.</p>
+        </div>
+    }
+</div>
+
+<style>
+    .path-analysis-container {
+        padding: 2rem;
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+    }
+
+    .page-header h1 {
+        margin: 0;
+        font-size: 2rem;
+    }
+
+    .back-link {
+        color: #0066cc;
+        text-decoration: none;
+        font-size: 0.9rem;
+    }
+
+    .back-link:hover {
+        text-decoration: underline;
+    }
+
+    .controls-section {
+        margin-bottom: 2rem;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .action-buttons button {
+        padding: 0.75rem 1.5rem;
+        background-color: #0066cc;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 1rem;
+        font-weight: 500;
+    }
+
+    .action-buttons button:hover:not(:disabled) {
+        background-color: #0052a3;
+    }
+
+    .action-buttons button:disabled {
+        background-color: #cccccc;
+        cursor: not-allowed;
+    }
+
+    .error-message {
+        background-color: #fff3cd;
+        border: 1px solid #ffc107;
+        color: #856404;
+        padding: 1rem;
+        border-radius: 4px;
+        margin-top: 1rem;
+    }
+
+    .results-section {
+        margin-top: 2rem;
+    }
+
+    .results-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+    }
+
+    .results-header h2 {
+        margin: 0;
+    }
+
+    .export-button {
+        padding: 0.5rem 1rem;
+        background-color: #28a745;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 0.9rem;
+        font-weight: 500;
+    }
+
+    .export-button:hover {
+        background-color: #218838;
+    }
+
+    .paths-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(900px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .path-card {
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        overflow: hidden;
+        background: white;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .card-header {
+        background-color: #f8f9fa;
+        padding: 1rem;
+        border-bottom: 1px solid #ddd;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .card-header h3 {
+        margin: 0;
+        font-size: 1.1rem;
+    }
+
+    .assessment-badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 4px;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+
+    .assessment-badge.ok {
+        background-color: #d4edda;
+        color: #155724;
+    }
+
+    .assessment-badge.minor {
+        background-color: #fff3cd;
+        color: #856404;
+    }
+
+    .assessment-badge.major {
+        background-color: #f8d7da;
+        color: #721c24;
+    }
+
+    .assessment-badge.broken {
+        background-color: #f5c6cb;
+        color: #721c24;
+    }
+
+    .card-body {
+        padding: 1.5rem;
+    }
+
+    .path-sequence {
+        margin-bottom: 1.5rem;
+    }
+
+    .path-sequence p {
+        margin: 0.5rem 0;
+        font-weight: 600;
+    }
+
+    .path-nodes {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-top: 0.5rem;
+    }
+
+    .path-node {
+        background-color: #e7f3ff;
+        color: #0066cc;
+        padding: 0.35rem 0.75rem;
+        border-radius: 4px;
+        font-size: 0.85rem;
+        border: 1px solid #b3d9ff;
+    }
+
+    .no-issues {
+        background-color: #d4edda;
+        color: #155724;
+        padding: 1rem;
+        border-radius: 4px;
+        text-align: center;
+    }
+
+    .issues-list {
+        margin-top: 1.5rem;
+    }
+
+    .issues-list h4 {
+        margin: 0 0 1rem 0;
+        color: #333;
+    }
+
+    .issue-item {
+        background-color: #f8f9fa;
+        padding: 1rem;
+        border-radius: 4px;
+        margin-bottom: 1rem;
+        border-left: 4px solid #ffc107;
+    }
+
+    .issue-header {
+        display: flex;
+        gap: 0.5rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .severity-badge {
+        padding: 0.25rem 0.5rem;
+        border-radius: 3px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .severity-badge.low {
+        background-color: #d4edda;
+        color: #155724;
+    }
+
+    .severity-badge.medium {
+        background-color: #fff3cd;
+        color: #856404;
+    }
+
+    .severity-badge.high {
+        background-color: #f8d7da;
+        color: #721c24;
+    }
+
+    .severity-badge.critical {
+        background-color: #f5c6cb;
+        color: #721c24;
+    }
+
+    .category-badge {
+        padding: 0.25rem 0.5rem;
+        background-color: #d1ecf1;
+        color: #0c5460;
+        border-radius: 3px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .issue-summary {
+        margin-bottom: 0.75rem;
+    }
+
+    .issue-summary p {
+        margin: 0;
+    }
+
+    .issue-summary strong {
+        display: block;
+        margin-bottom: 0.25rem;
+    }
+
+    .issue-fix {
+        background-color: white;
+        padding: 0.75rem;
+        border-radius: 3px;
+        margin-bottom: 0.75rem;
+    }
+
+    .issue-fix p {
+        margin: 0.25rem 0;
+    }
+
+    .issue-fix strong {
+        display: block;
+        margin-bottom: 0.25rem;
+    }
+
+    .issue-scenes {
+        color: #666;
+        font-size: 0.9rem;
+    }
+
+    .issue-scenes p {
+        margin: 0;
+    }
+
+    .success-message {
+        background-color: #d4edda;
+        border: 1px solid #c3e6cb;
+        color: #155724;
+        padding: 1.5rem;
+        border-radius: 4px;
+        text-align: center;
+        margin-top: 2rem;
+    }
+
+    @@media (max-width: 1200px) {
+        .paths-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+@code {
+    private List<DominatorPathAnalysisResult>? pathResults;
+    private bool isAnalyzing = false;
+    private bool evaluationCompleted = false;
+    private string evaluationError = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await ChatSessionService.EnsureInitializedAsync();
+
+        // Load available providers/models
+        await ModelSettingsService.InitializeAsync();
+        var models = await ModelSettingsService.GetAvailableModelsAsync();
+        allModels = models.ToList();
+        providerOptions = allModels
+            .Select(m => m.Provider)
+            .Where(p => !string.IsNullOrWhiteSpace(p))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .OrderBy(p => p)
+            .ToList();
+
+        // Defaults
+        selectedProvider = providerOptions.FirstOrDefault() ?? string.Empty;
+        selectedModel = GetModelsForProvider(selectedProvider).FirstOrDefault()?.Id ?? string.Empty;
+    }
+
+    private async Task AnalyzePath()
+    {
+        isAnalyzing = true;
+        evaluationError = string.Empty;
+        evaluationCompleted = false;
+
+        try
+        {
+            await ChatSessionService.EnsureInitializedAsync();
+            var ensured = await EnsureActiveSessionWithSnapshotAsync();
+            var session = ChatSessionService.CurrentSession;
+            if (!ensured || session == null || string.IsNullOrWhiteSpace(session.YamlSnapshot))
+            {
+                evaluationError = "No active chat with a story snapshot was found. Open or import a story in the chat, then try Analyze again.";
+                return;
+            }
+
+            var storyJson = JsonYamlConverter.ToJson(session.YamlSnapshot);
+
+            var snapshot = new StorySnapshot
+            {
+                StoryId = session.Id,
+                StoryVersion = Math.Max(1, session.Messages?.Count ?? 1),
+                Content = storyJson
+            };
+
+            var request = new EvaluateDominatorPathConsistencyRequest
+            {
+                CurrentStory = snapshot
+            };
+
+            var result = await AnalysisService.EvaluateAsync(request);
+
+            if (result.Success)
+            {
+                pathResults = result.PathResults;
+                evaluationCompleted = true;
+            }
+            else
+            {
+                evaluationError = result.Error ?? "Unknown error occurred";
+                Logger.LogError("Path analysis evaluation failed: {Error}", evaluationError);
+            }
+        }
+        catch (Exception ex)
+        {
+            evaluationError = $"Error: {ex.Message}";
+            Logger.LogError(ex, "Exception during path analysis evaluation");
+        }
+        finally
+        {
+            isAnalyzing = false;
+        }
+    }
+
+    private async Task<bool> EnsureActiveSessionWithSnapshotAsync()
+    {
+        var session = ChatSessionService.CurrentSession;
+        if (session != null && !string.IsNullOrWhiteSpace(session.YamlSnapshot))
+            return true;
+
+        try
+        {
+            var history = await ChatSessionService.GetSessionHistoryAsync();
+            var candidate = history
+                .OrderByDescending(h => h.UpdatedAt)
+                .FirstOrDefault(h => h.HasYamlSnapshot);
+
+            if (candidate != null)
+            {
+                await ChatSessionService.LoadSessionAsync(candidate.Id);
+                session = ChatSessionService.CurrentSession;
+                return session != null && !string.IsNullOrWhiteSpace(session.YamlSnapshot);
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.LogWarning(ex, "Failed to ensure active session with snapshot");
+        }
+
+        return false;
+    }
+
+    private string FormatAssessment(string assessment)
+    {
+        return assessment switch
+        {
+            "ok" => "✓ OK",
+            "has_minor_issues" => "⚠ Minor Issues",
+            "has_major_issues" => "✗ Major Issues",
+            "broken" => "✗ Broken",
+            _ => assessment
+        };
+    }
+
+    private string GetAssessmentClass(string assessment)
+    {
+        return assessment switch
+        {
+            "ok" => "ok",
+            "has_minor_issues" => "minor",
+            "has_major_issues" => "major",
+            "broken" => "broken",
+            _ => string.Empty
+        };
+    }
+
+    private string GetSeverityClass(string severity)
+    {
+        return severity?.ToLower() ?? string.Empty;
+    }
+
+    private async Task ExportToCsv()
+    {
+        if (pathResults == null || pathResults.Count == 0)
+        {
+            evaluationError = "No results to export";
+            return;
+        }
+
+        try
+        {
+            var csv = new StringBuilder();
+            csv.AppendLine("Path,Scene IDs,Issue ID,Severity,Category,Summary,Suggested Fix,Overall Assessment");
+
+            foreach (var pathResult in pathResults)
+            {
+                var pathStr = EscapeCsv(pathResult.Path);
+
+                if (pathResult.Result?.Issues != null && pathResult.Result.Issues.Count > 0)
+                {
+                    foreach (var issue in pathResult.Result.Issues)
+                    {
+                        var sceneIds = EscapeCsv(string.Join("; ", issue.SceneIds ?? new List<string>()));
+                        var severity = EscapeCsv(issue.Severity);
+                        var category = EscapeCsv(issue.Category);
+                        var summary = EscapeCsv(issue.Summary);
+                        var suggestedFix = EscapeCsv(issue.SuggestedFix);
+                        var assessment = EscapeCsv(pathResult.Result?.OverallAssessment ?? string.Empty);
+
+                        csv.AppendLine($"{pathStr},{sceneIds},,{severity},{category},{summary},{suggestedFix},{assessment}");
+                    }
+                }
+                else
+                {
+                    var assessment = EscapeCsv(pathResult.Result?.OverallAssessment ?? string.Empty);
+                    csv.AppendLine($"{pathStr},,,,,,No issues found,{assessment}");
+                }
+            }
+
+            var csvText = csv.ToString();
+            try
+            {
+                await JS.InvokeVoidAsync("downloadFileText",
+                    "scenario_path_analysis_results.csv",
+                    csvText,
+                    "text/csv;charset=utf-8");
+            }
+            catch
+            {
+                // Fallback: call generic downloader with plain text (no base64)
+                await JS.InvokeVoidAsync("downloadFile",
+                    "scenario_path_analysis_results.csv",
+                    csvText,
+                    "text/csv;charset=utf-8");
+            }
+        }
+        catch (Exception ex)
+        {
+            evaluationError = $"Error exporting to CSV: {ex.Message}";
+            Logger.LogError(ex, "Failed to export to CSV");
+        }
+    }
+
+    private string EscapeCsv(string value)
+    {
+        if (string.IsNullOrEmpty(value))
+            return string.Empty;
+
+        if (value.Contains(",") || value.Contains("\"") || value.Contains("\n"))
+        {
+            return "\"" + value.Replace("\"", "\"\"") + "\"";
+        }
+
+        return value;
+    }
+
+    [Inject]
+    private IJSRuntime JS { get; set; } = default!;
+
+    // Provider/Model dropdown state
+    private List<AiModelDefinition> allModels = new();
+    private List<string> providerOptions = new();
+    private string selectedProvider = string.Empty;
+    private string selectedModel = string.Empty;
+
+    private IEnumerable<AiModelDefinition> GetModelsForProvider(string provider)
+    {
+        if (string.IsNullOrWhiteSpace(provider)) return Enumerable.Empty<AiModelDefinition>();
+        return allModels.Where(m => string.Equals(m.Provider, provider, StringComparison.OrdinalIgnoreCase));
+    }
+}

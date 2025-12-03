@@ -7,6 +7,7 @@
   "required": [
     "title",
     "description",
+    "image",
     "tags",
     "difficulty",
     "session_length",
@@ -20,6 +21,7 @@
   "properties": {
     "title": { "type": "string", "description": "The title of the story" },
     "description": { "type": "string", "description": "Brief description of the story" },
+    "image": { "type": "string", "description": "Cover image id for the story" },
     "tags": { "type": "array", "items": { "type": "string" }, "description": "Story tags/categories" },
     "difficulty": { "type": "string", "enum": ["Easy", "Medium", "Hard"], "description": "Overall story difficulty" },
     "session_length": { "type": "string", "enum": ["Short", "Medium", "Long"], "description": "Approximate play session length" },

@@ -72,6 +72,7 @@ public class ScenarioFactory : IScenarioFactory
         [JsonPropertyName("id")] public string? Id { get; set; }
         [JsonPropertyName("title")] public string Title { get; set; } = string.Empty;
         [JsonPropertyName("description")] public string Description { get; set; } = string.Empty;
+        [JsonPropertyName("image")] public string? Image { get; set; }
         [JsonPropertyName("tags")] public List<string>? Tags { get; set; }
         [JsonPropertyName("difficulty")] public string? Difficulty { get; set; }
         [JsonPropertyName("session_length")] public string? SessionLength { get; set; }
@@ -178,6 +179,7 @@ public class ScenarioFactory : IScenarioFactory
             Id = dto.Id ?? string.Empty,
             Title = dto.Title ?? string.Empty,
             Description = dto.Description ?? string.Empty,
+            Image = dto.Image ?? string.Empty,
             Tags = dto.Tags ?? new List<string>(),
             Difficulty = ParseDifficulty(dto.Difficulty),
             SessionLength = ParseSessionLength(dto.SessionLength),

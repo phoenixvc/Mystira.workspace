@@ -97,7 +97,7 @@ builder.Services.AddScoped<IScenarioConsistencyEvaluationService, ScenarioConsis
 // Register story continuity service
 builder.Services.AddScoped<IStoryContinuityService, StoryContinuityService>();
 
-// Register Story Continuity dependencies (prefix summaries + SRL pipeline)
+// Register story continuity dependencies (prefix summaries + SRL pipeline)
 builder.Services.AddScoped<IPrefixSummaryService, ScenarioPrefixSummaryService>();
 builder.Services.AddScoped<IScenarioSrlAnalysisService, ScenarioSrlAnalysisService>();
 builder.Services.AddSingleton<IPrefixSummaryLlmService, PrefixSummaryLlmService>();

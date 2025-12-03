@@ -43,6 +43,9 @@ builder.Services.AddScoped<IYamlImportService, YamlImportService>();
 // Add Story Continuity Service
 builder.Services.AddScoped<WebStoryContinuityService>();
 
+// Add Scenario Dominator Path Analysis Service
+builder.Services.AddScoped<WebScenarioDominatorPathAnalysisService>();
+
 builder.Services.AddScoped(sp =>
 {
     var configuration = sp.GetRequiredService<IConfiguration>();
