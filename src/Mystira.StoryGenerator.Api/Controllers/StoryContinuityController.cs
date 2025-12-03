@@ -74,7 +74,7 @@ public class StoryContinuityController : ControllerBase
             var issues = await _storyContinuityService.AnalyzeAsync(scenario, cancellationToken);
 
             // Map analysis issues (EntityContinuityIssue) to API contract issues (StoryContinuityIssue)
-            var mappedIssues = (issues ?? Array.Empty<EntityContinuityIssue>())
+             var mappedIssues = (issues ?? Array.Empty<EntityContinuityIssue>())
                 .Select(i => new StoryContinuityIssue
                 {
                     SceneId = i.SceneId,
@@ -83,7 +83,7 @@ public class StoryContinuityController : ControllerBase
                     IssueType = i.IssueType.ToString(),
                     Detail = i.Detail,
                     EvidenceSpan = i.EvidenceSpan ?? string.Empty,
-                    IsPronoun = i.IsPronoun,
+                    IsProperNoun = i.IsProperNoun,
                     Confidence = i.Confidence,
                     SemanticRoles = i.SemanticRoles.ToArray()
                 })
