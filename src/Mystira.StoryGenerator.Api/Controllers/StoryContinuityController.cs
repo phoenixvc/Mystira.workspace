@@ -3,6 +3,7 @@ using Mystira.StoryGenerator.Contracts.Stories;
 using Mystira.StoryGenerator.Contracts.StoryConsistency;
 using Mystira.StoryGenerator.Domain.Services;
 using Mystira.StoryGenerator.Domain.Stories;
+using Mystira.StoryGenerator.Api.Services.ContinuityAsync;
 
 namespace Mystira.StoryGenerator.Api.Controllers;
 
@@ -16,15 +17,21 @@ public class StoryContinuityController : ControllerBase
     private readonly IStoryContinuityService _storyContinuityService;
     private readonly ILogger<StoryContinuityController> _logger;
     private readonly IScenarioFactory _scenarioFactory;
+    private readonly IContinuityOperationStore _store;
+    private readonly IContinuityBackgroundQueue _queue;
 
     public StoryContinuityController(
         IStoryContinuityService storyContinuityService,
         IScenarioFactory scenarioFactory,
-        ILogger<StoryContinuityController> logger)
+        ILogger<StoryContinuityController> logger,
+        IContinuityOperationStore store,
+        IContinuityBackgroundQueue queue)
     {
         _storyContinuityService = storyContinuityService ?? throw new ArgumentNullException(nameof(storyContinuityService));
         _scenarioFactory = scenarioFactory ?? throw new ArgumentNullException(nameof(scenarioFactory));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        _store = store ?? throw new ArgumentNullException(nameof(store));
+        _queue = queue ?? throw new ArgumentNullException(nameof(queue));
     }
 
     /// <summary>
@@ -108,5 +115,51 @@ public class StoryContinuityController : ControllerBase
                 Error = "An internal error occurred during continuity evaluation"
             });
         }
+    }
+
+    /// <summary>
+    /// Starts an asynchronous continuity evaluation and returns an operation id immediately.
+    /// </summary>
+    [HttpPost("evaluate-async")]
+    public async Task<ActionResult<object>> EvaluateAsyncStart(
+        [FromBody] EvaluateStoryContinuityRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        if (request == null)
+        {
+            return BadRequest(new { error = "Request body is required" });
+        }
+
+        // Create operation and queue a job
+        var op = _store.CreateNew();
+        await _queue.QueueAsync(new ContinuityJob
+        {
+            OperationId = op.OperationId,
+            Request = request
+        }, cancellationToken);
+
+        // Return 202 Accepted with Location header pointing to the operation status endpoint
+        return AcceptedAtAction(
+            nameof(GetOperationStatus),
+            new { id = op.OperationId },
+            new { operationId = op.OperationId, status = op.Status }
+        );
+    }
+
+    /// <summary>
+    /// Gets the status (and result if available) of a previously started continuity evaluation.
+    /// </summary>
+    [HttpGet("operations/{id}")]
+    public ActionResult<ContinuityOperationInfo> GetOperationStatus([FromRoute] string id)
+    {
+        if (string.IsNullOrWhiteSpace(id))
+            return BadRequest();
+
+        if (_store.TryGet(id, out var info) && info != null)
+        {
+            return Ok(info);
+        }
+
+        return NotFound();
     }
 }

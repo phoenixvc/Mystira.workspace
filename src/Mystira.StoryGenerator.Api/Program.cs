@@ -10,6 +10,8 @@ using Mystira.StoryGenerator.Llm.Services.ConsistencyEvaluators;
 using Mystira.StoryGenerator.Llm.Services.LLM;
 using Mystira.StoryGenerator.Llm.Services.StoryInstructionsRag;
 using Mystira.StoryGenerator.Llm.Services.StoryIntentClassification;
+using Mystira.StoryGenerator.Api.Services;
+using Mystira.StoryGenerator.Api.Services.ContinuityAsync;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -102,6 +104,11 @@ builder.Services.AddScoped<IPrefixSummaryService, ScenarioPrefixSummaryService>(
 builder.Services.AddScoped<IScenarioSrlAnalysisService, ScenarioSrlAnalysisService>();
 builder.Services.AddSingleton<IPrefixSummaryLlmService, PrefixSummaryLlmService>();
 builder.Services.AddSingleton<ISemanticRoleLabellingLlmService, SemanticRoleLabellingLlmService>();
+
+// Async continuity infrastructure (in-memory)
+builder.Services.AddSingleton<IContinuityOperationStore, InMemoryContinuityOperationStore>();
+builder.Services.AddSingleton<IContinuityBackgroundQueue, ContinuityBackgroundQueue>();
+builder.Services.AddHostedService<ContinuityWorker>();
 
 var app = builder.Build();
 
