@@ -422,7 +422,8 @@
                 SemanticRoleModel = string.IsNullOrEmpty(semanticRoleModel) ? null : semanticRoleModel
             };
 
-            var result = await ContinuityService.EvaluateAsync(request);
+            // Use async 202 + polling flow to avoid front-end timeouts in cloud
+            var result = await ContinuityService.EvaluateWithPollingAsync(request, TimeSpan.FromSeconds(2), TimeSpan.FromMinutes(20));
 
             if (result.Success)
             {

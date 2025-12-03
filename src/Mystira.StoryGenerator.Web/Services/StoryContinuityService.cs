@@ -65,6 +65,98 @@ public class WebStoryContinuityService
         }
     }
 
+    // ---- Async (202 + polling) helpers ----
+
+    public async Task<string?> StartAsyncEvaluation(
+        EvaluateStoryContinuityRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var json = JsonSerializer.Serialize(request, _jsonOptions);
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+            var response = await _httpClient.PostAsync("api/storycontinuity/evaluate-async", content, cancellationToken);
+            if (!response.IsSuccessStatusCode && (int)response.StatusCode != 202)
+            {
+                _logger.LogWarning("StartAsyncEvaluation returned status {Status}", response.StatusCode);
+                return null;
+            }
+
+            var body = await response.Content.ReadAsStringAsync(cancellationToken);
+            using var doc = JsonDocument.Parse(string.IsNullOrWhiteSpace(body) ? "{}" : body);
+            if (doc.RootElement.TryGetProperty("operationId", out var idProp))
+            {
+                return idProp.GetString();
+            }
+            return null;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error starting async continuity evaluation");
+            return null;
+        }
+    }
+
+    public async Task<ContinuityOperationInfo?> GetOperationStatusAsync(string operationId, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var response = await _httpClient.GetAsync($"api/storycontinuity/operations/{operationId}", cancellationToken);
+            if (!response.IsSuccessStatusCode)
+            {
+                _logger.LogWarning("GetOperationStatusAsync returned status {Status}", response.StatusCode);
+                return null;
+            }
+            var json = await response.Content.ReadAsStringAsync(cancellationToken);
+            var info = JsonSerializer.Deserialize<ContinuityOperationInfo>(json, _jsonOptions);
+            return info;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting async continuity operation status");
+            return null;
+        }
+    }
+
+    public async Task<EvaluateStoryContinuityResponse> EvaluateWithPollingAsync(
+        EvaluateStoryContinuityRequest request,
+        TimeSpan? pollInterval = null,
+        TimeSpan? overallTimeout = null,
+        CancellationToken cancellationToken = default)
+    {
+        var interval = pollInterval ?? TimeSpan.FromSeconds(2);
+        var timeout = overallTimeout ?? TimeSpan.FromMinutes(15);
+        var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        cts.CancelAfter(timeout);
+
+        var opId = await StartAsyncEvaluation(request, cts.Token);
+        if (string.IsNullOrWhiteSpace(opId))
+        {
+            return new EvaluateStoryContinuityResponse { Success = false, Error = "Failed to start async continuity evaluation" };
+        }
+
+        while (!cts.IsCancellationRequested)
+        {
+            await Task.Delay(interval, cts.Token);
+            var info = await GetOperationStatusAsync(opId, cts.Token);
+            if (info == null) continue;
+
+            switch (info.Status)
+            {
+                case ContinuityOperationStatus.Succeeded:
+                    return info.Result ?? new EvaluateStoryContinuityResponse { Success = true, Issues = new List<StoryContinuityIssue>() };
+                case ContinuityOperationStatus.Failed:
+                    return new EvaluateStoryContinuityResponse { Success = false, Error = info.Error ?? "Async evaluation failed" };
+                case ContinuityOperationStatus.Queued:
+                case ContinuityOperationStatus.Running:
+                default:
+                    break; // keep polling
+            }
+        }
+
+        return new EvaluateStoryContinuityResponse { Success = false, Error = "Async evaluation timed out" };
+    }
+
     /// <summary>
     /// Applies filters to continuity issues.
     /// </summary>
