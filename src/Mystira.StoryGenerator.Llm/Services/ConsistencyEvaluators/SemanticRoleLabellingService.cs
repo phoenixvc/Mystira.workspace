@@ -177,6 +177,16 @@ If the entity does not appear in the scene text (no mention, no pronoun, no impl
     •	introduction_status = ""not_present""
     •	removal_status = ""not_removed""
 This applies even if the entity appears in known_active_entities.
+
+Hard constraints for introduction_status:
+    • If an entity appears in the scene AND its (name, type) pair is present in
+      known_active_entities, you MUST set introduction_status = ""already_known"".
+      You are NOT allowed to label such an entity as ""new"" or ""reintroduced"".
+    • If an entity appears in the scene AND its (name, type) pair is present in
+      known_removed_entities, you MUST choose between:
+        o ""reintroduced"" if the scene clearly shows it coming back, OR
+        o ""not_present"" if the name is only mentioned indirectly without the entity actually being back.
+ You are NOT allowed to label a known_removed entity as ""new"".
 ________________________________________
 If the entity appears in the scene text:
 introduction_status = ""new""
