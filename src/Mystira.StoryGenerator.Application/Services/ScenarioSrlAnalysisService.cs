@@ -35,13 +35,12 @@ public sealed class ScenarioSrlAnalysisService : IScenarioSrlAnalysisService
         var scenesById = graph.Nodes.ToDictionary(s => s.Id, s => s);
 
         // 2. Derive per-scene must/may active & removed from prefix summaries
-        var comparer = new SceneEntityComparer();
-        var mustActive = PrefixSummaryAggregator.ComputeMustActivePerScene(prefixSummaries, comparer);
-        var mustRemoved = PrefixSummaryAggregator.BuildPerSceneDefinitelyAbsent(prefixSummaries, comparer);
-        var mayActive  = PrefixSummaryAggregator.ComputeMaybeActivePerScene(prefixSummaries, comparer);
+        var mustActive = PrefixSummaryMerger.ComputeMustActiveEntitiesByScene(prefixSummaries);
+        var mustRemoved = PrefixSummaryMerger.ComputeDefinitelyRemovedEntitiesByScene(prefixSummaries);
+        var mayActive  = PrefixSummaryMerger.ComputeMaybeActiveEntitiesByScene(prefixSummaries);
 
         // 3. Derive all entities referenced in the scenario
-        HashSet<SceneEntity> globalEntities = GetGlobalEntities(prefixSummaries, comparer);
+        HashSet<SceneEntity> globalEntities = GetGlobalEntities(prefixSummaries, new SceneEntityComparer());
 
         // 3. For each scene, call SRL LLM with appropriate sets, limited to configured requests per minute
         var rpmLimiter = new PerMinuteRateLimiter(_requestsPerMinute);

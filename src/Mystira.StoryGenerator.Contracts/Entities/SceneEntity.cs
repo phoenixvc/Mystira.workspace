@@ -2,6 +2,9 @@
 
 namespace Mystira.StoryGenerator.Contracts.Entities;
 
+/// <summary>
+/// Entity that was introduced in a specific scene.
+/// </summary>
 public class SceneEntity
 {
     public SceneEntityType Type { get; set; }
