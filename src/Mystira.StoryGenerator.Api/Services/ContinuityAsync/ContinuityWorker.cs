@@ -3,6 +3,7 @@ using Mystira.StoryGenerator.Contracts.Stories;
 using Mystira.StoryGenerator.Contracts.StoryConsistency;
 using Mystira.StoryGenerator.Domain.Services;
 using Mystira.StoryGenerator.Domain.Stories;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Mystira.StoryGenerator.Api.Services;
 
@@ -14,21 +15,18 @@ public class ContinuityWorker : BackgroundService
     private readonly ILogger<ContinuityWorker> _logger;
     private readonly IContinuityBackgroundQueue _queue;
     private readonly IContinuityOperationStore _store;
-    private readonly IStoryContinuityService _continuityService;
-    private readonly IScenarioFactory _scenarioFactory;
+    private readonly IServiceScopeFactory _scopeFactory;
 
     public ContinuityWorker(
         ILogger<ContinuityWorker> logger,
         IContinuityBackgroundQueue queue,
         IContinuityOperationStore store,
-        IStoryContinuityService continuityService,
-        IScenarioFactory scenarioFactory)
+        IServiceScopeFactory scopeFactory)
     {
         _logger = logger;
         _queue = queue;
         _store = store;
-        _continuityService = continuityService;
-        _scenarioFactory = scenarioFactory;
+        _scopeFactory = scopeFactory;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -51,12 +49,17 @@ public class ContinuityWorker : BackgroundService
             {
                 var req = job.Request;
 
+                // Create a DI scope per job to resolve scoped services safely
+                using var scope = _scopeFactory.CreateScope();
+                var scenarioFactory = scope.ServiceProvider.GetRequiredService<IScenarioFactory>();
+                var continuityService = scope.ServiceProvider.GetRequiredService<IStoryContinuityService>();
+
                 // Build scenario, preferring CurrentStory JSON
                 Scenario? scenario = null;
                 var snapshotJson = req.CurrentStory?.Content;
                 if (!string.IsNullOrWhiteSpace(snapshotJson))
                 {
-                    scenario = await _scenarioFactory.CreateFromContentAsync(snapshotJson!, ScenarioContentFormat.Json, stoppingToken);
+                    scenario = await scenarioFactory.CreateFromContentAsync(snapshotJson!, ScenarioContentFormat.Json, stoppingToken);
                 }
                 else if (req.Scenario != null)
                 {
@@ -70,7 +73,7 @@ public class ContinuityWorker : BackgroundService
                 }
 
                 // Run analysis
-                var issues = await _continuityService.AnalyzeAsync(scenario, stoppingToken);
+                var issues = await continuityService.AnalyzeAsync(scenario, stoppingToken);
                 var mapped = (issues ?? Array.Empty<EntityContinuityIssue>())
                     .Select(i => new StoryContinuityIssue
                     {

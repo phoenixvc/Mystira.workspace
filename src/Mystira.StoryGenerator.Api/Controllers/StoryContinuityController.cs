@@ -138,8 +138,12 @@ public class StoryContinuityController : ControllerBase
             Request = request
         }, cancellationToken);
 
-        // Return 202 Accepted with operation id
-        return Accepted(new { operationId = op.OperationId, status = op.Status });
+        // Return 202 Accepted with Location header pointing to the operation status endpoint
+        return AcceptedAtAction(
+            nameof(GetOperationStatus),
+            new { id = op.OperationId },
+            new { operationId = op.OperationId, status = op.Status }
+        );
     }
 
     /// <summary>

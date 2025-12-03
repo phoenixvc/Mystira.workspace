@@ -78,16 +78,50 @@ public class WebStoryContinuityService
             var response = await _httpClient.PostAsync("api/storycontinuity/evaluate-async", content, cancellationToken);
             if (!response.IsSuccessStatusCode && (int)response.StatusCode != 202)
             {
-                _logger.LogWarning("StartAsyncEvaluation returned status {Status}", response.StatusCode);
+                var bodyText = await response.Content.ReadAsStringAsync(cancellationToken);
+                _logger.LogWarning("StartAsyncEvaluation returned status {Status}. Body: {Body}", response.StatusCode, bodyText);
                 return null;
             }
 
+            // Try to read operationId from JSON body first
             var body = await response.Content.ReadAsStringAsync(cancellationToken);
-            using var doc = JsonDocument.Parse(string.IsNullOrWhiteSpace(body) ? "{}" : body);
-            if (doc.RootElement.TryGetProperty("operationId", out var idProp))
+            if (!string.IsNullOrWhiteSpace(body))
             {
-                return idProp.GetString();
+                try
+                {
+                    using var doc = JsonDocument.Parse(body);
+                    if (doc.RootElement.TryGetProperty("operationId", out var idProp))
+                    {
+                        var id = idProp.GetString();
+                        if (!string.IsNullOrWhiteSpace(id))
+                            return id;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    // Non-JSON or malformed body. We'll try Location header next.
+                    _logger.LogDebug(ex, "Unexpected response body when starting async evaluation");
+                }
             }
+
+            // Fall back to the Location header (from AcceptedAtAction)
+            var location = response.Headers?.Location?.ToString();
+            if (string.IsNullOrWhiteSpace(location) && response.Headers.TryGetValues("Location", out var values))
+            {
+                location = values.FirstOrDefault();
+            }
+
+            if (!string.IsNullOrWhiteSpace(location))
+            {
+                // Expecting something like .../api/storycontinuity/operations/{id}
+                var lastSegment = location.TrimEnd('/').Split('/').LastOrDefault();
+                if (!string.IsNullOrWhiteSpace(lastSegment))
+                {
+                    return lastSegment;
+                }
+            }
+
+            _logger.LogWarning("StartAsyncEvaluation did not return an operationId (empty body and no Location header)");
             return null;
         }
         catch (Exception ex)
