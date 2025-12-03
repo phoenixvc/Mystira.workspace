@@ -791,9 +791,24 @@
        {
            if (!string.IsNullOrWhiteSpace(chat?.Id))
            {
-               await ChatSessionService.LoadSessionAsync(chat.Id);
+               // Try to load the session into ChatSessionService and set it as current.
+               // If it doesn't exist (e.g., created via this page only), create a new
+               // ChatSession and persist the YAML as its snapshot so other pages use it.
+               try
+               {
+                   await ChatSessionService.LoadSessionAsync(chat.Id);
+               }
+               catch
+               {
+                   // Create a new ChatSession (with a generated id) so the service has a
+                   // current session; title mirrors the selected chat for UX consistency.
+                   await ChatSessionService.CreateNewSessionAsync(string.IsNullOrWhiteSpace(chat.Title) ? "New Story" : chat.Title);
+               }
+
                if (!string.IsNullOrWhiteSpace(chat?.YamlSnapshot))
                {
+                   // Always persist the latest YAML from the selected chat as the active snapshot
+                   // so analysis pages operate on the correct story.
                    await ChatSessionService.SaveYamlSnapshotAsync(chat.YamlSnapshot);
                }
            }
@@ -819,6 +834,16 @@
             }
             await SaveChatsAsync();
             StateHasChanged();
+
+            // Keep ChatSessionService in sync so stale sessions/ids aren't left behind in local storage
+            try
+            {
+                await ChatSessionService.DeleteSessionAsync(chatId);
+            }
+            catch (Exception ex)
+            {
+                Logger.LogWarning(ex, "Failed to delete mirrored ChatSessionService session for chat {ChatId}", chatId);
+            }
         }
     }
 
@@ -2391,6 +2416,21 @@
             newChat.YamlSnapshot = importResult.YamlContent;
 
             await SaveChatsAsync();
+
+            // Mirror the imported story into ChatSessionService as the active session/snapshot
+            try
+            {
+                // Create a new ChatSession as current and persist the imported YAML
+                var created = await ChatSessionService.CreateNewSessionAsync(newChat.Title);
+                if (!string.IsNullOrWhiteSpace(YamlContent))
+                {
+                    await ChatSessionService.SaveYamlSnapshotAsync(YamlContent);
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.LogWarning(ex, "Failed to mirror imported story into ChatSessionService");
+            }
 
             CloseImportResult();
             StateHasChanged();
