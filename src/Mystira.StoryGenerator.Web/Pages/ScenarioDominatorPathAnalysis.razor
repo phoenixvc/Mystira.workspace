@@ -2,9 +2,11 @@
 @using Mystira.StoryGenerator.Web.Models
 @using Mystira.StoryGenerator.Contracts.Chat
 @using System.Text
+@using System.Linq
 @inject WebScenarioDominatorPathAnalysisService AnalysisService
 @inject ILogger<ScenarioDominatorPathAnalysis> Logger
 @inject IChatSessionService ChatSessionService
+@inject IAiModelSettingsService ModelSettingsService
 
 <PageTitle>Scenario Dominator Path Analysis</PageTitle>
 
@@ -26,6 +28,28 @@
                     <span>Analyze Story Paths</span>
                 }
             </button>
+        </div>
+
+        <!-- Provider / Model selection -->
+        <div class="model-selects">
+            <div class="select-group">
+                <label for="providerSelect">Provider</label>
+                <select id="providerSelect" @bind="selectedProvider">
+                    @foreach (var p in providerOptions)
+                    {
+                        <option value="@p">@p</option>
+                    }
+                </select>
+            </div>
+            <div class="select-group">
+                <label for="modelSelect">Model</label>
+                <select id="modelSelect" @bind="selectedModel">
+                    @foreach (var m in GetModelsForProvider(selectedProvider))
+                    {
+                        <option value="@m.Id">@m.DisplayName (@m.Id)</option>
+                    }
+                </select>
+            </div>
         </div>
 
         @if (!string.IsNullOrEmpty(evaluationError))
@@ -424,7 +448,7 @@
         margin-top: 2rem;
     }
 
-    @media (max-width: 1200px) {
+    @@media (max-width: 1200px) {
         .paths-grid {
             grid-template-columns: 1fr;
         }
@@ -440,6 +464,21 @@
     protected override async Task OnInitializedAsync()
     {
         await ChatSessionService.EnsureInitializedAsync();
+
+        // Load available providers/models
+        await ModelSettingsService.InitializeAsync();
+        var models = await ModelSettingsService.GetAvailableModelsAsync();
+        allModels = models.ToList();
+        providerOptions = allModels
+            .Select(m => m.Provider)
+            .Where(p => !string.IsNullOrWhiteSpace(p))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .OrderBy(p => p)
+            .ToList();
+
+        // Defaults
+        selectedProvider = providerOptions.FirstOrDefault() ?? string.Empty;
+        selectedModel = GetModelsForProvider(selectedProvider).FirstOrDefault()?.Id ?? string.Empty;
     }
 
     private async Task AnalyzePath()
@@ -570,7 +609,7 @@
             foreach (var pathResult in pathResults)
             {
                 var pathStr = EscapeCsv(pathResult.Path);
-                
+
                 if (pathResult.Result?.Issues != null && pathResult.Result.Issues.Count > 0)
                 {
                     foreach (var issue in pathResult.Result.Issues)
@@ -592,13 +631,22 @@
                 }
             }
 
-            var csvBytes = Encoding.UTF8.GetBytes(csv.ToString());
-            var base64 = Convert.ToBase64String(csvBytes);
-
-            await JS.InvokeVoidAsync("downloadFile", 
-                "scenario_path_analysis_results.csv", 
-                base64, 
-                "text/csv");
+            var csvText = csv.ToString();
+            try
+            {
+                await JS.InvokeVoidAsync("downloadFileText",
+                    "scenario_path_analysis_results.csv",
+                    csvText,
+                    "text/csv;charset=utf-8");
+            }
+            catch
+            {
+                // Fallback: call generic downloader with plain text (no base64)
+                await JS.InvokeVoidAsync("downloadFile",
+                    "scenario_path_analysis_results.csv",
+                    csvText,
+                    "text/csv;charset=utf-8");
+            }
         }
         catch (Exception ex)
         {
@@ -622,4 +670,16 @@
 
     [Inject]
     private IJSRuntime JS { get; set; } = default!;
+
+    // Provider/Model dropdown state
+    private List<AiModelDefinition> allModels = new();
+    private List<string> providerOptions = new();
+    private string selectedProvider = string.Empty;
+    private string selectedModel = string.Empty;
+
+    private IEnumerable<AiModelDefinition> GetModelsForProvider(string provider)
+    {
+        if (string.IsNullOrWhiteSpace(provider)) return Enumerable.Empty<AiModelDefinition>();
+        return allModels.Where(m => string.Equals(m.Provider, provider, StringComparison.OrdinalIgnoreCase));
+    }
 }
