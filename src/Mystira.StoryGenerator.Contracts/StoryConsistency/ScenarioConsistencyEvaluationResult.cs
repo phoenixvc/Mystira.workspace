@@ -95,7 +95,12 @@ public sealed record PathConsistencyEvaluationResult(
     /// <summary>
     /// The consistency evaluation result for this path.
     /// </summary>
-    ConsistencyEvaluationResult? Result)
+    ConsistencyEvaluationResult? Result,
+
+    /// <summary>
+    /// The full story content for this path.
+    /// </summary>
+    string? PathContent = null)
 {
 }
 

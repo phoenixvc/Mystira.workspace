@@ -1,6 +1,24 @@
-window.downloadFile = function(fileName, content) {
+window.downloadFile = function(fileName, content, mimeType) {
   try {
-    const blob = new Blob([content], { type: 'text/yaml;charset=utf-8' });
+    // Determine if content is base64 or raw
+    const isBase64 = mimeType && (mimeType.includes('csv') || mimeType.includes('json'));
+    
+    let blobContent;
+    if (isBase64) {
+      // Convert base64 to binary
+      const binaryString = atob(content);
+      const bytes = new Uint8Array(binaryString.length);
+      for (let i = 0; i < binaryString.length; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+      }
+      blobContent = bytes;
+    } else {
+      // Raw content
+      blobContent = content;
+    }
+    
+    const mimeTypeToUse = mimeType || 'text/yaml;charset=utf-8';
+    const blob = new Blob([blobContent], { type: mimeTypeToUse });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;

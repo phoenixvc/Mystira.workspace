@@ -100,12 +100,12 @@ public class ScenarioDominatorPathConsistencyEvaluationService : IScenarioDomina
                 _logger.LogDebug("Path {PathIndex} consistency evaluation returned no result", pathIndex);
             }
 
-            return new PathConsistencyEvaluationResult(path.SceneIds, result);
+            return new PathConsistencyEvaluationResult(path.SceneIds, result, pathContent);
         }
         catch (Exception ex)
         {
             _logger.LogWarning(ex, "Failed to evaluate consistency for path {PathIndex}", pathIndex);
-            return new PathConsistencyEvaluationResult(path.SceneIds, null);
+            return new PathConsistencyEvaluationResult(path.SceneIds, null, null);
         }
     }
 }
