@@ -31,7 +31,7 @@ internal static class StoryContinuityFileRunner
 
             string[] includedConfidences = ["medium", "high"];
             string[] includedEntityTypes = ["character", "location", "item"]; // "character", "location", "item", "concept"
-            bool pronounsOnly = true;
+            bool properNounsOnly = true;
 
             string defaultPath = Path.Combine("test_data", "Test-Story-UnintroducedEntities-Small.yaml");
             string path = (flagIdx + 1) < args.Length && !args[flagIdx + 1].StartsWith("--")
@@ -68,7 +68,7 @@ internal static class StoryContinuityFileRunner
                 .Filter(issues,
                     confidences: includedConfidences,
                     entityTypes: includedEntityTypes,
-                    pronounsOnly: pronounsOnly);
+                    properNounsOnly: properNounsOnly);
             swAnalysis.Stop();
             logger.LogInformation("Story continuity: Analysis completed in {ElapsedMs} ms", swAnalysis.ElapsedMilliseconds);
 

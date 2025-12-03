@@ -38,9 +38,9 @@ public class StoryContinuityIssue
     public string EvidenceSpan { get; set; } = string.Empty;
 
     /// <summary>
-    /// Whether the entity is a pronoun.
+    /// Whether the entity is a proper noun.
     /// </summary>
-    public bool IsPronoun { get; set; }
+    public bool IsProperNoun { get; set; }
 
     /// <summary>
     /// The confidence level of the issue detection.
@@ -127,7 +127,7 @@ public class StoryContinuityIssueFilter
     public string[] IncludedEntityTypes { get; set; } = [];
 
     /// <summary>
-    /// If true, only include issues with pronouns.
+    /// If true, only include issues with proper nouns.
     /// </summary>
-    public bool PronounsOnly { get; set; }
+    public bool ProperNounsOnly { get; set; }
 }

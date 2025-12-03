@@ -96,8 +96,8 @@
 
             <div class="filter-group">
                 <label>
-                    <input type="checkbox" @bind="PronounsOnly" />
-                    Pronouns Only
+                    <input type="checkbox" @bind="ProperNounsOnly" />
+                    Proper Nouns Only
                 </label>
             </div>
         </div>
@@ -142,9 +142,9 @@
                                 <p><strong>Scene:</strong> @issue.SceneId</p>
                                 <p><strong>Entity Type:</strong> @issue.EntityType</p>
                                 <p><strong>Confidence:</strong> <span class="confidence @GetConfidenceClass(issue.Confidence)">@issue.Confidence</span></p>
-                                @if (issue.IsPronoun)
+                                @if (issue.IsProperNoun)
                                 {
-                                    <p><strong>Is Pronoun:</strong> Yes</p>
+                                    <p><strong>Is Proper Noun:</strong> Yes</p>
                                 }
                                 @if (issue.SemanticRoles != null && issue.SemanticRoles.Length > 0)
                                 {
@@ -220,14 +220,14 @@
         set => UpdateEntityTypeFilter("concept", value);
     }
 
-    // Ensure filter re-application when PronounsOnly is toggled
-    private bool _pronounsOnly;
-    private bool PronounsOnly
+    // Ensure filter re-application when ProperNounsOnly is toggled
+    private bool _properNounsOnly;
+    private bool ProperNounsOnly
     {
-        get => _pronounsOnly;
+        get => _properNounsOnly;
         set
         {
-            _pronounsOnly = value;
+            _properNounsOnly = value;
             ApplyFilters();
         }
     }
@@ -313,7 +313,7 @@
         EnsureValidSrlModel();
 
         // Initialize filter defaults
-        // By default tick all confidence and entity type checkboxes; PronounsOnly remains false
+        // By default tick all confidence and entity type checkboxes; ProperNounsOnly remains false
         if (selectedConfidences.Count == 0)
         {
             selectedConfidences = new HashSet<string>(new[] { "high", "medium" }, StringComparer.OrdinalIgnoreCase);
@@ -324,7 +324,7 @@
             selectedEntityTypes = new HashSet<string>(new[] { "character", "location", "item" }, StringComparer.OrdinalIgnoreCase);
         }
 
-        _pronounsOnly = true;
+        _properNounsOnly = true;
     }
 
     private IEnumerable<AiModelDefinition> GetModelsForProvider(string provider)
@@ -481,7 +481,7 @@
         {
             IncludedConfidences = selectedConfidences.ToArray(),
             IncludedEntityTypes = selectedEntityTypes.ToArray(),
-            PronounsOnly = PronounsOnly
+            ProperNounsOnly = ProperNounsOnly
         };
 
         filteredIssues = ContinuityService.ApplyFilters(filteredIssues, filter);

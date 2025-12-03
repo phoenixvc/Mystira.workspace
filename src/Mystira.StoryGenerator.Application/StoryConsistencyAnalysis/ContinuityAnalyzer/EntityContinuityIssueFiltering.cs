@@ -5,16 +5,16 @@ namespace Mystira.StoryGenerator.Application.StoryConsistencyAnalysis.Continuity
 public static class EntityContinuityIssueFiltering
 {
     /// <summary>
-    /// Filters issues by confidence, entity types, pronoun-only, and optional role whitelist.
+    /// Filters issues by confidence, entity types, proper-nouns-only, and optional role whitelist.
     /// - confidences/types compare using OrdinalIgnoreCase.
-    /// - If pronounsOnly is true, keeps only issues where IsPronoun == true.
+    /// - If properNounsOnly is true, keeps only issues where IsProperNoun == true.
     /// - If roleWhitelist is provided and non-empty, keeps issues where any SemanticRoles contains one of the roles (OrdinalIgnoreCase).
     /// </summary>
     public static IReadOnlyList<EntityContinuityIssue> Filter(
         IEnumerable<EntityContinuityIssue> issues,
         IEnumerable<string>? confidences = null,
         IEnumerable<string>? entityTypes = null,
-        bool pronounsOnly = false,
+        bool properNounsOnly = false,
         IEnumerable<string>? roleWhitelist = null)
     {
         if (issues == null) return Array.Empty<EntityContinuityIssue>();
@@ -38,7 +38,7 @@ public static class EntityContinuityIssueFiltering
         return issues.Where(i =>
             (!hasConf || confSet.Contains(i.Confidence)) &&
             (!hasTypes || typeSet.Contains(i.EntityType)) &&
-            (!pronounsOnly || i.IsPronoun) &&
+            (!properNounsOnly || i.IsProperNoun) &&
             (!hasRoles || (i.SemanticRoles?.Any(r => roleSet.Contains(r)) ?? false))
         ).ToList();
     }

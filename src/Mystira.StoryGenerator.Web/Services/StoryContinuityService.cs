@@ -95,11 +95,11 @@ public class WebStoryContinuityService
                 .ToList();
         }
 
-        // Filter by pronouns
-        if (filter.PronounsOnly)
-        {
-            filtered = filtered.Where(i => i.IsPronoun).ToList();
-        }
+        // Filter by proper nouns
+         if (filter.ProperNounsOnly)
+         {
+             filtered = filtered.Where(i => i.IsProperNoun).ToList();
+         }
 
         return filtered;
     }

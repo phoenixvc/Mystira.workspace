@@ -9,7 +9,7 @@ public sealed class EntityContinuityIssue
     public string Detail { get; init; } = string.Empty;
     public string? EvidenceSpan { get; init; }
     // Post-analysis filtering fields (copied from SRL classification)
-    public bool IsPronoun { get; init; }
+    public bool IsProperNoun { get; init; }
     public string Confidence { get; init; } = string.Empty; // "high" | "medium" | "low"
     public List<string> SemanticRoles { get; init; } = new();
 }

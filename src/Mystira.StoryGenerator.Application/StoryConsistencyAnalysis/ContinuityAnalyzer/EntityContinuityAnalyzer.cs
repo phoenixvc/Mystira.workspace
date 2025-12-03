@@ -1,4 +1,4 @@
-﻿using Mystira.StoryGenerator.Contracts.StoryConsistency;
+using Mystira.StoryGenerator.Contracts.StoryConsistency;
 
 namespace Mystira.StoryGenerator.Application.StoryConsistencyAnalysis.ContinuityAnalyzer;
 
@@ -58,7 +58,7 @@ public static class EntityContinuityAnalyzer
                                  "but is not guaranteed to be active on all prefixes leading here.",
                         EvidenceSpan = entity.EvidenceSpan,
                         // Map SRL fields for post-processing
-                        IsPronoun = !entity.IsProperNoun,
+                        IsProperNoun = entity.IsProperNoun,
                         Confidence = entity.Confidence,
                         SemanticRoles = entity.SemanticRoles ?? new List<string>()
                     });
@@ -77,7 +77,7 @@ public static class EntityContinuityAnalyzer
                         Detail = $"Entity '{name}' is marked as newly introduced here, " +
                                  "but prefix summaries say it must already be active on all paths.",
                         EvidenceSpan = entity.EvidenceSpan,
-                        IsPronoun = !entity.IsProperNoun,
+                        IsProperNoun = entity.IsProperNoun,
                         Confidence = entity.Confidence,
                         SemanticRoles = entity.SemanticRoles ?? new List<string>()
                     });
@@ -100,7 +100,7 @@ public static class EntityContinuityAnalyzer
                                  "treats it as if the audience already knows them. This suggests the entity should have " +
                                  "been introduced earlier on this branch.",
                         EvidenceSpan = entity.EvidenceSpan,
-                        IsPronoun = !entity.IsProperNoun,
+                        IsProperNoun = entity.IsProperNoun,
                         Confidence = entity.Confidence,
                         SemanticRoles = entity.SemanticRoles ?? new List<string>()
                     });
@@ -121,7 +121,7 @@ public static class EntityContinuityAnalyzer
                                  "is ambiguous about whether the audience already knows them. This might suggest the " +
                                  "entity should have been introduced earlier on this branch.",
                         EvidenceSpan = entity.EvidenceSpan,
-                        IsPronoun = !entity.IsProperNoun,
+                        IsProperNoun = entity.IsProperNoun,
                         Confidence = entity.Confidence,
                         SemanticRoles = entity.SemanticRoles ?? new List<string>()
                     });
@@ -140,7 +140,7 @@ public static class EntityContinuityAnalyzer
                         Detail = $"Entity '{name}' is removed here, but prefix summaries do not " +
                                  "guarantee that it was present on all paths.",
                         EvidenceSpan = entity.EvidenceSpan,
-                        IsPronoun = !entity.IsProperNoun,
+                        IsProperNoun = entity.IsProperNoun,
                         Confidence = entity.Confidence,
                         SemanticRoles = entity.SemanticRoles ?? new List<string>()
                     });
