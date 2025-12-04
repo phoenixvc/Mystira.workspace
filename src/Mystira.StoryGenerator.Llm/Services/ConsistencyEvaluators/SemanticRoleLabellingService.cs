@@ -36,7 +36,8 @@ public class SemanticRoleLabellingLlmService : ISemanticRoleLabellingLlmService
         IEnumerable<SceneEntity> knownRemovedEntities,
         CancellationToken cancellationToken = default)
     {
-        if (!candidateEntities.Any())
+        var sceneCandidates = candidateEntities as SceneEntity[] ?? candidateEntities.ToArray();
+        if (!sceneCandidates.Any())
         {
             _logger.LogWarning("SRL service requested with no candidate entities");
             return null;
@@ -56,13 +57,14 @@ public class SemanticRoleLabellingLlmService : ISemanticRoleLabellingLlmService
 
             if (service == null)
             {
-                _logger.LogDebug("Entity classifier is not configured, skipping classification");
+                _logger.LogDebug("SRL classifier is not configured, skipping classification");
                 return null;
             }
 
             var deploymentName = service.DeploymentNameOrModelId;
             var systemPrompt = GetSystemInstructionPrompt();
 
+            var userPrompt = GetUserPrompt(scene, sceneCandidates, knownActiveEntities, knownRemovedEntities);
             var request = new ChatCompletionRequest
             {
                 Provider = _settings.Provider,
@@ -82,7 +84,7 @@ public class SemanticRoleLabellingLlmService : ISemanticRoleLabellingLlmService
                     new MystiraChatMessage
                     {
                         MessageType = ChatMessageType.User,
-                        Content = GetUserPrompt(scene, candidateEntities, knownActiveEntities, knownRemovedEntities),
+                        Content = userPrompt,
                         Timestamp = DateTime.UtcNow
                     }
                 ],
@@ -90,20 +92,44 @@ public class SemanticRoleLabellingLlmService : ISemanticRoleLabellingLlmService
             };
 
             var response = await service.CompleteAsync(request, cancellationToken);
-            var content = response.Content;
-            if (string.IsNullOrWhiteSpace(content))
+            var classificationContent = response.Content;
+            if (string.IsNullOrWhiteSpace(classificationContent))
             {
-                _logger.LogWarning("Entity classification failed: empty response");
+                _logger.LogWarning("SRL classification failed: empty response");
                 return null;
             }
 
-            var summary = JsonConvert.DeserializeObject<SemanticRoleLabellingClassification>(content);
+            var summary = JsonConvert.DeserializeObject<SemanticRoleLabellingClassification>(classificationContent);
+
+            LogEntityClassificationIssues(userPrompt, summary, classificationContent);
+
             return summary;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error during scene entity classification");
+            _logger.LogError(ex, "Error during scene {SceneId} SRL classification", scene.Id);
             return null;
+        }
+
+        void LogEntityClassificationIssues(string userPrompt, SemanticRoleLabellingClassification? summary,
+            string classificationContent)
+        {
+            var srlInput = JsonConvert.DeserializeObject<SrlInput>(userPrompt);
+            var newlyIntroducedOrReintroduced =
+                summary?
+                    .EntityClassifications
+                    .Where(x => x.IntroductionStatus == "new" || x.IntroductionStatus == "reintroduced")
+                    .ToList();
+            if (newlyIntroducedOrReintroduced == null) return;
+            foreach (var newlyIntroduced in newlyIntroducedOrReintroduced)
+            {
+                var knownActive = srlInput?.KnownActiveEntities.Select(x => x.Name).ToArray();
+                if (!(knownActive?.Contains(newlyIntroduced.Name) ?? false)) continue;
+                _logger.LogWarning("SRL classification problem: entity {EntityName} is already known in {SceneId}", newlyIntroduced.Name, scene.Id);
+                _logger.LogInformation("Known active entities: {KnownActiveEntities}", string.Join(", ", knownActive));
+                _logger.LogInformation("User prompt: {UserPrompt}", userPrompt);
+                _logger.LogInformation("Classification content: {ClassificationContent}", classificationContent);
+            }
         }
     }
 

@@ -1,3 +1,4 @@
+using Mystira.StoryGenerator.Contracts.Entities;
 using Mystira.StoryGenerator.Contracts.StoryConsistency;
 
 namespace Mystira.StoryGenerator.Application.StoryConsistencyAnalysis.ContinuityAnalyzer;
@@ -22,15 +23,17 @@ public static class EntityContinuityAnalyzer
     /// vs. info vs. errors.
     /// </summary>
     public static IReadOnlyList<EntityContinuityIssue> FindIssues(
-        IReadOnlyDictionary<string, HashSet<string>> mustActiveByScene,
+        IReadOnlyDictionary<string, HashSet<SceneEntity>> mustActiveByScene,
         IReadOnlyDictionary<string, SemanticRoleLabellingClassification> srlByScene)
     {
         var issues = new List<EntityContinuityIssue>();
 
         foreach (var (sceneId, srlResult) in srlByScene)
         {
-            mustActiveByScene.TryGetValue(sceneId, out var mustActive);
-            mustActive ??= new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            mustActiveByScene.TryGetValue(sceneId, out var mustActiveScenes);
+            var mustActive =
+                mustActiveScenes?.Select(x => x.Name).ToHashSet(StringComparer.OrdinalIgnoreCase)
+                ?? new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
             foreach (var entity in srlResult.EntityClassifications)
             {
