@@ -6,6 +6,7 @@ using Mystira.StoryGenerator.Contracts.StoryConsistency;
 using Mystira.StoryGenerator.Domain.Services;
 using Mystira.StoryGenerator.Domain.Stories;
 using System.Text.Json;
+using Mystira.StoryGenerator.Contracts.Entities;
 
 namespace Mystira.StoryGenerator.Application.Services;
 
@@ -35,7 +36,7 @@ public sealed class StoryContinuityService : IStoryContinuityService
 
         // 2) Merge prefixes into per-scene must-active entity sets
         var mustActiveByScene = PrefixSummaryMerger
-            .ComputeMustActiveEntitiesByScene(prefixSummaries);
+            .ComputeMustActiveEntitiesByScene(prefixSummaries, new SceneEntityComparer());
 
         // 3) Lightweight pass: per-scene SRL classification
         var srlResults = await _srlService.ClassifyScenarioAsync(
