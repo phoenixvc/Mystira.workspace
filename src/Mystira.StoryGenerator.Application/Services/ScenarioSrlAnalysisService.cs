@@ -35,9 +35,9 @@ public sealed class ScenarioSrlAnalysisService : IScenarioSrlAnalysisService
         var scenesById = graph.Nodes.ToDictionary(s => s.Id, s => s);
 
         // 2. Derive per-scene must/may active & removed from prefix summaries
-        var mustActive = PrefixSummaryMerger.ComputeMustActiveEntitiesByScene(prefixSummaries);
-        var mustRemoved = PrefixSummaryMerger.ComputeDefinitelyRemovedEntitiesByScene(prefixSummaries);
-        var mayActive  = PrefixSummaryMerger.ComputeMaybeActiveEntitiesByScene(prefixSummaries);
+        var mustActive = PrefixSummaryMerger.ComputeMustActiveEntitiesByScene(prefixSummaries, new SceneEntityComparer());
+        var mustRemoved = PrefixSummaryMerger.ComputeDefinitelyRemovedEntitiesByScene(prefixSummaries, new SceneEntityComparer());
+        var mayActive  = PrefixSummaryMerger.ComputeMaybeActiveEntitiesByScene(prefixSummaries, new SceneEntityComparer());
 
         // 3. Derive all entities referenced in the scenario
         HashSet<SceneEntity> globalEntities = GetGlobalEntities(prefixSummaries, new SceneEntityComparer());
