@@ -407,6 +407,20 @@
 </div>
 
 @code {
+    private async Task RefreshChatSessionAsync()
+    {
+        try
+        {
+            if (CurrentChat != null && !string.IsNullOrWhiteSpace(CurrentChat.Id))
+            {
+                await ChatSessionService.LoadSessionAsync(CurrentChat.Id);
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.LogDebug(ex, "RefreshChatSessionAsync failed");
+        }
+    }
     private record DifficultyOption(
         string Key,
         string DifficultyDisplay,
@@ -1203,6 +1217,7 @@
                     StateHasChanged();
 
                     await SaveChatsAsync();
+                    await RefreshChatSessionAsync();
 
                     var validation = await ApiService.ValidateStoryAsync(generatedYaml, "yaml");
                     ValidationResult = MapValidation(validation);
@@ -1300,6 +1315,7 @@
                             currentViewedVersion = nextVersion;
                             StateHasChanged();
                             await SaveChatsAsync();
+                            await RefreshChatSessionAsync();
                         }
 
                         // Validate updated YAML
@@ -1318,6 +1334,7 @@
                         // Ensure UI reflects the latest version
                         StateHasChanged();
                         await SaveChatsAsync();
+                        await RefreshChatSessionAsync();
                         // Do not show the original assistant content (which contained JSON) in chat
                     }
                 }
@@ -1341,6 +1358,7 @@
                         currentViewedVersion = nextVersion2;
                         StateHasChanged();
                         await SaveChatsAsync();
+                        await RefreshChatSessionAsync();
                 }
 
                 // Validate updated YAML
@@ -1357,6 +1375,7 @@
                         Timestamp = DateTime.Now
                     });
                     await SaveChatsAsync();
+                    await RefreshChatSessionAsync();
                 }
                 else
                 {
