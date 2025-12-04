@@ -15,12 +15,21 @@
     </div>
 
     <div class="controls-section">
-        <!-- Active story info -->
-        <div class="active-story-info">
-            <span class="label">Active Story:</span>
-            <span class="title">@GetActiveStoryTitle()</span>
-            <span class="version">(v@GetActiveStoryVersion())</span>
-        </div>
+        <!-- Active scenario info from YAML snapshot -->
+        @if (HasActiveScenario())
+        {
+            <div class="active-story-info">
+                <span class="label">Active Scenario:</span>
+                <span class="title">@GetActiveScenarioTitle()</span>
+                <span class="version">(v@(GetActiveScenarioVersion()))</span>
+            </div>
+        }
+        else
+        {
+            <div class="error-message">
+                <p>No active scenario with a YAML snapshot was found. Please select a different adventure in the Story Generator, or generate/import a scenario.</p>
+            </div>
+        }
 
         <h2>Provider Configuration</h2>
 
@@ -61,6 +70,32 @@
         <h2>Filters</h2>
 
         <div class="filters-section">
+            <div class="filter-group">
+                <label>Issue Types:</label>
+                <div class="checkbox-group">
+                    <label>
+                        <input type="checkbox" @bind="IssueUsedButNotGuaranteedIntroduced" />
+                        Used but not guaranteed introduced
+                    </label>
+                    <label>
+                        <input type="checkbox" @bind="IssueReintroducedButAlreadyGuaranteed" />
+                        Reintroduced but already guaranteed
+                    </label>
+                    <label>
+                        <input type="checkbox" @bind="IssueRemovedButNotGuaranteedPresent" />
+                        Removed but not guaranteed present
+                    </label>
+                    <label>
+                        <input type="checkbox" @bind="IssueNewButUsedAsKnown" />
+                        New but used as known
+                    </label>
+                    <label>
+                        <input type="checkbox" @bind="IssueNewButAmbiguousUsage" />
+                        New but ambiguous usage
+                    </label>
+                </div>
+            </div>
+
             <div class="filter-group">
                 <label>Confidence Levels:</label>
                 <div class="checkbox-group">
@@ -183,12 +218,60 @@
     }
 </div>
 
+@implements IDisposable
+
 @code {
-    private string GetActiveStoryTitle()
+    protected override void OnInitialized()
     {
         try
         {
-            return ChatSessionService?.CurrentSession?.Title ?? "None";
+            ChatSessionService.CurrentSessionChanged += OnCurrentSessionChanged;
+        }
+        catch { /* ignore */ }
+        base.OnInitialized();
+    }
+
+    private void OnCurrentSessionChanged(ChatSession? session)
+    {
+        InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        try
+        {
+            ChatSessionService.CurrentSessionChanged -= OnCurrentSessionChanged;
+        }
+        catch { /* ignore */ }
+    }
+    private bool HasActiveScenario()
+    {
+        try
+        {
+            return !string.IsNullOrWhiteSpace(ChatSessionService?.CurrentSession?.YamlSnapshot);
+        }
+        catch { return false; }
+    }
+
+    private string GetActiveScenarioTitle()
+    {
+        try
+        {
+            var yaml = ChatSessionService?.CurrentSession?.YamlSnapshot;
+            if (string.IsNullOrWhiteSpace(yaml)) return "None";
+            // Try to parse title: look for a line starting with "title:" at root
+            foreach (var raw in yaml.Split('\n'))
+            {
+                var line = raw.Trim();
+                if (line.StartsWith("title:", StringComparison.OrdinalIgnoreCase))
+                {
+                    var val = line.Substring("title:".Length).Trim();
+                    return TrimQuotes(val);
+                }
+                // Stop scanning early if we pass the header block
+                if (line.StartsWith("scenes:", StringComparison.OrdinalIgnoreCase)) break;
+            }
+            return "Untitled Scenario";
         }
         catch
         {
@@ -196,10 +279,37 @@
         }
     }
 
-    private int GetActiveStoryVersion()
+    private int GetActiveScenarioVersion()
     {
         try
         {
+            var yaml = ChatSessionService?.CurrentSession?.YamlSnapshot;
+            if (string.IsNullOrWhiteSpace(yaml)) return 1;
+            // Prefer metadata.message_count if present
+            var lines = yaml.Split('\n');
+            var inMetadata = false;
+            foreach (var raw in lines)
+            {
+                var line = raw.Trim();
+                if (line.StartsWith("metadata:", StringComparison.OrdinalIgnoreCase))
+                {
+                    inMetadata = true; continue;
+                }
+                if (inMetadata)
+                {
+                    if (line.StartsWith("message_count:", StringComparison.OrdinalIgnoreCase))
+                    {
+                        var num = line.Substring("message_count:".Length).Trim();
+                        if (int.TryParse(num, out var v)) return Math.Max(1, v);
+                    }
+                    // End of metadata block when next top-level key appears
+                    if (!line.StartsWith("- ") && !line.StartsWith("#") && line.Contains(": ") && !raw.StartsWith(" "))
+                    {
+                        inMetadata = false;
+                    }
+                }
+            }
+            // Fallback to chat message count
             var messages = ChatSessionService?.CurrentSession?.Messages?.Count ?? 0;
             return Math.Max(1, messages);
         }
@@ -207,6 +317,15 @@
         {
             return 1;
         }
+    }
+
+    private static string TrimQuotes(string value)
+    {
+        if (value.Length >= 2 && ((value.StartsWith("\"") && value.EndsWith("\"")) || (value.StartsWith("'") && value.EndsWith("'"))))
+        {
+            return value.Substring(1, value.Length - 2);
+        }
+        return value;
     }
 
     // Bound checkbox helpers -> map to internal filter sets
@@ -313,6 +432,7 @@
 
     private HashSet<string> selectedConfidences = new();
     private HashSet<string> selectedEntityTypes = new();
+    private HashSet<string> selectedIssueTypes = new(StringComparer.OrdinalIgnoreCase);
 
     // Keep the full set of issues from the last analysis run.
     // Filtering must be a post-processing step applied on top of these
@@ -361,6 +481,19 @@
         }
 
         _properNounsOnly = true;
+
+        // Default all issue types selected
+        if (selectedIssueTypes.Count == 0)
+        {
+            selectedIssueTypes = new HashSet<string>(new[]
+            {
+                "usedButNotGuaranteedIntroduced",
+                "reintroducedButAlreadyGuaranteed",
+                "removedButNotGuaranteedPresent",
+                "newButUsedAsKnown",
+                "newButAmbiguousUsage"
+            }, StringComparer.OrdinalIgnoreCase);
+        }
     }
 
     private IEnumerable<AiModelDefinition> GetModelsForProvider(string provider)
@@ -523,8 +656,57 @@
         };
 
         // Always re-apply filters to the original unfiltered issue set
-        filteredIssues = ContinuityService.ApplyFilters(originalIssues, filter);
+        var baseFiltered = ContinuityService.ApplyFilters(originalIssues, filter);
+
+        // Apply issue-type filter locally (issue.IssueType in API uses camelCase strings)
+        if (selectedIssueTypes.Count > 0)
+        {
+            filteredIssues = baseFiltered
+                .Where(i => !string.IsNullOrWhiteSpace(i.IssueType) && selectedIssueTypes.Contains(i.IssueType))
+                .ToList();
+        }
+        else
+        {
+            filteredIssues = baseFiltered;
+        }
         StateHasChanged();
+    }
+
+    // Bound checkbox helpers for Issue Types
+    private bool IssueUsedButNotGuaranteedIntroduced
+    {
+        get => selectedIssueTypes.Contains("usedButNotGuaranteedIntroduced");
+        set => UpdateIssueTypeFilter("usedButNotGuaranteedIntroduced", value);
+    }
+    private bool IssueReintroducedButAlreadyGuaranteed
+    {
+        get => selectedIssueTypes.Contains("reintroducedButAlreadyGuaranteed");
+        set => UpdateIssueTypeFilter("reintroducedButAlreadyGuaranteed", value);
+    }
+    private bool IssueRemovedButNotGuaranteedPresent
+    {
+        get => selectedIssueTypes.Contains("removedButNotGuaranteedPresent");
+        set => UpdateIssueTypeFilter("removedButNotGuaranteedPresent", value);
+    }
+    private bool IssueNewButUsedAsKnown
+    {
+        get => selectedIssueTypes.Contains("newButUsedAsKnown");
+        set => UpdateIssueTypeFilter("newButUsedAsKnown", value);
+    }
+    private bool IssueNewButAmbiguousUsage
+    {
+        get => selectedIssueTypes.Contains("newButAmbiguousUsage");
+        set => UpdateIssueTypeFilter("newButAmbiguousUsage", value);
+    }
+
+    private void UpdateIssueTypeFilter(string key, bool include)
+    {
+        if (include)
+            selectedIssueTypes.Add(key);
+        else
+            selectedIssueTypes.Remove(key);
+
+        ApplyFilters();
     }
 
     private Scenario CreateSampleScenario()
