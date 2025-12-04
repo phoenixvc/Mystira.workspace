@@ -15,6 +15,13 @@
     </div>
 
     <div class="controls-section">
+        <!-- Active story info -->
+        <div class="active-story-info">
+            <span class="label">Active Story:</span>
+            <span class="title">@GetActiveStoryTitle()</span>
+            <span class="version">(v@GetActiveStoryVersion())</span>
+        </div>
+
         <h2>Provider Configuration</h2>
 
         <div class="provider-config">
@@ -177,6 +184,31 @@
 </div>
 
 @code {
+    private string GetActiveStoryTitle()
+    {
+        try
+        {
+            return ChatSessionService?.CurrentSession?.Title ?? "None";
+        }
+        catch
+        {
+            return "None";
+        }
+    }
+
+    private int GetActiveStoryVersion()
+    {
+        try
+        {
+            var messages = ChatSessionService?.CurrentSession?.Messages?.Count ?? 0;
+            return Math.Max(1, messages);
+        }
+        catch
+        {
+            return 1;
+        }
+    }
+
     // Bound checkbox helpers -> map to internal filter sets
     private bool ConfidenceHigh
     {

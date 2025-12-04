@@ -195,6 +195,13 @@ For each entity in candidate_entities, decide:
     6. Overall confidence and a short evidence span.
     7. Whether the entity is used as a proper noun (is_proper_noun) in the local wording of this scene.
 You are doing local classification: only this scene’s text plus the provided known_active / known_removed context.
+Special rules for control / UI markup (Very Important):
+    •   Text patterns like ""[c:Name] playing Name"", ""playing as Name"", or similar control prompts
+        MUST be treated as normal references to an already-known entity, not as introductions.
+    •   If such a pattern appears for an entity that is listed in known_active_entities, you MUST
+        set introduction_status = ""already_known"" and local_usage_style = ""already_known_style""
+        for that entity (assuming it appears in this scene at all).
+    •   Do NOT label an entity as ""new"" solely because it appears in control/markup text.
 ________________________________________
 3. Local Introduction / Removal Status
 Use the following rules:
@@ -212,12 +219,21 @@ Hard constraints for introduction_status:
       known_removed_entities, you MUST choose between:
         o ""reintroduced"" if the scene clearly shows it coming back, OR
         o ""not_present"" if the name is only mentioned indirectly without the entity actually being back.
- You are NOT allowed to label a known_removed entity as ""new"".
+You are NOT allowed to label a known_removed entity as ""new"".
+Important:
+    • Even if the wording looks like an introduction (for example, ""Archimedes the owl hooted
+      from his branch""), if the entity's (name, type) pair is present in known_active_entities,
+      you MUST still use introduction_status = ""already_known"". The descriptive phrase does NOT
+      override the known_active_entities truth.
+    • Do NOT label an entity as ""new"" just because the sentence repeats a pattern like
+      ""<Name> the <species>"" or adds adjectives. If the entity is already in known_active_entities,
+      treat this as a normal continued mention, not a first introduction.
 ________________________________________
 If the entity appears in the scene text:
 introduction_status = ""new""
 Use this when:
-    •	The entity is not in known_active_entities
+    •	The entity appears in this scene AND is NOT in known_active_entities AND
+        NOT in known_removed_entities.
 and
     •	The scene clearly brings it into the story for the first time:
         o	meeting for the first time
