@@ -15,12 +15,21 @@
     </div>
 
     <div class="controls-section">
-        <!-- Active story info -->
-        <div class="active-story-info">
-            <span class="label">Active Story:</span>
-            <span class="title">@GetActiveStoryTitle()</span>
-            <span class="version">(v@GetActiveStoryVersion())</span>
-        </div>
+        <!-- Active scenario info from YAML snapshot -->
+        @if (HasActiveScenario())
+        {
+            <div class="active-story-info">
+                <span class="label">Active Scenario:</span>
+                <span class="title">@GetActiveScenarioTitle()</span>
+                <span class="version">(v@(GetActiveScenarioVersion()))</span>
+            </div>
+        }
+        else
+        {
+            <div class="error-message">
+                <p>No active scenario with a YAML snapshot was found. Please select a different adventure in the Story Generator, or generate/import a scenario.</p>
+            </div>
+        }
 
         <h2>Provider Configuration</h2>
 
@@ -184,11 +193,34 @@
 </div>
 
 @code {
-    private string GetActiveStoryTitle()
+    private bool HasActiveScenario()
     {
         try
         {
-            return ChatSessionService?.CurrentSession?.Title ?? "None";
+            return !string.IsNullOrWhiteSpace(ChatSessionService?.CurrentSession?.YamlSnapshot);
+        }
+        catch { return false; }
+    }
+
+    private string GetActiveScenarioTitle()
+    {
+        try
+        {
+            var yaml = ChatSessionService?.CurrentSession?.YamlSnapshot;
+            if (string.IsNullOrWhiteSpace(yaml)) return "None";
+            // Try to parse title: look for a line starting with "title:" at root
+            foreach (var raw in yaml.Split('\n'))
+            {
+                var line = raw.Trim();
+                if (line.StartsWith("title:", StringComparison.OrdinalIgnoreCase))
+                {
+                    var val = line.Substring("title:".Length).Trim();
+                    return TrimQuotes(val);
+                }
+                // Stop scanning early if we pass the header block
+                if (line.StartsWith("scenes:", StringComparison.OrdinalIgnoreCase)) break;
+            }
+            return "Untitled Scenario";
         }
         catch
         {
@@ -196,10 +228,37 @@
         }
     }
 
-    private int GetActiveStoryVersion()
+    private int GetActiveScenarioVersion()
     {
         try
         {
+            var yaml = ChatSessionService?.CurrentSession?.YamlSnapshot;
+            if (string.IsNullOrWhiteSpace(yaml)) return 1;
+            // Prefer metadata.message_count if present
+            var lines = yaml.Split('\n');
+            var inMetadata = false;
+            foreach (var raw in lines)
+            {
+                var line = raw.Trim();
+                if (line.StartsWith("metadata:", StringComparison.OrdinalIgnoreCase))
+                {
+                    inMetadata = true; continue;
+                }
+                if (inMetadata)
+                {
+                    if (line.StartsWith("message_count:", StringComparison.OrdinalIgnoreCase))
+                    {
+                        var num = line.Substring("message_count:".Length).Trim();
+                        if (int.TryParse(num, out var v)) return Math.Max(1, v);
+                    }
+                    // End of metadata block when next top-level key appears
+                    if (!line.StartsWith("- ") && !line.StartsWith("#") && line.Contains(": ") && !raw.StartsWith(" "))
+                    {
+                        inMetadata = false;
+                    }
+                }
+            }
+            // Fallback to chat message count
             var messages = ChatSessionService?.CurrentSession?.Messages?.Count ?? 0;
             return Math.Max(1, messages);
         }
@@ -207,6 +266,15 @@
         {
             return 1;
         }
+    }
+
+    private static string TrimQuotes(string value)
+    {
+        if (value.Length >= 2 && ((value.StartsWith("\"") && value.EndsWith("\"")) || (value.StartsWith("'") && value.EndsWith("'"))))
+        {
+            return value.Substring(1, value.Length - 2);
+        }
+        return value;
     }
 
     // Bound checkbox helpers -> map to internal filter sets

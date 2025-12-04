@@ -1186,6 +1186,7 @@
                             Content = generatedYaml,
                             CreatedAt = DateTime.UtcNow
                         });
+                        currentViewedVersion = 1;
                     }
                     else
                     {
@@ -1197,7 +1198,9 @@
                             Content = generatedYaml,
                             CreatedAt = DateTime.UtcNow
                         });
+                        currentViewedVersion = nextVersion;
                     }
+                    StateHasChanged();
 
                     await SaveChatsAsync();
 
@@ -1294,7 +1297,8 @@
                                 Content = convertedYaml,
                                 CreatedAt = DateTime.UtcNow
                             });
-
+                            currentViewedVersion = nextVersion;
+                            StateHasChanged();
                             await SaveChatsAsync();
                         }
 
@@ -1311,6 +1315,8 @@
                                 : $"Story updated from JSON but validation failed. Issues: {BuildValidationSummary(validation)}",
                             Timestamp = DateTime.Now
                         });
+                        // Ensure UI reflects the latest version
+                        StateHasChanged();
                         await SaveChatsAsync();
                         // Do not show the original assistant content (which contained JSON) in chat
                     }
@@ -1322,12 +1328,24 @@
                     if (CurrentChat != null)
                     {
                         CurrentChat.YamlSnapshot = updatedYaml;
+                        // Create a new version snapshot for updated YAML
+                        var nextVersion2 = CurrentChat.YamlSnapshots.Count == 0
+                            ? 1
+                            : CurrentChat.YamlSnapshots.Max(s => s.Version) + 1;
+                        CurrentChat.YamlSnapshots.Add(new YamlSnapshot
+                        {
+                            Version = nextVersion2,
+                            Content = updatedYaml,
+                            CreatedAt = DateTime.UtcNow
+                        });
+                        currentViewedVersion = nextVersion2;
+                        StateHasChanged();
                         await SaveChatsAsync();
-                    }
+                }
 
-                    // Validate updated YAML
-                    var validation = await ApiService.ValidateStoryAsync(updatedYaml, "yaml");
-                    ValidationResult = MapValidation(validation);
+                // Validate updated YAML
+                var validation = await ApiService.ValidateStoryAsync(updatedYaml, "yaml");
+                ValidationResult = MapValidation(validation);
 
                     // Add concise system message
                     CurrentChat!.Messages.Add(new StoryGeneratorChatMessage
@@ -1401,6 +1419,8 @@
                                     Content = fixedYaml,
                                     CreatedAt = DateTime.UtcNow
                                 });
+                                currentViewedVersion = nextVersion;
+                                StateHasChanged();
 
                                 await SaveChatsAsync();
 
@@ -1976,7 +1996,9 @@
                             Content = YamlContent,
                             CreatedAt = DateTime.UtcNow
                         });
+                        currentViewedVersion = 1;
                     }
+                    StateHasChanged();
 
                     var summary = BuildYamlSummaryMessage(YamlContent);
                     CurrentChat.Messages.Add(new StoryGeneratorChatMessage
