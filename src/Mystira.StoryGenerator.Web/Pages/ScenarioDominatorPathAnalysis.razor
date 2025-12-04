@@ -475,7 +475,32 @@
     }
 </style>
 
+@implements IDisposable
+
 @code {
+    protected override void OnInitialized()
+    {
+        try
+        {
+            ChatSessionService.CurrentSessionChanged += OnCurrentSessionChanged;
+        }
+        catch { /* ignore */ }
+        base.OnInitialized();
+    }
+
+    private void OnCurrentSessionChanged(ChatSession? session)
+    {
+        InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        try
+        {
+            ChatSessionService.CurrentSessionChanged -= OnCurrentSessionChanged;
+        }
+        catch { /* ignore */ }
+    }
     private bool HasActiveScenario()
     {
         try

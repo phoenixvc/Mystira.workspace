@@ -71,6 +71,32 @@
 
         <div class="filters-section">
             <div class="filter-group">
+                <label>Issue Types:</label>
+                <div class="checkbox-group">
+                    <label>
+                        <input type="checkbox" @bind="IssueUsedButNotGuaranteedIntroduced" />
+                        Used but not guaranteed introduced
+                    </label>
+                    <label>
+                        <input type="checkbox" @bind="IssueReintroducedButAlreadyGuaranteed" />
+                        Reintroduced but already guaranteed
+                    </label>
+                    <label>
+                        <input type="checkbox" @bind="IssueRemovedButNotGuaranteedPresent" />
+                        Removed but not guaranteed present
+                    </label>
+                    <label>
+                        <input type="checkbox" @bind="IssueNewButUsedAsKnown" />
+                        New but used as known
+                    </label>
+                    <label>
+                        <input type="checkbox" @bind="IssueNewButAmbiguousUsage" />
+                        New but ambiguous usage
+                    </label>
+                </div>
+            </div>
+
+            <div class="filter-group">
                 <label>Confidence Levels:</label>
                 <div class="checkbox-group">
                     <label>
@@ -192,7 +218,32 @@
     }
 </div>
 
+@implements IDisposable
+
 @code {
+    protected override void OnInitialized()
+    {
+        try
+        {
+            ChatSessionService.CurrentSessionChanged += OnCurrentSessionChanged;
+        }
+        catch { /* ignore */ }
+        base.OnInitialized();
+    }
+
+    private void OnCurrentSessionChanged(ChatSession? session)
+    {
+        InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        try
+        {
+            ChatSessionService.CurrentSessionChanged -= OnCurrentSessionChanged;
+        }
+        catch { /* ignore */ }
+    }
     private bool HasActiveScenario()
     {
         try
@@ -381,6 +432,7 @@
 
     private HashSet<string> selectedConfidences = new();
     private HashSet<string> selectedEntityTypes = new();
+    private HashSet<string> selectedIssueTypes = new(StringComparer.OrdinalIgnoreCase);
 
     // Keep the full set of issues from the last analysis run.
     // Filtering must be a post-processing step applied on top of these
@@ -429,6 +481,19 @@
         }
 
         _properNounsOnly = true;
+
+        // Default all issue types selected
+        if (selectedIssueTypes.Count == 0)
+        {
+            selectedIssueTypes = new HashSet<string>(new[]
+            {
+                "usedButNotGuaranteedIntroduced",
+                "reintroducedButAlreadyGuaranteed",
+                "removedButNotGuaranteedPresent",
+                "newButUsedAsKnown",
+                "newButAmbiguousUsage"
+            }, StringComparer.OrdinalIgnoreCase);
+        }
     }
 
     private IEnumerable<AiModelDefinition> GetModelsForProvider(string provider)
@@ -591,8 +656,57 @@
         };
 
         // Always re-apply filters to the original unfiltered issue set
-        filteredIssues = ContinuityService.ApplyFilters(originalIssues, filter);
+        var baseFiltered = ContinuityService.ApplyFilters(originalIssues, filter);
+
+        // Apply issue-type filter locally (issue.IssueType in API uses camelCase strings)
+        if (selectedIssueTypes.Count > 0)
+        {
+            filteredIssues = baseFiltered
+                .Where(i => !string.IsNullOrWhiteSpace(i.IssueType) && selectedIssueTypes.Contains(i.IssueType))
+                .ToList();
+        }
+        else
+        {
+            filteredIssues = baseFiltered;
+        }
         StateHasChanged();
+    }
+
+    // Bound checkbox helpers for Issue Types
+    private bool IssueUsedButNotGuaranteedIntroduced
+    {
+        get => selectedIssueTypes.Contains("usedButNotGuaranteedIntroduced");
+        set => UpdateIssueTypeFilter("usedButNotGuaranteedIntroduced", value);
+    }
+    private bool IssueReintroducedButAlreadyGuaranteed
+    {
+        get => selectedIssueTypes.Contains("reintroducedButAlreadyGuaranteed");
+        set => UpdateIssueTypeFilter("reintroducedButAlreadyGuaranteed", value);
+    }
+    private bool IssueRemovedButNotGuaranteedPresent
+    {
+        get => selectedIssueTypes.Contains("removedButNotGuaranteedPresent");
+        set => UpdateIssueTypeFilter("removedButNotGuaranteedPresent", value);
+    }
+    private bool IssueNewButUsedAsKnown
+    {
+        get => selectedIssueTypes.Contains("newButUsedAsKnown");
+        set => UpdateIssueTypeFilter("newButUsedAsKnown", value);
+    }
+    private bool IssueNewButAmbiguousUsage
+    {
+        get => selectedIssueTypes.Contains("newButAmbiguousUsage");
+        set => UpdateIssueTypeFilter("newButAmbiguousUsage", value);
+    }
+
+    private void UpdateIssueTypeFilter(string key, bool include)
+    {
+        if (include)
+            selectedIssueTypes.Add(key);
+        else
+            selectedIssueTypes.Remove(key);
+
+        ApplyFilters();
     }
 
     private Scenario CreateSampleScenario()
