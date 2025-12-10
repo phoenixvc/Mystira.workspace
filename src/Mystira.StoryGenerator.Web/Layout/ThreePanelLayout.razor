@@ -6,6 +6,7 @@
 @inject Blazored.LocalStorage.ILocalStorageService LocalStorage
 @inject IJSRuntime JSRuntime
 @inject IAiModelSettingsService ModelSettingsService
+@inject NavigationManager NavManager
 @inject IYamlImportService YamlImportService
 @inject ILogger<ThreePanelLayout> Logger
 @inject Mystira.StoryGenerator.Web.Services.IChatSessionService ChatSessionService
@@ -36,22 +37,12 @@
                     </svg>
                 </button>
                 <h1 class="text-2xl font-bold text-gray-900">Mystira Story Generator</h1>
-                <span class="bg-primary-100 text-primary-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
-                    Alpha
+                <span title="Early preview build"
+                      class="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-amber-100 via-orange-100 to-rose-100 text-amber-800 text-xs font-semibold px-2.5 py-0.5 ring-1 ring-inset ring-amber-500/30 shadow-sm">
+                    <span class="inline-block w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+                    <span class="uppercase tracking-wide">Alpha</span>
                 </span>
-                <!-- Top navigation links to analysis pages -->
-                <NavLink class="text-sm font-medium text-gray-600 hover:text-gray-900 px-3 py-1 rounded hover:bg-gray-100"
-                         href="/story-continuity"
-                         Match="NavLinkMatch.Prefix"
-                         title="Open Story Continuity Analyzer">
-                    Story Continuity
-                </NavLink>
-                <NavLink class="text-sm font-medium text-gray-600 hover:text-gray-900 px-3 py-1 rounded hover:bg-gray-100"
-                         href="/scenario-dominator-path-analysis"
-                         Match="NavLinkMatch.Prefix"
-                         title="Open Scenario Dominator Path Analysis">
-                    Path Analysis
-                </NavLink>
+                <!-- Analysis links moved into the left panel sidebar -->
             </div>
             <div class="flex items-center space-x-4">
                 <button class="text-gray-500 hover:text-gray-700 transition-colors">
@@ -81,78 +72,152 @@
         @Body
     </div>
 
-    <!-- Main Content Area -->
+    <!-- Main Content Area (hidden on analysis pages) -->
+    @if (!isAnalysisRoute)
+    {
     <main class="flex-1 flex overflow-hidden relative">
         <!-- Syncfusion Sidebar - Left Panel -->
         <SfSidebar @ref="sidebarRef"
                    Width="320px"
                    Type="SidebarType.Push"
                    Position="SidebarPosition.Left"
-                   DockSize="80px"
-                   EnableDock="false"
+                   DockSize="0px"
+                   EnableDock="true"
                    ShowBackdrop="false"
                    MediaQuery="(min-width: 1024px)"
                    Target=".sidebar-main-content"
                    @bind-IsOpen="sidebarIsOpen">
             <ChildContent>
-                <div class="flex flex-col h-full bg-gray-50 border-r border-gray-200">
+                <div class="flex flex-col h-full bg-gray-50 border-r border-gray-200 overflow-x-hidden">
                     <div class="p-3 bg-white border-b">
-                         <div class="flex flex-col gap-3">
-                             <div class="flex items-center justify-between gap-2">
-                                 <span class="text-xs font-semibold uppercase tracking-wide text-gray-500">Random Adventures</span>
-                                 <div class="relative">
-                                     <button type="button"
-                                             class="text-gray-500 hover:text-gray-700 p-1 rounded hover:bg-gray-100 transition-colors"
-                                             @onclick="ToggleImportMenu"
-                                             title="Import YAML story">
-                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                                         </svg>
-                                     </button>
-                                     @if (showImportMenu)
-                                     {
-                                         <div class="absolute top-8 right-0 bg-white border border-gray-200 rounded-md shadow-lg z-10 min-w-[160px]">
-                                             <button type="button"
-                                                     class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
-                                                     @onclick="ImportFromClipboard">
-                                                 <span>📋</span>
-                                                 <span>From Clipboard</span>
-                                             </button>
-                                             <button type="button"
-                                                     class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2 border-t border-gray-200"
-                                                     @onclick="TriggerFileInput">
-                                                 <span>📁</span>
-                                                 <span>From File</span>
-                                             </button>
-                                         </div>
-                                     }
-                                 </div>
-                             </div>
-                             <div class="flex flex-col gap-2">
-                                 @foreach (var option in difficultyOptions)
-                                 {
-                                     <button type="button"
-                                             class="@($"difficulty-button difficulty-{option.Key}")"
-                                             @onclick="async () => await HandleRandomizeStory(option.Key)">
-                                         <span class="difficulty-icon">
-                                             @((MarkupString)option.IconSvg)
-                                         </span>
-                                         <span class="difficulty-text">
-                                             <span class="difficulty-label">@option.ButtonHeading</span>
-                                             <span class="difficulty-meta">@option.ButtonDescription</span>
-                                         </span>
-                                         <span class="difficulty-pill">@option.DifficultyDisplay</span>
-                                     </button>
-                                 }
-                             </div>
-                         </div>
-                         <div class="mt-2">
-                             <input class="w-full border border-gray-300 rounded-md px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
-                                    placeholder="Fuzzy search chats..."
-                                    @bind="searchQuery"
-                                    @bind:event="oninput" />
-                         </div>
-                     </div>
+                        <div class="flex flex-col gap-3">
+                            <!-- New Chat (moved to top of side panel) -->
+                            <div class="relative">
+                                <button type="button"
+                                        class="w-full inline-flex items-center justify-between gap-2 rounded-md border border-primary-200 bg-primary-50 px-3 py-2 text-sm font-semibold text-primary-800 shadow-sm hover:bg-primary-100"
+                                        title="Start a new chat"
+                                        @onclick="HandleNewChat">
+                                    <span class="inline-flex items-center gap-2">
+                                        <!-- chat-plus icon -->
+                                        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M8 9h5m-9 6v4l3-3h8a4 4 0 004-4V8a4 4 0 00-4-4H7a4 4 0 00-4 4v3" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M16 9h3m-1.5-1.5V10.5" />
+                                        </svg>
+                                        <span>New Chat</span>
+                                    </span>
+                                    <svg class="w-4 h-4 text-primary-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                                </button>
+                            </div>
+                            <!-- Random Adventure dropdown -->
+                            <div>
+                                <div class="relative">
+                                    <button type="button"
+                                            class="w-full inline-flex items-center justify-between gap-2 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50"
+                                            @onclick="ToggleRandomMenu">
+                                        <span class="inline-flex items-center gap-2">
+                                            <!-- dice icon for random -->
+                                            <svg class="w-4 h-4 text-gray-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                                                <rect x="3" y="3" width="18" height="18" rx="3" ry="3" />
+                                                <circle cx="8" cy="8" r="1" />
+                                                <circle cx="12" cy="12" r="1" />
+                                                <circle cx="16" cy="16" r="1" />
+                                                <circle cx="8" cy="16" r="1" />
+                                                <circle cx="16" cy="8" r="1" />
+                                            </svg>
+                                            <span>Random Adventure</span>
+                                        </span>
+                                        <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                                    </button>
+                                    @if (showRandomMenu)
+                                    {
+                                        <div class="absolute z-50 mt-2 w-full rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5">
+                                            <button type="button" class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2" @onclick="SelectRandomEasy">
+                                                <span class="inline-block w-2.5 h-2.5 rounded-full bg-green-500"></span>
+                                                <span>Easy (8-12 scenes)</span>
+                                            </button>
+                                            <button type="button" class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2" @onclick="SelectRandomMedium">
+                                                <span class="inline-block w-2.5 h-2.5 rounded-full bg-amber-500"></span>
+                                                <span>Heroic (20-40 scenes)</span>
+                                            </button>
+                                            <button type="button" class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2" @onclick="SelectRandomHard">
+                                                <span class="inline-block w-2.5 h-2.5 rounded-full bg-red-500"></span>
+                                                <span>Epic (80-120 scenes)</span>
+                                            </button>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+
+                            <!-- Import Story dropdown -->
+                            <div>
+                                <div class="relative">
+                                    <button type="button"
+                                            class="w-full inline-flex items-center justify-between gap-2 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50"
+                                            @onclick="ToggleImportMenu">
+                                        <span class="inline-flex items-center gap-2">
+                                            <!-- import icon -->
+                                            <svg class="w-4 h-4 text-gray-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v12m0 0l-3-3m3 3l3-3M4 21h16" />
+                                            </svg>
+                                            <span>Import Story</span>
+                                        </span>
+                                        <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                                    </button>
+                                    @if (showImportMenu)
+                                    {
+                                        <div class="absolute z-50 mt-2 w-full rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5">
+                                            <button type="button"
+                                                    class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                                                    @onclick="ImportFromClipboard">
+                                                <span>📋</span>
+                                                <span>From Clipboard</span>
+                                            </button>
+                                            <button type="button"
+                                                    class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                                                    @onclick="TriggerFileInput">
+                                                <span>📁</span>
+                                                <span>From File</span>
+                                            </button>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+
+                            <!-- Search (placed below Import Story) -->
+                            <div>
+                                <input class="w-full border border-gray-300 rounded-md px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                       placeholder="Search chats..."
+                                       @bind="searchQuery"
+                                       @bind:event="oninput" />
+                            </div>
+
+                            <!-- Analysis section moved here -->
+                            <div>
+                                <span class="text-xs font-semibold uppercase tracking-wide text-gray-500">Analysis</span>
+                                <div class="mt-2 grid grid-cols-1 gap-2">
+                                    <NavLink class="w-full inline-flex items-center justify-between gap-2 rounded-md border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                                             href="/story-continuity"
+                                             Match="NavLinkMatch.Prefix"
+                                             title="Open Story Continuity Analyzer">
+                                        <span class="inline-flex items-center gap-2">
+                                            <span class="bi bi-diagram-3-fill" aria-hidden="true"></span>
+                                            <span>Story Continuity</span>
+                                        </span>
+                                    </NavLink>
+                                    <NavLink class="w-full inline-flex items-center justify-between gap-2 rounded-md border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                                             href="/scenario-dominator-path-analysis"
+                                             Match="NavLinkMatch.Prefix"
+                                             title="Open Scenario Dominator Path Analysis">
+                                        <span class="inline-flex items-center gap-2">
+                                            <span class="bi bi-graph-up" aria-hidden="true"></span>
+                                            <span>Path Analysis</span>
+                                        </span>
+                                    </NavLink>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
 
                     <InputFile OnChange="HandleFileSelect" hidden accept=".yaml,.yml" />
                     <div class="flex-1 overflow-hidden">
@@ -196,6 +261,23 @@
                 overflow: hidden;
                 flex: 1 1 50%;
                 min-width: 0;
+            }
+            /* Ensure the left sidebar truly collapses to 0 when closed */
+            .e-sidebar.app-left-sidebar.e-close {
+                width: 0 !important;
+                min-width: 0 !important;
+                flex: 0 0 0 !important;
+                border-right-width: 0 !important;
+            }
+            /* When open, keep the configured width */
+            .e-sidebar.app-left-sidebar.e-open {
+                width: 320px !important;
+                min-width: 320px !important;
+                flex: 0 0 320px !important;
+            }
+            /* Prevent the sidebar from overlaying and consuming layout space unexpectedly */
+            .e-sidebar.app-left-sidebar {
+                position: relative;
             }
             .difficulty-button {
                 display: flex;
@@ -293,6 +375,7 @@
             }
         </style>
     </main>
+    }
 
     @if (!string.IsNullOrWhiteSpace(copyFeedbackMessage))
     {
@@ -404,9 +487,34 @@
             </div>
         </div>
     }
+
+
 </div>
 
 @code {
+    // Tracks whether the current route is one of the analysis pages that should render standalone
+    private bool isAnalysisRoute;
+
+    private void UpdateRouteState()
+    {
+        try
+        {
+            var relative = NavManager.ToBaseRelativePath(NavManager.Uri).Trim('/');
+            isAnalysisRoute = relative.StartsWith("story-continuity", StringComparison.OrdinalIgnoreCase)
+                              || relative.StartsWith("scenario-dominator-path-analysis", StringComparison.OrdinalIgnoreCase);
+        }
+        catch
+        {
+            isAnalysisRoute = false;
+        }
+    }
+
+    private void HandleLocationChanged(object? sender, Microsoft.AspNetCore.Components.Routing.LocationChangedEventArgs e)
+    {
+        UpdateRouteState();
+        _ = InvokeAsync(StateHasChanged);
+    }
+
     private async Task RefreshChatSessionAsync()
     {
         try
@@ -483,7 +591,7 @@
 
     // Sidebar state
     private SfSidebar? sidebarRef;
-    private bool sidebarIsOpen = false;
+    private bool sidebarIsOpen = true;
     private bool showSettingsModal;
 
     // Data properties
@@ -505,8 +613,9 @@
     private int RightPanelWidth { get; set; } = 50;
     private string RightPanelInlineStyle => $"width:{Math.Clamp(RightPanelWidth, 0, 100)}%;";
 
-    // Import state
+    // Import & dropdown state
     private bool showImportMenu = false;
+    private bool showRandomMenu = false;
     private bool showImportResult = false;
     private YamlImportResult? importResult;
 
@@ -552,6 +661,8 @@
     {
         try
         {
+            UpdateRouteState();
+            NavManager.LocationChanged += HandleLocationChanged;
             var saved = await LocalStorage.GetItemAsync<List<StoryGeneratorChatHistory>>(ChatsStorageKey);
             ChatHistories = saved ?? new List<StoryGeneratorChatHistory>();
             CurrentChat = ChatHistories.FirstOrDefault();
@@ -570,20 +681,50 @@
         await base.OnInitializedAsync();
     }
 
+    // Note: do not force the sidebar open on first render; allow user to toggle/collapse it freely.
+
     private async Task ToggleSidebarAsync()
     {
+        // Flip the bound state; Syncfusion will apply .e-open/.e-close classes accordingly
         sidebarIsOpen = !sidebarIsOpen;
+
+        if (!sidebarIsOpen)
+        {
+            // Ensure no floating menus remain visible when the sidebar is collapsed
+            showImportMenu = false;
+            showRandomMenu = false;
+        }
+
         await InvokeAsync(StateHasChanged);
     }
 
     private void CloseMobileMenu()
     {
-        // Close the sidebar on mobile/new chat selection
-        sidebarIsOpen = false;
-        // Also ensure any small pop menus are closed
+        // Do not auto-collapse the sidebar; only close any small pop menus
         showImportMenu = false;
+        showRandomMenu = false;
         // No need to InvokeAsync here; callers trigger StateHasChanged after actions
     }
+
+    private void ToggleRandomMenu()
+    {
+        showRandomMenu = !showRandomMenu;
+        if (showRandomMenu)
+        {
+            showImportMenu = false;
+        }
+    }
+
+    private async Task SelectRandomDifficultyAndClose(string key)
+    {
+        showRandomMenu = false;
+        await HandleRandomizeStory(key);
+    }
+
+    private Task SelectRandomEasy() => SelectRandomDifficultyAndClose("easy");
+    private Task SelectRandomMedium() => SelectRandomDifficultyAndClose("medium");
+    private Task SelectRandomHard() => SelectRandomDifficultyAndClose("hard");
+
 
     private async Task EnsureModelSettingsAsync()
     {
@@ -886,63 +1027,63 @@
        StateHasChanged();
 
         // Optionally kick off the setup flow with an initial prompt
-        IsTyping = true;
-        StateHasChanged();
-        try
-        {
-            var settings = await GetSettingsAsync();
-            var temperature = ClampTemperatureForCurrentModel(settings.Temperature);
-            var maxTokens = ClampTokensForCurrentModel(settings.MaxTokens);
-
-            var req = new ChatCompletionRequest
-            {
-                Provider = settings.Provider,
-                ModelId = settings.ModelId,
-                Model = settings.Deployment,
-                Temperature = temperature,
-                MaxTokens = maxTokens,
-                Messages = new List<MystiraChatMessage>
-                {
-                    new MystiraChatMessage { MessageType = ChatMessageType.User, Content = "I'd like to generate a new story. Please start gathering the required parameters." }
-                }
-            };
-
-            var resp = await ApiService.SetupStoryAsync(req);
-            if (resp.Success && !string.IsNullOrWhiteSpace(resp.Content))
-            {
-                CurrentChat.Messages.Add(new StoryGeneratorChatMessage
-                {
-                    Role = "assistant",
-                    Content = resp.Content,
-                    Timestamp = DateTime.Now
-                });
-            }
-            else if (!string.IsNullOrWhiteSpace(resp.Error))
-            {
-                CurrentChat.Messages.Add(new StoryGeneratorChatMessage
-                {
-                    Role = "assistant",
-                    Content = $"Error starting setup: {resp.Error}",
-                    Timestamp = DateTime.Now
-                });
-            }
-            await SaveChatsAsync();
-        }
-        catch (Exception ex)
-        {
-            CurrentChat.Messages.Add(new StoryGeneratorChatMessage
-            {
-                Role = "assistant",
-                Content = $"Failed to start setup: {ex.Message}",
-                Timestamp = DateTime.Now
-            });
-            await SaveChatsAsync();
-        }
-        finally
-        {
-            IsTyping = false;
-            StateHasChanged();
-        }
+        // IsTyping = true;
+        // StateHasChanged();
+        // try
+        // {
+        //     var settings = await GetSettingsAsync();
+        //     var temperature = ClampTemperatureForCurrentModel(settings.Temperature);
+        //     var maxTokens = ClampTokensForCurrentModel(settings.MaxTokens);
+        //
+        //     var req = new ChatCompletionRequest
+        //     {
+        //         Provider = settings.Provider,
+        //         ModelId = settings.ModelId,
+        //         Model = settings.Deployment,
+        //         Temperature = temperature,
+        //         MaxTokens = maxTokens,
+        //         Messages = new List<MystiraChatMessage>
+        //         {
+        //             new MystiraChatMessage { MessageType = ChatMessageType.User, Content = "I'd like to generate a new story. Please start gathering the required parameters." }
+        //         }
+        //     };
+        //
+        //     var resp = await ApiService.SetupStoryAsync(req);
+        //     if (resp.Success && !string.IsNullOrWhiteSpace(resp.Content))
+        //     {
+        //         CurrentChat.Messages.Add(new StoryGeneratorChatMessage
+        //         {
+        //             Role = "assistant",
+        //             Content = resp.Content,
+        //             Timestamp = DateTime.Now
+        //         });
+        //     }
+        //     else if (!string.IsNullOrWhiteSpace(resp.Error))
+        //     {
+        //         CurrentChat.Messages.Add(new StoryGeneratorChatMessage
+        //         {
+        //             Role = "assistant",
+        //             Content = $"Error starting setup: {resp.Error}",
+        //             Timestamp = DateTime.Now
+        //         });
+        //     }
+        //     await SaveChatsAsync();
+        // }
+        // catch (Exception ex)
+        // {
+        //     CurrentChat.Messages.Add(new StoryGeneratorChatMessage
+        //     {
+        //         Role = "assistant",
+        //         Content = $"Failed to start setup: {ex.Message}",
+        //         Timestamp = DateTime.Now
+        //     });
+        //     await SaveChatsAsync();
+        // }
+        // finally
+        // {
+        //     IsTyping = false;
+        //     StateHasChanged();
+        // }
     }
 
     private async Task HandleRandomizeStory(string difficultyKey)
@@ -1665,7 +1806,11 @@
     {
         if (FuzzyMatch(chat.Title, query)) return true;
         // Search last few messages for fuzzy match
-        foreach (var m in chat.Messages.AsEnumerable().Reverse().Take(5))
+        var recentMessages = (chat.Messages ?? Enumerable.Empty<StoryGeneratorChatMessage>())
+            .AsEnumerable()
+            .Reverse()
+            .Take(5);
+        foreach (var m in recentMessages)
         {
             if (FuzzyMatch(m.Content, query)) return true;
         }
@@ -2323,6 +2468,7 @@
     public void Dispose()
     {
         ModelSettingsService.SettingsChanged -= HandleModelSettingsChanged;
+        NavManager.LocationChanged -= HandleLocationChanged;
         if (copyFeedbackCts != null)
         {
             copyFeedbackCts.Cancel();

@@ -6,6 +6,7 @@ using Mystira.StoryGenerator.Contracts.Stories;
 using Mystira.StoryGenerator.Domain.Commands;
 using Mystira.StoryGenerator.Domain.Commands.Stories;
 using Mystira.StoryGenerator.Domain.Services;
+using Mystira.StoryGenerator.Application.Utilities;
 
 namespace Mystira.StoryGenerator.Application.Handlers.Stories;
 
@@ -80,7 +81,7 @@ public class AutoFixStoryJsonCommandHandler : ICommandHandler<AutoFixStoryJsonCo
             return new GenerateJsonStoryResponse
             {
                 Success = true,
-                Json = response.Content ?? string.Empty,
+                Json = StoryTextSanitizer.CollapseNewlinesToSpace(response.Content) ?? string.Empty,
                 Provider = response.Provider ?? service.ProviderName,
                 Model = response.Model ?? resolvedModelName ?? string.Empty,
                 ModelId = response.ModelId ?? resolvedModelId
