@@ -7,6 +7,7 @@ using Mystira.StoryGenerator.Contracts.Stories;
 using Mystira.StoryGenerator.Domain.Commands;
 using Mystira.StoryGenerator.Domain.Commands.Stories;
 using Mystira.StoryGenerator.Domain.Services;
+using Mystira.StoryGenerator.Application.Utilities;
 
 namespace Mystira.StoryGenerator.Application.Handlers.Stories;
 
@@ -93,10 +94,12 @@ public class GenerateStoryCommandHandler : ICommandHandler<GenerateStoryCommand,
                 };
             }
 
+            var story = StoryTextSanitizer.CollapseNewlinesToSpace(response.Content);
+
             return new GenerateJsonStoryResponse
             {
                 Success = true,
-                Json = response.Content ?? string.Empty,
+                Json = story ?? string.Empty,
                 Provider = response.Provider ?? service.ProviderName,
                 Model = response.Model ?? resolvedModelName ?? string.Empty,
                 ModelId = response.ModelId ?? resolvedModelId
@@ -134,14 +137,6 @@ Top-level keys (no extras allowed):
     •   title, description, tags, difficulty, session_length, age_group, minimum_age, core_axes, archetypes
     •   characters: array
     •   scenes: array
-STRING FORMATTING (Critical)
-    •   All string fields must be single-line.
-    •   Do not insert newline or carriage return characters in any string value.
-    •   This is especially strict for: title, description, backstory, and any branch description.
-    •   If a sentence would normally be on a new line, replace the line break with a single space.
-    •   Allowed whitespace inside strings: regular spaces only.
-    •   The JSON itself may be pretty-printed, but string values must not contain line breaks.
-    •   The JSON must be self-contained, parseable, and obey all rules below.
 CHARACTERS
     •   characters must contain exactly character_count entries.
     •   Each character has:

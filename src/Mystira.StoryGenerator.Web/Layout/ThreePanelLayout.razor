@@ -6,6 +6,7 @@
 @inject Blazored.LocalStorage.ILocalStorageService LocalStorage
 @inject IJSRuntime JSRuntime
 @inject IAiModelSettingsService ModelSettingsService
+@inject NavigationManager NavManager
 @inject IYamlImportService YamlImportService
 @inject ILogger<ThreePanelLayout> Logger
 @inject Mystira.StoryGenerator.Web.Services.IChatSessionService ChatSessionService
@@ -71,7 +72,9 @@
         @Body
     </div>
 
-    <!-- Main Content Area -->
+    <!-- Main Content Area (hidden on analysis pages) -->
+    @if (!isAnalysisRoute)
+    {
     <main class="flex-1 flex overflow-hidden relative">
         <!-- Syncfusion Sidebar - Left Panel -->
         <SfSidebar @ref="sidebarRef"
@@ -259,6 +262,23 @@
                 flex: 1 1 50%;
                 min-width: 0;
             }
+            /* Ensure the left sidebar truly collapses to 0 when closed */
+            .e-sidebar.app-left-sidebar.e-close {
+                width: 0 !important;
+                min-width: 0 !important;
+                flex: 0 0 0 !important;
+                border-right-width: 0 !important;
+            }
+            /* When open, keep the configured width */
+            .e-sidebar.app-left-sidebar.e-open {
+                width: 320px !important;
+                min-width: 320px !important;
+                flex: 0 0 320px !important;
+            }
+            /* Prevent the sidebar from overlaying and consuming layout space unexpectedly */
+            .e-sidebar.app-left-sidebar {
+                position: relative;
+            }
             .difficulty-button {
                 display: flex;
                 align-items: center;
@@ -355,6 +375,7 @@
             }
         </style>
     </main>
+    }
 
     @if (!string.IsNullOrWhiteSpace(copyFeedbackMessage))
     {
@@ -471,6 +492,29 @@
 </div>
 
 @code {
+    // Tracks whether the current route is one of the analysis pages that should render standalone
+    private bool isAnalysisRoute;
+
+    private void UpdateRouteState()
+    {
+        try
+        {
+            var relative = NavManager.ToBaseRelativePath(NavManager.Uri).Trim('/');
+            isAnalysisRoute = relative.StartsWith("story-continuity", StringComparison.OrdinalIgnoreCase)
+                              || relative.StartsWith("scenario-dominator-path-analysis", StringComparison.OrdinalIgnoreCase);
+        }
+        catch
+        {
+            isAnalysisRoute = false;
+        }
+    }
+
+    private void HandleLocationChanged(object? sender, Microsoft.AspNetCore.Components.Routing.LocationChangedEventArgs e)
+    {
+        UpdateRouteState();
+        _ = InvokeAsync(StateHasChanged);
+    }
+
     private async Task RefreshChatSessionAsync()
     {
         try
@@ -617,6 +661,8 @@
     {
         try
         {
+            UpdateRouteState();
+            NavManager.LocationChanged += HandleLocationChanged;
             var saved = await LocalStorage.GetItemAsync<List<StoryGeneratorChatHistory>>(ChatsStorageKey);
             ChatHistories = saved ?? new List<StoryGeneratorChatHistory>();
             CurrentChat = ChatHistories.FirstOrDefault();
@@ -635,38 +681,26 @@
         await base.OnInitializedAsync();
     }
 
-    // Ensure the left-hand sidebar starts open on initial render
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
-        {
-            // Force open state in case the underlying component or media query defaulted it closed
-            if (!sidebarIsOpen)
-            {
-                sidebarIsOpen = true;
-                await InvokeAsync(StateHasChanged);
-            }
-        }
-        await base.OnAfterRenderAsync(firstRender);
-    }
+    // Note: do not force the sidebar open on first render; allow user to toggle/collapse it freely.
 
     private async Task ToggleSidebarAsync()
     {
+        // Flip the bound state; Syncfusion will apply .e-open/.e-close classes accordingly
         sidebarIsOpen = !sidebarIsOpen;
+
         if (!sidebarIsOpen)
         {
-            // Ensure no floating menus remain visible when the sidebar is docked/collapsed
+            // Ensure no floating menus remain visible when the sidebar is collapsed
             showImportMenu = false;
             showRandomMenu = false;
         }
+
         await InvokeAsync(StateHasChanged);
     }
 
     private void CloseMobileMenu()
     {
-        // Close the sidebar on mobile/new chat selection
-        sidebarIsOpen = false;
-        // Also ensure any small pop menus are closed
+        // Do not auto-collapse the sidebar; only close any small pop menus
         showImportMenu = false;
         showRandomMenu = false;
         // No need to InvokeAsync here; callers trigger StateHasChanged after actions
@@ -2434,6 +2468,7 @@
     public void Dispose()
     {
         ModelSettingsService.SettingsChanged -= HandleModelSettingsChanged;
+        NavManager.LocationChanged -= HandleLocationChanged;
         if (copyFeedbackCts != null)
         {
             copyFeedbackCts.Cancel();
