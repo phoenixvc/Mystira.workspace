@@ -134,7 +134,14 @@ Top-level keys (no extras allowed):
     •   title, description, tags, difficulty, session_length, age_group, minimum_age, core_axes, archetypes
     •   characters: array
     •   scenes: array
-The JSON must be self-contained, parseable, and obey all rules below.
+STRING FORMATTING (Critical)
+    •   All string fields must be single-line.
+    •   Do not insert newline or carriage return characters in any string value.
+    •   This is especially strict for: title, description, backstory, and any branch description.
+    •   If a sentence would normally be on a new line, replace the line break with a single space.
+    •   Allowed whitespace inside strings: regular spaces only.
+    •   The JSON itself may be pretty-printed, but string values must not contain line breaks.
+    •   The JSON must be self-contained, parseable, and obey all rules below.
 CHARACTERS
     •   characters must contain exactly character_count entries.
     •   Each character has:

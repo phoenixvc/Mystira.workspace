@@ -179,6 +179,14 @@ When refining (especially in Phase 2):
         o every referenced id exists;
         o removed scenes/characters are no longer referenced.
     • Validate that all required fields are present and consistent for each scene type and that all structural rules above are satisfied.
+    • STRING FORMATTING (Critical):
+        o   All string fields must be single-line.
+        o   Do not insert newline or carriage return characters in any string value.
+        o   This is especially strict for: title, description, backstory, and any branch description.
+        o   If a sentence would normally be on a new line, replace the line break with a single space.
+        o   Allowed whitespace inside strings: regular spaces only.
+        o   The JSON itself may be pretty-printed, but string values must not contain line breaks.
+        o   The JSON must be self-contained, parseable, and obey all rules below.
 Refinement Phases (Internal – Do Not Describe in Output)
     •   Phase 1 – Record the current state:
         o   Scan the input JSON and note in your internal working memory:
