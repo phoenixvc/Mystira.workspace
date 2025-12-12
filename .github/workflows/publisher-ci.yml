@@ -101,6 +101,7 @@ jobs:
           name: publisher-build
           path: packages/publisher/dist
           retention-days: 7
+          if-no-files-found: warn
 
   docker-build:
     name: Build Docker Image
@@ -119,6 +120,7 @@ jobs:
         with:
           name: publisher-build
           path: packages/publisher/dist
+        continue-on-error: true
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
