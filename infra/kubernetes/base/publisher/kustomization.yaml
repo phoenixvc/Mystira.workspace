@@ -13,5 +13,5 @@ commonLabels:
   app.kubernetes.io/component: publisher
 
 images:
-  - name: mystira/publisher
+  - name: mystiraacr.azurecr.io/publisher
     newTag: latest

@@ -1,16 +1,12 @@
-# Mystira Publisher Infrastructure Module
-# Terraform module for deploying Mystira.Publisher service infrastructure
+# Mystira Publisher Infrastructure Module - Azure
+# Terraform module for deploying Mystira.Publisher service infrastructure on Azure
 
 terraform {
   required_version = ">= 1.5.0"
   required_providers {
-    aws = {
-      source  = "hashicorp/aws"
-      version = "~> 5.0"
-    }
-    kubernetes = {
-      source  = "hashicorp/kubernetes"
-      version = "~> 2.23"
+    azurerm = {
+      source  = "hashicorp/azurerm"
+      version = "~> 3.80"
     }
   }
 }
@@ -20,26 +16,31 @@ variable "environment" {
   type        = string
 }
 
+variable "location" {
+  description = "Azure region for deployment"
+  type        = string
+  default     = "eastus"
+}
+
+variable "resource_group_name" {
+  description = "Name of the resource group"
+  type        = string
+}
+
 variable "publisher_replica_count" {
   description = "Number of publisher service replicas"
   type        = number
   default     = 2
 }
 
-variable "publisher_instance_type" {
-  description = "EC2 instance type for publisher service"
-  type        = string
-  default     = "t3.small"
-}
-
-variable "vpc_id" {
-  description = "VPC ID for publisher deployment"
+variable "vnet_id" {
+  description = "Virtual Network ID for publisher deployment"
   type        = string
 }
 
-variable "subnet_ids" {
-  description = "Subnet IDs for publisher service"
-  type        = list(string)
+variable "subnet_id" {
+  description = "Subnet ID for publisher service"
+  type        = string
 }
 
 variable "chain_rpc_endpoint" {
@@ -54,174 +55,209 @@ variable "tags" {
 }
 
 locals {
-  name_prefix = "mystira-publisher-${var.environment}"
+  name_prefix = "mystira-pub-${var.environment}"
   common_tags = merge(var.tags, {
     Component   = "publisher"
     Environment = var.environment
     ManagedBy   = "terraform"
+    Project     = "Mystira"
   })
 }
 
-# Security Group for Publisher Service
-resource "aws_security_group" "publisher" {
-  name        = "${local.name_prefix}-sg"
-  description = "Security group for Mystira Publisher service"
-  vpc_id      = var.vpc_id
+# Network Security Group for Publisher Service
+resource "azurerm_network_security_group" "publisher" {
+  name                = "${local.name_prefix}-nsg"
+  location            = var.location
+  resource_group_name = var.resource_group_name
 
   # HTTP API endpoint
-  ingress {
-    from_port   = 3000
-    to_port     = 3000
-    protocol    = "tcp"
-    cidr_blocks = ["10.0.0.0/8"]
-    description = "Publisher API HTTP"
+  security_rule {
+    name                       = "AllowHTTP"
+    priority                   = 100
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "Tcp"
+    source_port_range          = "*"
+    destination_port_range     = "3000"
+    source_address_prefix      = "VirtualNetwork"
+    destination_address_prefix = "*"
   }
 
   # Health check endpoint
-  ingress {
-    from_port   = 3001
-    to_port     = 3001
-    protocol    = "tcp"
-    cidr_blocks = ["10.0.0.0/8"]
-    description = "Health check endpoint"
+  security_rule {
+    name                       = "AllowHealthCheck"
+    priority                   = 110
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "Tcp"
+    source_port_range          = "*"
+    destination_port_range     = "3001"
+    source_address_prefix      = "VirtualNetwork"
+    destination_address_prefix = "*"
   }
 
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-    description = "Allow all outbound"
+  tags = local.common_tags
+}
+
+# Managed Identity for Publisher Service
+resource "azurerm_user_assigned_identity" "publisher" {
+  name                = "${local.name_prefix}-identity"
+  location            = var.location
+  resource_group_name = var.resource_group_name
+
+  tags = local.common_tags
+}
+
+# Service Bus Namespace for Publisher Events
+resource "azurerm_servicebus_namespace" "publisher" {
+  name                = "${local.name_prefix}-sb"
+  location            = var.location
+  resource_group_name = var.resource_group_name
+  sku                 = var.environment == "prod" ? "Premium" : "Standard"
+
+  tags = local.common_tags
+}
+
+# Service Bus Queue for Publisher Events
+resource "azurerm_servicebus_queue" "publisher_events" {
+  name         = "publisher-events"
+  namespace_id = azurerm_servicebus_namespace.publisher.id
+
+  max_delivery_count                   = 3
+  default_message_ttl                  = "P1D"
+  dead_lettering_on_message_expiration = true
+  enable_partitioning                  = var.environment == "prod"
+}
+
+# Dead Letter Queue handled automatically by Service Bus
+
+# Log Analytics Workspace
+resource "azurerm_log_analytics_workspace" "publisher" {
+  name                = "${local.name_prefix}-logs"
+  location            = var.location
+  resource_group_name = var.resource_group_name
+  sku                 = "PerGB2018"
+  retention_in_days   = var.environment == "prod" ? 90 : 30
+
+  tags = local.common_tags
+}
+
+# Application Insights for Publisher Monitoring
+resource "azurerm_application_insights" "publisher" {
+  name                = "${local.name_prefix}-insights"
+  location            = var.location
+  resource_group_name = var.resource_group_name
+  workspace_id        = azurerm_log_analytics_workspace.publisher.id
+  application_type    = "Node.JS"
+
+  tags = local.common_tags
+}
+
+# Key Vault for Publisher Secrets
+resource "azurerm_key_vault" "publisher" {
+  name                        = "${local.name_prefix}-kv"
+  location                    = var.location
+  resource_group_name         = var.resource_group_name
+  enabled_for_disk_encryption = false
+  tenant_id                   = data.azurerm_client_config.current.tenant_id
+  soft_delete_retention_days  = 7
+  purge_protection_enabled    = var.environment == "prod"
+  sku_name                    = "standard"
+
+  access_policy {
+    tenant_id = data.azurerm_client_config.current.tenant_id
+    object_id = azurerm_user_assigned_identity.publisher.principal_id
+
+    secret_permissions = [
+      "Get",
+      "List",
+    ]
   }
 
-  tags = merge(local.common_tags, {
-    Name = "${local.name_prefix}-sg"
-  })
+  tags = local.common_tags
 }
 
-# IAM Role for Publisher Service
-resource "aws_iam_role" "publisher" {
-  name = "${local.name_prefix}-role"
+data "azurerm_client_config" "current" {}
 
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Action = "sts:AssumeRole"
-        Effect = "Allow"
-        Principal = {
-          Service = "ecs-tasks.amazonaws.com"
-        }
-      }
-    ]
-  })
+# Store Chain RPC Endpoint in Key Vault
+resource "azurerm_key_vault_secret" "chain_rpc_endpoint" {
+  name         = "chain-rpc-endpoint"
+  value        = var.chain_rpc_endpoint
+  key_vault_id = azurerm_key_vault.publisher.id
+}
+
+# Azure Container Registry for Publisher Images
+resource "azurerm_container_registry" "publisher" {
+  name                = replace("${local.name_prefix}acr", "-", "")
+  resource_group_name = var.resource_group_name
+  location            = var.location
+  sku                 = var.environment == "prod" ? "Premium" : "Standard"
+  admin_enabled       = false
 
   tags = local.common_tags
 }
 
-# IAM Policy for Publisher Service
-resource "aws_iam_role_policy" "publisher" {
-  name = "${local.name_prefix}-policy"
-  role = aws_iam_role.publisher.id
+# Redis Cache for Publisher (optional caching layer)
+resource "azurerm_redis_cache" "publisher" {
+  count               = var.environment == "prod" ? 1 : 0
+  name                = "${local.name_prefix}-redis"
+  location            = var.location
+  resource_group_name = var.resource_group_name
+  capacity            = 1
+  family              = "C"
+  sku_name            = "Standard"
+  enable_non_ssl_port = false
+  minimum_tls_version = "1.2"
 
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Effect = "Allow"
-        Action = [
-          "secretsmanager:GetSecretValue",
-          "ssm:GetParameter",
-          "ssm:GetParameters"
-        ]
-        Resource = [
-          "arn:aws:secretsmanager:*:*:secret:mystira/publisher/*",
-          "arn:aws:ssm:*:*:parameter/mystira/publisher/*"
-        ]
-      },
-      {
-        Effect = "Allow"
-        Action = [
-          "logs:CreateLogStream",
-          "logs:PutLogEvents"
-        ]
-        Resource = "${aws_cloudwatch_log_group.publisher.arn}:*"
-      },
-      {
-        Effect = "Allow"
-        Action = [
-          "sqs:SendMessage",
-          "sqs:ReceiveMessage",
-          "sqs:DeleteMessage"
-        ]
-        Resource = aws_sqs_queue.publisher_events.arn
-      }
-    ]
-  })
-}
-
-# SQS Queue for Publisher Events
-resource "aws_sqs_queue" "publisher_events" {
-  name                       = "${local.name_prefix}-events"
-  visibility_timeout_seconds = 300
-  message_retention_seconds  = 86400
-  receive_wait_time_seconds  = 20
-
-  redrive_policy = jsonencode({
-    deadLetterTargetArn = aws_sqs_queue.publisher_dlq.arn
-    maxReceiveCount     = 3
-  })
+  redis_configuration {
+    maxmemory_policy = "volatile-lru"
+  }
 
   tags = local.common_tags
 }
 
-# Dead Letter Queue for failed events
-resource "aws_sqs_queue" "publisher_dlq" {
-  name                      = "${local.name_prefix}-events-dlq"
-  message_retention_seconds = 1209600 # 14 days
-
-  tags = local.common_tags
+output "nsg_id" {
+  description = "Network Security Group ID for publisher service"
+  value       = azurerm_network_security_group.publisher.id
 }
 
-# CloudWatch Log Group for Publisher Logs
-resource "aws_cloudwatch_log_group" "publisher" {
-  name              = "/mystira/publisher/${var.environment}"
-  retention_in_days = var.environment == "prod" ? 90 : 30
-
-  tags = local.common_tags
+output "identity_id" {
+  description = "Managed Identity ID for publisher service"
+  value       = azurerm_user_assigned_identity.publisher.id
 }
 
-# Parameter Store for Publisher Configuration
-resource "aws_ssm_parameter" "chain_rpc_endpoint" {
-  name        = "/mystira/publisher/${var.environment}/chain_rpc_endpoint"
-  description = "Chain RPC endpoint for publisher service"
-  type        = "SecureString"
-  value       = var.chain_rpc_endpoint
-
-  tags = local.common_tags
+output "identity_principal_id" {
+  description = "Managed Identity Principal ID"
+  value       = azurerm_user_assigned_identity.publisher.principal_id
 }
 
-output "security_group_id" {
-  description = "Security group ID for publisher service"
-  value       = aws_security_group.publisher.id
+output "servicebus_namespace" {
+  description = "Service Bus namespace for publisher events"
+  value       = azurerm_servicebus_namespace.publisher.name
 }
 
-output "iam_role_arn" {
-  description = "IAM role ARN for publisher service"
-  value       = aws_iam_role.publisher.arn
+output "servicebus_queue_name" {
+  description = "Service Bus queue name for publisher events"
+  value       = azurerm_servicebus_queue.publisher_events.name
 }
 
-output "log_group_name" {
-  description = "CloudWatch log group name"
-  value       = aws_cloudwatch_log_group.publisher.name
+output "log_analytics_workspace_id" {
+  description = "Log Analytics Workspace ID"
+  value       = azurerm_log_analytics_workspace.publisher.id
 }
 
-output "sqs_queue_url" {
-  description = "SQS queue URL for publisher events"
-  value       = aws_sqs_queue.publisher_events.url
+output "app_insights_connection_string" {
+  description = "Application Insights connection string"
+  value       = azurerm_application_insights.publisher.connection_string
+  sensitive   = true
 }
 
-output "sqs_queue_arn" {
-  description = "SQS queue ARN for publisher events"
-  value       = aws_sqs_queue.publisher_events.arn
+output "key_vault_id" {
+  description = "Key Vault ID for publisher secrets"
+  value       = azurerm_key_vault.publisher.id
+}
+
+output "acr_login_server" {
+  description = "Azure Container Registry login server"
+  value       = azurerm_container_registry.publisher.login_server
 }

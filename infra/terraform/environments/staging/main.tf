@@ -1,63 +1,95 @@
-# Mystira Staging Environment
+# Mystira Staging Environment - Azure
 # Terraform configuration for staging environment
 
 terraform {
   required_version = ">= 1.5.0"
 
-  backend "s3" {
-    bucket         = "mystira-terraform-state"
-    key            = "staging/terraform.tfstate"
-    region         = "us-east-1"
-    encrypt        = true
-    dynamodb_table = "mystira-terraform-locks"
+  backend "azurerm" {
+    resource_group_name  = "mystira-terraform-state"
+    storage_account_name = "mystiraterraformstate"
+    container_name       = "tfstate"
+    key                  = "staging/terraform.tfstate"
   }
 
   required_providers {
-    aws = {
-      source  = "hashicorp/aws"
-      version = "~> 5.0"
+    azurerm = {
+      source  = "hashicorp/azurerm"
+      version = "~> 3.80"
     }
   }
 }
 
-provider "aws" {
-  region = var.aws_region
-
-  default_tags {
-    tags = {
-      Project     = "Mystira"
-      Environment = "staging"
-      ManagedBy   = "terraform"
+provider "azurerm" {
+  features {
+    key_vault {
+      purge_soft_delete_on_destroy = false
     }
   }
 }
 
-variable "aws_region" {
-  description = "AWS region for deployment"
+variable "location" {
+  description = "Azure region for deployment"
   type        = string
-  default     = "us-east-1"
+  default     = "eastus"
 }
 
-variable "vpc_id" {
-  description = "VPC ID for deployment"
-  type        = string
+# Resource Group
+resource "azurerm_resource_group" "main" {
+  name     = "mystira-staging-rg"
+  location = var.location
+
+  tags = {
+    Environment = "staging"
+    Project     = "Mystira"
+    ManagedBy   = "terraform"
+  }
 }
 
-variable "subnet_ids" {
-  description = "Subnet IDs for deployment"
-  type        = list(string)
+# Virtual Network
+resource "azurerm_virtual_network" "main" {
+  name                = "mystira-staging-vnet"
+  location            = azurerm_resource_group.main.location
+  resource_group_name = azurerm_resource_group.main.name
+  address_space       = ["10.1.0.0/16"]
+
+  tags = {
+    Environment = "staging"
+  }
+}
+
+resource "azurerm_subnet" "chain" {
+  name                 = "chain-subnet"
+  resource_group_name  = azurerm_resource_group.main.name
+  virtual_network_name = azurerm_virtual_network.main.name
+  address_prefixes     = ["10.1.1.0/24"]
+}
+
+resource "azurerm_subnet" "publisher" {
+  name                 = "publisher-subnet"
+  resource_group_name  = azurerm_resource_group.main.name
+  virtual_network_name = azurerm_virtual_network.main.name
+  address_prefixes     = ["10.1.2.0/24"]
+}
+
+resource "azurerm_subnet" "aks" {
+  name                 = "aks-subnet"
+  resource_group_name  = azurerm_resource_group.main.name
+  virtual_network_name = azurerm_virtual_network.main.name
+  address_prefixes     = ["10.1.10.0/22"]
 }
 
 # Chain Infrastructure
 module "chain" {
   source = "../../modules/chain"
 
-  environment              = "staging"
-  chain_node_count         = 2
-  chain_node_instance_type = "t3.medium"
-  chain_storage_size       = 100
-  vpc_id                   = var.vpc_id
-  subnet_ids               = var.subnet_ids
+  environment           = "staging"
+  location              = var.location
+  resource_group_name   = azurerm_resource_group.main.name
+  chain_node_count      = 2
+  chain_vm_size         = "Standard_D2s_v3"
+  chain_storage_size_gb = 100
+  vnet_id               = azurerm_virtual_network.main.id
+  subnet_id             = azurerm_subnet.chain.id
 
   tags = {
     CostCenter = "staging"
@@ -69,25 +101,67 @@ module "publisher" {
   source = "../../modules/publisher"
 
   environment             = "staging"
+  location                = var.location
+  resource_group_name     = azurerm_resource_group.main.name
   publisher_replica_count = 2
-  publisher_instance_type = "t3.small"
-  vpc_id                  = var.vpc_id
-  subnet_ids              = var.subnet_ids
-  chain_rpc_endpoint      = "http://chain.staging.mystira.internal:8545"
+  vnet_id                 = azurerm_virtual_network.main.id
+  subnet_id               = azurerm_subnet.publisher.id
+  chain_rpc_endpoint      = "http://mystira-chain.staging.mystira.internal:8545"
 
   tags = {
     CostCenter = "staging"
   }
 }
 
-output "chain_security_group_id" {
-  value = module.chain.security_group_id
+# AKS Cluster for Staging
+resource "azurerm_kubernetes_cluster" "main" {
+  name                = "mystira-staging-aks"
+  location            = azurerm_resource_group.main.location
+  resource_group_name = azurerm_resource_group.main.name
+  dns_prefix          = "mystira-staging"
+
+  default_node_pool {
+    name           = "default"
+    node_count     = 3
+    vm_size        = "Standard_D2s_v3"
+    vnet_subnet_id = azurerm_subnet.aks.id
+  }
+
+  identity {
+    type = "SystemAssigned"
+  }
+
+  network_profile {
+    network_plugin = "azure"
+    network_policy = "calico"
+  }
+
+  tags = {
+    Environment = "staging"
+    Project     = "Mystira"
+  }
 }
 
-output "publisher_security_group_id" {
-  value = module.publisher.security_group_id
+output "resource_group_name" {
+  value = azurerm_resource_group.main.name
 }
 
-output "publisher_sqs_queue_url" {
-  value = module.publisher.sqs_queue_url
+output "aks_cluster_name" {
+  value = azurerm_kubernetes_cluster.main.name
+}
+
+output "chain_nsg_id" {
+  value = module.chain.nsg_id
+}
+
+output "publisher_nsg_id" {
+  value = module.publisher.nsg_id
+}
+
+output "chain_acr_login_server" {
+  value = module.chain.acr_login_server
+}
+
+output "publisher_acr_login_server" {
+  value = module.publisher.acr_login_server
 }

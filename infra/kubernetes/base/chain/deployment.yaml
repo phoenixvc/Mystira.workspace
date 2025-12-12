@@ -16,14 +16,23 @@ spec:
       labels:
         app: mystira-chain
         component: blockchain
+        azure.workload.identity/use: "true"
     spec:
+      serviceAccountName: mystira-chain-sa
       securityContext:
         fsGroup: 1000
         runAsUser: 1000
         runAsNonRoot: true
+      nodeSelector:
+        workload: chain
+      tolerations:
+        - key: "workload"
+          operator: "Equal"
+          value: "chain"
+          effect: "NoSchedule"
       containers:
         - name: chain
-          image: mystira/chain:latest
+          image: mystiraacr.azurecr.io/chain:latest
           imagePullPolicy: Always
           ports:
             - name: rpc
@@ -46,11 +55,12 @@ spec:
                 configMapKeyRef:
                   name: mystira-chain-config
                   key: network_id
-            - name: CHAIN_NODE_KEY
+            - name: AZURE_CLIENT_ID
               valueFrom:
                 secretKeyRef:
                   name: mystira-chain-secrets
-                  key: node_key
+                  key: azure_client_id
+                  optional: true
           resources:
             requests:
               memory: "2Gi"
@@ -78,7 +88,7 @@ spec:
         name: chain-data
       spec:
         accessModes: ["ReadWriteOnce"]
-        storageClassName: gp3
+        storageClassName: managed-premium
         resources:
           requests:
             storage: 100Gi
@@ -107,8 +117,10 @@ metadata:
   name: mystira-chain-p2p
   labels:
     app: mystira-chain
+  annotations:
+    service.beta.kubernetes.io/azure-load-balancer-internal: "true"
 spec:
-  type: NodePort
+  type: LoadBalancer
   ports:
     - name: p2p-tcp
       port: 30303
@@ -130,3 +142,10 @@ data:
   chain_id: "1337"
   rpc_enabled: "true"
   ws_enabled: "true"
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: mystira-chain-sa
+  annotations:
+    azure.workload.identity/client-id: "${AZURE_CLIENT_ID}"

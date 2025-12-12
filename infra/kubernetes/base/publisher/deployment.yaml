@@ -20,13 +20,17 @@ spec:
       labels:
         app: mystira-publisher
         component: publisher
+        azure.workload.identity/use: "true"
     spec:
+      serviceAccountName: mystira-publisher-sa
       securityContext:
         runAsUser: 1000
         runAsNonRoot: true
+      nodeSelector:
+        workload: publisher
       containers:
         - name: publisher
-          image: mystira/publisher:latest
+          image: mystiraacr.azurecr.io/publisher:latest
           imagePullPolicy: Always
           ports:
             - name: http
@@ -52,21 +56,21 @@ spec:
                 configMapKeyRef:
                   name: mystira-publisher-config
                   key: chain_ws_url
-            - name: DATABASE_URL
+            - name: AZURE_SERVICEBUS_CONNECTION
               valueFrom:
                 secretKeyRef:
                   name: mystira-publisher-secrets
-                  key: database_url
-            - name: REDIS_URL
+                  key: servicebus_connection
+            - name: APPLICATIONINSIGHTS_CONNECTION_STRING
               valueFrom:
                 secretKeyRef:
                   name: mystira-publisher-secrets
-                  key: redis_url
-            - name: PUBLISHER_PRIVATE_KEY
+                  key: appinsights_connection
+            - name: KEY_VAULT_URL
               valueFrom:
-                secretKeyRef:
-                  name: mystira-publisher-secrets
-                  key: private_key
+                configMapKeyRef:
+                  name: mystira-publisher-config
+                  key: key_vault_url
           resources:
             requests:
               memory: "256Mi"
@@ -112,6 +116,7 @@ metadata:
 data:
   chain_rpc_url: "http://mystira-chain:8545"
   chain_ws_url: "ws://mystira-chain:8546"
+  key_vault_url: "https://mystira-pub-kv.vault.azure.net/"
 ---
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
@@ -137,3 +142,10 @@ spec:
         target:
           type: Utilization
           averageUtilization: 80
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: mystira-publisher-sa
+  annotations:
+    azure.workload.identity/client-id: "${AZURE_CLIENT_ID}"

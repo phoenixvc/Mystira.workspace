@@ -30,6 +30,9 @@ patches:
       - op: replace
         path: /spec/template/spec/containers/0/resources/limits/cpu
         value: "4000m"
+      - op: replace
+        path: /spec/volumeClaimTemplates/0/spec/resources/requests/storage
+        value: "500Gi"
   - target:
       kind: Deployment
       name: mystira-publisher
@@ -53,11 +56,18 @@ patches:
       - op: replace
         path: /spec/maxReplicas
         value: 20
+  - target:
+      kind: ConfigMap
+      name: mystira-publisher-config
+    patch: |-
+      - op: replace
+        path: /data/key_vault_url
+        value: "https://mystira-pub-prod-kv.vault.azure.net/"
 
 images:
-  - name: mystira/chain
-    newName: mystira/chain
+  - name: mystiraacr.azurecr.io/chain
+    newName: mystiraprodacr.azurecr.io/chain
     newTag: stable
-  - name: mystira/publisher
-    newName: mystira/publisher
+  - name: mystiraacr.azurecr.io/publisher
+    newName: mystiraprodacr.azurecr.io/publisher
     newTag: stable

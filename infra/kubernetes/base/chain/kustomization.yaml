@@ -13,5 +13,5 @@ commonLabels:
   app.kubernetes.io/component: blockchain
 
 images:
-  - name: mystira/chain
+  - name: mystiraacr.azurecr.io/chain
     newTag: latest

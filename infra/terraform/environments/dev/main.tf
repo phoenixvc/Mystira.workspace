@@ -1,63 +1,95 @@
-# Mystira Development Environment
+# Mystira Development Environment - Azure
 # Terraform configuration for dev environment
 
 terraform {
   required_version = ">= 1.5.0"
 
-  backend "s3" {
-    bucket         = "mystira-terraform-state"
-    key            = "dev/terraform.tfstate"
-    region         = "us-east-1"
-    encrypt        = true
-    dynamodb_table = "mystira-terraform-locks"
+  backend "azurerm" {
+    resource_group_name  = "mystira-terraform-state"
+    storage_account_name = "mystiraterraformstate"
+    container_name       = "tfstate"
+    key                  = "dev/terraform.tfstate"
   }
 
   required_providers {
-    aws = {
-      source  = "hashicorp/aws"
-      version = "~> 5.0"
+    azurerm = {
+      source  = "hashicorp/azurerm"
+      version = "~> 3.80"
     }
   }
 }
 
-provider "aws" {
-  region = var.aws_region
-
-  default_tags {
-    tags = {
-      Project     = "Mystira"
-      Environment = "dev"
-      ManagedBy   = "terraform"
+provider "azurerm" {
+  features {
+    key_vault {
+      purge_soft_delete_on_destroy = true
     }
   }
 }
 
-variable "aws_region" {
-  description = "AWS region for deployment"
+variable "location" {
+  description = "Azure region for deployment"
   type        = string
-  default     = "us-east-1"
+  default     = "eastus"
 }
 
-variable "vpc_id" {
-  description = "VPC ID for deployment"
-  type        = string
+# Resource Group
+resource "azurerm_resource_group" "main" {
+  name     = "mystira-dev-rg"
+  location = var.location
+
+  tags = {
+    Environment = "dev"
+    Project     = "Mystira"
+    ManagedBy   = "terraform"
+  }
 }
 
-variable "subnet_ids" {
-  description = "Subnet IDs for deployment"
-  type        = list(string)
+# Virtual Network
+resource "azurerm_virtual_network" "main" {
+  name                = "mystira-dev-vnet"
+  location            = azurerm_resource_group.main.location
+  resource_group_name = azurerm_resource_group.main.name
+  address_space       = ["10.0.0.0/16"]
+
+  tags = {
+    Environment = "dev"
+  }
+}
+
+resource "azurerm_subnet" "chain" {
+  name                 = "chain-subnet"
+  resource_group_name  = azurerm_resource_group.main.name
+  virtual_network_name = azurerm_virtual_network.main.name
+  address_prefixes     = ["10.0.1.0/24"]
+}
+
+resource "azurerm_subnet" "publisher" {
+  name                 = "publisher-subnet"
+  resource_group_name  = azurerm_resource_group.main.name
+  virtual_network_name = azurerm_virtual_network.main.name
+  address_prefixes     = ["10.0.2.0/24"]
+}
+
+resource "azurerm_subnet" "aks" {
+  name                 = "aks-subnet"
+  resource_group_name  = azurerm_resource_group.main.name
+  virtual_network_name = azurerm_virtual_network.main.name
+  address_prefixes     = ["10.0.10.0/22"]
 }
 
 # Chain Infrastructure
 module "chain" {
   source = "../../modules/chain"
 
-  environment              = "dev"
-  chain_node_count         = 1
-  chain_node_instance_type = "t3.small"
-  chain_storage_size       = 50
-  vpc_id                   = var.vpc_id
-  subnet_ids               = var.subnet_ids
+  environment           = "dev"
+  location              = var.location
+  resource_group_name   = azurerm_resource_group.main.name
+  chain_node_count      = 1
+  chain_vm_size         = "Standard_B2s"
+  chain_storage_size_gb = 50
+  vnet_id               = azurerm_virtual_network.main.id
+  subnet_id             = azurerm_subnet.chain.id
 
   tags = {
     CostCenter = "development"
@@ -69,25 +101,67 @@ module "publisher" {
   source = "../../modules/publisher"
 
   environment             = "dev"
+  location                = var.location
+  resource_group_name     = azurerm_resource_group.main.name
   publisher_replica_count = 1
-  publisher_instance_type = "t3.micro"
-  vpc_id                  = var.vpc_id
-  subnet_ids              = var.subnet_ids
-  chain_rpc_endpoint      = "http://chain.dev.mystira.internal:8545"
+  vnet_id                 = azurerm_virtual_network.main.id
+  subnet_id               = azurerm_subnet.publisher.id
+  chain_rpc_endpoint      = "http://mystira-chain.dev.mystira.internal:8545"
 
   tags = {
     CostCenter = "development"
   }
 }
 
-output "chain_security_group_id" {
-  value = module.chain.security_group_id
+# AKS Cluster for Dev
+resource "azurerm_kubernetes_cluster" "main" {
+  name                = "mystira-dev-aks"
+  location            = azurerm_resource_group.main.location
+  resource_group_name = azurerm_resource_group.main.name
+  dns_prefix          = "mystira-dev"
+
+  default_node_pool {
+    name           = "default"
+    node_count     = 2
+    vm_size        = "Standard_B2s"
+    vnet_subnet_id = azurerm_subnet.aks.id
+  }
+
+  identity {
+    type = "SystemAssigned"
+  }
+
+  network_profile {
+    network_plugin = "azure"
+    network_policy = "calico"
+  }
+
+  tags = {
+    Environment = "dev"
+    Project     = "Mystira"
+  }
 }
 
-output "publisher_security_group_id" {
-  value = module.publisher.security_group_id
+output "resource_group_name" {
+  value = azurerm_resource_group.main.name
 }
 
-output "publisher_sqs_queue_url" {
-  value = module.publisher.sqs_queue_url
+output "aks_cluster_name" {
+  value = azurerm_kubernetes_cluster.main.name
+}
+
+output "chain_nsg_id" {
+  value = module.chain.nsg_id
+}
+
+output "publisher_nsg_id" {
+  value = module.publisher.nsg_id
+}
+
+output "chain_acr_login_server" {
+  value = module.chain.acr_login_server
+}
+
+output "publisher_acr_login_server" {
+  value = module.publisher.acr_login_server
 }

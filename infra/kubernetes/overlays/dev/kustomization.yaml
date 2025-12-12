@@ -24,6 +24,10 @@ patches:
       - op: replace
         path: /spec/template/spec/containers/0/resources/limits/memory
         value: "2Gi"
+      - op: remove
+        path: /spec/template/spec/nodeSelector
+      - op: remove
+        path: /spec/template/spec/tolerations
   - target:
       kind: Deployment
       name: mystira-publisher
@@ -37,9 +41,20 @@ patches:
       - op: replace
         path: /spec/template/spec/containers/0/resources/limits/memory
         value: "256Mi"
+      - op: remove
+        path: /spec/template/spec/nodeSelector
+  - target:
+      kind: ConfigMap
+      name: mystira-publisher-config
+    patch: |-
+      - op: replace
+        path: /data/key_vault_url
+        value: "https://mystira-pub-dev-kv.vault.azure.net/"
 
 images:
-  - name: mystira/chain
+  - name: mystiraacr.azurecr.io/chain
+    newName: mystiradevacr.azurecr.io/chain
     newTag: dev
-  - name: mystira/publisher
+  - name: mystiraacr.azurecr.io/publisher
+    newName: mystiradevacr.azurecr.io/publisher
     newTag: dev

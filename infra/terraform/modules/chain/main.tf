@@ -1,16 +1,16 @@
-# Mystira Chain Infrastructure Module
-# Terraform module for deploying Mystira.Chain blockchain infrastructure
+# Mystira Chain Infrastructure Module - Azure
+# Terraform module for deploying Mystira.Chain blockchain infrastructure on Azure
 
 terraform {
   required_version = ">= 1.5.0"
   required_providers {
-    aws = {
-      source  = "hashicorp/aws"
-      version = "~> 5.0"
+    azurerm = {
+      source  = "hashicorp/azurerm"
+      version = "~> 3.80"
     }
-    kubernetes = {
-      source  = "hashicorp/kubernetes"
-      version = "~> 2.23"
+    azuread = {
+      source  = "hashicorp/azuread"
+      version = "~> 2.45"
     }
   }
 }
@@ -20,32 +20,43 @@ variable "environment" {
   type        = string
 }
 
+variable "location" {
+  description = "Azure region for deployment"
+  type        = string
+  default     = "eastus"
+}
+
+variable "resource_group_name" {
+  description = "Name of the resource group"
+  type        = string
+}
+
 variable "chain_node_count" {
   description = "Number of chain nodes to deploy"
   type        = number
   default     = 3
 }
 
-variable "chain_node_instance_type" {
-  description = "EC2 instance type for chain nodes"
+variable "chain_vm_size" {
+  description = "Azure VM size for chain nodes"
   type        = string
-  default     = "t3.medium"
+  default     = "Standard_D2s_v3"
 }
 
-variable "chain_storage_size" {
+variable "chain_storage_size_gb" {
   description = "Storage size in GB for chain data"
   type        = number
   default     = 100
 }
 
-variable "vpc_id" {
-  description = "VPC ID for chain deployment"
+variable "vnet_id" {
+  description = "Virtual Network ID for chain deployment"
   type        = string
 }
 
-variable "subnet_ids" {
-  description = "Subnet IDs for chain nodes"
-  type        = list(string)
+variable "subnet_id" {
+  description = "Subnet ID for chain nodes"
+  type        = string
 }
 
 variable "tags" {
@@ -60,129 +71,167 @@ locals {
     Component   = "chain"
     Environment = var.environment
     ManagedBy   = "terraform"
+    Project     = "Mystira"
   })
 }
 
-# Security Group for Chain Nodes
-resource "aws_security_group" "chain_nodes" {
-  name        = "${local.name_prefix}-nodes-sg"
-  description = "Security group for Mystira Chain nodes"
-  vpc_id      = var.vpc_id
+# Network Security Group for Chain Nodes
+resource "azurerm_network_security_group" "chain" {
+  name                = "${local.name_prefix}-nsg"
+  location            = var.location
+  resource_group_name = var.resource_group_name
 
   # P2P communication between chain nodes
-  ingress {
-    from_port   = 30303
-    to_port     = 30303
-    protocol    = "tcp"
-    self        = true
-    description = "Chain P2P TCP"
-  }
-
-  ingress {
-    from_port   = 30303
-    to_port     = 30303
-    protocol    = "udp"
-    self        = true
-    description = "Chain P2P UDP"
+  security_rule {
+    name                       = "AllowChainP2P"
+    priority                   = 100
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "*"
+    source_port_range          = "*"
+    destination_port_range     = "30303"
+    source_address_prefix      = "VirtualNetwork"
+    destination_address_prefix = "*"
   }
 
   # RPC endpoint (internal only)
-  ingress {
-    from_port   = 8545
-    to_port     = 8545
-    protocol    = "tcp"
-    cidr_blocks = ["10.0.0.0/8"]
-    description = "JSON-RPC HTTP"
+  security_rule {
+    name                       = "AllowRPC"
+    priority                   = 110
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "Tcp"
+    source_port_range          = "*"
+    destination_port_range     = "8545"
+    source_address_prefix      = "VirtualNetwork"
+    destination_address_prefix = "*"
   }
 
   # WebSocket endpoint (internal only)
-  ingress {
-    from_port   = 8546
-    to_port     = 8546
-    protocol    = "tcp"
-    cidr_blocks = ["10.0.0.0/8"]
-    description = "JSON-RPC WebSocket"
+  security_rule {
+    name                       = "AllowWebSocket"
+    priority                   = 120
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "Tcp"
+    source_port_range          = "*"
+    destination_port_range     = "8546"
+    source_address_prefix      = "VirtualNetwork"
+    destination_address_prefix = "*"
   }
 
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-    description = "Allow all outbound"
-  }
-
-  tags = merge(local.common_tags, {
-    Name = "${local.name_prefix}-nodes-sg"
-  })
+  tags = local.common_tags
 }
 
-# EBS volumes for chain data persistence
-resource "aws_ebs_volume" "chain_data" {
-  count             = var.chain_node_count
-  availability_zone = element(data.aws_availability_zones.available.names, count.index % length(data.aws_availability_zones.available.names))
-  size              = var.chain_storage_size
-  type              = "gp3"
-  encrypted         = true
+# Managed Identity for Chain Nodes
+resource "azurerm_user_assigned_identity" "chain" {
+  name                = "${local.name_prefix}-identity"
+  location            = var.location
+  resource_group_name = var.resource_group_name
 
-  tags = merge(local.common_tags, {
-    Name = "${local.name_prefix}-data-${count.index}"
-  })
+  tags = local.common_tags
 }
 
-data "aws_availability_zones" "available" {
-  state = "available"
+# Storage Account for Chain Data
+resource "azurerm_storage_account" "chain" {
+  name                     = replace("${local.name_prefix}sa", "-", "")
+  resource_group_name      = var.resource_group_name
+  location                 = var.location
+  account_tier             = "Premium"
+  account_replication_type = var.environment == "prod" ? "ZRS" : "LRS"
+  account_kind             = "FileStorage"
+
+  tags = local.common_tags
 }
 
-# IAM Role for Chain Nodes
-resource "aws_iam_role" "chain_node" {
-  name = "${local.name_prefix}-node-role"
+# Azure File Share for Chain Data Persistence
+resource "azurerm_storage_share" "chain_data" {
+  count                = var.chain_node_count
+  name                 = "chain-data-${count.index}"
+  storage_account_name = azurerm_storage_account.chain.name
+  quota                = var.chain_storage_size_gb
+  enabled_protocol     = "SMB"
+}
 
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Action = "sts:AssumeRole"
-        Effect = "Allow"
-        Principal = {
-          Service = "ec2.amazonaws.com"
-        }
-      }
+# Log Analytics Workspace
+resource "azurerm_log_analytics_workspace" "chain" {
+  name                = "${local.name_prefix}-logs"
+  location            = var.location
+  resource_group_name = var.resource_group_name
+  sku                 = "PerGB2018"
+  retention_in_days   = var.environment == "prod" ? 90 : 30
+
+  tags = local.common_tags
+}
+
+# Key Vault for Chain Secrets
+resource "azurerm_key_vault" "chain" {
+  name                        = "${local.name_prefix}-kv"
+  location                    = var.location
+  resource_group_name         = var.resource_group_name
+  enabled_for_disk_encryption = true
+  tenant_id                   = data.azurerm_client_config.current.tenant_id
+  soft_delete_retention_days  = 7
+  purge_protection_enabled    = var.environment == "prod"
+  sku_name                    = "standard"
+
+  access_policy {
+    tenant_id = data.azurerm_client_config.current.tenant_id
+    object_id = azurerm_user_assigned_identity.chain.principal_id
+
+    secret_permissions = [
+      "Get",
+      "List",
     ]
-  })
+  }
 
   tags = local.common_tags
 }
 
-resource "aws_iam_instance_profile" "chain_node" {
-  name = "${local.name_prefix}-node-profile"
-  role = aws_iam_role.chain_node.name
-}
+data "azurerm_client_config" "current" {}
 
-# CloudWatch Log Group for Chain Logs
-resource "aws_cloudwatch_log_group" "chain" {
-  name              = "/mystira/chain/${var.environment}"
-  retention_in_days = var.environment == "prod" ? 90 : 30
+# Azure Container Registry for Chain Images
+resource "azurerm_container_registry" "chain" {
+  name                = replace("${local.name_prefix}acr", "-", "")
+  resource_group_name = var.resource_group_name
+  location            = var.location
+  sku                 = var.environment == "prod" ? "Premium" : "Standard"
+  admin_enabled       = false
 
   tags = local.common_tags
 }
 
-output "security_group_id" {
-  description = "Security group ID for chain nodes"
-  value       = aws_security_group.chain_nodes.id
+output "nsg_id" {
+  description = "Network Security Group ID for chain nodes"
+  value       = azurerm_network_security_group.chain.id
 }
 
-output "iam_role_arn" {
-  description = "IAM role ARN for chain nodes"
-  value       = aws_iam_role.chain_node.arn
+output "identity_id" {
+  description = "Managed Identity ID for chain nodes"
+  value       = azurerm_user_assigned_identity.chain.id
 }
 
-output "log_group_name" {
-  description = "CloudWatch log group name"
-  value       = aws_cloudwatch_log_group.chain.name
+output "identity_principal_id" {
+  description = "Managed Identity Principal ID"
+  value       = azurerm_user_assigned_identity.chain.principal_id
 }
 
-output "ebs_volume_ids" {
-  description = "EBS volume IDs for chain data"
-  value       = aws_ebs_volume.chain_data[*].id
+output "storage_account_name" {
+  description = "Storage account name for chain data"
+  value       = azurerm_storage_account.chain.name
+}
+
+output "log_analytics_workspace_id" {
+  description = "Log Analytics Workspace ID"
+  value       = azurerm_log_analytics_workspace.chain.id
+}
+
+output "key_vault_id" {
+  description = "Key Vault ID for chain secrets"
+  value       = azurerm_key_vault.chain.id
+}
+
+output "acr_login_server" {
+  description = "Azure Container Registry login server"
+  value       = azurerm_container_registry.chain.login_server
 }
