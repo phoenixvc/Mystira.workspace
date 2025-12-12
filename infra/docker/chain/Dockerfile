@@ -25,6 +25,9 @@ COPY . .
 # Build the application
 RUN pnpm build || true
 
+# Create dist directory if it doesn't exist
+RUN mkdir -p /app/dist
+
 # Production stage
 FROM node:18-alpine AS production
 

@@ -25,6 +25,9 @@ COPY . .
 # Build the application
 RUN pnpm build || true
 
+# Create dist directory if it doesn't exist
+RUN mkdir -p /app/dist
+
 # Prune dev dependencies
 RUN pnpm prune --prod
 
