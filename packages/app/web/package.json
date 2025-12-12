@@ -7,7 +7,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint . --ext .ts,.tsx || true",
+    "lint": "next lint || true",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
