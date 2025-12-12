@@ -1,0 +1,132 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mystira-chain
+  labels:
+    app: mystira-chain
+    component: blockchain
+spec:
+  serviceName: mystira-chain
+  replicas: 3
+  selector:
+    matchLabels:
+      app: mystira-chain
+  template:
+    metadata:
+      labels:
+        app: mystira-chain
+        component: blockchain
+    spec:
+      securityContext:
+        fsGroup: 1000
+        runAsUser: 1000
+        runAsNonRoot: true
+      containers:
+        - name: chain
+          image: mystira/chain:latest
+          imagePullPolicy: Always
+          ports:
+            - name: rpc
+              containerPort: 8545
+              protocol: TCP
+            - name: ws
+              containerPort: 8546
+              protocol: TCP
+            - name: p2p-tcp
+              containerPort: 30303
+              protocol: TCP
+            - name: p2p-udp
+              containerPort: 30303
+              protocol: UDP
+          env:
+            - name: CHAIN_DATA_DIR
+              value: /data
+            - name: CHAIN_NETWORK_ID
+              valueFrom:
+                configMapKeyRef:
+                  name: mystira-chain-config
+                  key: network_id
+            - name: CHAIN_NODE_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: mystira-chain-secrets
+                  key: node_key
+          resources:
+            requests:
+              memory: "2Gi"
+              cpu: "500m"
+            limits:
+              memory: "4Gi"
+              cpu: "2000m"
+          volumeMounts:
+            - name: chain-data
+              mountPath: /data
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8545
+            initialDelaySeconds: 60
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 8545
+            initialDelaySeconds: 30
+            periodSeconds: 10
+  volumeClaimTemplates:
+    - metadata:
+        name: chain-data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        storageClassName: gp3
+        resources:
+          requests:
+            storage: 100Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mystira-chain
+  labels:
+    app: mystira-chain
+spec:
+  type: ClusterIP
+  ports:
+    - name: rpc
+      port: 8545
+      targetPort: 8545
+    - name: ws
+      port: 8546
+      targetPort: 8546
+  selector:
+    app: mystira-chain
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mystira-chain-p2p
+  labels:
+    app: mystira-chain
+spec:
+  type: NodePort
+  ports:
+    - name: p2p-tcp
+      port: 30303
+      targetPort: 30303
+      protocol: TCP
+    - name: p2p-udp
+      port: 30303
+      targetPort: 30303
+      protocol: UDP
+  selector:
+    app: mystira-chain
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mystira-chain-config
+data:
+  network_id: "1337"
+  chain_id: "1337"
+  rpc_enabled: "true"
+  ws_enabled: "true"

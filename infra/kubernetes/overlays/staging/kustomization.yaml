@@ -1,0 +1,33 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: mystira-staging
+
+resources:
+  - ../../base/chain
+  - ../../base/publisher
+
+commonLabels:
+  environment: staging
+
+patches:
+  - target:
+      kind: StatefulSet
+      name: mystira-chain
+    patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 2
+  - target:
+      kind: Deployment
+      name: mystira-publisher
+    patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 2
+
+images:
+  - name: mystira/chain
+    newTag: staging
+  - name: mystira/publisher
+    newTag: staging
