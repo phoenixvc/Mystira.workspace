@@ -1,0 +1,60 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: mystira-dev
+
+resources:
+  - ../../base/chain
+  - ../../base/publisher
+
+commonLabels:
+  environment: dev
+
+patches:
+  - target:
+      kind: StatefulSet
+      name: mystira-chain
+    patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 1
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/requests/memory
+        value: "1Gi"
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/limits/memory
+        value: "2Gi"
+      - op: remove
+        path: /spec/template/spec/nodeSelector
+      - op: remove
+        path: /spec/template/spec/tolerations
+  - target:
+      kind: Deployment
+      name: mystira-publisher
+    patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 1
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/requests/memory
+        value: "128Mi"
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/limits/memory
+        value: "256Mi"
+      - op: remove
+        path: /spec/template/spec/nodeSelector
+  - target:
+      kind: ConfigMap
+      name: mystira-publisher-config
+    patch: |-
+      - op: replace
+        path: /data/key_vault_url
+        value: "https://mystira-pub-dev-kv.vault.azure.net/"
+
+images:
+  - name: mystiraacr.azurecr.io/chain
+    newName: mystiradevacr.azurecr.io/chain
+    newTag: dev
+  - name: mystiraacr.azurecr.io/publisher
+    newName: mystiradevacr.azurecr.io/publisher
+    newTag: dev
