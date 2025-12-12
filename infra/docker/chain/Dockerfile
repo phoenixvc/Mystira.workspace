@@ -31,8 +31,8 @@ FROM node:18-alpine AS production
 WORKDIR /app
 
 # Create non-root user
-RUN addgroup -g 1000 chain && \
-    adduser -u 1000 -G chain -s /bin/sh -D chain
+RUN addgroup -g 10000 chain && \
+    adduser -u 10000 -G chain -s /bin/sh -D chain
 
 # Install runtime dependencies
 RUN apk add --no-cache tini
