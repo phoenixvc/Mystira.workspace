@@ -22,7 +22,8 @@
       2,
       "always",
       ["chain", "app", "story-generator", "infra", "workspace", "deps"]
-    ]
+    ],
+    "scope-empty": [0],
+    "scope-case": [2, "always", "lower-case"]
   }
 }
-
