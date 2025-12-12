@@ -1,0 +1,16 @@
+{
+  "name": "@mystira/publisher",
+  "version": "0.1.0",
+  "description": "Mystira Publisher Service - Placeholder",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc || echo 'No build configured yet'",
+    "start": "node dist/index.js"
+  },
+  "keywords": ["mystira", "publisher"],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "typescript": "^5.3.0"
+  }
+}

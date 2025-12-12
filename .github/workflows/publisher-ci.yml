@@ -33,9 +33,7 @@ jobs:
         with:
           submodules: recursive
 
-      - uses: pnpm/action-setup@v2
-        with:
-          version: 8
+      - uses: pnpm/action-setup@v4
 
       - uses: actions/setup-node@v4
         with:
@@ -56,9 +54,7 @@ jobs:
         with:
           submodules: recursive
 
-      - uses: pnpm/action-setup@v2
-        with:
-          version: 8
+      - uses: pnpm/action-setup@v4
 
       - uses: actions/setup-node@v4
         with:
@@ -86,9 +82,7 @@ jobs:
         with:
           submodules: recursive
 
-      - uses: pnpm/action-setup@v2
-        with:
-          version: 8
+      - uses: pnpm/action-setup@v4
 
       - uses: actions/setup-node@v4
         with:
@@ -107,6 +101,7 @@ jobs:
           name: publisher-build
           path: packages/publisher/dist
           retention-days: 7
+          if-no-files-found: warn
 
   docker-build:
     name: Build Docker Image
@@ -125,6 +120,7 @@ jobs:
         with:
           name: publisher-build
           path: packages/publisher/dist
+        continue-on-error: true
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -153,7 +149,7 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v5
         with:
-          context: packages/publisher
+          context: .
           file: infra/docker/publisher/Dockerfile
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}

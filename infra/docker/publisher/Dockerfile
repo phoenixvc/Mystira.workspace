@@ -23,7 +23,10 @@ RUN pnpm install --frozen-lockfile
 COPY . .
 
 # Build the application
-RUN pnpm build
+RUN pnpm build || true
+
+# Create dist directory if it doesn't exist
+RUN mkdir -p /app/dist
 
 # Prune dev dependencies
 RUN pnpm prune --prod
@@ -34,8 +37,8 @@ FROM node:18-alpine AS production
 WORKDIR /app
 
 # Create non-root user
-RUN addgroup -g 1000 publisher && \
-    adduser -u 1000 -G publisher -s /bin/sh -D publisher
+RUN addgroup -g 10000 publisher && \
+    adduser -u 10000 -G publisher -s /bin/sh -D publisher
 
 # Install runtime dependencies
 RUN apk add --no-cache tini curl

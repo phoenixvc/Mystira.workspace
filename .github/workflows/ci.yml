@@ -20,8 +20,6 @@ jobs:
           submodules: recursive
 
       - uses: pnpm/action-setup@v4
-        with:
-          version: 8
 
       - uses: actions/setup-node@v6
         with:
@@ -43,8 +41,6 @@ jobs:
           submodules: recursive
 
       - uses: pnpm/action-setup@v4
-        with:
-          version: 8
 
       - uses: actions/setup-node@v6
         with:
@@ -66,8 +62,6 @@ jobs:
           submodules: recursive
 
       - uses: pnpm/action-setup@v4
-        with:
-          version: 8
 
       - uses: actions/setup-node@v6
         with:
