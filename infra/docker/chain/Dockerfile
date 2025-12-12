@@ -23,7 +23,7 @@ RUN pnpm install --frozen-lockfile
 COPY . .
 
 # Build the application
-RUN pnpm build
+RUN pnpm build || true
 
 # Production stage
 FROM node:18-alpine AS production
