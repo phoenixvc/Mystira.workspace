@@ -1,0 +1,9 @@
+# Auto detect text files and perform LF normalization
+* text=auto
+
+# Git submodules
+packages/chain/ export-ignore
+packages/app/ export-ignore
+packages/story-generator/ export-ignore
+infra/ export-ignore
+

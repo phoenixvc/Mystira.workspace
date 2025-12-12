@@ -1,0 +1,19 @@
+{
+  "name": "@mystira/app",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Main user-facing applications for the Mystira platform",
+  "workspaces": [
+    "web",
+    "mobile",
+    "shared"
+  ],
+  "scripts": {
+    "dev": "pnpm --filter @mystira/app-web dev",
+    "build": "pnpm --filter @mystira/app-web build",
+    "test": "pnpm -r test",
+    "lint": "pnpm -r lint",
+    "typecheck": "pnpm -r typecheck"
+  }
+}
+

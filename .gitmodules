@@ -1,0 +1,20 @@
+[submodule "packages/chain"]
+	path = packages/chain
+	url = https://github.com/phoenixvc/Mystira.Chain.git
+	branch = main
+
+[submodule "packages/app"]
+	path = packages/app
+	url = https://github.com/phoenixvc/Mystira.App.git
+	branch = main
+
+[submodule "packages/story-generator"]
+	path = packages/story-generator
+	url = https://github.com/phoenixvc/Mystira.StoryGenerator.git
+	branch = main
+
+[submodule "infra"]
+	path = infra
+	url = https://github.com/phoenixvc/Mystira.INFRA.git
+	branch = main
+
