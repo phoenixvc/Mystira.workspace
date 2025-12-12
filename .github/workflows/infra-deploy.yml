@@ -1,0 +1,201 @@
+name: Infrastructure Deploy
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'infra/terraform/**'
+      - 'infra/kubernetes/**'
+      - '.github/workflows/infra-deploy.yml'
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy'
+        required: true
+        default: 'dev'
+        type: choice
+        options:
+          - dev
+          - staging
+          - prod
+      components:
+        description: 'Components to deploy (comma-separated: chain,publisher,all)'
+        required: true
+        default: 'all'
+        type: string
+
+concurrency:
+  group: infra-deploy-${{ github.event.inputs.environment || 'dev' }}
+  cancel-in-progress: false
+
+env:
+  TF_VERSION: 1.5.0
+  AZURE_RESOURCE_GROUP: mystira-${{ github.event.inputs.environment || 'dev' }}-rg
+  AKS_CLUSTER_NAME: mystira-${{ github.event.inputs.environment || 'dev' }}-aks
+
+jobs:
+  plan-terraform:
+    name: Plan Terraform - ${{ github.event.inputs.environment || 'dev' }}
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment || 'dev' }}
+    outputs:
+      plan-exit-code: ${{ steps.plan.outputs.exitcode }}
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Terraform Init
+        run: |
+          cd infra/terraform/environments/${{ github.event.inputs.environment || 'dev' }}
+          terraform init
+
+      - name: Terraform Plan
+        id: plan
+        run: |
+          cd infra/terraform/environments/${{ github.event.inputs.environment || 'dev' }}
+          terraform plan -out=tfplan -detailed-exitcode || echo "exitcode=$?" >> $GITHUB_OUTPUT
+        continue-on-error: true
+
+      - name: Upload Plan
+        uses: actions/upload-artifact@v4
+        with:
+          name: terraform-plan-${{ github.event.inputs.environment || 'dev' }}
+          path: infra/terraform/environments/${{ github.event.inputs.environment || 'dev' }}/tfplan
+          retention-days: 5
+
+  apply-terraform:
+    name: Apply Terraform - ${{ github.event.inputs.environment || 'dev' }}
+    runs-on: ubuntu-latest
+    needs: [plan-terraform]
+    if: needs.plan-terraform.outputs.plan-exit-code == '2'
+    environment: ${{ github.event.inputs.environment || 'dev' }}
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Download Plan
+        uses: actions/download-artifact@v4
+        with:
+          name: terraform-plan-${{ github.event.inputs.environment || 'dev' }}
+          path: infra/terraform/environments/${{ github.event.inputs.environment || 'dev' }}
+
+      - name: Terraform Init
+        run: |
+          cd infra/terraform/environments/${{ github.event.inputs.environment || 'dev' }}
+          terraform init
+
+      - name: Terraform Apply
+        run: |
+          cd infra/terraform/environments/${{ github.event.inputs.environment || 'dev' }}
+          terraform apply -auto-approve tfplan
+
+  deploy-chain:
+    name: Deploy Chain - ${{ github.event.inputs.environment || 'dev' }}
+    runs-on: ubuntu-latest
+    needs: [apply-terraform]
+    if: always() && (needs.apply-terraform.result == 'success' || needs.apply-terraform.result == 'skipped') && (github.event.inputs.components == 'all' || contains(github.event.inputs.components, 'chain'))
+    environment: ${{ github.event.inputs.environment || 'dev' }}
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v3
+
+      - name: Get AKS credentials
+        run: |
+          az aks get-credentials \
+            --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
+            --name ${{ env.AKS_CLUSTER_NAME }} \
+            --overwrite-existing
+
+      - name: Create namespace if not exists
+        run: |
+          kubectl create namespace mystira-${{ github.event.inputs.environment || 'dev' }} --dry-run=client -o yaml | kubectl apply -f -
+
+      - name: Deploy Chain to AKS
+        run: |
+          kubectl apply -k infra/kubernetes/overlays/${{ github.event.inputs.environment || 'dev' }}
+          kubectl rollout status statefulset/mystira-chain -n mystira-${{ github.event.inputs.environment || 'dev' }} --timeout=600s
+
+  deploy-publisher:
+    name: Deploy Publisher - ${{ github.event.inputs.environment || 'dev' }}
+    runs-on: ubuntu-latest
+    needs: [apply-terraform, deploy-chain]
+    if: always() && (needs.apply-terraform.result == 'success' || needs.apply-terraform.result == 'skipped') && (needs.deploy-chain.result == 'success' || needs.deploy-chain.result == 'skipped') && (github.event.inputs.components == 'all' || contains(github.event.inputs.components, 'publisher'))
+    environment: ${{ github.event.inputs.environment || 'dev' }}
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v3
+
+      - name: Get AKS credentials
+        run: |
+          az aks get-credentials \
+            --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
+            --name ${{ env.AKS_CLUSTER_NAME }} \
+            --overwrite-existing
+
+      - name: Create namespace if not exists
+        run: |
+          kubectl create namespace mystira-${{ github.event.inputs.environment || 'dev' }} --dry-run=client -o yaml | kubectl apply -f -
+
+      - name: Deploy Publisher to AKS
+        run: |
+          kubectl apply -k infra/kubernetes/overlays/${{ github.event.inputs.environment || 'dev' }}
+          kubectl rollout status deployment/mystira-publisher -n mystira-${{ github.event.inputs.environment || 'dev' }} --timeout=300s
+
+  notify:
+    name: Notify Deployment Status
+    runs-on: ubuntu-latest
+    needs: [deploy-chain, deploy-publisher]
+    if: always()
+    steps:
+      - name: Deployment Summary
+        run: |
+          echo "## Deployment Summary" >> $GITHUB_STEP_SUMMARY
+          echo "- Environment: ${{ github.event.inputs.environment || 'dev' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Azure Resource Group: mystira-${{ github.event.inputs.environment || 'dev' }}-rg" >> $GITHUB_STEP_SUMMARY
+          echo "- AKS Cluster: mystira-${{ github.event.inputs.environment || 'dev' }}-aks" >> $GITHUB_STEP_SUMMARY
+          echo "- Chain Deploy: ${{ needs.deploy-chain.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Publisher Deploy: ${{ needs.deploy-publisher.result }}" >> $GITHUB_STEP_SUMMARY
