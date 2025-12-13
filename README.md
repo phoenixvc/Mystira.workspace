@@ -145,6 +145,8 @@ Infrastructure and deployment configurations:
 - CI/CD pipelines
 - Monitoring and observability
 
+For Azure deployments, see [Azure Setup Guide](./infra/AZURE_SETUP.md) for configuring service principal permissions.
+
 ## Documentation
 
 - [Quick Start Guide](./docs/QUICK_START.md) - Get started in 5 minutes
@@ -152,6 +154,7 @@ Infrastructure and deployment configurations:
 - [Submodules Guide](./docs/SUBMODULES.md) - Working with git submodules
 - [Architecture](./docs/ARCHITECTURE.md) - System architecture overview
 - [Environment Variables](./docs/ENVIRONMENT.md) - Environment configuration
+- [Azure Setup](./infra/AZURE_SETUP.md) - Azure service principal and permissions setup
 
 ## Contributing
 

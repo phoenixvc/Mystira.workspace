@@ -11,11 +11,50 @@ CONTAINER_NAME="tfstate"
 LOCATION="${AZURE_LOCATION:-eastus}"
 STORAGE_SKU="${AZURE_STORAGE_SKU:-Standard_LRS}"
 
+# Error handler for authorization failures
+error_handler() {
+  local exit_code=$?
+  if [ $exit_code -ne 0 ]; then
+    echo ""
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo "❌ BOOTSTRAP FAILED"
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo ""
+    echo "The bootstrap script failed. This is commonly caused by insufficient"
+    echo "Azure permissions."
+    echo ""
+    echo "Required Permissions:"
+    echo "  The Azure service principal needs the 'Contributor' role at the"
+    echo "  subscription level to create and manage infrastructure resources."
+    echo ""
+    echo "To fix authorization errors:"
+    echo ""
+    echo "  1. Grant Contributor role to the service principal:"
+    echo "     az role assignment create \\"
+    echo "       --assignee <service-principal-id> \\"
+    echo "       --role Contributor \\"
+    echo "       --scope /subscriptions/<subscription-id>"
+    echo ""
+    echo "  2. Wait 5-10 minutes for permissions to propagate"
+    echo ""
+    echo "  3. Re-run this workflow"
+    echo ""
+    echo "For detailed setup instructions, see:"
+    echo "  infra/AZURE_SETUP.md in the repository"
+    echo ""
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+  fi
+}
+
+# Set trap to catch errors
+trap error_handler EXIT
+
 echo "Bootstrapping Terraform backend..."
 echo "Resource Group: $RESOURCE_GROUP_NAME"
 echo "Storage Account: $STORAGE_ACCOUNT_NAME"
 echo "Container: $CONTAINER_NAME"
 echo "Location: $LOCATION"
+echo ""
 
 # Check if resource group exists
 if az group show --name "$RESOURCE_GROUP_NAME" &>/dev/null; then
@@ -68,3 +107,6 @@ echo "Backend configuration:"
 echo "  resource_group_name  = \"$RESOURCE_GROUP_NAME\""
 echo "  storage_account_name = \"$STORAGE_ACCOUNT_NAME\""
 echo "  container_name       = \"$CONTAINER_NAME\""
+
+# Clear trap on success
+trap - EXIT

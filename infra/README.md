@@ -45,7 +45,16 @@ infra/
 - kubectl
 - Helm >= 3.0
 - Docker
-- AWS CLI / GCP CLI
+- Azure CLI (for Azure deployments)
+
+### Azure Setup
+
+For Azure deployments, you need to configure a service principal with appropriate permissions. See [AZURE_SETUP.md](./AZURE_SETUP.md) for detailed instructions on:
+
+- Creating and configuring a service principal
+- Required permissions (Contributor role at subscription level)
+- Setting up GitHub Actions secrets
+- Troubleshooting authorization issues
 
 ### Initial Setup
 
