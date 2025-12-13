@@ -116,14 +116,17 @@ terraform apply
 Alternatively, manually add the A records in Azure DNS:
 
 ```bash
+# Get the resource group name from Terraform output
+RESOURCE_GROUP=$(terraform output -raw resource_group_name)
+
 az network dns record-set a add-record \
-  --resource-group mystira-prod-rg \
+  --resource-group $RESOURCE_GROUP \
   --zone-name mystira.app \
   --record-set-name publisher \
   --ipv4-address <LOAD_BALANCER_IP>
 
 az network dns record-set a add-record \
-  --resource-group mystira-prod-rg \
+  --resource-group $RESOURCE_GROUP \
   --zone-name mystira.app \
   --record-set-name chain \
   --ipv4-address <LOAD_BALANCER_IP>
@@ -194,7 +197,7 @@ curl -X POST https://chain.mystira.app \
 
 - Check nameserver configuration at registrar
 - Wait for DNS propagation (up to 48 hours)
-- Verify Azure DNS zone has correct records: `az network dns record-set list --resource-group mystira-prod-rg --zone-name mystira.app`
+- Verify Azure DNS zone has correct records: `az network dns record-set list --resource-group $(terraform output -raw resource_group_name) --zone-name mystira.app`
 
 ### Certificate Not Issuing
 
