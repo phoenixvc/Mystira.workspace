@@ -56,6 +56,20 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
+      - name: Set Azure credentials for Terraform
+        run: |
+          # Extract credentials from AZURE_CREDENTIALS secret
+          ARM_CLIENT_ID=$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r '.clientId')
+          ARM_CLIENT_SECRET=$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r '.clientSecret')
+          ARM_SUBSCRIPTION_ID=$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r '.subscriptionId')
+          ARM_TENANT_ID=$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r '.tenantId')
+          
+          echo "ARM_CLIENT_ID=$ARM_CLIENT_ID" >> $GITHUB_ENV
+          echo "ARM_CLIENT_SECRET=$ARM_CLIENT_SECRET" >> $GITHUB_ENV
+          echo "ARM_SUBSCRIPTION_ID=$ARM_SUBSCRIPTION_ID" >> $GITHUB_ENV
+          echo "ARM_TENANT_ID=$ARM_TENANT_ID" >> $GITHUB_ENV
+          echo "ARM_USE_CLI=false" >> $GITHUB_ENV
+
       - name: Terraform Init
         run: |
           cd infra/terraform/environments/${{ github.event.inputs.environment || 'dev' }}
@@ -96,6 +110,20 @@ jobs:
         uses: azure/login@v1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Set Azure credentials for Terraform
+        run: |
+          # Extract credentials from AZURE_CREDENTIALS secret
+          ARM_CLIENT_ID=$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r '.clientId')
+          ARM_CLIENT_SECRET=$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r '.clientSecret')
+          ARM_SUBSCRIPTION_ID=$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r '.subscriptionId')
+          ARM_TENANT_ID=$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r '.tenantId')
+          
+          echo "ARM_CLIENT_ID=$ARM_CLIENT_ID" >> $GITHUB_ENV
+          echo "ARM_CLIENT_SECRET=$ARM_CLIENT_SECRET" >> $GITHUB_ENV
+          echo "ARM_SUBSCRIPTION_ID=$ARM_SUBSCRIPTION_ID" >> $GITHUB_ENV
+          echo "ARM_TENANT_ID=$ARM_TENANT_ID" >> $GITHUB_ENV
+          echo "ARM_USE_CLI=false" >> $GITHUB_ENV
 
       - name: Download Plan
         uses: actions/download-artifact@v4
