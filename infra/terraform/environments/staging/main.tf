@@ -78,21 +78,6 @@ resource "azurerm_subnet" "aks" {
   address_prefixes     = ["10.1.10.0/22"]
 }
 
-# Shared Azure Container Registry
-resource "azurerm_container_registry" "shared" {
-  name                = "mystiraacr"
-  resource_group_name = azurerm_resource_group.main.name
-  location            = azurerm_resource_group.main.location
-  sku                 = "Standard"
-  admin_enabled       = false
-
-  tags = {
-    Environment = "staging"
-    Project     = "Mystira"
-    ManagedBy   = "terraform"
-  }
-}
-
 # Chain Infrastructure
 module "chain" {
   source = "../../modules/chain"
@@ -171,12 +156,4 @@ output "chain_nsg_id" {
 
 output "publisher_nsg_id" {
   value = module.publisher.nsg_id
-}
-
-output "acr_login_server" {
-  value = azurerm_container_registry.shared.login_server
-}
-
-output "acr_name" {
-  value = azurerm_container_registry.shared.name
 }

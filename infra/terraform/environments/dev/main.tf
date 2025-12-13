@@ -87,9 +87,10 @@ resource "azurerm_container_registry" "shared" {
   admin_enabled       = false
 
   tags = {
-    Environment = "dev"
-    Project     = "Mystira"
-    ManagedBy   = "terraform"
+    Environment    = "shared"
+    Project        = "Mystira"
+    ManagedBy      = "terraform"
+    SharedResource = "true"
   }
 }
 
