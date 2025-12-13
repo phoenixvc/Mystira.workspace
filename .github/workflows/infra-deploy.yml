@@ -59,10 +59,13 @@ jobs:
       - name: Set Azure credentials for Terraform
         run: |
           # Extract credentials from AZURE_CREDENTIALS secret
-          ARM_CLIENT_ID=$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r '.clientId')
-          ARM_CLIENT_SECRET=$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r '.clientSecret')
-          ARM_SUBSCRIPTION_ID=$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r '.subscriptionId')
-          ARM_TENANT_ID=$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r '.tenantId')
+          ARM_CLIENT_ID=$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r '.clientId') || { echo "Failed to extract clientId"; exit 1; }
+          ARM_CLIENT_SECRET=$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r '.clientSecret') || { echo "Failed to extract clientSecret"; exit 1; }
+          ARM_SUBSCRIPTION_ID=$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r '.subscriptionId') || { echo "Failed to extract subscriptionId"; exit 1; }
+          ARM_TENANT_ID=$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r '.tenantId') || { echo "Failed to extract tenantId"; exit 1; }
+          
+          # Mask the client secret to prevent exposure in logs
+          echo "::add-mask::$ARM_CLIENT_SECRET"
           
           {
             echo "ARM_CLIENT_ID=$ARM_CLIENT_ID"
@@ -116,10 +119,13 @@ jobs:
       - name: Set Azure credentials for Terraform
         run: |
           # Extract credentials from AZURE_CREDENTIALS secret
-          ARM_CLIENT_ID=$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r '.clientId')
-          ARM_CLIENT_SECRET=$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r '.clientSecret')
-          ARM_SUBSCRIPTION_ID=$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r '.subscriptionId')
-          ARM_TENANT_ID=$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r '.tenantId')
+          ARM_CLIENT_ID=$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r '.clientId') || { echo "Failed to extract clientId"; exit 1; }
+          ARM_CLIENT_SECRET=$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r '.clientSecret') || { echo "Failed to extract clientSecret"; exit 1; }
+          ARM_SUBSCRIPTION_ID=$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r '.subscriptionId') || { echo "Failed to extract subscriptionId"; exit 1; }
+          ARM_TENANT_ID=$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r '.tenantId') || { echo "Failed to extract tenantId"; exit 1; }
+          
+          # Mask the client secret to prevent exposure in logs
+          echo "::add-mask::$ARM_CLIENT_SECRET"
           
           {
             echo "ARM_CLIENT_ID=$ARM_CLIENT_ID"
