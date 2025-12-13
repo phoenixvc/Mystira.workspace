@@ -24,8 +24,11 @@ For details, see [ADR-0002: Documentation Location Strategy](./architecture/adr/
 
 - [Architecture Overview](./ARCHITECTURE.md) - System architecture overview
 - [Infrastructure Guide](./INFRASTRUCTURE.md) - Infrastructure organization and deployment
+- [Shared Resources Guide](./SHARED_RESOURCES.md) - Using shared PostgreSQL, Redis, and Monitoring
+- [Kubernetes Secrets Management](./kubernetes-secrets-management.md) - Creating and managing Kubernetes secrets
 - [Architecture Decision Records](./architecture/adr/) - ADRs documenting key decisions
 - [Implementation Roadmap](./IMPLEMENTATION_ROADMAP.md) - Strategic implementation plan
+- [Phase 1 Status](./PHASE1_STATUS.md) - Phase 1 completion status and analysis
 
 ### Development
 
