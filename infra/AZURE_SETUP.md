@@ -145,8 +145,6 @@ az group create --name test-permissions-rg --location eastus
 # Clean up
 az group delete --name test-permissions-rg --yes --no-wait
 ```
-az group delete --name test-permissions-rg --yes --no-wait
-```
 
 ## Security Best Practices
 
