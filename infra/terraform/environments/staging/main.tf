@@ -157,11 +157,3 @@ output "chain_nsg_id" {
 output "publisher_nsg_id" {
   value = module.publisher.nsg_id
 }
-
-output "chain_acr_login_server" {
-  value = module.chain.acr_login_server
-}
-
-output "publisher_acr_login_server" {
-  value = module.publisher.acr_login_server
-}
