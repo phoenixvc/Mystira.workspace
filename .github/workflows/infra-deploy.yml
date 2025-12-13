@@ -75,6 +75,11 @@ jobs:
             echo "ARM_USE_CLI=false"
           } >> "$GITHUB_ENV"
 
+      - name: Bootstrap Terraform Backend
+        run: |
+          chmod +x infra/scripts/bootstrap-terraform-backend.sh
+          infra/scripts/bootstrap-terraform-backend.sh
+
       - name: Terraform Init
         run: |
           cd infra/terraform/environments/${{ github.event.inputs.environment || 'dev' }}
@@ -140,6 +145,11 @@ jobs:
         with:
           name: terraform-plan-${{ github.event.inputs.environment || 'dev' }}
           path: infra/terraform/environments/${{ github.event.inputs.environment || 'dev' }}
+
+      - name: Bootstrap Terraform Backend
+        run: |
+          chmod +x infra/scripts/bootstrap-terraform-backend.sh
+          infra/scripts/bootstrap-terraform-backend.sh
 
       - name: Terraform Init
         run: |
