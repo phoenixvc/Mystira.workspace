@@ -94,3 +94,8 @@ ENV/
 *.temp
 
 gasReporterOutput.json
+
+# Temporary documentation files
+SUBMODULE_SETUP_SUMMARY.md
+CHAIN_COMPARISON.md
+REPO_SETUP_COMPLETE.md

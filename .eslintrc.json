@@ -1,9 +1,6 @@
 {
   "root": true,
-  "extends": [
-    "eslint:recommended",
-    "plugin:@typescript-eslint/recommended"
-  ],
+  "extends": ["eslint:recommended", "plugin:@typescript-eslint/recommended"],
   "parser": "@typescript-eslint/parser",
   "parserOptions": {
     "ecmaVersion": 2022,
@@ -11,9 +8,18 @@
   },
   "plugins": ["@typescript-eslint"],
   "rules": {
-    "@typescript-eslint/no-unused-vars": ["error", { "argsIgnorePattern": "^_" }],
+    "@typescript-eslint/no-unused-vars": [
+      "error",
+      { "argsIgnorePattern": "^_" }
+    ],
     "@typescript-eslint/explicit-module-boundary-types": "off"
   },
-  "ignorePatterns": ["dist", "node_modules", "*.config.js"]
+  "ignorePatterns": [
+    "dist",
+    "node_modules",
+    "*.config.js",
+    "**/wwwroot/**",
+    "**/service-worker*.js",
+    "**/*.min.js"
+  ]
 }
-

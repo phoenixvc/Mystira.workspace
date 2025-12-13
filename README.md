@@ -15,6 +15,8 @@ Each component is maintained as a separate repository and integrated into this w
 | **Mystira.Chain**          | Blockchain infrastructure, smart contracts, and Web3 integration | `phoenixvc/Mystira.Chain`          | `packages/chain/`           |
 | **Mystira.App**            | Main application (being split into modular components)           | `phoenixvc/Mystira.App`            | `packages/app/`             |
 | **Mystira.StoryGenerator** | AI-powered story generation engine                               | `phoenixvc/Mystira.StoryGenerator` | `packages/story-generator/` |
+| **Mystira.Publisher**      | Publisher web application                                        | `phoenixvc/Mystira.Publisher`      | `packages/publisher/`       |
+| **Mystira.DevHub**         | Development operations desktop application                       | `phoenixvc/Mystira.DevHub`         | `packages/app/tools/`       |
 | **Mystira.Infra**          | Infrastructure, DevOps, and deployment configurations            | `phoenixvc/Mystira.INFRA`          | `infra/`                    |
 
 ## Repository Structure
@@ -28,7 +30,12 @@ Mystira.workspace/
 │   │   └── [Mystira.Chain repository contents]
 │   │
 │   ├── app/                # Mystira.App repository (git submodule)
-│   │   └── [Mystira.App repository contents]
+│   │   ├── [Mystira.App repository contents]
+│   │   └── tools/          # Mystira.DevHub repository (git submodule)
+│   │       └── [Mystira.DevHub repository contents]
+│   │
+│   ├── publisher/          # Mystira.Publisher repository (git submodule)
+│   │   └── [Mystira.Publisher repository contents]
 │   │
 │   └── story-generator/    # Mystira.StoryGenerator repository (git submodule)
 │       └── [Mystira.StoryGenerator repository contents]
@@ -117,6 +124,7 @@ pnpm lint
 ### Mystira.Chain
 
 Handles all blockchain-related functionality including:
+
 - Smart contract development and deployment
 - NFT minting and management
 - Token economics
@@ -125,6 +133,7 @@ Handles all blockchain-related functionality including:
 ### Mystira.App
 
 The main user-facing application, currently being modularized into:
+
 - **Web**: Next.js-based web application
 - **Mobile**: React Native mobile app
 - **Shared**: Common components and utilities
@@ -132,6 +141,7 @@ The main user-facing application, currently being modularized into:
 ### Mystira.StoryGenerator
 
 AI-powered story generation system featuring:
+
 - Dynamic narrative generation
 - Character and world-building
 - Multi-model AI orchestration
@@ -140,6 +150,7 @@ AI-powered story generation system featuring:
 ### Mystira.Infra
 
 Infrastructure and deployment configurations:
+
 - Cloud infrastructure (Terraform)
 - Container orchestration (Kubernetes)
 - CI/CD pipelines
@@ -203,4 +214,3 @@ Proprietary - All rights reserved by Phoenix VC / Mystira
 
 - GitHub: [@phoenixvc](https://github.com/phoenixvc)
 - Website: [mystira.io](https://mystira.io)
-

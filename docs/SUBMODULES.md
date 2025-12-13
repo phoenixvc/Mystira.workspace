@@ -46,17 +46,20 @@ git submodule update --remote packages/chain
 ### Making Changes in Submodules
 
 1. Navigate to the submodule directory:
+
    ```bash
    cd packages/chain
    ```
 
 2. Check out a branch (if needed):
+
    ```bash
    git checkout main
    git pull origin main
    ```
 
 3. Make your changes and commit them:
+
    ```bash
    git add .
    git commit -m "Your changes"
@@ -89,12 +92,14 @@ git submodule update --init --recursive
 
 ## Submodule Repositories
 
-| Submodule | Path | Repository |
-|-----------|------|------------|
-| Mystira.Chain | `packages/chain/` | `phoenixvc/Mystira.Chain` |
-| Mystira.App | `packages/app/` | `phoenixvc/Mystira.App` |
+| Submodule              | Path                        | Repository                         |
+| ---------------------- | --------------------------- | ---------------------------------- |
+| Mystira.Chain          | `packages/chain/`           | `phoenixvc/Mystira.Chain`          |
+| Mystira.App            | `packages/app/`             | `phoenixvc/Mystira.App`            |
 | Mystira.StoryGenerator | `packages/story-generator/` | `phoenixvc/Mystira.StoryGenerator` |
-| Mystira.INFRA | `infra/` | `phoenixvc/Mystira.INFRA` |
+| Mystira.Publisher      | `packages/publisher/`       | `phoenixvc/Mystira.Publisher`      |
+| Mystira.DevHub         | `packages/app/tools/`       | `phoenixvc/Mystira.DevHub`         |
+| Mystira.INFRA          | `infra/`                    | `phoenixvc/Mystira.INFRA`          |
 
 ## Troubleshooting
 
@@ -157,4 +162,3 @@ In CI/CD pipelines, ensure submodules are initialized:
   with:
     submodules: recursive
 ```
-

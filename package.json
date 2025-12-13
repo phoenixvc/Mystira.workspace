@@ -18,7 +18,7 @@
     "lint": "turbo run lint",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
     "clean": "turbo run clean && rm -rf node_modules",
-    "prepare": "husky install"
+    "prepare": "husky"
   },
   "devDependencies": {
     "@changesets/cli": "^2.27.0",
@@ -39,14 +39,11 @@
     "pnpm": ">=8.0.0"
   },
   "lint-staged": {
-    "*.{ts,tsx,js,jsx}": [
+    "*.{ts,tsx}": [
       "eslint --fix",
       "prettier --write"
     ],
     "*.{json,md}": [
-      "prettier --write"
-    ],
-    "pnpm-lock.yaml": [
       "prettier --write"
     ]
   }

@@ -5,5 +5,7 @@
 packages/chain/ export-ignore
 packages/app/ export-ignore
 packages/story-generator/ export-ignore
+packages/publisher/ export-ignore
+packages/app/tools/ export-ignore
 infra/ export-ignore
 

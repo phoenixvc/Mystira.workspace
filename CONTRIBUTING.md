@@ -14,12 +14,14 @@ Thank you for your interest in contributing to the Mystira platform!
 ### Getting Started
 
 1. Fork and clone the repository with submodules:
+
    ```bash
    git clone --recurse-submodules https://github.com/phoenixvc/Mystira.workspace.git
    cd Mystira.workspace
    ```
-   
+
    If already cloned:
+
    ```bash
    git submodule update --init --recursive
    ```
@@ -44,6 +46,8 @@ This workspace integrates multiple repositories as git submodules, managed with 
 - `packages/chain/` - Mystira.Chain repository (blockchain and smart contracts)
 - `packages/app/` - Mystira.App repository (web and mobile applications)
 - `packages/story-generator/` - Mystira.StoryGenerator repository (AI story generation engine)
+- `packages/publisher/` - Mystira.Publisher repository (publisher web application)
+- `packages/app/tools/` - Mystira.DevHub repository (development operations desktop app)
 - `infra/` - Mystira.INFRA repository (infrastructure and DevOps)
 
 See [SUBMODULES.md](./docs/SUBMODULES.md) for detailed information on working with git submodules.
@@ -77,6 +81,7 @@ Follow conventional commits format:
 Types: `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`
 
 Examples:
+
 - `feat(chain): add NFT minting contract`
 - `fix(app): resolve auth token refresh issue`
 - `docs(readme): update installation instructions`
@@ -162,4 +167,3 @@ pnpm format
 ## Code of Conduct
 
 Be respectful, inclusive, and professional. We're building something amazing together!
-
