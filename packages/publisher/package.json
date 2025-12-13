@@ -3,11 +3,18 @@
   "version": "0.1.0",
   "description": "Mystira Publisher Service - Placeholder",
   "main": "dist/index.js",
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org"
+  },
   "scripts": {
     "build": "tsc || echo 'No build configured yet'",
     "start": "node dist/index.js"
   },
-  "keywords": ["mystira", "publisher"],
+  "keywords": [
+    "mystira",
+    "publisher"
+  ],
   "author": "",
   "license": "MIT",
   "devDependencies": {
