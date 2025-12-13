@@ -25,6 +25,7 @@ Creates the Azure Storage Account and Container for storing Terraform state file
 
 **Environment Variables:**
 - `AZURE_LOCATION` - Azure region for the storage account (default: `eastus`)
+- `AZURE_STORAGE_SKU` - Storage account SKU (default: `Standard_LRS`, other options: `Standard_GRS`, `Standard_RAGRS`, `Standard_ZRS`, etc.)
 
 **Notes:**
 - This script is idempotent - it can be run multiple times safely

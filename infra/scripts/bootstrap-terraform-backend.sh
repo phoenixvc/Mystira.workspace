@@ -9,6 +9,7 @@ RESOURCE_GROUP_NAME="mystira-terraform-state"
 STORAGE_ACCOUNT_NAME="mystiraterraformstate"
 CONTAINER_NAME="tfstate"
 LOCATION="${AZURE_LOCATION:-eastus}"
+STORAGE_SKU="${AZURE_STORAGE_SKU:-Standard_LRS}"
 
 echo "Bootstrapping Terraform backend..."
 echo "Resource Group: $RESOURCE_GROUP_NAME"
@@ -37,7 +38,7 @@ else
     --name "$STORAGE_ACCOUNT_NAME" \
     --resource-group "$RESOURCE_GROUP_NAME" \
     --location "$LOCATION" \
-    --sku Standard_LRS \
+    --sku "$STORAGE_SKU" \
     --encryption-services blob \
     --allow-blob-public-access false \
     --min-tls-version TLS1_2 \
