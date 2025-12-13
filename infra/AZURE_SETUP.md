@@ -19,6 +19,7 @@ The GitHub Actions workflows use a service principal to authenticate with Azure.
 az login
 
 # Set your subscription (replace with your subscription ID)
+# To find your subscription ID: az account show --query id -o tsv
 SUBSCRIPTION_ID="your-subscription-id"
 az account set --subscription $SUBSCRIPTION_ID
 
@@ -75,14 +76,14 @@ You should see at least one role assignment with:
 3. Create a new repository secret named `AZURE_CREDENTIALS`
 4. Paste the JSON output from Step 1 as the secret value
 
-The JSON should look like this:
+The JSON should look like this (values from the `az ad sp create-for-rbac` command output):
 
 ```json
 {
-  "clientId": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
-  "clientSecret": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
-  "subscriptionId": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
-  "tenantId": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+  "clientId": "<clientId-from-json-output>",
+  "clientSecret": "<clientSecret-from-json-output>",
+  "subscriptionId": "<subscriptionId-from-json-output>",
+  "tenantId": "<tenantId-from-json-output>"
 }
 ```
 

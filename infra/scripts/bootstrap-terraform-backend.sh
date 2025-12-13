@@ -40,7 +40,7 @@ error_handler() {
     echo "  3. Re-run this workflow"
     echo ""
     echo "For detailed setup instructions, see:"
-    echo "  https://github.com/phoenixvc/Mystira.workspace/blob/main/infra/AZURE_SETUP.md"
+    echo "  infra/AZURE_SETUP.md in the repository"
     echo ""
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
   fi
