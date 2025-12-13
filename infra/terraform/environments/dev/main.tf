@@ -79,6 +79,9 @@ resource "azurerm_subnet" "aks" {
 }
 
 # Shared Azure Container Registry
+# Note: This ACR is shared across all environments (dev, staging, prod)
+# to align with the CI/CD workflows which expect a single registry named 'mystiraacr'.
+# Consider moving to a separate shared infrastructure workspace in the future.
 resource "azurerm_container_registry" "shared" {
   name                = "mystiraacr"
   resource_group_name = azurerm_resource_group.main.name
@@ -87,10 +90,10 @@ resource "azurerm_container_registry" "shared" {
   admin_enabled       = false
 
   tags = {
-    Environment    = "shared"
-    Project        = "Mystira"
-    ManagedBy      = "terraform"
-    SharedResource = "true"
+    Environment = "dev"
+    Project     = "Mystira"
+    ManagedBy   = "terraform"
+    Shared      = "all-environments"
   }
 }
 
