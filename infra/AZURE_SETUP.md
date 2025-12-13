@@ -24,14 +24,25 @@ SUBSCRIPTION_ID="your-subscription-id"
 az account set --subscription $SUBSCRIPTION_ID
 
 # Create a service principal with Contributor role at subscription level
-az ad sp create-for-rbac \
+# Note: --sdk-auth is deprecated, so we'll format the output manually
+SP_OUTPUT=$(az ad sp create-for-rbac \
   --name "mystira-github-actions" \
   --role "Contributor" \
-  --scopes "/subscriptions/$SUBSCRIPTION_ID" \
-  --sdk-auth
+  --scopes "/subscriptions/$SUBSCRIPTION_ID")
+
+# Display the output
+echo $SP_OUTPUT
+
+# The output will look like:
+# {
+#   "appId": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+#   "displayName": "mystira-github-actions",
+#   "password": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+#   "tenant": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+# }
 ```
 
-This command will output JSON credentials. **Save this output securely** - you'll need it for the GitHub secret.
+**Important**: Save this output securely. You'll need to format it for the GitHub secret (see Step 3).
 
 ### Step 2: Required Permissions
 
@@ -74,18 +85,24 @@ You should see at least one role assignment with:
 1. Go to your GitHub repository settings
 2. Navigate to **Secrets and variables** → **Actions**
 3. Create a new repository secret named `AZURE_CREDENTIALS`
-4. Paste the JSON output from Step 1 as the secret value
+4. Format and paste the JSON credentials from Step 1
 
-The JSON should look like this (values from the `az ad sp create-for-rbac` command output):
+The JSON format required for GitHub Actions (map the values from Step 1 output):
 
 ```json
 {
-  "clientId": "<clientId-from-json-output>",
-  "clientSecret": "<clientSecret-from-json-output>",
-  "subscriptionId": "<subscriptionId-from-json-output>",
-  "tenantId": "<tenantId-from-json-output>"
+  "clientId": "<appId-from-step1>",
+  "clientSecret": "<password-from-step1>",
+  "subscriptionId": "<your-subscription-id>",
+  "tenantId": "<tenant-from-step1>"
 }
 ```
+
+**Mapping from `az ad sp create-for-rbac` output:**
+- `appId` → `clientId`
+- `password` → `clientSecret`
+- `tenant` → `tenantId`
+- Add your `subscriptionId` manually
 
 ## Troubleshooting
 
@@ -116,15 +133,18 @@ To test if your service principal can create resource groups:
 
 ```bash
 # Login as the service principal
+# Use the values from Step 1: appId as -u, password as -p, tenant as --tenant
 az login --service-principal \
-  -u <clientId> \
-  -p <clientSecret> \
-  --tenant <tenantId>
+  -u <appId-from-step1> \
+  -p <password-from-step1> \
+  --tenant <tenant-from-step1>
 
 # Try to create a test resource group
 az group create --name test-permissions-rg --location eastus
 
 # Clean up
+az group delete --name test-permissions-rg --yes --no-wait
+```
 az group delete --name test-permissions-rg --yes --no-wait
 ```
 
