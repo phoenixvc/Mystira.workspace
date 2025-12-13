@@ -180,10 +180,15 @@ Code → Azure App Service / Static Web App → Service
 
 **Access**:
 
-- Internal: Kubernetes service or App Service internal endpoint
-- External: Ingress with DNS (`story-generator.{env}.mystira.app`) or App Service endpoint
+- Internal: Kubernetes service (`mystira-story-generator`)
+- External: Ingress with DNS (`story-generator.mystira.app`)
+- Kubernetes manifests: `infra/kubernetes/base/story-generator/`
 
-**Note**: Infrastructure templates are now available. Can use shared PostgreSQL/Redis modules or dedicated instances.
+**Deployment**:
+
+- Kubernetes Deployment with HorizontalPodAutoscaler
+- Uses shared PostgreSQL and Redis resources
+- Environment-specific configurations via Kustomize overlays
 
 ## Shared Resources
 
