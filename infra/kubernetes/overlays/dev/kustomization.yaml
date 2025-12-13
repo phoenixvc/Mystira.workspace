@@ -6,6 +6,7 @@ namespace: mystira-dev
 resources:
   - ../../base/chain
   - ../../base/publisher
+  - ../../base/cert-manager
 
 commonLabels:
   environment: dev

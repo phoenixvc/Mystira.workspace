@@ -6,6 +6,7 @@ namespace: mystira-staging
 resources:
   - ../../base/chain
   - ../../base/publisher
+  - ../../base/cert-manager
 
 commonLabels:
   environment: staging

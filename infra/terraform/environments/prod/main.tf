@@ -211,6 +211,20 @@ resource "azurerm_kubernetes_cluster_node_pool" "publisher" {
   }
 }
 
+# DNS Configuration
+module "dns" {
+  source = "../../modules/dns"
+
+  environment         = "prod"
+  resource_group_name = azurerm_resource_group.main.name
+  domain_name         = "mystira.app"
+
+  tags = {
+    CostCenter = "production"
+    Critical   = "true"
+  }
+}
+
 output "resource_group_name" {
   value = azurerm_resource_group.main.name
 }
@@ -225,4 +239,27 @@ output "chain_nsg_id" {
 
 output "publisher_nsg_id" {
   value = module.publisher.nsg_id
+}
+
+output "chain_acr_login_server" {
+  value = module.chain.acr_login_server
+}
+
+output "publisher_acr_login_server" {
+  value = module.publisher.acr_login_server
+}
+
+output "dns_name_servers" {
+  description = "Name servers for DNS zone - configure these in your domain registrar"
+  value       = module.dns.name_servers
+}
+
+output "publisher_domain" {
+  description = "Publisher service domain"
+  value       = module.dns.publisher_fqdn
+}
+
+output "chain_domain" {
+  description = "Chain service domain"
+  value       = module.dns.chain_fqdn
 }
