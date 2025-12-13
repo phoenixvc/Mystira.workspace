@@ -86,6 +86,31 @@ resource "azurerm_subnet" "aks" {
   address_prefixes     = ["10.2.10.0/22"]
 }
 
+# Shared Azure Container Registry
+resource "azurerm_container_registry" "shared" {
+  name                = "mystiraacr"
+  resource_group_name = azurerm_resource_group.main.name
+  location            = azurerm_resource_group.main.location
+  sku                 = "Premium"
+  admin_enabled       = false
+
+  # Enable geo-replication for production
+  georeplications {
+    location = var.location_secondary
+    tags = {
+      Environment = "prod"
+      Replication = "secondary"
+    }
+  }
+
+  tags = {
+    Environment = "prod"
+    Project     = "Mystira"
+    ManagedBy   = "terraform"
+    Critical    = "true"
+  }
+}
+
 # Chain Infrastructure
 module "chain" {
   source = "../../modules/chain"
@@ -227,10 +252,10 @@ output "publisher_nsg_id" {
   value = module.publisher.nsg_id
 }
 
-output "chain_acr_login_server" {
-  value = module.chain.acr_login_server
+output "acr_login_server" {
+  value = azurerm_container_registry.shared.login_server
 }
 
-output "publisher_acr_login_server" {
-  value = module.publisher.acr_login_server
+output "acr_name" {
+  value = azurerm_container_registry.shared.name
 }

@@ -51,6 +51,7 @@ deployments/localhost/
 *.tfstate
 *.tfstate.*
 .terraform/
+.terraform.lock.hcl
 *.tfvars
 !*.tfvars.example
 

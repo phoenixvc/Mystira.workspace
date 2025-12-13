@@ -190,17 +190,6 @@ resource "azurerm_key_vault" "chain" {
 
 data "azurerm_client_config" "current" {}
 
-# Azure Container Registry for Chain Images
-resource "azurerm_container_registry" "chain" {
-  name                = replace("${local.name_prefix}acr", "-", "")
-  resource_group_name = var.resource_group_name
-  location            = var.location
-  sku                 = var.environment == "prod" ? "Premium" : "Standard"
-  admin_enabled       = false
-
-  tags = local.common_tags
-}
-
 output "nsg_id" {
   description = "Network Security Group ID for chain nodes"
   value       = azurerm_network_security_group.chain.id
@@ -229,9 +218,4 @@ output "log_analytics_workspace_id" {
 output "key_vault_id" {
   description = "Key Vault ID for chain secrets"
   value       = azurerm_key_vault.chain.id
-}
-
-output "acr_login_server" {
-  description = "Azure Container Registry login server"
-  value       = azurerm_container_registry.chain.login_server
 }
