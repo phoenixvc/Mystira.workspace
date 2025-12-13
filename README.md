@@ -160,12 +160,25 @@ For Azure deployments, see [Azure Setup Guide](./infra/AZURE_SETUP.md) for confi
 
 ## Documentation
 
+**Workspace Documentation** (`docs/`):
+
+- [Documentation Index](./docs/README.md) - Complete documentation navigation
 - [Quick Start Guide](./docs/QUICK_START.md) - Get started in 5 minutes
 - [Setup Guide](./docs/SETUP.md) - Detailed setup instructions
 - [Submodules Guide](./docs/SUBMODULES.md) - Working with git submodules
 - [Architecture](./docs/ARCHITECTURE.md) - System architecture overview
+- [Infrastructure Guide](./docs/INFRASTRUCTURE.md) - Infrastructure organization and deployment
+- [Implementation Roadmap](./docs/IMPLEMENTATION_ROADMAP.md) - Strategic implementation plan
 - [Environment Variables](./docs/ENVIRONMENT.md) - Environment configuration
-- [Azure Setup](./infra/AZURE_SETUP.md) - Azure service principal and permissions setup
+- [Architecture Decisions](./docs/architecture/adr/) - ADRs documenting key decisions
+
+**Project-Specific Documentation**:
+
+- [App Documentation](./packages/app/README.md) and [App Docs](./packages/app/docs/)
+- [Publisher Documentation](./packages/publisher/README.md)
+- [Story-Generator Documentation](./packages/story-generator/README.md)
+- [Chain Documentation](./packages/chain/README.md)
+- [Infrastructure Documentation](./infra/README.md) and [Azure Setup](./infra/AZURE_SETUP.md)
 
 ## Contributing
 

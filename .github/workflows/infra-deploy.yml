@@ -4,24 +4,24 @@ on:
   push:
     branches: [main]
     paths:
-      - 'infra/terraform/**'
-      - 'infra/kubernetes/**'
-      - '.github/workflows/infra-deploy.yml'
+      - "infra/terraform/**"
+      - "infra/kubernetes/**"
+      - ".github/workflows/infra-deploy.yml"
   workflow_dispatch:
     inputs:
       environment:
-        description: 'Environment to deploy'
+        description: "Environment to deploy"
         required: true
-        default: 'dev'
+        default: "dev"
         type: choice
         options:
           - dev
           - staging
           - prod
       components:
-        description: 'Components to deploy (comma-separated: chain,publisher,all)'
+        description: "Components to deploy (comma-separated: chain,publisher,all)"
         required: true
-        default: 'all'
+        default: "all"
         type: string
 
 concurrency:
@@ -44,7 +44,7 @@ jobs:
       contents: read
       id-token: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
@@ -63,10 +63,10 @@ jobs:
           ARM_CLIENT_SECRET=$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r '.clientSecret') || { echo "Failed to extract clientSecret"; exit 1; }
           ARM_SUBSCRIPTION_ID=$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r '.subscriptionId') || { echo "Failed to extract subscriptionId"; exit 1; }
           ARM_TENANT_ID=$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r '.tenantId') || { echo "Failed to extract tenantId"; exit 1; }
-          
+
           # Mask the client secret to prevent exposure in logs
           echo "::add-mask::$ARM_CLIENT_SECRET"
-          
+
           {
             echo "ARM_CLIENT_ID=$ARM_CLIENT_ID"
             echo "ARM_CLIENT_SECRET=$ARM_CLIENT_SECRET"
@@ -109,7 +109,7 @@ jobs:
       contents: read
       id-token: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
@@ -128,10 +128,10 @@ jobs:
           ARM_CLIENT_SECRET=$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r '.clientSecret') || { echo "Failed to extract clientSecret"; exit 1; }
           ARM_SUBSCRIPTION_ID=$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r '.subscriptionId') || { echo "Failed to extract subscriptionId"; exit 1; }
           ARM_TENANT_ID=$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r '.tenantId') || { echo "Failed to extract tenantId"; exit 1; }
-          
+
           # Mask the client secret to prevent exposure in logs
           echo "::add-mask::$ARM_CLIENT_SECRET"
-          
+
           {
             echo "ARM_CLIENT_ID=$ARM_CLIENT_ID"
             echo "ARM_CLIENT_SECRET=$ARM_CLIENT_SECRET"
@@ -171,7 +171,7 @@ jobs:
       contents: read
       id-token: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Azure Login
         uses: azure/login@v1
@@ -207,7 +207,7 @@ jobs:
       contents: read
       id-token: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Azure Login
         uses: azure/login@v1

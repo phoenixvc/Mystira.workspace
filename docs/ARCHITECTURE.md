@@ -2,6 +2,8 @@
 
 This document provides a high-level overview of the Mystira platform architecture.
 
+> **Infrastructure Details**: For detailed infrastructure organization, deployment models, and coordination, see [Infrastructure Guide](./INFRASTRUCTURE.md)
+
 ## System Architecture
 
 ```
@@ -44,6 +46,7 @@ This document provides a high-level overview of the Mystira platform architectur
 ### Frontend Applications
 
 #### Web Application (`packages/app/web`)
+
 - **Framework**: Next.js 14 with App Router
 - **State Management**: Zustand
 - **Styling**: Tailwind CSS
@@ -51,6 +54,7 @@ This document provides a high-level overview of the Mystira platform architectur
 - **Web3**: Ethers.js / Viem
 
 #### Mobile Application (`packages/app/mobile`)
+
 - **Framework**: React Native with Expo
 - **Navigation**: React Navigation
 - **State Management**: Zustand
@@ -59,12 +63,14 @@ This document provides a high-level overview of the Mystira platform architectur
 ### Backend Services
 
 #### Story Generator (`packages/story-generator`)
+
 - **AI Models**: Claude (Anthropic), GPT-4 (OpenAI), Local models
 - **Context Management**: Long-term memory system
 - **API**: RESTful API with GraphQL support
 - **Database**: PostgreSQL for story state, Redis for caching
 
 #### Blockchain Layer (`packages/chain`)
+
 - **Smart Contracts**: Solidity (Ethereum) / Move (Aptos)
 - **Development**: Hardhat / Foundry
 - **Testing**: Comprehensive test coverage
@@ -73,12 +79,14 @@ This document provides a high-level overview of the Mystira platform architectur
 ### Infrastructure (`infra`)
 
 #### Cloud Infrastructure
+
 - **IaC**: Terraform
 - **Orchestration**: Kubernetes
 - **Containers**: Docker
 - **CI/CD**: GitHub Actions
 
 #### Services
+
 - **Database**: PostgreSQL (managed)
 - **Cache**: Redis (managed)
 - **CDN**: CloudFlare / AWS CloudFront
@@ -108,6 +116,7 @@ User Login → OAuth/JWT → Auth Service → Session Management → Protected R
 ## Technology Stack
 
 ### Frontend
+
 - React 18+
 - Next.js 14
 - TypeScript
@@ -116,6 +125,7 @@ User Login → OAuth/JWT → Auth Service → Session Management → Protected R
 - Zustand
 
 ### Backend
+
 - Node.js 18+
 - TypeScript
 - PostgreSQL
@@ -123,16 +133,19 @@ User Login → OAuth/JWT → Auth Service → Session Management → Protected R
 - GraphQL (optional)
 
 ### Blockchain
+
 - Solidity / Move
 - Hardhat / Foundry
 - Ethers.js / Viem
 
 ### AI/ML
+
 - Anthropic Claude API
 - OpenAI GPT-4 API
 - Local model support (Ollama, etc.)
 
 ### Infrastructure
+
 - Docker
 - Kubernetes
 - Terraform
@@ -163,4 +176,3 @@ User Login → OAuth/JWT → Auth Service → Session Management → Protected R
 - **Logging**: Centralized logging system
 - **Tracing**: Distributed tracing (OpenTelemetry)
 - **Alerting**: PagerDuty / Slack integration
-

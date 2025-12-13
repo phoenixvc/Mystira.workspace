@@ -4,17 +4,17 @@ on:
   push:
     branches: [main, develop]
     paths:
-      - 'packages/publisher/**'
-      - 'infra/docker/publisher/**'
-      - 'infra/kubernetes/base/publisher/**'
-      - '.github/workflows/publisher-ci.yml'
+      - "packages/publisher/**"
+      - "infra/docker/publisher/**"
+      - "infra/kubernetes/base/publisher/**"
+      - ".github/workflows/publisher-ci.yml"
   pull_request:
     branches: [main, develop]
     paths:
-      - 'packages/publisher/**'
-      - 'infra/docker/publisher/**'
-      - 'infra/kubernetes/base/publisher/**'
-      - '.github/workflows/publisher-ci.yml'
+      - "packages/publisher/**"
+      - "infra/docker/publisher/**"
+      - "infra/kubernetes/base/publisher/**"
+      - ".github/workflows/publisher-ci.yml"
 
 concurrency:
   group: publisher-${{ github.workflow }}-${{ github.ref }}
@@ -29,43 +29,43 @@ jobs:
     name: Lint Publisher
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           submodules: recursive
 
       - uses: pnpm/action-setup@v4
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
-          node-version: '18'
-          cache: 'pnpm'
+          node-version: "18"
+          cache: "pnpm"
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
       - name: Lint publisher package
-        run: pnpm --filter @mystira/publisher lint
+        run: pnpm --filter mystira-publisher lint
 
   test:
     name: Test Publisher
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           submodules: recursive
 
       - uses: pnpm/action-setup@v4
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
-          node-version: '18'
-          cache: 'pnpm'
+          node-version: "18"
+          cache: "pnpm"
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
       - name: Run publisher tests
-        run: pnpm --filter @mystira/publisher test
+        run: pnpm --filter mystira-publisher test
 
       - name: Upload coverage
         uses: codecov/codecov-action@v3
@@ -78,22 +78,22 @@ jobs:
     runs-on: ubuntu-latest
     needs: [lint, test]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           submodules: recursive
 
       - uses: pnpm/action-setup@v4
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
-          node-version: '18'
-          cache: 'pnpm'
+          node-version: "18"
+          cache: "pnpm"
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
       - name: Build publisher package
-        run: pnpm --filter @mystira/publisher build
+        run: pnpm --filter mystira-publisher build
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
@@ -111,7 +111,7 @@ jobs:
       contents: read
       id-token: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           submodules: recursive
 
@@ -161,7 +161,7 @@ jobs:
     name: Validate Kubernetes Manifests
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Install kubectl
         uses: azure/setup-kubectl@v3
@@ -177,7 +177,7 @@ jobs:
     name: Validate Terraform
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
