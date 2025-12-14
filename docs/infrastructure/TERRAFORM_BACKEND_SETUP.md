@@ -160,11 +160,7 @@ Here's a complete PowerShell script to set up the backend:
 ```powershell
 # Set variables
 $RESOURCE_GROUP = "mys-prod-terraform-rg-eus"
-<<<<<<< HEAD
 $STORAGE_ACCOUNT = "mysprodterraformstate"
-=======
-$STORAGE_ACCOUNT = "mystiraterraformstate"
->>>>>>> 7e9ebfc33431bb5e22e47513f9cdfc629718d390
 $LOCATION = "eastus"
 $CONTAINER = "tfstate"
 
