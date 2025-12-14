@@ -99,7 +99,7 @@ git submodule update --init --recursive
 | Mystira.StoryGenerator | `packages/story-generator/` | `phoenixvc/Mystira.StoryGenerator` |
 | Mystira.Publisher      | `packages/publisher/`       | `phoenixvc/Mystira.Publisher`      |
 | Mystira.DevHub         | `packages/devhub/`          | `phoenixvc/Mystira.DevHub`         |
-| Mystira.INFRA          | `infra/`                    | `phoenixvc/Mystira.INFRA`          |
+| Mystira.Infra          | `infra/`                    | `phoenixvc/Mystira.Infra`          |
 
 ## Troubleshooting
 

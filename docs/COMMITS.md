@@ -33,7 +33,7 @@ The scope should be one of:
 - `chain` - Mystira.Chain repository
 - `app` - Mystira.App repository
 - `story-generator` - Mystira.StoryGenerator repository
-- `infra` - Mystira.INFRA repository
+- `infra` - Mystira.Infra repository
 - `workspace` - Workspace configuration
 - `deps` - Dependency updates
 

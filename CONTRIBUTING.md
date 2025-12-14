@@ -48,7 +48,7 @@ This workspace integrates multiple repositories as git submodules, managed with 
 - `packages/story-generator/` - Mystira.StoryGenerator repository (AI story generation engine)
 - `packages/publisher/` - Mystira.Publisher repository (publisher web application)
 - `packages/devhub/` - Mystira.DevHub repository (development operations desktop app)
-- `infra/` - Mystira.INFRA repository (infrastructure and DevOps)
+- `infra/` - Mystira.Infra repository (infrastructure and DevOps)
 
 See [SUBMODULES.md](./docs/SUBMODULES.md) for detailed information on working with git submodules.
 

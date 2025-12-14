@@ -20,7 +20,7 @@
 
 [submodule "infra"]
 	path = infra
-	url = https://github.com/phoenixvc/Mystira.INFRA.git
+	url = https://github.com/phoenixvc/Mystira.Infra.git
 	branch = main
 
 [submodule "packages/devhub"]

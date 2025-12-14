@@ -16,7 +16,7 @@ This document analyzes all repositories in the Mystira workspace to determine wh
 | **Mystira.DevHub**         | `packages/devhub`          | .NET             | Desktop App    | Submodule |
 | **Mystira.Publisher**      | `packages/publisher`       | TypeScript/React | Kubernetes     | Submodule |
 | **Mystira.StoryGenerator** | `packages/story-generator` | .NET             | Kubernetes     | Submodule |
-| **Mystira.INFRA**          | `infra`                    | Terraform/K8s    | Infrastructure | Submodule |
+| **Mystira.Infra**          | `infra`                    | Terraform/K8s    | Infrastructure | Submodule |
 
 ## Analysis Criteria
 
