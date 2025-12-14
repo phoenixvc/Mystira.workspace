@@ -149,8 +149,11 @@ mkdir ../Mystira.Admin.Api
 cd ../Mystira.Admin.Api
 git init
 
-# Copy Admin API project
+# Copy Admin API project (excluding Razor Pages Views)
 cp -r ../Mystira.App/src/Mystira.App.Admin.Api ./src/Mystira.App.Admin.Api
+
+# Remove Razor Pages Views folder (will be migrated to Mystira.Admin.UI)
+rm -rf ./src/Mystira.App.Admin.Api/Views
 
 # Copy solution file and create new one if needed
 # Copy relevant configuration files
@@ -158,11 +161,13 @@ cp -r ../Mystira.App/src/Mystira.App.Admin.Api ./src/Mystira.App.Admin.Api
 
 **Files to Copy**:
 
-- `src/Mystira.App.Admin.Api/` (entire project)
+- `src/Mystira.App.Admin.Api/` (entire project, **excluding `Views/` folder**)
 - Solution file (or create new)
 - `.editorconfig`
 - `.gitattributes`
 - `Directory.Build.props` (if exists)
+
+**Note**: Razor Pages UI (`Views/` folder) will be migrated to `Mystira.Admin.UI` as a modern frontend application.
 
 ### 2.3 Update Project References
 
