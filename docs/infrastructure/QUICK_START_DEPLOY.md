@@ -4,10 +4,10 @@ Quick guide to deploy AKS clusters and infrastructure.
 
 ## Prerequisites Check
 
-```bash
+```powershell
 # Verify you're in the workspace root
-pwd
-# Should show: .../Mystira.workspace
+Get-Location
+# Should show: C:\Users\smitj\repos\Mystira.workspace
 
 # Check if Terraform is installed
 terraform --version
@@ -16,16 +16,16 @@ terraform --version
 
 ## Step 1: Install Terraform (if needed)
 
-### Windows (using Chocolatey)
-
-```powershell
-choco install terraform
-```
-
 ### Windows (using winget)
 
 ```powershell
 winget install HashiCorp.Terraform
+```
+
+### Windows (using Chocolatey)
+
+```powershell
+choco install terraform
 ```
 
 ### Windows (Manual)
@@ -36,43 +36,64 @@ winget install HashiCorp.Terraform
 
 ### Verify Installation
 
-```bash
+```powershell
 terraform --version
 ```
 
-## Step 2: Navigate to Correct Directory
+## Step 2: Initialize Submodule (IMPORTANT!)
 
-```bash
-# From workspace root (Mystira.workspace)
-cd infra/terraform/environments/dev
+The `infra` directory is a **Git submodule** and must be initialized first:
 
-# Verify you're in the right place
-pwd
-# Should show: .../Mystira.workspace/infra/terraform/environments/dev
-
-ls
-# Should show: main.tf and other terraform files
-```
-
-**Important**: The `infra` directory is a submodule. Make sure it's initialized:
-
-```bash
+```powershell
 # From workspace root
 git submodule update --init --recursive
+
+# Verify infra directory exists
+Test-Path infra\terraform\environments\dev\main.tf
+# Should return: True
 ```
 
-## Step 3: Initialize Terraform
+If you get an error or the directory doesn't exist, the submodule might not be initialized.
 
-```bash
-cd infra/terraform/environments/dev
+## Step 3: Navigate to Terraform Directory
+
+**IMPORTANT**: You must navigate to the Terraform environment directory, not run from workspace root!
+
+```powershell
+# From workspace root
+cd infra\terraform\environments\dev
+
+# Verify you're in the right place
+Get-Location
+# Should show: ...\Mystira.workspace\infra\terraform\environments\dev
+
+# Verify terraform files exist
+Get-ChildItem *.tf
+# Should show: main.tf and other .tf files
+```
+
+**Common Mistake**: Running `terraform` commands from the workspace root won't work - Terraform files are in `infra/terraform/environments/dev/`
+
+## Step 4: Initialize Terraform
+
+```powershell
+# Make sure you're in infra\terraform\environments\dev
 terraform init
 ```
 
 This downloads the Azure provider and sets up the backend.
 
-## Step 4: Review Deployment Plan
+**Expected output**:
 
-```bash
+```
+Initializing the backend...
+Initializing provider plugins...
+Terraform has been successfully initialized!
+```
+
+## Step 5: Review Deployment Plan
+
+```powershell
 terraform plan
 ```
 
@@ -88,9 +109,9 @@ This shows what will be created without actually creating it.
 - Key Vaults
 - (And more...)
 
-## Step 5: Deploy Infrastructure
+## Step 6: Deploy Infrastructure
 
-```bash
+```powershell
 terraform apply
 ```
 
@@ -98,11 +119,11 @@ Terraform will ask for confirmation. Type `yes` to proceed.
 
 **⚠️ Important**: This will create real Azure resources and may incur costs!
 
-## Step 6: Verify Deployment
+## Step 7: Verify Deployment
 
 ### Check AKS Cluster
 
-```bash
+```powershell
 # List clusters
 az aks list --output table
 
@@ -120,8 +141,24 @@ kubectl get nodes
 ### Check in Azure Portal
 
 1. Go to Azure Portal
-2. Search for "Kubernetes services"
+2. Search for "Kubernetes services" (NOT "Kubernetes center")
 3. You should see `mystira-dev-aks` listed
+
+## Quick Reference: Correct Paths
+
+```powershell
+# Workspace root
+C:\Users\smitj\repos\Mystira.workspace
+
+# Terraform dev environment
+C:\Users\smitj\repos\Mystira.workspace\infra\terraform\environments\dev
+
+# Terraform staging environment
+C:\Users\smitj\repos\Mystira.workspace\infra\terraform\environments\staging
+
+# Terraform prod environment
+C:\Users\smitj\repos\Mystira.workspace\infra\terraform\environments\prod
+```
 
 ## Troubleshooting
 
@@ -129,25 +166,36 @@ kubectl get nodes
 
 Terraform is not installed or not in your PATH. See "Install Terraform" above.
 
-### "No such file or directory: infra/terraform/environments/dev"
+### "No configuration files" Error
 
-You're in the wrong directory. Make sure you're in the workspace root:
+**You're in the wrong directory!** You must be in `infra\terraform\environments\dev` (or staging/prod).
 
-```bash
-cd ~/repos/Mystira.workspace  # or wherever your workspace is
-cd infra/terraform/environments/dev
+```powershell
+# Check where you are
+Get-Location
+
+# Navigate to correct directory
+cd infra\terraform\environments\dev
+
+# Verify terraform files exist
+Get-ChildItem *.tf
 ```
 
-### Submodule not initialized
+### "No such file or directory: infra/terraform/environments/dev"
 
-```bash
+The submodule is not initialized:
+
+```powershell
 # From workspace root
 git submodule update --init --recursive
+
+# Verify infra exists
+Test-Path infra\terraform\environments\dev\main.tf
 ```
 
 ### Azure authentication errors
 
-```bash
+```powershell
 # Login to Azure
 az login
 
@@ -171,5 +219,5 @@ If the backend doesn't exist, you may need to create it first or use a local bac
 After deploying dev environment:
 
 1. **Deploy services to Kubernetes**: See [Deployment Guide](../SETUP.md#deployment)
-2. **Deploy staging environment**: `cd ../staging` and repeat steps
+2. **Deploy staging environment**: `cd ..\staging` and repeat steps
 3. **Configure CI/CD**: Ensure GitHub secrets are set up (see [Setup Guide](../SETUP.md#github-secrets-configuration))

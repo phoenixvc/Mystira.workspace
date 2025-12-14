@@ -6,10 +6,8 @@ There's a **mismatch** in how ACR is configured:
 
 1. **Terraform**: ACR `mystiraacr` is created **only in the `dev` environment** (see `infra/terraform/environments/dev/main.tf:127`)
 2. **CI/CD Workflows**: All workflows push to `mystiraacr` (expecting it to exist)
-3. **Kubernetes Overlays**: Environment overlays map to environment-specific ACRs:
-   - Dev: `mystiradevacr.azurecr.io`
-   - Staging: `mystirastagingacr.azurecr.io`
-   - Prod: `mystiraprodacr.azurecr.io`
+3. **Kubernetes Overlays**: Environment overlays use shared ACR with environment tags (per [ADR-0008: Azure Resource Naming Conventions](../architecture/adr/0008-azure-resource-naming-conventions.md))
+   - All environments use: `mystiraacr.azurecr.io` with tags: `dev`, `staging`, `prod`
 
 **Result**: If staging/prod workflows run without `dev` being deployed, or if they run in different subscriptions, ACR doesn't exist.
 
@@ -27,22 +25,24 @@ There's a **mismatch** in how ACR is configured:
 
 ### How to Separate Images
 
-Use **tags** and **image names** for separation:
+Use **tags** for environment separation (per [ADR-0008: Azure Resource Naming Conventions](../architecture/adr/0008-azure-resource-naming-conventions.md)):
 
 ```yaml
 # Development images
+mystiraacr.azurecr.io/chain:dev
 mystiraacr.azurecr.io/chain:dev-abc123
-mystiraacr.azurecr.io/chain:dev-latest
 
 # Staging images
+mystiraacr.azurecr.io/chain:staging
 mystiraacr.azurecr.io/chain:staging-abc123
-mystiraacr.azurecr.io/chain:staging-latest
 
 # Production images
+mystiraacr.azurecr.io/chain:prod
 mystiraacr.azurecr.io/chain:prod-abc123
-mystiraacr.azurecr.io/chain:prod-latest
 mystiraacr.azurecr.io/chain:v1.2.3  # Semantic versioning for prod
 ```
+
+**Note**: ACR name `mystiraacr` follows the naming convention: `mystira{description}` (no dashes, lowercase only) because Azure Container Registry names cannot contain hyphens.
 
 ## Solution Options
 

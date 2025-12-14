@@ -12,9 +12,13 @@ dial tcp: lookup mystiraterraformstate.blob.core.windows.net: no such host
 
 The storage account `mystiraterraformstate` doesn't exist yet. You need to create it first.
 
+**Naming Convention**: Storage accounts follow the pattern `mystira{description}` (no dashes, lowercase only) per [ADR-0008: Azure Resource Naming Conventions](../architecture/adr/0008-azure-resource-naming-conventions.md).
+
 ## Solution: Create Storage Account Manually
 
 ### Step 1: Create Resource Group for Terraform State
+
+**Naming Convention**: Resource groups follow the pattern `mystira-{purpose}` per [ADR-0008](../architecture/adr/0008-azure-resource-naming-conventions.md).
 
 ```powershell
 # Create resource group for Terraform state
@@ -24,6 +28,8 @@ az group create \
 ```
 
 ### Step 2: Create Storage Account
+
+**Naming Convention**: Storage accounts use pattern `mystira{description}` (no dashes, lowercase only) per [ADR-0008](../architecture/adr/0008-azure-resource-naming-conventions.md).
 
 ```powershell
 # Create storage account for Terraform state
@@ -35,7 +41,7 @@ az storage account create \
   --kind StorageV2
 ```
 
-**Important**: Storage account names must be globally unique and lowercase. If `mystiraterraformstate` is taken, use a different name and update the Terraform backend configuration.
+**Important**: Storage account names must be globally unique, 3-24 characters, lowercase alphanumeric only (no dashes allowed). If `mystiraterraformstate` is taken, choose a different name following the pattern and update the Terraform backend configuration.
 
 ### Step 3: Create Storage Container
 

@@ -97,7 +97,7 @@ This traditional view shows all AKS clusters regardless of when they were create
 
 ## Expected Cluster Names
 
-Based on Terraform configuration:
+Based on Terraform configuration and [ADR-0008: Azure Resource Naming Conventions](../architecture/adr/0008-azure-resource-naming-conventions.md):
 
 | Environment | Cluster Name          | Resource Group       | Status               |
 | ----------- | --------------------- | -------------------- | -------------------- |
