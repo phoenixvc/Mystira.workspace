@@ -103,15 +103,26 @@ This document tracks the migration of Admin tooling from `Mystira.App` monorepo 
 - ✅ Implemented pagination and error handling
 - ✅ Set up React Query for data fetching
 
-**Remaining Tasks (Phase 3.4)**:
+**Completed Tasks (Phase 3.4)**:
 
-- [ ] Migrate remaining admin pages (Badges, Bundles, Character Maps, Master Data)
-- [ ] Create import pages (Scenario, Media, Bundle, Badge, Character Map)
-- [ ] Implement edit/create forms with validation
+- ✅ Migrated Badges page with list, search, delete
+- ✅ Migrated Bundles page with list and search
+- ✅ Created Import Scenario page with file upload
+- ✅ Created Import Media page with file upload
+- ✅ Created Import Bundle page with validation options
+- ✅ Added navigation links for all pages
+- ✅ Set up ESLint and Prettier configuration
+
+**Remaining Tasks**:
+
+- [ ] Migrate remaining pages (Character Maps, Master Data pages)
+- [ ] Create import pages (Badge, Character Map)
+- [ ] Implement edit/create forms with React Hook Form + Zod validation
 - [ ] Add more error handling and loading states
 - [ ] Test authentication flow end-to-end
 - [ ] Verify API integration with real backend
 - [ ] Complete styling migration and polish UI
+- [ ] Set up CI/CD pipeline
 
 ---
 
