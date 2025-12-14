@@ -51,22 +51,30 @@ git submodule update --remote packages/chain
    cd packages/chain
    ```
 
-2. Check out a branch (if needed):
+2. Check out the dev branch:
 
    ```bash
-   git checkout main
-   git pull origin main
+   git checkout dev
+   git pull origin dev
    ```
 
-3. Make your changes and commit them:
+3. Create a feature branch from dev:
+
+   ```bash
+   git checkout -b feature/your-feature-name
+   ```
+
+4. Make your changes and commit them:
 
    ```bash
    git add .
    git commit -m "Your changes"
-   git push origin main
+   git push origin feature/your-feature-name
    ```
 
-4. Return to the workspace root and update the submodule reference:
+5. Create a pull request from your feature branch to dev
+
+6. Return to the workspace root and update the submodule reference:
    ```bash
    cd ../..
    git add packages/chain
@@ -112,7 +120,8 @@ If a submodule shows as modified but you haven't made changes:
 cd packages/chain
 git status
 # If you want to update to the latest
-git pull origin main
+git checkout dev
+git pull origin dev
 cd ../..
 git add packages/chain
 ```
