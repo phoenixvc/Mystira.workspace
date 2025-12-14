@@ -155,7 +155,7 @@ See [Admin API Extraction Migration Plan](../migration/ADMIN_API_EXTRACTION_PLAN
 
 ### Key Steps
 
-1. **Phase 1**: Setup NuGet feed and publish shared libraries
+1. **Phase 1**: Setup NuGet feed and publish shared libraries (see [ADR-0007](./0007-nuget-feed-strategy-for-shared-libraries.md))
 2. **Phase 2**: Create Admin API repository and update references
 3. **Phase 3**: Setup CI/CD for new repository
 4. **Phase 4**: (Optional) Extract Admin UI to separate frontend
@@ -165,21 +165,205 @@ See [Admin API Extraction Migration Plan](../migration/ADMIN_API_EXTRACTION_PLAN
 
 ### Shared Libraries to Package
 
-- `Mystira.App.Domain` → NuGet package
-- `Mystira.App.Application` → NuGet package
-- `Mystira.App.Infrastructure.Azure` → NuGet package
-- `Mystira.App.Infrastructure.Data` → NuGet package
-- `Mystira.App.Infrastructure.Discord` → NuGet package
-- `Mystira.App.Infrastructure.StoryProtocol` → NuGet package
-- `Mystira.App.Shared` → NuGet package
-- `Mystira.App.Contracts` → NuGet package
+All shared libraries from `Mystira.App` will be published as NuGet packages to the internal feed:
+
+#### Core Libraries
+
+1. **`Mystira.App.Domain`**
+   - **Package ID**: `Mystira.App.Domain`
+   - **Purpose**: Core domain models, entities, enumerations, business logic
+   - **Dependencies**: Minimal (only external NuGet packages, no internal dependencies)
+   - **Usage**: Base layer, referenced by all other libraries
+   - **Initial Version**: `1.0.0`
+
+2. **`Mystira.App.Application`**
+   - **Package ID**: `Mystira.App.Application`
+   - **Purpose**: Application layer - CQRS handlers, MediatR, use cases, business orchestration
+   - **Dependencies**: `Mystira.App.Domain`, external packages (MediatR, etc.)
+   - **Usage**: Application logic, referenced by API projects
+   - **Initial Version**: `1.0.0`
+
+3. **`Mystira.App.Contracts`**
+   - **Package ID**: `Mystira.App.Contracts`
+   - **Purpose**: Shared request/response DTOs, API contracts
+   - **Dependencies**: `Mystira.App.Domain` (for domain models in DTOs)
+   - **Usage**: API contracts, referenced by API projects and potentially clients
+   - **Initial Version**: `1.0.0`
+
+#### Infrastructure Libraries
+
+4. **`Mystira.App.Infrastructure.Azure`**
+   - **Package ID**: `Mystira.App.Infrastructure.Azure`
+   - **Purpose**: Azure-specific infrastructure (Cosmos DB, Blob Storage, health checks)
+   - **Dependencies**: `Mystira.App.Domain`, Azure SDK packages
+   - **Usage**: Azure PaaS service implementations
+   - **Initial Version**: `1.0.0`
+
+5. **`Mystira.App.Infrastructure.Data`**
+   - **Package ID**: `Mystira.App.Infrastructure.Data`
+   - **Purpose**: Data access layer (repositories, unit of work, specifications)
+   - **Dependencies**: `Mystira.App.Domain`, `Mystira.App.Application`, Entity Framework Core
+   - **Usage**: Data persistence implementations
+   - **Initial Version**: `1.0.0`
+
+6. **`Mystira.App.Infrastructure.Discord`**
+   - **Package ID**: `Mystira.App.Infrastructure.Discord`
+   - **Purpose**: Discord bot integration
+   - **Dependencies**: `Mystira.App.Domain`, Discord.NET
+   - **Usage**: Discord bot functionality
+   - **Initial Version**: `1.0.0`
+
+7. **`Mystira.App.Infrastructure.StoryProtocol`**
+   - **Package ID**: `Mystira.App.Infrastructure.StoryProtocol`
+   - **Purpose**: Story Protocol blockchain integration
+   - **Dependencies**: `Mystira.App.Domain`, Story Protocol SDK
+   - **Usage**: Blockchain/IP asset management
+   - **Initial Version**: `1.0.0`
+
+#### Shared Services
+
+8. **`Mystira.App.Shared`**
+   - **Package ID**: `Mystira.App.Shared`
+   - **Purpose**: Shared services and utilities (JWT, telemetry, middleware, logging)
+   - **Dependencies**: `Mystira.App.Domain` (minimal), ASP.NET Core packages
+   - **Usage**: Cross-cutting concerns, used by all API projects
+   - **Initial Version**: `1.0.0`
+
+### Package Dependency Graph
+
+```
+Mystira.App.Domain (base, no internal deps)
+    ↑
+    ├── Mystira.App.Application
+    ├── Mystira.App.Contracts
+    ├── Mystira.App.Infrastructure.Azure
+    ├── Mystira.App.Infrastructure.Data
+    ├── Mystira.App.Infrastructure.Discord
+    ├── Mystira.App.Infrastructure.StoryProtocol
+    └── Mystira.App.Shared
+
+Mystira.App.Application
+    ↑
+    └── Mystira.App.Infrastructure.Data (implements application interfaces)
+```
+
+**Key Rules**:
+
+- Domain is the base layer (no internal dependencies)
+- Application depends on Domain
+- Infrastructure.\* depends on Domain (and Application if implementing interfaces)
+- Shared has minimal dependencies
+- Contracts depends on Domain (for domain models in DTOs)
 
 ### Version Strategy
 
-- **Semantic Versioning**: Major.Minor.Patch
-- **Breaking Changes**: Major version bump
-- **New Features**: Minor version bump
-- **Bug Fixes**: Patch version bump
+**Semantic Versioning** (SemVer): `MAJOR.MINOR.PATCH`
+
+**Version Rules**:
+
+- **MAJOR** (`2.0.0`): Breaking changes (incompatible API changes)
+  - Examples: Removing public methods, changing method signatures, breaking data contracts
+  - **Action Required**: Update all consuming projects, coordinate migration
+- **MINOR** (`1.1.0`): New features (backward compatible)
+  - Examples: Adding new methods, new properties, new functionality
+  - **Action Required**: Optional update, consuming projects can adopt when ready
+- **PATCH** (`1.0.1`): Bug fixes (backward compatible)
+  - Examples: Bug fixes, performance improvements, documentation updates
+  - **Action Required**: Recommended update, typically low risk
+
+**Initial Versions**: All packages start at `1.0.0`
+
+**Version Alignment**:
+
+- When possible, keep related packages at compatible versions
+- Domain changes may require version bumps in dependent packages
+- Document compatibility matrix
+
+**Pre-release Versions**:
+
+- Use for testing: `1.1.0-alpha.1`, `1.1.0-beta.1`
+- Publish to feed for testing before stable release
+- Example: `1.1.0-alpha.1` for Admin API team to test before `1.1.0` stable
+
+### Package Metadata Standards
+
+Each package `.csproj` must include:
+
+```xml
+<PropertyGroup>
+  <PackageId>Mystira.App.Domain</PackageId>
+  <Version>1.0.0</Version>
+  <Authors>Mystira Team</Authors>
+  <Company>Phoenix VC</Company>
+  <Description>Mystira platform domain models and business logic. Core domain layer with entities, value objects, and domain services.</Description>
+  <RepositoryUrl>https://github.com/phoenixvc/Mystira.App</RepositoryUrl>
+  <RepositoryType>git</RepositoryType>
+  <PackageLicenseExpression>PROPRIETARY</PackageLicenseExpression>
+  <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+  <IncludeSymbols>true</IncludeSymbols>
+  <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+  <PackageTags>mystira;domain;internal</PackageTags>
+</PropertyGroup>
+```
+
+### Consumption in Admin API
+
+After extraction, Admin API will reference packages like:
+
+```xml
+<ItemGroup>
+  <!-- Core packages -->
+  <PackageReference Include="Mystira.App.Domain" Version="1.0.0" />
+  <PackageReference Include="Mystira.App.Application" Version="1.0.0" />
+  <PackageReference Include="Mystira.App.Contracts" Version="1.0.0" />
+
+  <!-- Infrastructure packages -->
+  <PackageReference Include="Mystira.App.Infrastructure.Azure" Version="1.0.0" />
+  <PackageReference Include="Mystira.App.Infrastructure.Data" Version="1.0.0" />
+  <PackageReference Include="Mystira.App.Infrastructure.Discord" Version="1.0.0" />
+  <PackageReference Include="Mystira.App.Infrastructure.StoryProtocol" Version="1.0.0" />
+
+  <!-- Shared services -->
+  <PackageReference Include="Mystira.App.Shared" Version="1.0.0" />
+</ItemGroup>
+```
+
+### Breaking Changes Management
+
+**Process for Breaking Changes**:
+
+1. **Identify Breaking Change**: Document what will break
+2. **Plan Migration**: Create migration guide
+3. **Version Bump**: Increment major version (e.g., `1.0.0` → `2.0.0`)
+4. **Coordinate**: Notify all consuming teams
+5. **Publish**: Publish new major version
+6. **Migrate**: Update all consuming projects
+7. **Document**: Update changelog and release notes
+
+**Example Scenario**:
+
+- Domain package removes deprecated method → `1.0.0` → `2.0.0`
+- Admin API and Public API both need to update to `2.0.0`
+- Coordinate update across both repositories
+- Test thoroughly before deploying
+
+### Package Update Workflow
+
+**When Shared Library Changes**:
+
+1. Developer makes changes to shared library in `Mystira.App`
+2. Tests changes locally
+3. Creates PR with changeset (if using Changesets)
+4. After merge, CI publishes new package version
+5. Consuming projects (Admin API, Public API) update package reference
+6. Test and deploy updated services
+
+**Automated Updates**:
+
+- Consider Dependabot for package update notifications
+- Manual updates preferred for control over timing
+
+See [ADR-0007: NuGet Feed Strategy](./0007-nuget-feed-strategy-for-shared-libraries.md) for detailed feed setup and publishing workflow.
 
 ## Alternatives Considered
 
@@ -254,6 +438,7 @@ When Admin API is separate:
 - [ADR-0001: Infrastructure Organization](./0001-infrastructure-organization-hybrid-approach.md) - Deployment models
 - [ADR-0003: Release Pipeline Strategy](./0003-release-pipeline-strategy.md) - Release processes
 - [ADR-0005: Service Networking and Communication](./0005-service-networking-and-communication.md) - Service boundaries
+- [ADR-0007: NuGet Feed Strategy for Shared Libraries](./0007-nuget-feed-strategy-for-shared-libraries.md) - Package management strategy
 - [Admin API Extraction Plan](../migration/ADMIN_API_EXTRACTION_PLAN.md) - Implementation details
 
 ## References

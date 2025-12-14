@@ -19,11 +19,9 @@ This migration plan outlines the steps to extract the Admin API from the `Mystir
 
 ### 1.1 Create Internal NuGet Feed
 
-**Options**:
+**Decision**: Use Azure DevOps Artifacts (see [ADR-0007: NuGet Feed Strategy](../architecture/adr/0007-nuget-feed-strategy-for-shared-libraries.md))
 
-- Azure DevOps Artifacts (recommended if using Azure)
-- GitHub Packages (if using GitHub)
-- Private NuGet Server (self-hosted)
+**Feed Name**: `Mystira-Internal`
 
 **Steps**:
 
@@ -48,9 +46,9 @@ dotnet nuget add source https://pkgs.dev.azure.com/{org}/{project}/_packaging/{f
 7. `Mystira.App.Shared`
 8. `Mystira.App.Contracts`
 
-**For each library**:
+**For each library** (see [ADR-0006](./../architecture/adr/0006-admin-api-repository-extraction.md) for complete list):
 
-1. **Update `.csproj` files**:
+1. **Update `.csproj` files** with package metadata (see ADR-0007 for standards):
 
 ```xml
 <PropertyGroup>
