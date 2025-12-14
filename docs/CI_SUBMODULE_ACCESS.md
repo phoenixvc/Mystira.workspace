@@ -10,7 +10,11 @@ repository 'https://github.com/phoenixvc/Mystira.App.git/' not found
 
 ## Root Cause
 
-The default `GITHUB_TOKEN` may not have sufficient permissions to access private submodule repositories, even within the same organization.
+The "repository not found" error typically indicates one of:
+
+1. **Repositories don't exist**: The submodule repositories haven't been created in GitHub yet
+2. **Private repository access**: The default `GITHUB_TOKEN` may not have sufficient permissions to access private submodule repositories, even within the same organization
+3. **Organization permissions**: The repositories exist but are in a different organization or have restricted access
 
 ## Solution
 
