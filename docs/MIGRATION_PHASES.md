@@ -130,10 +130,18 @@ This document tracks the migration of Admin tooling from `Mystira.App` monorepo 
 - ✅ Updated ScenariosPage to use new components
 - ✅ All import pages now complete (Scenario, Media, Bundle, Badge, Character Map)
 
+**Completed Tasks (Phase 3.7)**:
+
+- ✅ Updated ScenariosPage, MediaPage, BadgesPage, BundlesPage to use reusable components
+- ✅ Replaced all inline loading states with LoadingSpinner component
+- ✅ Replaced all inline error states with ErrorAlert component
+- ✅ Replaced all inline search bars with SearchBar component
+- ✅ Replaced all inline pagination with Pagination component
+- ✅ Improved code consistency and maintainability across all pages
+
 **Remaining Tasks**:
 
 - [ ] Implement edit/create forms with React Hook Form + Zod validation
-- [ ] Update remaining pages to use LoadingSpinner and ErrorAlert
 - [ ] Add toast notifications for success/error messages (replace alerts)
 - [ ] Test authentication flow end-to-end
 - [ ] Verify API integration with real backend
