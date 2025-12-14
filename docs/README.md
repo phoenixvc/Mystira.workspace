@@ -31,7 +31,9 @@ For details, see [ADR-0002: Documentation Location Strategy](./architecture/adr/
   - [ADR-0006: Admin API Repository Extraction](./architecture/adr/0006-admin-api-repository-extraction.md) - Admin API extraction decision
   - [ADR-0007: NuGet Feed Strategy for Shared Libraries](./architecture/adr/0007-nuget-feed-strategy-for-shared-libraries.md) - Package management strategy
 - [Implementation Roadmap](./IMPLEMENTATION_ROADMAP.md) - Strategic implementation plan
-- [Phase 1 Status](./PHASE1_STATUS.md) - Phase 1 completion status and analysis
+- [Setup & Implementation Status](./SETUP_STATUS.md) - Repository setup and NuGet implementation status
+- [CI/CD Setup](./CI_CD_SETUP.md) - CI/CD pipelines and branch protection configuration
+- [Infrastructure Phase 1](./INFRASTRUCTURE_PHASE1.md) - Infrastructure Phase 1 status and analysis
 
 ### Repository Organization
 
