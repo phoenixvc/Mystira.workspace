@@ -150,9 +150,18 @@ This document tracks the migration of Admin tooling from `Mystira.App` monorepo 
 - ✅ Updated all import pages: Scenario, Media, Bundle, Badge, Character Map
 - ✅ Improved UX with non-blocking, consistent notifications
 
+**Completed Tasks (Phase 3.10)**:
+
+- ✅ Created Edit Scenario page with React Hook Form + Zod validation
+- ✅ Implemented form validation with proper error messages
+- ✅ Added scenario editing route
+- ✅ Updated LoginPage to use toast notifications
+- ✅ Fixed missing imports in BundlesPage
+
 **Remaining Tasks**:
 
-- [ ] Implement edit/create forms with React Hook Form + Zod validation
+- [ ] Create additional edit forms (Media, Badges, Bundles, Character Maps, Master Data)
+- [ ] Create new entity forms (not just edit)
 - [ ] Test authentication flow end-to-end
 - [ ] Verify API integration with real backend
 - [ ] Complete styling migration and polish UI
