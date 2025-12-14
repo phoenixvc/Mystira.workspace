@@ -160,7 +160,7 @@ We will **extract Admin API and Admin UI to separate repositories** (`Mystira.Ad
 
 ## Implementation
 
-See [Admin API Extraction Migration Plan](../migration/ADMIN_API_EXTRACTION_PLAN.md) for detailed implementation steps.
+See [Admin API Extraction Migration Plan](../migration/admin-api-extraction-plan.md) for detailed implementation steps.
 
 ### Key Steps
 
@@ -448,7 +448,7 @@ When Admin API is separate:
 - [ADR-0003: Release Pipeline Strategy](./0003-release-pipeline-strategy.md) - Release processes
 - [ADR-0005: Service Networking and Communication](./0005-service-networking-and-communication.md) - Service boundaries
 - [ADR-0007: NuGet Feed Strategy for Shared Libraries](./0007-nuget-feed-strategy-for-shared-libraries.md) - Package management strategy
-- [Admin API Extraction Plan](../migration/ADMIN_API_EXTRACTION_PLAN.md) - Implementation details
+- [Admin API Extraction Plan](../migration/admin-api-extraction-plan.md) - Implementation details
 
 ## References
 

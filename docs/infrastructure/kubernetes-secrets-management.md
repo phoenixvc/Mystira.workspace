@@ -291,7 +291,7 @@ kubectl get secret mystira-story-generator-secrets -n mystira-dev \
 
 ## Related Documentation
 
-- [Shared Resources Usage Guide](./SHARED_RESOURCES.md)
-- [Infrastructure Guide](./INFRASTRUCTURE.md)
+- [Shared Resources Usage Guide](./shared-resources.md)
+- [Infrastructure Guide](./infrastructure.md)
 - [Azure Key Vault CSI Driver](https://learn.microsoft.com/en-us/azure/aks/csi-secrets-store-driver)
 - [Kubernetes Secrets](https://kubernetes.io/docs/concepts/configuration/secret/)

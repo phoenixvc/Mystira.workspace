@@ -154,7 +154,7 @@ We will **keep the hybrid approach (Option B with enhancements)**:
    - `infra/terraform/modules/shared/` - DNS, networking, monitoring coordination
 
 3. **Document coordination**:
-   - Infrastructure guide in `docs/INFRASTRUCTURE.md`
+   - Infrastructure guide in `docs/infrastructure/infrastructure.md`
    - Integration points clearly documented
    - Shared resource management procedures
 
@@ -173,7 +173,7 @@ We will **keep the hybrid approach (Option B with enhancements)**:
 
 ## References
 
-- [Infrastructure Guide](../INFRASTRUCTURE.md)
+- [Infrastructure Guide](../infrastructure/infrastructure.md)
 - [Azure Bicep Documentation](https://learn.microsoft.com/en-us/azure/azure-resource-manager/bicep/)
 - [Terraform Documentation](https://www.terraform.io/docs)
 - [Kubernetes Documentation](https://kubernetes.io/docs/)

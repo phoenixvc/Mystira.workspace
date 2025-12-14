@@ -443,7 +443,7 @@ service StoryService {
 - [ADR-0004: Branching Strategy and CI/CD Process](./0004-branching-strategy-and-cicd.md) - CI/CD workflows
 - [ADR-0006: Admin API Repository Extraction](./0006-admin-api-repository-extraction.md) - Repository structure changes
 - [ADR-0007: NuGet Feed Strategy for Shared Libraries](./0007-nuget-feed-strategy-for-shared-libraries.md) - Package management
-- [Admin API Extraction Plan](../migration/ADMIN_API_EXTRACTION_PLAN.md) - Implementation details
+- [Admin API Extraction Plan](../migration/admin-api-extraction-plan.md) - Implementation details
 
 ## References
 

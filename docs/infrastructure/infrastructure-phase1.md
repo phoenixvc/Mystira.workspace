@@ -138,6 +138,6 @@ Phase 1 infrastructure code is **~90% complete** and ready for initial deploymen
 
 ## Related Documentation
 
-- [Infrastructure Guide](./INFRASTRUCTURE.md)
-- [Shared Resources](./SHARED_RESOURCES.md)
+- [Infrastructure Guide](./infrastructure.md)
+- [Shared Resources](./shared-resources.md)
 - [Kubernetes Secrets Management](./kubernetes-secrets-management.md)

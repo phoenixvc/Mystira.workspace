@@ -288,7 +288,7 @@ All workflows are located in `.github/workflows/`:
 
 ### Documentation
 
-- [Branch Protection & CI/CD Workflow Guide](../../BRANCH_PROTECTION.md)
+- [Branch Protection Guide](../cicd/branch-protection.md)
 - [ADR-0003: Release Pipeline Strategy](./0003-release-pipeline-strategy.md)
 
 ## References

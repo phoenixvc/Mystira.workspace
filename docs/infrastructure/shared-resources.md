@@ -380,7 +380,7 @@ spec:
 
 ## Related Documentation
 
-- [Infrastructure Guide](./INFRASTRUCTURE.md)
+- [Infrastructure Guide](./infrastructure.md)
 - [ADR-0001: Infrastructure Organization](./architecture/adr/0001-infrastructure-organization-hybrid-approach.md)
 - [Azure PostgreSQL Flexible Server Documentation](https://learn.microsoft.com/en-us/azure/postgresql/flexible-server/)
 - [Azure Cache for Redis Documentation](https://learn.microsoft.com/en-us/azure/azure-cache-for-redis/)

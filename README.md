@@ -176,8 +176,8 @@ For Azure deployments, see [Azure Setup Guide](./infra/AZURE_SETUP.md) for confi
 - [Setup Guide](./docs/SETUP.md) - Detailed setup instructions
 - [Submodules Guide](./docs/SUBMODULES.md) - Working with git submodules
 - [Architecture](./docs/ARCHITECTURE.md) - System architecture overview
-- [Infrastructure Guide](./docs/INFRASTRUCTURE.md) - Infrastructure organization and deployment
-- [Implementation Roadmap](./docs/IMPLEMENTATION_ROADMAP.md) - Strategic implementation plan
+- [Infrastructure Guide](./docs/infrastructure/infrastructure.md) - Infrastructure organization and deployment
+- [Implementation Roadmap](./docs/planning/implementation-roadmap.md) - Strategic implementation plan
 - [Environment Variables](./docs/ENVIRONMENT.md) - Environment configuration
 - [Architecture Decisions](./docs/architecture/adr/) - ADRs documenting key decisions
 

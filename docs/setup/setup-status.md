@@ -106,12 +106,12 @@ Once feed is configured:
 1. **Setup Azure DevOps Feed** - See [NuGet Setup Guide](../packages/app/docs/nuget/NUGET_SETUP.md)
 2. **Configure GitHub Secrets** - Add required secrets to repository
 3. **Publish Initial Packages** - Run workflow to publish v1.0.0
-4. **Proceed to Phase 2** - Create Admin API Repository (see [Migration Plan](./migration/ADMIN_API_EXTRACTION_PLAN.md))
+4. **Proceed to Phase 2** - Create Admin API Repository (see [Migration Plan](../migration/admin-api-extraction-plan.md))
 
 ## Related Documentation
 
 - [Submodules Guide](./SUBMODULES.md)
 - [NuGet Setup Guide](../packages/app/docs/nuget/NUGET_SETUP.md)
-- [Admin API Extraction Plan](./migration/ADMIN_API_EXTRACTION_PLAN.md)
+- [Admin API Extraction Plan](../migration/admin-api-extraction-plan.md)
 - [ADR-0006: Admin API Repository Extraction](./architecture/adr/0006-admin-api-repository-extraction.md)
 - [ADR-0007: NuGet Feed Strategy](./architecture/adr/0007-nuget-feed-strategy-for-shared-libraries.md)

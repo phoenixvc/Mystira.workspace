@@ -2,7 +2,7 @@
 
 This document provides a high-level overview of the Mystira platform architecture.
 
-> **Infrastructure Details**: For detailed infrastructure organization, deployment models, and coordination, see [Infrastructure Guide](./INFRASTRUCTURE.md)
+> **Infrastructure Details**: For detailed infrastructure organization, deployment models, and coordination, see [Infrastructure Guide](./infrastructure/infrastructure.md)
 
 ## System Architecture
 

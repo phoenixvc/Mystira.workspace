@@ -23,32 +23,35 @@ For details, see [ADR-0002: Documentation Location Strategy](./architecture/adr/
 ### Architecture & Infrastructure
 
 - [Architecture Overview](./ARCHITECTURE.md) - System architecture overview
-- [Infrastructure Guide](./INFRASTRUCTURE.md) - Infrastructure organization and deployment
-- [Shared Resources Guide](./SHARED_RESOURCES.md) - Using shared PostgreSQL, Redis, and Monitoring
-- [Kubernetes Secrets Management](./kubernetes-secrets-management.md) - Creating and managing Kubernetes secrets
+- [Infrastructure Documentation](./infrastructure/) - Infrastructure guides and resources
+  - [Infrastructure Guide](./infrastructure/infrastructure.md) - Infrastructure organization and deployment
+  - [Infrastructure Phase 1](./infrastructure/infrastructure-phase1.md) - Infrastructure Phase 1 status and analysis
+  - [Shared Resources](./infrastructure/shared-resources.md) - Using shared PostgreSQL, Redis, and Monitoring
+  - [Kubernetes Secrets Management](./infrastructure/kubernetes-secrets-management.md) - Creating and managing Kubernetes secrets
 - [Architecture Decision Records](./architecture/adr/) - ADRs documenting key decisions
   - [ADR-0005: Service Networking and Communication](./architecture/adr/0005-service-networking-and-communication.md) - Service communication patterns
   - [ADR-0006: Admin API Repository Extraction](./architecture/adr/0006-admin-api-repository-extraction.md) - Admin API extraction decision
   - [ADR-0007: NuGet Feed Strategy for Shared Libraries](./architecture/adr/0007-nuget-feed-strategy-for-shared-libraries.md) - Package management strategy
-- [Implementation Roadmap](./IMPLEMENTATION_ROADMAP.md) - Strategic implementation plan
-- [Setup & Implementation Status](./SETUP_STATUS.md) - Repository setup and NuGet implementation status
-- [CI/CD Setup](./CI_CD_SETUP.md) - CI/CD pipelines and branch protection configuration
-- [Infrastructure Phase 1](./INFRASTRUCTURE_PHASE1.md) - Infrastructure Phase 1 status and analysis
+- [Planning Documentation](./planning/) - Strategic planning documents
+  - [Implementation Roadmap](./planning/implementation-roadmap.md) - Strategic implementation plan
+- [Setup Documentation](./setup/) - Setup and configuration
+  - [Setup Status](./setup/setup-status.md) - Repository setup and NuGet implementation status
 
-### Repository Organization
+### Repository Organization & Migration
 
-- [Repository Extraction Analysis](./REPOSITORY_EXTRACTION_ANALYSIS.md) - Analysis of all repositories and extraction recommendations
-- [App Components Extraction Analysis](./APP_COMPONENTS_EXTRACTION_ANALYSIS.md) - Analysis of Admin API/Public API extraction
+- [Analysis Documents](./analysis/) - Repository structure analysis
+  - [Repository Extraction Analysis](./analysis/repository-extraction-analysis.md) - Analysis of all repositories and extraction recommendations
+  - [App Components Extraction](./analysis/app-components-extraction.md) - Analysis of Admin API/Public API extraction
 - [Migration Plans](./migration/) - Migration plans for repository extractions
-  - [Admin API Extraction Plan](./migration/ADMIN_API_EXTRACTION_PLAN.md) - Detailed migration plan
+  - [Admin API Extraction Plan](./migration/admin-api-extraction-plan.md) - Detailed migration plan
 
 ### CI/CD & DevOps
 
-- [Branch Protection & CI/CD Workflow](./BRANCH_PROTECTION.md) - Branch protection rules and deployment workflows
-
-### CI/CD & DevOps
-
-- [Branch Protection & CI/CD Workflow](./BRANCH_PROTECTION.md) - Branch protection rules and deployment workflows
+- [CI/CD Documentation](./cicd/) - CI/CD pipelines and workflows
+  - [CI/CD Setup](./cicd/cicd-setup.md) - CI/CD pipelines and branch protection configuration
+  - [Branch Protection](./cicd/branch-protection.md) - Branch protection rules for `dev` and `main`
+  - [Submodule Access](./cicd/submodule-access.md) - Troubleshooting guide for submodule access in CI/CD
+  - [Workflow Permissions](./cicd/workflow-permissions.md) - GitHub workflow permissions explained
 
 ### Development
 

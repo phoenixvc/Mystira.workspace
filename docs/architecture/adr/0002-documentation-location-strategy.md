@@ -66,7 +66,8 @@ docs/
 ├── QUICK_START.md              # Quick start guide
 ├── SETUP.md                    # Setup instructions
 ├── ARCHITECTURE.md             # System architecture
-├── INFRASTRUCTURE.md           # Infrastructure guide
+├── infrastructure/
+│   └── infrastructure.md       # Infrastructure guide
 ├── ENVIRONMENT.md              # Environment variables
 ├── SUBMODULES.md               # Submodule management
 ├── COMMITS.md                  # Commit conventions

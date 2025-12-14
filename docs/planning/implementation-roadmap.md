@@ -629,7 +629,7 @@ This roadmap should be reviewed and updated:
 
 ## Related Documentation
 
-- [Infrastructure Guide](./INFRASTRUCTURE.md)
+- [Infrastructure Guide](../infrastructure/infrastructure.md)
 - [ADR-0001: Infrastructure Organization](./architecture/adr/0001-infrastructure-organization-hybrid-approach.md)
 - [ADR-0002: Documentation Location Strategy](./architecture/adr/0002-documentation-location-strategy.md)
 - [ADR-0003: Release Pipeline Strategy](./architecture/adr/0003-release-pipeline-strategy.md)

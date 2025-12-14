@@ -123,7 +123,6 @@ gh api repos/phoenixvc/Mystira.workspace/environments
 
 ## Related Documentation
 
-- [Branch Protection Rules](./BRANCH_PROTECTION.md)
-- [Branch Protection for Dev](./BRANCH_PROTECTION_DEV.md)
+- [Branch Protection](./branch-protection.md)
 - [ADR-0004: Branching Strategy and CI/CD](./architecture/adr/0004-branching-strategy-and-cicd.md)
 - [ADR-0003: Release Pipeline Strategy](./architecture/adr/0003-release-pipeline-strategy.md)

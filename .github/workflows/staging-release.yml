@@ -59,6 +59,16 @@ jobs:
       contents: read
       id-token: write
     steps:
+      - name: Validate GitHub Submodule Access Token
+        run: |
+          if [ -z "${{ secrets.MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN }}" ]; then
+            echo "::error::Missing required GitHub secret: MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN"
+            echo "::error::Description: Personal Access Token (PAT) with 'repo' scope required to clone private submodules"
+            echo "::error::Action: Add secret at https://github.com/${{ github.repository }}/settings/secrets/actions"
+            echo "::error::Name: MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN"
+            echo "::error::Scope: 'repo' (Full control of private repositories)"
+            exit 1
+          fi
       - uses: actions/checkout@v6
         with:
           submodules: recursive
@@ -116,6 +126,16 @@ jobs:
       contents: read
       id-token: write
     steps:
+      - name: Validate GitHub Submodule Access Token
+        run: |
+          if [ -z "${{ secrets.MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN }}" ]; then
+            echo "::error::Missing required GitHub secret: MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN"
+            echo "::error::Description: Personal Access Token (PAT) with 'repo' scope required to clone private submodules"
+            echo "::error::Action: Add secret at https://github.com/${{ github.repository }}/settings/secrets/actions"
+            echo "::error::Name: MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN"
+            echo "::error::Scope: 'repo' (Full control of private repositories)"
+            exit 1
+          fi
       - uses: actions/checkout@v6
         with:
           submodules: recursive
