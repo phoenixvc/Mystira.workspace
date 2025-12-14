@@ -230,17 +230,17 @@ terraform plan
 terraform apply
 ```
 
-**What gets created**:
+**What gets created** (per [ADR-0008: Azure Resource Naming Conventions](../architecture/adr/0008-azure-resource-naming-conventions.md)):
 
-- Resource Group: `mystira-dev-rg` (legacy name, kept as-is per [ADR-0008](../architecture/adr/0008-azure-resource-naming-conventions.md))
-- Azure Container Registry: `mystiraacr` (shared across all environments, legacy name kept as-is per ADR-0008)
-- Virtual Network
-- Key Vaults for services
+- Resource Group: `mys-dev-mystira-rg-eus`
+- Azure Container Registry: `mysprodacr` (shared across all environments)
+- Virtual Network: `mys-dev-mystira-vnet-eus`
+- Key Vaults: `mys-dev-mystira-{component}-kv-eus`
 - Shared PostgreSQL (if configured)
 - Shared Redis (if configured)
-- AKS cluster: `mystira-dev-aks` (legacy name, kept as-is per ADR-0008)
+- AKS cluster: `mys-dev-mystira-aks-eus`
 
-**Important**: The ACR `mystiraacr` is created in the dev environment but is used by all environments. This is intentional - we use a shared ACR with environment-specific tags (dev, staging, prod). **Note**: Existing resource names follow legacy conventions and are kept as-is. New resources should follow the naming convention defined in [ADR-0008](../architecture/adr/0008-azure-resource-naming-conventions.md).
+**Important**: The ACR `mysprodacr` is created in the dev environment but is used by all environments. This is intentional - we use a shared ACR with environment-specific tags (dev, staging, prod).
 
 ### 2. Configure ACR Access
 
@@ -248,7 +248,7 @@ After dev environment is deployed, grant access to service principals:
 
 ```bash
 # Get ACR resource ID
-ACR_ID=$(az acr show --name mystiraacr --resource-group mystira-dev-rg --query id --output tsv)
+ACR_ID=$(az acr show --name mysprodacr --resource-group mys-dev-mystira-rg-eus --query id --output tsv)
 
 # Grant pull permissions to staging/prod service principals (when created)
 # az role assignment create --assignee <service-principal-id> --role AcrPull --scope $ACR_ID
@@ -423,7 +423,7 @@ The workspace uses GitHub Actions for CI/CD with the following workflows:
 
 ### Image Tagging Strategy
 
-The CI/CD workflows use a shared ACR (`mystiraacr`) with environment-specific tags:
+The CI/CD workflows use a shared ACR (`mysprodacr`) with environment-specific tags:
 
 - **`dev` branch pushes**: Images tagged with `dev`, `latest`, and branch name
 - **`main` branch pushes**: Images tagged with `staging`, `latest`, and branch name
@@ -431,9 +431,9 @@ The CI/CD workflows use a shared ACR (`mystiraacr`) with environment-specific ta
 
 Kubernetes overlays map base images to environment tags:
 
-- Dev overlay: `mystiraacr.azurecr.io/chain:dev`
-- Staging overlay: `mystiraacr.azurecr.io/chain:staging`
-- Prod overlay: `mystiraacr.azurecr.io/chain:prod`
+- Dev overlay: `mysprodacr.azurecr.io/chain:dev`
+- Staging overlay: `mysprodacr.azurecr.io/chain:staging`
+- Prod overlay: `mysprodacr.azurecr.io/chain:prod`
 
 ### Configuring Branch Protection
 
@@ -488,23 +488,23 @@ pnpm --filter mystira-publisher dev
 
 ### Development Environment (Azure)
 
-- **Resource Group**: `mystira-dev-rg`
-- **ACR**: `mystiraacr` (shared)
-- **AKS**: `mystira-dev-aks` (if configured)
+- **Resource Group**: `mys-dev-mystira-rg-eus`
+- **ACR**: `mysprodacr` (shared)
+- **AKS**: `mys-dev-mystira-aks-eus`
 - **Namespace**: `mystira-dev`
 
 ### Staging Environment (Azure)
 
-- **Resource Group**: `mystira-staging-rg`
-- **ACR**: `mystiraacr` (shared, uses `staging` tags)
-- **AKS**: `mystira-staging-aks` (if configured)
+- **Resource Group**: `mys-staging-mystira-rg-eus`
+- **ACR**: `mysprodacr` (shared, uses `staging` tags)
+- **AKS**: `mys-staging-mystira-aks-eus`
 - **Namespace**: `mystira-staging`
 
 ### Production Environment (Azure)
 
-- **Resource Group**: `mystira-prod-rg`
-- **ACR**: `mystiraacr` (shared, uses `prod` tags)
-- **AKS**: `mystira-prod-aks` (if configured)
+- **Resource Group**: `mys-prod-mystira-rg-eus`
+- **ACR**: `mysprodacr` (shared, uses `prod` tags)
+- **AKS**: `mys-prod-mystira-aks-eus`
 - **Namespace**: `mystira-prod`
 
 ---
@@ -539,7 +539,7 @@ pnpm --filter mystira-publisher dev
 
 3. **Verify ACR exists**:
    ```bash
-   az acr show --name mystiraacr --resource-group mystira-dev-rg
+   az acr show --name mysprodacr --resource-group mys-dev-mystira-rg-eus
    ```
 
 ### Deploying Services to Kubernetes
@@ -605,7 +605,7 @@ git submodule update --init --recursive
 **Problem**: `az acr login` fails with "resource not found"
 
 - Verify dev environment is deployed (ACR is created in dev)
-- Check ACR name: `mystiraacr`
+- Check ACR name: `mysprodacr`
 - Verify you're in correct Azure subscription: `az account show`
 
 **Problem**: CI/CD can't push to ACR
@@ -652,7 +652,7 @@ kubectl get events -n mystira-dev --sort-by='.lastTimestamp'
 - Create pull secret if missing:
   ```bash
   kubectl create secret docker-registry acr-secret \
-    --docker-server=mystiraacr.azurecr.io \
+    --docker-server=mysprodacr.azurecr.io \
     --docker-username=<sp-client-id> \
     --docker-password=<sp-client-secret> \
     -n mystira-dev

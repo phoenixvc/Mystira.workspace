@@ -22,7 +22,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  AZURE_ACR_NAME: mystiraacr
+  AZURE_ACR_NAME: mysprodacr
   IMAGE_NAME: chain
 
 jobs:

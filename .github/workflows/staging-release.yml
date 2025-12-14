@@ -17,8 +17,8 @@ concurrency:
 env:
   ENVIRONMENT: staging
   TF_VERSION: 1.5.0
-  AZURE_RESOURCE_GROUP: mystira-staging-rg
-  AKS_CLUSTER_NAME: mystira-staging-aks
+  AZURE_RESOURCE_GROUP: mys-staging-mystira-rg-eus
+  AKS_CLUSTER_NAME: mys-staging-mystira-aks-eus
 
 jobs:
   ci-check:
@@ -158,16 +158,16 @@ jobs:
 
       - name: Create namespace if not exists
         run: |
-          kubectl create namespace mystira-staging --dry-run=client -o yaml | kubectl apply -f -
+          kubectl create namespace mys-staging --dry-run=client -o yaml | kubectl apply -f -
 
       - name: Deploy all services to staging
         run: |
           kubectl apply -k infra/kubernetes/overlays/staging
 
           # Wait for deployments
-          kubectl rollout status deployment/mystira-publisher -n mystira-staging --timeout=300s || true
-          kubectl rollout status deployment/mystira-story-generator -n mystira-staging --timeout=300s || true
-          kubectl rollout status statefulset/mystira-chain -n mystira-staging --timeout=600s || true
+          kubectl rollout status deployment/mys-publisher -n mys-staging --timeout=300s || true
+          kubectl rollout status deployment/mys-story-generator -n mys-staging --timeout=300s || true
+          kubectl rollout status statefulset/mys-chain -n mys-staging --timeout=600s || true
 
   notify:
     name: Notify Deployment Status

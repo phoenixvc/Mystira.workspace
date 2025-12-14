@@ -60,7 +60,7 @@ We will adopt a **hybrid documentation strategy** with clear boundaries:
 
 **Structure**:
 
-```
+```text
 docs/
 ├── README.md                    # Documentation index
 ├── QUICK_START.md              # Quick start guide
@@ -85,7 +85,7 @@ docs/
 
 **Structure Pattern**:
 
-```
+```text
 {project}/
 ├── README.md                   # Project overview, quick start
 ├── docs/                       # Detailed project documentation

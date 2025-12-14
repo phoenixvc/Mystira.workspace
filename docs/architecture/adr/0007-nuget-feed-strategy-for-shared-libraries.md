@@ -158,7 +158,7 @@ dotnet nuget push **/*.nupkg --source "Mystira-Internal" --api-key {PAT}
 
 #### Automatic Versioning
 
-**Option 1: Changesets (Recommended)**
+##### **Option 1: Changesets (Recommended)**
 
 Use Changesets for version management:
 
@@ -178,7 +178,7 @@ dotnet nuget push
 - Clear changelog generation
 - Consistent with npm package versioning in workspace
 
-**Option 2: GitVersion (Alternative)**
+##### **Option 2: GitVersion (Alternative)**
 
 Use GitVersion for automatic semantic versioning:
 
@@ -367,7 +367,7 @@ Each shared library `.csproj` should include:
 
 #### Local Development
 
-**Option 1: Project References (During Development)**
+##### **Option 1: Project References (During Development)**
 
 During active development of shared libraries:
 
@@ -375,7 +375,7 @@ During active development of shared libraries:
 2. Test changes before publishing
 3. Publish after changes are complete
 
-**Option 2: Local NuGet Feed**
+##### **Option 2: Local NuGet Feed**
 
 Use local folder as NuGet source:
 

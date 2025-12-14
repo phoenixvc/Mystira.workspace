@@ -49,7 +49,7 @@ We adopt a **two-branch strategy with pull request workflow**:
 
 #### 1. Development Workflow (Push to `dev`)
 
-```
+```text
 Developer pushes to dev
   ↓
 CI workflows trigger automatically:
@@ -70,7 +70,7 @@ CI workflows trigger automatically:
 
 #### 2. Pull Request Workflow (PR from `dev` to `main`)
 
-```
+```text
 Developer creates PR from dev → main
   ↓
 Same CI checks run as dev push
@@ -92,7 +92,7 @@ Ready for merge
 
 #### 3. Staging Deployment (Merge to `main`)
 
-```
+```text
 PR merged to main
   ↓
 Staging Release workflow triggers automatically
@@ -114,7 +114,7 @@ Staging environment updated
 
 #### 4. Production Deployment (Manual with Approval)
 
-```
+```text
 Manual trigger from Actions
   ↓
 Confirmation required: "DEPLOY TO PRODUCTION"
@@ -270,6 +270,7 @@ All of the following must pass before merging to `main`:
    - Create `production` environment (require approval, add reviewers)
 
 3. **Create `dev` branch**:
+
    ```bash
    git checkout -b dev
    git push -u origin dev

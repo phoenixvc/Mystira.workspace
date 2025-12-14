@@ -31,8 +31,8 @@ concurrency:
 
 env:
   TF_VERSION: 1.5.0
-  AZURE_RESOURCE_GROUP: mystira-${{ github.event.inputs.environment || 'dev' }}-rg
-  AKS_CLUSTER_NAME: mystira-${{ github.event.inputs.environment || 'dev' }}-aks
+  AZURE_RESOURCE_GROUP: mys-${{ github.event.inputs.environment || 'dev' }}-mystira-rg-eus
+  AKS_CLUSTER_NAME: mys-${{ github.event.inputs.environment || 'dev' }}-mystira-aks-eus
 
 jobs:
   plan-terraform:
@@ -191,12 +191,12 @@ jobs:
 
       - name: Create namespace if not exists
         run: |
-          kubectl create namespace mystira-${{ github.event.inputs.environment || 'dev' }} --dry-run=client -o yaml | kubectl apply -f -
+          kubectl create namespace mys-${{ github.event.inputs.environment || 'dev' }} --dry-run=client -o yaml | kubectl apply -f -
 
       - name: Deploy Chain to AKS
         run: |
           kubectl apply -k infra/kubernetes/overlays/${{ github.event.inputs.environment || 'dev' }}
-          kubectl rollout status statefulset/mystira-chain -n mystira-${{ github.event.inputs.environment || 'dev' }} --timeout=600s
+          kubectl rollout status statefulset/mys-chain -n mys-${{ github.event.inputs.environment || 'dev' }} --timeout=600s
 
   deploy-publisher:
     name: Deploy Publisher - ${{ github.event.inputs.environment || 'dev' }}
@@ -227,12 +227,12 @@ jobs:
 
       - name: Create namespace if not exists
         run: |
-          kubectl create namespace mystira-${{ github.event.inputs.environment || 'dev' }} --dry-run=client -o yaml | kubectl apply -f -
+          kubectl create namespace mys-${{ github.event.inputs.environment || 'dev' }} --dry-run=client -o yaml | kubectl apply -f -
 
       - name: Deploy Publisher to AKS
         run: |
           kubectl apply -k infra/kubernetes/overlays/${{ github.event.inputs.environment || 'dev' }}
-          kubectl rollout status deployment/mystira-publisher -n mystira-${{ github.event.inputs.environment || 'dev' }} --timeout=300s
+          kubectl rollout status deployment/mys-publisher -n mys-${{ github.event.inputs.environment || 'dev' }} --timeout=300s
 
   notify:
     name: Notify Deployment Status
@@ -244,7 +244,7 @@ jobs:
         run: |
           echo "## Deployment Summary" >> $GITHUB_STEP_SUMMARY
           echo "- Environment: ${{ github.event.inputs.environment || 'dev' }}" >> $GITHUB_STEP_SUMMARY
-          echo "- Azure Resource Group: mystira-${{ github.event.inputs.environment || 'dev' }}-rg" >> $GITHUB_STEP_SUMMARY
-          echo "- AKS Cluster: mystira-${{ github.event.inputs.environment || 'dev' }}-aks" >> $GITHUB_STEP_SUMMARY
+          echo "- Azure Resource Group: mys-${{ github.event.inputs.environment || 'dev' }}-mystira-rg-eus" >> $GITHUB_STEP_SUMMARY
+          echo "- AKS Cluster: mys-${{ github.event.inputs.environment || 'dev' }}-mystira-aks-eus" >> $GITHUB_STEP_SUMMARY
           echo "- Chain Deploy: ${{ needs.deploy-chain.result }}" >> $GITHUB_STEP_SUMMARY
           echo "- Publisher Deploy: ${{ needs.deploy-publisher.result }}" >> $GITHUB_STEP_SUMMARY
