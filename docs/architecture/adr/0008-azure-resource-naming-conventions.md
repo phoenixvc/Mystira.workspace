@@ -69,23 +69,23 @@ Where:
 
 | Resource Type           | Abbreviation | Example                               |
 | ----------------------- | ------------ | ------------------------------------- |
-| Resource Group          | `rg`         | `nl-dev-rooivalk-rg-euw`              |
-| Azure Kubernetes        | `aks`        | `nl-dev-rooivalk-aks-euw`             |
-| Virtual Network         | `vnet`       | `nl-dev-rooivalk-vnet-euw`            |
-| Subnet                  | `subnet`     | `rooivalk-app-subnet` (no env prefix) |
-| Key Vault               | `kv`         | `nl-dev-rooivalk-kv-euw`              |
-| Storage Account         | (no dashes)  | `nlprodrooivalkstgeuw`                |
-| Container Registry      | (no dashes)  | `nlprodacr`                           |
-| PostgreSQL              | `pg`         | `nl-dev-shared-pg-euw`                |
-| Redis Cache             | (in name)    | `nl-dev-shared-redis-cache-euw`       |
-| Application Insights    | `ai`         | `nl-dev-rooivalk-ai-euw`              |
-| Log Analytics Workspace | `log`        | `nl-dev-rooivalk-log-euw`             |
-| App Service             | `app`        | `nl-dev-rooivalk-app-euw`             |
-| API                     | `api`        | `nl-dev-rooivalk-api-euw`             |
-| Function App            | `func`       | `nl-dev-rooivalk-func-euw`            |
-| Static Web App          | `swa`        | `nl-dev-rooivalk-swa-euw`             |
-| Database                | `db`         | `nl-dev-rooivalk-db-euw`              |
-| DNS                     | `dns`        | `nl-prod-rooivalk-dns-glob`           |
+| Resource Group          | `rg`         | `mys-dev-mystira-rg-euw`              |
+| Azure Kubernetes        | `aks`        | `mys-dev-mystira-aks-euw`             |
+| Virtual Network         | `vnet`       | `mys-dev-mystira-vnet-euw`            |
+| Subnet                  | `subnet`     | `mystira-app-subnet` (no env prefix)  |
+| Key Vault               | `kv`         | `mys-dev-mystira-kv-euw`              |
+| Storage Account         | (no dashes)  | `mysprodmystirastgeuw`                |
+| Container Registry      | (no dashes)  | `mysprodacr` (or `mystiraacr` legacy) |
+| PostgreSQL              | `pg`         | `mys-dev-shared-pg-euw`               |
+| Redis Cache             | (in name)    | `mys-dev-shared-redis-cache-euw`      |
+| Application Insights    | `ai`         | `mys-dev-mystira-ai-euw`              |
+| Log Analytics Workspace | `log`        | `mys-dev-mystira-log-euw`             |
+| App Service             | `app`        | `mys-dev-mystira-app-euw`             |
+| API                     | `api`        | `mys-dev-mystira-api-euw`             |
+| Function App            | `func`       | `mys-dev-mystira-func-euw`            |
+| Static Web App          | `swa`        | `mys-dev-mystira-swa-euw`             |
+| Database                | `db`         | `mys-dev-mystira-db-euw`              |
+| DNS                     | `dns`        | `mys-prod-mystira-dns-glob`           |
 
 ### Detailed Naming Patterns
 
@@ -177,11 +177,12 @@ No additional values allowed without updating this document.
 Pattern: `[org]-[env]-[project]-rg-[region]`
 
 ```
-nl-dev-rooivalk-rg-euw
+mys-dev-mystira-rg-euw
+mys-prod-mystira-rg-euw
+mys-staging-mystira-rg-euw
 nl-prod-autopr-rg-san
 pvc-prod-mktdata-rg-euw
 tws-prod-website-rg-san
-mys-dev-mystira-rg-swe
 ```
 
 #### App Services / APIs / Functions
@@ -189,12 +190,13 @@ mys-dev-mystira-rg-swe
 Pattern: `[org]-[env]-[project]-[type]-[region]`
 
 ```
-nl-prod-rooivalk-api-euw
+mys-prod-mystira-api-euw
+mys-dev-mystira-app-euw
+mys-dev-mystira-func-euw
+mys-prod-mystira-story-app-euw
 nl-dev-autopr-app-san
 pvc-prod-mktdata-func-euw
-pvc-prod-website-app-euw
 tws-prod-backoffice-api-san
-mys-prod-mystira-story-app-swe
 ```
 
 #### DNS Resources
@@ -202,16 +204,16 @@ mys-prod-mystira-story-app-swe
 DNS zones are typically global, so use `glob` as region:
 
 ```
-nl-prod-rooivalk-dns-glob
 mys-prod-mystira-dns-glob
+nl-prod-autopr-dns-glob
 pvc-prod-website-dns-glob
 ```
 
 Resource group for DNS:
 
 ```
-nl-prod-rooivalk-rg-glob
 mys-prod-mystira-rg-glob
+nl-prod-autopr-rg-glob
 pvc-prod-website-rg-glob
 ```
 
@@ -224,8 +226,9 @@ Storage accounts must be globally unique, 3-24 characters, lowercase alphanumeri
 Examples:
 
 ```
-nlprodrooivalkstgeuw    # nl-prod-rooivalk-storage-euw
-nlprodterraformstate    # Terraform state backend
+mysprodmystirastgeuw    # mys-prod-mystira-storage-euw
+mysprodterraformstate   # Terraform state backend
+nlprodautoprstgeuw      # nl-prod-autopr-storage-euw
 pvcprodmktdatastgeuw    # pvc-prod-mktdata-storage-euw
 ```
 
@@ -287,9 +290,10 @@ Examples:
 
 **Examples**:
 
-- `rooivalk.dev.neuraliquid.com` (dev)
+- `mystira.dev.mystira.app` (dev)
+- `mystira.staging.mystira.app` (staging)
+- `mystira.mystira.app` (prod)
 - `mktdata.staging.phoenixvc.tech` (staging)
-- `rooivalk.neuraliquid.com` (prod)
 - `website.phoenixvc.tech` (prod)
 
 ### Terraform State Backend
