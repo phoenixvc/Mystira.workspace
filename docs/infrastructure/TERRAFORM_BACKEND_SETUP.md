@@ -142,11 +142,7 @@ If the name `mysprodterraformstate` is already taken, you'll need to:
    ```hcl
    backend "azurerm" {
      resource_group_name  = "mys-prod-terraform-rg-eus"
-   <<<<<<< HEAD
      storage_account_name = "mysprodterraformstate123"  # Updated name
-   =======
-     storage_account_name = "mystiraterraformstate123"  # Updated name
-   >>>>>>> 7e9ebfc33431bb5e22e47513f9cdfc629718d390
      container_name       = "tfstate"
      key                  = "dev/terraform.tfstate"
      use_azuread_auth     = true
