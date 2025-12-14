@@ -101,14 +101,18 @@ This shows what will be created without actually creating it.
 
 **Expected resources** (following [ADR-0008: Azure Resource Naming Conventions](../architecture/adr/0008-azure-resource-naming-conventions.md)):
 
-- Resource Group: `mystira-dev-rg`
-- Virtual Network: `mystira-dev-vnet`
+**Note**: Existing resources use legacy naming and are kept as-is. New resources should follow the new convention `[org]-[env]-[project]-[type]-[region]`.
+
+**Legacy Resource Names** (kept as-is):
+
+- Resource Group: `mystira-dev-rg` (legacy, new would be `mys-dev-mystira-rg-euw`)
+- Virtual Network: `mystira-dev-vnet` (legacy, new would be `mys-dev-mystira-vnet-euw`)
 - Subnets: `chain-subnet`, `publisher-subnet`, `aks-subnet`, etc.
-- Azure Container Registry: `mystiraacr` (shared, no dashes)
-- Azure Kubernetes Service: `mystira-dev-aks`
-- Key Vaults: `mystira-{component}-dev-kv`
-- Shared PostgreSQL: `mystira-shared-pg-dev`
-- Shared Redis: `mystira-shared-redis-dev-cache`
+- Azure Container Registry: `mystiraacr` (shared, legacy name kept as-is per ADR-0008)
+- Azure Kubernetes Service: `mystira-dev-aks` (legacy, new would be `mys-dev-mystira-aks-euw`)
+- Key Vaults: `mystira-{component}-dev-kv` (legacy, new would be `mys-dev-mystira-{component}-kv-euw`)
+- Shared PostgreSQL: `mystira-shared-pg-dev` (legacy)
+- Shared Redis: `mystira-shared-redis-dev-cache` (legacy)
 - (And more...)
 
 ## Step 6: Deploy Infrastructure

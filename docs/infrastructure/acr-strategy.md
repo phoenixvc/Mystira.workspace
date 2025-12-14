@@ -42,7 +42,7 @@ mystiraacr.azurecr.io/chain:prod-abc123
 mystiraacr.azurecr.io/chain:v1.2.3  # Semantic versioning for prod
 ```
 
-**Note**: ACR name `mystiraacr` follows the naming convention: `mystira{description}` (no dashes, lowercase only) because Azure Container Registry names cannot contain hyphens.
+**Note**: ACR name `mystiraacr` is a legacy name kept as-is per [ADR-0008: Azure Resource Naming Conventions](../architecture/adr/0008-azure-resource-naming-conventions.md). The new convention would be `mysprodacr` (or similar), but `mystiraacr` is retained due to migration complexity (all images would need to be re-tagged and all deployments updated). See ADR-0008 for the complete naming standard.
 
 ## Solution Options
 

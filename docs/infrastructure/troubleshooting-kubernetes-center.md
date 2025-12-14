@@ -99,11 +99,13 @@ This traditional view shows all AKS clusters regardless of when they were create
 
 Based on Terraform configuration and [ADR-0008: Azure Resource Naming Conventions](../architecture/adr/0008-azure-resource-naming-conventions.md):
 
-| Environment | Cluster Name          | Resource Group       | Status               |
-| ----------- | --------------------- | -------------------- | -------------------- |
-| Dev         | `mystira-dev-aks`     | `mystira-dev-rg`     | Created by Terraform |
-| Staging     | `mystira-staging-aks` | `mystira-staging-rg` | Created by Terraform |
-| Prod        | `mystira-prod-aks`    | `mystira-prod-rg`    | Created by Terraform |
+**Note**: Existing resources use legacy naming (`mystira-*-rg`, `mystira-*-aks`) and are kept as-is per ADR-0008. New resources should follow the convention `mys-{env}-mystira-{type}-{region}`.
+
+| Environment | Cluster Name (Legacy) | Resource Group (Legacy) | New Convention (Future)       | Status               |
+| ----------- | --------------------- | ----------------------- | ----------------------------- | -------------------- |
+| Dev         | `mystira-dev-aks`     | `mystira-dev-rg`        | `mys-dev-mystira-aks-euw`     | Created by Terraform |
+| Staging     | `mystira-staging-aks` | `mystira-staging-rg`    | `mys-staging-mystira-aks-euw` | Created by Terraform |
+| Prod        | `mystira-prod-aks`    | `mystira-prod-rg`       | `mys-prod-mystira-aks-euw`    | Created by Terraform |
 
 ## Troubleshooting Steps
 

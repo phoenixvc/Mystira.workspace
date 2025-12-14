@@ -232,15 +232,15 @@ terraform apply
 
 **What gets created**:
 
-- Resource Group: `mystira-dev-rg`
-- Azure Container Registry: `mystiraacr` (shared across all environments)
+- Resource Group: `mystira-dev-rg` (legacy name, kept as-is per [ADR-0008](../architecture/adr/0008-azure-resource-naming-conventions.md))
+- Azure Container Registry: `mystiraacr` (shared across all environments, legacy name kept as-is per ADR-0008)
 - Virtual Network
 - Key Vaults for services
 - Shared PostgreSQL (if configured)
 - Shared Redis (if configured)
-- AKS cluster: `mystira-dev-aks` (if configured)
+- AKS cluster: `mystira-dev-aks` (legacy name, kept as-is per ADR-0008)
 
-**Important**: The ACR `mystiraacr` is created in the dev environment but is used by all environments. This is intentional - we use a shared ACR with environment-specific tags (dev, staging, prod).
+**Important**: The ACR `mystiraacr` is created in the dev environment but is used by all environments. This is intentional - we use a shared ACR with environment-specific tags (dev, staging, prod). **Note**: Existing resource names follow legacy conventions and are kept as-is. New resources should follow the naming convention defined in [ADR-0008](../architecture/adr/0008-azure-resource-naming-conventions.md).
 
 ### 2. Configure ACR Access
 

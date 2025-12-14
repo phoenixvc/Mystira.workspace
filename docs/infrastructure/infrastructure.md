@@ -306,22 +306,24 @@ Code → Azure App Service / Static Web App → Service
 
 ### Development
 
-**Resource Groups**:
+**Resource Groups** (per [ADR-0008: Azure Resource Naming Conventions](../architecture/adr/0008-azure-resource-naming-conventions.md)):
 
-- `mystira-dev-rg` (or `mys-dev-mystira-rg-san` for App)
+- `mystira-dev-rg` (legacy, kept as-is per ADR-0008)
+- `mys-dev-mystira-rg-euw` (new convention for future resources)
 
 **Resources**:
 
-- AKS cluster: `mystira-dev-aks`
-- App Services: `mys-dev-mystira-api-san`, `mys-dev-mystira-adminapi-san`
-- Static Web App: `mys-dev-mystira-swa-eus2`
-- Cosmos DB: `mys-dev-mystira-cosmos-san`
+- AKS cluster: `mystira-dev-aks` (legacy, kept as-is per ADR-0008)
+- App Services: `mys-dev-mystira-api-euw`, `mys-dev-mystira-adminapi-euw` (new convention)
+- Static Web App: `mys-dev-mystira-swa-euw` (new convention)
+- Cosmos DB: `mys-dev-mystira-cosmos-euw` (new convention)
 
 ### Staging
 
 **Resource Groups**:
 
-- `mystira-staging-rg` (or `mys-staging-mystira-rg-san` for App)
+- `mystira-staging-rg` (legacy, kept as-is per ADR-0008)
+- `mys-staging-mystira-rg-euw` (new convention for future resources)
 
 **Resources**: Similar structure with `staging` suffix
 
@@ -329,10 +331,13 @@ Code → Azure App Service / Static Web App → Service
 
 **Resource Groups**:
 
-- `mystira-prod-rg` (or `mys-prod-mystira-rg-san` for App)
-- `mys-prod-mystira-rg-glob` (DNS zone)
+- `mystira-prod-rg` (legacy, kept as-is per ADR-0008)
+- `mys-prod-mystira-rg-euw` (new convention for future resources)
+- `mys-prod-mystira-rg-glob` (DNS zone, new convention)
 
 **Resources**: Production-grade with higher SKUs and redundancy
+
+**Note**: See [ADR-0008](../architecture/adr/0008-azure-resource-naming-conventions.md) for complete naming conventions and legacy resource mapping.
 
 ## Getting Started
 
