@@ -39,13 +39,13 @@ We will adopt the following naming conventions for all Azure resources:
 
 ### Naming Pattern
 
-```
+```text
 [org]-[env]-[project]-[type]-[region]
 ```
 
 For resource groups specifically:
 
-```
+```text
 [org]-[env]-[project]-rg-[region]
 ```
 
@@ -176,7 +176,7 @@ No additional values allowed without updating this document.
 
 Pattern: `[org]-[env]-[project]-rg-[region]`
 
-```
+```text
 mys-dev-mystira-rg-euw
 mys-prod-mystira-rg-euw
 mys-staging-mystira-rg-euw
@@ -189,7 +189,7 @@ tws-prod-website-rg-san
 
 Pattern: `[org]-[env]-[project]-[type]-[region]`
 
-```
+```text
 mys-prod-mystira-api-euw
 mys-dev-mystira-app-euw
 mys-dev-mystira-func-euw
@@ -203,7 +203,7 @@ tws-prod-backoffice-api-san
 
 DNS zones are typically global, so use `glob` as region:
 
-```
+```text
 mys-prod-mystira-dns-glob
 nl-prod-autopr-dns-glob
 pvc-prod-website-dns-glob
@@ -211,7 +211,7 @@ pvc-prod-website-dns-glob
 
 Resource group for DNS:
 
-```
+```text
 mys-prod-mystira-rg-glob
 nl-prod-autopr-rg-glob
 pvc-prod-website-rg-glob
@@ -225,7 +225,7 @@ Storage accounts must be globally unique, 3-24 characters, lowercase alphanumeri
 
 Examples:
 
-```
+```text
 mysprodmystirastgeuw    # mys-prod-mystira-storage-euw
 mysprodterraformstate   # Terraform state backend
 nlprodautoprstgeuw      # nl-prod-autopr-storage-euw
@@ -240,7 +240,7 @@ Pattern: `[org][description]` (no dashes, shared across environments)
 
 Examples:
 
-```
+```text
 nlprodacr    # Shared ACR for NL (uses tags: dev, staging, prod)
 pvcprodacr   # Shared ACR for PVC
 mysprodacr   # Shared ACR for Mystira (or keep existing: mystiraacr)
@@ -442,7 +442,7 @@ AI systems working with this Azure environment MUST:
 
 ### AI Usage Summary (Copy-Paste Block)
 
-```
+```text
 Use [org]-[env]-[project]-[type]-[region] for resources.
 Use [org]-[env]-[project]-rg-[region] for resource groups.
 
