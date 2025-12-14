@@ -4,7 +4,7 @@ This document describes the branch protection rules and CI/CD workflow for the M
 
 ## Branch Strategy
 
-- **`dev`**: Development branch - all feature work is pushed here
+- **`dev`**: Development branch - all feature work is integrated here via PRs
 - **`main`**: Main branch - production-ready code, protected
 
 ## Workflow Overview
@@ -13,7 +13,43 @@ This document describes the branch protection rules and CI/CD workflow for the M
 dev (push) → CI/CD runs → PR to main → Staging Release → Production Release (manual approval)
 ```
 
-## Branch Protection Rules for `main`
+## Branch Protection Rules
+
+### Protection for `dev` Branch (Recommended)
+
+To ensure code quality even in development, configure protection for `dev`:
+
+1. **Require pull request before merging**
+   - ✅ Enabled
+   - ✅ Require approvals: 0 (or 1 for stricter quality)
+   - ✅ Dismiss stale reviews: Optional
+   - ❌ Require review from Code Owners: Optional (not required for dev)
+
+2. **Require status checks to pass before merging**
+   - ✅ Enabled
+   - ✅ Require branches to be up to date before merging
+   - ✅ Status checks required: All CI jobs (lint, test, build)
+
+3. **Require conversation resolution before merging**
+   - ❌ Not required (optional for dev)
+
+4. **Allow force pushes**
+   - ❌ Disabled (prevents accidental overwrites)
+
+5. **Allow deletions**
+   - ❌ Disabled
+
+**Rationale**: Requiring PRs to `dev` ensures:
+
+- All code is reviewed before integration
+- CI checks run before merge
+- Better collaboration and knowledge sharing
+- Cleaner git history
+- Still maintains fast iteration (no approval required if configured)
+
+**Alternative**: If team prefers faster iteration, allow direct pushes but require CI checks to pass before push completes (via pre-push hooks or branch protection that allows pushes but requires CI).
+
+### Protection for `main` Branch
 
 The following branch protection rules **must be configured** in GitHub repository settings:
 

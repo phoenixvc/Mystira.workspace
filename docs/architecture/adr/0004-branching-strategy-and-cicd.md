@@ -30,10 +30,12 @@ We adopt a **two-branch strategy with pull request workflow**:
 ### Branch Strategy
 
 1. **`dev` branch**: Development branch where all feature work is integrated
-   - Developers push directly to `dev`
-   - All CI/CD pipelines run automatically on push
+   - **Requires pull requests** from feature branches (recommended)
+   - All CI/CD pipelines run automatically on PR and push
    - Docker images are built and pushed to container registry
-   - No approval required for pushes
+   - CI checks must pass before merge
+   - Approval optional (0 approvals) for faster iteration, or require 1 approval for stricter quality
+   - **Alternative**: Allow direct pushes if team prefers (requires CI checks via branch protection)
 
 2. **`main` branch**: Production-ready code
    - Protected branch with strict rules
@@ -188,8 +190,9 @@ All of the following must pass before merging to `main`:
 
 1. **Complexity**: More steps required to get code to production
 2. **Slower Releases**: Multiple approval steps can slow down releases
-3. **Branch Management**: Developers must manage `dev` branch updates
-4. **PR Overhead**: Every change requires a PR, which adds overhead
+3. **Branch Management**: Developers must manage feature branches and PRs
+4. **PR Overhead**: Every change requires a PR (both to `dev` and `main`), which adds overhead
+5. **Slower Dev Iteration**: Requiring PRs to `dev` adds a step that may slow rapid development cycles
 
 ### Neutral
 
@@ -251,9 +254,16 @@ All of the following must pass before merging to `main`:
 ### GitHub Configuration Required
 
 1. **Branch Protection Rules** (Settings → Branches):
-   - Configure protection for `main` branch
-   - Set required status checks
-   - Configure approval requirements
+   - **Configure protection for `dev` branch** (recommended):
+     - Require pull request before merging
+     - Require status checks to pass (all CI jobs)
+     - Require approvals: 0 (or 1 for stricter quality)
+     - Do not allow force pushes
+   - **Configure protection for `main` branch**:
+     - Require pull request before merging
+     - Set required status checks
+     - Configure approval requirements (1 approval)
+     - Require conversation resolution
 
 2. **GitHub Environments** (Settings → Environments):
    - Create `staging` environment (optional approval)
