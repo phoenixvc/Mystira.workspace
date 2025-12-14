@@ -254,33 +254,33 @@ mysprodacr   # Shared ACR for Mystira (or keep existing: mystiraacr)
 
 Examples:
 
-- `nl-dev`, `nl-staging`, `nl-prod` (NeuralLiquid)
 - `mys-dev`, `mys-staging`, `mys-prod` (Mystira - new convention)
 - `mystira-dev`, `mystira-staging`, `mystira-prod` (Mystira - legacy, keep as-is)
+- `nl-dev`, `nl-staging`, `nl-prod` (NeuralLiquid)
 
 **Deployments/StatefulSets**: `{org}-{component}`
 
 Examples:
 
-- `nl-rooivalk`, `nl-autopr` (NeuralLiquid)
 - `mys-chain`, `mys-publisher`, `mys-story-generator` (Mystira - new convention)
 - `mystira-chain`, `mystira-publisher`, `mystira-story-generator` (Mystira - legacy, keep as-is)
+- `nl-autopr`, `nl-rooivalk` (NeuralLiquid)
 
 **Services**: `{org}-{component}`
 
 Examples:
 
-- `nl-rooivalk`, `nl-autopr` (NeuralLiquid)
 - `mys-chain`, `mys-publisher`, `mys-story-generator` (Mystira - new convention)
 - `mystira-chain`, `mystira-publisher`, `mystira-story-generator` (Mystira - legacy, keep as-is)
+- `nl-autopr`, `nl-rooivalk` (NeuralLiquid)
 
 **ConfigMaps/Secrets**: `{org}-{component}-{purpose}`
 
 Examples:
 
-- `nl-rooivalk-config`, `nl-autopr-secrets` (NeuralLiquid)
 - `mys-publisher-config`, `mys-story-generator-secrets` (Mystira - new convention)
 - `mystira-publisher-config`, `mystira-story-generator-secrets` (Mystira - legacy, keep as-is)
+- `nl-autopr-config`, `nl-rooivalk-secrets` (NeuralLiquid)
 
 **Note**: Existing Kubernetes resources using `mystira-{component}` naming should be kept as-is. New resources should use `mys-{component}` per the new convention. Migration can occur during cluster upgrades or namespace consolidation.
 
