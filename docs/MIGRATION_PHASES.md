@@ -176,12 +176,16 @@ This document tracks the migration of Admin tooling from `Mystira.App` monorepo 
 
 **Remaining Tasks**:
 
-- [ ] Create edit/create forms for Media (if API supports updates)
-- [ ] Create edit/create forms for Bundles (if API supports updates)
+- [x] ~~Create edit/create forms for Media~~ - Not applicable (file-based, upload/delete only)
+- [x] ~~Create edit/create forms for Bundles~~ - Not applicable (file-based, upload/delete only)
 - [ ] Test authentication flow end-to-end
 - [ ] Verify API integration with real backend
-- [ ] Complete styling migration and UI polish
+- [ ] Complete styling migration and UI polish (minor refinements)
 - [ ] Set up CI/CD pipeline
+- [ ] Remove Admin UI from `Mystira.App` monorepo (after verification)
+
+**Note**: Media and Bundles are file-based entities that use upload/import pages. Traditional create/edit forms are not applicable for these entities.
+
 - [ ] Complete styling migration and polish UI
 - [ ] Set up CI/CD pipeline
 
