@@ -22,7 +22,7 @@ module "shared_postgresql" {
 
   environment         = "dev"
   location           = "eastus"
-  resource_group_name = "mystira-dev-rg"
+  resource_group_name = "mystira-dev-rg"  # Legacy name, kept as-is per ADR-0008
   vnet_id            = azurerm_virtual_network.main.id
   subnet_id          = azurerm_subnet.postgresql.id
 
@@ -112,7 +112,7 @@ module "shared_redis" {
 
   environment         = "dev"
   location           = "eastus"
-  resource_group_name = "mystira-dev-rg"
+  resource_group_name = "mystira-dev-rg"  # Legacy name, kept as-is per ADR-0008
   subnet_id          = azurerm_subnet.redis.id
 
   capacity = 1
@@ -183,7 +183,7 @@ module "shared_monitoring" {
 
   environment         = "dev"
   location           = "eastus"
-  resource_group_name = "mystira-dev-rg"
+  resource_group_name = "mystira-dev-rg"  # Legacy name, kept as-is per ADR-0008
 
   retention_in_days = 30
 }

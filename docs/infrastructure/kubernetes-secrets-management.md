@@ -15,28 +15,28 @@ After Terraform deployment, create Kubernetes secrets from Key Vault:
 ```bash
 # Get connection strings from Key Vault
 POSTGRES_CONN=$(az keyvault secret show \
-  --vault-name "mystira-sg-dev-kv" \
+  --vault-name "mystira-sg-dev-kv"  # Legacy name, kept as-is per ADR-0008 (new would be mys-dev-mystira-sg-kv-euw) \
   --name "postgres-connection-string" \
   --query value -o tsv)
 
 REDIS_CONN=$(az keyvault secret show \
-  --vault-name "mystira-sg-dev-kv" \
+  --vault-name "mystira-sg-dev-kv"  # Legacy name, kept as-is per ADR-0008 (new would be mys-dev-mystira-sg-kv-euw) \
   --name "redis-connection-string" \
   --query value -o tsv)
 
 APPINSIGHTS_CONN=$(az keyvault secret show \
-  --vault-name "mystira-sg-dev-kv" \
+  --vault-name "mystira-sg-dev-kv"  # Legacy name, kept as-is per ADR-0008 (new would be mys-dev-mystira-sg-kv-euw) \
   --name "appinsights-connection-string" \
   --query value -o tsv)
 
 # Get API keys from Key Vault or environment
 ANTHROPIC_KEY=$(az keyvault secret show \
-  --vault-name "mystira-sg-dev-kv" \
+  --vault-name "mystira-sg-dev-kv"  # Legacy name, kept as-is per ADR-0008 (new would be mys-dev-mystira-sg-kv-euw) \
   --name "anthropic-api-key" \
   --query value -o tsv)
 
 OPENAI_KEY=$(az keyvault secret show \
-  --vault-name "mystira-sg-dev-kv" \
+  --vault-name "mystira-sg-dev-kv"  # Legacy name, kept as-is per ADR-0008 (new would be mys-dev-mystira-sg-kv-euw) \
   --name "openai-api-key" \
   --query value -o tsv)
 
@@ -91,7 +91,7 @@ spec:
     usePodIdentity: "false"
     useVMManagedIdentity: "true"
     userAssignedIdentityID: "<managed-identity-client-id>"
-    keyvaultName: "mystira-sg-dev-kv"
+    keyvaultName: "mystira-sg-dev-kv" # Legacy name, kept as-is per ADR-0008
     tenantId: "<azure-tenant-id>"
     objects: |
       array:
@@ -183,12 +183,12 @@ When using shared resources, connection strings must be manually stored:
 
    ```bash
    az keyvault secret set \
-     --vault-name "mystira-sg-dev-kv" \
+     --vault-name "mystira-sg-dev-kv"  # Legacy name, kept as-is per ADR-0008 (new would be mys-dev-mystira-sg-kv-euw) \
      --name "postgres-connection-string" \
      --value "<connection-string>"
 
    az keyvault secret set \
-     --vault-name "mystira-sg-dev-kv" \
+     --vault-name "mystira-sg-dev-kv"  # Legacy name, kept as-is per ADR-0008 (new would be mys-dev-mystira-sg-kv-euw) \
      --name "redis-connection-string" \
      --value "<connection-string>"
    ```
@@ -196,7 +196,7 @@ When using shared resources, connection strings must be manually stored:
 3. **Store Application Insights connection string**:
    ```bash
    az keyvault secret set \
-     --vault-name "mystira-sg-dev-kv" \
+     --vault-name "mystira-sg-dev-kv"  # Legacy name, kept as-is per ADR-0008 (new would be mys-dev-mystira-sg-kv-euw) \
      --name "appinsights-connection-string" \
      --value "$(terraform output -raw shared_monitoring_appinsights_connection_string)"
    ```
