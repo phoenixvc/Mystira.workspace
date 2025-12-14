@@ -165,9 +165,17 @@ This document tracks the migration of Admin tooling from `Mystira.App` monorepo 
 - ✅ Updated LoginPage to use toast notifications
 - ✅ Fixed missing imports in BundlesPage
 
+**Completed Tasks (Phase 3.13)**:
+
+- ✅ Created Create Scenario page with React Hook Form + Zod validation
+- ✅ Created Create Badge page with React Hook Form + Zod validation
+- ✅ Created Create Character Map page with React Hook Form + Zod validation
+- ✅ Created unified Create Master Data page for all master data types
+- ✅ Added routes for all create pages
+- ✅ Updated list pages to link to create pages instead of placeholder buttons
+
 **Remaining Tasks**:
 
-- [ ] Create new entity forms (not just edit) - Create forms for Scenarios, Badges, Character Maps, Master Data
 - [ ] Create edit/create forms for Media (if API supports updates)
 - [ ] Create edit/create forms for Bundles (if API supports updates)
 - [ ] Test authentication flow end-to-end
