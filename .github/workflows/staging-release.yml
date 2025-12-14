@@ -33,10 +33,10 @@ jobs:
         run: |
           # Get the last commit SHA that was merged
           LAST_COMMIT=${{ github.sha }}
-          
+
           # Check if there was a PR for this commit
           PR_NUMBER=$(gh pr list --state merged --base main --search "$LAST_COMMIT" --json number --jq '.[0].number // empty')
-          
+
           if [ -n "$PR_NUMBER" ]; then
             echo "Found merged PR #$PR_NUMBER"
             # Verify CI checks passed (this is a basic check - GitHub branch protection should enforce this)
@@ -79,9 +79,9 @@ jobs:
           ARM_CLIENT_SECRET=$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r '.clientSecret')
           ARM_SUBSCRIPTION_ID=$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r '.subscriptionId')
           ARM_TENANT_ID=$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r '.tenantId')
-          
+
           echo "::add-mask::$ARM_CLIENT_SECRET"
-          
+
           {
             echo "ARM_CLIENT_ID=$ARM_CLIENT_ID"
             echo "ARM_CLIENT_SECRET=$ARM_CLIENT_SECRET"
@@ -141,7 +141,7 @@ jobs:
       - name: Deploy all services to staging
         run: |
           kubectl apply -k infra/kubernetes/overlays/staging
-          
+
           # Wait for deployments
           kubectl rollout status deployment/mystira-publisher -n mystira-staging --timeout=300s || true
           kubectl rollout status deployment/mystira-story-generator -n mystira-staging --timeout=300s || true

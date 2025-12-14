@@ -19,7 +19,7 @@ git submodule update --init --recursive
 # Check each submodule
 echo "🔍 Checking submodule status..."
 
-submodules=("packages/chain" "packages/app" "packages/story-generator" "packages/publisher" "packages/app/tools" "infra")
+submodules=("packages/chain" "packages/app" "packages/story-generator" "packages/publisher" "packages/devhub" "infra")
 
 for submodule in "${submodules[@]}"; do
     if [ -d "$submodule" ] && [ -f "$submodule/.git" ]; then

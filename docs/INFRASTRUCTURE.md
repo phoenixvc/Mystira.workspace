@@ -500,6 +500,8 @@ Provides centralized monitoring and logging:
 - [Architecture Overview](./ARCHITECTURE.md)
 - [ADR-0001: Infrastructure Organization](./architecture/adr/0001-infrastructure-organization-hybrid-approach.md)
 - [ADR-0002: Documentation Location Strategy](./architecture/adr/0002-documentation-location-strategy.md)
+- [ADR-0005: Service Networking and Communication](./architecture/adr/0005-service-networking-and-communication.md) - Network topology and service communication patterns
+- [ADR-0006: Admin API Repository Extraction](./architecture/adr/0006-admin-api-repository-extraction.md) - Repository structure changes
 - [Environment Variables](./ENVIRONMENT.md)
 - [Azure Setup Guide](../infra/AZURE_SETUP.md)
 - [App Infrastructure README](../packages/app/infrastructure/README.md)

@@ -16,8 +16,8 @@ Each component is maintained as a separate repository and integrated into this w
 | **Mystira.App**            | Main application (being split into modular components)           | `phoenixvc/Mystira.App`            | `packages/app/`             |
 | **Mystira.StoryGenerator** | AI-powered story generation engine                               | `phoenixvc/Mystira.StoryGenerator` | `packages/story-generator/` |
 | **Mystira.Publisher**      | Publisher web application                                        | `phoenixvc/Mystira.Publisher`      | `packages/publisher/`       |
-| **Mystira.DevHub**         | Development operations desktop application                       | `phoenixvc/Mystira.DevHub`         | `packages/app/tools/`       |
-| **Mystira.Infra**          | Infrastructure, DevOps, and deployment configurations            | `phoenixvc/Mystira.INFRA`          | `infra/`                    |
+| **Mystira.DevHub**         | Development operations desktop application                       | `phoenixvc/Mystira.DevHub`         | `packages/devhub/`          |
+| **Mystira.Infra**          | Infrastructure, DevOps, and deployment configurations            | `phoenixvc/Mystira.Infra`          | `infra/`                    |
 
 ## Repository Structure
 
@@ -31,7 +31,8 @@ Mystira.workspace/
 │   │
 │   ├── app/                # Mystira.App repository (git submodule)
 │   │   ├── [Mystira.App repository contents]
-│   │   └── tools/          # Mystira.DevHub repository (git submodule)
+│   │
+│   ├── devhub/            # Mystira.DevHub repository (git submodule)
 │   │       └── [Mystira.DevHub repository contents]
 │   │
 │   ├── publisher/          # Mystira.Publisher repository (git submodule)
@@ -40,8 +41,8 @@ Mystira.workspace/
 │   └── story-generator/    # Mystira.StoryGenerator repository (git submodule)
 │       └── [Mystira.StoryGenerator repository contents]
 │
-├── infra/                  # Mystira.INFRA repository (git submodule)
-│   └── [Mystira.INFRA repository contents]
+├── infra/                  # Mystira.Infra repository (git submodule)
+│   └── [Mystira.Infra repository contents]
 │
 ├── docs/                   # Workspace documentation
 ├── tools/                  # Shared development tools

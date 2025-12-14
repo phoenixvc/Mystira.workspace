@@ -2,14 +2,14 @@ name: Chain CI
 
 on:
   push:
-    branches: [dev]
+    branches: [dev, main]
     paths:
       - "packages/chain/**"
       - "infra/docker/chain/**"
       - "infra/kubernetes/base/chain/**"
       - ".github/workflows/chain-ci.yml"
   pull_request:
-    branches: [main]
+    branches: [dev, main]
     types: [opened, synchronize, reopened, ready_for_review]
     paths:
       - "packages/chain/**"
@@ -138,13 +138,13 @@ jobs:
         uses: docker/setup-buildx-action@v3
 
       - name: Azure Login
-        if: github.event_name != 'pull_request'
+        if: github.event_name == 'push' && (github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/main')
         uses: azure/login@v1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
       - name: Log in to Azure Container Registry
-        if: github.event_name != 'pull_request'
+        if: github.event_name == 'push' && (github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/main')
         run: az acr login --name ${{ env.AZURE_ACR_NAME }}
 
       - name: Extract metadata
@@ -154,16 +154,15 @@ jobs:
           images: ${{ env.AZURE_ACR_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}
           tags: |
             type=ref,event=branch
-            type=ref,event=pr
             type=sha,prefix=
-            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
+            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev' }}
 
       - name: Build and push
         uses: docker/build-push-action@v5
         with:
           context: .
           file: infra/docker/chain/Dockerfile
-          push: ${{ github.event_name != 'pull_request' }}
+          push: ${{ github.event_name == 'push' && (github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/main') }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
