@@ -28,3 +28,6 @@
 	url = https://github.com/phoenixvc/Mystira.DevHub.git
 	branch = main
 
+[submodule "packages/admin-api"]
+	path = packages/admin-api
+	url = https://github.com/phoenixvc/Mystira.Admin.Api.git
