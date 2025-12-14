@@ -113,10 +113,18 @@ This document tracks the migration of Admin tooling from `Mystira.App` monorepo 
 - ✅ Added navigation links for all pages
 - ✅ Set up ESLint and Prettier configuration
 
+**Completed Tasks (Phase 3.5)**:
+
+- ✅ Migrated Character Maps page with list, search, delete
+- ✅ Created Import Character Map page
+- ✅ Created reusable Pagination and SearchBar components
+- ✅ Migrated all Master Data pages (Age Groups, Archetypes, Compass Axes, Echo Types, Fantasy Themes)
+- ✅ Created unified MasterDataPage component for efficient code reuse
+- ✅ Added masterData API client with full CRUD operations
+
 **Remaining Tasks**:
 
-- [ ] Migrate remaining pages (Character Maps, Master Data pages)
-- [ ] Create import pages (Badge, Character Map)
+- [ ] Create import pages (Badge)
 - [ ] Implement edit/create forms with React Hook Form + Zod validation
 - [ ] Add more error handling and loading states
 - [ ] Test authentication flow end-to-end
