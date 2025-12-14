@@ -7,7 +7,17 @@ The `packages/admin-ui` submodule is missing ESLint configuration for React and 
 - Node.js API errors in config files (`__dirname`)
 
 ## Solution
-Add the following `.eslintrc.cjs` file to the `Mystira.Admin.UI` repository (dev branch):
+A patch file `admin-ui-eslint-config.patch` has been created that adds the required `.eslintrc.cjs` file to the `Mystira.Admin.UI` repository.
+
+### Option 1: Apply the Patch File
+```bash
+cd packages/admin-ui
+git am ../../admin-ui-eslint-config.patch
+git push origin dev
+```
+
+### Option 2: Manually Add the Configuration
+Add the following `.eslintrc.cjs` file to the root of the `Mystira.Admin.UI` repository (dev branch):
 
 ```javascript
 module.exports = {
