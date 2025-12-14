@@ -17,6 +17,8 @@ Each component is maintained as a separate repository and integrated into this w
 | **Mystira.StoryGenerator** | AI-powered story generation engine                               | `phoenixvc/Mystira.StoryGenerator` | `packages/story-generator/` |
 | **Mystira.Publisher**      | Publisher web application                                        | `phoenixvc/Mystira.Publisher`      | `packages/publisher/`       |
 | **Mystira.DevHub**         | Development operations desktop application                       | `phoenixvc/Mystira.DevHub`         | `packages/devhub/`          |
+| **Mystira.Admin.Api**      | Admin API backend (pure REST/gRPC)                               | `phoenixvc/Mystira.Admin.Api`      | `packages/admin-api/`       |
+| **Mystira.Admin.UI**       | Admin frontend application (modern SPA)                          | `phoenixvc/Mystira.Admin.UI`       | `packages/admin-ui/`        |
 | **Mystira.Infra**          | Infrastructure, DevOps, and deployment configurations            | `phoenixvc/Mystira.Infra`          | `infra/`                    |
 
 ## Repository Structure
@@ -34,6 +36,12 @@ Mystira.workspace/
 │   │
 │   ├── devhub/            # Mystira.DevHub repository (git submodule)
 │   │       └── [Mystira.DevHub repository contents]
+│   │
+│   ├── admin-api/         # Mystira.Admin.Api repository (git submodule)
+│   │   └── [Mystira.Admin.Api repository contents]
+│   │
+│   ├── admin-ui/          # Mystira.Admin.UI repository (git submodule)
+│   │   └── [Mystira.Admin.UI repository contents]
 │   │
 │   ├── publisher/          # Mystira.Publisher repository (git submodule)
 │   │   └── [Mystira.Publisher repository contents]
