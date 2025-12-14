@@ -32,8 +32,8 @@ jobs:
     env:
       ENVIRONMENT: prod
       TF_VERSION: 1.5.0
-      AZURE_RESOURCE_GROUP: mystira-prod-rg
-      AKS_CLUSTER_NAME: mystira-prod-aks
+      AZURE_RESOURCE_GROUP: mys-prod-mystira-rg-eus
+      AKS_CLUSTER_NAME: mys-prod-mystira-aks-eus
     steps:
       - name: Validate GitHub Submodule Access Token
         run: |
@@ -103,8 +103,8 @@ jobs:
       contents: read
       id-token: write
     env:
-      AZURE_RESOURCE_GROUP: mystira-prod-rg
-      AKS_CLUSTER_NAME: mystira-prod-aks
+      AZURE_RESOURCE_GROUP: mys-prod-mystira-rg-eus
+      AKS_CLUSTER_NAME: mys-prod-mystira-aks-eus
     steps:
       - name: Validate GitHub Submodule Access Token
         run: |
@@ -139,26 +139,26 @@ jobs:
 
       - name: Create namespace if not exists
         run: |
-          kubectl create namespace mystira-prod --dry-run=client -o yaml | kubectl apply -f -
+          kubectl create namespace mys-prod --dry-run=client -o yaml | kubectl apply -f -
 
       - name: Deploy all services to production
         run: |
           kubectl apply -k infra/kubernetes/overlays/prod
 
           # Wait for deployments with longer timeout for production
-          kubectl rollout status deployment/mystira-publisher -n mystira-prod --timeout=600s || true
-          kubectl rollout status deployment/mystira-story-generator -n mystira-prod --timeout=600s || true
-          kubectl rollout status statefulset/mystira-chain -n mystira-prod --timeout=900s || true
+          kubectl rollout status deployment/mys-publisher -n mys-prod --timeout=600s || true
+          kubectl rollout status deployment/mys-story-generator -n mys-prod --timeout=600s || true
+          kubectl rollout status statefulset/mys-chain -n mys-prod --timeout=900s || true
 
       - name: Verify deployments
         run: |
           echo "## Production Deployment Verification" >> $GITHUB_STEP_SUMMARY
           echo "### Publisher" >> $GITHUB_STEP_SUMMARY
-          kubectl get deployment mystira-publisher -n mystira-prod >> $GITHUB_STEP_SUMMARY || true
+          kubectl get deployment mys-publisher -n mys-prod >> $GITHUB_STEP_SUMMARY || true
           echo "### Story Generator" >> $GITHUB_STEP_SUMMARY
-          kubectl get deployment mystira-story-generator -n mystira-prod >> $GITHUB_STEP_SUMMARY || true
+          kubectl get deployment mys-story-generator -n mys-prod >> $GITHUB_STEP_SUMMARY || true
           echo "### Chain" >> $GITHUB_STEP_SUMMARY
-          kubectl get statefulset mystira-chain -n mystira-prod >> $GITHUB_STEP_SUMMARY || true
+          kubectl get statefulset mys-chain -n mys-prod >> $GITHUB_STEP_SUMMARY || true
 
   notify:
     name: Notify Deployment Status

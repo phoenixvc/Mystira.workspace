@@ -201,28 +201,28 @@ All shared libraries from `Mystira.App` will be published as NuGet packages to t
 
 #### Infrastructure Libraries
 
-4. **`Mystira.App.Infrastructure.Azure`**
+1. **`Mystira.App.Infrastructure.Azure`**
    - **Package ID**: `Mystira.App.Infrastructure.Azure`
    - **Purpose**: Azure-specific infrastructure (Cosmos DB, Blob Storage, health checks)
    - **Dependencies**: `Mystira.App.Domain`, Azure SDK packages
    - **Usage**: Azure PaaS service implementations
    - **Initial Version**: `1.0.0`
 
-5. **`Mystira.App.Infrastructure.Data`**
+2. **`Mystira.App.Infrastructure.Data`**
    - **Package ID**: `Mystira.App.Infrastructure.Data`
    - **Purpose**: Data access layer (repositories, unit of work, specifications)
    - **Dependencies**: `Mystira.App.Domain`, `Mystira.App.Application`, Entity Framework Core
    - **Usage**: Data persistence implementations
    - **Initial Version**: `1.0.0`
 
-6. **`Mystira.App.Infrastructure.Discord`**
+3. **`Mystira.App.Infrastructure.Discord`**
    - **Package ID**: `Mystira.App.Infrastructure.Discord`
    - **Purpose**: Discord bot integration
    - **Dependencies**: `Mystira.App.Domain`, Discord.NET
    - **Usage**: Discord bot functionality
    - **Initial Version**: `1.0.0`
 
-7. **`Mystira.App.Infrastructure.StoryProtocol`**
+4. **`Mystira.App.Infrastructure.StoryProtocol`**
    - **Package ID**: `Mystira.App.Infrastructure.StoryProtocol`
    - **Purpose**: Story Protocol blockchain integration
    - **Dependencies**: `Mystira.App.Domain`, Story Protocol SDK
@@ -231,7 +231,7 @@ All shared libraries from `Mystira.App` will be published as NuGet packages to t
 
 #### Shared Services
 
-8. **`Mystira.App.Shared`**
+1. **`Mystira.App.Shared`**
    - **Package ID**: `Mystira.App.Shared`
    - **Purpose**: Shared services and utilities (JWT, telemetry, middleware, logging)
    - **Dependencies**: `Mystira.App.Domain` (minimal), ASP.NET Core packages
@@ -240,7 +240,7 @@ All shared libraries from `Mystira.App` will be published as NuGet packages to t
 
 ### Package Dependency Graph
 
-```
+```text
 Mystira.App.Domain (base, no internal deps)
     ↑
     ├── Mystira.App.Application

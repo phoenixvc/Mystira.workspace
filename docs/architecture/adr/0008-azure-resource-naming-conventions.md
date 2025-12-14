@@ -67,25 +67,25 @@ Where:
 
 ### Resource Type Abbreviations
 
-| Resource Type           | Abbreviation | Example                               |
-| ----------------------- | ------------ | ------------------------------------- |
-| Resource Group          | `rg`         | `mys-dev-mystira-rg-euw`              |
-| Azure Kubernetes        | `aks`        | `mys-dev-mystira-aks-euw`             |
-| Virtual Network         | `vnet`       | `mys-dev-mystira-vnet-euw`            |
-| Subnet                  | `subnet`     | `mystira-app-subnet` (no env prefix)  |
-| Key Vault               | `kv`         | `mys-dev-mystira-kv-euw`              |
-| Storage Account         | (no dashes)  | `mysprodmystirastgeuw`                |
-| Container Registry      | (no dashes)  | `mysprodacr` (or `mystiraacr` legacy) |
-| PostgreSQL              | `pg`         | `mys-dev-shared-pg-euw`               |
-| Redis Cache             | (in name)    | `mys-dev-shared-redis-cache-euw`      |
-| Application Insights    | `ai`         | `mys-dev-mystira-ai-euw`              |
-| Log Analytics Workspace | `log`        | `mys-dev-mystira-log-euw`             |
-| App Service             | `app`        | `mys-dev-mystira-app-euw`             |
-| API                     | `api`        | `mys-dev-mystira-api-euw`             |
-| Function App            | `func`       | `mys-dev-mystira-func-euw`            |
-| Static Web App          | `swa`        | `mys-dev-mystira-swa-euw`             |
-| Database                | `db`         | `mys-dev-mystira-db-euw`              |
-| DNS                     | `dns`        | `mys-prod-mystira-dns-glob`           |
+| Resource Type           | Abbreviation | Example                              |
+| ----------------------- | ------------ | ------------------------------------ |
+| Resource Group          | `rg`         | `mys-dev-mystira-rg-euw`             |
+| Azure Kubernetes        | `aks`        | `mys-dev-mystira-aks-euw`            |
+| Virtual Network         | `vnet`       | `mys-dev-mystira-vnet-euw`           |
+| Subnet                  | `subnet`     | `mystira-app-subnet` (no env prefix) |
+| Key Vault               | `kv`         | `mys-dev-mystira-kv-euw`             |
+| Storage Account         | (no dashes)  | `mysprodmystirastgeuw`               |
+| Container Registry      | (no dashes)  | `mysprodacr`                         |
+| PostgreSQL              | `pg`         | `mys-dev-shared-pg-euw`              |
+| Redis Cache             | (in name)    | `mys-dev-shared-redis-cache-euw`     |
+| Application Insights    | `ai`         | `mys-dev-mystira-ai-euw`             |
+| Log Analytics Workspace | `log`        | `mys-dev-mystira-log-euw`            |
+| App Service             | `app`        | `mys-dev-mystira-app-euw`            |
+| API                     | `api`        | `mys-dev-mystira-api-euw`            |
+| Function App            | `func`       | `mys-dev-mystira-func-euw`           |
+| Static Web App          | `swa`        | `mys-dev-mystira-swa-euw`            |
+| Database                | `db`         | `mys-dev-mystira-db-euw`             |
+| DNS                     | `dns`        | `mys-prod-mystira-dns-glob`          |
 
 ### Detailed Naming Patterns
 
@@ -236,17 +236,17 @@ pvcprodmktdatastgeuw    # pvc-prod-mktdata-storage-euw
 
 Pattern: `[org][description]` (no dashes, shared across environments)
 
-**Note**: ACR names cannot contain hyphens and must be globally unique. Existing ACRs (e.g., `mystiraacr`) should be kept as-is unless a full migration is planned.
+**Note**: ACR names cannot contain hyphens and must be globally unique. Use format `mys{description}` (e.g., `mysprodacr`).
 
 Examples:
 
 ```text
 nlprodacr    # Shared ACR for NL (uses tags: dev, staging, prod)
 pvcprodacr   # Shared ACR for PVC
-mysprodacr   # Shared ACR for Mystira (or keep existing: mystiraacr)
+mysprodacr   # Shared ACR for Mystira
 ```
 
-**Legacy Exception**: The existing `mystiraacr` is kept as-is due to migration complexity (all images would need to be re-tagged and all deployments updated).
+**ACR Naming**: Use `mysprodacr` for the shared Mystira ACR (no dashes, as per Azure requirements).
 
 ### Kubernetes Resources
 
@@ -321,7 +321,7 @@ Examples:
 - `staging/terraform.tfstate`
 - `prod/terraform.tfstate`
 
-**Note**: The existing `mystiraterraformstate` storage account and `mystira-terraform-state` resource group should be kept as-is unless a full state migration is planned.
+**Storage Account Name**: `mysprodterraformstate` (no dashes, as per Azure requirements).
 
 ## Renaming, Moving, and Recreating Resources
 

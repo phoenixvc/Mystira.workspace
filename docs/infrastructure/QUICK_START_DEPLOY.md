@@ -103,16 +103,16 @@ This shows what will be created without actually creating it.
 
 **Note**: Existing resources use legacy naming and are kept as-is. New resources should follow the new convention `[org]-[env]-[project]-[type]-[region]`.
 
-**Legacy Resource Names** (kept as-is):
+**Resource Names** (per [ADR-0008: Azure Resource Naming Conventions](../architecture/adr/0008-azure-resource-naming-conventions.md)):
 
-- Resource Group: `mystira-dev-rg` (legacy, new would be `mys-dev-mystira-rg-euw`)
-- Virtual Network: `mystira-dev-vnet` (legacy, new would be `mys-dev-mystira-vnet-euw`)
+- Resource Group: `mys-dev-mystira-rg-eus`
+- Virtual Network: `mys-dev-mystira-vnet-eus`
 - Subnets: `chain-subnet`, `publisher-subnet`, `aks-subnet`, etc.
-- Azure Container Registry: `mystiraacr` (shared, legacy name kept as-is per ADR-0008)
-- Azure Kubernetes Service: `mystira-dev-aks` (legacy, new would be `mys-dev-mystira-aks-euw`)
-- Key Vaults: `mystira-{component}-dev-kv` (legacy, new would be `mys-dev-mystira-{component}-kv-euw`)
-- Shared PostgreSQL: `mystira-shared-pg-dev` (legacy)
-- Shared Redis: `mystira-shared-redis-dev-cache` (legacy)
+- Azure Container Registry: `mysprodacr` (shared)
+- Azure Kubernetes Service: `mys-dev-mystira-aks-eus`
+- Key Vaults: `mys-dev-mystira-{component}-kv-eus`
+- Shared PostgreSQL: `mys-dev-mystira-pg-eus`
+- Shared Redis: `mys-dev-mystira-cache-eus`
 - (And more...)
 
 ## Step 6: Deploy Infrastructure
@@ -134,10 +134,10 @@ Terraform will ask for confirmation. Type `yes` to proceed.
 az aks list --output table
 
 # Get cluster details
-az aks show --name mystira-dev-aks --resource-group mystira-dev-rg
+az aks show --name mys-dev-mystira-aks-eus --resource-group mys-dev-mystira-rg-eus
 
 # Get cluster credentials for kubectl
-az aks get-credentials --resource-group mystira-dev-rg --name mystira-dev-aks
+az aks get-credentials --resource-group mys-dev-mystira-rg-eus --name mys-dev-mystira-aks-eus
 
 # Verify kubectl can connect
 kubectl cluster-info
@@ -148,7 +148,7 @@ kubectl get nodes
 
 1. Go to Azure Portal
 2. Search for "Kubernetes services" (NOT "Kubernetes center")
-3. You should see `mystira-dev-aks` listed
+3. You should see `mys-dev-mystira-aks-eus` listed
 
 ## Quick Reference: Correct Paths
 
@@ -214,7 +214,7 @@ az account set --subscription "Your Subscription Name"
 
 The Terraform backend uses Azure Storage. Make sure:
 
-1. The storage account `mystiraterraformstate` exists
+1. The storage account `mysprodterraformstate` exists
 2. The container `tfstate` exists
 3. Your Azure credentials have access
 

@@ -17,17 +17,17 @@ The **Kubernetes Center (preview)** in Azure Portal shows no clusters because:
 az aks list --output table
 
 # List clusters in specific resource group
-az aks list --resource-group mystira-dev-rg --output table
+az aks list --resource-group mys-dev-mystira-rg-eus --output table
 
 # Check if dev cluster exists
-az aks show --name mystira-dev-aks --resource-group mystira-dev-rg
+az aks show --name mys-dev-mystira-aks-eus --resource-group mys-dev-mystira-rg-eus
 ```
 
 ### Check via Azure Portal (Traditional View)
 
 1. Go to **Azure Portal** → **Kubernetes services** (not "Kubernetes center")
 2. Or search for "Kubernetes services" in the top search bar
-3. You should see: `mystira-dev-aks`, `mystira-staging-aks`, `mystira-prod-aks` (if deployed)
+3. You should see: `mys-dev-mystira-aks-eus`, `mys-staging-mystira-aks-eus`, `mys-prod-mystira-aks-eus` (if deployed)
 
 ## Deploying AKS Clusters
 
@@ -50,10 +50,10 @@ terraform apply
 
 **What gets created**:
 
-- Resource Group: `mystira-dev-rg`
+- Resource Group: `mys-dev-mystira-rg-eus`
 - Virtual Network and subnets
-- Azure Container Registry: `mystiraacr`
-- **Azure Kubernetes Service**: `mystira-dev-aks`
+- Azure Container Registry: `mysprodacr`
+- **Azure Kubernetes Service**: `mys-dev-mystira-aks-eus`
 - Key Vaults
 - Shared resources (PostgreSQL, Redis if configured)
 
@@ -63,7 +63,7 @@ After Terraform apply completes:
 
 ```bash
 # Get AKS credentials
-az aks get-credentials --resource-group mystira-dev-rg --name mystira-dev-aks
+az aks get-credentials --resource-group mys-dev-mystira-rg-eus --name mys-dev-mystira-aks-eus
 
 # Verify cluster is accessible
 kubectl cluster-info
@@ -99,13 +99,11 @@ This traditional view shows all AKS clusters regardless of when they were create
 
 Based on Terraform configuration and [ADR-0008: Azure Resource Naming Conventions](../architecture/adr/0008-azure-resource-naming-conventions.md):
 
-**Note**: Existing resources use legacy naming (`mystira-*-rg`, `mystira-*-aks`) and are kept as-is per ADR-0008. New resources should follow the convention `mys-{env}-mystira-{type}-{region}`.
-
-| Environment | Cluster Name (Legacy) | Resource Group (Legacy) | New Convention (Future)       | Status               |
-| ----------- | --------------------- | ----------------------- | ----------------------------- | -------------------- |
-| Dev         | `mystira-dev-aks`     | `mystira-dev-rg`        | `mys-dev-mystira-aks-euw`     | Created by Terraform |
-| Staging     | `mystira-staging-aks` | `mystira-staging-rg`    | `mys-staging-mystira-aks-euw` | Created by Terraform |
-| Prod        | `mystira-prod-aks`    | `mystira-prod-rg`       | `mys-prod-mystira-aks-euw`    | Created by Terraform |
+| Environment | Cluster Name                  | Resource Group               | Status               |
+| ----------- | ----------------------------- | ---------------------------- | -------------------- |
+| Dev         | `mys-dev-mystira-aks-eus`     | `mys-dev-mystira-rg-eus`     | Created by Terraform |
+| Staging     | `mys-staging-mystira-aks-eus` | `mys-staging-mystira-rg-eus` | Created by Terraform |
+| Prod        | `mys-prod-mystira-aks-eus`    | `mys-prod-mystira-rg-eus`    | Created by Terraform |
 
 ## Troubleshooting Steps
 
@@ -122,7 +120,7 @@ Look for `azurerm_kubernetes_cluster.main` resource - if it exists, cluster shou
 
 ```bash
 # List all resources in dev resource group
-az resource list --resource-group mystira-dev-rg --output table
+az resource list --resource-group mys-dev-mystira-rg-eus --output table
 ```
 
 Look for `Microsoft.ContainerService/managedClusters` resources.

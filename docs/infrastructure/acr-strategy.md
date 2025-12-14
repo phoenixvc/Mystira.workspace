@@ -2,14 +2,14 @@
 
 ## Current Issue
 
-There's a **mismatch** in how ACR is configured:
+**ACR Configuration** (per [ADR-0008: Azure Resource Naming Conventions](../architecture/adr/0008-azure-resource-naming-conventions.md)):
 
-1. **Terraform**: ACR `mystiraacr` is created **only in the `dev` environment** (see `infra/terraform/environments/dev/main.tf:127`)
-2. **CI/CD Workflows**: All workflows push to `mystiraacr` (expecting it to exist)
-3. **Kubernetes Overlays**: Environment overlays use shared ACR with environment tags (per [ADR-0008: Azure Resource Naming Conventions](../architecture/adr/0008-azure-resource-naming-conventions.md))
-   - All environments use: `mystiraacr.azurecr.io` with tags: `dev`, `staging`, `prod`
+1. **Terraform**: ACR `mysprodacr` is created **only in the `dev` environment** (see `infra/terraform/environments/dev/main.tf:127`)
+2. **CI/CD Workflows**: All workflows push to `mysprodacr` (expecting it to exist)
+3. **Kubernetes Overlays**: Environment overlays use shared ACR with environment tags
+   - All environments use: `mysprodacr.azurecr.io` with tags: `dev`, `staging`, `prod`
 
-**Result**: If staging/prod workflows run without `dev` being deployed, or if they run in different subscriptions, ACR doesn't exist.
+**Result**: The ACR is shared across all environments with environment-specific tags for image organization.
 
 ## Recommendation: Shared ACR
 
@@ -29,20 +29,20 @@ Use **tags** for environment separation (per [ADR-0008: Azure Resource Naming Co
 
 ```yaml
 # Development images
-mystiraacr.azurecr.io/chain:dev
-mystiraacr.azurecr.io/chain:dev-abc123
+mysprodacr.azurecr.io/chain:dev
+mysprodacr.azurecr.io/chain:dev-abc123
 
 # Staging images
-mystiraacr.azurecr.io/chain:staging
-mystiraacr.azurecr.io/chain:staging-abc123
+mysprodacr.azurecr.io/chain:staging
+mysprodacr.azurecr.io/chain:staging-abc123
 
 # Production images
-mystiraacr.azurecr.io/chain:prod
-mystiraacr.azurecr.io/chain:prod-abc123
-mystiraacr.azurecr.io/chain:v1.2.3  # Semantic versioning for prod
+mysprodacr.azurecr.io/chain:prod
+mysprodacr.azurecr.io/chain:prod-abc123
+mysprodacr.azurecr.io/chain:v1.2.3  # Semantic versioning for prod
 ```
 
-**Note**: ACR name `mystiraacr` is a legacy name kept as-is per [ADR-0008: Azure Resource Naming Conventions](../architecture/adr/0008-azure-resource-naming-conventions.md). The new convention would be `mysprodacr` (or similar), but `mystiraacr` is retained due to migration complexity (all images would need to be re-tagged and all deployments updated). See ADR-0008 for the complete naming standard.
+**Note**: ACR name `mysprodacr` follows [ADR-0008: Azure Resource Naming Conventions](../architecture/adr/0008-azure-resource-naming-conventions.md). ACR names cannot contain hyphens, so we use the format `mys{description}` (e.g., `mysprodacr` for Mystira production ACR). See ADR-0008 for the complete naming standard.
 
 ## Solution Options
 
@@ -71,7 +71,7 @@ infra/terraform/shared/
 Update staging/prod to reference the dev ACR:
 
 1. Remove environment-specific ACR references from Kubernetes overlays
-2. Use `mystiraacr.azurecr.io` in all environments
+2. Use `mysprodacr.azurecr.io` in all environments
 3. Use tags for environment separation
 
 **Pros**:
@@ -89,7 +89,7 @@ Update staging/prod to reference the dev ACR:
 
 Create ACR in each environment and update workflows:
 
-1. Create `mystiradevacr`, `mystirastagingacr`, `mystiraprodacr` in respective environments
+1. Create environment-specific ACRs (not recommended - use shared ACR with tags)
 2. Update CI/CD workflows to use environment-specific ACR names
 3. Update workflows to pass ACR name as variable
 
@@ -108,11 +108,11 @@ Create ACR in each environment and update workflows:
 
 ## Immediate Fix
 
-For now, ensure the `dev` environment is deployed so `mystiraacr` exists, OR:
+For now, ensure the `dev` environment is deployed so `mysprodacr` exists, OR:
 
 ### Quick Fix: Use Shared ACR
 
-1. **Update Kubernetes overlays** to use `mystiraacr.azurecr.io` instead of environment-specific names
+1. **Update Kubernetes overlays** to use `mysprodacr.azurecr.io` instead of environment-specific names
 2. **Update CI/CD workflows** to use environment-specific tags:
 
 ```yaml
@@ -123,7 +123,7 @@ tags: |
   type=raw,value=staging-latest,enable=${{ github.ref == 'refs/heads/main' && github.event_name == 'push' }}
 ```
 
-3. **Update Kubernetes deployments** to pull from `mystiraacr.azurecr.io` with appropriate tags
+3. **Update Kubernetes deployments** to pull from `mysprodacr.azurecr.io` with appropriate tags
 
 ## Long-Term Solution
 

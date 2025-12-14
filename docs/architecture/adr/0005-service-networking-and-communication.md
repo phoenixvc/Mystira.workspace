@@ -198,7 +198,7 @@ COSMOS_DB_CONNECTION_STRING=AccountEndpoint=...
 
 **Examples**:
 
-```
+```text
 GET    /api/v1/scenarios
 GET    /api/v1/scenarios/{id}
 POST   /api/v1/scenarios
