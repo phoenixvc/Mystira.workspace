@@ -37,7 +37,7 @@ All CI/CD pipelines and branch protection have been successfully configured acco
 - ✅ **Require code owner reviews**: Enabled
 - ✅ **Dismiss stale reviews**: Enabled
 - ✅ **Require status checks to pass**: Enabled (all CI checks required)
-- ✅ **Require conversation resolution**: Enabled
+- ✅ **Require conversation resolution**: Enabled (configured)
 - ✅ **Allow force pushes**: Disabled
 - ✅ **Allow deletions**: Disabled
 
