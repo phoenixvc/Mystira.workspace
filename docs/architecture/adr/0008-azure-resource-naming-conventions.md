@@ -233,35 +233,53 @@ pvcprodmktdatastgeuw    # pvc-prod-mktdata-storage-euw
 
 Pattern: `[org][description]` (no dashes, shared across environments)
 
+**Note**: ACR names cannot contain hyphens and must be globally unique. Existing ACRs (e.g., `mystiraacr`) should be kept as-is unless a full migration is planned.
+
+Examples:
+
 ```
 nlprodacr    # Shared ACR for NL (uses tags: dev, staging, prod)
 pvcprodacr   # Shared ACR for PVC
+mysprodacr   # Shared ACR for Mystira (or keep existing: mystiraacr)
 ```
+
+**Legacy Exception**: The existing `mystiraacr` is kept as-is due to migration complexity (all images would need to be re-tagged and all deployments updated).
 
 ### Kubernetes Resources
 
 **Namespaces**: `{org}-{env}`
 
-- `nl-dev`
-- `nl-staging`
-- `nl-prod`
+Examples:
+
+- `nl-dev`, `nl-staging`, `nl-prod` (NeuralLiquid)
+- `mys-dev`, `mys-staging`, `mys-prod` (Mystira - new convention)
+- `mystira-dev`, `mystira-staging`, `mystira-prod` (Mystira - legacy, keep as-is)
 
 **Deployments/StatefulSets**: `{org}-{component}`
 
-- `nl-rooivalk`
-- `nl-autopr`
-- `pvc-mktdata`
+Examples:
+
+- `nl-rooivalk`, `nl-autopr` (NeuralLiquid)
+- `mys-chain`, `mys-publisher`, `mys-story-generator` (Mystira - new convention)
+- `mystira-chain`, `mystira-publisher`, `mystira-story-generator` (Mystira - legacy, keep as-is)
 
 **Services**: `{org}-{component}`
 
-- `nl-rooivalk`
-- `nl-autopr`
-- `pvc-mktdata`
+Examples:
+
+- `nl-rooivalk`, `nl-autopr` (NeuralLiquid)
+- `mys-chain`, `mys-publisher`, `mys-story-generator` (Mystira - new convention)
+- `mystira-chain`, `mystira-publisher`, `mystira-story-generator` (Mystira - legacy, keep as-is)
 
 **ConfigMaps/Secrets**: `{org}-{component}-{purpose}`
 
-- `nl-rooivalk-config`
-- `nl-autopr-secrets`
+Examples:
+
+- `nl-rooivalk-config`, `nl-autopr-secrets` (NeuralLiquid)
+- `mys-publisher-config`, `mys-story-generator-secrets` (Mystira - new convention)
+- `mystira-publisher-config`, `mystira-story-generator-secrets` (Mystira - legacy, keep as-is)
+
+**Note**: Existing Kubernetes resources using `mystira-{component}` naming should be kept as-is. New resources should use `mys-{component}` per the new convention. Migration can occur during cluster upgrades or namespace consolidation.
 
 ### DNS and URLs
 
@@ -276,13 +294,30 @@ pvcprodacr   # Shared ACR for PVC
 
 ### Terraform State Backend
 
-**Storage Account**: `nlprodterraformstate` (or org-specific)
+**Storage Account**: `{org}prodterraformstate` (no dashes, lowercase only)
+
+Examples:
+
+- `nlprodterraformstate` (NeuralLiquid)
+- `mysprodterraformstate` (Mystira - new)
+- `mystiraterraformstate` (Mystira - legacy, keep as-is)
+
 **Container**: `tfstate`
+**Resource Group**: `{org}-prod-terraform-rg-{region}` (for state storage RG only)
+
+Examples:
+
+- `nl-prod-terraform-rg-euw`
+- `mys-prod-terraform-rg-euw`
+- `mystira-terraform-state` (legacy, keep as-is)
+
 **State File Keys**: `{env}/terraform.tfstate`
 
 - `dev/terraform.tfstate`
 - `staging/terraform.tfstate`
 - `prod/terraform.tfstate`
+
+**Note**: The existing `mystiraterraformstate` storage account and `mystira-terraform-state` resource group should be kept as-is unless a full state migration is planned.
 
 ## Renaming, Moving, and Recreating Resources
 
