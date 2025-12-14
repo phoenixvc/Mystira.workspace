@@ -12,13 +12,13 @@ dial tcp: lookup mystiraterraformstate.blob.core.windows.net: no such host
 
 The storage account `mystiraterraformstate` doesn't exist yet. You need to create it first.
 
-**Naming Convention**: Storage accounts follow the pattern `mystira{description}` (no dashes, lowercase only) per [ADR-0008: Azure Resource Naming Conventions](../architecture/adr/0008-azure-resource-naming-conventions.md).
+**Naming Convention**: Storage accounts follow the pattern `{org}{env}{description}` (no dashes, lowercase only) per [ADR-0008: Azure Resource Naming Conventions](../architecture/adr/0008-azure-resource-naming-conventions.md). For example: `nlprodterraformstate` for NeuralLiquid prod Terraform state.
 
 ## Solution: Create Storage Account Manually
 
 ### Step 1: Create Resource Group for Terraform State
 
-**Naming Convention**: Resource groups follow the pattern `mystira-{purpose}` per [ADR-0008](../architecture/adr/0008-azure-resource-naming-conventions.md).
+**Naming Convention**: Resource groups follow the pattern `{org}-{env}-{project}-rg-{region}` or `{org}-{env}-terraform-rg-{region}` for Terraform state storage per [ADR-0008](../architecture/adr/0008-azure-resource-naming-conventions.md).
 
 ```powershell
 # Create resource group for Terraform state
