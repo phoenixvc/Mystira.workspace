@@ -343,7 +343,7 @@ jobs:
 
 ### 5.1 Update README Files
 
-**Mystira.Admin.Api/README.md**:
+**Mystira.Admin.Api/README.md** and **Mystira.Admin.UI/README.md**:
 
 - Document new repository structure
 - Update setup instructions
@@ -450,26 +450,28 @@ git submodule add -b main https://github.com/phoenixvc/Mystira.Admin.UI.git pack
 ## Success Criteria
 
 - [ ] Admin API builds and runs from new repository
-- [ ] All tests pass
-- [ ] Deployed to staging successfully
-- [ ] Deployed to production successfully
+- [ ] Admin UI builds and runs from new repository
+- [ ] Admin UI successfully communicates with Admin API
+- [ ] All tests pass (both repositories)
+- [ ] Deployed to staging successfully (both services)
+- [ ] Deployed to production successfully (both services)
 - [ ] No functionality regression
-- [ ] Documentation updated
+- [ ] Documentation updated (both repositories)
 - [ ] Team trained on new structure
 
 ## Timeline
 
-| Phase                                | Duration  | Dependencies     |
-| ------------------------------------ | --------- | ---------------- |
-| Phase 1: Setup Shared Packages       | 1 week    | NuGet feed setup |
-| Phase 2: Create Admin API Repo       | 1-2 weeks | Phase 1          |
-| Phase 3: Setup CI/CD                 | 1 week    | Phase 2          |
-| Phase 4: Extract Admin UI (Optional) | 2-3 weeks | Phase 3          |
-| Phase 5: Update Documentation        | 1 week    | Phase 2          |
-| Phase 6: Migration Execution         | 1 week    | Phases 1-3, 5    |
-| Phase 7: Cleanup                     | 1 week    | Phase 6          |
+| Phase                          | Duration  | Dependencies     | Status           |
+| ------------------------------ | --------- | ---------------- | ---------------- |
+| Phase 1: Setup Shared Packages | 1 week    | NuGet feed setup | In Progress      |
+| Phase 2: Create Repositories   | 1-2 weeks | Phase 1          | ✅ **COMPLETED** |
+| Phase 3: Setup CI/CD           | 1 week    | Phase 2          | Pending          |
+| Phase 4: Migrate Admin UI      | 2-3 weeks | Phase 3          | Pending          |
+| Phase 5: Update Documentation  | 1 week    | Phase 2          | Pending          |
+| Phase 6: Migration Execution   | 1 week    | Phases 1-3, 5    | Pending          |
+| Phase 7: Cleanup               | 1 week    | Phase 6          | Pending          |
 
-**Total Estimated Time**: 6-9 weeks (8-12 weeks with Admin UI extraction)
+**Total Estimated Time**: 8-12 weeks (with Admin UI extraction included)
 
 ## Post-Migration
 
