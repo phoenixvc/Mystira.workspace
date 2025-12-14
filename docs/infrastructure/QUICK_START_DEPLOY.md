@@ -99,14 +99,16 @@ terraform plan
 
 This shows what will be created without actually creating it.
 
-**Expected resources**:
+**Expected resources** (following [ADR-0008: Azure Resource Naming Conventions](../architecture/adr/0008-azure-resource-naming-conventions.md)):
 
 - Resource Group: `mystira-dev-rg`
-- Virtual Network
-- Subnets
-- Azure Container Registry: `mystiraacr`
+- Virtual Network: `mystira-dev-vnet`
+- Subnets: `chain-subnet`, `publisher-subnet`, `aks-subnet`, etc.
+- Azure Container Registry: `mystiraacr` (shared, no dashes)
 - Azure Kubernetes Service: `mystira-dev-aks`
-- Key Vaults
+- Key Vaults: `mystira-{component}-dev-kv`
+- Shared PostgreSQL: `mystira-shared-pg-dev`
+- Shared Redis: `mystira-shared-redis-dev-cache`
 - (And more...)
 
 ## Step 6: Deploy Infrastructure
