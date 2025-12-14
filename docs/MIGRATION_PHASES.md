@@ -93,15 +93,25 @@ This document tracks the migration of Admin tooling from `Mystira.App` monorepo 
 - `Mystira.App.Admin.Api/Views/Shared/` - Layout files
 - `Mystira.App.Admin.Api/wwwroot/css/admin.css` - Styles
 
-**Remaining Tasks (Phase 3.2-3.4)**:
+**Completed Tasks (Phase 3.2-3.3)**:
 
-- [ ] Complete API client implementation (all Admin API endpoints)
-- [ ] Migrate all admin pages (Scenarios, Media, Badges, Bundles, etc.)
-- [ ] Implement form components and validation
-- [ ] Add error handling and loading states
-- [ ] Test authentication flow
-- [ ] Verify API integration
-- [ ] Complete styling migration
+- ✅ Complete API client implementation (scenarios, media, badges, bundles)
+- ✅ Updated auth to use cookie-based authentication
+- ✅ Created Scenarios management page with list, search, delete
+- ✅ Created Media management page with list, search, upload, delete
+- ✅ Added routing for new pages
+- ✅ Implemented pagination and error handling
+- ✅ Set up React Query for data fetching
+
+**Remaining Tasks (Phase 3.4)**:
+
+- [ ] Migrate remaining admin pages (Badges, Bundles, Character Maps, Master Data)
+- [ ] Create import pages (Scenario, Media, Bundle, Badge, Character Map)
+- [ ] Implement edit/create forms with validation
+- [ ] Add more error handling and loading states
+- [ ] Test authentication flow end-to-end
+- [ ] Verify API integration with real backend
+- [ ] Complete styling migration and polish UI
 
 ---
 
