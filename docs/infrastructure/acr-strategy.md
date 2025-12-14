@@ -1,0 +1,146 @@
+# Azure Container Registry (ACR) Strategy
+
+## Current Issue
+
+There's a **mismatch** in how ACR is configured:
+
+1. **Terraform**: ACR `mystiraacr` is created **only in the `dev` environment** (see `infra/terraform/environments/dev/main.tf:127`)
+2. **CI/CD Workflows**: All workflows push to `mystiraacr` (expecting it to exist)
+3. **Kubernetes Overlays**: Environment overlays map to environment-specific ACRs:
+   - Dev: `mystiradevacr.azurecr.io`
+   - Staging: `mystirastagingacr.azurecr.io`
+   - Prod: `mystiraprodacr.azurecr.io`
+
+**Result**: If staging/prod workflows run without `dev` being deployed, or if they run in different subscriptions, ACR doesn't exist.
+
+## Recommendation: Shared ACR
+
+**Best Practice**: Use a **single shared ACR** across all environments.
+
+### Benefits
+
+1. ✅ **Simpler CI/CD**: One registry to manage
+2. ✅ **Cost Efficient**: One ACR instead of three
+3. ✅ **Image Reusability**: Same image can be promoted between environments
+4. ✅ **Simpler Access Control**: One set of credentials
+5. ✅ **Consistent Naming**: Workflows don't need environment-specific logic
+
+### How to Separate Images
+
+Use **tags** and **image names** for separation:
+
+```yaml
+# Development images
+mystiraacr.azurecr.io/chain:dev-abc123
+mystiraacr.azurecr.io/chain:dev-latest
+
+# Staging images
+mystiraacr.azurecr.io/chain:staging-abc123
+mystiraacr.azurecr.io/chain:staging-latest
+
+# Production images
+mystiraacr.azurecr.io/chain:prod-abc123
+mystiraacr.azurecr.io/chain:prod-latest
+mystiraacr.azurecr.io/chain:v1.2.3  # Semantic versioning for prod
+```
+
+## Solution Options
+
+### Option 1: Shared ACR in Separate "Shared" Infrastructure (Recommended)
+
+Create a separate Terraform workspace for shared infrastructure:
+
+```
+infra/terraform/shared/
+  ├── main.tf  # ACR, DNS zones, other shared resources
+```
+
+**Pros**:
+
+- Clear separation of concerns
+- Can be deployed independently
+- Easier to manage lifecycle
+
+**Cons**:
+
+- Requires separate deployment step
+- Need to coordinate deployments
+
+### Option 2: Keep ACR in Dev, Make It Shared
+
+Update staging/prod to reference the dev ACR:
+
+1. Remove environment-specific ACR references from Kubernetes overlays
+2. Use `mystiraacr.azurecr.io` in all environments
+3. Use tags for environment separation
+
+**Pros**:
+
+- Minimal changes
+- Quick fix
+
+**Cons**:
+
+- Dev environment must be deployed first
+- Coupling between environments
+- Not ideal for production
+
+### Option 3: Environment-Specific ACRs
+
+Create ACR in each environment and update workflows:
+
+1. Create `mystiradevacr`, `mystirastagingacr`, `mystiraprodacr` in respective environments
+2. Update CI/CD workflows to use environment-specific ACR names
+3. Update workflows to pass ACR name as variable
+
+**Pros**:
+
+- Complete isolation between environments
+- Environment-specific access controls
+- No cross-environment dependencies
+
+**Cons**:
+
+- More complex workflows
+- Higher cost (3 ACRs)
+- Images can't be easily shared/promoted
+- More credentials to manage
+
+## Immediate Fix
+
+For now, ensure the `dev` environment is deployed so `mystiraacr` exists, OR:
+
+### Quick Fix: Use Shared ACR
+
+1. **Update Kubernetes overlays** to use `mystiraacr.azurecr.io` instead of environment-specific names
+2. **Update CI/CD workflows** to use environment-specific tags:
+
+```yaml
+# In workflow, use tags like:
+tags: |
+  type=ref,event=branch
+  type=raw,value=dev-latest,enable=${{ github.ref == 'refs/heads/dev' }}
+  type=raw,value=staging-latest,enable=${{ github.ref == 'refs/heads/main' && github.event_name == 'push' }}
+```
+
+3. **Update Kubernetes deployments** to pull from `mystiraacr.azurecr.io` with appropriate tags
+
+## Long-Term Solution
+
+Move ACR to a shared infrastructure workspace:
+
+```
+infra/terraform/
+  ├── shared/          # Shared resources (ACR, DNS, etc.)
+  ├── environments/
+  │   ├── dev/         # Dev-specific resources
+  │   ├── staging/     # Staging-specific resources
+  │   └── prod/        # Prod-specific resources
+```
+
+Deploy shared infrastructure first, then environments can reference it.
+
+## Related Documentation
+
+- [Shared Resources Guide](./shared-resources.md)
+- [Infrastructure Guide](./infrastructure.md)
