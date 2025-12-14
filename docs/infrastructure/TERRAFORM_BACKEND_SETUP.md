@@ -142,7 +142,11 @@ If the name `mysprodterraformstate` is already taken, you'll need to:
    ```hcl
    backend "azurerm" {
      resource_group_name  = "mys-prod-terraform-rg-eus"
+   <<<<<<< HEAD
      storage_account_name = "mysprodterraformstate123"  # Updated name
+   =======
+     storage_account_name = "mystiraterraformstate123"  # Updated name
+   >>>>>>> 7e9ebfc33431bb5e22e47513f9cdfc629718d390
      container_name       = "tfstate"
      key                  = "dev/terraform.tfstate"
      use_azuread_auth     = true
@@ -160,7 +164,11 @@ Here's a complete PowerShell script to set up the backend:
 ```powershell
 # Set variables
 $RESOURCE_GROUP = "mys-prod-terraform-rg-eus"
+<<<<<<< HEAD
 $STORAGE_ACCOUNT = "mysprodterraformstate"
+=======
+$STORAGE_ACCOUNT = "mystiraterraformstate"
+>>>>>>> 7e9ebfc33431bb5e22e47513f9cdfc629718d390
 $LOCATION = "eastus"
 $CONTAINER = "tfstate"
 
