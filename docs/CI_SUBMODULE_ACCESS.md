@@ -10,11 +10,7 @@ repository 'https://github.com/phoenixvc/Mystira.App.git/' not found
 
 ## Root Cause
 
-The "repository not found" error typically indicates one of:
-
-1. **Repositories don't exist**: The submodule repositories haven't been created in GitHub yet
-2. **Private repository access**: The default `GITHUB_TOKEN` may not have sufficient permissions to access private submodule repositories, even within the same organization
-3. **Organization permissions**: The repositories exist but are in a different organization or have restricted access
+The default `GITHUB_TOKEN` may not have sufficient permissions to access private submodule repositories, even within the same organization.
 
 ## Solution
 
@@ -31,24 +27,38 @@ The "repository not found" error typically indicates one of:
    - Paste the PAT token
 
 3. **Update Workflows**:
-   - All workflows already have `token: ${{ secrets.GITHUB_TOKEN }}` configured
-   - Change to: `token: ${{ secrets.SUBMODULE_ACCESS_TOKEN }}` if needed
+   - All workflows use `token: ${{ secrets.MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN }}`
+   - Add the PAT as secret: `MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN`
 
-### Option 2: Repository Permissions
+### Option 2: Create Missing Repositories (If Needed)
 
-Ensure the repositories exist and are accessible:
+If repositories don't exist, create them:
 
-1. Verify all submodule repositories exist:
-   - `Mystira.App`
-   - `Mystira.Chain`
-   - `Mystira.StoryGenerator`
-   - `Mystira.Publisher`
-   - `Mystira.DevHub`
-   - `Mystira.Infra`
+1. **Create repositories in GitHub**:
+   - Go to https://github.com/organizations/phoenixvc/repositories/new
+   - Create each repository:
+     - `Mystira.App`
+     - `Mystira.Chain`
+     - `Mystira.StoryGenerator`
+     - `Mystira.Publisher`
+     - `Mystira.DevHub`
+     - `Mystira.Infra`
 
+2. **Push initial commits** to each repository
+
+3. **Verify `.gitmodules` URLs** match the created repositories
+
+### Option 3: Repository Permissions
+
+If repositories exist but are private:
+
+1. Verify all submodule repositories exist and are accessible
 2. Check repository visibility:
-   - If private, ensure they're in the same organization
+   - If private, ensure they're in the same organization (`phoenixvc`)
    - Verify the GitHub Actions service account has access
+3. Check organization settings:
+   - Settings → Actions → General → Workflow permissions
+   - Ensure "Read and write permissions" is enabled
 
 ### Option 3: Workflow Permissions
 
