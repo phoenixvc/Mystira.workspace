@@ -141,10 +141,18 @@ This document tracks the migration of Admin tooling from `Mystira.App` monorepo 
 - ✅ Improved code consistency and maintainability across all pages
 - ✅ MasterDataPage already uses reusable components (created with them)
 
+**Completed Tasks (Phase 3.9)**:
+
+- ✅ Added react-hot-toast library for toast notifications
+- ✅ Created toast utility with success, error, info, loading, and promise helpers
+- ✅ Replaced all alert() calls with toast notifications across entire application
+- ✅ Updated all pages: Scenarios, Media, Badges, Bundles, Character Maps, Master Data
+- ✅ Updated all import pages: Scenario, Media, Bundle, Badge, Character Map
+- ✅ Improved UX with non-blocking, consistent notifications
+
 **Remaining Tasks**:
 
 - [ ] Implement edit/create forms with React Hook Form + Zod validation
-- [ ] Add toast notifications for success/error messages (replace alerts)
 - [ ] Test authentication flow end-to-end
 - [ ] Verify API integration with real backend
 - [ ] Complete styling migration and polish UI
