@@ -546,16 +546,7 @@ For existing resources that don't follow this convention:
 
 **Note**: Most resources cannot be renamed and must be recreated. Plan migrations carefully using the capabilities matrix above.
 
-### Legacy Resource Mapping
-
-Common legacy naming patterns and their new equivalents:
-
-| Old Pattern                   | New Pattern                             | Notes                        |
-| ----------------------------- | --------------------------------------- | ---------------------------- |
-| `{env}-{region}-rg-{project}` | `{org}-{env}-{project}-rg-{region}`     | Add org, reorder             |
-| `{project}_{env}_rg_{region}` | `{org}-{env}-{project}-rg-{region}`     | Replace underscores, add org |
-| `rg-{random}`                 | `{org}-{env}-{project}-rg-{region}`     | Classify and rename          |
-| `{env}-{project}-{type}`      | `{org}-{env}-{project}-{type}-{region}` | Add org and region           |
+**See the comprehensive "Legacy Resource Mapping (Existing → New Convention)" section above for detailed mapping of all existing Mystira resources.**
 
 ## Implementation
 
