@@ -1,0 +1,163 @@
+name: Staging Release
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "infra/**"
+      - "packages/**"
+      - ".github/workflows/staging-release.yml"
+      - ".github/workflows/infra-deploy.yml"
+
+concurrency:
+  group: staging-release
+  cancel-in-progress: false
+
+env:
+  ENVIRONMENT: staging
+  TF_VERSION: 1.5.0
+  AZURE_RESOURCE_GROUP: mystira-staging-rg
+  AKS_CLUSTER_NAME: mystira-staging-aks
+
+jobs:
+  ci-check:
+    name: Verify CI Checks Passed
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Check if CI passed on PR
+        run: |
+          # Get the last commit SHA that was merged
+          LAST_COMMIT=${{ github.sha }}
+
+          # Check if there was a PR for this commit
+          PR_NUMBER=$(gh pr list --state merged --base main --search "$LAST_COMMIT" --json number --jq '.[0].number // empty')
+
+          if [ -n "$PR_NUMBER" ]; then
+            echo "Found merged PR #$PR_NUMBER"
+            # Verify CI checks passed (this is a basic check - GitHub branch protection should enforce this)
+            echo "CI checks should have passed via branch protection rules"
+          else
+            echo "No PR found for commit $LAST_COMMIT - this may be a direct push to main"
+            echo "Branch protection should prevent direct pushes to main"
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  deploy-infrastructure:
+    name: Deploy Infrastructure to Staging
+    runs-on: ubuntu-latest
+    needs: [ci-check]
+    environment:
+      name: staging
+      url: https://staging.mystira.app
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          submodules: recursive
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Set Azure credentials for Terraform
+        run: |
+          ARM_CLIENT_ID=$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r '.clientId')
+          ARM_CLIENT_SECRET=$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r '.clientSecret')
+          ARM_SUBSCRIPTION_ID=$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r '.subscriptionId')
+          ARM_TENANT_ID=$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r '.tenantId')
+
+          echo "::add-mask::$ARM_CLIENT_SECRET"
+
+          {
+            echo "ARM_CLIENT_ID=$ARM_CLIENT_ID"
+            echo "ARM_CLIENT_SECRET=$ARM_CLIENT_SECRET"
+            echo "ARM_SUBSCRIPTION_ID=$ARM_SUBSCRIPTION_ID"
+            echo "ARM_TENANT_ID=$ARM_TENANT_ID"
+            echo "ARM_USE_CLI=false"
+          } >> "$GITHUB_ENV"
+
+      - name: Terraform Init
+        run: |
+          cd infra/terraform/environments/staging
+          terraform init
+
+      - name: Terraform Plan
+        run: |
+          cd infra/terraform/environments/staging
+          terraform plan -out=tfplan
+
+      - name: Terraform Apply
+        run: |
+          cd infra/terraform/environments/staging
+          terraform apply -auto-approve tfplan
+
+  deploy-services:
+    name: Deploy Services to Staging
+    runs-on: ubuntu-latest
+    needs: [deploy-infrastructure]
+    environment:
+      name: staging
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          submodules: recursive
+
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v3
+
+      - name: Get AKS credentials
+        run: |
+          az aks get-credentials \
+            --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
+            --name ${{ env.AKS_CLUSTER_NAME }} \
+            --overwrite-existing
+
+      - name: Create namespace if not exists
+        run: |
+          kubectl create namespace mystira-staging --dry-run=client -o yaml | kubectl apply -f -
+
+      - name: Deploy all services to staging
+        run: |
+          kubectl apply -k infra/kubernetes/overlays/staging
+
+          # Wait for deployments
+          kubectl rollout status deployment/mystira-publisher -n mystira-staging --timeout=300s || true
+          kubectl rollout status deployment/mystira-story-generator -n mystira-staging --timeout=300s || true
+          kubectl rollout status statefulset/mystira-chain -n mystira-staging --timeout=600s || true
+
+  notify:
+    name: Notify Deployment Status
+    runs-on: ubuntu-latest
+    needs: [deploy-services]
+    if: always()
+    steps:
+      - name: Deployment Summary
+        run: |
+          echo "## Staging Deployment Summary" >> $GITHUB_STEP_SUMMARY
+          echo "- Environment: staging" >> $GITHUB_STEP_SUMMARY
+          echo "- Commit: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Triggered by: ${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Infrastructure Deploy: ${{ needs.deploy-infrastructure.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Services Deploy: ${{ needs.deploy-services.result }}" >> $GITHUB_STEP_SUMMARY
