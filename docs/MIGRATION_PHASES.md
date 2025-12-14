@@ -150,23 +150,30 @@ This document tracks the migration of Admin tooling from `Mystira.App` monorepo 
 - ✅ Updated all import pages: Scenario, Media, Bundle, Badge, Character Map
 - ✅ Improved UX with non-blocking, consistent notifications
 
-**Completed Tasks (Phase 3.10-3.11)**:
+**Completed Tasks (Phase 3.10-3.12)**:
 
 - ✅ Created Edit Scenario page with React Hook Form + Zod validation
 - ✅ Implemented form validation with proper error messages
-- ✅ Added scenario editing route
 - ✅ Created reusable form components: FormField, TextInput, Textarea, NumberInput
 - ✅ Refactored EditScenarioPage to use new form components
+- ✅ Created Edit Badge page with React Hook Form + Zod validation
+- ✅ Created Edit Character Map page with React Hook Form + Zod validation
+- ✅ Created unified Edit Master Data page for all master data types (Age Groups, Archetypes, Compass Axes, Echo Types, Fantasy Themes)
+- ✅ Added routes for all edit pages
+- ✅ Updated list pages (Badges, Character Maps, Master Data) to link to edit pages
 - ✅ Updated CharacterMapsPage to use LoadingSpinner and ErrorAlert
 - ✅ Updated LoginPage to use toast notifications
 - ✅ Fixed missing imports in BundlesPage
 
 **Remaining Tasks**:
 
-- [ ] Create additional edit forms (Media, Badges, Bundles, Character Maps, Master Data)
-- [ ] Create new entity forms (not just edit)
+- [ ] Create new entity forms (not just edit) - Create forms for Scenarios, Badges, Character Maps, Master Data
+- [ ] Create edit/create forms for Media (if API supports updates)
+- [ ] Create edit/create forms for Bundles (if API supports updates)
 - [ ] Test authentication flow end-to-end
 - [ ] Verify API integration with real backend
+- [ ] Complete styling migration and UI polish
+- [ ] Set up CI/CD pipeline
 - [ ] Complete styling migration and polish UI
 - [ ] Set up CI/CD pipeline
 
