@@ -7,6 +7,7 @@ using Mystira.StoryGenerator.Contracts.Stories;
 using Mystira.StoryGenerator.Domain.Commands;
 using Mystira.StoryGenerator.Domain.Commands.Stories;
 using Mystira.StoryGenerator.Domain.Services;
+using Mystira.StoryGenerator.Application.Utilities;
 
 namespace Mystira.StoryGenerator.Application.Handlers.Stories;
 
@@ -93,10 +94,12 @@ public class GenerateStoryCommandHandler : ICommandHandler<GenerateStoryCommand,
                 };
             }
 
+            var story = StoryTextSanitizer.CollapseNewlinesToSpace(response.Content);
+
             return new GenerateJsonStoryResponse
             {
                 Success = true,
-                Json = response.Content ?? string.Empty,
+                Json = story ?? string.Empty,
                 Provider = response.Provider ?? service.ProviderName,
                 Model = response.Model ?? resolvedModelName ?? string.Empty,
                 ModelId = response.ModelId ?? resolvedModelId
@@ -134,33 +137,32 @@ Top-level keys (no extras allowed):
     •   title, description, tags, difficulty, session_length, age_group, minimum_age, core_axes, archetypes
     •   characters: array
     •   scenes: array
-The JSON must be self-contained, parseable, and obey all rules below.
 CHARACTERS
     •   characters must contain exactly character_count entries.
     •   Each character has:
-        o   id: lowercase snake_case, unique (e.g. """"brave_fox"""")
+        o   id: lowercase snake_case, unique (e.g. ""brave_fox"")
         o   name
         o   optional image and audio URLs
         o   metadata object with:
-       role: one or more narrative roles (e.g. """"protagonist"""", """"guide"""", """"ally"""", """"antagonist"""")
-       archetype: aligned with provided archetypes / core_axes
-       species
-       age
-       traits: array of personality traits (e.g. [""""curious"""", """"kind"""", """"cautious""""])
-       backstory: short, age-appropriate background and motivation
+    •   role: one or more narrative roles (e.g. ""protagonist"", ""guide"", ""ally"", ""antagonist"")
+    •   archetype: aligned with provided archetypes / core_axes
+    •   species
+    •   age
+    •   traits: array of personality traits (e.g. [""curious"", ""kind"", ""cautious""])
+    •   backstory: short, age-appropriate background and motivation
 SCENES
-Each story is a set of modular scenes of type: """"narrative"""", """"choice"""", """"roll"""", or """"special"""".
+Each story is a set of modular scenes of type: ""narrative"", ""choice"", ""roll"", or ""special"".
 All scenes must follow:
     •   id: string, lowercase snake_case, unique.
     •   title: short, descriptive, age-appropriate.
-    •   type: """"narrative"""" | """"choice"""" | """"roll"""" | """"special"""".
+    •   type: ""narrative"" | ""choice"" | ""roll"" | ""special"".
     •   description: clear, engaging, age-appropriate player-facing text.
     •   media (optional): image/audio/video URLs for some scenes.
     •   developmental metadata (optional, but highly important, and recommended for key moments):
         o   compass_change: how core_axes change.
 Scene variety
         •   Distribute scene types across narrative, choice, and roll; avoid clustering all choices or all rolls.
-        •   """"special"""" scenes are mainly for endings or big reveals and should be used sparingly.
+        •   ""special"" scenes are mainly for endings or big reveals and should be used sparingly.
 
 STRUCTURE AND BRANCHING
 Scene count
@@ -173,29 +175,29 @@ Overall graph
     •   Scene flow must be logical and chronological for the story context: no unexplained time jumps or teleporting between locations without clear narrative justification.
     •   NPCs (non-player characters) may be introduced in any scene, but they must not be referenced, spoken to, or relied on in earlier scenes before they have appeared and been clearly introduced.
 Endings
-    •   All final/ending scenes must be of type """"special"""".
-    •   Ending """"special"""" scenes:
+    •   All final/ending scenes must be of type ""special"".
+    •   Ending ""special"" scenes:
         o   Have no outgoing transitions: next_scene omitted or null.
         o   Must not have branches that continue the story.
 Scene-type-specific rules
-Narrative (""""narrative""""):
+Narrative (""narrative""):
     •   Used to move the story forward without a choice.
     •   Must have a next_scene pointing to a valid scene.
     •   Must not be used for final endings.
-Choice (""""choice""""):
+Choice (""choice""):
     •   Must have a branches array with at least two options.
     •   Each branch includes:
         o   A clear player-facing choice description.
         o   A next_scene id.
-Roll (""""roll""""):
+Roll (""roll""):
     •   Must have roll_requirements describing the mechanic (thresholds, difficulty) for a D20 dice.
     •   Must have a branches array with exactly two outcome branches, each with a next_scene id.
-Special (""""special""""):
+Special (""special""):
     •   Used for endings, major reveals, or meta moments.
     •   Ending specials: no further transitions (next_scene omitted or null).
     •   Non-ending specials may use next_scene but must keep story flow coherent.
 Branch uniqueness (critical)
-For every """"choice"""" or """"roll"""" scene:
+For every ""choice"" or ""roll"" scene:
     •   branches is required, with at least two entries.
     •   Within a single scene, each branch must have a unique next_scene id.
     •   No two branches from the same scene may point to the same next_scene.
@@ -204,9 +206,9 @@ General consistency
     •   Avoid dead ends / orphan scenes.
     •   Maintain continuity of characters, locations, and goals; avoid contradictions without explanation.
 SAFETY AND CHILD DEVELOPMENT (Critical)
-    •   age_group must be one of: """"1-3"""", """"4-5"""", """"6-9"""", """"10-12"""", """"13-18"""".
+    •   age_group must be one of: ""1-3"", ""4-5"", ""6-9"", ""10-12"", ""13-18"".
     •   Language, content, and themes must be age-appropriate for age_group and minimum_age.
-    •   Forbidden: profanity, slurs, sexual content, self-harm, graphic violence, humiliation, cruelty-based humor, or """"punching down"""".
+    •   Forbidden: profanity, slurs, sexual content, self-harm, graphic violence, humiliation, cruelty-based humor, or ""punching down"".
     •   Mild peril is allowed but must resolve in emotionally safe ways.
 FINAL OUTPUT RULES
     •   Output only:
@@ -218,7 +220,7 @@ FINAL OUTPUT RULES
     •   Return a single valid JSON object that fully respects all constraints.
     •   Character restrictions:
         o Never output control characters in the Unicode ranges U+0000–U+001F or U+007F–U+009F, except for standard whitespace characters: newline (\n), carriage return (\r), and tab (\t).
-        o Use normal printable characters only. If you need quotes, use """" and ' instead of any special control codes.
+        o Use normal printable characters only. If you need quotes, use "" and ' instead of any special control codes.
 ";
     }
 
