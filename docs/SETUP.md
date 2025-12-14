@@ -1,209 +1,694 @@
-# Setup Guide
+# Comprehensive Setup Guide
 
-Quick start guide for setting up the Mystira workspace.
+Complete setup guide for the Mystira workspace covering all projects, CI/CD workflows, secrets, environments, and platforms.
 
-## Initial Setup
+## Table of Contents
 
-1. **Clone the repository with submodules** (if not already done):
-   ```bash
-   git clone --recurse-submodules https://github.com/phoenixvc/Mystira.workspace.git
-   cd Mystira.workspace
-   ```
-   
-   If you've already cloned without submodules:
-   ```bash
-   git submodule update --init --recursive
-   ```
+1. [Prerequisites](#prerequisites)
+2. [Initial Workspace Setup](#initial-workspace-setup)
+3. [GitHub Secrets Configuration](#github-secrets-configuration)
+4. [Azure Infrastructure Setup](#azure-infrastructure-setup)
+5. [Project-Specific Setup](#project-specific-setup)
+6. [CI/CD Configuration](#cicd-configuration)
+7. [Environment Setup](#environment-setup)
+8. [Deployment](#deployment)
+9. [Troubleshooting](#troubleshooting)
 
-2. **Install pnpm** (if not already installed):
-   ```bash
-   npm install -g pnpm@8.10.0
-   ```
+---
 
-3. **Install dependencies**:
-   ```bash
-   pnpm install
-   ```
+## Prerequisites
 
-4. **Set up environment variables**:
-   ```bash
-   # Create .env.local from example
-   cp .env.example .env.local
-   # Edit .env.local with your actual values
-   ```
+### Required Tools
 
-## Development Workflow
+- **Node.js**: v18.x or higher
+- **pnpm**: v8.10.0 or higher
+- **Git**: Latest version with submodule support
+- **Docker**: Latest version (for local development)
+- **Azure CLI**: Latest version (for infrastructure deployment)
+- **Terraform**: v1.5.0 or higher (for infrastructure)
+- **kubectl**: Latest version (for Kubernetes management)
 
-### Running All Services
+### Install Prerequisites
 
 ```bash
-# Start all packages in development mode
+# Install Node.js (use nvm or download from nodejs.org)
+nvm install 18
+nvm use 18
+
+# Install pnpm globally
+npm install -g pnpm@8.10.0
+
+# Install Azure CLI
+# Windows (PowerShell as Admin):
+Invoke-WebRequest -Uri https://aka.ms/installazurecliwindows -OutFile .\AzureCLI.msi; Start-Process msiexec.exe -Wait -ArgumentList '/I AzureCLI.msi /quiet'; rm .\AzureCLI.msi
+
+# macOS:
+brew install azure-cli
+
+# Linux:
+curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+
+# Install Terraform
+# Windows (choco):
+choco install terraform
+
+# macOS:
+brew install terraform
+
+# Linux:
+curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -
+sudo apt-add-repository "deb [arch=$(dpkg --print-architecture)] https://apt.releases.hashicorp.com $(lsb_release -cs) main"
+sudo apt install terraform
+
+# Install kubectl
+# Windows (choco):
+choco install kubernetes-cli
+
+# macOS:
+brew install kubectl
+
+# Linux:
+curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+```
+
+### Azure Account Setup
+
+1. **Create Azure Account**: Sign up at https://azure.microsoft.com/
+2. **Create Service Principal** (for CI/CD):
+
+   ```bash
+   az login
+   az account set --subscription "Your Subscription Name"
+
+   # Create service principal with Contributor role
+   az ad sp create-for-rbac --name "MystiraGitHubActions" \
+     --role contributor \
+     --scopes /subscriptions/{subscription-id} \
+     --sdk-auth
+   ```
+
+   Save the JSON output - you'll need it for GitHub secrets.
+
+3. **Create Azure DevOps Organization** (for NuGet feed):
+   - Go to https://dev.azure.com/
+   - Create or select an organization
+   - Create a project (e.g., "Mystira")
+   - Create an Artifacts feed named "Mystira-Internal"
+   - Generate a Personal Access Token (PAT) with **Packaging (Read & Write)** scope
+
+---
+
+## Initial Workspace Setup
+
+### 1. Clone Repository with Submodules
+
+```bash
+# Clone with all submodules
+git clone --recurse-submodules https://github.com/phoenixvc/Mystira.workspace.git
+cd Mystira.workspace
+```
+
+If you already cloned without submodules:
+
+```bash
+git submodule update --init --recursive
+```
+
+### 2. Verify Submodules
+
+```bash
+# List all submodules
+git submodule status
+
+# Update all submodules to latest
+git submodule update --remote --recursive
+```
+
+Expected submodules:
+
+- `infra/` → `Mystira.Infra`
+- `packages/app/` → `Mystira.App`
+- `packages/chain/` → `Mystira.Chain`
+- `packages/publisher/` → `Mystira.Publisher`
+- `packages/story-generator/` → `Mystira.StoryGenerator`
+- `packages/devhub/` → `Mystira.DevHub`
+- `packages/admin-api/` → `Mystira.Admin.Api`
+
+### 3. Install Dependencies
+
+```bash
+# Install all workspace dependencies
+pnpm install --frozen-lockfile
+```
+
+### 4. Set Up Environment Variables
+
+See [ENVIRONMENT.md](./ENVIRONMENT.md) for detailed environment variable configuration.
+
+Create `.env.local` files in:
+
+- Root: `.env.local` (workspace config)
+- `packages/chain/.env.local` (blockchain config)
+- `packages/story-generator/.env.local` (AI services)
+
+---
+
+## GitHub Secrets Configuration
+
+All secrets must be configured in GitHub repository settings: `Settings → Secrets and variables → Actions`
+
+### Required Secrets for Mystira.workspace
+
+#### Submodule Access
+
+| Secret Name                             | Description                                                            | How to Create                                                                                                                     |
+| --------------------------------------- | ---------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| `MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN` | Personal Access Token with `repo` scope for cloning private submodules | GitHub → Settings → Developer settings → Personal access tokens → Generate new token (classic) → Select `repo` scope → Copy token |
+
+#### Azure Infrastructure
+
+| Secret Name         | Description                                            | How to Create                                                                   |
+| ------------------- | ------------------------------------------------------ | ------------------------------------------------------------------------------- |
+| `AZURE_CREDENTIALS` | Service Principal credentials for Azure authentication | Use the JSON output from `az ad sp create-for-rbac` command (see Prerequisites) |
+
+**Format** (JSON):
+
+```json
+{
+  "clientId": "xxx",
+  "clientSecret": "xxx",
+  "subscriptionId": "xxx",
+  "tenantId": "xxx"
+}
+```
+
+#### NPM Package Publishing (Optional)
+
+| Secret Name | Description                              | How to Create                                                                          |
+| ----------- | ---------------------------------------- | -------------------------------------------------------------------------------------- |
+| `NPM_TOKEN` | NPM access token for publishing packages | npm → Account Settings → Access Tokens → Generate New Token → Select "Automation" type |
+
+### Required Secrets for Mystira.Admin.Api
+
+| Secret Name                    | Description                                  | How to Create                                                                                 |
+| ------------------------------ | -------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| `MYSTIRA_DEVOPS_AZURE_ORG`     | Azure DevOps organization name               | Your Azure DevOps org name (e.g., "phoenixvc")                                                |
+| `MYSTIRA_DEVOPS_AZURE_PROJECT` | Azure DevOps project name                    | Your project name (e.g., "Mystira")                                                           |
+| `MYSTIRA_DEVOPS_AZURE_PAT`     | Azure DevOps PAT with Packaging (Read) scope | Azure DevOps → User Settings → Personal access tokens → New Token → Select "Packaging (Read)" |
+| `MYSTIRA_DEVOPS_NUGET_FEED`    | NuGet feed name                              | Your feed name (e.g., "Mystira-Internal")                                                     |
+
+### Creating GitHub Personal Access Token (PAT)
+
+1. Go to GitHub → Your Profile → Settings → Developer settings → Personal access tokens → Tokens (classic)
+2. Click "Generate new token (classic)"
+3. Name: `Mystira Submodule Access`
+4. Expiration: Set appropriate expiration (90 days recommended)
+5. Scopes: Check `repo` (Full control of private repositories)
+6. Click "Generate token"
+7. Copy the token immediately (you won't see it again)
+8. Add as secret `MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN` in repository settings
+
+---
+
+## Azure Infrastructure Setup
+
+### 1. Deploy Dev Environment (Required First)
+
+The dev environment creates the shared Azure Container Registry (`mystiraacr`) that all environments use.
+
+```bash
+cd infra/terraform/environments/dev
+
+# Initialize Terraform
+terraform init
+
+# Review plan
+terraform plan
+
+# Apply infrastructure
+terraform apply
+```
+
+**What gets created**:
+
+- Resource Group: `mystira-dev-rg`
+- Azure Container Registry: `mystiraacr` (shared across all environments)
+- Virtual Network
+- Key Vaults for services
+- Shared PostgreSQL (if configured)
+- Shared Redis (if configured)
+- AKS cluster: `mystira-dev-aks` (if configured)
+
+**Important**: The ACR `mystiraacr` is created in the dev environment but is used by all environments. This is intentional - we use a shared ACR with environment-specific tags (dev, staging, prod).
+
+### 2. Configure ACR Access
+
+After dev environment is deployed, grant access to service principals:
+
+```bash
+# Get ACR resource ID
+ACR_ID=$(az acr show --name mystiraacr --resource-group mystira-dev-rg --query id --output tsv)
+
+# Grant pull permissions to staging/prod service principals (when created)
+# az role assignment create --assignee <service-principal-id> --role AcrPull --scope $ACR_ID
+```
+
+### 3. Update Infra Submodule for Shared ACR
+
+The infra submodule has been updated to use shared ACR with environment tags. Ensure you have the latest:
+
+```bash
+# In workspace root
+cd infra
+git pull origin main
+cd ..
+
+# Update submodule reference
+git add infra
+git commit -m "chore: update infra submodule"
+git push origin dev
+```
+
+### 4. Deploy Staging Environment (Optional)
+
+```bash
+cd infra/terraform/environments/staging
+terraform init
+terraform plan
+terraform apply
+```
+
+### 5. Deploy Production Environment (Optional)
+
+```bash
+cd infra/terraform/environments/prod
+terraform init
+terraform plan
+terraform apply
+```
+
+**⚠️ Production Warning**: Production deployment should be carefully planned and tested in staging first.
+
+---
+
+## Project-Specific Setup
+
+### Mystira.Chain (Python gRPC Service)
+
+```bash
+cd packages/chain
+
+# Install Python dependencies
+pip install -r requirements.txt  # If requirements.txt exists
+
+# Set up environment variables
+cp .env.example .env.local
+# Edit .env.local with your values
+
+# Test locally
+python server.py
+```
+
+### Mystira.Publisher (TypeScript/React)
+
+```bash
+cd packages/publisher
+
+# Dependencies are installed at workspace root
+# Run development server
 pnpm dev
-```
 
-### Running Individual Packages
-
-```bash
-# Chain (blockchain)
-pnpm --filter @mystira/chain dev
-
-# App Web
-pnpm --filter @mystira/app-web dev
-
-# App Mobile
-pnpm --filter @mystira/app-mobile start
-
-# Story Generator
-pnpm --filter @mystira/story-generator dev
-```
-
-### Building
-
-```bash
-# Build all packages
+# Build
 pnpm build
-
-# Build specific package
-pnpm --filter @mystira/chain build
 ```
 
-### Testing
+### Mystira.StoryGenerator (.NET)
 
 ```bash
-# Run all tests
-pnpm test
+cd packages/story-generator
 
-# Run tests for specific package
-pnpm --filter @mystira/chain test
+# Restore NuGet packages
+dotnet restore
+
+# Build
+dotnet build
+
+# Run
+dotnet run --project src/StoryGenerator
 ```
 
-## Package-Specific Setup
+### Mystira.App (.NET + Blazor)
 
-### Mystira.Chain
+```bash
+cd packages/app
 
-1. Install Hardhat dependencies:
+# Restore NuGet packages
+dotnet restore
+
+# Build
+dotnet build
+
+# Run specific projects
+dotnet run --project src/Mystira.App.Api
+dotnet run --project src/Mystira.App.PWA
+```
+
+### Mystira.Admin.Api (.NET)
+
+```bash
+cd packages/admin-api
+
+# Configure NuGet.config with Azure DevOps feed
+# Edit NuGet.config and update feed URL/token placeholders
+
+# Restore packages
+dotnet restore
+
+# Build
+dotnet build
+
+# Run
+dotnet run --project src/Mystira.App.Admin.Api
+```
+
+**NuGet.config Setup**:
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<configuration>
+  <packageSources>
+    <clear />
+    <add key="nuget.org" value="https://api.nuget.org/v3/index.json" protocolVersion="3" />
+    <add key="Mystira-Internal" value="https://pkgs.dev.azure.com/{ORG}/{PROJECT}/_packaging/{FEED}/nuget/v3/index.json" />
+  </packageSources>
+  <packageSourceCredentials>
+    <Mystira-Internal>
+      <add key="Username" value="{ORG}" />
+      <add key="ClearTextPassword" value="{PAT}" />
+    </Mystira-Internal>
+  </packageSourceCredentials>
+</configuration>
+```
+
+---
+
+## CI/CD Configuration
+
+### Workflow Overview
+
+The workspace uses GitHub Actions for CI/CD with the following workflows:
+
+| Workflow                 | Triggers                                  | Purpose                                               |
+| ------------------------ | ----------------------------------------- | ----------------------------------------------------- |
+| `ci.yml`                 | Push/PR to `dev`/`main`                   | Lint, test, build workspace packages                  |
+| `chain-ci.yml`           | Push/PR to `dev`/`main` (chain files)     | Chain service CI: lint, test, build, Docker build     |
+| `publisher-ci.yml`       | Push/PR to `dev`/`main` (publisher files) | Publisher service CI: lint, test, build, Docker build |
+| `staging-release.yml`    | Push to `main`                            | Automatic staging deployment                          |
+| `production-release.yml` | Manual workflow dispatch                  | Production deployment (with approval)                 |
+| `release.yml`            | Push to `main`                            | NPM package releases via Changesets                   |
+
+### Branch Strategy
+
+- **`dev`**: Development branch - all feature work integrated here
+  - Requires PR (0 approvals for fast iteration)
+  - CI checks required
+  - Docker images tagged with `dev`
+- **`main`**: Production-ready code
+  - Requires PR with 1 approval
+  - Code owner review required
+  - Conversation resolution required
+  - Docker images tagged with `staging`
+  - Automatic staging deployment on merge
+
+### Image Tagging Strategy
+
+The CI/CD workflows use a shared ACR (`mystiraacr`) with environment-specific tags:
+
+- **`dev` branch pushes**: Images tagged with `dev`, `latest`, and branch name
+- **`main` branch pushes**: Images tagged with `staging`, `latest`, and branch name
+- **Production deployments**: Use `prod` tag (manually tagged or via production workflow)
+
+Kubernetes overlays map base images to environment tags:
+
+- Dev overlay: `mystiraacr.azurecr.io/chain:dev`
+- Staging overlay: `mystiraacr.azurecr.io/chain:staging`
+- Prod overlay: `mystiraacr.azurecr.io/chain:prod`
+
+### Configuring Branch Protection
+
+Branch protection is configured via GitHub UI or CLI:
+
+**Via GitHub UI**:
+
+1. Go to Repository → Settings → Branches
+2. Click "Add rule" or edit existing rule
+3. Configure for `dev` and `main` as per [Branch Protection Guide](./cicd/branch-protection.md)
+
+**Via GitHub CLI**:
+See [Branch Protection Guide](./cicd/branch-protection.md) for CLI commands.
+
+### Configuring GitHub Environments
+
+**Staging Environment**:
+
+1. Repository → Settings → Environments
+2. Click "New environment"
+3. Name: `staging`
+4. Deployment branches: Restrict to `main`
+5. Protection rules: Optional (no approval required for staging)
+
+**Production Environment**:
+
+1. Repository → Settings → Environments
+2. Click "New environment"
+3. Name: `production`
+4. Deployment branches: Restrict to `main`
+5. Protection rules:
+   - ✅ Required reviewers: Add at least 1 reviewer
+   - Optional: Wait timer (e.g., 5 minutes)
+
+---
+
+## Environment Setup
+
+### Local Development
+
+```bash
+# Start shared services (PostgreSQL, Redis)
+docker-compose up -d
+
+# Start all services in development mode
+pnpm dev
+
+# Or start individual services
+pnpm --filter @mystira/chain dev
+pnpm --filter mystira-publisher dev
+```
+
+### Development Environment (Azure)
+
+- **Resource Group**: `mystira-dev-rg`
+- **ACR**: `mystiraacr` (shared)
+- **AKS**: `mystira-dev-aks` (if configured)
+- **Namespace**: `mystira-dev`
+
+### Staging Environment (Azure)
+
+- **Resource Group**: `mystira-staging-rg`
+- **ACR**: `mystiraacr` (shared, uses `staging` tags)
+- **AKS**: `mystira-staging-aks` (if configured)
+- **Namespace**: `mystira-staging`
+
+### Production Environment (Azure)
+
+- **Resource Group**: `mystira-prod-rg`
+- **ACR**: `mystiraacr` (shared, uses `prod` tags)
+- **AKS**: `mystira-prod-aks` (if configured)
+- **Namespace**: `mystira-prod`
+
+---
+
+## Deployment
+
+### Initial Infrastructure Deployment
+
+1. **Deploy Dev Environment** (creates shared ACR):
+
    ```bash
-   cd packages/chain
-   pnpm install
-   ```
-
-2. Set up environment variables in `.env.local`:
-   ```
-   PRIVATE_KEY=your_key
-   INFURA_API_KEY=your_key
-   ```
-
-3. Compile contracts:
-   ```bash
-   pnpm compile
-   ```
-
-### Mystira.App
-
-#### Web
-
-1. Navigate to web package:
-   ```bash
-   cd packages/app/web
-   ```
-
-2. Install dependencies (if not done at root):
-   ```bash
-   pnpm install
-   ```
-
-3. Start development server:
-   ```bash
-   pnpm dev
-   ```
-
-#### Mobile
-
-1. Navigate to mobile package:
-   ```bash
-   cd packages/app/mobile
-   ```
-
-2. Install dependencies:
-   ```bash
-   pnpm install
-   ```
-
-3. Start Expo:
-   ```bash
-   pnpm start
-   ```
-
-### Mystira.StoryGenerator
-
-1. Navigate to story generator:
-   ```bash
-   cd packages/story-generator
-   ```
-
-2. Set up environment variables:
-   ```
-   ANTHROPIC_API_KEY=your_key
-   OPENAI_API_KEY=your_key
-   ```
-
-3. Start development server:
-   ```bash
-   pnpm dev
-   ```
-
-### Mystira.Infra
-
-1. Navigate to infra:
-   ```bash
-   cd infra
-   ```
-
-2. Initialize Terraform (if using):
-   ```bash
-   cd terraform/environments/dev
+   cd infra/terraform/environments/dev
    terraform init
+   terraform apply
    ```
+
+2. **Update Infra Submodule** (if changes were made):
+
+   ```bash
+   # If you modified infra submodule locally
+   cd infra
+   git add .
+   git commit -m "your changes"
+   git push origin main
+
+   # Then update reference in workspace
+   cd ..
+   git add infra
+   git commit -m "chore: update infra submodule"
+   git push origin dev
+   ```
+
+3. **Verify ACR exists**:
+   ```bash
+   az acr show --name mystiraacr --resource-group mystira-dev-rg
+   ```
+
+### Deploying Services to Kubernetes
+
+#### Staging Deployment (Automatic)
+
+Staging deployment happens automatically when code is merged to `main`:
+
+1. Create PR: `dev` → `main`
+2. CI checks pass
+3. PR approved and merged
+4. `staging-release.yml` workflow runs automatically
+5. Services deployed to staging AKS cluster
+
+#### Production Deployment (Manual)
+
+Production deployment requires manual approval:
+
+1. Go to GitHub Actions → "Production Release"
+2. Click "Run workflow"
+3. Select branch: `main`
+4. In confirmation field, type: `DEPLOY TO PRODUCTION`
+5. Click "Run workflow"
+6. Environment reviewers receive notification
+7. After approval, deployment proceeds
+
+### Manual Kubernetes Deployment
+
+```bash
+# Get AKS credentials
+az aks get-credentials --resource-group mystira-dev-rg --name mystira-dev-aks
+
+# Deploy using kustomize
+kubectl apply -k infra/kubernetes/overlays/dev
+
+# Verify deployment
+kubectl get pods -n mystira-dev
+kubectl get services -n mystira-dev
+```
+
+---
 
 ## Troubleshooting
 
-### pnpm Issues
+### Submodule Issues
 
-If you encounter pnpm workspace issues:
+**Problem**: Submodules not found or empty
+
 ```bash
-# Clear pnpm store
-pnpm store prune
-
-# Reinstall
-rm -rf node_modules
-pnpm install
+# Re-initialize submodules
+git submodule deinit -f --all
+git submodule update --init --recursive
 ```
 
-### TypeScript Errors
+**Problem**: CI fails with "repository not found" for submodules
 
-If you see TypeScript errors:
+- Verify `MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN` secret is configured
+- Verify PAT has `repo` scope
+- Check that all submodule repositories exist and are accessible
+
+### ACR Login Issues
+
+**Problem**: `az acr login` fails with "resource not found"
+
+- Verify dev environment is deployed (ACR is created in dev)
+- Check ACR name: `mystiraacr`
+- Verify you're in correct Azure subscription: `az account show`
+
+**Problem**: CI/CD can't push to ACR
+
+- Verify `AZURE_CREDENTIALS` secret is configured correctly
+- Verify service principal has `AcrPush` role on ACR:
+  ```bash
+  az role assignment list --assignee <sp-client-id> --scope /subscriptions/<sub-id>/resourceGroups/mystira-dev-rg/providers/Microsoft.ContainerRegistry/registries/mystiraacr
+  ```
+
+### Terraform Issues
+
+**Problem**: Terraform state locked
+
 ```bash
-# Run type checking
-pnpm typecheck
-
-# Clear TypeScript cache
-rm -rf node_modules/.cache
+# Force unlock (use with caution)
+terraform force-unlock <lock-id>
 ```
 
-### Build Issues
+**Problem**: Terraform backend authentication fails
 
-If builds fail:
+- Verify Azure authentication: `az login`
+- Check backend configuration in `terraform` block
+- Verify service principal has access to storage account
+
+### Kubernetes Deployment Issues
+
+**Problem**: Pods not starting
+
 ```bash
-# Clean all build artifacts
-pnpm clean
+# Check pod logs
+kubectl logs <pod-name> -n mystira-dev
 
-# Rebuild
-pnpm build
+# Describe pod for events
+kubectl describe pod <pod-name> -n mystira-dev
+
+# Check image pull errors
+kubectl get events -n mystira-dev --sort-by='.lastTimestamp'
 ```
+
+**Problem**: Image pull errors
+
+- Verify ACR credentials in Kubernetes: `kubectl get secret -n mystira-dev`
+- Create pull secret if missing:
+  ```bash
+  kubectl create secret docker-registry acr-secret \
+    --docker-server=mystiraacr.azurecr.io \
+    --docker-username=<sp-client-id> \
+    --docker-password=<sp-client-secret> \
+    -n mystira-dev
+  ```
+
+### CI/CD Workflow Issues
+
+**Problem**: Workflow fails with "Input required and not supplied: token"
+
+- Verify `MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN` secret exists
+- Check workflow file has token validation step
+- Verify secret name matches exactly (case-sensitive)
+
+**Problem**: Docker build fails in CI
+
+- Check Dockerfile paths are correct
+- Verify build context is set correctly
+- Check that required files exist in build context
+
+---
 
 ## Next Steps
 
-- Read the [Contributing Guide](../CONTRIBUTING.md)
-- Check individual package READMEs for specific instructions
-- Review the [Architecture Overview](../README.md#architecture)
+- Review [Architecture Overview](./ARCHITECTURE.md)
+- Read [CI/CD Setup Guide](./cicd/cicd-setup.md)
+- Check [Infrastructure Guide](./infrastructure/infrastructure.md)
+- See [Shared Resources Guide](./infrastructure/shared-resources.md)
+- Review [ACR Strategy](./infrastructure/acr-strategy.md)
 
+## Getting Help
+
+- Check existing GitHub issues
+- Review documentation in `docs/` directory
+- Check workflow logs in GitHub Actions
+- Review service logs in Azure Portal or Kubernetes
+
+---
+
+**Last Updated**: 2025-12-14
