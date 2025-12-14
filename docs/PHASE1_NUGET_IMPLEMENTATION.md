@@ -119,13 +119,12 @@ Created `.github/workflows/publish-shared-packages.yml`:
 
 Add these secrets to the `Mystira.App` repository:
 
-| Secret Name     | Description                                         | Example                                    |
-| --------------- | --------------------------------------------------- | ------------------------------------------ |
-| `AZURE_ORG`     | Azure DevOps organization name                      | `phoenixvc`                                |
-| `AZURE_PROJECT` | Azure DevOps project name                           | `Mystira`                                  |
-| `AZURE_USER`    | Username or service principal                       | `user@example.com` or service principal ID |
-| `AZURE_PAT`     | Personal Access Token with Packaging (Read & Write) | `[PAT token]`                              |
-| `NUGET_FEED`    | Feed name                                           | `Mystira-Internal`                         |
+| Secret Name                    | Description                                         | Example            |
+| ------------------------------ | --------------------------------------------------- | ------------------ |
+| `MYSTIRA_DEVOPS_AZURE_ORG`     | Azure DevOps organization name                      | `phoenixvc`        |
+| `MYSTIRA_DEVOPS_AZURE_PROJECT` | Azure DevOps project name                           | `Mystira`          |
+| `MYSTIRA_DEVOPS_AZURE_PAT`     | Personal Access Token with Packaging (Read & Write) | `[PAT token]`      |
+| `MYSTIRA_DEVOPS_NUGET_FEED`    | Feed name                                           | `Mystira-Internal` |
 
 **To create PAT**:
 
