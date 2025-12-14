@@ -1,0 +1,156 @@
+name: Production Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: 'Type "DEPLOY TO PRODUCTION" to confirm'
+        required: true
+        type: string
+
+jobs:
+  validate-confirmation:
+    name: Validate Confirmation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check confirmation
+        if: github.event.inputs.confirm != 'DEPLOY TO PRODUCTION'
+        run: |
+          echo "Invalid confirmation. You must type 'DEPLOY TO PRODUCTION' exactly."
+          exit 1
+
+  deploy-infrastructure:
+    name: Deploy Infrastructure to Production
+    runs-on: ubuntu-latest
+    needs: [validate-confirmation]
+    environment:
+      name: production
+      url: https://mystira.app
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      ENVIRONMENT: prod
+      TF_VERSION: 1.5.0
+      AZURE_RESOURCE_GROUP: mystira-prod-rg
+      AKS_CLUSTER_NAME: mystira-prod-aks
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          submodules: recursive
+          ref: main
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Set Azure credentials for Terraform
+        run: |
+          ARM_CLIENT_ID=$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r '.clientId')
+          ARM_CLIENT_SECRET=$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r '.clientSecret')
+          ARM_SUBSCRIPTION_ID=$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r '.subscriptionId')
+          ARM_TENANT_ID=$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r '.tenantId')
+          
+          echo "::add-mask::$ARM_CLIENT_SECRET"
+          
+          {
+            echo "ARM_CLIENT_ID=$ARM_CLIENT_ID"
+            echo "ARM_CLIENT_SECRET=$ARM_CLIENT_SECRET"
+            echo "ARM_SUBSCRIPTION_ID=$ARM_SUBSCRIPTION_ID"
+            echo "ARM_TENANT_ID=$ARM_TENANT_ID"
+            echo "ARM_USE_CLI=false"
+          } >> "$GITHUB_ENV"
+
+      - name: Terraform Init
+        run: |
+          cd infra/terraform/environments/prod
+          terraform init
+
+      - name: Terraform Plan
+        run: |
+          cd infra/terraform/environments/prod
+          terraform plan -out=tfplan
+
+      - name: Terraform Apply
+        run: |
+          cd infra/terraform/environments/prod
+          terraform apply -auto-approve tfplan
+
+  deploy-services:
+    name: Deploy Services to Production
+    runs-on: ubuntu-latest
+    needs: [deploy-infrastructure]
+    environment:
+      name: production
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      AZURE_RESOURCE_GROUP: mystira-prod-rg
+      AKS_CLUSTER_NAME: mystira-prod-aks
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          submodules: recursive
+          ref: main
+
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v3
+
+      - name: Get AKS credentials
+        run: |
+          az aks get-credentials \
+            --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
+            --name ${{ env.AKS_CLUSTER_NAME }} \
+            --overwrite-existing
+
+      - name: Create namespace if not exists
+        run: |
+          kubectl create namespace mystira-prod --dry-run=client -o yaml | kubectl apply -f -
+
+      - name: Deploy all services to production
+        run: |
+          kubectl apply -k infra/kubernetes/overlays/prod
+          
+          # Wait for deployments with longer timeout for production
+          kubectl rollout status deployment/mystira-publisher -n mystira-prod --timeout=600s || true
+          kubectl rollout status deployment/mystira-story-generator -n mystira-prod --timeout=600s || true
+          kubectl rollout status statefulset/mystira-chain -n mystira-prod --timeout=900s || true
+
+      - name: Verify deployments
+        run: |
+          echo "## Production Deployment Verification" >> $GITHUB_STEP_SUMMARY
+          echo "### Publisher" >> $GITHUB_STEP_SUMMARY
+          kubectl get deployment mystira-publisher -n mystira-prod >> $GITHUB_STEP_SUMMARY || true
+          echo "### Story Generator" >> $GITHUB_STEP_SUMMARY
+          kubectl get deployment mystira-story-generator -n mystira-prod >> $GITHUB_STEP_SUMMARY || true
+          echo "### Chain" >> $GITHUB_STEP_SUMMARY
+          kubectl get statefulset mystira-chain -n mystira-prod >> $GITHUB_STEP_SUMMARY || true
+
+  notify:
+    name: Notify Deployment Status
+    runs-on: ubuntu-latest
+    needs: [deploy-services]
+    if: always()
+    steps:
+      - name: Deployment Summary
+        run: |
+          echo "## Production Deployment Summary" >> $GITHUB_STEP_SUMMARY
+          echo "- Environment: production" >> $GITHUB_STEP_SUMMARY
+          echo "- Commit: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Triggered by: ${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Infrastructure Deploy: ${{ needs.deploy-infrastructure.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Services Deploy: ${{ needs.deploy-services.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "⚠️ Production deployment completed. Monitor services closely." >> $GITHUB_STEP_SUMMARY

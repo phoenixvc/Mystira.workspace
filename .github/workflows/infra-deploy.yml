@@ -8,6 +8,7 @@ on:
       - "infra/kubernetes/**"
       - ".github/workflows/infra-deploy.yml"
   workflow_dispatch:
+    # Manual trigger for infrastructure deployments
     inputs:
       environment:
         description: "Environment to deploy"

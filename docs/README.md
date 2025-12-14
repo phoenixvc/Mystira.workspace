@@ -30,6 +30,10 @@ For details, see [ADR-0002: Documentation Location Strategy](./architecture/adr/
 - [Implementation Roadmap](./IMPLEMENTATION_ROADMAP.md) - Strategic implementation plan
 - [Phase 1 Status](./PHASE1_STATUS.md) - Phase 1 completion status and analysis
 
+### CI/CD & DevOps
+
+- [Branch Protection & CI/CD Workflow](./BRANCH_PROTECTION.md) - Branch protection rules and deployment workflows
+
 ### Development
 
 - [Submodules Guide](./SUBMODULES.md) - Working with git submodules

@@ -7,6 +7,9 @@ on:
 
 concurrency: ${{ github.workflow }}-${{ github.ref }}
 
+# This workflow handles npm package releases via Changesets
+# For infrastructure deployments, see staging-release.yml and production-release.yml
+
 jobs:
   release:
     name: Release

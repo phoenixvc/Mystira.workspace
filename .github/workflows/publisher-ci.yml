@@ -2,14 +2,15 @@ name: Publisher CI
 
 on:
   push:
-    branches: [main, develop]
+    branches: [dev]
     paths:
       - "packages/publisher/**"
       - "infra/docker/publisher/**"
       - "infra/kubernetes/base/publisher/**"
       - ".github/workflows/publisher-ci.yml"
   pull_request:
-    branches: [main, develop]
+    branches: [main]
+    types: [opened, synchronize, reopened, ready_for_review]
     paths:
       - "packages/publisher/**"
       - "infra/docker/publisher/**"

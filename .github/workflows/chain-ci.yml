@@ -2,14 +2,15 @@ name: Chain CI
 
 on:
   push:
-    branches: [main, develop]
+    branches: [dev]
     paths:
       - "packages/chain/**"
       - "infra/docker/chain/**"
       - "infra/kubernetes/base/chain/**"
       - ".github/workflows/chain-ci.yml"
   pull_request:
-    branches: [main, develop]
+    branches: [main]
+    types: [opened, synchronize, reopened, ready_for_review]
     paths:
       - "packages/chain/**"
       - "infra/docker/chain/**"
