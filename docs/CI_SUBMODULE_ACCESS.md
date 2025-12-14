@@ -23,7 +23,7 @@ The default `GITHUB_TOKEN` may not have sufficient permissions to access private
 
 2. **Add as GitHub Secret**:
    - Go to repository Settings → Secrets and variables → Actions
-   - Add new secret: `SUBMODULE_ACCESS_TOKEN`
+   - Add new secret: `MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN`
    - Paste the PAT token
 
 3. **Update Workflows**:
@@ -78,7 +78,7 @@ All workflows now include:
 - uses: actions/checkout@v6
   with:
     submodules: recursive
-    token: ${{ secrets.GITHUB_TOKEN }}
+    token: ${{ secrets.MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN }}
 ```
 
 ## Troubleshooting
