@@ -15,7 +15,7 @@ git submodule update --init --recursive
 # Check each submodule
 Write-Host "🔍 Checking submodule status..." -ForegroundColor Yellow
 
-$submodules = @("packages/chain", "packages/app", "packages/story-generator", "packages/publisher", "packages/app/tools", "infra")
+$submodules = @("packages/chain", "packages/app", "packages/story-generator", "packages/publisher", "packages/devhub", "infra")
 
 foreach ($submodule in $submodules) {
     if ((Test-Path $submodule) -and (Test-Path "$submodule/.git")) {

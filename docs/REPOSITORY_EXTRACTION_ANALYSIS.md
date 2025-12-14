@@ -9,14 +9,14 @@ This document analyzes all repositories in the Mystira workspace to determine wh
 
 ## Current Repository Structure
 
-| Repository                 | Path                       | Tech Stack       | Deployment     | Status           |
-| -------------------------- | -------------------------- | ---------------- | -------------- | ---------------- |
-| **Mystira.Chain**          | `packages/chain`           | Python (gRPC)    | Kubernetes     | Submodule        |
-| **Mystira.App**            | `packages/app`             | .NET 9           | Azure PaaS     | Submodule        |
-| **Mystira.DevHub**         | `packages/app/tools`       | .NET             | Desktop App    | Nested Submodule |
-| **Mystira.Publisher**      | `packages/publisher`       | TypeScript/React | Kubernetes     | Submodule        |
-| **Mystira.StoryGenerator** | `packages/story-generator` | .NET             | Kubernetes     | Submodule        |
-| **Mystira.INFRA**          | `infra`                    | Terraform/K8s    | Infrastructure | Submodule        |
+| Repository                 | Path                       | Tech Stack       | Deployment     | Status    |
+| -------------------------- | -------------------------- | ---------------- | -------------- | --------- |
+| **Mystira.Chain**          | `packages/chain`           | Python (gRPC)    | Kubernetes     | Submodule |
+| **Mystira.App**            | `packages/app`             | .NET 9           | Azure PaaS     | Submodule |
+| **Mystira.DevHub**         | `packages/devhub`          | .NET             | Desktop App    | Submodule |
+| **Mystira.Publisher**      | `packages/publisher`       | TypeScript/React | Kubernetes     | Submodule |
+| **Mystira.StoryGenerator** | `packages/story-generator` | .NET             | Kubernetes     | Submodule |
+| **Mystira.INFRA**          | `infra`                    | Terraform/K8s    | Infrastructure | Submodule |
 
 ## Analysis Criteria
 
@@ -56,7 +56,7 @@ We evaluate each repository based on:
 
 ---
 
-### ⚠️ **EXTRACT TO STANDALONE**: Mystira.DevHub
+### ✅ **KEEP AS SUBMODULE**: Mystira.DevHub (Extracted)
 
 **Current Status**: Nested submodule inside `packages/app/tools/`
 
@@ -181,9 +181,9 @@ We evaluate each repository based on:
 4. **Mystira.App** - Cohesive .NET monorepo
 5. **Mystira.INFRA** - Infrastructure coordination
 
-### ⚠️ Extract/Reorganize
+### ✅ Completed Extraction
 
-1. **Mystira.DevHub** - Move from nested submodule to root level
+1. **Mystira.DevHub** - ✅ Moved from nested submodule to `packages/devhub/`
 
 ---
 
@@ -204,17 +204,14 @@ We evaluate each repository based on:
 5. Remove old nested submodule reference
 6. Test workspace build and CI/CD
 
-**Commands**:
+**Status**: ✅ **Completed** - DevHub has been moved from `packages/app/tools/` to `packages/devhub/`
 
-```bash
-# Remove nested submodule
-git submodule deinit packages/app/tools
-git rm packages/app/tools
-rm -rf .git/modules/packages/app/tools
+**Completed Steps**:
 
-# Add as root-level submodule
-git submodule add -b main https://github.com/phoenixvc/Mystira.DevHub.git packages/devhub
-```
+1. ✅ Added submodule at `packages/devhub/`
+2. ✅ Removed old nested submodule entry
+3. ✅ Updated all documentation references
+4. ✅ Updated CI/CD and setup scripts
 
 ---
 
@@ -241,14 +238,14 @@ git submodule add -b main https://github.com/phoenixvc/Mystira.DevHub.git packag
 
 ## Decision Matrix
 
-| Repository     | Extract?   | Reason                           | Priority |
-| -------------- | ---------- | -------------------------------- | -------- |
-| Chain          | ❌ No      | Well-isolated Python service     | -        |
-| Publisher      | ❌ No      | Independent frontend             | -        |
-| StoryGenerator | ⚠️ Monitor | Independent but same tech as App | Low      |
-| App            | ❌ No      | Cohesive monorepo                | -        |
-| DevHub         | ✅ Yes     | Nested submodule complexity      | Medium   |
-| INFRA          | ❌ No      | Multi-service coordination       | -        |
+| Repository     | Extract?   | Reason                           | Priority  |
+| -------------- | ---------- | -------------------------------- | --------- |
+| Chain          | ❌ No      | Well-isolated Python service     | -         |
+| Publisher      | ❌ No      | Independent frontend             | -         |
+| StoryGenerator | ⚠️ Monitor | Independent but same tech as App | Low       |
+| App            | ❌ No      | Cohesive monorepo                | -         |
+| DevHub         | ✅ Done    | Extracted to packages/devhub     | Completed |
+| INFRA          | ❌ No      | Multi-service coordination       | -         |
 
 ---
 

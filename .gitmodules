@@ -23,7 +23,3 @@
 	url = https://github.com/phoenixvc/Mystira.INFRA.git
 	branch = main
 
-[submodule "packages/app/tools"]
-	path = packages/app/tools
-	url = https://github.com/phoenixvc/Mystira.DevHub.git
-	branch = main
