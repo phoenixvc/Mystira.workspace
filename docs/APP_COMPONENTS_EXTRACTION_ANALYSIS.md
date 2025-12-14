@@ -24,11 +24,42 @@ This document analyzes whether `Mystira.App.Admin.Api`, `Mystira.App.Api` (Publi
 
 ## Analysis: Should Admin API and Public API be Extracted?
 
-### ❌ **Recommendation: KEEP TOGETHER**
+### ⚠️ **RECONSIDERED RECOMMENDATION: CONSIDER EXTRACTION**
 
-Both APIs should remain in the same repository for the following reasons:
+**Important Context**: The Admin API README explicitly states it's **separate** from the Client API for:
 
-### 1. Extensive Shared Code Dependencies
+- Enhanced Security
+- Independent Scaling
+- Better Maintainability
+- Flexible Deployment
+
+Yet they're in the **same repository**. This creates a contradiction.
+
+### Arguments FOR Extraction (Stronger Than Initially Considered)
+
+### Why Extraction May Make Sense
+
+**1. They Already Deploy Separately**
+
+- ✅ Separate Azure App Services (different URLs)
+- ✅ Separate deployment pipelines
+- ✅ Already functionally independent
+
+**2. Admin UI Mixed with API (Code Smell)**
+
+- ⚠️ Razor Pages UI is embedded in Admin API
+- ⚠️ Mixed concerns (UI + API in same project)
+- ⚠️ Extraction could enable modern frontend/backend separation
+
+**3. Different Security Boundaries**
+
+- Admin API: Internal staff, high security requirements
+- Public API: End users, different security posture
+- Separate repos improve security isolation
+
+### Arguments AGAINST Extraction
+
+**1. Extensive Shared Code Dependencies**
 
 Both APIs share the same core dependencies:
 
@@ -289,9 +320,9 @@ The current structure is appropriate because:
 - Same technology stack and deployment model
 - Current internal organization is clear and maintainable
 
-Extraction would add complexity (package management, version coupling, cross-repo changes) without providing clear benefits (different tech stacks, independent domains, independent releases).
+**My Revised Assessment**: Given they already deploy separately and have different security boundaries, extraction makes more sense than initially concluded. The shared dependencies can be managed via NuGet packages, which is standard practice for .NET monorepos that split into separate repositories.
 
-The repository structure appropriately balances code sharing, maintainability, and deployment independence.
+See [Re-Analysis](./APP_COMPONENTS_EXTRACTION_REANALYSIS.md) for deeper consideration.
 
 ## Related Documentation
 

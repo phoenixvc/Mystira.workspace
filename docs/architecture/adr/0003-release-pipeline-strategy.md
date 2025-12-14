@@ -301,6 +301,7 @@ Each requires different tooling and processes.
 - [ADR-0001: Infrastructure Organization](./0001-infrastructure-organization-hybrid-approach.md)
 - [ADR-0002: Documentation Location Strategy](./0002-documentation-location-strategy.md)
 - [ADR-0004: Branching Strategy and CI/CD Process](./0004-branching-strategy-and-cicd.md)
+- [ADR-0005: Service Networking and Communication](./0005-service-networking-and-communication.md)
 
 ## References
 

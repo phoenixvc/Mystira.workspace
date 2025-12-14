@@ -27,8 +27,17 @@ For details, see [ADR-0002: Documentation Location Strategy](./architecture/adr/
 - [Shared Resources Guide](./SHARED_RESOURCES.md) - Using shared PostgreSQL, Redis, and Monitoring
 - [Kubernetes Secrets Management](./kubernetes-secrets-management.md) - Creating and managing Kubernetes secrets
 - [Architecture Decision Records](./architecture/adr/) - ADRs documenting key decisions
+  - [ADR-0005: Service Networking and Communication](./architecture/adr/0005-service-networking-and-communication.md) - Service communication patterns
+  - [ADR-0006: Admin API Repository Extraction](./architecture/adr/0006-admin-api-repository-extraction.md) - Admin API extraction decision
 - [Implementation Roadmap](./IMPLEMENTATION_ROADMAP.md) - Strategic implementation plan
 - [Phase 1 Status](./PHASE1_STATUS.md) - Phase 1 completion status and analysis
+
+### Repository Organization
+
+- [Repository Extraction Analysis](./REPOSITORY_EXTRACTION_ANALYSIS.md) - Analysis of all repositories and extraction recommendations
+- [App Components Extraction Analysis](./APP_COMPONENTS_EXTRACTION_ANALYSIS.md) - Analysis of Admin API/Public API extraction
+- [Migration Plans](./migration/) - Migration plans for repository extractions
+  - [Admin API Extraction Plan](./migration/ADMIN_API_EXTRACTION_PLAN.md) - Detailed migration plan
 
 ### CI/CD & DevOps
 

@@ -167,6 +167,7 @@ We will **keep the hybrid approach (Option B with enhancements)**:
 - [ADR-0002: Documentation Location Strategy](./0002-documentation-location-strategy.md)
 - [ADR-0003: Release Pipeline Strategy](./0003-release-pipeline-strategy.md)
 - [ADR-0004: Branching Strategy and CI/CD Process](./0004-branching-strategy-and-cicd.md)
+- [ADR-0005: Service Networking and Communication](./0005-service-networking-and-communication.md)
 
 ## References
 

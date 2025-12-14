@@ -304,3 +304,4 @@ All workflows are located in `.github/workflows/`:
 - [ADR-0001: Infrastructure Organization](./0001-infrastructure-organization-hybrid-approach.md)
 - [ADR-0002: Documentation Location Strategy](./0002-documentation-location-strategy.md)
 - [ADR-0003: Release Pipeline Strategy](./0003-release-pipeline-strategy.md)
+- [ADR-0005: Service Networking and Communication](./0005-service-networking-and-communication.md)
