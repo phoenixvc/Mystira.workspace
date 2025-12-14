@@ -165,7 +165,7 @@ This document tracks the migration of Admin tooling from `Mystira.App` monorepo 
 - ✅ Updated LoginPage to use toast notifications
 - ✅ Fixed missing imports in BundlesPage
 
-**Completed Tasks (Phase 3.13)**:
+**Completed Tasks (Phase 3.13-3.14)**:
 
 - ✅ Created Create Scenario page with React Hook Form + Zod validation
 - ✅ Created Create Badge page with React Hook Form + Zod validation
@@ -173,6 +173,11 @@ This document tracks the migration of Admin tooling from `Mystira.App` monorepo 
 - ✅ Created unified Create Master Data page for all master data types
 - ✅ Added routes for all create pages
 - ✅ Updated list pages to link to create pages instead of placeholder buttons
+- ✅ Enhanced empty states with create and import options
+- ✅ Improved badge import to upload image to media first, then create badge
+- ✅ Updated MasterDataPage to use LoadingSpinner and ErrorAlert components
+- ✅ Updated BundlesPage view button to link to import page
+- ✅ All pages now use consistent reusable components
 
 **Remaining Tasks**:
 
@@ -185,9 +190,6 @@ This document tracks the migration of Admin tooling from `Mystira.App` monorepo 
 - [ ] Remove Admin UI from `Mystira.App` monorepo (after verification)
 
 **Note**: Media and Bundles are file-based entities that use upload/import pages. Traditional create/edit forms are not applicable for these entities.
-
-- [ ] Complete styling migration and polish UI
-- [ ] Set up CI/CD pipeline
 
 ---
 
