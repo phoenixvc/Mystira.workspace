@@ -153,7 +153,7 @@ We evaluate each repository based on:
 
 ---
 
-### ✅ **KEEP AS SUBMODULE**: Mystira.INFRA
+### ✅ **KEEP AS SUBMODULE**: Mystira.Infra
 
 **Current Status**: Infrastructure as Code repository
 
@@ -179,7 +179,7 @@ We evaluate each repository based on:
 2. **Mystira.Publisher** - Independent frontend service
 3. **Mystira.StoryGenerator** - Independent .NET service (monitor coupling)
 4. **Mystira.App** - Cohesive .NET monorepo
-5. **Mystira.INFRA** - Infrastructure coordination
+5. **Mystira.Infra** - Infrastructure coordination
 
 ### ✅ Completed Extraction
 
