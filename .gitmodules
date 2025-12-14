@@ -31,3 +31,4 @@
 [submodule "packages/admin-api"]
 	path = packages/admin-api
 	url = https://github.com/phoenixvc/Mystira.Admin.Api.git
+	branch = main
