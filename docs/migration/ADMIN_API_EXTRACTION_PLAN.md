@@ -466,15 +466,15 @@ git submodule add -b main https://github.com/phoenixvc/Mystira.Admin.UI.git pack
 
 ## Timeline
 
-| Phase                          | Duration  | Dependencies     | Status           |
-| ------------------------------ | --------- | ---------------- | ---------------- |
-| Phase 1: Setup Shared Packages | 1 week    | NuGet feed setup | In Progress      |
+| Phase                          | Duration  | Dependencies     | Status          |
+| ------------------------------ | --------- | ---------------- | --------------- |
+| Phase 1: Setup Shared Packages | 1 week    | NuGet feed setup | In Progress     |
 | Phase 2: Create Repositories   | 1-2 weeks | Phase 1          | ✅ **COMPLETED** |
-| Phase 3: Setup CI/CD           | 1 week    | Phase 2          | Pending          |
-| Phase 4: Migrate Admin UI      | 2-3 weeks | Phase 3          | Pending          |
-| Phase 5: Update Documentation  | 1 week    | Phase 2          | Pending          |
-| Phase 6: Migration Execution   | 1 week    | Phases 1-3, 5    | Pending          |
-| Phase 7: Cleanup               | 1 week    | Phase 6          | Pending          |
+| Phase 3: Setup CI/CD           | 1 week    | Phase 2          | Pending         |
+| Phase 4: Migrate Admin UI      | 2-3 weeks | Phase 3          | Pending         |
+| Phase 5: Update Documentation  | 1 week    | Phase 2          | Pending         |
+| Phase 6: Migration Execution   | 1 week    | Phases 1-3, 5    | Pending         |
+| Phase 7: Cleanup               | 1 week    | Phase 6          | Pending         |
 
 **Total Estimated Time**: 8-12 weeks (with Admin UI extraction included)
 
