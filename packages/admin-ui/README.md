@@ -38,7 +38,13 @@ This is a modern SPA frontend that connects to the `Mystira.Admin.Api` backend s
 - **Mystira.App**: Source repository where Admin UI currently exists (being migrated from)
 - **Mystira.workspace**: Unified workspace containing all Mystira components
 
-## Migration Plan
+## Migration Status
+
+**Current Phase**: Phase 2 - Repository Setup (In Progress)
+
+See [Migration Phases Documentation](../../docs/MIGRATION_PHASES.md) for detailed status and progress tracking.
+
+### Migration Plan
 
 1. ✅ Repository created
 2. ⏳ Extract Admin UI code from `Mystira.App`
@@ -47,6 +53,8 @@ This is a modern SPA frontend that connects to the `Mystira.Admin.Api` backend s
 5. ⏳ Set up CI/CD pipeline
 6. ⏳ Deploy and verify functionality
 7. ⏳ Remove Admin UI from `Mystira.App` monorepo
+
+**Note**: Repository is currently empty (no commits). First commit will be made once code extraction begins.
 
 ## Setup
 
