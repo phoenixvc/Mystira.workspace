@@ -130,14 +130,16 @@ This document tracks the migration of Admin tooling from `Mystira.App` monorepo 
 - ✅ Updated ScenariosPage to use new components
 - ✅ All import pages now complete (Scenario, Media, Bundle, Badge, Character Map)
 
-**Completed Tasks (Phase 3.7)**:
+**Completed Tasks (Phase 3.7-3.8)**:
 
-- ✅ Updated ScenariosPage, MediaPage, BadgesPage, BundlesPage to use reusable components
+- ✅ Updated all major pages (Scenarios, Media, Badges, Bundles, Dashboard) to use reusable components
 - ✅ Replaced all inline loading states with LoadingSpinner component
 - ✅ Replaced all inline error states with ErrorAlert component
 - ✅ Replaced all inline search bars with SearchBar component
 - ✅ Replaced all inline pagination with Pagination component
+- ✅ Improved Dashboard refresh to use React Query refetch instead of page reload
 - ✅ Improved code consistency and maintainability across all pages
+- ✅ MasterDataPage already uses reusable components (created with them)
 
 **Remaining Tasks**:
 
