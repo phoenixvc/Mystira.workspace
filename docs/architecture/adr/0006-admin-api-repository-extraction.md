@@ -39,15 +39,17 @@ Both APIs share extensive code dependencies:
 
 ## Decision
 
-We will **extract Admin API to a separate repository** (`Mystira.Admin.Api`).
+We will **extract Admin API and Admin UI to separate repositories** (`Mystira.Admin.Api` and `Mystira.Admin.UI`).
 
 ### Extraction Strategy
 
-1. **Create Separate Repository**: `Mystira.Admin.Api`
+1. **Create Separate Repositories**:
+   - `Mystira.Admin.Api` - Admin API backend (pure REST/gRPC API)
+   - `Mystira.Admin.UI` - Admin frontend (modern SPA, replacing Razor Pages)
 2. **Publish Shared Libraries as NuGet Packages**: Domain, Application, Infrastructure, Shared, Contracts
 3. **Update Admin API**: Replace project references with NuGet package references
 4. **Maintain API Compatibility**: No breaking changes to Admin API surface
-5. **Future UI Separation**: Plan to extract Admin UI to separate frontend (optional Phase 2)
+5. **Modernize Admin UI**: Extract Razor Pages to modern frontend architecture
 
 ### Repository Structure After Extraction
 
@@ -60,9 +62,16 @@ We will **extract Admin API to a separate repository** (`Mystira.Admin.Api`).
 
 **Mystira.Admin.Api** (new):
 
-- Admin API backend (`Mystira.App.Admin.Api` or renamed to `Mystira.Admin.Api`)
-- Admin UI (Razor Pages, to be modernized later)
+- Admin API backend (pure REST/gRPC API, no Razor Pages)
 - Depends on NuGet packages from `Mystira.App`
+- CORS configured for `Mystira.Admin.UI`
+
+**Mystira.Admin.UI** (new):
+
+- Modern frontend application (React/Vue/Blazor standalone)
+- Replaces Razor Pages from original Admin API
+- Communicates with `Mystira.Admin.Api` via REST/gRPC
+- Deployed as static site (Azure Static Web Apps) or separate service
 
 ## Rationale
 
@@ -418,12 +427,12 @@ See [ADR-0007: NuGet Feed Strategy](./0007-nuget-feed-strategy-for-shared-librar
 
 ### Admin UI Modernization
 
-After Admin API extraction, consider:
+Admin UI extraction is included in the initial migration:
 
-- Extract Admin UI to separate frontend repository
-- Modernize to React/Vue/Blazor standalone
-- REST API-only backend (remove Razor Pages)
-- Better frontend/backend separation
+- ✅ Admin UI extracted to `Mystira.Admin.UI` repository
+- ✅ Modernized to React/Vue/Blazor standalone (replacing Razor Pages)
+- ✅ Admin API is pure REST/gRPC backend (Razor Pages removed)
+- ✅ Better frontend/backend separation achieved
 
 ### Service Mesh Integration
 

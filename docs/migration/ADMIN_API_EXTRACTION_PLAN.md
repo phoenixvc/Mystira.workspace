@@ -1,19 +1,25 @@
 # Admin API Extraction Migration Plan
 
 **Date**: 2025-12-14  
-**Status**: Planning  
-**Target**: Extract `Mystira.App.Admin.Api` to separate repository `Mystira.Admin.Api`
+**Status**: In Progress  
+**Target**: Extract `Mystira.App.Admin.Api` to separate repositories `Mystira.Admin.Api` and `Mystira.Admin.UI`
 
 ## Executive Summary
 
-This migration plan outlines the steps to extract the Admin API from the `Mystira.App` monorepo into a separate repository, enabling better security isolation, independent release cycles, and modern frontend architecture.
+This migration plan outlines the steps to extract the Admin API and Admin UI from the `Mystira.App` monorepo into separate repositories, enabling better security isolation, independent release cycles, and modern frontend architecture.
+
+**Repositories Created**:
+
+- ✅ `Mystira.Admin.Api` - Admin API backend (pure REST/gRPC)
+- ✅ `Mystira.Admin.UI` - Admin frontend (modern SPA)
 
 ## Prerequisites
 
 - [ ] Internal NuGet feed configured (Azure DevOps, GitHub Packages, or private NuGet server)
-- [ ] Access to create new repository `Mystira.Admin.Api`
-- [ ] CI/CD pipeline access for new repository
-- [ ] Team alignment on extraction decision
+- [x] Access to create new repository `Mystira.Admin.Api` - **COMPLETED**
+- [x] Access to create new repository `Mystira.Admin.UI` - **COMPLETED**
+- [ ] CI/CD pipeline access for new repositories
+- [x] Team alignment on extraction decision - **COMPLETED**
 
 ## Phase 1: Setup Shared Packages (Week 1)
 
@@ -119,12 +125,15 @@ jobs:
           dotnet nuget push **/*.nupkg --source "Mystira-Internal" --skip-duplicate
 ```
 
-## Phase 2: Create Admin API Repository (Week 1-2)
+## Phase 2: Create Admin API and Admin UI Repositories (Week 1-2)
 
-### 2.1 Create Repository
+### 2.1 Create Repositories
 
-1. Create new GitHub repository: `Mystira.Admin.Api`
-2. Initialize with:
+**Status**: ✅ **COMPLETED**
+
+1. ✅ Created GitHub repository: `Mystira.Admin.Api`
+2. ✅ Created GitHub repository: `Mystira.Admin.UI`
+3. Initialize with:
    - `.gitignore` for .NET
    - `README.md`
    - `LICENSE`
@@ -300,33 +309,35 @@ jobs:
 - Ensure Admin API deployment references new repository
 - Update deployment pipelines to use new repo
 
-## Phase 4: Extract Admin UI (Optional - Week 3-4)
+## Phase 4: Migrate Admin UI to Modern Frontend (Week 3-4)
 
-### 4.1 Create Admin UI Repository
+### 4.1 Admin UI Repository
 
-1. Create `Mystira.Admin.UI` repository
-2. Choose frontend framework (React/Vue/Blazor standalone)
+**Status**: ✅ **REPOSITORY CREATED**
+
+- ✅ `Mystira.Admin.UI` repository created
+- [ ] Choose frontend framework (React/Vue/Blazor standalone)
 
 ### 4.2 Migrate Razor Pages to Modern Frontend
 
 **Current**: Razor Pages in `Mystira.App.Admin.Api/Views/`
 
-**Target**: Modern SPA (e.g., React + TypeScript)
+**Target**: Modern SPA (e.g., React + TypeScript) in `Mystira.Admin.UI`
 
 **Migration Steps**:
 
-1. Create new React application
-2. Recreate UI components from Razor Pages
-3. Connect to Admin API via REST/gRPC
-4. Implement authentication/authorization
-5. Deploy as static site (Azure Static Web Apps)
+1. [ ] Create new frontend application in `Mystira.Admin.UI`
+2. [ ] Recreate UI components from Razor Pages
+3. [ ] Connect to Admin API via REST/gRPC
+4. [ ] Implement authentication/authorization
+5. [ ] Deploy as static site (Azure Static Web Apps)
 
 ### 4.3 Update Admin API
 
-- Remove Razor Pages (`Views/` folder)
-- Convert to pure API (REST/gRPC endpoints only)
-- Add CORS configuration for new frontend
-- Update authentication for SPA
+- [ ] Remove Razor Pages (`Views/` folder) from `Mystira.Admin.Api`
+- [ ] Ensure Admin API is pure API (REST/gRPC endpoints only)
+- [ ] Add CORS configuration for `Mystira.Admin.UI`
+- [ ] Update authentication for SPA
 
 ## Phase 5: Update Documentation (Week 2-3)
 
@@ -355,7 +366,7 @@ jobs:
 
 **Mystira.workspace**:
 
-- Add `Mystira.Admin.Api` to submodules
+- Add `Mystira.Admin.Api` and `Mystira.Admin.UI` to submodules
 - Update README with new repository
 - Update setup scripts
 
@@ -405,6 +416,7 @@ If issues occur:
 ```bash
 cd Mystira.workspace
 git submodule add -b main https://github.com/phoenixvc/Mystira.Admin.Api.git packages/admin-api
+git submodule add -b main https://github.com/phoenixvc/Mystira.Admin.UI.git packages/admin-ui
 ```
 
 ### 7.3 Archive Old Code
