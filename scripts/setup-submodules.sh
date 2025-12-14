@@ -18,8 +18,12 @@ git submodule update --init --recursive
 
 # Copy ESLint config to admin-ui if submodule exists and file doesn't exist
 if [ -d "packages/admin-ui" ] && [ ! -f "packages/admin-ui/.eslintrc.cjs" ]; then
-    echo "📝 Copying ESLint configuration to packages/admin-ui..."
-    cp configs/admin-ui.eslintrc.cjs packages/admin-ui/.eslintrc.cjs
+    if [ -f "configs/admin-ui.eslintrc.cjs" ]; then
+        echo "📝 Copying ESLint configuration to packages/admin-ui..."
+        cp configs/admin-ui.eslintrc.cjs packages/admin-ui/.eslintrc.cjs
+    else
+        echo "⚠️  Warning: configs/admin-ui.eslintrc.cjs not found, skipping copy"
+    fi
 fi
 
 # Check each submodule
