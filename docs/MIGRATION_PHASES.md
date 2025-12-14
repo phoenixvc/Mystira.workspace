@@ -122,11 +122,19 @@ This document tracks the migration of Admin tooling from `Mystira.App` monorepo 
 - ✅ Created unified MasterDataPage component for efficient code reuse
 - ✅ Added masterData API client with full CRUD operations
 
+**Completed Tasks (Phase 3.6)**:
+
+- ✅ Created Import Badge page with image preview
+- ✅ Added reusable LoadingSpinner component
+- ✅ Added reusable ErrorAlert component with retry functionality
+- ✅ Updated ScenariosPage to use new components
+- ✅ All import pages now complete (Scenario, Media, Bundle, Badge, Character Map)
+
 **Remaining Tasks**:
 
-- [ ] Create import pages (Badge)
 - [ ] Implement edit/create forms with React Hook Form + Zod validation
-- [ ] Add more error handling and loading states
+- [ ] Update remaining pages to use LoadingSpinner and ErrorAlert
+- [ ] Add toast notifications for success/error messages (replace alerts)
 - [ ] Test authentication flow end-to-end
 - [ ] Verify API integration with real backend
 - [ ] Complete styling migration and polish UI
