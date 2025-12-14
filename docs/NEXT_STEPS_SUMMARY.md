@@ -45,15 +45,15 @@ gh api repos/phoenixvc/Mystira.workspace/branches/main/protection --jq '{approva
 
 | Branch | Protected | PR Required | Approvals | Code Owners | Conversation Resolution | CI Checks |
 | ------ | --------- | ----------- | --------- | ----------- | ----------------------- | --------- |
-| `dev`  | ✅ Yes     | ✅ Yes       | 0         | ❌ No        | ❌ No                    | ✅ 9       |
-| `main` | ✅ Yes     | ✅ Yes       | 1         | ✅ Yes       | ✅ Yes                   | ✅ 9       |
+| `dev`  | ✅ Yes    | ✅ Yes      | 0         | ❌ No       | ❌ No                   | ✅ 9      |
+| `main` | ✅ Yes    | ✅ Yes      | 1         | ✅ Yes      | ✅ Yes                  | ✅ 9      |
 
 ### Environments
 
 | Environment  | Created | Approval Required | Reviewers             |
 | ------------ | ------- | ----------------- | --------------------- |
-| `staging`    | ✅ Yes   | ❌ No              | None                  |
-| `production` | ✅ Yes   | ⚠️ Optional        | None (can add via UI) |
+| `staging`    | ✅ Yes  | ❌ No             | None                  |
+| `production` | ✅ Yes  | ⚠️ Optional       | None (can add via UI) |
 
 ## Optional Next Steps
 
