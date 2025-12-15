@@ -1,0 +1,19 @@
+name: 'Setup Admin-UI Submodule'
+description: 'Initialize the admin-ui submodule from the dev branch'
+inputs:
+  token:
+    description: 'GitHub token with access to the admin-ui repository'
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: Initialize admin-ui submodule
+      shell: bash
+      run: |
+        git config --global user.email "github-actions[bot]@users.noreply.github.com"
+        git config --global user.name "github-actions[bot]"
+        if [ ! -d "packages/admin-ui/.git" ]; then
+          echo "Cloning admin-ui submodule from dev branch..."
+          git clone --branch dev --depth 1 https://x-access-token:${{ inputs.token }}@github.com/phoenixvc/Mystira.Admin.UI.git packages/admin-ui
+        fi

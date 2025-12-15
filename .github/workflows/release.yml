@@ -20,6 +20,11 @@ jobs:
           submodules: recursive
           token: ${{ secrets.MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN }}
 
+      - name: Setup admin-ui submodule
+        uses: ./.github/actions/setup-admin-ui
+        with:
+          token: ${{ secrets.MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN }}
+
       - uses: pnpm/action-setup@v4
 
       - uses: actions/setup-node@v6
