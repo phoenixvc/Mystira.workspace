@@ -39,19 +39,6 @@ jobs:
           submodules: recursive
           token: ${{ secrets.MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN }}
 
-      - name: Update submodules to latest
-        run: |
-          # Force fetch latest from each submodule's tracking branch (fallback to HEAD if branch doesn't exist)
-          git submodule foreach '
-            git fetch origin
-            BRANCH=$(git config -f $toplevel/.gitmodules submodule.$name.branch || echo main)
-            if git rev-parse --verify origin/$BRANCH >/dev/null 2>&1; then
-              git checkout origin/$BRANCH --
-            else
-              git checkout origin/HEAD --
-            fi
-          '
-
       - name: Setup admin-ui submodule
         uses: ./.github/actions/setup-admin-ui
         with:
@@ -101,19 +88,6 @@ jobs:
           submodules: recursive
           token: ${{ secrets.MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN }}
 
-      - name: Update submodules to latest
-        run: |
-          # Force fetch latest from each submodule's tracking branch (fallback to HEAD if branch doesn't exist)
-          git submodule foreach '
-            git fetch origin
-            BRANCH=$(git config -f $toplevel/.gitmodules submodule.$name.branch || echo main)
-            if git rev-parse --verify origin/$BRANCH >/dev/null 2>&1; then
-              git checkout origin/$BRANCH --
-            else
-              git checkout origin/HEAD --
-            fi
-          '
-
       - name: Setup admin-ui submodule
         uses: ./.github/actions/setup-admin-ui
         with:
@@ -155,19 +129,6 @@ jobs:
         with:
           submodules: recursive
           token: ${{ secrets.MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN }}
-
-      - name: Update submodules to latest
-        run: |
-          # Force fetch latest from each submodule's tracking branch (fallback to HEAD if branch doesn't exist)
-          git submodule foreach '
-            git fetch origin
-            BRANCH=$(git config -f $toplevel/.gitmodules submodule.$name.branch || echo main)
-            if git rev-parse --verify origin/$BRANCH >/dev/null 2>&1; then
-              git checkout origin/$BRANCH --
-            else
-              git checkout origin/HEAD --
-            fi
-          '
 
       - name: Setup admin-ui submodule
         uses: ./.github/actions/setup-admin-ui
