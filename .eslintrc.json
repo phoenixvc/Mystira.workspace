@@ -42,6 +42,23 @@
         "@typescript-eslint/no-unused-vars": ["warn", { "argsIgnorePattern": "^_" }],
         "react-hooks/rules-of-hooks": "off"
       }
+    },
+    {
+      "files": ["packages/publisher/**/*.{ts,tsx,js}"],
+      "env": {
+        "browser": true,
+        "node": true
+      },
+      "rules": {
+        "@typescript-eslint/no-unused-vars": ["warn", { "argsIgnorePattern": "^_" }],
+        "@typescript-eslint/no-namespace": "warn"
+      }
+    },
+    {
+      "files": ["**/mockServiceWorker.js"],
+      "rules": {
+        "no-unused-disable-directives": "off"
+      }
     }
   ]
 }
