@@ -53,20 +53,16 @@ jobs:
           node-version: "18"
           cache: "pnpm"
 
-      - name: Setup admin-ui submodule configurations
+      - name: Setup submodule ESLint configurations
         run: |
-          # Copy legacy ESLint config if not present
+          # Copy legacy ESLint config for admin-ui if not present
           if [ ! -f "packages/admin-ui/.eslintrc.cjs" ] && [ -f "configs/admin-ui.eslintrc.cjs" ]; then
             cp configs/admin-ui.eslintrc.cjs packages/admin-ui/.eslintrc.cjs
           fi
-          # Remove flat config so ESLint uses the legacy .eslintrc.cjs
-          # (eslint.config.mjs takes precedence and requires @eslint/js which isn't available)
-          if [ -f "packages/admin-ui/eslint.config.mjs" ]; then
-            rm packages/admin-ui/eslint.config.mjs
-          fi
-          if [ -f "packages/admin-ui/eslint.config.js" ]; then
-            rm packages/admin-ui/eslint.config.js
-          fi
+          # Remove all flat config files from submodules so ESLint uses legacy .eslintrc.*
+          # (flat configs require @eslint/js which has module resolution issues in monorepo)
+          find packages -name "eslint.config.js" -o -name "eslint.config.mjs" -o -name "eslint.config.cjs" | xargs rm -f 2>/dev/null || true
+          find infra -name "eslint.config.js" -o -name "eslint.config.mjs" -o -name "eslint.config.cjs" | xargs rm -f 2>/dev/null || true
 
       - name: Install dependencies
         # Note: --frozen-lockfile is not used because all packages are git submodules
