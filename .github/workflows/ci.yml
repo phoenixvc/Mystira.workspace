@@ -39,6 +39,9 @@ jobs:
           submodules: recursive
           token: ${{ secrets.MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN }}
 
+      - name: Update submodules to latest
+        run: git submodule update --remote --merge
+
       - name: Setup admin-ui submodule
         uses: ./.github/actions/setup-admin-ui
         with:
@@ -51,14 +54,17 @@ jobs:
           node-version: "18"
           cache: "pnpm"
 
-      - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile
 
-      - name: Setup submodule configurations
+      - name: Setup submodule ESLint configurations
         run: |
-          if [ ! -f "packages/admin-ui/.eslintrc.cjs" ] && [ -f "configs/admin-ui.eslintrc.cjs" ]; then
-            cp configs/admin-ui.eslintrc.cjs packages/admin-ui/.eslintrc.cjs
-          fi
+          # Copy workspace ESLint configs to submodules (overrides their configs with proper globals)
+          cp configs/admin-ui.eslint.config.mjs packages/admin-ui/eslint.config.mjs
+          cp configs/admin-ui.eslint.config.mjs packages/publisher/eslint.config.mjs
+
+      - name: Install dependencies
+        # Note: --frozen-lockfile is not used because all packages are git submodules
+        # with their own dependencies that can't be tracked in the workspace lockfile
+        run: pnpm install
 
       - name: Run linting
         run: pnpm lint
@@ -86,6 +92,9 @@ jobs:
           submodules: recursive
           token: ${{ secrets.MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN }}
 
+      - name: Update submodules to latest
+        run: git submodule update --remote --merge
+
       - name: Setup admin-ui submodule
         uses: ./.github/actions/setup-admin-ui
         with:
@@ -99,7 +108,8 @@ jobs:
           cache: "pnpm"
 
       - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile
+        # Note: --frozen-lockfile is not used because all packages are git submodules
+        run: pnpm install
 
       - name: Run tests
         run: pnpm test
@@ -127,6 +137,9 @@ jobs:
           submodules: recursive
           token: ${{ secrets.MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN }}
 
+      - name: Update submodules to latest
+        run: git submodule update --remote --merge
+
       - name: Setup admin-ui submodule
         uses: ./.github/actions/setup-admin-ui
         with:
@@ -140,7 +153,8 @@ jobs:
           cache: "pnpm"
 
       - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile
+        # Note: --frozen-lockfile is not used because all packages are git submodules
+        run: pnpm install
 
       - name: Build all packages
         run: pnpm build
