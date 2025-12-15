@@ -23,8 +23,6 @@ jobs:
       contents: read
     env:
       NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN || 'dummy' }}
-      # Force ESLint v9 to use legacy .eslintrc.* config files
-      ESLINT_USE_FLAT_CONFIG: "false"
     steps:
       - name: Validate GitHub Submodule Access Token
         run: |
@@ -53,16 +51,6 @@ jobs:
           node-version: "18"
           cache: "pnpm"
 
-      - name: Setup submodule ESLint configurations
-        run: |
-          # Copy legacy ESLint config for admin-ui if not present
-          if [ ! -f "packages/admin-ui/.eslintrc.cjs" ] && [ -f "configs/admin-ui.eslintrc.cjs" ]; then
-            cp configs/admin-ui.eslintrc.cjs packages/admin-ui/.eslintrc.cjs
-          fi
-          # Remove all flat config files from submodules so ESLint uses legacy .eslintrc.*
-          # (flat configs require @eslint/js which has module resolution issues in monorepo)
-          find packages -name "eslint.config.js" -o -name "eslint.config.mjs" -o -name "eslint.config.cjs" | xargs rm -f 2>/dev/null || true
-          find infra -name "eslint.config.js" -o -name "eslint.config.mjs" -o -name "eslint.config.cjs" | xargs rm -f 2>/dev/null || true
 
       - name: Install dependencies
         # Note: --frozen-lockfile is not used because all packages are git submodules
