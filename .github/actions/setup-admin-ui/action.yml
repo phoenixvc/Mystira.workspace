@@ -12,16 +12,18 @@ runs:
       shell: bash
       env:
         GH_TOKEN: ${{ inputs.token }}
-        GIT_ASKPASS: /tmp/git-askpass-${{ github.run_id }}
+        GIT_ASKPASS: /tmp/git-askpass-${{ github.run_id }}-${{ github.job }}
       run: |
-        if [ ! -d "packages/admin-ui/.git" ] || [ ! -f "packages/admin-ui/.git/config" ]; then
+        if [ ! -d "packages/admin-ui" ] || [ ! -d "packages/admin-ui/.git" ]; then
           echo "Cloning admin-ui submodule from dev branch..."
           # Create a temporary askpass script for secure credential passing
           echo '#!/bin/sh' > "$GIT_ASKPASS"
           echo 'echo $GH_TOKEN' >> "$GIT_ASKPASS"
           chmod +x "$GIT_ASKPASS"
-          # Clone the repository
-          git clone --branch dev --depth 1 https://x-access-token@github.com/phoenixvc/Mystira.Admin.UI.git packages/admin-ui
+          # Export GIT_ASKPASS so git can use it
+          export GIT_ASKPASS
+          # Clone the repository (URL without embedded credentials - uses GIT_ASKPASS)
+          git clone --branch dev --depth 1 https://github.com/phoenixvc/Mystira.Admin.UI.git packages/admin-ui
           # Clean up the askpass script
           rm -f "$GIT_ASKPASS"
           # Set local git config for the submodule
