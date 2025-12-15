@@ -64,7 +64,6 @@ jobs:
           node-version: "18"
           cache: "pnpm"
 
-
       - name: Setup submodule ESLint configurations
         run: |
           # Copy workspace ESLint configs to submodules (overrides their configs with proper globals)
