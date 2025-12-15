@@ -72,6 +72,9 @@ jobs:
         run: pnpm install
 
       - name: Run linting
+        # ESLINT_USE_FLAT_CONFIG=false forces ESLint v9 to use legacy .eslintrc.* config
+        env:
+          ESLINT_USE_FLAT_CONFIG: "false"
         run: pnpm lint
 
   test:
