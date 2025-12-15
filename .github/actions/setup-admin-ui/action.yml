@@ -1,0 +1,36 @@
+name: 'Setup Admin-UI Submodule'
+description: 'Initialize the admin-ui submodule from the dev branch'
+inputs:
+  token:
+    description: 'GitHub token with access to the admin-ui repository'
+    required: true
+  branch:
+    description: 'Branch to clone from admin-ui repository'
+    required: false
+    default: 'dev'
+
+runs:
+  using: "composite"
+  steps:
+    - name: Initialize admin-ui submodule
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.token }}
+        GIT_ASKPASS_FILE: /tmp/.git-askpass-${{ github.run_id }}-${{ github.job }}-$RANDOM
+      run: |
+        if [ ! -d "packages/admin-ui" ] || [ ! -d "packages/admin-ui/.git" ]; then
+          echo "Cloning admin-ui submodule from ${{ inputs.branch }} branch..."
+          # Create a temporary askpass script for secure credential passing
+          echo '#!/bin/sh' > "$GIT_ASKPASS_FILE"
+          echo 'echo $GH_TOKEN' >> "$GIT_ASKPASS_FILE"
+          chmod 700 "$GIT_ASKPASS_FILE"
+          # Export GIT_ASKPASS so git can use it
+          export GIT_ASKPASS="$GIT_ASKPASS_FILE"
+          # Clone the repository (URL without embedded credentials - uses GIT_ASKPASS)
+          git clone --branch ${{ inputs.branch }} --depth 1 https://github.com/phoenixvc/Mystira.Admin.UI.git packages/admin-ui
+          # Clean up the askpass script
+          rm -f "$GIT_ASKPASS_FILE"
+          # Set local git config for the submodule
+          git -C packages/admin-ui config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git -C packages/admin-ui config --local user.name "github-actions[bot]"
+        fi
