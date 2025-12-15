@@ -40,7 +40,9 @@ jobs:
           token: ${{ secrets.MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN }}
 
       - name: Update submodules to latest
-        run: git submodule update --remote --merge
+        run: |
+          # Force fetch latest from each submodule's tracking branch
+          git submodule foreach 'git fetch origin && git checkout origin/$(git config -f $toplevel/.gitmodules submodule.$name.branch || echo main) --'
 
       - name: Setup admin-ui submodule
         uses: ./.github/actions/setup-admin-ui
@@ -93,7 +95,9 @@ jobs:
           token: ${{ secrets.MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN }}
 
       - name: Update submodules to latest
-        run: git submodule update --remote --merge
+        run: |
+          # Force fetch latest from each submodule's tracking branch
+          git submodule foreach 'git fetch origin && git checkout origin/$(git config -f $toplevel/.gitmodules submodule.$name.branch || echo main) --'
 
       - name: Setup admin-ui submodule
         uses: ./.github/actions/setup-admin-ui
@@ -138,7 +142,9 @@ jobs:
           token: ${{ secrets.MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN }}
 
       - name: Update submodules to latest
-        run: git submodule update --remote --merge
+        run: |
+          # Force fetch latest from each submodule's tracking branch
+          git submodule foreach 'git fetch origin && git checkout origin/$(git config -f $toplevel/.gitmodules submodule.$name.branch || echo main) --'
 
       - name: Setup admin-ui submodule
         uses: ./.github/actions/setup-admin-ui
