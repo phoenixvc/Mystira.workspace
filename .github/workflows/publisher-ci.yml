@@ -89,7 +89,7 @@ jobs:
         run: pnpm --filter mystira-publisher test
 
       - name: Upload coverage
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v5
         with:
           flags: publisher
           fail_ci_if_error: false
@@ -158,7 +158,7 @@ jobs:
 
       - name: Azure Login
         if: github.event_name == 'push' && (github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/main')
-        uses: azure/login@v1
+        uses: azure/login@v2
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
@@ -179,7 +179,7 @@ jobs:
             type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev' }}
 
       - name: Build and push
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: .
           file: infra/docker/publisher/Dockerfile
@@ -213,7 +213,7 @@ jobs:
           token: ${{ secrets.MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN }}
 
       - name: Install kubectl
-        uses: azure/setup-kubectl@v3
+        uses: azure/setup-kubectl@v4
 
       - name: Validate publisher manifests
         run: |
