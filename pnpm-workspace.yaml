@@ -5,6 +5,4 @@ packages:
   - "packages/publisher"
   - "infra"
   - "tools/*"
-  # Exclude admin-ui as it's a submodule with its own lockfile
-  - "!packages/admin-ui"
 
