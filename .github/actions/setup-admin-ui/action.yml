@@ -10,10 +10,14 @@ runs:
   steps:
     - name: Initialize admin-ui submodule
       shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.token }}
       run: |
-        git config --global user.email "github-actions[bot]@users.noreply.github.com"
-        git config --global user.name "github-actions[bot]"
         if [ ! -d "packages/admin-ui/.git" ]; then
           echo "Cloning admin-ui submodule from dev branch..."
-          git clone --branch dev --depth 1 https://x-access-token:${{ inputs.token }}@github.com/phoenixvc/Mystira.Admin.UI.git packages/admin-ui
+          git clone --branch dev --depth 1 https://x-access-token:${GH_TOKEN}@github.com/phoenixvc/Mystira.Admin.UI.git packages/admin-ui
+          cd packages/admin-ui
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config user.name "github-actions[bot]"
+          cd ../..
         fi
