@@ -12,14 +12,18 @@ runs:
       shell: bash
       env:
         GH_TOKEN: ${{ inputs.token }}
+        GIT_ASKPASS: /tmp/git-askpass-${{ github.run_id }}
       run: |
-        if [ ! -d "packages/admin-ui/.git" ]; then
+        if [ ! -d "packages/admin-ui/.git" ] || [ ! -f "packages/admin-ui/.git/config" ]; then
           echo "Cloning admin-ui submodule from dev branch..."
-          # Configure git credential helper to use the token
-          git config --global credential.helper '!f() { echo "username=x-access-token"; echo "password=$GH_TOKEN"; }; f'
-          git clone --branch dev --depth 1 https://github.com/phoenixvc/Mystira.Admin.UI.git packages/admin-ui
-          # Clear the credential helper after use
-          git config --global --unset credential.helper
+          # Create a temporary askpass script for secure credential passing
+          echo '#!/bin/sh' > "$GIT_ASKPASS"
+          echo 'echo $GH_TOKEN' >> "$GIT_ASKPASS"
+          chmod +x "$GIT_ASKPASS"
+          # Clone the repository
+          git clone --branch dev --depth 1 https://x-access-token@github.com/phoenixvc/Mystira.Admin.UI.git packages/admin-ui
+          # Clean up the askpass script
+          rm -f "$GIT_ASKPASS"
           # Set local git config for the submodule
           git -C packages/admin-ui config --local user.email "github-actions[bot]@users.noreply.github.com"
           git -C packages/admin-ui config --local user.name "github-actions[bot]"
