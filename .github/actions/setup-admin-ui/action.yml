@@ -15,9 +15,12 @@ runs:
       run: |
         if [ ! -d "packages/admin-ui/.git" ]; then
           echo "Cloning admin-ui submodule from dev branch..."
-          git clone --branch dev --depth 1 https://x-access-token:${GH_TOKEN}@github.com/phoenixvc/Mystira.Admin.UI.git packages/admin-ui
-          cd packages/admin-ui
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git config user.name "github-actions[bot]"
-          cd ../..
+          # Configure git credential helper to use the token
+          git config --global credential.helper '!f() { echo "username=x-access-token"; echo "password=$GH_TOKEN"; }; f'
+          git clone --branch dev --depth 1 https://github.com/phoenixvc/Mystira.Admin.UI.git packages/admin-ui
+          # Clear the credential helper after use
+          git config --global --unset credential.helper
+          # Set local git config for the submodule
+          git -C packages/admin-ui config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git -C packages/admin-ui config --local user.name "github-actions[bot]"
         fi
