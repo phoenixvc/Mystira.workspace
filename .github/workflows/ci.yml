@@ -39,6 +39,9 @@ jobs:
           submodules: recursive
           token: ${{ secrets.MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN }}
 
+      - name: Update submodules to latest
+        run: git submodule update --remote --merge
+
       - name: Setup admin-ui submodule
         uses: ./.github/actions/setup-admin-ui
         with:
@@ -89,6 +92,9 @@ jobs:
           submodules: recursive
           token: ${{ secrets.MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN }}
 
+      - name: Update submodules to latest
+        run: git submodule update --remote --merge
+
       - name: Setup admin-ui submodule
         uses: ./.github/actions/setup-admin-ui
         with:
@@ -130,6 +136,9 @@ jobs:
         with:
           submodules: recursive
           token: ${{ secrets.MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN }}
+
+      - name: Update submodules to latest
+        run: git submodule update --remote --merge
 
       - name: Setup admin-ui submodule
         uses: ./.github/actions/setup-admin-ui
