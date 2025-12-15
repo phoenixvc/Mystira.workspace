@@ -35,6 +35,15 @@ jobs:
           submodules: recursive
           token: ${{ secrets.MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN }}
 
+      - name: Initialize admin-ui submodule
+        run: |
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
+          if [ ! -d "packages/admin-ui/.git" ]; then
+            echo "Cloning admin-ui submodule from dev branch..."
+            git clone --branch dev --depth 1 https://x-access-token:${{ secrets.MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN }}@github.com/phoenixvc/Mystira.Admin.UI.git packages/admin-ui
+          fi
+
       - uses: pnpm/action-setup@v4
 
       - uses: actions/setup-node@v6
@@ -77,6 +86,15 @@ jobs:
           submodules: recursive
           token: ${{ secrets.MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN }}
 
+      - name: Initialize admin-ui submodule
+        run: |
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
+          if [ ! -d "packages/admin-ui/.git" ]; then
+            echo "Cloning admin-ui submodule from dev branch..."
+            git clone --branch dev --depth 1 https://x-access-token:${{ secrets.MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN }}@github.com/phoenixvc/Mystira.Admin.UI.git packages/admin-ui
+          fi
+
       - uses: pnpm/action-setup@v4
 
       - uses: actions/setup-node@v6
@@ -112,6 +130,15 @@ jobs:
         with:
           submodules: recursive
           token: ${{ secrets.MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN }}
+
+      - name: Initialize admin-ui submodule
+        run: |
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
+          if [ ! -d "packages/admin-ui/.git" ]; then
+            echo "Cloning admin-ui submodule from dev branch..."
+            git clone --branch dev --depth 1 https://x-access-token:${{ secrets.MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN }}@github.com/phoenixvc/Mystira.Admin.UI.git packages/admin-ui
+          fi
 
       - uses: pnpm/action-setup@v4
 
