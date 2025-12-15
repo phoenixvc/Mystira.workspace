@@ -17,6 +17,8 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN || 'dummy' }}
     steps:
       - name: Validate GitHub Submodule Access Token
         run: |
@@ -33,6 +35,11 @@ jobs:
           submodules: recursive
           token: ${{ secrets.MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN }}
 
+      - name: Setup admin-ui submodule
+        uses: ./.github/actions/setup-admin-ui
+        with:
+          token: ${{ secrets.MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN }}
+
       - uses: pnpm/action-setup@v4
 
       - uses: actions/setup-node@v6
@@ -43,6 +50,12 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Setup submodule configurations
+        run: |
+          if [ ! -f "packages/admin-ui/.eslintrc.cjs" ] && [ -f "configs/admin-ui.eslintrc.cjs" ]; then
+            cp configs/admin-ui.eslintrc.cjs packages/admin-ui/.eslintrc.cjs
+          fi
+
       - name: Run linting
         run: pnpm lint
 
@@ -51,6 +64,8 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN || 'dummy' }}
     steps:
       - name: Validate GitHub Submodule Access Token
         run: |
@@ -65,6 +80,11 @@ jobs:
       - uses: actions/checkout@v6
         with:
           submodules: recursive
+          token: ${{ secrets.MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN }}
+
+      - name: Setup admin-ui submodule
+        uses: ./.github/actions/setup-admin-ui
+        with:
           token: ${{ secrets.MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN }}
 
       - uses: pnpm/action-setup@v4
@@ -85,6 +105,8 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN || 'dummy' }}
     steps:
       - name: Validate GitHub Submodule Access Token
         run: |
@@ -99,6 +121,11 @@ jobs:
       - uses: actions/checkout@v6
         with:
           submodules: recursive
+          token: ${{ secrets.MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN }}
+
+      - name: Setup admin-ui submodule
+        uses: ./.github/actions/setup-admin-ui
+        with:
           token: ${{ secrets.MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN }}
 
       - uses: pnpm/action-setup@v4

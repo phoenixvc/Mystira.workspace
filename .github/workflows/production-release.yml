@@ -50,6 +50,10 @@ jobs:
           submodules: recursive
           token: ${{ secrets.MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN }}
           ref: main
+      - name: Setup admin-ui submodule
+        uses: ./.github/actions/setup-admin-ui
+        with:
+          token: ${{ secrets.MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN }}
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
@@ -121,6 +125,10 @@ jobs:
           submodules: recursive
           token: ${{ secrets.MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN }}
           ref: main
+      - name: Setup admin-ui submodule
+        uses: ./.github/actions/setup-admin-ui
+        with:
+          token: ${{ secrets.MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN }}
 
       - name: Azure Login
         uses: azure/login@v2
