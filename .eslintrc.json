@@ -21,5 +21,27 @@
     "**/wwwroot/**",
     "**/service-worker*.js",
     "**/*.min.js"
+  ],
+  "overrides": [
+    {
+      "files": ["packages/admin-ui/**/*.{ts,tsx}"],
+      "env": {
+        "browser": true,
+        "node": true
+      },
+      "parserOptions": {
+        "ecmaFeatures": {
+          "jsx": true
+        }
+      },
+      "globals": {
+        "React": "readonly"
+      },
+      "rules": {
+        "no-undef": "off",
+        "@typescript-eslint/no-unused-vars": ["warn", { "argsIgnorePattern": "^_" }],
+        "react-hooks/rules-of-hooks": "off"
+      }
+    }
   ]
 }
