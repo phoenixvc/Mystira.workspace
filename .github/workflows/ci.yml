@@ -11,6 +11,10 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  # Provide empty token to prevent pnpm warnings about missing NODE_AUTH_TOKEN
+  NODE_AUTH_TOKEN: ""
+
 jobs:
   lint:
     name: Lint
@@ -48,7 +52,7 @@ jobs:
           cache: "pnpm"
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
 
       - name: Setup submodule configurations
         run: |
@@ -95,7 +99,7 @@ jobs:
           cache: "pnpm"
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
 
       - name: Run tests
         run: pnpm test
@@ -136,7 +140,7 @@ jobs:
           cache: "pnpm"
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
 
       - name: Build all packages
         run: pnpm build

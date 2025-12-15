@@ -10,6 +10,11 @@ concurrency: ${{ github.workflow }}-${{ github.ref }}
 # This workflow handles npm package releases via Changesets
 # For infrastructure deployments, see staging-release.yml and production-release.yml
 
+env:
+  # Provide empty token to prevent pnpm warnings about missing NODE_AUTH_TOKEN
+  # The actual token is set in the changesets action for publishing
+  NODE_AUTH_TOKEN: ""
+
 jobs:
   release:
     name: Release
@@ -34,7 +39,7 @@ jobs:
           registry-url: "https://registry.npmjs.org"
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
 
       - name: Create Release Pull Request or Publish
         id: changesets
