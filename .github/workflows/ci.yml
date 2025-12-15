@@ -47,10 +47,10 @@ jobs:
           node-version: "18"
           cache: "pnpm"
 
-      - name: Install dependencies
+      - name: Install workspace dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Setup submodule configurations
+      - name: Setup admin-ui submodule configurations
         run: |
           # Copy legacy ESLint config if not present
           if [ ! -f "packages/admin-ui/.eslintrc.cjs" ] && [ -f "configs/admin-ui.eslintrc.cjs" ]; then
@@ -65,7 +65,15 @@ jobs:
             rm packages/admin-ui/eslint.config.js
           fi
 
-      - name: Run linting
+      - name: Install admin-ui dependencies
+        working-directory: packages/admin-ui
+        run: pnpm install
+
+      - name: Run workspace linting
+        run: pnpm lint
+
+      - name: Run admin-ui linting
+        working-directory: packages/admin-ui
         run: pnpm lint
 
   test:
@@ -103,8 +111,12 @@ jobs:
           node-version: "18"
           cache: "pnpm"
 
-      - name: Install dependencies
+      - name: Install workspace dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Install admin-ui dependencies
+        working-directory: packages/admin-ui
+        run: pnpm install
 
       - name: Run tests
         run: pnpm test
@@ -144,8 +156,12 @@ jobs:
           node-version: "18"
           cache: "pnpm"
 
-      - name: Install dependencies
+      - name: Install workspace dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Install admin-ui dependencies
+        working-directory: packages/admin-ui
+        run: pnpm install
 
       - name: Build all packages
         run: pnpm build
