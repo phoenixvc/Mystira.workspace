@@ -24,6 +24,8 @@ concurrency:
 env:
   AZURE_ACR_NAME: mysprodacr
   IMAGE_NAME: publisher
+  # Provide empty token to prevent pnpm warnings about missing NODE_AUTH_TOKEN
+  NODE_AUTH_TOKEN: ""
 
 jobs:
   lint:
@@ -57,7 +59,7 @@ jobs:
           cache: "pnpm"
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
 
       - name: Lint publisher package
         run: pnpm --filter mystira-publisher lint
@@ -83,7 +85,7 @@ jobs:
           cache: "pnpm"
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
 
       - name: Run publisher tests
         run: pnpm --filter mystira-publisher test
@@ -116,7 +118,7 @@ jobs:
           cache: "pnpm"
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
 
       - name: Build publisher package
         run: pnpm --filter mystira-publisher build

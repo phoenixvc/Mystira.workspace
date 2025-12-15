@@ -11,6 +11,10 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  # Provide empty token to prevent pnpm warnings about missing NODE_AUTH_TOKEN
+  NODE_AUTH_TOKEN: ""
+
 jobs:
   lint:
     name: Lint
