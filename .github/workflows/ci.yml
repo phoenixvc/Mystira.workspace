@@ -52,6 +52,12 @@ jobs:
           cache: "pnpm"
 
 
+      - name: Setup submodule ESLint configurations
+        run: |
+          # Copy workspace ESLint configs to submodules (overrides their configs with proper globals)
+          cp configs/admin-ui.eslint.config.mjs packages/admin-ui/eslint.config.mjs
+          cp configs/admin-ui.eslint.config.mjs packages/publisher/eslint.config.mjs
+
       - name: Install dependencies
         # Note: --frozen-lockfile is not used because all packages are git submodules
         # with their own dependencies that can't be tracked in the workspace lockfile
