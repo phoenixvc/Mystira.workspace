@@ -7,6 +7,9 @@ The `packages/admin-ui` submodule was missing ESLint configuration for React and
 A workaround has been implemented in this workspace repository:
 - ESLint configuration is stored in `configs/admin-ui.eslintrc.cjs`
 - CI workflow automatically copies it to `packages/admin-ui/.eslintrc.cjs` before linting
+- CI workflow removes `eslint.config.mjs` (ESLint v9 flat config) so the legacy config is used
+  - This is necessary because ESLint v9's flat config takes precedence over `.eslintrc.cjs`
+  - The flat config imports `@eslint/js` which isn't available in this workspace
 - Setup script also copies it when initializing submodules
 
 This resolves most of the lint errors related to undefined globals (React, window, document, etc.).

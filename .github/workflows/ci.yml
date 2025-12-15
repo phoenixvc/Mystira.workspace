@@ -52,8 +52,17 @@ jobs:
 
       - name: Setup submodule configurations
         run: |
+          # Copy legacy ESLint config if not present
           if [ ! -f "packages/admin-ui/.eslintrc.cjs" ] && [ -f "configs/admin-ui.eslintrc.cjs" ]; then
             cp configs/admin-ui.eslintrc.cjs packages/admin-ui/.eslintrc.cjs
+          fi
+          # Remove flat config so ESLint uses the legacy .eslintrc.cjs
+          # (eslint.config.mjs takes precedence and requires @eslint/js which isn't available)
+          if [ -f "packages/admin-ui/eslint.config.mjs" ]; then
+            rm packages/admin-ui/eslint.config.mjs
+          fi
+          if [ -f "packages/admin-ui/eslint.config.js" ]; then
+            rm packages/admin-ui/eslint.config.js
           fi
 
       - name: Run linting
