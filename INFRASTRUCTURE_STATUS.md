@@ -6,8 +6,8 @@ Complete overview of all infrastructure and CI/CD components in the Mystira work
 
 ### 1. CI/CD Pipelines (`.github/workflows/`)
 
-| Workflow                   | Purpose                                            | Status        |
-| -------------------------- | -------------------------------------------------- | ------------- |
+| Workflow                   | Purpose                                            | Status       |
+| -------------------------- | -------------------------------------------------- | ------------ |
 | **ci.yml**                 | Main CI pipeline for workspace                     | ✅ Configured |
 | **chain-ci.yml**           | Chain service CI (lint, test, build)               | ✅ Configured |
 | **publisher-ci.yml**       | Publisher service CI (lint, test, build)           | ✅ Configured |
@@ -28,8 +28,8 @@ Complete overview of all infrastructure and CI/CD components in the Mystira work
 
 #### Modules (Reusable Components)
 
-| Module                | Status        | Features                                                                         |
-| --------------------- | ------------- | -------------------------------------------------------------------------------- |
+| Module                | Status       | Features                                                                         |
+| --------------------- | ------------ | -------------------------------------------------------------------------------- |
 | **dns**               | ✅ Complete   | Environment-specific subdomains, A records, CNAME support, Front Door validation |
 | **front-door**        | ✅ Complete   | WAF, CDN, SSL, health probes, rate limiting, OWASP rules                         |
 | **chain**             | ✅ Configured | Chain service infrastructure                                                     |
@@ -41,8 +41,8 @@ Complete overview of all infrastructure and CI/CD components in the Mystira work
 
 #### Environments
 
-| Environment    | Status        | Config File                    | Components                                   |
-| -------------- | ------------- | ------------------------------ | -------------------------------------------- |
+| Environment    | Status       | Config File                    | Components                                   |
+| -------------- | ------------ | ------------------------------ | -------------------------------------------- |
 | **Dev**        | ✅ Configured | `environments/dev/main.tf`     | VNet, Subnets, Resource Groups, AKS (likely) |
 | **Staging**    | ✅ Configured | `environments/staging/main.tf` | VNet, Subnets, Resource Groups, AKS (likely) |
 | **Production** | ✅ Configured | `environments/prod/main.tf`    | VNet, Subnets, Resource Groups, AKS (likely) |
@@ -64,8 +64,8 @@ Complete overview of all infrastructure and CI/CD components in the Mystira work
 
 #### Base Manifests
 
-| Service             | Resources                     | Status        |
-| ------------------- | ----------------------------- | ------------- |
+| Service             | Resources                     | Status       |
+| ------------------- | ----------------------------- | ------------ |
 | **Publisher**       | Deployment, Ingress           | ✅ Configured |
 | **Chain**           | Deployment, Ingress           | ✅ Configured |
 | **Story Generator** | Deployment, Ingress           | ✅ Configured |
@@ -80,31 +80,31 @@ Complete overview of all infrastructure and CI/CD components in the Mystira work
 
 #### Environment Overlays
 
-| Environment    | Namespace     | Features                                                             |
-| -------------- | ------------- | -------------------------------------------------------------------- |
+| Environment    | Namespace     | Features                                                            |
+| -------------- | ------------- | ------------------------------------------------------------------- |
 | **Dev**        | `mys-dev`     | ✅ Low resources, 1 replica, staging SSL, dev.\*.mystira.app         |
 | **Staging**    | `mys-staging` | ✅ Medium resources, 2 replicas, staging SSL, staging.\*.mystira.app |
 | **Production** | `mys-prod`    | ✅ High resources, 3+ replicas, HPA, production SSL, \*.mystira.app  |
 
 ### 4. Docker Images (`infra/docker/`)
 
-| Service       | Dockerfile                    | Status        |
-| ------------- | ----------------------------- | ------------- |
+| Service       | Dockerfile                    | Status       |
+| ------------- | ----------------------------- | ------------ |
 | **Chain**     | `docker/chain/Dockerfile`     | ✅ Configured |
 | **Publisher** | `docker/publisher/Dockerfile` | ✅ Configured |
 
 ### 5. Scripts & Utilities (`infra/scripts/`)
 
-| Script                             | Purpose                           | Status       |
-| ---------------------------------- | --------------------------------- | ------------ |
+| Script                             | Purpose                           | Status      |
+| ---------------------------------- | --------------------------------- | ----------- |
 | **bootstrap-terraform-backend.sh** | Initialize Terraform backend      | ✅ Available |
 | **validate-infrastructure.sh**     | Validate infrastructure (Linux)   | ✅ Available |
 | **validate-infrastructure.ps1**    | Validate infrastructure (Windows) | ✅ Available |
 
 ### 6. Documentation
 
-| Document                           | Status      | Lines                             |
-| ---------------------------------- | ----------- | --------------------------------- |
+| Document                           | Status     | Lines                             |
+| ---------------------------------- | ---------- | --------------------------------- |
 | **README.md**                      | ✅ Complete | Main infrastructure documentation |
 | **AZURE_SETUP.md**                 | ✅ Complete | Azure setup guide                 |
 | **DNS_INGRESS_SETUP.md**           | ✅ Complete | DNS and Ingress configuration     |
@@ -119,8 +119,8 @@ Complete overview of all infrastructure and CI/CD components in the Mystira work
 
 ### Core Infrastructure (All Confirmed)
 
-| Component                          | Status      | Notes                                       |
-| ---------------------------------- | ----------- | ------------------------------------------- |
+| Component                          | Status     | Notes                                       |
+| ---------------------------------- | ---------- | ------------------------------------------- |
 | **AKS Cluster**                    | ✅ Verified | Configured in all 3 environments            |
 | **Azure Container Registry (ACR)** | ✅ Verified | `mysprodacr` shared across all environments |
 | **Key Vault**                      | ✅ Verified | Referenced in kustomization overlays        |
@@ -132,8 +132,8 @@ Complete overview of all infrastructure and CI/CD components in the Mystira work
 
 ### CI/CD Components (Likely Configured, Need Verification)
 
-| Component                             | Status   | Notes                               |
-| ------------------------------------- | -------- | ----------------------------------- |
+| Component                             | Status  | Notes                               |
+| ------------------------------------- | ------- | ----------------------------------- |
 | **GitHub Secrets**                    | ⚠️ Check | Azure credentials, tokens           |
 | **Azure Service Principal**           | ⚠️ Check | For CI/CD authentication            |
 | **GitHub Environments**               | ⚠️ Check | dev, staging, prod protection rules |
@@ -141,10 +141,10 @@ Complete overview of all infrastructure and CI/CD components in the Mystira work
 
 ### Service-Specific CI/CD
 
-| Service             | Workflow               | Status       | Notes                                                        |
-| ------------------- | ---------------------- | ------------ | ------------------------------------------------------------ |
-| **Story Generator** | story-generator-ci.yml | ✅ Complete   | .NET 8 CI/CD with lint, test, build, Docker                  |
-| **Admin UI**        | admin-ui-ci.yml        | ✅ Complete   | React/TypeScript CI/CD with lint, test, build                |
+| Service             | Workflow               | Status      | Notes                                                        |
+| ------------------- | ---------------------- | ----------- | ------------------------------------------------------------ |
+| **Story Generator** | story-generator-ci.yml | ✅ Complete  | .NET 8 CI/CD with lint, test, build, Docker                  |
+| **Admin UI**        | admin-ui-ci.yml        | ✅ Complete  | React/TypeScript CI/CD with lint, test, build                |
 | **DevHub**          | N/A                    | ⚠️ Different | Tauri desktop app (React + .NET 9) - requires separate setup |
 
 ## 🔍 How to Verify Missing Components

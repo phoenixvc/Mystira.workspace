@@ -88,8 +88,8 @@ All infrastructure and CI/CD components are now fully configured and ready for d
 
 ### 4. ✅ Infrastructure Modules (8 Complete)
 
-| Module                | Status      | Features                                                       |
-| --------------------- | ----------- | -------------------------------------------------------------- |
+| Module                | Status     | Features                                                       |
+| --------------------- | ---------- | -------------------------------------------------------------- |
 | **dns**               | ✅ Complete | Environment subdomains, A/CNAME records, Front Door validation |
 | **front-door**        | ✅ Complete | WAF, CDN, SSL, health probes, OWASP protection, rate limiting  |
 | **chain**             | ✅ Complete | Chain service infrastructure                                   |
@@ -157,8 +157,8 @@ All infrastructure and CI/CD components are now fully configured and ready for d
 
 ## 📊 Completion Status
 
-| Category                   | Status          | Completeness    |
-| -------------------------- | --------------- | --------------- |
+| Category                   | Status         | Completeness    |
+| -------------------------- | -------------- | --------------- |
 | **Infrastructure Modules** | ✅ Complete     | 100% (8/8)      |
 | **CI/CD Workflows**        | ✅ Complete     | 100% (10/10)    |
 | **Docker Images**          | ✅ Complete     | 100% (3/3)      |
