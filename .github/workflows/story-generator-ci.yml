@@ -106,7 +106,7 @@ jobs:
         run: dotnet publish --configuration Release --output ./publish
 
       - name: Azure Login
-        uses: azure/login@v6
+        uses: azure/login@v2
         with:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
