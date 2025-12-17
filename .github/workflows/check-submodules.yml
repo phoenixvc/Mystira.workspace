@@ -20,11 +20,11 @@ jobs:
         run: |
           # Initialize submodules without checking them out
           git submodule init
-          
+
           # Check each submodule
           echo "Checking if all submodule commits exist on remote..."
           FAILED=0
-          
+
           git submodule status | while read -r status path extra; do
             # Extract commit hash (remove leading +/- status indicator)
             commit=$(echo "$status" | sed 's/^[+-]//')
@@ -64,7 +64,7 @@ jobs:
               fi
             fi
           done
-          
+
           if [ $FAILED -eq 1 ]; then
             echo ""
             echo "================================================"
@@ -78,6 +78,6 @@ jobs:
             echo "  3. Then push the workspace"
             exit 1
           fi
-          
+
           echo ""
           echo "✅ All submodule commits exist on remotes"

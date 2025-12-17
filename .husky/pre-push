@@ -1,6 +1,3 @@
-#!/usr/bin/env sh
-. "$(dirname -- "$0")/_/husky.sh"
-
 # Check if all submodule commits are pushed to their remotes
 echo "Checking submodule commits..."
 
@@ -18,11 +15,17 @@ git submodule status | while read -r status path extra; do
   # Get into submodule directory
   cd "$path" || continue
   
-  # Check if current commit is pushed to remote
-  if ! git branch -r --contains "$commit" 2>/dev/null | grep -q .; then
-    echo "❌ ERROR: Submodule '$path' has unpushed commit: $commit"
-    echo "   Please push this submodule first: cd $path && git push"
-    FAILED=1
+  # Fetch latest refs to ensure we have up-to-date info
+  git fetch origin --quiet 2>/dev/null || true
+  
+  # Check if current commit exists on any remote branch or is reachable
+  if ! git ls-remote origin | grep -q "$commit"; then
+    # Try checking if it's in the commit history of remote branches
+    if ! git branch -r --contains "$commit" 2>/dev/null | grep -q .; then
+      echo "❌ ERROR: Submodule '$path' has unpushed commit: $commit"
+      echo "   Please push this submodule first: cd $path && git push"
+      FAILED=1
+    fi
   fi
   
   cd - > /dev/null || exit
