@@ -1,0 +1,129 @@
+name: Story Generator CI
+
+on:
+  push:
+    branches: [dev, main]
+    paths:
+      - "packages/story-generator/**"
+      - "infra/kubernetes/base/story-generator/**"
+      - ".github/workflows/story-generator-ci.yml"
+  pull_request:
+    branches: [dev, main]
+    types: [opened, synchronize, reopened, ready_for_review]
+    paths:
+      - "packages/story-generator/**"
+      - "infra/kubernetes/base/story-generator/**"
+      - ".github/workflows/story-generator-ci.yml"
+
+concurrency:
+  group: story-generator-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  AZURE_ACR_NAME: mysprodacr
+  IMAGE_NAME: story-generator
+
+jobs:
+  lint:
+    name: Lint Story Generator
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/story-generator/src/Mystira.StoryGenerator.Web
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          submodules: recursive
+          token: ${{ secrets.MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN }}
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Check format
+        run: dotnet format --verify-no-changes --verbosity diagnostic
+        continue-on-error: true
+
+  test:
+    name: Test Story Generator
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/story-generator
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          submodules: recursive
+          token: ${{ secrets.MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN }}
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Run tests
+        run: dotnet test --no-restore --verbosity normal --collect:"XPlat Code Coverage"
+
+      - name: Upload coverage reports
+        uses: codecov/codecov-action@v4
+        if: always()
+        with:
+          files: ./coverage.cobertura.xml
+          flags: story-generator
+          name: story-generator-coverage
+
+  build:
+    name: Build Story Generator
+    runs-on: ubuntu-latest
+    needs: [lint, test]
+    if: github.event_name == 'push'
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          submodules: recursive
+          token: ${{ secrets.MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN }}
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: Build application
+        working-directory: packages/story-generator/src/Mystira.StoryGenerator.Web
+        run: dotnet build --configuration Release
+
+      - name: Publish application
+        working-directory: packages/story-generator/src/Mystira.StoryGenerator.Web
+        run: dotnet publish --configuration Release --output ./publish
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Build and push Docker image
+        env:
+          TAG: ${{ github.ref == 'refs/heads/main' && 'prod' || 'dev' }}
+        run: |
+          az acr login --name ${{ env.AZURE_ACR_NAME }}
+
+          docker build \
+            -f infra/docker/story-generator/Dockerfile \
+            -t ${{ env.AZURE_ACR_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:${{ env.TAG }} \
+            -t ${{ env.AZURE_ACR_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:${{ github.sha }} \
+            packages/story-generator/
+
+          docker push ${{ env.AZURE_ACR_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:${{ env.TAG }}
+          docker push ${{ env.AZURE_ACR_NAME }}.azurecr.io/${{ env.IMAGE_NAME }}:${{ github.sha }}
