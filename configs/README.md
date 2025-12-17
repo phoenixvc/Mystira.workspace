@@ -2,6 +2,14 @@
 
 This directory contains configuration files that should be copied to submodules when they're missing.
 
+## admin-ui.vite.config.ts
+
+Vite/Vitest configuration for the `packages/admin-ui` submodule. This file is automatically copied to `packages/admin-ui/vite.config.ts` by the CI workflow before running tests.
+
+### Why is this needed?
+
+The admin-ui submodule currently has no test files. Vitest exits with code 1 when no test files are found, causing CI to fail. This configuration adds `passWithNoTests: true` to allow the test job to pass gracefully.
+
 ## admin-ui.eslintrc.cjs
 
 ESLint configuration for the `packages/admin-ui` submodule. This file is automatically copied to `packages/admin-ui/.eslintrc.cjs` by:
