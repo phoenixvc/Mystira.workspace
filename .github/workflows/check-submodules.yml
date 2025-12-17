@@ -1,0 +1,83 @@
+name: Check Submodules
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  push:
+    branches: [dev, main]
+
+jobs:
+  check-submodules:
+    name: Verify Submodule Commits Exist
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          submodules: false
+          token: ${{ secrets.MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN }}
+
+      - name: Check submodule commits are pushed
+        run: |
+          # Initialize submodules without checking them out
+          git submodule init
+          
+          # Check each submodule
+          echo "Checking if all submodule commits exist on remote..."
+          FAILED=0
+          
+          git submodule status | while read -r status path extra; do
+            # Extract commit hash (remove leading +/- status indicator)
+            commit=$(echo "$status" | sed 's/^[+-]//')
+            
+            echo ""
+            echo "===================================="
+            echo "Checking submodule: $path"
+            echo "Expected commit: $commit"
+            
+            # Get submodule remote URL
+            url=$(git config --file .gitmodules --get "submodule.$path.url")
+            echo "Remote URL: $url"
+            
+            # Try to fetch just this commit
+            if git ls-remote "$url" | grep -q "$commit"; then
+              echo "✅ Commit exists on remote"
+            else
+              # Check if it's on any remote branch
+              if git ls-remote --heads "$url" | while read hash ref; do
+                # Clone to temp dir and check
+                temp_dir=$(mktemp -d)
+                if git clone --bare --filter=blob:none "$url" "$temp_dir" 2>/dev/null; then
+                  if git --git-dir="$temp_dir" cat-file -e "$commit" 2>/dev/null; then
+                    echo "found"
+                    rm -rf "$temp_dir"
+                    exit 0
+                  fi
+                  rm -rf "$temp_dir"
+                fi
+              done | grep -q "found"; then
+                echo "✅ Commit exists on remote (in history)"
+              else
+                echo "❌ ERROR: Commit $commit does not exist on remote for $path"
+                echo "::error::Submodule '$path' references commit $commit which does not exist on remote"
+                echo "::error::Please push the submodule commits before pushing the workspace"
+                FAILED=1
+              fi
+            fi
+          done
+          
+          if [ $FAILED -eq 1 ]; then
+            echo ""
+            echo "================================================"
+            echo "❌ SUBMODULE CHECK FAILED"
+            echo "================================================"
+            echo ""
+            echo "Some submodules reference commits that don't exist on their remotes."
+            echo "To fix:"
+            echo "  1. cd into the submodule directory"
+            echo "  2. git push origin <branch>"
+            echo "  3. Then push the workspace"
+            exit 1
+          fi
+          
+          echo ""
+          echo "✅ All submodule commits exist on remotes"

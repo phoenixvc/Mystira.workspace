@@ -1,0 +1,43 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# Check if all submodule commits are pushed to their remotes
+echo "Checking submodule commits..."
+
+FAILED=0
+
+git submodule status | while read -r status path extra; do
+  # Extract commit hash (remove leading +/- status indicator)
+  commit=$(echo "$status" | sed 's/^[+-]//' | awk '{print $1}')
+  
+  # Skip if no commit (uninitialized submodule)
+  [ -z "$commit" ] && continue
+  
+  echo "Checking $path @ $commit"
+  
+  # Get into submodule directory
+  cd "$path" || continue
+  
+  # Check if current commit is pushed to remote
+  if ! git branch -r --contains "$commit" 2>/dev/null | grep -q .; then
+    echo "❌ ERROR: Submodule '$path' has unpushed commit: $commit"
+    echo "   Please push this submodule first: cd $path && git push"
+    FAILED=1
+  fi
+  
+  cd - > /dev/null || exit
+done
+
+if [ $FAILED -eq 1 ]; then
+  echo ""
+  echo "================================================"
+  echo "❌ PUSH BLOCKED: Unpushed submodule commits"
+  echo "================================================"
+  echo ""
+  echo "Push the submodules first, then push the workspace."
+  echo "Use: git push --recurse-submodules=on-demand"
+  echo "Or push submodules manually before pushing workspace."
+  exit 1
+fi
+
+echo "✅ All submodule commits are pushed"
