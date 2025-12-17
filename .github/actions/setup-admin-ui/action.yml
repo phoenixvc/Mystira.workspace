@@ -18,8 +18,13 @@ runs:
         GH_TOKEN: ${{ inputs.token }}
         GIT_ASKPASS_FILE: /tmp/.git-askpass-${{ github.run_id }}-${{ github.job }}-$RANDOM
       run: |
-        if [ ! -d "packages/admin-ui" ] || [ ! -d "packages/admin-ui/.git" ]; then
+        if [ ! -d "packages/admin-ui/.git" ]; then
           echo "Cloning admin-ui submodule from ${{ inputs.branch }} branch..."
+          # Remove the directory if it exists but doesn't have .git (empty or invalid state)
+          if [ -d "packages/admin-ui" ]; then
+            echo "Removing existing packages/admin-ui directory without .git..."
+            rm -rf packages/admin-ui
+          fi
           # Create a temporary askpass script for secure credential passing
           echo '#!/bin/sh' > "$GIT_ASKPASS_FILE"
           echo 'echo $GH_TOKEN' >> "$GIT_ASKPASS_FILE"

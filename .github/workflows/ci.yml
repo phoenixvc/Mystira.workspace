@@ -104,6 +104,11 @@ jobs:
         # Note: --frozen-lockfile is not used because all packages are git submodules
         run: pnpm install
 
+      - name: Setup submodule Vitest configurations
+        run: |
+          # Copy workspace Vitest configs to submodules (adds passWithNoTests for packages without tests)
+          cp configs/admin-ui.vite.config.ts packages/admin-ui/vite.config.ts
+
       - name: Run tests
         run: pnpm test
 
