@@ -41,7 +41,7 @@ All infrastructure and CI/CD components are now fully configured and ready for d
 - ✅ Edge caching with compression
 - ✅ Custom WAF rules (bad bots, HTTP methods, rate limiting)
 
-### 2. ✅ Complete CI/CD Workflows (10 Total)
+### 2. ✅ Complete CI/CD Workflows (9 Total)
 
 **Existing Workflows (7):**
 
@@ -53,19 +53,22 @@ All infrastructure and CI/CD components are now fully configured and ready for d
 - ✅ `staging-release.yml` - Staging deployments
 - ✅ `production-release.yml` - Production deployments
 
-**New Workflows (3):**
+**New Workflows (2):**
 
 - ✅ `story-generator-ci.yml` - **NEW** Story Generator CI/CD
 - ✅ `admin-ui-ci.yml` - **NEW** Admin UI CI/CD
-- ✅ `devhub-ci.yml` - **NEW** DevHub CI/CD
 
-**All Services Now Have CI:**
+**Not Included:**
+
+- DevHub - Tauri desktop application, not a cloud service (requires different CI setup)
+
+**Deployable Services Have CI:**
 
 - ✅ Chain (Python) - Lint, test, build, Docker push
 - ✅ Publisher (TypeScript/React) - Lint, test, build, Docker push
 - ✅ Story Generator (.NET 8) - Lint, test, build, Docker push
 - ✅ Admin UI (TypeScript/React) - Lint, test, build
-- ✅ DevHub (.NET 8) - Lint, test, build
+- ⚠️ DevHub (Tauri desktop app) - Not a deployable service, requires separate Tauri CI
 
 ### 3. ✅ Docker Support Complete
 

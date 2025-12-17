@@ -141,11 +141,11 @@ Complete overview of all infrastructure and CI/CD components in the Mystira work
 
 ### Service-Specific CI/CD
 
-| Service             | Workflow               | Status      | Notes                                         |
-| ------------------- | ---------------------- | ----------- | --------------------------------------------- |
-| **Story Generator** | story-generator-ci.yml | ✅ Complete | .NET 8 CI/CD with lint, test, build, Docker   |
-| **Admin UI**        | admin-ui-ci.yml        | ✅ Complete | React/TypeScript CI/CD with lint, test, build |
-| **DevHub**          | devhub-ci.yml          | ✅ Complete | .NET 8 CI/CD with lint, test, build           |
+| Service             | Workflow               | Status       | Notes                                                        |
+| ------------------- | ---------------------- | ------------ | ------------------------------------------------------------ |
+| **Story Generator** | story-generator-ci.yml | ✅ Complete   | .NET 8 CI/CD with lint, test, build, Docker                  |
+| **Admin UI**        | admin-ui-ci.yml        | ✅ Complete   | React/TypeScript CI/CD with lint, test, build                |
+| **DevHub**          | N/A                    | ⚠️ Different | Tauri desktop app (React + .NET 9) - requires separate setup |
 
 ## 🔍 How to Verify Missing Components
 
