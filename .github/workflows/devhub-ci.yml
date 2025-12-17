@@ -31,7 +31,7 @@ jobs:
           token: ${{ secrets.MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN }}
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@v6
+        uses: actions/setup-dotnet@v4
         with:
           dotnet-version: "8.0.x"
 
@@ -54,7 +54,7 @@ jobs:
           token: ${{ secrets.MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN }}
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@v6
+        uses: actions/setup-dotnet@v4
         with:
           dotnet-version: "8.0.x"
 
@@ -65,7 +65,7 @@ jobs:
         run: dotnet test --no-restore --verbosity normal --collect:"XPlat Code Coverage"
 
       - name: Upload coverage reports
-        uses: codecov/codecov-action@v6
+        uses: codecov/codecov-action@v4
         if: always()
         with:
           files: ./coverage.cobertura.xml
@@ -84,7 +84,7 @@ jobs:
           token: ${{ secrets.MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN }}
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@v6
+        uses: actions/setup-dotnet@v4
         with:
           dotnet-version: "8.0.x"
 
@@ -97,7 +97,7 @@ jobs:
         run: dotnet publish --configuration Release --output ./publish
 
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v4
         with:
           name: devhub-publish
           path: packages/devhub/Mystira.DevHub/publish
