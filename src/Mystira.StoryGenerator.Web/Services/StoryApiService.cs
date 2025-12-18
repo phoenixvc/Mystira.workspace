@@ -180,7 +180,35 @@ public class StoryApiService : IStoryApiService
 
             if (orchestration.RequiresClarification)
             {
-                return new ChatCompletionResponse { Success = true, Content = orchestration.Prompt ?? string.Empty };
+                var prompt = orchestration.Prompt ?? string.Empty;
+
+                // If we have an incomplete story result, repair it and append it to the prompt so the UI can display partial updates
+                if (orchestration.Result is not null)
+                {
+                    try
+                    {
+                        var resultJson = JsonSerializer.Serialize(orchestration.Result, _jsonOptions);
+                        using var doc = JsonDocument.Parse(resultJson);
+                        var root = doc.RootElement;
+
+                        if (root.TryGetProperty("is_incomplete", out var incompleteProp) && incompleteProp.GetBoolean() &&
+                            root.TryGetProperty("json", out var jsonProp) && jsonProp.ValueKind == JsonValueKind.String)
+                        {
+                            var partialJson = jsonProp.GetString();
+                            if (!string.IsNullOrWhiteSpace(partialJson))
+                            {
+                                var repairedJson = StoryJsonRepairHelper.RepairPartialJson(partialJson);
+                                prompt += "\n\nCURRENT_JSON:\n```json\n" + repairedJson + "\n```";
+                            }
+                        }
+                    }
+                    catch
+                    {
+                        // fall through
+                    }
+                }
+
+                return new ChatCompletionResponse { Success = true, Content = prompt };
             }
 
             // If handler provided a result try to extract the assistant text content from it

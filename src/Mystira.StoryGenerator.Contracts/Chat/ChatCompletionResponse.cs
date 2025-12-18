@@ -55,7 +55,17 @@ public class ChatCompletionResponse
     [JsonPropertyName("error")]
     public string? Error { get; set; }
 
+    /// <summary>
+    /// The reason the model stopped generating (e.g., "stop", "length", "content_filter")
+    /// </summary>
+    [JsonPropertyName("finish_reason")]
+    public string? FinishReason { get; set; }
 
+    /// <summary>
+    /// Whether the generation was incomplete (e.g., due to length limits)
+    /// </summary>
+    [JsonPropertyName("is_incomplete")]
+    public bool IsIncomplete { get; set; }
 }
 
 /// <summary>

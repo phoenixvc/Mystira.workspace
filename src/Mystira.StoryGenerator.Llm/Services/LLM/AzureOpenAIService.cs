@@ -178,6 +178,9 @@ public class AzureOpenAIService : ILLMService
 
             var cleanContent = Sanitize(content);
 
+            var finishReason = response?.FinishReason.ToString();
+            var isIncomplete = finishReason == "Length"; // OpenAI uses PascalCase for FinishReason enum ToString() or specific strings
+
             return new ChatCompletionResponse
             {
                 Content = cleanContent ?? string.Empty,
@@ -189,7 +192,9 @@ public class AzureOpenAIService : ILLMService
                     CompletionTokens = response.Usage.OutputTokenCount,
                     TotalTokens = response.Usage.TotalTokenCount
                 } : null,
-                Success = true
+                Success = true,
+                FinishReason = finishReason,
+                IsIncomplete = isIncomplete
             };
 
             string? Sanitize(string? input)

@@ -6,6 +6,7 @@ using Mystira.StoryGenerator.Contracts.Stories;
 using Mystira.StoryGenerator.Domain.Commands.Chat;
 using Mystira.StoryGenerator.Domain.Commands.Stories;
 using Mystira.StoryGenerator.Domain.Services;
+using Mystira.StoryGenerator.Contracts.Chat;
 
 namespace Mystira.StoryGenerator.Application.Services;
 
@@ -41,6 +42,16 @@ public class ChatOrchestrationService : IChatOrchestrationService
 
             // Detect intent using existing classifier
             var instructionType = await _commandRouter.DetectPrimaryInstructionTypeAsync(latestUserMessage, cancellationToken);
+
+            // Heuristic for "continue" intent
+            if (string.IsNullOrWhiteSpace(instructionType) || instructionType == "help")
+            {
+                var lowerMessage = latestUserMessage.ToLowerInvariant();
+                if (lowerMessage == "yes" || lowerMessage == "continue" || lowerMessage == "please continue" || lowerMessage == "yes please")
+                {
+                    instructionType = "story_generate_continue";
+                }
+            }
 
             if (string.IsNullOrWhiteSpace(instructionType))
             {
@@ -93,6 +104,9 @@ public class ChatOrchestrationService : IChatOrchestrationService
                 case "story_generate_refine":
                     return await HandleRefineStoryAsync(latestUserMessage, context, cancellationToken);
 
+                case "story_generate_continue":
+                    return await HandleContinueStoryAsync(latestUserMessage, context, cancellationToken);
+
                 case "story_validate":
                     return await HandleValidateStoryAsync(latestUserMessage, context, cancellationToken);
 
@@ -143,15 +157,50 @@ public class ChatOrchestrationService : IChatOrchestrationService
         // Use lightweight LLM call to check for missing parameters
         var missingParameters = await CheckForMissingStoryParametersAsync(userMessage, context, cancellationToken);
 
+        if (missingParameters.Contains("title"))
+        {
+            // Try to generate a title if an idea is provided
+            var generatedTitle = await TryGenerateTitleFromIdeaAsync(userMessage, context, cancellationToken);
+            if (!string.IsNullOrWhiteSpace(generatedTitle))
+            {
+                missingParameters.Remove("title");
+                // We'll pass the generated title through the user message or context if needed,
+                // but the ExtractStoryParametersAsync in the handler will also see the history.
+                // For now, let's assume if we generated it, it's no longer "missing" for the clarification prompt.
+            }
+        }
+
         if (missingParameters.Count > 0)
         {
+            // Get a conversational acknowledgement from the LLM instead of a hardcoded list if possible,
+            // but for now, let's just make the hardcoded response better as requested.
             var sb = new StringBuilder();
-            sb.AppendLine("To generate a story, please provide:");
-            foreach (var param in missingParameters)
+
+            if (missingParameters.Count == 1 && missingParameters.Contains("title"))
             {
-                sb.AppendLine($"- {param}");
+                sb.AppendLine("That sounds like an exciting story idea! To help me bring it to life, could you please specify a title for your story, or just give me a short idea of what happens?");
             }
-            sb.AppendLine("Optional: difficulty, session_length, minimum_age, core_axes, archetypes, character_count, tags, tone, description");
+            else
+            {
+                sb.AppendLine("That sounds like an exciting story idea! To help me bring it to life, I just need a few more details:");
+                sb.AppendLine();
+
+                foreach (var param in missingParameters)
+                {
+                    var friendlyName = param switch
+                    {
+                        "title" => "a title (or a short idea of what the story is about)",
+                        "ageGroup" => "the target age group (1-2, 3-5, 6-9, 10-12, or 13-18)",
+                        "minScenes" => "the minimum number of scenes",
+                        "maxScenes" => "the maximum number of scenes",
+                        _ => param.Replace("_", " ")
+                    };
+                    sb.AppendLine($"- {friendlyName}");
+                }
+
+                sb.AppendLine();
+                sb.AppendLine("You can also optionally specify things like difficulty, session length, minimum age, core axes, archetypes, character count, tags, tone, or a more detailed description.");
+            }
 
             return new ChatOrchestrationResponse
             {
@@ -171,8 +220,21 @@ public class ChatOrchestrationService : IChatOrchestrationService
             Model = context.Model,
         };
 
-        var command = new GenerateStoryCommand(request, userMessage);
+        var command = new GenerateStoryCommand(request, userMessage, context.Messages);
         var result = await _mediator.Send(command, cancellationToken);
+
+        if (result.Success && result.IsIncomplete)
+        {
+            return new ChatOrchestrationResponse
+            {
+                Success = true,
+                RequiresClarification = true,
+                Intent = "story_generate_initial",
+                Handler = nameof(GenerateStoryCommand),
+                Prompt = "The LLM hasn't finished generating yet but here are the key updates. Would you like to continue generating?",
+                Result = result
+            };
+        }
 
         return new ChatOrchestrationResponse
         {
@@ -182,6 +244,53 @@ public class ChatOrchestrationService : IChatOrchestrationService
             Result = result,
             Error = result.Success ? null : result.Error
         };
+    }
+
+    private async Task<string?> TryGenerateTitleFromIdeaAsync(string userMessage, ChatContext context, CancellationToken cancellationToken)
+    {
+        var service = !string.IsNullOrWhiteSpace(context.Provider)
+            ? _llmServiceFactory.GetService(context.Provider!, context.Model)
+            : _llmServiceFactory.GetDefaultService();
+
+        if (service is null) return null;
+
+        var messages = new List<MystiraChatMessage>();
+        messages.AddRange(context.Messages);
+
+        // Ensure the latest user message is included if not already in context.Messages
+        if (context.Messages.LastOrDefault()?.Content != userMessage)
+        {
+            messages.Add(new MystiraChatMessage { MessageType = ChatMessageType.User, Content = userMessage });
+        }
+
+        var prompt = @"Analyze the conversation and user request.
+If the user has provided a story idea, theme, or plot, generate a short, catchy title (3-6 words) for it.
+If the user HAS NOT provided any story idea yet (e.g. just said 'I want to make a story'), return 'NO_IDEA'.
+Respond with ONLY the title or 'NO_IDEA'.";
+
+        var request = new ChatCompletionRequest
+        {
+            Provider = context.Provider,
+            ModelId = context.ModelId,
+            Model = context.Model,
+            Messages = messages,
+            SystemPrompt = prompt,
+            Temperature = 0.3,
+            MaxTokens = 20
+        };
+
+        var response = await service.CompleteAsync(request, cancellationToken);
+        if (response.Success && !string.IsNullOrWhiteSpace(response.Content))
+        {
+            var content = response.Content.Trim().Trim('"');
+            if (content.Equals("NO_IDEA", StringComparison.OrdinalIgnoreCase))
+            {
+                return null;
+            }
+            return content;
+        }
+
+        return null;
     }
 
     private async Task<ChatOrchestrationResponse> HandleRefineStoryAsync(string userMessage, ChatContext context, CancellationToken cancellationToken)
@@ -209,13 +318,77 @@ public class ChatOrchestrationService : IChatOrchestrationService
             Model = context.Model
         };
 
-        var command = new RefineStoryCommand(request, userMessage, userMessage, context.CurrentStory);
+        var command = new RefineStoryCommand(request, userMessage, userMessage, context.CurrentStory, context.Messages);
         var result = await _mediator.Send(command, cancellationToken);
+
+        if (result.Success && result.IsIncomplete)
+        {
+            return new ChatOrchestrationResponse
+            {
+                Success = true,
+                RequiresClarification = true,
+                Intent = "story_generate_refine",
+                Handler = nameof(RefineStoryCommand),
+                Prompt = "The LLM hasn't finished generating yet but here are the key updates. Would you like to continue generating?",
+                Result = result
+            };
+        }
 
         return new ChatOrchestrationResponse
         {
             Success = result.Success,
             Intent = "story_generate_refine",
+            Handler = nameof(RefineStoryCommand),
+            Result = result,
+            Error = result.Success ? null : result.Error
+        };
+    }
+
+    private async Task<ChatOrchestrationResponse> HandleContinueStoryAsync(string userMessage, ChatContext context, CancellationToken cancellationToken)
+    {
+        var storyContent = ExtractStoryFromContext(context);
+        if (string.IsNullOrWhiteSpace(storyContent))
+        {
+            return new ChatOrchestrationResponse
+            {
+                Success = true,
+                RequiresClarification = true,
+                Intent = "story_generate_continue",
+                Handler = nameof(RefineStoryCommand),
+                Prompt = "I don't have enough story content to continue. Please provide the partial story."
+            };
+        }
+
+        // Create a basic request for refinement/continuation
+        var request = new GenerateJsonStoryRequest
+        {
+            Provider = context.Provider,
+            ModelId = context.ModelId,
+            Model = context.Model
+        };
+
+        var refinementPrompt = "Continue generating the story from where you left off. Return ONLY the complete story JSON incorporating all the content provided below and completing it.";
+
+        var command = new RefineStoryCommand(request, refinementPrompt, refinementPrompt, context.CurrentStory, context.Messages);
+        var result = await _mediator.Send(command, cancellationToken);
+
+        if (result.Success && result.IsIncomplete)
+        {
+            return new ChatOrchestrationResponse
+            {
+                Success = true,
+                RequiresClarification = true,
+                Intent = "story_generate_continue",
+                Handler = nameof(RefineStoryCommand),
+                Prompt = "The LLM hasn't finished generating yet but here are the key updates. Would you like to continue generating?",
+                Result = result
+            };
+        }
+
+        return new ChatOrchestrationResponse
+        {
+            Success = result.Success,
+            Intent = "story_generate_continue",
             Handler = nameof(RefineStoryCommand),
             Result = result,
             Error = result.Success ? null : result.Error
@@ -243,7 +416,7 @@ public class ChatOrchestrationService : IChatOrchestrationService
             Format = "json"
         };
 
-        var command = new ValidateStoryCommand(request, userMessage);
+        var command = new ValidateStoryCommand(request, userMessage, history: context.Messages);
         var result = await _mediator.Send(command, cancellationToken);
 
         return new ChatOrchestrationResponse
@@ -270,7 +443,7 @@ public class ChatOrchestrationService : IChatOrchestrationService
             };
         }
 
-        var command = new AutoFixStoryJsonCommand(storyContent, context.Provider, context.Model, userMessage);
+        var command = new AutoFixStoryJsonCommand(storyContent, context.Provider, context.Model, userMessage, history: context.Messages);
         var result = await _mediator.Send(command, cancellationToken);
 
         return new ChatOrchestrationResponse
@@ -298,7 +471,7 @@ public class ChatOrchestrationService : IChatOrchestrationService
             };
         }
 
-        var command = new SummarizeStoryCommand(storyContent, context.Provider, context.Model, userMessage);
+        var command = new SummarizeStoryCommand(storyContent, context.Provider, context.Model, userMessage, context.Messages);
         var result = await _mediator.Send(command, cancellationToken);
 
         return new ChatOrchestrationResponse
@@ -315,7 +488,7 @@ public class ChatOrchestrationService : IChatOrchestrationService
         ChatContext context, CancellationToken cancellationToken)
     {
         // Help command does not require an LLM service to be available; route directly to handler.
-        var command = new HelpCommand(userMessage);
+        var command = new HelpCommand(userMessage, context.Messages);
         var result = await _mediator.Send(command, cancellationToken);
 
         return new ChatOrchestrationResponse
@@ -330,7 +503,7 @@ public class ChatOrchestrationService : IChatOrchestrationService
 
     private async Task<ChatOrchestrationResponse> HandleSchemaDocsCommandAsync(string instructionType, string userMessage, ChatContext context, CancellationToken cancellationToken)
     {
-        var command = new SchemaDocsCommand(context, userMessage);
+        var command = new SchemaDocsCommand(context, userMessage, context.Messages);
         var result = await _mediator.Send(command, cancellationToken);
 
         return new ChatOrchestrationResponse
@@ -345,7 +518,7 @@ public class ChatOrchestrationService : IChatOrchestrationService
 
     private async Task<ChatOrchestrationResponse> HandleSafetyPolicyCommandAsync(string instructionType, string userMessage, ChatContext context, CancellationToken cancellationToken)
     {
-        var command = new SafetyPolicyCommand(context, userMessage);
+        var command = new SafetyPolicyCommand(context, userMessage, context.Messages);
         var result = await _mediator.Send(command, cancellationToken);
 
         return new ChatOrchestrationResponse
@@ -360,7 +533,7 @@ public class ChatOrchestrationService : IChatOrchestrationService
 
     private async Task<ChatOrchestrationResponse> HandleRequirementsCommandAsync(string instructionType, string userMessage, ChatContext context, CancellationToken cancellationToken)
     {
-        var command = new RequirementsCommand(context, userMessage);
+        var command = new RequirementsCommand(context, userMessage, context.Messages);
         var result = await _mediator.Send(command, cancellationToken);
 
         return new ChatOrchestrationResponse
@@ -375,7 +548,7 @@ public class ChatOrchestrationService : IChatOrchestrationService
 
     private async Task<ChatOrchestrationResponse> HandleGuidelinesCommandAsync(string instructionType, string userMessage, ChatContext context, CancellationToken cancellationToken)
     {
-        var command = new GuidelinesCommand(context, userMessage);
+        var command = new GuidelinesCommand(context, userMessage, context.Messages);
         var result = await _mediator.Send(command, cancellationToken);
 
         return new ChatOrchestrationResponse
@@ -390,7 +563,7 @@ public class ChatOrchestrationService : IChatOrchestrationService
 
     private async Task<ChatOrchestrationResponse> HandleFreeTextCommandAsync(string instructionType, ChatContext context, CancellationToken cancellationToken)
     {
-        var command = new FreeTextCommand(context, instructionType);
+        var command = new FreeTextCommand(context, instructionType, context.Messages);
         var result = await _mediator.Send(command, cancellationToken);
 
         return new ChatOrchestrationResponse

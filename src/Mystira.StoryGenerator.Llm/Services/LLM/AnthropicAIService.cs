@@ -192,6 +192,9 @@ public class AnthropicAIService : ILLMService
             var content = ExtractTextContent(response.Content);
             var cleanContent = Sanitize(content);
 
+            var finishReason = response.StopReason;
+            var isIncomplete = finishReason == "max_tokens";
+
             return new ChatCompletionResponse
             {
                 Content = cleanContent ?? string.Empty,
@@ -203,7 +206,9 @@ public class AnthropicAIService : ILLMService
                     CompletionTokens = (int)response.Usage.OutputTokens,
                     TotalTokens = (int)(response.Usage.InputTokens + response.Usage.OutputTokens)
                 } : null,
-                Success = true
+                Success = true,
+                FinishReason = finishReason,
+                IsIncomplete = isIncomplete
             };
 
             string? Sanitize(string? input)

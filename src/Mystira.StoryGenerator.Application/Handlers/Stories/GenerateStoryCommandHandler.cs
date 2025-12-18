@@ -67,6 +67,9 @@ public class GenerateStoryCommandHandler : ICommandHandler<GenerateStoryCommand,
                 _logger.LogWarning("Instruction search is disabled because search or embedding clients return null");
             }
 
+            // Extract story parameters from user query and history using LLM
+            await ExtractStoryParametersAsync(request, userQuery, command.History, cancellationToken);
+
             var messages = BuildMessages(request, userQuery, instructionBlock);
 
             var chatRequest = new ChatCompletionRequest
@@ -102,7 +105,8 @@ public class GenerateStoryCommandHandler : ICommandHandler<GenerateStoryCommand,
                 Json = story ?? string.Empty,
                 Provider = response.Provider ?? service.ProviderName,
                 Model = response.Model ?? resolvedModelName ?? string.Empty,
-                ModelId = response.ModelId ?? resolvedModelId
+                ModelId = response.ModelId ?? resolvedModelId,
+                IsIncomplete = response.IsIncomplete
             };
         }
         catch (OperationCanceledException)
@@ -128,7 +132,7 @@ public class GenerateStoryCommandHandler : ICommandHandler<GenerateStoryCommand,
     {
         return @"
 You are the Mystira interactive storytelling engine for a kids’ online story app (with audio, media, and video). Generate branching adventure stories for young players.
-Use the provided context parameters (e.g. title, difficulty, session_length, age_group, minimum_age, core_axes, archetypes, character_count, minScenes, maxScenes. Treat them as authoritative.
+Use the provided context parameters (e.g. title, age_group, session_length, description, difficulty, minimum_age, core_axes, archetypes, character_count, minScenes, maxScenes. Treat them as authoritative.
 Your task:
 Create a complete tabletop-style RPG adventure with {minScenes}–{maxScenes} scenes, mixing exploration, dialogue, obstacles, and meaningful choices.
 JSON OUTPUT (single object only)
@@ -206,7 +210,7 @@ General consistency
     •   Avoid dead ends / orphan scenes.
     •   Maintain continuity of characters, locations, and goals; avoid contradictions without explanation.
 SAFETY AND CHILD DEVELOPMENT (Critical)
-    •   age_group must be one of: ""1-3"", ""4-5"", ""6-9"", ""10-12"", ""13-18"".
+    •   age_group must be one of: ""1-2"", ""3-5"", ""6-9"", ""10-12"", ""13-18"".
     •   Language, content, and themes must be age-appropriate for age_group and minimum_age.
     •   Forbidden: profanity, slurs, sexual content, self-harm, graphic violence, humiliation, cruelty-based humor, or ""punching down"".
     •   Mild peril is allowed but must resolve in emotionally safe ways.
@@ -248,6 +252,7 @@ FINAL OUTPUT RULES
         var payload = new
         {
             title = request.Title,
+            description = request.Description,
             difficulty = request.Difficulty,
             session_length = request.SessionLength,
             age_group = request.AgeGroup,
@@ -266,13 +271,6 @@ FINAL OUTPUT RULES
         {
             MessageType = ChatMessageType.User,
             Content = "Context parameters:\n" + jsonPayload
-        });
-
-        messages.Add(new MystiraChatMessage
-        {
-            MessageType = ChatMessageType.User,
-            Content = "Where parameters are missing, infer them from the following user query, or the rest of the chat " +
-                "context:" + userQuery ?? string.Empty
         });
 
         return messages;
@@ -360,6 +358,105 @@ FINAL OUTPUT RULES
         };
 
         return JsonSerializer.Serialize(example, new JsonSerializerOptions { WriteIndented = true });
+    }
+
+    private async Task ExtractStoryParametersAsync(GenerateJsonStoryRequest request, string? userQuery, IEnumerable<MystiraChatMessage> history, CancellationToken cancellationToken)
+    {
+        // Get appropriate LLM service for parameter extraction
+        var service = !string.IsNullOrWhiteSpace(request.Provider)
+            ? _llmFactory.GetService(request.Provider!, request.Model)
+            : _llmFactory.GetDefaultService();
+
+        if (service is null) return;
+
+        var extractionPrompt = @"
+Extract story parameters from the user's query and the chat history.
+Return ONLY a valid JSON object matching the following structure.
+If a value is not found or cannot be inferred, leave it as null (for strings) or 0 (for numbers).
+Ensure that minimum required parameters (title, ageGroup, minScenes, maxScenes) are populated if possible.
+
+{
+  ""title"": ""string"",
+  ""difficulty"": ""string"", (options: Easy, Medium, Hard)
+  ""sessionLength"": ""string"", (options: Short, Medium, Long)
+  ""ageGroup"": ""string"", (options: 1-2, 3-5, 6-9, 10-12, 13-18)
+  ""description"": ""string""
+  ""minimumAge"": number,
+  ""coreAxes"": [""string""],
+  ""archetypes"": [""string""],
+  ""tags"": [""string""],
+  ""tone"": ""string"",
+  ""minScenes"": number,
+  ""maxScenes"": number,
+  ""characterCount"": number
+}";
+
+        var messages = new List<MystiraChatMessage>
+        {
+            new()
+            {
+                MessageType = ChatMessageType.System,
+                Content = extractionPrompt,
+                Timestamp = DateTime.UtcNow
+            }
+        };
+
+        messages.AddRange(history);
+
+        if (!string.IsNullOrWhiteSpace(userQuery))
+        {
+            messages.Add(new MystiraChatMessage
+            {
+                MessageType = ChatMessageType.User,
+                Content = "User Query: " + userQuery,
+                Timestamp = DateTime.UtcNow
+            });
+        }
+
+        var extractionRequest = new ChatCompletionRequest
+        {
+            Provider = service.ProviderName,
+            ModelId = request.ModelId,
+            Model = request.Model,
+            Messages = messages,
+            Temperature = 0.1,
+            MaxTokens = 500
+        };
+
+        var response = await service.CompleteAsync(extractionRequest, cancellationToken);
+        if (!response.Success || string.IsNullOrWhiteSpace(response.Content)) return;
+
+        try
+        {
+            var content = response.Content.Trim();
+            if (content.StartsWith("```json")) content = content.Replace("```json", "").Replace("```", "").Trim();
+
+            var extracted = JsonSerializer.Deserialize<GenerateJsonStoryRequest>(content, new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            });
+
+            if (extracted != null)
+            {
+                if (!string.IsNullOrWhiteSpace(extracted.Title)) request.Title = extracted.Title;
+                if (!string.IsNullOrWhiteSpace(extracted.Difficulty)) request.Difficulty = extracted.Difficulty;
+                if (!string.IsNullOrWhiteSpace(extracted.SessionLength)) request.SessionLength = extracted.SessionLength;
+                if (!string.IsNullOrWhiteSpace(extracted.AgeGroup)) request.AgeGroup = extracted.AgeGroup;
+                if (!string.IsNullOrWhiteSpace(extracted.Description)) request.Description = extracted.Description;
+                if (extracted.MinimumAge > 0) request.MinimumAge = extracted.MinimumAge;
+                if (extracted.CoreAxes.Count > 0) request.CoreAxes = extracted.CoreAxes;
+                if (extracted.Archetypes.Count > 0) request.Archetypes = extracted.Archetypes;
+                if (extracted.Tags != null && extracted.Tags.Count > 0) request.Tags = extracted.Tags;
+                if (!string.IsNullOrWhiteSpace(extracted.Tone)) request.Tone = extracted.Tone;
+                if (extracted.MinScenes > 0) request.MinScenes = extracted.MinScenes;
+                if (extracted.MaxScenes > 0) request.MaxScenes = extracted.MaxScenes;
+                if (extracted.CharacterCount > 0) request.CharacterCount = extracted.CharacterCount;
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Failed to parse extracted story parameters from LLM response");
+        }
     }
 
     private JsonSchemaResponseFormat? LoadSchemaFormatSafe()
