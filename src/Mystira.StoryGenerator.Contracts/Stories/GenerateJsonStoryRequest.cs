@@ -7,6 +7,7 @@ public class GenerateJsonStoryRequest
     public string? Model { get; set; }
 
     public string Title { get; set; } = string.Empty;
+    public string? Description { get; set; }
     public string Difficulty { get; set; } = "Medium";
     public string SessionLength { get; set; } = "Medium";
     public string AgeGroup { get; set; } = string.Empty; // e.g., "10-12"

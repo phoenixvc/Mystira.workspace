@@ -9,4 +9,5 @@ public class GenerateJsonStoryResponse
     public string Model { get; set; } = string.Empty;
     public string? ModelId { get; set; }
     public string? Error { get; set; }
+    public bool IsIncomplete { get; set; }
 }

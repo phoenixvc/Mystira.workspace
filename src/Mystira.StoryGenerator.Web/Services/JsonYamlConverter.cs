@@ -246,8 +246,11 @@ public static class JsonYamlConverter
                     }
                     else
                     {
-                        // Ensure escaped characters render correctly: use double-quoted for others
-                        eventInfo.Style = ScalarStyle.DoubleQuoted;
+                        // Prefer single-quoted style to avoid escaped double quotes (\")
+                        // which the user specifically requested to avoid.
+                        // Single-quoted strings in YAML escape ' by doubling it (''),
+                        // but leave " as is.
+                        eventInfo.Style = ScalarStyle.SingleQuoted;
                     }
                 }
             }

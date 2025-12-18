@@ -37,8 +37,8 @@ public class FreeTextCommandHandler : ICommandHandler<FreeTextCommand, ChatCompl
                 return Failure("No LLM services are currently available");
             }
 
-            var messages = context.Messages != null
-                ? new List<MystiraChatMessage>(context.Messages)
+            var messages = command.History != null
+                ? new List<MystiraChatMessage>(command.History)
                 : new List<MystiraChatMessage>();
 
             var systemPrompt = BuildSystemPrompt(command.Intent, context.SystemPrompt);
@@ -145,7 +145,7 @@ public class FreeTextCommandHandler : ICommandHandler<FreeTextCommand, ChatCompl
     {
         if (context?.CurrentStory == null)
             return null;
-        
+
         return ExtractAgeGroupFromJson(context.CurrentStory.Content);
     }
 

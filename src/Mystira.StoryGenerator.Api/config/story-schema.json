@@ -69,6 +69,7 @@
           "id",
           "title",
           "type",
+          "active_character",
           "description",
           "next_scene",
           "difficulty",
@@ -83,6 +84,10 @@
             "type": "string",
             "enum": ["narrative", "choice", "roll", "special"],
             "description": "Scene type"
+          },
+          "active_character": {
+            "type": ["string", "null"],
+            "description": "Required per scene. May be null. Must be populated with a valid character in choice scenes."
           },
           "description": { "type": "string", "description": "Scene description or narration" },
           "next_scene": { "type": ["string", "null"], "description": "Next scene ID (null if final/special)" },

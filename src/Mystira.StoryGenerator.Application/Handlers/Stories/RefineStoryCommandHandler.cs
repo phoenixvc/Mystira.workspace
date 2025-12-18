@@ -97,7 +97,8 @@ public class RefineStoryCommandHandler : ICommandHandler<RefineStoryCommand, Gen
                 Json = StoryTextSanitizer.CollapseNewlinesToSpace(response.Content) ?? string.Empty,
                 Provider = response.Provider ?? service.ProviderName,
                 Model = response.Model ?? resolvedModelName ?? string.Empty,
-                ModelId = response.ModelId ?? resolvedModelId
+                ModelId = response.ModelId ?? resolvedModelId,
+                IsIncomplete = response.IsIncomplete
             };
         }
         catch (OperationCanceledException)

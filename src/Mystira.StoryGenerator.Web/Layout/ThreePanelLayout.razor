@@ -1150,6 +1150,7 @@
                     Archetypes = response.Archetypes ?? new List<string>(),
                     Tags = response.Tags,
                     Tone = response.Tone,
+                    Description = response.Description,
                     MinScenes = response.MinScenes > 0 ? response.MinScenes : difficulty.MinScenes,
                     MaxScenes = response.MaxScenes > 0 ? response.MaxScenes : difficulty.MaxScenes,
                     CharacterCount = response.CharacterCount
@@ -1477,6 +1478,21 @@
                         await SaveChatsAsync();
                         await RefreshChatSessionAsync();
                         // Do not show the original assistant content (which contained JSON) in chat
+
+                        // Strip the JSON context from the content so it's not shown in chat
+                        content = StripJsonContext(content);
+
+                        // If there is still content after stripping (e.g. a clarification prompt), add it as an assistant message
+                        if (!string.IsNullOrWhiteSpace(content))
+                        {
+                            CurrentChat.Messages.Add(new StoryGeneratorChatMessage
+                            {
+                                Role = "assistant",
+                                Content = content,
+                                Timestamp = DateTime.Now
+                            });
+                            await SaveChatsAsync();
+                        }
                     }
                 }
                 // If YAML already exists and the assistant returned an updated YAML block, apply it without displaying in chat
@@ -2129,6 +2145,7 @@
                 Archetypes = payload.archetypes,
                 Tags = payload.tags ?? new List<string>(),
                 Tone = payload.tone,
+                Description = payload.description,
                 MinScenes = minScenes,
                 MaxScenes = maxScenes,
                 CharacterCount = payload.character_count > 0 ? payload.character_count : (payload.archetypes?.Count ?? 0)
@@ -2224,6 +2241,20 @@
             "long" => "Long",
             _ => "Medium"
         };
+    }
+
+    private string StripJsonContext(string content)
+    {
+        if (string.IsNullOrWhiteSpace(content)) return content;
+
+        var marker = "CURRENT_JSON:";
+        var idx = content.IndexOf(marker, StringComparison.OrdinalIgnoreCase);
+        if (idx >= 0)
+        {
+            return content.Substring(0, idx).Trim();
+        }
+
+        return content;
     }
 
     private static string StripCodeFences(string input)
@@ -2670,6 +2701,7 @@
          public int max_scenes { get; set; } = 12;
          public List<string>? tags { get; set; }
          public string? tone { get; set; }
+         public string? description { get; set; }
          public int character_count { get; set; } = 0;
      }
     }

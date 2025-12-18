@@ -5,12 +5,14 @@ namespace Mystira.StoryGenerator.Domain.Commands.Chat;
 
 public class SchemaDocsCommand : ICommand<ChatCompletionResponse>
 {
-    public SchemaDocsCommand(ChatContext context, string? userQuery)
+    public SchemaDocsCommand(ChatContext context, string? userQuery, IEnumerable<MystiraChatMessage>? history = null)
     {
         Context = context ?? throw new ArgumentNullException(nameof(context));
         UserQuery = userQuery;
+        History = history ?? Enumerable.Empty<MystiraChatMessage>();
     }
 
     public ChatContext Context { get; }
     public string? UserQuery { get; }
+    public IEnumerable<MystiraChatMessage> History { get; }
 }
