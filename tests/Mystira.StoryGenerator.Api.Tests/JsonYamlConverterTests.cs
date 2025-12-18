@@ -52,4 +52,26 @@ public class JsonYamlConverterTests
         Assert.Contains("nested:", yaml);
         Assert.Contains("x: 1", yaml);
     }
+
+    [Fact]
+    public void ToYaml_HandlesQuotesCorrectly()
+    {
+        // Case 1: Plain scalar (no quotes needed in YAML)
+        var json1 = @"{ ""description"": ""He says, \""Hello!\"" and walks away."" }";
+        var yaml1 = JsonYamlConverter.ToYaml(json1);
+        Assert.Contains("Hello!", yaml1);
+        Assert.DoesNotContain("\\\"", yaml1);
+
+        // Case 2: Forced quoting (contains ': ') - should use single quotes in YAML to avoid escaping double quotes
+        var json2 = @"{ ""description"": ""He says: \""Hello!\"" and walks away."" }";
+        var yaml2 = JsonYamlConverter.ToYaml(json2);
+        Assert.Contains("Hello!", yaml2);
+        Assert.DoesNotContain("\\\"", yaml2);
+
+        // Case 3: Both single and double quotes
+        var json3 = @"{ ""description"": ""It's a \""magic\"" day."" }";
+        var yaml3 = JsonYamlConverter.ToYaml(json3);
+        Assert.Contains("magic", yaml3);
+        Assert.DoesNotContain("\\\"", yaml3);
+    }
 }
