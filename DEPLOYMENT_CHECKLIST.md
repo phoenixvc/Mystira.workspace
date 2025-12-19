@@ -4,6 +4,59 @@
 
 The infrastructure is **configured but NOT deployed**. All Terraform modules, Kubernetes manifests, and CI/CD workflows exist, but the actual Azure resources have not been created yet.
 
+---
+
+## Quick Start: Automated Deployment (Recommended)
+
+The entire deployment process is now automated. Just run the GitHub Actions workflow!
+
+### Option 1: GitHub Actions (Fully Automated)
+
+1. Go to **Actions** → **Infrastructure Deploy**
+2. Click **Run workflow**
+3. Select environment: `dev`, `staging`, or `prod`
+4. Click **Run workflow**
+
+The pipeline will automatically:
+- ✅ Validate prerequisites
+- ✅ Create Terraform backend (if missing)
+- ✅ Create Container Registry (if missing)
+- ✅ Create DNS Zone (if missing)
+- ✅ Run Terraform plan/apply
+- ✅ Configure DNS A records
+- ✅ Build and push Docker images
+- ✅ Deploy to Kubernetes
+- ✅ Set up SSL certificates
+
+### Option 2: Local Bootstrap Script
+
+For initial setup or troubleshooting, run locally:
+
+```bash
+# Login to Azure first
+az login
+
+# Run bootstrap script
+./scripts/bootstrap-infra.sh
+```
+
+This creates all prerequisites (Terraform backend, ACR, DNS Zone, Service Principal).
+
+---
+
+## Prerequisites Checklist
+
+| Prerequisite | Status | Notes |
+|--------------|--------|-------|
+| Domain `mystira.app` registered | ✅ Done | |
+| Azure subscription | ✅ Done | |
+| `AZURE_CREDENTIALS` GitHub secret | ✅ Done | |
+| Terraform backend storage | ⏳ Auto-created | Created by pipeline |
+| Container Registry | ⏳ Auto-created | Created by pipeline |
+| DNS Zone in Azure | ⏳ Auto-created | Created by pipeline |
+
+---
+
 ## Domain Naming Convention
 
 **Pattern:** `{env}.{component}.{domain}` (e.g., `dev.publisher.mystira.app`)
