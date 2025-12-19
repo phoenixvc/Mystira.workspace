@@ -65,6 +65,24 @@ variable "shared_log_analytics_workspace_id" {
   default     = null
 }
 
+variable "use_shared_postgresql" {
+  description = "Whether to use shared PostgreSQL instead of creating dedicated one"
+  type        = bool
+  default     = false
+}
+
+variable "use_shared_redis" {
+  description = "Whether to use shared Redis instead of creating dedicated one"
+  type        = bool
+  default     = false
+}
+
+variable "use_shared_log_analytics" {
+  description = "Whether to use shared Log Analytics instead of creating dedicated one"
+  type        = bool
+  default     = false
+}
+
 variable "tags" {
   description = "Tags to apply to all resources"
   type        = map(string)
@@ -128,7 +146,7 @@ resource "azurerm_user_assigned_identity" "story_generator" {
 
 # PostgreSQL Database (if not using shared)
 resource "azurerm_postgresql_flexible_server" "story_generator" {
-  count                  = var.shared_postgresql_server_id == null ? 1 : 0
+  count                  = var.use_shared_postgresql ? 0 : 1
   name                   = "${local.name_prefix}-pg-${local.region_code}"
   location               = var.location
   resource_group_name    = var.resource_group_name
@@ -150,7 +168,7 @@ resource "azurerm_postgresql_flexible_server" "story_generator" {
 
 # Private DNS Zone for PostgreSQL (if not using shared)
 resource "azurerm_private_dns_zone" "postgres" {
-  count               = var.shared_postgresql_server_id == null ? 1 : 0
+  count               = var.use_shared_postgresql ? 0 : 1
   name                = "${local.name_prefix}-pg-${local.region_code}.postgres.database.azure.com"
   resource_group_name = var.resource_group_name
 
@@ -159,7 +177,7 @@ resource "azurerm_private_dns_zone" "postgres" {
 
 # Private DNS Zone Virtual Network Link (if not using shared)
 resource "azurerm_private_dns_zone_virtual_network_link" "postgres" {
-  count                 = var.shared_postgresql_server_id == null ? 1 : 0
+  count                 = var.use_shared_postgresql ? 0 : 1
   name                  = "${local.name_prefix}-pg-${local.region_code}-vnet-link"
   resource_group_name   = var.resource_group_name
   private_dns_zone_name = azurerm_private_dns_zone.postgres[0].name
@@ -171,7 +189,7 @@ resource "azurerm_private_dns_zone_virtual_network_link" "postgres" {
 
 # PostgreSQL Database (if not using shared)
 resource "azurerm_postgresql_flexible_server_database" "story_generator" {
-  count     = var.shared_postgresql_server_id == null ? 1 : 0
+  count     = var.use_shared_postgresql ? 0 : 1
   name      = "storygenerator"
   server_id = azurerm_postgresql_flexible_server.story_generator[0].id
   collation = "en_US.utf8"
@@ -180,14 +198,14 @@ resource "azurerm_postgresql_flexible_server_database" "story_generator" {
 
 # Random password for PostgreSQL (if not using shared)
 resource "random_password" "postgres" {
-  count   = var.shared_postgresql_server_id == null ? 1 : 0
+  count   = var.use_shared_postgresql ? 0 : 1
   length  = 32
   special = true
 }
 
 # Redis Cache (if not using shared)
 resource "azurerm_redis_cache" "story_generator" {
-  count               = var.shared_redis_cache_id == null ? 1 : 0
+  count               = var.use_shared_redis ? 0 : 1
   name                = "${local.name_prefix}-cache-${local.region_code}"
   location            = var.location
   resource_group_name = var.resource_group_name
@@ -207,7 +225,7 @@ resource "azurerm_redis_cache" "story_generator" {
 
 # Log Analytics Workspace (if not using shared)
 resource "azurerm_log_analytics_workspace" "story_generator" {
-  count               = var.shared_log_analytics_workspace_id == null ? 1 : 0
+  count               = var.use_shared_log_analytics ? 0 : 1
   name                = "${local.name_prefix}-log-${local.region_code}"
   location            = var.location
   resource_group_name = var.resource_group_name
@@ -222,7 +240,7 @@ resource "azurerm_application_insights" "story_generator" {
   name                = "${local.name_prefix}-ai-${local.region_code}"
   location            = var.location
   resource_group_name = var.resource_group_name
-  workspace_id        = var.shared_log_analytics_workspace_id != null ? var.shared_log_analytics_workspace_id : azurerm_log_analytics_workspace.story_generator[0].id
+  workspace_id        = var.use_shared_log_analytics ? var.shared_log_analytics_workspace_id : azurerm_log_analytics_workspace.story_generator[0].id
   application_type    = "other"
 
   tags = local.common_tags
@@ -230,7 +248,7 @@ resource "azurerm_application_insights" "story_generator" {
 
 # Key Vault for Story-Generator Secrets
 resource "azurerm_key_vault" "story_generator" {
-  name                        = "${local.name_prefix}-kv-${local.region_code}"
+  name                        = "mys-${var.environment}-sg-kv-${local.region_code}"
   location                    = var.location
   resource_group_name         = var.resource_group_name
   enabled_for_disk_encryption = false
@@ -258,7 +276,7 @@ data "azurerm_client_config" "current" {}
 # Note: When using shared PostgreSQL, connection string must be provided via environment outputs
 # or the shared module's connection_strings output should be used
 resource "azurerm_key_vault_secret" "postgres_connection_string" {
-  count        = var.shared_postgresql_server_id == null ? 1 : 0
+  count        = var.use_shared_postgresql ? 0 : 1
   name         = "postgres-connection-string"
   value        = "Host=${azurerm_postgresql_flexible_server.story_generator[0].fqdn};Port=5432;Username=${azurerm_postgresql_flexible_server.story_generator[0].administrator_login};Password=${random_password.postgres[0].result};Database=${azurerm_postgresql_flexible_server_database.story_generator[0].name};SSLMode=Require;Trust Server Certificate=true"
   key_vault_id = azurerm_key_vault.story_generator.id
@@ -268,7 +286,7 @@ resource "azurerm_key_vault_secret" "postgres_connection_string" {
 # Note: When using shared Redis, connection string must be provided via environment outputs
 # or the shared module's connection string output should be used
 resource "azurerm_key_vault_secret" "redis_connection_string" {
-  count        = var.shared_redis_cache_id == null ? 1 : 0
+  count        = var.use_shared_redis ? 0 : 1
   name         = "redis-connection-string"
   value        = azurerm_redis_cache.story_generator[0].primary_connection_string
   key_vault_id = azurerm_key_vault.story_generator.id
@@ -291,22 +309,22 @@ output "identity_principal_id" {
 
 output "postgresql_server_id" {
   description = "PostgreSQL server ID (shared or dedicated)"
-  value       = var.shared_postgresql_server_id != null ? var.shared_postgresql_server_id : azurerm_postgresql_flexible_server.story_generator[0].id
+  value       = var.use_shared_postgresql ? var.shared_postgresql_server_id : azurerm_postgresql_flexible_server.story_generator[0].id
 }
 
 output "postgresql_database_name" {
   description = "PostgreSQL database name"
-  value       = var.shared_postgresql_server_id == null ? azurerm_postgresql_flexible_server_database.story_generator[0].name : "storygenerator"
+  value       = var.use_shared_postgresql ? "storygenerator" : azurerm_postgresql_flexible_server_database.story_generator[0].name
 }
 
 output "redis_cache_id" {
   description = "Redis cache ID (shared or dedicated)"
-  value       = var.shared_redis_cache_id != null ? var.shared_redis_cache_id : (length(azurerm_redis_cache.story_generator) > 0 ? azurerm_redis_cache.story_generator[0].id : null)
+  value       = var.use_shared_redis ? var.shared_redis_cache_id : azurerm_redis_cache.story_generator[0].id
 }
 
 output "log_analytics_workspace_id" {
   description = "Log Analytics Workspace ID (shared or dedicated)"
-  value       = var.shared_log_analytics_workspace_id != null ? var.shared_log_analytics_workspace_id : (length(azurerm_log_analytics_workspace.story_generator) > 0 ? azurerm_log_analytics_workspace.story_generator[0].id : null)
+  value       = var.use_shared_log_analytics ? var.shared_log_analytics_workspace_id : azurerm_log_analytics_workspace.story_generator[0].id
 }
 
 output "app_insights_connection_string" {
