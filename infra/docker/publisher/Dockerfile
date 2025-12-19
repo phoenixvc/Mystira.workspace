@@ -9,9 +9,13 @@ WORKDIR /app
 # Install build dependencies
 RUN apk add --no-cache python3 make g++
 
-# Copy package files
-COPY package*.json ./
+# Copy workspace package files
+COPY package.json ./
 COPY pnpm-lock.yaml ./
+COPY pnpm-workspace.yaml ./
+
+# Copy publisher package.json
+COPY packages/publisher/package.json ./packages/publisher/
 
 # Install pnpm
 RUN npm install -g pnpm
@@ -19,14 +23,15 @@ RUN npm install -g pnpm
 # Install dependencies
 RUN pnpm install --frozen-lockfile
 
-# Copy source code
-COPY . .
+# Copy publisher source code
+COPY packages/publisher/ ./packages/publisher/
 
 # Build the application
+WORKDIR /app/packages/publisher
 RUN pnpm build || true
 
 # Create dist directory if it doesn't exist
-RUN mkdir -p /app/dist
+RUN mkdir -p /app/packages/publisher/dist
 
 # Prune dev dependencies
 RUN pnpm prune --prod
@@ -44,9 +49,9 @@ RUN addgroup -g 10000 publisher && \
 RUN apk add --no-cache tini curl
 
 # Copy built application
-COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/package.json ./
+COPY --from=builder /app/packages/publisher/dist ./dist
+COPY --from=builder /app/packages/publisher/node_modules ./node_modules
+COPY --from=builder /app/packages/publisher/package.json ./
 
 # Set ownership
 RUN chown -R publisher:publisher /app

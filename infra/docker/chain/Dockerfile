@@ -9,9 +9,13 @@ WORKDIR /app
 # Install build dependencies
 RUN apk add --no-cache python3 make g++ git
 
-# Copy package files
-COPY package*.json ./
+# Copy workspace package files
+COPY package.json ./
 COPY pnpm-lock.yaml ./
+COPY pnpm-workspace.yaml ./
+
+# Copy chain package.json
+COPY packages/chain/package.json ./packages/chain/
 
 # Install pnpm
 RUN npm install -g pnpm
@@ -19,14 +23,15 @@ RUN npm install -g pnpm
 # Install dependencies
 RUN pnpm install --frozen-lockfile
 
-# Copy source code
-COPY . .
+# Copy chain source code
+COPY packages/chain/ ./packages/chain/
 
 # Build the application
+WORKDIR /app/packages/chain
 RUN pnpm build || true
 
 # Create dist directory if it doesn't exist
-RUN mkdir -p /app/dist
+RUN mkdir -p /app/packages/chain/dist
 
 # Production stage
 FROM node:18-alpine AS production
@@ -41,9 +46,9 @@ RUN addgroup -g 10000 chain && \
 RUN apk add --no-cache tini
 
 # Copy built application
-COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/package.json ./
+COPY --from=builder /app/packages/chain/dist ./dist
+COPY --from=builder /app/packages/chain/node_modules ./node_modules
+COPY --from=builder /app/packages/chain/package.json ./
 
 # Create data directory
 RUN mkdir -p /data && chown -R chain:chain /data
