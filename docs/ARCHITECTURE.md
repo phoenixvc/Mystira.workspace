@@ -60,6 +60,12 @@ This document provides a high-level overview of the Mystira platform architectur
 - **State Management**: Zustand
 - **Styling**: NativeWind (Tailwind for React Native)
 
+#### Admin Dashboard (`packages/admin-ui`)
+
+- **Framework**: Modern SPA (Single Page Application)
+- **Purpose**: Content moderation, administrative workflows, platform management
+- **Backend**: Connects to `Mystira.Admin.Api` (REST/gRPC)
+
 ### Backend Services
 
 #### Story Generator (`packages/story-generator`)
@@ -75,6 +81,13 @@ This document provides a high-level overview of the Mystira platform architectur
 - **Development**: Hardhat / Foundry
 - **Testing**: Comprehensive test coverage
 - **Deployment**: Automated via CI/CD
+
+#### Admin API (`packages/admin-api`)
+
+- **Type**: Pure REST/gRPC API (no Razor Pages UI)
+- **Purpose**: Internal-facing API for moderation, content workflows, and administrative tooling
+- **Database**: Shared with main application
+- **Authentication**: Admin-level access control
 
 ### Infrastructure (`infra`)
 
