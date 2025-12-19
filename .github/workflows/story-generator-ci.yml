@@ -195,15 +195,20 @@ jobs:
         continue-on-error: true
 
       - name: Push to NuGet.org (if API key configured)
-        if: secrets.NUGET_API_KEY != ''
         working-directory: packages/story-generator
+        env:
+          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
         run: |
+          if [ -z "$NUGET_API_KEY" ]; then
+            echo "NUGET_API_KEY not configured, skipping NuGet.org publish"
+            exit 0
+          fi
           if ls ./nupkg/*.nupkg 1> /dev/null 2>&1; then
             for package in ./nupkg/*.nupkg; do
               echo "Publishing $package to NuGet.org..."
               dotnet nuget push "$package" \
                 --source "https://api.nuget.org/v3/index.json" \
-                --api-key ${{ secrets.NUGET_API_KEY }} \
+                --api-key "$NUGET_API_KEY" \
                 --skip-duplicate
             done
           fi
