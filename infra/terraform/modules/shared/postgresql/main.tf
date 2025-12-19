@@ -138,7 +138,7 @@ resource "azurerm_postgresql_flexible_server" "shared" {
   delegated_subnet_id    = var.subnet_id
   private_dns_zone_id    = azurerm_private_dns_zone.postgres.id
   administrator_login    = var.admin_login
-  administrator_password = var.admin_password != null ? var.admin_password : random_password.postgres.result
+  administrator_password = var.admin_password != null ? var.admin_password : random_password.postgres[0].result
   zone                   = "1"
 
   sku_name   = local.sku_name_final
