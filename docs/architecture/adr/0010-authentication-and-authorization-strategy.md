@@ -35,7 +35,33 @@ Key questions that need answering:
 
 ## Decision
 
-We adopt a **layered authentication strategy** with clear boundaries:
+We adopt a **layered security and authentication strategy** with clear boundaries:
+
+### Security Architecture Overview
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                          Unified Security Strategy                           │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  Layer 1: Edge Security (Azure Front Door)                                  │
+│  ├── DDoS Protection, WAF (OWASP), Rate Limiting, Bot Protection            │
+│  └── See: FRONT_DOOR_IMPLEMENTATION_SUMMARY.md                              │
+│                                                                              │
+│  Layer 2: Identity Providers (Microsoft Entra ID / Azure AD B2C)            │
+│  ├── Admin: Entra ID (MFA, Conditional Access, App Roles)                   │
+│  ├── Consumer: B2C (Social login: Google, Discord)                          │
+│  └── See: ADR-0011                                                          │
+│                                                                              │
+│  Layer 3: Application Authentication (This ADR)                             │
+│  ├── JWT tokens for APIs, Cookies for browser apps                          │
+│  └── Session management, token refresh, RBAC                                │
+│                                                                              │
+│  Layer 4: Service-to-Service (Managed Identity)                             │
+│  └── Passwordless Azure resource access                                     │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
 
 ### 1. Authentication Methods by Service Type
 
@@ -318,6 +344,42 @@ public class RefreshToken
 
 ### 5. Security Considerations
 
+#### Edge Security (Azure Front Door)
+
+Azure Front Door provides the first line of defense before requests reach authentication endpoints:
+
+```
+User Request
+     ↓
+┌─────────────────────────────────────────┐
+│        Azure Front Door (Edge)          │
+├─────────────────────────────────────────┤
+│  ✓ DDoS Protection (L3/L4/L7)          │
+│  ✓ WAF (OWASP 3.2 + Custom Rules)      │
+│  ✓ Edge Rate Limiting (per IP)          │
+│  ✓ Bot Protection                       │
+│  ✓ SSL/TLS Termination (1.2+)          │
+│  ✓ Geo-blocking (if needed)            │
+└─────────────────────────────────────────┘
+     ↓
+Application Layer (Auth Endpoints)
+```
+
+**Front Door WAF Rules for Auth Protection**:
+
+| Rule | Type | Action | Purpose |
+|------|------|--------|---------|
+| OWASP 3.2 | Managed | Block | SQL injection, XSS, etc. |
+| Bot Manager | Managed | Block | Bad bots, scanners |
+| Rate Limit | Custom | Block | 500 req/min per IP (prod) |
+| Method Filter | Custom | Block | Allow only GET, POST, PUT, DELETE |
+
+**Defense in Depth**: Front Door rate limiting + application-level rate limiting provide layered protection.
+
+For Front Door implementation details, see:
+- [Front Door Implementation Summary](../../../FRONT_DOOR_IMPLEMENTATION_SUMMARY.md)
+- [Front Door Deployment Guide](../../../infra/FRONT_DOOR_DEPLOYMENT_GUIDE.md)
+
 #### Password Requirements
 
 ```csharp
@@ -332,7 +394,9 @@ options.Password = new PasswordOptions
 };
 ```
 
-#### Rate Limiting
+#### Rate Limiting (Application Layer)
+
+**Note**: Front Door provides edge-level rate limiting (500 req/min per IP). The limits below are application-level rate limits for additional protection on auth endpoints specifically.
 
 | Endpoint           | Limit                 | Window    | Action on Exceed        |
 | ------------------ | --------------------- | --------- | ----------------------- |
@@ -342,6 +406,8 @@ options.Password = new PasswordOptions
 | `/auth/forgot`     | 3 attempts            | 1 hour    | Delay response          |
 
 #### Security Headers
+
+**Note**: Front Door handles SSL/TLS and can inject security headers at the edge. The application should also set these headers for defense in depth.
 
 ```
 Strict-Transport-Security: max-age=31536000; includeSubDomains
@@ -422,19 +488,30 @@ public class ScenariosController : ControllerBase
 | Scalability         | Needs shared session store | Stateless                  | JWT for public API         |
 | Mobile/Third-party  | Not supported              | Works everywhere           | JWT for external clients   |
 
-### Why Not OAuth/OIDC Yet?
+### OAuth/OIDC and External Identity Providers
 
-OAuth 2.0 / OpenID Connect remains the target for:
-- Social login (Google, Discord, etc.)
-- Third-party API access
-- Federated identity
+OAuth 2.0 / OpenID Connect is now implemented via Microsoft Entra ID and Azure AD B2C:
 
-**Current priority**: Establish solid internal auth before adding complexity of external identity providers.
+| Provider | Use Case | Features |
+|----------|----------|----------|
+| **Microsoft Entra ID** | Admin users, Enterprise SSO | MFA, Conditional Access, App Roles |
+| **Azure AD B2C** | Consumer users (Public API, PWA) | Social login (Google, Discord), Self-service registration |
+| **Managed Identity** | Service-to-service | Passwordless Azure resource access |
 
-**Planned timeline**: Implement OAuth/OIDC when:
-- User base requires social login
-- Third-party integrations need API access
-- Enterprise SSO requirements emerge
+**For complete implementation details**, see [ADR-0011: Microsoft Entra ID Authentication Integration](./0011-entra-id-authentication-integration.md).
+
+#### Social Login Support (via B2C)
+
+Azure AD B2C enables social identity providers for consumer applications:
+
+- **Google**: OAuth 2.0 integration for Google accounts
+- **Discord**: OpenID Connect custom provider for gamers
+- **Email/Password**: Local accounts with self-service registration
+
+**B2C User Flows**:
+- `B2C_1_SignUpSignIn`: Combined sign-up and sign-in
+- `B2C_1_PasswordReset`: Self-service password reset
+- `B2C_1_ProfileEdit`: User profile management
 
 ## Consequences
 
@@ -474,20 +551,58 @@ OAuth 2.0 / OpenID Connect remains the target for:
 
 ## Implementation Checklist
 
+### Core Authentication
 - [x] JWT services in `Mystira.App.Shared`
 - [x] Cookie-based auth for Admin UI
 - [ ] Refresh token implementation for Public API
 - [ ] Rate limiting on auth endpoints
 - [ ] Session management dashboard (Admin)
-- [ ] OAuth 2.0 / OpenID Connect integration
-- [ ] MFA support for admin accounts
 - [ ] Audit logging for auth events
+
+### Microsoft Entra ID Integration (see [ADR-0011](./0011-entra-id-authentication-integration.md))
+- [ ] Entra ID App Registration for Admin API
+- [ ] Entra ID App Registration for Admin UI
+- [ ] MSAL configuration in Admin UI (React)
+- [ ] Microsoft.Identity.Web in Admin API
+- [ ] MFA via Conditional Access policies
+- [ ] App Roles and group mapping
+
+### Azure AD B2C Integration (see [ADR-0011](./0011-entra-id-authentication-integration.md))
+- [ ] B2C tenant creation
+- [ ] User flow configuration (SignUpSignIn, PasswordReset, ProfileEdit)
+- [ ] Google identity provider setup
+- [ ] Discord identity provider setup (OpenID Connect)
+- [ ] B2C App Registration for Public API
+- [ ] B2C authentication in PWA (Blazor WASM)
+- [ ] Custom B2C UI branding
+
+### Service-to-Service Authentication
+- [ ] Managed Identity on App Services/AKS
+- [ ] Managed Identity access to Cosmos DB
+- [ ] Managed Identity access to Key Vault
+
+### Edge Security (Azure Front Door)
+- [ ] Deploy Front Door in dev environment
+- [ ] Configure WAF with OWASP 3.2 managed rules
+- [ ] Configure Bot Manager rules
+- [ ] Set up rate limiting (500 req/min prod, 100 req/min dev)
+- [ ] Configure custom domain and SSL certificates
+- [ ] Test WAF in Detection mode before switching to Prevention
+- [ ] Deploy to production with Prevention mode
 
 ## Related ADRs
 
+- [ADR-0011: Microsoft Entra ID Authentication Integration](./0011-entra-id-authentication-integration.md) - **Entra ID, B2C, and social login implementation details**
 - [ADR-0005: Service Networking and Communication](./0005-service-networking-and-communication.md) - Network-level security
 - [ADR-0006: Admin API Repository Extraction](./0006-admin-api-repository-extraction.md) - Admin service architecture
 - [ADR-0007: NuGet Feed Strategy](./0007-nuget-feed-strategy-for-shared-libraries.md) - Shared auth library distribution
+
+## Related Documentation
+
+- [Front Door Implementation Summary](../../../FRONT_DOOR_IMPLEMENTATION_SUMMARY.md) - **Edge security, WAF, DDoS protection**
+- [Front Door Deployment Guide](../../../infra/FRONT_DOOR_DEPLOYMENT_GUIDE.md) - Deployment instructions
+- [Azure Front Door Plan](../../../infra/AZURE_FRONT_DOOR_PLAN.md) - Architecture and cost analysis
+- [Kubernetes Secrets Management](../infrastructure/kubernetes-secrets-management.md) - Auth secrets in K8s
 
 ## References
 
@@ -496,3 +611,5 @@ OAuth 2.0 / OpenID Connect remains the target for:
 - [JWT Best Practices (RFC 8725)](https://datatracker.ietf.org/doc/html/rfc8725)
 - [OAuth 2.0 Security Best Current Practice](https://datatracker.ietf.org/doc/html/draft-ietf-oauth-security-topics)
 - [ASP.NET Core Authentication Documentation](https://docs.microsoft.com/en-us/aspnet/core/security/authentication/)
+- [Azure Front Door Documentation](https://docs.microsoft.com/en-us/azure/frontdoor/)
+- [Azure Front Door WAF](https://docs.microsoft.com/en-us/azure/web-application-firewall/afds/afds-overview)
