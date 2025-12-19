@@ -162,6 +162,64 @@ spec:
 | `anthropic_api_key`          | Key Vault | Anthropic API key for Claude           |
 | `openai_api_key`             | Key Vault | OpenAI API key for GPT models          |
 
+## Required Secrets for Authentication
+
+### Admin API (Entra ID)
+
+| Secret Key                   | Source    | Description                            |
+| ---------------------------- | --------- | -------------------------------------- |
+| `azure-ad-tenant-id`         | Key Vault | Microsoft Entra ID tenant ID           |
+| `azure-ad-client-id`         | Key Vault | Admin API app registration client ID   |
+| `azure-ad-client-secret`     | Key Vault | Admin API app registration secret      |
+
+### Public API (Azure AD B2C)
+
+| Secret Key                   | Source    | Description                            |
+| ---------------------------- | --------- | -------------------------------------- |
+| `azure-b2c-tenant-id`        | Key Vault | Azure AD B2C tenant ID                 |
+| `azure-b2c-client-id`        | Key Vault | Public API B2C app registration ID     |
+| `azure-b2c-client-secret`    | Key Vault | B2C client secret (if confidential)    |
+
+### Social Identity Provider Secrets
+
+These secrets are stored in Azure Key Vault and referenced by B2C custom policies:
+
+| Secret Key                   | Source    | Description                            |
+| ---------------------------- | --------- | -------------------------------------- |
+| `google-oauth-client-id`     | Key Vault | Google OAuth 2.0 client ID             |
+| `google-oauth-client-secret` | Key Vault | Google OAuth 2.0 client secret         |
+| `discord-oauth-client-id`    | Key Vault | Discord OAuth client ID                |
+| `discord-oauth-client-secret`| Key Vault | Discord OAuth client secret            |
+
+### Creating Authentication Secrets in Kubernetes
+
+```bash
+# Get authentication secrets from Key Vault
+AZURE_AD_TENANT_ID=$(az keyvault secret show \
+  --vault-name "mystira-admin-kv" \
+  --name "azure-ad-tenant-id" \
+  --query value -o tsv)
+
+AZURE_AD_CLIENT_ID=$(az keyvault secret show \
+  --vault-name "mystira-admin-kv" \
+  --name "azure-ad-client-id" \
+  --query value -o tsv)
+
+AZURE_AD_CLIENT_SECRET=$(az keyvault secret show \
+  --vault-name "mystira-admin-kv" \
+  --name "azure-ad-client-secret" \
+  --query value -o tsv)
+
+# Create Kubernetes secret for Admin API
+kubectl create secret generic mystira-admin-api-auth \
+  --from-literal=azure-ad-tenant-id="$AZURE_AD_TENANT_ID" \
+  --from-literal=azure-ad-client-id="$AZURE_AD_CLIENT_ID" \
+  --from-literal=azure-ad-client-secret="$AZURE_AD_CLIENT_SECRET" \
+  --namespace mystira-dev
+```
+
+**Note**: For production, use Azure Key Vault CSI Driver with Managed Identity to automatically sync secrets. See [ADR-0011: Entra ID Integration](../architecture/adr/0011-entra-id-authentication-integration.md) for details.
+
 ## Secret Storage in Key Vault
 
 ### For Dedicated Resources

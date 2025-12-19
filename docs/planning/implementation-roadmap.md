@@ -297,16 +297,63 @@ This roadmap outlines the strategic implementation plan for the Mystira workspac
 
 **Goal**: Strengthen security posture and ensure compliance.
 
+### 5.0 Authentication Implementation (Entra ID & B2C)
+
+**Priority**: High
+**Dependencies**: None
+**Estimated Effort**: 3 weeks
+
+**Reference**: [ADR-0011: Entra ID Integration](../architecture/adr/0011-entra-id-authentication-integration.md)
+
+**Tasks**:
+
+#### Phase 5.0.1: Microsoft Entra ID (Admin)
+- [ ] Create Entra ID App Registration for Admin API
+- [ ] Create Entra ID App Registration for Admin UI
+- [ ] Configure MSAL in Admin UI (React)
+- [ ] Add Microsoft.Identity.Web to Admin API
+- [ ] Define App Roles (Admin, SuperAdmin, Moderator, Viewer)
+- [ ] Configure group-to-role mapping
+- [ ] Create Conditional Access policies (MFA requirement)
+- [ ] Test admin authentication flow end-to-end
+
+#### Phase 5.0.2: Azure AD B2C (Consumer)
+- [ ] Create Azure AD B2C tenant
+- [ ] Configure user flows (SignUpSignIn, PasswordReset, ProfileEdit)
+- [ ] Set up Google identity provider
+- [ ] Set up Discord identity provider (OpenID Connect)
+- [ ] Create B2C App Registration for Public API
+- [ ] Update PWA for B2C authentication (Blazor WASM)
+- [ ] Customize B2C UI branding
+- [ ] Test consumer sign-up/sign-in flow
+
+#### Phase 5.0.3: Service-to-Service Authentication
+- [ ] Enable Managed Identity on App Services
+- [ ] Enable Managed Identity on AKS
+- [ ] Configure Cosmos DB for Entra ID auth
+- [ ] Configure Key Vault access via Managed Identity
+- [ ] Remove connection string authentication
+- [ ] Test service-to-service auth
+
+**Deliverables**:
+
+- Entra ID authentication for Admin UI/API
+- B2C authentication with social login (Google, Discord)
+- Managed Identity for all Azure resources
+- MFA enabled for admin users
+
 ### 5.1 Secrets Management
 
-**Priority**: High  
-**Dependencies**: Phase 1 (Infrastructure)  
+**Priority**: High
+**Dependencies**: Phase 1 (Infrastructure), Phase 5.0 (Authentication)
 **Estimated Effort**: 1 week
 
 **Tasks**:
 
 - [ ] Audit all secrets and credentials
 - [ ] Centralize secrets in Azure Key Vault
+- [ ] Store Entra ID and B2C secrets in Key Vault
+- [ ] Store social provider secrets (Google, Discord) in Key Vault
 - [ ] Implement secrets rotation policies
 - [ ] Set up secrets access auditing
 - [ ] Document secrets management procedures
@@ -630,6 +677,8 @@ This roadmap should be reviewed and updated:
 ## Related Documentation
 
 - [Infrastructure Guide](../infrastructure/infrastructure.md)
-- [ADR-0001: Infrastructure Organization](./architecture/adr/0001-infrastructure-organization-hybrid-approach.md)
-- [ADR-0002: Documentation Location Strategy](./architecture/adr/0002-documentation-location-strategy.md)
-- [ADR-0003: Release Pipeline Strategy](./architecture/adr/0003-release-pipeline-strategy.md)
+- [ADR-0001: Infrastructure Organization](../architecture/adr/0001-infrastructure-organization-hybrid-approach.md)
+- [ADR-0002: Documentation Location Strategy](../architecture/adr/0002-documentation-location-strategy.md)
+- [ADR-0003: Release Pipeline Strategy](../architecture/adr/0003-release-pipeline-strategy.md)
+- [ADR-0010: Authentication Strategy](../architecture/adr/0010-authentication-and-authorization-strategy.md)
+- [ADR-0011: Entra ID Integration](../architecture/adr/0011-entra-id-authentication-integration.md)

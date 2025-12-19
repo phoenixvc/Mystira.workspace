@@ -292,6 +292,125 @@ terraform apply
 
 ---
 
+## Authentication Setup (Entra ID & B2C)
+
+The Mystira platform uses Microsoft Entra ID for admin authentication and Azure AD B2C for consumer authentication with social login support. For complete details, see [ADR-0011: Entra ID Integration](./architecture/adr/0011-entra-id-authentication-integration.md).
+
+### 1. Microsoft Entra ID Setup (Admin)
+
+#### Create App Registration for Admin API
+
+1. Go to Azure Portal → Microsoft Entra ID → App registrations
+2. Click "New registration"
+3. Configure:
+   - Name: `mystira-admin-api`
+   - Supported account types: Single tenant
+   - Redirect URI: (none for API)
+4. After creation, note the **Application (client) ID**
+5. Go to "Expose an API" → Set Application ID URI: `api://mystira-admin-api`
+6. Add scopes: `Admin.Read`, `Admin.Write`, `Users.Manage`, `Content.Moderate`
+
+#### Create App Registration for Admin UI
+
+1. Go to Azure Portal → Microsoft Entra ID → App registrations
+2. Click "New registration"
+3. Configure:
+   - Name: `mystira-admin-ui`
+   - Supported account types: Single tenant
+   - Redirect URI: `https://admin.mystira.app/auth/callback` (Web)
+4. Add localhost for development: `http://localhost:5173/auth/callback`
+5. Enable "Access tokens" and "ID tokens" in Authentication
+
+#### Configure App Roles
+
+1. Go to Admin API app registration → App roles
+2. Create roles:
+   - Admin (users/groups)
+   - SuperAdmin (users)
+   - Moderator (users/groups)
+   - Viewer (users/groups)
+
+#### Set Up Conditional Access (MFA)
+
+1. Go to Azure Portal → Microsoft Entra ID → Security → Conditional Access
+2. Create policy:
+   - Name: "Require MFA for Mystira Admin"
+   - Users: Assign to admin groups
+   - Cloud apps: Select `mystira-admin-api` and `mystira-admin-ui`
+   - Grant: Require MFA
+
+### 2. Azure AD B2C Setup (Consumer)
+
+#### Create B2C Tenant
+
+```bash
+# Via Azure CLI (or use Azure Portal)
+az ad b2c tenant create \
+  --display-name "Mystira B2C" \
+  --domain-name "mystirab2c.onmicrosoft.com" \
+  --country-code "US"
+```
+
+#### Configure Identity Providers
+
+**Google**:
+1. Create OAuth credentials at [Google Cloud Console](https://console.cloud.google.com/)
+2. In B2C tenant → Identity providers → Add Google
+3. Enter Client ID and Client Secret from Google
+4. Redirect URI: `https://mystirab2c.b2clogin.com/mystirab2c.onmicrosoft.com/oauth2/authresp`
+
+**Discord**:
+1. Create application at [Discord Developer Portal](https://discord.com/developers/applications)
+2. In B2C tenant → Identity providers → Add OpenID Connect (custom)
+3. Configure:
+   - Name: Discord
+   - Metadata URL: `https://discord.com/.well-known/openid-configuration`
+   - Client ID/Secret from Discord
+   - Scope: `identify email`
+
+#### Create User Flows
+
+1. Go to B2C tenant → User flows
+2. Create **Sign up and sign in** flow (`B2C_1_SignUpSignIn`):
+   - Identity providers: Email, Google, Discord
+   - User attributes: Email Address, Display Name
+   - Application claims: Object ID, Email, Display Name, Identity Provider
+3. Create **Password reset** flow (`B2C_1_PasswordReset`)
+4. Create **Profile editing** flow (`B2C_1_ProfileEdit`)
+
+#### Create App Registration for Public API
+
+1. In B2C tenant → App registrations
+2. Create `mystira-public-api`:
+   - Supported account types: B2C tenant accounts
+   - Application ID URI: `https://mystirab2c.onmicrosoft.com/mystira-api`
+   - Add scope: `API.Access`
+
+### 3. Environment Configuration
+
+After setup, configure environment variables as documented in [ENVIRONMENT.md](./ENVIRONMENT.md#authentication-variables).
+
+**Required Secrets in Azure Key Vault**:
+
+| Secret Name | Description |
+|-------------|-------------|
+| `azure-ad-client-secret` | Admin API client secret |
+| `azure-b2c-client-secret` | B2C API client secret (if confidential) |
+| `google-client-secret` | Google OAuth client secret |
+| `discord-client-secret` | Discord OAuth client secret |
+
+### 4. Verify Setup
+
+```bash
+# Test Entra ID token acquisition (Admin)
+az account get-access-token --resource api://mystira-admin-api
+
+# Verify B2C metadata endpoint
+curl https://mystirab2c.b2clogin.com/mystirab2c.onmicrosoft.com/B2C_1_SignUpSignIn/v2.0/.well-known/openid-configuration
+```
+
+---
+
 ## Project-Specific Setup
 
 ### Mystira.Chain (Python gRPC Service)
