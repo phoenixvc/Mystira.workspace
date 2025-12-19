@@ -31,7 +31,7 @@ provider "azurerm" {
 variable "location" {
   description = "Azure region for deployment"
   type        = string
-  default     = "eastus"
+  default     = "southafricanorth"
 }
 
 # Common tags for all resources
@@ -45,7 +45,7 @@ locals {
 
 # Resource Group
 resource "azurerm_resource_group" "main" {
-  name     = "mys-dev-mystira-rg-eus"
+  name     = "mys-dev-mystira-rg-san"
   location = var.location
 
   tags = {
@@ -57,7 +57,7 @@ resource "azurerm_resource_group" "main" {
 
 # Virtual Network
 resource "azurerm_virtual_network" "main" {
-  name                = "mys-dev-mystira-vnet-eus"
+  name                = "mys-dev-mystira-vnet-san"
   location            = azurerm_resource_group.main.location
   resource_group_name = azurerm_resource_group.main.name
   address_space       = ["10.0.0.0/16"]
@@ -145,7 +145,7 @@ module "chain" {
 
   environment           = "dev"
   location              = var.location
-  region_code           = "eus"
+  region_code           = "san"
   resource_group_name   = azurerm_resource_group.main.name
   chain_node_count      = 1
   chain_vm_size         = "Standard_B2s"
@@ -164,7 +164,7 @@ module "publisher" {
 
   environment             = "dev"
   location                = var.location
-  region_code             = "eus"
+  region_code             = "san"
   resource_group_name     = azurerm_resource_group.main.name
   publisher_replica_count = 1
   vnet_id                 = azurerm_virtual_network.main.id
@@ -235,7 +235,7 @@ module "story_generator" {
 
   environment         = "dev"
   location           = var.location
-  region_code        = "eus"
+  region_code        = "san"
   resource_group_name = azurerm_resource_group.main.name
   vnet_id            = azurerm_virtual_network.main.id
   subnet_id          = azurerm_subnet.story_generator.id
@@ -255,7 +255,7 @@ module "story_generator" {
 
 # AKS Cluster for Dev
 resource "azurerm_kubernetes_cluster" "main" {
-  name                = "mys-dev-mystira-aks-eus"
+  name                = "mys-dev-mystira-aks-san"
   location            = azurerm_resource_group.main.location
   resource_group_name = azurerm_resource_group.main.name
   dns_prefix          = "mys-dev-mystira"
