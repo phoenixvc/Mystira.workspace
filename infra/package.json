@@ -1,0 +1,15 @@
+{
+  "name": "@mystira/infra",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Infrastructure, DevOps, and deployment configurations for Mystira",
+  "scripts": {
+    "terraform:init": "cd terraform && terraform init",
+    "terraform:plan": "cd terraform && terraform plan",
+    "terraform:apply": "cd terraform && terraform apply",
+    "k8s:apply": "kubectl apply -k kubernetes/overlays",
+    "docker:build": "./scripts/build-images.sh",
+    "docker:push": "./scripts/push-images.sh"
+  }
+}
+
