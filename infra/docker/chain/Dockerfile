@@ -11,14 +11,18 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy requirements if exists, otherwise create minimal one
-COPY packages/chain/requirements.txt ./requirements.txt 2>/dev/null || echo "grpcio>=1.50.0\ngrpcio-tools>=1.50.0\nprotobuf>=4.21.0" > requirements.txt
+# Copy chain source code first
+COPY packages/chain/ ./
+
+# Create requirements.txt if it doesn't exist
+RUN if [ ! -f requirements.txt ]; then \
+    echo "grpcio>=1.50.0" > requirements.txt && \
+    echo "grpcio-tools>=1.50.0" >> requirements.txt && \
+    echo "protobuf>=4.21.0" >> requirements.txt; \
+    fi
 
 # Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
-
-# Copy chain source code
-COPY packages/chain/ ./
 
 # Production stage
 FROM python:3.11-slim AS production
