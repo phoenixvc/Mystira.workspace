@@ -61,6 +61,7 @@ jobs:
       backend-exists: ${{ steps.check-backend.outputs.exists }}
       acr-exists: ${{ steps.check-acr.outputs.exists }}
       dns-zone-exists: ${{ steps.check-dns.outputs.exists }}
+      aks-exists: ${{ steps.check-aks.outputs.exists }}
     steps:
       - name: Azure Login
         uses: azure/login@v2
@@ -100,6 +101,17 @@ jobs:
             echo "::warning::DNS Zone does not exist - will be created"
           fi
 
+      - name: Check AKS Cluster
+        id: check-aks
+        run: |
+          if az aks show --name ${{ env.AKS_CLUSTER_NAME }} --resource-group ${{ env.AZURE_RESOURCE_GROUP }} &> /dev/null; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+            echo "::notice::AKS Cluster exists"
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+            echo "::notice::AKS Cluster does not exist - Kubernetes deployment will be skipped"
+          fi
+
       - name: Validation Summary
         run: |
           echo "## Pre-deployment Validation" >> $GITHUB_STEP_SUMMARY
@@ -109,6 +121,7 @@ jobs:
           echo "| Terraform Backend | ${{ steps.check-backend.outputs.exists == 'true' && '✅ Exists' || '⚠️ Will Create' }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Container Registry | ${{ steps.check-acr.outputs.exists == 'true' && '✅ Exists' || '⚠️ Will Create' }} |" >> $GITHUB_STEP_SUMMARY
           echo "| DNS Zone | ${{ steps.check-dns.outputs.exists == 'true' && '✅ Exists' || '⚠️ Will Create' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| AKS Cluster | ${{ steps.check-aks.outputs.exists == 'true' && '✅ Exists' || '⏭️ Not Found (K8s deploy skipped)' }} |" >> $GITHUB_STEP_SUMMARY
 
   # ============================================
   # Bootstrap Infrastructure Prerequisites
@@ -339,13 +352,16 @@ jobs:
           echo "✅ Infrastructure applied successfully" >> $GITHUB_STEP_SUMMARY
 
   # ============================================
-  # Configure DNS Records
+  # Configure DNS Records (AKS-based)
   # ============================================
   configure-dns:
     name: Configure DNS
     runs-on: ubuntu-latest
-    needs: [apply-terraform]
-    if: always() && needs.apply-terraform.result == 'success'
+    needs: [validate, apply-terraform]
+    if: |
+      always() &&
+      needs.apply-terraform.result == 'success' &&
+      needs.validate.outputs.aks-exists == 'true'
     environment: ${{ github.event.inputs.environment || 'dev' }}
     steps:
       - name: Azure Login
@@ -523,9 +539,10 @@ jobs:
   deploy-kubernetes:
     name: Deploy to Kubernetes
     runs-on: ubuntu-latest
-    needs: [apply-terraform, configure-dns, build-images]
+    needs: [validate, apply-terraform, configure-dns, build-images]
     if: |
       always() &&
+      needs.validate.outputs.aks-exists == 'true' &&
       (needs.apply-terraform.result == 'success' || needs.apply-terraform.result == 'skipped') &&
       (needs.build-images.result == 'success' || needs.build-images.result == 'skipped') &&
       (github.event.inputs.components == 'all' ||
