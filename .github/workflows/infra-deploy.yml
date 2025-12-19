@@ -124,7 +124,7 @@ jobs:
        needs.validate.outputs.acr-exists != 'true' ||
        needs.validate.outputs.dns-zone-exists != 'true')
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Azure Login
         uses: azure/login@v2
@@ -210,7 +210,7 @@ jobs:
       contents: read
       id-token: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
@@ -256,7 +256,7 @@ jobs:
 
       - name: Upload Plan
         if: steps.plan.outputs.exitcode == '2'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: terraform-plan-${{ env.ENVIRONMENT }}
           path: infra/terraform/environments/${{ env.ENVIRONMENT }}/tfplan
@@ -288,7 +288,7 @@ jobs:
       contents: read
       id-token: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
@@ -316,7 +316,7 @@ jobs:
           } >> "$GITHUB_ENV"
 
       - name: Download Plan
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: terraform-plan-${{ env.ENVIRONMENT }}
           path: infra/terraform/environments/${{ env.ENVIRONMENT }}
@@ -447,7 +447,7 @@ jobs:
       (needs.apply-terraform.result == 'success' || needs.apply-terraform.result == 'skipped') &&
       (github.event.inputs.components == 'all' || github.event.inputs.components == '')
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Azure Login
         uses: azure/login@v2
@@ -507,7 +507,7 @@ jobs:
       contents: read
       id-token: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Azure Login
         uses: azure/login@v2
