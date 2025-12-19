@@ -19,7 +19,7 @@ Each component is maintained as a separate repository and integrated into this w
 | **Mystira.DevHub**         | Development operations desktop application                       | `phoenixvc/Mystira.DevHub`         | `packages/devhub/`          |
 | **Mystira.Admin.Api**      | Admin API backend (pure REST/gRPC)                               | `phoenixvc/Mystira.Admin.Api`      | `packages/admin-api/`       |
 | **Mystira.Admin.UI**       | Admin frontend application (modern SPA)                          | `phoenixvc/Mystira.Admin.UI`       | `packages/admin-ui/`        |
-| **Mystira.Infra**          | Infrastructure, DevOps, and deployment configurations            | `phoenixvc/Mystira.Infra`          | `infra/`                    |
+| **Infrastructure**         | Infrastructure, DevOps, and deployment configurations            | *(direct - not a submodule)*       | `infra/`                    |
 
 ## Repository Structure
 
@@ -49,8 +49,11 @@ Mystira.workspace/
 │   └── story-generator/    # Mystira.StoryGenerator repository (git submodule)
 │       └── [Mystira.StoryGenerator repository contents]
 │
-├── infra/                  # Mystira.Infra repository (git submodule)
-│   └── [Mystira.Infra repository contents]
+├── infra/                  # Infrastructure (direct content, not a submodule)
+│   ├── terraform/         # Terraform modules and environments
+│   ├── kubernetes/        # Kubernetes manifests
+│   ├── docker/            # Dockerfiles
+│   └── scripts/           # Infrastructure scripts
 │
 ├── docs/                   # Workspace documentation
 ├── tools/                  # Shared development tools
@@ -156,14 +159,17 @@ AI-powered story generation system featuring:
 - Multi-model AI orchestration
 - Context-aware story continuation
 
-### Mystira.Infra
+### Infrastructure (`infra/`)
 
-Infrastructure and deployment configurations:
+Infrastructure and deployment configurations (consolidated directly in workspace):
 
 - Cloud infrastructure (Terraform)
 - Container orchestration (Kubernetes)
 - CI/CD pipelines
 - Monitoring and observability
+- Azure Front Door (WAF, CDN, DDoS protection)
+
+> **Note**: Infrastructure code lives directly in the workspace (not as a submodule) for atomic commits and simpler CI/CD.
 
 For Azure deployments, see [Azure Setup Guide](./infra/AZURE_SETUP.md) for configuring service principal permissions.
 

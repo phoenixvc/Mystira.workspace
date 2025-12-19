@@ -245,42 +245,19 @@ curl https://dev.publisher.mystira.app/health
 
 ## 🎯 What Changed (Summary)
 
-### Infra Submodule Changes
+### Infrastructure Consolidation
 
-**Commits:**
+The `infra/` directory has been **consolidated directly into the workspace** (no longer a submodule). This provides:
+- Atomic commits across infra + workflows
+- Simpler CI/CD (no submodule token needed for infra)
+- Better discoverability
 
-```
-ee1c91b - Enable Azure Front Door for all environments and add Story Generator Docker support
-7467fbb - Implement Azure Front Door Terraform module and deployment framework
-94b65ab - Add Azure Front Door implementation plan and analysis
-ca1c411 - Configure environment-specific URLs for Publisher and Chain services
-```
+**Key Infrastructure Features:**
+- Azure Front Door enabled in all environments (WAF, CDN, DDoS)
+- Story Generator Docker support
+- NuGet Alpha versioning (`1.0.0-alpha.{build_number}`)
 
-**Files Modified:**
-
-- 4 Front Door configs (dev, staging, prod + module)
-- 1 DNS module (Front Door support)
-- 1 Story Generator Dockerfile
-- 9 documentation files
-
-### Workspace Changes
-
-**New Files:**
-
-- 3 CI/CD workflows (Story Generator, Admin UI, DevHub)
-- 3 documentation files
-
-**All Changes Ready to Commit:**
-
-```
-A  .github/workflows/admin-ui-ci.yml
-A  .github/workflows/devhub-ci.yml
-A  .github/workflows/story-generator-ci.yml
-A  ENVIRONMENT_URLS_UPDATE.md
-A  FRONT_DOOR_IMPLEMENTATION_SUMMARY.md
-A  INFRASTRUCTURE_COMPLETE.md
-MM infra (new commits)
-```
+See [Infrastructure Consolidation Plan](./docs/infrastructure/INFRA_CONSOLIDATION_PLAN.md) for details.
 
 ## 📚 Documentation Available
 

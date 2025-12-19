@@ -105,14 +105,14 @@ az ad sp create-for-rbac --name "mystira-github-actions" \
   --sdk-auth
 ```
 
-### 1.4 Clone Infrastructure Submodule
+### 1.4 Verify Infrastructure Directory
 ```bash
-# From workspace root
-git submodule update --init infra
-
-# Verify it worked
+# Infrastructure is now part of the workspace (not a submodule)
+# Verify it exists
 ls infra/terraform/environments/dev/
 ```
+
+> **Note**: The `infra/` directory contains infrastructure code directly in the workspace. It was consolidated from the `Mystira.Infra` repository for simpler CI/CD.
 
 ---
 
