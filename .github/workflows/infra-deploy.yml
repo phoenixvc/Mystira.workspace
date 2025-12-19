@@ -463,7 +463,7 @@ jobs:
             -t ${{ env.ACR_NAME }}.azurecr.io/publisher:${{ env.ENVIRONMENT }} \
             -t ${{ env.ACR_NAME }}.azurecr.io/publisher:${{ github.sha }} \
             -f infra/docker/publisher/Dockerfile \
-            packages/publisher
+            .
           docker push ${{ env.ACR_NAME }}.azurecr.io/publisher:${{ env.ENVIRONMENT }}
           docker push ${{ env.ACR_NAME }}.azurecr.io/publisher:${{ github.sha }}
 
@@ -473,7 +473,7 @@ jobs:
             -t ${{ env.ACR_NAME }}.azurecr.io/chain:${{ env.ENVIRONMENT }} \
             -t ${{ env.ACR_NAME }}.azurecr.io/chain:${{ github.sha }} \
             -f infra/docker/chain/Dockerfile \
-            packages/chain
+            .
           docker push ${{ env.ACR_NAME }}.azurecr.io/chain:${{ env.ENVIRONMENT }}
           docker push ${{ env.ACR_NAME }}.azurecr.io/chain:${{ github.sha }}
 
