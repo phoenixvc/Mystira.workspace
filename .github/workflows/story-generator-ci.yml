@@ -163,8 +163,9 @@ jobs:
         working-directory: packages/story-generator
         run: |
           # Pack any projects that produce NuGet packages (Contracts, Client libraries)
+          # Using Alpha versioning: 1.0.0-alpha.{build_number}
           dotnet pack --configuration Release --no-build --output ./nupkg \
-            -p:PackageVersion=1.0.${{ github.run_number }} \
+            -p:PackageVersion=1.0.0-alpha.${{ github.run_number }} \
             -p:RepositoryUrl=https://github.com/${{ github.repository }} \
             -p:RepositoryType=git
         continue-on-error: true

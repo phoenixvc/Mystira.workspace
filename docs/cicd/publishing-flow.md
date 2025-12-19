@@ -139,12 +139,31 @@ Uses **Changesets** for versioning and publishing.
 ```
 
 ### Versioning
-Uses `<Version>` property in `.csproj` files or Directory.Build.props:
-```xml
-<PropertyGroup>
-  <Version>1.0.0</Version>
-  <PackageVersion>$(Version)</PackageVersion>
-</PropertyGroup>
+
+**Current Strategy**: Alpha pre-release versioning
+
+```
+1.0.0-alpha.{build_number}
+```
+
+Examples:
+- `1.0.0-alpha.42`
+- `1.0.0-alpha.43`
+
+The build number increments automatically with each CI run (`github.run_number`).
+
+**Progression**:
+| Phase | Version Pattern | When |
+|-------|-----------------|------|
+| Alpha | `1.0.0-alpha.{n}` | Current development |
+| Beta | `1.0.0-beta.{n}` | Feature complete, testing |
+| RC | `1.0.0-rc.{n}` | Release candidate |
+| Stable | `1.0.0` | Production release |
+
+To update version stage, modify the workflow:
+```yaml
+# In story-generator-ci.yml
+-p:PackageVersion=1.0.0-alpha.${{ github.run_number }}
 ```
 
 ---
