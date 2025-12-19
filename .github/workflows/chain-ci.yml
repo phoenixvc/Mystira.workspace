@@ -140,7 +140,7 @@ jobs:
           submodules: recursive
 
       - name: Download build artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: chain-build
           path: packages/chain/artifacts
