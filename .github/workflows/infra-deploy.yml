@@ -448,6 +448,8 @@ jobs:
       (github.event.inputs.components == 'all' || github.event.inputs.components == '')
     steps:
       - uses: actions/checkout@v6
+        with:
+          submodules: recursive
 
       - name: Azure Login
         uses: azure/login@v2
