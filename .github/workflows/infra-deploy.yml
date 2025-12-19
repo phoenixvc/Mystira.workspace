@@ -256,6 +256,11 @@ jobs:
           cd infra/terraform/environments/${{ env.ENVIRONMENT }}
           terraform init
 
+      - name: Terraform Refresh (sync state with Azure)
+        run: |
+          cd infra/terraform/environments/${{ env.ENVIRONMENT }}
+          terraform refresh
+
       - name: Terraform Plan
         id: plan
         run: |
