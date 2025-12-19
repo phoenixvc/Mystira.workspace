@@ -466,6 +466,19 @@ jobs:
           echo ""
           echo "Publisher package contents:"
           ls -la packages/publisher/ || echo "Publisher directory empty or missing"
+          echo ""
+          # Fail if submodules are empty
+          if [ ! -f "packages/chain/package.json" ]; then
+            echo "::error::packages/chain/package.json not found - submodule checkout failed"
+            echo "Make sure GH_PAT has access to https://github.com/phoenixvc/Mystira.Chain"
+            exit 1
+          fi
+          if [ ! -f "packages/publisher/package.json" ]; then
+            echo "::error::packages/publisher/package.json not found - submodule checkout failed"
+            echo "Make sure GH_PAT has access to https://github.com/phoenixvc/Mystira.Publisher"
+            exit 1
+          fi
+          echo "✅ Submodules verified successfully"
 
       - name: Azure Login
         uses: azure/login@v2
