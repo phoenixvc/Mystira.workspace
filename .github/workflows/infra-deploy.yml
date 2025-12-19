@@ -42,8 +42,8 @@ concurrency:
 env:
   TF_VERSION: "1.5.0"
   ENVIRONMENT: ${{ github.event.inputs.environment || 'dev' }}
-  AZURE_RESOURCE_GROUP: mys-${{ github.event.inputs.environment || 'dev' }}-mystira-rg-eus
-  AKS_CLUSTER_NAME: mys-${{ github.event.inputs.environment || 'dev' }}-mystira-aks-eus
+  AZURE_RESOURCE_GROUP: mys-${{ github.event.inputs.environment || 'dev' }}-mystira-rg-san
+  AKS_CLUSTER_NAME: mys-${{ github.event.inputs.environment || 'dev' }}-mystira-aks-san
   ACR_NAME: mysprodacr
   DNS_ZONE: mystira.app
   TERRAFORM_RG: mys-prod-terraform-rg-eus
