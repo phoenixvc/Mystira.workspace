@@ -155,6 +155,23 @@ git clone https://github.com/phoenixvc/Mystira.workspace.git
 
 Then add submodules later as needed.
 
+### Git Proxy Limitations
+
+If you're using a local git proxy that only authorizes the main workspace repository, you may encounter errors when trying to push submodule changes:
+
+```
+remote: Proxy error: repository not authorized
+fatal: unable to access 'http://127.0.0.1:22376/git/phoenixvc/Mystira.Chain/': The requested URL returned error: 502
+```
+
+**Solution**: If the proxy only authorizes `Mystira.workspace`, you'll need to push submodule changes directly to GitHub (not through the proxy) or ensure the proxy is configured to authorize all submodule repositories.
+
+To work around this:
+
+1. Push submodule changes from an environment with direct GitHub access
+2. Or configure the proxy to authorize all required submodule repositories
+3. Or use direct GitHub remotes instead of the proxy for submodule repositories
+
 ## Best Practices
 
 1. **Always commit submodule updates**: When a submodule is updated, commit the change in the workspace
