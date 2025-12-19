@@ -43,7 +43,7 @@ module "shared_redis" {
 | capacity            | Redis cache capacity             | `number`      | `1`              | no       |
 | family              | Redis cache family               | `string`      | `"C"`            | no       |
 | sku_name            | Redis cache SKU name             | `string`      | `"Standard"`     | no       |
-| enable_non_ssl_port | Enable non-SSL port              | `bool`        | `false`          | no       |
+| non_ssl_port_enabled | Enable non-SSL port              | `bool`        | `false`          | no       |
 | minimum_tls_version | Minimum TLS version              | `string`      | `"1.2"`          | no       |
 | maxmemory_policy    | Redis maxmemory policy           | `string`      | `"volatile-lru"` | no       |
 | tags                | Resource tags                    | `map(string)` | `{}`             | no       |

@@ -212,7 +212,7 @@ resource "azurerm_redis_cache" "story_generator" {
   capacity            = var.environment == "prod" ? 2 : 1
   family              = var.environment == "prod" ? "C" : "C"
   sku_name            = var.environment == "prod" ? "Standard" : "Basic"
-  enable_non_ssl_port = false
+  non_ssl_port_enabled = false
   minimum_tls_version = "1.2"
   subnet_id           = var.subnet_id
 
