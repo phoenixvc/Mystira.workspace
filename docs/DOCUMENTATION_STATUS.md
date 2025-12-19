@@ -21,10 +21,12 @@ All Mystira repositories should include:
 |----------|--------|-------|
 | README.md | Complete | |
 | docs/ARCHITECTURE.md | Complete | High-level architecture |
-| docs/architecture/adr/ | Complete | 10 ADRs documented |
+| docs/architecture/adr/ | Complete | 11 ADRs documented |
 | docs/ENVIRONMENT.md | Complete | Environment configuration |
 | docs/MIGRATION_PHASES.md | Complete | Migration tracking |
 | ADR-0010: Auth Strategy | Complete | Authentication/authorization strategy |
+| ADR-0011: Entra ID | Complete | Microsoft Entra ID integration |
+| SECURITY.md | Complete | Comprehensive security documentation |
 
 ### Mystira.App
 
@@ -72,11 +74,13 @@ All Mystira repositories should include:
 | README.md | Complete | Basic but covers essentials |
 | .env.example | Complete | AI provider configuration |
 | docs/ | Good | Feature documentation |
+| docs/ARCHITECTURE.md | Complete | System architecture, layers, data flow |
 
 **Recent Additions**:
 - `.env.example` - Environment configuration template
+- `docs/ARCHITECTURE.md` - Comprehensive architecture documentation
 
-**Gaps**: Could use ARCHITECTURE.md, API reference
+**Gaps**: Could use API reference
 
 ### Mystira.Admin.Api
 
@@ -124,15 +128,15 @@ All repositories should reference this ADR for authentication patterns.
 
 ### High Priority
 
-1. All repos should link to ADR-0010 for auth documentation
-2. Mystira.StoryGenerator needs ARCHITECTURE.md
+1. ~~All repos should link to ADR-0010 for auth documentation~~ ✅ ADRs created
+2. ~~Mystira.StoryGenerator needs ARCHITECTURE.md~~ ✅ Added
 3. Mystira.Admin.Api could consolidate docs into /docs folder
 
 ### Medium Priority
 
 1. Mystira.Chain could add docs/ folder for API reference
 2. All repos should have consistent CONTRIBUTING.md
-3. Add SECURITY.md to repos handling sensitive data
+3. ~~Add SECURITY.md to repos handling sensitive data~~ ✅ Enhanced
 
 ### Low Priority
 
@@ -145,7 +149,9 @@ All repositories should reference this ADR for authentication patterns.
 | Topic | Location |
 |-------|----------|
 | Authentication Strategy | `docs/architecture/adr/0010-authentication-and-authorization-strategy.md` |
+| Entra ID Integration | `docs/architecture/adr/0011-entra-id-authentication-integration.md` |
 | Service Networking | `docs/architecture/adr/0005-service-networking-and-communication.md` |
 | Infrastructure | `docs/architecture/adr/0001-infrastructure-organization-hybrid-approach.md` |
 | Admin API Extraction | `docs/architecture/adr/0006-admin-api-repository-extraction.md` |
 | NuGet Strategy | `docs/architecture/adr/0007-nuget-feed-strategy-for-shared-libraries.md` |
+| Security Policy | `SECURITY.md` |
