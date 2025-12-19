@@ -164,6 +164,121 @@ Supported Account Types: B2C tenant accounts
        │◀───────────────────────────────────────│
 ```
 
+#### Azure AD B2C Sign-Up/Sign-In Flow (Consumer)
+
+```
+┌─────────┐     ┌──────────────┐     ┌─────────────┐     ┌──────────┐
+│   PWA   │     │   Azure AD   │     │  Public API │     │ Cosmos DB│
+│ (Blazor)│     │     B2C      │     │             │     │          │
+└────┬────┘     └──────┬───────┘     └──────┬──────┘     └────┬─────┘
+     │                 │                    │                  │
+     │  1. User clicks "Sign In"            │                  │
+     │────────────────▶│                    │                  │
+     │                 │                    │                  │
+     │  2. Redirect to B2C login page       │                  │
+     │◀────────────────│                    │                  │
+     │                 │                    │                  │
+     │  ┌──────────────────────────────┐    │                  │
+     │  │  B2C Hosted UI               │    │                  │
+     │  │  ┌────────────────────────┐  │    │                  │
+     │  │  │ Sign in with:         │  │    │                  │
+     │  │  │ [Google] [Discord]    │  │    │                  │
+     │  │  │ ─────────────────────  │  │    │                  │
+     │  │  │ Email: [          ]   │  │    │                  │
+     │  │  │ Password: [       ]   │  │    │                  │
+     │  │  │ [Sign In] [Sign Up]   │  │    │                  │
+     │  │  └────────────────────────┘  │    │                  │
+     │  └──────────────────────────────┘    │                  │
+     │                 │                    │                  │
+     │  3. User authenticates (email/social)│                  │
+     │────────────────▶│                    │                  │
+     │                 │                    │                  │
+     │  4. B2C validates, runs user flow    │                  │
+     │                 │                    │                  │
+     │  5. Redirect with auth code          │                  │
+     │◀────────────────│                    │                  │
+     │                 │                    │                  │
+     │  6. Exchange code for tokens         │                  │
+     │────────────────▶│                    │                  │
+     │                 │                    │                  │
+     │  7. ID token + access token + refresh│                  │
+     │◀────────────────│                    │                  │
+     │                 │                    │                  │
+     │  8. API request with access token    │                  │
+     │─────────────────────────────────────▶│                  │
+     │                 │                    │                  │
+     │                 │  9. Validate B2C token                │
+     │                 │◀───────────────────│                  │
+     │                 │                    │                  │
+     │                 │                    │ 10. Query user   │
+     │                 │                    │─────────────────▶│
+     │                 │                    │                  │
+     │ 11. Response with user data          │◀─────────────────│
+     │◀─────────────────────────────────────│                  │
+```
+
+#### B2C Token Refresh Flow
+
+```
+┌─────────┐     ┌──────────────┐     ┌─────────────┐
+│   PWA   │     │   Azure AD   │     │  Public API │
+│         │     │     B2C      │     │             │
+└────┬────┘     └──────┬───────┘     └──────┬──────┘
+     │                 │                    │
+     │  1. Access token expired             │
+     │  (401 from API)                      │
+     │◀─────────────────────────────────────│
+     │                 │                    │
+     │  2. POST /token with refresh_token   │
+     │────────────────▶│                    │
+     │                 │                    │
+     │  3. Validate refresh token           │
+     │                 │                    │
+     │  4. New access token + refresh token │
+     │◀────────────────│                    │
+     │                 │                    │
+     │  5. Retry API request                │
+     │─────────────────────────────────────▶│
+     │                 │                    │
+     │  6. Success response                 │
+     │◀─────────────────────────────────────│
+```
+
+#### B2C Social Login Flow (Google/Discord)
+
+```
+┌─────────┐     ┌──────────┐     ┌──────────────┐     ┌─────────────┐
+│   PWA   │     │  B2C UI  │     │   Identity   │     │  Public API │
+│         │     │          │     │   Provider   │     │             │
+└────┬────┘     └────┬─────┘     └──────┬───────┘     └──────┬──────┘
+     │               │                  │                    │
+     │ 1. Click social login button     │                    │
+     │──────────────▶│                  │                    │
+     │               │                  │                    │
+     │               │ 2. Redirect to IdP                    │
+     │               │─────────────────▶│                    │
+     │               │                  │                    │
+     │               │ 3. User authenticates with IdP        │
+     │               │                  │                    │
+     │               │ 4. IdP returns auth code              │
+     │               │◀─────────────────│                    │
+     │               │                  │                    │
+     │               │ 5. Exchange for IdP tokens            │
+     │               │─────────────────▶│                    │
+     │               │                  │                    │
+     │               │ 6. IdP tokens (user info)             │
+     │               │◀─────────────────│                    │
+     │               │                  │                    │
+     │ 7. B2C creates/links user, issues tokens              │
+     │◀──────────────│                  │                    │
+     │               │                  │                    │
+     │ 8. API call with B2C token       │                    │
+     │──────────────────────────────────────────────────────▶│
+     │               │                  │                    │
+     │ 9. Success                       │                    │
+     │◀──────────────────────────────────────────────────────│
+```
+
 ### 4. Implementation Details
 
 #### ASP.NET Core Configuration
@@ -427,6 +542,189 @@ AZURE_B2C_CLIENT_ID=your-b2c-client-id
 - [ ] Update PWA for B2C authentication
 - [ ] Test consumer sign-up/sign-in
 
+## Azure AD B2C Setup Guide
+
+### 1. Create B2C Tenant
+
+```bash
+# Via Azure CLI
+az ad b2c tenant create \
+  --display-name "Mystira B2C" \
+  --domain-name "mystirab2c.onmicrosoft.com" \
+  --country-code "US"
+```
+
+### 2. Configure Identity Providers
+
+#### Google Identity Provider
+
+1. Create OAuth credentials at [Google Cloud Console](https://console.cloud.google.com/)
+2. Configure in Azure Portal:
+
+```
+Azure Portal → Azure AD B2C → Identity providers → Google
+├── Client ID: [from Google Console]
+├── Client Secret: [from Google Console]
+└── Scope: openid profile email
+```
+
+**Redirect URI for Google**: `https://mystirab2c.b2clogin.com/mystirab2c.onmicrosoft.com/oauth2/authresp`
+
+#### Discord Identity Provider
+
+1. Create application at [Discord Developer Portal](https://discord.com/developers/applications)
+2. Configure as OpenID Connect provider:
+
+```
+Azure Portal → Azure AD B2C → Identity providers → OpenID Connect
+├── Name: Discord
+├── Metadata URL: https://discord.com/.well-known/openid-configuration
+├── Client ID: [from Discord]
+├── Client Secret: [from Discord]
+├── Scope: identify email
+├── Response type: code
+└── Claims mapping:
+    ├── User ID: sub
+    ├── Display name: username
+    └── Email: email
+```
+
+**Redirect URI for Discord**: `https://mystirab2c.b2clogin.com/mystirab2c.onmicrosoft.com/oauth2/authresp`
+
+### 3. User Flow Configuration
+
+#### Sign-up/Sign-in Flow (B2C_1_SignUpSignIn)
+
+```yaml
+Name: B2C_1_SignUpSignIn
+Identity providers:
+  - Local Account (Email)
+  - Google
+  - Discord
+User attributes to collect:
+  - Email Address (required)
+  - Display Name (required)
+Application claims to return:
+  - User's Object ID
+  - Email Addresses
+  - Display Name
+  - Identity Provider
+  - Identity Provider Access Token
+Page layouts:
+  - Sign-up or sign-in page: Ocean Blue (or custom)
+  - Local account sign-up page: Ocean Blue
+```
+
+#### Password Reset Flow (B2C_1_PasswordReset)
+
+```yaml
+Name: B2C_1_PasswordReset
+Identity providers:
+  - Local Account (Email)
+User attributes:
+  - Email Address
+Application claims:
+  - User's Object ID
+  - Email Addresses
+```
+
+### 4. B2C ASP.NET Core Configuration
+
+**appsettings.json**:
+
+```json
+{
+  "AzureAdB2C": {
+    "Instance": "https://mystirab2c.b2clogin.com",
+    "Domain": "mystirab2c.onmicrosoft.com",
+    "TenantId": "YOUR_B2C_TENANT_ID",
+    "ClientId": "YOUR_B2C_CLIENT_ID",
+    "SignUpSignInPolicyId": "B2C_1_SignUpSignIn",
+    "ResetPasswordPolicyId": "B2C_1_PasswordReset",
+    "EditProfilePolicyId": "B2C_1_ProfileEdit"
+  }
+}
+```
+
+**Program.cs**:
+
+```csharp
+// Add B2C authentication
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddMicrosoftIdentityWebApi(options =>
+    {
+        builder.Configuration.Bind("AzureAdB2C", options);
+        options.TokenValidationParameters.NameClaimType = "name";
+    },
+    options => { builder.Configuration.Bind("AzureAdB2C", options); });
+
+// Configure CORS for B2C
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("B2CPolicy", policy =>
+    {
+        policy.WithOrigins(
+            "https://mystira.app",
+            "http://localhost:5173")
+        .AllowAnyHeader()
+        .AllowAnyMethod()
+        .AllowCredentials();
+    });
+});
+```
+
+### 5. Blazor WASM B2C Configuration
+
+**wwwroot/appsettings.json**:
+
+```json
+{
+  "AzureAdB2C": {
+    "Authority": "https://mystirab2c.b2clogin.com/mystirab2c.onmicrosoft.com/B2C_1_SignUpSignIn",
+    "ClientId": "YOUR_B2C_CLIENT_ID",
+    "ValidateAuthority": false
+  }
+}
+```
+
+**Program.cs**:
+
+```csharp
+builder.Services.AddMsalAuthentication(options =>
+{
+    builder.Configuration.Bind("AzureAdB2C", options.ProviderOptions.Authentication);
+    options.ProviderOptions.DefaultAccessTokenScopes.Add(
+        "https://mystirab2c.onmicrosoft.com/mystira-api/API.Access");
+    options.ProviderOptions.LoginMode = "redirect";
+});
+```
+
+## Setup Documentation Links
+
+### Secrets Management
+
+- **[Secrets Management Guide](../../packages/app/docs/setup/secrets-management.md)** - How to manage secrets locally and in production
+- **[Quick Secrets Reference](../../packages/app/docs/setup/quick-secrets-reference.md)** - Quick lookup for common secrets
+- **[Kubernetes Secrets](../infrastructure/kubernetes-secrets-management.md)** - K8s secret management for deployed services
+- **[GitHub Secrets/Variables](../../packages/app/docs/setup/github-secrets-variables.md)** - CI/CD secrets configuration
+
+### Infrastructure Setup
+
+- **[Infrastructure Quick Start](../infrastructure/QUICK_START_DEPLOY.md)** - Quick deployment guide
+- **[Terraform Backend Setup](../infrastructure/TERRAFORM_BACKEND_SETUP.md)** - IaC backend configuration
+- **[Shared Resources](../infrastructure/shared-resources.md)** - Shared Azure resources
+
+### Application Setup
+
+- **[Environment Configuration](../ENVIRONMENT.md)** - Environment variable reference
+- **[Database Setup](../../packages/app/docs/setup/database-setup.md)** - Cosmos DB configuration
+- **[Email Setup](../../packages/app/docs/setup/email-setup.md)** - Azure Communication Services
+
+### Security
+
+- **[Security Policy](../../SECURITY.md)** - Security guidelines and contacts
+- **[ADR-0010: Auth Strategy](./0010-authentication-and-authorization-strategy.md)** - Overall authentication strategy
+
 ## Related ADRs
 
 - [ADR-0010: Authentication and Authorization Strategy](./0010-authentication-and-authorization-strategy.md) - Overall auth strategy
@@ -439,5 +737,7 @@ AZURE_B2C_CLIENT_ID=your-b2c-client-id
 - [MSAL.js for React](https://github.com/AzureAD/microsoft-authentication-library-for-js/tree/dev/lib/msal-react)
 - [Microsoft.Identity.Web](https://docs.microsoft.com/en-us/azure/active-directory/develop/microsoft-identity-web)
 - [Azure AD B2C Documentation](https://docs.microsoft.com/en-us/azure/active-directory-b2c/)
+- [B2C Custom Policies](https://docs.microsoft.com/en-us/azure/active-directory-b2c/custom-policy-overview)
+- [B2C Identity Providers](https://docs.microsoft.com/en-us/azure/active-directory-b2c/add-identity-provider)
 - [Managed Identities](https://docs.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/)
 - [Conditional Access](https://docs.microsoft.com/en-us/azure/active-directory/conditional-access/)
