@@ -467,9 +467,9 @@ jobs:
           echo "Publisher package contents:"
           ls -la packages/publisher/ || echo "Publisher directory empty or missing"
           echo ""
-          # Fail if submodules are empty
-          if [ ! -f "packages/chain/package.json" ]; then
-            echo "::error::packages/chain/package.json not found - submodule checkout failed"
+          # Fail if submodules are empty (chain is Python, publisher is Node.js)
+          if [ ! -f "packages/chain/server.py" ]; then
+            echo "::error::packages/chain/server.py not found - submodule checkout failed"
             echo "Make sure GH_PAT has access to https://github.com/phoenixvc/Mystira.Chain"
             exit 1
           fi
