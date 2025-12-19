@@ -453,6 +453,20 @@ jobs:
           token: ${{ secrets.GH_PAT }}
           persist-credentials: true
 
+      - name: Verify submodules
+        run: |
+          echo "Checking submodule status..."
+          git submodule status
+          echo ""
+          echo "Packages directory contents:"
+          ls -la packages/
+          echo ""
+          echo "Chain package contents:"
+          ls -la packages/chain/ || echo "Chain directory empty or missing"
+          echo ""
+          echo "Publisher package contents:"
+          ls -la packages/publisher/ || echo "Publisher directory empty or missing"
+
       - name: Azure Login
         uses: azure/login@v2
         with:
