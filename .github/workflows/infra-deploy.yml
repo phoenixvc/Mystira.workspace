@@ -195,7 +195,7 @@ jobs:
   # Terraform Plan
   # ============================================
   plan-terraform:
-    name: Plan Terraform - ${{ github.event.inputs.environment || 'dev' }}
+    name: Plan Terraform
     runs-on: ubuntu-latest
     needs: [validate, bootstrap]
     if: |
@@ -277,7 +277,7 @@ jobs:
   # Terraform Apply
   # ============================================
   apply-terraform:
-    name: Apply Terraform - ${{ github.event.inputs.environment || 'dev' }}
+    name: Apply Terraform
     runs-on: ubuntu-latest
     needs: [plan-terraform]
     if: needs.plan-terraform.outputs.plan-exit-code == '2'
@@ -342,7 +342,7 @@ jobs:
   # Configure DNS Records
   # ============================================
   configure-dns:
-    name: Configure DNS - ${{ github.event.inputs.environment || 'dev' }}
+    name: Configure DNS
     runs-on: ubuntu-latest
     needs: [apply-terraform]
     if: always() && needs.apply-terraform.result == 'success'
@@ -490,7 +490,7 @@ jobs:
   # Deploy to Kubernetes
   # ============================================
   deploy-kubernetes:
-    name: Deploy to Kubernetes - ${{ github.event.inputs.environment || 'dev' }}
+    name: Deploy to Kubernetes
     runs-on: ubuntu-latest
     needs: [apply-terraform, configure-dns, build-images]
     if: |
