@@ -6,15 +6,18 @@ This guide explains the infrastructure organization, deployment models, and coor
 
 The Mystira workspace uses a **hybrid infrastructure approach** with infrastructure code located in multiple places, each optimized for the specific deployment model of the services:
 
+> **Note**: The `infra/` directory is now **consolidated directly in the workspace** (not a submodule) for simpler CI/CD and atomic commits. See [Infrastructure Consolidation Plan](./INFRA_CONSOLIDATION_PLAN.md).
+
 ```
 Mystira.workspace/
-├── infra/                        # Containerized services (Kubernetes)
+├── infra/                        # Containerized services (direct content, not submodule)
 │   ├── terraform/               # Infrastructure as Code (Terraform)
 │   │   ├── modules/
 │   │   │   ├── chain/          # Chain service infrastructure
 │   │   │   ├── publisher/      # Publisher service infrastructure
 │   │   │   ├── story-generator/# Story-Generator service infrastructure
 │   │   │   ├── dns/            # DNS zone management
+│   │   │   ├── front-door/     # Azure Front Door (WAF, CDN, DDoS)
 │   │   │   └── shared/         # Shared infrastructure modules
 │   │   │       ├── postgresql/ # Shared PostgreSQL database
 │   │   │       ├── redis/      # Shared Redis cache
