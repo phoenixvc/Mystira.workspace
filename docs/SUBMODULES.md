@@ -107,6 +107,8 @@ git submodule update --init --recursive
 | Mystira.StoryGenerator | `packages/story-generator/` | `phoenixvc/Mystira.StoryGenerator` |
 | Mystira.Publisher      | `packages/publisher/`       | `phoenixvc/Mystira.Publisher`      |
 | Mystira.DevHub         | `packages/devhub/`          | `phoenixvc/Mystira.DevHub`         |
+| Mystira.Admin.Api      | `packages/admin-api/`       | `phoenixvc/Mystira.Admin.Api`      |
+| Mystira.Admin.UI       | `packages/admin-ui/`        | `phoenixvc/Mystira.Admin.UI`       |
 
 > **Note**: The `infra/` directory is **not** a submodule. It contains infrastructure code directly in the workspace for simpler CI/CD and atomic commits. See [Infrastructure Consolidation](./infrastructure/INFRA_CONSOLIDATION_PLAN.md).
 
