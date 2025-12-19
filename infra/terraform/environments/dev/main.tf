@@ -34,6 +34,15 @@ variable "location" {
   default     = "eastus"
 }
 
+# Common tags for all resources
+locals {
+  common_tags = {
+    Environment = "dev"
+    Project     = "Mystira"
+    ManagedBy   = "terraform"
+  }
+}
+
 # Resource Group
 resource "azurerm_resource_group" "main" {
   name     = "mys-dev-mystira-rg-eus"
@@ -101,16 +110,7 @@ resource "azurerm_subnet" "redis" {
   resource_group_name  = azurerm_resource_group.main.name
   virtual_network_name = azurerm_virtual_network.main.name
   address_prefixes     = ["10.0.4.0/24"]
-
-  delegation {
-    name = "redis-delegation"
-    service_delegation {
-      name = "Microsoft.Cache/redis"
-      actions = [
-        "Microsoft.Network/virtualNetworks/subnets/join/action",
-      ]
-    }
-  }
+  # Note: Azure Cache for Redis does not support subnet delegation
 }
 
 resource "azurerm_subnet" "story_generator" {

@@ -111,7 +111,7 @@ resource "azurerm_monitor_metric_alert" "high_cpu" {
 resource "azurerm_monitor_action_group" "default" {
   name                = "${local.name_prefix}-alerts"
   resource_group_name = var.resource_group_name
-  short_name          = "MystiraAlerts"
+  short_name          = "MysAlerts"
   enabled             = true
 
   # Email notification (configure as needed)
