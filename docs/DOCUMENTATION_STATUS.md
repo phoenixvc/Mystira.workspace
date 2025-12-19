@@ -155,3 +155,33 @@ All repositories should reference this ADR for authentication patterns.
 | Admin API Extraction | `docs/architecture/adr/0006-admin-api-repository-extraction.md` |
 | NuGet Strategy | `docs/architecture/adr/0007-nuget-feed-strategy-for-shared-libraries.md` |
 | Security Policy | `SECURITY.md` |
+
+## Pending Submodule Documentation
+
+The following documentation has been created in submodule local branches and needs to be pushed to their respective repositories:
+
+| Repository | Branch | Files | Status |
+|------------|--------|-------|--------|
+| Mystira.Chain | `claude/add-documentation-CVn3r` | `requirements.txt`, `.env.example`, README Quick Start | Pending push |
+| Mystira.Admin.UI | `claude/add-documentation-CVn3r` | `.env.example` | Pending push |
+| Mystira.Publisher | `claude/add-documentation-CVn3r` | `CONTRIBUTING.md` | Pending push |
+| Mystira.StoryGenerator | `claude/add-documentation-CVn3r` | `.env.example`, `docs/ARCHITECTURE.md` | Pending push |
+
+**To push these changes**, run from each submodule directory:
+
+```bash
+# From workspace root
+cd packages/chain && git push -u origin claude/add-documentation-CVn3r
+cd ../admin-ui && git push -u origin claude/add-documentation-CVn3r
+cd ../publisher && git push -u origin claude/add-documentation-CVn3r
+cd ../story-generator && git push -u origin claude/add-documentation-CVn3r
+```
+
+Then update the workspace to reference the new commits:
+
+```bash
+cd /home/user/Mystira.workspace
+git add packages/chain packages/admin-ui packages/publisher packages/story-generator
+git commit -m "Update submodule references after documentation push"
+git push
+```
