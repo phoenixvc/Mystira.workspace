@@ -32,24 +32,9 @@ jobs:
     name: Lint Publisher
     runs-on: ubuntu-latest
     steps:
-      - name: Validate GitHub Submodule Access Token
-        run: |
-          if [ -z "${{ secrets.MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN }}" ]; then
-            echo "::error::Missing required GitHub secret: MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN"
-            echo "::error::Description: Personal Access Token (PAT) with 'repo' scope required to clone private submodules"
-            echo "::error::Action: Add secret at https://github.com/${{ github.repository }}/settings/secrets/actions"
-            echo "::error::Name: MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN"
-            echo "::error::Scope: 'repo' (Full control of private repositories)"
-            exit 1
-          fi
       - uses: actions/checkout@v6
         with:
           submodules: recursive
-          token: ${{ secrets.MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN }}
-      - name: Setup admin-ui submodule
-        uses: ./.github/actions/setup-admin-ui
-        with:
-          token: ${{ secrets.MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN }}
 
       - uses: pnpm/action-setup@v4
 
@@ -71,11 +56,6 @@ jobs:
       - uses: actions/checkout@v6
         with:
           submodules: recursive
-          token: ${{ secrets.MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN }}
-      - name: Setup admin-ui submodule
-        uses: ./.github/actions/setup-admin-ui
-        with:
-          token: ${{ secrets.MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN }}
 
       - uses: pnpm/action-setup@v4
 
@@ -104,11 +84,6 @@ jobs:
       - uses: actions/checkout@v6
         with:
           submodules: recursive
-          token: ${{ secrets.MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN }}
-      - name: Setup admin-ui submodule
-        uses: ./.github/actions/setup-admin-ui
-        with:
-          token: ${{ secrets.MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN }}
 
       - uses: pnpm/action-setup@v4
 
@@ -142,11 +117,6 @@ jobs:
       - uses: actions/checkout@v6
         with:
           submodules: recursive
-          token: ${{ secrets.MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN }}
-      - name: Setup admin-ui submodule
-        uses: ./.github/actions/setup-admin-ui
-        with:
-          token: ${{ secrets.MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN }}
 
       - name: Download build artifacts
         uses: actions/download-artifact@v4
@@ -195,24 +165,9 @@ jobs:
     name: Validate Kubernetes Manifests
     runs-on: ubuntu-latest
     steps:
-      - name: Validate GitHub Submodule Access Token
-        run: |
-          if [ -z "${{ secrets.MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN }}" ]; then
-            echo "::error::Missing required GitHub secret: MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN"
-            echo "::error::Description: Personal Access Token (PAT) with 'repo' scope required to clone private submodules"
-            echo "::error::Action: Add secret at https://github.com/${{ github.repository }}/settings/secrets/actions"
-            echo "::error::Name: MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN"
-            echo "::error::Scope: 'repo' (Full control of private repositories)"
-            exit 1
-          fi
       - uses: actions/checkout@v6
         with:
           submodules: recursive
-          token: ${{ secrets.MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN }}
-      - name: Setup admin-ui submodule
-        uses: ./.github/actions/setup-admin-ui
-        with:
-          token: ${{ secrets.MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN }}
 
       - name: Install kubectl
         uses: azure/setup-kubectl@v4
@@ -228,24 +183,9 @@ jobs:
     name: Validate Terraform
     runs-on: ubuntu-latest
     steps:
-      - name: Validate GitHub Submodule Access Token
-        run: |
-          if [ -z "${{ secrets.MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN }}" ]; then
-            echo "::error::Missing required GitHub secret: MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN"
-            echo "::error::Description: Personal Access Token (PAT) with 'repo' scope required to clone private submodules"
-            echo "::error::Action: Add secret at https://github.com/${{ github.repository }}/settings/secrets/actions"
-            echo "::error::Name: MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN"
-            echo "::error::Scope: 'repo' (Full control of private repositories)"
-            exit 1
-          fi
       - uses: actions/checkout@v6
         with:
           submodules: recursive
-          token: ${{ secrets.MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN }}
-      - name: Setup admin-ui submodule
-        uses: ./.github/actions/setup-admin-ui
-        with:
-          token: ${{ secrets.MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN }}
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
