@@ -260,6 +260,11 @@ jobs:
         run: |
           cd infra/terraform/environments/${{ env.ENVIRONMENT }}
           terraform refresh
+          # Remove AKS from state if it exists but not in Azure - forces recreation
+          if ! az aks show --name ${{ env.AKS_CLUSTER_NAME }} --resource-group ${{ env.AZURE_RESOURCE_GROUP }} &> /dev/null; then
+            echo "AKS not found in Azure, removing from Terraform state if present..."
+            terraform state rm azurerm_kubernetes_cluster.main || true
+          fi
 
       - name: Terraform Plan
         id: plan
