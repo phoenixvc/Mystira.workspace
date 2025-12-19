@@ -74,6 +74,8 @@ variable "tags" {
 locals {
   name_prefix = "mys-${var.environment}-mystira-chain"
   region_code = var.region_code
+  # Key Vault names must be 3-24 chars, alphanumeric and dashes only
+  kv_name     = "mys-${var.environment}-chn-kv-${local.region_code}"
   common_tags = merge(var.tags, {
     Component   = "chain"
     Environment = var.environment
@@ -173,7 +175,7 @@ resource "azurerm_log_analytics_workspace" "chain" {
 
 # Key Vault for Chain Secrets
 resource "azurerm_key_vault" "chain" {
-  name                        = "${local.name_prefix}-kv-${local.region_code}"
+  name                        = local.kv_name
   location                    = var.location
   resource_group_name         = var.resource_group_name
   enabled_for_disk_encryption = true
