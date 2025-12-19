@@ -59,20 +59,9 @@ jobs:
       contents: read
       id-token: write
     steps:
-      - name: Validate GitHub Submodule Access Token
-        run: |
-          if [ -z "${{ secrets.MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN }}" ]; then
-            echo "::error::Missing required GitHub secret: MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN"
-            echo "::error::Description: Personal Access Token (PAT) with 'repo' scope required to clone private submodules"
-            echo "::error::Action: Add secret at https://github.com/${{ github.repository }}/settings/secrets/actions"
-            echo "::error::Name: MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN"
-            echo "::error::Scope: 'repo' (Full control of private repositories)"
-            exit 1
-          fi
       - uses: actions/checkout@v6
         with:
           submodules: recursive
-          token: ${{ secrets.MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN }}
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
@@ -80,16 +69,16 @@ jobs:
           terraform_version: ${{ env.TF_VERSION }}
 
       - name: Azure Login
-        uses: azure/login@v1
+        uses: azure/login@v2
         with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
+          creds: ${{ secrets.MYSTIRA_AZURE_CREDENTIALS }}
 
       - name: Set Azure credentials for Terraform
         run: |
-          ARM_CLIENT_ID=$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r '.clientId')
-          ARM_CLIENT_SECRET=$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r '.clientSecret')
-          ARM_SUBSCRIPTION_ID=$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r '.subscriptionId')
-          ARM_TENANT_ID=$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r '.tenantId')
+          ARM_CLIENT_ID=$(echo '${{ secrets.MYSTIRA_AZURE_CREDENTIALS }}' | jq -r '.clientId')
+          ARM_CLIENT_SECRET=$(echo '${{ secrets.MYSTIRA_AZURE_CREDENTIALS }}' | jq -r '.clientSecret')
+          ARM_SUBSCRIPTION_ID=$(echo '${{ secrets.MYSTIRA_AZURE_CREDENTIALS }}' | jq -r '.subscriptionId')
+          ARM_TENANT_ID=$(echo '${{ secrets.MYSTIRA_AZURE_CREDENTIALS }}' | jq -r '.tenantId')
 
           echo "::add-mask::$ARM_CLIENT_SECRET"
 
@@ -126,28 +115,17 @@ jobs:
       contents: read
       id-token: write
     steps:
-      - name: Validate GitHub Submodule Access Token
-        run: |
-          if [ -z "${{ secrets.MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN }}" ]; then
-            echo "::error::Missing required GitHub secret: MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN"
-            echo "::error::Description: Personal Access Token (PAT) with 'repo' scope required to clone private submodules"
-            echo "::error::Action: Add secret at https://github.com/${{ github.repository }}/settings/secrets/actions"
-            echo "::error::Name: MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN"
-            echo "::error::Scope: 'repo' (Full control of private repositories)"
-            exit 1
-          fi
       - uses: actions/checkout@v6
         with:
           submodules: recursive
-          token: ${{ secrets.MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN }}
 
       - name: Azure Login
-        uses: azure/login@v1
+        uses: azure/login@v2
         with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
+          creds: ${{ secrets.MYSTIRA_AZURE_CREDENTIALS }}
 
       - name: Setup kubectl
-        uses: azure/setup-kubectl@v3
+        uses: azure/setup-kubectl@v4
 
       - name: Get AKS credentials
         run: |

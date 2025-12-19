@@ -88,12 +88,12 @@ Examples:
 
 ### Pull Requests
 
-1. Create a feature branch from `main`
+1. Create a feature branch from `dev` branch
 2. Make your changes with clear commits
 3. Write/update tests as needed
 4. Ensure all tests pass: `pnpm test`
 5. Ensure linting passes: `pnpm lint`
-6. Submit a PR with a clear description
+6. Submit a PR to the `dev` branch with a clear description
 
 ### Code Review
 

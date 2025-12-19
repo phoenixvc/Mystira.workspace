@@ -21,5 +21,44 @@
     "**/wwwroot/**",
     "**/service-worker*.js",
     "**/*.min.js"
+  ],
+  "overrides": [
+    {
+      "files": ["packages/admin-ui/**/*.{ts,tsx}"],
+      "env": {
+        "browser": true,
+        "node": true
+      },
+      "parserOptions": {
+        "ecmaFeatures": {
+          "jsx": true
+        }
+      },
+      "globals": {
+        "React": "readonly"
+      },
+      "rules": {
+        "no-undef": "off",
+        "@typescript-eslint/no-unused-vars": ["warn", { "argsIgnorePattern": "^_" }],
+        "react-hooks/rules-of-hooks": "off"
+      }
+    },
+    {
+      "files": ["packages/publisher/**/*.{ts,tsx,js}"],
+      "env": {
+        "browser": true,
+        "node": true
+      },
+      "rules": {
+        "@typescript-eslint/no-unused-vars": ["warn", { "argsIgnorePattern": "^_" }],
+        "@typescript-eslint/no-namespace": "warn"
+      }
+    },
+    {
+      "files": ["**/mockServiceWorker.js"],
+      "rules": {
+        "no-unused-disable-directives": "off"
+      }
+    }
   ]
 }

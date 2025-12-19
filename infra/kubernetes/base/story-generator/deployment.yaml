@@ -1,0 +1,155 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mystira-story-generator
+  labels:
+    app: mystira-story-generator
+    component: story-generator
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: mystira-story-generator
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: mystira-story-generator
+        component: story-generator
+        azure.workload.identity/use: "true"
+    spec:
+      serviceAccountName: mystira-story-generator-sa
+      securityContext:
+        runAsUser: 1000
+        runAsNonRoot: true
+      containers:
+        - name: story-generator
+          image: mystiraacr.azurecr.io/story-generator:latest
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+            - name: health
+              containerPort: 8081
+              protocol: TCP
+          env:
+            - name: ASPNETCORE_ENVIRONMENT
+              value: Production
+            - name: ASPNETCORE_URLS
+              value: "http://+:8080"
+            - name: ASPNETCORE_HTTP_PORTS
+              value: "8080"
+            - name: ASPNETCORE_HEALTHCHECK_PORTS
+              value: "8081"
+            - name: ConnectionStrings__PostgreSQL
+              valueFrom:
+                secretKeyRef:
+                  name: mystira-story-generator-secrets
+                  key: postgres_connection_string
+            - name: ConnectionStrings__Redis
+              valueFrom:
+                secretKeyRef:
+                  name: mystira-story-generator-secrets
+                  key: redis_connection_string
+            - name: Ai__Anthropic__ApiKey
+              valueFrom:
+                secretKeyRef:
+                  name: mystira-story-generator-secrets
+                  key: anthropic_api_key
+            - name: Ai__OpenAI__ApiKey
+              valueFrom:
+                secretKeyRef:
+                  name: mystira-story-generator-secrets
+                  key: openai_api_key
+            - name: APPLICATIONINSIGHTS_CONNECTION_STRING
+              valueFrom:
+                secretKeyRef:
+                  name: mystira-story-generator-secrets
+                  key: appinsights_connection
+            - name: KEY_VAULT_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: mystira-story-generator-config
+                  key: key_vault_url
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "250m"
+            limits:
+              memory: "1Gi"
+              cpu: "1000m"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8081
+            initialDelaySeconds: 60
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8081
+            initialDelaySeconds: 30
+            periodSeconds: 5
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mystira-story-generator
+  labels:
+    app: mystira-story-generator
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080
+    - name: health
+      port: 8081
+      targetPort: 8081
+  selector:
+    app: mystira-story-generator
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mystira-story-generator-config
+data:
+  key_vault_url: "https://mystira-sg-kv.vault.azure.net/"
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: mystira-story-generator-hpa
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: mystira-story-generator
+  minReplicas: 2
+  maxReplicas: 10
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 80
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: mystira-story-generator-sa
+  annotations:
+    azure.workload.identity/client-id: "${AZURE_CLIENT_ID}"
+

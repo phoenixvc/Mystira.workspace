@@ -1,0 +1,90 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: mys-staging
+
+resources:
+  - ../../base/chain
+  - ../../base/publisher
+  - ../../base/story-generator
+  - ../../base/cert-manager
+
+commonLabels:
+  environment: staging
+
+patches:
+  - target:
+      kind: Ingress
+      name: mystira-publisher-ingress
+    patch: |-
+      - op: replace
+        path: /spec/tls/0/hosts/0
+        value: "staging.publisher.mystira.app"
+      - op: replace
+        path: /spec/rules/0/host
+        value: "staging.publisher.mystira.app"
+      - op: replace
+        path: /metadata/annotations/cert-manager.io~1cluster-issuer
+        value: "letsencrypt-staging"
+  - target:
+      kind: Ingress
+      name: mystira-chain-ingress
+    patch: |-
+      - op: replace
+        path: /spec/tls/0/hosts/0
+        value: "staging.chain.mystira.app"
+      - op: replace
+        path: /spec/rules/0/host
+        value: "staging.chain.mystira.app"
+      - op: replace
+        path: /metadata/annotations/cert-manager.io~1cluster-issuer
+        value: "letsencrypt-staging"
+  - target:
+      kind: StatefulSet
+      name: mys-chain
+    patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 2
+      - op: remove
+        path: /spec/template/spec/nodeSelector
+      - op: remove
+        path: /spec/template/spec/tolerations
+  - target:
+      kind: Deployment
+      name: mys-publisher
+    patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 2
+      - op: remove
+        path: /spec/template/spec/nodeSelector
+  - target:
+      kind: ConfigMap
+      name: mys-publisher-config
+    patch: |-
+      - op: replace
+        path: /data/key_vault_url
+        value: "https://mys-staging-mystira-pub-kv-eus.vault.azure.net/"
+  - target:
+      kind: Deployment
+      name: mys-story-generator
+    patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 2
+  - target:
+      kind: ConfigMap
+      name: mys-story-generator-config
+    patch: |-
+      - op: replace
+        path: /data/key_vault_url
+        value: "https://mys-staging-mystira-sg-kv-eus.vault.azure.net/"
+
+images:
+  - name: mysprodacr.azurecr.io/chain
+    newTag: staging
+  - name: mysprodacr.azurecr.io/publisher
+    newTag: staging
+  - name: mysprodacr.azurecr.io/story-generator
+    newTag: staging
