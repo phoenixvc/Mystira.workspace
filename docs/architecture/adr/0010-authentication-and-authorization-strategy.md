@@ -422,19 +422,30 @@ public class ScenariosController : ControllerBase
 | Scalability         | Needs shared session store | Stateless                  | JWT for public API         |
 | Mobile/Third-party  | Not supported              | Works everywhere           | JWT for external clients   |
 
-### Why Not OAuth/OIDC Yet?
+### OAuth/OIDC and External Identity Providers
 
-OAuth 2.0 / OpenID Connect remains the target for:
-- Social login (Google, Discord, etc.)
-- Third-party API access
-- Federated identity
+OAuth 2.0 / OpenID Connect is now implemented via Microsoft Entra ID and Azure AD B2C:
 
-**Current priority**: Establish solid internal auth before adding complexity of external identity providers.
+| Provider | Use Case | Features |
+|----------|----------|----------|
+| **Microsoft Entra ID** | Admin users, Enterprise SSO | MFA, Conditional Access, App Roles |
+| **Azure AD B2C** | Consumer users (Public API, PWA) | Social login (Google, Discord), Self-service registration |
+| **Managed Identity** | Service-to-service | Passwordless Azure resource access |
 
-**Planned timeline**: Implement OAuth/OIDC when:
-- User base requires social login
-- Third-party integrations need API access
-- Enterprise SSO requirements emerge
+**For complete implementation details**, see [ADR-0011: Microsoft Entra ID Authentication Integration](./0011-entra-id-authentication-integration.md).
+
+#### Social Login Support (via B2C)
+
+Azure AD B2C enables social identity providers for consumer applications:
+
+- **Google**: OAuth 2.0 integration for Google accounts
+- **Discord**: OpenID Connect custom provider for gamers
+- **Email/Password**: Local accounts with self-service registration
+
+**B2C User Flows**:
+- `B2C_1_SignUpSignIn`: Combined sign-up and sign-in
+- `B2C_1_PasswordReset`: Self-service password reset
+- `B2C_1_ProfileEdit`: User profile management
 
 ## Consequences
 
@@ -474,17 +485,39 @@ OAuth 2.0 / OpenID Connect remains the target for:
 
 ## Implementation Checklist
 
+### Core Authentication
 - [x] JWT services in `Mystira.App.Shared`
 - [x] Cookie-based auth for Admin UI
 - [ ] Refresh token implementation for Public API
 - [ ] Rate limiting on auth endpoints
 - [ ] Session management dashboard (Admin)
-- [ ] OAuth 2.0 / OpenID Connect integration
-- [ ] MFA support for admin accounts
 - [ ] Audit logging for auth events
+
+### Microsoft Entra ID Integration (see [ADR-0011](./0011-entra-id-authentication-integration.md))
+- [ ] Entra ID App Registration for Admin API
+- [ ] Entra ID App Registration for Admin UI
+- [ ] MSAL configuration in Admin UI (React)
+- [ ] Microsoft.Identity.Web in Admin API
+- [ ] MFA via Conditional Access policies
+- [ ] App Roles and group mapping
+
+### Azure AD B2C Integration (see [ADR-0011](./0011-entra-id-authentication-integration.md))
+- [ ] B2C tenant creation
+- [ ] User flow configuration (SignUpSignIn, PasswordReset, ProfileEdit)
+- [ ] Google identity provider setup
+- [ ] Discord identity provider setup (OpenID Connect)
+- [ ] B2C App Registration for Public API
+- [ ] B2C authentication in PWA (Blazor WASM)
+- [ ] Custom B2C UI branding
+
+### Service-to-Service Authentication
+- [ ] Managed Identity on App Services/AKS
+- [ ] Managed Identity access to Cosmos DB
+- [ ] Managed Identity access to Key Vault
 
 ## Related ADRs
 
+- [ADR-0011: Microsoft Entra ID Authentication Integration](./0011-entra-id-authentication-integration.md) - **Entra ID, B2C, and social login implementation details**
 - [ADR-0005: Service Networking and Communication](./0005-service-networking-and-communication.md) - Network-level security
 - [ADR-0006: Admin API Repository Extraction](./0006-admin-api-repository-extraction.md) - Admin service architecture
 - [ADR-0007: NuGet Feed Strategy](./0007-nuget-feed-strategy-for-shared-libraries.md) - Shared auth library distribution
