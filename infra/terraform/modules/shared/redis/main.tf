@@ -51,7 +51,7 @@ variable "sku_name" {
   default     = "Standard"
 }
 
-variable "enable_non_ssl_port" {
+variable "non_ssl_port_enabled" {
   description = "Enable non-SSL port"
   type        = bool
   default     = false
@@ -93,7 +93,7 @@ resource "azurerm_redis_cache" "shared" {
   capacity            = var.capacity
   family              = var.family
   sku_name            = var.sku_name
-  enable_non_ssl_port = var.enable_non_ssl_port
+  non_ssl_port_enabled = var.non_ssl_port_enabled
   minimum_tls_version = var.minimum_tls_version
   subnet_id           = var.subnet_id
   shard_count         = var.sku_name == "Premium" && var.capacity > 1 ? var.capacity : null
