@@ -41,7 +41,7 @@ patches:
         value: "letsencrypt-staging"
   - target:
       kind: StatefulSet
-      name: mys-chain
+      name: mystira-chain
     patch: |-
       - op: replace
         path: /spec/replicas
@@ -58,7 +58,7 @@ patches:
         path: /spec/template/spec/tolerations
   - target:
       kind: Deployment
-      name: mys-publisher
+      name: mystira-publisher
     patch: |-
       - op: replace
         path: /spec/replicas
@@ -73,14 +73,14 @@ patches:
         path: /spec/template/spec/nodeSelector
   - target:
       kind: ConfigMap
-      name: mys-publisher-config
+      name: mystira-publisher-config
     patch: |-
       - op: replace
         path: /data/key_vault_url
         value: "https://mys-dev-mystira-kv-san.vault.azure.net/"
   - target:
       kind: Deployment
-      name: mys-story-generator
+      name: mystira-story-generator
     patch: |-
       - op: replace
         path: /spec/replicas
@@ -93,16 +93,19 @@ patches:
         value: "512Mi"
   - target:
       kind: ConfigMap
-      name: mys-story-generator-config
+      name: mystira-story-generator-config
     patch: |-
       - op: replace
         path: /data/key_vault_url
         value: "https://mys-dev-mystira-kv-san.vault.azure.net/"
 
 images:
-  - name: mysprodacr.azurecr.io/chain
+  - name: mystiraacr.azurecr.io/chain
+    newName: mysprodacr.azurecr.io/chain
     newTag: dev
-  - name: mysprodacr.azurecr.io/publisher
+  - name: mystiraacr.azurecr.io/publisher
+    newName: mysprodacr.azurecr.io/publisher
     newTag: dev
-  - name: mysprodacr.azurecr.io/story-generator
+  - name: mystiraacr.azurecr.io/story-generator
+    newName: mysprodacr.azurecr.io/story-generator
     newTag: dev
