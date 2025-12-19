@@ -1,28 +1,3 @@
-[submodule "packages/chain"]
-	path = packages/chain
-	url = https://github.com/phoenixvc/Mystira.Chain.git
-
-[submodule "packages/app"]
-	path = packages/app
-	url = https://github.com/phoenixvc/Mystira.App.git
-
-[submodule "packages/story-generator"]
-	path = packages/story-generator
-	url = https://github.com/phoenixvc/Mystira.StoryGenerator.git
-
 [submodule "packages/publisher"]
 	path = packages/publisher
 	url = https://github.com/phoenixvc/Mystira.Publisher.git
-
-[submodule "packages/devhub"]
-	path = packages/devhub
-	url = https://github.com/phoenixvc/Mystira.DevHub.git
-
-[submodule "packages/admin-api"]
-	path = packages/admin-api
-	url = https://github.com/phoenixvc/Mystira.Admin.Api.git
-
-[submodule "packages/admin-ui"]
-	path = packages/admin-ui
-	url = https://github.com/phoenixvc/Mystira.Admin.UI.git
-	branch = dev

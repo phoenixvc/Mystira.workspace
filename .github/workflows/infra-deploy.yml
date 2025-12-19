@@ -211,8 +211,6 @@ jobs:
       id-token: write
     steps:
       - uses: actions/checkout@v4
-        with:
-          submodules: recursive
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
@@ -291,8 +289,6 @@ jobs:
       id-token: write
     steps:
       - uses: actions/checkout@v4
-        with:
-          submodules: recursive
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
@@ -452,8 +448,6 @@ jobs:
       (github.event.inputs.components == 'all' || github.event.inputs.components == '')
     steps:
       - uses: actions/checkout@v4
-        with:
-          submodules: recursive
 
       - name: Azure Login
         uses: azure/login@v2
@@ -514,8 +508,6 @@ jobs:
       id-token: write
     steps:
       - uses: actions/checkout@v4
-        with:
-          submodules: recursive
 
       - name: Azure Login
         uses: azure/login@v2
