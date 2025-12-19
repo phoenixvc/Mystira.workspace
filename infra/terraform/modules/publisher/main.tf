@@ -133,7 +133,7 @@ resource "azurerm_servicebus_queue" "publisher_events" {
   max_delivery_count                   = 3
   default_message_ttl                  = "P1D"
   dead_lettering_on_message_expiration = true
-  enable_partitioning                  = var.environment == "prod"
+  partitioning_enabled                 = var.environment == "prod"
 }
 
 # Dead Letter Queue handled automatically by Service Bus
@@ -162,7 +162,7 @@ resource "azurerm_application_insights" "publisher" {
 
 # Key Vault for Publisher Secrets
 resource "azurerm_key_vault" "publisher" {
-  name                        = "${local.name_prefix}-kv-${local.region_code}"
+  name                        = "mys-${var.environment}-pub-kv-${local.region_code}"
   location                    = var.location
   resource_group_name         = var.resource_group_name
   enabled_for_disk_encryption = false

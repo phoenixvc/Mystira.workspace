@@ -222,8 +222,11 @@ module "story_generator" {
   subnet_id          = azurerm_subnet.story_generator.id
 
   # Use shared resources
-  shared_postgresql_server_id     = module.shared_postgresql.server_id
-  shared_redis_cache_id           = module.shared_redis.cache_id
+  use_shared_postgresql             = true
+  use_shared_redis                  = true
+  use_shared_log_analytics          = true
+  shared_postgresql_server_id       = module.shared_postgresql.server_id
+  shared_redis_cache_id             = module.shared_redis.cache_id
   shared_log_analytics_workspace_id = module.shared_monitoring.log_analytics_workspace_id
 
   tags = {
