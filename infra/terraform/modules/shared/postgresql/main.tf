@@ -131,15 +131,17 @@ resource "azurerm_private_dns_zone_virtual_network_link" "postgres" {
 
 # PostgreSQL Flexible Server
 resource "azurerm_postgresql_flexible_server" "shared" {
-  name                   = "${local.name_prefix}-server"
-  location               = var.location
-  resource_group_name    = var.resource_group_name
-  version                = var.postgres_version
-  delegated_subnet_id    = var.subnet_id
-  private_dns_zone_id    = azurerm_private_dns_zone.postgres.id
-  administrator_login    = var.admin_login
-  administrator_password = var.admin_password != null ? var.admin_password : random_password.postgres[0].result
-  zone                   = "1"
+  name                          = "${local.name_prefix}-server"
+  location                      = var.location
+  resource_group_name           = var.resource_group_name
+  version                       = var.postgres_version
+  delegated_subnet_id           = var.subnet_id
+  private_dns_zone_id           = azurerm_private_dns_zone.postgres.id
+  administrator_login           = var.admin_login
+  administrator_password        = var.admin_password != null ? var.admin_password : random_password.postgres[0].result
+  zone                          = "1"
+  # VNet integration requires public network access to be disabled
+  public_network_access_enabled = false
 
   sku_name   = local.sku_name_final
   storage_mb = var.storage_mb
@@ -166,8 +168,11 @@ resource "azurerm_postgresql_flexible_server_database" "databases" {
   charset   = "utf8"
 }
 
-# PostgreSQL Firewall Rules (allow Azure services)
+# Note: Firewall rules are not compatible with VNet integration (delegated_subnet_id)
+# When using VNet integration, access is controlled through NSG rules and the private endpoint
+# The firewall rule below is only created when NOT using VNet integration
 resource "azurerm_postgresql_flexible_server_firewall_rule" "allow_azure_services" {
+  count            = var.subnet_id == null ? 1 : 0
   name             = "AllowAzureServices"
   server_id        = azurerm_postgresql_flexible_server.shared.id
   start_ip_address = "0.0.0.0"

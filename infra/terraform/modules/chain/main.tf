@@ -12,6 +12,14 @@ terraform {
       source  = "hashicorp/azuread"
       version = "~> 2.45"
     }
+    azapi = {
+      source  = "azure/azapi"
+      version = "~> 1.10"
+    }
+    time = {
+      source  = "hashicorp/time"
+      version = "~> 0.9"
+    }
   }
 }
 
@@ -50,9 +58,14 @@ variable "chain_vm_size" {
 }
 
 variable "chain_storage_size_gb" {
-  description = "Storage size in GB for chain data"
+  description = "Storage size in GB for chain data (minimum 100 GB for Premium file shares)"
   type        = number
   default     = 100
+
+  validation {
+    condition     = var.chain_storage_size_gb >= 100
+    error_message = "Premium file shares require a minimum quota of 100 GB."
+  }
 }
 
 variable "vnet_id" {
@@ -143,23 +156,76 @@ resource "azurerm_user_assigned_identity" "chain" {
 
 # Storage Account for Chain Data
 resource "azurerm_storage_account" "chain" {
-  name                     = replace("mys${var.environment}mystirachainstg${local.region_code}", "-", "")
-  resource_group_name      = var.resource_group_name
-  location                 = var.location
-  account_tier             = "Premium"
-  account_replication_type = var.environment == "prod" ? "ZRS" : "LRS"
-  account_kind             = "FileStorage"
+  name                          = replace("mys${var.environment}mystirachainstg${local.region_code}", "-", "")
+  resource_group_name           = var.resource_group_name
+  location                      = var.location
+  account_tier                  = "Premium"
+  account_replication_type      = var.environment == "prod" ? "ZRS" : "LRS"
+  account_kind                  = "FileStorage"
+  https_traffic_only_enabled    = true
+  min_tls_version               = "TLS1_2"
+  public_network_access_enabled = true
 
   tags = local.common_tags
 }
 
+# Wait for storage account to be fully provisioned before creating file shares
+resource "time_sleep" "wait_for_storage" {
+  depends_on      = [azurerm_storage_account.chain]
+  create_duration = "60s"
+}
+
 # Azure File Share for Chain Data Persistence
-resource "azurerm_storage_share" "chain_data" {
-  count                = var.chain_node_count
-  name                 = "chain-data-${count.index}"
-  storage_account_name = azurerm_storage_account.chain.name
-  quota                = var.chain_storage_size_gb
-  enabled_protocol     = "SMB"
+# Using data plane API (az storage share create) instead of ARM API to work around InvalidHeaderValue bug
+resource "terraform_data" "chain_data_share" {
+  count = var.chain_node_count
+
+  triggers_replace = {
+    resource_group  = var.resource_group_name
+    storage_account = azurerm_storage_account.chain.name
+    share_name      = "chain-data-${count.index}"
+    quota           = var.chain_storage_size_gb
+  }
+
+  provisioner "local-exec" {
+    command = <<-EOT
+      # Get storage account key and use data plane API
+      STORAGE_KEY=$(az storage account keys list \
+        --resource-group "${var.resource_group_name}" \
+        --account-name "${azurerm_storage_account.chain.name}" \
+        --query '[0].value' -o tsv)
+
+      az storage share create \
+        --name "chain-data-${count.index}" \
+        --account-name "${azurerm_storage_account.chain.name}" \
+        --account-key "$STORAGE_KEY" \
+        --quota ${var.chain_storage_size_gb} \
+        --output none
+    EOT
+    interpreter = ["/bin/bash", "-c"]
+  }
+
+  provisioner "local-exec" {
+    when    = destroy
+    command = <<-EOT
+      # Get storage account key for deletion
+      STORAGE_KEY=$(az storage account keys list \
+        --resource-group "${self.triggers_replace.resource_group}" \
+        --account-name "${self.triggers_replace.storage_account}" \
+        --query '[0].value' -o tsv 2>/dev/null) || true
+
+      if [ -n "$STORAGE_KEY" ]; then
+        az storage share delete \
+          --name "${self.triggers_replace.share_name}" \
+          --account-name "${self.triggers_replace.storage_account}" \
+          --account-key "$STORAGE_KEY" \
+          --output none || true
+      fi
+    EOT
+    interpreter = ["/bin/bash", "-c"]
+  }
+
+  depends_on = [time_sleep.wait_for_storage]
 }
 
 # Log Analytics Workspace
