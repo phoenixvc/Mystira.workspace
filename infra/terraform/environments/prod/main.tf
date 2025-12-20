@@ -194,13 +194,15 @@ module "shared_postgresql" {
 }
 
 # Shared Redis Infrastructure
+# Note: Standard SKU does not support VNet integration (subnet_id)
+# Only Premium SKU supports subnet deployment
 module "shared_redis" {
   source = "../../modules/shared/redis"
 
   environment         = "prod"
   location           = var.location
   resource_group_name = azurerm_resource_group.main.name
-  subnet_id          = azurerm_subnet.redis.id
+  # subnet_id omitted - Standard SKU doesn't support VNet integration
 
   capacity = 2
   family   = "C"
