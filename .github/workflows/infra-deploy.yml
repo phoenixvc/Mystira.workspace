@@ -677,6 +677,10 @@ jobs:
         run: |
           kubectl create namespace mys-${{ env.ENVIRONMENT }} --dry-run=client -o yaml | kubectl apply -f -
 
+      - name: Enable ACR Admin
+        run: |
+          az acr update --name ${{ env.ACR_NAME }} --admin-enabled true --output none
+
       - name: Create ACR Pull Secret
         run: |
           ACR_USERNAME=$(az acr credential show --name ${{ env.ACR_NAME }} --query username -o tsv)
