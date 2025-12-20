@@ -151,12 +151,15 @@ resource "azurerm_user_assigned_identity" "chain" {
 
 # Storage Account for Chain Data
 resource "azurerm_storage_account" "chain" {
-  name                     = replace("mys${var.environment}mystirachainstg${local.region_code}", "-", "")
-  resource_group_name      = var.resource_group_name
-  location                 = var.location
-  account_tier             = "Premium"
-  account_replication_type = var.environment == "prod" ? "ZRS" : "LRS"
-  account_kind             = "FileStorage"
+  name                          = replace("mys${var.environment}mystirachainstg${local.region_code}", "-", "")
+  resource_group_name           = var.resource_group_name
+  location                      = var.location
+  account_tier                  = "Premium"
+  account_replication_type      = var.environment == "prod" ? "ZRS" : "LRS"
+  account_kind                  = "FileStorage"
+  https_traffic_only_enabled    = true
+  min_tls_version               = "TLS1_2"
+  public_network_access_enabled = true
 
   tags = local.common_tags
 }
@@ -164,21 +167,43 @@ resource "azurerm_storage_account" "chain" {
 # Wait for storage account to be fully provisioned before creating file shares
 resource "time_sleep" "wait_for_storage" {
   depends_on      = [azurerm_storage_account.chain]
-  create_duration = "30s"
+  create_duration = "60s"
 }
 
 # Azure File Share for Chain Data Persistence
-# Using azapi provider to work around azurerm provider bug with Premium FileStorage
-resource "azapi_resource" "chain_data" {
-  count     = var.chain_node_count
-  type      = "Microsoft.Storage/storageAccounts/fileServices/shares@2023-01-01"
-  name      = "chain-data-${count.index}"
-  parent_id = "${azurerm_storage_account.chain.id}/fileServices/default"
+# Using terraform_data with Azure CLI to work around ARM API InvalidHeaderValue bug
+resource "terraform_data" "chain_data_share" {
+  count = var.chain_node_count
 
-  body = {
-    properties = {
-      shareQuota = var.chain_storage_size_gb
-    }
+  triggers_replace = {
+    resource_group  = var.resource_group_name
+    storage_account = azurerm_storage_account.chain.name
+    share_name      = "chain-data-${count.index}"
+    quota           = var.chain_storage_size_gb
+  }
+
+  provisioner "local-exec" {
+    command = <<-EOT
+      az storage share-rm create \
+        --resource-group "${var.resource_group_name}" \
+        --storage-account "${azurerm_storage_account.chain.name}" \
+        --name "chain-data-${count.index}" \
+        --quota ${var.chain_storage_size_gb} \
+        --enabled-protocols SMB \
+        --output none
+    EOT
+  }
+
+  provisioner "local-exec" {
+    when    = destroy
+    command = <<-EOT
+      az storage share-rm delete \
+        --resource-group "${self.triggers_replace.resource_group}" \
+        --storage-account "${self.triggers_replace.storage_account}" \
+        --name "${self.triggers_replace.share_name}" \
+        --yes \
+        --output none || true
+    EOT
   }
 
   depends_on = [time_sleep.wait_for_storage]
