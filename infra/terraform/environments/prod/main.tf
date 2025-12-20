@@ -281,6 +281,9 @@ resource "azurerm_kubernetes_cluster" "main" {
   network_profile {
     network_plugin = "azure"
     network_policy = "calico"
+    # Use a non-overlapping CIDR for Kubernetes services (VNet is 10.0.0.0/16)
+    service_cidr   = "172.16.0.0/16"
+    dns_service_ip = "172.16.0.10"
   }
 
   azure_active_directory_role_based_access_control {
