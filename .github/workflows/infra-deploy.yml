@@ -692,6 +692,30 @@ jobs:
             --docker-password=$ACR_PASSWORD \
             --dry-run=client -o yaml | kubectl apply -f -
 
+      - name: Deploy NGINX Ingress Controller
+        run: |
+          # Deploy NGINX Ingress Controller
+          kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.9.4/deploy/static/provider/cloud/deploy.yaml
+
+          # Wait for ingress controller to be ready
+          echo "Waiting for NGINX Ingress Controller..."
+          kubectl wait --namespace ingress-nginx \
+            --for=condition=ready pod \
+            --selector=app.kubernetes.io/component=controller \
+            --timeout=300s || true
+
+          # Wait for LoadBalancer IP
+          echo "Waiting for LoadBalancer IP..."
+          for i in {1..30}; do
+            IP=$(kubectl get svc -n ingress-nginx ingress-nginx-controller -o jsonpath='{.status.loadBalancer.ingress[0].ip}' 2>/dev/null || true)
+            if [ -n "$IP" ]; then
+              echo "Ingress Controller IP: $IP"
+              break
+            fi
+            echo "Waiting for LoadBalancer IP... ($i/30)"
+            sleep 10
+          done
+
       - name: Deploy cert-manager
         run: |
           kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.13.0/cert-manager.yaml || true
