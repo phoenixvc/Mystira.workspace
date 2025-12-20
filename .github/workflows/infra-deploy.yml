@@ -257,6 +257,47 @@ jobs:
           cd infra/terraform/environments/${{ env.ENVIRONMENT }}
           terraform init
 
+      - name: Import Existing Resources
+        run: |
+          cd infra/terraform/environments/${{ env.ENVIRONMENT }}
+
+          # Get subscription ID from Azure CLI
+          SUBSCRIPTION_ID=$(az account show --query id -o tsv)
+
+          # Check if resource group exists in Azure but not in state
+          if az group show --name ${{ env.AZURE_RESOURCE_GROUP }} &> /dev/null; then
+            echo "Resource group exists in Azure, checking if in state..."
+            if ! terraform state list 2>/dev/null | grep -q "azurerm_resource_group.main"; then
+              echo "Resource group not in state, importing..."
+              terraform import azurerm_resource_group.main "/subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${{ env.AZURE_RESOURCE_GROUP }}"
+              echo "::notice::Imported existing resource group into Terraform state"
+            else
+              echo "Resource group already in state"
+            fi
+          else
+            echo "Resource group does not exist in Azure - will be created"
+          fi
+
+          # Determine region code based on environment
+          if [ "${{ env.ENVIRONMENT }}" == "dev" ]; then
+            REGION_CODE="san"
+          else
+            REGION_CODE="eus"
+          fi
+          VNET_NAME="mys-${{ env.ENVIRONMENT }}-mystira-vnet-${REGION_CODE}"
+
+          # Check if VNet exists in Azure but not in state
+          if az network vnet show --name "${VNET_NAME}" --resource-group ${{ env.AZURE_RESOURCE_GROUP }} &> /dev/null; then
+            echo "VNet exists in Azure, checking if in state..."
+            if ! terraform state list 2>/dev/null | grep -q "azurerm_virtual_network.main"; then
+              echo "VNet not in state, importing..."
+              terraform import azurerm_virtual_network.main "/subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${{ env.AZURE_RESOURCE_GROUP }}/providers/Microsoft.Network/virtualNetworks/${VNET_NAME}"
+              echo "::notice::Imported existing VNet into Terraform state"
+            else
+              echo "VNet already in state"
+            fi
+          fi
+
       - name: Terraform Refresh (sync state with Azure)
         run: |
           cd infra/terraform/environments/${{ env.ENVIRONMENT }}
