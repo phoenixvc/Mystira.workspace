@@ -48,20 +48,21 @@ We will use **NuGet packages** hosted on an **internal NuGet feed** for shared l
 
 ### NuGet Feed Provider
 
-**Selected**: Azure DevOps Artifacts (primary) with GitHub Packages as alternative
+**Selected**: GitHub Packages
+
+**Feed URL**: `https://nuget.pkg.github.com/phoenixvc/index.json`
 
 **Rationale**:
 
-- ✅ Integrated with Azure ecosystem (we use Azure for deployments)
-- ✅ Built-in authentication via Azure AD
-- ✅ Free for teams under 5 users (then per-user pricing)
-- ✅ Supports upstream sources (nuget.org)
-- ✅ Good CI/CD integration
-- ✅ Private feed with access control
+- ✅ Integrated with GitHub (our source control and CI/CD)
+- ✅ Built-in authentication via GITHUB_TOKEN in workflows
+- ✅ Free for public repositories, included storage for private
+- ✅ Simple CI/CD integration with GitHub Actions
+- ✅ Private feed with access control via GitHub permissions
 
 **Alternative Options**:
 
-- **GitHub Packages**: Good if primarily using GitHub, but requires GitHub token management
+- **Azure DevOps Artifacts**: Good for Azure-centric teams, but adds another system to manage
 - **Private NuGet Server**: Self-hosted, more maintenance overhead
 - **NuGet.org (public)**: Not appropriate for private/internal libraries
 
@@ -247,19 +248,20 @@ Each shared library `.csproj` should include:
   <packageSources>
     <clear />
     <add key="nuget.org" value="https://api.nuget.org/v3/index.json" />
-    <add key="Mystira-Internal"
-         value="https://pkgs.dev.azure.com/{org}/{project}/_packaging/{feed}/nuget/v3/index.json" />
+    <add key="github" value="https://nuget.pkg.github.com/phoenixvc/index.json" />
   </packageSources>
   <packageSourceCredentials>
-    <Mystira-Internal>
-      <add key="Username" value="{username}" />
-      <add key="ClearTextPassword" value="{pat}" />
-    </Mystira-Internal>
+    <github>
+      <add key="Username" value="USERNAME" />
+      <add key="ClearTextPassword" value="GITHUB_TOKEN_OR_PAT" />
+    </github>
   </packageSourceCredentials>
 </configuration>
 ```
 
-**For CI/CD**: Use environment variables or secrets instead of hardcoded credentials
+**For CI/CD**: Use `GITHUB_TOKEN` secret (automatically available in GitHub Actions)
+
+**For Local Development**: Create a Personal Access Token (PAT) with `read:packages` scope
 
 #### Package References
 
@@ -436,13 +438,13 @@ dotnet restore
 4. **CI/CD Integration**: Well-integrated with build systems
 5. **Access Control**: Fine-grained permissions and security
 
-### Why Azure DevOps Artifacts?
+### Why GitHub Packages?
 
-1. **Azure Integration**: Aligns with Azure deployment ecosystem
-2. **Cost**: Free for small teams, reasonable pricing for growth
-3. **Security**: Enterprise-grade security and access control
-4. **Ease of Use**: Simple setup and management
-5. **Upstream Sources**: Can proxy nuget.org for better performance
+1. **GitHub Integration**: Aligns with our GitHub-based source control and CI/CD
+2. **Cost**: Free for public repos, included with GitHub plans for private
+3. **Security**: Leverages existing GitHub permissions and access control
+4. **Ease of Use**: Simple setup, automatic GITHUB_TOKEN authentication in Actions
+5. **Single Platform**: No additional accounts or systems to manage
 
 ### Why Single Feed?
 
@@ -481,10 +483,10 @@ dotnet restore
 
 ### Phase 1: Setup Feed
 
-1. Create Azure DevOps Artifacts feed: `Mystira-Internal`
-2. Configure permissions (Readers, Contributors)
-3. Create service principal for CI/CD
-4. Configure authentication
+1. GitHub Packages feed is automatically available at: `https://nuget.pkg.github.com/phoenixvc/index.json`
+2. Permissions are inherited from GitHub repository access
+3. CI/CD uses automatic `GITHUB_TOKEN` authentication
+4. Local development uses Personal Access Tokens (PATs)
 
 ### Phase 2: Package Shared Libraries
 
