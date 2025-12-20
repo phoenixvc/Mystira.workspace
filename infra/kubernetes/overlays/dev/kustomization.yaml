@@ -24,8 +24,8 @@ patches:
         path: /spec/rules/0/host
         value: "dev.publisher.mystira.app"
       - op: replace
-        path: /metadata/annotations/cert-manager.io~1cluster-issuer
-        value: "letsencrypt-staging"
+        path: /spec/tls/0/secretName
+        value: "mystira-publisher-tls-dev"
   - target:
       kind: Ingress
       name: mystira-chain-ingress
@@ -37,8 +37,8 @@ patches:
         path: /spec/rules/0/host
         value: "dev.chain.mystira.app"
       - op: replace
-        path: /metadata/annotations/cert-manager.io~1cluster-issuer
-        value: "letsencrypt-staging"
+        path: /spec/tls/0/secretName
+        value: "mystira-chain-tls-dev"
   - target:
       kind: StatefulSet
       name: mystira-chain
