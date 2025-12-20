@@ -328,7 +328,7 @@ jobs:
     name: Apply Terraform
     runs-on: ubuntu-latest
     needs: [plan-terraform]
-    if: needs.plan-terraform.outputs.has-changes == 'true'
+    if: always() && needs.plan-terraform.result == 'success'
     environment: ${{ github.event.inputs.environment || 'dev' }}
     outputs:
       aks-exists: ${{ steps.check-aks-post-apply.outputs.exists }}
@@ -379,7 +379,7 @@ jobs:
         id: apply
         run: |
           cd infra/terraform/environments/${{ env.ENVIRONMENT }}
-          terraform apply -auto-approve tfplan
+          terraform apply -auto-approve
 
       - name: Check AKS Cluster After Apply
         id: check-aks-post-apply
