@@ -81,9 +81,33 @@ resource "azurerm_application_insights" "shared" {
   tags = local.common_tags
 }
 
-# Note: Metric alerts for Log Analytics workspaces are limited.
-# Consider using Log Analytics queries with scheduled query rules for monitoring.
-# The action group below is available for integration with other alerting mechanisms.
+# Metric Alert: High Data Ingestion
+# Note: Log Analytics workspaces don't have a "Usage" metric.
+# Using "IngestionVolumeMB" to monitor data ingestion volume instead.
+resource "azurerm_monitor_metric_alert" "high_ingestion" {
+  name                = "${local.name_prefix}-high-ingestion"
+  resource_group_name = var.resource_group_name
+  scopes              = [azurerm_log_analytics_workspace.shared.id]
+  description         = "Alert when data ingestion is unusually high"
+  severity            = 2
+  enabled             = var.environment == "prod" # Only enable in production
+  frequency           = "PT5M"
+  window_size         = "PT1H"
+
+  criteria {
+    metric_namespace = "Microsoft.OperationalInsights/workspaces"
+    metric_name      = "IngestionVolumeMB"
+    aggregation      = "Total"
+    operator         = "GreaterThan"
+    threshold        = 1000 # 1 GB per hour threshold
+  }
+
+  action {
+    action_group_id = azurerm_monitor_action_group.default.id
+  }
+
+  tags = local.common_tags
+}
 
 # Action Group for Alerts
 resource "azurerm_monitor_action_group" "default" {
