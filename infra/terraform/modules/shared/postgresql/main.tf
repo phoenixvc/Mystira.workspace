@@ -166,8 +166,11 @@ resource "azurerm_postgresql_flexible_server_database" "databases" {
   charset   = "utf8"
 }
 
-# PostgreSQL Firewall Rules (allow Azure services)
+# Note: Firewall rules are not compatible with VNet integration (delegated_subnet_id)
+# When using VNet integration, access is controlled through NSG rules and the private endpoint
+# The firewall rule below is only created when NOT using VNet integration
 resource "azurerm_postgresql_flexible_server_firewall_rule" "allow_azure_services" {
+  count            = var.subnet_id == null ? 1 : 0
   name             = "AllowAzureServices"
   server_id        = azurerm_postgresql_flexible_server.shared.id
   start_ip_address = "0.0.0.0"

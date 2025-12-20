@@ -204,19 +204,9 @@ resource "azurerm_cdn_frontdoor_firewall_policy" "main" {
   enabled             = true
   mode                = var.waf_mode
 
-  # Managed rules - OWASP 3.2
-  managed_rule {
-    type    = "Microsoft_DefaultRuleSet"
-    version = "2.1"
-    action  = "Block"
-  }
-
-  # Managed rules - Bot protection
-  managed_rule {
-    type    = "Microsoft_BotManagerRuleSet"
-    version = "1.0"
-    action  = "Block"
-  }
+  # Note: managed_rule blocks require Premium_AzureFrontDoor SKU
+  # Managed rules are only available with Premium tier
+  # For Standard tier, only custom rules are supported
 
   # Custom rule - Rate limiting
   custom_rule {

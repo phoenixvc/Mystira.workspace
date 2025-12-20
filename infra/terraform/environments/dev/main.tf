@@ -85,7 +85,7 @@ resource "azurerm_subnet" "aks" {
   name                 = "aks-subnet"
   resource_group_name  = azurerm_resource_group.main.name
   virtual_network_name = azurerm_virtual_network.main.name
-  address_prefixes     = ["10.0.10.0/22"]
+  address_prefixes     = ["10.0.8.0/22"]
 }
 
 resource "azurerm_subnet" "postgresql" {
