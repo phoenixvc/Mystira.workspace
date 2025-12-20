@@ -281,7 +281,7 @@ resource "azurerm_cdn_frontdoor_firewall_policy" "main" {
 # so we need a single security policy covering all domains
 resource "azurerm_cdn_frontdoor_security_policy" "main" {
   count                    = var.enable_waf ? 1 : 0
-  name                     = "waf-security-policy"
+  name                     = "${var.project_name}-${var.environment}-waf-security-policy"
   cdn_frontdoor_profile_id = azurerm_cdn_frontdoor_profile.main.id
 
   security_policies {
@@ -299,4 +299,19 @@ resource "azurerm_cdn_frontdoor_security_policy" "main" {
       }
     }
   }
+
+  lifecycle {
+    create_before_destroy = false
+    # Ignore changes to association since Azure may modify the order
+    ignore_changes = [
+      security_policies[0].firewall[0].association[0].domain
+    ]
+  }
+
+  # Ensure the WAF policy and profile are fully created before attaching
+  depends_on = [
+    azurerm_cdn_frontdoor_firewall_policy.main,
+    azurerm_cdn_frontdoor_custom_domain.publisher,
+    azurerm_cdn_frontdoor_custom_domain.chain
+  ]
 }

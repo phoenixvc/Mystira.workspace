@@ -81,29 +81,40 @@ resource "azurerm_application_insights" "shared" {
   tags = local.common_tags
 }
 
-# Metric Alert: High Data Ingestion
-# Note: Log Analytics workspaces don't have a "Usage" metric.
-# Using "IngestionVolumeMB" to monitor data ingestion volume instead.
-resource "azurerm_monitor_metric_alert" "high_ingestion" {
+# Scheduled Query Rule Alert: High Data Ingestion
+# Uses log-based query against Usage table for accurate ingestion monitoring
+resource "azurerm_monitor_scheduled_query_rules_alert_v2" "high_ingestion" {
   name                = "${local.name_prefix}-high-ingestion"
   resource_group_name = var.resource_group_name
-  scopes              = [azurerm_log_analytics_workspace.shared.id]
+  location            = var.location
   description         = "Alert when data ingestion is unusually high"
   severity            = 2
   enabled             = var.environment == "prod" # Only enable in production
-  frequency           = "PT5M"
-  window_size         = "PT1H"
+
+  evaluation_frequency = "PT5M"
+  window_duration      = "PT1H"
+  scopes               = [azurerm_log_analytics_workspace.shared.id]
 
   criteria {
-    metric_namespace = "Microsoft.OperationalInsights/workspaces"
-    metric_name      = "IngestionVolumeMB"
-    aggregation      = "Total"
-    operator         = "GreaterThan"
-    threshold        = 1000 # 1 GB per hour threshold
+    query = <<-QUERY
+      Usage
+      | where TimeGenerated > ago(1h)
+      | summarize IngestionMB = sum(Quantity) by bin(TimeGenerated, 1h)
+      | where IngestionMB > 1000
+    QUERY
+
+    time_aggregation_method = "Count"
+    threshold               = 0
+    operator                = "GreaterThan"
+
+    failing_periods {
+      minimum_failing_periods_to_trigger_alert = 1
+      number_of_evaluation_periods             = 1
+    }
   }
 
   action {
-    action_group_id = azurerm_monitor_action_group.default.id
+    action_groups = [azurerm_monitor_action_group.default.id]
   }
 
   tags = local.common_tags
