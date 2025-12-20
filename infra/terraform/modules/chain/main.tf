@@ -12,6 +12,10 @@ terraform {
       source  = "hashicorp/azuread"
       version = "~> 2.45"
     }
+    time = {
+      source  = "hashicorp/time"
+      version = "~> 0.9"
+    }
   }
 }
 
@@ -153,14 +157,21 @@ resource "azurerm_storage_account" "chain" {
   tags = local.common_tags
 }
 
+# Wait for storage account to be fully provisioned before creating file shares
+resource "time_sleep" "wait_for_storage" {
+  depends_on      = [azurerm_storage_account.chain]
+  create_duration = "30s"
+}
+
 # Azure File Share for Chain Data Persistence
-# Note: Premium FileStorage accounts automatically use Premium access tier - do not specify access_tier
+# Note: Premium FileStorage accounts use SMB by default - don't specify enabled_protocol or access_tier
 resource "azurerm_storage_share" "chain_data" {
   count                = var.chain_node_count
   name                 = "chain-data-${count.index}"
   storage_account_name = azurerm_storage_account.chain.name
   quota                = var.chain_storage_size_gb
-  enabled_protocol     = "SMB"
+
+  depends_on = [time_sleep.wait_for_storage]
 }
 
 # Log Analytics Workspace
