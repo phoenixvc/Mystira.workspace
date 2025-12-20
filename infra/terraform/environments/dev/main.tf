@@ -181,10 +181,10 @@ module "shared_postgresql" {
   source = "../../modules/shared/postgresql"
 
   environment         = "dev"
-  location           = var.location
+  location            = var.location
   resource_group_name = azurerm_resource_group.main.name
-  vnet_id            = azurerm_virtual_network.main.id
-  subnet_id          = azurerm_subnet.postgresql.id
+  vnet_id             = azurerm_virtual_network.main.id
+  subnet_id           = azurerm_subnet.postgresql.id
 
   databases = [
     "storygenerator",
@@ -201,9 +201,9 @@ module "shared_redis" {
   source = "../../modules/shared/redis"
 
   environment         = "dev"
-  location           = var.location
+  location            = var.location
   resource_group_name = azurerm_resource_group.main.name
-  subnet_id          = azurerm_subnet.redis.id
+  subnet_id           = azurerm_subnet.redis.id
 
   capacity = 1
   family   = "C"
@@ -219,7 +219,7 @@ module "shared_monitoring" {
   source = "../../modules/shared/monitoring"
 
   environment         = "dev"
-  location           = var.location
+  location            = var.location
   resource_group_name = azurerm_resource_group.main.name
 
   retention_in_days = 30
@@ -234,11 +234,11 @@ module "story_generator" {
   source = "../../modules/story-generator"
 
   environment         = "dev"
-  location           = var.location
-  region_code        = "san"
+  location            = var.location
+  region_code         = "san"
   resource_group_name = azurerm_resource_group.main.name
-  vnet_id            = azurerm_virtual_network.main.id
-  subnet_id          = azurerm_subnet.story_generator.id
+  vnet_id             = azurerm_virtual_network.main.id
+  subnet_id           = azurerm_subnet.story_generator.id
 
   # Use shared resources
   use_shared_postgresql             = true
