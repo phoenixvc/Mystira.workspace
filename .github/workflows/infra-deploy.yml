@@ -298,6 +298,20 @@ jobs:
             fi
           fi
 
+          # Check if ACR exists in Azure but not in state (ACR is shared across environments)
+          if az acr show --name ${{ env.ACR_NAME }} &> /dev/null; then
+            echo "ACR exists in Azure, checking if in state..."
+            if ! terraform state list 2>/dev/null | grep -q "azurerm_container_registry.shared"; then
+              # Get the resource group where ACR actually exists
+              ACR_RG=$(az acr show --name ${{ env.ACR_NAME }} --query resourceGroup -o tsv)
+              echo "ACR not in state, importing from resource group ${ACR_RG}..."
+              terraform import azurerm_container_registry.shared "/subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${ACR_RG}/providers/Microsoft.ContainerRegistry/registries/${{ env.ACR_NAME }}"
+              echo "::notice::Imported existing ACR into Terraform state"
+            else
+              echo "ACR already in state"
+            fi
+          fi
+
       - name: Terraform Refresh (sync state with Azure)
         run: |
           cd infra/terraform/environments/${{ env.ENVIRONMENT }}
