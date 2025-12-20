@@ -12,6 +12,10 @@ terraform {
       source  = "hashicorp/azuread"
       version = "~> 2.45"
     }
+    azapi = {
+      source  = "azure/azapi"
+      version = "~> 1.10"
+    }
     time = {
       source  = "hashicorp/time"
       version = "~> 0.9"
@@ -164,12 +168,18 @@ resource "time_sleep" "wait_for_storage" {
 }
 
 # Azure File Share for Chain Data Persistence
-# Note: Premium FileStorage accounts use SMB by default - don't specify enabled_protocol or access_tier
-resource "azurerm_storage_share" "chain_data" {
-  count                = var.chain_node_count
-  name                 = "chain-data-${count.index}"
-  storage_account_name = azurerm_storage_account.chain.name
-  quota                = var.chain_storage_size_gb
+# Using azapi provider to work around azurerm provider bug with Premium FileStorage
+resource "azapi_resource" "chain_data" {
+  count     = var.chain_node_count
+  type      = "Microsoft.Storage/storageAccounts/fileServices/shares@2023-01-01"
+  name      = "chain-data-${count.index}"
+  parent_id = "${azurerm_storage_account.chain.id}/fileServices/default"
+
+  body = {
+    properties = {
+      shareQuota = var.chain_storage_size_gb
+    }
+  }
 
   depends_on = [time_sleep.wait_for_storage]
 }
