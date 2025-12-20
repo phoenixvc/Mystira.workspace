@@ -154,11 +154,13 @@ resource "azurerm_storage_account" "chain" {
 }
 
 # Azure File Share for Chain Data Persistence
+# Note: Premium FileStorage accounts require access_tier = "Premium"
 resource "azurerm_storage_share" "chain_data" {
   count                = var.chain_node_count
   name                 = "chain-data-${count.index}"
   storage_account_name = azurerm_storage_account.chain.name
   quota                = var.chain_storage_size_gb
+  access_tier          = "Premium"
   enabled_protocol     = "SMB"
 }
 

@@ -131,15 +131,17 @@ resource "azurerm_private_dns_zone_virtual_network_link" "postgres" {
 
 # PostgreSQL Flexible Server
 resource "azurerm_postgresql_flexible_server" "shared" {
-  name                   = "${local.name_prefix}-server"
-  location               = var.location
-  resource_group_name    = var.resource_group_name
-  version                = var.postgres_version
-  delegated_subnet_id    = var.subnet_id
-  private_dns_zone_id    = azurerm_private_dns_zone.postgres.id
-  administrator_login    = var.admin_login
-  administrator_password = var.admin_password != null ? var.admin_password : random_password.postgres[0].result
-  zone                   = "1"
+  name                          = "${local.name_prefix}-server"
+  location                      = var.location
+  resource_group_name           = var.resource_group_name
+  version                       = var.postgres_version
+  delegated_subnet_id           = var.subnet_id
+  private_dns_zone_id           = azurerm_private_dns_zone.postgres.id
+  administrator_login           = var.admin_login
+  administrator_password        = var.admin_password != null ? var.admin_password : random_password.postgres[0].result
+  zone                          = "1"
+  # VNet integration requires public network access to be disabled
+  public_network_access_enabled = false
 
   sku_name   = local.sku_name_final
   storage_mb = var.storage_mb

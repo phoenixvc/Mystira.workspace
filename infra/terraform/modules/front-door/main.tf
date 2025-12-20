@@ -276,10 +276,12 @@ resource "azurerm_cdn_frontdoor_firewall_policy" "main" {
   tags = local.common_tags
 }
 
-# Associate WAF policy with Publisher endpoint
-resource "azurerm_cdn_frontdoor_security_policy" "publisher" {
+# Associate WAF policy with all custom domains
+# Note: A WAF policy can only be attached once per Front Door profile,
+# so we need a single security policy covering all domains
+resource "azurerm_cdn_frontdoor_security_policy" "main" {
   count                    = var.enable_waf ? 1 : 0
-  name                     = "publisher-security-policy"
+  name                     = "waf-security-policy"
   cdn_frontdoor_profile_id = azurerm_cdn_frontdoor_profile.main.id
 
   security_policies {
@@ -290,23 +292,6 @@ resource "azurerm_cdn_frontdoor_security_policy" "publisher" {
         domain {
           cdn_frontdoor_domain_id = azurerm_cdn_frontdoor_custom_domain.publisher.id
         }
-        patterns_to_match = ["/*"]
-      }
-    }
-  }
-}
-
-# Associate WAF policy with Chain endpoint
-resource "azurerm_cdn_frontdoor_security_policy" "chain" {
-  count                    = var.enable_waf ? 1 : 0
-  name                     = "chain-security-policy"
-  cdn_frontdoor_profile_id = azurerm_cdn_frontdoor_profile.main.id
-
-  security_policies {
-    firewall {
-      cdn_frontdoor_firewall_policy_id = azurerm_cdn_frontdoor_firewall_policy.main[0].id
-
-      association {
         domain {
           cdn_frontdoor_domain_id = azurerm_cdn_frontdoor_custom_domain.chain.id
         }
