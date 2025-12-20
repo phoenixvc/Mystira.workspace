@@ -171,7 +171,7 @@ resource "time_sleep" "wait_for_storage" {
 }
 
 # Azure File Share for Chain Data Persistence
-# Using terraform_data with Azure CLI to work around ARM API InvalidHeaderValue bug
+# Using data plane API (az storage share create) instead of ARM API to work around InvalidHeaderValue bug
 resource "terraform_data" "chain_data_share" {
   count = var.chain_node_count
 
@@ -184,26 +184,40 @@ resource "terraform_data" "chain_data_share" {
 
   provisioner "local-exec" {
     command = <<-EOT
-      az storage share-rm create \
+      # Get storage account key and use data plane API
+      STORAGE_KEY=$(az storage account keys list \
         --resource-group "${var.resource_group_name}" \
-        --storage-account "${azurerm_storage_account.chain.name}" \
+        --account-name "${azurerm_storage_account.chain.name}" \
+        --query '[0].value' -o tsv)
+
+      az storage share create \
         --name "chain-data-${count.index}" \
+        --account-name "${azurerm_storage_account.chain.name}" \
+        --account-key "$STORAGE_KEY" \
         --quota ${var.chain_storage_size_gb} \
-        --enabled-protocols SMB \
         --output none
     EOT
+    interpreter = ["/bin/bash", "-c"]
   }
 
   provisioner "local-exec" {
     when    = destroy
     command = <<-EOT
-      az storage share-rm delete \
+      # Get storage account key for deletion
+      STORAGE_KEY=$(az storage account keys list \
         --resource-group "${self.triggers_replace.resource_group}" \
-        --storage-account "${self.triggers_replace.storage_account}" \
-        --name "${self.triggers_replace.share_name}" \
-        --yes \
-        --output none || true
+        --account-name "${self.triggers_replace.storage_account}" \
+        --query '[0].value' -o tsv 2>/dev/null) || true
+
+      if [ -n "$STORAGE_KEY" ]; then
+        az storage share delete \
+          --name "${self.triggers_replace.share_name}" \
+          --account-name "${self.triggers_replace.storage_account}" \
+          --account-key "$STORAGE_KEY" \
+          --output none || true
+      fi
     EOT
+    interpreter = ["/bin/bash", "-c"]
   }
 
   depends_on = [time_sleep.wait_for_storage]
