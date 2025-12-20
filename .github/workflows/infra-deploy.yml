@@ -130,8 +130,8 @@ jobs:
     name: Bootstrap Infrastructure
     runs-on: ubuntu-latest
     needs: [validate]
-    if: |
-      always() &&
+    # Only run if validation passed/skipped AND at least one prerequisite is missing
+    if: >-
       (needs.validate.result == 'success' || needs.validate.result == 'skipped') &&
       (needs.validate.outputs.backend-exists != 'true' ||
        needs.validate.outputs.acr-exists != 'true' ||
