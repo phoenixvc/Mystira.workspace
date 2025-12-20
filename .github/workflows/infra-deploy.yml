@@ -516,6 +516,35 @@ jobs:
 
           echo "::notice::DNS records configured for ${{ env.ENVIRONMENT }} pointing to $INGRESS_IP"
 
+      - name: Check DNS Nameserver Configuration
+        run: |
+          echo "## DNS Nameserver Check" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # Get Azure DNS nameservers for our zone
+          AZURE_NS=$(az network dns zone show --name ${{ env.DNS_ZONE }} --resource-group ${{ env.TERRAFORM_RG }} --query "nameServers[0]" -o tsv | sed 's/\.$//')
+
+          # Check if domain is using Azure DNS
+          ACTUAL_NS=$(dig +short NS ${{ env.DNS_ZONE }} | head -1 | sed 's/\.$//')
+
+          if echo "$ACTUAL_NS" | grep -q "azure-dns"; then
+            echo "✅ Domain is using Azure DNS nameservers" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "⚠️ **Domain is NOT using Azure DNS!**" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "The A records were created in Azure DNS, but your domain is using:" >> $GITHUB_STEP_SUMMARY
+            echo "\`$ACTUAL_NS\`" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "**To fix this, either:**" >> $GITHUB_STEP_SUMMARY
+            echo "1. Update your domain registrar's nameservers to Azure DNS:" >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            az network dns zone show --name ${{ env.DNS_ZONE }} --resource-group ${{ env.TERRAFORM_RG }} --query nameServers -o tsv >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "2. Or create A records in your current DNS provider pointing to: **${{ needs.deploy-kubernetes.outputs.ingress-ip }}**" >> $GITHUB_STEP_SUMMARY
+            echo "::warning::Domain ${{ env.DNS_ZONE }} is not using Azure DNS nameservers. DNS records may not resolve."
+          fi
+
       - name: DNS Summary
         run: |
           INGRESS_IP="${{ needs.deploy-kubernetes.outputs.ingress-ip }}"
