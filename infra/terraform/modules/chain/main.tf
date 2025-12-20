@@ -58,9 +58,14 @@ variable "chain_vm_size" {
 }
 
 variable "chain_storage_size_gb" {
-  description = "Storage size in GB for chain data"
+  description = "Storage size in GB for chain data (minimum 100 GB for Premium file shares)"
   type        = number
   default     = 100
+
+  validation {
+    condition     = var.chain_storage_size_gb >= 100
+    error_message = "Premium file shares require a minimum quota of 100 GB."
+  }
 }
 
 variable "vnet_id" {
