@@ -26,6 +26,9 @@ patches:
       - op: replace
         path: /spec/tls/0/secretName
         value: "mystira-publisher-tls-dev"
+      - op: replace
+        path: /metadata/annotations/cert-manager.io~1cluster-issuer
+        value: "letsencrypt-staging"
   - target:
       kind: Ingress
       name: mystira-chain-ingress
@@ -39,6 +42,25 @@ patches:
       - op: replace
         path: /spec/tls/0/secretName
         value: "mystira-chain-tls-dev"
+      - op: replace
+        path: /metadata/annotations/cert-manager.io~1cluster-issuer
+        value: "letsencrypt-staging"
+  - target:
+      kind: Ingress
+      name: mystira-story-generator-ingress
+    patch: |-
+      - op: replace
+        path: /spec/tls/0/hosts/0
+        value: "dev.story-generator.mystira.app"
+      - op: replace
+        path: /spec/rules/0/host
+        value: "dev.story-generator.mystira.app"
+      - op: replace
+        path: /spec/tls/0/secretName
+        value: "mystira-story-generator-tls-dev"
+      - op: replace
+        path: /metadata/annotations/cert-manager.io~1cluster-issuer
+        value: "letsencrypt-staging"
   - target:
       kind: StatefulSet
       name: mystira-chain
