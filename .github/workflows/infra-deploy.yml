@@ -46,6 +46,7 @@ env:
   AKS_CLUSTER_NAME: mys-${{ github.event.inputs.environment || 'dev' }}-mystira-aks-san
   ACR_NAME: mysprodacr
   DNS_ZONE: mystira.app
+  DNS_ZONE_RG: mys-prod-mystira-rg-glob
   TERRAFORM_RG: mys-prod-terraform-rg-eus
   TERRAFORM_STORAGE: mysprodterraformstate
 
@@ -93,9 +94,9 @@ jobs:
       - name: Check DNS Zone
         id: check-dns
         run: |
-          if az network dns zone show --name ${{ env.DNS_ZONE }} --resource-group ${{ env.TERRAFORM_RG }} &> /dev/null; then
+          if az network dns zone show --name ${{ env.DNS_ZONE }} --resource-group ${{ env.DNS_ZONE_RG }} &> /dev/null; then
             echo "exists=true" >> $GITHUB_OUTPUT
-            echo "::notice::DNS Zone exists"
+            echo "::notice::DNS Zone exists in ${{ env.DNS_ZONE_RG }}"
           else
             echo "exists=false" >> $GITHUB_OUTPUT
             echo "::warning::DNS Zone does not exist - will be created"
@@ -194,14 +195,14 @@ jobs:
         run: |
           az network dns zone create \
             --name ${{ env.DNS_ZONE }} \
-            --resource-group ${{ env.TERRAFORM_RG }} \
+            --resource-group ${{ env.DNS_ZONE_RG }} \
             --output none
 
           echo "::warning::DNS Zone created. Update your domain registrar nameservers!"
           echo "## DNS Nameservers" >> $GITHUB_STEP_SUMMARY
           echo "Update your domain registrar with these nameservers:" >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
-          az network dns zone show --name ${{ env.DNS_ZONE }} --resource-group ${{ env.TERRAFORM_RG }} --query nameServers -o tsv >> $GITHUB_STEP_SUMMARY
+          az network dns zone show --name ${{ env.DNS_ZONE }} --resource-group ${{ env.DNS_ZONE_RG }} --query nameServers -o tsv >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
 
   # ============================================
@@ -484,7 +485,7 @@ jobs:
 
           # Configure Publisher DNS
           az network dns record-set a add-record \
-            --resource-group ${{ env.TERRAFORM_RG }} \
+            --resource-group ${{ env.DNS_ZONE_RG }} \
             --zone-name ${{ env.DNS_ZONE }} \
             --record-set-name "${ENV_PREFIX}publisher" \
             --ipv4-address "$INGRESS_IP" \
@@ -492,7 +493,7 @@ jobs:
 
           # Configure Chain DNS
           az network dns record-set a add-record \
-            --resource-group ${{ env.TERRAFORM_RG }} \
+            --resource-group ${{ env.DNS_ZONE_RG }} \
             --zone-name ${{ env.DNS_ZONE }} \
             --record-set-name "${ENV_PREFIX}chain" \
             --ipv4-address "$INGRESS_IP" \
@@ -500,7 +501,7 @@ jobs:
 
           # Configure API DNS
           az network dns record-set a add-record \
-            --resource-group ${{ env.TERRAFORM_RG }} \
+            --resource-group ${{ env.DNS_ZONE_RG }} \
             --zone-name ${{ env.DNS_ZONE }} \
             --record-set-name "${ENV_PREFIX}api" \
             --ipv4-address "$INGRESS_IP" \
@@ -508,7 +509,7 @@ jobs:
 
           # Configure Story Generator DNS
           az network dns record-set a add-record \
-            --resource-group ${{ env.TERRAFORM_RG }} \
+            --resource-group ${{ env.DNS_ZONE_RG }} \
             --zone-name ${{ env.DNS_ZONE }} \
             --record-set-name "${ENV_PREFIX}story-generator" \
             --ipv4-address "$INGRESS_IP" \
@@ -522,7 +523,7 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
 
           # Get Azure DNS nameservers for our zone
-          AZURE_NS=$(az network dns zone show --name ${{ env.DNS_ZONE }} --resource-group ${{ env.TERRAFORM_RG }} --query "nameServers[0]" -o tsv | sed 's/\.$//')
+          AZURE_NS=$(az network dns zone show --name ${{ env.DNS_ZONE }} --resource-group ${{ env.DNS_ZONE_RG }} --query "nameServers[0]" -o tsv | sed 's/\.$//')
 
           # Check if domain is using Azure DNS
           ACTUAL_NS=$(dig +short NS ${{ env.DNS_ZONE }} | head -1 | sed 's/\.$//')
@@ -538,7 +539,7 @@ jobs:
             echo "**To fix this, either:**" >> $GITHUB_STEP_SUMMARY
             echo "1. Update your domain registrar's nameservers to Azure DNS:" >> $GITHUB_STEP_SUMMARY
             echo '```' >> $GITHUB_STEP_SUMMARY
-            az network dns zone show --name ${{ env.DNS_ZONE }} --resource-group ${{ env.TERRAFORM_RG }} --query nameServers -o tsv >> $GITHUB_STEP_SUMMARY
+            az network dns zone show --name ${{ env.DNS_ZONE }} --resource-group ${{ env.DNS_ZONE_RG }} --query nameServers -o tsv >> $GITHUB_STEP_SUMMARY
             echo '```' >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
             echo "2. Or create A records in your current DNS provider pointing to: **${{ needs.deploy-kubernetes.outputs.ingress-ip }}**" >> $GITHUB_STEP_SUMMARY
