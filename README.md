@@ -160,6 +160,7 @@ The workspace uses a comprehensive CI/CD system with organized workflow naming:
 
 ### Utilities
 - **Utilities: Check Submodules** - Validate submodule commits
+- **Utilities: Link Checker** - Check markdown links in documentation
 
 All workflows run on push to `dev`/`main` and on pull requests.
 

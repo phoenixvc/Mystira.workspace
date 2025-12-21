@@ -6,7 +6,7 @@ Accepted
 
 ## Context
 
-The Mystira workspace contains 14 GitHub Actions workflows that handle CI/CD for components, infrastructure, deployments, and utilities. As the number of workflows grew, several issues emerged:
+The Mystira workspace contains 15 GitHub Actions workflows that handle CI/CD for components, infrastructure, deployments, and utilities. As the number of workflows grew, several issues emerged:
 
 1. **Inconsistent naming**: Workflows used different naming patterns ("Chain CI", "CI", "Release", "Production Release")
 2. **Poor discoverability**: In the GitHub Actions UI, related workflows were scattered alphabetically
@@ -56,11 +56,11 @@ We adopt a **hierarchical "Category: Name" naming convention** for all GitHub Ac
 | **Infrastructure** | Infrastructure operations                | `Infrastructure: Deploy`          |
 | **Deployment**   | Environment-specific deployments           | `Deployment: Staging`             |
 | **Workspace**    | Workspace-level operations                 | `Workspace: CI`                   |
-| **Utilities**    | Helper workflows and checks                | `Utilities: Check Submodules`     |
+| **Utilities**    | Helper workflows and checks                | `Utilities: Check Submodules`, `Utilities: Link Checker` |
 
 ### Implementation
 
-All 14 workflows have been renamed following this convention:
+All 15 workflows have been renamed following this convention:
 
 #### Components (7 workflows)
 - `Components: Admin API - CI` - Admin backend CI
@@ -83,8 +83,9 @@ All 14 workflows have been renamed following this convention:
 - `Workspace: CI` - Workspace-level CI
 - `Workspace: Release` - NPM package releases
 
-#### Utilities (1 workflow)
+#### Utilities (2 workflows)
 - `Utilities: Check Submodules` - Validate submodule commits
+- `Utilities: Link Checker` - Check markdown links in documentation
 
 ## Consequences
 
