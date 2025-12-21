@@ -337,6 +337,89 @@ jobs:
           az network dns zone show --name ${{ env.DNS_ZONE }} --resource-group ${{ env.DNS_ZONE_RG }} --query nameServers -o tsv >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
 
+      - name: Grant Storage Account Permissions
+        run: |
+          # Always grant service principal access to storage account
+          # Use the SAME service principal that Terraform will use (from secrets)
+          echo "Granting storage access to service principal..."
+
+          # Extract client ID from the credentials that Terraform uses
+          SP_CLIENT_ID=$(echo '${{ secrets.MYSTIRA_AZURE_CREDENTIALS }}' | jq -r '.clientId')
+          echo "Service Principal Client ID: ${SP_CLIENT_ID:0:8}..."
+
+          # CRITICAL: Get the Object ID from the Client ID
+          # Role assignments need the Object ID, not the Client ID
+          echo "Looking up service principal object ID..."
+          SP_OBJECT_ID=$(az ad sp show --id "$SP_CLIENT_ID" --query id -o tsv)
+
+          if [ -z "$SP_OBJECT_ID" ]; then
+            echo "::error::Could not find service principal object ID for client ID $SP_CLIENT_ID"
+            exit 1
+          fi
+
+          echo "Service Principal Object ID: ${SP_OBJECT_ID:0:8}..."
+
+          STORAGE_ID=$(az storage account show \
+            --resource-group ${{ env.TERRAFORM_RG }} \
+            --name ${{ env.TERRAFORM_STORAGE }} \
+            --query id -o tsv)
+          echo "Storage Account: $STORAGE_ID"
+
+          # Grant multiple roles to ensure all permissions
+          echo "Granting storage permissions (this may take a moment)..."
+
+          # Role 1: Storage Blob Data Contributor (for blob access)
+          az role assignment create \
+            --assignee-object-id "$SP_OBJECT_ID" \
+            --assignee-principal-type ServicePrincipal \
+            --role "Storage Blob Data Contributor" \
+            --scope "$STORAGE_ID" 2>/dev/null || echo "Storage Blob Data Contributor role may already exist"
+
+          # Role 2: Storage Account Contributor (for account-level operations)
+          az role assignment create \
+            --assignee-object-id "$SP_OBJECT_ID" \
+            --assignee-principal-type ServicePrincipal \
+            --role "Storage Account Contributor" \
+            --scope "$STORAGE_ID" 2>/dev/null || echo "Storage Account Contributor role may already exist"
+
+          # Role 3: Reader and Data Access (sometimes needed)
+          az role assignment create \
+            --assignee-object-id "$SP_OBJECT_ID" \
+            --assignee-principal-type ServicePrincipal \
+            --role "Reader and Data Access" \
+            --scope "$STORAGE_ID" 2>/dev/null || echo "Reader and Data Access role may already exist"
+
+          echo "✓ Storage roles configured"
+
+          # Verify permissions were granted
+          echo ""
+          echo "Verifying role assignments..."
+          az role assignment list \
+            --assignee "$SP_OBJECT_ID" \
+            --scope "$STORAGE_ID" \
+            --query "[].{Role:roleDefinitionName, Scope:scope}" \
+            --output table
+
+          echo ""
+          echo "Role assignment count:"
+          ROLE_COUNT=$(az role assignment list \
+            --assignee "$SP_OBJECT_ID" \
+            --scope "$STORAGE_ID" \
+            --query "length(@)" -o tsv)
+          echo "  Found $ROLE_COUNT role assignment(s) for this service principal on the storage account"
+
+          if [ "$ROLE_COUNT" -eq "0" ]; then
+            echo "::error::No role assignments found! Permission grant may have failed."
+            exit 1
+          fi
+
+          # Wait for Azure AD propagation (increased wait time)
+          echo ""
+          echo "Waiting 30 seconds for Azure AD to propagate permissions..."
+          sleep 30
+
+          echo "::notice::Storage permissions configured and verified"
+
   # ============================================
   # Terraform Plan
   # ============================================
