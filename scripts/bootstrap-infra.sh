@@ -13,10 +13,12 @@ BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 # Configuration
+# Note: These are SHARED resources that remain in East US
+# Per-environment resources (AKS, PostgreSQL, etc.) deploy to South Africa North
 TERRAFORM_RG="mys-prod-terraform-rg-eus"
 TERRAFORM_STORAGE="mysprodterraformstate"
 TERRAFORM_CONTAINER="tfstate"
-LOCATION="eastus"
+LOCATION="eastus"  # Shared resources stay in East US
 ACR_NAME="myssharedacr"
 DNS_ZONE="mystira.app"
 

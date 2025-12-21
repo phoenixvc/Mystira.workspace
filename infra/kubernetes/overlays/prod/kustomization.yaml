@@ -66,6 +66,13 @@ patches:
         path: /data/key_vault_url
         value: "https://mys-prod-pub-kv-san.vault.azure.net/"
   - target:
+      kind: ConfigMap
+      name: mys-chain-config
+    patch: |-
+      - op: replace
+        path: /data/key_vault_url
+        value: "https://mys-prod-chain-kv-san.vault.azure.net/"
+  - target:
       kind: Deployment
       name: mys-story-generator
     patch: |-
