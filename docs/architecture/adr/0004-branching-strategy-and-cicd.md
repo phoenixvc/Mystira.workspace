@@ -72,6 +72,7 @@ CI workflows trigger automatically:
 - **Components: Story Generator - CI** (`story-generator-ci.yml`) - Story Generator CI (if changed)
 - **Infrastructure: Validate** (`infra-validate.yml`) - Infrastructure validation
 - **Utilities: Check Submodules** (`check-submodules.yml`) - Submodule validation
+- **Utilities: Link Checker** (`utilities-link-checker.yml`) - Markdown link validation
 
 **Docker images**: Tagged with branch name (`dev`) and commit SHA
 
@@ -191,6 +192,7 @@ All of the following must pass before merging to `main`:
 **Infrastructure:**
 - `Infrastructure: Validate` (if infrastructure changed)
 - `Utilities: Check Submodules` (validates submodule commits exist)
+- `Utilities: Link Checker` (validates markdown links in documentation)
 
 ## Consequences
 
@@ -318,8 +320,9 @@ All workflows are located in `.github/workflows/`:
 - `ci.yml` - **Workspace: CI**
 - `release.yml` - **Workspace: Release** (NPM packages via Changesets)
 
-**Utilities** (1 workflow):
+**Utilities** (2 workflows):
 - `check-submodules.yml` - **Utilities: Check Submodules**
+- `utilities-link-checker.yml` - **Utilities: Link Checker**
 
 > **Note**: Workflow naming follows a hierarchical "Category: Name" convention for better organization. See [ADR-0012: GitHub Workflow Naming Convention](./0012-github-workflow-naming-convention.md).
 
