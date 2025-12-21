@@ -159,9 +159,9 @@ resource "azurerm_postgresql_flexible_server" "story_generator" {
 
   sku_name = var.environment == "prod" ? "GP_Standard_D2s_v3" : "B_Standard_B1ms"
 
-  storage_mb                    = var.environment == "prod" ? 32768 : 32768
-  backup_retention_days         = var.environment == "prod" ? 35 : 7
-  geo_redundant_backup_enabled  = var.environment == "prod"
+  storage_mb                   = var.environment == "prod" ? 32768 : 32768
+  backup_retention_days        = var.environment == "prod" ? 35 : 7
+  geo_redundant_backup_enabled = var.environment == "prod"
 
   tags = local.common_tags
 }
@@ -205,16 +205,16 @@ resource "random_password" "postgres" {
 
 # Redis Cache (if not using shared)
 resource "azurerm_redis_cache" "story_generator" {
-  count               = var.use_shared_redis ? 0 : 1
-  name                = "${local.name_prefix}-cache-${local.region_code}"
-  location            = var.location
-  resource_group_name = var.resource_group_name
-  capacity            = var.environment == "prod" ? 2 : 1
-  family              = var.environment == "prod" ? "C" : "C"
-  sku_name            = var.environment == "prod" ? "Standard" : "Basic"
+  count                = var.use_shared_redis ? 0 : 1
+  name                 = "${local.name_prefix}-cache-${local.region_code}"
+  location             = var.location
+  resource_group_name  = var.resource_group_name
+  capacity             = var.environment == "prod" ? 2 : 1
+  family               = var.environment == "prod" ? "C" : "C"
+  sku_name             = var.environment == "prod" ? "Standard" : "Basic"
   non_ssl_port_enabled = false
-  minimum_tls_version = "1.2"
-  subnet_id           = var.subnet_id
+  minimum_tls_version  = "1.2"
+  subnet_id            = var.subnet_id
 
   redis_configuration {
     maxmemory_policy = "volatile-lru"

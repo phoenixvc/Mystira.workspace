@@ -18,12 +18,12 @@ module "front_door" {
 
   # WAF Configuration - Staging Settings
   enable_waf           = true
-  waf_mode             = "Detection"  # Detection mode for staging (non-blocking)
-  rate_limit_threshold = 200          # Moderate threshold for staging
+  waf_mode             = "Detection" # Detection mode for staging (non-blocking)
+  rate_limit_threshold = 200         # Moderate threshold for staging
 
   # Caching Configuration
   enable_caching         = true
-  cache_duration_seconds = 3600  # 1 hour for staging
+  cache_duration_seconds = 3600 # 1 hour for staging
 
   # Health Probes
   health_probe_path     = "/health"

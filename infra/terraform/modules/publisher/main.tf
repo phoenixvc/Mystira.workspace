@@ -211,15 +211,15 @@ resource "azurerm_key_vault_secret" "chain_rpc_endpoint" {
 
 # Redis Cache for Publisher (optional caching layer)
 resource "azurerm_redis_cache" "publisher" {
-  count               = var.environment == "prod" ? 1 : 0
-  name                = "${local.name_prefix}-cache-${local.region_code}"
-  location            = var.location
-  resource_group_name = var.resource_group_name
-  capacity            = 1
-  family              = "C"
-  sku_name            = "Standard"
+  count                = var.environment == "prod" ? 1 : 0
+  name                 = "${local.name_prefix}-cache-${local.region_code}"
+  location             = var.location
+  resource_group_name  = var.resource_group_name
+  capacity             = 1
+  family               = "C"
+  sku_name             = "Standard"
   non_ssl_port_enabled = false
-  minimum_tls_version = "1.2"
+  minimum_tls_version  = "1.2"
 
   redis_configuration {
     maxmemory_policy = "volatile-lru"

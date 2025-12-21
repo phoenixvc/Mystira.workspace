@@ -104,7 +104,7 @@ locals {
     ManagedBy   = "terraform"
     Project     = "Mystira"
   })
-  
+
   sku_name_final = var.sku_name != null ? var.sku_name : (
     var.environment == "prod" ? "GP_Standard_D4s_v3" : "B_Standard_B1ms"
   )
@@ -131,15 +131,15 @@ resource "azurerm_private_dns_zone_virtual_network_link" "postgres" {
 
 # PostgreSQL Flexible Server
 resource "azurerm_postgresql_flexible_server" "shared" {
-  name                          = "${local.name_prefix}-server"
-  location                      = var.location
-  resource_group_name           = var.resource_group_name
-  version                       = var.postgres_version
-  delegated_subnet_id           = var.subnet_id
-  private_dns_zone_id           = azurerm_private_dns_zone.postgres.id
-  administrator_login           = var.admin_login
-  administrator_password        = var.admin_password != null ? var.admin_password : random_password.postgres[0].result
-  zone                          = "1"
+  name                   = "${local.name_prefix}-server"
+  location               = var.location
+  resource_group_name    = var.resource_group_name
+  version                = var.postgres_version
+  delegated_subnet_id    = var.subnet_id
+  private_dns_zone_id    = azurerm_private_dns_zone.postgres.id
+  administrator_login    = var.admin_login
+  administrator_password = var.admin_password != null ? var.admin_password : random_password.postgres[0].result
+  zone                   = "1"
   # VNet integration requires public network access to be disabled
   public_network_access_enabled = false
 
