@@ -194,13 +194,15 @@ module "shared_postgresql" {
 }
 
 # Shared Redis Infrastructure
+# Note: Standard SKU does not support VNet integration (subnet_id)
+# Only Premium SKU supports subnet deployment
 module "shared_redis" {
   source = "../../modules/shared/redis"
 
   environment         = "prod"
   location           = var.location
   resource_group_name = azurerm_resource_group.main.name
-  subnet_id          = azurerm_subnet.redis.id
+  # subnet_id omitted - Standard SKU doesn't support VNet integration
 
   capacity = 2
   family   = "C"
@@ -279,6 +281,9 @@ resource "azurerm_kubernetes_cluster" "main" {
   network_profile {
     network_plugin = "azure"
     network_policy = "calico"
+    # Use a non-overlapping CIDR for Kubernetes services (VNet is 10.0.0.0/16)
+    service_cidr   = "172.16.0.0/16"
+    dns_service_ip = "172.16.0.10"
   }
 
   azure_active_directory_role_based_access_control {

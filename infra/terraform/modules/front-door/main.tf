@@ -204,19 +204,9 @@ resource "azurerm_cdn_frontdoor_firewall_policy" "main" {
   enabled             = true
   mode                = var.waf_mode
 
-  # Managed rules - OWASP 3.2
-  managed_rule {
-    type    = "Microsoft_DefaultRuleSet"
-    version = "2.1"
-    action  = "Block"
-  }
-
-  # Managed rules - Bot protection
-  managed_rule {
-    type    = "Microsoft_BotManagerRuleSet"
-    version = "1.0"
-    action  = "Block"
-  }
+  # Note: managed_rule blocks require Premium_AzureFrontDoor SKU
+  # Managed rules are only available with Premium tier
+  # For Standard tier, only custom rules are supported
 
   # Custom rule - Rate limiting
   custom_rule {
@@ -286,10 +276,12 @@ resource "azurerm_cdn_frontdoor_firewall_policy" "main" {
   tags = local.common_tags
 }
 
-# Associate WAF policy with Publisher endpoint
-resource "azurerm_cdn_frontdoor_security_policy" "publisher" {
+# Associate WAF policy with all custom domains
+# Note: A WAF policy can only be attached once per Front Door profile,
+# so we need a single security policy covering all domains
+resource "azurerm_cdn_frontdoor_security_policy" "main" {
   count                    = var.enable_waf ? 1 : 0
-  name                     = "publisher-security-policy"
+  name                     = "${var.project_name}-${var.environment}-waf-security-policy"
   cdn_frontdoor_profile_id = azurerm_cdn_frontdoor_profile.main.id
 
   security_policies {
@@ -300,23 +292,6 @@ resource "azurerm_cdn_frontdoor_security_policy" "publisher" {
         domain {
           cdn_frontdoor_domain_id = azurerm_cdn_frontdoor_custom_domain.publisher.id
         }
-        patterns_to_match = ["/*"]
-      }
-    }
-  }
-}
-
-# Associate WAF policy with Chain endpoint
-resource "azurerm_cdn_frontdoor_security_policy" "chain" {
-  count                    = var.enable_waf ? 1 : 0
-  name                     = "chain-security-policy"
-  cdn_frontdoor_profile_id = azurerm_cdn_frontdoor_profile.main.id
-
-  security_policies {
-    firewall {
-      cdn_frontdoor_firewall_policy_id = azurerm_cdn_frontdoor_firewall_policy.main[0].id
-
-      association {
         domain {
           cdn_frontdoor_domain_id = azurerm_cdn_frontdoor_custom_domain.chain.id
         }
@@ -324,4 +299,19 @@ resource "azurerm_cdn_frontdoor_security_policy" "chain" {
       }
     }
   }
+
+  lifecycle {
+    create_before_destroy = false
+    # Ignore changes to association since Azure may modify the order
+    ignore_changes = [
+      security_policies[0].firewall[0].association[0].domain
+    ]
+  }
+
+  # Ensure the WAF policy and profile are fully created before attaching
+  depends_on = [
+    azurerm_cdn_frontdoor_firewall_policy.main,
+    azurerm_cdn_frontdoor_custom_domain.publisher,
+    azurerm_cdn_frontdoor_custom_domain.chain
+  ]
 }

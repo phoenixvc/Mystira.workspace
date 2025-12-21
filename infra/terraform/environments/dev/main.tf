@@ -31,7 +31,7 @@ provider "azurerm" {
 variable "location" {
   description = "Azure region for deployment"
   type        = string
-  default     = "eastus"
+  default     = "southafricanorth"
 }
 
 # Common tags for all resources
@@ -45,7 +45,7 @@ locals {
 
 # Resource Group
 resource "azurerm_resource_group" "main" {
-  name     = "mys-dev-mystira-rg-eus"
+  name     = "mys-dev-mystira-rg-san"
   location = var.location
 
   tags = {
@@ -57,7 +57,7 @@ resource "azurerm_resource_group" "main" {
 
 # Virtual Network
 resource "azurerm_virtual_network" "main" {
-  name                = "mys-dev-mystira-vnet-eus"
+  name                = "mys-dev-mystira-vnet-san"
   location            = azurerm_resource_group.main.location
   resource_group_name = azurerm_resource_group.main.name
   address_space       = ["10.0.0.0/16"]
@@ -85,7 +85,7 @@ resource "azurerm_subnet" "aks" {
   name                 = "aks-subnet"
   resource_group_name  = azurerm_resource_group.main.name
   virtual_network_name = azurerm_virtual_network.main.name
-  address_prefixes     = ["10.0.10.0/22"]
+  address_prefixes     = ["10.0.8.0/22"]
 }
 
 resource "azurerm_subnet" "postgresql" {
@@ -145,11 +145,11 @@ module "chain" {
 
   environment           = "dev"
   location              = var.location
-  region_code           = "eus"
+  region_code           = "san"
   resource_group_name   = azurerm_resource_group.main.name
   chain_node_count      = 1
   chain_vm_size         = "Standard_B2s"
-  chain_storage_size_gb = 50
+  chain_storage_size_gb = 100  # Premium file shares require minimum 100 GB
   vnet_id               = azurerm_virtual_network.main.id
   subnet_id             = azurerm_subnet.chain.id
 
@@ -164,7 +164,7 @@ module "publisher" {
 
   environment             = "dev"
   location                = var.location
-  region_code             = "eus"
+  region_code             = "san"
   resource_group_name     = azurerm_resource_group.main.name
   publisher_replica_count = 1
   vnet_id                 = azurerm_virtual_network.main.id
@@ -181,10 +181,10 @@ module "shared_postgresql" {
   source = "../../modules/shared/postgresql"
 
   environment         = "dev"
-  location           = var.location
+  location            = var.location
   resource_group_name = azurerm_resource_group.main.name
-  vnet_id            = azurerm_virtual_network.main.id
-  subnet_id          = azurerm_subnet.postgresql.id
+  vnet_id             = azurerm_virtual_network.main.id
+  subnet_id           = azurerm_subnet.postgresql.id
 
   databases = [
     "storygenerator",
@@ -197,13 +197,15 @@ module "shared_postgresql" {
 }
 
 # Shared Redis Infrastructure
+# Note: Standard SKU does not support VNet integration (subnet_id)
+# Only Premium SKU supports subnet deployment
 module "shared_redis" {
   source = "../../modules/shared/redis"
 
   environment         = "dev"
-  location           = var.location
+  location            = var.location
   resource_group_name = azurerm_resource_group.main.name
-  subnet_id          = azurerm_subnet.redis.id
+  # subnet_id omitted - Standard SKU doesn't support VNet integration
 
   capacity = 1
   family   = "C"
@@ -219,7 +221,7 @@ module "shared_monitoring" {
   source = "../../modules/shared/monitoring"
 
   environment         = "dev"
-  location           = var.location
+  location            = var.location
   resource_group_name = azurerm_resource_group.main.name
 
   retention_in_days = 30
@@ -234,11 +236,11 @@ module "story_generator" {
   source = "../../modules/story-generator"
 
   environment         = "dev"
-  location           = var.location
-  region_code        = "eus"
+  location            = var.location
+  region_code         = "san"
   resource_group_name = azurerm_resource_group.main.name
-  vnet_id            = azurerm_virtual_network.main.id
-  subnet_id          = azurerm_subnet.story_generator.id
+  vnet_id             = azurerm_virtual_network.main.id
+  subnet_id           = azurerm_subnet.story_generator.id
 
   # Use shared resources
   use_shared_postgresql             = true
@@ -255,7 +257,7 @@ module "story_generator" {
 
 # AKS Cluster for Dev
 resource "azurerm_kubernetes_cluster" "main" {
-  name                = "mys-dev-mystira-aks-eus"
+  name                = "mys-dev-mystira-aks-san"
   location            = azurerm_resource_group.main.location
   resource_group_name = azurerm_resource_group.main.name
   dns_prefix          = "mys-dev-mystira"
@@ -274,6 +276,9 @@ resource "azurerm_kubernetes_cluster" "main" {
   network_profile {
     network_plugin = "azure"
     network_policy = "calico"
+    # Use a non-overlapping CIDR for Kubernetes services (VNet is 10.0.0.0/16)
+    service_cidr   = "172.16.0.0/16"
+    dns_service_ip = "172.16.0.10"
   }
 
   tags = {
