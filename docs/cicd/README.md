@@ -16,7 +16,7 @@ This directory contains documentation for CI/CD pipelines, GitHub Actions workfl
 
 | Artifact Type | Destination | Trigger |
 |---------------|-------------|---------|
-| Docker Images | `mysprodacr.azurecr.io` | Push to `dev`/`main` |
+| Docker Images | `myssharedacr.azurecr.io` | Push to `dev`/`main` |
 | NPM Packages | `npmjs.org` | Changesets on `main` |
 | NuGet Packages | GitHub Packages / NuGet.org | Push to `main` |
 | Deployments | Azure Kubernetes Service | Auto (staging) / Manual (prod) |

@@ -84,14 +84,20 @@ variable "tags" {
   default     = {}
 }
 
+variable "shared_log_analytics_workspace_id" {
+  description = "ID of shared Log Analytics workspace (from shared monitoring module)"
+  type        = string
+}
+
 locals {
-  name_prefix = "mys-${var.environment}-mystira-chain"
+  name_prefix = "mys-${var.environment}-chain"
   region_code = var.region_code
   # Key Vault names must be 3-24 chars, alphanumeric and dashes only
-  kv_name = "mys-${var.environment}-chn-kv-${local.region_code}"
+  kv_name = "mys-${var.environment}-chain-kv-${local.region_code}"
   common_tags = merge(var.tags, {
     Component   = "chain"
     Environment = var.environment
+    Service     = "chain"
     ManagedBy   = "terraform"
     Project     = "Mystira"
   })
@@ -228,13 +234,13 @@ resource "terraform_data" "chain_data_share" {
   depends_on = [time_sleep.wait_for_storage]
 }
 
-# Log Analytics Workspace
-resource "azurerm_log_analytics_workspace" "chain" {
-  name                = "${local.name_prefix}-log-${local.region_code}"
+# Application Insights for Chain (uses shared Log Analytics workspace)
+resource "azurerm_application_insights" "chain" {
+  name                = "${local.name_prefix}-ai-${local.region_code}"
   location            = var.location
   resource_group_name = var.resource_group_name
-  sku                 = "PerGB2018"
-  retention_in_days   = var.environment == "prod" ? 90 : 30
+  workspace_id        = var.shared_log_analytics_workspace_id
+  application_type    = "other"
 
   tags = local.common_tags
 }
@@ -285,9 +291,15 @@ output "storage_account_name" {
   value       = azurerm_storage_account.chain.name
 }
 
-output "log_analytics_workspace_id" {
-  description = "Log Analytics Workspace ID"
-  value       = azurerm_log_analytics_workspace.chain.id
+output "application_insights_id" {
+  description = "Application Insights ID for chain monitoring"
+  value       = azurerm_application_insights.chain.id
+}
+
+output "application_insights_connection_string" {
+  description = "Application Insights connection string"
+  value       = azurerm_application_insights.chain.connection_string
+  sensitive   = true
 }
 
 output "key_vault_id" {

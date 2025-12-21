@@ -65,7 +65,7 @@ patches:
     patch: |-
       - op: replace
         path: /data/key_vault_url
-        value: "https://mys-staging-mystira-pub-kv-eus.vault.azure.net/"
+        value: "https://mys-staging-pub-kv-san.vault.azure.net/"
   - target:
       kind: Deployment
       name: mys-story-generator
@@ -79,12 +79,12 @@ patches:
     patch: |-
       - op: replace
         path: /data/key_vault_url
-        value: "https://mys-staging-mystira-sg-kv-eus.vault.azure.net/"
+        value: "https://mys-staging-story-kv-san.vault.azure.net/"
 
 images:
-  - name: mysprodacr.azurecr.io/chain
+  - name: myssharedacr.azurecr.io/chain
     newTag: staging
-  - name: mysprodacr.azurecr.io/publisher
+  - name: myssharedacr.azurecr.io/publisher
     newTag: staging
-  - name: mysprodacr.azurecr.io/story-generator
+  - name: myssharedacr.azurecr.io/story-generator
     newTag: staging

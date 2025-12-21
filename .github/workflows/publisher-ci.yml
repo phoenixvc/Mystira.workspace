@@ -29,7 +29,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  AZURE_ACR_NAME: mysprodacr
+  AZURE_ACR_NAME: myssharedacr
   IMAGE_NAME: publisher
   # Provide empty token to prevent pnpm warnings about missing NODE_AUTH_TOKEN
   NODE_AUTH_TOKEN: ""

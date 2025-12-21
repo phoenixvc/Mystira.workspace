@@ -47,11 +47,11 @@ concurrency:
 env:
   TF_VERSION: "1.5.0"
   ENVIRONMENT: ${{ github.event.inputs.environment || 'dev' }}
-  AZURE_RESOURCE_GROUP: mys-${{ github.event.inputs.environment || 'dev' }}-mystira-rg-san
-  AKS_CLUSTER_NAME: mys-${{ github.event.inputs.environment || 'dev' }}-mystira-aks-san
-  ACR_NAME: mysprodacr
+  AZURE_RESOURCE_GROUP: mys-${{ github.event.inputs.environment || 'dev' }}-core-rg-san
+  AKS_CLUSTER_NAME: mys-${{ github.event.inputs.environment || 'dev' }}-core-aks-san
+  ACR_NAME: myssharedacr
   DNS_ZONE: mystira.app
-  DNS_ZONE_RG: mys-prod-mystira-rg-glob
+  DNS_ZONE_RG: mys-prod-core-rg-glob
   TERRAFORM_RG: mys-prod-terraform-rg-eus
   TERRAFORM_STORAGE: mysprodterraformstate
 
@@ -288,9 +288,9 @@ jobs:
           if [ "${{ env.ENVIRONMENT }}" == "dev" ]; then
             REGION_CODE="san"
           else
-            REGION_CODE="eus"
+            REGION_CODE="san"
           fi
-          VNET_NAME="mys-${{ env.ENVIRONMENT }}-mystira-vnet-${REGION_CODE}"
+          VNET_NAME="mys-${{ env.ENVIRONMENT }}-core-vnet-${REGION_CODE}"
 
           # Check if VNet exists in Azure but not in state
           if az network vnet show --name "${VNET_NAME}" --resource-group ${{ env.AZURE_RESOURCE_GROUP }} &> /dev/null; then

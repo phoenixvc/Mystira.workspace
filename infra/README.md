@@ -181,7 +181,7 @@ Cert-manager is deployed automatically via `Infrastructure: Deploy` workflow.
 
 Images are built and pushed automatically via CI/CD:
 
-- **Registry**: `mysprodacr.azurecr.io`
+- **Registry**: `myssharedacr.azurecr.io`
 - **Tags**: `dev`, `staging`, `prod`, `${SHA}`
 - **Build**: Automated on push to `dev`/`main` branches
 
@@ -189,13 +189,13 @@ Manual build and push:
 
 ```bash
 # Build image
-docker build -t mysprodacr.azurecr.io/chain:dev -f docker/chain/Dockerfile .
+docker build -t myssharedacr.azurecr.io/chain:dev -f docker/chain/Dockerfile .
 
 # Login to ACR
-az acr login --name mysprodacr
+az acr login --name myssharedacr
 
 # Push image
-docker push mysprodacr.azurecr.io/chain:dev
+docker push myssharedacr.azurecr.io/chain:dev
 ```
 
 ## DNS Configuration
@@ -212,7 +212,7 @@ DNS is managed via Azure DNS:
 # Get DNS name servers
 az network dns zone show \
   --name mystira.app \
-  --resource-group mys-prod-mystira-rg-glob \
+  --resource-group mys-prod-core-rg-glob \
   --query nameServers -o tsv
 
 # Update your domain registrar with these name servers
@@ -263,7 +263,7 @@ kubectl logs -n mys-prod deployment/mys-publisher
 # Check metrics in Azure Portal
 az monitor app-insights component show \
   --app mystira-prod-appinsights \
-  --resource-group mys-prod-mystira-rg-eus
+  --resource-group mys-prod-core-rg-eus
 ```
 
 ## Security
@@ -304,7 +304,7 @@ kubectl get events -n mys-dev --sort-by='.lastTimestamp'
 ```bash
 # Check DNS records
 az network dns record-set a list \
-  --resource-group mys-prod-mystira-rg-glob \
+  --resource-group mys-prod-core-rg-glob \
   --zone-name mystira.app
 
 # Test DNS resolution

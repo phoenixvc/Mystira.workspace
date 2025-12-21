@@ -13,7 +13,7 @@ This document describes how packages are built, published, and deployed across a
 ┌─────────────────────────────────────────────────────────────────────────────┐
 │                           PUBLISHING DESTINATIONS                            │
 ├─────────────────────────────────────────────────────────────────────────────┤
-│  Docker Images  →  Azure Container Registry (mysprodacr.azurecr.io)         │
+│  Docker Images  →  Azure Container Registry (myssharedacr.azurecr.io)         │
 │  NPM Packages   →  npmjs.org (via Changesets)                               │
 │  NuGet Packages →  GitHub Packages / NuGet.org                              │
 │  Deployments    →  Azure Kubernetes Service (AKS)                           │
@@ -25,7 +25,7 @@ This document describes how packages are built, published, and deployed across a
 ## Docker Image Publishing
 
 ### Registry
-**Azure Container Registry**: `mysprodacr.azurecr.io`
+**Azure Container Registry**: `myssharedacr.azurecr.io`
 
 ### Images Published
 
@@ -261,8 +261,8 @@ To update version stage, modify the workflow:
 
 ### Check Published Docker Images
 ```bash
-az acr repository list --name mysprodacr
-az acr repository show-tags --name mysprodacr --repository publisher
+az acr repository list --name myssharedacr
+az acr repository show-tags --name myssharedacr --repository publisher
 ```
 
 ### Check NPM Package

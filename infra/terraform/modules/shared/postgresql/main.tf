@@ -97,10 +97,11 @@ variable "tags" {
 }
 
 locals {
-  name_prefix = "mystira-shared-pg-${var.environment}"
+  name_prefix = "mys-${var.environment}-core"
   common_tags = merge(var.tags, {
     Component   = "shared-postgresql"
     Environment = var.environment
+    Service     = "core"
     ManagedBy   = "terraform"
     Project     = "Mystira"
   })
@@ -131,7 +132,7 @@ resource "azurerm_private_dns_zone_virtual_network_link" "postgres" {
 
 # PostgreSQL Flexible Server
 resource "azurerm_postgresql_flexible_server" "shared" {
-  name                   = "${local.name_prefix}-server"
+  name                   = "${local.name_prefix}-db"
   location               = var.location
   resource_group_name    = var.resource_group_name
   version                = var.postgres_version

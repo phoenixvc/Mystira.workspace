@@ -99,7 +99,7 @@ patches:
     patch: |-
       - op: replace
         path: /data/key_vault_url
-        value: "https://mys-dev-mystira-kv-san.vault.azure.net/"
+        value: "https://mys-dev-pub-kv-san.vault.azure.net/"
   - target:
       kind: Deployment
       name: mystira-story-generator
@@ -119,15 +119,15 @@ patches:
     patch: |-
       - op: replace
         path: /data/key_vault_url
-        value: "https://mys-dev-mystira-kv-san.vault.azure.net/"
+        value: "https://mys-dev-story-kv-san.vault.azure.net/"
 
 images:
   - name: mystiraacr.azurecr.io/chain
-    newName: mysprodacr.azurecr.io/chain
+    newName: myssharedacr.azurecr.io/chain
     newTag: dev
   - name: mystiraacr.azurecr.io/publisher
-    newName: mysprodacr.azurecr.io/publisher
+    newName: myssharedacr.azurecr.io/publisher
     newTag: dev
   - name: mystiraacr.azurecr.io/story-generator
-    newName: mysprodacr.azurecr.io/story-generator
+    newName: myssharedacr.azurecr.io/story-generator
     newTag: dev
