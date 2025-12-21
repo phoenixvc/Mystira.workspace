@@ -86,15 +86,17 @@ You should see at least one role assignment with:
 
 This is a **one-time manual setup** that must be completed before running deployments:
 
+**IMPORTANT**: On Windows, use **PowerShell** (not Git Bash) to run these commands. Git Bash mangles the scope paths and causes "MissingSubscription" errors.
+
 ```bash
 # Get your service principal object ID
 SP_OBJECT_ID=$(az ad sp list --display-name "mystira-github-actions" --query "[0].id" -o tsv)
 
 # Grant Storage Blob Data Contributor role on the Terraform state storage account
 # This allows the service principal to read/write Terraform state blobs
+# NOTE: Use --assignee (not --assignee-object-id) to avoid path mangling issues
 az role assignment create \
-  --assignee-object-id "$SP_OBJECT_ID" \
-  --assignee-principal-type ServicePrincipal \
+  --assignee "$SP_OBJECT_ID" \
   --role "Storage Blob Data Contributor" \
   --scope "/subscriptions/22f9eb18-6553-4b7d-9451-47d0195085fe/resourceGroups/mys-shared-terraform-rg-san/providers/Microsoft.Storage/storageAccounts/myssharedtfstatesan"
 
