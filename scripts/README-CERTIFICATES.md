@@ -75,25 +75,135 @@ kubectl describe certificate mystira-story-generator-tls-dev -n mys-dev
 ./scripts/debug-certificates.sh
 ```
 
-### Step 4: Clear Browser Cache
+### Step 4: Clear Browser Cache and SSL State
 
-Even after certificates are valid, browsers cache old certificates:
+Even after certificates are valid, browsers cache old certificates and SSL state. **This is the most common reason why you still see certificate errors after importing the staging CA.**
 
-**Chrome/Edge:**
-1. Open DevTools (F12)
-2. Right-click refresh button → "Empty Cache and Hard Reload"
-3. Or: Settings → Privacy → Clear browsing data → Cached images and files
+#### Quick Method (Try First)
+
+**Chrome/Edge/Brave:**
+1. Navigate to: `chrome://settings/clearBrowserData`
+2. Select:
+   - ✅ **Cached images and files**
+   - ✅ **Cookies and other site data**
+3. Time range: **Last hour** (or "All time")
+4. Click **"Clear data"**
+5. **Close ALL browser windows completely**
+6. Restart browser
 
 **Firefox:**
-1. Ctrl+Shift+Delete
+1. Press `Ctrl+Shift+Delete`
 2. Select "Cache" and "Cookies"
-3. Clear
+3. Time range: "Last hour"
+4. Click "Clear Now"
+5. Close all Firefox windows
+6. Restart Firefox
 
 **Safari:**
-1. Develop → Empty Caches
-2. Or: Safari → Clear History
+1. Safari → Clear History
+2. Select "Last hour"
+3. Click "Clear History"
+4. Quit Safari completely (Cmd+Q)
+5. Restart Safari
 
-**Alternative: Use Incognito/Private Mode**
+#### Deep SSL State Clear (If Quick Method Doesn't Work)
+
+If you still see certificate errors after clearing cache and restarting, the browser's SSL state cache may be holding onto old certificate information:
+
+**Chrome/Edge/Brave - Advanced SSL State Clear:**
+
+1. **Clear SSL state cache:**
+   - Navigate to: `chrome://net-internals/#ssl`
+   - Click **"Clear all"** button
+   - This clears all cached SSL session data
+
+2. **Close idle sockets:**
+   - Navigate to: `chrome://net-internals/#sockets`
+   - Click **"Close idle sockets"** button
+   - Click **"Flush socket pools"** button
+   - This forces new SSL connections
+
+3. **Clear HSTS settings (if site was previously accessed):**
+   - Navigate to: `chrome://net-internals/#hsts`
+   - Under "Delete domain security policies"
+   - Enter: `dev.story-generator.mystira.app`
+   - Click **"Delete"**
+   - Repeat for:
+     - `dev.publisher.mystira.app`
+     - `dev.chain.mystira.app`
+
+4. **Verify Windows trusts the certificate:**
+   ```bash
+   # In Git Bash or PowerShell:
+   curl -I https://dev.story-generator.mystira.app
+
+   # If successful with no certificate errors:
+   # - Windows trusts the certificate ✓
+   # - Problem is browser cache/SSL state
+
+   # If certificate errors:
+   # - Certificate not imported correctly
+   # - Re-import to Trusted Root Certification Authorities
+   ```
+
+5. **Complete browser restart:**
+   - Close **ALL** browser windows and tabs
+   - Open Task Manager (`Ctrl+Shift+Esc`)
+   - Find browser process (chrome.exe, msedge.exe, brave.exe)
+   - Right-click → **End Task** (if still running)
+   - Wait 5 seconds
+   - Restart browser
+
+6. **Test:**
+   - Navigate to: `https://dev.story-generator.mystira.app`
+   - You should now see a green padlock with no warnings!
+
+**Firefox - Advanced Cache Clear:**
+
+1. Navigate to: `about:preferences#privacy`
+2. Under "Cookies and Site Data", click **"Clear Data..."**
+3. Check both boxes, click **"Clear"**
+4. Navigate to: `about:networking#sockets`
+5. Find any connections to `mystira.app` and close them
+6. Close all Firefox windows
+7. Restart Firefox
+
+**Edge-Specific - Internet Options Method:**
+
+1. Press `Win + R`
+2. Type: `inetcpl.cpl`
+3. Go to **"Content"** tab
+4. Click **"Clear SSL state"** button
+5. Click **"OK"**
+6. Restart Edge
+
+#### Verification After Clearing Cache
+
+Run these tests to verify everything works:
+
+```bash
+# Test 1: Verify Windows trusts the certificate
+curl -I https://dev.story-generator.mystira.app
+# Expected: HTTP 200 OK (or 301/302), no certificate errors
+
+# Test 2: Check certificate details
+echo | openssl s_client -servername dev.story-generator.mystira.app \
+  -connect dev.story-generator.mystira.app:443 2>/dev/null \
+  | openssl x509 -noout -issuer -subject
+
+# Expected output:
+# issuer=C=US, O=(STAGING) Let's Encrypt, CN=(STAGING) Tenuous Tomato R13
+# subject=CN=dev.story-generator.mystira.app
+```
+
+**Alternative: Use Incognito/Private Mode for Quick Testing**
+
+Incognito mode doesn't use cached certificates, making it useful for testing:
+- Chrome/Edge: `Ctrl+Shift+N`
+- Firefox: `Ctrl+Shift+P`
+- Safari: `Cmd+Shift+N`
+
+Note: You may still need to import the certificate in incognito mode depending on browser settings.
 
 ## Common Issues & Solutions
 
