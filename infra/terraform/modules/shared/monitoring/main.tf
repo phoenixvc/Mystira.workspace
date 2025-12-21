@@ -46,10 +46,11 @@ variable "tags" {
 }
 
 locals {
-  name_prefix = "mystira-shared-mon-${var.environment}"
+  name_prefix = "mys-${var.environment}-core"
   common_tags = merge(var.tags, {
     Component   = "shared-monitoring"
     Environment = var.environment
+    Service     = "core"
     ManagedBy   = "terraform"
     Project     = "Mystira"
   })
@@ -61,7 +62,7 @@ locals {
 
 # Log Analytics Workspace
 resource "azurerm_log_analytics_workspace" "shared" {
-  name                = "${local.name_prefix}-logs"
+  name                = "${local.name_prefix}-log"
   location            = var.location
   resource_group_name = var.resource_group_name
   sku                 = var.sku
@@ -72,7 +73,7 @@ resource "azurerm_log_analytics_workspace" "shared" {
 
 # Application Insights for workspace-level monitoring
 resource "azurerm_application_insights" "shared" {
-  name                = "${local.name_prefix}-insights"
+  name                = "${local.name_prefix}-ai"
   location            = var.location
   resource_group_name = var.resource_group_name
   workspace_id        = azurerm_log_analytics_workspace.shared.id

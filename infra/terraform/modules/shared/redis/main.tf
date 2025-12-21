@@ -76,10 +76,11 @@ variable "tags" {
 }
 
 locals {
-  name_prefix = "mystira-shared-redis-${var.environment}"
+  name_prefix = "mys-${var.environment}-core"
   common_tags = merge(var.tags, {
     Component   = "shared-redis"
     Environment = var.environment
+    Service     = "core"
     ManagedBy   = "terraform"
     Project     = "Mystira"
   })
