@@ -23,7 +23,7 @@ The storage account `mystiraterraformstate` doesn't exist yet. You need to creat
 ```powershell
 # Create resource group for Terraform state
 az group create \
-  --name mys-prod-terraform-rg-eus \
+  --name mys-shared-terraform-rg-san \
   --location eastus
 ```
 
@@ -34,21 +34,21 @@ az group create \
 ```powershell
 # Create storage account for Terraform state
 az storage account create \
-  --name mysprodterraformstate \
-  --resource-group mys-prod-terraform-rg-eus \
+  --name myssharedtfstatesan \
+  --resource-group mys-shared-terraform-rg-san \
   --location eastus \
   --sku Standard_LRS \
   --kind StorageV2
 ```
 
-**Important**: Storage account names must be globally unique, 3-24 characters, lowercase alphanumeric only (no dashes allowed). The standard name is `mysprodterraformstate` per [ADR-0008: Azure Resource Naming Conventions](../architecture/adr/0008-azure-resource-naming-conventions.md). If this name is taken, choose a different name following the pattern and update the Terraform backend configuration.
+**Important**: Storage account names must be globally unique, 3-24 characters, lowercase alphanumeric only (no dashes allowed). The standard name is `myssharedtfstatesan` per [ADR-0008: Azure Resource Naming Conventions](../architecture/adr/0008-azure-resource-naming-conventions.md). If this name is taken, choose a different name following the pattern and update the Terraform backend configuration.
 
 ### Step 3: Create Storage Container
 
 ```powershell
 # Get storage account key
 $STORAGE_KEY = az storage account keys list \
-  --resource-group mys-prod-terraform-rg-eus \
+  --resource-group mys-shared-terraform-rg-san \
   --account-name mystiraterraformstate \
   --query "[0].value" -o tsv
 
@@ -92,8 +92,8 @@ terraform {
 
   # Temporarily disable remote backend
   # backend "azurerm" {
-  #   resource_group_name  = "mys-prod-terraform-rg-eus"
-  #   storage_account_name = "mysprodterraformstate"
+  #   resource_group_name  = "mys-shared-terraform-rg-san"
+  #   storage_account_name = "myssharedtfstatesan"
   #   container_name       = "tfstate"
   #   key                  = "dev/terraform.tfstate"
   #   use_azuread_auth     = true
@@ -126,13 +126,13 @@ Once the storage account is created, you can migrate:
 
 ## Storage Account Naming
 
-If the name `mysprodterraformstate` is already taken, you'll need to:
+If the name `myssharedtfstatesan` is already taken, you'll need to:
 
 1. **Choose a different name** (must be globally unique, 3-24 characters, lowercase):
 
    ```powershell
-   # Example: mysprodterraformstate123
-   az storage account create --name mysprodterraformstate123 ...
+   # Example: myssharedtfstatesan123
+   az storage account create --name myssharedtfstatesan123 ...
    ```
 
 2. **Update Terraform backend configuration**:
@@ -141,8 +141,8 @@ If the name `mysprodterraformstate` is already taken, you'll need to:
 
    ```hcl
    backend "azurerm" {
-     resource_group_name  = "mys-prod-terraform-rg-eus"
-     storage_account_name = "mysprodterraformstate123"  # Updated name
+     resource_group_name  = "mys-shared-terraform-rg-san"
+     storage_account_name = "myssharedtfstatesan123"  # Updated name
      container_name       = "tfstate"
      key                  = "dev/terraform.tfstate"
      use_azuread_auth     = true
@@ -159,8 +159,8 @@ Here's a complete PowerShell script to set up the backend:
 
 ```powershell
 # Set variables
-$RESOURCE_GROUP = "mys-prod-terraform-rg-eus"
-$STORAGE_ACCOUNT = "mysprodterraformstate"
+$RESOURCE_GROUP = "mys-shared-terraform-rg-san"
+$STORAGE_ACCOUNT = "myssharedtfstatesan"
 $LOCATION = "eastus"
 $CONTAINER = "tfstate"
 
@@ -205,7 +205,7 @@ Write-Host "Now run: cd infra\terraform\environments\dev && terraform init"
 
 ### "Storage account name is not available"
 
-The name `mysprodterraformstate` is already taken. Choose a different name and update all backend configurations.
+The name `myssharedtfstatesan` is already taken. Choose a different name and update all backend configurations.
 
 ### "Resource group already exists"
 
@@ -220,7 +220,7 @@ The container exists. This is fine - Terraform init should work now.
 1. Verify the storage account exists:
 
    ```powershell
-   az storage account show --name mysprodterraformstate --resource-group mys-prod-terraform-rg-eus
+   az storage account show --name myssharedtfstatesan --resource-group mys-shared-terraform-rg-san
    ```
 
 2. Check you're using the correct subscription:

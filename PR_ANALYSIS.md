@@ -96,12 +96,12 @@ DNS_ZONE_RG: mys-prod-core-rg-san
 **Location:** Multiple workflows and `bootstrap-infra.sh`
 
 ```bash
-TERRAFORM_STORAGE="mysprodterraformstate"
+TERRAFORM_STORAGE="myssharedtfstatesan"
 ```
 
 **Issue:** Storage account name doesn't follow v2.2 convention.
 
-**Current:** `mysprodterraformstate` (24 chars limit)  
+**Current:** `myssharedtfstatesan` (24 chars limit)  
 **V2.2 Should Be:** Would be `mys-prod-terraform-st-eus` but storage accounts have strict naming:
 - Max 24 chars
 - Only lowercase alphanumeric

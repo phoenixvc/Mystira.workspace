@@ -5,8 +5,8 @@ terraform {
   required_version = ">= 1.5.0"
 
   backend "azurerm" {
-    resource_group_name  = "mys-prod-terraform-rg-eus"
-    storage_account_name = "mysprodterraformstate"
+    resource_group_name  = "mys-shared-terraform-rg-san"
+    storage_account_name = "myssharedtfstatesan"
     container_name       = "tfstate"
     key                  = "staging/terraform.tfstate"
     use_azuread_auth     = true
