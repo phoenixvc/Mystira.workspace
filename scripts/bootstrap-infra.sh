@@ -17,7 +17,7 @@ TERRAFORM_RG="mys-prod-terraform-rg-eus"
 TERRAFORM_STORAGE="mysprodterraformstate"
 TERRAFORM_CONTAINER="tfstate"
 LOCATION="eastus"
-ACR_NAME="mysprodacr"
+ACR_NAME="myssharedacr"
 DNS_ZONE="mystira.app"
 
 log_info() { echo -e "${BLUE}[INFO]${NC} $1"; }

@@ -27,7 +27,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  AZURE_ACR_NAME: mysprodacr
+  AZURE_ACR_NAME: myssharedacr
   IMAGE_NAME: story-generator
 
 jobs:
