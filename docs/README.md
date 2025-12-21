@@ -36,6 +36,7 @@ For details, see [ADR-0002: Documentation Location Strategy](./architecture/adr/
   - [ADR-0009: Further App Segregation Strategy](./architecture/adr/0009-further-app-segregation-strategy.md)
   - [ADR-0010: Authentication and Authorization Strategy](./architecture/adr/0010-authentication-and-authorization-strategy.md)
   - [ADR-0011: Entra ID Authentication Integration](./architecture/adr/0011-entra-id-authentication-integration.md)
+  - [ADR-0012: GitHub Workflow Naming Convention](./architecture/adr/0012-github-workflow-naming-convention.md)
 
 ### Infrastructure Documentation
 
