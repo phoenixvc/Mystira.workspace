@@ -1,4 +1,4 @@
-name: Admin UI CI
+name: "Components: Admin UI - CI"
 
 on:
   push:

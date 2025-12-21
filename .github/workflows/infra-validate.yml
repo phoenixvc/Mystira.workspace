@@ -1,4 +1,4 @@
-name: Infrastructure Validation
+name: "Infrastructure: Validate"
 
 on:
   pull_request:

@@ -1,4 +1,4 @@
-name: Check Submodules
+name: "Utilities: Check Submodules"
 
 on:
   pull_request:
