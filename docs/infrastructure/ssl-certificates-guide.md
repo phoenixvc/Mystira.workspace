@@ -171,32 +171,129 @@ curl -o letsencrypt-stg-root-x1.pem https://letsencrypt.org/certs/staging/letsen
 
 ### Import to Browser
 
-**Google Chrome / Microsoft Edge:**
-1. Settings → Privacy and Security → Security
-2. Manage certificates → Authorities
-3. Import → Select `letsencrypt-stg-root-x1.pem`
-4. Check "Trust this certificate for identifying websites"
-5. Click OK
-6. Restart browser
+#### Windows (Recommended Method for Chrome, Edge, Brave, Arc, etc.)
 
-**Mozilla Firefox:**
-1. Settings → Privacy & Security → Certificates
-2. View Certificates → Authorities
-3. Import → Select `letsencrypt-stg-root-x1.pem`
-4. Check "Trust this CA to identify websites"
-5. Click OK
-6. Restart browser
+**All Chromium-based browsers on Windows use the Windows Certificate Store.** This is the most reliable method:
 
-**Safari (macOS):**
-1. Double-click `letsencrypt-stg-root-x1.pem` to open Keychain Access
-2. Find "Let's Encrypt Staging" in the System or Login keychain
-3. Double-click → Trust → "When using this certificate: Always Trust"
-4. Close (enter password if prompted)
-5. Restart Safari
+1. **Download the certificate:**
+   ```bash
+   curl -o ~/Downloads/letsencrypt-staging.crt https://letsencrypt.org/certs/staging/letsencrypt-stg-root-x1.pem
+   ```
 
-**After importing:** dev.*.mystira.app and staging.*.mystira.app will show as trusted with green padlock.
+2. **Open Windows Certificate Manager:**
+   - Press `Win + R`
+   - Type: `certmgr.msc`
+   - Press Enter
 
-⚠️ **Warning:** Only do this on development machines. Don't import staging CAs on production systems.
+3. **Import the certificate:**
+   - Navigate to: **Trusted Root Certification Authorities** → **Certificates**
+   - Right-click on **Certificates** folder
+   - Select **All Tasks** → **Import...**
+   - Click **Next**
+   - Click **Browse...** and navigate to your Downloads folder
+   - **Important:** Change file filter to **"All Files (*.*)"**
+   - Select `letsencrypt-staging.crt`
+   - Click **Next** → **Next** → **Finish**
+   - You should see: "The import was successful"
+
+4. **Verify the import:**
+   - In the Certificates window, you should now see:
+   - Certificate name: **(STAGING) Pretend Pear X1**
+   - Issued To: **(STAGING) Pretend Pear X1**
+   - Issued By: **(STAGING) Pretend Pear X1**
+
+   ![Windows Certificate Manager showing the imported staging certificate](../assets/certmgr-staging-cert.png)
+
+5. **Close ALL browser windows completely:**
+   - Close all tabs and windows
+   - Check Task Manager (Ctrl+Shift+Esc) to ensure the browser process is fully closed
+   - Look for any browser processes and end them if they're still running
+
+6. **Clear browser SSL state:**
+   - Open browser
+   - Navigate to: `chrome://settings/clearBrowserData` (or `edge://settings/clearBrowserData`)
+   - Select:
+     - ✅ Cached images and files
+     - ✅ Cookies and other site data
+   - Time range: "Last hour"
+   - Click "Clear data"
+
+7. **Restart browser and test:**
+   - Navigate to `https://dev.story-generator.mystira.app`
+   - You should see a green padlock with no security warnings!
+
+**Verification:** After import, run this in Git Bash:
+```bash
+curl -I https://dev.story-generator.mystira.app
+# If no certificate errors, the import worked!
+```
+
+#### Firefox (Windows, macOS, Linux)
+
+Firefox uses its own certificate store, separate from the system:
+
+1. Download the certificate (same as above)
+2. Settings → Privacy & Security → Certificates
+3. View Certificates → Authorities
+4. Import → Select `letsencrypt-staging.crt`
+5. Check "Trust this CA to identify websites"
+6. Click OK
+7. **Close ALL Firefox windows**
+8. Restart Firefox
+
+#### Safari (macOS)
+
+1. Download: `curl -o ~/Downloads/letsencrypt-staging.crt https://letsencrypt.org/certs/staging/letsencrypt-stg-root-x1.pem`
+2. Double-click `letsencrypt-staging.crt` to open Keychain Access
+3. Find "(STAGING) Pretend Pear X1" in the System or Login keychain
+4. Double-click the certificate
+5. Expand "Trust" section
+6. Set "When using this certificate" to: **Always Trust**
+7. Close (enter password if prompted)
+8. **Quit Safari completely** (Cmd+Q)
+9. Restart Safari
+
+### Troubleshooting Certificate Import
+
+**Problem:** Still seeing certificate warning after import
+
+**Solutions:**
+
+1. **Browser not fully closed:**
+   - Windows: Open Task Manager (Ctrl+Shift+Esc)
+   - Look for browser processes (chrome.exe, msedge.exe, brave.exe, etc.)
+   - End all browser processes
+   - Restart browser
+
+2. **Wrong certificate store:**
+   - Certificate must be in **"Trusted Root Certification Authorities"**
+   - NOT in "Personal" or "Intermediate Certification Authorities"
+   - Re-import to correct location if needed
+
+3. **Browser cache:**
+   - Clear SSL state and cached files
+   - `chrome://settings/clearBrowserData`
+   - Select "Cached images and files" and "Cookies"
+   - Clear data
+
+4. **Multiple certificate chain needed:**
+   ```bash
+   # Download and import both staging roots:
+   curl -o ~/Downloads/staging-root-x1.crt https://letsencrypt.org/certs/staging/letsencrypt-stg-root-x1.pem
+   curl -o ~/Downloads/staging-root-x2.crt https://letsencrypt.org/certs/staging/letsencrypt-stg-root-x2.pem
+   # Import both using certmgr.msc
+   ```
+
+5. **DER format may be required:**
+   ```bash
+   # Convert to DER format (Windows native)
+   openssl x509 -in ~/Downloads/letsencrypt-staging.crt -outform der -out ~/Downloads/letsencrypt-staging.der
+   # Import the .der file instead
+   ```
+
+**After successful import:** dev.*.mystira.app and staging.*.mystira.app will show as trusted with green padlock icon.
+
+⚠️ **Security Warning:** Only import staging certificates on development machines. Never import them on production systems or shared computers.
 
 ## Troubleshooting
 
