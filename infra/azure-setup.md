@@ -80,6 +80,57 @@ You should see at least one role assignment with:
 - Role: `Contributor`
 - Scope: `/subscriptions/{subscription-id}`
 
+#### Terraform Backend Storage Permissions (REQUIRED)
+
+**CRITICAL**: The service principal needs **Storage Blob Data Contributor** role on the Terraform state storage account to access the backend using Azure AD authentication.
+
+This is a **one-time manual setup** that must be completed before running deployments:
+
+```bash
+# Get your service principal object ID
+SP_OBJECT_ID=$(az ad sp list --display-name "mystira-github-actions" --query "[0].id" -o tsv)
+
+# Grant Storage Blob Data Contributor role on the Terraform state storage account
+# This allows the service principal to read/write Terraform state blobs
+az role assignment create \
+  --assignee-object-id "$SP_OBJECT_ID" \
+  --assignee-principal-type ServicePrincipal \
+  --role "Storage Blob Data Contributor" \
+  --scope "/subscriptions/22f9eb18-6553-4b7d-9451-47d0195085fe/resourceGroups/mys-shared-terraform-rg-san/providers/Microsoft.Storage/storageAccounts/myssharedtfstatesan"
+
+# Verify the role assignment was created
+az role assignment list \
+  --assignee "$SP_OBJECT_ID" \
+  --scope "/subscriptions/22f9eb18-6553-4b7d-9451-47d0195085fe/resourceGroups/mys-shared-terraform-rg-san/providers/Microsoft.Storage/storageAccounts/myssharedtfstatesan" \
+  --query "[].{Role:roleDefinitionName}" -o table
+```
+
+**Why is this needed?**
+
+The Terraform backend configuration uses `use_azuread_auth = true` for enhanced security instead of storage account keys. This requires the service principal to have explicit RBAC permissions on the storage account.
+
+**When to run this:**
+
+- **Once** during initial infrastructure setup
+- After creating or regenerating the service principal
+- If you see 403 authorization errors during `terraform init`
+
+**Why can't the workflow grant this automatically?**
+
+The service principal cannot grant role assignments to itself because:
+- It only has **Contributor** role (creates/manages resources)
+- Granting role assignments requires **Owner** or **User Access Administrator** role
+- This is a security feature - only users with elevated permissions can grant access
+
+**Error if missing:**
+
+If you don't grant this permission, Terraform init will fail with:
+
+```
+Error: Failed to get existing workspaces: containers.Client#ListBlobs: Failure responding to request: StatusCode=403
+Code="AuthorizationPermissionMismatch" Message="This request is not authorized to perform this operation using this permission."
+```
+
 ### Step 3: Configure GitHub Secret
 
 1. Go to your GitHub repository settings
