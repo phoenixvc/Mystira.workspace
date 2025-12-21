@@ -1,5 +1,9 @@
 name: "Components: App - CI"
 
+# App Component CI: Validates .NET application code quality and functionality
+# Runs: Format checking, unit tests, and production builds
+# Triggers: Changes to packages/app/** on dev/main branches
+
 on:
   push:
     branches: [dev, main]
@@ -14,6 +18,7 @@ on:
       - "packages/app/**"
     paths-ignore:
       - "**/*.md"
+  workflow_dispatch:
 
 concurrency:
   group: app-${{ github.workflow }}-${{ github.ref }}

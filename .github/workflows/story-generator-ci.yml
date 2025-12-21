@@ -1,5 +1,9 @@
 name: "Components: Story Generator - CI"
 
+# Story Generator Component CI: Validates .NET story generation service
+# Runs: Format checking, tests, Docker builds, and NuGet package publishing
+# Triggers: Changes to packages/story-generator/** or related infra on dev/main
+
 on:
   push:
     branches: [dev, main]
@@ -16,6 +20,7 @@ on:
       - "infra/kubernetes/base/story-generator/**"
     paths-ignore:
       - "**/*.md"
+  workflow_dispatch:
 
 concurrency:
   group: story-generator-${{ github.workflow }}-${{ github.ref }}

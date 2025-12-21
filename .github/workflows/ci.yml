@@ -1,11 +1,16 @@
 name: "Workspace: CI"
 
+# Workspace-level CI: Runs linting, testing, and building across all packages
+# This is the main CI pipeline that validates code quality and functionality
+# Runs on: Pull requests and pushes to dev/main branches
+
 on:
   push:
     branches: [dev, main]
   pull_request:
     branches: [dev, main]
     types: [opened, synchronize, reopened, ready_for_review]
+  workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
