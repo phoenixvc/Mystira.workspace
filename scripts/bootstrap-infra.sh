@@ -20,7 +20,7 @@ TERRAFORM_CONTAINER="tfstate"
 LOCATION="southafricanorth"
 ACR_NAME="myssharedacr"
 DNS_ZONE="mystira.app"
-DNS_ZONE_RG="mys-prod-core-rg-san"
+DNS_ZONE_RG="mys-shared-terraform-rg-san"
 
 log_info() { echo -e "${BLUE}[INFO]${NC} $1"; }
 log_success() { echo -e "${GREEN}[SUCCESS]${NC} $1"; }
@@ -129,13 +129,7 @@ create_shared_acr() {
 setup_dns_zone() {
     log_info "Setting up DNS Zone for $DNS_ZONE..."
 
-    # Ensure DNS zone resource group exists
-    if ! az group show --name "$DNS_ZONE_RG" &> /dev/null; then
-        log_info "Creating DNS zone resource group $DNS_ZONE_RG..."
-        az group create --name "$DNS_ZONE_RG" --location "$LOCATION" --output none
-        log_success "Created resource group $DNS_ZONE_RG"
-    fi
-
+    # DNS zone uses the same resource group as terraform backend (shared resources)
     # Check if DNS zone exists
     if az network dns zone show --name "$DNS_ZONE" --resource-group "$DNS_ZONE_RG" &> /dev/null; then
         log_info "DNS Zone $DNS_ZONE already exists"
