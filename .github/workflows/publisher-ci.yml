@@ -11,8 +11,7 @@ on:
       - "packages/publisher/**"
       - "infra/docker/publisher/**"
       - "infra/kubernetes/base/publisher/**"
-    paths-ignore:
-      - "**/*.md"
+      - "!**/*.md"
   pull_request:
     branches: [dev, main]
     types: [opened, synchronize, reopened, ready_for_review]
@@ -20,8 +19,7 @@ on:
       - "packages/publisher/**"
       - "infra/docker/publisher/**"
       - "infra/kubernetes/base/publisher/**"
-    paths-ignore:
-      - "**/*.md"
+      - "!**/*.md"
   workflow_dispatch:
 
 concurrency:
