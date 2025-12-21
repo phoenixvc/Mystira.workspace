@@ -181,6 +181,20 @@ jobs:
             --account-key "$STORAGE_KEY" \
             --output none
 
+          # Grant service principal access to storage account
+          # Required for Terraform backend with use_azuread_auth = true
+          CURRENT_PRINCIPAL=$(az account show --query user.name -o tsv)
+          STORAGE_ID=$(az storage account show \
+            --resource-group ${{ env.TERRAFORM_RG }} \
+            --name ${{ env.TERRAFORM_STORAGE }} \
+            --query id -o tsv)
+
+          az role assignment create \
+            --assignee "$CURRENT_PRINCIPAL" \
+            --role "Storage Blob Data Contributor" \
+            --scope "$STORAGE_ID" \
+            --output none || true
+
           echo "::notice::Created Terraform backend storage"
 
       - name: Create Container Registry
