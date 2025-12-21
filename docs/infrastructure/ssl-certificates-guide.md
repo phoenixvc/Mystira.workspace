@@ -270,11 +270,51 @@ Firefox uses its own certificate store, separate from the system:
    - NOT in "Personal" or "Intermediate Certification Authorities"
    - Re-import to correct location if needed
 
-3. **Browser cache:**
-   - Clear SSL state and cached files
-   - `chrome://settings/clearBrowserData`
-   - Select "Cached images and files" and "Cookies"
-   - Clear data
+3. **Browser cache (CRITICAL - Most Common Issue):**
+
+   **Standard cache clear:**
+   - Navigate to: `chrome://settings/clearBrowserData` (or `edge://settings/clearBrowserData`)
+   - Select:
+     - ✅ **Cached images and files**
+     - ✅ **Cookies and other site data**
+   - Time range: **Last hour** (or "All time" to be thorough)
+   - Click **"Clear data"**
+   - **Close browser completely**
+   - Restart browser
+
+   **Deep SSL state clear (if standard clear doesn't work):**
+
+   Step 1 - Clear SSL state:
+   - Navigate to: `chrome://net-internals/#ssl`
+   - Click **"Clear all"** button
+
+   Step 2 - Close idle sockets:
+   - Navigate to: `chrome://net-internals/#sockets`
+   - Click **"Close idle sockets"** button
+   - Click **"Flush socket pools"** button
+
+   Step 3 - Clear HSTS settings (if applicable):
+   - Navigate to: `chrome://net-internals/#hsts`
+   - Under "Delete domain security policies"
+   - Enter: `dev.story-generator.mystira.app`
+   - Click **"Delete"**
+   - Repeat for other dev domains
+
+   Step 4 - Complete restart:
+   - Close ALL browser windows
+   - Check Task Manager - end all browser processes
+   - Wait 5 seconds
+   - Restart browser
+   - Test: `https://dev.story-generator.mystira.app`
+
+   **Verify Windows trusts the certificate:**
+   ```bash
+   # In Git Bash, test if Windows trusts the cert:
+   curl -I https://dev.story-generator.mystira.app
+
+   # If no certificate errors, the import worked!
+   # If still errors, the certificate isn't imported correctly
+   ```
 
 4. **Multiple certificate chain needed:**
    ```bash
