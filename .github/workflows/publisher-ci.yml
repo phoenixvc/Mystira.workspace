@@ -7,7 +7,8 @@ on:
       - "packages/publisher/**"
       - "infra/docker/publisher/**"
       - "infra/kubernetes/base/publisher/**"
-      - ".github/workflows/publisher-ci.yml"
+    paths-ignore:
+      - "**/*.md"
   pull_request:
     branches: [dev, main]
     types: [opened, synchronize, reopened, ready_for_review]
@@ -15,7 +16,8 @@ on:
       - "packages/publisher/**"
       - "infra/docker/publisher/**"
       - "infra/kubernetes/base/publisher/**"
-      - ".github/workflows/publisher-ci.yml"
+    paths-ignore:
+      - "**/*.md"
 
 concurrency:
   group: publisher-${{ github.workflow }}-${{ github.ref }}

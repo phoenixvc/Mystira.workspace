@@ -2,15 +2,26 @@ name: "Infrastructure: Validate"
 
 on:
   pull_request:
+    branches: [main, staging]
     paths:
-      - "infra/**"
+      - "infra/terraform/**"
+      - "infra/kubernetes/**"
+      - "infra/docker/**"
       - ".github/workflows/infra-*.yml"
       - "scripts/bootstrap-infra.sh"
+    paths-ignore:
+      - "**/*.md"
+      - "**/README.md"
   push:
-    branches: [main, dev]
+    branches: [main, staging]
     paths:
-      - "infra/**"
+      - "infra/terraform/**"
+      - "infra/kubernetes/**"
+      - "infra/docker/**"
       - ".github/workflows/infra-*.yml"
+    paths-ignore:
+      - "**/*.md"
+      - "**/README.md"
   workflow_dispatch:
 
 jobs:

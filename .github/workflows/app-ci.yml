@@ -5,13 +5,15 @@ on:
     branches: [dev, main]
     paths:
       - "packages/app/**"
-      - ".github/workflows/app-ci.yml"
+    paths-ignore:
+      - "**/*.md"
   pull_request:
     branches: [dev, main]
     types: [opened, synchronize, reopened, ready_for_review]
     paths:
       - "packages/app/**"
-      - ".github/workflows/app-ci.yml"
+    paths-ignore:
+      - "**/*.md"
 
 concurrency:
   group: app-${{ github.workflow }}-${{ github.ref }}

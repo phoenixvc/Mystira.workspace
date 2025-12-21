@@ -6,14 +6,16 @@ on:
     paths:
       - "packages/story-generator/**"
       - "infra/kubernetes/base/story-generator/**"
-      - ".github/workflows/story-generator-ci.yml"
+    paths-ignore:
+      - "**/*.md"
   pull_request:
     branches: [dev, main]
     types: [opened, synchronize, reopened, ready_for_review]
     paths:
       - "packages/story-generator/**"
       - "infra/kubernetes/base/story-generator/**"
-      - ".github/workflows/story-generator-ci.yml"
+    paths-ignore:
+      - "**/*.md"
 
 concurrency:
   group: story-generator-${{ github.workflow }}-${{ github.ref }}
