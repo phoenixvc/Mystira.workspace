@@ -1,4 +1,4 @@
-name: Chain CI
+name: "Components: Chain - CI"
 
 on:
   push:

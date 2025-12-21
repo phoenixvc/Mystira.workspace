@@ -1,62 +1,110 @@
-# Mystira.Infra
+# Mystira Infrastructure
 
-Infrastructure, DevOps, and deployment configurations for the Mystira platform.
+Infrastructure as Code, Kubernetes manifests, and deployment configurations for the Mystira platform.
 
 ## Overview
 
-Mystira.Infra manages all infrastructure concerns including:
+This directory contains all infrastructure components for the Mystira platform:
 
-- Cloud infrastructure provisioning
-- Kubernetes deployments
-- CI/CD pipelines
-- Monitoring and observability
-- Security configurations
+- **Terraform** - Cloud resource provisioning (Azure AKS, networking, databases)
+- **Kubernetes** - Container orchestration and service deployment
+- **Docker** - Containerization for all microservices
+- **Scripts** - Deployment automation and utilities
 
 ## Structure
 
 ```
 infra/
-├── terraform/         # Infrastructure as Code
-│   ├── modules/      # Reusable Terraform modules
-│   ├── environments/ # Environment-specific configs
-│   │   ├── dev/
-│   │   ├── staging/
-│   │   └── prod/
-│   └── shared/       # Shared resources
-├── kubernetes/        # K8s manifests
-│   ├── base/         # Base configurations
-│   ├── overlays/     # Environment overlays
-│   └── charts/       # Helm charts
-├── docker/            # Dockerfiles
-│   ├── app/
-│   ├── api/
-│   └── worker/
-└── scripts/           # DevOps automation scripts
-    ├── deploy/
-    ├── backup/
-    └── monitoring/
+├── terraform/              # Infrastructure as Code
+│   ├── modules/           # Reusable Terraform modules
+│   │   ├── shared/       # Shared resources (PostgreSQL, Redis, ACR)
+│   │   ├── chain/        # Chain service module
+│   │   ├── publisher/    # Publisher service module
+│   │   ├── story-generator/  # Story Generator module
+│   │   └── front-door/   # Azure Front Door (CDN, WAF)
+│   └── environments/      # Environment configurations
+│       ├── dev/
+│       ├── staging/
+│       └── prod/
+│
+├── kubernetes/             # Kubernetes manifests (Kustomize)
+│   ├── base/              # Base configurations
+│   │   ├── cert-manager/
+│   │   ├── chain/
+│   │   ├── publisher/
+│   │   └── story-generator/
+│   └── overlays/          # Environment-specific overlays
+│       ├── dev/
+│       ├── staging/
+│       └── prod/
+│
+├── docker/                 # Dockerfiles for all services
+│   ├── chain/
+│   ├── publisher/
+│   └── story-generator/
+│
+└── scripts/                # Deployment and utility scripts
+    └── README.md          # Script documentation
 ```
 
-## Getting Started
+## Quick Start
 
 ### Prerequisites
 
-- Terraform >= 1.5
-- kubectl
-- Helm >= 3.0
-- Docker
-- Azure CLI (for Azure deployments)
+- **Terraform** >= 1.5.0
+- **kubectl** - Kubernetes CLI
+- **Azure CLI** (`az`) - For Azure deployments
+- **Docker** - For local builds
+- **GitHub CLI** (`gh`) - For workflow triggers
 
 ### Azure Setup
 
-For Azure deployments, you need to configure a service principal with appropriate permissions. See [AZURE_SETUP.md](./AZURE_SETUP.md) for detailed instructions on:
+Configure Azure service principal with required permissions:
 
-- Creating and configuring a service principal
-- Required permissions (Contributor role at subscription level)
-- Setting up GitHub Actions secrets
-- Troubleshooting authorization issues
+```bash
+# Login to Azure
+az login
 
-### Initial Setup
+# Create service principal (if not exists)
+az ad sp create-for-rbac \
+  --name "mystira-terraform" \
+  --role Contributor \
+  --scopes /subscriptions/<SUBSCRIPTION_ID>
+
+# Set GitHub secrets (requires gh CLI)
+gh secret set MYSTIRA_AZURE_CREDENTIALS --body '{
+  "clientId": "...",
+  "clientSecret": "...",
+  "subscriptionId": "...",
+  "tenantId": "..."
+}'
+```
+
+For detailed instructions, see [AZURE_SETUP.md](./AZURE_SETUP.md).
+
+## Deployment
+
+### Using GitHub Actions (Recommended)
+
+Deploy infrastructure using the CI/CD workflows:
+
+```bash
+# Deploy to dev environment
+gh workflow run "Infrastructure: Deploy" \
+  --field environment=dev \
+  --field components=all
+
+# Deploy to staging (automatic on main push)
+git push origin main
+
+# Deploy to production (manual, requires confirmation)
+gh workflow run "Deployment: Production" \
+  --field confirm="DEPLOY TO PRODUCTION"
+```
+
+### Manual Deployment
+
+For local development or troubleshooting:
 
 ```bash
 # Initialize Terraform
@@ -64,166 +112,219 @@ cd terraform/environments/dev
 terraform init
 
 # Plan infrastructure changes
-terraform plan
+terraform plan -out=tfplan
 
 # Apply changes
-terraform apply
-```
+terraform apply tfplan
 
-## Infrastructure Components
-
-### Cloud Resources (Terraform)
-
-- **Compute**: Kubernetes clusters, VM instances
-- **Networking**: VPCs, load balancers, CDN
-- **Storage**: Object storage, databases
-- **Security**: IAM, secrets management
-- **DNS**: Azure DNS zones for domain management
-
-### DNS Configuration
-
-The infrastructure includes environment-specific DNS zones and records:
-
-| Environment    | Publisher URL                   | Chain URL                   |
-| -------------- | ------------------------------- | --------------------------- |
-| **Dev**        | `dev.publisher.mystira.app`     | `dev.chain.mystira.app`     |
-| **Staging**    | `staging.publisher.mystira.app` | `staging.chain.mystira.app` |
-| **Production** | `publisher.mystira.app`         | `chain.mystira.app`         |
-
-After deploying the Terraform infrastructure, you need to:
-
-1. Get the name servers from the Terraform output:
-
-   ```bash
-   cd terraform/environments/prod
-   terraform output dns_name_servers
-   ```
-
-2. Configure these name servers in your domain registrar for `mystira.app`
-
-3. The DNS module will automatically create environment-specific A records pointing to the ingress load balancer IPs
-
-**For detailed setup instructions, see [ENVIRONMENT_URLS_SETUP.md](./ENVIRONMENT_URLS_SETUP.md)**
-
-### Kubernetes Deployments
-
-The Kubernetes manifests include:
-
-- **Deployments/StatefulSets**: Chain nodes, Publisher service
-- **Services**: Internal and external endpoints
-- **Ingress**: HTTPS ingress for public endpoints with SSL/TLS
-- **Cert-Manager**: Automated SSL certificate management via Let's Encrypt
-- **ConfigMaps/Secrets**: Configuration and credentials
-
-```bash
-# Deploy to dev
-kubectl apply -k kubernetes/overlays/dev
-
-# Deploy to staging
-kubectl apply -k kubernetes/overlays/staging
-
-# Deploy to production
-kubectl apply -k kubernetes/overlays/prod
-```
-
-### SSL/TLS Certificates
-
-The infrastructure uses cert-manager with Let's Encrypt for automatic SSL certificate provisioning:
-
-- Certificates are automatically requested for `publisher.mystira.app` and `chain.mystira.app`
-- Certificates auto-renew before expiration
-- Uses HTTP-01 challenge for validation
-
-To install cert-manager in your cluster (if not already installed):
-
-```bash
-kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.13.0/cert-manager.yaml
-```
-
-### Docker Images
-
-```bash
-# Build all images
-./scripts/build-images.sh
-
-# Push to registry
-./scripts/push-images.sh
+# Deploy Kubernetes manifests
+kubectl apply -k ../../kubernetes/overlays/dev
 ```
 
 ## Environments
 
-| Environment | Purpose           | URL                |
-| ----------- | ----------------- | ------------------ |
-| Development | Local/Dev testing | dev.mystira.io     |
-| Staging     | Pre-production    | staging.mystira.io |
-| Production  | Live platform     | mystira.io         |
+| Environment | Domain                 | Deployment          | Branch  |
+| ----------- | ---------------------- | ------------------- | ------- |
+| Development | `*.dev.mystira.app`    | Manual              | `dev`   |
+| Staging     | `*.staging.mystira.app`| Auto (on main push) | `main`  |
+| Production  | `*.mystira.app`        | Manual (protected)  | `main`  |
+
+### Service URLs
+
+| Service         | Dev                              | Staging                              | Production                   |
+| --------------- | -------------------------------- | ------------------------------------ | ---------------------------- |
+| Publisher       | `dev.publisher.mystira.app`      | `staging.publisher.mystira.app`      | `publisher.mystira.app`      |
+| Chain           | `dev.chain.mystira.app`          | `staging.chain.mystira.app`          | `chain.mystira.app`          |
+| Story Generator | `dev.story-generator.mystira.app`| `staging.story-generator.mystira.app`| `story-generator.mystira.app`|
+
+## Infrastructure Components
+
+### Azure Resources (Terraform)
+
+- **AKS** - Azure Kubernetes Service clusters
+- **Virtual Network** - Network isolation and security
+- **Azure Container Registry** - Docker image registry (shared)
+- **PostgreSQL** - Managed database (shared)
+- **Redis Cache** - Distributed caching (shared)
+- **Azure Front Door** - CDN, WAF, DDoS protection
+- **Azure DNS** - DNS zone and record management
+- **Monitoring** - Application Insights and Log Analytics
+
+### Kubernetes Deployments
+
+All services are deployed to AKS using Kustomize:
+
+```bash
+# Lint and validate manifests
+kubectl kustomize kubernetes/overlays/dev --enable-helm
+
+# Deploy to environment
+kubectl apply -k kubernetes/overlays/dev
+
+# Check deployment status
+kubectl get pods -n mys-dev
+kubectl get ingress -n mys-dev
+```
+
+### SSL/TLS Certificates
+
+Automated certificate management with cert-manager:
+
+- **Provider**: Let's Encrypt (production)
+- **Challenge**: HTTP-01 validation
+- **Auto-renewal**: Certificates renew automatically
+- **Wildcard support**: No (uses individual certs per service)
+
+Cert-manager is deployed automatically via `Infrastructure: Deploy` workflow.
+
+### Docker Images
+
+Images are built and pushed automatically via CI/CD:
+
+- **Registry**: `mysprodacr.azurecr.io`
+- **Tags**: `dev`, `staging`, `prod`, `${SHA}`
+- **Build**: Automated on push to `dev`/`main` branches
+
+Manual build and push:
+
+```bash
+# Build image
+docker build -t mysprodacr.azurecr.io/chain:dev -f docker/chain/Dockerfile .
+
+# Login to ACR
+az acr login --name mysprodacr
+
+# Push image
+docker push mysprodacr.azurecr.io/chain:dev
+```
+
+## DNS Configuration
+
+DNS is managed via Azure DNS:
+
+1. **DNS Zone**: `mystira.app` (created by Terraform)
+2. **Name Servers**: Retrieved from Azure DNS
+3. **A Records**: Auto-created for each service pointing to ingress IP
+
+**Setup Steps:**
+
+```bash
+# Get DNS name servers
+az network dns zone show \
+  --name mystira.app \
+  --resource-group mys-prod-mystira-rg-glob \
+  --query nameServers -o tsv
+
+# Update your domain registrar with these name servers
+# Records are created automatically by the infrastructure workflow
+```
+
+See [QUICK_ACCESS.md](./QUICK_ACCESS.md) for quick reference commands.
 
 ## CI/CD Pipeline
 
+Infrastructure workflows are fully automated:
+
+### Workflows
+
+- **Infrastructure: Deploy** - Deploy Terraform + Kubernetes
+- **Infrastructure: Validate** - Validate configs on PRs
+- **Deployment: Staging** - Auto-deploy to staging
+- **Deployment: Production** - Manual prod deployment
+
+### Pipeline Stages
+
 ```
-┌──────────┐    ┌──────────┐    ┌──────────┐    ┌──────────┐
-│   Code   │───▶│   Build  │───▶│   Test   │───▶│  Deploy  │
-│   Push   │    │          │    │          │    │          │
-└──────────┘    └──────────┘    └──────────┘    └──────────┘
-                     │                               │
-                     ▼                               ▼
-               ┌──────────┐                   ┌──────────┐
-               │  Lint &  │                   │ Release  │
-               │  Scan    │                   │  Notes   │
-               └──────────┘                   └──────────┘
+┌────────────┐    ┌────────────┐    ┌────────────┐    ┌────────────┐
+│  Validate  │───▶│  Terraform │───▶│   Build    │───▶│   Deploy   │
+│  Configs   │    │   Plan     │    │   Images   │    │    K8s     │
+└────────────┘    └────────────┘    └────────────┘    └────────────┘
+      │                  │                  │                 │
+      ▼                  ▼                  ▼                 ▼
+┌────────────┐    ┌────────────┐    ┌────────────┐    ┌────────────┐
+│  Security  │    │  Terraform │    │    Push    │    │ Configure  │
+│   Scan     │    │   Apply    │    │ to Registry│    │    DNS     │
+└────────────┘    └────────────┘    └────────────┘    └────────────┘
 ```
 
-## Monitoring
+## Monitoring & Observability
 
-### Observability Stack
+- **Application Insights** - Application performance monitoring
+- **Log Analytics** - Centralized logging
+- **Prometheus** - Metrics collection (planned)
+- **Grafana** - Dashboards (planned)
 
-- **Metrics**: Prometheus + Grafana
-- **Logging**: Loki / ELK Stack
-- **Tracing**: Jaeger / OpenTelemetry
-- **Alerting**: PagerDuty / Slack
+Access monitoring:
 
-### Dashboards
+```bash
+# View logs
+kubectl logs -n mys-prod deployment/mys-publisher
 
-Access dashboards at: `monitoring.mystira.io/grafana`
+# Check metrics in Azure Portal
+az monitor app-insights component show \
+  --app mystira-prod-appinsights \
+  --resource-group mys-prod-mystira-rg-eus
+```
 
 ## Security
 
-- Secrets managed via HashiCorp Vault
-- Network policies enforced in K8s
-- Regular security scanning
-- SSL/TLS everywhere
+- **Secrets**: Azure Key Vault + Kubernetes secrets
+- **Network**: Virtual network isolation, network policies
+- **RBAC**: Kubernetes role-based access control
+- **SSL/TLS**: All traffic encrypted via cert-manager
+- **WAF**: Azure Front Door Web Application Firewall
+- **DDoS**: Azure DDoS Protection Standard
 
-## Disaster Recovery
+## Troubleshooting
 
-- Automated backups (daily)
-- Multi-region deployment
-- Documented runbooks
-- Regular DR drills
+### Common Issues
+
+**Certificate not issuing:**
+```bash
+# Check cert-manager logs
+kubectl logs -n cert-manager deployment/cert-manager
+
+# Check certificate status
+kubectl describe certificate -n mys-dev
+```
+
+**Pods not starting:**
+```bash
+# Check pod status
+kubectl describe pod <pod-name> -n mys-dev
+
+# Check logs
+kubectl logs <pod-name> -n mys-dev
+
+# Check events
+kubectl get events -n mys-dev --sort-by='.lastTimestamp'
+```
+
+**DNS not resolving:**
+```bash
+# Check DNS records
+az network dns record-set a list \
+  --resource-group mys-prod-mystira-rg-glob \
+  --zone-name mystira.app
+
+# Test DNS resolution
+dig publisher.mystira.app
+```
+
+For more troubleshooting tips, see [docs/infrastructure/troubleshooting-kubernetes-center.md](../docs/infrastructure/troubleshooting-kubernetes-center.md).
 
 ## Scripts
 
-```bash
-# Database backup
-./scripts/backup/db-backup.sh
+See [scripts/README.md](./scripts/README.md) for available automation scripts.
 
-# Scale deployment
-./scripts/deploy/scale.sh app 5
+## Documentation
 
-# Rollback deployment
-./scripts/deploy/rollback.sh app v1.2.3
-```
-
-## Environment Variables
-
-Infrastructure secrets are managed through environment-specific `.tfvars` files and Kubernetes secrets.
-
-```bash
-# Example terraform.tfvars
-project_id = "mystira-prod"
-region     = "us-central1"
-env        = "production"
-```
+- [Azure Setup Guide](./AZURE_SETUP.md) - Configure Azure service principal
+- [Quick Access Commands](./QUICK_ACCESS.md) - Common commands reference
+- [Infrastructure Docs](../docs/infrastructure/) - Detailed infrastructure guides
+- [Kubernetes Secrets Management](../docs/infrastructure/kubernetes-secrets-management.md)
+- [SSL Certificates Guide](../docs/infrastructure/ssl-certificates-guide.md)
 
 ## License
 
-Proprietary - All rights reserved
+Proprietary - All rights reserved by Phoenix VC / Mystira

@@ -1,4 +1,4 @@
-name: Story Generator CI
+name: "Components: Story Generator - CI"
 
 on:
   push:

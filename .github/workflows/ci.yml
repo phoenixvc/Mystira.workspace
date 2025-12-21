@@ -1,4 +1,4 @@
-name: CI
+name: "Workspace: CI"
 
 on:
   push:

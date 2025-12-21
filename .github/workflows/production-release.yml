@@ -1,4 +1,4 @@
-name: Production Release
+name: "Deployment: Production"
 
 on:
   workflow_dispatch:
