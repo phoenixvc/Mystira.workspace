@@ -248,6 +248,18 @@ jobs:
           SP_CLIENT_ID=$(echo '${{ secrets.MYSTIRA_AZURE_CREDENTIALS }}' | jq -r '.clientId')
           echo "Service Principal Client ID: ${SP_CLIENT_ID:0:8}..."
 
+          # CRITICAL: Get the Object ID from the Client ID
+          # Role assignments need the Object ID, not the Client ID
+          echo "Looking up service principal object ID..."
+          SP_OBJECT_ID=$(az ad sp show --id "$SP_CLIENT_ID" --query id -o tsv)
+
+          if [ -z "$SP_OBJECT_ID" ]; then
+            echo "::error::Could not find service principal object ID for client ID $SP_CLIENT_ID"
+            exit 1
+          fi
+
+          echo "Service Principal Object ID: ${SP_OBJECT_ID:0:8}..."
+
           STORAGE_ID=$(az storage account show \
             --resource-group ${{ env.TERRAFORM_RG }} \
             --name ${{ env.TERRAFORM_STORAGE }} \
@@ -259,19 +271,22 @@ jobs:
 
           # Role 1: Storage Blob Data Contributor (for blob access)
           az role assignment create \
-            --assignee "$SP_CLIENT_ID" \
+            --assignee-object-id "$SP_OBJECT_ID" \
+            --assignee-principal-type ServicePrincipal \
             --role "Storage Blob Data Contributor" \
             --scope "$STORAGE_ID" 2>/dev/null || echo "Storage Blob Data Contributor role may already exist"
 
           # Role 2: Storage Account Contributor (for account-level operations)
           az role assignment create \
-            --assignee "$SP_CLIENT_ID" \
+            --assignee-object-id "$SP_OBJECT_ID" \
+            --assignee-principal-type ServicePrincipal \
             --role "Storage Account Contributor" \
             --scope "$STORAGE_ID" 2>/dev/null || echo "Storage Account Contributor role may already exist"
 
           # Role 3: Reader and Data Access (sometimes needed)
           az role assignment create \
-            --assignee "$SP_CLIENT_ID" \
+            --assignee-object-id "$SP_OBJECT_ID" \
+            --assignee-principal-type ServicePrincipal \
             --role "Reader and Data Access" \
             --scope "$STORAGE_ID" 2>/dev/null || echo "Reader and Data Access role may already exist"
 
@@ -281,7 +296,7 @@ jobs:
           echo ""
           echo "Verifying role assignments..."
           az role assignment list \
-            --assignee "$SP_CLIENT_ID" \
+            --assignee "$SP_OBJECT_ID" \
             --scope "$STORAGE_ID" \
             --query "[].{Role:roleDefinitionName, Scope:scope}" \
             --output table
@@ -289,7 +304,7 @@ jobs:
           echo ""
           echo "Role assignment count:"
           ROLE_COUNT=$(az role assignment list \
-            --assignee "$SP_CLIENT_ID" \
+            --assignee "$SP_OBJECT_ID" \
             --scope "$STORAGE_ID" \
             --query "length(@)" -o tsv)
           echo "  Found $ROLE_COUNT role assignment(s) for this service principal on the storage account"
