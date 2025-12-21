@@ -177,25 +177,40 @@ jobs:
           echo "Granting storage permissions (this may take a moment)..."
 
           # Role 1: Storage Blob Data Contributor (for blob access)
-          az role assignment create \
+          echo "Attempting to grant Storage Blob Data Contributor..."
+          if az role assignment create \
             --assignee-object-id "$SP_OBJECT_ID" \
             --assignee-principal-type ServicePrincipal \
             --role "Storage Blob Data Contributor" \
-            --scope "$STORAGE_ID" 2>/dev/null || echo "Storage Blob Data Contributor role may already exist"
+            --scope "$STORAGE_ID"; then
+            echo "✓ Granted Storage Blob Data Contributor"
+          else
+            echo "⚠ Failed to grant Storage Blob Data Contributor (may already exist)"
+          fi
 
           # Role 2: Storage Account Contributor (for account-level operations)
-          az role assignment create \
+          echo "Attempting to grant Storage Account Contributor..."
+          if az role assignment create \
             --assignee-object-id "$SP_OBJECT_ID" \
             --assignee-principal-type ServicePrincipal \
             --role "Storage Account Contributor" \
-            --scope "$STORAGE_ID" 2>/dev/null || echo "Storage Account Contributor role may already exist"
+            --scope "$STORAGE_ID"; then
+            echo "✓ Granted Storage Account Contributor"
+          else
+            echo "⚠ Failed to grant Storage Account Contributor (may already exist)"
+          fi
 
           # Role 3: Reader and Data Access (sometimes needed)
-          az role assignment create \
+          echo "Attempting to grant Reader and Data Access..."
+          if az role assignment create \
             --assignee-object-id "$SP_OBJECT_ID" \
             --assignee-principal-type ServicePrincipal \
             --role "Reader and Data Access" \
-            --scope "$STORAGE_ID" 2>/dev/null || echo "Reader and Data Access role may already exist"
+            --scope "$STORAGE_ID"; then
+            echo "✓ Granted Reader and Data Access"
+          else
+            echo "⚠ Failed to grant Reader and Data Access (may already exist)"
+          fi
 
           echo "✓ Storage roles configured"
 
