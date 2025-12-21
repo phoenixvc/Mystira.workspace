@@ -31,12 +31,12 @@ provider "azurerm" {
 variable "location" {
   description = "Azure region for deployment"
   type        = string
-  default     = "eastus"
+  default     = "southafricanorth"
 }
 
 # Resource Group
 resource "azurerm_resource_group" "main" {
-  name     = "mys-staging-core-rg-eus"
+  name     = "mys-staging-core-rg-san"
   location = var.location
 
   tags = {
@@ -49,7 +49,7 @@ resource "azurerm_resource_group" "main" {
 
 # Virtual Network
 resource "azurerm_virtual_network" "main" {
-  name                = "mys-staging-core-vnet-eus"
+  name                = "mys-staging-core-vnet-san"
   location            = azurerm_resource_group.main.location
   resource_group_name = azurerm_resource_group.main.name
   address_space       = ["10.1.0.0/16"]
@@ -127,7 +127,7 @@ module "chain" {
 
   environment                       = "staging"
   location                          = var.location
-  region_code                       = "eus"
+  region_code                       = "san"
   resource_group_name               = azurerm_resource_group.main.name
   chain_node_count                  = 2
   chain_vm_size                     = "Standard_D2s_v3"
@@ -147,7 +147,7 @@ module "publisher" {
 
   environment                       = "staging"
   location                          = var.location
-  region_code                       = "eus"
+  region_code                       = "san"
   resource_group_name               = azurerm_resource_group.main.name
   publisher_replica_count           = 2
   vnet_id                           = azurerm_virtual_network.main.id
@@ -241,7 +241,7 @@ module "story_generator" {
 
 # AKS Cluster for Staging
 resource "azurerm_kubernetes_cluster" "main" {
-  name                = "mys-staging-core-aks-eus"
+  name                = "mys-staging-core-aks-san"
   location            = azurerm_resource_group.main.location
   resource_group_name = azurerm_resource_group.main.name
   dns_prefix          = "mys-staging-core"
