@@ -183,17 +183,31 @@ jobs:
 
           # Grant service principal access to storage account
           # Required for Terraform backend with use_azuread_auth = true
-          CURRENT_PRINCIPAL=$(az account show --query user.name -o tsv)
+          echo "Getting service principal details..."
+          SP_OBJECT_ID=$(az ad sp list --show-mine --query "[0].id" -o tsv)
+          if [ -z "$SP_OBJECT_ID" ]; then
+            # Fallback: Get from credentials JSON
+            SP_OBJECT_ID=$(echo '${{ secrets.MYSTIRA_AZURE_CREDENTIALS }}' | jq -r '.clientId')
+            echo "Using client ID from credentials: $SP_OBJECT_ID"
+          else
+            echo "Using service principal object ID: $SP_OBJECT_ID"
+          fi
+
           STORAGE_ID=$(az storage account show \
             --resource-group ${{ env.TERRAFORM_RG }} \
             --name ${{ env.TERRAFORM_STORAGE }} \
             --query id -o tsv)
 
+          echo "Granting Storage Blob Data Contributor role..."
           az role assignment create \
-            --assignee "$CURRENT_PRINCIPAL" \
+            --assignee "$SP_OBJECT_ID" \
             --role "Storage Blob Data Contributor" \
             --scope "$STORAGE_ID" \
-            --output none || true
+            --output none || echo "Role assignment may already exist"
+
+          # Wait for role assignment to propagate
+          echo "Waiting 10 seconds for role assignment to propagate..."
+          sleep 10
 
           echo "::notice::Created Terraform backend storage"
 
