@@ -105,17 +105,30 @@ create_terraform_backend() {
     # Grant current service principal access to storage account
     # Required for Terraform backend with use_azuread_auth = true
     log_info "Granting service principal access to storage account..."
-    CURRENT_PRINCIPAL=$(az account show --query user.name -o tsv)
+
+    # Try to get service principal object ID
+    SP_OBJECT_ID=$(az ad sp list --show-mine --query "[0].id" -o tsv 2>/dev/null)
+    if [ -z "$SP_OBJECT_ID" ]; then
+        # Fallback to current user
+        SP_OBJECT_ID=$(az account show --query user.name -o tsv)
+        log_info "Using current user: $SP_OBJECT_ID"
+    else
+        log_info "Using service principal: $SP_OBJECT_ID"
+    fi
+
     STORAGE_ID=$(az storage account show \
         --resource-group "$TERRAFORM_RG" \
         --name "$TERRAFORM_STORAGE" \
         --query id -o tsv)
 
     az role assignment create \
-        --assignee "$CURRENT_PRINCIPAL" \
+        --assignee "$SP_OBJECT_ID" \
         --role "Storage Blob Data Contributor" \
         --scope "$STORAGE_ID" \
         --output none 2>/dev/null || log_info "Role assignment already exists"
+
+    # Wait a moment for propagation
+    sleep 5
 
     log_success "Terraform backend ready"
 }
