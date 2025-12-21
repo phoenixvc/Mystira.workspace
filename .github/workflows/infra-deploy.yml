@@ -51,7 +51,7 @@ env:
   AKS_CLUSTER_NAME: mys-${{ github.event.inputs.environment || 'dev' }}-core-aks-san
   ACR_NAME: myssharedacr
   DNS_ZONE: mystira.app
-  DNS_ZONE_RG: mys-prod-core-rg-glob
+  DNS_ZONE_RG: mys-prod-mystira-rg-glob
   TERRAFORM_RG: mys-prod-terraform-rg-eus
   TERRAFORM_STORAGE: mysprodterraformstate
 
