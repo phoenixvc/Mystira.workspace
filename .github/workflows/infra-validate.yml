@@ -1,5 +1,10 @@
 name: "Infrastructure: Validate"
 
+# Infrastructure Validation: Validates Terraform, Kubernetes, and Docker configurations
+# Checks: Terraform format/validate, K8s manifest validation, Dockerfile linting, security scans
+# Triggers: PRs and pushes to main/staging with infrastructure changes
+# Runs across dev, staging, and prod environments
+
 on:
   pull_request:
     branches: [main, staging]

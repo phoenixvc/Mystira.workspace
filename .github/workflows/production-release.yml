@@ -1,5 +1,11 @@
 name: "Deployment: Production"
 
+# Production Environment Deployment: Deploys infrastructure and services to production
+# Security: Requires manual confirmation "DEPLOY TO PRODUCTION"
+# Steps: Validate input, deploy Terraform infrastructure, deploy Kubernetes services
+# Environment: https://mystira.app
+# Trigger: Manual workflow_dispatch only
+
 on:
   workflow_dispatch:
     inputs:

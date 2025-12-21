@@ -1,5 +1,9 @@
 name: "Components: Publisher - CI"
 
+# Publisher Component CI: Validates Node.js publishing service code quality
+# Runs: ESLint linting, unit tests, Docker builds, and K8s/Terraform validation
+# Triggers: Changes to packages/publisher/** or related infra on dev/main branches
+
 on:
   push:
     branches: [dev, main]
@@ -18,6 +22,7 @@ on:
       - "infra/kubernetes/base/publisher/**"
     paths-ignore:
       - "**/*.md"
+  workflow_dispatch:
 
 concurrency:
   group: publisher-${{ github.workflow }}-${{ github.ref }}

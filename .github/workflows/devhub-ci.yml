@@ -1,5 +1,9 @@
 name: "Components: Devhub - CI"
 
+# Devhub Component CI: Validates developer hub application code quality
+# Runs: ESLint linting, unit tests with coverage, and production builds
+# Triggers: Changes to packages/devhub/** on dev/main branches
+
 on:
   push:
     branches: [dev, main]
@@ -14,6 +18,7 @@ on:
       - "packages/devhub/**"
     paths-ignore:
       - "**/*.md"
+  workflow_dispatch:
 
 concurrency:
   group: devhub-${{ github.workflow }}-${{ github.ref }}

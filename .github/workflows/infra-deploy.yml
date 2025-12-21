@@ -1,5 +1,10 @@
 name: "Infrastructure: Deploy"
 
+# Infrastructure Deployment: Flexible deployment to dev/staging/prod environments
+# Steps: Validate prerequisites, bootstrap infrastructure, Terraform apply, build images, deploy K8s
+# Supports: Selective component deployment, skip validation, manual triggers
+# Triggers: Pushes to main (auto-deploy dev) or manual workflow_dispatch
+
 on:
   push:
     branches: [main]

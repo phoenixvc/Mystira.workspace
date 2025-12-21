@@ -1,5 +1,9 @@
 name: "Components: Admin UI - CI"
 
+# Admin UI Component CI: Validates React/TypeScript UI code quality and functionality
+# Runs: ESLint, Vitest unit tests, and Vite production builds
+# Triggers: Changes to packages/admin-ui/** on dev/main branches
+
 on:
   push:
     branches: [dev, main]
@@ -14,6 +18,7 @@ on:
       - "packages/admin-ui/**"
     paths-ignore:
       - "**/*.md"
+  workflow_dispatch:
 
 concurrency:
   group: admin-ui-${{ github.workflow }}-${{ github.ref }}

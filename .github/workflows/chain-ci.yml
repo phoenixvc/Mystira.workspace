@@ -1,5 +1,9 @@
 name: "Components: Chain - CI"
 
+# Chain Component CI: Validates Python blockchain service code quality
+# Runs: Black/Flake8 linting, pytest tests, Docker builds, and K8s validation
+# Triggers: Changes to packages/chain/** or related infra on dev/main branches
+
 on:
   push:
     branches: [dev, main]
@@ -18,6 +22,7 @@ on:
       - "infra/kubernetes/base/chain/**"
     paths-ignore:
       - "**/*.md"
+  workflow_dispatch:
 
 concurrency:
   group: chain-${{ github.workflow }}-${{ github.ref }}
