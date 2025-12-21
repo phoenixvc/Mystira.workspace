@@ -36,19 +36,20 @@ variable "location" {
 
 # Resource Group
 resource "azurerm_resource_group" "main" {
-  name     = "mys-staging-mystira-rg-eus"
+  name     = "mys-staging-core-rg-eus"
   location = var.location
 
   tags = {
     Environment = "staging"
     Project     = "Mystira"
+    Service     = "core"
     ManagedBy   = "terraform"
   }
 }
 
 # Virtual Network
 resource "azurerm_virtual_network" "main" {
-  name                = "mys-staging-mystira-vnet-eus"
+  name                = "mys-staging-core-vnet-eus"
   location            = azurerm_resource_group.main.location
   resource_group_name = azurerm_resource_group.main.name
   address_space       = ["10.1.0.0/16"]
@@ -124,15 +125,16 @@ resource "azurerm_subnet" "story_generator" {
 module "chain" {
   source = "../../modules/chain"
 
-  environment           = "staging"
-  location              = var.location
-  region_code           = "eus"
-  resource_group_name   = azurerm_resource_group.main.name
-  chain_node_count      = 2
-  chain_vm_size         = "Standard_D2s_v3"
-  chain_storage_size_gb = 100
-  vnet_id               = azurerm_virtual_network.main.id
-  subnet_id             = azurerm_subnet.chain.id
+  environment                       = "staging"
+  location                          = var.location
+  region_code                       = "eus"
+  resource_group_name               = azurerm_resource_group.main.name
+  chain_node_count                  = 2
+  chain_vm_size                     = "Standard_D2s_v3"
+  chain_storage_size_gb             = 100
+  vnet_id                           = azurerm_virtual_network.main.id
+  subnet_id                         = azurerm_subnet.chain.id
+  shared_log_analytics_workspace_id = module.shared_monitoring.log_analytics_workspace_id
 
   tags = {
     CostCenter = "staging"
@@ -143,14 +145,15 @@ module "chain" {
 module "publisher" {
   source = "../../modules/publisher"
 
-  environment             = "staging"
-  location                = var.location
-  region_code             = "eus"
-  resource_group_name     = azurerm_resource_group.main.name
-  publisher_replica_count = 2
-  vnet_id                 = azurerm_virtual_network.main.id
-  subnet_id               = azurerm_subnet.publisher.id
-  chain_rpc_endpoint      = "http://mys-chain.mys-staging.svc.cluster.local:8545"
+  environment                       = "staging"
+  location                          = var.location
+  region_code                       = "eus"
+  resource_group_name               = azurerm_resource_group.main.name
+  publisher_replica_count           = 2
+  vnet_id                           = azurerm_virtual_network.main.id
+  subnet_id                         = azurerm_subnet.publisher.id
+  chain_rpc_endpoint                = "http://mys-chain.mys-staging.svc.cluster.local:8545"
+  shared_log_analytics_workspace_id = module.shared_monitoring.log_analytics_workspace_id
 
   tags = {
     CostCenter = "staging"
@@ -238,10 +241,10 @@ module "story_generator" {
 
 # AKS Cluster for Staging
 resource "azurerm_kubernetes_cluster" "main" {
-  name                = "mys-staging-mystira-aks-eus"
+  name                = "mys-staging-core-aks-eus"
   location            = azurerm_resource_group.main.location
   resource_group_name = azurerm_resource_group.main.name
-  dns_prefix          = "mys-staging-mystira"
+  dns_prefix          = "mys-staging-core"
 
   default_node_pool {
     name           = "default"
