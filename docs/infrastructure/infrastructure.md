@@ -212,7 +212,7 @@ Code → Azure App Service / Static Web App → Service
 
 - Central DNS module in `infra/terraform/modules/dns/`
 - Both App Bicep and Terraform modules reference the same DNS zone
-- DNS zone lives in separate resource group: `mys-prod-mystira-rg-glob`
+- DNS zone lives in separate resource group: `mys-prod-core-rg-glob`
 
 ### Networking
 
@@ -311,11 +311,11 @@ Code → Azure App Service / Static Web App → Service
 
 **Resource Groups** (per [ADR-0008: Azure Resource Naming Conventions](../architecture/adr/0008-azure-resource-naming-conventions.md)):
 
-- `mys-dev-mystira-rg-eus`
+- `mys-dev-core-rg-eus`
 
 **Resources**:
 
-- AKS cluster: `mys-dev-mystira-aks-eus`
+- AKS cluster: `mys-dev-core-aks-eus`
 - App Services: `mys-dev-mystira-api-eus`, `mys-dev-mystira-adminapi-eus`
 - Static Web App: `mys-dev-mystira-swa-eus`
 - Cosmos DB: `mys-dev-mystira-cosmos-eus`
@@ -324,7 +324,7 @@ Code → Azure App Service / Static Web App → Service
 
 **Resource Groups**:
 
-- `mys-staging-mystira-rg-eus`
+- `mys-staging-core-rg-eus`
 
 **Resources**: Similar structure with `staging` suffix
 
@@ -332,8 +332,8 @@ Code → Azure App Service / Static Web App → Service
 
 **Resource Groups**:
 
-- `mys-prod-mystira-rg-eus`
-- `mys-prod-mystira-rg-glob` (DNS zone)
+- `mys-prod-core-rg-eus`
+- `mys-prod-core-rg-glob` (DNS zone)
 
 **Resources**: Production-grade with higher SKUs and redundancy
 
@@ -377,7 +377,7 @@ Code → Azure App Service / Static Web App → Service
    ```bash
    cd packages/app/infrastructure
    az deployment group create \
-     --resource-group mys-dev-mystira-rg-eus \
+     --resource-group mys-dev-core-rg-eus \
      --template-file main.bicep \
      --parameters @params.dev.json \
      --parameters jwtRsaPrivateKey="<key>" jwtRsaPublicKey="<key>"

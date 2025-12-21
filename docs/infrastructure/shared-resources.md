@@ -22,7 +22,7 @@ module "shared_postgresql" {
 
   environment         = "dev"
   location           = "eastus"
-  resource_group_name = "mys-dev-mystira-rg-eus"
+  resource_group_name = "mys-dev-core-rg-eus"
   vnet_id            = azurerm_virtual_network.main.id
   subnet_id          = azurerm_subnet.postgresql.id
 
@@ -112,7 +112,7 @@ module "shared_redis" {
 
   environment         = "dev"
   location           = "eastus"
-  resource_group_name = "mys-dev-mystira-rg-eus"
+  resource_group_name = "mys-dev-core-rg-eus"
   subnet_id          = azurerm_subnet.redis.id
 
   capacity = 1
@@ -183,7 +183,7 @@ module "shared_monitoring" {
 
   environment         = "dev"
   location           = "eastus"
-  resource_group_name = "mys-dev-mystira-rg-eus"
+  resource_group_name = "mys-dev-core-rg-eus"
 
   retention_in_days = 30
 }

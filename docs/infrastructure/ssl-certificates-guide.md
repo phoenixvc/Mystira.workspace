@@ -406,7 +406,7 @@ kubectl delete secret mystira-story-generator-tls-dev -n mys-dev
 # Check Azure DNS zone
 az network dns record-set a list \
   --zone-name mystira.app \
-  --resource-group mys-prod-mystira-rg-glob
+  --resource-group mys-prod-core-rg-glob
 
 # Get ingress IP
 kubectl get ingress mystira-story-generator-ingress -n mys-dev \
@@ -414,7 +414,7 @@ kubectl get ingress mystira-story-generator-ingress -n mys-dev \
 
 # Add DNS record if missing
 az network dns record-set a add-record \
-  --resource-group mys-prod-mystira-rg-glob \
+  --resource-group mys-prod-core-rg-glob \
   --zone-name mystira.app \
   --record-set-name dev.story-generator \
   --ipv4-address <INGRESS_IP>
