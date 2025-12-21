@@ -174,7 +174,7 @@ jobs:
         uses: infracost/actions/setup@v3
         with:
           api-key: ${{ secrets.INFRACOST_API_KEY }}
-        continue-on-error: true
+        continue-on-error: ${{ github.ref != 'refs/heads/main' }}
 
       - name: Generate Cost Estimate
         if: env.INFRACOST_API_KEY != ''
@@ -182,7 +182,7 @@ jobs:
           infracost breakdown --path infra/terraform/environments/dev --format table || true
         env:
           INFRACOST_API_KEY: ${{ secrets.INFRACOST_API_KEY }}
-        continue-on-error: true
+        continue-on-error: ${{ github.ref != 'refs/heads/main' }}
 
   # ============================================
   # Summary

@@ -80,7 +80,7 @@ gh secret set MYSTIRA_AZURE_CREDENTIALS --body '{
 }'
 ```
 
-For detailed instructions, see [AZURE_SETUP.md](./AZURE_SETUP.md).
+For detailed instructions, see [Azure Setup Guide](./azure-setup.md).
 
 ## Deployment
 
@@ -219,7 +219,7 @@ az network dns zone show \
 # Records are created automatically by the infrastructure workflow
 ```
 
-See [QUICK_ACCESS.md](./QUICK_ACCESS.md) for quick reference commands.
+See [Quick Access Commands](./quick-access.md) for quick reference commands.
 
 ## CI/CD Pipeline
 
@@ -319,8 +319,8 @@ See [scripts/README.md](./scripts/README.md) for available automation scripts.
 
 ## Documentation
 
-- [Azure Setup Guide](./AZURE_SETUP.md) - Configure Azure service principal
-- [Quick Access Commands](./QUICK_ACCESS.md) - Common commands reference
+- [Azure Setup Guide](./azure-setup.md) - Configure Azure service principal
+- [Quick Access Commands](./quick-access.md) - Common commands reference
 - [Infrastructure Docs](../docs/infrastructure/) - Detailed infrastructure guides
 - [Kubernetes Secrets Management](../docs/infrastructure/kubernetes-secrets-management.md)
 - [SSL Certificates Guide](../docs/infrastructure/ssl-certificates-guide.md)

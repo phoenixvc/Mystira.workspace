@@ -40,7 +40,7 @@ jobs:
 
       - name: Check format
         run: dotnet format --verify-no-changes --verbosity diagnostic
-        continue-on-error: true
+        continue-on-error: ${{ github.ref != 'refs/heads/main' }}
 
   test:
     name: Test App
@@ -64,7 +64,7 @@ jobs:
 
       - name: Run tests
         run: dotnet test --no-restore --verbosity normal --collect:"XPlat Code Coverage"
-        continue-on-error: true
+        continue-on-error: ${{ github.ref != 'refs/heads/main' }}
 
       - name: Upload coverage reports
         uses: codecov/codecov-action@v5
@@ -73,7 +73,7 @@ jobs:
           files: ./coverage.cobertura.xml
           flags: app
           name: app-coverage
-        continue-on-error: true
+        continue-on-error: ${{ github.ref != 'refs/heads/main' }}
 
   build:
     name: Build App

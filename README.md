@@ -31,7 +31,7 @@ pnpm build
 pnpm dev
 ```
 
-For detailed setup instructions, see [Quick Start Guide](./docs/QUICK_START.md).
+For detailed setup instructions, see [Quick Start Guide](./docs/guides/quick-start.md).
 
 ## Components
 
@@ -106,7 +106,7 @@ git submodule update --remote
 git submodule update --remote packages/chain
 ```
 
-For detailed submodule workflows, see [Submodules Guide](./docs/SUBMODULES.md).
+For detailed submodule workflows, see [Submodules Guide](./docs/guides/submodules.md).
 
 ### Common Tasks
 
@@ -201,20 +201,20 @@ See [Infrastructure Documentation](./infra/README.md) for detailed guides.
 ## Documentation
 
 ### Getting Started
-- [Quick Start Guide](./docs/QUICK_START.md) - Get running in 5 minutes
-- [Setup Guide](./docs/SETUP.md) - Detailed setup instructions
-- [Submodules Guide](./docs/SUBMODULES.md) - Working with git submodules
+- [Quick Start Guide](./docs/guides/quick-start.md) - Get running in 5 minutes
+- [Setup Guide](./docs/guides/setup.md) - Detailed setup instructions
+- [Submodules Guide](./docs/guides/submodules.md) - Working with git submodules
 
 ### Development
-- [Architecture Overview](./docs/ARCHITECTURE.md) - System architecture
+- [Architecture Overview](./docs/guides/architecture.md) - System architecture
 - [Architecture Decision Records](./docs/architecture/adr/) - Key design decisions
-- [Commit Conventions](./docs/COMMITS.md) - Commit message guidelines
+- [Commit Conventions](./docs/guides/commit-conventions.md) - Commit message guidelines
 - [Contributing Guide](./CONTRIBUTING.md) - How to contribute
 
 ### Infrastructure & DevOps
 - [Infrastructure Guide](./docs/infrastructure/infrastructure.md) - Infrastructure overview
 - [CI/CD Documentation](./docs/cicd/) - CI/CD setup and workflows
-- [Azure Setup Guide](./infra/AZURE_SETUP.md) - Azure configuration
+- [Azure Setup Guide](./infra/azure-setup.md) - Azure configuration
 - [Kubernetes Secrets](./docs/infrastructure/kubernetes-secrets-management.md)
 
 ### Planning & Migration
@@ -286,8 +286,8 @@ Configuration: [`scripts/repo-metadata.json`](./scripts/repo-metadata.json)
 We welcome contributions! Please read:
 
 1. [Contributing Guide](./CONTRIBUTING.md) - Development process
-2. [Commit Conventions](./docs/COMMITS.md) - Commit message format
-3. [Submodules Guide](./docs/SUBMODULES.md) - Working with submodules
+2. [Commit Conventions](./docs/guides/commit-conventions.md) - Commit message format
+3. [Submodules Guide](./docs/guides/submodules.md) - Working with submodules
 
 ## License
 

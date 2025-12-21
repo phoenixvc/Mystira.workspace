@@ -8,5 +8,5 @@ This directory contains strategic planning documents and roadmaps.
 
 ## Related Documentation
 
-- [Architecture Overview](../ARCHITECTURE.md) - System architecture overview
+- [Architecture Overview](../guides/architecture.md) - System architecture overview
 - [Architecture Decision Records](../architecture/adr/) - ADRs documenting key decisions

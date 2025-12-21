@@ -515,4 +515,4 @@ Staging environment has **much higher** rate limits suitable for testing and dev
 
 - [Infrastructure Overview](./README.md)
 - [Kubernetes Troubleshooting](./troubleshooting-kubernetes-center.md)
-- [Infrastructure Deployment Guide](./QUICK_START_DEPLOY.md)
+- [Infrastructure Deployment Guide](./quick-start-deploy.md)

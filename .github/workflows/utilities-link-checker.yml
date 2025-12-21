@@ -1,0 +1,69 @@
+name: "Utilities: Link Checker"
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "**/*.md"
+  pull_request:
+    branches: [dev, main]
+    paths:
+      - "**/*.md"
+  schedule:
+    # Run weekly on Sundays at 00:00 UTC
+    - cron: "0 0 * * 0"
+  workflow_dispatch:
+
+concurrency:
+  group: link-checker-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check-links:
+    name: Check Markdown Links
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          submodules: recursive
+          token: ${{ secrets.MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN }}
+
+      - name: Link Checker
+        uses: lycheeverse/lychee-action@v2
+        with:
+          # Check all markdown files
+          args: >-
+            --verbose
+            --no-progress
+            --accept 200,204,301,302,403,429
+            --exclude-path node_modules
+            --exclude-path .git
+            --exclude "^https://github.com/phoenixvc/.*/compare"
+            --exclude "^https://github.com/phoenixvc/.*/issues/new"
+            --exclude "localhost"
+            --exclude "127.0.0.1"
+            --exclude "mystirab2c.b2clogin.com"
+            --exclude "dev.azure.com"
+            --max-concurrency 10
+            --timeout 30
+            '**/*.md'
+          output: ./lychee-report.md
+          fail: ${{ github.ref == 'refs/heads/main' }}
+
+      - name: Upload Link Check Report
+        uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: link-checker-report
+          path: ./lychee-report.md
+          retention-days: 7
+
+      - name: Create Issue for Broken Links
+        if: failure() && github.event_name == 'schedule'
+        uses: peter-evans/create-issue-from-file@v5
+        with:
+          title: "Broken links detected in documentation"
+          content-filepath: ./lychee-report.md
+          labels: |
+            documentation
+            automated

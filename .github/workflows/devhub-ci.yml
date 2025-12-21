@@ -43,7 +43,7 @@ jobs:
 
       - name: Lint devhub package
         run: pnpm --filter devhub lint
-        continue-on-error: true
+        continue-on-error: ${{ github.ref != 'refs/heads/main' }}
 
   test:
     name: Test Devhub
@@ -66,14 +66,14 @@ jobs:
 
       - name: Run devhub tests
         run: pnpm --filter devhub test
-        continue-on-error: true
+        continue-on-error: ${{ github.ref != 'refs/heads/main' }}
 
       - name: Upload coverage
         uses: codecov/codecov-action@v5
         with:
           flags: devhub
           fail_ci_if_error: false
-        continue-on-error: true
+        continue-on-error: ${{ github.ref != 'refs/heads/main' }}
 
   build:
     name: Build Devhub

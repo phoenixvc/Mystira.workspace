@@ -27,7 +27,7 @@ All submodules are properly configured and initialized:
 5. **Infrastructure** - Properly configured as submodule
 6. **Documentation** - Updated all references and cross-links
 
-See [SUBMODULES.md](./SUBMODULES.md) for detailed submodule management.
+See [Submodules Guide](../guides/submodules.md) for detailed submodule management.
 
 ## Admin API Extraction - Phase 1: NuGet Package Setup ✅
 
@@ -110,8 +110,8 @@ Once feed is configured:
 
 ## Related Documentation
 
-- [Submodules Guide](./SUBMODULES.md)
-- [NuGet Setup Guide](../packages/app/docs/nuget/NUGET_SETUP.md)
+- [Submodules Guide](../guides/submodules.md)
+- [NuGet Setup Guide](../../packages/app/docs/nuget/NUGET_SETUP.md)
 - [Admin API Extraction Plan](../migration/admin-api-extraction-plan.md)
-- [ADR-0006: Admin API Repository Extraction](./architecture/adr/0006-admin-api-repository-extraction.md)
-- [ADR-0007: NuGet Feed Strategy](./architecture/adr/0007-nuget-feed-strategy-for-shared-libraries.md)
+- [ADR-0006: Admin API Repository Extraction](../architecture/adr/0006-admin-api-repository-extraction.md)
+- [ADR-0007: NuGet Feed Strategy](../architecture/adr/0007-nuget-feed-strategy-for-shared-libraries.md)

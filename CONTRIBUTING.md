@@ -50,7 +50,7 @@ This workspace integrates multiple repositories as git submodules, managed with 
 - `packages/devhub/` - Mystira.DevHub repository (development operations desktop app)
 - `infra/` - Mystira.Infra repository (infrastructure and DevOps)
 
-See [SUBMODULES.md](./docs/SUBMODULES.md) for detailed information on working with git submodules.
+See [Submodules Guide](./docs/guides/submodules.md) for detailed information on working with git submodules.
 
 ## Development Workflow
 
@@ -157,6 +157,53 @@ pnpm format
 - Document all Terraform resources
 - Use semantic versioning for releases
 - Include rollback procedures
+
+## GitHub Workflows
+
+### Workflow Naming Convention
+
+All workflows follow the "Category: Name" pattern for consistency. See [ADR-0012: GitHub Workflow Naming Convention](./docs/architecture/adr/0012-github-workflow-naming-convention.md) for details.
+
+**Categories:**
+
+| Category         | Description                           | Example                       |
+| ---------------- | ------------------------------------- | ----------------------------- |
+| `Components:`    | CI workflows for individual services  | `Components: Admin API - CI`  |
+| `Infrastructure:`| Infrastructure provisioning           | `Infrastructure: Deploy`      |
+| `Deployment:`    | Environment deployments               | `Deployment: Staging`         |
+| `Workspace:`     | Workspace-level operations            | `Workspace: CI`               |
+| `Utilities:`     | Support and helper workflows          | `Utilities: Check Submodules` |
+
+### Adding New Components
+
+When adding a new component workflow:
+
+1. **Name format**: `Components: {Component Name} - CI`
+2. **File naming**: `{component-name}-ci.yml` (lowercase, hyphens)
+3. **Include standard jobs**: lint, test, build
+4. **Add path filters** to only trigger on relevant changes
+5. **Update README.md** badges if applicable
+
+Example workflow structure:
+
+```yaml
+name: "Components: New Service - CI"
+
+on:
+  push:
+    branches: [dev, main]
+    paths:
+      - "packages/new-service/**"
+      - ".github/workflows/new-service-ci.yml"
+```
+
+### Repository Metadata Sync
+
+GitHub repository descriptions and topics are synced from `scripts/repo-metadata.json`. To update:
+
+1. Edit `scripts/repo-metadata.json` with new metadata
+2. Run `./scripts/sync-repo-metadata.sh --dry-run` to preview changes
+3. Run `./scripts/sync-repo-metadata.sh` to apply
 
 ## Getting Help
 

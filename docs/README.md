@@ -16,14 +16,14 @@ For details, see [ADR-0002: Documentation Location Strategy](./architecture/adr/
 
 ### Getting Started
 
-- 📚 [Quick Start Guide](./QUICK_START.md) - Get started in 5 minutes
-- ⚙️ [Setup Guide](./SETUP.md) - Detailed setup instructions
-- 🔧 [Environment Variables](./ENVIRONMENT.md) - Environment configuration
-- 🔀 [Submodules Guide](./SUBMODULES.md) - Working with git submodules
+- 📚 [Quick Start Guide](./guides/quick-start.md) - Get started in 5 minutes
+- ⚙️ [Setup Guide](./guides/setup.md) - Detailed setup instructions
+- 🔧 [Environment Variables](./guides/environment-variables.md) - Environment configuration
+- 🔀 [Submodules Guide](./guides/submodules.md) - Working with git submodules
 
 ### Architecture & Infrastructure
 
-- 🏗️ [Architecture Overview](./ARCHITECTURE.md) - System architecture overview
+- 🏗️ [Architecture Overview](./guides/architecture.md) - System architecture overview
 - 📋 [Architecture Decision Records](./architecture/adr/) - ADRs documenting key decisions
   - [ADR-0001: Infrastructure Organization](./architecture/adr/0001-infrastructure-organization-hybrid-approach.md)
   - [ADR-0002: Documentation Location Strategy](./architecture/adr/0002-documentation-location-strategy.md)
@@ -41,11 +41,11 @@ For details, see [ADR-0002: Documentation Location Strategy](./architecture/adr/
 ### Infrastructure Documentation
 
 - 🌐 [Infrastructure Guide](./infrastructure/infrastructure.md) - Infrastructure organization and deployment
-- 🚀 [Quick Start Deploy](./infrastructure/QUICK_START_DEPLOY.md) - Quick infrastructure deployment
+- 🚀 [Quick Start Deploy](./infrastructure/quick-start-deploy.md) - Quick infrastructure deployment
 - 🔒 [Kubernetes Secrets Management](./infrastructure/kubernetes-secrets-management.md) - Creating and managing K8s secrets
 - 📜 [SSL Certificates Guide](./infrastructure/ssl-certificates-guide.md) - SSL/TLS certificate management
 - 🗃️ [Shared Resources](./infrastructure/shared-resources.md) - PostgreSQL, Redis, and Monitoring
-- 🛠️ [Terraform Backend Setup](./infrastructure/TERRAFORM_BACKEND_SETUP.md) - Setting up Terraform state backend
+- 🛠️ [Terraform Backend Setup](./infrastructure/terraform-backend-setup.md) - Setting up Terraform state backend
 - 🏭 [ACR Strategy](./infrastructure/acr-strategy.md) - Azure Container Registry strategy
 - 🧩 [Troubleshooting Kubernetes](./infrastructure/troubleshooting-kubernetes-center.md) - K8s troubleshooting guide
 
@@ -77,11 +77,11 @@ All workflows follow the "Category: Name" naming convention for clarity.
 ### Planning & Roadmaps
 
 - 🗺️ [Implementation Roadmap](./planning/implementation-roadmap.md) - Strategic implementation plan
-- 📍 [Migration Phases](./MIGRATION_PHASES.md) - Migration phases and status
+- 📍 [Migration Phases](./migration/phases.md) - Migration phases and status
 
 ### Development
 
-- 📝 [Commit Conventions](./COMMITS.md) - Commit message guidelines
+- 📝 [Commit Conventions](./guides/commit-conventions.md) - Commit message guidelines
 - 🏢 [Setup Status](./setup/setup-status.md) - Repository setup and NuGet implementation status
 
 ## Project Documentation
@@ -186,7 +186,7 @@ Always include:
 
 - **Issues**: [github.com/phoenixvc/Mystira.workspace/issues](https://github.com/phoenixvc/Mystira.workspace/issues)
 - **Discussions**: [github.com/phoenixvc/Mystira.workspace/discussions](https://github.com/phoenixvc/Mystira.workspace/discussions)
-- **Documentation**: Start with [Quick Start Guide](./QUICK_START.md)
+- **Documentation**: Start with [Quick Start Guide](./guides/quick-start.md)
 
 ## License
 

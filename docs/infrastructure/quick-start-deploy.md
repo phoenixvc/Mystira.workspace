@@ -224,6 +224,6 @@ If the backend doesn't exist, you may need to create it first or use a local bac
 
 After deploying dev environment:
 
-1. **Deploy services to Kubernetes**: See [Deployment Guide](../SETUP.md#deployment)
+1. **Deploy services to Kubernetes**: See [Deployment Guide](../guides/setup.md#deployment)
 2. **Deploy staging environment**: `cd ..\staging` and repeat steps
-3. **Configure CI/CD**: Ensure GitHub secrets are set up (see [Setup Guide](../SETUP.md#github-secrets-configuration))
+3. **Configure CI/CD**: Ensure GitHub secrets are set up (see [Setup Guide](../guides/setup.md#github-secrets-configuration))

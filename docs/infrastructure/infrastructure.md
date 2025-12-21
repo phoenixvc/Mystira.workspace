@@ -6,7 +6,7 @@ This guide explains the infrastructure organization, deployment models, and coor
 
 The Mystira workspace uses a **hybrid infrastructure approach** with infrastructure code located in multiple places, each optimized for the specific deployment model of the services:
 
-> **Note**: The `infra/` directory is now **consolidated directly in the workspace** (not a submodule) for simpler CI/CD and atomic commits. See [Infrastructure Consolidation Plan](./INFRA_CONSOLIDATION_PLAN.md).
+> **Note**: The `infra/` directory is now **consolidated directly in the workspace** (not a submodule) for simpler CI/CD and atomic commits. See [Infrastructure Consolidation Plan](./consolidation-plan.md).
 
 ```
 Mystira.workspace/
@@ -459,7 +459,7 @@ See individual README files:
 - Check service-specific README files
 - Review GitHub Actions workflow logs
 - Consult Azure Portal for resource status
-- See `infra/AZURE_SETUP.md` for Azure configuration
+- See `infra/azure-setup.md` for Azure configuration
 
 ## Shared Infrastructure Modules
 
@@ -502,12 +502,12 @@ Provides centralized monitoring and logging:
 
 ## Related Documentation
 
-- [Architecture Overview](./ARCHITECTURE.md)
-- [ADR-0001: Infrastructure Organization](./architecture/adr/0001-infrastructure-organization-hybrid-approach.md)
-- [ADR-0002: Documentation Location Strategy](./architecture/adr/0002-documentation-location-strategy.md)
-- [ADR-0005: Service Networking and Communication](./architecture/adr/0005-service-networking-and-communication.md) - Network topology and service communication patterns
-- [ADR-0006: Admin API Repository Extraction](./architecture/adr/0006-admin-api-repository-extraction.md) - Repository structure changes
-- [Environment Variables](./ENVIRONMENT.md)
-- [Azure Setup Guide](../infra/AZURE_SETUP.md)
-- [App Infrastructure README](../packages/app/infrastructure/README.md)
-- [Infra README](../infra/README.md)
+- [Architecture Overview](../guides/architecture.md)
+- [ADR-0001: Infrastructure Organization](../architecture/adr/0001-infrastructure-organization-hybrid-approach.md)
+- [ADR-0002: Documentation Location Strategy](../architecture/adr/0002-documentation-location-strategy.md)
+- [ADR-0005: Service Networking and Communication](../architecture/adr/0005-service-networking-and-communication.md) - Network topology and service communication patterns
+- [ADR-0006: Admin API Repository Extraction](../architecture/adr/0006-admin-api-repository-extraction.md) - Repository structure changes
+- [Environment Variables](../guides/environment-variables.md)
+- [Azure Setup Guide](../../infra/azure-setup.md)
+- [App Infrastructure README](../../packages/app/infrastructure/README.md)
+- [Infra README](../../infra/README.md)

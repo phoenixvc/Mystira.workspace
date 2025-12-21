@@ -158,5 +158,5 @@ az role assignment list --assignee $(az account show --query user.name --output 
 ## Related Documentation
 
 - [Infrastructure Guide](./infrastructure.md)
-- [Setup Guide](../SETUP.md#azure-infrastructure-setup)
+- [Setup Guide](../guides/setup.md#azure-infrastructure-setup)
 - [ACR Strategy](./acr-strategy.md)

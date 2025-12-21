@@ -33,7 +33,7 @@ jobs:
       - uses: actions/checkout@v6
         with:
           submodules: recursive
-        continue-on-error: true
+        continue-on-error: ${{ github.ref != 'refs/heads/main' }}
         id: checkout
 
       - name: Check submodule clone status
@@ -84,7 +84,7 @@ jobs:
         working-directory: packages/chain
         run: |
           pytest --cov=. --cov-report=xml || echo "No tests found or tests failed"
-        continue-on-error: true
+        continue-on-error: ${{ github.ref != 'refs/heads/main' }}
 
       - name: Upload coverage
         uses: codecov/codecov-action@v5
@@ -92,7 +92,7 @@ jobs:
           files: packages/chain/coverage.xml
           flags: chain
           fail_ci_if_error: false
-        continue-on-error: true
+        continue-on-error: ${{ github.ref != 'refs/heads/main' }}
 
   build:
     name: Build Chain (Python gRPC)
@@ -144,7 +144,7 @@ jobs:
         with:
           name: chain-build
           path: packages/chain/artifacts
-        continue-on-error: true
+        continue-on-error: ${{ github.ref != 'refs/heads/main' }}
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3

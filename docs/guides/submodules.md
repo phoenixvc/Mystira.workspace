@@ -110,7 +110,7 @@ git submodule update --init --recursive
 | Mystira.Admin.Api      | `packages/admin-api/`       | `phoenixvc/Mystira.Admin.Api`      |
 | Mystira.Admin.UI       | `packages/admin-ui/`        | `phoenixvc/Mystira.Admin.UI`       |
 
-> **Note**: The `infra/` directory is **not** a submodule. It contains infrastructure code directly in the workspace for simpler CI/CD and atomic commits. See [Infrastructure Consolidation](./infrastructure/INFRA_CONSOLIDATION_PLAN.md).
+> **Note**: The `infra/` directory is **not** a submodule. It contains infrastructure code directly in the workspace for simpler CI/CD and atomic commits. See [Infrastructure Consolidation](../infrastructure/consolidation-plan.md).
 
 ## Troubleshooting
 
