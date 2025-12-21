@@ -13,12 +13,14 @@ BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 # Configuration
-TERRAFORM_RG="mys-prod-terraform-rg-eus"
-TERRAFORM_STORAGE="mysprodterraformstate"
+# All resources deploy to South Africa North (fresh deployment)
+TERRAFORM_RG="mys-shared-terraform-rg-san"
+TERRAFORM_STORAGE="myssharedtfstatesan"
 TERRAFORM_CONTAINER="tfstate"
-LOCATION="eastus"
+LOCATION="southafricanorth"
 ACR_NAME="myssharedacr"
 DNS_ZONE="mystira.app"
+DNS_ZONE_RG="mys-prod-core-rg-san"
 
 log_info() { echo -e "${BLUE}[INFO]${NC} $1"; }
 log_success() { echo -e "${GREEN}[SUCCESS]${NC} $1"; }
@@ -127,19 +129,26 @@ create_shared_acr() {
 setup_dns_zone() {
     log_info "Setting up DNS Zone for $DNS_ZONE..."
 
+    # Ensure DNS zone resource group exists
+    if ! az group show --name "$DNS_ZONE_RG" &> /dev/null; then
+        log_info "Creating DNS zone resource group $DNS_ZONE_RG..."
+        az group create --name "$DNS_ZONE_RG" --location "$LOCATION" --output none
+        log_success "Created resource group $DNS_ZONE_RG"
+    fi
+
     # Check if DNS zone exists
-    if az network dns zone show --name "$DNS_ZONE" --resource-group "$TERRAFORM_RG" &> /dev/null; then
+    if az network dns zone show --name "$DNS_ZONE" --resource-group "$DNS_ZONE_RG" &> /dev/null; then
         log_info "DNS Zone $DNS_ZONE already exists"
     else
         log_info "Creating DNS Zone $DNS_ZONE..."
         az network dns zone create \
             --name "$DNS_ZONE" \
-            --resource-group "$TERRAFORM_RG" \
+            --resource-group "$DNS_ZONE_RG" \
             --output none
         log_success "Created DNS Zone $DNS_ZONE"
 
         log_warn "IMPORTANT: Update your domain registrar's nameservers to:"
-        az network dns zone show --name "$DNS_ZONE" --resource-group "$TERRAFORM_RG" --query nameServers -o tsv
+        az network dns zone show --name "$DNS_ZONE" --resource-group "$DNS_ZONE_RG" --query nameServers -o tsv
     fi
 
     log_success "DNS Zone ready"

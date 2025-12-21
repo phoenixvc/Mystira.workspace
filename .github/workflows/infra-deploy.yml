@@ -51,9 +51,9 @@ env:
   AKS_CLUSTER_NAME: mys-${{ github.event.inputs.environment || 'dev' }}-core-aks-san
   ACR_NAME: myssharedacr
   DNS_ZONE: mystira.app
-  DNS_ZONE_RG: mys-prod-mystira-rg-glob
-  TERRAFORM_RG: mys-prod-terraform-rg-eus
-  TERRAFORM_STORAGE: mysprodterraformstate
+  DNS_ZONE_RG: mys-prod-core-rg-san
+  TERRAFORM_RG: mys-shared-terraform-rg-san
+  TERRAFORM_STORAGE: myssharedtfstatesan
 
 jobs:
   # ============================================
@@ -155,7 +155,7 @@ jobs:
         run: |
           az group create \
             --name ${{ env.TERRAFORM_RG }} \
-            --location eastus \
+            --location southafricanorth \
             --output none
           echo "::notice::Created Terraform resource group"
 
@@ -165,7 +165,7 @@ jobs:
           az storage account create \
             --name ${{ env.TERRAFORM_STORAGE }} \
             --resource-group ${{ env.TERRAFORM_RG }} \
-            --location eastus \
+            --location southafricanorth \
             --sku Standard_LRS \
             --kind StorageV2 \
             --output none
@@ -189,7 +189,7 @@ jobs:
           az acr create \
             --name ${{ env.ACR_NAME }} \
             --resource-group ${{ env.TERRAFORM_RG }} \
-            --location eastus \
+            --location southafricanorth \
             --sku Basic \
             --admin-enabled true \
             --output none
@@ -284,12 +284,8 @@ jobs:
             echo "Resource group does not exist in Azure - will be created"
           fi
 
-          # Determine region code based on environment
-          if [ "${{ env.ENVIRONMENT }}" == "dev" ]; then
-            REGION_CODE="san"
-          else
-            REGION_CODE="san"
-          fi
+          # All environments use South Africa North (san)
+          REGION_CODE="san"
           VNET_NAME="mys-${{ env.ENVIRONMENT }}-core-vnet-${REGION_CODE}"
 
           # Check if VNet exists in Azure but not in state

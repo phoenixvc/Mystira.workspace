@@ -67,6 +67,13 @@ patches:
         path: /data/key_vault_url
         value: "https://mys-staging-pub-kv-san.vault.azure.net/"
   - target:
+      kind: ConfigMap
+      name: mys-chain-config
+    patch: |-
+      - op: replace
+        path: /data/key_vault_url
+        value: "https://mys-staging-chain-kv-san.vault.azure.net/"
+  - target:
       kind: Deployment
       name: mys-story-generator
     patch: |-

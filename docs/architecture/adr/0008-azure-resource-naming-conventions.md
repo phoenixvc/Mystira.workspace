@@ -227,7 +227,7 @@ Examples:
 
 ```text
 mysprodmystirastgeuw    # mys-prod-mystira-storage-euw
-mysprodterraformstate   # Terraform state backend
+myssharedtfstatesan   # Terraform state backend
 nlprodautoprstgeuw      # nl-prod-autopr-storage-euw
 pvcprodmktdatastgeuw    # pvc-prod-mktdata-storage-euw
 ```
@@ -303,7 +303,7 @@ Examples:
 Examples:
 
 - `nlprodterraformstate` (NeuralLiquid)
-- `mysprodterraformstate` (Mystira - new)
+- `myssharedtfstatesan` (Mystira - new)
 - `mystiraterraformstate` (Mystira - legacy, keep as-is)
 
 **Container**: `tfstate`
@@ -321,7 +321,7 @@ Examples:
 - `staging/terraform.tfstate`
 - `prod/terraform.tfstate`
 
-**Storage Account Name**: `mysprodterraformstate` (no dashes, as per Azure requirements).
+**Storage Account Name**: `myssharedtfstatesan` (no dashes, as per Azure requirements).
 
 ## Renaming, Moving, and Recreating Resources
 

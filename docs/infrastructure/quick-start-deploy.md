@@ -214,7 +214,7 @@ az account set --subscription "Your Subscription Name"
 
 The Terraform backend uses Azure Storage. Make sure:
 
-1. The storage account `mysprodterraformstate` exists
+1. The storage account `myssharedtfstatesan` exists
 2. The container `tfstate` exists
 3. Your Azure credentials have access
 
