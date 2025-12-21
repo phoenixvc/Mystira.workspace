@@ -98,8 +98,8 @@ jobs:
       contents: read
       id-token: write
     env:
-      AZURE_RESOURCE_GROUP: mys-prod-mystira-rg-eus
-      AKS_CLUSTER_NAME: mys-prod-mystira-aks-eus
+      AZURE_RESOURCE_GROUP: mys-prod-core-rg-san
+      AKS_CLUSTER_NAME: mys-prod-core-aks-san
     steps:
       - uses: actions/checkout@v6
         with:
