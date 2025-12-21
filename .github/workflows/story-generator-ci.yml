@@ -10,16 +10,14 @@ on:
     paths:
       - "packages/story-generator/**"
       - "infra/kubernetes/base/story-generator/**"
-    paths-ignore:
-      - "**/*.md"
+      - "!**/*.md"
   pull_request:
     branches: [dev, main]
     types: [opened, synchronize, reopened, ready_for_review]
     paths:
       - "packages/story-generator/**"
       - "infra/kubernetes/base/story-generator/**"
-    paths-ignore:
-      - "**/*.md"
+      - "!**/*.md"
   workflow_dispatch:
 
 concurrency:
