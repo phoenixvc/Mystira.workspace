@@ -103,10 +103,10 @@ If ports are already in use:
 
 ## Next Steps
 
-- Read [SETUP.md](./SETUP.md) for detailed setup instructions
-- Check [SUBMODULES.md](./SUBMODULES.md) for submodule management
-- Review [ARCHITECTURE.md](./ARCHITECTURE.md) for system overview
-- See [ENVIRONMENT.md](./ENVIRONMENT.md) for environment variables
+- Read [Setup Guide](./setup.md) for detailed setup instructions
+- Check [Submodules Guide](./submodules.md) for submodule management
+- Review [Architecture Overview](./architecture.md) for system overview
+- See [Environment Variables](./environment-variables.md) for environment variables
 
 ## Getting Help
 

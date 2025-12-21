@@ -19,7 +19,7 @@ Creates the Azure Storage Account and Container for storing Terraform state file
 - Service principal with **Contributor** role at the subscription level
 - For GitHub Actions: `AZURE_CREDENTIALS` secret configured with service principal credentials
 
-> **Important**: If you encounter authorization errors, the service principal needs Contributor permissions at the subscription level. See [../AZURE_SETUP.md](../AZURE_SETUP.md) for detailed setup instructions.
+> **Important**: If you encounter authorization errors, the service principal needs Contributor permissions at the subscription level. See [Azure Setup Guide](../azure-setup.md) for detailed setup instructions.
 
 **What it does:**
 1. Creates resource group `mystira-terraform-state` (if it doesn't exist)

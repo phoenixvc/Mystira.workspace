@@ -6,14 +6,16 @@ on:
     paths:
       - "packages/story-generator/**"
       - "infra/kubernetes/base/story-generator/**"
-      - ".github/workflows/story-generator-ci.yml"
+    paths-ignore:
+      - "**/*.md"
   pull_request:
     branches: [dev, main]
     types: [opened, synchronize, reopened, ready_for_review]
     paths:
       - "packages/story-generator/**"
       - "infra/kubernetes/base/story-generator/**"
-      - ".github/workflows/story-generator-ci.yml"
+    paths-ignore:
+      - "**/*.md"
 
 concurrency:
   group: story-generator-${{ github.workflow }}-${{ github.ref }}
@@ -46,7 +48,7 @@ jobs:
 
       - name: Check format
         run: dotnet format --verify-no-changes --verbosity diagnostic
-        continue-on-error: true
+        continue-on-error: ${{ github.ref != 'refs/heads/main' }}
 
   test:
     name: Test Story Generator
@@ -70,7 +72,7 @@ jobs:
 
       - name: Run tests
         run: dotnet test --no-restore --verbosity normal --collect:"XPlat Code Coverage"
-        continue-on-error: true
+        continue-on-error: ${{ github.ref != 'refs/heads/main' }}
 
       - name: Upload coverage reports
         uses: codecov/codecov-action@v5
@@ -168,7 +170,7 @@ jobs:
             -p:PackageVersion=1.0.0-alpha.${{ github.run_number }} \
             -p:RepositoryUrl=https://github.com/${{ github.repository }} \
             -p:RepositoryType=git
-        continue-on-error: true
+        continue-on-error: ${{ github.ref != 'refs/heads/main' }}
 
       - name: Configure GitHub Packages source
         run: |
@@ -192,7 +194,7 @@ jobs:
           else
             echo "No NuGet packages found to publish"
           fi
-        continue-on-error: true
+        continue-on-error: ${{ github.ref != 'refs/heads/main' }}
 
       - name: Push to NuGet.org (if API key configured)
         working-directory: packages/story-generator
@@ -212,7 +214,7 @@ jobs:
                 --skip-duplicate
             done
           fi
-        continue-on-error: true
+        continue-on-error: ${{ github.ref != 'refs/heads/main' }}
 
       - name: Upload NuGet packages as artifact
         uses: actions/upload-artifact@v6

@@ -241,6 +241,6 @@ After the backend is set up:
 
 ## Related Documentation
 
-- [Quick Start Deployment Guide](./QUICK_START_DEPLOY.md)
+- [Quick Start Deployment Guide](./quick-start-deploy.md)
 - [Infrastructure Guide](./infrastructure.md)
-- [Setup Guide](../SETUP.md)
+- [Setup Guide](../guides/setup.md)

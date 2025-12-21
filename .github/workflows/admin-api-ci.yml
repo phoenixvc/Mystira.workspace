@@ -5,13 +5,15 @@ on:
     branches: [dev, main]
     paths:
       - "packages/admin-api/**"
-      - ".github/workflows/admin-api-ci.yml"
+    paths-ignore:
+      - "**/*.md"
   pull_request:
     branches: [dev, main]
     types: [opened, synchronize, reopened, ready_for_review]
     paths:
       - "packages/admin-api/**"
-      - ".github/workflows/admin-api-ci.yml"
+    paths-ignore:
+      - "**/*.md"
 
 concurrency:
   group: admin-api-${{ github.workflow }}-${{ github.ref }}
@@ -40,7 +42,7 @@ jobs:
 
       - name: Check format
         run: dotnet format --verify-no-changes --verbosity diagnostic
-        continue-on-error: true
+        continue-on-error: ${{ github.ref != 'refs/heads/main' }}
 
   test:
     name: Test Admin API
@@ -64,7 +66,7 @@ jobs:
 
       - name: Run tests
         run: dotnet test --no-restore --verbosity normal --collect:"XPlat Code Coverage"
-        continue-on-error: true
+        continue-on-error: ${{ github.ref != 'refs/heads/main' }}
 
       - name: Upload coverage reports
         uses: codecov/codecov-action@v5
@@ -73,7 +75,7 @@ jobs:
           files: ./coverage.cobertura.xml
           flags: admin-api
           name: admin-api-coverage
-        continue-on-error: true
+        continue-on-error: ${{ github.ref != 'refs/heads/main' }}
 
   build:
     name: Build Admin API

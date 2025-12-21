@@ -8,6 +8,6 @@ This directory contains documentation related to setup, configuration, and statu
 
 ## Related Documentation
 
-- [Main Setup Guide](../SETUP.md) - Comprehensive setup instructions
-- [Environment Variables](../ENVIRONMENT.md) - Environment configuration
-- [Quick Start Guide](../QUICK_START.md) - Quick start guide
+- [Main Setup Guide](../guides/setup.md) - Comprehensive setup instructions
+- [Environment Variables](../guides/environment-variables.md) - Environment configuration
+- [Quick Start Guide](../guides/quick-start.md) - Quick start guide

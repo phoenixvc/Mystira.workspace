@@ -144,7 +144,7 @@ pnpm install --frozen-lockfile
 
 ### 4. Set Up Environment Variables
 
-See [ENVIRONMENT.md](./ENVIRONMENT.md) for detailed environment variable configuration.
+See [Environment Variables](./environment-variables.md) for detailed environment variable configuration.
 
 Create `.env.local` files in:
 
@@ -388,7 +388,7 @@ az ad b2c tenant create \
 
 ### 3. Environment Configuration
 
-After setup, configure environment variables as documented in [ENVIRONMENT.md](./ENVIRONMENT.md#authentication-variables).
+After setup, configure environment variables as documented in [Environment Variables](./environment-variables.md#authentication-variables).
 
 **Required Secrets in Azure Key Vault**:
 
@@ -795,11 +795,11 @@ kubectl get events -n mystira-dev --sort-by='.lastTimestamp'
 
 ## Next Steps
 
-- Review [Architecture Overview](./ARCHITECTURE.md)
-- Read [CI/CD Setup Guide](./cicd/cicd-setup.md)
-- Check [Infrastructure Guide](./infrastructure/infrastructure.md)
-- See [Shared Resources Guide](./infrastructure/shared-resources.md)
-- Review [ACR Strategy](./infrastructure/acr-strategy.md)
+- Review [Architecture Overview](./architecture.md)
+- Read [CI/CD Setup Guide](../cicd/cicd-setup.md)
+- Check [Infrastructure Guide](../infrastructure/infrastructure.md)
+- See [Shared Resources Guide](../infrastructure/shared-resources.md)
+- Review [ACR Strategy](../infrastructure/acr-strategy.md)
 
 ## Getting Help
 

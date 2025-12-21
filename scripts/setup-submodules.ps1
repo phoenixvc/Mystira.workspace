@@ -31,5 +31,5 @@ Write-Host ""
 Write-Host "Next steps:" -ForegroundColor Cyan
 Write-Host "  1. Run 'pnpm install' to install dependencies"
 Write-Host "  2. Run 'pnpm build' to build all packages"
-Write-Host "  3. See docs/SUBMODULES.md for more information"
+Write-Host "  3. See docs/guides/submodules.md for more information"
 
