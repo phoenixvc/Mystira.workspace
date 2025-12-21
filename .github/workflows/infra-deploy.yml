@@ -238,6 +238,40 @@ jobs:
           az network dns zone show --name ${{ env.DNS_ZONE }} --resource-group ${{ env.DNS_ZONE_RG }} --query nameServers -o tsv >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
 
+      - name: Grant Storage Account Permissions
+        run: |
+          # Always grant service principal access to storage account
+          # Required for Terraform backend with use_azuread_auth = true
+          echo "Ensuring service principal has storage access..."
+
+          # Get service principal details
+          SP_OBJECT_ID=$(az ad sp list --show-mine --query "[0].id" -o tsv)
+          if [ -z "$SP_OBJECT_ID" ]; then
+            # Fallback: Get from credentials JSON
+            SP_OBJECT_ID=$(echo '${{ secrets.MYSTIRA_AZURE_CREDENTIALS }}' | jq -r '.clientId')
+            echo "Using client ID from credentials: $SP_OBJECT_ID"
+          else
+            echo "Using service principal object ID: $SP_OBJECT_ID"
+          fi
+
+          STORAGE_ID=$(az storage account show \
+            --resource-group ${{ env.TERRAFORM_RG }} \
+            --name ${{ env.TERRAFORM_STORAGE }} \
+            --query id -o tsv)
+
+          echo "Granting Storage Blob Data Contributor role..."
+          az role assignment create \
+            --assignee "$SP_OBJECT_ID" \
+            --role "Storage Blob Data Contributor" \
+            --scope "$STORAGE_ID" \
+            --output none 2>&1 | grep -v "already exists" || true
+
+          # Wait for role assignment to propagate
+          echo "Waiting 15 seconds for role assignment to propagate..."
+          sleep 15
+
+          echo "::notice::Service principal has storage access"
+
   # ============================================
   # Terraform Plan
   # ============================================
