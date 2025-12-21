@@ -162,10 +162,10 @@ module "shared_postgresql" {
   source = "../../modules/shared/postgresql"
 
   environment         = "staging"
-  location           = var.location
+  location            = var.location
   resource_group_name = azurerm_resource_group.main.name
-  vnet_id            = azurerm_virtual_network.main.id
-  subnet_id          = azurerm_subnet.postgresql.id
+  vnet_id             = azurerm_virtual_network.main.id
+  subnet_id           = azurerm_subnet.postgresql.id
 
   databases = [
     "storygenerator",
@@ -184,7 +184,7 @@ module "shared_redis" {
   source = "../../modules/shared/redis"
 
   environment         = "staging"
-  location           = var.location
+  location            = var.location
   resource_group_name = azurerm_resource_group.main.name
   # subnet_id omitted - Standard SKU doesn't support VNet integration
 
@@ -202,7 +202,7 @@ module "shared_monitoring" {
   source = "../../modules/shared/monitoring"
 
   environment         = "staging"
-  location           = var.location
+  location            = var.location
   resource_group_name = azurerm_resource_group.main.name
 
   retention_in_days = 30
@@ -217,11 +217,11 @@ module "story_generator" {
   source = "../../modules/story-generator"
 
   environment         = "staging"
-  location           = var.location
-  region_code        = "eus"
+  location            = var.location
+  region_code         = "eus"
   resource_group_name = azurerm_resource_group.main.name
-  vnet_id            = azurerm_virtual_network.main.id
-  subnet_id          = azurerm_subnet.story_generator.id
+  vnet_id             = azurerm_virtual_network.main.id
+  subnet_id           = azurerm_subnet.story_generator.id
 
   # Use shared resources
   use_shared_postgresql             = true

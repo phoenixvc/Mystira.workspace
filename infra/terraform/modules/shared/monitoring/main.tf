@@ -53,7 +53,7 @@ locals {
     ManagedBy   = "terraform"
     Project     = "Mystira"
   })
-  
+
   retention_days = var.retention_in_days != null ? var.retention_in_days : (
     var.environment == "prod" ? 90 : 30
   )

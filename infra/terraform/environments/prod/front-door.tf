@@ -25,19 +25,19 @@ module "front_door" {
 
   # WAF Configuration - PRODUCTION SETTINGS
   enable_waf           = true
-  waf_mode             = "Prevention"  # BLOCK malicious traffic in production
-  rate_limit_threshold = 500           # Higher threshold for production traffic
+  waf_mode             = "Prevention" # BLOCK malicious traffic in production
+  rate_limit_threshold = 500          # Higher threshold for production traffic
 
   # Caching Configuration
   enable_caching         = true
-  cache_duration_seconds = 7200  # 2 hours for production
+  cache_duration_seconds = 7200 # 2 hours for production
 
   # Health Probes
   health_probe_path     = "/health"
   health_probe_interval = 30
 
   # Session Affinity
-  session_affinity_enabled = false  # Disabled for stateless apps
+  session_affinity_enabled = false # Disabled for stateless apps
 
   tags = merge(local.common_tags, {
     Component   = "front-door"

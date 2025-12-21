@@ -149,7 +149,7 @@ module "chain" {
   resource_group_name   = azurerm_resource_group.main.name
   chain_node_count      = 1
   chain_vm_size         = "Standard_B2s"
-  chain_storage_size_gb = 100  # Premium file shares require minimum 100 GB
+  chain_storage_size_gb = 100 # Premium file shares require minimum 100 GB
   vnet_id               = azurerm_virtual_network.main.id
   subnet_id             = azurerm_subnet.chain.id
 

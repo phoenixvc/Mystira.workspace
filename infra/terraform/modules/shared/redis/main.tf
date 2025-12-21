@@ -88,16 +88,16 @@ locals {
 # Redis Cache
 # Note: subnet_id can only be used with Premium SKU
 resource "azurerm_redis_cache" "shared" {
-  name                = "${local.name_prefix}-cache"
-  location            = var.location
-  resource_group_name = var.resource_group_name
-  capacity            = var.capacity
-  family              = var.family
-  sku_name            = var.sku_name
+  name                 = "${local.name_prefix}-cache"
+  location             = var.location
+  resource_group_name  = var.resource_group_name
+  capacity             = var.capacity
+  family               = var.family
+  sku_name             = var.sku_name
   non_ssl_port_enabled = var.non_ssl_port_enabled
-  minimum_tls_version = var.minimum_tls_version
-  subnet_id           = var.sku_name == "Premium" ? var.subnet_id : null
-  shard_count         = var.sku_name == "Premium" && var.capacity > 1 ? var.capacity : null
+  minimum_tls_version  = var.minimum_tls_version
+  subnet_id            = var.sku_name == "Premium" ? var.subnet_id : null
+  shard_count          = var.sku_name == "Premium" && var.capacity > 1 ? var.capacity : null
 
   redis_configuration {
     maxmemory_policy = var.maxmemory_policy

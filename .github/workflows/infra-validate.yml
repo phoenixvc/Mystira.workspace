@@ -21,6 +21,7 @@ jobs:
     name: Validate Terraform
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         environment: [dev, staging, prod]
     steps:
@@ -64,6 +65,7 @@ jobs:
     name: Validate Kubernetes
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         environment: [dev, staging, prod]
     steps:
