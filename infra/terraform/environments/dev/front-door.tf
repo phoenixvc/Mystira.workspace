@@ -24,19 +24,19 @@ module "front_door" {
 
   # WAF Configuration
   enable_waf           = true
-  waf_mode             = "Detection"  # Use Detection mode for dev to avoid blocking legitimate test traffic
-  rate_limit_threshold = 100          # Lower threshold for dev
+  waf_mode             = "Detection" # Use Detection mode for dev to avoid blocking legitimate test traffic
+  rate_limit_threshold = 100         # Lower threshold for dev
 
   # Caching Configuration
   enable_caching         = true
-  cache_duration_seconds = 1800  # 30 minutes for dev
+  cache_duration_seconds = 1800 # 30 minutes for dev
 
   # Health Probes
   health_probe_path     = "/health"
   health_probe_interval = 30
 
   # Session Affinity
-  session_affinity_enabled = false  # Disabled for stateless apps
+  session_affinity_enabled = false # Disabled for stateless apps
 
   tags = merge(local.common_tags, {
     Component = "front-door"

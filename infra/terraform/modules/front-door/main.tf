@@ -15,7 +15,7 @@ locals {
     Project     = var.project_name
     Component   = "front-door"
   })
-  
+
   front_door_name = "${var.project_name}-${var.environment}-fd"
   waf_policy_name = "${var.project_name}${var.environment}waf"
 }
@@ -25,7 +25,7 @@ resource "azurerm_cdn_frontdoor_profile" "main" {
   name                = local.front_door_name
   resource_group_name = var.resource_group_name
   sku_name            = "Standard_AzureFrontDoor"
-  
+
   tags = local.common_tags
 }
 
@@ -33,7 +33,7 @@ resource "azurerm_cdn_frontdoor_profile" "main" {
 resource "azurerm_cdn_frontdoor_endpoint" "publisher" {
   name                     = "${var.project_name}-${var.environment}-publisher"
   cdn_frontdoor_profile_id = azurerm_cdn_frontdoor_profile.main.id
-  
+
   tags = local.common_tags
 }
 
@@ -41,7 +41,7 @@ resource "azurerm_cdn_frontdoor_endpoint" "publisher" {
 resource "azurerm_cdn_frontdoor_endpoint" "chain" {
   name                     = "${var.project_name}-${var.environment}-chain"
   cdn_frontdoor_profile_id = azurerm_cdn_frontdoor_profile.main.id
-  
+
   tags = local.common_tags
 }
 
@@ -52,8 +52,8 @@ resource "azurerm_cdn_frontdoor_origin_group" "publisher" {
   session_affinity_enabled = var.session_affinity_enabled
 
   load_balancing {
-    sample_size                 = 4
-    successful_samples_required = 3
+    sample_size                        = 4
+    successful_samples_required        = 3
     additional_latency_in_milliseconds = 50
   }
 
@@ -72,8 +72,8 @@ resource "azurerm_cdn_frontdoor_origin_group" "chain" {
   session_affinity_enabled = var.session_affinity_enabled
 
   load_balancing {
-    sample_size                 = 4
-    successful_samples_required = 3
+    sample_size                        = 4
+    successful_samples_required        = 3
     additional_latency_in_milliseconds = 50
   }
 
@@ -89,12 +89,12 @@ resource "azurerm_cdn_frontdoor_origin_group" "chain" {
 resource "azurerm_cdn_frontdoor_origin" "publisher" {
   name                          = "publisher-origin"
   cdn_frontdoor_origin_group_id = azurerm_cdn_frontdoor_origin_group.publisher.id
-  
+
   enabled                        = true
   host_name                      = var.publisher_backend_address
   http_port                      = 80
   https_port                     = 443
-  origin_host_header            = var.publisher_backend_address
+  origin_host_header             = var.publisher_backend_address
   priority                       = 1
   weight                         = 1000
   certificate_name_check_enabled = true
@@ -104,12 +104,12 @@ resource "azurerm_cdn_frontdoor_origin" "publisher" {
 resource "azurerm_cdn_frontdoor_origin" "chain" {
   name                          = "chain-origin"
   cdn_frontdoor_origin_group_id = azurerm_cdn_frontdoor_origin_group.chain.id
-  
+
   enabled                        = true
   host_name                      = var.chain_backend_address
   http_port                      = 80
   https_port                     = 443
-  origin_host_header            = var.chain_backend_address
+  origin_host_header             = var.chain_backend_address
   priority                       = 1
   weight                         = 1000
   certificate_name_check_enabled = true
@@ -143,12 +143,12 @@ resource "azurerm_cdn_frontdoor_custom_domain" "chain" {
 
 # Publisher Route
 resource "azurerm_cdn_frontdoor_route" "publisher" {
-  name                          = "publisher-route"
-  cdn_frontdoor_endpoint_id     = azurerm_cdn_frontdoor_endpoint.publisher.id
-  cdn_frontdoor_origin_group_id = azurerm_cdn_frontdoor_origin_group.publisher.id
-  cdn_frontdoor_origin_ids      = [azurerm_cdn_frontdoor_origin.publisher.id]
+  name                            = "publisher-route"
+  cdn_frontdoor_endpoint_id       = azurerm_cdn_frontdoor_endpoint.publisher.id
+  cdn_frontdoor_origin_group_id   = azurerm_cdn_frontdoor_origin_group.publisher.id
+  cdn_frontdoor_origin_ids        = [azurerm_cdn_frontdoor_origin.publisher.id]
   cdn_frontdoor_custom_domain_ids = [azurerm_cdn_frontdoor_custom_domain.publisher.id]
-  
+
   supported_protocols    = ["Http", "Https"]
   patterns_to_match      = ["/*"]
   forwarding_protocol    = "HttpsOnly"
@@ -176,12 +176,12 @@ resource "azurerm_cdn_frontdoor_route" "publisher" {
 
 # Chain Route
 resource "azurerm_cdn_frontdoor_route" "chain" {
-  name                          = "chain-route"
-  cdn_frontdoor_endpoint_id     = azurerm_cdn_frontdoor_endpoint.chain.id
-  cdn_frontdoor_origin_group_id = azurerm_cdn_frontdoor_origin_group.chain.id
-  cdn_frontdoor_origin_ids      = [azurerm_cdn_frontdoor_origin.chain.id]
+  name                            = "chain-route"
+  cdn_frontdoor_endpoint_id       = azurerm_cdn_frontdoor_endpoint.chain.id
+  cdn_frontdoor_origin_group_id   = azurerm_cdn_frontdoor_origin_group.chain.id
+  cdn_frontdoor_origin_ids        = [azurerm_cdn_frontdoor_origin.chain.id]
   cdn_frontdoor_custom_domain_ids = [azurerm_cdn_frontdoor_custom_domain.chain.id]
-  
+
   supported_protocols    = ["Http", "Https"]
   patterns_to_match      = ["/*"]
   forwarding_protocol    = "HttpsOnly"

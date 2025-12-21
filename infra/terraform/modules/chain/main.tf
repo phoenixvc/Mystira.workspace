@@ -88,7 +88,7 @@ locals {
   name_prefix = "mys-${var.environment}-mystira-chain"
   region_code = var.region_code
   # Key Vault names must be 3-24 chars, alphanumeric and dashes only
-  kv_name     = "mys-${var.environment}-chn-kv-${local.region_code}"
+  kv_name = "mys-${var.environment}-chn-kv-${local.region_code}"
   common_tags = merge(var.tags, {
     Component   = "chain"
     Environment = var.environment
@@ -188,7 +188,7 @@ resource "terraform_data" "chain_data_share" {
   }
 
   provisioner "local-exec" {
-    command = <<-EOT
+    command     = <<-EOT
       # Get storage account key and use data plane API
       STORAGE_KEY=$(az storage account keys list \
         --resource-group "${var.resource_group_name}" \
@@ -206,8 +206,8 @@ resource "terraform_data" "chain_data_share" {
   }
 
   provisioner "local-exec" {
-    when    = destroy
-    command = <<-EOT
+    when        = destroy
+    command     = <<-EOT
       # Get storage account key for deletion
       STORAGE_KEY=$(az storage account keys list \
         --resource-group "${self.triggers_replace.resource_group}" \
