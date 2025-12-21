@@ -27,21 +27,55 @@ These workflows run when respective component files change in workspace PRs and 
 
 ### 📱 App Component (Special Case)
 
-**No workspace CI workflow** - The App submodule has comprehensive CI/CD in its own repository ([Mystira.App](https://github.com/phoenixvc/Mystira.App)) with 18+ workflows:
+**No workspace CI workflow** - The App submodule has its own CI/CD in ([Mystira.App](https://github.com/phoenixvc/Mystira.App)) repository:
 
-**App repo handles:**
-- ✅ CI tests & code coverage (runs on all App PRs)
-- ✅ Dev environment deployments
-- ✅ Preview environments
-- ✅ SWA (Static Web Apps) deployments
-- ✅ Fast development feedback loop
+**App repo handles (KEEP these workflows):**
+- ✅ `ci-tests-codecov.yml` - CI tests & code coverage (runs on all App PRs)
+- ✅ `swa-preview-tests.yml` - Preview environment testing
+- ✅ `swa-cleanup-staging-environments.yml` - Preview cleanup
+- ✅ `infrastructure-deploy-dev.yml` - Dev infrastructure (optional, see below)
+- ✅ `mystira-app-*-dev.yml` - Dev deployments for API/PWA/Admin (optional, see below)
 
 **Workspace handles (for App):**
-- ✅ Staging/Production releases (via `staging-release.yml`, `production-release.yml`)
+- ✅ Staging releases (via `staging-release.yml`)
+- ✅ Production releases (via `production-release.yml`)
+- ✅ NuGet package publishing (centralized on workspace main)
 - ✅ Multi-service orchestration
 - ✅ Integration with other services
 
-**Rationale:** App has independent development lifecycle with NuGet packages. Duplicating CI in workspace creates confusion and wastes resources. Developers work in App repo with fast CI feedback, while releases are controlled from workspace.
+**DELETE from App repo (11 workflows):**
+
+These workflows should be removed as workspace handles staging/prod releases:
+
+**Staging (6 workflows):**
+- ❌ `infrastructure-deploy-staging.yml`
+- ❌ `mystira-app-admin-api-cicd-staging.yml`
+- ❌ `mystira-app-api-cicd-staging.yml`
+- ❌ `mystira-app-pwa-cicd-staging.yml`
+- ❌ `mystira-app-pwa-cicd-staging.yml.disabled`
+- ❌ `staging-automated-setup.yml`
+
+**Production (4 workflows):**
+- ❌ `infrastructure-deploy-prod.yml`
+- ❌ `mystira-app-admin-api-cicd-prod.yml`
+- ❌ `mystira-app-api-cicd-prod.yml`
+- ❌ `mystira-app-pwa-cicd-prod.yml`
+
+**Package Publishing (1 workflow):**
+- ❌ `publish-shared-packages.yml` (move to workspace)
+
+**Dev Deployments (4 workflows - YOUR CHOICE):**
+
+Option A (Recommended): **KEEP** for fast dev iterations
+- ✅ `infrastructure-deploy-dev.yml`
+- ✅ `mystira-app-admin-api-cicd-dev.yml`
+- ✅ `mystira-app-api-cicd-dev.yml`
+- ✅ `mystira-app-pwa-cicd-dev.yml`
+
+Option B: **DELETE** for centralized control
+- ❌ Move all dev deployments to workspace
+
+**Rationale:** App has independent development lifecycle. Developers work in App repo with fast CI feedback. Staging/production releases are controlled from workspace to prevent accidental deployments and maintain consistency with other components.
 
 ### 🚀 Deployment Workflows
 
@@ -150,6 +184,63 @@ These workflows run when respective component files change in workspace PRs and 
 - App uses its own comprehensive CI/CD
 - Clear documentation of workflow strategy
 - No duplication, clear boundaries
+
+### App Repo Cleanup Required
+
+**Action Required:** Delete these 11+ workflows from [Mystira.App](https://github.com/phoenixvc/Mystira.App) repository:
+
+#### Must Delete - Staging Deployments (6 workflows)
+```bash
+# Workspace staging-release.yml now handles these
+rm .github/workflows/infrastructure-deploy-staging.yml
+rm .github/workflows/mystira-app-admin-api-cicd-staging.yml
+rm .github/workflows/mystira-app-api-cicd-staging.yml
+rm .github/workflows/mystira-app-pwa-cicd-staging.yml
+rm .github/workflows/mystira-app-pwa-cicd-staging.yml.disabled
+rm .github/workflows/staging-automated-setup.yml
+```
+
+#### Must Delete - Production Deployments (4 workflows)
+```bash
+# Workspace production-release.yml now handles these
+rm .github/workflows/infrastructure-deploy-prod.yml
+rm .github/workflows/mystira-app-admin-api-cicd-prod.yml
+rm .github/workflows/mystira-app-api-cicd-prod.yml
+rm .github/workflows/mystira-app-pwa-cicd-prod.yml
+```
+
+#### Must Delete - Package Publishing (1 workflow)
+```bash
+# Move to workspace for centralized control
+rm .github/workflows/publish-shared-packages.yml
+```
+
+#### Optional - Dev Deployments (4 workflows)
+
+**Recommendation: KEEP** for fast dev iterations
+
+If you want centralized control, delete these:
+```bash
+rm .github/workflows/infrastructure-deploy-dev.yml
+rm .github/workflows/mystira-app-admin-api-cicd-dev.yml
+rm .github/workflows/mystira-app-api-cicd-dev.yml
+rm .github/workflows/mystira-app-pwa-cicd-dev.yml
+```
+
+#### Keep in App Repo (3 workflows)
+```bash
+# These should stay in App repo for fast dev feedback
+✅ .github/workflows/ci-tests-codecov.yml
+✅ .github/workflows/swa-preview-tests.yml
+✅ .github/workflows/swa-cleanup-staging-environments.yml
+```
+
+### Summary of Changes
+
+**Before:** 18 workflows in App repo
+**After:** 3-7 workflows in App repo (depending on dev deployment choice)
+**Removed:** 11-15 duplicate/unnecessary workflows
+**Result:** Clear separation, no duplication, controlled releases
 
 ## Related Repositories
 
