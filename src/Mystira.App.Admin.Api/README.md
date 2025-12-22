@@ -343,33 +343,86 @@ app.Run();
 
 ## Authentication & Authorization
 
-### Admin-Only Access
+### Multi-Scheme Authentication
+
+The Admin API supports three authentication schemes:
+
+1. **Cookie Authentication** - Default scheme for browser-based admin dashboard
+2. **JWT Bearer** - For API clients with custom tokens (RSA or symmetric key)
+3. **Microsoft Entra ID (Azure AD)** - Enterprise SSO via Microsoft.Identity.Web
 
 ```csharp
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options =>
-    {
-        options.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuer = true,
-            ValidateAudience = true,
-            ValidateLifetime = true,
-            ValidateIssuerSigningKey = true,
-            ValidIssuer = builder.Configuration["Jwt:Issuer"],
-            ValidAudience = builder.Configuration["Jwt:Audience"],
-            IssuerSigningKey = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
-        };
-    });
+// Cookie authentication (default for dashboard)
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultScheme = "Cookies";
+    options.DefaultChallengeScheme = "Cookies";
+})
+.AddCookie("Cookies", options =>
+{
+    options.Cookie.Name = "Mystira.Admin.Auth";
+    options.LoginPath = "/admin/login";
+})
+.AddJwtBearer(options =>
+{
+    // Supports RSA (recommended) or symmetric key
+    options.TokenValidationParameters = new TokenValidationParameters { ... };
+});
 
+// Microsoft Entra ID (conditionally enabled)
+var azureAdSection = builder.Configuration.GetSection("AzureAd");
+if (!string.IsNullOrEmpty(azureAdSection["TenantId"]) &&
+    !string.IsNullOrEmpty(azureAdSection["ClientId"]))
+{
+    builder.Services.AddAuthentication()
+        .AddMicrosoftIdentityWebApi(azureAdSection, jwtBearerScheme: "AzureAd");
+}
+```
+
+### Enabling Entra ID Authentication
+
+Configure via User Secrets or Azure Key Vault:
+
+```bash
+dotnet user-secrets set "AzureAd:TenantId" "your-tenant-id-guid"
+dotnet user-secrets set "AzureAd:ClientId" "your-app-client-id-guid"
+```
+
+**Configuration** (`appsettings.json`):
+```json
+{
+  "AzureAd": {
+    "Instance": "https://login.microsoftonline.com/",
+    "TenantId": "",
+    "ClientId": "",
+    "Audience": "api://mystira-admin-api",
+    "Scopes": {
+      "Read": "Admin.Read",
+      "Write": "Admin.Write",
+      "UsersManage": "Users.Manage",
+      "ContentModerate": "Content.Moderate"
+    }
+  }
+}
+```
+
+### Authorization Policies
+
+```csharp
 builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("AdminOnly", policy =>
-        policy.RequireRole("Admin"));
+        policy.RequireRole("Admin", "SuperAdmin"));
+    options.AddPolicy("CanModerate", policy =>
+        policy.RequireRole("Moderator", "Admin", "SuperAdmin"));
+    options.AddPolicy("ReadOnly", policy =>
+        policy.RequireRole("Viewer", "Moderator", "Admin", "SuperAdmin"));
+    options.AddPolicy("SuperAdminOnly", policy =>
+        policy.RequireRole("SuperAdmin"));
 });
 ```
 
-All admin controllers require `[Authorize(Roles = "Admin")]`.
+All admin controllers require `[Authorize(Roles = "Admin")]` or appropriate policy.
 
 ## Deployment
 
