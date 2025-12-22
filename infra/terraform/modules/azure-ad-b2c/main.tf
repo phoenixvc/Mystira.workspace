@@ -135,6 +135,11 @@ resource "azuread_application" "pwa" {
   display_name     = "Mystira PWA (${var.environment})"
   sign_in_audience = "AzureADandPersonalMicrosoftAccount"
 
+  # API configuration for token version
+  api {
+    requested_access_token_version = 2
+  }
+
   # Single-page application (SPA) configuration
   single_page_application {
     redirect_uris = var.pwa_redirect_uris
@@ -188,6 +193,11 @@ resource "azuread_application" "mobile" {
   count            = length(var.mobile_redirect_uris) > 0 ? 1 : 0
   display_name     = "Mystira Mobile App (${var.environment})"
   sign_in_audience = "AzureADandPersonalMicrosoftAccount"
+
+  # API configuration for token version
+  api {
+    requested_access_token_version = 2
+  }
 
   # Public client configuration for mobile apps
   public_client {
