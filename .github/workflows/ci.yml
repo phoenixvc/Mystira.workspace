@@ -17,6 +17,10 @@ on:
     types: [opened, synchronize, reopened, ready_for_review]
   workflow_dispatch:
 
+permissions:
+  contents: read
+  packages: read
+
 concurrency:
   group: admin-api-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
