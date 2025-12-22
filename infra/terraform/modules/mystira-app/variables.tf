@@ -91,13 +91,13 @@ variable "app_service_sku" {
 }
 
 variable "dotnet_version" {
-  description = ".NET version for App Service (AzureRM ~3.80 supports: 3.1, 5.0, 6.0, 7.0, 8.0)"
+  description = ".NET version for App Service (AzureRM 4.x supports: 3.1, 5.0, 6.0, 7.0, 8.0, 9.0)"
   type        = string
-  default     = "8.0"
+  default     = "9.0"
 
   validation {
-    condition     = contains(["3.1", "5.0", "6.0", "7.0", "8.0"], var.dotnet_version)
-    error_message = "dotnet_version must be one of: 3.1, 5.0, 6.0, 7.0, 8.0. .NET 9.0 requires AzureRM provider 4.x+"
+    condition     = contains(["3.1", "5.0", "6.0", "7.0", "8.0", "9.0"], var.dotnet_version)
+    error_message = "dotnet_version must be one of: 3.1, 5.0, 6.0, 7.0, 8.0, 9.0"
   }
 }
 
