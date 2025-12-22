@@ -61,3 +61,30 @@ jobs:
 
       - name: Test
         run: dotnet test --no-build --verbosity normal
+
+      - name: Verify Configuration Files
+        run: |
+          echo "Checking configuration files..."
+          # Verify appsettings.json is valid JSON
+          for file in src/Mystira.App.Admin.Api/appsettings*.json; do
+            if [ -f "$file" ]; then
+              echo "Validating: $file"
+              python3 -c "import json; json.load(open('$file'))" || exit 1
+            fi
+          done
+          echo "Configuration files validated successfully"
+
+      - name: Check Documentation
+        run: |
+          echo "Checking documentation structure..."
+          required_docs=(
+            "docs/README.md"
+            "docs/architecture/adr/0006-admin-api-repository-extraction.md"
+            "docs/planning/master-implementation-checklist.md"
+          )
+          for doc in "${required_docs[@]}"; do
+            if [ ! -f "$doc" ]; then
+              echo "::warning::Missing documentation: $doc"
+            fi
+          done
+          echo "Documentation check complete"
