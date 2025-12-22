@@ -69,17 +69,25 @@ This project depends on NuGet packages published from `Mystira.App`:
 ### Prerequisites
 
 - .NET 9.0 SDK
-- Azure DevOps account (for NuGet feed access)
+- (Optional) Azure DevOps account - for private NuGet feed access
 - (Optional) Azure Cosmos DB account
 - (Optional) Azure Storage account
 
 ### Local Development
 
-1. **Configure NuGet feed** in `NuGet.config`:
+1. **Configure NuGet feed** (optional - only needed if packages are not on nuget.org):
    ```xml
-   <!-- Update with your Azure DevOps details -->
+   <!-- Update with your Azure DevOps details in NuGet.config -->
    <add key="Mystira-Internal"
         value="https://pkgs.dev.azure.com/{org}/{project}/_packaging/{feed}/nuget/v3/index.json" />
+   ```
+   
+   Or using the CLI:
+   ```bash
+   dotnet nuget add source https://pkgs.dev.azure.com/{org}/{project}/_packaging/{feed}/nuget/v3/index.json \
+     --name "Mystira-Internal" \
+     --username {your-email} \
+     --password {your-pat}
    ```
 
 2. **Restore packages**:
@@ -164,6 +172,20 @@ GitHub Actions workflows are configured for:
 - **Build & Test**: On push to `main`/`dev` and PRs
 - **Configuration Validation**: Verify JSON config files
 - **Documentation Check**: Ensure required docs exist
+
+### Azure DevOps NuGet Feed (Optional)
+
+The CI workflow supports an optional Azure DevOps private NuGet feed. If you need to use internal packages:
+
+1. Configure the following GitHub secrets in your repository:
+   - `MYSTIRA_DEVOPS_AZURE_ORG` - Azure DevOps organization name
+   - `MYSTIRA_DEVOPS_AZURE_PROJECT` - Azure DevOps project name
+   - `MYSTIRA_DEVOPS_AZURE_PAT` - Personal Access Token with package read permissions
+   - `MYSTIRA_DEVOPS_NUGET_FEED` - NuGet feed name
+
+2. The workflow will automatically configure the feed if these secrets are present
+
+If the secrets are not configured, the workflow will skip the Azure DevOps feed and use only nuget.org.
 
 ## CORS Configuration
 

@@ -26,9 +26,9 @@ The Admin API uses GitHub Actions for continuous integration and deployment.
 - Build artifact retention (7 days)
 - NuGet feed authentication
 
-### Required Secrets
+### Required Secrets (Optional)
 
-Configure these secrets in GitHub repository settings:
+The following secrets are **optional**. Configure them only if you need access to a private Azure DevOps NuGet feed:
 
 | Secret | Description |
 |--------|-------------|
@@ -36,6 +36,8 @@ Configure these secrets in GitHub repository settings:
 | `MYSTIRA_DEVOPS_AZURE_PROJECT` | Azure DevOps project name |
 | `MYSTIRA_DEVOPS_AZURE_PAT` | Personal Access Token (Packaging Read scope) |
 | `MYSTIRA_DEVOPS_NUGET_FEED` | Artifacts feed name (e.g., `Mystira-Internal`) |
+
+**Note**: If these secrets are not configured, the workflow will skip the Azure DevOps feed configuration and use only nuget.org. This is intentional to support environments without access to private feeds.
 
 ## Deployment
 
@@ -63,9 +65,9 @@ dotnet build --configuration Release
 dotnet publish src/Mystira.App.Admin.Api/Mystira.App.Admin.Api.csproj -c Release -o ./publish
 ```
 
-### NuGet Feed Configuration
+### NuGet Feed Configuration (Optional)
 
-For local development, configure the internal NuGet feed:
+For local development with private packages, configure the internal NuGet feed:
 
 ```bash
 dotnet nuget add source https://pkgs.dev.azure.com/{org}/{project}/_packaging/{feed}/nuget/v3/index.json \
@@ -75,6 +77,8 @@ dotnet nuget add source https://pkgs.dev.azure.com/{org}/{project}/_packaging/{f
 ```
 
 Or update `NuGet.config` with your credentials.
+
+**Note**: This is only needed if you're using packages from a private Azure DevOps feed. Public packages from nuget.org don't require any additional configuration.
 
 ## Alignment with Workspace
 
