@@ -311,23 +311,26 @@ This roadmap outlines the strategic implementation plan for the Mystira workspac
 ## Phase 5: Security and Compliance (Months 5-6)
 
 **Goal**: Strengthen security posture and ensure compliance.
+**Status**: 🔄 In Progress (December 2025)
 
 ### 5.0 Authentication Implementation (Entra ID & B2C)
 
 **Priority**: High
 **Dependencies**: None
 **Estimated Effort**: 3 weeks
+**Status**: 🔄 In Progress
 
 **Reference**: [ADR-0011: Entra ID Integration](../architecture/adr/0011-entra-id-authentication-integration.md)
 
 **Tasks**:
 
 #### Phase 5.0.1: Microsoft Entra ID (Admin)
-- [ ] Create Entra ID App Registration for Admin API
-- [ ] Create Entra ID App Registration for Admin UI
+- [x] Create Entra ID Terraform module (`infra/terraform/modules/entra-id/` - December 2025)
+- [x] Define App Roles (Admin, SuperAdmin, Moderator, Viewer) - in Terraform module
+- [x] Define API Scopes (Admin.Read, Admin.Write, Users.Manage, Content.Moderate) - in Terraform module
+- [ ] Deploy Entra ID app registrations (run Terraform)
 - [ ] Configure MSAL in Admin UI (React)
 - [ ] Add Microsoft.Identity.Web to Admin API
-- [ ] Define App Roles (Admin, SuperAdmin, Moderator, Viewer)
 - [ ] Configure group-to-role mapping
 - [ ] Create Conditional Access policies (MFA requirement)
 - [ ] Test admin authentication flow end-to-end
