@@ -28,6 +28,13 @@ This directory contains operational runbooks for the Mystira platform. Each runb
 | Scaling operations | [scaling-operations.md](./scaling-operations.md) | 10-20 minutes | On-call lead |
 | Log rotation | [log-management.md](./log-management.md) | 5-10 minutes | None |
 
+### Infrastructure Maintenance
+
+| Scenario | Runbook | Estimated Time | Approval Required |
+|----------|---------|----------------|-------------------|
+| Terraform state cleanup | [terraform-state-cleanup.md](./terraform-state-cleanup.md) | 30-60 minutes | Engineering Lead |
+| Fix workflow naming | [workflow-naming-fix.md](./workflow-naming-fix.md) | 5 min/submodule | None |
+
 ### Troubleshooting
 
 | Scenario | Runbook | Priority |

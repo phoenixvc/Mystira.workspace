@@ -30,7 +30,7 @@ module "mystira_app" {
   # App Service Configuration (API Backend)
   # -----------------------------------------------------------------------------
   app_service_sku = "B1"
-  dotnet_version  = "9.0"
+  dotnet_version  = "8.0"  # AzureRM ~3.80 supports up to 8.0; upgrade provider for .NET 9
 
   # Custom domain (enable after initial deployment)
   enable_api_custom_domain = false
