@@ -67,7 +67,7 @@ For end users with social login (Google, Discord) and self-service registration.
 | Public API | JWT Bearer Token | Azure AD B2C |
 
 **Key Files:**
-- Terraform: [`infra/terraform/modules/azure-ad-b2c/`](../../infra/terraform/modules/azure-ad-b2c/)
+- Terraform: [`infra/terraform/modules/external-id/`](../../infra/terraform/modules/external-id/)
 - ADR: [`docs/architecture/adr/0010-authentication-and-authorization-strategy.md`](../architecture/adr/0010-authentication-and-authorization-strategy.md)
 
 ### Tier 3: Service Authentication (Workload Identity)
@@ -92,7 +92,7 @@ For service-to-service and service-to-Azure-resource authentication.
 | Module | Purpose | Location |
 |--------|---------|----------|
 | `entra-id` | Admin app registrations, scopes, roles | [`modules/entra-id/`](../../infra/terraform/modules/entra-id/) |
-| `azure-ad-b2c` | Consumer auth with social login | [`modules/azure-ad-b2c/`](../../infra/terraform/modules/azure-ad-b2c/) |
+| `external-id` | Consumer auth with social login | [`modules/external-id/`](../../infra/terraform/modules/external-id/) |
 | `admin-api` | Admin API managed identity | [`modules/admin-api/`](../../infra/terraform/modules/admin-api/) |
 | `shared/identity` | RBAC, workload identity federation | [`modules/shared/identity/`](../../infra/terraform/modules/shared/identity/) |
 | `shared/postgresql` | Database with Azure AD auth | [`modules/shared/postgresql/`](../../infra/terraform/modules/shared/postgresql/) |

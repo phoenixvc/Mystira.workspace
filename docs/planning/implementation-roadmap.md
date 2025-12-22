@@ -340,7 +340,7 @@ This roadmap outlines the strategic implementation plan for the Mystira workspac
 - [ ] Test admin authentication flow end-to-end
 
 #### Phase 5.0.2: Azure AD B2C (Consumer)
-- [x] Create Azure AD B2C Terraform module (`infra/terraform/modules/azure-ad-b2c/` - December 2025)
+- [x] Create External ID Terraform module (`infra/terraform/modules/external-id/` - December 2025)
   - [x] Public API app registration with exposed scopes
   - [x] PWA/SPA app registration for Blazor WASM and React clients
   - [x] API scopes: API.Access, Stories.Read, Stories.Write, Profile.Read

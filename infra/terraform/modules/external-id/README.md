@@ -92,7 +92,7 @@ az rest --method put \
 
 ```hcl
 module "entra_external_id" {
-  source = "../../modules/azure-ad-b2c"
+  source = "../../modules/external-id"
 
   environment     = "dev"
   tenant_name     = "mystira"  # Your external tenant subdomain
@@ -109,7 +109,7 @@ module "entra_external_id" {
 
 ```hcl
 module "entra_external_id" {
-  source = "../../modules/azure-ad-b2c"
+  source = "../../modules/external-id"
 
   environment     = "dev"
   tenant_name     = "mystira"

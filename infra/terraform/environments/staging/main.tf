@@ -38,8 +38,8 @@ variable "location" {
   default     = "southafricanorth"
 }
 
-variable "b2c_tenant_id" {
-  description = "Azure AD B2C tenant ID (optional - set when B2C tenant is created)"
+variable "external_tenant_id" {
+  description = "Microsoft Entra External ID tenant ID (optional - set when tenant is created)"
   type        = string
   default     = ""
 }
@@ -333,14 +333,14 @@ module "entra_id" {
 }
 
 # Microsoft Entra External ID Consumer Authentication
-# Note: External ID tenant must be created manually first, then set b2c_tenant_id variable
-module "azure_ad_b2c" {
-  source = "../../modules/azure-ad-b2c"
-  count  = var.b2c_tenant_id != "" ? 1 : 0
+# Note: External ID tenant must be created manually first, then set external_tenant_id variable
+module "external_id" {
+  source = "../../modules/external-id"
+  count  = var.external_tenant_id != "" ? 1 : 0
 
   environment = "staging"
-  tenant_id   = var.b2c_tenant_id
-  tenant_name = "mystirab2cstaging"
+  tenant_id   = var.external_tenant_id
+  tenant_name = "mystirastaging"
 
   pwa_redirect_uris = [
     "https://app.staging.mystira.app/auth/callback"
