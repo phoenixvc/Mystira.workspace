@@ -297,8 +297,8 @@ public class DualWriteAccountRepository : IAccountRepository
             // Primary: Cosmos
             var result = await _cosmosRepo.AddAsync(entity, ct);
 
-            // Secondary: PostgreSQL (async, non-blocking)
-            _ = WriteToPostgresAsync(entity, SyncOperation.Insert);
+            // Secondary: PostgreSQL (queued for reliability)
+            await QueueSecondaryWriteAsync(entity.Id, SyncOperation.Insert, ct);
 
             return result;
         }
@@ -307,8 +307,8 @@ public class DualWriteAccountRepository : IAccountRepository
             // Primary: PostgreSQL
             var result = await _pgRepo.AddAsync(entity, ct);
 
-            // Secondary: Cosmos (async, non-blocking)
-            _ = WriteToCosmosAsync(entity, SyncOperation.Insert);
+            // Secondary: Cosmos (fire-and-forget with logging)
+            _ = Task.Run(async () => await WriteToCosmosWithErrorHandlingAsync(entity, SyncOperation.Insert));
 
             return result;
         }
@@ -321,13 +321,13 @@ public class DualWriteAccountRepository : IAccountRepository
         if (phase == MigrationPhase.DualWriteCosmosRead)
         {
             var result = await _cosmosRepo.UpdateAsync(entity, ct);
-            _ = WriteToPostgresAsync(entity, SyncOperation.Update);
+            await QueueSecondaryWriteAsync(entity.Id, SyncOperation.Update, ct);
             return result;
         }
         else
         {
             var result = await _pgRepo.UpdateAsync(entity, ct);
-            _ = WriteToCosmosAsync(entity, SyncOperation.Update);
+            _ = Task.Run(async () => await WriteToCosmosWithErrorHandlingAsync(entity, SyncOperation.Update));
             return result;
         }
     }
@@ -339,12 +339,12 @@ public class DualWriteAccountRepository : IAccountRepository
         if (phase == MigrationPhase.DualWriteCosmosRead)
         {
             await _cosmosRepo.DeleteAsync(id, ct);
-            _ = DeleteFromPostgresAsync(id);
+            await QueueSecondaryWriteAsync(id, SyncOperation.Delete, ct);
         }
         else
         {
             await _pgRepo.DeleteAsync(id, ct);
-            _ = DeleteFromCosmosAsync(id);
+            _ = Task.Run(async () => await DeleteFromCosmosWithErrorHandlingAsync(id));
         }
     }
 
@@ -375,30 +375,27 @@ public class DualWriteAccountRepository : IAccountRepository
             : await _pgRepo.ExistsByEmailAsync(email);
     }
 
-    // Helper methods for async secondary writes
-    private async Task WriteToPostgresAsync(Account entity, SyncOperation op)
+    // Queue-based secondary write (reliable, retryable)
+    private async Task QueueSecondaryWriteAsync(string id, SyncOperation op, CancellationToken ct)
     {
         try
         {
-            if (op == SyncOperation.Insert)
-                await _pgRepo.AddAsync(entity);
-            else
-                await _pgRepo.UpdateAsync(entity);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Failed to sync account {Id} to PostgreSQL", entity.Id);
             await _syncQueue.EnqueueAsync(new SyncItem
             {
                 EntityType = nameof(Account),
-                EntityId = entity.Id,
-                Operation = op,
-                RetryCount = 0
-            });
+                EntityId = id,
+                Operation = op
+            }, ct);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to queue sync for account {Id}", id);
+            // Consider alerting - this is a critical failure
         }
     }
 
-    private async Task WriteToCosmosAsync(Account entity, SyncOperation op)
+    // Fire-and-forget with proper error handling (for non-critical secondary writes)
+    private async Task WriteToCosmosWithErrorHandlingAsync(Account entity, SyncOperation op)
     {
         try
         {
@@ -409,26 +406,20 @@ public class DualWriteAccountRepository : IAccountRepository
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to sync account {Id} to Cosmos", entity.Id);
-            // Don't queue for retry since PostgreSQL is primary
+            _logger.LogError(ex, "Failed to sync account {Id} to Cosmos (non-blocking)", entity.Id);
+            // Don't queue for retry since PostgreSQL is primary in this phase
         }
     }
 
-    private async Task DeleteFromPostgresAsync(string id)
+    private async Task DeleteFromCosmosWithErrorHandlingAsync(string id)
     {
-        try { await _pgRepo.DeleteAsync(id); }
-        catch (Exception ex)
+        try
         {
-            _logger.LogError(ex, "Failed to delete account {Id} from PostgreSQL", id);
+            await _cosmosRepo.DeleteAsync(id);
         }
-    }
-
-    private async Task DeleteFromCosmosAsync(string id)
-    {
-        try { await _cosmosRepo.DeleteAsync(id); }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to delete account {Id} from Cosmos", id);
+            _logger.LogError(ex, "Failed to delete account {Id} from Cosmos (non-blocking)", id);
         }
     }
 }
@@ -440,20 +431,22 @@ public class DualWriteAccountRepository : IAccountRepository
 // Infrastructure.Hybrid/Sync/SyncQueue.cs
 public interface ISyncQueue
 {
-    Task EnqueueAsync(SyncItem item);
-    Task<SyncItem?> DequeueAsync(CancellationToken ct);
-    Task<int> GetQueueLengthAsync();
+    Task EnqueueAsync(SyncItem item, CancellationToken ct = default);
+    Task<SyncItem?> DequeueAsync(CancellationToken ct = default);
+    Task<int> GetQueueLengthAsync(CancellationToken ct = default);
+    Task<IEnumerable<SyncItem>> GetAllAsync(CancellationToken ct = default);
+    Task RetryFailedAsync(CancellationToken ct = default);
 }
 
-public class SyncItem
+public record SyncItem
 {
-    public string Id { get; set; } = Guid.NewGuid().ToString();
-    public string EntityType { get; set; } = string.Empty;
-    public string EntityId { get; set; } = string.Empty;
-    public SyncOperation Operation { get; set; }
+    public string Id { get; init; } = Guid.NewGuid().ToString();
+    public required string EntityType { get; init; }
+    public required string EntityId { get; init; }
+    public required SyncOperation Operation { get; init; }
     public int RetryCount { get; set; }
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-    public DateTime? LastAttemptAt { get; set; }
+    public DateTimeOffset CreatedAt { get; init; } = DateTimeOffset.UtcNow;
+    public DateTimeOffset? LastAttemptAt { get; set; }
     public string? LastError { get; set; }
 }
 
@@ -465,9 +458,43 @@ public enum SyncOperation
     Delete
 }
 
+// Thread-safe in-memory implementation (for development/testing)
+public class InMemorySyncQueue : ISyncQueue
+{
+    private readonly ConcurrentQueue<SyncItem> _queue = new();
+    private readonly ConcurrentBag<SyncItem> _failed = [];
+
+    public Task EnqueueAsync(SyncItem item, CancellationToken ct = default)
+    {
+        _queue.Enqueue(item);
+        return Task.CompletedTask;
+    }
+
+    public Task<SyncItem?> DequeueAsync(CancellationToken ct = default)
+    {
+        return Task.FromResult(_queue.TryDequeue(out var item) ? item : null);
+    }
+
+    public Task<int> GetQueueLengthAsync(CancellationToken ct = default)
+        => Task.FromResult(_queue.Count);
+
+    public Task<IEnumerable<SyncItem>> GetAllAsync(CancellationToken ct = default)
+        => Task.FromResult<IEnumerable<SyncItem>>([.. _queue]);
+
+    public Task RetryFailedAsync(CancellationToken ct = default)
+    {
+        while (_failed.TryTake(out var item))
+        {
+            item.RetryCount++;
+            _queue.Enqueue(item);
+        }
+        return Task.CompletedTask;
+    }
+}
+
 // Can be backed by:
-// - In-memory queue (simple, not durable)
-// - Redis queue (recommended)
+// - In-memory queue (simple, not durable) - InMemorySyncQueue above
+// - Redis queue (recommended for production)
 // - Azure Service Bus (enterprise)
 // - PostgreSQL table (simple, durable)
 ```
@@ -582,26 +609,38 @@ public class CachedAccountRepository : IAccountRepository
 {
     private readonly IAccountRepository _inner;
     private readonly IDistributedCache _cache;
-    private readonly TimeSpan _cacheDuration = TimeSpan.FromMinutes(5);
+    private readonly IOptions<RedisOptions> _options;
+    private readonly ILogger<CachedAccountRepository> _logger;
+    private readonly TimeSpan _cacheDuration;
 
     public CachedAccountRepository(
         IAccountRepository inner,
-        IDistributedCache cache)
+        IDistributedCache cache,
+        IOptions<RedisOptions> options,
+        ILogger<CachedAccountRepository> logger)
     {
         _inner = inner;
         _cache = cache;
+        _options = options;
+        _logger = logger;
+        _cacheDuration = TimeSpan.FromMinutes(options.Value.DefaultExpirationMinutes);
     }
+
+    // Cache key includes instance prefix to avoid collisions across environments
+    private string GetCacheKey(string suffix) => $"{_options.Value.InstanceName}account:{suffix}";
 
     public async Task<Account?> GetByIdAsync(string id, CancellationToken ct = default)
     {
-        var cacheKey = $"account:{id}";
+        var cacheKey = GetCacheKey(id);
         var cached = await _cache.GetStringAsync(cacheKey, ct);
 
         if (cached != null)
         {
+            _logger.LogDebug("Cache hit for {Key}", cacheKey);
             return JsonSerializer.Deserialize<Account>(cached);
         }
 
+        _logger.LogDebug("Cache miss for {Key}", cacheKey);
         var account = await _inner.GetByIdAsync(id, ct);
         if (account != null)
         {
@@ -622,9 +661,9 @@ public class CachedAccountRepository : IAccountRepository
     {
         var result = await _inner.UpdateAsync(entity, ct);
 
-        // Invalidate cache
-        await _cache.RemoveAsync($"account:{entity.Id}", ct);
-        await _cache.RemoveAsync($"account:email:{entity.Email}", ct);
+        // Invalidate cache (use prefixed keys)
+        await _cache.RemoveAsync(GetCacheKey(entity.Id), ct);
+        await _cache.RemoveAsync(GetCacheKey($"email:{entity.Email}"), ct);
 
         return result;
     }

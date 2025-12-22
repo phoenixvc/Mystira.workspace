@@ -119,19 +119,20 @@ public class Account : Entity, IAuditable
 
     // Navigation properties (used by PostgreSQL EF Core)
     public virtual Subscription? Subscription { get; set; }
-    public virtual ICollection<UserProfile> Profiles { get; set; } = new List<UserProfile>();
+    public virtual ICollection<UserProfile> Profiles { get; set; } = [];  // C# 12 collection expression
 }
 
 /// <summary>
 /// Account settings stored as JSONB in PostgreSQL.
+/// Uses record for immutability (C# 10+).
 /// </summary>
-public class AccountSettings
+public record AccountSettings
 {
-    public bool EmailNotifications { get; set; } = true;
-    public bool PushNotifications { get; set; } = true;
-    public string PreferredLanguage { get; set; } = "en";
-    public string Theme { get; set; } = "default";
-    public Dictionary<string, object> Custom { get; set; } = new();
+    public bool EmailNotifications { get; init; } = true;
+    public bool PushNotifications { get; init; } = true;
+    public string PreferredLanguage { get; init; } = "en";
+    public string Theme { get; init; } = "default";
+    public Dictionary<string, object> Custom { get; init; } = [];  // C# 12 collection expression
 }
 ```
 
@@ -165,18 +166,19 @@ public class UserProfile : Entity, IAuditable
 
     // Navigation properties
     public virtual Account? Account { get; set; }
-    public virtual ICollection<UserBadge> Badges { get; set; } = new List<UserBadge>();
-    public virtual ICollection<CompletedScenario> CompletedScenarios { get; set; } = new List<CompletedScenario>();
+    public virtual ICollection<UserBadge> Badges { get; set; } = [];  // C# 12 collection expression
+    public virtual ICollection<CompletedScenario> CompletedScenarios { get; set; } = [];
 }
 
 /// <summary>
 /// Profile theme preferences stored as JSONB.
+/// Uses record for immutability.
 /// </summary>
-public class ProfileThemes
+public record ProfileThemes
 {
-    public string? SelectedEchoType { get; set; }
-    public string? SelectedFantasyTheme { get; set; }
-    public List<string> UnlockedThemes { get; set; } = new();
+    public string? SelectedEchoType { get; init; }
+    public string? SelectedFantasyTheme { get; init; }
+    public List<string> UnlockedThemes { get; init; } = [];  // C# 12 collection expression
 }
 ```
 
@@ -201,7 +203,7 @@ public class Subscription : Entity
     public DateTimeOffset? EndDate { get; set; }
     public string? PurchaseToken { get; set; }
     public DateTimeOffset? LastVerified { get; set; }
-    public List<string> PurchasedScenarios { get; set; } = new();
+    public List<string> PurchasedScenarios { get; set; } = [];  // C# 12 collection expression
 
     // Navigation
     public virtual Account? Account { get; set; }
@@ -349,13 +351,16 @@ public record ProfileUpdatedEvent(
 
 /// <summary>
 /// Event raised when a game session is completed.
+/// Uses required init properties for immutability.
 /// </summary>
-public record SessionCompletedEvent(
-    string SessionId,
-    string AccountId,
-    string ScenarioId,
-    int Score,
-    Dictionary<string, double> AxisScores) : DomainEvent;
+public record SessionCompletedEvent : DomainEvent
+{
+    public required string SessionId { get; init; }
+    public required string AccountId { get; init; }
+    public required string ScenarioId { get; init; }
+    public required int Score { get; init; }
+    public Dictionary<string, double> AxisScores { get; init; } = [];  // C# 12 collection expression
+}
 ```
 
 ## Mapping Considerations

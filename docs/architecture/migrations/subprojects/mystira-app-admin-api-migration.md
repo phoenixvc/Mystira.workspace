@@ -193,6 +193,8 @@ public static class AdminDataServiceExtensions
 
 #### 2.1 Create Read-Only Interfaces
 
+**Note**: Add these interfaces to `Mystira.App.Application/Ports/Data/` (BUG-6 fix).
+
 ```csharp
 // Application/Ports/Data/IAccountQueryService.cs
 namespace Mystira.App.Application.Ports.Data;
@@ -200,14 +202,25 @@ namespace Mystira.App.Application.Ports.Data;
 /// <summary>
 /// Read-only access to account data for Admin API.
 /// Does not include write operations.
+/// Uses string ID for Cosmos DB compatibility (BUG-1 fix).
 /// </summary>
 public interface IAccountQueryService
 {
-    Task<Account?> GetByIdAsync(Guid id, CancellationToken ct = default);
+    Task<Account?> GetByIdAsync(string id, CancellationToken ct = default);
     Task<Account?> GetByEmailAsync(string email, CancellationToken ct = default);
     Task<IEnumerable<Account>> SearchAsync(string query, int limit = 20, CancellationToken ct = default);
     Task<int> GetTotalCountAsync(CancellationToken ct = default);
     Task<IEnumerable<Account>> GetRecentAsync(int count = 10, CancellationToken ct = default);
+}
+
+/// <summary>
+/// Read-only access to profile data for Admin API.
+/// </summary>
+public interface IProfileQueryService
+{
+    Task<UserProfile?> GetByIdAsync(string id, CancellationToken ct = default);
+    Task<IEnumerable<UserProfile>> GetByAccountIdAsync(string accountId, CancellationToken ct = default);
+    Task<int> GetTotalCountAsync(CancellationToken ct = default);
 }
 ```
 
@@ -217,20 +230,24 @@ public interface IAccountQueryService
 // Infrastructure.PostgreSQL/Services/PostgresAccountQueryService.cs
 namespace Mystira.App.Infrastructure.PostgreSQL.Services;
 
-public class PostgresAccountQueryService : IAccountQueryService
+/// <summary>
+/// Read-only PostgreSQL implementation of IAccountQueryService.
+/// Uses primary constructor (C# 12).
+/// </summary>
+public class PostgresAccountQueryService(PostgreSqlDbContext context) : IAccountQueryService
 {
-    private readonly PostgreSqlDbContext _context;
-
-    public PostgresAccountQueryService(PostgreSqlDbContext context)
+    public async Task<Account?> GetByIdAsync(string id, CancellationToken ct = default)
     {
-        _context = context;
-    }
-
-    public async Task<Account?> GetByIdAsync(Guid id, CancellationToken ct = default)
-    {
-        return await _context.Accounts
+        return await context.Accounts
             .AsNoTracking()
             .FirstOrDefaultAsync(a => a.Id == id, ct);
+    }
+
+    public async Task<Account?> GetByEmailAsync(string email, CancellationToken ct = default)
+    {
+        return await context.Accounts
+            .AsNoTracking()
+            .FirstOrDefaultAsync(a => EF.Functions.ILike(a.Email, email), ct);
     }
 
     public async Task<IEnumerable<Account>> SearchAsync(
@@ -238,7 +255,7 @@ public class PostgresAccountQueryService : IAccountQueryService
         int limit = 20,
         CancellationToken ct = default)
     {
-        return await _context.Accounts
+        return await context.Accounts
             .AsNoTracking()
             .Where(a => EF.Functions.ILike(a.Email, $"%{query}%")
                      || EF.Functions.ILike(a.DisplayName, $"%{query}%"))
@@ -248,14 +265,14 @@ public class PostgresAccountQueryService : IAccountQueryService
 
     public async Task<int> GetTotalCountAsync(CancellationToken ct = default)
     {
-        return await _context.Accounts.CountAsync(ct);
+        return await context.Accounts.CountAsync(ct);
     }
 
     public async Task<IEnumerable<Account>> GetRecentAsync(
         int count = 10,
         CancellationToken ct = default)
     {
-        return await _context.Accounts
+        return await context.Accounts
             .AsNoTracking()
             .OrderByDescending(a => a.CreatedAt)
             .Take(count)

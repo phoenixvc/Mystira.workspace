@@ -259,55 +259,110 @@ public class AccountConfiguration : IEntityTypeConfiguration<Account>
 }
 ```
 
-### PostgreSQL Repository
+### Base PostgreSQL Repository
+
+```csharp
+// Repositories/PgRepository.cs
+namespace Mystira.App.Infrastructure.PostgreSQL.Repositories;
+
+/// <summary>
+/// Base repository for PostgreSQL with built-in SaveChangesAsync.
+/// Uses primary constructor (C# 12) for cleaner code.
+/// </summary>
+public abstract class PgRepository<TEntity>(PostgreSqlDbContext context)
+    : IRepository<TEntity> where TEntity : class, IEntity
+{
+    protected readonly PostgreSqlDbContext _context = context;
+    protected readonly DbSet<TEntity> _dbSet = context.Set<TEntity>();
+
+    public virtual async Task<TEntity?> GetByIdAsync(string id, CancellationToken ct = default)
+        => await _dbSet.FindAsync([id], ct);
+
+    public virtual async Task<IReadOnlyList<TEntity>> ListAsync(CancellationToken ct = default)
+        => await _dbSet.ToListAsync(ct);
+
+    public virtual async Task<TEntity> AddAsync(TEntity entity, CancellationToken ct = default)
+    {
+        await _dbSet.AddAsync(entity, ct);
+        await _context.SaveChangesAsync(ct);  // BUG-5 fix: Always call SaveChangesAsync
+        return entity;
+    }
+
+    public virtual async Task<IEnumerable<TEntity>> AddRangeAsync(
+        IEnumerable<TEntity> entities,
+        CancellationToken ct = default)
+    {
+        var list = entities.ToList();
+        await _dbSet.AddRangeAsync(list, ct);
+        await _context.SaveChangesAsync(ct);
+        return list;
+    }
+
+    public virtual async Task UpdateAsync(TEntity entity, CancellationToken ct = default)
+    {
+        _dbSet.Update(entity);
+        await _context.SaveChangesAsync(ct);
+    }
+
+    public virtual async Task DeleteAsync(string id, CancellationToken ct = default)
+    {
+        var entity = await _dbSet.FindAsync([id], ct);
+        if (entity != null)
+        {
+            _dbSet.Remove(entity);
+            await _context.SaveChangesAsync(ct);
+        }
+    }
+
+    public virtual async Task<int> CountAsync(CancellationToken ct = default)
+        => await _dbSet.CountAsync(ct);
+
+    public virtual async Task<bool> AnyAsync(CancellationToken ct = default)
+        => await _dbSet.AnyAsync(ct);
+
+    public virtual async Task<int> SaveChangesAsync(CancellationToken ct = default)
+        => await _context.SaveChangesAsync(ct);
+}
+```
+
+### Account Repository (PostgreSQL)
 
 ```csharp
 // Repositories/PgAccountRepository.cs
 namespace Mystira.App.Infrastructure.PostgreSQL.Repositories;
 
-public class PgAccountRepository : PgRepository<Account>, IAccountRepository
+/// <summary>
+/// PostgreSQL implementation of IAccountRepository.
+/// Uses primary constructor (C# 12).
+/// </summary>
+public class PgAccountRepository(PostgreSqlDbContext context)
+    : PgRepository<Account>(context), IAccountRepository
 {
-    public PgAccountRepository(PostgreSqlDbContext context) : base(context) { }
-
-    public async Task<Account?> GetByEmailAsync(string email)
+    public async Task<Account?> GetByEmailAsync(string email, CancellationToken ct = default)
     {
         return await _dbSet
             .Where(a => EF.Functions.ILike(a.Email, email))
-            .FirstOrDefaultAsync();
+            .FirstOrDefaultAsync(ct);
     }
 
-    public async Task<Account?> GetByAuth0UserIdAsync(string auth0UserId)
+    public async Task<Account?> GetByAuth0UserIdAsync(string auth0UserId, CancellationToken ct = default)
     {
         return await _dbSet
             .Where(a => a.Auth0UserId == auth0UserId)
-            .FirstOrDefaultAsync();
+            .FirstOrDefaultAsync(ct);
     }
 
-    public async Task<bool> ExistsByEmailAsync(string email)
+    public async Task<bool> ExistsByEmailAsync(string email, CancellationToken ct = default)
     {
-        return await _dbSet.AnyAsync(a => EF.Functions.ILike(a.Email, email));
+        return await _dbSet.AnyAsync(a => EF.Functions.ILike(a.Email, email), ct);
     }
 
-    public async Task<Account> AddAsync(Account entity, CancellationToken ct = default)
+    // Soft delete override
+    public override async Task DeleteAsync(string id, CancellationToken ct = default)
     {
-        await _dbSet.AddAsync(entity, ct);
-        await _context.SaveChangesAsync(ct);
-        return entity;
-    }
-
-    public async Task<Account> UpdateAsync(Account entity, CancellationToken ct = default)
-    {
-        _dbSet.Update(entity);
-        await _context.SaveChangesAsync(ct);
-        return entity;
-    }
-
-    public async Task DeleteAsync(string id, CancellationToken ct = default)
-    {
-        var entity = await _dbSet.FindAsync(id);
+        var entity = await _dbSet.FindAsync([id], ct);
         if (entity != null)
         {
-            // Soft delete
             entity.IsDeleted = true;
             entity.DeletedAt = DateTimeOffset.UtcNow;
             await _context.SaveChangesAsync(ct);
