@@ -164,11 +164,12 @@ module "publisher" {
 module "shared_postgresql" {
   source = "../../modules/shared/postgresql"
 
-  environment         = "staging"
-  location            = var.location
-  resource_group_name = azurerm_resource_group.main.name
-  vnet_id             = azurerm_virtual_network.main.id
-  subnet_id           = azurerm_subnet.postgresql.id
+  environment             = "staging"
+  location                = var.location
+  resource_group_name     = azurerm_resource_group.main.name
+  vnet_id                 = azurerm_virtual_network.main.id
+  subnet_id               = azurerm_subnet.postgresql.id
+  enable_vnet_integration = true
 
   databases = [
     "storygenerator",
