@@ -29,6 +29,14 @@ This roadmap outlines the strategic implementation plan for the Mystira workspac
    - CI/CD workflows identified and categorized
    - Release coordination approach defined
 
+5. **Distributed CI Model Migration (December 2025)**
+   - Migrated dev CI workflows to individual component repositories
+   - Updated all .NET components to .NET 9.0
+   - Updated all Node.js components to Node.js 20
+   - Workspace now focuses on staging/production deployments
+   - Component repos: Admin API (#7), Admin UI (#12), Chain (#1), DevHub (#1), Publisher (#13), Story Generator (#56)
+   - See [CI/CD Setup](../cicd/cicd-setup.md) for details
+
 ## Implementation Phases
 
 ## Phase 1: Infrastructure Foundation (Months 1-2)
@@ -105,25 +113,28 @@ This roadmap outlines the strategic implementation plan for the Mystira workspac
 
 ### 2.1 Pipeline Standardization
 
-**Priority**: Medium  
-**Dependencies**: None  
+**Priority**: Medium
+**Dependencies**: None
 **Estimated Effort**: 2 weeks
+**Status**: ✅ Partially Complete (December 2025)
 
 **Tasks**:
 
-- [ ] Create reusable workflow templates for common patterns
+- [x] Create reusable workflow templates for common patterns
   - [ ] Container build template
   - [ ] Terraform deployment template
-  - [ ] .NET build/test template
-- [ ] Standardize pipeline naming conventions
+  - [x] .NET build/test template (standardized across admin-api, story-generator)
+  - [x] Node.js build/test template (standardized across admin-ui, devhub, publisher)
+  - [x] Python build/test template (chain)
+- [x] Standardize pipeline naming conventions (all use `ci.yml` with consistent job names)
 - [ ] Implement consistent error handling across pipelines
 - [ ] Add pipeline metrics and reporting
 
 **Deliverables**:
 
-- Reusable workflow templates
-- Pipeline documentation
-- Standardized naming conventions
+- ✅ Reusable workflow templates (dev CI in component repos)
+- ✅ Pipeline documentation (updated cicd-setup.md)
+- ✅ Standardized naming conventions
 
 ### 2.2 Automated Testing Integration
 
