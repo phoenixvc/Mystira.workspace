@@ -10,27 +10,27 @@ This is the master checklist for the Mystira platform modernization initiative. 
 
 ## Quick Links
 
-| Document | Description |
-|----------|-------------|
-| [Hybrid Data Strategy Roadmap](./hybrid-data-strategy-roadmap.md) | Cosmos DB → PostgreSQL migration phases |
-| [ADR-0014 Implementation Roadmap](./adr-0014-implementation-roadmap.md) | Polyglot persistence framework |
-| [ADR-0015 Implementation Roadmap](./adr-0015-implementation-roadmap.md) | Wolverine event-driven architecture |
+| Document                                                                                             | Description                                 |
+| ---------------------------------------------------------------------------------------------------- | ------------------------------------------- |
+| [Hybrid Data Strategy Roadmap](./hybrid-data-strategy-roadmap.md)                                    | Cosmos DB → PostgreSQL migration phases     |
+| [ADR-0014 Implementation Roadmap](./adr-0014-implementation-roadmap.md)                              | Polyglot persistence framework              |
+| [ADR-0015 Implementation Roadmap](./adr-0015-implementation-roadmap.md)                              | Wolverine event-driven architecture         |
 | [Remaining Issues & Opportunities](../architecture/migrations/remaining-issues-and-opportunities.md) | All bugs, incomplete features, enhancements |
-| [Code Review Improvements](../architecture/migrations/code-review-improvements.md) | Code-level fixes from review |
-| [**MPR Analysis Review**](../architecture/migrations/mpr-analysis-review.md) | **Critical review of all documentation** |
+| [Code Review Improvements](../architecture/migrations/code-review-improvements.md)                   | Code-level fixes from review                |
+| [**MPR Analysis Review**](../architecture/migrations/mpr-analysis-review.md)                         | **Critical review of all documentation**    |
 
 ---
 
 ## Progress Summary
 
-| Area | Total Tasks | Completed | Progress |
-|------|-------------|-----------|----------|
-| Critical Bugs | 3 | 0 | 0% |
-| Medium Bugs | 8 | 0 | 0% |
-| ADR-0014 (Polyglot) | 15 | 0 | 0% |
-| ADR-0015 (Events) | 12 | 0 | 0% |
-| Data Migration | 20 | 0 | 0% |
-| **Total** | **58** | **0** | **0%** |
+| Area                | Total Tasks | Completed | Progress |
+| ------------------- | ----------- | --------- | -------- |
+| Critical Bugs       | 3           | 0         | 0%       |
+| Medium Bugs         | 8           | 0         | 0%       |
+| ADR-0014 (Polyglot) | 15          | 0         | 0%       |
+| ADR-0015 (Events)   | 12          | 0         | 0%       |
+| Data Migration      | 20          | 0         | 0%       |
+| **Total**           | **58**      | **0**     | **0%**   |
 
 ---
 
@@ -39,18 +39,21 @@ This is the master checklist for the Mystira platform modernization initiative. 
 > Reference: [remaining-issues-and-opportunities.md](../architecture/migrations/remaining-issues-and-opportunities.md#-critical-bugs-must-fix-before-implementation)
 
 ### CRIT-1: Cosmos DB FindAsync Signature
+
 - [ ] Update `FindAsync([id], ct)` to `FirstOrDefaultAsync(e => e.Id == id, ct)`
 - [ ] Configure partition key in `OnModelCreating`
 - [ ] Update all Cosmos repository implementations
 - [ ] Test with actual Cosmos DB
 
 ### CRIT-2: PostgreSQL JSONB Serialization
+
 - [ ] Add `UseJsonSerializationOptions` to Npgsql configuration
 - [ ] Or add value converters per JSONB property
 - [ ] Update `AccountConfiguration` with proper serialization
 - [ ] Test JSON round-trip (serialize → store → deserialize)
 
 ### CRIT-3: Dual-Write Transaction Safety
+
 - [ ] Wrap dual-write in `TransactionScope`
 - [ ] Implement proper rollback on failure
 - [ ] Add retry logic for transient failures
@@ -65,6 +68,7 @@ This is the master checklist for the Mystira platform modernization initiative. 
 > Reference: [hybrid-data-strategy-roadmap.md](./hybrid-data-strategy-roadmap.md#phase-1-foundation-weeks-1-6)
 
 ### Terraform Modules
+
 - [ ] PostgreSQL Flexible Server module created
 - [ ] Redis Cache module created
 - [ ] Azure Service Bus module created
@@ -73,6 +77,7 @@ This is the master checklist for the Mystira platform modernization initiative. 
 - [ ] Private endpoints configured (production)
 
 ### Database Setup
+
 - [ ] PostgreSQL instance provisioned (dev/staging)
 - [ ] EF Core migrations created
 - [ ] Initial schema deployed
@@ -112,12 +117,14 @@ This is the master checklist for the Mystira platform modernization initiative. 
 ## 2.1 Sync Queue Implementation
 
 ### In-Memory Queue (Development)
+
 - [ ] `ISyncQueue` interface defined
 - [ ] `InMemorySyncQueue` with `ConcurrentQueue<T>`
 - [ ] Thread-safe operations verified
 - [ ] Unit tests passing
 
 ### Redis Queue (Production)
+
 - [ ] `RedisSyncQueue` implementation
 - [ ] BRPOPLPUSH reliable pattern
 - [ ] Processing/failed queues
@@ -299,6 +306,7 @@ This is the master checklist for the Mystira platform modernization initiative. 
 > Reference: [remaining-issues-and-opportunities.md](../architecture/migrations/remaining-issues-and-opportunities.md#-enhancement-opportunities)
 
 ## Modern C# Features
+
 - [ ] ENH-1: File-scoped namespaces in all new files
 - [ ] ENH-2: Global usings in new projects
 - [ ] ENH-3: Nullable enable all projects
@@ -307,6 +315,7 @@ This is the master checklist for the Mystira platform modernization initiative. 
 - [ ] ENH-6: Records for all DTOs
 
 ## Architectural Enhancements
+
 - [ ] ENH-7: Source generators for repositories
 - [ ] ENH-8: Result<T, Error> pattern
 - [ ] ENH-9: Strongly-typed IDs
@@ -315,6 +324,7 @@ This is the master checklist for the Mystira platform modernization initiative. 
 - [ ] ENH-12: Feature flags via Azure App Config
 
 ## Performance
+
 - [ ] ENH-13: Connection pooling optimization
 - [ ] ENH-14: Read replicas
 - [ ] ENH-15: Query plan caching
@@ -323,16 +333,16 @@ This is the master checklist for the Mystira platform modernization initiative. 
 
 # Component Impact Summary
 
-| Component | Phase 1 | Phase 2 | Phase 3 | Phase 4 | Phase 5 |
-|-----------|---------|---------|---------|---------|---------|
-| Infrastructure | ✅ | ✅ | ✅ | ⚪ | ⚪ |
-| Mystira.App | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Mystira.Admin.Api | ⚪ | ✅ | ✅ | ✅ | ✅ |
-| Mystira.Admin.UI | ⚪ | ⚪ | ✅ | ✅ | ⚪ |
-| Mystira.StoryGenerator | ⚪ | ⚪ | ✅ | ✅ | ✅ |
-| Mystira.Publisher | ⚪ | ⚪ | ⚪ | ✅ | ✅ |
-| Mystira.Chain | ⚪ | ⚪ | ⚪ | ✅ | ✅ |
-| Mystira.DevHub | ⚪ | ⚪ | ⚪ | ⚪ | ✅ |
+| Component              | Phase 1 | Phase 2 | Phase 3 | Phase 4 | Phase 5 |
+| ---------------------- | ------- | ------- | ------- | ------- | ------- |
+| Infrastructure         | ✅      | ✅      | ✅      | ⚪      | ⚪      |
+| Mystira.App            | ✅      | ✅      | ✅      | ✅      | ✅      |
+| Mystira.Admin.Api      | ⚪      | ✅      | ✅      | ✅      | ✅      |
+| Mystira.Admin.UI       | ⚪      | ⚪      | ✅      | ✅      | ⚪      |
+| Mystira.StoryGenerator | ⚪      | ⚪      | ✅      | ✅      | ✅      |
+| Mystira.Publisher      | ⚪      | ⚪      | ⚪      | ✅      | ✅      |
+| Mystira.Chain          | ⚪      | ⚪      | ⚪      | ✅      | ✅      |
+| Mystira.DevHub         | ⚪      | ⚪      | ⚪      | ⚪      | ✅      |
 
 **Legend**: ✅ = Primary focus, ⚪ = No changes
 
@@ -343,20 +353,25 @@ This is the master checklist for the Mystira platform modernization initiative. 
 ## Sprint: Week X
 
 ### Completed This Week
+
 - [ ] Task 1
 - [ ] Task 2
 
 ### In Progress
+
 - [ ] Task 3 (70% complete)
 
 ### Blockers
+
 - Blocker 1: Description
 
 ### Next Week Priorities
+
 1. Priority 1
 2. Priority 2
 
 ### Metrics
+
 - Tasks completed: X
 - Critical bugs remaining: Y
 - Test coverage: Z%
@@ -368,36 +383,41 @@ This is the master checklist for the Mystira platform modernization initiative. 
 ## Phase Completion Sign-Off
 
 ### Phase 1 Complete
+
 - [ ] All Phase 1 tasks marked complete
 - [ ] Integration tests passing
 - [ ] No critical bugs remaining
 - [ ] Stakeholder review completed
-- [ ] **Signed off by**: _____________ **Date**: _____________
+- [ ] **Signed off by**: **\*\***\_**\*\*** **Date**: **\*\***\_**\*\***
 
 ### Phase 2 Complete
+
 - [ ] Dual-write operational
 - [ ] Data sync verified
 - [ ] Performance baseline met
-- [ ] **Signed off by**: _____________ **Date**: _____________
+- [ ] **Signed off by**: **\*\***\_**\*\*** **Date**: **\*\***\_**\*\***
 
 ### Phase 3 Complete
+
 - [ ] Wolverine handling all events
 - [ ] MediatR fully removed
 - [ ] Cross-service events working
-- [ ] **Signed off by**: _____________ **Date**: _____________
+- [ ] **Signed off by**: **\*\***\_**\*\*** **Date**: **\*\***\_**\*\***
 
 ### Phase 4 Complete
+
 - [ ] PostgreSQL serving 100% reads
 - [ ] Cosmos in read-only mode
 - [ ] Zero data discrepancies
-- [ ] **Signed off by**: _____________ **Date**: _____________
+- [ ] **Signed off by**: **\*\***\_**\*\*** **Date**: **\*\***\_**\*\***
 
 ### Phase 5 Complete (Final)
+
 - [ ] All enhancement opportunities reviewed
 - [ ] Documentation complete
 - [ ] Team trained
 - [ ] Monitoring in place
-- [ ] **Signed off by**: _____________ **Date**: _____________
+- [ ] **Signed off by**: **\*\***\_**\*\*** **Date**: **\*\***\_**\*\***
 
 ---
 

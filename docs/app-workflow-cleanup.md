@@ -72,16 +72,19 @@ git commit -m "refactor: Move all deployment workflows to workspace
 These workflows provide fast feedback for developers and should stay:
 
 #### 1. ci-tests-codecov.yml
+
 **Purpose:** Run tests and collect code coverage on PRs
 **Keep because:** Fast dev feedback, PR validation
 **Triggers:** pull_request, push to dev/main
 
 #### 2. swa-preview-tests.yml
+
 **Purpose:** Deploy and test preview environments for PRs
 **Keep because:** Review app changes before merging
 **Triggers:** pull_request, workflow_dispatch
 
 #### 3. swa-cleanup-staging-environments.yml
+
 **Purpose:** Clean up preview environments
 **Keep because:** Resource management, cost control
 **Triggers:** schedule, workflow_dispatch
@@ -91,25 +94,31 @@ These workflows provide fast feedback for developers and should stay:
 Workspace `staging-release.yml` now handles staging deployments:
 
 #### 4. infrastructure-deploy-staging.yml
+
 **Replaced by:** Workspace staging-release.yml
 **Why delete:** Duplicate, workspace has centralized control
 
 #### 5. mystira-app-admin-api-cicd-staging.yml
+
 **Replaced by:** Workspace staging-release.yml
 **Why delete:** Workspace orchestrates multi-service deployment
 
 #### 6. mystira-app-api-cicd-staging.yml
+
 **Replaced by:** Workspace staging-release.yml
 **Why delete:** Workspace orchestrates multi-service deployment
 
 #### 7. mystira-app-pwa-cicd-staging.yml
+
 **Replaced by:** Workspace staging-release.yml
 **Why delete:** Workspace orchestrates multi-service deployment
 
 #### 8. mystira-app-pwa-cicd-staging.yml.disabled
+
 **Why delete:** Already disabled, no longer needed
 
 #### 9. staging-automated-setup.yml
+
 **Replaced by:** Workspace staging-release.yml
 **Why delete:** Workspace handles infrastructure setup
 
@@ -118,18 +127,22 @@ Workspace `staging-release.yml` now handles staging deployments:
 Workspace `production-release.yml` now handles production deployments:
 
 #### 10. infrastructure-deploy-prod.yml
+
 **Replaced by:** Workspace production-release.yml
 **Why delete:** Prevents accidental prod deployments, centralized control
 
 #### 11. mystira-app-admin-api-cicd-prod.yml
+
 **Replaced by:** Workspace production-release.yml
 **Why delete:** Workspace orchestrates multi-service deployment
 
 #### 12. mystira-app-api-cicd-prod.yml
+
 **Replaced by:** Workspace production-release.yml
 **Why delete:** Workspace orchestrates multi-service deployment
 
 #### 13. mystira-app-pwa-cicd-prod.yml
+
 **Replaced by:** Workspace production-release.yml
 **Why delete:** Workspace orchestrates multi-service deployment
 
@@ -138,6 +151,7 @@ Workspace `production-release.yml` now handles production deployments:
 Workspace will handle NuGet package publishing:
 
 #### 14. publish-shared-packages.yml
+
 **Replaced by:** Workspace workflow (to be added)
 **Why delete:** Centralized release control, consistent versioning
 
@@ -148,12 +162,14 @@ Workspace will handle NuGet package publishing:
 #### Option A: Keep Dev Workflows (Recommended)
 
 **Advantages:**
+
 - ✅ Fast deployment after merging to dev branch
 - ✅ No workspace dependency for dev work
 - ✅ Quick testing in dev environment
 - ✅ Independent development velocity
 
 **Keep these:**
+
 - infrastructure-deploy-dev.yml
 - mystira-app-admin-api-cicd-dev.yml
 - mystira-app-api-cicd-dev.yml
@@ -162,11 +178,13 @@ Workspace will handle NuGet package publishing:
 #### Option B: Delete Dev Workflows (More Centralized)
 
 **Advantages:**
+
 - ✅ All deployments in one place
 - ✅ Consistent with staging/prod approach
 - ✅ Single source of truth
 
 **Disadvantages:**
+
 - ⚠️ Slower dev feedback (must update workspace submodule)
 - ⚠️ More steps to deploy to dev
 - ⚠️ Couples dev work to workspace updates
@@ -184,6 +202,7 @@ ls -1 .github/workflows/*.yml
 ```
 
 **Expected result (if keeping dev workflows):**
+
 ```
 .github/workflows/ci-tests-codecov.yml
 .github/workflows/infrastructure-deploy-dev.yml
@@ -215,6 +234,7 @@ ls -1 .github/workflows/*.yml
 ## Questions?
 
 If you have questions about which workflows to delete, refer to:
+
 - This guide
 - `.github/workflows/README.md` in workspace
 - Team discussions

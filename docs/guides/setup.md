@@ -354,12 +354,14 @@ az ad b2c tenant create \
 #### Configure Identity Providers
 
 **Google**:
+
 1. Create OAuth credentials at [Google Cloud Console](https://console.cloud.google.com/)
 2. In B2C tenant → Identity providers → Add Google
 3. Enter Client ID and Client Secret from Google
 4. Redirect URI: `https://mystirab2c.b2clogin.com/mystirab2c.onmicrosoft.com/oauth2/authresp`
 
 **Discord**:
+
 1. Create application at [Discord Developer Portal](https://discord.com/developers/applications)
 2. In B2C tenant → Identity providers → Add OpenID Connect (custom)
 3. Configure:
@@ -392,12 +394,12 @@ After setup, configure environment variables as documented in [Environment Varia
 
 **Required Secrets in Azure Key Vault**:
 
-| Secret Name | Description |
-|-------------|-------------|
-| `azure-ad-client-secret` | Admin API client secret |
+| Secret Name               | Description                             |
+| ------------------------- | --------------------------------------- |
+| `azure-ad-client-secret`  | Admin API client secret                 |
 | `azure-b2c-client-secret` | B2C API client secret (if confidential) |
-| `google-client-secret` | Google OAuth client secret |
-| `discord-client-secret` | Discord OAuth client secret |
+| `google-client-secret`    | Google OAuth client secret              |
+| `discord-client-secret`   | Discord OAuth client secret             |
 
 ### 4. Verify Setup
 

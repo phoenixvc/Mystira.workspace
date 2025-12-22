@@ -10,13 +10,13 @@ This roadmap details the implementation of Wolverine as the unified messaging fr
 
 ## Phase Summary
 
-| Phase | Duration | Focus | Risk Level |
-|-------|----------|-------|------------|
-| Phase 1 | Week 1-2 | Infrastructure & Wolverine Setup | Low |
-| Phase 2 | Week 3-4 | New Events with Wolverine | Low |
-| Phase 3 | Week 5-8 | MediatR Handler Migration | Medium |
-| Phase 4 | Week 9-10 | Cross-Service Events | Medium |
-| Phase 5 | Week 11-12 | MediatR Removal & Cleanup | Low |
+| Phase   | Duration   | Focus                            | Risk Level |
+| ------- | ---------- | -------------------------------- | ---------- |
+| Phase 1 | Week 1-2   | Infrastructure & Wolverine Setup | Low        |
+| Phase 2 | Week 3-4   | New Events with Wolverine        | Low        |
+| Phase 3 | Week 5-8   | MediatR Handler Migration        | Medium     |
+| Phase 4 | Week 9-10  | Cross-Service Events             | Medium     |
+| Phase 5 | Week 11-12 | MediatR Removal & Cleanup        | Low        |
 
 ---
 
@@ -25,6 +25,7 @@ This roadmap details the implementation of Wolverine as the unified messaging fr
 ### 1.1 Azure Service Bus Provisioning
 
 **Terraform Resources**:
+
 ```hcl
 # modules/servicebus/main.tf
 
@@ -69,6 +70,7 @@ resource "azurerm_servicebus_subscription" "analytics" {
 ### 1.2 Add Wolverine Packages
 
 **Mystira.App.csproj**:
+
 ```xml
 <PackageReference Include="WolverineFx" Version="3.*" />
 <PackageReference Include="WolverineFx.AzureServiceBus" Version="3.*" />
@@ -76,6 +78,7 @@ resource "azurerm_servicebus_subscription" "analytics" {
 ```
 
 **Mystira.Admin.Api.csproj**:
+
 ```xml
 <PackageReference Include="WolverineFx" Version="3.*" />
 <PackageReference Include="WolverineFx.AzureServiceBus" Version="3.*" />
@@ -85,6 +88,7 @@ resource "azurerm_servicebus_subscription" "analytics" {
 ### 1.3 Wolverine Configuration
 
 **Common/Wolverine/WolverineConfiguration.cs**:
+
 ```csharp
 namespace Mystira.Common.Wolverine;
 
@@ -132,6 +136,7 @@ public static class WolverineConfiguration
 ### 1.4 Outbox Table Migration
 
 **Migrations/AddWolverineOutbox.cs**:
+
 ```csharp
 public partial class AddWolverineOutbox : Migration
 {
@@ -192,6 +197,7 @@ public partial class AddWolverineOutbox : Migration
 ### 2.1 Define Domain Events
 
 **Mystira.Domain/Events/AccountEvents.cs**:
+
 ```csharp
 namespace Mystira.Domain.Events;
 
@@ -230,6 +236,7 @@ public sealed record AccountDeletedEvent
 ```
 
 **Mystira.Domain/Events/SessionEvents.cs**:
+
 ```csharp
 namespace Mystira.Domain.Events;
 
@@ -252,6 +259,7 @@ public sealed record SessionCompletedEvent
 ```
 
 **Mystira.Domain/Events/ContentEvents.cs**:
+
 ```csharp
 namespace Mystira.Domain.Events;
 
@@ -274,6 +282,7 @@ public sealed record ScenarioUnpublishedEvent
 ### 2.2 Event Publishers
 
 **Mystira.App/Services/AccountService.cs**:
+
 ```csharp
 public class AccountService(
     IAccountRepository accountRepository,
@@ -310,6 +319,7 @@ public class AccountService(
 ### 2.3 Event Handlers
 
 **Mystira.Analytics/Handlers/AccountEventHandlers.cs**:
+
 ```csharp
 namespace Mystira.Analytics.Handlers;
 
@@ -368,6 +378,7 @@ public static class AccountEventHandlers
 ### 2.4 Cache Invalidation Handler
 
 **Mystira.App/Handlers/CacheInvalidationHandler.cs**:
+
 ```csharp
 namespace Mystira.App.Handlers;
 
@@ -417,6 +428,7 @@ public static class CacheInvalidationHandler
 ### 3.1 Migration Strategy
 
 Migrate handlers in this order:
+
 1. **Simple queries** (no side effects)
 2. **Simple commands** (single write)
 3. **Complex commands** (multiple writes, transactions)
@@ -539,6 +551,7 @@ public static class CreateAccountHandler
 ### 3.3 Controller Updates
 
 **Before (MediatR)**:
+
 ```csharp
 [ApiController]
 [Route("api/accounts")]
@@ -554,6 +567,7 @@ public class AccountsController(ISender sender) : ControllerBase
 ```
 
 **After (Wolverine)**:
+
 ```csharp
 [ApiController]
 [Route("api/accounts")]
@@ -571,6 +585,7 @@ public class AccountsController(IMessageBus bus) : ControllerBase
 ### 3.4 Validation Migration
 
 **FluentValidation Integration**:
+
 ```csharp
 // Configure Wolverine to use FluentValidation
 builder.Host.UseWolverine(opts =>
@@ -596,20 +611,20 @@ public class CreateAccountValidator : AbstractValidator<CreateAccount>
 
 ### 3.5 Migration Tracking
 
-| Handler | Type | Migrated | Tested |
-|---------|------|----------|--------|
-| GetAccountByIdHandler | Query | [ ] | [ ] |
-| GetAccountByEmailHandler | Query | [ ] | [ ] |
-| ListAccountsHandler | Query | [ ] | [ ] |
-| CreateAccountHandler | Command | [ ] | [ ] |
-| UpdateAccountHandler | Command | [ ] | [ ] |
-| DeleteAccountHandler | Command | [ ] | [ ] |
-| GetProfileHandler | Query | [ ] | [ ] |
-| UpdateProfileHandler | Command | [ ] | [ ] |
-| StartSessionHandler | Command | [ ] | [ ] |
-| EndSessionHandler | Command | [ ] | [ ] |
-| GetScenarioHandler | Query | [ ] | [ ] |
-| PublishScenarioHandler | Command | [ ] | [ ] |
+| Handler                  | Type    | Migrated | Tested |
+| ------------------------ | ------- | -------- | ------ |
+| GetAccountByIdHandler    | Query   | [ ]      | [ ]    |
+| GetAccountByEmailHandler | Query   | [ ]      | [ ]    |
+| ListAccountsHandler      | Query   | [ ]      | [ ]    |
+| CreateAccountHandler     | Command | [ ]      | [ ]    |
+| UpdateAccountHandler     | Command | [ ]      | [ ]    |
+| DeleteAccountHandler     | Command | [ ]      | [ ]    |
+| GetProfileHandler        | Query   | [ ]      | [ ]    |
+| UpdateProfileHandler     | Command | [ ]      | [ ]    |
+| StartSessionHandler      | Command | [ ]      | [ ]    |
+| EndSessionHandler        | Command | [ ]      | [ ]    |
+| GetScenarioHandler       | Query   | [ ]      | [ ]    |
+| PublishScenarioHandler   | Command | [ ]      | [ ]    |
 
 ### 3.6 Deliverables Checklist
 
@@ -669,6 +684,7 @@ public class CreateAccountValidator : AbstractValidator<CreateAccount>
 Create shared package for event contracts:
 
 **Mystira.Contracts/Events/IIntegrationEvent.cs**:
+
 ```csharp
 namespace Mystira.Contracts.Events;
 
@@ -695,6 +711,7 @@ public interface IIntegrationEvent
 ```
 
 **Mystira.Contracts/Events/AccountEvents.cs**:
+
 ```csharp
 namespace Mystira.Contracts.Events;
 
@@ -712,6 +729,7 @@ public sealed record AccountCreatedIntegrationEvent : IIntegrationEvent
 ### 4.3 Subscription Filters
 
 **Admin API - Only account events**:
+
 ```csharp
 opts.ListenToAzureServiceBusSubscription("mystira-events", "admin-api")
     .AddRule("AccountEventsOnly", new SqlRuleFilter(
@@ -719,6 +737,7 @@ opts.ListenToAzureServiceBusSubscription("mystira-events", "admin-api")
 ```
 
 **Publisher - Only content events**:
+
 ```csharp
 opts.ListenToAzureServiceBusSubscription("mystira-events", "publisher")
     .AddRule("ContentEventsOnly", new SqlRuleFilter(
@@ -773,6 +792,7 @@ dotnet list package --include-transitive | grep MediatR
 ### 5.2 Package Removal
 
 **Remove from all .csproj files**:
+
 ```xml
 <!-- REMOVE these -->
 <PackageReference Include="MediatR" Version="*" />
@@ -789,6 +809,7 @@ dotnet list package --include-transitive | grep MediatR
 ### 5.4 Pipeline Behavior Migration
 
 **Before (MediatR Pipeline Behavior)**:
+
 ```csharp
 public class LoggingBehavior<TRequest, TResponse>
     : IPipelineBehavior<TRequest, TResponse>
@@ -807,6 +828,7 @@ public class LoggingBehavior<TRequest, TResponse>
 ```
 
 **After (Wolverine Middleware)**:
+
 ```csharp
 public class LoggingMiddleware : IWolverineMiddleware
 {
@@ -872,24 +894,24 @@ builder.Services.AddOpenTelemetry()
 
 ### Key Metrics
 
-| Metric | Description | Alert Threshold |
-|--------|-------------|-----------------|
-| `wolverine_messages_received` | Total messages received | N/A |
-| `wolverine_messages_succeeded` | Successfully processed | N/A |
-| `wolverine_messages_failed` | Failed processing | > 10/min |
-| `wolverine_inbox_count` | Pending inbox messages | > 1000 |
-| `wolverine_outbox_count` | Pending outbox messages | > 500 |
+| Metric                         | Description             | Alert Threshold |
+| ------------------------------ | ----------------------- | --------------- |
+| `wolverine_messages_received`  | Total messages received | N/A             |
+| `wolverine_messages_succeeded` | Successfully processed  | N/A             |
+| `wolverine_messages_failed`    | Failed processing       | > 10/min        |
+| `wolverine_inbox_count`        | Pending inbox messages  | > 1000          |
+| `wolverine_outbox_count`       | Pending outbox messages | > 500           |
 
 ---
 
 ## Risk Mitigation
 
-| Risk | Probability | Impact | Mitigation |
-|------|-------------|--------|------------|
-| Handler migration breaks functionality | Medium | High | Comprehensive test coverage, phased rollout |
-| Azure Service Bus connectivity issues | Low | High | Retry policies, fallback to local queue |
-| Message ordering issues | Low | Medium | Use session IDs for ordered processing |
-| Performance regression | Low | Medium | Load testing before production |
+| Risk                                   | Probability | Impact | Mitigation                                  |
+| -------------------------------------- | ----------- | ------ | ------------------------------------------- |
+| Handler migration breaks functionality | Medium      | High   | Comprehensive test coverage, phased rollout |
+| Azure Service Bus connectivity issues  | Low         | High   | Retry policies, fallback to local queue     |
+| Message ordering issues                | Low         | Medium | Use session IDs for ordered processing      |
+| Performance regression                 | Low         | Medium | Load testing before production              |
 
 ---
 

@@ -22,12 +22,12 @@ Mystira.App.Admin.Api/
 
 ## Key Differences from App API
 
-| Aspect | App API | Admin API |
-|--------|---------|-----------|
-| User Data | Read/Write | Read-Only |
-| Content Data | Read-Only | Read/Write |
+| Aspect          | App API         | Admin API                 |
+| --------------- | --------------- | ------------------------- |
+| User Data       | Read/Write      | Read-Only                 |
+| Content Data    | Read-Only       | Read/Write                |
 | Migration Phase | Full dual-write | Read-only from PostgreSQL |
-| Redis Caching | User sessions | Content caching |
+| Redis Caching   | User sessions   | Content caching           |
 
 ## Required Changes
 
@@ -461,12 +461,12 @@ az webapp config appsettings set --name mys-staging-mystira-admin-api-san \
 
 ## Dependencies
 
-| Dependency | Version | Purpose |
-|------------|---------|---------|
-| `Mystira.App.Application` | * | Query interfaces |
-| `Mystira.App.Infrastructure.Data` | * | Cosmos repositories |
-| `Mystira.App.Infrastructure.PostgreSQL` | * | Read-only PostgreSQL access |
-| `Mystira.App.Infrastructure.Redis` | * | Content caching |
+| Dependency                              | Version | Purpose                     |
+| --------------------------------------- | ------- | --------------------------- |
+| `Mystira.App.Application`               | \*      | Query interfaces            |
+| `Mystira.App.Infrastructure.Data`       | \*      | Cosmos repositories         |
+| `Mystira.App.Infrastructure.PostgreSQL` | \*      | Read-only PostgreSQL access |
+| `Mystira.App.Infrastructure.Redis`      | \*      | Content caching             |
 
 ## See Also
 

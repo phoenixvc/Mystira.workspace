@@ -16,12 +16,12 @@ The Mystira platform requires event-driven communication for:
 
 ### Current State
 
-| Pattern | Current Implementation | Issue |
-|---------|----------------------|-------|
-| In-Process Messaging | MediatR | Good for commands/queries, not for events |
-| Cross-Service | HTTP REST calls | Tight coupling, no retry |
-| Background Jobs | None | Missing |
-| Event Bus | None | Missing |
+| Pattern              | Current Implementation | Issue                                     |
+| -------------------- | ---------------------- | ----------------------------------------- |
+| In-Process Messaging | MediatR                | Good for commands/queries, not for events |
+| Cross-Service        | HTTP REST calls        | Tight coupling, no retry                  |
+| Background Jobs      | None                   | Missing                                   |
+| Event Bus            | None                   | Missing                                   |
 
 ### Integration Points
 
@@ -56,14 +56,14 @@ The Mystira platform requires event-driven communication for:
 
 ## Decision Drivers
 
-| Driver | Weight | Description |
-|--------|--------|-------------|
-| **Azure Integration** | 25% | Works well with Azure Service Bus |
-| **Developer Experience** | 20% | Easy to understand and use |
-| **Cost** | 20% | Licensing and operational costs |
-| **Reliability** | 15% | At-least-once delivery, outbox pattern |
-| **Performance** | 10% | Low latency, high throughput |
-| **Community/Support** | 10% | Active development, documentation |
+| Driver                   | Weight | Description                            |
+| ------------------------ | ------ | -------------------------------------- |
+| **Azure Integration**    | 25%    | Works well with Azure Service Bus      |
+| **Developer Experience** | 20%    | Easy to understand and use             |
+| **Cost**                 | 20%    | Licensing and operational costs        |
+| **Reliability**          | 15%    | At-least-once delivery, outbox pattern |
+| **Performance**          | 10%    | Low latency, high throughput           |
+| **Community/Support**    | 10%    | Active development, documentation      |
 
 ---
 
@@ -101,6 +101,7 @@ The Mystira platform requires event-driven communication for:
 ```
 
 **Key Features**:
+
 - Saga state machines for complex workflows
 - Transactional outbox with EF Core
 - Competing consumer support
@@ -108,6 +109,7 @@ The Mystira platform requires event-driven communication for:
 - Monitoring with OpenTelemetry
 
 **Implementation**:
+
 ```csharp
 // Configure MassTransit with Azure Service Bus
 builder.Services.AddMassTransit(x =>
@@ -149,12 +151,14 @@ public class AccountService
 ```
 
 **Licensing Changes (2025-2026)**:
+
 - Q3 2025: MassTransit v9 prerelease (commercial)
 - Q1 2026: Official v9 release under commercial license
 - Post-2026: End of v8 maintenance
 - Pricing: $400/month (SMB) to $1,200/month (Enterprise)
 
 **Pros**:
+
 - Battle-tested, production-ready
 - Excellent Azure Service Bus integration
 - Rich feature set (sagas, outbox, scheduling)
@@ -162,6 +166,7 @@ public class AccountService
 - MediatR-like in-process support
 
 **Cons**:
+
 - Going commercial in 2026
 - Large dependency
 - Learning curve for advanced features
@@ -214,6 +219,7 @@ public class AccountService
 ```
 
 **Key Features**:
+
 - Both in-process AND distributed messaging (replaces MediatR)
 - Compiled message handlers (minimal reflection)
 - Built-in transactional outbox (even for in-memory)
@@ -221,6 +227,7 @@ public class AccountService
 - Interoperability with MassTransit and NServiceBus messages
 
 **Implementation**:
+
 ```csharp
 // Configure Wolverine
 builder.Host.UseWolverine(opts =>
@@ -267,6 +274,7 @@ public class AccountService
 ```
 
 **Pros**:
+
 - Free and open source (MIT license)
 - Replaces both MediatR and distributed messaging
 - Faster startup (compiled handlers)
@@ -274,6 +282,7 @@ public class AccountService
 - Growing interoperability
 
 **Cons**:
+
 - Younger framework (less battle-tested)
 - Smaller community than MassTransit
 - Documentation still evolving
@@ -328,6 +337,7 @@ public class AccountService
 ```
 
 **Key Features**:
+
 - Built-in outbox pattern
 - Dashboard for monitoring
 - Retry with exponential backoff
@@ -335,6 +345,7 @@ public class AccountService
 - Multi-database support
 
 **Implementation**:
+
 ```csharp
 // Configure CAP
 builder.Services.AddCap(x =>
@@ -385,6 +396,7 @@ public class AccountCreatedSubscriber : ICapSubscribe
 ```
 
 **Pros**:
+
 - Simple, focused on event bus
 - Built-in outbox pattern
 - Good dashboard
@@ -392,6 +404,7 @@ public class AccountCreatedSubscriber : ICapSubscribe
 - Lightweight
 
 **Cons**:
+
 - No saga support
 - Less feature-rich than MassTransit
 - Smaller Western community
@@ -440,12 +453,14 @@ public class AccountCreatedSubscriber : ICapSubscribe
 ```
 
 **Pros**:
+
 - Full control
 - No framework overhead
 - Direct Azure integration
 - No licensing concerns
 
 **Cons**:
+
 - Significant development effort
 - Need to implement outbox, retry, etc.
 - Missing battle-tested patterns
@@ -493,12 +508,14 @@ public class AccountCreatedSubscriber : ICapSubscribe
 ```
 
 **Pros**:
+
 - Gradual migration path
 - Keep MediatR patterns initially
 - Wolverine for new distributed events
 - Eventually unify on Wolverine
 
 **Cons**:
+
 - Two frameworks during transition
 - Complexity during migration
 - Developer confusion
@@ -518,13 +535,13 @@ public class AccountCreatedSubscriber : ICapSubscribe
 
 ## Decision Matrix Summary
 
-| Option | Azure | DevEx | Cost | Reliable | Perf | Community | **Total** |
-|--------|-------|-------|------|----------|------|-----------|-----------|
-| 1. MassTransit | 5 | 4 | 2 | 5 | 4 | 5 | **4.10** |
-| 2. Wolverine | 4 | 5 | 5 | 4 | 5 | 3 | **4.40** |
-| 3. CAP | 4 | 4 | 5 | 4 | 4 | 3 | **4.10** |
-| 4. Azure SDK Direct | 5 | 2 | 5 | 2 | 5 | 2 | **3.65** |
-| 5. Wolverine + MediatR | 4 | 3 | 5 | 4 | 4 | 3 | **3.90** |
+| Option                 | Azure | DevEx | Cost | Reliable | Perf | Community | **Total** |
+| ---------------------- | ----- | ----- | ---- | -------- | ---- | --------- | --------- |
+| 1. MassTransit         | 5     | 4     | 2    | 5        | 4    | 5         | **4.10**  |
+| 2. Wolverine           | 4     | 5     | 5    | 4        | 5    | 3         | **4.40**  |
+| 3. CAP                 | 4     | 4     | 5    | 4        | 4    | 3         | **4.10**  |
+| 4. Azure SDK Direct    | 5     | 2     | 5    | 2        | 5    | 2         | **3.65**  |
+| 5. Wolverine + MediatR | 4     | 3     | 5    | 4        | 4    | 3         | **3.90**  |
 
 ---
 
@@ -535,6 +552,7 @@ public class AccountCreatedSubscriber : ICapSubscribe
 Adopt Wolverine as the unified messaging framework for both in-process and distributed messaging:
 
 **Rationale**:
+
 1. **Free Forever**: No licensing concerns (MIT license)
 2. **Replaces MediatR**: Simplifies stack, one framework for all messaging
 3. **Modern Design**: Clean API, compiled handlers, excellent performance
@@ -545,6 +563,7 @@ Adopt Wolverine as the unified messaging framework for both in-process and distr
 ### Migration Strategy
 
 #### Phase 1: Add Wolverine for New Events (Month 1)
+
 ```csharp
 // Add alongside existing MediatR
 builder.Host.UseWolverine(opts =>
@@ -558,11 +577,13 @@ builder.Host.UseWolverine(opts =>
 ```
 
 Events to start with:
+
 - `AccountCreatedEvent`
 - `ScenarioPublishedEvent`
 - `SessionCompletedEvent`
 
 #### Phase 2: Migrate MediatR Commands (Month 2-3)
+
 ```csharp
 // Before (MediatR)
 public class CreateAccountHandler : IRequestHandler<CreateAccountCommand, AccountDto>
@@ -580,6 +601,7 @@ public static class CreateAccountHandler
 ```
 
 #### Phase 3: Remove MediatR Dependency (Month 3-4)
+
 - All handlers migrated to Wolverine
 - Remove MediatR packages
 - Single unified messaging framework
@@ -627,6 +649,7 @@ public static class CreateAccountHandler
 ## Consequences
 
 ### Positive
+
 - Free, no licensing costs ever
 - Unified messaging (replaces MediatR)
 - Excellent developer experience
@@ -634,6 +657,7 @@ public static class CreateAccountHandler
 - Future-proof (active development)
 
 ### Negative
+
 - Smaller community than MassTransit
 - Less third-party tooling
 - Documentation still evolving
@@ -641,12 +665,12 @@ public static class CreateAccountHandler
 
 ### Risks & Mitigations
 
-| Risk | Mitigation |
-|------|------------|
-| Framework maturity | Start with non-critical events |
-| Team familiarity | Wolverine syntax similar to MediatR |
-| Azure Service Bus issues | Wolverine supports multiple transports |
-| Performance concerns | Compiled handlers are faster than reflection |
+| Risk                     | Mitigation                                   |
+| ------------------------ | -------------------------------------------- |
+| Framework maturity       | Start with non-critical events               |
+| Team familiarity         | Wolverine syntax similar to MediatR          |
+| Azure Service Bus issues | Wolverine supports multiple transports       |
+| Performance concerns     | Compiled handlers are faster than reflection |
 
 ---
 

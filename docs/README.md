@@ -37,6 +37,10 @@ For details, see [ADR-0002: Documentation Location Strategy](./architecture/adr/
   - [ADR-0010: Authentication and Authorization Strategy](./architecture/adr/0010-authentication-and-authorization-strategy.md)
   - [ADR-0011: Entra ID Authentication Integration](./architecture/adr/0011-entra-id-authentication-integration.md)
   - [ADR-0012: GitHub Workflow Naming Convention](./architecture/adr/0012-github-workflow-naming-convention.md)
+  - [ADR-0013: Data Management and Storage Strategy](./architecture/adr/0013-data-management-and-storage-strategy.md)
+  - [ADR-0014: Polyglot Persistence Framework Selection](./architecture/adr/0014-polyglot-persistence-framework-selection.md)
+  - [ADR-0015: Event-Driven Architecture Framework](./architecture/adr/0015-event-driven-architecture-framework.md)
+  - [ADR-0016: Monorepo Tooling and Multi-Repository Strategy](./architecture/adr/0016-monorepo-tooling-and-multi-repository-strategy.md)
 
 ### Infrastructure Documentation
 
@@ -59,6 +63,7 @@ For details, see [ADR-0002: Documentation Location Strategy](./architecture/adr/
   - [Publishing Flow](./cicd/publishing-flow.md) - Package publishing workflows
 
 **Current Workflows:**
+
 - **Components**: Admin API, Admin UI, App, Chain, Devhub, Publisher, Story Generator
 - **Infrastructure**: Deploy, Validate
 - **Deployment**: Production, Staging
@@ -88,16 +93,16 @@ All workflows follow the "Category: Name" naming convention for clarity.
 
 Each project maintains its own documentation within their respective repositories:
 
-| Project             | Location                                                         |
-| ------------------- | ---------------------------------------------------------------- |
-| **App**             | `packages/app/docs/` and `packages/app/README.md`                |
-| **Publisher**       | `packages/publisher/docs/` and `packages/publisher/README.md`    |
+| Project             | Location                                                                  |
+| ------------------- | ------------------------------------------------------------------------- |
+| **App**             | `packages/app/docs/` and `packages/app/README.md`                         |
+| **Publisher**       | `packages/publisher/docs/` and `packages/publisher/README.md`             |
 | **Story-Generator** | `packages/story-generator/docs/` and `packages/story-generator/README.md` |
-| **Chain**           | `packages/chain/README.md`                                       |
-| **Admin UI**        | `packages/admin-ui/README.md`                                    |
-| **Admin API**       | `packages/admin-api/README.md`                                   |
-| **Devhub**          | `packages/devhub/README.md`                                      |
-| **Infrastructure**  | `infra/README.md` and `infra/` subdirectories                    |
+| **Chain**           | `packages/chain/README.md`                                                |
+| **Admin UI**        | `packages/admin-ui/README.md`                                             |
+| **Admin API**       | `packages/admin-api/README.md`                                            |
+| **Devhub**          | `packages/devhub/README.md`                                               |
+| **Infrastructure**  | `infra/README.md` and `infra/` subdirectories                             |
 
 ## Contributing Documentation
 
@@ -163,6 +168,7 @@ Practical examples when applicable.
 ### Code Examples
 
 Always include:
+
 - Working code examples
 - Expected output
 - Prerequisites or dependencies

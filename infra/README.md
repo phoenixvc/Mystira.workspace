@@ -123,19 +123,19 @@ kubectl apply -k ../../kubernetes/overlays/dev
 
 ## Environments
 
-| Environment | Domain                 | Deployment          | Branch  |
-| ----------- | ---------------------- | ------------------- | ------- |
-| Development | `*.dev.mystira.app`    | Manual              | `dev`   |
-| Staging     | `*.staging.mystira.app`| Auto (on main push) | `main`  |
-| Production  | `*.mystira.app`        | Manual (protected)  | `main`  |
+| Environment | Domain                  | Deployment          | Branch |
+| ----------- | ----------------------- | ------------------- | ------ |
+| Development | `*.dev.mystira.app`     | Manual              | `dev`  |
+| Staging     | `*.staging.mystira.app` | Auto (on main push) | `main` |
+| Production  | `*.mystira.app`         | Manual (protected)  | `main` |
 
 ### Service URLs
 
-| Service         | Dev                              | Staging                              | Production                   |
-| --------------- | -------------------------------- | ------------------------------------ | ---------------------------- |
-| Publisher       | `dev.publisher.mystira.app`      | `staging.publisher.mystira.app`      | `publisher.mystira.app`      |
-| Chain           | `dev.chain.mystira.app`          | `staging.chain.mystira.app`          | `chain.mystira.app`          |
-| Story Generator | `dev.story-generator.mystira.app`| `staging.story-generator.mystira.app`| `story-generator.mystira.app`|
+| Service         | Dev                               | Staging                               | Production                    |
+| --------------- | --------------------------------- | ------------------------------------- | ----------------------------- |
+| Publisher       | `dev.publisher.mystira.app`       | `staging.publisher.mystira.app`       | `publisher.mystira.app`       |
+| Chain           | `dev.chain.mystira.app`           | `staging.chain.mystira.app`           | `chain.mystira.app`           |
+| Story Generator | `dev.story-generator.mystira.app` | `staging.story-generator.mystira.app` | `story-generator.mystira.app` |
 
 ## Infrastructure Components
 
@@ -280,6 +280,7 @@ az monitor app-insights component show \
 ### Common Issues
 
 **Certificate not issuing:**
+
 ```bash
 # Check cert-manager logs
 kubectl logs -n cert-manager deployment/cert-manager
@@ -289,6 +290,7 @@ kubectl describe certificate -n mys-dev
 ```
 
 **Pods not starting:**
+
 ```bash
 # Check pod status
 kubectl describe pod <pod-name> -n mys-dev
@@ -301,6 +303,7 @@ kubectl get events -n mys-dev --sort-by='.lastTimestamp'
 ```
 
 **DNS not resolving:**
+
 ```bash
 # Check DNS records
 az network dns record-set a list \

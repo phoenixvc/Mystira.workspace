@@ -29,16 +29,16 @@ For detailed setup instructions, see [Quick Start Guide](./docs/guides/quick-sta
 
 Each component is maintained as a separate repository and integrated into this workspace:
 
-| Component                   | Description                              | Tech Stack       | Repository                         |
-| --------------------------- | ---------------------------------------- | ---------------- | ---------------------------------- |
-| **Mystira.Chain**           | Blockchain integration & Story Protocol  | Python, gRPC     | `phoenixvc/Mystira.Chain`          |
-| **Mystira.App**             | Main storytelling application            | C#, .NET         | `phoenixvc/Mystira.App`            |
-| **Mystira.StoryGenerator**  | AI-powered story generation engine       | C#, .NET         | `phoenixvc/Mystira.StoryGenerator` |
-| **Mystira.Publisher**       | Content publishing service               | TypeScript, Node | `phoenixvc/Mystira.Publisher`      |
-| **Mystira.DevHub**          | Developer portal and tools               | TypeScript       | `phoenixvc/Mystira.DevHub`         |
-| **Mystira.Admin.Api**       | Admin backend API                        | C#, ASP.NET Core | `phoenixvc/Mystira.Admin.Api`      |
-| **Mystira.Admin.UI**        | Admin dashboard frontend                 | TypeScript, React | `phoenixvc/Mystira.Admin.UI`       |
-| **Infrastructure**          | Terraform, Kubernetes, CI/CD             | HCL, YAML        | *(workspace-native)*               |
+| Component                  | Description                             | Tech Stack        | Repository                         |
+| -------------------------- | --------------------------------------- | ----------------- | ---------------------------------- |
+| **Mystira.Chain**          | Blockchain integration & Story Protocol | Python, gRPC      | `phoenixvc/Mystira.Chain`          |
+| **Mystira.App**            | Main storytelling application           | C#, .NET          | `phoenixvc/Mystira.App`            |
+| **Mystira.StoryGenerator** | AI-powered story generation engine      | C#, .NET          | `phoenixvc/Mystira.StoryGenerator` |
+| **Mystira.Publisher**      | Content publishing service              | TypeScript, Node  | `phoenixvc/Mystira.Publisher`      |
+| **Mystira.DevHub**         | Developer portal and tools              | TypeScript        | `phoenixvc/Mystira.DevHub`         |
+| **Mystira.Admin.Api**      | Admin backend API                       | C#, ASP.NET Core  | `phoenixvc/Mystira.Admin.Api`      |
+| **Mystira.Admin.UI**       | Admin dashboard frontend                | TypeScript, React | `phoenixvc/Mystira.Admin.UI`       |
+| **Infrastructure**         | Terraform, Kubernetes, CI/CD            | HCL, YAML         | _(workspace-native)_               |
 
 ## Repository Structure
 
@@ -133,33 +133,37 @@ The workspace uses a distributed CI/CD model:
 
 Each component runs its own dev CI workflow in its repository for fast feedback during development:
 
-| Component | Repository | Runtime |
-|-----------|------------|---------|
-| Admin API | [phoenixvc/Mystira.Admin.Api](https://github.com/phoenixvc/Mystira.Admin.Api) | .NET 9.0 |
-| Admin UI | [phoenixvc/Mystira.Admin.UI](https://github.com/phoenixvc/Mystira.Admin.UI) | Node.js 20 |
-| App | [phoenixvc/Mystira.App](https://github.com/phoenixvc/Mystira.App) | .NET 9.0 |
-| Chain | [phoenixvc/Mystira.Chain](https://github.com/phoenixvc/Mystira.Chain) | Python 3.11 |
-| DevHub | [phoenixvc/Mystira.DevHub](https://github.com/phoenixvc/Mystira.DevHub) | Node.js 20 |
-| Publisher | [phoenixvc/Mystira.Publisher](https://github.com/phoenixvc/Mystira.Publisher) | Node.js 20 |
-| Story Generator | [phoenixvc/Mystira.StoryGenerator](https://github.com/phoenixvc/Mystira.StoryGenerator) | .NET 9.0 |
+| Component       | Repository                                                                              | Runtime     |
+| --------------- | --------------------------------------------------------------------------------------- | ----------- |
+| Admin API       | [phoenixvc/Mystira.Admin.Api](https://github.com/phoenixvc/Mystira.Admin.Api)           | .NET 9.0    |
+| Admin UI        | [phoenixvc/Mystira.Admin.UI](https://github.com/phoenixvc/Mystira.Admin.UI)             | Node.js 20  |
+| App             | [phoenixvc/Mystira.App](https://github.com/phoenixvc/Mystira.App)                       | .NET 9.0    |
+| Chain           | [phoenixvc/Mystira.Chain](https://github.com/phoenixvc/Mystira.Chain)                   | Python 3.11 |
+| DevHub          | [phoenixvc/Mystira.DevHub](https://github.com/phoenixvc/Mystira.DevHub)                 | Node.js 20  |
+| Publisher       | [phoenixvc/Mystira.Publisher](https://github.com/phoenixvc/Mystira.Publisher)           | Node.js 20  |
+| Story Generator | [phoenixvc/Mystira.StoryGenerator](https://github.com/phoenixvc/Mystira.StoryGenerator) | .NET 9.0    |
 
 ### Workspace Workflows (staging/production)
 
 This workspace handles integration, staging, and production deployments:
 
 ### Infrastructure Workflows
+
 - **Infrastructure: Deploy** - Automated infrastructure deployment
 - **Infrastructure: Validate** - Infrastructure validation
 
 ### Deployment Workflows
+
 - **Deployment: Staging** - Auto-deploy to staging on main branch
 - **Deployment: Production** - Manual production deployment
 
 ### Workspace Workflows
+
 - **Workspace: CI** - Workspace-level CI
 - **Workspace: Release** - NPM package releases via Changesets
 
 ### Utilities
+
 - **Utilities: Check Submodules** - Validate submodule commits
 - **Utilities: Link Checker** - Check markdown links in documentation
 
@@ -176,11 +180,11 @@ The infrastructure is defined using:
 
 ### Environments
 
-| Environment | URL                      | Deployment          | Branch |
-| ----------- | ------------------------ | ------------------- | ------ |
-| Development | `*.dev.mystira.app`      | Manual              | `dev`  |
-| Staging     | `*.staging.mystira.app`  | Auto (on main push) | `main` |
-| Production  | `*.mystira.app`          | Manual (protected)  | `main` |
+| Environment | URL                     | Deployment          | Branch |
+| ----------- | ----------------------- | ------------------- | ------ |
+| Development | `*.dev.mystira.app`     | Manual              | `dev`  |
+| Staging     | `*.staging.mystira.app` | Auto (on main push) | `main` |
+| Production  | `*.mystira.app`         | Manual (protected)  | `main` |
 
 ### Quick Deploy
 
@@ -203,23 +207,27 @@ See [Infrastructure Documentation](./infra/README.md) for detailed guides.
 ## Documentation
 
 ### Getting Started
+
 - [Quick Start Guide](./docs/guides/quick-start.md) - Get running in 5 minutes
 - [Setup Guide](./docs/guides/setup.md) - Detailed setup instructions
 - [Submodules Guide](./docs/guides/submodules.md) - Working with git submodules
 
 ### Development
+
 - [Architecture Overview](./docs/guides/architecture.md) - System architecture
 - [Architecture Decision Records](./docs/architecture/adr/) - Key design decisions
 - [Commit Conventions](./docs/guides/commit-conventions.md) - Commit message guidelines
 - [Contributing Guide](./CONTRIBUTING.md) - How to contribute
 
 ### Infrastructure & DevOps
+
 - [Infrastructure Guide](./docs/infrastructure/infrastructure.md) - Infrastructure overview
 - [CI/CD Documentation](./docs/cicd/) - CI/CD setup and workflows
 - [Azure Setup Guide](./infra/azure-setup.md) - Azure configuration
 - [Kubernetes Secrets](./docs/infrastructure/kubernetes-secrets-management.md)
 
 ### Planning & Migration
+
 - [Implementation Roadmap](./docs/planning/implementation-roadmap.md)
 - [Repository Analysis](./docs/analysis/)
 - [Migration Plans](./docs/migration/)
@@ -329,6 +337,7 @@ Configuration: [`scripts/repo-metadata.json`](./scripts/repo-metadata.json)
 ### Mystira.App
 
 The main client application ([Mystira.App](https://github.com/phoenixvc/Mystira.App)) is built with:
+
 - **Blazor WebAssembly** - C# frontend running in the browser via WebAssembly
 - **Progressive Web App (PWA)** - Offline-capable with service workers
 - **IndexedDB** - Client-side data persistence and sync
@@ -338,30 +347,30 @@ The main client application ([Mystira.App](https://github.com/phoenixvc/Mystira.
 
 ### Package Ecosystem
 
-| Registry | Packages | Purpose |
-|----------|----------|---------|
-| **Azure Container Registry** | `publisher`, `chain`, `story-generator`, `admin-api`, `admin-ui` | Docker images for Kubernetes deployment |
-| **GitHub Packages (NuGet)** | `Mystira.App.Domain`, `Mystira.App.Shared`, `Mystira.App.Contracts`, `Mystira.StoryGenerator.*` | Shared .NET libraries for service development |
-| **npmjs.org** | `@mystira/publisher`, `@mystira/shared-utils` | TypeScript packages via Changesets |
+| Registry                     | Packages                                                                                        | Purpose                                       |
+| ---------------------------- | ----------------------------------------------------------------------------------------------- | --------------------------------------------- |
+| **Azure Container Registry** | `publisher`, `chain`, `story-generator`, `admin-api`, `admin-ui`                                | Docker images for Kubernetes deployment       |
+| **GitHub Packages (NuGet)**  | `Mystira.App.Domain`, `Mystira.App.Shared`, `Mystira.App.Contracts`, `Mystira.StoryGenerator.*` | Shared .NET libraries for service development |
+| **npmjs.org**                | `@mystira/publisher`, `@mystira/shared-utils`                                                   | TypeScript packages via Changesets            |
 
 ### Service Endpoints
 
-| Environment | Service         | URL                              |
-|-------------|-----------------|----------------------------------|
-| Development | Web App         | dev.mystira.app                  |
-|             | Admin UI        | dev.admin.mystira.app            |
-|             | Admin API       | dev.admin-api.mystira.app        |
-|             | Publisher       | dev.publisher.mystira.app        |
-|             | Story Generator | dev.story-generator.mystira.app  |
-|             | Chain           | dev.chain.mystira.app            |
-| Staging     | Web App         | staging.mystira.app              |
-|             | Admin UI        | staging.admin.mystira.app        |
-|             | Admin API       | staging.admin-api.mystira.app    |
-|             | Publisher       | staging.publisher.mystira.app    |
-| Production  | Web App         | mystira.app                      |
-|             | Admin UI        | admin.mystira.app                |
-|             | Admin API       | admin-api.mystira.app            |
-|             | Publisher       | publisher.mystira.app            |
+| Environment | Service         | URL                             |
+| ----------- | --------------- | ------------------------------- |
+| Development | Web App         | dev.mystira.app                 |
+|             | Admin UI        | dev.admin.mystira.app           |
+|             | Admin API       | dev.admin-api.mystira.app       |
+|             | Publisher       | dev.publisher.mystira.app       |
+|             | Story Generator | dev.story-generator.mystira.app |
+|             | Chain           | dev.chain.mystira.app           |
+| Staging     | Web App         | staging.mystira.app             |
+|             | Admin UI        | staging.admin.mystira.app       |
+|             | Admin API       | staging.admin-api.mystira.app   |
+|             | Publisher       | staging.publisher.mystira.app   |
+| Production  | Web App         | mystira.app                     |
+|             | Admin UI        | admin.mystira.app               |
+|             | Admin API       | admin-api.mystira.app           |
+|             | Publisher       | publisher.mystira.app           |
 
 ## Security
 

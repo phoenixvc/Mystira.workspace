@@ -176,11 +176,13 @@ The `main` branch is protected with the following rules:
 All of the following must pass before merging to `main`:
 
 **Workspace-level:**
+
 - `Workspace: CI / lint`
 - `Workspace: CI / test`
 - `Workspace: CI / build`
 
 **Component-level** (if respective component changed):
+
 - `Components: Admin API - CI / lint, test, build`
 - `Components: Admin UI - CI / lint, test, build`
 - `Components: App - CI / lint, test, build`
@@ -190,6 +192,7 @@ All of the following must pass before merging to `main`:
 - `Components: Story Generator - CI / lint, test, build`
 
 **Infrastructure:**
+
 - `Infrastructure: Validate` (if infrastructure changed)
 - `Utilities: Check Submodules` (validates submodule commits exist)
 - `Utilities: Link Checker` (validates markdown links in documentation)
@@ -300,6 +303,7 @@ All of the following must pass before merging to `main`:
 All workflows are located in `.github/workflows/`:
 
 **Component CI** (7 workflows):
+
 - `admin-api-ci.yml` - **Components: Admin API - CI**
 - `admin-ui-ci.yml` - **Components: Admin UI - CI**
 - `app-ci.yml` - **Components: App - CI**
@@ -309,18 +313,22 @@ All workflows are located in `.github/workflows/`:
 - `story-generator-ci.yml` - **Components: Story Generator - CI**
 
 **Infrastructure** (2 workflows):
+
 - `infra-deploy.yml` - **Infrastructure: Deploy**
 - `infra-validate.yml` - **Infrastructure: Validate**
 
 **Deployment** (2 workflows):
+
 - `staging-release.yml` - **Deployment: Staging**
 - `production-release.yml` - **Deployment: Production**
 
 **Workspace** (2 workflows):
+
 - `ci.yml` - **Workspace: CI**
 - `release.yml` - **Workspace: Release** (NPM packages via Changesets)
 
 **Utilities** (2 workflows):
+
 - `check-submodules.yml` - **Utilities: Check Submodules**
 - `utilities-link-checker.yml` - **Utilities: Link Checker**
 

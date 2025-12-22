@@ -77,6 +77,7 @@ az role assignment list --assignee $SP_OBJECT_ID --all -o table
 ```
 
 You should see at least one role assignment with:
+
 - Role: `Contributor`
 - Scope: `/subscriptions/{subscription-id}`
 
@@ -120,6 +121,7 @@ The Terraform backend configuration uses `use_azuread_auth = true` for enhanced 
 **Why can't the workflow grant this automatically?**
 
 The service principal cannot grant role assignments to itself because:
+
 - It only has **Contributor** role (creates/manages resources)
 - Granting role assignments requires **Owner** or **User Access Administrator** role
 - This is a security feature - only users with elevated permissions can grant access
@@ -152,6 +154,7 @@ The JSON format required for GitHub Actions (map the values from Step 1 output):
 ```
 
 **Mapping from `az ad sp create-for-rbac` output:**
+
 - `appId` → `clientId`
 - `password` → `clientSecret`
 - `tenant` → `tenantId`
@@ -164,7 +167,7 @@ The JSON format required for GitHub Actions (map the values from Step 1 output):
 If you see an error like:
 
 ```
-ERROR: (AuthorizationFailed) The client '***' with object id 'xxx' does not have 
+ERROR: (AuthorizationFailed) The client '***' with object id 'xxx' does not have
 authorization to perform action 'Microsoft.Resources/subscriptions/resourcegroups/write'
 ```
 
@@ -172,7 +175,6 @@ This means:
 
 1. **The service principal doesn't have sufficient permissions**
    - Solution: Grant the `Contributor` role at the subscription level (see Step 1)
-   
 2. **Permissions were recently granted but not yet propagated**
    - Solution: Wait 5-10 minutes for Azure to propagate the permissions
    - Then re-run the workflow
@@ -211,11 +213,13 @@ az group delete --name test-permissions-rg --yes --no-wait
 The service principal will create and manage the following Azure resources:
 
 ### Bootstrap Resources (Terraform State)
+
 - Resource Group: `mystira-terraform-state`
 - Storage Account: `mystiraterraformstate`
 - Storage Container: `tfstate`
 
 ### Application Resources (per environment)
+
 - Resource Group: `mystira-{env}-rg` (dev/staging/prod)
 - AKS Cluster: `mystira-{env}-aks`
 - Azure DNS Zone: `mystira.app` (production only)

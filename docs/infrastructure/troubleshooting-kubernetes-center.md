@@ -99,8 +99,8 @@ This traditional view shows all AKS clusters regardless of when they were create
 
 Based on Terraform configuration and [ADR-0008: Azure Resource Naming Conventions](../architecture/adr/0008-azure-resource-naming-conventions.md):
 
-| Environment | Cluster Name                  | Resource Group               | Status               |
-| ----------- | ----------------------------- | ---------------------------- | -------------------- |
+| Environment | Cluster Name               | Resource Group            | Status               |
+| ----------- | -------------------------- | ------------------------- | -------------------- |
 | Dev         | `mys-dev-core-aks-eus`     | `mys-dev-core-rg-eus`     | Created by Terraform |
 | Staging     | `mys-staging-core-aks-eus` | `mys-staging-core-rg-eus` | Created by Terraform |
 | Prod        | `mys-prod-core-aks-eus`    | `mys-prod-core-rg-eus`    | Created by Terraform |

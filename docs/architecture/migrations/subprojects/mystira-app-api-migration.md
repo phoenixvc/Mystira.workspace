@@ -465,12 +465,14 @@ az webapp config appsettings set --name mys-prod-mystira-api-san \
 If issues occur during migration:
 
 1. **Set phase back to CosmosOnly**:
+
    ```bash
    az webapp config appsettings set --name <app-name> \
      --settings DataMigration__Phase=0
    ```
 
 2. **Restart the application**:
+
    ```bash
    az webapp restart --name <app-name> --resource-group <rg>
    ```
@@ -482,13 +484,13 @@ If issues occur during migration:
 
 ## Dependencies
 
-| Dependency | Version | Purpose |
-|------------|---------|---------|
-| `Mystira.App.Application` | * | Repository interfaces |
-| `Mystira.App.Infrastructure.Data` | * | Cosmos repositories |
-| `Mystira.App.Infrastructure.PostgreSQL` | * | PostgreSQL repositories (new) |
-| `Mystira.App.Infrastructure.Hybrid` | * | Dual-write coordination (new) |
-| `Mystira.App.Infrastructure.Redis` | * | Caching layer (new) |
+| Dependency                              | Version | Purpose                       |
+| --------------------------------------- | ------- | ----------------------------- |
+| `Mystira.App.Application`               | \*      | Repository interfaces         |
+| `Mystira.App.Infrastructure.Data`       | \*      | Cosmos repositories           |
+| `Mystira.App.Infrastructure.PostgreSQL` | \*      | PostgreSQL repositories (new) |
+| `Mystira.App.Infrastructure.Hybrid`     | \*      | Dual-write coordination (new) |
+| `Mystira.App.Infrastructure.Redis`      | \*      | Caching layer (new)           |
 
 ## See Also
 

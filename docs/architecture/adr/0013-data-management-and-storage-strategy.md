@@ -10,23 +10,25 @@ The Mystira platform consists of multiple services with diverse data storage nee
 
 ### Current Architecture
 
-| Service | Database | Storage | Purpose |
-|---------|----------|---------|---------|
-| **Mystira.App** (Main API) | Cosmos DB | Azure Blob | Game app, user profiles, scenarios |
-| **Mystira.App** (Admin API) | Cosmos DB | Azure Blob | Content management, admin tools |
-| **Story-Generator** | PostgreSQL | - | AI scenario generation |
-| **Publisher** | - | - | Blockchain publishing service |
-| **Chain** | File storage | - | Blockchain node data |
+| Service                     | Database     | Storage    | Purpose                            |
+| --------------------------- | ------------ | ---------- | ---------------------------------- |
+| **Mystira.App** (Main API)  | Cosmos DB    | Azure Blob | Game app, user profiles, scenarios |
+| **Mystira.App** (Admin API) | Cosmos DB    | Azure Blob | Content management, admin tools    |
+| **Story-Generator**         | PostgreSQL   | -          | AI scenario generation             |
+| **Publisher**               | -            | -          | Blockchain publishing service      |
+| **Chain**                   | File storage | -          | Blockchain node data               |
 
 ### Data Categories
 
 #### 1. Transactional Data (High Write, Moderate Read)
+
 - User profiles and accounts
 - Game sessions and progress
 - Player scores and achievements
 - Pending signups
 
 #### 2. Content/Master Data (Low Write, High Read)
+
 - Scenarios (YAML-based, complex nested documents)
 - Character maps and metadata
 - Badge configurations
@@ -34,6 +36,7 @@ The Mystira platform consists of multiple services with diverse data storage nee
 - Compass axis definitions
 
 #### 3. Binary/Media Assets (Write Once, Read Many)
+
 - Character images and avatars
 - Background images
 - Music tracks (MP3/OGG)
@@ -41,17 +44,20 @@ The Mystira platform consists of multiple services with diverse data storage nee
 - Scenario artwork
 
 #### 4. Analytical/Tracking Data (Append-Only, Aggregate Read)
+
 - Compass tracking events
 - Player session analytics
 - Usage metrics
 
 #### 5. AI/ML Data (Batch Write, Complex Query)
+
 - Generated scenario content
 - Training data
 - Prompt templates
 - Generation history
 
 #### 6. Blockchain Data (Append-Only, Immutable)
+
 - Story IP registrations
 - Royalty distributions
 - On-chain metadata
@@ -67,14 +73,14 @@ The Mystira platform consists of multiple services with diverse data storage nee
 
 ## Decision Drivers
 
-| Driver | Weight | Description |
-|--------|--------|-------------|
-| **Cost Efficiency** | 25% | Minimize operational costs while scaling |
-| **Performance** | 20% | Low latency for real-time game interactions |
-| **Data Consistency** | 15% | ACID where needed, eventual consistency acceptable elsewhere |
-| **Developer Experience** | 15% | Easy to develop, test, and maintain |
-| **Scalability** | 15% | Handle growth from 100 to 100K+ users |
-| **Extensibility** | 10% | Easy to add new data types and services |
+| Driver                   | Weight | Description                                                  |
+| ------------------------ | ------ | ------------------------------------------------------------ |
+| **Cost Efficiency**      | 25%    | Minimize operational costs while scaling                     |
+| **Performance**          | 20%    | Low latency for real-time game interactions                  |
+| **Data Consistency**     | 15%    | ACID where needed, eventual consistency acceptable elsewhere |
+| **Developer Experience** | 15%    | Easy to develop, test, and maintain                          |
+| **Scalability**          | 15%    | Handle growth from 100 to 100K+ users                        |
+| **Extensibility**        | 10%    | Easy to add new data types and services                      |
 
 ---
 
@@ -114,12 +120,14 @@ The Mystira platform consists of multiple services with diverse data storage nee
 ```
 
 **Pros**:
+
 - Minimal migration effort
 - Cosmos DB excels at document storage (scenarios are complex JSON)
 - Serverless scales automatically
 - Global distribution if needed later
 
 **Cons**:
+
 - Higher cost at scale compared to PostgreSQL
 - No relational integrity for cross-references
 - Complex queries require denormalization
@@ -173,6 +181,7 @@ The Mystira platform consists of multiple services with diverse data storage nee
 ```
 
 **Pros**:
+
 - PostgreSQL is cheaper for structured data
 - ACID transactions for user/account data
 - SQL joins for complex queries (reports, analytics)
@@ -180,6 +189,7 @@ The Mystira platform consists of multiple services with diverse data storage nee
 - PostgreSQL JSONB can handle semi-structured data
 
 **Cons**:
+
 - Significant migration effort
 - Two databases to manage
 - Cross-database consistency challenges
@@ -232,6 +242,7 @@ The Mystira platform consists of multiple services with diverse data storage nee
 ```
 
 **Pros**:
+
 - Single database to manage
 - Lowest operational cost
 - Full SQL capabilities + JSONB flexibility
@@ -239,6 +250,7 @@ The Mystira platform consists of multiple services with diverse data storage nee
 - Simpler connection management
 
 **Cons**:
+
 - Major migration effort
 - JSONB queries less performant than Cosmos DB for documents
 - Lose Cosmos DB global distribution capability
@@ -308,6 +320,7 @@ The Mystira platform consists of multiple services with diverse data storage nee
 ```
 
 **Pros**:
+
 - Clear domain boundaries
 - Each service can scale independently
 - Right tool for each job
@@ -315,6 +328,7 @@ The Mystira platform consists of multiple services with diverse data storage nee
 - Easier to reason about data ownership
 
 **Cons**:
+
 - Most complex to implement
 - Cross-service queries require APIs
 - Data duplication for read optimization
@@ -335,12 +349,12 @@ The Mystira platform consists of multiple services with diverse data storage nee
 
 ## Decision Matrix Summary
 
-| Option | Cost | Perf | Consistency | DevEx | Scale | Extend | **Total** |
-|--------|------|------|-------------|-------|-------|--------|-----------|
-| 1. Cosmos DB Primary | 2 | 4 | 3 | 4 | 5 | 4 | **3.50** |
-| 2. PostgreSQL + Cosmos | 4 | 4 | 5 | 3 | 4 | 4 | **4.00** |
-| 3. PostgreSQL Only | 5 | 3 | 5 | 4 | 3 | 3 | **3.95** |
-| 4. Polyglot Persistence | 3 | 5 | 4 | 3 | 5 | 5 | **4.05** |
+| Option                  | Cost | Perf | Consistency | DevEx | Scale | Extend | **Total** |
+| ----------------------- | ---- | ---- | ----------- | ----- | ----- | ------ | --------- |
+| 1. Cosmos DB Primary    | 2    | 4    | 3           | 4     | 5     | 4      | **3.50**  |
+| 2. PostgreSQL + Cosmos  | 4    | 4    | 5           | 3     | 4     | 4      | **4.00**  |
+| 3. PostgreSQL Only      | 5    | 3    | 5           | 4     | 3     | 3      | **3.95**  |
+| 4. Polyglot Persistence | 3    | 5    | 4           | 3     | 5     | 5      | **4.05**  |
 
 ---
 
@@ -365,6 +379,7 @@ Start migrating transactional data to PostgreSQL while keeping Cosmos DB for doc
 ### Long-Term (6-18 months): **Evolve toward Option 4 - Polyglot Persistence**
 
 As services mature:
+
 1. Extract Analytics as separate service with dedicated PostgreSQL
 2. Add Redis for caching frequently accessed content
 3. Implement event-driven sync between domains
@@ -406,15 +421,15 @@ As services mature:
 
 ### Data Ownership Rules
 
-| Domain | Owner Service | Database | Consumers |
-|--------|--------------|----------|-----------|
-| Users & Accounts | App API | PostgreSQL (future) | Admin API (read) |
-| Profiles & Progress | App API | Cosmos DB | Admin API (read) |
-| Scenarios & Content | Admin API | Cosmos DB | App API (read) |
-| Game Sessions | App API | Cosmos DB | Analytics (events) |
-| Generated Content | Story-Generator | PostgreSQL | Admin API (read) |
-| Analytics | Analytics Svc | PostgreSQL | Admin API (reports) |
-| IP Registration | Publisher | Redis + Chain | Admin API (status) |
+| Domain              | Owner Service   | Database            | Consumers           |
+| ------------------- | --------------- | ------------------- | ------------------- |
+| Users & Accounts    | App API         | PostgreSQL (future) | Admin API (read)    |
+| Profiles & Progress | App API         | Cosmos DB           | Admin API (read)    |
+| Scenarios & Content | Admin API       | Cosmos DB           | App API (read)      |
+| Game Sessions       | App API         | Cosmos DB           | Analytics (events)  |
+| Generated Content   | Story-Generator | PostgreSQL          | Admin API (read)    |
+| Analytics           | Analytics Svc   | PostgreSQL          | Admin API (reports) |
+| IP Registration     | Publisher       | Redis + Chain       | Admin API (status)  |
 
 ---
 
@@ -467,36 +482,40 @@ As services mature:
 
 ### CDN Configuration
 
-| Content Type | Cache TTL | Origin Shield | Compression |
-|--------------|-----------|---------------|-------------|
-| Images (PNG/JPG/WebP) | 7 days | Yes | Yes |
-| Music (OGG/MP3) | 30 days | Yes | No |
-| YAML/JSON configs | 1 hour | No | Yes |
-| User uploads | 1 day | No | Yes |
+| Content Type          | Cache TTL | Origin Shield | Compression |
+| --------------------- | --------- | ------------- | ----------- |
+| Images (PNG/JPG/WebP) | 7 days    | Yes           | Yes         |
+| Music (OGG/MP3)       | 30 days   | Yes           | No          |
+| YAML/JSON configs     | 1 hour    | No            | Yes         |
+| User uploads          | 1 day     | No            | Yes         |
 
 ---
 
 ## Implementation Phases
 
 ### Phase 1: Foundation (Month 1-2)
+
 - [ ] Define PostgreSQL schema for user domain
 - [ ] Set up database migration tooling (EF Core Migrations)
 - [ ] Create internal API contracts between services
 - [ ] Implement blob storage tiering
 
 ### Phase 2: User Domain Migration (Month 2-4)
+
 - [ ] Migrate Users/Accounts to PostgreSQL
 - [ ] Keep Cosmos DB profiles synced during transition
 - [ ] Add Redis caching for session data
 - [ ] Update App API to use dual-write pattern
 
 ### Phase 3: Analytics Extraction (Month 4-6)
+
 - [ ] Create Analytics service
 - [ ] Implement event ingestion from all services
 - [ ] Build reporting database in PostgreSQL
 - [ ] Create dashboards for Admin UI
 
 ### Phase 4: Optimization (Month 6+)
+
 - [ ] Remove dual-write, cutover to PostgreSQL
 - [ ] Optimize Cosmos DB for read-heavy workloads
 - [ ] Implement CQRS for complex queries
@@ -507,18 +526,21 @@ As services mature:
 ## Consequences
 
 ### Positive
+
 - Clear data ownership and boundaries
 - Cost optimization through right-sizing databases
 - Better performance for each data type
 - Improved maintainability with domain separation
 
 ### Negative
+
 - Increased operational complexity initially
 - Cross-service queries require API calls
 - Data synchronization challenges
 - Learning curve for polyglot persistence
 
 ### Neutral
+
 - Requires discipline in maintaining boundaries
 - May need to revisit as scale changes
 - Documentation and training investment

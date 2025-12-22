@@ -2,11 +2,11 @@
 
 ## Summary of Issues Found
 
-| Category | Count | Severity |
-|----------|-------|----------|
-| Bugs in Migration Docs | 8 | Medium-High |
-| Missed Opportunities | 12 | Medium |
-| Modern C# Features Missing | 10 | Low-Medium |
+| Category                   | Count | Severity    |
+| -------------------------- | ----- | ----------- |
+| Bugs in Migration Docs     | 8     | Medium-High |
+| Missed Opportunities       | 12    | Medium      |
+| Modern C# Features Missing | 10    | Low-Medium  |
 
 ---
 
@@ -17,6 +17,7 @@
 **Location**: `repository-architecture.md`, `mystira-app-infrastructure-data-migration.md`
 
 **Issue**: Our migration docs use `Guid id` but existing code uses `string id`:
+
 ```csharp
 // Our doc says:
 public async Task<Account?> GetByIdAsync(Guid id, CancellationToken ct)
@@ -34,6 +35,7 @@ public async Task<Account?> GetByIdAsync(string id)
 **Location**: `mystira-app-api-migration.md`
 
 **Issue**: We added `CancellationToken` to new methods, but existing `IRepository<T>` doesn't have it:
+
 ```csharp
 // Existing interface (no CancellationToken):
 Task<TEntity?> GetByIdAsync(string id);
@@ -51,12 +53,14 @@ Task<TEntity?> GetByIdAsync(string id, CancellationToken ct = default);
 **Location**: `repository-architecture.md:301-303`
 
 **Issue**: Fire-and-forget without exception handling:
+
 ```csharp
 // Dangerous - exceptions are swallowed
 _ = WriteToPostgresAsync(entity, SyncOperation.Insert);
 ```
 
 **Fix**: Use proper background task with error tracking:
+
 ```csharp
 // Better approach
 await Task.Run(async () =>
@@ -75,6 +79,7 @@ Or better, queue to sync service immediately.
 **Location**: `user-domain-postgresql-migration.md`
 
 **Issue**: Schema mismatch:
+
 ```sql
 -- Our schema uses:
 date_of_birth DATE,
@@ -94,6 +99,7 @@ public DateTime CreatedAt { get; set; }  -- Not DateTimeOffset!
 **Location**: `mystira-app-infrastructure-data-migration.md`
 
 **Issue**: Cosmos repository doesn't call `SaveChangesAsync()` after operations:
+
 ```csharp
 public virtual async Task<TEntity> AddAsync(TEntity entity)
 {
@@ -119,11 +125,13 @@ public virtual async Task<TEntity> AddAsync(TEntity entity)
 **Location**: `repository-architecture.md`
 
 **Issue**: Simple key format without namespace:
+
 ```csharp
 var cacheKey = $"account:{id}";  // Could collide across environments
 ```
 
 **Fix**:
+
 ```csharp
 var cacheKey = $"{_options.InstanceName}account:{id}";  // e.g., "mystira-dev:account:123"
 ```
@@ -143,6 +151,7 @@ var cacheKey = $"{_options.InstanceName}account:{id}";  // e.g., "mystira-dev:ac
 ### MISS-1: Not Using Primary Constructors (C# 12)
 
 **Current**:
+
 ```csharp
 public class AccountRepository : Repository<Account>, IAccountRepository
 {
@@ -153,6 +162,7 @@ public class AccountRepository : Repository<Account>, IAccountRepository
 ```
 
 **Better** (C# 12+):
+
 ```csharp
 public class AccountRepository(DbContext context)
     : Repository<Account>(context), IAccountRepository
@@ -165,12 +175,14 @@ public class AccountRepository(DbContext context)
 ### MISS-2: Not Using Collection Expressions (C# 12)
 
 **Current**:
+
 ```csharp
 public List<string> UserProfileIds { get; set; } = new();
 public List<string> PurchasedScenarios { get; set; } = new();
 ```
 
 **Better**:
+
 ```csharp
 public List<string> UserProfileIds { get; set; } = [];
 public List<string> PurchasedScenarios { get; set; } = [];
@@ -181,6 +193,7 @@ public List<string> PurchasedScenarios { get; set; } = [];
 ### MISS-3: Not Using Required Members (C# 11)
 
 **Current**:
+
 ```csharp
 public class Account
 {
@@ -190,6 +203,7 @@ public class Account
 ```
 
 **Better**:
+
 ```csharp
 public class Account
 {
@@ -203,6 +217,7 @@ public class Account
 ### MISS-4: Not Using Records for DTOs
 
 **Current** (in our contracts doc):
+
 ```csharp
 public class AccountDto
 {
@@ -213,6 +228,7 @@ public class AccountDto
 ```
 
 **Better**:
+
 ```csharp
 public record AccountDto(
     Guid Id,
@@ -227,11 +243,13 @@ public record AccountDto(
 ### MISS-5: Not Using Generic Constraints for Entity Base
 
 **Current**:
+
 ```csharp
 public interface IRepository<TEntity> where TEntity : class
 ```
 
 **Better**:
+
 ```csharp
 public interface IEntity
 {
@@ -248,11 +266,13 @@ This enables generic `GetByIdAsync` without reflection.
 ### MISS-6: Not Using IAsyncEnumerable for Large Collections
 
 **Current**:
+
 ```csharp
 Task<IEnumerable<TEntity>> GetAllAsync();
 ```
 
 **Better** (for streaming large datasets):
+
 ```csharp
 IAsyncEnumerable<TEntity> GetAllAsyncStream(CancellationToken ct = default);
 ```
@@ -262,11 +282,13 @@ IAsyncEnumerable<TEntity> GetAllAsyncStream(CancellationToken ct = default);
 ### MISS-7: Not Using Result Pattern for Error Handling
 
 **Current**:
+
 ```csharp
 public async Task<Account?> GetByIdAsync(string id)
 ```
 
 **Better** (discriminated unions coming in C# 13, or use library):
+
 ```csharp
 public async Task<Result<Account, Error>> GetByIdAsync(string id)
 
@@ -281,6 +303,7 @@ public async Task<OneOf<Account, NotFound, Error>> GetByIdAsync(string id)
 **Current**: Single `IRepository<T>` with all operations.
 
 **Better** (CQRS-friendly):
+
 ```csharp
 public interface IReadRepository<TEntity> where TEntity : class, IEntity
 {
@@ -301,12 +324,14 @@ public interface IRepository<TEntity> : IReadRepository<TEntity> where TEntity :
 ### MISS-9: Not Using Strongly-Typed IDs
 
 **Current**:
+
 ```csharp
 public string Id { get; set; }
 public string AccountId { get; set; }
 ```
 
 **Better**:
+
 ```csharp
 public readonly record struct AccountId(Guid Value)
 {
@@ -324,6 +349,7 @@ Prevents mixing up `AccountId` with `ProfileId` at compile time.
 ### MISS-10: Not Using Source Generators for Boilerplate
 
 Could use source generators for:
+
 - Repository implementations from interfaces
 - Mapper generation (instead of manual `FromEntity`/`ToEntity`)
 - Specification builders
@@ -333,11 +359,13 @@ Could use source generators for:
 ### MISS-11: Not Using Nullable Reference Types Properly
 
 **Current**:
+
 ```csharp
 public string Auth0UserId { get; set; } = string.Empty;
 ```
 
 **Better** (with proper nullability):
+
 ```csharp
 public string? Auth0UserId { get; set; }  // Actually nullable
 public required string Email { get; init; }  // Required, non-null
@@ -348,11 +376,13 @@ public required string Email { get; init; }  // Required, non-null
 ### MISS-12: Not Using TimeProvider for Testability
 
 **Current**:
+
 ```csharp
 public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 ```
 
 **Better** (testable):
+
 ```csharp
 // Inject TimeProvider
 public class Entity(TimeProvider timeProvider)
@@ -601,14 +631,15 @@ public static IServiceCollection AddRepositories(
 
 ## Summary
 
-| Category | Items Found |
-|----------|-------------|
-| Bugs to Fix | 8 |
-| Modern C# Features | 12 |
-| Generic Repo Improvements | 4 patterns |
-| Quick Wins | 12 items |
+| Category                  | Items Found |
+| ------------------------- | ----------- |
+| Bugs to Fix               | 8           |
+| Modern C# Features        | 12          |
+| Generic Repo Improvements | 4 patterns  |
+| Quick Wins                | 12 items    |
 
 The codebase already has good foundations (generic repository, specification pattern), but could benefit from:
+
 1. Proper async patterns with CancellationToken
 2. Modern C# features (records, required, collection expressions)
 3. Generic decorators for caching/dual-write

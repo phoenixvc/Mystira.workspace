@@ -14,6 +14,7 @@ This checklist ensures comprehensive testing of the Azure v2.2 naming convention
 ### Terraform Validation
 
 - [ ] **Terraform Init**: All environments initialize successfully
+
   ```bash
   for env in dev staging prod; do
     cd infra/terraform/environments/$env
@@ -22,6 +23,7 @@ This checklist ensures comprehensive testing of the Azure v2.2 naming convention
   ```
 
 - [ ] **Terraform Validate**: No syntax or validation errors
+
   ```bash
   for env in dev staging prod; do
     cd infra/terraform/environments/$env
@@ -30,6 +32,7 @@ This checklist ensures comprehensive testing of the Azure v2.2 naming convention
   ```
 
 - [ ] **Terraform Plan**: Review execution plans for all environments
+
   ```bash
   for env in dev staging prod; do
     cd infra/terraform/environments/$env
@@ -44,6 +47,7 @@ This checklist ensures comprehensive testing of the Azure v2.2 naming convention
   - Prod: Expected creates: ~25, destroys: ~0
 
 - [ ] **Naming Validation**: All resource names follow v2.2 pattern
+
   ```bash
   # Pattern: [org]-[env]-[project]-[type]-[region]
   grep -r "mys-.*-core-.*-san" infra/terraform/
@@ -57,6 +61,7 @@ This checklist ensures comprehensive testing of the Azure v2.2 naming convention
 ### Kubernetes Manifest Validation
 
 - [ ] **Kustomize Build**: All overlays build successfully
+
   ```bash
   for env in dev staging prod; do
     kubectl kustomize infra/kubernetes/overlays/$env/ > /dev/null
@@ -65,6 +70,7 @@ This checklist ensures comprehensive testing of the Azure v2.2 naming convention
   ```
 
 - [ ] **Key Vault URLs**: All ConfigMaps reference correct Key Vault URLs
+
   ```bash
   kubectl kustomize infra/kubernetes/overlays/dev/ | grep "key_vault_url"
   # Expected: https://mys-dev-{service}-kv-san.vault.azure.net/
@@ -77,6 +83,7 @@ This checklist ensures comprehensive testing of the Azure v2.2 naming convention
   ```
 
 - [ ] **ACR References**: All images reference correct ACR
+
   ```bash
   kubectl kustomize infra/kubernetes/overlays/dev/ | grep "image:"
   # Expected: myssharedacr.azurecr.io/
@@ -91,11 +98,13 @@ This checklist ensures comprehensive testing of the Azure v2.2 naming convention
 ### Workflow Validation
 
 - [ ] **All workflows reference new naming**:
+
   ```bash
   grep -r "mys-.*-core-.*-san" .github/workflows/
   ```
 
 - [ ] **No old naming patterns remaining**:
+
   ```bash
   # Should return no results
   grep -r "mys-.*-mystira-.*-eus" .github/workflows/ || echo "✓ No old patterns found"
@@ -121,17 +130,20 @@ This checklist ensures comprehensive testing of the Azure v2.2 naming convention
 ### Infrastructure Deployment
 
 - [ ] **Deploy Infrastructure**:
+
   ```bash
   cd infra/terraform/environments/dev
   terraform apply
   ```
 
 - [ ] **Verify Resource Group Created**:
+
   ```bash
   az group show --name mys-dev-core-rg-san
   ```
 
 - [ ] **Verify VNet Created**:
+
   ```bash
   az network vnet show \
     --resource-group mys-dev-core-rg-san \
@@ -139,6 +151,7 @@ This checklist ensures comprehensive testing of the Azure v2.2 naming convention
   ```
 
 - [ ] **Verify AKS Cluster Created**:
+
   ```bash
   az aks show \
     --resource-group mys-dev-core-rg-san \
@@ -146,6 +159,7 @@ This checklist ensures comprehensive testing of the Azure v2.2 naming convention
   ```
 
 - [ ] **Verify PostgreSQL Server Created**:
+
   ```bash
   az postgres flexible-server show \
     --resource-group mys-dev-core-rg-san \
@@ -153,6 +167,7 @@ This checklist ensures comprehensive testing of the Azure v2.2 naming convention
   ```
 
 - [ ] **Verify Redis Cache Created**:
+
   ```bash
   az redis show \
     --resource-group mys-dev-core-rg-san \
@@ -160,6 +175,7 @@ This checklist ensures comprehensive testing of the Azure v2.2 naming convention
   ```
 
 - [ ] **Verify Key Vaults Created**:
+
   ```bash
   az keyvault list \
     --resource-group mys-dev-core-rg-san \
@@ -168,6 +184,7 @@ This checklist ensures comprehensive testing of the Azure v2.2 naming convention
   ```
 
 - [ ] **Verify Log Analytics Workspace**:
+
   ```bash
   az monitor log-analytics workspace show \
     --resource-group mys-dev-core-rg-san \
@@ -184,6 +201,7 @@ This checklist ensures comprehensive testing of the Azure v2.2 naming convention
 ### AKS Cluster Validation
 
 - [ ] **Get Credentials**:
+
   ```bash
   az aks get-credentials \
     --resource-group mys-dev-core-rg-san \
@@ -192,23 +210,27 @@ This checklist ensures comprehensive testing of the Azure v2.2 naming convention
   ```
 
 - [ ] **Cluster Info**:
+
   ```bash
   kubectl cluster-info
   ```
 
 - [ ] **Verify Nodes Running**:
+
   ```bash
   kubectl get nodes
   # Expected: 2-3 nodes in Ready state
   ```
 
 - [ ] **Verify System Pods Running**:
+
   ```bash
   kubectl get pods -n kube-system
   # All pods should be Running
   ```
 
 - [ ] **Verify Ingress Controller**:
+
   ```bash
   kubectl get pods -n ingress-nginx
   kubectl get svc -n ingress-nginx
@@ -223,22 +245,26 @@ This checklist ensures comprehensive testing of the Azure v2.2 naming convention
 ### Application Deployment
 
 - [ ] **Deploy Applications**:
+
   ```bash
   kubectl apply -k infra/kubernetes/overlays/dev/
   ```
 
 - [ ] **Verify Namespace Created**:
+
   ```bash
   kubectl get namespace mys-dev
   ```
 
 - [ ] **Verify Pods Running**:
+
   ```bash
   kubectl get pods -n mys-dev
   # All pods should reach Running state within 5 minutes
   ```
 
 - [ ] **Verify ConfigMaps**:
+
   ```bash
   kubectl get configmaps -n mys-dev
   kubectl describe configmap mys-publisher-config -n mys-dev
@@ -246,12 +272,14 @@ This checklist ensures comprehensive testing of the Azure v2.2 naming convention
   ```
 
 - [ ] **Verify Secrets**:
+
   ```bash
   kubectl get secrets -n mys-dev
   # Secrets should be populated by CSI driver
   ```
 
 - [ ] **Verify Services**:
+
   ```bash
   kubectl get services -n mys-dev
   ```
@@ -266,6 +294,7 @@ This checklist ensures comprehensive testing of the Azure v2.2 naming convention
 ### Database Validation
 
 - [ ] **Database Connectivity**:
+
   ```bash
   # Test from pod
   kubectl exec -n mys-dev deploy/mys-publisher -- \
@@ -273,6 +302,7 @@ This checklist ensures comprehensive testing of the Azure v2.2 naming convention
   ```
 
 - [ ] **Databases Exist**:
+
   ```bash
   az postgres flexible-server db list \
     --resource-group mys-dev-core-rg-san \
@@ -290,6 +320,7 @@ This checklist ensures comprehensive testing of the Azure v2.2 naming convention
 ### Redis Validation
 
 - [ ] **Redis Connectivity**:
+
   ```bash
   kubectl exec -n mys-dev deploy/mys-publisher -- \
     sh -c 'redis-cli -u $REDIS_URL ping'
@@ -307,6 +338,7 @@ This checklist ensures comprehensive testing of the Azure v2.2 naming convention
 ### Key Vault Validation
 
 - [ ] **Key Vault Access**:
+
   ```bash
   # Test from AKS pod identity
   kubectl exec -n mys-dev deploy/mys-publisher -- \
@@ -323,12 +355,14 @@ This checklist ensures comprehensive testing of the Azure v2.2 naming convention
 ### Certificate Validation
 
 - [ ] **Certificates Issued**:
+
   ```bash
   kubectl get certificates -n mys-dev
   # All should show Ready=True
   ```
 
 - [ ] **Certificate Details**:
+
   ```bash
   kubectl describe certificate -n mys-dev
   # Should show Let's Encrypt issuer
@@ -342,6 +376,7 @@ This checklist ensures comprehensive testing of the Azure v2.2 naming convention
 ### Endpoint Testing
 
 - [ ] **Health Endpoints**:
+
   ```bash
   curl -f https://dev.publisher.mystira.app/health
   curl -f https://dev.chain.mystira.app/health
@@ -349,6 +384,7 @@ This checklist ensures comprehensive testing of the Azure v2.2 naming convention
   ```
 
 - [ ] **API Endpoints**:
+
   ```bash
   # Test basic API functionality
   curl -X POST https://dev.publisher.mystira.app/api/v1/test
@@ -362,6 +398,7 @@ This checklist ensures comprehensive testing of the Azure v2.2 naming convention
 ### Application Logs
 
 - [ ] **No Critical Errors in Logs**:
+
   ```bash
   kubectl logs -n mys-dev -l app.kubernetes.io/name=mys-publisher --tail=100
   kubectl logs -n mys-dev -l app.kubernetes.io/name=mys-chain --tail=100
@@ -384,9 +421,9 @@ This checklist ensures comprehensive testing of the Azure v2.2 naming convention
 
 ### Dev Environment Sign-Off
 
-**Tester**: _________________
-**Date**: _________________
-**Signature**: _________________
+**Tester**: **\*\*\*\***\_**\*\*\*\***
+**Date**: **\*\*\*\***\_**\*\*\*\***
+**Signature**: **\*\*\*\***\_**\*\*\*\***
 
 ---
 
@@ -401,11 +438,13 @@ This checklist ensures comprehensive testing of the Azure v2.2 naming convention
 ### Data Migration
 
 - [ ] **Backup Staging Databases**:
+
   ```bash
   ./scripts/backup-postgres.sh staging
   ```
 
 - [ ] **Verify Backup Integrity**:
+
   ```bash
   ls -lh backups/staging_*/
   # Verify file sizes are reasonable
@@ -428,19 +467,21 @@ This checklist ensures comprehensive testing of the Azure v2.2 naming convention
 ### Data Restore
 
 - [ ] **Restore Databases**:
+
   ```bash
   ./scripts/restore-postgres.sh staging
   ```
 
 - [ ] **Verify Data Integrity**:
+
   ```bash
   ./scripts/verify-data.sh staging
   ```
 
 - [ ] **Row Count Comparison**:
-  - [ ] chain_db: Old ___ rows, New ___ rows ✓ Match
-  - [ ] publisher_db: Old ___ rows, New ___ rows ✓ Match
-  - [ ] story_generator_db: Old ___ rows, New ___ rows ✓ Match
+  - [ ] chain*db: Old \*\** rows, New \_\*\* rows ✓ Match
+  - [ ] publisher*db: Old \*\** rows, New \_\*\* rows ✓ Match
+  - [ ] story*generator_db: Old \*\** rows, New \_\*\* rows ✓ Match
 
 ### Application Deployment
 
@@ -451,11 +492,13 @@ This checklist ensures comprehensive testing of the Azure v2.2 naming convention
 ### Automated Testing
 
 - [ ] **Run E2E Test Suite**:
+
   ```bash
   npm run test:e2e -- --env=staging
   ```
 
 - [ ] **Run Integration Tests**:
+
   ```bash
   npm run test:integration -- --env=staging
   ```
@@ -484,9 +527,9 @@ This checklist ensures comprehensive testing of the Azure v2.2 naming convention
 
 ### Staging Environment Sign-Off
 
-**Tester**: _________________
-**Date**: _________________
-**Signature**: _________________
+**Tester**: **\*\*\*\***\_**\*\*\*\***
+**Date**: **\*\*\*\***\_**\*\*\*\***
+**Signature**: **\*\*\*\***\_**\*\*\*\***
 
 ---
 
@@ -505,11 +548,13 @@ This checklist ensures comprehensive testing of the Azure v2.2 naming convention
 ### Data Migration
 
 - [ ] **Final Production Backup**:
+
   ```bash
   ./scripts/backup-postgres.sh prod
   ```
 
 - [ ] **Verify Backup Integrity**:
+
   ```bash
   # Test restore to temporary server
   az postgres flexible-server create \
@@ -526,6 +571,7 @@ This checklist ensures comprehensive testing of the Azure v2.2 naming convention
   ```
 
 - [ ] **Upload Backup to Multiple Locations**:
+
   ```bash
   # Primary backup
   az storage blob upload-batch \
@@ -552,9 +598,9 @@ This checklist ensures comprehensive testing of the Azure v2.2 naming convention
 - [ ] Restore databases to new PostgreSQL server
 - [ ] Verify data integrity
 - [ ] Row count comparison (document counts):
-  - [ ] chain_db: Old _______ rows, New _______ rows ✓
-  - [ ] publisher_db: Old _______ rows, New _______ rows ✓
-  - [ ] story_generator_db: Old _______ rows, New _______ rows ✓
+  - [ ] chain_db: Old **\_\_\_** rows, New **\_\_\_** rows ✓
+  - [ ] publisher_db: Old **\_\_\_** rows, New **\_\_\_** rows ✓
+  - [ ] story_generator_db: Old **\_\_\_** rows, New **\_\_\_** rows ✓
 
 ### Application Deployment
 
@@ -566,12 +612,14 @@ This checklist ensures comprehensive testing of the Azure v2.2 naming convention
 ### Pre-Cutover Validation
 
 - [ ] **Synthetic Transactions**:
+
   ```bash
   # Test against new infrastructure before cutover
   curl -H "Host: publisher.mystira.app" https://<NEW_INGRESS_IP>/health
   ```
 
 - [ ] **Database Queries**:
+
   ```bash
   kubectl exec -n mys-prod deploy/mys-publisher -- \
     sh -c 'psql $DATABASE_URL -c "SELECT COUNT(*) FROM users"'
@@ -586,12 +634,14 @@ This checklist ensures comprehensive testing of the Azure v2.2 naming convention
 ### Cutover
 
 - [ ] **DNS/Ingress Update** (cutover moment):
+
   ```bash
   # Update DNS records or ingress controller
   kubectl apply -k infra/kubernetes/overlays/prod/
   ```
 
 - [ ] **Verify New IP Active**:
+
   ```bash
   kubectl get ingress -n mys-prod
   nslookup publisher.mystira.app
@@ -606,27 +656,29 @@ This checklist ensures comprehensive testing of the Azure v2.2 naming convention
 ### Post-Cutover Monitoring (First Hour)
 
 - [ ] **0-5 min**: Monitor pod health
+
   ```bash
   watch kubectl get pods -n mys-prod
   ```
 
 - [ ] **0-5 min**: Monitor application logs
+
   ```bash
   kubectl logs -n mys-prod -l app.kubernetes.io/name=mys-publisher -f
   ```
 
 - [ ] **5-10 min**: Check error rates
-  - HTTP 2xx: ____%
-  - HTTP 4xx: ____%
-  - HTTP 5xx: ____%
+  - HTTP 2xx: \_\_\_\_%
+  - HTTP 4xx: \_\_\_\_%
+  - HTTP 5xx: \_\_\_\_%
 
 - [ ] **10-15 min**: Check response times
-  - p50: _____ ms
-  - p95: _____ ms
-  - p99: _____ ms
+  - p50: **\_** ms
+  - p95: **\_** ms
+  - p99: **\_** ms
 
 - [ ] **15-30 min**: Database performance
-  - Active connections: _____
+  - Active connections: **\_**
   - Query performance: Normal / Degraded
   - No deadlocks: ✓
 
@@ -655,39 +707,39 @@ This checklist ensures comprehensive testing of the Azure v2.2 naming convention
 ### Comparison with Old Production
 
 - [ ] Response time comparison:
-  - Old p50: _____ ms
-  - New p50: _____ ms
-  - Difference: _____%
+  - Old p50: **\_** ms
+  - New p50: **\_** ms
+  - Difference: **\_**%
 
 - [ ] Error rate comparison:
-  - Old error rate: _____%
-  - New error rate: _____%
+  - Old error rate: **\_**%
+  - New error rate: **\_**%
 
 - [ ] Throughput comparison:
-  - Old requests/sec: _____
-  - New requests/sec: _____
+  - Old requests/sec: **\_**
+  - New requests/sec: **\_**
 
 ### Cleanup
 
 - [ ] **48 hours post-cutover**: Final approval to destroy old infrastructure
 - [ ] Destroy old production infrastructure
 - [ ] Verify old resources deleted
-- [ ] Archive backups for compliance (retain for _____ days)
+- [ ] Archive backups for compliance (retain for **\_** days)
 
 ### Production Sign-Off
 
-**Deployment Lead**: _________________
-**Date**: _________________
-**Time**: _________________
+**Deployment Lead**: **\*\*\*\***\_**\*\*\*\***
+**Date**: **\*\*\*\***\_**\*\*\*\***
+**Time**: **\*\*\*\***\_**\*\*\*\***
 
-**Infrastructure Lead**: _________________
-**Date**: _________________
+**Infrastructure Lead**: **\*\*\*\***\_**\*\*\*\***
+**Date**: **\*\*\*\***\_**\*\*\*\***
 
-**Application Lead**: _________________
-**Date**: _________________
+**Application Lead**: **\*\*\*\***\_**\*\*\*\***
+**Date**: **\*\*\*\***\_**\*\*\*\***
 
-**Product Owner**: _________________
-**Date**: _________________
+**Product Owner**: **\*\*\*\***\_**\*\*\*\***
+**Date**: **\*\*\*\***\_**\*\*\*\***
 
 ---
 

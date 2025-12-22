@@ -506,6 +506,7 @@ public class DualWriteAccountRepositoryPhase2 : IAccountRepository
 ## Migration Checklist
 
 ### Phase 1: Foundation
+
 - [ ] Create PostgreSQL database in shared PostgreSQL server
 - [ ] Run schema migration scripts
 - [ ] Create EF Core PostgreSQL context
@@ -513,12 +514,14 @@ public class DualWriteAccountRepositoryPhase2 : IAccountRepository
 - [ ] Add feature flags for migration phases
 
 ### Phase 2: Data Migration
+
 - [ ] Create migration job to copy existing Cosmos DB data
 - [ ] Validate data integrity between sources
 - [ ] Monitor write latency and errors
 - [ ] Set up alerting for sync failures
 
 ### Phase 3: Cutover
+
 - [ ] Switch read path to PostgreSQL
 - [ ] Keep Cosmos DB writes for rollback
 - [ ] Monitor for 1 week

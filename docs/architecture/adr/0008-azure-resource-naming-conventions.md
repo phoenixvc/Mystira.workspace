@@ -69,13 +69,13 @@ Where:
 
 | Resource Type           | Abbreviation | Example                              |
 | ----------------------- | ------------ | ------------------------------------ |
-| Resource Group          | `rg`         | `mys-dev-core-rg-euw`             |
-| Azure Kubernetes        | `aks`        | `mys-dev-core-aks-euw`            |
-| Virtual Network         | `vnet`       | `mys-dev-core-vnet-euw`           |
+| Resource Group          | `rg`         | `mys-dev-core-rg-euw`                |
+| Azure Kubernetes        | `aks`        | `mys-dev-core-aks-euw`               |
+| Virtual Network         | `vnet`       | `mys-dev-core-vnet-euw`              |
 | Subnet                  | `subnet`     | `mystira-app-subnet` (no env prefix) |
 | Key Vault               | `kv`         | `mys-dev-CONTEXT-kv-euw`             |
 | Storage Account         | (no dashes)  | `mysprodmystirastgeuw`               |
-| Container Registry      | (no dashes)  | `myssharedacr`                         |
+| Container Registry      | (no dashes)  | `myssharedacr`                       |
 | PostgreSQL              | `pg`         | `mys-dev-shared-pg-euw`              |
 | Redis Cache             | (in name)    | `mys-dev-shared-redis-cache-euw`     |
 | Application Insights    | `ai`         | `mys-dev-mystira-ai-euw`             |

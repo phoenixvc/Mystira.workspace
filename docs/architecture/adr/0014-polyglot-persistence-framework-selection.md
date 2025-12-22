@@ -15,13 +15,13 @@ Following [ADR-0013](./0013-data-management-and-storage-strategy.md), we need to
 
 ### Current State
 
-| Layer | Current Implementation | Technology |
-|-------|----------------------|------------|
-| ORM | Entity Framework Core | EF Core 9.0 |
-| Repository Pattern | Custom repositories | Per-entity |
-| Unit of Work | Custom UoW | `IUnitOfWork` |
-| Caching | None | - |
-| Query Pattern | Direct DbContext | LINQ |
+| Layer              | Current Implementation | Technology    |
+| ------------------ | ---------------------- | ------------- |
+| ORM                | Entity Framework Core  | EF Core 9.0   |
+| Repository Pattern | Custom repositories    | Per-entity    |
+| Unit of Work       | Custom UoW             | `IUnitOfWork` |
+| Caching            | None                   | -             |
+| Query Pattern      | Direct DbContext       | LINQ          |
 
 ### Requirements
 
@@ -34,14 +34,14 @@ Following [ADR-0013](./0013-data-management-and-storage-strategy.md), we need to
 
 ## Decision Drivers
 
-| Driver | Weight | Description |
-|--------|--------|-------------|
-| **Developer Experience** | 25% | Easy to understand and use |
-| **Migration Support** | 20% | Supports gradual database migration |
-| **Performance** | 20% | Low overhead, efficient queries |
-| **Maintainability** | 15% | Clean code, testable |
-| **Community/Support** | 10% | Active development, documentation |
-| **Cost** | 10% | Licensing, operational costs |
+| Driver                   | Weight | Description                         |
+| ------------------------ | ------ | ----------------------------------- |
+| **Developer Experience** | 25%    | Easy to understand and use          |
+| **Migration Support**    | 20%    | Supports gradual database migration |
+| **Performance**          | 20%    | Low overhead, efficient queries     |
+| **Maintainability**      | 15%    | Clean code, testable                |
+| **Community/Support**    | 10%    | Active development, documentation   |
+| **Cost**                 | 10%    | Licensing, operational costs        |
 
 ---
 
@@ -84,6 +84,7 @@ Following [ADR-0013](./0013-data-management-and-storage-strategy.md), we need to
 ```
 
 **Implementation**:
+
 ```csharp
 // Decorator pattern for caching
 public class CachedAccountRepository : IAccountRepository
@@ -134,12 +135,14 @@ public class DualWriteAccountRepository : IAccountRepository
 ```
 
 **Pros**:
+
 - Full control over implementation
 - No external dependencies
 - Builds on existing codebase
 - Lightweight, minimal overhead
 
 **Cons**:
+
 - Significant development effort
 - Need to implement all patterns from scratch
 - Testing complexity
@@ -194,6 +197,7 @@ public class DualWriteAccountRepository : IAccountRepository
 ```
 
 **Implementation**:
+
 ```csharp
 // Specification definition
 public class AccountByEmailSpec : Specification<Account>, ISingleResultSpecification<Account>
@@ -218,6 +222,7 @@ public class AccountService
 ```
 
 **Pros**:
+
 - Clean specification pattern
 - Works with any EF Core provider
 - Strong community (Steve Smith / Ardalis)
@@ -225,6 +230,7 @@ public class AccountService
 - Easy to test specifications
 
 **Cons**:
+
 - Doesn't solve dual-write problem
 - No built-in caching
 - Need to build infrastructure around it
@@ -277,6 +283,7 @@ public class AccountService
 ```
 
 **Pros**:
+
 - Complete framework with all patterns built-in
 - Multi-tenancy support
 - Excellent documentation
@@ -284,6 +291,7 @@ public class AccountService
 - Commercial support available
 
 **Cons**:
+
 - Heavyweight, requires significant refactoring
 - Opinionated, may conflict with existing patterns
 - Overkill for just persistence layer
@@ -339,6 +347,7 @@ public class AccountService
 ```
 
 **NuGet Packages**:
+
 ```xml
 <PackageReference Include="Ardalis.Specification" Version="8.0.0" />
 <PackageReference Include="Ardalis.Specification.EntityFrameworkCore" Version="8.0.0" />
@@ -349,6 +358,7 @@ public class AccountService
 ```
 
 **Implementation**:
+
 ```csharp
 // Polyglot repository with all features
 public class PolyglotRepository<T> : IRepository<T> where T : class, IEntity
@@ -385,6 +395,7 @@ public class PolyglotRepository<T> : IRepository<T> where T : class, IEntity
 ```
 
 **Pros**:
+
 - Best-of-breed for each concern
 - Ardalis.Specification for queries (proven pattern)
 - StackExchange.Redis for high-performance caching
@@ -393,6 +404,7 @@ public class PolyglotRepository<T> : IRepository<T> where T : class, IEntity
 - Incremental adoption
 
 **Cons**:
+
 - Multiple dependencies to manage
 - Custom integration code needed
 - Testing complexity
@@ -412,12 +424,12 @@ public class PolyglotRepository<T> : IRepository<T> where T : class, IEntity
 
 ## Decision Matrix Summary
 
-| Option | DevEx | Migration | Perf | Maintain | Community | Cost | **Total** |
-|--------|-------|-----------|------|----------|-----------|------|-----------|
-| 1. Custom Extended | 4 | 5 | 5 | 3 | 2 | 5 | **4.15** |
-| 2. Ardalis.Spec | 5 | 2 | 4 | 5 | 4 | 5 | **4.10** |
-| 3. ABP Framework | 3 | 4 | 4 | 4 | 5 | 3 | **3.75** |
-| 4. Hybrid Approach | 4 | 5 | 5 | 4 | 4 | 5 | **4.50** |
+| Option             | DevEx | Migration | Perf | Maintain | Community | Cost | **Total** |
+| ------------------ | ----- | --------- | ---- | -------- | --------- | ---- | --------- |
+| 1. Custom Extended | 4     | 5         | 5    | 3        | 2         | 5    | **4.15**  |
+| 2. Ardalis.Spec    | 5     | 2         | 4    | 5        | 4         | 5    | **4.10**  |
+| 3. ABP Framework   | 3     | 4         | 4    | 4        | 5         | 3    | **3.75**  |
+| 4. Hybrid Approach | 4     | 5         | 5    | 4        | 4         | 5    | **4.50**  |
 
 ---
 
@@ -435,21 +447,25 @@ Implement a hybrid solution combining:
 ### Implementation Phases
 
 #### Phase 1: Foundation (Week 1-2)
+
 - Add Ardalis.Specification to `Mystira.App.Application`
 - Create base `IPolyglotRepository<T>` interface
 - Migrate existing specifications to Ardalis format
 
 #### Phase 2: Dual-Write Infrastructure (Week 2-3)
+
 - Implement `PolyglotRepository<T>` in `Mystira.App.Infrastructure.Data`
 - Add migration phase configuration
 - Create health checks for each backend
 
 #### Phase 3: Caching Layer (Week 3-4)
+
 - Add StackExchange.Redis integration
 - Implement cache-aside pattern in repositories
 - Add cache invalidation on writes
 
 #### Phase 4: Migration Rollout (Week 4+)
+
 - Start with `AccountRepository` as pilot
 - Gradually migrate other repositories
 - Monitor and optimize
@@ -459,6 +475,7 @@ Implement a hybrid solution combining:
 ## Consequences
 
 ### Positive
+
 - Clean separation of concerns
 - Gradual migration path
 - High performance with caching
@@ -466,18 +483,19 @@ Implement a hybrid solution combining:
 - Minimal vendor lock-in
 
 ### Negative
+
 - Initial setup complexity
 - Multiple packages to maintain
 - Need to coordinate updates
 
 ### Risks & Mitigations
 
-| Risk | Mitigation |
-|------|------------|
-| Ardalis.Spec version conflicts | Pin versions, test upgrades |
-| Redis cache stampede | Use cache locks for expensive queries |
-| Dual-write consistency | Implement compensation patterns |
-| Testing complexity | Use in-memory providers for unit tests |
+| Risk                           | Mitigation                             |
+| ------------------------------ | -------------------------------------- |
+| Ardalis.Spec version conflicts | Pin versions, test upgrades            |
+| Redis cache stampede           | Use cache locks for expensive queries  |
+| Dual-write consistency         | Implement compensation patterns        |
+| Testing complexity             | Use in-memory providers for unit tests |
 
 ---
 
