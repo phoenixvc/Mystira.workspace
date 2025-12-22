@@ -172,17 +172,17 @@ spec:
 | `azure-ad-client-id`         | Key Vault | Admin API app registration client ID   |
 | `azure-ad-client-secret`     | Key Vault | Admin API app registration secret      |
 
-### Public API (Azure AD B2C)
+### Public API (Microsoft Entra External ID)
 
 | Secret Key                   | Source    | Description                            |
 | ---------------------------- | --------- | -------------------------------------- |
-| `azure-b2c-tenant-id`        | Key Vault | Azure AD B2C tenant ID                 |
-| `azure-b2c-client-id`        | Key Vault | Public API B2C app registration ID     |
-| `azure-b2c-client-secret`    | Key Vault | B2C client secret (if confidential)    |
+| `azure-b2c-tenant-id`        | Key Vault | External ID tenant ID                  |
+| `azure-b2c-client-id`        | Key Vault | Public API External ID app registration ID |
+| `azure-b2c-client-secret`    | Key Vault | External ID client secret (if confidential) |
 
 ### Social Identity Provider Secrets
 
-These secrets are stored in Azure Key Vault and referenced by B2C custom policies:
+These secrets are stored in Azure Key Vault and referenced by External ID user flows:
 
 | Secret Key                   | Source    | Description                            |
 | ---------------------------- | --------- | -------------------------------------- |

@@ -132,8 +132,8 @@ The platform uses a tiered authentication strategy based on user type:
 │  ┌─────────────────┐   ┌─────────────────┐   ┌─────────────────────────┐│
 │  │   Admin Users   │   │ Consumer Users  │   │   Service-to-Service   ││
 │  ├─────────────────┤   ├─────────────────┤   ├─────────────────────────┤│
-│  │ Microsoft Entra │   │   Azure AD B2C  │   │    Managed Identity    ││
-│  │   ID (OIDC)     │   │   (OAuth 2.0)   │   │    (Azure RBAC)        ││
+│  │ Microsoft Entra │   │ Entra External  │   │    Managed Identity    ││
+│  │   ID (OIDC)     │   │  ID (OAuth 2.0) │   │    (Azure RBAC)        ││
 │  ├─────────────────┤   ├─────────────────┤   ├─────────────────────────┤│
 │  │ • Admin UI      │   │ • PWA           │   │ • Cosmos DB access     ││
 │  │ • Admin API     │   │ • Public API    │   │ • Key Vault access     ││
@@ -151,11 +151,11 @@ The platform uses a tiered authentication strategy based on user type:
 |-----------|-------------|----------|------------|
 | Admin UI | Cookie + OIDC | Microsoft Entra ID | Session cookie |
 | Admin API | JWT Bearer | Microsoft Entra ID | Access token |
-| Public API | JWT Bearer | Azure AD B2C | Access token |
-| PWA | MSAL + B2C | Azure AD B2C | Access + Refresh |
+| Public API | JWT Bearer | Entra External ID | Access token |
+| PWA | MSAL + External ID | Entra External ID | Access + Refresh |
 | Services | Managed Identity | Azure | AAD token |
 
-**Social Login** (via Azure AD B2C):
+**Social Login** (via Microsoft Entra External ID):
 - Google OAuth 2.0 for Google accounts
 - Discord OpenID Connect for gaming community
 - Email/password for local accounts

@@ -81,8 +81,6 @@ The service principal running Terraform needs the following Microsoft Graph API 
 |------|-------------|------|---------|:--------:|
 | environment | Deployment environment (dev, staging, prod) | `string` | n/a | yes |
 | admin_ui_redirect_uris | Redirect URIs for Admin UI application | `list(string)` | `[]` | no |
-| enable_b2c | Enable Azure AD B2C configuration | `bool` | `false` | no |
-| b2c_tenant_domain | B2C tenant domain | `string` | `""` | no |
 | tags | Tags to apply to resources | `map(string)` | `{}` | no |
 
 ## Outputs

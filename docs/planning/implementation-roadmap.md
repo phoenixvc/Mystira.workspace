@@ -316,7 +316,7 @@ This roadmap outlines the strategic implementation plan for the Mystira workspac
 **Goal**: Strengthen security posture and ensure compliance.
 **Status**: 🔄 In Progress (December 2025)
 
-### 5.0 Authentication Implementation (Entra ID & B2C)
+### 5.0 Authentication Implementation (Entra ID & External ID)
 
 **Priority**: High
 **Dependencies**: None
@@ -339,17 +339,17 @@ This roadmap outlines the strategic implementation plan for the Mystira workspac
 - [ ] Create Conditional Access policies (MFA requirement)
 - [ ] Test admin authentication flow end-to-end
 
-#### Phase 5.0.2: Azure AD B2C (Consumer)
+#### Phase 5.0.2: Microsoft Entra External ID (Consumer)
 - [x] Create External ID Terraform module (`infra/terraform/modules/external-id/` - December 2025)
   - [x] Public API app registration with exposed scopes
   - [x] PWA/SPA app registration for Blazor WASM and React clients
   - [x] API scopes: API.Access, Stories.Read, Stories.Write, Profile.Read
-- [ ] Create Azure AD B2C tenant (manual - not supported via Terraform)
+- [ ] Create Microsoft Entra External ID tenant (manual - not supported via Terraform)
 - [ ] Configure user flows (SignUpSignIn, PasswordReset, ProfileEdit)
 - [ ] Set up Google identity provider
 - [ ] Set up Discord identity provider (OpenID Connect)
-- [ ] Update PWA for B2C authentication (Blazor WASM)
-- [ ] Customize B2C UI branding
+- [ ] Update PWA for External ID authentication (Blazor WASM)
+- [ ] Customize External ID UI branding
 - [ ] Test consumer sign-up/sign-in flow
 
 #### Phase 5.0.3: Service-to-Service Authentication (Managed Identity)
@@ -370,7 +370,7 @@ This roadmap outlines the strategic implementation plan for the Mystira workspac
 **Deliverables**:
 
 - Entra ID authentication for Admin UI/API
-- B2C authentication with social login (Google, Discord)
+- External ID authentication with social login (Google, Discord)
 - Managed Identity for all Azure resources
 - MFA enabled for admin users
 
@@ -384,7 +384,7 @@ This roadmap outlines the strategic implementation plan for the Mystira workspac
 
 - [ ] Audit all secrets and credentials
 - [ ] Centralize secrets in Azure Key Vault
-- [ ] Store Entra ID and B2C secrets in Key Vault
+- [ ] Store Entra ID and External ID secrets in Key Vault
 - [ ] Store social provider secrets (Google, Discord) in Key Vault
 - [ ] Implement secrets rotation policies
 - [ ] Set up secrets access auditing
