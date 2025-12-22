@@ -140,15 +140,39 @@ terraform import 'module.mystira_app.azurerm_application_insights.main[0]' \
 
 ## Cosmos DB Containers
 
+### Infrastructure-Managed Containers (7)
+
+These containers are created by Terraform. Partition keys match the DbContext `ToJsonProperty` mappings.
+
 | Container | Partition Key | Purpose |
 |-----------|--------------|---------|
-| UserProfiles | `/accountId` | User profile data |
+| UserProfiles | `/id` | User profile data |
 | Accounts | `/id` | User accounts |
 | Scenarios | `/id` | Game scenarios |
 | GameSessions | `/accountId` | Active game sessions |
 | ContentBundles | `/id` | Downloadable content |
 | PendingSignups | `/email` | Unverified registrations |
-| CompassTrackings | `/Axis` | Analytics tracking |
+| CompassTrackings | `/id` | Analytics tracking (Axis mapped to "id") |
+
+### EF Core Auto-Created Containers (13+)
+
+Additional containers are created automatically by EF Core `EnsureCreatedAsync()` at application startup:
+
+| Container | Partition Key | Purpose |
+|-----------|--------------|---------|
+| CharacterMaps | `/id` | Character mapping data |
+| BadgeConfigurations | `/id` | Badge definitions |
+| Badges | `/id` | Badge instances |
+| BadgeImages | `/id` | Badge image assets |
+| CompassAxes | `/id` | Compass axis definitions |
+| ArchetypeDefinitions | `/id` | Archetype master data |
+| EchoTypeDefinitions | `/id` | Echo type master data |
+| FantasyThemeDefinitions | `/id` | Fantasy theme master data |
+| AgeGroupDefinitions | `/id` | Age group master data |
+| PlayerScenarioScores | `/profileId` | Player scores per scenario |
+| MediaAssets | `/mediaType` | Media asset metadata |
+| MediaMetadataFiles | `/id` | Media metadata |
+| AvatarConfigurationFiles | `/id` | Avatar configurations |
 
 ## Naming Convention
 
@@ -171,3 +195,5 @@ Example: `mys-dev-mystira-cosmos-san`
 3. **Key Vault Soft Delete**: Enabled with 7-day retention. Production enables purge protection.
 
 4. **Managed Identity**: App Service uses System Assigned Managed Identity for secure access to Key Vault and other resources.
+
+5. **Container Migration**: If importing existing containers deployed with old Bicep templates, partition keys may differ. Cosmos DB partition keys cannot be changed after creation - containers must be recreated with correct keys. The EF Core DbContext `ToJsonProperty` mappings are the source of truth.

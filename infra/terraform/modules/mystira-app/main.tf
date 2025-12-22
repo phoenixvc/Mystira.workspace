@@ -66,14 +66,15 @@ locals {
   })
 
   # Cosmos DB containers configuration
+  # Partition keys match DbContext ToJsonProperty mappings in Mystira.App
   cosmos_containers = [
-    { name = "UserProfiles", partition_key = "/accountId" },
-    { name = "Accounts", partition_key = "/id" },
-    { name = "Scenarios", partition_key = "/id" },
-    { name = "GameSessions", partition_key = "/accountId" },
-    { name = "ContentBundles", partition_key = "/id" },
-    { name = "PendingSignups", partition_key = "/email" },
-    { name = "CompassTrackings", partition_key = "/Axis" },
+    { name = "UserProfiles", partition_key = "/id" },        # Id → "id"
+    { name = "Accounts", partition_key = "/id" },            # Id → "id"
+    { name = "Scenarios", partition_key = "/id" },           # Id → "id"
+    { name = "GameSessions", partition_key = "/accountId" }, # AccountId → "accountId"
+    { name = "ContentBundles", partition_key = "/id" },      # Id → "id"
+    { name = "PendingSignups", partition_key = "/email" },   # Email → "email"
+    { name = "CompassTrackings", partition_key = "/id" },    # Axis → "id" (mapped)
   ]
 
   # Resolved monitoring resource references (shared or created)
