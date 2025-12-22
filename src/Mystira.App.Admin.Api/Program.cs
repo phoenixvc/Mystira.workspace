@@ -3,10 +3,13 @@ using System.Text.Json.Serialization;
 using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Identity.Web;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Mystira.App.Admin.Api.Configuration;
 using Mystira.App.Admin.Api.Adapters;
 using Mystira.App.Admin.Api.Services;
+using Mystira.App.Admin.Api.Services.Caching;
 using Mystira.App.Application.Behaviors;
 using Mystira.App.Application.Services;
 // Note: Avoid unqualified IJwtService to prevent ambiguity with Application port interface
@@ -398,7 +401,59 @@ builder.Services.AddAuthentication(options =>
         };
     });
 
-builder.Services.AddAuthorization();
+// ═══════════════════════════════════════════════════════════════════════════════
+// MICROSOFT ENTRA ID (AZURE AD) AUTHENTICATION
+// ═══════════════════════════════════════════════════════════════════════════════
+// Add Entra ID authentication if configured (alongside existing Cookie/JWT)
+var azureAdSection = builder.Configuration.GetSection("AzureAd");
+var entraIdConfigured = !string.IsNullOrEmpty(azureAdSection["TenantId"]) &&
+                        !string.IsNullOrEmpty(azureAdSection["ClientId"]);
+
+if (entraIdConfigured)
+{
+    builder.Services.AddAuthentication()
+        .AddMicrosoftIdentityWebApi(azureAdSection, jwtBearerScheme: "AzureAd");
+
+    Log.Information("Microsoft Entra ID authentication configured (TenantId: {TenantId})",
+        azureAdSection["TenantId"]?[..8] + "...");
+}
+else
+{
+    Log.Warning("Microsoft Entra ID authentication not configured. Set AzureAd:TenantId and AzureAd:ClientId to enable.");
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// AUTHORIZATION POLICIES
+// ═══════════════════════════════════════════════════════════════════════════════
+builder.Services.AddAuthorization(options =>
+{
+    // Admin-only policy: requires Admin or SuperAdmin role
+    options.AddPolicy("AdminOnly", policy =>
+        policy.RequireRole("Admin", "SuperAdmin"));
+
+    // Content moderation policy: requires Moderator, Admin, or SuperAdmin role
+    options.AddPolicy("CanModerate", policy =>
+        policy.RequireRole("Moderator", "Admin", "SuperAdmin"));
+
+    // Read-only policy: any authenticated user with a valid role
+    options.AddPolicy("ReadOnly", policy =>
+        policy.RequireRole("Viewer", "Moderator", "Admin", "SuperAdmin"));
+
+    // SuperAdmin-only policy: requires SuperAdmin role (dangerous operations)
+    options.AddPolicy("SuperAdminOnly", policy =>
+        policy.RequireRole("SuperAdmin"));
+});
+
+// Register data migration options
+builder.Services.Configure<AdminDataMigrationOptions>(
+    builder.Configuration.GetSection(AdminDataMigrationOptions.SectionName));
+builder.Services.Configure<RedisCacheOptions>(
+    builder.Configuration.GetSection(RedisCacheOptions.SectionName));
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// CONTENT CACHING (Redis or In-Memory)
+// ═══════════════════════════════════════════════════════════════════════════════
+builder.Services.AddContentCaching(builder.Configuration);
 
 // Register application services - Admin API services
 builder.Services.AddScoped<IScenarioApiService, ScenarioApiService>();
@@ -509,7 +564,12 @@ builder.Services.AddScoped<RegisterBundleIpAssetUseCase>();
 builder.Services.AddScoped<IGameSessionApiService, GameSessionApiService>();
 builder.Services.AddScoped<IAccountApiService, AccountApiService>();
 
-// Configure Health Checks
+// Add caching decorators (must be after base services are registered)
+builder.Services.AddCachedServiceDecorators(builder.Configuration);
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// HEALTH CHECKS (Cosmos DB, PostgreSQL, Redis, Blob Storage)
+// ═══════════════════════════════════════════════════════════════════════════════
 var healthChecksBuilder = builder.Services.AddHealthChecks()
     .AddCheck<BlobStorageHealthCheck>("blob_storage");
 
@@ -517,6 +577,35 @@ var healthChecksBuilder = builder.Services.AddHealthChecks()
 if (useCosmosDb)
 {
     healthChecksBuilder.AddCheck<CosmosDbHealthCheck>("cosmos_db", tags: new[] { "ready", "db" });
+}
+
+// Add PostgreSQL health check if connection string is configured
+var postgresConnectionString = builder.Configuration.GetConnectionString("PostgreSQL");
+if (!string.IsNullOrEmpty(postgresConnectionString))
+{
+    healthChecksBuilder.AddNpgSql(
+        postgresConnectionString,
+        name: "postgresql",
+        tags: new[] { "ready", "db", "postgresql" });
+    Log.Information("PostgreSQL health check configured");
+}
+
+// Add Redis health check if connection string is configured
+var redisConnectionString = builder.Configuration.GetConnectionString("Redis");
+if (!string.IsNullOrEmpty(redisConnectionString))
+{
+    healthChecksBuilder.AddRedis(
+        redisConnectionString,
+        name: "redis",
+        tags: new[] { "ready", "cache" });
+    Log.Information("Redis health check configured");
+
+    // Register Redis distributed cache
+    builder.Services.AddStackExchangeRedisCache(options =>
+    {
+        options.Configuration = redisConnectionString;
+        options.InstanceName = builder.Configuration["Redis:InstanceName"] ?? "mystira-admin:";
+    });
 }
 
 // Configure CORS for frontend integration (Best Practices)
