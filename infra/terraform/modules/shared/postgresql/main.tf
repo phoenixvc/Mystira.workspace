@@ -97,6 +97,21 @@ variable "databases" {
   default     = []
 }
 
+variable "aad_auth_enabled" {
+  description = "Enable Azure AD authentication for PostgreSQL"
+  type        = bool
+  default     = false
+}
+
+variable "aad_admin_identities" {
+  description = "Map of managed identities to add as Azure AD administrators (principal_name is used to look up the identity)"
+  type = map(object({
+    principal_name = string
+    principal_type = string # ServicePrincipal, User, or Group
+  }))
+  default = {}
+}
+
 variable "tags" {
   description = "Tags to apply to all resources"
   type        = map(string)
@@ -187,6 +202,33 @@ resource "azurerm_postgresql_flexible_server_firewall_rule" "allow_azure_service
   end_ip_address   = "0.0.0.0"
 }
 
+# =============================================================================
+# Azure AD Authentication
+# Enables managed identities and Azure AD users to authenticate without passwords
+# =============================================================================
+
+# Configure Azure AD authentication on the PostgreSQL server
+resource "azurerm_postgresql_flexible_server_active_directory_administrator" "aad_admins" {
+  for_each = var.aad_auth_enabled ? var.aad_admin_identities : {}
+
+  server_name         = azurerm_postgresql_flexible_server.shared.name
+  resource_group_name = var.resource_group_name
+  tenant_id           = data.azurerm_client_config.current.tenant_id
+  object_id           = data.azurerm_user_assigned_identity.aad_admins[each.key].principal_id
+  principal_name      = each.value.principal_name
+  principal_type      = each.value.principal_type
+}
+
+data "azurerm_client_config" "current" {}
+
+# Look up managed identities by name to avoid circular dependencies
+data "azurerm_user_assigned_identity" "aad_admins" {
+  for_each = var.aad_auth_enabled ? var.aad_admin_identities : {}
+
+  name                = each.value.principal_name
+  resource_group_name = var.resource_group_name
+}
+
 output "server_id" {
   description = "PostgreSQL server ID"
   value       = azurerm_postgresql_flexible_server.shared.id
@@ -225,5 +267,20 @@ output "connection_strings" {
     for db in var.databases : db => "Host=${azurerm_postgresql_flexible_server.shared.fqdn};Port=5432;Username=${azurerm_postgresql_flexible_server.shared.administrator_login};Password=${var.admin_password != null ? var.admin_password : random_password.postgres[0].result};Database=${db};SSLMode=Require;Trust Server Certificate=true"
   }
   sensitive = true
+}
+
+output "aad_connection_string_template" {
+  description = "Connection string template for Azure AD authentication (replace {database} and {identity-name})"
+  value       = var.aad_auth_enabled ? "Host=${azurerm_postgresql_flexible_server.shared.fqdn};Port=5432;Database={database};Username={identity-name};Ssl Mode=Require;Trust Server Certificate=true" : null
+}
+
+output "aad_admins" {
+  description = "Map of Azure AD administrators configured on the PostgreSQL server"
+  value = {
+    for k, v in azurerm_postgresql_flexible_server_active_directory_administrator.aad_admins : k => {
+      principal_name = v.principal_name
+      object_id      = v.object_id
+    }
+  }
 }
 
