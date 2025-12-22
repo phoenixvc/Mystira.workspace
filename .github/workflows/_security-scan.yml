@@ -1,0 +1,250 @@
+# Reusable Security Scanning Workflow
+# Provides SAST, dependency scanning, and container scanning
+
+name: Security Scan
+
+on:
+  workflow_call:
+    inputs:
+      language:
+        description: 'Primary language (csharp, javascript, python)'
+        required: true
+        type: string
+      scan_dependencies:
+        description: 'Run dependency vulnerability scan'
+        required: false
+        type: boolean
+        default: true
+      scan_container:
+        description: 'Run container image scan'
+        required: false
+        type: boolean
+        default: false
+      container_image:
+        description: 'Container image to scan (required if scan_container is true)'
+        required: false
+        type: string
+      working_directory:
+        description: 'Working directory for scanning'
+        required: false
+        type: string
+        default: '.'
+      fail_on_severity:
+        description: 'Fail on vulnerability severity (critical, high, medium, low)'
+        required: false
+        type: string
+        default: 'high'
+    secrets:
+      GITHUB_TOKEN:
+        required: true
+
+jobs:
+  # CodeQL SAST Analysis
+  codeql:
+    name: CodeQL Analysis
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: ${{ inputs.language }}
+          queries: +security-extended,security-and-quality
+
+      - name: Setup .NET
+        if: inputs.language == 'csharp'
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+
+      - name: Build .NET for CodeQL
+        if: inputs.language == 'csharp'
+        working-directory: ${{ inputs.working_directory }}
+        run: dotnet build --no-restore || true
+
+      - name: Setup Node.js
+        if: inputs.language == 'javascript'
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Setup Python
+        if: inputs.language == 'python'
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:${{ inputs.language }}"
+
+  # Dependency Vulnerability Scanning
+  dependency-scan:
+    name: Dependency Scan
+    if: inputs.scan_dependencies
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # .NET Dependency Scanning
+      - name: Setup .NET
+        if: inputs.language == 'csharp'
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+
+      - name: Restore .NET packages
+        if: inputs.language == 'csharp'
+        working-directory: ${{ inputs.working_directory }}
+        run: dotnet restore
+
+      - name: Scan .NET vulnerabilities
+        if: inputs.language == 'csharp'
+        working-directory: ${{ inputs.working_directory }}
+        run: |
+          echo "## .NET Dependency Vulnerabilities" >> $GITHUB_STEP_SUMMARY
+          dotnet list package --vulnerable --include-transitive 2>&1 | tee vulnerabilities.txt
+          if grep -q "has the following vulnerable packages" vulnerabilities.txt; then
+            echo "::warning::Vulnerable packages found"
+            cat vulnerabilities.txt >> $GITHUB_STEP_SUMMARY
+            if [ "${{ inputs.fail_on_severity }}" = "critical" ] || [ "${{ inputs.fail_on_severity }}" = "high" ]; then
+              if grep -q "Critical\|High" vulnerabilities.txt; then
+                exit 1
+              fi
+            fi
+          else
+            echo "No vulnerable packages found" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      # Node.js Dependency Scanning
+      - name: Setup Node.js
+        if: inputs.language == 'javascript'
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Node.js dependencies
+        if: inputs.language == 'javascript'
+        working-directory: ${{ inputs.working_directory }}
+        run: npm ci --ignore-scripts
+
+      - name: Scan npm vulnerabilities
+        if: inputs.language == 'javascript'
+        working-directory: ${{ inputs.working_directory }}
+        run: |
+          echo "## npm Dependency Vulnerabilities" >> $GITHUB_STEP_SUMMARY
+          npm audit --json > audit.json || true
+
+          # Parse and display results
+          CRITICAL=$(jq '.metadata.vulnerabilities.critical // 0' audit.json)
+          HIGH=$(jq '.metadata.vulnerabilities.high // 0' audit.json)
+          MODERATE=$(jq '.metadata.vulnerabilities.moderate // 0' audit.json)
+          LOW=$(jq '.metadata.vulnerabilities.low // 0' audit.json)
+
+          echo "| Severity | Count |" >> $GITHUB_STEP_SUMMARY
+          echo "|----------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Critical | $CRITICAL |" >> $GITHUB_STEP_SUMMARY
+          echo "| High | $HIGH |" >> $GITHUB_STEP_SUMMARY
+          echo "| Moderate | $MODERATE |" >> $GITHUB_STEP_SUMMARY
+          echo "| Low | $LOW |" >> $GITHUB_STEP_SUMMARY
+
+          # Fail based on severity
+          if [ "${{ inputs.fail_on_severity }}" = "critical" ] && [ "$CRITICAL" -gt 0 ]; then
+            exit 1
+          fi
+          if [ "${{ inputs.fail_on_severity }}" = "high" ] && [ $((CRITICAL + HIGH)) -gt 0 ]; then
+            exit 1
+          fi
+
+      # Python Dependency Scanning
+      - name: Setup Python
+        if: inputs.language == 'python'
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install pip-audit
+        if: inputs.language == 'python'
+        run: pip install pip-audit
+
+      - name: Scan Python vulnerabilities
+        if: inputs.language == 'python'
+        working-directory: ${{ inputs.working_directory }}
+        run: |
+          echo "## Python Dependency Vulnerabilities" >> $GITHUB_STEP_SUMMARY
+          pip-audit -r requirements.txt --format json > audit.json 2>&1 || true
+
+          if [ -s audit.json ]; then
+            VULNS=$(jq 'length' audit.json)
+            if [ "$VULNS" -gt 0 ]; then
+              echo "Found $VULNS vulnerable packages" >> $GITHUB_STEP_SUMMARY
+              jq -r '.[] | "- \(.name) \(.version): \(.vulns[].id)"' audit.json >> $GITHUB_STEP_SUMMARY
+              if [ "${{ inputs.fail_on_severity }}" = "critical" ] || [ "${{ inputs.fail_on_severity }}" = "high" ]; then
+                exit 1
+              fi
+            else
+              echo "No vulnerable packages found" >> $GITHUB_STEP_SUMMARY
+            fi
+          fi
+
+  # Container Image Scanning with Trivy
+  container-scan:
+    name: Container Scan
+    if: inputs.scan_container && inputs.container_image != ''
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ inputs.container_image }}
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+          severity: 'CRITICAL,HIGH,MEDIUM'
+          ignore-unfixed: true
+
+      - name: Upload Trivy scan results to GitHub Security
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: 'trivy-results.sarif'
+
+      - name: Trivy summary
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ inputs.container_image }}
+          format: 'table'
+          severity: 'CRITICAL,HIGH'
+          ignore-unfixed: true
+          exit-code: ${{ inputs.fail_on_severity == 'critical' && '0' || '1' }}
+
+  # Secret Scanning (additional layer)
+  secret-scan:
+    name: Secret Detection
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: TruffleHog Secret Scan
+        uses: trufflesecurity/trufflehog@main
+        with:
+          path: ./
+          base: ${{ github.event.repository.default_branch }}
+          head: HEAD
+          extra_args: --only-verified

@@ -398,23 +398,30 @@ This roadmap outlines the strategic implementation plan for the Mystira workspac
 
 ### 5.2 Security Scanning and Compliance
 
-**Priority**: High  
-**Dependencies**: None  
+**Priority**: High
+**Dependencies**: None
 **Estimated Effort**: 2 weeks
+**Status**: ✅ Partially Complete (December 2025)
 
 **Tasks**:
 
-- [ ] Implement automated security scanning in CI/CD
-- [ ] Set up dependency vulnerability scanning
-- [ ] Implement infrastructure security scanning
+- [x] Implement automated security scanning in CI/CD (December 2025)
+  - [x] Reusable security workflow (`_security-scan.yml`)
+  - [x] CodeQL SAST analysis for .NET, JavaScript, Python
+  - [x] Dependency vulnerability scanning (dotnet, npm, pip-audit)
+  - [x] Container image scanning (Trivy)
+  - [x] Secret detection (TruffleHog)
+- [x] Set up dependency vulnerability scanning
+- [x] Implement infrastructure security scanning (tfsec, checkov)
+- [x] Scheduled weekly security scans (`security-scan.yml`)
 - [ ] Create compliance checklists
 - [ ] Set up security incident response procedures
 
 **Deliverables**:
 
-- Security scanning integration
-- Compliance checklists
-- Security incident procedures
+- ✅ Security scanning integration
+- [ ] Compliance checklists
+- [ ] Security incident procedures
 
 ### 5.3 Access Control and IAM
 
