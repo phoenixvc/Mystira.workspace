@@ -188,7 +188,7 @@ resource "azurerm_storage_container" "media" {
   count = var.skip_storage_creation ? 0 : 1
 
   name                  = "mystira-app-media"
-  storage_account_name  = azurerm_storage_account.main[0].name
+  storage_account_id    = azurerm_storage_account.main[0].id
   container_access_type = "blob"
 }
 
@@ -197,7 +197,7 @@ resource "azurerm_storage_container" "avatars" {
   count = var.skip_storage_creation ? 0 : 1
 
   name                  = "avatars"
-  storage_account_name  = azurerm_storage_account.main[0].name
+  storage_account_id    = azurerm_storage_account.main[0].id
   container_access_type = "blob"
 }
 
@@ -206,7 +206,7 @@ resource "azurerm_storage_container" "audio" {
   count = var.skip_storage_creation ? 0 : 1
 
   name                  = "audio"
-  storage_account_name  = azurerm_storage_account.main[0].name
+  storage_account_id    = azurerm_storage_account.main[0].id
   container_access_type = "blob"
 }
 
@@ -215,7 +215,7 @@ resource "azurerm_storage_container" "content_bundles" {
   count = var.skip_storage_creation ? 0 : 1
 
   name                  = "content-bundles"
-  storage_account_name  = azurerm_storage_account.main[0].name
+  storage_account_id    = azurerm_storage_account.main[0].id
   container_access_type = "blob"
 }
 
@@ -224,7 +224,7 @@ resource "azurerm_storage_container" "archives" {
   count = var.skip_storage_creation ? 0 : 1
 
   name                  = "archives"
-  storage_account_name  = azurerm_storage_account.main[0].name
+  storage_account_id    = azurerm_storage_account.main[0].id
   container_access_type = "private"  # Private - accessed via SAS tokens
 }
 
@@ -233,7 +233,7 @@ resource "azurerm_storage_container" "uploads" {
   count = var.skip_storage_creation ? 0 : 1
 
   name                  = "uploads"
-  storage_account_name  = azurerm_storage_account.main[0].name
+  storage_account_id    = azurerm_storage_account.main[0].id
   container_access_type = "private"
 }
 
