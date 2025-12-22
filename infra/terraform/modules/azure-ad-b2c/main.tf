@@ -1,9 +1,12 @@
-# Azure AD B2C Consumer Authentication Module
-# Terraform module for managing B2C app registrations
+# Microsoft Entra External ID Consumer Authentication Module
+# Terraform module for managing External ID app registrations
 #
-# NOTE: Azure AD B2C tenant creation is not supported via Terraform.
-# The B2C tenant must be created manually in Azure Portal first.
-# This module creates app registrations within an existing B2C tenant.
+# NOTE: Microsoft Entra External ID tenant creation must be done manually
+# or via Azure CLI. This module manages app registrations within an existing
+# external tenant.
+#
+# IMPORTANT: As of May 1, 2025, Azure AD B2C is no longer available for new
+# customers. This module has been updated for Microsoft Entra External ID.
 
 terraform {
   required_version = ">= 1.5.0"
@@ -22,11 +25,12 @@ terraform {
 
 # Local variables
 locals {
-  api_identifier_uri = "https://${var.b2c_tenant_name}.onmicrosoft.com/mystira-api"
+  # External ID uses api:// scheme for app ID URIs
+  api_identifier_uri = "api://${var.tenant_name}-api"
 
-  common_tags = [var.environment, "b2c", "mystira", "consumer"]
+  common_tags = [var.environment, "external-id", "mystira", "consumer"]
 
-  # B2C API scopes
+  # API scopes for consumer operations
   api_scopes = {
     "API.Access" = {
       description                = "Access the Mystira API"
@@ -64,13 +68,13 @@ locals {
 }
 
 # =============================================================================
-# Public API App Registration (B2C)
+# Public API App Registration (External ID)
 # =============================================================================
 
 resource "azuread_application" "public_api" {
   display_name     = "Mystira Public API (${var.environment})"
   identifier_uris  = [local.api_identifier_uri]
-  sign_in_audience = "AzureADandPersonalMicrosoftAccount" # B2C multi-tenant
+  sign_in_audience = "AzureADandPersonalMicrosoftAccount"
 
   # Expose API scopes
   api {
@@ -90,7 +94,7 @@ resource "azuread_application" "public_api" {
     }
   }
 
-  # Optional claims for B2C tokens
+  # Optional claims for tokens
   optional_claims {
     access_token {
       name = "email"
@@ -124,12 +128,12 @@ resource "azuread_service_principal" "public_api" {
 }
 
 # =============================================================================
-# PWA/SPA App Registration (B2C)
+# PWA/SPA App Registration (External ID)
 # =============================================================================
 
 resource "azuread_application" "pwa" {
   display_name     = "Mystira PWA (${var.environment})"
-  sign_in_audience = "AzureADandPersonalMicrosoftAccount" # B2C multi-tenant
+  sign_in_audience = "AzureADandPersonalMicrosoftAccount"
 
   # Single-page application (SPA) configuration
   single_page_application {
@@ -138,7 +142,7 @@ resource "azuread_application" "pwa" {
 
   # Required resource access (to Public API)
   required_resource_access {
-    resource_app_id = azuread_application.public_api.client_id  # Updated: application_id deprecated
+    resource_app_id = azuread_application.public_api.client_id
 
     dynamic "resource_access" {
       for_each = local.api_scopes
@@ -177,13 +181,13 @@ resource "azuread_service_principal" "pwa" {
 }
 
 # =============================================================================
-# Mobile App Registration (B2C)
+# Mobile App Registration (External ID)
 # =============================================================================
 
 resource "azuread_application" "mobile" {
   count            = length(var.mobile_redirect_uris) > 0 ? 1 : 0
   display_name     = "Mystira Mobile App (${var.environment})"
-  sign_in_audience = "AzureADandPersonalMicrosoftAccount" # B2C multi-tenant
+  sign_in_audience = "AzureADandPersonalMicrosoftAccount"
 
   # Public client configuration for mobile apps
   public_client {
