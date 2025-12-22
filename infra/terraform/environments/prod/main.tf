@@ -17,10 +17,6 @@ terraform {
       source  = "hashicorp/azurerm"
       version = "~> 4.0"  # 4.x required for .NET 9.0 support
     }
-    azuread = {
-      source  = "hashicorp/azuread"
-      version = "~> 2.47"
-    }
   }
 }
 
