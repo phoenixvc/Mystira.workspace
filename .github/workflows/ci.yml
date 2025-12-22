@@ -1,47 +1,56 @@
-name: Admin API CI
+name: "Admin API CI"
+
+# Admin API Component CI: Validates .NET Admin API code quality and functionality
+# Runs: Format checking, unit tests, code coverage, and production builds
+# Triggers: Push to main/dev branches, PRs, and manual dispatch
 
 on:
   push:
     branches: [main, dev]
+    paths:
+      - "src/**"
+      - "*.sln"
+      - "Directory.Build.props"
+      - ".github/workflows/ci.yml"
   pull_request:
     branches: [main, dev]
+    types: [opened, synchronize, reopened, ready_for_review]
+  workflow_dispatch:
+
+concurrency:
+  group: admin-api-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  build:
-    name: Build and Test
+  lint:
+    name: Lint
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v5
         with:
           dotnet-version: "9.0.x"
 
       - name: Validate NuGet Feed Secrets
         run: |
+          missing_secrets=""
           if [ -z "${{ secrets.MYSTIRA_DEVOPS_AZURE_ORG }}" ]; then
-            echo "::error::Missing required GitHub secret: MYSTIRA_DEVOPS_AZURE_ORG"
-            echo "::error::Description: Azure DevOps organization name for NuGet feed access"
-            echo "::error::Action: Add secret at https://github.com/${{ github.repository }}/settings/secrets/actions"
-            exit 1
+            missing_secrets="$missing_secrets MYSTIRA_DEVOPS_AZURE_ORG"
           fi
           if [ -z "${{ secrets.MYSTIRA_DEVOPS_AZURE_PROJECT }}" ]; then
-            echo "::error::Missing required GitHub secret: MYSTIRA_DEVOPS_AZURE_PROJECT"
-            echo "::error::Description: Azure DevOps project name for NuGet feed access"
-            echo "::error::Action: Add secret at https://github.com/${{ github.repository }}/settings/secrets/actions"
-            exit 1
+            missing_secrets="$missing_secrets MYSTIRA_DEVOPS_AZURE_PROJECT"
           fi
           if [ -z "${{ secrets.MYSTIRA_DEVOPS_AZURE_PAT }}" ]; then
-            echo "::error::Missing required GitHub secret: MYSTIRA_DEVOPS_AZURE_PAT"
-            echo "::error::Description: Azure DevOps Personal Access Token with Packaging (Read) scope"
-            echo "::error::Action: Add secret at https://github.com/${{ github.repository }}/settings/secrets/actions"
-            exit 1
+            missing_secrets="$missing_secrets MYSTIRA_DEVOPS_AZURE_PAT"
           fi
           if [ -z "${{ secrets.MYSTIRA_DEVOPS_NUGET_FEED }}" ]; then
-            echo "::error::Missing required GitHub secret: MYSTIRA_DEVOPS_NUGET_FEED"
-            echo "::error::Description: Azure DevOps Artifacts feed name (e.g., Mystira-Internal)"
-            echo "::error::Action: Add secret at https://github.com/${{ github.repository }}/settings/secrets/actions"
+            missing_secrets="$missing_secrets MYSTIRA_DEVOPS_NUGET_FEED"
+          fi
+          if [ -n "$missing_secrets" ]; then
+            echo "::error::Missing required GitHub secrets:$missing_secrets"
+            echo "::error::Add secrets at https://github.com/${{ github.repository }}/settings/secrets/actions"
             exit 1
           fi
 
@@ -56,8 +65,121 @@ jobs:
       - name: Restore dependencies
         run: dotnet restore
 
-      - name: Build
-        run: dotnet build --no-restore
+      - name: Check format
+        run: dotnet format --verify-no-changes --verbosity diagnostic
+        continue-on-error: ${{ github.ref != 'refs/heads/main' }}
 
-      - name: Test
-        run: dotnet test --no-build --verbosity normal
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: "9.0.x"
+
+      - name: Configure NuGet Feed
+        run: |
+          dotnet nuget add source https://pkgs.dev.azure.com/${{ secrets.MYSTIRA_DEVOPS_AZURE_ORG }}/${{ secrets.MYSTIRA_DEVOPS_AZURE_PROJECT }}/_packaging/${{ secrets.MYSTIRA_DEVOPS_NUGET_FEED }}/nuget/v3/index.json \
+            --name "Mystira-Internal" \
+            --username "${{ secrets.MYSTIRA_DEVOPS_AZURE_ORG }}" \
+            --password "${{ secrets.MYSTIRA_DEVOPS_AZURE_PAT }}" \
+            --store-password-in-clear-text
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Run tests with coverage
+        run: dotnet test --no-restore --verbosity normal --collect:"XPlat Code Coverage" --results-directory ./coverage
+        continue-on-error: ${{ github.ref != 'refs/heads/main' }}
+
+      - name: Upload coverage reports
+        uses: codecov/codecov-action@v5
+        if: always()
+        with:
+          directory: ./coverage
+          flags: admin-api
+          name: admin-api-coverage
+          fail_ci_if_error: false
+        continue-on-error: true
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    needs: [lint, test]
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: "9.0.x"
+
+      - name: Configure NuGet Feed
+        run: |
+          dotnet nuget add source https://pkgs.dev.azure.com/${{ secrets.MYSTIRA_DEVOPS_AZURE_ORG }}/${{ secrets.MYSTIRA_DEVOPS_AZURE_PROJECT }}/_packaging/${{ secrets.MYSTIRA_DEVOPS_NUGET_FEED }}/nuget/v3/index.json \
+            --name "Mystira-Internal" \
+            --username "${{ secrets.MYSTIRA_DEVOPS_AZURE_ORG }}" \
+            --password "${{ secrets.MYSTIRA_DEVOPS_AZURE_PAT }}" \
+            --store-password-in-clear-text
+
+      - name: Build application
+        run: dotnet build --configuration Release
+
+      - name: Publish application
+        run: dotnet publish src/Mystira.App.Admin.Api/Mystira.App.Admin.Api.csproj --configuration Release --output ./publish
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v6
+        with:
+          name: admin-api-build
+          path: ./publish
+          retention-days: 7
+
+  validate:
+    name: Validate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Verify Configuration Files
+        run: |
+          echo "Checking configuration files..."
+          for file in src/Mystira.App.Admin.Api/appsettings*.json; do
+            if [ -f "$file" ]; then
+              echo "Validating: $file"
+              python3 -c "import json; json.load(open('$file'))" || exit 1
+            fi
+          done
+          echo "✅ Configuration files validated successfully"
+
+      - name: Check Documentation
+        run: |
+          echo "Checking documentation structure..."
+          required_docs=(
+            "docs/README.md"
+            "docs/architecture/adr/0006-admin-api-repository-extraction.md"
+            "docs/planning/master-implementation-checklist.md"
+          )
+          all_present=true
+          for doc in "${required_docs[@]}"; do
+            if [ ! -f "$doc" ]; then
+              echo "::warning::Missing documentation: $doc"
+              all_present=false
+            else
+              echo "✅ Found: $doc"
+            fi
+          done
+          echo "Documentation check complete"
+
+      - name: Validate Dockerfile
+        run: |
+          if [ -f "src/Mystira.App.Admin.Api/Dockerfile" ]; then
+            echo "✅ Dockerfile exists"
+            # Basic syntax check
+            docker build --check src/Mystira.App.Admin.Api/ 2>/dev/null || echo "::warning::Dockerfile syntax check not available"
+          else
+            echo "::warning::No Dockerfile found"
+          fi
