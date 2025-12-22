@@ -225,12 +225,10 @@ module "shared_postgresql" {
   aad_auth_enabled = true
   aad_admin_identities = {
     "admin-api" = {
-      principal_id   = module.admin_api.identity_principal_id
       principal_name = "mys-staging-admin-api-identity-san"
       principal_type = "ServicePrincipal"
     }
     "story-generator" = {
-      principal_id   = module.story_generator.identity_principal_id
       principal_name = "mys-staging-story-identity-san"
       principal_type = "ServicePrincipal"
     }
@@ -239,11 +237,6 @@ module "shared_postgresql" {
   tags = {
     CostCenter = "staging"
   }
-
-  depends_on = [
-    module.admin_api,
-    module.story_generator
-  ]
 }
 
 # Shared Redis Infrastructure
