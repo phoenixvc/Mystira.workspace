@@ -417,7 +417,7 @@ resource "azurerm_cosmosdb_sql_container" "containers" {
   resource_group_name = var.resource_group_name
   account_name        = azurerm_cosmosdb_account.main[0].name
   database_name       = azurerm_cosmosdb_sql_database.main[0].name
-  partition_key_path  = each.value.partition_key
+  partition_key_paths = [each.value.partition_key]  # Updated: partition_key_path deprecated in AzureRM 4.0
 
   indexing_policy {
     indexing_mode = "consistent"
