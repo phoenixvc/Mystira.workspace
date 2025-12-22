@@ -731,7 +731,7 @@ resource "azurerm_redis_cache" "main" {
   capacity            = var.redis_capacity
   family              = var.redis_family
   sku_name            = var.redis_sku
-  enable_non_ssl_port = false
+  non_ssl_port_enabled = false  # Renamed from enable_non_ssl_port in AzureRM 4.x
   minimum_tls_version = "1.2"
 
   redis_configuration {
