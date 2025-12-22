@@ -289,23 +289,35 @@ resource "azurerm_linux_web_app" "api" {
   }
 
   app_settings = {
-    "ASPNETCORE_ENVIRONMENT"                    = var.environment == "prod" ? "Production" : (var.environment == "staging" ? "Staging" : "Development")
-    "APPLICATIONINSIGHTS_CONNECTION_STRING"     = local.application_insights_connection_string
+    # Core Settings
+    "ASPNETCORE_ENVIRONMENT"                     = var.environment == "prod" ? "Production" : (var.environment == "staging" ? "Staging" : "Development")
+    "WEBSITES_ENABLE_APP_SERVICE_STORAGE"        = "false"
+
+    # Application Insights
+    "APPLICATIONINSIGHTS_CONNECTION_STRING"      = local.application_insights_connection_string
     "ApplicationInsightsAgent_EXTENSION_VERSION" = "~3"
+    "XDT_MicrosoftApplicationInsights_Mode"      = "recommended"
 
-    # Cosmos DB connection - use Key Vault reference if available
-    "CosmosDb__ConnectionString" = var.skip_cosmos_creation ? var.existing_cosmos_connection_string : "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault.main.vault_uri}secrets/cosmos-connection-string/)"
-    "CosmosDb__DatabaseName"     = "MystiraAppDb"
+    # Connection Strings (matching Bicep naming)
+    "ConnectionStrings__CosmosDb"      = var.skip_cosmos_creation ? var.existing_cosmos_connection_string : "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault.main.vault_uri}secrets/cosmos-connection-string/)"
+    "ConnectionStrings__AzureStorage"  = var.skip_storage_creation ? "" : "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault.main.vault_uri}secrets/storage-connection-string/)"
 
-    # Storage connection
-    "BlobStorage__ConnectionString" = var.skip_storage_creation ? "" : "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault.main.vault_uri}secrets/storage-connection-string/)"
-    "BlobStorage__ContainerName"    = "mystira-app-media"
+    # Azure Resource Settings (matching Bicep naming)
+    "Azure__CosmosDb__DatabaseName"    = "MystiraAppDb"
+    "Azure__BlobStorage__ContainerName" = "mystira-app-media"
 
-    # JWT Settings (references to Key Vault)
-    "Jwt__Issuer"     = var.jwt_issuer
-    "Jwt__Audience"   = var.jwt_audience
-    "Jwt__PrivateKey" = var.jwt_private_key != "" ? "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault.main.vault_uri}secrets/jwt-private-key/)" : ""
-    "Jwt__PublicKey"  = var.jwt_public_key != "" ? "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault.main.vault_uri}secrets/jwt-public-key/)" : ""
+    # CORS Settings
+    "CorsSettings__AllowedOrigins" = join(",", var.cors_allowed_origins)
+
+    # JWT Settings (Key Vault references)
+    "JwtSettings__Issuer"        = var.jwt_issuer != "" ? "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault.main.vault_uri}secrets/jwt-issuer/)" : "MystiraAPI"
+    "JwtSettings__Audience"      = var.jwt_audience != "" ? "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault.main.vault_uri}secrets/jwt-audience/)" : "MystiraPWA"
+    "JwtSettings__RsaPrivateKey" = var.jwt_private_key != "" ? "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault.main.vault_uri}secrets/jwt-rsa-private-key/)" : ""
+    "JwtSettings__RsaPublicKey"  = var.jwt_public_key != "" ? "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault.main.vault_uri}secrets/jwt-rsa-public-key/)" : ""
+
+    # Azure Communication Services
+    "AzureCommunicationServices__ConnectionString" = var.enable_communication_services ? "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault.main.vault_uri}secrets/acs-connection-string/)" : ""
+    "AzureCommunicationServices__SenderEmail"      = var.sender_email
   }
 
   tags = local.common_tags
@@ -328,19 +340,43 @@ resource "azurerm_key_vault_secret" "storage_connection_string" {
   key_vault_id = azurerm_key_vault.main.id
 }
 
-resource "azurerm_key_vault_secret" "jwt_private_key" {
+resource "azurerm_key_vault_secret" "jwt_rsa_private_key" {
   count = var.jwt_private_key != "" ? 1 : 0
 
-  name         = "jwt-private-key"
+  name         = "jwt-rsa-private-key"
   value        = var.jwt_private_key
   key_vault_id = azurerm_key_vault.main.id
 }
 
-resource "azurerm_key_vault_secret" "jwt_public_key" {
+resource "azurerm_key_vault_secret" "jwt_rsa_public_key" {
   count = var.jwt_public_key != "" ? 1 : 0
 
-  name         = "jwt-public-key"
+  name         = "jwt-rsa-public-key"
   value        = var.jwt_public_key
+  key_vault_id = azurerm_key_vault.main.id
+}
+
+resource "azurerm_key_vault_secret" "jwt_issuer" {
+  count = var.jwt_issuer != "" ? 1 : 0
+
+  name         = "jwt-issuer"
+  value        = var.jwt_issuer
+  key_vault_id = azurerm_key_vault.main.id
+}
+
+resource "azurerm_key_vault_secret" "jwt_audience" {
+  count = var.jwt_audience != "" ? 1 : 0
+
+  name         = "jwt-audience"
+  value        = var.jwt_audience
+  key_vault_id = azurerm_key_vault.main.id
+}
+
+resource "azurerm_key_vault_secret" "acs_connection_string" {
+  count = var.enable_communication_services ? 1 : 0
+
+  name         = "acs-connection-string"
+  value        = azurerm_communication_service.main[0].primary_connection_string
   key_vault_id = azurerm_key_vault.main.id
 }
 
