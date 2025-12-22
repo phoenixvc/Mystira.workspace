@@ -225,7 +225,7 @@ This roadmap outlines the strategic implementation plan for the Mystira workspac
 
 - ✅ Alert configuration (in Terraform)
 
-> **Deferred to Phase 6 (Operations)**: On-call rotation, incident management integration, alert runbooks
+> **Deferred to Future Phase**: On-call rotation, incident management integration, and alert runbooks will be addressed as operational maturity increases. These operational procedures are beyond the current infrastructure setup phase and will be implemented when the platform reaches production readiness.
 
 ### 3.3 Dashboards and Reporting
 
