@@ -15,4 +15,4 @@ commonLabels:
 
 images:
   - name: myssharedacr.azurecr.io/story-generator
-    newTag: latest
+    newTag: v0.0.0  # Replace with actual version/commit SHA via CI/CD pipeline

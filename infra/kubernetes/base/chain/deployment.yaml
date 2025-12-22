@@ -1,24 +1,24 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: mystira-chain
+  name: mys-chain
   labels:
-    app: mystira-chain
+    app: mys-chain
     component: blockchain
 spec:
-  serviceName: mystira-chain
+  serviceName: mys-chain
   replicas: 3
   selector:
     matchLabels:
-      app: mystira-chain
+      app: mys-chain
   template:
     metadata:
       labels:
-        app: mystira-chain
+        app: mys-chain
         component: blockchain
         azure.workload.identity/use: "true"
     spec:
-      serviceAccountName: mystira-chain-sa
+      serviceAccountName: chain-sa
       securityContext:
         fsGroup: 1000
         runAsUser: 1000
@@ -32,8 +32,8 @@ spec:
           effect: "NoSchedule"
       containers:
         - name: chain
-          image: mystiraacr.azurecr.io/chain:latest
-          imagePullPolicy: Always
+          image: myssharedacr.azurecr.io/chain:v0.0.0
+          imagePullPolicy: IfNotPresent
           ports:
             - name: rpc
               containerPort: 8545
@@ -53,17 +53,17 @@ spec:
             - name: CHAIN_NETWORK_ID
               valueFrom:
                 configMapKeyRef:
-                  name: mystira-chain-config
+                  name: mys-chain-config
                   key: network_id
             - name: KEY_VAULT_URL
               valueFrom:
                 configMapKeyRef:
-                  name: mystira-chain-config
+                  name: mys-chain-config
                   key: key_vault_url
             - name: AZURE_CLIENT_ID
               valueFrom:
                 secretKeyRef:
-                  name: mystira-chain-secrets
+                  name: mys-chain-secrets
                   key: azure_client_id
                   optional: true
           resources:
@@ -101,9 +101,9 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: mystira-chain
+  name: mys-chain
   labels:
-    app: mystira-chain
+    app: mys-chain
 spec:
   type: ClusterIP
   ports:
@@ -114,14 +114,14 @@ spec:
       port: 8546
       targetPort: 8546
   selector:
-    app: mystira-chain
+    app: mys-chain
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: mystira-chain-p2p
+  name: mys-chain-p2p
   labels:
-    app: mystira-chain
+    app: mys-chain
   annotations:
     service.beta.kubernetes.io/azure-load-balancer-internal: "true"
 spec:
@@ -136,22 +136,15 @@ spec:
       targetPort: 30303
       protocol: UDP
   selector:
-    app: mystira-chain
+    app: mys-chain
 ---
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: mystira-chain-config
+  name: mys-chain-config
 data:
   network_id: "1337"
   chain_id: "1337"
   rpc_enabled: "true"
   ws_enabled: "true"
-  key_vault_url: "https://mystira-chain-kv.vault.azure.net/"
----
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: mystira-chain-sa
-  annotations:
-    azure.workload.identity/client-id: "${AZURE_CLIENT_ID}"
+  key_vault_url: "<OVERRIDE_IN_OVERLAY>"

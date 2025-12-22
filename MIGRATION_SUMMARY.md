@@ -5,6 +5,29 @@
 All infrastructure resources have been updated to comply with Azure Naming Convention v2.2:
 **Pattern:** `[org]-[env]-[project]-[type]-[region]`
 
+**Last Updated:** December 2025
+**Status:** ✅ Complete - All environments aligned
+**Current Branch:** `claude/update-readme-ci-badge-jWXQm`
+
+---
+
+## 📋 Recent Updates (December 2025)
+
+### Environment Alignment
+- **Staging/Prod aligned with Dev**: Added missing admin-api module, subnets, PostgreSQL AAD auth
+- **Workload Identity**: All services (story-generator, publisher, chain, admin-api) now have `workload_identities` configured
+- **Azure AD B2C**: Module added to staging/prod (disabled until B2C tenant created)
+- **PostgreSQL AAD Auth**: `aad_auth_enabled` and `aad_admin_identities` added for passwordless database access
+
+### Kubernetes Standardization
+- **Resource Naming**: All K8s resources standardized to `mys-*` prefix (deployments, services, configmaps, HPAs)
+- **Kustomization Patches**: Fixed all overlay patch targets to match actual resource names in dev/staging/prod
+- **ServiceAccounts**: Consolidated to `service-accounts.yaml`, removed duplicates from deployment files
+- **Image Registry**: Updated to `myssharedacr.azurecr.io` across all manifests
+
+### New Terraform Modules
+- **Admin API Module** (`infra/terraform/modules/admin-api/`): Managed identity, Key Vault, Application Insights
+
 ---
 
 ## ✅ Completed Changes
@@ -250,5 +273,5 @@ Submodules:
 ---
 
 **Migration Status:** ✅ **COMPLETE**  
-**Branch:** `claude/standardize-dev-resources-cT39Z`  
+**Branch:** `claude/update-readme-ci-badge-jWXQm`  
 **Ready for:** Deployment and testing
