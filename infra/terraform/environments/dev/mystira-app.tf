@@ -3,19 +3,11 @@
 # Blazor WASM PWA + ASP.NET Core API + Cosmos DB
 # Converted from Bicep: https://github.com/phoenixvc/Mystira.App/infrastructure
 # =============================================================================
-
-# Resource Group for Mystira.App (separate from core services)
-resource "azurerm_resource_group" "mystira_app" {
-  name     = "mys-dev-mystira-rg-san"
-  location = var.location
-
-  tags = {
-    Environment = "dev"
-    Project     = "Mystira"
-    Service     = "mystira-app"
-    ManagedBy   = "terraform"
-  }
-}
+#
+# NOTE: Mystira.App resources are deployed to the shared core resource group
+# and use shared monitoring (Log Analytics + App Insights) to reduce duplication.
+#
+# =============================================================================
 
 module "mystira_app" {
   source = "../../modules/mystira-app"
@@ -23,7 +15,7 @@ module "mystira_app" {
   environment         = "dev"
   location            = var.location
   fallback_location   = "eastus2"  # Static Web Apps not available in South Africa North
-  resource_group_name = azurerm_resource_group.mystira_app.name
+  resource_group_name = azurerm_resource_group.main.name  # Use shared core resource group
   project_name        = "mystira"
   org                 = "mys"
 
@@ -59,7 +51,7 @@ module "mystira_app" {
   # -----------------------------------------------------------------------------
   # Storage Configuration
   # -----------------------------------------------------------------------------
-  storage_sku          = "Standard_LRS"
+  storage_sku           = "Standard_LRS"
   skip_storage_creation = false  # Set to true if importing existing
 
   cors_allowed_origins = [
@@ -85,11 +77,14 @@ module "mystira_app" {
   bot_microsoft_app_id = ""
 
   # -----------------------------------------------------------------------------
-  # Monitoring Configuration
+  # Monitoring Configuration - USE SHARED MONITORING
   # -----------------------------------------------------------------------------
-  log_retention_days = 30
-  daily_quota_gb     = 1
-  enable_alerts      = false  # Disabled for dev to reduce noise
+  use_shared_monitoring                        = true
+  shared_log_analytics_workspace_id            = module.shared_monitoring.log_analytics_workspace_id
+  shared_application_insights_id               = module.shared_monitoring.application_insights_id
+  shared_application_insights_connection_string = module.shared_monitoring.application_insights_connection_string
+
+  enable_alerts = false  # Disabled for dev to reduce noise
 
   # -----------------------------------------------------------------------------
   # Budget Configuration
@@ -102,6 +97,9 @@ module "mystira_app" {
   # Tags
   # -----------------------------------------------------------------------------
   tags = local.common_tags
+
+  # Ensure shared monitoring is created first
+  depends_on = [module.shared_monitoring]
 }
 
 # =============================================================================

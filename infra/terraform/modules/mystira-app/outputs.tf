@@ -150,35 +150,40 @@ output "key_vault_uri" {
 # -----------------------------------------------------------------------------
 
 output "log_analytics_workspace_id" {
-  description = "Log Analytics Workspace ID"
-  value       = azurerm_log_analytics_workspace.main.id
+  description = "Log Analytics Workspace ID (shared or created)"
+  value       = local.log_analytics_workspace_id
 }
 
 output "log_analytics_workspace_name" {
-  description = "Log Analytics Workspace name"
-  value       = azurerm_log_analytics_workspace.main.name
+  description = "Log Analytics Workspace name (null if using shared)"
+  value       = var.use_shared_monitoring ? null : azurerm_log_analytics_workspace.main[0].name
 }
 
 output "application_insights_id" {
-  description = "Application Insights ID"
-  value       = azurerm_application_insights.main.id
+  description = "Application Insights ID (null if using shared)"
+  value       = var.use_shared_monitoring ? var.shared_application_insights_id : azurerm_application_insights.main[0].id
 }
 
 output "application_insights_name" {
-  description = "Application Insights name"
-  value       = azurerm_application_insights.main.name
+  description = "Application Insights name (null if using shared)"
+  value       = var.use_shared_monitoring ? null : azurerm_application_insights.main[0].name
 }
 
 output "application_insights_connection_string" {
   description = "Application Insights connection string"
-  value       = azurerm_application_insights.main.connection_string
+  value       = local.application_insights_connection_string
   sensitive   = true
 }
 
 output "application_insights_instrumentation_key" {
-  description = "Application Insights instrumentation key"
-  value       = azurerm_application_insights.main.instrumentation_key
+  description = "Application Insights instrumentation key (null if using shared)"
+  value       = var.use_shared_monitoring ? null : azurerm_application_insights.main[0].instrumentation_key
   sensitive   = true
+}
+
+output "using_shared_monitoring" {
+  description = "Whether shared monitoring resources are being used"
+  value       = var.use_shared_monitoring
 }
 
 # -----------------------------------------------------------------------------

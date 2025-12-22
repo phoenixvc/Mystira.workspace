@@ -75,13 +75,19 @@ locals {
     { name = "PendingSignups", partition_key = "/email" },
     { name = "CompassTrackings", partition_key = "/Axis" },
   ]
+
+  # Resolved monitoring resource references (shared or created)
+  log_analytics_workspace_id       = var.use_shared_monitoring ? var.shared_log_analytics_workspace_id : azurerm_log_analytics_workspace.main[0].id
+  application_insights_connection_string = var.use_shared_monitoring ? var.shared_application_insights_connection_string : azurerm_application_insights.main[0].connection_string
 }
 
 # =============================================================================
-# Log Analytics Workspace
+# Log Analytics Workspace (only created if not using shared monitoring)
 # =============================================================================
 
 resource "azurerm_log_analytics_workspace" "main" {
+  count = var.use_shared_monitoring ? 0 : 1
+
   name                = "${local.name_prefix}-law-${local.region_code}"
   location            = var.location
   resource_group_name = var.resource_group_name
@@ -92,15 +98,17 @@ resource "azurerm_log_analytics_workspace" "main" {
 }
 
 # =============================================================================
-# Application Insights
+# Application Insights (only created if not using shared monitoring)
 # =============================================================================
 
 resource "azurerm_application_insights" "main" {
-  name                = "${local.name_prefix}-ai-${local.region_code}"
-  location            = var.location
-  resource_group_name = var.resource_group_name
-  workspace_id        = azurerm_log_analytics_workspace.main.id
-  application_type    = "web"
+  count = var.use_shared_monitoring ? 0 : 1
+
+  name                 = "${local.name_prefix}-ai-${local.region_code}"
+  location             = var.location
+  resource_group_name  = var.resource_group_name
+  workspace_id         = azurerm_log_analytics_workspace.main[0].id
+  application_type     = "web"
   daily_data_cap_in_gb = var.daily_quota_gb
 
   tags = local.common_tags
@@ -282,7 +290,7 @@ resource "azurerm_linux_web_app" "api" {
 
   app_settings = {
     "ASPNETCORE_ENVIRONMENT"                    = var.environment == "prod" ? "Production" : (var.environment == "staging" ? "Staging" : "Development")
-    "APPLICATIONINSIGHTS_CONNECTION_STRING"     = azurerm_application_insights.main.connection_string
+    "APPLICATIONINSIGHTS_CONNECTION_STRING"     = local.application_insights_connection_string
     "ApplicationInsightsAgent_EXTENSION_VERSION" = "~3"
 
     # Cosmos DB connection - use Key Vault reference if available

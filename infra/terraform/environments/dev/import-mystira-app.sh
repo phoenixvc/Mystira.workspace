@@ -8,19 +8,25 @@
 # 2. Creating the resource group manually or via first apply
 #
 # This imports resources that were previously deployed via Bicep
+#
+# NOTE: Mystira.App now uses the shared core resource group (mys-dev-core-rg-san)
+# and shared monitoring. If you have existing resources in a separate RG,
+# you may need to migrate them first.
 # =============================================================================
 
 set -e
 
 # Configuration
 SUBSCRIPTION_ID=$(az account show --query id -o tsv)
-RG_NAME="mys-dev-mystira-rg-san"
+RG_NAME="mys-dev-core-rg-san"  # Now using shared core resource group
+OLD_RG_NAME="mys-dev-mystira-rg-san"  # Previous separate resource group (if exists)
 LOCATION="southafricanorth"
 FALLBACK_LOCATION="eastus2"
 
 echo "=== Mystira.App Terraform Import Script ==="
 echo "Subscription: $SUBSCRIPTION_ID"
-echo "Resource Group: $RG_NAME"
+echo "Resource Group: $RG_NAME (shared core)"
+echo "Note: Using shared monitoring from shared_monitoring module"
 echo ""
 
 # Check if logged in
@@ -44,29 +50,17 @@ import_resource() {
 }
 
 # =============================================================================
-# Import Resource Group
+# NOTE: Resource Group and Monitoring
 # =============================================================================
 echo ""
-echo "--- Importing Resource Group ---"
-import_resource \
-    'azurerm_resource_group.mystira_app' \
-    "/subscriptions/$SUBSCRIPTION_ID/resourceGroups/$RG_NAME" \
-    "Resource Group"
-
-# =============================================================================
-# Import Log Analytics Workspace
-# =============================================================================
+echo "--- Resource Group & Monitoring ---"
+echo "Mystira.App now uses:"
+echo "  - Shared resource group: mys-dev-core-rg-san (already exists)"
+echo "  - Shared monitoring from shared_monitoring module (already exists)"
+echo "  - No separate imports needed for these resources"
 echo ""
-echo "--- Importing Monitoring ---"
-import_resource \
-    'module.mystira_app.azurerm_log_analytics_workspace.main' \
-    "/subscriptions/$SUBSCRIPTION_ID/resourceGroups/$RG_NAME/providers/Microsoft.OperationalInsights/workspaces/mys-dev-mystira-law-san" \
-    "Log Analytics Workspace"
-
-import_resource \
-    'module.mystira_app.azurerm_application_insights.main' \
-    "/subscriptions/$SUBSCRIPTION_ID/resourceGroups/$RG_NAME/providers/Microsoft.Insights/components/mys-dev-mystira-ai-san" \
-    "Application Insights"
+echo "If you have resources in the old separate resource group ($OLD_RG_NAME),"
+echo "you may need to migrate them to $RG_NAME first."
 
 # =============================================================================
 # Import Key Vault

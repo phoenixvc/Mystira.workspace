@@ -206,14 +206,39 @@ variable "bot_microsoft_app_id" {
 # Monitoring Settings
 # -----------------------------------------------------------------------------
 
+variable "use_shared_monitoring" {
+  description = "Use shared Log Analytics and Application Insights instead of creating new ones"
+  type        = bool
+  default     = false
+}
+
+variable "shared_log_analytics_workspace_id" {
+  description = "ID of shared Log Analytics workspace (when use_shared_monitoring is true)"
+  type        = string
+  default     = ""
+}
+
+variable "shared_application_insights_id" {
+  description = "ID of shared Application Insights (when use_shared_monitoring is true)"
+  type        = string
+  default     = ""
+}
+
+variable "shared_application_insights_connection_string" {
+  description = "Connection string of shared Application Insights (when use_shared_monitoring is true)"
+  type        = string
+  default     = ""
+  sensitive   = true
+}
+
 variable "log_retention_days" {
-  description = "Log retention in days"
+  description = "Log retention in days (only used when not using shared monitoring)"
   type        = number
   default     = 30
 }
 
 variable "daily_quota_gb" {
-  description = "Daily quota for Application Insights in GB"
+  description = "Daily quota for Application Insights in GB (only used when not using shared monitoring)"
   type        = number
   default     = 1
 }
