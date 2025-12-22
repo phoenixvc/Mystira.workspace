@@ -23,6 +23,13 @@ module "front_door" {
   custom_domain_publisher = "publisher.mystira.app"
   custom_domain_chain     = "chain.mystira.app"
 
+  # Admin services
+  enable_admin_services     = true
+  admin_api_backend_address = "admin-api.mystira.app"
+  admin_ui_backend_address  = "admin.mystira.app"
+  custom_domain_admin_api   = "admin-api.mystira.app"
+  custom_domain_admin_ui    = "admin.mystira.app"
+
   # WAF Configuration - PRODUCTION SETTINGS
   enable_waf           = true
   waf_mode             = "Prevention" # BLOCK malicious traffic in production
@@ -66,6 +73,16 @@ output "front_door_waf_policy_id" {
 output "front_door_custom_domain_verification" {
   description = "Custom domain verification instructions"
   value       = module.front_door.custom_domain_verification
+}
+
+output "front_door_admin_api_endpoint" {
+  description = "Front Door endpoint for Admin API - use this for CNAME"
+  value       = module.front_door.admin_api_endpoint_hostname
+}
+
+output "front_door_admin_ui_endpoint" {
+  description = "Front Door endpoint for Admin UI - use this for CNAME"
+  value       = module.front_door.admin_ui_endpoint_hostname
 }
 
 # After deploying, update DNS with:
