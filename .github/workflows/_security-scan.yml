@@ -51,6 +51,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          submodules: recursive
 
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v3
@@ -63,6 +65,11 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '9.0.x'
+
+      - name: Restore .NET packages
+        if: inputs.language == 'csharp'
+        working-directory: ${{ inputs.working_directory }}
+        run: dotnet restore
 
       - name: Build .NET for CodeQL
         if: inputs.language == 'csharp'
@@ -95,6 +102,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          submodules: recursive
 
       # .NET Dependency Scanning
       - name: Setup .NET

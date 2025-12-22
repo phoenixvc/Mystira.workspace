@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
     inputs:
       component:
-        description: 'Component to scan (all, admin-api, admin-ui, chain, publisher, story-generator)'
+        description: 'Component to scan (all, admin-api, admin-ui, chain, devhub, publisher, story-generator)'
         required: false
         default: 'all'
         type: choice
@@ -19,6 +19,7 @@ on:
           - admin-api
           - admin-ui
           - chain
+          - devhub
           - publisher
           - story-generator
 
@@ -64,6 +65,20 @@ jobs:
     with:
       language: python
       working_directory: packages/chain
+      scan_dependencies: true
+      scan_container: false
+      fail_on_severity: high
+    secrets:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # DevHub (Node.js)
+  devhub:
+    name: DevHub Security Scan
+    if: github.event.inputs.component == 'all' || github.event.inputs.component == 'devhub' || github.event_name == 'schedule'
+    uses: ./.github/workflows/_security-scan.yml
+    with:
+      language: javascript
+      working_directory: packages/devhub
       scan_dependencies: true
       scan_container: false
       fail_on_severity: high
@@ -132,7 +147,7 @@ jobs:
   # Summary and Notifications
   summary:
     name: Security Summary
-    needs: [admin-api, admin-ui, chain, publisher, story-generator, infrastructure]
+    needs: [admin-api, admin-ui, chain, devhub, publisher, story-generator, infrastructure]
     if: always()
     runs-on: ubuntu-latest
 
@@ -146,6 +161,7 @@ jobs:
           echo "| Admin API | ${{ needs.admin-api.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Admin UI | ${{ needs.admin-ui.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Chain | ${{ needs.chain.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| DevHub | ${{ needs.devhub.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Publisher | ${{ needs.publisher.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Story Generator | ${{ needs.story-generator.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Infrastructure | ${{ needs.infrastructure.result }} |" >> $GITHUB_STEP_SUMMARY

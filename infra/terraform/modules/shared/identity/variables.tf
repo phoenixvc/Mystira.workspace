@@ -11,6 +11,12 @@ variable "aks_principal_id" {
   default     = ""
 }
 
+variable "cicd_principal_id" {
+  description = "Principal ID of the CI/CD service principal (for ACR push access)"
+  type        = string
+  default     = ""
+}
+
 variable "acr_id" {
   description = "Resource ID of the container registry"
   type        = string

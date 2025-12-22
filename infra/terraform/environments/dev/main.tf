@@ -38,6 +38,18 @@ variable "location" {
   default     = "southafricanorth"
 }
 
+variable "b2c_tenant_id" {
+  description = "Azure AD B2C tenant ID (optional - set when B2C tenant is created)"
+  type        = string
+  default     = ""
+}
+
+variable "alert_email_addresses" {
+  description = "Email addresses for monitoring alerts"
+  type        = list(string)
+  default     = ["devops@mystira.app"]
+}
+
 # Common tags for all resources
 locals {
   common_tags = {
@@ -233,7 +245,8 @@ module "shared_monitoring" {
   location            = var.location
   resource_group_name = azurerm_resource_group.main.name
 
-  retention_in_days = 30
+  retention_in_days       = 30
+  alert_email_addresses   = var.alert_email_addresses
 
   tags = {
     CostCenter = "development"
@@ -312,13 +325,25 @@ module "identity" {
     }
   }
 
-  # Workload identity for AKS pods (optional, enable when deploying to AKS)
+  # Workload identity for AKS pods
   workload_identities = {
     "story-generator" = {
       identity_id         = module.story_generator.identity_id
       aks_oidc_issuer_url = azurerm_kubernetes_cluster.main.oidc_issuer_url
       namespace           = "mystira"
       service_account     = "story-generator-sa"
+    }
+    "publisher" = {
+      identity_id         = module.publisher.identity_id
+      aks_oidc_issuer_url = azurerm_kubernetes_cluster.main.oidc_issuer_url
+      namespace           = "mystira"
+      service_account     = "publisher-sa"
+    }
+    "chain" = {
+      identity_id         = module.chain.identity_id
+      aks_oidc_issuer_url = azurerm_kubernetes_cluster.main.oidc_issuer_url
+      namespace           = "mystira"
+      service_account     = "chain-sa"
     }
   }
 
@@ -331,6 +356,23 @@ module "identity" {
     module.story_generator,
     module.publisher,
     module.chain
+  ]
+}
+
+# Azure AD B2C Consumer Authentication
+# Note: B2C tenant must be created manually first, then set b2c_tenant_id variable
+module "azure_ad_b2c" {
+  source = "../../modules/azure-ad-b2c"
+  count  = var.b2c_tenant_id != "" ? 1 : 0
+
+  environment     = "dev"
+  b2c_tenant_id   = var.b2c_tenant_id
+  b2c_tenant_name = "mystirab2cdev"
+
+  pwa_redirect_uris = [
+    "http://localhost:5173/auth/callback",
+    "http://localhost:3000/auth/callback",
+    "https://app.dev.mystira.app/auth/callback"
   ]
 }
 

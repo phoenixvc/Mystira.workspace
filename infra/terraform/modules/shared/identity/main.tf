@@ -28,6 +28,19 @@ resource "azurerm_role_assignment" "aks_acr_pull" {
 }
 
 # =============================================================================
+# CI/CD to ACR Role Assignment (AcrPush)
+# Allows CI/CD pipelines to push images to the container registry
+# =============================================================================
+
+resource "azurerm_role_assignment" "cicd_acr_push" {
+  count                = var.cicd_principal_id != "" && var.acr_id != "" ? 1 : 0
+  scope                = var.acr_id
+  role_definition_name = "AcrPush"
+  principal_id         = var.cicd_principal_id
+  description          = "Allow CI/CD pipeline to push images to ACR"
+}
+
+# =============================================================================
 # Service Managed Identities to Key Vault
 # Grants read access to Key Vault secrets for service identities
 # =============================================================================

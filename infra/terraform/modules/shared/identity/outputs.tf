@@ -5,6 +5,11 @@ output "aks_acr_role_assignment_id" {
   value       = length(azurerm_role_assignment.aks_acr_pull) > 0 ? azurerm_role_assignment.aks_acr_pull[0].id : null
 }
 
+output "cicd_acr_role_assignment_id" {
+  description = "Role assignment ID for CI/CD to ACR push access"
+  value       = length(azurerm_role_assignment.cicd_acr_push) > 0 ? azurerm_role_assignment.cicd_acr_push[0].id : null
+}
+
 output "service_key_vault_role_assignments" {
   description = "Map of service to Key Vault role assignment IDs"
   value       = { for k, v in azurerm_role_assignment.service_key_vault_reader : k => v.id }

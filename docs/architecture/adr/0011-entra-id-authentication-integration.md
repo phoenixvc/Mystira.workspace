@@ -960,6 +960,14 @@ builder.Services.AddMsalAuthentication(options =>
 - [ADR-0005: Service Networking and Communication](./0005-service-networking-and-communication.md) - Service security
 - [ADR-0006: Admin API Repository Extraction](./0006-admin-api-repository-extraction.md) - Admin service architecture
 
+## Related Infrastructure
+
+- [Entra ID Terraform Module](../../../infra/terraform/modules/entra-id/README.md) - App registrations, scopes, roles
+- [Azure AD B2C Terraform Module](../../../infra/terraform/modules/azure-ad-b2c/README.md) - Consumer auth with social login
+- [Shared Identity Module](../../../infra/terraform/modules/shared/identity/README.md) - RBAC and workload identity
+- [Kubernetes ServiceAccounts](../../../infra/kubernetes/README.md) - Workload identity for pods
+- [Implementation Roadmap - Phase 5.0](../../planning/implementation-roadmap.md#phase-50-authentication-implementation-entra-id--b2c) - Implementation status
+
 ## References
 
 - [Microsoft Identity Platform Documentation](https://docs.microsoft.com/en-us/azure/active-directory/develop/)
