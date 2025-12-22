@@ -332,6 +332,7 @@ This roadmap outlines the strategic implementation plan for the Mystira workspac
 - [x] Create Entra ID Terraform module (`infra/terraform/modules/entra-id/` - December 2025)
 - [x] Define App Roles (Admin, SuperAdmin, Moderator, Viewer) - in Terraform module
 - [x] Define API Scopes (Admin.Read, Admin.Write, Users.Manage, Content.Moderate) - in Terraform module
+- [x] Add Entra ID module to all environment configs (dev, staging, prod - December 2025)
 - [ ] Deploy Entra ID app registrations (run Terraform)
 - [ ] Configure MSAL in Admin UI (React)
 - [ ] Add Microsoft.Identity.Web to Admin API
@@ -340,21 +341,30 @@ This roadmap outlines the strategic implementation plan for the Mystira workspac
 - [ ] Test admin authentication flow end-to-end
 
 #### Phase 5.0.2: Azure AD B2C (Consumer)
-- [ ] Create Azure AD B2C tenant
+- [x] Create Azure AD B2C Terraform module (`infra/terraform/modules/azure-ad-b2c/` - December 2025)
+  - [x] Public API app registration with exposed scopes
+  - [x] PWA/SPA app registration for Blazor WASM and React clients
+  - [x] API scopes: API.Access, Stories.Read, Stories.Write, Profile.Read
+- [ ] Create Azure AD B2C tenant (manual - not supported via Terraform)
 - [ ] Configure user flows (SignUpSignIn, PasswordReset, ProfileEdit)
 - [ ] Set up Google identity provider
 - [ ] Set up Discord identity provider (OpenID Connect)
-- [ ] Create B2C App Registration for Public API
 - [ ] Update PWA for B2C authentication (Blazor WASM)
 - [ ] Customize B2C UI branding
 - [ ] Test consumer sign-up/sign-in flow
 
-#### Phase 5.0.3: Service-to-Service Authentication
-- [ ] Enable Managed Identity on App Services
-- [ ] Enable Managed Identity on AKS
+#### Phase 5.0.3: Service-to-Service Authentication (Managed Identity)
+- [x] Create shared identity RBAC module (`infra/terraform/modules/shared/identity/` - December 2025)
+  - [x] AKS to ACR role assignments (AcrPull)
+  - [x] Key Vault Secrets User role assignments
+  - [x] PostgreSQL and Redis access roles
+  - [x] Log Analytics contributor roles
+  - [x] AKS workload identity federation support
+- [x] Add identity module to all environment configs (dev, staging, prod - December 2025)
+- [x] Enable OIDC issuer and workload identity on AKS clusters
+- [ ] Deploy identity infrastructure (run Terraform)
 - [ ] Configure Cosmos DB for Entra ID auth
-- [ ] Configure Key Vault access via Managed Identity
-- [ ] Remove connection string authentication
+- [ ] Remove connection string authentication where applicable
 - [ ] Test service-to-service auth
 
 **Deliverables**:
