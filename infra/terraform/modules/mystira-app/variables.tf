@@ -170,6 +170,30 @@ variable "cors_allowed_origins" {
   default     = []
 }
 
+variable "enable_storage_tiering" {
+  description = "Enable automatic blob storage tiering with lifecycle management"
+  type        = bool
+  default     = true
+}
+
+variable "storage_tier_to_cool_days" {
+  description = "Days after last modification to move blobs to cool tier"
+  type        = number
+  default     = 30
+}
+
+variable "storage_tier_to_archive_days" {
+  description = "Days after last modification to move blobs to archive tier"
+  type        = number
+  default     = 90
+}
+
+variable "storage_delete_after_days" {
+  description = "Days after last modification to delete blobs (0 = never delete)"
+  type        = number
+  default     = 0
+}
+
 # -----------------------------------------------------------------------------
 # Communication Services Settings
 # -----------------------------------------------------------------------------
@@ -333,4 +357,94 @@ variable "whatsapp_callback_token" {
   type        = string
   default     = ""
   sensitive   = true
+}
+
+# -----------------------------------------------------------------------------
+# PostgreSQL Settings (for hybrid data strategy)
+# -----------------------------------------------------------------------------
+
+variable "use_shared_postgresql" {
+  description = "Use shared PostgreSQL server instead of creating dedicated one"
+  type        = bool
+  default     = true
+}
+
+variable "shared_postgresql_server_id" {
+  description = "ID of shared PostgreSQL server (required if use_shared_postgresql = true)"
+  type        = string
+  default     = ""
+}
+
+variable "shared_postgresql_server_fqdn" {
+  description = "FQDN of shared PostgreSQL server (required if use_shared_postgresql = true)"
+  type        = string
+  default     = ""
+}
+
+variable "shared_postgresql_admin_login" {
+  description = "Admin login for shared PostgreSQL server"
+  type        = string
+  default     = ""
+}
+
+variable "shared_postgresql_admin_password" {
+  description = "Admin password for shared PostgreSQL server"
+  type        = string
+  default     = ""
+  sensitive   = true
+}
+
+variable "postgresql_database_name" {
+  description = "PostgreSQL database name for Mystira.App"
+  type        = string
+  default     = "mystiraapp"
+}
+
+variable "enable_postgresql" {
+  description = "Enable PostgreSQL for hybrid data strategy (Phase 1+)"
+  type        = bool
+  default     = false
+}
+
+# -----------------------------------------------------------------------------
+# Redis Cache Settings
+# -----------------------------------------------------------------------------
+
+variable "enable_redis" {
+  description = "Enable Redis cache for session and data caching"
+  type        = bool
+  default     = false
+}
+
+variable "redis_sku" {
+  description = "Redis cache SKU (Basic, Standard, Premium)"
+  type        = string
+  default     = "Basic"
+}
+
+variable "redis_capacity" {
+  description = "Redis cache capacity (0-6 for Basic/Standard, 1-4 for Premium)"
+  type        = number
+  default     = 0
+}
+
+variable "redis_family" {
+  description = "Redis cache family (C for Basic/Standard, P for Premium)"
+  type        = string
+  default     = "C"
+}
+
+# -----------------------------------------------------------------------------
+# Data Migration Settings
+# -----------------------------------------------------------------------------
+
+variable "data_migration_phase" {
+  description = "Current data migration phase (0=CosmosOnly, 1=DualWriteCosmosRead, 2=DualWritePostgresRead, 3=PostgresOnly)"
+  type        = number
+  default     = 0
+
+  validation {
+    condition     = var.data_migration_phase >= 0 && var.data_migration_phase <= 3
+    error_message = "data_migration_phase must be between 0 and 3."
+  }
 }

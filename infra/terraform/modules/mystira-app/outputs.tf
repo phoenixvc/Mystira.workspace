@@ -136,6 +136,36 @@ output "media_container_url" {
   value       = var.skip_storage_creation ? null : "${azurerm_storage_account.main[0].primary_blob_endpoint}mystira-app-media"
 }
 
+output "avatars_container_url" {
+  description = "Avatars container URL"
+  value       = var.skip_storage_creation ? null : "${azurerm_storage_account.main[0].primary_blob_endpoint}avatars"
+}
+
+output "audio_container_url" {
+  description = "Audio container URL"
+  value       = var.skip_storage_creation ? null : "${azurerm_storage_account.main[0].primary_blob_endpoint}audio"
+}
+
+output "content_bundles_container_url" {
+  description = "Content bundles container URL"
+  value       = var.skip_storage_creation ? null : "${azurerm_storage_account.main[0].primary_blob_endpoint}content-bundles"
+}
+
+output "archives_container_name" {
+  description = "Archives container name (private, use SAS tokens)"
+  value       = var.skip_storage_creation ? null : "archives"
+}
+
+output "uploads_container_name" {
+  description = "Uploads container name (private, use SAS tokens)"
+  value       = var.skip_storage_creation ? null : "uploads"
+}
+
+output "storage_tiering_enabled" {
+  description = "Whether storage lifecycle tiering is enabled"
+  value       = var.skip_storage_creation ? false : var.enable_storage_tiering
+}
+
 # -----------------------------------------------------------------------------
 # Key Vault Outputs
 # -----------------------------------------------------------------------------
@@ -227,6 +257,65 @@ output "bot_id" {
 output "bot_name" {
   description = "Azure Bot name"
   value       = var.enable_azure_bot && var.bot_microsoft_app_id != "" ? azurerm_bot_service_azure_bot.main[0].name : null
+}
+
+# -----------------------------------------------------------------------------
+# PostgreSQL Outputs (Hybrid Data Strategy)
+# -----------------------------------------------------------------------------
+
+output "postgresql_database_name" {
+  description = "PostgreSQL database name"
+  value       = var.enable_postgresql && var.use_shared_postgresql ? azurerm_postgresql_flexible_server_database.mystira_app[0].name : null
+}
+
+output "postgresql_database_id" {
+  description = "PostgreSQL database ID"
+  value       = var.enable_postgresql && var.use_shared_postgresql ? azurerm_postgresql_flexible_server_database.mystira_app[0].id : null
+}
+
+output "postgresql_enabled" {
+  description = "Whether PostgreSQL is enabled for this deployment"
+  value       = var.enable_postgresql
+}
+
+output "data_migration_phase" {
+  description = "Current data migration phase (0=CosmosOnly, 1=DualWriteCosmosRead, 2=DualWritePostgresRead, 3=PostgresOnly)"
+  value       = var.data_migration_phase
+}
+
+# -----------------------------------------------------------------------------
+# Redis Cache Outputs
+# -----------------------------------------------------------------------------
+
+output "redis_cache_id" {
+  description = "Redis Cache ID"
+  value       = var.enable_redis ? azurerm_redis_cache.main[0].id : null
+}
+
+output "redis_cache_name" {
+  description = "Redis Cache name"
+  value       = var.enable_redis ? azurerm_redis_cache.main[0].name : null
+}
+
+output "redis_cache_hostname" {
+  description = "Redis Cache hostname"
+  value       = var.enable_redis ? azurerm_redis_cache.main[0].hostname : null
+}
+
+output "redis_cache_port" {
+  description = "Redis Cache SSL port"
+  value       = var.enable_redis ? azurerm_redis_cache.main[0].ssl_port : null
+}
+
+output "redis_cache_connection_string" {
+  description = "Redis Cache connection string"
+  value       = var.enable_redis ? azurerm_redis_cache.main[0].primary_connection_string : null
+  sensitive   = true
+}
+
+output "redis_enabled" {
+  description = "Whether Redis Cache is enabled for this deployment"
+  value       = var.enable_redis
 }
 
 # -----------------------------------------------------------------------------

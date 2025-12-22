@@ -182,12 +182,191 @@ resource "azurerm_storage_account" "main" {
   tags = local.common_tags
 }
 
+# Primary media container (hot tier - frequently accessed content)
 resource "azurerm_storage_container" "media" {
   count = var.skip_storage_creation ? 0 : 1
 
   name                  = "mystira-app-media"
   storage_account_name  = azurerm_storage_account.main[0].name
   container_access_type = "blob"
+}
+
+# Avatar images container (hot tier - profile pictures, avatars)
+resource "azurerm_storage_container" "avatars" {
+  count = var.skip_storage_creation ? 0 : 1
+
+  name                  = "avatars"
+  storage_account_name  = azurerm_storage_account.main[0].name
+  container_access_type = "blob"
+}
+
+# Audio content container (mixed tier - music, sound effects)
+resource "azurerm_storage_container" "audio" {
+  count = var.skip_storage_creation ? 0 : 1
+
+  name                  = "audio"
+  storage_account_name  = azurerm_storage_account.main[0].name
+  container_access_type = "blob"
+}
+
+# Scenario content bundles (cool tier - downloadable content packs)
+resource "azurerm_storage_container" "content_bundles" {
+  count = var.skip_storage_creation ? 0 : 1
+
+  name                  = "content-bundles"
+  storage_account_name  = azurerm_storage_account.main[0].name
+  container_access_type = "blob"
+}
+
+# Game session recordings/exports (archive tier - historical data)
+resource "azurerm_storage_container" "archives" {
+  count = var.skip_storage_creation ? 0 : 1
+
+  name                  = "archives"
+  storage_account_name  = azurerm_storage_account.main[0].name
+  container_access_type = "private"  # Private - accessed via SAS tokens
+}
+
+# Temporary uploads container (hot tier - transient content)
+resource "azurerm_storage_container" "uploads" {
+  count = var.skip_storage_creation ? 0 : 1
+
+  name                  = "uploads"
+  storage_account_name  = azurerm_storage_account.main[0].name
+  container_access_type = "private"
+}
+
+# =============================================================================
+# Storage Lifecycle Management Policy
+# Implements tiered storage strategy from ADR-0013
+# =============================================================================
+
+resource "azurerm_storage_management_policy" "tiering" {
+  count = var.skip_storage_creation || !var.enable_storage_tiering ? 0 : 1
+
+  storage_account_id = azurerm_storage_account.main[0].id
+
+  # Rule 1: Audio content - move to cool after 30 days, archive after 90
+  rule {
+    name    = "audio-tiering"
+    enabled = true
+
+    filters {
+      prefix_match = ["audio/"]
+      blob_types   = ["blockBlob"]
+    }
+
+    actions {
+      base_blob {
+        tier_to_cool_after_days_since_modification_greater_than    = var.storage_tier_to_cool_days
+        tier_to_archive_after_days_since_modification_greater_than = var.storage_tier_to_archive_days
+      }
+    }
+  }
+
+  # Rule 2: Content bundles - move to cool tier quickly (downloaded once, rarely re-accessed)
+  rule {
+    name    = "content-bundle-tiering"
+    enabled = true
+
+    filters {
+      prefix_match = ["content-bundles/"]
+      blob_types   = ["blockBlob"]
+    }
+
+    actions {
+      base_blob {
+        tier_to_cool_after_days_since_modification_greater_than    = 14  # 2 weeks
+        tier_to_archive_after_days_since_modification_greater_than = 60  # 2 months
+      }
+    }
+  }
+
+  # Rule 3: Archives - move to archive tier after 7 days (already infrequent access)
+  rule {
+    name    = "archive-tiering"
+    enabled = true
+
+    filters {
+      prefix_match = ["archives/"]
+      blob_types   = ["blockBlob"]
+    }
+
+    actions {
+      base_blob {
+        tier_to_archive_after_days_since_modification_greater_than = 7
+      }
+    }
+  }
+
+  # Rule 4: Uploads - clean up temporary uploads after 7 days
+  rule {
+    name    = "uploads-cleanup"
+    enabled = true
+
+    filters {
+      prefix_match = ["uploads/"]
+      blob_types   = ["blockBlob"]
+    }
+
+    actions {
+      base_blob {
+        delete_after_days_since_modification_greater_than = 7
+      }
+    }
+  }
+
+  # Rule 5: Delete old snapshots across all containers
+  rule {
+    name    = "snapshot-cleanup"
+    enabled = true
+
+    filters {
+      blob_types = ["blockBlob"]
+    }
+
+    actions {
+      snapshot {
+        delete_after_days_since_creation_greater_than = 30
+      }
+    }
+  }
+
+  # Rule 6: General media tiering (for media not in specialized containers)
+  rule {
+    name    = "general-media-tiering"
+    enabled = var.storage_tier_to_cool_days > 0
+
+    filters {
+      prefix_match = ["mystira-app-media/"]
+      blob_types   = ["blockBlob"]
+    }
+
+    actions {
+      base_blob {
+        tier_to_cool_after_days_since_modification_greater_than    = var.storage_tier_to_cool_days
+        tier_to_archive_after_days_since_modification_greater_than = var.storage_tier_to_archive_days
+      }
+    }
+  }
+
+  # Rule 7: Avatar images - keep in hot tier longer (frequently accessed)
+  rule {
+    name    = "avatar-tiering"
+    enabled = true
+
+    filters {
+      prefix_match = ["avatars/"]
+      blob_types   = ["blockBlob"]
+    }
+
+    actions {
+      base_blob {
+        tier_to_cool_after_days_since_modification_greater_than    = 90   # 3 months
+        tier_to_archive_after_days_since_modification_greater_than = 365  # 1 year
+      }
+    }
+  }
 }
 
 # =============================================================================
@@ -319,6 +498,16 @@ resource "azurerm_linux_web_app" "api" {
     # Azure Communication Services
     "AzureCommunicationServices__ConnectionString" = var.enable_communication_services ? "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault.main.vault_uri}secrets/acs-connection-string/)" : ""
     "AzureCommunicationServices__SenderEmail"      = var.sender_email
+
+    # PostgreSQL (for hybrid data strategy)
+    "ConnectionStrings__PostgreSQL" = var.enable_postgresql ? "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault.main.vault_uri}secrets/postgresql-connection-string/)" : ""
+
+    # Redis Cache
+    "ConnectionStrings__Redis" = var.enable_redis ? "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault.main.vault_uri}secrets/redis-connection-string/)" : ""
+
+    # Data Migration Settings
+    "DataMigration__Phase"   = tostring(var.data_migration_phase)
+    "DataMigration__Enabled" = var.enable_postgresql ? "true" : "false"
   }
 
   tags = local.common_tags
@@ -503,4 +692,59 @@ resource "azurerm_consumption_budget_resource_group" "main" {
   lifecycle {
     ignore_changes = [time_period]
   }
+}
+
+# =============================================================================
+# PostgreSQL Database (for hybrid data strategy)
+# Uses shared PostgreSQL server from shared/postgresql module
+# =============================================================================
+
+resource "azurerm_postgresql_flexible_server_database" "mystira_app" {
+  count = var.enable_postgresql && var.use_shared_postgresql ? 1 : 0
+
+  name      = var.postgresql_database_name
+  server_id = var.shared_postgresql_server_id
+  charset   = "UTF8"
+  collation = "en_US.utf8"
+}
+
+# Store PostgreSQL connection string in Key Vault
+resource "azurerm_key_vault_secret" "postgresql_connection_string" {
+  count = var.enable_postgresql && var.use_shared_postgresql ? 1 : 0
+
+  name         = "postgresql-connection-string"
+  value        = "Host=${var.shared_postgresql_server_fqdn};Port=5432;Username=${var.shared_postgresql_admin_login};Password=${var.shared_postgresql_admin_password};Database=${var.postgresql_database_name};SSLMode=Require;Trust Server Certificate=true"
+  key_vault_id = azurerm_key_vault.main.id
+}
+
+# =============================================================================
+# Redis Cache (for session and data caching)
+# =============================================================================
+
+resource "azurerm_redis_cache" "main" {
+  count = var.enable_redis ? 1 : 0
+
+  name                = "${local.name_prefix}-redis-${local.region_code}"
+  location            = var.location
+  resource_group_name = var.resource_group_name
+  capacity            = var.redis_capacity
+  family              = var.redis_family
+  sku_name            = var.redis_sku
+  enable_non_ssl_port = false
+  minimum_tls_version = "1.2"
+
+  redis_configuration {
+    maxmemory_policy = "volatile-lru"
+  }
+
+  tags = local.common_tags
+}
+
+# Store Redis connection string in Key Vault
+resource "azurerm_key_vault_secret" "redis_connection_string" {
+  count = var.enable_redis ? 1 : 0
+
+  name         = "redis-connection-string"
+  value        = azurerm_redis_cache.main[0].primary_connection_string
+  key_vault_id = azurerm_key_vault.main.id
 }
