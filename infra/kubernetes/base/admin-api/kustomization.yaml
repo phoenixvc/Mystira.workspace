@@ -1,0 +1,18 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+metadata:
+  name: mys-admin-api
+
+resources:
+  - deployment.yaml
+  - ingress.yaml
+
+commonLabels:
+  app.kubernetes.io/name: mys-admin-api
+  app.kubernetes.io/part-of: mys
+  app.kubernetes.io/component: admin-api
+
+images:
+  - name: myssharedacr.azurecr.io/admin-api
+    newTag: latest
