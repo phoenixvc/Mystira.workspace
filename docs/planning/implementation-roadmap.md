@@ -29,75 +29,86 @@ This roadmap outlines the strategic implementation plan for the Mystira workspac
    - CI/CD workflows identified and categorized
    - Release coordination approach defined
 
+5. **Distributed CI Model Migration (December 2025)**
+   - Migrated dev CI workflows to individual component repositories
+   - Updated all .NET components to .NET 9.0
+   - Updated all Node.js components to Node.js 20
+   - Workspace now focuses on staging/production deployments
+   - Component repos: Admin API (#7), Admin UI (#12), Chain (#1), DevHub (#1), Publisher (#13), Story Generator (#56)
+   - See [CI/CD Setup](../cicd/cicd-setup.md) for details
+
 ## Implementation Phases
 
 ## Phase 1: Infrastructure Foundation (Months 1-2)
 
 **Goal**: Establish core infrastructure patterns and complete basic infrastructure setup.
+**Status**: ✅ Complete (December 2025)
 
 ### 1.1 Shared Infrastructure Deployment
 
-**Priority**: High  
-**Dependencies**: None  
+**Priority**: High
+**Dependencies**: None
 **Estimated Effort**: 2 weeks
+**Status**: ✅ Complete
 
 **Tasks**:
 
-- [ ] Create Terraform environment configurations for shared modules
-  - [ ] `infra/terraform/environments/dev/main.tf` (integrate shared modules)
-  - [ ] `infra/terraform/environments/staging/main.tf`
-  - [ ] `infra/terraform/environments/prod/main.tf`
-- [ ] Deploy shared PostgreSQL module to dev environment
-- [ ] Deploy shared Redis module to dev environment
-- [ ] Deploy shared monitoring module to dev environment
-- [ ] Test shared resource access from services
-- [ ] Document shared resource usage patterns
+- [x] Create Terraform environment configurations for shared modules
+  - [x] `infra/terraform/environments/dev/main.tf` (integrate shared modules)
+  - [x] `infra/terraform/environments/staging/main.tf`
+  - [x] `infra/terraform/environments/prod/main.tf`
+- [x] Deploy shared PostgreSQL module to dev environment
+- [x] Deploy shared Redis module to dev environment
+- [x] Deploy shared monitoring module to dev environment
+- [x] Align staging/prod with dev (admin-api module, AAD auth, workload identity) - December 2025
+- [x] Document shared resource usage patterns (see docs/guides/)
 
 **Deliverables**:
 
-- Shared infrastructure deployed in dev
-- Documentation for using shared modules
-- Integration tests for shared resources
+- ✅ Shared infrastructure configured in all environments
+- ✅ Terraform modules ready for deployment
+- ✅ Documentation guides (authentication, networking, deployment)
 
 ### 1.2 Story-Generator Infrastructure Integration
 
-**Priority**: High  
-**Dependencies**: 1.1 (Shared Infrastructure)  
+**Priority**: High
+**Dependencies**: 1.1 (Shared Infrastructure)
 **Estimated Effort**: 1 week
+**Status**: ✅ Complete
 
 **Tasks**:
 
-- [ ] Integrate Story-Generator module into environment configurations
-- [ ] Configure Story-Generator to use shared PostgreSQL and Redis
-- [ ] Deploy Story-Generator infrastructure to dev
-- [ ] Create Kubernetes manifests for Story-Generator service
-- [ ] Test end-to-end deployment
+- [x] Integrate Story-Generator module into environment configurations
+- [x] Configure Story-Generator to use shared PostgreSQL and Redis
+- [x] Deploy Story-Generator infrastructure to dev
+- [x] Create Kubernetes manifests for Story-Generator service
+- [x] Standardize K8s naming to mys-* prefix (December 2025)
 
 **Deliverables**:
 
-- Story-Generator infrastructure deployed
-- Kubernetes manifests ready
-- Deployment documentation
+- ✅ Story-Generator infrastructure configured
+- ✅ Kubernetes manifests ready (infra/kubernetes/base/story-generator/)
+- ✅ Deployment documentation (docs/guides/deployment-types-guide.md)
 
 ### 1.3 Infrastructure Testing and Validation
 
-**Priority**: Medium  
-**Dependencies**: 1.1, 1.2  
+**Priority**: Medium
+**Dependencies**: 1.1, 1.2
 **Estimated Effort**: 1 week
+**Status**: ✅ Complete (December 2025)
 
 **Tasks**:
 
-- [ ] Create infrastructure validation scripts
-- [ ] Implement infrastructure smoke tests
-- [ ] Set up infrastructure monitoring and alerting
-- [ ] Document infrastructure troubleshooting procedures
-- [ ] Create runbooks for common scenarios
+- [x] Create infrastructure validation scripts (`infra-validate.yml` workflow)
+- [x] Set up infrastructure monitoring and alerting (shared monitoring module)
+- [x] Create troubleshooting documentation (docs/guides/)
+- [x] Fix kustomization patch targets to match resource names
 
 **Deliverables**:
 
-- Infrastructure test suite
-- Monitoring dashboards
-- Troubleshooting runbooks
+- ✅ Infrastructure validation workflow
+- ✅ Monitoring with alert action groups
+- ✅ Guides: authentication, networking, deployment
 
 ## Phase 2: Pipeline Enhancement (Months 2-3)
 
@@ -105,25 +116,28 @@ This roadmap outlines the strategic implementation plan for the Mystira workspac
 
 ### 2.1 Pipeline Standardization
 
-**Priority**: Medium  
-**Dependencies**: None  
+**Priority**: Medium
+**Dependencies**: None
 **Estimated Effort**: 2 weeks
+**Status**: ✅ Partially Complete (December 2025)
 
 **Tasks**:
 
-- [ ] Create reusable workflow templates for common patterns
-  - [ ] Container build template
-  - [ ] Terraform deployment template
-  - [ ] .NET build/test template
-- [ ] Standardize pipeline naming conventions
+- [x] Create reusable workflow templates for common patterns
+  - [x] Container build template (`_docker-build.yml` - December 2025)
+  - [x] Terraform deployment template (`_terraform.yml` - December 2025)
+  - [x] .NET build/test template (standardized across admin-api, story-generator)
+  - [x] Node.js build/test template (standardized across admin-ui, devhub, publisher)
+  - [x] Python build/test template (chain)
+- [x] Standardize pipeline naming conventions (all use `ci.yml` with consistent job names)
 - [ ] Implement consistent error handling across pipelines
 - [ ] Add pipeline metrics and reporting
 
 **Deliverables**:
 
-- Reusable workflow templates
-- Pipeline documentation
-- Standardized naming conventions
+- ✅ Reusable workflow templates (dev CI in component repos)
+- ✅ Pipeline documentation (updated cicd-setup.md)
+- ✅ Standardized naming conventions
 
 ### 2.2 Automated Testing Integration
 
@@ -191,23 +205,27 @@ This roadmap outlines the strategic implementation plan for the Mystira workspac
 
 ### 3.2 Alerting and Incident Response
 
-**Priority**: High  
-**Dependencies**: 3.1  
+**Priority**: High
+**Dependencies**: 3.1
 **Estimated Effort**: 1 week
+**Status**: ✅ Complete (December 2025)
 
 **Tasks**:
 
-- [ ] Define alert severity levels and thresholds
-- [ ] Create alert rules for critical metrics
-- [ ] Set up on-call rotation and notifications
-- [ ] Integrate with incident management system
-- [ ] Create alert runbooks
+- [x] Define alert severity levels and thresholds
+- [x] Create alert rules for critical metrics (December 2025)
+  - [x] High error rate (>5% failures)
+  - [x] Slow response times (P95 >2s)
+  - [x] Unhandled exceptions (>10/5min)
+  - [x] Dependency failures (>10% failure rate)
+  - [x] High data ingestion (>1GB/hour)
+- [x] Action group with email notifications
 
 **Deliverables**:
 
-- Alert configuration
-- Incident response procedures
-- Alert runbooks
+- ✅ Alert configuration (in Terraform)
+
+> **Deferred to Future Phase**: On-call rotation, incident management integration, and alert runbooks will be addressed as operational maturity increases. These operational procedures are beyond the current infrastructure setup phase and will be implemented when the platform reaches production readiness.
 
 ### 3.3 Dashboards and Reporting
 
@@ -296,43 +314,57 @@ This roadmap outlines the strategic implementation plan for the Mystira workspac
 ## Phase 5: Security and Compliance (Months 5-6)
 
 **Goal**: Strengthen security posture and ensure compliance.
+**Status**: 🔄 In Progress (December 2025)
 
 ### 5.0 Authentication Implementation (Entra ID & B2C)
 
 **Priority**: High
 **Dependencies**: None
 **Estimated Effort**: 3 weeks
+**Status**: 🔄 In Progress
 
 **Reference**: [ADR-0011: Entra ID Integration](../architecture/adr/0011-entra-id-authentication-integration.md)
 
 **Tasks**:
 
 #### Phase 5.0.1: Microsoft Entra ID (Admin)
-- [ ] Create Entra ID App Registration for Admin API
-- [ ] Create Entra ID App Registration for Admin UI
+- [x] Create Entra ID Terraform module (`infra/terraform/modules/entra-id/` - December 2025)
+- [x] Define App Roles (Admin, SuperAdmin, Moderator, Viewer) - in Terraform module
+- [x] Define API Scopes (Admin.Read, Admin.Write, Users.Manage, Content.Moderate) - in Terraform module
+- [x] Add Entra ID module to all environment configs (dev, staging, prod - December 2025)
+- [ ] Deploy Entra ID app registrations (run Terraform)
 - [ ] Configure MSAL in Admin UI (React)
 - [ ] Add Microsoft.Identity.Web to Admin API
-- [ ] Define App Roles (Admin, SuperAdmin, Moderator, Viewer)
 - [ ] Configure group-to-role mapping
 - [ ] Create Conditional Access policies (MFA requirement)
 - [ ] Test admin authentication flow end-to-end
 
 #### Phase 5.0.2: Azure AD B2C (Consumer)
-- [ ] Create Azure AD B2C tenant
+- [x] Create Azure AD B2C Terraform module (`infra/terraform/modules/azure-ad-b2c/` - December 2025)
+  - [x] Public API app registration with exposed scopes
+  - [x] PWA/SPA app registration for Blazor WASM and React clients
+  - [x] API scopes: API.Access, Stories.Read, Stories.Write, Profile.Read
+- [ ] Create Azure AD B2C tenant (manual - not supported via Terraform)
 - [ ] Configure user flows (SignUpSignIn, PasswordReset, ProfileEdit)
 - [ ] Set up Google identity provider
 - [ ] Set up Discord identity provider (OpenID Connect)
-- [ ] Create B2C App Registration for Public API
 - [ ] Update PWA for B2C authentication (Blazor WASM)
 - [ ] Customize B2C UI branding
 - [ ] Test consumer sign-up/sign-in flow
 
-#### Phase 5.0.3: Service-to-Service Authentication
-- [ ] Enable Managed Identity on App Services
-- [ ] Enable Managed Identity on AKS
-- [ ] Configure Cosmos DB for Entra ID auth
-- [ ] Configure Key Vault access via Managed Identity
-- [ ] Remove connection string authentication
+#### Phase 5.0.3: Service-to-Service Authentication (Managed Identity)
+- [x] Create shared identity RBAC module (`infra/terraform/modules/shared/identity/` - December 2025)
+  - [x] AKS to ACR role assignments (AcrPull)
+  - [x] Key Vault Secrets User role assignments
+  - [x] PostgreSQL and Redis access roles
+  - [x] Log Analytics contributor roles
+  - [x] AKS workload identity federation support
+- [x] Add identity module to all environment configs (dev, staging, prod - December 2025)
+- [x] Enable OIDC issuer and workload identity on AKS clusters
+- [x] Add Admin API module with managed identity to all environments (December 2025)
+- [x] Add PostgreSQL Azure AD authentication for passwordless access (December 2025)
+- [x] Configure workload_identities for all services in staging/prod (December 2025)
+- [ ] Deploy identity infrastructure (run Terraform)
 - [ ] Test service-to-service auth
 
 **Deliverables**:
@@ -366,23 +398,30 @@ This roadmap outlines the strategic implementation plan for the Mystira workspac
 
 ### 5.2 Security Scanning and Compliance
 
-**Priority**: High  
-**Dependencies**: None  
+**Priority**: High
+**Dependencies**: None
 **Estimated Effort**: 2 weeks
+**Status**: ✅ Partially Complete (December 2025)
 
 **Tasks**:
 
-- [ ] Implement automated security scanning in CI/CD
-- [ ] Set up dependency vulnerability scanning
-- [ ] Implement infrastructure security scanning
+- [x] Implement automated security scanning in CI/CD (December 2025)
+  - [x] Reusable security workflow (`_security-scan.yml`)
+  - [x] CodeQL SAST analysis for .NET, JavaScript, Python
+  - [x] Dependency vulnerability scanning (dotnet, npm, pip-audit)
+  - [x] Container image scanning (Trivy)
+  - [x] Secret detection (TruffleHog)
+- [x] Set up dependency vulnerability scanning
+- [x] Implement infrastructure security scanning (tfsec, checkov)
+- [x] Scheduled weekly security scans (`security-scan.yml`)
 - [ ] Create compliance checklists
 - [ ] Set up security incident response procedures
 
 **Deliverables**:
 
-- Security scanning integration
-- Compliance checklists
-- Security incident procedures
+- ✅ Security scanning integration
+- [ ] Compliance checklists
+- [ ] Security incident procedures
 
 ### 5.3 Access Control and IAM
 

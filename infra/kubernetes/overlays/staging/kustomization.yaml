@@ -17,7 +17,7 @@ commonLabels:
 patches:
   - target:
       kind: Ingress
-      name: mystira-publisher-ingress
+      name: mys-publisher-ingress
     patch: |-
       - op: replace
         path: /spec/tls/0/hosts/0
@@ -30,7 +30,7 @@ patches:
         value: "letsencrypt-staging"
   - target:
       kind: Ingress
-      name: mystira-chain-ingress
+      name: mys-chain-ingress
     patch: |-
       - op: replace
         path: /spec/tls/0/hosts/0
@@ -91,7 +91,7 @@ patches:
         value: "https://mys-staging-story-kv-san.vault.azure.net/"
   - target:
       kind: Ingress
-      name: mystira-admin-api-ingress
+      name: mys-admin-api-ingress
     patch: |-
       - op: replace
         path: /spec/tls/0/hosts/0
@@ -104,7 +104,7 @@ patches:
         value: "letsencrypt-staging"
   - target:
       kind: Ingress
-      name: mystira-admin-ui-ingress
+      name: mys-admin-ui-ingress
     patch: |-
       - op: replace
         path: /spec/tls/0/hosts/0
@@ -117,28 +117,28 @@ patches:
         value: "letsencrypt-staging"
   - target:
       kind: Deployment
-      name: mystira-admin-api
+      name: mys-admin-api
     patch: |-
       - op: replace
         path: /spec/replicas
         value: 2
   - target:
       kind: Deployment
-      name: mystira-admin-ui
+      name: mys-admin-ui
     patch: |-
       - op: replace
         path: /spec/replicas
         value: 2
   - target:
       kind: ConfigMap
-      name: mystira-admin-api-config
+      name: mys-admin-api-config
     patch: |-
       - op: replace
         path: /data/key_vault_url
         value: "https://mys-staging-admin-kv-san.vault.azure.net/"
   - target:
       kind: ConfigMap
-      name: mystira-admin-ui-config
+      name: mys-admin-ui-config
     patch: |-
       - op: replace
         path: /data/api_url
