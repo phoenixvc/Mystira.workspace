@@ -7,6 +7,8 @@ resources:
   - ../../base/chain
   - ../../base/publisher
   - ../../base/story-generator
+  - ../../base/admin-api
+  - ../../base/admin-ui
   - ../../base/cert-manager
 
 commonLabels:
@@ -127,6 +129,78 @@ patches:
       - op: replace
         path: /data/key_vault_url
         value: "https://mys-dev-story-kv-san.vault.azure.net/"
+  - target:
+      kind: Ingress
+      name: mystira-admin-api-ingress
+    patch: |-
+      - op: replace
+        path: /spec/tls/0/hosts/0
+        value: "dev.admin-api.mystira.app"
+      - op: replace
+        path: /spec/rules/0/host
+        value: "dev.admin-api.mystira.app"
+      - op: replace
+        path: /spec/tls/0/secretName
+        value: "mystira-admin-api-tls-dev"
+      - op: replace
+        path: /metadata/annotations/cert-manager.io~1cluster-issuer
+        value: "letsencrypt-staging"
+  - target:
+      kind: Ingress
+      name: mystira-admin-ui-ingress
+    patch: |-
+      - op: replace
+        path: /spec/tls/0/hosts/0
+        value: "dev.admin.mystira.app"
+      - op: replace
+        path: /spec/rules/0/host
+        value: "dev.admin.mystira.app"
+      - op: replace
+        path: /spec/tls/0/secretName
+        value: "mystira-admin-ui-tls-dev"
+      - op: replace
+        path: /metadata/annotations/cert-manager.io~1cluster-issuer
+        value: "letsencrypt-staging"
+  - target:
+      kind: Deployment
+      name: mystira-admin-api
+    patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 1
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/requests/memory
+        value: "128Mi"
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/limits/memory
+        value: "256Mi"
+  - target:
+      kind: Deployment
+      name: mystira-admin-ui
+    patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 1
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/requests/memory
+        value: "64Mi"
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/limits/memory
+        value: "128Mi"
+  - target:
+      kind: ConfigMap
+      name: mystira-admin-api-config
+    patch: |-
+      - op: replace
+        path: /data/key_vault_url
+        value: "https://mys-dev-admin-kv-san.vault.azure.net/"
+  - target:
+      kind: ConfigMap
+      name: mystira-admin-ui-config
+    patch: |-
+      - op: replace
+        path: /data/api_url
+        value: "https://dev.admin-api.mystira.app"
 
 images:
   - name: mystiraacr.azurecr.io/chain
@@ -137,4 +211,10 @@ images:
     newTag: dev
   - name: mystiraacr.azurecr.io/story-generator
     newName: myssharedacr.azurecr.io/story-generator
+    newTag: dev
+  - name: mystiraacr.azurecr.io/admin-api
+    newName: myssharedacr.azurecr.io/admin-api
+    newTag: dev
+  - name: mystiraacr.azurecr.io/admin-ui
+    newName: myssharedacr.azurecr.io/admin-ui
     newTag: dev

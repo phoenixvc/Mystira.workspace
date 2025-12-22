@@ -242,38 +242,125 @@ Configuration: [`scripts/repo-metadata.json`](./scripts/repo-metadata.json)
 ## Architecture
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                     Mystira Platform                         │
-├─────────────────────────────────────────────────────────────┤
-│                                                              │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────────┐  │
-│  │   Web App    │  │  Mobile App  │  │  Admin Dashboard │  │
-│  │  (Mystira.App)                 │  │  (Admin.UI)      │  │
-│  └──────┬───────┘  └──────┬───────┘  └────────┬─────────┘  │
-│         │                 │                    │            │
-│         └─────────────────┴────────────────────┘            │
-│                          │                                  │
-│         ┌────────────────┴────────────────┐                 │
-│         │                                 │                 │
-│  ┌──────▼──────┐  ┌──────────┐  ┌────────▼────────┐        │
-│  │  Publisher  │  │ Admin.Api │  │ Story Generator │        │
-│  │ (TypeScript)│  │  (C# API) │  │    (C# / AI)    │        │
-│  └──────┬──────┘  └─────┬─────┘  └────────┬────────┘        │
-│         │               │                 │                 │
-│         └───────────────┴─────────────────┘                 │
-│                          │                                  │
-│                   ┌──────▼──────┐                           │
-│                   │    Chain    │                           │
-│                   │  (Python)   │                           │
-│                   │ Story Protocol                          │
-│                   └─────────────┘                           │
-│                                                              │
-│  ┌──────────────────────────────────────────────────────┐  │
-│  │  Infrastructure (Terraform + Kubernetes + Docker)    │  │
-│  │  Azure AKS │ PostgreSQL │ Redis │ Monitoring │ CDN   │  │
-│  └──────────────────────────────────────────────────────┘  │
-└─────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                              Mystira Platform                                    │
+├─────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                 │
+│                            ┌─────────────────────┐                              │
+│                            │   Azure Front Door  │                              │
+│                            │   (CDN + WAF + TLS) │                              │
+│                            └──────────┬──────────┘                              │
+│                                       │                                         │
+│  ┌────────────────────────────────────┼────────────────────────────────────┐    │
+│  │                                    │                                    │    │
+│  ▼                                    ▼                                    ▼    │
+│ ┌───────────────────────────────┐  ┌─────────────┐  ┌───────────────────────┐  │
+│ │      Mystira.App (Client)     │  │ Admin UI    │  │     DevHub            │  │
+│ │  ┌───────────────────────────┐│  │  (React)    │  │  (Tauri Desktop)      │  │
+│ │  │  Blazor WebAssembly PWA   ││  │             │  │  Developer Portal     │  │
+│ │  │  • Web • Mobile • Offline ││  │ admin.      │  │                       │  │
+│ │  │  • IndexedDB • Haptics    ││  │ mystira.app │  │                       │  │
+│ │  └────────────┬──────────────┘│  └──────┬──────┘  └───────────┬───────────┘  │
+│ │               │               │         │                     │              │
+│ └───────────────┼───────────────┘         │                     │              │
+│                 │                         │                     │              │
+│                 └─────────────────────────┴─────────────────────┘              │
+│                                    │                                            │
+│                                    ▼                                            │
+│  ┌──────────────────────────────────────────────────────────────────────────┐  │
+│  │                         Kubernetes (AKS)                                  │  │
+│  │  ┌────────────┐  ┌────────────┐  ┌─────────────┐  ┌───────────┐          │  │
+│  │  │ Publisher  │  │ Admin API  │  │   Story     │  │   Chain   │          │  │
+│  │  │(TypeScript)│  │(C# .NET 9) │  │  Generator  │  │  (Python) │          │  │
+│  │  │            │  │            │  │ (C# + AI)   │  │           │          │  │
+│  │  │ • Content  │  │ • Entra ID │  │ • Claude    │  │ • Story   │          │  │
+│  │  │ • Publish  │  │ • CRUD     │  │ • GPT-4     │  │   Protocol│          │  │
+│  │  │ • NFT Mint │  │ • Analytics│  │ • Context   │  │ • Web3    │          │  │
+│  │  └─────┬──────┘  └─────┬──────┘  └──────┬──────┘  └─────┬─────┘          │  │
+│  │        │               │                │               │                │  │
+│  │        └───────────────┴────────────────┴───────────────┘                │  │
+│  │                                │                                         │  │
+│  └────────────────────────────────┼─────────────────────────────────────────┘  │
+│                                   │                                            │
+│  ┌────────────────────────────────┴─────────────────────────────────────────┐  │
+│  │                        Shared Infrastructure                              │  │
+│  │  ┌────────────┐  ┌─────────┐  ┌───────────┐  ┌─────────────────────────┐ │  │
+│  │  │ PostgreSQL │  │  Redis  │  │ Key Vault │  │    Azure Monitor        │ │  │
+│  │  │ (Flexible) │  │ (Cache) │  │ (Secrets) │  │ (App Insights + Logs)   │ │  │
+│  │  └────────────┘  └─────────┘  └───────────┘  └─────────────────────────┘ │  │
+│  └──────────────────────────────────────────────────────────────────────────┘  │
+│                                                                                 │
+│  ┌──────────────────────────────────────────────────────────────────────────┐  │
+│  │                          Security & Auth                                  │  │
+│  │  ┌─────────────────┐  ┌───────────────────┐  ┌─────────────────────────┐ │  │
+│  │  │ Microsoft Entra │  │   Azure AD B2C    │  │   Managed Identity      │ │  │
+│  │  │  ID (Admins)    │  │ (Consumer Users)  │  │  (Service-to-Service)   │ │  │
+│  │  └─────────────────┘  └───────────────────┘  └─────────────────────────┘ │  │
+│  └──────────────────────────────────────────────────────────────────────────┘  │
+│                                                                                 │
+└─────────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                           Package & Container Registries                         │
+├─────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                 │
+│  ┌─────────────────────────┐  ┌─────────────────────────┐  ┌─────────────────┐ │
+│  │    Docker Images        │  │     NuGet Packages      │  │   NPM Packages  │ │
+│  │  (Azure Container Reg.) │  │   (GitHub Packages)     │  │   (npmjs.org)   │ │
+│  │                         │  │                         │  │                 │ │
+│  │  myssharedacr.azurecr.io│  │  nuget.pkg.github.com/  │  │  @mystira/*     │ │
+│  │                         │  │  phoenixvc/index.json   │  │                 │ │
+│  │  • publisher:latest     │  │                         │  │  • publisher    │ │
+│  │  • chain:latest         │  │  • Mystira.App.Domain   │  │  • shared-utils │ │
+│  │  • story-generator      │  │  • Mystira.App.Shared   │  │  • ui-components│ │
+│  │  • admin-api:latest     │  │  • Mystira.App.Contracts│  │                 │ │
+│  │  • admin-ui:latest      │  │  • Mystira.StoryGen.*   │  │                 │ │
+│  └─────────────────────────┘  └─────────────────────────┘  └─────────────────┘ │
+│                                                                                 │
+│  ┌──────────────────────────────────────────────────────────────────────────┐  │
+│  │                      Infrastructure as Code                               │  │
+│  │   Terraform (Azure) │ Kubernetes (Kustomize) │ GitHub Actions (CI/CD)    │  │
+│  └──────────────────────────────────────────────────────────────────────────┘  │
+│                                                                                 │
+└─────────────────────────────────────────────────────────────────────────────────┘
 ```
+
+### Mystira.App
+
+The main client application ([Mystira.App](https://github.com/phoenixvc/Mystira.App)) is built with:
+- **Blazor WebAssembly** - C# frontend running in the browser via WebAssembly
+- **Progressive Web App (PWA)** - Offline-capable with service workers
+- **IndexedDB** - Client-side data persistence and sync
+- **Haptics & Audio** - Native device feature integration via JS interop
+
+**Backend**: ASP.NET Core on .NET 9 with Cosmos DB and hexagonal architecture (CQRS + MediatR)
+
+### Package Ecosystem
+
+| Registry | Packages | Purpose |
+|----------|----------|---------|
+| **Azure Container Registry** | `publisher`, `chain`, `story-generator`, `admin-api`, `admin-ui` | Docker images for Kubernetes deployment |
+| **GitHub Packages (NuGet)** | `Mystira.App.Domain`, `Mystira.App.Shared`, `Mystira.App.Contracts`, `Mystira.StoryGenerator.*` | Shared .NET libraries for service development |
+| **npmjs.org** | `@mystira/publisher`, `@mystira/shared-utils` | TypeScript packages via Changesets |
+
+### Service Endpoints
+
+| Environment | Service         | URL                              |
+|-------------|-----------------|----------------------------------|
+| Development | Web App         | dev.mystira.app                  |
+|             | Admin UI        | dev.admin.mystira.app            |
+|             | Admin API       | dev.admin-api.mystira.app        |
+|             | Publisher       | dev.publisher.mystira.app        |
+|             | Story Generator | dev.story-generator.mystira.app  |
+|             | Chain           | dev.chain.mystira.app            |
+| Staging     | Web App         | staging.mystira.app              |
+|             | Admin UI        | staging.admin.mystira.app        |
+|             | Admin API       | staging.admin-api.mystira.app    |
+|             | Publisher       | staging.publisher.mystira.app    |
+| Production  | Web App         | mystira.app                      |
+|             | Admin UI        | admin.mystira.app                |
+|             | Admin API       | admin-api.mystira.app            |
+|             | Publisher       | publisher.mystira.app            |
 
 ## Security
 
