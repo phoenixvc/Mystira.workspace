@@ -292,9 +292,9 @@ terraform apply
 
 ---
 
-## Authentication Setup (Entra ID & B2C)
+## Authentication Setup (Entra ID & External ID)
 
-The Mystira platform uses Microsoft Entra ID for admin authentication and Azure AD B2C for consumer authentication with social login support. For complete details, see [ADR-0011: Entra ID Integration](./architecture/adr/0011-entra-id-authentication-integration.md).
+The Mystira platform uses Microsoft Entra ID for admin authentication and Microsoft Entra External ID (formerly Azure AD B2C) for consumer authentication with social login support. For complete details, see [ADR-0011: Entra ID Integration](../architecture/adr/0011-entra-id-authentication-integration.md).
 
 ### 1. Microsoft Entra ID Setup (Admin)
 
@@ -339,16 +339,16 @@ The Mystira platform uses Microsoft Entra ID for admin authentication and Azure 
    - Cloud apps: Select `mystira-admin-api` and `mystira-admin-ui`
    - Grant: Require MFA
 
-### 2. Azure AD B2C Setup (Consumer)
+### 2. Microsoft Entra External ID Setup (Consumer)
 
-#### Create B2C Tenant
+#### Create External ID Tenant
 
 ```bash
-# Via Azure CLI (or use Azure Portal)
-az ad b2c tenant create \
-  --display-name "Mystira B2C" \
-  --domain-name "mystirab2c.onmicrosoft.com" \
-  --country-code "US"
+# Via Azure Portal (CLI not fully supported)
+# Azure Portal → Create a resource → Microsoft Entra External ID → Create
+# - Display Name: Mystira External ID
+# - Domain name: mystirab2c.onmicrosoft.com
+# - Country: US
 ```
 
 #### Configure Identity Providers
@@ -356,14 +356,14 @@ az ad b2c tenant create \
 **Google**:
 
 1. Create OAuth credentials at [Google Cloud Console](https://console.cloud.google.com/)
-2. In B2C tenant → Identity providers → Add Google
+2. In External ID tenant → External Identities → All identity providers → Add Google
 3. Enter Client ID and Client Secret from Google
 4. Redirect URI: `https://mystirab2c.b2clogin.com/mystirab2c.onmicrosoft.com/oauth2/authresp`
 
 **Discord**:
 
 1. Create application at [Discord Developer Portal](https://discord.com/developers/applications)
-2. In B2C tenant → Identity providers → Add OpenID Connect (custom)
+2. In External ID tenant → External Identities → All identity providers → Add OpenID Connect (custom)
 3. Configure:
    - Name: Discord
    - Metadata URL: `https://discord.com/.well-known/openid-configuration`
@@ -372,7 +372,7 @@ az ad b2c tenant create \
 
 #### Create User Flows
 
-1. Go to B2C tenant → User flows
+1. Go to External ID tenant → User flows
 2. Create **Sign up and sign in** flow (`B2C_1_SignUpSignIn`):
    - Identity providers: Email, Google, Discord
    - User attributes: Email Address, Display Name
@@ -382,9 +382,9 @@ az ad b2c tenant create \
 
 #### Create App Registration for Public API
 
-1. In B2C tenant → App registrations
+1. In External ID tenant → App registrations
 2. Create `mystira-public-api`:
-   - Supported account types: B2C tenant accounts
+   - Supported account types: External ID tenant accounts
    - Application ID URI: `https://mystirab2c.onmicrosoft.com/mystira-api`
    - Add scope: `API.Access`
 
@@ -397,7 +397,7 @@ After setup, configure environment variables as documented in [Environment Varia
 | Secret Name               | Description                             |
 | ------------------------- | --------------------------------------- |
 | `azure-ad-client-secret`  | Admin API client secret                 |
-| `azure-b2c-client-secret` | B2C API client secret (if confidential) |
+| `azure-b2c-client-secret` | External ID API client secret (if confidential) |
 | `google-client-secret`    | Google OAuth client secret              |
 | `discord-client-secret`   | Discord OAuth client secret             |
 
@@ -407,7 +407,7 @@ After setup, configure environment variables as documented in [Environment Varia
 # Test Entra ID token acquisition (Admin)
 az account get-access-token --resource api://mystira-admin-api
 
-# Verify B2C metadata endpoint
+# Verify External ID metadata endpoint
 curl https://mystirab2c.b2clogin.com/mystirab2c.onmicrosoft.com/B2C_1_SignUpSignIn/v2.0/.well-known/openid-configuration
 ```
 

@@ -118,16 +118,125 @@ jobs:
             echo "::notice::AKS Cluster does not exist - Kubernetes deployment will be skipped"
           fi
 
+      - name: Check Service Principal Permissions
+        id: check-permissions
+        run: |
+          echo "Checking service principal permissions..."
+          PERMISSION_ISSUES=""
+
+          # Get service principal info
+          SP_CLIENT_ID=$(echo '${{ secrets.MYSTIRA_AZURE_CREDENTIALS }}' | jq -r '.clientId')
+          SP_OBJECT_ID=$(az ad sp show --id "$SP_CLIENT_ID" --query id -o tsv 2>/dev/null || echo "")
+          SUBSCRIPTION_ID=$(az account show --query id -o tsv)
+
+          if [ -z "$SP_OBJECT_ID" ]; then
+            echo "::error::Could not retrieve service principal object ID"
+            echo "sp-valid=false" >> $GITHUB_OUTPUT
+            exit 1
+          fi
+          echo "Service Principal Object ID: $SP_OBJECT_ID"
+
+          # Check 1: Azure AD App Registration permissions
+          echo "Checking Azure AD permissions..."
+          # Try to list apps to verify we have some Graph API access
+          if ! az ad app list --filter "displayName eq 'permission-test-$(date +%s)'" --query "[].id" -o tsv &>/dev/null; then
+            PERMISSION_ISSUES="${PERMISSION_ISSUES}\n- Missing Azure AD permissions (Application.ReadWrite.All or Application Administrator role)"
+            echo "has-ad-permissions=false" >> $GITHUB_OUTPUT
+          else
+            echo "has-ad-permissions=true" >> $GITHUB_OUTPUT
+            echo "::notice::Azure AD permissions OK"
+          fi
+
+          # Check 2: Role assignment permissions (User Access Administrator)
+          echo "Checking role assignment permissions..."
+          # Check if SP has User Access Administrator or Owner at subscription level
+          HAS_UAA=$(az role assignment list \
+            --assignee "$SP_OBJECT_ID" \
+            --scope "/subscriptions/${SUBSCRIPTION_ID}" \
+            --query "[?roleDefinitionName=='User Access Administrator' || roleDefinitionName=='Owner'].roleDefinitionName" \
+            -o tsv 2>/dev/null | head -1)
+
+          if [ -z "$HAS_UAA" ]; then
+            # Check at resource group level
+            HAS_UAA=$(az role assignment list \
+              --assignee "$SP_OBJECT_ID" \
+              --scope "/subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${{ env.AZURE_RESOURCE_GROUP }}" \
+              --query "[?roleDefinitionName=='User Access Administrator' || roleDefinitionName=='Owner'].roleDefinitionName" \
+              -o tsv 2>/dev/null | head -1)
+          fi
+
+          if [ -z "$HAS_UAA" ]; then
+            PERMISSION_ISSUES="${PERMISSION_ISSUES}\n- Missing User Access Administrator role (cannot create role assignments)"
+            echo "has-rbac-permissions=false" >> $GITHUB_OUTPUT
+          else
+            echo "has-rbac-permissions=true" >> $GITHUB_OUTPUT
+            echo "::notice::Role assignment permissions OK ($HAS_UAA)"
+          fi
+
+          # Check 3: Front Door WAF policy conflicts
+          echo "Checking for WAF policy conflicts..."
+          if az afd profile show --profile-name "mystira-${{ env.ENVIRONMENT }}-fd" --resource-group ${{ env.AZURE_RESOURCE_GROUP }} &>/dev/null; then
+            EXISTING_POLICIES=$(az afd security-policy list \
+              --profile-name "mystira-${{ env.ENVIRONMENT }}-fd" \
+              --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
+              --query "[].name" -o tsv 2>/dev/null || echo "")
+
+            if [ -n "$EXISTING_POLICIES" ]; then
+              echo "::warning::Existing WAF security policies found: $EXISTING_POLICIES"
+              echo "waf-policies=$EXISTING_POLICIES" >> $GITHUB_OUTPUT
+            fi
+          fi
+          echo "has-waf-conflict=false" >> $GITHUB_OUTPUT
+
+          # Summary
+          if [ -n "$PERMISSION_ISSUES" ]; then
+            echo "::warning::Permission issues detected:$PERMISSION_ISSUES"
+            echo "## ⚠️ Permission Issues Detected" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "The following permissions are missing from the service principal:" >> $GITHUB_STEP_SUMMARY
+            echo -e "$PERMISSION_ISSUES" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "### How to Fix" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "**Azure AD Permissions:**" >> $GITHUB_STEP_SUMMARY
+            echo '```bash' >> $GITHUB_STEP_SUMMARY
+            echo "# Option 1: Add API permission (requires admin consent)" >> $GITHUB_STEP_SUMMARY
+            echo "az ad app permission add --id $SP_CLIENT_ID --api 00000003-0000-0000-c000-000000000000 --api-permissions 1bfefb4e-e0b5-418b-a88f-73c46d2cc8e9=Role" >> $GITHUB_STEP_SUMMARY
+            echo "az ad app permission admin-consent --id $SP_CLIENT_ID" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "# Option 2: Assign Application Administrator role" >> $GITHUB_STEP_SUMMARY
+            echo "az rest --method POST --url 'https://graph.microsoft.com/v1.0/directoryRoles/roleTemplateId=9b895d92-2cd3-44c7-9d02-a6ac2d5ea5c3/members/\$ref' --body '{\"@odata.id\":\"https://graph.microsoft.com/v1.0/directoryObjects/$SP_OBJECT_ID\"}'" >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "**Role Assignment Permissions:**" >> $GITHUB_STEP_SUMMARY
+            echo '```bash' >> $GITHUB_STEP_SUMMARY
+            echo "az role assignment create \\" >> $GITHUB_STEP_SUMMARY
+            echo "  --assignee $SP_OBJECT_ID \\" >> $GITHUB_STEP_SUMMARY
+            echo "  --role 'User Access Administrator' \\" >> $GITHUB_STEP_SUMMARY
+            echo "  --scope /subscriptions/$SUBSCRIPTION_ID" >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+          fi
+
+          echo "sp-valid=true" >> $GITHUB_OUTPUT
+
       - name: Validation Summary
         run: |
           echo "## Pre-deployment Validation" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Resources" >> $GITHUB_STEP_SUMMARY
           echo "| Resource | Status |" >> $GITHUB_STEP_SUMMARY
           echo "|----------|--------|" >> $GITHUB_STEP_SUMMARY
           echo "| Terraform Backend | ${{ steps.check-backend.outputs.exists == 'true' && '✅ Exists' || '⚠️ Will Create' }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Container Registry | ${{ steps.check-acr.outputs.exists == 'true' && '✅ Exists' || '⚠️ Will Create' }} |" >> $GITHUB_STEP_SUMMARY
           echo "| DNS Zone | ${{ steps.check-dns.outputs.exists == 'true' && '✅ Exists' || '⚠️ Will Create' }} |" >> $GITHUB_STEP_SUMMARY
           echo "| AKS Cluster | ${{ steps.check-aks.outputs.exists == 'true' && '✅ Exists' || '⏭️ Not Found (K8s deploy skipped)' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Service Principal Permissions" >> $GITHUB_STEP_SUMMARY
+          echo "| Permission | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|------------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Azure AD (App Registration) | ${{ steps.check-permissions.outputs.has-ad-permissions == 'true' && '✅ OK' || '❌ Missing' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| RBAC (Role Assignments) | ${{ steps.check-permissions.outputs.has-rbac-permissions == 'true' && '✅ OK' || '❌ Missing' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| WAF Policy Conflicts | ${{ steps.check-permissions.outputs.waf-policies == '' && '✅ None' || '⚠️ Check Above' }} |" >> $GITHUB_STEP_SUMMARY
 
   # ============================================
   # Bootstrap Infrastructure Prerequisites

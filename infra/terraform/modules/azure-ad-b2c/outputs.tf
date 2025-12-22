@@ -27,17 +27,6 @@ output "pwa_object_id" {
   value       = azuread_application.pwa.object_id
 }
 
-# Mobile App outputs
-output "mobile_client_id" {
-  description = "Mobile application (client) ID"
-  value       = length(azuread_application.mobile) > 0 ? azuread_application.mobile[0].client_id : ""
-}
-
-output "mobile_object_id" {
-  description = "Mobile application object ID"
-  value       = length(azuread_application.mobile) > 0 ? azuread_application.mobile[0].object_id : ""
-}
-
 # API Scopes
 output "api_scopes" {
   description = "Map of API scope names to their IDs and URIs"
