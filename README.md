@@ -2,7 +2,6 @@
 
 [![Components: Admin API - CI](https://github.com/phoenixvc/Mystira.workspace/actions/workflows/admin-api-ci.yml/badge.svg)](https://github.com/phoenixvc/Mystira.workspace/actions/workflows/admin-api-ci.yml)
 [![Components: Admin UI - CI](https://github.com/phoenixvc/Mystira.workspace/actions/workflows/admin-ui-ci.yml/badge.svg)](https://github.com/phoenixvc/Mystira.workspace/actions/workflows/admin-ui-ci.yml)
-[![Components: App - CI](https://github.com/phoenixvc/Mystira.workspace/actions/workflows/app-ci.yml/badge.svg)](https://github.com/phoenixvc/Mystira.workspace/actions/workflows/app-ci.yml)
 [![Components: Chain - CI](https://github.com/phoenixvc/Mystira.workspace/actions/workflows/chain-ci.yml/badge.svg)](https://github.com/phoenixvc/Mystira.workspace/actions/workflows/chain-ci.yml)
 [![Components: Devhub - CI](https://github.com/phoenixvc/Mystira.workspace/actions/workflows/devhub-ci.yml/badge.svg)](https://github.com/phoenixvc/Mystira.workspace/actions/workflows/devhub-ci.yml)
 [![Components: Publisher - CI](https://github.com/phoenixvc/Mystira.workspace/actions/workflows/publisher-ci.yml/badge.svg)](https://github.com/phoenixvc/Mystira.workspace/actions/workflows/publisher-ci.yml)
@@ -140,11 +139,12 @@ The workspace uses a comprehensive CI/CD system with organized workflow naming:
 ### Component CI Workflows
 - **Components: Admin API - CI** - Admin backend (.NET)
 - **Components: Admin UI - CI** - Admin frontend (React)
-- **Components: App - CI** - Main application (.NET)
 - **Components: Chain - CI** - Blockchain service (Python)
 - **Components: Devhub - CI** - Developer portal (TypeScript)
 - **Components: Publisher - CI** - Publishing service (TypeScript)
 - **Components: Story Generator - CI** - Story engine (.NET)
+
+> **Note:** Mystira.App runs dev CI in its own repository ([phoenixvc/Mystira.App](https://github.com/phoenixvc/Mystira.App)); staging/production deployments are managed from this workspace.
 
 ### Infrastructure Workflows
 - **Infrastructure: Deploy** - Automated infrastructure deployment
