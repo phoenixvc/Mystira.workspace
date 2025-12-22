@@ -332,15 +332,15 @@ module "entra_id" {
   }
 }
 
-# Azure AD B2C Consumer Authentication
-# Note: B2C tenant must be created manually first, then set b2c_tenant_id variable
+# Microsoft Entra External ID Consumer Authentication
+# Note: External ID tenant must be created manually first, then set b2c_tenant_id variable
 module "azure_ad_b2c" {
   source = "../../modules/azure-ad-b2c"
   count  = var.b2c_tenant_id != "" ? 1 : 0
 
-  environment     = "staging"
-  b2c_tenant_id   = var.b2c_tenant_id
-  b2c_tenant_name = "mystirab2cstaging"
+  environment = "staging"
+  tenant_id   = var.b2c_tenant_id
+  tenant_name = "mystirab2cstaging"
 
   pwa_redirect_uris = [
     "https://app.staging.mystira.app/auth/callback"
