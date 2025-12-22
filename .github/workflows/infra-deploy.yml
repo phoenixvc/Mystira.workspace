@@ -389,7 +389,7 @@ jobs:
     if: |
       always() &&
       (needs.validate.result == 'success' || needs.validate.result == 'skipped') &&
-      (needs.grant-permissions.result == 'success') &&
+      (needs.grant-permissions.result == 'success' || needs.grant-permissions.result == 'failure') &&
       (needs.bootstrap.result == 'success' || needs.bootstrap.result == 'skipped') &&
       (github.event.inputs.components == 'all' || github.event.inputs.components == 'terraform-only' || github.event.inputs.components == '')
     environment: ${{ github.event.inputs.environment || 'dev' }}
