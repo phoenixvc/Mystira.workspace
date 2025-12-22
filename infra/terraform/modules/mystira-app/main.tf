@@ -1,0 +1,452 @@
+# =============================================================================
+# Mystira.App Infrastructure Module
+# Converted from Bicep: https://github.com/phoenixvc/Mystira.App/infrastructure
+# =============================================================================
+#
+# Resources deployed:
+# - Cosmos DB (serverless) with 7 containers
+# - App Service Plan + App Service (API backend)
+# - Static Web App (Blazor WASM PWA)
+# - Storage Account with blob container
+# - Key Vault for secrets
+# - Application Insights + Log Analytics
+# - Communication Services (email)
+# - Azure Bot (optional, for Teams)
+#
+# =============================================================================
+
+terraform {
+  required_providers {
+    azurerm = {
+      source  = "hashicorp/azurerm"
+      version = ">= 3.0"
+    }
+  }
+}
+
+# -----------------------------------------------------------------------------
+# Data Sources
+# -----------------------------------------------------------------------------
+
+data "azurerm_client_config" "current" {}
+
+# -----------------------------------------------------------------------------
+# Local Variables
+# -----------------------------------------------------------------------------
+
+locals {
+  # Naming convention: [org]-[env]-[project]-[type]-[region]
+  region_code = lookup({
+    "southafricanorth" = "san"
+    "eastus2"          = "eus2"
+    "westeurope"       = "weu"
+    "northeurope"      = "neu"
+  }, var.location, substr(var.location, 0, 4))
+
+  fallback_region_code = lookup({
+    "southafricanorth" = "san"
+    "eastus2"          = "eus2"
+    "westeurope"       = "weu"
+    "northeurope"      = "neu"
+  }, var.fallback_location, substr(var.fallback_location, 0, 4))
+
+  name_prefix = "${var.org}-${var.environment}-${var.project_name}"
+
+  # Storage account names can't have dashes and max 24 chars
+  storage_account_name = replace("${var.org}${var.environment}${var.project_name}st${local.region_code}", "-", "")
+
+  # Key Vault names max 24 chars
+  key_vault_name = "${var.org}-${var.environment}-app-kv-${local.region_code}"
+
+  common_tags = merge(var.tags, {
+    Environment = var.environment
+    Project     = var.project_name
+    ManagedBy   = "terraform"
+    Source      = "mystira-app-module"
+  })
+
+  # Cosmos DB containers configuration
+  cosmos_containers = [
+    { name = "UserProfiles", partition_key = "/accountId" },
+    { name = "Accounts", partition_key = "/id" },
+    { name = "Scenarios", partition_key = "/id" },
+    { name = "GameSessions", partition_key = "/accountId" },
+    { name = "ContentBundles", partition_key = "/id" },
+    { name = "PendingSignups", partition_key = "/email" },
+    { name = "CompassTrackings", partition_key = "/Axis" },
+  ]
+}
+
+# =============================================================================
+# Log Analytics Workspace
+# =============================================================================
+
+resource "azurerm_log_analytics_workspace" "main" {
+  name                = "${local.name_prefix}-law-${local.region_code}"
+  location            = var.location
+  resource_group_name = var.resource_group_name
+  sku                 = "PerGB2018"
+  retention_in_days   = var.log_retention_days
+
+  tags = local.common_tags
+}
+
+# =============================================================================
+# Application Insights
+# =============================================================================
+
+resource "azurerm_application_insights" "main" {
+  name                = "${local.name_prefix}-ai-${local.region_code}"
+  location            = var.location
+  resource_group_name = var.resource_group_name
+  workspace_id        = azurerm_log_analytics_workspace.main.id
+  application_type    = "web"
+  daily_data_cap_in_gb = var.daily_quota_gb
+
+  tags = local.common_tags
+}
+
+# =============================================================================
+# Key Vault
+# =============================================================================
+
+resource "azurerm_key_vault" "main" {
+  name                        = local.key_vault_name
+  location                    = var.location
+  resource_group_name         = var.resource_group_name
+  enabled_for_disk_encryption = false
+  tenant_id                   = data.azurerm_client_config.current.tenant_id
+  soft_delete_retention_days  = 7
+  purge_protection_enabled    = var.environment == "prod"
+  sku_name                    = var.key_vault_sku
+
+  # Access policy for Terraform service principal
+  access_policy {
+    tenant_id = data.azurerm_client_config.current.tenant_id
+    object_id = data.azurerm_client_config.current.object_id
+
+    secret_permissions = [
+      "Get", "List", "Set", "Delete", "Purge", "Recover"
+    ]
+  }
+
+  tags = local.common_tags
+}
+
+# Key Vault access policy for App Service managed identity
+resource "azurerm_key_vault_access_policy" "app_service" {
+  key_vault_id = azurerm_key_vault.main.id
+  tenant_id    = data.azurerm_client_config.current.tenant_id
+  object_id    = azurerm_linux_web_app.api.identity[0].principal_id
+
+  secret_permissions = ["Get", "List"]
+}
+
+# =============================================================================
+# Storage Account
+# =============================================================================
+
+resource "azurerm_storage_account" "main" {
+  count = var.skip_storage_creation ? 0 : 1
+
+  name                     = local.storage_account_name
+  location                 = var.location
+  resource_group_name      = var.resource_group_name
+  account_tier             = "Standard"
+  account_replication_type = replace(var.storage_sku, "Standard_", "")
+  account_kind             = "StorageV2"
+  min_tls_version          = "TLS1_2"
+
+  blob_properties {
+    dynamic "cors_rule" {
+      for_each = length(var.cors_allowed_origins) > 0 ? [1] : []
+      content {
+        allowed_headers    = ["*"]
+        allowed_methods    = ["GET", "POST", "PUT", "DELETE", "HEAD", "OPTIONS"]
+        allowed_origins    = var.cors_allowed_origins
+        exposed_headers    = ["*"]
+        max_age_in_seconds = 3600
+      }
+    }
+  }
+
+  tags = local.common_tags
+}
+
+resource "azurerm_storage_container" "media" {
+  count = var.skip_storage_creation ? 0 : 1
+
+  name                  = "mystira-app-media"
+  storage_account_name  = azurerm_storage_account.main[0].name
+  container_access_type = "blob"
+}
+
+# =============================================================================
+# Cosmos DB
+# =============================================================================
+
+resource "azurerm_cosmosdb_account" "main" {
+  count = var.skip_cosmos_creation ? 0 : 1
+
+  name                = "${local.name_prefix}-cosmos-${local.region_code}"
+  location            = var.location
+  resource_group_name = var.resource_group_name
+  offer_type          = "Standard"
+  kind                = "GlobalDocumentDB"
+
+  # Serverless capacity mode (recommended for dev/staging)
+  dynamic "capabilities" {
+    for_each = var.cosmos_db_serverless ? [1] : []
+    content {
+      name = "EnableServerless"
+    }
+  }
+
+  consistency_policy {
+    consistency_level = var.cosmos_db_consistency_level
+  }
+
+  geo_location {
+    location          = var.location
+    failover_priority = 0
+  }
+
+  tags = local.common_tags
+}
+
+resource "azurerm_cosmosdb_sql_database" "main" {
+  count = var.skip_cosmos_creation ? 0 : 1
+
+  name                = "MystiraAppDb"
+  resource_group_name = var.resource_group_name
+  account_name        = azurerm_cosmosdb_account.main[0].name
+}
+
+resource "azurerm_cosmosdb_sql_container" "containers" {
+  for_each = var.skip_cosmos_creation ? {} : { for c in local.cosmos_containers : c.name => c }
+
+  name                = each.value.name
+  resource_group_name = var.resource_group_name
+  account_name        = azurerm_cosmosdb_account.main[0].name
+  database_name       = azurerm_cosmosdb_sql_database.main[0].name
+  partition_key_path  = each.value.partition_key
+
+  indexing_policy {
+    indexing_mode = "consistent"
+
+    included_path {
+      path = "/*"
+    }
+  }
+}
+
+# =============================================================================
+# App Service Plan
+# =============================================================================
+
+resource "azurerm_service_plan" "main" {
+  name                = "${local.name_prefix}-asp-${local.region_code}"
+  location            = var.location
+  resource_group_name = var.resource_group_name
+  os_type             = "Linux"
+  sku_name            = var.app_service_sku
+
+  tags = local.common_tags
+}
+
+# =============================================================================
+# App Service (API Backend)
+# =============================================================================
+
+resource "azurerm_linux_web_app" "api" {
+  name                = "${local.name_prefix}-api-${local.region_code}"
+  location            = var.location
+  resource_group_name = var.resource_group_name
+  service_plan_id     = azurerm_service_plan.main.id
+
+  identity {
+    type = "SystemAssigned"
+  }
+
+  site_config {
+    application_stack {
+      dotnet_version = "9.0"
+    }
+
+    always_on = var.app_service_sku != "F1" && var.app_service_sku != "D1"
+
+    cors {
+      allowed_origins = var.cors_allowed_origins
+    }
+  }
+
+  app_settings = {
+    "ASPNETCORE_ENVIRONMENT"                    = var.environment == "prod" ? "Production" : (var.environment == "staging" ? "Staging" : "Development")
+    "APPLICATIONINSIGHTS_CONNECTION_STRING"     = azurerm_application_insights.main.connection_string
+    "ApplicationInsightsAgent_EXTENSION_VERSION" = "~3"
+
+    # Cosmos DB connection - use Key Vault reference if available
+    "CosmosDb__ConnectionString" = var.skip_cosmos_creation ? var.existing_cosmos_connection_string : "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault.main.vault_uri}secrets/cosmos-connection-string/)"
+    "CosmosDb__DatabaseName"     = "MystiraAppDb"
+
+    # Storage connection
+    "BlobStorage__ConnectionString" = var.skip_storage_creation ? "" : "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault.main.vault_uri}secrets/storage-connection-string/)"
+    "BlobStorage__ContainerName"    = "mystira-app-media"
+
+    # JWT Settings (references to Key Vault)
+    "Jwt__Issuer"     = var.jwt_issuer
+    "Jwt__Audience"   = var.jwt_audience
+    "Jwt__PrivateKey" = var.jwt_private_key != "" ? "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault.main.vault_uri}secrets/jwt-private-key/)" : ""
+    "Jwt__PublicKey"  = var.jwt_public_key != "" ? "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault.main.vault_uri}secrets/jwt-public-key/)" : ""
+  }
+
+  tags = local.common_tags
+}
+
+# Store secrets in Key Vault
+resource "azurerm_key_vault_secret" "cosmos_connection_string" {
+  count = var.skip_cosmos_creation ? 0 : 1
+
+  name         = "cosmos-connection-string"
+  value        = azurerm_cosmosdb_account.main[0].primary_sql_connection_string
+  key_vault_id = azurerm_key_vault.main.id
+}
+
+resource "azurerm_key_vault_secret" "storage_connection_string" {
+  count = var.skip_storage_creation ? 0 : 1
+
+  name         = "storage-connection-string"
+  value        = azurerm_storage_account.main[0].primary_connection_string
+  key_vault_id = azurerm_key_vault.main.id
+}
+
+resource "azurerm_key_vault_secret" "jwt_private_key" {
+  count = var.jwt_private_key != "" ? 1 : 0
+
+  name         = "jwt-private-key"
+  value        = var.jwt_private_key
+  key_vault_id = azurerm_key_vault.main.id
+}
+
+resource "azurerm_key_vault_secret" "jwt_public_key" {
+  count = var.jwt_public_key != "" ? 1 : 0
+
+  name         = "jwt-public-key"
+  value        = var.jwt_public_key
+  key_vault_id = azurerm_key_vault.main.id
+}
+
+# =============================================================================
+# Static Web App (Blazor WASM PWA)
+# Note: Not available in South Africa North, deployed to fallback region
+# =============================================================================
+
+resource "azurerm_static_web_app" "main" {
+  count = var.enable_static_web_app ? 1 : 0
+
+  name                = "${local.name_prefix}-swa-${local.fallback_region_code}"
+  location            = var.fallback_location  # Static Web Apps not available in South Africa North
+  resource_group_name = var.resource_group_name
+  sku_tier            = var.static_web_app_sku
+  sku_size            = var.static_web_app_sku
+
+  tags = local.common_tags
+}
+
+# Custom domain for Static Web App
+resource "azurerm_static_web_app_custom_domain" "main" {
+  count = var.enable_static_web_app && var.enable_app_custom_domain && var.app_custom_domain != "" ? 1 : 0
+
+  static_web_app_id = azurerm_static_web_app.main[0].id
+  domain_name       = var.app_custom_domain
+  validation_type   = "cname-delegation"
+}
+
+# =============================================================================
+# Communication Services (Email)
+# =============================================================================
+
+resource "azurerm_communication_service" "main" {
+  count = var.enable_communication_services ? 1 : 0
+
+  name                = "${local.name_prefix}-acs-${local.region_code}"
+  resource_group_name = var.resource_group_name
+  data_location       = "Africa"  # Data residency
+
+  tags = local.common_tags
+}
+
+resource "azurerm_email_communication_service" "main" {
+  count = var.enable_communication_services ? 1 : 0
+
+  name                = "${local.name_prefix}-ecs-${local.region_code}"
+  resource_group_name = var.resource_group_name
+  data_location       = "Africa"
+
+  tags = local.common_tags
+}
+
+# =============================================================================
+# Azure Bot (Optional - Teams Integration)
+# =============================================================================
+
+resource "azurerm_bot_service_azure_bot" "main" {
+  count = var.enable_azure_bot && var.bot_microsoft_app_id != "" ? 1 : 0
+
+  name                = "${local.name_prefix}-bot-${local.region_code}"
+  resource_group_name = var.resource_group_name
+  location            = "global"
+  microsoft_app_id    = var.bot_microsoft_app_id
+  sku                 = "F0"
+
+  endpoint = "https://${azurerm_linux_web_app.api.default_hostname}/api/messages"
+
+  tags = local.common_tags
+}
+
+# Teams channel for bot
+resource "azurerm_bot_channel_ms_teams" "main" {
+  count = var.enable_azure_bot && var.bot_microsoft_app_id != "" ? 1 : 0
+
+  bot_name            = azurerm_bot_service_azure_bot.main[0].name
+  resource_group_name = var.resource_group_name
+  location            = azurerm_bot_service_azure_bot.main[0].location
+}
+
+# =============================================================================
+# Budget (Optional)
+# =============================================================================
+
+resource "azurerm_consumption_budget_resource_group" "main" {
+  count = var.enable_budget ? 1 : 0
+
+  name              = "${local.name_prefix}-budget"
+  resource_group_id = "/subscriptions/${data.azurerm_client_config.current.subscription_id}/resourceGroups/${var.resource_group_name}"
+
+  amount     = var.monthly_budget
+  time_grain = "Monthly"
+
+  time_period {
+    start_date = formatdate("YYYY-MM-01'T'00:00:00Z", timestamp())
+  }
+
+  notification {
+    enabled        = true
+    threshold      = 80
+    operator       = "GreaterThan"
+    threshold_type = "Actual"
+    contact_emails = var.budget_alert_emails
+  }
+
+  notification {
+    enabled        = true
+    threshold      = 100
+    operator       = "GreaterThan"
+    threshold_type = "Forecasted"
+    contact_emails = var.budget_alert_emails
+  }
+
+  lifecycle {
+    ignore_changes = [time_period]
+  }
+}
