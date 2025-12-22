@@ -496,6 +496,16 @@ jobs:
             fi
           fi
 
+          # Admin API Key Vault
+          ADMIN_KV_NAME="mys-${{ env.ENVIRONMENT }}-adm-kv-${REGION_CODE}"
+          if az keyvault show --name "${ADMIN_KV_NAME}" &> /dev/null; then
+            if ! terraform state list 2>/dev/null | grep -q "module.admin_api.azurerm_key_vault.admin_api"; then
+              echo "Importing admin_api Key Vault..."
+              terraform import 'module.admin_api.azurerm_key_vault.admin_api' \
+                "/subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${{ env.AZURE_RESOURCE_GROUP }}/providers/Microsoft.KeyVault/vaults/${ADMIN_KV_NAME}" || true
+            fi
+          fi
+
           # Import WAF Security Policy if it exists
           FD_PROFILE_NAME="mystira-${{ env.ENVIRONMENT }}-fd"
           WAF_POLICY_NAME="mystira-${{ env.ENVIRONMENT }}-admin-waf-security-policy"
