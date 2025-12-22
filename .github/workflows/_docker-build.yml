@@ -1,0 +1,110 @@
+name: "Reusable: Docker Build"
+
+# Reusable workflow for building and pushing Docker images to Azure Container Registry
+# Usage: Call from other workflows with workflow_call trigger
+
+on:
+  workflow_call:
+    inputs:
+      image_name:
+        description: "Name of the Docker image (e.g., publisher, chain, story-generator)"
+        required: true
+        type: string
+      dockerfile:
+        description: "Path to Dockerfile relative to repo root"
+        required: true
+        type: string
+      context:
+        description: "Docker build context path"
+        required: false
+        type: string
+        default: "."
+      environment:
+        description: "Environment tag (dev, staging, prod)"
+        required: false
+        type: string
+        default: "dev"
+      acr_name:
+        description: "Azure Container Registry name"
+        required: false
+        type: string
+        default: "myssharedacr"
+      push:
+        description: "Whether to push the image to ACR"
+        required: false
+        type: boolean
+        default: true
+    secrets:
+      AZURE_CREDENTIALS:
+        description: "Azure credentials JSON"
+        required: true
+      GH_PAT:
+        description: "GitHub PAT for submodule access"
+        required: false
+    outputs:
+      image_tag:
+        description: "Full image tag that was built"
+        value: ${{ jobs.build.outputs.image_tag }}
+      image_digest:
+        description: "Image digest"
+        value: ${{ jobs.build.outputs.digest }}
+
+jobs:
+  build:
+    name: Build ${{ inputs.image_name }}
+    runs-on: ubuntu-latest
+    outputs:
+      image_tag: ${{ steps.meta.outputs.tags }}
+      digest: ${{ steps.build.outputs.digest }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          token: ${{ secrets.GH_PAT || github.token }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Login to ACR
+        run: az acr login --name ${{ inputs.acr_name }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ inputs.acr_name }}.azurecr.io/${{ inputs.image_name }}
+          tags: |
+            type=raw,value=${{ inputs.environment }}
+            type=sha,prefix=
+            type=raw,value=latest,enable=${{ inputs.environment == 'prod' }}
+
+      - name: Build and push
+        id: build
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ inputs.context }}
+          file: ${{ inputs.dockerfile }}
+          push: ${{ inputs.push }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build Summary
+        run: |
+          echo "## Docker Build: ${{ inputs.image_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Property | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|----------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Image | ${{ inputs.acr_name }}.azurecr.io/${{ inputs.image_name }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Tags | ${{ steps.meta.outputs.tags }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Pushed | ${{ inputs.push }} |" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ inputs.push }}" == "true" ]; then
+            echo "| Digest | ${{ steps.build.outputs.digest }} |" >> $GITHUB_STEP_SUMMARY
+          fi
