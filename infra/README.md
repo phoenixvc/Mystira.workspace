@@ -80,7 +80,15 @@ gh secret set MYSTIRA_AZURE_CREDENTIALS --body '{
 }'
 ```
 
-For detailed instructions, see [Azure Setup Guide](./azure-setup.md).
+**Important:** The service principal needs additional permissions beyond Contributor:
+
+| Permission | Purpose |
+|------------|---------|
+| **User Access Administrator** | Assign RBAC roles to managed identities |
+| **Azure AD permissions** | Manage app registrations (Azure AD B2C) |
+| **Storage Blob Data Contributor** | Access Terraform state storage |
+
+The deployment workflow includes automated permission validation. For complete setup instructions, see [Azure Setup Guide](./azure-setup.md#step-2-required-permissions).
 
 ## Deployment
 

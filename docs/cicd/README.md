@@ -29,8 +29,18 @@ This directory contains documentation for CI/CD pipelines, GitHub Actions workfl
 | Staging     | `staging.*.mystira.app` | Auto on merge to `main`   |
 | Production  | `*.mystira.app`         | Manual with confirmation  |
 
+## Azure Permissions
+
+Infrastructure deployments require specific Azure permissions for the service principal. See [Azure Setup Guide](../../infra/azure-setup.md#step-2-required-permissions) for:
+
+- Required Azure RBAC roles
+- Azure AD / Entra ID permissions
+- Complete permission setup script
+- Automated permission validation
+
 ## Related Documentation
 
+- [Azure Setup Guide](../../infra/azure-setup.md) - Service principal and permission setup
 - [Infrastructure Deployment Checklist](../../DEPLOYMENT_CHECKLIST.md) - Full deployment guide
 - [ADR-0004: Branching Strategy and CI/CD](../architecture/adr/0004-branching-strategy-and-cicd.md) - Architecture decision on branching
 - [ADR-0003: Release Pipeline Strategy](../architecture/adr/0003-release-pipeline-strategy.md) - Release pipeline architecture

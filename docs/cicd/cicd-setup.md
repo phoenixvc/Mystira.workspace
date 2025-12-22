@@ -121,8 +121,28 @@ gh api repos/phoenixvc/Mystira.workspace/branches/main/protection
 gh api repos/phoenixvc/Mystira.workspace/environments
 ```
 
+## Azure Service Principal Permissions
+
+The infrastructure deployment workflows require specific Azure permissions. Before running infrastructure deployments, ensure the service principal has:
+
+1. **Contributor** role at subscription level (basic resource management)
+2. **User Access Administrator** role (for RBAC role assignments)
+3. **Azure AD permissions** (for app registrations and managed identities)
+4. **Storage Blob Data Contributor** on Terraform state storage account
+
+For detailed setup instructions, see the [Azure Setup Guide](../../infra/azure-setup.md#step-2-required-permissions).
+
+### Automated Permission Checks
+
+The `infra-deploy.yml` workflow includes automated permission validation that runs before Terraform. If permissions are missing, check the "Check Service Principal Permissions" step in the workflow run for:
+
+- Specific missing permissions
+- Commands to grant the required permissions
+- Links to relevant documentation
+
 ## Related Documentation
 
+- [Azure Setup Guide](../../infra/azure-setup.md) - Service principal and permission setup
 - [Branch Protection](./branch-protection.md)
-- [ADR-0004: Branching Strategy and CI/CD](./architecture/adr/0004-branching-strategy-and-cicd.md)
-- [ADR-0003: Release Pipeline Strategy](./architecture/adr/0003-release-pipeline-strategy.md)
+- [ADR-0004: Branching Strategy and CI/CD](../architecture/adr/0004-branching-strategy-and-cicd.md)
+- [ADR-0003: Release Pipeline Strategy](../architecture/adr/0003-release-pipeline-strategy.md)

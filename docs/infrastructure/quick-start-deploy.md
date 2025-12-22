@@ -14,6 +14,19 @@ terraform --version
 # Should show: Terraform v1.5.0 or higher
 ```
 
+### Service Principal Permissions (CI/CD)
+
+If deploying via GitHub Actions, ensure the service principal has the required permissions:
+
+| Permission | Purpose | When Required |
+|------------|---------|---------------|
+| **Contributor** | Create/manage Azure resources | Always |
+| **User Access Administrator** | Assign RBAC roles to identities | When using managed identities |
+| **Azure AD Application.ReadWrite.All** | Manage app registrations | When using Azure AD B2C |
+| **Storage Blob Data Contributor** | Access Terraform state | Always |
+
+See [Azure Setup Guide](../../infra/azure-setup.md#step-2-required-permissions) for complete setup instructions.
+
 ## Step 1: Install Terraform (if needed)
 
 ### Windows (using winget)
@@ -209,6 +222,17 @@ az login
 az account list --output table
 az account set --subscription "Your Subscription Name"
 ```
+
+### Permission errors (CI/CD)
+
+If you see errors like `AuthorizationFailed` or `Authorization_RequestDenied`:
+
+1. **Check the workflow summary** - The "Check Service Principal Permissions" step shows missing permissions
+2. **Grant required permissions** - See [Azure Setup Guide](../../infra/azure-setup.md#step-2-required-permissions)
+3. **Common permission issues:**
+   - `AuthorizationFailed` on role assignments → Need **User Access Administrator** role
+   - `Authorization_RequestDenied` on AD operations → Need **Azure AD permissions**
+   - `AuthorizationPermissionMismatch` on state → Need **Storage Blob Data Contributor**
 
 ### Terraform backend errors
 
