@@ -32,8 +32,8 @@ spec:
           effect: "NoSchedule"
       containers:
         - name: chain
-          image: myssharedacr.azurecr.io/chain:latest
-          imagePullPolicy: Always
+          image: myssharedacr.azurecr.io/chain:v0.0.0
+          imagePullPolicy: IfNotPresent
           ports:
             - name: rpc
               containerPort: 8545

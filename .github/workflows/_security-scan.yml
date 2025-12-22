@@ -234,12 +234,23 @@ jobs:
         with:
           sarif_file: 'trivy-results.sarif'
 
+      - name: Set Trivy severity
+        id: set-severity
+        run: |
+          case "${{ inputs.fail_on_severity }}" in
+            critical) echo "severity=CRITICAL" >> $GITHUB_OUTPUT ;;
+            high) echo "severity=CRITICAL,HIGH" >> $GITHUB_OUTPUT ;;
+            medium) echo "severity=CRITICAL,HIGH,MEDIUM" >> $GITHUB_OUTPUT ;;
+            low) echo "severity=CRITICAL,HIGH,MEDIUM,LOW" >> $GITHUB_OUTPUT ;;
+            *) echo "severity=CRITICAL,HIGH" >> $GITHUB_OUTPUT ;;
+          esac
+
       - name: Trivy summary
         uses: aquasecurity/trivy-action@0.33.1
         with:
           image-ref: ${{ inputs.container_image }}
           format: 'table'
-          severity: 'CRITICAL,HIGH'
+          severity: ${{ steps.set-severity.outputs.severity }}
           ignore-unfixed: true
           exit-code: '1'
 
