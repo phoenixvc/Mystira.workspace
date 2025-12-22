@@ -147,4 +147,4 @@ data:
   chain_id: "1337"
   rpc_enabled: "true"
   ws_enabled: "true"
-  key_vault_url: "https://mys-dev-chain-kv-san.vault.azure.net/"
+  key_vault_url: "<OVERRIDE_IN_OVERLAY>"
