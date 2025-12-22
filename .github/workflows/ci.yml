@@ -34,14 +34,22 @@ jobs:
           dotnet-version: "9.0.x"
 
       - name: Configure NuGet Feed (Optional)
-        if: ${{ secrets.MYSTIRA_DEVOPS_AZURE_ORG != '' && secrets.MYSTIRA_DEVOPS_AZURE_PAT != '' }}
+        env:
+          AZURE_ORG: ${{ secrets.MYSTIRA_DEVOPS_AZURE_ORG }}
+          AZURE_PAT: ${{ secrets.MYSTIRA_DEVOPS_AZURE_PAT }}
+          AZURE_PROJECT: ${{ secrets.MYSTIRA_DEVOPS_AZURE_PROJECT }}
+          NUGET_FEED: ${{ secrets.MYSTIRA_DEVOPS_NUGET_FEED }}
         run: |
-          echo "Configuring Azure DevOps NuGet feed..."
-          dotnet nuget add source https://pkgs.dev.azure.com/${{ secrets.MYSTIRA_DEVOPS_AZURE_ORG }}/${{ secrets.MYSTIRA_DEVOPS_AZURE_PROJECT }}/_packaging/${{ secrets.MYSTIRA_DEVOPS_NUGET_FEED }}/nuget/v3/index.json \
-            --name "Mystira-Internal" \
-            --username "${{ secrets.MYSTIRA_DEVOPS_AZURE_ORG }}" \
-            --password "${{ secrets.MYSTIRA_DEVOPS_AZURE_PAT }}" \
-            --store-password-in-clear-text
+          if [ -n "$AZURE_ORG" ] && [ -n "$AZURE_PAT" ]; then
+            echo "Configuring Azure DevOps NuGet feed..."
+            dotnet nuget add source "https://pkgs.dev.azure.com/$AZURE_ORG/$AZURE_PROJECT/_packaging/$NUGET_FEED/nuget/v3/index.json" \
+              --name "Mystira-Internal" \
+              --username "$AZURE_ORG" \
+              --password "$AZURE_PAT" \
+              --store-password-in-clear-text
+          else
+            echo "Skipping NuGet feed configuration (secrets not available)"
+          fi
         continue-on-error: true
 
       - name: Restore dependencies
@@ -63,14 +71,22 @@ jobs:
           dotnet-version: "9.0.x"
 
       - name: Configure NuGet Feed (Optional)
-        if: ${{ secrets.MYSTIRA_DEVOPS_AZURE_ORG != '' && secrets.MYSTIRA_DEVOPS_AZURE_PAT != '' }}
+        env:
+          AZURE_ORG: ${{ secrets.MYSTIRA_DEVOPS_AZURE_ORG }}
+          AZURE_PAT: ${{ secrets.MYSTIRA_DEVOPS_AZURE_PAT }}
+          AZURE_PROJECT: ${{ secrets.MYSTIRA_DEVOPS_AZURE_PROJECT }}
+          NUGET_FEED: ${{ secrets.MYSTIRA_DEVOPS_NUGET_FEED }}
         run: |
-          echo "Configuring Azure DevOps NuGet feed..."
-          dotnet nuget add source https://pkgs.dev.azure.com/${{ secrets.MYSTIRA_DEVOPS_AZURE_ORG }}/${{ secrets.MYSTIRA_DEVOPS_AZURE_PROJECT }}/_packaging/${{ secrets.MYSTIRA_DEVOPS_NUGET_FEED }}/nuget/v3/index.json \
-            --name "Mystira-Internal" \
-            --username "${{ secrets.MYSTIRA_DEVOPS_AZURE_ORG }}" \
-            --password "${{ secrets.MYSTIRA_DEVOPS_AZURE_PAT }}" \
-            --store-password-in-clear-text
+          if [ -n "$AZURE_ORG" ] && [ -n "$AZURE_PAT" ]; then
+            echo "Configuring Azure DevOps NuGet feed..."
+            dotnet nuget add source "https://pkgs.dev.azure.com/$AZURE_ORG/$AZURE_PROJECT/_packaging/$NUGET_FEED/nuget/v3/index.json" \
+              --name "Mystira-Internal" \
+              --username "$AZURE_ORG" \
+              --password "$AZURE_PAT" \
+              --store-password-in-clear-text
+          else
+            echo "Skipping NuGet feed configuration (secrets not available)"
+          fi
         continue-on-error: true
 
       - name: Restore dependencies
@@ -103,14 +119,22 @@ jobs:
           dotnet-version: "9.0.x"
 
       - name: Configure NuGet Feed (Optional)
-        if: ${{ secrets.MYSTIRA_DEVOPS_AZURE_ORG != '' && secrets.MYSTIRA_DEVOPS_AZURE_PAT != '' }}
+        env:
+          AZURE_ORG: ${{ secrets.MYSTIRA_DEVOPS_AZURE_ORG }}
+          AZURE_PAT: ${{ secrets.MYSTIRA_DEVOPS_AZURE_PAT }}
+          AZURE_PROJECT: ${{ secrets.MYSTIRA_DEVOPS_AZURE_PROJECT }}
+          NUGET_FEED: ${{ secrets.MYSTIRA_DEVOPS_NUGET_FEED }}
         run: |
-          echo "Configuring Azure DevOps NuGet feed..."
-          dotnet nuget add source https://pkgs.dev.azure.com/${{ secrets.MYSTIRA_DEVOPS_AZURE_ORG }}/${{ secrets.MYSTIRA_DEVOPS_AZURE_PROJECT }}/_packaging/${{ secrets.MYSTIRA_DEVOPS_NUGET_FEED }}/nuget/v3/index.json \
-            --name "Mystira-Internal" \
-            --username "${{ secrets.MYSTIRA_DEVOPS_AZURE_ORG }}" \
-            --password "${{ secrets.MYSTIRA_DEVOPS_AZURE_PAT }}" \
-            --store-password-in-clear-text
+          if [ -n "$AZURE_ORG" ] && [ -n "$AZURE_PAT" ]; then
+            echo "Configuring Azure DevOps NuGet feed..."
+            dotnet nuget add source "https://pkgs.dev.azure.com/$AZURE_ORG/$AZURE_PROJECT/_packaging/$NUGET_FEED/nuget/v3/index.json" \
+              --name "Mystira-Internal" \
+              --username "$AZURE_ORG" \
+              --password "$AZURE_PAT" \
+              --store-password-in-clear-text
+          else
+            echo "Skipping NuGet feed configuration (secrets not available)"
+          fi
         continue-on-error: true
 
       - name: Build application
