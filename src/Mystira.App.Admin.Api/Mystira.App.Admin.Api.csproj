@@ -34,6 +34,9 @@
     <!-- Redis caching for content and distributed cache -->
     <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="9.0.0" />
     <PackageReference Include="AspNetCore.HealthChecks.Redis" Version="9.0.0" />
+
+    <!-- Microsoft Entra ID (Azure AD) authentication -->
+    <PackageReference Include="Microsoft.Identity.Web" Version="3.5.0" />
   </ItemGroup>
 
   <ItemGroup>
