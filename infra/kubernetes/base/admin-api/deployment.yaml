@@ -121,7 +121,7 @@ kind: ConfigMap
 metadata:
   name: mys-admin-api-config
 data:
-  key_vault_url: "https://mys-dev-admin-kv-san.vault.azure.net/"
+  key_vault_url: ""  # Patched by environment overlay
 ---
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
