@@ -191,3 +191,9 @@ In CI/CD pipelines, ensure submodules are initialized:
   with:
     submodules: recursive
 ```
+
+## See Also
+
+- [ADR-0016: Monorepo Tooling and Multi-Repository Strategy](../architecture/adr/0016-monorepo-tooling-and-multi-repository-strategy.md) - Why we use submodules + Turborepo instead of other monorepo tools
+- [Quick Start Guide](./quick-start.md) - Getting started with the workspace
+- [Architecture Overview](./architecture.md) - System architecture overview

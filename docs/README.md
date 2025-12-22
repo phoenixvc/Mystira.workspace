@@ -37,6 +37,10 @@ For details, see [ADR-0002: Documentation Location Strategy](./architecture/adr/
   - [ADR-0010: Authentication and Authorization Strategy](./architecture/adr/0010-authentication-and-authorization-strategy.md)
   - [ADR-0011: Entra ID Authentication Integration](./architecture/adr/0011-entra-id-authentication-integration.md)
   - [ADR-0012: GitHub Workflow Naming Convention](./architecture/adr/0012-github-workflow-naming-convention.md)
+  - [ADR-0013: Data Management and Storage Strategy](./architecture/adr/0013-data-management-and-storage-strategy.md)
+  - [ADR-0014: Polyglot Persistence Framework Selection](./architecture/adr/0014-polyglot-persistence-framework-selection.md)
+  - [ADR-0015: Event-Driven Architecture Framework](./architecture/adr/0015-event-driven-architecture-framework.md)
+  - [ADR-0016: Monorepo Tooling and Multi-Repository Strategy](./architecture/adr/0016-monorepo-tooling-and-multi-repository-strategy.md)
 
 ### Infrastructure Documentation
 
