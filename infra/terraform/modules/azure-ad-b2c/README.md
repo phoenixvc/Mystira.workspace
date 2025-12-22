@@ -119,11 +119,6 @@ module "entra_external_id" {
     "http://localhost:5173/authentication/login-callback",
     "https://mystira.app/authentication/login-callback"
   ]
-
-  mobile_redirect_uris = [
-    "mystira://auth/callback",
-    "exp://localhost:8081/--/auth/callback"  # For Expo development
-  ]
 }
 ```
 
@@ -136,6 +131,8 @@ module "entra_external_id" {
 | tenant_id | External tenant ID (GUID) | `string` | n/a | yes |
 | pwa_redirect_uris | PWA redirect URIs | `list(string)` | `[]` | no |
 | mobile_redirect_uris | Mobile app redirect URIs | `list(string)` | `[]` | no |
+| sign_up_sign_in_policy | Sign-up/sign-in policy name | `string` | `"B2C_1_SignUpSignIn"` | no |
+| password_reset_policy | Password reset policy name | `string` | `"B2C_1_PasswordReset"` | no |
 
 ## Outputs
 
@@ -143,12 +140,12 @@ module "entra_external_id" {
 |------|-------------|
 | public_api_client_id | Public API application (client) ID |
 | pwa_client_id | PWA application (client) ID |
-| mobile_client_id | Mobile application (client) ID |
 | api_scopes | Map of API scopes |
 | public_api_config | Configuration for Public API |
 | pwa_config | Configuration for PWA |
 | mobile_config | Configuration for Mobile App |
 | auth_endpoints | Authentication endpoints |
+| user_flow_urls | B2C user flow URLs |
 
 ## API Scopes
 
@@ -600,3 +597,5 @@ This module focuses on app registration management and assumes the external tena
 - [External ID Quickstart](https://learn.microsoft.com/en-us/entra/external-id/customers/quickstart-get-started-guide)
 - [Terraform AzureAD Provider](https://registry.terraform.io/providers/hashicorp/azuread/latest/docs)
 - [ADR-0011: Entra ID Authentication Integration](../../../docs/architecture/adr/0011-entra-id-authentication-integration.md)
+- [Microsoft Entra External ID Documentation](https://learn.microsoft.com/en-us/entra/external-id/)
+- [External ID User Flows](https://learn.microsoft.com/en-us/entra/external-id/customers/how-to-user-flow-sign-up-sign-in-customers)
