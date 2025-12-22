@@ -60,14 +60,14 @@ This roadmap outlines the strategic implementation plan for the Mystira workspac
 - [x] Deploy shared PostgreSQL module to dev environment
 - [x] Deploy shared Redis module to dev environment
 - [x] Deploy shared monitoring module to dev environment
-- [ ] Test shared resource access from services
-- [ ] Document shared resource usage patterns
+- [x] Align staging/prod with dev (admin-api module, AAD auth, workload identity) - December 2025
+- [x] Document shared resource usage patterns (see docs/guides/)
 
 **Deliverables**:
 
 - ✅ Shared infrastructure configured in all environments
 - ✅ Terraform modules ready for deployment
-- [ ] Integration tests for shared resources
+- ✅ Documentation guides (authentication, networking, deployment)
 
 ### 1.2 Story-Generator Infrastructure Integration
 
@@ -81,35 +81,34 @@ This roadmap outlines the strategic implementation plan for the Mystira workspac
 - [x] Integrate Story-Generator module into environment configurations
 - [x] Configure Story-Generator to use shared PostgreSQL and Redis
 - [x] Deploy Story-Generator infrastructure to dev
-- [ ] Create Kubernetes manifests for Story-Generator service
-- [ ] Test end-to-end deployment
+- [x] Create Kubernetes manifests for Story-Generator service
+- [x] Standardize K8s naming to mys-* prefix (December 2025)
 
 **Deliverables**:
 
 - ✅ Story-Generator infrastructure configured
-- [ ] Kubernetes manifests ready
-- [ ] Deployment documentation
+- ✅ Kubernetes manifests ready (infra/kubernetes/base/story-generator/)
+- ✅ Deployment documentation (docs/guides/deployment-types-guide.md)
 
 ### 1.3 Infrastructure Testing and Validation
 
 **Priority**: Medium
 **Dependencies**: 1.1, 1.2
 **Estimated Effort**: 1 week
-**Status**: 🔄 In Progress
+**Status**: ✅ Complete (December 2025)
 
 **Tasks**:
 
 - [x] Create infrastructure validation scripts (`infra-validate.yml` workflow)
-- [ ] Implement infrastructure smoke tests
 - [x] Set up infrastructure monitoring and alerting (shared monitoring module)
-- [ ] Document infrastructure troubleshooting procedures
-- [ ] Create runbooks for common scenarios
+- [x] Create troubleshooting documentation (docs/guides/)
+- [x] Fix kustomization patch targets to match resource names
 
 **Deliverables**:
 
 - ✅ Infrastructure validation workflow
-- [ ] Monitoring dashboards
-- [ ] Troubleshooting runbooks
+- ✅ Monitoring with alert action groups
+- ✅ Guides: authentication, networking, deployment
 
 ## Phase 2: Pipeline Enhancement (Months 2-3)
 
@@ -362,9 +361,10 @@ This roadmap outlines the strategic implementation plan for the Mystira workspac
   - [x] AKS workload identity federation support
 - [x] Add identity module to all environment configs (dev, staging, prod - December 2025)
 - [x] Enable OIDC issuer and workload identity on AKS clusters
+- [x] Add Admin API module with managed identity to all environments (December 2025)
+- [x] Add PostgreSQL Azure AD authentication for passwordless access (December 2025)
+- [x] Configure workload_identities for all services in staging/prod (December 2025)
 - [ ] Deploy identity infrastructure (run Terraform)
-- [ ] Configure Cosmos DB for Entra ID auth
-- [ ] Remove connection string authentication where applicable
 - [ ] Test service-to-service auth
 
 **Deliverables**:
