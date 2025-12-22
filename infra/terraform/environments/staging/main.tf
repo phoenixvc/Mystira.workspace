@@ -227,11 +227,6 @@ module "shared_postgresql" {
   tags = {
     CostCenter = "staging"
   }
-
-  depends_on = [
-    module.admin_api,
-    module.story_generator
-  ]
 }
 
 # Shared Redis Infrastructure

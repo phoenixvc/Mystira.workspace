@@ -138,7 +138,7 @@ resource "azuread_application" "pwa" {
 
   # Required resource access (to Public API)
   required_resource_access {
-    resource_app_id = azuread_application.public_api.client_id
+    resource_app_id = azuread_application.public_api.application_id
 
     dynamic "resource_access" {
       for_each = local.api_scopes

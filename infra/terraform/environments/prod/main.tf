@@ -244,11 +244,6 @@ module "shared_postgresql" {
     CostCenter = "production"
     Critical   = "true"
   }
-
-  depends_on = [
-    module.admin_api,
-    module.story_generator
-  ]
 }
 
 # Shared Redis Infrastructure
