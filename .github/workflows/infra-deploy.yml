@@ -506,16 +506,34 @@ jobs:
             fi
           fi
 
-          # Import WAF Security Policy if it exists
+          # Import WAF Security Policy if it exists (use az rest since az cdn security-policy may not exist)
           FD_PROFILE_NAME="mystira-${{ env.ENVIRONMENT }}-fd"
           WAF_POLICY_NAME="mystira-${{ env.ENVIRONMENT }}-admin-waf-security-policy"
-          if az cdn security-policy show --profile-name "${FD_PROFILE_NAME}" --resource-group ${{ env.AZURE_RESOURCE_GROUP }} --name "${WAF_POLICY_NAME}" &> /dev/null 2>&1; then
+          WAF_POLICY_ID="/subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${{ env.AZURE_RESOURCE_GROUP }}/providers/Microsoft.Cdn/profiles/${FD_PROFILE_NAME}/securityPolicies/${WAF_POLICY_NAME}"
+          if az rest --method GET --url "https://management.azure.com${WAF_POLICY_ID}?api-version=2024-02-01" &> /dev/null 2>&1; then
             if ! terraform state list 2>/dev/null | grep -q 'module.front_door.azurerm_cdn_frontdoor_security_policy.admin\[0\]'; then
               echo "Importing Front Door WAF Security Policy..."
-              terraform import 'module.front_door.azurerm_cdn_frontdoor_security_policy.admin[0]' \
-                "/subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${{ env.AZURE_RESOURCE_GROUP }}/providers/Microsoft.Cdn/profiles/${FD_PROFILE_NAME}/securityPolicies/${WAF_POLICY_NAME}" || true
+              terraform import 'module.front_door.azurerm_cdn_frontdoor_security_policy.admin[0]' "${WAF_POLICY_ID}" || true
             fi
           fi
+
+          # Import federated identity credentials if they exist
+          FEDERATED_CREDS=(
+            "admin-api:mys-${{ env.ENVIRONMENT }}-admin-api-identity-${REGION_CODE}:admin-api-federated-credential"
+            "story-generator:mys-${{ env.ENVIRONMENT }}-story-identity-${REGION_CODE}:story-generator-federated-credential"
+            "publisher:mys-${{ env.ENVIRONMENT }}-publisher-identity:publisher-federated-credential"
+            "chain:mys-${{ env.ENVIRONMENT }}-chain-identity-${REGION_CODE}:chain-federated-credential"
+          )
+          for cred in "${FEDERATED_CREDS[@]}"; do
+            IFS=':' read -r KEY IDENTITY_NAME CRED_NAME <<< "$cred"
+            CRED_ID="/subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${{ env.AZURE_RESOURCE_GROUP }}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/${IDENTITY_NAME}/federatedIdentityCredentials/${CRED_NAME}"
+            if az rest --method GET --url "https://management.azure.com${CRED_ID}?api-version=2023-01-31" &> /dev/null 2>&1; then
+              if ! terraform state list 2>/dev/null | grep -q "module.identity.azurerm_federated_identity_credential.workload_identity\[\"${KEY}\"\]"; then
+                echo "Importing federated identity credential: ${KEY}..."
+                terraform import "module.identity.azurerm_federated_identity_credential.workload_identity[\"${KEY}\"]" "${CRED_ID}" || true
+              fi
+            fi
+          done
 
       - name: Clean Up Orphaned State
         run: |
@@ -523,9 +541,8 @@ jobs:
           echo "Checking for orphaned modules in state..."
 
           # List of modules that were removed from codebase but may still be in state
-          # NOTE: admin_api and entra_id are active modules - do NOT orphan them
+          # NOTE: admin_api, entra_id, and identity are active modules - do NOT orphan them
           ORPHANED_MODULES=(
-            "module.identity"
             "module.azure_ad_b2c"
             "module.azure-ad-b2c"
           )
