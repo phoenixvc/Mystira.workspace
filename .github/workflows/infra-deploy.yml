@@ -130,24 +130,6 @@ jobs:
           echo "| AKS Cluster | ${{ steps.check-aks.outputs.exists == 'true' && '✅ Exists' || '⏭️ Not Found (K8s deploy skipped)' }} |" >> $GITHUB_STEP_SUMMARY
 
   # ============================================
-  # IMPORTANT: Terraform Backend Storage Permissions
-  # ============================================
-  # The service principal needs "Storage Blob Data Contributor" role on the
-  # Terraform state storage account to access the backend (uses use_azuread_auth = true).
-  #
-  # This MUST be granted manually ONCE during initial setup because:
-  # - The service principal only has Contributor role (creates/manages resources)
-  # - Granting role assignments requires Owner or User Access Administrator role
-  # - The SP cannot grant permissions to itself
-  #
-  # Run this from PowerShell (NOT Git Bash on Windows):
-  #   az role assignment create \
-  #     --assignee "4a4f8652-7323-4804-849a-9ea0b3640472" \
-  #     --role "Storage Blob Data Contributor" \
-  #     --scope "/subscriptions/22f9eb18-6553-4b7d-9451-47d0195085fe/resourceGroups/mys-shared-terraform-rg-san/providers/Microsoft.Storage/storageAccounts/myssharedtfstatesan"
-  #
-  # See infra/azure-setup.md for detailed instructions.
-  # ============================================
   # Bootstrap Infrastructure Prerequisites
   # ============================================
   bootstrap:
@@ -199,34 +181,6 @@ jobs:
             --account-key "$STORAGE_KEY" \
             --output none
 
-          # Grant service principal access to storage account
-          # Required for Terraform backend with use_azuread_auth = true
-          echo "Getting service principal details..."
-          SP_OBJECT_ID=$(az ad sp list --show-mine --query "[0].id" -o tsv)
-          if [ -z "$SP_OBJECT_ID" ]; then
-            # Fallback: Get from credentials JSON
-            SP_OBJECT_ID=$(echo '${{ secrets.MYSTIRA_AZURE_CREDENTIALS }}' | jq -r '.clientId')
-            echo "Using client ID from credentials: $SP_OBJECT_ID"
-          else
-            echo "Using service principal object ID: $SP_OBJECT_ID"
-          fi
-
-          STORAGE_ID=$(az storage account show \
-            --resource-group ${{ env.TERRAFORM_RG }} \
-            --name ${{ env.TERRAFORM_STORAGE }} \
-            --query id -o tsv)
-
-          echo "Granting Storage Blob Data Contributor role..."
-          az role assignment create \
-            --assignee "$SP_OBJECT_ID" \
-            --role "Storage Blob Data Contributor" \
-            --scope "$STORAGE_ID" \
-            --output none || echo "Role assignment may already exist"
-
-          # Wait for role assignment to propagate
-          echo "Waiting 10 seconds for role assignment to propagate..."
-          sleep 10
-
           echo "::notice::Created Terraform backend storage"
 
       - name: Create Container Registry
@@ -258,101 +212,44 @@ jobs:
 
       - name: Grant Storage Account Permissions
         run: |
-          # Always grant service principal access to storage account
-          # Use the SAME service principal that Terraform will use (from secrets)
-          echo "Granting storage access to service principal..."
-
-          # Extract client ID from the credentials that Terraform uses
+          # Grant service principal access to Terraform state storage
           SP_CLIENT_ID=$(echo '${{ secrets.MYSTIRA_AZURE_CREDENTIALS }}' | jq -r '.clientId')
-          echo "Service Principal Client ID: ${SP_CLIENT_ID:0:8}..."
-
-          # CRITICAL: Get the Object ID from the Client ID
-          # Role assignments need the Object ID, not the Client ID
-          echo "Looking up service principal object ID..."
           SP_OBJECT_ID=$(az ad sp show --id "$SP_CLIENT_ID" --query id -o tsv)
-
           if [ -z "$SP_OBJECT_ID" ]; then
-            echo "::error::Could not find service principal object ID for client ID $SP_CLIENT_ID"
+            echo "::error::Could not find service principal object ID"
             exit 1
           fi
-
-          echo "Service Principal Object ID: ${SP_OBJECT_ID:0:8}..."
 
           STORAGE_ID=$(az storage account show \
             --resource-group ${{ env.TERRAFORM_RG }} \
             --name ${{ env.TERRAFORM_STORAGE }} \
             --query id -o tsv)
-          echo "Storage Account: $STORAGE_ID"
 
-          # Grant multiple roles to ensure all permissions
-          echo "Granting storage permissions (this may take a moment)..."
+          # Grant required storage roles (idempotent - safe to run multiple times)
+          echo "Configuring storage permissions..."
+          for role in "Storage Blob Data Contributor" "Storage Account Contributor" "Reader and Data Access"; do
+            az role assignment create \
+              --assignee-object-id "$SP_OBJECT_ID" \
+              --assignee-principal-type ServicePrincipal \
+              --role "$role" \
+              --scope "$STORAGE_ID" \
+              --output none 2>/dev/null || true
+          done
 
-          # Role 1: Storage Blob Data Contributor (for blob access)
-          echo "Attempting to grant Storage Blob Data Contributor..."
-          if az role assignment create \
-            --assignee-object-id "$SP_OBJECT_ID" \
-            --assignee-principal-type ServicePrincipal \
-            --role "Storage Blob Data Contributor" \
-            --scope "$STORAGE_ID"; then
-            echo "✓ Granted Storage Blob Data Contributor"
-          else
-            echo "⚠ Failed to grant Storage Blob Data Contributor (may already exist)"
-          fi
-
-          # Role 2: Storage Account Contributor (for account-level operations)
-          echo "Attempting to grant Storage Account Contributor..."
-          if az role assignment create \
-            --assignee-object-id "$SP_OBJECT_ID" \
-            --assignee-principal-type ServicePrincipal \
-            --role "Storage Account Contributor" \
-            --scope "$STORAGE_ID"; then
-            echo "✓ Granted Storage Account Contributor"
-          else
-            echo "⚠ Failed to grant Storage Account Contributor (may already exist)"
-          fi
-
-          # Role 3: Reader and Data Access (sometimes needed)
-          echo "Attempting to grant Reader and Data Access..."
-          if az role assignment create \
-            --assignee-object-id "$SP_OBJECT_ID" \
-            --assignee-principal-type ServicePrincipal \
-            --role "Reader and Data Access" \
-            --scope "$STORAGE_ID"; then
-            echo "✓ Granted Reader and Data Access"
-          else
-            echo "⚠ Failed to grant Reader and Data Access (may already exist)"
-          fi
-
-          echo "✓ Storage roles configured"
-
-          # Verify permissions were granted
-          echo ""
-          echo "Verifying role assignments..."
-          az role assignment list \
-            --assignee "$SP_OBJECT_ID" \
-            --scope "$STORAGE_ID" \
-            --query "[].{Role:roleDefinitionName, Scope:scope}" \
-            --output table
-
-          echo ""
-          echo "Role assignment count:"
+          # Verify at least one role was assigned
           ROLE_COUNT=$(az role assignment list \
             --assignee "$SP_OBJECT_ID" \
             --scope "$STORAGE_ID" \
             --query "length(@)" -o tsv)
-          echo "  Found $ROLE_COUNT role assignment(s) for this service principal on the storage account"
 
           if [ "$ROLE_COUNT" -eq "0" ]; then
-            echo "::error::No role assignments found! Permission grant may have failed."
+            echo "::error::No role assignments found!"
             exit 1
           fi
 
-          # Wait for Azure AD propagation (increased wait time)
-          echo ""
-          echo "Waiting 30 seconds for Azure AD to propagate permissions..."
-          sleep 30
-
-          echo "::notice::Storage permissions configured and verified"
+          echo "::notice::Storage permissions configured ($ROLE_COUNT roles assigned)"
+          # Wait for Azure AD propagation
+          sleep 15
 
   # ============================================
   # Terraform Plan
@@ -360,11 +257,10 @@ jobs:
   plan-terraform:
     name: Plan Terraform
     runs-on: ubuntu-latest
-    needs: [validate, grant-permissions, bootstrap]
+    needs: [validate, bootstrap]
     if: |
       always() &&
       (needs.validate.result == 'success' || needs.validate.result == 'skipped') &&
-      (needs.grant-permissions.result == 'success') &&
       (needs.bootstrap.result == 'success' || needs.bootstrap.result == 'skipped') &&
       (github.event.inputs.components == 'all' || github.event.inputs.components == 'terraform-only' || github.event.inputs.components == '')
     environment: ${{ github.event.inputs.environment || 'dev' }}
@@ -799,10 +695,10 @@ jobs:
   deploy-kubernetes:
     name: Deploy to Kubernetes
     runs-on: ubuntu-latest
-    needs: [validate, plan-terraform, apply-terraform, build-images]
+    needs: [apply-terraform, build-images]
     if: |
       always() &&
-      (needs.plan-terraform.outputs.aks-exists == 'true' || needs.apply-terraform.outputs.aks-exists == 'true') &&
+      (needs.apply-terraform.outputs.aks-exists == 'true') &&
       (needs.apply-terraform.result == 'success' || needs.apply-terraform.result == 'skipped') &&
       (needs.build-images.result == 'success' || needs.build-images.result == 'skipped') &&
       (github.event.inputs.components == 'all' ||
@@ -932,7 +828,7 @@ jobs:
   summary:
     name: Deployment Summary
     runs-on: ubuntu-latest
-    needs: [validate, bootstrap, plan-terraform, apply-terraform, configure-dns, build-images, deploy-kubernetes]
+    needs: [validate, bootstrap, plan-terraform, apply-terraform, build-images, deploy-kubernetes, configure-dns]
     if: always()
     steps:
       - name: Final Summary
