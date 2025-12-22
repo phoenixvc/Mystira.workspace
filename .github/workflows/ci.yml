@@ -17,6 +17,10 @@ on:
     types: [opened, synchronize, reopened, ready_for_review]
   workflow_dispatch:
 
+permissions:
+  contents: read
+  packages: read
+
 concurrency:
   group: admin-api-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -33,24 +37,16 @@ jobs:
         with:
           dotnet-version: "9.0.x"
 
-      - name: Configure NuGet Feed (Optional)
+      - name: Configure GitHub Packages NuGet Feed
         env:
-          AZURE_ORG: ${{ secrets.MYSTIRA_DEVOPS_AZURE_ORG }}
-          AZURE_PAT: ${{ secrets.MYSTIRA_DEVOPS_AZURE_PAT }}
-          AZURE_PROJECT: ${{ secrets.MYSTIRA_DEVOPS_AZURE_PROJECT }}
-          NUGET_FEED: ${{ secrets.MYSTIRA_DEVOPS_NUGET_FEED }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          if [ -n "$AZURE_ORG" ] && [ -n "$AZURE_PAT" ]; then
-            echo "Configuring Azure DevOps NuGet feed..."
-            dotnet nuget add source "https://pkgs.dev.azure.com/$AZURE_ORG/$AZURE_PROJECT/_packaging/$NUGET_FEED/nuget/v3/index.json" \
-              --name "Mystira-Internal" \
-              --username "$AZURE_ORG" \
-              --password "$AZURE_PAT" \
-              --store-password-in-clear-text
-          else
-            echo "Skipping NuGet feed configuration (secrets not available)"
-          fi
-        continue-on-error: true
+          echo "Configuring GitHub Packages NuGet feed..."
+          dotnet nuget update source github \
+            --username phoenixvc \
+            --password "$GITHUB_TOKEN" \
+            --store-password-in-clear-text \
+            --configfile NuGet.config
 
       - name: Restore dependencies
         run: dotnet restore
@@ -70,24 +66,16 @@ jobs:
         with:
           dotnet-version: "9.0.x"
 
-      - name: Configure NuGet Feed (Optional)
+      - name: Configure GitHub Packages NuGet Feed
         env:
-          AZURE_ORG: ${{ secrets.MYSTIRA_DEVOPS_AZURE_ORG }}
-          AZURE_PAT: ${{ secrets.MYSTIRA_DEVOPS_AZURE_PAT }}
-          AZURE_PROJECT: ${{ secrets.MYSTIRA_DEVOPS_AZURE_PROJECT }}
-          NUGET_FEED: ${{ secrets.MYSTIRA_DEVOPS_NUGET_FEED }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          if [ -n "$AZURE_ORG" ] && [ -n "$AZURE_PAT" ]; then
-            echo "Configuring Azure DevOps NuGet feed..."
-            dotnet nuget add source "https://pkgs.dev.azure.com/$AZURE_ORG/$AZURE_PROJECT/_packaging/$NUGET_FEED/nuget/v3/index.json" \
-              --name "Mystira-Internal" \
-              --username "$AZURE_ORG" \
-              --password "$AZURE_PAT" \
-              --store-password-in-clear-text
-          else
-            echo "Skipping NuGet feed configuration (secrets not available)"
-          fi
-        continue-on-error: true
+          echo "Configuring GitHub Packages NuGet feed..."
+          dotnet nuget update source github \
+            --username phoenixvc \
+            --password "$GITHUB_TOKEN" \
+            --store-password-in-clear-text \
+            --configfile NuGet.config
 
       - name: Restore dependencies
         run: dotnet restore
@@ -118,24 +106,16 @@ jobs:
         with:
           dotnet-version: "9.0.x"
 
-      - name: Configure NuGet Feed (Optional)
+      - name: Configure GitHub Packages NuGet Feed
         env:
-          AZURE_ORG: ${{ secrets.MYSTIRA_DEVOPS_AZURE_ORG }}
-          AZURE_PAT: ${{ secrets.MYSTIRA_DEVOPS_AZURE_PAT }}
-          AZURE_PROJECT: ${{ secrets.MYSTIRA_DEVOPS_AZURE_PROJECT }}
-          NUGET_FEED: ${{ secrets.MYSTIRA_DEVOPS_NUGET_FEED }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          if [ -n "$AZURE_ORG" ] && [ -n "$AZURE_PAT" ]; then
-            echo "Configuring Azure DevOps NuGet feed..."
-            dotnet nuget add source "https://pkgs.dev.azure.com/$AZURE_ORG/$AZURE_PROJECT/_packaging/$NUGET_FEED/nuget/v3/index.json" \
-              --name "Mystira-Internal" \
-              --username "$AZURE_ORG" \
-              --password "$AZURE_PAT" \
-              --store-password-in-clear-text
-          else
-            echo "Skipping NuGet feed configuration (secrets not available)"
-          fi
-        continue-on-error: true
+          echo "Configuring GitHub Packages NuGet feed..."
+          dotnet nuget update source github \
+            --username phoenixvc \
+            --password "$GITHUB_TOKEN" \
+            --store-password-in-clear-text \
+            --configfile NuGet.config
 
       - name: Build application
         run: dotnet build --configuration Release
