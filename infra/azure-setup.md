@@ -80,6 +80,12 @@ az ad app permission add \
   --api 00000003-0000-0000-c000-000000000000 \
   --api-permissions 1bfefb4e-e0b5-418b-a88f-73c46d2cc8e9=Role
 
+# Add DelegatedPermissionGrant.ReadWrite.All permission (required for OAuth2 permission grants)
+az ad app permission add \
+  --id "$SP_CLIENT_ID" \
+  --api 00000003-0000-0000-c000-000000000000 \
+  --api-permissions 8e8e4742-1d95-4f68-9d56-6ee75648c72a=Role
+
 # Grant admin consent (requires Global Administrator or Privileged Role Administrator)
 az ad app permission admin-consent --id "$SP_CLIENT_ID"
 
@@ -182,6 +188,13 @@ az ad app permission add \
   --id "$SP_CLIENT_ID" \
   --api 00000003-0000-0000-c000-000000000000 \
   --api-permissions 1bfefb4e-e0b5-418b-a88f-73c46d2cc8e9=Role 2>/dev/null || true
+
+# 1b. Azure AD - DelegatedPermissionGrant.ReadWrite.All permission (for OAuth2 grants)
+echo "1b. Adding Azure AD DelegatedPermissionGrant.ReadWrite.All permission..."
+az ad app permission add \
+  --id "$SP_CLIENT_ID" \
+  --api 00000003-0000-0000-c000-000000000000 \
+  --api-permissions 8e8e4742-1d95-4f68-9d56-6ee75648c72a=Role 2>/dev/null || true
 
 echo "   Granting admin consent..."
 az ad app permission admin-consent --id "$SP_CLIENT_ID" 2>/dev/null || echo "   (Requires Global Administrator - ask your admin to run this)"
