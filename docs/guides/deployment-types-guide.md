@@ -530,6 +530,121 @@ az acr repository list -n myssharedacr -o table
 az acr repository show-tags -n myssharedacr --repository admin-api -o table
 ```
 
+## Rollback and Disaster Recovery
+
+### AKS Rollback
+
+AKS deployments maintain revision history that can be used for rollbacks:
+
+```bash
+# Check deployment history
+kubectl rollout history deployment/mys-admin-api -n mystira
+
+# View specific revision
+kubectl rollout history deployment/mys-admin-api -n mystira --revision=2
+
+# Rollback to previous version
+kubectl rollout undo deployment/mys-admin-api -n mystira
+
+# Rollback to specific revision
+kubectl rollout undo deployment/mys-admin-api -n mystira --to-revision=2
+
+# Verify rollback
+kubectl rollout status deployment/mys-admin-api -n mystira
+kubectl get pods -n mystira -l app=mys-admin-api
+```
+
+**Best Practices:**
+- Always verify deployment health before and after rollback
+- Check pod logs: `kubectl logs -n mystira -l app=mys-admin-api`
+- Monitor application metrics during rollback
+- Document the reason for rollback in incident reports
+
+**References:**
+- [Azure AKS Rollback Guide](https://learn.microsoft.com/en-us/azure/aks/operator-best-practices-run-workloads#rollback-deployments)
+- [Kubernetes Rollout Management](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#rolling-back-a-deployment)
+
+### App Service Rollback
+
+App Service uses deployment slots for zero-downtime deployments and quick rollbacks:
+
+```bash
+# List deployment slots
+az webapp deployment slot list \
+  -n mys-dev-app-api-san \
+  -g mys-dev-core-rg-san \
+  -o table
+
+# Swap slots (rollback to previous version)
+az webapp deployment slot swap \
+  -n mys-dev-app-api-san \
+  -g mys-dev-core-rg-san \
+  --slot staging \
+  --target-slot production
+
+# Verify health after swap
+az webapp show \
+  -n mys-dev-app-api-san \
+  -g mys-dev-core-rg-san \
+  --query "state" -o tsv
+
+# Check logs
+az webapp log tail \
+  -n mys-dev-app-api-san \
+  -g mys-dev-core-rg-san
+```
+
+**Best Practices:**
+- Always test in staging slot before swapping to production
+- Use slot settings to maintain environment-specific configurations
+- Monitor application health endpoints after slot swap
+- Keep previous deployment available in staging for quick rollback
+
+**References:**
+- [App Service Deployment Slots](https://learn.microsoft.com/en-us/azure/app-service/deploy-staging-slots)
+- [Best Practices for Deployment Slots](https://learn.microsoft.com/en-us/azure/app-service/deploy-best-practices)
+
+### Static Web Apps Rollback
+
+Static Web Apps maintain deployment history for each environment:
+
+```bash
+# List deployments
+az staticwebapp show \
+  -n mys-dev-pwa-swa-san \
+  -g mys-dev-core-rg-san
+
+# Redeploy previous version from GitHub Actions
+# Navigate to: https://github.com/phoenixvc/Mystira.App/actions
+# Select the successful workflow run you want to restore
+# Click "Re-run jobs" to redeploy that version
+```
+
+**Best Practices:**
+- Static Web Apps deployments are tied to Git commits
+- To rollback, redeploy from a previous successful commit
+- Use Git tags to mark stable releases
+- Deployment artifacts are stored in Azure, accessible via Azure Portal
+- Monitor CDN cache invalidation after redeployment
+
+**Alternative Method - Manual Deployment:**
+```bash
+# Build from specific commit
+git checkout <commit-sha>
+npm install
+npm run build
+
+# Deploy using Azure CLI
+az staticwebapp deploy \
+  -n mys-dev-pwa-swa-san \
+  -g mys-dev-core-rg-san \
+  --app-location "dist"
+```
+
+**References:**
+- [Static Web Apps Deployment](https://learn.microsoft.com/en-us/azure/static-web-apps/deployment-token-management)
+- [GitHub Actions for Static Web Apps](https://learn.microsoft.com/en-us/azure/static-web-apps/github-actions-workflow)
+
 ## Related Documentation
 
 - [Kubernetes README](../../infra/kubernetes/README.md)
