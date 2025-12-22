@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: mystira
+  labels:
+    app.kubernetes.io/name: mystira
+    app.kubernetes.io/managed-by: terraform
