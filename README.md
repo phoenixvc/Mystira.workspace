@@ -2,9 +2,24 @@
 
 Admin API backend for the Mystira platform. This is a pure REST/gRPC API for content management and administration.
 
+## ✅ Migration Status
+
+**This repository was extracted from `Mystira.App` as part of the admin tooling separation.**
+
+**Status**: ✅ **COMPLETE** - Admin API extraction is finished and operational.
+
+See [Migration Phases Documentation](../../docs/MIGRATION_PHASES.md) for overall migration status.
+
+The Admin API was separated from the `Mystira.App` monorepo to enable:
+- Independent deployment and versioning
+- Separate development workflows
+- Pure API service without UI dependencies
+- Better separation of concerns between admin tools and main application
+- Support for modern frontend frameworks (React/Vue/etc) via REST/gRPC
+
 ## Overview
 
-This repository contains the Admin API extracted from the `Mystira.App` monorepo. The Admin UI has been separated into the `Mystira.Admin.UI` repository.
+This repository contains the Admin API extracted from the `Mystira.App` monorepo. The Admin UI has been separated into the `Mystira.Admin.UI` repository, allowing the frontend to be built with modern web technologies while this API provides a clean REST/gRPC interface.
 
 ### Key Responsibilities
 
@@ -159,6 +174,27 @@ The API is configured to accept requests from:
 - Production Azure Static Web Apps
 
 Update CORS settings in `Program.cs` or via `CorsSettings:AllowedOrigins` configuration.
+
+## Architecture
+
+```
+┌─────────────────┐
+│  Admin UI (SPA) │  ← Mystira.Admin.UI repository
+│  (React/Vue/etc)│
+└────────┬────────┘
+         │ REST/gRPC
+         ▼
+┌─────────────────┐
+│  Admin API      │  ← This repository
+│  (ASP.NET Core) │
+└────────┬────────┘
+         │ NuGet packages
+         ▼
+┌─────────────────┐
+│  Mystira.App    │  ← Source of shared libraries
+│  (Domain/Infra) │
+└─────────────────┘
+```
 
 ## Related Repositories
 
