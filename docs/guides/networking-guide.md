@@ -459,6 +459,138 @@ az network nsg rule list -g mys-dev-core-rg-san --nsg-name mys-dev-admin-api-nsg
 2. Verify AKS network policy allows egress
 3. Confirm DNS resolution works within VNet
 
+## Rollback Procedures
+
+### Rolling Back Terraform Changes
+
+When network changes cause issues, follow these steps to safely rollback:
+
+```bash
+# 1. Backup current Terraform state
+cd infra/terraform/environments/dev
+terraform state pull > state-backup-$(date +%Y%m%d-%H%M%S).json
+
+# 2. Identify the commit to rollback to
+git log --oneline -- main.tf modules/
+
+# 3. Checkout the previous working version
+git checkout <commit-sha> -- main.tf
+
+# 4. Review changes before applying
+terraform plan -out=rollback.tfplan
+
+# 5. Apply the rollback
+terraform apply rollback.tfplan
+
+# 6. Verify resources
+terraform state list | grep -E "network|subnet|nsg"
+```
+
+**Best Practices:**
+- Always backup Terraform state before making changes
+- Test rollbacks in staging environment first
+- Document the reason for rollback in Git commit message
+- Verify connectivity after rollback with health checks
+- Keep rollback window minimal to reduce impact
+
+**References:**
+- [Terraform State Management](https://developer.hashicorp.com/terraform/language/state)
+- [Azure Resource Rollback Best Practices](https://learn.microsoft.com/en-us/azure/azure-resource-manager/templates/rollback-on-error)
+
+### Rolling Back NSG Rules
+
+Network Security Group rules can be quickly restored:
+
+```bash
+# 1. Identify the faulty NSG rule
+az network nsg rule list \
+  -g mys-dev-core-rg-san \
+  --nsg-name mys-dev-admin-api-nsg-san \
+  -o table
+
+# 2. Remove the faulty rule
+az network nsg rule delete \
+  -g mys-dev-core-rg-san \
+  --nsg-name mys-dev-admin-api-nsg-san \
+  --name <rule-name>
+
+# 3. Reapply NSG via Terraform (recommended)
+cd infra/terraform/environments/dev
+terraform plan -target=azurerm_network_security_group.admin_api
+terraform apply -target=azurerm_network_security_group.admin_api
+
+# 4. Verify critical traffic flows
+# Test connectivity to PostgreSQL
+kubectl exec -n mystira deploy/mys-admin-api -- nc -zv mys-dev-core-db.postgres.database.azure.com 5432
+
+# Test outbound connectivity
+kubectl exec -n mystira deploy/mys-admin-api -- curl -I https://api.github.com
+```
+
+**Best Practices:**
+- Document all NSG rule changes with comments
+- Test rules in non-production environment first
+- Use Terraform for NSG management to maintain consistency
+- Keep default deny rules as last priority
+- Monitor network flow logs after changes
+
+**References:**
+- [NSG Diagnostic Logging](https://learn.microsoft.com/en-us/azure/network-watcher/network-watcher-nsg-flow-logging-overview)
+- [Network Security Best Practices](https://learn.microsoft.com/en-us/azure/security/fundamentals/network-best-practices)
+
+### Rolling Back Subnet Delegation
+
+Subnet delegation changes require careful coordination:
+
+```bash
+# 1. Stop dependent resources (if necessary)
+# For PostgreSQL delegation, ensure no active connections
+az postgres flexible-server stop \
+  -g mys-dev-core-rg-san \
+  -n mys-dev-core-db
+
+# 2. Remove or restore delegation via Terraform
+cd infra/terraform/environments/dev
+
+# Edit main.tf to remove delegation
+# delegated_subnet_id = null  # or restore previous value
+
+# 3. Apply targeted change
+terraform plan -target=azurerm_subnet.postgresql
+terraform apply -target=azurerm_subnet.postgresql
+
+# 4. Restart services
+az postgres flexible-server start \
+  -g mys-dev-core-rg-san \
+  -n mys-dev-core-db
+
+# 5. Test connectivity
+kubectl exec -n mystira deploy/mys-admin-api -- \
+  psql -h mys-dev-core-db.postgres.database.azure.com -U adminuser -d adminapi -c "SELECT 1"
+```
+
+**Best Practices:**
+- Schedule subnet delegation changes during maintenance windows
+- Communicate changes to team before executing
+- Test in staging environment with same network topology
+- Have monitoring alerts ready for connectivity issues
+- Keep rollback script ready before making changes
+
+**Important Notes:**
+- Some Azure services require subnet delegation (e.g., Azure Database for PostgreSQL Flexible Server)
+- Removing delegation may break service connectivity
+- Always verify service requirements before removing delegation
+- Consult Azure service documentation for delegation requirements
+
+**Escalation Contacts:**
+- For production issues: Check team runbooks in `docs/runbooks/`
+- Azure Support: Use Azure Portal support request for platform issues
+- Network team: Contact designated network administrator
+
+**References:**
+- [Subnet Delegation Overview](https://learn.microsoft.com/en-us/azure/virtual-network/subnet-delegation-overview)
+- [Azure Database for PostgreSQL Networking](https://learn.microsoft.com/en-us/azure/postgresql/flexible-server/concepts-networking)
+
 ## Related Documentation
 
 - [ADR-0005: Service Networking and Communication](../architecture/adr/0005-service-networking-and-communication.md)
