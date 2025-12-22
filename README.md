@@ -302,7 +302,7 @@ Configuration: [`scripts/repo-metadata.json`](./scripts/repo-metadata.json)
 │  ┌──────────────────────────────────────────────────────────────────────────┐  │
 │  │                          Security & Auth                                  │  │
 │  │  ┌─────────────────┐  ┌───────────────────┐  ┌─────────────────────────┐ │  │
-│  │  │ Microsoft Entra │  │   Azure AD B2C    │  │   Managed Identity      │ │  │
+│  │  │ Microsoft Entra │  │ Entra External ID │  │   Managed Identity      │ │  │
 │  │  │  ID (Admins)    │  │ (Consumer Users)  │  │  (Service-to-Service)   │ │  │
 │  │  └─────────────────┘  └───────────────────┘  └─────────────────────────┘ │  │
 │  └──────────────────────────────────────────────────────────────────────────┘  │

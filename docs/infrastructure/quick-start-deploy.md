@@ -22,7 +22,7 @@ If deploying via GitHub Actions, ensure the service principal has the required p
 |------------|---------|---------------|
 | **Contributor** | Create/manage Azure resources | Always |
 | **User Access Administrator** | Assign RBAC roles to identities | When using managed identities |
-| **Azure AD Application.ReadWrite.All** | Manage app registrations | When using Azure AD B2C |
+| **Azure AD Application.ReadWrite.All** | Manage app registrations | When using Entra External ID |
 | **Storage Blob Data Contributor** | Access Terraform state | Always |
 
 See [Azure Setup Guide](../../infra/azure-setup.md#step-2-required-permissions) for complete setup instructions.

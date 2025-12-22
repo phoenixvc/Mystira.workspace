@@ -51,7 +51,7 @@ For detailed authentication architecture, see:
 |-----------|-------------|----------|
 | Admin UI | Cookie + OIDC | Microsoft Entra ID |
 | Admin API | JWT Bearer | Microsoft Entra ID |
-| Public API | JWT Bearer | Azure AD B2C / Internal |
+| Public API | JWT Bearer | Entra External ID / Internal |
 | Service-to-Service | Managed Identity | Azure |
 
 ### Secret Management

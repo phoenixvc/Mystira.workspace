@@ -1,6 +1,6 @@
-# Azure AD B2C Consumer Authentication Module
+# Microsoft Entra External ID (Consumer Authentication) Module
 
-This Terraform module manages Azure AD B2C app registrations for consumer-facing authentication in the Mystira platform.
+This Terraform module manages Microsoft Entra External ID (formerly Azure AD B2C) app registrations for consumer-facing authentication in the Mystira platform.
 
 ## Overview
 
@@ -12,25 +12,25 @@ This module creates and configures:
 
 ## Prerequisites
 
-**IMPORTANT**: Azure AD B2C tenant creation is not supported via Terraform. You must:
+**IMPORTANT**: Entra External ID tenant creation is not supported via Terraform. You must:
 
-1. Create the B2C tenant manually in Azure Portal
+1. Create the External ID tenant manually in Azure Portal
 2. Configure user flows (Sign-up/Sign-in, Password Reset, Profile Edit)
-3. Set up identity providers (Google, Discord) in the B2C tenant
+3. Set up identity providers (Google, Discord) in the External ID tenant
 4. Then run this Terraform module to create app registrations
 
-### Manual B2C Setup Steps
+### Manual External ID Setup Steps
 
-1. **Create B2C Tenant**:
+1. **Create External ID Tenant**:
    ```
-   Azure Portal → Create a resource → Azure Active Directory B2C → Create
-   - Organization name: Mystira B2C
+   Azure Portal → Create a resource → Microsoft Entra External ID → Create
+   - Organization name: Mystira External ID
    - Domain name: mystirab2c.onmicrosoft.com
    ```
 
 2. **Create User Flows**:
    ```
-   Azure Portal → Azure AD B2C → User flows → New user flow
+   Azure Portal → External Identities → User flows → New user flow
    - B2C_1_SignUpSignIn (Sign up and sign in)
    - B2C_1_PasswordReset (Password reset)
    - B2C_1_ProfileEdit (Profile editing)
@@ -40,12 +40,12 @@ This module creates and configures:
 
    **Google**:
    - Create OAuth credentials at Google Cloud Console
-   - Azure Portal → Azure AD B2C → Identity providers → Google
+   - Azure Portal → External Identities → Identity providers → Google
    - Add Client ID and Secret
 
    **Discord**:
    - Create application at Discord Developer Portal
-   - Azure Portal → Azure AD B2C → Identity providers → OpenID Connect
+   - Azure Portal → External Identities → Identity providers → OpenID Connect
    - Metadata URL: https://discord.com/.well-known/openid-configuration
 
 ## Usage
@@ -139,5 +139,5 @@ Configure these in your identity providers:
 ## Related Documentation
 
 - [ADR-0011: Entra ID Authentication Integration](../../../docs/architecture/adr/0011-entra-id-authentication-integration.md)
-- [Azure AD B2C Documentation](https://docs.microsoft.com/en-us/azure/active-directory-b2c/)
-- [B2C User Flows](https://docs.microsoft.com/en-us/azure/active-directory-b2c/user-flow-overview)
+- [Microsoft Entra External ID Documentation](https://learn.microsoft.com/en-us/entra/external-id/)
+- [External ID User Flows](https://learn.microsoft.com/en-us/entra/external-id/customers/how-to-user-flow-sign-up-sign-in-customers)

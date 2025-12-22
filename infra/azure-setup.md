@@ -109,7 +109,7 @@ az rest --method POST \
 
 **When are these permissions needed?**
 
-- Creating Azure AD app registrations (Azure AD B2C integration)
+- Creating Azure AD app registrations (Microsoft Entra External ID integration)
 - Configuring managed identity AAD authentication for PostgreSQL
 - Setting up workload identity federation for AKS
 
