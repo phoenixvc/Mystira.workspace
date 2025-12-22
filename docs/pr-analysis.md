@@ -3,6 +3,7 @@
 ## Summary
 
 This PR accomplishes:
+
 1. ✅ Standardized naming for 14 GitHub workflows
 2. ✅ Added 3 missing component CI workflows
 3. ✅ Created repository metadata sync tooling
@@ -20,6 +21,7 @@ None identified.
 #### 1. Script Permissions Inconsistency
 
 **Problem:**
+
 ```bash
 -rwxr-xr-x scripts/bootstrap-infra.sh       # ✓ Good
 -rwxr-xr-x scripts/debug-certificates.sh    # ✓ Good
@@ -29,6 +31,7 @@ None identified.
 ```
 
 **Recommendation:**
+
 ```bash
 chmod 755 scripts/setup-submodules.sh
 chmod 755 scripts/show-submodules.sh
@@ -42,10 +45,12 @@ CHANGELOG.md only mentions initial workspace setup, doesn't include recent signi
 
 **Recommendation:**
 Update CHANGELOG.md with:
+
 ```markdown
 ## [Unreleased]
 
 ### Added
+
 - CI workflows for Admin API, App, and Devhub components
 - Repository metadata sync script (scripts/sync-repo-metadata.sh)
 - Repository metadata configuration (scripts/repo-metadata.json)
@@ -54,6 +59,7 @@ Update CHANGELOG.md with:
 - Comprehensive deployment documentation in infra/README.md
 
 ### Changed
+
 - Standardized all 14 GitHub workflow names to "Category: Name" pattern
 - Updated README.md with complete component inventory and CI/CD info
 - Consolidated documentation structure (removed 24 temporary files)
@@ -61,6 +67,7 @@ Update CHANGELOG.md with:
 - Improved docs/README.md with all 12 ADRs and better organization
 
 ### Removed
+
 - 24 temporary status and summary files
 - Outdated infrastructure planning documents
 ```
@@ -69,23 +76,26 @@ Update CHANGELOG.md with:
 
 **Problem:**
 21 instances of `continue-on-error: true` across workflows, particularly in:
+
 - Linting steps (format checks)
 - Test steps
 - Code coverage uploads
 
 **Current Usage:**
+
 ```yaml
 # Examples:
 - name: Check format
   run: dotnet format --verify-no-changes
-  continue-on-error: true  # ⚠️ Masks formatting issues
+  continue-on-error: true # ⚠️ Masks formatting issues
 
 - name: Run tests
   run: dotnet test
-  continue-on-error: true  # ⚠️ Allows tests to fail silently
+  continue-on-error: true # ⚠️ Allows tests to fail silently
 ```
 
 **Recommendation:**
+
 - **Keep for**: Coverage uploads, optional steps (already done correctly)
 - **Remove for**: Linting and tests in production (main branch)
 - **Alternative approach**:
@@ -105,6 +115,7 @@ New workflows use pnpm filters (`--filter devhub`, `--filter @mystira/admin-ui`)
 
 **Recommendation:**
 After merging, verify with initialized submodules:
+
 ```bash
 git submodule update --init --recursive
 pnpm list --depth 0  # Check actual package names
@@ -116,12 +127,14 @@ Update workflow filters if needed to match actual package.json names.
 
 **Observation:**
 CONTRIBUTING.md exists but doesn't mention:
+
 - New workflow naming convention
 - How to add new component CI workflows
 - Repository metadata sync process
 
 **Recommendation:**
 Add section to CONTRIBUTING.md:
+
 ```markdown
 ## Adding a New Component
 
@@ -145,6 +158,7 @@ ADR-0012 references ADR-0004, and ADR-0004 now references ADR-0012, but other re
 
 **Recommendation:**
 Add ADR-0012 reference to:
+
 - ADR-0001 (Infrastructure Organization) - mentions CI/CD
 - ADR-0003 (Release Pipeline Strategy) - directly related to workflows
 
@@ -155,6 +169,7 @@ Documentation has many internal links, but no automated checking for broken link
 
 **Recommendation:**
 Add link checker workflow:
+
 ```yaml
 name: "Utilities: Check Links"
 on:
@@ -177,6 +192,7 @@ GitHub Actions dependencies (like `actions/checkout@v6`) should be kept up-to-da
 
 **Recommendation:**
 Add to `.github/dependabot.yml`:
+
 ```yaml
 version: 2
 updates:
@@ -192,6 +208,7 @@ updates:
 ## Completeness Checklist
 
 ### ✅ Completed
+
 - [x] All 14 workflows renamed with consistent pattern
 - [x] 3 missing component CI workflows created
 - [x] Repository metadata sync tooling implemented
@@ -218,12 +235,14 @@ updates:
 ### 🔍 Testing Recommendations
 
 Before merging:
+
 1. Ensure all workflows pass on the PR
 2. Verify workflow names appear correctly in GitHub Actions UI
 3. Check that CI badges render correctly in README.md
 4. Validate that all documentation links work
 
 After merging:
+
 1. Initialize submodules and verify package names
 2. Test repository metadata sync script
 3. Ensure deployment workflows trigger correctly
@@ -232,18 +251,21 @@ After merging:
 ## Metrics
 
 **Changes:**
+
 - Files changed: ~40 files
 - Lines removed: ~7,000 (cleanup)
 - Lines added: ~1,500 (documentation + new workflows)
 - Net: -5,500 lines (significant cleanup)
 
 **Workflows:**
+
 - Total workflows: 14
 - New workflows: 3 (Admin API, App, Devhub)
 - Renamed workflows: 14 (all)
 - Workflow categories: 5 (Components, Infrastructure, Deployment, Workspace, Utilities)
 
 **Documentation:**
+
 - New ADRs: 1 (ADR-0012)
 - Updated ADRs: 1 (ADR-0004)
 - Files removed: 24 temporary docs
@@ -254,6 +276,7 @@ After merging:
 **Overall Assessment: ✅ Excellent**
 
 This PR successfully:
+
 - Establishes a clear, scalable workflow organization pattern
 - Fills gaps in CI coverage (3 missing components)
 - Dramatically improves documentation quality
