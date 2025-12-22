@@ -16,4 +16,4 @@ commonLabels:
 
 images:
   - name: myssharedacr.azurecr.io/admin-api
-    newTag: latest
+    newTag: v0.0.0  # Replace with actual version/commit SHA via CI/CD pipeline
