@@ -132,7 +132,6 @@ jobs:
   # ============================================
   # Bootstrap Infrastructure Prerequisites
   # ============================================
-  # ============================================
   bootstrap:
     name: Bootstrap Infrastructure
     runs-on: ubuntu-latest
@@ -216,7 +215,6 @@ jobs:
           # Grant service principal access to Terraform state storage
           SP_CLIENT_ID=$(echo '${{ secrets.MYSTIRA_AZURE_CREDENTIALS }}' | jq -r '.clientId')
           SP_OBJECT_ID=$(az ad sp show --id "$SP_CLIENT_ID" --query id -o tsv)
-          
           if [ -z "$SP_OBJECT_ID" ]; then
             echo "::error::Could not find service principal object ID"
             exit 1
@@ -250,7 +248,6 @@ jobs:
           fi
 
           echo "::notice::Storage permissions configured ($ROLE_COUNT roles assigned)"
-          
           # Wait for Azure AD propagation
           sleep 15
 
