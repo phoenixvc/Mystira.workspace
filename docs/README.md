@@ -21,6 +21,10 @@ For details, see [ADR-0002: Documentation Location Strategy](./architecture/adr/
 - 🔧 [Environment Variables](./guides/environment-variables.md) - Environment configuration
 - 🔀 [Submodules Guide](./guides/submodules.md) - Working with git submodules
 
+### Development Guides
+
+- 💾 [Caching Strategies](./guides/caching-strategies.md) - Cache-aside pattern for WASM and Redis caching for Blazor vs React
+
 ### Architecture & Infrastructure
 
 - 🏗️ [Architecture Overview](./guides/architecture.md) - System architecture overview
