@@ -1,13 +1,5 @@
 # Mystira Workspace
 
-[![Components: Admin API - CI](https://github.com/phoenixvc/Mystira.workspace/actions/workflows/admin-api-ci.yml/badge.svg)](https://github.com/phoenixvc/Mystira.workspace/actions/workflows/admin-api-ci.yml)
-[![Components: Admin UI - CI](https://github.com/phoenixvc/Mystira.workspace/actions/workflows/admin-ui-ci.yml/badge.svg)](https://github.com/phoenixvc/Mystira.workspace/actions/workflows/admin-ui-ci.yml)
-[![Components: App - CI](https://github.com/phoenixvc/Mystira.workspace/actions/workflows/app-ci.yml/badge.svg)](https://github.com/phoenixvc/Mystira.workspace/actions/workflows/app-ci.yml)
-[![Components: Chain - CI](https://github.com/phoenixvc/Mystira.workspace/actions/workflows/chain-ci.yml/badge.svg)](https://github.com/phoenixvc/Mystira.workspace/actions/workflows/chain-ci.yml)
-[![Components: Devhub - CI](https://github.com/phoenixvc/Mystira.workspace/actions/workflows/devhub-ci.yml/badge.svg)](https://github.com/phoenixvc/Mystira.workspace/actions/workflows/devhub-ci.yml)
-[![Components: Publisher - CI](https://github.com/phoenixvc/Mystira.workspace/actions/workflows/publisher-ci.yml/badge.svg)](https://github.com/phoenixvc/Mystira.workspace/actions/workflows/publisher-ci.yml)
-[![Components: Story Generator - CI](https://github.com/phoenixvc/Mystira.workspace/actions/workflows/story-generator-ci.yml/badge.svg)](https://github.com/phoenixvc/Mystira.workspace/actions/workflows/story-generator-ci.yml)
-
 A unified workspace containing all Mystira platform components as integrated git submodules.
 
 ## Overview
@@ -135,16 +127,25 @@ pnpm --filter mystira-publisher dev
 
 ## CI/CD Pipeline
 
-The workspace uses a comprehensive CI/CD system with organized workflow naming:
+The workspace uses a distributed CI/CD model:
 
-### Component CI Workflows
-- **Components: Admin API - CI** - Admin backend (.NET)
-- **Components: Admin UI - CI** - Admin frontend (React)
-- **Components: App - CI** - Main application (.NET)
-- **Components: Chain - CI** - Blockchain service (Python)
-- **Components: Devhub - CI** - Developer portal (TypeScript)
-- **Components: Publisher - CI** - Publishing service (TypeScript)
-- **Components: Story Generator - CI** - Story engine (.NET)
+### Component Dev CI (in component repos)
+
+Each component runs its own dev CI workflow in its repository for fast feedback during development:
+
+| Component | Repository | Runtime |
+|-----------|------------|---------|
+| Admin API | [phoenixvc/Mystira.Admin.Api](https://github.com/phoenixvc/Mystira.Admin.Api) | .NET 9.0 |
+| Admin UI | [phoenixvc/Mystira.Admin.UI](https://github.com/phoenixvc/Mystira.Admin.UI) | Node.js 20 |
+| App | [phoenixvc/Mystira.App](https://github.com/phoenixvc/Mystira.App) | .NET 9.0 |
+| Chain | [phoenixvc/Mystira.Chain](https://github.com/phoenixvc/Mystira.Chain) | Python 3.11 |
+| DevHub | [phoenixvc/Mystira.DevHub](https://github.com/phoenixvc/Mystira.DevHub) | Node.js 20 |
+| Publisher | [phoenixvc/Mystira.Publisher](https://github.com/phoenixvc/Mystira.Publisher) | Node.js 20 |
+| Story Generator | [phoenixvc/Mystira.StoryGenerator](https://github.com/phoenixvc/Mystira.StoryGenerator) | .NET 9.0 |
+
+### Workspace Workflows (staging/production)
+
+This workspace handles integration, staging, and production deployments:
 
 ### Infrastructure Workflows
 - **Infrastructure: Deploy** - Automated infrastructure deployment
