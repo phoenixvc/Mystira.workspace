@@ -1,5 +1,11 @@
 name: "Deployment: Production"
 
+# Production Environment Deployment: Deploys infrastructure and services to production
+# Security: Requires manual confirmation "DEPLOY TO PRODUCTION"
+# Steps: Validate input, deploy Terraform infrastructure, deploy Kubernetes services
+# Environment: https://mystira.app
+# Trigger: Manual workflow_dispatch only
+
 on:
   workflow_dispatch:
     inputs:
@@ -32,8 +38,8 @@ jobs:
     env:
       ENVIRONMENT: prod
       TF_VERSION: 1.5.0
-      AZURE_RESOURCE_GROUP: mys-prod-mystira-rg-eus
-      AKS_CLUSTER_NAME: mys-prod-mystira-aks-eus
+      AZURE_RESOURCE_GROUP: mys-prod-core-rg-san
+      AKS_CLUSTER_NAME: mys-prod-core-aks-san
     steps:
       - uses: actions/checkout@v6
         with:
@@ -92,8 +98,8 @@ jobs:
       contents: read
       id-token: write
     env:
-      AZURE_RESOURCE_GROUP: mys-prod-mystira-rg-eus
-      AKS_CLUSTER_NAME: mys-prod-mystira-aks-eus
+      AZURE_RESOURCE_GROUP: mys-prod-core-rg-san
+      AKS_CLUSTER_NAME: mys-prod-core-aks-san
     steps:
       - uses: actions/checkout@v6
         with:

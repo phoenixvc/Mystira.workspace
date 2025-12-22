@@ -14,5 +14,5 @@ commonLabels:
   app.kubernetes.io/component: publisher
 
 images:
-  - name: mysprodacr.azurecr.io/publisher
+  - name: myssharedacr.azurecr.io/publisher
     newTag: latest

@@ -14,20 +14,20 @@ This directory contains documentation for CI/CD pipelines, GitHub Actions workfl
 
 ### Publishing Destinations
 
-| Artifact Type | Destination | Trigger |
-|---------------|-------------|---------|
-| Docker Images | `mysprodacr.azurecr.io` | Push to `dev`/`main` |
-| NPM Packages | `npmjs.org` | Changesets on `main` |
-| NuGet Packages | GitHub Packages / NuGet.org | Push to `main` |
-| Deployments | Azure Kubernetes Service | Auto (staging) / Manual (prod) |
+| Artifact Type  | Destination                 | Trigger                        |
+| -------------- | --------------------------- | ------------------------------ |
+| Docker Images  | `myssharedacr.azurecr.io`   | Push to `dev`/`main`           |
+| NPM Packages   | `npmjs.org`                 | Changesets on `main`           |
+| NuGet Packages | GitHub Packages / NuGet.org | Push to `main`                 |
+| Deployments    | Azure Kubernetes Service    | Auto (staging) / Manual (prod) |
 
 ### Deployment Environments
 
-| Environment | URL Pattern | Trigger |
-|-------------|-------------|---------|
-| Dev | `dev.*.mystira.app` | Manual via `infra-deploy` |
-| Staging | `staging.*.mystira.app` | Auto on merge to `main` |
-| Production | `*.mystira.app` | Manual with confirmation |
+| Environment | URL Pattern             | Trigger                   |
+| ----------- | ----------------------- | ------------------------- |
+| Dev         | `dev.*.mystira.app`     | Manual via `infra-deploy` |
+| Staging     | `staging.*.mystira.app` | Auto on merge to `main`   |
+| Production  | `*.mystira.app`         | Manual with confirmation  |
 
 ## Related Documentation
 

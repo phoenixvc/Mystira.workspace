@@ -39,6 +39,13 @@ variable "vnet_id" {
 variable "subnet_id" {
   description = "Subnet ID for PostgreSQL server"
   type        = string
+  default     = null
+}
+
+variable "enable_vnet_integration" {
+  description = "Enable VNet integration (must be set explicitly to avoid count dependency issues during import)"
+  type        = bool
+  default     = true
 }
 
 variable "admin_login" {
@@ -97,10 +104,11 @@ variable "tags" {
 }
 
 locals {
-  name_prefix = "mystira-shared-pg-${var.environment}"
+  name_prefix = "mys-${var.environment}-core"
   common_tags = merge(var.tags, {
     Component   = "shared-postgresql"
     Environment = var.environment
+    Service     = "core"
     ManagedBy   = "terraform"
     Project     = "Mystira"
   })
@@ -131,7 +139,7 @@ resource "azurerm_private_dns_zone_virtual_network_link" "postgres" {
 
 # PostgreSQL Flexible Server
 resource "azurerm_postgresql_flexible_server" "shared" {
-  name                   = "${local.name_prefix}-server"
+  name                   = "${local.name_prefix}-db"
   location               = var.location
   resource_group_name    = var.resource_group_name
   version                = var.postgres_version
@@ -172,7 +180,7 @@ resource "azurerm_postgresql_flexible_server_database" "databases" {
 # When using VNet integration, access is controlled through NSG rules and the private endpoint
 # The firewall rule below is only created when NOT using VNet integration
 resource "azurerm_postgresql_flexible_server_firewall_rule" "allow_azure_services" {
-  count            = var.subnet_id == null ? 1 : 0
+  count            = var.enable_vnet_integration ? 0 : 1
   name             = "AllowAzureServices"
   server_id        = azurerm_postgresql_flexible_server.shared.id
   start_ip_address = "0.0.0.0"

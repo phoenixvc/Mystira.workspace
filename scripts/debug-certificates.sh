@@ -57,7 +57,7 @@ section_header "1. Kubernetes Connection"
 if ! kubectl cluster-info &> /dev/null; then
     print_status "ERROR" "kubectl is not configured or cannot connect to cluster"
     echo -e "${YELLOW}Please configure kubectl to connect to your AKS cluster:${NC}"
-    echo "  az aks get-credentials --resource-group mys-dev-mystira-rg-san --name mys-dev-mystira-aks-san"
+    echo "  az aks get-credentials --resource-group mys-dev-core-rg-san --name mys-dev-core-aks-san"
     exit 1
 fi
 print_status "OK" "Successfully connected to Kubernetes cluster"

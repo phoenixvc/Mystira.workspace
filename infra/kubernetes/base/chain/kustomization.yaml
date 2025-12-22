@@ -14,5 +14,5 @@ commonLabels:
   app.kubernetes.io/component: blockchain
 
 images:
-  - name: mysprodacr.azurecr.io/chain
+  - name: myssharedacr.azurecr.io/chain
     newTag: latest

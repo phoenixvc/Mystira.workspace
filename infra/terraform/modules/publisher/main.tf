@@ -60,12 +60,18 @@ variable "tags" {
   default     = {}
 }
 
+variable "shared_log_analytics_workspace_id" {
+  description = "ID of shared Log Analytics workspace (from shared monitoring module)"
+  type        = string
+}
+
 locals {
-  name_prefix = "mys-${var.environment}-mystira-pub"
+  name_prefix = "mys-${var.environment}-publisher"
   region_code = var.region_code
   common_tags = merge(var.tags, {
     Component   = "publisher"
     Environment = var.environment
+    Service     = "publisher"
     ManagedBy   = "terraform"
     Project     = "Mystira"
   })
@@ -138,29 +144,23 @@ resource "azurerm_servicebus_queue" "publisher_events" {
 
 # Dead Letter Queue handled automatically by Service Bus
 
-# Log Analytics Workspace
-resource "azurerm_log_analytics_workspace" "publisher" {
-  name                = "${local.name_prefix}-logs"
-  location            = var.location
-  resource_group_name = var.resource_group_name
-  sku                 = "PerGB2018"
-  retention_in_days   = var.environment == "prod" ? 90 : 30
-
-  tags = local.common_tags
-}
-
-# Application Insights for Publisher Monitoring
+# Application Insights for Publisher Monitoring (uses shared Log Analytics workspace)
 resource "azurerm_application_insights" "publisher" {
   name                = "${local.name_prefix}-ai-${local.region_code}"
   location            = var.location
   resource_group_name = var.resource_group_name
-  workspace_id        = azurerm_log_analytics_workspace.publisher.id
+  workspace_id        = var.shared_log_analytics_workspace_id
   application_type    = "Node.JS"
 
   tags = local.common_tags
 }
 
 # Key Vault for Publisher Secrets
+# Note: KV names limited to 24 chars, using "pub" abbreviation
+# TROUBLESHOOTING: If you get "SoftDeletedVaultDoesNotExist" error:
+#   1. Check for soft-deleted vaults: az keyvault list-deleted --query "[?name=='mys-dev-pub-kv-san']"
+#   2. If found, purge it: az keyvault purge --name mys-dev-pub-kv-san --location <location>
+#   3. If not found, wait a few minutes and retry (Azure caching issue)
 resource "azurerm_key_vault" "publisher" {
   name                        = "mys-${var.environment}-pub-kv-${local.region_code}"
   location                    = var.location
@@ -253,9 +253,9 @@ output "servicebus_queue_name" {
   value       = azurerm_servicebus_queue.publisher_events.name
 }
 
-output "log_analytics_workspace_id" {
-  description = "Log Analytics Workspace ID"
-  value       = azurerm_log_analytics_workspace.publisher.id
+output "application_insights_id" {
+  description = "Application Insights ID for publisher monitoring"
+  value       = azurerm_application_insights.publisher.id
 }
 
 output "app_insights_connection_string" {

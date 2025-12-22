@@ -1,10 +1,16 @@
 name: "Utilities: Check Submodules"
 
+# Submodule Validation: Verifies all submodule commits exist on their remote repositories
+# Purpose: Prevents broken submodule references before merging
+# Checks: Each submodule commit hash against remote repository
+# Triggers: Pull requests and pushes to dev/main branches
+
 on:
   pull_request:
     types: [opened, synchronize, reopened]
   push:
     branches: [dev, main]
+  workflow_dispatch:
 
 jobs:
   check-submodules:

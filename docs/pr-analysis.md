@@ -1,287 +1,484 @@
-# PR Analysis: Workflow Naming & Documentation Cleanup
+# PR Analysis: v2.2 Naming Convention Migration
 
-## Summary
+## Executive Summary
 
-This PR accomplishes:
+**Branch:** `claude/standardize-dev-resources-cT39Z`  
+**Files Modified:** 40 files  
+**Commits:** 5  
+**Status:** ✅ Ready for Review
 
-1. ✅ Standardized naming for 14 GitHub workflows
-2. ✅ Added 3 missing component CI workflows
-3. ✅ Created repository metadata sync tooling
-4. ✅ Consolidated and cleaned up documentation
-5. ✅ Created ADR-0012 and updated ADR-0004
+---
 
-## Issues Found & Recommendations
+## ✅ What Was Done Well
 
-### 🔴 Critical Issues
+### 1. **Comprehensive Coverage**
 
-None identified.
+- ✅ Updated all 7 Terraform modules
+- ✅ Updated all 3 environment configurations
+- ✅ Updated all 6 CI/CD workflows
+- ✅ Updated all 9 Kubernetes manifests
+- ✅ Updated 2 infrastructure scripts
+- ✅ Updated 11 documentation files
+- ✅ Created migration summary and analysis docs
 
-### 🟡 Issues to Address
+### 2. **Architectural Improvements**
 
-#### 1. Script Permissions Inconsistency
+- ✅ Consolidated monitoring (9 Log Analytics → 3)
+- ✅ Maintained service isolation with separate Key Vaults
+- ✅ Standardized region to South Africa North
+- ✅ Implemented shared ACR across environments
 
-**Problem:**
+### 3. **Security Enhancements**
+
+- ✅ Zero-trust compliance with service-specific Key Vaults
+- ✅ Proper RBAC boundaries
+- ✅ Principle of least privilege
+
+### 4. **Cost Optimization**
+
+- ✅ ~$300/month savings from Log Analytics consolidation
+- ✅ Shared ACR reduces redundancy
+
+### 5. **Documentation**
+
+- ✅ Comprehensive migration summary
+- ✅ Clear architecture decisions documented
+- ✅ Deployment instructions provided
+
+---
+
+## ⚠️ Potential Issues & Missed Opportunities
+
+### 1. **Region Code Inconsistency in Workflow** ⚠️
+
+**Location:** `.github/workflows/infra-deploy.yml:287-292`
+
+```yaml
+# Determine region code based on environment
+if [ "${{ env.ENVIRONMENT }}" == "dev" ]; then
+  REGION_CODE="san"
+else
+  REGION_CODE="san"  # ❌ This else is redundant
+fi
+```
+
+**Issue:** The conditional is pointless - both branches set the same value.
+
+**Fix:** Simplify to:
+
+```yaml
+REGION_CODE="san" # All environments use South Africa North
+```
+
+**Impact:** Low - code works but is confusing
+
+---
+
+### 2. **DNS Zone Resource Group Name** ⚠️
+
+**Location:** `.github/workflows/infra-deploy.yml:54`
+
+```yaml
+DNS_ZONE_RG: mys-prod-core-rg-glob
+```
+
+**Issue:** Using "glob" region code, but this resource group may not exist.
+
+**Analysis:**
+
+- In Terraform, the DNS module is in `production-release.yml` but no separate global RG is defined
+- DNS zone is likely in the main prod resource group: `mys-prod-core-rg-san`
+
+**Recommendation:** Verify if `mys-prod-core-rg-glob` exists, otherwise change to:
+
+```yaml
+DNS_ZONE_RG: mys-prod-core-rg-san
+```
+
+**Impact:** High - could cause DNS operations to fail
+
+---
+
+### 3. **Terraform Backend Storage Account Name** 💡
+
+**Location:** Multiple workflows and `bootstrap-infra.sh`
 
 ```bash
--rwxr-xr-x scripts/bootstrap-infra.sh       # ✓ Good
--rwxr-xr-x scripts/debug-certificates.sh    # ✓ Good
--rw-r--r-- scripts/setup-submodules.sh      # ✗ Not executable
--rw-r--r-- scripts/show-submodules.sh       # ✗ Not executable
--rwx--x--x scripts/sync-repo-metadata.sh    # ✗ Weird permissions (no read for group/other)
+TERRAFORM_STORAGE="myssharedtfstatesan"
 ```
+
+**Issue:** Storage account name doesn't follow v2.2 convention.
+
+**Current:** `myssharedtfstatesan` (24 chars limit)  
+**V2.2 Should Be:** Would be `mys-prod-terraform-st-eus` but storage accounts have strict naming:
+
+- Max 24 chars
+- Only lowercase alphanumeric
+- Globally unique
+
+**Recommendation:** Keep as-is for now (changing would require state migration), but document exception.
+
+**Impact:** Low - cosmetic only, not worth the migration risk
+
+---
+
+### 4. **Missing Chain Key Vault References** ⚠️
+
+**Location:** Kubernetes overlays don't configure Chain Key Vault
+
+**Issue:** Publisher and Story-Generator have Key Vault URLs in ConfigMaps, but Chain doesn't.
+
+**Analysis:**
+
+- Chain module creates `mys-{env}-chain-kv-{region}`
+- But no Kubernetes ConfigMap references it
+
+**Questions:**
+
+1. Does Chain service need Key Vault access?
+2. If yes, add ConfigMap patch in overlays similar to publisher
+
+**Recommendation:** Verify if Chain needs KV access and add if needed.
+
+**Impact:** Medium - functionality may be missing
+
+---
+
+### 5. **Hardcoded East US in Bootstrap Script** ⚠️
+
+**Location:** `scripts/bootstrap-infra.sh:19`
+
+```bash
+LOCATION="eastus"
+```
+
+**Issue:** Script hardcodes `eastus` for Terraform backend, but all other resources use `southafricanorth`.
+
+**Analysis:**
+
+- Terraform backend is global/shared, so location matters less
+- But inconsistent with main resource regions
 
 **Recommendation:**
 
-```bash
-chmod 755 scripts/setup-submodules.sh
-chmod 755 scripts/show-submodules.sh
-chmod 755 scripts/sync-repo-metadata.sh
-```
+- Either change to `southafricanorth` for consistency
+- Or document why backend is in East US (e.g., performance, cost)
 
-#### 2. CHANGELOG.md is Outdated
+**Impact:** Low - Terraform backend region doesn't affect app performance
 
-**Problem:**
-CHANGELOG.md only mentions initial workspace setup, doesn't include recent significant changes.
+---
 
-**Recommendation:**
-Update CHANGELOG.md with:
+### 6. **ACR Naming Exception Not Documented** 💡
+
+**Current:** `myssharedacr`  
+**V2.2 Would Be:** `mys-shared-acr-glob`
+
+**Issue:** ACR name doesn't follow v2.2 pattern due to:
+
+- Max 50 chars (not a real constraint)
+- Only alphanumeric (no dashes allowed) ✅ This is the real reason
+
+**Recommendation:** Add note in docs explaining ACR naming constraint:
+
+> "ACR names only allow alphanumeric characters (no dashes), so `myssharedacr` is the closest v2.2-compliant name possible."
+
+**Impact:** Low - just needs documentation
+
+---
+
+### 7. **Incomplete Cost Analysis** 💡
+
+**Location:** `MIGRATION_SUMMARY.md`
+
+**Current:**
+
+- Only analyzes Log Analytics savings
+- Doesn't consider other cost impacts
+
+**Missing Analysis:**
+
+- Key Vault costs (9 vaults vs 3 vaults)
+- Network egress costs (region change)
+- Storage costs in South Africa North vs East US
+
+**Recommendation:** Add complete cost comparison:
+
+| Resource            | Before | After  | Delta        |
+| ------------------- | ------ | ------ | ------------ |
+| Log Analytics (9→3) | $450   | $150   | -$300 ✅     |
+| Key Vaults (0→9)    | $0     | $27    | +$27         |
+| Region pricing diff | Varies | Varies | TBD          |
+| **Net savings**     | -      | -      | **~$273/mo** |
+
+**Impact:** Low - doesn't affect implementation, just documentation
+
+---
+
+### 8. **No Rollback Plan** ⚠️
+
+**Issue:** Migration summary doesn't include rollback procedure.
+
+**Recommendation:** Add rollback section:
 
 ```markdown
-## [Unreleased]
+## Rollback Procedure
 
-### Added
+If issues arise during deployment:
 
-- CI workflows for Admin API, App, and Devhub components
-- Repository metadata sync script (scripts/sync-repo-metadata.sh)
-- Repository metadata configuration (scripts/repo-metadata.json)
-- ADR-0012: GitHub Workflow Naming Convention
-- CI status badges for all 7 components in README.md
-- Comprehensive deployment documentation in infra/README.md
+1. **Terraform State**
+   - State is isolated per environment
+   - Can rollback by reverting commits and re-running terraform
 
-### Changed
+2. **Kubernetes**
+   - Previous manifests in git history
+   - Can redeploy previous version
 
-- Standardized all 14 GitHub workflow names to "Category: Name" pattern
-- Updated README.md with complete component inventory and CI/CD info
-- Consolidated documentation structure (removed 24 temporary files)
-- Updated ADR-0004 with current CI/CD workflows
-- Improved docs/README.md with all 12 ADRs and better organization
+3. **DNS**
+   - Update A records to point back to old resources
+   - TTL is 60 seconds, quick recovery
 
-### Removed
-
-- 24 temporary status and summary files
-- Outdated infrastructure planning documents
+4. **Applications**
+   - Use previous ACR image tags
+   - Roll back Kubernetes deployments
 ```
 
-#### 3. Heavy Use of `continue-on-error: true`
+**Impact:** Medium - important for production safety
 
-**Problem:**
-21 instances of `continue-on-error: true` across workflows, particularly in:
+---
 
-- Linting steps (format checks)
-- Test steps
-- Code coverage uploads
+### 9. **No Testing Plan** ⚠️
 
-**Current Usage:**
+**Issue:** No documented test plan for validating migration.
 
-```yaml
-# Examples:
-- name: Check format
-  run: dotnet format --verify-no-changes
-  continue-on-error: true # ⚠️ Masks formatting issues
-
-- name: Run tests
-  run: dotnet test
-  continue-on-error: true # ⚠️ Allows tests to fail silently
-```
-
-**Recommendation:**
-
-- **Keep for**: Coverage uploads, optional steps (already done correctly)
-- **Remove for**: Linting and tests in production (main branch)
-- **Alternative approach**:
-  ```yaml
-  # Allow failures on dev, enforce on main
-  - name: Run tests
-    run: dotnet test
-    continue-on-error: ${{ github.ref != 'refs/heads/main' }}
-  ```
-
-### 🟢 Opportunities for Improvement
-
-#### 4. Package Filter Names Not Verified
-
-**Problem:**
-New workflows use pnpm filters (`--filter devhub`, `--filter @mystira/admin-ui`) but submodules aren't initialized, so we can't verify package names match.
-
-**Recommendation:**
-After merging, verify with initialized submodules:
-
-```bash
-git submodule update --init --recursive
-pnpm list --depth 0  # Check actual package names
-```
-
-Update workflow filters if needed to match actual package.json names.
-
-#### 5. Missing CONTRIBUTING.md Update
-
-**Observation:**
-CONTRIBUTING.md exists but doesn't mention:
-
-- New workflow naming convention
-- How to add new component CI workflows
-- Repository metadata sync process
-
-**Recommendation:**
-Add section to CONTRIBUTING.md:
+**Recommendation:** Add test checklist:
 
 ```markdown
-## Adding a New Component
+## Post-Deployment Testing
 
-When adding a new component:
+### Infrastructure Tests
 
-1. Create the component repository
-2. Add as git submodule: `git submodule add <url> packages/<name>`
-3. Create CI workflow following naming convention:
-   - File: `.github/workflows/<name>-ci.yml`
-   - Name: `"Components: <Name> - CI"`
-4. Update `scripts/repo-metadata.json` with component info
-5. Run `./scripts/sync-repo-metadata.sh --dry-run` to verify
-6. Update README.md component table
-7. Add CI status badge to README.md
+- [ ] All resource groups created
+- [ ] AKS cluster accessible
+- [ ] ACR contains images
+- [ ] DNS resolves correctly
+- [ ] Certificates issued
+
+### Application Tests
+
+- [ ] Publisher API responds
+- [ ] Chain RPC accessible
+- [ ] Story-Generator API functional
+- [ ] Database connections work
+- [ ] Redis caching functional
+- [ ] Key Vault secrets accessible
+
+### Integration Tests
+
+- [ ] End-to-end flow works
+- [ ] Monitoring/logging visible
+- [ ] Alerts configured
 ```
 
-#### 6. ADR Cross-References Could Be Improved
+**Impact:** High - critical for safe deployment
 
-**Observation:**
-ADR-0012 references ADR-0004, and ADR-0004 now references ADR-0012, but other related ADRs don't cross-reference ADR-0012.
+---
 
-**Recommendation:**
-Add ADR-0012 reference to:
+### 10. **Missing Monitoring Dashboard Updates** 💡
 
-- ADR-0001 (Infrastructure Organization) - mentions CI/CD
-- ADR-0003 (Release Pipeline Strategy) - directly related to workflows
-
-#### 7. No Automated Link Checking
-
-**Observation:**
-Documentation has many internal links, but no automated checking for broken links.
+**Issue:** If Azure Dashboards or Application Insights queries reference old resource names, they'll break.
 
 **Recommendation:**
-Add link checker workflow:
 
-```yaml
-name: "Utilities: Check Links"
-on:
-  pull_request:
-    paths: ["**.md"]
-jobs:
-  check-links:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
-      - uses: lycheeverse/lychee-action@v2
-        with:
-          args: --verbose --no-progress './**/*.md'
+1. Check for any saved dashboards in Azure Portal
+2. Update any hardcoded resource names in queries
+3. Update any alert rules that reference old names
+
+**Impact:** Medium - monitoring might not work after deployment
+
+---
+
+### 11. **No Database Migration Plan** ⚠️
+
+**Issue:** Changing PostgreSQL from `mystira-shared-pg-{env}` to `mys-{env}-core-db` requires:
+
+1. Exporting data from old server
+2. Importing to new server
+3. Updating connection strings
+
+**Current Plan:**
+
+- Terraform will try to recreate PostgreSQL
+- This will destroy existing data ❌
+
+**Recommendation:** Add data migration step:
+
+````markdown
+## Data Migration (CRITICAL)
+
+### Before Terraform Apply:
+
+1. Export databases:
+   ```bash
+   az postgres flexible-server db export \
+     --server-name mystira-shared-pg-dev \
+     --database storygenerator \
+     --output backup.sql
+   ```
+````
+
+2. Store backup securely
+
+3. After new server created, import:
+   ```bash
+   az postgres flexible-server db import \
+     --server-name mys-dev-core-db \
+     --database storygenerator \
+     --input backup.sql
+   ```
+
+### Or Use Lifecycle Protection:
+
+- Add `prevent_destroy = true` to PostgreSQL module
+- Manual migration instead of Terraform recreation
+
 ```
 
-#### 8. Missing Dependabot Configuration for Workflows
+**Impact:** 🔴 CRITICAL - data loss risk
 
-**Observation:**
-GitHub Actions dependencies (like `actions/checkout@v6`) should be kept up-to-date.
+---
+
+### 12. **Terraform State Import Strategy** ⚠️
+
+**Location:** `.github/workflows/infra-deploy.yml:266-319`
+
+**Current Approach:**
+- Tries to import existing resources into new state
+- Uses VNet name check to determine region code
+
+**Issue:**
+- Only imports VNet and RG
+- Doesn't import PostgreSQL, Redis, AKS, etc.
+- These will be recreated, causing downtime
 
 **Recommendation:**
-Add to `.github/dependabot.yml`:
+1. **Option A - Import All Resources:**
+   - Extend import logic to all resources
+   - Most complex but preserves everything
 
-```yaml
-version: 2
-updates:
-  - package-ecosystem: "github-actions"
-    directory: "/"
-    schedule:
-      interval: "weekly"
-    commit-message:
-      prefix: "ci"
-      include: "scope"
+2. **Option B - Fresh Environment:**
+   - Deploy to new resource groups
+   - Migrate data
+   - Switch DNS
+   - Delete old resources
+   - Cleanest approach ✅
+
+3. **Option C - Rename in Place:**
+   - Use Azure CLI to rename resources
+   - Update Terraform state manually
+   - Riskiest but fastest
+
+**For Dev Environment:** Option B (fresh) is safest
+**For Prod:** Option B or C with thorough testing
+
+**Impact:** 🔴 CRITICAL - affects deployment strategy
+
+---
+
+## 🎯 Recommended Action Items
+
+### Before Merging PR
+
+1. **🔴 CRITICAL - Data Safety**
+   - [ ] Document PostgreSQL data migration plan
+   - [ ] Add lifecycle protection to databases
+   - [ ] Create backup procedure
+
+2. **🔴 CRITICAL - Deployment Strategy**
+   - [ ] Decide: Fresh deployment vs import vs rename
+   - [ ] Document chosen approach
+   - [ ] Create step-by-step deployment runbook
+
+3. **⚠️ High Priority**
+   - [ ] Fix DNS_ZONE_RG resource group name
+   - [ ] Verify Chain Key Vault requirements
+   - [ ] Create post-deployment testing checklist
+
+4. **💡 Medium Priority**
+   - [ ] Simplify region code conditional in workflow
+   - [ ] Add rollback procedure to docs
+   - [ ] Complete cost analysis
+
+5. **💡 Low Priority**
+   - [ ] Document ACR naming exception
+   - [ ] Document Terraform backend region choice
+   - [ ] Update any Azure dashboards
+
+### After Initial Deployment
+
+1. **Validation**
+   - [ ] Run full test suite
+   - [ ] Verify all services functional
+   - [ ] Check monitoring/alerting
+
+2. **Documentation**
+   - [ ] Update ADRs with lessons learned
+   - [ ] Document any deviations from plan
+   - [ ] Create troubleshooting guide
+
+---
+
+## 🏆 Overall Assessment
+
+**Grade: B+**
+
+**Strengths:**
+- ✅ Comprehensive coverage of infrastructure code
+- ✅ Well-documented changes
+- ✅ Good architectural decisions
+- ✅ Security improvements
+
+**Weaknesses:**
+- ⚠️ Missing data migration plan (critical)
+- ⚠️ No deployment strategy documented
+- ⚠️ Testing plan not defined
+- ⚠️ Rollback procedure missing
+
+**Recommendation:**
+**DO NOT MERGE** until critical items addressed:
+1. Data migration plan
+2. Deployment strategy
+3. Testing checklist
+
+Once these are added, PR will be **production-ready**.
+
+---
+
+## 📋 Deployment Checklist
+
+### Pre-Deployment
+- [ ] All critical action items completed
+- [ ] Database backups taken
+- [ ] Deployment runbook created
+- [ ] Rollback plan documented
+- [ ] Testing checklist prepared
+- [ ] Stakeholders notified
+
+### Deployment
+- [ ] Deploy to dev environment first
+- [ ] Run full test suite
+- [ ] Monitor for 24 hours
+- [ ] Deploy to staging
+- [ ] Production deployment (after staging validation)
+
+### Post-Deployment
+- [ ] Verify all tests pass
+- [ ] Confirm monitoring working
+- [ ] Update documentation with actual results
+- [ ] Clean up old resources (after validation period)
+
+---
+
+**Analysis Date:** 2025-12-21
+**Analyzer:** Claude (AI Assistant)
+**Branch:** claude/standardize-dev-resources-cT39Z
 ```
-
-## Completeness Checklist
-
-### ✅ Completed
-
-- [x] All 14 workflows renamed with consistent pattern
-- [x] 3 missing component CI workflows created
-- [x] Repository metadata sync tooling implemented
-- [x] 24 temporary documentation files removed
-- [x] README.md updated with badges and workflow info
-- [x] infra/README.md completely rewritten
-- [x] docs/README.md updated
-- [x] ADR-0012 created documenting naming convention
-- [x] ADR-0004 updated with all current workflows
-- [x] All commits have clear, descriptive messages
-- [x] No TODO/FIXME comments left in code
-
-### ⏳ Follow-up Tasks (Post-Merge)
-
-- [ ] Fix script permissions (chmod 755)
-- [ ] Update CHANGELOG.md
-- [ ] Review `continue-on-error` usage
-- [ ] Verify pnpm package filter names with initialized submodules
-- [ ] Update CONTRIBUTING.md with workflow guidance
-- [ ] Add cross-references to ADR-0001 and ADR-0003
-- [ ] Consider adding link checker workflow
-- [ ] Consider adding Dependabot for GitHub Actions
-
-### 🔍 Testing Recommendations
-
-Before merging:
-
-1. Ensure all workflows pass on the PR
-2. Verify workflow names appear correctly in GitHub Actions UI
-3. Check that CI badges render correctly in README.md
-4. Validate that all documentation links work
-
-After merging:
-
-1. Initialize submodules and verify package names
-2. Test repository metadata sync script
-3. Ensure deployment workflows trigger correctly
-4. Validate staging auto-deployment on main merge
-
-## Metrics
-
-**Changes:**
-
-- Files changed: ~40 files
-- Lines removed: ~7,000 (cleanup)
-- Lines added: ~1,500 (documentation + new workflows)
-- Net: -5,500 lines (significant cleanup)
-
-**Workflows:**
-
-- Total workflows: 14
-- New workflows: 3 (Admin API, App, Devhub)
-- Renamed workflows: 14 (all)
-- Workflow categories: 5 (Components, Infrastructure, Deployment, Workspace, Utilities)
-
-**Documentation:**
-
-- New ADRs: 1 (ADR-0012)
-- Updated ADRs: 1 (ADR-0004)
-- Files removed: 24 temporary docs
-- Major rewrites: 3 (README.md, infra/README.md, docs/README.md)
-
-## Conclusion
-
-**Overall Assessment: ✅ Excellent**
-
-This PR successfully:
-
-- Establishes a clear, scalable workflow organization pattern
-- Fills gaps in CI coverage (3 missing components)
-- Dramatically improves documentation quality
-- Documents architectural decisions properly
-
-**Minor issues identified** (script permissions, CHANGELOG, continue-on-error) are **non-blocking** and can be addressed in follow-up PRs or as part of this one.
-
-**Recommendation: Approve with optional follow-up for minor issues.**

@@ -105,11 +105,11 @@ This shows what will be created without actually creating it.
 
 **Resource Names** (per [ADR-0008: Azure Resource Naming Conventions](../architecture/adr/0008-azure-resource-naming-conventions.md)):
 
-- Resource Group: `mys-dev-mystira-rg-eus`
-- Virtual Network: `mys-dev-mystira-vnet-eus`
+- Resource Group: `mys-dev-core-rg-eus`
+- Virtual Network: `mys-dev-core-vnet-eus`
 - Subnets: `chain-subnet`, `publisher-subnet`, `aks-subnet`, etc.
-- Azure Container Registry: `mysprodacr` (shared)
-- Azure Kubernetes Service: `mys-dev-mystira-aks-eus`
+- Azure Container Registry: `myssharedacr` (shared)
+- Azure Kubernetes Service: `mys-dev-core-aks-eus`
 - Key Vaults: `mys-dev-mystira-{component}-kv-eus`
 - Shared PostgreSQL: `mys-dev-mystira-pg-eus`
 - Shared Redis: `mys-dev-mystira-cache-eus`
@@ -134,10 +134,10 @@ Terraform will ask for confirmation. Type `yes` to proceed.
 az aks list --output table
 
 # Get cluster details
-az aks show --name mys-dev-mystira-aks-eus --resource-group mys-dev-mystira-rg-eus
+az aks show --name mys-dev-core-aks-eus --resource-group mys-dev-core-rg-eus
 
 # Get cluster credentials for kubectl
-az aks get-credentials --resource-group mys-dev-mystira-rg-eus --name mys-dev-mystira-aks-eus
+az aks get-credentials --resource-group mys-dev-core-rg-eus --name mys-dev-core-aks-eus
 
 # Verify kubectl can connect
 kubectl cluster-info
@@ -148,7 +148,7 @@ kubectl get nodes
 
 1. Go to Azure Portal
 2. Search for "Kubernetes services" (NOT "Kubernetes center")
-3. You should see `mys-dev-mystira-aks-eus` listed
+3. You should see `mys-dev-core-aks-eus` listed
 
 ## Quick Reference: Correct Paths
 
@@ -214,7 +214,7 @@ az account set --subscription "Your Subscription Name"
 
 The Terraform backend uses Azure Storage. Make sure:
 
-1. The storage account `mysprodterraformstate` exists
+1. The storage account `myssharedtfstatesan` exists
 2. The container `tfstate` exists
 3. Your Azure credentials have access
 

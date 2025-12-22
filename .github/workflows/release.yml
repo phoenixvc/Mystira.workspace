@@ -1,9 +1,15 @@
 name: "Workspace: Release"
 
+# NPM Package Releases: Manages package versioning and publishing via Changesets
+# Handles: Creating release PRs and publishing to npm registry
+# Note: For infrastructure deployments, see Deployment workflows
+# Runs on: Pushes to main branch
+
 on:
   push:
     branches:
       - main
+  workflow_dispatch:
 
 concurrency: ${{ github.workflow }}-${{ github.ref }}
 

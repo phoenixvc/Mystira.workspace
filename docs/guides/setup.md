@@ -232,15 +232,15 @@ terraform apply
 
 **What gets created** (per [ADR-0008: Azure Resource Naming Conventions](../architecture/adr/0008-azure-resource-naming-conventions.md)):
 
-- Resource Group: `mys-dev-mystira-rg-eus`
-- Azure Container Registry: `mysprodacr` (shared across all environments)
-- Virtual Network: `mys-dev-mystira-vnet-eus`
+- Resource Group: `mys-dev-core-rg-eus`
+- Azure Container Registry: `myssharedacr` (shared across all environments)
+- Virtual Network: `mys-dev-core-vnet-eus`
 - Key Vaults: `mys-dev-mystira-{component}-kv-eus`
 - Shared PostgreSQL (if configured)
 - Shared Redis (if configured)
-- AKS cluster: `mys-dev-mystira-aks-eus`
+- AKS cluster: `mys-dev-core-aks-eus`
 
-**Important**: The ACR `mysprodacr` is created in the dev environment but is used by all environments. This is intentional - we use a shared ACR with environment-specific tags (dev, staging, prod).
+**Important**: The ACR `myssharedacr` is created in the dev environment but is used by all environments. This is intentional - we use a shared ACR with environment-specific tags (dev, staging, prod).
 
 ### 2. Configure ACR Access
 
@@ -248,7 +248,7 @@ After dev environment is deployed, grant access to service principals:
 
 ```bash
 # Get ACR resource ID
-ACR_ID=$(az acr show --name mysprodacr --resource-group mys-dev-mystira-rg-eus --query id --output tsv)
+ACR_ID=$(az acr show --name myssharedacr --resource-group mys-dev-core-rg-eus --query id --output tsv)
 
 # Grant pull permissions to staging/prod service principals (when created)
 # az role assignment create --assignee <service-principal-id> --role AcrPull --scope $ACR_ID
@@ -354,12 +354,14 @@ az ad b2c tenant create \
 #### Configure Identity Providers
 
 **Google**:
+
 1. Create OAuth credentials at [Google Cloud Console](https://console.cloud.google.com/)
 2. In B2C tenant → Identity providers → Add Google
 3. Enter Client ID and Client Secret from Google
 4. Redirect URI: `https://mystirab2c.b2clogin.com/mystirab2c.onmicrosoft.com/oauth2/authresp`
 
 **Discord**:
+
 1. Create application at [Discord Developer Portal](https://discord.com/developers/applications)
 2. In B2C tenant → Identity providers → Add OpenID Connect (custom)
 3. Configure:
@@ -392,12 +394,12 @@ After setup, configure environment variables as documented in [Environment Varia
 
 **Required Secrets in Azure Key Vault**:
 
-| Secret Name | Description |
-|-------------|-------------|
-| `azure-ad-client-secret` | Admin API client secret |
+| Secret Name               | Description                             |
+| ------------------------- | --------------------------------------- |
+| `azure-ad-client-secret`  | Admin API client secret                 |
 | `azure-b2c-client-secret` | B2C API client secret (if confidential) |
-| `google-client-secret` | Google OAuth client secret |
-| `discord-client-secret` | Discord OAuth client secret |
+| `google-client-secret`    | Google OAuth client secret              |
+| `discord-client-secret`   | Discord OAuth client secret             |
 
 ### 4. Verify Setup
 
@@ -542,7 +544,7 @@ The workspace uses GitHub Actions for CI/CD with the following workflows:
 
 ### Image Tagging Strategy
 
-The CI/CD workflows use a shared ACR (`mysprodacr`) with environment-specific tags:
+The CI/CD workflows use a shared ACR (`myssharedacr`) with environment-specific tags:
 
 - **`dev` branch pushes**: Images tagged with `dev`, `latest`, and branch name
 - **`main` branch pushes**: Images tagged with `staging`, `latest`, and branch name
@@ -550,9 +552,9 @@ The CI/CD workflows use a shared ACR (`mysprodacr`) with environment-specific ta
 
 Kubernetes overlays map base images to environment tags:
 
-- Dev overlay: `mysprodacr.azurecr.io/chain:dev`
-- Staging overlay: `mysprodacr.azurecr.io/chain:staging`
-- Prod overlay: `mysprodacr.azurecr.io/chain:prod`
+- Dev overlay: `myssharedacr.azurecr.io/chain:dev`
+- Staging overlay: `myssharedacr.azurecr.io/chain:staging`
+- Prod overlay: `myssharedacr.azurecr.io/chain:prod`
 
 ### Configuring Branch Protection
 
@@ -607,23 +609,23 @@ pnpm --filter mystira-publisher dev
 
 ### Development Environment (Azure)
 
-- **Resource Group**: `mys-dev-mystira-rg-eus`
-- **ACR**: `mysprodacr` (shared)
-- **AKS**: `mys-dev-mystira-aks-eus`
+- **Resource Group**: `mys-dev-core-rg-eus`
+- **ACR**: `myssharedacr` (shared)
+- **AKS**: `mys-dev-core-aks-eus`
 - **Namespace**: `mystira-dev`
 
 ### Staging Environment (Azure)
 
-- **Resource Group**: `mys-staging-mystira-rg-eus`
-- **ACR**: `mysprodacr` (shared, uses `staging` tags)
-- **AKS**: `mys-staging-mystira-aks-eus`
+- **Resource Group**: `mys-staging-core-rg-eus`
+- **ACR**: `myssharedacr` (shared, uses `staging` tags)
+- **AKS**: `mys-staging-core-aks-eus`
 - **Namespace**: `mystira-staging`
 
 ### Production Environment (Azure)
 
-- **Resource Group**: `mys-prod-mystira-rg-eus`
-- **ACR**: `mysprodacr` (shared, uses `prod` tags)
-- **AKS**: `mys-prod-mystira-aks-eus`
+- **Resource Group**: `mys-prod-core-rg-eus`
+- **ACR**: `myssharedacr` (shared, uses `prod` tags)
+- **AKS**: `mys-prod-core-aks-eus`
 - **Namespace**: `mystira-prod`
 
 ---
@@ -658,7 +660,7 @@ pnpm --filter mystira-publisher dev
 
 3. **Verify ACR exists**:
    ```bash
-   az acr show --name mysprodacr --resource-group mys-dev-mystira-rg-eus
+   az acr show --name myssharedacr --resource-group mys-dev-core-rg-eus
    ```
 
 ### Deploying Services to Kubernetes
@@ -724,7 +726,7 @@ git submodule update --init --recursive
 **Problem**: `az acr login` fails with "resource not found"
 
 - Verify dev environment is deployed (ACR is created in dev)
-- Check ACR name: `mysprodacr`
+- Check ACR name: `myssharedacr`
 - Verify you're in correct Azure subscription: `az account show`
 
 **Problem**: CI/CD can't push to ACR
@@ -771,7 +773,7 @@ kubectl get events -n mystira-dev --sort-by='.lastTimestamp'
 - Create pull secret if missing:
   ```bash
   kubectl create secret docker-registry acr-secret \
-    --docker-server=mysprodacr.azurecr.io \
+    --docker-server=myssharedacr.azurecr.io \
     --docker-username=<sp-client-id> \
     --docker-password=<sp-client-secret> \
     -n mystira-dev

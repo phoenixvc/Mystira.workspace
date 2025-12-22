@@ -13,7 +13,7 @@ This document describes how packages are built, published, and deployed across a
 ┌─────────────────────────────────────────────────────────────────────────────┐
 │                           PUBLISHING DESTINATIONS                            │
 ├─────────────────────────────────────────────────────────────────────────────┤
-│  Docker Images  →  Azure Container Registry (mysprodacr.azurecr.io)         │
+│  Docker Images  →  Azure Container Registry (myssharedacr.azurecr.io)         │
 │  NPM Packages   →  npmjs.org (via Changesets)                               │
 │  NuGet Packages →  GitHub Packages / NuGet.org                              │
 │  Deployments    →  Azure Kubernetes Service (AKS)                           │
@@ -25,23 +25,24 @@ This document describes how packages are built, published, and deployed across a
 ## Docker Image Publishing
 
 ### Registry
-**Azure Container Registry**: `mysprodacr.azurecr.io`
+
+**Azure Container Registry**: `myssharedacr.azurecr.io`
 
 ### Images Published
 
-| Image | Source | Dockerfile |
-|-------|--------|------------|
-| `publisher` | `packages/publisher` | `infra/docker/publisher/Dockerfile` |
-| `chain` | `packages/chain` | `infra/docker/chain/Dockerfile` |
+| Image             | Source                     | Dockerfile                                |
+| ----------------- | -------------------------- | ----------------------------------------- |
+| `publisher`       | `packages/publisher`       | `infra/docker/publisher/Dockerfile`       |
+| `chain`           | `packages/chain`           | `infra/docker/chain/Dockerfile`           |
 | `story-generator` | `packages/story-generator` | `infra/docker/story-generator/Dockerfile` |
 
 ### Tagging Strategy
 
-| Branch | Tags Applied |
-|--------|--------------|
-| `dev` | `dev`, `latest`, `{sha}` |
-| `main` | `staging`, `latest`, `{sha}` |
-| Manual deploy | `prod`, `{sha}` |
+| Branch        | Tags Applied                 |
+| ------------- | ---------------------------- |
+| `dev`         | `dev`, `latest`, `{sha}`     |
+| `main`        | `staging`, `latest`, `{sha}` |
+| Manual deploy | `prod`, `{sha}`              |
 
 ### Workflow Triggers
 
@@ -68,12 +69,15 @@ on:
 ## NPM Package Publishing
 
 ### Registry
+
 **npmjs.org** (public registry)
 
 ### Configuration
+
 Uses **Changesets** for versioning and publishing.
 
 ### Workflow
+
 ```yaml
 # .github/workflows/release.yml
 - Triggers on push to main
@@ -82,8 +86,9 @@ Uses **Changesets** for versioning and publishing.
 ```
 
 ### Required Secrets
-| Secret | Description |
-|--------|-------------|
+
+| Secret      | Description                     |
+| ----------- | ------------------------------- |
 | `NPM_TOKEN` | npm access token for publishing |
 
 ### Publishing Flow
@@ -100,22 +105,23 @@ Uses **Changesets** for versioning and publishing.
 ## NuGet Package Publishing
 
 ### Registry Options
+
 - **GitHub Packages**: `https://nuget.pkg.github.com/phoenixvc/index.json` (private)
 - **NuGet.org**: `https://api.nuget.org/v3/index.json` (public)
 
 ### Packages Published
 
-| Package | Project | Description |
-|---------|---------|-------------|
-| `Mystira.StoryGenerator.Contracts` | Shared contracts/DTOs | gRPC/API contracts |
-| `Mystira.StoryGenerator.Client` | Client library | SDK for consuming Story Generator API |
+| Package                            | Project               | Description                           |
+| ---------------------------------- | --------------------- | ------------------------------------- |
+| `Mystira.StoryGenerator.Contracts` | Shared contracts/DTOs | gRPC/API contracts                    |
+| `Mystira.StoryGenerator.Client`    | Client library        | SDK for consuming Story Generator API |
 
 ### Required Secrets
 
-| Secret | Description |
-|--------|-------------|
+| Secret          | Description                             |
+| --------------- | --------------------------------------- |
 | `NUGET_API_KEY` | NuGet.org API key (for public packages) |
-| `GITHUB_TOKEN` | Auto-provided (for GitHub Packages) |
+| `GITHUB_TOKEN`  | Auto-provided (for GitHub Packages)     |
 
 ### Workflow Configuration
 
@@ -147,6 +153,7 @@ Uses **Changesets** for versioning and publishing.
 ```
 
 Examples:
+
 - `1.0.0-alpha.42`
 - `1.0.0-alpha.43`
 
@@ -161,6 +168,7 @@ The build number increments automatically with each CI run (`github.run_number`)
 | Stable | `1.0.0` | Production release |
 
 To update version stage, modify the workflow:
+
 ```yaml
 # In story-generator-ci.yml
 -p:PackageVersion=1.0.0-alpha.${{ github.run_number }}
@@ -172,11 +180,11 @@ To update version stage, modify the workflow:
 
 ### Environment URLs
 
-| Environment | Publisher | Chain | API |
-|-------------|-----------|-------|-----|
-| Dev | `dev.publisher.mystira.app` | `dev.chain.mystira.app` | `dev.api.mystira.app` |
-| Staging | `staging.publisher.mystira.app` | `staging.chain.mystira.app` | `staging.api.mystira.app` |
-| Production | `publisher.mystira.app` | `chain.mystira.app` | `api.mystira.app` |
+| Environment | Publisher                       | Chain                       | API                       |
+| ----------- | ------------------------------- | --------------------------- | ------------------------- |
+| Dev         | `dev.publisher.mystira.app`     | `dev.chain.mystira.app`     | `dev.api.mystira.app`     |
+| Staging     | `staging.publisher.mystira.app` | `staging.chain.mystira.app` | `staging.api.mystira.app` |
+| Production  | `publisher.mystira.app`         | `chain.mystira.app`         | `api.mystira.app`         |
 
 ### Complete Flow Diagram
 
@@ -231,52 +239,56 @@ To update version stage, modify the workflow:
 
 ### Workflow Files
 
-| Workflow | Trigger | Action |
-|----------|---------|--------|
-| `publisher-ci.yml` | Push/PR to dev/main | Lint, test, build, Docker push |
-| `chain-ci.yml` | Push/PR to dev/main | Lint, test, build, Docker push |
+| Workflow                 | Trigger             | Action                                |
+| ------------------------ | ------------------- | ------------------------------------- |
+| `publisher-ci.yml`       | Push/PR to dev/main | Lint, test, build, Docker push        |
+| `chain-ci.yml`           | Push/PR to dev/main | Lint, test, build, Docker push        |
 | `story-generator-ci.yml` | Push/PR to dev/main | Lint, test, build, Docker push, NuGet |
-| `release.yml` | Push to main | NPM publish via Changesets |
-| `staging-release.yml` | Push to main | Auto-deploy to staging AKS |
-| `production-release.yml` | Manual | Deploy to production AKS |
-| `infra-deploy.yml` | Manual/Push | Full infrastructure deployment |
+| `release.yml`            | Push to main        | NPM publish via Changesets            |
+| `staging-release.yml`    | Push to main        | Auto-deploy to staging AKS            |
+| `production-release.yml` | Manual              | Deploy to production AKS              |
+| `infra-deploy.yml`       | Manual/Push         | Full infrastructure deployment        |
 
 ---
 
 ## GitHub Secrets Required
 
-| Secret | Purpose | Required For |
-|--------|---------|--------------|
-| `AZURE_CREDENTIALS` | Azure service principal JSON | All Azure operations |
-| `MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN` | PAT for private submodules | CI checkout |
-| `NPM_TOKEN` | npm publish token | NPM releases |
-| `NUGET_API_KEY` | NuGet.org API key | NuGet releases |
-| `AZURE_CLIENT_ID` | Azure client ID (OIDC) | Federated auth |
-| `AZURE_TENANT_ID` | Azure tenant ID (OIDC) | Federated auth |
-| `AZURE_SUBSCRIPTION_ID` | Azure subscription ID | Federated auth |
+| Secret                                  | Purpose                      | Required For         |
+| --------------------------------------- | ---------------------------- | -------------------- |
+| `AZURE_CREDENTIALS`                     | Azure service principal JSON | All Azure operations |
+| `MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN` | PAT for private submodules   | CI checkout          |
+| `NPM_TOKEN`                             | npm publish token            | NPM releases         |
+| `NUGET_API_KEY`                         | NuGet.org API key            | NuGet releases       |
+| `AZURE_CLIENT_ID`                       | Azure client ID (OIDC)       | Federated auth       |
+| `AZURE_TENANT_ID`                       | Azure tenant ID (OIDC)       | Federated auth       |
+| `AZURE_SUBSCRIPTION_ID`                 | Azure subscription ID        | Federated auth       |
 
 ---
 
 ## Quick Reference Commands
 
 ### Check Published Docker Images
+
 ```bash
-az acr repository list --name mysprodacr
-az acr repository show-tags --name mysprodacr --repository publisher
+az acr repository list --name myssharedacr
+az acr repository show-tags --name myssharedacr --repository publisher
 ```
 
 ### Check NPM Package
+
 ```bash
 npm view @mystira/publisher versions
 ```
 
 ### Check NuGet Package
+
 ```bash
 dotnet nuget list source
 dotnet package search Mystira.StoryGenerator --source github
 ```
 
 ### Trigger Manual Deployment
+
 ```bash
 # Via GitHub CLI
 gh workflow run "Infrastructure Deploy" -f environment=dev

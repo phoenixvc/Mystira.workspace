@@ -90,11 +90,12 @@ variable "tags" {
 }
 
 locals {
-  name_prefix = "mys-${var.environment}-mystira-sg"
+  name_prefix = "mys-${var.environment}-story"
   region_code = var.region_code
   common_tags = merge(var.tags, {
     Component   = "story-generator"
     Environment = var.environment
+    Service     = "story"
     ManagedBy   = "terraform"
     Project     = "Mystira"
   })
@@ -248,7 +249,7 @@ resource "azurerm_application_insights" "story_generator" {
 
 # Key Vault for Story-Generator Secrets
 resource "azurerm_key_vault" "story_generator" {
-  name                        = "mys-${var.environment}-sg-kv-${local.region_code}"
+  name                        = "mys-${var.environment}-story-kv-${local.region_code}"
   location                    = var.location
   resource_group_name         = var.resource_group_name
   enabled_for_disk_encryption = false

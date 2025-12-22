@@ -77,8 +77,63 @@ az role assignment list --assignee $SP_OBJECT_ID --all -o table
 ```
 
 You should see at least one role assignment with:
+
 - Role: `Contributor`
 - Scope: `/subscriptions/{subscription-id}`
+
+#### Terraform Backend Storage Permissions (REQUIRED)
+
+**CRITICAL**: The service principal needs **Storage Blob Data Contributor** role on the Terraform state storage account to access the backend using Azure AD authentication.
+
+This is a **one-time manual setup** that must be completed before running deployments:
+
+**IMPORTANT**: On Windows, use **PowerShell** (not Git Bash) to run these commands. Git Bash mangles the scope paths and causes "MissingSubscription" errors.
+
+```bash
+# Get your service principal object ID
+SP_OBJECT_ID=$(az ad sp list --display-name "mystira-github-actions" --query "[0].id" -o tsv)
+
+# Grant Storage Blob Data Contributor role on the Terraform state storage account
+# This allows the service principal to read/write Terraform state blobs
+# NOTE: Use --assignee (not --assignee-object-id) to avoid path mangling issues
+az role assignment create \
+  --assignee "$SP_OBJECT_ID" \
+  --role "Storage Blob Data Contributor" \
+  --scope "/subscriptions/22f9eb18-6553-4b7d-9451-47d0195085fe/resourceGroups/mys-shared-terraform-rg-san/providers/Microsoft.Storage/storageAccounts/myssharedtfstatesan"
+
+# Verify the role assignment was created
+az role assignment list \
+  --assignee "$SP_OBJECT_ID" \
+  --scope "/subscriptions/22f9eb18-6553-4b7d-9451-47d0195085fe/resourceGroups/mys-shared-terraform-rg-san/providers/Microsoft.Storage/storageAccounts/myssharedtfstatesan" \
+  --query "[].{Role:roleDefinitionName}" -o table
+```
+
+**Why is this needed?**
+
+The Terraform backend configuration uses `use_azuread_auth = true` for enhanced security instead of storage account keys. This requires the service principal to have explicit RBAC permissions on the storage account.
+
+**When to run this:**
+
+- **Once** during initial infrastructure setup
+- After creating or regenerating the service principal
+- If you see 403 authorization errors during `terraform init`
+
+**Why can't the workflow grant this automatically?**
+
+The service principal cannot grant role assignments to itself because:
+
+- It only has **Contributor** role (creates/manages resources)
+- Granting role assignments requires **Owner** or **User Access Administrator** role
+- This is a security feature - only users with elevated permissions can grant access
+
+**Error if missing:**
+
+If you don't grant this permission, Terraform init will fail with:
+
+```
+Error: Failed to get existing workspaces: containers.Client#ListBlobs: Failure responding to request: StatusCode=403
+Code="AuthorizationPermissionMismatch" Message="This request is not authorized to perform this operation using this permission."
+```
 
 ### Step 3: Configure GitHub Secret
 
@@ -99,6 +154,7 @@ The JSON format required for GitHub Actions (map the values from Step 1 output):
 ```
 
 **Mapping from `az ad sp create-for-rbac` output:**
+
 - `appId` → `clientId`
 - `password` → `clientSecret`
 - `tenant` → `tenantId`
@@ -111,7 +167,7 @@ The JSON format required for GitHub Actions (map the values from Step 1 output):
 If you see an error like:
 
 ```
-ERROR: (AuthorizationFailed) The client '***' with object id 'xxx' does not have 
+ERROR: (AuthorizationFailed) The client '***' with object id 'xxx' does not have
 authorization to perform action 'Microsoft.Resources/subscriptions/resourcegroups/write'
 ```
 
@@ -119,7 +175,6 @@ This means:
 
 1. **The service principal doesn't have sufficient permissions**
    - Solution: Grant the `Contributor` role at the subscription level (see Step 1)
-   
 2. **Permissions were recently granted but not yet propagated**
    - Solution: Wait 5-10 minutes for Azure to propagate the permissions
    - Then re-run the workflow
@@ -158,11 +213,13 @@ az group delete --name test-permissions-rg --yes --no-wait
 The service principal will create and manage the following Azure resources:
 
 ### Bootstrap Resources (Terraform State)
+
 - Resource Group: `mystira-terraform-state`
 - Storage Account: `mystiraterraformstate`
 - Storage Container: `tfstate`
 
 ### Application Resources (per environment)
+
 - Resource Group: `mystira-{env}-rg` (dev/staging/prod)
 - AKS Cluster: `mystira-{env}-aks`
 - Azure DNS Zone: `mystira.app` (production only)

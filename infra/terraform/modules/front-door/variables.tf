@@ -44,6 +44,37 @@ variable "custom_domain_chain" {
   type        = string
 }
 
+# Admin services (optional)
+variable "enable_admin_services" {
+  description = "Enable admin-api and admin-ui endpoints in Front Door"
+  type        = bool
+  default     = false
+}
+
+variable "admin_api_backend_address" {
+  description = "Backend address for Admin API service (e.g., dev.admin-api.mystira.app)"
+  type        = string
+  default     = ""
+}
+
+variable "admin_ui_backend_address" {
+  description = "Backend address for Admin UI service (e.g., dev.admin.mystira.app)"
+  type        = string
+  default     = ""
+}
+
+variable "custom_domain_admin_api" {
+  description = "Custom domain for Admin API (e.g., dev.admin-api.mystira.app)"
+  type        = string
+  default     = ""
+}
+
+variable "custom_domain_admin_ui" {
+  description = "Custom domain for Admin UI (e.g., dev.admin.mystira.app)"
+  type        = string
+  default     = ""
+}
+
 variable "enable_waf" {
   description = "Enable Web Application Firewall"
   type        = bool

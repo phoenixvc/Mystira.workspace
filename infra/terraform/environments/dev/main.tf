@@ -5,8 +5,8 @@ terraform {
   required_version = ">= 1.5.0"
 
   backend "azurerm" {
-    resource_group_name  = "mys-prod-terraform-rg-eus"
-    storage_account_name = "mysprodterraformstate"
+    resource_group_name  = "mys-shared-terraform-rg-san"
+    storage_account_name = "myssharedtfstatesan"
     container_name       = "tfstate"
     key                  = "dev/terraform.tfstate"
     use_azuread_auth     = true
@@ -45,19 +45,20 @@ locals {
 
 # Resource Group
 resource "azurerm_resource_group" "main" {
-  name     = "mys-dev-mystira-rg-san"
+  name     = "mys-dev-core-rg-san"
   location = var.location
 
   tags = {
     Environment = "dev"
     Project     = "Mystira"
+    Service     = "core"
     ManagedBy   = "terraform"
   }
 }
 
 # Virtual Network
 resource "azurerm_virtual_network" "main" {
-  name                = "mys-dev-mystira-vnet-san"
+  name                = "mys-dev-core-vnet-san"
   location            = azurerm_resource_group.main.location
   resource_group_name = azurerm_resource_group.main.name
   address_space       = ["10.0.0.0/16"]
@@ -122,18 +123,19 @@ resource "azurerm_subnet" "story_generator" {
 
 # Shared Azure Container Registry
 # Note: This ACR is shared across all environments (dev, staging, prod)
-# to align with the CI/CD workflows which expect a single registry named 'mystiraacr'.
-# Consider moving to a separate shared infrastructure workspace in the future.
+# Use image tags/repos to separate environments: dev/*, staging/*, prod/*
+# RBAC controls access: dev can push to dev/*, CD pipeline pushes to staging/* and prod/*
 resource "azurerm_container_registry" "shared" {
-  name                = "mysprodacr"
+  name                = "myssharedacr"
   resource_group_name = azurerm_resource_group.main.name
   location            = azurerm_resource_group.main.location
   sku                 = "Standard"
   admin_enabled       = false
 
   tags = {
-    Environment = "dev"
+    Environment = "shared"
     Project     = "Mystira"
+    Service     = "core"
     ManagedBy   = "terraform"
     Shared      = "all-environments"
   }
@@ -143,15 +145,16 @@ resource "azurerm_container_registry" "shared" {
 module "chain" {
   source = "../../modules/chain"
 
-  environment           = "dev"
-  location              = var.location
-  region_code           = "san"
-  resource_group_name   = azurerm_resource_group.main.name
-  chain_node_count      = 1
-  chain_vm_size         = "Standard_B2s"
-  chain_storage_size_gb = 100 # Premium file shares require minimum 100 GB
-  vnet_id               = azurerm_virtual_network.main.id
-  subnet_id             = azurerm_subnet.chain.id
+  environment                       = "dev"
+  location                          = var.location
+  region_code                       = "san"
+  resource_group_name               = azurerm_resource_group.main.name
+  chain_node_count                  = 1
+  chain_vm_size                     = "Standard_B2s"
+  chain_storage_size_gb             = 100 # Premium file shares require minimum 100 GB
+  vnet_id                           = azurerm_virtual_network.main.id
+  subnet_id                         = azurerm_subnet.chain.id
+  shared_log_analytics_workspace_id = module.shared_monitoring.log_analytics_workspace_id
 
   tags = {
     CostCenter = "development"
@@ -162,14 +165,15 @@ module "chain" {
 module "publisher" {
   source = "../../modules/publisher"
 
-  environment             = "dev"
-  location                = var.location
-  region_code             = "san"
-  resource_group_name     = azurerm_resource_group.main.name
-  publisher_replica_count = 1
-  vnet_id                 = azurerm_virtual_network.main.id
-  subnet_id               = azurerm_subnet.publisher.id
-  chain_rpc_endpoint      = "http://mys-chain.mys-dev.svc.cluster.local:8545"
+  environment                       = "dev"
+  location                          = var.location
+  region_code                       = "san"
+  resource_group_name               = azurerm_resource_group.main.name
+  publisher_replica_count           = 1
+  vnet_id                           = azurerm_virtual_network.main.id
+  subnet_id                         = azurerm_subnet.publisher.id
+  chain_rpc_endpoint                = "http://mys-chain.mys-dev.svc.cluster.local:8545"
+  shared_log_analytics_workspace_id = module.shared_monitoring.log_analytics_workspace_id
 
   tags = {
     CostCenter = "development"
@@ -180,11 +184,12 @@ module "publisher" {
 module "shared_postgresql" {
   source = "../../modules/shared/postgresql"
 
-  environment         = "dev"
-  location            = var.location
-  resource_group_name = azurerm_resource_group.main.name
-  vnet_id             = azurerm_virtual_network.main.id
-  subnet_id           = azurerm_subnet.postgresql.id
+  environment             = "dev"
+  location                = var.location
+  resource_group_name     = azurerm_resource_group.main.name
+  vnet_id                 = azurerm_virtual_network.main.id
+  subnet_id               = azurerm_subnet.postgresql.id
+  enable_vnet_integration = true
 
   databases = [
     "storygenerator",
@@ -257,10 +262,10 @@ module "story_generator" {
 
 # AKS Cluster for Dev
 resource "azurerm_kubernetes_cluster" "main" {
-  name                = "mys-dev-mystira-aks-san"
+  name                = "mys-dev-core-aks-san"
   location            = azurerm_resource_group.main.location
   resource_group_name = azurerm_resource_group.main.name
-  dns_prefix          = "mys-dev-mystira"
+  dns_prefix          = "mys-dev-core"
 
   default_node_pool {
     name           = "default"

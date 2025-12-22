@@ -14,5 +14,5 @@ commonLabels:
   app.kubernetes.io/component: story-generator
 
 images:
-  - name: mysprodacr.azurecr.io/story-generator
+  - name: myssharedacr.azurecr.io/story-generator
     newTag: latest

@@ -1,0 +1,156 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mystira-admin-api
+  labels:
+    app: mystira-admin-api
+    component: admin-api
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: mystira-admin-api
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: mystira-admin-api
+        component: admin-api
+        azure.workload.identity/use: "true"
+    spec:
+      serviceAccountName: mystira-admin-api-sa
+      securityContext:
+        runAsUser: 1000
+        runAsNonRoot: true
+      containers:
+        - name: admin-api
+          image: mystiraacr.azurecr.io/admin-api:latest
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+            - name: health
+              containerPort: 8081
+              protocol: TCP
+          env:
+            - name: ASPNETCORE_ENVIRONMENT
+              value: Production
+            - name: ASPNETCORE_URLS
+              value: "http://+:8080"
+            - name: ASPNETCORE_HTTP_PORTS
+              value: "8080"
+            - name: ASPNETCORE_HEALTHCHECK_PORTS
+              value: "8081"
+            - name: ConnectionStrings__PostgreSQL
+              valueFrom:
+                secretKeyRef:
+                  name: mystira-admin-api-secrets
+                  key: postgres_connection_string
+            - name: ConnectionStrings__Redis
+              valueFrom:
+                secretKeyRef:
+                  name: mystira-admin-api-secrets
+                  key: redis_connection_string
+            - name: AzureAd__Instance
+              value: "https://login.microsoftonline.com/"
+            - name: AzureAd__TenantId
+              valueFrom:
+                secretKeyRef:
+                  name: mystira-admin-api-secrets
+                  key: azure_ad_tenant_id
+            - name: AzureAd__ClientId
+              valueFrom:
+                secretKeyRef:
+                  name: mystira-admin-api-secrets
+                  key: azure_ad_client_id
+            - name: APPLICATIONINSIGHTS_CONNECTION_STRING
+              valueFrom:
+                secretKeyRef:
+                  name: mystira-admin-api-secrets
+                  key: appinsights_connection
+            - name: KEY_VAULT_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: mystira-admin-api-config
+                  key: key_vault_url
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "100m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8081
+            initialDelaySeconds: 60
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8081
+            initialDelaySeconds: 30
+            periodSeconds: 5
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mystira-admin-api
+  labels:
+    app: mystira-admin-api
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080
+    - name: health
+      port: 8081
+      targetPort: 8081
+  selector:
+    app: mystira-admin-api
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mystira-admin-api-config
+data:
+  key_vault_url: "https://mystira-admin-kv.vault.azure.net/"
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: mystira-admin-api-hpa
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: mystira-admin-api
+  minReplicas: 2
+  maxReplicas: 5
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 80
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: mystira-admin-api-sa
+  annotations:
+    azure.workload.identity/client-id: "${AZURE_CLIENT_ID}"

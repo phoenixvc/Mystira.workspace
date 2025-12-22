@@ -5,8 +5,8 @@ terraform {
   required_version = ">= 1.5.0"
 
   backend "azurerm" {
-    resource_group_name  = "mys-prod-terraform-rg-eus"
-    storage_account_name = "mysprodterraformstate"
+    resource_group_name  = "mys-shared-terraform-rg-san"
+    storage_account_name = "myssharedtfstatesan"
     container_name       = "tfstate"
     key                  = "prod/terraform.tfstate"
     use_azuread_auth     = true
@@ -31,7 +31,7 @@ provider "azurerm" {
 variable "location" {
   description = "Azure region for deployment"
   type        = string
-  default     = "eastus"
+  default     = "southafricanorth"
 }
 
 variable "location_secondary" {
@@ -42,12 +42,13 @@ variable "location_secondary" {
 
 # Resource Group
 resource "azurerm_resource_group" "main" {
-  name     = "mys-prod-mystira-rg-eus"
+  name     = "mys-prod-core-rg-san"
   location = var.location
 
   tags = {
     Environment = "prod"
     Project     = "Mystira"
+    Service     = "core"
     ManagedBy   = "terraform"
     Critical    = "true"
   }
@@ -55,7 +56,7 @@ resource "azurerm_resource_group" "main" {
 
 # Virtual Network
 resource "azurerm_virtual_network" "main" {
-  name                = "mys-prod-mystira-vnet-eus"
+  name                = "mys-prod-core-vnet-san"
   location            = azurerm_resource_group.main.location
   resource_group_name = azurerm_resource_group.main.name
   address_space       = ["10.2.0.0/16"]
@@ -132,15 +133,16 @@ resource "azurerm_subnet" "story_generator" {
 module "chain" {
   source = "../../modules/chain"
 
-  environment           = "prod"
-  location              = var.location
-  region_code           = "eus"
-  resource_group_name   = azurerm_resource_group.main.name
-  chain_node_count      = 3
-  chain_vm_size         = "Standard_D4s_v3"
-  chain_storage_size_gb = 500
-  vnet_id               = azurerm_virtual_network.main.id
-  subnet_id             = azurerm_subnet.chain.id
+  environment                       = "prod"
+  location                          = var.location
+  region_code                       = "san"
+  resource_group_name               = azurerm_resource_group.main.name
+  chain_node_count                  = 3
+  chain_vm_size                     = "Standard_D4s_v3"
+  chain_storage_size_gb             = 500
+  vnet_id                           = azurerm_virtual_network.main.id
+  subnet_id                         = azurerm_subnet.chain.id
+  shared_log_analytics_workspace_id = module.shared_monitoring.log_analytics_workspace_id
 
   tags = {
     CostCenter = "production"
@@ -152,14 +154,15 @@ module "chain" {
 module "publisher" {
   source = "../../modules/publisher"
 
-  environment             = "prod"
-  location                = var.location
-  region_code             = "eus"
-  resource_group_name     = azurerm_resource_group.main.name
-  publisher_replica_count = 3
-  vnet_id                 = azurerm_virtual_network.main.id
-  subnet_id               = azurerm_subnet.publisher.id
-  chain_rpc_endpoint      = "http://mys-chain.mys-prod.svc.cluster.local:8545"
+  environment                       = "prod"
+  location                          = var.location
+  region_code                       = "san"
+  resource_group_name               = azurerm_resource_group.main.name
+  publisher_replica_count           = 3
+  vnet_id                           = azurerm_virtual_network.main.id
+  subnet_id                         = azurerm_subnet.publisher.id
+  chain_rpc_endpoint                = "http://mys-chain.mys-prod.svc.cluster.local:8545"
+  shared_log_analytics_workspace_id = module.shared_monitoring.log_analytics_workspace_id
 
   tags = {
     CostCenter = "production"
@@ -171,11 +174,12 @@ module "publisher" {
 module "shared_postgresql" {
   source = "../../modules/shared/postgresql"
 
-  environment         = "prod"
-  location            = var.location
-  resource_group_name = azurerm_resource_group.main.name
-  vnet_id             = azurerm_virtual_network.main.id
-  subnet_id           = azurerm_subnet.postgresql.id
+  environment             = "prod"
+  location                = var.location
+  resource_group_name     = azurerm_resource_group.main.name
+  vnet_id                 = azurerm_virtual_network.main.id
+  subnet_id               = azurerm_subnet.postgresql.id
+  enable_vnet_integration = true
 
   databases = [
     "storygenerator",
@@ -236,7 +240,7 @@ module "story_generator" {
 
   environment         = "prod"
   location            = var.location
-  region_code         = "eus"
+  region_code         = "san"
   resource_group_name = azurerm_resource_group.main.name
   vnet_id             = azurerm_virtual_network.main.id
   subnet_id           = azurerm_subnet.story_generator.id
@@ -257,10 +261,10 @@ module "story_generator" {
 
 # AKS Cluster for Production
 resource "azurerm_kubernetes_cluster" "main" {
-  name                = "mys-prod-mystira-aks-eus"
+  name                = "mys-prod-core-aks-san"
   location            = azurerm_resource_group.main.location
   resource_group_name = azurerm_resource_group.main.name
-  dns_prefix          = "mys-prod-mystira"
+  dns_prefix          = "mys-prod-core"
   kubernetes_version  = "1.28"
 
   default_node_pool {

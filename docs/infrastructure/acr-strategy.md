@@ -4,10 +4,10 @@
 
 **ACR Configuration** (per [ADR-0008: Azure Resource Naming Conventions](../architecture/adr/0008-azure-resource-naming-conventions.md)):
 
-1. **Terraform**: ACR `mysprodacr` is created **only in the `dev` environment** (see `infra/terraform/environments/dev/main.tf:127`)
-2. **CI/CD Workflows**: All workflows push to `mysprodacr` (expecting it to exist)
+1. **Terraform**: ACR `myssharedacr` is created **only in the `dev` environment** (see `infra/terraform/environments/dev/main.tf:127`)
+2. **CI/CD Workflows**: All workflows push to `myssharedacr` (expecting it to exist)
 3. **Kubernetes Overlays**: Environment overlays use shared ACR with environment tags
-   - All environments use: `mysprodacr.azurecr.io` with tags: `dev`, `staging`, `prod`
+   - All environments use: `myssharedacr.azurecr.io` with tags: `dev`, `staging`, `prod`
 
 **Result**: The ACR is shared across all environments with environment-specific tags for image organization.
 
@@ -29,20 +29,20 @@ Use **tags** for environment separation (per [ADR-0008: Azure Resource Naming Co
 
 ```yaml
 # Development images
-mysprodacr.azurecr.io/chain:dev
-mysprodacr.azurecr.io/chain:dev-abc123
+myssharedacr.azurecr.io/chain:dev
+myssharedacr.azurecr.io/chain:dev-abc123
 
 # Staging images
-mysprodacr.azurecr.io/chain:staging
-mysprodacr.azurecr.io/chain:staging-abc123
+myssharedacr.azurecr.io/chain:staging
+myssharedacr.azurecr.io/chain:staging-abc123
 
 # Production images
-mysprodacr.azurecr.io/chain:prod
-mysprodacr.azurecr.io/chain:prod-abc123
-mysprodacr.azurecr.io/chain:v1.2.3  # Semantic versioning for prod
+myssharedacr.azurecr.io/chain:prod
+myssharedacr.azurecr.io/chain:prod-abc123
+myssharedacr.azurecr.io/chain:v1.2.3  # Semantic versioning for prod
 ```
 
-**Note**: ACR name `mysprodacr` follows [ADR-0008: Azure Resource Naming Conventions](../architecture/adr/0008-azure-resource-naming-conventions.md). ACR names cannot contain hyphens, so we use the format `mys{description}` (e.g., `mysprodacr` for Mystira production ACR). See ADR-0008 for the complete naming standard.
+**Note**: ACR name `myssharedacr` follows [ADR-0008: Azure Resource Naming Conventions](../architecture/adr/0008-azure-resource-naming-conventions.md). ACR names cannot contain hyphens, so we use the format `mys{description}` (e.g., `myssharedacr` for Mystira production ACR). See ADR-0008 for the complete naming standard.
 
 ## Solution Options
 
@@ -71,7 +71,7 @@ infra/terraform/shared/
 Update staging/prod to reference the dev ACR:
 
 1. Remove environment-specific ACR references from Kubernetes overlays
-2. Use `mysprodacr.azurecr.io` in all environments
+2. Use `myssharedacr.azurecr.io` in all environments
 3. Use tags for environment separation
 
 **Pros**:
@@ -108,11 +108,11 @@ Create ACR in each environment and update workflows:
 
 ## Immediate Fix
 
-For now, ensure the `dev` environment is deployed so `mysprodacr` exists, OR:
+For now, ensure the `dev` environment is deployed so `myssharedacr` exists, OR:
 
 ### Quick Fix: Use Shared ACR
 
-1. **Update Kubernetes overlays** to use `mysprodacr.azurecr.io` instead of environment-specific names
+1. **Update Kubernetes overlays** to use `myssharedacr.azurecr.io` instead of environment-specific names
 2. **Update CI/CD workflows** to use environment-specific tags:
 
 ```yaml
@@ -123,7 +123,7 @@ tags: |
   type=raw,value=staging-latest,enable=${{ github.ref == 'refs/heads/main' && github.event_name == 'push' }}
 ```
 
-3. **Update Kubernetes deployments** to pull from `mysprodacr.azurecr.io` with appropriate tags
+3. **Update Kubernetes deployments** to pull from `myssharedacr.azurecr.io` with appropriate tags
 
 ## Long-Term Solution
 

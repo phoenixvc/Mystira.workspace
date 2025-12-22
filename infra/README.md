@@ -123,19 +123,19 @@ kubectl apply -k ../../kubernetes/overlays/dev
 
 ## Environments
 
-| Environment | Domain                 | Deployment          | Branch  |
-| ----------- | ---------------------- | ------------------- | ------- |
-| Development | `*.dev.mystira.app`    | Manual              | `dev`   |
-| Staging     | `*.staging.mystira.app`| Auto (on main push) | `main`  |
-| Production  | `*.mystira.app`        | Manual (protected)  | `main`  |
+| Environment | Domain                  | Deployment          | Branch |
+| ----------- | ----------------------- | ------------------- | ------ |
+| Development | `*.dev.mystira.app`     | Manual              | `dev`  |
+| Staging     | `*.staging.mystira.app` | Auto (on main push) | `main` |
+| Production  | `*.mystira.app`         | Manual (protected)  | `main` |
 
 ### Service URLs
 
-| Service         | Dev                              | Staging                              | Production                   |
-| --------------- | -------------------------------- | ------------------------------------ | ---------------------------- |
-| Publisher       | `dev.publisher.mystira.app`      | `staging.publisher.mystira.app`      | `publisher.mystira.app`      |
-| Chain           | `dev.chain.mystira.app`          | `staging.chain.mystira.app`          | `chain.mystira.app`          |
-| Story Generator | `dev.story-generator.mystira.app`| `staging.story-generator.mystira.app`| `story-generator.mystira.app`|
+| Service         | Dev                               | Staging                               | Production                    |
+| --------------- | --------------------------------- | ------------------------------------- | ----------------------------- |
+| Publisher       | `dev.publisher.mystira.app`       | `staging.publisher.mystira.app`       | `publisher.mystira.app`       |
+| Chain           | `dev.chain.mystira.app`           | `staging.chain.mystira.app`           | `chain.mystira.app`           |
+| Story Generator | `dev.story-generator.mystira.app` | `staging.story-generator.mystira.app` | `story-generator.mystira.app` |
 
 ## Infrastructure Components
 
@@ -181,7 +181,7 @@ Cert-manager is deployed automatically via `Infrastructure: Deploy` workflow.
 
 Images are built and pushed automatically via CI/CD:
 
-- **Registry**: `mysprodacr.azurecr.io`
+- **Registry**: `myssharedacr.azurecr.io`
 - **Tags**: `dev`, `staging`, `prod`, `${SHA}`
 - **Build**: Automated on push to `dev`/`main` branches
 
@@ -189,13 +189,13 @@ Manual build and push:
 
 ```bash
 # Build image
-docker build -t mysprodacr.azurecr.io/chain:dev -f docker/chain/Dockerfile .
+docker build -t myssharedacr.azurecr.io/chain:dev -f docker/chain/Dockerfile .
 
 # Login to ACR
-az acr login --name mysprodacr
+az acr login --name myssharedacr
 
 # Push image
-docker push mysprodacr.azurecr.io/chain:dev
+docker push myssharedacr.azurecr.io/chain:dev
 ```
 
 ## DNS Configuration
@@ -212,7 +212,7 @@ DNS is managed via Azure DNS:
 # Get DNS name servers
 az network dns zone show \
   --name mystira.app \
-  --resource-group mys-prod-mystira-rg-glob \
+  --resource-group mys-prod-core-rg-glob \
   --query nameServers -o tsv
 
 # Update your domain registrar with these name servers
@@ -263,7 +263,7 @@ kubectl logs -n mys-prod deployment/mys-publisher
 # Check metrics in Azure Portal
 az monitor app-insights component show \
   --app mystira-prod-appinsights \
-  --resource-group mys-prod-mystira-rg-eus
+  --resource-group mys-prod-core-rg-eus
 ```
 
 ## Security
@@ -280,6 +280,7 @@ az monitor app-insights component show \
 ### Common Issues
 
 **Certificate not issuing:**
+
 ```bash
 # Check cert-manager logs
 kubectl logs -n cert-manager deployment/cert-manager
@@ -289,6 +290,7 @@ kubectl describe certificate -n mys-dev
 ```
 
 **Pods not starting:**
+
 ```bash
 # Check pod status
 kubectl describe pod <pod-name> -n mys-dev
@@ -301,10 +303,11 @@ kubectl get events -n mys-dev --sort-by='.lastTimestamp'
 ```
 
 **DNS not resolving:**
+
 ```bash
 # Check DNS records
 az network dns record-set a list \
-  --resource-group mys-prod-mystira-rg-glob \
+  --resource-group mys-prod-core-rg-glob \
   --zone-name mystira.app
 
 # Test DNS resolution

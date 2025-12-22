@@ -1,5 +1,10 @@
 name: "Infrastructure: Validate"
 
+# Infrastructure Validation: Validates Terraform, Kubernetes, and Docker configurations
+# Checks: Terraform format/validate, K8s manifest validation, Dockerfile linting, security scans
+# Triggers: PRs and pushes to main/staging with infrastructure changes
+# Runs across dev, staging, and prod environments
+
 on:
   pull_request:
     branches: [main, staging]
@@ -9,9 +14,8 @@ on:
       - "infra/docker/**"
       - ".github/workflows/infra-*.yml"
       - "scripts/bootstrap-infra.sh"
-    paths-ignore:
-      - "**/*.md"
-      - "**/README.md"
+      - "!**/*.md"
+      - "!**/README.md"
   push:
     branches: [main, staging]
     paths:
@@ -19,9 +23,8 @@ on:
       - "infra/kubernetes/**"
       - "infra/docker/**"
       - ".github/workflows/infra-*.yml"
-    paths-ignore:
-      - "**/*.md"
-      - "**/README.md"
+      - "!**/*.md"
+      - "!**/README.md"
   workflow_dispatch:
 
 jobs:

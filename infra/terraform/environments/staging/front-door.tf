@@ -16,6 +16,13 @@ module "front_door" {
   custom_domain_publisher = "staging.publisher.mystira.app"
   custom_domain_chain     = "staging.chain.mystira.app"
 
+  # Admin services
+  enable_admin_services     = true
+  admin_api_backend_address = "staging.admin-api.mystira.app"
+  admin_ui_backend_address  = "staging.admin.mystira.app"
+  custom_domain_admin_api   = "staging.admin-api.mystira.app"
+  custom_domain_admin_ui    = "staging.admin.mystira.app"
+
   # WAF Configuration - Staging Settings
   enable_waf           = true
   waf_mode             = "Detection" # Detection mode for staging (non-blocking)
@@ -52,4 +59,14 @@ output "front_door_chain_endpoint" {
 output "front_door_custom_domain_verification" {
   description = "Custom domain verification instructions"
   value       = module.front_door.custom_domain_verification
+}
+
+output "front_door_admin_api_endpoint" {
+  description = "Front Door endpoint for Admin API - use this for CNAME"
+  value       = module.front_door.admin_api_endpoint_hostname
+}
+
+output "front_door_admin_ui_endpoint" {
+  description = "Front Door endpoint for Admin UI - use this for CNAME"
+  value       = module.front_door.admin_ui_endpoint_hostname
 }
