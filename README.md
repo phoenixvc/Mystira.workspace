@@ -256,13 +256,11 @@ Configuration: [`scripts/repo-metadata.json`](./scripts/repo-metadata.json)
 │  ▼                                    ▼                                    ▼    │
 │ ┌───────────────────────────────┐  ┌─────────────┐  ┌───────────────────────┐  │
 │ │      Mystira.App (Client)     │  │ Admin UI    │  │     DevHub            │  │
-│ │  ┌─────────┬────────┬───────┐ │  │  (React)    │  │  (TypeScript)         │  │
-│ │  │   Web   │ Mobile │  PWA  │ │  │             │  │  Developer Portal     │  │
-│ │  │(Next.js)│(React N│       │ │  │ admin.      │  │                       │  │
-│ │  │         │ative)  │       │ │  │ mystira.app │  │                       │  │
-│ │  └────┬────┴────┬───┴───┬───┘ │  └──────┬──────┘  └───────────┬───────────┘  │
-│ │       │         │       │     │         │                     │              │
-│ │       └─────────┴───────┘     │         │                     │              │
+│ │  ┌───────────────────────────┐│  │  (React)    │  │  (Tauri Desktop)      │  │
+│ │  │  Blazor WebAssembly PWA   ││  │             │  │  Developer Portal     │  │
+│ │  │  • Web • Mobile • Offline ││  │ admin.      │  │                       │  │
+│ │  │  • IndexedDB • Haptics    ││  │ mystira.app │  │                       │  │
+│ │  └────────────┬──────────────┘│  └──────┬──────┘  └───────────┬───────────┘  │
 │ │               │               │         │                     │              │
 │ └───────────────┼───────────────┘         │                     │              │
 │                 │                         │                     │              │
@@ -273,7 +271,7 @@ Configuration: [`scripts/repo-metadata.json`](./scripts/repo-metadata.json)
 │  │                         Kubernetes (AKS)                                  │  │
 │  │  ┌────────────┐  ┌────────────┐  ┌─────────────┐  ┌───────────┐          │  │
 │  │  │ Publisher  │  │ Admin API  │  │   Story     │  │   Chain   │          │  │
-│  │  │(TypeScript)│  │(C# .NET 8) │  │  Generator  │  │  (Python) │          │  │
+│  │  │(TypeScript)│  │(C# .NET 9) │  │  Generator  │  │  (Python) │          │  │
 │  │  │            │  │            │  │ (C# + AI)   │  │           │          │  │
 │  │  │ • Content  │  │ • Entra ID │  │ • Claude    │  │ • Story   │          │  │
 │  │  │ • Publish  │  │ • CRUD     │  │ • GPT-4     │  │   Protocol│          │  │
@@ -329,10 +327,13 @@ Configuration: [`scripts/repo-metadata.json`](./scripts/repo-metadata.json)
 
 ### Mystira.App
 
-The main client application ([Mystira.App](https://github.com/phoenixvc/Mystira.App)) includes:
-- **Web Application** - Next.js-based web client
-- **Mobile Application** - React Native for iOS/Android
-- **PWA** - Progressive Web App for offline-capable experience
+The main client application ([Mystira.App](https://github.com/phoenixvc/Mystira.App)) is built with:
+- **Blazor WebAssembly** - C# frontend running in the browser via WebAssembly
+- **Progressive Web App (PWA)** - Offline-capable with service workers
+- **IndexedDB** - Client-side data persistence and sync
+- **Haptics & Audio** - Native device feature integration via JS interop
+
+**Backend**: ASP.NET Core on .NET 9 with Cosmos DB and hexagonal architecture (CQRS + MediatR)
 
 ### Package Ecosystem
 

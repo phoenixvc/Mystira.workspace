@@ -157,6 +157,10 @@ resource "azurerm_application_insights" "publisher" {
 
 # Key Vault for Publisher Secrets
 # Note: KV names limited to 24 chars, using "pub" abbreviation
+# TROUBLESHOOTING: If you get "SoftDeletedVaultDoesNotExist" error:
+#   1. Check for soft-deleted vaults: az keyvault list-deleted --query "[?name=='mys-dev-pub-kv-san']"
+#   2. If found, purge it: az keyvault purge --name mys-dev-pub-kv-san --location <location>
+#   3. If not found, wait a few minutes and retry (Azure caching issue)
 resource "azurerm_key_vault" "publisher" {
   name                        = "mys-${var.environment}-pub-kv-${local.region_code}"
   location                    = var.location
