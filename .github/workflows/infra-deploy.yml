@@ -464,18 +464,60 @@ jobs:
             fi
           fi
 
+          # Import admin_api module resources if they exist in Azure but not in state
+          ADMIN_NSG_NAME="mys-${{ env.ENVIRONMENT }}-admin-api-nsg-${REGION_CODE}"
+          ADMIN_IDENTITY_NAME="mys-${{ env.ENVIRONMENT }}-admin-api-identity-${REGION_CODE}"
+          ADMIN_AI_NAME="mys-${{ env.ENVIRONMENT }}-admin-api-ai-${REGION_CODE}"
+
+          # Admin API Network Security Group
+          if az network nsg show --name "${ADMIN_NSG_NAME}" --resource-group ${{ env.AZURE_RESOURCE_GROUP }} &> /dev/null; then
+            if ! terraform state list 2>/dev/null | grep -q "module.admin_api.azurerm_network_security_group.admin_api"; then
+              echo "Importing admin_api NSG..."
+              terraform import 'module.admin_api.azurerm_network_security_group.admin_api' \
+                "/subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${{ env.AZURE_RESOURCE_GROUP }}/providers/Microsoft.Network/networkSecurityGroups/${ADMIN_NSG_NAME}" || true
+            fi
+          fi
+
+          # Admin API User Assigned Identity
+          if az identity show --name "${ADMIN_IDENTITY_NAME}" --resource-group ${{ env.AZURE_RESOURCE_GROUP }} &> /dev/null; then
+            if ! terraform state list 2>/dev/null | grep -q "module.admin_api.azurerm_user_assigned_identity.admin_api"; then
+              echo "Importing admin_api User Assigned Identity..."
+              terraform import 'module.admin_api.azurerm_user_assigned_identity.admin_api' \
+                "/subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${{ env.AZURE_RESOURCE_GROUP }}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/${ADMIN_IDENTITY_NAME}" || true
+            fi
+          fi
+
+          # Admin API Application Insights
+          if az monitor app-insights component show --app "${ADMIN_AI_NAME}" --resource-group ${{ env.AZURE_RESOURCE_GROUP }} &> /dev/null; then
+            if ! terraform state list 2>/dev/null | grep -q "module.admin_api.azurerm_application_insights.admin_api"; then
+              echo "Importing admin_api Application Insights..."
+              terraform import 'module.admin_api.azurerm_application_insights.admin_api' \
+                "/subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${{ env.AZURE_RESOURCE_GROUP }}/providers/Microsoft.Insights/components/${ADMIN_AI_NAME}" || true
+            fi
+          fi
+
+          # Import WAF Security Policy if it exists
+          FD_PROFILE_NAME="mystira-${{ env.ENVIRONMENT }}-fd"
+          WAF_POLICY_NAME="mystira-${{ env.ENVIRONMENT }}-admin-waf-security-policy"
+          if az cdn security-policy show --profile-name "${FD_PROFILE_NAME}" --resource-group ${{ env.AZURE_RESOURCE_GROUP }} --name "${WAF_POLICY_NAME}" &> /dev/null 2>&1; then
+            if ! terraform state list 2>/dev/null | grep -q 'module.front_door.azurerm_cdn_frontdoor_security_policy.admin\[0\]'; then
+              echo "Importing Front Door WAF Security Policy..."
+              terraform import 'module.front_door.azurerm_cdn_frontdoor_security_policy.admin[0]' \
+                "/subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${{ env.AZURE_RESOURCE_GROUP }}/providers/Microsoft.Cdn/profiles/${FD_PROFILE_NAME}/securityPolicies/${WAF_POLICY_NAME}" || true
+            fi
+          fi
+
       - name: Clean Up Orphaned State
         run: |
           cd infra/terraform/environments/${{ env.ENVIRONMENT }}
           echo "Checking for orphaned modules in state..."
 
           # List of modules that were removed from codebase but may still be in state
+          # NOTE: admin_api and entra_id are active modules - do NOT orphan them
           ORPHANED_MODULES=(
             "module.identity"
             "module.azure_ad_b2c"
             "module.azure-ad-b2c"
-            "module.admin_api"
-            "module.entra_id"
           )
 
           for module in "${ORPHANED_MODULES[@]}"; do
