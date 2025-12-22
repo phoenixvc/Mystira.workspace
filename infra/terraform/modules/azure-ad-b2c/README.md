@@ -179,7 +179,7 @@ module "entra_external_id" {
 ```json
 {
   "MicrosoftEntraExternalId": {
-    "Authority": "https://mystira.ciamlogin.com/<external-tenant-id>",
+    "Authority": "https://mystira.ciamlogin.com/<external-tenant-id>/v2.0",
     "ClientId": "<pwa_client_id>",
     "ValidateAuthority": true
   },
@@ -195,7 +195,7 @@ module "entra_external_id" {
 ```bash
 VITE_ENTRA_CLIENT_ID=<pwa_client_id>
 VITE_ENTRA_TENANT_ID=<external_tenant_id>
-VITE_ENTRA_AUTHORITY=https://mystira.ciamlogin.com/<external_tenant_id>
+VITE_ENTRA_AUTHORITY=https://mystira.ciamlogin.com/<external_tenant_id>/v2.0
 VITE_ENTRA_API_SCOPE=api://<public_api_client_id>/API.Access
 ```
 
@@ -204,7 +204,7 @@ VITE_ENTRA_API_SCOPE=api://<public_api_client_id>/API.Access
 ```bash
 EXPO_PUBLIC_ENTRA_CLIENT_ID=<mobile_client_id>
 EXPO_PUBLIC_ENTRA_TENANT_ID=<external_tenant_id>
-EXPO_PUBLIC_ENTRA_AUTHORITY=https://mystira.ciamlogin.com/<external_tenant_id>
+EXPO_PUBLIC_ENTRA_AUTHORITY=https://mystira.ciamlogin.com/<external_tenant_id>/v2.0
 EXPO_PUBLIC_ENTRA_API_SCOPE=api://<public_api_client_id>/API.Access
 EXPO_PUBLIC_ENTRA_REDIRECT_URI=mystira://auth/callback
 ```
