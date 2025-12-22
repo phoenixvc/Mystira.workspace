@@ -115,14 +115,13 @@ class CacheAsideWASM {
     }
 
     console.log(`Cache miss for ${key}`);
-    
+
     // 2. Fetch from backend
-    const data = await fetch(`/api/data/${key}`)
-      .then(res => res.json());
-    
+    const data = await fetch(`/api/data/${key}`).then((res) => res.json());
+
     // 3. Store in cache with TTL
     this.setCacheEntry(key, data);
-    
+
     // 4. Return data
     return data;
   }
@@ -132,7 +131,7 @@ class CacheAsideWASM {
       const item = localStorage.getItem(`cache:${key}`);
       return item ? JSON.parse(item) : null;
     } catch (e) {
-      console.error('Cache read error:', e);
+      console.error("Cache read error:", e);
       return null;
     }
   }
@@ -142,11 +141,11 @@ class CacheAsideWASM {
       const entry = {
         data: data,
         timestamp: Date.now(),
-        ttl: this.ttl
+        ttl: this.ttl,
       };
       localStorage.setItem(`cache:${key}`, JSON.stringify(entry));
     } catch (e) {
-      console.error('Cache write error:', e);
+      console.error("Cache write error:", e);
     }
   }
 
@@ -163,14 +162,14 @@ class CacheAsideWASM {
 const cache = new CacheAsideWASM(300); // 5 minute TTL
 
 // Read with cache
-const userData = await cache.getData('user:123');
+const userData = await cache.getData("user:123");
 
 // Write - invalidate cache after update
-await fetch('/api/user/123', {
-  method: 'PUT',
-  body: JSON.stringify(updatedUser)
+await fetch("/api/user/123", {
+  method: "PUT",
+  body: JSON.stringify(updatedUser),
 });
-cache.invalidate('user:123');
+cache.invalidate("user:123");
 ```
 
 #### Example: Rust WASM with wasm-bindgen
@@ -255,7 +254,7 @@ impl CacheManager {
 For larger datasets, IndexedDB provides better performance than localStorage:
 
 ```javascript
-import { get, set, del } from 'idb-keyval';
+import { get, set, del } from "idb-keyval";
 
 class IndexedDBCache {
   constructor(ttlSeconds = 300) {
@@ -265,25 +264,24 @@ class IndexedDBCache {
   async getData(key) {
     // 1. Check IndexedDB cache
     const cached = await get(key);
-    
+
     if (cached && !this.isExpired(cached)) {
       console.log(`Cache hit for ${key}`);
       return cached.data;
     }
 
     console.log(`Cache miss for ${key}`);
-    
+
     // 2. Fetch from backend
-    const data = await fetch(`/api/data/${key}`)
-      .then(res => res.json());
-    
+    const data = await fetch(`/api/data/${key}`).then((res) => res.json());
+
     // 3. Store in IndexedDB with timestamp
     await set(key, {
       data: data,
       timestamp: Date.now(),
-      ttl: this.ttl
+      ttl: this.ttl,
     });
-    
+
     return data;
   }
 
@@ -319,6 +317,7 @@ class IndexedDBCache {
 #### When to Use Cache-Aside for WASM
 
 ✅ **Good fits:**
+
 - Read-heavy workloads (90%+ reads)
 - Data that tolerates slight staleness (user preferences, configuration)
 - Compute-intensive WASM operations that need fast data access
@@ -326,6 +325,7 @@ class IndexedDBCache {
 - Offline-first applications
 
 ❌ **Poor fits:**
+
 - Real-time data requiring strong consistency
 - Frequently updated data
 - Highly personalized data that can't be shared
@@ -457,7 +457,7 @@ public class HybridCache : IHybridCache
     private readonly IMemoryCache _memoryCache;
     private readonly IDistributedCache _distributedCache;
     private readonly ILogger<HybridCache> _logger;
-    
+
     public HybridCache(
         IMemoryCache memoryCache,
         IDistributedCache distributedCache,
@@ -483,7 +483,7 @@ public class HybridCache : IHybridCache
         {
             _logger.LogDebug("Redis hit for {Key}", key);
             var value = JsonSerializer.Deserialize<T>(redisValue);
-            
+
             // 3. Populate memory cache
             _memoryCache.Set(key, value, TimeSpan.FromMinutes(5));
             return value;
@@ -494,18 +494,18 @@ public class HybridCache : IHybridCache
     }
 
     public async Task SetAsync<T>(
-        string key, 
-        T value, 
+        string key,
+        T value,
         TimeSpan expiration,
         CancellationToken ct = default)
     {
         var serialized = JsonSerializer.Serialize(value);
-        
+
         // Write to both caches
         _memoryCache.Set(key, value, expiration);
-        
+
         await _distributedCache.SetStringAsync(
-            key, 
+            key,
             serialized,
             new DistributedCacheEntryOptions
             {
@@ -536,7 +536,7 @@ public class ScenarioService
     public async Task<Scenario?> GetScenarioAsync(string id)
     {
         var cacheKey = $"scenario:{id}";
-        
+
         // Try cache first
         var cached = await _cache.GetAsync<Scenario>(cacheKey);
         if (cached != null)
@@ -556,7 +556,7 @@ public class ScenarioService
     public async Task UpdateScenarioAsync(Scenario scenario)
     {
         await _repository.UpdateAsync(scenario);
-        
+
         // Invalidate cache
         var cacheKey = $"scenario:{scenario.Id}";
         await _cache.RemoveAsync(cacheKey);
@@ -577,7 +577,7 @@ public class CacheInvalidationService : BackgroundService
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         var subscriber = _redis.GetSubscriber();
-        
+
         await subscriber.SubscribeAsync("cache:invalidate", (channel, message) =>
         {
             _logger.LogInformation("Received invalidation for {Key}", message);
@@ -609,7 +609,7 @@ public class ClientCacheService
     {
         // Check IndexedDB via JS interop
         var cached = await _js.InvokeAsync<string>("localStorageGet", $"cache:{key}");
-        
+
         if (cached != null)
         {
             return JsonSerializer.Deserialize<T>(cached);
@@ -617,7 +617,7 @@ public class ClientCacheService
 
         // Fetch from API (which may use Redis server-side)
         var data = await _http.GetFromJsonAsync<T>($"/api/data/{key}");
-        
+
         if (data != null)
         {
             var serialized = JsonSerializer.Serialize(data);
@@ -684,7 +684,7 @@ export function useUpdateScenario() {
     onSuccess: (data, variables) => {
       // Invalidate and refetch
       queryClient.invalidateQueries({ queryKey: ['scenario', variables.id] });
-      
+
       // Or optimistically update
       queryClient.setQueryData(['scenario', variables.id], data);
     },
@@ -717,8 +717,8 @@ function ScenarioEditor({ scenarioId }: { scenarioId: string }) {
 
 ```typescript
 // server/middleware/redisCache.ts
-import { createClient } from 'redis';
-import { Request, Response, NextFunction } from 'express';
+import { createClient } from "redis";
+import { Request, Response, NextFunction } from "express";
 
 const redisClient = createClient({
   url: process.env.REDIS_URL,
@@ -735,7 +735,7 @@ export function cacheMiddleware(durationSeconds: number) {
     try {
       // Check Redis cache
       const cachedResponse = await redisClient.get(key);
-      
+
       if (cachedResponse) {
         console.log(`Cache hit: ${key}`);
         return res.json(JSON.parse(cachedResponse));
@@ -755,31 +755,31 @@ export function cacheMiddleware(durationSeconds: number) {
 
       next();
     } catch (error) {
-      console.error('Redis cache error:', error);
+      console.error("Redis cache error:", error);
       next(); // Continue without cache on error
     }
   };
 }
 
 // routes/scenarios.ts
-import express from 'express';
-import { cacheMiddleware } from '../middleware/redisCache';
+import express from "express";
+import { cacheMiddleware } from "../middleware/redisCache";
 
 const router = express.Router();
 
 // Cache scenario for 5 minutes
-router.get('/scenarios/:id', cacheMiddleware(300), async (req, res) => {
+router.get("/scenarios/:id", cacheMiddleware(300), async (req, res) => {
   const scenario = await db.scenarios.findById(req.params.id);
   res.json(scenario);
 });
 
 // Invalidate cache on update
-router.put('/scenarios/:id', async (req, res) => {
+router.put("/scenarios/:id", async (req, res) => {
   const updated = await db.scenarios.update(req.params.id, req.body);
-  
+
   // Invalidate cache
   await redisClient.del(`cache:GET:/api/scenarios/${req.params.id}`);
-  
+
   res.json(updated);
 });
 ```
@@ -788,7 +788,7 @@ router.put('/scenarios/:id', async (req, res) => {
 
 ```typescript
 // hooks/useStaleWhileRevalidate.ts
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 
 export function useStaleWhileRevalidate<T>(
   key: string,
@@ -817,13 +817,16 @@ export function useStaleWhileRevalidate<T>(
         const fresh = await fetcher();
         if (!cancelled) {
           setData(fresh);
-          localStorage.setItem(key, JSON.stringify({
-            data: fresh,
-            timestamp: Date.now()
-          }));
+          localStorage.setItem(
+            key,
+            JSON.stringify({
+              data: fresh,
+              timestamp: Date.now(),
+            })
+          );
         }
       } catch (error) {
-        console.error('Revalidation error:', error);
+        console.error("Revalidation error:", error);
       } finally {
         if (!cancelled) {
           setIsValidating(false);
@@ -844,16 +847,16 @@ export function useStaleWhileRevalidate<T>(
 
 ### Key Differences
 
-| Aspect | Blazor Server | Blazor WASM | React (Client) |
-|--------|---------------|-------------|----------------|
-| **Cache Location** | Server-side shared Redis | Client-side (IndexedDB/localStorage) | Client-side + API proxy Redis |
-| **Primary Libraries** | `IDistributedCache`, `MemoryCache` | JS interop to browser storage | React Query, Redux, SWR |
-| **Invalidation** | Pub/Sub across server instances | Local invalidation only | Hooks, API polling, WebSockets |
-| **Scalability** | Multi-server consistency via Redis | Per-user, no server state | Per-user, reduces API load |
-| **TTL Strategy** | Long TTLs (hours) for static content | Medium TTLs (minutes to hours) | Short TTLs (1-5 minutes) |
-| **Consistency** | Strong (single source) | Eventual (client may be stale) | Eventual (optimistic updates) |
-| **Network Access** | Direct Redis connection | Via HTTP APIs only | Via HTTP APIs only |
-| **Best For** | Heavy server-side workloads | Offline-first apps | High interactivity, frequent updates |
+| Aspect                | Blazor Server                        | Blazor WASM                          | React (Client)                       |
+| --------------------- | ------------------------------------ | ------------------------------------ | ------------------------------------ |
+| **Cache Location**    | Server-side shared Redis             | Client-side (IndexedDB/localStorage) | Client-side + API proxy Redis        |
+| **Primary Libraries** | `IDistributedCache`, `MemoryCache`   | JS interop to browser storage        | React Query, Redux, SWR              |
+| **Invalidation**      | Pub/Sub across server instances      | Local invalidation only              | Hooks, API polling, WebSockets       |
+| **Scalability**       | Multi-server consistency via Redis   | Per-user, no server state            | Per-user, reduces API load           |
+| **TTL Strategy**      | Long TTLs (hours) for static content | Medium TTLs (minutes to hours)       | Short TTLs (1-5 minutes)             |
+| **Consistency**       | Strong (single source)               | Eventual (client may be stale)       | Eventual (optimistic updates)        |
+| **Network Access**    | Direct Redis connection              | Via HTTP APIs only                   | Via HTTP APIs only                   |
+| **Best For**          | Heavy server-side workloads          | Offline-first apps                   | High interactivity, frequent updates |
 
 ---
 
@@ -914,7 +917,7 @@ public class CachedScenarioService : IScenarioService
         // Invalidate cache
         var cacheKey = $"mystira:scenario:{scenario.Id}";
         await _cache.RemoveAsync(cacheKey, ct);
-        
+
         _logger.LogInformation("Invalidated cache for scenario {Id}", scenario.Id);
     }
 }
@@ -924,7 +927,7 @@ public class CachedScenarioService : IScenarioService
 
 ```typescript
 // services/scenarioCache.ts
-import { createClient } from 'redis';
+import { createClient } from "redis";
 
 export class ScenarioCacheService {
   private redis = createClient({ url: process.env.REDIS_URL });
@@ -936,7 +939,7 @@ export class ScenarioCacheService {
 
   async getScenario(id: string): Promise<Scenario | null> {
     const key = `mystira:scenario:${id}`;
-    
+
     try {
       // Check Redis
       const cached = await this.redis.get(key);
@@ -948,7 +951,9 @@ export class ScenarioCacheService {
       console.log(`Cache miss for scenario ${id}`);
 
       // Fetch from Admin API
-      const response = await fetch(`${process.env.ADMIN_API_URL}/api/scenarios/${id}`);
+      const response = await fetch(
+        `${process.env.ADMIN_API_URL}/api/scenarios/${id}`
+      );
       if (!response.ok) return null;
 
       const scenario = await response.json();
@@ -958,7 +963,7 @@ export class ScenarioCacheService {
 
       return scenario;
     } catch (error) {
-      console.error('Cache error:', error);
+      console.error("Cache error:", error);
       return null;
     }
   }
@@ -975,14 +980,14 @@ export class ScenarioCacheService {
 
 ```typescript
 // hooks/useScenario.ts
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 export function useScenario(id: string) {
   return useQuery({
-    queryKey: ['scenario', id],
+    queryKey: ["scenario", id],
     queryFn: async () => {
       const response = await fetch(`/admin/api/scenarios/${id}`);
-      if (!response.ok) throw new Error('Failed to fetch');
+      if (!response.ok) throw new Error("Failed to fetch");
       return response.json();
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
@@ -996,15 +1001,15 @@ export function useUpdateScenario() {
   return useMutation({
     mutationFn: async (scenario: Scenario) => {
       const response = await fetch(`/admin/api/scenarios/${scenario.id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(scenario),
       });
       return response.json();
     },
     onSuccess: (_, variables) => {
       // Invalidate React Query cache
-      queryClient.invalidateQueries({ queryKey: ['scenario', variables.id] });
+      queryClient.invalidateQueries({ queryKey: ["scenario", variables.id] });
     },
   });
 }
