@@ -278,7 +278,7 @@ resource "azurerm_cdn_frontdoor_firewall_policy" "main" {
 
 # Associate WAF policy with all custom domains
 # Note: A WAF policy can only be attached once per Front Door profile,
-# so we need a single security policy covering all domains
+# so we need a single security policy covering all domains (including admin if enabled)
 resource "azurerm_cdn_frontdoor_security_policy" "main" {
   count                    = var.enable_waf ? 1 : 0
   name                     = "${var.project_name}-${var.environment}-waf-security-policy"
@@ -294,6 +294,19 @@ resource "azurerm_cdn_frontdoor_security_policy" "main" {
         }
         domain {
           cdn_frontdoor_domain_id = azurerm_cdn_frontdoor_custom_domain.chain.id
+        }
+        # Conditionally include admin domains when admin services are enabled
+        dynamic "domain" {
+          for_each = var.enable_admin_services ? [1] : []
+          content {
+            cdn_frontdoor_domain_id = azurerm_cdn_frontdoor_custom_domain.admin_api[0].id
+          }
+        }
+        dynamic "domain" {
+          for_each = var.enable_admin_services ? [1] : []
+          content {
+            cdn_frontdoor_domain_id = azurerm_cdn_frontdoor_custom_domain.admin_ui[0].id
+          }
         }
         patterns_to_match = ["/*"]
       }
