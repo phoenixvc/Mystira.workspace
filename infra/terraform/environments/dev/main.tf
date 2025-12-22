@@ -17,6 +17,10 @@ terraform {
       source  = "hashicorp/azurerm"
       version = "~> 3.80"
     }
+    azuread = {
+      source  = "hashicorp/azuread"
+      version = "~> 2.47"
+    }
   }
 }
 
@@ -260,6 +264,23 @@ module "story_generator" {
   }
 }
 
+# Entra ID Authentication
+module "entra_id" {
+  source = "../../modules/entra-id"
+
+  environment = "dev"
+
+  admin_ui_redirect_uris = [
+    "http://localhost:7001/auth/callback",
+    "http://localhost:3000/auth/callback",
+    "https://admin.dev.mystira.app/auth/callback"
+  ]
+
+  tags = {
+    CostCenter = "development"
+  }
+}
+
 # AKS Cluster for Dev
 resource "azurerm_kubernetes_cluster" "main" {
   name                = "mys-dev-core-aks-san"
@@ -372,4 +393,30 @@ output "shared_redis_connection_string" {
   description = "Redis connection string (from shared Redis module)"
   value       = module.shared_redis.primary_connection_string
   sensitive   = true
+}
+
+# Entra ID Authentication Outputs
+output "entra_admin_api_client_id" {
+  description = "Admin API application (client) ID"
+  value       = module.entra_id.admin_api_client_id
+}
+
+output "entra_admin_ui_client_id" {
+  description = "Admin UI application (client) ID"
+  value       = module.entra_id.admin_ui_client_id
+}
+
+output "entra_tenant_id" {
+  description = "Azure AD tenant ID"
+  value       = module.entra_id.tenant_id
+}
+
+output "entra_admin_api_config" {
+  description = "Configuration for Admin API (appsettings.json)"
+  value       = module.entra_id.admin_api_config
+}
+
+output "entra_admin_ui_config" {
+  description = "Configuration for Admin UI (.env)"
+  value       = module.entra_id.admin_ui_config
 }

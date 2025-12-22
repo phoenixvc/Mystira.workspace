@@ -17,6 +17,10 @@ terraform {
       source  = "hashicorp/azurerm"
       version = "~> 3.80"
     }
+    azuread = {
+      source  = "hashicorp/azuread"
+      version = "~> 2.47"
+    }
   }
 }
 
@@ -240,6 +244,21 @@ module "story_generator" {
   }
 }
 
+# Entra ID Authentication
+module "entra_id" {
+  source = "../../modules/entra-id"
+
+  environment = "staging"
+
+  admin_ui_redirect_uris = [
+    "https://admin.staging.mystira.app/auth/callback"
+  ]
+
+  tags = {
+    CostCenter = "staging"
+  }
+}
+
 # AKS Cluster for Staging
 resource "azurerm_kubernetes_cluster" "main" {
   name                = "mys-staging-core-aks-san"
@@ -317,4 +336,20 @@ output "shared_log_analytics_workspace_id" {
 output "story_generator_postgresql_database_name" {
   description = "Story-Generator PostgreSQL database name"
   value       = module.story_generator.postgresql_database_name
+}
+
+# Entra ID Authentication Outputs
+output "entra_admin_api_client_id" {
+  description = "Admin API application (client) ID"
+  value       = module.entra_id.admin_api_client_id
+}
+
+output "entra_admin_ui_client_id" {
+  description = "Admin UI application (client) ID"
+  value       = module.entra_id.admin_ui_client_id
+}
+
+output "entra_tenant_id" {
+  description = "Azure AD tenant ID"
+  value       = module.entra_id.tenant_id
 }
