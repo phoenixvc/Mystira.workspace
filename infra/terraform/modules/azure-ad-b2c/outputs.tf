@@ -1,4 +1,4 @@
-# Azure AD B2C Module Outputs
+# Microsoft Entra External ID Module Outputs
 
 # Public API outputs
 output "public_api_client_id" {
@@ -39,51 +39,50 @@ output "api_scopes" {
   }
 }
 
-# B2C Configuration for Public API
+# Configuration for Public API
 output "public_api_config" {
   description = "Configuration values for Public API (appsettings.json)"
   value = {
-    AzureAdB2C = {
-      Instance          = "https://${var.b2c_tenant_name}.b2clogin.com"
-      Domain            = "${var.b2c_tenant_name}.onmicrosoft.com"
-      ClientId          = azuread_application.public_api.client_id
-      SignUpSignInPolicy = var.sign_up_sign_in_policy
+    MicrosoftEntraExternalId = {
+      Instance  = "https://${var.tenant_name}.ciamlogin.com"
+      Domain    = "${var.tenant_name}.onmicrosoft.com"
+      TenantId  = var.tenant_id
+      ClientId  = azuread_application.public_api.client_id
     }
   }
 }
 
-# B2C Configuration for PWA
+# Configuration for PWA
 output "pwa_config" {
   description = "Configuration values for PWA (environment variables)"
   value = {
-    VITE_B2C_CLIENT_ID     = azuread_application.pwa.client_id
-    VITE_B2C_TENANT_NAME   = var.b2c_tenant_name
-    VITE_B2C_AUTHORITY     = "https://${var.b2c_tenant_name}.b2clogin.com/${var.b2c_tenant_name}.onmicrosoft.com/${var.sign_up_sign_in_policy}"
-    VITE_B2C_KNOWN_AUTHORITY = "https://${var.b2c_tenant_name}.b2clogin.com"
-    VITE_B2C_API_SCOPE     = "${local.api_identifier_uri}/API.Access"
-    VITE_B2C_REDIRECT_URI  = length(var.pwa_redirect_uris) > 0 ? var.pwa_redirect_uris[0] : ""
+    VITE_ENTRA_CLIENT_ID     = azuread_application.pwa.client_id
+    VITE_ENTRA_TENANT_ID     = var.tenant_id
+    VITE_ENTRA_AUTHORITY     = "https://${var.tenant_name}.ciamlogin.com/${var.tenant_id}/v2.0"
+    VITE_ENTRA_API_SCOPE     = "${local.api_identifier_uri}/API.Access"
+    VITE_ENTRA_REDIRECT_URI  = length(var.pwa_redirect_uris) > 0 ? var.pwa_redirect_uris[0] : ""
   }
 }
 
-# B2C Configuration for Mobile App
+# Configuration for Mobile App
 output "mobile_config" {
   description = "Configuration values for Mobile App (React Native / Expo)"
   value = length(azuread_application.mobile) > 0 ? {
-    EXPO_PUBLIC_B2C_CLIENT_ID     = azuread_application.mobile[0].client_id
-    EXPO_PUBLIC_B2C_TENANT_NAME   = var.b2c_tenant_name
-    EXPO_PUBLIC_B2C_AUTHORITY     = "https://${var.b2c_tenant_name}.b2clogin.com/${var.b2c_tenant_name}.onmicrosoft.com/${var.sign_up_sign_in_policy}"
-    EXPO_PUBLIC_B2C_KNOWN_AUTHORITY = "https://${var.b2c_tenant_name}.b2clogin.com"
-    EXPO_PUBLIC_B2C_API_SCOPE     = "${local.api_identifier_uri}/API.Access"
-    EXPO_PUBLIC_B2C_REDIRECT_URI  = length(var.mobile_redirect_uris) > 0 ? var.mobile_redirect_uris[0] : ""
+    EXPO_PUBLIC_ENTRA_CLIENT_ID   = azuread_application.mobile[0].client_id
+    EXPO_PUBLIC_ENTRA_TENANT_ID   = var.tenant_id
+    EXPO_PUBLIC_ENTRA_AUTHORITY   = "https://${var.tenant_name}.ciamlogin.com/${var.tenant_id}/v2.0"
+    EXPO_PUBLIC_ENTRA_API_SCOPE   = "${local.api_identifier_uri}/API.Access"
+    EXPO_PUBLIC_ENTRA_REDIRECT_URI = length(var.mobile_redirect_uris) > 0 ? var.mobile_redirect_uris[0] : ""
   } : {}
 }
 
-# User flow URLs
-output "user_flow_urls" {
-  description = "B2C user flow URLs"
+# Authentication endpoints
+output "auth_endpoints" {
+  description = "Microsoft Entra External ID authentication endpoints"
   value = {
-    sign_up_sign_in = "https://${var.b2c_tenant_name}.b2clogin.com/${var.b2c_tenant_name}.onmicrosoft.com/${var.sign_up_sign_in_policy}/oauth2/v2.0/authorize"
-    password_reset  = "https://${var.b2c_tenant_name}.b2clogin.com/${var.b2c_tenant_name}.onmicrosoft.com/${var.password_reset_policy}/oauth2/v2.0/authorize"
-    profile_edit    = "https://${var.b2c_tenant_name}.b2clogin.com/${var.b2c_tenant_name}.onmicrosoft.com/${var.profile_edit_policy}/oauth2/v2.0/authorize"
+    authority       = "https://${var.tenant_name}.ciamlogin.com/${var.tenant_id}/v2.0"
+    token_endpoint  = "https://${var.tenant_name}.ciamlogin.com/${var.tenant_id}/oauth2/v2.0/token"
+    authorize_endpoint = "https://${var.tenant_name}.ciamlogin.com/${var.tenant_id}/oauth2/v2.0/authorize"
+    logout_endpoint = "https://${var.tenant_name}.ciamlogin.com/${var.tenant_id}/oauth2/v2.0/logout"
   }
 }
