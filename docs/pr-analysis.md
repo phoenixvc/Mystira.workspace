@@ -12,6 +12,7 @@
 ## ✅ What Was Done Well
 
 ### 1. **Comprehensive Coverage**
+
 - ✅ Updated all 7 Terraform modules
 - ✅ Updated all 3 environment configurations
 - ✅ Updated all 6 CI/CD workflows
@@ -21,21 +22,25 @@
 - ✅ Created migration summary and analysis docs
 
 ### 2. **Architectural Improvements**
+
 - ✅ Consolidated monitoring (9 Log Analytics → 3)
 - ✅ Maintained service isolation with separate Key Vaults
 - ✅ Standardized region to South Africa North
 - ✅ Implemented shared ACR across environments
 
 ### 3. **Security Enhancements**
+
 - ✅ Zero-trust compliance with service-specific Key Vaults
 - ✅ Proper RBAC boundaries
 - ✅ Principle of least privilege
 
 ### 4. **Cost Optimization**
+
 - ✅ ~$300/month savings from Log Analytics consolidation
 - ✅ Shared ACR reduces redundancy
 
 ### 5. **Documentation**
+
 - ✅ Comprehensive migration summary
 - ✅ Clear architecture decisions documented
 - ✅ Deployment instructions provided
@@ -60,8 +65,9 @@ fi
 **Issue:** The conditional is pointless - both branches set the same value.
 
 **Fix:** Simplify to:
+
 ```yaml
-REGION_CODE="san"  # All environments use South Africa North
+REGION_CODE="san" # All environments use South Africa North
 ```
 
 **Impact:** Low - code works but is confusing
@@ -79,10 +85,12 @@ DNS_ZONE_RG: mys-prod-core-rg-glob
 **Issue:** Using "glob" region code, but this resource group may not exist.
 
 **Analysis:**
+
 - In Terraform, the DNS module is in `production-release.yml` but no separate global RG is defined
 - DNS zone is likely in the main prod resource group: `mys-prod-core-rg-san`
 
 **Recommendation:** Verify if `mys-prod-core-rg-glob` exists, otherwise change to:
+
 ```yaml
 DNS_ZONE_RG: mys-prod-core-rg-san
 ```
@@ -103,6 +111,7 @@ TERRAFORM_STORAGE="myssharedtfstatesan"
 
 **Current:** `myssharedtfstatesan` (24 chars limit)  
 **V2.2 Should Be:** Would be `mys-prod-terraform-st-eus` but storage accounts have strict naming:
+
 - Max 24 chars
 - Only lowercase alphanumeric
 - Globally unique
@@ -120,10 +129,12 @@ TERRAFORM_STORAGE="myssharedtfstatesan"
 **Issue:** Publisher and Story-Generator have Key Vault URLs in ConfigMaps, but Chain doesn't.
 
 **Analysis:**
+
 - Chain module creates `mys-{env}-chain-kv-{region}`
 - But no Kubernetes ConfigMap references it
 
 **Questions:**
+
 1. Does Chain service need Key Vault access?
 2. If yes, add ConfigMap patch in overlays similar to publisher
 
@@ -144,10 +155,12 @@ LOCATION="eastus"
 **Issue:** Script hardcodes `eastus` for Terraform backend, but all other resources use `southafricanorth`.
 
 **Analysis:**
+
 - Terraform backend is global/shared, so location matters less
 - But inconsistent with main resource regions
 
 **Recommendation:**
+
 - Either change to `southafricanorth` for consistency
 - Or document why backend is in East US (e.g., performance, cost)
 
@@ -161,10 +174,12 @@ LOCATION="eastus"
 **V2.2 Would Be:** `mys-shared-acr-glob`
 
 **Issue:** ACR name doesn't follow v2.2 pattern due to:
+
 - Max 50 chars (not a real constraint)
 - Only alphanumeric (no dashes allowed) ✅ This is the real reason
 
 **Recommendation:** Add note in docs explaining ACR naming constraint:
+
 > "ACR names only allow alphanumeric characters (no dashes), so `myssharedacr` is the closest v2.2-compliant name possible."
 
 **Impact:** Low - just needs documentation
@@ -176,22 +191,24 @@ LOCATION="eastus"
 **Location:** `MIGRATION_SUMMARY.md`
 
 **Current:**
+
 - Only analyzes Log Analytics savings
 - Doesn't consider other cost impacts
 
 **Missing Analysis:**
+
 - Key Vault costs (9 vaults vs 3 vaults)
 - Network egress costs (region change)
 - Storage costs in South Africa North vs East US
 
 **Recommendation:** Add complete cost comparison:
 
-| Resource | Before | After | Delta |
-|----------|--------|-------|-------|
-| Log Analytics (9→3) | $450 | $150 | -$300 ✅ |
-| Key Vaults (0→9) | $0 | $27 | +$27 |
-| Region pricing diff | Varies | Varies | TBD |
-| **Net savings** | - | - | **~$273/mo** |
+| Resource            | Before | After  | Delta        |
+| ------------------- | ------ | ------ | ------------ |
+| Log Analytics (9→3) | $450   | $150   | -$300 ✅     |
+| Key Vaults (0→9)    | $0     | $27    | +$27         |
+| Region pricing diff | Varies | Varies | TBD          |
+| **Net savings**     | -      | -      | **~$273/mo** |
 
 **Impact:** Low - doesn't affect implementation, just documentation
 
@@ -202,6 +219,7 @@ LOCATION="eastus"
 **Issue:** Migration summary doesn't include rollback procedure.
 
 **Recommendation:** Add rollback section:
+
 ```markdown
 ## Rollback Procedure
 
@@ -233,10 +251,12 @@ If issues arise during deployment:
 **Issue:** No documented test plan for validating migration.
 
 **Recommendation:** Add test checklist:
+
 ```markdown
 ## Post-Deployment Testing
 
 ### Infrastructure Tests
+
 - [ ] All resource groups created
 - [ ] AKS cluster accessible
 - [ ] ACR contains images
@@ -244,6 +264,7 @@ If issues arise during deployment:
 - [ ] Certificates issued
 
 ### Application Tests
+
 - [ ] Publisher API responds
 - [ ] Chain RPC accessible
 - [ ] Story-Generator API functional
@@ -252,6 +273,7 @@ If issues arise during deployment:
 - [ ] Key Vault secrets accessible
 
 ### Integration Tests
+
 - [ ] End-to-end flow works
 - [ ] Monitoring/logging visible
 - [ ] Alerts configured
@@ -265,7 +287,8 @@ If issues arise during deployment:
 
 **Issue:** If Azure Dashboards or Application Insights queries reference old resource names, they'll break.
 
-**Recommendation:** 
+**Recommendation:**
+
 1. Check for any saved dashboards in Azure Portal
 2. Update any hardcoded resource names in queries
 3. Update any alert rules that reference old names
@@ -277,19 +300,23 @@ If issues arise during deployment:
 ### 11. **No Database Migration Plan** ⚠️
 
 **Issue:** Changing PostgreSQL from `mystira-shared-pg-{env}` to `mys-{env}-core-db` requires:
+
 1. Exporting data from old server
 2. Importing to new server
 3. Updating connection strings
 
-**Current Plan:** 
+**Current Plan:**
+
 - Terraform will try to recreate PostgreSQL
 - This will destroy existing data ❌
 
 **Recommendation:** Add data migration step:
-```markdown
+
+````markdown
 ## Data Migration (CRITICAL)
 
 ### Before Terraform Apply:
+
 1. Export databases:
    ```bash
    az postgres flexible-server db export \
@@ -297,6 +324,7 @@ If issues arise during deployment:
      --database storygenerator \
      --output backup.sql
    ```
+````
 
 2. Store backup securely
 
@@ -309,8 +337,10 @@ If issues arise during deployment:
    ```
 
 ### Or Use Lifecycle Protection:
+
 - Add `prevent_destroy = true` to PostgreSQL module
 - Manual migration instead of Terraform recreation
+
 ```
 
 **Impact:** 🔴 CRITICAL - data loss risk
@@ -325,7 +355,7 @@ If issues arise during deployment:
 - Tries to import existing resources into new state
 - Uses VNet name check to determine region code
 
-**Issue:** 
+**Issue:**
 - Only imports VNet and RG
 - Doesn't import PostgreSQL, Redis, AKS, etc.
 - These will be recreated, causing downtime
@@ -347,7 +377,7 @@ If issues arise during deployment:
    - Update Terraform state manually
    - Riskiest but fastest
 
-**For Dev Environment:** Option B (fresh) is safest  
+**For Dev Environment:** Option B (fresh) is safest
 **For Prod:** Option B or C with thorough testing
 
 **Impact:** 🔴 CRITICAL - affects deployment strategy
@@ -413,7 +443,7 @@ If issues arise during deployment:
 - ⚠️ Testing plan not defined
 - ⚠️ Rollback procedure missing
 
-**Recommendation:** 
+**Recommendation:**
 **DO NOT MERGE** until critical items addressed:
 1. Data migration plan
 2. Deployment strategy
@@ -448,6 +478,7 @@ Once these are added, PR will be **production-ready**.
 
 ---
 
-**Analysis Date:** 2025-12-21  
-**Analyzer:** Claude (AI Assistant)  
+**Analysis Date:** 2025-12-21
+**Analyzer:** Claude (AI Assistant)
 **Branch:** claude/standardize-dev-resources-cT39Z
+```

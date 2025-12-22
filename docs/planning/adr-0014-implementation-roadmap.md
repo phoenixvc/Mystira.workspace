@@ -246,6 +246,7 @@ public class CosmosRepository<T> : RepositoryBase<T>, IRepository<T> where T : c
 #### 1.5 Update Service Layer Usage
 
 **Before** (Direct repository methods):
+
 ```csharp
 public class AccountService
 {
@@ -257,6 +258,7 @@ public class AccountService
 ```
 
 **After** (Specification-based):
+
 ```csharp
 public class AccountService
 {
@@ -276,15 +278,15 @@ public class AccountService
 }
 ```
 
-| Task | Location | Priority | Effort |
-|------|----------|----------|--------|
-| Add Ardalis.Specification packages | Application, Infrastructure.Data | P0 | 0.5 day |
-| Update IRepository interface | Application/Ports/Data | P0 | 0.5 day |
-| Create Account specifications | Application/Specifications | P0 | 1 day |
-| Create UserProfile specifications | Application/Specifications | P1 | 1 day |
-| Create GameSession specifications | Application/Specifications | P2 | 1 day |
-| Update CosmosRepository | Infrastructure.Data | P0 | 1 day |
-| Update service layer usage | Application/Services | P1 | 2 days |
+| Task                               | Location                         | Priority | Effort  |
+| ---------------------------------- | -------------------------------- | -------- | ------- |
+| Add Ardalis.Specification packages | Application, Infrastructure.Data | P0       | 0.5 day |
+| Update IRepository interface       | Application/Ports/Data           | P0       | 0.5 day |
+| Create Account specifications      | Application/Specifications       | P0       | 1 day   |
+| Create UserProfile specifications  | Application/Specifications       | P1       | 1 day   |
+| Create GameSession specifications  | Application/Specifications       | P2       | 1 day   |
+| Update CosmosRepository            | Infrastructure.Data              | P0       | 1 day   |
+| Update service layer usage         | Application/Services             | P1       | 2 days  |
 
 ---
 
@@ -446,14 +448,14 @@ public class ResilientDualWriteRepository<T> : IRepository<T> where T : class, I
 }
 ```
 
-| Task | Location | Priority | Effort |
-|------|----------|----------|--------|
-| Add Polly packages | Infrastructure.Hybrid | P0 | 0.5 day |
-| Create resilience strategies | Infrastructure.Hybrid/Resilience | P0 | 1 day |
-| Create pipeline registration | Infrastructure.Hybrid/Extensions | P0 | 0.5 day |
-| Integrate with dual-write repository | Infrastructure.Hybrid | P0 | 1 day |
-| Add health check integration | Infrastructure.Hybrid | P1 | 0.5 day |
-| Add metrics for resilience events | Infrastructure.Hybrid | P2 | 1 day |
+| Task                                 | Location                         | Priority | Effort  |
+| ------------------------------------ | -------------------------------- | -------- | ------- |
+| Add Polly packages                   | Infrastructure.Hybrid            | P0       | 0.5 day |
+| Create resilience strategies         | Infrastructure.Hybrid/Resilience | P0       | 1 day   |
+| Create pipeline registration         | Infrastructure.Hybrid/Extensions | P0       | 0.5 day |
+| Integrate with dual-write repository | Infrastructure.Hybrid            | P0       | 1 day   |
+| Add health check integration         | Infrastructure.Hybrid            | P1       | 0.5 day |
+| Add metrics for resilience events    | Infrastructure.Hybrid            | P2       | 1 day   |
 
 ---
 
@@ -671,14 +673,14 @@ public class AccountByEmailSpec : Specification<Account>, ISingleResultSpecifica
 }
 ```
 
-| Task | Location | Priority | Effort |
-|------|----------|----------|--------|
-| Create cache configuration options | Infrastructure.Redis/Configuration | P0 | 0.5 day |
-| Implement generic CachedRepository | Infrastructure.Redis | P0 | 2 days |
-| Add ICacheableSpecification interface | Application/Specifications | P1 | 0.5 day |
-| Update specifications for caching | Application/Specifications | P1 | 1 day |
-| Add cache metrics | Infrastructure.Redis | P2 | 1 day |
-| Add cache warming on startup | Infrastructure.Redis | P3 | 1 day |
+| Task                                  | Location                           | Priority | Effort  |
+| ------------------------------------- | ---------------------------------- | -------- | ------- |
+| Create cache configuration options    | Infrastructure.Redis/Configuration | P0       | 0.5 day |
+| Implement generic CachedRepository    | Infrastructure.Redis               | P0       | 2 days  |
+| Add ICacheableSpecification interface | Application/Specifications         | P1       | 0.5 day |
+| Update specifications for caching     | Application/Specifications         | P1       | 1 day   |
+| Add cache metrics                     | Infrastructure.Redis               | P2       | 1 day   |
+| Add cache warming on startup          | Infrastructure.Redis               | P3       | 1 day   |
 
 ---
 
@@ -896,12 +898,12 @@ public static class PolyglotMetrics
 
 ## Summary Timeline
 
-| Week | Phase | Key Deliverables |
-|------|-------|------------------|
-| 1-2 | Ardalis.Specification | Interface updates, specifications, repository updates |
-| 2-3 | Polly Resilience | Retry/circuit breaker/timeout pipelines |
-| 3-4 | Enhanced Caching | Generic cached repository, cache configuration |
-| 4-5 | Integration | DI registration, testing, metrics |
+| Week | Phase                 | Key Deliverables                                      |
+| ---- | --------------------- | ----------------------------------------------------- |
+| 1-2  | Ardalis.Specification | Interface updates, specifications, repository updates |
+| 2-3  | Polly Resilience      | Retry/circuit breaker/timeout pipelines               |
+| 3-4  | Enhanced Caching      | Generic cached repository, cache configuration        |
+| 4-5  | Integration           | DI registration, testing, metrics                     |
 
 ---
 

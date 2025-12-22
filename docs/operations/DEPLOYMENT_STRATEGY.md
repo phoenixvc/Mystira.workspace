@@ -13,23 +13,24 @@ This document outlines the complete deployment strategy for migrating from the o
 
 ### Infrastructure Changes
 
-| Resource Type | Old Name Pattern | New Name Pattern | Recreate Required |
-|---------------|------------------|------------------|-------------------|
-| Resource Groups | `mys-{env}-mystira-rg-eus` | `mys-{env}-core-rg-san` | No (can rename) |
-| AKS Clusters | `mys-{env}-mystira-aks-eus` | `mys-{env}-core-aks-san` | Yes |
-| PostgreSQL | `mys-{env}-db-psql-eus` | `mys-{env}-core-psql-san` | Yes |
-| Redis Cache | `mys-{env}-redis-eus` | `mys-{env}-core-redis-san` | Yes |
-| VNets | `mys-{env}-mystira-vnet-eus` | `mys-{env}-core-vnet-san` | No (can rename) |
-| Storage Accounts | `mys{env}storageeus` | `mys{env}corestoragesa` | Yes |
-| Key Vaults | `mys{env}kv` | `mys-{env}-{service}-kv-san` | Yes |
-| Log Analytics | Multiple per service | 3 total (1 per env) | Consolidation |
-| ACR | `mysprodacr` | `myssharedacr` | No (keep old) |
+| Resource Type    | Old Name Pattern             | New Name Pattern             | Recreate Required |
+| ---------------- | ---------------------------- | ---------------------------- | ----------------- |
+| Resource Groups  | `mys-{env}-mystira-rg-eus`   | `mys-{env}-core-rg-san`      | No (can rename)   |
+| AKS Clusters     | `mys-{env}-mystira-aks-eus`  | `mys-{env}-core-aks-san`     | Yes               |
+| PostgreSQL       | `mys-{env}-db-psql-eus`      | `mys-{env}-core-psql-san`    | Yes               |
+| Redis Cache      | `mys-{env}-redis-eus`        | `mys-{env}-core-redis-san`   | Yes               |
+| VNets            | `mys-{env}-mystira-vnet-eus` | `mys-{env}-core-vnet-san`    | No (can rename)   |
+| Storage Accounts | `mys{env}storageeus`         | `mys{env}corestoragesa`      | Yes               |
+| Key Vaults       | `mys{env}kv`                 | `mys-{env}-{service}-kv-san` | Yes               |
+| Log Analytics    | Multiple per service         | 3 total (1 per env)          | Consolidation     |
+| ACR              | `mysprodacr`                 | `myssharedacr`               | No (keep old)     |
 
 ### Region Migration
 
 All resources moving from **East US** → **South Africa North**
 
 **Impact:**
+
 - Physical data transfer required
 - Network latency changes
 - Compliance considerations
@@ -42,17 +43,20 @@ All resources moving from **East US** → **South Africa North**
 **Approach:** Deploy new infrastructure, migrate data, cutover
 
 **Workflow:**
+
 ```
 Old Infra (running) → Deploy New Infra → Migrate Data → Test → Cutover → Destroy Old
 ```
 
 **Pros:**
+
 - Clean slate, no legacy issues
 - Validates Terraform from scratch
 - Clear separation between old and new
 - Easy rollback (keep old running)
 
 **Cons:**
+
 - Requires double resources temporarily
 - More complex data migration
 - Higher cost during transition
@@ -67,6 +71,7 @@ Old Infra (running) → Deploy New Infra → Migrate Data → Test → Cutover �
 **Approach:** Rename resources and update Terraform state
 
 **Why Not Viable:**
+
 - PostgreSQL servers cannot be renamed
 - Redis cache cannot be renamed
 - Storage accounts cannot be renamed
@@ -81,15 +86,18 @@ Old Infra (running) → Deploy New Infra → Migrate Data → Test → Cutover �
 **Approach:** Import renameable resources, recreate others
 
 **Workflow:**
+
 ```
 Rename RG/VNet → Import to Terraform → Recreate databases/AKS → Update apps
 ```
 
 **Pros:**
+
 - Reuse some existing resources
 - Lower cost than full fresh deployment
 
 **Cons:**
+
 - Complex state management
 - High risk of state corruption
 - Still requires data migration for databases
@@ -104,6 +112,7 @@ Rename RG/VNet → Import to Terraform → Recreate databases/AKS → Update app
 **Approach:** Deploy new infrastructure alongside old, migrate per service, gradual cutover
 
 **Phases:**
+
 1. Deploy new infrastructure (green)
 2. Migrate databases (backup/restore)
 3. Deploy applications to new AKS
@@ -113,6 +122,7 @@ Rename RG/VNet → Import to Terraform → Recreate databases/AKS → Update app
 7. Destroy old infrastructure (blue)
 
 **Workflow:**
+
 ```
 ┌─────────────┐
 │  Old Infra  │ ← Users (100% traffic)
@@ -140,12 +150,14 @@ Rename RG/VNet → Import to Terraform → Recreate databases/AKS → Update app
 ```
 
 **Pros:**
+
 - Zero downtime (or minimal)
 - Easy rollback (switch back to blue)
 - Production-safe
 - Test thoroughly before cutover
 
 **Cons:**
+
 - Requires double resources
 - More complex orchestration
 - Higher temporary cost
@@ -159,6 +171,7 @@ Rename RG/VNet → Import to Terraform → Recreate databases/AKS → Update app
 **Strategy:** Fresh Deployment (simplified)
 
 **Rationale:**
+
 - Non-critical data
 - Can afford downtime
 - Cost-sensitive (avoid double resources)
@@ -167,6 +180,7 @@ Rename RG/VNet → Import to Terraform → Recreate databases/AKS → Update app
 **Estimated Downtime:** 1-2 hours
 
 **Procedure:**
+
 1. Notify dev team of maintenance window
 2. Optional: Backup databases for reference
 3. Deploy new infrastructure
@@ -182,6 +196,7 @@ Rename RG/VNet → Import to Terraform → Recreate databases/AKS → Update app
 **Strategy:** Blue-Green Deployment
 
 **Rationale:**
+
 - Important test data
 - Practice for production
 - Minimal downtime requirement
@@ -190,6 +205,7 @@ Rename RG/VNet → Import to Terraform → Recreate databases/AKS → Update app
 **Estimated Downtime:** 5-10 minutes (DNS cutover)
 
 **Procedure:**
+
 1. Deploy new infrastructure
 2. Backup and restore databases
 3. Verify data integrity
@@ -206,6 +222,7 @@ Rename RG/VNet → Import to Terraform → Recreate databases/AKS → Update app
 **Strategy:** Blue-Green Deployment with Phased Cutover
 
 **Rationale:**
+
 - Zero data loss requirement
 - Minimal downtime requirement
 - Risk mitigation critical
@@ -214,6 +231,7 @@ Rename RG/VNet → Import to Terraform → Recreate databases/AKS → Update app
 **Estimated Downtime:** <5 minutes (DNS propagation)
 
 **Procedure:**
+
 1. **Pre-deployment (1 week before):**
    - Final review of migration plan
    - Stakeholder communication
@@ -268,6 +286,7 @@ Rename RG/VNet → Import to Terraform → Recreate databases/AKS → Update app
 ### Step 1: Pre-Deployment Validation
 
 **Checklist:**
+
 - [ ] All code changes reviewed and merged to branch `claude/standardize-dev-resources-cT39Z`
 - [ ] PR analysis reviewed, critical issues addressed
 - [ ] Terraform plan reviewed for all environments
@@ -279,6 +298,7 @@ Rename RG/VNet → Import to Terraform → Recreate databases/AKS → Update app
 - [ ] On-call engineers briefed
 
 **Commands:**
+
 ```bash
 # Verify terraform plans
 for env in dev staging prod; do
@@ -341,6 +361,7 @@ echo "=== Deployment complete for ${ENVIRONMENT} ==="
 See [DATA_MIGRATION_PLAN.md](./DATA_MIGRATION_PLAN.md) for detailed procedures.
 
 **Summary:**
+
 ```bash
 # 1. Backup old databases
 ./scripts/backup-postgres.sh ${ENVIRONMENT}
@@ -426,6 +447,7 @@ done
 See [TESTING_CHECKLIST.md](./TESTING_CHECKLIST.md) for comprehensive testing procedures.
 
 **Quick Validation:**
+
 ```bash
 #!/bin/bash
 # validate-deployment.sh
@@ -481,6 +503,7 @@ echo "=== Validation complete ==="
 ### Step 7: Monitor
 
 **Metrics to Watch:**
+
 - Pod restart counts
 - HTTP error rates (4xx, 5xx)
 - Response times (p50, p95, p99)
@@ -489,6 +512,7 @@ echo "=== Validation complete ==="
 - Certificate expiration dates
 
 **Commands:**
+
 ```bash
 # Watch pods
 kubectl get pods -n mys-${ENVIRONMENT} -w
@@ -557,16 +581,19 @@ Issue Detected?
 ### Pre-Deployment Communication
 
 **1 Week Before:**
+
 - Email to all stakeholders with maintenance window
 - Post in Slack #engineering channel
 - Update status page
 
 **24 Hours Before:**
+
 - Reminder email
 - Reminder in Slack
 - Pre-deployment briefing with on-call team
 
 **1 Hour Before:**
+
 - Final reminder in Slack
 - Set status page to "Scheduled Maintenance"
 
@@ -586,62 +613,62 @@ Issue Detected?
 
 ### Dev Environment
 
-| Day | Activity | Duration |
-|-----|----------|----------|
-| Week 1 | Code review and final testing | 2 days |
-| Week 1 | Deploy new infrastructure | 30 min |
-| Week 1 | Deploy applications | 30 min |
-| Week 1 | Validation | 1 day |
-| Week 1 | Destroy old infra | 15 min |
+| Day    | Activity                      | Duration |
+| ------ | ----------------------------- | -------- |
+| Week 1 | Code review and final testing | 2 days   |
+| Week 1 | Deploy new infrastructure     | 30 min   |
+| Week 1 | Deploy applications           | 30 min   |
+| Week 1 | Validation                    | 1 day    |
+| Week 1 | Destroy old infra             | 15 min   |
 
 **Total: 3 days**
 
 ### Staging Environment
 
-| Day | Activity | Duration |
-|-----|----------|----------|
-| Week 2 | Deploy new infrastructure | 30 min |
-| Week 2 | Backup databases | 15 min |
-| Week 2 | Restore databases | 30 min |
-| Week 2 | Verify data integrity | 30 min |
-| Week 2 | Deploy applications | 30 min |
-| Week 2 | Automated testing | 1 hour |
-| Week 2 | Cutover | 10 min |
-| Week 2 | Monitoring period | 24 hours |
-| Week 2 | Destroy old infra | 15 min |
+| Day    | Activity                  | Duration |
+| ------ | ------------------------- | -------- |
+| Week 2 | Deploy new infrastructure | 30 min   |
+| Week 2 | Backup databases          | 15 min   |
+| Week 2 | Restore databases         | 30 min   |
+| Week 2 | Verify data integrity     | 30 min   |
+| Week 2 | Deploy applications       | 30 min   |
+| Week 2 | Automated testing         | 1 hour   |
+| Week 2 | Cutover                   | 10 min   |
+| Week 2 | Monitoring period         | 24 hours |
+| Week 2 | Destroy old infra         | 15 min   |
 
 **Total: 2 days**
 
 ### Production Environment
 
-| Day | Activity | Duration |
-|-----|----------|----------|
-| Week 3 | Final stakeholder approval | 1 day |
-| Week 3 | Deploy new infrastructure | 30 min |
-| Week 3 | Backup databases | 30 min |
-| Week 3 | Restore databases | 1 hour |
-| Week 3 | Verify data integrity | 1 hour |
-| Week 3 | Deploy applications | 30 min |
-| Week 3 | Smoke testing | 30 min |
-| Week 3 | Cutover | 10 min |
-| Week 3 | Intensive monitoring | 4 hours |
-| Week 3 | Monitoring period | 48 hours |
-| Week 3 | Destroy old infra | 15 min |
+| Day    | Activity                   | Duration |
+| ------ | -------------------------- | -------- |
+| Week 3 | Final stakeholder approval | 1 day    |
+| Week 3 | Deploy new infrastructure  | 30 min   |
+| Week 3 | Backup databases           | 30 min   |
+| Week 3 | Restore databases          | 1 hour   |
+| Week 3 | Verify data integrity      | 1 hour   |
+| Week 3 | Deploy applications        | 30 min   |
+| Week 3 | Smoke testing              | 30 min   |
+| Week 3 | Cutover                    | 10 min   |
+| Week 3 | Intensive monitoring       | 4 hours  |
+| Week 3 | Monitoring period          | 48 hours |
+| Week 3 | Destroy old infra          | 15 min   |
 
 **Total: 4 days (including validation periods)**
 
 ## Risk Assessment
 
-| Risk | Likelihood | Impact | Mitigation |
-|------|------------|--------|------------|
-| Data loss during migration | Low | Critical | Multiple backups, verification scripts |
-| Extended downtime | Medium | High | Blue-green deployment, tested rollback |
-| Application errors post-migration | Medium | High | Comprehensive testing, gradual rollout |
-| Cost overrun | Low | Medium | Temporary double resources budgeted |
-| DNS propagation delays | Low | Low | Use Azure DNS with low TTL |
-| Certificate issues | Medium | Medium | Pre-provision certificates, staging issuer |
-| Terraform state corruption | Low | High | State backups, careful import procedures |
-| Network connectivity issues | Low | Medium | VNet peering, firewall rules validated |
+| Risk                              | Likelihood | Impact   | Mitigation                                 |
+| --------------------------------- | ---------- | -------- | ------------------------------------------ |
+| Data loss during migration        | Low        | Critical | Multiple backups, verification scripts     |
+| Extended downtime                 | Medium     | High     | Blue-green deployment, tested rollback     |
+| Application errors post-migration | Medium     | High     | Comprehensive testing, gradual rollout     |
+| Cost overrun                      | Low        | Medium   | Temporary double resources budgeted        |
+| DNS propagation delays            | Low        | Low      | Use Azure DNS with low TTL                 |
+| Certificate issues                | Medium     | Medium   | Pre-provision certificates, staging issuer |
+| Terraform state corruption        | Low        | High     | State backups, careful import procedures   |
+| Network connectivity issues       | Low        | Medium   | VNet peering, firewall rules validated     |
 
 ## Success Criteria
 

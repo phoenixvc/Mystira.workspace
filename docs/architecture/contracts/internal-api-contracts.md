@@ -778,12 +778,12 @@ public interface IEventHandler<in TEvent> where TEvent : class
 
 All internal APIs must include the following headers:
 
-| Header | Description | Example |
-|--------|-------------|---------|
-| `X-Api-Version` | API version | `1.0` |
-| `X-Correlation-Id` | Request correlation ID | `uuid` |
-| `X-Service-Name` | Calling service name | `mystira-app-api` |
-| `X-Migration-Phase` | Current data migration phase | `1` |
+| Header              | Description                  | Example           |
+| ------------------- | ---------------------------- | ----------------- |
+| `X-Api-Version`     | API version                  | `1.0`             |
+| `X-Correlation-Id`  | Request correlation ID       | `uuid`            |
+| `X-Service-Name`    | Calling service name         | `mystira-app-api` |
+| `X-Migration-Phase` | Current data migration phase | `1`               |
 
 ### Version Compatibility
 

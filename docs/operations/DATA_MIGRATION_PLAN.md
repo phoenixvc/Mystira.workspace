@@ -16,18 +16,21 @@ This document outlines the data migration strategy for transitioning from the ol
 Each environment has a PostgreSQL Flexible Server with application databases:
 
 **Dev Environment:**
+
 - Server: `mys-dev-db-psql-eus` → `mys-dev-core-psql-san`
 - Databases: `chain_db`, `publisher_db`, `story_generator_db`
 - Size: ~5-10 GB (estimated)
 - Criticality: Low (can be recreated)
 
 **Staging Environment:**
+
 - Server: `mys-staging-db-psql-eus` → `mys-staging-core-psql-san`
 - Databases: `chain_db`, `publisher_db`, `story_generator_db`
 - Size: ~10-20 GB (estimated)
 - Criticality: Medium (test data, but valuable)
 
 **Production Environment:**
+
 - Server: `mys-prod-db-psql-eus` → `mys-prod-core-psql-san`
 - Databases: `chain_db`, `publisher_db`, `story_generator_db`
 - Size: ~50-100 GB (estimated)
@@ -55,16 +58,19 @@ Each environment has a PostgreSQL Flexible Server with application databases:
 **Approach**: Deploy new infrastructure, recreate/reseed data
 
 **Pros:**
+
 - Clean slate
 - No migration complexity
 - Validates terraform from scratch
 
 **Cons:**
+
 - Lose all dev data
 
 **Best For:** Dev environment
 
 **Steps:**
+
 1. Backup existing dev data (optional, for reference)
 2. Deploy new infrastructure with `terraform apply`
 3. Reseed databases with test data
@@ -76,12 +82,14 @@ Each environment has a PostgreSQL Flexible Server with application databases:
 **Approach**: Deploy new infrastructure alongside old, migrate data, switch traffic
 
 **Pros:**
+
 - Zero data loss
 - Easy rollback
 - No downtime (or minimal)
 - Production-safe
 
 **Cons:**
+
 - Requires double resources temporarily
 - More complex coordination
 - Higher cost during migration
@@ -89,6 +97,7 @@ Each environment has a PostgreSQL Flexible Server with application databases:
 **Best For:** Staging and Production environments
 
 **Steps:**
+
 1. Deploy new infrastructure (blue-green)
 2. Backup all databases
 3. Restore backups to new PostgreSQL servers
@@ -102,6 +111,7 @@ Each environment has a PostgreSQL Flexible Server with application databases:
 **Approach**: Rename resources and import into new terraform state
 
 **Cons:**
+
 - Cannot rename PostgreSQL servers (requires recreation)
 - Cannot rename Redis (requires recreation)
 - Cannot rename storage accounts (requires recreation)
@@ -112,11 +122,11 @@ Each environment has a PostgreSQL Flexible Server with application databases:
 
 ## Recommended Approach per Environment
 
-| Environment | Strategy | Downtime | Risk Level |
-|-------------|----------|----------|------------|
-| Dev | Fresh Deployment | 1-2 hours | Low |
-| Staging | Blue-Green | ~5 minutes | Low |
-| Production | Blue-Green | ~5 minutes | Medium |
+| Environment | Strategy         | Downtime   | Risk Level |
+| ----------- | ---------------- | ---------- | ---------- |
+| Dev         | Fresh Deployment | 1-2 hours  | Low        |
+| Staging     | Blue-Green       | ~5 minutes | Low        |
+| Production  | Blue-Green       | ~5 minutes | Medium     |
 
 ## Detailed Migration Procedures
 
@@ -557,11 +567,11 @@ No data migration needed (cache data). Just update connection strings.
 
 ## Estimated Timeline
 
-| Environment | Backup | Deploy | Restore | Verify | Total |
-|-------------|--------|--------|---------|--------|-------|
-| Dev | - | 30m | - | 15m | 45m |
-| Staging | 15m | 30m | 30m | 30m | 1h 45m |
-| Production | 30m | 30m | 1h | 1h | 3h |
+| Environment | Backup | Deploy | Restore | Verify | Total  |
+| ----------- | ------ | ------ | ------- | ------ | ------ |
+| Dev         | -      | 30m    | -       | 15m    | 45m    |
+| Staging     | 15m    | 30m    | 30m     | 30m    | 1h 45m |
+| Production  | 30m    | 30m    | 1h      | 1h     | 3h     |
 
 ## Contacts
 

@@ -5,6 +5,7 @@
 **Pattern:** `[org]-[env]-[project]-[type]-[region]`
 
 ### Components:
+
 - **org:** Organization code (`mys` for Mystira)
 - **env:** Environment (`dev`, `staging`, `prod`)
 - **project:** What it belongs to (domain/system) - `core`, `chain`, `publisher`, `story`
@@ -12,6 +13,7 @@
 - **region:** `san` (South Africa North) or `glob` (Global)
 
 ### Key Rules:
+
 1. ✓ 5-part structure only (no 6-part names)
 2. ✓ No org duplication (never `mys-dev-mys-...`)
 3. ✓ Global resources use `glob` region
@@ -23,31 +25,37 @@
 ## Current Problems
 
 ### 1. Six-Part Names (Non-Compliant)
+
 Current Terraform creates **6-part names** which violates v2.2:
+
 - ❌ `mys-dev-mystira-chain-log-san` (org-env-project-service-type-region)
 - ❌ `mys-dev-mystira-pub-nsg-san` (has both project and service)
 - ✅ Should be: `mys-dev-chain-log-san` (5 parts)
 
 **Root cause:** Terraform modules use:
+
 ```terraform
 name_prefix = "mys-${var.environment}-mystira-chain"  # WRONG - 4 parts before type
 ```
 
 Should be:
+
 ```terraform
 name_prefix = "mys-${var.environment}-chain"  # CORRECT - 3 parts before type
 ```
 
 ### 2. Shared Modules Use Wrong Pattern
+
 - ❌ `mystira-shared-pg-dev-server` (doesn't follow v2.2 at all)
 - ❌ `mystira-shared-redis-dev-cache` (wrong order)
 - ✅ Should be: `mys-dev-core-db-san` (using "core" for shared infra)
 
 ### 3. Redundant Resources
-| Resource Type | Current Count | Should Be | Waste |
-|--------------|---------------|-----------|-------|
-| Log Analytics Workspaces | 3+ | 1 | ~$150/mo |
-| Email Communication Services | 2-3? | 1 | ~$50/mo |
+
+| Resource Type                | Current Count | Should Be | Waste    |
+| ---------------------------- | ------------- | --------- | -------- |
+| Log Analytics Workspaces     | 3+            | 1         | ~$150/mo |
+| Email Communication Services | 2-3?          | 1         | ~$50/mo  |
 
 ---
 
@@ -55,14 +63,15 @@ name_prefix = "mys-${var.environment}-chain"  # CORRECT - 3 parts before type
 
 Following v2.2, we'll use these projects:
 
-| Project Code | Purpose | Examples |
-|--------------|---------|----------|
-| `core` | Shared infrastructure | VNet, AKS, shared DB, shared Redis, shared Logs |
-| `chain` | Blockchain service | Chain-specific KV, Storage, NSG, App Insights |
-| `publisher` | Publisher service | Publisher KV, Service Bus, NSG, App Insights |
-| `story` | Story Generator service | Story Gen KV, NSG, App Insights |
+| Project Code | Purpose                 | Examples                                        |
+| ------------ | ----------------------- | ----------------------------------------------- |
+| `core`       | Shared infrastructure   | VNet, AKS, shared DB, shared Redis, shared Logs |
+| `chain`      | Blockchain service      | Chain-specific KV, Storage, NSG, App Insights   |
+| `publisher`  | Publisher service       | Publisher KV, Service Bus, NSG, App Insights    |
+| `story`      | Story Generator service | Story Gen KV, NSG, App Insights                 |
 
 ### Why "core" for shared resources?
+
 Following v2.2 canonical projects pattern (e.g., `nl-prod-core-kv-glob`), shared infrastructure should use the "core" project code.
 
 ---
@@ -70,6 +79,7 @@ Following v2.2 canonical projects pattern (e.g., `nl-prod-core-kv-glob`), shared
 ## v2.2 Compliant Resource Names for Dev
 
 ### Core Infrastructure (Shared)
+
 ```
 mys-dev-core-rg-san                         # Resource Group
 mys-dev-core-vnet-san                       # Virtual Network
@@ -85,6 +95,7 @@ mysdevcorestsan                             # General storage account
 ```
 
 ### Chain Service
+
 ```
 mys-dev-chain-nsg-san                       # Network Security Group
 mys-dev-chain-identity-san                  # Managed Identity
@@ -94,6 +105,7 @@ mysdevchainsan                              # Storage Account (Premium FileStora
 ```
 
 ### Publisher Service
+
 ```
 mys-dev-publisher-nsg-san                   # Network Security Group
 mys-dev-publisher-identity-san              # Managed Identity
@@ -103,6 +115,7 @@ mysdevpublisherqueuesan                     # Service Bus Namespace (no hyphens)
 ```
 
 ### Story Generator Service
+
 ```
 mys-dev-story-nsg-san                       # Network Security Group
 mys-dev-story-identity-san                  # Managed Identity
@@ -111,6 +124,7 @@ mys-dev-story-ai-san                        # Application Insights (uses shared 
 ```
 
 ### Global Services
+
 ```
 mys-dev-core-fd-glob                        # Front Door (global scope)
 mys-dev-core-waf-glob                       # WAF Policy (global)
@@ -122,49 +136,55 @@ mys-dev-core-dns-glob                       # DNS Zone (if needed)
 
 ## Type Vocabulary (v2.2 Controlled List)
 
-| Type Code | Resource | Example |
-|-----------|----------|---------|
-| `rg` | Resource Group | `mys-dev-core-rg-san` |
-| `vnet` | Virtual Network | `mys-dev-core-vnet-san` |
-| `subnet` | Subnet | `mys-dev-core-subnet-san` |
-| `nsg` | Network Security Group | `mys-dev-chain-nsg-san` |
-| `aks` | AKS Cluster | `mys-dev-core-aks-san` |
-| `acr` | Container Registry | `mys-dev-core-acr-glob` |
-| `kv` | Key Vault | `mys-dev-chain-kv-san` |
-| `db` | Database (PostgreSQL/MySQL) | `mys-dev-core-db-san` |
-| `cache` | Redis Cache | `mys-dev-core-cache-san` |
-| `storage` | Storage Account | `mysdevcorestorage` |
-| `queue` | Service Bus/Queue | `mysdevpublisherqueue` |
-| `log` | Log Analytics | `mys-dev-core-log-san` |
-| `ai` | Application Insights | `mys-dev-chain-ai-san` |
-| `identity` | Managed Identity | `mys-dev-chain-identity-san` |
-| `fd` | Front Door | `mys-dev-core-fd-glob` |
-| `waf` | WAF Policy | `mys-dev-core-waf-glob` |
-| `dns` | DNS Zone | `mys-dev-core-dns-glob` |
-| `email` | Email Service | `mys-dev-core-email-glob` |
+| Type Code  | Resource                    | Example                      |
+| ---------- | --------------------------- | ---------------------------- |
+| `rg`       | Resource Group              | `mys-dev-core-rg-san`        |
+| `vnet`     | Virtual Network             | `mys-dev-core-vnet-san`      |
+| `subnet`   | Subnet                      | `mys-dev-core-subnet-san`    |
+| `nsg`      | Network Security Group      | `mys-dev-chain-nsg-san`      |
+| `aks`      | AKS Cluster                 | `mys-dev-core-aks-san`       |
+| `acr`      | Container Registry          | `mys-dev-core-acr-glob`      |
+| `kv`       | Key Vault                   | `mys-dev-chain-kv-san`       |
+| `db`       | Database (PostgreSQL/MySQL) | `mys-dev-core-db-san`        |
+| `cache`    | Redis Cache                 | `mys-dev-core-cache-san`     |
+| `storage`  | Storage Account             | `mysdevcorestorage`          |
+| `queue`    | Service Bus/Queue           | `mysdevpublisherqueue`       |
+| `log`      | Log Analytics               | `mys-dev-core-log-san`       |
+| `ai`       | Application Insights        | `mys-dev-chain-ai-san`       |
+| `identity` | Managed Identity            | `mys-dev-chain-identity-san` |
+| `fd`       | Front Door                  | `mys-dev-core-fd-glob`       |
+| `waf`      | WAF Policy                  | `mys-dev-core-waf-glob`      |
+| `dns`      | DNS Zone                    | `mys-dev-core-dns-glob`      |
+| `email`    | Email Service               | `mys-dev-core-email-glob`    |
 
 ---
 
 ## Resources to DELETE (Redundant)
 
 ### Log Analytics Workspaces (Keep only 1)
+
 - ❌ `mys-dev-mystira-chain-log-san` - DELETE (chain creates its own)
 - ❌ `mys-dev-mystira-pub-logs` - DELETE (publisher creates its own)
 - ✅ `mystira-shared-mon-dev-logs` - KEEP and RENAME to `mys-dev-core-log-san`
 
 ### Email Communication Services (Consolidate)
+
 Current resources (from screenshots):
+
 - `AzureManagedDomain` (managed domain for email)
 - `mys-dev-mystira-acs-glob` (Azure Communication Service?)
 - `mys-dev-mystira-email-glob` (Email Communication Service)
 
 **Action:** Consolidate to ONE email service + ONE managed domain:
+
 - Keep: `mys-dev-core-email-glob` (rename from `mys-dev-mystira-email-glob`)
 - Keep: Managed domain (associate with email service)
 - Delete: Duplicate/redundant services
 
 ### Application Insights Strategy
+
 **Keep service-specific App Insights, but connect to shared Log Analytics:**
+
 - ✅ `mys-dev-chain-ai-san` (chain telemetry)
 - ✅ `mys-dev-publisher-ai-san` (publisher telemetry)
 - ✅ `mys-dev-story-ai-san` (story generator telemetry)
@@ -177,9 +197,11 @@ All should use `mys-dev-core-log-san` as the workspace backend.
 ## Terraform Code Changes Required
 
 ### 1. Update Chain Module
+
 **File:** `infra/terraform/modules/chain/main.tf`
 
 **Changes:**
+
 ```terraform
 # Line 88: Fix name prefix (remove "mystira")
 locals {
@@ -213,9 +235,11 @@ resource "azurerm_application_insights" "chain" {
 ```
 
 ### 2. Update Publisher Module
+
 **File:** `infra/terraform/modules/publisher/main.tf`
 
 **Changes:**
+
 ```terraform
 # Line 64: Fix name prefix (remove "mystira")
 locals {
@@ -243,9 +267,11 @@ resource "azurerm_application_insights" "publisher" {
 ```
 
 ### 3. Update Story Generator Module
+
 **File:** `infra/terraform/modules/story-generator/main.tf`
 
 **Changes:**
+
 ```terraform
 # Line 93: Fix name prefix (remove "mystira")
 locals {
@@ -259,9 +285,11 @@ locals {
 ```
 
 ### 4. Update Shared PostgreSQL Module
+
 **File:** `infra/terraform/modules/shared/postgresql/main.tf`
 
 **Changes:**
+
 ```terraform
 # Line 100: Fix name prefix to use "core" project
 locals {
@@ -283,9 +311,11 @@ resource "azurerm_postgresql_flexible_server" "shared" {
 ```
 
 ### 5. Update Shared Redis Module
+
 **File:** `infra/terraform/modules/shared/redis/main.tf`
 
 **Changes:**
+
 ```terraform
 # Line 79: Fix name prefix to use "core" project
 locals {
@@ -301,9 +331,11 @@ resource "azurerm_redis_cache" "shared" {
 ```
 
 ### 6. Update Shared Monitoring Module
+
 **File:** `infra/terraform/modules/shared/monitoring/main.tf`
 
 **Changes:**
+
 ```terraform
 # Line 49: Fix name prefix to use "core" project
 locals {
@@ -325,9 +357,11 @@ resource "azurerm_application_insights" "shared" {
 ```
 
 ### 7. Update Dev Environment
+
 **File:** `infra/terraform/environments/dev/main.tf`
 
 **Changes:**
+
 ```terraform
 # Line 48: Fix Resource Group name
 resource "azurerm_resource_group" "main" {
@@ -373,11 +407,13 @@ module "publisher" {
 ## v2.2 Compliance Validation
 
 ### Regex Pattern (from v2.2 spec):
+
 ```regex
 ^(nl|pvc|tws|mys)-(dev|staging|prod)-[a-z0-9-]+-(rg|app|api|func|swa|db|storage|kv|queue|cache|ai|acr|vnet|subnet|dns|log|fd)-(euw|eun|wus|eus|san|saf|swe|uks|usw|glob)$
 ```
 
 ### Compliance Tests:
+
 ✅ Must NOT contain `-mys-mystira-` (org duplication)
 ✅ Must NOT contain 6-part names
 ✅ If type is `dns` or `fd`, region must be `glob`
@@ -388,6 +424,7 @@ module "publisher" {
 ## Implementation Plan
 
 ### Phase 1: Update Terraform Code (No Infrastructure Changes)
+
 1. ✅ Create branch: `claude/standardize-dev-resources-cT39Z`
 2. Update all module name prefixes to remove "mystira" redundancy
 3. Change shared modules from `mystira-shared-*` to `mys-{env}-core-*`
@@ -397,24 +434,28 @@ module "publisher" {
 7. Run `terraform fmt` and validate
 
 ### Phase 2: Terraform Plan Review
+
 1. Run `terraform plan` to see destroy/recreate changes
 2. Export all secrets from existing Key Vaults
 3. Document configuration values
 4. Review plan with team
 
 ### Phase 3: Backup and Prepare
+
 1. Export all Key Vault secrets
 2. Backup storage account data
 3. Document all configuration
 4. Take snapshots if applicable
 
 ### Phase 4: Destroy and Recreate
+
 1. Run `terraform destroy` targeting old Log Analytics workspaces
 2. Run `terraform apply` to create resources with v2.2 compliant names
 3. Restore secrets to new Key Vaults
 4. Update Kubernetes manifests to reference new resource names
 
 ### Phase 5: Validation and Cleanup
+
 1. Verify all resources created successfully
 2. Test all services
 3. Delete orphaned resources manually (if any)
@@ -426,11 +467,11 @@ module "publisher" {
 
 ## Estimated Cost Savings
 
-| Resource | Current | Proposed | Monthly Savings |
-|----------|---------|----------|-----------------|
-| Log Analytics (3 → 1) | ~$150 | ~$50 | $100 |
-| Email Services (3? → 1) | ~$50 | ~$25 | $25 |
-| **Total** | | | **~$125/mo** |
+| Resource                | Current | Proposed | Monthly Savings |
+| ----------------------- | ------- | -------- | --------------- |
+| Log Analytics (3 → 1)   | ~$150   | ~$50     | $100            |
+| Email Services (3? → 1) | ~$50    | ~$25     | $25             |
+| **Total**               |         |          | **~$125/mo**    |
 
 ---
 
@@ -459,6 +500,7 @@ module "publisher" {
 ## Next Steps
 
 Once you confirm the above questions, I'll:
+
 1. Update all Terraform module files
 2. Run `terraform fmt` and `terraform validate`
 3. Generate a `terraform plan` for review

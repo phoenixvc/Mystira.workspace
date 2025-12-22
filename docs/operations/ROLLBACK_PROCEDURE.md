@@ -11,14 +11,14 @@ This document provides detailed rollback procedures for the Azure v2.2 naming co
 
 ## Rollback Decision Matrix
 
-| Phase | Time Since Cutover | Rollback Approach | Data Loss Risk |
-|-------|-------------------|-------------------|----------------|
-| Pre-deployment | N/A | Abort deployment | None |
-| Deployment (before cutover) | N/A | Destroy new infra | None |
-| Immediate post-cutover | 0-1 hour | Quick rollback | None |
-| Short-term post-cutover | 1-24 hours | Evaluated rollback | Low |
-| Long-term post-cutover | 24-48 hours | Fix forward | Medium |
-| Old infra destroyed | > 48 hours | Emergency recovery | High |
+| Phase                       | Time Since Cutover | Rollback Approach  | Data Loss Risk |
+| --------------------------- | ------------------ | ------------------ | -------------- |
+| Pre-deployment              | N/A                | Abort deployment   | None           |
+| Deployment (before cutover) | N/A                | Destroy new infra  | None           |
+| Immediate post-cutover      | 0-1 hour           | Quick rollback     | None           |
+| Short-term post-cutover     | 1-24 hours         | Evaluated rollback | Low            |
+| Long-term post-cutover      | 24-48 hours        | Fix forward        | Medium         |
+| Old infra destroyed         | > 48 hours         | Emergency recovery | High           |
 
 ## Rollback Criteria
 
@@ -58,6 +58,7 @@ Do NOT rollback for:
 **Scenario**: Issues found before `terraform apply`
 
 **Steps**:
+
 1. Do not proceed with deployment
 2. Review and fix issues
 3. Re-validate terraform plans
@@ -190,6 +191,7 @@ kubectl logs -n "mys-${ENVIRONMENT}" -l app.kubernetes.io/name=mys-publisher --t
 #### Step 4: Handle Data Loss (1 Hour Window)
 
 **Option A: Accept Data Loss**
+
 - Simplest approach
 - Lose 0-1 hour of new data
 - Communicate to users
@@ -260,12 +262,14 @@ terraform destroy -auto-approve
 ### Decision Process
 
 **Rollback Committee** (required for approval):
+
 - Incident Commander
 - Engineering Lead
 - Product Owner
 - On-call Engineer
 
 **Considerations**:
+
 1. Severity of issue
 2. User impact
 3. Data loss implications (1-24 hours of new data)
@@ -373,6 +377,7 @@ echo "Coordinate with data team for complex merges"
 ### Why Fix Forward is Preferred
 
 At this point:
+
 - 24-48 hours of new data in new databases
 - Old infrastructure may be partially destroyed
 - Data recovery extremely complex
@@ -381,12 +386,14 @@ At this point:
 ### If Rollback is Absolutely Necessary
 
 **Approval Required From**:
+
 - CTO/Engineering VP
 - Product VP
 - Legal (data loss implications)
 - Customer Success (user communication)
 
 **Procedure**:
+
 1. Full database export from new infrastructure
 2. Complex data merge/reconciliation
 3. Restore old infrastructure from backups
@@ -452,16 +459,19 @@ done
 ### During Rollback
 
 **Immediate** (within 5 minutes of decision):
+
 - [ ] Post in #incidents Slack channel
 - [ ] Update status page: "Investigating issue"
 - [ ] Page on-call team
 
 **After Rollback Initiated** (within 15 minutes):
+
 - [ ] Email to stakeholders: "Rollback in progress"
 - [ ] Update status page: "Service degradation - rollback initiated"
 - [ ] Post update in #incidents every 15 minutes
 
 **After Rollback Complete**:
+
 - [ ] Email to stakeholders: "Rollback complete"
 - [ ] Update status page: "Operational"
 - [ ] Post-incident update in #engineering
@@ -542,19 +552,19 @@ After a rollback:
 ```markdown
 # Rollback Post-Mortem - Azure v2.2 Migration
 
-**Date**: ___________
-**Environment**: ___________
+**Date**: \***\*\_\_\_\*\***
+**Environment**: \***\*\_\_\_\*\***
 **Rollback Type**: Quick / Evaluated / Emergency
 
 ## Timeline
 
-| Time | Event |
-|------|-------|
-|      | Issue detected |
-|      | Rollback decision |
+| Time | Event              |
+| ---- | ------------------ |
+|      | Issue detected     |
+|      | Rollback decision  |
 |      | Rollback initiated |
-|      | Rollback complete |
-|      | Service restored |
+|      | Rollback complete  |
+|      | Service restored   |
 
 ## Root Cause
 
@@ -562,10 +572,10 @@ After a rollback:
 
 ## Impact
 
-- **Users Affected**: _____
-- **Downtime**: _____ minutes
+- **Users Affected**: **\_**
+- **Downtime**: **\_** minutes
 - **Data Loss**: Yes / No (details)
-- **Financial Impact**: $ _____
+- **Financial Impact**: $ **\_**
 
 ## What Went Well
 
@@ -580,16 +590,14 @@ After a rollback:
 ## Action Items
 
 | Action | Owner | Due Date | Priority |
-|--------|-------|----------|----------|
+| ------ | ----- | -------- | -------- |
 |        |       |          |          |
 
 ## Process Improvements
 
 -
--
-
-**Incident Commander**: _________________
-**Date**: _________________
+- **Incident Commander**: **\*\*\*\***\_**\*\*\*\***
+  **Date**: **\*\*\*\***\_**\*\*\*\***
 ```
 
 ## References
@@ -601,12 +609,12 @@ After a rollback:
 
 ## Emergency Contacts
 
-- **Incident Commander**: _________________
-- **Engineering Lead**: _________________
-- **DevOps Lead**: _________________
-- **On-Call Engineer**: _________________
-- **Database Administrator**: _________________
-- **Product Owner**: _________________
+- **Incident Commander**: **\*\*\*\***\_**\*\*\*\***
+- **Engineering Lead**: **\*\*\*\***\_**\*\*\*\***
+- **DevOps Lead**: **\*\*\*\***\_**\*\*\*\***
+- **On-Call Engineer**: **\*\*\*\***\_**\*\*\*\***
+- **Database Administrator**: **\*\*\*\***\_**\*\*\*\***
+- **Product Owner**: **\*\*\*\***\_**\*\*\*\***
 
 ---
 

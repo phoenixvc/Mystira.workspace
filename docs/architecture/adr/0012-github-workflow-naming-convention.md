@@ -14,6 +14,7 @@ The Mystira workspace contains 15 GitHub Actions workflows that handle CI/CD for
 4. **Scaling concerns**: Adding new components would worsen the organization problem
 
 **Example of the problem:**
+
 ```
 All Workflows (old):
 - Admin UI CI
@@ -42,6 +43,7 @@ We adopt a **hierarchical "Category: Name" naming convention** for all GitHub Ac
 ```
 
 **Examples:**
+
 - `Components: Publisher - CI`
 - `Infrastructure: Deploy`
 - `Deployment: Production`
@@ -50,19 +52,20 @@ We adopt a **hierarchical "Category: Name" naming convention** for all GitHub Ac
 
 ### Categories
 
-| Category         | Purpose                                    | Examples                          |
-| ---------------- | ------------------------------------------ | --------------------------------- |
-| **Components**   | Component-specific CI/CD                   | `Components: Chain - CI`          |
-| **Infrastructure** | Infrastructure operations                | `Infrastructure: Deploy`          |
-| **Deployment**   | Environment-specific deployments           | `Deployment: Staging`             |
-| **Workspace**    | Workspace-level operations                 | `Workspace: CI`                   |
-| **Utilities**    | Helper workflows and checks                | `Utilities: Check Submodules`, `Utilities: Link Checker` |
+| Category           | Purpose                          | Examples                                                 |
+| ------------------ | -------------------------------- | -------------------------------------------------------- |
+| **Components**     | Component-specific CI/CD         | `Components: Chain - CI`                                 |
+| **Infrastructure** | Infrastructure operations        | `Infrastructure: Deploy`                                 |
+| **Deployment**     | Environment-specific deployments | `Deployment: Staging`                                    |
+| **Workspace**      | Workspace-level operations       | `Workspace: CI`                                          |
+| **Utilities**      | Helper workflows and checks      | `Utilities: Check Submodules`, `Utilities: Link Checker` |
 
 ### Implementation
 
 All 15 workflows have been renamed following this convention:
 
 #### Components (7 workflows)
+
 - `Components: Admin API - CI` - Admin backend CI
 - `Components: Admin UI - CI` - Admin frontend CI
 - `Components: App - CI` - Main application CI
@@ -72,18 +75,22 @@ All 15 workflows have been renamed following this convention:
 - `Components: Story Generator - CI` - Story engine CI
 
 #### Infrastructure (2 workflows)
+
 - `Infrastructure: Deploy` - Terraform + Kubernetes deployment
 - `Infrastructure: Validate` - Infrastructure validation on PRs
 
 #### Deployment (2 workflows)
+
 - `Deployment: Production` - Manual production deployment
 - `Deployment: Staging` - Auto-deploy to staging
 
 #### Workspace (2 workflows)
+
 - `Workspace: CI` - Workspace-level CI
 - `Workspace: Release` - NPM package releases
 
 #### Utilities (2 workflows)
+
 - `Utilities: Check Submodules` - Validate submodule commits
 - `Utilities: Link Checker` - Check markdown links in documentation
 
@@ -92,6 +99,7 @@ All 15 workflows have been renamed following this convention:
 ### Positive
 
 1. **Better organization**: Related workflows group together alphabetically
+
    ```
    Components: Admin API - CI
    Components: Admin UI - CI
@@ -150,6 +158,7 @@ Deploy: Staging
 ```
 
 **Rejected because:**
+
 - Doesn't group as well (CI workflows would be far from each other)
 - Less descriptive for complex workflows
 
@@ -162,6 +171,7 @@ Deploy: Staging
 ```
 
 **Rejected because:**
+
 - Hard to maintain numbering as workflows are added/removed
 - Not semantic (numbers have no meaning)
 - Poor UX in GitHub Actions UI
@@ -169,6 +179,7 @@ Deploy: Staging
 ### 3. No changes (status quo)
 
 **Rejected because:**
+
 - Problems with discoverability and organization would continue
 - Would worsen as more components are added
 
@@ -185,10 +196,12 @@ Deploy: Staging
 ### Workflow File Names
 
 **Important**: Workflow **file names** remain unchanged (only the `name:` field is updated):
+
 - File: `.github/workflows/chain-ci.yml`
 - Name: `Components: Chain - CI`
 
 This ensures:
+
 - Git history is preserved
 - URLs to workflows remain stable
 - Automation referencing file paths still works
@@ -204,6 +217,7 @@ When adding new workflows:
 5. **Utility**: `Utilities: [Purpose]`
 
 Use quotation marks in YAML:
+
 ```yaml
 name: "Components: My Service - CI"
 ```

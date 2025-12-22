@@ -38,17 +38,17 @@ This Terraform module deploys the infrastructure for [Mystira.App](https://githu
 
 ## Resources Created
 
-| Resource | Purpose | Notes |
-|----------|---------|-------|
-| **Cosmos DB** | Document database | Serverless mode, 7 containers |
-| **App Service** | API backend | Linux, .NET 9.0, System Managed Identity |
-| **Static Web App** | Blazor WASM PWA | Deployed to fallback region (not available in ZA) |
-| **Storage Account** | Media blobs | With CORS support |
-| **Key Vault** | Secrets management | Stores connection strings, JWT keys |
-| **Application Insights** | APM & monitoring | Connected to Log Analytics |
-| **Log Analytics** | Centralized logging | 30-day retention (configurable) |
-| **Communication Services** | Email (optional) | Azure-managed email |
-| **Azure Bot** | Teams integration (optional) | For Teams channel |
+| Resource                   | Purpose                      | Notes                                             |
+| -------------------------- | ---------------------------- | ------------------------------------------------- |
+| **Cosmos DB**              | Document database            | Serverless mode, 7 containers                     |
+| **App Service**            | API backend                  | Linux, .NET 9.0, System Managed Identity          |
+| **Static Web App**         | Blazor WASM PWA              | Deployed to fallback region (not available in ZA) |
+| **Storage Account**        | Media blobs                  | With CORS support                                 |
+| **Key Vault**              | Secrets management           | Stores connection strings, JWT keys               |
+| **Application Insights**   | APM & monitoring             | Connected to Log Analytics                        |
+| **Log Analytics**          | Centralized logging          | 30-day retention (configurable)                   |
+| **Communication Services** | Email (optional)             | Azure-managed email                               |
+| **Azure Bot**              | Teams integration (optional) | For Teams channel                                 |
 
 ## Usage
 
@@ -144,35 +144,35 @@ terraform import 'module.mystira_app.azurerm_application_insights.main[0]' \
 
 These containers are created by Terraform. Partition keys match the DbContext `ToJsonProperty` mappings.
 
-| Container | Partition Key | Purpose |
-|-----------|--------------|---------|
-| UserProfiles | `/id` | User profile data |
-| Accounts | `/id` | User accounts |
-| Scenarios | `/id` | Game scenarios |
-| GameSessions | `/accountId` | Active game sessions |
-| ContentBundles | `/id` | Downloadable content |
-| PendingSignups | `/email` | Unverified registrations |
-| CompassTrackings | `/id` | Analytics tracking (Axis mapped to "id") |
+| Container        | Partition Key | Purpose                                  |
+| ---------------- | ------------- | ---------------------------------------- |
+| UserProfiles     | `/id`         | User profile data                        |
+| Accounts         | `/id`         | User accounts                            |
+| Scenarios        | `/id`         | Game scenarios                           |
+| GameSessions     | `/accountId`  | Active game sessions                     |
+| ContentBundles   | `/id`         | Downloadable content                     |
+| PendingSignups   | `/email`      | Unverified registrations                 |
+| CompassTrackings | `/id`         | Analytics tracking (Axis mapped to "id") |
 
 ### EF Core Auto-Created Containers (13+)
 
 Additional containers are created automatically by EF Core `EnsureCreatedAsync()` at application startup:
 
-| Container | Partition Key | Purpose |
-|-----------|--------------|---------|
-| CharacterMaps | `/id` | Character mapping data |
-| BadgeConfigurations | `/id` | Badge definitions |
-| Badges | `/id` | Badge instances |
-| BadgeImages | `/id` | Badge image assets |
-| CompassAxes | `/id` | Compass axis definitions |
-| ArchetypeDefinitions | `/id` | Archetype master data |
-| EchoTypeDefinitions | `/id` | Echo type master data |
-| FantasyThemeDefinitions | `/id` | Fantasy theme master data |
-| AgeGroupDefinitions | `/id` | Age group master data |
-| PlayerScenarioScores | `/profileId` | Player scores per scenario |
-| MediaAssets | `/mediaType` | Media asset metadata |
-| MediaMetadataFiles | `/id` | Media metadata |
-| AvatarConfigurationFiles | `/id` | Avatar configurations |
+| Container                | Partition Key | Purpose                    |
+| ------------------------ | ------------- | -------------------------- |
+| CharacterMaps            | `/id`         | Character mapping data     |
+| BadgeConfigurations      | `/id`         | Badge definitions          |
+| Badges                   | `/id`         | Badge instances            |
+| BadgeImages              | `/id`         | Badge image assets         |
+| CompassAxes              | `/id`         | Compass axis definitions   |
+| ArchetypeDefinitions     | `/id`         | Archetype master data      |
+| EchoTypeDefinitions      | `/id`         | Echo type master data      |
+| FantasyThemeDefinitions  | `/id`         | Fantasy theme master data  |
+| AgeGroupDefinitions      | `/id`         | Age group master data      |
+| PlayerScenarioScores     | `/profileId`  | Player scores per scenario |
+| MediaAssets              | `/mediaType`  | Media asset metadata       |
+| MediaMetadataFiles       | `/id`         | Media metadata             |
+| AvatarConfigurationFiles | `/id`         | Avatar configurations      |
 
 ## Naming Convention
 

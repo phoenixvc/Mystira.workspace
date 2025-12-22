@@ -5,6 +5,7 @@
 This document provides a critical analysis of all migration planning documentation, identifying bugs, inconsistencies, missed opportunities, and areas for improvement.
 
 **Documents Reviewed**:
+
 - `hybrid-data-strategy-roadmap.md`
 - `adr-0014-implementation-roadmap.md`
 - `adr-0015-implementation-roadmap.md`
@@ -22,6 +23,7 @@ This document provides a critical analysis of all migration planning documentati
 **Location**: `repository-architecture.md:579, 589`
 
 **Issue**: We standardized on `string` IDs but sync service still parses to Guid:
+
 ```csharp
 // BUG: Will throw FormatException for ULID or non-Guid strings
 var pgAccount = await pg.Accounts.FindAsync(Guid.Parse(item.EntityId));
@@ -30,6 +32,7 @@ var pgAccount = await pg.Accounts.FindAsync(Guid.Parse(item.EntityId));
 **Impact**: Sync service will crash for any entity with ULID or non-Guid ID.
 
 **Fix**:
+
 ```csharp
 var pgAccount = await pg.Accounts.FindAsync(item.EntityId);
 // Or if PostgreSQL uses Guid:
@@ -44,6 +47,7 @@ if (Guid.TryParse(item.EntityId, out var guidId))
 **Location**: `repository-architecture.md:317-333` vs `mystira-app-infrastructure-data-migration.md:301-305`
 
 **Issue**: Inconsistent return types across docs:
+
 ```csharp
 // DualWriteAccountRepository says:
 public async Task<Account> UpdateAsync(Account entity, CancellationToken ct)
@@ -64,6 +68,7 @@ public virtual async Task UpdateAsync(TEntity entity, CancellationToken ct = def
 **Location**: `repository-architecture.md:447-450`
 
 **Issue**: Despite documenting this as MED-1 in remaining-issues.md, the code still has:
+
 ```csharp
 public record SyncItem
 {
@@ -82,6 +87,7 @@ public record SyncItem
 **Location**: `repository-architecture.md:465`
 
 **Issue**: Despite documenting this as MED-3:
+
 ```csharp
 private readonly ConcurrentBag<SyncItem> _failed = [];
 ```
@@ -95,6 +101,7 @@ private readonly ConcurrentBag<SyncItem> _failed = [];
 **Location**: `repository-architecture.md:352-376`
 
 **Issue**: Domain-specific methods missing CancellationToken:
+
 ```csharp
 public async Task<Account?> GetByEmailAsync(string email)  // No CT!
 public async Task<Account?> GetByAuth0UserIdAsync(string auth0UserId)  // No CT!
@@ -110,11 +117,13 @@ public async Task<bool> ExistsByEmailAsync(string email)  // No CT!
 **Location**: `adr-0015-implementation-roadmap.md:141-168`
 
 **Issue**: Manual SQL for Wolverine tables is incomplete. Wolverine requires additional columns:
+
 ```sql
 -- Missing: scheduled_time, saga_id, exception_type, exception_message
 ```
 
 **Fix**: Use Wolverine's built-in migration:
+
 ```csharp
 opts.PersistMessagesWithPostgresql(connectionString);
 // This auto-creates correct schema
@@ -129,6 +138,7 @@ opts.PersistMessagesWithPostgresql(connectionString);
 **Location**: `repository-architecture.md:290-315`
 
 **Issue**: If primary write succeeds but queue fails, data is inconsistent:
+
 ```csharp
 var result = await _cosmosRepo.AddAsync(entity, ct);  // Succeeds
 await QueueSecondaryWriteAsync(entity.Id, SyncOperation.Insert, ct);  // Fails!
@@ -138,6 +148,7 @@ return result;  // Returns success but secondary never synced
 **Even with error logging**, the entity exists in Cosmos but not in queue. This violates eventual consistency.
 
 **Fix**: Use TransactionScope or implement compensating transaction:
+
 ```csharp
 using var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
 try
@@ -161,6 +172,7 @@ catch
 **Location**: `repository-architecture.md:311, 330, 347`
 
 **Issue**: Even with error handling, `Task.Run` creates untracked background work:
+
 ```csharp
 _ = Task.Run(async () => await WriteToCosmosWithErrorHandlingAsync(entity, SyncOperation.Insert));
 ```
@@ -168,6 +180,7 @@ _ = Task.Run(async () => await WriteToCosmosWithErrorHandlingAsync(entity, SyncO
 **Impact**: If app crashes during `Task.Run`, operation is lost. No visibility into pending operations.
 
 **Better**:
+
 ```csharp
 // Queue all secondary writes, even when PostgreSQL is primary
 await _syncQueue.EnqueueAsync(new SyncItem { ... }, ct);
@@ -180,6 +193,7 @@ await _syncQueue.EnqueueAsync(new SyncItem { ... }, ct);
 **Location**: `repository-architecture.md:532`
 
 **Issue**: Uses `DateTime.UtcNow` instead of injected `TimeProvider`:
+
 ```csharp
 item.LastAttemptAt = DateTime.UtcNow;  // Not testable
 ```
@@ -191,6 +205,7 @@ item.LastAttemptAt = DateTime.UtcNow;  // Not testable
 **Location**: `adr-0015-implementation-roadmap.md:325`
 
 **Issue**: Handler uses untyped `ILogger`:
+
 ```csharp
 public static async Task HandleAsync(
     AccountCreatedEvent @event,
@@ -205,6 +220,7 @@ public static async Task HandleAsync(
 **Location**: `adr-0015-implementation-roadmap.md:196-230`
 
 **Issue**: Events have no version field:
+
 ```csharp
 public sealed record AccountCreatedEvent
 {
@@ -222,15 +238,16 @@ public sealed record AccountCreatedEvent
 
 **Issue**: Roadmaps have conflicting timelines:
 
-| Document | Week 5-8 Task |
-|----------|---------------|
-| hybrid-data-strategy-roadmap | Data sync validation |
-| adr-0014-implementation-roadmap | Enhanced caching layer |
+| Document                        | Week 5-8 Task             |
+| ------------------------------- | ------------------------- |
+| hybrid-data-strategy-roadmap    | Data sync validation      |
+| adr-0014-implementation-roadmap | Enhanced caching layer    |
 | adr-0015-implementation-roadmap | MediatR handler migration |
 
 **All three require significant developer time in the same period.**
 
 **Fix**: Sequence them:
+
 1. Week 1-4: Infrastructure + Ardalis.Specification
 2. Week 5-8: Dual-write + Polly + Initial Wolverine
 3. Week 9-12: MediatR migration + Cross-service events
@@ -243,6 +260,7 @@ public sealed record AccountCreatedEvent
 **Issue**: Wolverine depends on PostgreSQL for outbox, but ADR-0015 doesn't reference ADR-0014 completion.
 
 **Fix**: Add explicit dependencies in master checklist:
+
 ```
 [ ] Phase 1.4 (Wolverine outbox) requires Phase 1.2 (PostgreSQL)
 [ ] Phase 3.1 (Cross-service events) requires Phase 2.2 (Sync queue stable)
@@ -257,6 +275,7 @@ public sealed record AccountCreatedEvent
 **Current**: Each repository operation is independent.
 
 **Better**: Multiple operations in single transaction:
+
 ```csharp
 public interface IUnitOfWork
 {
@@ -278,6 +297,7 @@ await _uow.SaveChangesAsync(ct);  // Single transaction
 **Current**: Services publish integration events directly.
 
 **Better**: Separate internal domain events from external integration events:
+
 ```csharp
 // Domain event (internal)
 public record AccountCreated(Account Account) : IDomainEvent;
@@ -304,6 +324,7 @@ public static class AccountCreatedHandler
 **Current approach**: Queue secondary writes immediately.
 
 **Better for eventual consistency**:
+
 ```csharp
 // Write to Cosmos with outbox document
 container.CreateTransactionalBatch(partitionKey)
@@ -321,6 +342,7 @@ container.CreateTransactionalBatch(partitionKey)
 **Current**: Phase determines routing statically.
 
 **Better**: Dynamic routing based on database health:
+
 ```csharp
 public async Task<Account?> GetByIdAsync(string id, CancellationToken ct)
 {
@@ -343,6 +365,7 @@ public async Task<Account?> GetByIdAsync(string id, CancellationToken ct)
 **Current**: No way to trace a request across dual-write, cache, and events.
 
 **Better**:
+
 ```csharp
 public class CorrelationContext
 {
@@ -360,6 +383,7 @@ public class CorrelationContext
 **Current**: Dual-write either works or fails.
 
 **Better**: Graceful degradation with shadow mode:
+
 ```csharp
 public enum MigrationPhase
 {
@@ -379,6 +403,7 @@ public enum MigrationPhase
 **Issue**: As we migrate data models, API contracts may change.
 
 **Should add**:
+
 ```csharp
 [ApiVersion("1.0")]
 [ApiVersion("2.0")]
@@ -393,6 +418,7 @@ public class AccountsController
 **Current**: Phase configured via appsettings.
 
 **Better**: Azure App Configuration with feature flags:
+
 ```csharp
 services.AddAzureAppConfiguration(options =>
 {
@@ -411,6 +437,7 @@ if (await _featureManager.IsEnabledAsync("DualWriteEnabled"))
 **Current**: Metrics defined but no dashboards.
 
 **Should add**: Azure Monitor workbook or Grafana dashboard JSON in repo:
+
 ```
 infra/monitoring/
 ├── dashboards/
@@ -429,6 +456,7 @@ infra/monitoring/
 **Current**: No mention of required resources.
 
 **Should document**:
+
 ```
 ## Resource Requirements
 
@@ -447,6 +475,7 @@ infra/monitoring/
 ### ARCH-1: No Security Considerations
 
 **Missing**:
+
 - Data encryption at rest
 - TLS configuration
 - Managed Identity for database connections
@@ -461,6 +490,7 @@ infra/monitoring/
 **Issue**: Running dual databases doubles costs during migration.
 
 **Should include**:
+
 ```
 ## Cost Comparison
 
@@ -480,6 +510,7 @@ Net savings after 6 months: $500/mo
 **Issue**: What if Phase 2 validation fails?
 
 **Should document**:
+
 ```
 ## Rollback Procedure: Phase 2 → Phase 1
 
@@ -498,6 +529,7 @@ Net savings after 6 months: $500/mo
 **Issue**: No mention of load testing before cutover.
 
 **Should include**:
+
 ```
 ## Load Testing Requirements
 
@@ -517,6 +549,7 @@ Tools: k6, Artillery, or Azure Load Testing
 **Issue**: No mention of backup/restore or RTO/RPO.
 
 **Should document**:
+
 ```
 ## Disaster Recovery
 
@@ -531,14 +564,14 @@ Tools: k6, Artillery, or Azure Load Testing
 
 ## Summary of Issues Found
 
-| Category | Count | Severity |
-|----------|-------|----------|
-| Critical Bugs in Docs | 6 | 🔴 High |
-| Medium Bugs | 5 | 🟠 Medium |
-| Timeline Issues | 2 | 🟡 Medium |
-| Missed Opportunities | 10 | 🔵 Low-Med |
-| Architectural Concerns | 5 | 🟢 Low-Med |
-| **Total** | **28** | |
+| Category               | Count  | Severity   |
+| ---------------------- | ------ | ---------- |
+| Critical Bugs in Docs  | 6      | 🔴 High    |
+| Medium Bugs            | 5      | 🟠 Medium  |
+| Timeline Issues        | 2      | 🟡 Medium  |
+| Missed Opportunities   | 10     | 🔵 Low-Med |
+| Architectural Concerns | 5      | 🟢 Low-Med |
+| **Total**              | **28** |            |
 
 ---
 

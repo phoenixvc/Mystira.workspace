@@ -20,6 +20,7 @@ ESLint configuration for the `packages/admin-ui` submodule. This file is automat
 ### Why is this needed?
 
 The admin-ui submodule is a React/Vite application that requires specific ESLint configuration:
+
 - Browser environment for DOM APIs
 - ES2020 environment features
 - React Hooks linting rules
@@ -30,7 +31,7 @@ The admin-ui submodule is a React/Vite application that requires specific ESLint
 
 This is a temporary workaround. The permanent solution is to add this `.eslintrc.cjs` file directly to the [Mystira.Admin.UI repository](https://github.com/phoenixvc/Mystira.Admin.UI).
 
-A patch file is available at `../admin-ui-eslint-config.patch` that can be applied to the admin-ui repository.
+A patch file is available at `admin-ui-eslint-config.patch` that can be applied to the admin-ui repository.
 
 ## Future
 

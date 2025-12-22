@@ -11,11 +11,13 @@ The Mystira workspace uses a hybrid approach combining multiple independent repo
 ### Current Architecture
 
 **Multi-Repository Structure**:
+
 - 7 independent repositories, each with their own history, CI/CD, and release cycles
 - Integrated into workspace via git submodules
 - Each repository remains independently accessible at its own GitHub URL
 
 **Monorepo Tooling**:
+
 - **pnpm workspaces**: Dependency management across packages
 - **Turborepo**: Build orchestration and caching
 - **Changesets**: Version management and changelogs
@@ -40,12 +42,14 @@ Can monorepo tools (like Nx, Lerna, Rush, etc.) effectively "fake" or manage mul
 **Multi-Repo Support**: ⚠️ Limited
 
 **How It Works**:
+
 - Designed for monorepos where all code is in one repository
 - Works with git submodules but treats them as local packages
 - Requires all code to be checked out locally
 - No native understanding of separate repositories
 
 **With Git Submodules**:
+
 - ✅ Works when all submodules are initialized
 - ✅ Fast build orchestration and caching
 - ✅ Simple configuration
@@ -62,12 +66,14 @@ Can monorepo tools (like Nx, Lerna, Rush, etc.) effectively "fake" or manage mul
 **Multi-Repo Support**: ⚠️ Limited (similar to Turborepo)
 
 **How It Works**:
+
 - Powerful build system with dependency graph analysis
 - Designed for monorepos with all code in one repo
 - Can work with git submodules when checked out locally
 - No native multi-repository support
 
 **With Git Submodules**:
+
 - ✅ Advanced build orchestration
 - ✅ Better visualization of dependencies
 - ✅ More sophisticated caching strategies
@@ -85,6 +91,7 @@ Can monorepo tools (like Nx, Lerna, Rush, etc.) effectively "fake" or manage mul
 **Multi-Repo Support**: ❌ No (Deprecated for new projects)
 
 **How It Works**:
+
 - Package management and versioning tool
 - Designed for JavaScript monorepos
 - Largely superseded by workspace features in pnpm/yarn/npm
@@ -100,12 +107,14 @@ Can monorepo tools (like Nx, Lerna, Rush, etc.) effectively "fake" or manage mul
 **Multi-Repo Support**: ⚠️ Limited
 
 **How It Works**:
+
 - Enterprise-scale monorepo management from Microsoft
 - Excellent for large JavaScript/TypeScript monorepos
 - Strict dependency management and versioning
 - No native multi-repository support
 
 **With Git Submodules**:
+
 - ✅ Enterprise-grade build orchestration
 - ✅ Strict dependency policies
 - ✅ Better for large teams
@@ -123,12 +132,14 @@ Can monorepo tools (like Nx, Lerna, Rush, etc.) effectively "fake" or manage mul
 **Multi-Repo Support**: ✅ Yes (Designed for it)
 
 **How It Works**:
+
 - Manages multiple git repositories
 - Executes commands across multiple repos
 - Lightweight wrapper around git
 - No build orchestration features
 
 **Features**:
+
 - ✅ Native multi-repository support
 - ✅ Execute git commands across repos
 - ✅ Track relationships between repos
@@ -145,11 +156,13 @@ Can monorepo tools (like Nx, Lerna, Rush, etc.) effectively "fake" or manage mul
 **Multi-Repo Support**: ✅ Yes (Designed for it)
 
 **How It Works**:
+
 - Manages multiple git repositories (used by Android)
 - XML manifest defines repository relationships
 - Git wrapper for multi-repo operations
 
 **Features**:
+
 - ✅ Native multi-repository support
 - ✅ Powerful sync operations
 - ✅ Branch management across repos
@@ -166,11 +179,13 @@ Can monorepo tools (like Nx, Lerna, Rush, etc.) effectively "fake" or manage mul
 **Multi-Repo Support**: ⚠️ Limited
 
 **How It Works**:
+
 - Polyglot build system (Python, Java, Go, Shell, etc.)
 - Designed for monorepos
 - Advanced build graph and caching
 
 **Features**:
+
 - ✅ Polyglot support (matches our stack: Python, C#, TypeScript)
 - ✅ Very sophisticated caching
 - ✅ Remote execution support
@@ -187,11 +202,13 @@ Can monorepo tools (like Nx, Lerna, Rush, etc.) effectively "fake" or manage mul
 **Multi-Repo Support**: ⚠️ Partial (via WORKSPACE rules)
 
 **How It Works**:
+
 - Google's build system (used for Google's monorepo)
 - Can reference external repositories
 - Hermetic builds with explicit dependencies
 
 **Features**:
+
 - ✅ Can reference external git repositories
 - ✅ Hermetic, reproducible builds
 - ✅ Polyglot support
@@ -206,17 +223,17 @@ Can monorepo tools (like Nx, Lerna, Rush, etc.) effectively "fake" or manage mul
 
 ### Summary Matrix
 
-| Tool        | Multi-Repo Native | Build Orchestration | Caching | Complexity | Polyglot | Verdict          |
-| ----------- | ----------------- | ------------------- | ------- | ---------- | -------- | ---------------- |
-| Turborepo   | ❌ No             | ✅ Excellent        | ✅ Good | Low        | ✅ Yes   | ✅ **Best fit**  |
-| Nx          | ❌ No             | ✅ Excellent        | ✅ Great| Medium     | ✅ Yes   | ⚠️ Overkill     |
-| Lerna       | ❌ No             | ❌ No               | ❌ No   | Low        | ❌ No    | ❌ Deprecated    |
-| Rush        | ❌ No             | ✅ Good             | ✅ Good | High       | ⚠️ JS only| ❌ Too complex  |
-| Meta        | ✅ Yes            | ❌ No               | ❌ No   | Low        | ✅ Yes   | ⚠️ No build     |
-| repo        | ✅ Yes            | ❌ No               | ❌ No   | Medium     | ✅ Yes   | ❌ Overkill      |
-| Pants       | ❌ No             | ✅ Excellent        | ✅ Great| Very High  | ✅ Yes   | ❌ Too complex   |
-| Bazel       | ⚠️ Partial        | ✅ Excellent        | ✅ Great| Extreme    | ✅ Yes   | ❌ Overkill      |
-| Submodules  | ✅ Yes            | ❌ No               | ❌ No   | Low        | ✅ Yes   | ✅ **Current**   |
+| Tool       | Multi-Repo Native | Build Orchestration | Caching  | Complexity | Polyglot   | Verdict         |
+| ---------- | ----------------- | ------------------- | -------- | ---------- | ---------- | --------------- |
+| Turborepo  | ❌ No             | ✅ Excellent        | ✅ Good  | Low        | ✅ Yes     | ✅ **Best fit** |
+| Nx         | ❌ No             | ✅ Excellent        | ✅ Great | Medium     | ✅ Yes     | ⚠️ Overkill     |
+| Lerna      | ❌ No             | ❌ No               | ❌ No    | Low        | ❌ No      | ❌ Deprecated   |
+| Rush       | ❌ No             | ✅ Good             | ✅ Good  | High       | ⚠️ JS only | ❌ Too complex  |
+| Meta       | ✅ Yes            | ❌ No               | ❌ No    | Low        | ✅ Yes     | ⚠️ No build     |
+| repo       | ✅ Yes            | ❌ No               | ❌ No    | Medium     | ✅ Yes     | ❌ Overkill     |
+| Pants      | ❌ No             | ✅ Excellent        | ✅ Great | Very High  | ✅ Yes     | ❌ Too complex  |
+| Bazel      | ⚠️ Partial        | ✅ Excellent        | ✅ Great | Extreme    | ✅ Yes     | ❌ Overkill     |
+| Submodules | ✅ Yes            | ❌ No               | ❌ No    | Low        | ✅ Yes     | ✅ **Current**  |
 
 ## Decision
 
@@ -229,6 +246,7 @@ Can monorepo tools (like Nx, Lerna, Rush, etc.) effectively "fake" or manage mul
 All monorepo build tools (Turborepo, Nx, Rush, Pants, Bazel) are designed for **single-repository monorepos** where all code lives in one git history. They can work with git submodules by treating checked-out submodules as local packages, but they provide **no special intelligence for multi-repository structures**.
 
 Key limitations:
+
 - Build tools don't understand submodule boundaries
 - Caching doesn't respect individual submodule commits
 - Dependency graph analysis treats all code as one repo
@@ -237,6 +255,7 @@ Key limitations:
 #### 2. **Git Submodules are the Right Tool for Multi-Repository Management**
 
 Git submodules are explicitly designed to:
+
 - Reference external repositories at specific commits
 - Maintain independent repository histories
 - Allow independent CI/CD pipelines
@@ -248,6 +267,7 @@ Alternative multi-repo tools (Meta, repo) provide similar functionality but with
 #### 3. **Turborepo Provides Optimal Build Orchestration**
 
 For build orchestration within the workspace, Turborepo is ideal:
+
 - ✅ Simple configuration (`turbo.json`)
 - ✅ Fast builds with excellent caching
 - ✅ Polyglot support (works with C#, Python, TypeScript)
@@ -256,6 +276,7 @@ For build orchestration within the workspace, Turborepo is ideal:
 - ✅ Sufficient for our current scale (7 repos)
 
 More complex tools (Nx, Pants, Bazel) offer:
+
 - More sophisticated build graphs (not needed)
 - Remote execution (not needed at current scale)
 - Advanced features (unused complexity)
@@ -263,6 +284,7 @@ More complex tools (Nx, Pants, Bazel) offer:
 #### 4. **pnpm Workspaces Handle Dependency Management**
 
 For JavaScript/TypeScript packages:
+
 - ✅ Fast and efficient
 - ✅ Native workspace support
 - ✅ Works across submodule boundaries
@@ -273,6 +295,7 @@ No need for Lerna or other package management overlays.
 #### 5. **Our Hybrid Approach is Intentional**
 
 We deliberately chose to keep repositories separate because:
+
 1. **Different technology stacks**: Python, C#, TypeScript, Terraform
 2. **Independent deployment cycles**: Each service deploys separately
 3. **Team autonomy**: Different teams own different repos
@@ -393,11 +416,13 @@ pnpm build
 **Approach**: Merge all repositories into one via git subtree or migration
 
 **Pros**:
+
 - Single git history
 - Simpler tooling (no submodules)
 - Atomic cross-repo changes
 
 **Cons**:
+
 - ❌ Loss of repository independence
 - ❌ Loss of independent CI/CD
 - ❌ Loss of team autonomy
@@ -414,11 +439,13 @@ pnpm build
 **Approach**: Replace Turborepo with Nx
 
 **Pros**:
+
 - More powerful build graph
 - Better visualization
 - More sophisticated caching
 
 **Cons**:
+
 - ❌ More complex configuration
 - ❌ Steeper learning curve
 - ❌ Doesn't solve multi-repo challenges
@@ -433,10 +460,12 @@ pnpm build
 **Approach**: Replace git submodules with Meta or repo
 
 **Pros**:
+
 - Better multi-repo commands
 - Easier cross-repo operations
 
 **Cons**:
+
 - ❌ Additional tooling to learn
 - ❌ Less mature/less common than submodules
 - ❌ Still need Turborepo for builds
@@ -451,11 +480,13 @@ pnpm build
 **Approach**: Replace entire build system with Pants or Bazel
 
 **Pros**:
+
 - Very sophisticated build system
 - Hermetic builds
 - Remote execution possible
 
 **Cons**:
+
 - ❌ Extreme complexity
 - ❌ Steep learning curve
 - ❌ Requires rewriting all build logic
@@ -469,15 +500,18 @@ pnpm build
 **Answer to the Original Question**: No, there is no monorepo tool that can effectively "fake" or manage multiple repository locations as if they were a true monorepo. All monorepo build tools are designed for single-repository structures and provide no special intelligence for multi-repository setups.
 
 **Our Solution**: The combination of **git submodules + Turborepo + pnpm workspaces** is the right approach because:
+
 1. Git submodules handle multi-repository management (their intended purpose)
 2. Turborepo handles build orchestration (simple and effective)
 3. pnpm workspaces handle dependency management (fast and standard)
 
 This hybrid approach gives us the benefits of both worlds:
+
 - **Multi-repository**: Independence, autonomy, selective checkout
 - **Monorepo-like experience**: Unified builds, dependency management, orchestration
 
 Alternative tools either:
+
 - Don't solve the multi-repository challenge (Nx, Rush, Pants, Bazel)
 - Don't provide build orchestration (Meta, repo)
 - Add unnecessary complexity (all advanced build systems)

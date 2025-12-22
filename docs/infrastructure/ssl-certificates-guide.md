@@ -6,17 +6,18 @@ This guide explains how SSL/TLS certificates work in the Mystira infrastructure 
 
 ## Certificate Strategy by Environment
 
-| Environment | Certificate Issuer | Browser Behavior | Use Case |
-|-------------|-------------------|------------------|----------|
-| **dev** | Let's Encrypt Staging | ⚠️ Shows security warning | Development and testing |
-| **staging** | Let's Encrypt Staging | ⚠️ Shows security warning | Pre-production validation |
-| **prod** | Let's Encrypt Production | ✅ Fully trusted | Production services |
+| Environment | Certificate Issuer       | Browser Behavior          | Use Case                  |
+| ----------- | ------------------------ | ------------------------- | ------------------------- |
+| **dev**     | Let's Encrypt Staging    | ⚠️ Shows security warning | Development and testing   |
+| **staging** | Let's Encrypt Staging    | ⚠️ Shows security warning | Pre-production validation |
+| **prod**    | Let's Encrypt Production | ✅ Fully trusted          | Production services       |
 
 ## Understanding the Certificate Warning in Dev/Staging
 
 ### Why You See "Your connection is not private"
 
 When accessing dev or staging environments, you'll see:
+
 ```
 Your connection is not private
 NET::ERR_CERT_AUTHORITY_INVALID
@@ -35,7 +36,7 @@ Attackers might be trying to steal your information from dev.*.mystira.app
 **You can safely access dev/staging sites - here's how:**
 
 1. When you see the security warning, click **"Advanced"** (or "Show Details")
-2. Click **"Proceed to dev.*.mystira.app (unsafe)"** or similar option
+2. Click **"Proceed to dev.\*.mystira.app (unsafe)"** or similar option
 3. The site will load normally and function correctly
 
 **This is the standard workflow for accessing dev/staging environments.**
@@ -47,6 +48,7 @@ Attackers might be trying to steal your information from dev.*.mystira.app
 Our Kubernetes clusters use [cert-manager](https://cert-manager.io/) to automatically provision and renew SSL/TLS certificates.
 
 **ClusterIssuers:**
+
 ```yaml
 # Staging issuer (dev/staging environments)
 apiVersion: cert-manager.io/v1
@@ -86,6 +88,7 @@ spec:
 Each environment's ingress resources specify which issuer to use:
 
 **Dev/Staging:**
+
 ```yaml
 metadata:
   annotations:
@@ -93,6 +96,7 @@ metadata:
 ```
 
 **Production:**
+
 ```yaml
 metadata:
   annotations:
@@ -126,6 +130,7 @@ When an ingress is created or updated:
 ### Development Environment
 
 **Domains:**
+
 - `dev.publisher.mystira.app`
 - `dev.chain.mystira.app`
 - `dev.story-generator.mystira.app`
@@ -133,13 +138,15 @@ When an ingress is created or updated:
 **Certificate Type:** Let's Encrypt Staging
 
 **Access Method:**
+
 1. Navigate to `https://dev.*.mystira.app`
 2. Click "Advanced" on security warning
-3. Click "Proceed to dev.*.mystira.app (unsafe)"
+3. Click "Proceed to dev.\*.mystira.app (unsafe)"
 
 ### Staging Environment
 
 **Domains:**
+
 - `staging.publisher.mystira.app`
 - `staging.chain.mystira.app`
 - `staging.story-generator.mystira.app`
@@ -151,6 +158,7 @@ When an ingress is created or updated:
 ### Production Environment
 
 **Domains:**
+
 - `publisher.mystira.app`
 - `chain.mystira.app`
 - `story-generator.mystira.app`
@@ -176,6 +184,7 @@ curl -o letsencrypt-stg-root-x1.pem https://letsencrypt.org/certs/staging/letsen
 **All Chromium-based browsers on Windows use the Windows Certificate Store.** This is the most reliable method:
 
 1. **Download the certificate:**
+
    ```bash
    curl -o ~/Downloads/letsencrypt-staging.crt https://letsencrypt.org/certs/staging/letsencrypt-stg-root-x1.pem
    ```
@@ -191,7 +200,7 @@ curl -o letsencrypt-stg-root-x1.pem https://letsencrypt.org/certs/staging/letsen
    - Select **All Tasks** → **Import...**
    - Click **Next**
    - Click **Browse...** and navigate to your Downloads folder
-   - **Important:** Change file filter to **"All Files (*.*)"**
+   - **Important:** Change file filter to **"All Files (_._)"**
    - Select `letsencrypt-staging.crt`
    - Click **Next** → **Next** → **Finish**
    - You should see: "The import was successful"
@@ -223,6 +232,7 @@ curl -o letsencrypt-stg-root-x1.pem https://letsencrypt.org/certs/staging/letsen
    - You should see a green padlock with no security warnings!
 
 **Verification:** After import, run this in Git Bash:
+
 ```bash
 curl -I https://dev.story-generator.mystira.app
 # If no certificate errors, the import worked!
@@ -308,6 +318,7 @@ Firefox uses its own certificate store, separate from the system:
    - Test: `https://dev.story-generator.mystira.app`
 
    **Verify Windows trusts the certificate:**
+
    ```bash
    # In Git Bash, test if Windows trusts the cert:
    curl -I https://dev.story-generator.mystira.app
@@ -317,6 +328,7 @@ Firefox uses its own certificate store, separate from the system:
    ```
 
 4. **Multiple certificate chain needed:**
+
    ```bash
    # Download and import both staging roots:
    curl -o ~/Downloads/staging-root-x1.crt https://letsencrypt.org/certs/staging/letsencrypt-stg-root-x1.pem
@@ -331,7 +343,7 @@ Firefox uses its own certificate store, separate from the system:
    # Import the .der file instead
    ```
 
-**After successful import:** dev.*.mystira.app and staging.*.mystira.app will show as trusted with green padlock icon.
+**After successful import:** dev._.mystira.app and staging._.mystira.app will show as trusted with green padlock icon.
 
 ⚠️ **Security Warning:** Only import staging certificates on development machines. Never import them on production systems or shared computers.
 
@@ -367,6 +379,7 @@ kubectl get secret mystira-story-generator-tls-dev -n mys-dev \
 #### Certificate Not Ready
 
 **Symptom:**
+
 ```bash
 kubectl get certificates -n mys-dev
 NAME                              READY   SECRET                            AGE
@@ -374,6 +387,7 @@ mystira-story-generator-tls-dev   False   mystira-story-generator-tls-dev   2m
 ```
 
 **Solutions:**
+
 1. Wait 5-10 minutes - certificate issuance takes time
 2. Check cert-manager logs: `kubectl logs -n cert-manager deployment/cert-manager`
 3. Check certificate events: `kubectl describe certificate mystira-story-generator-tls-dev -n mys-dev`
@@ -384,6 +398,7 @@ mystira-story-generator-tls-dev   False   mystira-story-generator-tls-dev   2m
 **Symptom:** Certificate shows "Let's Encrypt Authority X3" instead of "STAGING"
 
 **Solutions:**
+
 ```bash
 # Check ingress annotation
 kubectl get ingress mystira-story-generator-ingress -n mys-dev \
@@ -402,6 +417,7 @@ kubectl delete secret mystira-story-generator-tls-dev -n mys-dev
 **Symptom:** `nslookup dev.story-generator.mystira.app` returns no records
 
 **Solutions:**
+
 ```bash
 # Check Azure DNS zone
 az network dns record-set a list \
@@ -431,6 +447,7 @@ Run the comprehensive certificate debugging script:
 ```
 
 This checks:
+
 - Kubernetes connectivity
 - DNS resolution
 - NGINX ingress controller
@@ -458,17 +475,20 @@ echo | openssl s_client -servername dev.story-generator.mystira.app \
 ### Why Not Use Production Certificates for Dev?
 
 **Rate Limits:**
+
 - Let's Encrypt production: 50 certificates per registered domain per week
 - Frequent dev deployments could hit this limit
 - Staging has much higher limits
 
 **Risk of Misconfiguration:**
+
 - Using production certs in dev increases risk of:
   - Accidentally exposing production credentials
   - Confusing dev and prod environments
   - Wasting production certificate quota on testing
 
 **Best Practice:**
+
 - Dev/Staging: Use staging certificates
 - Production: Use production certificates
 - Clear visual distinction (browser warning) prevents confusion
@@ -476,12 +496,14 @@ echo | openssl s_client -servername dev.story-generator.mystira.app \
 ### Certificate Storage
 
 **Kubernetes Secrets:**
+
 - Certificates stored as Kubernetes secrets in each namespace
 - Type: `kubernetes.io/tls`
 - Contains: `tls.crt` (certificate) and `tls.key` (private key)
 - Access controlled by Kubernetes RBAC
 
 **Security Best Practices:**
+
 - Private keys never leave the cluster
 - Secrets encrypted at rest (Azure AKS encryption)
 - No manual certificate management required
@@ -491,13 +513,13 @@ echo | openssl s_client -servername dev.story-generator.mystira.app \
 
 ### Let's Encrypt Production Limits
 
-| Limit Type | Value |
-|------------|-------|
-| Certificates per Registered Domain | 50 per week |
-| Duplicate Certificate | 5 per week |
-| Failed Validations | 5 failures per account, per hostname, per hour |
-| Accounts per IP Address | 10 per 3 hours |
-| Pending Authorizations | 300 per account |
+| Limit Type                         | Value                                          |
+| ---------------------------------- | ---------------------------------------------- |
+| Certificates per Registered Domain | 50 per week                                    |
+| Duplicate Certificate              | 5 per week                                     |
+| Failed Validations                 | 5 failures per account, per hostname, per hour |
+| Accounts per IP Address            | 10 per 3 hours                                 |
+| Pending Authorizations             | 300 per account                                |
 
 ### Let's Encrypt Staging Limits
 

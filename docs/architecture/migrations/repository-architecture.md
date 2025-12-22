@@ -717,17 +717,18 @@ public class AccountRepositoryTests
 
 ## Summary
 
-| Component | Purpose | Location |
-|-----------|---------|----------|
-| **IRepository<T>** | Interface contracts | Application.Ports.Data |
-| **CosmosAccountRepository** | Cosmos DB implementation | Infrastructure.Data.Repositories.Cosmos |
-| **PgAccountRepository** | PostgreSQL implementation | Infrastructure.PostgreSQL.Repositories |
-| **DualWriteAccountRepository** | Coordinates both | Infrastructure.Hybrid.DualWrite |
-| **DataSyncBackgroundService** | Handles failed syncs | Infrastructure.Hybrid.Sync |
-| **MigrationPhaseManager** | Controls migration phase | Infrastructure.Hybrid.Migration |
-| **CachedAccountRepository** | Redis caching decorator | Infrastructure.Redis |
+| Component                      | Purpose                   | Location                                |
+| ------------------------------ | ------------------------- | --------------------------------------- |
+| **IRepository<T>**             | Interface contracts       | Application.Ports.Data                  |
+| **CosmosAccountRepository**    | Cosmos DB implementation  | Infrastructure.Data.Repositories.Cosmos |
+| **PgAccountRepository**        | PostgreSQL implementation | Infrastructure.PostgreSQL.Repositories  |
+| **DualWriteAccountRepository** | Coordinates both          | Infrastructure.Hybrid.DualWrite         |
+| **DataSyncBackgroundService**  | Handles failed syncs      | Infrastructure.Hybrid.Sync              |
+| **MigrationPhaseManager**      | Controls migration phase  | Infrastructure.Hybrid.Migration         |
+| **CachedAccountRepository**    | Redis caching decorator   | Infrastructure.Redis                    |
 
 This architecture:
+
 1. **Keeps existing interfaces unchanged** - No breaking changes to consumers
 2. **Separates concerns** - Each implementation in its own project
 3. **Enables gradual migration** - Phase-based rollout

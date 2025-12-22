@@ -63,6 +63,7 @@ For details, see [ADR-0002: Documentation Location Strategy](./architecture/adr/
   - [Publishing Flow](./cicd/publishing-flow.md) - Package publishing workflows
 
 **Current Workflows:**
+
 - **Components**: Admin API, Admin UI, App, Chain, Devhub, Publisher, Story Generator
 - **Infrastructure**: Deploy, Validate
 - **Deployment**: Production, Staging
@@ -92,16 +93,16 @@ All workflows follow the "Category: Name" naming convention for clarity.
 
 Each project maintains its own documentation within their respective repositories:
 
-| Project             | Location                                                         |
-| ------------------- | ---------------------------------------------------------------- |
-| **App**             | `packages/app/docs/` and `packages/app/README.md`                |
-| **Publisher**       | `packages/publisher/docs/` and `packages/publisher/README.md`    |
+| Project             | Location                                                                  |
+| ------------------- | ------------------------------------------------------------------------- |
+| **App**             | `packages/app/docs/` and `packages/app/README.md`                         |
+| **Publisher**       | `packages/publisher/docs/` and `packages/publisher/README.md`             |
 | **Story-Generator** | `packages/story-generator/docs/` and `packages/story-generator/README.md` |
-| **Chain**           | `packages/chain/README.md`                                       |
-| **Admin UI**        | `packages/admin-ui/README.md`                                    |
-| **Admin API**       | `packages/admin-api/README.md`                                   |
-| **Devhub**          | `packages/devhub/README.md`                                      |
-| **Infrastructure**  | `infra/README.md` and `infra/` subdirectories                    |
+| **Chain**           | `packages/chain/README.md`                                                |
+| **Admin UI**        | `packages/admin-ui/README.md`                                             |
+| **Admin API**       | `packages/admin-api/README.md`                                            |
+| **Devhub**          | `packages/devhub/README.md`                                               |
+| **Infrastructure**  | `infra/README.md` and `infra/` subdirectories                             |
 
 ## Contributing Documentation
 
@@ -167,6 +168,7 @@ Practical examples when applicable.
 ### Code Examples
 
 Always include:
+
 - Working code examples
 - Expected output
 - Prerequisites or dependencies
