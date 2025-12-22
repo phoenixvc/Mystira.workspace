@@ -59,7 +59,7 @@ jobs:
       - name: Terraform Init (Backend Disabled)
         run: |
           cd infra/terraform/environments/${{ matrix.environment }}
-          terraform init -backend=false
+          terraform init -backend=false -upgrade
 
       - name: Terraform Validate
         run: |
