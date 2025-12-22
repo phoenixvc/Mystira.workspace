@@ -281,6 +281,59 @@ module "entra_id" {
   }
 }
 
+# Shared Identity and RBAC Configuration
+module "identity" {
+  source = "../../modules/shared/identity"
+
+  resource_group_name = azurerm_resource_group.main.name
+
+  # AKS to ACR access
+  aks_principal_id = azurerm_kubernetes_cluster.main.identity[0].principal_id
+  acr_id           = azurerm_container_registry.shared.id
+
+  # Service identity configurations
+  service_identities = {
+    "story-generator" = {
+      principal_id               = module.story_generator.identity_principal_id
+      key_vault_id               = module.story_generator.key_vault_id
+      postgres_server_id         = module.shared_postgresql.server_id
+      redis_cache_id             = module.shared_redis.cache_id
+      log_analytics_workspace_id = module.shared_monitoring.log_analytics_workspace_id
+    }
+    "publisher" = {
+      principal_id               = module.publisher.identity_principal_id
+      key_vault_id               = module.publisher.key_vault_id
+      log_analytics_workspace_id = module.shared_monitoring.log_analytics_workspace_id
+    }
+    "chain" = {
+      principal_id               = module.chain.identity_principal_id
+      key_vault_id               = module.chain.key_vault_id
+      log_analytics_workspace_id = module.shared_monitoring.log_analytics_workspace_id
+    }
+  }
+
+  # Workload identity for AKS pods (optional, enable when deploying to AKS)
+  workload_identities = {
+    "story-generator" = {
+      identity_id         = module.story_generator.identity_id
+      aks_oidc_issuer_url = azurerm_kubernetes_cluster.main.oidc_issuer_url
+      namespace           = "mystira"
+      service_account     = "story-generator-sa"
+    }
+  }
+
+  tags = {
+    CostCenter = "development"
+  }
+
+  depends_on = [
+    azurerm_kubernetes_cluster.main,
+    module.story_generator,
+    module.publisher,
+    module.chain
+  ]
+}
+
 # AKS Cluster for Dev
 resource "azurerm_kubernetes_cluster" "main" {
   name                = "mys-dev-core-aks-san"
@@ -298,6 +351,10 @@ resource "azurerm_kubernetes_cluster" "main" {
   identity {
     type = "SystemAssigned"
   }
+
+  # Enable OIDC issuer for workload identity
+  oidc_issuer_enabled       = true
+  workload_identity_enabled = true
 
   network_profile {
     network_plugin = "azure"
@@ -419,4 +476,15 @@ output "entra_admin_api_config" {
 output "entra_admin_ui_config" {
   description = "Configuration for Admin UI (.env)"
   value       = module.entra_id.admin_ui_config
+}
+
+# Identity and RBAC Outputs
+output "aks_oidc_issuer_url" {
+  description = "OIDC issuer URL for AKS workload identity"
+  value       = azurerm_kubernetes_cluster.main.oidc_issuer_url
+}
+
+output "identity_aks_acr_role_assignment" {
+  description = "AKS to ACR role assignment ID"
+  value       = module.identity.aks_acr_role_assignment_id
 }
