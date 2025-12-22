@@ -241,23 +241,287 @@ const result = await pca.acquireTokenInteractive({
 
 ## Social Login Configuration
 
+> **⚠️ CAUTION: Custom Domain Limitations**
+>
+> Social federation with custom domains (e.g., `mystira.ciamlogin.com`) has provider-specific limitations:
+>
+> - **Google & Facebook**: Require manual registration of custom redirect URIs with their internal federation services. This **cannot be completed from the Azure portal alone** - you must contact Google/Facebook support to allowlist your custom domain.
+> - **Custom OIDC Providers (Discord)**: May require explicit OpenID Connect discovery endpoint configuration and manual validation of the discovery document.
+> - **Default Domain Alternative**: If custom domain registration is blocked or delayed, you can temporarily use the default Microsoft domain: `mystira.onmicrosoft.com` (redirect URI: `https://mystira.ciamlogin.com/mystira.onmicrosoft.com/oauth2/authresp`)
+
 ### Google
 
-1. Create OAuth 2.0 credentials at [Google Cloud Console](https://console.cloud.google.com/)
-2. Add authorized redirect URI: `https://mystira.ciamlogin.com/mystira.onmicrosoft.com/oauth2/authresp`
-3. Configure in Microsoft Entra admin center
+1. **Create OAuth 2.0 credentials** at [Google Cloud Console](https://console.cloud.google.com/)
+   - Navigate to APIs & Services > Credentials > Create Credentials > OAuth client ID
+   - Application type: Web application
+   - Authorized redirect URIs: `https://mystira.ciamlogin.com/mystira.onmicrosoft.com/oauth2/authresp`
+
+2. **Manual Custom Domain Registration** (Required for production custom domains)
+   - Custom domain redirect URIs require approval by Google's internal federation team
+   - Submit a request through Google Cloud Support to allowlist your custom domain
+   - Processing time: 5-10 business days
+   - Alternative: Use default Microsoft domain until approved
+
+3. **Required OAuth Scopes**:
+   - `openid` (required)
+   - `profile` (recommended - provides name, picture)
+   - `email` (recommended - provides email address)
+
+4. **Configure in Microsoft Entra admin center**:
+   - Navigate to External ID > Identity providers > Google
+   - Enter Client ID and Client Secret from Google Console
+   - Map attributes: email → email, given_name → firstName, family_name → lastName
+
+5. **User Consent Settings**:
+   - Set OAuth consent screen to "External" for public access
+   - Add all required scopes to the consent screen
+   - Verify domain ownership in Google Console (required for production)
 
 ### Facebook
 
-1. Create app at [Facebook Developers](https://developers.facebook.com/)
-2. Add OAuth redirect URI: `https://mystira.ciamlogin.com/mystira.onmicrosoft.com/oauth2/authresp`
-3. Configure in Microsoft Entra admin center
+1. **Create app** at [Facebook Developers](https://developers.facebook.com/)
+   - Create New App > Consumer > Add Facebook Login product
+   - Valid OAuth Redirect URIs: `https://mystira.ciamlogin.com/mystira.onmicrosoft.com/oauth2/authresp`
+
+2. **Manual Custom Domain Registration** (Required for production custom domains)
+   - Custom domain redirect URIs require approval by Facebook's Platform Operations team
+   - Submit via Facebook Developer Support > Platform Policy & Support
+   - Processing time: 7-14 business days
+   - Alternative: Use default Microsoft domain until approved
+
+3. **Required Permissions**:
+   - `email` (default - user's email address)
+   - `public_profile` (default - name, profile picture, gender, locale)
+
+4. **Configure in Microsoft Entra admin center**:
+   - Navigate to External ID > Identity providers > Facebook
+   - Enter App ID and App Secret from Facebook Developers
+   - Map attributes: email → email, first_name → firstName, last_name → lastName
+
+5. **User Consent & Privacy Settings**:
+   - Complete App Review for `email` permission (required for production)
+   - Add Privacy Policy URL (required)
+   - Add Terms of Service URL (required)
+   - Set app to "Live" mode after review completion
 
 ### Discord (Custom OIDC)
 
-1. Create application at [Discord Developer Portal](https://discord.com/developers/applications)
-2. Add redirect URI: `https://mystira.ciamlogin.com/mystira.onmicrosoft.com/oauth2/authresp`
-3. Configure as Custom OIDC provider with discovery URL: `https://discord.com/.well-known/openid-configuration`
+1. **Create application** at [Discord Developer Portal](https://discord.com/developers/applications)
+   - Create New Application
+   - Navigate to OAuth2 settings
+   - Add redirect URI: `https://mystira.ciamlogin.com/mystira.onmicrosoft.com/oauth2/authresp`
+
+2. **Required OAuth2 Scopes**:
+   - `identify` (required - basic user info)
+   - `email` (required - user email address)
+
+3. **Explicit Discovery Configuration**:
+   - Discord uses standard OpenID Connect discovery
+   - Discovery URL: `https://discord.com/.well-known/openid-configuration`
+   - Verify the discovery document is accessible and valid before configuration
+   - Key endpoints to validate:
+     - `authorization_endpoint`: `https://discord.com/oauth2/authorize`
+     - `token_endpoint`: `https://discord.com/api/oauth2/token`
+     - `userinfo_endpoint`: `https://discord.com/api/users/@me`
+
+4. **Configure as Custom OIDC provider in Microsoft Entra admin center**:
+   - Navigate to External ID > Identity providers > Custom OIDC
+   - Provider name: Discord
+   - Metadata URL: `https://discord.com/.well-known/openid-configuration`
+   - Enter Client ID and Client Secret from Discord Developer Portal
+   - Claims mapping:
+     - `sub` → User ID (unique identifier)
+     - `email` → Email
+     - `username` → Display Name
+
+5. **Additional Configuration**:
+   - Enable "Verify email" claim if email verification is required
+   - Test the configuration in a non-production tenant first
+   - Monitor for any discovery endpoint changes (Discord may update endpoints)
+
+## Rollback Procedure
+
+If you need to revert changes made by this Terraform module or restore previous identity provider configurations, follow this rollback procedure in accordance with the repository's infrastructure change guidelines.
+
+### Prerequisites
+
+- [ ] Verify you have access to Terraform state (Azure Storage or local state file)
+- [ ] Document the reason for rollback
+- [ ] Notify stakeholders of the rollback
+- [ ] Have backup of current configuration (if available)
+
+### Rollback Steps
+
+#### Option 1: Terraform State Rollback (Preferred)
+
+If you need to revert to a previous Terraform state:
+
+```bash
+# 1. List available Terraform state versions (if using Azure Storage backend)
+az storage blob list \
+  --account-name <storage_account> \
+  --container-name <container_name> \
+  --prefix "terraform.tfstate" \
+  --output table
+
+# 2. Download the previous state version
+az storage blob download \
+  --account-name <storage_account> \
+  --container-name <container_name> \
+  --name "terraform.tfstate.<version>" \
+  --file "terraform.tfstate.backup"
+
+# 3. Replace current state with backup
+cp terraform.tfstate.backup terraform.tfstate
+
+# 4. Verify state integrity
+terraform state list
+
+# 5. Apply the previous configuration
+terraform plan  # Review changes
+terraform apply  # Restore previous configuration
+```
+
+#### Option 2: Targeted Resource Destruction
+
+If you need to remove specific resources created by this module:
+
+```bash
+# 1. List all resources managed by this module
+terraform state list
+
+# 2. Remove specific app registrations (example)
+terraform destroy \
+  -target=azuread_application.pwa \
+  -target=azuread_application.public_api \
+  -target=azuread_application.mobile_app
+
+# 3. Verify resources are removed
+az ad app list --display-name "Mystira" --output table
+```
+
+#### Option 3: Complete Module Rollback
+
+If you need to remove all resources created by this module:
+
+```bash
+# 1. Navigate to the module directory
+cd infra/terraform/environments/<environment>
+
+# 2. Run targeted destroy for the auth module
+terraform destroy -target=module.azure_ad_external_id
+
+# 3. Verify all resources are removed
+az ad app list --display-name "Mystira" --output table
+```
+
+### Restore Identity Provider Configurations
+
+If you need to restore previous social identity provider configurations:
+
+#### Google Provider Rollback
+
+1. **Revert to previous OAuth credentials**:
+   - Access [Google Cloud Console](https://console.cloud.google.com/)
+   - Navigate to APIs & Services > Credentials
+   - Restore previous Client ID and Secret
+   - Update redirect URIs to previous values
+
+2. **Update Microsoft Entra configuration**:
+   - Navigate to External ID > Identity providers > Google
+   - Replace Client ID and Client Secret with previous values
+   - Verify claims mapping matches previous configuration
+
+#### Facebook Provider Rollback
+
+1. **Revert to previous app configuration**:
+   - Access [Facebook Developers](https://developers.facebook.com/)
+   - Navigate to your app settings
+   - Restore previous OAuth redirect URIs
+   - Revert to previous App ID and Secret
+
+2. **Update Microsoft Entra configuration**:
+   - Navigate to External ID > Identity providers > Facebook
+   - Replace App ID and App Secret with previous values
+   - Verify permissions and claims mapping
+
+#### Discord Provider Rollback
+
+1. **Revert to previous application settings**:
+   - Access [Discord Developer Portal](https://discord.com/developers/applications)
+   - Navigate to OAuth2 settings
+   - Restore previous redirect URIs
+   - Revert to previous Client ID and Secret
+
+2. **Update Microsoft Entra configuration**:
+   - Navigate to External ID > Identity providers > Custom OIDC
+   - Replace Client ID and Client Secret with previous values
+   - Verify discovery URL and claims mapping
+
+### Post-Rollback Validation
+
+After completing the rollback, perform these validation steps:
+
+```bash
+# 1. Verify Terraform state is consistent
+terraform plan  # Should show no changes
+
+# 2. Verify app registrations in Azure
+az ad app list --display-name "Mystira" --output table
+
+# 3. Test authentication flows
+# - Test web app login
+# - Test mobile app login (if applicable)
+# - Test social provider login (Google, Facebook, Discord)
+
+# 4. Check application logs for authentication errors
+# Review logs for any failed login attempts or misconfigurations
+
+# 5. Monitor authentication metrics
+# - Login success rate
+# - Token issuance rate
+# - Error rates
+```
+
+### Emergency Rollback (Production Critical)
+
+If authentication is completely broken in production:
+
+1. **Immediate Actions**:
+   - Switch to backup authentication tenant (if available)
+   - Update application configurations to use backup tenant
+   - Notify users of temporary authentication issues
+
+2. **Quick Restoration**:
+   ```bash
+   # Restore from last known good state
+   terraform state pull > current.tfstate.backup
+   terraform state push last-known-good.tfstate
+   terraform apply -auto-approve
+   ```
+
+3. **Communication**:
+   - Post status page update
+   - Notify engineering team
+   - Document incident for post-mortem
+
+### Rollback Completion Checklist
+
+- [ ] Terraform state restored or resources destroyed
+- [ ] Identity provider configurations reverted
+- [ ] Application configurations updated (if needed)
+- [ ] Authentication flows tested and validated
+- [ ] No authentication errors in application logs
+- [ ] Monitoring dashboards show normal metrics
+- [ ] Stakeholders notified of rollback completion
+- [ ] Incident documentation completed
+- [ ] Post-rollback review scheduled
+
+### Additional Resources
+
+- [Terraform State Management](https://www.terraform.io/docs/state/index.html)
+- [Azure AD Application Management](https://docs.microsoft.com/en-us/azure/active-directory/develop/app-objects-and-service-principals)
+- Repository infrastructure change guidelines: See `docs/operations/ROLLBACK_PROCEDURE.md`
 
 ## Mobile App URL Scheme Configuration
 
