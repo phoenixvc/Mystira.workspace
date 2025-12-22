@@ -9,6 +9,7 @@ using Microsoft.OpenApi.Models;
 using Mystira.App.Admin.Api.Configuration;
 using Mystira.App.Admin.Api.Adapters;
 using Mystira.App.Admin.Api.Services;
+using Mystira.App.Admin.Api.Services.Caching;
 using Mystira.App.Application.Behaviors;
 using Mystira.App.Application.Services;
 // Note: Avoid unqualified IJwtService to prevent ambiguity with Application port interface
@@ -449,6 +450,11 @@ builder.Services.Configure<AdminDataMigrationOptions>(
 builder.Services.Configure<RedisCacheOptions>(
     builder.Configuration.GetSection(RedisCacheOptions.SectionName));
 
+// ═══════════════════════════════════════════════════════════════════════════════
+// CONTENT CACHING (Redis or In-Memory)
+// ═══════════════════════════════════════════════════════════════════════════════
+builder.Services.AddContentCaching(builder.Configuration);
+
 // Register application services - Admin API services
 builder.Services.AddScoped<IScenarioApiService, ScenarioApiService>();
 builder.Services.AddScoped<ICharacterMapApiService, CharacterMapApiService>();
@@ -557,6 +563,9 @@ builder.Services.AddScoped<RegisterBundleIpAssetUseCase>();
 
 builder.Services.AddScoped<IGameSessionApiService, GameSessionApiService>();
 builder.Services.AddScoped<IAccountApiService, AccountApiService>();
+
+// Add caching decorators (must be after base services are registered)
+builder.Services.AddCachedServiceDecorators(builder.Configuration);
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // HEALTH CHECKS (Cosmos DB, PostgreSQL, Redis, Blob Storage)
