@@ -123,8 +123,7 @@ resource "azurerm_cdn_frontdoor_custom_domain" "publisher" {
   host_name                = var.custom_domain_publisher
 
   tls {
-    certificate_type    = "ManagedCertificate"
-    minimum_tls_version = "TLS12"
+    certificate_type = "ManagedCertificate"
   }
 }
 
@@ -136,8 +135,7 @@ resource "azurerm_cdn_frontdoor_custom_domain" "chain" {
   host_name                = var.custom_domain_chain
 
   tls {
-    certificate_type    = "ManagedCertificate"
-    minimum_tls_version = "TLS12"
+    certificate_type = "ManagedCertificate"
   }
 }
 
@@ -434,8 +432,7 @@ resource "azurerm_cdn_frontdoor_custom_domain" "admin_api" {
   host_name                = var.custom_domain_admin_api
 
   tls {
-    certificate_type    = "ManagedCertificate"
-    minimum_tls_version = "TLS12"
+    certificate_type = "ManagedCertificate"
   }
 }
 
@@ -448,8 +445,7 @@ resource "azurerm_cdn_frontdoor_custom_domain" "admin_ui" {
   host_name                = var.custom_domain_admin_ui
 
   tls {
-    certificate_type    = "ManagedCertificate"
-    minimum_tls_version = "TLS12"
+    certificate_type = "ManagedCertificate"
   }
 }
 
