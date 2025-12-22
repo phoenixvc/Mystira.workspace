@@ -28,8 +28,8 @@ spec:
         runAsNonRoot: true
       containers:
         - name: admin-api
-          image: myssharedacr.azurecr.io/admin-api:latest
-          imagePullPolicy: Always
+          image: myssharedacr.azurecr.io/admin-api:v0.0.0
+          imagePullPolicy: IfNotPresent
           ports:
             - name: http
               containerPort: 8080

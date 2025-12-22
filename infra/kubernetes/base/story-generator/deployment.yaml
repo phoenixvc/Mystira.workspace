@@ -28,8 +28,8 @@ spec:
         runAsNonRoot: true
       containers:
         - name: story-generator
-          image: myssharedacr.azurecr.io/story-generator:latest
-          imagePullPolicy: Always
+          image: myssharedacr.azurecr.io/story-generator:v0.0.0
+          imagePullPolicy: IfNotPresent
           ports:
             - name: http
               containerPort: 8080
