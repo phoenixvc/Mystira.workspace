@@ -38,9 +38,8 @@ on:
         required: false
         type: string
         default: 'high'
-    secrets:
-      GITHUB_TOKEN:
-        required: true
+    # Note: GITHUB_TOKEN is automatically available in all workflows
+    # Do not define it as a secret - it's a reserved name
 
 jobs:
   # CodeQL SAST Analysis
