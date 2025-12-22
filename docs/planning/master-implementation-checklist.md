@@ -17,6 +17,7 @@ This is the master checklist for the Mystira platform modernization initiative. 
 | [ADR-0015 Implementation Roadmap](./adr-0015-implementation-roadmap.md) | Wolverine event-driven architecture |
 | [Remaining Issues & Opportunities](../architecture/migrations/remaining-issues-and-opportunities.md) | All bugs, incomplete features, enhancements |
 | [Code Review Improvements](../architecture/migrations/code-review-improvements.md) | Code-level fixes from review |
+| [**MPR Analysis Review**](../architecture/migrations/mpr-analysis-review.md) | **Critical review of all documentation** |
 
 ---
 
