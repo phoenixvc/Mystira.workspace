@@ -40,6 +40,8 @@ jobs:
       scan_dependencies: true
       scan_container: false
       fail_on_severity: high
+    secrets:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   # Admin UI (Node.js/React)
   admin-ui:
@@ -52,6 +54,8 @@ jobs:
       scan_dependencies: true
       scan_container: false
       fail_on_severity: high
+    secrets:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   # Chain (Python)
   chain:
@@ -64,6 +68,8 @@ jobs:
       scan_dependencies: true
       scan_container: false
       fail_on_severity: high
+    secrets:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   # DevHub (Node.js)
   devhub:
@@ -76,6 +82,8 @@ jobs:
       scan_dependencies: true
       scan_container: false
       fail_on_severity: high
+    secrets:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   # Publisher (Node.js)
   publisher:
@@ -88,6 +96,8 @@ jobs:
       scan_dependencies: true
       scan_container: false
       fail_on_severity: high
+    secrets:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   # Story Generator (.NET)
   story-generator:
@@ -100,6 +110,8 @@ jobs:
       scan_dependencies: true
       scan_container: false
       fail_on_severity: high
+    secrets:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   # Infrastructure as Code Scanning
   infrastructure:
