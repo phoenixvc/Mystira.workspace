@@ -583,7 +583,7 @@ kubectl exec -n mystira deploy/mys-admin-api -- \
 - Consult Azure service documentation for delegation requirements
 
 **Escalation Contacts:**
-- For production issues: Check team runbooks in `docs/runbooks/`
+- For production issues: Contact your team's on-call engineer or incident response team
 - Azure Support: Use Azure Portal support request for platform issues
 - Network team: Contact designated network administrator
 
