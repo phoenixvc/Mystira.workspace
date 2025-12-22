@@ -39,6 +39,13 @@ variable "vnet_id" {
 variable "subnet_id" {
   description = "Subnet ID for PostgreSQL server"
   type        = string
+  default     = null
+}
+
+variable "enable_vnet_integration" {
+  description = "Enable VNet integration (must be set explicitly to avoid count dependency issues during import)"
+  type        = bool
+  default     = true
 }
 
 variable "admin_login" {
@@ -173,7 +180,7 @@ resource "azurerm_postgresql_flexible_server_database" "databases" {
 # When using VNet integration, access is controlled through NSG rules and the private endpoint
 # The firewall rule below is only created when NOT using VNet integration
 resource "azurerm_postgresql_flexible_server_firewall_rule" "allow_azure_services" {
-  count            = var.subnet_id == null ? 1 : 0
+  count            = var.enable_vnet_integration ? 0 : 1
   name             = "AllowAzureServices"
   server_id        = azurerm_postgresql_flexible_server.shared.id
   start_ip_address = "0.0.0.0"
