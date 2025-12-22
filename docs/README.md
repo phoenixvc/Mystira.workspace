@@ -7,6 +7,7 @@ This directory contains architecture, planning, and operational documentation fo
 ```
 docs/
 ├── README.md                    # This file
+├── ALIGNMENT_REPORT.md          # Cross-repo alignment status
 ├── architecture/
 │   ├── adr/                     # Architecture Decision Records
 │   │   ├── 0006-admin-api-repository-extraction.md
@@ -19,6 +20,8 @@ docs/
 │       ├── repository-architecture.md
 │       ├── remaining-issues-and-opportunities.md
 │       └── code-review-improvements.md
+├── cicd/                        # CI/CD documentation
+│   └── README.md
 ├── planning/                    # Planning and roadmap documents
 │   ├── master-implementation-checklist.md
 │   ├── hybrid-data-strategy-roadmap.md
@@ -52,6 +55,11 @@ docs/
 - **[Master Implementation Checklist](planning/master-implementation-checklist.md)** - Complete task tracking
 - **[Hybrid Data Strategy Roadmap](planning/hybrid-data-strategy-roadmap.md)** - Phased migration plan
 - **[Admin API Extraction Plan](planning/admin-api-extraction-plan.md)** - Step-by-step extraction process
+
+### CI/CD
+
+- **[CI/CD Documentation](cicd/README.md)** - Workflows, secrets, local development
+- **[Alignment Report](ALIGNMENT_REPORT.md)** - Cross-repository alignment status
 
 ### Operations
 
