@@ -24,7 +24,7 @@ The ServiceAccounts in this directory are configured for Azure Workload Identity
 
 | ServiceAccount | Service | Terraform Module | Notes |
 |----------------|---------|------------------|-------|
-| `admin-api-sa` | Admin API | `modules/admin-api` (TODO) | Needs managed identity |
+| `admin-api-sa` | Admin API | `modules/admin-api` | ✅ Ready |
 | `story-generator-sa` | Story Generator | `modules/story-generator` | ✅ Ready |
 | `publisher-sa` | Publisher | `modules/publisher` | ✅ Ready |
 | `chain-sa` | Chain | `modules/chain` | ✅ Ready |
@@ -156,8 +156,43 @@ If Azure SDK authentication fails:
 2. Check that federated credential subject matches: `system:serviceaccount:mystira:<service-account-name>`
 3. Ensure pod has the correct label: `azure.workload.identity/use: "true"`
 
+## PostgreSQL Azure AD Authentication
+
+Services can authenticate to PostgreSQL using Azure AD tokens instead of passwords. This is configured via the shared PostgreSQL module.
+
+### Connection String Format
+
+For Azure AD authentication, use this connection string format:
+
+```
+Host=<server>.postgres.database.azure.com;Database=<database>;Username=<identity-name>;Ssl Mode=Require
+```
+
+The Azure SDK automatically obtains tokens via workload identity when running in AKS.
+
+### .NET Configuration
+
+For .NET applications using Npgsql:
+
+```csharp
+// In appsettings.json or environment variable
+"ConnectionStrings": {
+  "DefaultConnection": "Host=mys-dev-core-db.postgres.database.azure.com;Database=adminapi;Username=mys-dev-admin-api-identity-san;Ssl Mode=Require"
+}
+
+// In Program.cs, configure Npgsql to use Azure AD
+builder.Services.AddDbContext<AppDbContext>(options =>
+{
+    var dataSourceBuilder = new NpgsqlDataSourceBuilder(connectionString);
+    dataSourceBuilder.UseAzureADAuthentication(new DefaultAzureCredential());
+    options.UseNpgsql(dataSourceBuilder.Build());
+});
+```
+
 ## Related Documentation
 
 - [Azure Workload Identity](https://azure.github.io/azure-workload-identity/)
 - [AKS Workload Identity](https://learn.microsoft.com/en-us/azure/aks/workload-identity-overview)
 - [Terraform Identity Module](../terraform/modules/shared/identity/README.md)
+- [Terraform Admin API Module](../terraform/modules/admin-api/README.md)
+- [PostgreSQL Azure AD Auth](https://learn.microsoft.com/en-us/azure/postgresql/flexible-server/how-to-configure-sign-in-azure-ad-authentication)

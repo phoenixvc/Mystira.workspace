@@ -966,7 +966,36 @@ builder.Services.AddMsalAuthentication(options =>
 - [Azure AD B2C Terraform Module](../../../infra/terraform/modules/azure-ad-b2c/README.md) - Consumer auth with social login
 - [Shared Identity Module](../../../infra/terraform/modules/shared/identity/README.md) - RBAC and workload identity
 - [Kubernetes ServiceAccounts](../../../infra/kubernetes/README.md) - Workload identity for pods
+- [Admin API Module](../../../infra/terraform/modules/admin-api/README.md) - Admin API managed identity
+- [PostgreSQL Module](../../../infra/terraform/modules/shared/postgresql/README.md) - Database with Azure AD auth
 - [Implementation Roadmap - Phase 5.0](../../planning/implementation-roadmap.md#phase-50-authentication-implementation-entra-id--b2c) - Implementation status
+
+### PostgreSQL Azure AD Authentication
+
+Services can authenticate to PostgreSQL using Azure AD tokens (passwordless), eliminating the need to store database credentials:
+
+```hcl
+# In environments/dev/main.tf
+module "shared_postgresql" {
+  # ... other config ...
+
+  aad_auth_enabled = true
+  aad_admin_identities = {
+    "admin-api" = {
+      principal_id   = module.admin_api.identity_principal_id
+      principal_name = "mys-dev-admin-api-identity-san"
+      principal_type = "ServicePrincipal"
+    }
+  }
+}
+```
+
+**Connection String** (no password):
+```
+Host=<server>.postgres.database.azure.com;Database=adminapi;Username=mys-dev-admin-api-identity-san;Ssl Mode=Require
+```
+
+See the [PostgreSQL Module README](../../../infra/terraform/modules/shared/postgresql/README.md) for detailed configuration.
 
 ## References
 

@@ -137,6 +137,13 @@ resource "azurerm_subnet" "story_generator" {
   address_prefixes     = ["10.0.5.0/24"]
 }
 
+resource "azurerm_subnet" "admin_api" {
+  name                 = "admin-api-subnet"
+  resource_group_name  = azurerm_resource_group.main.name
+  virtual_network_name = azurerm_virtual_network.main.name
+  address_prefixes     = ["10.0.6.0/24"]
+}
+
 # Shared Azure Container Registry
 # Note: This ACR is shared across all environments (dev, staging, prod)
 # Use image tags/repos to separate environments: dev/*, staging/*, prod/*
@@ -209,12 +216,33 @@ module "shared_postgresql" {
 
   databases = [
     "storygenerator",
-    "publisher"
+    "publisher",
+    "adminapi"
   ]
+
+  # Enable Azure AD authentication for passwordless access
+  aad_auth_enabled = true
+  aad_admin_identities = {
+    "admin-api" = {
+      principal_id   = module.admin_api.identity_principal_id
+      principal_name = "mys-dev-admin-api-identity-san"
+      principal_type = "ServicePrincipal"
+    }
+    "story-generator" = {
+      principal_id   = module.story_generator.identity_principal_id
+      principal_name = "mys-dev-story-identity-san"
+      principal_type = "ServicePrincipal"
+    }
+  }
 
   tags = {
     CostCenter = "development"
   }
+
+  depends_on = [
+    module.admin_api,
+    module.story_generator
+  ]
 }
 
 # Shared Redis Infrastructure
@@ -277,6 +305,24 @@ module "story_generator" {
   }
 }
 
+# Admin API Infrastructure
+module "admin_api" {
+  source = "../../modules/admin-api"
+
+  environment                       = "dev"
+  location                          = var.location
+  region_code                       = "san"
+  resource_group_name               = azurerm_resource_group.main.name
+  vnet_id                           = azurerm_virtual_network.main.id
+  subnet_id                         = azurerm_subnet.admin_api.id
+  shared_log_analytics_workspace_id = module.shared_monitoring.log_analytics_workspace_id
+  shared_postgresql_server_id       = module.shared_postgresql.server_id
+
+  tags = {
+    CostCenter = "development"
+  }
+}
+
 # Entra ID Authentication
 module "entra_id" {
   source = "../../modules/entra-id"
@@ -323,6 +369,12 @@ module "identity" {
       key_vault_id               = module.chain.key_vault_id
       log_analytics_workspace_id = module.shared_monitoring.log_analytics_workspace_id
     }
+    "admin-api" = {
+      principal_id               = module.admin_api.identity_principal_id
+      key_vault_id               = module.admin_api.key_vault_id
+      postgres_server_id         = module.shared_postgresql.server_id
+      log_analytics_workspace_id = module.shared_monitoring.log_analytics_workspace_id
+    }
   }
 
   # Workload identity for AKS pods
@@ -345,6 +397,12 @@ module "identity" {
       namespace           = "mystira"
       service_account     = "chain-sa"
     }
+    "admin-api" = {
+      identity_id         = module.admin_api.identity_id
+      aks_oidc_issuer_url = azurerm_kubernetes_cluster.main.oidc_issuer_url
+      namespace           = "mystira"
+      service_account     = "admin-api-sa"
+    }
   }
 
   tags = {
@@ -355,7 +413,8 @@ module "identity" {
     azurerm_kubernetes_cluster.main,
     module.story_generator,
     module.publisher,
-    module.chain
+    module.chain,
+    module.admin_api
   ]
 }
 
@@ -529,4 +588,31 @@ output "aks_oidc_issuer_url" {
 output "identity_aks_acr_role_assignment" {
   description = "AKS to ACR role assignment ID"
   value       = module.identity.aks_acr_role_assignment_id
+}
+
+# Admin API Outputs
+output "admin_api_identity_id" {
+  description = "Admin API managed identity ID"
+  value       = module.admin_api.identity_id
+}
+
+output "admin_api_identity_client_id" {
+  description = "Admin API managed identity client ID (for workload identity)"
+  value       = module.admin_api.identity_client_id
+}
+
+output "admin_api_key_vault_id" {
+  description = "Admin API Key Vault ID"
+  value       = module.admin_api.key_vault_id
+}
+
+output "admin_api_key_vault_uri" {
+  description = "Admin API Key Vault URI"
+  value       = module.admin_api.key_vault_uri
+}
+
+# PostgreSQL Azure AD connection string template
+output "postgresql_aad_connection_template" {
+  description = "PostgreSQL Azure AD connection string template"
+  value       = module.shared_postgresql.aad_connection_string_template
 }
