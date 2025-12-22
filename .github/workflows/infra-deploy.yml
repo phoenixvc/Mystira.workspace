@@ -132,11 +132,38 @@ jobs:
   # ============================================
   # Grant Storage Permissions (Always Runs)
   # ============================================
+  # IMPORTANT: This job attempts to grant Storage Blob Data Contributor permissions
+  # to the service principal for accessing the Terraform backend storage.
+  #
+  # WHY THIS IS NEEDED:
+  # - Terraform backend uses use_azuread_auth = true for security
+  # - Service principal needs Storage Blob Data Contributor role to access blobs
+  # - Without this, terraform init fails with 403 authorization errors
+  #
+  # WHY THIS JOB MAY FAIL:
+  # - The service principal only has Contributor role (creates resources)
+  # - Granting role assignments requires Owner or User Access Administrator role
+  # - This is a bootstrap/chicken-egg problem - the SP can't grant itself permissions
+  #
+  # SOLUTION:
+  # If this job fails with AuthorizationFailed errors, you must manually grant
+  # the permission ONCE from your local machine with Owner permissions:
+  #
+  # az role assignment create \
+  #   --assignee-object-id "4a4f8652-7323-4804-849a-9ea0b3640472" \
+  #   --assignee-principal-type ServicePrincipal \
+  #   --role "Storage Blob Data Contributor" \
+  #   --scope "/subscriptions/22f9eb18-6553-4b7d-9451-47d0195085fe/resourceGroups/mys-shared-terraform-rg-san/providers/Microsoft.Storage/storageAccounts/myssharedtfstatesan"
+  #
+  # See infra/azure-setup.md for detailed instructions.
+  # ============================================
   grant-permissions:
     name: Grant Storage Permissions
     runs-on: ubuntu-latest
     needs: [validate]
     # Always run - permissions needed even if storage exists
+    # NOTE: This job will FAIL if the service principal doesn't have Owner/User Access Administrator
+    # See comments above for manual setup instructions
     steps:
       - uses: actions/checkout@v6
 
