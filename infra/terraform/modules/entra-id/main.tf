@@ -17,7 +17,7 @@ terraform {
     }
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~> 3.80"
+      version = "~> 4.0"  # 4.x required for .NET 9.0 support
     }
     random = {
       source  = "hashicorp/random"
