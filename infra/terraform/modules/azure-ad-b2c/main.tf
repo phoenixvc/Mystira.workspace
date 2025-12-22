@@ -177,6 +177,61 @@ resource "azuread_service_principal" "pwa" {
 }
 
 # =============================================================================
+# Mobile App Registration (B2C)
+# =============================================================================
+
+resource "azuread_application" "mobile" {
+  count            = length(var.mobile_redirect_uris) > 0 ? 1 : 0
+  display_name     = "Mystira Mobile App (${var.environment})"
+  sign_in_audience = "AzureADandPersonalMicrosoftAccount" # B2C multi-tenant
+
+  # Public client configuration for mobile apps
+  public_client {
+    redirect_uris = var.mobile_redirect_uris
+  }
+
+  # Required resource access (to Public API)
+  required_resource_access {
+    resource_app_id = azuread_application.public_api.client_id
+
+    dynamic "resource_access" {
+      for_each = local.api_scopes
+      content {
+        id   = random_uuid.scope_ids[resource_access.key].result
+        type = "Scope"
+      }
+    }
+  }
+
+  # Optional claims
+  optional_claims {
+    access_token {
+      name = "email"
+    }
+    id_token {
+      name = "email"
+    }
+    id_token {
+      name = "family_name"
+    }
+    id_token {
+      name = "given_name"
+    }
+  }
+
+  tags = local.common_tags
+}
+
+# Service principal for Mobile App
+resource "azuread_service_principal" "mobile" {
+  count                        = length(var.mobile_redirect_uris) > 0 ? 1 : 0
+  client_id                    = azuread_application.mobile[0].client_id
+  app_role_assignment_required = false
+
+  tags = local.common_tags
+}
+
+# =============================================================================
 # Random UUIDs for scopes
 # =============================================================================
 

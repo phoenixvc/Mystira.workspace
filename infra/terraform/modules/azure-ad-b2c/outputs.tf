@@ -65,6 +65,19 @@ output "pwa_config" {
   }
 }
 
+# B2C Configuration for Mobile App
+output "mobile_config" {
+  description = "Configuration values for Mobile App (React Native / Expo)"
+  value = length(azuread_application.mobile) > 0 ? {
+    EXPO_PUBLIC_B2C_CLIENT_ID     = azuread_application.mobile[0].client_id
+    EXPO_PUBLIC_B2C_TENANT_NAME   = var.b2c_tenant_name
+    EXPO_PUBLIC_B2C_AUTHORITY     = "https://${var.b2c_tenant_name}.b2clogin.com/${var.b2c_tenant_name}.onmicrosoft.com/${var.sign_up_sign_in_policy}"
+    EXPO_PUBLIC_B2C_KNOWN_AUTHORITY = "https://${var.b2c_tenant_name}.b2clogin.com"
+    EXPO_PUBLIC_B2C_API_SCOPE     = "${local.api_identifier_uri}/API.Access"
+    EXPO_PUBLIC_B2C_REDIRECT_URI  = length(var.mobile_redirect_uris) > 0 ? var.mobile_redirect_uris[0] : ""
+  } : {}
+}
+
 # User flow URLs
 output "user_flow_urls" {
   description = "B2C user flow URLs"

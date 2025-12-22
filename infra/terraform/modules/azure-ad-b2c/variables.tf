@@ -23,6 +23,12 @@ variable "pwa_redirect_uris" {
   default     = []
 }
 
+variable "mobile_redirect_uris" {
+  description = "Redirect URIs for mobile application (e.g., mystira://auth/callback)"
+  type        = list(string)
+  default     = []
+}
+
 variable "sign_up_sign_in_policy" {
   description = "Name of the sign-up/sign-in user flow policy"
   type        = string
