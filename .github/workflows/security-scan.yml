@@ -1,0 +1,185 @@
+# Scheduled Security Scanning Workflow
+# Runs security scans across all components on a schedule and on-demand
+
+name: Security Scan
+
+on:
+  schedule:
+    # Run weekly on Sundays at 2 AM UTC
+    - cron: '0 2 * * 0'
+  workflow_dispatch:
+    inputs:
+      component:
+        description: 'Component to scan (all, admin-api, admin-ui, chain, devhub, publisher, story-generator)'
+        required: false
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - admin-api
+          - admin-ui
+          - chain
+          - devhub
+          - publisher
+          - story-generator
+
+permissions:
+  contents: read
+  security-events: write
+  actions: read
+
+jobs:
+  # Admin API (.NET)
+  admin-api:
+    name: Admin API Security Scan
+    if: github.event.inputs.component == 'all' || github.event.inputs.component == 'admin-api' || github.event_name == 'schedule'
+    uses: ./.github/workflows/_security-scan.yml
+    with:
+      language: csharp
+      working_directory: packages/admin-api
+      scan_dependencies: true
+      scan_container: false
+      fail_on_severity: high
+    secrets:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # Admin UI (Node.js/React)
+  admin-ui:
+    name: Admin UI Security Scan
+    if: github.event.inputs.component == 'all' || github.event.inputs.component == 'admin-ui' || github.event_name == 'schedule'
+    uses: ./.github/workflows/_security-scan.yml
+    with:
+      language: javascript
+      working_directory: packages/admin-ui
+      scan_dependencies: true
+      scan_container: false
+      fail_on_severity: high
+    secrets:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # Chain (Python)
+  chain:
+    name: Chain Security Scan
+    if: github.event.inputs.component == 'all' || github.event.inputs.component == 'chain' || github.event_name == 'schedule'
+    uses: ./.github/workflows/_security-scan.yml
+    with:
+      language: python
+      working_directory: packages/chain
+      scan_dependencies: true
+      scan_container: false
+      fail_on_severity: high
+    secrets:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # DevHub (Node.js)
+  devhub:
+    name: DevHub Security Scan
+    if: github.event.inputs.component == 'all' || github.event.inputs.component == 'devhub' || github.event_name == 'schedule'
+    uses: ./.github/workflows/_security-scan.yml
+    with:
+      language: javascript
+      working_directory: packages/devhub
+      scan_dependencies: true
+      scan_container: false
+      fail_on_severity: high
+    secrets:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # Publisher (Node.js)
+  publisher:
+    name: Publisher Security Scan
+    if: github.event.inputs.component == 'all' || github.event.inputs.component == 'publisher' || github.event_name == 'schedule'
+    uses: ./.github/workflows/_security-scan.yml
+    with:
+      language: javascript
+      working_directory: packages/publisher
+      scan_dependencies: true
+      scan_container: false
+      fail_on_severity: high
+    secrets:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # Story Generator (.NET)
+  story-generator:
+    name: Story Generator Security Scan
+    if: github.event.inputs.component == 'all' || github.event.inputs.component == 'story-generator' || github.event_name == 'schedule'
+    uses: ./.github/workflows/_security-scan.yml
+    with:
+      language: csharp
+      working_directory: packages/story-generator
+      scan_dependencies: true
+      scan_container: false
+      fail_on_severity: high
+    secrets:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # Infrastructure as Code Scanning
+  infrastructure:
+    name: Infrastructure Security Scan
+    if: github.event.inputs.component == 'all' || github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run Trivy IaC scan
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          scan-type: 'config'
+          scan-ref: 'infra/terraform'
+          format: 'sarif'
+          output: 'trivy-iac-results.sarif'
+          severity: 'CRITICAL,HIGH,MEDIUM,LOW'
+          exit-code: '1'
+
+      - name: Upload Trivy IaC results to GitHub Security
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: 'trivy-iac-results.sarif'
+        if: success() || failure()
+
+      - name: Run checkov
+        uses: bridgecrewio/checkov-action@v12
+        with:
+          directory: infra/terraform
+          framework: terraform
+          output_format: sarif
+          output_file_path: checkov-results.sarif
+          soft_fail: true
+
+      - name: Upload checkov results
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: checkov-results.sarif
+        if: always()
+
+  # Summary and Notifications
+  summary:
+    name: Security Summary
+    needs: [admin-api, admin-ui, chain, devhub, publisher, story-generator, infrastructure]
+    if: always()
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Generate summary
+        run: |
+          echo "## Security Scan Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Component | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|-----------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Admin API | ${{ needs.admin-api.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Admin UI | ${{ needs.admin-ui.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Chain | ${{ needs.chain.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| DevHub | ${{ needs.devhub.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Publisher | ${{ needs.publisher.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Story Generator | ${{ needs.story-generator.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Infrastructure | ${{ needs.infrastructure.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "View detailed results in the Security tab." >> $GITHUB_STEP_SUMMARY
+
+      - name: Check for failures
+        if: contains(needs.*.result, 'failure')
+        run: |
+          echo "::error::One or more security scans failed. Review the results above."
+          exit 1

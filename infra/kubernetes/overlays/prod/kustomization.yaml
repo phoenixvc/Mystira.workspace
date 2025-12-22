@@ -39,7 +39,7 @@ patches:
         value: "500Gi"
   - target:
       kind: Deployment
-      name: mystira-publisher
+      name: mys-publisher
     patch: |-
       - op: replace
         path: /spec/replicas
@@ -106,7 +106,7 @@ patches:
         value: "https://mys-prod-story-kv-san.vault.azure.net/"
   - target:
       kind: Deployment
-      name: mystira-admin-api
+      name: mys-admin-api
     patch: |-
       - op: replace
         path: /spec/replicas
@@ -119,7 +119,7 @@ patches:
         value: "1Gi"
   - target:
       kind: Deployment
-      name: mystira-admin-ui
+      name: mys-admin-ui
     patch: |-
       - op: replace
         path: /spec/replicas
@@ -132,7 +132,7 @@ patches:
         value: "512Mi"
   - target:
       kind: HorizontalPodAutoscaler
-      name: mystira-admin-api-hpa
+      name: mys-admin-api-hpa
     patch: |-
       - op: replace
         path: /spec/minReplicas
@@ -142,7 +142,7 @@ patches:
         value: 10
   - target:
       kind: HorizontalPodAutoscaler
-      name: mystira-admin-ui-hpa
+      name: mys-admin-ui-hpa
     patch: |-
       - op: replace
         path: /spec/minReplicas
@@ -152,14 +152,14 @@ patches:
         value: 10
   - target:
       kind: ConfigMap
-      name: mystira-admin-api-config
+      name: mys-admin-api-config
     patch: |-
       - op: replace
         path: /data/key_vault_url
         value: "https://mys-prod-admin-kv-san.vault.azure.net/"
   - target:
       kind: ConfigMap
-      name: mystira-admin-ui-config
+      name: mys-admin-ui-config
     patch: |-
       - op: replace
         path: /data/api_url
