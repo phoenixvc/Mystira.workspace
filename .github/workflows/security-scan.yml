@@ -137,7 +137,7 @@ jobs:
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: 'trivy-iac-results.sarif'
-        if: always()
+        if: success() || failure()
 
       - name: Run checkov
         uses: bridgecrewio/checkov-action@v12
