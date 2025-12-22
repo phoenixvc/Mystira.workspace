@@ -38,6 +38,27 @@ variable "location" {
   default     = "southafricanorth"
 }
 
+variable "b2c_tenant_id" {
+  description = "Azure AD B2C tenant ID (optional - set when B2C tenant is created)"
+  type        = string
+  default     = ""
+}
+
+variable "alert_email_addresses" {
+  description = "Email addresses for monitoring alerts"
+  type        = list(string)
+  default     = ["devops@mystira.app"]
+}
+
+# Common tags for all resources
+locals {
+  common_tags = {
+    Environment = "staging"
+    Project     = "Mystira"
+    ManagedBy   = "terraform"
+  }
+}
+
 # Resource Group
 resource "azurerm_resource_group" "main" {
   name     = "mys-staging-core-rg-san"
@@ -125,6 +146,13 @@ resource "azurerm_subnet" "story_generator" {
   address_prefixes     = ["10.1.5.0/24"]
 }
 
+resource "azurerm_subnet" "admin_api" {
+  name                 = "admin-api-subnet"
+  resource_group_name  = azurerm_resource_group.main.name
+  virtual_network_name = azurerm_virtual_network.main.name
+  address_prefixes     = ["10.1.6.0/24"]
+}
+
 # Chain Infrastructure
 module "chain" {
   source = "../../modules/chain"
@@ -177,12 +205,33 @@ module "shared_postgresql" {
 
   databases = [
     "storygenerator",
-    "publisher"
+    "publisher",
+    "adminapi"
   ]
+
+  # Enable Azure AD authentication for passwordless access
+  aad_auth_enabled = true
+  aad_admin_identities = {
+    "admin-api" = {
+      principal_id   = module.admin_api.identity_principal_id
+      principal_name = "mys-staging-admin-api-identity-san"
+      principal_type = "ServicePrincipal"
+    }
+    "story-generator" = {
+      principal_id   = module.story_generator.identity_principal_id
+      principal_name = "mys-staging-story-identity-san"
+      principal_type = "ServicePrincipal"
+    }
+  }
 
   tags = {
     CostCenter = "staging"
   }
+
+  depends_on = [
+    module.admin_api,
+    module.story_generator
+  ]
 }
 
 # Shared Redis Infrastructure
@@ -213,7 +262,8 @@ module "shared_monitoring" {
   location            = var.location
   resource_group_name = azurerm_resource_group.main.name
 
-  retention_in_days = 30
+  retention_in_days     = 30
+  alert_email_addresses = var.alert_email_addresses
 
   tags = {
     CostCenter = "staging"
@@ -226,7 +276,7 @@ module "story_generator" {
 
   environment         = "staging"
   location            = var.location
-  region_code         = "eus"
+  region_code         = "san"
   resource_group_name = azurerm_resource_group.main.name
   vnet_id             = azurerm_virtual_network.main.id
   subnet_id           = azurerm_subnet.story_generator.id
@@ -238,6 +288,24 @@ module "story_generator" {
   shared_postgresql_server_id       = module.shared_postgresql.server_id
   shared_redis_cache_id             = module.shared_redis.cache_id
   shared_log_analytics_workspace_id = module.shared_monitoring.log_analytics_workspace_id
+
+  tags = {
+    CostCenter = "staging"
+  }
+}
+
+# Admin API Infrastructure
+module "admin_api" {
+  source = "../../modules/admin-api"
+
+  environment                       = "staging"
+  location                          = var.location
+  region_code                       = "san"
+  resource_group_name               = azurerm_resource_group.main.name
+  vnet_id                           = azurerm_virtual_network.main.id
+  subnet_id                         = azurerm_subnet.admin_api.id
+  shared_log_analytics_workspace_id = module.shared_monitoring.log_analytics_workspace_id
+  shared_postgresql_server_id       = module.shared_postgresql.server_id
 
   tags = {
     CostCenter = "staging"
@@ -257,6 +325,21 @@ module "entra_id" {
   tags = {
     CostCenter = "staging"
   }
+}
+
+# Azure AD B2C Consumer Authentication
+# Note: B2C tenant must be created manually first, then set b2c_tenant_id variable
+module "azure_ad_b2c" {
+  source = "../../modules/azure-ad-b2c"
+  count  = var.b2c_tenant_id != "" ? 1 : 0
+
+  environment     = "staging"
+  b2c_tenant_id   = var.b2c_tenant_id
+  b2c_tenant_name = "mystirab2cstaging"
+
+  pwa_redirect_uris = [
+    "https://app.staging.mystira.app/auth/callback"
+  ]
 }
 
 # Shared Identity and RBAC Configuration
@@ -288,6 +371,40 @@ module "identity" {
       key_vault_id               = module.chain.key_vault_id
       log_analytics_workspace_id = module.shared_monitoring.log_analytics_workspace_id
     }
+    "admin-api" = {
+      principal_id               = module.admin_api.identity_principal_id
+      key_vault_id               = module.admin_api.key_vault_id
+      postgres_server_id         = module.shared_postgresql.server_id
+      log_analytics_workspace_id = module.shared_monitoring.log_analytics_workspace_id
+    }
+  }
+
+  # Workload identity for AKS pods
+  workload_identities = {
+    "story-generator" = {
+      identity_id         = module.story_generator.identity_id
+      aks_oidc_issuer_url = azurerm_kubernetes_cluster.main.oidc_issuer_url
+      namespace           = "mystira"
+      service_account     = "story-generator-sa"
+    }
+    "publisher" = {
+      identity_id         = module.publisher.identity_id
+      aks_oidc_issuer_url = azurerm_kubernetes_cluster.main.oidc_issuer_url
+      namespace           = "mystira"
+      service_account     = "publisher-sa"
+    }
+    "chain" = {
+      identity_id         = module.chain.identity_id
+      aks_oidc_issuer_url = azurerm_kubernetes_cluster.main.oidc_issuer_url
+      namespace           = "mystira"
+      service_account     = "chain-sa"
+    }
+    "admin-api" = {
+      identity_id         = module.admin_api.identity_id
+      aks_oidc_issuer_url = azurerm_kubernetes_cluster.main.oidc_issuer_url
+      namespace           = "mystira"
+      service_account     = "admin-api-sa"
+    }
   }
 
   tags = {
@@ -298,7 +415,8 @@ module "identity" {
     azurerm_kubernetes_cluster.main,
     module.story_generator,
     module.publisher,
-    module.chain
+    module.chain,
+    module.admin_api
   ]
 }
 
@@ -416,4 +534,31 @@ output "aks_oidc_issuer_url" {
 output "identity_aks_acr_role_assignment" {
   description = "AKS to ACR role assignment ID"
   value       = module.identity.aks_acr_role_assignment_id
+}
+
+# Admin API Outputs
+output "admin_api_identity_id" {
+  description = "Admin API managed identity ID"
+  value       = module.admin_api.identity_id
+}
+
+output "admin_api_identity_client_id" {
+  description = "Admin API managed identity client ID (for workload identity)"
+  value       = module.admin_api.identity_client_id
+}
+
+output "admin_api_key_vault_id" {
+  description = "Admin API Key Vault ID"
+  value       = module.admin_api.key_vault_id
+}
+
+output "admin_api_key_vault_uri" {
+  description = "Admin API Key Vault URI"
+  value       = module.admin_api.key_vault_uri
+}
+
+# PostgreSQL Azure AD connection string template
+output "postgresql_aad_connection_template" {
+  description = "PostgreSQL Azure AD connection string template"
+  value       = module.shared_postgresql.aad_connection_string_template
 }

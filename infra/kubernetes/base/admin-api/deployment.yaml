@@ -1,15 +1,15 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: mystira-admin-api
+  name: mys-admin-api
   labels:
-    app: mystira-admin-api
+    app: mys-admin-api
     component: admin-api
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: mystira-admin-api
+      app: mys-admin-api
   strategy:
     type: RollingUpdate
     rollingUpdate:
@@ -18,17 +18,17 @@ spec:
   template:
     metadata:
       labels:
-        app: mystira-admin-api
+        app: mys-admin-api
         component: admin-api
         azure.workload.identity/use: "true"
     spec:
-      serviceAccountName: mystira-admin-api-sa
+      serviceAccountName: admin-api-sa
       securityContext:
         runAsUser: 1000
         runAsNonRoot: true
       containers:
         - name: admin-api
-          image: mystiraacr.azurecr.io/admin-api:latest
+          image: myssharedacr.azurecr.io/admin-api:latest
           imagePullPolicy: Always
           ports:
             - name: http
@@ -49,34 +49,34 @@ spec:
             - name: ConnectionStrings__PostgreSQL
               valueFrom:
                 secretKeyRef:
-                  name: mystira-admin-api-secrets
+                  name: mys-admin-api-secrets
                   key: postgres_connection_string
             - name: ConnectionStrings__Redis
               valueFrom:
                 secretKeyRef:
-                  name: mystira-admin-api-secrets
+                  name: mys-admin-api-secrets
                   key: redis_connection_string
             - name: AzureAd__Instance
               value: "https://login.microsoftonline.com/"
             - name: AzureAd__TenantId
               valueFrom:
                 secretKeyRef:
-                  name: mystira-admin-api-secrets
+                  name: mys-admin-api-secrets
                   key: azure_ad_tenant_id
             - name: AzureAd__ClientId
               valueFrom:
                 secretKeyRef:
-                  name: mystira-admin-api-secrets
+                  name: mys-admin-api-secrets
                   key: azure_ad_client_id
             - name: APPLICATIONINSIGHTS_CONNECTION_STRING
               valueFrom:
                 secretKeyRef:
-                  name: mystira-admin-api-secrets
+                  name: mys-admin-api-secrets
                   key: appinsights_connection
             - name: KEY_VAULT_URL
               valueFrom:
                 configMapKeyRef:
-                  name: mystira-admin-api-config
+                  name: mys-admin-api-config
                   key: key_vault_url
           resources:
             requests:
@@ -101,9 +101,9 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: mystira-admin-api
+  name: mys-admin-api
   labels:
-    app: mystira-admin-api
+    app: mys-admin-api
 spec:
   type: ClusterIP
   ports:
@@ -114,24 +114,24 @@ spec:
       port: 8081
       targetPort: 8081
   selector:
-    app: mystira-admin-api
+    app: mys-admin-api
 ---
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: mystira-admin-api-config
+  name: mys-admin-api-config
 data:
-  key_vault_url: "https://mystira-admin-kv.vault.azure.net/"
+  key_vault_url: "https://mys-dev-admin-kv-san.vault.azure.net/"
 ---
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: mystira-admin-api-hpa
+  name: mys-admin-api-hpa
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: mystira-admin-api
+    name: mys-admin-api
   minReplicas: 2
   maxReplicas: 5
   metrics:
@@ -147,10 +147,3 @@ spec:
         target:
           type: Utilization
           averageUtilization: 80
----
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: mystira-admin-api-sa
-  annotations:
-    azure.workload.identity/client-id: "${AZURE_CLIENT_ID}"
