@@ -322,11 +322,30 @@ output "redis_enabled" {
 # Resource Import Commands
 # -----------------------------------------------------------------------------
 
+locals {
+  cosmos_import_cmd = var.skip_cosmos_creation ? "" : join("", [
+    "# terraform import 'module.mystira_app.azurerm_cosmosdb_account.main[0]' ",
+    "/subscriptions/<sub>/resourceGroups/",
+    var.resource_group_name,
+    "/providers/Microsoft.DocumentDB/databaseAccounts/",
+    local.name_prefix,
+    "-cosmos-",
+    local.region_code
+  ])
+  storage_import_cmd = var.skip_storage_creation ? "" : join("", [
+    "# terraform import 'module.mystira_app.azurerm_storage_account.main[0]' ",
+    "/subscriptions/<sub>/resourceGroups/",
+    var.resource_group_name,
+    "/providers/Microsoft.Storage/storageAccounts/",
+    local.storage_account_name
+  ])
+}
+
 output "import_commands" {
   description = "Terraform import commands for existing resources"
-  value = var.skip_cosmos_creation || var.skip_storage_creation ? <<-EOT
-    # Import commands for existing resources:
-    ${var.skip_cosmos_creation ? "" : "# terraform import 'module.mystira_app.azurerm_cosmosdb_account.main[0]' /subscriptions/<sub>/resourceGroups/${var.resource_group_name}/providers/Microsoft.DocumentDB/databaseAccounts/${local.name_prefix}-cosmos-${local.region_code}"}
-    ${var.skip_storage_creation ? "" : "# terraform import 'module.mystira_app.azurerm_storage_account.main[0]' /subscriptions/<sub>/resourceGroups/${var.resource_group_name}/providers/Microsoft.Storage/storageAccounts/${local.storage_account_name}"}
-  EOT : null
+  value = var.skip_cosmos_creation || var.skip_storage_creation ? join("\n", compact([
+    "# Import commands for existing resources:",
+    local.cosmos_import_cmd,
+    local.storage_import_cmd
+  ])) : null
 }
