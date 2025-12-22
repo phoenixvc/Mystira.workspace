@@ -46,7 +46,8 @@ resource "azurerm_role_assignment" "cicd_acr_push" {
 # =============================================================================
 
 resource "azurerm_role_assignment" "service_key_vault_reader" {
-  for_each = { for k, v in var.service_identities : k => v if v.key_vault_id != "" }
+  # Use static boolean flag instead of checking resource ID (which may be unknown at plan time)
+  for_each = { for k, v in var.service_identities : k => v if v.enable_key_vault_access }
 
   scope                = each.value.key_vault_id
   role_definition_name = "Key Vault Secrets User"
@@ -60,7 +61,8 @@ resource "azurerm_role_assignment" "service_key_vault_reader" {
 # =============================================================================
 
 resource "azurerm_role_assignment" "service_postgres_reader" {
-  for_each = { for k, v in var.service_identities : k => v if v.postgres_server_id != "" && v.postgres_role == "reader" }
+  # Use static boolean flag instead of checking resource ID (which may be unknown at plan time)
+  for_each = { for k, v in var.service_identities : k => v if v.enable_postgres_access && v.postgres_role == "reader" }
 
   scope                = each.value.postgres_server_id
   role_definition_name = "Reader"
@@ -74,7 +76,8 @@ resource "azurerm_role_assignment" "service_postgres_reader" {
 # =============================================================================
 
 resource "azurerm_role_assignment" "service_redis_contributor" {
-  for_each = { for k, v in var.service_identities : k => v if v.redis_cache_id != "" }
+  # Use static boolean flag instead of checking resource ID (which may be unknown at plan time)
+  for_each = { for k, v in var.service_identities : k => v if v.enable_redis_access }
 
   scope                = each.value.redis_cache_id
   role_definition_name = "Redis Cache Contributor"
@@ -88,7 +91,8 @@ resource "azurerm_role_assignment" "service_redis_contributor" {
 # =============================================================================
 
 resource "azurerm_role_assignment" "service_log_analytics" {
-  for_each = { for k, v in var.service_identities : k => v if v.log_analytics_workspace_id != "" }
+  # Use static boolean flag instead of checking resource ID (which may be unknown at plan time)
+  for_each = { for k, v in var.service_identities : k => v if v.enable_log_analytics }
 
   scope                = each.value.log_analytics_workspace_id
   role_definition_name = "Log Analytics Contributor"
@@ -102,7 +106,8 @@ resource "azurerm_role_assignment" "service_log_analytics" {
 # =============================================================================
 
 resource "azurerm_role_assignment" "service_storage_blob" {
-  for_each = { for k, v in var.service_identities : k => v if v.storage_account_id != "" }
+  # Use static boolean flag instead of checking resource ID (which may be unknown at plan time)
+  for_each = { for k, v in var.service_identities : k => v if v.enable_storage_access }
 
   scope                = each.value.storage_account_id
   role_definition_name = var.storage_role

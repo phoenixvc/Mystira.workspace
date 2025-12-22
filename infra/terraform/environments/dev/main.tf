@@ -232,18 +232,21 @@ module "shared_postgresql" {
     "adminapi"
   ]
 
-  # Enable Azure AD authentication for passwordless access
-  aad_auth_enabled = true
-  aad_admin_identities = {
-    "admin-api" = {
-      principal_name = "mys-dev-admin-api-identity-san"
-      principal_type = "ServicePrincipal"
-    }
-    "story-generator" = {
-      principal_name = "mys-dev-story-identity-san"
-      principal_type = "ServicePrincipal"
-    }
-  }
+  # Azure AD authentication disabled - identities need to be created first
+  # To enable: 1) Create user assigned identities for each service
+  #            2) Set aad_auth_enabled = true
+  #            3) Add identity entries to aad_admin_identities
+  aad_auth_enabled = false
+  # aad_admin_identities = {
+  #   "admin-api" = {
+  #     principal_name = "mys-dev-admin-api-identity-san"
+  #     principal_type = "ServicePrincipal"
+  #   }
+  #   "story-generator" = {
+  #     principal_name = "mys-dev-story-identity-san"
+  #     principal_type = "ServicePrincipal"
+  #   }
+  # }
 
   tags = {
     CostCenter = "development"

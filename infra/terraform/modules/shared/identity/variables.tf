@@ -33,6 +33,14 @@ variable "service_identities" {
   description = "Map of service identities and their resource access requirements"
   type = map(object({
     principal_id               = string
+    # Static boolean flags to determine which role assignments to create
+    # These must be known at plan time (not derived from resource attributes)
+    enable_key_vault_access    = optional(bool, false)
+    enable_postgres_access     = optional(bool, false)
+    enable_redis_access        = optional(bool, false)
+    enable_log_analytics       = optional(bool, false)
+    enable_storage_access      = optional(bool, false)
+    # Resource IDs (can be unknown at plan time)
     key_vault_id               = optional(string, "")
     postgres_server_id         = optional(string, "")
     postgres_role              = optional(string, "reader")

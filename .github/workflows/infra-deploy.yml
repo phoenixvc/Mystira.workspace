@@ -355,6 +355,36 @@ jobs:
             fi
           fi
 
+      - name: Clean Up Orphaned State
+        run: |
+          cd infra/terraform/environments/${{ env.ENVIRONMENT }}
+          echo "Checking for orphaned modules in state..."
+
+          # List of modules that were removed from codebase but may still be in state
+          ORPHANED_MODULES=(
+            "module.identity"
+            "module.azure_ad_b2c"
+            "module.azure-ad-b2c"
+            "module.admin_api"
+            "module.entra_id"
+          )
+
+          for module in "${ORPHANED_MODULES[@]}"; do
+            if terraform state list 2>/dev/null | grep -q "^${module}\."; then
+              echo "Found orphaned module: $module - removing from state..."
+              terraform state rm "$module" || true
+            fi
+          done
+
+          # Remove orphaned data sources from shared_postgresql module
+          # These reference identities that no longer exist
+          if terraform state list 2>/dev/null | grep -q "module.shared_postgresql.data.azurerm_user_assigned_identity"; then
+            echo "Found orphaned user_assigned_identity data sources in shared_postgresql - removing..."
+            for item in $(terraform state list 2>/dev/null | grep "module.shared_postgresql.data.azurerm_user_assigned_identity"); do
+              terraform state rm "$item" || true
+            done
+          fi
+
       - name: Terraform Refresh (sync state with Azure)
         run: |
           cd infra/terraform/environments/${{ env.ENVIRONMENT }}
