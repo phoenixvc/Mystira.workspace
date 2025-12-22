@@ -96,6 +96,16 @@ output "static_web_app_api_key" {
   sensitive   = true
 }
 
+output "api_custom_domain" {
+  description = "API custom domain (if enabled)"
+  value       = var.enable_api_custom_domain && var.api_custom_domain != "" ? var.api_custom_domain : null
+}
+
+output "app_custom_domain" {
+  description = "Static Web App custom domain (if enabled)"
+  value       = var.enable_app_custom_domain && var.app_custom_domain != "" ? var.app_custom_domain : null
+}
+
 # -----------------------------------------------------------------------------
 # Storage Outputs
 # -----------------------------------------------------------------------------

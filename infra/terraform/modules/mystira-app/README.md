@@ -103,7 +103,7 @@ If resources already exist from Bicep deployments, import them into Terraform st
 ```bash
 # Get your subscription ID
 SUBSCRIPTION_ID=$(az account show --query id -o tsv)
-RG_NAME="mys-dev-mystira-rg-san"
+RG_NAME="mys-dev-core-rg-san"  # Using shared core resource group
 
 # Import Cosmos DB
 terraform import 'module.mystira_app.azurerm_cosmosdb_account.main[0]' \
@@ -129,12 +129,12 @@ terraform import 'module.mystira_app.azurerm_key_vault.main' \
 terraform import 'module.mystira_app.azurerm_static_web_app.main[0]' \
   /subscriptions/$SUBSCRIPTION_ID/resourceGroups/$RG_NAME/providers/Microsoft.Web/staticSites/mys-dev-mystira-swa-eus2
 
-# Import Log Analytics
-terraform import 'module.mystira_app.azurerm_log_analytics_workspace.main' \
+# Import Log Analytics (only if NOT using shared monitoring)
+terraform import 'module.mystira_app.azurerm_log_analytics_workspace.main[0]' \
   /subscriptions/$SUBSCRIPTION_ID/resourceGroups/$RG_NAME/providers/Microsoft.OperationalInsights/workspaces/mys-dev-mystira-law-san
 
-# Import Application Insights
-terraform import 'module.mystira_app.azurerm_application_insights.main' \
+# Import Application Insights (only if NOT using shared monitoring)
+terraform import 'module.mystira_app.azurerm_application_insights.main[0]' \
   /subscriptions/$SUBSCRIPTION_ID/resourceGroups/$RG_NAME/providers/Microsoft.Insights/components/mys-dev-mystira-ai-san
 ```
 

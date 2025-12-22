@@ -278,7 +278,7 @@ resource "azurerm_linux_web_app" "api" {
 
   site_config {
     application_stack {
-      dotnet_version = "9.0"
+      dotnet_version = var.dotnet_version
     }
 
     always_on = var.app_service_sku != "F1" && var.app_service_sku != "D1"
@@ -404,6 +404,15 @@ resource "azurerm_static_web_app_custom_domain" "main" {
   static_web_app_id = azurerm_static_web_app.main[0].id
   domain_name       = var.app_custom_domain
   validation_type   = "cname-delegation"
+}
+
+# Custom domain for API App Service
+resource "azurerm_app_service_custom_hostname_binding" "api" {
+  count = var.enable_api_custom_domain && var.api_custom_domain != "" ? 1 : 0
+
+  hostname            = var.api_custom_domain
+  app_service_name    = azurerm_linux_web_app.api.name
+  resource_group_name = var.resource_group_name
 }
 
 # =============================================================================
