@@ -121,8 +121,8 @@ This roadmap outlines the strategic implementation plan for the Mystira workspac
 **Tasks**:
 
 - [x] Create reusable workflow templates for common patterns
-  - [ ] Container build template
-  - [ ] Terraform deployment template
+  - [x] Container build template (`_docker-build.yml` - December 2025)
+  - [x] Terraform deployment template (`_terraform.yml` - December 2025)
   - [x] .NET build/test template (standardized across admin-api, story-generator)
   - [x] Node.js build/test template (standardized across admin-ui, devhub, publisher)
   - [x] Python build/test template (chain)
