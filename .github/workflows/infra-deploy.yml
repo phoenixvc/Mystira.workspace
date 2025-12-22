@@ -831,7 +831,7 @@ jobs:
   summary:
     name: Deployment Summary
     runs-on: ubuntu-latest
-    needs: [validate, bootstrap, plan-terraform, apply-terraform, build-images, configure-dns, deploy-kubernetes]
+    needs: [validate, bootstrap, plan-terraform, apply-terraform, build-images, deploy-kubernetes, configure-dns]
     if: always()
     steps:
       - name: Final Summary
