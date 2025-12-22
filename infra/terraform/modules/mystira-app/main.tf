@@ -713,7 +713,7 @@ resource "azurerm_key_vault_secret" "postgresql_connection_string" {
   count = var.enable_postgresql && var.use_shared_postgresql ? 1 : 0
 
   name         = "postgresql-connection-string"
-  value        = "Host=${var.shared_postgresql_server_fqdn};Port=5432;Username=${var.shared_postgresql_admin_login};Password=${var.shared_postgresql_admin_password};Database=${var.postgresql_database_name};SSLMode=Require;Trust Server Certificate=true"
+  value        = "Host=${var.shared_postgresql_server_fqdn};Port=5432;Username=${var.shared_postgresql_admin_login};Password=${var.shared_postgresql_admin_password};Database=${var.postgresql_database_name};SSL Mode=Require;Trust Server Certificate=True"
   key_vault_id = azurerm_key_vault.main.id
 }
 
