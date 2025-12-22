@@ -104,9 +104,8 @@ variable "aad_auth_enabled" {
 }
 
 variable "aad_admin_identities" {
-  description = "Map of managed identities to add as Azure AD administrators"
+  description = "Map of managed identities to add as Azure AD administrators (principal_name is used to look up the identity)"
   type = map(object({
-    principal_id   = string
     principal_name = string
     principal_type = string # ServicePrincipal, User, or Group
   }))
@@ -215,12 +214,20 @@ resource "azurerm_postgresql_flexible_server_active_directory_administrator" "aa
   server_name         = azurerm_postgresql_flexible_server.shared.name
   resource_group_name = var.resource_group_name
   tenant_id           = data.azurerm_client_config.current.tenant_id
-  object_id           = each.value.principal_id
+  object_id           = data.azurerm_user_assigned_identity.aad_admins[each.key].principal_id
   principal_name      = each.value.principal_name
   principal_type      = each.value.principal_type
 }
 
 data "azurerm_client_config" "current" {}
+
+# Look up managed identities by name to avoid circular dependencies
+data "azurerm_user_assigned_identity" "aad_admins" {
+  for_each = var.aad_auth_enabled ? var.aad_admin_identities : {}
+
+  name                = each.value.principal_name
+  resource_group_name = var.resource_group_name
+}
 
 output "server_id" {
   description = "PostgreSQL server ID"

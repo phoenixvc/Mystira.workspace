@@ -50,6 +50,18 @@ variable "alert_email_addresses" {
   default     = ["devops@mystira.app"]
 }
 
+variable "oidc_issuer_enabled" {
+  description = "Enable OIDC issuer for AKS workload identity"
+  type        = bool
+  default     = true
+}
+
+variable "workload_identity_enabled" {
+  description = "Enable workload identity for AKS"
+  type        = bool
+  default     = true
+}
+
 # Common tags for all resources
 locals {
   common_tags = {
@@ -213,12 +225,10 @@ module "shared_postgresql" {
   aad_auth_enabled = true
   aad_admin_identities = {
     "admin-api" = {
-      principal_id   = module.admin_api.identity_principal_id
       principal_name = "mys-staging-admin-api-identity-san"
       principal_type = "ServicePrincipal"
     }
     "story-generator" = {
-      principal_id   = module.story_generator.identity_principal_id
       principal_name = "mys-staging-story-identity-san"
       principal_type = "ServicePrincipal"
     }
@@ -440,8 +450,8 @@ resource "azurerm_kubernetes_cluster" "main" {
   }
 
   # Enable OIDC issuer for workload identity
-  oidc_issuer_enabled       = true
-  workload_identity_enabled = true
+  oidc_issuer_enabled       = var.oidc_issuer_enabled
+  workload_identity_enabled = var.workload_identity_enabled
 
   network_profile {
     network_plugin = "azure"
