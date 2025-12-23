@@ -529,34 +529,25 @@ jobs:
             fi
           fi
 
-          # Import WAF Security Policy if it exists (use az rest since az cdn security-policy may not exist)
+          # Clean up legacy admin WAF Security Policy
+          # The admin security policy was removed from Terraform because Azure only allows
+          # one WAF firewall policy attachment per Front Door profile. Admin domains are now
+          # protected via the main security policy using dynamic blocks.
           FD_PROFILE_NAME="mystira-${{ env.ENVIRONMENT }}-fd"
-          WAF_POLICY_NAME="mystira-${{ env.ENVIRONMENT }}-admin-waf-security-policy"
-          WAF_POLICY_ID="/subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${{ env.AZURE_RESOURCE_GROUP }}/providers/Microsoft.Cdn/profiles/${FD_PROFILE_NAME}/securityPolicies/${WAF_POLICY_NAME}"
+          ADMIN_WAF_POLICY_NAME="mystira-${{ env.ENVIRONMENT }}-admin-waf-security-policy"
+          ADMIN_WAF_POLICY_ID="/subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${{ env.AZURE_RESOURCE_GROUP }}/providers/Microsoft.Cdn/profiles/${FD_PROFILE_NAME}/securityPolicies/${ADMIN_WAF_POLICY_NAME}"
 
-          # Check if WAF policy exists in Azure
-          if az rest --method GET --url "https://management.azure.com${WAF_POLICY_ID}?api-version=2024-02-01" &> /dev/null 2>&1; then
-            echo "WAF Security Policy exists in Azure"
+          # Remove from Terraform state if present (resource no longer exists in config)
+          if terraform state list 2>/dev/null | grep -q 'module.front_door.azurerm_cdn_frontdoor_security_policy.admin\[0\]'; then
+            echo "Removing legacy admin WAF policy from Terraform state..."
+            terraform state rm 'module.front_door.azurerm_cdn_frontdoor_security_policy.admin[0]' || true
+          fi
 
-            # Check if already in Terraform state
-            if terraform state list 2>/dev/null | grep -q 'module.front_door.azurerm_cdn_frontdoor_security_policy.admin\[0\]'; then
-              echo "WAF Security Policy already in Terraform state"
-            else
-              echo "WAF Security Policy not in state, importing..."
-              # Try to import, if it fails, remove from Azure and let Terraform recreate
-              if ! terraform import 'module.front_door.azurerm_cdn_frontdoor_security_policy.admin[0]' "${WAF_POLICY_ID}"; then
-                echo "::warning::Import failed. Attempting to delete existing WAF policy and recreate..."
-                az rest --method DELETE --url "https://management.azure.com${WAF_POLICY_ID}?api-version=2024-02-01" || true
-                echo "Deleted existing WAF policy - Terraform will recreate it"
-              fi
-            fi
-          else
-            echo "WAF Security Policy does not exist in Azure - will be created by Terraform"
-            # Also check if there's stale state and remove it
-            if terraform state list 2>/dev/null | grep -q 'module.front_door.azurerm_cdn_frontdoor_security_policy.admin\[0\]'; then
-              echo "Removing stale WAF policy from Terraform state..."
-              terraform state rm 'module.front_door.azurerm_cdn_frontdoor_security_policy.admin[0]' || true
-            fi
+          # Delete from Azure if it exists (it conflicts with the main security policy)
+          if az rest --method GET --url "https://management.azure.com${ADMIN_WAF_POLICY_ID}?api-version=2024-02-01" &> /dev/null 2>&1; then
+            echo "::warning::Legacy admin WAF security policy exists in Azure - deleting..."
+            az rest --method DELETE --url "https://management.azure.com${ADMIN_WAF_POLICY_ID}?api-version=2024-02-01" || true
+            echo "Deleted legacy admin WAF policy - admin domains are now protected by the main security policy"
           fi
 
           # Import federated identity credentials if they exist
