@@ -423,6 +423,207 @@ az ad app list --display-name "Mystira" --output table
 
 This module focuses on app registration management and assumes the external tenant already exists.
 
+## Troubleshooting
+
+### Issue 1: "No subscriptions found" when running `az login`
+
+**Symptom**:
+```
+az login --tenant <external-tenant-id>
+No subscriptions found for <user@domain.com>.
+```
+
+**Cause**: External ID tenants are standalone identity tenants and don't have Azure subscriptions. This is expected and normal.
+
+**Solution**: Use the `--allow-no-subscriptions` flag:
+```bash
+az login --tenant <external-tenant-id> --allow-no-subscriptions
+```
+
+Verify authentication:
+```bash
+az account show
+```
+
+### Issue 2: "Please run 'az login' to setup account" during Terraform plan
+
+**Symptom**:
+```
+Error: unable to build authorizer: could not configure AzureCli Authorizer
+```
+
+**Cause**: Azure CLI session expired or not authenticated to the External ID tenant.
+
+**Solution**:
+```bash
+# Clear cached credentials
+az account clear
+
+# Login to External ID tenant
+az login --tenant <external-tenant-id> --allow-no-subscriptions
+
+# Verify
+az account show
+
+# Retry Terraform
+terraform plan
+```
+
+### Issue 3: "requested_access_token_version must be 2" error
+
+**Symptom**:
+```
+Error: `requested_access_token_version` must be 2 when `sign_in_audience` is "AzureADandPersonalMicrosoftAccount"
+```
+
+**Cause**: PWA and Mobile app registrations require explicit token version configuration when using personal Microsoft accounts.
+
+**Solution**: This has been fixed in the module. Ensure you're using the latest version with the `api` block:
+```hcl
+resource "azuread_application" "pwa" {
+  # ...
+  api {
+    requested_access_token_version = 2
+  }
+}
+```
+
+### Issue 4: Testing the module without full infrastructure
+
+**Symptom**: Want to test app registrations without deploying the entire dev environment.
+
+**Solution**: Create a standalone test configuration:
+
+1. **Create test directory**:
+   ```bash
+   cd infra/terraform/modules/azure-ad-b2c
+   mkdir test
+   cd test
+   ```
+
+2. **Create `main.tf`**:
+   ```hcl
+   terraform {
+     required_version = ">= 1.5.0"
+     required_providers {
+       azuread = {
+         source  = "hashicorp/azuread"
+         version = "~> 2.47"
+       }
+       random = {
+         source  = "hashicorp/random"
+         version = "~> 3.5"
+       }
+     }
+   }
+
+   provider "azuread" {
+     tenant_id = var.tenant_id
+   }
+
+   module "entra_external_id" {
+     source = "../"
+
+     environment  = "dev"
+     tenant_name  = "mystira"
+     tenant_id    = var.tenant_id
+
+     pwa_redirect_uris = [
+       "http://localhost:5173/authentication/login-callback",
+       "https://mystira.app/authentication/login-callback"
+     ]
+
+     mobile_redirect_uris = [
+       "mystira://auth/callback"
+     ]
+   }
+
+   output "pwa_client_id" {
+     value = module.entra_external_id.pwa_client_id
+   }
+
+   output "public_api_client_id" {
+     value = module.entra_external_id.public_api_client_id
+   }
+
+   output "pwa_config" {
+     value = module.entra_external_id.pwa_config
+   }
+   ```
+
+3. **Create `variables.tf`**:
+   ```hcl
+   variable "tenant_id" {
+     description = "External ID tenant ID"
+     type        = string
+   }
+   ```
+
+4. **Create `terraform.tfvars`**:
+   ```hcl
+   tenant_id = "<your-external-tenant-id>"
+   ```
+
+5. **Run Terraform**:
+   ```bash
+   az login --tenant <your-external-tenant-id> --allow-no-subscriptions
+   terraform init
+   terraform plan
+   terraform apply
+   ```
+
+### Issue 5: Finding your External Tenant ID
+
+**Solution**:
+1. Go to [Microsoft Entra admin center](https://entra.microsoft.com/)
+2. Switch to your External ID tenant (look for tenant name in tenant switcher)
+3. Navigate to **Overview**
+4. Copy the **Directory (tenant) ID** (GUID format)
+
+### Issue 6: Authority endpoint missing `/v2.0` suffix
+
+**Symptom**: MSAL authentication fails or tokens cannot be acquired.
+
+**Cause**: The authority endpoint must include the `/v2.0` suffix for proper OAuth2 endpoint discovery.
+
+**Solution**: This has been fixed in the module outputs. The correct format is:
+```
+https://mystira.ciamlogin.com/<tenant-id>/v2.0
+```
+
+Not:
+```
+https://mystira.ciamlogin.com/<tenant-id>
+```
+
+### Issue 7: Backend storage authentication errors
+
+**Symptom**:
+```
+Error: Failed to get existing workspaces: unexpected status 403
+```
+
+**Cause**: Trying to run Terraform from the `environments/dev` directory which uses Azure Storage backend.
+
+**Solution**: Use the standalone test approach (see Issue 4) or grant yourself **Storage Blob Data Contributor** role on the storage account:
+
+```bash
+# Get your user object ID
+USER_OBJECT_ID=$(az ad signed-in-user show --query id -o tsv)
+
+# Get the storage account resource ID
+STORAGE_ACCOUNT_ID=$(az storage account show \
+  --name <storage-account-name> \
+  --resource-group <resource-group-name> \
+  --query id -o tsv)
+
+# Assign the role
+az role assignment create \
+  --assignee $USER_OBJECT_ID \
+  --role "Storage Blob Data Contributor" \
+  --scope $STORAGE_ACCOUNT_ID
+```
+
 ## Related Documentation
 
 - [Microsoft Entra External ID Overview](https://learn.microsoft.com/en-us/entra/external-id/external-identities-overview)
