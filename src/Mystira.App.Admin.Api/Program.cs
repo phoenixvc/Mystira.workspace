@@ -503,9 +503,6 @@ builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<Mystira.App.Shared.Services.IJwtService, Mystira.App.Shared.Services.JwtService>();
 builder.Services.AddScoped<Mystira.App.Application.Ports.Auth.IJwtService, Mystira.App.Admin.Api.Adapters.JwtServiceAdapter>();
 
-// Health port adapter for CQRS handlers
-builder.Services.AddScoped<Mystira.App.Application.Ports.Health.IHealthCheckPort, Mystira.App.Shared.Adapters.HealthCheckPortAdapter>();
-
 // Discord/Messaging: keep as No-Op in this environment
 builder.Services.AddSingleton<NoOpChatBotService>();
 builder.Services.AddSingleton<IChatBotService>(sp => sp.GetRequiredService<NoOpChatBotService>());

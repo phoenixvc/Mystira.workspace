@@ -140,8 +140,7 @@ public class CachedScenarioApiService : IScenarioApiService
     {
         // Consider a query "default" if it has no specific filters
         return string.IsNullOrEmpty(request.AgeGroup) &&
-               string.IsNullOrEmpty(request.SearchQuery) &&
-               request.PageNumber <= 1 &&
+               request.Page <= 1 &&
                request.PageSize >= 50;
     }
 }
