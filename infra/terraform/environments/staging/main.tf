@@ -503,24 +503,28 @@ module "identity" {
   workload_identities = {
     "story-generator" = {
       identity_id         = module.story_generator.identity_id
+      resource_group_name = azurerm_resource_group.story.name
       aks_oidc_issuer_url = azurerm_kubernetes_cluster.main.oidc_issuer_url
       namespace           = "mystira"
       service_account     = "story-generator-sa"
     }
     "publisher" = {
       identity_id         = module.publisher.identity_id
+      resource_group_name = azurerm_resource_group.publisher.name
       aks_oidc_issuer_url = azurerm_kubernetes_cluster.main.oidc_issuer_url
       namespace           = "mystira"
       service_account     = "publisher-sa"
     }
     "chain" = {
       identity_id         = module.chain.identity_id
+      resource_group_name = azurerm_resource_group.chain.name
       aks_oidc_issuer_url = azurerm_kubernetes_cluster.main.oidc_issuer_url
       namespace           = "mystira"
       service_account     = "chain-sa"
     }
     "admin-api" = {
       identity_id         = module.admin_api.identity_id
+      resource_group_name = azurerm_resource_group.admin.name
       aks_oidc_issuer_url = azurerm_kubernetes_cluster.main.oidc_issuer_url
       namespace           = "mystira"
       service_account     = "admin-api-sa"

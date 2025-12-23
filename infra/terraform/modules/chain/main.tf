@@ -256,6 +256,7 @@ resource "azurerm_key_vault" "chain" {
   purge_protection_enabled    = var.environment == "prod"
   sku_name                    = "standard"
 
+  # Access policy for managed identity (read-only)
   access_policy {
     tenant_id = data.azurerm_client_config.current.tenant_id
     object_id = azurerm_user_assigned_identity.chain.principal_id
@@ -263,6 +264,21 @@ resource "azurerm_key_vault" "chain" {
     secret_permissions = [
       "Get",
       "List",
+    ]
+  }
+
+  # Access policy for Terraform service principal (manage secrets)
+  access_policy {
+    tenant_id = data.azurerm_client_config.current.tenant_id
+    object_id = data.azurerm_client_config.current.object_id
+
+    secret_permissions = [
+      "Get",
+      "List",
+      "Set",
+      "Delete",
+      "Purge",
+      "Recover",
     ]
   }
 
