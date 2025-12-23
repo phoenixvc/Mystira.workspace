@@ -121,6 +121,34 @@ Configuration is managed through `appsettings.json` and environment-specific ove
 | `ConnectionStrings:Redis` | Redis cache connection string |
 | `DataMigration:Phase` | Current migration phase (0-3) |
 | `DataMigration:Enabled` | Enable migration features |
+| `AzureAd:TenantId` | Microsoft Entra ID tenant ID |
+| `AzureAd:ClientId` | App registration client ID |
+
+### Authentication
+
+The Admin API supports multiple authentication schemes:
+
+1. **Cookie Authentication** - For browser-based admin dashboard sessions
+2. **JWT Bearer** - For API clients with custom JWT tokens
+3. **Microsoft Entra ID (Azure AD)** - Enterprise SSO via Microsoft.Identity.Web
+
+#### Enabling Entra ID Authentication
+
+To enable Microsoft Entra ID authentication, configure the following settings via User Secrets or Azure Key Vault:
+
+```bash
+# Set via User Secrets (local development)
+dotnet user-secrets set "AzureAd:TenantId" "your-tenant-id-guid"
+dotnet user-secrets set "AzureAd:ClientId" "your-app-client-id-guid"
+```
+
+When both `TenantId` and `ClientId` are configured, the API automatically enables Entra ID authentication with the "AzureAd" scheme.
+
+**Exposed API Scopes** (configure in Azure App Registration):
+- `Admin.Read` - Read access to admin data
+- `Admin.Write` - Write access to admin data
+- `Users.Manage` - User management operations
+- `Content.Moderate` - Content moderation operations
 
 ## API Endpoints
 
