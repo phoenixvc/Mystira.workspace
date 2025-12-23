@@ -47,14 +47,26 @@ concurrency:
 env:
   TF_VERSION: "1.5.0"
   ENVIRONMENT: ${{ github.event.inputs.environment || 'dev' }}
-  # Resource Groups (see ADR-0017 for organization strategy)
-  # Tier 1: Core RG (shared infrastructure: VNet, AKS, PostgreSQL, Redis, Monitoring)
+
+  # ==========================================================================
+  # Resource Groups (ADR-0017: Resource Group Organization Strategy)
+  # ==========================================================================
+
+  # Tier 1: Core RG (shared infrastructure: VNet, AKS, PostgreSQL, Redis, Service Bus, Monitoring)
   AZURE_RESOURCE_GROUP: mys-${{ github.event.inputs.environment || 'dev' }}-core-rg-san
-  # Tier 2: Service RGs (service-specific resources per ADR-0017)
-  # - mys-{env}-chain-rg-san, mys-{env}-publisher-rg-san, mys-{env}-story-rg-san
-  # - mys-{env}-admin-rg-san, mys-{env}-app-rg-san
-  # Tier 3: Cross-environment shared RGs
-  # - mys-shared-acr-rg-san, mys-shared-comms-rg-glob
+
+  # Tier 2: Service-Specific RGs (per ADR-0017)
+  CHAIN_RG: mys-${{ github.event.inputs.environment || 'dev' }}-chain-rg-san
+  PUBLISHER_RG: mys-${{ github.event.inputs.environment || 'dev' }}-publisher-rg-san
+  STORY_RG: mys-${{ github.event.inputs.environment || 'dev' }}-story-rg-san
+  ADMIN_RG: mys-${{ github.event.inputs.environment || 'dev' }}-admin-rg-san
+  APP_RG: mys-${{ github.event.inputs.environment || 'dev' }}-app-rg-san
+
+  # Tier 3: Cross-Environment Shared RGs
+  SHARED_ACR_RG: mys-shared-acr-rg-san
+  SHARED_COMMS_RG: mys-shared-comms-rg-glob
+
+  # Infrastructure
   AKS_CLUSTER_NAME: mys-${{ github.event.inputs.environment || 'dev' }}-core-aks-san
   ACR_NAME: myssharedacr
   DNS_ZONE: mystira.app

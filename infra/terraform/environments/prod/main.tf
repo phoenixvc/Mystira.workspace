@@ -76,9 +76,14 @@ locals {
     ManagedBy   = "terraform"
     Critical    = "true"
   }
+  region_code = "san"
 }
 
-# Resource Group
+# =============================================================================
+# Resource Groups (ADR-0017: Resource Group Organization Strategy)
+# =============================================================================
+
+# Tier 1: Core Resource Group (shared infrastructure)
 resource "azurerm_resource_group" "main" {
   name     = "mys-prod-core-rg-san"
   location = var.location
@@ -91,6 +96,41 @@ resource "azurerm_resource_group" "main" {
     Critical    = "true"
   }
 }
+
+# Tier 2: Service-Specific Resource Groups
+resource "azurerm_resource_group" "chain" {
+  name     = "mys-prod-chain-rg-${local.region_code}"
+  location = var.location
+  tags     = merge(local.common_tags, { Service = "chain" })
+}
+
+resource "azurerm_resource_group" "publisher" {
+  name     = "mys-prod-publisher-rg-${local.region_code}"
+  location = var.location
+  tags     = merge(local.common_tags, { Service = "publisher" })
+}
+
+resource "azurerm_resource_group" "story" {
+  name     = "mys-prod-story-rg-${local.region_code}"
+  location = var.location
+  tags     = merge(local.common_tags, { Service = "story-generator" })
+}
+
+resource "azurerm_resource_group" "admin" {
+  name     = "mys-prod-admin-rg-${local.region_code}"
+  location = var.location
+  tags     = merge(local.common_tags, { Service = "admin-api" })
+}
+
+resource "azurerm_resource_group" "app" {
+  name     = "mys-prod-app-rg-${local.region_code}"
+  location = var.location
+  tags     = merge(local.common_tags, { Service = "app" })
+}
+
+# =============================================================================
+# Networking (in core-rg)
+# =============================================================================
 
 # Virtual Network
 resource "azurerm_virtual_network" "main" {
@@ -174,14 +214,14 @@ resource "azurerm_subnet" "admin_api" {
   address_prefixes     = ["10.2.6.0/24"]
 }
 
-# Chain Infrastructure
+# Chain Infrastructure (in chain-rg per ADR-0017)
 module "chain" {
   source = "../../modules/chain"
 
   environment                       = "prod"
   location                          = var.location
   region_code                       = "san"
-  resource_group_name               = azurerm_resource_group.main.name
+  resource_group_name               = azurerm_resource_group.chain.name
   chain_node_count                  = 3
   chain_vm_size                     = "Standard_D4s_v3"
   chain_storage_size_gb             = 500
@@ -195,19 +235,24 @@ module "chain" {
   }
 }
 
-# Publisher Infrastructure
+# Publisher Infrastructure (in publisher-rg per ADR-0017)
 module "publisher" {
   source = "../../modules/publisher"
 
   environment                       = "prod"
   location                          = var.location
   region_code                       = "san"
-  resource_group_name               = azurerm_resource_group.main.name
+  resource_group_name               = azurerm_resource_group.publisher.name
   publisher_replica_count           = 3
   vnet_id                           = azurerm_virtual_network.main.id
   subnet_id                         = azurerm_subnet.publisher.id
   chain_rpc_endpoint                = "http://mys-chain.mys-prod.svc.cluster.local:8545"
   shared_log_analytics_workspace_id = module.shared_monitoring.log_analytics_workspace_id
+
+  # Use shared Service Bus (in core-rg per ADR-0017)
+  use_shared_servicebus          = true
+  shared_servicebus_namespace_id = module.shared_servicebus.namespace_id
+  shared_servicebus_queue_name   = "publisher-events"
 
   tags = {
     CostCenter = "production"
@@ -277,6 +322,41 @@ module "shared_redis" {
   }
 }
 
+# Shared Service Bus Infrastructure (in core-rg per ADR-0017)
+module "shared_servicebus" {
+  source = "../../modules/shared/servicebus"
+
+  environment         = "prod"
+  location            = var.location
+  resource_group_name = azurerm_resource_group.main.name
+  sku                 = "Premium"
+  capacity            = 1
+  zone_redundant      = true
+
+  queues = {
+    "publisher-events" = {
+      max_delivery_count                   = 3
+      default_message_ttl                  = "P1D"
+      dead_lettering_on_message_expiration = true
+    }
+    "admin-notifications" = {
+      max_delivery_count                   = 5
+      default_message_ttl                  = "P7D"
+      dead_lettering_on_message_expiration = true
+    }
+    "app-events" = {
+      max_delivery_count                   = 5
+      default_message_ttl                  = "P7D"
+      dead_lettering_on_message_expiration = true
+    }
+  }
+
+  tags = {
+    CostCenter = "production"
+    Critical   = "true"
+  }
+}
+
 # Shared Monitoring Infrastructure
 module "shared_monitoring" {
   source = "../../modules/shared/monitoring"
@@ -294,14 +374,14 @@ module "shared_monitoring" {
   }
 }
 
-# Story-Generator Infrastructure
+# Story-Generator Infrastructure (in story-rg per ADR-0017)
 module "story_generator" {
   source = "../../modules/story-generator"
 
   environment         = "prod"
   location            = var.location
   region_code         = "san"
-  resource_group_name = azurerm_resource_group.main.name
+  resource_group_name = azurerm_resource_group.story.name
   vnet_id             = azurerm_virtual_network.main.id
   subnet_id           = azurerm_subnet.story_generator.id
 
@@ -319,14 +399,14 @@ module "story_generator" {
   }
 }
 
-# Admin API Infrastructure
+# Admin API Infrastructure (in admin-rg per ADR-0017)
 module "admin_api" {
   source = "../../modules/admin-api"
 
   environment                       = "prod"
   location                          = var.location
   region_code                       = "san"
-  resource_group_name               = azurerm_resource_group.main.name
+  resource_group_name               = azurerm_resource_group.admin.name
   vnet_id                           = azurerm_virtual_network.main.id
   subnet_id                         = azurerm_subnet.admin_api.id
   shared_log_analytics_workspace_id = module.shared_monitoring.log_analytics_workspace_id
@@ -448,10 +528,10 @@ module "identity" {
   ]
 }
 
-# Reference to shared ACR (created in dev environment)
+# Reference to shared ACR (in shared-acr-rg per ADR-0017)
 data "azurerm_container_registry" "shared" {
   name                = "myssharedacr"
-  resource_group_name = "mys-dev-core-rg-san"
+  resource_group_name = "mys-shared-acr-rg-san"
 }
 
 # AKS Cluster for Production
@@ -685,4 +765,53 @@ output "admin_api_key_vault_uri" {
 output "postgresql_aad_connection_template" {
   description = "PostgreSQL Azure AD connection string template"
   value       = module.shared_postgresql.aad_connection_string_template
+}
+
+# =============================================================================
+# Resource Group Outputs (ADR-0017)
+# =============================================================================
+
+output "resource_group_chain" {
+  description = "Chain service resource group name"
+  value       = azurerm_resource_group.chain.name
+}
+
+output "resource_group_publisher" {
+  description = "Publisher service resource group name"
+  value       = azurerm_resource_group.publisher.name
+}
+
+output "resource_group_story" {
+  description = "Story-Generator service resource group name"
+  value       = azurerm_resource_group.story.name
+}
+
+output "resource_group_admin" {
+  description = "Admin API service resource group name"
+  value       = azurerm_resource_group.admin.name
+}
+
+output "resource_group_app" {
+  description = "App (PWA/API) service resource group name"
+  value       = azurerm_resource_group.app.name
+}
+
+# =============================================================================
+# Shared Service Bus Outputs
+# =============================================================================
+
+output "servicebus_namespace_id" {
+  description = "Shared Service Bus namespace ID"
+  value       = module.shared_servicebus.namespace_id
+}
+
+output "servicebus_namespace_name" {
+  description = "Shared Service Bus namespace name"
+  value       = module.shared_servicebus.namespace_name
+}
+
+output "servicebus_connection_string" {
+  description = "Shared Service Bus primary connection string"
+  value       = module.shared_servicebus.default_primary_connection_string
+  sensitive   = true
 }

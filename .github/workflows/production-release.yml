@@ -38,7 +38,15 @@ jobs:
     env:
       ENVIRONMENT: prod
       TF_VERSION: 1.5.0
+      # Resource Groups (ADR-0017)
       AZURE_RESOURCE_GROUP: mys-prod-core-rg-san
+      CHAIN_RG: mys-prod-chain-rg-san
+      PUBLISHER_RG: mys-prod-publisher-rg-san
+      STORY_RG: mys-prod-story-rg-san
+      ADMIN_RG: mys-prod-admin-rg-san
+      APP_RG: mys-prod-app-rg-san
+      SHARED_ACR_RG: mys-shared-acr-rg-san
+      # Infrastructure
       AKS_CLUSTER_NAME: mys-prod-core-aks-san
     steps:
       - uses: actions/checkout@v6
@@ -98,7 +106,13 @@ jobs:
       contents: read
       id-token: write
     env:
+      # Resource Groups (ADR-0017)
       AZURE_RESOURCE_GROUP: mys-prod-core-rg-san
+      CHAIN_RG: mys-prod-chain-rg-san
+      PUBLISHER_RG: mys-prod-publisher-rg-san
+      STORY_RG: mys-prod-story-rg-san
+      ADMIN_RG: mys-prod-admin-rg-san
+      APP_RG: mys-prod-app-rg-san
       AKS_CLUSTER_NAME: mys-prod-core-aks-san
     steps:
       - uses: actions/checkout@v6
