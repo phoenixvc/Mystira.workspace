@@ -11,14 +11,14 @@ variable "admin_ui_redirect_uris" {
   default     = []
 }
 
-variable "enable_b2c" {
-  description = "Enable Azure AD B2C configuration (consumer authentication)"
+variable "enable_external_id" {
+  description = "Enable Entra External ID configuration (consumer authentication)"
   type        = bool
   default     = false
 }
 
-variable "b2c_tenant_domain" {
-  description = "Azure AD B2C tenant domain (e.g., mystirab2c.onmicrosoft.com)"
+variable "external_id_tenant_domain" {
+  description = "Entra External ID tenant domain (e.g., mystira.ciamlogin.com)"
   type        = string
   default     = ""
 }

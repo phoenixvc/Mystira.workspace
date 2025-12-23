@@ -508,10 +508,10 @@ Microsoft Entra External ID enables social identity providers for consumer appli
 - **Discord**: OpenID Connect custom provider for gamers
 - **Email/Password**: Local accounts with self-service registration
 
-**External ID User Flows**:
-- `B2C_1_SignUpSignIn`: Combined sign-up and sign-in
-- `B2C_1_PasswordReset`: Self-service password reset
-- `B2C_1_ProfileEdit`: User profile management
+**External ID Sign-in Experience**:
+- Combined sign-up and sign-in with email/password or social providers
+- Self-service password reset via email verification
+- User profile management for display name and avatar
 
 ## Consequences
 
@@ -592,7 +592,7 @@ Microsoft Entra External ID enables social identity providers for consumer appli
 
 ## Related ADRs
 
-- [ADR-0011: Microsoft Entra ID Authentication Integration](./0011-entra-id-authentication-integration.md) - **Entra ID, B2C, and social login implementation details**
+- [ADR-0011: Microsoft Entra ID Authentication Integration](./0011-entra-id-authentication-integration.md) - **Entra ID, External ID, and social login implementation details**
 - [ADR-0005: Service Networking and Communication](./0005-service-networking-and-communication.md) - Network-level security
 - [ADR-0006: Admin API Repository Extraction](./0006-admin-api-repository-extraction.md) - Admin service architecture
 - [ADR-0007: NuGet Feed Strategy](./0007-nuget-feed-strategy-for-shared-libraries.md) - Shared auth library distribution

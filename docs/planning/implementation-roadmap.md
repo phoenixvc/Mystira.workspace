@@ -37,6 +37,25 @@ This roadmap outlines the strategic implementation plan for the Mystira workspac
    - Component repos: Admin API (#7), Admin UI (#12), Chain (#1), DevHub (#1), Publisher (#13), Story Generator (#56)
    - See [CI/CD Setup](../cicd/cicd-setup.md) for details
 
+6. **ADR-0017: Resource Group Organization (December 2025)**
+   - Implemented 3-tier resource group strategy
+   - Tier 1: Core resource group with shared infrastructure (VNet, AKS, PostgreSQL, Redis, Service Bus)
+   - Tier 2: Service-specific resource groups (chain, publisher, story, admin, app)
+   - Tier 3: Cross-environment shared resources (ACR, Communications, Terraform state)
+   - All environments (dev, staging, prod) aligned to new structure
+   - See [ADR-0017](../architecture/adr/0017-resource-group-organization-strategy.md)
+
+7. **Azure AI Foundry Integration (December 2025)**
+   - Created shared Azure AI module for Azure OpenAI Service
+   - Deployed gpt-4o and gpt-4o-mini models
+   - Auto-populate AI secrets to Story-Generator Key Vault
+   - Replaced direct OpenAI/Anthropic API keys
+
+8. **Entra External ID Migration (December 2025)**
+   - Migrated from Azure AD B2C to Entra External ID
+   - Updated all Terraform modules and documentation
+   - Modern CIAM solution with `*.ciamlogin.com` domains
+
 ## Implementation Phases
 
 ## Phase 1: Infrastructure Foundation (Months 1-2)
@@ -316,12 +335,12 @@ This roadmap outlines the strategic implementation plan for the Mystira workspac
 **Goal**: Strengthen security posture and ensure compliance.
 **Status**: 🔄 In Progress (December 2025)
 
-### 5.0 Authentication Implementation (Entra ID & B2C)
+### 5.0 Authentication Implementation (Entra ID & External ID)
 
 **Priority**: High
 **Dependencies**: None
 **Estimated Effort**: 3 weeks
-**Status**: 🔄 In Progress
+**Status**: ✅ Infrastructure Complete (December 2025)
 
 **Reference**: [ADR-0011: Entra ID Integration](../architecture/adr/0011-entra-id-authentication-integration.md)
 
@@ -332,6 +351,7 @@ This roadmap outlines the strategic implementation plan for the Mystira workspac
 - [x] Define App Roles (Admin, SuperAdmin, Moderator, Viewer) - in Terraform module
 - [x] Define API Scopes (Admin.Read, Admin.Write, Users.Manage, Content.Moderate) - in Terraform module
 - [x] Add Entra ID module to all environment configs (dev, staging, prod - December 2025)
+- [x] Auto-populate Entra ID secrets to Admin-API Key Vault (December 2025)
 - [ ] Deploy Entra ID app registrations (run Terraform)
 - [ ] Configure MSAL in Admin UI (React)
 - [ ] Add Microsoft.Identity.Web to Admin API
@@ -339,17 +359,17 @@ This roadmap outlines the strategic implementation plan for the Mystira workspac
 - [ ] Create Conditional Access policies (MFA requirement)
 - [ ] Test admin authentication flow end-to-end
 
-#### Phase 5.0.2: Azure AD B2C (Consumer)
-- [x] Create Azure AD B2C Terraform module (`infra/terraform/modules/azure-ad-b2c/` - December 2025)
+#### Phase 5.0.2: Microsoft Entra External ID (Consumer)
+- [x] Create Entra External ID Terraform module (`infra/terraform/modules/entra-external-id/` - December 2025)
   - [x] Public API app registration with exposed scopes
   - [x] PWA/SPA app registration for Blazor WASM and React clients
   - [x] API scopes: API.Access, Stories.Read, Stories.Write, Profile.Read
-- [ ] Create Azure AD B2C tenant (manual - not supported via Terraform)
-- [ ] Configure user flows (SignUpSignIn, PasswordReset, ProfileEdit)
+- [ ] Create Entra External ID tenant (manual - via Azure Portal)
+- [ ] Configure sign-in experience (Email/password, Social)
 - [ ] Set up Google identity provider
 - [ ] Set up Discord identity provider (OpenID Connect)
-- [ ] Update PWA for B2C authentication (Blazor WASM)
-- [ ] Customize B2C UI branding
+- [ ] Update PWA for External ID authentication (Blazor WASM)
+- [ ] Customize External ID UI branding
 - [ ] Test consumer sign-up/sign-in flow
 
 #### Phase 5.0.3: Service-to-Service Authentication (Managed Identity)
@@ -369,32 +389,44 @@ This roadmap outlines the strategic implementation plan for the Mystira workspac
 
 **Deliverables**:
 
-- Entra ID authentication for Admin UI/API
-- B2C authentication with social login (Google, Discord)
-- Managed Identity for all Azure resources
-- MFA enabled for admin users
+- ✅ Entra ID Terraform module with app registrations, roles, scopes
+- ✅ Entra External ID Terraform module for consumer auth
+- Entra ID authentication for Admin UI/API (pending app deployment)
+- External ID authentication with social login (Google, Discord)
+- ✅ Managed Identity for all Azure resources
+- MFA enabled for admin users (pending Conditional Access policy)
 
 ### 5.1 Secrets Management
 
 **Priority**: High
 **Dependencies**: Phase 1 (Infrastructure), Phase 5.0 (Authentication)
 **Estimated Effort**: 1 week
+**Status**: ✅ Complete (December 2025)
 
 **Tasks**:
 
-- [ ] Audit all secrets and credentials
-- [ ] Centralize secrets in Azure Key Vault
-- [ ] Store Entra ID and B2C secrets in Key Vault
+- [x] Audit all secrets and credentials
+- [x] Centralize secrets in Azure Key Vault (per-service Key Vaults)
+- [x] Auto-populate infrastructure secrets from Terraform (December 2025)
+  - [x] PostgreSQL connection strings
+  - [x] Redis connection strings
+  - [x] Service Bus connection strings
+  - [x] Application Insights connection strings
+  - [x] Azure AI Foundry endpoint and API key
+  - [x] Entra ID tenant/client IDs
+- [x] Zero GitHub Secrets required for infrastructure
+- [x] Document secrets management procedures (docs/infrastructure/secrets-management.md)
 - [ ] Store social provider secrets (Google, Discord) in Key Vault
 - [ ] Implement secrets rotation policies
 - [ ] Set up secrets access auditing
-- [ ] Document secrets management procedures
 
 **Deliverables**:
 
-- Centralized secrets management
-- Rotation policies
-- Secrets management documentation
+- ✅ All secrets auto-populated by Terraform
+- ✅ Secrets management documentation
+- ✅ CI/CD secret validation workflow
+- Social provider secrets (pending External ID setup)
+- Rotation policies (future enhancement)
 
 ### 5.2 Security Scanning and Compliance
 
@@ -716,8 +748,11 @@ This roadmap should be reviewed and updated:
 ## Related Documentation
 
 - [Infrastructure Guide](../infrastructure/infrastructure.md)
+- [Secrets Management](../infrastructure/secrets-management.md)
+- [Entra ID Best Practices](../infrastructure/entra-id-best-practices.md)
 - [ADR-0001: Infrastructure Organization](../architecture/adr/0001-infrastructure-organization-hybrid-approach.md)
 - [ADR-0002: Documentation Location Strategy](../architecture/adr/0002-documentation-location-strategy.md)
 - [ADR-0003: Release Pipeline Strategy](../architecture/adr/0003-release-pipeline-strategy.md)
 - [ADR-0010: Authentication Strategy](../architecture/adr/0010-authentication-and-authorization-strategy.md)
 - [ADR-0011: Entra ID Integration](../architecture/adr/0011-entra-id-authentication-integration.md)
+- [ADR-0017: Resource Group Organization](../architecture/adr/0017-resource-group-organization-strategy.md)

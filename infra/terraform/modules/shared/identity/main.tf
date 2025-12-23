@@ -130,3 +130,26 @@ resource "azurerm_federated_identity_credential" "workload_identity" {
   issuer              = each.value.aks_oidc_issuer_url
   subject             = "system:serviceaccount:${each.value.namespace}:${each.value.service_account}"
 }
+
+# =============================================================================
+# Service Bus Access
+# For services that need to send/receive messages from shared Service Bus
+# =============================================================================
+
+resource "azurerm_role_assignment" "service_servicebus_sender" {
+  for_each = { for k, v in var.service_identities : k => v if v.enable_servicebus_sender }
+
+  scope                = each.value.servicebus_namespace_id
+  role_definition_name = "Azure Service Bus Data Sender"
+  principal_id         = each.value.principal_id
+  description          = "Allow ${each.key} service to send messages to Service Bus"
+}
+
+resource "azurerm_role_assignment" "service_servicebus_receiver" {
+  for_each = { for k, v in var.service_identities : k => v if v.enable_servicebus_receiver }
+
+  scope                = each.value.servicebus_namespace_id
+  role_definition_name = "Azure Service Bus Data Receiver"
+  principal_id         = each.value.principal_id
+  description          = "Allow ${each.key} service to receive messages from Service Bus"
+}

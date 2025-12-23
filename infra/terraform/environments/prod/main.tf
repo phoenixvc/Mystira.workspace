@@ -44,8 +44,8 @@ variable "location_secondary" {
   default     = "westus2"
 }
 
-variable "b2c_tenant_id" {
-  description = "Azure AD B2C tenant ID (optional - set when B2C tenant is created)"
+variable "external_id_tenant_id" {
+  description = "Microsoft Entra External ID tenant ID (optional - set when External ID tenant is created)"
   type        = string
   default     = ""
 }
@@ -76,9 +76,14 @@ locals {
     ManagedBy   = "terraform"
     Critical    = "true"
   }
+  region_code = "san"
 }
 
-# Resource Group
+# =============================================================================
+# Resource Groups (ADR-0017: Resource Group Organization Strategy)
+# =============================================================================
+
+# Tier 1: Core Resource Group (shared infrastructure)
 resource "azurerm_resource_group" "main" {
   name     = "mys-prod-core-rg-san"
   location = var.location
@@ -91,6 +96,41 @@ resource "azurerm_resource_group" "main" {
     Critical    = "true"
   }
 }
+
+# Tier 2: Service-Specific Resource Groups
+resource "azurerm_resource_group" "chain" {
+  name     = "mys-prod-chain-rg-${local.region_code}"
+  location = var.location
+  tags     = merge(local.common_tags, { Service = "chain" })
+}
+
+resource "azurerm_resource_group" "publisher" {
+  name     = "mys-prod-publisher-rg-${local.region_code}"
+  location = var.location
+  tags     = merge(local.common_tags, { Service = "publisher" })
+}
+
+resource "azurerm_resource_group" "story" {
+  name     = "mys-prod-story-rg-${local.region_code}"
+  location = var.location
+  tags     = merge(local.common_tags, { Service = "story-generator" })
+}
+
+resource "azurerm_resource_group" "admin" {
+  name     = "mys-prod-admin-rg-${local.region_code}"
+  location = var.location
+  tags     = merge(local.common_tags, { Service = "admin-api" })
+}
+
+resource "azurerm_resource_group" "app" {
+  name     = "mys-prod-app-rg-${local.region_code}"
+  location = var.location
+  tags     = merge(local.common_tags, { Service = "app" })
+}
+
+# =============================================================================
+# Networking (in core-rg)
+# =============================================================================
 
 # Virtual Network
 resource "azurerm_virtual_network" "main" {
@@ -148,16 +188,8 @@ resource "azurerm_subnet" "redis" {
   resource_group_name  = azurerm_resource_group.main.name
   virtual_network_name = azurerm_virtual_network.main.name
   address_prefixes     = ["10.2.4.0/24"]
-
-  delegation {
-    name = "redis-delegation"
-    service_delegation {
-      name = "Microsoft.Cache/redis"
-      actions = [
-        "Microsoft.Network/virtualNetworks/subnets/join/action",
-      ]
-    }
-  }
+  # Note: Standard SKU Redis doesn't support VNet integration
+  # Remove delegation if using Standard SKU, add back if upgrading to Premium
 }
 
 resource "azurerm_subnet" "story_generator" {
@@ -174,14 +206,14 @@ resource "azurerm_subnet" "admin_api" {
   address_prefixes     = ["10.2.6.0/24"]
 }
 
-# Chain Infrastructure
+# Chain Infrastructure (in chain-rg per ADR-0017)
 module "chain" {
   source = "../../modules/chain"
 
   environment                       = "prod"
   location                          = var.location
   region_code                       = "san"
-  resource_group_name               = azurerm_resource_group.main.name
+  resource_group_name               = azurerm_resource_group.chain.name
   chain_node_count                  = 3
   chain_vm_size                     = "Standard_D4s_v3"
   chain_storage_size_gb             = 500
@@ -195,19 +227,24 @@ module "chain" {
   }
 }
 
-# Publisher Infrastructure
+# Publisher Infrastructure (in publisher-rg per ADR-0017)
 module "publisher" {
   source = "../../modules/publisher"
 
   environment                       = "prod"
   location                          = var.location
   region_code                       = "san"
-  resource_group_name               = azurerm_resource_group.main.name
+  resource_group_name               = azurerm_resource_group.publisher.name
   publisher_replica_count           = 3
   vnet_id                           = azurerm_virtual_network.main.id
   subnet_id                         = azurerm_subnet.publisher.id
   chain_rpc_endpoint                = "http://mys-chain.mys-prod.svc.cluster.local:8545"
   shared_log_analytics_workspace_id = module.shared_monitoring.log_analytics_workspace_id
+
+  # Use shared Service Bus (in core-rg per ADR-0017)
+  use_shared_servicebus          = true
+  shared_servicebus_namespace_id = module.shared_servicebus.namespace_id
+  shared_servicebus_queue_name   = "publisher-events"
 
   tags = {
     CostCenter = "production"
@@ -277,6 +314,41 @@ module "shared_redis" {
   }
 }
 
+# Shared Service Bus Infrastructure (in core-rg per ADR-0017)
+module "shared_servicebus" {
+  source = "../../modules/shared/servicebus"
+
+  environment         = "prod"
+  location            = var.location
+  resource_group_name = azurerm_resource_group.main.name
+  sku                 = "Premium"
+  capacity            = 1
+  zone_redundant      = true
+
+  queues = {
+    "publisher-events" = {
+      max_delivery_count                   = 3
+      default_message_ttl                  = "P1D"
+      dead_lettering_on_message_expiration = true
+    }
+    "admin-notifications" = {
+      max_delivery_count                   = 5
+      default_message_ttl                  = "P7D"
+      dead_lettering_on_message_expiration = true
+    }
+    "app-events" = {
+      max_delivery_count                   = 5
+      default_message_ttl                  = "P7D"
+      dead_lettering_on_message_expiration = true
+    }
+  }
+
+  tags = {
+    CostCenter = "production"
+    Critical   = "true"
+  }
+}
+
 # Shared Monitoring Infrastructure
 module "shared_monitoring" {
   source = "../../modules/shared/monitoring"
@@ -294,14 +366,45 @@ module "shared_monitoring" {
   }
 }
 
-# Story-Generator Infrastructure
+# Shared Azure AI Foundry Infrastructure (in core-rg)
+module "shared_azure_ai" {
+  source = "../../modules/shared/azure-ai"
+
+  environment         = "prod"
+  location            = var.location
+  region_code         = local.region_code
+  resource_group_name = azurerm_resource_group.main.name
+
+  # Production: Higher capacity for AI workloads
+  model_deployments = {
+    "gpt-4o" = {
+      model_name    = "gpt-4o"
+      model_version = "2024-08-06"
+      sku_name      = "GlobalStandard"
+      capacity      = 50
+    }
+    "gpt-4o-mini" = {
+      model_name    = "gpt-4o-mini"
+      model_version = "2024-07-18"
+      sku_name      = "GlobalStandard"
+      capacity      = 100
+    }
+  }
+
+  tags = {
+    CostCenter = "production"
+    Critical   = "true"
+  }
+}
+
+# Story-Generator Infrastructure (in story-rg per ADR-0017)
 module "story_generator" {
   source = "../../modules/story-generator"
 
   environment         = "prod"
   location            = var.location
   region_code         = "san"
-  resource_group_name = azurerm_resource_group.main.name
+  resource_group_name = azurerm_resource_group.story.name
   vnet_id             = azurerm_virtual_network.main.id
   subnet_id           = azurerm_subnet.story_generator.id
 
@@ -319,14 +422,14 @@ module "story_generator" {
   }
 }
 
-# Admin API Infrastructure
+# Admin API Infrastructure (in admin-rg per ADR-0017)
 module "admin_api" {
   source = "../../modules/admin-api"
 
   environment                       = "prod"
   location                          = var.location
   region_code                       = "san"
-  resource_group_name               = azurerm_resource_group.main.name
+  resource_group_name               = azurerm_resource_group.admin.name
   vnet_id                           = azurerm_virtual_network.main.id
   subnet_id                         = azurerm_subnet.admin_api.id
   shared_log_analytics_workspace_id = module.shared_monitoring.log_analytics_workspace_id
@@ -354,15 +457,15 @@ module "entra_id" {
   }
 }
 
-# Azure AD B2C Consumer Authentication
-# Note: B2C tenant must be created manually first, then set b2c_tenant_id variable
-module "azure_ad_b2c" {
-  source = "../../modules/azure-ad-b2c"
-  count  = var.b2c_tenant_id != "" ? 1 : 0
+# Microsoft Entra External ID Consumer Authentication
+# Note: External ID tenant must be created manually first, then set external_id_tenant_id variable
+module "entra_external_id" {
+  source = "../../modules/entra-external-id"
+  count  = var.external_id_tenant_id != "" ? 1 : 0
 
-  environment     = "prod"
-  b2c_tenant_id   = var.b2c_tenant_id
-  b2c_tenant_name = "mystirab2c"
+  environment   = "prod"
+  tenant_id     = var.external_id_tenant_id
+  tenant_name   = "mystira"
 
   pwa_redirect_uris = [
     "https://app.mystira.app/auth/callback"
@@ -379,29 +482,45 @@ module "identity" {
   aks_principal_id = azurerm_kubernetes_cluster.main.identity[0].principal_id
   acr_id           = data.azurerm_container_registry.shared.id
 
-  # Service identity configurations
+  # Service identity configurations (with explicit boolean flags for RBAC)
   service_identities = {
     "story-generator" = {
       principal_id               = module.story_generator.identity_principal_id
+      enable_key_vault_access    = true
       key_vault_id               = module.story_generator.key_vault_id
+      enable_postgres_access     = true
       postgres_server_id         = module.shared_postgresql.server_id
+      postgres_role              = "reader"
+      enable_redis_access        = true
       redis_cache_id             = module.shared_redis.cache_id
+      enable_log_analytics       = true
       log_analytics_workspace_id = module.shared_monitoring.log_analytics_workspace_id
     }
     "publisher" = {
       principal_id               = module.publisher.identity_principal_id
+      enable_key_vault_access    = true
       key_vault_id               = module.publisher.key_vault_id
+      enable_log_analytics       = true
       log_analytics_workspace_id = module.shared_monitoring.log_analytics_workspace_id
+      enable_servicebus_sender   = true
+      enable_servicebus_receiver = true
+      servicebus_namespace_id    = module.shared_servicebus.namespace_id
     }
     "chain" = {
       principal_id               = module.chain.identity_principal_id
+      enable_key_vault_access    = true
       key_vault_id               = module.chain.key_vault_id
+      enable_log_analytics       = true
       log_analytics_workspace_id = module.shared_monitoring.log_analytics_workspace_id
     }
     "admin-api" = {
       principal_id               = module.admin_api.identity_principal_id
+      enable_key_vault_access    = true
       key_vault_id               = module.admin_api.key_vault_id
+      enable_postgres_access     = true
       postgres_server_id         = module.shared_postgresql.server_id
+      postgres_role              = "reader"
+      enable_log_analytics       = true
       log_analytics_workspace_id = module.shared_monitoring.log_analytics_workspace_id
     }
   }
@@ -448,10 +567,134 @@ module "identity" {
   ]
 }
 
-# Reference to shared ACR (created in dev environment)
+# =============================================================================
+# Auto-Populated Key Vault Secrets (from Shared Resources)
+# These secrets are automatically created from shared infrastructure outputs
+# Manual secrets (API keys, external credentials) must be added via CI/CD
+# =============================================================================
+
+# Story-Generator Key Vault Secrets
+resource "azurerm_key_vault_secret" "story_postgres" {
+  name         = "postgres-connection-string"
+  value        = "Host=${module.shared_postgresql.server_fqdn};Port=5432;Database=storygenerator;Username=${module.shared_postgresql.admin_login};Password=${module.shared_postgresql.admin_password};SSL Mode=Require;Trust Server Certificate=true"
+  key_vault_id = module.story_generator.key_vault_id
+  content_type = "connection-string"
+  tags         = { AutoPopulated = "true", Source = "shared-postgresql" }
+}
+
+resource "azurerm_key_vault_secret" "story_redis" {
+  name         = "redis-connection-string"
+  value        = module.shared_redis.primary_connection_string
+  key_vault_id = module.story_generator.key_vault_id
+  content_type = "connection-string"
+  tags         = { AutoPopulated = "true", Source = "shared-redis" }
+}
+
+resource "azurerm_key_vault_secret" "story_appinsights" {
+  name         = "appinsights-connection-string"
+  value        = module.shared_monitoring.application_insights_connection_string
+  key_vault_id = module.story_generator.key_vault_id
+  content_type = "connection-string"
+  tags         = { AutoPopulated = "true", Source = "shared-monitoring" }
+}
+
+# Story-Generator Azure AI Foundry Secrets (auto-populated from shared_azure_ai module)
+resource "azurerm_key_vault_secret" "story_azure_ai_endpoint" {
+  name         = "azure-ai-endpoint"
+  value        = module.shared_azure_ai.endpoint
+  key_vault_id = module.story_generator.key_vault_id
+  content_type = "azure-ai"
+  tags         = { AutoPopulated = "true", Source = "shared-azure-ai" }
+}
+
+resource "azurerm_key_vault_secret" "story_azure_ai_key" {
+  name         = "azure-ai-api-key"
+  value        = module.shared_azure_ai.primary_access_key
+  key_vault_id = module.story_generator.key_vault_id
+  content_type = "azure-ai"
+  tags         = { AutoPopulated = "true", Source = "shared-azure-ai" }
+}
+
+# Publisher Key Vault Secrets
+resource "azurerm_key_vault_secret" "publisher_servicebus" {
+  name         = "servicebus-connection-string"
+  value        = module.shared_servicebus.default_primary_connection_string
+  key_vault_id = module.publisher.key_vault_id
+  content_type = "connection-string"
+  tags         = { AutoPopulated = "true", Source = "shared-servicebus" }
+}
+
+resource "azurerm_key_vault_secret" "publisher_appinsights" {
+  name         = "appinsights-connection-string"
+  value        = module.shared_monitoring.application_insights_connection_string
+  key_vault_id = module.publisher.key_vault_id
+  content_type = "connection-string"
+  tags         = { AutoPopulated = "true", Source = "shared-monitoring" }
+}
+
+# Admin-API Key Vault Secrets
+resource "azurerm_key_vault_secret" "admin_postgres" {
+  name         = "postgres-connection-string"
+  value        = "Host=${module.shared_postgresql.server_fqdn};Port=5432;Database=adminapi;Username=${module.shared_postgresql.admin_login};Password=${module.shared_postgresql.admin_password};SSL Mode=Require;Trust Server Certificate=true"
+  key_vault_id = module.admin_api.key_vault_id
+  content_type = "connection-string"
+  tags         = { AutoPopulated = "true", Source = "shared-postgresql" }
+}
+
+resource "azurerm_key_vault_secret" "admin_redis" {
+  name         = "redis-connection-string"
+  value        = module.shared_redis.primary_connection_string
+  key_vault_id = module.admin_api.key_vault_id
+  content_type = "connection-string"
+  tags         = { AutoPopulated = "true", Source = "shared-redis" }
+}
+
+resource "azurerm_key_vault_secret" "admin_appinsights" {
+  name         = "appinsights-connection-string"
+  value        = module.shared_monitoring.application_insights_connection_string
+  key_vault_id = module.admin_api.key_vault_id
+  content_type = "connection-string"
+  tags         = { AutoPopulated = "true", Source = "shared-monitoring" }
+}
+
+# Chain Key Vault Secrets
+resource "azurerm_key_vault_secret" "chain_appinsights" {
+  name         = "appinsights-connection-string"
+  value        = module.shared_monitoring.application_insights_connection_string
+  key_vault_id = module.chain.key_vault_id
+  content_type = "connection-string"
+  tags         = { AutoPopulated = "true", Source = "shared-monitoring" }
+}
+
+# Admin-API Entra ID Secrets (auto-populated from entra_id module)
+resource "azurerm_key_vault_secret" "admin_entra_tenant_id" {
+  name         = "azure-ad-tenant-id"
+  value        = module.entra_id.tenant_id
+  key_vault_id = module.admin_api.key_vault_id
+  content_type = "azure-ad"
+  tags         = { AutoPopulated = "true", Source = "entra-id-module" }
+}
+
+resource "azurerm_key_vault_secret" "admin_entra_client_id" {
+  name         = "azure-ad-client-id"
+  value        = module.entra_id.admin_api_client_id
+  key_vault_id = module.admin_api.key_vault_id
+  content_type = "azure-ad"
+  tags         = { AutoPopulated = "true", Source = "entra-id-module" }
+}
+
+resource "azurerm_key_vault_secret" "admin_entra_ui_client_id" {
+  name         = "admin-ui-client-id"
+  value        = module.entra_id.admin_ui_client_id
+  key_vault_id = module.admin_api.key_vault_id
+  content_type = "azure-ad"
+  tags         = { AutoPopulated = "true", Source = "entra-id-module" }
+}
+
+# Reference to shared ACR (in shared-acr-rg per ADR-0017)
 data "azurerm_container_registry" "shared" {
   name                = "myssharedacr"
-  resource_group_name = "mys-dev-core-rg-san"
+  resource_group_name = "mys-shared-acr-rg-san"
 }
 
 # AKS Cluster for Production
@@ -579,12 +822,15 @@ output "publisher_nsg_id" {
   value = module.publisher.nsg_id
 }
 
-output "chain_acr_login_server" {
-  value = module.chain.acr_login_server
+# ACR outputs - using shared ACR (per ADR-0017)
+output "acr_login_server" {
+  description = "Shared ACR login server"
+  value       = data.azurerm_container_registry.shared.login_server
 }
 
-output "publisher_acr_login_server" {
-  value = module.publisher.acr_login_server
+output "acr_name" {
+  description = "Shared ACR name"
+  value       = data.azurerm_container_registry.shared.name
 }
 
 output "dns_name_servers" {
@@ -685,4 +931,53 @@ output "admin_api_key_vault_uri" {
 output "postgresql_aad_connection_template" {
   description = "PostgreSQL Azure AD connection string template"
   value       = module.shared_postgresql.aad_connection_string_template
+}
+
+# =============================================================================
+# Resource Group Outputs (ADR-0017)
+# =============================================================================
+
+output "resource_group_chain" {
+  description = "Chain service resource group name"
+  value       = azurerm_resource_group.chain.name
+}
+
+output "resource_group_publisher" {
+  description = "Publisher service resource group name"
+  value       = azurerm_resource_group.publisher.name
+}
+
+output "resource_group_story" {
+  description = "Story-Generator service resource group name"
+  value       = azurerm_resource_group.story.name
+}
+
+output "resource_group_admin" {
+  description = "Admin API service resource group name"
+  value       = azurerm_resource_group.admin.name
+}
+
+output "resource_group_app" {
+  description = "App (PWA/API) service resource group name"
+  value       = azurerm_resource_group.app.name
+}
+
+# =============================================================================
+# Shared Service Bus Outputs
+# =============================================================================
+
+output "servicebus_namespace_id" {
+  description = "Shared Service Bus namespace ID"
+  value       = module.shared_servicebus.namespace_id
+}
+
+output "servicebus_namespace_name" {
+  description = "Shared Service Bus namespace name"
+  value       = module.shared_servicebus.namespace_name
+}
+
+output "servicebus_connection_string" {
+  description = "Shared Service Bus primary connection string"
+  value       = module.shared_servicebus.default_primary_connection_string
+  sensitive   = true
 }
