@@ -65,6 +65,24 @@ variable "shared_log_analytics_workspace_id" {
   type        = string
 }
 
+variable "use_shared_servicebus" {
+  description = "Use shared Service Bus namespace instead of creating one"
+  type        = bool
+  default     = false
+}
+
+variable "shared_servicebus_namespace_id" {
+  description = "ID of shared Service Bus namespace (required when use_shared_servicebus = true)"
+  type        = string
+  default     = null
+}
+
+variable "shared_servicebus_queue_name" {
+  description = "Name of the publisher queue in shared Service Bus (required when use_shared_servicebus = true)"
+  type        = string
+  default     = "publisher-events"
+}
+
 locals {
   name_prefix = "mys-${var.environment}-publisher"
   region_code = var.region_code
@@ -121,8 +139,9 @@ resource "azurerm_user_assigned_identity" "publisher" {
   tags = local.common_tags
 }
 
-# Service Bus Namespace for Publisher Events
+# Service Bus Namespace for Publisher Events (only if not using shared)
 resource "azurerm_servicebus_namespace" "publisher" {
+  count               = var.use_shared_servicebus ? 0 : 1
   name                = replace("${local.name_prefix}-queue-${local.region_code}", "-", "")
   location            = var.location
   resource_group_name = var.resource_group_name
@@ -131,10 +150,11 @@ resource "azurerm_servicebus_namespace" "publisher" {
   tags = local.common_tags
 }
 
-# Service Bus Queue for Publisher Events
+# Service Bus Queue for Publisher Events (only if not using shared)
 resource "azurerm_servicebus_queue" "publisher_events" {
+  count        = var.use_shared_servicebus ? 0 : 1
   name         = "publisher-events"
-  namespace_id = azurerm_servicebus_namespace.publisher.id
+  namespace_id = azurerm_servicebus_namespace.publisher[0].id
 
   max_delivery_count                   = 3
   default_message_ttl                  = "P1D"
@@ -245,12 +265,12 @@ output "identity_principal_id" {
 
 output "servicebus_namespace" {
   description = "Service Bus namespace for publisher events"
-  value       = azurerm_servicebus_namespace.publisher.name
+  value       = var.use_shared_servicebus ? null : azurerm_servicebus_namespace.publisher[0].name
 }
 
 output "servicebus_queue_name" {
   description = "Service Bus queue name for publisher events"
-  value       = azurerm_servicebus_queue.publisher_events.name
+  value       = var.use_shared_servicebus ? var.shared_servicebus_queue_name : azurerm_servicebus_queue.publisher_events[0].name
 }
 
 output "application_insights_id" {

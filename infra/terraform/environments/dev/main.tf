@@ -280,6 +280,11 @@ module "publisher" {
   chain_rpc_endpoint                = "http://mys-chain.mys-dev.svc.cluster.local:8545"
   shared_log_analytics_workspace_id = module.shared_monitoring.log_analytics_workspace_id
 
+  # Use shared Service Bus (in core-rg per ADR-0017)
+  use_shared_servicebus          = true
+  shared_servicebus_namespace_id = module.shared_servicebus.namespace_id
+  shared_servicebus_queue_name   = "publisher-events"
+
   tags = {
     CostCenter = "development"
   }
@@ -337,6 +342,39 @@ module "shared_redis" {
   capacity = 1
   family   = "C"
   sku_name = "Standard"
+
+  tags = {
+    CostCenter = "development"
+  }
+}
+
+# Shared Service Bus Infrastructure (in core-rg per ADR-0017)
+module "shared_servicebus" {
+  source = "../../modules/shared/servicebus"
+
+  environment         = "dev"
+  location            = var.location
+  resource_group_name = azurerm_resource_group.main.name
+  sku                 = "Standard"
+
+  # Define queues for all services that need messaging
+  queues = {
+    "publisher-events" = {
+      max_delivery_count                   = 3
+      default_message_ttl                  = "P1D"
+      dead_lettering_on_message_expiration = true
+    }
+    "admin-notifications" = {
+      max_delivery_count                   = 5
+      default_message_ttl                  = "P7D"
+      dead_lettering_on_message_expiration = true
+    }
+    "app-events" = {
+      max_delivery_count                   = 5
+      default_message_ttl                  = "P7D"
+      dead_lettering_on_message_expiration = true
+    }
+  }
 
   tags = {
     CostCenter = "development"
@@ -757,4 +795,29 @@ output "communication_service_connection_string" {
 output "email_service_id" {
   description = "Email Communication Service ID"
   value       = module.shared_comms.email_service_id
+}
+
+# =============================================================================
+# Shared Service Bus Outputs
+# =============================================================================
+
+output "servicebus_namespace_id" {
+  description = "Shared Service Bus namespace ID"
+  value       = module.shared_servicebus.namespace_id
+}
+
+output "servicebus_namespace_name" {
+  description = "Shared Service Bus namespace name"
+  value       = module.shared_servicebus.namespace_name
+}
+
+output "servicebus_connection_string" {
+  description = "Shared Service Bus primary connection string"
+  value       = module.shared_servicebus.default_primary_connection_string
+  sensitive   = true
+}
+
+output "servicebus_queue_ids" {
+  description = "Map of Service Bus queue names to their IDs"
+  value       = module.shared_servicebus.queue_ids
 }

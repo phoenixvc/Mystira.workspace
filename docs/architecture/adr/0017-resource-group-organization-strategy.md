@@ -90,6 +90,7 @@ mys-prod-frontdoor-rg-glob          # Front Door, WAF (global, prod only)
 | PostgreSQL Server | `core-rg` | Shared database, long-lived |
 | PostgreSQL Databases | `core-rg` | Part of server lifecycle |
 | Redis Cache | `core-rg` | Shared cache, long-lived |
+| Service Bus Namespace | `core-rg` | Shared messaging (used by publisher, admin, app, future services) |
 | Cosmos DB Account | `core-rg` | Shared document store (used by App, Admin, future services) |
 | Shared Storage Account | `core-rg` | Media, content (used by multiple services) |
 | Log Analytics Workspace | `core-rg` | Central logging |
@@ -101,7 +102,6 @@ mys-prod-frontdoor-rg-glob          # Front Door, WAF (global, prod only)
 | **Publisher Service** | | |
 | Publisher Identity | `publisher-rg` | Service-specific |
 | Publisher Key Vault | `publisher-rg` | Service secrets |
-| Publisher Service Bus | `publisher-rg` | Service messaging |
 | Publisher App Insights | `publisher-rg` | Service telemetry |
 | **Story Generator** | | |
 | Story Generator Identity | `story-rg` | Service-specific |
