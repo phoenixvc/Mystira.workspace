@@ -508,31 +508,6 @@ resource "azurerm_cdn_frontdoor_route" "admin_ui" {
   }
 }
 
-# WAF Security Policy for Admin Services
-resource "azurerm_cdn_frontdoor_security_policy" "admin" {
-  count                    = var.enable_waf && var.enable_admin_services ? 1 : 0
-  name                     = "${var.project_name}-${var.environment}-admin-waf-security-policy"
-  cdn_frontdoor_profile_id = azurerm_cdn_frontdoor_profile.main.id
-
-  security_policies {
-    firewall {
-      cdn_frontdoor_firewall_policy_id = azurerm_cdn_frontdoor_firewall_policy.main[0].id
-
-      association {
-        domain {
-          cdn_frontdoor_domain_id = azurerm_cdn_frontdoor_custom_domain.admin_api[0].id
-        }
-        domain {
-          cdn_frontdoor_domain_id = azurerm_cdn_frontdoor_custom_domain.admin_ui[0].id
-        }
-        patterns_to_match = ["/*"]
-      }
-    }
-  }
-
-  depends_on = [
-    azurerm_cdn_frontdoor_firewall_policy.main,
-    azurerm_cdn_frontdoor_custom_domain.admin_api,
-    azurerm_cdn_frontdoor_custom_domain.admin_ui
-  ]
-}
+# NOTE: Admin domains WAF protection is handled by the main security policy above
+# via dynamic blocks. A separate admin security policy was removed because Azure
+# only allows one WAF firewall policy attachment per Front Door profile.
