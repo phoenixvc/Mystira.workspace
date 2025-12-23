@@ -424,6 +424,89 @@ mys-{env}-chain-rg-{region}     # Chain service
 
 **Decision**: Rejected - Too expensive and complex.
 
+## Implementation Gap Analysis
+
+### Current State Assessment
+
+The infrastructure is **NOT yet aligned** with this ADR. Analysis of current Terraform and CI/CD reveals:
+
+| Component | Current State | Required State | Gap |
+|-----------|---------------|----------------|-----|
+| **Resource Groups/Env** | 1 (core-rg) | 6 (core + 5 service) | ❌ Missing 5 RGs |
+| **ACR Location** | `mys-dev-core-rg-san` | `mys-shared-acr-rg-san` | ❌ Wrong RG |
+| **Communication Svc** | Not deployed | `mys-shared-comms-rg-glob` | ❌ Not created |
+| **Service Key Vaults** | All in core-rg | Each in service-rg | ❌ Wrong RG |
+| **Module RG Params** | Modules accept params | ✅ | ✅ Ready |
+| **CI/CD Workflows** | Hardcoded to core-rg | Multi-RG support | ⚠️ Needs update |
+
+### Files Requiring Changes
+
+#### Terraform Environments (High Priority)
+
+| File | Changes Needed |
+|------|----------------|
+| `infra/terraform/environments/dev/main.tf` | Add 5 service RGs, update module calls |
+| `infra/terraform/environments/staging/main.tf` | Same as dev |
+| `infra/terraform/environments/prod/main.tf` | Same as dev, plus global RGs |
+| `infra/terraform/environments/dev/mystira-app.tf` | Update RG parameter |
+
+**Current issue** (dev/main.tf lines 180-197):
+```hcl
+# ALL modules currently pass core-rg
+module "chain" {
+  resource_group_name = azurerm_resource_group.main.name  # Should be chain RG
+}
+module "publisher" {
+  resource_group_name = azurerm_resource_group.main.name  # Should be publisher RG
+}
+```
+
+#### Terraform Modules (New Required)
+
+| Module | Purpose | Status |
+|--------|---------|--------|
+| `modules/shared/container-registry/` | Extract ACR to shared | ❌ Create |
+| `modules/shared/communications/` | ACS/Email services | ❌ Create |
+
+#### CI/CD Workflows
+
+| File | Issue | Change |
+|------|-------|--------|
+| `.github/workflows/infra-deploy.yml` | Line 50: `AZURE_RESOURCE_GROUP: mys-${{ env }}-core-rg-san` | Add service RG variables |
+| `.github/workflows/infra-deploy.yml` | Lines 295-305: ACR in bootstrap | Move to shared RG logic |
+| `.github/workflows/infra-validate.yml` | Only validates core-rg | Add all RG validation |
+
+**Current hardcoded references** (infra-deploy.yml):
+```yaml
+env:
+  AZURE_RESOURCE_GROUP: mys-${{ github.event.inputs.environment || 'dev' }}-core-rg-san
+  # Missing: CHAIN_RG, PUBLISHER_RG, STORY_RG, ADMIN_RG, APP_RG
+```
+
+#### Cross-Environment References
+
+| File | Reference | Issue |
+|------|-----------|-------|
+| `environments/prod/main.tf` line 454 | `resource_group_name = "mys-dev-core-rg-san"` | ACR should be in shared-acr-rg |
+| `environments/staging/main.tf` line 431 | Same | Same |
+
+### What's Already Correct
+
+1. ✅ **Terraform modules accept RG parameters** - Good design, just used incorrectly
+2. ✅ **Kubernetes manifests** - Reference Key Vaults by name, will auto-resolve
+3. ✅ **Shared monitoring module** - Already accepts RG parameter
+4. ✅ **Identity module** - Supports cross-RG RBAC (needs minor updates)
+
+### Risk Assessment
+
+| Risk | Impact | Mitigation |
+|------|--------|-----------|
+| Key Vault secret loss during migration | HIGH | Backup secrets before any changes |
+| Service interruption during transition | HIGH | Blue-green deployment, dev first |
+| Cross-RG RBAC failures | MEDIUM | Pre-test identity assignments |
+| CI/CD pipeline breaks | MEDIUM | Update workflows before prod migration |
+| Terraform state drift | MEDIUM | Use `terraform import` carefully |
+
 ## Implementation
 
 ### Phase 1: Create Service RGs (Immediate)
@@ -557,17 +640,49 @@ tags = {
 
 ## Migration Checklist
 
-- [ ] Create service RGs in dev
-- [ ] Update Terraform modules to accept RG parameter
-- [ ] Deploy new Key Vaults to service RGs
-- [ ] Migrate secrets to new Key Vaults
-- [ ] Update service configurations
-- [ ] Deploy new Storage Accounts to service RGs
-- [ ] Migrate App Insights to service RGs (or create new)
-- [ ] Update CI/CD pipelines
-- [ ] Repeat for staging
-- [ ] Repeat for production
-- [ ] Update documentation
+### Phase 1: Preparation
+- [ ] Backup all Key Vault secrets (all environments)
+- [ ] Document current RBAC assignments
+- [ ] Create new Terraform modules:
+  - [ ] `modules/shared/container-registry/`
+  - [ ] `modules/shared/communications/`
+
+### Phase 2: Development Environment
+- [ ] Add 5 new resource group definitions to `dev/main.tf`
+- [ ] Create `mys-shared-acr-rg-san` and `mys-shared-comms-rg-glob`
+- [ ] Move ACR resource to shared ACR module
+- [ ] Update module calls to use service-specific RGs
+- [ ] Run `terraform plan` - verify changes
+- [ ] Run `terraform apply` - creates new RGs
+- [ ] Create new Key Vaults in service RGs
+- [ ] Copy secrets from old to new Key Vaults
+- [ ] Update workload identity RBAC for cross-RG access
+- [ ] Test all services connect to correct Key Vaults
+- [ ] Update CI/CD workflows with service RG variables
+
+### Phase 3: Staging Environment
+- [ ] Update `staging/main.tf` with service RGs
+- [ ] Update ACR data source to reference `mys-shared-acr-rg-san`
+- [ ] Apply Terraform changes
+- [ ] Migrate Key Vaults and secrets
+- [ ] Validate all services
+
+### Phase 4: Production Environment
+- [ ] Schedule maintenance window
+- [ ] Update `prod/main.tf` with service RGs
+- [ ] Add global RGs (frontdoor, dns) if not exists
+- [ ] Update ACR data source
+- [ ] Apply Terraform changes
+- [ ] Migrate Key Vaults and secrets
+- [ ] Validate all services
+- [ ] Monitor for 24-48 hours
+
+### Phase 5: Cleanup & Documentation
+- [ ] Remove old Key Vaults from core-rg (after validation)
+- [ ] Update `infra/terraform/README.md`
+- [ ] Update `docs/infrastructure/azure-setup.md`
+- [ ] Update monitoring alerts for new RGs
+- [ ] Archive old Terraform state references
 
 ## Related ADRs
 
