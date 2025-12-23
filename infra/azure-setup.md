@@ -66,7 +66,7 @@ Alternatively, you can use more granular roles:
 
 #### Azure AD / Entra ID Permissions (Required for Identity Management)
 
-If your infrastructure includes Azure AD app registrations, managed identities, or Azure AD B2C integration, the service principal needs additional permissions:
+If your infrastructure includes Azure AD app registrations, managed identities, or Microsoft Entra External ID integration, the service principal needs additional permissions:
 
 **Option 1: Microsoft Graph API Permissions (Recommended)**
 

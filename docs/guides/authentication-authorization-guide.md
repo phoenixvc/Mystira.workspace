@@ -57,14 +57,14 @@ For internal admin users with enterprise SSO, MFA, and conditional access.
 - Terraform: [`infra/terraform/modules/entra-id/`](../../infra/terraform/modules/entra-id/)
 - ADR: [`docs/architecture/adr/0011-entra-id-authentication-integration.md`](../architecture/adr/0011-entra-id-authentication-integration.md)
 
-### Tier 2: Consumer Authentication (Entra External ID)
+### Tier 2: Consumer Authentication (Microsoft Entra External ID)
 
 For end users with social login (Google, Discord) and self-service registration.
 
 | Component | Authentication Method | Identity Provider |
 |-----------|----------------------|-------------------|
-| PWA | MSAL (Browser) | Entra External ID |
-| Public API | JWT Bearer Token | Entra External ID |
+| PWA | MSAL (Browser) | Microsoft Entra External ID |
+| Public API | JWT Bearer Token | Microsoft Entra External ID |
 
 **Key Files:**
 - Terraform: [`infra/terraform/modules/entra-external-id/`](../../infra/terraform/modules/entra-external-id/)
