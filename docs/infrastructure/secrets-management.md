@@ -41,14 +41,11 @@ Per [ADR-0017](../architecture/adr/0017-resource-group-organization-strategy.md)
 | `postgres-connection-string` | Shared PostgreSQL | ✅ Yes | Yes |
 | `redis-connection-string` | Shared Redis | ✅ Yes | Yes |
 | `appinsights-connection-string` | Shared Monitoring | ✅ Yes | Yes |
-| `azure-ad-tenant-id` | GitHub Secrets | ❌ No | Yes |
-| `azure-ad-client-id` | GitHub Secrets | ❌ No | Yes |
-| `admin-ui-client-id` | GitHub Secrets | ❌ No | Optional |
+| `azure-ad-tenant-id` | Entra ID Module | ✅ Yes | Yes |
+| `azure-ad-client-id` | Entra ID Module | ✅ Yes | Yes |
+| `admin-ui-client-id` | Entra ID Module | ✅ Yes | Yes |
 
-**GitHub Secrets Required:**
-- `ENTRA_TENANT_ID_DEV`, `ENTRA_TENANT_ID_STAGING`, `ENTRA_TENANT_ID_PROD`
-- `ENTRA_ADMIN_API_CLIENT_ID_DEV`, `ENTRA_ADMIN_API_CLIENT_ID_STAGING`, `ENTRA_ADMIN_API_CLIENT_ID_PROD`
-- `ENTRA_ADMIN_UI_CLIENT_ID_DEV` (optional), etc.
+**GitHub Secrets Required:** None - all secrets are auto-populated from Terraform modules.
 
 ### Publisher
 
@@ -95,8 +92,8 @@ Add the required secrets to your GitHub repository:
 |-------------|-------------|---------|
 | `ANTHROPIC_API_KEY_DEV` | Anthropic API key for dev | `sk-ant-...` |
 | `OPENAI_API_KEY_DEV` | OpenAI API key for dev | `sk-...` |
-| `ENTRA_TENANT_ID_DEV` | Azure AD B2C tenant ID | `xxxxxxxx-xxxx-...` |
-| `ENTRA_ADMIN_API_CLIENT_ID_DEV` | Admin API app registration client ID | `xxxxxxxx-xxxx-...` |
+
+**Note:** Entra ID credentials are auto-populated by Terraform from the `entra_id` module.
 
 ### Step 3: Sync Secrets to Key Vault
 
@@ -216,9 +213,8 @@ kubectl create secret generic mys-story-generator-secrets \
 |----------------|----------|-------------|
 | `ANTHROPIC_API_KEY_{ENV}` | Story-Generator | Anthropic Claude API key |
 | `OPENAI_API_KEY_{ENV}` | Story-Generator | OpenAI API key |
-| `ENTRA_TENANT_ID_{ENV}` | Admin-API | Azure AD B2C tenant ID |
-| `ENTRA_ADMIN_API_CLIENT_ID_{ENV}` | Admin-API | Admin API app client ID |
-| `ENTRA_ADMIN_UI_CLIENT_ID_{ENV}` | Admin-API | Admin UI app client ID |
+
+**Note:** Admin-API, Publisher, and Chain services have all secrets auto-populated by Terraform - no GitHub Secrets required.
 
 ### Global Secrets (all environments)
 

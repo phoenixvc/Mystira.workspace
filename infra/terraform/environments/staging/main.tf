@@ -592,6 +592,31 @@ resource "azurerm_key_vault_secret" "chain_appinsights" {
   tags         = { AutoPopulated = "true", Source = "shared-monitoring" }
 }
 
+# Admin-API Entra ID Secrets (auto-populated from entra_id module)
+resource "azurerm_key_vault_secret" "admin_entra_tenant_id" {
+  name         = "azure-ad-tenant-id"
+  value        = module.entra_id.tenant_id
+  key_vault_id = module.admin_api.key_vault_id
+  content_type = "azure-ad"
+  tags         = { AutoPopulated = "true", Source = "entra-id-module" }
+}
+
+resource "azurerm_key_vault_secret" "admin_entra_client_id" {
+  name         = "azure-ad-client-id"
+  value        = module.entra_id.admin_api_client_id
+  key_vault_id = module.admin_api.key_vault_id
+  content_type = "azure-ad"
+  tags         = { AutoPopulated = "true", Source = "entra-id-module" }
+}
+
+resource "azurerm_key_vault_secret" "admin_entra_ui_client_id" {
+  name         = "admin-ui-client-id"
+  value        = module.entra_id.admin_ui_client_id
+  key_vault_id = module.admin_api.key_vault_id
+  content_type = "azure-ad"
+  tags         = { AutoPopulated = "true", Source = "entra-id-module" }
+}
+
 # Reference to shared ACR (in shared-acr-rg per ADR-0017)
 data "azurerm_container_registry" "shared" {
   name                = "myssharedacr"
