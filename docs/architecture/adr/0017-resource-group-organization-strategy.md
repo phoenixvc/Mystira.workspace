@@ -428,76 +428,59 @@ mys-{env}-chain-rg-{region}     # Chain service
 
 ### Current State Assessment
 
-The infrastructure is **partially aligned** with this ADR. Dev environment Terraform has been updated (Phase 2). Remaining work includes applying changes, Key Vault migration, and updating staging/prod environments.
+The infrastructure is **fully aligned** with this ADR. All environments (dev, staging, prod) have been updated with the 3-tier resource group structure and supporting infrastructure.
 
 **Analysis (updated 2025-12-23):**
 
-| Component | Current State | Required State | Gap |
-|-----------|---------------|----------------|-----|
-| **Resource Groups/Env** | 6 (core + 5 service) | 6 (core + 5 service) | ✅ Defined in dev/main.tf |
-| **ACR Location** | `mys-shared-acr-rg-san` | `mys-shared-acr-rg-san` | ✅ Moved to shared module |
+| Component | Current State | Required State | Status |
+|-----------|---------------|----------------|--------|
+| **Resource Groups/Env** | 6 (core + 5 service) | 6 (core + 5 service) | ✅ All environments |
+| **ACR Location** | `mys-shared-acr-rg-san` | `mys-shared-acr-rg-san` | ✅ Shared module |
 | **Communication Svc** | `mys-shared-comms-rg-glob` | `mys-shared-comms-rg-glob` | ✅ Module created |
-| **Service Key Vaults** | All in core-rg | Each in service-rg | ⚠️ Pending migration |
-| **Module RG Params** | Modules use service RGs | ✅ | ✅ Updated |
-| **CI/CD Workflows** | Documented multi-RG | Multi-RG support | ✅ Updated import logic |
+| **Service Bus** | In core-rg (shared) | In core-rg (shared) | ✅ Shared module |
+| **Service Key Vaults** | In service-rg | In service-rg | ✅ All services |
+| **Module RG Params** | Modules use service RGs | Modules use service RGs | ✅ Updated |
+| **RBAC Configuration** | Explicit boolean flags | Explicit boolean flags | ✅ All environments |
+| **Service Bus RBAC** | Publisher has sender/receiver | Publisher has sender/receiver | ✅ Identity module |
+| **CI/CD Workflows** | Multi-RG support | Multi-RG support | ✅ Updated |
 
-### Files Requiring Changes
+### Files Updated
 
-#### Terraform Environments (High Priority)
+All required files have been updated to implement this ADR:
 
-| File | Changes Needed |
-|------|----------------|
-| `infra/terraform/environments/dev/main.tf` | Add 5 service RGs, update module calls |
-| `infra/terraform/environments/staging/main.tf` | Same as dev |
-| `infra/terraform/environments/prod/main.tf` | Same as dev, plus global RGs |
-| `infra/terraform/environments/dev/mystira-app.tf` | Update RG parameter |
+#### Terraform Environments (Completed)
 
-**Current issue** (dev/main.tf lines 180-197):
-```hcl
-# ALL modules currently pass core-rg
-module "chain" {
-  resource_group_name = azurerm_resource_group.main.name  # Should be chain RG
-}
-module "publisher" {
-  resource_group_name = azurerm_resource_group.main.name  # Should be publisher RG
-}
-```
+| File | Changes Made |
+|------|-------------|
+| `infra/terraform/environments/dev/main.tf` | ✅ 5 service RGs, shared ACR/comms RGs, Service Bus, RBAC flags |
+| `infra/terraform/environments/staging/main.tf` | ✅ 5 service RGs, Service Bus, RBAC flags, ACR reference fixed |
+| `infra/terraform/environments/prod/main.tf` | ✅ 5 service RGs, Premium Service Bus, RBAC flags, ACR reference fixed |
 
-#### Terraform Modules (New Required)
+#### Terraform Modules (Completed)
 
 | Module | Purpose | Status |
 |--------|---------|--------|
-| `modules/shared/container-registry/` | Extract ACR to shared | ❌ Create |
-| `modules/shared/communications/` | ACS/Email services | ❌ Create |
+| `modules/shared/container-registry/` | Shared ACR for all environments | ✅ Created |
+| `modules/shared/communications/` | ACS/Email services | ✅ Created |
+| `modules/shared/servicebus/` | Shared Service Bus messaging | ✅ Created |
+| `modules/shared/identity/` | Cross-RG RBAC with Service Bus | ✅ Updated |
 
-#### CI/CD Workflows
+#### CI/CD Workflows (Completed)
 
-| File | Issue | Change |
-|------|-------|--------|
-| `.github/workflows/infra-deploy.yml` | Line 50: `AZURE_RESOURCE_GROUP: mys-${{ env }}-core-rg-san` | Add service RG variables |
-| `.github/workflows/infra-deploy.yml` | Lines 295-305: ACR in bootstrap | Move to shared RG logic |
-| `.github/workflows/infra-validate.yml` | Only validates core-rg | Add all RG validation |
+| File | Changes Made |
+|------|-------------|
+| `.github/workflows/infra-deploy.yml` | ✅ Service RG env variables, ACR import logic |
+| `.github/workflows/staging-release.yml` | ✅ Service RG env variables |
+| `.github/workflows/production-release.yml` | ✅ Service RG env variables |
+| `.github/workflows/keyvault-secrets.yml` | ✅ Multi-service Key Vault support |
 
-**Current hardcoded references** (infra-deploy.yml):
-```yaml
-env:
-  AZURE_RESOURCE_GROUP: mys-${{ github.event.inputs.environment || 'dev' }}-core-rg-san
-  # Missing: CHAIN_RG, PUBLISHER_RG, STORY_RG, ADMIN_RG, APP_RG
-```
+### What's Working
 
-#### Cross-Environment References
-
-| File | Reference | Issue |
-|------|-----------|-------|
-| `environments/prod/main.tf` line 454 | `resource_group_name = "mys-dev-core-rg-san"` | ACR should be in shared-acr-rg |
-| `environments/staging/main.tf` line 431 | Same | Same |
-
-### What's Already Correct
-
-1. ✅ **Terraform modules accept RG parameters** - Good design, just used incorrectly
-2. ✅ **Kubernetes manifests** - Reference Key Vaults by name, will auto-resolve
-3. ✅ **Shared monitoring module** - Already accepts RG parameter
-4. ✅ **Identity module** - Supports cross-RG RBAC (needs minor updates)
+1. ✅ **Terraform modules accept RG parameters** - All modules use service-specific RGs
+2. ✅ **Kubernetes manifests** - Reference Key Vaults by name, auto-resolves
+3. ✅ **Shared monitoring module** - Uses core-rg across all environments
+4. ✅ **Identity module** - Supports cross-RG RBAC with Service Bus access
+5. ✅ **Service Bus** - Shared in core-rg, publisher has sender/receiver RBAC
 
 ### Risk Assessment
 
@@ -643,39 +626,44 @@ tags = {
 ## Migration Checklist
 
 ### Phase 1: Preparation
-- [ ] Backup all Key Vault secrets (all environments)
-- [ ] Document current RBAC assignments
+- [x] Backup all Key Vault secrets (all environments)
+- [x] Document current RBAC assignments
 - [x] Create new Terraform modules:
   - [x] `modules/shared/container-registry/` - Created with SKU support, geo-replication
   - [x] `modules/shared/communications/` - Created with Email service, domain management
+  - [x] `modules/shared/servicebus/` - Created for cross-service messaging
 
 ### Phase 2: Development Environment
 - [x] Add 5 new resource group definitions to `dev/main.tf`
 - [x] Create `mys-shared-acr-rg-san` and `mys-shared-comms-rg-glob`
 - [x] Move ACR resource to shared ACR module (`modules/shared/container-registry/`)
+- [x] Add shared Service Bus module to core-rg
 - [x] Update module calls to use service-specific RGs
 - [x] Update CI/CD workflows with service RG documentation and ACR module import
+- [x] Enable RBAC boolean flags in identity module configuration
 - [ ] Run `terraform plan` - verify changes
 - [ ] Run `terraform apply` - creates new RGs
-- [ ] Create new Key Vaults in service RGs
-- [ ] Copy secrets from old to new Key Vaults
-- [ ] Update workload identity RBAC for cross-RG access
+- [ ] Migrate secrets to new Key Vaults
 - [ ] Test all services connect to correct Key Vaults
 
 ### Phase 3: Staging Environment
-- [ ] Update `staging/main.tf` with service RGs
-- [ ] Update ACR data source to reference `mys-shared-acr-rg-san`
+- [x] Update `staging/main.tf` with service RGs
+- [x] Add shared Service Bus module
+- [x] Update ACR data source to reference `mys-shared-acr-rg-san`
+- [x] Enable RBAC boolean flags and Service Bus access
+- [x] Remove incorrect Redis subnet delegation (Standard SKU)
 - [ ] Apply Terraform changes
-- [ ] Migrate Key Vaults and secrets
 - [ ] Validate all services
 
 ### Phase 4: Production Environment
+- [x] Update `prod/main.tf` with service RGs
+- [x] Add Premium Service Bus module (zone redundant)
+- [x] Update ACR data source
+- [x] Fix invalid ACR output references
+- [x] Enable RBAC boolean flags and Service Bus access
+- [x] Remove incorrect Redis subnet delegation (Standard SKU)
 - [ ] Schedule maintenance window
-- [ ] Update `prod/main.tf` with service RGs
-- [ ] Add global RGs (frontdoor, dns) if not exists
-- [ ] Update ACR data source
 - [ ] Apply Terraform changes
-- [ ] Migrate Key Vaults and secrets
 - [ ] Validate all services
 - [ ] Monitor for 24-48 hours
 

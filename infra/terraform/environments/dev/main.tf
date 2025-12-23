@@ -466,29 +466,45 @@ module "identity" {
   aks_principal_id = azurerm_kubernetes_cluster.main.identity[0].principal_id
   acr_id           = module.shared_acr.acr_id
 
-  # Service identity configurations
+  # Service identity configurations (with explicit boolean flags for RBAC)
   service_identities = {
     "story-generator" = {
       principal_id               = module.story_generator.identity_principal_id
+      enable_key_vault_access    = true
       key_vault_id               = module.story_generator.key_vault_id
+      enable_postgres_access     = true
       postgres_server_id         = module.shared_postgresql.server_id
+      postgres_role              = "reader"
+      enable_redis_access        = true
       redis_cache_id             = module.shared_redis.cache_id
+      enable_log_analytics       = true
       log_analytics_workspace_id = module.shared_monitoring.log_analytics_workspace_id
     }
     "publisher" = {
       principal_id               = module.publisher.identity_principal_id
+      enable_key_vault_access    = true
       key_vault_id               = module.publisher.key_vault_id
+      enable_log_analytics       = true
       log_analytics_workspace_id = module.shared_monitoring.log_analytics_workspace_id
+      enable_servicebus_sender   = true
+      enable_servicebus_receiver = true
+      servicebus_namespace_id    = module.shared_servicebus.namespace_id
     }
     "chain" = {
       principal_id               = module.chain.identity_principal_id
+      enable_key_vault_access    = true
       key_vault_id               = module.chain.key_vault_id
+      enable_log_analytics       = true
       log_analytics_workspace_id = module.shared_monitoring.log_analytics_workspace_id
     }
     "admin-api" = {
       principal_id               = module.admin_api.identity_principal_id
+      enable_key_vault_access    = true
       key_vault_id               = module.admin_api.key_vault_id
+      enable_postgres_access     = true
       postgres_server_id         = module.shared_postgresql.server_id
+      postgres_role              = "reader"
+      enable_log_analytics       = true
       log_analytics_workspace_id = module.shared_monitoring.log_analytics_workspace_id
     }
   }

@@ -40,6 +40,8 @@ variable "service_identities" {
     enable_redis_access        = optional(bool, false)
     enable_log_analytics       = optional(bool, false)
     enable_storage_access      = optional(bool, false)
+    enable_servicebus_sender   = optional(bool, false)
+    enable_servicebus_receiver = optional(bool, false)
     # Resource IDs (can be unknown at plan time)
     key_vault_id               = optional(string, "")
     postgres_server_id         = optional(string, "")
@@ -47,6 +49,7 @@ variable "service_identities" {
     redis_cache_id             = optional(string, "")
     log_analytics_workspace_id = optional(string, "")
     storage_account_id         = optional(string, "")
+    servicebus_namespace_id    = optional(string, "")
   }))
   default = {}
 }
