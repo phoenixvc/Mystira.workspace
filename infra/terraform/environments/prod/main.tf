@@ -479,8 +479,9 @@ module "identity" {
   resource_group_name = azurerm_resource_group.main.name
 
   # AKS to ACR access (uses shared ACR from dev environment)
-  aks_principal_id = azurerm_kubernetes_cluster.main.identity[0].principal_id
-  acr_id           = data.azurerm_container_registry.shared.id
+  enable_aks_acr_pull = true
+  aks_principal_id    = azurerm_kubernetes_cluster.main.identity[0].principal_id
+  acr_id              = data.azurerm_container_registry.shared.id
 
   # Service identity configurations (with explicit boolean flags for RBAC)
   service_identities = {

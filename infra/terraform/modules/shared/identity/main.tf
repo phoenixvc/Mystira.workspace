@@ -20,7 +20,8 @@ data "azurerm_client_config" "current" {}
 # =============================================================================
 
 resource "azurerm_role_assignment" "aks_acr_pull" {
-  count                = var.aks_principal_id != "" && var.acr_id != "" ? 1 : 0
+  # Use static boolean flag instead of checking resource IDs (which may be unknown at plan time)
+  count                = var.enable_aks_acr_pull ? 1 : 0
   scope                = var.acr_id
   role_definition_name = "AcrPull"
   principal_id         = var.aks_principal_id
@@ -33,7 +34,8 @@ resource "azurerm_role_assignment" "aks_acr_pull" {
 # =============================================================================
 
 resource "azurerm_role_assignment" "cicd_acr_push" {
-  count                = var.cicd_principal_id != "" && var.acr_id != "" ? 1 : 0
+  # Use static boolean flag instead of checking resource IDs (which may be unknown at plan time)
+  count                = var.enable_cicd_acr_push ? 1 : 0
   scope                = var.acr_id
   role_definition_name = "AcrPush"
   principal_id         = var.cicd_principal_id

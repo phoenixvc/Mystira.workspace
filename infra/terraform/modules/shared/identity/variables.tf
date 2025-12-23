@@ -23,6 +23,19 @@ variable "acr_id" {
   default     = ""
 }
 
+# Static boolean flags to control role assignments (must be known at plan time)
+variable "enable_aks_acr_pull" {
+  description = "Enable AKS to ACR pull role assignment. Set to true when AKS and ACR are configured."
+  type        = bool
+  default     = false
+}
+
+variable "enable_cicd_acr_push" {
+  description = "Enable CI/CD to ACR push role assignment. Set to true when CI/CD principal and ACR are configured."
+  type        = bool
+  default     = false
+}
+
 variable "storage_role" {
   description = "Role to assign for storage account access"
   type        = string
