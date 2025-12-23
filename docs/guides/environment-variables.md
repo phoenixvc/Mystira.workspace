@@ -80,34 +80,31 @@ VITE_POST_LOGOUT_URI=http://localhost:5173
 VITE_API_SCOPES=api://mystira-admin-api/Admin.Read,api://mystira-admin-api/Admin.Write
 ```
 
-### Public API - Azure AD B2C (`packages/app/src/Mystira.App.Api/appsettings.json`)
+### Public API - Entra External ID (`packages/app/src/Mystira.App.Api/appsettings.json`)
 
 ```env
-# Azure AD B2C Configuration
-AZURE_B2C_INSTANCE=https://mystirab2c.b2clogin.com
-AZURE_B2C_DOMAIN=mystirab2c.onmicrosoft.com
-AZURE_B2C_TENANT_ID=your-b2c-tenant-id
-AZURE_B2C_CLIENT_ID=your-b2c-public-api-client-id
-AZURE_B2C_POLICY=B2C_1_SignUpSignIn
+# Entra External ID Configuration
+AZURE_EXTERNAL_ID_AUTHORITY=https://mystira.ciamlogin.com/your-tenant-id/v2.0
+AZURE_EXTERNAL_ID_CLIENT_ID=your-external-id-public-api-client-id
 ```
 
-### PWA (Blazor WASM) - Azure AD B2C (`packages/app/src/Mystira.App.PWA/wwwroot/appsettings.json`)
+### PWA (Blazor WASM) - Entra External ID (`packages/app/src/Mystira.App.PWA/wwwroot/appsettings.json`)
 
 ```env
-# Azure AD B2C Configuration for Blazor WASM
-AZURE_B2C_AUTHORITY=https://mystirab2c.b2clogin.com/mystirab2c.onmicrosoft.com/B2C_1_SignUpSignIn
-AZURE_B2C_CLIENT_ID=your-b2c-pwa-client-id
-AZURE_B2C_SCOPES=https://mystirab2c.onmicrosoft.com/mystira-api/API.Access
+# Entra External ID Configuration for Blazor WASM
+AZURE_EXTERNAL_ID_AUTHORITY=https://mystira.ciamlogin.com/your-tenant-id/v2.0
+AZURE_EXTERNAL_ID_CLIENT_ID=your-external-id-pwa-client-id
+AZURE_EXTERNAL_ID_SCOPES=api://mystira-api/API.Access
 ```
 
 ### Social Identity Providers (configured in Azure Portal)
 
-These are configured in Azure AD B2C, not as environment variables:
+These are configured in Entra External ID, not as environment variables:
 
 | Provider | Configuration Location |
 |----------|----------------------|
-| Google | Azure Portal → B2C → Identity providers → Google |
-| Discord | Azure Portal → B2C → Identity providers → OpenID Connect (custom) |
+| Google | Microsoft Entra admin center → External Identities → All identity providers → Google |
+| Discord | Microsoft Entra admin center → External Identities → All identity providers → Custom OIDC |
 
 See [ADR-0011: Entra ID Integration](./architecture/adr/0011-entra-id-authentication-integration.md) for detailed setup instructions.
 

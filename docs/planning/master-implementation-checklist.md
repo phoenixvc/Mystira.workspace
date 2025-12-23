@@ -4,7 +4,7 @@
 
 This is the master checklist for the Mystira platform modernization initiative. It provides a single source of truth for tracking progress across all ADRs, migrations, and improvements.
 
-**Last Updated**: 2024-12-22
+**Last Updated**: 2025-12-23
 
 ---
 
@@ -66,23 +66,24 @@ This is the master checklist for the Mystira platform modernization initiative. 
 ## 1.1 Infrastructure Setup
 
 > Reference: [hybrid-data-strategy-roadmap.md](./hybrid-data-strategy-roadmap.md#phase-1-foundation-weeks-1-6)
+> Status: ✅ **Complete** (December 2025) - ADR-0017 implemented
 
 ### Terraform Modules
 
-- [ ] PostgreSQL Flexible Server module created
-- [ ] Redis Cache module created
-- [ ] Azure Service Bus module created
-- [ ] Key Vault secrets configured
-- [ ] Network security groups updated
-- [ ] Private endpoints configured (production)
+- [x] PostgreSQL Flexible Server module created (`infra/terraform/modules/shared/postgresql/`)
+- [x] Redis Cache module created (`infra/terraform/modules/shared/redis/`)
+- [x] Azure Service Bus module created (`infra/terraform/modules/shared/servicebus/`)
+- [x] Key Vault secrets auto-populated from Terraform
+- [x] Network security groups updated
+- [ ] Private endpoints configured (production) - Future enhancement
 
 ### Database Setup
 
-- [ ] PostgreSQL instance provisioned (dev/staging)
+- [x] PostgreSQL instance provisioned (dev/staging/prod)
 - [ ] EF Core migrations created
 - [ ] Initial schema deployed
-- [ ] Connection pooling configured (PgBouncer or built-in)
-- [ ] Redis Cache provisioned
+- [x] Connection pooling configured (built-in Azure)
+- [x] Redis Cache provisioned
 
 ## 1.2 Ardalis.Specification Integration
 

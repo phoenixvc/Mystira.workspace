@@ -90,22 +90,23 @@ Supported Account Types: Single tenant
 
 #### Consumer Applications (Tier 2)
 
-**Microsoft Entra External ID Tenant: `mystirab2c.onmicrosoft.com`**
+**Microsoft Entra External ID Tenant: `mystira.ciamlogin.com`**
 
-**User Flows**:
+**Sign-in Experience**:
 
-| Flow | Type | Features |
-|------|------|----------|
-| `B2C_1_SignUpSignIn` | Combined | Email/password, Social (Google, Discord) |
-| `B2C_1_PasswordReset` | Self-service | Email verification |
-| `B2C_1_ProfileEdit` | Edit profile | Update display name, avatar |
+| Feature | Description |
+|---------|-------------|
+| Sign-up/Sign-in | Combined email/password and social provider authentication |
+| Password Reset | Self-service via email verification |
+| Profile Edit | User can update display name and avatar |
+| Social Providers | Google OAuth 2.0, Discord OpenID Connect |
 
 **App Registration: `mystira-public-api`**
 
 ```
 Display Name: Mystira Public API
-Application ID URI: https://mystirab2c.onmicrosoft.com/mystira-api
-Supported Account Types: External ID tenant accounts
+Application ID URI: api://mystira-api
+Supported Account Types: External ID tenant accounts (AzureADandPersonalMicrosoftAccount)
 ```
 
 ### 3. Authentication Flows
@@ -175,11 +176,11 @@ Supported Account Types: External ID tenant accounts
      │  1. User clicks "Sign In"            │                  │
      │────────────────▶│                    │                  │
      │                 │                    │                  │
-     │  2. Redirect to B2C login page       │                  │
+     │  2. Redirect to External ID login    │                  │
      │◀────────────────│                    │                  │
      │                 │                    │                  │
      │  ┌──────────────────────────────┐    │                  │
-     │  │  B2C Hosted UI               │    │                  │
+     │  │  External ID Hosted UI       │    │                  │
      │  │  ┌────────────────────────┐  │    │                  │
      │  │  │ Sign in with:         │  │    │                  │
      │  │  │ [Google] [Discord]    │  │    │                  │
@@ -193,7 +194,7 @@ Supported Account Types: External ID tenant accounts
      │  3. User authenticates (email/social)│                  │
      │────────────────▶│                    │                  │
      │                 │                    │                  │
-     │  4. B2C validates, runs user flow    │                  │
+     │  4. External ID validates user        │                  │
      │                 │                    │                  │
      │  5. Redirect with auth code          │                  │
      │◀────────────────│                    │                  │
@@ -207,7 +208,7 @@ Supported Account Types: External ID tenant accounts
      │  8. API request with access token    │                  │
      │─────────────────────────────────────▶│                  │
      │                 │                    │                  │
-     │                 │  9. Validate B2C token                │
+     │                 │  9. Validate External ID token        │
      │                 │◀───────────────────│                  │
      │                 │                    │                  │
      │                 │                    │ 10. Query user   │
@@ -221,8 +222,8 @@ Supported Account Types: External ID tenant accounts
 
 ```
 ┌─────────┐     ┌──────────────┐     ┌─────────────┐
-│   PWA   │     │   Azure AD   │     │  Public API │
-│         │     │     B2C      │     │             │
+│   PWA   │     │  External ID │     │  Public API │
+│         │     │   (CIAM)     │     │             │
 └────┬────┘     └──────┬───────┘     └──────┬──────┘
      │                 │                    │
      │  1. Access token expired             │
@@ -248,8 +249,8 @@ Supported Account Types: External ID tenant accounts
 
 ```
 ┌─────────┐     ┌──────────┐     ┌──────────────┐     ┌─────────────┐
-│   PWA   │     │  B2C UI  │     │   Identity   │     │  Public API │
-│         │     │          │     │   Provider   │     │             │
+│   PWA   │     │ Ext. ID  │     │   Identity   │     │  Public API │
+│         │     │   UI     │     │   Provider   │     │             │
 └────┬────┘     └────┬─────┘     └──────┬───────┘     └──────┬──────┘
      │               │                  │                    │
      │ 1. Click social login button     │                    │
@@ -269,10 +270,10 @@ Supported Account Types: External ID tenant accounts
      │               │ 6. IdP tokens (user info)             │
      │               │◀─────────────────│                    │
      │               │                  │                    │
-     │ 7. B2C creates/links user, issues tokens              │
+     │ 7. External ID creates/links user, issues tokens       │
      │◀──────────────│                  │                    │
      │               │                  │                    │
-     │ 8. API call with B2C token       │                    │
+     │ 8. API call with External ID token                    │
      │──────────────────────────────────────────────────────▶│
      │               │                  │                    │
      │ 9. Success                       │                    │
@@ -459,11 +460,9 @@ VITE_AZURE_TENANT_ID=your-tenant-id
 VITE_REDIRECT_URI=https://admin.mystira.app/auth/callback
 VITE_POST_LOGOUT_URI=https://admin.mystira.app
 
-# B2C (Public API)
-AZURE_B2C_INSTANCE=https://mystirab2c.b2clogin.com
-AZURE_B2C_TENANT=mystirab2c.onmicrosoft.com
-AZURE_B2C_POLICY=B2C_1_SignUpSignIn
-AZURE_B2C_CLIENT_ID=your-b2c-client-id
+# External ID (Public API)
+AZURE_EXTERNAL_ID_AUTHORITY=https://mystira.ciamlogin.com/your-tenant-id/v2.0
+AZURE_EXTERNAL_ID_CLIENT_ID=your-external-id-client-id
 ```
 
 ## Rationale
@@ -496,7 +495,7 @@ AZURE_B2C_CLIENT_ID=your-b2c-client-id
 1. **Enterprise Ready**: SSO integration for organizations
 2. **Secure**: MFA, Conditional Access, Passwordless options
 3. **Compliant**: Audit logs, identity governance
-4. **Scalable**: Handles millions of users (B2C)
+4. **Scalable**: Handles millions of users (External ID)
 5. **Integrated**: Native Azure service authentication
 
 ### Negative
