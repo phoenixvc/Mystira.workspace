@@ -96,7 +96,7 @@ resource "azurerm_servicebus_namespace" "shared" {
 
   # Premium-only features
   premium_messaging_partitions = var.sku == "Premium" ? 1 : null
-  zone_redundant               = var.sku == "Premium" ? var.zone_redundant : null
+  # Note: zone_redundant was removed in AzureRM 4.0 - zone redundancy is now automatic for Premium
 
   tags = local.common_tags
 }

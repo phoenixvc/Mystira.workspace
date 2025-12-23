@@ -104,14 +104,8 @@ resource "azurerm_container_registry" "shared" {
     }
   }
 
-  # Retention policy for untagged manifests (Premium only)
-  dynamic "retention_policy" {
-    for_each = var.sku == "Premium" ? [1] : []
-    content {
-      days    = var.retention_policy_days
-      enabled = true
-    }
-  }
+  # Note: retention_policy block was removed in AzureRM 4.0
+  # Retention is now managed via azurerm_container_registry_task or lifecycle policies
 
   tags = local.common_tags
 }
