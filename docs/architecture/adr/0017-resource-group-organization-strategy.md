@@ -299,6 +299,77 @@ With service-specific RGs:
 | State migration | Phased approach, start with new resources |
 | Complexity | Clear naming, tagging, documentation |
 
+## Decision Analysis
+
+### Weighted Decision Matrix
+
+We evaluated four approaches against seven criteria, weighted by importance to Mystira's current needs:
+
+| Criteria | Weight | A: Status Quo | B: Proposed | C: Full Split | D: Per-Service |
+|----------|--------|---------------|-------------|---------------|----------------|
+| **Migration Effort** | 25% | 5 (none) | 4 (minimal) | 2 (significant) | 1 (massive) |
+| **RBAC/Security Isolation** | 25% | 1 (none) | 4 (secrets isolated) | 5 (full) | 5 (full) |
+| **Cost Visibility** | 15% | 1 (none) | 4 (per service) | 4 (per service) | 5 (complete) |
+| **Blast Radius** | 15% | 1 (entire env) | 3 (core + services) | 4 (component) | 5 (single service) |
+| **Operational Complexity** | 10% | 5 (simple) | 4 (manageable) | 2 (complex) | 1 (very complex) |
+| **Terraform Management** | 5% | 5 (simple) | 4 (modular) | 3 (many states) | 2 (fragmented) |
+| **Team Scalability** | 5% | 2 (poor) | 4 (good) | 4 (good) | 3 (overkill) |
+| **Weighted Score** | 100% | **2.45** | **3.85** | **3.30** | **2.95** |
+
+**Scoring**: 1 = Poor, 3 = Adequate, 5 = Excellent
+
+### Score Breakdown
+
+**Option A: Status Quo (Score: 2.45)**
+- Easiest to maintain but fails on isolation, cost tracking, and blast radius
+- Not viable for multi-team or compliance scenarios
+
+**Option B: Proposed Strategy (Score: 3.85)** ✅ Selected
+- Best balance of migration effort vs. security isolation
+- Secrets (Key Vaults) are isolated per service - primary goal achieved
+- Core infrastructure stays together - minimal disruption
+- Cross-environment sharing reduces costs
+
+**Option C: Full 4-Tier Split (Score: 3.30)**
+- Better isolation but significantly more migration effort
+- 8+ RGs per environment creates operational overhead
+- Overkill for current team size (< 10 developers)
+- Consider if team grows beyond 20 or compliance requires it
+
+**Option D: Full Per-Service Isolation (Score: 2.95)**
+- Massive cost (duplicate VNets, AKS clusters, databases)
+- Extreme complexity with VNet peering
+- Only justified for completely independent business units
+
+### Honest Assessment of Proposed Strategy
+
+**Strengths:**
+1. ✅ **Solves the primary pain point** - Key Vault isolation per service
+2. ✅ **Minimal disruption** - Core infra unchanged
+3. ✅ **Right-sized for team** - Not over-engineered
+4. ✅ **Evolvable** - Can split core-rg later if needed
+5. ✅ **Cross-env sharing** - ACR/Comms pattern is proven
+
+**Acknowledged Trade-offs:**
+1. ⚠️ **core-rg remains large** - VNet + AKS + PostgreSQL + Redis + Cosmos DB + Storage
+2. ⚠️ **Blast radius for core** - Deleting core-rg still destroys environment
+3. ⚠️ **Shared data access** - All services can access Cosmos DB (no database-level RBAC)
+4. ⚠️ **Mixed patterns** - PaaS (App Service) and containers (AKS) in same structure
+
+**Why these trade-offs are acceptable:**
+1. **Core-rg size**: Platform team owns it entirely; no service team has write access
+2. **Blast radius**: Mitigated by Terraform state, Azure locks, and backup policies
+3. **Shared data**: Application-level auth handles data isolation; DB-level separation is future work
+4. **Mixed patterns**: Both deploy independently to their RGs; core-rg just holds shared infra
+
+### When to Reconsider
+
+Upgrade to **Option C (Full Split)** when:
+- Team grows beyond 20 developers
+- Multiple distinct platform teams form
+- Compliance requires network/data separation
+- Need separate RBAC for DBA vs. Network Admin roles
+
 ## Alternatives Considered
 
 ### Alternative 1: Full 4-Tier Split (More Granular)
