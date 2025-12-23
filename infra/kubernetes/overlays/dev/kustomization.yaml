@@ -1,0 +1,70 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: mys-dev
+
+resources:
+  - ../../base/admin-api
+
+commonLabels:
+  environment: dev
+
+patches:
+  # Reduce replicas for dev
+  - target:
+      kind: Deployment
+      name: mys-admin-api
+    patch: |
+      - op: replace
+        path: /spec/replicas
+        value: 1
+
+  # Reduce resource limits for dev
+  - target:
+      kind: Deployment
+      name: mys-admin-api
+    patch: |
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/requests/memory
+        value: "128Mi"
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/limits/memory
+        value: "256Mi"
+
+  # Use staging Let's Encrypt for dev
+  - target:
+      kind: Ingress
+      name: mys-admin-api
+    patch: |
+      - op: replace
+        path: /metadata/annotations/cert-manager.io~1cluster-issuer
+        value: letsencrypt-staging
+      - op: replace
+        path: /spec/tls/0/hosts/0
+        value: dev.admin-api.mystira.app
+      - op: replace
+        path: /spec/rules/0/host
+        value: dev.admin-api.mystira.app
+
+  # Disable HPA in dev (use single replica)
+  - target:
+      kind: HorizontalPodAutoscaler
+      name: mys-admin-api
+    patch: |
+      - op: replace
+        path: /spec/minReplicas
+        value: 1
+      - op: replace
+        path: /spec/maxReplicas
+        value: 2
+
+configMapGenerator:
+  - name: mys-admin-api-config
+    behavior: merge
+    literals:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - Logging__LogLevel__Default=Debug
+
+images:
+  - name: mysdevacr.azurecr.io/mys-admin-api
+    newTag: dev
