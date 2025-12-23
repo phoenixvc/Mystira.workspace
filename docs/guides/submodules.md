@@ -192,6 +192,49 @@ In CI/CD pipelines, ensure submodules are initialized:
     submodules: recursive
 ```
 
+### Submodule Deployment Flow (Dev Only)
+
+Submodule repositories can trigger automated deployments to the **dev environment** via `repository_dispatch`:
+
+```
+Submodule (e.g., Admin.Api)          Workspace
+┌──────────────────────────┐     ┌─────────────────────────┐
+│ 1. PR merged to dev      │     │                         │
+│ 2. Build & push to ACR   │────►│ 3. Receive dispatch     │
+│ 3. Trigger dispatch      │     │ 4. Deploy to dev K8s    │
+└──────────────────────────┘     └─────────────────────────┘
+```
+
+**Required Setup in Submodule:**
+
+1. Add `WORKSPACE_DISPATCH_TOKEN` secret (GitHub PAT with `repo` scope)
+2. Add dispatch job to CI workflow:
+
+```yaml
+trigger-workspace-deploy:
+  needs: build-and-push
+  steps:
+    - uses: peter-evans/repository-dispatch@v3
+      with:
+        token: ${{ secrets.WORKSPACE_DISPATCH_TOKEN }}
+        repository: phoenixvc/Mystira.workspace
+        event-type: admin-api-deploy  # Use appropriate event type
+        client-payload: |
+          {
+            "environment": "dev",
+            "image_tag": "dev-${{ github.sha }}"
+          }
+```
+
+**Supported Event Types:**
+- `admin-api-deploy`
+- `admin-ui-deploy`
+- `story-generator-deploy`
+- `publisher-deploy`
+- `chain-deploy`
+
+> **Important**: This is for **dev environment only**. Staging and production deployments are managed through the workspace release workflows. See [Publishing Flow](../cicd/publishing-flow.md#submodule-deployment-dev-only) for details.
+
 ## See Also
 
 - [ADR-0016: Monorepo Tooling and Multi-Repository Strategy](../architecture/adr/0016-monorepo-tooling-and-multi-repository-strategy.md) - Why we use submodules + Turborepo instead of other monorepo tools

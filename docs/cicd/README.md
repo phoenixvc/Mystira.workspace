@@ -23,11 +23,13 @@ This directory contains documentation for CI/CD pipelines, GitHub Actions workfl
 
 ### Deployment Environments
 
-| Environment | URL Pattern             | Trigger                   |
-| ----------- | ----------------------- | ------------------------- |
-| Dev         | `dev.*.mystira.app`     | Manual via `infra-deploy` |
-| Staging     | `staging.*.mystira.app` | Auto on merge to `main`   |
-| Production  | `*.mystira.app`         | Manual with confirmation  |
+| Environment | URL Pattern             | Trigger                                  |
+| ----------- | ----------------------- | ---------------------------------------- |
+| Dev         | `dev.*.mystira.app`     | Submodule dispatch or `infra-deploy`     |
+| Staging     | `staging.*.mystira.app` | Auto on merge to `main`                  |
+| Production  | `*.mystira.app`         | Manual with confirmation                 |
+
+> **Note**: Dev deployments can be triggered automatically by submodule repositories via `repository_dispatch`. See [Submodule Deployment](./publishing-flow.md#submodule-deployment-dev-only).
 
 ## Azure Permissions
 

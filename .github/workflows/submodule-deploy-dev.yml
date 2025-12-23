@@ -1,0 +1,185 @@
+name: "Submodule: Deploy to Dev"
+
+# Handler for repository_dispatch events from submodule repositories
+# When a submodule (Admin.Api, Admin.UI, etc.) builds and pushes to ACR,
+# it triggers this workflow to deploy the new image to dev Kubernetes.
+#
+# NOTE: This is for DEV environment ONLY.
+# Staging and production deployments are managed through the workspace directly
+# via staging-release.yml and production-release.yml workflows.
+
+on:
+  repository_dispatch:
+    types:
+      - admin-api-deploy
+      - admin-ui-deploy
+      - story-generator-deploy
+      - publisher-deploy
+      - chain-deploy
+
+concurrency:
+  group: submodule-deploy-dev-${{ github.event.action }}
+  cancel-in-progress: false
+
+env:
+  ENVIRONMENT: dev
+  AZURE_RESOURCE_GROUP: mys-dev-core-rg-san
+  AKS_CLUSTER_NAME: mys-dev-core-aks-san
+  ACR_NAME: myssharedacr
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  deploy:
+    name: Deploy ${{ github.event.action }} to Dev
+    runs-on: ubuntu-latest
+    environment: dev
+    steps:
+      - name: Checkout workspace
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+          token: ${{ secrets.MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN }}
+
+      - name: Log dispatch payload
+        run: |
+          echo "## Submodule Deployment Triggered" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Property | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|----------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Event Type | ${{ github.event.action }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Environment | ${{ github.event.client_payload.environment }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Source Commit | ${{ github.event.client_payload.ref }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Triggered By | ${{ github.event.client_payload.triggered_by }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Image Tag | ${{ github.event.client_payload.image_tag }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Source Run ID | ${{ github.event.client_payload.run_id }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| PR Number | ${{ github.event.client_payload.pr_number }} |" >> $GITHUB_STEP_SUMMARY
+
+      - name: Validate environment
+        run: |
+          # Only allow dev deployments via this workflow
+          if [ "${{ github.event.client_payload.environment }}" != "dev" ]; then
+            echo "::error::This workflow only supports dev deployments. For staging/prod, use the workspace release workflows."
+            exit 1
+          fi
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.MYSTIRA_AZURE_CREDENTIALS }}
+
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v4
+
+      - name: Get AKS credentials
+        run: |
+          az aks get-credentials \
+            --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
+            --name ${{ env.AKS_CLUSTER_NAME }} \
+            --overwrite-existing
+
+      - name: Determine deployment target
+        id: target
+        run: |
+          case "${{ github.event.action }}" in
+            admin-api-deploy)
+              echo "deployment=mys-admin-api" >> $GITHUB_OUTPUT
+              echo "image=admin-api" >> $GITHUB_OUTPUT
+              ;;
+            admin-ui-deploy)
+              echo "deployment=mys-admin-ui" >> $GITHUB_OUTPUT
+              echo "image=admin-ui" >> $GITHUB_OUTPUT
+              ;;
+            story-generator-deploy)
+              echo "deployment=mys-story-generator" >> $GITHUB_OUTPUT
+              echo "image=story-generator" >> $GITHUB_OUTPUT
+              ;;
+            publisher-deploy)
+              echo "deployment=mys-publisher" >> $GITHUB_OUTPUT
+              echo "image=publisher" >> $GITHUB_OUTPUT
+              ;;
+            chain-deploy)
+              echo "deployment=mys-chain" >> $GITHUB_OUTPUT
+              echo "image=chain" >> $GITHUB_OUTPUT
+              echo "is_statefulset=true" >> $GITHUB_OUTPUT
+              ;;
+            *)
+              echo "::error::Unknown event type: ${{ github.event.action }}"
+              exit 1
+              ;;
+          esac
+
+      - name: Update deployment image
+        run: |
+          NAMESPACE="mys-${{ env.ENVIRONMENT }}"
+          IMAGE="${{ env.ACR_NAME }}.azurecr.io/${{ steps.target.outputs.image }}:${{ github.event.client_payload.image_tag }}"
+
+          echo "Updating ${{ steps.target.outputs.deployment }} to use image: $IMAGE"
+
+          if [ "${{ steps.target.outputs.is_statefulset }}" == "true" ]; then
+            # StatefulSet (chain)
+            kubectl set image statefulset/${{ steps.target.outputs.deployment }} \
+              ${{ steps.target.outputs.image }}=$IMAGE \
+              -n $NAMESPACE
+          else
+            # Deployment
+            kubectl set image deployment/${{ steps.target.outputs.deployment }} \
+              ${{ steps.target.outputs.image }}=$IMAGE \
+              -n $NAMESPACE
+          fi
+
+      - name: Wait for rollout
+        run: |
+          NAMESPACE="mys-${{ env.ENVIRONMENT }}"
+
+          if [ "${{ steps.target.outputs.is_statefulset }}" == "true" ]; then
+            kubectl rollout status statefulset/${{ steps.target.outputs.deployment }} \
+              -n $NAMESPACE --timeout=300s
+          else
+            kubectl rollout status deployment/${{ steps.target.outputs.deployment }} \
+              -n $NAMESPACE --timeout=300s
+          fi
+
+      - name: Verify deployment
+        run: |
+          NAMESPACE="mys-${{ env.ENVIRONMENT }}"
+
+          echo "### Deployment Status" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          kubectl get pods -n $NAMESPACE -l app=${{ steps.target.outputs.deployment }} >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+
+      - name: Generate summary
+        if: always()
+        run: |
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Result" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ job.status }}" == "success" ]; then
+            echo "Deployment successful! Service available at:" >> $GITHUB_STEP_SUMMARY
+            case "${{ github.event.action }}" in
+              admin-api-deploy)
+                echo "- https://dev.admin-api.mystira.app" >> $GITHUB_STEP_SUMMARY
+                ;;
+              admin-ui-deploy)
+                echo "- https://dev.admin.mystira.app" >> $GITHUB_STEP_SUMMARY
+                ;;
+              story-generator-deploy)
+                echo "- https://dev.story-generator.mystira.app" >> $GITHUB_STEP_SUMMARY
+                ;;
+              publisher-deploy)
+                echo "- https://dev.publisher.mystira.app" >> $GITHUB_STEP_SUMMARY
+                ;;
+              chain-deploy)
+                echo "- https://dev.chain.mystira.app" >> $GITHUB_STEP_SUMMARY
+                ;;
+            esac
+          else
+            echo "Deployment failed. Check the logs above for details." >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "---" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "_Note: Staging and production deployments are managed through the workspace release workflows._" >> $GITHUB_STEP_SUMMARY

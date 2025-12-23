@@ -239,15 +239,109 @@ To update version stage, modify the workflow:
 
 ### Workflow Files
 
-| Workflow                 | Trigger             | Action                                |
-| ------------------------ | ------------------- | ------------------------------------- |
-| `publisher-ci.yml`       | Push/PR to dev/main | Lint, test, build, Docker push        |
-| `chain-ci.yml`           | Push/PR to dev/main | Lint, test, build, Docker push        |
-| `story-generator-ci.yml` | Push/PR to dev/main | Lint, test, build, Docker push, NuGet |
-| `release.yml`            | Push to main        | NPM publish via Changesets            |
-| `staging-release.yml`    | Push to main        | Auto-deploy to staging AKS            |
-| `production-release.yml` | Manual              | Deploy to production AKS              |
-| `infra-deploy.yml`       | Manual/Push         | Full infrastructure deployment        |
+| Workflow                    | Trigger                    | Action                                |
+| --------------------------- | -------------------------- | ------------------------------------- |
+| `publisher-ci.yml`          | Push/PR to dev/main        | Lint, test, build, Docker push        |
+| `chain-ci.yml`              | Push/PR to dev/main        | Lint, test, build, Docker push        |
+| `story-generator-ci.yml`    | Push/PR to dev/main        | Lint, test, build, Docker push, NuGet |
+| `submodule-deploy-dev.yml`  | `repository_dispatch`      | Deploy submodule updates to dev K8s   |
+| `release.yml`               | Push to main               | NPM publish via Changesets            |
+| `staging-release.yml`       | Push to main               | Auto-deploy to staging AKS            |
+| `production-release.yml`    | Manual                     | Deploy to production AKS              |
+| `infra-deploy.yml`          | Manual/Push                | Full infrastructure deployment        |
+
+---
+
+## Submodule Deployment (Dev Only)
+
+Submodule repositories (Admin.Api, Admin.UI, etc.) use `repository_dispatch` to trigger deployments to the **dev environment only**.
+
+### Flow Diagram
+
+```
+┌─────────────────────────┐     ┌─────────────────────────────┐
+│   Submodule Repository  │     │      Mystira.workspace      │
+│   (e.g., Admin.Api)     │     │                             │
+├─────────────────────────┤     ├─────────────────────────────┤
+│ 1. PR merged to dev     │     │                             │
+│         ↓               │     │                             │
+│ 2. Build Docker image   │     │                             │
+│ 3. Push to ACR          │────►│ 4. repository_dispatch      │
+│         ↓               │     │    event received           │
+│ 4. Trigger dispatch     │     │         ↓                   │
+│    (admin-api-deploy)   │     │ 5. Update K8s deployment    │
+└─────────────────────────┘     │    with new image tag       │
+                                │         ↓                   │
+                                │ 6. Rollout to dev AKS       │
+                                └─────────────────────────────┘
+```
+
+### Supported Event Types
+
+| Event Type               | Target Deployment    | Service URL                          |
+| ------------------------ | -------------------- | ------------------------------------ |
+| `admin-api-deploy`       | `mys-admin-api`      | `https://dev.admin-api.mystira.app`  |
+| `admin-ui-deploy`        | `mys-admin-ui`       | `https://dev.admin.mystira.app`      |
+| `story-generator-deploy` | `mys-story-generator`| `https://dev.story-generator.mystira.app` |
+| `publisher-deploy`       | `mys-publisher`      | `https://dev.publisher.mystira.app`  |
+| `chain-deploy`           | `mys-chain`          | `https://dev.chain.mystira.app`      |
+
+### Client Payload Format
+
+Submodules should send the following payload:
+
+```json
+{
+  "environment": "dev",
+  "ref": "<commit-sha>",
+  "triggered_by": "<github-actor>",
+  "run_id": "<workflow-run-id>",
+  "image_tag": "dev-<commit-sha>",
+  "pr_number": "<pr-number-or-empty>"
+}
+```
+
+### Example Submodule Workflow
+
+```yaml
+# In submodule repository (e.g., Mystira.Admin.Api)
+trigger-workspace-deploy:
+  name: Trigger Workspace Deployment
+  runs-on: ubuntu-latest
+  needs: build-and-push
+  steps:
+    - name: Trigger deployment via workspace
+      uses: peter-evans/repository-dispatch@v3
+      with:
+        token: ${{ secrets.WORKSPACE_DISPATCH_TOKEN }}
+        repository: phoenixvc/Mystira.workspace
+        event-type: admin-api-deploy
+        client-payload: |
+          {
+            "environment": "dev",
+            "ref": "${{ github.sha }}",
+            "triggered_by": "${{ github.actor }}",
+            "run_id": "${{ github.run_id }}",
+            "image_tag": "dev-${{ github.sha }}",
+            "pr_number": "${{ github.event.pull_request.number || '' }}"
+          }
+```
+
+### Required Secrets (Submodule Repositories)
+
+| Secret                     | Description                                      |
+| -------------------------- | ------------------------------------------------ |
+| `WORKSPACE_DISPATCH_TOKEN` | GitHub PAT with `repo` scope to trigger dispatch |
+
+> **Note**: The PAT `MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN` in the workspace already has the required permissions. Each submodule needs its own secret (`WORKSPACE_DISPATCH_TOKEN`) configured with a PAT that can trigger workflows in the workspace.
+
+### Why Dev Only?
+
+Submodule-triggered deployments are **intentionally limited to the dev environment**:
+
+- **Staging/Production**: Managed through workspace release workflows (`staging-release.yml`, `production-release.yml`)
+- **Rationale**: Production deployments require coordinated releases, approval gates, and testing
+- **Dev**: Enables rapid iteration and testing of individual services
 
 ---
 
