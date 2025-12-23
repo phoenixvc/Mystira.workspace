@@ -13,8 +13,8 @@
     <PackageReference Include="Grpc.AspNetCore" Version="2.65.0" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.9.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Cosmos" Version="9.0.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="9.0.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Cosmos" Version="9.0.8" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="9.0.8" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authorization" Version="9.0.0" />
     <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="9.0.0" />
@@ -24,8 +24,8 @@
     <PackageReference Include="NJsonSchema" Version="11.1.0" />
     <PackageReference Include="Azure.Communication.Email" Version="1.0.1" />
     <!-- Application Insights for monitoring and telemetry -->
-    <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.22.0" />
-    <PackageReference Include="Microsoft.ApplicationInsights.DependencyCollector" Version="2.22.0" />
+    <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.23.0" />
+    <PackageReference Include="Microsoft.ApplicationInsights.DependencyCollector" Version="2.23.0" />
 
     <!-- PostgreSQL support for hybrid data strategy (Phase 2+) -->
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.2" />
@@ -36,7 +36,7 @@
     <PackageReference Include="AspNetCore.HealthChecks.Redis" Version="9.0.0" />
 
     <!-- Microsoft Entra ID (Azure AD) authentication -->
-    <PackageReference Include="Microsoft.Identity.Web" Version="3.5.0" />
+    <PackageReference Include="Microsoft.Identity.Web" Version="3.8.2" />
   </ItemGroup>
 
   <ItemGroup>
