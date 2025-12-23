@@ -28,8 +28,8 @@ Mystira uses a multi-tier authentication strategy:
 │  │ • Admin UI       │   │ • PWA            │   │ • Publisher              │ │
 │  │ • DevHub         │   │ • Publisher      │   │ • Chain                  │ │
 │  ├──────────────────┤   ├──────────────────┤   ├──────────────────────────┤ │
-│  │ Microsoft        │   │ Azure AD B2C     │   │ Azure Workload Identity  │ │
-│  │ Entra ID         │   │ (Social Login)   │   │ (Managed Identity)       │ │
+│  │ Microsoft        │   │ Entra            │   │ Azure Workload Identity  │ │
+│  │ Entra ID         │   │ External ID      │   │ (Managed Identity)       │ │
 │  └──────────────────┘   └──────────────────┘   └──────────────────────────┘ │
 │                                                                              │
 │  ┌─────────────────────────────────────────────────────────────────────────┐ │
@@ -57,17 +57,17 @@ For internal admin users with enterprise SSO, MFA, and conditional access.
 - Terraform: [`infra/terraform/modules/entra-id/`](../../infra/terraform/modules/entra-id/)
 - ADR: [`docs/architecture/adr/0011-entra-id-authentication-integration.md`](../architecture/adr/0011-entra-id-authentication-integration.md)
 
-### Tier 2: Consumer Authentication (Azure AD B2C)
+### Tier 2: Consumer Authentication (Entra External ID)
 
 For end users with social login (Google, Discord) and self-service registration.
 
 | Component | Authentication Method | Identity Provider |
 |-----------|----------------------|-------------------|
-| PWA | MSAL (Browser) | Azure AD B2C |
-| Public API | JWT Bearer Token | Azure AD B2C |
+| PWA | MSAL (Browser) | Entra External ID |
+| Public API | JWT Bearer Token | Entra External ID |
 
 **Key Files:**
-- Terraform: [`infra/terraform/modules/azure-ad-b2c/`](../../infra/terraform/modules/azure-ad-b2c/)
+- Terraform: [`infra/terraform/modules/entra-external-id/`](../../infra/terraform/modules/entra-external-id/)
 - ADR: [`docs/architecture/adr/0010-authentication-and-authorization-strategy.md`](../architecture/adr/0010-authentication-and-authorization-strategy.md)
 
 ### Tier 3: Service Authentication (Workload Identity)
@@ -92,7 +92,7 @@ For service-to-service and service-to-Azure-resource authentication.
 | Module | Purpose | Location |
 |--------|---------|----------|
 | `entra-id` | Admin app registrations, scopes, roles | [`modules/entra-id/`](../../infra/terraform/modules/entra-id/) |
-| `azure-ad-b2c` | Consumer auth with social login | [`modules/azure-ad-b2c/`](../../infra/terraform/modules/azure-ad-b2c/) |
+| `entra-external-id` | Consumer auth with social login | [`modules/entra-external-id/`](../../infra/terraform/modules/entra-external-id/) |
 | `admin-api` | Admin API managed identity | [`modules/admin-api/`](../../infra/terraform/modules/admin-api/) |
 | `shared/identity` | RBAC, workload identity federation | [`modules/shared/identity/`](../../infra/terraform/modules/shared/identity/) |
 | `shared/postgresql` | Database with Azure AD auth | [`modules/shared/postgresql/`](../../infra/terraform/modules/shared/postgresql/) |
@@ -188,13 +188,13 @@ VITE_REDIRECT_URI=https://admin.dev.mystira.app/auth/callback
 
 ### PWA (Consumer App)
 
-**B2C Configuration:**
+**External ID Configuration:**
 ```typescript
-export const b2cConfig = {
+export const externalIdConfig = {
   auth: {
-    clientId: import.meta.env.VITE_B2C_CLIENT_ID,
-    authority: 'https://mystirab2cdev.b2clogin.com/mystirab2cdev.onmicrosoft.com/B2C_1_SignUpSignIn',
-    knownAuthorities: ['mystirab2cdev.b2clogin.com'],
+    clientId: import.meta.env.VITE_EXTERNAL_ID_CLIENT_ID,
+    authority: 'https://mystiradev.ciamlogin.com/<tenant-id>/v2.0',
+    knownAuthorities: ['mystiradev.ciamlogin.com'],
     redirectUri: import.meta.env.VITE_REDIRECT_URI,
   },
 };

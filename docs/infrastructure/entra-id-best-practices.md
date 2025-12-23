@@ -6,7 +6,7 @@ This guide provides best practices for configuring Microsoft Entra ID (Azure AD)
 
 Mystira uses Microsoft Entra ID for:
 - **Admin authentication**: Internal staff accessing the Admin UI and API
-- **Consumer authentication**: End users via Azure AD B2C (separate tenant)
+- **Consumer authentication**: End users via Entra External ID (separate tenant)
 - **Service-to-service**: Workload identity for AKS pods
 
 ## Multi-Environment Strategy
@@ -246,31 +246,32 @@ resource "azurerm_key_vault_secret" "admin_entra_tenant_id" {
    - Sign-ins from unusual locations
    - App consent from non-admins
 
-## Azure AD B2C (Consumer Authentication)
+## Microsoft Entra External ID (Consumer Authentication)
 
-For end-user (consumer) authentication, use a separate Azure AD B2C tenant:
+For end-user (consumer) authentication, Mystira uses Microsoft Entra External ID - Microsoft's modern customer identity and access management (CIAM) solution.
 
-### B2C vs Entra ID
+### Entra ID vs External ID
 
-| Feature | Entra ID (Admin) | Azure AD B2C (Consumers) |
-|---------|------------------|--------------------------|
+| Feature | Entra ID (Admin) | Entra External ID (Consumers) |
+|---------|------------------|-------------------------------|
 | Users | Internal staff | External customers |
 | Identity providers | Microsoft account | Social (Google, Facebook), local accounts |
 | Branding | Corporate | Fully customizable |
-| User flows | Standard | Custom policies |
+| Authentication | Standard sign-in | Self-service sign-up/sign-in |
 | Scale | Thousands | Millions |
+| Login domain | `login.microsoftonline.com` | `*.ciamlogin.com` |
 
-### B2C Configuration
+### External ID Configuration
 
 ```hcl
-# B2C is a separate tenant, created manually
-module "azure_ad_b2c" {
-  source = "../../modules/azure-ad-b2c"
-  count  = var.b2c_tenant_id != "" ? 1 : 0
+# External ID tenant must be created manually first
+module "entra_external_id" {
+  source = "../../modules/entra-external-id"
+  count  = var.external_id_tenant_id != "" ? 1 : 0
 
-  environment     = "dev"
-  b2c_tenant_id   = var.b2c_tenant_id
-  b2c_tenant_name = "mystirab2cdev"
+  environment   = "dev"
+  tenant_id     = var.external_id_tenant_id
+  tenant_name   = "mystiradev"
 
   pwa_redirect_uris = [
     "http://localhost:5173/auth/callback",
@@ -278,6 +279,35 @@ module "azure_ad_b2c" {
   ]
 }
 ```
+
+### Multi-Environment External ID Strategy
+
+For complete isolation, create separate External ID tenants per environment:
+
+| Environment | Tenant Domain | Purpose |
+|-------------|---------------|---------|
+| Dev | `mystiradev.ciamlogin.com` | Development testing |
+| Staging | `mystirastaging.ciamlogin.com` | Pre-production validation |
+| Prod | `mystira.ciamlogin.com` | Production |
+
+### Setting Up External ID Tenant
+
+1. **Create tenant** in Azure Portal:
+   - Microsoft Entra ID → Manage tenants → Create
+   - Select "External" configuration
+   - Set organization name and domain
+
+2. **Configure sign-in experience**:
+   - Choose authentication methods (Email + password, Email + OTP, Social)
+   - Customize branding (logo, colors, background)
+   - Configure user attributes to collect
+
+3. **Add identity providers**:
+   - Google: Create OAuth credentials, add to External Identities
+   - Facebook: Create app, configure in External Identities
+   - Custom OIDC: Configure discovery endpoint
+
+See [Entra External ID Module Documentation](../../infra/terraform/modules/entra-external-id/README.md) for detailed setup instructions.
 
 ## Troubleshooting
 
@@ -314,7 +344,8 @@ az ad app show --id <client-id> --query appRoles
 ## Related Documentation
 
 - [Terraform Entra ID Module](../../infra/terraform/modules/entra-id/)
+- [Terraform Entra External ID Module](../../infra/terraform/modules/entra-external-id/)
 - [Secrets Management](./secrets-management.md)
 - [Infrastructure Guide](./infrastructure.md)
 - [Microsoft Entra ID Documentation](https://learn.microsoft.com/en-us/entra/identity/)
-- [Azure AD B2C Documentation](https://learn.microsoft.com/en-us/azure/active-directory-b2c/)
+- [Microsoft Entra External ID Documentation](https://learn.microsoft.com/en-us/entra/external-id/)

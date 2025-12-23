@@ -4,9 +4,6 @@
 # NOTE: Microsoft Entra External ID tenant creation must be done manually
 # or via Azure CLI. This module manages app registrations within an existing
 # external tenant.
-#
-# IMPORTANT: As of May 1, 2025, Azure AD B2C is no longer available for new
-# customers. This module has been updated for Microsoft Entra External ID.
 
 terraform {
   required_version = ">= 1.5.0"

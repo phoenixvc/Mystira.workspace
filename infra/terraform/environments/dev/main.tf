@@ -38,8 +38,8 @@ variable "location" {
   default     = "southafricanorth"
 }
 
-variable "b2c_tenant_id" {
-  description = "Azure AD B2C tenant ID (optional - set when B2C tenant is created)"
+variable "external_id_tenant_id" {
+  description = "Microsoft Entra External ID tenant ID (optional - set when External ID tenant is created)"
   type        = string
   default     = ""
 }
@@ -704,15 +704,15 @@ resource "azurerm_key_vault_secret" "admin_entra_ui_client_id" {
   tags         = { AutoPopulated = "true", Source = "entra-id-module" }
 }
 
-# Azure AD B2C Consumer Authentication
-# Note: B2C tenant must be created manually first, then set b2c_tenant_id variable
-module "azure_ad_b2c" {
-  source = "../../modules/azure-ad-b2c"
-  count  = var.b2c_tenant_id != "" ? 1 : 0
+# Microsoft Entra External ID Consumer Authentication
+# Note: External ID tenant must be created manually first, then set external_id_tenant_id variable
+module "entra_external_id" {
+  source = "../../modules/entra-external-id"
+  count  = var.external_id_tenant_id != "" ? 1 : 0
 
-  environment     = "dev"
-  b2c_tenant_id   = var.b2c_tenant_id
-  b2c_tenant_name = "mystirab2cdev"
+  environment   = "dev"
+  tenant_id     = var.external_id_tenant_id
+  tenant_name   = "mystiradev"
 
   pwa_redirect_uris = [
     "http://localhost:5173/auth/callback",

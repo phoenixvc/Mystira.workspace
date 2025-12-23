@@ -47,7 +47,7 @@ terraform/
     ├── admin-api/        # Admin API infrastructure
     ├── dns/              # DNS zone management
     ├── entra-id/         # Entra ID (Azure AD) authentication
-    ├── azure-ad-b2c/     # Azure AD B2C consumer auth
+    ├── entra-external-id/# Entra External ID (consumer auth)
     └── shared/           # Shared infrastructure modules
         ├── postgresql/   # Shared PostgreSQL (core-rg)
         ├── redis/        # Shared Redis (core-rg)
