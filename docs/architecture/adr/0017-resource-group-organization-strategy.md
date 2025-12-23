@@ -428,16 +428,18 @@ mys-{env}-chain-rg-{region}     # Chain service
 
 ### Current State Assessment
 
-The infrastructure is **NOT yet aligned** with this ADR. Analysis of current Terraform and CI/CD reveals:
+The infrastructure is **partially aligned** with this ADR. Dev environment Terraform has been updated (Phase 2). Remaining work includes applying changes, Key Vault migration, and updating staging/prod environments.
+
+**Analysis (updated 2025-12-23):**
 
 | Component | Current State | Required State | Gap |
 |-----------|---------------|----------------|-----|
-| **Resource Groups/Env** | 1 (core-rg) | 6 (core + 5 service) | ❌ Missing 5 RGs |
-| **ACR Location** | `mys-dev-core-rg-san` | `mys-shared-acr-rg-san` | ❌ Wrong RG |
-| **Communication Svc** | Not deployed | `mys-shared-comms-rg-glob` | ❌ Not created |
-| **Service Key Vaults** | All in core-rg | Each in service-rg | ❌ Wrong RG |
-| **Module RG Params** | Modules accept params | ✅ | ✅ Ready |
-| **CI/CD Workflows** | Hardcoded to core-rg | Multi-RG support | ⚠️ Needs update |
+| **Resource Groups/Env** | 6 (core + 5 service) | 6 (core + 5 service) | ✅ Defined in dev/main.tf |
+| **ACR Location** | `mys-shared-acr-rg-san` | `mys-shared-acr-rg-san` | ✅ Moved to shared module |
+| **Communication Svc** | `mys-shared-comms-rg-glob` | `mys-shared-comms-rg-glob` | ✅ Module created |
+| **Service Key Vaults** | All in core-rg | Each in service-rg | ⚠️ Pending migration |
+| **Module RG Params** | Modules use service RGs | ✅ | ✅ Updated |
+| **CI/CD Workflows** | Documented multi-RG | Multi-RG support | ✅ Updated import logic |
 
 ### Files Requiring Changes
 
@@ -643,22 +645,22 @@ tags = {
 ### Phase 1: Preparation
 - [ ] Backup all Key Vault secrets (all environments)
 - [ ] Document current RBAC assignments
-- [ ] Create new Terraform modules:
-  - [ ] `modules/shared/container-registry/`
-  - [ ] `modules/shared/communications/`
+- [x] Create new Terraform modules:
+  - [x] `modules/shared/container-registry/` - Created with SKU support, geo-replication
+  - [x] `modules/shared/communications/` - Created with Email service, domain management
 
 ### Phase 2: Development Environment
-- [ ] Add 5 new resource group definitions to `dev/main.tf`
-- [ ] Create `mys-shared-acr-rg-san` and `mys-shared-comms-rg-glob`
-- [ ] Move ACR resource to shared ACR module
-- [ ] Update module calls to use service-specific RGs
+- [x] Add 5 new resource group definitions to `dev/main.tf`
+- [x] Create `mys-shared-acr-rg-san` and `mys-shared-comms-rg-glob`
+- [x] Move ACR resource to shared ACR module (`modules/shared/container-registry/`)
+- [x] Update module calls to use service-specific RGs
+- [x] Update CI/CD workflows with service RG documentation and ACR module import
 - [ ] Run `terraform plan` - verify changes
 - [ ] Run `terraform apply` - creates new RGs
 - [ ] Create new Key Vaults in service RGs
 - [ ] Copy secrets from old to new Key Vaults
 - [ ] Update workload identity RBAC for cross-RG access
 - [ ] Test all services connect to correct Key Vaults
-- [ ] Update CI/CD workflows with service RG variables
 
 ### Phase 3: Staging Environment
 - [ ] Update `staging/main.tf` with service RGs

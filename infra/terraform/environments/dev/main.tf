@@ -69,9 +69,14 @@ locals {
     Project     = "Mystira"
     ManagedBy   = "terraform"
   }
+  region_code = "san"
 }
 
-# Resource Group
+# =============================================================================
+# Resource Groups (ADR-0017: Resource Group Organization Strategy)
+# =============================================================================
+
+# Tier 1: Core Resource Group (shared infrastructure)
 resource "azurerm_resource_group" "main" {
   name     = "mys-dev-core-rg-san"
   location = var.location
@@ -83,6 +88,63 @@ resource "azurerm_resource_group" "main" {
     ManagedBy   = "terraform"
   }
 }
+
+# Tier 2: Service-Specific Resource Groups
+resource "azurerm_resource_group" "chain" {
+  name     = "mys-dev-chain-rg-${local.region_code}"
+  location = var.location
+  tags     = merge(local.common_tags, { Service = "chain" })
+}
+
+resource "azurerm_resource_group" "publisher" {
+  name     = "mys-dev-publisher-rg-${local.region_code}"
+  location = var.location
+  tags     = merge(local.common_tags, { Service = "publisher" })
+}
+
+resource "azurerm_resource_group" "story" {
+  name     = "mys-dev-story-rg-${local.region_code}"
+  location = var.location
+  tags     = merge(local.common_tags, { Service = "story-generator" })
+}
+
+resource "azurerm_resource_group" "admin" {
+  name     = "mys-dev-admin-rg-${local.region_code}"
+  location = var.location
+  tags     = merge(local.common_tags, { Service = "admin-api" })
+}
+
+resource "azurerm_resource_group" "app" {
+  name     = "mys-dev-app-rg-${local.region_code}"
+  location = var.location
+  tags     = merge(local.common_tags, { Service = "app" })
+}
+
+# Tier 3: Cross-Environment Shared Resource Groups
+# Note: These are created once (in dev) and referenced by other environments
+resource "azurerm_resource_group" "shared_acr" {
+  name     = "mys-shared-acr-rg-${local.region_code}"
+  location = var.location
+  tags = merge(local.common_tags, {
+    Environment = "shared"
+    Service     = "acr"
+    Shared      = "all-environments"
+  })
+}
+
+resource "azurerm_resource_group" "shared_comms" {
+  name     = "mys-shared-comms-rg-glob"
+  location = var.location
+  tags = merge(local.common_tags, {
+    Environment = "shared"
+    Service     = "communications"
+    Shared      = "all-environments"
+  })
+}
+
+# =============================================================================
+# Networking (in core-rg)
+# =============================================================================
 
 # Virtual Network
 resource "azurerm_virtual_network" "main" {
@@ -156,34 +218,42 @@ resource "azurerm_subnet" "admin_api" {
   address_prefixes     = ["10.0.6.0/24"]
 }
 
-# Shared Azure Container Registry
-# Note: This ACR is shared across all environments (dev, staging, prod)
-# Use image tags/repos to separate environments: dev/*, staging/*, prod/*
-# RBAC controls access: dev can push to dev/*, CD pipeline pushes to staging/* and prod/*
-resource "azurerm_container_registry" "shared" {
-  name                = "myssharedacr"
-  resource_group_name = azurerm_resource_group.main.name
-  location            = azurerm_resource_group.main.location
-  sku                 = "Standard"
-  admin_enabled       = false
+# =============================================================================
+# Shared Container Registry (in shared-acr-rg, cross-environment)
+# =============================================================================
+module "shared_acr" {
+  source = "../../modules/shared/container-registry"
 
-  tags = {
-    Environment = "shared"
-    Project     = "Mystira"
-    Service     = "core"
-    ManagedBy   = "terraform"
-    Shared      = "all-environments"
-  }
+  resource_group_name = azurerm_resource_group.shared_acr.name
+  location            = azurerm_resource_group.shared_acr.location
+  acr_name            = "myssharedacr"
+  sku                 = "Standard"
+
+  tags = local.common_tags
 }
 
-# Chain Infrastructure
+# =============================================================================
+# Shared Communications (in shared-comms-rg, cross-environment)
+# =============================================================================
+module "shared_comms" {
+  source = "../../modules/shared/communications"
+
+  resource_group_name = azurerm_resource_group.shared_comms.name
+  location            = azurerm_resource_group.shared_comms.location
+  name_prefix         = "mys-shared"
+  data_location       = "Africa"
+
+  tags = local.common_tags
+}
+
+# Chain Infrastructure (in chain-rg per ADR-0017)
 module "chain" {
   source = "../../modules/chain"
 
   environment                       = "dev"
   location                          = var.location
   region_code                       = "san"
-  resource_group_name               = azurerm_resource_group.main.name
+  resource_group_name               = azurerm_resource_group.chain.name
   chain_node_count                  = 1
   chain_vm_size                     = "Standard_B2s"
   chain_storage_size_gb             = 100 # Premium file shares require minimum 100 GB
@@ -196,14 +266,14 @@ module "chain" {
   }
 }
 
-# Publisher Infrastructure
+# Publisher Infrastructure (in publisher-rg per ADR-0017)
 module "publisher" {
   source = "../../modules/publisher"
 
   environment                       = "dev"
   location                          = var.location
   region_code                       = "san"
-  resource_group_name               = azurerm_resource_group.main.name
+  resource_group_name               = azurerm_resource_group.publisher.name
   publisher_replica_count           = 1
   vnet_id                           = azurerm_virtual_network.main.id
   subnet_id                         = azurerm_subnet.publisher.id
@@ -289,14 +359,14 @@ module "shared_monitoring" {
   }
 }
 
-# Story-Generator Infrastructure
+# Story-Generator Infrastructure (in story-rg per ADR-0017)
 module "story_generator" {
   source = "../../modules/story-generator"
 
   environment         = "dev"
   location            = var.location
   region_code         = "san"
-  resource_group_name = azurerm_resource_group.main.name
+  resource_group_name = azurerm_resource_group.story.name
   vnet_id             = azurerm_virtual_network.main.id
   subnet_id           = azurerm_subnet.story_generator.id
 
@@ -313,14 +383,14 @@ module "story_generator" {
   }
 }
 
-# Admin API Infrastructure
+# Admin API Infrastructure (in admin-rg per ADR-0017)
 module "admin_api" {
   source = "../../modules/admin-api"
 
   environment                       = "dev"
   location                          = var.location
   region_code                       = "san"
-  resource_group_name               = azurerm_resource_group.main.name
+  resource_group_name               = azurerm_resource_group.admin.name
   vnet_id                           = azurerm_virtual_network.main.id
   subnet_id                         = azurerm_subnet.admin_api.id
   shared_log_analytics_workspace_id = module.shared_monitoring.log_analytics_workspace_id
@@ -356,7 +426,7 @@ module "identity" {
 
   # AKS to ACR access
   aks_principal_id = azurerm_kubernetes_cluster.main.identity[0].principal_id
-  acr_id           = azurerm_container_registry.shared.id
+  acr_id           = module.shared_acr.acr_id
 
   # Service identity configurations
   service_identities = {
@@ -496,11 +566,11 @@ output "publisher_nsg_id" {
 }
 
 output "acr_login_server" {
-  value = azurerm_container_registry.shared.login_server
+  value = module.shared_acr.acr_login_server
 }
 
 output "acr_name" {
-  value = azurerm_container_registry.shared.name
+  value = module.shared_acr.acr_name
 }
 
 # Shared Infrastructure Outputs
@@ -623,4 +693,68 @@ output "admin_api_key_vault_uri" {
 output "postgresql_aad_connection_template" {
   description = "PostgreSQL Azure AD connection string template"
   value       = module.shared_postgresql.aad_connection_string_template
+}
+
+# =============================================================================
+# Resource Group Outputs (ADR-0017)
+# =============================================================================
+
+output "resource_group_chain" {
+  description = "Chain service resource group name"
+  value       = azurerm_resource_group.chain.name
+}
+
+output "resource_group_publisher" {
+  description = "Publisher service resource group name"
+  value       = azurerm_resource_group.publisher.name
+}
+
+output "resource_group_story" {
+  description = "Story-Generator service resource group name"
+  value       = azurerm_resource_group.story.name
+}
+
+output "resource_group_admin" {
+  description = "Admin API service resource group name"
+  value       = azurerm_resource_group.admin.name
+}
+
+output "resource_group_app" {
+  description = "App (PWA/API) service resource group name"
+  value       = azurerm_resource_group.app.name
+}
+
+output "resource_group_shared_acr" {
+  description = "Shared ACR resource group name"
+  value       = azurerm_resource_group.shared_acr.name
+}
+
+output "resource_group_shared_comms" {
+  description = "Shared Communications resource group name"
+  value       = azurerm_resource_group.shared_comms.name
+}
+
+# =============================================================================
+# Shared Communications Outputs
+# =============================================================================
+
+output "communication_service_id" {
+  description = "Azure Communication Service ID"
+  value       = module.shared_comms.communication_service_id
+}
+
+output "communication_service_name" {
+  description = "Azure Communication Service name"
+  value       = module.shared_comms.communication_service_name
+}
+
+output "communication_service_connection_string" {
+  description = "Azure Communication Service connection string"
+  value       = module.shared_comms.communication_service_primary_connection_string
+  sensitive   = true
+}
+
+output "email_service_id" {
+  description = "Email Communication Service ID"
+  value       = module.shared_comms.email_service_id
 }

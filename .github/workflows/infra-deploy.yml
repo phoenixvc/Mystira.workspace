@@ -47,7 +47,14 @@ concurrency:
 env:
   TF_VERSION: "1.5.0"
   ENVIRONMENT: ${{ github.event.inputs.environment || 'dev' }}
+  # Resource Groups (see ADR-0017 for organization strategy)
+  # Tier 1: Core RG (shared infrastructure: VNet, AKS, PostgreSQL, Redis, Monitoring)
   AZURE_RESOURCE_GROUP: mys-${{ github.event.inputs.environment || 'dev' }}-core-rg-san
+  # Tier 2: Service RGs (service-specific resources per ADR-0017)
+  # - mys-{env}-chain-rg-san, mys-{env}-publisher-rg-san, mys-{env}-story-rg-san
+  # - mys-{env}-admin-rg-san, mys-{env}-app-rg-san
+  # Tier 3: Cross-environment shared RGs
+  # - mys-shared-acr-rg-san, mys-shared-comms-rg-glob
   AKS_CLUSTER_NAME: mys-${{ github.event.inputs.environment || 'dev' }}-core-aks-san
   ACR_NAME: myssharedacr
   DNS_ZONE: mystira.app
@@ -451,16 +458,20 @@ jobs:
           fi
 
           # Check if ACR exists in Azure but not in state (ACR is shared across environments)
+          # Note: ACR is now managed via module.shared_acr (see ADR-0017)
           if az acr show --name ${{ env.ACR_NAME }} &> /dev/null; then
             echo "ACR exists in Azure, checking if in state..."
-            if ! terraform state list 2>/dev/null | grep -q "azurerm_container_registry.shared"; then
+            # Check for both old direct resource and new module resource
+            if terraform state list 2>/dev/null | grep -q "module.shared_acr.azurerm_container_registry.shared"; then
+              echo "ACR already in state via shared_acr module"
+            elif terraform state list 2>/dev/null | grep -q "azurerm_container_registry.shared"; then
+              echo "ACR in state as direct resource - migration to module may be needed"
+            else
               # Get the resource group where ACR actually exists
               ACR_RG=$(az acr show --name ${{ env.ACR_NAME }} --query resourceGroup -o tsv)
-              echo "ACR not in state, importing from resource group ${ACR_RG}..."
-              terraform import azurerm_container_registry.shared "/subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${ACR_RG}/providers/Microsoft.ContainerRegistry/registries/${{ env.ACR_NAME }}"
-              echo "::notice::Imported existing ACR into Terraform state"
-            else
-              echo "ACR already in state"
+              echo "ACR not in state, importing from resource group ${ACR_RG} into shared_acr module..."
+              terraform import 'module.shared_acr.azurerm_container_registry.shared' "/subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${ACR_RG}/providers/Microsoft.ContainerRegistry/registries/${{ env.ACR_NAME }}"
+              echo "::notice::Imported existing ACR into Terraform state via shared_acr module"
             fi
           fi
 
