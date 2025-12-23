@@ -58,18 +58,20 @@ We will adopt a **pragmatic two-tier resource group strategy** that retains `cor
 ### Resource Group Structure
 
 ```text
-# Tier 1: Shared Infrastructure (existing core-rg, no migration needed)
-mys-{env}-core-rg-{region}          # VNet, Subnets, NSGs, AKS, ACR, PostgreSQL, Redis, Log Analytics
+# Tier 1: Shared Infrastructure (existing core-rg, extended)
+mys-{env}-core-rg-{region}          # VNet, AKS, PostgreSQL, Redis, Cosmos DB, Shared Storage, Log Analytics
 
-# Tier 2: Service-Specific (new, per service)
-mys-{env}-chain-rg-{region}         # Chain: Identity, Key Vault, Storage, App Insights
-mys-{env}-publisher-rg-{region}     # Publisher: Identity, Key Vault, Storage, Service Bus, App Insights
-mys-{env}-story-rg-{region}         # Story Generator: Identity, Key Vault, Storage, App Insights
+# Tier 2: Service-Specific (service compute & secrets only)
+mys-{env}-chain-rg-{region}         # Chain: Identity, Key Vault, App Insights
+mys-{env}-publisher-rg-{region}     # Publisher: Identity, Key Vault, Service Bus, App Insights
+mys-{env}-story-rg-{region}         # Story Generator: Identity, Key Vault, App Insights
 mys-{env}-admin-rg-{region}         # Admin API: Identity, Key Vault, App Insights
-mys-{env}-app-rg-{region}           # App: Cosmos DB, App Service, Static Web App, Storage, Key Vault, ACS
+mys-{env}-app-rg-{region}           # App: App Service, Static Web App, Key Vault, App Insights
 
-# Tier 3: Global/Shared (environment-independent)
+# Tier 3: Global/Shared (environment-independent, like ACR)
 mys-shared-terraform-rg-{region}    # Terraform state backend (existing)
+mys-shared-acr-rg-{region}          # Container Registry (existing, in core-rg currently)
+mys-shared-comms-rg-glob            # Communication Services, Email (cross-environment)
 mys-prod-dns-rg-glob                # DNS zones (global, prod only)
 mys-prod-frontdoor-rg-glob          # Front Door, WAF (global, prod only)
 ```
@@ -78,70 +80,65 @@ mys-prod-frontdoor-rg-glob          # Front Door, WAF (global, prod only)
 
 | Resource Type | Resource Group | Rationale |
 |--------------|----------------|-----------|
-| **Shared Infrastructure** | | |
+| **Shared Infrastructure (per-environment)** | | |
 | Virtual Network | `core-rg` | Core networking, rarely changes |
 | Subnets | `core-rg` | Part of VNet lifecycle |
 | NSGs (VNet-level) | `core-rg` | Network security rules |
 | Private DNS Zones | `core-rg` | VNet-linked DNS |
 | AKS Cluster | `core-rg` | Shared compute platform |
 | AKS Node Pools | `core-rg` | Part of AKS lifecycle |
-| Container Registry | `core-rg` | Container images (shared) |
 | PostgreSQL Server | `core-rg` | Shared database, long-lived |
 | PostgreSQL Databases | `core-rg` | Part of server lifecycle |
 | Redis Cache | `core-rg` | Shared cache, long-lived |
+| Cosmos DB Account | `core-rg` | Shared document store (used by App, Admin, future services) |
+| Shared Storage Account | `core-rg` | Media, content (used by multiple services) |
 | Log Analytics Workspace | `core-rg` | Central logging |
 | Action Groups | `core-rg` | Alert notifications |
 | **Chain Service** | | |
 | Chain Identity | `chain-rg` | Service-specific |
 | Chain Key Vault | `chain-rg` | Service secrets |
-| Chain Storage | `chain-rg` | Service data |
 | Chain App Insights | `chain-rg` | Service telemetry |
-| Chain NSG | `chain-rg` | Service network rules |
 | **Publisher Service** | | |
 | Publisher Identity | `publisher-rg` | Service-specific |
 | Publisher Key Vault | `publisher-rg` | Service secrets |
-| Publisher Storage | `publisher-rg` | Service data |
 | Publisher Service Bus | `publisher-rg` | Service messaging |
 | Publisher App Insights | `publisher-rg` | Service telemetry |
-| Publisher NSG | `publisher-rg` | Service network rules |
 | **Story Generator** | | |
 | Story Generator Identity | `story-rg` | Service-specific |
 | Story Generator Key Vault | `story-rg` | Service secrets |
-| Story Generator Storage | `story-rg` | Service data |
 | Story Generator App Insights | `story-rg` | Service telemetry |
 | **Admin API** | | |
 | Admin API Identity | `admin-rg` | Service-specific |
 | Admin API Key Vault | `admin-rg` | Service secrets |
 | Admin API App Insights | `admin-rg` | Service telemetry |
-| Admin API NSG | `admin-rg` | Service network rules |
 | **App (PWA + API)** | | |
 | App Service Plan | `app-rg` | API hosting |
 | App Service (API) | `app-rg` | .NET API backend |
 | Static Web App (PWA) | `app-rg` | Blazor WASM frontend |
-| Cosmos DB Account | `app-rg` | App document store |
-| App Storage Account | `app-rg` | Media, avatars, content |
 | App Key Vault | `app-rg` | App secrets |
 | App Insights | `app-rg` | App telemetry |
-| Communication Services | `app-rg` | Email/SMS |
-| Email Communication Svc | `app-rg` | Email sending |
 | Azure Bot | `app-rg` | Teams integration (optional) |
-| **Global Resources** | | |
+| **Cross-Environment Shared (like ACR)** | | |
+| Container Registry | `shared-acr-rg` | Container images (all envs) |
+| Communication Services | `shared-comms-rg` | Email/SMS (all envs) |
+| Email Communication Svc | `shared-comms-rg` | Email sending (all envs) |
+| Terraform State Storage | `shared-terraform-rg` | IaC state |
+| **Global Resources (prod only)** | | |
 | Front Door | `frontdoor-rg` | Global routing |
 | WAF Policy | `frontdoor-rg` | Security policy |
 | DNS Zone | `dns-rg` | Domain management |
-| Terraform State Storage | `terraform-rg` | IaC state |
 
 ### Complete Resource Group Inventory
 
 #### Development Environment
 
 ```text
-mys-dev-core-rg-san         # Shared: VNet, AKS, PostgreSQL, Redis, ACR, Log Analytics
-mys-dev-chain-rg-san        # Chain service resources
-mys-dev-publisher-rg-san    # Publisher service resources
-mys-dev-story-rg-san        # Story Generator resources
-mys-dev-admin-rg-san        # Admin API resources
-mys-dev-app-rg-san          # App: PWA, API, Cosmos DB, Storage, ACS
+mys-dev-core-rg-san         # Shared: VNet, AKS, PostgreSQL, Redis, Cosmos DB, Storage, Log Analytics
+mys-dev-chain-rg-san        # Chain: Identity, Key Vault, App Insights
+mys-dev-publisher-rg-san    # Publisher: Identity, Key Vault, Service Bus, App Insights
+mys-dev-story-rg-san        # Story Generator: Identity, Key Vault, App Insights
+mys-dev-admin-rg-san        # Admin API: Identity, Key Vault, App Insights
+mys-dev-app-rg-san          # App: App Service, Static Web App, Key Vault, App Insights
 ```
 
 #### Staging Environment
@@ -164,15 +161,19 @@ mys-prod-publisher-rg-san
 mys-prod-story-rg-san
 mys-prod-admin-rg-san
 mys-prod-app-rg-san
-mys-prod-frontdoor-rg-glob    # Global resources
-mys-prod-dns-rg-glob          # Global resources
+mys-prod-frontdoor-rg-glob    # Global edge/CDN
+mys-prod-dns-rg-glob          # DNS zones
 ```
 
-#### Shared (Environment-Independent)
+#### Cross-Environment Shared (like ACR)
 
 ```text
 mys-shared-terraform-rg-san   # Existing: Terraform state
+mys-shared-acr-rg-san         # Container Registry (currently in dev core-rg)
+mys-shared-comms-rg-glob      # Communication Services, Email Service
 ```
+
+**Note**: Cross-environment resources follow the pattern `mys-shared-{purpose}-rg-{region}` and are used by all environments (dev, staging, prod). Similar to how ACR uses image tags to separate environments, these resources use configuration/data separation rather than resource duplication.
 
 ### Naming Convention
 
@@ -186,15 +187,38 @@ Where project values for resource groups are:
 
 | Project Code | Purpose |
 |-------------|---------|
-| `core` | Shared infrastructure (VNet, AKS, databases, monitoring) |
+| `core` | Shared infrastructure (VNet, AKS, databases, Cosmos DB, Storage, monitoring) |
 | `chain` | Chain service (blockchain/ledger) |
 | `publisher` | Publisher service (content publishing) |
 | `story` | Story Generator service |
 | `admin` | Admin API service |
-| `app` | App service (PWA + API, Cosmos DB, Storage, ACS) |
+| `app` | App service (PWA + API compute) |
+| `acr` | Container Registry (cross-environment) |
+| `comms` | Communication Services (cross-environment) |
 | `frontdoor` | Global edge/CDN |
 | `dns` | DNS management |
 | `terraform` | IaC state |
+
+### Cross-Environment Resource Sharing
+
+Some resources are shared across all environments (dev, staging, prod) to reduce costs and simplify management:
+
+| Resource | Pattern | Separation Strategy |
+|----------|---------|---------------------|
+| Container Registry (ACR) | `mys-shared-acr-rg-san` | Image tags: `dev/*`, `staging/*`, `prod/*` |
+| Communication Services | `mys-shared-comms-rg-glob` | Configuration per environment |
+| Email Service | `mys-shared-comms-rg-glob` | Sender addresses per environment |
+| Terraform State | `mys-shared-terraform-rg-san` | State files: `dev/`, `staging/`, `prod/` |
+
+**Why share these resources?**
+
+1. **ACR**: Images are environment-agnostic; tags provide separation. One registry reduces costs.
+2. **Communication Services**: Email/SMS infrastructure is stateless; configuration determines behavior.
+3. **Terraform State**: Single backend with environment-keyed state files.
+
+**RBAC for shared resources:**
+- Platform team has Contributor access
+- Service teams have Reader access (or specific role for pushing images to ACR)
 
 ## Rationale
 
@@ -365,6 +389,27 @@ resource "azurerm_resource_group" "app" {
   name     = "mys-${var.environment}-app-rg-${local.region_code}"
   location = var.location
   tags     = merge(local.common_tags, { Service = "app" })
+}
+
+# Cross-environment shared RGs (create once, typically in a shared workspace)
+resource "azurerm_resource_group" "shared_acr" {
+  count    = var.environment == "dev" ? 1 : 0  # Only create once
+  name     = "mys-shared-acr-rg-${local.region_code}"
+  location = var.location
+  tags     = merge(local.common_tags, {
+    Environment = "shared"
+    Service     = "acr"
+  })
+}
+
+resource "azurerm_resource_group" "shared_comms" {
+  count    = var.environment == "dev" ? 1 : 0  # Only create once
+  name     = "mys-shared-comms-rg-glob"
+  location = var.location  # Logical location, resource is global
+  tags     = merge(local.common_tags, {
+    Environment = "shared"
+    Service     = "communications"
+  })
 }
 ```
 
