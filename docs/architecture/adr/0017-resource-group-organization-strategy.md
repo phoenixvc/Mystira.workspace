@@ -66,6 +66,7 @@ mys-{env}-chain-rg-{region}         # Chain: Identity, Key Vault, Storage, App I
 mys-{env}-publisher-rg-{region}     # Publisher: Identity, Key Vault, Storage, Service Bus, App Insights
 mys-{env}-story-rg-{region}         # Story Generator: Identity, Key Vault, Storage, App Insights
 mys-{env}-admin-rg-{region}         # Admin API: Identity, Key Vault, App Insights
+mys-{env}-app-rg-{region}           # App: Cosmos DB, App Service, Static Web App, Storage, Key Vault, ACS
 
 # Tier 3: Global/Shared (environment-independent)
 mys-shared-terraform-rg-{region}    # Terraform state backend (existing)
@@ -113,6 +114,17 @@ mys-prod-frontdoor-rg-glob          # Front Door, WAF (global, prod only)
 | Admin API Key Vault | `admin-rg` | Service secrets |
 | Admin API App Insights | `admin-rg` | Service telemetry |
 | Admin API NSG | `admin-rg` | Service network rules |
+| **App (PWA + API)** | | |
+| App Service Plan | `app-rg` | API hosting |
+| App Service (API) | `app-rg` | .NET API backend |
+| Static Web App (PWA) | `app-rg` | Blazor WASM frontend |
+| Cosmos DB Account | `app-rg` | App document store |
+| App Storage Account | `app-rg` | Media, avatars, content |
+| App Key Vault | `app-rg` | App secrets |
+| App Insights | `app-rg` | App telemetry |
+| Communication Services | `app-rg` | Email/SMS |
+| Email Communication Svc | `app-rg` | Email sending |
+| Azure Bot | `app-rg` | Teams integration (optional) |
 | **Global Resources** | | |
 | Front Door | `frontdoor-rg` | Global routing |
 | WAF Policy | `frontdoor-rg` | Security policy |
@@ -129,6 +141,7 @@ mys-dev-chain-rg-san        # Chain service resources
 mys-dev-publisher-rg-san    # Publisher service resources
 mys-dev-story-rg-san        # Story Generator resources
 mys-dev-admin-rg-san        # Admin API resources
+mys-dev-app-rg-san          # App: PWA, API, Cosmos DB, Storage, ACS
 ```
 
 #### Staging Environment
@@ -139,6 +152,7 @@ mys-staging-chain-rg-san
 mys-staging-publisher-rg-san
 mys-staging-story-rg-san
 mys-staging-admin-rg-san
+mys-staging-app-rg-san
 ```
 
 #### Production Environment
@@ -149,6 +163,7 @@ mys-prod-chain-rg-san
 mys-prod-publisher-rg-san
 mys-prod-story-rg-san
 mys-prod-admin-rg-san
+mys-prod-app-rg-san
 mys-prod-frontdoor-rg-glob    # Global resources
 mys-prod-dns-rg-glob          # Global resources
 ```
@@ -172,10 +187,11 @@ Where project values for resource groups are:
 | Project Code | Purpose |
 |-------------|---------|
 | `core` | Shared infrastructure (VNet, AKS, databases, monitoring) |
-| `chain` | Chain service |
-| `publisher` | Publisher service |
+| `chain` | Chain service (blockchain/ledger) |
+| `publisher` | Publisher service (content publishing) |
 | `story` | Story Generator service |
 | `admin` | Admin API service |
+| `app` | App service (PWA + API, Cosmos DB, Storage, ACS) |
 | `frontdoor` | Global edge/CDN |
 | `dns` | DNS management |
 | `terraform` | IaC state |
@@ -242,14 +258,14 @@ With service-specific RGs:
 3. ✅ **Cost visibility**: Track spending by service
 4. ✅ **Blast radius**: Service failures/deletions don't affect core
 5. ✅ **Team autonomy**: Service teams manage their own RGs
-6. ✅ **Simpler than full split**: Only 5 RGs per env (not 8+)
+6. ✅ **Simpler than full split**: Only 6 RGs per env (not 8+)
 
 ### Negative
 
 1. ⚠️ **Partial isolation**: Core RG still has mixed resources
 2. ⚠️ **Service resources need migration**: Key Vaults, Storage, etc. must move
 3. ⚠️ **Cross-RG references**: Need explicit resource IDs for dependencies
-4. ⚠️ **More RGs to manage**: Increases from 4 to ~17 RGs total
+4. ⚠️ **More RGs to manage**: Increases from 4 to ~20 RGs total (6 per env × 3 + shared/global)
 
 ### Mitigations
 
@@ -343,6 +359,12 @@ resource "azurerm_resource_group" "admin" {
   name     = "mys-${var.environment}-admin-rg-${local.region_code}"
   location = var.location
   tags     = merge(local.common_tags, { Service = "admin-api" })
+}
+
+resource "azurerm_resource_group" "app" {
+  name     = "mys-${var.environment}-app-rg-${local.region_code}"
+  location = var.location
+  tags     = merge(local.common_tags, { Service = "app" })
 }
 ```
 
