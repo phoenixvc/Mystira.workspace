@@ -1,14 +1,17 @@
 # Shared Resources Usage Guide
 
-This guide explains how to use shared infrastructure resources (PostgreSQL, Redis, Monitoring) in the Mystira workspace.
+This guide explains how to use shared infrastructure resources (PostgreSQL, Redis, Service Bus, Monitoring) in the Mystira workspace.
 
 ## Overview
 
+Per [ADR-0017](../architecture/adr/0017-resource-group-organization-strategy.md), shared resources are deployed to `core-rg` and used by all services in their respective service RGs.
+
 Shared resources provide:
 
-- **Cost efficiency**: Single database/cache instance shared across services
+- **Cost efficiency**: Single database/cache/messaging instance shared across services
 - **Centralized management**: Unified backup, monitoring, and maintenance
 - **Simplified networking**: Single VNet integration point
+- **RBAC isolation**: Each service has specific access via identity module
 
 ## Shared PostgreSQL
 
@@ -168,6 +171,82 @@ resource "azurerm_key_vault_secret" "story_generator_redis" {
   name         = "redis-connection-string"
   value        = module.shared_redis.primary_connection_string
   key_vault_id = module.story_generator.key_vault_id
+}
+```
+
+## Shared Service Bus
+
+Per [ADR-0017](../architecture/adr/0017-resource-group-organization-strategy.md), Service Bus is shared in `core-rg` and used by publisher, admin-api, and app services.
+
+### Configuration
+
+The shared Service Bus module creates a namespace with queues and topics:
+
+```hcl
+module "shared_servicebus" {
+  source = "../../modules/shared/servicebus"
+
+  environment         = "dev"
+  location            = "southafricanorth"
+  resource_group_name = azurerm_resource_group.main.name
+  sku                 = "Standard"  # Premium in prod
+
+  queues = {
+    "publisher-events" = {
+      max_delivery_count = 3
+      default_message_ttl = "P1D"
+      dead_lettering_on_message_expiration = true
+    }
+    "admin-notifications" = { ... }
+    "app-events" = { ... }
+  }
+}
+```
+
+### Connection Strings
+
+#### For .NET Applications (Azure.Messaging.ServiceBus)
+
+```hcl
+output "servicebus_connection_string" {
+  value     = module.shared_servicebus.default_primary_connection_string
+  sensitive = true
+}
+```
+
+Format: `Endpoint=sb://{namespace}.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey={key}`
+
+#### For TypeScript/Node.js Applications
+
+```typescript
+import { ServiceBusClient } from "@azure/service-bus";
+
+const client = new ServiceBusClient(connectionString);
+const sender = client.createSender("publisher-events");
+```
+
+### RBAC Access
+
+Services need explicit RBAC for Service Bus access via the identity module:
+
+```hcl
+service_identities = {
+  "publisher" = {
+    principal_id               = module.publisher.identity_principal_id
+    enable_servicebus_sender   = true
+    enable_servicebus_receiver = true
+    servicebus_namespace_id    = module.shared_servicebus.namespace_id
+  }
+}
+```
+
+### Storing Connection Strings in Key Vault
+
+```hcl
+resource "azurerm_key_vault_secret" "publisher_servicebus" {
+  name         = "servicebus-connection-string"
+  value        = module.shared_servicebus.default_primary_connection_string
+  key_vault_id = module.publisher.key_vault_id
 }
 ```
 
@@ -381,6 +460,8 @@ spec:
 ## Related Documentation
 
 - [Infrastructure Guide](./infrastructure.md)
-- [ADR-0001: Infrastructure Organization](./architecture/adr/0001-infrastructure-organization-hybrid-approach.md)
+- [ADR-0001: Infrastructure Organization](../architecture/adr/0001-infrastructure-organization-hybrid-approach.md)
+- [ADR-0017: Resource Group Organization Strategy](../architecture/adr/0017-resource-group-organization-strategy.md)
 - [Azure PostgreSQL Flexible Server Documentation](https://learn.microsoft.com/en-us/azure/postgresql/flexible-server/)
 - [Azure Cache for Redis Documentation](https://learn.microsoft.com/en-us/azure/azure-cache-for-redis/)
+- [Azure Service Bus Documentation](https://learn.microsoft.com/en-us/azure/service-bus-messaging/)

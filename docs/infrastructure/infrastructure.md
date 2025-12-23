@@ -49,11 +49,18 @@ Mystira.workspace/
   - `chain/` - Chain service infrastructure (VMs, networking, storage)
   - `publisher/` - Publisher service infrastructure
   - `story-generator/` - Story-Generator service infrastructure
+  - `admin-api/` - Admin API service infrastructure
   - `dns/` - DNS zone and record management
+  - `entra-id/` - Entra ID (Azure AD) authentication
+  - `azure-ad-b2c/` - Azure AD B2C consumer authentication
   - `shared/` - Shared infrastructure modules:
-    - `postgresql/` - Shared PostgreSQL database
-    - `redis/` - Shared Redis cache
-    - `monitoring/` - Shared monitoring and logging
+    - `postgresql/` - Shared PostgreSQL database (in core-rg)
+    - `redis/` - Shared Redis cache (in core-rg)
+    - `monitoring/` - Shared Log Analytics and Application Insights (in core-rg)
+    - `servicebus/` - Shared Service Bus messaging (in core-rg)
+    - `container-registry/` - Shared ACR (in shared-acr-rg)
+    - `communications/` - Azure Communication Services (in shared-comms-rg)
+    - `identity/` - Cross-RG RBAC and workload identity federation
 
 - **Kubernetes Manifests** (`infra/kubernetes/`):
   - Base configurations for each service
@@ -307,37 +314,40 @@ Code → Azure App Service / Static Web App → Service
 
 ## Environments
 
+Resource groups follow a 3-tier organization per [ADR-0017: Resource Group Organization Strategy](../architecture/adr/0017-resource-group-organization-strategy.md).
+
 ### Development
 
-**Resource Groups** (per [ADR-0008: Azure Resource Naming Conventions](../architecture/adr/0008-azure-resource-naming-conventions.md)):
+**Tier 1: Core Resource Group** (shared infrastructure):
+- `mys-dev-core-rg-san` - VNet, AKS, PostgreSQL, Redis, Service Bus, Log Analytics
 
-- `mys-dev-core-rg-eus`
+**Tier 2: Service-Specific Resource Groups**:
+- `mys-dev-chain-rg-san` - Chain service (Identity, Key Vault, App Insights)
+- `mys-dev-publisher-rg-san` - Publisher service (Identity, Key Vault, App Insights)
+- `mys-dev-story-rg-san` - Story Generator (Identity, Key Vault, App Insights)
+- `mys-dev-admin-rg-san` - Admin API (Identity, Key Vault, App Insights)
+- `mys-dev-app-rg-san` - App (Static Web App, App Service)
 
-**Resources**:
-
-- AKS cluster: `mys-dev-core-aks-eus`
-- App Services: `mys-dev-mystira-api-eus`, `mys-dev-mystira-adminapi-eus`
-- Static Web App: `mys-dev-mystira-swa-eus`
-- Cosmos DB: `mys-dev-mystira-cosmos-eus`
+**Tier 3: Cross-Environment Shared** (created in dev, used by all):
+- `mys-shared-acr-rg-san` - Container Registry
+- `mys-shared-comms-rg-glob` - Communication Services, Email
 
 ### Staging
 
-**Resource Groups**:
-
-- `mys-staging-core-rg-eus`
-
-**Resources**: Similar structure with `staging` suffix
+**Tier 1**: `mys-staging-core-rg-san` - Same structure as dev
+**Tier 2**: `mys-staging-{service}-rg-san` - chain, publisher, story, admin, app
 
 ### Production
 
-**Resource Groups**:
+**Tier 1**: `mys-prod-core-rg-san` - Same structure, premium SKUs
+**Tier 2**: `mys-prod-{service}-rg-san` - chain, publisher, story, admin, app
 
-- `mys-prod-core-rg-eus`
-- `mys-prod-core-rg-glob` (DNS zone)
+**Production-specific**:
+- Premium Service Bus (zone redundant)
+- Higher capacity Redis and PostgreSQL
+- Dedicated node pools for chain and publisher workloads
 
-**Resources**: Production-grade with higher SKUs and redundancy
-
-**Note**: See [ADR-0008](../architecture/adr/0008-azure-resource-naming-conventions.md) for complete naming conventions and legacy resource mapping.
+**Note**: See [ADR-0008](../architecture/adr/0008-azure-resource-naming-conventions.md) for naming conventions and [ADR-0017](../architecture/adr/0017-resource-group-organization-strategy.md) for resource group organization.
 
 ## Getting Started
 
@@ -463,6 +473,8 @@ See individual README files:
 
 ## Shared Infrastructure Modules
 
+All shared modules are deployed to `core-rg` per [ADR-0017](../architecture/adr/0017-resource-group-organization-strategy.md).
+
 ### Shared PostgreSQL (`infra/terraform/modules/shared/postgresql/`)
 
 Provides a shared PostgreSQL Flexible Server for all services:
@@ -471,6 +483,7 @@ Provides a shared PostgreSQL Flexible Server for all services:
 - Cost-efficient multi-tenant database hosting
 - Configurable databases per service
 - Private DNS zone and VNet integration
+- Azure AD authentication support
 
 ### Shared Redis (`infra/terraform/modules/shared/redis/`)
 
@@ -478,8 +491,17 @@ Provides a shared Redis cache for all services:
 
 - Centralized caching layer
 - Configurable capacity and SKU
-- VNet integration for Premium tier
+- Standard SKU in dev/staging, upgrade to Premium for VNet integration
 - TLS enforcement
+
+### Shared Service Bus (`infra/terraform/modules/shared/servicebus/`)
+
+Provides a shared Service Bus namespace for cross-service messaging:
+
+- Central messaging infrastructure
+- Standard SKU in dev/staging, Premium in prod (zone redundant)
+- Configurable queues and topics
+- Used by publisher, admin-api, and app services
 
 ### Shared Monitoring (`infra/terraform/modules/shared/monitoring/`)
 
@@ -490,7 +512,31 @@ Provides centralized monitoring and logging:
 - Metric alerts and action groups
 - Unified observability across services
 
-**Usage**: Services can reference these shared modules or use dedicated instances as needed.
+### Shared Container Registry (`infra/terraform/modules/shared/container-registry/`)
+
+Provides a shared ACR for all environments (in `mys-shared-acr-rg-san`):
+
+- Single ACR for dev, staging, prod
+- Image tags separate environments (e.g., `dev/service:tag`)
+- Standard SKU, upgrade to Premium for geo-replication
+
+### Shared Communications (`infra/terraform/modules/shared/communications/`)
+
+Provides Azure Communication Services (in `mys-shared-comms-rg-glob`):
+
+- Email Communication Service
+- Cross-environment shared resource
+- Configurable sender addresses per environment
+
+### Shared Identity (`infra/terraform/modules/shared/identity/`)
+
+Manages cross-RG RBAC and workload identity:
+
+- AKS to ACR pull access
+- Service identities to Key Vault, PostgreSQL, Redis, Service Bus
+- Federated credentials for AKS workload identity
+
+**Usage**: Services reference these shared modules from their respective resource groups.
 
 ## Future Improvements
 
@@ -507,6 +553,7 @@ Provides centralized monitoring and logging:
 - [ADR-0002: Documentation Location Strategy](../architecture/adr/0002-documentation-location-strategy.md)
 - [ADR-0005: Service Networking and Communication](../architecture/adr/0005-service-networking-and-communication.md) - Network topology and service communication patterns
 - [ADR-0006: Admin API Repository Extraction](../architecture/adr/0006-admin-api-repository-extraction.md) - Repository structure changes
+- [ADR-0017: Resource Group Organization Strategy](../architecture/adr/0017-resource-group-organization-strategy.md) - 3-tier RG structure
 - [Environment Variables](../guides/environment-variables.md)
 - [Azure Setup Guide](../../infra/azure-setup.md)
 - [App Infrastructure README](../../packages/app/infrastructure/README.md)
