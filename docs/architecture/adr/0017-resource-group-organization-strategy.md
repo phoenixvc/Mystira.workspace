@@ -53,75 +53,78 @@ This includes:
 
 ## Decision
 
-We will adopt a **tiered resource group strategy** that separates resources by lifecycle, ownership, and security boundary:
+We will adopt a **pragmatic two-tier resource group strategy** that retains `core-rg` for shared infrastructure while extracting service-specific resources into dedicated RGs:
 
 ### Resource Group Structure
 
 ```text
-# Tier 1: Shared Infrastructure (long-lived, cross-service)
-mys-{env}-network-rg-{region}       # VNet, Subnets, NSGs, DNS
-mys-{env}-compute-rg-{region}       # AKS, ACR
-mys-{env}-data-rg-{region}          # PostgreSQL, Redis (shared databases)
-mys-{env}-monitor-rg-{region}       # Log Analytics, Action Groups
+# Tier 1: Shared Infrastructure (existing core-rg, no migration needed)
+mys-{env}-core-rg-{region}          # VNet, Subnets, NSGs, AKS, ACR, PostgreSQL, Redis, Log Analytics
 
-# Tier 2: Service-Specific (per service, independent lifecycle)
+# Tier 2: Service-Specific (new, per service)
 mys-{env}-chain-rg-{region}         # Chain: Identity, Key Vault, Storage, App Insights
 mys-{env}-publisher-rg-{region}     # Publisher: Identity, Key Vault, Storage, Service Bus, App Insights
 mys-{env}-story-rg-{region}         # Story Generator: Identity, Key Vault, Storage, App Insights
 mys-{env}-admin-rg-{region}         # Admin API: Identity, Key Vault, App Insights
 
 # Tier 3: Global/Shared (environment-independent)
-mys-shared-terraform-rg-{region}    # Terraform state backend
-mys-shared-acr-rg-{region}          # Container Registry (if separated from compute)
+mys-shared-terraform-rg-{region}    # Terraform state backend (existing)
 mys-prod-dns-rg-glob                # DNS zones (global, prod only)
 mys-prod-frontdoor-rg-glob          # Front Door, WAF (global, prod only)
-mys-shared-identity-rg-glob         # Entra ID apps (optional, if managed separately)
 ```
 
 ### Resource Allocation Matrix
 
 | Resource Type | Resource Group | Rationale |
 |--------------|----------------|-----------|
-| Virtual Network | `network-rg` | Core networking, rarely changes |
-| Subnets | `network-rg` | Part of VNet lifecycle |
-| NSGs (VNet-level) | `network-rg` | Network security rules |
-| Private DNS Zones | `network-rg` | VNet-linked DNS |
-| AKS Cluster | `compute-rg` | Shared compute platform |
-| AKS Node Pools | `compute-rg` | Part of AKS lifecycle |
-| Container Registry | `compute-rg` or `shared-acr-rg` | Container images |
-| PostgreSQL Server | `data-rg` | Shared database, long-lived |
-| PostgreSQL Databases | `data-rg` | Part of server lifecycle |
-| Redis Cache | `data-rg` | Shared cache, long-lived |
-| Log Analytics | `monitor-rg` | Central logging |
-| Action Groups | `monitor-rg` | Alert notifications |
+| **Shared Infrastructure** | | |
+| Virtual Network | `core-rg` | Core networking, rarely changes |
+| Subnets | `core-rg` | Part of VNet lifecycle |
+| NSGs (VNet-level) | `core-rg` | Network security rules |
+| Private DNS Zones | `core-rg` | VNet-linked DNS |
+| AKS Cluster | `core-rg` | Shared compute platform |
+| AKS Node Pools | `core-rg` | Part of AKS lifecycle |
+| Container Registry | `core-rg` | Container images (shared) |
+| PostgreSQL Server | `core-rg` | Shared database, long-lived |
+| PostgreSQL Databases | `core-rg` | Part of server lifecycle |
+| Redis Cache | `core-rg` | Shared cache, long-lived |
+| Log Analytics Workspace | `core-rg` | Central logging |
+| Action Groups | `core-rg` | Alert notifications |
+| **Chain Service** | | |
 | Chain Identity | `chain-rg` | Service-specific |
 | Chain Key Vault | `chain-rg` | Service secrets |
 | Chain Storage | `chain-rg` | Service data |
 | Chain App Insights | `chain-rg` | Service telemetry |
+| Chain NSG | `chain-rg` | Service network rules |
+| **Publisher Service** | | |
 | Publisher Identity | `publisher-rg` | Service-specific |
 | Publisher Key Vault | `publisher-rg` | Service secrets |
+| Publisher Storage | `publisher-rg` | Service data |
 | Publisher Service Bus | `publisher-rg` | Service messaging |
 | Publisher App Insights | `publisher-rg` | Service telemetry |
+| Publisher NSG | `publisher-rg` | Service network rules |
+| **Story Generator** | | |
 | Story Generator Identity | `story-rg` | Service-specific |
 | Story Generator Key Vault | `story-rg` | Service secrets |
+| Story Generator Storage | `story-rg` | Service data |
 | Story Generator App Insights | `story-rg` | Service telemetry |
+| **Admin API** | | |
 | Admin API Identity | `admin-rg` | Service-specific |
 | Admin API Key Vault | `admin-rg` | Service secrets |
 | Admin API App Insights | `admin-rg` | Service telemetry |
+| Admin API NSG | `admin-rg` | Service network rules |
+| **Global Resources** | | |
 | Front Door | `frontdoor-rg` | Global routing |
 | WAF Policy | `frontdoor-rg` | Security policy |
 | DNS Zone | `dns-rg` | Domain management |
-| Entra ID Apps | `identity-rg` or in tenant | Identity platform |
+| Terraform State Storage | `terraform-rg` | IaC state |
 
 ### Complete Resource Group Inventory
 
 #### Development Environment
 
 ```text
-mys-dev-network-rg-san      # VNet, Subnets, NSGs, Private DNS
-mys-dev-compute-rg-san      # AKS
-mys-dev-data-rg-san         # PostgreSQL, Redis
-mys-dev-monitor-rg-san      # Log Analytics, Action Groups
+mys-dev-core-rg-san         # Shared: VNet, AKS, PostgreSQL, Redis, ACR, Log Analytics
 mys-dev-chain-rg-san        # Chain service resources
 mys-dev-publisher-rg-san    # Publisher service resources
 mys-dev-story-rg-san        # Story Generator resources
@@ -131,10 +134,7 @@ mys-dev-admin-rg-san        # Admin API resources
 #### Staging Environment
 
 ```text
-mys-staging-network-rg-san
-mys-staging-compute-rg-san
-mys-staging-data-rg-san
-mys-staging-monitor-rg-san
+mys-staging-core-rg-san
 mys-staging-chain-rg-san
 mys-staging-publisher-rg-san
 mys-staging-story-rg-san
@@ -144,10 +144,7 @@ mys-staging-admin-rg-san
 #### Production Environment
 
 ```text
-mys-prod-network-rg-san
-mys-prod-compute-rg-san
-mys-prod-data-rg-san
-mys-prod-monitor-rg-san
+mys-prod-core-rg-san
 mys-prod-chain-rg-san
 mys-prod-publisher-rg-san
 mys-prod-story-rg-san
@@ -160,7 +157,6 @@ mys-prod-dns-rg-glob          # Global resources
 
 ```text
 mys-shared-terraform-rg-san   # Existing: Terraform state
-mys-shared-acr-rg-san         # Optional: If ACR separated from compute
 ```
 
 ### Naming Convention
@@ -175,10 +171,7 @@ Where project values for resource groups are:
 
 | Project Code | Purpose |
 |-------------|---------|
-| `network` | Networking resources |
-| `compute` | Compute platforms (AKS) |
-| `data` | Shared data stores |
-| `monitor` | Monitoring/observability |
+| `core` | Shared infrastructure (VNet, AKS, databases, monitoring) |
 | `chain` | Chain service |
 | `publisher` | Publisher service |
 | `story` | Story Generator service |
@@ -186,252 +179,257 @@ Where project values for resource groups are:
 | `frontdoor` | Global edge/CDN |
 | `dns` | DNS management |
 | `terraform` | IaC state |
-| `acr` | Container registry |
 
 ## Rationale
 
-### 1. Security Isolation (RBAC)
+### Why Keep `core-rg`?
 
-Separating services into dedicated resource groups enables:
+1. **No immediate migration** - Shared infrastructure stays in place
+2. **Already well-established** - VNet, AKS, databases are stable
+3. **Single platform team scope** - Platform team manages all shared infra in one RG
+4. **Cross-service dependencies** - Services depend on core infra; keeping it together is logical
+5. **Simpler Terraform** - No state migration for existing resources
 
-- **Least privilege**: Grant developers access only to their service's RG
-- **Secrets isolation**: Each service's Key Vault is in a separate RBAC scope
-- **Audit clarity**: Know exactly who accessed which service's resources
-- **Third-party access**: Grant external vendors access to specific services only
+### Why Extract Service RGs?
+
+1. **Service isolation** - Each service's secrets and resources are RBAC-isolated
+2. **Independent deployment** - Services can be deployed without touching core infra
+3. **Cost attribution** - Track spending per service
+4. **Team ownership** - Service teams own their RG
+5. **Reduced blast radius** - Deleting a service RG doesn't affect core infra
+
+### Security Isolation (RBAC)
 
 Example RBAC assignments:
 
 ```text
 Chain Team       → Contributor on mys-{env}-chain-rg-san
+                 → Reader on mys-{env}-core-rg-san (to see shared resources)
+
 Publisher Team   → Contributor on mys-{env}-publisher-rg-san
-Platform Team    → Contributor on mys-{env}-network-rg-san, compute-rg, data-rg, monitor-rg
-DevOps           → Reader on all RGs, Contributor on mys-shared-terraform-rg-san
+                 → Reader on mys-{env}-core-rg-san
+
+Platform Team    → Contributor on mys-{env}-core-rg-san
+                 → Reader on all service RGs
+
+DevOps           → Reader on all RGs
+                 → Contributor on mys-shared-terraform-rg-san
 ```
 
-### 2. Lifecycle Management
+### Lifecycle Management
 
-Resources are grouped by how often they change:
+| Tier | Change Frequency | Resources |
+|------|-----------------|-----------|
+| Core | Rarely (months) | VNet, AKS, PostgreSQL, Redis |
+| Services | Frequently (days/weeks) | Key Vaults, Storage, App Insights |
+| Global | Rarely | DNS, Front Door |
 
-| Tier | Change Frequency | Example |
-|------|-----------------|---------|
-| Network | Rarely (months) | VNets, Subnets |
-| Compute | Occasionally (weeks) | AKS versions, node pools |
-| Data | Rarely (months) | Database servers |
-| Monitor | Occasionally | Log retention, alerts |
-| Services | Frequently (daily) | Service configs, secrets |
+### Cost Attribution
 
-### 3. Cost Attribution
+With service-specific RGs:
 
-Each resource group enables:
-
-- **Cost tagging**: Tag RGs with cost center, owner, service
-- **Budget alerts**: Set budgets per service or infrastructure tier
-- **Chargeback**: Bill teams for their service resource consumption
-- **Optimization**: Identify high-cost services independently
-
-### 4. Blast Radius Reduction
-
-| Current (Single RG) | Proposed (Multi-RG) |
-|--------------------|---------------------|
-| Accidental RG delete = entire environment lost | Accidental delete = one service or component |
-| Terraform destroy affects everything | Terraform modules target specific RGs |
-| One bad deployment breaks all | Failures isolated to service |
-
-### 5. Azure Best Practices Alignment
-
-This approach aligns with:
-
-- **Azure Well-Architected Framework**: Recommends logical grouping by lifecycle
-- **Cloud Adoption Framework**: Suggests separating workloads for governance
-- **Landing Zone patterns**: Uses tiered resource organization
+- **Per-service budgets**: Set cost alerts per service RG
+- **Clear ownership**: Each RG tagged with owning team
+- **Chargeback**: Bill teams for their service resources
+- **Core costs shared**: Core infra costs split across services
 
 ## Consequences
 
 ### Positive
 
-1. ✅ **Security**: Fine-grained RBAC per service
-2. ✅ **Cost visibility**: Track spending by service/component
-3. ✅ **Blast radius**: Failures/deletions are isolated
-4. ✅ **Lifecycle alignment**: Resources grouped by change frequency
-5. ✅ **Team autonomy**: Teams manage their own RGs
-6. ✅ **Compliance**: Easier to audit and demonstrate isolation
-7. ✅ **Scalability**: Won't hit 800 resources/RG limit
-8. ✅ **Parallel deployment**: Services deploy independently
+1. ✅ **Minimal migration**: Core infra stays in place
+2. ✅ **Security**: Fine-grained RBAC per service
+3. ✅ **Cost visibility**: Track spending by service
+4. ✅ **Blast radius**: Service failures/deletions don't affect core
+5. ✅ **Team autonomy**: Service teams manage their own RGs
+6. ✅ **Simpler than full split**: Only 5 RGs per env (not 8+)
 
 ### Negative
 
-1. ⚠️ **Migration effort**: Moving existing resources requires planning
-2. ⚠️ **More RGs to manage**: Increases from 4 to ~28 RGs (9 per env × 3 + shared)
-3. ⚠️ **Cross-RG references**: Need explicit resource IDs for cross-RG dependencies
-4. ⚠️ **Terraform refactoring**: State migration and module updates required
-5. ⚠️ **Naming complexity**: More RGs means more names to remember
+1. ⚠️ **Partial isolation**: Core RG still has mixed resources
+2. ⚠️ **Service resources need migration**: Key Vaults, Storage, etc. must move
+3. ⚠️ **Cross-RG references**: Need explicit resource IDs for dependencies
+4. ⚠️ **More RGs to manage**: Increases from 4 to ~17 RGs total
 
 ### Mitigations
 
 | Risk | Mitigation |
 |------|------------|
-| Migration complexity | Phased approach, start with new services |
-| RG sprawl | Consistent naming, tagging, documentation |
 | Cross-RG references | Terraform data sources, output passing |
-| State migration | Use `terraform state mv`, test in dev first |
+| State migration | Phased approach, start with new resources |
+| Complexity | Clear naming, tagging, documentation |
 
 ## Alternatives Considered
 
-### Alternative 1: Keep Single RG per Environment (Rejected)
+### Alternative 1: Full 4-Tier Split (More Granular)
+
+**Approach**: Split core into network, compute, data, and monitor RGs.
+
+```text
+mys-{env}-network-rg-{region}   # VNet, Subnets, NSGs
+mys-{env}-compute-rg-{region}   # AKS, ACR
+mys-{env}-data-rg-{region}      # PostgreSQL, Redis
+mys-{env}-monitor-rg-{region}   # Log Analytics
+mys-{env}-chain-rg-{region}     # Chain service
+...
+```
+
+**Pros**:
+- Maximum granularity
+- Separate RBAC for networking vs databases
+
+**Cons**:
+- More RGs (8+ per environment)
+- More migration effort
+- Overkill for current team size
+
+**Decision**: Not selected - Unnecessary complexity for current scale.
+
+### Alternative 2: Keep Single RG (No Change)
 
 **Approach**: Continue with `mys-{env}-core-rg-{region}` for everything.
 
 **Pros**:
-- Simple, no migration needed
-- Fewer RGs to manage
-- All resources visible in one place
+- No migration needed
+- Simple
 
 **Cons**:
-- No isolation or fine-grained RBAC
+- No service isolation
 - Cannot track costs per service
 - Large blast radius
-- Approaching Azure limits
 
 **Decision**: Rejected - Does not address security and cost visibility needs.
 
-### Alternative 2: One RG per Resource Type (Rejected)
+### Alternative 3: One RG per Service Including Infrastructure
 
-**Approach**: Group by Azure resource type (all Key Vaults in one RG, all Storage in another).
-
-```text
-mys-{env}-keyvaults-rg-{region}
-mys-{env}-storage-rg-{region}
-mys-{env}-identities-rg-{region}
-```
+**Approach**: Each service gets its own VNet, AKS, databases.
 
 **Pros**:
-- Easy to find resources by type
-- Consistent management patterns
+- Complete isolation
 
 **Cons**:
-- Breaks service isolation (all Key Vaults accessible together)
-- Lifecycle mismatch (different services' Key Vaults change at different times)
-- No cost attribution per service
+- Massive duplication and cost
+- Network complexity
 
-**Decision**: Rejected - Does not provide service-level isolation.
-
-### Alternative 3: One RG per Service Only (Considered)
-
-**Approach**: Each service gets its own RG with everything, including networking and databases.
-
-```text
-mys-{env}-chain-rg-{region}      # VNet, AKS, databases, everything
-mys-{env}-publisher-rg-{region}  # Duplicate VNet, AKS, databases
-```
-
-**Pros**:
-- Complete isolation per service
-- Full autonomy for each team
-
-**Cons**:
-- Massive duplication (each service has its own VNet, AKS)
-- Much higher costs
-- Harder to manage shared dependencies
-- Networking complexity (VNet peering everywhere)
-
-**Decision**: Rejected - Too much duplication and cost.
-
-### Alternative 4: Hybrid with Fewer Tiers (Considered)
-
-**Approach**: Only 2 tiers - shared and service-specific.
-
-```text
-mys-{env}-shared-rg-{region}  # VNet, AKS, PostgreSQL, Redis, Monitoring
-mys-{env}-chain-rg-{region}
-mys-{env}-publisher-rg-{region}
-mys-{env}-story-rg-{region}
-mys-{env}-admin-rg-{region}
-```
-
-**Pros**:
-- Simpler than 4-tier approach
-- Still provides service isolation
-- Fewer RGs to manage
-
-**Cons**:
-- "Shared" becomes a dumping ground
-- Cannot grant network access without database access
-- Mixed lifecycles in shared RG
-
-**Decision**: Viable but less flexible. The 4-tier approach provides better separation.
+**Decision**: Rejected - Too expensive and complex.
 
 ## Implementation
 
-### Phase 1: New Services (Immediate)
+### Phase 1: Create Service RGs (Immediate)
 
-Deploy any new services to dedicated resource groups following this pattern.
-
-### Phase 2: Terraform Refactoring (Week 1-2)
-
-1. Create new resource group resources in Terraform
-2. Update module outputs to expose resource group names
-3. Add resource group parameters to all modules
+Create the new service resource groups in Terraform:
 
 ```hcl
-# Example: Updated module structure
+# In each environment's main.tf
+resource "azurerm_resource_group" "chain" {
+  name     = "mys-${var.environment}-chain-rg-${local.region_code}"
+  location = var.location
+  tags     = merge(local.common_tags, { Service = "chain" })
+}
+
+resource "azurerm_resource_group" "publisher" {
+  name     = "mys-${var.environment}-publisher-rg-${local.region_code}"
+  location = var.location
+  tags     = merge(local.common_tags, { Service = "publisher" })
+}
+
+resource "azurerm_resource_group" "story" {
+  name     = "mys-${var.environment}-story-rg-${local.region_code}"
+  location = var.location
+  tags     = merge(local.common_tags, { Service = "story-generator" })
+}
+
+resource "azurerm_resource_group" "admin" {
+  name     = "mys-${var.environment}-admin-rg-${local.region_code}"
+  location = var.location
+  tags     = merge(local.common_tags, { Service = "admin-api" })
+}
+```
+
+### Phase 2: Update Modules to Accept RG Parameter
+
+```hcl
+# Example: Updated chain module
 module "chain" {
   source = "../../modules/chain"
 
-  resource_group_name = azurerm_resource_group.chain.name  # Service-specific RG
-  network_rg_name     = azurerm_resource_group.network.name
-  data_rg_name        = azurerm_resource_group.data.name
+  resource_group_name = azurerm_resource_group.chain.name  # Now uses service RG
+  core_rg_name        = azurerm_resource_group.main.name   # Reference to core
   ...
 }
 ```
 
-### Phase 3: Dev Environment Migration (Week 2-3)
+### Phase 3: New Resources in Service RGs
 
-1. Create new RGs in dev
-2. Use `terraform state mv` to migrate resources
-3. Update cross-RG references
-4. Validate all services work
-5. Update CI/CD pipelines
+Deploy new service resources (Key Vaults, Storage, App Insights) directly to service RGs.
 
-### Phase 4: Staging Migration (Week 3-4)
+### Phase 4: Migrate Existing Resources (Optional, Phased)
 
-Repeat Phase 3 for staging environment.
+For existing resources, choose:
 
-### Phase 5: Production Migration (Week 4-5)
-
-1. Schedule maintenance window
-2. Repeat Phase 3 for production
-3. Verify all monitoring and alerts
-4. Update documentation
-
-### Terraform State Migration Example
-
-```bash
-# Move Chain resources to new RG (after creating new RG in TF)
-terraform state mv \
-  'module.chain.azurerm_user_assigned_identity.main' \
-  'module.chain.azurerm_user_assigned_identity.main'
-
-# Most resources need recreation - plan carefully
-terraform plan -target=module.chain
+**Option A: Recreate** (Recommended for Key Vaults with rotation)
+```hcl
+# Create new Key Vault in service RG
+# Migrate secrets
+# Update references
+# Delete old Key Vault
 ```
+
+**Option B: Azure Resource Mover** (For supported resources)
+```bash
+az resource move --destination-group mys-dev-chain-rg-san \
+  --ids /subscriptions/.../mys-dev-chain-kv-san
+```
+
+**Option C: Leave in core-rg** (For stable resources)
+- Keep stable resources in core-rg with proper tagging
+- Only move new resources to service RGs
 
 ### RBAC Configuration
 
 ```hcl
-# Example: Team access to service RG
-resource "azurerm_role_assignment" "chain_team" {
+# Service team access
+resource "azurerm_role_assignment" "chain_team_contributor" {
   scope                = azurerm_resource_group.chain.id
   role_definition_name = "Contributor"
   principal_id         = data.azuread_group.chain_team.object_id
 }
 
-# Platform team access to shared RGs
-resource "azurerm_role_assignment" "platform_network" {
-  scope                = azurerm_resource_group.network.id
-  role_definition_name = "Contributor"
-  principal_id         = data.azuread_group.platform_team.object_id
+resource "azurerm_role_assignment" "chain_team_core_reader" {
+  scope                = azurerm_resource_group.main.id
+  role_definition_name = "Reader"
+  principal_id         = data.azuread_group.chain_team.object_id
 }
 ```
+
+### Tagging Strategy
+
+All RGs should be tagged for cost tracking and ownership:
+
+```hcl
+tags = {
+  Environment = var.environment
+  Project     = "Mystira"
+  Service     = "chain"        # or "core", "publisher", etc.
+  Team        = "chain-team"   # owning team
+  CostCenter  = "engineering"
+  ManagedBy   = "terraform"
+}
+```
+
+## Migration Checklist
+
+- [ ] Create service RGs in dev
+- [ ] Update Terraform modules to accept RG parameter
+- [ ] Deploy new Key Vaults to service RGs
+- [ ] Migrate secrets to new Key Vaults
+- [ ] Update service configurations
+- [ ] Deploy new Storage Accounts to service RGs
+- [ ] Migrate App Insights to service RGs (or create new)
+- [ ] Update CI/CD pipelines
+- [ ] Repeat for staging
+- [ ] Repeat for production
+- [ ] Update documentation
 
 ## Related ADRs
 
@@ -447,3 +445,4 @@ resource "azurerm_role_assignment" "platform_network" {
 - [Cloud Adoption Framework - Resource organization](https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-setup-guide/organize-resources)
 - [Azure Landing Zones](https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/landing-zone/)
 - [RBAC best practices](https://learn.microsoft.com/en-us/azure/role-based-access-control/best-practices)
+- [Azure Resource Mover](https://learn.microsoft.com/en-us/azure/resource-mover/overview)
