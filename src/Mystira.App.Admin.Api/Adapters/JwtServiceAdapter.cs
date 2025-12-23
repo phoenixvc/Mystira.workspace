@@ -1,4 +1,4 @@
-﻿using Mystira.App.Shared.Services;
+using Mystira.App.Shared.Services;
 
 namespace Mystira.App.Admin.Api.Adapters;
 
