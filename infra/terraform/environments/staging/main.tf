@@ -344,6 +344,35 @@ module "shared_monitoring" {
   }
 }
 
+# Shared Azure AI Foundry Infrastructure (in core-rg)
+module "shared_azure_ai" {
+  source = "../../modules/shared/azure-ai"
+
+  environment         = "staging"
+  location            = var.location
+  region_code         = local.region_code
+  resource_group_name = azurerm_resource_group.main.name
+
+  model_deployments = {
+    "gpt-4o" = {
+      model_name    = "gpt-4o"
+      model_version = "2024-08-06"
+      sku_name      = "GlobalStandard"
+      capacity      = 20
+    }
+    "gpt-4o-mini" = {
+      model_name    = "gpt-4o-mini"
+      model_version = "2024-07-18"
+      sku_name      = "GlobalStandard"
+      capacity      = 40
+    }
+  }
+
+  tags = {
+    CostCenter = "staging"
+  }
+}
+
 # Story-Generator Infrastructure (in story-rg per ADR-0017)
 module "story_generator" {
   source = "../../modules/story-generator"
@@ -539,6 +568,23 @@ resource "azurerm_key_vault_secret" "story_appinsights" {
   key_vault_id = module.story_generator.key_vault_id
   content_type = "connection-string"
   tags         = { AutoPopulated = "true", Source = "shared-monitoring" }
+}
+
+# Story-Generator Azure AI Foundry Secrets (auto-populated from shared_azure_ai module)
+resource "azurerm_key_vault_secret" "story_azure_ai_endpoint" {
+  name         = "azure-ai-endpoint"
+  value        = module.shared_azure_ai.endpoint
+  key_vault_id = module.story_generator.key_vault_id
+  content_type = "azure-ai"
+  tags         = { AutoPopulated = "true", Source = "shared-azure-ai" }
+}
+
+resource "azurerm_key_vault_secret" "story_azure_ai_key" {
+  name         = "azure-ai-api-key"
+  value        = module.shared_azure_ai.primary_access_key
+  key_vault_id = module.story_generator.key_vault_id
+  content_type = "azure-ai"
+  tags         = { AutoPopulated = "true", Source = "shared-azure-ai" }
 }
 
 # Publisher Key Vault Secrets

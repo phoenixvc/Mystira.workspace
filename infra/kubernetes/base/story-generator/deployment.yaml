@@ -56,16 +56,16 @@ spec:
                 secretKeyRef:
                   name: mys-story-generator-secrets
                   key: redis_connection_string
-            - name: Ai__Anthropic__ApiKey
+            - name: Ai__AzureOpenAI__Endpoint
               valueFrom:
                 secretKeyRef:
                   name: mys-story-generator-secrets
-                  key: anthropic_api_key
-            - name: Ai__OpenAI__ApiKey
+                  key: azure_ai_endpoint
+            - name: Ai__AzureOpenAI__ApiKey
               valueFrom:
                 secretKeyRef:
                   name: mys-story-generator-secrets
-                  key: openai_api_key
+                  key: azure_ai_api_key
             - name: APPLICATIONINSIGHTS_CONNECTION_STRING
               valueFrom:
                 secretKeyRef:

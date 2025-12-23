@@ -1,13 +1,10 @@
 # Secrets Management Guide
 
-This guide documents how secrets are managed across Mystira's services, including which secrets are auto-populated by Terraform and which require manual configuration.
+This guide documents how secrets are managed across Mystira's services. All secrets are auto-populated by Terraform modules - no manual configuration is required.
 
 ## Overview
 
-Per [ADR-0017](../architecture/adr/0017-resource-group-organization-strategy.md), each service has its own Key Vault in its service-specific resource group. Secrets are managed in two ways:
-
-1. **Auto-populated by Terraform** - Connection strings from shared infrastructure
-2. **Manual via CI/CD** - API keys and external credentials synced from GitHub Secrets
+Per [ADR-0017](../architecture/adr/0017-resource-group-organization-strategy.md), each service has its own Key Vault in its service-specific resource group. **All secrets are auto-populated by Terraform** from shared infrastructure modules.
 
 ## Key Vault Naming
 
@@ -22,46 +19,43 @@ Per [ADR-0017](../architecture/adr/0017-resource-group-organization-strategy.md)
 
 ### Story-Generator
 
-| Secret Name | Source | Auto-Populated | Required |
-|-------------|--------|----------------|----------|
-| `postgres-connection-string` | Shared PostgreSQL | ✅ Yes | Yes |
-| `redis-connection-string` | Shared Redis | ✅ Yes | Yes |
-| `appinsights-connection-string` | Shared Monitoring | ✅ Yes | Yes |
-| `anthropic-api-key` | GitHub Secrets | ❌ No | Yes |
-| `openai-api-key` | GitHub Secrets | ❌ No | Yes |
+| Secret Name | Source | Description |
+|-------------|--------|-------------|
+| `postgres-connection-string` | Shared PostgreSQL | Database connection string |
+| `redis-connection-string` | Shared Redis | Cache connection string |
+| `appinsights-connection-string` | Shared Monitoring | Application Insights connection |
+| `azure-ai-endpoint` | Shared Azure AI | Azure AI Foundry endpoint URL |
+| `azure-ai-api-key` | Shared Azure AI | Azure AI Foundry API key |
 
-**GitHub Secrets Required:**
-- `ANTHROPIC_API_KEY_DEV`, `ANTHROPIC_API_KEY_STAGING`, `ANTHROPIC_API_KEY_PROD`
-- `OPENAI_API_KEY_DEV`, `OPENAI_API_KEY_STAGING`, `OPENAI_API_KEY_PROD`
+**GitHub Secrets Required:** None - all secrets are auto-populated from Terraform modules.
 
 ### Admin-API
 
-| Secret Name | Source | Auto-Populated | Required |
-|-------------|--------|----------------|----------|
-| `postgres-connection-string` | Shared PostgreSQL | ✅ Yes | Yes |
-| `redis-connection-string` | Shared Redis | ✅ Yes | Yes |
-| `appinsights-connection-string` | Shared Monitoring | ✅ Yes | Yes |
-| `azure-ad-tenant-id` | Entra ID Module | ✅ Yes | Yes |
-| `azure-ad-client-id` | Entra ID Module | ✅ Yes | Yes |
-| `admin-ui-client-id` | Entra ID Module | ✅ Yes | Yes |
+| Secret Name | Source | Description |
+|-------------|--------|-------------|
+| `postgres-connection-string` | Shared PostgreSQL | Database connection string |
+| `redis-connection-string` | Shared Redis | Cache connection string |
+| `appinsights-connection-string` | Shared Monitoring | Application Insights connection |
+| `azure-ad-tenant-id` | Entra ID Module | Azure AD tenant ID |
+| `azure-ad-client-id` | Entra ID Module | Admin API client ID |
+| `admin-ui-client-id` | Entra ID Module | Admin UI client ID |
 
 **GitHub Secrets Required:** None - all secrets are auto-populated from Terraform modules.
 
 ### Publisher
 
-| Secret Name | Source | Auto-Populated | Required |
-|-------------|--------|----------------|----------|
-| `servicebus-connection-string` | Shared Service Bus | ✅ Yes | Yes |
-| `appinsights-connection-string` | Shared Monitoring | ✅ Yes | Yes |
-| `chain-rpc-endpoint` | Terraform variable | ✅ Yes | Yes |
+| Secret Name | Source | Description |
+|-------------|--------|-------------|
+| `servicebus-connection-string` | Shared Service Bus | Message queue connection |
+| `appinsights-connection-string` | Shared Monitoring | Application Insights connection |
 
 **GitHub Secrets Required:** None - all secrets are auto-populated.
 
 ### Chain
 
-| Secret Name | Source | Auto-Populated | Required |
-|-------------|--------|----------------|----------|
-| `appinsights-connection-string` | Shared Monitoring | ✅ Yes | Yes |
+| Secret Name | Source | Description |
+|-------------|--------|-------------|
+| `appinsights-connection-string` | Shared Monitoring | Application Insights connection |
 
 **GitHub Secrets Required:** None - all secrets are auto-populated.
 
@@ -69,7 +63,7 @@ Per [ADR-0017](../architecture/adr/0017-resource-group-organization-strategy.md)
 
 ### Step 1: Deploy Infrastructure
 
-Run Terraform to create the infrastructure. Auto-populated secrets are created during this step:
+Run Terraform to create the infrastructure. All secrets are auto-populated during this step:
 
 ```bash
 cd infra/terraform/environments/dev
@@ -79,36 +73,11 @@ terraform apply
 
 This automatically creates:
 - All Key Vaults in service-specific RGs
-- Connection strings from shared PostgreSQL, Redis, Service Bus, Monitoring
+- All secrets from shared modules (PostgreSQL, Redis, Service Bus, Monitoring, Azure AI, Entra ID)
 
-### Step 2: Configure GitHub Secrets
+### Step 2: Verify Secrets
 
-Add the required secrets to your GitHub repository:
-
-1. Go to **Settings > Secrets and variables > Actions**
-2. Add environment-specific secrets:
-
-| Secret Name | Description | Example |
-|-------------|-------------|---------|
-| `ANTHROPIC_API_KEY_DEV` | Anthropic API key for dev | `sk-ant-...` |
-| `OPENAI_API_KEY_DEV` | OpenAI API key for dev | `sk-...` |
-
-**Note:** Entra ID credentials are auto-populated by Terraform from the `entra_id` module.
-
-### Step 3: Sync Secrets to Key Vault
-
-Run the GitHub Actions workflow to sync secrets:
-
-1. Go to **Actions > Key Vault Secrets**
-2. Click **Run workflow**
-3. Select:
-   - Environment: `dev`
-   - Service: `all` (or specific service)
-   - Action: `sync-manual-secrets`
-
-### Step 4: Verify Secrets
-
-Run the verification action:
+Run the GitHub Actions workflow to verify all secrets are present:
 
 1. Go to **Actions > Key Vault Secrets**
 2. Click **Run workflow**
@@ -131,12 +100,17 @@ env:
     valueFrom:
       secretKeyRef:
         name: mys-story-generator-secrets
-        key: postgres-connection-string
-  - name: Ai__Anthropic__ApiKey
+        key: postgres_connection_string
+  - name: Ai__AzureOpenAI__Endpoint
     valueFrom:
       secretKeyRef:
         name: mys-story-generator-secrets
-        key: anthropic-api-key
+        key: azure_ai_endpoint
+  - name: Ai__AzureOpenAI__ApiKey
+    valueFrom:
+      secretKeyRef:
+        name: mys-story-generator-secrets
+        key: azure_ai_api_key
 ```
 
 ### Creating Kubernetes Secrets from Key Vault
@@ -144,28 +118,34 @@ env:
 ```bash
 # Get secrets from Key Vault
 POSTGRES_CONN=$(az keyvault secret show --vault-name "mys-dev-story-kv-san" --name "postgres-connection-string" --query value -o tsv)
-ANTHROPIC_KEY=$(az keyvault secret show --vault-name "mys-dev-story-kv-san" --name "anthropic-api-key" --query value -o tsv)
+AZURE_AI_ENDPOINT=$(az keyvault secret show --vault-name "mys-dev-story-kv-san" --name "azure-ai-endpoint" --query value -o tsv)
+AZURE_AI_KEY=$(az keyvault secret show --vault-name "mys-dev-story-kv-san" --name "azure-ai-api-key" --query value -o tsv)
 
 # Create Kubernetes secret
 kubectl create secret generic mys-story-generator-secrets \
-  --from-literal=postgres-connection-string="$POSTGRES_CONN" \
-  --from-literal=anthropic-api-key="$ANTHROPIC_KEY" \
+  --from-literal=postgres_connection_string="$POSTGRES_CONN" \
+  --from-literal=azure_ai_endpoint="$AZURE_AI_ENDPOINT" \
+  --from-literal=azure_ai_api_key="$AZURE_AI_KEY" \
   -n mystira
 ```
 
 ## Secret Rotation
 
-### Rotating Auto-Populated Secrets
+### Rotating Infrastructure Secrets
 
-1. Update the source resource (e.g., regenerate PostgreSQL password)
+All secrets are managed by Terraform. To rotate:
+
+1. Update the source resource (e.g., regenerate PostgreSQL password, rotate Azure AI key)
 2. Run `terraform apply` to update Key Vault secrets
 3. Restart affected pods to pick up new secrets
 
-### Rotating Manual Secrets
+```bash
+cd infra/terraform/environments/dev
+terraform apply
 
-1. Update the secret in GitHub Secrets
-2. Run the `sync-manual-secrets` workflow
-3. Restart affected pods
+# Restart pods
+kubectl rollout restart deployment/mys-story-generator -n mystira
+```
 
 ## Troubleshooting
 
@@ -187,12 +167,6 @@ kubectl create secret generic mys-story-generator-secrets \
    az keyvault secret list --vault-name "mys-dev-story-kv-san" -o table
    ```
 
-### GitHub Secrets Not Syncing
-
-1. Check workflow run logs in GitHub Actions
-2. Verify GitHub Secrets are set with correct environment suffix
-3. Ensure Azure credentials have Key Vault access
-
 ### Pod Cannot Access Secrets
 
 1. Verify Kubernetes secret exists:
@@ -205,18 +179,22 @@ kubectl create secret generic mys-story-generator-secrets \
    kubectl describe pod -n mystira | grep -A5 "azure.workload.identity"
    ```
 
-## Complete GitHub Secrets Reference
+## Terraform Modules
 
-### Per-Environment Secrets
+All secrets are auto-populated from these Terraform modules:
 
-| Secret Pattern | Services | Description |
-|----------------|----------|-------------|
-| `ANTHROPIC_API_KEY_{ENV}` | Story-Generator | Anthropic Claude API key |
-| `OPENAI_API_KEY_{ENV}` | Story-Generator | OpenAI API key |
+| Module | Secrets Provided |
+|--------|------------------|
+| `shared/postgresql` | postgres-connection-string |
+| `shared/redis` | redis-connection-string |
+| `shared/servicebus` | servicebus-connection-string |
+| `shared/monitoring` | appinsights-connection-string |
+| `shared/azure-ai` | azure-ai-endpoint, azure-ai-api-key |
+| `entra-id` | azure-ad-tenant-id, azure-ad-client-id, admin-ui-client-id |
 
-**Note:** Admin-API, Publisher, and Chain services have all secrets auto-populated by Terraform - no GitHub Secrets required.
+## Global Azure Secrets (CI/CD only)
 
-### Global Secrets (all environments)
+These secrets are only needed in GitHub Actions for infrastructure deployments:
 
 | Secret | Description |
 |--------|-------------|
@@ -230,3 +208,4 @@ kubectl create secret generic mys-story-generator-secrets \
 - [Shared Resources](./shared-resources.md)
 - [ADR-0017: Resource Group Organization Strategy](../architecture/adr/0017-resource-group-organization-strategy.md)
 - [Kubernetes Secrets Management](./kubernetes-secrets-management.md)
+- [Entra ID Best Practices](./entra-id-best-practices.md)

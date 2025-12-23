@@ -6,9 +6,10 @@ This directory contains documentation for infrastructure, deployment, and shared
 
 - [Infrastructure Guide](./infrastructure.md) - Infrastructure organization and deployment
 - [Infrastructure Phase 1](./infrastructure-phase1.md) - Infrastructure Phase 1 status and analysis
-- [Shared Resources](./shared-resources.md) - Using shared PostgreSQL, Redis, Service Bus, and Monitoring
-- [Secrets Management](./secrets-management.md) - Key Vault secrets (auto-populated vs manual)
+- [Shared Resources](./shared-resources.md) - Using shared PostgreSQL, Redis, Service Bus, Monitoring, and Azure AI
+- [Secrets Management](./secrets-management.md) - Key Vault secrets (all auto-populated by Terraform)
 - [Kubernetes Secrets Management](./kubernetes-secrets-management.md) - Creating and managing Kubernetes secrets
+- [Entra ID Best Practices](./entra-id-best-practices.md) - Multi-environment auth, external entities, security
 
 ## Resource Group Organization
 
