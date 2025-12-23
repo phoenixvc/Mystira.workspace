@@ -12,7 +12,7 @@ Terraform is attempting to initialize modules that no longer exist in the codeba
 ```
 Error: Module not found
   module.admin_api in ../../modules/admin-api
-  module.azure_ad_b2c in ../../modules/azure-ad-b2c
+  module.external_id in ../../modules/external-id
   module.identity in ../../modules/shared/identity
   module.entra_id in ../../modules/entra-id
 ```
@@ -65,7 +65,7 @@ ls -la terraform.tfstate.backup.*
 terraform state list
 
 # Filter for modules we need to remove
-terraform state list | grep -E "(admin_api|azure_ad_b2c|identity|entra_id)"
+terraform state list | grep -E "(admin_api|external_id|identity|entra_id)"
 ```
 
 ### Step 3: Remove Orphaned Module References
@@ -76,8 +76,8 @@ For each orphaned module, remove from state:
 # Remove admin_api module (if exists in state)
 terraform state rm 'module.admin_api'
 
-# Remove azure_ad_b2c module (if exists in state)
-terraform state rm 'module.azure_ad_b2c'
+# Remove external_id module (if exists in state)
+terraform state rm 'module.external_id'
 
 # Remove identity module (if exists in state)
 terraform state rm 'module.identity'
@@ -229,7 +229,7 @@ To prevent future orphaned state:
 
 ## Related Issues
 
-- Missing modules: `admin-api`, `azure-ad-b2c`, `identity`, `entra-id`
+- Missing modules: `admin-api`, `external-id`, `identity`, `entra-id`
 - These modules may need to be:
   - Created if they're actually needed
   - Or fully removed from state if deprecated

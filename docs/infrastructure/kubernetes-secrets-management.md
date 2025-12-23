@@ -172,7 +172,7 @@ spec:
 | `azure-ad-client-id`         | Key Vault | Admin API app registration client ID   |
 | `azure-ad-client-secret`     | Key Vault | Admin API app registration secret      |
 
-### Public API (Entra External ID)
+### Public API (Microsoft Entra External ID)
 
 | Secret Key                       | Source    | Description                              |
 | -------------------------------- | --------- | ---------------------------------------- |

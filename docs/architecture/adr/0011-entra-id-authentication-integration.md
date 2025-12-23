@@ -962,7 +962,7 @@ builder.Services.AddMsalAuthentication(options =>
 ## Related Infrastructure
 
 - [Entra ID Terraform Module](../../../infra/terraform/modules/entra-id/README.md) - App registrations, scopes, roles
-- [Azure AD B2C Terraform Module](../../../infra/terraform/modules/azure-ad-b2c/README.md) - Consumer auth with social login
+- [External ID Terraform Module](../../../infra/terraform/modules/external-id/README.md) - Consumer auth with social login
 - [Shared Identity Module](../../../infra/terraform/modules/shared/identity/README.md) - RBAC and workload identity
 - [Kubernetes ServiceAccounts](../../../infra/kubernetes/README.md) - Workload identity for pods
 - [Admin API Module](../../../infra/terraform/modules/admin-api/README.md) - Admin API managed identity

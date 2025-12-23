@@ -80,18 +80,18 @@ VITE_POST_LOGOUT_URI=http://localhost:5173
 VITE_API_SCOPES=api://mystira-admin-api/Admin.Read,api://mystira-admin-api/Admin.Write
 ```
 
-### Public API - Entra External ID (`packages/app/src/Mystira.App.Api/appsettings.json`)
+### Public API - Microsoft Entra External ID (`packages/app/src/Mystira.App.Api/appsettings.json`)
 
 ```env
-# Entra External ID Configuration
+# Microsoft Entra External ID Configuration (CIAM)
 AZURE_EXTERNAL_ID_AUTHORITY=https://mystira.ciamlogin.com/your-tenant-id/v2.0
 AZURE_EXTERNAL_ID_CLIENT_ID=your-external-id-public-api-client-id
 ```
 
-### PWA (Blazor WASM) - Entra External ID (`packages/app/src/Mystira.App.PWA/wwwroot/appsettings.json`)
+### PWA (Blazor WASM) - Microsoft Entra External ID (`packages/app/src/Mystira.App.PWA/wwwroot/appsettings.json`)
 
 ```env
-# Entra External ID Configuration for Blazor WASM
+# Microsoft Entra External ID Configuration for Blazor WASM (CIAM)
 AZURE_EXTERNAL_ID_AUTHORITY=https://mystira.ciamlogin.com/your-tenant-id/v2.0
 AZURE_EXTERNAL_ID_CLIENT_ID=your-external-id-pwa-client-id
 AZURE_EXTERNAL_ID_SCOPES=api://mystira-api/API.Access
@@ -99,7 +99,7 @@ AZURE_EXTERNAL_ID_SCOPES=api://mystira-api/API.Access
 
 ### Social Identity Providers (configured in Azure Portal)
 
-These are configured in Entra External ID, not as environment variables:
+These are configured in Microsoft Entra External ID, not as environment variables:
 
 | Provider | Configuration Location |
 |----------|----------------------|

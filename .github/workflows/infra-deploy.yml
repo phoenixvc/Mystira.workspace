@@ -563,8 +563,9 @@ jobs:
           cd infra/terraform/environments/${{ env.ENVIRONMENT }}
           echo "Checking for orphaned modules in state..."
 
-          # List of modules that were removed from codebase but may still be in state
-          # NOTE: admin_api, entra_id, and identity are active modules - do NOT orphan them
+          # List of modules that were removed/renamed and may still be in state
+          # NOTE: admin_api, entra_id, identity, and external_id are active modules - do NOT orphan them
+          # azure_ad_b2c was renamed to external_id
           ORPHANED_MODULES=(
             "module.azure_ad_b2c"
             "module.azure-ad-b2c"

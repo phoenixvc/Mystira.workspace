@@ -16,7 +16,7 @@ All infrastructure resources have been updated to comply with Azure Naming Conve
 ### Environment Alignment
 - **Staging/Prod aligned with Dev**: Added missing admin-api module, subnets, PostgreSQL AAD auth
 - **Workload Identity**: All services (story-generator, publisher, chain, admin-api) now have `workload_identities` configured
-- **Azure AD B2C**: Module added to staging/prod (disabled until B2C tenant created)
+- **Microsoft Entra External ID**: Module added to staging/prod (disabled until External ID tenant created)
 - **PostgreSQL AAD Auth**: `aad_auth_enabled` and `aad_admin_identities` added for passwordless database access
 
 ### Kubernetes Standardization

@@ -155,7 +155,7 @@ The platform uses a tiered authentication strategy based on user type:
 | PWA | MSAL + External ID | Entra External ID | Access + Refresh |
 | Services | Managed Identity | Azure | AAD token |
 
-**Social Login** (via Entra External ID):
+**Social Login** (via Microsoft Entra External ID):
 - Google OAuth 2.0 for Google accounts
 - Discord OpenID Connect for gaming community
 - Email/password for local accounts

@@ -364,7 +364,7 @@ This roadmap outlines the strategic implementation plan for the Mystira workspac
   - [x] Public API app registration with exposed scopes
   - [x] PWA/SPA app registration for Blazor WASM and React clients
   - [x] API scopes: API.Access, Stories.Read, Stories.Write, Profile.Read
-- [ ] Create Entra External ID tenant (manual - via Azure Portal)
+- [ ] Create Microsoft Entra External ID tenant (manual - via Azure Portal)
 - [ ] Configure sign-in experience (Email/password, Social)
 - [ ] Set up Google identity provider
 - [ ] Set up Discord identity provider (OpenID Connect)
