@@ -533,26 +533,47 @@ jobs:
           FD_PROFILE_NAME="mystira-${{ env.ENVIRONMENT }}-fd"
           WAF_POLICY_NAME="mystira-${{ env.ENVIRONMENT }}-admin-waf-security-policy"
           WAF_POLICY_ID="/subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${{ env.AZURE_RESOURCE_GROUP }}/providers/Microsoft.Cdn/profiles/${FD_PROFILE_NAME}/securityPolicies/${WAF_POLICY_NAME}"
+
+          # Check if WAF policy exists in Azure
           if az rest --method GET --url "https://management.azure.com${WAF_POLICY_ID}?api-version=2024-02-01" &> /dev/null 2>&1; then
-            if ! terraform state list 2>/dev/null | grep -q 'module.front_door.azurerm_cdn_frontdoor_security_policy.admin\[0\]'; then
-              echo "Importing Front Door WAF Security Policy..."
-              terraform import 'module.front_door.azurerm_cdn_frontdoor_security_policy.admin[0]' "${WAF_POLICY_ID}" || true
+            echo "WAF Security Policy exists in Azure"
+
+            # Check if already in Terraform state
+            if terraform state list 2>/dev/null | grep -q 'module.front_door.azurerm_cdn_frontdoor_security_policy.admin\[0\]'; then
+              echo "WAF Security Policy already in Terraform state"
+            else
+              echo "WAF Security Policy not in state, importing..."
+              # Try to import, if it fails, remove from Azure and let Terraform recreate
+              if ! terraform import 'module.front_door.azurerm_cdn_frontdoor_security_policy.admin[0]' "${WAF_POLICY_ID}"; then
+                echo "::warning::Import failed. Attempting to delete existing WAF policy and recreate..."
+                az rest --method DELETE --url "https://management.azure.com${WAF_POLICY_ID}?api-version=2024-02-01" || true
+                echo "Deleted existing WAF policy - Terraform will recreate it"
+              fi
+            fi
+          else
+            echo "WAF Security Policy does not exist in Azure - will be created by Terraform"
+            # Also check if there's stale state and remove it
+            if terraform state list 2>/dev/null | grep -q 'module.front_door.azurerm_cdn_frontdoor_security_policy.admin\[0\]'; then
+              echo "Removing stale WAF policy from Terraform state..."
+              terraform state rm 'module.front_door.azurerm_cdn_frontdoor_security_policy.admin[0]' || true
             fi
           fi
 
           # Import federated identity credentials if they exist
+          # Note: Federated credentials are in service-specific RGs (per ADR-0017)
+          # Format: KEY:RG:IDENTITY_NAME:CRED_NAME
           FEDERATED_CREDS=(
-            "admin-api:mys-${{ env.ENVIRONMENT }}-admin-api-identity-${REGION_CODE}:admin-api-federated-credential"
-            "story-generator:mys-${{ env.ENVIRONMENT }}-story-identity-${REGION_CODE}:story-generator-federated-credential"
-            "publisher:mys-${{ env.ENVIRONMENT }}-publisher-identity:publisher-federated-credential"
-            "chain:mys-${{ env.ENVIRONMENT }}-chain-identity-${REGION_CODE}:chain-federated-credential"
+            "admin-api:${{ env.ADMIN_RG }}:mys-${{ env.ENVIRONMENT }}-admin-api-identity-${REGION_CODE}:admin-api-federated-credential"
+            "story-generator:${{ env.STORY_RG }}:mys-${{ env.ENVIRONMENT }}-story-identity-${REGION_CODE}:story-generator-federated-credential"
+            "publisher:${{ env.PUBLISHER_RG }}:mys-${{ env.ENVIRONMENT }}-publisher-identity:publisher-federated-credential"
+            "chain:${{ env.CHAIN_RG }}:mys-${{ env.ENVIRONMENT }}-chain-identity-${REGION_CODE}:chain-federated-credential"
           )
           for cred in "${FEDERATED_CREDS[@]}"; do
-            IFS=':' read -r KEY IDENTITY_NAME CRED_NAME <<< "$cred"
-            CRED_ID="/subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${{ env.AZURE_RESOURCE_GROUP }}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/${IDENTITY_NAME}/federatedIdentityCredentials/${CRED_NAME}"
+            IFS=':' read -r KEY RG_NAME IDENTITY_NAME CRED_NAME <<< "$cred"
+            CRED_ID="/subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${RG_NAME}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/${IDENTITY_NAME}/federatedIdentityCredentials/${CRED_NAME}"
             if az rest --method GET --url "https://management.azure.com${CRED_ID}?api-version=2023-01-31" &> /dev/null 2>&1; then
               if ! terraform state list 2>/dev/null | grep -q "module.identity.azurerm_federated_identity_credential.workload_identity\[\"${KEY}\"\]"; then
-                echo "Importing federated identity credential: ${KEY}..."
+                echo "Importing federated identity credential: ${KEY} from ${RG_NAME}..."
                 terraform import "module.identity.azurerm_federated_identity_credential.workload_identity[\"${KEY}\"]" "${CRED_ID}" || true
               fi
             fi
