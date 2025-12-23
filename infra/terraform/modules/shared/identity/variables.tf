@@ -71,6 +71,7 @@ variable "workload_identities" {
   description = "Map of workload identities for AKS federation"
   type = map(object({
     identity_id         = string
+    resource_group_name = string  # Resource group where the managed identity exists
     aks_oidc_issuer_url = string
     namespace           = string
     service_account     = string
