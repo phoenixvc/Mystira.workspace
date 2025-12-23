@@ -463,7 +463,11 @@ All required files have been updated to implement this ADR:
 | `modules/shared/container-registry/` | Shared ACR for all environments | ✅ Created |
 | `modules/shared/communications/` | ACS/Email services | ✅ Created |
 | `modules/shared/servicebus/` | Shared Service Bus messaging | ✅ Created |
-| `modules/shared/identity/` | Cross-RG RBAC with Service Bus | ✅ Updated |
+| `modules/shared/identity/` | Cross-RG RBAC, federated credentials per service RG | ✅ Updated |
+| `modules/story-generator/` | Key Vault with Terraform SP access policy | ✅ Fixed |
+| `modules/chain/` | Key Vault with Terraform SP access policy | ✅ Fixed |
+| `modules/publisher/` | Key Vault with Terraform SP access policy | ✅ Has policy |
+| `modules/admin-api/` | Key Vault with Terraform SP access policy | ✅ Has policy |
 
 #### CI/CD Workflows (Completed)
 
@@ -481,6 +485,8 @@ All required files have been updated to implement this ADR:
 3. ✅ **Shared monitoring module** - Uses core-rg across all environments
 4. ✅ **Identity module** - Supports cross-RG RBAC with Service Bus access
 5. ✅ **Service Bus** - Shared in core-rg, publisher has sender/receiver RBAC
+6. ✅ **Federated identity credentials** - Created in service-specific RGs (matching parent identity)
+7. ✅ **Key Vault access policies** - All modules grant Terraform SP access for secret management
 
 ### Risk Assessment
 
