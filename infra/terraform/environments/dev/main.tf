@@ -550,6 +550,88 @@ module "identity" {
   ]
 }
 
+# =============================================================================
+# Auto-Populated Key Vault Secrets (from Shared Resources)
+# These secrets are automatically created from shared infrastructure outputs
+# Manual secrets (API keys, external credentials) must be added via CI/CD
+# =============================================================================
+
+# Story-Generator Key Vault Secrets
+resource "azurerm_key_vault_secret" "story_postgres" {
+  name         = "postgres-connection-string"
+  value        = "Host=${module.shared_postgresql.server_fqdn};Port=5432;Database=storygenerator;Username=${module.shared_postgresql.admin_login};Password=${module.shared_postgresql.admin_password};SSL Mode=Require;Trust Server Certificate=true"
+  key_vault_id = module.story_generator.key_vault_id
+  content_type = "connection-string"
+  tags         = { AutoPopulated = "true", Source = "shared-postgresql" }
+}
+
+resource "azurerm_key_vault_secret" "story_redis" {
+  name         = "redis-connection-string"
+  value        = module.shared_redis.primary_connection_string
+  key_vault_id = module.story_generator.key_vault_id
+  content_type = "connection-string"
+  tags         = { AutoPopulated = "true", Source = "shared-redis" }
+}
+
+resource "azurerm_key_vault_secret" "story_appinsights" {
+  name         = "appinsights-connection-string"
+  value        = module.shared_monitoring.application_insights_connection_string
+  key_vault_id = module.story_generator.key_vault_id
+  content_type = "connection-string"
+  tags         = { AutoPopulated = "true", Source = "shared-monitoring" }
+}
+
+# Publisher Key Vault Secrets
+resource "azurerm_key_vault_secret" "publisher_servicebus" {
+  name         = "servicebus-connection-string"
+  value        = module.shared_servicebus.default_primary_connection_string
+  key_vault_id = module.publisher.key_vault_id
+  content_type = "connection-string"
+  tags         = { AutoPopulated = "true", Source = "shared-servicebus" }
+}
+
+resource "azurerm_key_vault_secret" "publisher_appinsights" {
+  name         = "appinsights-connection-string"
+  value        = module.shared_monitoring.application_insights_connection_string
+  key_vault_id = module.publisher.key_vault_id
+  content_type = "connection-string"
+  tags         = { AutoPopulated = "true", Source = "shared-monitoring" }
+}
+
+# Admin-API Key Vault Secrets
+resource "azurerm_key_vault_secret" "admin_postgres" {
+  name         = "postgres-connection-string"
+  value        = "Host=${module.shared_postgresql.server_fqdn};Port=5432;Database=adminapi;Username=${module.shared_postgresql.admin_login};Password=${module.shared_postgresql.admin_password};SSL Mode=Require;Trust Server Certificate=true"
+  key_vault_id = module.admin_api.key_vault_id
+  content_type = "connection-string"
+  tags         = { AutoPopulated = "true", Source = "shared-postgresql" }
+}
+
+resource "azurerm_key_vault_secret" "admin_redis" {
+  name         = "redis-connection-string"
+  value        = module.shared_redis.primary_connection_string
+  key_vault_id = module.admin_api.key_vault_id
+  content_type = "connection-string"
+  tags         = { AutoPopulated = "true", Source = "shared-redis" }
+}
+
+resource "azurerm_key_vault_secret" "admin_appinsights" {
+  name         = "appinsights-connection-string"
+  value        = module.shared_monitoring.application_insights_connection_string
+  key_vault_id = module.admin_api.key_vault_id
+  content_type = "connection-string"
+  tags         = { AutoPopulated = "true", Source = "shared-monitoring" }
+}
+
+# Chain Key Vault Secrets
+resource "azurerm_key_vault_secret" "chain_appinsights" {
+  name         = "appinsights-connection-string"
+  value        = module.shared_monitoring.application_insights_connection_string
+  key_vault_id = module.chain.key_vault_id
+  content_type = "connection-string"
+  tags         = { AutoPopulated = "true", Source = "shared-monitoring" }
+}
+
 # Azure AD B2C Consumer Authentication
 # Note: B2C tenant must be created manually first, then set b2c_tenant_id variable
 module "azure_ad_b2c" {

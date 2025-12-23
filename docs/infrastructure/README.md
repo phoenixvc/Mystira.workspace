@@ -7,6 +7,7 @@ This directory contains documentation for infrastructure, deployment, and shared
 - [Infrastructure Guide](./infrastructure.md) - Infrastructure organization and deployment
 - [Infrastructure Phase 1](./infrastructure-phase1.md) - Infrastructure Phase 1 status and analysis
 - [Shared Resources](./shared-resources.md) - Using shared PostgreSQL, Redis, Service Bus, and Monitoring
+- [Secrets Management](./secrets-management.md) - Key Vault secrets (auto-populated vs manual)
 - [Kubernetes Secrets Management](./kubernetes-secrets-management.md) - Creating and managing Kubernetes secrets
 
 ## Resource Group Organization
