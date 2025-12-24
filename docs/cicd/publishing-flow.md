@@ -290,11 +290,11 @@ Submodule repositories (Admin.Api, Admin.UI, etc.) use `repository_dispatch` to 
                                 │ 6. Rollout to dev AKS       │
                                 │         ↓                   │
                                 │ 7. Update submodule ref     │
-                                │    and commit to main       │
+                                │    and commit to dev        │
                                 └─────────────────────────────┘
 ```
 
-> **Note**: After successful deployment, the workspace automatically updates the submodule reference to the deployed commit and pushes to `main`. This keeps the workspace in sync with deployed versions.
+> **Note**: After successful deployment, the workspace automatically updates the submodule reference to the deployed commit and pushes to `dev`. This keeps the workspace in sync with deployed versions.
 
 ### Supported Event Types
 
@@ -306,6 +306,7 @@ Submodule repositories (Admin.Api, Admin.UI, etc.) use `repository_dispatch` to 
 | `publisher-deploy`       | `mys-publisher` (K8s)   | `submodule-deploy-dev.yml`            |
 | `chain-deploy`           | `mys-chain` (K8s)       | `submodule-deploy-dev.yml`            |
 | `app-deploy`             | App Service             | `submodule-deploy-dev-appservice.yml` |
+| `app-swa-deploy`         | Static Web App          | `submodule-deploy-dev-appservice.yml` |
 | `nuget-publish`          | GitHub/NuGet.org        | `nuget-publish.yml`                   |
 
 ### Client Payload Format

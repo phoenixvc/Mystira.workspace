@@ -190,8 +190,8 @@ jobs:
 Deployed to dev by ${{ github.event.client_payload.triggered_by }}
 Source run: https://github.com/${{ github.event.client_payload.repository || 'unknown' }}/actions/runs/${{ github.event.client_payload.run_id }}"
 
-            # Push to main branch
-            git push origin HEAD:main
+            # Push to dev branch
+            git push origin HEAD:dev
 
             echo "Submodule reference updated and pushed"
             echo "submodule_updated=true" >> $GITHUB_OUTPUT

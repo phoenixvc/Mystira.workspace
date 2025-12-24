@@ -81,7 +81,8 @@ Each submodule uses a specific event type:
 | Mystira.StoryGenerator | `story-generator-deploy` | `mys-story-generator` | Kubernetes |
 | Mystira.Publisher | `publisher-deploy` | `mys-publisher` | Kubernetes |
 | Mystira.Chain | `chain-deploy` | `mys-chain` | Kubernetes |
-| Mystira.App | `app-deploy` | `mys-dev-app-api-san` | App Service |
+| Mystira.App (API) | `app-deploy` | `mys-dev-app-api-san` | App Service |
+| Mystira.App (SWA) | `app-swa-deploy` | `mys-dev-mystira-swa-eus2` | Static Web App |
 
 ---
 
@@ -308,14 +309,23 @@ jobs:
 
 ## Mystira.App Special Case
 
-Mystira.App uses **Azure App Service** (not Kubernetes). It has a different deployment pattern:
+Mystira.App uses **Azure App Service** (API) and **Static Web App** (Blazor WASM frontend), not Kubernetes.
 
-| Environment | Workflow | Trigger |
-|-------------|----------|---------|
-| Dev | `submodule-deploy-dev-appservice.yml` | `app-deploy` event |
-| Production | `mystira-app-api-cicd-prod.yml` | Manual with confirmation |
+### Event Types
 
-For Mystira.App, use `app-deploy` as the event type and the workspace will deploy to App Service instead of Kubernetes.
+| Component | Event Type | Target | Notes |
+|-----------|------------|--------|-------|
+| API | `app-deploy` | `mys-dev-app-api-san` | Builds and deploys to App Service |
+| SWA | `app-swa-deploy` | `mys-dev-mystira-swa-eus2` | SWA deploys from App repo; triggers submodule ref update |
+
+### Deployment Pattern
+
+| Environment | API Workflow | SWA Workflow |
+|-------------|--------------|--------------|
+| Dev | `submodule-deploy-dev-appservice.yml` | Same (via `app-swa-deploy` event) |
+| Production | `mystira-app-api-cicd-prod.yml` | Separate SWA workflow (blue-green) |
+
+**Note**: The Static Web App deployment happens directly in the App repository via `Azure/static-web-apps-deploy`. After successful SWA deployment, the App repo triggers `app-swa-deploy` to update the submodule reference in the workspace.
 
 ---
 
@@ -364,9 +374,9 @@ trigger-nuget-publish:
 
 After a successful dev deployment, the workspace:
 
-1. **Deploys** to K8s/App Service
+1. **Deploys** to K8s/App Service/SWA
 2. **Updates submodule reference** to the deployed commit
-3. **Commits and pushes** to workspace `main`
+3. **Commits and pushes** to workspace `dev` branch
 
 This keeps the workspace in sync with deployed versions. You don't need to manually update submodule refs.
 

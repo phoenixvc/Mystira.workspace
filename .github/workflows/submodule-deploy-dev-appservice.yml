@@ -1,7 +1,8 @@
-name: "Submodule: Deploy to Dev (App Service)"
+name: "Submodule: Deploy to Dev (App Service/SWA)"
 
-# Handler for repository_dispatch events from App Service-based submodules
-# Mystira.App uses Azure App Service, not Kubernetes
+# Handler for repository_dispatch events from Mystira.App
+# - app-deploy: Deploy API to Azure App Service
+# - app-swa-deploy: Update submodule ref after SWA deployment (SWA deploys from App repo)
 #
 # NOTE: This is for DEV environment ONLY.
 # Production deployments use mystira-app-api-cicd-prod.yml (blue-green slot swap)
@@ -10,6 +11,7 @@ on:
   repository_dispatch:
     types:
       - app-deploy
+      - app-swa-deploy
 
 concurrency:
   group: submodule-deploy-dev-appservice-${{ github.event.action }}
@@ -61,7 +63,11 @@ jobs:
         with:
           creds: ${{ secrets.MYSTIRA_AZURE_CREDENTIALS }}
 
+      # ============================================
+      # App Service Deployment (skip for SWA events)
+      # ============================================
       - name: Setup .NET
+        if: github.event.action == 'app-deploy'
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '8.0.x'
@@ -74,6 +80,7 @@ jobs:
           echo "Checked out commit: $(git rev-parse HEAD)"
 
       - name: Restore dependencies
+        if: github.event.action == 'app-deploy'
         run: |
           cd packages/app
           dotnet restore
@@ -81,27 +88,32 @@ jobs:
           NUGET_AUTH_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN }}
 
       - name: Build application
+        if: github.event.action == 'app-deploy'
         run: |
           cd packages/app
           dotnet build --configuration Release --no-restore
 
       - name: Publish application
+        if: github.event.action == 'app-deploy'
         run: |
           cd packages/app
           dotnet publish --configuration Release --no-build --output ./publish
 
       - name: Deploy to App Service
+        if: github.event.action == 'app-deploy'
         uses: azure/webapps-deploy@v3
         with:
           app-name: ${{ env.APP_SERVICE_NAME }}
           package: packages/app/publish
 
       - name: Wait for deployment
+        if: github.event.action == 'app-deploy'
         run: |
           echo "Waiting for App Service to restart..."
           sleep 30
 
       - name: Health check
+        if: github.event.action == 'app-deploy'
         run: |
           APP_URL="https://${{ env.APP_SERVICE_NAME }}.azurewebsites.net/health"
           echo "Checking health at: $APP_URL"
@@ -119,6 +131,9 @@ jobs:
 
           echo "::warning::Health check did not return 200 after 5 attempts"
 
+      # ============================================
+      # Update Submodule Reference (both events)
+      # ============================================
       - name: Update submodule reference
         run: |
           SUBMODULE_PATH="packages/app"
@@ -144,8 +159,8 @@ jobs:
 Deployed to dev by ${{ github.event.client_payload.triggered_by }}
 Source run: https://github.com/${{ github.event.client_payload.repository || 'unknown' }}/actions/runs/${{ github.event.client_payload.run_id }}"
 
-            # Push to main branch
-            git push origin HEAD:main
+            # Push to dev branch
+            git push origin HEAD:dev
 
             echo "Submodule reference updated and pushed"
           fi
@@ -163,8 +178,12 @@ Source run: https://github.com/${{ github.event.client_payload.repository || 'un
           echo "" >> $GITHUB_STEP_SUMMARY
           if [ "${{ job.status }}" == "success" ]; then
             echo "Deployment successful!" >> $GITHUB_STEP_SUMMARY
-            echo "- URL: https://${{ env.APP_SERVICE_NAME }}.azurewebsites.net" >> $GITHUB_STEP_SUMMARY
-            echo "- Dev API: https://dev.api.mystira.app" >> $GITHUB_STEP_SUMMARY
+            if [ "${{ github.event.action }}" == "app-deploy" ]; then
+              echo "- App Service: https://${{ env.APP_SERVICE_NAME }}.azurewebsites.net" >> $GITHUB_STEP_SUMMARY
+              echo "- Dev API: https://dev.api.mystira.app" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "- Static Web App: https://dev.app.mystira.app" >> $GITHUB_STEP_SUMMARY
+            fi
           else
             echo "Deployment failed. Check the logs above for details." >> $GITHUB_STEP_SUMMARY
           fi
