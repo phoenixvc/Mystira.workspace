@@ -14,7 +14,11 @@ Currently, Dockerfiles are inconsistently located across the Mystira ecosystem:
 | Admin.UI | `packages/admin-ui` (submodule) | Submodule repo | Submodule CI |
 | Chain | `packages/chain` (submodule) | `infra/docker/chain/` (workspace) | Workspace CI |
 | Publisher | `packages/publisher` (submodule) | `infra/docker/publisher/` (workspace) | Workspace CI |
-| Story-Generator | `packages/story-generator` (submodule) | `infra/docker/story-generator/` (workspace) | Workspace CI |
+| Story-Generator.Api | `packages/story-generator` (submodule) | `infra/docker/story-generator/` (workspace) | Workspace CI |
+
+> **Note**: Story-Generator follows the same pattern as Mystira.App:
+> - **API** (`Mystira.StoryGenerator.Api`) → Kubernetes via `story-generator-deploy`
+> - **Web** (`Mystira.StoryGenerator.Web`, Blazor WASM) → Static Web App (separate deployment)
 
 This inconsistency causes:
 - Confusion about where to find/update Dockerfiles
@@ -68,8 +72,12 @@ All services will:
 #### Story-Generator (.NET)
 
 1. Copy `infra/docker/story-generator/Dockerfile` to `Mystira.StoryGenerator` repo
-2. Paths already assume submodule structure (`src/Mystira.StoryGenerator.Web/`)
+2. Update to build **API** project (`src/Mystira.StoryGenerator.Api/`), not Web
 3. Add CI/CD workflow
+
+> **Important**: The current workspace Dockerfile incorrectly builds `Mystira.StoryGenerator.Web` (Blazor WASM).
+> The `story-generator-deploy` event targets Kubernetes, which should run the **API**.
+> Blazor WASM should deploy to Static Web Apps (if needed), similar to `app-swa-deploy`.
 
 ### Phase 2: Update Workspace CI/CD
 
