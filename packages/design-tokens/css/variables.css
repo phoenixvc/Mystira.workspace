@@ -109,19 +109,89 @@
   --z-toast: 1080;
 }
 
-/* Dark mode colors (optional, for future use) */
+/* Semantic color tokens - Light mode (default) */
+:root {
+  /* Backgrounds */
+  --bg-primary: var(--color-neutral-50);
+  --bg-secondary: var(--color-neutral-100);
+  --bg-tertiary: var(--color-neutral-200);
+  --bg-elevated: #ffffff;
+  --bg-inverse: var(--color-neutral-900);
+
+  /* Foreground / Text */
+  --fg-primary: var(--color-neutral-900);
+  --fg-secondary: var(--color-neutral-600);
+  --fg-tertiary: var(--color-neutral-500);
+  --fg-inverse: var(--color-neutral-50);
+  --fg-muted: var(--color-neutral-400);
+
+  /* Borders */
+  --border-default: var(--color-neutral-200);
+  --border-strong: var(--color-neutral-300);
+  --border-muted: var(--color-neutral-100);
+
+  /* Interactive states */
+  --interactive-default: var(--color-primary-700);
+  --interactive-hover: var(--color-primary-800);
+  --interactive-active: var(--color-primary-900);
+  --interactive-focus: var(--color-primary-600);
+}
+
+/* Dark mode - triggered by class or media query */
+.dark,
+[data-theme="dark"] {
+  /* Backgrounds (inverted) */
+  --bg-primary: var(--color-neutral-900);
+  --bg-secondary: var(--color-neutral-800);
+  --bg-tertiary: var(--color-neutral-700);
+  --bg-elevated: var(--color-neutral-800);
+  --bg-inverse: var(--color-neutral-50);
+
+  /* Foreground / Text */
+  --fg-primary: var(--color-neutral-50);
+  --fg-secondary: var(--color-neutral-300);
+  --fg-tertiary: var(--color-neutral-400);
+  --fg-inverse: var(--color-neutral-900);
+  --fg-muted: var(--color-neutral-500);
+
+  /* Borders */
+  --border-default: var(--color-neutral-700);
+  --border-strong: var(--color-neutral-600);
+  --border-muted: var(--color-neutral-800);
+
+  /* Interactive states (lighter for dark mode contrast) */
+  --interactive-default: var(--color-primary-500);
+  --interactive-hover: var(--color-primary-400);
+  --interactive-active: var(--color-primary-600);
+  --interactive-focus: var(--color-primary-400);
+}
+
+/* System preference dark mode */
 @media (prefers-color-scheme: dark) {
-  :root {
-    --color-neutral-50: #18181b;
-    --color-neutral-100: #27272a;
-    --color-neutral-200: #3f3f46;
-    --color-neutral-300: #52525b;
-    --color-neutral-400: #71717a;
-    --color-neutral-500: #a1a1aa;
-    --color-neutral-600: #d4d4d8;
-    --color-neutral-700: #e4e4e7;
-    --color-neutral-800: #f4f4f5;
-    --color-neutral-900: #fafafa;
-    --color-neutral-950: #ffffff;
+  :root:not(.light):not([data-theme="light"]) {
+    /* Backgrounds (inverted) */
+    --bg-primary: var(--color-neutral-900);
+    --bg-secondary: var(--color-neutral-800);
+    --bg-tertiary: var(--color-neutral-700);
+    --bg-elevated: var(--color-neutral-800);
+    --bg-inverse: var(--color-neutral-50);
+
+    /* Foreground / Text */
+    --fg-primary: var(--color-neutral-50);
+    --fg-secondary: var(--color-neutral-300);
+    --fg-tertiary: var(--color-neutral-400);
+    --fg-inverse: var(--color-neutral-900);
+    --fg-muted: var(--color-neutral-500);
+
+    /* Borders */
+    --border-default: var(--color-neutral-700);
+    --border-strong: var(--color-neutral-600);
+    --border-muted: var(--color-neutral-800);
+
+    /* Interactive states (lighter for dark mode contrast) */
+    --interactive-default: var(--color-primary-500);
+    --interactive-hover: var(--color-primary-400);
+    --interactive-active: var(--color-primary-600);
+    --interactive-focus: var(--color-primary-400);
   }
 }

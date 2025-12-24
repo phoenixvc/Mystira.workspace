@@ -4,9 +4,25 @@ namespace Mystira.Shared.Data.Specifications;
 
 /// <summary>
 /// Specification pattern for encapsulating query logic.
-/// Specifications are composable and reusable query definitions.
+///
+/// DEPRECATED: Use Ardalis.Specification.ISpecification instead.
+/// This interface is kept for backward compatibility only.
+/// New code should use Ardalis.Specification.Specification{T} as the base class.
+///
+/// Example using Ardalis.Specification:
+/// <code>
+/// public class ActiveUsersSpec : Specification{User}
+/// {
+///     public ActiveUsersSpec()
+///     {
+///         Query.Where(u => u.IsActive)
+///              .OrderBy(u => u.Name);
+///     }
+/// }
+/// </code>
 /// </summary>
 /// <typeparam name="T">The entity type.</typeparam>
+[Obsolete("Use Ardalis.Specification.ISpecification<T> instead. This interface will be removed in a future version.")]
 public interface ISpecification<T>
 {
     /// <summary>
@@ -57,9 +73,27 @@ public interface ISpecification<T>
 
 /// <summary>
 /// Base implementation of the Specification pattern.
-/// Provides a fluent API for building query specifications.
+///
+/// DEPRECATED: Use Ardalis.Specification.Specification{T} instead.
+/// This class is kept for backward compatibility only.
+///
+/// Example migration to Ardalis.Specification:
+/// <code>
+/// // Old way (deprecated):
+/// public class MySpec : BaseSpecification{Entity}
+/// {
+///     public MySpec() { ApplyCriteria(e => e.IsActive); }
+/// }
+///
+/// // New way (recommended):
+/// public class MySpec : Specification{Entity}
+/// {
+///     public MySpec() { Query.Where(e => e.IsActive); }
+/// }
+/// </code>
 /// </summary>
 /// <typeparam name="T">The entity type.</typeparam>
+[Obsolete("Use Ardalis.Specification.Specification<T> instead. This class will be removed in a future version.")]
 public abstract class BaseSpecification<T> : ISpecification<T>
 {
     protected BaseSpecification()

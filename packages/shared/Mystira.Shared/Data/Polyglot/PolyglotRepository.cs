@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Mystira.Shared.Telemetry;
 using System.Text.Json;
 
 namespace Mystira.Shared.Data.Polyglot;
@@ -69,6 +70,9 @@ public class PolyglotRepository<TEntity> : IPolyglotRepository<TEntity> where TE
     public async Task<TEntity?> GetByIdAsync<TKey>(TKey id, CancellationToken cancellationToken = default)
         where TKey : notnull
     {
+        using var activity = MystiraActivitySource.StartRepositoryActivity("GetById", typeof(TEntity).Name);
+        activity?.SetTag("mystira.entity_id", id.ToString());
+
         var idString = id.ToString()!;
 
         if (_cache is not null)
@@ -77,8 +81,10 @@ public class PolyglotRepository<TEntity> : IPolyglotRepository<TEntity> where TE
             if (cached is not null)
             {
                 _logger.LogDebug("Cache hit for {EntityType} with ID {Id}", typeof(TEntity).Name, idString);
+                activity?.RecordCacheResult(hit: true);
                 return cached;
             }
+            activity?.RecordCacheResult(hit: false);
         }
 
         var entity = await GetByIdNoCacheAsync(id, cancellationToken);
@@ -88,6 +94,7 @@ public class PolyglotRepository<TEntity> : IPolyglotRepository<TEntity> where TE
             await SetCacheAsync(idString, entity, cancellationToken);
         }
 
+        activity?.SetTag("mystira.found", entity is not null);
         return entity;
     }
 
@@ -155,19 +162,29 @@ public class PolyglotRepository<TEntity> : IPolyglotRepository<TEntity> where TE
     /// <inheritdoc />
     public async Task<TEntity> AddAsync(TEntity entity, CancellationToken cancellationToken = default)
     {
+        using var activity = MystiraActivitySource.StartRepositoryActivity("Add", typeof(TEntity).Name);
+
         ArgumentNullException.ThrowIfNull(entity);
         await _dbSet.AddAsync(entity, cancellationToken);
+
+        var id = GetEntityId(entity);
+        activity?.SetTag("mystira.entity_id", id);
+
         return entity;
     }
 
     /// <inheritdoc />
     public async Task UpdateAsync(TEntity entity, CancellationToken cancellationToken = default)
     {
+        using var activity = MystiraActivitySource.StartRepositoryActivity("Update", typeof(TEntity).Name);
+
         ArgumentNullException.ThrowIfNull(entity);
         _dbSet.Update(entity);
 
         // Invalidate cache on update - await to ensure completion
         var id = GetEntityId(entity);
+        activity?.SetTag("mystira.entity_id", id);
+
         if (id is not null && _cache is not null)
         {
             await InvalidateCacheInternalAsync(id, cancellationToken);
@@ -199,11 +216,15 @@ public class PolyglotRepository<TEntity> : IPolyglotRepository<TEntity> where TE
     /// <inheritdoc />
     public async Task DeleteAsync(TEntity entity, CancellationToken cancellationToken = default)
     {
+        using var activity = MystiraActivitySource.StartRepositoryActivity("Delete", typeof(TEntity).Name);
+
         ArgumentNullException.ThrowIfNull(entity);
         _dbSet.Remove(entity);
 
         // Invalidate cache on delete - await to ensure completion
         var id = GetEntityId(entity);
+        activity?.SetTag("mystira.entity_id", id);
+
         if (id is not null && _cache is not null)
         {
             await InvalidateCacheInternalAsync(id, cancellationToken);

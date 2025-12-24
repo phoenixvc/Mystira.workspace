@@ -1,12 +1,14 @@
 using System.Linq.Expressions;
+using Ardalis.Specification;
+using Ardalis.Specification.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using Mystira.Shared.Data.Specifications;
 
 namespace Mystira.Shared.Data.Repositories;
 
 /// <summary>
 /// Generic repository implementation using Entity Framework Core.
 /// Supports both basic CRUD operations and specification-based queries.
+/// Uses Ardalis.Specification for specification pattern implementation.
 /// </summary>
 /// <typeparam name="TEntity">The entity type.</typeparam>
 public class RepositoryBase<TEntity> : IRepository<TEntity> where TEntity : class
@@ -27,17 +29,27 @@ public class RepositoryBase<TEntity> : IRepository<TEntity> where TEntity : clas
         return await DbSet.FindAsync(new object[] { id }, cancellationToken);
     }
 
+    /// <summary>
+    /// Gets an entity by its Guid ID.
+    /// </summary>
+    public virtual async Task<TEntity?> GetByIdAsync(
+        Guid id,
+        CancellationToken cancellationToken = default)
+    {
+        return await DbSet.FindAsync(new object[] { id }, cancellationToken);
+    }
+
     public virtual async Task<IEnumerable<TEntity>> GetAllAsync(
         CancellationToken cancellationToken = default)
     {
-        return await DbSet.ToListAsync(cancellationToken);
+        return await DbSet.AsNoTracking().ToListAsync(cancellationToken);
     }
 
     public virtual async Task<IEnumerable<TEntity>> FindAsync(
         Expression<Func<TEntity, bool>> predicate,
         CancellationToken cancellationToken = default)
     {
-        return await DbSet.Where(predicate).ToListAsync(cancellationToken);
+        return await DbSet.AsNoTracking().Where(predicate).ToListAsync(cancellationToken);
     }
 
     public virtual async Task<TEntity> AddAsync(
@@ -77,6 +89,20 @@ public class RepositoryBase<TEntity> : IRepository<TEntity> where TEntity : clas
         }
     }
 
+    /// <summary>
+    /// Deletes an entity by its Guid ID.
+    /// </summary>
+    public virtual async Task DeleteAsync(
+        Guid id,
+        CancellationToken cancellationToken = default)
+    {
+        var entity = await GetByIdAsync(id, cancellationToken);
+        if (entity != null)
+        {
+            DbSet.Remove(entity);
+        }
+    }
+
     public virtual Task DeleteAsync(
         TEntity entity,
         CancellationToken cancellationToken = default)
@@ -107,20 +133,20 @@ public class RepositoryBase<TEntity> : IRepository<TEntity> where TEntity : clas
         return await DbSet.CountAsync(cancellationToken);
     }
 
-    // Specification pattern operations
+    // Specification pattern operations using Ardalis.Specification
 
     public virtual async Task<TEntity?> GetBySpecAsync(
         ISpecification<TEntity> spec,
         CancellationToken cancellationToken = default)
     {
-        return await ApplySpecification(spec).FirstOrDefaultAsync(cancellationToken);
+        return await ApplySpecification(spec).AsNoTracking().FirstOrDefaultAsync(cancellationToken);
     }
 
     public virtual async Task<IEnumerable<TEntity>> ListAsync(
         ISpecification<TEntity> spec,
         CancellationToken cancellationToken = default)
     {
-        return await ApplySpecification(spec).ToListAsync(cancellationToken);
+        return await ApplySpecification(spec).AsNoTracking().ToListAsync(cancellationToken);
     }
 
     public virtual async Task<int> CountAsync(
@@ -131,62 +157,10 @@ public class RepositoryBase<TEntity> : IRepository<TEntity> where TEntity : clas
     }
 
     /// <summary>
-    /// Apply a specification to the query.
+    /// Apply an Ardalis.Specification to the query.
     /// </summary>
     protected virtual IQueryable<TEntity> ApplySpecification(ISpecification<TEntity> spec)
     {
-        return SpecificationEvaluator<TEntity>.GetQuery(DbSet.AsQueryable(), spec);
-    }
-}
-
-/// <summary>
-/// Evaluates specifications and applies them to EF Core queries.
-/// </summary>
-public static class SpecificationEvaluator<T> where T : class
-{
-    /// <summary>
-    /// Apply a specification to an IQueryable.
-    /// </summary>
-    public static IQueryable<T> GetQuery(IQueryable<T> inputQuery, ISpecification<T> specification)
-    {
-        var query = inputQuery;
-
-        // Apply criteria (WHERE clause)
-        if (specification.Criteria != null)
-        {
-            query = query.Where(specification.Criteria);
-        }
-
-        // Apply includes (eager loading)
-        query = specification.Includes
-            .Aggregate(query, (current, include) => current.Include(include));
-
-        // Apply include strings (for ThenInclude scenarios)
-        query = specification.IncludeStrings
-            .Aggregate(query, (current, include) => current.Include(include));
-
-        // Apply ordering
-        if (specification.OrderBy != null)
-        {
-            query = query.OrderBy(specification.OrderBy);
-        }
-        else if (specification.OrderByDescending != null)
-        {
-            query = query.OrderByDescending(specification.OrderByDescending);
-        }
-
-        // Apply grouping
-        if (specification.GroupBy != null)
-        {
-            query = query.GroupBy(specification.GroupBy).SelectMany(x => x);
-        }
-
-        // Apply paging
-        if (specification.IsPagingEnabled)
-        {
-            query = query.Skip(specification.Skip).Take(specification.Take);
-        }
-
-        return query;
+        return SpecificationEvaluator.Default.GetQuery(DbSet.AsQueryable(), spec);
     }
 }

@@ -18,6 +18,7 @@ export const colors = {
     800: '#6b21a8',
     900: '#581c87',
     950: '#3b0764',
+    DEFAULT: '#7c3aed', // Convenience accessor for the main brand color
   },
 
   // Neutral Gray
@@ -91,3 +92,83 @@ export const colors = {
 
 export type ColorScale = typeof colors.primary;
 export type ColorName = keyof typeof colors;
+
+/**
+ * Semantic color mappings for light mode
+ */
+export const lightModeColors = {
+  // Backgrounds
+  background: {
+    primary: colors.neutral[50],
+    secondary: colors.neutral[100],
+    tertiary: colors.neutral[200],
+    elevated: '#ffffff',
+    inverse: colors.neutral[900],
+  },
+  // Foregrounds / Text
+  foreground: {
+    primary: colors.neutral[900],
+    secondary: colors.neutral[600],
+    tertiary: colors.neutral[500],
+    inverse: colors.neutral[50],
+    muted: colors.neutral[400],
+  },
+  // Borders
+  border: {
+    default: colors.neutral[200],
+    strong: colors.neutral[300],
+    muted: colors.neutral[100],
+  },
+  // Interactive states
+  interactive: {
+    default: colors.primary[700],
+    hover: colors.primary[800],
+    active: colors.primary[900],
+    focus: colors.primary[600],
+  },
+} as const;
+
+/**
+ * Semantic color mappings for dark mode
+ */
+export const darkModeColors = {
+  // Backgrounds (inverted neutral scale)
+  background: {
+    primary: colors.neutral[900],
+    secondary: colors.neutral[800],
+    tertiary: colors.neutral[700],
+    elevated: colors.neutral[800],
+    inverse: colors.neutral[50],
+  },
+  // Foregrounds / Text
+  foreground: {
+    primary: colors.neutral[50],
+    secondary: colors.neutral[300],
+    tertiary: colors.neutral[400],
+    inverse: colors.neutral[900],
+    muted: colors.neutral[500],
+  },
+  // Borders
+  border: {
+    default: colors.neutral[700],
+    strong: colors.neutral[600],
+    muted: colors.neutral[800],
+  },
+  // Interactive states (slightly lighter for dark mode contrast)
+  interactive: {
+    default: colors.primary[500],
+    hover: colors.primary[400],
+    active: colors.primary[600],
+    focus: colors.primary[400],
+  },
+} as const;
+
+export type SemanticColors = typeof lightModeColors;
+export type ThemeMode = 'light' | 'dark';
+
+/**
+ * Get semantic colors for a given theme mode
+ */
+export function getSemanticColors(mode: ThemeMode): SemanticColors {
+  return mode === 'dark' ? darkModeColors : lightModeColors;
+}

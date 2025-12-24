@@ -276,35 +276,38 @@ Could expose events when circuit breaker opens/closes for monitoring.
 
 ## RECOMMENDED FIX PRIORITY
 
-### Phase 1: Critical Bugs (Before Merge)
-1. [ ] Fix fire-and-forget cache invalidation
-2. [ ] Fix value type null check in cache
-3. [ ] Fix exponential backoff calculation
-4. [ ] Create test project with basic tests
+### Phase 1: Critical Bugs (Before Merge) ✅ COMPLETED
+1. [x] Fix fire-and-forget cache invalidation
+2. [x] Fix value type null check in cache (added TryGetAsync)
+3. [x] Fix exponential backoff calculation
+4. [x] Create test project with basic tests
 
-### Phase 2: Important Fixes (Soon After Merge)
-5. [ ] Consolidate to single ISpecification (use Ardalis)
-6. [ ] Add `AsNoTracking()` to read operations
-7. [ ] Fix migration docs to match actual API
-8. [ ] Add Guid ID support
+### Phase 2: Important Fixes (Soon After Merge) ✅ COMPLETED
+5. [x] Consolidate to single ISpecification (use Ardalis)
+6. [x] Add `AsNoTracking()` to read operations
+7. [x] Fix migration docs to match actual API (AddMystiraResiliencePolicy added)
+8. [x] Add Guid ID support
 
-### Phase 3: Enhancements (Future)
-9. [ ] Add health checks
-10. [ ] Add OpenTelemetry tracing
-11. [ ] Add dark mode tokens
-12. [ ] Add options validation
+### Phase 3: Enhancements (Future) ✅ COMPLETED
+9. [x] Add health checks (Redis, Wolverine, Database)
+10. [x] Add OpenTelemetry tracing (MystiraActivitySource)
+11. [x] Add dark mode tokens (semantic color system)
+12. [ ] Add options validation (deferred to future PR)
 
 ---
 
-## FILES NEEDING CHANGES
+## FILES CHANGED (Implementation Complete)
 
-| File | Changes Needed |
-|------|----------------|
-| `PolyglotRepository.cs` | Await cache invalidation, add AsNoTracking, support Guid IDs |
-| `DistributedCacheService.cs` | Fix value type null check |
-| `CachingExtensions.cs` | Change to Scoped lifetime |
-| `PolicyFactory.cs` | Fix backoff calculation, remove unused import |
-| `MessagingExtensions.cs` | Use MaxRetries option |
-| `RepositoryBase.cs` | Use Ardalis.Specification, add AsNoTracking |
-| `mystira-app-migration.md` | Fix method references |
-| (new) `Mystira.Shared.Tests/` | Create test project |
+| File | Changes Made |
+|------|--------------|
+| `PolyglotRepository.cs` | ✅ Await cache invalidation, AsNoTracking, Guid IDs, OpenTelemetry |
+| `DistributedCacheService.cs` | ✅ Added TryGetAsync for value types |
+| `CachingExtensions.cs` | ✅ Changed to Scoped lifetime |
+| `PolicyFactory.cs` | ✅ Fixed backoff formula, removed unused import |
+| `MessagingExtensions.cs` | ✅ Dynamic retry delays from MaxRetries |
+| `RepositoryBase.cs` | ✅ Uses Ardalis.Specification, AsNoTracking |
+| `ResilienceExtensions.cs` | ✅ Added AddMystiraResiliencePolicy for IHttpClientBuilder |
+| `Mystira.Shared.Tests/` | ✅ Created test project with unit tests |
+| `Health/` | ✅ Added Redis, Wolverine, Database health checks |
+| `Telemetry/` | ✅ Added MystiraActivitySource for tracing |
+| `design-tokens/` | ✅ Added dark mode semantic colors |
