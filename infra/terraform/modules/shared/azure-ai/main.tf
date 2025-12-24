@@ -27,7 +27,8 @@ terraform {
 
 # Local variables
 locals {
-  name = "mys-${var.environment}-ai-${var.region_code}"
+  # Naming: mys-shared-ai-{region_code} (shared resource pattern)
+  name = "mys-shared-ai-${var.region_code}"
 
   common_tags = merge(var.tags, {
     Component   = "azure-ai-foundry"

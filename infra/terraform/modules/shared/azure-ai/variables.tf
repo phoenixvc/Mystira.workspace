@@ -57,6 +57,7 @@ variable "model_deployments" {
     # ==========================================================================
     # OpenAI Models (GPT Series)
     # ==========================================================================
+    # Standard models - widely available
     "gpt-4o" = {
       model_name    = "gpt-4o"
       model_version = "2024-08-06"
@@ -71,43 +72,51 @@ variable "model_deployments" {
       sku_name      = "GlobalStandard"
       capacity      = 20
     }
-    # GPT-4.1 series (newer models)
+
+    # GPT-4.1 series - next generation
     "gpt-4-1" = {
       model_name    = "gpt-4.1"
-      model_version = "2024-04-01-preview" # Check Azure for latest version
+      model_version = "2025-04-14"
       model_format  = "OpenAI"
       sku_name      = "GlobalStandard"
       capacity      = 10
     }
-    # GPT-5 series (if available in your region)
-    # Note: These models may have limited regional availability
-    "gpt-5-nano" = {
-      model_name    = "gpt-5-nano"
-      model_version = "2024-12-01-preview" # Check Azure for latest version
+    "gpt-4-1-nano" = {
+      model_name    = "gpt-4.1-nano"
+      model_version = "2025-04-14"
       model_format  = "OpenAI"
       sku_name      = "GlobalStandard"
-      capacity      = 20 # Higher capacity for smaller model
+      capacity      = 20
+    }
+
+    # GPT-5 series - latest generation
+    # Note: gpt-5.1 requires registration for access
+    "gpt-5-nano" = {
+      model_name    = "gpt-5-nano"
+      model_version = "2025-04-14"
+      model_format  = "OpenAI"
+      sku_name      = "GlobalStandard"
+      capacity      = 20
     }
     "gpt-5-1" = {
       model_name    = "gpt-5.1"
-      model_version = "2024-12-01-preview" # Check Azure for latest version
+      model_version = "2025-04-14"
       model_format  = "OpenAI"
       sku_name      = "GlobalStandard"
       capacity      = 10
     }
 
     # ==========================================================================
-    # Anthropic Models (Claude Series)
+    # Anthropic Models (Claude Series) - via Azure AI Model Catalog
     # ==========================================================================
-    # Note: Claude models require Azure AI Model Catalog access and may have
-    # allocation constraints. Deployment may fail if quota is not available.
-    # Check Azure portal for model availability in your region.
+    # Available models: claude-opus-4-5, claude-sonnet-4-5, claude-haiku-4-5, claude-opus-4-1
+    # Note: May have allocation constraints. Check Azure portal for quota.
     "claude-sonnet-4-5" = {
       model_name    = "claude-sonnet-4-5"
-      model_version = "1" # Anthropic versioning
+      model_version = "1"
       model_format  = "Anthropic"
-      sku_name      = "Standard" # Pay-as-you-go
-      capacity      = 1          # Anthropic models typically have lower capacity limits
+      sku_name      = "Standard"
+      capacity      = 1
     }
   }
 }

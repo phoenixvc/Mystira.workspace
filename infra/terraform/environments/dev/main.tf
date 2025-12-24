@@ -417,8 +417,9 @@ module "shared_azure_ai" {
   enable_project = true
 
   # Model deployments - includes OpenAI and catalog models
+  # See: https://ai.azure.com/catalog/models for full catalog
   model_deployments = {
-    # OpenAI Models
+    # OpenAI Models - Standard
     "gpt-4o" = {
       model_name    = "gpt-4o"
       model_version = "2024-08-06"
@@ -433,30 +434,38 @@ module "shared_azure_ai" {
       sku_name      = "GlobalStandard"
       capacity      = 20
     }
+    # GPT-4.1 series
     "gpt-4-1" = {
       model_name    = "gpt-4.1"
-      model_version = "2024-04-01-preview"
+      model_version = "2025-04-14"
       model_format  = "OpenAI"
       sku_name      = "GlobalStandard"
       capacity      = 10
     }
-    # GPT-5 series - check Azure portal for regional availability
+    "gpt-4-1-nano" = {
+      model_name    = "gpt-4.1-nano"
+      model_version = "2025-04-14"
+      model_format  = "OpenAI"
+      sku_name      = "GlobalStandard"
+      capacity      = 20
+    }
+    # GPT-5 series (gpt-5.1 requires registration)
     "gpt-5-nano" = {
       model_name    = "gpt-5-nano"
-      model_version = "2024-12-01-preview"
+      model_version = "2025-04-14"
       model_format  = "OpenAI"
       sku_name      = "GlobalStandard"
       capacity      = 20
     }
     "gpt-5-1" = {
       model_name    = "gpt-5.1"
-      model_version = "2024-12-01-preview"
+      model_version = "2025-04-14"
       model_format  = "OpenAI"
       sku_name      = "GlobalStandard"
       capacity      = 10
     }
     # Anthropic Claude - may have allocation constraints
-    # If deployment fails, check quota in Azure portal
+    # Available: claude-opus-4-5, claude-sonnet-4-5, claude-haiku-4-5, claude-opus-4-1
     "claude-sonnet-4-5" = {
       model_name    = "claude-sonnet-4-5"
       model_version = "1"
