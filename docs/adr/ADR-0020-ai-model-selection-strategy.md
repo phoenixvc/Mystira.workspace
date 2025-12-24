@@ -51,8 +51,16 @@ Mystira will deploy models from multiple providers to optimize for:
 | claude-haiku-4-5 | Anthropic | Fast | UK South | Serverless | High-volume analysis |
 | claude-sonnet-4-5 | Anthropic | Balanced | UK South | Serverless | Deep analysis, code review |
 | claude-opus-4-5 | Anthropic | Premium | UK South | Serverless | Complex research |
+| cohere-rerank-v3 | Cohere | RAG | UK South | Serverless | Search reranking |
+| cohere-embed-multilingual | Cohere | Embedding | UK South | Serverless | Multilingual RAG |
+| codestral-2501 | Mistral | Code | UK South | Serverless | Code generation |
+| deepseek-coder-v2 | DeepSeek | Code | UK South | Serverless | Cost-effective code |
+| jamba-1.5-large | AI21 | Long Context | UK South | Serverless | 256K context |
+| jamba-1.5-mini | AI21 | Long Context | UK South | Serverless | Efficient long context |
 
-**Total: 18 models configured**
+**Total: 24 models deployed**
+
+See [ADR-0021](./ADR-0021-specialized-edge-case-models.md) for additional specialized model considerations.
 
 ---
 
@@ -275,6 +283,27 @@ Fallback (UK South):
 ├── Models not available in SAN
 └── Overflow capacity
 ```
+
+### Regional Cost Considerations
+
+Azure AI Services pricing is generally **consistent globally** for the same SKU tier:
+
+| SKU | Pricing Model | Regional Variation |
+|-----|---------------|-------------------|
+| **GlobalStandard** | Pay-per-token | No variation - globally routed |
+| **Standard** | Pay-per-token | Minimal variation by region |
+| **ProvisionedManaged** | Reserved capacity | May vary by region availability |
+
+**Key Points**:
+- `GlobalStandard` SKU automatically routes to optimal datacenter, no regional cost difference
+- UK South and South Africa North have identical per-token pricing for OpenAI models
+- Catalog models (Anthropic, Cohere, etc.) are billed through Azure Marketplace with global pricing
+- Data egress charges may apply for cross-region traffic (minimal for AI workloads)
+
+**Recommendation**: Use `GlobalStandard` for all deployable models to:
+1. Avoid regional pricing variations
+2. Get automatic load balancing
+3. Better availability during regional outages
 
 ---
 

@@ -146,20 +146,35 @@ check_prerequisites() {
 accept_marketplace_terms() {
   print_header "MARKETPLACE TERMS"
 
-  local publisher="anthropic"
+  print_info "Checking marketplace terms for Anthropic Claude models..."
+  print_info ""
+  print_info "Azure AI Model Catalog models require marketplace agreement acceptance."
+  print_info "This is typically done via the Azure portal or REST API."
+  print_info ""
+
+  # Check if terms are already accepted by trying to list subscriptions
+  local subscription_id
+  subscription_id=$(az account show --query id -o tsv)
 
   for deployment_name in "${!CLAUDE_MODELS[@]}"; do
     local model_id="${CLAUDE_MODELS[$deployment_name]}"
-    print_info "Checking marketplace terms for $deployment_name..."
+    print_info "Verifying terms for $deployment_name..."
 
-    # Try to accept terms (idempotent - safe to run multiple times)
-    # Note: This uses the Azure Marketplace terms acceptance
-    # The actual command may vary based on how Anthropic publishes to Azure
-    if az term accept --publisher "$publisher" --product "claude" --plan "${deployment_name}" 2>/dev/null; then
-      print_success "Terms accepted for $deployment_name"
+    # Check marketplace agreement status via REST API
+    local agreement_url="https://management.azure.com/subscriptions/${subscription_id}/providers/Microsoft.MarketplaceOrdering/agreements/Anthropic/offers/claude/plans/${deployment_name}?api-version=2021-01-01"
+
+    if az rest --method GET --url "$agreement_url" --query "properties.accepted" -o tsv 2>/dev/null | grep -q "true"; then
+      print_success "Terms already accepted for $deployment_name"
     else
-      print_warning "Could not auto-accept terms for $deployment_name"
-      print_info "Please accept manually at: https://ai.azure.com/explore/models"
+      # Try to accept terms via REST API
+      local accept_body='{"properties": {"accepted": true}}'
+      if az rest --method PUT --url "$agreement_url" --body "$accept_body" 2>/dev/null; then
+        print_success "Terms accepted for $deployment_name"
+      else
+        print_warning "Could not auto-accept terms for $deployment_name"
+        print_info "Please accept manually at: https://ai.azure.com/explore/models"
+        print_info "Search for 'Claude' and click 'Deploy' to trigger terms acceptance"
+      fi
     fi
   done
 

@@ -42,18 +42,43 @@ variable "enable_project" {
 # =============================================================================
 # Supports both OpenAI models and Azure AI Model Catalog models (Anthropic, etc.)
 # model_format: "OpenAI" for GPT models, "Anthropic" for Claude, etc.
+#
+# Supported model formats:
+#   - OpenAI: GPT, DALL-E, Whisper, TTS, embedding models
+#   - Anthropic: Claude models (haiku, sonnet, opus)
+#   - Cohere: Rerank, Embed, Command models
+#   - Meta: Llama models
+#   - Mistral: Mistral, Codestral, Pixtral models
+#   - DeepSeek: DeepSeek-V3, DeepSeek-Coder models
+#   - AI21: Jamba models
 
 variable "model_deployments" {
   description = "Map of model deployments to create"
   type = map(object({
     model_name      = string
     model_version   = string
-    model_format    = optional(string, "OpenAI") # OpenAI, Anthropic, Cohere, Meta, Mistral, etc.
+    model_format    = optional(string, "OpenAI") # OpenAI, Anthropic, Cohere, Meta, Mistral, DeepSeek, AI21
     sku_name        = optional(string, "Standard")
     capacity        = optional(number, 10)
     rai_policy_name = optional(string, null)   # Responsible AI policy name
     location        = optional(string, null)   # Override region for models not available in primary region
   }))
+
+  validation {
+    condition = alltrue([
+      for k, v in var.model_deployments :
+      contains(["OpenAI", "Anthropic", "Cohere", "Meta", "Mistral", "DeepSeek", "AI21"], v.model_format)
+    ])
+    error_message = "model_format must be one of: OpenAI, Anthropic, Cohere, Meta, Mistral, DeepSeek, AI21"
+  }
+
+  validation {
+    condition = alltrue([
+      for k, v in var.model_deployments :
+      contains(["Standard", "GlobalStandard", "ProvisionedManaged"], v.sku_name)
+    ])
+    error_message = "sku_name must be one of: Standard, GlobalStandard, ProvisionedManaged"
+  }
   default = {
     # ==========================================================================
     # OpenAI Models (GPT Series) - Flagship & Latest
@@ -77,7 +102,9 @@ variable "model_deployments" {
       capacity      = 20
     }
 
+    # ==========================================================================
     # GPT-4.1 Series - Enhanced reasoning models
+    # ==========================================================================
     "gpt-4.1" = {
       model_name    = "gpt-4.1"
       model_version = "2025-04-14"
@@ -100,7 +127,9 @@ variable "model_deployments" {
       capacity      = 20
     }
 
+    # ==========================================================================
     # GPT-5 Series - Next generation models
+    # ==========================================================================
     "gpt-5-nano" = {
       model_name    = "gpt-5-nano"
       model_version = "2025-05-01"

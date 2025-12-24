@@ -77,36 +77,88 @@ output "openai_model_deployments" {
 }
 
 output "catalog_model_deployments" {
-  description = "Map of deployed catalog models (Anthropic, etc.) and their deployment names"
+  description = "Map of deployed catalog models (Anthropic, etc.) - primary region"
   value = {
     for k, v in azapi_resource.catalog_models : k => {
-      name   = v.name
-      format = var.model_deployments[k].model_format
-      model  = var.model_deployments[k].model_name
+      name     = v.name
+      format   = var.model_deployments[k].model_format
+      model    = var.model_deployments[k].model_name
+      region   = "primary"
+      endpoint = azurerm_cognitive_account.ai_foundry.endpoint
+    }
+  }
+}
+
+output "catalog_model_deployments_uksouth" {
+  description = "Map of deployed catalog models in UK South region"
+  value = {
+    for k, v in azapi_resource.catalog_models_uksouth : k => {
+      name     = v.name
+      format   = var.model_deployments[k].model_format
+      model    = var.model_deployments[k].model_name
+      region   = "uksouth"
+      endpoint = azurerm_cognitive_account.ai_foundry_uksouth[0].endpoint
     }
   }
 }
 
 output "model_deployments" {
-  description = "Combined map of all deployed models"
+  description = "Combined map of all deployed models across all regions"
   value = merge(
+    # OpenAI models (primary region)
     {
       for k, v in azurerm_cognitive_deployment.openai_models : k => {
-        name    = v.name
-        model   = v.model[0].name
-        version = v.model[0].version
-        format  = "OpenAI"
+        name     = v.name
+        model    = v.model[0].name
+        version  = v.model[0].version
+        format   = "OpenAI"
+        region   = var.location
+        endpoint = azurerm_cognitive_account.ai_foundry.endpoint
       }
     },
+    # Catalog models (primary region)
     {
       for k, v in azapi_resource.catalog_models : k => {
-        name    = v.name
-        model   = var.model_deployments[k].model_name
-        version = var.model_deployments[k].model_version
-        format  = var.model_deployments[k].model_format
+        name     = v.name
+        model    = var.model_deployments[k].model_name
+        version  = var.model_deployments[k].model_version
+        format   = var.model_deployments[k].model_format
+        region   = var.location
+        endpoint = azurerm_cognitive_account.ai_foundry.endpoint
+      }
+    },
+    # Catalog models (UK South region)
+    {
+      for k, v in azapi_resource.catalog_models_uksouth : k => {
+        name     = v.name
+        model    = var.model_deployments[k].model_name
+        version  = var.model_deployments[k].model_version
+        format   = var.model_deployments[k].model_format
+        region   = "uksouth"
+        endpoint = azurerm_cognitive_account.ai_foundry_uksouth[0].endpoint
       }
     }
   )
+}
+
+# =============================================================================
+# UK South Account (Secondary Region)
+# =============================================================================
+
+output "uksouth_account_id" {
+  description = "UK South AI Foundry account ID (if created)"
+  value       = local.needs_uksouth ? azurerm_cognitive_account.ai_foundry_uksouth[0].id : null
+}
+
+output "uksouth_endpoint" {
+  description = "UK South AI Foundry endpoint URL (if created)"
+  value       = local.needs_uksouth ? azurerm_cognitive_account.ai_foundry_uksouth[0].endpoint : null
+}
+
+output "uksouth_primary_access_key" {
+  description = "UK South primary access key (if created)"
+  value       = local.needs_uksouth ? azurerm_cognitive_account.ai_foundry_uksouth[0].primary_access_key : null
+  sensitive   = true
 }
 
 # =============================================================================
@@ -114,11 +166,43 @@ output "model_deployments" {
 # =============================================================================
 
 output "connection_config" {
-  description = "Connection configuration for applications"
+  description = "Connection configuration for applications (primary region)"
   value = {
     endpoint   = azurerm_cognitive_account.ai_foundry.endpoint
     account_id = azurerm_cognitive_account.ai_foundry.id
+    region     = var.location
     # API key should be retrieved from Key Vault in production
+  }
+}
+
+output "connection_config_uksouth" {
+  description = "Connection configuration for UK South models"
+  value = local.needs_uksouth ? {
+    endpoint   = azurerm_cognitive_account.ai_foundry_uksouth[0].endpoint
+    account_id = azurerm_cognitive_account.ai_foundry_uksouth[0].id
+    region     = "uksouth"
+  } : null
+}
+
+# =============================================================================
+# Deployment Health
+# =============================================================================
+
+output "deployment_health" {
+  description = "Deployment health summary for monitoring"
+  value = {
+    primary_region = var.location
+    primary_endpoint = azurerm_cognitive_account.ai_foundry.endpoint
+    openai_model_count = length(azurerm_cognitive_deployment.openai_models)
+    catalog_model_count_primary = length(azapi_resource.catalog_models)
+    catalog_model_count_uksouth = length(azapi_resource.catalog_models_uksouth)
+    total_model_count = (
+      length(azurerm_cognitive_deployment.openai_models) +
+      length(azapi_resource.catalog_models) +
+      length(azapi_resource.catalog_models_uksouth)
+    )
+    uksouth_enabled = local.needs_uksouth
+    uksouth_endpoint = local.needs_uksouth ? azurerm_cognitive_account.ai_foundry_uksouth[0].endpoint : null
   }
 }
 

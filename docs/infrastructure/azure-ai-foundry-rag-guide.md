@@ -2449,9 +2449,172 @@ output "search_admin_key" {
 
 ---
 
+## Troubleshooting
+
+### Common Issues
+
+#### 1. Model Deployment Failed: "Model not available in region"
+
+**Problem**: Catalog models (Cohere, Mistral, DeepSeek, AI21) are not available in South Africa North.
+
+**Solution**: These models are configured with `location = "uksouth"` and deployed to a secondary AI Services account. Check:
+
+```bash
+# Verify UK South account exists
+az cognitiveservices account show \
+  --name mys-shared-ai-uks \
+  --resource-group <rg-name>
+
+# List deployments on UK South
+az cognitiveservices account deployment list \
+  --name mys-shared-ai-uks \
+  --resource-group <rg-name> \
+  --output table
+```
+
+#### 2. Quota Exceeded: "InsufficientQuota"
+
+**Problem**: Model deployment fails due to token quota limits.
+
+**Solutions**:
+1. Reduce `capacity` in the model configuration
+2. Request quota increase at: https://aka.ms/oai/quotaincrease
+3. Use `GlobalStandard` SKU for automatic global routing
+
+```bash
+# Check current quota usage
+az cognitiveservices account list-usages \
+  --name mys-shared-ai-san \
+  --resource-group <rg-name> \
+  --output table
+```
+
+#### 3. Marketplace Terms Not Accepted
+
+**Problem**: Catalog models fail with "MarketplaceTermsNotAccepted" or similar.
+
+**Solution**:
+1. Visit Azure AI Foundry portal: https://ai.azure.com/explore/models
+2. Search for the model (e.g., "Claude")
+3. Click "Deploy" to trigger terms acceptance
+4. Accept the marketplace agreement
+
+Alternatively, use the deployment script:
+```bash
+./infra/scripts/deploy-claude-models.sh dev
+```
+
+#### 4. API Version Mismatch
+
+**Problem**: AzAPI resource fails with "InvalidApiVersion".
+
+**Solution**: Ensure correct API versions:
+- Cognitive Services account: `2025-06-01` (for `allowProjectManagement`)
+- Model deployments: `2024-10-01`
+- AI Projects: `2025-06-01`
+
+#### 5. Claude Models Not Working via OpenAI SDK
+
+**Problem**: Claude models return errors when called via OpenAI SDK.
+
+**Solution**: Claude models require the Anthropic SDK or direct REST calls:
+
+```python
+# WRONG: OpenAI SDK (doesn't work for Claude)
+from openai import AzureOpenAI
+client = AzureOpenAI(...)
+client.chat.completions.create(model="claude-sonnet-4-5", ...)  # Fails
+
+# CORRECT: Use direct REST API
+import requests
+response = requests.post(
+    f"{endpoint}/openai/deployments/claude-sonnet-4-5/chat/completions?api-version=2024-10-01",
+    headers={"api-key": api_key, "Content-Type": "application/json"},
+    json={"messages": [...], "max_tokens": 1000}
+)
+```
+
+#### 6. Embedding Dimension Mismatch
+
+**Problem**: Vector search fails with dimension mismatch errors.
+
+**Solution**: Ensure consistent embedding dimensions:
+- `text-embedding-3-large`: 3072 dimensions (default)
+- `text-embedding-3-small`: 1536 dimensions (default)
+
+Both can be configured with custom dimensions using the `dimensions` parameter:
+```python
+response = client.embeddings.create(
+    model="text-embedding-3-large",
+    input="text to embed",
+    dimensions=1536  # Reduce from 3072 to 1536
+)
+```
+
+#### 7. Terraform State Drift
+
+**Problem**: Terraform shows unexpected changes or fails to apply.
+
+**Solution**:
+1. Check for manual changes in Azure portal
+2. Import existing resources if needed
+3. Use `terraform refresh` to update state
+
+```bash
+# Refresh state
+terraform refresh
+
+# Import existing resource
+terraform import module.shared_azure_ai.azurerm_cognitive_account.ai_foundry /subscriptions/.../resourceGroups/.../providers/Microsoft.CognitiveServices/accounts/mys-shared-ai-san
+```
+
+### Deployment Verification
+
+Run these commands to verify your deployment:
+
+```bash
+# 1. Check AI Services accounts
+az cognitiveservices account list \
+  --resource-group <rg-name> \
+  --output table
+
+# 2. List all model deployments (primary region)
+az cognitiveservices account deployment list \
+  --name mys-shared-ai-san \
+  --resource-group <rg-name> \
+  --output table
+
+# 3. List all model deployments (UK South)
+az cognitiveservices account deployment list \
+  --name mys-shared-ai-uks \
+  --resource-group <rg-name> \
+  --output table
+
+# 4. Test endpoint connectivity
+curl -s -o /dev/null -w "%{http_code}" \
+  "https://mys-shared-ai-san.cognitiveservices.azure.com/openai/deployments?api-version=2024-10-01" \
+  -H "api-key: $API_KEY"
+
+# 5. Verify model availability
+az cognitiveservices model list \
+  --location southafricanorth \
+  --query "[?kind=='OpenAI'].{name:name,version:version}" \
+  --output table
+```
+
+### Getting Help
+
+- **Azure Support**: https://azure.microsoft.com/support/
+- **OpenAI on Azure**: https://learn.microsoft.com/en-us/azure/ai-services/openai/
+- **Mystira Docs**: See ADR-0020 and ADR-0021 for model strategy
+
+---
+
 ## References
 
 - [Azure AI Foundry Documentation](https://learn.microsoft.com/en-us/azure/ai-services/)
 - [Azure AI Search Vector Search](https://learn.microsoft.com/en-us/azure/search/vector-search-overview)
 - [OpenAI Embeddings Guide](https://platform.openai.com/docs/guides/embeddings)
 - [RAG Pattern Best Practices](https://learn.microsoft.com/en-us/azure/architecture/ai-ml/guide/rag-solution-design)
+- [ADR-0020: AI Model Selection Strategy](../adr/ADR-0020-ai-model-selection-strategy.md)
+- [ADR-0021: Specialized & Edge Case Models](../adr/ADR-0021-specialized-edge-case-models.md)
