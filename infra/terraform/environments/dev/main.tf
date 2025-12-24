@@ -416,36 +416,15 @@ module "shared_azure_ai" {
   # Enable AI Foundry project for workload isolation
   enable_project = true # Uses AzAPI to enable allowProjectManagement on account
 
-  # Model deployments - OpenAI models only
-  # See: https://ai.azure.com/catalog/models for full catalog
-  # Note: Claude/Anthropic models require Azure AI Foundry portal deployment (not Terraform)
-  # Note: GPT-4.1/5.x models not yet available - add when released
-  model_deployments = {
-    # GPT-4o-mini - cost-effective for dev (gpt-4o quota exceeded)
-    "gpt-4o-mini" = {
-      model_name    = "gpt-4o-mini"
-      model_version = "2024-07-18"
-      model_format  = "OpenAI"
-      sku_name      = "GlobalStandard"
-      capacity      = 20
-    }
-    # Embedding models for RAG / Vector Search (reduces tokens ~20x)
-    # Note: Must use GlobalStandard - Standard not available in SAN
-    "text-embedding-3-large" = {
-      model_name    = "text-embedding-3-large"
-      model_version = "1"
-      model_format  = "OpenAI"
-      sku_name      = "GlobalStandard"
-      capacity      = 120
-    }
-    "text-embedding-3-small" = {
-      model_name    = "text-embedding-3-small"
-      model_version = "1"
-      model_format  = "OpenAI"
-      sku_name      = "GlobalStandard"
-      capacity      = 120
-    }
-  }
+  # Model deployments - use module defaults (24 models per ADR-0020/0021)
+  # Includes:
+  #   - OpenAI: gpt-4o, gpt-4o-mini, gpt-4.1/5.x series, o3-mini, embeddings, dall-e-3, whisper, tts
+  #   - Anthropic: claude-haiku-4-5, claude-sonnet-4-5, claude-opus-4-5
+  #   - Cohere: rerank-v3, embed-multilingual (UK South)
+  #   - Mistral: codestral-2501 (UK South)
+  #   - DeepSeek: deepseek-coder-v2 (UK South)
+  #   - AI21: jamba-1.5-large, jamba-1.5-mini (UK South)
+  # See: docs/adr/ADR-0020-ai-model-selection-strategy.md for full list
 
   tags = {
     CostCenter = "development"
