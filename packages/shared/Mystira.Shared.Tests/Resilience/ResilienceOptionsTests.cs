@@ -17,8 +17,8 @@ public class ResilienceOptionsTests
         options.TimeoutSeconds.Should().Be(30);
         options.LongRunningTimeoutSeconds.Should().Be(300);
         options.CircuitBreakerThreshold.Should().Be(5);
-        options.CircuitBreakerDurationSeconds.Should().Be(60);
-        options.EnableDetailedLogging.Should().BeFalse();
+        options.CircuitBreakerDurationSeconds.Should().Be(30);
+        options.EnableDetailedLogging.Should().BeTrue();
     }
 
     [Fact]
