@@ -245,12 +245,14 @@ variable "model_deployments" {
     # Note: Claude models are deployed via Azure AI Model Catalog (Serverless API)
     # They require marketplace subscription and use pay-as-you-go billing
     # Deploy via: az ml serverless-endpoint create or Azure AI Foundry portal
+    # NOTE: Disabled - requires marketplace subscription first
     "claude-haiku-4-5" = {
       model_name    = "claude-3-5-haiku"
       model_version = "20241022"
       model_format  = "Anthropic"
       sku_name      = "GlobalStandard"
       capacity      = 1  # Serverless - capacity is token-based
+      enabled       = false # Requires marketplace subscription
     }
     "claude-sonnet-4-5" = {
       model_name    = "claude-sonnet-4-5"
@@ -258,6 +260,7 @@ variable "model_deployments" {
       model_format  = "Anthropic"
       sku_name      = "GlobalStandard"
       capacity      = 1  # Serverless - capacity is token-based
+      enabled       = false # Requires marketplace subscription
     }
     "claude-opus-4-5" = {
       model_name    = "claude-opus-4-5"
@@ -265,6 +268,7 @@ variable "model_deployments" {
       model_format  = "Anthropic"
       sku_name      = "GlobalStandard"
       capacity      = 1  # Serverless - capacity is token-based
+      enabled       = false # Requires marketplace subscription
     }
 
     # ==========================================================================
