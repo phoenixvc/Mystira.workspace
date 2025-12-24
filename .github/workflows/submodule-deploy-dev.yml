@@ -252,10 +252,15 @@ jobs:
 
             # Stage and commit the submodule update
             git add $SUBMODULE_PATH
-            git commit -m "chore: Update $SUBMODULE_PATH to $SOURCE_REF
+            REPO="${{ github.event.client_payload.repository }}"
+            REPO="${REPO:-unknown}"
+            git commit -m "$(cat <<EOF
+chore: Update $SUBMODULE_PATH to $SOURCE_REF
 
 Deployed to dev by ${{ github.event.client_payload.triggered_by }}
-Source run: https://github.com/${{ github.event.client_payload.repository || 'unknown' }}/actions/runs/${{ github.event.client_payload.run_id }}"
+Source run: https://github.com/${REPO}/actions/runs/${{ github.event.client_payload.run_id }}
+EOF
+)"
 
             # Push to dev branch
             git push origin HEAD:dev
