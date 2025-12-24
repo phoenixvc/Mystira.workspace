@@ -10,6 +10,8 @@ This guide covers Mystira's Azure AI Foundry infrastructure and Retrieval-Augmen
 - [Azure AI Foundry Setup](#azure-ai-foundry-setup)
 - [Embedding Models](#embedding-models)
 - [Azure AI Search](#azure-ai-search)
+- [Semantic Search](#semantic-search)
+- [Knowledge Graphs](#knowledge-graphs)
 - [RAG Pipeline](#rag-pipeline)
 - [Token Economics](#token-economics)
 - [Regional Availability](#regional-availability)
@@ -498,6 +500,454 @@ module "shared_azure_search" {
   }
 }
 ```
+
+---
+
+## Semantic Search
+
+Semantic search goes beyond keyword matching to understand the *meaning* and *intent* behind queries.
+
+### How Semantic Search Differs from Traditional Search
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    Traditional vs Semantic Search                            │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  KEYWORD SEARCH (BM25/TF-IDF)                                              │
+│  ┌─────────────────────────────────────────────────────────────────────┐   │
+│  │  Query: "How do I fix my car not starting?"                         │   │
+│  │                                                                      │   │
+│  │  Matches documents containing: "fix", "car", "starting"              │   │
+│  │  ✗ Misses: "vehicle won't turn over" (same meaning, different words)│   │
+│  │  ✗ Misses: "engine ignition problems" (related concept)             │   │
+│  └─────────────────────────────────────────────────────────────────────┘   │
+│                                                                             │
+│  SEMANTIC SEARCH (Vector Embeddings)                                        │
+│  ┌─────────────────────────────────────────────────────────────────────┐   │
+│  │  Query: "How do I fix my car not starting?"                         │   │
+│  │                           ↓                                          │   │
+│  │              [0.12, -0.34, 0.56, ...]  (query vector)               │   │
+│  │                           ↓                                          │   │
+│  │  ✓ Finds: "vehicle won't turn over" (similar vector)                │   │
+│  │  ✓ Finds: "troubleshooting ignition issues" (similar vector)        │   │
+│  │  ✓ Finds: "battery dead symptoms" (contextually related)            │   │
+│  └─────────────────────────────────────────────────────────────────────┘   │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+### Azure AI Search Semantic Ranking
+
+Azure AI Search offers **semantic ranking** as an additional layer on top of vector search:
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                   Semantic Ranking Pipeline                      │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  1. INITIAL RETRIEVAL (Vector or Keyword)                       │
+│     └─▶ Returns top 50 candidate documents                      │
+│                                                                 │
+│  2. SEMANTIC RERANKING (Microsoft's language models)            │
+│     └─▶ Reorders based on deep semantic understanding          │
+│     └─▶ Considers query intent, not just word overlap           │
+│                                                                 │
+│  3. SEMANTIC CAPTIONS                                           │
+│     └─▶ Extracts most relevant passages                         │
+│     └─▶ Highlights key phrases                                  │
+│                                                                 │
+│  4. SEMANTIC ANSWERS (optional)                                 │
+│     └─▶ Extracts direct answers from content                    │
+│     └─▶ Like a mini-QA system                                   │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Terraform Configuration for Semantic Search
+
+```hcl
+module "shared_azure_search" {
+  source = "../../modules/shared/azure-search"
+
+  environment         = "prod"
+  location           = "southafricanorth"
+  resource_group_name = azurerm_resource_group.shared.name
+
+  sku                 = "standard"    # Required for semantic search
+  semantic_search_sku = "standard"    # Enable semantic ranking
+  replica_count       = 2
+  partition_count     = 1
+}
+```
+
+### Hybrid Search: Best of Both Worlds
+
+Combine keyword and vector search for optimal results:
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                           Hybrid Search Strategy                             │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│                              User Query                                      │
+│                                  │                                          │
+│                    ┌─────────────┴─────────────┐                            │
+│                    ▼                           ▼                            │
+│           ┌──────────────┐            ┌──────────────┐                      │
+│           │   Keyword    │            │   Vector     │                      │
+│           │   Search     │            │   Search     │                      │
+│           │   (BM25)     │            │ (Embeddings) │                      │
+│           └──────┬───────┘            └──────┬───────┘                      │
+│                  │                           │                              │
+│                  │     ┌───────────────┐     │                              │
+│                  └────▶│  RRF Fusion   │◀────┘                              │
+│                        │ (Reciprocal   │                                    │
+│                        │  Rank Fusion) │                                    │
+│                        └───────┬───────┘                                    │
+│                                │                                            │
+│                                ▼                                            │
+│                      ┌──────────────────┐                                   │
+│                      │ Semantic Rerank  │                                   │
+│                      │   (optional)     │                                   │
+│                      └────────┬─────────┘                                   │
+│                               │                                             │
+│                               ▼                                             │
+│                        Final Results                                        │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+### Search Query Example (C#)
+
+```csharp
+var searchOptions = new SearchOptions
+{
+    // Hybrid: keyword + vector
+    QueryType = SearchQueryType.Semantic,
+    SemanticSearch = new SemanticSearchOptions
+    {
+        SemanticConfigurationName = "my-semantic-config",
+        QueryCaption = new QueryCaption(QueryCaptionType.Extractive),
+        QueryAnswer = new QueryAnswer(QueryAnswerType.Extractive)
+    },
+    VectorSearch = new VectorSearchOptions
+    {
+        Queries = {
+            new VectorizedQuery(queryEmbedding)
+            {
+                KNearestNeighborsCount = 10,
+                Fields = { "contentVector" }
+            }
+        }
+    },
+    Size = 10
+};
+
+var results = await searchClient.SearchAsync<Document>(
+    searchText: "How do I reset my password?",  // Keyword component
+    searchOptions
+);
+
+// Access semantic answers
+foreach (var answer in results.SemanticSearch.Answers)
+{
+    Console.WriteLine($"Answer: {answer.Text}");
+    Console.WriteLine($"Confidence: {answer.Score}");
+}
+```
+
+### When to Use Each Search Type
+
+| Search Type | Best For | Latency | Cost |
+|-------------|----------|---------|------|
+| Keyword (BM25) | Exact matches, known terms | ~10ms | Low |
+| Vector | Semantic similarity, concept search | ~50ms | Medium |
+| Hybrid (Keyword + Vector) | General purpose, best recall | ~60ms | Medium |
+| Hybrid + Semantic Rerank | Highest quality results | ~200ms | Higher |
+
+**Mystira Recommendation:** Use hybrid search with semantic reranking for user-facing queries, pure vector search for background/batch operations.
+
+---
+
+## Knowledge Graphs
+
+Knowledge graphs represent information as interconnected entities and relationships, enabling structured reasoning beyond what vector search alone can provide.
+
+### What is a Knowledge Graph?
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                         Knowledge Graph Structure                            │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  ENTITIES (Nodes)                    RELATIONSHIPS (Edges)                  │
+│  ┌─────────────┐                                                           │
+│  │   Author    │                                                           │
+│  │  "J.K.      │──────── wrote ────────▶┌─────────────┐                    │
+│  │  Rowling"   │                        │    Book     │                    │
+│  └─────────────┘                        │  "Harry     │                    │
+│        │                                │   Potter"   │                    │
+│        │                                └──────┬──────┘                    │
+│   born_in                                      │                           │
+│        │                          features     │    set_in                 │
+│        ▼                                       ▼        │                  │
+│  ┌─────────────┐                        ┌───────────┐   │                  │
+│  │  Location   │                        │ Character │   │                  │
+│  │   "UK"      │                        │ "Hermione"│   │                  │
+│  └─────────────┘                        └───────────┘   │                  │
+│                                               │         ▼                  │
+│                                          attends  ┌───────────┐            │
+│                                               │   │  Location │            │
+│                                               ▼   │ "Hogwarts"│            │
+│                                         ┌─────────┴───┐                    │
+│                                         │    School   │                    │
+│                                         │  "Hogwarts" │                    │
+│                                         └─────────────┘                    │
+│                                                                             │
+│  Triple Format: (Subject) ─[Predicate]─▶ (Object)                          │
+│  Example: (Harry Potter) ─[written_by]─▶ (J.K. Rowling)                    │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+### Why Knowledge Graphs + RAG?
+
+Vector search finds semantically similar text, but can miss structured relationships:
+
+| Query | Vector Search Result | Knowledge Graph Result |
+|-------|---------------------|----------------------|
+| "Who wrote Harry Potter?" | Passages mentioning the book | Direct: J.K. Rowling (author entity) |
+| "Books by British authors" | Text about British literature | Traversal: Author(country=UK) → wrote → Book |
+| "Characters in the same school as Harry" | Passages mentioning Hogwarts | Graph query: Harry → attends → Hogwarts ← attends ← ? |
+
+### GraphRAG Architecture
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                          GraphRAG Architecture                               │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│                              User Query                                      │
+│                                  │                                          │
+│                    ┌─────────────┼─────────────┐                            │
+│                    ▼             ▼             ▼                            │
+│           ┌──────────────┐ ┌──────────┐ ┌──────────────┐                   │
+│           │   Vector     │ │  Graph   │ │   Keyword    │                   │
+│           │   Search     │ │  Query   │ │   Search     │                   │
+│           │ (Embeddings) │ │ (Cypher/ │ │   (BM25)     │                   │
+│           │              │ │  SPARQL) │ │              │                   │
+│           └──────┬───────┘ └────┬─────┘ └──────┬───────┘                   │
+│                  │              │              │                            │
+│                  │   ┌──────────┴──────────┐   │                            │
+│                  │   │   Entity Linking    │   │                            │
+│                  │   │ (Connect text to    │   │                            │
+│                  │   │  graph entities)    │   │                            │
+│                  │   └──────────┬──────────┘   │                            │
+│                  │              │              │                            │
+│                  └──────────────┼──────────────┘                            │
+│                                 ▼                                           │
+│                    ┌────────────────────────┐                               │
+│                    │    Context Assembly    │                               │
+│                    │  • Retrieved passages  │                               │
+│                    │  • Graph triples       │                               │
+│                    │  • Entity properties   │                               │
+│                    └───────────┬────────────┘                               │
+│                                │                                            │
+│                                ▼                                            │
+│                    ┌────────────────────────┐                               │
+│                    │         LLM            │                               │
+│                    │  (Enhanced context     │                               │
+│                    │   with structured      │                               │
+│                    │   knowledge)           │                               │
+│                    └───────────┬────────────┘                               │
+│                                │                                            │
+│                                ▼                                            │
+│                         Final Response                                      │
+│                  (Grounded in both text AND                                │
+│                   structured relationships)                                 │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+### Building a Knowledge Graph from Documents
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    Knowledge Graph Construction Pipeline                     │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  1. ENTITY EXTRACTION (NER)                                                 │
+│     ┌─────────────────────────────────────────────────────────────────┐    │
+│     │ "Microsoft announced that Satya Nadella will present the new    │    │
+│     │  Azure AI features at Build 2025 in Seattle."                   │    │
+│     └─────────────────────────────────────────────────────────────────┘    │
+│                                    │                                        │
+│                                    ▼                                        │
+│     Entities: [Microsoft:ORG] [Satya Nadella:PERSON] [Azure AI:PRODUCT]    │
+│               [Build 2025:EVENT] [Seattle:LOCATION]                         │
+│                                                                             │
+│  2. RELATION EXTRACTION                                                     │
+│     • (Satya Nadella) ─[CEO_of]─▶ (Microsoft)                              │
+│     • (Satya Nadella) ─[presents_at]─▶ (Build 2025)                        │
+│     • (Build 2025) ─[located_in]─▶ (Seattle)                               │
+│     • (Azure AI) ─[product_of]─▶ (Microsoft)                               │
+│                                                                             │
+│  3. ENTITY RESOLUTION (Deduplication)                                       │
+│     • "Microsoft" = "Microsoft Corp" = "MSFT" → Single entity              │
+│     • "Satya Nadella" = "Nadella" = "Microsoft CEO" → Single entity        │
+│                                                                             │
+│  4. GRAPH STORAGE                                                           │
+│     • Neo4j, Azure Cosmos DB (Gremlin), or Amazon Neptune                  │
+│     • Indexed for fast traversal queries                                    │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+### LLM-Powered Entity Extraction
+
+```python
+from openai import AzureOpenAI
+
+def extract_entities_and_relations(text: str) -> dict:
+    """Use LLM to extract knowledge graph triples from text."""
+
+    prompt = """Extract entities and relationships from the following text.
+
+    Return JSON format:
+    {
+        "entities": [
+            {"name": "...", "type": "PERSON|ORG|LOCATION|PRODUCT|EVENT|CONCEPT"}
+        ],
+        "relations": [
+            {"subject": "...", "predicate": "...", "object": "..."}
+        ]
+    }
+
+    Text: {text}
+    """
+
+    response = client.chat.completions.create(
+        model="gpt-4.1",
+        messages=[{"role": "user", "content": prompt.format(text=text)}],
+        response_format={"type": "json_object"}
+    )
+
+    return json.loads(response.choices[0].message.content)
+
+# Example usage
+text = "Mystira is a storytelling platform founded in South Africa that uses Azure AI."
+result = extract_entities_and_relations(text)
+
+# Result:
+# {
+#     "entities": [
+#         {"name": "Mystira", "type": "ORG"},
+#         {"name": "South Africa", "type": "LOCATION"},
+#         {"name": "Azure AI", "type": "PRODUCT"}
+#     ],
+#     "relations": [
+#         {"subject": "Mystira", "predicate": "is_a", "object": "storytelling platform"},
+#         {"subject": "Mystira", "predicate": "founded_in", "object": "South Africa"},
+#         {"subject": "Mystira", "predicate": "uses", "object": "Azure AI"}
+#     ]
+# }
+```
+
+### Azure Options for Knowledge Graphs
+
+| Service | Best For | Query Language | Integration |
+|---------|----------|---------------|-------------|
+| **Azure Cosmos DB (Gremlin)** | Managed graph DB, global distribution | Gremlin | Native Azure |
+| **Neo4j on Azure** | Full-featured graph, Cypher queries | Cypher | Marketplace VM |
+| **Azure SQL Graph** | SQL Server with graph extensions | T-SQL + MATCH | Existing SQL workloads |
+| **RDF Triple Store** | Semantic web, ontologies | SPARQL | Standards-based |
+
+### Cosmos DB Gremlin Example
+
+```csharp
+// Add entities
+await gremlinClient.SubmitAsync(
+    "g.addV('Author').property('name', 'J.K. Rowling').property('country', 'UK')"
+);
+await gremlinClient.SubmitAsync(
+    "g.addV('Book').property('title', 'Harry Potter').property('year', 1997)"
+);
+
+// Add relationship
+await gremlinClient.SubmitAsync(
+    "g.V().has('Author', 'name', 'J.K. Rowling')" +
+    ".addE('wrote')" +
+    ".to(g.V().has('Book', 'title', 'Harry Potter'))"
+);
+
+// Query: Find all books by British authors
+var query = @"
+    g.V().hasLabel('Author')
+         .has('country', 'UK')
+         .out('wrote')
+         .hasLabel('Book')
+         .values('title')
+";
+var results = await gremlinClient.SubmitAsync<string>(query);
+```
+
+### When to Use Knowledge Graphs
+
+| Use Case | Vector Search | Knowledge Graph | Both (GraphRAG) |
+|----------|--------------|-----------------|-----------------|
+| "Find similar documents" | ✓ Best | ✗ | ✓ |
+| "Who is the CEO of X?" | ✗ Indirect | ✓ Best | ✓ |
+| "List all products in category Y" | ✗ | ✓ Best | ✓ |
+| "Explain concept X with examples" | ✓ | ✓ | ✓ Best |
+| "How are A and B related?" | ✗ | ✓ Best | ✓ |
+| Multi-hop reasoning | ✗ | ✓ Best | ✓ |
+
+### GraphRAG for Mystira: Potential Use Cases
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                     Mystira Knowledge Graph Schema                           │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  ┌─────────┐         creates        ┌─────────┐        contains            │
+│  │  User   │─────────────────────▶│  Story  │────────────────────┐        │
+│  └────┬────┘                        └────┬────┘                   │        │
+│       │                                  │                        ▼        │
+│       │ follows                          │ features         ┌──────────┐   │
+│       │                                  │                  │  Scene   │   │
+│       ▼                                  ▼                  └──────────┘   │
+│  ┌─────────┐                       ┌───────────┐                           │
+│  │  User   │                       │ Character │◀───────────┐              │
+│  └─────────┘                       └─────┬─────┘            │              │
+│                                          │                  │ appears_in   │
+│                                    related_to               │              │
+│                                          │                  │              │
+│                                          ▼            ┌─────┴────┐         │
+│                                    ┌───────────┐      │  Scene   │         │
+│                                    │ Character │      └──────────┘         │
+│                                    └───────────┘                           │
+│                                                                             │
+│  Query Examples:                                                            │
+│  • "Stories with characters similar to [X]"                                │
+│  • "Users who like stories featuring [theme]"                              │
+│  • "Character relationship map for [story]"                                │
+│  • "Recommend stories based on graph similarity"                           │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+### Implementation Roadmap
+
+| Phase | Component | Description |
+|-------|-----------|-------------|
+| 1 | Vector Search (Current) | Azure AI Search with embeddings |
+| 2 | Semantic Ranking | Enable semantic reranking on search |
+| 3 | Entity Extraction | LLM-powered NER on story content |
+| 4 | Graph Storage | Cosmos DB Gremlin for entities |
+| 5 | GraphRAG Integration | Combined retrieval pipeline |
+
+**Mystira Decision:** Start with hybrid semantic search (Phase 1-2), evaluate knowledge graph needs based on query patterns and user feedback.
 
 ---
 
