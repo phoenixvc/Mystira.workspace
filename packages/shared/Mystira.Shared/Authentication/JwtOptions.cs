@@ -75,6 +75,7 @@ public class JwtOptions
 /// </summary>
 public class JwtOptionsValidator : IValidateOptions<JwtOptions>
 {
+    /// <inheritdoc />
     public ValidateOptionsResult Validate(string? name, JwtOptions options)
     {
         var failures = new List<string>();

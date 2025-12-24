@@ -13,15 +13,27 @@ namespace Mystira.Shared.Data.Repositories;
 /// <typeparam name="TEntity">The entity type.</typeparam>
 public class RepositoryBase<TEntity> : IRepository<TEntity> where TEntity : class
 {
+    /// <summary>
+    /// The database context.
+    /// </summary>
     protected readonly DbContext Context;
+
+    /// <summary>
+    /// The entity set for this repository.
+    /// </summary>
     protected readonly DbSet<TEntity> DbSet;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="RepositoryBase{TEntity}"/> class.
+    /// </summary>
+    /// <param name="context">The database context.</param>
     public RepositoryBase(DbContext context)
     {
         Context = context ?? throw new ArgumentNullException(nameof(context));
         DbSet = context.Set<TEntity>();
     }
 
+    /// <inheritdoc />
     public virtual async Task<TEntity?> GetByIdAsync(
         string id,
         CancellationToken cancellationToken = default)
@@ -29,9 +41,7 @@ public class RepositoryBase<TEntity> : IRepository<TEntity> where TEntity : clas
         return await DbSet.FindAsync(new object[] { id }, cancellationToken);
     }
 
-    /// <summary>
-    /// Gets an entity by its Guid ID.
-    /// </summary>
+    /// <inheritdoc />
     public virtual async Task<TEntity?> GetByIdAsync(
         Guid id,
         CancellationToken cancellationToken = default)
@@ -39,12 +49,14 @@ public class RepositoryBase<TEntity> : IRepository<TEntity> where TEntity : clas
         return await DbSet.FindAsync(new object[] { id }, cancellationToken);
     }
 
+    /// <inheritdoc />
     public virtual async Task<IEnumerable<TEntity>> GetAllAsync(
         CancellationToken cancellationToken = default)
     {
         return await DbSet.AsNoTracking().ToListAsync(cancellationToken);
     }
 
+    /// <inheritdoc />
     public virtual async Task<IEnumerable<TEntity>> FindAsync(
         Expression<Func<TEntity, bool>> predicate,
         CancellationToken cancellationToken = default)
@@ -52,6 +64,7 @@ public class RepositoryBase<TEntity> : IRepository<TEntity> where TEntity : clas
         return await DbSet.AsNoTracking().Where(predicate).ToListAsync(cancellationToken);
     }
 
+    /// <inheritdoc />
     public virtual async Task<TEntity> AddAsync(
         TEntity entity,
         CancellationToken cancellationToken = default)
@@ -61,6 +74,7 @@ public class RepositoryBase<TEntity> : IRepository<TEntity> where TEntity : clas
         return entity;
     }
 
+    /// <inheritdoc />
     public virtual async Task AddRangeAsync(
         IEnumerable<TEntity> entities,
         CancellationToken cancellationToken = default)
@@ -69,6 +83,7 @@ public class RepositoryBase<TEntity> : IRepository<TEntity> where TEntity : clas
         await DbSet.AddRangeAsync(entities, cancellationToken);
     }
 
+    /// <inheritdoc />
     public virtual Task UpdateAsync(
         TEntity entity,
         CancellationToken cancellationToken = default)
@@ -78,6 +93,7 @@ public class RepositoryBase<TEntity> : IRepository<TEntity> where TEntity : clas
         return Task.CompletedTask;
     }
 
+    /// <inheritdoc />
     public virtual async Task DeleteAsync(
         string id,
         CancellationToken cancellationToken = default)
@@ -89,9 +105,7 @@ public class RepositoryBase<TEntity> : IRepository<TEntity> where TEntity : clas
         }
     }
 
-    /// <summary>
-    /// Deletes an entity by its Guid ID.
-    /// </summary>
+    /// <inheritdoc />
     public virtual async Task DeleteAsync(
         Guid id,
         CancellationToken cancellationToken = default)
@@ -103,6 +117,7 @@ public class RepositoryBase<TEntity> : IRepository<TEntity> where TEntity : clas
         }
     }
 
+    /// <inheritdoc />
     public virtual Task DeleteAsync(
         TEntity entity,
         CancellationToken cancellationToken = default)
@@ -112,6 +127,7 @@ public class RepositoryBase<TEntity> : IRepository<TEntity> where TEntity : clas
         return Task.CompletedTask;
     }
 
+    /// <inheritdoc />
     public virtual async Task<bool> ExistsAsync(
         string id,
         CancellationToken cancellationToken = default)
@@ -120,6 +136,7 @@ public class RepositoryBase<TEntity> : IRepository<TEntity> where TEntity : clas
         return entity != null;
     }
 
+    /// <inheritdoc />
     public virtual async Task<bool> AnyAsync(
         Expression<Func<TEntity, bool>> predicate,
         CancellationToken cancellationToken = default)
@@ -127,14 +144,14 @@ public class RepositoryBase<TEntity> : IRepository<TEntity> where TEntity : clas
         return await DbSet.AnyAsync(predicate, cancellationToken);
     }
 
+    /// <inheritdoc />
     public virtual async Task<int> CountAsync(
         CancellationToken cancellationToken = default)
     {
         return await DbSet.CountAsync(cancellationToken);
     }
 
-    // Specification pattern operations using Ardalis.Specification
-
+    /// <inheritdoc />
     public virtual async Task<TEntity?> GetBySpecAsync(
         ISpecification<TEntity> spec,
         CancellationToken cancellationToken = default)
@@ -142,6 +159,7 @@ public class RepositoryBase<TEntity> : IRepository<TEntity> where TEntity : clas
         return await ApplySpecification(spec).AsNoTracking().FirstOrDefaultAsync(cancellationToken);
     }
 
+    /// <inheritdoc />
     public virtual async Task<IEnumerable<TEntity>> ListAsync(
         ISpecification<TEntity> spec,
         CancellationToken cancellationToken = default)
@@ -149,6 +167,7 @@ public class RepositoryBase<TEntity> : IRepository<TEntity> where TEntity : clas
         return await ApplySpecification(spec).AsNoTracking().ToListAsync(cancellationToken);
     }
 
+    /// <inheritdoc />
     public virtual async Task<int> CountAsync(
         ISpecification<TEntity> spec,
         CancellationToken cancellationToken = default)
@@ -196,15 +215,27 @@ public class RepositoryBase<TEntity, TKey> : IRepository<TEntity, TKey>
     where TEntity : class
     where TKey : notnull
 {
+    /// <summary>
+    /// The database context.
+    /// </summary>
     protected readonly DbContext Context;
+
+    /// <summary>
+    /// The entity set for this repository.
+    /// </summary>
     protected readonly DbSet<TEntity> DbSet;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="RepositoryBase{TEntity, TKey}"/> class.
+    /// </summary>
+    /// <param name="context">The database context.</param>
     public RepositoryBase(DbContext context)
     {
         Context = context ?? throw new ArgumentNullException(nameof(context));
         DbSet = context.Set<TEntity>();
     }
 
+    /// <inheritdoc />
     public virtual async Task<TEntity?> GetByIdAsync(
         TKey id,
         CancellationToken cancellationToken = default)
@@ -212,12 +243,14 @@ public class RepositoryBase<TEntity, TKey> : IRepository<TEntity, TKey>
         return await DbSet.FindAsync(new object[] { id }, cancellationToken);
     }
 
+    /// <inheritdoc />
     public virtual async Task<IEnumerable<TEntity>> GetAllAsync(
         CancellationToken cancellationToken = default)
     {
         return await DbSet.AsNoTracking().ToListAsync(cancellationToken);
     }
 
+    /// <inheritdoc />
     public virtual async Task<TEntity> AddAsync(
         TEntity entity,
         CancellationToken cancellationToken = default)
@@ -227,6 +260,7 @@ public class RepositoryBase<TEntity, TKey> : IRepository<TEntity, TKey>
         return entity;
     }
 
+    /// <inheritdoc />
     public virtual Task UpdateAsync(
         TEntity entity,
         CancellationToken cancellationToken = default)
@@ -236,6 +270,7 @@ public class RepositoryBase<TEntity, TKey> : IRepository<TEntity, TKey>
         return Task.CompletedTask;
     }
 
+    /// <inheritdoc />
     public virtual async Task DeleteAsync(
         TKey id,
         CancellationToken cancellationToken = default)
@@ -247,6 +282,7 @@ public class RepositoryBase<TEntity, TKey> : IRepository<TEntity, TKey>
         }
     }
 
+    /// <inheritdoc />
     public virtual async Task<bool> ExistsAsync(
         TKey id,
         CancellationToken cancellationToken = default)
@@ -274,21 +310,28 @@ public class UnitOfWork : IUnitOfWork
     private Microsoft.EntityFrameworkCore.Storage.IDbContextTransaction? _transaction;
     private bool _disposed;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="UnitOfWork"/> class.
+    /// </summary>
+    /// <param name="context">The database context.</param>
     public UnitOfWork(DbContext context)
     {
         _context = context ?? throw new ArgumentNullException(nameof(context));
     }
 
+    /// <inheritdoc />
     public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         return await _context.SaveChangesAsync(cancellationToken);
     }
 
+    /// <inheritdoc />
     public async Task BeginTransactionAsync(CancellationToken cancellationToken = default)
     {
         _transaction = await _context.Database.BeginTransactionAsync(cancellationToken);
     }
 
+    /// <inheritdoc />
     public async Task CommitTransactionAsync(CancellationToken cancellationToken = default)
     {
         if (_transaction is null)
@@ -312,6 +355,7 @@ public class UnitOfWork : IUnitOfWork
         }
     }
 
+    /// <inheritdoc />
     public async Task RollbackTransactionAsync(CancellationToken cancellationToken = default)
     {
         if (_transaction is not null)
@@ -330,6 +374,7 @@ public class UnitOfWork : IUnitOfWork
         }
     }
 
+    /// <inheritdoc />
     public void Dispose()
     {
         Dispose(true);

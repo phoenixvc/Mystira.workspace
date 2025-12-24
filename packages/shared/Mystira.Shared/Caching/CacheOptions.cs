@@ -57,6 +57,7 @@ public class CacheOptions
 /// </summary>
 public class CacheOptionsValidator : IValidateOptions<CacheOptions>
 {
+    /// <inheritdoc />
     public ValidateOptionsResult Validate(string? name, CacheOptions options)
     {
         var failures = new List<string>();

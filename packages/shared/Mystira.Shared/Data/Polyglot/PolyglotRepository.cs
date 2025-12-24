@@ -28,6 +28,13 @@ public class PolyglotRepository<TEntity> : IPolyglotRepository<TEntity> where TE
     /// <inheritdoc />
     public DatabaseTarget Target { get; }
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="PolyglotRepository{TEntity}"/> class.
+    /// </summary>
+    /// <param name="contextResolver">The DbContext resolver for database routing.</param>
+    /// <param name="cache">Optional distributed cache for cache-aside pattern.</param>
+    /// <param name="options">Polyglot persistence configuration options.</param>
+    /// <param name="logger">Logger instance.</param>
     public PolyglotRepository(
         IDbContextResolver contextResolver,
         IDistributedCache? cache,
@@ -361,6 +368,12 @@ public class DbContextResolver : IDbContextResolver
     private readonly Type? _cosmosContextType;
     private readonly Type? _postgresContextType;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="DbContextResolver"/> class.
+    /// </summary>
+    /// <param name="serviceProvider">The service provider for resolving DbContext instances.</param>
+    /// <param name="cosmosContextType">The type of DbContext for Cosmos DB.</param>
+    /// <param name="postgresContextType">The type of DbContext for PostgreSQL.</param>
     public DbContextResolver(
         IServiceProvider serviceProvider,
         Type? cosmosContextType = null,
@@ -371,6 +384,7 @@ public class DbContextResolver : IDbContextResolver
         _postgresContextType = postgresContextType;
     }
 
+    /// <inheritdoc />
     public DbContext Resolve(DatabaseTarget target)
     {
         var contextType = target switch

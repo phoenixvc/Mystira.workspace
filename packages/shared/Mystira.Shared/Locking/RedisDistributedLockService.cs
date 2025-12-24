@@ -38,6 +38,12 @@ public class RedisDistributedLockService : IDistributedLockService
         end
     ";
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="RedisDistributedLockService"/> class.
+    /// </summary>
+    /// <param name="redis">The Redis connection multiplexer.</param>
+    /// <param name="options">Distributed lock configuration options.</param>
+    /// <param name="logger">Logger instance.</param>
     public RedisDistributedLockService(
         IConnectionMultiplexer redis,
         IOptions<DistributedLockOptions> options,
@@ -48,6 +54,7 @@ public class RedisDistributedLockService : IDistributedLockService
         _logger = logger;
     }
 
+    /// <inheritdoc />
     public async Task<IDistributedLockHandle?> TryAcquireAsync(
         string resource,
         TimeSpan expiry,
@@ -90,6 +97,7 @@ public class RedisDistributedLockService : IDistributedLockService
         return null;
     }
 
+    /// <inheritdoc />
     public async Task<IDistributedLockHandle> AcquireAsync(
         string resource,
         TimeSpan expiry,
@@ -122,6 +130,7 @@ public class RedisDistributedLockService : IDistributedLockService
             $"Could not acquire lock on resource '{resource}' within {wait.TotalSeconds} seconds");
     }
 
+    /// <inheritdoc />
     public async Task<bool> IsLockedAsync(string resource, CancellationToken cancellationToken = default)
     {
         var key = GetLockKey(resource);
@@ -129,6 +138,7 @@ public class RedisDistributedLockService : IDistributedLockService
         return await db.KeyExistsAsync(key);
     }
 
+    /// <inheritdoc />
     public async Task<T> ExecuteWithLockAsync<T>(
         string resource,
         Func<CancellationToken, Task<T>> action,
@@ -149,6 +159,7 @@ public class RedisDistributedLockService : IDistributedLockService
         }
     }
 
+    /// <inheritdoc />
     public async Task ExecuteWithLockAsync(
         string resource,
         Func<CancellationToken, Task> action,

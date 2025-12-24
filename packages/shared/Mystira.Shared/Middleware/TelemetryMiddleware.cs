@@ -14,6 +14,12 @@ public class TelemetryMiddleware
     private readonly ILogger<TelemetryMiddleware> _logger;
     private readonly TelemetryOptions _options;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="TelemetryMiddleware"/> class.
+    /// </summary>
+    /// <param name="next">The next request delegate in the pipeline.</param>
+    /// <param name="logger">Logger instance.</param>
+    /// <param name="options">Telemetry configuration options.</param>
     public TelemetryMiddleware(
         RequestDelegate next,
         ILogger<TelemetryMiddleware> logger,
@@ -24,6 +30,10 @@ public class TelemetryMiddleware
         _options = options.Value;
     }
 
+    /// <summary>
+    /// Invokes the middleware for the HTTP context.
+    /// </summary>
+    /// <param name="context">The HTTP context.</param>
     public async Task InvokeAsync(HttpContext context)
     {
         var path = context.Request.Path.Value ?? string.Empty;

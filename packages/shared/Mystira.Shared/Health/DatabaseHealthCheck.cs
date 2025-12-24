@@ -13,6 +13,11 @@ public class DatabaseHealthCheck<TContext> : IHealthCheck where TContext : DbCon
     private readonly TContext _context;
     private readonly ILogger<DatabaseHealthCheck<TContext>> _logger;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="DatabaseHealthCheck{TContext}"/> class.
+    /// </summary>
+    /// <param name="context">The database context to check.</param>
+    /// <param name="logger">Logger instance.</param>
     public DatabaseHealthCheck(
         TContext context,
         ILogger<DatabaseHealthCheck<TContext>> logger)
@@ -21,6 +26,7 @@ public class DatabaseHealthCheck<TContext> : IHealthCheck where TContext : DbCon
         _logger = logger;
     }
 
+    /// <inheritdoc />
     public async Task<HealthCheckResult> CheckHealthAsync(
         HealthCheckContext context,
         CancellationToken cancellationToken = default)

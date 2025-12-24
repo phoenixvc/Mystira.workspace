@@ -34,6 +34,7 @@ public static class OptionsValidationExtensions
 /// </summary>
 public class CacheOptionsValidator : IValidateOptions<CacheOptions>
 {
+    /// <inheritdoc />
     public ValidateOptionsResult Validate(string? name, CacheOptions options)
     {
         var errors = new List<string>();
@@ -79,6 +80,7 @@ public class CacheOptionsValidator : IValidateOptions<CacheOptions>
 /// </summary>
 public class ResilienceOptionsValidator : IValidateOptions<ResilienceOptions>
 {
+    /// <inheritdoc />
     public ValidateOptionsResult Validate(string? name, ResilienceOptions options)
     {
         var errors = new List<string>();
@@ -129,6 +131,7 @@ public class ResilienceOptionsValidator : IValidateOptions<ResilienceOptions>
 /// </summary>
 public class PolyglotOptionsValidator : IValidateOptions<PolyglotOptions>
 {
+    /// <inheritdoc />
     public ValidateOptionsResult Validate(string? name, PolyglotOptions options)
     {
         var errors = new List<string>();
@@ -164,6 +167,7 @@ public class PolyglotOptionsValidator : IValidateOptions<PolyglotOptions>
 /// </summary>
 public class MessagingOptionsValidator : IValidateOptions<MessagingOptions>
 {
+    /// <inheritdoc />
     public ValidateOptionsResult Validate(string? name, MessagingOptions options)
     {
         var errors = new List<string>();

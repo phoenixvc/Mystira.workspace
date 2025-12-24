@@ -106,11 +106,30 @@ public abstract class GuidEntity
 /// </summary>
 public abstract class AuditableGuidEntity : GuidEntity
 {
+    /// <summary>
+    /// When the entity was created (UTC).
+    /// </summary>
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+    /// <summary>
+    /// Who created the entity (user ID or system identifier).
+    /// </summary>
     public string? CreatedBy { get; set; }
+
+    /// <summary>
+    /// When the entity was last updated (UTC).
+    /// </summary>
     public DateTime? UpdatedAt { get; set; }
+
+    /// <summary>
+    /// Who last updated the entity (user ID or system identifier).
+    /// </summary>
     public string? UpdatedBy { get; set; }
 
+    /// <summary>
+    /// Marks the entity as updated.
+    /// </summary>
+    /// <param name="updatedBy">Who is updating the entity.</param>
     public virtual void MarkUpdated(string? updatedBy = null)
     {
         UpdatedAt = DateTime.UtcNow;

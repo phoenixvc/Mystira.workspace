@@ -9,11 +9,18 @@ namespace Mystira.Shared.Authorization;
 /// </summary>
 public class PermissionRequirement : IAuthorizationRequirement
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="PermissionRequirement"/> class.
+    /// </summary>
+    /// <param name="permission">The required permission string.</param>
     public PermissionRequirement(string permission)
     {
         Permission = permission;
     }
 
+    /// <summary>
+    /// Gets the required permission.
+    /// </summary>
     public string Permission { get; }
 }
 
@@ -24,11 +31,16 @@ public class PermissionHandler : AuthorizationHandler<PermissionRequirement>
 {
     private readonly ILogger<PermissionHandler> _logger;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="PermissionHandler"/> class.
+    /// </summary>
+    /// <param name="logger">Logger instance.</param>
     public PermissionHandler(ILogger<PermissionHandler> logger)
     {
         _logger = logger;
     }
 
+    /// <inheritdoc />
     protected override Task HandleRequirementAsync(
         AuthorizationHandlerContext context,
         PermissionRequirement requirement)

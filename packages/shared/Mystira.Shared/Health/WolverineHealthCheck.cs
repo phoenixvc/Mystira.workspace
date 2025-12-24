@@ -16,6 +16,12 @@ public class WolverineHealthCheck : IHealthCheck
     private readonly MessagingOptions _options;
     private readonly ILogger<WolverineHealthCheck> _logger;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="WolverineHealthCheck"/> class.
+    /// </summary>
+    /// <param name="messageBus">The Wolverine message bus.</param>
+    /// <param name="options">Messaging configuration options.</param>
+    /// <param name="logger">Logger instance.</param>
     public WolverineHealthCheck(
         IMessageBus messageBus,
         IOptions<MessagingOptions> options,
@@ -26,6 +32,7 @@ public class WolverineHealthCheck : IHealthCheck
         _logger = logger;
     }
 
+    /// <inheritdoc />
     public Task<HealthCheckResult> CheckHealthAsync(
         HealthCheckContext context,
         CancellationToken cancellationToken = default)

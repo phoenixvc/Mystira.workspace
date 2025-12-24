@@ -16,6 +16,11 @@ public class GlobalExceptionHandler : IExceptionHandler
     private readonly ILogger<GlobalExceptionHandler> _logger;
     private readonly IHostEnvironment _environment;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="GlobalExceptionHandler"/> class.
+    /// </summary>
+    /// <param name="logger">Logger instance.</param>
+    /// <param name="environment">Host environment for determining detail level.</param>
     public GlobalExceptionHandler(
         ILogger<GlobalExceptionHandler> logger,
         IHostEnvironment environment)
@@ -24,6 +29,7 @@ public class GlobalExceptionHandler : IExceptionHandler
         _environment = environment;
     }
 
+    /// <inheritdoc />
     public async ValueTask<bool> TryHandleAsync(
         HttpContext httpContext,
         Exception exception,

@@ -69,6 +69,10 @@ public sealed class DatabaseTargetAttribute : Attribute
     /// </summary>
     public string? Rationale { get; set; }
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="DatabaseTargetAttribute"/> class.
+    /// </summary>
+    /// <param name="target">The target database for this entity.</param>
     public DatabaseTargetAttribute(DatabaseTarget target)
     {
         Target = target;
