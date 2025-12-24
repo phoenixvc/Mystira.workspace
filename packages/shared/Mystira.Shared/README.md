@@ -8,10 +8,13 @@ This package provides cross-cutting concerns for all Mystira .NET services:
 
 - **Authentication**: JWT token generation, validation, and middleware
 - **Authorization**: Role-based and permission-based access control
-- **Resilience**: Polly-based retry, circuit breaker, and timeout policies
+- **Resilience**: Polly v8 resilience pipelines with retry, circuit breaker, and timeout
 - **Exceptions**: Standardized error handling, Result<T> pattern, ProblemDetails
 - **Caching**: Distributed caching with Redis support
 - **Messaging**: Wolverine integration for unified in-process and distributed messaging
+- **Locking**: Redis-based distributed locking for concurrency control
+- **Source Generators**: Auto-generate repository implementations and validators
+- **Observability**: Circuit breaker events with OpenTelemetry metrics
 - **Middleware**: Telemetry, logging, and request/response handling
 - **Extensions**: Dependency injection helpers for easy integration
 
@@ -302,6 +305,78 @@ This package replaces `Mystira.App.Shared`. To migrate:
    services.AddMystiraAuthorization();
    ```
 
+### Distributed Locking
+
+```csharp
+using Mystira.Shared.Locking;
+
+// Setup
+builder.Services.AddMystiraCaching(configuration); // Redis required
+builder.Services.AddMystiraDistributedLocking(configuration);
+
+// Usage
+public class PaymentService
+{
+    private readonly IDistributedLockService _lockService;
+
+    public async Task ProcessPaymentAsync(Guid paymentId, CancellationToken ct)
+    {
+        // Execute with automatic lock management
+        await _lockService.ExecuteWithLockAsync(
+            $"payment:{paymentId}",
+            async token => await DoPaymentProcessing(paymentId, token),
+            expiry: TimeSpan.FromSeconds(30),
+            wait: TimeSpan.FromSeconds(10),
+            ct);
+    }
+}
+```
+
+### Polly v8 Resilience Pipelines
+
+```csharp
+using Mystira.Shared.Extensions;
+using Mystira.Shared.Resilience;
+
+// Standard resilience with Polly v8 pipelines
+builder.Services.AddResilientHttpClientV8<IMyApiClient, MyApiClient>(
+    "MyApi",
+    client => client.BaseAddress = new Uri("https://api.example.com"));
+
+// Long-running operations (e.g., LLM calls)
+builder.Services.AddLongRunningHttpClientV8<ILlmClient, LlmClient>(
+    "LlmApi");
+
+// Direct pipeline usage for non-HTTP operations
+var pipeline = ResiliencePipelineFactory.CreateRetryPipeline<string>(
+    "DatabaseQuery",
+    new ResilienceOptions { MaxRetries = 3 });
+
+var result = await pipeline.ExecuteAsync(async ct => await db.QueryAsync(ct));
+```
+
+### Circuit Breaker Events
+
+```csharp
+using Mystira.Shared.Resilience;
+
+// Register metrics
+builder.Services.AddSingleton<CircuitBreakerMetrics>();
+
+// Subscribe to events
+public class CircuitMonitor
+{
+    public CircuitMonitor(IObservableCircuitBreaker circuit)
+    {
+        circuit.StateChanged += (s, e) =>
+        {
+            if (e.NewState == CircuitState.Open)
+                _alertService.SendAlert($"Circuit {e.CircuitName} opened!");
+        };
+    }
+}
+```
+
 ## Package Contents
 
 ```
@@ -313,22 +388,29 @@ Mystira.Shared/
 │   ├── Permissions.cs             # Permission constants
 │   ├── RequirePermissionAttribute.cs
 │   └── PermissionHandler.cs       # Authorization handler
-├── Resilience/                    # Wave 1
+├── Resilience/
 │   ├── ResilienceOptions.cs       # Retry/circuit breaker config
-│   └── PolicyFactory.cs           # Polly policy creation
-├── Exceptions/                    # Wave 1
+│   ├── PolicyFactory.cs           # Legacy Polly v7 policies
+│   ├── ResiliencePipelineFactory.cs  # Polly v8 pipelines (NEW)
+│   ├── ResiliencePipelineExtensions.cs  # v8 DI helpers (NEW)
+│   └── CircuitBreakerEvents.cs    # Observable circuit breaker (NEW)
+├── Exceptions/
 │   ├── ErrorResponse.cs           # Standard error responses
 │   ├── Result.cs                  # Result<T> pattern
 │   ├── MystiraException.cs        # Base exception types
 │   └── GlobalExceptionHandler.cs  # IExceptionHandler
-├── Caching/                       # Wave 2
+├── Caching/
 │   ├── CacheOptions.cs            # Cache configuration
 │   ├── ICacheService.cs           # Cache abstraction
 │   └── DistributedCacheService.cs # Redis/memory implementation
-├── Messaging/                     # Wave 3 (Wolverine)
+├── Messaging/                     # Wolverine
 │   ├── MessagingOptions.cs        # Messaging configuration
 │   └── ICommand.cs                # Message marker interfaces
-├── Data/                          # Wave 4
+├── Locking/                       # NEW
+│   ├── IDistributedLock.cs        # Lock interfaces
+│   ├── RedisDistributedLockService.cs  # Redis implementation
+│   └── DistributedLockExtensions.cs    # DI helpers
+├── Data/
 │   └── Repositories/
 │       ├── IRepository.cs         # Repository + UnitOfWork interfaces
 │       └── RepositoryBase.cs      # EF Core implementation with streaming
@@ -339,15 +421,16 @@ Mystira.Shared/
     ├── AuthorizationExtensions.cs
     ├── CachingExtensions.cs
     ├── ExceptionExtensions.cs
-    ├── HealthCheckExtensions.cs   # Health check registration
+    ├── HealthCheckExtensions.cs
     ├── MessagingExtensions.cs
-    ├── OptionsValidationExtensions.cs  # Options validators
-    ├── ResilienceExtensions.cs    # Resilient HTTP clients
+    ├── OptionsValidationExtensions.cs
+    ├── ResilienceExtensions.cs
     └── TelemetryExtensions.cs
 ```
 
 ## Related Documentation
 
+- [Migration Guide](https://github.com/phoenixvc/Mystira.workspace/blob/main/docs/guides/mystira-shared-migration.md) - Detailed migration and feature adoption guide
 - [ADR-0020: Package Consolidation Strategy](https://github.com/phoenixvc/Mystira.workspace/blob/main/docs/architecture/adr/0020-package-consolidation-strategy.md)
 - [Authentication & Authorization Guide](https://github.com/phoenixvc/Mystira.workspace/blob/main/docs/guides/authentication-authorization-guide.md)
 
