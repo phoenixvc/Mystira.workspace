@@ -116,29 +116,26 @@ resource "azurerm_cognitive_account" "ai_foundry" {
 }
 
 # =============================================================================
-# Enable Project Management (using Azure CLI)
+# Enable Project Management (using AzAPI)
 # =============================================================================
 # The allowProjectManagement property is not available in azurerm provider
-# We use az rest command to PATCH the account with this setting
+# We use azapi_update_resource to PATCH the account with this setting
 
-resource "terraform_data" "enable_project_management" {
+resource "azapi_update_resource" "enable_project_management" {
   count = var.enable_project ? 1 : 0
 
+  type        = "Microsoft.CognitiveServices/accounts@2025-06-01"
+  resource_id = azurerm_cognitive_account.ai_foundry.id
+
   # Must wait for OpenAI model deployments to complete first
-  # Otherwise, az rest PATCH will fail with RequestConflict error because
+  # Otherwise, PATCH will fail with RequestConflict error because
   # the Cognitive Services account is in a non-terminal provisioning state
   depends_on = [azurerm_cognitive_deployment.openai_models]
 
-  triggers_replace = [
-    azurerm_cognitive_account.ai_foundry.id
-  ]
-
-  provisioner "local-exec" {
-    command = <<-EOT
-      az rest --method PATCH \
-        --url "https://management.azure.com${azurerm_cognitive_account.ai_foundry.id}?api-version=2025-06-01" \
-        --body '{"properties": {"allowProjectManagement": true}}'
-    EOT
+  body = {
+    properties = {
+      allowProjectManagement = true
+    }
   }
 }
 
@@ -156,8 +153,8 @@ resource "azapi_resource" "ai_project" {
   parent_id = azurerm_cognitive_account.ai_foundry.id
   location  = var.location
 
-  # Must wait for allowProjectManagement to be enabled via az CLI
-  depends_on = [terraform_data.enable_project_management]
+  # Must wait for allowProjectManagement to be enabled
+  depends_on = [azapi_update_resource.enable_project_management]
 
   identity {
     type = "SystemAssigned"
@@ -218,7 +215,7 @@ resource "azapi_resource" "catalog_models" {
   parent_id = azurerm_cognitive_account.ai_foundry.id
 
   # Wait for project management to be enabled
-  depends_on = [terraform_data.enable_project_management]
+  depends_on = [azapi_update_resource.enable_project_management]
 
   body = {
     properties = {
