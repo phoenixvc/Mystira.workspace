@@ -449,7 +449,8 @@ Based on comprehensive analysis, the following namespaces should be added to `My
 | `Microsoft.EntityFrameworkCore` | 9.0.0 | App.Infrastructure | ORM |
 | `Microsoft.EntityFrameworkCore.Cosmos` | 9.0.0 | App.Api, Admin.Api | Cosmos DB |
 | `FluentValidation` | 11.11.0 | App.Application | Input validation |
-| `MediatR` | 12.4.1 | App.Application | CQRS pattern |
+| `MediatR` | 12.4.1 | App.Application | CQRS pattern ⚠️ **Migrating to Wolverine** |
+| `Wolverine` | - | **Planned** | Unified messaging (replaces MediatR) |
 | `StackExchange.Redis` | - | **Not used** | Need for distributed cache |
 | `Polly` | via Http.Polly | App.PWA | Resilience policies |
 
@@ -463,6 +464,18 @@ Based on comprehensive analysis, the following namespaces should be added to `My
 | 4b | Add `Mystira.Shared.Exceptions` | `Mystira.Shared` | ⏳ Planned |
 | 4c | Add `Mystira.Shared.Caching` | `Mystira.Shared` | ⏳ Planned |
 | 4d | Add `Mystira.Shared.Data` | `Mystira.Shared` | ⏳ Planned |
+| 4h | **Migrate MediatR → Wolverine** | All .NET services | ⏳ Planned |
+
+#### Wolverine Migration (ADR-0015 Accepted)
+
+See [ADR-0015](../architecture/adr/0015-event-driven-architecture-framework.md) for full details.
+
+| Phase | Action | Services | Status |
+|-------|--------|----------|--------|
+| W1 | Add Wolverine alongside MediatR | App.Application | ⏳ Planned |
+| W2 | Migrate command/query handlers | App, StoryGenerator | ⏳ Planned |
+| W3 | Add Azure Service Bus for events | All .NET services | ⏳ Planned |
+| W4 | Remove MediatR dependency | All .NET services | ⏳ Planned |
 
 #### Frontend/TypeScript Consolidation
 
@@ -495,16 +508,23 @@ See [ADR-0020](../architecture/adr/0020-package-consolidation-strategy.md#compre
 12. **Phase 4b**: Add `Mystira.Shared.Exceptions` - Error/Result patterns
 13. **Phase 4c**: Add `Mystira.Shared.Caching` - Redis distributed cache
 14. **Phase 4d**: Add `Mystira.Shared.Data` - Repository + Specifications
+15. **Phase 4h**: Migrate MediatR → Wolverine (ADR-0015 Accepted)
+
+### Wolverine Migration (ADR-0015 Accepted)
+16. **Phase W1**: Add Wolverine alongside MediatR in App.Application
+17. **Phase W2**: Migrate command/query handlers to Wolverine convention
+18. **Phase W3**: Add Azure Service Bus transport for distributed events
+19. **Phase W4**: Remove MediatR dependency from all services
 
 ### Phase 4: Frontend/TypeScript Consolidation (In Progress)
-15. **Phase 4e**: Create `@mystira/design-tokens` - Unified color/typography/spacing
-16. **Phase 4f**: Create Tailwind preset for DevHub, Story Generator
-17. **Phase 4g**: Evaluate `@mystira/ui-react` for shared components
+20. **Phase 4e**: Create `@mystira/design-tokens` - Unified color/typography/spacing
+21. **Phase 4f**: Create Tailwind preset for DevHub, Story Generator
+22. **Phase 4g**: Evaluate `@mystira/ui-react` for shared components
 
 ### Phase 5: Cleanup (Pending)
-18. Migrate services to use `Mystira.Shared` namespaces
-19. Migrate frontends to use `@mystira/design-tokens`
-20. Cleanup deprecated packages and workflows
+23. Migrate services to use `Mystira.Shared` namespaces
+24. Migrate frontends to use `@mystira/design-tokens`
+25. Cleanup deprecated packages and workflows
 
 ---
 
@@ -514,3 +534,5 @@ See [ADR-0020](../architecture/adr/0020-package-consolidation-strategy.md#compre
 - [Package Releases Guide](../guides/package-releases.md)
 - [ADR-0007: NuGet Feed Strategy](../architecture/adr/0007-nuget-feed-strategy-for-shared-libraries.md)
 - [ADR-0009: App Segregation Strategy](../architecture/adr/0009-further-app-segregation-strategy.md)
+- [ADR-0015: Event-Driven Architecture (Wolverine)](../architecture/adr/0015-event-driven-architecture-framework.md)
+- [ADR-0020: Package Consolidation Strategy](../architecture/adr/0020-package-consolidation-strategy.md)
