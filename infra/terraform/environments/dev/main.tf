@@ -486,6 +486,70 @@ module "entra_id" {
   }
 }
 
+# GitHub Actions OIDC Authentication
+# Creates federated credentials for all submodule repositories
+module "github_oidc" {
+  source = "../../modules/github-oidc"
+
+  environment = "dev"
+  github_org  = "phoenixvc"
+
+  # Role assignments
+  acr_id = module.shared_acr.acr_id
+  aks_id = azurerm_kubernetes_cluster.main.id
+
+  # All Mystira submodule repositories
+  repositories = {
+    # Kubernetes-deployed services
+    "admin-api" = {
+      name     = "Mystira.Admin.Api"
+      branches = ["dev", "main"]
+    }
+    "admin-ui" = {
+      name     = "Mystira.Admin.UI"
+      branches = ["dev", "main"]
+    }
+    "chain" = {
+      name     = "Mystira.Chain"
+      branches = ["dev", "main"]
+    }
+    "publisher" = {
+      name     = "Mystira.Publisher"
+      branches = ["dev", "main"]
+    }
+    "story-generator" = {
+      name     = "Mystira.StoryGenerator"
+      branches = ["dev", "main"]
+    }
+
+    # App Service / Static Web App services
+    "app" = {
+      name     = "Mystira.App"
+      branches = ["dev", "main"]
+    }
+    "devhub" = {
+      name     = "Mystira.DevHub"
+      branches = ["dev", "main"]
+    }
+
+    # Workspace (for infra and orchestration)
+    "workspace" = {
+      name        = "Mystira.workspace"
+      branches    = ["dev", "main"]
+      enable_tags = true # For release deployments
+    }
+  }
+
+  tags = {
+    CostCenter = "development"
+  }
+
+  depends_on = [
+    module.shared_acr,
+    azurerm_kubernetes_cluster.main
+  ]
+}
+
 # Shared Identity and RBAC Configuration
 module "identity" {
   source = "../../modules/shared/identity"
@@ -1014,4 +1078,33 @@ output "azure_ai_endpoint" {
 output "azure_ai_model_deployments" {
   description = "Map of deployed AI models"
   value       = module.shared_azure_ai.model_deployments
+}
+
+# =============================================================================
+# GitHub Actions OIDC Outputs
+# =============================================================================
+
+output "github_oidc_client_id" {
+  description = "CI/CD app client ID - use as AZURE_CLIENT_ID in GitHub secrets"
+  value       = module.github_oidc.cicd_client_id
+}
+
+output "github_oidc_tenant_id" {
+  description = "Azure AD tenant ID - use as AZURE_TENANT_ID in GitHub secrets"
+  value       = module.github_oidc.tenant_id
+}
+
+output "github_oidc_subscription_id" {
+  description = "Azure subscription ID - use as AZURE_SUBSCRIPTION_ID in GitHub secrets"
+  value       = module.github_oidc.subscription_id
+}
+
+output "github_oidc_secrets" {
+  description = "All GitHub secrets needed for OIDC authentication"
+  value       = module.github_oidc.github_secrets
+}
+
+output "github_oidc_credential_count" {
+  description = "Number of federated credentials created"
+  value       = module.github_oidc.credential_count
 }

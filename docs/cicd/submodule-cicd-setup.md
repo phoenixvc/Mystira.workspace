@@ -56,14 +56,30 @@ This guide provides complete instructions for setting up CI/CD in Mystira submod
 
 ## Required Secrets
 
-Add these secrets to your submodule repository:
+### Azure OIDC Credentials (Terraform-Managed)
+
+Azure authentication credentials are managed via Terraform in `infra/terraform/modules/github-oidc`. After running `terraform apply`, get the values:
+
+```bash
+cd infra/terraform/environments/dev
+terraform output github_oidc_secrets
+```
+
+Add these secrets to **each submodule repository**:
+
+| Secret | Source | Purpose |
+|--------|--------|---------|
+| `AZURE_CLIENT_ID` | `terraform output github_oidc_client_id` | Azure OIDC authentication |
+| `AZURE_TENANT_ID` | `terraform output github_oidc_tenant_id` | Azure OIDC authentication |
+| `AZURE_SUBSCRIPTION_ID` | `terraform output github_oidc_subscription_id` | Azure OIDC authentication |
+
+> **Note**: Federated credentials for each repo/branch are automatically created by Terraform. No manual Azure AD configuration needed.
+
+### Other Secrets
 
 | Secret | Value | Purpose |
 |--------|-------|---------|
 | `MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN` | GitHub PAT with `repo` scope | Trigger workspace deployments |
-| `AZURE_CLIENT_ID` | From Azure service principal | Azure authentication |
-| `AZURE_TENANT_ID` | From Azure service principal | Azure authentication |
-| `AZURE_SUBSCRIPTION_ID` | Azure subscription | Azure authentication |
 | `GH_PACKAGES_TOKEN` | GitHub PAT with `read:packages` | NuGet package restore |
 
 **Workspace-level secrets** (configured in `Mystira.workspace`):
@@ -74,6 +90,28 @@ Add these secrets to your submodule repository:
 | `MS_TEAMS_WEBHOOK_URL` | Teams incoming webhook URL | Deployment notifications (optional) |
 
 > **Note**: `MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN` is the standard PAT used across all Mystira repositories. It must have `repo` scope to trigger `repository_dispatch` events in the workspace.
+
+### Adding a New Submodule Repository
+
+When adding a new submodule that needs CI/CD:
+
+1. Add the repository to `infra/terraform/environments/dev/main.tf`:
+   ```hcl
+   module "github_oidc" {
+     # ... existing config ...
+     repositories = {
+       # ... existing repos ...
+       "new-service" = {
+         name     = "Mystira.NewService"
+         branches = ["dev", "main"]
+       }
+     }
+   }
+   ```
+
+2. Run `terraform apply` to create the federated credentials
+
+3. Copy the OIDC secrets to the new repository's GitHub secrets
 
 ---
 
@@ -90,6 +128,7 @@ Each submodule uses a specific event type:
 | Mystira.Chain | `chain-deploy` | `mys-chain` | Kubernetes |
 | Mystira.App (API) | `app-deploy` | `mys-dev-app-api-san` | App Service |
 | Mystira.App (SWA) | `app-swa-deploy` | `mys-dev-mystira-swa-eus2` | Static Web App |
+| Mystira.DevHub | `devhub-deploy` | `mys-dev-devhub-san` | App Service |
 
 ---
 
