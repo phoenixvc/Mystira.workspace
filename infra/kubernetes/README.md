@@ -158,6 +158,22 @@ If Azure SDK authentication fails:
 2. Check that federated credential subject matches: `system:serviceaccount:mystira:<service-account-name>`
 3. Ensure pod has the correct label: `azure.workload.identity/use: "true"`
 
+### Deployment selector is immutable
+
+If you encounter an error like `spec.selector: Invalid value: ... field is immutable` when applying manifests:
+
+This occurs when an existing deployment has a different selector than what Kustomize is trying to apply. Since deployment selectors are immutable in Kubernetes, the deployment must be deleted and recreated:
+
+```bash
+# Delete the deployment (this will cause downtime)
+kubectl delete deployment <deployment-name> -n <namespace>
+
+# Reapply the manifests to recreate with correct selector
+kubectl apply -k overlays/dev/
+```
+
+For production deployments, use a blue-green deployment strategy to avoid downtime.
+
 ## PostgreSQL Azure AD Authentication
 
 Services can authenticate to PostgreSQL using Azure AD tokens instead of passwords. This is configured via the shared PostgreSQL module.

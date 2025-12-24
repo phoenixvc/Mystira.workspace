@@ -11,8 +11,10 @@ resources:
   - ../../base/admin-ui
   - ../../base/cert-manager
 
-commonLabels:
-  environment: prod
+labels:
+  - pairs:
+      environment: prod
+    includeSelectors: true
 
 patches:
   - target:
