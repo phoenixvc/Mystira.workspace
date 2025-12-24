@@ -8,6 +8,8 @@ This guide covers Mystira's Azure AI Foundry infrastructure and Retrieval-Augmen
 - [SWOT Analysis](#swot-analysis)
 - [Architecture](#architecture)
 - [Azure AI Foundry Setup](#azure-ai-foundry-setup)
+- [Model Selection Guide](#model-selection-guide)
+- [Deploying Claude Models](#deploying-claude-models)
 - [Embedding Models](#embedding-models)
 - [Azure AI Search](#azure-ai-search)
 - [Semantic Search](#semantic-search)
@@ -295,6 +297,359 @@ Resources follow the pattern: `mys-shared-ai-{region_code}`
 | dev | mys-shared-ai-san | South Africa North |
 | staging | mys-shared-ai-san | South Africa North |
 | prod | mys-shared-ai-san | South Africa North |
+
+---
+
+## Model Selection Guide
+
+Choose the right model for your use case based on capability, cost, and latency requirements.
+
+### Model Overview
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                           Model Capability Spectrum                          │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  COST ←──────────────────────────────────────────────────────────→ QUALITY  │
+│                                                                             │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐     │
+│  │ GPT-4o   │  │ GPT-4.1  │  │ GPT-4o   │  │ Claude   │  │ Claude   │     │
+│  │  mini    │  │  nano    │  │          │  │ Sonnet   │  │  Opus    │     │
+│  │ $0.15/1M │  │ $0.10/1M │  │ $2.50/1M │  │ $3.00/1M │  │$15.00/1M │     │
+│  └──────────┘  └──────────┘  └──────────┘  └──────────┘  └──────────┘     │
+│       │              │             │             │             │           │
+│       ▼              ▼             ▼             ▼             ▼           │
+│   High-volume    Embeddings    General      Analysis     Complex          │
+│   Simple tasks   + Simple      Purpose      Reasoning    Multi-step       │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+### Use Case Matrix
+
+| Use Case | Recommended Model | Why |
+|----------|-------------------|-----|
+| **Chat/Conversational** | gpt-4o-mini | Fast, cheap, good enough for most conversations |
+| **Content Generation** | gpt-4o | Better creativity and coherence |
+| **Code Generation** | gpt-5.1-codex / Claude Sonnet | Specialized for code understanding |
+| **Code Review/Analysis** | Claude Sonnet | Superior reasoning about code structure |
+| **Summarization** | gpt-4o-mini | Cost-effective for high-volume |
+| **Complex Analysis** | Claude Opus | Best reasoning, handles nuance |
+| **RAG Retrieval** | gpt-4o-mini | Fast context processing |
+| **Data Extraction** | gpt-4.1 | Good structured output |
+| **Translation** | gpt-4o | Strong multilingual support |
+| **Classification** | gpt-4.1-nano | Fastest for simple decisions |
+| **Creative Writing** | Claude Sonnet | Better narrative flow |
+| **Technical Docs** | Claude Sonnet | Precise, well-structured |
+| **Embeddings** | text-embedding-3-large | Best accuracy for RAG |
+| **High-volume Embeddings** | text-embedding-3-small | 6x cheaper, 95% accuracy |
+
+### Model Tiers
+
+#### Tier 1: High-Volume / Cost-Optimized
+
+| Model | Input Cost | Output Cost | Best For |
+|-------|------------|-------------|----------|
+| gpt-4o-mini | $0.15/1M | $0.60/1M | Chat, summarization, classification |
+| gpt-4.1-nano | $0.10/1M | $0.40/1M | Simple tasks, routing, embeddings assist |
+| Claude Haiku | $0.25/1M | $1.25/1M | Fast analysis, high-volume processing |
+
+#### Tier 2: General Purpose
+
+| Model | Input Cost | Output Cost | Best For |
+|-------|------------|-------------|----------|
+| gpt-4o | $2.50/1M | $10.00/1M | General tasks, content creation |
+| gpt-4.1 | $2.00/1M | $8.00/1M | Structured output, data extraction |
+| gpt-5-nano | $1.00/1M | $4.00/1M | Advanced reasoning, cheaper than 4o |
+
+#### Tier 3: Premium / Analysis
+
+| Model | Input Cost | Output Cost | Best For |
+|-------|------------|-------------|----------|
+| gpt-5.1 | $5.00/1M | $15.00/1M | Complex multi-step tasks |
+| gpt-5.1-codex | $5.00/1M | $15.00/1M | Code generation and review |
+| Claude Sonnet | $3.00/1M | $15.00/1M | Analysis, reasoning, code review |
+
+#### Tier 4: Maximum Capability
+
+| Model | Input Cost | Output Cost | Best For |
+|-------|------------|-------------|----------|
+| Claude Opus | $15.00/1M | $75.00/1M | Most complex tasks, research, deep analysis |
+
+### Decision Flowchart
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                        Model Selection Flowchart                             │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│                            Start                                            │
+│                              │                                              │
+│                              ▼                                              │
+│                    ┌─────────────────┐                                      │
+│                    │ Is it code-     │                                      │
+│                    │ related?        │                                      │
+│                    └────────┬────────┘                                      │
+│                      Yes    │    No                                         │
+│              ┌──────────────┴──────────────┐                                │
+│              ▼                             ▼                                │
+│    ┌─────────────────┐           ┌─────────────────┐                       │
+│    │ Complex review? │           │ High volume?    │                       │
+│    └────────┬────────┘           │ (>1000/day)     │                       │
+│       Yes   │   No               └────────┬────────┘                       │
+│        │    │                       Yes   │   No                           │
+│        ▼    ▼                        │    │                                │
+│   Claude   gpt-5.1                   ▼    ▼                                │
+│   Sonnet   -codex              ┌─────────────────┐                         │
+│                                │ Needs complex   │                         │
+│              ┌─────────────────│ reasoning?      │                         │
+│              │                 └────────┬────────┘                         │
+│              ▼                    Yes   │   No                             │
+│         gpt-4o-mini                │    │                                  │
+│         or Haiku                   ▼    ▼                                  │
+│                              ┌─────────────────┐                           │
+│                              │ Creative or     │──Yes──▶ Claude Sonnet     │
+│                              │ analytical?     │         or gpt-4o         │
+│                              └────────┬────────┘                           │
+│                                       │ No                                 │
+│                                       ▼                                    │
+│                              ┌─────────────────┐                           │
+│                              │ Mission         │──Yes──▶ Claude Opus       │
+│                              │ critical?       │                           │
+│                              └────────┬────────┘                           │
+│                                       │ No                                 │
+│                                       ▼                                    │
+│                                  gpt-4o-mini                               │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+### Mystira Model Deployment
+
+| Model | Region | SKU | Use Case in Mystira |
+|-------|--------|-----|---------------------|
+| gpt-4o | SAN | GlobalStandard | General content generation |
+| gpt-4o-mini | SAN | GlobalStandard | Chat, high-volume tasks |
+| gpt-4.1 | SAN | GlobalStandard | Structured data extraction |
+| gpt-4.1-nano | SAN | GlobalStandard | Classification, routing |
+| gpt-5-nano | SAN | GlobalStandard | Advanced reasoning (cost-effective) |
+| gpt-5.1 | UK South | GlobalStandard | Complex analysis (not in SAN) |
+| gpt-5.1-codex | UK South | GlobalStandard | Code generation/review |
+| text-embedding-3-large | SAN | GlobalStandard | Production RAG embeddings |
+| text-embedding-3-small | SAN | GlobalStandard | Draft/test embeddings |
+| claude-haiku-4-5 | UK South | Standard | High-volume analysis |
+| claude-sonnet-4-5 | UK South | Standard | Deep analysis, code review |
+| claude-opus-4-5 | UK South | Standard | Complex research tasks |
+
+---
+
+## Deploying Claude Models
+
+Claude models (Anthropic) are available through the Azure AI Model Catalog but **cannot be deployed via Terraform**. They require manual deployment through the Azure AI Foundry portal.
+
+### Why Claude Can't Be Deployed via Terraform
+
+1. **Marketplace Agreement**: First deployment requires accepting marketplace terms
+2. **Billing Setup**: Separate pay-as-you-go billing configuration
+3. **Regional Constraints**: Only available in specific regions (UK South, East US 2)
+4. **Quota Management**: Separate quota system from OpenAI models
+
+### Step-by-Step Deployment
+
+#### Step 1: Navigate to Azure AI Foundry
+
+```
+https://ai.azure.com
+```
+
+Or via Azure Portal:
+```
+Azure Portal → Azure AI services → Your AI Services account → Model catalog
+```
+
+#### Step 2: Find Claude Models
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│  Azure AI Model Catalog                                                      │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  Search: [anthropic claude                    ] [🔍]                        │
+│                                                                             │
+│  Filter by:  □ OpenAI  ☑ Anthropic  □ Meta  □ Mistral  □ Cohere           │
+│                                                                             │
+│  ┌─────────────────────────────────────────────────────────────────────┐   │
+│  │  claude-opus-4-5                                                     │   │
+│  │  Anthropic's most capable model for complex tasks                    │   │
+│  │  Context: 200K tokens | Output: 4K tokens                           │   │
+│  │  [Deploy]                                                            │   │
+│  └─────────────────────────────────────────────────────────────────────┘   │
+│                                                                             │
+│  ┌─────────────────────────────────────────────────────────────────────┐   │
+│  │  claude-sonnet-4-5                                                   │   │
+│  │  Balanced performance and cost for most tasks                        │   │
+│  │  Context: 200K tokens | Output: 4K tokens                           │   │
+│  │  [Deploy]                                                            │   │
+│  └─────────────────────────────────────────────────────────────────────┘   │
+│                                                                             │
+│  ┌─────────────────────────────────────────────────────────────────────┐   │
+│  │  claude-haiku-4-5                                                    │   │
+│  │  Fast and cost-effective for high-volume tasks                       │   │
+│  │  Context: 200K tokens | Output: 4K tokens                           │   │
+│  │  [Deploy]                                                            │   │
+│  └─────────────────────────────────────────────────────────────────────┘   │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+#### Step 3: Configure Deployment
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│  Deploy claude-sonnet-4-5                                                    │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  Deployment name:    [claude-sonnet-4-5          ]                         │
+│                                                                             │
+│  Azure AI resource:  [mys-shared-ai-san          ] ▼                       │
+│                                                                             │
+│  Region:             [UK South                   ] ▼                       │
+│                      ⚠️ Model not available in South Africa North           │
+│                                                                             │
+│  Pricing tier:       ○ Standard (Pay-as-you-go)                            │
+│                      ● Provisioned (Reserved capacity)                      │
+│                                                                             │
+│  ☑ I accept the Anthropic terms of service                                 │
+│                                                                             │
+│                                      [Cancel]  [Deploy]                     │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+#### Step 4: Accept Marketplace Terms (First Time Only)
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│  Anthropic Claude Terms of Service                                           │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  By deploying Claude models, you agree to:                                  │
+│                                                                             │
+│  • Anthropic's Acceptable Use Policy                                        │
+│  • Azure Marketplace Terms                                                  │
+│  • Pay-as-you-go pricing (separate from Azure OpenAI)                      │
+│                                                                             │
+│  Pricing:                                                                   │
+│  ┌─────────────────────────────────────────────────────────┐               │
+│  │ Model           │ Input (per 1M) │ Output (per 1M)     │               │
+│  ├─────────────────┼────────────────┼─────────────────────┤               │
+│  │ Claude Haiku    │ $0.25          │ $1.25               │               │
+│  │ Claude Sonnet   │ $3.00          │ $15.00              │               │
+│  │ Claude Opus     │ $15.00         │ $75.00              │               │
+│  └─────────────────────────────────────────────────────────┘               │
+│                                                                             │
+│  ☑ I have read and accept the terms                                        │
+│                                                                             │
+│                                              [Accept and Continue]          │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+#### Step 5: Verify Deployment
+
+After deployment, verify via Azure CLI:
+
+```bash
+# List all deployments
+az cognitiveservices account deployment list \
+  --name mys-shared-ai-san \
+  --resource-group mys-dev-core-rg-san \
+  --output table
+
+# Test Claude endpoint
+curl -X POST "https://mys-shared-ai-san.cognitiveservices.azure.com/openai/deployments/claude-sonnet-4-5/chat/completions?api-version=2024-10-01" \
+  -H "Content-Type: application/json" \
+  -H "api-key: $AZURE_AI_KEY" \
+  -d '{
+    "messages": [{"role": "user", "content": "Hello Claude!"}],
+    "max_tokens": 100
+  }'
+```
+
+### Using Claude in Code
+
+```csharp
+// C# - Using Azure.AI.OpenAI client (works with Claude too)
+var client = new AzureOpenAIClient(
+    new Uri("https://mys-shared-ai-san.cognitiveservices.azure.com"),
+    new AzureKeyCredential(apiKey)
+);
+
+var chatClient = client.GetChatClient("claude-sonnet-4-5");
+
+var response = await chatClient.CompleteChatAsync(new[]
+{
+    new UserChatMessage("Analyze this code for potential issues...")
+});
+```
+
+```python
+# Python - Using openai client with Azure
+from openai import AzureOpenAI
+
+client = AzureOpenAI(
+    azure_endpoint="https://mys-shared-ai-san.cognitiveservices.azure.com",
+    api_key=os.getenv("AZURE_AI_KEY"),
+    api_version="2024-10-01"
+)
+
+response = client.chat.completions.create(
+    model="claude-sonnet-4-5",  # deployment name
+    messages=[
+        {"role": "user", "content": "Analyze this code for potential issues..."}
+    ],
+    max_tokens=1000
+)
+```
+
+### Claude-Specific Features
+
+| Feature | Claude Advantage |
+|---------|-----------------|
+| **Context Window** | 200K tokens (vs 128K for GPT-4) |
+| **Constitutional AI** | Built-in safety guardrails |
+| **Artifacts** | Can generate interactive components |
+| **XML Handling** | Excellent at structured XML output |
+| **Long-form Analysis** | Superior at maintaining coherence |
+
+### When to Route to Claude vs GPT
+
+```python
+def select_model(task_type: str, complexity: str, volume: str) -> str:
+    """Route requests to optimal model based on task characteristics."""
+
+    # High-volume, simple tasks → GPT-4o-mini
+    if volume == "high" and complexity == "low":
+        return "gpt-4o-mini"
+
+    # Code-related tasks → Claude Sonnet or GPT-5.1-codex
+    if task_type in ["code_review", "code_generation", "debugging"]:
+        return "claude-sonnet-4-5" if complexity == "high" else "gpt-5.1-codex"
+
+    # Complex analysis → Claude
+    if task_type in ["analysis", "research", "reasoning"]:
+        if complexity == "critical":
+            return "claude-opus-4-5"
+        return "claude-sonnet-4-5"
+
+    # Creative writing → Claude Sonnet
+    if task_type in ["creative", "narrative", "storytelling"]:
+        return "claude-sonnet-4-5"
+
+    # Default to GPT-4o for general tasks
+    return "gpt-4o"
+```
 
 ---
 
