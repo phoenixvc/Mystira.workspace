@@ -739,6 +739,40 @@ jobs:
           echo "## Terraform Apply - ${{ env.ENVIRONMENT }}" >> $GITHUB_STEP_SUMMARY
           echo "✅ Infrastructure applied successfully" >> $GITHUB_STEP_SUMMARY
 
+      - name: List Deployed AI Models
+        run: |
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## 🤖 Deployed AI Models" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # Get AI Services accounts
+          for AI_NAME in "mys-shared-ai-san" "mys-shared-ai-uks"; do
+            if az cognitiveservices account show --name "$AI_NAME" --resource-group ${{ env.AZURE_RESOURCE_GROUP }} &>/dev/null; then
+              ENDPOINT=$(az cognitiveservices account show --name "$AI_NAME" --resource-group ${{ env.AZURE_RESOURCE_GROUP }} --query "properties.endpoint" -o tsv 2>/dev/null || echo "N/A")
+              LOCATION=$(az cognitiveservices account show --name "$AI_NAME" --resource-group ${{ env.AZURE_RESOURCE_GROUP }} --query "location" -o tsv 2>/dev/null || echo "N/A")
+
+              echo "### ${AI_NAME} (${LOCATION})" >> $GITHUB_STEP_SUMMARY
+              echo "" >> $GITHUB_STEP_SUMMARY
+              echo "**Endpoint:** \`${ENDPOINT}\`" >> $GITHUB_STEP_SUMMARY
+              echo "" >> $GITHUB_STEP_SUMMARY
+              echo "| Model | Version | Format | SKU | Capacity |" >> $GITHUB_STEP_SUMMARY
+              echo "|-------|---------|--------|-----|----------|" >> $GITHUB_STEP_SUMMARY
+
+              # List all model deployments
+              az cognitiveservices account deployment list \
+                --name "$AI_NAME" \
+                --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
+                --query "[].{name:name, model:properties.model.name, version:properties.model.version, format:properties.model.format, sku:sku.name, capacity:sku.capacity}" \
+                -o json 2>/dev/null | jq -r '.[] | "| \(.name) | \(.version // "latest") | \(.format) | \(.sku) | \(.capacity) |"' >> $GITHUB_STEP_SUMMARY || echo "| (no deployments) | | | | |" >> $GITHUB_STEP_SUMMARY
+
+              echo "" >> $GITHUB_STEP_SUMMARY
+            fi
+          done
+
+          echo "---" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Note:** Claude models are deployed separately via Azure AI Model Catalog (see next job)" >> $GITHUB_STEP_SUMMARY
+
   # ============================================
   # Deploy Claude Models (via Azure AI Model Catalog)
   # ============================================
