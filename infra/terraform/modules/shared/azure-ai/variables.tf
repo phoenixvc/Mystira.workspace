@@ -62,6 +62,7 @@ variable "model_deployments" {
     capacity        = optional(number, 10)
     rai_policy_name = optional(string, null)   # Responsible AI policy name
     location        = optional(string, null)   # Override region for models not available in primary region
+    enabled         = optional(bool, true)     # Set to false to skip deploying this model
   }))
 
   validation {
@@ -128,25 +129,27 @@ variable "model_deployments" {
     }
 
     # ==========================================================================
-    # GPT-5 Series - Next generation models
+    # GPT-5 Series - Latest flagship models
     # ==========================================================================
+    # Note: gpt-5.1 and gpt-5.1-codex require registration for access
+    # Available via GlobalStandard in East US2/Sweden Central
     "gpt-5-nano" = {
       model_name    = "gpt-5-nano"
-      model_version = "2025-05-01"
+      model_version = "2025-08-07"
       model_format  = "OpenAI"
       sku_name      = "GlobalStandard"
       capacity      = 20
     }
     "gpt-5.1" = {
       model_name    = "gpt-5.1"
-      model_version = "2025-06-01"
+      model_version = "2025-11-13"
       model_format  = "OpenAI"
       sku_name      = "GlobalStandard"
       capacity      = 20
     }
     "gpt-5.1-codex" = {
       model_name    = "gpt-5.1-codex"
-      model_version = "2025-06-01"
+      model_version = "2025-11-13"
       model_format  = "OpenAI"
       sku_name      = "GlobalStandard"
       capacity      = 20
@@ -190,24 +193,28 @@ variable "model_deployments" {
     # Image Generation (DALL-E)
     # ==========================================================================
     # For story illustrations, visual content creation
+    # Deployed to East US (Standard SKU not available in South Africa North)
     "dall-e-3" = {
       model_name    = "dall-e-3"
       model_version = "3.0"
       model_format  = "OpenAI"
       sku_name      = "Standard"
       capacity      = 1
+      location      = "eastus"
     }
 
     # ==========================================================================
     # Audio Models (Whisper & TTS)
     # ==========================================================================
     # Speech-to-text for voice input, text-to-speech for narration
+    # Deployed to East US (Standard SKU not available in South Africa North)
     "whisper" = {
       model_name    = "whisper"
       model_version = "001"
       model_format  = "OpenAI"
       sku_name      = "Standard"
       capacity      = 1
+      location      = "eastus"
     }
     "tts" = {
       model_name    = "tts"
@@ -215,6 +222,7 @@ variable "model_deployments" {
       model_format  = "OpenAI"
       sku_name      = "Standard"
       capacity      = 1
+      location      = "eastus"
     }
     "tts-hd" = {
       model_name    = "tts-hd"
@@ -222,6 +230,7 @@ variable "model_deployments" {
       model_format  = "OpenAI"
       sku_name      = "Standard"
       capacity      = 1
+      location      = "eastus"
     }
 
     # ==========================================================================
@@ -257,17 +266,17 @@ variable "model_deployments" {
     # ==========================================================================
     # Specialized models for RAG enhancement
     # Rerank: Improves search relevance by 10-30% for complex queries
-    # Embed Multilingual: 100+ languages including African languages
-    "cohere-rerank-v3" = {
-      model_name    = "rerank-v3.5"
+    # Embed: Multi-language support including African languages
+    "cohere-rerank-v4" = {
+      model_name    = "Cohere-rerank-v4.0-pro"
       model_version = "1"
       model_format  = "Cohere"
       sku_name      = "GlobalStandard"
       capacity      = 1  # Serverless - pay per query
       location      = "uksouth" # Not available in SAN
     }
-    "cohere-embed-multilingual" = {
-      model_name    = "embed-multilingual-v3.0"
+    "cohere-embed-v4" = {
+      model_name    = "embed-v-4-0"
       model_version = "1"
       model_format  = "Cohere"
       sku_name      = "GlobalStandard"
@@ -280,8 +289,8 @@ variable "model_deployments" {
     # ==========================================================================
     # Codestral: Dedicated code model, 256K context, 80+ languages
     # Much cheaper than gpt-5.1-codex for code tasks
-    "codestral-2501" = {
-      model_name    = "Codestral-2501"
+    "codestral" = {
+      model_name    = "Codestral"
       model_version = "2501"
       model_format  = "Mistral"
       sku_name      = "GlobalStandard"
@@ -292,10 +301,10 @@ variable "model_deployments" {
     # ==========================================================================
     # DeepSeek Models (via Azure AI Model Catalog)
     # ==========================================================================
-    # DeepSeek-Coder: Near GPT-4 code performance at fraction of cost
+    # DeepSeek-V3: Advanced reasoning and agent performance
     # Strong benchmarks on code generation and understanding
-    "deepseek-coder-v2" = {
-      model_name    = "DeepSeek-Coder-V2-236B"
+    "deepseek-v3" = {
+      model_name    = "DeepSeek-V3.2"
       model_version = "1"
       model_format  = "DeepSeek"
       sku_name      = "GlobalStandard"
@@ -306,7 +315,7 @@ variable "model_deployments" {
     # ==========================================================================
     # AI21 Jamba Models (via Azure AI Model Catalog)
     # ==========================================================================
-    # Jamba: Novel Mamba architecture with 256K context window
+    # Jamba: Hybrid Mamba-Transformer architecture with long context
     # Linear scaling with context - efficient for long documents
     # Use for full story manuscript analysis, cross-chapter consistency
     "jamba-1.5-large" = {

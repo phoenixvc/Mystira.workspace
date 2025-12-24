@@ -102,6 +102,20 @@ output "catalog_model_deployments_uksouth" {
   }
 }
 
+output "openai_model_deployments_eastus" {
+  description = "Map of deployed OpenAI models in East US (Standard SKU)"
+  value = {
+    for k, v in azurerm_cognitive_deployment.openai_models_eastus : k => {
+      name     = v.name
+      model    = v.model[0].name
+      version  = v.model[0].version
+      format   = "OpenAI"
+      region   = "eastus"
+      endpoint = azurerm_cognitive_account.ai_foundry_eastus[0].endpoint
+    }
+  }
+}
+
 output "model_deployments" {
   description = "Combined map of all deployed models across all regions"
   value = merge(
@@ -114,6 +128,17 @@ output "model_deployments" {
         format   = "OpenAI"
         region   = var.location
         endpoint = azurerm_cognitive_account.ai_foundry.endpoint
+      }
+    },
+    # OpenAI models (East US - Standard SKU)
+    {
+      for k, v in azurerm_cognitive_deployment.openai_models_eastus : k => {
+        name     = v.name
+        model    = v.model[0].name
+        version  = v.model[0].version
+        format   = "OpenAI"
+        region   = "eastus"
+        endpoint = azurerm_cognitive_account.ai_foundry_eastus[0].endpoint
       }
     },
     # Catalog models (primary region)
@@ -185,6 +210,35 @@ output "connection_config_uksouth" {
 }
 
 # =============================================================================
+# East US Account (Secondary Region - Standard SKU)
+# =============================================================================
+
+output "eastus_account_id" {
+  description = "East US AI Foundry account ID (if created)"
+  value       = local.needs_eastus ? azurerm_cognitive_account.ai_foundry_eastus[0].id : null
+}
+
+output "eastus_endpoint" {
+  description = "East US AI Foundry endpoint URL (if created)"
+  value       = local.needs_eastus ? azurerm_cognitive_account.ai_foundry_eastus[0].endpoint : null
+}
+
+output "eastus_primary_access_key" {
+  description = "East US primary access key (if created)"
+  value       = local.needs_eastus ? azurerm_cognitive_account.ai_foundry_eastus[0].primary_access_key : null
+  sensitive   = true
+}
+
+output "connection_config_eastus" {
+  description = "Connection configuration for East US models (DALL-E, Whisper, TTS)"
+  value = local.needs_eastus ? {
+    endpoint   = azurerm_cognitive_account.ai_foundry_eastus[0].endpoint
+    account_id = azurerm_cognitive_account.ai_foundry_eastus[0].id
+    region     = "eastus"
+  } : null
+}
+
+# =============================================================================
 # Deployment Health
 # =============================================================================
 
@@ -193,16 +247,20 @@ output "deployment_health" {
   value = {
     primary_region = var.location
     primary_endpoint = azurerm_cognitive_account.ai_foundry.endpoint
-    openai_model_count = length(azurerm_cognitive_deployment.openai_models)
+    openai_model_count_primary = length(azurerm_cognitive_deployment.openai_models)
+    openai_model_count_eastus = length(azurerm_cognitive_deployment.openai_models_eastus)
     catalog_model_count_primary = length(azapi_resource.catalog_models)
     catalog_model_count_uksouth = length(azapi_resource.catalog_models_uksouth)
     total_model_count = (
       length(azurerm_cognitive_deployment.openai_models) +
+      length(azurerm_cognitive_deployment.openai_models_eastus) +
       length(azapi_resource.catalog_models) +
       length(azapi_resource.catalog_models_uksouth)
     )
     uksouth_enabled = local.needs_uksouth
     uksouth_endpoint = local.needs_uksouth ? azurerm_cognitive_account.ai_foundry_uksouth[0].endpoint : null
+    eastus_enabled = local.needs_eastus
+    eastus_endpoint = local.needs_eastus ? azurerm_cognitive_account.ai_foundry_eastus[0].endpoint : null
   }
 }
 
