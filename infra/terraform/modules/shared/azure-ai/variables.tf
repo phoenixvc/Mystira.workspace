@@ -58,55 +58,13 @@ variable "model_deployments" {
     # ==========================================================================
     # OpenAI Models (GPT Series)
     # ==========================================================================
-    # Standard models - widely available in most regions
-    "gpt-4o" = {
-      model_name    = "gpt-4o"
-      model_version = "2024-08-06"
-      model_format  = "OpenAI"
-      sku_name      = "GlobalStandard"
-      capacity      = 10
-    }
+    # GPT-4o-mini - cost-effective, widely available
     "gpt-4o-mini" = {
       model_name    = "gpt-4o-mini"
       model_version = "2024-07-18"
       model_format  = "OpenAI"
       sku_name      = "GlobalStandard"
       capacity      = 20
-    }
-
-    # GPT-4.1 series - next generation
-    "gpt-4-1" = {
-      model_name    = "gpt-4.1"
-      model_version = "2025-04-14"
-      model_format  = "OpenAI"
-      sku_name      = "GlobalStandard"
-      capacity      = 10
-    }
-    "gpt-4-1-nano" = {
-      model_name    = "gpt-4.1-nano"
-      model_version = "2025-04-14"
-      model_format  = "OpenAI"
-      sku_name      = "GlobalStandard"
-      capacity      = 20
-    }
-
-    # GPT-5 series - limited regional availability
-    # gpt-5.1 available in: UK South, Australia East, Canada East, East US 2, Japan East, Korea Central, Switzerland North
-    # NOT available in: South Africa North, East US, West US 2, Southeast Asia, North Europe
-    "gpt-5-nano" = {
-      model_name    = "gpt-5-nano"
-      model_version = "2025-04-14"
-      model_format  = "OpenAI"
-      sku_name      = "GlobalStandard"
-      capacity      = 20
-    }
-    "gpt-5-1" = {
-      model_name    = "gpt-5.1"
-      model_version = "2025-04-14"
-      model_format  = "OpenAI"
-      sku_name      = "GlobalStandard"
-      capacity      = 10
-      location      = "uksouth" # Closest region to SAN with quota
     }
 
     # ==========================================================================
@@ -131,37 +89,15 @@ variable "model_deployments" {
     }
 
     # ==========================================================================
-    # Anthropic Models (Claude Series) - via Azure AI Model Catalog
+    # NOTE: Additional models to add when available/needed:
     # ==========================================================================
-    # Available models: claude-opus-4-5, claude-sonnet-4-5, claude-haiku-4-5, claude-opus-4-1
-    # Note: May have allocation constraints. Check Azure portal for quota.
-    # All deployed to UK South (closest region to SAN with Claude availability)
-    "claude-haiku-4-5" = {
-      model_name    = "claude-haiku-4-5"
-      model_version = "1"
-      model_format  = "Anthropic"
-      sku_name      = "Standard"
-      capacity      = 1
-      location      = "uksouth"
-    }
-    "claude-sonnet-4-5" = {
-      model_name    = "claude-sonnet-4-5"
-      model_version = "1"
-      model_format  = "Anthropic"
-      sku_name      = "Standard"
-      capacity      = 1
-      location      = "uksouth"
-    }
-    "claude-opus-4-5" = {
-      model_name    = "claude-opus-4-5"
-      model_version = "1"
-      model_format  = "Anthropic"
-      sku_name      = "Standard"
-      capacity      = 1
-      location      = "uksouth"
-    }
+    # GPT-4o: Currently quota exceeded in SAN - request increase or use gpt-4o-mini
+    # GPT-4.1/5.x: Not yet released - add when available
+    # Claude models: Cannot be deployed via Terraform - use Azure AI Foundry portal
+    #   See: https://ai.azure.com/explore/models for marketplace deployment
   }
 }
+
 
 # =============================================================================
 # Network Configuration
