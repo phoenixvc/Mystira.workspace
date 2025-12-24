@@ -1,0 +1,148 @@
+name: "Contracts: Publish NuGet Package"
+
+# Unified contracts NuGet package publishing
+# Publishes Mystira.Contracts to GitHub Packages and NuGet.org
+#
+# Note: NPM publishing (@mystira/contracts) is handled by Changesets in release.yml
+# This workflow only handles the corresponding NuGet package
+#
+# Triggered by:
+# - repository_dispatch from release.yml after @mystira/contracts NPM publish
+# - Manual workflow_dispatch
+#
+# See: docs/architecture/adr/0020-package-consolidation-strategy.md
+
+on:
+  repository_dispatch:
+    types:
+      - contracts-nuget-publish
+
+  workflow_dispatch:
+    inputs:
+      version_suffix:
+        description: 'Version suffix (e.g., dev.123, empty for stable)'
+        required: false
+        type: string
+      is_prerelease:
+        description: 'Is this a pre-release build?'
+        required: false
+        type: boolean
+        default: false
+
+concurrency:
+  group: contracts-nuget-publish
+  cancel-in-progress: false
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+
+permissions:
+  id-token: write
+  contents: read
+  packages: write
+
+jobs:
+  publish-nuget:
+    name: Publish Mystira.Contracts NuGet
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout workspace
+        uses: actions/checkout@v4
+
+      - name: Determine version details
+        id: version
+        run: |
+          VERSION_SUFFIX="${{ github.event.client_payload.version_suffix || github.event.inputs.version_suffix }}"
+          IS_PRERELEASE="${{ github.event.client_payload.is_prerelease || github.event.inputs.is_prerelease || 'false' }}"
+
+          echo "version_suffix=$VERSION_SUFFIX" >> $GITHUB_OUTPUT
+          echo "is_prerelease=$IS_PRERELEASE" >> $GITHUB_OUTPUT
+
+          if [ -n "$VERSION_SUFFIX" ] || [ "$IS_PRERELEASE" = "true" ]; then
+            echo "publish_to_nuget_org=false" >> $GITHUB_OUTPUT
+          else
+            echo "publish_to_nuget_org=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restore dependencies
+        run: |
+          cd packages/contracts/dotnet/Mystira.Contracts
+          dotnet restore
+        env:
+          NUGET_AUTH_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN }}
+
+      - name: Build
+        run: |
+          cd packages/contracts/dotnet/Mystira.Contracts
+          dotnet build --configuration Release --no-restore
+
+      - name: Pack NuGet package
+        id: pack
+        run: |
+          cd packages/contracts/dotnet/Mystira.Contracts
+
+          PACK_ARGS="--configuration Release --no-build --output ./nupkg"
+
+          if [ -n "${{ steps.version.outputs.version_suffix }}" ]; then
+            PACK_ARGS="$PACK_ARGS --version-suffix ${{ steps.version.outputs.version_suffix }}"
+          fi
+
+          dotnet pack $PACK_ARGS
+
+          # Get the package version
+          NUPKG_FILE=$(ls ./nupkg/*.nupkg | head -1)
+          PACKAGE_VERSION=$(basename "$NUPKG_FILE" .nupkg | sed "s/Mystira.Contracts\.//")
+          echo "version=$PACKAGE_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Push to GitHub Packages
+        run: |
+          cd packages/contracts/dotnet/Mystira.Contracts
+          dotnet nuget push "./nupkg/*.nupkg" \
+            --source "https://nuget.pkg.github.com/phoenixvc/index.json" \
+            --api-key ${{ secrets.GITHUB_TOKEN }} \
+            --skip-duplicate
+
+      - name: Push to NuGet.org (stable releases only)
+        if: steps.version.outputs.publish_to_nuget_org == 'true'
+        run: |
+          cd packages/contracts/dotnet/Mystira.Contracts
+          dotnet nuget push "./nupkg/*.nupkg" \
+            --source "https://api.nuget.org/v3/index.json" \
+            --api-key ${{ secrets.NUGET_API_KEY }} \
+            --skip-duplicate
+
+      - name: Generate summary
+        run: |
+          TRIGGER_SOURCE="${{ github.event.client_payload.triggered_by || 'manual' }}"
+
+          echo "## Mystira.Contracts NuGet Package Published" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Property | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|----------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Package | Mystira.Contracts |" >> $GITHUB_STEP_SUMMARY
+          echo "| Version | ${{ steps.pack.outputs.version }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Pre-release | ${{ steps.version.outputs.is_prerelease }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Triggered By | ${TRIGGER_SOURCE} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Published To" >> $GITHUB_STEP_SUMMARY
+          echo "- GitHub Packages: \`https://nuget.pkg.github.com/phoenixvc/index.json\`" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ steps.version.outputs.publish_to_nuget_org }}" = "true" ]; then
+            echo "- NuGet.org: \`https://www.nuget.org/packages/Mystira.Contracts\`" >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Unified Contracts Package" >> $GITHUB_STEP_SUMMARY
+          echo "This package replaces:" >> $GITHUB_STEP_SUMMARY
+          echo "- \`Mystira.App.Contracts\` → \`Mystira.Contracts.App\`" >> $GITHUB_STEP_SUMMARY
+          echo "- \`Mystira.StoryGenerator.Contracts\` → \`Mystira.Contracts.StoryGenerator\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "See [Migration Guide](docs/guides/contracts-migration.md) for upgrade instructions." >> $GITHUB_STEP_SUMMARY
+
+    outputs:
+      version: ${{ steps.pack.outputs.version }}
+      is_prerelease: ${{ steps.version.outputs.is_prerelease }}

@@ -1,6 +1,6 @@
 # Publishing & Deployment Flow
 
-**Last Updated**: 2025-12-19
+**Last Updated**: 2025-12-24
 **Status**: ✅ Complete
 
 This document describes how packages are built, published, and deployed across all Mystira services.
@@ -19,6 +19,65 @@ This document describes how packages are built, published, and deployed across a
 │  Deployments    →  Azure Kubernetes Service (AKS)                           │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
+
+---
+
+## Unified Version Strategy
+
+All packages across ecosystems follow a synchronized versioning approach:
+
+### Version Synchronization
+
+| Package Type | Version Source | Synchronization |
+|--------------|----------------|-----------------|
+| NPM Packages | Changesets | Primary source of truth |
+| NuGet Packages | Triggered by NPM release | Follows NPM package versions |
+| Docker Images | Git SHA + environment tag | Tagged with release version |
+
+### Linked Packages
+
+Related packages are versioned together using Changesets' `linked` feature:
+
+- `@mystira/app` ↔ `Mystira.App.Contracts`
+- `@mystira/story-generator` ↔ `Mystira.StoryGenerator.Contracts`
+
+When an NPM package is released via Changesets, the corresponding NuGet package is automatically triggered for release.
+
+### Version Flow
+
+The unified publishing system supports bidirectional synchronization:
+
+**Forward Flow (Changesets → NuGet):**
+```
+┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
+│   Changeset     │ ──▶ │  NPM Release    │ ──▶ │  NuGet Release  │
+│   Created       │     │  (Changesets)   │     │  (Triggered)    │
+└─────────────────┘     └─────────────────┘     └─────────────────┘
+```
+
+**Reverse Flow (Submodule → Changeset):**
+```
+┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
+│   Submodule     │ ──▶ │  NuGet Release  │ ──▶ │  Auto-Changeset │
+│   Push to Main  │     │  (Dispatch)     │     │  Created        │
+└─────────────────┘     └─────────────────┘     └─────────────────┘
+                                                        │
+                                                        ▼
+                                                ┌─────────────────┐
+                                                │  NPM Version PR │
+                                                │  (Changesets)   │
+                                                └─────────────────┘
+```
+
+This ensures NPM packages stay in sync when their NuGet dependencies are updated directly from submodules.
+
+### Pre-release Strategy
+
+| Environment | NPM Version | NuGet Version | Docker Tag |
+|-------------|-------------|---------------|------------|
+| Development | `1.0.0-dev.N` | `1.0.0-dev.N` | `dev-{sha}` |
+| Staging | `1.0.0-rc.N` | `1.0.0-rc.N` | `staging-{sha}` |
+| Production | `1.0.0` | `1.0.0` | `prod-{sha}`, `latest` |
 
 ---
 
@@ -106,17 +165,31 @@ Uses **Changesets** for versioning and publishing.
 
 ## NuGet Package Publishing
 
+### Unified Triggering
+
+NuGet packages are published through a **unified workflow** that supports multiple trigger sources:
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                        NuGet Publishing Triggers                             │
+├─────────────────────────────────────────────────────────────────────────────┤
+│  1. Changesets Release  →  Triggered after NPM publish (unified versioning)  │
+│  2. Submodule Dispatch  →  repository_dispatch from submodule CI            │
+│  3. Manual Dispatch     →  workflow_dispatch for ad-hoc releases            │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
 ### Registry Options
 
 - **GitHub Packages**: `https://nuget.pkg.github.com/phoenixvc/index.json` (private)
-- **NuGet.org**: `https://api.nuget.org/v3/index.json` (public)
+- **NuGet.org**: `https://api.nuget.org/v3/index.json` (public, stable releases only)
 
 ### Packages Published
 
-| Package                            | Project               | Description                           |
-| ---------------------------------- | --------------------- | ------------------------------------- |
-| `Mystira.StoryGenerator.Contracts` | Shared contracts/DTOs | gRPC/API contracts                    |
-| `Mystira.StoryGenerator.Client`    | Client library        | SDK for consuming Story Generator API |
+| Package                            | NPM Counterpart          | Description                           |
+| ---------------------------------- | ------------------------ | ------------------------------------- |
+| `Mystira.App.Contracts`            | `@mystira/app`           | App API contracts/DTOs                |
+| `Mystira.StoryGenerator.Contracts` | `@mystira/story-generator` | gRPC/API contracts                  |
 
 ### Required Secrets
 
@@ -125,56 +198,21 @@ Uses **Changesets** for versioning and publishing.
 | `NUGET_API_KEY` | NuGet.org API key (for public packages) |
 | `GITHUB_TOKEN`  | Auto-provided (for GitHub Packages)     |
 
-### Workflow Configuration
+### Versioning (Synchronized with NPM)
 
-```yaml
-# In story-generator-ci.yml
-- name: Pack NuGet packages
-  run: dotnet pack --configuration Release --output ./nupkg
+NuGet packages follow the same version as their NPM counterparts:
 
-- name: Push to GitHub Packages
-  run: |
-    dotnet nuget push ./nupkg/*.nupkg \
-      --source "https://nuget.pkg.github.com/phoenixvc/index.json" \
-      --api-key ${{ secrets.GITHUB_TOKEN }}
+| Trigger Source | Version Strategy | Destination |
+|----------------|------------------|-------------|
+| Changesets (unified) | Matches NPM package version | GitHub Packages + NuGet.org |
+| Submodule dispatch (dev) | `1.0.0-dev.{run_number}` | GitHub Packages only |
+| Submodule dispatch (main) | Stable version from .csproj | GitHub Packages + NuGet.org |
 
-- name: Push to NuGet.org (optional)
-  if: github.ref == 'refs/heads/main'
-  run: |
-    dotnet nuget push ./nupkg/*.nupkg \
-      --source "https://api.nuget.org/v3/index.json" \
-      --api-key ${{ secrets.NUGET_API_KEY }}
-```
+### Workflow File
 
-### Versioning
+**Location**: `.github/workflows/nuget-publish.yml`
 
-**Current Strategy**: Alpha pre-release versioning
-
-```
-1.0.0-alpha.{build_number}
-```
-
-Examples:
-
-- `1.0.0-alpha.42`
-- `1.0.0-alpha.43`
-
-The build number increments automatically with each CI run (`github.run_number`).
-
-**Progression**:
-| Phase | Version Pattern | When |
-|-------|-----------------|------|
-| Alpha | `1.0.0-alpha.{n}` | Current development |
-| Beta | `1.0.0-beta.{n}` | Feature complete, testing |
-| RC | `1.0.0-rc.{n}` | Release candidate |
-| Stable | `1.0.0` | Production release |
-
-To update version stage, modify the workflow:
-
-```yaml
-# In story-generator-ci.yml
--p:PackageVersion=1.0.0-alpha.${{ github.run_number }}
-```
+Handles all trigger types with consistent behavior and logging.
 
 ---
 
@@ -248,8 +286,8 @@ To update version stage, modify the workflow:
 | `story-generator-ci.yml`              | Push/PR to dev/main        | Lint, test, build, Docker push        |
 | `submodule-deploy-dev.yml`            | `repository_dispatch`      | Deploy submodule to dev K8s           |
 | `submodule-deploy-dev-appservice.yml` | `repository_dispatch`      | Deploy Mystira.App to dev App Service |
-| `nuget-publish.yml`                   | `repository_dispatch`      | Publish NuGet packages                |
-| `release.yml`                         | Push to main               | NPM publish via Changesets            |
+| `nuget-publish.yml`                   | `repository_dispatch` / unified | Publish NuGet packages (unified)  |
+| `release.yml`                         | Push to main               | NPM + NuGet publish (unified)         |
 | `staging-release.yml`                 | Push to main               | Auto-deploy to staging AKS            |
 | `production-release.yml`              | Manual                     | Deploy to production AKS              |
 | `infra-deploy.yml`                    | Manual/Push                | Full infrastructure deployment        |
