@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Mystira.Shared.Messaging;
 using Wolverine;
+using Wolverine.AzureServiceBus;
 
 namespace Mystira.Shared.Extensions;
 
@@ -18,8 +19,8 @@ public static class MessagingExtensions
     /// <param name="builder">The host application builder.</param>
     /// <param name="configureWolverine">Optional additional Wolverine configuration.</param>
     /// <returns>The host application builder for chaining.</returns>
-    public static IHostApplicationBuilder AddMystiraMessaging(
-        this IHostApplicationBuilder builder,
+    public static HostApplicationBuilder AddMystiraMessaging(
+        this HostApplicationBuilder builder,
         Action<WolverineOptions>? configureWolverine = null)
     {
         var options = new MessagingOptions();
@@ -28,7 +29,7 @@ public static class MessagingExtensions
         builder.Services.Configure<MessagingOptions>(
             builder.Configuration.GetSection(MessagingOptions.SectionName));
 
-        builder.Host.UseWolverine(wolverine =>
+        builder.UseWolverine(wolverine =>
         {
             ConfigureWolverineDefaults(wolverine, options);
             configureWolverine?.Invoke(wolverine);
@@ -44,8 +45,8 @@ public static class MessagingExtensions
     /// <param name="options">Messaging options.</param>
     /// <param name="configureWolverine">Optional additional Wolverine configuration.</param>
     /// <returns>The host application builder for chaining.</returns>
-    public static IHostApplicationBuilder AddMystiraMessaging(
-        this IHostApplicationBuilder builder,
+    public static HostApplicationBuilder AddMystiraMessaging(
+        this HostApplicationBuilder builder,
         MessagingOptions options,
         Action<WolverineOptions>? configureWolverine = null)
     {
@@ -61,7 +62,7 @@ public static class MessagingExtensions
             o.InitialRetryDelaySeconds = options.InitialRetryDelaySeconds;
         });
 
-        builder.Host.UseWolverine(wolverine =>
+        builder.UseWolverine(wolverine =>
         {
             ConfigureWolverineDefaults(wolverine, options);
             configureWolverine?.Invoke(wolverine);
@@ -87,7 +88,7 @@ public static class MessagingExtensions
         var retryDelays = GenerateRetryDelays(options.MaxRetries, options.InitialRetryDelaySeconds);
         if (retryDelays.Length > 0)
         {
-            wolverine.Policies.OnException<Exception>()
+            wolverine.OnException<Exception>()
                 .RetryWithCooldown(retryDelays);
         }
 
@@ -95,7 +96,7 @@ public static class MessagingExtensions
         if (!string.IsNullOrEmpty(options.ServiceBusConnectionString))
         {
             wolverine.UseAzureServiceBus(options.ServiceBusConnectionString)
-                .AutoProvision(options.AutoProvision);
+                .AutoProvision();
         }
 
         // Apply local queue settings
