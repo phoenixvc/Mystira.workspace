@@ -110,6 +110,26 @@ variable "model_deployments" {
     }
 
     # ==========================================================================
+    # Embedding Models (for RAG / Vector Search)
+    # ==========================================================================
+    # Used to convert text to vectors before sending to AI Search
+    # Reduces token usage by ~20x compared to sending raw text
+    "text-embedding-3-large" = {
+      model_name    = "text-embedding-3-large"
+      model_version = "1"
+      model_format  = "OpenAI"
+      sku_name      = "Standard"
+      capacity      = 120 # Higher capacity for embeddings (high volume)
+    }
+    "text-embedding-3-small" = {
+      model_name    = "text-embedding-3-small"
+      model_version = "1"
+      model_format  = "OpenAI"
+      sku_name      = "Standard"
+      capacity      = 120 # Higher capacity for embeddings (high volume)
+    }
+
+    # ==========================================================================
     # Anthropic Models (Claude Series) - via Azure AI Model Catalog
     # ==========================================================================
     # Available models: claude-opus-4-5, claude-sonnet-4-5, claude-haiku-4-5, claude-opus-4-1

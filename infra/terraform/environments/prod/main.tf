@@ -436,6 +436,21 @@ module "shared_azure_ai" {
       capacity      = 50
       location      = "uksouth" # Not available in SAN
     }
+    # Embedding models for RAG / Vector Search (reduces tokens ~20x)
+    "text-embedding-3-large" = {
+      model_name    = "text-embedding-3-large"
+      model_version = "1"
+      model_format  = "OpenAI"
+      sku_name      = "Standard"
+      capacity      = 240 # Higher capacity for production
+    }
+    "text-embedding-3-small" = {
+      model_name    = "text-embedding-3-small"
+      model_version = "1"
+      model_format  = "OpenAI"
+      sku_name      = "Standard"
+      capacity      = 240 # Higher capacity for production
+    }
     # Anthropic Claude - UK South (closest to SAN with availability)
     "claude-haiku-4-5" = {
       model_name    = "claude-haiku-4-5"
