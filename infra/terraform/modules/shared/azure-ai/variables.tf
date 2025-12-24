@@ -114,13 +114,30 @@ variable "model_deployments" {
     # ==========================================================================
     # Available models: claude-opus-4-5, claude-sonnet-4-5, claude-haiku-4-5, claude-opus-4-1
     # Note: May have allocation constraints. Check Azure portal for quota.
+    # All deployed to UK South (closest region to SAN with Claude availability)
+    "claude-haiku-4-5" = {
+      model_name    = "claude-haiku-4-5"
+      model_version = "1"
+      model_format  = "Anthropic"
+      sku_name      = "Standard"
+      capacity      = 1
+      location      = "uksouth"
+    }
     "claude-sonnet-4-5" = {
       model_name    = "claude-sonnet-4-5"
       model_version = "1"
       model_format  = "Anthropic"
       sku_name      = "Standard"
       capacity      = 1
-      location      = "uksouth" # Closest region to SAN with Claude availability
+      location      = "uksouth"
+    }
+    "claude-opus-4-5" = {
+      model_name    = "claude-opus-4-5"
+      model_version = "1"
+      model_format  = "Anthropic"
+      sku_name      = "Standard"
+      capacity      = 1
+      location      = "uksouth"
     }
   }
 }

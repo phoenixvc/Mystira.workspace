@@ -437,13 +437,28 @@ module "shared_azure_ai" {
       location      = "uksouth" # Not available in SAN
     }
     # Anthropic Claude - UK South (closest to SAN with availability)
-    # Available: claude-opus-4-5, claude-sonnet-4-5, claude-haiku-4-5, claude-opus-4-1
+    "claude-haiku-4-5" = {
+      model_name    = "claude-haiku-4-5"
+      model_version = "1"
+      model_format  = "Anthropic"
+      sku_name      = "Standard"
+      capacity      = 5
+      location      = "uksouth"
+    }
     "claude-sonnet-4-5" = {
       model_name    = "claude-sonnet-4-5"
       model_version = "1"
       model_format  = "Anthropic"
       sku_name      = "Standard"
-      capacity      = 5  # Higher capacity for production
+      capacity      = 5
+      location      = "uksouth"
+    }
+    "claude-opus-4-5" = {
+      model_name    = "claude-opus-4-5"
+      model_version = "1"
+      model_format  = "Anthropic"
+      sku_name      = "Standard"
+      capacity      = 5
       location      = "uksouth"
     }
   }
