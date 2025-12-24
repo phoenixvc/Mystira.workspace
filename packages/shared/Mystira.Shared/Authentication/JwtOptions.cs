@@ -1,3 +1,6 @@
+using System.ComponentModel.DataAnnotations;
+using Microsoft.Extensions.Options;
+
 namespace Mystira.Shared.Authentication;
 
 /// <summary>
@@ -14,16 +17,20 @@ public class JwtOptions
     /// <summary>
     /// The authority URL for token validation (e.g., https://login.microsoftonline.com/{tenant-id})
     /// </summary>
+    [Required(ErrorMessage = "Authority URL is required")]
+    [Url(ErrorMessage = "Authority must be a valid URL")]
     public string Authority { get; set; } = string.Empty;
 
     /// <summary>
     /// The client/application ID registered in Entra ID
     /// </summary>
+    [Required(ErrorMessage = "ClientId is required")]
     public string ClientId { get; set; } = string.Empty;
 
     /// <summary>
     /// The expected audience for tokens (usually api://{client-id})
     /// </summary>
+    [Required(ErrorMessage = "Audience is required")]
     public string Audience { get; set; } = string.Empty;
 
     /// <summary>
@@ -49,6 +56,7 @@ public class JwtOptions
     /// <summary>
     /// Clock skew tolerance for token validation (in minutes)
     /// </summary>
+    [Range(0, 60, ErrorMessage = "ClockSkewMinutes must be between 0 and 60")]
     public int ClockSkewMinutes { get; set; } = 5;
 
     /// <summary>
@@ -60,4 +68,50 @@ public class JwtOptions
     /// Custom sign-up/sign-in policy for External ID
     /// </summary>
     public string? SignUpSignInPolicyId { get; set; }
+}
+
+/// <summary>
+/// Validator for JwtOptions that enforces conditional rules.
+/// </summary>
+public class JwtOptionsValidator : IValidateOptions<JwtOptions>
+{
+    public ValidateOptionsResult Validate(string? name, JwtOptions options)
+    {
+        var failures = new List<string>();
+
+        if (string.IsNullOrWhiteSpace(options.Authority))
+        {
+            failures.Add("Authority URL is required");
+        }
+        else if (!Uri.TryCreate(options.Authority, UriKind.Absolute, out var uri) ||
+                 (uri.Scheme != Uri.UriSchemeHttps && uri.Scheme != Uri.UriSchemeHttp))
+        {
+            failures.Add("Authority must be a valid HTTP(S) URL");
+        }
+
+        if (string.IsNullOrWhiteSpace(options.ClientId))
+        {
+            failures.Add("ClientId is required");
+        }
+
+        if (string.IsNullOrWhiteSpace(options.Audience))
+        {
+            failures.Add("Audience is required");
+        }
+
+        if (options.ClockSkewMinutes < 0 || options.ClockSkewMinutes > 60)
+        {
+            failures.Add("ClockSkewMinutes must be between 0 and 60");
+        }
+
+        // Conditional validation: SignUpSignInPolicyId required for External ID
+        if (options.IsExternalId && string.IsNullOrWhiteSpace(options.SignUpSignInPolicyId))
+        {
+            failures.Add("SignUpSignInPolicyId is required when IsExternalId is true");
+        }
+
+        return failures.Count > 0
+            ? ValidateOptionsResult.Fail(failures)
+            : ValidateOptionsResult.Success;
+    }
 }
