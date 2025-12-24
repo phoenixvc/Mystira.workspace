@@ -333,7 +333,7 @@ trigger-workspace-deploy:
     - name: Trigger deployment via workspace
       uses: peter-evans/repository-dispatch@v3
       with:
-        token: ${{ secrets.WORKSPACE_DISPATCH_TOKEN }}
+        token: ${{ secrets.MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN }}
         repository: phoenixvc/Mystira.workspace
         event-type: admin-api-deploy  # Change per service
         client-payload: |
@@ -349,15 +349,15 @@ trigger-workspace-deploy:
 
 ### Required Secrets (Submodule Repositories)
 
-| Secret                     | Description                                      |
-| -------------------------- | ------------------------------------------------ |
-| `WORKSPACE_DISPATCH_TOKEN` | GitHub PAT with `repo` scope to trigger dispatch |
-| `AZURE_CLIENT_ID`          | Azure service principal client ID                |
-| `AZURE_TENANT_ID`          | Azure tenant ID                                  |
-| `AZURE_SUBSCRIPTION_ID`    | Azure subscription ID                            |
-| `GH_PACKAGES_TOKEN`        | GitHub PAT for NuGet package restore             |
+| Secret                               | Description                                      |
+| ------------------------------------ | ------------------------------------------------ |
+| `MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN` | GitHub PAT with `repo` scope to trigger dispatch |
+| `AZURE_CLIENT_ID`                    | Azure service principal client ID                |
+| `AZURE_TENANT_ID`                    | Azure tenant ID                                  |
+| `AZURE_SUBSCRIPTION_ID`              | Azure subscription ID                            |
+| `GH_PACKAGES_TOKEN`                  | GitHub PAT for NuGet package restore             |
 
-> **Token Setup**: Use the existing PAT `MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN` (which has `repo` scope) as the value for `WORKSPACE_DISPATCH_TOKEN` in each submodule repository.
+> **Token Setup**: `MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN` is the standard PAT used across all Mystira repositories. It must have `repo` scope to trigger `repository_dispatch` events in the workspace.
 
 ### Why Dev Only?
 

@@ -1,6 +1,6 @@
 # Submodule CI/CD Setup Guide
 
-**For**: Mystira submodule repositories (Admin.Api, Admin.UI, Publisher, Chain, StoryGenerator)
+**For**: Mystira submodule repositories (Admin.Api, Admin.UI, Publisher, Chain, StoryGenerator, App)
 **Last Updated**: 2024-12-24
 
 This guide provides complete instructions for setting up CI/CD in Mystira submodule repositories to enable automated dev deployments via the workspace.
@@ -60,15 +60,13 @@ Add these secrets to your submodule repository:
 
 | Secret | Value | Purpose |
 |--------|-------|---------|
-| `WORKSPACE_DISPATCH_TOKEN` | GitHub PAT with `repo` scope | Trigger workspace deployments |
+| `MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN` | GitHub PAT with `repo` scope | Trigger workspace deployments |
 | `AZURE_CLIENT_ID` | From Azure service principal | Azure authentication |
 | `AZURE_TENANT_ID` | From Azure service principal | Azure authentication |
 | `AZURE_SUBSCRIPTION_ID` | Azure subscription | Azure authentication |
 | `GH_PACKAGES_TOKEN` | GitHub PAT with `read:packages` | NuGet package restore |
 
-### Getting the WORKSPACE_DISPATCH_TOKEN
-
-Use the existing PAT `MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN` which already has `repo` scope for the workspace. Add it to your submodule repository as `WORKSPACE_DISPATCH_TOKEN`.
+> **Note**: `MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN` is the standard PAT used across all Mystira repositories. It must have `repo` scope to trigger `repository_dispatch` events in the workspace.
 
 ---
 
@@ -76,19 +74,47 @@ Use the existing PAT `MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN` which already has `
 
 Each submodule uses a specific event type:
 
-| Repository | Event Type | Target Deployment |
-|------------|------------|-------------------|
-| Mystira.Admin.Api | `admin-api-deploy` | `mys-admin-api` |
-| Mystira.Admin.UI | `admin-ui-deploy` | `mys-admin-ui` |
-| Mystira.StoryGenerator | `story-generator-deploy` | `mys-story-generator` |
-| Mystira.Publisher | `publisher-deploy` | `mys-publisher` |
-| Mystira.Chain | `chain-deploy` | `mys-chain` |
+| Repository | Event Type | Target | Infra |
+|------------|------------|--------|-------|
+| Mystira.Admin.Api | `admin-api-deploy` | `mys-admin-api` | Kubernetes |
+| Mystira.Admin.UI | `admin-ui-deploy` | `mys-admin-ui` | Kubernetes |
+| Mystira.StoryGenerator | `story-generator-deploy` | `mys-story-generator` | Kubernetes |
+| Mystira.Publisher | `publisher-deploy` | `mys-publisher` | Kubernetes |
+| Mystira.Chain | `chain-deploy` | `mys-chain` | Kubernetes |
+| Mystira.App | `app-deploy` | `mys-dev-app-api-san` | App Service |
 
 ---
 
-## Complete Workflow Template
+## Workflow Architecture Options
 
-Copy and adapt this workflow for your submodule:
+### Option A: Separate Jobs (Recommended)
+
+Faster PR feedback - lint and test run in parallel, fail fast.
+
+```
+PR opened → lint ─┬─→ (all pass) → PR ready
+                  │
+           test ──┘
+
+Push to dev → lint ─┬─→ build-and-push → trigger-deploy
+                    │
+             test ──┘
+```
+
+### Option B: Combined Job
+
+Simpler, single workflow - but slower PR feedback.
+
+```
+PR opened → build-and-push (push=false)
+Push to dev → build-and-push (push=true) → trigger-deploy
+```
+
+**Choose Option A** if you want faster CI feedback on PRs.
+
+---
+
+## Complete Workflow Template (Option A - Separate Jobs)
 
 ```yaml
 name: "Service Name: Build & Deploy Dev"
@@ -117,13 +143,58 @@ permissions:
 
 jobs:
   # ============================================
+  # CI Jobs (run in parallel for fast feedback)
+  # ============================================
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    if: github.event_name != 'pull_request' || !github.event.pull_request.draft
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restore
+        run: dotnet restore
+
+      - name: Format check
+        run: dotnet format --verify-no-changes --verbosity diagnostic
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    if: github.event_name != 'pull_request' || !github.event.pull_request.draft
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restore
+        run: dotnet restore
+        env:
+          NUGET_AUTH_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN }}
+
+      - name: Build
+        run: dotnet build --no-restore
+
+      - name: Test
+        run: dotnet test --no-build --verbosity normal
+
+  # ============================================
   # Build and Push Docker Image
   # ============================================
   build-and-push:
     name: Build & Push Image
     runs-on: ubuntu-latest
-    # Skip draft PRs, run on everything else
-    if: github.event_name != 'pull_request' || !github.event.pull_request.draft
+    needs: [lint, test]
+    # Only build/push on push to branch (not PRs)
+    if: github.event_name != 'pull_request'
     outputs:
       image-tag: ${{ steps.meta.outputs.version }}
       image-digest: ${{ steps.build.outputs.digest }}
@@ -159,7 +230,7 @@ jobs:
         with:
           context: .
           file: ./src/YourProject/Dockerfile  # Update path
-          push: ${{ github.event_name != 'pull_request' }}
+          push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
@@ -183,7 +254,7 @@ jobs:
       - name: Trigger deployment via workspace
         uses: peter-evans/repository-dispatch@v3
         with:
-          token: ${{ secrets.WORKSPACE_DISPATCH_TOKEN }}
+          token: ${{ secrets.MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN }}
           repository: phoenixvc/Mystira.workspace
           event-type: admin-api-deploy  # Change to your event type
           client-payload: |
@@ -202,7 +273,7 @@ jobs:
   notify:
     name: Deployment Summary
     runs-on: ubuntu-latest
-    needs: [build-and-push, trigger-workspace-deploy]
+    needs: [lint, test, build-and-push, trigger-workspace-deploy]
     if: always()
     steps:
       - name: Generate Summary
@@ -214,8 +285,10 @@ jobs:
           echo "| Branch | ${{ github.ref_name }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Commit | \`${{ github.sha }}\` |" >> $GITHUB_STEP_SUMMARY
           echo "| Actor | ${{ github.actor }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Build Status | ${{ needs.build-and-push.result }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Dispatch Status | ${{ needs.trigger-workspace-deploy.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Lint | ${{ needs.lint.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Test | ${{ needs.test.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Build | ${{ needs.build-and-push.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Deploy | ${{ needs.trigger-workspace-deploy.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
 
           if [ "${{ needs.trigger-workspace-deploy.result }}" == "success" ]; then
@@ -230,6 +303,19 @@ jobs:
           echo "---" >> $GITHUB_STEP_SUMMARY
           echo "_Staging/prod deployments are managed through the workspace._" >> $GITHUB_STEP_SUMMARY
 ```
+
+---
+
+## Mystira.App Special Case
+
+Mystira.App uses **Azure App Service** (not Kubernetes). It has a different deployment pattern:
+
+| Environment | Workflow | Trigger |
+|-------------|----------|---------|
+| Dev | `submodule-deploy-dev-appservice.yml` | `app-deploy` event |
+| Production | `mystira-app-api-cicd-prod.yml` | Manual with confirmation |
+
+For Mystira.App, use `app-deploy` as the event type and the workspace will deploy to App Service instead of Kubernetes.
 
 ---
 
@@ -263,12 +349,10 @@ When adapting the template:
 
 After setup, verify:
 
-1. **PR creates CI run** - Open a PR and confirm CI runs
-2. **Draft PR skips CI** - Convert to draft and confirm no run
-3. **Merge triggers deploy** - Merge PR and confirm:
-   - Docker image pushed to ACR with `dev-<sha>` tag
-   - Workspace `submodule-deploy-dev` workflow triggered
-   - Pod updated in `mys-dev` namespace
+1. **PR opens → lint + test run in parallel**
+2. **Draft PR → all jobs skip**
+3. **Merge to dev → lint + test + build + deploy**
+4. **Push to main → lint + test + build (no deploy)**
 
 ### Check deployment status
 
@@ -276,8 +360,11 @@ After setup, verify:
 # View workspace workflow runs
 gh run list --repo phoenixvc/Mystira.workspace --workflow=submodule-deploy-dev.yml
 
-# Check pod in dev cluster
+# Check pod in dev cluster (Kubernetes services)
 kubectl get pods -n mys-dev -l app=mys-admin-api
+
+# Check App Service (Mystira.App)
+az webapp show --name mys-dev-app-api-san --resource-group mys-dev-core-rg-san --query state
 ```
 
 ---
@@ -286,7 +373,7 @@ kubectl get pods -n mys-dev -l app=mys-admin-api
 
 ### Dispatch not triggering
 
-1. Verify `WORKSPACE_DISPATCH_TOKEN` has `repo` scope
+1. Verify `MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN` has `repo` scope
 2. Check event type matches workspace handler
 3. Verify push to `dev` branch (not `main` or feature branch)
 

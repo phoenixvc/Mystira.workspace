@@ -1,0 +1,136 @@
+name: "Submodule: Deploy to Dev (App Service)"
+
+# Handler for repository_dispatch events from App Service-based submodules
+# Mystira.App uses Azure App Service, not Kubernetes
+#
+# NOTE: This is for DEV environment ONLY.
+# Production deployments use mystira-app-api-cicd-prod.yml (blue-green slot swap)
+
+on:
+  repository_dispatch:
+    types:
+      - app-deploy
+
+concurrency:
+  group: submodule-deploy-dev-appservice-${{ github.event.action }}
+  cancel-in-progress: false
+
+env:
+  ENVIRONMENT: dev
+  AZURE_RESOURCE_GROUP: mys-dev-core-rg-san
+  APP_SERVICE_NAME: mys-dev-app-api-san
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  deploy:
+    name: Deploy App to Dev
+    runs-on: ubuntu-latest
+    environment: dev
+    steps:
+      - name: Checkout workspace
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+          token: ${{ secrets.MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN }}
+
+      - name: Log dispatch payload
+        run: |
+          echo "## App Service Deployment Triggered" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Property | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|----------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Event Type | ${{ github.event.action }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Environment | ${{ github.event.client_payload.environment }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Source Commit | ${{ github.event.client_payload.ref }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Triggered By | ${{ github.event.client_payload.triggered_by }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Source Run ID | ${{ github.event.client_payload.run_id }} |" >> $GITHUB_STEP_SUMMARY
+
+      - name: Validate environment
+        run: |
+          if [ "${{ github.event.client_payload.environment }}" != "dev" ]; then
+            echo "::error::This workflow only supports dev deployments. For production, use mystira-app-api-cicd-prod.yml."
+            exit 1
+          fi
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.MYSTIRA_AZURE_CREDENTIALS }}
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Update submodule to latest
+        run: |
+          cd packages/app
+          git fetch origin dev
+          git checkout ${{ github.event.client_payload.ref || 'dev' }}
+          echo "Checked out commit: $(git rev-parse HEAD)"
+
+      - name: Restore dependencies
+        run: |
+          cd packages/app
+          dotnet restore
+        env:
+          NUGET_AUTH_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN }}
+
+      - name: Build application
+        run: |
+          cd packages/app
+          dotnet build --configuration Release --no-restore
+
+      - name: Publish application
+        run: |
+          cd packages/app
+          dotnet publish --configuration Release --no-build --output ./publish
+
+      - name: Deploy to App Service
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ env.APP_SERVICE_NAME }}
+          package: packages/app/publish
+
+      - name: Wait for deployment
+        run: |
+          echo "Waiting for App Service to restart..."
+          sleep 30
+
+      - name: Health check
+        run: |
+          APP_URL="https://${{ env.APP_SERVICE_NAME }}.azurewebsites.net/health"
+          echo "Checking health at: $APP_URL"
+
+          for i in 1 2 3 4 5; do
+            HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 30 "$APP_URL" || echo "000")
+            echo "Health check $i: HTTP $HTTP_STATUS"
+
+            if [ "$HTTP_STATUS" = "200" ]; then
+              echo "App is healthy!"
+              exit 0
+            fi
+            sleep 10
+          done
+
+          echo "::warning::Health check did not return 200 after 5 attempts"
+
+      - name: Generate summary
+        if: always()
+        run: |
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Result" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ job.status }}" == "success" ]; then
+            echo "Deployment successful!" >> $GITHUB_STEP_SUMMARY
+            echo "- URL: https://${{ env.APP_SERVICE_NAME }}.azurewebsites.net" >> $GITHUB_STEP_SUMMARY
+            echo "- Dev API: https://dev.api.mystira.app" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "Deployment failed. Check the logs above for details." >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "---" >> $GITHUB_STEP_SUMMARY
+          echo "_Production deployments use blue-green slot swap via mystira-app-api-cicd-prod.yml_" >> $GITHUB_STEP_SUMMARY
