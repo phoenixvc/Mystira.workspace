@@ -1,5 +1,6 @@
 using FluentAssertions;
 using Mystira.Shared.Caching;
+using Xunit;
 
 namespace Mystira.Shared.Tests.Caching;
 
