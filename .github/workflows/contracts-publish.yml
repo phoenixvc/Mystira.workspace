@@ -93,6 +93,24 @@ jobs:
           echo "trigger_source=$TRIGGER_SOURCE" >> $GITHUB_OUTPUT
           echo "publish_to_nuget_org=$PUBLISH_TO_NUGET_ORG" >> $GITHUB_OUTPUT
 
+      - name: Read version from package.json (NPM source of truth)
+        id: npm_version
+        run: |
+          # Read base version from NPM package.json (managed by Changesets)
+          BASE_VERSION=$(jq -r '.version' packages/contracts/package.json)
+          echo "base_version=$BASE_VERSION" >> $GITHUB_OUTPUT
+          echo "Base version from package.json: $BASE_VERSION"
+
+          # Calculate full version with suffix if applicable
+          VERSION_SUFFIX="${{ steps.version.outputs.version_suffix }}"
+          if [ -n "$VERSION_SUFFIX" ]; then
+            FULL_VERSION="${BASE_VERSION}-${VERSION_SUFFIX}"
+          else
+            FULL_VERSION="$BASE_VERSION"
+          fi
+          echo "full_version=$FULL_VERSION" >> $GITHUB_OUTPUT
+          echo "Full NuGet version: $FULL_VERSION"
+
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
@@ -108,25 +126,23 @@ jobs:
       - name: Build
         run: |
           cd packages/contracts/dotnet/Mystira.Contracts
-          dotnet build --configuration Release --no-restore
+          # Override version from package.json to keep NPM and NuGet in sync
+          dotnet build --configuration Release --no-restore \
+            -p:Version=${{ steps.npm_version.outputs.full_version }}
 
       - name: Pack NuGet package
         id: pack
         run: |
           cd packages/contracts/dotnet/Mystira.Contracts
 
-          PACK_ARGS="--configuration Release --no-build --output ./nupkg"
+          # Use version from package.json (synced with NPM via Changesets)
+          # Full version already includes suffix if applicable
+          dotnet pack --configuration Release --no-build --output ./nupkg \
+            -p:Version=${{ steps.npm_version.outputs.full_version }}
 
-          if [ -n "${{ steps.version.outputs.version_suffix }}" ]; then
-            PACK_ARGS="$PACK_ARGS --version-suffix ${{ steps.version.outputs.version_suffix }}"
-          fi
-
-          dotnet pack $PACK_ARGS
-
-          # Get the package version
-          NUPKG_FILE=$(ls ./nupkg/*.nupkg | head -1)
-          PACKAGE_VERSION=$(basename "$NUPKG_FILE" .nupkg | sed "s/Mystira.Contracts\.//")
-          echo "version=$PACKAGE_VERSION" >> $GITHUB_OUTPUT
+          # Output the version we just packed
+          echo "version=${{ steps.npm_version.outputs.full_version }}" >> $GITHUB_OUTPUT
+          echo "Packed Mystira.Contracts v${{ steps.npm_version.outputs.full_version }}"
 
       - name: Push to GitHub Packages
         run: |
