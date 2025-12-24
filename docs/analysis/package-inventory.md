@@ -339,20 +339,70 @@ public async Task<T> ExecuteWithRetryAsync<T>(
 - `ContinuityBackgroundQueue` using `Channel<T>`
 - Not suitable for multi-instance deployments
 
+### Submodule Initialization Status
+
+| Submodule | Status | Analysis |
+|-----------|--------|----------|
+| `packages/app` | ✅ Initialized | Full analysis completed |
+| `packages/story-generator` | ✅ Initialized | Full analysis completed |
+| `packages/publisher` | ⚠️ Not initialized | Run `git submodule update --init packages/publisher` |
+| `packages/admin-api` | ⚠️ Empty placeholder | Code exists at `packages/app/src/Mystira.App.Admin.Api/` |
+| `packages/devhub` | ⚠️ Not initialized | Run `git submodule update --init packages/devhub` |
+| `packages/admin-ui` | ⚠️ Empty placeholder | Future React submodule |
+
+### Proposed Mystira.Shared Namespaces
+
+Based on comprehensive analysis, the following namespaces should be added to `Mystira.Shared`:
+
+#### High Priority (⭐⭐⭐)
+
+| Namespace | Description | Source Patterns |
+|-----------|-------------|-----------------|
+| `Mystira.Shared.Data` | Repository + Specifications | App: `IRepository<T>`, `Repository<T>`, `ISpecification<T>` |
+| `Mystira.Shared.Resilience` | Polly pipelines | App: `CreateResiliencePolicy()`, StoryGen: `RetryPolicyService` |
+| `Mystira.Shared.Caching` | Redis + distributed cache | New (IMemoryCache → IDistributedCache) |
+| `Mystira.Shared.Exceptions` | Error/Result patterns | App: `ErrorResponse`, `ValidationErrorResponse` |
+
+#### Medium Priority (⭐⭐)
+
+| Namespace | Description | Source Patterns |
+|-----------|-------------|-----------------|
+| `Mystira.Shared.Domain` | Base entities | App: `Entity`, `AuditableEntity`, `SoftDeletableEntity` |
+| `Mystira.Shared.Http` | HTTP client config | App: `BaseApiClient`, handler patterns |
+| `Mystira.Shared.Validation` | FluentValidation pipeline | App: MediatR validation behaviors |
+| `Mystira.Shared.Api` | Response wrappers | Contracts: `ApiResponse<T>`, `ApiError` |
+| `Mystira.Shared.Migration` | Dual-write helpers | New (for future migrations) |
+
+### NuGet Package Dependencies
+
+| Package | Version | Used By | Purpose |
+|---------|---------|---------|---------|
+| `Microsoft.Extensions.Http.Polly` | 9.0.0 | App.PWA | HTTP resilience policies |
+| `Microsoft.EntityFrameworkCore` | 9.0.0 | App.Infrastructure | ORM |
+| `Microsoft.EntityFrameworkCore.Cosmos` | 9.0.0 | App.Api, Admin.Api | Cosmos DB |
+| `FluentValidation` | 11.11.0 | App.Application | Input validation |
+| `MediatR` | 12.4.1 | App.Application | CQRS pattern |
+| `StackExchange.Redis` | - | **Not used** | Need for distributed cache |
+| `Polly` | via Http.Polly | App.PWA | Resilience policies |
+
 ### Consolidation Roadmap
 
 | Phase | Action | Package | Status |
 |-------|--------|---------|--------|
 | 4a | Add `Mystira.Shared.Resilience` | `Mystira.Shared` | ⏳ Planned |
-| 4b | Add `Mystira.Shared.ErrorHandling` | `Mystira.Shared` | ⏳ Planned |
+| 4b | Add `Mystira.Shared.Exceptions` | `Mystira.Shared` | ⏳ Planned |
 | 4c | Add `Mystira.Shared.Caching` | `Mystira.Shared` | ⏳ Planned |
+| 4d | Add `Mystira.Shared.Data` | `Mystira.Shared` | ⏳ Planned |
+| 4e | Add `Mystira.Shared.Http` | `Mystira.Shared` | ⏳ Planned |
+| 4f | Add `Mystira.Shared.Validation` | `Mystira.Shared` | ⏳ Planned |
 
-See [ADR-0020](../architecture/adr/0020-package-consolidation-strategy.md#phase-4-infrastructure-consolidation-analysis-) for detailed implementation plans.
+See [ADR-0020](../architecture/adr/0020-package-consolidation-strategy.md#comprehensive-consolidation-matrix) for detailed implementation plans.
 
 ---
 
 ## Next Steps
 
+### Completed ✅
 1. ~~**Create `packages/contracts`** workspace package~~ ✅
 2. ~~**Migrate TypeScript types** from submodules~~ ✅
 3. ~~**Migrate NuGet contracts** from submodules~~ ✅
@@ -360,10 +410,20 @@ See [ADR-0020](../architecture/adr/0020-package-consolidation-strategy.md#phase-
 5. ~~**Update Changesets config** for new package structure~~ ✅
 6. ~~**Update CI/CD workflows** for unified contracts publishing~~ ✅
 7. ~~**Create `Mystira.Shared`** with auth infrastructure~~ ✅
-8. **Phase 4a**: Add Polly resilience patterns to `Mystira.Shared`
-9. **Phase 4b**: Add error handling middleware to `Mystira.Shared`
-10. **Phase 4c**: Add Redis caching support to `Mystira.Shared`
-11. **Phase 5**: Cleanup deprecated packages and workflows
+8. ~~**Analyze App and StoryGenerator for consolidation**~~ ✅
+
+### Phase 4: Infrastructure Consolidation (In Progress)
+9. **Phase 4a**: Add `Mystira.Shared.Resilience` - Polly policies
+10. **Phase 4b**: Add `Mystira.Shared.Exceptions` - Error/Result patterns
+11. **Phase 4c**: Add `Mystira.Shared.Caching` - Redis distributed cache
+12. **Phase 4d**: Add `Mystira.Shared.Data` - Repository + Specifications
+13. **Phase 4e**: Add `Mystira.Shared.Http` - Typed HTTP client base
+14. **Phase 4f**: Add `Mystira.Shared.Validation` - FluentValidation pipeline
+
+### Phase 5: Cleanup (Pending)
+15. Initialize remaining submodules (publisher, devhub)
+16. Migrate services to use `Mystira.Shared` namespaces
+17. Cleanup deprecated packages and workflows
 
 ---
 
