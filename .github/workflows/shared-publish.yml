@@ -147,27 +147,43 @@ jobs:
       - name: Restore dependencies
         run: dotnet restore ${{ env.PACKAGE_PATH }}
 
+      - name: Read version from .csproj
+        id: csproj_version
+        run: |
+          # Read base version from .csproj
+          BASE_VERSION=$(grep -oP '(?<=<Version>)[^<]+' ${{ env.PACKAGE_PATH }}/Mystira.Shared.csproj)
+          echo "base_version=$BASE_VERSION" >> $GITHUB_OUTPUT
+          echo "Base version from .csproj: $BASE_VERSION"
+
+          # Calculate full version with suffix if applicable
+          VERSION_SUFFIX="${{ steps.version.outputs.version_suffix }}"
+          if [ -n "$VERSION_SUFFIX" ]; then
+            FULL_VERSION="${BASE_VERSION}-${VERSION_SUFFIX}"
+          else
+            FULL_VERSION="$BASE_VERSION"
+          fi
+          echo "full_version=$FULL_VERSION" >> $GITHUB_OUTPUT
+          echo "Full NuGet version: $FULL_VERSION"
+
       - name: Build
-        run: dotnet build ${{ env.PACKAGE_PATH }} --configuration Release --no-restore
+        run: |
+          dotnet build ${{ env.PACKAGE_PATH }} --configuration Release --no-restore \
+            -p:Version=${{ steps.csproj_version.outputs.full_version }}
 
       - name: Pack NuGet package
         id: pack
         run: |
-          PACK_ARGS="--configuration Release --no-build --output ./nupkg"
+          # Use calculated version (base from .csproj + suffix if applicable)
+          dotnet pack ${{ env.PACKAGE_PATH }} \
+            --configuration Release \
+            --no-build \
+            --output ./nupkg \
+            -p:Version=${{ steps.csproj_version.outputs.full_version }}
 
-          if [ -n "${{ steps.version.outputs.version_suffix }}" ]; then
-            PACK_ARGS="$PACK_ARGS --version-suffix ${{ steps.version.outputs.version_suffix }}"
-          fi
-
-          dotnet pack ${{ env.PACKAGE_PATH }} $PACK_ARGS
-
-          # Get the package info
-          NUPKG_FILE=$(ls ./nupkg/*.nupkg | head -1)
-          PACKAGE_NAME=$(basename "$NUPKG_FILE" .nupkg | sed 's/\.[0-9].*//')
-          PACKAGE_VERSION=$(basename "$NUPKG_FILE" .nupkg | sed "s/${PACKAGE_NAME}\.//")
-
-          echo "version=$PACKAGE_VERSION" >> $GITHUB_OUTPUT
-          echo "package_name=$PACKAGE_NAME" >> $GITHUB_OUTPUT
+          # Output package info (hardcoded - we know the package name)
+          echo "version=${{ steps.csproj_version.outputs.full_version }}" >> $GITHUB_OUTPUT
+          echo "package_name=Mystira.Shared" >> $GITHUB_OUTPUT
+          echo "Packed Mystira.Shared v${{ steps.csproj_version.outputs.full_version }}"
 
       - name: Push to GitHub Packages
         run: |
