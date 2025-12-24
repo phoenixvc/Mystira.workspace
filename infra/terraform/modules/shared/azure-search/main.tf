@@ -54,7 +54,8 @@ resource "azurerm_search_service" "main" {
   local_authentication_enabled  = var.local_authentication_enabled
 
   # Semantic search (requires standard tier or higher)
-  semantic_search_sku = var.semantic_search_sku
+  # Convert "disabled" to null for Azure API
+  semantic_search_sku = var.semantic_search_sku == "disabled" ? null : var.semantic_search_sku
 
   # Managed identity for secure access to other Azure resources
   identity {

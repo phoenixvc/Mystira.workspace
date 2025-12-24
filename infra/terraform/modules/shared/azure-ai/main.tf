@@ -121,8 +121,8 @@ resource "azapi_resource" "ai_project" {
 
   body = {
     properties = {
-      friendlyName = "${var.environment} AI Project"
-      description  = "Mystira ${var.environment} AI workloads"
+      displayName = "${var.environment} AI Project"
+      description = "Mystira ${var.environment} AI workloads"
     }
   }
 
@@ -149,14 +149,6 @@ resource "azurerm_cognitive_deployment" "openai_models" {
   sku {
     name     = each.value.sku_name
     capacity = each.value.capacity
-  }
-
-  # RAI policy for content filtering (optional)
-  dynamic "model" {
-    for_each = each.value.rai_policy_name != null ? [] : []
-    content {
-      # rai_policy_name = each.value.rai_policy_name
-    }
   }
 
   lifecycle {

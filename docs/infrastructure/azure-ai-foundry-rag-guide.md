@@ -327,6 +327,121 @@ Resources follow the pattern: `mys-shared-ai-{region_code}`
 
 *Assuming average chunk size of 500 tokens*
 
+### Matryoshka Embeddings
+
+OpenAI's `text-embedding-3` models support **Matryoshka Representation Learning (MRL)**, allowing you to truncate embeddings to smaller dimensions without recomputing them.
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                        Matryoshka Embeddings Concept                         │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  Full Embedding (3072 dimensions):                                          │
+│  ┌─────────────────────────────────────────────────────────────────────┐   │
+│  │ [0.12, -0.34, 0.56, ... , 0.78, -0.91, 0.23, ... , 0.45, -0.67, ...]│   │
+│  │  ◀──── 256 dims ────▶ ◀──── 512 dims ────▶ ◀────── 3072 dims ─────▶│   │
+│  └─────────────────────────────────────────────────────────────────────┘   │
+│           │                      │                         │                │
+│           ▼                      ▼                         ▼                │
+│   ┌──────────────┐     ┌──────────────────┐    ┌───────────────────────┐   │
+│   │  256 dims    │     │    1024 dims     │    │     3072 dims         │   │
+│   │  (smallest)  │     │   (balanced)     │    │    (full accuracy)    │   │
+│   └──────────────┘     └──────────────────┘    └───────────────────────┘   │
+│                                                                             │
+│   Like Russian nesting dolls - smaller representations are                  │
+│   contained within larger ones, no need to re-embed!                        │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+#### How It Works
+
+Traditional embeddings require you to choose dimensions at embedding time. Matryoshka models embed the most important semantic information in the first dimensions, with progressively less critical information in later dimensions.
+
+```python
+from openai import AzureOpenAI
+
+client = AzureOpenAI(...)
+
+# Generate full 3072-dimension embedding
+response = client.embeddings.create(
+    model="text-embedding-3-large",
+    input="Your document text here",
+    dimensions=3072  # Full dimensions
+)
+
+# OR generate truncated 1024-dimension embedding (same model!)
+response = client.embeddings.create(
+    model="text-embedding-3-large",
+    input="Your document text here",
+    dimensions=1024  # Truncated - 66% storage savings
+)
+```
+
+#### Dimension Trade-offs
+
+| Dimensions | Storage (per vector) | MTEB Score | Use Case |
+|------------|---------------------|------------|----------|
+| 256 | 1 KB | ~60% | Prototyping, massive scale |
+| 512 | 2 KB | ~62% | High-volume, cost-sensitive |
+| 1024 | 4 KB | ~63% | Balanced accuracy/cost |
+| 1536 | 6 KB | ~64% | Standard (matches small model) |
+| 3072 | 12 KB | ~65% | Maximum accuracy |
+
+#### Cost Implications
+
+Using Matryoshka to reduce dimensions provides:
+
+1. **Storage Savings**: 1024 dims = 66% less storage than 3072
+2. **Faster Search**: Smaller vectors = faster similarity calculations
+3. **Same Embedding Cost**: You pay the same to embed, but save on storage/compute
+4. **Index Flexibility**: Can test different dimensions without re-embedding
+
+#### Practical Strategy
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  Recommended Matryoshka Strategy                                │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  1. EMBED at full dimensions (3072) - store original vectors   │
+│                                                                 │
+│  2. INDEX at reduced dimensions:                                │
+│     • Dev/Test: 512 dims (fast iteration)                      │
+│     • Production: 1024 or 1536 dims (balanced)                 │
+│     • High-precision: 3072 dims (when accuracy critical)       │
+│                                                                 │
+│  3. UPGRADE without re-embedding:                               │
+│     • Start with 1024 dims                                      │
+│     • If accuracy insufficient, expand to 1536 or 3072          │
+│     • No API calls needed - just use more of stored vector      │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+#### Azure AI Search Configuration
+
+```json
+{
+  "name": "documents-index",
+  "fields": [
+    {
+      "name": "contentVector",
+      "type": "Collection(Edm.Single)",
+      "dimensions": 1024,
+      "vectorSearchProfile": "default"
+    },
+    {
+      "name": "contentVectorFull",
+      "type": "Collection(Edm.Single)",
+      "dimensions": 3072,
+      "vectorSearchProfile": "high-precision"
+    }
+  ]
+}
+```
+
+This allows querying with reduced dimensions for speed, falling back to full dimensions when precision matters.
+
 ---
 
 ## Azure AI Search
