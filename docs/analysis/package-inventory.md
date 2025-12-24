@@ -503,22 +503,22 @@ See [ADR-0020](../architecture/adr/0020-package-consolidation-strategy.md#compre
 9. ~~**Initialize all submodules**~~ ✅ (admin-api, admin-ui, publisher, devhub, chain)
 10. ~~**Analyze design tokens and UI/UX assets**~~ ✅
 
-### Phase 4: .NET Backend Consolidation (In Progress)
-11. **Phase 4a**: Add `Mystira.Shared.Resilience` - Polly policies
-12. **Phase 4b**: Add `Mystira.Shared.Exceptions` - Error/Result patterns
-13. **Phase 4c**: Add `Mystira.Shared.Caching` - Redis distributed cache
-14. **Phase 4d**: Add `Mystira.Shared.Data` - Repository + Specifications
+### Phase 4: .NET Backend Consolidation ✅
+11. ~~**Phase 4a**: Add `Mystira.Shared.Resilience` - Polly policies~~ ✅
+12. ~~**Phase 4b**: Add `Mystira.Shared.Exceptions` - Error/Result patterns~~ ✅
+13. ~~**Phase 4c**: Add `Mystira.Shared.Caching` - Redis distributed cache~~ ✅
+14. ~~**Phase 4d**: Add `Mystira.Shared.Data` - Repository + Specifications~~ ✅
 15. **Phase 4h**: Migrate MediatR → Wolverine (ADR-0015 Accepted)
 
 ### Wolverine Migration (ADR-0015 Accepted)
-16. **Phase W1**: Add Wolverine alongside MediatR in App.Application
+16. ~~**Phase W1**: Add Wolverine alongside MediatR in App.Application~~ ✅ (Mystira.Shared.Messaging)
 17. **Phase W2**: Migrate command/query handlers to Wolverine convention
 18. **Phase W3**: Add Azure Service Bus transport for distributed events
 19. **Phase W4**: Remove MediatR dependency from all services
 
-### Phase 4: Frontend/TypeScript Consolidation (In Progress)
-20. **Phase 4e**: Create `@mystira/design-tokens` - Unified color/typography/spacing
-21. **Phase 4f**: Create Tailwind preset for DevHub, Story Generator
+### Phase 4: Frontend/TypeScript Consolidation ✅
+20. ~~**Phase 4e**: Create `@mystira/design-tokens` - Unified color/typography/spacing~~ ✅
+21. ~~**Phase 4f**: Create Tailwind preset for DevHub, Story Generator~~ ✅
 22. **Phase 4g**: Evaluate `@mystira/ui-react` for shared components
 
 ### Phase 5: Cleanup (Pending)

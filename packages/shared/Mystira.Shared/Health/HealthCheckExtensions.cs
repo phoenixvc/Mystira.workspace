@@ -1,8 +1,9 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
+using Mystira.Shared.Health;
 
-namespace Mystira.Shared.Health;
+namespace Mystira.Shared.Extensions;
 
 /// <summary>
 /// Extension methods for registering Mystira health checks.

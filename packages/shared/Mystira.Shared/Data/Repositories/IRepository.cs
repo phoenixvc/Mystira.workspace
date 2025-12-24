@@ -103,20 +103,67 @@ public interface IRepository<TEntity> where TEntity : class
     Task<int> CountAsync(
         ISpecification<TEntity> spec,
         CancellationToken cancellationToken = default);
+
+    // Streaming operations for large datasets
+
+    /// <summary>
+    /// Streams all entities asynchronously (uses AsNoTracking).
+    /// Use for large datasets where loading all into memory is not practical.
+    /// </summary>
+    IAsyncEnumerable<TEntity> StreamAllAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Streams entities matching a specification asynchronously (uses AsNoTracking).
+    /// </summary>
+    IAsyncEnumerable<TEntity> StreamAsync(
+        ISpecification<TEntity> spec,
+        CancellationToken cancellationToken = default);
 }
 
 /// <summary>
 /// Repository interface with generic key type.
 /// Use this when you need explicit key type control.
 /// </summary>
-public interface IRepository<TEntity, TKey> where TEntity : class
+/// <typeparam name="TEntity">The entity type.</typeparam>
+/// <typeparam name="TKey">The primary key type (e.g., Guid, int, string).</typeparam>
+public interface IRepository<TEntity, TKey>
+    where TEntity : class
+    where TKey : notnull
 {
+    /// <summary>
+    /// Gets an entity by its typed ID.
+    /// </summary>
     Task<TEntity?> GetByIdAsync(TKey id, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Gets all entities (uses AsNoTracking).
+    /// </summary>
     Task<IEnumerable<TEntity>> GetAllAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Adds a new entity.
+    /// </summary>
     Task<TEntity> AddAsync(TEntity entity, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Updates an entity.
+    /// </summary>
     Task UpdateAsync(TEntity entity, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Deletes an entity by its typed ID.
+    /// </summary>
     Task DeleteAsync(TKey id, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Checks if an entity exists by its typed ID.
+    /// </summary>
     Task<bool> ExistsAsync(TKey id, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Streams all entities asynchronously for large datasets.
+    /// </summary>
+    IAsyncEnumerable<TEntity> StreamAllAsync(CancellationToken cancellationToken = default);
 }
 
 /// <summary>

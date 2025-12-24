@@ -1,9 +1,10 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Mystira.Shared.Resilience;
 using Polly;
 
-namespace Mystira.Shared.Resilience;
+namespace Mystira.Shared.Extensions;
 
 /// <summary>
 /// Extension methods for registering resilience policies in DI.

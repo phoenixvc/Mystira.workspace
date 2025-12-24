@@ -110,31 +110,29 @@ public class CachedAccountRepository : IAccountRepository
     }
 }
 
-// Dual-write for migration
-public class DualWriteAccountRepository : IAccountRepository
+// Polyglot repository - routes to appropriate database based on entity configuration
+public class PolyglotAccountRepository : IAccountRepository
 {
-    private readonly IAccountRepository _cosmos;
-    private readonly IAccountRepository _postgres;
-    private readonly MigrationPhase _phase;
+    private readonly IDbContextResolver _contextResolver;
+    private readonly IDistributedCache _cache;
 
     public async Task<Account> CreateAsync(Account account, CancellationToken ct)
     {
-        // Always write to both during migration
-        await _postgres.CreateAsync(account, ct);
-        await _cosmos.CreateAsync(account, ct);
+        // Writes to the configured database for Account entity
+        var context = _contextResolver.Resolve(DatabaseTarget.CosmosDb);
+        await context.Set<Account>().AddAsync(account, ct);
         return account;
     }
 
     public async Task<Account?> GetByIdAsync(Guid id, CancellationToken ct)
     {
-        return _phase switch
-        {
-            MigrationPhase.CosmosOnly => await _cosmos.GetByIdAsync(id, ct),
-            MigrationPhase.DualWriteCosmosRead => await _cosmos.GetByIdAsync(id, ct),
-            MigrationPhase.DualWritePostgresRead => await _postgres.GetByIdAsync(id, ct),
-            MigrationPhase.PostgresOnly => await _postgres.GetByIdAsync(id, ct),
-            _ => await _cosmos.GetByIdAsync(id, ct)
-        };
+        // Check cache first
+        var cached = await _cache.GetAsync<Account>($"account:{id}", ct);
+        if (cached is not null) return cached;
+
+        // Route to appropriate database based on entity's [DatabaseTarget] attribute
+        var context = _contextResolver.Resolve(DatabaseTarget.CosmosDb);
+        return await context.Set<Account>().FindAsync(id, ct);
     }
 }
 ```
@@ -366,13 +364,12 @@ public class AccountService
 
 ```csharp
 // Polyglot repository with all features
-public class PolyglotRepository<T> : IRepository<T> where T : class, IEntity
+public class PolyglotRepository<T> : IRepository<T> where T : class
 {
-    private readonly IDbContextFactory<CosmosDbContext> _cosmosFactory;
-    private readonly IDbContextFactory<PostgresDbContext> _postgresFactory;
+    private readonly IDbContextResolver _contextResolver;
     private readonly IDistributedCache _cache;
-    private readonly IOptions<MigrationOptions> _options;
-    private readonly ResiliencePipeline _resilience;
+    private readonly IOptions<PolyglotOptions> _options;
+    private readonly DatabaseTarget _target; // Determined from [DatabaseTarget] attribute
 
     public async Task<T?> GetByIdAsync(Guid id, ISpecification<T>? spec, CancellationToken ct)
     {
@@ -380,17 +377,19 @@ public class PolyglotRepository<T> : IRepository<T> where T : class, IEntity
         var cached = await GetFromCacheAsync(id, ct);
         if (cached is not null) return cached;
 
-        // 2. Get from appropriate database based on migration phase
-        var entity = await _resilience.ExecuteAsync(async token =>
-        {
-            return _options.Value.Phase switch
-            {
-                MigrationPhase.PostgresOnly => await GetFromPostgresAsync(id, spec, token),
-                _ => await GetFromCosmosAsync(id, spec, token)
-            };
-        }, ct);
+        // 2. Get from appropriate database based on entity's routing configuration
+        var context = _contextResolver.Resolve(_target);
+        var entity = await context.Set<T>().FindAsync(id, ct);
 
-        // 3. Cache result
+        // 3. Apply specification if provided
+        if (entity is not null && spec is not null)
+        {
+            var query = SpecificationEvaluator.Default.GetQuery(
+                context.Set<T>().AsQueryable(), spec);
+            entity = await query.FirstOrDefaultAsync(ct);
+        }
+
+        // 4. Cache result
         if (entity is not null)
             await SetCacheAsync(id, entity, ct);
 
