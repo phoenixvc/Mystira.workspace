@@ -259,8 +259,7 @@ public class CircuitBreakerMetrics : IDisposable
 
     public void Dispose()
     {
-        s_meter.Dispose();
-        s_activitySource.Dispose();
+        // Static fields are app-lifetime and should not be disposed per-instance
     }
 }
 
