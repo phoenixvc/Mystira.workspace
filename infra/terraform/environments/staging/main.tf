@@ -21,8 +21,14 @@ terraform {
       source  = "hashicorp/azuread"
       version = "~> 2.47"
     }
+    azapi = {
+      source  = "Azure/azapi"
+      version = "~> 2.0"  # Required for AI Foundry projects and catalog models
+    }
   }
 }
+
+provider "azapi" {}
 
 provider "azurerm" {
   features {
@@ -345,6 +351,7 @@ module "shared_monitoring" {
 }
 
 # Shared Azure AI Foundry Infrastructure (in core-rg)
+# Updated to use AIServices (Azure AI Foundry) instead of legacy OpenAI
 module "shared_azure_ai" {
   source = "../../modules/shared/azure-ai"
 
@@ -353,18 +360,56 @@ module "shared_azure_ai" {
   region_code         = local.region_code
   resource_group_name = azurerm_resource_group.main.name
 
+  # Enable AI Foundry project for workload isolation
+  enable_project = true
+
+  # Model deployments - includes OpenAI and catalog models
   model_deployments = {
+    # OpenAI Models
     "gpt-4o" = {
       model_name    = "gpt-4o"
       model_version = "2024-08-06"
+      model_format  = "OpenAI"
       sku_name      = "GlobalStandard"
       capacity      = 20
     }
     "gpt-4o-mini" = {
       model_name    = "gpt-4o-mini"
       model_version = "2024-07-18"
+      model_format  = "OpenAI"
       sku_name      = "GlobalStandard"
       capacity      = 40
+    }
+    "gpt-4-1" = {
+      model_name    = "gpt-4.1"
+      model_version = "2024-04-01-preview"
+      model_format  = "OpenAI"
+      sku_name      = "GlobalStandard"
+      capacity      = 20
+    }
+    # GPT-5 series - check Azure portal for regional availability
+    "gpt-5-nano" = {
+      model_name    = "gpt-5-nano"
+      model_version = "2024-12-01-preview"
+      model_format  = "OpenAI"
+      sku_name      = "GlobalStandard"
+      capacity      = 40
+    }
+    "gpt-5-1" = {
+      model_name    = "gpt-5.1"
+      model_version = "2024-12-01-preview"
+      model_format  = "OpenAI"
+      sku_name      = "GlobalStandard"
+      capacity      = 20
+    }
+    # Anthropic Claude - may have allocation constraints
+    # If deployment fails, check quota in Azure portal
+    "claude-sonnet-4-5" = {
+      model_name    = "claude-sonnet-4-5"
+      model_version = "1"
+      model_format  = "Anthropic"
+      sku_name      = "Standard"
+      capacity      = 1
     }
   }
 
