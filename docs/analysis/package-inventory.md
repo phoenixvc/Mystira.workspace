@@ -460,10 +460,10 @@ Based on comprehensive analysis, the following namespaces should be added to `My
 
 | Phase | Action | Package | Status |
 |-------|--------|---------|--------|
-| 4a | Add `Mystira.Shared.Resilience` | `Mystira.Shared` | ⏳ Planned |
-| 4b | Add `Mystira.Shared.Exceptions` | `Mystira.Shared` | ⏳ Planned |
-| 4c | Add `Mystira.Shared.Caching` | `Mystira.Shared` | ⏳ Planned |
-| 4d | Add `Mystira.Shared.Data` | `Mystira.Shared` | ⏳ Planned |
+| 4a | Add `Mystira.Shared.Resilience` | `Mystira.Shared` | ✅ Complete |
+| 4b | Add `Mystira.Shared.Exceptions` | `Mystira.Shared` | ✅ Complete |
+| 4c | Add `Mystira.Shared.Caching` | `Mystira.Shared` | ✅ Complete |
+| 4d | Add `Mystira.Shared.Data` | `Mystira.Shared` | ✅ Complete |
 | 4h | **Migrate MediatR → Wolverine** | All .NET services | ⏳ Planned |
 
 #### Wolverine Migration (ADR-0015 Accepted)
@@ -472,7 +472,7 @@ See [ADR-0015](../architecture/adr/0015-event-driven-architecture-framework.md) 
 
 | Phase | Action | Services | Status |
 |-------|--------|----------|--------|
-| W1 | Add Wolverine alongside MediatR | App.Application | ⏳ Planned |
+| W1 | Add Wolverine alongside MediatR | App.Application | ✅ Complete (Mystira.Shared.Messaging) |
 | W2 | Migrate command/query handlers | App, StoryGenerator | ⏳ Planned |
 | W3 | Add Azure Service Bus for events | All .NET services | ⏳ Planned |
 | W4 | Remove MediatR dependency | All .NET services | ⏳ Planned |
@@ -481,8 +481,8 @@ See [ADR-0015](../architecture/adr/0015-event-driven-architecture-framework.md) 
 
 | Phase | Action | Package | Status |
 |-------|--------|---------|--------|
-| 4e | Create `@mystira/design-tokens` | NPM | ⏳ Planned |
-| 4f | Standardize Tailwind preset | NPM | ⏳ Planned |
+| 4e | Create `@mystira/design-tokens` | NPM | ✅ Complete |
+| 4f | Standardize Tailwind preset | NPM | ✅ Complete (in design-tokens) |
 | 4g | Consider `@mystira/ui-react` | NPM | 🔍 Evaluate |
 
 See [ADR-0020](../architecture/adr/0020-package-consolidation-strategy.md#comprehensive-consolidation-matrix) for detailed implementation plans.

@@ -50,6 +50,8 @@
     <!-- Wave 3: Wolverine (replaces MediatR) -->
     <PackageReference Include="Wolverine" Version="3.8.1" />
     <PackageReference Include="WolverineFx.AzureServiceBus" Version="3.8.1" />
+    <!-- Wave 2 Data: Entity Framework Core -->
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.0" />
   </ItemGroup>
 
   <ItemGroup>
