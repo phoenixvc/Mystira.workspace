@@ -139,7 +139,7 @@ public class ResiliencePipelineFactoryTests
         // Act & Assert
         await Assert.ThrowsAsync<InvalidOperationException>(async () =>
         {
-            await pipeline.ExecuteAsync(async ct =>
+            await pipeline.ExecuteAsync<string>(async ct =>
             {
                 callCount++;
                 throw new InvalidOperationException("Persistent error");
