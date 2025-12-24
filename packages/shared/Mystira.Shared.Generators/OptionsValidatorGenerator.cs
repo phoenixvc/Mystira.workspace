@@ -150,6 +150,7 @@ public class OptionsValidatorGenerator : IIncrementalGenerator
         sb.AppendLine();
         sb.AppendLine("using System;");
         sb.AppendLine("using System.Collections.Generic;");
+        sb.AppendLine("using Microsoft.Extensions.DependencyInjection;");
         sb.AppendLine("using Microsoft.Extensions.Options;");
         sb.AppendLine();
         sb.AppendLine($"namespace {namespaceName};");
