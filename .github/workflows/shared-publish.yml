@@ -57,14 +57,35 @@ jobs:
           dotnet-version: '9.0.x'
 
       - name: Restore dependencies
-        run: dotnet restore ${{ env.PACKAGE_PATH }}
+        run: |
+          dotnet restore ${{ env.PACKAGE_PATH }}
+          dotnet restore packages/shared/Mystira.Shared.Tests
 
       - name: Build
-        run: dotnet build ${{ env.PACKAGE_PATH }} --configuration Release --no-restore
+        run: |
+          dotnet build ${{ env.PACKAGE_PATH }} --configuration Release --no-restore
+          dotnet build packages/shared/Mystira.Shared.Tests --configuration Release --no-restore
 
-      # Note: Add tests when available
-      # - name: Test
-      #   run: dotnet test ${{ env.PACKAGE_PATH }} --configuration Release --no-build
+      - name: Test with Coverage
+        run: |
+          dotnet test packages/shared/Mystira.Shared.Tests \
+            --configuration Release \
+            --no-restore \
+            --collect:"XPlat Code Coverage" \
+            --results-directory ./coverage \
+            -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=cobertura
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          directory: ./coverage
+          files: "**/coverage.cobertura.xml"
+          flags: mystira-shared
+          name: mystira-shared-coverage
+          fail_ci_if_error: false
+          verbose: true
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
   publish:
     name: Publish NuGet Package

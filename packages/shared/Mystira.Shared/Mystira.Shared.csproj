@@ -42,9 +42,10 @@
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />
     <PackageReference Include="OpenTelemetry.Api" Version="1.10.0" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.3.0" />
-    <!-- Wave 1: Resilience -->
-    <PackageReference Include="Microsoft.Extensions.Http.Polly" Version="9.0.0" />
+    <!-- Wave 1: Resilience (Polly v8 Pipelines) -->
+    <PackageReference Include="Microsoft.Extensions.Http.Resilience" Version="9.0.0" />
     <PackageReference Include="Polly" Version="8.5.2" />
+    <PackageReference Include="Polly.Extensions" Version="8.5.2" />
     <!-- Wave 2: Caching -->
     <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="9.0.0" />
     <!-- Wave 3: Wolverine (replaces MediatR) -->
@@ -62,5 +63,64 @@
   <ItemGroup>
     <None Include="README.md" Pack="true" PackagePath="\" />
   </ItemGroup>
+
+  <!--
+    ==========================================================================
+    REPOSITORY PATTERN: Recommended Approach
+    ==========================================================================
+
+    Use Generic Repository + Ardalis.Specification (zero boilerplate):
+
+      services.AddScoped(typeof(IRepository<>), typeof(RepositoryBase<>));
+
+      // Use specifications for queries:
+      var products = await _repo.ListAsync(new LowStockProductsSpec(10));
+
+    See: docs/guides/entity-and-repository-guide.md
+
+    ==========================================================================
+    SOURCE GENERATORS: Experimental (Commented Out)
+    ==========================================================================
+
+    Source generators are available but NOT recommended for most cases.
+    Generic Repo + Specs covers 90% of use cases with less complexity.
+
+    Enable only if you have 20+ similar repositories with custom methods
+    that cannot be expressed as specifications.
+
+    <ItemGroup>
+      <ProjectReference Include="..\Mystira.Shared.Generators\Mystira.Shared.Generators.csproj"
+                        OutputItemType="Analyzer"
+                        ReferenceOutputAssembly="false" />
+    </ItemGroup>
+
+    ==========================================================================
+    FUTURE: Potential AOP Alternatives
+    ==========================================================================
+
+    Consider these modern alternatives for cross-cutting concerns:
+
+    1. .NET 8+ Interceptors (compile-time method interception):
+       - No runtime reflection, type-safe
+       - Good for caching, logging, validation
+       - See: https://learn.microsoft.com/en-us/dotnet/csharp/whats-new/csharp-12#interceptors
+
+    2. Scrutor (convention-based DI registration):
+       - Auto-discover and register services by convention
+       - Decorator pattern for cross-cutting concerns
+       - See: https://github.com/khellang/Scrutor
+
+    3. Castle.DynamicProxy (runtime AOP):
+       - Full AOP with interception
+       - Good for complex scenarios
+       - See: https://github.com/castleproject/Core
+
+    4. Metalama (successor to PostSharp):
+       - Compile-time AOP, fully type-safe
+       - License required for commercial use
+       - See: https://www.postsharp.net/metalama
+
+    ==========================================================================
+  -->
 
 </Project>

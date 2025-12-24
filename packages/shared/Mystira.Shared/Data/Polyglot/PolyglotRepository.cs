@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Mystira.Shared.Telemetry;
 using System.Text.Json;
 
 namespace Mystira.Shared.Data.Polyglot;
@@ -22,6 +23,7 @@ public class PolyglotRepository<TEntity> : IPolyglotRepository<TEntity> where TE
     private readonly ILogger<PolyglotRepository<TEntity>> _logger;
     private readonly PolyglotOptions _options;
     private readonly string _cachePrefix;
+    private readonly JsonSerializerOptions _jsonOptions;
 
     /// <inheritdoc />
     public DatabaseTarget Target { get; }
@@ -36,6 +38,11 @@ public class PolyglotRepository<TEntity> : IPolyglotRepository<TEntity> where TE
         _logger = logger;
         _cache = _options.EnableCaching ? cache : null;
         _cachePrefix = $"polyglot:{typeof(TEntity).Name}:";
+        _jsonOptions = new JsonSerializerOptions
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            WriteIndented = false
+        };
 
         // Determine target database
         Target = ResolveTarget();
@@ -48,23 +55,46 @@ public class PolyglotRepository<TEntity> : IPolyglotRepository<TEntity> where TE
     /// <inheritdoc />
     public async Task<TEntity?> GetByIdAsync(string id, CancellationToken cancellationToken = default)
     {
+        return await GetByIdAsync<string>(id, cancellationToken);
+    }
+
+    /// <inheritdoc />
+    public async Task<TEntity?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        return await GetByIdAsync<Guid>(id, cancellationToken);
+    }
+
+    /// <summary>
+    /// Gets an entity by its ID with generic key type support.
+    /// </summary>
+    public async Task<TEntity?> GetByIdAsync<TKey>(TKey id, CancellationToken cancellationToken = default)
+        where TKey : notnull
+    {
+        using var activity = MystiraActivitySource.StartRepositoryActivity("GetById", typeof(TEntity).Name);
+        activity?.SetTag("mystira.entity_id", id.ToString());
+
+        var idString = id.ToString()!;
+
         if (_cache is not null)
         {
-            var cached = await GetFromCacheAsync(id, cancellationToken);
+            var cached = await GetFromCacheAsync(idString, cancellationToken);
             if (cached is not null)
             {
-                _logger.LogDebug("Cache hit for {EntityType} with ID {Id}", typeof(TEntity).Name, id);
+                _logger.LogDebug("Cache hit for {EntityType} with ID {Id}", typeof(TEntity).Name, idString);
+                activity?.RecordCacheResult(hit: true);
                 return cached;
             }
+            activity?.RecordCacheResult(hit: false);
         }
 
         var entity = await GetByIdNoCacheAsync(id, cancellationToken);
 
         if (entity is not null && _cache is not null)
         {
-            await SetCacheAsync(id, entity, cancellationToken);
+            await SetCacheAsync(idString, entity, cancellationToken);
         }
 
+        activity?.SetTag("mystira.found", entity is not null);
         return entity;
     }
 
@@ -74,10 +104,27 @@ public class PolyglotRepository<TEntity> : IPolyglotRepository<TEntity> where TE
         return await _dbSet.FindAsync(new object[] { id }, cancellationToken);
     }
 
+    /// <summary>
+    /// Gets an entity by Guid ID without caching.
+    /// </summary>
+    public async Task<TEntity?> GetByIdNoCacheAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        return await _dbSet.FindAsync(new object[] { id }, cancellationToken);
+    }
+
+    /// <summary>
+    /// Gets an entity by generic key type without caching.
+    /// </summary>
+    public async Task<TEntity?> GetByIdNoCacheAsync<TKey>(TKey id, CancellationToken cancellationToken = default)
+        where TKey : notnull
+    {
+        return await _dbSet.FindAsync(new object[] { id }, cancellationToken);
+    }
+
     /// <inheritdoc />
     public async Task<IReadOnlyList<TEntity>> GetAllAsync(CancellationToken cancellationToken = default)
     {
-        return await _dbSet.ToListAsync(cancellationToken);
+        return await _dbSet.AsNoTracking().ToListAsync(cancellationToken);
     }
 
     /// <inheritdoc />
@@ -85,7 +132,7 @@ public class PolyglotRepository<TEntity> : IPolyglotRepository<TEntity> where TE
         ISpecification<TEntity> specification,
         CancellationToken cancellationToken = default)
     {
-        return await ApplySpecification(specification).FirstOrDefaultAsync(cancellationToken);
+        return await ApplySpecification(specification).AsNoTracking().FirstOrDefaultAsync(cancellationToken);
     }
 
     /// <inheritdoc />
@@ -93,7 +140,7 @@ public class PolyglotRepository<TEntity> : IPolyglotRepository<TEntity> where TE
         ISpecification<TEntity> specification,
         CancellationToken cancellationToken = default)
     {
-        return await ApplySpecification(specification).ToListAsync(cancellationToken);
+        return await ApplySpecification(specification).AsNoTracking().ToListAsync(cancellationToken);
     }
 
     /// <inheritdoc />
@@ -115,25 +162,33 @@ public class PolyglotRepository<TEntity> : IPolyglotRepository<TEntity> where TE
     /// <inheritdoc />
     public async Task<TEntity> AddAsync(TEntity entity, CancellationToken cancellationToken = default)
     {
+        using var activity = MystiraActivitySource.StartRepositoryActivity("Add", typeof(TEntity).Name);
+
         ArgumentNullException.ThrowIfNull(entity);
         await _dbSet.AddAsync(entity, cancellationToken);
+
+        var id = GetEntityId(entity);
+        activity?.SetTag("mystira.entity_id", id);
+
         return entity;
     }
 
     /// <inheritdoc />
-    public Task UpdateAsync(TEntity entity, CancellationToken cancellationToken = default)
+    public async Task UpdateAsync(TEntity entity, CancellationToken cancellationToken = default)
     {
+        using var activity = MystiraActivitySource.StartRepositoryActivity("Update", typeof(TEntity).Name);
+
         ArgumentNullException.ThrowIfNull(entity);
         _dbSet.Update(entity);
 
-        // Invalidate cache on update
+        // Invalidate cache on update - await to ensure completion
         var id = GetEntityId(entity);
+        activity?.SetTag("mystira.entity_id", id);
+
         if (id is not null && _cache is not null)
         {
-            _ = InvalidateCacheAsync(id, cancellationToken);
+            await InvalidateCacheInternalAsync(id, cancellationToken);
         }
-
-        return Task.CompletedTask;
     }
 
     /// <inheritdoc />
@@ -146,20 +201,34 @@ public class PolyglotRepository<TEntity> : IPolyglotRepository<TEntity> where TE
         }
     }
 
-    /// <inheritdoc />
-    public Task DeleteAsync(TEntity entity, CancellationToken cancellationToken = default)
+    /// <summary>
+    /// Deletes an entity by Guid ID.
+    /// </summary>
+    public async Task DeleteAsync(Guid id, CancellationToken cancellationToken = default)
     {
+        var entity = await GetByIdNoCacheAsync(id, cancellationToken);
+        if (entity is not null)
+        {
+            await DeleteAsync(entity, cancellationToken);
+        }
+    }
+
+    /// <inheritdoc />
+    public async Task DeleteAsync(TEntity entity, CancellationToken cancellationToken = default)
+    {
+        using var activity = MystiraActivitySource.StartRepositoryActivity("Delete", typeof(TEntity).Name);
+
         ArgumentNullException.ThrowIfNull(entity);
         _dbSet.Remove(entity);
 
-        // Invalidate cache on delete
+        // Invalidate cache on delete - await to ensure completion
         var id = GetEntityId(entity);
+        activity?.SetTag("mystira.entity_id", id);
+
         if (id is not null && _cache is not null)
         {
-            _ = InvalidateCacheAsync(id, cancellationToken);
+            await InvalidateCacheInternalAsync(id, cancellationToken);
         }
-
-        return Task.CompletedTask;
     }
 
     /// <inheritdoc />
@@ -171,11 +240,24 @@ public class PolyglotRepository<TEntity> : IPolyglotRepository<TEntity> where TE
     /// <inheritdoc />
     public async Task InvalidateCacheAsync(string id, CancellationToken cancellationToken = default)
     {
+        await InvalidateCacheInternalAsync(id, cancellationToken);
+    }
+
+    private async Task InvalidateCacheInternalAsync(string id, CancellationToken cancellationToken)
+    {
         if (_cache is null) return;
 
-        var cacheKey = $"{_cachePrefix}{id}";
-        await _cache.RemoveAsync(cacheKey, cancellationToken);
-        _logger.LogDebug("Invalidated cache for {EntityType} with ID {Id}", typeof(TEntity).Name, id);
+        try
+        {
+            var cacheKey = $"{_cachePrefix}{id}";
+            await _cache.RemoveAsync(cacheKey, cancellationToken);
+            _logger.LogDebug("Invalidated cache for {EntityType} with ID {Id}", typeof(TEntity).Name, id);
+        }
+        catch (Exception ex)
+        {
+            // Log but don't throw - cache invalidation failure shouldn't break the operation
+            _logger.LogWarning(ex, "Failed to invalidate cache for {EntityType} with ID {Id}", typeof(TEntity).Name, id);
+        }
     }
 
     private DatabaseTarget ResolveTarget()
@@ -219,7 +301,7 @@ public class PolyglotRepository<TEntity> : IPolyglotRepository<TEntity> where TE
 
             if (cached is not null)
             {
-                return JsonSerializer.Deserialize<TEntity>(cached);
+                return JsonSerializer.Deserialize<TEntity>(cached, _jsonOptions);
             }
         }
         catch (Exception ex)
@@ -237,7 +319,7 @@ public class PolyglotRepository<TEntity> : IPolyglotRepository<TEntity> where TE
         try
         {
             var cacheKey = $"{_cachePrefix}{id}";
-            var json = JsonSerializer.Serialize(entity);
+            var json = JsonSerializer.Serialize(entity, _jsonOptions);
             var options = new DistributedCacheEntryOptions
             {
                 AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(_options.CacheExpirationSeconds)
@@ -253,7 +335,7 @@ public class PolyglotRepository<TEntity> : IPolyglotRepository<TEntity> where TE
 
     private static string? GetEntityId(TEntity entity)
     {
-        // Try to get Id property
+        // Try to get Id property (supports string, Guid, int, etc.)
         var idProperty = typeof(TEntity).GetProperty("Id");
         return idProperty?.GetValue(entity)?.ToString();
     }

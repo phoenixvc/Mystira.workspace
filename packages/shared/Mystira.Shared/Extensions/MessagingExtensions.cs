@@ -82,12 +82,14 @@ public static class MessagingExtensions
             _ => Wolverine.DurabilityMode.Balanced
         };
 
-        // Configure retry policy
-        wolverine.Policies.OnException<Exception>()
-            .RetryWithCooldown(
-                TimeSpan.FromSeconds(options.InitialRetryDelaySeconds),
-                TimeSpan.FromSeconds(options.InitialRetryDelaySeconds * 2),
-                TimeSpan.FromSeconds(options.InitialRetryDelaySeconds * 4));
+        // Configure retry policy using MaxRetries from options
+        // Generate exponential backoff delays: baseDelay, baseDelay*2, baseDelay*4, etc.
+        var retryDelays = GenerateRetryDelays(options.MaxRetries, options.InitialRetryDelaySeconds);
+        if (retryDelays.Length > 0)
+        {
+            wolverine.Policies.OnException<Exception>()
+                .RetryWithCooldown(retryDelays);
+        }
 
         // Configure Azure Service Bus if connection string is provided
         if (!string.IsNullOrEmpty(options.ServiceBusConnectionString))
@@ -99,5 +101,27 @@ public static class MessagingExtensions
         // Apply local queue settings
         wolverine.LocalQueue("default")
             .Sequential();
+    }
+
+    /// <summary>
+    /// Generates exponential backoff retry delays based on MaxRetries and InitialRetryDelaySeconds.
+    /// </summary>
+    private static TimeSpan[] GenerateRetryDelays(int maxRetries, int initialDelaySeconds)
+    {
+        if (maxRetries <= 0)
+        {
+            return Array.Empty<TimeSpan>();
+        }
+
+        var delays = new TimeSpan[maxRetries];
+        for (var i = 0; i < maxRetries; i++)
+        {
+            // Exponential backoff: initialDelay * 2^i
+            // Cap at 60 seconds
+            var delaySeconds = Math.Min(initialDelaySeconds * Math.Pow(2, i), 60);
+            delays[i] = TimeSpan.FromSeconds(delaySeconds);
+        }
+
+        return delays;
     }
 }

@@ -55,6 +55,36 @@ public class DistributedCacheService : ICacheService
         }
     }
 
+    /// <summary>
+    /// Attempts to get a value from the cache.
+    /// Returns true if the value was found, false otherwise.
+    /// Works correctly with value types (int, bool, etc.).
+    /// </summary>
+    public async Task<(bool Found, T? Value)> TryGetAsync<T>(string key, CancellationToken cancellationToken = default)
+    {
+        if (!_options.Enabled)
+        {
+            return (false, default);
+        }
+
+        try
+        {
+            var data = await _cache.GetStringAsync(key, cancellationToken);
+            if (data == null)
+            {
+                return (false, default);
+            }
+
+            var value = JsonSerializer.Deserialize<T>(data, _jsonOptions);
+            return (true, value);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Failed to get cache key {Key}", key);
+            return (false, default);
+        }
+    }
+
     public Task SetAsync<T>(string key, T value, CancellationToken cancellationToken = default)
     {
         return SetAsync(key, value, TimeSpan.FromMinutes(_options.DefaultExpirationMinutes), cancellationToken);
@@ -108,17 +138,20 @@ public class DistributedCacheService : ICacheService
         TimeSpan expiration,
         CancellationToken cancellationToken = default)
     {
-        var cached = await GetAsync<T>(key, cancellationToken);
-        if (cached != null)
+        // Use TryGetAsync to correctly handle value types
+        var (found, cached) = await TryGetAsync<T>(key, cancellationToken);
+        if (found)
         {
             _logger.LogDebug("Cache hit for key {Key}", key);
-            return cached;
+            return cached!;
         }
 
         _logger.LogDebug("Cache miss for key {Key}, executing factory", key);
         var value = await factory(cancellationToken);
 
-        if (value != null)
+        // Cache even null/default values for reference types to avoid repeated factory calls
+        // For value types, always cache the result
+        if (value is not null || !typeof(T).IsValueType)
         {
             await SetAsync(key, value, expiration, cancellationToken);
         }

@@ -48,7 +48,8 @@ public static class CachingExtensions
             services.AddDistributedMemoryCache();
         }
 
-        services.AddSingleton<ICacheService, DistributedCacheService>();
+        // Use Scoped to match IDistributedCache lifetime and support options reloading
+        services.AddScoped<ICacheService, DistributedCacheService>();
 
         return services;
     }
@@ -87,7 +88,8 @@ public static class CachingExtensions
             services.AddDistributedMemoryCache();
         }
 
-        services.AddSingleton<ICacheService, DistributedCacheService>();
+        // Use Scoped to match IDistributedCache lifetime and support options reloading
+        services.AddScoped<ICacheService, DistributedCacheService>();
 
         return services;
     }
