@@ -1,8 +1,10 @@
 # Mystira.StoryGenerator Migration Guide
 
 **Target**: Migrate StoryGenerator to use `Mystira.Shared` infrastructure
-**Prerequisites**: Mystira.Shared v0.1.0+ published to NuGet feed
+**Prerequisites**: Mystira.Shared v0.2.0+ published to NuGet feed
 **Estimated Effort**: 2 days
+**Last Updated**: December 2025
+**Status**: 🔄 In Progress
 
 ---
 
@@ -10,11 +12,14 @@
 
 StoryGenerator migration includes:
 
-1. .NET 8.0 → .NET 9.0 upgrade (required for Mystira.Shared)
+1. **.NET 9.0 upgrade** (required for Mystira.Shared)
 2. MediatR → Wolverine migration
-3. Custom `RetryPolicyService` → `Mystira.Shared.Resilience`
-4. In-memory stores → Redis caching (optional)
+3. Custom `RetryPolicyService` → `Mystira.Shared.Resilience` (Polly v8)
+4. In-memory stores → Redis caching
 5. Contracts migration to unified package
+6. **Ardalis.Specification 8.0.0** for data access
+7. **Distributed locking** for LLM operations
+8. **Dockerfile migration** to submodule repo (ADR-0019)
 
 ---
 
@@ -91,21 +96,31 @@ dotnet test
 <PackageReference Include="MediatR" Version="12.1.1" />
 
 <!-- Add -->
-<PackageReference Include="Mystira.Shared" Version="0.1.0" />
+<PackageReference Include="Mystira.Shared" Version="0.2.0" />
+<PackageReference Include="Ardalis.Specification" Version="8.0.0" />
+<PackageReference Include="Ardalis.Specification.EntityFrameworkCore" Version="8.0.0" />
 ```
 
 ### 2.2 Update Mystira.StoryGenerator.Application.csproj
 
 ```xml
 <!-- Add -->
-<PackageReference Include="Mystira.Shared" Version="0.1.0" />
+<PackageReference Include="Mystira.Shared" Version="0.2.0" />
+<PackageReference Include="Ardalis.Specification" Version="8.0.0" />
 ```
 
 ### 2.3 Update Mystira.StoryGenerator.RagIndexer.csproj
 
 ```xml
 <!-- Add for resilience -->
-<PackageReference Include="Mystira.Shared" Version="0.1.0" />
+<PackageReference Include="Mystira.Shared" Version="0.2.0" />
+```
+
+### 2.4 Update Mystira.StoryGenerator.Domain.csproj
+
+```xml
+<!-- Add for specification pattern -->
+<PackageReference Include="Ardalis.Specification" Version="8.0.0" />
 ```
 
 ---
@@ -213,20 +228,38 @@ public class RagIndexingService
 }
 ```
 
-### 4.2 HTTP Client Resilience
+### 4.2 HTTP Client Resilience (Polly v8)
 
 ```csharp
 // Program.cs
 builder.Services.AddMystiraResilience(builder.Configuration);
 
-// For LLM HTTP clients
-builder.Services.AddHttpClient<IOpenAIClient, OpenAIClient>()
-    .AddMystiraResiliencePolicy("OpenAI", options =>
+// For LLM HTTP clients with extended timeouts
+builder.Services.AddResilientHttpClientV8<IOpenAIClient, OpenAIClient>(
+    "OpenAI",
+    client => client.BaseAddress = new Uri("https://api.openai.com"),
+    options =>
     {
         options.TimeoutSeconds = 120; // LLM calls need longer timeout
-        options.RetryCount = 2;
+        options.MaxRetries = 2;
+        options.LongRunningTimeoutSeconds = 300; // For very long generations
+    });
+
+// Or use standard resilience handler
+builder.Services.AddHttpClient<IOpenAIClient, OpenAIClient>()
+    .AddStandardResilienceHandler()
+    .Configure(options =>
+    {
+        options.TotalRequestTimeout.Timeout = TimeSpan.FromMinutes(5);
     });
 ```
+
+### 4.3 Breaking Changes (Polly v7 → v8)
+
+| Before (v7) | After (v8) |
+|-------------|------------|
+| `IAsyncPolicy<T>` | `ResiliencePipeline<T>` |
+| `PolicyFactory.CreateStandardPipeline()` | `ResiliencePipelineFactory.CreateStandardHttpPipeline()` |
 
 ---
 
@@ -312,6 +345,154 @@ module.exports = {
 ```css
 /* app.css */
 @import '@mystira/design-tokens/css/variables.css';
+@import '@mystira/design-tokens/css/dark-mode.css';
+```
+
+---
+
+## Phase 8: Distributed Locking
+
+### 8.1 Setup
+
+```csharp
+// Program.cs
+builder.Services.AddMystiraDistributedLocking(builder.Configuration);
+```
+
+### 8.2 Usage for LLM Operations
+
+```csharp
+public class StoryGenerationService
+{
+    private readonly IDistributedLockService _lockService;
+
+    public async Task<StoryResult> GenerateAsync(string sessionId, CancellationToken ct)
+    {
+        // Prevent duplicate generations for the same session
+        return await _lockService.ExecuteWithLockAsync(
+            $"story:generation:{sessionId}",
+            async token =>
+            {
+                // Only one generation per session at a time
+                return await DoGenerateAsync(sessionId, token);
+            },
+            expiry: TimeSpan.FromMinutes(10), // Long timeout for LLM
+            wait: TimeSpan.FromSeconds(5),
+            ct);
+    }
+}
+```
+
+---
+
+## Phase 9: Ardalis.Specification 8.0.0
+
+### 9.1 Create Specification Classes
+
+```csharp
+using Ardalis.Specification;
+
+namespace Mystira.StoryGenerator.Domain.Specifications;
+
+public sealed class StoryByIdSpec : Specification<Story>, ISingleResultSpecification<Story>
+{
+    public StoryByIdSpec(string storyId)
+    {
+        Query
+            .Where(s => s.Id == storyId)
+            .Include(s => s.Chapters)
+            .AsNoTracking();
+    }
+}
+
+public sealed class StoriesBySessionSpec : Specification<Story>
+{
+    public StoriesBySessionSpec(string sessionId)
+    {
+        Query
+            .Where(s => s.SessionId == sessionId)
+            .OrderByDescending(s => s.CreatedAt)
+            .AsNoTracking();
+    }
+}
+```
+
+---
+
+## Phase 10: Dockerfile Migration (ADR-0019)
+
+Move Dockerfile from workspace to submodule repo:
+
+### 10.1 Create Dockerfile in Submodule
+
+```dockerfile
+# packages/story-generator/Dockerfile (new location)
+FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS base
+WORKDIR /app
+EXPOSE 80
+
+FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
+WORKDIR /src
+COPY ["src/Mystira.StoryGenerator.Api/Mystira.StoryGenerator.Api.csproj", "src/Mystira.StoryGenerator.Api/"]
+# ... other project references
+RUN dotnet restore "src/Mystira.StoryGenerator.Api/Mystira.StoryGenerator.Api.csproj"
+COPY . .
+RUN dotnet build "src/Mystira.StoryGenerator.Api/Mystira.StoryGenerator.Api.csproj" -c Release -o /app/build
+
+FROM build AS publish
+RUN dotnet publish "src/Mystira.StoryGenerator.Api/Mystira.StoryGenerator.Api.csproj" -c Release -o /app/publish
+
+FROM base AS final
+WORKDIR /app
+COPY --from=publish /app/publish .
+ENTRYPOINT ["dotnet", "Mystira.StoryGenerator.Api.dll"]
+```
+
+### 10.2 Add CI/CD Workflow
+
+```yaml
+# .github/workflows/ci.yml (in Mystira.StoryGenerator repo)
+name: StoryGenerator CI
+
+on:
+  push:
+    branches: [main, dev]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+      - run: dotnet restore
+      - run: dotnet build --configuration Release --no-restore
+      - run: dotnet test --configuration Release --no-build
+
+  docker:
+    needs: build
+    if: github.ref == 'refs/heads/dev'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/login-action@v3
+        with:
+          registry: myssharedacr.azurecr.io
+          username: ${{ secrets.ACR_USERNAME }}
+          password: ${{ secrets.ACR_PASSWORD }}
+      - uses: docker/build-push-action@v5
+        with:
+          push: true
+          tags: myssharedacr.azurecr.io/story-generator:${{ github.sha }}
+      - name: Trigger workspace deployment
+        uses: peter-evans/repository-dispatch@v2
+        with:
+          token: ${{ secrets.WORKSPACE_PAT }}
+          repository: phoenixvc/Mystira.workspace
+          event-type: story-generator-deploy
+          client-payload: '{"sha": "${{ github.sha }}"}'
 ```
 
 ---
@@ -319,17 +500,19 @@ module.exports = {
 ## Migration Checklist
 
 ### Pre-Migration
-- [ ] Ensure Mystira.Shared is published
+- [ ] Ensure Mystira.Shared v0.2.0+ is published
 - [ ] Create feature branch
 - [ ] Document current handler count
+- [ ] Backup Key Vault secrets
 
-### Phase 1: .NET Upgrade
+### Phase 1: .NET 9.0 Upgrade
 - [ ] Update all csproj to net9.0
 - [ ] Update package versions
+- [ ] Add Ardalis.Specification packages
 - [ ] Verify build and tests pass
 
 ### Phase 2: Package Setup
-- [ ] Add Mystira.Shared to Api, Application, RagIndexer
+- [ ] Add Mystira.Shared to Api, Application, RagIndexer, Domain
 - [ ] Verify build succeeds
 
 ### Phase 3: Wolverine
@@ -338,12 +521,13 @@ module.exports = {
 - [ ] Convert command handlers
 - [ ] Remove MediatR package
 
-### Phase 4: Resilience
+### Phase 4: Resilience (Polly v8)
 - [ ] Delete RetryPolicyService.cs
 - [ ] Add Mystira.Shared.Resilience
-- [ ] Update HTTP clients with policies
+- [ ] Replace `IAsyncPolicy` with `ResiliencePipeline`
+- [ ] Update HTTP clients with extended timeouts for LLM
 
-### Phase 5: Caching (Optional)
+### Phase 5: Caching
 - [ ] Add Redis configuration
 - [ ] Replace in-memory stores
 - [ ] Test multi-instance scenarios
@@ -352,14 +536,31 @@ module.exports = {
 - [ ] Update to Mystira.Contracts
 - [ ] Remove Mystira.StoryGenerator.Contracts project reference
 
-### Phase 7: Web
+### Phase 7: Web (Design Tokens)
 - [ ] Add design tokens
+- [ ] Add dark mode support
 - [ ] Update color variables
 
+### Phase 8: Distributed Locking
+- [ ] Add distributed locking configuration
+- [ ] Implement locks for LLM operations
+- [ ] Test concurrent generation scenarios
+
+### Phase 9: Specification Pattern
+- [ ] Create specification classes for data access
+- [ ] Update repositories to use Ardalis.Specification
+
+### Phase 10: Dockerfile Migration
+- [ ] Create Dockerfile in submodule repo
+- [ ] Add CI/CD workflow
+- [ ] Remove Dockerfile from workspace
+
 ### Post-Migration
-- [ ] Run all tests
+- [ ] Run all unit tests
+- [ ] Run integration tests
 - [ ] Test API endpoints
 - [ ] Load test LLM endpoints
+- [ ] Verify distributed lock behavior
 - [ ] Create PR
 
 ---
@@ -380,22 +581,29 @@ module.exports = {
 
 | Change | Impact | Mitigation |
 |--------|--------|------------|
-| .NET 8 → 9 | Runtime upgrade | Test thoroughly |
+| .NET 8 → 9 | Runtime upgrade | Test thoroughly in staging |
 | MediatR → Wolverine | Handler signatures | Gradual migration |
+| Polly v7 → v8 | Policy API changes | Use new ResiliencePipeline API |
 | In-memory → Redis | Requires Redis | Feature flag |
+| Custom specs → Ardalis | Query patterns change | Gradual migration |
 
 ---
 
 ## Performance Considerations
 
-1. **LLM Timeouts**: Configure longer timeouts for LLM operations
+1. **LLM Timeouts**: Configure longer timeouts for LLM operations (5+ minutes)
 2. **Streaming**: Wolverine supports streaming responses
 3. **Redis**: Improves multi-instance support for background operations
+4. **Distributed Locking**: Use appropriate lock durations for LLM operations
+5. **Polly v8**: Lower memory allocation than v7
 
 ---
 
 ## Related Documentation
 
 - [ADR-0015: Wolverine Migration](../architecture/adr/0015-event-driven-architecture-framework.md)
+- [ADR-0019: Dockerfile Location Standardization](../adr/ADR-0019-dockerfile-location-standardization.md)
+- [Ardalis.Specification 8.0.0 Guide](../architecture/specifications/ardalis-specification-migration.md)
 - [Mystira.App Migration Guide](./mystira-app-migration.md)
+- [Mystira.Shared Migration Guide](../guides/mystira-shared-migration.md)
 - [Mystira.Shared README](../../packages/shared/Mystira.Shared/README.md)
