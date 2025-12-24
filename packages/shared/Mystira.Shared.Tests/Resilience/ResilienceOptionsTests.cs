@@ -1,5 +1,6 @@
 using FluentAssertions;
 using Mystira.Shared.Resilience;
+using Xunit;
 
 namespace Mystira.Shared.Tests.Resilience;
 
