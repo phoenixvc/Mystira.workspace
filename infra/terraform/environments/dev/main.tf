@@ -21,8 +21,14 @@ terraform {
       source  = "hashicorp/azuread"
       version = "~> 2.47"
     }
+    azapi = {
+      source  = "Azure/azapi"
+      version = "~> 2.0"  # Required for AI Foundry projects and catalog models
+    }
   }
 }
+
+provider "azapi" {}
 
 provider "azurerm" {
   features {
@@ -398,6 +404,7 @@ module "shared_monitoring" {
 }
 
 # Shared Azure AI Foundry Infrastructure (in core-rg)
+# Updated to use AIServices (Azure AI Foundry) instead of legacy OpenAI
 module "shared_azure_ai" {
   source = "../../modules/shared/azure-ai"
 
@@ -406,21 +413,60 @@ module "shared_azure_ai" {
   region_code         = local.region_code
   resource_group_name = azurerm_resource_group.main.name
 
-  # Use default model deployments (gpt-4o, gpt-4o-mini)
+  # Enable AI Foundry project for workload isolation
+  enable_project = true # Uses AzAPI to enable allowProjectManagement on account
+
+  # Model deployments - OpenAI models only
+  # See: https://ai.azure.com/catalog/models for full catalog
+  # Note: Claude/Anthropic models require Azure AI Foundry portal deployment (not Terraform)
+  # Note: GPT-4.1/5.x models not yet available - add when released
   model_deployments = {
-    "gpt-4o" = {
-      model_name    = "gpt-4o"
-      model_version = "2024-08-06"
-      sku_name      = "GlobalStandard"
-      capacity      = 10
-    }
+    # GPT-4o-mini - cost-effective for dev (gpt-4o quota exceeded)
     "gpt-4o-mini" = {
       model_name    = "gpt-4o-mini"
       model_version = "2024-07-18"
+      model_format  = "OpenAI"
       sku_name      = "GlobalStandard"
       capacity      = 20
     }
+    # Embedding models for RAG / Vector Search (reduces tokens ~20x)
+    # Note: Must use GlobalStandard - Standard not available in SAN
+    "text-embedding-3-large" = {
+      model_name    = "text-embedding-3-large"
+      model_version = "1"
+      model_format  = "OpenAI"
+      sku_name      = "GlobalStandard"
+      capacity      = 120
+    }
+    "text-embedding-3-small" = {
+      model_name    = "text-embedding-3-small"
+      model_version = "1"
+      model_format  = "OpenAI"
+      sku_name      = "GlobalStandard"
+      capacity      = 120
+    }
   }
+
+  tags = {
+    CostCenter = "development"
+  }
+}
+
+# Shared Azure AI Search Infrastructure (in core-rg)
+# Provides RAG, vector search, and semantic search capabilities
+module "shared_azure_search" {
+  source = "../../modules/shared/azure-search"
+
+  environment         = "dev"
+  location            = var.location
+  region_code         = local.region_code
+  resource_group_name = azurerm_resource_group.main.name
+
+  # Use basic tier for dev (cost-effective, 2GB storage, 15 indexes)
+  # Note: semantic search requires standard tier
+  sku             = "basic"
+  replica_count   = 1
+  partition_count = 1
 
   tags = {
     CostCenter = "development"
