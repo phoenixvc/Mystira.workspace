@@ -741,35 +741,95 @@ jobs:
 
       - name: List Deployed AI Models
         run: |
+          cd infra/terraform/environments/${{ env.ENVIRONMENT }}
+
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "## 🤖 Deployed AI Models" >> $GITHUB_STEP_SUMMARY
+          echo "## 🤖 AI Model Deployment Results" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
 
-          # Get AI Services accounts
+          # Get expected models from Terraform output
+          echo "### Expected vs Actual Deployments" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # Get Terraform outputs for model deployments
+          EXPECTED_MODELS=$(terraform output -json azure_ai_model_deployments 2>/dev/null || echo "{}")
+
+          echo "| Model | Format | Region | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------|--------|--------|--------|" >> $GITHUB_STEP_SUMMARY
+
+          # Track counts
+          SUCCESS_COUNT=0
+          FAILED_COUNT=0
+
+          # Check each AI Services account
           for AI_NAME in "mys-shared-ai-san" "mys-shared-ai-uks"; do
             if az cognitiveservices account show --name "$AI_NAME" --resource-group ${{ env.AZURE_RESOURCE_GROUP }} &>/dev/null; then
-              ENDPOINT=$(az cognitiveservices account show --name "$AI_NAME" --resource-group ${{ env.AZURE_RESOURCE_GROUP }} --query "properties.endpoint" -o tsv 2>/dev/null || echo "N/A")
-              LOCATION=$(az cognitiveservices account show --name "$AI_NAME" --resource-group ${{ env.AZURE_RESOURCE_GROUP }} --query "location" -o tsv 2>/dev/null || echo "N/A")
+              LOCATION=$(az cognitiveservices account show --name "$AI_NAME" --resource-group ${{ env.AZURE_RESOURCE_GROUP }} --query "location" -o tsv 2>/dev/null)
 
-              echo "### ${AI_NAME} (${LOCATION})" >> $GITHUB_STEP_SUMMARY
+              # List deployed models
+              DEPLOYED=$(az cognitiveservices account deployment list \
+                --name "$AI_NAME" \
+                --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
+                --query "[].{name:name, model:properties.model.name, format:properties.model.format, state:properties.provisioningState}" \
+                -o json 2>/dev/null || echo "[]")
+
+              echo "$DEPLOYED" | jq -r --arg loc "$LOCATION" '.[] |
+                if .state == "Succeeded" then
+                  "| \(.name) | \(.format) | \($loc) | ✅ Deployed |"
+                elif .state == "Failed" then
+                  "| \(.name) | \(.format) | \($loc) | ❌ Failed |"
+                else
+                  "| \(.name) | \(.format) | \($loc) | ⏳ \(.state) |"
+                end' >> $GITHUB_STEP_SUMMARY
+
+              # Count successes and failures
+              SUCCESS_COUNT=$((SUCCESS_COUNT + $(echo "$DEPLOYED" | jq '[.[] | select(.state == "Succeeded")] | length')))
+              FAILED_COUNT=$((FAILED_COUNT + $(echo "$DEPLOYED" | jq '[.[] | select(.state == "Failed")] | length')))
+            fi
+          done
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # Show detailed view per account
+          echo "### Deployment Details" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          for AI_NAME in "mys-shared-ai-san" "mys-shared-ai-uks"; do
+            if az cognitiveservices account show --name "$AI_NAME" --resource-group ${{ env.AZURE_RESOURCE_GROUP }} &>/dev/null; then
+              ENDPOINT=$(az cognitiveservices account show --name "$AI_NAME" --resource-group ${{ env.AZURE_RESOURCE_GROUP }} --query "properties.endpoint" -o tsv 2>/dev/null)
+              LOCATION=$(az cognitiveservices account show --name "$AI_NAME" --resource-group ${{ env.AZURE_RESOURCE_GROUP }} --query "location" -o tsv 2>/dev/null)
+
+              echo "<details>" >> $GITHUB_STEP_SUMMARY
+              echo "<summary><strong>${AI_NAME}</strong> (${LOCATION})</summary>" >> $GITHUB_STEP_SUMMARY
               echo "" >> $GITHUB_STEP_SUMMARY
               echo "**Endpoint:** \`${ENDPOINT}\`" >> $GITHUB_STEP_SUMMARY
               echo "" >> $GITHUB_STEP_SUMMARY
-              echo "| Model | Version | Format | SKU | Capacity |" >> $GITHUB_STEP_SUMMARY
-              echo "|-------|---------|--------|-----|----------|" >> $GITHUB_STEP_SUMMARY
+              echo "| Model | Version | SKU | Capacity | State |" >> $GITHUB_STEP_SUMMARY
+              echo "|-------|---------|-----|----------|-------|" >> $GITHUB_STEP_SUMMARY
 
-              # List all model deployments
               az cognitiveservices account deployment list \
                 --name "$AI_NAME" \
                 --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
-                --query "[].{name:name, model:properties.model.name, version:properties.model.version, format:properties.model.format, sku:sku.name, capacity:sku.capacity}" \
-                -o json 2>/dev/null | jq -r '.[] | "| \(.name) | \(.version // "latest") | \(.format) | \(.sku) | \(.capacity) |"' >> $GITHUB_STEP_SUMMARY || echo "| (no deployments) | | | | |" >> $GITHUB_STEP_SUMMARY
+                --query "[].{name:name, version:properties.model.version, sku:sku.name, capacity:sku.capacity, state:properties.provisioningState}" \
+                -o json 2>/dev/null | jq -r '.[] | "| \(.name) | \(.version // "latest") | \(.sku) | \(.capacity) | \(.state) |"' >> $GITHUB_STEP_SUMMARY || echo "| (no deployments) | | | | |" >> $GITHUB_STEP_SUMMARY
 
+              echo "" >> $GITHUB_STEP_SUMMARY
+              echo "</details>" >> $GITHUB_STEP_SUMMARY
               echo "" >> $GITHUB_STEP_SUMMARY
             fi
           done
 
+          # Summary
+          TOTAL=$((SUCCESS_COUNT + FAILED_COUNT))
           echo "---" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ "$FAILED_COUNT" -eq 0 ] && [ "$SUCCESS_COUNT" -gt 0 ]; then
+            echo "### ✅ All $SUCCESS_COUNT models deployed successfully!" >> $GITHUB_STEP_SUMMARY
+          elif [ "$FAILED_COUNT" -gt 0 ]; then
+            echo "### ⚠️ $SUCCESS_COUNT/$TOTAL models deployed, $FAILED_COUNT failed" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "### ℹ️ No models configured for deployment" >> $GITHUB_STEP_SUMMARY
+          fi
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Note:** Claude models are deployed separately via Azure AI Model Catalog (see next job)" >> $GITHUB_STEP_SUMMARY
 
