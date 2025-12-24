@@ -103,6 +103,8 @@ public class NotFoundErrorResponse : ErrorResponse
             : $"{resourceType} was not found.";
         IsRecoverable = true;
         SuggestedAction = "check-id";
+        ResourceType = resourceType;
+        ResourceId = resourceId;
     }
 
     /// <summary>

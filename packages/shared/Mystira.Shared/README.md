@@ -8,10 +8,13 @@ This package provides cross-cutting concerns for all Mystira .NET services:
 
 - **Authentication**: JWT token generation, validation, and middleware
 - **Authorization**: Role-based and permission-based access control
-- **Resilience**: Polly-based retry, circuit breaker, and timeout policies
+- **Resilience**: Polly v8 resilience pipelines with retry, circuit breaker, and timeout
 - **Exceptions**: Standardized error handling, Result<T> pattern, ProblemDetails
 - **Caching**: Distributed caching with Redis support
 - **Messaging**: Wolverine integration for unified in-process and distributed messaging
+- **Locking**: Redis-based distributed locking for concurrency control
+- **Repository Pattern**: Generic repository + Ardalis.Specification (recommended)
+- **Observability**: Circuit breaker events with OpenTelemetry metrics
 - **Middleware**: Telemetry, logging, and request/response handling
 - **Extensions**: Dependency injection helpers for easy integration
 
@@ -111,6 +114,119 @@ public static class CreateAccountHandler
 }
 ```
 
+### Repository Pattern
+
+```csharp
+using Mystira.Shared.Data.Repositories;
+
+// Create a repository implementation
+public class AccountRepository : RepositoryBase<Account>, IAccountRepository
+{
+    public AccountRepository(MyDbContext context) : base(context) { }
+}
+
+// Use typed key repository
+public class OrderRepository : RepositoryBase<Order, Guid>, IOrderRepository
+{
+    public OrderRepository(MyDbContext context) : base(context) { }
+}
+
+// Query with specifications (Ardalis.Specification)
+public class ActiveAccountsSpec : Specification<Account>
+{
+    public ActiveAccountsSpec()
+    {
+        Query.Where(a => a.IsActive)
+             .OrderBy(a => a.CreatedAt);
+    }
+}
+
+// Use in service
+public class AccountService
+{
+    private readonly IRepository<Account> _repo;
+
+    public async Task<IEnumerable<Account>> GetActiveAccountsAsync()
+    {
+        return await _repo.ListAsync(new ActiveAccountsSpec());
+    }
+
+    // Stream large datasets without loading all into memory
+    public async IAsyncEnumerable<Account> StreamAllAsync(
+        [EnumeratorCancellation] CancellationToken ct = default)
+    {
+        await foreach (var account in _repo.StreamAllAsync(ct))
+        {
+            yield return account;
+        }
+    }
+}
+```
+
+### Unit of Work Pattern
+
+```csharp
+using Mystira.Shared.Data.Repositories;
+
+public class OrderService
+{
+    private readonly IRepository<Order> _orders;
+    private readonly IRepository<OrderItem> _items;
+    private readonly IUnitOfWork _unitOfWork;
+
+    public async Task CreateOrderAsync(CreateOrderDto dto)
+    {
+        await _unitOfWork.BeginTransactionAsync();
+        try
+        {
+            var order = new Order { CustomerId = dto.CustomerId };
+            await _orders.AddAsync(order);
+
+            foreach (var item in dto.Items)
+            {
+                await _items.AddAsync(new OrderItem
+                {
+                    OrderId = order.Id,
+                    ProductId = item.ProductId
+                });
+            }
+
+            await _unitOfWork.SaveChangesAsync();
+            await _unitOfWork.CommitTransactionAsync();
+        }
+        catch
+        {
+            await _unitOfWork.RollbackTransactionAsync();
+            throw;
+        }
+    }
+}
+```
+
+### Options Validation
+
+```csharp
+using Mystira.Shared.Extensions;
+
+// Add options with validation (fails fast on startup if invalid)
+builder.Services.AddMystiraCaching(configuration)
+    .AddMystiraOptionsValidation(); // Validates CacheOptions
+
+builder.Services.AddMystiraResilience(configuration)
+    .AddMystiraOptionsValidation(); // Validates ResilienceOptions
+
+// Custom options validation
+public class MyOptionsValidator : IValidateOptions<MyOptions>
+{
+    public ValidateOptionsResult Validate(string? name, MyOptions options)
+    {
+        if (options.Timeout <= TimeSpan.Zero)
+            return ValidateOptionsResult.Fail("Timeout must be positive");
+        return ValidateOptionsResult.Success;
+    }
+}
+```
+
 ### Configuration
 
 ```json
@@ -189,6 +305,78 @@ This package replaces `Mystira.App.Shared`. To migrate:
    services.AddMystiraAuthorization();
    ```
 
+### Distributed Locking
+
+```csharp
+using Mystira.Shared.Locking;
+
+// Setup
+builder.Services.AddMystiraCaching(configuration); // Redis required
+builder.Services.AddMystiraDistributedLocking(configuration);
+
+// Usage
+public class PaymentService
+{
+    private readonly IDistributedLockService _lockService;
+
+    public async Task ProcessPaymentAsync(Guid paymentId, CancellationToken ct)
+    {
+        // Execute with automatic lock management
+        await _lockService.ExecuteWithLockAsync(
+            $"payment:{paymentId}",
+            async token => await DoPaymentProcessing(paymentId, token),
+            expiry: TimeSpan.FromSeconds(30),
+            wait: TimeSpan.FromSeconds(10),
+            ct);
+    }
+}
+```
+
+### Polly v8 Resilience Pipelines
+
+```csharp
+using Mystira.Shared.Extensions;
+using Mystira.Shared.Resilience;
+
+// Standard resilience with Polly v8 pipelines
+builder.Services.AddResilientHttpClientV8<IMyApiClient, MyApiClient>(
+    "MyApi",
+    client => client.BaseAddress = new Uri("https://api.example.com"));
+
+// Long-running operations (e.g., LLM calls)
+builder.Services.AddLongRunningHttpClientV8<ILlmClient, LlmClient>(
+    "LlmApi");
+
+// Direct pipeline usage for non-HTTP operations
+var pipeline = ResiliencePipelineFactory.CreateRetryPipeline<string>(
+    "DatabaseQuery",
+    new ResilienceOptions { MaxRetries = 3 });
+
+var result = await pipeline.ExecuteAsync(async ct => await db.QueryAsync(ct));
+```
+
+### Circuit Breaker Events
+
+```csharp
+using Mystira.Shared.Resilience;
+
+// Register metrics
+builder.Services.AddSingleton<CircuitBreakerMetrics>();
+
+// Subscribe to events
+public class CircuitMonitor
+{
+    public CircuitMonitor(IObservableCircuitBreaker circuit)
+    {
+        circuit.StateChanged += (s, e) =>
+        {
+            if (e.NewState == CircuitState.Open)
+                _alertService.SendAlert($"Circuit {e.CircuitName} opened!");
+        };
+    }
+}
+```
+
 ## Package Contents
 
 ```
@@ -200,22 +388,32 @@ Mystira.Shared/
 │   ├── Permissions.cs             # Permission constants
 │   ├── RequirePermissionAttribute.cs
 │   └── PermissionHandler.cs       # Authorization handler
-├── Resilience/                    # Wave 1
+├── Resilience/
 │   ├── ResilienceOptions.cs       # Retry/circuit breaker config
-│   ├── PolicyFactory.cs           # Polly policy creation
-│   └── ResilienceExtensions.cs    # DI registration
-├── Exceptions/                    # Wave 1
+│   ├── PolicyFactory.cs           # Legacy Polly v7 policies
+│   ├── ResiliencePipelineFactory.cs  # Polly v8 pipelines (NEW)
+│   ├── ResiliencePipelineExtensions.cs  # v8 DI helpers (NEW)
+│   └── CircuitBreakerEvents.cs    # Observable circuit breaker (NEW)
+├── Exceptions/
 │   ├── ErrorResponse.cs           # Standard error responses
 │   ├── Result.cs                  # Result<T> pattern
 │   ├── MystiraException.cs        # Base exception types
 │   └── GlobalExceptionHandler.cs  # IExceptionHandler
-├── Caching/                       # Wave 2
+├── Caching/
 │   ├── CacheOptions.cs            # Cache configuration
 │   ├── ICacheService.cs           # Cache abstraction
 │   └── DistributedCacheService.cs # Redis/memory implementation
-├── Messaging/                     # Wave 3 (Wolverine)
+├── Messaging/                     # Wolverine
 │   ├── MessagingOptions.cs        # Messaging configuration
 │   └── ICommand.cs                # Message marker interfaces
+├── Locking/                       # NEW
+│   ├── IDistributedLock.cs        # Lock interfaces
+│   ├── RedisDistributedLockService.cs  # Redis implementation
+│   └── DistributedLockExtensions.cs    # DI helpers
+├── Data/
+│   └── Repositories/
+│       ├── IRepository.cs         # Repository + UnitOfWork interfaces
+│       └── RepositoryBase.cs      # EF Core implementation with streaming
 ├── Middleware/
 │   └── TelemetryMiddleware.cs     # OpenTelemetry integration
 └── Extensions/
@@ -223,12 +421,16 @@ Mystira.Shared/
     ├── AuthorizationExtensions.cs
     ├── CachingExtensions.cs
     ├── ExceptionExtensions.cs
+    ├── HealthCheckExtensions.cs
     ├── MessagingExtensions.cs
+    ├── OptionsValidationExtensions.cs
+    ├── ResilienceExtensions.cs
     └── TelemetryExtensions.cs
 ```
 
 ## Related Documentation
 
+- [Migration Guide](https://github.com/phoenixvc/Mystira.workspace/blob/main/docs/guides/mystira-shared-migration.md) - Detailed migration and feature adoption guide
 - [ADR-0020: Package Consolidation Strategy](https://github.com/phoenixvc/Mystira.workspace/blob/main/docs/architecture/adr/0020-package-consolidation-strategy.md)
 - [Authentication & Authorization Guide](https://github.com/phoenixvc/Mystira.workspace/blob/main/docs/guides/authentication-authorization-guide.md)
 

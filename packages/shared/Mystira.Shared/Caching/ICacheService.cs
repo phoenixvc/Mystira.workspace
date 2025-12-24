@@ -7,12 +7,24 @@ public interface ICacheService
 {
     /// <summary>
     /// Gets a value from the cache.
+    /// Note: For value types, use TryGetAsync to distinguish between "not found" and "found default value".
     /// </summary>
     /// <typeparam name="T">The type of the cached value.</typeparam>
     /// <param name="key">The cache key.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>The cached value, or default if not found.</returns>
     Task<T?> GetAsync<T>(string key, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Attempts to get a value from the cache.
+    /// Use this method for value types (int, bool, etc.) to correctly distinguish
+    /// between "not found" and "found with default value".
+    /// </summary>
+    /// <typeparam name="T">The type of the cached value.</typeparam>
+    /// <param name="key">The cache key.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>A tuple of (Found, Value) where Found indicates if the key was in cache.</returns>
+    Task<(bool Found, T? Value)> TryGetAsync<T>(string key, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Sets a value in the cache with default expiration.
@@ -35,6 +47,7 @@ public interface ICacheService
 
     /// <summary>
     /// Gets a value from cache, or creates and caches it if not found.
+    /// Works correctly with value types.
     /// </summary>
     /// <typeparam name="T">The type of the value.</typeparam>
     /// <param name="key">The cache key.</param>
@@ -48,6 +61,7 @@ public interface ICacheService
 
     /// <summary>
     /// Gets a value from cache, or creates and caches it with custom expiration.
+    /// Works correctly with value types.
     /// </summary>
     Task<T> GetOrCreateAsync<T>(
         string key,
@@ -64,6 +78,7 @@ public interface ICacheService
 
     /// <summary>
     /// Removes all values matching a pattern.
+    /// Note: May not be supported by all cache providers.
     /// </summary>
     /// <param name="pattern">The key pattern (e.g., "user:*").</param>
     /// <param name="cancellationToken">Cancellation token.</param>

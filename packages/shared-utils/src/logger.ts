@@ -83,9 +83,18 @@ export function createLogger(options: LoggerOptions = {}): Logger {
   };
 }
 
+function safeStringify(value: unknown): string {
+  try {
+    return JSON.stringify(value);
+  } catch {
+    // Handle circular references or non-serializable values
+    return '[unserializable context]';
+  }
+}
+
 function defaultOutput(entry: LogEntry): void {
   const { level, message, timestamp, context } = entry;
-  const contextStr = context && Object.keys(context).length > 0 ? ` ${JSON.stringify(context)}` : '';
+  const contextStr = context && Object.keys(context).length > 0 ? ` ${safeStringify(context)}` : '';
 
   // Use appropriate console method based on level
   const consoleFn =

@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Mystira.Shared.Caching;
 
 namespace Mystira.Shared.Extensions;
@@ -20,10 +21,17 @@ public static class CachingExtensions
         this IServiceCollection services,
         IConfiguration configuration)
     {
-        var options = new CacheOptions();
-        configuration.GetSection(CacheOptions.SectionName).Bind(options);
+        // Register options with validation - fails fast at startup if misconfigured
+        services.AddOptions<CacheOptions>()
+            .BindConfiguration(CacheOptions.SectionName)
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
 
-        services.Configure<CacheOptions>(configuration.GetSection(CacheOptions.SectionName));
+        // Register custom validator for logical constraints
+        services.AddSingleton<IValidateOptions<CacheOptions>, CacheOptionsValidator>();
+
+        var options = configuration.GetSection(CacheOptions.SectionName).Get<CacheOptions>()
+            ?? new CacheOptions();
 
         if (!string.IsNullOrEmpty(options.RedisConnectionString))
         {
@@ -40,7 +48,8 @@ public static class CachingExtensions
             services.AddDistributedMemoryCache();
         }
 
-        services.AddSingleton<ICacheService, DistributedCacheService>();
+        // Use Scoped to match IDistributedCache lifetime and support options reloading
+        services.AddScoped<ICacheService, DistributedCacheService>();
 
         return services;
     }
@@ -63,6 +72,9 @@ public static class CachingExtensions
             options.InstanceName = instanceName;
         });
 
+        // Register custom validator for logical constraints
+        services.AddSingleton<IValidateOptions<CacheOptions>, CacheOptionsValidator>();
+
         if (!string.IsNullOrEmpty(redisConnectionString))
         {
             services.AddStackExchangeRedisCache(options =>
@@ -76,7 +88,8 @@ public static class CachingExtensions
             services.AddDistributedMemoryCache();
         }
 
-        services.AddSingleton<ICacheService, DistributedCacheService>();
+        // Use Scoped to match IDistributedCache lifetime and support options reloading
+        services.AddScoped<ICacheService, DistributedCacheService>();
 
         return services;
     }

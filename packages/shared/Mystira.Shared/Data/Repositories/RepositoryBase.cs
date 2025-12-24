@@ -1,12 +1,14 @@
 using System.Linq.Expressions;
+using Ardalis.Specification;
+using Ardalis.Specification.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using Mystira.Shared.Data.Specifications;
 
 namespace Mystira.Shared.Data.Repositories;
 
 /// <summary>
 /// Generic repository implementation using Entity Framework Core.
 /// Supports both basic CRUD operations and specification-based queries.
+/// Uses Ardalis.Specification for specification pattern implementation.
 /// </summary>
 /// <typeparam name="TEntity">The entity type.</typeparam>
 public class RepositoryBase<TEntity> : IRepository<TEntity> where TEntity : class
@@ -27,17 +29,27 @@ public class RepositoryBase<TEntity> : IRepository<TEntity> where TEntity : clas
         return await DbSet.FindAsync(new object[] { id }, cancellationToken);
     }
 
+    /// <summary>
+    /// Gets an entity by its Guid ID.
+    /// </summary>
+    public virtual async Task<TEntity?> GetByIdAsync(
+        Guid id,
+        CancellationToken cancellationToken = default)
+    {
+        return await DbSet.FindAsync(new object[] { id }, cancellationToken);
+    }
+
     public virtual async Task<IEnumerable<TEntity>> GetAllAsync(
         CancellationToken cancellationToken = default)
     {
-        return await DbSet.ToListAsync(cancellationToken);
+        return await DbSet.AsNoTracking().ToListAsync(cancellationToken);
     }
 
     public virtual async Task<IEnumerable<TEntity>> FindAsync(
         Expression<Func<TEntity, bool>> predicate,
         CancellationToken cancellationToken = default)
     {
-        return await DbSet.Where(predicate).ToListAsync(cancellationToken);
+        return await DbSet.AsNoTracking().Where(predicate).ToListAsync(cancellationToken);
     }
 
     public virtual async Task<TEntity> AddAsync(
@@ -77,6 +89,20 @@ public class RepositoryBase<TEntity> : IRepository<TEntity> where TEntity : clas
         }
     }
 
+    /// <summary>
+    /// Deletes an entity by its Guid ID.
+    /// </summary>
+    public virtual async Task DeleteAsync(
+        Guid id,
+        CancellationToken cancellationToken = default)
+    {
+        var entity = await GetByIdAsync(id, cancellationToken);
+        if (entity != null)
+        {
+            DbSet.Remove(entity);
+        }
+    }
+
     public virtual Task DeleteAsync(
         TEntity entity,
         CancellationToken cancellationToken = default)
@@ -107,20 +133,20 @@ public class RepositoryBase<TEntity> : IRepository<TEntity> where TEntity : clas
         return await DbSet.CountAsync(cancellationToken);
     }
 
-    // Specification pattern operations
+    // Specification pattern operations using Ardalis.Specification
 
     public virtual async Task<TEntity?> GetBySpecAsync(
         ISpecification<TEntity> spec,
         CancellationToken cancellationToken = default)
     {
-        return await ApplySpecification(spec).FirstOrDefaultAsync(cancellationToken);
+        return await ApplySpecification(spec).AsNoTracking().FirstOrDefaultAsync(cancellationToken);
     }
 
     public virtual async Task<IEnumerable<TEntity>> ListAsync(
         ISpecification<TEntity> spec,
         CancellationToken cancellationToken = default)
     {
-        return await ApplySpecification(spec).ToListAsync(cancellationToken);
+        return await ApplySpecification(spec).AsNoTracking().ToListAsync(cancellationToken);
     }
 
     public virtual async Task<int> CountAsync(
@@ -131,62 +157,191 @@ public class RepositoryBase<TEntity> : IRepository<TEntity> where TEntity : clas
     }
 
     /// <summary>
-    /// Apply a specification to the query.
+    /// Apply an Ardalis.Specification to the query.
     /// </summary>
     protected virtual IQueryable<TEntity> ApplySpecification(ISpecification<TEntity> spec)
     {
-        return SpecificationEvaluator<TEntity>.GetQuery(DbSet.AsQueryable(), spec);
+        return SpecificationEvaluator.Default.GetQuery(DbSet.AsQueryable(), spec);
+    }
+
+    /// <summary>
+    /// Streams all entities asynchronously for large datasets.
+    /// Uses AsNoTracking for performance.
+    /// </summary>
+    public virtual IAsyncEnumerable<TEntity> StreamAllAsync(
+        CancellationToken cancellationToken = default)
+    {
+        return DbSet.AsNoTracking().AsAsyncEnumerable();
+    }
+
+    /// <summary>
+    /// Streams entities matching a specification asynchronously.
+    /// Uses AsNoTracking for performance.
+    /// </summary>
+    public virtual IAsyncEnumerable<TEntity> StreamAsync(
+        ISpecification<TEntity> spec,
+        CancellationToken cancellationToken = default)
+    {
+        return ApplySpecification(spec).AsNoTracking().AsAsyncEnumerable();
     }
 }
 
 /// <summary>
-/// Evaluates specifications and applies them to EF Core queries.
+/// Repository implementation with explicit key type.
+/// Use when you need type-safe key operations.
 /// </summary>
-public static class SpecificationEvaluator<T> where T : class
+/// <typeparam name="TEntity">The entity type.</typeparam>
+/// <typeparam name="TKey">The key type (e.g., Guid, int, string).</typeparam>
+public class RepositoryBase<TEntity, TKey> : IRepository<TEntity, TKey>
+    where TEntity : class
+    where TKey : notnull
 {
-    /// <summary>
-    /// Apply a specification to an IQueryable.
-    /// </summary>
-    public static IQueryable<T> GetQuery(IQueryable<T> inputQuery, ISpecification<T> specification)
+    protected readonly DbContext Context;
+    protected readonly DbSet<TEntity> DbSet;
+
+    public RepositoryBase(DbContext context)
     {
-        var query = inputQuery;
+        Context = context ?? throw new ArgumentNullException(nameof(context));
+        DbSet = context.Set<TEntity>();
+    }
 
-        // Apply criteria (WHERE clause)
-        if (specification.Criteria != null)
+    public virtual async Task<TEntity?> GetByIdAsync(
+        TKey id,
+        CancellationToken cancellationToken = default)
+    {
+        return await DbSet.FindAsync(new object[] { id }, cancellationToken);
+    }
+
+    public virtual async Task<IEnumerable<TEntity>> GetAllAsync(
+        CancellationToken cancellationToken = default)
+    {
+        return await DbSet.AsNoTracking().ToListAsync(cancellationToken);
+    }
+
+    public virtual async Task<TEntity> AddAsync(
+        TEntity entity,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(entity);
+        await DbSet.AddAsync(entity, cancellationToken);
+        return entity;
+    }
+
+    public virtual Task UpdateAsync(
+        TEntity entity,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(entity);
+        DbSet.Update(entity);
+        return Task.CompletedTask;
+    }
+
+    public virtual async Task DeleteAsync(
+        TKey id,
+        CancellationToken cancellationToken = default)
+    {
+        var entity = await GetByIdAsync(id, cancellationToken);
+        if (entity != null)
         {
-            query = query.Where(specification.Criteria);
+            DbSet.Remove(entity);
+        }
+    }
+
+    public virtual async Task<bool> ExistsAsync(
+        TKey id,
+        CancellationToken cancellationToken = default)
+    {
+        var entity = await GetByIdAsync(id, cancellationToken);
+        return entity != null;
+    }
+
+    /// <summary>
+    /// Streams all entities asynchronously for large datasets.
+    /// </summary>
+    public virtual IAsyncEnumerable<TEntity> StreamAllAsync(
+        CancellationToken cancellationToken = default)
+    {
+        return DbSet.AsNoTracking().AsAsyncEnumerable();
+    }
+}
+
+/// <summary>
+/// Unit of Work implementation for coordinating repository transactions.
+/// </summary>
+public class UnitOfWork : IUnitOfWork
+{
+    private readonly DbContext _context;
+    private Microsoft.EntityFrameworkCore.Storage.IDbContextTransaction? _transaction;
+    private bool _disposed;
+
+    public UnitOfWork(DbContext context)
+    {
+        _context = context ?? throw new ArgumentNullException(nameof(context));
+    }
+
+    public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    {
+        return await _context.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task BeginTransactionAsync(CancellationToken cancellationToken = default)
+    {
+        _transaction = await _context.Database.BeginTransactionAsync(cancellationToken);
+    }
+
+    public async Task CommitTransactionAsync(CancellationToken cancellationToken = default)
+    {
+        if (_transaction is null)
+        {
+            throw new InvalidOperationException("No transaction has been started. Call BeginTransactionAsync first.");
         }
 
-        // Apply includes (eager loading)
-        query = specification.Includes
-            .Aggregate(query, (current, include) => current.Include(include));
-
-        // Apply include strings (for ThenInclude scenarios)
-        query = specification.IncludeStrings
-            .Aggregate(query, (current, include) => current.Include(include));
-
-        // Apply ordering
-        if (specification.OrderBy != null)
+        try
         {
-            query = query.OrderBy(specification.OrderBy);
+            await _context.SaveChangesAsync(cancellationToken);
+            await _transaction.CommitAsync(cancellationToken);
         }
-        else if (specification.OrderByDescending != null)
+        catch
         {
-            query = query.OrderByDescending(specification.OrderByDescending);
+            await RollbackTransactionAsync(cancellationToken);
+            throw;
         }
-
-        // Apply grouping
-        if (specification.GroupBy != null)
+        finally
         {
-            query = query.GroupBy(specification.GroupBy).SelectMany(x => x);
+            await DisposeTransactionAsync();
         }
+    }
 
-        // Apply paging
-        if (specification.IsPagingEnabled)
+    public async Task RollbackTransactionAsync(CancellationToken cancellationToken = default)
+    {
+        if (_transaction is not null)
         {
-            query = query.Skip(specification.Skip).Take(specification.Take);
+            await _transaction.RollbackAsync(cancellationToken);
+            await DisposeTransactionAsync();
         }
+    }
 
-        return query;
+    private async Task DisposeTransactionAsync()
+    {
+        if (_transaction is not null)
+        {
+            await _transaction.DisposeAsync();
+            _transaction = null;
+        }
+    }
+
+    public void Dispose()
+    {
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+
+    protected virtual void Dispose(bool disposing)
+    {
+        if (!_disposed && disposing)
+        {
+            _transaction?.Dispose();
+            _disposed = true;
+        }
     }
 }

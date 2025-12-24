@@ -229,16 +229,16 @@ jobs:
           CHANGESET_FILE=".changeset/${CHANGESET_NAME}.md"
           echo "changeset_file=${CHANGESET_FILE}" >> $GITHUB_OUTPUT
 
-          # Create the changeset
-          cat > "$CHANGESET_FILE" << 'CHANGESET_EOF'
----
-"${{ steps.npm_package.outputs.npm_package }}": patch
----
-
-${{ steps.npm_package.outputs.description }} to version ${{ needs.publish.outputs.version }}.
-
-This changeset was auto-generated after NuGet package `${{ needs.publish.outputs.package_name }}` was published.
-CHANGESET_EOF
+          # Create the changeset using printf to avoid YAML parsing issues with ---
+          printf '%s\n' \
+            '---' \
+            "\"${{ steps.npm_package.outputs.npm_package }}\": patch" \
+            '---' \
+            '' \
+            "${{ steps.npm_package.outputs.description }} to version ${{ needs.publish.outputs.version }}." \
+            '' \
+            "This changeset was auto-generated after NuGet package \`${{ needs.publish.outputs.package_name }}\` was published." \
+            > "$CHANGESET_FILE"
 
           echo "Created changeset: $CHANGESET_FILE"
           cat "$CHANGESET_FILE"

@@ -1,9 +1,10 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Mystira.Shared.Resilience;
 using Polly;
 
-namespace Mystira.Shared.Resilience;
+namespace Mystira.Shared.Extensions;
 
 /// <summary>
 /// Extension methods for registering resilience policies in DI.
@@ -84,6 +85,64 @@ public static class ResilienceExtensions
             configureClient?.Invoke(client);
         });
 
+        builder.AddPolicyHandler((provider, _) =>
+        {
+            var logger = provider.GetService<ILoggerFactory>()?.CreateLogger(clientName);
+            return PolicyFactory.CreateLongRunningHttpPolicy(clientName, options, logger);
+        });
+
+        return builder;
+    }
+
+    /// <summary>
+    /// Adds standard Mystira resilience policy to an existing HTTP client builder.
+    /// Use this to add resilience to a client that was already configured with AddHttpClient.
+    /// </summary>
+    /// <param name="builder">The HTTP client builder.</param>
+    /// <param name="clientName">Name of the client for logging.</param>
+    /// <param name="options">Optional resilience options. Uses defaults if null.</param>
+    /// <returns>The IHttpClientBuilder for further configuration.</returns>
+    /// <example>
+    /// <code>
+    /// services.AddHttpClient&lt;IMyClient, MyClient&gt;()
+    ///     .ConfigureHttpClient(client => client.BaseAddress = new Uri("https://api.example.com"))
+    ///     .AddMystiraResiliencePolicy("MyClient");
+    /// </code>
+    /// </example>
+    public static IHttpClientBuilder AddMystiraResiliencePolicy(
+        this IHttpClientBuilder builder,
+        string clientName,
+        ResilienceOptions? options = null)
+    {
+        builder.AddPolicyHandler((provider, _) =>
+        {
+            var logger = provider.GetService<ILoggerFactory>()?.CreateLogger(clientName);
+            return PolicyFactory.CreateStandardHttpPolicy(clientName, options, logger);
+        });
+
+        return builder;
+    }
+
+    /// <summary>
+    /// Adds long-running Mystira resilience policy to an existing HTTP client builder.
+    /// Suitable for LLM API calls and other operations that may take minutes.
+    /// </summary>
+    /// <param name="builder">The HTTP client builder.</param>
+    /// <param name="clientName">Name of the client for logging.</param>
+    /// <param name="options">Optional resilience options. Uses defaults if null.</param>
+    /// <returns>The IHttpClientBuilder for further configuration.</returns>
+    /// <example>
+    /// <code>
+    /// services.AddHttpClient&lt;ILlmClient, LlmClient&gt;()
+    ///     .ConfigureHttpClient(client => client.Timeout = TimeSpan.FromMinutes(5))
+    ///     .AddMystiraLongRunningResiliencePolicy("LlmClient");
+    /// </code>
+    /// </example>
+    public static IHttpClientBuilder AddMystiraLongRunningResiliencePolicy(
+        this IHttpClientBuilder builder,
+        string clientName,
+        ResilienceOptions? options = null)
+    {
         builder.AddPolicyHandler((provider, _) =>
         {
             var logger = provider.GetService<ILoggerFactory>()?.CreateLogger(clientName);

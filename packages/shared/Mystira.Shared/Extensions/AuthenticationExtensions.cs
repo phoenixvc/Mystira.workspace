@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Microsoft.Identity.Web;
 using Mystira.Shared.Authentication;
 
@@ -21,9 +22,17 @@ public static class AuthenticationExtensions
         this IServiceCollection services,
         IConfiguration configuration)
     {
-        var jwtOptions = new JwtOptions();
-        configuration.GetSection(JwtOptions.SectionName).Bind(jwtOptions);
-        services.Configure<JwtOptions>(configuration.GetSection(JwtOptions.SectionName));
+        // Register options with validation - fails fast at startup if misconfigured
+        services.AddOptions<JwtOptions>()
+            .BindConfiguration(JwtOptions.SectionName)
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
+
+        // Register custom validator for conditional rules
+        services.AddSingleton<IValidateOptions<JwtOptions>, JwtOptionsValidator>();
+
+        var jwtOptions = configuration.GetSection(JwtOptions.SectionName).Get<JwtOptions>()
+            ?? throw new InvalidOperationException($"JWT configuration section '{JwtOptions.SectionName}' is missing");
 
         if (jwtOptions.IsExternalId)
         {
@@ -64,15 +73,22 @@ public static class AuthenticationExtensions
         this IServiceCollection services,
         IConfiguration configuration)
     {
-        services.Configure<JwtOptions>(configuration.GetSection(JwtOptions.SectionName));
+        // Register options with validation - fails fast at startup if misconfigured
+        services.AddOptions<JwtOptions>()
+            .BindConfiguration(JwtOptions.SectionName)
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
+
+        // Register custom validator for conditional rules
+        services.AddSingleton<IValidateOptions<JwtOptions>, JwtOptionsValidator>();
+
+        var jwtOptions = configuration.GetSection(JwtOptions.SectionName).Get<JwtOptions>()
+            ?? throw new InvalidOperationException($"JWT configuration section '{JwtOptions.SectionName}' is missing");
 
         // For service-to-service, we validate tokens but don't need full MSAL
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>
             {
-                var jwtOptions = new JwtOptions();
-                configuration.GetSection(JwtOptions.SectionName).Bind(jwtOptions);
-
                 options.Authority = jwtOptions.Authority;
                 options.Audience = jwtOptions.Audience;
                 options.TokenValidationParameters.ValidateIssuer = jwtOptions.ValidateIssuer;
