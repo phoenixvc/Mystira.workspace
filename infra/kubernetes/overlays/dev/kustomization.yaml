@@ -14,7 +14,7 @@ resources:
 labels:
   - pairs:
       environment: dev
-    includeSelectors: true
+    includeSelectors: false
 
 patches:
   - target:
