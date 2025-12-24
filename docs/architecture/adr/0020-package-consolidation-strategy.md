@@ -372,6 +372,72 @@ App has a well-designed 3-level entity hierarchy:
 
 **Legend**: ✅ Implemented | 🟡 Partial | ❌ Not used | 🔗 References | ❓ Submodule not initialized
 
+#### Updated Cross-Service Analysis (All Submodules Initialized)
+
+| Pattern | App | StoryGenerator | Admin-Api | Publisher | DevHub | Admin-UI |
+|---------|-----|----------------|-----------|-----------|--------|----------|
+| Repository | ✅ 23 repos | ❌ Service-based | ✅ Uses App NuGet | ❌ None | 🟡 Service pattern | ❌ None |
+| Polly | ✅ 11 clients | ❌ Custom retry | ❌ None | ❌ None | ❌ Custom retry | ❌ None |
+| Caching | 🟡 IMemoryCache | 🟡 ConcurrentDict | ✅ Redis | 🟡 React Query | 🟡 Zustand | 🟡 React Query |
+| Entities | ✅ 3-level | ❌ None | ✅ Uses App NuGet | ❌ TS types | ❌ TS types | ❌ TS types |
+| JWT Auth | ✅ Custom + Entra | ❌ None | ✅ Full (JWT+Entra+Cookie) | 🟡 Custom JWT | ❌ CLI-based | 🟡 Cookie-based |
+| FluentValidation | ✅ v11.11 | ❌ DataAnnotations | ❌ JSON Schema | ✅ Zod | ❌ None | ✅ Zod |
+| MediatR/CQRS | ✅ v12.4.1 | ✅ v12.1.1 | ✅ Use Cases | ❌ None | ❌ None | ❌ None |
+| Design Tokens | 🟡 Partial CSS | 🟡 Tailwind | N/A | ✅ Comprehensive | 🟡 Tailwind | 🟡 Bootstrap |
+| State Mgmt | ❌ Server-side | ❌ Server-side | N/A | ✅ Zustand v5 | ✅ Zustand v4 | ✅ Zustand v5 |
+
+---
+
+### Phase 4e: Design System Consolidation (New)
+
+Analysis revealed **fragmented design systems** across 5 frontend packages:
+
+#### Color Palette Inconsistency
+
+| Package | Primary Color | Framework |
+|---------|--------------|-----------|
+| App/PWA | `#7c3aed` (Purple) | Custom CSS |
+| Publisher | `#9333ea` (Purple) | Custom CSS Tokens |
+| DevHub | `#0ea5e9` (Sky Blue) | Tailwind |
+| Story Generator | `#3b82f6` (Blue) | Tailwind |
+| Admin UI | `#4e73df` (Blue) | Bootstrap |
+
+**Recommendation**: Create `@mystira/design-tokens` package:
+
+```
+packages/
+└── design-tokens/
+    ├── package.json           # @mystira/design-tokens
+    ├── src/
+    │   ├── colors.ts          # Color palette (purple primary)
+    │   ├── typography.ts      # Font families, sizes, weights
+    │   ├── spacing.ts         # 11-point spacing scale
+    │   ├── components.ts      # Border radius, shadows, transitions
+    │   └── index.ts           # Unified exports
+    ├── css/
+    │   └── variables.css      # CSS custom properties
+    └── tailwind/
+        └── preset.js          # Tailwind preset
+```
+
+**Migration Path**:
+1. Extract Publisher's `variables.css` as base (most comprehensive)
+2. Standardize on purple primary (`#7c3aed`) across all packages
+3. Create Tailwind preset for DevHub, Story Generator
+4. Create CSS variables for App/PWA, Admin UI
+
+#### Component Duplication Analysis
+
+| Component | Publisher | Admin-UI | App/PWA | DevHub |
+|-----------|-----------|----------|---------|--------|
+| Button | React TSX | Bootstrap | Blazor CSS | Tailwind TSX |
+| Card | React TSX | Bootstrap | Blazor CSS | Tailwind TSX |
+| Modal | React TSX | Bootstrap | Blazor CSS | N/A |
+| Toast | Custom | react-hot-toast | Blazor | Custom |
+| Spinner | React TSX | Bootstrap | Blazor CSS | React TSX |
+
+**Recommendation**: Consider `@mystira/ui-react` for React apps (Publisher, Admin-UI, DevHub).
+
 #### Infrastructure Consolidation Summary
 
 | Pattern | Priority | Effort | Impact |

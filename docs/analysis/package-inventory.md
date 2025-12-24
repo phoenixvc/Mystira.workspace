@@ -345,10 +345,78 @@ public async Task<T> ExecuteWithRetryAsync<T>(
 |-----------|--------|----------|
 | `packages/app` | ✅ Initialized | Full analysis completed |
 | `packages/story-generator` | ✅ Initialized | Full analysis completed |
-| `packages/publisher` | ⚠️ Not initialized | Run `git submodule update --init packages/publisher` |
-| `packages/admin-api` | ⚠️ Empty placeholder | Code exists at `packages/app/src/Mystira.App.Admin.Api/` |
-| `packages/devhub` | ⚠️ Not initialized | Run `git submodule update --init packages/devhub` |
-| `packages/admin-ui` | ⚠️ Empty placeholder | Future React submodule |
+| `packages/publisher` | ✅ Initialized | React + Zustand + Axios + comprehensive design tokens |
+| `packages/admin-api` | ✅ Initialized | .NET 9 API with Redis caching, JWT + Entra ID auth |
+| `packages/devhub` | ✅ Initialized | Tauri desktop app with Rust backend, Zustand stores |
+| `packages/admin-ui` | ✅ Initialized | React + Bootstrap 5 + Zustand + React Query |
+| `packages/chain` | ✅ Initialized | Blockchain service |
+
+---
+
+## Design System Analysis (Phase 4e)
+
+### Current State: Fragmented Design Tokens
+
+| Package | Framework | Primary Color | Token System |
+|---------|-----------|---------------|--------------|
+| Publisher | Custom CSS | `#9333ea` (Purple) | ✅ Comprehensive (variables.css) |
+| App/PWA | Custom CSS | `#7c3aed` (Purple) | 🟡 Partial (app.css) |
+| DevHub | Tailwind | `#0ea5e9` (Sky Blue) | 🟡 Tailwind defaults |
+| Story Generator | Tailwind | `#3b82f6` (Blue) | 🟡 Tailwind defaults |
+| Admin UI | Bootstrap 5 | `#4e73df` (Blue) | ❌ Bootstrap defaults |
+
+### Publisher's Token System (Reference Implementation)
+
+Publisher has the most comprehensive design token system at `/packages/publisher/src/styles/variables.css`:
+
+```css
+/* Color System */
+--color-primary-50 through --color-primary-900 (purple gradient)
+--color-neutral-50 through --color-neutral-900
+--color-success, --color-warning, --color-danger, --color-info
+
+/* Typography */
+--font-family-sans: 'Inter', system-ui, sans-serif
+--font-family-mono: 'Fira Code', monospace
+--font-size-xs through --font-size-4xl (8 scales)
+--font-weight-normal/medium/semibold/bold
+
+/* Spacing */
+--spacing-0 through --spacing-16 (11-point scale)
+
+/* Components */
+--radius-sm/md/lg/xl/full
+--shadow-sm/md/lg/xl
+--transition-fast/base/slow
+--z-dropdown/sticky/modal/tooltip/toast
+```
+
+### Frontend State Management Comparison
+
+| Package | State Manager | HTTP Client | Form Validation |
+|---------|---------------|-------------|-----------------|
+| Publisher | Zustand v5 | Axios | Zod + React Hook Form |
+| Admin-UI | Zustand v5 | Axios | Zod + React Hook Form |
+| DevHub | Zustand v4 | Tauri IPC | N/A (CLI-based) |
+| App/PWA | Blazor state | HttpClient | DataAnnotations |
+| Story Generator | Blazor state | HttpClient | DataAnnotations |
+
+### Proposed Design Token Package
+
+```
+packages/
+└── design-tokens/
+    ├── package.json           # @mystira/design-tokens
+    ├── src/
+    │   ├── colors.ts          # Unified color palette
+    │   ├── typography.ts      # Font system
+    │   ├── spacing.ts         # Spacing scale
+    │   └── index.ts
+    ├── css/
+    │   └── variables.css      # CSS custom properties
+    └── tailwind/
+        └── preset.js          # Tailwind preset for DevHub, StoryGen
+```
 
 ### Proposed Mystira.Shared Namespaces
 
@@ -387,14 +455,22 @@ Based on comprehensive analysis, the following namespaces should be added to `My
 
 ### Consolidation Roadmap
 
+#### .NET Backend Consolidation
+
 | Phase | Action | Package | Status |
 |-------|--------|---------|--------|
 | 4a | Add `Mystira.Shared.Resilience` | `Mystira.Shared` | ⏳ Planned |
 | 4b | Add `Mystira.Shared.Exceptions` | `Mystira.Shared` | ⏳ Planned |
 | 4c | Add `Mystira.Shared.Caching` | `Mystira.Shared` | ⏳ Planned |
 | 4d | Add `Mystira.Shared.Data` | `Mystira.Shared` | ⏳ Planned |
-| 4e | Add `Mystira.Shared.Http` | `Mystira.Shared` | ⏳ Planned |
-| 4f | Add `Mystira.Shared.Validation` | `Mystira.Shared` | ⏳ Planned |
+
+#### Frontend/TypeScript Consolidation
+
+| Phase | Action | Package | Status |
+|-------|--------|---------|--------|
+| 4e | Create `@mystira/design-tokens` | NPM | ⏳ Planned |
+| 4f | Standardize Tailwind preset | NPM | ⏳ Planned |
+| 4g | Consider `@mystira/ui-react` | NPM | 🔍 Evaluate |
 
 See [ADR-0020](../architecture/adr/0020-package-consolidation-strategy.md#comprehensive-consolidation-matrix) for detailed implementation plans.
 
@@ -411,19 +487,24 @@ See [ADR-0020](../architecture/adr/0020-package-consolidation-strategy.md#compre
 6. ~~**Update CI/CD workflows** for unified contracts publishing~~ ✅
 7. ~~**Create `Mystira.Shared`** with auth infrastructure~~ ✅
 8. ~~**Analyze App and StoryGenerator for consolidation**~~ ✅
+9. ~~**Initialize all submodules**~~ ✅ (admin-api, admin-ui, publisher, devhub, chain)
+10. ~~**Analyze design tokens and UI/UX assets**~~ ✅
 
-### Phase 4: Infrastructure Consolidation (In Progress)
-9. **Phase 4a**: Add `Mystira.Shared.Resilience` - Polly policies
-10. **Phase 4b**: Add `Mystira.Shared.Exceptions` - Error/Result patterns
-11. **Phase 4c**: Add `Mystira.Shared.Caching` - Redis distributed cache
-12. **Phase 4d**: Add `Mystira.Shared.Data` - Repository + Specifications
-13. **Phase 4e**: Add `Mystira.Shared.Http` - Typed HTTP client base
-14. **Phase 4f**: Add `Mystira.Shared.Validation` - FluentValidation pipeline
+### Phase 4: .NET Backend Consolidation (In Progress)
+11. **Phase 4a**: Add `Mystira.Shared.Resilience` - Polly policies
+12. **Phase 4b**: Add `Mystira.Shared.Exceptions` - Error/Result patterns
+13. **Phase 4c**: Add `Mystira.Shared.Caching` - Redis distributed cache
+14. **Phase 4d**: Add `Mystira.Shared.Data` - Repository + Specifications
+
+### Phase 4: Frontend/TypeScript Consolidation (In Progress)
+15. **Phase 4e**: Create `@mystira/design-tokens` - Unified color/typography/spacing
+16. **Phase 4f**: Create Tailwind preset for DevHub, Story Generator
+17. **Phase 4g**: Evaluate `@mystira/ui-react` for shared components
 
 ### Phase 5: Cleanup (Pending)
-15. Initialize remaining submodules (publisher, devhub)
-16. Migrate services to use `Mystira.Shared` namespaces
-17. Cleanup deprecated packages and workflows
+18. Migrate services to use `Mystira.Shared` namespaces
+19. Migrate frontends to use `@mystira/design-tokens`
+20. Cleanup deprecated packages and workflows
 
 ---
 
