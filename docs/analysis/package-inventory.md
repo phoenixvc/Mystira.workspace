@@ -5,28 +5,57 @@
 
 ---
 
+## Consolidation Status (ADR-0020)
+
+| Status | Package | Action |
+|--------|---------|--------|
+| ✅ Complete | `@mystira/contracts` | Unified TypeScript contracts |
+| ✅ Complete | `Mystira.Contracts` | Unified .NET contracts |
+| ✅ Complete | `@mystira/shared-utils` | Moved to workspace level |
+| ✅ Complete | `Mystira.Shared` | .NET shared auth/infrastructure |
+| ⏳ Deprecated | `@mystira/app-contracts` | Use `@mystira/contracts/app` |
+| ⏳ Deprecated | `@mystira/story-generator-contracts` | Use `@mystira/contracts/story-generator` |
+| ⏳ Deprecated | `Mystira.App.Contracts` | Use `Mystira.Contracts.App` |
+| ⏳ Deprecated | `Mystira.StoryGenerator.Contracts` | Use `Mystira.Contracts.StoryGenerator` |
+| ⏳ Deprecated | `Mystira.App.Shared` | Use `Mystira.Shared` |
+
+---
+
 ## Package Inventory Summary
 
-### NPM Packages
+### NPM Packages (Workspace Level)
+
+| Package | Location | Status | Notes |
+|---------|----------|--------|-------|
+| `@mystira/contracts` | `packages/contracts` | ✅ Active | Unified API types with subpath exports |
+| `@mystira/shared-utils` | `packages/shared-utils` | ✅ Active | Retry, logging, validation utilities |
+
+### NPM Packages (Submodules)
 
 | Package | Current Location | Type | Could Combine? | Optimal Destination | Notes |
 |---------|------------------|------|----------------|---------------------|-------|
 | `@mystira/app` | `packages/app` (submodule) | NPM | ❌ Keep separate | Submodule | Core app - linked with contracts |
-| `@mystira/app-contracts` | `packages/app` (submodule) | NPM | ⚠️ Consider | Workspace `packages/shared` | TypeScript types for API - could move to shared workspace package |
+| `@mystira/app-contracts` | `packages/app` (submodule) | NPM | ⏳ Deprecated | Use `@mystira/contracts/app` | Migrating to unified contracts |
 | `@mystira/story-generator` | `packages/story-generator` (submodule) | NPM | ❌ Keep separate | Submodule | Core service - linked with contracts |
-| `@mystira/story-generator-contracts` | `packages/story-generator` (submodule) | NPM | ⚠️ Consider | Workspace `packages/shared` | TypeScript types - could combine with app-contracts into `@mystira/contracts` |
+| `@mystira/story-generator-contracts` | `packages/story-generator` (submodule) | NPM | ⏳ Deprecated | Use `@mystira/contracts/story-generator` | Migrating to unified contracts |
 | `@mystira/publisher` | `packages/publisher` (submodule) | NPM | ❌ Keep separate | Submodule | Independent service |
-| `@mystira/shared-utils` | `packages/publisher` (submodule) | NPM | ✅ Move | Workspace `packages/shared-utils` | Generic utils - should be workspace-level |
 
-### NuGet Packages
+### NuGet Packages (Workspace Level)
+
+| Package | Location | Status | Notes |
+|---------|----------|--------|-------|
+| `Mystira.Contracts` | `packages/contracts/dotnet` | ✅ Active | Unified .NET contracts |
+| `Mystira.Shared` | `packages/shared/Mystira.Shared` | ✅ Active | Auth, authorization, telemetry |
+
+### NuGet Packages (Submodules)
 
 | Package | Current Location | Type | Could Combine? | Optimal Destination | Notes |
 |---------|------------------|------|----------------|---------------------|-------|
 | `Mystira.App.Domain` | `packages/app/src/` | NuGet | ❌ Keep | Submodule | Core domain - consumed by Admin.Api via NuGet |
 | `Mystira.App.Application` | `packages/app/src/` | NuGet | ❌ Keep | Submodule | Application layer - consumed by Admin.Api |
-| `Mystira.App.Shared` | `packages/app/src/` | NuGet | ⚠️ Consider | Workspace or shared submodule | Cross-cutting utilities - could be `Mystira.Shared` |
-| `Mystira.App.Contracts` | `packages/app/src/` | NuGet | ⚠️ Consider | Workspace `packages/contracts` | API contracts - could combine into `Mystira.Contracts` |
-| `Mystira.StoryGenerator.Contracts` | `packages/story-generator/src/` | NuGet | ⚠️ Consider | Workspace `packages/contracts` | Could merge with App.Contracts into unified contracts package |
+| `Mystira.App.Shared` | `packages/app/src/` | NuGet | ⏳ Deprecated | Use `Mystira.Shared` | Migrating to workspace-level shared |
+| `Mystira.App.Contracts` | `packages/app/src/` | NuGet | ⏳ Deprecated | Use `Mystira.Contracts.App` | Migrating to unified contracts |
+| `Mystira.StoryGenerator.Contracts` | `packages/story-generator/src/` | NuGet | ⏳ Deprecated | Use `Mystira.Contracts.StoryGenerator` | Migrating to unified contracts |
 
 ### Docker Images
 

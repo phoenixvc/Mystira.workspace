@@ -2,7 +2,12 @@
 
 ## Status
 
-**Proposed** - 2025-12-24
+**In Progress** - 2025-12-24
+
+- Phase 1: ✅ Complete - New packages created
+- Phase 2: ✅ Complete - Migration period active
+- Phase 3: ✅ Complete - .NET shared infrastructure created
+- Phase 4: 🔄 Pending - Cleanup and final migration
 
 ## Context
 
@@ -149,25 +154,56 @@ The following should NOT be consolidated:
 
 ## Implementation Plan
 
-### Phase 1: Create New Packages (Non-Breaking)
+### Phase 1: Create New Packages (Non-Breaking) ✅
 
-1. Create `packages/contracts` with unified structure
-2. Create `packages/shared-utils` at workspace level
-3. Set up publishing workflows for new packages
-4. Publish initial versions
+1. ✅ Create `packages/contracts` with unified structure
+2. ✅ Create `packages/shared-utils` at workspace level
+3. ✅ Set up publishing workflows for new packages
+4. ✅ Publish initial versions
 
-### Phase 2: Migration Period
+### Phase 2: Migration Period ✅
 
-1. Update workspace packages to use new contracts
-2. Deprecation notices on old packages
-3. Migration guide and codemods
-4. Monitor adoption
+1. ✅ Update workspace packages to use new contracts
+2. ✅ Deprecation notices on old packages
+3. ✅ Migration guide and codemods
+4. 🔄 Monitor adoption
 
-### Phase 3: Cleanup
+### Phase 3: .NET Shared Infrastructure ✅
+
+Extract `Mystira.App.Shared` to workspace-level `Mystira.Shared`:
+
+1. ✅ Create `packages/shared/Mystira.Shared` with auth services
+2. ✅ Set up publishing workflow for Mystira.Shared NuGet
+3. 🔄 Update admin-api, story-generator, devhub to use new package
+4. 🔄 Deprecate `Mystira.App.Shared`
+
+**Rationale**: `Mystira.App.Shared` contains cross-cutting concerns (JWT auth,
+authorization, telemetry) used by 3+ services. Moving it to workspace level:
+- Removes misleading "App" prefix
+- Enables all .NET services to share auth infrastructure
+- Maintains consistency with `@mystira/shared-utils` (TypeScript equivalent)
+
+**Package Structure**:
+```
+packages/
+└── shared/
+    └── Mystira.Shared/
+        ├── Authentication/     # JWT services, options
+        ├── Authorization/      # Permissions, roles, handlers
+        ├── Middleware/         # Telemetry, request logging
+        └── Extensions/         # DI registration helpers
+```
+
+### Phase 4: Cleanup
 
 1. Remove contracts from submodules
 2. Remove old publishing workflows
-3. Archive deprecated packages
+3. Archive deprecated packages:
+   - `@mystira/app-contracts`
+   - `@mystira/story-generator-contracts`
+   - `Mystira.App.Contracts`
+   - `Mystira.StoryGenerator.Contracts`
+   - `Mystira.App.Shared`
 4. Update all documentation
 
 ## Import Changes
