@@ -18,9 +18,6 @@ spec:
   selector:
     matchLabels:
       app: mys-story-generator
-      app.kubernetes.io/name: mys-story-generator
-      app.kubernetes.io/part-of: mys
-      app.kubernetes.io/component: story-generator-api
   strategy:
     type: RollingUpdate
     rollingUpdate:
@@ -30,9 +27,6 @@ spec:
     metadata:
       labels:
         app: mys-story-generator
-        app.kubernetes.io/name: mys-story-generator
-        app.kubernetes.io/part-of: mys
-        app.kubernetes.io/component: story-generator-api
         component: story-generator-api
         azure.workload.identity/use: "true"
     spec:

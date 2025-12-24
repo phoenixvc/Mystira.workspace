@@ -14,7 +14,7 @@ labels:
       app.kubernetes.io/name: mys-admin-ui
       app.kubernetes.io/part-of: mys
       app.kubernetes.io/component: admin-ui
-    includeSelectors: true
+    includeSelectors: false
 
 images:
   - name: myssharedacr.azurecr.io/admin-ui

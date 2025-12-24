@@ -15,7 +15,7 @@ labels:
       app.kubernetes.io/name: mys-story-generator
       app.kubernetes.io/part-of: mys
       app.kubernetes.io/component: story-generator-api
-    includeSelectors: true
+    includeSelectors: false
 
 images:
   - name: myssharedacr.azurecr.io/story-generator
