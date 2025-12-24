@@ -307,6 +307,7 @@ Submodule repositories (Admin.Api, Admin.UI, etc.) use `repository_dispatch` to 
 | `chain-deploy`           | `mys-chain` (K8s)       | `submodule-deploy-dev.yml`            |
 | `app-deploy`             | App Service             | `submodule-deploy-dev-appservice.yml` |
 | `app-swa-deploy`         | Static Web App          | `submodule-deploy-dev-appservice.yml` |
+| `devhub-deploy`          | Static Web App          | `submodule-deploy-dev-appservice.yml` |
 | `nuget-publish`          | GitHub/NuGet.org        | `nuget-publish.yml`                   |
 
 ### Client Payload Format
@@ -319,6 +320,7 @@ Submodules should send the following payload:
   "ref": "<commit-sha>",
   "triggered_by": "<github-actor>",
   "run_id": "<workflow-run-id>",
+  "repository": "<owner/repo>",
   "image_tag": "dev-<commit-sha>",
   "pr_number": "<pr-number-or-empty>"
 }
@@ -352,6 +354,7 @@ trigger-workspace-deploy:
             "ref": "${{ github.sha }}",
             "triggered_by": "${{ github.actor }}",
             "run_id": "${{ github.run_id }}",
+            "repository": "${{ github.repository }}",
             "image_tag": "dev-${{ github.sha }}",
             "pr_number": ""
           }

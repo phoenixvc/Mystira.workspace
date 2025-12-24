@@ -134,7 +134,7 @@ concurrency:
 env:
   DOTNET_NOLOGO: true
   DOTNET_CLI_TELEMETRY_OPTOUT: true
-  AZURE_CONTAINER_REGISTRY: mysdevacr
+  AZURE_CONTAINER_REGISTRY: myssharedacr
   IMAGE_NAME: admin-api  # Change to your image name
 
 permissions:
@@ -264,6 +264,7 @@ jobs:
               "ref": "${{ github.sha }}",
               "triggered_by": "${{ github.actor }}",
               "run_id": "${{ github.run_id }}",
+              "repository": "${{ github.repository }}",
               "image_tag": "dev-${{ github.sha }}",
               "pr_number": ""
             }

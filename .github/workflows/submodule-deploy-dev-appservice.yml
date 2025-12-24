@@ -1,8 +1,9 @@
 name: "Submodule: Deploy to Dev (App Service/SWA)"
 
-# Handler for repository_dispatch events from Mystira.App
-# - app-deploy: Deploy API to Azure App Service
-# - app-swa-deploy: Update submodule ref after SWA deployment (SWA deploys from App repo)
+# Handler for repository_dispatch events from App Service/SWA submodules
+# - app-deploy: Deploy API to Azure App Service (Mystira.App)
+# - app-swa-deploy: Update submodule ref after App SWA deployment
+# - devhub-deploy: Update submodule ref after DevHub SWA deployment
 #
 # NOTE: This is for DEV environment ONLY.
 # Production deployments use mystira-app-api-cicd-prod.yml (blue-green slot swap)
@@ -12,6 +13,7 @@ on:
     types:
       - app-deploy
       - app-swa-deploy
+      - devhub-deploy
 
 concurrency:
   group: submodule-deploy-dev-appservice-${{ github.event.action }}
@@ -58,6 +60,22 @@ jobs:
             exit 1
           fi
 
+      - name: Determine target
+        id: target
+        run: |
+          case "${{ github.event.action }}" in
+            app-deploy|app-swa-deploy)
+              echo "submodule_path=packages/app" >> $GITHUB_OUTPUT
+              ;;
+            devhub-deploy)
+              echo "submodule_path=packages/devhub" >> $GITHUB_OUTPUT
+              ;;
+            *)
+              echo "::error::Unknown event type: ${{ github.event.action }}"
+              exit 1
+              ;;
+          esac
+
       - name: Azure Login
         uses: azure/login@v2
         with:
@@ -74,7 +92,7 @@ jobs:
 
       - name: Update submodule to latest
         run: |
-          cd packages/app
+          cd ${{ steps.target.outputs.submodule_path }}
           git fetch origin dev
           git checkout ${{ github.event.client_payload.ref || 'dev' }}
           echo "Checked out commit: $(git rev-parse HEAD)"
@@ -132,11 +150,11 @@ jobs:
           echo "::warning::Health check did not return 200 after 5 attempts"
 
       # ============================================
-      # Update Submodule Reference (both events)
+      # Update Submodule Reference (all events)
       # ============================================
       - name: Update submodule reference
         run: |
-          SUBMODULE_PATH="packages/app"
+          SUBMODULE_PATH="${{ steps.target.outputs.submodule_path }}"
           SOURCE_REF="${{ github.event.client_payload.ref }}"
 
           echo "Updating submodule $SUBMODULE_PATH to $SOURCE_REF"
@@ -178,12 +196,18 @@ Source run: https://github.com/${{ github.event.client_payload.repository || 'un
           echo "" >> $GITHUB_STEP_SUMMARY
           if [ "${{ job.status }}" == "success" ]; then
             echo "Deployment successful!" >> $GITHUB_STEP_SUMMARY
-            if [ "${{ github.event.action }}" == "app-deploy" ]; then
-              echo "- App Service: https://${{ env.APP_SERVICE_NAME }}.azurewebsites.net" >> $GITHUB_STEP_SUMMARY
-              echo "- Dev API: https://dev.api.mystira.app" >> $GITHUB_STEP_SUMMARY
-            else
-              echo "- Static Web App: https://dev.app.mystira.app" >> $GITHUB_STEP_SUMMARY
-            fi
+            case "${{ github.event.action }}" in
+              app-deploy)
+                echo "- App Service: https://${{ env.APP_SERVICE_NAME }}.azurewebsites.net" >> $GITHUB_STEP_SUMMARY
+                echo "- Dev API: https://dev.api.mystira.app" >> $GITHUB_STEP_SUMMARY
+                ;;
+              app-swa-deploy)
+                echo "- Static Web App: https://dev.app.mystira.app" >> $GITHUB_STEP_SUMMARY
+                ;;
+              devhub-deploy)
+                echo "- DevHub: https://dev.devhub.mystira.app" >> $GITHUB_STEP_SUMMARY
+                ;;
+            esac
           else
             echo "Deployment failed. Check the logs above for details." >> $GITHUB_STEP_SUMMARY
           fi

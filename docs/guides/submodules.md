@@ -207,31 +207,43 @@ Submodule (e.g., Admin.Api)          Workspace
 
 **Required Setup in Submodule:**
 
-1. Add `WORKSPACE_DISPATCH_TOKEN` secret (GitHub PAT with `repo` scope)
+1. Add `MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN` secret (GitHub PAT with `repo` scope)
 2. Add dispatch job to CI workflow:
 
 ```yaml
 trigger-workspace-deploy:
   needs: build-and-push
+  if: github.ref == 'refs/heads/dev'
   steps:
     - uses: peter-evans/repository-dispatch@v3
       with:
-        token: ${{ secrets.WORKSPACE_DISPATCH_TOKEN }}
+        token: ${{ secrets.MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN }}
         repository: phoenixvc/Mystira.workspace
         event-type: admin-api-deploy  # Use appropriate event type
         client-payload: |
           {
             "environment": "dev",
-            "image_tag": "dev-${{ github.sha }}"
+            "ref": "${{ github.sha }}",
+            "triggered_by": "${{ github.actor }}",
+            "run_id": "${{ github.run_id }}",
+            "repository": "${{ github.repository }}",
+            "image_tag": "dev-${{ github.sha }}",
+            "pr_number": ""
           }
 ```
 
 **Supported Event Types:**
-- `admin-api-deploy`
-- `admin-ui-deploy`
-- `story-generator-deploy`
-- `publisher-deploy`
-- `chain-deploy`
+
+| Event Type | Service | Infra |
+|------------|---------|-------|
+| `admin-api-deploy` | Admin.Api | Kubernetes |
+| `admin-ui-deploy` | Admin.UI | Kubernetes |
+| `story-generator-deploy` | StoryGenerator | Kubernetes |
+| `publisher-deploy` | Publisher | Kubernetes |
+| `chain-deploy` | Chain | Kubernetes |
+| `app-deploy` | App (API) | App Service |
+| `app-swa-deploy` | App (SWA) | Static Web App |
+| `devhub-deploy` | DevHub | Static Web App |
 
 > **Important**: This is for **dev environment only**. Staging and production deployments are managed through the workspace release workflows. See [Publishing Flow](../cicd/publishing-flow.md#submodule-deployment-dev-only) for details.
 
