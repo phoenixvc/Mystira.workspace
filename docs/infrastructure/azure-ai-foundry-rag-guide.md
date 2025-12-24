@@ -8,6 +8,8 @@ This guide covers Mystira's Azure AI Foundry infrastructure and Retrieval-Augmen
 - [SWOT Analysis](#swot-analysis)
 - [Architecture](#architecture)
 - [Azure AI Foundry Setup](#azure-ai-foundry-setup)
+- [Model Selection Guide](#model-selection-guide)
+- [Deploying Claude Models](#deploying-claude-models)
 - [Embedding Models](#embedding-models)
 - [Azure AI Search](#azure-ai-search)
 - [Semantic Search](#semantic-search)
@@ -295,6 +297,1285 @@ Resources follow the pattern: `mys-shared-ai-{region_code}`
 | dev | mys-shared-ai-san | South Africa North |
 | staging | mys-shared-ai-san | South Africa North |
 | prod | mys-shared-ai-san | South Africa North |
+
+---
+
+## Model Selection Guide
+
+Choose the right model for your use case based on capability, cost, and latency requirements.
+
+### Model Overview
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                           Model Capability Spectrum                          │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  COST ←──────────────────────────────────────────────────────────→ QUALITY  │
+│                                                                             │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐     │
+│  │ GPT-4o   │  │ GPT-4.1  │  │ GPT-4o   │  │ Claude   │  │ Claude   │     │
+│  │  mini    │  │  nano    │  │          │  │ Sonnet   │  │  Opus    │     │
+│  │ $0.15/1M │  │ $0.10/1M │  │ $2.50/1M │  │ $3.00/1M │  │$15.00/1M │     │
+│  └──────────┘  └──────────┘  └──────────┘  └──────────┘  └──────────┘     │
+│       │              │             │             │             │           │
+│       ▼              ▼             ▼             ▼             ▼           │
+│   High-volume    Embeddings    General      Analysis     Complex          │
+│   Simple tasks   + Simple      Purpose      Reasoning    Multi-step       │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+### Use Case Matrix
+
+| Use Case | Recommended Model | Why |
+|----------|-------------------|-----|
+| **Chat/Conversational** | gpt-4o-mini | Fast, cheap, good enough for most conversations |
+| **Content Generation** | gpt-4o | Better creativity and coherence |
+| **Code Generation** | gpt-5.1-codex / Claude Sonnet | Specialized for code understanding |
+| **Code Review/Analysis** | Claude Sonnet | Superior reasoning about code structure |
+| **Summarization** | gpt-4o-mini | Cost-effective for high-volume |
+| **Complex Analysis** | Claude Opus | Best reasoning, handles nuance |
+| **RAG Retrieval** | gpt-4o-mini | Fast context processing |
+| **Data Extraction** | gpt-4.1 | Good structured output |
+| **Translation** | gpt-4o | Strong multilingual support |
+| **Classification** | gpt-4.1-nano | Fastest for simple decisions |
+| **Creative Writing** | Claude Sonnet | Better narrative flow |
+| **Technical Docs** | Claude Sonnet | Precise, well-structured |
+| **Embeddings** | text-embedding-3-large | Best accuracy for RAG |
+| **High-volume Embeddings** | text-embedding-3-small | 6x cheaper, 95% accuracy |
+
+### Model Tiers
+
+#### Tier 1: High-Volume / Cost-Optimized
+
+| Model | Input Cost | Output Cost | Best For |
+|-------|------------|-------------|----------|
+| gpt-4o-mini | $0.15/1M | $0.60/1M | Chat, summarization, classification |
+| gpt-4.1-nano | $0.10/1M | $0.40/1M | Simple tasks, routing, embeddings assist |
+| Claude Haiku | $0.25/1M | $1.25/1M | Fast analysis, high-volume processing |
+
+#### Tier 2: General Purpose
+
+| Model | Input Cost | Output Cost | Best For |
+|-------|------------|-------------|----------|
+| gpt-4o | $2.50/1M | $10.00/1M | General tasks, content creation |
+| gpt-4.1 | $2.00/1M | $8.00/1M | Structured output, data extraction |
+| gpt-5-nano | $1.00/1M | $4.00/1M | Advanced reasoning, cheaper than 4o |
+
+#### Tier 3: Premium / Analysis
+
+| Model | Input Cost | Output Cost | Best For |
+|-------|------------|-------------|----------|
+| gpt-5.1 | $5.00/1M | $15.00/1M | Complex multi-step tasks |
+| gpt-5.1-codex | $5.00/1M | $15.00/1M | Code generation and review |
+| Claude Sonnet | $3.00/1M | $15.00/1M | Analysis, reasoning, code review |
+
+#### Tier 4: Maximum Capability
+
+| Model | Input Cost | Output Cost | Best For |
+|-------|------------|-------------|----------|
+| Claude Opus | $15.00/1M | $75.00/1M | Most complex tasks, research, deep analysis |
+
+### Decision Flowchart
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                        Model Selection Flowchart                             │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│                            Start                                            │
+│                              │                                              │
+│                              ▼                                              │
+│                    ┌─────────────────┐                                      │
+│                    │ Is it code-     │                                      │
+│                    │ related?        │                                      │
+│                    └────────┬────────┘                                      │
+│                      Yes    │    No                                         │
+│              ┌──────────────┴──────────────┐                                │
+│              ▼                             ▼                                │
+│    ┌─────────────────┐           ┌─────────────────┐                       │
+│    │ Complex review? │           │ High volume?    │                       │
+│    └────────┬────────┘           │ (>1000/day)     │                       │
+│       Yes   │   No               └────────┬────────┘                       │
+│        │    │                       Yes   │   No                           │
+│        ▼    ▼                        │    │                                │
+│   Claude   gpt-5.1                   ▼    ▼                                │
+│   Sonnet   -codex              ┌─────────────────┐                         │
+│                                │ Needs complex   │                         │
+│              ┌─────────────────│ reasoning?      │                         │
+│              │                 └────────┬────────┘                         │
+│              ▼                    Yes   │   No                             │
+│         gpt-4o-mini                │    │                                  │
+│         or Haiku                   ▼    ▼                                  │
+│                              ┌─────────────────┐                           │
+│                              │ Creative or     │──Yes──▶ Claude Sonnet     │
+│                              │ analytical?     │         or gpt-4o         │
+│                              └────────┬────────┘                           │
+│                                       │ No                                 │
+│                                       ▼                                    │
+│                              ┌─────────────────┐                           │
+│                              │ Mission         │──Yes──▶ Claude Opus       │
+│                              │ critical?       │                           │
+│                              └────────┬────────┘                           │
+│                                       │ No                                 │
+│                                       ▼                                    │
+│                                  gpt-4o-mini                               │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+### Mystira Model Deployment
+
+| Model | Region | SKU | Use Case in Mystira |
+|-------|--------|-----|---------------------|
+| gpt-4o | SAN | GlobalStandard | General content generation |
+| gpt-4o-mini | SAN | GlobalStandard | Chat, high-volume tasks |
+| gpt-4.1 | SAN | GlobalStandard | Structured data extraction |
+| gpt-4.1-nano | SAN | GlobalStandard | Classification, routing |
+| gpt-5-nano | SAN | GlobalStandard | Advanced reasoning (cost-effective) |
+| gpt-5.1 | UK South | GlobalStandard | Complex analysis (not in SAN) |
+| gpt-5.1-codex | UK South | GlobalStandard | Code generation/review |
+| text-embedding-3-large | SAN | GlobalStandard | Production RAG embeddings |
+| text-embedding-3-small | SAN | GlobalStandard | Draft/test embeddings |
+| claude-haiku-4-5 | UK South | Standard | High-volume analysis |
+| claude-sonnet-4-5 | UK South | Standard | Deep analysis, code review |
+| claude-opus-4-5 | UK South | Standard | Complex research tasks |
+
+---
+
+## Deploying Claude Models
+
+Claude models (Anthropic) are available through the Azure AI Model Catalog but **cannot be deployed via Terraform**. They can be deployed via:
+
+1. **Azure CLI Script** (recommended for automation)
+2. **Azure AI Foundry Portal** (for manual/first-time setup)
+
+### Why Claude Can't Be Deployed via Terraform
+
+1. **Marketplace Agreement**: First deployment requires accepting marketplace terms
+2. **Billing Setup**: Separate pay-as-you-go billing configuration
+3. **Regional Constraints**: Only available in specific regions (UK South, East US 2)
+4. **Quota Management**: Separate quota system from OpenAI models
+
+---
+
+### Option 1: Deploy via Azure CLI (Recommended)
+
+Use the provided deployment script for automated Claude model deployment:
+
+```bash
+# Deploy all Claude models to dev environment
+./infra/scripts/deploy-claude-models.sh dev
+
+# Deploy to production with custom region
+AZURE_LOCATION=uksouth ./infra/scripts/deploy-claude-models.sh prod
+
+# Deploy with custom resource names
+AZURE_RESOURCE_GROUP=my-rg \
+AZURE_AI_SERVICES_NAME=my-ai-services \
+./infra/scripts/deploy-claude-models.sh staging
+```
+
+#### Script Features
+
+- **Idempotent**: Safe to run multiple times
+- **Pre-flight checks**: Validates prerequisites before deployment
+- **Multiple deployment methods**: Falls back to alternative APIs if needed
+- **Verification**: Lists deployments and provides usage examples
+
+#### Manual CLI Deployment
+
+If you prefer manual control, use `az ml serverless-endpoint create`:
+
+```bash
+# Install Azure ML extension
+az extension add -n ml --yes
+
+# Set variables
+RESOURCE_GROUP="mys-dev-core-rg-san"
+AI_SERVICES_NAME="mys-shared-ai-san"
+LOCATION="uksouth"
+
+# Deploy Claude Sonnet
+az ml serverless-endpoint create \
+  --name "claude-sonnet-4-5" \
+  --model-id "azureml://registries/azure-openai/models/Anthropic-claude-sonnet-4-5" \
+  --resource-group "$RESOURCE_GROUP" \
+  --workspace-name "$AI_SERVICES_NAME"
+
+# Deploy Claude Haiku
+az ml serverless-endpoint create \
+  --name "claude-haiku-4-5" \
+  --model-id "azureml://registries/azure-openai/models/Anthropic-claude-3-5-haiku" \
+  --resource-group "$RESOURCE_GROUP" \
+  --workspace-name "$AI_SERVICES_NAME"
+
+# Deploy Claude Opus
+az ml serverless-endpoint create \
+  --name "claude-opus-4-5" \
+  --model-id "azureml://registries/azure-openai/models/Anthropic-claude-opus-4-5" \
+  --resource-group "$RESOURCE_GROUP" \
+  --workspace-name "$AI_SERVICES_NAME"
+```
+
+#### Alternative: Using az rest (Cognitive Services API)
+
+```bash
+# Get subscription ID
+SUBSCRIPTION_ID=$(az account show --query id -o tsv)
+
+# Deploy via Cognitive Services deployment API
+az rest --method PUT \
+  --url "https://management.azure.com/subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${RESOURCE_GROUP}/providers/Microsoft.CognitiveServices/accounts/${AI_SERVICES_NAME}/deployments/claude-sonnet-4-5?api-version=2024-10-01" \
+  --body '{
+    "sku": {
+      "name": "Standard",
+      "capacity": 1
+    },
+    "properties": {
+      "model": {
+        "format": "Anthropic",
+        "name": "claude-sonnet-4-5",
+        "version": "latest"
+      }
+    }
+  }'
+```
+
+---
+
+### Option 2: Deploy via Azure Portal
+
+#### Step 1: Navigate to Azure AI Foundry
+
+```
+https://ai.azure.com
+```
+
+Or via Azure Portal:
+```
+Azure Portal → Azure AI services → Your AI Services account → Model catalog
+```
+
+#### Step 2: Find Claude Models
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│  Azure AI Model Catalog                                                      │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  Search: [anthropic claude                    ] [🔍]                        │
+│                                                                             │
+│  Filter by:  □ OpenAI  ☑ Anthropic  □ Meta  □ Mistral  □ Cohere           │
+│                                                                             │
+│  ┌─────────────────────────────────────────────────────────────────────┐   │
+│  │  claude-opus-4-5                                                     │   │
+│  │  Anthropic's most capable model for complex tasks                    │   │
+│  │  Context: 200K tokens | Output: 4K tokens                           │   │
+│  │  [Deploy]                                                            │   │
+│  └─────────────────────────────────────────────────────────────────────┘   │
+│                                                                             │
+│  ┌─────────────────────────────────────────────────────────────────────┐   │
+│  │  claude-sonnet-4-5                                                   │   │
+│  │  Balanced performance and cost for most tasks                        │   │
+│  │  Context: 200K tokens | Output: 4K tokens                           │   │
+│  │  [Deploy]                                                            │   │
+│  └─────────────────────────────────────────────────────────────────────┘   │
+│                                                                             │
+│  ┌─────────────────────────────────────────────────────────────────────┐   │
+│  │  claude-haiku-4-5                                                    │   │
+│  │  Fast and cost-effective for high-volume tasks                       │   │
+│  │  Context: 200K tokens | Output: 4K tokens                           │   │
+│  │  [Deploy]                                                            │   │
+│  └─────────────────────────────────────────────────────────────────────┘   │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+#### Step 3: Configure Deployment
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│  Deploy claude-sonnet-4-5                                                    │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  Deployment name:    [claude-sonnet-4-5          ]                         │
+│                                                                             │
+│  Azure AI resource:  [mys-shared-ai-san          ] ▼                       │
+│                                                                             │
+│  Region:             [UK South                   ] ▼                       │
+│                      ⚠️ Model not available in South Africa North           │
+│                                                                             │
+│  Pricing tier:       ○ Standard (Pay-as-you-go)                            │
+│                      ● Provisioned (Reserved capacity)                      │
+│                                                                             │
+│  ☑ I accept the Anthropic terms of service                                 │
+│                                                                             │
+│                                      [Cancel]  [Deploy]                     │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+#### Step 4: Accept Marketplace Terms (First Time Only)
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│  Anthropic Claude Terms of Service                                           │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  By deploying Claude models, you agree to:                                  │
+│                                                                             │
+│  • Anthropic's Acceptable Use Policy                                        │
+│  • Azure Marketplace Terms                                                  │
+│  • Pay-as-you-go pricing (separate from Azure OpenAI)                      │
+│                                                                             │
+│  Pricing:                                                                   │
+│  ┌─────────────────────────────────────────────────────────┐               │
+│  │ Model           │ Input (per 1M) │ Output (per 1M)     │               │
+│  ├─────────────────┼────────────────┼─────────────────────┤               │
+│  │ Claude Haiku    │ $0.25          │ $1.25               │               │
+│  │ Claude Sonnet   │ $3.00          │ $15.00              │               │
+│  │ Claude Opus     │ $15.00         │ $75.00              │               │
+│  └─────────────────────────────────────────────────────────┘               │
+│                                                                             │
+│  ☑ I have read and accept the terms                                        │
+│                                                                             │
+│                                              [Accept and Continue]          │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+#### Step 5: Verify Deployment
+
+After deployment, verify via Azure CLI:
+
+```bash
+# List all deployments
+az cognitiveservices account deployment list \
+  --name mys-shared-ai-san \
+  --resource-group mys-dev-core-rg-san \
+  --output table
+
+# Test Claude endpoint
+curl -X POST "https://mys-shared-ai-san.cognitiveservices.azure.com/openai/deployments/claude-sonnet-4-5/chat/completions?api-version=2024-10-01" \
+  -H "Content-Type: application/json" \
+  -H "api-key: $AZURE_AI_KEY" \
+  -d '{
+    "messages": [{"role": "user", "content": "Hello Claude!"}],
+    "max_tokens": 100
+  }'
+```
+
+### Using Claude in Code
+
+```csharp
+// C# - Using Azure.AI.OpenAI client (works with Claude too)
+var client = new AzureOpenAIClient(
+    new Uri("https://mys-shared-ai-san.cognitiveservices.azure.com"),
+    new AzureKeyCredential(apiKey)
+);
+
+var chatClient = client.GetChatClient("claude-sonnet-4-5");
+
+var response = await chatClient.CompleteChatAsync(new[]
+{
+    new UserChatMessage("Analyze this code for potential issues...")
+});
+```
+
+```python
+# Python - Using openai client with Azure
+from openai import AzureOpenAI
+
+client = AzureOpenAI(
+    azure_endpoint="https://mys-shared-ai-san.cognitiveservices.azure.com",
+    api_key=os.getenv("AZURE_AI_KEY"),
+    api_version="2024-10-01"
+)
+
+response = client.chat.completions.create(
+    model="claude-sonnet-4-5",  # deployment name
+    messages=[
+        {"role": "user", "content": "Analyze this code for potential issues..."}
+    ],
+    max_tokens=1000
+)
+```
+
+### Claude-Specific Features
+
+| Feature | Claude Advantage |
+|---------|-----------------|
+| **Context Window** | 200K tokens (vs 128K for GPT-4) |
+| **Constitutional AI** | Built-in safety guardrails |
+| **Artifacts** | Can generate interactive components |
+| **XML Handling** | Excellent at structured XML output |
+| **Long-form Analysis** | Superior at maintaining coherence |
+
+### When to Route to Claude vs GPT
+
+```python
+def select_model(task_type: str, complexity: str, volume: str) -> str:
+    """Route requests to optimal model based on task characteristics."""
+
+    # High-volume, simple tasks → GPT-4o-mini
+    if volume == "high" and complexity == "low":
+        return "gpt-4o-mini"
+
+    # Code-related tasks → Claude Sonnet or GPT-5.1-codex
+    if task_type in ["code_review", "code_generation", "debugging"]:
+        return "claude-sonnet-4-5" if complexity == "high" else "gpt-5.1-codex"
+
+    # Complex analysis → Claude
+    if task_type in ["analysis", "research", "reasoning"]:
+        if complexity == "critical":
+            return "claude-opus-4-5"
+        return "claude-sonnet-4-5"
+
+    # Creative writing → Claude Sonnet
+    if task_type in ["creative", "narrative", "storytelling"]:
+        return "claude-sonnet-4-5"
+
+    # Default to GPT-4o for general tasks
+    return "gpt-4o"
+```
+
+---
+
+## Model Router & Decision Guide
+
+### Complete Model Inventory (25 Models)
+
+| Model | Provider | Category | Region | Primary Use Case |
+|-------|----------|----------|--------|------------------|
+| gpt-4o | OpenAI | Flagship | SAN | General content generation |
+| gpt-4o-mini | OpenAI | Cost-optimized | SAN | High-volume chat |
+| gpt-4.1 | OpenAI | Reasoning | SAN | Structured extraction |
+| gpt-4.1-mini | OpenAI | Reasoning | SAN | Lightweight reasoning |
+| gpt-4.1-nano | OpenAI | Reasoning | SAN | Classification, routing |
+| gpt-5-nano | OpenAI | Next-gen | SAN | Advanced reasoning |
+| gpt-5.1 | OpenAI | Next-gen | SAN | Complex multi-step |
+| gpt-5.1-codex | OpenAI | Code | SAN | Code generation |
+| o3-mini | OpenAI | Reasoning | SAN | Chain-of-thought |
+| text-embedding-3-large | OpenAI | Embedding | SAN | Production RAG |
+| text-embedding-3-small | OpenAI | Embedding | SAN | Draft embeddings |
+| dall-e-3 | OpenAI | Image | SAN | Story illustrations |
+| whisper | OpenAI | Audio | SAN | Speech-to-text |
+| tts / tts-hd | OpenAI | Audio | SAN | Text-to-speech |
+| claude-haiku-4-5 | Anthropic | Fast | UK South | High-volume analysis |
+| claude-sonnet-4-5 | Anthropic | Balanced | UK South | Deep analysis |
+| claude-opus-4-5 | Anthropic | Premium | UK South | Complex research |
+| cohere-rerank-v3 | Cohere | RAG | UK South | Search reranking |
+| cohere-embed-multilingual | Cohere | Embedding | UK South | 100+ languages |
+| codestral-2501 | Mistral | Code | UK South | Code (256K context) |
+| deepseek-coder-v2 | DeepSeek | Code | UK South | Budget code |
+| jamba-1.5-large | AI21 | Long-context | UK South | 256K context |
+| jamba-1.5-mini | AI21 | Long-context | UK South | Budget long-context |
+
+---
+
+### Master Decision Tree
+
+```
+┌─────────────────────────────────────────────────────────────────────────────────────┐
+│                          MYSTIRA MODEL DECISION TREE                                 │
+├─────────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                     │
+│                                   START                                             │
+│                                     │                                               │
+│                    ┌────────────────┴────────────────┐                              │
+│                    ▼                                 ▼                              │
+│           ┌───────────────┐                 ┌───────────────┐                       │
+│           │ What type of  │                 │ Is it a       │                       │
+│           │ content?      │                 │ specialized   │                       │
+│           └───────┬───────┘                 │ task?         │                       │
+│                   │                         └───────┬───────┘                       │
+│    ┌──────┬───────┼───────┬──────┐                 │                               │
+│    ▼      ▼       ▼       ▼      ▼          ┌──────┴──────┐                        │
+│  Text   Code   Image   Audio  Embed         ▼             ▼                        │
+│    │      │       │       │      │        Yes            No                        │
+│    ▼      ▼       ▼       ▼      ▼          │             │                        │
+│ [TEXT]  [CODE] dall-e-3 [AUDIO] [EMBED]     ▼             └──▶ [TEXT FLOW]         │
+│                                        ┌─────────┐                                  │
+│                                        │ Which?  │                                  │
+│                                        └────┬────┘                                  │
+│                              ┌──────┬───────┼───────┬──────┐                       │
+│                              ▼      ▼       ▼       ▼      ▼                       │
+│                          Rerank  Long-ctx  Multi   Reason  Other                   │
+│                              │      │      lang      │      │                      │
+│                              ▼      ▼       ▼        ▼      ▼                      │
+│                          cohere  jamba  cohere    o3-mini  [TEXT]                  │
+│                          rerank  1.5    embed                                      │
+│                                                                                     │
+└─────────────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────────────┐
+│                              [TEXT FLOW] - Text Generation                           │
+├─────────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                     │
+│                            Is it high volume?                                       │
+│                            (>1000 req/day)                                          │
+│                                   │                                                 │
+│                    ┌──────────────┴──────────────┐                                  │
+│                    ▼                             ▼                                  │
+│                  YES                            NO                                  │
+│                    │                             │                                  │
+│                    ▼                             ▼                                  │
+│         ┌─────────────────┐           ┌─────────────────┐                          │
+│         │ Needs analysis? │           │ What complexity?│                          │
+│         └────────┬────────┘           └────────┬────────┘                          │
+│            Yes   │   No                        │                                   │
+│             │    │                   ┌─────────┼─────────┐                         │
+│             ▼    ▼                   ▼         ▼         ▼                         │
+│         claude  gpt-4o            Simple   Medium    Complex                       │
+│         haiku   -mini               │         │         │                          │
+│                                     ▼         ▼         ▼                          │
+│                                 gpt-4o     gpt-4o   ┌─────────┐                    │
+│                                 -mini               │Creative?│                    │
+│                                                     └────┬────┘                    │
+│                                                    Yes   │   No                    │
+│                                                     │    │                         │
+│                                                     ▼    ▼                         │
+│                                                 claude  ┌─────────┐                │
+│                                                 sonnet  │Critical?│                │
+│                                                         └────┬────┘                │
+│                                                        Yes   │   No                │
+│                                                         │    │                     │
+│                                                         ▼    ▼                     │
+│                                                      claude  claude                │
+│                                                      opus    sonnet                │
+│                                                                                     │
+└─────────────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────────────┐
+│                              [CODE FLOW] - Code Tasks                                │
+├─────────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                     │
+│                           What code task?                                           │
+│                                 │                                                   │
+│              ┌──────────┬───────┼───────┬──────────┐                               │
+│              ▼          ▼       ▼       ▼          ▼                               │
+│          Generate    Review   Debug   Explain   Complete                           │
+│              │          │       │       │          │                               │
+│              ▼          ▼       ▼       ▼          ▼                               │
+│         ┌────────┐  ┌────────┐  │   gpt-4o    codestral                            │
+│         │Complex?│  │Complex?│  │              -2501                               │
+│         └───┬────┘  └───┬────┘  │                                                  │
+│         Yes │ No    Yes │ No    │                                                  │
+│          │  │        │  │       │                                                  │
+│          ▼  ▼        ▼  ▼       ▼                                                  │
+│       claude gpt   claude gpt   ┌────────┐                                         │
+│       sonnet 5.1   sonnet 5.1   │Budget? │                                         │
+│              codex       codex  └───┬────┘                                         │
+│                              Yes    │   No                                         │
+│                               │     │                                              │
+│                               ▼     ▼                                              │
+│                          deepseek  claude                                          │
+│                          -coder    sonnet                                          │
+│                                                                                     │
+└─────────────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────────────┐
+│                              [AUDIO FLOW] - Audio Tasks                              │
+├─────────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                     │
+│                           Audio direction?                                          │
+│                                 │                                                   │
+│                    ┌────────────┴────────────┐                                      │
+│                    ▼                         ▼                                      │
+│              Speech → Text              Text → Speech                               │
+│                    │                         │                                      │
+│                    ▼                         ▼                                      │
+│                whisper               ┌─────────────┐                               │
+│                                      │ Quality?    │                               │
+│                                      └──────┬──────┘                               │
+│                                      Standard │ High                               │
+│                                          │    │                                    │
+│                                          ▼    ▼                                    │
+│                                        tts   tts-hd                                │
+│                                                                                     │
+└─────────────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────────────┐
+│                           [EMBED FLOW] - Embedding Tasks                             │
+├─────────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                     │
+│                           What language?                                            │
+│                                 │                                                   │
+│                    ┌────────────┴────────────┐                                      │
+│                    ▼                         ▼                                      │
+│               English                   Multilingual                                │
+│                    │                    (African, etc.)                             │
+│                    │                         │                                      │
+│                    ▼                         ▼                                      │
+│         ┌─────────────────┐            cohere-embed                                │
+│         │ What purpose?   │            -multilingual                               │
+│         └────────┬────────┘                                                        │
+│         Production │ Draft/Test                                                    │
+│              │     │                                                               │
+│              ▼     ▼                                                               │
+│          embed-3  embed-3                                                          │
+│          -large   -small                                                           │
+│                                                                                     │
+└─────────────────────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+### Model Router Implementation
+
+```python
+"""
+Mystira Model Router - Intelligent model selection based on task characteristics.
+
+This module provides automatic routing to the optimal AI model based on:
+- Task type (text, code, image, audio, embedding)
+- Complexity level (simple, medium, complex, critical)
+- Volume requirements (standard, high)
+- Special requirements (long-context, multilingual, reasoning)
+"""
+
+from enum import Enum
+from dataclasses import dataclass
+from typing import Optional, List
+import logging
+
+logger = logging.getLogger(__name__)
+
+
+class TaskType(Enum):
+    # Text Generation
+    CHAT = "chat"
+    CONTENT_GENERATION = "content_generation"
+    SUMMARIZATION = "summarization"
+    TRANSLATION = "translation"
+    CLASSIFICATION = "classification"
+
+    # Analysis
+    ANALYSIS = "analysis"
+    RESEARCH = "research"
+    REASONING = "reasoning"
+
+    # Creative
+    CREATIVE_WRITING = "creative_writing"
+    STORYTELLING = "storytelling"
+    NARRATIVE = "narrative"
+
+    # Code
+    CODE_GENERATION = "code_generation"
+    CODE_REVIEW = "code_review"
+    CODE_COMPLETION = "code_completion"
+    DEBUGGING = "debugging"
+    CODE_EXPLANATION = "code_explanation"
+
+    # Specialized
+    DATA_EXTRACTION = "data_extraction"
+    STRUCTURED_OUTPUT = "structured_output"
+
+    # Multimodal
+    IMAGE_GENERATION = "image_generation"
+    SPEECH_TO_TEXT = "speech_to_text"
+    TEXT_TO_SPEECH = "text_to_speech"
+
+    # RAG
+    EMBEDDING = "embedding"
+    RERANKING = "reranking"
+
+
+class Complexity(Enum):
+    SIMPLE = "simple"      # Basic tasks, no reasoning needed
+    MEDIUM = "medium"      # Standard tasks, some reasoning
+    COMPLEX = "complex"    # Multi-step, requires analysis
+    CRITICAL = "critical"  # Mission-critical, highest quality
+
+
+class Volume(Enum):
+    STANDARD = "standard"  # Normal usage
+    HIGH = "high"          # >1000 requests/day
+
+
+@dataclass
+class ModelConfig:
+    """Configuration for a deployed model."""
+    name: str
+    provider: str
+    region: str
+    input_cost_per_1m: float
+    output_cost_per_1m: float
+    context_window: int
+    strengths: List[str]
+
+
+@dataclass
+class RoutingRequest:
+    """Request for model routing."""
+    task_type: TaskType
+    complexity: Complexity = Complexity.MEDIUM
+    volume: Volume = Volume.STANDARD
+
+    # Special requirements
+    requires_long_context: bool = False
+    context_length: int = 0
+    requires_multilingual: bool = False
+    language: str = "en"
+    requires_reasoning: bool = False
+    budget_constrained: bool = False
+
+    # Quality preferences
+    prefer_speed: bool = False
+    prefer_quality: bool = False
+
+
+class ModelRouter:
+    """
+    Intelligent model router for Mystira.
+
+    Routes requests to optimal models based on task characteristics,
+    cost constraints, and quality requirements.
+    """
+
+    # Model definitions with costs and capabilities
+    MODELS = {
+        # OpenAI - Cost-Optimized
+        "gpt-4o-mini": ModelConfig(
+            name="gpt-4o-mini",
+            provider="OpenAI",
+            region="SAN",
+            input_cost_per_1m=0.15,
+            output_cost_per_1m=0.60,
+            context_window=128000,
+            strengths=["high-volume", "chat", "summarization"]
+        ),
+        "gpt-4.1-nano": ModelConfig(
+            name="gpt-4.1-nano",
+            provider="OpenAI",
+            region="SAN",
+            input_cost_per_1m=0.10,
+            output_cost_per_1m=0.40,
+            context_window=128000,
+            strengths=["classification", "routing", "simple-tasks"]
+        ),
+
+        # OpenAI - General Purpose
+        "gpt-4o": ModelConfig(
+            name="gpt-4o",
+            provider="OpenAI",
+            region="SAN",
+            input_cost_per_1m=2.50,
+            output_cost_per_1m=10.00,
+            context_window=128000,
+            strengths=["content", "translation", "general"]
+        ),
+        "gpt-4.1": ModelConfig(
+            name="gpt-4.1",
+            provider="OpenAI",
+            region="SAN",
+            input_cost_per_1m=2.00,
+            output_cost_per_1m=8.00,
+            context_window=128000,
+            strengths=["structured-output", "data-extraction"]
+        ),
+
+        # OpenAI - Premium
+        "gpt-5.1": ModelConfig(
+            name="gpt-5.1",
+            provider="OpenAI",
+            region="SAN",
+            input_cost_per_1m=5.00,
+            output_cost_per_1m=15.00,
+            context_window=128000,
+            strengths=["complex-tasks", "multi-step"]
+        ),
+        "gpt-5.1-codex": ModelConfig(
+            name="gpt-5.1-codex",
+            provider="OpenAI",
+            region="SAN",
+            input_cost_per_1m=5.00,
+            output_cost_per_1m=15.00,
+            context_window=128000,
+            strengths=["code-generation", "code-review"]
+        ),
+
+        # OpenAI - Reasoning
+        "o3-mini": ModelConfig(
+            name="o3-mini",
+            provider="OpenAI",
+            region="SAN",
+            input_cost_per_1m=1.10,
+            output_cost_per_1m=4.40,
+            context_window=128000,
+            strengths=["reasoning", "chain-of-thought", "planning"]
+        ),
+
+        # Anthropic
+        "claude-haiku-4-5": ModelConfig(
+            name="claude-haiku-4-5",
+            provider="Anthropic",
+            region="UK South",
+            input_cost_per_1m=0.25,
+            output_cost_per_1m=1.25,
+            context_window=200000,
+            strengths=["high-volume", "fast-analysis"]
+        ),
+        "claude-sonnet-4-5": ModelConfig(
+            name="claude-sonnet-4-5",
+            provider="Anthropic",
+            region="UK South",
+            input_cost_per_1m=3.00,
+            output_cost_per_1m=15.00,
+            context_window=200000,
+            strengths=["analysis", "creative", "code-review", "reasoning"]
+        ),
+        "claude-opus-4-5": ModelConfig(
+            name="claude-opus-4-5",
+            provider="Anthropic",
+            region="UK South",
+            input_cost_per_1m=15.00,
+            output_cost_per_1m=75.00,
+            context_window=200000,
+            strengths=["critical-tasks", "research", "complex-analysis"]
+        ),
+
+        # Specialized - Code
+        "codestral-2501": ModelConfig(
+            name="codestral-2501",
+            provider="Mistral",
+            region="UK South",
+            input_cost_per_1m=0.30,
+            output_cost_per_1m=0.90,
+            context_window=256000,
+            strengths=["code-completion", "long-context-code"]
+        ),
+        "deepseek-coder-v2": ModelConfig(
+            name="deepseek-coder-v2",
+            provider="DeepSeek",
+            region="UK South",
+            input_cost_per_1m=0.14,
+            output_cost_per_1m=0.28,
+            context_window=128000,
+            strengths=["budget-code", "code-generation"]
+        ),
+
+        # Specialized - Long Context
+        "jamba-1.5-large": ModelConfig(
+            name="jamba-1.5-large",
+            provider="AI21",
+            region="UK South",
+            input_cost_per_1m=2.00,
+            output_cost_per_1m=8.00,
+            context_window=256000,
+            strengths=["long-documents", "manuscript-analysis"]
+        ),
+        "jamba-1.5-mini": ModelConfig(
+            name="jamba-1.5-mini",
+            provider="AI21",
+            region="UK South",
+            input_cost_per_1m=0.20,
+            output_cost_per_1m=0.40,
+            context_window=256000,
+            strengths=["budget-long-context"]
+        ),
+
+        # RAG
+        "cohere-rerank-v3": ModelConfig(
+            name="cohere-rerank-v3",
+            provider="Cohere",
+            region="UK South",
+            input_cost_per_1m=2.00,  # per 1K queries
+            output_cost_per_1m=0,
+            context_window=4096,
+            strengths=["reranking", "search-quality"]
+        ),
+        "cohere-embed-multilingual": ModelConfig(
+            name="cohere-embed-multilingual",
+            provider="Cohere",
+            region="UK South",
+            input_cost_per_1m=0.10,
+            output_cost_per_1m=0,
+            context_window=512,
+            strengths=["multilingual", "african-languages"]
+        ),
+
+        # Audio
+        "whisper": ModelConfig(
+            name="whisper",
+            provider="OpenAI",
+            region="SAN",
+            input_cost_per_1m=0.006,  # per minute
+            output_cost_per_1m=0,
+            context_window=0,
+            strengths=["speech-to-text"]
+        ),
+        "tts": ModelConfig(
+            name="tts",
+            provider="OpenAI",
+            region="SAN",
+            input_cost_per_1m=15.00,  # per 1M chars
+            output_cost_per_1m=0,
+            context_window=0,
+            strengths=["text-to-speech"]
+        ),
+        "tts-hd": ModelConfig(
+            name="tts-hd",
+            provider="OpenAI",
+            region="SAN",
+            input_cost_per_1m=30.00,  # per 1M chars
+            output_cost_per_1m=0,
+            context_window=0,
+            strengths=["high-quality-tts"]
+        ),
+
+        # Image
+        "dall-e-3": ModelConfig(
+            name="dall-e-3",
+            provider="OpenAI",
+            region="SAN",
+            input_cost_per_1m=0.04,  # per image
+            output_cost_per_1m=0,
+            context_window=0,
+            strengths=["image-generation"]
+        ),
+
+        # Embeddings
+        "text-embedding-3-large": ModelConfig(
+            name="text-embedding-3-large",
+            provider="OpenAI",
+            region="SAN",
+            input_cost_per_1m=0.13,
+            output_cost_per_1m=0,
+            context_window=8191,
+            strengths=["production-embeddings", "high-accuracy"]
+        ),
+        "text-embedding-3-small": ModelConfig(
+            name="text-embedding-3-small",
+            provider="OpenAI",
+            region="SAN",
+            input_cost_per_1m=0.02,
+            output_cost_per_1m=0,
+            context_window=8191,
+            strengths=["budget-embeddings", "draft"]
+        ),
+    }
+
+    # Fallback chains for resilience
+    FALLBACK_CHAINS = {
+        "gpt-4o": ["claude-sonnet-4-5", "gpt-4o-mini"],
+        "gpt-5.1-codex": ["claude-sonnet-4-5", "codestral-2501", "gpt-4.1"],
+        "claude-opus-4-5": ["claude-sonnet-4-5", "gpt-5.1"],
+        "claude-sonnet-4-5": ["gpt-4o", "claude-haiku-4-5"],
+        "o3-mini": ["claude-sonnet-4-5", "gpt-4.1"],
+        "jamba-1.5-large": ["jamba-1.5-mini", "claude-sonnet-4-5"],
+    }
+
+    def __init__(self):
+        self.usage_stats = {}
+
+    def route(self, request: RoutingRequest) -> str:
+        """
+        Route a request to the optimal model.
+
+        Args:
+            request: RoutingRequest with task characteristics
+
+        Returns:
+            Model name string
+        """
+
+        # Handle specialized task types first
+        if request.task_type == TaskType.IMAGE_GENERATION:
+            return "dall-e-3"
+
+        if request.task_type == TaskType.SPEECH_TO_TEXT:
+            return "whisper"
+
+        if request.task_type == TaskType.TEXT_TO_SPEECH:
+            return "tts-hd" if request.prefer_quality else "tts"
+
+        if request.task_type == TaskType.RERANKING:
+            return "cohere-rerank-v3"
+
+        if request.task_type == TaskType.EMBEDDING:
+            return self._route_embedding(request)
+
+        # Handle long context requirements
+        if request.requires_long_context or request.context_length > 128000:
+            return self._route_long_context(request)
+
+        # Handle code tasks
+        if request.task_type in [
+            TaskType.CODE_GENERATION, TaskType.CODE_REVIEW,
+            TaskType.CODE_COMPLETION, TaskType.DEBUGGING,
+            TaskType.CODE_EXPLANATION
+        ]:
+            return self._route_code(request)
+
+        # Handle reasoning tasks
+        if request.requires_reasoning or request.task_type == TaskType.REASONING:
+            return self._route_reasoning(request)
+
+        # Handle creative tasks
+        if request.task_type in [
+            TaskType.CREATIVE_WRITING, TaskType.STORYTELLING,
+            TaskType.NARRATIVE
+        ]:
+            return self._route_creative(request)
+
+        # Handle analysis tasks
+        if request.task_type in [TaskType.ANALYSIS, TaskType.RESEARCH]:
+            return self._route_analysis(request)
+
+        # Handle general text tasks
+        return self._route_general_text(request)
+
+    def _route_embedding(self, request: RoutingRequest) -> str:
+        """Route embedding requests."""
+        if request.requires_multilingual:
+            return "cohere-embed-multilingual"
+        if request.budget_constrained or request.prefer_speed:
+            return "text-embedding-3-small"
+        return "text-embedding-3-large"
+
+    def _route_long_context(self, request: RoutingRequest) -> str:
+        """Route requests requiring >128K context."""
+        if request.budget_constrained:
+            return "jamba-1.5-mini"
+
+        # Code with long context
+        if request.task_type in [TaskType.CODE_GENERATION, TaskType.CODE_REVIEW]:
+            return "codestral-2501"
+
+        # Premium long-context
+        return "jamba-1.5-large"
+
+    def _route_code(self, request: RoutingRequest) -> str:
+        """Route code-related tasks."""
+
+        # Simple code completion
+        if request.task_type == TaskType.CODE_COMPLETION:
+            return "codestral-2501"
+
+        # Code explanation
+        if request.task_type == TaskType.CODE_EXPLANATION:
+            return "gpt-4o"
+
+        # Budget code tasks
+        if request.budget_constrained:
+            return "deepseek-coder-v2"
+
+        # Complex code review/debugging
+        if request.complexity in [Complexity.COMPLEX, Complexity.CRITICAL]:
+            return "claude-sonnet-4-5"
+
+        # Standard code generation
+        return "gpt-5.1-codex"
+
+    def _route_reasoning(self, request: RoutingRequest) -> str:
+        """Route reasoning-heavy tasks."""
+
+        # Critical reasoning
+        if request.complexity == Complexity.CRITICAL:
+            return "claude-opus-4-5"
+
+        # Chain-of-thought reasoning
+        if request.prefer_quality:
+            return "o3-mini"
+
+        # Standard reasoning
+        return "claude-sonnet-4-5"
+
+    def _route_creative(self, request: RoutingRequest) -> str:
+        """Route creative writing tasks."""
+
+        # High-volume creative (e.g., story variations)
+        if request.volume == Volume.HIGH:
+            return "claude-haiku-4-5"
+
+        # Claude is generally better for creative
+        return "claude-sonnet-4-5"
+
+    def _route_analysis(self, request: RoutingRequest) -> str:
+        """Route analysis and research tasks."""
+
+        # Critical analysis
+        if request.complexity == Complexity.CRITICAL:
+            return "claude-opus-4-5"
+
+        # High-volume analysis
+        if request.volume == Volume.HIGH:
+            return "claude-haiku-4-5"
+
+        # Standard analysis
+        return "claude-sonnet-4-5"
+
+    def _route_general_text(self, request: RoutingRequest) -> str:
+        """Route general text generation tasks."""
+
+        # High-volume simple tasks
+        if request.volume == Volume.HIGH:
+            if request.complexity == Complexity.SIMPLE:
+                return "gpt-4.1-nano"
+            return "gpt-4o-mini"
+
+        # Classification/routing
+        if request.task_type == TaskType.CLASSIFICATION:
+            return "gpt-4.1-nano"
+
+        # Structured output
+        if request.task_type in [TaskType.DATA_EXTRACTION, TaskType.STRUCTURED_OUTPUT]:
+            return "gpt-4.1"
+
+        # Complex tasks
+        if request.complexity == Complexity.COMPLEX:
+            return "gpt-5.1"
+
+        # Critical tasks
+        if request.complexity == Complexity.CRITICAL:
+            return "claude-sonnet-4-5"
+
+        # Default general purpose
+        return "gpt-4o"
+
+    def get_fallback(self, model: str) -> Optional[str]:
+        """Get fallback model if primary is unavailable."""
+        chain = self.FALLBACK_CHAINS.get(model, [])
+        return chain[0] if chain else None
+
+    def get_cost_estimate(self, model: str, input_tokens: int, output_tokens: int) -> float:
+        """Estimate cost for a request."""
+        config = self.MODELS.get(model)
+        if not config:
+            return 0.0
+
+        input_cost = (input_tokens / 1_000_000) * config.input_cost_per_1m
+        output_cost = (output_tokens / 1_000_000) * config.output_cost_per_1m
+        return input_cost + output_cost
+
+
+# Convenience function for simple routing
+def select_model(
+    task_type: str,
+    complexity: str = "medium",
+    volume: str = "standard",
+    **kwargs
+) -> str:
+    """
+    Simple model selection function.
+
+    Args:
+        task_type: Type of task (e.g., "chat", "code_review", "analysis")
+        complexity: "simple", "medium", "complex", or "critical"
+        volume: "standard" or "high"
+        **kwargs: Additional options (requires_long_context, budget_constrained, etc.)
+
+    Returns:
+        Optimal model name
+
+    Example:
+        >>> select_model("code_review", complexity="complex")
+        'claude-sonnet-4-5'
+
+        >>> select_model("chat", volume="high")
+        'gpt-4o-mini'
+    """
+    router = ModelRouter()
+
+    request = RoutingRequest(
+        task_type=TaskType(task_type),
+        complexity=Complexity(complexity),
+        volume=Volume(volume),
+        requires_long_context=kwargs.get("requires_long_context", False),
+        context_length=kwargs.get("context_length", 0),
+        requires_multilingual=kwargs.get("requires_multilingual", False),
+        requires_reasoning=kwargs.get("requires_reasoning", False),
+        budget_constrained=kwargs.get("budget_constrained", False),
+        prefer_speed=kwargs.get("prefer_speed", False),
+        prefer_quality=kwargs.get("prefer_quality", False),
+    )
+
+    return router.route(request)
+```
+
+---
+
+### Quick Reference Card
+
+```
+┌─────────────────────────────────────────────────────────────────────────────────────┐
+│                          MODEL QUICK REFERENCE                                       │
+├─────────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                     │
+│  COST TIERS (per 1M tokens):                                                        │
+│  ─────────────────────────────                                                      │
+│  💚 Budget     ($0.10-$0.30)  gpt-4.1-nano, deepseek-coder, jamba-mini             │
+│  💛 Standard   ($0.15-$2.00)  gpt-4o-mini, claude-haiku, gpt-4.1, o3-mini          │
+│  🟠 Premium    ($2.50-$5.00)  gpt-4o, gpt-5.1, claude-sonnet, jamba-large          │
+│  🔴 Maximum    ($15.00+)      claude-opus                                           │
+│                                                                                     │
+│  TASK SHORTCUTS:                                                                    │
+│  ─────────────────────────────                                                      │
+│  Chat (high vol)     → gpt-4o-mini                                                 │
+│  Chat (quality)      → gpt-4o                                                      │
+│  Code generation     → gpt-5.1-codex or codestral-2501                             │
+│  Code review         → claude-sonnet-4-5                                           │
+│  Analysis            → claude-sonnet-4-5                                           │
+│  Critical tasks      → claude-opus-4-5                                             │
+│  Reasoning/planning  → o3-mini                                                     │
+│  Creative writing    → claude-sonnet-4-5                                           │
+│  Classification      → gpt-4.1-nano                                                │
+│  Data extraction     → gpt-4.1                                                     │
+│  Long docs (256K)    → jamba-1.5-large                                             │
+│  Multilingual embed  → cohere-embed-multilingual                                   │
+│  Search reranking    → cohere-rerank-v3                                            │
+│                                                                                     │
+│  FALLBACK CHAINS:                                                                   │
+│  ─────────────────────────────                                                      │
+│  gpt-4o         → claude-sonnet → gpt-4o-mini                                      │
+│  claude-opus    → claude-sonnet → gpt-5.1                                          │
+│  gpt-5.1-codex  → claude-sonnet → codestral → gpt-4.1                             │
+│  o3-mini        → claude-sonnet → gpt-4.1                                          │
+│                                                                                     │
+└─────────────────────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+### Usage Examples
+
+```python
+# Example 1: Simple chat
+model = select_model("chat", volume="high")
+# Returns: "gpt-4o-mini"
+
+# Example 2: Complex code review
+model = select_model("code_review", complexity="complex")
+# Returns: "claude-sonnet-4-5"
+
+# Example 3: Long document analysis
+model = select_model(
+    "analysis",
+    complexity="complex",
+    requires_long_context=True,
+    context_length=200000
+)
+# Returns: "jamba-1.5-large"
+
+# Example 4: Budget code generation
+model = select_model("code_generation", budget_constrained=True)
+# Returns: "deepseek-coder-v2"
+
+# Example 5: Critical research
+model = select_model("research", complexity="critical")
+# Returns: "claude-opus-4-5"
+
+# Example 6: Chain-of-thought reasoning
+model = select_model("reasoning", requires_reasoning=True, prefer_quality=True)
+# Returns: "o3-mini"
+
+# Example 7: Multilingual embedding
+model = select_model("embedding", requires_multilingual=True)
+# Returns: "cohere-embed-multilingual"
+```
 
 ---
 
@@ -1168,9 +2449,172 @@ output "search_admin_key" {
 
 ---
 
+## Troubleshooting
+
+### Common Issues
+
+#### 1. Model Deployment Failed: "Model not available in region"
+
+**Problem**: Catalog models (Cohere, Mistral, DeepSeek, AI21) are not available in South Africa North.
+
+**Solution**: These models are configured with `location = "uksouth"` and deployed to a secondary AI Services account. Check:
+
+```bash
+# Verify UK South account exists
+az cognitiveservices account show \
+  --name mys-shared-ai-uks \
+  --resource-group <rg-name>
+
+# List deployments on UK South
+az cognitiveservices account deployment list \
+  --name mys-shared-ai-uks \
+  --resource-group <rg-name> \
+  --output table
+```
+
+#### 2. Quota Exceeded: "InsufficientQuota"
+
+**Problem**: Model deployment fails due to token quota limits.
+
+**Solutions**:
+1. Reduce `capacity` in the model configuration
+2. Request quota increase at: https://aka.ms/oai/quotaincrease
+3. Use `GlobalStandard` SKU for automatic global routing
+
+```bash
+# Check current quota usage
+az cognitiveservices account list-usages \
+  --name mys-shared-ai-san \
+  --resource-group <rg-name> \
+  --output table
+```
+
+#### 3. Marketplace Terms Not Accepted
+
+**Problem**: Catalog models fail with "MarketplaceTermsNotAccepted" or similar.
+
+**Solution**:
+1. Visit Azure AI Foundry portal: https://ai.azure.com/explore/models
+2. Search for the model (e.g., "Claude")
+3. Click "Deploy" to trigger terms acceptance
+4. Accept the marketplace agreement
+
+Alternatively, use the deployment script:
+```bash
+./infra/scripts/deploy-claude-models.sh dev
+```
+
+#### 4. API Version Mismatch
+
+**Problem**: AzAPI resource fails with "InvalidApiVersion".
+
+**Solution**: Ensure correct API versions:
+- Cognitive Services account: `2025-06-01` (for `allowProjectManagement`)
+- Model deployments: `2024-10-01`
+- AI Projects: `2025-06-01`
+
+#### 5. Claude Models Not Working via OpenAI SDK
+
+**Problem**: Claude models return errors when called via OpenAI SDK.
+
+**Solution**: Claude models require the Anthropic SDK or direct REST calls:
+
+```python
+# WRONG: OpenAI SDK (doesn't work for Claude)
+from openai import AzureOpenAI
+client = AzureOpenAI(...)
+client.chat.completions.create(model="claude-sonnet-4-5", ...)  # Fails
+
+# CORRECT: Use direct REST API
+import requests
+response = requests.post(
+    f"{endpoint}/openai/deployments/claude-sonnet-4-5/chat/completions?api-version=2024-10-01",
+    headers={"api-key": api_key, "Content-Type": "application/json"},
+    json={"messages": [...], "max_tokens": 1000}
+)
+```
+
+#### 6. Embedding Dimension Mismatch
+
+**Problem**: Vector search fails with dimension mismatch errors.
+
+**Solution**: Ensure consistent embedding dimensions:
+- `text-embedding-3-large`: 3072 dimensions (default)
+- `text-embedding-3-small`: 1536 dimensions (default)
+
+Both can be configured with custom dimensions using the `dimensions` parameter:
+```python
+response = client.embeddings.create(
+    model="text-embedding-3-large",
+    input="text to embed",
+    dimensions=1536  # Reduce from 3072 to 1536
+)
+```
+
+#### 7. Terraform State Drift
+
+**Problem**: Terraform shows unexpected changes or fails to apply.
+
+**Solution**:
+1. Check for manual changes in Azure portal
+2. Import existing resources if needed
+3. Use `terraform refresh` to update state
+
+```bash
+# Refresh state
+terraform refresh
+
+# Import existing resource
+terraform import module.shared_azure_ai.azurerm_cognitive_account.ai_foundry /subscriptions/.../resourceGroups/.../providers/Microsoft.CognitiveServices/accounts/mys-shared-ai-san
+```
+
+### Deployment Verification
+
+Run these commands to verify your deployment:
+
+```bash
+# 1. Check AI Services accounts
+az cognitiveservices account list \
+  --resource-group <rg-name> \
+  --output table
+
+# 2. List all model deployments (primary region)
+az cognitiveservices account deployment list \
+  --name mys-shared-ai-san \
+  --resource-group <rg-name> \
+  --output table
+
+# 3. List all model deployments (UK South)
+az cognitiveservices account deployment list \
+  --name mys-shared-ai-uks \
+  --resource-group <rg-name> \
+  --output table
+
+# 4. Test endpoint connectivity
+curl -s -o /dev/null -w "%{http_code}" \
+  "https://mys-shared-ai-san.cognitiveservices.azure.com/openai/deployments?api-version=2024-10-01" \
+  -H "api-key: $API_KEY"
+
+# 5. Verify model availability
+az cognitiveservices model list \
+  --location southafricanorth \
+  --query "[?kind=='OpenAI'].{name:name,version:version}" \
+  --output table
+```
+
+### Getting Help
+
+- **Azure Support**: https://azure.microsoft.com/support/
+- **OpenAI on Azure**: https://learn.microsoft.com/en-us/azure/ai-services/openai/
+- **Mystira Docs**: See ADR-0020 and ADR-0021 for model strategy
+
+---
+
 ## References
 
 - [Azure AI Foundry Documentation](https://learn.microsoft.com/en-us/azure/ai-services/)
 - [Azure AI Search Vector Search](https://learn.microsoft.com/en-us/azure/search/vector-search-overview)
 - [OpenAI Embeddings Guide](https://platform.openai.com/docs/guides/embeddings)
 - [RAG Pattern Best Practices](https://learn.microsoft.com/en-us/azure/architecture/ai-ml/guide/rag-solution-design)
+- [ADR-0020: AI Model Selection Strategy](../adr/ADR-0020-ai-model-selection-strategy.md)
+- [ADR-0021: Specialized & Edge Case Models](../adr/ADR-0021-specialized-edge-case-models.md)

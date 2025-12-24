@@ -44,10 +44,24 @@ locals {
   }
 
   # Catalog models require different deployment approach via AzAPI
-  catalog_deployments = {
+  # Split by region: primary (same as account) vs secondary (different region like uksouth)
+  catalog_deployments_primary = {
     for k, v in var.model_deployments : k => v
-    if v.model_format != "OpenAI"
+    if v.model_format != "OpenAI" && (v.location == null || v.location == var.location)
   }
+
+  catalog_deployments_secondary = {
+    for k, v in var.model_deployments : k => v
+    if v.model_format != "OpenAI" && v.location != null && v.location != var.location
+  }
+
+  # Get unique secondary regions needed
+  secondary_regions = distinct([
+    for k, v in local.catalog_deployments_secondary : v.location
+  ])
+
+  # Check if we need UK South account
+  needs_uksouth = contains(local.secondary_regions, "uksouth")
 }
 
 # =============================================================================
@@ -102,21 +116,24 @@ resource "azurerm_cognitive_account" "ai_foundry" {
 }
 
 # =============================================================================
-# Enable Project Management (using AzAPI to patch the account)
+# Enable Project Management (using Azure CLI)
 # =============================================================================
 # The allowProjectManagement property is not available in azurerm provider
-# We use azapi_update_resource to patch the account with this setting
+# We use az rest command to PATCH the account with this setting
 
-resource "azapi_update_resource" "enable_project_management" {
+resource "terraform_data" "enable_project_management" {
   count = var.enable_project ? 1 : 0
 
-  type        = "Microsoft.CognitiveServices/accounts@2025-06-01"
-  resource_id = azurerm_cognitive_account.ai_foundry.id
+  triggers_replace = [
+    azurerm_cognitive_account.ai_foundry.id
+  ]
 
-  body = {
-    properties = {
-      allowProjectManagement = true
-    }
+  provisioner "local-exec" {
+    command = <<-EOT
+      az rest --method PATCH \
+        --url "https://management.azure.com${azurerm_cognitive_account.ai_foundry.id}?api-version=2025-06-01" \
+        --body '{"properties": {"allowProjectManagement": true}}'
+    EOT
   }
 }
 
@@ -134,8 +151,8 @@ resource "azapi_resource" "ai_project" {
   parent_id = azurerm_cognitive_account.ai_foundry.id
   location  = var.location
 
-  # Must wait for allowProjectManagement to be enabled
-  depends_on = [azapi_update_resource.enable_project_management]
+  # Must wait for allowProjectManagement to be enabled via az CLI
+  depends_on = [terraform_data.enable_project_management]
 
   identity {
     type = "SystemAssigned"
@@ -173,6 +190,9 @@ resource "azurerm_cognitive_deployment" "openai_models" {
     capacity = each.value.capacity
   }
 
+  # Responsible AI policy (optional)
+  rai_policy_name = each.value.rai_policy_name
+
   lifecycle {
     # Prevent recreation when capacity changes (use update instead)
     ignore_changes = []
@@ -180,17 +200,20 @@ resource "azurerm_cognitive_deployment" "openai_models" {
 }
 
 # =============================================================================
-# Azure AI Model Catalog Deployments (Anthropic, Cohere, etc.)
+# Azure AI Model Catalog Deployments (Primary Region)
 # =============================================================================
-# Catalog models require AzAPI for deployment as they use different API structure
-# Note: Catalog model availability varies by region and may require separate billing
+# Catalog models in the same region as the primary AI Foundry account
+# These are models like Anthropic Claude that are available in the primary region
 
 resource "azapi_resource" "catalog_models" {
-  for_each = local.catalog_deployments
+  for_each = local.catalog_deployments_primary
 
   type      = "Microsoft.CognitiveServices/accounts/deployments@2024-10-01"
   name      = each.key
   parent_id = azurerm_cognitive_account.ai_foundry.id
+
+  # Wait for project management to be enabled
+  depends_on = [terraform_data.enable_project_management]
 
   body = {
     properties = {
@@ -199,8 +222,7 @@ resource "azapi_resource" "catalog_models" {
         name    = each.value.model_name
         version = each.value.model_version
       }
-      # Catalog models may have different SKU requirements
-      # Some models are pay-as-you-go only
+      raiPolicyName = each.value.rai_policy_name
     }
     sku = {
       name     = each.value.sku_name
@@ -217,7 +239,93 @@ resource "azapi_resource" "catalog_models" {
 
   lifecycle {
     ignore_changes = [
-      # Model versions may be updated automatically
+      # Model versions may be updated automatically by Azure
+      body["properties"]["model"]["version"]
+    ]
+  }
+}
+
+# =============================================================================
+# Secondary Region AI Foundry Account (UK South)
+# =============================================================================
+# Required for catalog models not available in primary region (SAN)
+# Models like Cohere, Mistral, DeepSeek, AI21 are only available in select regions
+
+resource "azurerm_cognitive_account" "ai_foundry_uksouth" {
+  count = local.needs_uksouth ? 1 : 0
+
+  name                  = "mys-shared-ai-uks"
+  location              = "uksouth"
+  resource_group_name   = var.resource_group_name
+  kind                  = "AIServices"
+  sku_name              = var.sku_name
+  custom_subdomain_name = "mys-shared-ai-uks"
+
+  # Network rules (inherit from primary)
+  dynamic "network_acls" {
+    for_each = var.enable_network_rules ? [1] : []
+    content {
+      default_action = var.network_default_action
+      ip_rules       = var.allowed_ip_ranges
+    }
+  }
+
+  identity {
+    type = "SystemAssigned"
+  }
+
+  local_auth_enabled                 = !var.disable_local_auth
+  public_network_access_enabled      = var.public_network_access_enabled
+  outbound_network_access_restricted = false
+
+  tags = merge(local.common_tags, {
+    Region = "uksouth"
+    Role   = "secondary-catalog-models"
+  })
+
+  lifecycle {
+    ignore_changes = [
+      tags["hidden-link:*"],
+    ]
+  }
+}
+
+# =============================================================================
+# Azure AI Model Catalog Deployments (UK South Region)
+# =============================================================================
+# Catalog models only available in UK South (Cohere, Mistral, DeepSeek, AI21)
+
+resource "azapi_resource" "catalog_models_uksouth" {
+  for_each = local.catalog_deployments_secondary
+
+  type      = "Microsoft.CognitiveServices/accounts/deployments@2024-10-01"
+  name      = each.key
+  parent_id = azurerm_cognitive_account.ai_foundry_uksouth[0].id
+
+  body = {
+    properties = {
+      model = {
+        format  = each.value.model_format
+        name    = each.value.model_name
+        version = each.value.model_version
+      }
+      raiPolicyName = each.value.rai_policy_name
+    }
+    sku = {
+      name     = each.value.sku_name
+      capacity = each.value.capacity
+    }
+  }
+
+  timeouts {
+    create = "30m"
+    update = "30m"
+    delete = "15m"
+  }
+
+  lifecycle {
+    ignore_changes = [
+      body["properties"]["model"]["version"]
     ]
   }
 }
