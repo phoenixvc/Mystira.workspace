@@ -102,21 +102,24 @@ resource "azurerm_cognitive_account" "ai_foundry" {
 }
 
 # =============================================================================
-# Enable Project Management (using AzAPI to patch the account)
+# Enable Project Management (using Azure CLI)
 # =============================================================================
 # The allowProjectManagement property is not available in azurerm provider
-# We use azapi_update_resource to patch the account with this setting
+# We use az rest command to PATCH the account with this setting
 
-resource "azapi_update_resource" "enable_project_management" {
+resource "terraform_data" "enable_project_management" {
   count = var.enable_project ? 1 : 0
 
-  type        = "Microsoft.CognitiveServices/accounts@2025-06-01"
-  resource_id = azurerm_cognitive_account.ai_foundry.id
+  triggers_replace = [
+    azurerm_cognitive_account.ai_foundry.id
+  ]
 
-  body = {
-    properties = {
-      allowProjectManagement = true
-    }
+  provisioner "local-exec" {
+    command = <<-EOT
+      az rest --method PATCH \
+        --url "https://management.azure.com${azurerm_cognitive_account.ai_foundry.id}?api-version=2025-06-01" \
+        --body '{"properties": {"allowProjectManagement": true}}'
+    EOT
   }
 }
 
@@ -134,8 +137,8 @@ resource "azapi_resource" "ai_project" {
   parent_id = azurerm_cognitive_account.ai_foundry.id
   location  = var.location
 
-  # Must wait for allowProjectManagement to be enabled
-  depends_on = [azapi_update_resource.enable_project_management]
+  # Must wait for allowProjectManagement to be enabled via az CLI
+  depends_on = [terraform_data.enable_project_management]
 
   identity {
     type = "SystemAssigned"
