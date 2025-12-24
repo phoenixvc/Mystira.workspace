@@ -210,6 +210,7 @@ variable "model_deployments" {
     # ==========================================================================
     # Speech-to-text for voice input, text-to-speech for narration
     # Deployed to North Central US (only region with Whisper/TTS support)
+    # NOTE: Disabled by default - enable when audio features needed
     "whisper" = {
       model_name    = "whisper"
       model_version = "001"
@@ -217,6 +218,7 @@ variable "model_deployments" {
       sku_name      = "Standard"
       capacity      = 1
       location      = "northcentralus"
+      enabled       = false # Enable when audio features needed
     }
     "tts" = {
       model_name    = "tts"
@@ -225,6 +227,7 @@ variable "model_deployments" {
       sku_name      = "Standard"
       capacity      = 1
       location      = "northcentralus"
+      enabled       = false # Enable when audio features needed
     }
     "tts-hd" = {
       model_name    = "tts-hd"
@@ -233,6 +236,7 @@ variable "model_deployments" {
       sku_name      = "Standard"
       capacity      = 1
       location      = "northcentralus"
+      enabled       = false # Enable when audio features needed
     }
 
     # ==========================================================================
@@ -269,6 +273,7 @@ variable "model_deployments" {
     # Specialized models for RAG enhancement
     # Rerank: Improves search relevance by 10-30% for complex queries
     # Embed: Multi-language support including African languages
+    # NOTE: Disabled by default - enable individually after core deployment
     "cohere-rerank-v4" = {
       model_name    = "Cohere-rerank-v4.0-pro"
       model_version = "1"
@@ -276,6 +281,7 @@ variable "model_deployments" {
       sku_name      = "GlobalStandard"
       capacity      = 1  # Serverless - pay per query
       location      = "uksouth" # Not available in SAN
+      enabled       = false # Enable after core deployment succeeds
     }
     "cohere-embed-v4" = {
       model_name    = "embed-v-4-0"
@@ -284,6 +290,7 @@ variable "model_deployments" {
       sku_name      = "GlobalStandard"
       capacity      = 1
       location      = "uksouth" # Not available in SAN
+      enabled       = false # Enable after core deployment succeeds
     }
 
     # ==========================================================================
@@ -291,6 +298,7 @@ variable "model_deployments" {
     # ==========================================================================
     # Codestral: Dedicated code model, 256K context, 80+ languages
     # Much cheaper than gpt-5.1-codex for code tasks
+    # NOTE: Disabled by default - enable individually after core deployment
     "codestral" = {
       model_name    = "Codestral"
       model_version = "2501"
@@ -298,6 +306,7 @@ variable "model_deployments" {
       sku_name      = "GlobalStandard"
       capacity      = 1
       location      = "uksouth" # Not available in SAN
+      enabled       = false # Enable after core deployment succeeds
     }
 
     # ==========================================================================
@@ -305,6 +314,7 @@ variable "model_deployments" {
     # ==========================================================================
     # DeepSeek-V3: Advanced reasoning and agent performance
     # Strong benchmarks on code generation and understanding
+    # NOTE: Disabled by default - enable individually after core deployment
     "deepseek-v3" = {
       model_name    = "DeepSeek-V3.2"
       model_version = "1"
@@ -312,6 +322,7 @@ variable "model_deployments" {
       sku_name      = "GlobalStandard"
       capacity      = 1
       location      = "uksouth" # Not available in SAN
+      enabled       = false # Enable after core deployment succeeds
     }
 
     # ==========================================================================
@@ -320,6 +331,7 @@ variable "model_deployments" {
     # Jamba: Hybrid Mamba-Transformer architecture with long context
     # Linear scaling with context - efficient for long documents
     # Use for full story manuscript analysis, cross-chapter consistency
+    # NOTE: Disabled by default - enable individually after core deployment
     "jamba-1.5-large" = {
       model_name    = "AI21-Jamba-1.5-Large"
       model_version = "1"
@@ -327,6 +339,7 @@ variable "model_deployments" {
       sku_name      = "GlobalStandard"
       capacity      = 1
       location      = "uksouth" # Not available in SAN
+      enabled       = false # Enable after core deployment succeeds
     }
     "jamba-1.5-mini" = {
       model_name    = "AI21-Jamba-1.5-Mini"
@@ -335,6 +348,7 @@ variable "model_deployments" {
       sku_name      = "GlobalStandard"
       capacity      = 1  # 10x cheaper than large for simpler long-context tasks
       location      = "uksouth" # Not available in SAN
+      enabled       = false # Enable after core deployment succeeds
     }
   }
 }
