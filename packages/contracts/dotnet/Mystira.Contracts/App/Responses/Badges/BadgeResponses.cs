@@ -96,6 +96,16 @@ public record BadgeProgressResponse
     /// Description of the current milestone.
     /// </summary>
     public string? MilestoneDescription { get; init; }
+
+    /// <summary>
+    /// The age group identifier for age-appropriate badge tracking.
+    /// </summary>
+    public string? AgeGroupId { get; init; }
+
+    /// <summary>
+    /// Progress on each compass axis related to this badge.
+    /// </summary>
+    public IReadOnlyList<AxisProgressResponse> AxisProgresses { get; init; } = [];
 }
 
 /// <summary>
