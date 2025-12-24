@@ -56,12 +56,68 @@ variable "model_deployments" {
   }))
   default = {
     # ==========================================================================
-    # OpenAI Models (GPT Series)
+    # OpenAI Models (GPT Series) - Flagship & Latest
     # ==========================================================================
-    # GPT-4o-mini - cost-effective, widely available
+
+    # GPT-4o - Flagship multimodal model (request quota increase if exceeded)
+    "gpt-4o" = {
+      model_name    = "gpt-4o"
+      model_version = "2024-11-20"
+      model_format  = "OpenAI"
+      sku_name      = "GlobalStandard"
+      capacity      = 20
+    }
+
+    # GPT-4o-mini - Cost-effective, widely available
     "gpt-4o-mini" = {
       model_name    = "gpt-4o-mini"
       model_version = "2024-07-18"
+      model_format  = "OpenAI"
+      sku_name      = "GlobalStandard"
+      capacity      = 20
+    }
+
+    # GPT-4.1 Series - Enhanced reasoning models
+    "gpt-4.1" = {
+      model_name    = "gpt-4.1"
+      model_version = "2025-04-14"
+      model_format  = "OpenAI"
+      sku_name      = "GlobalStandard"
+      capacity      = 20
+    }
+    "gpt-4.1-nano" = {
+      model_name    = "gpt-4.1-nano"
+      model_version = "2025-04-14"
+      model_format  = "OpenAI"
+      sku_name      = "GlobalStandard"
+      capacity      = 20
+    }
+    "gpt-4.1-mini" = {
+      model_name    = "gpt-4.1-mini"
+      model_version = "2025-04-14"
+      model_format  = "OpenAI"
+      sku_name      = "GlobalStandard"
+      capacity      = 20
+    }
+
+    # GPT-5 Series - Next generation models
+    "gpt-5-nano" = {
+      model_name    = "gpt-5-nano"
+      model_version = "2025-05-01"
+      model_format  = "OpenAI"
+      sku_name      = "GlobalStandard"
+      capacity      = 20
+    }
+    "gpt-5.1" = {
+      model_name    = "gpt-5.1"
+      model_version = "2025-06-01"
+      model_format  = "OpenAI"
+      sku_name      = "GlobalStandard"
+      capacity      = 20
+    }
+    "gpt-5.1-codex" = {
+      model_name    = "gpt-5.1-codex"
+      model_version = "2025-06-01"
       model_format  = "OpenAI"
       sku_name      = "GlobalStandard"
       capacity      = 20
@@ -89,12 +145,32 @@ variable "model_deployments" {
     }
 
     # ==========================================================================
-    # NOTE: Additional models to add when available/needed:
+    # Anthropic Claude Models (via Azure AI Model Catalog)
     # ==========================================================================
-    # GPT-4o: Currently quota exceeded in SAN - request increase or use gpt-4o-mini
-    # GPT-4.1/5.x: Not yet released - add when available
-    # Claude models: Cannot be deployed via Terraform - use Azure AI Foundry portal
-    #   See: https://ai.azure.com/explore/models for marketplace deployment
+    # Note: Claude models are deployed via Azure AI Model Catalog (Serverless API)
+    # They require marketplace subscription and use pay-as-you-go billing
+    # Deploy via: az ml serverless-endpoint create or Azure AI Foundry portal
+    "claude-haiku-4-5" = {
+      model_name    = "claude-3-5-haiku"
+      model_version = "20241022"
+      model_format  = "Anthropic"
+      sku_name      = "GlobalStandard"
+      capacity      = 1  # Serverless - capacity is token-based
+    }
+    "claude-sonnet-4-5" = {
+      model_name    = "claude-sonnet-4-5"
+      model_version = "20250514"
+      model_format  = "Anthropic"
+      sku_name      = "GlobalStandard"
+      capacity      = 1  # Serverless - capacity is token-based
+    }
+    "claude-opus-4-5" = {
+      model_name    = "claude-opus-4-5"
+      model_version = "20250514"
+      model_format  = "Anthropic"
+      sku_name      = "GlobalStandard"
+      capacity      = 1  # Serverless - capacity is token-based
+    }
   }
 }
 
