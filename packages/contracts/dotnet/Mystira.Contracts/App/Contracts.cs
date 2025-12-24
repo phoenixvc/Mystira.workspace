@@ -3,10 +3,13 @@ namespace Mystira.Contracts.App;
 /// <summary>
 /// App API Contracts
 ///
-/// These types will be migrated from Mystira.App.Contracts.
-/// During migration, types will be added here and deprecated in the old package.
+/// These types are migrated from Mystira.App.Contracts.
+/// Additional contracts are available in sub-namespaces:
+/// - Mystira.Contracts.App.Responses.Badges - Badge and achievement DTOs
+/// - Mystira.Contracts.App.Responses.Common - Common response types (ErrorResponse, etc.)
+/// - Mystira.Contracts.App.Ports.Health - Health check port interface and types
 ///
-/// Migration status: PENDING
+/// Migration status: IN_PROGRESS
 /// See: docs/architecture/adr/0020-package-consolidation-strategy.md
 /// </summary>
 

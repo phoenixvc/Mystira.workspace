@@ -26,32 +26,30 @@ public class WolverineHealthCheck : IHealthCheck
         _logger = logger;
     }
 
-    public async Task<HealthCheckResult> CheckHealthAsync(
+    public Task<HealthCheckResult> CheckHealthAsync(
         HealthCheckContext context,
         CancellationToken cancellationToken = default)
     {
         if (!_options.Enabled)
         {
-            return HealthCheckResult.Healthy("Messaging is disabled");
+            return Task.FromResult(HealthCheckResult.Healthy("Messaging is disabled"));
         }
 
         try
         {
-            // Check if the message bus is available
-            // We can't easily verify Azure Service Bus connectivity without sending a message
-            // But we can verify the runtime is operational
-            var runtime = (_messageBus as IMessageContext)?.Runtime;
-
-            if (runtime == null)
+            // Check if the message bus is available by verifying it was injected
+            // The actual connectivity to Azure Service Bus is verified on first message
+            if (_messageBus == null)
             {
-                return HealthCheckResult.Degraded("Wolverine runtime not accessible");
+                return Task.FromResult(HealthCheckResult.Degraded("Wolverine message bus not available"));
             }
 
             var data = new Dictionary<string, object>
             {
                 ["serviceName"] = _options.ServiceName ?? "Unknown",
                 ["durabilityMode"] = _options.DurabilityMode.ToString(),
-                ["hasServiceBus"] = !string.IsNullOrEmpty(_options.ServiceBusConnectionString)
+                ["hasServiceBus"] = !string.IsNullOrEmpty(_options.ServiceBusConnectionString),
+                ["messageBusType"] = _messageBus.GetType().Name
             };
 
             // If using Azure Service Bus, note that connectivity will only be verified on first message
@@ -60,18 +58,18 @@ public class WolverineHealthCheck : IHealthCheck
                 data["azureServiceBus"] = "Configured (connectivity verified on first message)";
             }
 
-            return HealthCheckResult.Healthy("Wolverine messaging operational", data);
+            return Task.FromResult(HealthCheckResult.Healthy("Wolverine messaging operational", data));
         }
         catch (Exception ex)
         {
             _logger.LogWarning(ex, "Wolverine health check failed");
-            return HealthCheckResult.Unhealthy(
+            return Task.FromResult(HealthCheckResult.Unhealthy(
                 "Wolverine messaging check failed",
                 ex,
                 new Dictionary<string, object>
                 {
                     ["error"] = ex.Message
-                });
+                }));
         }
     }
 }
