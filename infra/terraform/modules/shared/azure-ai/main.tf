@@ -129,7 +129,7 @@ resource "azapi_update_resource" "enable_project_management" {
 resource "azapi_resource" "ai_project" {
   count = var.enable_project ? 1 : 0
 
-  type      = "Microsoft.CognitiveServices/accounts/projects@2024-10-01"
+  type      = "Microsoft.CognitiveServices/accounts/projects@2025-06-01"
   name      = "${local.name}-project"
   parent_id = azurerm_cognitive_account.ai_foundry.id
   location  = var.location
