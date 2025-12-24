@@ -383,7 +383,7 @@ module "shared_azure_ai" {
   resource_group_name = azurerm_resource_group.main.name
 
   # Enable AI Foundry project for workload isolation
-  enable_project = false # Requires allowProjectManagement on account (not yet supported)
+  enable_project = true # Uses AzAPI to enable allowProjectManagement on account
 
   # Production: Higher capacity for AI workloads
   # Model deployments - OpenAI models only
