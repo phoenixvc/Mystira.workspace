@@ -22,6 +22,8 @@ docs/
 │       └── code-review-improvements.md
 ├── cicd/                        # CI/CD documentation
 │   └── README.md
+├── guides/                      # Developer guides
+│   └── contracts-migration.md
 ├── planning/                    # Planning and roadmap documents
 │   ├── master-implementation-checklist.md
 │   ├── hybrid-data-strategy-roadmap.md
@@ -55,6 +57,10 @@ docs/
 - **[Master Implementation Checklist](planning/master-implementation-checklist.md)** - Complete task tracking
 - **[Hybrid Data Strategy Roadmap](planning/hybrid-data-strategy-roadmap.md)** - Phased migration plan
 - **[Admin API Extraction Plan](planning/admin-api-extraction-plan.md)** - Step-by-step extraction process
+
+### Guides
+
+- **[Contracts Migration Guide](guides/contracts-migration.md)** - Migrating to unified @mystira/contracts packages
 
 ### CI/CD
 
