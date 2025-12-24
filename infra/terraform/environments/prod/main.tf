@@ -469,6 +469,28 @@ module "shared_azure_ai" {
   }
 }
 
+# Shared Azure AI Search Infrastructure (in core-rg)
+# Provides RAG, vector search, and semantic search capabilities
+module "shared_azure_search" {
+  source = "../../modules/shared/azure-search"
+
+  environment         = "prod"
+  location            = var.location
+  region_code         = local.region_code
+  resource_group_name = azurerm_resource_group.main.name
+
+  # Use standard tier for production (semantic search, higher capacity)
+  sku                 = "standard"
+  replica_count       = 2  # High availability
+  partition_count     = 1
+  semantic_search_sku = "standard" # Standard semantic search for production
+
+  tags = {
+    CostCenter = "production"
+    Critical   = "true"
+  }
+}
+
 # Story-Generator Infrastructure (in story-rg per ADR-0017)
 # Supports both API (Kubernetes) and Web (Static Web App) components
 module "story_generator" {
