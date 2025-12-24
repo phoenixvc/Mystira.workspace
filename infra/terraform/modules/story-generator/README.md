@@ -1,6 +1,13 @@
 # Story-Generator Infrastructure Module
 
-Terraform module for deploying Mystira.StoryGenerator service infrastructure on Azure.
+Terraform module for deploying **Mystira.StoryGenerator.Api** infrastructure on Azure.
+
+> **Note**: This module provisions infrastructure for the **API** component, not the Blazor WASM frontend.
+> StoryGenerator follows the same pattern as Mystira.App:
+> - **API** (`Mystira.StoryGenerator.Api`) → Kubernetes (uses this infrastructure)
+> - **Web** (`Mystira.StoryGenerator.Web`, Blazor WASM) → Static Web App (separate infrastructure if needed)
+>
+> See [ADR-0019](../../../docs/adr/ADR-0019-dockerfile-location-standardization.md) for architecture documentation.
 
 ## Features
 

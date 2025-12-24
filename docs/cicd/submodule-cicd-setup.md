@@ -123,12 +123,16 @@ Each submodule uses a specific event type:
 |------------|------------|--------|-------|
 | Mystira.Admin.Api | `admin-api-deploy` | `mys-admin-api` | Kubernetes |
 | Mystira.Admin.UI | `admin-ui-deploy` | `mys-admin-ui` | Kubernetes |
-| Mystira.StoryGenerator | `story-generator-deploy` | `mys-story-generator` | Kubernetes |
+| Mystira.StoryGenerator (API) | `story-generator-deploy` | `mys-story-generator` | Kubernetes |
 | Mystira.Publisher | `publisher-deploy` | `mys-publisher` | Kubernetes |
 | Mystira.Chain | `chain-deploy` | `mys-chain` | Kubernetes |
 | Mystira.App (API) | `app-deploy` | `mys-dev-app-api-san` | App Service |
 | Mystira.App (SWA) | `app-swa-deploy` | `mys-dev-mystira-swa-eus2` | Static Web App |
 | Mystira.DevHub | `devhub-deploy` | `mys-dev-devhub-san` | App Service |
+
+> **Note**: `Mystira.StoryGenerator` follows the same API/Web pattern as `Mystira.App`:
+> - **API** (`Mystira.StoryGenerator.Api`) → Kubernetes via `story-generator-deploy`
+> - **Web** (`Mystira.StoryGenerator.Web`, Blazor WASM) → Static Web App (if needed, similar to `app-swa-deploy`)
 
 ---
 

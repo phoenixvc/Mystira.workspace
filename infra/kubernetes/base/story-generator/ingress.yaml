@@ -1,9 +1,12 @@
+# Ingress for Story Generator API
+# Exposes the API at story-generator.mystira.app (or dev./staging. prefixed)
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: mystira-story-generator-ingress
   labels:
     app: mystira-story-generator
+    component: story-generator-api
   annotations:
     cert-manager.io/cluster-issuer: "letsencrypt-prod"
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
@@ -22,7 +25,7 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: mystira-story-generator
+                name: mys-story-generator
                 port:
                   number: 8080
 

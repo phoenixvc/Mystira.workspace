@@ -1,3 +1,5 @@
+# Kustomization for Story Generator API
+# Deploys the API component to Kubernetes (not the Blazor WASM Web frontend)
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
@@ -11,7 +13,7 @@ resources:
 commonLabels:
   app.kubernetes.io/name: mys-story-generator
   app.kubernetes.io/part-of: mys
-  app.kubernetes.io/component: story-generator
+  app.kubernetes.io/component: story-generator-api
 
 images:
   - name: myssharedacr.azurecr.io/story-generator

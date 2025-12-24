@@ -1,10 +1,18 @@
+# Mystira Story Generator API Deployment
+#
+# This deploys the API component (Mystira.StoryGenerator.Api), NOT the Blazor WASM frontend.
+# The deployment pattern mirrors Mystira.App:
+#   - API → Kubernetes (this deployment, triggered by `story-generator-deploy`)
+#   - Web → Static Web App (separate deployment if needed)
+#
+# See ADR-0019 for architecture documentation.
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: mys-story-generator
   labels:
     app: mys-story-generator
-    component: story-generator
+    component: story-generator-api
 spec:
   replicas: 2
   selector:
@@ -19,7 +27,7 @@ spec:
     metadata:
       labels:
         app: mys-story-generator
-        component: story-generator
+        component: story-generator-api
         azure.workload.identity/use: "true"
     spec:
       serviceAccountName: story-generator-sa

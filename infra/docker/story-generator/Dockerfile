@@ -1,6 +1,13 @@
 # Multi-stage Dockerfile for Mystira Story Generator API (.NET 8)
-# NOTE: This builds the API project, not the Blazor WASM Web project.
-# The Web project (Blazor WASM) should be deployed to Static Web Apps.
+#
+# IMPORTANT: This builds the API project (Mystira.StoryGenerator.Api), NOT the
+# Blazor WASM Web project (Mystira.StoryGenerator.Web).
+#
+# Deployment pattern (mirrors Mystira.App):
+#   - API (this Dockerfile) → Kubernetes via `story-generator-deploy`
+#   - Web (Blazor WASM)     → Static Web App (separate deployment if needed)
+#
+# See ADR-0019 for full documentation on the deployment architecture.
 
 # Stage 1: Build
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
@@ -43,16 +50,21 @@ RUN chown -R appuser:appuser /app
 # Switch to non-root user
 USER appuser
 
-# Expose port
-EXPOSE 5000
+# Expose ports (matching Kubernetes deployment configuration)
+# 8080: Main HTTP API endpoint
+# 8081: Health check endpoint
+EXPOSE 8080
+EXPOSE 8081
 
 # Configure environment
-ENV ASPNETCORE_URLS=http://+:5000
+ENV ASPNETCORE_URLS="http://+:8080"
+ENV ASPNETCORE_HTTP_PORTS="8080"
+ENV ASPNETCORE_HEALTHCHECK_PORTS="8081"
 ENV ASPNETCORE_ENVIRONMENT=Production
 
-# Health check
+# Health check (uses dedicated health port)
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost:5000/health || exit 1
+    CMD curl -f http://localhost:8081/health || exit 1
 
 # Entry point
 ENTRYPOINT ["dotnet", "Mystira.StoryGenerator.Api.dll"]

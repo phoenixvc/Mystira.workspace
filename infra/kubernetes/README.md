@@ -25,11 +25,13 @@ The ServiceAccounts in this directory are configured for Azure Workload Identity
 | ServiceAccount | Service | Terraform Module | Notes |
 |----------------|---------|------------------|-------|
 | `admin-api-sa` | Admin API | `modules/admin-api` | ✅ Ready |
-| `story-generator-sa` | Story Generator | `modules/story-generator` | ✅ Ready |
+| `story-generator-sa` | Story Generator API | `modules/story-generator` | ✅ Ready |
 | `publisher-sa` | Publisher | `modules/publisher` | ✅ Ready |
 | `chain-sa` | Chain | `modules/chain` | ✅ Ready |
 
-**Note:** Admin UI is a browser-based SPA and doesn't need a ServiceAccount (it uses MSAL authentication in the browser).
+**Notes:**
+- Admin UI is a browser-based SPA and doesn't need a ServiceAccount (it uses MSAL authentication in the browser).
+- Story Generator deploys the **API** component to Kubernetes. The Blazor WASM frontend (if needed) would use Static Web App (no ServiceAccount required).
 
 ### Prerequisites
 
