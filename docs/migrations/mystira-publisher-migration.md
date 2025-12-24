@@ -1,8 +1,10 @@
 # Mystira.Publisher Migration Guide
 
 **Target**: Migrate Publisher to use `@mystira/design-tokens` and shared utilities
-**Prerequisites**: `@mystira/design-tokens` published to NPM
+**Prerequisites**: `@mystira/design-tokens` v0.2.0+ published to NPM
 **Estimated Effort**: 0.5-1 day
+**Last Updated**: December 2025
+**Status**: 📋 Planned
 
 ---
 
@@ -10,9 +12,11 @@
 
 Publisher is a React/TypeScript frontend with the most comprehensive design token system in the workspace. Migration focuses on:
 
-1. Adopting `@mystira/design-tokens` (derived from Publisher's own tokens)
-2. Migrating to unified `@mystira/shared-utils`
-3. Standardizing HTTP client patterns
+1. Adopting `@mystira/design-tokens` v0.2.0 (derived from Publisher's own tokens)
+2. Migrating to unified `@mystira/shared-utils` v0.2.0
+3. Standardizing HTTP client patterns with retry utilities
+4. **Dark mode support** (new)
+5. **Dockerfile migration** to submodule repo (ADR-0019)
 
 Publisher's `variables.css` was the **reference implementation** for `@mystira/design-tokens`, so this migration is mostly about consuming the centralized package.
 
@@ -63,7 +67,7 @@ Publisher has a comprehensive design token system at `/src/styles/variables.css`
 
 ```bash
 cd packages/publisher
-npm install @mystira/design-tokens
+pnpm add @mystira/design-tokens@0.2.0 @mystira/shared-utils@0.2.0
 ```
 
 ### 1.2 Update package.json
@@ -71,8 +75,19 @@ npm install @mystira/design-tokens
 ```json
 {
   "dependencies": {
-    "@mystira/design-tokens": "^0.1.0",
-    "@mystira/shared-utils": "^0.1.0"
+    "@mystira/design-tokens": "^0.2.0",
+    "@mystira/shared-utils": "^0.2.0"
+  }
+}
+```
+
+### 1.3 Ensure Node.js Version
+
+```json
+// package.json
+{
+  "engines": {
+    "node": ">=20.0.0"
   }
 }
 ```
@@ -280,6 +295,83 @@ Before and after screenshots for:
 
 ---
 
+## Phase 6: Dockerfile Migration (ADR-0019)
+
+Move Dockerfile from workspace to submodule repo:
+
+### 6.1 Create Dockerfile in Submodule
+
+```dockerfile
+# packages/publisher/Dockerfile (new location)
+FROM node:22-alpine AS build
+
+WORKDIR /app
+
+COPY package.json pnpm-lock.yaml ./
+RUN corepack enable && pnpm install --frozen-lockfile
+
+COPY . .
+RUN pnpm build
+
+FROM nginx:alpine
+COPY --from=build /app/dist /usr/share/nginx/html
+COPY nginx.conf /etc/nginx/nginx.conf
+
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]
+```
+
+### 6.2 Add CI/CD Workflow
+
+```yaml
+# .github/workflows/ci.yml (in Mystira.Publisher repo)
+name: Publisher CI
+
+on:
+  push:
+    branches: [main, dev]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - run: pnpm test
+
+  docker:
+    needs: build
+    if: github.ref == 'refs/heads/dev'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/login-action@v3
+        with:
+          registry: myssharedacr.azurecr.io
+          username: ${{ secrets.ACR_USERNAME }}
+          password: ${{ secrets.ACR_PASSWORD }}
+      - uses: docker/build-push-action@v5
+        with:
+          push: true
+          tags: myssharedacr.azurecr.io/publisher:${{ github.sha }}
+      - name: Trigger workspace deployment
+        uses: peter-evans/repository-dispatch@v2
+        with:
+          token: ${{ secrets.WORKSPACE_PAT }}
+          repository: phoenixvc/Mystira.workspace
+          event-type: publisher-deploy
+          client-payload: '{"sha": "${{ github.sha }}"}'
+```
+
+---
+
 ## Notes
 
 Publisher was the **source** for `@mystira/design-tokens`. The main benefit of this migration is:
@@ -287,11 +379,14 @@ Publisher was the **source** for `@mystira/design-tokens`. The main benefit of t
 1. **Consistency**: Other apps (Admin-UI, DevHub) will match Publisher's design
 2. **Single Source**: Design changes propagate to all apps
 3. **Reduced Maintenance**: No need to maintain tokens in Publisher separately
+4. **Faster CI/CD**: Docker builds run in submodule repo (ADR-0019)
 
 ---
 
 ## Related Documentation
 
+- [ADR-0019: Dockerfile Location Standardization](../adr/ADR-0019-dockerfile-location-standardization.md)
 - [Design Token Analysis](../analysis/package-inventory.md#design-system-analysis-phase-4e)
 - [@mystira/design-tokens README](../../packages/design-tokens/README.md)
 - [Mystira.Admin Migration Guide](./mystira-admin-migration.md)
+- [Mystira.Admin.UI Migration Guide](./mystira-admin-ui-migration.md)
