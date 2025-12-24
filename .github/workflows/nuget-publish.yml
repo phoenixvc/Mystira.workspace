@@ -170,4 +170,87 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Unified Publishing" >> $GITHUB_STEP_SUMMARY
           echo "This package was published as part of the unified release process." >> $GITHUB_STEP_SUMMARY
-          echo "See [Publishing Guide](../docs/guides/publishing.md) for more information." >> $GITHUB_STEP_SUMMARY
+          echo "See [Publishing Guide](docs/guides/package-releases.md) for more information." >> $GITHUB_STEP_SUMMARY
+
+    outputs:
+      package: ${{ steps.package.outputs.package }}
+      package_name: ${{ steps.package.outputs.package_name }}
+      version: ${{ steps.pack.outputs.version }}
+      is_prerelease: ${{ steps.package.outputs.is_prerelease }}
+      version_suffix: ${{ steps.package.outputs.version_suffix }}
+
+  # Create changeset for dependent NPM packages after stable NuGet publish
+  # Only runs for submodule-triggered publishes (not Changesets-triggered to avoid loops)
+  create-changeset:
+    name: Create Changeset for NPM Dependencies
+    runs-on: ubuntu-latest
+    needs: publish
+    # Only for stable releases triggered by submodules (not from unified workflow)
+    if: |
+      needs.publish.outputs.is_prerelease != 'true' &&
+      needs.publish.outputs.version_suffix == '' &&
+      github.event.client_payload.triggered_by != 'changesets-release'
+    steps:
+      - name: Checkout workspace
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN }}
+          fetch-depth: 0
+
+      - name: Determine dependent NPM package
+        id: npm_package
+        run: |
+          case "${{ needs.publish.outputs.package }}" in
+            app-contracts)
+              echo "npm_package=@mystira/app" >> $GITHUB_OUTPUT
+              echo "description=Update Mystira.App.Contracts dependency" >> $GITHUB_OUTPUT
+              ;;
+            story-generator-contracts)
+              echo "npm_package=@mystira/story-generator" >> $GITHUB_OUTPUT
+              echo "description=Update Mystira.StoryGenerator.Contracts dependency" >> $GITHUB_OUTPUT
+              ;;
+            *)
+              echo "npm_package=" >> $GITHUB_OUTPUT
+              echo "No dependent NPM package for ${{ needs.publish.outputs.package }}"
+              ;;
+          esac
+
+      - name: Create changeset file
+        if: steps.npm_package.outputs.npm_package != ''
+        run: |
+          # Generate a random changeset name
+          CHANGESET_NAME="nuget-$(echo $RANDOM | md5sum | head -c 8)"
+          CHANGESET_FILE=".changeset/${CHANGESET_NAME}.md"
+
+          # Create the changeset
+          cat > "$CHANGESET_FILE" << 'CHANGESET_EOF'
+          ---
+          "${{ steps.npm_package.outputs.npm_package }}": patch
+          ---
+
+          ${{ steps.npm_package.outputs.description }} to version ${{ needs.publish.outputs.version }}.
+
+          This changeset was auto-generated after NuGet package `${{ needs.publish.outputs.package_name }}` was published.
+          CHANGESET_EOF
+
+          echo "Created changeset: $CHANGESET_FILE"
+          cat "$CHANGESET_FILE"
+
+      - name: Commit and push changeset
+        if: steps.npm_package.outputs.npm_package != ''
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git add .changeset/*.md
+          git commit -m "chore: add changeset for ${{ needs.publish.outputs.package_name }} v${{ needs.publish.outputs.version }}"
+          git push origin HEAD:main
+
+      - name: Summary
+        if: steps.npm_package.outputs.npm_package != ''
+        run: |
+          echo "## Changeset Created" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "A changeset was created to bump \`${{ steps.npm_package.outputs.npm_package }}\` after NuGet package \`${{ needs.publish.outputs.package_name }}\` v${{ needs.publish.outputs.version }} was published." >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "This will trigger the Changesets release workflow to create a version PR." >> $GITHUB_STEP_SUMMARY

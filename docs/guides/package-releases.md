@@ -211,7 +211,7 @@ pnpm changeset pre exit
 
 ## NuGet Package Releases
 
-NuGet packages are released through two mechanisms:
+NuGet packages are released through two mechanisms, with **bidirectional synchronization**:
 
 ### 1. Unified Release (via Changesets)
 
@@ -220,9 +220,19 @@ When NPM packages are published, corresponding NuGet packages are triggered:
 - `@mystira/app` → `Mystira.App.Contracts`
 - `@mystira/story-generator` → `Mystira.StoryGenerator.Contracts`
 
-### 2. Submodule Dispatch (Dev Builds)
+### 2. Submodule Dispatch (with Auto-Changeset)
 
-Submodule CI can trigger NuGet publishing directly:
+Submodule CI can trigger NuGet publishing directly. For **stable releases**, a changeset is automatically created:
+
+```
+Submodule Push → NuGet Publish → Auto-Changeset → NPM Version PR
+```
+
+This ensures NPM packages are bumped when their NuGet dependencies change.
+
+### 3. Submodule Dispatch (Dev Builds)
+
+For development builds, submodule CI triggers NuGet publishing without creating changesets:
 
 ```yaml
 # In submodule workflow

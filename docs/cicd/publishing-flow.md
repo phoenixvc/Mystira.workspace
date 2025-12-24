@@ -45,18 +45,31 @@ When an NPM package is released via Changesets, the corresponding NuGet package 
 
 ### Version Flow
 
+The unified publishing system supports bidirectional synchronization:
+
+**Forward Flow (Changesets → NuGet):**
 ```
 ┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
 │   Changeset     │ ──▶ │  NPM Release    │ ──▶ │  NuGet Release  │
 │   Created       │     │  (Changesets)   │     │  (Triggered)    │
 └─────────────────┘     └─────────────────┘     └─────────────────┘
-                                │
-                                ▼
-                        ┌─────────────────┐
-                        │  Docker Build   │
-                        │  (Tagged)       │
-                        └─────────────────┘
 ```
+
+**Reverse Flow (Submodule → Changeset):**
+```
+┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
+│   Submodule     │ ──▶ │  NuGet Release  │ ──▶ │  Auto-Changeset │
+│   Push to Main  │     │  (Dispatch)     │     │  Created        │
+└─────────────────┘     └─────────────────┘     └─────────────────┘
+                                                        │
+                                                        ▼
+                                                ┌─────────────────┐
+                                                │  NPM Version PR │
+                                                │  (Changesets)   │
+                                                └─────────────────┘
+```
+
+This ensures NPM packages stay in sync when their NuGet dependencies are updated directly from submodules.
 
 ### Pre-release Strategy
 
