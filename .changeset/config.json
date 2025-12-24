@@ -3,9 +3,14 @@
   "changelog": "@changesets/cli/changelog",
   "commit": false,
   "fixed": [],
-  "linked": [],
+  "linked": [
+    ["@mystira/app", "@mystira/app-contracts"],
+    ["@mystira/story-generator", "@mystira/story-generator-contracts"],
+    ["@mystira/publisher", "@mystira/shared-utils"]
+  ],
   "access": "public",
   "baseBranch": "main",
   "updateInternalDependencies": "patch",
-  "ignore": []
+  "ignore": [],
+  "___dependencies___": "Related packages are versioned together. When @mystira/app is bumped, @mystira/app-contracts gets the same version bump."
 }

@@ -1,8 +1,14 @@
 name: "NuGet: Publish Packages"
 
-# Publishes NuGet packages from submodule repositories
+# Unified NuGet package publishing
+# Triggered by:
+# - Submodule repository_dispatch (preserves existing mechanism)
+# - Changesets release workflow (unified versioning)
+# - Manual workflow_dispatch
+#
+# Version Strategy:
 # - Dev push: Pre-release version (e.g., 1.0.0-dev.123)
-# - Main push: Stable version (e.g., 1.0.0)
+# - Main push / Changesets: Stable version (e.g., 1.0.0)
 
 on:
   repository_dispatch:
@@ -144,6 +150,8 @@ jobs:
 
       - name: Generate summary
         run: |
+          TRIGGER_SOURCE="${{ github.event.client_payload.triggered_by || github.event.client_payload.source || 'manual' }}"
+
           echo "## NuGet Package Published" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "| Property | Value |" >> $GITHUB_STEP_SUMMARY
@@ -152,9 +160,14 @@ jobs:
           echo "| Version | ${{ steps.pack.outputs.version }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Pre-release | ${{ steps.package.outputs.is_prerelease }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Source Ref | ${{ steps.package.outputs.source_ref || 'latest' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Triggered By | ${TRIGGER_SOURCE} |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Published To" >> $GITHUB_STEP_SUMMARY
           echo "- GitHub Packages: \`https://nuget.pkg.github.com/phoenixvc/index.json\`" >> $GITHUB_STEP_SUMMARY
           if [ "${{ steps.package.outputs.is_prerelease }}" != "true" ] && [ -z "${{ steps.package.outputs.version_suffix }}" ]; then
             echo "- NuGet.org: \`https://www.nuget.org/packages/${{ steps.package.outputs.package_name }}\`" >> $GITHUB_STEP_SUMMARY
           fi
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Unified Publishing" >> $GITHUB_STEP_SUMMARY
+          echo "This package was published as part of the unified release process." >> $GITHUB_STEP_SUMMARY
+          echo "See [Publishing Guide](../docs/guides/publishing.md) for more information." >> $GITHUB_STEP_SUMMARY

@@ -1,7 +1,7 @@
 name: "Workspace: Release"
 
-# NPM Package Releases: Manages package versioning and publishing via Changesets
-# Handles: Creating release PRs and publishing to npm registry
+# Unified Package Releases: Manages versioning and publishing via Changesets
+# Handles: Creating release PRs and publishing to npm registry + triggering NuGet releases
 # Note: For infrastructure deployments, see Deployment workflows
 # Runs on: Pushes to main branch
 
@@ -13,7 +13,9 @@ on:
 
 concurrency: ${{ github.workflow }}-${{ github.ref }}
 
-# This workflow handles npm package releases via Changesets
+# This workflow handles unified package releases via Changesets
+# - NPM packages: Published directly via changesets action
+# - NuGet packages: Triggered via repository_dispatch after NPM release
 # For infrastructure deployments, see staging-release.yml and production-release.yml
 
 env:
@@ -25,6 +27,9 @@ jobs:
   release:
     name: Release
     runs-on: ubuntu-latest
+    outputs:
+      published: ${{ steps.changesets.outputs.published }}
+      publishedPackages: ${{ steps.changesets.outputs.publishedPackages }}
     steps:
       - uses: actions/checkout@v6
         with:
@@ -59,3 +64,41 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+  # Trigger NuGet package releases after successful NPM release
+  # This ensures synchronized versioning across package ecosystems
+  trigger-nuget-release:
+    name: Trigger NuGet Releases
+    runs-on: ubuntu-latest
+    needs: release
+    if: needs.release.outputs.published == 'true'
+    strategy:
+      matrix:
+        package:
+          - name: app-contracts
+            npm_trigger: "@mystira/app"
+          - name: story-generator-contracts
+            npm_trigger: "@mystira/story-generator"
+    steps:
+      - name: Check if related NPM package was published
+        id: check
+        run: |
+          PUBLISHED='${{ needs.release.outputs.publishedPackages }}'
+          if echo "$PUBLISHED" | grep -q '"${{ matrix.package.npm_trigger }}"'; then
+            echo "should_publish=true" >> $GITHUB_OUTPUT
+          else
+            echo "should_publish=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Trigger NuGet publish for ${{ matrix.package.name }}
+        if: steps.check.outputs.should_publish == 'true'
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          event-type: nuget-publish
+          client-payload: |
+            {
+              "package": "${{ matrix.package.name }}",
+              "triggered_by": "changesets-release",
+              "source": "unified-release-workflow"
+            }
