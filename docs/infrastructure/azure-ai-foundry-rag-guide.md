@@ -5,6 +5,7 @@ This guide covers Mystira's Azure AI Foundry infrastructure and Retrieval-Augmen
 ## Table of Contents
 
 - [Overview](#overview)
+- [SWOT Analysis](#swot-analysis)
 - [Architecture](#architecture)
 - [Azure AI Foundry Setup](#azure-ai-foundry-setup)
 - [Embedding Models](#embedding-models)
@@ -27,6 +28,178 @@ Mystira uses Azure AI Foundry (formerly Azure OpenAI) with Azure AI Search to im
 | AI Foundry | LLM inference & embeddings | `Microsoft.CognitiveServices/accounts` (kind: AIServices) |
 | AI Search | Vector storage & retrieval | `Microsoft.Search/searchServices` |
 | AI Project | Workload isolation | AzAPI resource |
+
+---
+
+## SWOT Analysis
+
+Strategic analysis of key architectural decisions for Mystira's AI infrastructure.
+
+### 1. RAG vs Fine-tuning
+
+| | RAG (Retrieval-Augmented Generation) | Fine-tuning |
+|---|---|---|
+| **Strengths** | Real-time knowledge updates without retraining | Better task-specific performance |
+| | No training costs or GPU requirements | Faster inference (no retrieval step) |
+| | Full control over source documents | Consistent tone and style |
+| | Easy to audit and explain responses | Lower per-query latency |
+| **Weaknesses** | Added latency from retrieval step | Expensive training ($1k-$100k+) |
+| | Requires vector database infrastructure | Knowledge frozen at training time |
+| | Chunking strategy affects quality | Risk of catastrophic forgetting |
+| | More complex architecture | Requires ML expertise |
+| **Opportunities** | Combine with fine-tuning for best results | Distill knowledge into smaller models |
+| | Hybrid search (vector + keyword) | Custom domain vocabulary |
+| | Multi-modal RAG (images, tables) | Reduce inference costs long-term |
+| **Threats** | Retrieval failures cause hallucinations | Model drift over time |
+| | Embedding model changes break indices | Training data poisoning |
+| | Context window growth may reduce need | OpenAI deprecation of base models |
+
+**Mystira Decision:** RAG for dynamic content (documents, stories), fine-tuning considered for stable domain knowledge.
+
+---
+
+### 2. Embedding Model Selection
+
+| | text-embedding-3-large | text-embedding-3-small |
+|---|---|---|
+| **Strengths** | Highest accuracy (64.6% MTEB) | 6.5x cheaper ($0.02 vs $0.13/1M) |
+| | 3072 dimensions for nuance | 5x faster processing |
+| | Best for complex/technical content | Sufficient for most use cases |
+| | Matryoshka support (variable dims) | Lower storage requirements |
+| **Weaknesses** | Higher storage costs (3072 floats) | Lower accuracy (62.3% MTEB) |
+| | Slower embedding generation | Less nuance in similar content |
+| | Overkill for simple content | May miss subtle distinctions |
+| **Opportunities** | Reduce dims to 1536 for cost savings | Upgrade path to large if needed |
+| | Premium tier for critical queries | Batch processing for high volume |
+| **Threats** | Cost overruns at scale | Accuracy issues in edge cases |
+| | Dimension lock-in (reindex needed) | Competitive models may surpass |
+
+**Mystira Decision:** Both models deployed. Large for production documents, small for high-volume/draft content.
+
+---
+
+### 3. Regional Deployment (South Africa North vs UK South)
+
+| | South Africa North (Primary) | UK South (Fallback) |
+|---|---|---|
+| **Strengths** | Lowest latency for SA users | Full model availability |
+| | Data sovereignty compliance | Standard SKU support |
+| | Reduced egress costs | Anthropic Claude access |
+| | Growing Azure investment | Mature infrastructure |
+| **Weaknesses** | Limited model availability | 150ms+ additional latency |
+| | GlobalStandard SKU only | Higher egress costs to SA |
+| | No Anthropic models | GDPR considerations |
+| | Smaller capacity quotas | Separate billing region |
+| **Opportunities** | Microsoft expanding SA region | Multi-region failover |
+| | First-mover in African AI market | EU market expansion |
+| | Local partnerships | Access to latest models first |
+| **Threats** | Model deprecation without replacement | Latency-sensitive features suffer |
+| | Capacity constraints during growth | Currency fluctuation (ZAR/GBP) |
+| | Power/connectivity issues | Brexit regulatory changes |
+
+**Mystira Decision:** Primary workloads in SAN, specific models (gpt-5.1, Claude) in UK South with per-model override.
+
+---
+
+### 4. Azure AI Search SKU Tiers
+
+| | Basic ($75/mo) | Standard ($250/mo) | Standard2 ($1000/mo) |
+|---|---|---|---|
+| **Strengths** | Cost-effective for dev/small prod | Semantic search support | High-volume production |
+| | 2GB storage sufficient for MVP | 25GB covers most use cases | 100GB for large corpora |
+| | 15 indexes for multi-tenant | 50 indexes for growth | 200 indexes enterprise |
+| | Quick provisioning | 12 replicas for HA | 12 partitions for scale |
+| **Weaknesses** | No semantic ranking | 4x cost of basic | 13x cost of basic |
+| | Limited to 3 replicas | May be oversized for small apps | Overkill for most startups |
+| | Single partition only | Complex capacity planning | Long provisioning times |
+| **Opportunities** | Upgrade path when needed | Hybrid search combinations | Dedicated capacity |
+| | Validate before scaling | Geographic replicas | SLA guarantees |
+| **Threats** | Outgrow quickly with success | Cost creep with replicas | Underutilization waste |
+| | No HA without replicas | Semantic search costs extra | Lock-in at scale |
+
+**Mystira Decision:** Basic for dev, Standard for staging/prod (semantic search enabled).
+
+---
+
+### 5. LLM Provider Selection
+
+| | Azure OpenAI (GPT-4.1) | Anthropic Claude (Sonnet 4.5) |
+|---|---|---|
+| **Strengths** | Native Azure integration | Superior reasoning/analysis |
+| | Established ecosystem | Longer context (200k tokens) |
+| | GPT-4.1 strong general purpose | Better instruction following |
+| | Predictable Microsoft roadmap | Constitutional AI safety |
+| | GlobalStandard in more regions | Competitive pricing |
+| **Weaknesses** | Context limited vs Claude | UK South only (no SAN) |
+| | Higher hallucination rate | Smaller ecosystem |
+| | Azure-only deployment | Less Azure tooling integration |
+| | Slower new model rollout | Newer, less battle-tested |
+| **Opportunities** | GPT-5 on horizon | Claude Opus for complex tasks |
+| | Multi-modal (vision, audio) | Haiku for cost-effective volume |
+| | Function calling maturity | Artifacts/tool use features |
+| **Threats** | OpenAI/Microsoft relationship | Anthropic funding/runway |
+| | Rapid deprecation cycles | Limited regional expansion |
+| | Competition from open models | API stability (newer provider) |
+
+**Mystira Decision:** Multi-provider strategy. GPT-4.1 for general tasks, Claude Sonnet for analysis, Haiku for high-volume.
+
+---
+
+### 6. Vector Search Algorithm
+
+| | HNSW (Hierarchical NSW) | IVF (Inverted File Index) | Flat/Brute Force |
+|---|---|---|---|
+| **Strengths** | Best recall/speed balance | Lower memory footprint | 100% recall (exact) |
+| | No training required | Good for very large datasets | Simple implementation |
+| | Incremental updates | Faster index building | No tuning needed |
+| | Industry standard | Predictable performance | Best for small datasets |
+| **Weaknesses** | Higher memory usage | Requires training step | O(n) query time |
+| | Tuning parameters (M, ef) | Lower recall than HNSW | Doesn't scale |
+| | Slower index builds | Updates require retraining | Impractical >100k vectors |
+| **Opportunities** | Hybrid with pre-filtering | Combine with quantization | Baseline for testing |
+| | Dynamic ef for quality/speed | Product quantization | Validation benchmark |
+| **Threats** | Memory costs at scale | Training data distribution shift | Performance cliff |
+| | Suboptimal parameters hurt recall | Cold start with new data | Cost explosion |
+
+**Mystira Decision:** HNSW (Azure AI Search default) with M=4, efConstruction=400, efSearch=500.
+
+---
+
+### 7. Chunking Strategy
+
+| | Fixed-size (500 tokens) | Semantic (paragraph/section) | Sliding Window (overlap) |
+|---|---|---|---|
+| **Strengths** | Predictable, simple | Preserves meaning boundaries | Context continuity |
+| | Consistent embedding quality | Better retrieval relevance | Handles topic transitions |
+| | Easy capacity planning | Natural document structure | Reduces boundary artifacts |
+| | Reproducible results | Fewer chunks overall | Best recall for edge cases |
+| **Weaknesses** | Splits mid-sentence/thought | Variable chunk sizes | 20-30% more embeddings |
+| | Context loss at boundaries | Complex implementation | Higher storage/compute |
+| | May separate related content | Depends on document format | Duplicate content in results |
+| **Opportunities** | Hybrid with overlap | LLM-based chunking | Adaptive overlap by content |
+| | Post-retrieval merging | Hierarchical chunks | Dynamic window sizing |
+| **Threats** | Poor retrieval for narratives | Inconsistent quality | Cost overruns |
+| | Missed context in answers | Parser failures | Deduplication complexity |
+
+**Mystira Decision:** Semantic chunking with 100-token sliding window overlap for narrative content.
+
+---
+
+### Summary Decision Matrix
+
+| Decision | Choice | Primary Driver |
+|----------|--------|----------------|
+| Architecture | RAG | Dynamic content, cost efficiency |
+| Embedding (primary) | text-embedding-3-large | Accuracy for production |
+| Embedding (volume) | text-embedding-3-small | Cost for drafts/testing |
+| Primary Region | South Africa North | Latency, data sovereignty |
+| Fallback Region | UK South | Model availability |
+| Search Tier | Standard | Semantic search, growth |
+| Primary LLM | GPT-4.1 | Integration, availability |
+| Analysis LLM | Claude Sonnet | Reasoning quality |
+| Volume LLM | Claude Haiku / GPT-4.1-nano | Cost efficiency |
+| Vector Algorithm | HNSW | Recall/speed balance |
+| Chunking | Semantic + overlap | Narrative content quality |
 
 ---
 
