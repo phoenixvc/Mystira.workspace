@@ -22,7 +22,7 @@ env:
 
 permissions:
   id-token: write
-  contents: read
+  contents: write
 
 jobs:
   deploy:
@@ -35,6 +35,7 @@ jobs:
         with:
           submodules: true
           token: ${{ secrets.MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN }}
+          fetch-depth: 0
 
       - name: Log dispatch payload
         run: |
@@ -117,6 +118,42 @@ jobs:
           done
 
           echo "::warning::Health check did not return 200 after 5 attempts"
+
+      - name: Update submodule reference
+        run: |
+          SUBMODULE_PATH="packages/app"
+          SOURCE_REF="${{ github.event.client_payload.ref }}"
+
+          echo "Updating submodule $SUBMODULE_PATH to $SOURCE_REF"
+
+          # Go back to workspace root (in case we're somewhere else)
+          cd ${{ github.workspace }}
+
+          # Check if there are changes
+          if git diff --quiet $SUBMODULE_PATH; then
+            echo "Submodule already at $SOURCE_REF, no update needed"
+          else
+            # Configure git
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+
+            # Stage and commit the submodule update
+            git add $SUBMODULE_PATH
+            git commit -m "chore: Update $SUBMODULE_PATH to $SOURCE_REF
+
+Deployed to dev by ${{ github.event.client_payload.triggered_by }}
+Source run: https://github.com/${{ github.event.client_payload.repository || 'unknown' }}/actions/runs/${{ github.event.client_payload.run_id }}"
+
+            # Push to main branch
+            git push origin HEAD:main
+
+            echo "Submodule reference updated and pushed"
+          fi
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Submodule Reference" >> $GITHUB_STEP_SUMMARY
+          echo "- Path: \`$SUBMODULE_PATH\`" >> $GITHUB_STEP_SUMMARY
+          echo "- Commit: \`$SOURCE_REF\`" >> $GITHUB_STEP_SUMMARY
 
       - name: Generate summary
         if: always()

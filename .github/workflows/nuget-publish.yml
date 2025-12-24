@@ -1,0 +1,160 @@
+name: "NuGet: Publish Packages"
+
+# Publishes NuGet packages from submodule repositories
+# - Dev push: Pre-release version (e.g., 1.0.0-dev.123)
+# - Main push: Stable version (e.g., 1.0.0)
+
+on:
+  repository_dispatch:
+    types:
+      - nuget-publish
+
+  workflow_dispatch:
+    inputs:
+      package:
+        description: 'Package to publish'
+        required: true
+        type: choice
+        options:
+          - app-contracts
+          - story-generator-contracts
+      version_suffix:
+        description: 'Version suffix (e.g., dev.123, empty for stable)'
+        required: false
+        type: string
+      source_ref:
+        description: 'Source commit SHA'
+        required: false
+        type: string
+
+concurrency:
+  group: nuget-publish-${{ github.event.client_payload.package || github.event.inputs.package }}
+  cancel-in-progress: false
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+
+permissions:
+  id-token: write
+  contents: write
+  packages: write
+
+jobs:
+  publish:
+    name: Publish NuGet Package
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout workspace
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+          token: ${{ secrets.MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN }}
+
+      - name: Determine package details
+        id: package
+        run: |
+          PACKAGE="${{ github.event.client_payload.package || github.event.inputs.package }}"
+          VERSION_SUFFIX="${{ github.event.client_payload.version_suffix || github.event.inputs.version_suffix }}"
+          SOURCE_REF="${{ github.event.client_payload.ref || github.event.inputs.source_ref }}"
+          IS_PRERELEASE="${{ github.event.client_payload.is_prerelease || 'false' }}"
+
+          case "$PACKAGE" in
+            app-contracts)
+              echo "submodule_path=packages/app" >> $GITHUB_OUTPUT
+              echo "project_path=src/Mystira.App.Contracts/Mystira.App.Contracts.csproj" >> $GITHUB_OUTPUT
+              echo "package_name=Mystira.App.Contracts" >> $GITHUB_OUTPUT
+              ;;
+            story-generator-contracts)
+              echo "submodule_path=packages/story-generator" >> $GITHUB_OUTPUT
+              echo "project_path=src/Mystira.StoryGenerator.Contracts/Mystira.StoryGenerator.Contracts.csproj" >> $GITHUB_OUTPUT
+              echo "package_name=Mystira.StoryGenerator.Contracts" >> $GITHUB_OUTPUT
+              ;;
+            *)
+              echo "::error::Unknown package: $PACKAGE"
+              exit 1
+              ;;
+          esac
+
+          echo "package=$PACKAGE" >> $GITHUB_OUTPUT
+          echo "version_suffix=$VERSION_SUFFIX" >> $GITHUB_OUTPUT
+          echo "source_ref=$SOURCE_REF" >> $GITHUB_OUTPUT
+          echo "is_prerelease=$IS_PRERELEASE" >> $GITHUB_OUTPUT
+
+      - name: Update submodule to source ref
+        if: steps.package.outputs.source_ref != ''
+        run: |
+          cd ${{ steps.package.outputs.submodule_path }}
+          git fetch origin
+          git checkout ${{ steps.package.outputs.source_ref }}
+          echo "Checked out: $(git rev-parse HEAD)"
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restore dependencies
+        run: |
+          cd ${{ steps.package.outputs.submodule_path }}
+          dotnet restore ${{ steps.package.outputs.project_path }}
+        env:
+          NUGET_AUTH_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN }}
+
+      - name: Build
+        run: |
+          cd ${{ steps.package.outputs.submodule_path }}
+          dotnet build ${{ steps.package.outputs.project_path }} \
+            --configuration Release \
+            --no-restore
+
+      - name: Pack NuGet package
+        id: pack
+        run: |
+          cd ${{ steps.package.outputs.submodule_path }}
+
+          PACK_ARGS="--configuration Release --no-build --output ./nupkg"
+
+          if [ -n "${{ steps.package.outputs.version_suffix }}" ]; then
+            PACK_ARGS="$PACK_ARGS --version-suffix ${{ steps.package.outputs.version_suffix }}"
+          fi
+
+          dotnet pack ${{ steps.package.outputs.project_path }} $PACK_ARGS
+
+          # Get the package version
+          NUPKG_FILE=$(ls ./nupkg/*.nupkg | head -1)
+          PACKAGE_VERSION=$(basename "$NUPKG_FILE" .nupkg | sed "s/${{ steps.package.outputs.package_name }}\.//")
+          echo "version=$PACKAGE_VERSION" >> $GITHUB_OUTPUT
+          echo "nupkg_path=${{ steps.package.outputs.submodule_path }}/nupkg" >> $GITHUB_OUTPUT
+
+      - name: Push to GitHub Packages
+        run: |
+          dotnet nuget push "${{ steps.pack.outputs.nupkg_path }}/*.nupkg" \
+            --source "https://nuget.pkg.github.com/phoenixvc/index.json" \
+            --api-key ${{ secrets.GITHUB_TOKEN }} \
+            --skip-duplicate
+
+      - name: Push to NuGet.org (stable releases only)
+        if: steps.package.outputs.is_prerelease != 'true' && steps.package.outputs.version_suffix == ''
+        run: |
+          dotnet nuget push "${{ steps.pack.outputs.nupkg_path }}/*.nupkg" \
+            --source "https://api.nuget.org/v3/index.json" \
+            --api-key ${{ secrets.NUGET_API_KEY }} \
+            --skip-duplicate
+
+      - name: Generate summary
+        run: |
+          echo "## NuGet Package Published" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Property | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|----------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Package | ${{ steps.package.outputs.package_name }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Version | ${{ steps.pack.outputs.version }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Pre-release | ${{ steps.package.outputs.is_prerelease }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Source Ref | ${{ steps.package.outputs.source_ref || 'latest' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Published To" >> $GITHUB_STEP_SUMMARY
+          echo "- GitHub Packages: \`https://nuget.pkg.github.com/phoenixvc/index.json\`" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ steps.package.outputs.is_prerelease }}" != "true" ] && [ -z "${{ steps.package.outputs.version_suffix }}" ]; then
+            echo "- NuGet.org: \`https://www.nuget.org/packages/${{ steps.package.outputs.package_name }}\`" >> $GITHUB_STEP_SUMMARY
+          fi

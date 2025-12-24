@@ -239,16 +239,18 @@ To update version stage, modify the workflow:
 
 ### Workflow Files
 
-| Workflow                    | Trigger                    | Action                                |
-| --------------------------- | -------------------------- | ------------------------------------- |
-| `publisher-ci.yml`          | Push/PR to dev/main        | Lint, test, build, Docker push        |
-| `chain-ci.yml`              | Push/PR to dev/main        | Lint, test, build, Docker push        |
-| `story-generator-ci.yml`    | Push/PR to dev/main        | Lint, test, build, Docker push, NuGet |
-| `submodule-deploy-dev.yml`  | `repository_dispatch`      | Deploy submodule updates to dev K8s   |
-| `release.yml`               | Push to main               | NPM publish via Changesets            |
-| `staging-release.yml`       | Push to main               | Auto-deploy to staging AKS            |
-| `production-release.yml`    | Manual                     | Deploy to production AKS              |
-| `infra-deploy.yml`          | Manual/Push                | Full infrastructure deployment        |
+| Workflow                              | Trigger                    | Action                                |
+| ------------------------------------- | -------------------------- | ------------------------------------- |
+| `publisher-ci.yml`                    | Push/PR to dev/main        | Lint, test, build, Docker push        |
+| `chain-ci.yml`                        | Push/PR to dev/main        | Lint, test, build, Docker push        |
+| `story-generator-ci.yml`              | Push/PR to dev/main        | Lint, test, build, Docker push        |
+| `submodule-deploy-dev.yml`            | `repository_dispatch`      | Deploy submodule to dev K8s           |
+| `submodule-deploy-dev-appservice.yml` | `repository_dispatch`      | Deploy Mystira.App to dev App Service |
+| `nuget-publish.yml`                   | `repository_dispatch`      | Publish NuGet packages                |
+| `release.yml`                         | Push to main               | NPM publish via Changesets            |
+| `staging-release.yml`                 | Push to main               | Auto-deploy to staging AKS            |
+| `production-release.yml`              | Manual                     | Deploy to production AKS              |
+| `infra-deploy.yml`                    | Manual/Push                | Full infrastructure deployment        |
 
 ---
 
@@ -286,18 +288,25 @@ Submodule repositories (Admin.Api, Admin.UI, etc.) use `repository_dispatch` to 
 └─────────────────────────┘     │    with new image tag       │
                                 │         ↓                   │
                                 │ 6. Rollout to dev AKS       │
+                                │         ↓                   │
+                                │ 7. Update submodule ref     │
+                                │    and commit to main       │
                                 └─────────────────────────────┘
 ```
 
+> **Note**: After successful deployment, the workspace automatically updates the submodule reference to the deployed commit and pushes to `main`. This keeps the workspace in sync with deployed versions.
+
 ### Supported Event Types
 
-| Event Type               | Target Deployment    | Service URL                          |
-| ------------------------ | -------------------- | ------------------------------------ |
-| `admin-api-deploy`       | `mys-admin-api`      | `https://dev.admin-api.mystira.app`  |
-| `admin-ui-deploy`        | `mys-admin-ui`       | `https://dev.admin.mystira.app`      |
-| `story-generator-deploy` | `mys-story-generator`| `https://dev.story-generator.mystira.app` |
-| `publisher-deploy`       | `mys-publisher`      | `https://dev.publisher.mystira.app`  |
-| `chain-deploy`           | `mys-chain`          | `https://dev.chain.mystira.app`      |
+| Event Type               | Target                  | Handler Workflow                      |
+| ------------------------ | ----------------------- | ------------------------------------- |
+| `admin-api-deploy`       | `mys-admin-api` (K8s)   | `submodule-deploy-dev.yml`            |
+| `admin-ui-deploy`        | `mys-admin-ui` (K8s)    | `submodule-deploy-dev.yml`            |
+| `story-generator-deploy` | `mys-story-generator` (K8s) | `submodule-deploy-dev.yml`        |
+| `publisher-deploy`       | `mys-publisher` (K8s)   | `submodule-deploy-dev.yml`            |
+| `chain-deploy`           | `mys-chain` (K8s)       | `submodule-deploy-dev.yml`            |
+| `app-deploy`             | App Service             | `submodule-deploy-dev-appservice.yml` |
+| `nuget-publish`          | GitHub/NuGet.org        | `nuget-publish.yml`                   |
 
 ### Client Payload Format
 
@@ -366,6 +375,56 @@ Submodule-triggered deployments are **intentionally limited to the dev environme
 - **Staging/Production**: Managed through workspace release workflows (`staging-release.yml`, `production-release.yml`)
 - **Rationale**: Production deployments require coordinated releases, approval gates, and testing
 - **Dev**: Enables rapid iteration and testing of individual services
+
+---
+
+## NuGet Package Publishing
+
+Submodules with shared contracts (e.g., `Mystira.App.Contracts`) can trigger NuGet package publishing via the workspace.
+
+### Version Strategy
+
+| Branch | Version | Destination |
+|--------|---------|-------------|
+| `dev`  | `1.0.0-dev.{run_number}` | GitHub Packages only |
+| `main` | `1.0.0` (stable) | GitHub Packages + NuGet.org |
+
+### Triggering NuGet Publish
+
+Add this job to your submodule workflow (after successful build):
+
+```yaml
+trigger-nuget-publish:
+  name: Trigger NuGet Publish
+  runs-on: ubuntu-latest
+  needs: build-and-push
+  if: |
+    needs.build-and-push.result == 'success' &&
+    (github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/main')
+  steps:
+    - name: Trigger NuGet publish
+      uses: peter-evans/repository-dispatch@v3
+      with:
+        token: ${{ secrets.MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN }}
+        repository: phoenixvc/Mystira.workspace
+        event-type: nuget-publish
+        client-payload: |
+          {
+            "package": "app-contracts",
+            "ref": "${{ github.sha }}",
+            "triggered_by": "${{ github.actor }}",
+            "run_id": "${{ github.run_id }}",
+            "version_suffix": "${{ github.ref == 'refs/heads/dev' && format('dev.{0}', github.run_number) || '' }}",
+            "is_prerelease": "${{ github.ref == 'refs/heads/dev' }}"
+          }
+```
+
+### Supported Packages
+
+| Package Name | Event Payload `package` Value |
+|--------------|-------------------------------|
+| Mystira.App.Contracts | `app-contracts` |
+| Mystira.StoryGenerator.Contracts | `story-generator-contracts` |
 
 ---
 

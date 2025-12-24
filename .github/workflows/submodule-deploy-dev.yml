@@ -29,19 +29,22 @@ env:
 
 permissions:
   id-token: write
-  contents: read
+  contents: write
 
 jobs:
   deploy:
     name: Deploy ${{ github.event.action }} to Dev
     runs-on: ubuntu-latest
     environment: dev
+    outputs:
+      submodule_path: ${{ steps.target.outputs.submodule_path }}
     steps:
       - name: Checkout workspace
         uses: actions/checkout@v4
         with:
           submodules: true
           token: ${{ secrets.MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN }}
+          fetch-depth: 0
 
       - name: Log dispatch payload
         run: |
@@ -87,22 +90,27 @@ jobs:
             admin-api-deploy)
               echo "deployment=mys-admin-api" >> $GITHUB_OUTPUT
               echo "image=admin-api" >> $GITHUB_OUTPUT
+              echo "submodule_path=packages/admin-api" >> $GITHUB_OUTPUT
               ;;
             admin-ui-deploy)
               echo "deployment=mys-admin-ui" >> $GITHUB_OUTPUT
               echo "image=admin-ui" >> $GITHUB_OUTPUT
+              echo "submodule_path=packages/admin-ui" >> $GITHUB_OUTPUT
               ;;
             story-generator-deploy)
               echo "deployment=mys-story-generator" >> $GITHUB_OUTPUT
               echo "image=story-generator" >> $GITHUB_OUTPUT
+              echo "submodule_path=packages/story-generator" >> $GITHUB_OUTPUT
               ;;
             publisher-deploy)
               echo "deployment=mys-publisher" >> $GITHUB_OUTPUT
               echo "image=publisher" >> $GITHUB_OUTPUT
+              echo "submodule_path=packages/publisher" >> $GITHUB_OUTPUT
               ;;
             chain-deploy)
               echo "deployment=mys-chain" >> $GITHUB_OUTPUT
               echo "image=chain" >> $GITHUB_OUTPUT
+              echo "submodule_path=packages/chain" >> $GITHUB_OUTPUT
               echo "is_statefulset=true" >> $GITHUB_OUTPUT
               ;;
             *)
@@ -150,6 +158,49 @@ jobs:
           echo '```' >> $GITHUB_STEP_SUMMARY
           kubectl get pods -n $NAMESPACE -l app=${{ steps.target.outputs.deployment }} >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
+
+      - name: Update submodule reference
+        run: |
+          SUBMODULE_PATH="${{ steps.target.outputs.submodule_path }}"
+          SOURCE_REF="${{ github.event.client_payload.ref }}"
+
+          echo "Updating submodule $SUBMODULE_PATH to $SOURCE_REF"
+
+          # Update submodule to the deployed commit
+          cd $SUBMODULE_PATH
+          git fetch origin
+          git checkout $SOURCE_REF
+
+          # Go back to workspace root
+          cd ${{ github.workspace }}
+
+          # Check if there are changes
+          if git diff --quiet $SUBMODULE_PATH; then
+            echo "Submodule already at $SOURCE_REF, no update needed"
+            echo "submodule_updated=false" >> $GITHUB_OUTPUT
+          else
+            # Configure git
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+
+            # Stage and commit the submodule update
+            git add $SUBMODULE_PATH
+            git commit -m "chore: Update $SUBMODULE_PATH to $SOURCE_REF
+
+Deployed to dev by ${{ github.event.client_payload.triggered_by }}
+Source run: https://github.com/${{ github.event.client_payload.repository || 'unknown' }}/actions/runs/${{ github.event.client_payload.run_id }}"
+
+            # Push to main branch
+            git push origin HEAD:main
+
+            echo "Submodule reference updated and pushed"
+            echo "submodule_updated=true" >> $GITHUB_OUTPUT
+          fi
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Submodule Reference" >> $GITHUB_STEP_SUMMARY
+          echo "- Path: \`$SUBMODULE_PATH\`" >> $GITHUB_STEP_SUMMARY
+          echo "- Commit: \`$SOURCE_REF\`" >> $GITHUB_STEP_SUMMARY
 
       - name: Generate summary
         if: always()

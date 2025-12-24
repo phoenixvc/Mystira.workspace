@@ -319,6 +319,59 @@ For Mystira.App, use `app-deploy` as the event type and the workspace will deplo
 
 ---
 
+## NuGet Package Publishing (Optional)
+
+If your submodule has shared contracts (e.g., `Mystira.App.Contracts`), add a NuGet publish job:
+
+```yaml
+trigger-nuget-publish:
+  name: Trigger NuGet Publish
+  runs-on: ubuntu-latest
+  needs: build-and-push
+  if: |
+    needs.build-and-push.result == 'success' &&
+    (github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/main')
+  steps:
+    - name: Trigger NuGet publish
+      uses: peter-evans/repository-dispatch@v3
+      with:
+        token: ${{ secrets.MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN }}
+        repository: phoenixvc/Mystira.workspace
+        event-type: nuget-publish
+        client-payload: |
+          {
+            "package": "app-contracts",
+            "ref": "${{ github.sha }}",
+            "triggered_by": "${{ github.actor }}",
+            "run_id": "${{ github.run_id }}",
+            "version_suffix": "${{ github.ref == 'refs/heads/dev' && format('dev.{0}', github.run_number) || '' }}",
+            "is_prerelease": "${{ github.ref == 'refs/heads/dev' }}"
+          }
+```
+
+| Package | `package` Value |
+|---------|-----------------|
+| Mystira.App.Contracts | `app-contracts` |
+| Mystira.StoryGenerator.Contracts | `story-generator-contracts` |
+
+**Version strategy:**
+- `dev` branch: Pre-release (`1.0.0-dev.123`) → GitHub Packages only
+- `main` branch: Stable (`1.0.0`) → GitHub Packages + NuGet.org
+
+---
+
+## What Happens After Deployment
+
+After a successful dev deployment, the workspace:
+
+1. **Deploys** to K8s/App Service
+2. **Updates submodule reference** to the deployed commit
+3. **Commits and pushes** to workspace `main`
+
+This keeps the workspace in sync with deployed versions. You don't need to manually update submodule refs.
+
+---
+
 ## Customization Checklist
 
 When adapting the template:
