@@ -243,9 +243,12 @@ trigger-workspace-deploy:
 | `chain-deploy` | Chain | Kubernetes |
 | `app-deploy` | App (API) | App Service |
 | `app-swa-deploy` | App (SWA) | Static Web App |
+| `story-generator-swa-deploy` | StoryGenerator (SWA) | Static Web App |
 | `devhub-deploy` | DevHub | Static Web App |
 
-> **Note**: `story-generator-deploy` deploys the **API** (`Mystira.StoryGenerator.Api`), not the Blazor WASM frontend. This follows the same pattern as `Mystira.App` (see ADR-0019).
+> **Note**: `Mystira.StoryGenerator` follows the same API/Web pattern as `Mystira.App`:
+> - **API** (`Mystira.StoryGenerator.Api`) → Kubernetes via `story-generator-deploy`
+> - **Web** (`Mystira.StoryGenerator.Web`, Blazor WASM) → Static Web App via `story-generator-swa-deploy`
 
 > **Important**: This is for **dev environment only**. Staging and production deployments are managed through the workspace release workflows. See [Publishing Flow](../cicd/publishing-flow.md#submodule-deployment-dev-only) for details.
 

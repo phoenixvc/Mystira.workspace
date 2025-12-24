@@ -18,7 +18,12 @@ Currently, Dockerfiles are inconsistently located across the Mystira ecosystem:
 
 > **Note**: Story-Generator follows the same pattern as Mystira.App:
 > - **API** (`Mystira.StoryGenerator.Api`) → Kubernetes via `story-generator-deploy`
-> - **Web** (`Mystira.StoryGenerator.Web`, Blazor WASM) → Static Web App (separate deployment)
+> - **Web** (`Mystira.StoryGenerator.Web`, Blazor WASM) → Static Web App via `story-generator-swa-deploy`
+>
+> **SWA Infrastructure (Implemented)**:
+> - Terraform module: `infra/terraform/modules/story-generator/` (includes SWA resources)
+> - Front Door: `infra/terraform/modules/front-door/` (story-generator endpoints)
+> - Workflow: `submodule-deploy-dev-appservice.yml` (handles `story-generator-swa-deploy`)
 
 This inconsistency causes:
 - Confusion about where to find/update Dockerfiles
@@ -72,12 +77,12 @@ All services will:
 #### Story-Generator (.NET)
 
 1. Copy `infra/docker/story-generator/Dockerfile` to `Mystira.StoryGenerator` repo
-2. Update to build **API** project (`src/Mystira.StoryGenerator.Api/`), not Web
+2. Verify it builds **API** project (`src/Mystira.StoryGenerator.Api/`)
 3. Add CI/CD workflow
 
-> **Important**: The current workspace Dockerfile incorrectly builds `Mystira.StoryGenerator.Web` (Blazor WASM).
-> The `story-generator-deploy` event targets Kubernetes, which should run the **API**.
-> Blazor WASM should deploy to Static Web Apps (if needed), similar to `app-swa-deploy`.
+> **Note**: The workspace Dockerfile (`infra/docker/story-generator/Dockerfile`) has been updated to build
+> `Mystira.StoryGenerator.Api` for Kubernetes deployment. The Blazor WASM frontend deploys to
+> Static Web Apps via `story-generator-swa-deploy`, following the same pattern as Mystira.App.
 
 ### Phase 2: Update Workspace CI/CD
 

@@ -310,9 +310,12 @@ Submodule repositories (Admin.Api, Admin.UI, etc.) use `repository_dispatch` to 
 | `app-deploy`             | App Service                 | `submodule-deploy-dev-appservice.yml` |
 | `app-swa-deploy`         | Static Web App              | `submodule-deploy-dev-appservice.yml` |
 | `devhub-deploy`          | Static Web App              | `submodule-deploy-dev-appservice.yml` |
+| `story-generator-swa-deploy` | Static Web App          | `submodule-deploy-dev-appservice.yml` |
 | `nuget-publish`          | GitHub/NuGet.org            | `nuget-publish.yml`                   |
 
-> **Note**: `story-generator-deploy` deploys the **API** (`Mystira.StoryGenerator.Api`), not the Blazor WASM frontend. This follows the same pattern as `Mystira.App` (see ADR-0019).
+> **Note**: `Mystira.StoryGenerator` follows the same API/Web pattern as `Mystira.App`:
+> - **API** (`Mystira.StoryGenerator.Api`) → Kubernetes via `story-generator-deploy`
+> - **Web** (`Mystira.StoryGenerator.Web`, Blazor WASM) → Static Web App via `story-generator-swa-deploy`
 
 ### Client Payload Format
 
