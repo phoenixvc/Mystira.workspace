@@ -13,7 +13,7 @@ This package provides cross-cutting concerns for all Mystira .NET services:
 - **Caching**: Distributed caching with Redis support
 - **Messaging**: Wolverine integration for unified in-process and distributed messaging
 - **Locking**: Redis-based distributed locking for concurrency control
-- **Source Generators**: Auto-generate repository implementations and validators
+- **Repository Pattern**: Generic repository + Ardalis.Specification (recommended)
 - **Observability**: Circuit breaker events with OpenTelemetry metrics
 - **Middleware**: Telemetry, logging, and request/response handling
 - **Extensions**: Dependency injection helpers for easy integration
