@@ -7,12 +7,24 @@ name: "Contracts: Publish NuGet Package"
 # This workflow only handles the corresponding NuGet package
 #
 # Triggered by:
-# - repository_dispatch from release.yml after @mystira/contracts NPM publish
+# - Push to dev branch (publishes pre-release: 1.0.0-dev.123)
+# - repository_dispatch from release.yml after @mystira/contracts NPM publish (stable)
 # - Manual workflow_dispatch
+#
+# Version Strategy:
+# - Dev push: Pre-release to GitHub Packages only (e.g., 1.0.0-dev.123)
+# - Main/Changesets: Stable to GitHub Packages + NuGet.org (e.g., 1.0.0)
 #
 # See: docs/architecture/adr/0020-package-consolidation-strategy.md
 
 on:
+  push:
+    branches:
+      - dev
+    paths:
+      - 'packages/contracts/dotnet/**'
+      - '.github/workflows/contracts-publish.yml'
+
   repository_dispatch:
     types:
       - contracts-nuget-publish
@@ -53,11 +65,23 @@ jobs:
       - name: Determine version details
         id: version
         run: |
-          VERSION_SUFFIX="${{ github.event.client_payload.version_suffix || github.event.inputs.version_suffix }}"
-          IS_PRERELEASE="${{ github.event.client_payload.is_prerelease || github.event.inputs.is_prerelease || 'false' }}"
+          # Check if this is a dev branch push
+          if [ "${{ github.event_name }}" = "push" ] && [ "${{ github.ref }}" = "refs/heads/dev" ]; then
+            # Dev push: generate pre-release version suffix
+            VERSION_SUFFIX="dev.${{ github.run_number }}"
+            IS_PRERELEASE="true"
+            TRIGGER_SOURCE="dev-push"
+            echo "Dev branch push detected - publishing pre-release version"
+          else
+            # repository_dispatch or workflow_dispatch
+            VERSION_SUFFIX="${{ github.event.client_payload.version_suffix || github.event.inputs.version_suffix }}"
+            IS_PRERELEASE="${{ github.event.client_payload.is_prerelease || github.event.inputs.is_prerelease || 'false' }}"
+            TRIGGER_SOURCE="${{ github.event.client_payload.triggered_by || 'manual' }}"
+          fi
 
           echo "version_suffix=$VERSION_SUFFIX" >> $GITHUB_OUTPUT
           echo "is_prerelease=$IS_PRERELEASE" >> $GITHUB_OUTPUT
+          echo "trigger_source=$TRIGGER_SOURCE" >> $GITHUB_OUTPUT
 
           if [ -n "$VERSION_SUFFIX" ] || [ "$IS_PRERELEASE" = "true" ]; then
             echo "publish_to_nuget_org=false" >> $GITHUB_OUTPUT
@@ -119,8 +143,6 @@ jobs:
 
       - name: Generate summary
         run: |
-          TRIGGER_SOURCE="${{ github.event.client_payload.triggered_by || 'manual' }}"
-
           echo "## Mystira.Contracts NuGet Package Published" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "| Property | Value |" >> $GITHUB_STEP_SUMMARY
@@ -128,7 +150,7 @@ jobs:
           echo "| Package | Mystira.Contracts |" >> $GITHUB_STEP_SUMMARY
           echo "| Version | ${{ steps.pack.outputs.version }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Pre-release | ${{ steps.version.outputs.is_prerelease }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Triggered By | ${TRIGGER_SOURCE} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Triggered By | ${{ steps.version.outputs.trigger_source }} |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Published To" >> $GITHUB_STEP_SUMMARY
           echo "- GitHub Packages: \`https://nuget.pkg.github.com/phoenixvc/index.json\`" >> $GITHUB_STEP_SUMMARY

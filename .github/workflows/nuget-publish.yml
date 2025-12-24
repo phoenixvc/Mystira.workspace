@@ -1,14 +1,19 @@
-name: "NuGet: Publish Packages"
+name: "Legacy: Submodule NuGet Packages"
 
-# Unified NuGet package publishing
+# ⚠️ DEPRECATED - This workflow is being phased out
+# Use "Contracts: Publish NuGet Package" for the new unified Mystira.Contracts package
+# See: docs/architecture/adr/0020-package-consolidation-strategy.md
+#
+# This workflow handles LEGACY submodule-based packages:
+# - Mystira.App.Contracts (from packages/app submodule)
+# - Mystira.StoryGenerator.Contracts (from packages/story-generator submodule)
+#
+# These are being replaced by the unified Mystira.Contracts package.
+# This workflow will be removed in Phase 5 of ADR-0020.
+#
 # Triggered by:
 # - Submodule repository_dispatch (preserves existing mechanism)
-# - Changesets release workflow (unified versioning)
 # - Manual workflow_dispatch
-#
-# Version Strategy:
-# - Dev push: Pre-release version (e.g., 1.0.0-dev.123)
-# - Main push / Changesets: Stable version (e.g., 1.0.0)
 
 on:
   repository_dispatch:
