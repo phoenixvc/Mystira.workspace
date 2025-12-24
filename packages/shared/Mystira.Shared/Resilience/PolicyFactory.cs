@@ -1,9 +1,6 @@
-using Microsoft.Extensions.Http;
 using Microsoft.Extensions.Logging;
 using Polly;
-using Polly.CircuitBreaker;
 using Polly.Extensions.Http;
-using Polly.Timeout;
 
 namespace Mystira.Shared.Resilience;
 
@@ -78,8 +75,7 @@ public static class PolicyFactory
             .Handle<Exception>()
             .WaitAndRetryAsync(
                 options.MaxRetries,
-                retryAttempt => TimeSpan.FromSeconds(
-                    Math.Pow(options.BaseDelaySeconds, retryAttempt)),
+                retryAttempt => CalculateDelay(retryAttempt, options.BaseDelaySeconds),
                 onRetry: (outcome, timespan, retryAttempt, _) =>
                 {
                     if (options.EnableDetailedLogging && logger != null)
@@ -112,8 +108,7 @@ public static class PolicyFactory
             .Handle<Exception>()
             .WaitAndRetryAsync(
                 options.MaxRetries,
-                retryAttempt => TimeSpan.FromSeconds(
-                    Math.Pow(options.BaseDelaySeconds, retryAttempt)),
+                retryAttempt => CalculateDelay(retryAttempt, options.BaseDelaySeconds),
                 onRetry: (exception, timespan, retryAttempt, _) =>
                 {
                     if (options.EnableDetailedLogging && logger != null)
@@ -128,6 +123,27 @@ public static class PolicyFactory
                 });
     }
 
+    /// <summary>
+    /// Calculates the delay for a retry attempt using exponential backoff with jitter.
+    /// Formula: baseDelay * 2^(attempt-1) + random jitter
+    /// </summary>
+    private static TimeSpan CalculateDelay(int retryAttempt, int baseDelaySeconds)
+    {
+        // Exponential backoff: baseDelay * 2^(attempt-1)
+        // Attempt 1: baseDelay * 1 = baseDelay
+        // Attempt 2: baseDelay * 2
+        // Attempt 3: baseDelay * 4
+        var exponentialDelay = baseDelaySeconds * Math.Pow(2, retryAttempt - 1);
+
+        // Add jitter (±20%) to prevent thundering herd
+        var jitter = exponentialDelay * 0.2 * (Random.Shared.NextDouble() * 2 - 1);
+
+        // Cap at 60 seconds
+        var totalDelay = Math.Min(exponentialDelay + jitter, 60);
+
+        return TimeSpan.FromSeconds(totalDelay);
+    }
+
     private static IAsyncPolicy<HttpResponseMessage> CreateRetryPolicy(
         string clientName,
         ResilienceOptions options,
@@ -137,8 +153,7 @@ public static class PolicyFactory
             .HandleTransientHttpError()
             .WaitAndRetryAsync(
                 options.MaxRetries,
-                retryAttempt => TimeSpan.FromSeconds(
-                    Math.Pow(options.BaseDelaySeconds, retryAttempt)),
+                retryAttempt => CalculateDelay(retryAttempt, options.BaseDelaySeconds),
                 onRetry: (outcome, timespan, retryAttempt, _) =>
                 {
                     if (options.EnableDetailedLogging && logger != null)
