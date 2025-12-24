@@ -124,6 +124,11 @@ resource "azurerm_cognitive_account" "ai_foundry" {
 resource "terraform_data" "enable_project_management" {
   count = var.enable_project ? 1 : 0
 
+  # Must wait for OpenAI model deployments to complete first
+  # Otherwise, az rest PATCH will fail with RequestConflict error because
+  # the Cognitive Services account is in a non-terminal provisioning state
+  depends_on = [azurerm_cognitive_deployment.openai_models]
+
   triggers_replace = [
     azurerm_cognitive_account.ai_foundry.id
   ]
