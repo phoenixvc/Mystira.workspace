@@ -381,6 +381,10 @@ public class UnitOfWork : IUnitOfWork
         GC.SuppressFinalize(this);
     }
 
+    /// <summary>
+    /// Releases unmanaged and managed resources.
+    /// </summary>
+    /// <param name="disposing">True to release both managed and unmanaged resources.</param>
     protected virtual void Dispose(bool disposing)
     {
         if (!_disposed && disposing)

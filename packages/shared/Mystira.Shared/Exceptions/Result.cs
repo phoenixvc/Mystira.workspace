@@ -136,9 +136,20 @@ public readonly struct Result
 {
     private readonly Error? _error;
 
+    /// <summary>
+    /// Whether the result represents a success.
+    /// </summary>
     public bool IsSuccess { get; }
+
+    /// <summary>
+    /// Whether the result represents a failure.
+    /// </summary>
     public bool IsFailure => !IsSuccess;
 
+    /// <summary>
+    /// The error if the result is a failure.
+    /// </summary>
+    /// <exception cref="InvalidOperationException">Thrown when accessed on a successful result.</exception>
     public Error Error => IsFailure
         ? _error!
         : throw new InvalidOperationException("Cannot access Error on a successful result.");
@@ -149,13 +160,37 @@ public readonly struct Result
         _error = error;
     }
 
+    /// <summary>
+    /// Creates a successful result.
+    /// </summary>
     public static Result Success() => new(true);
+
+    /// <summary>
+    /// Creates a failed result with the specified error.
+    /// </summary>
+    /// <param name="error">The error.</param>
     public static Result Failure(Error error) => new(false, error);
+
+    /// <summary>
+    /// Creates a failed result with the specified error code and message.
+    /// </summary>
+    /// <param name="code">The error code.</param>
+    /// <param name="message">The error message.</param>
     public static Result Failure(string code, string message) =>
         new(false, new Error(code, message));
 
+    /// <summary>
+    /// Implicitly converts an error to a failed result.
+    /// </summary>
+    /// <param name="error">The error.</param>
     public static implicit operator Result(Error error) => Failure(error);
 
+    /// <summary>
+    /// Pattern matches the result to produce a value.
+    /// </summary>
+    /// <typeparam name="TResult">The result type.</typeparam>
+    /// <param name="onSuccess">Function to call on success.</param>
+    /// <param name="onFailure">Function to call on failure.</param>
     public TResult Match<TResult>(
         Func<TResult> onSuccess,
         Func<Error, TResult> onFailure)

@@ -96,23 +96,47 @@ public interface ISpecification<T>
 [Obsolete("Use Ardalis.Specification.Specification<T> instead. This class will be removed in a future version.")]
 public abstract class BaseSpecification<T> : ISpecification<T>
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="BaseSpecification{T}"/> class.
+    /// </summary>
     protected BaseSpecification()
     {
     }
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="BaseSpecification{T}"/> class with criteria.
+    /// </summary>
+    /// <param name="criteria">The filter criteria expression.</param>
     protected BaseSpecification(Expression<Func<T, bool>> criteria)
     {
         Criteria = criteria;
     }
 
+    /// <inheritdoc />
     public Expression<Func<T, bool>>? Criteria { get; private set; }
+
+    /// <inheritdoc />
     public List<Expression<Func<T, object>>> Includes { get; } = new();
+
+    /// <inheritdoc />
     public List<string> IncludeStrings { get; } = new();
+
+    /// <inheritdoc />
     public Expression<Func<T, object>>? OrderBy { get; private set; }
+
+    /// <inheritdoc />
     public Expression<Func<T, object>>? OrderByDescending { get; private set; }
+
+    /// <inheritdoc />
     public Expression<Func<T, object>>? GroupBy { get; private set; }
+
+    /// <inheritdoc />
     public int Skip { get; private set; }
+
+    /// <inheritdoc />
     public int Take { get; private set; }
+
+    /// <inheritdoc />
     public bool IsPagingEnabled { get; private set; }
 
     /// <summary>

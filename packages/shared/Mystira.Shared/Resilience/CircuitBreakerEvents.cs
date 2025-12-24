@@ -257,6 +257,7 @@ public class CircuitBreakerMetrics : IDisposable
         }
     }
 
+    /// <inheritdoc />
     public void Dispose()
     {
         // Static fields are app-lifetime and should not be disposed per-instance
