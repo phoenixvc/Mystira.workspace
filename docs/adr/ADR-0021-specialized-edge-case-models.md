@@ -483,8 +483,8 @@ Edge Case Request
 - [x] Add Codestral-2501 to Terraform (Phase 2)
 - [x] Add DeepSeek-Coder-V2 to Terraform (Phase 2)
 - [x] Add Jamba-1.5-Large/Mini to Terraform (Phase 2)
+- [x] Implement model routing logic for specialized models (see azure-ai-foundry-rag-guide.md#model-router)
 - [ ] Create reranking integration in RAG pipeline
-- [ ] Implement model routing logic for specialized models
 - [ ] Monitor costs and usage monthly
 - [ ] Review this ADR quarterly for relevance
 

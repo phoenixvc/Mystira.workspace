@@ -428,9 +428,9 @@ claude-opus-4-5 → o3-mini → claude-sonnet-4-5
 - [x] Add tts/tts-hd for text-to-speech
 - [x] Add Cohere Rerank for RAG improvement (see ADR-0021)
 - [x] Add specialized models (Codestral, DeepSeek-Coder, Jamba) - see ADR-0021
-- [ ] Implement model routing logic
+- [x] Implement model routing logic (see azure-ai-foundry-rag-guide.md#model-router)
+- [x] Document model selection in developer guide
 - [ ] Set up cost monitoring per model
-- [ ] Document model selection in developer guide
 
 ---
 
