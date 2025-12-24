@@ -59,13 +59,13 @@ variable "partition_count" {
 }
 
 variable "semantic_search_sku" {
-  description = "Semantic search SKU (free, standard, or null to disable)"
+  description = "Semantic search SKU (free, standard, or disabled)"
   type        = string
-  default     = null
+  default     = "disabled"
 
   validation {
-    condition     = var.semantic_search_sku == null || contains(["free", "standard"], var.semantic_search_sku)
-    error_message = "Semantic search SKU must be 'free', 'standard', or null"
+    condition     = contains(["disabled", "free", "standard"], var.semantic_search_sku)
+    error_message = "Semantic search SKU must be 'disabled', 'free', or 'standard'"
   }
 }
 
