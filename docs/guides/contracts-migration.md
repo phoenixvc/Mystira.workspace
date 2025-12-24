@@ -122,33 +122,16 @@ dotnet remove package Mystira.StoryGenerator.Contracts
 
 ---
 
-## Automated Migration (Codemod)
+## Automated Migration
 
-We provide a codemod to automate the migration:
+> **Note**: Automated migration tooling is planned but not yet available.
+> Please use the manual migration steps above for now.
+>
+> Track progress: [GitHub Issue #TBD](https://github.com/phoenixvc/Mystira.workspace/issues)
 
-### TypeScript
-
-```bash
-# Run the codemod
-npx @mystira/contracts-codemod
-
-# Or with specific path
-npx @mystira/contracts-codemod --path ./src
-```
-
-The codemod will:
-1. Replace import statements
-2. Update type references
-3. Add new package to dependencies
-4. Remove old packages from dependencies
-
-### C#
-
-```bash
-# Run the Roslyn analyzer/fixer
-dotnet tool install -g Mystira.Contracts.Migration
-mystira-migrate --path ./src
-```
+When available, the tooling will:
+- **TypeScript**: `npx @mystira/contracts-codemod` - Replace imports automatically
+- **C#**: Roslyn analyzer to update using statements
 
 ---
 

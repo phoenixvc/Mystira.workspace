@@ -1,6 +1,7 @@
 /**
  * Retry utilities with exponential backoff
  */
+import { setTimeout } from 'node:timers/promises';
 
 export interface RetryOptions {
   /** Maximum number of retry attempts */
@@ -27,9 +28,10 @@ const DEFAULT_OPTIONS: Required<Omit<RetryOptions, 'onRetry'>> = {
 
 /**
  * Sleep for a specified duration
+ * Uses Node.js timers/promises API for proper typing
  */
-export function sleep(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
+export async function sleep(ms: number): Promise<void> {
+  await setTimeout(ms);
 }
 
 /**
