@@ -997,6 +997,15 @@ jobs:
             echo "missing_images=false" >> $GITHUB_OUTPUT
           fi
 
+      - name: Clean up deployments with incompatible selectors
+        run: |
+          # Delete existing deployments/statefulsets to avoid selector immutability errors
+          # This is needed because selectors cannot be changed after creation
+          # The resources will be recreated by the apply step
+          echo "Cleaning up deployments with incompatible selectors..."
+          kubectl delete deployments,statefulsets -n mys-${{ env.ENVIRONMENT }} --all --ignore-not-found
+          echo "Cleanup complete"
+
       - name: Deploy Applications
         run: |
           kubectl apply -k infra/kubernetes/overlays/${{ env.ENVIRONMENT }}
