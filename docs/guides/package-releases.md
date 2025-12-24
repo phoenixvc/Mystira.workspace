@@ -211,31 +211,51 @@ pnpm changeset pre exit
 
 ## NuGet Package Releases
 
-NuGet packages are released through two mechanisms, with **bidirectional synchronization**:
+NuGet packages are released through dedicated publish workflows with automatic dev/main branch handling:
 
-### 1. Unified Release (via Changesets)
+### Workflows
 
-When NPM packages are published, corresponding NuGet packages are triggered:
+| Workflow | Package | Version Source |
+|----------|---------|----------------|
+| `Packages - Contracts: Publish NuGet` | `Mystira.Contracts` | `package.json` (Changesets) |
+| `Packages - Shared: Publish NuGet` | `Mystira.Shared` | `.csproj` file |
+| `Packages - Legacy: Submodule NuGet` | Legacy submodule packages | ⚠️ Deprecated |
 
-- `@mystira/app` → `Mystira.App.Contracts`
-- `@mystira/story-generator` → `Mystira.StoryGenerator.Contracts`
+### Automatic Branch Publishing
 
-### 2. Submodule Dispatch (with Auto-Changeset)
+Both `contracts-publish.yml` and `shared-publish.yml` automatically publish on pushes to dev or main:
 
-Submodule CI can trigger NuGet publishing directly. For **stable releases**, a changeset is automatically created:
+| Branch | Version Format | Destination | Example |
+|--------|---------------|-------------|---------|
+| `dev` | `{base}-dev.{run_number}` | GitHub Packages only | `0.1.0-dev.123` |
+| `main` | `{base}` (stable) | GitHub Packages + NuGet.org | `0.1.0` |
 
-```
-Submodule Push → NuGet Publish → Auto-Changeset → NPM Version PR
-```
+### Manual Trigger
 
-This ensures NPM packages are bumped when their NuGet dependencies change.
+Both workflows support manual dispatch with:
+- **Version suffix** (optional): e.g., `beta.1`, `rc.1`
+- **Publish to NuGet.org** checkbox: Controls whether to publish to public registry
 
-### 3. Submodule Dispatch (Dev Builds)
+### Unified Release (via Changesets)
 
-For development builds, submodule CI triggers NuGet publishing without creating changesets:
+When `@mystira/contracts` NPM package is published via Changesets, the corresponding NuGet package is triggered:
+
+- `@mystira/contracts` (NPM) → `Mystira.Contracts` (NuGet)
+
+### Version Synchronization
+
+| Package | Version Source | Strategy |
+|---------|----------------|----------|
+| `Mystira.Contracts` | `packages/contracts/package.json` | Synced with NPM via Changesets |
+| `Mystira.Shared` | `.csproj` Version property | Independent versioning |
+
+### Legacy Submodule Dispatch
+
+> ⚠️ **Deprecated**: The `Packages - Legacy: Submodule NuGet` workflow handles old submodule-based packages. Use `Mystira.Contracts` for new development.
+
+For legacy packages, submodule CI can trigger publishing via `repository_dispatch`:
 
 ```yaml
-# In submodule workflow
 - uses: peter-evans/repository-dispatch@v3
   with:
     token: ${{ secrets.MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN }}
@@ -248,13 +268,6 @@ For development builds, submodule CI triggers NuGet publishing without creating 
         "is_prerelease": "true"
       }
 ```
-
-### NuGet Version Strategy
-
-| Branch | Version | Registry |
-|--------|---------|----------|
-| `dev` | `1.0.0-dev.{N}` | GitHub Packages |
-| `main` | `1.0.0` | GitHub Packages + NuGet.org |
 
 ---
 
@@ -315,8 +328,10 @@ Monitor releases at: `https://github.com/phoenixvc/Mystira.workspace/actions`
 
 | Workflow | Purpose |
 |----------|---------|
-| `Workspace: Release` | NPM + NuGet publishing |
-| `NuGet: Publish Packages` | NuGet package publishing |
+| `Workspace: Release` | NPM publishing via Changesets + trigger NuGet |
+| `Packages - Contracts: Publish NuGet` | Unified contracts NuGet package |
+| `Packages - Shared: Publish NuGet` | Shared utilities NuGet package |
+| `Packages - Legacy: Submodule NuGet` | ⚠️ Deprecated submodule packages |
 | `*-ci.yml` | Docker image builds |
 
 ---
@@ -359,7 +374,10 @@ git commit -m "chore: add changeset"
 **Check**:
 1. `NUGET_API_KEY` secret is valid
 2. Package version doesn't already exist
-3. Check `nuget-publish.yml` workflow logs
+3. Check workflow logs:
+   - `contracts-publish.yml` for Mystira.Contracts
+   - `shared-publish.yml` for Mystira.Shared
+   - `nuget-publish.yml` for legacy packages
 
 ---
 
@@ -405,8 +423,10 @@ fix: refactor ApiClient.ts to use async/await with try/catch
 | `@mystira/story-generator-contracts` | NPM | `packages/story-generator` | Story generator API types |
 | `@mystira/publisher` | NPM | `packages/publisher` | Publishing service |
 | `@mystira/shared-utils` | NPM | `packages/publisher` | Shared utilities |
-| `Mystira.App.Contracts` | NuGet | `packages/app` | .NET API contracts |
-| `Mystira.StoryGenerator.Contracts` | NuGet | `packages/story-generator` | .NET API contracts |
+| `Mystira.Contracts` | NuGet | `packages/contracts/dotnet` | Unified .NET API contracts |
+| `Mystira.Shared` | NuGet | `packages/shared` | .NET shared utilities |
+| `Mystira.App.Contracts` | NuGet | `packages/app` | ⚠️ Deprecated - use Mystira.Contracts |
+| `Mystira.StoryGenerator.Contracts` | NuGet | `packages/story-generator` | ⚠️ Deprecated - use Mystira.Contracts |
 
 ### Linked Packages
 
@@ -426,9 +446,20 @@ Group 3: @mystira/publisher ↔ @mystira/shared-utils
 |-------------|----------|--------|
 | `@mystira/contracts` (NPM) | `@mystira/app-contracts`, `@mystira/story-generator-contracts` | ✅ Available |
 | `Mystira.Contracts` (NuGet) | `Mystira.App.Contracts`, `Mystira.StoryGenerator.Contracts` | ✅ Available |
+| `Mystira.Shared` (NuGet) | N/A (new shared utilities) | ✅ Available |
 | `@mystira/shared-utils` | (moved from Publisher) | ✅ Available |
 
 **Migration Period Active** - Old packages still work but are deprecated.
+
+### NuGet Workflow Names
+
+All NuGet workflows use the "Packages - " prefix for grouping in GitHub Actions UI:
+
+| Workflow Name | Purpose |
+|---------------|---------|
+| `Packages - Contracts: Publish NuGet` | Unified contracts package |
+| `Packages - Shared: Publish NuGet` | Shared utilities package |
+| `Packages - Legacy: Submodule NuGet` | ⚠️ Deprecated submodule packages |
 
 See [Contracts Migration Guide](./contracts-migration.md) for upgrade instructions.
 
