@@ -66,6 +66,13 @@ Add these secrets to your submodule repository:
 | `AZURE_SUBSCRIPTION_ID` | Azure subscription | Azure authentication |
 | `GH_PACKAGES_TOKEN` | GitHub PAT with `read:packages` | NuGet package restore |
 
+**Workspace-level secrets** (configured in `Mystira.workspace`):
+
+| Secret | Value | Purpose |
+|--------|-------|---------|
+| `MYSTIRA_AZURE_CREDENTIALS` | Azure service principal JSON | Azure login for deployments |
+| `MS_TEAMS_WEBHOOK_URL` | Teams incoming webhook URL | Deployment notifications (optional) |
+
 > **Note**: `MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN` is the standard PAT used across all Mystira repositories. It must have `repo` scope to trigger `repository_dispatch` events in the workspace.
 
 ---
@@ -368,6 +375,95 @@ trigger-nuget-publish:
 **Version strategy:**
 - `dev` branch: Pre-release (`1.0.0-dev.123`) → GitHub Packages only
 - `main` branch: Stable (`1.0.0`) → GitHub Packages + NuGet.org
+
+---
+
+## Deployment Features
+
+The workspace deployment workflows include several reliability and observability features:
+
+### Image Verification
+
+Before deploying, the workflow verifies the image exists in ACR:
+
+```yaml
+- name: Verify image exists in ACR
+  run: |
+    if ! az acr repository show-tags \
+      --name myssharedacr \
+      --repository "$IMAGE" \
+      --query "[?@=='$TAG']" \
+      --output tsv | grep -q .; then
+      echo "::error::Image not found in ACR"
+      exit 1
+    fi
+```
+
+### Automatic Rollback
+
+If a Kubernetes deployment fails, the workflow automatically rolls back:
+
+```yaml
+- name: Rollback on failure
+  if: failure() && steps.rollout.outcome == 'failure'
+  run: |
+    kubectl rollout undo deployment/$DEPLOYMENT -n $NAMESPACE
+    kubectl rollout status deployment/$DEPLOYMENT -n $NAMESPACE --timeout=120s
+```
+
+### Deployment Annotations
+
+Successful deployments are annotated with tracking metadata:
+
+```yaml
+kubectl annotate deployment/$DEPLOYMENT -n $NAMESPACE --overwrite \
+  mystira.app/deployed-by="$ACTOR" \
+  mystira.app/deployed-at="$(date -u +"%Y-%m-%dT%H:%M:%SZ")" \
+  mystira.app/source-commit="$REF" \
+  mystira.app/image-tag="$IMAGE_TAG"
+```
+
+Query annotations with:
+```bash
+kubectl get deployment mys-admin-api -n mys-dev -o jsonpath='{.metadata.annotations}'
+```
+
+### Teams Notifications
+
+If `MS_TEAMS_WEBHOOK_URL` is configured, the workflow sends success/failure notifications to Microsoft Teams.
+
+---
+
+## Setting Up Teams Notifications
+
+To receive deployment notifications in Microsoft Teams:
+
+### 1. Create an Incoming Webhook
+
+1. Open Microsoft Teams and navigate to the channel where you want notifications
+2. Click the **...** (More options) next to the channel name
+3. Select **Connectors** (or **Manage channel** → **Connectors**)
+4. Find **Incoming Webhook** and click **Configure**
+5. Give the webhook a name (e.g., "Mystira Dev Deployments")
+6. Optionally upload a custom icon
+7. Click **Create**
+8. **Copy the webhook URL** - you'll need this for the secret
+
+### 2. Add the Secret
+
+Add the webhook URL as a repository secret in `Mystira.workspace`:
+
+1. Go to https://github.com/phoenixvc/Mystira.workspace/settings/secrets/actions
+2. Click **New repository secret**
+3. Name: `MS_TEAMS_WEBHOOK_URL`
+4. Value: Paste the webhook URL from step 1
+5. Click **Add secret**
+
+### 3. Verify It Works
+
+Trigger a deployment and check your Teams channel for the notification card.
+
+> **Note**: Teams notifications are optional. If the secret is not configured, the notification steps are skipped gracefully.
 
 ---
 
