@@ -956,6 +956,47 @@ jobs:
           kubectl delete certificate --all -n mys-${{ env.ENVIRONMENT }} --ignore-not-found || true
           echo "Old certificates cleared"
 
+      - name: Check for Docker Images
+        id: check-images
+        run: |
+          echo "## Docker Image Status" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          MISSING_IMAGES=""
+          IMAGES=("publisher" "chain" "story-generator" "admin-api" "admin-ui")
+
+          for IMAGE in "${IMAGES[@]}"; do
+            # Check if image exists with 'dev' tag
+            if az acr repository show-tags --name ${{ env.ACR_NAME }} --repository "mys-${IMAGE}" --query "[?@=='${{ env.ENVIRONMENT }}']" -o tsv 2>/dev/null | grep -q .; then
+              echo "✅ mys-${IMAGE}:${{ env.ENVIRONMENT }} exists" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "⚠️ **mys-${IMAGE}:${{ env.ENVIRONMENT }} NOT FOUND**" >> $GITHUB_STEP_SUMMARY
+              MISSING_IMAGES="${MISSING_IMAGES} mys-${IMAGE}"
+            fi
+          done
+
+          if [ -n "$MISSING_IMAGES" ]; then
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "---" >> $GITHUB_STEP_SUMMARY
+            echo "## ⚠️ WARNING: Missing Docker Images" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "The following images are missing from ACR:" >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            echo "$MISSING_IMAGES" >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "**Deployments for these services will fail until images are built.**" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "Images should be built by submodule CI/CD pipelines. See:" >> $GITHUB_STEP_SUMMARY
+            echo "- \`docs/adr/ADR-0019-dockerfile-location-standardization.md\`" >> $GITHUB_STEP_SUMMARY
+            echo "- \`docs/cicd/submodule-cicd-setup.md\`" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "::warning::Missing Docker images:${MISSING_IMAGES}"
+            echo "missing_images=true" >> $GITHUB_OUTPUT
+          else
+            echo "missing_images=false" >> $GITHUB_OUTPUT
+          fi
+
       - name: Deploy Applications
         run: |
           kubectl apply -k infra/kubernetes/overlays/${{ env.ENVIRONMENT }}
@@ -963,8 +1004,22 @@ jobs:
       - name: Wait for Deployments
         run: |
           echo "Waiting for deployments to be ready..."
-          kubectl rollout status deployment/mys-publisher -n mys-${{ env.ENVIRONMENT }} --timeout=300s || true
-          kubectl rollout status statefulset/mys-chain -n mys-${{ env.ENVIRONMENT }} --timeout=600s || true
+
+          # Check publisher - skip if likely no image
+          if kubectl get deployment/mys-publisher -n mys-${{ env.ENVIRONMENT }} &>/dev/null; then
+            kubectl rollout status deployment/mys-publisher -n mys-${{ env.ENVIRONMENT }} --timeout=120s || {
+              echo "::warning::mys-publisher deployment not ready (image may be missing)"
+            }
+          fi
+
+          # Check chain - skip if likely no image
+          if kubectl get statefulset/mys-chain -n mys-${{ env.ENVIRONMENT }} &>/dev/null; then
+            kubectl rollout status statefulset/mys-chain -n mys-${{ env.ENVIRONMENT }} --timeout=120s || {
+              echo "::warning::mys-chain statefulset not ready (image may be missing)"
+            }
+          fi
+
+          echo "Deployment check complete (some services may be pending images)"
 
       - name: Deployment Summary
         run: |
