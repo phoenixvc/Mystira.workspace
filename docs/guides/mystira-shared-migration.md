@@ -436,12 +436,12 @@ The following metrics are automatically exported:
 - Replace with `AddStandardResilienceHandler()` or `AddResilienceHandler()`
 
 ### Distributed Lock Timeouts
-
 **DistributedLockException: Could not acquire lock**
+#### DistributedLockException: Could not acquire lock
+
 - Increase `DefaultWaitSeconds` in configuration
 - Check Redis connectivity
 - Verify no deadlocks in lock acquisition order
-
 ### Circuit Breaker Events Not Firing
 
 - Ensure `CircuitBreakerMetrics` is registered as singleton
