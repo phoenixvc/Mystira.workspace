@@ -446,7 +446,10 @@ Choose the right model for your use case based on capability, cost, and latency 
 
 ## Deploying Claude Models
 
-Claude models (Anthropic) are available through the Azure AI Model Catalog but **cannot be deployed via Terraform**. They require manual deployment through the Azure AI Foundry portal.
+Claude models (Anthropic) are available through the Azure AI Model Catalog but **cannot be deployed via Terraform**. They can be deployed via:
+
+1. **Azure CLI Script** (recommended for automation)
+2. **Azure AI Foundry Portal** (for manual/first-time setup)
 
 ### Why Claude Can't Be Deployed via Terraform
 
@@ -455,7 +458,94 @@ Claude models (Anthropic) are available through the Azure AI Model Catalog but *
 3. **Regional Constraints**: Only available in specific regions (UK South, East US 2)
 4. **Quota Management**: Separate quota system from OpenAI models
 
-### Step-by-Step Deployment
+---
+
+### Option 1: Deploy via Azure CLI (Recommended)
+
+Use the provided deployment script for automated Claude model deployment:
+
+```bash
+# Deploy all Claude models to dev environment
+./infra/scripts/deploy-claude-models.sh dev
+
+# Deploy to production with custom region
+AZURE_LOCATION=uksouth ./infra/scripts/deploy-claude-models.sh prod
+
+# Deploy with custom resource names
+AZURE_RESOURCE_GROUP=my-rg \
+AZURE_AI_SERVICES_NAME=my-ai-services \
+./infra/scripts/deploy-claude-models.sh staging
+```
+
+#### Script Features
+
+- **Idempotent**: Safe to run multiple times
+- **Pre-flight checks**: Validates prerequisites before deployment
+- **Multiple deployment methods**: Falls back to alternative APIs if needed
+- **Verification**: Lists deployments and provides usage examples
+
+#### Manual CLI Deployment
+
+If you prefer manual control, use `az ml serverless-endpoint create`:
+
+```bash
+# Install Azure ML extension
+az extension add -n ml --yes
+
+# Set variables
+RESOURCE_GROUP="mys-dev-core-rg-san"
+AI_SERVICES_NAME="mys-shared-ai-san"
+LOCATION="uksouth"
+
+# Deploy Claude Sonnet
+az ml serverless-endpoint create \
+  --name "claude-sonnet-4-5" \
+  --model-id "azureml://registries/azure-openai/models/Anthropic-claude-sonnet-4-5" \
+  --resource-group "$RESOURCE_GROUP" \
+  --workspace-name "$AI_SERVICES_NAME"
+
+# Deploy Claude Haiku
+az ml serverless-endpoint create \
+  --name "claude-haiku-4-5" \
+  --model-id "azureml://registries/azure-openai/models/Anthropic-claude-3-5-haiku" \
+  --resource-group "$RESOURCE_GROUP" \
+  --workspace-name "$AI_SERVICES_NAME"
+
+# Deploy Claude Opus
+az ml serverless-endpoint create \
+  --name "claude-opus-4-5" \
+  --model-id "azureml://registries/azure-openai/models/Anthropic-claude-opus-4-5" \
+  --resource-group "$RESOURCE_GROUP" \
+  --workspace-name "$AI_SERVICES_NAME"
+```
+
+#### Alternative: Using az rest (Cognitive Services API)
+
+```bash
+# Get subscription ID
+SUBSCRIPTION_ID=$(az account show --query id -o tsv)
+
+# Deploy via Cognitive Services deployment API
+az rest --method PUT \
+  --url "https://management.azure.com/subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${RESOURCE_GROUP}/providers/Microsoft.CognitiveServices/accounts/${AI_SERVICES_NAME}/deployments/claude-sonnet-4-5?api-version=2024-10-01" \
+  --body '{
+    "sku": {
+      "name": "Standard",
+      "capacity": 1
+    },
+    "properties": {
+      "model": {
+        "format": "Anthropic",
+        "name": "claude-sonnet-4-5",
+        "version": "latest"
+      }
+    }
+  }'
+```
+
+---
+
+### Option 2: Deploy via Azure Portal
 
 #### Step 1: Navigate to Azure AI Foundry
 
