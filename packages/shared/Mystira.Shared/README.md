@@ -8,6 +8,10 @@ This package provides cross-cutting concerns for all Mystira .NET services:
 
 - **Authentication**: JWT token generation, validation, and middleware
 - **Authorization**: Role-based and permission-based access control
+- **Resilience**: Polly-based retry, circuit breaker, and timeout policies
+- **Exceptions**: Standardized error handling, Result<T> pattern, ProblemDetails
+- **Caching**: Distributed caching with Redis support
+- **Messaging**: Wolverine integration for unified in-process and distributed messaging
 - **Middleware**: Telemetry, logging, and request/response handling
 - **Extensions**: Dependency injection helpers for easy integration
 
@@ -47,6 +51,64 @@ var app = builder.Build();
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseMystiraTelemetry();
+app.UseMystiraExceptionHandling();
+```
+
+### Resilience (HTTP Clients)
+
+```csharp
+using Mystira.Shared.Resilience;
+
+// Add resilient HTTP client with retry, circuit breaker, and timeout
+builder.Services.AddResilientHttpClient<IScenarioApiClient, ScenarioApiClient>(
+    "ScenarioApi",
+    client => client.BaseAddress = new Uri("https://api.mystira.app"));
+
+// For long-running operations (e.g., LLM calls)
+builder.Services.AddLongRunningHttpClient<ILlmApiClient, LlmApiClient>(
+    "LlmApi");
+```
+
+### Caching
+
+```csharp
+using Mystira.Shared.Extensions;
+
+// Add distributed caching (Redis or in-memory fallback)
+builder.Services.AddMystiraCaching(builder.Configuration);
+
+// Use ICacheService
+public class ScenarioService
+{
+    private readonly ICacheService _cache;
+
+    public async Task<Scenario> GetScenarioAsync(string id)
+    {
+        return await _cache.GetOrCreateAsync(
+            $"scenario:{id}",
+            async ct => await _repository.GetByIdAsync(id, ct));
+    }
+}
+```
+
+### Messaging (Wolverine)
+
+```csharp
+using Mystira.Shared.Extensions;
+
+// Add Wolverine messaging
+builder.AddMystiraMessaging();
+
+// Handler (convention-based, no interfaces needed)
+public static class CreateAccountHandler
+{
+    public static async Task<AccountDto> HandleAsync(
+        CreateAccountCommand command,
+        IAccountRepository repo)
+    {
+        // Handler implementation
+    }
+}
 ```
 
 ### Configuration
@@ -133,21 +195,35 @@ This package replaces `Mystira.App.Shared`. To migrate:
 Mystira.Shared/
 ├── Authentication/
 │   ├── JwtOptions.cs              # JWT configuration options
-│   ├── JwtService.cs              # Token generation and validation
-│   └── JwtMiddleware.cs           # ASP.NET Core middleware
+│   └── JwtService.cs              # Token generation and validation
 ├── Authorization/
 │   ├── Permissions.cs             # Permission constants
-│   ├── Roles.cs                   # Role constants
 │   ├── RequirePermissionAttribute.cs
-│   ├── RequireRoleAttribute.cs
 │   └── PermissionHandler.cs       # Authorization handler
+├── Resilience/                    # Wave 1
+│   ├── ResilienceOptions.cs       # Retry/circuit breaker config
+│   ├── PolicyFactory.cs           # Polly policy creation
+│   └── ResilienceExtensions.cs    # DI registration
+├── Exceptions/                    # Wave 1
+│   ├── ErrorResponse.cs           # Standard error responses
+│   ├── Result.cs                  # Result<T> pattern
+│   ├── MystiraException.cs        # Base exception types
+│   └── GlobalExceptionHandler.cs  # IExceptionHandler
+├── Caching/                       # Wave 2
+│   ├── CacheOptions.cs            # Cache configuration
+│   ├── ICacheService.cs           # Cache abstraction
+│   └── DistributedCacheService.cs # Redis/memory implementation
+├── Messaging/                     # Wave 3 (Wolverine)
+│   ├── MessagingOptions.cs        # Messaging configuration
+│   └── ICommand.cs                # Message marker interfaces
 ├── Middleware/
-│   ├── TelemetryMiddleware.cs     # OpenTelemetry integration
-│   ├── RequestLoggingMiddleware.cs
-│   └── ExceptionHandlingMiddleware.cs
+│   └── TelemetryMiddleware.cs     # OpenTelemetry integration
 └── Extensions/
-    ├── AuthenticationExtensions.cs # DI registration
+    ├── AuthenticationExtensions.cs
     ├── AuthorizationExtensions.cs
+    ├── CachingExtensions.cs
+    ├── ExceptionExtensions.cs
+    ├── MessagingExtensions.cs
     └── TelemetryExtensions.cs
 ```
 
