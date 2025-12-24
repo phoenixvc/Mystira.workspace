@@ -1,4 +1,4 @@
-name: "Contracts: Publish NuGet Package"
+name: "Packages - Contracts: Publish NuGet"
 
 # Unified contracts NuGet package publishing
 # Publishes Mystira.Contracts to GitHub Packages and NuGet.org
@@ -32,14 +32,14 @@ on:
   workflow_dispatch:
     inputs:
       version_suffix:
-        description: 'Version suffix (e.g., dev.123, empty for stable)'
+        description: 'Version suffix (e.g., beta.1, rc.1 - leave empty for stable)'
         required: false
         type: string
-      is_prerelease:
-        description: 'Is this a pre-release build?'
+      publish_to_nuget_org:
+        description: 'Also publish to NuGet.org (uncheck for GitHub Packages only)'
         required: false
         type: boolean
-        default: false
+        default: true
 
 concurrency:
   group: contracts-nuget-publish
@@ -67,27 +67,31 @@ jobs:
         run: |
           # Check if this is a dev branch push
           if [ "${{ github.event_name }}" = "push" ] && [ "${{ github.ref }}" = "refs/heads/dev" ]; then
-            # Dev push: generate pre-release version suffix
+            # Dev push: generate pre-release version suffix, GitHub Packages only
             VERSION_SUFFIX="dev.${{ github.run_number }}"
             IS_PRERELEASE="true"
+            PUBLISH_TO_NUGET_ORG="false"
             TRIGGER_SOURCE="dev-push"
-            echo "Dev branch push detected - publishing pre-release version"
+            echo "Dev branch push detected - publishing pre-release to GitHub Packages only"
+          elif [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            # Manual trigger: user controls everything
+            VERSION_SUFFIX="${{ github.event.inputs.version_suffix }}"
+            IS_PRERELEASE="${{ github.event.inputs.version_suffix && 'true' || 'false' }}"
+            PUBLISH_TO_NUGET_ORG="${{ github.event.inputs.publish_to_nuget_org }}"
+            TRIGGER_SOURCE="manual"
+            echo "Manual trigger - publishing to $([ "$PUBLISH_TO_NUGET_ORG" = "true" ] && echo "GitHub + NuGet.org" || echo "GitHub Packages only")"
           else
-            # repository_dispatch or workflow_dispatch
-            VERSION_SUFFIX="${{ github.event.client_payload.version_suffix || github.event.inputs.version_suffix }}"
-            IS_PRERELEASE="${{ github.event.client_payload.is_prerelease || github.event.inputs.is_prerelease || 'false' }}"
-            TRIGGER_SOURCE="${{ github.event.client_payload.triggered_by || 'manual' }}"
+            # repository_dispatch (from Changesets release)
+            VERSION_SUFFIX="${{ github.event.client_payload.version_suffix }}"
+            IS_PRERELEASE="${{ github.event.client_payload.is_prerelease || 'false' }}"
+            PUBLISH_TO_NUGET_ORG="${{ github.event.client_payload.publish_to_nuget_org || 'true' }}"
+            TRIGGER_SOURCE="${{ github.event.client_payload.triggered_by || 'changesets' }}"
           fi
 
           echo "version_suffix=$VERSION_SUFFIX" >> $GITHUB_OUTPUT
           echo "is_prerelease=$IS_PRERELEASE" >> $GITHUB_OUTPUT
           echo "trigger_source=$TRIGGER_SOURCE" >> $GITHUB_OUTPUT
-
-          if [ -n "$VERSION_SUFFIX" ] || [ "$IS_PRERELEASE" = "true" ]; then
-            echo "publish_to_nuget_org=false" >> $GITHUB_OUTPUT
-          else
-            echo "publish_to_nuget_org=true" >> $GITHUB_OUTPUT
-          fi
+          echo "publish_to_nuget_org=$PUBLISH_TO_NUGET_ORG" >> $GITHUB_OUTPUT
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v4

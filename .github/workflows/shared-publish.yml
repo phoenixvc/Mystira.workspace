@@ -1,33 +1,39 @@
-name: "Shared: Publish NuGet Package"
+name: "Packages - Shared: Publish NuGet"
 
 # Mystira.Shared NuGet package publishing
 # Publishes to GitHub Packages and NuGet.org
 #
 # Triggered by:
+# - Push to dev branch (publishes pre-release: 1.0.0-dev.123)
+# - Push to main branch (publishes stable: 1.0.0)
 # - Manual workflow_dispatch
-# - Changes to packages/shared (via CI trigger)
+#
+# Version Strategy:
+# - Dev push: Pre-release to GitHub Packages only (e.g., 1.0.0-dev.123)
+# - Main push: Stable to GitHub Packages + NuGet.org (e.g., 1.0.0)
 #
 # See: docs/architecture/adr/0020-package-consolidation-strategy.md
 
 on:
-  workflow_dispatch:
-    inputs:
-      version_suffix:
-        description: 'Version suffix (e.g., dev.123, empty for stable)'
-        required: false
-        type: string
-      is_prerelease:
-        description: 'Is this a pre-release build?'
-        required: false
-        type: boolean
-        default: false
-
   push:
     branches:
+      - dev
       - main
     paths:
       - 'packages/shared/**'
       - '.github/workflows/shared-publish.yml'
+
+  workflow_dispatch:
+    inputs:
+      version_suffix:
+        description: 'Version suffix (e.g., beta.1, rc.1 - leave empty for stable)'
+        required: false
+        type: string
+      publish_to_nuget_org:
+        description: 'Also publish to NuGet.org (uncheck for GitHub Packages only)'
+        required: false
+        type: boolean
+        default: true
 
 concurrency:
   group: shared-nuget-publish
@@ -91,8 +97,8 @@ jobs:
     name: Publish NuGet Package
     runs-on: ubuntu-latest
     needs: build-and-test
-    # Only publish on main branch or manual trigger
-    if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
+    # Publish on dev (pre-release), main (stable), or manual trigger
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev' || github.event_name == 'workflow_dispatch'
     outputs:
       version: ${{ steps.pack.outputs.version }}
       package_name: ${{ steps.pack.outputs.package_name }}
@@ -109,17 +115,34 @@ jobs:
       - name: Determine version details
         id: version
         run: |
-          VERSION_SUFFIX="${{ github.event.inputs.version_suffix }}"
-          IS_PRERELEASE="${{ github.event.inputs.is_prerelease || 'false' }}"
+          # Check if this is a dev branch push
+          if [ "${{ github.event_name }}" = "push" ] && [ "${{ github.ref }}" = "refs/heads/dev" ]; then
+            # Dev push: generate pre-release version suffix, GitHub Packages only
+            VERSION_SUFFIX="dev.${{ github.run_number }}"
+            IS_PRERELEASE="true"
+            PUBLISH_TO_NUGET_ORG="false"
+            TRIGGER_SOURCE="dev-push"
+            echo "Dev branch push detected - publishing pre-release to GitHub Packages only"
+          elif [ "${{ github.event_name }}" = "push" ] && [ "${{ github.ref }}" = "refs/heads/main" ]; then
+            # Main push: stable release to both registries
+            VERSION_SUFFIX=""
+            IS_PRERELEASE="false"
+            PUBLISH_TO_NUGET_ORG="true"
+            TRIGGER_SOURCE="main-push"
+            echo "Main branch push detected - publishing stable to GitHub + NuGet.org"
+          else
+            # workflow_dispatch: user controls everything
+            VERSION_SUFFIX="${{ github.event.inputs.version_suffix }}"
+            IS_PRERELEASE="${{ github.event.inputs.version_suffix && 'true' || 'false' }}"
+            PUBLISH_TO_NUGET_ORG="${{ github.event.inputs.publish_to_nuget_org }}"
+            TRIGGER_SOURCE="manual"
+            echo "Manual trigger - publishing to $([ "$PUBLISH_TO_NUGET_ORG" = "true" ] && echo "GitHub + NuGet.org" || echo "GitHub Packages only")"
+          fi
 
           echo "version_suffix=$VERSION_SUFFIX" >> $GITHUB_OUTPUT
           echo "is_prerelease=$IS_PRERELEASE" >> $GITHUB_OUTPUT
-
-          if [ -n "$VERSION_SUFFIX" ] || [ "$IS_PRERELEASE" = "true" ]; then
-            echo "publish_to_nuget_org=false" >> $GITHUB_OUTPUT
-          else
-            echo "publish_to_nuget_org=true" >> $GITHUB_OUTPUT
-          fi
+          echo "trigger_source=$TRIGGER_SOURCE" >> $GITHUB_OUTPUT
+          echo "publish_to_nuget_org=$PUBLISH_TO_NUGET_ORG" >> $GITHUB_OUTPUT
 
       - name: Restore dependencies
         run: dotnet restore ${{ env.PACKAGE_PATH }}
@@ -170,6 +193,7 @@ jobs:
           echo "| Package | ${{ steps.pack.outputs.package_name }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Version | ${{ steps.pack.outputs.version }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Pre-release | ${{ steps.version.outputs.is_prerelease }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Triggered By | ${{ steps.version.outputs.trigger_source }} |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Published To" >> $GITHUB_STEP_SUMMARY
           echo "- GitHub Packages: \`https://nuget.pkg.github.com/phoenixvc/index.json\`" >> $GITHUB_STEP_SUMMARY
