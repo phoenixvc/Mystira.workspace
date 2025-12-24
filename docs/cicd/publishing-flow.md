@@ -256,6 +256,18 @@ To update version stage, modify the workflow:
 
 Submodule repositories (Admin.Api, Admin.UI, etc.) use `repository_dispatch` to trigger deployments to the **dev environment only**.
 
+> **Full Setup Guide**: See [Submodule CI/CD Setup](./submodule-cicd-setup.md) for complete instructions including workflow templates and secrets configuration.
+
+### Trigger Behavior
+
+| Event | CI (lint/test/build) | Deploy to Dev |
+|-------|---------------------|---------------|
+| PR opened/updated | ✅ | ❌ |
+| Draft PR | ❌ skip | ❌ |
+| Push/merge to dev | ✅ | ✅ |
+| Push to main | ✅ | ❌ |
+| Manual dispatch | ✅ | ✅ |
+
 ### Flow Diagram
 
 ```
@@ -264,6 +276,7 @@ Submodule repositories (Admin.Api, Admin.UI, etc.) use `repository_dispatch` to 
 │   (e.g., Admin.Api)     │     │                             │
 ├─────────────────────────┤     ├─────────────────────────────┤
 │ 1. PR merged to dev     │     │                             │
+│    (push event fires)   │     │                             │
 │         ↓               │     │                             │
 │ 2. Build Docker image   │     │                             │
 │ 3. Push to ACR          │────►│ 4. repository_dispatch      │
@@ -301,21 +314,28 @@ Submodules should send the following payload:
 }
 ```
 
-### Example Submodule Workflow
+### Example Submodule Workflow (Dispatch Job Only)
 
 ```yaml
-# In submodule repository (e.g., Mystira.Admin.Api)
+# In submodule repository - add this job to your CI workflow
+# Full template: docs/cicd/submodule-cicd-setup.md
+
 trigger-workspace-deploy:
   name: Trigger Workspace Deployment
   runs-on: ubuntu-latest
   needs: build-and-push
+  # Only deploy on push to dev (includes merges) or manual dispatch
+  if: |
+    needs.build-and-push.result == 'success' &&
+    github.ref == 'refs/heads/dev' &&
+    (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
   steps:
     - name: Trigger deployment via workspace
       uses: peter-evans/repository-dispatch@v3
       with:
         token: ${{ secrets.WORKSPACE_DISPATCH_TOKEN }}
         repository: phoenixvc/Mystira.workspace
-        event-type: admin-api-deploy
+        event-type: admin-api-deploy  # Change per service
         client-payload: |
           {
             "environment": "dev",
@@ -323,7 +343,7 @@ trigger-workspace-deploy:
             "triggered_by": "${{ github.actor }}",
             "run_id": "${{ github.run_id }}",
             "image_tag": "dev-${{ github.sha }}",
-            "pr_number": "${{ github.event.pull_request.number || '' }}"
+            "pr_number": ""
           }
 ```
 
@@ -332,8 +352,12 @@ trigger-workspace-deploy:
 | Secret                     | Description                                      |
 | -------------------------- | ------------------------------------------------ |
 | `WORKSPACE_DISPATCH_TOKEN` | GitHub PAT with `repo` scope to trigger dispatch |
+| `AZURE_CLIENT_ID`          | Azure service principal client ID                |
+| `AZURE_TENANT_ID`          | Azure tenant ID                                  |
+| `AZURE_SUBSCRIPTION_ID`    | Azure subscription ID                            |
+| `GH_PACKAGES_TOKEN`        | GitHub PAT for NuGet package restore             |
 
-> **Note**: The PAT `MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN` in the workspace already has the required permissions. Each submodule needs its own secret (`WORKSPACE_DISPATCH_TOKEN`) configured with a PAT that can trigger workflows in the workspace.
+> **Token Setup**: Use the existing PAT `MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN` (which has `repo` scope) as the value for `WORKSPACE_DISPATCH_TOKEN` in each submodule repository.
 
 ### Why Dev Only?
 

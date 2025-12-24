@@ -5,6 +5,7 @@ This directory contains documentation for CI/CD pipelines, GitHub Actions workfl
 ## Contents
 
 - [Publishing & Deployment Flow](./publishing-flow.md) - **Complete guide to package publishing and deployment**
+- [Submodule CI/CD Setup](./submodule-cicd-setup.md) - **Instructions for submodule repositories** (tokens, workflows, triggers)
 - [CI/CD Setup](./cicd-setup.md) - CI/CD pipelines and branch protection configuration
 - [Branch Protection](./branch-protection.md) - Branch protection rules for `dev` and `main`
 - [Submodule Access](./submodule-access.md) - Troubleshooting guide for submodule access in CI/CD
