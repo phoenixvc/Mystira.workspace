@@ -124,6 +124,19 @@ variable "model_deployments" {
     }
 
     # ==========================================================================
+    # Reasoning Models (o-series) - Chain of Thought
+    # ==========================================================================
+    # Advanced reasoning with explicit thinking process
+    # Best for complex analysis, planning, and multi-step problems
+    "o3-mini" = {
+      model_name    = "o3-mini"
+      model_version = "2025-01-31"
+      model_format  = "OpenAI"
+      sku_name      = "GlobalStandard"
+      capacity      = 10
+    }
+
+    # ==========================================================================
     # Embedding Models (for RAG / Vector Search)
     # ==========================================================================
     # Used to convert text to vectors before sending to AI Search
@@ -142,6 +155,44 @@ variable "model_deployments" {
       model_format  = "OpenAI"
       sku_name      = "GlobalStandard" # Required for SAN region
       capacity      = 120
+    }
+
+    # ==========================================================================
+    # Image Generation (DALL-E)
+    # ==========================================================================
+    # For story illustrations, visual content creation
+    "dall-e-3" = {
+      model_name    = "dall-e-3"
+      model_version = "3.0"
+      model_format  = "OpenAI"
+      sku_name      = "Standard"
+      capacity      = 1
+    }
+
+    # ==========================================================================
+    # Audio Models (Whisper & TTS)
+    # ==========================================================================
+    # Speech-to-text for voice input, text-to-speech for narration
+    "whisper" = {
+      model_name    = "whisper"
+      model_version = "001"
+      model_format  = "OpenAI"
+      sku_name      = "Standard"
+      capacity      = 1
+    }
+    "tts" = {
+      model_name    = "tts"
+      model_version = "001"
+      model_format  = "OpenAI"
+      sku_name      = "Standard"
+      capacity      = 1
+    }
+    "tts-hd" = {
+      model_name    = "tts-hd"
+      model_version = "001"
+      model_format  = "OpenAI"
+      sku_name      = "Standard"
+      capacity      = 1
     }
 
     # ==========================================================================
