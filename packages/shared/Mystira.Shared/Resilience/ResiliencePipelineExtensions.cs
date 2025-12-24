@@ -195,6 +195,7 @@ public static class ResiliencePipelineExtensions
                     BreakDuration = TimeSpan.FromSeconds(options.CircuitBreakerDurationSeconds),
                     ShouldHandle = new PredicateBuilder<HttpResponseMessage>()
                         .Handle<HttpRequestException>()
+                        .Handle<Polly.Timeout.TimeoutRejectedException>()
                         .HandleResult(r => (int)r.StatusCode >= 500)
                 });
         });
