@@ -1,7 +1,7 @@
-name: "Legacy: Submodule NuGet Packages"
+name: "Packages - Legacy: Submodule NuGet"
 
 # ⚠️ DEPRECATED - This workflow is being phased out
-# Use "Contracts: Publish NuGet Package" for the new unified Mystira.Contracts package
+# Use "Packages - Contracts: Publish NuGet" for the new unified Mystira.Contracts package
 # See: docs/architecture/adr/0020-package-consolidation-strategy.md
 #
 # This workflow handles LEGACY submodule-based packages:
