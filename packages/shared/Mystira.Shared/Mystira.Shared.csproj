@@ -5,11 +5,12 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <NoWarn>CS1591</NoWarn> <!-- Missing XML comment for publicly visible type -->
     <RootNamespace>Mystira.Shared</RootNamespace>
 
     <!-- Package metadata -->
     <PackageId>Mystira.Shared</PackageId>
-    <Version>0.1.0</Version>
+    <Version>0.1.0-alpha</Version>
     <Authors>Mystira Team</Authors>
     <Company>PhoenixVC</Company>
     <Description>Shared infrastructure for Mystira platform services - authentication, authorization, middleware, and cross-cutting concerns</Description>
