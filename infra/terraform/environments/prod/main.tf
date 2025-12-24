@@ -388,8 +388,9 @@ module "shared_azure_ai" {
   # Production: Higher capacity for AI workloads
   # Model deployments - includes OpenAI and catalog models
   # See: https://ai.azure.com/catalog/models for full catalog
+  # Note: Some models not available in SAN, using UK South as closest fallback
   model_deployments = {
-    # OpenAI Models - Standard
+    # OpenAI Models - Standard (available in SAN)
     "gpt-4o" = {
       model_name    = "gpt-4o"
       model_version = "2024-08-06"
@@ -419,7 +420,7 @@ module "shared_azure_ai" {
       sku_name      = "GlobalStandard"
       capacity      = 100
     }
-    # GPT-5 series (gpt-5.1 requires registration)
+    # GPT-5 series - limited regional availability
     "gpt-5-nano" = {
       model_name    = "gpt-5-nano"
       model_version = "2025-04-14"
@@ -433,8 +434,9 @@ module "shared_azure_ai" {
       model_format  = "OpenAI"
       sku_name      = "GlobalStandard"
       capacity      = 50
+      location      = "uksouth" # Not available in SAN
     }
-    # Anthropic Claude - may have allocation constraints
+    # Anthropic Claude - UK South (closest to SAN with availability)
     # Available: claude-opus-4-5, claude-sonnet-4-5, claude-haiku-4-5, claude-opus-4-1
     "claude-sonnet-4-5" = {
       model_name    = "claude-sonnet-4-5"
@@ -442,6 +444,7 @@ module "shared_azure_ai" {
       model_format  = "Anthropic"
       sku_name      = "Standard"
       capacity      = 5  # Higher capacity for production
+      location      = "uksouth"
     }
   }
 

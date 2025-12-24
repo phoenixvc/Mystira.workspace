@@ -51,13 +51,14 @@ variable "model_deployments" {
     model_format    = optional(string, "OpenAI") # OpenAI, Anthropic, Cohere, Meta, Mistral, etc.
     sku_name        = optional(string, "Standard")
     capacity        = optional(number, 10)
-    rai_policy_name = optional(string, null) # Responsible AI policy name
+    rai_policy_name = optional(string, null)   # Responsible AI policy name
+    location        = optional(string, null)   # Override region for models not available in primary region
   }))
   default = {
     # ==========================================================================
     # OpenAI Models (GPT Series)
     # ==========================================================================
-    # Standard models - widely available
+    # Standard models - widely available in most regions
     "gpt-4o" = {
       model_name    = "gpt-4o"
       model_version = "2024-08-06"
@@ -89,8 +90,9 @@ variable "model_deployments" {
       capacity      = 20
     }
 
-    # GPT-5 series - latest generation
-    # Note: gpt-5.1 requires registration for access
+    # GPT-5 series - limited regional availability
+    # gpt-5.1 available in: UK South, Australia East, Canada East, East US 2, Japan East, Korea Central, Switzerland North
+    # NOT available in: South Africa North, East US, West US 2, Southeast Asia, North Europe
     "gpt-5-nano" = {
       model_name    = "gpt-5-nano"
       model_version = "2025-04-14"
@@ -104,6 +106,7 @@ variable "model_deployments" {
       model_format  = "OpenAI"
       sku_name      = "GlobalStandard"
       capacity      = 10
+      location      = "uksouth" # Closest region to SAN with quota
     }
 
     # ==========================================================================
@@ -117,6 +120,7 @@ variable "model_deployments" {
       model_format  = "Anthropic"
       sku_name      = "Standard"
       capacity      = 1
+      location      = "uksouth" # Closest region to SAN with Claude availability
     }
   }
 }
