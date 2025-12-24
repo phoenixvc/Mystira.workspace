@@ -852,99 +852,18 @@ jobs:
           fi
 
   # ============================================
-  # Build and Push Docker Images
+  # Deploy to Kubernetes
   # ============================================
-  build-images:
-    name: Build Docker Images
+  # NOTE: Docker images are built by submodule CI/CD pipelines (see ADR-0019)
+  # This job deploys existing images from ACR
+  deploy-kubernetes:
+    name: Deploy to Kubernetes
     runs-on: ubuntu-latest
     needs: [apply-terraform]
     if: |
       always() &&
-      (needs.apply-terraform.result == 'success' || needs.apply-terraform.result == 'skipped') &&
-      (github.event.inputs.components == 'all' || github.event.inputs.components == '')
-    steps:
-      - uses: actions/checkout@v6
-        with:
-          submodules: recursive
-          token: ${{ secrets.GH_PAT }}
-          persist-credentials: true
-
-      - name: Verify submodules
-        run: |
-          echo "Checking submodule status..."
-          git submodule status
-          echo ""
-          echo "Packages directory contents:"
-          ls -la packages/
-          echo ""
-          echo "Chain package contents:"
-          ls -la packages/chain/ || echo "Chain directory empty or missing"
-          echo ""
-          echo "Publisher package contents:"
-          ls -la packages/publisher/ || echo "Publisher directory empty or missing"
-          echo ""
-          # Fail if submodules are empty (chain is Python, publisher is Node.js)
-          if [ ! -f "packages/chain/server.py" ]; then
-            echo "::error::packages/chain/server.py not found - submodule checkout failed"
-            echo "Make sure GH_PAT has access to https://github.com/phoenixvc/Mystira.Chain"
-            exit 1
-          fi
-          if [ ! -f "packages/publisher/package.json" ]; then
-            echo "::error::packages/publisher/package.json not found - submodule checkout failed"
-            echo "Make sure GH_PAT has access to https://github.com/phoenixvc/Mystira.Publisher"
-            exit 1
-          fi
-          echo "✅ Submodules verified successfully"
-
-      - name: Azure Login
-        uses: azure/login@v2
-        with:
-          creds: ${{ secrets.MYSTIRA_AZURE_CREDENTIALS }}
-
-      - name: Login to ACR
-        run: az acr login --name ${{ env.ACR_NAME }}
-
-      - name: Build and Push Publisher
-        run: |
-          docker build \
-            -t ${{ env.ACR_NAME }}.azurecr.io/publisher:${{ env.ENVIRONMENT }} \
-            -t ${{ env.ACR_NAME }}.azurecr.io/publisher:${{ github.sha }} \
-            -f infra/docker/publisher/Dockerfile \
-            .
-          docker push ${{ env.ACR_NAME }}.azurecr.io/publisher:${{ env.ENVIRONMENT }}
-          docker push ${{ env.ACR_NAME }}.azurecr.io/publisher:${{ github.sha }}
-
-      - name: Build and Push Chain
-        run: |
-          docker build \
-            -t ${{ env.ACR_NAME }}.azurecr.io/chain:${{ env.ENVIRONMENT }} \
-            -t ${{ env.ACR_NAME }}.azurecr.io/chain:${{ github.sha }} \
-            -f infra/docker/chain/Dockerfile \
-            .
-          docker push ${{ env.ACR_NAME }}.azurecr.io/chain:${{ env.ENVIRONMENT }}
-          docker push ${{ env.ACR_NAME }}.azurecr.io/chain:${{ github.sha }}
-
-      - name: Image Summary
-        run: |
-          echo "## Docker Images Built" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "| Image | Tags |" >> $GITHUB_STEP_SUMMARY
-          echo "|-------|------|" >> $GITHUB_STEP_SUMMARY
-          echo "| publisher | ${{ env.ENVIRONMENT }}, ${{ github.sha }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| chain | ${{ env.ENVIRONMENT }}, ${{ github.sha }} |" >> $GITHUB_STEP_SUMMARY
-
-  # ============================================
-  # Deploy to Kubernetes
-  # ============================================
-  deploy-kubernetes:
-    name: Deploy to Kubernetes
-    runs-on: ubuntu-latest
-    needs: [apply-terraform, build-images]
-    if: |
-      always() &&
       (needs.apply-terraform.outputs.aks-exists == 'true') &&
       (needs.apply-terraform.result == 'success' || needs.apply-terraform.result == 'skipped') &&
-      (needs.build-images.result == 'success' || needs.build-images.result == 'skipped') &&
       (github.event.inputs.components == 'all' ||
        github.event.inputs.components == 'kubernetes-only' ||
        github.event.inputs.components == 'chain' ||
@@ -1037,6 +956,47 @@ jobs:
           kubectl delete certificate --all -n mys-${{ env.ENVIRONMENT }} --ignore-not-found || true
           echo "Old certificates cleared"
 
+      - name: Check for Docker Images
+        id: check-images
+        run: |
+          echo "## Docker Image Status" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          MISSING_IMAGES=""
+          IMAGES=("publisher" "chain" "story-generator" "admin-api" "admin-ui")
+
+          for IMAGE in "${IMAGES[@]}"; do
+            # Check if image exists with 'dev' tag
+            if az acr repository show-tags --name ${{ env.ACR_NAME }} --repository "mys-${IMAGE}" --query "[?@=='${{ env.ENVIRONMENT }}']" -o tsv 2>/dev/null | grep -q .; then
+              echo "✅ mys-${IMAGE}:${{ env.ENVIRONMENT }} exists" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "⚠️ **mys-${IMAGE}:${{ env.ENVIRONMENT }} NOT FOUND**" >> $GITHUB_STEP_SUMMARY
+              MISSING_IMAGES="${MISSING_IMAGES} mys-${IMAGE}"
+            fi
+          done
+
+          if [ -n "$MISSING_IMAGES" ]; then
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "---" >> $GITHUB_STEP_SUMMARY
+            echo "## ⚠️ WARNING: Missing Docker Images" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "The following images are missing from ACR:" >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            echo "$MISSING_IMAGES" >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "**Deployments for these services will fail until images are built.**" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "Images should be built by submodule CI/CD pipelines. See:" >> $GITHUB_STEP_SUMMARY
+            echo "- \`docs/adr/ADR-0019-dockerfile-location-standardization.md\`" >> $GITHUB_STEP_SUMMARY
+            echo "- \`docs/cicd/submodule-cicd-setup.md\`" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "::warning::Missing Docker images:${MISSING_IMAGES}"
+            echo "missing_images=true" >> $GITHUB_OUTPUT
+          else
+            echo "missing_images=false" >> $GITHUB_OUTPUT
+          fi
+
       - name: Deploy Applications
         run: |
           kubectl apply -k infra/kubernetes/overlays/${{ env.ENVIRONMENT }}
@@ -1044,8 +1004,22 @@ jobs:
       - name: Wait for Deployments
         run: |
           echo "Waiting for deployments to be ready..."
-          kubectl rollout status deployment/mys-publisher -n mys-${{ env.ENVIRONMENT }} --timeout=300s || true
-          kubectl rollout status statefulset/mys-chain -n mys-${{ env.ENVIRONMENT }} --timeout=600s || true
+
+          # Check publisher - skip if likely no image
+          if kubectl get deployment/mys-publisher -n mys-${{ env.ENVIRONMENT }} &>/dev/null; then
+            kubectl rollout status deployment/mys-publisher -n mys-${{ env.ENVIRONMENT }} --timeout=120s || {
+              echo "::warning::mys-publisher deployment not ready (image may be missing)"
+            }
+          fi
+
+          # Check chain - skip if likely no image
+          if kubectl get statefulset/mys-chain -n mys-${{ env.ENVIRONMENT }} &>/dev/null; then
+            kubectl rollout status statefulset/mys-chain -n mys-${{ env.ENVIRONMENT }} --timeout=120s || {
+              echo "::warning::mys-chain statefulset not ready (image may be missing)"
+            }
+          fi
+
+          echo "Deployment check complete (some services may be pending images)"
 
       - name: Deployment Summary
         run: |
@@ -1072,7 +1046,7 @@ jobs:
   summary:
     name: Deployment Summary
     runs-on: ubuntu-latest
-    needs: [validate, bootstrap, plan-terraform, apply-terraform, build-images, deploy-kubernetes, configure-dns]
+    needs: [validate, bootstrap, plan-terraform, apply-terraform, deploy-kubernetes, configure-dns]
     if: always()
     steps:
       - name: Final Summary
@@ -1086,7 +1060,6 @@ jobs:
           echo "| Terraform Plan | ${{ needs.plan-terraform.result == 'success' && '✅' || needs.plan-terraform.result == 'skipped' && '⏭️' || '❌' }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Terraform Apply | ${{ needs.apply-terraform.result == 'success' && '✅' || needs.apply-terraform.result == 'skipped' && '⏭️' || '❌' }} |" >> $GITHUB_STEP_SUMMARY
           echo "| DNS Config | ${{ needs.configure-dns.result == 'success' && '✅' || needs.configure-dns.result == 'skipped' && '⏭️' || '❌' }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Build Images | ${{ needs.build-images.result == 'success' && '✅' || needs.build-images.result == 'skipped' && '⏭️' || '❌' }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Deploy K8s | ${{ needs.deploy-kubernetes.result == 'success' && '✅' || needs.deploy-kubernetes.result == 'skipped' && '⏭️' || '❌' }} |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "## Environment URLs" >> $GITHUB_STEP_SUMMARY
