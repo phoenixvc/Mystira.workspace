@@ -148,6 +148,12 @@ jobs:
       - name: Push to NuGet.org (stable releases only)
         if: steps.package.outputs.is_prerelease != 'true' && steps.package.outputs.version_suffix == ''
         run: |
+          # NuGet API key only allows packages matching *alpha* pattern
+          # Skip push if version doesn't contain alpha
+          if [[ ! "${{ steps.pack.outputs.version }}" == *"alpha"* ]]; then
+            echo "::warning::Skipping NuGet.org push - version '${{ steps.pack.outputs.version }}' must contain 'alpha'"
+            exit 0
+          fi
           dotnet nuget push "${{ steps.pack.outputs.nupkg_path }}/*.nupkg" \
             --source "https://api.nuget.org/v3/index.json" \
             --api-key ${{ secrets.NUGET_API_KEY }} \

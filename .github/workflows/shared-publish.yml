@@ -162,6 +162,14 @@ jobs:
           else
             FULL_VERSION="$BASE_VERSION"
           fi
+
+          # Ensure version contains 'alpha' for NuGet.org API key permissions
+          # The API key only allows pushing packages matching *alpha* pattern
+          if [[ ! "$FULL_VERSION" == *"alpha"* ]]; then
+            FULL_VERSION="${FULL_VERSION}-alpha"
+            echo "Added alpha suffix for NuGet.org compatibility"
+          fi
+
           echo "full_version=$FULL_VERSION" >> $GITHUB_OUTPUT
           echo "Full NuGet version: $FULL_VERSION"
 
