@@ -114,19 +114,20 @@ variable "model_deployments" {
     # ==========================================================================
     # Used to convert text to vectors before sending to AI Search
     # Reduces token usage by ~20x compared to sending raw text
+    # Note: Must use GlobalStandard - Standard not available in SAN
     "text-embedding-3-large" = {
       model_name    = "text-embedding-3-large"
       model_version = "1"
       model_format  = "OpenAI"
-      sku_name      = "Standard"
-      capacity      = 120 # Higher capacity for embeddings (high volume)
+      sku_name      = "GlobalStandard" # Required for SAN region
+      capacity      = 120
     }
     "text-embedding-3-small" = {
       model_name    = "text-embedding-3-small"
       model_version = "1"
       model_format  = "OpenAI"
-      sku_name      = "Standard"
-      capacity      = 120 # Higher capacity for embeddings (high volume)
+      sku_name      = "GlobalStandard" # Required for SAN region
+      capacity      = 120
     }
 
     # ==========================================================================
