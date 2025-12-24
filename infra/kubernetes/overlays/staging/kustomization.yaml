@@ -14,7 +14,7 @@ resources:
 labels:
   - pairs:
       environment: staging
-    includeSelectors: false
+    includeSelectors: true
 
 patches:
   - target:
