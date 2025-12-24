@@ -110,7 +110,7 @@ resource "azurerm_cognitive_account" "ai_foundry" {
 resource "azapi_update_resource" "enable_project_management" {
   count = var.enable_project ? 1 : 0
 
-  type        = "Microsoft.CognitiveServices/accounts@2024-10-01"
+  type        = "Microsoft.CognitiveServices/accounts@2025-06-01"
   resource_id = azurerm_cognitive_account.ai_foundry.id
 
   body = {
