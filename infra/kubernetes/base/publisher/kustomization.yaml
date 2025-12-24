@@ -13,7 +13,7 @@ labels:
       app.kubernetes.io/name: mys-publisher
       app.kubernetes.io/part-of: mys
       app.kubernetes.io/component: publisher
-    includeSelectors: true
+    includeSelectors: false
 
 images:
   - name: myssharedacr.azurecr.io/publisher

@@ -13,7 +13,7 @@ labels:
       app.kubernetes.io/name: mys-chain
       app.kubernetes.io/part-of: mys
       app.kubernetes.io/component: blockchain
-    includeSelectors: true
+    includeSelectors: false
 
 images:
   - name: myssharedacr.azurecr.io/chain
