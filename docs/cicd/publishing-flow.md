@@ -165,31 +165,51 @@ Uses **Changesets** for versioning and publishing.
 
 ## NuGet Package Publishing
 
-### Unified Triggering
+### Workflows
 
-NuGet packages are published through a **unified workflow** that supports multiple trigger sources:
+NuGet packages are published through dedicated workflows with the "Packages - " prefix:
+
+| Workflow | File | Package | Status |
+|----------|------|---------|--------|
+| `Packages - Contracts: Publish NuGet` | `contracts-publish.yml` | `Mystira.Contracts` | ✅ Active |
+| `Packages - Shared: Publish NuGet` | `shared-publish.yml` | `Mystira.Shared` | ✅ Active |
+| `Packages - Legacy: Submodule NuGet` | `nuget-publish.yml` | Legacy packages | ⚠️ Deprecated |
+
+### Automatic Branch Publishing
+
+Both `contracts-publish.yml` and `shared-publish.yml` trigger on pushes to dev or main:
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
 │                        NuGet Publishing Triggers                             │
 ├─────────────────────────────────────────────────────────────────────────────┤
-│  1. Changesets Release  →  Triggered after NPM publish (unified versioning)  │
-│  2. Submodule Dispatch  →  repository_dispatch from submodule CI            │
-│  3. Manual Dispatch     →  workflow_dispatch for ad-hoc releases            │
+│  Push to dev   →  Pre-release to GitHub Packages (e.g., 0.1.0-dev.123)     │
+│  Push to main  →  Stable to GitHub Packages + NuGet.org (e.g., 0.1.0)      │
+│  Changesets    →  Triggered after @mystira/contracts NPM publish           │
+│  Manual        →  workflow_dispatch with version suffix + NuGet.org toggle │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
 
 ### Registry Options
 
-- **GitHub Packages**: `https://nuget.pkg.github.com/phoenixvc/index.json` (private)
-- **NuGet.org**: `https://api.nuget.org/v3/index.json` (public, stable releases only)
+- **GitHub Packages**: `https://nuget.pkg.github.com/phoenixvc/index.json` (all builds)
+- **NuGet.org**: `https://api.nuget.org/v3/index.json` (stable releases only)
 
 ### Packages Published
 
-| Package                            | NPM Counterpart          | Description                           |
-| ---------------------------------- | ------------------------ | ------------------------------------- |
-| `Mystira.App.Contracts`            | `@mystira/app`           | App API contracts/DTOs                |
-| `Mystira.StoryGenerator.Contracts` | `@mystira/story-generator` | gRPC/API contracts                  |
+| Package | NPM Counterpart | Description | Workflow |
+|---------|-----------------|-------------|----------|
+| `Mystira.Contracts` | `@mystira/contracts` | Unified API contracts | `contracts-publish.yml` |
+| `Mystira.Shared` | N/A | .NET shared utilities | `shared-publish.yml` |
+| `Mystira.App.Contracts` | `@mystira/app` | ⚠️ Deprecated | `nuget-publish.yml` |
+| `Mystira.StoryGenerator.Contracts` | `@mystira/story-generator` | ⚠️ Deprecated | `nuget-publish.yml` |
+
+### Version Synchronization
+
+| Package | Version Source | Strategy |
+|---------|----------------|----------|
+| `Mystira.Contracts` | `packages/contracts/package.json` | Synced with NPM via Changesets |
+| `Mystira.Shared` | `.csproj` Version property | Independent versioning |
 
 ### Required Secrets
 
@@ -198,21 +218,20 @@ NuGet packages are published through a **unified workflow** that supports multip
 | `NUGET_API_KEY` | NuGet.org API key (for public packages) |
 | `GITHUB_TOKEN`  | Auto-provided (for GitHub Packages)     |
 
-### Versioning (Synchronized with NPM)
+### Version Strategy
 
-NuGet packages follow the same version as their NPM counterparts:
+| Branch/Trigger | Version Format | Destination |
+|----------------|----------------|-------------|
+| Push to `dev` | `{base}-dev.{run_number}` | GitHub Packages only |
+| Push to `main` | `{base}` (stable) | GitHub Packages + NuGet.org |
+| Changesets release | Matches NPM version | GitHub Packages + NuGet.org |
+| Manual dispatch | User-specified suffix | Configurable via checkbox |
 
-| Trigger Source | Version Strategy | Destination |
-|----------------|------------------|-------------|
-| Changesets (unified) | Matches NPM package version | GitHub Packages + NuGet.org |
-| Submodule dispatch (dev) | `1.0.0-dev.{run_number}` | GitHub Packages only |
-| Submodule dispatch (main) | Stable version from .csproj | GitHub Packages + NuGet.org |
+### Manual Trigger Options
 
-### Workflow File
-
-**Location**: `.github/workflows/nuget-publish.yml`
-
-Handles all trigger types with consistent behavior and logging.
+Both contracts and shared workflows support manual dispatch with:
+- **Version suffix** (optional): e.g., `beta.1`, `rc.1`
+- **Publish to NuGet.org** checkbox: Controls public registry publishing
 
 ---
 
@@ -286,8 +305,10 @@ Handles all trigger types with consistent behavior and logging.
 | `story-generator-ci.yml`              | Push/PR to dev/main        | Lint, test, build, Docker push        |
 | `submodule-deploy-dev.yml`            | `repository_dispatch`      | Deploy submodule to dev K8s           |
 | `submodule-deploy-dev-appservice.yml` | `repository_dispatch`      | Deploy Mystira.App to dev App Service |
-| `nuget-publish.yml`                   | `repository_dispatch` / unified | Publish NuGet packages (unified)  |
-| `release.yml`                         | Push to main               | NPM + NuGet publish (unified)         |
+| `contracts-publish.yml`               | Push to dev/main, Changesets    | Publish Mystira.Contracts NuGet   |
+| `shared-publish.yml`                  | Push to dev/main                | Publish Mystira.Shared NuGet      |
+| `nuget-publish.yml`                   | `repository_dispatch`           | ⚠️ Legacy submodule packages      |
+| `release.yml`                         | Push to main                    | NPM + NuGet publish (Changesets)  |
 | `staging-release.yml`                 | Push to main               | Auto-deploy to staging AKS            |
 | `production-release.yml`              | Manual                     | Deploy to production AKS              |
 | `infra-deploy.yml`                    | Manual/Push                | Full infrastructure deployment        |
@@ -349,7 +370,8 @@ Submodule repositories (Admin.Api, Admin.UI, etc.) use `repository_dispatch` to 
 | `app-swa-deploy`         | Static Web App              | `submodule-deploy-dev-appservice.yml` |
 | `devhub-deploy`          | Static Web App              | `submodule-deploy-dev-appservice.yml` |
 | `story-generator-swa-deploy` | Static Web App          | `submodule-deploy-dev-appservice.yml` |
-| `nuget-publish`          | GitHub/NuGet.org            | `nuget-publish.yml`                   |
+| `contracts-nuget-publish` | GitHub/NuGet.org           | `contracts-publish.yml`               |
+| `nuget-publish`          | GitHub/NuGet.org            | `nuget-publish.yml` (⚠️ legacy)       |
 
 > **Note**: `Mystira.StoryGenerator` follows the same API/Web pattern as `Mystira.App`:
 > - **API** (`Mystira.StoryGenerator.Api`) → Kubernetes via `story-generator-deploy`
@@ -427,18 +449,20 @@ Submodule-triggered deployments are **intentionally limited to the dev environme
 
 ---
 
-## NuGet Package Publishing
+## Legacy NuGet Package Publishing (Submodules)
 
-Submodules with shared contracts (e.g., `Mystira.App.Contracts`) can trigger NuGet package publishing via the workspace.
+> ⚠️ **Deprecated**: This section describes the legacy submodule-triggered NuGet publishing. For new packages, use the unified `Mystira.Contracts` and `Mystira.Shared` packages which publish automatically on push to dev/main.
 
-### Version Strategy
+Submodules with shared contracts can trigger NuGet package publishing via the workspace's `nuget-publish.yml` workflow.
+
+### Version Strategy (Legacy)
 
 | Branch | Version | Destination |
 |--------|---------|-------------|
 | `dev`  | `1.0.0-dev.{run_number}` | GitHub Packages only |
 | `main` | `1.0.0` (stable) | GitHub Packages + NuGet.org |
 
-### Triggering NuGet Publish
+### Triggering NuGet Publish (Legacy)
 
 Add this job to your submodule workflow (after successful build):
 
@@ -468,12 +492,14 @@ trigger-nuget-publish:
           }
 ```
 
-### Supported Packages
+### Supported Legacy Packages
 
 | Package Name | Event Payload `package` Value |
 |--------------|-------------------------------|
 | Mystira.App.Contracts | `app-contracts` |
 | Mystira.StoryGenerator.Contracts | `story-generator-contracts` |
+
+> **Recommendation**: Migrate to `Mystira.Contracts` which consolidates both packages and is managed via Changesets.
 
 ---
 
