@@ -37,7 +37,7 @@ public static class DataExtensions
     /// <typeparam name="TImplementation">The repository implementation.</typeparam>
     /// <param name="services">The service collection.</param>
     /// <returns>The service collection for chaining.</returns>
-    public static IServiceCollection AddRepository<TInterface, TImplementation>(
+    public static IServiceCollection AddCustomRepository<TInterface, TImplementation>(
         this IServiceCollection services)
         where TInterface : class
         where TImplementation : class, TInterface
