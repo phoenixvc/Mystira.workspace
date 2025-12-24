@@ -6,6 +6,7 @@ using Moq;
 using Mystira.Shared.Caching;
 using System.Text;
 using System.Text.Json;
+using Xunit;
 
 namespace Mystira.Shared.Tests.Caching;
 

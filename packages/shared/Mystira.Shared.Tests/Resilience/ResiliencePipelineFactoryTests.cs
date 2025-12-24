@@ -2,6 +2,7 @@ using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Mystira.Shared.Resilience;
+using Xunit;
 
 namespace Mystira.Shared.Tests.Resilience;
 

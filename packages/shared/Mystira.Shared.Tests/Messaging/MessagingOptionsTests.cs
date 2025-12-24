@@ -1,5 +1,6 @@
 using FluentAssertions;
 using Mystira.Shared.Messaging;
+using Xunit;
 
 namespace Mystira.Shared.Tests.Messaging;
 
