@@ -133,7 +133,7 @@ When an ingress is created or updated:
 
 - `dev.publisher.mystira.app`
 - `dev.chain.mystira.app`
-- `dev.story-generator.mystira.app`
+- `dev.story-api.mystira.app`
 
 **Certificate Type:** Let's Encrypt Staging
 
@@ -149,7 +149,7 @@ When an ingress is created or updated:
 
 - `staging.publisher.mystira.app`
 - `staging.chain.mystira.app`
-- `staging.story-generator.mystira.app`
+- `staging.story-api.mystira.app`
 
 **Certificate Type:** Let's Encrypt Staging
 
@@ -161,7 +161,7 @@ When an ingress is created or updated:
 
 - `publisher.mystira.app`
 - `chain.mystira.app`
-- `story-generator.mystira.app`
+- `story-api.mystira.app`
 
 **Certificate Type:** Let's Encrypt Production
 
@@ -228,13 +228,13 @@ curl -o letsencrypt-stg-root-x1.pem https://letsencrypt.org/certs/staging/letsen
    - Click "Clear data"
 
 7. **Restart browser and test:**
-   - Navigate to `https://dev.story-generator.mystira.app`
+   - Navigate to `https://dev.story-api.mystira.app`
    - You should see a green padlock with no security warnings!
 
 **Verification:** After import, run this in Git Bash:
 
 ```bash
-curl -I https://dev.story-generator.mystira.app
+curl -I https://dev.story-api.mystira.app
 # If no certificate errors, the import worked!
 ```
 
@@ -306,7 +306,7 @@ Firefox uses its own certificate store, separate from the system:
    Step 3 - Clear HSTS settings (if applicable):
    - Navigate to: `chrome://net-internals/#hsts`
    - Under "Delete domain security policies"
-   - Enter: `dev.story-generator.mystira.app`
+   - Enter: `dev.story-api.mystira.app`
    - Click **"Delete"**
    - Repeat for other dev domains
 
@@ -315,13 +315,13 @@ Firefox uses its own certificate store, separate from the system:
    - Check Task Manager - end all browser processes
    - Wait 5 seconds
    - Restart browser
-   - Test: `https://dev.story-generator.mystira.app`
+   - Test: `https://dev.story-api.mystira.app`
 
    **Verify Windows trusts the certificate:**
 
    ```bash
    # In Git Bash, test if Windows trusts the cert:
-   curl -I https://dev.story-generator.mystira.app
+   curl -I https://dev.story-api.mystira.app
 
    # If no certificate errors, the import worked!
    # If still errors, the certificate isn't imported correctly
@@ -401,7 +401,7 @@ mystira-story-generator-tls-dev   False   mystira-story-generator-tls-dev   2m
 
 ```bash
 # Check ingress annotation
-kubectl get ingress mystira-story-generator-ingress -n mys-dev \
+kubectl get ingress mys-story-generator-ingress -n mys-dev \
   -o jsonpath='{.metadata.annotations.cert-manager\.io/cluster-issuer}'
 
 # Should output: letsencrypt-staging
@@ -414,7 +414,7 @@ kubectl delete secret mystira-story-generator-tls-dev -n mys-dev
 
 #### Domain Not Resolving
 
-**Symptom:** `nslookup dev.story-generator.mystira.app` returns no records
+**Symptom:** `nslookup dev.story-api.mystira.app` returns no records
 
 **Solutions:**
 
@@ -425,7 +425,7 @@ az network dns record-set a list \
   --resource-group mys-prod-core-rg-glob
 
 # Get ingress IP
-kubectl get ingress mystira-story-generator-ingress -n mys-dev \
+kubectl get ingress mys-story-generator-ingress -n mys-dev \
   -o jsonpath='{.status.loadBalancer.ingress[0].ip}'
 
 # Add DNS record if missing
@@ -462,11 +462,11 @@ This checks:
 
 ```bash
 # Test HTTPS connection
-curl -vI https://dev.story-generator.mystira.app
+curl -vI https://dev.story-api.mystira.app
 
 # Get certificate details
-echo | openssl s_client -servername dev.story-generator.mystira.app \
-  -connect dev.story-generator.mystira.app:443 2>/dev/null \
+echo | openssl s_client -servername dev.story-api.mystira.app \
+  -connect dev.story-api.mystira.app:443 2>/dev/null \
   | openssl x509 -noout -text
 ```
 

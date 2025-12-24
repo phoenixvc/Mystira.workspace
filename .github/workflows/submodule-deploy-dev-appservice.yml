@@ -4,6 +4,7 @@ name: "Submodule: Deploy to Dev (App Service/SWA)"
 # - app-deploy: Deploy API to Azure App Service (Mystira.App)
 # - app-swa-deploy: Update submodule ref after App SWA deployment
 # - devhub-deploy: Update submodule ref after DevHub SWA deployment
+# - story-generator-swa-deploy: Update submodule ref after Story Generator SWA deployment
 #
 # NOTE: This is for DEV environment ONLY.
 # Production deployments use mystira-app-api-cicd-prod.yml (blue-green slot swap)
@@ -14,6 +15,7 @@ on:
       - app-deploy
       - app-swa-deploy
       - devhub-deploy
+      - story-generator-swa-deploy
 
 concurrency:
   group: submodule-deploy-dev-appservice-${{ github.event.action }}
@@ -69,6 +71,9 @@ jobs:
               ;;
             devhub-deploy)
               echo "submodule_path=packages/devhub" >> $GITHUB_OUTPUT
+              ;;
+            story-generator-swa-deploy)
+              echo "submodule_path=packages/story-generator" >> $GITHUB_OUTPUT
               ;;
             *)
               echo "::error::Unknown event type: ${{ github.event.action }}"
@@ -204,6 +209,9 @@ jobs:
               devhub-deploy)
                 echo "- DevHub: https://dev.devhub.mystira.app" >> $GITHUB_STEP_SUMMARY
                 ;;
+              story-generator-swa-deploy)
+                echo "- Story Generator SWA: https://dev.story.mystira.app" >> $GITHUB_STEP_SUMMARY
+                ;;
             esac
           else
             echo "Deployment failed. Check the logs above for details." >> $GITHUB_STEP_SUMMARY
@@ -217,7 +225,13 @@ jobs:
         env:
           MS_TEAMS_WEBHOOK_URL: ${{ secrets.MS_TEAMS_WEBHOOK_URL }}
         run: |
-          SERVICE_NAME="${{ github.event.action == 'app-deploy' && 'App API' || (github.event.action == 'app-swa-deploy' && 'App SWA' || 'DevHub') }}"
+          case "${{ github.event.action }}" in
+            app-deploy) SERVICE_NAME="App API" ;;
+            app-swa-deploy) SERVICE_NAME="App SWA" ;;
+            devhub-deploy) SERVICE_NAME="DevHub" ;;
+            story-generator-swa-deploy) SERVICE_NAME="Story Generator SWA" ;;
+            *) SERVICE_NAME="Unknown Service" ;;
+          esac
           curl -H "Content-Type: application/json" -d '{
             "@type": "MessageCard",
             "@context": "http://schema.org/extensions",
@@ -245,7 +259,13 @@ jobs:
         env:
           MS_TEAMS_WEBHOOK_URL: ${{ secrets.MS_TEAMS_WEBHOOK_URL }}
         run: |
-          SERVICE_NAME="${{ github.event.action == 'app-deploy' && 'App API' || (github.event.action == 'app-swa-deploy' && 'App SWA' || 'DevHub') }}"
+          case "${{ github.event.action }}" in
+            app-deploy) SERVICE_NAME="App API" ;;
+            app-swa-deploy) SERVICE_NAME="App SWA" ;;
+            devhub-deploy) SERVICE_NAME="DevHub" ;;
+            story-generator-swa-deploy) SERVICE_NAME="Story Generator SWA" ;;
+            *) SERVICE_NAME="Unknown Service" ;;
+          esac
           curl -H "Content-Type: application/json" -d '{
             "@type": "MessageCard",
             "@context": "http://schema.org/extensions",

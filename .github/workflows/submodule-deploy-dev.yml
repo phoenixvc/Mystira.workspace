@@ -4,6 +4,13 @@ name: "Submodule: Deploy to Dev"
 # When a submodule (Admin.Api, Admin.UI, etc.) builds and pushes to ACR,
 # it triggers this workflow to deploy the new image to dev Kubernetes.
 #
+# Event types:
+#   - admin-api-deploy:       Mystira.Admin.Api → K8s
+#   - admin-ui-deploy:        Mystira.Admin.UI → K8s
+#   - story-generator-deploy: Mystira.StoryGenerator.Api → K8s (API only, not Blazor WASM)
+#   - publisher-deploy:       Mystira.Publisher → K8s
+#   - chain-deploy:           Mystira.Chain → K8s
+#
 # NOTE: This is for DEV environment ONLY.
 # Staging and production deployments are managed through the workspace directly
 # via staging-release.yml and production-release.yml workflows.
@@ -282,7 +289,7 @@ jobs:
                 echo "- https://dev.admin.mystira.app" >> $GITHUB_STEP_SUMMARY
                 ;;
               story-generator-deploy)
-                echo "- https://dev.story-generator.mystira.app" >> $GITHUB_STEP_SUMMARY
+                echo "- https://dev.story-api.mystira.app" >> $GITHUB_STEP_SUMMARY
                 ;;
               publisher-deploy)
                 echo "- https://dev.publisher.mystira.app" >> $GITHUB_STEP_SUMMARY

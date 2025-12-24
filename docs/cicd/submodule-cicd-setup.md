@@ -123,12 +123,17 @@ Each submodule uses a specific event type:
 |------------|------------|--------|-------|
 | Mystira.Admin.Api | `admin-api-deploy` | `mys-admin-api` | Kubernetes |
 | Mystira.Admin.UI | `admin-ui-deploy` | `mys-admin-ui` | Kubernetes |
-| Mystira.StoryGenerator | `story-generator-deploy` | `mys-story-generator` | Kubernetes |
+| Mystira.StoryGenerator (API) | `story-generator-deploy` | `mys-story-generator` | Kubernetes |
 | Mystira.Publisher | `publisher-deploy` | `mys-publisher` | Kubernetes |
 | Mystira.Chain | `chain-deploy` | `mys-chain` | Kubernetes |
 | Mystira.App (API) | `app-deploy` | `mys-dev-app-api-san` | App Service |
 | Mystira.App (SWA) | `app-swa-deploy` | `mys-dev-mystira-swa-eus2` | Static Web App |
+| Mystira.StoryGenerator (SWA) | `story-generator-swa-deploy` | `mys-dev-story-swa-eus2` | Static Web App |
 | Mystira.DevHub | `devhub-deploy` | `mys-dev-devhub-san` | App Service |
+
+> **Note**: `Mystira.StoryGenerator` follows the same API/Web pattern as `Mystira.App`:
+> - **API** (`Mystira.StoryGenerator.Api`) → Kubernetes via `story-generator-deploy`
+> - **Web** (`Mystira.StoryGenerator.Web`, Blazor WASM) → Static Web App via `story-generator-swa-deploy`
 
 ---
 
@@ -351,6 +356,128 @@ jobs:
           echo "---" >> $GITHUB_STEP_SUMMARY
           echo "_Staging/prod deployments are managed through the workspace._" >> $GITHUB_STEP_SUMMARY
 ```
+
+---
+
+## Static Web App (SWA) Workflow Template
+
+For submodules with Blazor WASM frontends (Mystira.App, Mystira.StoryGenerator), use this template:
+
+```yaml
+name: "Story Generator Web: Build & Deploy SWA"
+
+on:
+  push:
+    branches: [dev, main]
+    paths:
+      - 'src/Mystira.StoryGenerator.Web/**'
+      - '.github/workflows/swa-deploy.yml'
+  pull_request:
+    branches: [dev]
+    paths:
+      - 'src/Mystira.StoryGenerator.Web/**'
+  workflow_dispatch:
+
+concurrency:
+  group: swa-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+  APP_LOCATION: "src/Mystira.StoryGenerator.Web"
+  OUTPUT_LOCATION: "wwwroot"
+
+permissions:
+  id-token: write
+  contents: read
+  packages: read
+
+jobs:
+  build-and-deploy:
+    name: Build and Deploy SWA
+    runs-on: ubuntu-latest
+    if: github.event_name != 'pull_request' || !github.event.pull_request.draft
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Install wasm-tools
+        run: dotnet workload install wasm-tools
+
+      - name: Restore dependencies
+        run: dotnet restore ${{ env.APP_LOCATION }}
+        env:
+          NUGET_AUTH_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN }}
+
+      - name: Build Blazor WASM
+        run: dotnet publish ${{ env.APP_LOCATION }} -c Release -o publish
+        env:
+          NUGET_AUTH_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN }}
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Get SWA deployment token
+        id: swa-token
+        run: |
+          # Get token from Terraform output or Azure directly
+          SWA_NAME=$(az staticwebapp list --resource-group mys-dev-story-rg-san --query "[0].name" -o tsv)
+          TOKEN=$(az staticwebapp secrets list --name "$SWA_NAME" --query "properties.apiKey" -o tsv)
+          echo "::add-mask::$TOKEN"
+          echo "token=$TOKEN" >> $GITHUB_OUTPUT
+
+      - name: Deploy to Azure Static Web Apps
+        uses: Azure/static-web-apps-deploy@v1
+        with:
+          azure_static_web_apps_api_token: ${{ steps.swa-token.outputs.token }}
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          action: "upload"
+          app_location: "publish/wwwroot"
+          skip_app_build: true
+          skip_api_build: true
+
+  # Trigger workspace to update submodule reference
+  trigger-workspace-update:
+    name: Update Workspace Submodule
+    runs-on: ubuntu-latest
+    needs: build-and-deploy
+    if: |
+      needs.build-and-deploy.result == 'success' &&
+      github.ref == 'refs/heads/dev' &&
+      github.event_name == 'push'
+    steps:
+      - name: Trigger workspace submodule update
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN }}
+          repository: phoenixvc/Mystira.workspace
+          event-type: story-generator-swa-deploy
+          client-payload: |
+            {
+              "environment": "dev",
+              "ref": "${{ github.sha }}",
+              "triggered_by": "${{ github.actor }}",
+              "run_id": "${{ github.run_id }}",
+              "repository": "${{ github.repository }}"
+            }
+```
+
+**Key differences from Kubernetes workflow:**
+- Builds Blazor WASM with `dotnet publish`
+- Deploys directly to Azure SWA (no Docker/ACR)
+- Uses `Azure/static-web-apps-deploy` action
+- Triggers `story-generator-swa-deploy` (not `story-generator-deploy`)
 
 ---
 

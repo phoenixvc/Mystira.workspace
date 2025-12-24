@@ -29,6 +29,13 @@ module "front_door" {
   custom_domain_admin_api   = "dev.admin-api.mystira.app"
   custom_domain_admin_ui    = "dev.admin.mystira.app"
 
+  # Story Generator services (API + SWA)
+  enable_story_generator              = true
+  story_generator_api_backend_address = "dev.story-api.mystira.app"
+  story_generator_swa_backend_address = module.story_generator.static_web_app_default_hostname
+  custom_domain_story_generator_api   = "dev.story-api.mystira.app"
+  custom_domain_story_generator_swa   = "dev.story.mystira.app"
+
   # WAF Configuration
   enable_waf           = true
   waf_mode             = "Detection" # Use Detection mode for dev to avoid blocking legitimate test traffic
@@ -75,6 +82,16 @@ output "front_door_admin_api_endpoint" {
 output "front_door_admin_ui_endpoint" {
   description = "Front Door endpoint for Admin UI - use this for CNAME"
   value       = module.front_door.admin_ui_endpoint_hostname
+}
+
+output "front_door_story_generator_api_endpoint" {
+  description = "Front Door endpoint for Story Generator API - use this for CNAME"
+  value       = module.front_door.story_generator_api_endpoint_hostname
+}
+
+output "front_door_story_generator_swa_endpoint" {
+  description = "Front Door endpoint for Story Generator SWA - use this for CNAME"
+  value       = module.front_door.story_generator_swa_endpoint_hostname
 }
 
 # After deploying, update DNS with:

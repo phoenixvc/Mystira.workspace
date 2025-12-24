@@ -76,6 +76,22 @@ patches:
         path: /data/key_vault_url
         value: "https://mys-staging-chain-kv-san.vault.azure.net/"
   - target:
+      kind: Ingress
+      name: mys-story-generator-ingress
+    patch: |-
+      - op: replace
+        path: /spec/tls/0/hosts/0
+        value: "staging.story-api.mystira.app"
+      - op: replace
+        path: /spec/rules/0/host
+        value: "staging.story-api.mystira.app"
+      - op: replace
+        path: /spec/tls/0/secretName
+        value: "mys-story-generator-tls-staging"
+      - op: replace
+        path: /metadata/annotations/cert-manager.io~1cluster-issuer
+        value: "letsencrypt-staging"
+  - target:
       kind: Deployment
       name: mys-story-generator
     patch: |-

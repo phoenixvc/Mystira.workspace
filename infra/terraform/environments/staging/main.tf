@@ -374,6 +374,7 @@ module "shared_azure_ai" {
 }
 
 # Story-Generator Infrastructure (in story-rg per ADR-0017)
+# Supports both API (Kubernetes) and Web (Static Web App) components
 module "story_generator" {
   source = "../../modules/story-generator"
 
@@ -391,6 +392,15 @@ module "story_generator" {
   shared_postgresql_server_id       = module.shared_postgresql.server_id
   shared_redis_cache_id             = module.shared_redis.cache_id
   shared_log_analytics_workspace_id = module.shared_monitoring.log_analytics_workspace_id
+
+  # Static Web App (Blazor WASM frontend) - same pattern as Mystira.App
+  enable_static_web_app    = true
+  static_web_app_sku       = "Free"
+  fallback_location        = "eastus2"  # SWA not available in South Africa North
+  github_repository_url    = "https://github.com/phoenixvc/Mystira.StoryGenerator"
+  github_branch            = "main"  # staging uses main branch
+  enable_swa_custom_domain = false   # Enable after DNS is configured
+  swa_custom_domain        = "staging.story.mystira.app"
 
   tags = {
     CostCenter = "staging"
@@ -755,6 +765,22 @@ output "shared_log_analytics_workspace_id" {
 output "story_generator_postgresql_database_name" {
   description = "Story-Generator PostgreSQL database name"
   value       = module.story_generator.postgresql_database_name
+}
+
+output "story_generator_swa_url" {
+  description = "Story-Generator Static Web App URL"
+  value       = module.story_generator.static_web_app_url
+}
+
+output "story_generator_swa_api_key" {
+  description = "Story-Generator Static Web App API key (for deployments)"
+  value       = module.story_generator.static_web_app_api_key
+  sensitive   = true
+}
+
+output "story_generator_swa_default_hostname" {
+  description = "Story-Generator Static Web App default hostname"
+  value       = module.story_generator.static_web_app_default_hostname
 }
 
 # Entra ID Authentication Outputs

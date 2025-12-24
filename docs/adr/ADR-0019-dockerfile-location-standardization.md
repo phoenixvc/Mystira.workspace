@@ -14,7 +14,16 @@ Currently, Dockerfiles are inconsistently located across the Mystira ecosystem:
 | Admin.UI | `packages/admin-ui` (submodule) | Submodule repo | Submodule CI |
 | Chain | `packages/chain` (submodule) | `infra/docker/chain/` (workspace) | Workspace CI |
 | Publisher | `packages/publisher` (submodule) | `infra/docker/publisher/` (workspace) | Workspace CI |
-| Story-Generator | `packages/story-generator` (submodule) | `infra/docker/story-generator/` (workspace) | Workspace CI |
+| Story-Generator.Api | `packages/story-generator` (submodule) | `infra/docker/story-generator/` (workspace) | Workspace CI |
+
+> **Note**: Story-Generator follows the same pattern as Mystira.App:
+> - **API** (`Mystira.StoryGenerator.Api`) → Kubernetes via `story-generator-deploy`
+> - **Web** (`Mystira.StoryGenerator.Web`, Blazor WASM) → Static Web App via `story-generator-swa-deploy`
+>
+> **SWA Infrastructure (Implemented)**:
+> - Terraform module: `infra/terraform/modules/story-generator/` (includes SWA resources)
+> - Front Door: `infra/terraform/modules/front-door/` (story-generator endpoints)
+> - Workflow: `submodule-deploy-dev-appservice.yml` (handles `story-generator-swa-deploy`)
 
 This inconsistency causes:
 - Confusion about where to find/update Dockerfiles
@@ -68,8 +77,12 @@ All services will:
 #### Story-Generator (.NET)
 
 1. Copy `infra/docker/story-generator/Dockerfile` to `Mystira.StoryGenerator` repo
-2. Paths already assume submodule structure (`src/Mystira.StoryGenerator.Web/`)
+2. Verify it builds **API** project (`src/Mystira.StoryGenerator.Api/`)
 3. Add CI/CD workflow
+
+> **Note**: The workspace Dockerfile (`infra/docker/story-generator/Dockerfile`) has been updated to build
+> `Mystira.StoryGenerator.Api` for Kubernetes deployment. The Blazor WASM frontend deploys to
+> Static Web Apps via `story-generator-swa-deploy`, following the same pattern as Mystira.App.
 
 ### Phase 2: Update Workspace CI/CD
 

@@ -53,10 +53,10 @@ patches:
     patch: |-
       - op: replace
         path: /spec/tls/0/hosts/0
-        value: "dev.story-generator.mystira.app"
+        value: "dev.story-api.mystira.app"
       - op: replace
         path: /spec/rules/0/host
-        value: "dev.story-generator.mystira.app"
+        value: "dev.story-api.mystira.app"
       - op: replace
         path: /spec/tls/0/secretName
         value: "mys-story-generator-tls-dev"

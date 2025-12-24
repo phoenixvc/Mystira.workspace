@@ -191,7 +191,7 @@ Code → Azure App Service / Static Web App → Service
 **Access**:
 
 - Internal: Kubernetes service (`mystira-story-generator`)
-- External: Ingress with DNS (`story-generator.mystira.app`)
+- External: Ingress with DNS (`story-api.mystira.app`)
 - Kubernetes manifests: `infra/kubernetes/base/story-generator/`
 
 **Deployment**:

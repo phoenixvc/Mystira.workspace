@@ -30,11 +30,13 @@ This document describes how packages are built, published, and deployed across a
 
 ### Images Published
 
-| Image             | Source                     | Dockerfile                                |
-| ----------------- | -------------------------- | ----------------------------------------- |
-| `publisher`       | `packages/publisher`       | `infra/docker/publisher/Dockerfile`       |
-| `chain`           | `packages/chain`           | `infra/docker/chain/Dockerfile`           |
-| `story-generator` | `packages/story-generator` | `infra/docker/story-generator/Dockerfile` |
+| Image             | Source                     | Dockerfile                                | Notes |
+| ----------------- | -------------------------- | ----------------------------------------- | ----- |
+| `publisher`       | `packages/publisher`       | `infra/docker/publisher/Dockerfile`       | Node.js |
+| `chain`           | `packages/chain`           | `infra/docker/chain/Dockerfile`           | Python |
+| `story-generator` | `packages/story-generator` | `infra/docker/story-generator/Dockerfile` | .NET API (not Blazor WASM) |
+
+> **Note**: The `story-generator` image builds `Mystira.StoryGenerator.Api`, following the same pattern as `Mystira.App` where API goes to Kubernetes and Web (Blazor WASM) would go to Static Web App.
 
 ### Tagging Strategy
 
@@ -298,17 +300,22 @@ Submodule repositories (Admin.Api, Admin.UI, etc.) use `repository_dispatch` to 
 
 ### Supported Event Types
 
-| Event Type               | Target                  | Handler Workflow                      |
-| ------------------------ | ----------------------- | ------------------------------------- |
-| `admin-api-deploy`       | `mys-admin-api` (K8s)   | `submodule-deploy-dev.yml`            |
-| `admin-ui-deploy`        | `mys-admin-ui` (K8s)    | `submodule-deploy-dev.yml`            |
-| `story-generator-deploy` | `mys-story-generator` (K8s) | `submodule-deploy-dev.yml`        |
-| `publisher-deploy`       | `mys-publisher` (K8s)   | `submodule-deploy-dev.yml`            |
-| `chain-deploy`           | `mys-chain` (K8s)       | `submodule-deploy-dev.yml`            |
-| `app-deploy`             | App Service             | `submodule-deploy-dev-appservice.yml` |
-| `app-swa-deploy`         | Static Web App          | `submodule-deploy-dev-appservice.yml` |
-| `devhub-deploy`          | Static Web App          | `submodule-deploy-dev-appservice.yml` |
-| `nuget-publish`          | GitHub/NuGet.org        | `nuget-publish.yml`                   |
+| Event Type               | Target                      | Handler Workflow                      |
+| ------------------------ | --------------------------- | ------------------------------------- |
+| `admin-api-deploy`       | `mys-admin-api` (K8s)       | `submodule-deploy-dev.yml`            |
+| `admin-ui-deploy`        | `mys-admin-ui` (K8s)        | `submodule-deploy-dev.yml`            |
+| `story-generator-deploy` | `mys-story-generator` (K8s) | `submodule-deploy-dev.yml`            |
+| `publisher-deploy`       | `mys-publisher` (K8s)       | `submodule-deploy-dev.yml`            |
+| `chain-deploy`           | `mys-chain` (K8s)           | `submodule-deploy-dev.yml`            |
+| `app-deploy`             | App Service                 | `submodule-deploy-dev-appservice.yml` |
+| `app-swa-deploy`         | Static Web App              | `submodule-deploy-dev-appservice.yml` |
+| `devhub-deploy`          | Static Web App              | `submodule-deploy-dev-appservice.yml` |
+| `story-generator-swa-deploy` | Static Web App          | `submodule-deploy-dev-appservice.yml` |
+| `nuget-publish`          | GitHub/NuGet.org            | `nuget-publish.yml`                   |
+
+> **Note**: `Mystira.StoryGenerator` follows the same API/Web pattern as `Mystira.App`:
+> - **API** (`Mystira.StoryGenerator.Api`) → Kubernetes via `story-generator-deploy`
+> - **Web** (`Mystira.StoryGenerator.Web`, Blazor WASM) → Static Web App via `story-generator-swa-deploy`
 
 ### Client Payload Format
 

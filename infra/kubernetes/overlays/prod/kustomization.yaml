@@ -75,6 +75,19 @@ patches:
         path: /data/key_vault_url
         value: "https://mys-prod-chain-kv-san.vault.azure.net/"
   - target:
+      kind: Ingress
+      name: mys-story-generator-ingress
+    patch: |-
+      - op: replace
+        path: /spec/tls/0/hosts/0
+        value: "story-api.mystira.app"
+      - op: replace
+        path: /spec/rules/0/host
+        value: "story-api.mystira.app"
+      - op: replace
+        path: /spec/tls/0/secretName
+        value: "mys-story-generator-tls-prod"
+  - target:
       kind: Deployment
       name: mys-story-generator
     patch: |-

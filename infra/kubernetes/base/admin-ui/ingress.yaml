@@ -1,7 +1,7 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: mystira-admin-ui-ingress
+  name: mys-admin-ui-ingress
   labels:
     app: mystira-admin-ui
   annotations:

@@ -17,7 +17,7 @@ NAMESPACE="mys-dev"
 DOMAINS=(
     "dev.publisher.mystira.app"
     "dev.chain.mystira.app"
-    "dev.story-generator.mystira.app"
+    "dev.story-api.mystira.app"
 )
 CERT_SECRETS=(
     "mystira-publisher-tls-dev"
@@ -25,9 +25,9 @@ CERT_SECRETS=(
     "mystira-story-generator-tls-dev"
 )
 INGRESSES=(
-    "mystira-publisher-ingress"
-    "mystira-chain-ingress"
-    "mystira-story-generator-ingress"
+    "mys-publisher-ingress"
+    "mys-chain-ingress"
+    "mys-story-generator-ingress"
 )
 
 echo -e "${BLUE}========================================${NC}"
