@@ -11,8 +11,10 @@ resources:
   - ../../base/admin-ui
   - ../../base/cert-manager
 
-commonLabels:
-  environment: staging
+labels:
+  - pairs:
+      environment: staging
+    includeSelectors: false
 
 patches:
   - target:

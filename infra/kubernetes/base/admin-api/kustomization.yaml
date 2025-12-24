@@ -9,10 +9,12 @@ resources:
   - ingress.yaml
   - network-policy.yaml
 
-commonLabels:
-  app.kubernetes.io/name: mys-admin-api
-  app.kubernetes.io/part-of: mys
-  app.kubernetes.io/component: admin-api
+labels:
+  - pairs:
+      app.kubernetes.io/name: mys-admin-api
+      app.kubernetes.io/part-of: mys
+      app.kubernetes.io/component: admin-api
+    includeSelectors: true
 
 images:
   - name: myssharedacr.azurecr.io/admin-api

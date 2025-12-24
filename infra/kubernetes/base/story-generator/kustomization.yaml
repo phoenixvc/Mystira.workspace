@@ -10,10 +10,12 @@ resources:
   - deployment.yaml
   - ingress.yaml
 
-commonLabels:
-  app.kubernetes.io/name: mys-story-generator
-  app.kubernetes.io/part-of: mys
-  app.kubernetes.io/component: story-generator-api
+labels:
+  - pairs:
+      app.kubernetes.io/name: mys-story-generator
+      app.kubernetes.io/part-of: mys
+      app.kubernetes.io/component: story-generator-api
+    includeSelectors: true
 
 images:
   - name: myssharedacr.azurecr.io/story-generator

@@ -8,10 +8,12 @@ resources:
   - deployment.yaml
   - ingress.yaml
 
-commonLabels:
-  app.kubernetes.io/name: mys-publisher
-  app.kubernetes.io/part-of: mys
-  app.kubernetes.io/component: publisher
+labels:
+  - pairs:
+      app.kubernetes.io/name: mys-publisher
+      app.kubernetes.io/part-of: mys
+      app.kubernetes.io/component: publisher
+    includeSelectors: true
 
 images:
   - name: myssharedacr.azurecr.io/publisher
