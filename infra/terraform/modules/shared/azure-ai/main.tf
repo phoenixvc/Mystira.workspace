@@ -102,6 +102,25 @@ resource "azurerm_cognitive_account" "ai_foundry" {
 }
 
 # =============================================================================
+# Enable Project Management (using AzAPI to patch the account)
+# =============================================================================
+# The allowProjectManagement property is not available in azurerm provider
+# We use azapi_update_resource to patch the account with this setting
+
+resource "azapi_update_resource" "enable_project_management" {
+  count = var.enable_project ? 1 : 0
+
+  type        = "Microsoft.CognitiveServices/accounts@2024-10-01"
+  resource_id = azurerm_cognitive_account.ai_foundry.id
+
+  body = {
+    properties = {
+      allowProjectManagement = true
+    }
+  }
+}
+
+# =============================================================================
 # AI Foundry Project (using AzAPI for preview feature support)
 # =============================================================================
 # Projects provide workload isolation within AI Foundry
@@ -110,10 +129,13 @@ resource "azurerm_cognitive_account" "ai_foundry" {
 resource "azapi_resource" "ai_project" {
   count = var.enable_project ? 1 : 0
 
-  type      = "Microsoft.CognitiveServices/accounts/projects@2025-04-01-preview"
+  type      = "Microsoft.CognitiveServices/accounts/projects@2024-10-01"
   name      = "${local.name}-project"
   parent_id = azurerm_cognitive_account.ai_foundry.id
   location  = var.location
+
+  # Must wait for allowProjectManagement to be enabled
+  depends_on = [azapi_update_resource.enable_project_management]
 
   identity {
     type = "SystemAssigned"

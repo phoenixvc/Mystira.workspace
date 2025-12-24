@@ -361,57 +361,20 @@ module "shared_azure_ai" {
   resource_group_name = azurerm_resource_group.main.name
 
   # Enable AI Foundry project for workload isolation
-  enable_project = true
+  enable_project = true # Uses AzAPI to enable allowProjectManagement on account
 
-  # Model deployments - includes OpenAI and catalog models
+  # Model deployments - OpenAI models only
   # See: https://ai.azure.com/catalog/models for full catalog
-  # Note: Some models not available in SAN, using UK South as closest fallback
+  # Note: Claude/Anthropic models require Azure AI Foundry portal deployment (not Terraform)
+  # Note: GPT-4.1/5.x models not yet available - add when released
   model_deployments = {
-    # OpenAI Models - Standard (available in SAN)
-    "gpt-4o" = {
-      model_name    = "gpt-4o"
-      model_version = "2024-08-06"
-      model_format  = "OpenAI"
-      sku_name      = "GlobalStandard"
-      capacity      = 20
-    }
+    # GPT-4o-mini - staging uses moderate capacity
     "gpt-4o-mini" = {
       model_name    = "gpt-4o-mini"
       model_version = "2024-07-18"
       model_format  = "OpenAI"
       sku_name      = "GlobalStandard"
       capacity      = 40
-    }
-    # GPT-4.1 series
-    "gpt-4-1" = {
-      model_name    = "gpt-4.1"
-      model_version = "2025-04-14"
-      model_format  = "OpenAI"
-      sku_name      = "GlobalStandard"
-      capacity      = 20
-    }
-    "gpt-4-1-nano" = {
-      model_name    = "gpt-4.1-nano"
-      model_version = "2025-04-14"
-      model_format  = "OpenAI"
-      sku_name      = "GlobalStandard"
-      capacity      = 40
-    }
-    # GPT-5 series - limited regional availability
-    "gpt-5-nano" = {
-      model_name    = "gpt-5-nano"
-      model_version = "2025-04-14"
-      model_format  = "OpenAI"
-      sku_name      = "GlobalStandard"
-      capacity      = 40
-    }
-    "gpt-5-1" = {
-      model_name    = "gpt-5.1"
-      model_version = "2025-04-14"
-      model_format  = "OpenAI"
-      sku_name      = "GlobalStandard"
-      capacity      = 20
-      location      = "uksouth" # Not available in SAN
     }
     # Embedding models for RAG / Vector Search (reduces tokens ~20x)
     # Note: Must use GlobalStandard - Standard not available in SAN
@@ -428,31 +391,6 @@ module "shared_azure_ai" {
       model_format  = "OpenAI"
       sku_name      = "GlobalStandard"
       capacity      = 120
-    }
-    # Anthropic Claude - UK South (closest to SAN with availability)
-    "claude-haiku-4-5" = {
-      model_name    = "claude-haiku-4-5"
-      model_version = "1"
-      model_format  = "Anthropic"
-      sku_name      = "Standard"
-      capacity      = 1
-      location      = "uksouth"
-    }
-    "claude-sonnet-4-5" = {
-      model_name    = "claude-sonnet-4-5"
-      model_version = "1"
-      model_format  = "Anthropic"
-      sku_name      = "Standard"
-      capacity      = 1
-      location      = "uksouth"
-    }
-    "claude-opus-4-5" = {
-      model_name    = "claude-opus-4-5"
-      model_version = "1"
-      model_format  = "Anthropic"
-      sku_name      = "Standard"
-      capacity      = 1
-      location      = "uksouth"
     }
   }
 
