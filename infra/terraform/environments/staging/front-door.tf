@@ -23,6 +23,13 @@ module "front_door" {
   custom_domain_admin_api   = "staging.admin-api.mystira.app"
   custom_domain_admin_ui    = "staging.admin.mystira.app"
 
+  # Story Generator services (API + SWA)
+  enable_story_generator              = true
+  story_generator_api_backend_address = "staging.story-generator.mystira.app"
+  story_generator_swa_backend_address = module.story_generator.static_web_app_default_hostname
+  custom_domain_story_generator_api   = "staging.story-generator.mystira.app"
+  custom_domain_story_generator_swa   = "staging.story.mystira.app"
+
   # WAF Configuration - Staging Settings
   enable_waf           = true
   waf_mode             = "Detection" # Detection mode for staging (non-blocking)
@@ -69,4 +76,14 @@ output "front_door_admin_api_endpoint" {
 output "front_door_admin_ui_endpoint" {
   description = "Front Door endpoint for Admin UI - use this for CNAME"
   value       = module.front_door.admin_ui_endpoint_hostname
+}
+
+output "front_door_story_generator_api_endpoint" {
+  description = "Front Door endpoint for Story Generator API - use this for CNAME"
+  value       = module.front_door.story_generator_api_endpoint_hostname
+}
+
+output "front_door_story_generator_swa_endpoint" {
+  description = "Front Door endpoint for Story Generator SWA - use this for CNAME"
+  value       = module.front_door.story_generator_swa_endpoint_hostname
 }
