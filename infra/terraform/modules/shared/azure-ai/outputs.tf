@@ -130,7 +130,7 @@ output "model_deployments" {
         endpoint = azurerm_cognitive_account.ai_foundry.endpoint
       }
     },
-    # OpenAI models (East US - Standard SKU)
+    # OpenAI models (East US - DALL-E)
     {
       for k, v in azurerm_cognitive_deployment.openai_models_eastus : k => {
         name     = v.name
@@ -139,6 +139,28 @@ output "model_deployments" {
         format   = "OpenAI"
         region   = "eastus"
         endpoint = azurerm_cognitive_account.ai_foundry_eastus[0].endpoint
+      }
+    },
+    # OpenAI models (Sweden Central - GPT-5.1)
+    {
+      for k, v in azurerm_cognitive_deployment.openai_models_swedencentral : k => {
+        name     = v.name
+        model    = v.model[0].name
+        version  = v.model[0].version
+        format   = "OpenAI"
+        region   = "swedencentral"
+        endpoint = azurerm_cognitive_account.ai_foundry_swedencentral[0].endpoint
+      }
+    },
+    # OpenAI models (North Central US - Whisper/TTS)
+    {
+      for k, v in azurerm_cognitive_deployment.openai_models_northcentralus : k => {
+        name     = v.name
+        model    = v.model[0].name
+        version  = v.model[0].version
+        format   = "OpenAI"
+        region   = "northcentralus"
+        endpoint = azurerm_cognitive_account.ai_foundry_northcentralus[0].endpoint
       }
     },
     # Catalog models (primary region)
@@ -230,11 +252,57 @@ output "eastus_primary_access_key" {
 }
 
 output "connection_config_eastus" {
-  description = "Connection configuration for East US models (DALL-E, Whisper, TTS)"
+  description = "Connection configuration for East US models (DALL-E)"
   value = local.needs_eastus ? {
     endpoint   = azurerm_cognitive_account.ai_foundry_eastus[0].endpoint
     account_id = azurerm_cognitive_account.ai_foundry_eastus[0].id
     region     = "eastus"
+  } : null
+}
+
+# =============================================================================
+# Sweden Central Account (Secondary Region - GPT-5.1)
+# =============================================================================
+
+output "swedencentral_account_id" {
+  description = "Sweden Central AI Foundry account ID (if created)"
+  value       = local.needs_swedencentral ? azurerm_cognitive_account.ai_foundry_swedencentral[0].id : null
+}
+
+output "swedencentral_endpoint" {
+  description = "Sweden Central AI Foundry endpoint URL (if created)"
+  value       = local.needs_swedencentral ? azurerm_cognitive_account.ai_foundry_swedencentral[0].endpoint : null
+}
+
+output "connection_config_swedencentral" {
+  description = "Connection configuration for Sweden Central models (GPT-5.1)"
+  value = local.needs_swedencentral ? {
+    endpoint   = azurerm_cognitive_account.ai_foundry_swedencentral[0].endpoint
+    account_id = azurerm_cognitive_account.ai_foundry_swedencentral[0].id
+    region     = "swedencentral"
+  } : null
+}
+
+# =============================================================================
+# North Central US Account (Secondary Region - Audio Models)
+# =============================================================================
+
+output "northcentralus_account_id" {
+  description = "North Central US AI Foundry account ID (if created)"
+  value       = local.needs_northcentralus ? azurerm_cognitive_account.ai_foundry_northcentralus[0].id : null
+}
+
+output "northcentralus_endpoint" {
+  description = "North Central US AI Foundry endpoint URL (if created)"
+  value       = local.needs_northcentralus ? azurerm_cognitive_account.ai_foundry_northcentralus[0].endpoint : null
+}
+
+output "connection_config_northcentralus" {
+  description = "Connection configuration for North Central US models (Whisper, TTS)"
+  value = local.needs_northcentralus ? {
+    endpoint   = azurerm_cognitive_account.ai_foundry_northcentralus[0].endpoint
+    account_id = azurerm_cognitive_account.ai_foundry_northcentralus[0].id
+    region     = "northcentralus"
   } : null
 }
 
@@ -245,22 +313,30 @@ output "connection_config_eastus" {
 output "deployment_health" {
   description = "Deployment health summary for monitoring"
   value = {
-    primary_region = var.location
+    primary_region   = var.location
     primary_endpoint = azurerm_cognitive_account.ai_foundry.endpoint
-    openai_model_count_primary = length(azurerm_cognitive_deployment.openai_models)
-    openai_model_count_eastus = length(azurerm_cognitive_deployment.openai_models_eastus)
-    catalog_model_count_primary = length(azapi_resource.catalog_models)
-    catalog_model_count_uksouth = length(azapi_resource.catalog_models_uksouth)
+    openai_model_count_primary        = length(azurerm_cognitive_deployment.openai_models)
+    openai_model_count_eastus         = length(azurerm_cognitive_deployment.openai_models_eastus)
+    openai_model_count_swedencentral  = length(azurerm_cognitive_deployment.openai_models_swedencentral)
+    openai_model_count_northcentralus = length(azurerm_cognitive_deployment.openai_models_northcentralus)
+    catalog_model_count_primary       = length(azapi_resource.catalog_models)
+    catalog_model_count_uksouth       = length(azapi_resource.catalog_models_uksouth)
     total_model_count = (
       length(azurerm_cognitive_deployment.openai_models) +
       length(azurerm_cognitive_deployment.openai_models_eastus) +
+      length(azurerm_cognitive_deployment.openai_models_swedencentral) +
+      length(azurerm_cognitive_deployment.openai_models_northcentralus) +
       length(azapi_resource.catalog_models) +
       length(azapi_resource.catalog_models_uksouth)
     )
-    uksouth_enabled = local.needs_uksouth
-    uksouth_endpoint = local.needs_uksouth ? azurerm_cognitive_account.ai_foundry_uksouth[0].endpoint : null
-    eastus_enabled = local.needs_eastus
-    eastus_endpoint = local.needs_eastus ? azurerm_cognitive_account.ai_foundry_eastus[0].endpoint : null
+    uksouth_enabled        = local.needs_uksouth
+    uksouth_endpoint       = local.needs_uksouth ? azurerm_cognitive_account.ai_foundry_uksouth[0].endpoint : null
+    eastus_enabled         = local.needs_eastus
+    eastus_endpoint        = local.needs_eastus ? azurerm_cognitive_account.ai_foundry_eastus[0].endpoint : null
+    swedencentral_enabled  = local.needs_swedencentral
+    swedencentral_endpoint = local.needs_swedencentral ? azurerm_cognitive_account.ai_foundry_swedencentral[0].endpoint : null
+    northcentralus_enabled  = local.needs_northcentralus
+    northcentralus_endpoint = local.needs_northcentralus ? azurerm_cognitive_account.ai_foundry_northcentralus[0].endpoint : null
   }
 }
 

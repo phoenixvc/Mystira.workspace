@@ -146,6 +146,7 @@ variable "model_deployments" {
       model_format  = "OpenAI"
       sku_name      = "GlobalStandard"
       capacity      = 20
+      location      = "swedencentral" # Not available in SAN
     }
     "gpt-5.1-codex" = {
       model_name    = "gpt-5.1-codex"
@@ -153,6 +154,7 @@ variable "model_deployments" {
       model_format  = "OpenAI"
       sku_name      = "GlobalStandard"
       capacity      = 20
+      location      = "swedencentral" # Not available in SAN
     }
 
     # ==========================================================================
@@ -207,14 +209,14 @@ variable "model_deployments" {
     # Audio Models (Whisper & TTS)
     # ==========================================================================
     # Speech-to-text for voice input, text-to-speech for narration
-    # Deployed to East US (Standard SKU not available in South Africa North)
+    # Deployed to North Central US (only region with Whisper/TTS support)
     "whisper" = {
       model_name    = "whisper"
       model_version = "001"
       model_format  = "OpenAI"
       sku_name      = "Standard"
       capacity      = 1
-      location      = "eastus"
+      location      = "northcentralus"
     }
     "tts" = {
       model_name    = "tts"
@@ -222,7 +224,7 @@ variable "model_deployments" {
       model_format  = "OpenAI"
       sku_name      = "Standard"
       capacity      = 1
-      location      = "eastus"
+      location      = "northcentralus"
     }
     "tts-hd" = {
       model_name    = "tts-hd"
@@ -230,7 +232,7 @@ variable "model_deployments" {
       model_format  = "OpenAI"
       sku_name      = "Standard"
       capacity      = 1
-      location      = "eastus"
+      location      = "northcentralus"
     }
 
     # ==========================================================================
@@ -319,7 +321,7 @@ variable "model_deployments" {
     # Linear scaling with context - efficient for long documents
     # Use for full story manuscript analysis, cross-chapter consistency
     "jamba-1.5-large" = {
-      model_name    = "jamba-1.5-large"
+      model_name    = "AI21-Jamba-1.5-Large"
       model_version = "1"
       model_format  = "AI21"
       sku_name      = "GlobalStandard"
@@ -327,7 +329,7 @@ variable "model_deployments" {
       location      = "uksouth" # Not available in SAN
     }
     "jamba-1.5-mini" = {
-      model_name    = "jamba-1.5-mini"
+      model_name    = "AI21-Jamba-1.5-Mini"
       model_version = "1"
       model_format  = "AI21"
       sku_name      = "GlobalStandard"
