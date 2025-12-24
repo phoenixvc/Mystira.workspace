@@ -4,6 +4,7 @@ using Microsoft.Extensions.Hosting;
 using Mystira.Shared.Messaging;
 using Wolverine;
 using Wolverine.AzureServiceBus;
+using Wolverine.ErrorHandling;
 
 namespace Mystira.Shared.Extensions;
 
@@ -88,7 +89,7 @@ public static class MessagingExtensions
         var retryDelays = GenerateRetryDelays(options.MaxRetries, options.InitialRetryDelaySeconds);
         if (retryDelays.Length > 0)
         {
-            wolverine.OnException<Exception>()
+            wolverine.Policies.OnException<Exception>()
                 .RetryWithCooldown(retryDelays);
         }
 
