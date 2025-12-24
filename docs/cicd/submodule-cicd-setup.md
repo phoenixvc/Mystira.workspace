@@ -32,6 +32,46 @@ This guide provides complete instructions for setting up CI/CD in Mystira submod
 
 ---
 
+## Workflow Cleanup (Submodules)
+
+Submodule repositories should **delete** staging/production workflows since the workspace handles these:
+
+### DELETE from Submodules
+
+| Category | Workflows to Remove |
+|----------|---------------------|
+| **Staging Infra** | `infrastructure-deploy-staging.yml` |
+| **Staging CI/CD** | `*-cicd-staging.yml`, `staging-automated-setup.yml` |
+| **Production Infra** | `infrastructure-deploy-prod.yml` |
+| **Production CI/CD** | `*-cicd-prod.yml` |
+| **Package Publishing** | `publish-shared-packages.yml` (moved to workspace) |
+
+### KEEP in Submodules
+
+| Workflow | Purpose |
+|----------|---------|
+| `*-cicd-dev.yml` or similar | Dev builds, Docker push, trigger workspace dispatch |
+| `trigger-nuget-publish` job | NuGet publishing via workspace (add to dev workflow) |
+
+### Why Delete?
+
+The workspace now provides unified handling for:
+
+| Concern | Workspace Workflow |
+|---------|-------------------|
+| Staging deployment | `staging-release.yml` |
+| Production deployment | `production-release.yml` |
+| NuGet publishing | `nuget-publish.yml` |
+| NPM publishing | `release.yml` |
+| Infrastructure | `infra-deploy.yml` |
+
+Keeping staging/prod workflows in submodules creates:
+- Duplicate deployment paths
+- Version synchronization issues
+- Unclear ownership of release process
+
+---
+
 ## CI/CD Trigger Behavior
 
 | Event | CI (lint/test/build) | Deploy to Dev |
@@ -503,9 +543,32 @@ Mystira.App uses **Azure App Service** (API) and **Static Web App** (Blazor WASM
 
 ---
 
-## NuGet Package Publishing (Optional)
+## NuGet Package Publishing (with Auto-Changeset)
 
-If your submodule has shared contracts (e.g., `Mystira.App.Contracts`), add a NuGet publish job:
+If your submodule has shared contracts (e.g., `Mystira.App.Contracts`), add a NuGet publish job. **The workspace automatically creates a changeset** for stable releases to keep NPM packages in sync.
+
+### Flow Diagram
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    Submodule NuGet Publishing Flow                           │
+├─────────────────────────────────────────────────────────────────────────────┤
+│  Submodule Push to Main                                                      │
+│         ↓                                                                    │
+│  trigger-nuget-publish job fires                                             │
+│         ↓                                                                    │
+│  repository_dispatch → workspace                                             │
+│         ↓                                                                    │
+│  nuget-publish.yml runs:                                                     │
+│    1. Build & pack NuGet package                                            │
+│    2. Push to GitHub Packages + NuGet.org                                   │
+│    3. Auto-create changeset for dependent NPM package (stable only)         │
+│         ↓                                                                    │
+│  Changeset pushed to main → release.yml creates Version PR                 │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+### Workflow Template
 
 ```yaml
 trigger-nuget-publish:
@@ -533,14 +596,24 @@ trigger-nuget-publish:
           }
 ```
 
-| Package | `package` Value |
-|---------|-----------------|
-| Mystira.App.Contracts | `app-contracts` |
-| Mystira.StoryGenerator.Contracts | `story-generator-contracts` |
+| Package | `package` Value | NPM Dependent |
+|---------|-----------------|---------------|
+| Mystira.App.Contracts | `app-contracts` | `@mystira/app` |
+| Mystira.StoryGenerator.Contracts | `story-generator-contracts` | `@mystira/story-generator` |
 
-**Version strategy:**
-- `dev` branch: Pre-release (`1.0.0-dev.123`) → GitHub Packages only
-- `main` branch: Stable (`1.0.0`) → GitHub Packages + NuGet.org
+### Version Strategy
+
+| Branch | NuGet Version | Changeset Created? | Destination |
+|--------|--------------|-------------------|-------------|
+| `dev` | `1.0.0-dev.123` | ❌ No | GitHub Packages only |
+| `main` | `1.0.0` | ✅ Yes (patch bump) | GitHub Packages + NuGet.org |
+
+**Stable releases from main branch** automatically create a changeset that:
+- Bumps the dependent NPM package with a `patch` version
+- Includes a changelog entry referencing the NuGet package version
+- Triggers the Changesets release workflow to create a Version PR
+
+This ensures NPM packages stay synchronized when their NuGet dependencies are updated.
 
 ---
 
