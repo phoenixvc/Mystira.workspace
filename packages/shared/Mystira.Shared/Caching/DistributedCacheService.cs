@@ -16,6 +16,12 @@ public class DistributedCacheService : ICacheService
     private readonly ILogger<DistributedCacheService> _logger;
     private readonly JsonSerializerOptions _jsonOptions;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="DistributedCacheService"/> class.
+    /// </summary>
+    /// <param name="cache">The distributed cache implementation.</param>
+    /// <param name="options">Cache configuration options.</param>
+    /// <param name="logger">Logger instance.</param>
     public DistributedCacheService(
         IDistributedCache cache,
         IOptions<CacheOptions> options,
@@ -31,6 +37,7 @@ public class DistributedCacheService : ICacheService
         };
     }
 
+    /// <inheritdoc />
     public async Task<T?> GetAsync<T>(string key, CancellationToken cancellationToken = default)
     {
         if (!_options.Enabled)
@@ -55,11 +62,7 @@ public class DistributedCacheService : ICacheService
         }
     }
 
-    /// <summary>
-    /// Attempts to get a value from the cache.
-    /// Returns true if the value was found, false otherwise.
-    /// Works correctly with value types (int, bool, etc.).
-    /// </summary>
+    /// <inheritdoc />
     public async Task<(bool Found, T? Value)> TryGetAsync<T>(string key, CancellationToken cancellationToken = default)
     {
         if (!_options.Enabled)
@@ -85,11 +88,13 @@ public class DistributedCacheService : ICacheService
         }
     }
 
+    /// <inheritdoc />
     public Task SetAsync<T>(string key, T value, CancellationToken cancellationToken = default)
     {
         return SetAsync(key, value, TimeSpan.FromMinutes(_options.DefaultExpirationMinutes), cancellationToken);
     }
 
+    /// <inheritdoc />
     public async Task SetAsync<T>(
         string key,
         T value,
@@ -123,6 +128,7 @@ public class DistributedCacheService : ICacheService
         }
     }
 
+    /// <inheritdoc />
     public Task<T> GetOrCreateAsync<T>(
         string key,
         Func<CancellationToken, Task<T>> factory,
@@ -132,6 +138,7 @@ public class DistributedCacheService : ICacheService
             TimeSpan.FromMinutes(_options.DefaultExpirationMinutes), cancellationToken);
     }
 
+    /// <inheritdoc />
     public async Task<T> GetOrCreateAsync<T>(
         string key,
         Func<CancellationToken, Task<T>> factory,
@@ -159,6 +166,7 @@ public class DistributedCacheService : ICacheService
         return value;
     }
 
+    /// <inheritdoc />
     public async Task RemoveAsync(string key, CancellationToken cancellationToken = default)
     {
         try
@@ -171,6 +179,7 @@ public class DistributedCacheService : ICacheService
         }
     }
 
+    /// <inheritdoc />
     public Task RemoveByPatternAsync(string pattern, CancellationToken cancellationToken = default)
     {
         // Note: Pattern-based removal requires Redis SCAN command
@@ -181,6 +190,7 @@ public class DistributedCacheService : ICacheService
         return Task.CompletedTask;
     }
 
+    /// <inheritdoc />
     public async Task<bool> ExistsAsync(string key, CancellationToken cancellationToken = default)
     {
         if (!_options.Enabled)

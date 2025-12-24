@@ -257,6 +257,7 @@ public class CircuitBreakerMetrics : IDisposable
         }
     }
 
+    /// <inheritdoc />
     public void Dispose()
     {
         // Static fields are app-lifetime and should not be disposed per-instance
@@ -272,8 +273,10 @@ public class CircuitBreakerEventPublisher : IObservableCircuitBreaker
     private readonly ILogger<CircuitBreakerEventPublisher> _logger;
     private CircuitState _state = CircuitState.Closed;
 
+    /// <inheritdoc />
     public string Name { get; }
 
+    /// <inheritdoc />
     public CircuitState State
     {
         get => _state;
@@ -288,9 +291,18 @@ public class CircuitBreakerEventPublisher : IObservableCircuitBreaker
         }
     }
 
+    /// <inheritdoc />
     public event EventHandler<CircuitBreakerStateChangedEventArgs>? StateChanged;
+
+    /// <inheritdoc />
     public event EventHandler<CircuitBreakerRejectionEventArgs>? RequestRejected;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="CircuitBreakerEventPublisher"/> class.
+    /// </summary>
+    /// <param name="name">The circuit breaker name.</param>
+    /// <param name="metrics">The metrics collector.</param>
+    /// <param name="logger">Logger instance.</param>
     public CircuitBreakerEventPublisher(
         string name,
         CircuitBreakerMetrics metrics,

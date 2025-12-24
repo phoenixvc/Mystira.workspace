@@ -132,18 +132,33 @@ public class DistributedLockException : Exception
     /// </summary>
     public string Resource { get; }
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="DistributedLockException"/> class.
+    /// </summary>
+    /// <param name="resource">The resource that could not be locked.</param>
     public DistributedLockException(string resource)
         : base($"Could not acquire lock on resource: {resource}")
     {
         Resource = resource;
     }
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="DistributedLockException"/> class.
+    /// </summary>
+    /// <param name="resource">The resource that could not be locked.</param>
+    /// <param name="message">The error message.</param>
     public DistributedLockException(string resource, string message)
         : base(message)
     {
         Resource = resource;
     }
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="DistributedLockException"/> class.
+    /// </summary>
+    /// <param name="resource">The resource that could not be locked.</param>
+    /// <param name="message">The error message.</param>
+    /// <param name="innerException">The inner exception.</param>
     public DistributedLockException(string resource, string message, Exception innerException)
         : base(message, innerException)
     {

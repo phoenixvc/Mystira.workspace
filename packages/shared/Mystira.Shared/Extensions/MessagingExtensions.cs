@@ -4,6 +4,7 @@ using Microsoft.Extensions.Hosting;
 using Mystira.Shared.Messaging;
 using Wolverine;
 using Wolverine.AzureServiceBus;
+using Wolverine.ErrorHandling;
 
 namespace Mystira.Shared.Extensions;
 

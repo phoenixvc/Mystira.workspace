@@ -54,6 +54,7 @@ public interface IIntegrationEvent : IDomainEvent
 /// </summary>
 public abstract record DomainEventBase : IDomainEvent
 {
+    /// <inheritdoc />
     public DateTimeOffset OccurredAt { get; init; } = DateTimeOffset.UtcNow;
 }
 
@@ -62,6 +63,9 @@ public abstract record DomainEventBase : IDomainEvent
 /// </summary>
 public abstract record IntegrationEventBase : IIntegrationEvent
 {
+    /// <inheritdoc />
     public Guid EventId { get; init; } = Guid.NewGuid();
+
+    /// <inheritdoc />
     public DateTimeOffset OccurredAt { get; init; } = DateTimeOffset.UtcNow;
 }

@@ -45,6 +45,11 @@ public class JwtService : IJwtService
     private readonly JwtSecurityTokenHandler _tokenHandler;
     private readonly ConfigurationManager<OpenIdConnectConfiguration> _configurationManager;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="JwtService"/> class.
+    /// </summary>
+    /// <param name="options">JWT authentication options.</param>
+    /// <param name="logger">Logger instance.</param>
     public JwtService(IOptions<JwtOptions> options, ILogger<JwtService> logger)
     {
         _options = options.Value;

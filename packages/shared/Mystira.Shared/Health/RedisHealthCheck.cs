@@ -16,6 +16,12 @@ public class RedisHealthCheck : IHealthCheck
     private readonly CacheOptions _options;
     private readonly ILogger<RedisHealthCheck> _logger;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="RedisHealthCheck"/> class.
+    /// </summary>
+    /// <param name="cache">The distributed cache implementation.</param>
+    /// <param name="options">Cache configuration options.</param>
+    /// <param name="logger">Logger instance.</param>
     public RedisHealthCheck(
         IDistributedCache cache,
         IOptions<CacheOptions> options,
@@ -26,6 +32,7 @@ public class RedisHealthCheck : IHealthCheck
         _logger = logger;
     }
 
+    /// <inheritdoc />
     public async Task<HealthCheckResult> CheckHealthAsync(
         HealthCheckContext context,
         CancellationToken cancellationToken = default)

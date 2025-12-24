@@ -152,6 +152,23 @@ jobs:
           echo "version=${{ steps.npm_version.outputs.full_version }}" >> $GITHUB_OUTPUT
           echo "Packed Mystira.Contracts v${{ steps.npm_version.outputs.full_version }}"
 
+      - name: List package contents
+        run: |
+          cd packages/contracts/dotnet/Mystira.Contracts
+          echo "=== Source Files Included ==="
+          find . -name "*.cs" -type f | sort
+          echo ""
+          echo "=== Namespaces & Types ==="
+          # Extract all public types from source files
+          grep -rh "^public \(class\|record\|interface\|enum\|struct\)" --include="*.cs" . | \
+            sed 's/^public //' | \
+            sed 's/{.*//' | \
+            sed 's/ :.*//' | \
+            sort | uniq
+          echo ""
+          echo "=== Package Files ==="
+          unzip -l ./nupkg/*.nupkg | grep -E "\.dll|\.xml|\.pdb" || true
+
       - name: Push to GitHub Packages
         run: |
           cd packages/contracts/dotnet/Mystira.Contracts
@@ -171,6 +188,8 @@ jobs:
 
       - name: Generate summary
         run: |
+          cd packages/contracts/dotnet/Mystira.Contracts
+
           echo "## Mystira.Contracts NuGet Package Published" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "| Property | Value |" >> $GITHUB_STEP_SUMMARY
@@ -180,6 +199,29 @@ jobs:
           echo "| Pre-release | ${{ steps.version.outputs.is_prerelease }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Triggered By | ${{ steps.version.outputs.trigger_source }} |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
+
+          echo "### Types Included" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "<details>" >> $GITHUB_STEP_SUMMARY
+          echo "<summary>Click to expand type list</summary>" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          # List all public types by namespace
+          for ns in App App/Responses/Badges App/Responses/Common App/Ports/Health StoryGenerator; do
+            if [ -d "$ns" ]; then
+              echo "# Mystira.Contracts.${ns//\//.}" >> $GITHUB_STEP_SUMMARY
+              grep -rh "^public \(class\|record\|interface\|enum\|struct\)" --include="*.cs" "$ns" 2>/dev/null | \
+                sed 's/^public /  - /' | \
+                sed 's/{.*//' | \
+                sed 's/ :.*//' | \
+                sort | uniq >> $GITHUB_STEP_SUMMARY || true
+              echo "" >> $GITHUB_STEP_SUMMARY
+            fi
+          done
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          echo "</details>" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
           echo "### Published To" >> $GITHUB_STEP_SUMMARY
           echo "- GitHub Packages: \`https://nuget.pkg.github.com/phoenixvc/index.json\`" >> $GITHUB_STEP_SUMMARY
           if [ "${{ steps.version.outputs.publish_to_nuget_org }}" = "true" ]; then

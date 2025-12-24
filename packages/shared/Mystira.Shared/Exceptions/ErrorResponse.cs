@@ -76,6 +76,9 @@ public class ErrorResponse
 /// </summary>
 public class ValidationErrorResponse : ErrorResponse
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ValidationErrorResponse"/> class.
+    /// </summary>
     public ValidationErrorResponse()
     {
         Category = "Validation";
@@ -94,6 +97,11 @@ public class ValidationErrorResponse : ErrorResponse
 /// </summary>
 public class NotFoundErrorResponse : ErrorResponse
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="NotFoundErrorResponse"/> class.
+    /// </summary>
+    /// <param name="resourceType">The type of resource that was not found.</param>
+    /// <param name="resourceId">The ID of the resource that was not found.</param>
     public NotFoundErrorResponse(string resourceType, string? resourceId = null)
     {
         Category = "NotFound";
@@ -123,6 +131,10 @@ public class NotFoundErrorResponse : ErrorResponse
 /// </summary>
 public class ForbiddenErrorResponse : ErrorResponse
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ForbiddenErrorResponse"/> class.
+    /// </summary>
+    /// <param name="requiredPermission">The permission that was required but not granted.</param>
     public ForbiddenErrorResponse(string? requiredPermission = null)
     {
         Category = "Authorization";
