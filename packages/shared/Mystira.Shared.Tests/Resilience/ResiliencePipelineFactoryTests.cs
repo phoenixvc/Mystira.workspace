@@ -194,16 +194,14 @@ public class ResiliencePipelineFactoryTests
     }
 
     [Fact]
-    public void CreateRetryPipeline_WithZeroRetries_ReturnsValidPipeline()
+    public void CreateRetryPipeline_WithZeroRetries_ThrowsValidationException()
     {
         // Arrange
         var options = new ResilienceOptions { MaxRetries = 0 };
 
-        // Act
-        var pipeline = ResiliencePipelineFactory.CreateRetryPipeline<string>("Test", options);
-
-        // Assert
-        pipeline.Should().NotBeNull();
+        // Act & Assert - Polly requires at least 1 retry attempt
+        Assert.Throws<System.ComponentModel.DataAnnotations.ValidationException>(() =>
+            ResiliencePipelineFactory.CreateRetryPipeline<string>("Test", options));
     }
 
     [Theory]
