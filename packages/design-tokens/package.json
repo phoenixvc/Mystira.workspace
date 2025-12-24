@@ -1,0 +1,52 @@
+{
+  "name": "@mystira/design-tokens",
+  "version": "0.1.0",
+  "description": "Unified design tokens for Mystira platform - colors, typography, spacing, and component styles",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./css": "./css/variables.css",
+    "./tailwind": "./tailwind/preset.js"
+  },
+  "files": [
+    "dist",
+    "css",
+    "tailwind"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "clean": "rm -rf dist",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "mystira",
+    "design-tokens",
+    "css",
+    "tailwind",
+    "design-system"
+  ],
+  "author": "Mystira Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/phoenixvc/Mystira.workspace.git",
+    "directory": "packages/design-tokens"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.2"
+  },
+  "peerDependencies": {
+    "tailwindcss": "^3.4.0"
+  },
+  "peerDependenciesMeta": {
+    "tailwindcss": {
+      "optional": true
+    }
+  }
+}
