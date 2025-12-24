@@ -57,7 +57,7 @@ public record BadgeResponse
     /// <summary>
     /// The compass axis this badge is associated with, if any.
     /// </summary>
-    public string? AxisId { get; init; }
+    public string? CompassAxisId { get; init; }
 }
 
 /// <summary>
@@ -109,9 +109,9 @@ public record AxisAchievementResponse
     public required string Id { get; init; }
 
     /// <summary>
-    /// The axis this achievement belongs to.
+    /// The compass axis this achievement belongs to.
     /// </summary>
-    public required string AxisId { get; init; }
+    public required string CompassAxisId { get; init; }
 
     /// <summary>
     /// Name of the axis (e.g., "Creativity", "Logic", "Empathy").
@@ -160,9 +160,9 @@ public record AxisAchievementResponse
 public record AxisProgressResponse
 {
     /// <summary>
-    /// The axis identifier.
+    /// The compass axis identifier.
     /// </summary>
-    public required string AxisId { get; init; }
+    public required string CompassAxisId { get; init; }
 
     /// <summary>
     /// Display name of the axis.
@@ -264,9 +264,9 @@ public record BadgeTierProgressResponse
 public record CompassAxisScoreResult
 {
     /// <summary>
-    /// The axis identifier.
+    /// The compass axis identifier.
     /// </summary>
-    public required string AxisId { get; init; }
+    public required string CompassAxisId { get; init; }
 
     /// <summary>
     /// Display name of the axis.
