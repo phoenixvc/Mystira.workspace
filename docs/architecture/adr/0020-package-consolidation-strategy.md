@@ -7,7 +7,8 @@
 - Phase 1: ✅ Complete - New packages created
 - Phase 2: ✅ Complete - Migration period active
 - Phase 3: ✅ Complete - .NET shared infrastructure created
-- Phase 4: 🔄 Pending - Cleanup and final migration
+- Phase 4: 🔄 In Analysis - Infrastructure consolidation opportunities identified
+- Phase 5: ⏳ Pending - Cleanup and final migration
 
 ## Context
 
@@ -194,7 +195,145 @@ packages/
         └── Extensions/         # DI registration helpers
 ```
 
-### Phase 4: Cleanup
+### Phase 4: Infrastructure Consolidation Analysis 🔄
+
+Code-level analysis of App and StoryGenerator submodules revealed additional consolidation opportunities:
+
+#### 4a: Resilience Patterns (High Priority)
+
+| Service | Current Implementation | Lines of Code |
+|---------|----------------------|---------------|
+| App (PWA) | `Microsoft.Extensions.Http.Polly` with retry + circuit breaker | 11 clients × same config |
+| StoryGenerator | Custom `RetryPolicyService` with manual exponential backoff | ~50 lines |
+
+**Recommendation**: Create `Mystira.Shared.Resilience` with standardized Polly policies:
+
+```csharp
+// Mystira.Shared/Resilience/PolicyFactory.cs
+public static class PolicyFactory
+{
+    public static IAsyncPolicy<HttpResponseMessage> CreateStandardPolicy(
+        string clientName,
+        int retries = 3,
+        int circuitBreakerThreshold = 5)
+    {
+        var retryPolicy = HttpPolicyExtensions
+            .HandleTransientHttpError()
+            .WaitAndRetryAsync(retries,
+                attempt => TimeSpan.FromSeconds(Math.Pow(2, attempt)));
+
+        var circuitBreaker = HttpPolicyExtensions
+            .HandleTransientHttpError()
+            .CircuitBreakerAsync(circuitBreakerThreshold,
+                TimeSpan.FromSeconds(30));
+
+        var timeout = Policy.TimeoutAsync<HttpResponseMessage>(
+            TimeSpan.FromSeconds(30));
+
+        return Policy.WrapAsync(timeout, retryPolicy, circuitBreaker);
+    }
+
+    // Long-running operations (LLM calls)
+    public static IAsyncPolicy<HttpResponseMessage> CreateLongRunningPolicy(
+        string clientName,
+        int timeoutSeconds = 300) { ... }
+}
+```
+
+**Migration Path**:
+1. Add `Mystira.Shared.Resilience` namespace to `Mystira.Shared`
+2. Update App PWA to use `PolicyFactory.CreateStandardPolicy()`
+3. Update StoryGenerator to use Polly instead of custom retry
+4. Remove `RetryPolicyService` from StoryGenerator
+
+#### 4b: Error Handling (Medium Priority)
+
+| Service | Pattern | Issues |
+|---------|---------|--------|
+| App | `ExceptionDetailsHelper` + per-client try-catch | No ProblemDetails, inconsistent responses |
+| StoryGenerator | Response object pattern (`{ Success, Error }`) | No standard HTTP error codes |
+
+**Recommendation**: Add `Mystira.Shared.ErrorHandling`:
+
+```csharp
+// Mystira.Shared/ErrorHandling/ProblemDetailsFactory.cs
+public static class MystiraProblemDetails
+{
+    public static ProblemDetails ValidationFailed(IEnumerable<ValidationResult> errors);
+    public static ProblemDetails NotFound(string resourceType, string id);
+    public static ProblemDetails ServiceUnavailable(string serviceName);
+    public static ProblemDetails InternalError(Exception ex, bool includeDetails);
+}
+
+// Mystira.Shared/ErrorHandling/GlobalExceptionHandler.cs
+public class GlobalExceptionHandler : IExceptionHandler
+{
+    public async ValueTask<bool> TryHandleAsync(
+        HttpContext context,
+        Exception exception,
+        CancellationToken ct) { ... }
+}
+```
+
+#### 4c: Caching Infrastructure (Medium Priority)
+
+| Service | Current | Limitation |
+|---------|---------|------------|
+| App | `IMemoryCache` with `QueryCachingBehavior` | Single-instance only |
+| StoryGenerator | `ConcurrentDictionary` stores | No distributed support |
+
+**Recommendation**: Add `Mystira.Shared.Caching` with Redis support:
+
+```csharp
+// Mystira.Shared/Caching/DistributedCacheExtensions.cs
+public static IServiceCollection AddMystiraCaching(
+    this IServiceCollection services,
+    IConfiguration config)
+{
+    var redisConnectionString = config["Redis:ConnectionString"];
+
+    if (!string.IsNullOrEmpty(redisConnectionString))
+    {
+        services.AddStackExchangeRedisCache(options =>
+        {
+            options.Configuration = redisConnectionString;
+            options.InstanceName = "mystira:";
+        });
+    }
+    else
+    {
+        services.AddDistributedMemoryCache(); // Fallback for local dev
+    }
+
+    return services;
+}
+```
+
+#### 4d: Base Entity Patterns (Low Priority - App Only)
+
+App has a well-designed 3-level entity hierarchy:
+- `Entity` → base with ID
+- `AuditableEntity` → adds CreatedAt/UpdatedAt/CreatedBy/UpdatedBy
+- `SoftDeletableEntity` → adds IsDeleted/DeletedAt/DeletedBy
+
+**StoryGenerator** uses service-based architecture without ORM entities.
+
+**Recommendation**: Move to `Mystira.Shared.Domain` only if future services need it:
+```csharp
+// Mystira.Shared/Domain/BaseEntity.cs (future)
+// Only migrate if admin-api or devhub needs entity persistence
+```
+
+#### Infrastructure Consolidation Summary
+
+| Pattern | Priority | Effort | Impact |
+|---------|----------|--------|--------|
+| Polly Resilience | 🔴 High | 2-3 days | Eliminates 100+ lines duplication |
+| Error Handling | 🟡 Medium | 2-3 days | Standardizes API responses |
+| Redis Caching | 🟡 Medium | 1-2 days | Enables multi-instance |
+| Base Entities | 🟢 Low | 1 day | Only if needed |
+
+### Phase 5: Cleanup
 
 1. Remove contracts from submodules
 2. Remove old publishing workflows

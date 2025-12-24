@@ -271,15 +271,99 @@ packages/
 
 ---
 
+## Infrastructure Pattern Analysis (Phase 4)
+
+Detailed code-level analysis of App and StoryGenerator submodules identified shared patterns that could be consolidated into `Mystira.Shared`.
+
+### Pattern Comparison
+
+| Pattern | App | StoryGenerator | Consolidation Opportunity |
+|---------|-----|----------------|---------------------------|
+| **Repository** | 23 implementations with generic `Repository<T>` base | None (service-based) | Keep App-specific |
+| **Polly Resilience** | `Microsoft.Extensions.Http.Polly` (11 clients) | Custom `RetryPolicyService` | 🔴 High - Standardize |
+| **Caching** | `IMemoryCache` with MediatR pipeline | `ConcurrentDictionary` stores | 🟡 Medium - Add Redis |
+| **Error Handling** | `ExceptionDetailsHelper` + try-catch | Response object pattern | 🟡 Medium - ProblemDetails |
+| **Base Entities** | 3-level hierarchy (Entity→Auditable→SoftDeletable) | No ORM entities | Keep App-specific |
+| **HTTP Clients** | 11 typed clients + `BaseApiClient` | 2 LLM service clients | 🟢 Low - Patterns differ |
+
+### Key Findings
+
+#### App (packages/app)
+
+**Repository Pattern** (`Mystira.App.Infrastructure.Data/Repositories/`):
+- Generic `Repository<T>` with specification support
+- 23 specialized repositories (GameSession, UserProfile, Account, etc.)
+- UnitOfWork pattern for transactions
+- Well-designed but App-specific
+
+**Resilience** (`Mystira.App.PWA/Program.cs:69-172`):
+```csharp
+// Same policy duplicated for 11 HTTP clients
+IAsyncPolicy<HttpResponseMessage> CreateResiliencePolicy(string clientName)
+{
+    var retryPolicy = HttpPolicyExtensions.HandleTransientHttpError()
+        .WaitAndRetryAsync(3, attempt => TimeSpan.FromSeconds(Math.Pow(2, attempt)));
+    var circuitBreaker = HttpPolicyExtensions.HandleTransientHttpError()
+        .CircuitBreakerAsync(5, TimeSpan.FromSeconds(30));
+    var timeout = Policy.TimeoutAsync<HttpResponseMessage>(TimeSpan.FromSeconds(30));
+    return Policy.WrapAsync(timeout, retryPolicy, circuitBreaker);
+}
+```
+
+**Caching** (`Mystira.App.Application/Behaviors/QueryCachingBehavior.cs`):
+- MediatR pipeline behavior for query caching
+- Uses `IMemoryCache` (single-instance limitation)
+- No Redis/distributed cache support
+
+#### StoryGenerator (packages/story-generator)
+
+**Custom Retry** (`Mystira.StoryGenerator.RagIndexer/Services/RetryPolicyService.cs`):
+```csharp
+public async Task<T> ExecuteWithRetryAsync<T>(
+    Func<Task<T>> operation, string operationName,
+    int maxRetries = 3, int delayMs = 1000)
+{
+    int attempt = 0;
+    while (true) {
+        attempt++;
+        try { return await operation(); }
+        catch (Exception ex) when (attempt < maxRetries) {
+            await Task.Delay(delayMs * attempt); // Manual exponential backoff
+        }
+    }
+}
+```
+
+**In-Memory State** (`Mystira.StoryGenerator.Api/Services/ContinuityAsync/`):
+- `InMemoryContinuityOperationStore` using `ConcurrentDictionary`
+- `ContinuityBackgroundQueue` using `Channel<T>`
+- Not suitable for multi-instance deployments
+
+### Consolidation Roadmap
+
+| Phase | Action | Package | Status |
+|-------|--------|---------|--------|
+| 4a | Add `Mystira.Shared.Resilience` | `Mystira.Shared` | ⏳ Planned |
+| 4b | Add `Mystira.Shared.ErrorHandling` | `Mystira.Shared` | ⏳ Planned |
+| 4c | Add `Mystira.Shared.Caching` | `Mystira.Shared` | ⏳ Planned |
+
+See [ADR-0020](../architecture/adr/0020-package-consolidation-strategy.md#phase-4-infrastructure-consolidation-analysis-) for detailed implementation plans.
+
+---
+
 ## Next Steps
 
-1. **Create `packages/contracts`** workspace package
-2. **Migrate TypeScript types** from submodules
-3. **Migrate NuGet contracts** from submodules
-4. **Move `shared-utils`** to workspace level
-5. **Update Changesets config** for new package structure
-6. **Update CI/CD workflows** for unified contracts publishing
-7. **Update submodule workflows** to remove contracts publishing
+1. ~~**Create `packages/contracts`** workspace package~~ ✅
+2. ~~**Migrate TypeScript types** from submodules~~ ✅
+3. ~~**Migrate NuGet contracts** from submodules~~ ✅
+4. ~~**Move `shared-utils`** to workspace level~~ ✅
+5. ~~**Update Changesets config** for new package structure~~ ✅
+6. ~~**Update CI/CD workflows** for unified contracts publishing~~ ✅
+7. ~~**Create `Mystira.Shared`** with auth infrastructure~~ ✅
+8. **Phase 4a**: Add Polly resilience patterns to `Mystira.Shared`
+9. **Phase 4b**: Add error handling middleware to `Mystira.Shared`
+10. **Phase 4c**: Add Redis caching support to `Mystira.Shared`
+11. **Phase 5**: Cleanup deprecated packages and workflows
 
 ---
 
