@@ -1,0 +1,202 @@
+name: "Contracts: Publish Packages"
+
+# Unified contracts package publishing
+# Publishes both @mystira/contracts (NPM) and Mystira.Contracts (NuGet)
+#
+# Triggered by:
+# - Changesets release workflow
+# - Manual workflow_dispatch
+#
+# See: docs/architecture/adr/0020-package-consolidation-strategy.md
+
+on:
+  workflow_call:
+    inputs:
+      version:
+        description: 'Version to publish (from Changesets)'
+        required: false
+        type: string
+    secrets:
+      NPM_TOKEN:
+        required: true
+      NUGET_API_KEY:
+        required: true
+      GH_PACKAGES_TOKEN:
+        required: true
+
+  workflow_dispatch:
+    inputs:
+      version_suffix:
+        description: 'Version suffix (e.g., dev.123, empty for stable)'
+        required: false
+        type: string
+      publish_npm:
+        description: 'Publish NPM package'
+        required: true
+        type: boolean
+        default: true
+      publish_nuget:
+        description: 'Publish NuGet package'
+        required: true
+        type: boolean
+        default: true
+
+concurrency:
+  group: contracts-publish
+  cancel-in-progress: false
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+
+permissions:
+  id-token: write
+  contents: read
+  packages: write
+
+jobs:
+  publish-npm:
+    name: Publish NPM Package
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_call' || github.event.inputs.publish_npm == 'true'
+    steps:
+      - name: Checkout workspace
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build contracts package
+        run: pnpm --filter @mystira/contracts build
+
+      - name: Publish to NPM
+        run: |
+          cd packages/contracts
+          npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Generate summary
+        run: |
+          echo "## NPM Package Published" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Property | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|----------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Package | @mystira/contracts |" >> $GITHUB_STEP_SUMMARY
+          echo "| Registry | npmjs.org |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Install" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`bash" >> $GITHUB_STEP_SUMMARY
+          echo "npm install @mystira/contracts" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+
+  publish-nuget:
+    name: Publish NuGet Package
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_call' || github.event.inputs.publish_nuget == 'true'
+    steps:
+      - name: Checkout workspace
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restore dependencies
+        run: |
+          cd packages/contracts/dotnet/Mystira.Contracts
+          dotnet restore
+        env:
+          NUGET_AUTH_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN }}
+
+      - name: Build
+        run: |
+          cd packages/contracts/dotnet/Mystira.Contracts
+          dotnet build --configuration Release --no-restore
+
+      - name: Pack NuGet package
+        id: pack
+        run: |
+          cd packages/contracts/dotnet/Mystira.Contracts
+
+          PACK_ARGS="--configuration Release --no-build --output ./nupkg"
+
+          if [ -n "${{ github.event.inputs.version_suffix }}" ]; then
+            PACK_ARGS="$PACK_ARGS --version-suffix ${{ github.event.inputs.version_suffix }}"
+          fi
+
+          dotnet pack $PACK_ARGS
+
+          # Get the package version
+          NUPKG_FILE=$(ls ./nupkg/*.nupkg | head -1)
+          PACKAGE_VERSION=$(basename "$NUPKG_FILE" .nupkg | sed "s/Mystira.Contracts\.//")
+          echo "version=$PACKAGE_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Push to GitHub Packages
+        run: |
+          cd packages/contracts/dotnet/Mystira.Contracts
+          dotnet nuget push "./nupkg/*.nupkg" \
+            --source "https://nuget.pkg.github.com/phoenixvc/index.json" \
+            --api-key ${{ secrets.GITHUB_TOKEN }} \
+            --skip-duplicate
+
+      - name: Push to NuGet.org (stable releases only)
+        if: github.event.inputs.version_suffix == ''
+        run: |
+          cd packages/contracts/dotnet/Mystira.Contracts
+          dotnet nuget push "./nupkg/*.nupkg" \
+            --source "https://api.nuget.org/v3/index.json" \
+            --api-key ${{ secrets.NUGET_API_KEY }} \
+            --skip-duplicate
+
+      - name: Generate summary
+        run: |
+          echo "## NuGet Package Published" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Property | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|----------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Package | Mystira.Contracts |" >> $GITHUB_STEP_SUMMARY
+          echo "| Version | ${{ steps.pack.outputs.version }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Published To" >> $GITHUB_STEP_SUMMARY
+          echo "- GitHub Packages: \`https://nuget.pkg.github.com/phoenixvc/index.json\`" >> $GITHUB_STEP_SUMMARY
+          if [ -z "${{ github.event.inputs.version_suffix }}" ]; then
+            echo "- NuGet.org: \`https://www.nuget.org/packages/Mystira.Contracts\`" >> $GITHUB_STEP_SUMMARY
+          fi
+
+  summary:
+    name: Generate Summary
+    runs-on: ubuntu-latest
+    needs: [publish-npm, publish-nuget]
+    if: always()
+    steps:
+      - name: Create workflow summary
+        run: |
+          echo "## Contracts Publishing Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Package | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|---------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| @mystira/contracts (NPM) | ${{ needs.publish-npm.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Mystira.Contracts (NuGet) | ${{ needs.publish-nuget.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Migration" >> $GITHUB_STEP_SUMMARY
+          echo "This unified contracts package replaces:" >> $GITHUB_STEP_SUMMARY
+          echo "- \`@mystira/app-contracts\` → \`@mystira/contracts/app\`" >> $GITHUB_STEP_SUMMARY
+          echo "- \`@mystira/story-generator-contracts\` → \`@mystira/contracts/story-generator\`" >> $GITHUB_STEP_SUMMARY
+          echo "- \`Mystira.App.Contracts\` → \`Mystira.Contracts.App\`" >> $GITHUB_STEP_SUMMARY
+          echo "- \`Mystira.StoryGenerator.Contracts\` → \`Mystira.Contracts.StoryGenerator\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "See [Migration Guide](docs/guides/contracts-migration.md) for upgrade instructions." >> $GITHUB_STEP_SUMMARY

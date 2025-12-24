@@ -1,0 +1,64 @@
+{
+  "name": "@mystira/contracts",
+  "version": "0.1.0",
+  "description": "Unified API contracts for Mystira platform",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    },
+    "./app": {
+      "types": "./dist/app/index.d.ts",
+      "import": "./dist/app/index.mjs",
+      "require": "./dist/app/index.js"
+    },
+    "./story-generator": {
+      "types": "./dist/story-generator/index.d.ts",
+      "import": "./dist/story-generator/index.mjs",
+      "require": "./dist/story-generator/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "clean": "rimraf dist",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src --ext .ts"
+  },
+  "keywords": [
+    "mystira",
+    "contracts",
+    "api",
+    "types"
+  ],
+  "author": "Mystira Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/phoenixvc/Mystira.workspace.git",
+    "directory": "packages/contracts"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "devDependencies": {
+    "tsup": "^8.0.0",
+    "typescript": "^5.3.0",
+    "rimraf": "^5.0.0"
+  },
+  "peerDependencies": {
+    "typescript": ">=4.7.0"
+  },
+  "peerDependenciesMeta": {
+    "typescript": {
+      "optional": true
+    }
+  }
+}

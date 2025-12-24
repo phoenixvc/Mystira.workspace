@@ -418,15 +418,19 @@ Group 2: @mystira/story-generator ↔ @mystira/story-generator-contracts
 Group 3: @mystira/publisher ↔ @mystira/shared-utils
 ```
 
-### Consolidation Roadmap
+### Consolidation Status
 
-We are planning to consolidate contracts into unified packages:
+**Phase 1 Complete** - New unified packages are available:
 
-| Current | Future | Benefits |
-|---------|--------|----------|
-| Multiple `*-contracts` packages | `@mystira/contracts` (NPM) | Single source of truth |
-| Multiple `*.Contracts` packages | `Mystira.Contracts` (NuGet) | Simplified dependencies |
-| `shared-utils` in Publisher | Workspace-level package | Proper placement |
+| New Package | Replaces | Status |
+|-------------|----------|--------|
+| `@mystira/contracts` (NPM) | `@mystira/app-contracts`, `@mystira/story-generator-contracts` | ✅ Available |
+| `Mystira.Contracts` (NuGet) | `Mystira.App.Contracts`, `Mystira.StoryGenerator.Contracts` | ✅ Available |
+| `@mystira/shared-utils` | (moved from Publisher) | ✅ Available |
+
+**Migration Period Active** - Old packages still work but are deprecated.
+
+See [Contracts Migration Guide](./contracts-migration.md) for upgrade instructions.
 
 See [ADR-0020: Package Consolidation Strategy](../architecture/adr/0020-package-consolidation-strategy.md) for details.
 
@@ -434,6 +438,7 @@ See [ADR-0020: Package Consolidation Strategy](../architecture/adr/0020-package-
 
 ## Related Documentation
 
+- [Contracts Migration Guide](./contracts-migration.md) - Migrate to unified contracts
 - [Publishing & Deployment Flow](../cicd/publishing-flow.md) - Complete publishing overview
 - [Package Inventory](../analysis/package-inventory.md) - Full package analysis with consolidation recommendations
 - [CI/CD Setup](../cicd/cicd-setup.md) - CI configuration
