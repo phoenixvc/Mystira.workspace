@@ -228,12 +228,72 @@ variable "model_deployments" {
     # ==========================================================================
     # Specialized models for RAG enhancement
     # Rerank: Improves search relevance by 10-30% for complex queries
+    # Embed Multilingual: 100+ languages including African languages
     "cohere-rerank-v3" = {
       model_name    = "rerank-v3.5"
       model_version = "1"
       model_format  = "Cohere"
       sku_name      = "GlobalStandard"
       capacity      = 1  # Serverless - pay per query
+      location      = "uksouth" # Not available in SAN
+    }
+    "cohere-embed-multilingual" = {
+      model_name    = "embed-multilingual-v3.0"
+      model_version = "1"
+      model_format  = "Cohere"
+      sku_name      = "GlobalStandard"
+      capacity      = 1
+      location      = "uksouth" # Not available in SAN
+    }
+
+    # ==========================================================================
+    # Mistral Models (via Azure AI Model Catalog)
+    # ==========================================================================
+    # Codestral: Dedicated code model, 256K context, 80+ languages
+    # Much cheaper than gpt-5.1-codex for code tasks
+    "codestral-2501" = {
+      model_name    = "Codestral-2501"
+      model_version = "2501"
+      model_format  = "Mistral"
+      sku_name      = "GlobalStandard"
+      capacity      = 1
+      location      = "uksouth" # Not available in SAN
+    }
+
+    # ==========================================================================
+    # DeepSeek Models (via Azure AI Model Catalog)
+    # ==========================================================================
+    # DeepSeek-Coder: Near GPT-4 code performance at fraction of cost
+    # Strong benchmarks on code generation and understanding
+    "deepseek-coder-v2" = {
+      model_name    = "DeepSeek-Coder-V2-236B"
+      model_version = "1"
+      model_format  = "DeepSeek"
+      sku_name      = "GlobalStandard"
+      capacity      = 1
+      location      = "uksouth" # Not available in SAN
+    }
+
+    # ==========================================================================
+    # AI21 Jamba Models (via Azure AI Model Catalog)
+    # ==========================================================================
+    # Jamba: Novel Mamba architecture with 256K context window
+    # Linear scaling with context - efficient for long documents
+    # Use for full story manuscript analysis, cross-chapter consistency
+    "jamba-1.5-large" = {
+      model_name    = "jamba-1.5-large"
+      model_version = "1"
+      model_format  = "AI21"
+      sku_name      = "GlobalStandard"
+      capacity      = 1
+      location      = "uksouth" # Not available in SAN
+    }
+    "jamba-1.5-mini" = {
+      model_name    = "jamba-1.5-mini"
+      model_version = "1"
+      model_format  = "AI21"
+      sku_name      = "GlobalStandard"
+      capacity      = 1  # 10x cheaper than large for simpler long-context tasks
       location      = "uksouth" # Not available in SAN
     }
   }

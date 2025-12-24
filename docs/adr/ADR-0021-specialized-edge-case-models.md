@@ -478,10 +478,13 @@ Edge Case Request
 
 ## Action Items
 
-- [ ] Add Cohere Rerank v3.5 to Terraform (Phase 1)
+- [x] Add Cohere Rerank v3.5 to Terraform (Phase 1)
+- [x] Add Cohere Embed Multilingual to Terraform
+- [x] Add Codestral-2501 to Terraform (Phase 2)
+- [x] Add DeepSeek-Coder-V2 to Terraform (Phase 2)
+- [x] Add Jamba-1.5-Large/Mini to Terraform (Phase 2)
 - [ ] Create reranking integration in RAG pipeline
-- [ ] Evaluate Codestral-2501 after 3 months of gpt-5.1-codex usage
-- [ ] Evaluate Jamba-1.5-Large if long-document use cases emerge
+- [ ] Implement model routing logic for specialized models
 - [ ] Monitor costs and usage monthly
 - [ ] Review this ADR quarterly for relevance
 
