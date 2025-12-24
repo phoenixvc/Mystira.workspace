@@ -163,7 +163,37 @@ export const darkModeColors = {
   },
 } as const;
 
-export type SemanticColors = typeof lightModeColors;
+/**
+ * Semantic colors structure type (uses string to allow different color values per theme)
+ */
+export interface SemanticColors {
+  readonly background: {
+    readonly primary: string;
+    readonly secondary: string;
+    readonly tertiary: string;
+    readonly elevated: string;
+    readonly inverse: string;
+  };
+  readonly foreground: {
+    readonly primary: string;
+    readonly secondary: string;
+    readonly tertiary: string;
+    readonly inverse: string;
+    readonly muted: string;
+  };
+  readonly border: {
+    readonly default: string;
+    readonly strong: string;
+    readonly muted: string;
+  };
+  readonly interactive: {
+    readonly default: string;
+    readonly hover: string;
+    readonly active: string;
+    readonly focus: string;
+  };
+}
+
 export type ThemeMode = 'light' | 'dark';
 
 /**
