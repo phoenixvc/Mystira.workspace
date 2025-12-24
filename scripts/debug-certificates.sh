@@ -25,9 +25,9 @@ CERT_SECRETS=(
     "mystira-story-generator-tls-dev"
 )
 INGRESSES=(
-    "mystira-publisher-ingress"
-    "mystira-chain-ingress"
-    "mystira-story-generator-ingress"
+    "mys-publisher-ingress"
+    "mys-chain-ingress"
+    "mys-story-generator-ingress"
 )
 
 echo -e "${BLUE}========================================${NC}"

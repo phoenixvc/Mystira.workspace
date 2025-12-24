@@ -401,7 +401,7 @@ mystira-story-generator-tls-dev   False   mystira-story-generator-tls-dev   2m
 
 ```bash
 # Check ingress annotation
-kubectl get ingress mystira-story-generator-ingress -n mys-dev \
+kubectl get ingress mys-story-generator-ingress -n mys-dev \
   -o jsonpath='{.metadata.annotations.cert-manager\.io/cluster-issuer}'
 
 # Should output: letsencrypt-staging
@@ -425,7 +425,7 @@ az network dns record-set a list \
   --resource-group mys-prod-core-rg-glob
 
 # Get ingress IP
-kubectl get ingress mystira-story-generator-ingress -n mys-dev \
+kubectl get ingress mys-story-generator-ingress -n mys-dev \
   -o jsonpath='{.status.loadBalancer.ingress[0].ip}'
 
 # Add DNS record if missing

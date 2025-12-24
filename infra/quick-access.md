@@ -146,7 +146,7 @@ Service is not running or ingress is not properly configured.
 kubectl get pods -n mys-<env> -l app=mystira-publisher
 
 # Check ingress configuration
-kubectl describe ingress -n mys-<env> mystira-publisher-ingress
+kubectl describe ingress -n mys-<env> mys-publisher-ingress
 ```
 
 ### "Certificate error" (Production only)

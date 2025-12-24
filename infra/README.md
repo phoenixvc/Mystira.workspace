@@ -140,11 +140,12 @@ kubectl apply -k ../../kubernetes/overlays/dev
 
 ### Service URLs
 
-| Service         | Dev                               | Staging                               | Production                    |
-| --------------- | --------------------------------- | ------------------------------------- | ----------------------------- |
-| Publisher       | `dev.publisher.mystira.app`       | `staging.publisher.mystira.app`       | `publisher.mystira.app`       |
-| Chain           | `dev.chain.mystira.app`           | `staging.chain.mystira.app`           | `chain.mystira.app`           |
-| Story Generator | `dev.story-api.mystira.app`       | `staging.story-api.mystira.app`       | `story-api.mystira.app`       |
+| Service           | Dev                               | Staging                               | Production                    |
+| ----------------- | --------------------------------- | ------------------------------------- | ----------------------------- |
+| Publisher         | `dev.publisher.mystira.app`       | `staging.publisher.mystira.app`       | `publisher.mystira.app`       |
+| Chain             | `dev.chain.mystira.app`           | `staging.chain.mystira.app`           | `chain.mystira.app`           |
+| Story Generator   | `dev.story-api.mystira.app`       | `staging.story-api.mystira.app`       | `story-api.mystira.app`       |
+| Story Web (SWA)   | `dev.story.mystira.app`           | `staging.story.mystira.app`           | `story.mystira.app`           |
 
 ## Infrastructure Components
 
