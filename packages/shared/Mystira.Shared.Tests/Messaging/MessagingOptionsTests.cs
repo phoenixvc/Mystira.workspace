@@ -14,7 +14,7 @@ public class MessagingOptionsTests
         // Assert
         options.Enabled.Should().BeTrue();
         options.MaxRetries.Should().Be(3);
-        options.InitialRetryDelaySeconds.Should().Be(2);
+        options.InitialRetryDelaySeconds.Should().Be(5);
         options.AutoProvision.Should().BeTrue();
         options.DurabilityMode.Should().Be(DurabilityMode.Balanced);
     }
