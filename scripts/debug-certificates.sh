@@ -17,7 +17,7 @@ NAMESPACE="mys-dev"
 DOMAINS=(
     "dev.publisher.mystira.app"
     "dev.chain.mystira.app"
-    "dev.story-generator.mystira.app"
+    "dev.story-api.mystira.app"
 )
 CERT_SECRETS=(
     "mystira-publisher-tls-dev"

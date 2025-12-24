@@ -25,9 +25,9 @@ module "front_door" {
 
   # Story Generator services (API + SWA)
   enable_story_generator              = true
-  story_generator_api_backend_address = "staging.storyapi.mystira.app"
+  story_generator_api_backend_address = "staging.story-api.mystira.app"
   story_generator_swa_backend_address = module.story_generator.static_web_app_default_hostname
-  custom_domain_story_generator_api   = "staging.storyapi.mystira.app"
+  custom_domain_story_generator_api   = "staging.story-api.mystira.app"
   custom_domain_story_generator_swa   = "staging.story.mystira.app"
 
   # WAF Configuration - Staging Settings

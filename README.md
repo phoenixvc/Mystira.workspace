@@ -361,7 +361,8 @@ The main client application ([Mystira.App](https://github.com/phoenixvc/Mystira.
 |             | Admin UI        | dev.admin.mystira.app           |
 |             | Admin API       | dev.admin-api.mystira.app       |
 |             | Publisher       | dev.publisher.mystira.app       |
-|             | Story Generator | dev.story-generator.mystira.app |
+|             | Story Generator | dev.story-api.mystira.app       |
+|             | Story Web       | dev.story.mystira.app           |
 |             | Chain           | dev.chain.mystira.app           |
 | Staging     | Web App         | staging.mystira.app             |
 |             | Admin UI        | staging.admin.mystira.app       |

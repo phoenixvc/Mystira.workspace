@@ -380,7 +380,7 @@ This checklist ensures comprehensive testing of the Azure v2.2 naming convention
   ```bash
   curl -f https://dev.publisher.mystira.app/health
   curl -f https://dev.chain.mystira.app/health
-  curl -f https://dev.story-generator.mystira.app/health
+  curl -f https://dev.story-api.mystira.app/health
   ```
 
 - [ ] **API Endpoints**:

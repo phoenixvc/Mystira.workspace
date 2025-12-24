@@ -83,7 +83,7 @@ variable "enable_story_generator" {
 }
 
 variable "story_generator_api_backend_address" {
-  description = "Backend address for Story Generator API (e.g., dev.story-generator.mystira.app)"
+  description = "Backend address for Story Generator API (e.g., dev.story-api.mystira.app)"
   type        = string
   default     = ""
 }
@@ -95,7 +95,7 @@ variable "story_generator_swa_backend_address" {
 }
 
 variable "custom_domain_story_generator_api" {
-  description = "Custom domain for Story Generator API (e.g., dev.story-generator.mystira.app)"
+  description = "Custom domain for Story Generator API (e.g., dev.story-api.mystira.app)"
   type        = string
   default     = ""
 }

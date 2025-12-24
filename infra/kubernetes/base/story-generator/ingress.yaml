@@ -1,5 +1,5 @@
 # Ingress for Story Generator API
-# Exposes the API at story-generator.mystira.app (or dev./staging. prefixed)
+# Exposes the API at story-api.mystira.app (or dev./staging. prefixed)
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -15,10 +15,10 @@ spec:
   ingressClassName: nginx
   tls:
     - hosts:
-        - story-generator.mystira.app
+        - story-api.mystira.app
       secretName: mystira-story-generator-tls
   rules:
-    - host: story-generator.mystira.app
+    - host: story-api.mystira.app
       http:
         paths:
           - path: /

@@ -289,7 +289,7 @@ jobs:
                 echo "- https://dev.admin.mystira.app" >> $GITHUB_STEP_SUMMARY
                 ;;
               story-generator-deploy)
-                echo "- https://dev.story-generator.mystira.app" >> $GITHUB_STEP_SUMMARY
+                echo "- https://dev.story-api.mystira.app" >> $GITHUB_STEP_SUMMARY
                 ;;
               publisher-deploy)
                 echo "- https://dev.publisher.mystira.app" >> $GITHUB_STEP_SUMMARY

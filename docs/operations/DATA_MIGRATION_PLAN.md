@@ -183,7 +183,7 @@ kubectl logs -n mys-dev -l app.kubernetes.io/name=mys-publisher --tail=50
 # 7. Test endpoints
 curl https://dev.publisher.mystira.app/health
 curl https://dev.chain.mystira.app/health
-curl https://dev.story-generator.mystira.app/health
+curl https://dev.story-api.mystira.app/health
 ```
 
 #### Post-Migration

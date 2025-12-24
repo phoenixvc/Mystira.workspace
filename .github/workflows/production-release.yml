@@ -199,7 +199,7 @@ jobs:
           echo "- API: https://mystira.app" >> $GITHUB_STEP_SUMMARY
           echo "- Publisher: https://publisher.mystira.app" >> $GITHUB_STEP_SUMMARY
           echo "- Chain: https://chain.mystira.app" >> $GITHUB_STEP_SUMMARY
-          echo "- Story Generator API: https://story-generator.mystira.app" >> $GITHUB_STEP_SUMMARY
+          echo "- Story Generator API: https://story-api.mystira.app" >> $GITHUB_STEP_SUMMARY
           echo "- Story Generator SWA: https://story.mystira.app" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "⚠️ Production deployment completed. Monitor services closely." >> $GITHUB_STEP_SUMMARY

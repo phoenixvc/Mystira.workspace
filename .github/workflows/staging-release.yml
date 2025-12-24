@@ -204,5 +204,5 @@ jobs:
           echo "- API: https://staging.mystira.app" >> $GITHUB_STEP_SUMMARY
           echo "- Publisher: https://staging.publisher.mystira.app" >> $GITHUB_STEP_SUMMARY
           echo "- Chain: https://staging.chain.mystira.app" >> $GITHUB_STEP_SUMMARY
-          echo "- Story Generator API: https://staging.story-generator.mystira.app" >> $GITHUB_STEP_SUMMARY
+          echo "- Story Generator API: https://staging.story-api.mystira.app" >> $GITHUB_STEP_SUMMARY
           echo "- Story Generator SWA: https://staging.story.mystira.app" >> $GITHUB_STEP_SUMMARY

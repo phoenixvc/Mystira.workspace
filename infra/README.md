@@ -144,7 +144,7 @@ kubectl apply -k ../../kubernetes/overlays/dev
 | --------------- | --------------------------------- | ------------------------------------- | ----------------------------- |
 | Publisher       | `dev.publisher.mystira.app`       | `staging.publisher.mystira.app`       | `publisher.mystira.app`       |
 | Chain           | `dev.chain.mystira.app`           | `staging.chain.mystira.app`           | `chain.mystira.app`           |
-| Story Generator | `dev.story-generator.mystira.app` | `staging.story-generator.mystira.app` | `story-generator.mystira.app` |
+| Story Generator | `dev.story-api.mystira.app`       | `staging.story-api.mystira.app`       | `story-api.mystira.app`       |
 
 ## Infrastructure Components
 
