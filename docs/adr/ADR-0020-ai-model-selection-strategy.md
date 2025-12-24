@@ -41,13 +41,18 @@ Mystira will deploy models from multiple providers to optimize for:
 | gpt-5-nano | OpenAI | Next-gen | SAN | GlobalStandard | Advanced reasoning (cost-effective) |
 | gpt-5.1 | OpenAI | Next-gen | SAN | GlobalStandard | Complex multi-step tasks |
 | gpt-5.1-codex | OpenAI | Code | SAN | GlobalStandard | Code generation/review |
+| o3-mini | OpenAI | Reasoning | SAN | GlobalStandard | Chain-of-thought analysis |
 | text-embedding-3-large | OpenAI | Embedding | SAN | GlobalStandard | Production RAG |
 | text-embedding-3-small | OpenAI | Embedding | SAN | GlobalStandard | Draft/test embeddings |
+| dall-e-3 | OpenAI | Image | SAN | Standard | Story illustrations |
+| whisper | OpenAI | Audio | SAN | Standard | Speech-to-text |
+| tts | OpenAI | Audio | SAN | Standard | Text-to-speech |
+| tts-hd | OpenAI | Audio | SAN | Standard | High-quality TTS |
 | claude-haiku-4-5 | Anthropic | Fast | UK South | Serverless | High-volume analysis |
 | claude-sonnet-4-5 | Anthropic | Balanced | UK South | Serverless | Deep analysis, code review |
 | claude-opus-4-5 | Anthropic | Premium | UK South | Serverless | Complex research |
 
-**Total: 13 models configured**
+**Total: 18 models configured**
 
 ---
 
@@ -68,12 +73,13 @@ Mystira will deploy models from multiple providers to optimize for:
 | gpt-5-nano | Yes | Yes | Deployed | Next-gen efficient |
 | gpt-5.1 | Yes | Yes | Deployed | Next-gen flagship |
 | gpt-5.1-codex | Yes | Yes | Deployed | Code specialized |
-| o1-preview | Yes | No | **Gap** | Reasoning chain-of-thought |
-| o1-mini | Yes | No | **Gap** | Efficient reasoning |
-| o3-mini | Yes | No | **Gap** | Latest reasoning |
-| dall-e-3 | Yes | No | **Gap** | Image generation |
-| whisper | Yes | No | **Gap** | Speech-to-text |
-| tts | Yes | No | **Gap** | Text-to-speech |
+| o1-preview | Yes | No | Not needed | Superseded by o3-mini |
+| o1-mini | Yes | No | Not needed | Superseded by o3-mini |
+| o3-mini | Yes | Yes | Deployed | Latest reasoning |
+| dall-e-3 | Yes | Yes | Deployed | Image generation |
+| whisper | Yes | Yes | Deployed | Speech-to-text |
+| tts | Yes | Yes | Deployed | Text-to-speech |
+| tts-hd | Yes | Yes | Deployed | High-quality TTS |
 | text-embedding-3-large | Yes | Yes | Deployed | Production embeddings |
 | text-embedding-3-small | Yes | Yes | Deployed | Efficient embeddings |
 | text-embedding-ada-002 | Yes | No | Not needed | Legacy, use v3 |
@@ -140,14 +146,14 @@ Mystira will deploy models from multiple providers to optimize for:
 
 ### Critical Gaps (Recommended to Add)
 
-| Gap | Model | Why Needed | Priority |
-|-----|-------|------------|----------|
-| **Reasoning Models** | o1-mini, o3-mini | Deep reasoning for complex analysis | High |
-| **Image Generation** | dall-e-3 | Story illustrations, content creation | High |
-| **Speech-to-Text** | whisper | Voice input for accessibility | Medium |
-| **Text-to-Speech** | tts | Audio narration for stories | Medium |
-| **Code Specialized** | Codestral-2501 | Alternative to gpt-5.1-codex | Low |
-| **Reranking** | Cohere Rerank v3 | Improve RAG search quality | Medium |
+| Gap | Model | Why Needed | Priority | Status |
+|-----|-------|------------|----------|--------|
+| **Reasoning Models** | o3-mini | Deep reasoning for complex analysis | High | ✅ Added |
+| **Image Generation** | dall-e-3 | Story illustrations, content creation | High | ✅ Added |
+| **Speech-to-Text** | whisper | Voice input for accessibility | Medium | ✅ Added |
+| **Text-to-Speech** | tts, tts-hd | Audio narration for stories | Medium | ✅ Added |
+| **Code Specialized** | Codestral-2501 | Alternative to gpt-5.1-codex | Low | See ADR-0021 |
+| **Reranking** | Cohere Rerank v3 | Improve RAG search quality | Medium | See ADR-0021 |
 
 ### Optional Additions (Future Consideration)
 
@@ -416,11 +422,11 @@ claude-opus-4-5 → o3-mini → claude-sonnet-4-5
 - [x] Configure embedding models (text-embedding-3-large/small)
 - [x] Configure Anthropic Claude models (haiku, sonnet, opus)
 - [x] Add Claude deployment script for automation
-- [ ] Add o3-mini for reasoning tasks
-- [ ] Add dall-e-3 for image generation
-- [ ] Add whisper for speech-to-text
-- [ ] Add tts for text-to-speech
-- [ ] Add Cohere Rerank for RAG improvement
+- [x] Add o3-mini for reasoning tasks
+- [x] Add dall-e-3 for image generation
+- [x] Add whisper for speech-to-text
+- [x] Add tts/tts-hd for text-to-speech
+- [ ] Add Cohere Rerank for RAG improvement (see ADR-0021)
 - [ ] Implement model routing logic
 - [ ] Set up cost monitoring per model
 - [ ] Document model selection in developer guide

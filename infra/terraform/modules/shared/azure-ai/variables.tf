@@ -222,6 +222,20 @@ variable "model_deployments" {
       sku_name      = "GlobalStandard"
       capacity      = 1  # Serverless - capacity is token-based
     }
+
+    # ==========================================================================
+    # Cohere Models (via Azure AI Model Catalog)
+    # ==========================================================================
+    # Specialized models for RAG enhancement
+    # Rerank: Improves search relevance by 10-30% for complex queries
+    "cohere-rerank-v3" = {
+      model_name    = "rerank-v3.5"
+      model_version = "1"
+      model_format  = "Cohere"
+      sku_name      = "GlobalStandard"
+      capacity      = 1  # Serverless - pay per query
+      location      = "uksouth" # Not available in SAN
+    }
   }
 }
 
