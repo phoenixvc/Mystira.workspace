@@ -35,7 +35,7 @@ public class RepositoryBaseTests
         var methods = repoType.GetMethods();
 
         methods.Should().Contain(m => m.Name == "ListAsync");
-        methods.Should().Contain(m => m.Name == "FirstOrDefaultAsync");
+        methods.Should().Contain(m => m.Name == "GetBySpecAsync");
         methods.Should().Contain(m => m.Name == "CountAsync");
     }
 }
