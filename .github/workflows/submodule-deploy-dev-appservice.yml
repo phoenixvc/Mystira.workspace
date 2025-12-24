@@ -214,3 +214,58 @@ Source run: https://github.com/${{ github.event.client_payload.repository || 'un
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "---" >> $GITHUB_STEP_SUMMARY
           echo "_Production deployments use blue-green slot swap via mystira-app-api-cicd-prod.yml_" >> $GITHUB_STEP_SUMMARY
+
+      - name: Notify Teams on success
+        if: success() && env.MS_TEAMS_WEBHOOK_URL != ''
+        env:
+          MS_TEAMS_WEBHOOK_URL: ${{ secrets.MS_TEAMS_WEBHOOK_URL }}
+        run: |
+          SERVICE_NAME="${{ github.event.action == 'app-deploy' && 'App API' || (github.event.action == 'app-swa-deploy' && 'App SWA' || 'DevHub') }}"
+          curl -H "Content-Type: application/json" -d '{
+            "@type": "MessageCard",
+            "@context": "http://schema.org/extensions",
+            "themeColor": "00ff00",
+            "summary": "Dev Deployment Successful",
+            "sections": [{
+              "activityTitle": "✅ '"$SERVICE_NAME"' deployed to dev",
+              "facts": [
+                {"name": "Event", "value": "${{ github.event.action }}"},
+                {"name": "Submodule", "value": "${{ steps.target.outputs.submodule_path }}"},
+                {"name": "Deployed by", "value": "${{ github.event.client_payload.triggered_by }}"},
+                {"name": "Commit", "value": "${{ github.event.client_payload.ref }}"}
+              ],
+              "markdown": true
+            }],
+            "potentialAction": [{
+              "@type": "OpenUri",
+              "name": "View Workflow",
+              "targets": [{"os": "default", "uri": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"}]
+            }]
+          }' "$MS_TEAMS_WEBHOOK_URL"
+
+      - name: Notify Teams on failure
+        if: failure() && env.MS_TEAMS_WEBHOOK_URL != ''
+        env:
+          MS_TEAMS_WEBHOOK_URL: ${{ secrets.MS_TEAMS_WEBHOOK_URL }}
+        run: |
+          SERVICE_NAME="${{ github.event.action == 'app-deploy' && 'App API' || (github.event.action == 'app-swa-deploy' && 'App SWA' || 'DevHub') }}"
+          curl -H "Content-Type: application/json" -d '{
+            "@type": "MessageCard",
+            "@context": "http://schema.org/extensions",
+            "themeColor": "ff0000",
+            "summary": "Dev Deployment Failed",
+            "sections": [{
+              "activityTitle": "❌ '"$SERVICE_NAME"' deployment FAILED",
+              "facts": [
+                {"name": "Event", "value": "${{ github.event.action }}"},
+                {"name": "Submodule", "value": "${{ steps.target.outputs.submodule_path }}"},
+                {"name": "Triggered by", "value": "${{ github.event.client_payload.triggered_by }}"}
+              ],
+              "markdown": true
+            }],
+            "potentialAction": [{
+              "@type": "OpenUri",
+              "name": "View Logs",
+              "targets": [{"os": "default", "uri": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"}]
+            }]
+          }' "$MS_TEAMS_WEBHOOK_URL"

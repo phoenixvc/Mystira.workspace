@@ -119,12 +119,42 @@ jobs:
               ;;
           esac
 
+      - name: Verify image exists in ACR
+        run: |
+          IMAGE="${{ steps.target.outputs.image }}"
+          TAG="${{ github.event.client_payload.image_tag }}"
+
+          echo "Verifying image $IMAGE:$TAG exists in ACR..."
+
+          # Check if image tag exists
+          if ! az acr repository show-tags \
+            --name ${{ env.ACR_NAME }} \
+            --repository "$IMAGE" \
+            --query "[?@=='$TAG']" \
+            --output tsv | grep -q .; then
+            echo "::error::Image $IMAGE:$TAG not found in ACR ${{ env.ACR_NAME }}"
+            echo "Available tags:"
+            az acr repository show-tags --name ${{ env.ACR_NAME }} --repository "$IMAGE" --top 10 --orderby time_desc
+            exit 1
+          fi
+
+          echo "✓ Image verified: ${{ env.ACR_NAME }}.azurecr.io/$IMAGE:$TAG"
+
       - name: Update deployment image
+        id: deploy
         run: |
           NAMESPACE="mys-${{ env.ENVIRONMENT }}"
           IMAGE="${{ env.ACR_NAME }}.azurecr.io/${{ steps.target.outputs.image }}:${{ github.event.client_payload.image_tag }}"
 
           echo "Updating ${{ steps.target.outputs.deployment }} to use image: $IMAGE"
+
+          # Record current revision for potential rollback
+          if [ "${{ steps.target.outputs.is_statefulset }}" == "true" ]; then
+            CURRENT_REV=$(kubectl get statefulset/${{ steps.target.outputs.deployment }} -n $NAMESPACE -o jsonpath='{.status.currentRevision}' 2>/dev/null || echo "unknown")
+          else
+            CURRENT_REV=$(kubectl rollout history deployment/${{ steps.target.outputs.deployment }} -n $NAMESPACE --revision=0 2>/dev/null | tail -1 | awk '{print $1}' || echo "unknown")
+          fi
+          echo "previous_revision=$CURRENT_REV" >> $GITHUB_OUTPUT
 
           if [ "${{ steps.target.outputs.is_statefulset }}" == "true" ]; then
             # StatefulSet (chain)
@@ -139,6 +169,7 @@ jobs:
           fi
 
       - name: Wait for rollout
+        id: rollout
         run: |
           NAMESPACE="mys-${{ env.ENVIRONMENT }}"
 
@@ -149,6 +180,42 @@ jobs:
             kubectl rollout status deployment/${{ steps.target.outputs.deployment }} \
               -n $NAMESPACE --timeout=300s
           fi
+
+      - name: Rollback on failure
+        if: failure() && steps.rollout.outcome == 'failure'
+        run: |
+          NAMESPACE="mys-${{ env.ENVIRONMENT }}"
+
+          echo "::warning::Deployment failed, initiating rollback..."
+
+          if [ "${{ steps.target.outputs.is_statefulset }}" == "true" ]; then
+            kubectl rollout undo statefulset/${{ steps.target.outputs.deployment }} -n $NAMESPACE
+            kubectl rollout status statefulset/${{ steps.target.outputs.deployment }} -n $NAMESPACE --timeout=120s
+          else
+            kubectl rollout undo deployment/${{ steps.target.outputs.deployment }} -n $NAMESPACE
+            kubectl rollout status deployment/${{ steps.target.outputs.deployment }} -n $NAMESPACE --timeout=120s
+          fi
+
+          echo "::notice::Rollback completed. Previous version restored."
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### ⚠️ Rollback Executed" >> $GITHUB_STEP_SUMMARY
+          echo "Deployment failed and was automatically rolled back to the previous version." >> $GITHUB_STEP_SUMMARY
+
+      - name: Annotate deployment
+        if: success()
+        run: |
+          NAMESPACE="mys-${{ env.ENVIRONMENT }}"
+          RESOURCE_TYPE="${{ steps.target.outputs.is_statefulset == 'true' && 'statefulset' || 'deployment' }}"
+
+          kubectl annotate $RESOURCE_TYPE/${{ steps.target.outputs.deployment }} -n $NAMESPACE --overwrite \
+            mystira.app/deployed-by="${{ github.event.client_payload.triggered_by }}" \
+            mystira.app/deployed-at="$(date -u +"%Y-%m-%dT%H:%M:%SZ")" \
+            mystira.app/source-commit="${{ github.event.client_payload.ref }}" \
+            mystira.app/source-repo="${{ github.event.client_payload.repository }}" \
+            mystira.app/image-tag="${{ github.event.client_payload.image_tag }}" \
+            mystira.app/workflow-run="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+
+          echo "✓ Deployment annotated with tracking metadata"
 
       - name: Verify deployment
         run: |
@@ -234,3 +301,57 @@ Source run: https://github.com/${{ github.event.client_payload.repository || 'un
           echo "---" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "_Note: Staging and production deployments are managed through the workspace release workflows._" >> $GITHUB_STEP_SUMMARY
+
+      - name: Notify Teams on success
+        if: success() && env.MS_TEAMS_WEBHOOK_URL != ''
+        env:
+          MS_TEAMS_WEBHOOK_URL: ${{ secrets.MS_TEAMS_WEBHOOK_URL }}
+        run: |
+          curl -H "Content-Type: application/json" -d '{
+            "@type": "MessageCard",
+            "@context": "http://schema.org/extensions",
+            "themeColor": "00ff00",
+            "summary": "Dev Deployment Successful",
+            "sections": [{
+              "activityTitle": "✅ ${{ steps.target.outputs.deployment }} deployed to dev",
+              "facts": [
+                {"name": "Service", "value": "${{ steps.target.outputs.deployment }}"},
+                {"name": "Image", "value": "${{ github.event.client_payload.image_tag }}"},
+                {"name": "Deployed by", "value": "${{ github.event.client_payload.triggered_by }}"},
+                {"name": "Commit", "value": "${{ github.event.client_payload.ref }}"}
+              ],
+              "markdown": true
+            }],
+            "potentialAction": [{
+              "@type": "OpenUri",
+              "name": "View Workflow",
+              "targets": [{"os": "default", "uri": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"}]
+            }]
+          }' "$MS_TEAMS_WEBHOOK_URL"
+
+      - name: Notify Teams on failure
+        if: failure() && env.MS_TEAMS_WEBHOOK_URL != ''
+        env:
+          MS_TEAMS_WEBHOOK_URL: ${{ secrets.MS_TEAMS_WEBHOOK_URL }}
+        run: |
+          curl -H "Content-Type: application/json" -d '{
+            "@type": "MessageCard",
+            "@context": "http://schema.org/extensions",
+            "themeColor": "ff0000",
+            "summary": "Dev Deployment Failed",
+            "sections": [{
+              "activityTitle": "❌ ${{ steps.target.outputs.deployment }} deployment FAILED",
+              "facts": [
+                {"name": "Service", "value": "${{ steps.target.outputs.deployment }}"},
+                {"name": "Image", "value": "${{ github.event.client_payload.image_tag }}"},
+                {"name": "Triggered by", "value": "${{ github.event.client_payload.triggered_by }}"},
+                {"name": "Rollback", "value": "Automatic rollback attempted"}
+              ],
+              "markdown": true
+            }],
+            "potentialAction": [{
+              "@type": "OpenUri",
+              "name": "View Logs",
+              "targets": [{"os": "default", "uri": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"}]
+            }]
+          }' "$MS_TEAMS_WEBHOOK_URL"
