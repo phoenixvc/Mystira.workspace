@@ -2,14 +2,19 @@
 
 ## Status
 
-**Proposed** - 2025-12-22
+**Accepted** - 2025-12-24
+
+Decision accepted to implement permanent polyglot persistence architecture. Key clarifications:
+- **No full PostgreSQL migration** - Cosmos DB remains the primary document store
+- Each database serves its optimal use case permanently
+- PolyglotRepository provides unified access with database-appropriate routing
 
 ## Context
 
-Following [ADR-0013](./0013-data-management-and-storage-strategy.md), we need to select appropriate frameworks and libraries to implement polyglot persistence across Mystira services. The architecture involves:
+Following [ADR-0013](./0013-data-management-and-storage-strategy.md), we implement **permanent polyglot persistence** across Mystira services. This is NOT a migration strategy - each database is chosen for its strengths:
 
-- **Cosmos DB**: Document storage for scenarios, content, complex nested structures
-- **PostgreSQL**: Relational data for users, accounts, analytics, Story-Generator
+- **Cosmos DB**: Document storage for scenarios, content, complex nested structures (primary store)
+- **PostgreSQL**: Relational data for analytics, Story-Generator, structured queries
 - **Redis**: Caching layer for sessions, frequently accessed data
 - **Blob Storage**: Media assets with tiered storage
 
@@ -26,7 +31,7 @@ Following [ADR-0013](./0013-data-management-and-storage-strategy.md), we need to
 ### Requirements
 
 1. **Unified Repository Interface**: Abstract database technology from business logic
-2. **Dual-Write Support**: Write to multiple stores during migration
+2. **Polyglot Routing**: Route entities to appropriate database (Cosmos vs PostgreSQL)
 3. **Cache Integration**: Transparent caching with cache-aside pattern
 4. **Query Optimization**: Specification pattern for complex queries
 5. **Transaction Coordination**: Cross-database consistency where needed
@@ -435,40 +440,54 @@ public class PolyglotRepository<T> : IRepository<T> where T : class, IEntity
 
 ## Recommendation
 
-### **Option 4: Hybrid Approach**
+### **Option 4: Hybrid Approach (Permanent Polyglot)**
 
 Implement a hybrid solution combining:
 
 1. **Ardalis.Specification** for query patterns
-2. **Custom PolyglotRepository** for dual-write and migration support
+2. **Custom PolyglotRepository** for database-appropriate routing (NOT migration)
 3. **StackExchange.Redis** for distributed caching
 4. **Polly** for resilience patterns
+5. **Wolverine EF Core** for saga/outbox persistence
 
-### Implementation Phases
+### Database Routing Strategy
 
-#### Phase 1: Foundation (Week 1-2)
+| Entity Type | Primary Store | Rationale |
+|-------------|---------------|-----------|
+| Scenarios, Content Bundles | Cosmos DB | Complex nested documents, flexible schema |
+| User Profiles, Sessions | Cosmos DB | Document-oriented, low-latency reads |
+| Analytics, Metrics | PostgreSQL | Relational queries, aggregations |
+| Story Generator data | PostgreSQL | Structured LLM responses, embeddings |
+| Saga/Outbox state | PostgreSQL | Transactional consistency for Wolverine |
 
-- Add Ardalis.Specification to `Mystira.App.Application`
-- Create base `IPolyglotRepository<T>` interface
-- Migrate existing specifications to Ardalis format
+### Implementation in Mystira.Shared
 
-#### Phase 2: Dual-Write Infrastructure (Week 2-3)
+All infrastructure is consolidated in `Mystira.Shared`:
 
-- Implement `PolyglotRepository<T>` in `Mystira.App.Infrastructure.Data`
-- Add migration phase configuration
-- Create health checks for each backend
+```
+Mystira.Shared/
+├── Data/
+│   ├── Repositories/       # IRepository, RepositoryBase ✅
+│   ├── Specifications/     # ISpecification, BaseSpecification ✅
+│   ├── Entities/          # Entity, AuditableEntity ✅
+│   └── Polyglot/          # PolyglotRepository, routing config ⏳
+├── Caching/               # ICacheService, Redis ✅
+├── Resilience/            # Polly policies ✅
+└── Messaging/             # Wolverine integration ✅
+```
 
-#### Phase 3: Caching Layer (Week 3-4)
+### Implementation Status
 
-- Add StackExchange.Redis integration
-- Implement cache-aside pattern in repositories
-- Add cache invalidation on writes
-
-#### Phase 4: Migration Rollout (Week 4+)
-
-- Start with `AccountRepository` as pilot
-- Gradually migrate other repositories
-- Monitor and optimize
+| Component | Package | Status |
+|-----------|---------|--------|
+| Specification Pattern | `Mystira.Shared.Data.Specifications` | ✅ Complete |
+| Repository Base | `Mystira.Shared.Data.Repositories` | ✅ Complete |
+| Redis Caching | `Mystira.Shared.Caching` | ✅ Complete |
+| Polly Resilience | `Mystira.Shared.Resilience` | ✅ Complete |
+| Wolverine Messaging | `Mystira.Shared.Messaging` | ✅ Complete |
+| Ardalis.Specification | NuGet integration | ✅ Complete |
+| PolyglotRepository | `Mystira.Shared.Data.Polyglot` | ✅ Complete |
+| Wolverine EF Core | NuGet integration | ✅ Complete |
 
 ---
 
@@ -476,26 +495,27 @@ Implement a hybrid solution combining:
 
 ### Positive
 
-- Clean separation of concerns
-- Gradual migration path
-- High performance with caching
-- Battle-tested components
-- Minimal vendor lock-in
+- **Database-appropriate storage**: Each data type uses optimal database technology
+- **Clean separation of concerns**: Unified interface hides persistence complexity
+- **High performance with caching**: Redis cache-aside pattern for hot data
+- **Battle-tested components**: Ardalis.Specification, Polly, StackExchange.Redis
+- **Minimal vendor lock-in**: Standard abstractions allow swapping implementations
 
 ### Negative
 
-- Initial setup complexity
+- Initial setup complexity for PolyglotRepository
 - Multiple packages to maintain
-- Need to coordinate updates
+- Need to coordinate database updates for same entity
 
 ### Risks & Mitigations
 
-| Risk                           | Mitigation                             |
-| ------------------------------ | -------------------------------------- |
-| Ardalis.Spec version conflicts | Pin versions, test upgrades            |
-| Redis cache stampede           | Use cache locks for expensive queries  |
-| Dual-write consistency         | Implement compensation patterns        |
-| Testing complexity             | Use in-memory providers for unit tests |
+| Risk                               | Mitigation                                   |
+| ---------------------------------- | -------------------------------------------- |
+| Ardalis.Spec version conflicts     | Pin versions, test upgrades                  |
+| Redis cache stampede               | Use cache locks for expensive queries        |
+| Cross-database consistency         | Use Wolverine saga/outbox for coordination   |
+| Testing complexity                 | Use in-memory providers for unit tests       |
+| Wrong database choice for entity   | Document routing rationale, review in PRs    |
 
 ---
 
