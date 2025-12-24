@@ -39,9 +39,15 @@ locals {
 
   # Separate OpenAI models from catalog models (Anthropic, etc.)
   # Filter out disabled models using coalesce to handle missing enabled field
-  openai_deployments = {
+  # Split OpenAI models: primary (no location override) vs secondary (with location override)
+  openai_deployments_primary = {
     for k, v in var.model_deployments : k => v
-    if v.model_format == "OpenAI" && coalesce(v.enabled, true)
+    if v.model_format == "OpenAI" && coalesce(v.enabled, true) && v.location == null
+  }
+
+  openai_deployments_secondary = {
+    for k, v in var.model_deployments : k => v
+    if v.model_format == "OpenAI" && coalesce(v.enabled, true) && v.location != null
   }
 
   # Catalog models require different deployment approach via AzAPI
@@ -56,13 +62,21 @@ locals {
     if v.model_format != "OpenAI" && v.location != null && v.location != var.location && coalesce(v.enabled, true)
   }
 
-  # Get unique secondary regions needed
+  # Get unique secondary regions needed for catalog models
   secondary_regions = distinct([
     for k, v in local.catalog_deployments_secondary : v.location
   ])
 
-  # Check if we need UK South account
+  # Get unique secondary regions needed for OpenAI models (Standard SKU)
+  openai_secondary_regions = distinct([
+    for k, v in local.openai_deployments_secondary : v.location
+  ])
+
+  # Check if we need UK South account (for catalog models)
   needs_uksouth = contains(local.secondary_regions, "uksouth")
+
+  # Check if we need East US account (for Standard SKU OpenAI models like DALL-E, Whisper, TTS)
+  needs_eastus = contains(local.openai_secondary_regions, "eastus")
 }
 
 # =============================================================================
@@ -177,7 +191,7 @@ resource "azapi_resource" "ai_project" {
 # Standard OpenAI model deployments using azurerm provider
 
 resource "azurerm_cognitive_deployment" "openai_models" {
-  for_each = local.openai_deployments
+  for_each = local.openai_deployments_primary
 
   name                 = each.key
   cognitive_account_id = azurerm_cognitive_account.ai_foundry.id
@@ -342,6 +356,92 @@ resource "azapi_resource" "catalog_models_uksouth" {
     ignore_changes = [
       body["properties"]["model"]["version"]
     ]
+  }
+}
+
+# =============================================================================
+# Secondary Region AI Foundry Account (East US)
+# =============================================================================
+# Required for OpenAI models that need Standard SKU (DALL-E, Whisper, TTS)
+# Standard SKU is not available in South Africa North
+
+resource "azurerm_cognitive_account" "ai_foundry_eastus" {
+  count = local.needs_eastus ? 1 : 0
+
+  name                  = "mys-shared-ai-eus"
+  location              = "eastus"
+  resource_group_name   = var.resource_group_name
+  kind                  = "AIServices"
+  sku_name              = var.sku_name
+  custom_subdomain_name = "mys-shared-ai-eus"
+
+  # Network rules (inherit from primary)
+  dynamic "network_acls" {
+    for_each = var.enable_network_rules ? [1] : []
+    content {
+      default_action = var.network_default_action
+      ip_rules       = var.allowed_ip_ranges
+    }
+  }
+
+  identity {
+    type = "SystemAssigned"
+  }
+
+  local_auth_enabled                 = !var.disable_local_auth
+  public_network_access_enabled      = var.public_network_access_enabled
+  outbound_network_access_restricted = false
+
+  tags = merge(local.common_tags, {
+    Region = "eastus"
+    Role   = "secondary-standard-sku-models"
+  })
+
+  lifecycle {
+    ignore_changes = [
+      tags["hidden-link:*"],
+    ]
+  }
+}
+
+# =============================================================================
+# OpenAI Model Deployments (East US Region)
+# =============================================================================
+# OpenAI models that require Standard SKU (DALL-E, Whisper, TTS)
+
+resource "azurerm_cognitive_deployment" "openai_models_eastus" {
+  for_each = {
+    for k, v in local.openai_deployments_secondary : k => v
+    if v.location == "eastus"
+  }
+
+  name                 = each.key
+  cognitive_account_id = azurerm_cognitive_account.ai_foundry_eastus[0].id
+
+  model {
+    format  = "OpenAI"
+    name    = each.value.model_name
+    version = each.value.model_version
+  }
+
+  sku {
+    name     = each.value.sku_name
+    capacity = each.value.capacity
+  }
+
+  rai_policy_name = each.value.rai_policy_name
+
+  timeouts {
+    create = "30m"
+    update = "30m"
+    delete = "15m"
+  }
+
+  lifecycle {
+    ignore_changes = [
+      model[0].version
+    ]
+    create_before_destroy = false
   }
 }
 

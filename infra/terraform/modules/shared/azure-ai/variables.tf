@@ -193,43 +193,45 @@ variable "model_deployments" {
     # Image Generation (DALL-E)
     # ==========================================================================
     # For story illustrations, visual content creation
-    # NOTE: DALL-E 3 requires Standard SKU which is not available in South Africa North.
-    # Deploy separately to a supported region (e.g., East US, West Europe) when needed.
-    # "dall-e-3" = {
-    #   model_name    = "dall-e-3"
-    #   model_version = "3.0"
-    #   model_format  = "OpenAI"
-    #   sku_name      = "Standard"
-    #   capacity      = 1
-    # }
+    # Deployed to East US (Standard SKU not available in South Africa North)
+    "dall-e-3" = {
+      model_name    = "dall-e-3"
+      model_version = "3.0"
+      model_format  = "OpenAI"
+      sku_name      = "Standard"
+      capacity      = 1
+      location      = "eastus"
+    }
 
     # ==========================================================================
     # Audio Models (Whisper & TTS)
     # ==========================================================================
     # Speech-to-text for voice input, text-to-speech for narration
-    # NOTE: Audio models require Standard SKU which is not available in South Africa North.
-    # Deploy separately to a supported region (e.g., East US, West Europe) when needed.
-    # "whisper" = {
-    #   model_name    = "whisper"
-    #   model_version = "001"
-    #   model_format  = "OpenAI"
-    #   sku_name      = "Standard"
-    #   capacity      = 1
-    # }
-    # "tts" = {
-    #   model_name    = "tts"
-    #   model_version = "001"
-    #   model_format  = "OpenAI"
-    #   sku_name      = "Standard"
-    #   capacity      = 1
-    # }
-    # "tts-hd" = {
-    #   model_name    = "tts-hd"
-    #   model_version = "001"
-    #   model_format  = "OpenAI"
-    #   sku_name      = "Standard"
-    #   capacity      = 1
-    # }
+    # Deployed to East US (Standard SKU not available in South Africa North)
+    "whisper" = {
+      model_name    = "whisper"
+      model_version = "001"
+      model_format  = "OpenAI"
+      sku_name      = "Standard"
+      capacity      = 1
+      location      = "eastus"
+    }
+    "tts" = {
+      model_name    = "tts"
+      model_version = "001"
+      model_format  = "OpenAI"
+      sku_name      = "Standard"
+      capacity      = 1
+      location      = "eastus"
+    }
+    "tts-hd" = {
+      model_name    = "tts-hd"
+      model_version = "001"
+      model_format  = "OpenAI"
+      sku_name      = "Standard"
+      capacity      = 1
+      location      = "eastus"
+    }
 
     # ==========================================================================
     # Anthropic Claude Models (via Azure AI Model Catalog)
