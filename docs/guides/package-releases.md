@@ -393,12 +393,53 @@ fix: refactor ApiClient.ts to use async/await with try/catch
 
 ---
 
+## Package Structure
+
+### Current Packages
+
+| Package | Type | Location | Purpose |
+|---------|------|----------|---------|
+| `@mystira/app` | NPM | `packages/app` | Core app package |
+| `@mystira/app-contracts` | NPM | `packages/app` | App API types |
+| `@mystira/story-generator` | NPM | `packages/story-generator` | Story generator package |
+| `@mystira/story-generator-contracts` | NPM | `packages/story-generator` | Story generator API types |
+| `@mystira/publisher` | NPM | `packages/publisher` | Publishing service |
+| `@mystira/shared-utils` | NPM | `packages/publisher` | Shared utilities |
+| `Mystira.App.Contracts` | NuGet | `packages/app` | .NET API contracts |
+| `Mystira.StoryGenerator.Contracts` | NuGet | `packages/story-generator` | .NET API contracts |
+
+### Linked Packages
+
+Packages in linked groups always version together:
+
+```
+Group 1: @mystira/app ↔ @mystira/app-contracts
+Group 2: @mystira/story-generator ↔ @mystira/story-generator-contracts
+Group 3: @mystira/publisher ↔ @mystira/shared-utils
+```
+
+### Consolidation Roadmap
+
+We are planning to consolidate contracts into unified packages:
+
+| Current | Future | Benefits |
+|---------|--------|----------|
+| Multiple `*-contracts` packages | `@mystira/contracts` (NPM) | Single source of truth |
+| Multiple `*.Contracts` packages | `Mystira.Contracts` (NuGet) | Simplified dependencies |
+| `shared-utils` in Publisher | Workspace-level package | Proper placement |
+
+See [ADR-0020: Package Consolidation Strategy](../architecture/adr/0020-package-consolidation-strategy.md) for details.
+
+---
+
 ## Related Documentation
 
 - [Publishing & Deployment Flow](../cicd/publishing-flow.md) - Complete publishing overview
+- [Package Inventory](../analysis/package-inventory.md) - Full package analysis with consolidation recommendations
 - [CI/CD Setup](../cicd/cicd-setup.md) - CI configuration
 - [Commit Conventions](./commit-conventions.md) - Commit message format
-- [ADR-0003: Release Pipeline Strategy](../architecture/adr/0003-release-pipeline-strategy.md) - Architecture decision
+- [ADR-0003: Release Pipeline Strategy](../architecture/adr/0003-release-pipeline-strategy.md) - Release architecture
+- [ADR-0020: Package Consolidation Strategy](../architecture/adr/0020-package-consolidation-strategy.md) - Package consolidation plan
 
 ---
 
