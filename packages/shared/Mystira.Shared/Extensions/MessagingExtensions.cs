@@ -89,7 +89,7 @@ public static class MessagingExtensions
         var retryDelays = GenerateRetryDelays(options.MaxRetries, options.InitialRetryDelaySeconds);
         if (retryDelays.Length > 0)
         {
-            wolverine.Policies.OnException<Exception>()
+            wolverine.OnException<Exception>()
                 .RetryWithCooldown(retryDelays);
         }
 
