@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace Mystira.Shared.Middleware;
 
@@ -11,15 +12,36 @@ public class TelemetryMiddleware
 {
     private readonly RequestDelegate _next;
     private readonly ILogger<TelemetryMiddleware> _logger;
+    private readonly TelemetryOptions _options;
 
-    public TelemetryMiddleware(RequestDelegate next, ILogger<TelemetryMiddleware> logger)
+    public TelemetryMiddleware(
+        RequestDelegate next,
+        ILogger<TelemetryMiddleware> logger,
+        IOptions<TelemetryOptions> options)
     {
         _next = next;
         _logger = logger;
+        _options = options.Value;
     }
 
     public async Task InvokeAsync(HttpContext context)
     {
+        var path = context.Request.Path.Value ?? string.Empty;
+
+        // Skip telemetry for excluded paths
+        if (ShouldExcludePath(path))
+        {
+            await _next(context);
+            return;
+        }
+
+        // Skip if both tracing and metrics are disabled
+        if (!_options.EnableTracing && !_options.EnableMetrics)
+        {
+            await _next(context);
+            return;
+        }
+
         var stopwatch = Stopwatch.StartNew();
         var requestId = Activity.Current?.Id ?? context.TraceIdentifier;
 
@@ -34,17 +56,39 @@ public class TelemetryMiddleware
         {
             stopwatch.Stop();
 
-            var logLevel = context.Response.StatusCode >= 500 ? LogLevel.Error
-                : context.Response.StatusCode >= 400 ? LogLevel.Warning
-                : LogLevel.Information;
+            if (_options.EnableMetrics)
+            {
+                var logLevel = context.Response.StatusCode >= 500 ? LogLevel.Error
+                    : context.Response.StatusCode >= 400 ? LogLevel.Warning
+                    : LogLevel.Information;
 
-            _logger.Log(logLevel,
-                "HTTP {Method} {Path} responded {StatusCode} in {ElapsedMs}ms",
-                context.Request.Method,
-                context.Request.Path,
-                context.Response.StatusCode,
-                stopwatch.ElapsedMilliseconds);
+                _logger.Log(logLevel,
+                    "HTTP {Method} {Path} responded {StatusCode} in {ElapsedMs}ms [Service: {ServiceName}]",
+                    context.Request.Method,
+                    path,
+                    context.Response.StatusCode,
+                    stopwatch.ElapsedMilliseconds,
+                    _options.ServiceName);
+            }
         }
+    }
+
+    private bool ShouldExcludePath(string path)
+    {
+        if (_options.ExcludePaths == null || _options.ExcludePaths.Length == 0)
+        {
+            return false;
+        }
+
+        foreach (var excludePath in _options.ExcludePaths)
+        {
+            if (path.StartsWith(excludePath, StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
 
@@ -76,5 +120,5 @@ public class TelemetryOptions
     /// <summary>
     /// Paths to exclude from telemetry (e.g., health checks)
     /// </summary>
-    public string[] ExcludePaths { get; set; } = { "/health", "/ready", "/metrics" };
+    public string[] ExcludePaths { get; set; } = ["/health", "/ready", "/metrics"];
 }
