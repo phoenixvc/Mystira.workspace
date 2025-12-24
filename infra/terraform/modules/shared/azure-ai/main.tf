@@ -38,21 +38,22 @@ locals {
   })
 
   # Separate OpenAI models from catalog models (Anthropic, etc.)
+  # Filter out disabled models using coalesce to handle missing enabled field
   openai_deployments = {
     for k, v in var.model_deployments : k => v
-    if v.model_format == "OpenAI"
+    if v.model_format == "OpenAI" && coalesce(v.enabled, true)
   }
 
   # Catalog models require different deployment approach via AzAPI
   # Split by region: primary (same as account) vs secondary (different region like uksouth)
   catalog_deployments_primary = {
     for k, v in var.model_deployments : k => v
-    if v.model_format != "OpenAI" && (v.location == null || v.location == var.location)
+    if v.model_format != "OpenAI" && (v.location == null || v.location == var.location) && coalesce(v.enabled, true)
   }
 
   catalog_deployments_secondary = {
     for k, v in var.model_deployments : k => v
-    if v.model_format != "OpenAI" && v.location != null && v.location != var.location
+    if v.model_format != "OpenAI" && v.location != null && v.location != var.location && coalesce(v.enabled, true)
   }
 
   # Get unique secondary regions needed
@@ -195,9 +196,21 @@ resource "azurerm_cognitive_deployment" "openai_models" {
   # Responsible AI policy (optional)
   rai_policy_name = each.value.rai_policy_name
 
+  # Longer timeouts for model deployments which can take time
+  timeouts {
+    create = "30m"
+    update = "30m"
+    delete = "15m"
+  }
+
   lifecycle {
     # Prevent recreation when capacity changes (use update instead)
-    ignore_changes = []
+    # Model versions may be updated automatically by Azure
+    ignore_changes = [
+      model[0].version
+    ]
+    # Allow replacement if needed, don't block on failures
+    create_before_destroy = false
   }
 }
 
