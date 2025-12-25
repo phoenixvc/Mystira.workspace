@@ -36,9 +36,9 @@ public record MediaQueryRequest
     public string? SortBy { get; set; }
 
     /// <summary>
-    /// Optional flag to sort in descending order.
+    /// Flag to sort in descending order.
     /// </summary>
-    public bool? SortDescending { get; set; }
+    public bool SortDescending { get; set; }
 }
 
 /// <summary>

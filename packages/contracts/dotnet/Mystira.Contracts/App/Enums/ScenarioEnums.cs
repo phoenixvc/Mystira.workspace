@@ -65,25 +65,15 @@ public enum ScenarioGameState
     /// <summary>
     /// The game has not been started yet.
     /// </summary>
-    NotStarted = 0,
+    NotStarted,
 
     /// <summary>
     /// The game is currently in progress.
     /// </summary>
-    InProgress = 1,
-
-    /// <summary>
-    /// The game has been paused.
-    /// </summary>
-    Paused = 2,
+    InProgress,
 
     /// <summary>
     /// The game has been completed.
     /// </summary>
-    Completed = 3,
-
-    /// <summary>
-    /// The game was abandoned before completion.
-    /// </summary>
-    Abandoned = 4
+    Completed
 }

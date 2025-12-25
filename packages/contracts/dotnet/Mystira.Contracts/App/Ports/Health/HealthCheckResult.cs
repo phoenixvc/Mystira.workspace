@@ -10,7 +10,7 @@ public record HealthCheckResult
     /// <summary>
     /// The status of the health check as a string (e.g., "Healthy", "Degraded", "Unhealthy").
     /// </summary>
-    public required string Status { get; init; }
+    public string Status { get; init; } = "Healthy";
 
     /// <summary>
     /// Description or additional information about the health check result.
@@ -30,12 +30,12 @@ public record HealthCheckResult
     /// <summary>
     /// Additional data about the health check.
     /// </summary>
-    public IReadOnlyDictionary<string, object>? Data { get; init; }
+    public Dictionary<string, object>? Data { get; init; }
 
     /// <summary>
     /// Individual component health check results.
     /// </summary>
-    public IReadOnlyDictionary<string, ComponentHealthResult>? Components { get; init; }
+    public Dictionary<string, ComponentHealthResult>? Components { get; init; }
 
     /// <summary>
     /// Creates a healthy result.
@@ -73,7 +73,7 @@ public record ComponentHealthResult
     /// <summary>
     /// The status of the component as a string.
     /// </summary>
-    public required string Status { get; init; }
+    public string Status { get; init; } = "Healthy";
 
     /// <summary>
     /// Description of the component health status.
@@ -88,5 +88,5 @@ public record ComponentHealthResult
     /// <summary>
     /// Additional data about the component health.
     /// </summary>
-    public IReadOnlyDictionary<string, object>? Data { get; init; }
+    public Dictionary<string, object>? Data { get; init; }
 }

@@ -53,7 +53,7 @@ public record UpdateSubscriptionRequest
     /// <summary>
     /// The subscription type.
     /// </summary>
-    public SubscriptionType SubscriptionType { get; set; }
+    public SubscriptionType Type { get; set; }
 
     /// <summary>
     /// Optional product identifier from the app store.
