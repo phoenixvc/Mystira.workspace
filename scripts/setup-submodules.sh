@@ -45,5 +45,5 @@ echo ""
 echo "Next steps:"
 echo "  1. Run 'pnpm install' to install dependencies"
 echo "  2. Run 'pnpm build' to build all packages"
-echo "  3. See docs/SUBMODULES.md for more information"
+echo "  3. See docs/guides/submodules.md for more information"
 

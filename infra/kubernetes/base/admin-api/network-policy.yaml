@@ -1,0 +1,76 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: mystira-admin-api-network-policy
+  labels:
+    app: mystira-admin-api
+spec:
+  podSelector:
+    matchLabels:
+      app: mystira-admin-api
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    # Allow traffic from ingress controller
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: ingress-nginx
+      ports:
+        - protocol: TCP
+          port: 8080
+        - protocol: TCP
+          port: 8081
+    # Allow traffic from admin-ui (for API calls)
+    - from:
+        - podSelector:
+            matchLabels:
+              app: mystira-admin-ui
+      ports:
+        - protocol: TCP
+          port: 8080
+    # Allow health check probes from kubelet
+    - from: []
+      ports:
+        - protocol: TCP
+          port: 8081
+  egress:
+    # Allow DNS resolution
+    - to:
+        - namespaceSelector: {}
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+    # Allow traffic to PostgreSQL (shared database)
+    - to:
+        - ipBlock:
+            cidr: 10.0.0.0/8
+      ports:
+        - protocol: TCP
+          port: 5432
+    # Allow traffic to Redis (shared cache)
+    - to:
+        - ipBlock:
+            cidr: 10.0.0.0/8
+      ports:
+        - protocol: TCP
+          port: 6379
+        - protocol: TCP
+          port: 6380
+    # Allow HTTPS to Azure services (Key Vault, Entra ID, App Insights)
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+            except:
+              - 10.0.0.0/8
+              - 172.16.0.0/12
+              - 192.168.0.0/16
+      ports:
+        - protocol: TCP
+          port: 443

@@ -170,6 +170,8 @@ We will **keep the hybrid approach (Option B with enhancements)**:
 - [ADR-0005: Service Networking and Communication](./0005-service-networking-and-communication.md)
 - [ADR-0006: Admin API Repository Extraction](./0006-admin-api-repository-extraction.md)
 - [ADR-0007: NuGet Feed Strategy for Shared Libraries](./0007-nuget-feed-strategy-for-shared-libraries.md)
+- [ADR-0012: GitHub Workflow Naming Convention](./0012-github-workflow-naming-convention.md)
+- [ADR-0016: Monorepo Tooling and Multi-Repository Strategy](./0016-monorepo-tooling-and-multi-repository-strategy.md)
 
 ## References
 

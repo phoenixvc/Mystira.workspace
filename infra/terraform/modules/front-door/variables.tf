@@ -44,6 +44,68 @@ variable "custom_domain_chain" {
   type        = string
 }
 
+# Admin services (optional)
+variable "enable_admin_services" {
+  description = "Enable admin-api and admin-ui endpoints in Front Door"
+  type        = bool
+  default     = false
+}
+
+variable "admin_api_backend_address" {
+  description = "Backend address for Admin API service (e.g., dev.admin-api.mystira.app)"
+  type        = string
+  default     = ""
+}
+
+variable "admin_ui_backend_address" {
+  description = "Backend address for Admin UI service (e.g., dev.admin.mystira.app)"
+  type        = string
+  default     = ""
+}
+
+variable "custom_domain_admin_api" {
+  description = "Custom domain for Admin API (e.g., dev.admin-api.mystira.app)"
+  type        = string
+  default     = ""
+}
+
+variable "custom_domain_admin_ui" {
+  description = "Custom domain for Admin UI (e.g., dev.admin.mystira.app)"
+  type        = string
+  default     = ""
+}
+
+# Story Generator services (optional)
+variable "enable_story_generator" {
+  description = "Enable story-generator API and SWA endpoints in Front Door"
+  type        = bool
+  default     = false
+}
+
+variable "story_generator_api_backend_address" {
+  description = "Backend address for Story Generator API (e.g., dev.story-api.mystira.app)"
+  type        = string
+  default     = ""
+}
+
+variable "story_generator_swa_backend_address" {
+  description = "Backend address for Story Generator SWA (Blazor WASM frontend)"
+  type        = string
+  default     = ""
+}
+
+variable "custom_domain_story_generator_api" {
+  description = "Custom domain for Story Generator API (e.g., dev.story-api.mystira.app)"
+  type        = string
+  default     = ""
+}
+
+variable "custom_domain_story_generator_swa" {
+  description = "Custom domain for Story Generator SWA (e.g., dev.story.mystira.app)"
+  type        = string
+  default     = ""
+}
+
 variable "enable_waf" {
   description = "Enable Web Application Firewall"
   type        = bool

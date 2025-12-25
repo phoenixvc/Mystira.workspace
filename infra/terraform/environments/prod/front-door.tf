@@ -23,21 +23,35 @@ module "front_door" {
   custom_domain_publisher = "publisher.mystira.app"
   custom_domain_chain     = "chain.mystira.app"
 
+  # Admin services
+  enable_admin_services     = true
+  admin_api_backend_address = "admin-api.mystira.app"
+  admin_ui_backend_address  = "admin.mystira.app"
+  custom_domain_admin_api   = "admin-api.mystira.app"
+  custom_domain_admin_ui    = "admin.mystira.app"
+
+  # Story Generator services (API + SWA)
+  enable_story_generator              = true
+  story_generator_api_backend_address = "story-api.mystira.app"
+  story_generator_swa_backend_address = module.story_generator.static_web_app_default_hostname
+  custom_domain_story_generator_api   = "story-api.mystira.app"
+  custom_domain_story_generator_swa   = "story.mystira.app"
+
   # WAF Configuration - PRODUCTION SETTINGS
   enable_waf           = true
-  waf_mode             = "Prevention"  # BLOCK malicious traffic in production
-  rate_limit_threshold = 500           # Higher threshold for production traffic
+  waf_mode             = "Prevention" # BLOCK malicious traffic in production
+  rate_limit_threshold = 500          # Higher threshold for production traffic
 
   # Caching Configuration
   enable_caching         = true
-  cache_duration_seconds = 7200  # 2 hours for production
+  cache_duration_seconds = 7200 # 2 hours for production
 
   # Health Probes
   health_probe_path     = "/health"
   health_probe_interval = 30
 
   # Session Affinity
-  session_affinity_enabled = false  # Disabled for stateless apps
+  session_affinity_enabled = false # Disabled for stateless apps
 
   tags = merge(local.common_tags, {
     Component   = "front-door"
@@ -66,6 +80,26 @@ output "front_door_waf_policy_id" {
 output "front_door_custom_domain_verification" {
   description = "Custom domain verification instructions"
   value       = module.front_door.custom_domain_verification
+}
+
+output "front_door_admin_api_endpoint" {
+  description = "Front Door endpoint for Admin API - use this for CNAME"
+  value       = module.front_door.admin_api_endpoint_hostname
+}
+
+output "front_door_admin_ui_endpoint" {
+  description = "Front Door endpoint for Admin UI - use this for CNAME"
+  value       = module.front_door.admin_ui_endpoint_hostname
+}
+
+output "front_door_story_generator_api_endpoint" {
+  description = "Front Door endpoint for Story Generator API - use this for CNAME"
+  value       = module.front_door.story_generator_api_endpoint_hostname
+}
+
+output "front_door_story_generator_swa_endpoint" {
+  description = "Front Door endpoint for Story Generator SWA - use this for CNAME"
+  value       = module.front_door.story_generator_swa_endpoint_hostname
 }
 
 # After deploying, update DNS with:

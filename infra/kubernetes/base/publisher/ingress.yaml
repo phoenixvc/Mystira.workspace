@@ -1,7 +1,7 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: mystira-publisher-ingress
+  name: mys-publisher-ingress
   labels:
     app: mystira-publisher
   annotations:

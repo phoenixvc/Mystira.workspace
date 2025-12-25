@@ -7,15 +7,19 @@ resources:
   - ../../base/chain
   - ../../base/publisher
   - ../../base/story-generator
+  - ../../base/admin-api
+  - ../../base/admin-ui
   - ../../base/cert-manager
 
-commonLabels:
-  environment: staging
+labels:
+  - pairs:
+      environment: staging
+    includeSelectors: true
 
 patches:
   - target:
       kind: Ingress
-      name: mystira-publisher-ingress
+      name: mys-publisher-ingress
     patch: |-
       - op: replace
         path: /spec/tls/0/hosts/0
@@ -28,7 +32,7 @@ patches:
         value: "letsencrypt-staging"
   - target:
       kind: Ingress
-      name: mystira-chain-ingress
+      name: mys-chain-ingress
     patch: |-
       - op: replace
         path: /spec/tls/0/hosts/0
@@ -65,7 +69,30 @@ patches:
     patch: |-
       - op: replace
         path: /data/key_vault_url
-        value: "https://mys-staging-mystira-pub-kv-eus.vault.azure.net/"
+        value: "https://mys-staging-pub-kv-san.vault.azure.net/"
+  - target:
+      kind: ConfigMap
+      name: mys-chain-config
+    patch: |-
+      - op: replace
+        path: /data/key_vault_url
+        value: "https://mys-staging-chain-kv-san.vault.azure.net/"
+  - target:
+      kind: Ingress
+      name: mys-story-generator-ingress
+    patch: |-
+      - op: replace
+        path: /spec/tls/0/hosts/0
+        value: "staging.story-api.mystira.app"
+      - op: replace
+        path: /spec/rules/0/host
+        value: "staging.story-api.mystira.app"
+      - op: replace
+        path: /spec/tls/0/secretName
+        value: "mys-story-generator-tls-staging"
+      - op: replace
+        path: /metadata/annotations/cert-manager.io~1cluster-issuer
+        value: "letsencrypt-staging"
   - target:
       kind: Deployment
       name: mys-story-generator
@@ -79,12 +106,70 @@ patches:
     patch: |-
       - op: replace
         path: /data/key_vault_url
-        value: "https://mys-staging-mystira-sg-kv-eus.vault.azure.net/"
+        value: "https://mys-staging-story-kv-san.vault.azure.net/"
+  - target:
+      kind: Ingress
+      name: mys-admin-api-ingress
+    patch: |-
+      - op: replace
+        path: /spec/tls/0/hosts/0
+        value: "staging.admin-api.mystira.app"
+      - op: replace
+        path: /spec/rules/0/host
+        value: "staging.admin-api.mystira.app"
+      - op: replace
+        path: /metadata/annotations/cert-manager.io~1cluster-issuer
+        value: "letsencrypt-staging"
+  - target:
+      kind: Ingress
+      name: mys-admin-ui-ingress
+    patch: |-
+      - op: replace
+        path: /spec/tls/0/hosts/0
+        value: "staging.admin.mystira.app"
+      - op: replace
+        path: /spec/rules/0/host
+        value: "staging.admin.mystira.app"
+      - op: replace
+        path: /metadata/annotations/cert-manager.io~1cluster-issuer
+        value: "letsencrypt-staging"
+  - target:
+      kind: Deployment
+      name: mys-admin-api
+    patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 2
+  - target:
+      kind: Deployment
+      name: mys-admin-ui
+    patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 2
+  - target:
+      kind: ConfigMap
+      name: mys-admin-api-config
+    patch: |-
+      - op: replace
+        path: /data/key_vault_url
+        value: "https://mys-staging-admin-kv-san.vault.azure.net/"
+  - target:
+      kind: ConfigMap
+      name: mys-admin-ui-config
+    patch: |-
+      - op: replace
+        path: /data/api_url
+        value: "https://staging.admin-api.mystira.app"
 
 images:
-  - name: mysprodacr.azurecr.io/chain
+  - name: myssharedacr.azurecr.io/chain
     newTag: staging
-  - name: mysprodacr.azurecr.io/publisher
+  - name: myssharedacr.azurecr.io/publisher
     newTag: staging
-  - name: mysprodacr.azurecr.io/story-generator
+  - name: myssharedacr.azurecr.io/story-generator
+    newTag: staging
+  - name: myssharedacr.azurecr.io/admin-api
+    newTag: staging
+  - name: myssharedacr.azurecr.io/admin-ui
     newTag: staging

@@ -69,13 +69,13 @@ Where:
 
 | Resource Type           | Abbreviation | Example                              |
 | ----------------------- | ------------ | ------------------------------------ |
-| Resource Group          | `rg`         | `mys-dev-mystira-rg-euw`             |
-| Azure Kubernetes        | `aks`        | `mys-dev-mystira-aks-euw`            |
-| Virtual Network         | `vnet`       | `mys-dev-mystira-vnet-euw`           |
+| Resource Group          | `rg`         | `mys-dev-core-rg-euw`                |
+| Azure Kubernetes        | `aks`        | `mys-dev-core-aks-euw`               |
+| Virtual Network         | `vnet`       | `mys-dev-core-vnet-euw`              |
 | Subnet                  | `subnet`     | `mystira-app-subnet` (no env prefix) |
-| Key Vault               | `kv`         | `mys-dev-mystira-kv-euw`             |
+| Key Vault               | `kv`         | `mys-dev-CONTEXT-kv-euw`             |
 | Storage Account         | (no dashes)  | `mysprodmystirastgeuw`               |
-| Container Registry      | (no dashes)  | `mysprodacr`                         |
+| Container Registry      | (no dashes)  | `myssharedacr`                       |
 | PostgreSQL              | `pg`         | `mys-dev-shared-pg-euw`              |
 | Redis Cache             | (in name)    | `mys-dev-shared-redis-cache-euw`     |
 | Application Insights    | `ai`         | `mys-dev-mystira-ai-euw`             |
@@ -177,9 +177,9 @@ No additional values allowed without updating this document.
 Pattern: `[org]-[env]-[project]-rg-[region]`
 
 ```text
-mys-dev-mystira-rg-euw
-mys-prod-mystira-rg-euw
-mys-staging-mystira-rg-euw
+mys-dev-core-rg-euw
+mys-prod-core-rg-euw
+mys-staging-core-rg-euw
 nl-prod-autopr-rg-san
 pvc-prod-mktdata-rg-euw
 tws-prod-website-rg-san
@@ -212,7 +212,7 @@ pvc-prod-website-dns-glob
 Resource group for DNS:
 
 ```text
-mys-prod-mystira-rg-glob
+mys-prod-core-rg-glob
 nl-prod-autopr-rg-glob
 pvc-prod-website-rg-glob
 ```
@@ -227,7 +227,7 @@ Examples:
 
 ```text
 mysprodmystirastgeuw    # mys-prod-mystira-storage-euw
-mysprodterraformstate   # Terraform state backend
+myssharedtfstatesan   # Terraform state backend
 nlprodautoprstgeuw      # nl-prod-autopr-storage-euw
 pvcprodmktdatastgeuw    # pvc-prod-mktdata-storage-euw
 ```
@@ -236,17 +236,17 @@ pvcprodmktdatastgeuw    # pvc-prod-mktdata-storage-euw
 
 Pattern: `[org][description]` (no dashes, shared across environments)
 
-**Note**: ACR names cannot contain hyphens and must be globally unique. Use format `mys{description}` (e.g., `mysprodacr`).
+**Note**: ACR names cannot contain hyphens and must be globally unique. Use format `mys{description}` (e.g., `myssharedacr`).
 
 Examples:
 
 ```text
 nlprodacr    # Shared ACR for NL (uses tags: dev, staging, prod)
 pvcprodacr   # Shared ACR for PVC
-mysprodacr   # Shared ACR for Mystira
+myssharedacr   # Shared ACR for Mystira
 ```
 
-**ACR Naming**: Use `mysprodacr` for the shared Mystira ACR (no dashes, as per Azure requirements).
+**ACR Naming**: Use `myssharedacr` for the shared Mystira ACR (no dashes, as per Azure requirements).
 
 ### Kubernetes Resources
 
@@ -303,7 +303,7 @@ Examples:
 Examples:
 
 - `nlprodterraformstate` (NeuralLiquid)
-- `mysprodterraformstate` (Mystira - new)
+- `myssharedtfstatesan` (Mystira - new)
 - `mystiraterraformstate` (Mystira - legacy, keep as-is)
 
 **Container**: `tfstate`
@@ -321,7 +321,7 @@ Examples:
 - `staging/terraform.tfstate`
 - `prod/terraform.tfstate`
 
-**Storage Account Name**: `mysprodterraformstate` (no dashes, as per Azure requirements).
+**Storage Account Name**: `myssharedtfstatesan` (no dashes, as per Azure requirements).
 
 ## Renaming, Moving, and Recreating Resources
 

@@ -1,4 +1,9 @@
-name: Infrastructure Deploy
+name: "Infrastructure: Deploy"
+
+# Infrastructure Deployment: Flexible deployment to dev/staging/prod environments
+# Steps: Validate prerequisites, bootstrap infrastructure, Terraform apply, build images, deploy K8s
+# Supports: Selective component deployment, skip validation, manual triggers
+# Triggers: Pushes to main (auto-deploy dev) or manual workflow_dispatch
 
 on:
   push:
@@ -42,12 +47,32 @@ concurrency:
 env:
   TF_VERSION: "1.5.0"
   ENVIRONMENT: ${{ github.event.inputs.environment || 'dev' }}
-  AZURE_RESOURCE_GROUP: mys-${{ github.event.inputs.environment || 'dev' }}-mystira-rg-eus
-  AKS_CLUSTER_NAME: mys-${{ github.event.inputs.environment || 'dev' }}-mystira-aks-eus
-  ACR_NAME: mysprodacr
+
+  # ==========================================================================
+  # Resource Groups (ADR-0017: Resource Group Organization Strategy)
+  # ==========================================================================
+
+  # Tier 1: Core RG (shared infrastructure: VNet, AKS, PostgreSQL, Redis, Service Bus, Monitoring)
+  AZURE_RESOURCE_GROUP: mys-${{ github.event.inputs.environment || 'dev' }}-core-rg-san
+
+  # Tier 2: Service-Specific RGs (per ADR-0017)
+  CHAIN_RG: mys-${{ github.event.inputs.environment || 'dev' }}-chain-rg-san
+  PUBLISHER_RG: mys-${{ github.event.inputs.environment || 'dev' }}-publisher-rg-san
+  STORY_RG: mys-${{ github.event.inputs.environment || 'dev' }}-story-rg-san
+  ADMIN_RG: mys-${{ github.event.inputs.environment || 'dev' }}-admin-rg-san
+  APP_RG: mys-${{ github.event.inputs.environment || 'dev' }}-app-rg-san
+
+  # Tier 3: Cross-Environment Shared RGs
+  SHARED_ACR_RG: mys-shared-acr-rg-san
+  SHARED_COMMS_RG: mys-shared-comms-rg-glob
+
+  # Infrastructure
+  AKS_CLUSTER_NAME: mys-${{ github.event.inputs.environment || 'dev' }}-core-aks-san
+  ACR_NAME: myssharedacr
   DNS_ZONE: mystira.app
-  TERRAFORM_RG: mys-prod-terraform-rg-eus
-  TERRAFORM_STORAGE: mysprodterraformstate
+  DNS_ZONE_RG: mys-shared-terraform-rg-san
+  TERRAFORM_RG: mys-shared-terraform-rg-san
+  TERRAFORM_STORAGE: myssharedtfstatesan
 
 jobs:
   # ============================================
@@ -61,6 +86,7 @@ jobs:
       backend-exists: ${{ steps.check-backend.outputs.exists }}
       acr-exists: ${{ steps.check-acr.outputs.exists }}
       dns-zone-exists: ${{ steps.check-dns.outputs.exists }}
+      aks-exists: ${{ steps.check-aks.outputs.exists }}
     steps:
       - name: Azure Login
         uses: azure/login@v2
@@ -92,23 +118,144 @@ jobs:
       - name: Check DNS Zone
         id: check-dns
         run: |
-          if az network dns zone show --name ${{ env.DNS_ZONE }} --resource-group ${{ env.TERRAFORM_RG }} &> /dev/null; then
+          if az network dns zone show --name ${{ env.DNS_ZONE }} --resource-group ${{ env.DNS_ZONE_RG }} &> /dev/null; then
             echo "exists=true" >> $GITHUB_OUTPUT
-            echo "::notice::DNS Zone exists"
+            echo "::notice::DNS Zone exists in ${{ env.DNS_ZONE_RG }}"
           else
             echo "exists=false" >> $GITHUB_OUTPUT
             echo "::warning::DNS Zone does not exist - will be created"
           fi
 
+      - name: Check AKS Cluster
+        id: check-aks
+        run: |
+          if az aks show --name ${{ env.AKS_CLUSTER_NAME }} --resource-group ${{ env.AZURE_RESOURCE_GROUP }} &> /dev/null; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+            echo "::notice::AKS Cluster exists"
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+            echo "::notice::AKS Cluster does not exist - Kubernetes deployment will be skipped"
+          fi
+
+      - name: Check Service Principal Permissions
+        id: check-permissions
+        run: |
+          echo "Checking service principal permissions..."
+          PERMISSION_ISSUES=""
+
+          # Get service principal info
+          SP_CLIENT_ID=$(echo '${{ secrets.MYSTIRA_AZURE_CREDENTIALS }}' | jq -r '.clientId')
+          SP_OBJECT_ID=$(az ad sp show --id "$SP_CLIENT_ID" --query id -o tsv 2>/dev/null || echo "")
+          SUBSCRIPTION_ID=$(az account show --query id -o tsv)
+
+          if [ -z "$SP_OBJECT_ID" ]; then
+            echo "::error::Could not retrieve service principal object ID"
+            echo "sp-valid=false" >> $GITHUB_OUTPUT
+            exit 1
+          fi
+          echo "Service Principal Object ID: $SP_OBJECT_ID"
+
+          # Check 1: Azure AD App Registration permissions
+          echo "Checking Azure AD permissions..."
+          # Try to list apps to verify we have some Graph API access
+          if ! az ad app list --filter "displayName eq 'permission-test-$(date +%s)'" --query "[].id" -o tsv &>/dev/null; then
+            PERMISSION_ISSUES="${PERMISSION_ISSUES}\n- Missing Azure AD permissions (Application.ReadWrite.All or Application Administrator role)"
+            echo "has-ad-permissions=false" >> $GITHUB_OUTPUT
+          else
+            echo "has-ad-permissions=true" >> $GITHUB_OUTPUT
+            echo "::notice::Azure AD permissions OK"
+          fi
+
+          # Check 2: Role assignment permissions (User Access Administrator)
+          echo "Checking role assignment permissions..."
+          # Check if SP has User Access Administrator or Owner at subscription level
+          HAS_UAA=$(az role assignment list \
+            --assignee "$SP_OBJECT_ID" \
+            --scope "/subscriptions/${SUBSCRIPTION_ID}" \
+            --query "[?roleDefinitionName=='User Access Administrator' || roleDefinitionName=='Owner'].roleDefinitionName" \
+            -o tsv 2>/dev/null | head -1)
+
+          if [ -z "$HAS_UAA" ]; then
+            # Check at resource group level
+            HAS_UAA=$(az role assignment list \
+              --assignee "$SP_OBJECT_ID" \
+              --scope "/subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${{ env.AZURE_RESOURCE_GROUP }}" \
+              --query "[?roleDefinitionName=='User Access Administrator' || roleDefinitionName=='Owner'].roleDefinitionName" \
+              -o tsv 2>/dev/null | head -1)
+          fi
+
+          if [ -z "$HAS_UAA" ]; then
+            PERMISSION_ISSUES="${PERMISSION_ISSUES}\n- Missing User Access Administrator role (cannot create role assignments)"
+            echo "has-rbac-permissions=false" >> $GITHUB_OUTPUT
+          else
+            echo "has-rbac-permissions=true" >> $GITHUB_OUTPUT
+            echo "::notice::Role assignment permissions OK ($HAS_UAA)"
+          fi
+
+          # Check 3: Front Door WAF policy conflicts
+          echo "Checking for WAF policy conflicts..."
+          if az afd profile show --profile-name "mystira-${{ env.ENVIRONMENT }}-fd" --resource-group ${{ env.AZURE_RESOURCE_GROUP }} &>/dev/null; then
+            EXISTING_POLICIES=$(az afd security-policy list \
+              --profile-name "mystira-${{ env.ENVIRONMENT }}-fd" \
+              --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
+              --query "[].name" -o tsv 2>/dev/null || echo "")
+
+            if [ -n "$EXISTING_POLICIES" ]; then
+              echo "::warning::Existing WAF security policies found: $EXISTING_POLICIES"
+              echo "waf-policies=$EXISTING_POLICIES" >> $GITHUB_OUTPUT
+            fi
+          fi
+          echo "has-waf-conflict=false" >> $GITHUB_OUTPUT
+
+          # Summary
+          if [ -n "$PERMISSION_ISSUES" ]; then
+            echo "::warning::Permission issues detected:$PERMISSION_ISSUES"
+            echo "## ⚠️ Permission Issues Detected" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "The following permissions are missing from the service principal:" >> $GITHUB_STEP_SUMMARY
+            echo -e "$PERMISSION_ISSUES" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "### How to Fix" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "**Azure AD Permissions:**" >> $GITHUB_STEP_SUMMARY
+            echo '```bash' >> $GITHUB_STEP_SUMMARY
+            echo "# Option 1: Add API permission (requires admin consent)" >> $GITHUB_STEP_SUMMARY
+            echo "az ad app permission add --id $SP_CLIENT_ID --api 00000003-0000-0000-c000-000000000000 --api-permissions 1bfefb4e-e0b5-418b-a88f-73c46d2cc8e9=Role" >> $GITHUB_STEP_SUMMARY
+            echo "az ad app permission admin-consent --id $SP_CLIENT_ID" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "# Option 2: Assign Application Administrator role" >> $GITHUB_STEP_SUMMARY
+            echo "az rest --method POST --url 'https://graph.microsoft.com/v1.0/directoryRoles/roleTemplateId=9b895d92-2cd3-44c7-9d02-a6ac2d5ea5c3/members/\$ref' --body '{\"@odata.id\":\"https://graph.microsoft.com/v1.0/directoryObjects/$SP_OBJECT_ID\"}'" >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "**Role Assignment Permissions:**" >> $GITHUB_STEP_SUMMARY
+            echo '```bash' >> $GITHUB_STEP_SUMMARY
+            echo "az role assignment create \\" >> $GITHUB_STEP_SUMMARY
+            echo "  --assignee $SP_OBJECT_ID \\" >> $GITHUB_STEP_SUMMARY
+            echo "  --role 'User Access Administrator' \\" >> $GITHUB_STEP_SUMMARY
+            echo "  --scope /subscriptions/$SUBSCRIPTION_ID" >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+          fi
+
+          echo "sp-valid=true" >> $GITHUB_OUTPUT
+
       - name: Validation Summary
         run: |
           echo "## Pre-deployment Validation" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Resources" >> $GITHUB_STEP_SUMMARY
           echo "| Resource | Status |" >> $GITHUB_STEP_SUMMARY
           echo "|----------|--------|" >> $GITHUB_STEP_SUMMARY
           echo "| Terraform Backend | ${{ steps.check-backend.outputs.exists == 'true' && '✅ Exists' || '⚠️ Will Create' }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Container Registry | ${{ steps.check-acr.outputs.exists == 'true' && '✅ Exists' || '⚠️ Will Create' }} |" >> $GITHUB_STEP_SUMMARY
           echo "| DNS Zone | ${{ steps.check-dns.outputs.exists == 'true' && '✅ Exists' || '⚠️ Will Create' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| AKS Cluster | ${{ steps.check-aks.outputs.exists == 'true' && '✅ Exists' || '⏭️ Not Found (K8s deploy skipped)' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Service Principal Permissions" >> $GITHUB_STEP_SUMMARY
+          echo "| Permission | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|------------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Azure AD (App Registration) | ${{ steps.check-permissions.outputs.has-ad-permissions == 'true' && '✅ OK' || '❌ Missing' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| RBAC (Role Assignments) | ${{ steps.check-permissions.outputs.has-rbac-permissions == 'true' && '✅ OK' || '❌ Missing' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| WAF Policy Conflicts | ${{ steps.check-permissions.outputs.waf-policies == '' && '✅ None' || '⚠️ Check Above' }} |" >> $GITHUB_STEP_SUMMARY
 
   # ============================================
   # Bootstrap Infrastructure Prerequisites
@@ -117,8 +264,8 @@ jobs:
     name: Bootstrap Infrastructure
     runs-on: ubuntu-latest
     needs: [validate]
-    if: |
-      always() &&
+    # Only run if validation passed/skipped AND at least one prerequisite is missing
+    if: >-
       (needs.validate.result == 'success' || needs.validate.result == 'skipped') &&
       (needs.validate.outputs.backend-exists != 'true' ||
        needs.validate.outputs.acr-exists != 'true' ||
@@ -136,7 +283,7 @@ jobs:
         run: |
           az group create \
             --name ${{ env.TERRAFORM_RG }} \
-            --location eastus \
+            --location southafricanorth \
             --output none
           echo "::notice::Created Terraform resource group"
 
@@ -146,7 +293,7 @@ jobs:
           az storage account create \
             --name ${{ env.TERRAFORM_STORAGE }} \
             --resource-group ${{ env.TERRAFORM_RG }} \
-            --location eastus \
+            --location southafricanorth \
             --sku Standard_LRS \
             --kind StorageV2 \
             --output none
@@ -170,7 +317,7 @@ jobs:
           az acr create \
             --name ${{ env.ACR_NAME }} \
             --resource-group ${{ env.TERRAFORM_RG }} \
-            --location eastus \
+            --location southafricanorth \
             --sku Basic \
             --admin-enabled true \
             --output none
@@ -181,15 +328,56 @@ jobs:
         run: |
           az network dns zone create \
             --name ${{ env.DNS_ZONE }} \
-            --resource-group ${{ env.TERRAFORM_RG }} \
+            --resource-group ${{ env.DNS_ZONE_RG }} \
             --output none
 
           echo "::warning::DNS Zone created. Update your domain registrar nameservers!"
           echo "## DNS Nameservers" >> $GITHUB_STEP_SUMMARY
           echo "Update your domain registrar with these nameservers:" >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
-          az network dns zone show --name ${{ env.DNS_ZONE }} --resource-group ${{ env.TERRAFORM_RG }} --query nameServers -o tsv >> $GITHUB_STEP_SUMMARY
+          az network dns zone show --name ${{ env.DNS_ZONE }} --resource-group ${{ env.DNS_ZONE_RG }} --query nameServers -o tsv >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
+
+      - name: Grant Storage Account Permissions
+        run: |
+          # Grant service principal access to Terraform state storage
+          SP_CLIENT_ID=$(echo '${{ secrets.MYSTIRA_AZURE_CREDENTIALS }}' | jq -r '.clientId')
+          SP_OBJECT_ID=$(az ad sp show --id "$SP_CLIENT_ID" --query id -o tsv)
+          if [ -z "$SP_OBJECT_ID" ]; then
+            echo "::error::Could not find service principal object ID"
+            exit 1
+          fi
+
+          STORAGE_ID=$(az storage account show \
+            --resource-group ${{ env.TERRAFORM_RG }} \
+            --name ${{ env.TERRAFORM_STORAGE }} \
+            --query id -o tsv)
+
+          # Grant required storage roles (idempotent - safe to run multiple times)
+          echo "Configuring storage permissions..."
+          for role in "Storage Blob Data Contributor" "Storage Account Contributor" "Reader and Data Access"; do
+            az role assignment create \
+              --assignee-object-id "$SP_OBJECT_ID" \
+              --assignee-principal-type ServicePrincipal \
+              --role "$role" \
+              --scope "$STORAGE_ID" \
+              --output none 2>/dev/null || true
+          done
+
+          # Verify at least one role was assigned
+          ROLE_COUNT=$(az role assignment list \
+            --assignee "$SP_OBJECT_ID" \
+            --scope "$STORAGE_ID" \
+            --query "length(@)" -o tsv)
+
+          if [ "$ROLE_COUNT" -eq "0" ]; then
+            echo "::error::No role assignments found!"
+            exit 1
+          fi
+
+          echo "::notice::Storage permissions configured ($ROLE_COUNT roles assigned)"
+          # Wait for Azure AD propagation
+          sleep 15
 
   # ============================================
   # Terraform Plan
@@ -205,7 +393,8 @@ jobs:
       (github.event.inputs.components == 'all' || github.event.inputs.components == 'terraform-only' || github.event.inputs.components == '')
     environment: ${{ github.event.inputs.environment || 'dev' }}
     outputs:
-      plan-exit-code: ${{ steps.plan.outputs.exitcode }}
+      has-changes: ${{ steps.plan.outputs.changes }}
+      aks-exists: ${{ steps.check-aks-plan.outputs.exists }}
     permissions:
       contents: read
       id-token: write
@@ -216,6 +405,7 @@ jobs:
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: ${{ env.TF_VERSION }}
+          terraform_wrapper: false
 
       - name: Azure Login
         uses: azure/login@v2
@@ -240,7 +430,189 @@ jobs:
       - name: Terraform Init
         run: |
           cd infra/terraform/environments/${{ env.ENVIRONMENT }}
-          terraform init
+          terraform init -upgrade
+
+      - name: Import Existing Resources
+        run: |
+          cd infra/terraform/environments/${{ env.ENVIRONMENT }}
+
+          # Get subscription ID from Azure CLI
+          SUBSCRIPTION_ID=$(az account show --query id -o tsv)
+
+          # Check if resource group exists in Azure but not in state
+          if az group show --name ${{ env.AZURE_RESOURCE_GROUP }} &> /dev/null; then
+            echo "Resource group exists in Azure, checking if in state..."
+            if ! terraform state list 2>/dev/null | grep -q "azurerm_resource_group.main"; then
+              echo "Resource group not in state, importing..."
+              terraform import azurerm_resource_group.main "/subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${{ env.AZURE_RESOURCE_GROUP }}"
+              echo "::notice::Imported existing resource group into Terraform state"
+            else
+              echo "Resource group already in state"
+            fi
+          else
+            echo "Resource group does not exist in Azure - will be created"
+          fi
+
+          # All environments use South Africa North (san)
+          REGION_CODE="san"
+          VNET_NAME="mys-${{ env.ENVIRONMENT }}-core-vnet-${REGION_CODE}"
+
+          # Check if VNet exists in Azure but not in state
+          if az network vnet show --name "${VNET_NAME}" --resource-group ${{ env.AZURE_RESOURCE_GROUP }} &> /dev/null; then
+            echo "VNet exists in Azure, checking if in state..."
+            if ! terraform state list 2>/dev/null | grep -q "azurerm_virtual_network.main"; then
+              echo "VNet not in state, importing..."
+              terraform import azurerm_virtual_network.main "/subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${{ env.AZURE_RESOURCE_GROUP }}/providers/Microsoft.Network/virtualNetworks/${VNET_NAME}"
+              echo "::notice::Imported existing VNet into Terraform state"
+            else
+              echo "VNet already in state"
+            fi
+          fi
+
+          # Check if ACR exists in Azure but not in state (ACR is shared across environments)
+          # Note: ACR is now managed via module.shared_acr (see ADR-0017)
+          if az acr show --name ${{ env.ACR_NAME }} &> /dev/null; then
+            echo "ACR exists in Azure, checking if in state..."
+            # Check for both old direct resource and new module resource
+            if terraform state list 2>/dev/null | grep -q "module.shared_acr.azurerm_container_registry.shared"; then
+              echo "ACR already in state via shared_acr module"
+            elif terraform state list 2>/dev/null | grep -q "azurerm_container_registry.shared"; then
+              echo "ACR in state as direct resource - migration to module may be needed"
+            else
+              # Get the resource group where ACR actually exists
+              ACR_RG=$(az acr show --name ${{ env.ACR_NAME }} --query resourceGroup -o tsv)
+              echo "ACR not in state, importing from resource group ${ACR_RG} into shared_acr module..."
+              terraform import 'module.shared_acr.azurerm_container_registry.shared' "/subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${ACR_RG}/providers/Microsoft.ContainerRegistry/registries/${{ env.ACR_NAME }}"
+              echo "::notice::Imported existing ACR into Terraform state via shared_acr module"
+            fi
+          fi
+
+          # Import admin_api module resources if they exist in Azure but not in state
+          ADMIN_NSG_NAME="mys-${{ env.ENVIRONMENT }}-admin-api-nsg-${REGION_CODE}"
+          ADMIN_IDENTITY_NAME="mys-${{ env.ENVIRONMENT }}-admin-api-identity-${REGION_CODE}"
+          ADMIN_AI_NAME="mys-${{ env.ENVIRONMENT }}-admin-api-ai-${REGION_CODE}"
+
+          # Admin API Network Security Group
+          if az network nsg show --name "${ADMIN_NSG_NAME}" --resource-group ${{ env.AZURE_RESOURCE_GROUP }} &> /dev/null; then
+            if ! terraform state list 2>/dev/null | grep -q "module.admin_api.azurerm_network_security_group.admin_api"; then
+              echo "Importing admin_api NSG..."
+              terraform import 'module.admin_api.azurerm_network_security_group.admin_api' \
+                "/subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${{ env.AZURE_RESOURCE_GROUP }}/providers/Microsoft.Network/networkSecurityGroups/${ADMIN_NSG_NAME}" || true
+            fi
+          fi
+
+          # Admin API User Assigned Identity
+          if az identity show --name "${ADMIN_IDENTITY_NAME}" --resource-group ${{ env.AZURE_RESOURCE_GROUP }} &> /dev/null; then
+            if ! terraform state list 2>/dev/null | grep -q "module.admin_api.azurerm_user_assigned_identity.admin_api"; then
+              echo "Importing admin_api User Assigned Identity..."
+              terraform import 'module.admin_api.azurerm_user_assigned_identity.admin_api' \
+                "/subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${{ env.AZURE_RESOURCE_GROUP }}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/${ADMIN_IDENTITY_NAME}" || true
+            fi
+          fi
+
+          # Admin API Application Insights
+          if az monitor app-insights component show --app "${ADMIN_AI_NAME}" --resource-group ${{ env.AZURE_RESOURCE_GROUP }} &> /dev/null; then
+            if ! terraform state list 2>/dev/null | grep -q "module.admin_api.azurerm_application_insights.admin_api"; then
+              echo "Importing admin_api Application Insights..."
+              terraform import 'module.admin_api.azurerm_application_insights.admin_api' \
+                "/subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${{ env.AZURE_RESOURCE_GROUP }}/providers/Microsoft.Insights/components/${ADMIN_AI_NAME}" || true
+            fi
+          fi
+
+          # Admin API Key Vault
+          ADMIN_KV_NAME="mys-${{ env.ENVIRONMENT }}-adm-kv-${REGION_CODE}"
+          if az keyvault show --name "${ADMIN_KV_NAME}" &> /dev/null; then
+            if ! terraform state list 2>/dev/null | grep -q "module.admin_api.azurerm_key_vault.admin_api"; then
+              echo "Importing admin_api Key Vault..."
+              terraform import 'module.admin_api.azurerm_key_vault.admin_api' \
+                "/subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${{ env.AZURE_RESOURCE_GROUP }}/providers/Microsoft.KeyVault/vaults/${ADMIN_KV_NAME}" || true
+            fi
+          fi
+
+          # Clean up legacy admin WAF Security Policy
+          # The admin security policy was removed from Terraform because Azure only allows
+          # one WAF firewall policy attachment per Front Door profile. Admin domains are now
+          # protected via the main security policy using dynamic blocks.
+          FD_PROFILE_NAME="mystira-${{ env.ENVIRONMENT }}-fd"
+          ADMIN_WAF_POLICY_NAME="mystira-${{ env.ENVIRONMENT }}-admin-waf-security-policy"
+          ADMIN_WAF_POLICY_ID="/subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${{ env.AZURE_RESOURCE_GROUP }}/providers/Microsoft.Cdn/profiles/${FD_PROFILE_NAME}/securityPolicies/${ADMIN_WAF_POLICY_NAME}"
+
+          # Remove from Terraform state if present (resource no longer exists in config)
+          if terraform state list 2>/dev/null | grep -q 'module.front_door.azurerm_cdn_frontdoor_security_policy.admin\[0\]'; then
+            echo "Removing legacy admin WAF policy from Terraform state..."
+            terraform state rm 'module.front_door.azurerm_cdn_frontdoor_security_policy.admin[0]' || true
+          fi
+
+          # Delete from Azure if it exists (it conflicts with the main security policy)
+          if az rest --method GET --url "https://management.azure.com${ADMIN_WAF_POLICY_ID}?api-version=2024-02-01" &> /dev/null 2>&1; then
+            echo "::warning::Legacy admin WAF security policy exists in Azure - deleting..."
+            az rest --method DELETE --url "https://management.azure.com${ADMIN_WAF_POLICY_ID}?api-version=2024-02-01" || true
+            echo "Deleted legacy admin WAF policy - admin domains are now protected by the main security policy"
+          fi
+
+          # Import federated identity credentials if they exist
+          # Note: Federated credentials are in service-specific RGs (per ADR-0017)
+          # Format: KEY:RG:IDENTITY_NAME:CRED_NAME
+          FEDERATED_CREDS=(
+            "admin-api:${{ env.ADMIN_RG }}:mys-${{ env.ENVIRONMENT }}-admin-api-identity-${REGION_CODE}:admin-api-federated-credential"
+            "story-generator:${{ env.STORY_RG }}:mys-${{ env.ENVIRONMENT }}-story-identity-${REGION_CODE}:story-generator-federated-credential"
+            "publisher:${{ env.PUBLISHER_RG }}:mys-${{ env.ENVIRONMENT }}-publisher-identity:publisher-federated-credential"
+            "chain:${{ env.CHAIN_RG }}:mys-${{ env.ENVIRONMENT }}-chain-identity-${REGION_CODE}:chain-federated-credential"
+          )
+          for cred in "${FEDERATED_CREDS[@]}"; do
+            IFS=':' read -r KEY RG_NAME IDENTITY_NAME CRED_NAME <<< "$cred"
+            CRED_ID="/subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${RG_NAME}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/${IDENTITY_NAME}/federatedIdentityCredentials/${CRED_NAME}"
+            if az rest --method GET --url "https://management.azure.com${CRED_ID}?api-version=2023-01-31" &> /dev/null 2>&1; then
+              if ! terraform state list 2>/dev/null | grep -q "module.identity.azurerm_federated_identity_credential.workload_identity\[\"${KEY}\"\]"; then
+                echo "Importing federated identity credential: ${KEY} from ${RG_NAME}..."
+                terraform import "module.identity.azurerm_federated_identity_credential.workload_identity[\"${KEY}\"]" "${CRED_ID}" || true
+              fi
+            fi
+          done
+
+      - name: Clean Up Orphaned State
+        run: |
+          cd infra/terraform/environments/${{ env.ENVIRONMENT }}
+          echo "Checking for orphaned modules in state..."
+
+          # List of modules that were removed/renamed and may still be in state
+          # NOTE: admin_api, entra_id, identity, and external_id are active modules - do NOT orphan them
+          # azure_ad_b2c was renamed to external_id
+          ORPHANED_MODULES=(
+            "module.azure_ad_b2c"
+            "module.azure-ad-b2c"
+          )
+
+          for module in "${ORPHANED_MODULES[@]}"; do
+            if terraform state list 2>/dev/null | grep -q "^${module}\."; then
+              echo "Found orphaned module: $module - removing from state..."
+              terraform state rm "$module" || true
+            fi
+          done
+
+          # Remove orphaned data sources from shared_postgresql module
+          # These reference identities that no longer exist
+          if terraform state list 2>/dev/null | grep -q "module.shared_postgresql.data.azurerm_user_assigned_identity"; then
+            echo "Found orphaned user_assigned_identity data sources in shared_postgresql - removing..."
+            for item in $(terraform state list 2>/dev/null | grep "module.shared_postgresql.data.azurerm_user_assigned_identity"); do
+              terraform state rm "$item" || true
+            done
+          fi
+
+      - name: Terraform Refresh (sync state with Azure)
+        run: |
+          cd infra/terraform/environments/${{ env.ENVIRONMENT }}
+          terraform refresh || true
+          # Remove AKS from state if it exists but not in Azure - forces recreation
+          if ! az aks show --name ${{ env.AKS_CLUSTER_NAME }} --resource-group ${{ env.AZURE_RESOURCE_GROUP }} &> /dev/null; then
+            echo "AKS not found in Azure, checking if in state..."
+            if terraform state list 2>/dev/null | grep -q "azurerm_kubernetes_cluster.main"; then
+              echo "Removing stale AKS from state..."
+              terraform state rm azurerm_kubernetes_cluster.main
+            else
+              echo "AKS not in state either - will be created fresh"
+            fi
+          fi
 
       - name: Terraform Plan
         id: plan
@@ -248,30 +620,48 @@ jobs:
           cd infra/terraform/environments/${{ env.ENVIRONMENT }}
           set +e
           terraform plan -out=tfplan -detailed-exitcode
-          exitcode=$?
-          echo "exitcode=$exitcode" >> $GITHUB_OUTPUT
-          if [ $exitcode -eq 1 ]; then
+          PLAN_EXIT=$?
+          echo "Terraform plan exit code: $PLAN_EXIT"
+          if [ $PLAN_EXIT -eq 1 ]; then
+            echo "Terraform plan failed"
             exit 1
+          elif [ $PLAN_EXIT -eq 2 ]; then
+            echo "changes=true" >> $GITHUB_OUTPUT
+            echo "Changes detected - will apply"
+          else
+            echo "changes=false" >> $GITHUB_OUTPUT
+            echo "No changes needed"
           fi
 
       - name: Upload Plan
-        if: steps.plan.outputs.exitcode == '2'
+        if: steps.plan.outputs.changes == 'true'
         uses: actions/upload-artifact@v6
         with:
           name: terraform-plan-${{ env.ENVIRONMENT }}
           path: infra/terraform/environments/${{ env.ENVIRONMENT }}/tfplan
           retention-days: 5
 
+      - name: Check AKS Cluster (for downstream jobs)
+        id: check-aks-plan
+        run: |
+          if az aks show --name ${{ env.AKS_CLUSTER_NAME }} --resource-group ${{ env.AZURE_RESOURCE_GROUP }} &> /dev/null; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+            echo "::notice::AKS Cluster exists"
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+            echo "::notice::AKS Cluster does not exist"
+          fi
+
       - name: Plan Summary
         run: |
           echo "## Terraform Plan - ${{ env.ENVIRONMENT }}" >> $GITHUB_STEP_SUMMARY
-          if [ "${{ steps.plan.outputs.exitcode }}" == "0" ]; then
-            echo "✅ No changes needed" >> $GITHUB_STEP_SUMMARY
-          elif [ "${{ steps.plan.outputs.exitcode }}" == "2" ]; then
+          if [ "${{ steps.plan.outputs.changes }}" == "true" ]; then
             echo "📝 Changes detected - will apply" >> $GITHUB_STEP_SUMMARY
           else
-            echo "❌ Plan failed" >> $GITHUB_STEP_SUMMARY
+            echo "✅ No changes needed" >> $GITHUB_STEP_SUMMARY
           fi
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "AKS Cluster: ${{ steps.check-aks-plan.outputs.exists == 'true' && '✅ Exists' || '❌ Not Found' }}" >> $GITHUB_STEP_SUMMARY
 
   # ============================================
   # Terraform Apply
@@ -280,10 +670,10 @@ jobs:
     name: Apply Terraform
     runs-on: ubuntu-latest
     needs: [plan-terraform]
-    if: needs.plan-terraform.outputs.plan-exit-code == '2'
+    if: always() && needs.plan-terraform.result == 'success'
     environment: ${{ github.event.inputs.environment || 'dev' }}
     outputs:
-      aks-created: ${{ steps.apply.outputs.aks-created }}
+      aks-exists: ${{ steps.check-aks-post-apply.outputs.exists }}
     permissions:
       contents: read
       id-token: write
@@ -294,6 +684,7 @@ jobs:
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: ${{ env.TF_VERSION }}
+          terraform_wrapper: false
 
       - name: Azure Login
         uses: azure/login@v2
@@ -324,28 +715,201 @@ jobs:
       - name: Terraform Init
         run: |
           cd infra/terraform/environments/${{ env.ENVIRONMENT }}
-          terraform init
+          terraform init -upgrade
 
       - name: Terraform Apply
         id: apply
         run: |
           cd infra/terraform/environments/${{ env.ENVIRONMENT }}
-          terraform apply -auto-approve tfplan
-          echo "aks-created=true" >> $GITHUB_OUTPUT
+          terraform apply -auto-approve
+
+      - name: Check AKS Cluster After Apply
+        id: check-aks-post-apply
+        run: |
+          if az aks show --name ${{ env.AKS_CLUSTER_NAME }} --resource-group ${{ env.AZURE_RESOURCE_GROUP }} &> /dev/null; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+            echo "::notice::AKS Cluster exists after Terraform apply"
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+            echo "::notice::AKS Cluster not found after Terraform apply"
+          fi
 
       - name: Apply Summary
         run: |
           echo "## Terraform Apply - ${{ env.ENVIRONMENT }}" >> $GITHUB_STEP_SUMMARY
           echo "✅ Infrastructure applied successfully" >> $GITHUB_STEP_SUMMARY
 
+      - name: List Deployed AI Models
+        run: |
+          cd infra/terraform/environments/${{ env.ENVIRONMENT }}
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## 🤖 AI Model Deployment Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # Get expected models from Terraform output
+          echo "### Expected vs Actual Deployments" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # Get Terraform outputs for model deployments
+          EXPECTED_MODELS=$(terraform output -json azure_ai_model_deployments 2>/dev/null || echo "{}")
+
+          echo "| Model | Format | Region | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------|--------|--------|--------|" >> $GITHUB_STEP_SUMMARY
+
+          # Track counts
+          SUCCESS_COUNT=0
+          FAILED_COUNT=0
+
+          # Check each AI Services account
+          for AI_NAME in "mys-shared-ai-san" "mys-shared-ai-uks"; do
+            if az cognitiveservices account show --name "$AI_NAME" --resource-group ${{ env.AZURE_RESOURCE_GROUP }} &>/dev/null; then
+              LOCATION=$(az cognitiveservices account show --name "$AI_NAME" --resource-group ${{ env.AZURE_RESOURCE_GROUP }} --query "location" -o tsv 2>/dev/null)
+
+              # List deployed models
+              DEPLOYED=$(az cognitiveservices account deployment list \
+                --name "$AI_NAME" \
+                --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
+                --query "[].{name:name, model:properties.model.name, format:properties.model.format, state:properties.provisioningState}" \
+                -o json 2>/dev/null || echo "[]")
+
+              echo "$DEPLOYED" | jq -r --arg loc "$LOCATION" '.[] |
+                if .state == "Succeeded" then
+                  "| \(.name) | \(.format) | \($loc) | ✅ Deployed |"
+                elif .state == "Failed" then
+                  "| \(.name) | \(.format) | \($loc) | ❌ Failed |"
+                else
+                  "| \(.name) | \(.format) | \($loc) | ⏳ \(.state) |"
+                end' >> $GITHUB_STEP_SUMMARY
+
+              # Count successes and failures
+              SUCCESS_COUNT=$((SUCCESS_COUNT + $(echo "$DEPLOYED" | jq '[.[] | select(.state == "Succeeded")] | length')))
+              FAILED_COUNT=$((FAILED_COUNT + $(echo "$DEPLOYED" | jq '[.[] | select(.state == "Failed")] | length')))
+            fi
+          done
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # Show detailed view per account
+          echo "### Deployment Details" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          for AI_NAME in "mys-shared-ai-san" "mys-shared-ai-uks"; do
+            if az cognitiveservices account show --name "$AI_NAME" --resource-group ${{ env.AZURE_RESOURCE_GROUP }} &>/dev/null; then
+              ENDPOINT=$(az cognitiveservices account show --name "$AI_NAME" --resource-group ${{ env.AZURE_RESOURCE_GROUP }} --query "properties.endpoint" -o tsv 2>/dev/null)
+              LOCATION=$(az cognitiveservices account show --name "$AI_NAME" --resource-group ${{ env.AZURE_RESOURCE_GROUP }} --query "location" -o tsv 2>/dev/null)
+
+              echo "<details>" >> $GITHUB_STEP_SUMMARY
+              echo "<summary><strong>${AI_NAME}</strong> (${LOCATION})</summary>" >> $GITHUB_STEP_SUMMARY
+              echo "" >> $GITHUB_STEP_SUMMARY
+              echo "**Endpoint:** \`${ENDPOINT}\`" >> $GITHUB_STEP_SUMMARY
+              echo "" >> $GITHUB_STEP_SUMMARY
+              echo "| Model | Version | SKU | Capacity | State |" >> $GITHUB_STEP_SUMMARY
+              echo "|-------|---------|-----|----------|-------|" >> $GITHUB_STEP_SUMMARY
+
+              az cognitiveservices account deployment list \
+                --name "$AI_NAME" \
+                --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
+                --query "[].{name:name, version:properties.model.version, sku:sku.name, capacity:sku.capacity, state:properties.provisioningState}" \
+                -o json 2>/dev/null | jq -r '.[] | "| \(.name) | \(.version // "latest") | \(.sku) | \(.capacity) | \(.state) |"' >> $GITHUB_STEP_SUMMARY || echo "| (no deployments) | | | | |" >> $GITHUB_STEP_SUMMARY
+
+              echo "" >> $GITHUB_STEP_SUMMARY
+              echo "</details>" >> $GITHUB_STEP_SUMMARY
+              echo "" >> $GITHUB_STEP_SUMMARY
+            fi
+          done
+
+          # Summary
+          TOTAL=$((SUCCESS_COUNT + FAILED_COUNT))
+          echo "---" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ "$FAILED_COUNT" -eq 0 ] && [ "$SUCCESS_COUNT" -gt 0 ]; then
+            echo "### ✅ All $SUCCESS_COUNT models deployed successfully!" >> $GITHUB_STEP_SUMMARY
+          elif [ "$FAILED_COUNT" -gt 0 ]; then
+            echo "### ⚠️ $SUCCESS_COUNT/$TOTAL models deployed, $FAILED_COUNT failed" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "### ℹ️ No models configured for deployment" >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Note:** Claude models are deployed separately via Azure AI Model Catalog (see next job)" >> $GITHUB_STEP_SUMMARY
+
   # ============================================
-  # Configure DNS Records
+  # Deploy Claude Models (via Azure AI Model Catalog)
+  # ============================================
+  # Claude models cannot be deployed via Terraform due to marketplace terms
+  # This job uses Azure CLI to deploy Claude models as serverless endpoints
+  deploy-claude-models:
+    name: Deploy Claude Models
+    runs-on: ubuntu-latest
+    needs: [apply-terraform]
+    if: |
+      always() &&
+      needs.apply-terraform.result == 'success' &&
+      (github.event.inputs.components == 'all' || github.event.inputs.components == 'terraform-only' || github.event.inputs.components == '')
+    environment: ${{ github.event.inputs.environment || 'dev' }}
+    continue-on-error: true  # Don't fail the whole pipeline if Claude deployment fails
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.MYSTIRA_AZURE_CREDENTIALS }}
+
+      - name: Install Azure ML Extension
+        run: |
+          az extension add -n ml --yes
+
+      - name: Deploy Claude Models
+        run: |
+          chmod +x ./infra/scripts/deploy-claude-models.sh
+
+          # Run the deployment script
+          # Use UK South for Claude models (not available in SAN)
+          AZURE_LOCATION=uksouth \
+          AZURE_RESOURCE_GROUP=${{ env.AZURE_RESOURCE_GROUP }} \
+          AZURE_AI_SERVICES_NAME=mys-shared-ai-san \
+          ./infra/scripts/deploy-claude-models.sh ${{ env.ENVIRONMENT }} || {
+            echo "::warning::Claude model deployment failed - models may need manual deployment"
+            echo "See: docs/infrastructure/azure-ai-foundry-rag-guide.md#deploying-claude-models"
+          }
+
+      - name: Claude Deployment Summary
+        run: |
+          echo "## Claude Model Deployment - ${{ env.ENVIRONMENT }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # List deployments
+          AI_SERVICES_NAME="mys-shared-ai-san"
+          echo "### Current Model Deployments" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          az cognitiveservices account deployment list \
+            --name "$AI_SERVICES_NAME" \
+            --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
+            --output table 2>/dev/null >> $GITHUB_STEP_SUMMARY || echo "Could not list deployments" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # Get endpoint
+          ENDPOINT=$(az cognitiveservices account show \
+            --name "$AI_SERVICES_NAME" \
+            --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
+            --query "properties.endpoint" -o tsv 2>/dev/null || echo "N/A")
+          echo "**Endpoint:** \`$ENDPOINT\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "For manual deployment, see: \`docs/infrastructure/azure-ai-foundry-rag-guide.md\`" >> $GITHUB_STEP_SUMMARY
+
+  # ============================================
+  # Configure DNS Records (AKS-based)
   # ============================================
   configure-dns:
     name: Configure DNS
     runs-on: ubuntu-latest
-    needs: [apply-terraform]
-    if: always() && needs.apply-terraform.result == 'success'
+    needs: [deploy-kubernetes]
+    if: |
+      always() &&
+      needs.deploy-kubernetes.result == 'success' &&
+      needs.deploy-kubernetes.outputs.ingress-ip != ''
     environment: ${{ github.event.inputs.environment || 'dev' }}
     steps:
       - name: Azure Login
@@ -353,33 +917,9 @@ jobs:
         with:
           creds: ${{ secrets.MYSTIRA_AZURE_CREDENTIALS }}
 
-      - name: Setup kubectl
-        uses: azure/setup-kubectl@v4
-
-      - name: Get AKS credentials
-        run: |
-          az aks get-credentials \
-            --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
-            --name ${{ env.AKS_CLUSTER_NAME }} \
-            --overwrite-existing
-
-      - name: Wait for Ingress Controller
-        run: |
-          echo "Waiting for NGINX Ingress Controller..."
-          for i in {1..30}; do
-            IP=$(kubectl get svc -n ingress-nginx ingress-nginx-controller -o jsonpath='{.status.loadBalancer.ingress[0].ip}' 2>/dev/null || true)
-            if [ -n "$IP" ]; then
-              echo "Ingress IP: $IP"
-              echo "INGRESS_IP=$IP" >> $GITHUB_ENV
-              break
-            fi
-            echo "Waiting for Load Balancer IP... ($i/30)"
-            sleep 10
-          done
-
       - name: Configure DNS A Records
-        if: env.INGRESS_IP != ''
         run: |
+          INGRESS_IP="${{ needs.deploy-kubernetes.outputs.ingress-ip }}"
           ENV_PREFIX="${{ env.ENVIRONMENT }}"
           if [ "$ENV_PREFIX" == "prod" ]; then
             ENV_PREFIX=""
@@ -387,140 +927,111 @@ jobs:
             ENV_PREFIX="${ENV_PREFIX}."
           fi
 
+          echo "Configuring DNS records to point to $INGRESS_IP"
+
           # Configure Publisher DNS
           az network dns record-set a add-record \
-            --resource-group ${{ env.TERRAFORM_RG }} \
+            --resource-group ${{ env.DNS_ZONE_RG }} \
             --zone-name ${{ env.DNS_ZONE }} \
             --record-set-name "${ENV_PREFIX}publisher" \
-            --ipv4-address ${{ env.INGRESS_IP }} \
+            --ipv4-address "$INGRESS_IP" \
             --if-none-match || true
 
           # Configure Chain DNS
           az network dns record-set a add-record \
-            --resource-group ${{ env.TERRAFORM_RG }} \
+            --resource-group ${{ env.DNS_ZONE_RG }} \
             --zone-name ${{ env.DNS_ZONE }} \
             --record-set-name "${ENV_PREFIX}chain" \
-            --ipv4-address ${{ env.INGRESS_IP }} \
+            --ipv4-address "$INGRESS_IP" \
             --if-none-match || true
 
           # Configure API DNS
           az network dns record-set a add-record \
-            --resource-group ${{ env.TERRAFORM_RG }} \
+            --resource-group ${{ env.DNS_ZONE_RG }} \
             --zone-name ${{ env.DNS_ZONE }} \
             --record-set-name "${ENV_PREFIX}api" \
-            --ipv4-address ${{ env.INGRESS_IP }} \
+            --ipv4-address "$INGRESS_IP" \
             --if-none-match || true
 
-          echo "::notice::DNS records configured for ${{ env.ENVIRONMENT }}"
+          # Configure Story Generator DNS
+          az network dns record-set a add-record \
+            --resource-group ${{ env.DNS_ZONE_RG }} \
+            --zone-name ${{ env.DNS_ZONE }} \
+            --record-set-name "${ENV_PREFIX}story-generator" \
+            --ipv4-address "$INGRESS_IP" \
+            --if-none-match || true
+
+          echo "::notice::DNS records configured for ${{ env.ENVIRONMENT }} pointing to $INGRESS_IP"
+
+      - name: Check DNS Nameserver Configuration
+        run: |
+          echo "## DNS Nameserver Check" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # Get Azure DNS nameservers for our zone
+          AZURE_NS=$(az network dns zone show --name ${{ env.DNS_ZONE }} --resource-group ${{ env.DNS_ZONE_RG }} --query "nameServers[0]" -o tsv | sed 's/\.$//')
+
+          # Check if domain is using Azure DNS
+          ACTUAL_NS=$(dig +short NS ${{ env.DNS_ZONE }} | head -1 | sed 's/\.$//')
+
+          if echo "$ACTUAL_NS" | grep -q "azure-dns"; then
+            echo "✅ Domain is using Azure DNS nameservers" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "⚠️ **Domain is NOT using Azure DNS!**" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "The A records were created in Azure DNS, but your domain is using:" >> $GITHUB_STEP_SUMMARY
+            echo "\`$ACTUAL_NS\`" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "**To fix this, either:**" >> $GITHUB_STEP_SUMMARY
+            echo "1. Update your domain registrar's nameservers to Azure DNS:" >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            az network dns zone show --name ${{ env.DNS_ZONE }} --resource-group ${{ env.DNS_ZONE_RG }} --query nameServers -o tsv >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "2. Or create A records in your current DNS provider pointing to: **${{ needs.deploy-kubernetes.outputs.ingress-ip }}**" >> $GITHUB_STEP_SUMMARY
+            echo "::warning::Domain ${{ env.DNS_ZONE }} is not using Azure DNS nameservers. DNS records may not resolve."
+          fi
 
       - name: DNS Summary
         run: |
+          INGRESS_IP="${{ needs.deploy-kubernetes.outputs.ingress-ip }}"
           echo "## DNS Configuration - ${{ env.ENVIRONMENT }}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          if [ -n "${{ env.INGRESS_IP }}" ]; then
-            echo "✅ Load Balancer IP: ${{ env.INGRESS_IP }}" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "| Service | URL |" >> $GITHUB_STEP_SUMMARY
-            echo "|---------|-----|" >> $GITHUB_STEP_SUMMARY
-            if [ "${{ env.ENVIRONMENT }}" == "prod" ]; then
-              echo "| Publisher | https://publisher.mystira.app |" >> $GITHUB_STEP_SUMMARY
-              echo "| Chain | https://chain.mystira.app |" >> $GITHUB_STEP_SUMMARY
-              echo "| API | https://api.mystira.app |" >> $GITHUB_STEP_SUMMARY
-            else
-              echo "| Publisher | https://${{ env.ENVIRONMENT }}.publisher.mystira.app |" >> $GITHUB_STEP_SUMMARY
-              echo "| Chain | https://${{ env.ENVIRONMENT }}.chain.mystira.app |" >> $GITHUB_STEP_SUMMARY
-              echo "| API | https://${{ env.ENVIRONMENT }}.api.mystira.app |" >> $GITHUB_STEP_SUMMARY
-            fi
-          else
-            echo "⚠️ No Load Balancer IP available yet" >> $GITHUB_STEP_SUMMARY
-          fi
-
-  # ============================================
-  # Build and Push Docker Images
-  # ============================================
-  build-images:
-    name: Build Docker Images
-    runs-on: ubuntu-latest
-    needs: [apply-terraform]
-    if: |
-      always() &&
-      (needs.apply-terraform.result == 'success' || needs.apply-terraform.result == 'skipped') &&
-      (github.event.inputs.components == 'all' || github.event.inputs.components == '')
-    steps:
-      - uses: actions/checkout@v6
-        with:
-          submodules: recursive
-          token: ${{ secrets.GH_PAT }}
-          persist-credentials: true
-
-      - name: Verify submodules
-        run: |
-          echo "Checking submodule status..."
-          git submodule status
-          echo ""
-          echo "Packages directory contents:"
-          ls -la packages/
-          echo ""
-          echo "Chain package contents:"
-          ls -la packages/chain/ || echo "Chain directory empty or missing"
-          echo ""
-          echo "Publisher package contents:"
-          ls -la packages/publisher/ || echo "Publisher directory empty or missing"
-
-      - name: Azure Login
-        uses: azure/login@v2
-        with:
-          creds: ${{ secrets.MYSTIRA_AZURE_CREDENTIALS }}
-
-      - name: Login to ACR
-        run: az acr login --name ${{ env.ACR_NAME }}
-
-      - name: Build and Push Publisher
-        run: |
-          docker build \
-            -t ${{ env.ACR_NAME }}.azurecr.io/publisher:${{ env.ENVIRONMENT }} \
-            -t ${{ env.ACR_NAME }}.azurecr.io/publisher:${{ github.sha }} \
-            -f infra/docker/publisher/Dockerfile \
-            .
-          docker push ${{ env.ACR_NAME }}.azurecr.io/publisher:${{ env.ENVIRONMENT }}
-          docker push ${{ env.ACR_NAME }}.azurecr.io/publisher:${{ github.sha }}
-
-      - name: Build and Push Chain
-        run: |
-          docker build \
-            -t ${{ env.ACR_NAME }}.azurecr.io/chain:${{ env.ENVIRONMENT }} \
-            -t ${{ env.ACR_NAME }}.azurecr.io/chain:${{ github.sha }} \
-            -f infra/docker/chain/Dockerfile \
-            .
-          docker push ${{ env.ACR_NAME }}.azurecr.io/chain:${{ env.ENVIRONMENT }}
-          docker push ${{ env.ACR_NAME }}.azurecr.io/chain:${{ github.sha }}
-
-      - name: Image Summary
-        run: |
-          echo "## Docker Images Built" >> $GITHUB_STEP_SUMMARY
+          echo "✅ Load Balancer IP: $INGRESS_IP" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "| Image | Tags |" >> $GITHUB_STEP_SUMMARY
-          echo "|-------|------|" >> $GITHUB_STEP_SUMMARY
-          echo "| publisher | ${{ env.ENVIRONMENT }}, ${{ github.sha }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| chain | ${{ env.ENVIRONMENT }}, ${{ github.sha }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Service | URL |" >> $GITHUB_STEP_SUMMARY
+          echo "|---------|-----|" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ env.ENVIRONMENT }}" == "prod" ]; then
+            echo "| Publisher | https://publisher.mystira.app |" >> $GITHUB_STEP_SUMMARY
+            echo "| Chain | https://chain.mystira.app |" >> $GITHUB_STEP_SUMMARY
+            echo "| API | https://api.mystira.app |" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "| Publisher | https://${{ env.ENVIRONMENT }}.publisher.mystira.app |" >> $GITHUB_STEP_SUMMARY
+            echo "| Chain | https://${{ env.ENVIRONMENT }}.chain.mystira.app |" >> $GITHUB_STEP_SUMMARY
+            echo "| API | https://${{ env.ENVIRONMENT }}.api.mystira.app |" >> $GITHUB_STEP_SUMMARY
+          fi
 
   # ============================================
   # Deploy to Kubernetes
   # ============================================
+  # NOTE: Docker images are built by submodule CI/CD pipelines (see ADR-0019)
+  # This job deploys existing images from ACR
   deploy-kubernetes:
     name: Deploy to Kubernetes
     runs-on: ubuntu-latest
-    needs: [apply-terraform, configure-dns, build-images]
+    needs: [apply-terraform]
     if: |
       always() &&
+      (needs.apply-terraform.outputs.aks-exists == 'true') &&
       (needs.apply-terraform.result == 'success' || needs.apply-terraform.result == 'skipped') &&
-      (needs.build-images.result == 'success' || needs.build-images.result == 'skipped') &&
       (github.event.inputs.components == 'all' ||
        github.event.inputs.components == 'kubernetes-only' ||
        github.event.inputs.components == 'chain' ||
        github.event.inputs.components == 'publisher' ||
        github.event.inputs.components == '')
     environment: ${{ github.event.inputs.environment || 'dev' }}
+    outputs:
+      ingress-ip: ${{ steps.get-ingress-ip.outputs.ip }}
     permissions:
       contents: read
       id-token: write
@@ -546,6 +1057,10 @@ jobs:
         run: |
           kubectl create namespace mys-${{ env.ENVIRONMENT }} --dry-run=client -o yaml | kubectl apply -f -
 
+      - name: Enable ACR Admin
+        run: |
+          az acr update --name ${{ env.ACR_NAME }} --admin-enabled true --output none
+
       - name: Create ACR Pull Secret
         run: |
           ACR_USERNAME=$(az acr credential show --name ${{ env.ACR_NAME }} --query username -o tsv)
@@ -557,10 +1072,99 @@ jobs:
             --docker-password=$ACR_PASSWORD \
             --dry-run=client -o yaml | kubectl apply -f -
 
+      - name: Deploy NGINX Ingress Controller
+        id: get-ingress-ip
+        run: |
+          # Deploy NGINX Ingress Controller
+          kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.9.4/deploy/static/provider/cloud/deploy.yaml
+
+          # Wait for ingress controller to be ready
+          echo "Waiting for NGINX Ingress Controller..."
+          kubectl wait --namespace ingress-nginx \
+            --for=condition=ready pod \
+            --selector=app.kubernetes.io/component=controller \
+            --timeout=300s || true
+
+          # Wait for LoadBalancer IP
+          echo "Waiting for LoadBalancer IP..."
+          INGRESS_IP=""
+          for i in {1..30}; do
+            INGRESS_IP=$(kubectl get svc -n ingress-nginx ingress-nginx-controller -o jsonpath='{.status.loadBalancer.ingress[0].ip}' 2>/dev/null || true)
+            if [ -n "$INGRESS_IP" ]; then
+              echo "Ingress Controller IP: $INGRESS_IP"
+              break
+            fi
+            echo "Waiting for LoadBalancer IP... ($i/30)"
+            sleep 10
+          done
+          echo "ip=$INGRESS_IP" >> $GITHUB_OUTPUT
+
       - name: Deploy cert-manager
         run: |
           kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.13.0/cert-manager.yaml || true
           kubectl wait --for=condition=ready pod -l app.kubernetes.io/instance=cert-manager -n cert-manager --timeout=300s || true
+
+      - name: Clear old TLS certificates
+        run: |
+          # Delete old certificate secrets so cert-manager issues fresh ones
+          echo "Clearing old TLS certificates..."
+          kubectl delete secret mystira-publisher-tls -n mys-${{ env.ENVIRONMENT }} --ignore-not-found
+          kubectl delete secret mystira-publisher-tls-dev -n mys-${{ env.ENVIRONMENT }} --ignore-not-found
+          kubectl delete secret mystira-chain-tls -n mys-${{ env.ENVIRONMENT }} --ignore-not-found
+          kubectl delete secret mystira-chain-tls-dev -n mys-${{ env.ENVIRONMENT }} --ignore-not-found
+          # Also delete any certificate resources so they get recreated
+          kubectl delete certificate --all -n mys-${{ env.ENVIRONMENT }} --ignore-not-found || true
+          echo "Old certificates cleared"
+
+      - name: Check for Docker Images
+        id: check-images
+        run: |
+          echo "## Docker Image Status" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          MISSING_IMAGES=""
+          IMAGES=("publisher" "chain" "story-generator" "admin-api" "admin-ui")
+
+          for IMAGE in "${IMAGES[@]}"; do
+            # Check if image exists with 'dev' tag
+            if az acr repository show-tags --name ${{ env.ACR_NAME }} --repository "mys-${IMAGE}" --query "[?@=='${{ env.ENVIRONMENT }}']" -o tsv 2>/dev/null | grep -q .; then
+              echo "✅ mys-${IMAGE}:${{ env.ENVIRONMENT }} exists" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "⚠️ **mys-${IMAGE}:${{ env.ENVIRONMENT }} NOT FOUND**" >> $GITHUB_STEP_SUMMARY
+              MISSING_IMAGES="${MISSING_IMAGES} mys-${IMAGE}"
+            fi
+          done
+
+          if [ -n "$MISSING_IMAGES" ]; then
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "---" >> $GITHUB_STEP_SUMMARY
+            echo "## ⚠️ WARNING: Missing Docker Images" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "The following images are missing from ACR:" >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            echo "$MISSING_IMAGES" >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "**Deployments for these services will fail until images are built.**" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "Images should be built by submodule CI/CD pipelines. See:" >> $GITHUB_STEP_SUMMARY
+            echo "- \`docs/adr/ADR-0019-dockerfile-location-standardization.md\`" >> $GITHUB_STEP_SUMMARY
+            echo "- \`docs/cicd/submodule-cicd-setup.md\`" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "::warning::Missing Docker images:${MISSING_IMAGES}"
+            echo "missing_images=true" >> $GITHUB_OUTPUT
+          else
+            echo "missing_images=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Clean up deployments with incompatible selectors
+        run: |
+          # Delete existing deployments/statefulsets to avoid selector immutability errors
+          # This is needed because selectors cannot be changed after creation
+          # The resources will be recreated by the apply step
+          echo "Cleaning up deployments with incompatible selectors..."
+          kubectl delete deployments,statefulsets -n mys-${{ env.ENVIRONMENT }} --all --ignore-not-found
+          echo "Cleanup complete"
 
       - name: Deploy Applications
         run: |
@@ -569,8 +1173,22 @@ jobs:
       - name: Wait for Deployments
         run: |
           echo "Waiting for deployments to be ready..."
-          kubectl rollout status deployment/mys-publisher -n mys-${{ env.ENVIRONMENT }} --timeout=300s || true
-          kubectl rollout status statefulset/mys-chain -n mys-${{ env.ENVIRONMENT }} --timeout=600s || true
+
+          # Check publisher - skip if likely no image
+          if kubectl get deployment/mys-publisher -n mys-${{ env.ENVIRONMENT }} &>/dev/null; then
+            kubectl rollout status deployment/mys-publisher -n mys-${{ env.ENVIRONMENT }} --timeout=120s || {
+              echo "::warning::mys-publisher deployment not ready (image may be missing)"
+            }
+          fi
+
+          # Check chain - skip if likely no image
+          if kubectl get statefulset/mys-chain -n mys-${{ env.ENVIRONMENT }} &>/dev/null; then
+            kubectl rollout status statefulset/mys-chain -n mys-${{ env.ENVIRONMENT }} --timeout=120s || {
+              echo "::warning::mys-chain statefulset not ready (image may be missing)"
+            }
+          fi
+
+          echo "Deployment check complete (some services may be pending images)"
 
       - name: Deployment Summary
         run: |
@@ -597,7 +1215,7 @@ jobs:
   summary:
     name: Deployment Summary
     runs-on: ubuntu-latest
-    needs: [validate, bootstrap, plan-terraform, apply-terraform, configure-dns, build-images, deploy-kubernetes]
+    needs: [validate, bootstrap, plan-terraform, apply-terraform, deploy-claude-models, deploy-kubernetes, configure-dns]
     if: always()
     steps:
       - name: Final Summary
@@ -610,8 +1228,8 @@ jobs:
           echo "| Bootstrap | ${{ needs.bootstrap.result == 'success' && '✅' || needs.bootstrap.result == 'skipped' && '⏭️' || '❌' }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Terraform Plan | ${{ needs.plan-terraform.result == 'success' && '✅' || needs.plan-terraform.result == 'skipped' && '⏭️' || '❌' }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Terraform Apply | ${{ needs.apply-terraform.result == 'success' && '✅' || needs.apply-terraform.result == 'skipped' && '⏭️' || '❌' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Claude Models | ${{ needs.deploy-claude-models.result == 'success' && '✅' || needs.deploy-claude-models.result == 'skipped' && '⏭️' || '⚠️' }} |" >> $GITHUB_STEP_SUMMARY
           echo "| DNS Config | ${{ needs.configure-dns.result == 'success' && '✅' || needs.configure-dns.result == 'skipped' && '⏭️' || '❌' }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Build Images | ${{ needs.build-images.result == 'success' && '✅' || needs.build-images.result == 'skipped' && '⏭️' || '❌' }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Deploy K8s | ${{ needs.deploy-kubernetes.result == 'success' && '✅' || needs.deploy-kubernetes.result == 'skipped' && '⏭️' || '❌' }} |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "## Environment URLs" >> $GITHUB_STEP_SUMMARY

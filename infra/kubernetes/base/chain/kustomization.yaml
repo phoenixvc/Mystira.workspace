@@ -8,11 +8,13 @@ resources:
   - deployment.yaml
   - ingress.yaml
 
-commonLabels:
-  app.kubernetes.io/name: mys-chain
-  app.kubernetes.io/part-of: mys
-  app.kubernetes.io/component: blockchain
+labels:
+  - pairs:
+      app.kubernetes.io/name: mys-chain
+      app.kubernetes.io/part-of: mys
+      app.kubernetes.io/component: blockchain
+    includeSelectors: false
 
 images:
-  - name: mysprodacr.azurecr.io/chain
-    newTag: latest
+  - name: myssharedacr.azurecr.io/chain
+    newTag: v0.0.0  # Replace with actual version/commit SHA via CI/CD pipeline

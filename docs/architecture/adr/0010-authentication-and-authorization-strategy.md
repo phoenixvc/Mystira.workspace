@@ -48,9 +48,9 @@ We adopt a **layered security and authentication strategy** with clear boundarie
 │  ├── DDoS Protection, WAF (OWASP), Rate Limiting, Bot Protection            │
 │  └── See: FRONT_DOOR_IMPLEMENTATION_SUMMARY.md                              │
 │                                                                              │
-│  Layer 2: Identity Providers (Microsoft Entra ID / Azure AD B2C)            │
+│  Layer 2: Identity Providers (Microsoft Entra ID / External ID)             │
 │  ├── Admin: Entra ID (MFA, Conditional Access, App Roles)                   │
-│  ├── Consumer: B2C (Social login: Google, Discord)                          │
+│  ├── Consumer: External ID (Social login: Google, Discord)                  │
 │  └── See: ADR-0011                                                          │
 │                                                                              │
 │  Layer 3: Application Authentication (This ADR)                             │
@@ -490,28 +490,28 @@ public class ScenariosController : ControllerBase
 
 ### OAuth/OIDC and External Identity Providers
 
-OAuth 2.0 / OpenID Connect is now implemented via Microsoft Entra ID and Azure AD B2C:
+OAuth 2.0 / OpenID Connect is now implemented via Microsoft Entra ID and External ID:
 
 | Provider | Use Case | Features |
 |----------|----------|----------|
 | **Microsoft Entra ID** | Admin users, Enterprise SSO | MFA, Conditional Access, App Roles |
-| **Azure AD B2C** | Consumer users (Public API, PWA) | Social login (Google, Discord), Self-service registration |
+| **Microsoft Entra External ID** | Consumer users (Public API, PWA) | Social login (Google, Discord), Self-service registration |
 | **Managed Identity** | Service-to-service | Passwordless Azure resource access |
 
 **For complete implementation details**, see [ADR-0011: Microsoft Entra ID Authentication Integration](./0011-entra-id-authentication-integration.md).
 
-#### Social Login Support (via B2C)
+#### Social Login Support (via External ID)
 
-Azure AD B2C enables social identity providers for consumer applications:
+Microsoft Entra External ID enables social identity providers for consumer applications:
 
 - **Google**: OAuth 2.0 integration for Google accounts
 - **Discord**: OpenID Connect custom provider for gamers
 - **Email/Password**: Local accounts with self-service registration
 
-**B2C User Flows**:
-- `B2C_1_SignUpSignIn`: Combined sign-up and sign-in
-- `B2C_1_PasswordReset`: Self-service password reset
-- `B2C_1_ProfileEdit`: User profile management
+**External ID Sign-in Experience**:
+- Combined sign-up and sign-in with email/password or social providers
+- Self-service password reset via email verification
+- User profile management for display name and avatar
 
 ## Consequences
 
@@ -567,14 +567,14 @@ Azure AD B2C enables social identity providers for consumer applications:
 - [ ] MFA via Conditional Access policies
 - [ ] App Roles and group mapping
 
-### Azure AD B2C Integration (see [ADR-0011](./0011-entra-id-authentication-integration.md))
-- [ ] B2C tenant creation
+### Microsoft Entra External ID Integration (see [ADR-0011](./0011-entra-id-authentication-integration.md))
+- [ ] External ID tenant creation
 - [ ] User flow configuration (SignUpSignIn, PasswordReset, ProfileEdit)
 - [ ] Google identity provider setup
 - [ ] Discord identity provider setup (OpenID Connect)
-- [ ] B2C App Registration for Public API
-- [ ] B2C authentication in PWA (Blazor WASM)
-- [ ] Custom B2C UI branding
+- [ ] External ID App Registration for Public API
+- [ ] External ID authentication in PWA (Blazor WASM)
+- [ ] Custom External ID UI branding
 
 ### Service-to-Service Authentication
 - [ ] Managed Identity on App Services/AKS
@@ -592,7 +592,7 @@ Azure AD B2C enables social identity providers for consumer applications:
 
 ## Related ADRs
 
-- [ADR-0011: Microsoft Entra ID Authentication Integration](./0011-entra-id-authentication-integration.md) - **Entra ID, B2C, and social login implementation details**
+- [ADR-0011: Microsoft Entra ID Authentication Integration](./0011-entra-id-authentication-integration.md) - **Entra ID, External ID, and social login implementation details**
 - [ADR-0005: Service Networking and Communication](./0005-service-networking-and-communication.md) - Network-level security
 - [ADR-0006: Admin API Repository Extraction](./0006-admin-api-repository-extraction.md) - Admin service architecture
 - [ADR-0007: NuGet Feed Strategy](./0007-nuget-feed-strategy-for-shared-libraries.md) - Shared auth library distribution

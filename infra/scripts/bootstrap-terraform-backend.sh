@@ -40,7 +40,7 @@ error_handler() {
     echo "  3. Re-run this workflow"
     echo ""
     echo "For detailed setup instructions, see:"
-    echo "  infra/AZURE_SETUP.md in the repository"
+    echo "  infra/azure-setup.md in the repository"
     echo ""
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
   fi

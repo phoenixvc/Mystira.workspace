@@ -62,11 +62,21 @@ CI workflows trigger automatically:
 
 **Workflows triggered**:
 
-- `ci.yml` - Workspace-level lint, test, build
-- `chain-ci.yml` - Chain service CI (if chain files changed)
-- `publisher-ci.yml` - Publisher service CI (if publisher files changed)
+- **Workspace: CI** (`ci.yml`) - Workspace-level lint, test, build
+- **Components: Admin API - CI** (`admin-api-ci.yml`) - Admin API CI (if changed)
+- **Components: Admin UI - CI** (`admin-ui-ci.yml`) - Admin UI CI (if changed)
+- **Components: App - CI** (`app-ci.yml`) - Main app CI (if changed)
+- **Components: Chain - CI** (`chain-ci.yml`) - Chain service CI (if changed)
+- **Components: Devhub - CI** (`devhub-ci.yml`) - Devhub CI (if changed)
+- **Components: Publisher - CI** (`publisher-ci.yml`) - Publisher CI (if changed)
+- **Components: Story Generator - CI** (`story-generator-ci.yml`) - Story Generator CI (if changed)
+- **Infrastructure: Validate** (`infra-validate.yml`) - Infrastructure validation
+- **Utilities: Check Submodules** (`check-submodules.yml`) - Submodule validation
+- **Utilities: Link Checker** (`utilities-link-checker.yml`) - Markdown link validation
 
 **Docker images**: Tagged with branch name (`dev`) and commit SHA
+
+> **Note**: See [ADR-0012: GitHub Workflow Naming Convention](./0012-github-workflow-naming-convention.md) for details on workflow naming.
 
 #### 2. Pull Request Workflow (PR from `dev` to `main`)
 
@@ -105,7 +115,7 @@ Deploys to staging:
 Staging environment updated
 ```
 
-**Workflow**: `staging-release.yml`
+**Workflow**: **Deployment: Staging** (`staging-release.yml`)
 
 - Automatic trigger on push to `main`
 - No manual approval required
@@ -129,10 +139,10 @@ Production Release workflow executes:
 Production environment updated
 ```
 
-**Workflow**: `production-release.yml`
+**Workflow**: **Deployment: Production** (`production-release.yml`)
 
 - Manual workflow dispatch only
-- Requires explicit confirmation input
+- Requires explicit confirmation input: "DEPLOY TO PRODUCTION"
 - Uses `production` GitHub environment with approval gates
 - Deploys infrastructure and services to production environment
 
@@ -165,15 +175,27 @@ The `main` branch is protected with the following rules:
 
 All of the following must pass before merging to `main`:
 
-- `CI / lint`
-- `CI / test`
-- `CI / build`
-- `Chain CI / lint` (if chain changed)
-- `Chain CI / test` (if chain changed)
-- `Chain CI / build` (if chain changed)
-- `Publisher CI / lint` (if publisher changed)
-- `Publisher CI / test` (if publisher changed)
-- `Publisher CI / build` (if publisher changed)
+**Workspace-level:**
+
+- `Workspace: CI / lint`
+- `Workspace: CI / test`
+- `Workspace: CI / build`
+
+**Component-level** (if respective component changed):
+
+- `Components: Admin API - CI / lint, test, build`
+- `Components: Admin UI - CI / lint, test, build`
+- `Components: App - CI / lint, test, build`
+- `Components: Chain - CI / lint, test, build`
+- `Components: Devhub - CI / lint, test, build`
+- `Components: Publisher - CI / lint, test, build`
+- `Components: Story Generator - CI / lint, test, build`
+
+**Infrastructure:**
+
+- `Infrastructure: Validate` (if infrastructure changed)
+- `Utilities: Check Submodules` (validates submodule commits exist)
+- `Utilities: Link Checker` (validates markdown links in documentation)
 
 ## Consequences
 
@@ -280,12 +302,37 @@ All of the following must pass before merging to `main`:
 
 All workflows are located in `.github/workflows/`:
 
-- `ci.yml` - Workspace CI
-- `chain-ci.yml` - Chain service CI
-- `publisher-ci.yml` - Publisher service CI
-- `staging-release.yml` - Staging deployment
-- `production-release.yml` - Production deployment
-- `release.yml` - NPM package releases (Changesets)
+**Component CI** (7 workflows):
+
+- `admin-api-ci.yml` - **Components: Admin API - CI**
+- `admin-ui-ci.yml` - **Components: Admin UI - CI**
+- `app-ci.yml` - **Components: App - CI**
+- `chain-ci.yml` - **Components: Chain - CI**
+- `devhub-ci.yml` - **Components: Devhub - CI**
+- `publisher-ci.yml` - **Components: Publisher - CI**
+- `story-generator-ci.yml` - **Components: Story Generator - CI**
+
+**Infrastructure** (2 workflows):
+
+- `infra-deploy.yml` - **Infrastructure: Deploy**
+- `infra-validate.yml` - **Infrastructure: Validate**
+
+**Deployment** (2 workflows):
+
+- `staging-release.yml` - **Deployment: Staging**
+- `production-release.yml` - **Deployment: Production**
+
+**Workspace** (2 workflows):
+
+- `ci.yml` - **Workspace: CI**
+- `release.yml` - **Workspace: Release** (NPM packages via Changesets)
+
+**Utilities** (2 workflows):
+
+- `check-submodules.yml` - **Utilities: Check Submodules**
+- `utilities-link-checker.yml` - **Utilities: Link Checker**
+
+> **Note**: Workflow naming follows a hierarchical "Category: Name" convention for better organization. See [ADR-0012: GitHub Workflow Naming Convention](./0012-github-workflow-naming-convention.md).
 
 ### Documentation
 
@@ -308,3 +355,4 @@ All workflows are located in `.github/workflows/`:
 - [ADR-0005: Service Networking and Communication](./0005-service-networking-and-communication.md)
 - [ADR-0006: Admin API Repository Extraction](./0006-admin-api-repository-extraction.md)
 - [ADR-0007: NuGet Feed Strategy for Shared Libraries](./0007-nuget-feed-strategy-for-shared-libraries.md)
+- [ADR-0012: GitHub Workflow Naming Convention](./0012-github-workflow-naming-convention.md)

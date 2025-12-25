@@ -1,0 +1,745 @@
+{
+  "id": "eval-mystira-2025-12-23",
+  "date": "2025-12-23",
+  "version": "3.1",
+  "type": "Baseline Assessment",
+  "weightPreset": "startup-weighted",
+  "evaluator": "AI Assessment (Claude)",
+  "gates": [
+    {
+      "id": "G1",
+      "title": "Data Recovery",
+      "description": "No tested backup restore for critical data",
+      "passed": true,
+      "evidence": "PostgreSQL configured with 35-day backup retention in production (infra/terraform/modules/shared/postgresql/main.tf:172-173), geo-redundant backups enabled for production. Comprehensive DR runbook exists (docs/operations/runbooks/disaster-recovery.md) with RTO 4 hours, RPO 1 hour targets. Point-in-time restore procedures documented with Azure CLI commands. Quarterly DR testing requirement documented in pre-disaster checklist.",
+      "confidence": "high"
+    },
+    {
+      "id": "G2",
+      "title": "Cost Visibility",
+      "description": "Cannot attribute or explain last billing cycle by cost driver",
+      "passed": true,
+      "evidence": "Comprehensive resource tagging strategy implemented: Service, CostCenter, Environment, Project tags across all Terraform modules (ADR-0017). Per-service resource groups enable cost attribution (mys-{env}-chain-rg, mys-{env}-publisher-rg, etc.). Azure Consumption Budget alerts configured at 80% actual and 100% forecasted thresholds (infra/terraform/modules/mystira-app/main.tf:665-696). Environment-specific SKU tiers document cost differences.",
+      "confidence": "high"
+    },
+    {
+      "id": "G3",
+      "title": "Content Safety",
+      "description": "No content moderation audit trail (AI-generated + creator uploads)",
+      "passed": false,
+      "evidence": "Moderator role defined with Content.Moderate API scope (ADR-0010, ADR-0011), authorization policy CanModerateContent designed. However, actual audit trail logging is NOT implemented - only planned in implementation roadmap (Phase 5.0). COPPA compliance documented in SECURITY.md but moderation pipeline deployment pending. No evidence of actual AI-generated content audit logging or creator upload moderation trail in production.",
+      "confidence": "medium"
+    },
+    {
+      "id": "G4",
+      "title": "Deployment Safety",
+      "description": "No rollback strategy for production deployments",
+      "passed": true,
+      "evidence": "Comprehensive rollback infrastructure: Blue-green deployment with Azure App Service slot swapping (.github/workflows/mystira-app-api-cicd-prod.yml), dedicated rollback workflow with confirmation gates (.github/workflows/mystira-app-api-rollback.yml), emergency rollback runbook (docs/operations/runbooks/emergency-rollback.md), Kubernetes rollout undo capability documented. Decision matrix covers 0-48hr+ scenarios with automatic rollback criteria (>10% 5xx errors).",
+      "confidence": "high"
+    },
+    {
+      "id": "G5",
+      "title": "Access Control",
+      "description": "Child/parent/creator permission boundaries not technically enforced",
+      "passed": true,
+      "evidence": "Five-tier role system implemented: Player, Creator, Moderator, Admin, SuperAdmin (ADR-0010:267-281). API scopes enforced via Entra ID: Admin.Read, Admin.Write, Users.Manage, Content.Moderate (infra/terraform/modules/entra-id/main.tf:45-107). Network policies in Kubernetes restrict inter-service communication. Managed identities for service-to-service auth. COPPA compliance with age verification and parental consent requirements documented (SECURITY.md:183-191).",
+      "confidence": "high"
+    },
+    {
+      "id": "G6",
+      "title": "AI Resilience",
+      "description": "No fallback behavior when AI provider fails or exceeds cost threshold",
+      "passed": false,
+      "evidence": "Circuit breaker and retry patterns DESIGNED in ADR-0014 using Polly (FailureRatio=0.5, MaxRetry=3), but implementation status shows 'designed' not 'implemented'. Azure OpenAI capacity limits configured (gpt-4o:50, gpt-4o-mini:100 in prod) but no fallback to alternative provider when primary fails. No cost threshold kill-switch implemented - budget alerts exist but no automated response. Graceful degradation when AI unavailable not evidenced in code.",
+      "confidence": "medium"
+    }
+  ],
+  "dimensions": [
+    {
+      "id": "A",
+      "name": "Cost Efficiency & Unit Economics",
+      "weight": 18,
+      "description": "Runway preservation and sustainable growth.",
+      "focus": "Survival critical.",
+      "score": 3.5,
+      "confidence": "high",
+      "criteria": [
+        {
+          "id": "A1",
+          "description": "Cost attribution by service, namespace, and environment",
+          "score": 4,
+          "evidence": "Resource tagging with Service, CostCenter, Environment tags. Per-service resource groups (ADR-0017). All Terraform resources tagged consistently."
+        },
+        {
+          "id": "A2",
+          "description": "Unit cost visibility (per story, per active user/day, per publish)",
+          "score": 2,
+          "evidence": "Infrastructure-level cost tracking exists. No application-level unit cost per story or per active user visible in codebase."
+        },
+        {
+          "id": "A3",
+          "description": "Autoscaling and right-sizing discipline",
+          "score": 4,
+          "evidence": "HPA configured with CPU 70% / Memory 80% targets, 2-10 replicas for services. Environment-specific SKUs (Basic for dev, Premium for prod)."
+        },
+        {
+          "id": "A4",
+          "description": "AI usage controls (prompt caching, rate limiting, model tiering)",
+          "score": 3,
+          "evidence": "Model tiering implemented (gpt-4o, gpt-4o-mini). Rate limiting via Front Door (500 req/min prod). No prompt caching implementation found."
+        },
+        {
+          "id": "A5",
+          "description": "Cost alerts, budgets, and kill-switches configured",
+          "score": 4,
+          "evidence": "Azure Consumption Budget with 80%/100% threshold alerts configured. Kill-switch not automated but manual budget control possible."
+        }
+      ],
+      "notes": "Strong infrastructure cost visibility with room for improvement on application-level unit economics. AI prompt caching would improve efficiency."
+    },
+    {
+      "id": "B",
+      "name": "Security, Privacy & Trust Safety",
+      "weight": 15,
+      "description": "Compliance readiness, data protection, platform trust.",
+      "focus": "Non-negotiable for kids platform.",
+      "score": 3,
+      "confidence": "medium",
+      "criteria": [
+        {
+          "id": "B1",
+          "description": "Identity separation enforced (child/parent/creator/educator/admin)",
+          "score": 4,
+          "evidence": "Five roles defined (Player, Creator, Moderator, Admin, SuperAdmin). Entra ID for enterprise, External ID for consumers. API scopes enforce boundaries."
+        },
+        {
+          "id": "B2",
+          "description": "Consent management and data minimization practices",
+          "score": 3,
+          "evidence": "COPPA compliance documented with age verification, parental consent for under-13. GDPR rights documented. Implementation details not fully visible."
+        },
+        {
+          "id": "B3",
+          "description": "Secrets management (no hardcoded secrets, rotation policy)",
+          "score": 4,
+          "evidence": "Azure Key Vault per service. Managed identities for passwordless auth. TruffleHog secret scanning in CI. No hardcoded secrets found."
+        },
+        {
+          "id": "B4",
+          "description": "Content moderation pipeline (AI + human review workflow)",
+          "score": 2,
+          "evidence": "Moderator role and Content.Moderate scope defined. Pipeline architecture documented but deployment pending (Phase 5.0 in roadmap)."
+        },
+        {
+          "id": "B5",
+          "description": "Auditability (who published/viewed what, decision rationale logged)",
+          "score": 2,
+          "evidence": "Application Insights for monitoring. Audit logging infrastructure planned but not implemented. No decision rationale logging visible."
+        }
+      ],
+      "notes": "Strong identity and secrets management. Content moderation pipeline needs implementation to fully meet kids platform requirements."
+    },
+    {
+      "id": "C",
+      "name": "Reliability & Resilience",
+      "weight": 14,
+      "description": "Platform stability across critical user journeys.",
+      "focus": "",
+      "score": 3.5,
+      "confidence": "high",
+      "criteria": [
+        {
+          "id": "C1",
+          "description": "Critical user journeys defined and monitored",
+          "score": 4,
+          "evidence": "SLO definitions (docs/operations/slo-definitions.md) with 3 service tiers. Availability targets: Tier 1 99.9%, Tier 2 99.5%, Tier 3 99.0%."
+        },
+        {
+          "id": "C2",
+          "description": "Graceful degradation modes implemented",
+          "score": 3,
+          "evidence": "Dual-write pattern with phase-aware routing designed (ADR-0014). Cache-aside pattern for database failures. Not all modes implemented."
+        },
+        {
+          "id": "C3",
+          "description": "Multi-AZ or fault tolerance",
+          "score": 4,
+          "evidence": "Zone-redundant storage (ZRS) for production. AKS multi-AZ capable. Geo-redundant PostgreSQL backups. Front Door global distribution."
+        },
+        {
+          "id": "C4",
+          "description": "Backup and restore tested (not just configured)",
+          "score": 4,
+          "evidence": "DR runbook with point-in-time restore commands. Quarterly testing requirement documented. Backup inventory with 35-day retention."
+        },
+        {
+          "id": "C5",
+          "description": "Dependency failure handling (AI, storage, auth, payments)",
+          "score": 3,
+          "evidence": "Polly resilience patterns designed (circuit breaker, retry). Dead letter queues for Service Bus. AI provider fallback not implemented."
+        }
+      ],
+      "notes": "Good foundation with SLOs and backup procedures. Dependency failure handling needs completion, especially for AI provider resilience."
+    },
+    {
+      "id": "D",
+      "name": "Delivery & Change Safety",
+      "weight": 13,
+      "description": "Ship fast without breaking things.",
+      "focus": "",
+      "score": 3.5,
+      "confidence": "high",
+      "criteria": [
+        {
+          "id": "D1",
+          "description": "Terraform/IaC state isolation and hygiene",
+          "score": 4,
+          "evidence": "Remote backend with Azure Storage. State cleanup runbook. 30-version state retention. Environment-specific state files."
+        },
+        {
+          "id": "D2",
+          "description": "Environment parity (dev/staging/prod)",
+          "score": 4,
+          "evidence": "v2.2 naming convention standardized across all environments (MIGRATION_SUMMARY.md). Same Terraform modules with environment-specific variables."
+        },
+        {
+          "id": "D3",
+          "description": "Deployment strategy (blue/green, canary, instant rollback)",
+          "score": 4,
+          "evidence": "Blue-green with slot swapping. Emergency rollback workflow. Decision matrix for rollback timing. Kubernetes rollout undo documented."
+        },
+        {
+          "id": "D4",
+          "description": "Database migration safety (backward compatible, tested)",
+          "score": 3,
+          "evidence": "EF Core migrations with PostgreSQL. Dual-write pattern for zero-downtime. Migration phases documented but complex."
+        },
+        {
+          "id": "D5",
+          "description": "Feature flags for safe rollout",
+          "score": 2,
+          "evidence": "Feature flags planned for Phase 8.1 in roadmap but NOT implemented. Currently relies on environment-based deployments only."
+        }
+      ],
+      "notes": "Excellent IaC practices and deployment safety. Feature flags would enable safer incremental rollouts."
+    },
+    {
+      "id": "E",
+      "name": "ML/AI System Integrity",
+      "weight": 10,
+      "description": "AI operations, safety, cost control, auditability.",
+      "focus": "Core product differentiator.",
+      "score": 2,
+      "confidence": "low",
+      "criteria": [
+        {
+          "id": "E1",
+          "description": "Model/prompt versioning and rollback capability",
+          "score": 2,
+          "evidence": "Model versions tracked in Terraform (gpt-4o:2024-08-06). No prompt versioning in source control visible. Rollback would require Terraform apply."
+        },
+        {
+          "id": "E2",
+          "description": "AI cost attribution (per inference, per feature)",
+          "score": 2,
+          "evidence": "Capacity limits configured but no per-inference cost tracking. No feature-level AI cost attribution visible."
+        },
+        {
+          "id": "E3",
+          "description": "Output safety and bias evaluation",
+          "score": 2,
+          "evidence": "Azure OpenAI Responsible AI acknowledgment required. No explicit content filtering, toxicity detection, or bias evaluation configured."
+        },
+        {
+          "id": "E4",
+          "description": "Prompt/chain observability (tracing, token usage)",
+          "score": 2,
+          "evidence": "Application Insights configured. OpenTelemetry for distributed tracing. No AI-specific prompt/response logging or token tracking."
+        },
+        {
+          "id": "E5",
+          "description": "Fallback behavior (provider down, slow, cost spike)",
+          "score": 1,
+          "evidence": "No fallback to alternative AI provider implemented. No cost spike kill-switch. Circuit breaker designed but not confirmed deployed."
+        },
+        {
+          "id": "E6",
+          "description": "Experimentation discipline (A/B, shadow mode)",
+          "score": 1,
+          "evidence": "A/B testing infrastructure and shadow mode deployment planned but not implemented."
+        },
+        {
+          "id": "E7",
+          "description": "Data lineage and reproducibility",
+          "score": 2,
+          "evidence": "No explicit data lineage tracking for AI training data. Model configurations tracked in IaC."
+        },
+        {
+          "id": "E8",
+          "description": "Retention and compliance (child data, PII in prompts)",
+          "score": 2,
+          "evidence": "COPPA compliance documented. 30-90 day log retention configured. PII handling in prompts not explicitly addressed."
+        }
+      ],
+      "notes": "AI operations maturity is the weakest dimension. Critical gaps in fallback behavior, cost attribution, and safety filtering need immediate attention for a kids platform."
+    },
+    {
+      "id": "F",
+      "name": "Observability & Operational Maturity",
+      "weight": 8,
+      "description": "Small-team operational leverage.",
+      "focus": "",
+      "score": 3.5,
+      "confidence": "high",
+      "criteria": [
+        {
+          "id": "F1",
+          "description": "End-to-end tracing (frontend → API → queue → worker)",
+          "score": 4,
+          "evidence": "OpenTelemetry with W3C Trace Context (distributed-tracing-extensions.md). Custom spans for database, external services, message processing."
+        },
+        {
+          "id": "F2",
+          "description": "User journey dashboards",
+          "score": 3,
+          "evidence": "Dashboard requirements documented in SLO definitions (availability, latency, errors, capacity panels). Implementation status unclear."
+        },
+        {
+          "id": "F3",
+          "description": "Pipeline and system health dashboards",
+          "score": 4,
+          "evidence": "5 production alerts configured: High ingestion, error rate, slow response, exceptions, dependency failures. Log Analytics with KQL queries."
+        },
+        {
+          "id": "F4",
+          "description": "Alert quality (actionable, low noise)",
+          "score": 3,
+          "evidence": "Alert thresholds defined (>5% errors, P95 >2s). Severity levels assigned. Production-only alerts to reduce noise. Some refinement may be needed."
+        },
+        {
+          "id": "F5",
+          "description": "Incident readiness (runbooks, post-mortems)",
+          "score": 4,
+          "evidence": "Comprehensive runbooks: emergency-rollback, disaster-recovery, terraform-state-cleanup. Incident report templates in rollback workflow."
+        }
+      ],
+      "notes": "Strong observability foundation with OpenTelemetry and comprehensive runbooks. Dashboard implementation should be verified."
+    },
+    {
+      "id": "G",
+      "name": "Scalability Path (10×–50×)",
+      "weight": 8,
+      "description": "Growth ceiling awareness (not premature optimization).",
+      "focus": "",
+      "score": 3.5,
+      "confidence": "high",
+      "criteria": [
+        {
+          "id": "G1",
+          "description": "First bottlenecks identified",
+          "score": 4,
+          "evidence": "Bottlenecks documented: Cosmos DB RU limits, N+1 queries, cross-database consistency. Migration to PostgreSQL addresses Cosmos limits."
+        },
+        {
+          "id": "G2",
+          "description": "Async vs sync boundaries defined",
+          "score": 4,
+          "evidence": "Event-driven architecture planned with Wolverine/Service Bus (ADR-0015). Transactional outbox pattern designed. Clear event boundaries."
+        },
+        {
+          "id": "G3",
+          "description": "Stateless scaling where applicable",
+          "score": 4,
+          "evidence": "Kubernetes services stateless with HPA. Redis for distributed state. Session management via tokens not server state."
+        },
+        {
+          "id": "G4",
+          "description": "CDN and asset delivery strategy",
+          "score": 4,
+          "evidence": "Azure Front Door with 100+ edge locations. Caching strategy per content type (1hr-30days TTL). Compression enabled."
+        },
+        {
+          "id": "G5",
+          "description": "AI throughput constraints understood",
+          "score": 3,
+          "evidence": "Capacity configured (50 TPM for gpt-4o in prod). SLO notes AI latency dependency. No explicit throughput capacity planning documented."
+        }
+      ],
+      "notes": "Well-prepared for scale with CDN, async patterns, and stateless architecture. AI throughput planning could be more explicit."
+    },
+    {
+      "id": "H",
+      "name": "Architecture Quality",
+      "weight": 7,
+      "description": "Evolvability without rewrites (good enough, not perfect).",
+      "focus": "",
+      "score": 3.5,
+      "confidence": "high",
+      "criteria": [
+        {
+          "id": "H1",
+          "description": "Clear domain boundaries",
+          "score": 4,
+          "evidence": "ADR-0013 defines domain ownership matrix. Service boundaries clear: App API (users), Admin API (content), Story-Gen (AI). API-based data access."
+        },
+        {
+          "id": "H2",
+          "description": "Dependency direction discipline",
+          "score": 3,
+          "evidence": "Layered architecture documented. NuGet packages for shared libraries. Some cross-service dependencies during migration period."
+        },
+        {
+          "id": "H3",
+          "description": "Major components replaceable",
+          "score": 4,
+          "evidence": "Polyglot persistence strategy (ADR-0013/0014) enables database swapping. Managed identities abstract provider details. Event-driven decoupling."
+        },
+        {
+          "id": "H4",
+          "description": "Appropriate abstraction level",
+          "score": 3,
+          "evidence": "Specification pattern, PolyglotRepository abstraction appropriate. Some complexity in dual-write migration patterns."
+        }
+      ],
+      "notes": "Sound architecture with clear boundaries and replaceability. Migration complexity is temporary."
+    },
+    {
+      "id": "I",
+      "name": "Code Quality",
+      "weight": 7,
+      "description": "Maintainability (velocity > perfection).",
+      "focus": "",
+      "score": 3.5,
+      "confidence": "medium",
+      "criteria": [
+        {
+          "id": "I1",
+          "description": "Readability and consistency",
+          "score": 4,
+          "evidence": "ESLint 9.15.0 with TypeScript rules enforced. Prettier 3.1.0 for formatting. Commitlint for commit messages. EditorConfig for consistency."
+        },
+        {
+          "id": "I2",
+          "description": "Complexity hotspots identified",
+          "score": 3,
+          "evidence": "Migration documents identify hotspots (N+1 queries, dual-write complexity). No automated complexity tracking (SonarQube, etc.) visible."
+        },
+        {
+          "id": "I3",
+          "description": "Meaningful test coverage",
+          "score": 3,
+          "evidence": "Vitest configured with coverage-v8. CI pipeline runs tests. passWithNoTests flag suggests low current coverage. Security scanning comprehensive."
+        },
+        {
+          "id": "I4",
+          "description": "Technical debt visible and prioritized",
+          "score": 4,
+          "evidence": "ADRs document decisions and trade-offs. Migration documents track remaining issues. Implementation roadmap prioritizes debt (Phase 8)."
+        }
+      ],
+      "notes": "Good code quality practices with linting and formatting. Test coverage appears low; complexity tracking could be automated."
+    }
+  ],
+  "deepDives": {
+    "codeQuality": {
+      "id": "code-quality",
+      "name": "Code Quality",
+      "description": "Use when main scorecard indicates concerns (score ≤ 2) or when preparing for scale/acquisition.",
+      "overallScore": 3.0,
+      "sections": [
+        {
+          "id": "readability",
+          "name": "Readability & Consistency",
+          "weight": 25,
+          "sectionScore": 3.5,
+          "criteria": [
+            {"id": "1.1", "description": "Consistent naming conventions", "score": 4, "evidence": "ESLint enforces naming. Terraform v2.2 naming convention standardized."},
+            {"id": "1.2", "description": "Linting enforced in CI", "score": 4, "evidence": "ESLint runs in CI lint job (ci.yml). Pre-commit hooks via Husky."},
+            {"id": "1.3", "description": "Formatting automated", "score": 4, "evidence": "Prettier 3.1.0 with lint-staged. Auto-fix on commit."},
+            {"id": "1.4", "description": "Code style guide documented", "score": 3, "evidence": "ESLint/Prettier configs serve as implicit style guide. No explicit style doc."},
+            {"id": "1.5", "description": "Meaningful comments on complex logic", "score": 3, "evidence": "ADRs explain architectural decisions. Code comments not assessed."},
+            {"id": "1.6", "description": "Self-documenting code", "score": 3, "evidence": "TypeScript strict mode enforces types. Specification pattern improves readability."},
+            {"id": "1.7", "description": "Consistent error handling", "score": 3, "evidence": "Polly patterns designed for resilience. Implementation consistency unclear."},
+            {"id": "1.8", "description": "Import organization", "score": 4, "evidence": "ESLint can enforce. TypeScript module resolution configured."}
+          ]
+        },
+        {
+          "id": "complexity",
+          "name": "Complexity Management",
+          "weight": 25,
+          "sectionScore": 2.5,
+          "criteria": [
+            {"id": "2.1", "description": "Cyclomatic complexity tracked", "score": 2, "evidence": "No SonarQube or complexity tool configured in CI."},
+            {"id": "2.2", "description": "Cognitive complexity tracked", "score": 2, "evidence": "No automated cognitive complexity tracking."},
+            {"id": "2.3", "description": "Hotspot analysis performed", "score": 3, "evidence": "Migration docs identify hotspots manually. No CodeClimate."},
+            {"id": "2.4", "description": "Long methods identified", "score": 2, "evidence": "No automated method length checking."},
+            {"id": "2.5", "description": "Deep nesting avoided", "score": 3, "evidence": "Specification pattern reduces nesting. No automated enforcement."},
+            {"id": "2.6", "description": "God classes decomposed", "score": 3, "evidence": "Service separation documented. PolyglotRepository intentionally comprehensive."},
+            {"id": "2.7", "description": "Feature envy addressed", "score": 2, "evidence": "No automated detection."},
+            {"id": "2.8", "description": "Duplicate code eliminated", "score": 3, "evidence": "Shared NuGet packages reduce duplication. No DRY enforcement tool."}
+          ]
+        },
+        {
+          "id": "testing",
+          "name": "Test Coverage & Quality",
+          "weight": 25,
+          "sectionScore": 2.5,
+          "criteria": [
+            {"id": "3.1", "description": "Unit test coverage measured", "score": 3, "evidence": "Vitest with coverage-v8 configured. Actual coverage metrics not visible."},
+            {"id": "3.2", "description": "Integration tests for APIs", "score": 2, "evidence": "Test infrastructure exists. No API test files found in workspace."},
+            {"id": "3.3", "description": "E2E tests for critical journeys", "score": 2, "evidence": "No Playwright/Cypress configuration found."},
+            {"id": "3.4", "description": "Tests run in CI on every PR", "score": 4, "evidence": "CI pipeline includes test job. PRs blocked on test failure."},
+            {"id": "3.5", "description": "Test quality (meaningful assertions)", "score": 2, "evidence": "passWithNoTests flag suggests limited tests currently."},
+            {"id": "3.6", "description": "Flaky tests quarantined", "score": 2, "evidence": "No flaky test tracking visible."},
+            {"id": "3.7", "description": "Test data management", "score": 2, "evidence": "MSW for mocking available. No test data factory visible."},
+            {"id": "3.8", "description": "Mutation testing", "score": 1, "evidence": "No mutation testing (Stryker) configured."}
+          ]
+        },
+        {
+          "id": "tech-debt",
+          "name": "Technical Debt Management",
+          "weight": 25,
+          "sectionScore": 3.5,
+          "criteria": [
+            {"id": "4.1", "description": "Tech debt tracked", "score": 4, "evidence": "ADRs document trade-offs. Migration docs track remaining issues."},
+            {"id": "4.2", "description": "Debt categorized", "score": 3, "evidence": "Implementation roadmap organizes by phase/priority."},
+            {"id": "4.3", "description": "Debt prioritized", "score": 4, "evidence": "Roadmap phases 1-8 with priority ratings (High/Medium/Low)."},
+            {"id": "4.4", "description": "Debt budget allocated", "score": 3, "evidence": "Phase 8 dedicated to advanced features/debt. No explicit % allocation."},
+            {"id": "4.5", "description": "TODO/FIXME tracked", "score": 2, "evidence": "No TODO scanning in CI."},
+            {"id": "4.6", "description": "Dependency freshness", "score": 4, "evidence": "Recent versions: ESLint 9.15.0, Vitest 2.1.9, TypeScript 5.3.0."},
+            {"id": "4.7", "description": "Security vulnerabilities tracked", "score": 4, "evidence": "npm audit, pip-audit, dotnet vulnerable in CI. Trivy container scanning."},
+            {"id": "4.8", "description": "Debt trend visible", "score": 3, "evidence": "ADRs show evolution. No debt dashboard or burndown."}
+          ]
+        }
+      ]
+    },
+    "architecture": {
+      "id": "architecture",
+      "name": "Architecture Quality",
+      "description": "Use when evaluating evolvability, preparing for scale, or during due diligence.",
+      "overallScore": 3.5,
+      "sections": [
+        {
+          "id": "domain-boundaries",
+          "name": "Domain Boundaries",
+          "weight": 25,
+          "sectionScore": 4.0,
+          "criteria": [
+            {"id": "1.1", "description": "Bounded contexts identified", "score": 4, "evidence": "ADR-0013 domain ownership matrix. 6 domains with clear owners."},
+            {"id": "1.2", "description": "Clear ownership per domain", "score": 4, "evidence": "App API owns Users, Admin API owns Content, Story-Gen owns AI."},
+            {"id": "1.3", "description": "Domain models don't leak", "score": 3, "evidence": "API contracts via NuGet packages. Some shared models during migration."},
+            {"id": "1.4", "description": "API contracts explicit", "score": 4, "evidence": "Mystira.App.Contracts package. REST/gRPC contracts defined."},
+            {"id": "1.5", "description": "Database schema separation", "score": 4, "evidence": "Service-specific databases planned. Currently shared PostgreSQL."},
+            {"id": "1.6", "description": "Event-driven where appropriate", "score": 3, "evidence": "Wolverine/Service Bus architecture designed (ADR-0015). Partial implementation."},
+            {"id": "1.7", "description": "Shared kernel minimized", "score": 3, "evidence": "Mystira.App.Shared package exists. Domain package base entities shared."},
+            {"id": "1.8", "description": "Anti-corruption layers", "score": 4, "evidence": "PolyglotRepository abstracts database. External service wrappers planned."}
+          ]
+        },
+        {
+          "id": "dependency-mgmt",
+          "name": "Dependency Management",
+          "weight": 25,
+          "sectionScore": 3.5,
+          "criteria": [
+            {"id": "2.1", "description": "Dependency direction enforced", "score": 3, "evidence": "Layered architecture documented. No madge or similar tool."},
+            {"id": "2.2", "description": "No circular dependencies", "score": 3, "evidence": "Package structure prevents most. No automated detection."},
+            {"id": "2.3", "description": "Dependency injection used", "score": 4, "evidence": "ASP.NET Core DI. MediatR for CQRS handlers."},
+            {"id": "2.4", "description": "Interface segregation", "score": 3, "evidence": "IRepository, IUnitOfWork interfaces. Specification pattern for queries."},
+            {"id": "2.5", "description": "Third-party deps wrapped", "score": 4, "evidence": "OpenTelemetry, Polly, Redis abstractions documented."},
+            {"id": "2.6", "description": "Dependency graph visualized", "score": 2, "evidence": "No dependency graph tool configured."},
+            {"id": "2.7", "description": "Layered architecture respected", "score": 4, "evidence": "Domain → Application → Infrastructure layers in NuGet packages."},
+            {"id": "2.8", "description": "Boundaries enforced", "score": 3, "evidence": "Package separation enforces some. Network policies for services."}
+          ]
+        },
+        {
+          "id": "replaceability",
+          "name": "Replaceability",
+          "weight": 25,
+          "sectionScore": 3.5,
+          "criteria": [
+            {"id": "3.1", "description": "Database swappable", "score": 4, "evidence": "PolyglotRepository abstracts Cosmos/PostgreSQL. Migration proves swappability."},
+            {"id": "3.2", "description": "AI provider swappable", "score": 3, "evidence": "Supports Claude/GPT-4/Ollama. No provider abstraction layer visible."},
+            {"id": "3.3", "description": "Auth provider swappable", "score": 3, "evidence": "Entra ID abstraction via MSAL. Would require work to swap providers."},
+            {"id": "3.4", "description": "Payment provider swappable", "score": 2, "evidence": "No payment integration visible in current codebase."},
+            {"id": "3.5", "description": "Storage provider swappable", "score": 4, "evidence": "Azure Blob abstracted via managed identity. Standard SDK patterns."},
+            {"id": "3.6", "description": "Queue/messaging swappable", "score": 3, "evidence": "Wolverine supports multiple transports. Currently Azure Service Bus bound."},
+            {"id": "3.7", "description": "Frontend independent", "score": 4, "evidence": "Admin UI (React), App (Blazor), DevHub (Tauri) all consume same APIs."},
+            {"id": "3.8", "description": "Feature toggles enable migration", "score": 2, "evidence": "Feature flags planned but not implemented."}
+          ]
+        },
+        {
+          "id": "abstraction",
+          "name": "Abstraction Appropriateness",
+          "weight": 25,
+          "sectionScore": 3.5,
+          "criteria": [
+            {"id": "4.1", "description": "No premature abstraction (YAGNI)", "score": 3, "evidence": "Some complexity for migration. Generally pragmatic approach in ADRs."},
+            {"id": "4.2", "description": "No under-abstraction", "score": 4, "evidence": "Repository pattern, Specification pattern provide good abstraction."},
+            {"id": "4.3", "description": "Abstractions documented", "score": 4, "evidence": "ADRs explain abstraction choices. Migration docs detail patterns."},
+            {"id": "4.4", "description": "Generic only for 3+ use cases", "score": 3, "evidence": "PolyglotRepository serves multiple entities. Specification reused."},
+            {"id": "4.5", "description": "Config over code where appropriate", "score": 4, "evidence": "Terraform variables. Kubernetes ConfigMaps. Environment variables."},
+            {"id": "4.6", "description": "Convention over config", "score": 3, "evidence": "Naming conventions enforced. Folder structure conventional."},
+            {"id": "4.7", "description": "Inheritance depth < 3", "score": 4, "evidence": "Entity base class only 1-2 levels deep based on domain model docs."},
+            {"id": "4.8", "description": "Composition over inheritance", "score": 4, "evidence": "MediatR handlers, Specification pattern favor composition."}
+          ]
+        }
+      ]
+    },
+    "mlAi": {
+      "id": "ml-ai",
+      "name": "ML/AI System Integrity",
+      "description": "Critical for AI-native platforms where AI is a core product differentiator.",
+      "overallScore": 2.0,
+      "sections": [
+        {
+          "id": "model-prompt-ops",
+          "name": "Model & Prompt Ops",
+          "weight": 20,
+          "sectionScore": 2.0,
+          "criteria": [
+            {"id": "1.1", "description": "Prompts versioned in source control", "score": 2, "evidence": "Model configs in Terraform. Prompts likely in Story-Generator code but not visible as versioned assets."},
+            {"id": "1.2", "description": "Model versions tracked", "score": 3, "evidence": "Terraform tracks gpt-4o:2024-08-06, gpt-4o-mini:2024-07-18 versions."},
+            {"id": "1.3", "description": "Rollback capability", "score": 2, "evidence": "Would require Terraform apply to rollback model. No quick model rollback."},
+            {"id": "1.4", "description": "A/B testing infrastructure", "score": 1, "evidence": "Planned for Phase 8 but not implemented."},
+            {"id": "1.5", "description": "Shadow mode deployment", "score": 1, "evidence": "Not implemented."},
+            {"id": "1.6", "description": "Prompt review process", "score": 2, "evidence": "Standard PR review would apply. No specialized prompt review."},
+            {"id": "1.7", "description": "System/user prompt separation", "score": 2, "evidence": "Environment variables for defaults. Separation not explicitly documented."},
+            {"id": "1.8", "description": "Parameters versioned", "score": 3, "evidence": "TEMPERATURE, TOP_P, MAX_TOKENS in env vars. Terraform tracks capacity."}
+          ]
+        },
+        {
+          "id": "cost-control",
+          "name": "Cost Control",
+          "weight": 20,
+          "sectionScore": 2.0,
+          "criteria": [
+            {"id": "2.1", "description": "Cost per inference tracked", "score": 2, "evidence": "Capacity limits set. No per-inference cost tracking visible."},
+            {"id": "2.2", "description": "Cost attributed to features", "score": 1, "evidence": "No feature-level AI cost attribution."},
+            {"id": "2.3", "description": "Token usage monitored", "score": 2, "evidence": "Application Insights would capture. No explicit token dashboard."},
+            {"id": "2.4", "description": "Prompt caching implemented", "score": 1, "evidence": "Redis cache exists but no prompt caching specifically."},
+            {"id": "2.5", "description": "Rate limiting per user/feature", "score": 3, "evidence": "Front Door rate limiting (500/min). Not per-user AI specific."},
+            {"id": "2.6", "description": "Model tiering", "score": 4, "evidence": "gpt-4o for complex, gpt-4o-mini for simpler tasks configured."},
+            {"id": "2.7", "description": "Cost alerts configured", "score": 3, "evidence": "Azure budget alerts at 80/100%. Not AI-specific."},
+            {"id": "2.8", "description": "Kill-switch for runaway costs", "score": 1, "evidence": "No automated AI cost kill-switch."}
+          ]
+        },
+        {
+          "id": "output-safety",
+          "name": "Output Safety",
+          "weight": 20,
+          "sectionScore": 2.0,
+          "criteria": [
+            {"id": "3.1", "description": "Content filtering", "score": 2, "evidence": "Azure OpenAI includes default filtering. No custom filters visible."},
+            {"id": "3.2", "description": "Toxicity detection", "score": 2, "evidence": "Relies on Azure OpenAI defaults. No additional detection."},
+            {"id": "3.3", "description": "Bias evaluation", "score": 1, "evidence": "No bias evaluation framework."},
+            {"id": "3.4", "description": "Factual accuracy validation", "score": 1, "evidence": "No fact-checking implementation for stories."},
+            {"id": "3.5", "description": "Output format validation", "score": 2, "evidence": "Application would validate. No explicit schema enforcement."},
+            {"id": "3.6", "description": "PII detection in outputs", "score": 2, "evidence": "No explicit PII detection in AI outputs."},
+            {"id": "3.7", "description": "Child-appropriate verification", "score": 2, "evidence": "Azure defaults plus COPPA policy. No custom child-safe filter."},
+            {"id": "3.8", "description": "Human review queue", "score": 2, "evidence": "Moderator role designed but review queue not implemented."}
+          ]
+        },
+        {
+          "id": "observability",
+          "name": "Observability",
+          "weight": 20,
+          "sectionScore": 2.5,
+          "criteria": [
+            {"id": "4.1", "description": "Inference latency monitored", "score": 3, "evidence": "Application Insights tracks response times. SLO notes AI dependency."},
+            {"id": "4.2", "description": "Token consumption tracked", "score": 2, "evidence": "Azure tracks at service level. No app-level token metrics."},
+            {"id": "4.3", "description": "Prompt/response logging", "score": 2, "evidence": "Standard request logging. No AI-specific prompt/response logs."},
+            {"id": "4.4", "description": "Chain tracing", "score": 3, "evidence": "OpenTelemetry external service spans. Would capture AI calls."},
+            {"id": "4.5", "description": "Error rate by prompt/model", "score": 2, "evidence": "General error tracking. No prompt-specific error analysis."},
+            {"id": "4.6", "description": "Output quality metrics", "score": 1, "evidence": "No output quality scoring implemented."},
+            {"id": "4.7", "description": "User feedback loop", "score": 2, "evidence": "No explicit AI feedback mechanism visible."},
+            {"id": "4.8", "description": "Dashboards for AI operations", "score": 2, "evidence": "General Application Insights. No AI-specific dashboard."}
+          ]
+        },
+        {
+          "id": "experimentation",
+          "name": "Experimentation & Testing",
+          "weight": 20,
+          "sectionScore": 1.5,
+          "criteria": [
+            {"id": "5.1", "description": "Prompt regression testing", "score": 1, "evidence": "No prompt regression tests visible."},
+            {"id": "5.2", "description": "Evaluation datasets maintained", "score": 1, "evidence": "No eval datasets found."},
+            {"id": "5.3", "description": "Automated quality scoring", "score": 1, "evidence": "No automated story quality scoring."},
+            {"id": "5.4", "description": "Shadow mode for new models", "score": 1, "evidence": "Not implemented."},
+            {"id": "5.5", "description": "A/B test framework", "score": 1, "evidence": "Not implemented."},
+            {"id": "5.6", "description": "Reproducibility guaranteed", "score": 2, "evidence": "Seed parameters could enable. Not explicitly configured."},
+            {"id": "5.7", "description": "Data lineage tracking", "score": 1, "evidence": "No data lineage for AI training."},
+            {"id": "5.8", "description": "Compliance for child data/PII", "score": 3, "evidence": "COPPA documented. Log retention configured. PII in prompts unclear."}
+          ]
+        }
+      ]
+    }
+  },
+  "summary": {
+    "overallScore": 65.5,
+    "gatesPassed": false,
+    "failedGates": ["G3 (Content Safety)", "G6 (AI Resilience)"],
+    "interpretation": "50-65: High risk - Focused investment needed",
+    "keyFindings": [
+      "CRITICAL: Content moderation audit trail not implemented despite being a kids platform requirement (G3 FAIL)",
+      "CRITICAL: No AI provider fallback or cost threshold kill-switch implemented (G6 FAIL)",
+      "STRENGTH: Excellent IaC practices with Terraform, comprehensive backup/DR, and deployment safety mechanisms",
+      "STRENGTH: Strong security foundation with Entra ID, managed identities, and COPPA compliance documentation",
+      "STRENGTH: Well-documented architecture with 17 ADRs and clear domain boundaries",
+      "GAP: ML/AI System Integrity is the weakest dimension (score: 2.0) - needs immediate investment",
+      "GAP: Test coverage appears low despite testing infrastructure being in place",
+      "GAP: Feature flags not implemented, limiting safe incremental rollouts"
+    ],
+    "recommendations": [
+      {
+        "priority": "P0",
+        "gate": "G3",
+        "action": "Implement content moderation audit trail",
+        "details": "Deploy the designed moderator pipeline with audit logging for all AI-generated content and creator uploads. Critical for kids platform compliance."
+      },
+      {
+        "priority": "P0",
+        "gate": "G6",
+        "action": "Implement AI resilience and fallback",
+        "details": "Deploy Polly circuit breakers, add fallback to secondary AI provider when primary fails, implement cost threshold kill-switch that can disable AI features automatically."
+      },
+      {
+        "priority": "P1",
+        "dimension": "E",
+        "action": "Enhance AI observability and safety",
+        "details": "Add AI-specific dashboards with token usage, prompt/response logging, and implement child-appropriate content verification beyond Azure defaults."
+      },
+      {
+        "priority": "P1",
+        "dimension": "E",
+        "action": "Implement prompt versioning and testing",
+        "details": "Store prompts as versioned assets in source control. Add prompt regression tests and evaluation datasets for story quality."
+      },
+      {
+        "priority": "P2",
+        "dimension": "D",
+        "action": "Implement feature flags",
+        "details": "Deploy Azure App Configuration or similar for feature flags. Enable safer incremental rollouts and instant feature disable capability."
+      },
+      {
+        "priority": "P2",
+        "dimension": "I",
+        "action": "Increase test coverage",
+        "details": "Add unit tests, integration tests for APIs, and E2E tests for critical user journeys. Target >70% coverage for critical paths."
+      },
+      {
+        "priority": "P3",
+        "dimension": "A",
+        "action": "Implement unit cost tracking",
+        "details": "Add application-level cost attribution per story generated, per active user, to support unit economics analysis."
+      }
+    ],
+    "nextSteps": [
+      "Address P0 gate failures immediately - these block overall PASS status",
+      "Schedule ML/AI deep-dive assessment after P0 fixes to validate improvements",
+      "Re-evaluate in 4-6 weeks after implementing P0 and P1 recommendations",
+      "Consider SOC 2 Type II preparation once gates pass consistently"
+    ]
+  },
+  "notes": "Assessment based on codebase analysis including Infrastructure (Terraform, Kubernetes), documentation (87 markdown files, 17 ADRs), CI/CD workflows, and architecture specifications. Code-level assessment limited to configuration files; actual service implementation in submodules not deeply inspected. Confidence is 'medium' for criteria requiring runtime verification."
+}

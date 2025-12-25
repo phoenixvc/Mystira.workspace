@@ -71,3 +71,49 @@ output "custom_domain_verification" {
     }
   }
 }
+
+# Admin Services Outputs (conditional)
+output "admin_api_endpoint_hostname" {
+  description = "Hostname of the Admin API endpoint"
+  value       = var.enable_admin_services ? azurerm_cdn_frontdoor_endpoint.admin_api[0].host_name : null
+}
+
+output "admin_ui_endpoint_hostname" {
+  description = "Hostname of the Admin UI endpoint"
+  value       = var.enable_admin_services ? azurerm_cdn_frontdoor_endpoint.admin_ui[0].host_name : null
+}
+
+output "admin_api_custom_domain_validation_token" {
+  description = "Validation token for Admin API custom domain"
+  value       = var.enable_admin_services ? azurerm_cdn_frontdoor_custom_domain.admin_api[0].validation_token : null
+  sensitive   = true
+}
+
+output "admin_ui_custom_domain_validation_token" {
+  description = "Validation token for Admin UI custom domain"
+  value       = var.enable_admin_services ? azurerm_cdn_frontdoor_custom_domain.admin_ui[0].validation_token : null
+  sensitive   = true
+}
+
+# Story Generator Outputs (conditional)
+output "story_generator_api_endpoint_hostname" {
+  description = "Hostname of the Story Generator API endpoint"
+  value       = var.enable_story_generator ? azurerm_cdn_frontdoor_endpoint.story_generator_api[0].host_name : null
+}
+
+output "story_generator_swa_endpoint_hostname" {
+  description = "Hostname of the Story Generator SWA endpoint"
+  value       = var.enable_story_generator ? azurerm_cdn_frontdoor_endpoint.story_generator_swa[0].host_name : null
+}
+
+output "story_generator_api_custom_domain_validation_token" {
+  description = "Validation token for Story Generator API custom domain"
+  value       = var.enable_story_generator ? azurerm_cdn_frontdoor_custom_domain.story_generator_api[0].validation_token : null
+  sensitive   = true
+}
+
+output "story_generator_swa_custom_domain_validation_token" {
+  description = "Validation token for Story Generator SWA custom domain"
+  value       = var.enable_story_generator ? azurerm_cdn_frontdoor_custom_domain.story_generator_swa[0].validation_token : null
+  sensitive   = true
+}
