@@ -15,6 +15,12 @@
       "description": "Disable updates for submodule packages (managed separately)",
       "matchPaths": ["packages/admin-api/**", "packages/publisher/**"],
       "enabled": false
+    },
+    {
+      "description": "Block .NET 10 updates - stay on .NET 8/9 LTS",
+      "matchDatasources": ["docker", "dotnet-sdk", "nuget"],
+      "matchPackagePatterns": ["^mcr.microsoft.com/dotnet", "^dotnet-sdk$", "^dotnet-runtime$"],
+      "allowedVersions": "<10.0.0"
     }
   ]
 }
