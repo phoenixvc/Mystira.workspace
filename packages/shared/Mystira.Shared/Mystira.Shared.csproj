@@ -56,7 +56,7 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.11" />
     <!-- Polyglot Persistence: Ardalis.Specification -->
     <PackageReference Include="Ardalis.Specification" Version="8.0.0" />
-    <PackageReference Include="Ardalis.Specification.EntityFrameworkCore" Version="8.0.0" />
+    <PackageReference Include="Ardalis.Specification.EntityFrameworkCore" Version="9.3.1" />
     <!-- Polyglot Persistence: Wolverine EF Core for saga/outbox -->
     <PackageReference Include="WolverineFx.EntityFrameworkCore" Version="5.9.2" />
   </ItemGroup>
