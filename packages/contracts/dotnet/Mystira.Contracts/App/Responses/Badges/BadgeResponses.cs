@@ -40,6 +40,31 @@ public record BadgeResponse
     public string? Tier { get; init; }
 
     /// <summary>
+    /// Display order of this tier within the badge hierarchy.
+    /// </summary>
+    public int TierOrder { get; init; }
+
+    /// <summary>
+    /// Title of the badge.
+    /// </summary>
+    public string? Title { get; init; }
+
+    /// <summary>
+    /// Age group identifier for age-appropriate badge tracking.
+    /// </summary>
+    public string? AgeGroupId { get; init; }
+
+    /// <summary>
+    /// Required score threshold to earn this badge.
+    /// </summary>
+    public float RequiredScore { get; init; }
+
+    /// <summary>
+    /// Media identifier for the badge image.
+    /// </summary>
+    public string? ImageId { get; init; }
+
+    /// <summary>
     /// Points awarded when earning this badge.
     /// </summary>
     public int Points { get; init; }
@@ -119,14 +144,29 @@ public record AxisAchievementResponse
     public required string Id { get; init; }
 
     /// <summary>
+    /// Age group identifier for age-appropriate achievement tracking.
+    /// </summary>
+    public string? AgeGroupId { get; init; }
+
+    /// <summary>
     /// The compass axis this achievement belongs to.
     /// </summary>
     public required string CompassAxisId { get; init; }
 
     /// <summary>
+    /// Name of the compass axis.
+    /// </summary>
+    public string? CompassAxisName { get; init; }
+
+    /// <summary>
     /// Name of the axis (e.g., "Creativity", "Logic", "Empathy").
     /// </summary>
     public required string AxisName { get; init; }
+
+    /// <summary>
+    /// Direction on the compass axis (e.g., "positive", "negative").
+    /// </summary>
+    public string? AxesDirection { get; init; }
 
     /// <summary>
     /// Display name of the achievement.
@@ -175,6 +215,11 @@ public record AxisProgressResponse
     public required string CompassAxisId { get; init; }
 
     /// <summary>
+    /// Name of the compass axis.
+    /// </summary>
+    public string? CompassAxisName { get; init; }
+
+    /// <summary>
     /// Display name of the axis.
     /// </summary>
     public required string AxisName { get; init; }
@@ -210,6 +255,11 @@ public record AxisProgressResponse
     public IReadOnlyList<AxisAchievementResponse> Achievements { get; init; } = [];
 
     /// <summary>
+    /// Badge tier progress for this axis.
+    /// </summary>
+    public IReadOnlyList<BadgeTierProgressResponse> Tiers { get; init; } = [];
+
+    /// <summary>
     /// Color associated with this axis for UI display.
     /// </summary>
     public string? Color { get; init; }
@@ -221,14 +271,64 @@ public record AxisProgressResponse
 public record BadgeTierProgressResponse
 {
     /// <summary>
+    /// Unique identifier for the badge.
+    /// </summary>
+    public string? BadgeId { get; init; }
+
+    /// <summary>
     /// The tier name (e.g., "bronze", "silver", "gold", "platinum").
     /// </summary>
     public required string TierName { get; init; }
 
     /// <summary>
+    /// Tier identifier (e.g., "bronze", "silver", "gold").
+    /// </summary>
+    public string? Tier { get; init; }
+
+    /// <summary>
     /// Display order of this tier.
     /// </summary>
     public required int TierOrder { get; init; }
+
+    /// <summary>
+    /// Title of the badge tier.
+    /// </summary>
+    public string? Title { get; init; }
+
+    /// <summary>
+    /// Description of the badge tier.
+    /// </summary>
+    public string? Description { get; init; }
+
+    /// <summary>
+    /// Required score threshold to earn this tier.
+    /// </summary>
+    public float RequiredScore { get; init; }
+
+    /// <summary>
+    /// Media identifier for the tier image.
+    /// </summary>
+    public string? ImageId { get; init; }
+
+    /// <summary>
+    /// Whether the tier has been earned.
+    /// </summary>
+    public bool IsEarned { get; init; }
+
+    /// <summary>
+    /// When the tier was earned, if applicable.
+    /// </summary>
+    public DateTime? EarnedAt { get; init; }
+
+    /// <summary>
+    /// Progress toward the threshold as a percentage (0-1).
+    /// </summary>
+    public float ProgressToThreshold { get; init; }
+
+    /// <summary>
+    /// Remaining score needed to reach this tier.
+    /// </summary>
+    public float RemainingScore { get; init; }
 
     /// <summary>
     /// Total badges available in this tier.
