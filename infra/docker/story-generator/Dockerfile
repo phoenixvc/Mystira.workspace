@@ -10,7 +10,7 @@
 # See ADR-0019 for full documentation on the deployment architecture.
 
 # Stage 1: Build
-FROM mcr.microsoft.com/dotnet/sdk:8.0@sha256:8f710c2f7f3e60392fba1d408dcd9c30c26295bd4ded326cb7cf6cc6fd66cfde AS build
+FROM mcr.microsoft.com/dotnet/sdk:10.0@sha256:d1823fecac3689a2eb959e02ee3bfe1c2142392808240039097ad70644566190 AS build
 WORKDIR /src
 
 # Copy project files
@@ -35,7 +35,7 @@ RUN dotnet publish "Mystira.StoryGenerator.Api.csproj" \
     /p:UseAppHost=false
 
 # Stage 3: Runtime
-FROM mcr.microsoft.com/dotnet/aspnet:8.0@sha256:86cbca9fc08f712273edef23b0dff38d81fe0d20486662946f98b164c3af6d33 AS final
+FROM mcr.microsoft.com/dotnet/aspnet:10.0@sha256:eaa79205c3ade4792a7f7bf310a3aac51fe0e1d91c44e40f70b7c6423d475fe0 AS final
 WORKDIR /app
 
 # Create non-root user for security
