@@ -1,6 +1,20 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
-    "config:recommended"
+    "config:recommended",
+    "local>phoenixvc/Mystira.workspace:renovate-config"
+  ],
+  "baseBranches": ["main"],
+  "ignorePaths": [
+    "**/node_modules/**",
+    "**/vendor/**",
+    "**/.terraform/**"
+  ],
+  "packageRules": [
+    {
+      "description": "Disable updates for submodule packages (managed separately)",
+      "matchPaths": ["packages/admin-api/**", "packages/publisher/**"],
+      "enabled": false
+    }
   ]
 }
