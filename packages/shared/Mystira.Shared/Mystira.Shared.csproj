@@ -59,6 +59,11 @@
     <PackageReference Include="Ardalis.Specification.EntityFrameworkCore" Version="9.3.1" />
     <!-- Polyglot Persistence: Wolverine EF Core for saga/outbox -->
     <PackageReference Include="WolverineFx.EntityFrameworkCore" Version="5.9.2" />
+    <!-- CodeAnalysis version alignment: EF Core Design requires 4.8.0, JasperFx.RuntimeCompiler requires 4.14.0+ -->
+    <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="4.14.0" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.14.0" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.Common" Version="4.14.0" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.MSBuild" Version="4.14.0" />
   </ItemGroup>
 
   <ItemGroup>
