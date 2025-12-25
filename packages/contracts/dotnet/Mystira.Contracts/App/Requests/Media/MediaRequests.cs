@@ -24,6 +24,21 @@ public record MediaQueryRequest
     /// The number of items per page.
     /// </summary>
     public int PageSize { get; set; } = 20;
+
+    /// <summary>
+    /// Optional search term to filter media items.
+    /// </summary>
+    public string? Search { get; set; }
+
+    /// <summary>
+    /// Optional field to sort results by.
+    /// </summary>
+    public string? SortBy { get; set; }
+
+    /// <summary>
+    /// Optional flag to sort in descending order.
+    /// </summary>
+    public bool? SortDescending { get; set; }
 }
 
 /// <summary>
@@ -40,6 +55,11 @@ public record MediaUpdateRequest
     /// Optional updated list of tags for the media item.
     /// </summary>
     public List<string>? Tags { get; set; }
+
+    /// <summary>
+    /// Optional updated media type.
+    /// </summary>
+    public string? MediaType { get; set; }
 }
 
 /// <summary>
@@ -81,4 +101,9 @@ public record UploadMediaRequest
     /// Optional list of tags for categorization.
     /// </summary>
     public List<string>? Tags { get; set; }
+
+    /// <summary>
+    /// Optional file stream for the uploaded media.
+    /// </summary>
+    public Stream? FileStream { get; set; }
 }

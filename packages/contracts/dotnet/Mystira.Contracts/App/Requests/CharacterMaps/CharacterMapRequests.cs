@@ -24,6 +24,11 @@ public record CreateCharacterMapRequest
     /// Optional URL or identifier for the character's audio.
     /// </summary>
     public string? Audio { get; set; }
+
+    /// <summary>
+    /// Optional metadata associated with the character map.
+    /// </summary>
+    public Dictionary<string, object>? Metadata { get; set; }
 }
 
 /// <summary>
@@ -45,4 +50,9 @@ public record UpdateCharacterMapRequest
     /// Optional updated URL or identifier for the character's audio.
     /// </summary>
     public string? Audio { get; set; }
+
+    /// <summary>
+    /// Optional updated metadata associated with the character map.
+    /// </summary>
+    public Dictionary<string, object>? Metadata { get; set; }
 }

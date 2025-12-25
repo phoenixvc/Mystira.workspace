@@ -51,6 +51,11 @@ public record MediaQueryResponse
     /// The number of items per page.
     /// </summary>
     public int PageSize { get; set; }
+
+    /// <summary>
+    /// The total number of pages available.
+    /// </summary>
+    public int TotalPages { get; set; }
 }
 
 /// <summary>

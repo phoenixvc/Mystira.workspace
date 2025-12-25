@@ -1,3 +1,5 @@
+using Mystira.Contracts.App.Enums;
+
 namespace Mystira.Contracts.App.Requests.Contributors;
 
 /// <summary>
@@ -14,6 +16,11 @@ public record RegisterIpAssetRequest
     /// The hash of the metadata content for verification.
     /// </summary>
     public string MetadataHash { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Optional license terms identifier for this IP asset.
+    /// </summary>
+    public string? LicenseTermsId { get; set; }
 }
 
 /// <summary>
@@ -43,12 +50,22 @@ public record ContributorRequest
     public string? WalletAddress { get; set; }
 
     /// <summary>
-    /// The role of the contributor (e.g., Author, Artist, Editor).
+    /// The role of the contributor.
     /// </summary>
-    public string Role { get; set; } = string.Empty;
+    public ContributorRole Role { get; set; }
 
     /// <summary>
     /// The percentage of contribution for revenue sharing.
     /// </summary>
     public decimal ContributionPercentage { get; set; }
+
+    /// <summary>
+    /// Optional email address of the contributor.
+    /// </summary>
+    public string? Email { get; set; }
+
+    /// <summary>
+    /// Optional notes about the contributor.
+    /// </summary>
+    public string? Notes { get; set; }
 }
