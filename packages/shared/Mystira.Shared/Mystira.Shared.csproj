@@ -53,7 +53,7 @@
     <PackageReference Include="WolverineFx" Version="5.9.2" />
     <PackageReference Include="WolverineFx.AzureServiceBus" Version="5.9.2" />
     <!-- Wave 2 Data: Entity Framework Core -->
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.1" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.8" />
     <!-- Polyglot Persistence: Ardalis.Specification -->
     <PackageReference Include="Ardalis.Specification" Version="9.3.1" />
     <PackageReference Include="Ardalis.Specification.EntityFrameworkCore" Version="9.3.1" />
