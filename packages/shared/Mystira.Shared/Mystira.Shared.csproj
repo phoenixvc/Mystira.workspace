@@ -35,25 +35,25 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.0" />
-    <PackageReference Include="Microsoft.Identity.Web" Version="3.8.2" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Options" Version="9.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.11" />
+    <PackageReference Include="Microsoft.Identity.Web" Version="3.14.1" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.11" />
+    <PackageReference Include="Microsoft.Extensions.Options" Version="9.0.11" />
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />
     <PackageReference Include="OpenTelemetry.Api" Version="1.11.2" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.7.0" />
     <!-- Wave 1: Resilience (Polly v8 Pipelines) -->
-    <PackageReference Include="Microsoft.Extensions.Http.Polly" Version="9.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Http.Resilience" Version="9.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Http.Polly" Version="9.0.11" />
+    <PackageReference Include="Microsoft.Extensions.Http.Resilience" Version="9.10.0" />
     <PackageReference Include="Polly" Version="8.5.2" />
     <PackageReference Include="Polly.Extensions" Version="8.5.2" />
     <!-- Wave 2: Caching -->
-    <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="9.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="9.0.11" />
     <!-- Wave 3: Wolverine (replaces MediatR) -->
     <PackageReference Include="WolverineFx" Version="3.9.0" />
     <PackageReference Include="WolverineFx.AzureServiceBus" Version="3.9.0" />
     <!-- Wave 2 Data: Entity Framework Core -->
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.11" />
     <!-- Polyglot Persistence: Ardalis.Specification -->
     <PackageReference Include="Ardalis.Specification" Version="8.0.0" />
     <PackageReference Include="Ardalis.Specification.EntityFrameworkCore" Version="8.0.0" />
