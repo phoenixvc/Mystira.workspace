@@ -4,7 +4,7 @@
     "config:recommended",
     "local>phoenixvc/Mystira.workspace:renovate-config"
   ],
-  "baseBranches": ["main"],
+  "baseBranches": ["dev"],
   "ignorePaths": [
     "**/node_modules/**",
     "**/vendor/**",
