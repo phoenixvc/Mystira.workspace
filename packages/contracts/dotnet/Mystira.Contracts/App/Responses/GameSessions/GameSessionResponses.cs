@@ -1,3 +1,5 @@
+using Mystira.Contracts.App.Models.GameSessions;
+
 namespace Mystira.Contracts.App.Responses.GameSessions;
 
 /// <summary>
@@ -59,6 +61,41 @@ public record GameSessionResponse
     /// The target age group for content filtering in this session.
     /// </summary>
     public string TargetAgeGroup { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Compass progress totals for all players in the session.
+    /// </summary>
+    public List<PlayerCompassProgressDto>? PlayerCompassProgressTotals { get; set; }
+
+    /// <summary>
+    /// The number of echoes earned in this session.
+    /// </summary>
+    public int EchoCount { get; set; }
+
+    /// <summary>
+    /// The number of achievements earned in this session.
+    /// </summary>
+    public int AchievementCount { get; set; }
+
+    /// <summary>
+    /// The elapsed time of the session.
+    /// </summary>
+    public TimeSpan? ElapsedTime { get; set; }
+
+    /// <summary>
+    /// Indicates whether the session is currently paused.
+    /// </summary>
+    public bool IsPaused { get; set; }
+
+    /// <summary>
+    /// The total number of scenes in the session.
+    /// </summary>
+    public int SceneCount { get; set; }
+
+    /// <summary>
+    /// The character assignments for this session.
+    /// </summary>
+    public List<CharacterAssignmentDto>? CharacterAssignments { get; set; }
 }
 
 /// <summary>
@@ -80,4 +117,19 @@ public record SessionStatsResponse
     /// The total duration of the session.
     /// </summary>
     public TimeSpan SessionDuration { get; set; }
+
+    /// <summary>
+    /// Compass progress totals for all players in the session.
+    /// </summary>
+    public List<PlayerCompassProgressDto>? PlayerCompassProgressTotals { get; set; }
+
+    /// <summary>
+    /// Recent echoes earned during the session.
+    /// </summary>
+    public List<object>? RecentEchoes { get; set; }
+
+    /// <summary>
+    /// Achievements earned during the session.
+    /// </summary>
+    public List<object>? Achievements { get; set; }
 }

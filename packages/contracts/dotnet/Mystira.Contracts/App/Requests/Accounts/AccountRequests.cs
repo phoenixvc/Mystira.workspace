@@ -1,3 +1,6 @@
+using Mystira.Contracts.App.Enums;
+using Mystira.Contracts.App.Models;
+
 namespace Mystira.Contracts.App.Requests.Accounts;
 
 /// <summary>
@@ -14,6 +17,11 @@ public record CreateAccountRequest
     /// Optional display name for the account.
     /// </summary>
     public string? DisplayName { get; set; }
+
+    /// <summary>
+    /// Optional Auth0 user identifier for linking to external authentication.
+    /// </summary>
+    public string? Auth0UserId { get; set; }
 }
 
 /// <summary>
@@ -30,6 +38,11 @@ public record UpdateAccountRequest
     /// Optional updated email address.
     /// </summary>
     public string? Email { get; set; }
+
+    /// <summary>
+    /// Optional account settings to update.
+    /// </summary>
+    public AccountSettings? Settings { get; set; }
 }
 
 /// <summary>
@@ -38,9 +51,9 @@ public record UpdateAccountRequest
 public record UpdateSubscriptionRequest
 {
     /// <summary>
-    /// The subscription type (e.g., Free, Premium).
+    /// The subscription type.
     /// </summary>
-    public string Type { get; set; } = string.Empty;
+    public SubscriptionType SubscriptionType { get; set; }
 
     /// <summary>
     /// Optional product identifier from the app store.

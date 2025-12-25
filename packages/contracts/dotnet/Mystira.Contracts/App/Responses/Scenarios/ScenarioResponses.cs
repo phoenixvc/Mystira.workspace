@@ -60,6 +60,41 @@ public record ScenarioSummary
     /// The difficulty level of the scenario.
     /// </summary>
     public string Difficulty { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Optional list of tags for categorization.
+    /// </summary>
+    public List<string>? Tags { get; set; }
+
+    /// <summary>
+    /// The expected duration of a session.
+    /// </summary>
+    public string? SessionLength { get; set; }
+
+    /// <summary>
+    /// Optional list of character archetypes available in this scenario.
+    /// </summary>
+    public List<string>? Archetypes { get; set; }
+
+    /// <summary>
+    /// The minimum recommended age for players.
+    /// </summary>
+    public int? MinimumAge { get; set; }
+
+    /// <summary>
+    /// Optional list of core moral compass axes explored in this scenario.
+    /// </summary>
+    public List<string>? CoreAxes { get; set; }
+
+    /// <summary>
+    /// The date and time when the scenario was created.
+    /// </summary>
+    public DateTime CreatedAt { get; set; }
+
+    /// <summary>
+    /// Optional music palette identifier for the scenario.
+    /// </summary>
+    public string? MusicPalette { get; set; }
 }
 
 /// <summary>
@@ -107,4 +142,44 @@ public record ScenarioWithGameState
     /// The date and time when the scenario was last played.
     /// </summary>
     public DateTime? LastPlayedAt { get; set; }
+
+    /// <summary>
+    /// The target age group for this scenario.
+    /// </summary>
+    public string? AgeGroup { get; set; }
+
+    /// <summary>
+    /// The difficulty level of the scenario.
+    /// </summary>
+    public string? Difficulty { get; set; }
+
+    /// <summary>
+    /// The expected duration of a session.
+    /// </summary>
+    public string? SessionLength { get; set; }
+
+    /// <summary>
+    /// Optional list of core moral compass axes explored in this scenario.
+    /// </summary>
+    public List<string>? CoreAxes { get; set; }
+
+    /// <summary>
+    /// Optional list of tags for categorization.
+    /// </summary>
+    public List<string>? Tags { get; set; }
+
+    /// <summary>
+    /// Optional list of character archetypes available in this scenario.
+    /// </summary>
+    public List<string>? Archetypes { get; set; }
+
+    /// <summary>
+    /// The number of times this scenario has been played.
+    /// </summary>
+    public int PlayCount { get; set; }
+
+    /// <summary>
+    /// Optional URL or identifier for the scenario's cover image.
+    /// </summary>
+    public string? Image { get; set; }
 }

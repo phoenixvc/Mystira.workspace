@@ -1,3 +1,5 @@
+using Mystira.Contracts.App.Enums;
+
 namespace Mystira.Contracts.App.Requests.Scenarios;
 
 /// <summary>
@@ -18,12 +20,12 @@ public record CreateScenarioRequest
     /// <summary>
     /// The difficulty level of the scenario.
     /// </summary>
-    public string Difficulty { get; set; } = string.Empty;
+    public DifficultyLevel Difficulty { get; set; }
 
     /// <summary>
     /// The expected duration of a session.
     /// </summary>
-    public string SessionLength { get; set; } = string.Empty;
+    public SessionLength SessionLength { get; set; }
 
     /// <summary>
     /// Optional list of tags for categorization.
@@ -49,6 +51,26 @@ public record CreateScenarioRequest
     /// Optional list of core moral compass axes explored in this scenario.
     /// </summary>
     public List<string>? CoreAxes { get; set; }
+
+    /// <summary>
+    /// Optional list of characters in this scenario.
+    /// </summary>
+    public List<CharacterRequest>? Characters { get; set; }
+
+    /// <summary>
+    /// Optional list of scenes in this scenario.
+    /// </summary>
+    public List<SceneRequest>? Scenes { get; set; }
+
+    /// <summary>
+    /// Optional URL or identifier for the scenario's cover image.
+    /// </summary>
+    public string? Image { get; set; }
+
+    /// <summary>
+    /// Optional list of compass axes used in this scenario.
+    /// </summary>
+    public List<string>? CompassAxes { get; set; }
 }
 
 /// <summary>
@@ -57,14 +79,14 @@ public record CreateScenarioRequest
 public record ScenarioQueryRequest
 {
     /// <summary>
-    /// Optional filter by difficulty level.
+    /// Optional filter by difficulty level (enum).
     /// </summary>
-    public string? Difficulty { get; set; }
+    public DifficultyLevel? Difficulty { get; set; }
 
     /// <summary>
-    /// Optional filter by session length.
+    /// Optional filter by session length (enum).
     /// </summary>
-    public string? SessionLength { get; set; }
+    public SessionLength? SessionLength { get; set; }
 
     /// <summary>
     /// Optional filter by minimum age requirement.
@@ -95,4 +117,14 @@ public record ScenarioQueryRequest
     /// Optional search term to filter scenarios by title or description.
     /// </summary>
     public string? SearchTerm { get; set; }
+
+    /// <summary>
+    /// Optional list of archetypes to filter scenarios.
+    /// </summary>
+    public List<string>? Archetypes { get; set; }
+
+    /// <summary>
+    /// Optional list of core compass axes to filter scenarios.
+    /// </summary>
+    public List<string>? CoreAxes { get; set; }
 }

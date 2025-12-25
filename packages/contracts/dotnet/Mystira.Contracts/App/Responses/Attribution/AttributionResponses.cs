@@ -96,4 +96,14 @@ public record IpVerificationResponse
     /// The number of contributors associated with this content.
     /// </summary>
     public int ContributorCount { get; set; }
+
+    /// <summary>
+    /// The royalty module identifier for revenue distribution.
+    /// </summary>
+    public string? RoyaltyModuleId { get; set; }
+
+    /// <summary>
+    /// URL to view the IP asset in a blockchain explorer.
+    /// </summary>
+    public string? ExplorerUrl { get; set; }
 }

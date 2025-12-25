@@ -54,6 +54,16 @@ public record CreateUserProfileRequest
     /// Optional media identifier for the selected avatar.
     /// </summary>
     public string? SelectedAvatarMediaId { get; set; }
+
+    /// <summary>
+    /// Optional pronouns for the user.
+    /// </summary>
+    public string? Pronouns { get; set; }
+
+    /// <summary>
+    /// Optional biography text for the user.
+    /// </summary>
+    public string? Bio { get; set; }
 }
 
 /// <summary>
