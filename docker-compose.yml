@@ -35,7 +35,7 @@ services:
 
   # Local blockchain node (Hardhat)
   hardhat:
-    image: node:18-alpine
+    image: node:24-alpine@sha256:c921b97d4b74f51744057454b306b418cf693865e73b8100559189605f6955b8
     container_name: mystira-hardhat
     working_dir: /app
     volumes:
