@@ -1,0 +1,118 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "description": "Shared Renovate preset for Mystira repositories",
+  "extends": [
+    "config:recommended",
+    ":semanticCommits",
+    ":prHourlyLimitNone",
+    "group:allNonMajor"
+  ],
+  "labels": ["dependencies"],
+  "prConcurrentLimit": 10,
+  "platformAutomerge": true,
+  "dependencyDashboard": true,
+  "dependencyDashboardTitle": "Renovate Dependency Dashboard",
+  "timezone": "Africa/Johannesburg",
+  "schedule": ["after 8am and before 6pm on weekdays"],
+  "packageRules": [
+    {
+      "description": "Group all Mystira packages together",
+      "matchPackagePatterns": ["^Mystira\\."],
+      "groupName": "Mystira packages",
+      "automerge": false,
+      "prPriority": 10,
+      "schedule": ["at any time"]
+    },
+    {
+      "description": "Automerge patch updates for non-Mystira packages",
+      "matchUpdateTypes": ["patch"],
+      "excludePackagePatterns": ["^Mystira\\."],
+      "automerge": true,
+      "automergeType": "pr"
+    },
+    {
+      "description": "Automerge minor updates for trusted packages",
+      "matchUpdateTypes": ["minor"],
+      "matchPackagePatterns": [
+        "^Microsoft\\.",
+        "^System\\.",
+        "^Azure\\.",
+        "^Swashbuckle\\.",
+        "^Serilog\\."
+      ],
+      "automerge": true,
+      "automergeType": "pr"
+    },
+    {
+      "description": "Group Microsoft packages",
+      "matchPackagePatterns": ["^Microsoft\\."],
+      "groupName": "Microsoft packages"
+    },
+    {
+      "description": "Group Azure packages",
+      "matchPackagePatterns": ["^Azure\\."],
+      "groupName": "Azure SDK packages"
+    },
+    {
+      "description": "Group testing packages",
+      "matchPackagePatterns": [
+        "^xunit",
+        "^Moq",
+        "^FluentAssertions",
+        "^NSubstitute",
+        "^coverlet",
+        "^Microsoft\\.NET\\.Test"
+      ],
+      "groupName": "Testing packages"
+    },
+    {
+      "description": "Group ESLint and Prettier",
+      "matchPackagePatterns": ["^eslint", "^prettier", "^@typescript-eslint"],
+      "groupName": "Linting packages"
+    },
+    {
+      "description": "Group TypeScript and build tools",
+      "matchPackageNames": ["typescript", "tsup", "tsx", "vite", "vitest"],
+      "groupName": "TypeScript tooling"
+    },
+    {
+      "description": "Require approval for major updates",
+      "matchUpdateTypes": ["major"],
+      "automerge": false,
+      "prPriority": -1
+    },
+    {
+      "description": "Pin Docker digests for security",
+      "matchDatasources": ["docker"],
+      "pinDigests": true
+    },
+    {
+      "description": "Group Terraform providers",
+      "matchManagers": ["terraform"],
+      "groupName": "Terraform providers"
+    },
+    {
+      "description": "Group GitHub Actions",
+      "matchManagers": ["github-actions"],
+      "groupName": "GitHub Actions",
+      "automerge": true
+    }
+  ],
+  "vulnerabilityAlerts": {
+    "labels": ["security"],
+    "prPriority": 100,
+    "automerge": false
+  },
+  "customManagers": [
+    {
+      "customType": "regex",
+      "description": "Update Azure CLI version in workflows",
+      "fileMatch": ["^\\.github/workflows/.*\\.ya?ml$"],
+      "matchStrings": [
+        "azure-cli-version:\\s*['\"]?(?<currentValue>[\\d.]+)['\"]?"
+      ],
+      "depNameTemplate": "Azure/azure-cli",
+      "datasourceTemplate": "github-releases"
+    }
+  ]
+}
