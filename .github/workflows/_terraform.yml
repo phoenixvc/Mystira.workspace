@@ -51,7 +51,7 @@ jobs:
       exit_code: ${{ steps.plan.outputs.exit_code }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
@@ -109,7 +109,7 @@ jobs:
 
       - name: Upload Plan Artifact
         if: steps.plan.outputs.has_changes == 'true'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: terraform-plan-${{ inputs.environment }}
           path: ${{ inputs.working_directory }}/${{ inputs.environment }}/tfplan
@@ -133,7 +133,7 @@ jobs:
     environment: ${{ inputs.environment }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
@@ -162,7 +162,7 @@ jobs:
           } >> "$GITHUB_ENV"
 
       - name: Download Plan Artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: terraform-plan-${{ inputs.environment }}
           path: ${{ inputs.working_directory }}/${{ inputs.environment }}

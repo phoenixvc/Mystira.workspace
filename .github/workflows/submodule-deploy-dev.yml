@@ -47,7 +47,7 @@ jobs:
       submodule_path: ${{ steps.target.outputs.submodule_path }}
     steps:
       - name: Checkout workspace
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           submodules: true
           token: ${{ secrets.MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN }}
