@@ -50,15 +50,15 @@
     <!-- Wave 2: Caching -->
     <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="10.0.1" />
     <!-- Wave 3: Wolverine (replaces MediatR) -->
-    <PackageReference Include="WolverineFx" Version="3.13.5" />
-    <PackageReference Include="WolverineFx.AzureServiceBus" Version="3.13.5" />
+    <PackageReference Include="WolverineFx" Version="5.9.2" />
+    <PackageReference Include="WolverineFx.AzureServiceBus" Version="5.9.2" />
     <!-- Wave 2 Data: Entity Framework Core -->
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.1" />
     <!-- Polyglot Persistence: Ardalis.Specification -->
     <PackageReference Include="Ardalis.Specification" Version="8.0.0" />
     <PackageReference Include="Ardalis.Specification.EntityFrameworkCore" Version="8.0.0" />
     <!-- Polyglot Persistence: Wolverine EF Core for saga/outbox -->
-    <PackageReference Include="WolverineFx.EntityFrameworkCore" Version="3.13.5" />
+    <PackageReference Include="WolverineFx.EntityFrameworkCore" Version="5.9.2" />
   </ItemGroup>
 
   <ItemGroup>
