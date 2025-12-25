@@ -1,16 +1,30 @@
-name: Infrastructure Validation
+name: "Infrastructure: Validate"
+
+# Infrastructure Validation: Validates Terraform, Kubernetes, and Docker configurations
+# Checks: Terraform format/validate, K8s manifest validation, Dockerfile linting, security scans
+# Triggers: PRs and pushes to main/staging with infrastructure changes
+# Runs across dev, staging, and prod environments
 
 on:
   pull_request:
+    branches: [main, staging]
     paths:
-      - "infra/**"
+      - "infra/terraform/**"
+      - "infra/kubernetes/**"
+      - "infra/docker/**"
       - ".github/workflows/infra-*.yml"
       - "scripts/bootstrap-infra.sh"
+      - "!**/*.md"
+      - "!**/README.md"
   push:
-    branches: [main, dev]
+    branches: [main, staging]
     paths:
-      - "infra/**"
+      - "infra/terraform/**"
+      - "infra/kubernetes/**"
+      - "infra/docker/**"
       - ".github/workflows/infra-*.yml"
+      - "!**/*.md"
+      - "!**/README.md"
   workflow_dispatch:
 
 jobs:
@@ -21,6 +35,7 @@ jobs:
     name: Validate Terraform
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         environment: [dev, staging, prod]
     steps:
@@ -44,7 +59,7 @@ jobs:
       - name: Terraform Init (Backend Disabled)
         run: |
           cd infra/terraform/environments/${{ matrix.environment }}
-          terraform init -backend=false
+          terraform init -backend=false -upgrade
 
       - name: Terraform Validate
         run: |
@@ -64,6 +79,7 @@ jobs:
     name: Validate Kubernetes
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         environment: [dev, staging, prod]
     steps:
@@ -174,7 +190,7 @@ jobs:
         uses: infracost/actions/setup@v3
         with:
           api-key: ${{ secrets.INFRACOST_API_KEY }}
-        continue-on-error: true
+        continue-on-error: ${{ github.ref != 'refs/heads/main' }}
 
       - name: Generate Cost Estimate
         if: env.INFRACOST_API_KEY != ''
@@ -182,7 +198,7 @@ jobs:
           infracost breakdown --path infra/terraform/environments/dev --format table || true
         env:
           INFRACOST_API_KEY: ${{ secrets.INFRACOST_API_KEY }}
-        continue-on-error: true
+        continue-on-error: ${{ github.ref != 'refs/heads/main' }}
 
   # ============================================
   # Summary

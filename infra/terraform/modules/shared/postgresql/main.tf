@@ -6,7 +6,7 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~> 3.80"
+      version = "~> 4.0"  # 4.x required for .NET 9.0 support
     }
     random = {
       source  = "hashicorp/random"
@@ -39,6 +39,13 @@ variable "vnet_id" {
 variable "subnet_id" {
   description = "Subnet ID for PostgreSQL server"
   type        = string
+  default     = null
+}
+
+variable "enable_vnet_integration" {
+  description = "Enable VNet integration (must be set explicitly to avoid count dependency issues during import)"
+  type        = bool
+  default     = true
 }
 
 variable "admin_login" {
@@ -90,6 +97,21 @@ variable "databases" {
   default     = []
 }
 
+variable "aad_auth_enabled" {
+  description = "Enable Azure AD authentication for PostgreSQL"
+  type        = bool
+  default     = false
+}
+
+variable "aad_admin_identities" {
+  description = "Map of managed identities to add as Azure AD administrators (principal_name is used to look up the identity)"
+  type = map(object({
+    principal_name = string
+    principal_type = string # ServicePrincipal, User, or Group
+  }))
+  default = {}
+}
+
 variable "tags" {
   description = "Tags to apply to all resources"
   type        = map(string)
@@ -97,14 +119,15 @@ variable "tags" {
 }
 
 locals {
-  name_prefix = "mystira-shared-pg-${var.environment}"
+  name_prefix = "mys-${var.environment}-core"
   common_tags = merge(var.tags, {
     Component   = "shared-postgresql"
     Environment = var.environment
+    Service     = "core"
     ManagedBy   = "terraform"
     Project     = "Mystira"
   })
-  
+
   sku_name_final = var.sku_name != null ? var.sku_name : (
     var.environment == "prod" ? "GP_Standard_D4s_v3" : "B_Standard_B1ms"
   )
@@ -131,7 +154,7 @@ resource "azurerm_private_dns_zone_virtual_network_link" "postgres" {
 
 # PostgreSQL Flexible Server
 resource "azurerm_postgresql_flexible_server" "shared" {
-  name                   = "${local.name_prefix}-server"
+  name                   = "${local.name_prefix}-db"
   location               = var.location
   resource_group_name    = var.resource_group_name
   version                = var.postgres_version
@@ -140,6 +163,8 @@ resource "azurerm_postgresql_flexible_server" "shared" {
   administrator_login    = var.admin_login
   administrator_password = var.admin_password != null ? var.admin_password : random_password.postgres[0].result
   zone                   = "1"
+  # VNet integration requires public network access to be disabled
+  public_network_access_enabled = false
 
   sku_name   = local.sku_name_final
   storage_mb = var.storage_mb
@@ -166,12 +191,42 @@ resource "azurerm_postgresql_flexible_server_database" "databases" {
   charset   = "utf8"
 }
 
-# PostgreSQL Firewall Rules (allow Azure services)
+# Note: Firewall rules are not compatible with VNet integration (delegated_subnet_id)
+# When using VNet integration, access is controlled through NSG rules and the private endpoint
+# The firewall rule below is only created when NOT using VNet integration
 resource "azurerm_postgresql_flexible_server_firewall_rule" "allow_azure_services" {
+  count            = var.enable_vnet_integration ? 0 : 1
   name             = "AllowAzureServices"
   server_id        = azurerm_postgresql_flexible_server.shared.id
   start_ip_address = "0.0.0.0"
   end_ip_address   = "0.0.0.0"
+}
+
+# =============================================================================
+# Azure AD Authentication
+# Enables managed identities and Azure AD users to authenticate without passwords
+# =============================================================================
+
+# Configure Azure AD authentication on the PostgreSQL server
+resource "azurerm_postgresql_flexible_server_active_directory_administrator" "aad_admins" {
+  for_each = var.aad_auth_enabled ? var.aad_admin_identities : {}
+
+  server_name         = azurerm_postgresql_flexible_server.shared.name
+  resource_group_name = var.resource_group_name
+  tenant_id           = data.azurerm_client_config.current.tenant_id
+  object_id           = data.azurerm_user_assigned_identity.aad_admins[each.key].principal_id
+  principal_name      = each.value.principal_name
+  principal_type      = each.value.principal_type
+}
+
+data "azurerm_client_config" "current" {}
+
+# Look up managed identities by name to avoid circular dependencies
+data "azurerm_user_assigned_identity" "aad_admins" {
+  for_each = var.aad_auth_enabled ? var.aad_admin_identities : {}
+
+  name                = each.value.principal_name
+  resource_group_name = var.resource_group_name
 }
 
 output "server_id" {
@@ -212,5 +267,20 @@ output "connection_strings" {
     for db in var.databases : db => "Host=${azurerm_postgresql_flexible_server.shared.fqdn};Port=5432;Username=${azurerm_postgresql_flexible_server.shared.administrator_login};Password=${var.admin_password != null ? var.admin_password : random_password.postgres[0].result};Database=${db};SSLMode=Require;Trust Server Certificate=true"
   }
   sensitive = true
+}
+
+output "aad_connection_string_template" {
+  description = "Connection string template for Azure AD authentication (replace {database} and {identity-name})"
+  value       = var.aad_auth_enabled ? "Host=${azurerm_postgresql_flexible_server.shared.fqdn};Port=5432;Database={database};Username={identity-name};Ssl Mode=Require;Trust Server Certificate=true" : null
+}
+
+output "aad_admins" {
+  description = "Map of Azure AD administrators configured on the PostgreSQL server"
+  value = {
+    for k, v in azurerm_postgresql_flexible_server_active_directory_administrator.aad_admins : k => {
+      principal_name = v.principal_name
+      object_id      = v.object_id
+    }
+  }
 }
 

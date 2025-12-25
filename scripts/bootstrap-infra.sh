@@ -13,12 +13,14 @@ BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 # Configuration
-TERRAFORM_RG="mys-prod-terraform-rg-eus"
-TERRAFORM_STORAGE="mysprodterraformstate"
+# All resources deploy to South Africa North (fresh deployment)
+TERRAFORM_RG="mys-shared-terraform-rg-san"
+TERRAFORM_STORAGE="myssharedtfstatesan"
 TERRAFORM_CONTAINER="tfstate"
-LOCATION="eastus"
-ACR_NAME="mysprodacr"
+LOCATION="southafricanorth"
+ACR_NAME="myssharedacr"
 DNS_ZONE="mystira.app"
+DNS_ZONE_RG="mys-shared-terraform-rg-san"
 
 log_info() { echo -e "${BLUE}[INFO]${NC} $1"; }
 log_success() { echo -e "${GREEN}[SUCCESS]${NC} $1"; }
@@ -100,6 +102,34 @@ create_terraform_backend() {
         log_success "Created container $TERRAFORM_CONTAINER"
     fi
 
+    # Grant current service principal access to storage account
+    # Required for Terraform backend with use_azuread_auth = true
+    log_info "Granting service principal access to storage account..."
+
+    # Try to get service principal object ID
+    SP_OBJECT_ID=$(az ad sp list --show-mine --query "[0].id" -o tsv 2>/dev/null)
+    if [ -z "$SP_OBJECT_ID" ]; then
+        # Fallback to current user
+        SP_OBJECT_ID=$(az account show --query user.name -o tsv)
+        log_info "Using current user: $SP_OBJECT_ID"
+    else
+        log_info "Using service principal: $SP_OBJECT_ID"
+    fi
+
+    STORAGE_ID=$(az storage account show \
+        --resource-group "$TERRAFORM_RG" \
+        --name "$TERRAFORM_STORAGE" \
+        --query id -o tsv)
+
+    az role assignment create \
+        --assignee "$SP_OBJECT_ID" \
+        --role "Storage Blob Data Contributor" \
+        --scope "$STORAGE_ID" \
+        --output none 2>/dev/null || log_info "Role assignment already exists"
+
+    # Wait a moment for propagation
+    sleep 5
+
     log_success "Terraform backend ready"
 }
 
@@ -127,19 +157,20 @@ create_shared_acr() {
 setup_dns_zone() {
     log_info "Setting up DNS Zone for $DNS_ZONE..."
 
+    # DNS zone uses the same resource group as terraform backend (shared resources)
     # Check if DNS zone exists
-    if az network dns zone show --name "$DNS_ZONE" --resource-group "$TERRAFORM_RG" &> /dev/null; then
+    if az network dns zone show --name "$DNS_ZONE" --resource-group "$DNS_ZONE_RG" &> /dev/null; then
         log_info "DNS Zone $DNS_ZONE already exists"
     else
         log_info "Creating DNS Zone $DNS_ZONE..."
         az network dns zone create \
             --name "$DNS_ZONE" \
-            --resource-group "$TERRAFORM_RG" \
+            --resource-group "$DNS_ZONE_RG" \
             --output none
         log_success "Created DNS Zone $DNS_ZONE"
 
         log_warn "IMPORTANT: Update your domain registrar's nameservers to:"
-        az network dns zone show --name "$DNS_ZONE" --resource-group "$TERRAFORM_RG" --query nameServers -o tsv
+        az network dns zone show --name "$DNS_ZONE" --resource-group "$DNS_ZONE_RG" --query nameServers -o tsv
     fi
 
     log_success "DNS Zone ready"

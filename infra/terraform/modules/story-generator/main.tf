@@ -1,12 +1,19 @@
 # Mystira Story-Generator Infrastructure Module - Azure
-# Terraform module for deploying Mystira.StoryGenerator service infrastructure on Azure
+# Terraform module for deploying Mystira.StoryGenerator infrastructure on Azure
+#
+# This module provisions infrastructure for BOTH API and Web components:
+#   - API (Mystira.StoryGenerator.Api) → Kubernetes (NSG, Identity, DB, Cache)
+#   - Web (Mystira.StoryGenerator.Web, Blazor WASM) → Static Web App (optional)
+#
+# StoryGenerator follows the same deployment pattern as Mystira.App.
+# See ADR-0019 for architecture documentation.
 
 terraform {
   required_version = ">= 1.5.0"
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~> 3.80"
+      version = "~> 4.0"  # 4.x required for .NET 9.0 support
     }
     random = {
       source  = "hashicorp/random"
@@ -89,12 +96,69 @@ variable "tags" {
   default     = {}
 }
 
+# -----------------------------------------------------------------------------
+# Static Web App Settings (Blazor WASM Frontend)
+# -----------------------------------------------------------------------------
+
+variable "enable_static_web_app" {
+  description = "Deploy Static Web App for Blazor WASM frontend"
+  type        = bool
+  default     = false
+}
+
+variable "static_web_app_sku" {
+  description = "SKU for Static Web App (Free or Standard)"
+  type        = string
+  default     = "Free"
+}
+
+variable "fallback_location" {
+  description = "Fallback region for resources not available in primary location (e.g., Static Web Apps not available in South Africa North)"
+  type        = string
+  default     = "eastus2"
+}
+
+variable "github_repository_url" {
+  description = "GitHub repository URL for Static Web App deployment (optional - for GitHub integration)"
+  type        = string
+  default     = ""
+}
+
+variable "github_branch" {
+  description = "GitHub branch for Static Web App deployment"
+  type        = string
+  default     = "dev"
+}
+
+variable "swa_custom_domain" {
+  description = "Custom domain for Static Web App (e.g., story.mystira.app)"
+  type        = string
+  default     = ""
+}
+
+variable "enable_swa_custom_domain" {
+  description = "Enable custom domain for Static Web App"
+  type        = bool
+  default     = false
+}
+
 locals {
-  name_prefix = "mys-${var.environment}-mystira-sg"
+  name_prefix = "mys-${var.environment}-story"
   region_code = var.region_code
+
+  # Fallback region code for SWA (not available in all regions like South Africa North)
+  fallback_region_code = lookup({
+    "southafricanorth" = "san"
+    "eastus2"          = "eus2"
+    "westeurope"       = "weu"
+    "northeurope"      = "neu"
+    "eastus"           = "eus"
+  }, var.fallback_location, substr(var.fallback_location, 0, 4))
+
   common_tags = merge(var.tags, {
     Component   = "story-generator"
     Environment = var.environment
+    Service     = "story"
     ManagedBy   = "terraform"
     Project     = "Mystira"
   })
@@ -159,9 +223,9 @@ resource "azurerm_postgresql_flexible_server" "story_generator" {
 
   sku_name = var.environment == "prod" ? "GP_Standard_D2s_v3" : "B_Standard_B1ms"
 
-  storage_mb                    = var.environment == "prod" ? 32768 : 32768
-  backup_retention_days         = var.environment == "prod" ? 35 : 7
-  geo_redundant_backup_enabled  = var.environment == "prod"
+  storage_mb                   = var.environment == "prod" ? 32768 : 32768
+  backup_retention_days        = var.environment == "prod" ? 35 : 7
+  geo_redundant_backup_enabled = var.environment == "prod"
 
   tags = local.common_tags
 }
@@ -205,16 +269,16 @@ resource "random_password" "postgres" {
 
 # Redis Cache (if not using shared)
 resource "azurerm_redis_cache" "story_generator" {
-  count               = var.use_shared_redis ? 0 : 1
-  name                = "${local.name_prefix}-cache-${local.region_code}"
-  location            = var.location
-  resource_group_name = var.resource_group_name
-  capacity            = var.environment == "prod" ? 2 : 1
-  family              = var.environment == "prod" ? "C" : "C"
-  sku_name            = var.environment == "prod" ? "Standard" : "Basic"
+  count                = var.use_shared_redis ? 0 : 1
+  name                 = "${local.name_prefix}-cache-${local.region_code}"
+  location             = var.location
+  resource_group_name  = var.resource_group_name
+  capacity             = var.environment == "prod" ? 2 : 1
+  family               = var.environment == "prod" ? "C" : "C"
+  sku_name             = var.environment == "prod" ? "Standard" : "Basic"
   non_ssl_port_enabled = false
-  minimum_tls_version = "1.2"
-  subnet_id           = var.subnet_id
+  minimum_tls_version  = "1.2"
+  subnet_id            = var.subnet_id
 
   redis_configuration {
     maxmemory_policy = "volatile-lru"
@@ -248,7 +312,7 @@ resource "azurerm_application_insights" "story_generator" {
 
 # Key Vault for Story-Generator Secrets
 resource "azurerm_key_vault" "story_generator" {
-  name                        = "mys-${var.environment}-sg-kv-${local.region_code}"
+  name                        = "mys-${var.environment}-story-kv-${local.region_code}"
   location                    = var.location
   resource_group_name         = var.resource_group_name
   enabled_for_disk_encryption = false
@@ -257,6 +321,7 @@ resource "azurerm_key_vault" "story_generator" {
   purge_protection_enabled    = var.environment == "prod"
   sku_name                    = "standard"
 
+  # Access policy for managed identity (read-only)
   access_policy {
     tenant_id = data.azurerm_client_config.current.tenant_id
     object_id = azurerm_user_assigned_identity.story_generator.principal_id
@@ -264,6 +329,21 @@ resource "azurerm_key_vault" "story_generator" {
     secret_permissions = [
       "Get",
       "List",
+    ]
+  }
+
+  # Access policy for Terraform service principal (manage secrets)
+  access_policy {
+    tenant_id = data.azurerm_client_config.current.tenant_id
+    object_id = data.azurerm_client_config.current.object_id
+
+    secret_permissions = [
+      "Get",
+      "List",
+      "Set",
+      "Delete",
+      "Purge",
+      "Recover",
     ]
   }
 
@@ -291,6 +371,39 @@ resource "azurerm_key_vault_secret" "redis_connection_string" {
   value        = azurerm_redis_cache.story_generator[0].primary_connection_string
   key_vault_id = azurerm_key_vault.story_generator.id
 }
+
+# =============================================================================
+# Static Web App (Blazor WASM Frontend)
+# Note: SWA not available in South Africa North, deployed to fallback region
+# =============================================================================
+
+resource "azurerm_static_web_app" "story_generator" {
+  count = var.enable_static_web_app ? 1 : 0
+
+  name                = "${local.name_prefix}-swa-${local.fallback_region_code}"
+  location            = var.fallback_location  # SWA not available in all regions
+  resource_group_name = var.resource_group_name
+  sku_tier            = var.static_web_app_sku
+  sku_size            = var.static_web_app_sku
+
+  tags = merge(local.common_tags, {
+    Component = "story-generator-web"
+    Type      = "static-web-app"
+  })
+}
+
+# Custom domain for Static Web App
+resource "azurerm_static_web_app_custom_domain" "story_generator" {
+  count = var.enable_static_web_app && var.enable_swa_custom_domain && var.swa_custom_domain != "" ? 1 : 0
+
+  static_web_app_id = azurerm_static_web_app.story_generator[0].id
+  domain_name       = var.swa_custom_domain
+  validation_type   = "cname-delegation"
+}
+
+# =============================================================================
+# Outputs
+# =============================================================================
 
 output "nsg_id" {
   description = "Network Security Group ID for story-generator service"
@@ -336,5 +449,50 @@ output "app_insights_connection_string" {
 output "key_vault_id" {
   description = "Key Vault ID for story-generator secrets"
   value       = azurerm_key_vault.story_generator.id
+}
+
+output "key_vault_uri" {
+  description = "Key Vault URI for story-generator secrets"
+  value       = azurerm_key_vault.story_generator.vault_uri
+}
+
+output "identity_client_id" {
+  description = "Managed Identity Client ID (for workload identity)"
+  value       = azurerm_user_assigned_identity.story_generator.client_id
+}
+
+# -----------------------------------------------------------------------------
+# Static Web App Outputs
+# -----------------------------------------------------------------------------
+
+output "static_web_app_id" {
+  description = "Static Web App ID"
+  value       = var.enable_static_web_app ? azurerm_static_web_app.story_generator[0].id : null
+}
+
+output "static_web_app_name" {
+  description = "Static Web App name"
+  value       = var.enable_static_web_app ? azurerm_static_web_app.story_generator[0].name : null
+}
+
+output "static_web_app_default_hostname" {
+  description = "Static Web App default hostname"
+  value       = var.enable_static_web_app ? azurerm_static_web_app.story_generator[0].default_host_name : null
+}
+
+output "static_web_app_url" {
+  description = "Static Web App URL"
+  value       = var.enable_static_web_app ? "https://${azurerm_static_web_app.story_generator[0].default_host_name}" : null
+}
+
+output "static_web_app_api_key" {
+  description = "Static Web App API key for deployments"
+  value       = var.enable_static_web_app ? azurerm_static_web_app.story_generator[0].api_key : null
+  sensitive   = true
+}
+
+output "swa_custom_domain" {
+  description = "Static Web App custom domain (if enabled)"
+  value       = var.enable_swa_custom_domain && var.swa_custom_domain != "" ? var.swa_custom_domain : null
 }
 

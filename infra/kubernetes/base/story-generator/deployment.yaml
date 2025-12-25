@@ -1,15 +1,23 @@
+# Mystira Story Generator API Deployment
+#
+# This deploys the API component (Mystira.StoryGenerator.Api), NOT the Blazor WASM frontend.
+# The deployment pattern mirrors Mystira.App:
+#   - API → Kubernetes (this deployment, triggered by `story-generator-deploy`)
+#   - Web → Static Web App (separate deployment if needed)
+#
+# See ADR-0019 for architecture documentation.
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: mystira-story-generator
+  name: mys-story-generator
   labels:
-    app: mystira-story-generator
-    component: story-generator
+    app: mys-story-generator
+    component: story-generator-api
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: mystira-story-generator
+      app: mys-story-generator
   strategy:
     type: RollingUpdate
     rollingUpdate:
@@ -18,18 +26,18 @@ spec:
   template:
     metadata:
       labels:
-        app: mystira-story-generator
-        component: story-generator
+        app: mys-story-generator
+        component: story-generator-api
         azure.workload.identity/use: "true"
     spec:
-      serviceAccountName: mystira-story-generator-sa
+      serviceAccountName: story-generator-sa
       securityContext:
         runAsUser: 1000
         runAsNonRoot: true
       containers:
         - name: story-generator
-          image: mystiraacr.azurecr.io/story-generator:latest
-          imagePullPolicy: Always
+          image: myssharedacr.azurecr.io/story-generator:v0.0.0
+          imagePullPolicy: IfNotPresent
           ports:
             - name: http
               containerPort: 8080
@@ -49,32 +57,32 @@ spec:
             - name: ConnectionStrings__PostgreSQL
               valueFrom:
                 secretKeyRef:
-                  name: mystira-story-generator-secrets
+                  name: mys-story-generator-secrets
                   key: postgres_connection_string
             - name: ConnectionStrings__Redis
               valueFrom:
                 secretKeyRef:
-                  name: mystira-story-generator-secrets
+                  name: mys-story-generator-secrets
                   key: redis_connection_string
-            - name: Ai__Anthropic__ApiKey
+            - name: Ai__AzureOpenAI__Endpoint
               valueFrom:
                 secretKeyRef:
-                  name: mystira-story-generator-secrets
-                  key: anthropic_api_key
-            - name: Ai__OpenAI__ApiKey
+                  name: mys-story-generator-secrets
+                  key: azure_ai_endpoint
+            - name: Ai__AzureOpenAI__ApiKey
               valueFrom:
                 secretKeyRef:
-                  name: mystira-story-generator-secrets
-                  key: openai_api_key
+                  name: mys-story-generator-secrets
+                  key: azure_ai_api_key
             - name: APPLICATIONINSIGHTS_CONNECTION_STRING
               valueFrom:
                 secretKeyRef:
-                  name: mystira-story-generator-secrets
+                  name: mys-story-generator-secrets
                   key: appinsights_connection
             - name: KEY_VAULT_URL
               valueFrom:
                 configMapKeyRef:
-                  name: mystira-story-generator-config
+                  name: mys-story-generator-config
                   key: key_vault_url
           resources:
             requests:
@@ -99,9 +107,9 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: mystira-story-generator
+  name: mys-story-generator
   labels:
-    app: mystira-story-generator
+    app: mys-story-generator
 spec:
   type: ClusterIP
   ports:
@@ -112,24 +120,24 @@ spec:
       port: 8081
       targetPort: 8081
   selector:
-    app: mystira-story-generator
+    app: mys-story-generator
 ---
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: mystira-story-generator-config
+  name: mys-story-generator-config
 data:
-  key_vault_url: "https://mystira-sg-kv.vault.azure.net/"
+  key_vault_url: "https://mys-dev-story-kv-san.vault.azure.net/"
 ---
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: mystira-story-generator-hpa
+  name: mys-story-generator-hpa
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: mystira-story-generator
+    name: mys-story-generator
   minReplicas: 2
   maxReplicas: 10
   metrics:
@@ -145,11 +153,3 @@ spec:
         target:
           type: Utilization
           averageUtilization: 80
----
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: mystira-story-generator-sa
-  annotations:
-    azure.workload.identity/client-id: "${AZURE_CLIENT_ID}"
-

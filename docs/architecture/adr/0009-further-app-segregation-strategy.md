@@ -398,6 +398,7 @@ If extraction is considered in the future, evaluate:
 - [ADR-0007: NuGet Feed Strategy for Shared Libraries](./0007-nuget-feed-strategy-for-shared-libraries.md) - Package management strategy
 - [ADR-0005: Service Networking and Communication](./0005-service-networking-and-communication.md) - Service boundaries
 - [ADR-0003: Release Pipeline Strategy](./0003-release-pipeline-strategy.md) - Release processes
+- [ADR-0016: Monorepo Tooling and Multi-Repository Strategy](./0016-monorepo-tooling-and-multi-repository-strategy.md) - Monorepo tooling decision and rationale
 
 ## References
 

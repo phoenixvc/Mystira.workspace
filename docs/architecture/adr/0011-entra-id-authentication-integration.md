@@ -28,7 +28,7 @@ The Mystira platform currently uses:
 1. **Admin Authentication**: Admin API and Admin UI must support Entra ID sign-in
 2. **Service-to-Service**: Azure services must authenticate using Managed Identities
 3. **Multi-tenant Support**: Support both single-tenant (enterprise) and multi-tenant (SaaS) scenarios
-4. **B2C Option**: Consumer-facing apps may use Azure AD B2C for social login
+4. **External ID Option**: Consumer-facing apps may use Microsoft Entra External ID for social login
 5. **Backward Compatibility**: Maintain existing auth for non-enterprise deployments
 
 ## Decision
@@ -50,7 +50,7 @@ We adopt **Microsoft Entra ID** as the enterprise identity provider with the fol
 │  │ Admin UI    │    │ PWA         │    │ B2B Collaboration   │  │
 │  │ DevHub      │    │ Publisher   │    │ Managed Partners    │  │
 │  ├─────────────┤    ├─────────────┤    ├─────────────────────┤  │
-│  │ Entra ID    │    │ Entra B2C   │    │ Entra ID External   │  │
+│  │ Entra ID    │    │ External ID │    │ Entra ID External   │  │
 │  │ (Workforce) │    │ (Consumer)  │    │ (Guests)            │  │
 │  └─────────────┘    └─────────────┘    └─────────────────────┘  │
 │                                                                  │
@@ -90,22 +90,23 @@ Supported Account Types: Single tenant
 
 #### Consumer Applications (Tier 2)
 
-**Azure AD B2C Tenant: `mystirab2c.onmicrosoft.com`**
+**Microsoft Entra External ID Tenant: `mystira.ciamlogin.com`**
 
-**User Flows**:
+**Sign-in Experience**:
 
-| Flow | Type | Features |
-|------|------|----------|
-| `B2C_1_SignUpSignIn` | Combined | Email/password, Social (Google, Discord) |
-| `B2C_1_PasswordReset` | Self-service | Email verification |
-| `B2C_1_ProfileEdit` | Edit profile | Update display name, avatar |
+| Feature | Description |
+|---------|-------------|
+| Sign-up/Sign-in | Combined email/password and social provider authentication |
+| Password Reset | Self-service via email verification |
+| Profile Edit | User can update display name and avatar |
+| Social Providers | Google OAuth 2.0, Discord OpenID Connect |
 
 **App Registration: `mystira-public-api`**
 
 ```
 Display Name: Mystira Public API
-Application ID URI: https://mystirab2c.onmicrosoft.com/mystira-api
-Supported Account Types: B2C tenant accounts
+Application ID URI: api://mystira-api
+Supported Account Types: External ID tenant accounts (AzureADandPersonalMicrosoftAccount)
 ```
 
 ### 3. Authentication Flows
@@ -164,22 +165,22 @@ Supported Account Types: B2C tenant accounts
        │◀───────────────────────────────────────│
 ```
 
-#### Azure AD B2C Sign-Up/Sign-In Flow (Consumer)
+#### External ID Sign-Up/Sign-In Flow (Consumer)
 
 ```
 ┌─────────┐     ┌──────────────┐     ┌─────────────┐     ┌──────────┐
-│   PWA   │     │   Azure AD   │     │  Public API │     │ Cosmos DB│
-│ (Blazor)│     │     B2C      │     │             │     │          │
+│   PWA   │     │  External ID │     │  Public API │     │ Cosmos DB│
+│ (Blazor)│     │  (Consumer)  │     │             │     │          │
 └────┬────┘     └──────┬───────┘     └──────┬──────┘     └────┬─────┘
      │                 │                    │                  │
      │  1. User clicks "Sign In"            │                  │
      │────────────────▶│                    │                  │
      │                 │                    │                  │
-     │  2. Redirect to B2C login page       │                  │
+     │  2. Redirect to External ID login    │                  │
      │◀────────────────│                    │                  │
      │                 │                    │                  │
      │  ┌──────────────────────────────┐    │                  │
-     │  │  B2C Hosted UI               │    │                  │
+     │  │  External ID Hosted UI       │    │                  │
      │  │  ┌────────────────────────┐  │    │                  │
      │  │  │ Sign in with:         │  │    │                  │
      │  │  │ [Google] [Discord]    │  │    │                  │
@@ -193,7 +194,7 @@ Supported Account Types: B2C tenant accounts
      │  3. User authenticates (email/social)│                  │
      │────────────────▶│                    │                  │
      │                 │                    │                  │
-     │  4. B2C validates, runs user flow    │                  │
+     │  4. External ID validates user        │                  │
      │                 │                    │                  │
      │  5. Redirect with auth code          │                  │
      │◀────────────────│                    │                  │
@@ -207,7 +208,7 @@ Supported Account Types: B2C tenant accounts
      │  8. API request with access token    │                  │
      │─────────────────────────────────────▶│                  │
      │                 │                    │                  │
-     │                 │  9. Validate B2C token                │
+     │                 │  9. Validate External ID token        │
      │                 │◀───────────────────│                  │
      │                 │                    │                  │
      │                 │                    │ 10. Query user   │
@@ -217,12 +218,12 @@ Supported Account Types: B2C tenant accounts
      │◀─────────────────────────────────────│                  │
 ```
 
-#### B2C Token Refresh Flow
+#### External ID Token Refresh Flow
 
 ```
 ┌─────────┐     ┌──────────────┐     ┌─────────────┐
-│   PWA   │     │   Azure AD   │     │  Public API │
-│         │     │     B2C      │     │             │
+│   PWA   │     │  External ID │     │  Public API │
+│         │     │   (CIAM)     │     │             │
 └────┬────┘     └──────┬───────┘     └──────┬──────┘
      │                 │                    │
      │  1. Access token expired             │
@@ -244,12 +245,12 @@ Supported Account Types: B2C tenant accounts
      │◀─────────────────────────────────────│
 ```
 
-#### B2C Social Login Flow (Google/Discord)
+#### External ID Social Login Flow (Google/Discord)
 
 ```
 ┌─────────┐     ┌──────────┐     ┌──────────────┐     ┌─────────────┐
-│   PWA   │     │  B2C UI  │     │   Identity   │     │  Public API │
-│         │     │          │     │   Provider   │     │             │
+│   PWA   │     │ Ext. ID  │     │   Identity   │     │  Public API │
+│         │     │   UI     │     │   Provider   │     │             │
 └────┬────┘     └────┬─────┘     └──────┬───────┘     └──────┬──────┘
      │               │                  │                    │
      │ 1. Click social login button     │                    │
@@ -269,10 +270,10 @@ Supported Account Types: B2C tenant accounts
      │               │ 6. IdP tokens (user info)             │
      │               │◀─────────────────│                    │
      │               │                  │                    │
-     │ 7. B2C creates/links user, issues tokens              │
+     │ 7. External ID creates/links user, issues tokens       │
      │◀──────────────│                  │                    │
      │               │                  │                    │
-     │ 8. API call with B2C token       │                    │
+     │ 8. API call with External ID token                    │
      │──────────────────────────────────────────────────────▶│
      │               │                  │                    │
      │ 9. Success                       │                    │
@@ -459,11 +460,9 @@ VITE_AZURE_TENANT_ID=your-tenant-id
 VITE_REDIRECT_URI=https://admin.mystira.app/auth/callback
 VITE_POST_LOGOUT_URI=https://admin.mystira.app
 
-# B2C (Public API)
-AZURE_B2C_INSTANCE=https://mystirab2c.b2clogin.com
-AZURE_B2C_TENANT=mystirab2c.onmicrosoft.com
-AZURE_B2C_POLICY=B2C_1_SignUpSignIn
-AZURE_B2C_CLIENT_ID=your-b2c-client-id
+# External ID (Public API)
+AZURE_EXTERNAL_ID_AUTHORITY=https://mystira.ciamlogin.com/your-tenant-id/v2.0
+AZURE_EXTERNAL_ID_CLIENT_ID=your-external-id-client-id
 ```
 
 ## Rationale
@@ -475,7 +474,7 @@ AZURE_B2C_CLIENT_ID=your-b2c-client-id
 3. **Compliance**: Enterprise-grade audit logs
 4. **Management**: Centralized identity governance
 
-### Why B2C for Consumer?
+### Why External ID for Consumer?
 
 1. **Social Login**: Google, Discord, custom providers
 2. **Branding**: Custom login experience
@@ -496,13 +495,13 @@ AZURE_B2C_CLIENT_ID=your-b2c-client-id
 1. **Enterprise Ready**: SSO integration for organizations
 2. **Secure**: MFA, Conditional Access, Passwordless options
 3. **Compliant**: Audit logs, identity governance
-4. **Scalable**: Handles millions of users (B2C)
+4. **Scalable**: Handles millions of users (External ID)
 5. **Integrated**: Native Azure service authentication
 
 ### Negative
 
-1. **Complexity**: Multiple tenants (workforce + B2C)
-2. **Cost**: B2C pricing per MAU
+1. **Complexity**: Multiple tenants (workforce + External ID)
+2. **Cost**: External ID pricing per MAU
 3. **Azure Lock-in**: Tight coupling to Azure identity
 4. **Learning Curve**: Entra ID configuration
 
@@ -533,25 +532,25 @@ AZURE_B2C_CLIENT_ID=your-b2c-client-id
 - [ ] Remove connection string authentication
 - [ ] Test service-to-service auth
 
-### Phase 3: Consumer Authentication (B2C)
+### Phase 3: Consumer Authentication (External ID)
 
-- [ ] Create Azure AD B2C tenant
+- [ ] Create Microsoft Entra External ID tenant
 - [ ] Configure user flows
 - [ ] Set up social identity providers
 - [ ] Create App Registration for Public API
-- [ ] Update PWA for B2C authentication
+- [ ] Update PWA for External ID authentication
 - [ ] Test consumer sign-up/sign-in
 
-## Azure AD B2C Setup Guide
+## Microsoft Entra External ID Setup Guide
 
-### 1. Create B2C Tenant
+### 1. Create External ID Tenant
 
 ```bash
-# Via Azure CLI
-az ad b2c tenant create \
-  --display-name "Mystira B2C" \
-  --domain-name "mystirab2c.onmicrosoft.com" \
-  --country-code "US"
+# Via Azure Portal (CLI not fully supported)
+# Azure Portal → Create a resource → Microsoft Entra External ID → Create
+# - Display Name: Mystira External ID
+# - Domain name: mystirab2c.onmicrosoft.com
+# - Country: US
 ```
 
 ### 2. Configure Identity Providers
@@ -562,7 +561,7 @@ az ad b2c tenant create \
 2. Configure in Azure Portal:
 
 ```
-Azure Portal → Azure AD B2C → Identity providers → Google
+Azure Portal → External Identities → All identity providers → Google
 ├── Client ID: [from Google Console]
 ├── Client Secret: [from Google Console]
 └── Scope: openid profile email
@@ -576,7 +575,7 @@ Azure Portal → Azure AD B2C → Identity providers → Google
 2. Configure as OpenID Connect provider:
 
 ```
-Azure Portal → Azure AD B2C → Identity providers → OpenID Connect
+Azure Portal → External Identities → All identity providers → OpenID Connect
 ├── Name: Discord
 ├── Metadata URL: https://discord.com/.well-known/openid-configuration
 ├── Client ID: [from Discord]
@@ -628,7 +627,7 @@ Application claims:
   - Email Addresses
 ```
 
-### 4. B2C ASP.NET Core Configuration
+### 4. External ID ASP.NET Core Configuration
 
 **appsettings.json**:
 
@@ -673,9 +672,9 @@ builder.Services.AddCors(options =>
 });
 ```
 
-### 5. B2C UI Customization
+### 5. External ID UI Customization
 
-Azure AD B2C supports custom branding and page layouts to match the Mystira visual identity.
+Microsoft Entra External ID supports custom branding and page layouts to match the Mystira visual identity.
 
 #### Option 1: Built-in Page Layouts
 
@@ -902,7 +901,7 @@ function calculatePasswordStrength(password) {
 }
 ```
 
-### 6. Blazor WASM B2C Configuration
+### 6. Blazor WASM External ID Configuration
 
 **wwwroot/appsettings.json**:
 
@@ -960,13 +959,50 @@ builder.Services.AddMsalAuthentication(options =>
 - [ADR-0005: Service Networking and Communication](./0005-service-networking-and-communication.md) - Service security
 - [ADR-0006: Admin API Repository Extraction](./0006-admin-api-repository-extraction.md) - Admin service architecture
 
+## Related Infrastructure
+
+- [Entra ID Terraform Module](../../../infra/terraform/modules/entra-id/README.md) - App registrations, scopes, roles
+- [External ID Terraform Module](../../../infra/terraform/modules/external-id/README.md) - Consumer auth with social login
+- [Shared Identity Module](../../../infra/terraform/modules/shared/identity/README.md) - RBAC and workload identity
+- [Kubernetes ServiceAccounts](../../../infra/kubernetes/README.md) - Workload identity for pods
+- [Admin API Module](../../../infra/terraform/modules/admin-api/README.md) - Admin API managed identity
+- [PostgreSQL Module](../../../infra/terraform/modules/shared/postgresql/README.md) - Database with Azure AD auth
+- [Implementation Roadmap - Phase 5.0](../../planning/implementation-roadmap.md#phase-50-authentication-implementation-entra-id--b2c) - Implementation status
+
+### PostgreSQL Azure AD Authentication
+
+Services can authenticate to PostgreSQL using Azure AD tokens (passwordless), eliminating the need to store database credentials:
+
+```hcl
+# In environments/dev/main.tf
+module "shared_postgresql" {
+  # ... other config ...
+
+  aad_auth_enabled = true
+  aad_admin_identities = {
+    "admin-api" = {
+      principal_id   = module.admin_api.identity_principal_id
+      principal_name = "mys-dev-admin-api-identity-san"
+      principal_type = "ServicePrincipal"
+    }
+  }
+}
+```
+
+**Connection String** (no password):
+```
+Host=<server>.postgres.database.azure.com;Database=adminapi;Username=mys-dev-admin-api-identity-san;Ssl Mode=Require
+```
+
+See the [PostgreSQL Module README](../../../infra/terraform/modules/shared/postgresql/README.md) for detailed configuration.
+
 ## References
 
 - [Microsoft Identity Platform Documentation](https://docs.microsoft.com/en-us/azure/active-directory/develop/)
 - [MSAL.js for React](https://github.com/AzureAD/microsoft-authentication-library-for-js/tree/dev/lib/msal-react)
 - [Microsoft.Identity.Web](https://docs.microsoft.com/en-us/azure/active-directory/develop/microsoft-identity-web)
-- [Azure AD B2C Documentation](https://docs.microsoft.com/en-us/azure/active-directory-b2c/)
-- [B2C Custom Policies](https://docs.microsoft.com/en-us/azure/active-directory-b2c/custom-policy-overview)
-- [B2C Identity Providers](https://docs.microsoft.com/en-us/azure/active-directory-b2c/add-identity-provider)
+- [Microsoft Entra External ID Documentation](https://learn.microsoft.com/en-us/entra/external-id/)
+- [External ID Custom Policies](https://learn.microsoft.com/en-us/entra/external-id/customers/concept-custom-extensions)
+- [External ID Identity Providers](https://learn.microsoft.com/en-us/entra/external-id/customers/how-to-google-federation-customers)
 - [Managed Identities](https://docs.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/)
 - [Conditional Access](https://docs.microsoft.com/en-us/azure/active-directory/conditional-access/)

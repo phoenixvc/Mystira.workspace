@@ -6,7 +6,7 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~> 3.80"
+      version = "~> 4.0"  # 4.x required for .NET 9.0 support
     }
   }
 }
@@ -60,12 +60,36 @@ variable "tags" {
   default     = {}
 }
 
+variable "shared_log_analytics_workspace_id" {
+  description = "ID of shared Log Analytics workspace (from shared monitoring module)"
+  type        = string
+}
+
+variable "use_shared_servicebus" {
+  description = "Use shared Service Bus namespace instead of creating one"
+  type        = bool
+  default     = false
+}
+
+variable "shared_servicebus_namespace_id" {
+  description = "ID of shared Service Bus namespace (required when use_shared_servicebus = true)"
+  type        = string
+  default     = null
+}
+
+variable "shared_servicebus_queue_name" {
+  description = "Name of the publisher queue in shared Service Bus (required when use_shared_servicebus = true)"
+  type        = string
+  default     = "publisher-events"
+}
+
 locals {
-  name_prefix = "mys-${var.environment}-mystira-pub"
+  name_prefix = "mys-${var.environment}-publisher"
   region_code = var.region_code
   common_tags = merge(var.tags, {
     Component   = "publisher"
     Environment = var.environment
+    Service     = "publisher"
     ManagedBy   = "terraform"
     Project     = "Mystira"
   })
@@ -115,8 +139,9 @@ resource "azurerm_user_assigned_identity" "publisher" {
   tags = local.common_tags
 }
 
-# Service Bus Namespace for Publisher Events
+# Service Bus Namespace for Publisher Events (only if not using shared)
 resource "azurerm_servicebus_namespace" "publisher" {
+  count               = var.use_shared_servicebus ? 0 : 1
   name                = replace("${local.name_prefix}-queue-${local.region_code}", "-", "")
   location            = var.location
   resource_group_name = var.resource_group_name
@@ -125,10 +150,11 @@ resource "azurerm_servicebus_namespace" "publisher" {
   tags = local.common_tags
 }
 
-# Service Bus Queue for Publisher Events
+# Service Bus Queue for Publisher Events (only if not using shared)
 resource "azurerm_servicebus_queue" "publisher_events" {
+  count        = var.use_shared_servicebus ? 0 : 1
   name         = "publisher-events"
-  namespace_id = azurerm_servicebus_namespace.publisher.id
+  namespace_id = azurerm_servicebus_namespace.publisher[0].id
 
   max_delivery_count                   = 3
   default_message_ttl                  = "P1D"
@@ -138,29 +164,23 @@ resource "azurerm_servicebus_queue" "publisher_events" {
 
 # Dead Letter Queue handled automatically by Service Bus
 
-# Log Analytics Workspace
-resource "azurerm_log_analytics_workspace" "publisher" {
-  name                = "${local.name_prefix}-logs"
-  location            = var.location
-  resource_group_name = var.resource_group_name
-  sku                 = "PerGB2018"
-  retention_in_days   = var.environment == "prod" ? 90 : 30
-
-  tags = local.common_tags
-}
-
-# Application Insights for Publisher Monitoring
+# Application Insights for Publisher Monitoring (uses shared Log Analytics workspace)
 resource "azurerm_application_insights" "publisher" {
   name                = "${local.name_prefix}-ai-${local.region_code}"
   location            = var.location
   resource_group_name = var.resource_group_name
-  workspace_id        = azurerm_log_analytics_workspace.publisher.id
+  workspace_id        = var.shared_log_analytics_workspace_id
   application_type    = "Node.JS"
 
   tags = local.common_tags
 }
 
 # Key Vault for Publisher Secrets
+# Note: KV names limited to 24 chars, using "pub" abbreviation
+# TROUBLESHOOTING: If you get "SoftDeletedVaultDoesNotExist" error:
+#   1. Check for soft-deleted vaults: az keyvault list-deleted --query "[?name=='mys-dev-pub-kv-san']"
+#   2. If found, purge it: az keyvault purge --name mys-dev-pub-kv-san --location <location>
+#   3. If not found, wait a few minutes and retry (Azure caching issue)
 resource "azurerm_key_vault" "publisher" {
   name                        = "mys-${var.environment}-pub-kv-${local.region_code}"
   location                    = var.location
@@ -171,6 +191,7 @@ resource "azurerm_key_vault" "publisher" {
   purge_protection_enabled    = var.environment == "prod"
   sku_name                    = "standard"
 
+  # Access policy for managed identity (read-only)
   access_policy {
     tenant_id = data.azurerm_client_config.current.tenant_id
     object_id = azurerm_user_assigned_identity.publisher.principal_id
@@ -178,6 +199,21 @@ resource "azurerm_key_vault" "publisher" {
     secret_permissions = [
       "Get",
       "List",
+    ]
+  }
+
+  # Access policy for Terraform service principal (manage secrets)
+  access_policy {
+    tenant_id = data.azurerm_client_config.current.tenant_id
+    object_id = data.azurerm_client_config.current.object_id
+
+    secret_permissions = [
+      "Get",
+      "List",
+      "Set",
+      "Delete",
+      "Purge",
+      "Recover",
     ]
   }
 
@@ -195,15 +231,15 @@ resource "azurerm_key_vault_secret" "chain_rpc_endpoint" {
 
 # Redis Cache for Publisher (optional caching layer)
 resource "azurerm_redis_cache" "publisher" {
-  count               = var.environment == "prod" ? 1 : 0
-  name                = "${local.name_prefix}-cache-${local.region_code}"
-  location            = var.location
-  resource_group_name = var.resource_group_name
-  capacity            = 1
-  family              = "C"
-  sku_name            = "Standard"
+  count                = var.environment == "prod" ? 1 : 0
+  name                 = "${local.name_prefix}-cache-${local.region_code}"
+  location             = var.location
+  resource_group_name  = var.resource_group_name
+  capacity             = 1
+  family               = "C"
+  sku_name             = "Standard"
   non_ssl_port_enabled = false
-  minimum_tls_version = "1.2"
+  minimum_tls_version  = "1.2"
 
   redis_configuration {
     maxmemory_policy = "volatile-lru"
@@ -229,17 +265,17 @@ output "identity_principal_id" {
 
 output "servicebus_namespace" {
   description = "Service Bus namespace for publisher events"
-  value       = azurerm_servicebus_namespace.publisher.name
+  value       = var.use_shared_servicebus ? null : azurerm_servicebus_namespace.publisher[0].name
 }
 
 output "servicebus_queue_name" {
   description = "Service Bus queue name for publisher events"
-  value       = azurerm_servicebus_queue.publisher_events.name
+  value       = var.use_shared_servicebus ? var.shared_servicebus_queue_name : azurerm_servicebus_queue.publisher_events[0].name
 }
 
-output "log_analytics_workspace_id" {
-  description = "Log Analytics Workspace ID"
-  value       = azurerm_log_analytics_workspace.publisher.id
+output "application_insights_id" {
+  description = "Application Insights ID for publisher monitoring"
+  value       = azurerm_application_insights.publisher.id
 }
 
 output "app_insights_connection_string" {

@@ -1,0 +1,116 @@
+{
+  "organization": "phoenixvc",
+  "repositories": {
+    "Mystira.workspace": {
+      "description": "Unified workspace for Mystira multi-repo development - VS Code workspace, docs, and tooling",
+      "topics": [
+        "mystira",
+        "workspace",
+        "monorepo",
+        "vscode",
+        "infrastructure",
+        "devops"
+      ],
+      "homepage": "https://mystira.app"
+    },
+    "Mystira.App": {
+      "description": "Story adventure app for young adventurers - Interactive storytelling platform",
+      "topics": [
+        "mystira",
+        "dotnet",
+        "csharp",
+        "app",
+        "storytelling",
+        "adventure"
+      ],
+      "homepage": "https://mystira.app"
+    },
+    "Mystira.StoryGenerator": {
+      "description": "AI-powered story generator for the Mystira ecosystem",
+      "topics": [
+        "mystira",
+        "dotnet",
+        "csharp",
+        "ai",
+        "story-generation",
+        "microservice"
+      ],
+      "homepage": "https://mystira.app"
+    },
+    "Mystira.Publisher": {
+      "description": "Content publishing service for Mystira stories - TypeScript/Node.js microservice",
+      "topics": [
+        "mystira",
+        "typescript",
+        "nodejs",
+        "publisher",
+        "microservice",
+        "api"
+      ],
+      "homepage": "https://mystira.app"
+    },
+    "Mystira.Admin.UI": {
+      "description": "Admin dashboard for Mystira platform - React/TypeScript web application",
+      "topics": [
+        "mystira",
+        "typescript",
+        "react",
+        "admin",
+        "dashboard",
+        "frontend"
+      ],
+      "homepage": "https://mystira.app"
+    },
+    "Mystira.Admin.Api": {
+      "description": "Admin API for Mystira platform management - ASP.NET Core backend",
+      "topics": [
+        "mystira",
+        "dotnet",
+        "csharp",
+        "aspnetcore",
+        "admin",
+        "api",
+        "backend"
+      ],
+      "homepage": "https://mystira.app"
+    },
+    "Mystira.Devhub": {
+      "description": "Developer hub and documentation portal for Mystira ecosystem",
+      "topics": [
+        "mystira",
+        "typescript",
+        "documentation",
+        "developer-portal",
+        "devhub"
+      ],
+      "homepage": "https://mystira.app"
+    },
+    "Mystira.Chain": {
+      "description": "Blockchain integration service for Story Protocol IP registration and royalties - Python/gRPC",
+      "topics": [
+        "mystira",
+        "python",
+        "blockchain",
+        "story-protocol",
+        "grpc",
+        "microservice",
+        "web3"
+      ],
+      "homepage": "https://mystira.app"
+    },
+    "Mystira.Infra": {
+      "description": "Infrastructure as Code for Mystira platform - Azure Bicep, Terraform, networking, and deployment",
+      "topics": [
+        "mystira",
+        "infrastructure",
+        "terraform",
+        "azure",
+        "bicep",
+        "iac",
+        "kubernetes"
+      ],
+      "homepage": "https://mystira.app",
+      "archived": true
+    }
+  }
+}

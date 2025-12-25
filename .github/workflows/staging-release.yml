@@ -1,4 +1,9 @@
-name: Staging Release
+name: "Deployment: Staging"
+
+# Staging Environment Deployment: Deploys infrastructure and services to staging
+# Steps: Verify CI, deploy Terraform infrastructure, deploy Kubernetes services
+# Triggers: Pushes to main branch with infrastructure or package changes
+# Environment: https://staging.mystira.app
 
 on:
   push:
@@ -9,6 +14,7 @@ on:
       - "packages/**"
       - ".github/workflows/staging-release.yml"
       - ".github/workflows/infra-deploy.yml"
+  workflow_dispatch:
 
 concurrency:
   group: staging-release
@@ -17,8 +23,18 @@ concurrency:
 env:
   ENVIRONMENT: staging
   TF_VERSION: 1.5.0
-  AZURE_RESOURCE_GROUP: mys-staging-mystira-rg-eus
-  AKS_CLUSTER_NAME: mys-staging-mystira-aks-eus
+
+  # Resource Groups (ADR-0017)
+  AZURE_RESOURCE_GROUP: mys-staging-core-rg-san
+  CHAIN_RG: mys-staging-chain-rg-san
+  PUBLISHER_RG: mys-staging-publisher-rg-san
+  STORY_RG: mys-staging-story-rg-san
+  ADMIN_RG: mys-staging-admin-rg-san
+  APP_RG: mys-staging-app-rg-san
+  SHARED_ACR_RG: mys-shared-acr-rg-san
+
+  # Infrastructure
+  AKS_CLUSTER_NAME: mys-staging-core-aks-san
 
 jobs:
   ci-check:
@@ -147,6 +163,28 @@ jobs:
           kubectl rollout status deployment/mys-story-generator -n mys-staging --timeout=300s || true
           kubectl rollout status statefulset/mys-chain -n mys-staging --timeout=600s || true
 
+      - name: Verify Static Web Apps
+        run: |
+          echo "## Static Web App Status" >> $GITHUB_STEP_SUMMARY
+
+          # Check Mystira.App SWA
+          APP_SWA=$(az staticwebapp list --resource-group ${{ env.APP_RG }} --query "[0].name" -o tsv 2>/dev/null || echo "")
+          if [ -n "$APP_SWA" ]; then
+            APP_STATUS=$(az staticwebapp show --name "$APP_SWA" --query "contentDistributionEndpoint" -o tsv 2>/dev/null || echo "Not available")
+            echo "- Mystira.App SWA: $APP_SWA → $APP_STATUS" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "- Mystira.App SWA: Not deployed" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          # Check Story Generator SWA
+          STORY_SWA=$(az staticwebapp list --resource-group ${{ env.STORY_RG }} --query "[0].name" -o tsv 2>/dev/null || echo "")
+          if [ -n "$STORY_SWA" ]; then
+            STORY_STATUS=$(az staticwebapp show --name "$STORY_SWA" --query "contentDistributionEndpoint" -o tsv 2>/dev/null || echo "Not available")
+            echo "- Story Generator SWA: $STORY_SWA → $STORY_STATUS" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "- Story Generator SWA: Not deployed" >> $GITHUB_STEP_SUMMARY
+          fi
+
   notify:
     name: Notify Deployment Status
     runs-on: ubuntu-latest
@@ -161,3 +199,10 @@ jobs:
           echo "- Triggered by: ${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
           echo "- Infrastructure Deploy: ${{ needs.deploy-infrastructure.result }}" >> $GITHUB_STEP_SUMMARY
           echo "- Services Deploy: ${{ needs.deploy-services.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Service Endpoints" >> $GITHUB_STEP_SUMMARY
+          echo "- API: https://staging.mystira.app" >> $GITHUB_STEP_SUMMARY
+          echo "- Publisher: https://staging.publisher.mystira.app" >> $GITHUB_STEP_SUMMARY
+          echo "- Chain: https://staging.chain.mystira.app" >> $GITHUB_STEP_SUMMARY
+          echo "- Story Generator API: https://staging.story-api.mystira.app" >> $GITHUB_STEP_SUMMARY
+          echo "- Story Generator SWA: https://staging.story.mystira.app" >> $GITHUB_STEP_SUMMARY

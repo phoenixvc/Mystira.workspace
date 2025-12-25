@@ -1,0 +1,259 @@
+# Git Submodules Guide
+
+This workspace integrates multiple Mystira repositories as git submodules. This guide explains how to work with them.
+
+## What are Submodules?
+
+Git submodules allow you to include one Git repository as a subdirectory of another Git repository. Each submodule points to a specific commit in the external repository.
+
+## Initial Setup
+
+### Cloning the Workspace
+
+When cloning this workspace for the first time, use:
+
+```bash
+git clone --recurse-submodules https://github.com/phoenixvc/Mystira.workspace.git
+```
+
+This will clone the workspace and all submodules in one command.
+
+### If Already Cloned
+
+If you've already cloned without submodules:
+
+```bash
+# Initialize and clone all submodules
+git submodule update --init --recursive
+```
+
+## Working with Submodules
+
+### Updating Submodules
+
+To update all submodules to their latest commits:
+
+```bash
+git submodule update --remote
+```
+
+To update a specific submodule:
+
+```bash
+git submodule update --remote packages/chain
+```
+
+### Making Changes in Submodules
+
+1. Navigate to the submodule directory:
+
+   ```bash
+   cd packages/chain
+   ```
+
+2. Check out the dev branch:
+
+   ```bash
+   git checkout dev
+   git pull origin dev
+   ```
+
+3. Create a feature branch from dev:
+
+   ```bash
+   git checkout -b feature/your-feature-name
+   ```
+
+4. Make your changes and commit them:
+
+   ```bash
+   git add .
+   git commit -m "Your changes"
+   git push origin feature/your-feature-name
+   ```
+
+5. Create a pull request from your feature branch to dev
+
+6. Return to the workspace root and update the submodule reference:
+   ```bash
+   cd ../..
+   git add packages/chain
+   git commit -m "Update Mystira.Chain submodule"
+   ```
+
+### Pulling Latest Changes
+
+To pull the latest changes from all submodules:
+
+```bash
+git submodule update --remote --merge
+```
+
+### Switching Branches
+
+When switching branches in the main workspace, update submodules:
+
+```bash
+git checkout <branch>
+git submodule update --init --recursive
+```
+
+## Submodule Repositories
+
+| Submodule              | Path                        | Repository                         |
+| ---------------------- | --------------------------- | ---------------------------------- |
+| Mystira.Chain          | `packages/chain/`           | `phoenixvc/Mystira.Chain`          |
+| Mystira.App            | `packages/app/`             | `phoenixvc/Mystira.App`            |
+| Mystira.StoryGenerator | `packages/story-generator/` | `phoenixvc/Mystira.StoryGenerator` |
+| Mystira.Publisher      | `packages/publisher/`       | `phoenixvc/Mystira.Publisher`      |
+| Mystira.DevHub         | `packages/devhub/`          | `phoenixvc/Mystira.DevHub`         |
+| Mystira.Admin.Api      | `packages/admin-api/`       | `phoenixvc/Mystira.Admin.Api`      |
+| Mystira.Admin.UI       | `packages/admin-ui/`        | `phoenixvc/Mystira.Admin.UI`       |
+
+> **Note**: The `infra/` directory is **not** a submodule. It contains infrastructure code directly in the workspace for simpler CI/CD and atomic commits. See [Infrastructure Consolidation](../infrastructure/consolidation-plan.md).
+
+## Troubleshooting
+
+### Submodule Shows as Modified
+
+If a submodule shows as modified but you haven't made changes:
+
+```bash
+# This usually means the submodule is on a different commit
+cd packages/chain
+git status
+# If you want to update to the latest
+git checkout dev
+git pull origin dev
+cd ../..
+git add packages/chain
+```
+
+### Removing a Submodule
+
+If you need to remove a submodule:
+
+```bash
+# Remove the submodule entry from .git/config
+git submodule deinit -f packages/chain
+
+# Remove the submodule from .gitmodules
+# (edit .gitmodules manually)
+
+# Remove the submodule from git index
+git rm --cached packages/chain
+
+# Remove the submodule directory
+rm -rf packages/chain
+```
+
+### Cloning Without Submodules
+
+If you want to clone the workspace without submodules:
+
+```bash
+git clone https://github.com/phoenixvc/Mystira.workspace.git
+```
+
+Then add submodules later as needed.
+
+### Git Proxy Limitations
+
+If you're using a local git proxy that only authorizes the main workspace repository, you may encounter errors when trying to push submodule changes:
+
+```
+remote: Proxy error: repository not authorized
+fatal: unable to access 'http://127.0.0.1:22376/git/phoenixvc/Mystira.Chain/': The requested URL returned error: 502
+```
+
+**Solution**: If the proxy only authorizes `Mystira.workspace`, you'll need to push submodule changes directly to GitHub (not through the proxy) or ensure the proxy is configured to authorize all submodule repositories.
+
+To work around this:
+
+1. Push submodule changes from an environment with direct GitHub access
+2. Or configure the proxy to authorize all required submodule repositories
+3. Or use direct GitHub remotes instead of the proxy for submodule repositories
+
+## Best Practices
+
+1. **Always commit submodule updates**: When a submodule is updated, commit the change in the workspace
+2. **Use specific commits**: The workspace tracks specific commits, not branches (unless using `--remote`)
+3. **Document submodule versions**: Keep track of which versions of each submodule are compatible
+4. **Test after updates**: Always test the workspace after updating submodules
+
+## CI/CD Considerations
+
+In CI/CD pipelines, ensure submodules are initialized:
+
+```yaml
+- name: Checkout with submodules
+  uses: actions/checkout@v4
+  with:
+    submodules: recursive
+```
+
+### Submodule Deployment Flow (Dev Only)
+
+Submodule repositories can trigger automated deployments to the **dev environment** via `repository_dispatch`:
+
+```
+Submodule (e.g., Admin.Api)          Workspace
+┌──────────────────────────┐     ┌─────────────────────────┐
+│ 1. PR merged to dev      │     │                         │
+│ 2. Build & push to ACR   │────►│ 3. Receive dispatch     │
+│ 3. Trigger dispatch      │     │ 4. Deploy to dev K8s    │
+└──────────────────────────┘     └─────────────────────────┘
+```
+
+**Required Setup in Submodule:**
+
+1. Add `MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN` secret (GitHub PAT with `repo` scope)
+2. Add dispatch job to CI workflow:
+
+```yaml
+trigger-workspace-deploy:
+  needs: build-and-push
+  if: github.ref == 'refs/heads/dev'
+  steps:
+    - uses: peter-evans/repository-dispatch@v3
+      with:
+        token: ${{ secrets.MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN }}
+        repository: phoenixvc/Mystira.workspace
+        event-type: admin-api-deploy  # Use appropriate event type
+        client-payload: |
+          {
+            "environment": "dev",
+            "ref": "${{ github.sha }}",
+            "triggered_by": "${{ github.actor }}",
+            "run_id": "${{ github.run_id }}",
+            "repository": "${{ github.repository }}",
+            "image_tag": "dev-${{ github.sha }}",
+            "pr_number": ""
+          }
+```
+
+**Supported Event Types:**
+
+| Event Type | Service | Infra |
+|------------|---------|-------|
+| `admin-api-deploy` | Admin.Api | Kubernetes |
+| `admin-ui-deploy` | Admin.UI | Kubernetes |
+| `story-generator-deploy` | StoryGenerator (API) | Kubernetes |
+| `publisher-deploy` | Publisher | Kubernetes |
+| `chain-deploy` | Chain | Kubernetes |
+| `app-deploy` | App (API) | App Service |
+| `app-swa-deploy` | App (SWA) | Static Web App |
+| `story-generator-swa-deploy` | StoryGenerator (SWA) | Static Web App |
+| `devhub-deploy` | DevHub | Static Web App |
+
+> **Note**: `Mystira.StoryGenerator` follows the same API/Web pattern as `Mystira.App`:
+> - **API** (`Mystira.StoryGenerator.Api`) → Kubernetes via `story-generator-deploy`
+> - **Web** (`Mystira.StoryGenerator.Web`, Blazor WASM) → Static Web App via `story-generator-swa-deploy`
+
+> **Important**: This is for **dev environment only**. Staging and production deployments are managed through the workspace release workflows. See [Publishing Flow](../cicd/publishing-flow.md#submodule-deployment-dev-only) for details.
+
+## See Also
+
+- [ADR-0016: Monorepo Tooling and Multi-Repository Strategy](../architecture/adr/0016-monorepo-tooling-and-multi-repository-strategy.md) - Why we use submodules + Turborepo instead of other monorepo tools
+- [Quick Start Guide](./quick-start.md) - Getting started with the workspace
+- [Architecture Overview](./architecture.md) - System architecture overview

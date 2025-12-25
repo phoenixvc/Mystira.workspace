@@ -1,0 +1,268 @@
+name: "Mystira App API: Manual Rollback"
+
+# Manual Rollback Workflow for Mystira App API
+# Purpose: Emergency rollback by swapping slots back
+# Usage: Run manually when production issues are detected
+# Safety: Requires confirmation and records rollback reason
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: 'Type "ROLLBACK PRODUCTION" to confirm'
+        required: true
+        type: string
+      reason:
+        description: 'Reason for rollback (required for audit trail)'
+        required: true
+        type: string
+      skip_verification:
+        description: 'Skip post-rollback verification (emergency only)'
+        required: false
+        type: boolean
+        default: false
+
+concurrency:
+  group: mystira-app-api-prod
+  cancel-in-progress: false
+
+env:
+  AZURE_RESOURCE_GROUP: mys-prod-core-rg-san
+  APP_SERVICE_NAME: mys-prod-app-api-san
+  STAGING_SLOT: staging
+  PRODUCTION_SLOT: production
+  HEALTH_CHECK_ENDPOINT: /health
+
+jobs:
+  validate-rollback:
+    name: Validate Rollback Request
+    runs-on: ubuntu-latest
+    outputs:
+      rollback_id: ${{ steps.generate_id.outputs.rollback_id }}
+    steps:
+      - name: Check confirmation
+        if: github.event.inputs.confirm != 'ROLLBACK PRODUCTION'
+        run: |
+          echo "::error::Invalid confirmation. You must type 'ROLLBACK PRODUCTION' exactly."
+          exit 1
+
+      - name: Validate reason provided
+        if: github.event.inputs.reason == ''
+        run: |
+          echo "::error::A reason for rollback must be provided for the audit trail."
+          exit 1
+
+      - name: Generate rollback ID
+        id: generate_id
+        run: |
+          ROLLBACK_ID="rollback-$(date +%Y%m%d-%H%M%S)-${GITHUB_RUN_NUMBER}"
+          echo "rollback_id=${ROLLBACK_ID}" >> $GITHUB_OUTPUT
+
+      - name: Record rollback initiation
+        run: |
+          echo "# Emergency Rollback Initiated" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Field | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Rollback ID | ${{ steps.generate_id.outputs.rollback_id }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Triggered by | ${{ github.actor }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Timestamp | $(date -u +%Y-%m-%dT%H:%M:%SZ) |" >> $GITHUB_STEP_SUMMARY
+          echo "| Reason | ${{ github.event.inputs.reason }} |" >> $GITHUB_STEP_SUMMARY
+
+  pre-rollback-snapshot:
+    name: Capture Pre-Rollback State
+    runs-on: ubuntu-latest
+    needs: [validate-rollback]
+    permissions:
+      contents: read
+      id-token: write
+    outputs:
+      pre_health_status: ${{ steps.health.outputs.status }}
+    steps:
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.MYSTIRA_AZURE_CREDENTIALS }}
+
+      - name: Capture production health status
+        id: health
+        run: |
+          PROD_URL="https://${{ env.APP_SERVICE_NAME }}.azurewebsites.net${{ env.HEALTH_CHECK_ENDPOINT }}"
+
+          echo "## Pre-Rollback Production State" >> $GITHUB_STEP_SUMMARY
+
+          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 10 "${PROD_URL}" || echo "000")
+          echo "status=${HTTP_STATUS}" >> $GITHUB_OUTPUT
+
+          echo "- Health endpoint status: HTTP ${HTTP_STATUS}" >> $GITHUB_STEP_SUMMARY
+
+          # Capture response time
+          RESPONSE_TIME=$(curl -s -o /dev/null -w "%{time_total}" --max-time 10 "${PROD_URL}" || echo "timeout")
+          echo "- Response time: ${RESPONSE_TIME}s" >> $GITHUB_STEP_SUMMARY
+
+      - name: Capture slot configuration
+        run: |
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Current Slot Configuration" >> $GITHUB_STEP_SUMMARY
+
+          # Get production slot info
+          PROD_INFO=$(az webapp show \
+            --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
+            --name ${{ env.APP_SERVICE_NAME }} \
+            --query "{state: state, hostNames: hostNames}" \
+            -o json 2>/dev/null || echo "{}")
+          echo "Production: ${PROD_INFO}" >> $GITHUB_STEP_SUMMARY
+
+          # Get staging slot info
+          STAGING_INFO=$(az webapp show \
+            --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
+            --name ${{ env.APP_SERVICE_NAME }} \
+            --slot ${{ env.STAGING_SLOT }} \
+            --query "{state: state, hostNames: hostNames}" \
+            -o json 2>/dev/null || echo "{}")
+          echo "Staging: ${STAGING_INFO}" >> $GITHUB_STEP_SUMMARY
+
+  execute-rollback:
+    name: Execute Slot Swap Rollback
+    runs-on: ubuntu-latest
+    needs: [validate-rollback, pre-rollback-snapshot]
+    environment:
+      name: production-rollback
+      url: https://mystira.app/api
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.MYSTIRA_AZURE_CREDENTIALS }}
+
+      - name: Execute slot swap (rollback)
+        id: swap
+        run: |
+          echo "Initiating rollback: swapping ${{ env.STAGING_SLOT }} <-> ${{ env.PRODUCTION_SLOT }}"
+          echo "This will restore the previous production version."
+
+          SWAP_START=$(date +%s)
+
+          az webapp deployment slot swap \
+            --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
+            --name ${{ env.APP_SERVICE_NAME }} \
+            --slot ${{ env.STAGING_SLOT }} \
+            --target-slot ${{ env.PRODUCTION_SLOT }}
+
+          SWAP_END=$(date +%s)
+          SWAP_DURATION=$((SWAP_END - SWAP_START))
+
+          echo "## Slot Swap Executed" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- Swap duration: ${SWAP_DURATION} seconds" >> $GITHUB_STEP_SUMMARY
+          echo "- Previous staging (now production): restored" >> $GITHUB_STEP_SUMMARY
+          echo "- Previous production (now staging): preserved for analysis" >> $GITHUB_STEP_SUMMARY
+
+  verify-rollback:
+    name: Verify Rollback Success
+    runs-on: ubuntu-latest
+    needs: [execute-rollback]
+    if: ${{ github.event.inputs.skip_verification != 'true' }}
+    steps:
+      - name: Wait for swap propagation
+        run: sleep 30
+
+      - name: Verify production health
+        id: verify
+        run: |
+          PROD_URL="https://${{ env.APP_SERVICE_NAME }}.azurewebsites.net${{ env.HEALTH_CHECK_ENDPOINT }}"
+
+          echo "## Post-Rollback Verification" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          HEALTHY_COUNT=0
+          ERROR_COUNT=0
+
+          for i in 1 2 3 4 5 6 7 8 9 10; do
+            HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 10 "${PROD_URL}" || echo "000")
+
+            if [ "$HTTP_STATUS" = "200" ]; then
+              HEALTHY_COUNT=$((HEALTHY_COUNT + 1))
+              echo "- Check ${i}: HTTP ${HTTP_STATUS} ✓" >> $GITHUB_STEP_SUMMARY
+            else
+              ERROR_COUNT=$((ERROR_COUNT + 1))
+              echo "- Check ${i}: HTTP ${HTTP_STATUS} ✗" >> $GITHUB_STEP_SUMMARY
+            fi
+
+            sleep 5
+          done
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [ $HEALTHY_COUNT -ge 8 ]; then
+            echo "**Result: ROLLBACK SUCCESSFUL** (${HEALTHY_COUNT}/10 healthy checks)" >> $GITHUB_STEP_SUMMARY
+          elif [ $HEALTHY_COUNT -ge 5 ]; then
+            echo "**Result: ROLLBACK PARTIAL** (${HEALTHY_COUNT}/10 healthy checks) - Manual verification recommended" >> $GITHUB_STEP_SUMMARY
+            echo "::warning::Rollback completed but with some health check failures. Manual verification recommended."
+          else
+            echo "**Result: ROLLBACK MAY HAVE FAILED** (${HEALTHY_COUNT}/10 healthy checks) - Immediate attention required!" >> $GITHUB_STEP_SUMMARY
+            echo "::error::Rollback health verification failed. Production may still be unhealthy."
+          fi
+
+      - name: Compare with pre-rollback state
+        run: |
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### State Comparison" >> $GITHUB_STEP_SUMMARY
+          echo "- Pre-rollback health: HTTP ${{ needs.pre-rollback-snapshot.outputs.pre_health_status }}" >> $GITHUB_STEP_SUMMARY
+
+          CURRENT_STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 10 \
+            "https://${{ env.APP_SERVICE_NAME }}.azurewebsites.net${{ env.HEALTH_CHECK_ENDPOINT }}" || echo "000")
+          echo "- Post-rollback health: HTTP ${CURRENT_STATUS}" >> $GITHUB_STEP_SUMMARY
+
+  post-rollback-actions:
+    name: Post-Rollback Actions
+    runs-on: ubuntu-latest
+    needs: [validate-rollback, execute-rollback, verify-rollback]
+    if: always() && needs.execute-rollback.result == 'success'
+    steps:
+      - name: Generate incident report template
+        run: |
+          echo "# Rollback Incident Report" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Field | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Rollback ID | ${{ needs.validate-rollback.outputs.rollback_id }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Triggered by | ${{ github.actor }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Reason | ${{ github.event.inputs.reason }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Execution Status | ${{ needs.execute-rollback.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Verification Status | ${{ needs.verify-rollback.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Timestamp | $(date -u +%Y-%m-%dT%H:%M:%SZ) |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## Next Steps" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "1. **Verify Production**: Manually verify production is functioning correctly" >> $GITHUB_STEP_SUMMARY
+          echo "2. **Analyze Staging Slot**: The problematic deployment is now in staging for analysis" >> $GITHUB_STEP_SUMMARY
+          echo "3. **Root Cause Analysis**: Investigate why the original deployment failed" >> $GITHUB_STEP_SUMMARY
+          echo "4. **Document Findings**: Update incident report with root cause and remediation" >> $GITHUB_STEP_SUMMARY
+          echo "5. **Update Runbook**: If needed, update rollback runbook with lessons learned" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## Commands for Further Investigation" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo '```bash' >> $GITHUB_STEP_SUMMARY
+          echo "# View staging slot logs (contains problematic deployment)" >> $GITHUB_STEP_SUMMARY
+          echo "az webapp log tail --resource-group ${{ env.AZURE_RESOURCE_GROUP }} --name ${{ env.APP_SERVICE_NAME }} --slot ${{ env.STAGING_SLOT }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "# View staging slot configuration" >> $GITHUB_STEP_SUMMARY
+          echo "az webapp config show --resource-group ${{ env.AZURE_RESOURCE_GROUP }} --name ${{ env.APP_SERVICE_NAME }} --slot ${{ env.STAGING_SLOT }}" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+
+      - name: Notify completion
+        run: |
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "---" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Rollback workflow completed at $(date -u +%Y-%m-%dT%H:%M:%SZ)**" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "The previous production deployment has been restored. The problematic deployment" >> $GITHUB_STEP_SUMMARY
+          echo "is now in the staging slot for investigation. Do not run new deployments until" >> $GITHUB_STEP_SUMMARY
+          echo "the root cause has been identified and fixed." >> $GITHUB_STEP_SUMMARY
