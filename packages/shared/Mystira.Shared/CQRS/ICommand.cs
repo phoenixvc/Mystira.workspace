@@ -71,6 +71,6 @@ public interface ICommand
 /// }
 /// </code>
 /// </example>
-public interface ICommand<out TResponse>
+public interface ICommand<out TResponse> : ICommand
 {
 }

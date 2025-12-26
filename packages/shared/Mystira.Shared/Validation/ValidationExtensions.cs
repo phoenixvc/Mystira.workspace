@@ -114,9 +114,7 @@ public static class ValidationExtensions
 
         if (!result.IsValid)
         {
-            throw new Exceptions.ValidationException(
-                "One or more validation errors occurred.",
-                result.ToDictionary());
+            throw new Exceptions.ValidationException(result.ToDictionary());
         }
     }
 }

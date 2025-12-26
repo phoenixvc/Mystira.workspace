@@ -52,9 +52,7 @@ public class ValidationMiddleware<TMessage> where TMessage : IValidatable
                     g => g.Key,
                     g => g.Select(f => f.ErrorMessage).ToArray());
 
-            throw new Mystira.Shared.Exceptions.ValidationException(
-                "One or more validation errors occurred.",
-                errors);
+            throw new Mystira.Shared.Exceptions.ValidationException(errors);
         }
 
         return HandlerContinuation.Continue;
