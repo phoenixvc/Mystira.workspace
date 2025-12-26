@@ -1588,54 +1588,1517 @@ components:
               type: string
               nullable: true
 
-    # Union type for all events (58 total)
+    # Onboarding Events
+    EmailVerified:
+      allOf:
+        - $ref: '#/components/schemas/IntegrationEvent'
+        - type: object
+          required:
+            - type
+            - accountId
+            - email
+            - verificationMethod
+          properties:
+            type:
+              type: string
+              const: EmailVerified
+            accountId:
+              type: string
+            email:
+              type: string
+              format: email
+            verificationMethod:
+              type: string
+
+    OnboardingStarted:
+      allOf:
+        - $ref: '#/components/schemas/IntegrationEvent'
+        - type: object
+          required:
+            - type
+            - accountId
+            - onboardingVersion
+          properties:
+            type:
+              type: string
+              const: OnboardingStarted
+            accountId:
+              type: string
+            onboardingVersion:
+              type: string
+            source:
+              type: string
+              nullable: true
+
+    OnboardingStepCompleted:
+      allOf:
+        - $ref: '#/components/schemas/IntegrationEvent'
+        - type: object
+          required:
+            - type
+            - accountId
+            - stepId
+            - stepName
+            - stepNumber
+            - totalSteps
+          properties:
+            type:
+              type: string
+              const: OnboardingStepCompleted
+            accountId:
+              type: string
+            stepId:
+              type: string
+            stepName:
+              type: string
+            stepNumber:
+              type: integer
+            totalSteps:
+              type: integer
+            skipped:
+              type: boolean
+              default: false
+
+    OnboardingCompleted:
+      allOf:
+        - $ref: '#/components/schemas/IntegrationEvent'
+        - type: object
+          required:
+            - type
+            - accountId
+            - durationSeconds
+            - stepsCompleted
+            - stepsSkipped
+          properties:
+            type:
+              type: string
+              const: OnboardingCompleted
+            accountId:
+              type: string
+            durationSeconds:
+              type: integer
+            stepsCompleted:
+              type: integer
+            stepsSkipped:
+              type: integer
+
+    OnboardingSkipped:
+      allOf:
+        - $ref: '#/components/schemas/IntegrationEvent'
+        - type: object
+          required:
+            - type
+            - accountId
+            - atStep
+          properties:
+            type:
+              type: string
+              const: OnboardingSkipped
+            accountId:
+              type: string
+            atStep:
+              type: integer
+
+    ProfileCompleted:
+      allOf:
+        - $ref: '#/components/schemas/IntegrationEvent'
+        - type: object
+          required:
+            - type
+            - accountId
+          properties:
+            type:
+              type: string
+              const: ProfileCompleted
+            accountId:
+              type: string
+            displayNameSet:
+              type: boolean
+              default: false
+            avatarSet:
+              type: boolean
+              default: false
+            preferencesSet:
+              type: boolean
+              default: false
+
+    ReferralSignup:
+      allOf:
+        - $ref: '#/components/schemas/IntegrationEvent'
+        - type: object
+          required:
+            - type
+            - accountId
+            - referrerAccountId
+            - referralCode
+          properties:
+            type:
+              type: string
+              const: ReferralSignup
+            accountId:
+              type: string
+            referrerAccountId:
+              type: string
+            referralCode:
+              type: string
+            campaign:
+              type: string
+              nullable: true
+
+    ReferralRewardGranted:
+      allOf:
+        - $ref: '#/components/schemas/IntegrationEvent'
+        - type: object
+          required:
+            - type
+            - accountId
+            - referredAccountId
+            - rewardType
+            - rewardValue
+          properties:
+            type:
+              type: string
+              const: ReferralRewardGranted
+            accountId:
+              type: string
+            referredAccountId:
+              type: string
+            rewardType:
+              type: string
+            rewardValue:
+              type: string
+
+    # Bundle Events
+    BundleCreated:
+      allOf:
+        - $ref: '#/components/schemas/IntegrationEvent'
+        - type: object
+          required:
+            - type
+            - bundleId
+            - bundleName
+            - creatorId
+            - itemCount
+          properties:
+            type:
+              type: string
+              const: BundleCreated
+            bundleId:
+              type: string
+            bundleName:
+              type: string
+            creatorId:
+              type: string
+            itemCount:
+              type: integer
+            priceCents:
+              type: integer
+              nullable: true
+            currency:
+              type: string
+              nullable: true
+
+    BundlePurchased:
+      allOf:
+        - $ref: '#/components/schemas/IntegrationEvent'
+        - type: object
+          required:
+            - type
+            - accountId
+            - bundleId
+            - paymentId
+            - priceCents
+            - currency
+          properties:
+            type:
+              type: string
+              const: BundlePurchased
+            accountId:
+              type: string
+            bundleId:
+              type: string
+            paymentId:
+              type: string
+            priceCents:
+              type: integer
+            currency:
+              type: string
+            discountApplied:
+              type: boolean
+              default: false
+
+    BundleActivated:
+      allOf:
+        - $ref: '#/components/schemas/IntegrationEvent'
+        - type: object
+          required:
+            - type
+            - accountId
+            - bundleId
+            - itemsUnlocked
+          properties:
+            type:
+              type: string
+              const: BundleActivated
+            accountId:
+              type: string
+            bundleId:
+              type: string
+            itemsUnlocked:
+              type: array
+              items:
+                type: string
+
+    BundleGifted:
+      allOf:
+        - $ref: '#/components/schemas/IntegrationEvent'
+        - type: object
+          required:
+            - type
+            - senderAccountId
+            - recipientAccountId
+            - bundleId
+          properties:
+            type:
+              type: string
+              const: BundleGifted
+            senderAccountId:
+              type: string
+            recipientAccountId:
+              type: string
+            bundleId:
+              type: string
+            giftMessage:
+              type: string
+              nullable: true
+
+    PromoCodeRedeemed:
+      allOf:
+        - $ref: '#/components/schemas/IntegrationEvent'
+        - type: object
+          required:
+            - type
+            - accountId
+            - promoCode
+            - discountType
+            - discountValue
+          properties:
+            type:
+              type: string
+              const: PromoCodeRedeemed
+            accountId:
+              type: string
+            promoCode:
+              type: string
+            discountType:
+              type: string
+            discountValue:
+              type: number
+            appliedTo:
+              type: string
+              nullable: true
+
+    # Co-op/Partner Events
+    PartnerInviteSent:
+      allOf:
+        - $ref: '#/components/schemas/IntegrationEvent'
+        - type: object
+          required:
+            - type
+            - inviteId
+            - senderAccountId
+            - recipientAccountId
+            - expiresAt
+          properties:
+            type:
+              type: string
+              const: PartnerInviteSent
+            inviteId:
+              type: string
+            senderAccountId:
+              type: string
+            recipientAccountId:
+              type: string
+            scenarioId:
+              type: string
+              nullable: true
+            expiresAt:
+              type: string
+              format: date-time
+
+    PartnerInviteAccepted:
+      allOf:
+        - $ref: '#/components/schemas/IntegrationEvent'
+        - type: object
+          required:
+            - type
+            - inviteId
+            - senderAccountId
+            - recipientAccountId
+          properties:
+            type:
+              type: string
+              const: PartnerInviteAccepted
+            inviteId:
+              type: string
+            senderAccountId:
+              type: string
+            recipientAccountId:
+              type: string
+            scenarioId:
+              type: string
+              nullable: true
+
+    PartnerInviteDeclined:
+      allOf:
+        - $ref: '#/components/schemas/IntegrationEvent'
+        - type: object
+          required:
+            - type
+            - inviteId
+            - senderAccountId
+            - recipientAccountId
+          properties:
+            type:
+              type: string
+              const: PartnerInviteDeclined
+            inviteId:
+              type: string
+            senderAccountId:
+              type: string
+            recipientAccountId:
+              type: string
+            reason:
+              type: string
+              nullable: true
+
+    CoopSessionStarted:
+      allOf:
+        - $ref: '#/components/schemas/IntegrationEvent'
+        - type: object
+          required:
+            - type
+            - coopSessionId
+            - hostAccountId
+            - scenarioId
+            - maxPartners
+          properties:
+            type:
+              type: string
+              const: CoopSessionStarted
+            coopSessionId:
+              type: string
+            hostAccountId:
+              type: string
+            scenarioId:
+              type: string
+            maxPartners:
+              type: integer
+
+    PartnerJoinedSession:
+      allOf:
+        - $ref: '#/components/schemas/IntegrationEvent'
+        - type: object
+          required:
+            - type
+            - coopSessionId
+            - partnerAccountId
+            - joinMethod
+            - currentPartnerCount
+          properties:
+            type:
+              type: string
+              const: PartnerJoinedSession
+            coopSessionId:
+              type: string
+            partnerAccountId:
+              type: string
+            joinMethod:
+              type: string
+            currentPartnerCount:
+              type: integer
+
+    PartnerLeftSession:
+      allOf:
+        - $ref: '#/components/schemas/IntegrationEvent'
+        - type: object
+          required:
+            - type
+            - coopSessionId
+            - partnerAccountId
+            - reason
+            - remainingPartners
+          properties:
+            type:
+              type: string
+              const: PartnerLeftSession
+            coopSessionId:
+              type: string
+            partnerAccountId:
+              type: string
+            reason:
+              type: string
+            remainingPartners:
+              type: integer
+
+    CoopSessionEnded:
+      allOf:
+        - $ref: '#/components/schemas/IntegrationEvent'
+        - type: object
+          required:
+            - type
+            - coopSessionId
+            - hostAccountId
+            - durationSeconds
+            - participantCount
+            - endReason
+          properties:
+            type:
+              type: string
+              const: CoopSessionEnded
+            coopSessionId:
+              type: string
+            hostAccountId:
+              type: string
+            durationSeconds:
+              type: integer
+            participantCount:
+              type: integer
+            endReason:
+              type: string
+
+    TurnPassed:
+      allOf:
+        - $ref: '#/components/schemas/IntegrationEvent'
+        - type: object
+          required:
+            - type
+            - coopSessionId
+            - fromAccountId
+            - toAccountId
+            - turnNumber
+          properties:
+            type:
+              type: string
+              const: TurnPassed
+            coopSessionId:
+              type: string
+            fromAccountId:
+              type: string
+            toAccountId:
+              type: string
+            turnNumber:
+              type: integer
+
+    # Chat/Messaging Events
+    ConversationStarted:
+      allOf:
+        - $ref: '#/components/schemas/IntegrationEvent'
+        - type: object
+          required:
+            - type
+            - conversationId
+            - initiatorAccountId
+            - participantIds
+            - conversationType
+          properties:
+            type:
+              type: string
+              const: ConversationStarted
+            conversationId:
+              type: string
+            initiatorAccountId:
+              type: string
+            participantIds:
+              type: array
+              items:
+                type: string
+            conversationType:
+              type: string
+            contextId:
+              type: string
+              nullable: true
+
+    MessageSent:
+      allOf:
+        - $ref: '#/components/schemas/IntegrationEvent'
+        - type: object
+          required:
+            - type
+            - messageId
+            - conversationId
+            - senderAccountId
+            - messageType
+          properties:
+            type:
+              type: string
+              const: MessageSent
+            messageId:
+              type: string
+            conversationId:
+              type: string
+            senderAccountId:
+              type: string
+            messageType:
+              type: string
+            contentLength:
+              type: integer
+              default: 0
+            hasAttachments:
+              type: boolean
+              default: false
+
+    MessageDelivered:
+      allOf:
+        - $ref: '#/components/schemas/IntegrationEvent'
+        - type: object
+          required:
+            - type
+            - messageId
+            - conversationId
+            - recipientAccountId
+          properties:
+            type:
+              type: string
+              const: MessageDelivered
+            messageId:
+              type: string
+            conversationId:
+              type: string
+            recipientAccountId:
+              type: string
+            deliveryLatencyMs:
+              type: integer
+              default: 0
+
+    MessageRead:
+      allOf:
+        - $ref: '#/components/schemas/IntegrationEvent'
+        - type: object
+          required:
+            - type
+            - messageId
+            - conversationId
+            - readerAccountId
+          properties:
+            type:
+              type: string
+              const: MessageRead
+            messageId:
+              type: string
+            conversationId:
+              type: string
+            readerAccountId:
+              type: string
+            readDelaySeconds:
+              type: integer
+              default: 0
+
+    MessageDeleted:
+      allOf:
+        - $ref: '#/components/schemas/IntegrationEvent'
+        - type: object
+          required:
+            - type
+            - messageId
+            - conversationId
+            - deletedByAccountId
+          properties:
+            type:
+              type: string
+              const: MessageDeleted
+            messageId:
+              type: string
+            conversationId:
+              type: string
+            deletedByAccountId:
+              type: string
+            deletedForEveryone:
+              type: boolean
+              default: false
+
+    TypingStarted:
+      allOf:
+        - $ref: '#/components/schemas/IntegrationEvent'
+        - type: object
+          required:
+            - type
+            - conversationId
+            - accountId
+          properties:
+            type:
+              type: string
+              const: TypingStarted
+            conversationId:
+              type: string
+            accountId:
+              type: string
+
+    ConversationArchived:
+      allOf:
+        - $ref: '#/components/schemas/IntegrationEvent'
+        - type: object
+          required:
+            - type
+            - conversationId
+            - archivedByAccountId
+          properties:
+            type:
+              type: string
+              const: ConversationArchived
+            conversationId:
+              type: string
+            archivedByAccountId:
+              type: string
+
+    UserMutedInConversation:
+      allOf:
+        - $ref: '#/components/schemas/IntegrationEvent'
+        - type: object
+          required:
+            - type
+            - conversationId
+            - mutedAccountId
+            - mutedByAccountId
+          properties:
+            type:
+              type: string
+              const: UserMutedInConversation
+            conversationId:
+              type: string
+            mutedAccountId:
+              type: string
+            mutedByAccountId:
+              type: string
+            durationMinutes:
+              type: integer
+              nullable: true
+
+    # Device/Sync Events
+    DeviceRegistered:
+      allOf:
+        - $ref: '#/components/schemas/IntegrationEvent'
+        - type: object
+          required:
+            - type
+            - accountId
+            - deviceId
+            - deviceType
+            - deviceName
+            - appVersion
+          properties:
+            type:
+              type: string
+              const: DeviceRegistered
+            accountId:
+              type: string
+            deviceId:
+              type: string
+            deviceType:
+              type: string
+            deviceName:
+              type: string
+            osVersion:
+              type: string
+              nullable: true
+            appVersion:
+              type: string
+
+    DeviceRemoved:
+      allOf:
+        - $ref: '#/components/schemas/IntegrationEvent'
+        - type: object
+          required:
+            - type
+            - accountId
+            - deviceId
+            - removedBy
+            - reason
+          properties:
+            type:
+              type: string
+              const: DeviceRemoved
+            accountId:
+              type: string
+            deviceId:
+              type: string
+            removedBy:
+              type: string
+            reason:
+              type: string
+
+    SessionSynced:
+      allOf:
+        - $ref: '#/components/schemas/IntegrationEvent'
+        - type: object
+          required:
+            - type
+            - accountId
+            - sessionId
+            - fromDeviceId
+            - toDeviceId
+            - dataSize
+          properties:
+            type:
+              type: string
+              const: SessionSynced
+            accountId:
+              type: string
+            sessionId:
+              type: string
+            fromDeviceId:
+              type: string
+            toDeviceId:
+              type: string
+            dataSize:
+              type: integer
+
+    SyncConflictDetected:
+      allOf:
+        - $ref: '#/components/schemas/IntegrationEvent'
+        - type: object
+          required:
+            - type
+            - accountId
+            - sessionId
+            - device1Id
+            - device2Id
+            - conflictType
+            - resolution
+          properties:
+            type:
+              type: string
+              const: SyncConflictDetected
+            accountId:
+              type: string
+            sessionId:
+              type: string
+            device1Id:
+              type: string
+            device2Id:
+              type: string
+            conflictType:
+              type: string
+            resolution:
+              type: string
+
+    DeviceHandoffStarted:
+      allOf:
+        - $ref: '#/components/schemas/IntegrationEvent'
+        - type: object
+          required:
+            - type
+            - accountId
+            - sessionId
+            - fromDeviceId
+            - toDeviceId
+          properties:
+            type:
+              type: string
+              const: DeviceHandoffStarted
+            accountId:
+              type: string
+            sessionId:
+              type: string
+            fromDeviceId:
+              type: string
+            toDeviceId:
+              type: string
+
+    DeviceHandoffCompleted:
+      allOf:
+        - $ref: '#/components/schemas/IntegrationEvent'
+        - type: object
+          required:
+            - type
+            - accountId
+            - sessionId
+            - fromDeviceId
+            - toDeviceId
+            - handoffDurationMs
+            - success
+          properties:
+            type:
+              type: string
+              const: DeviceHandoffCompleted
+            accountId:
+              type: string
+            sessionId:
+              type: string
+            fromDeviceId:
+              type: string
+            toDeviceId:
+              type: string
+            handoffDurationMs:
+              type: integer
+            success:
+              type: boolean
+
+    PushSettingsUpdated:
+      allOf:
+        - $ref: '#/components/schemas/IntegrationEvent'
+        - type: object
+          required:
+            - type
+            - accountId
+            - deviceId
+            - pushEnabled
+          properties:
+            type:
+              type: string
+              const: PushSettingsUpdated
+            accountId:
+              type: string
+            deviceId:
+              type: string
+            pushEnabled:
+              type: boolean
+            categories:
+              type: array
+              items:
+                type: string
+              nullable: true
+
+    # Discovery/Recommendation Events
+    SearchPerformed:
+      allOf:
+        - $ref: '#/components/schemas/IntegrationEvent'
+        - type: object
+          required:
+            - type
+            - searchId
+            - query
+            - resultCount
+            - searchType
+          properties:
+            type:
+              type: string
+              const: SearchPerformed
+            accountId:
+              type: string
+              nullable: true
+            searchId:
+              type: string
+            query:
+              type: string
+            filters:
+              type: object
+              additionalProperties:
+                type: string
+              nullable: true
+            resultCount:
+              type: integer
+            searchType:
+              type: string
+
+    SearchResultClicked:
+      allOf:
+        - $ref: '#/components/schemas/IntegrationEvent'
+        - type: object
+          required:
+            - type
+            - accountId
+            - searchId
+            - resultId
+            - resultType
+            - position
+          properties:
+            type:
+              type: string
+              const: SearchResultClicked
+            accountId:
+              type: string
+            searchId:
+              type: string
+            resultId:
+              type: string
+            resultType:
+              type: string
+            position:
+              type: integer
+
+    RecommendationShown:
+      allOf:
+        - $ref: '#/components/schemas/IntegrationEvent'
+        - type: object
+          required:
+            - type
+            - accountId
+            - recommendationId
+            - itemIds
+            - algorithm
+            - context
+          properties:
+            type:
+              type: string
+              const: RecommendationShown
+            accountId:
+              type: string
+            recommendationId:
+              type: string
+            itemIds:
+              type: array
+              items:
+                type: string
+            algorithm:
+              type: string
+            context:
+              type: string
+
+    RecommendationClicked:
+      allOf:
+        - $ref: '#/components/schemas/IntegrationEvent'
+        - type: object
+          required:
+            - type
+            - accountId
+            - recommendationId
+            - itemId
+            - position
+          properties:
+            type:
+              type: string
+              const: RecommendationClicked
+            accountId:
+              type: string
+            recommendationId:
+              type: string
+            itemId:
+              type: string
+            position:
+              type: integer
+
+    RecommendationDismissed:
+      allOf:
+        - $ref: '#/components/schemas/IntegrationEvent'
+        - type: object
+          required:
+            - type
+            - accountId
+            - recommendationId
+          properties:
+            type:
+              type: string
+              const: RecommendationDismissed
+            accountId:
+              type: string
+            recommendationId:
+              type: string
+            itemId:
+              type: string
+              nullable: true
+            reason:
+              type: string
+              nullable: true
+
+    ContentFeatured:
+      allOf:
+        - $ref: '#/components/schemas/IntegrationEvent'
+        - type: object
+          required:
+            - type
+            - contentId
+            - contentType
+            - featuredBy
+            - placement
+          properties:
+            type:
+              type: string
+              const: ContentFeatured
+            contentId:
+              type: string
+            contentType:
+              type: string
+            featuredBy:
+              type: string
+            featuredUntil:
+              type: string
+              format: date-time
+              nullable: true
+            placement:
+              type: string
+
+    TagFollowed:
+      allOf:
+        - $ref: '#/components/schemas/IntegrationEvent'
+        - type: object
+          required:
+            - type
+            - accountId
+            - tagId
+            - tagName
+          properties:
+            type:
+              type: string
+              const: TagFollowed
+            accountId:
+              type: string
+            tagId:
+              type: string
+            tagName:
+              type: string
+
+    TagUnfollowed:
+      allOf:
+        - $ref: '#/components/schemas/IntegrationEvent'
+        - type: object
+          required:
+            - type
+            - accountId
+            - tagId
+            - tagName
+          properties:
+            type:
+              type: string
+              const: TagUnfollowed
+            accountId:
+              type: string
+            tagId:
+              type: string
+            tagName:
+              type: string
+
+    # Inventory Events
+    ItemAcquired:
+      allOf:
+        - $ref: '#/components/schemas/IntegrationEvent'
+        - type: object
+          required:
+            - type
+            - accountId
+            - itemId
+            - itemType
+            - itemName
+            - quantity
+            - acquisitionMethod
+          properties:
+            type:
+              type: string
+              const: ItemAcquired
+            accountId:
+              type: string
+            itemId:
+              type: string
+            itemType:
+              type: string
+            itemName:
+              type: string
+            quantity:
+              type: integer
+            acquisitionMethod:
+              type: string
+            sourceId:
+              type: string
+              nullable: true
+
+    ItemUsed:
+      allOf:
+        - $ref: '#/components/schemas/IntegrationEvent'
+        - type: object
+          required:
+            - type
+            - accountId
+            - itemId
+            - quantity
+            - remainingQuantity
+          properties:
+            type:
+              type: string
+              const: ItemUsed
+            accountId:
+              type: string
+            itemId:
+              type: string
+            quantity:
+              type: integer
+            contextId:
+              type: string
+              nullable: true
+            remainingQuantity:
+              type: integer
+
+    ItemEquipped:
+      allOf:
+        - $ref: '#/components/schemas/IntegrationEvent'
+        - type: object
+          required:
+            - type
+            - accountId
+            - itemId
+            - slot
+          properties:
+            type:
+              type: string
+              const: ItemEquipped
+            accountId:
+              type: string
+            itemId:
+              type: string
+            slot:
+              type: string
+            previousItemId:
+              type: string
+              nullable: true
+
+    ItemUnequipped:
+      allOf:
+        - $ref: '#/components/schemas/IntegrationEvent'
+        - type: object
+          required:
+            - type
+            - accountId
+            - itemId
+            - slot
+          properties:
+            type:
+              type: string
+              const: ItemUnequipped
+            accountId:
+              type: string
+            itemId:
+              type: string
+            slot:
+              type: string
+
+    CurrencyEarned:
+      allOf:
+        - $ref: '#/components/schemas/IntegrationEvent'
+        - type: object
+          required:
+            - type
+            - accountId
+            - currencyType
+            - amount
+            - source
+            - newBalance
+          properties:
+            type:
+              type: string
+              const: CurrencyEarned
+            accountId:
+              type: string
+            currencyType:
+              type: string
+            amount:
+              type: integer
+            source:
+              type: string
+            newBalance:
+              type: integer
+              format: int64
+
+    CurrencySpent:
+      allOf:
+        - $ref: '#/components/schemas/IntegrationEvent'
+        - type: object
+          required:
+            - type
+            - accountId
+            - currencyType
+            - amount
+            - spentOn
+            - newBalance
+          properties:
+            type:
+              type: string
+              const: CurrencySpent
+            accountId:
+              type: string
+            currencyType:
+              type: string
+            amount:
+              type: integer
+            spentOn:
+              type: string
+            itemId:
+              type: string
+              nullable: true
+            newBalance:
+              type: integer
+              format: int64
+
+    ItemTraded:
+      allOf:
+        - $ref: '#/components/schemas/IntegrationEvent'
+        - type: object
+          required:
+            - type
+            - tradeId
+            - user1AccountId
+            - user2AccountId
+            - user1ItemIds
+            - user2ItemIds
+          properties:
+            type:
+              type: string
+              const: ItemTraded
+            tradeId:
+              type: string
+            user1AccountId:
+              type: string
+            user2AccountId:
+              type: string
+            user1ItemIds:
+              type: array
+              items:
+                type: string
+            user2ItemIds:
+              type: array
+              items:
+                type: string
+
+    DailyRewardClaimed:
+      allOf:
+        - $ref: '#/components/schemas/IntegrationEvent'
+        - type: object
+          required:
+            - type
+            - accountId
+            - streakDay
+            - rewardType
+            - rewardValue
+          properties:
+            type:
+              type: string
+              const: DailyRewardClaimed
+            accountId:
+              type: string
+            streakDay:
+              type: integer
+            rewardType:
+              type: string
+            rewardValue:
+              type: string
+            streakBonusApplied:
+              type: boolean
+              default: false
+
+    # Preference Events
+    PreferencesUpdated:
+      allOf:
+        - $ref: '#/components/schemas/IntegrationEvent'
+        - type: object
+          required:
+            - type
+            - accountId
+            - category
+            - key
+            - newValue
+          properties:
+            type:
+              type: string
+              const: PreferencesUpdated
+            accountId:
+              type: string
+            category:
+              type: string
+            key:
+              type: string
+            newValue:
+              type: string
+            previousValue:
+              type: string
+              nullable: true
+
+    ThemeChanged:
+      allOf:
+        - $ref: '#/components/schemas/IntegrationEvent'
+        - type: object
+          required:
+            - type
+            - accountId
+            - fromTheme
+            - toTheme
+          properties:
+            type:
+              type: string
+              const: ThemeChanged
+            accountId:
+              type: string
+            fromTheme:
+              type: string
+            toTheme:
+              type: string
+
+    LanguageChanged:
+      allOf:
+        - $ref: '#/components/schemas/IntegrationEvent'
+        - type: object
+          required:
+            - type
+            - accountId
+            - fromLanguage
+            - toLanguage
+          properties:
+            type:
+              type: string
+              const: LanguageChanged
+            accountId:
+              type: string
+            fromLanguage:
+              type: string
+            toLanguage:
+              type: string
+
+    AccessibilitySettingChanged:
+      allOf:
+        - $ref: '#/components/schemas/IntegrationEvent'
+        - type: object
+          required:
+            - type
+            - accountId
+            - setting
+            - enabled
+          properties:
+            type:
+              type: string
+              const: AccessibilitySettingChanged
+            accountId:
+              type: string
+            setting:
+              type: string
+            enabled:
+              type: boolean
+            value:
+              type: string
+              nullable: true
+
+    PrivacySettingChanged:
+      allOf:
+        - $ref: '#/components/schemas/IntegrationEvent'
+        - type: object
+          required:
+            - type
+            - accountId
+            - setting
+            - newValue
+          properties:
+            type:
+              type: string
+              const: PrivacySettingChanged
+            accountId:
+              type: string
+            setting:
+              type: string
+            newValue:
+              type: string
+
+    NotificationPreferenceChanged:
+      allOf:
+        - $ref: '#/components/schemas/IntegrationEvent'
+        - type: object
+          required:
+            - type
+            - accountId
+            - channel
+            - category
+            - enabled
+          properties:
+            type:
+              type: string
+              const: NotificationPreferenceChanged
+            accountId:
+              type: string
+            channel:
+              type: string
+            category:
+              type: string
+            enabled:
+              type: boolean
+
+    ContentPreferenceUpdated:
+      allOf:
+        - $ref: '#/components/schemas/IntegrationEvent'
+        - type: object
+          required:
+            - type
+            - accountId
+            - preferenceType
+            - values
+          properties:
+            type:
+              type: string
+              const: ContentPreferenceUpdated
+            accountId:
+              type: string
+            preferenceType:
+              type: string
+            values:
+              type: array
+              items:
+                type: string
+
+    ParentalControlsUpdated:
+      allOf:
+        - $ref: '#/components/schemas/IntegrationEvent'
+        - type: object
+          required:
+            - type
+            - parentAccountId
+            - controlType
+            - restrictionValue
+          properties:
+            type:
+              type: string
+              const: ParentalControlsUpdated
+            parentAccountId:
+              type: string
+            childAccountId:
+              type: string
+              nullable: true
+            controlType:
+              type: string
+            restrictionValue:
+              type: string
+
+    # Union type for all events (118 total across 20 categories)
     MystiraEvent:
       oneOf:
-        # Account Events
+        # Account Events (3)
         - $ref: '#/components/schemas/AccountCreated'
         - $ref: '#/components/schemas/AccountUpdated'
         - $ref: '#/components/schemas/AccountDeleted'
-        # Session Events
+        # Session Events (3)
         - $ref: '#/components/schemas/SessionStarted'
         - $ref: '#/components/schemas/SessionCompleted'
         - $ref: '#/components/schemas/SessionAbandoned'
-        # Content Events
+        # Content Events (5)
         - $ref: '#/components/schemas/ScenarioCreated'
         - $ref: '#/components/schemas/ScenarioUpdated'
         - $ref: '#/components/schemas/ScenarioPublished'
         - $ref: '#/components/schemas/ScenarioUnpublished'
         - $ref: '#/components/schemas/MediaUploaded'
-        # Cache Events
+        # Cache Events (2)
         - $ref: '#/components/schemas/CacheInvalidated'
         - $ref: '#/components/schemas/CacheWarmupRequested'
-        # AI Events
+        # AI Events (3)
         - $ref: '#/components/schemas/StoryGenerationRequested'
         - $ref: '#/components/schemas/StoryGenerationCompleted'
         - $ref: '#/components/schemas/StoryGenerationFailed'
-        # User Events
+        # User Events (4)
         - $ref: '#/components/schemas/UserLoggedIn'
         - $ref: '#/components/schemas/UserLoggedOut'
         - $ref: '#/components/schemas/PasswordResetRequested'
         - $ref: '#/components/schemas/PasswordChanged'
-        # Notification Events
+        # Notification Events (3)
         - $ref: '#/components/schemas/NotificationSent'
         - $ref: '#/components/schemas/EmailSent'
         - $ref: '#/components/schemas/NotificationFailed'
-        # Progression Events
+        # Progression Events (6)
         - $ref: '#/components/schemas/ChoiceMade'
         - $ref: '#/components/schemas/ChapterStarted'
         - $ref: '#/components/schemas/ChapterCompleted'
         - $ref: '#/components/schemas/CheckpointReached'
         - $ref: '#/components/schemas/StoryBranchTaken'
         - $ref: '#/components/schemas/ProgressSaved'
-        # Gamification Events
+        # Gamification Events (6)
         - $ref: '#/components/schemas/AchievementUnlocked'
         - $ref: '#/components/schemas/BadgeEarned'
         - $ref: '#/components/schemas/XPEarned'
         - $ref: '#/components/schemas/LevelUp'
         - $ref: '#/components/schemas/StreakUpdated'
         - $ref: '#/components/schemas/LeaderboardUpdated'
-        # Payment Events
+        # Payment Events (7)
         - $ref: '#/components/schemas/SubscriptionStarted'
         - $ref: '#/components/schemas/SubscriptionRenewed'
         - $ref: '#/components/schemas/SubscriptionCancelled'
@@ -1643,7 +3106,7 @@ components:
         - $ref: '#/components/schemas/PaymentFailed'
         - $ref: '#/components/schemas/RefundProcessed'
         - $ref: '#/components/schemas/PremiumContentUnlocked'
-        # Social Events
+        # Social Events (9)
         - $ref: '#/components/schemas/ScenarioRated'
         - $ref: '#/components/schemas/ScenarioReviewed'
         - $ref: '#/components/schemas/ScenarioShared'
@@ -1653,7 +3116,7 @@ components:
         - $ref: '#/components/schemas/CommentDeleted'
         - $ref: '#/components/schemas/ContentLiked'
         - $ref: '#/components/schemas/ContentUnliked'
-        # Moderation Events
+        # Moderation Events (7)
         - $ref: '#/components/schemas/ContentReported'
         - $ref: '#/components/schemas/ContentModerated'
         - $ref: '#/components/schemas/UserWarned'
@@ -1661,6 +3124,74 @@ components:
         - $ref: '#/components/schemas/UserBanned'
         - $ref: '#/components/schemas/AppealSubmitted'
         - $ref: '#/components/schemas/AppealResolved'
+        # Onboarding Events (8)
+        - $ref: '#/components/schemas/EmailVerified'
+        - $ref: '#/components/schemas/OnboardingStarted'
+        - $ref: '#/components/schemas/OnboardingStepCompleted'
+        - $ref: '#/components/schemas/OnboardingCompleted'
+        - $ref: '#/components/schemas/OnboardingSkipped'
+        - $ref: '#/components/schemas/ProfileCompleted'
+        - $ref: '#/components/schemas/ReferralSignup'
+        - $ref: '#/components/schemas/ReferralRewardGranted'
+        # Bundle Events (5)
+        - $ref: '#/components/schemas/BundleCreated'
+        - $ref: '#/components/schemas/BundlePurchased'
+        - $ref: '#/components/schemas/BundleActivated'
+        - $ref: '#/components/schemas/BundleGifted'
+        - $ref: '#/components/schemas/PromoCodeRedeemed'
+        # Co-op/Partner Events (8)
+        - $ref: '#/components/schemas/PartnerInviteSent'
+        - $ref: '#/components/schemas/PartnerInviteAccepted'
+        - $ref: '#/components/schemas/PartnerInviteDeclined'
+        - $ref: '#/components/schemas/CoopSessionStarted'
+        - $ref: '#/components/schemas/PartnerJoinedSession'
+        - $ref: '#/components/schemas/PartnerLeftSession'
+        - $ref: '#/components/schemas/CoopSessionEnded'
+        - $ref: '#/components/schemas/TurnPassed'
+        # Chat/Messaging Events (8)
+        - $ref: '#/components/schemas/ConversationStarted'
+        - $ref: '#/components/schemas/MessageSent'
+        - $ref: '#/components/schemas/MessageDelivered'
+        - $ref: '#/components/schemas/MessageRead'
+        - $ref: '#/components/schemas/MessageDeleted'
+        - $ref: '#/components/schemas/TypingStarted'
+        - $ref: '#/components/schemas/ConversationArchived'
+        - $ref: '#/components/schemas/UserMutedInConversation'
+        # Device/Sync Events (7)
+        - $ref: '#/components/schemas/DeviceRegistered'
+        - $ref: '#/components/schemas/DeviceRemoved'
+        - $ref: '#/components/schemas/SessionSynced'
+        - $ref: '#/components/schemas/SyncConflictDetected'
+        - $ref: '#/components/schemas/DeviceHandoffStarted'
+        - $ref: '#/components/schemas/DeviceHandoffCompleted'
+        - $ref: '#/components/schemas/PushSettingsUpdated'
+        # Discovery/Recommendation Events (8)
+        - $ref: '#/components/schemas/SearchPerformed'
+        - $ref: '#/components/schemas/SearchResultClicked'
+        - $ref: '#/components/schemas/RecommendationShown'
+        - $ref: '#/components/schemas/RecommendationClicked'
+        - $ref: '#/components/schemas/RecommendationDismissed'
+        - $ref: '#/components/schemas/ContentFeatured'
+        - $ref: '#/components/schemas/TagFollowed'
+        - $ref: '#/components/schemas/TagUnfollowed'
+        # Inventory Events (8)
+        - $ref: '#/components/schemas/ItemAcquired'
+        - $ref: '#/components/schemas/ItemUsed'
+        - $ref: '#/components/schemas/ItemEquipped'
+        - $ref: '#/components/schemas/ItemUnequipped'
+        - $ref: '#/components/schemas/CurrencyEarned'
+        - $ref: '#/components/schemas/CurrencySpent'
+        - $ref: '#/components/schemas/ItemTraded'
+        - $ref: '#/components/schemas/DailyRewardClaimed'
+        # Preference Events (8)
+        - $ref: '#/components/schemas/PreferencesUpdated'
+        - $ref: '#/components/schemas/ThemeChanged'
+        - $ref: '#/components/schemas/LanguageChanged'
+        - $ref: '#/components/schemas/AccessibilitySettingChanged'
+        - $ref: '#/components/schemas/PrivacySettingChanged'
+        - $ref: '#/components/schemas/NotificationPreferenceChanged'
+        - $ref: '#/components/schemas/ContentPreferenceUpdated'
+        - $ref: '#/components/schemas/ParentalControlsUpdated'
       discriminator:
         propertyName: type
         mapping:
@@ -1734,3 +3265,71 @@ components:
           UserBanned: '#/components/schemas/UserBanned'
           AppealSubmitted: '#/components/schemas/AppealSubmitted'
           AppealResolved: '#/components/schemas/AppealResolved'
+          # Onboarding Events
+          EmailVerified: '#/components/schemas/EmailVerified'
+          OnboardingStarted: '#/components/schemas/OnboardingStarted'
+          OnboardingStepCompleted: '#/components/schemas/OnboardingStepCompleted'
+          OnboardingCompleted: '#/components/schemas/OnboardingCompleted'
+          OnboardingSkipped: '#/components/schemas/OnboardingSkipped'
+          ProfileCompleted: '#/components/schemas/ProfileCompleted'
+          ReferralSignup: '#/components/schemas/ReferralSignup'
+          ReferralRewardGranted: '#/components/schemas/ReferralRewardGranted'
+          # Bundle Events
+          BundleCreated: '#/components/schemas/BundleCreated'
+          BundlePurchased: '#/components/schemas/BundlePurchased'
+          BundleActivated: '#/components/schemas/BundleActivated'
+          BundleGifted: '#/components/schemas/BundleGifted'
+          PromoCodeRedeemed: '#/components/schemas/PromoCodeRedeemed'
+          # Co-op/Partner Events
+          PartnerInviteSent: '#/components/schemas/PartnerInviteSent'
+          PartnerInviteAccepted: '#/components/schemas/PartnerInviteAccepted'
+          PartnerInviteDeclined: '#/components/schemas/PartnerInviteDeclined'
+          CoopSessionStarted: '#/components/schemas/CoopSessionStarted'
+          PartnerJoinedSession: '#/components/schemas/PartnerJoinedSession'
+          PartnerLeftSession: '#/components/schemas/PartnerLeftSession'
+          CoopSessionEnded: '#/components/schemas/CoopSessionEnded'
+          TurnPassed: '#/components/schemas/TurnPassed'
+          # Chat/Messaging Events
+          ConversationStarted: '#/components/schemas/ConversationStarted'
+          MessageSent: '#/components/schemas/MessageSent'
+          MessageDelivered: '#/components/schemas/MessageDelivered'
+          MessageRead: '#/components/schemas/MessageRead'
+          MessageDeleted: '#/components/schemas/MessageDeleted'
+          TypingStarted: '#/components/schemas/TypingStarted'
+          ConversationArchived: '#/components/schemas/ConversationArchived'
+          UserMutedInConversation: '#/components/schemas/UserMutedInConversation'
+          # Device/Sync Events
+          DeviceRegistered: '#/components/schemas/DeviceRegistered'
+          DeviceRemoved: '#/components/schemas/DeviceRemoved'
+          SessionSynced: '#/components/schemas/SessionSynced'
+          SyncConflictDetected: '#/components/schemas/SyncConflictDetected'
+          DeviceHandoffStarted: '#/components/schemas/DeviceHandoffStarted'
+          DeviceHandoffCompleted: '#/components/schemas/DeviceHandoffCompleted'
+          PushSettingsUpdated: '#/components/schemas/PushSettingsUpdated'
+          # Discovery/Recommendation Events
+          SearchPerformed: '#/components/schemas/SearchPerformed'
+          SearchResultClicked: '#/components/schemas/SearchResultClicked'
+          RecommendationShown: '#/components/schemas/RecommendationShown'
+          RecommendationClicked: '#/components/schemas/RecommendationClicked'
+          RecommendationDismissed: '#/components/schemas/RecommendationDismissed'
+          ContentFeatured: '#/components/schemas/ContentFeatured'
+          TagFollowed: '#/components/schemas/TagFollowed'
+          TagUnfollowed: '#/components/schemas/TagUnfollowed'
+          # Inventory Events
+          ItemAcquired: '#/components/schemas/ItemAcquired'
+          ItemUsed: '#/components/schemas/ItemUsed'
+          ItemEquipped: '#/components/schemas/ItemEquipped'
+          ItemUnequipped: '#/components/schemas/ItemUnequipped'
+          CurrencyEarned: '#/components/schemas/CurrencyEarned'
+          CurrencySpent: '#/components/schemas/CurrencySpent'
+          ItemTraded: '#/components/schemas/ItemTraded'
+          DailyRewardClaimed: '#/components/schemas/DailyRewardClaimed'
+          # Preference Events
+          PreferencesUpdated: '#/components/schemas/PreferencesUpdated'
+          ThemeChanged: '#/components/schemas/ThemeChanged'
+          LanguageChanged: '#/components/schemas/LanguageChanged'
+          AccessibilitySettingChanged: '#/components/schemas/AccessibilitySettingChanged'
+          PrivacySettingChanged: '#/components/schemas/PrivacySettingChanged'
+          NotificationPreferenceChanged: '#/components/schemas/NotificationPreferenceChanged'
+          ContentPreferenceUpdated: '#/components/schemas/ContentPreferenceUpdated'
+          ParentalControlsUpdated: '#/components/schemas/ParentalControlsUpdated'

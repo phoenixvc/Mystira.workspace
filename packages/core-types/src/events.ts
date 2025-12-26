@@ -760,6 +760,716 @@ export interface AppealResolved extends IntegrationEvent {
 }
 
 // =============================================================================
+// Onboarding Events
+// =============================================================================
+
+/**
+ * Published when a user's email is verified.
+ */
+export interface EmailVerified extends IntegrationEvent {
+  type: 'EmailVerified';
+  accountId: string;
+  email: string;
+  verificationMethod: string;
+}
+
+/**
+ * Published when onboarding flow begins.
+ */
+export interface OnboardingStarted extends IntegrationEvent {
+  type: 'OnboardingStarted';
+  accountId: string;
+  onboardingVersion: string;
+  source?: string;
+}
+
+/**
+ * Published when an onboarding step is completed.
+ */
+export interface OnboardingStepCompleted extends IntegrationEvent {
+  type: 'OnboardingStepCompleted';
+  accountId: string;
+  stepId: string;
+  stepName: string;
+  stepNumber: number;
+  totalSteps: number;
+  skipped: boolean;
+}
+
+/**
+ * Published when full onboarding is completed.
+ */
+export interface OnboardingCompleted extends IntegrationEvent {
+  type: 'OnboardingCompleted';
+  accountId: string;
+  durationSeconds: number;
+  stepsCompleted: number;
+  stepsSkipped: number;
+}
+
+/**
+ * Published when onboarding is entirely skipped.
+ */
+export interface OnboardingSkipped extends IntegrationEvent {
+  type: 'OnboardingSkipped';
+  accountId: string;
+  atStep: number;
+}
+
+/**
+ * Published when profile setup is completed.
+ */
+export interface ProfileCompleted extends IntegrationEvent {
+  type: 'ProfileCompleted';
+  accountId: string;
+  displayNameSet: boolean;
+  avatarSet: boolean;
+  preferencesSet: boolean;
+}
+
+/**
+ * Published when a user signs up via referral.
+ */
+export interface ReferralSignup extends IntegrationEvent {
+  type: 'ReferralSignup';
+  accountId: string;
+  referrerAccountId: string;
+  referralCode: string;
+  campaign?: string;
+}
+
+/**
+ * Published when referral reward is granted.
+ */
+export interface ReferralRewardGranted extends IntegrationEvent {
+  type: 'ReferralRewardGranted';
+  accountId: string;
+  referredAccountId: string;
+  rewardType: string;
+  rewardValue: string;
+}
+
+// =============================================================================
+// Bundle Events
+// =============================================================================
+
+/**
+ * Published when a content bundle is created.
+ */
+export interface BundleCreated extends IntegrationEvent {
+  type: 'BundleCreated';
+  bundleId: string;
+  bundleName: string;
+  creatorId: string;
+  itemCount: number;
+  priceCents?: number;
+  currency?: string;
+}
+
+/**
+ * Published when a bundle is purchased.
+ */
+export interface BundlePurchased extends IntegrationEvent {
+  type: 'BundlePurchased';
+  accountId: string;
+  bundleId: string;
+  paymentId: string;
+  priceCents: number;
+  currency: string;
+  discountApplied: boolean;
+}
+
+/**
+ * Published when a bundle is activated.
+ */
+export interface BundleActivated extends IntegrationEvent {
+  type: 'BundleActivated';
+  accountId: string;
+  bundleId: string;
+  itemsUnlocked: string[];
+}
+
+/**
+ * Published when a bundle is gifted.
+ */
+export interface BundleGifted extends IntegrationEvent {
+  type: 'BundleGifted';
+  senderAccountId: string;
+  recipientAccountId: string;
+  bundleId: string;
+  giftMessage?: string;
+}
+
+/**
+ * Published when a promo code is redeemed.
+ */
+export interface PromoCodeRedeemed extends IntegrationEvent {
+  type: 'PromoCodeRedeemed';
+  accountId: string;
+  promoCode: string;
+  discountType: string;
+  discountValue: number;
+  appliedTo?: string;
+}
+
+// =============================================================================
+// Co-op/Partner Events
+// =============================================================================
+
+/**
+ * Published when a partner invite is sent.
+ */
+export interface PartnerInviteSent extends IntegrationEvent {
+  type: 'PartnerInviteSent';
+  inviteId: string;
+  senderAccountId: string;
+  recipientAccountId: string;
+  scenarioId?: string;
+  expiresAt: string;
+}
+
+/**
+ * Published when a partner invite is accepted.
+ */
+export interface PartnerInviteAccepted extends IntegrationEvent {
+  type: 'PartnerInviteAccepted';
+  inviteId: string;
+  senderAccountId: string;
+  recipientAccountId: string;
+  scenarioId?: string;
+}
+
+/**
+ * Published when a partner invite is declined.
+ */
+export interface PartnerInviteDeclined extends IntegrationEvent {
+  type: 'PartnerInviteDeclined';
+  inviteId: string;
+  senderAccountId: string;
+  recipientAccountId: string;
+  reason?: string;
+}
+
+/**
+ * Published when a co-op session is started.
+ */
+export interface CoopSessionStarted extends IntegrationEvent {
+  type: 'CoopSessionStarted';
+  coopSessionId: string;
+  hostAccountId: string;
+  scenarioId: string;
+  maxPartners: number;
+}
+
+/**
+ * Published when a partner joins a session.
+ */
+export interface PartnerJoinedSession extends IntegrationEvent {
+  type: 'PartnerJoinedSession';
+  coopSessionId: string;
+  partnerAccountId: string;
+  joinMethod: string;
+  currentPartnerCount: number;
+}
+
+/**
+ * Published when a partner leaves a session.
+ */
+export interface PartnerLeftSession extends IntegrationEvent {
+  type: 'PartnerLeftSession';
+  coopSessionId: string;
+  partnerAccountId: string;
+  reason: string;
+  remainingPartners: number;
+}
+
+/**
+ * Published when a co-op session ends.
+ */
+export interface CoopSessionEnded extends IntegrationEvent {
+  type: 'CoopSessionEnded';
+  coopSessionId: string;
+  hostAccountId: string;
+  durationSeconds: number;
+  participantCount: number;
+  endReason: string;
+}
+
+/**
+ * Published when a turn is passed in co-op.
+ */
+export interface TurnPassed extends IntegrationEvent {
+  type: 'TurnPassed';
+  coopSessionId: string;
+  fromAccountId: string;
+  toAccountId: string;
+  turnNumber: number;
+}
+
+// =============================================================================
+// Chat/Messaging Events
+// =============================================================================
+
+/**
+ * Published when a conversation is started.
+ */
+export interface ConversationStarted extends IntegrationEvent {
+  type: 'ConversationStarted';
+  conversationId: string;
+  initiatorAccountId: string;
+  participantIds: string[];
+  conversationType: string;
+  contextId?: string;
+}
+
+/**
+ * Published when a message is sent.
+ */
+export interface MessageSent extends IntegrationEvent {
+  type: 'MessageSent';
+  messageId: string;
+  conversationId: string;
+  senderAccountId: string;
+  messageType: string;
+  contentLength: number;
+  hasAttachments: boolean;
+}
+
+/**
+ * Published when a message is delivered.
+ */
+export interface MessageDelivered extends IntegrationEvent {
+  type: 'MessageDelivered';
+  messageId: string;
+  conversationId: string;
+  recipientAccountId: string;
+  deliveryLatencyMs: number;
+}
+
+/**
+ * Published when a message is read.
+ */
+export interface MessageRead extends IntegrationEvent {
+  type: 'MessageRead';
+  messageId: string;
+  conversationId: string;
+  readerAccountId: string;
+  readDelaySeconds: number;
+}
+
+/**
+ * Published when a message is deleted.
+ */
+export interface MessageDeleted extends IntegrationEvent {
+  type: 'MessageDeleted';
+  messageId: string;
+  conversationId: string;
+  deletedByAccountId: string;
+  deletedForEveryone: boolean;
+}
+
+/**
+ * Published when user starts typing.
+ */
+export interface TypingStarted extends IntegrationEvent {
+  type: 'TypingStarted';
+  conversationId: string;
+  accountId: string;
+}
+
+/**
+ * Published when a conversation is archived.
+ */
+export interface ConversationArchived extends IntegrationEvent {
+  type: 'ConversationArchived';
+  conversationId: string;
+  archivedByAccountId: string;
+}
+
+/**
+ * Published when a user is muted in a conversation.
+ */
+export interface UserMutedInConversation extends IntegrationEvent {
+  type: 'UserMutedInConversation';
+  conversationId: string;
+  mutedAccountId: string;
+  mutedByAccountId: string;
+  durationMinutes?: number;
+}
+
+// =============================================================================
+// Device/Sync Events
+// =============================================================================
+
+/**
+ * Published when a device is registered.
+ */
+export interface DeviceRegistered extends IntegrationEvent {
+  type: 'DeviceRegistered';
+  accountId: string;
+  deviceId: string;
+  deviceType: string;
+  deviceName: string;
+  osVersion?: string;
+  appVersion: string;
+}
+
+/**
+ * Published when a device is removed.
+ */
+export interface DeviceRemoved extends IntegrationEvent {
+  type: 'DeviceRemoved';
+  accountId: string;
+  deviceId: string;
+  removedBy: string;
+  reason: string;
+}
+
+/**
+ * Published when a session is synced across devices.
+ */
+export interface SessionSynced extends IntegrationEvent {
+  type: 'SessionSynced';
+  accountId: string;
+  sessionId: string;
+  fromDeviceId: string;
+  toDeviceId: string;
+  dataSize: number;
+}
+
+/**
+ * Published when a sync conflict is detected.
+ */
+export interface SyncConflictDetected extends IntegrationEvent {
+  type: 'SyncConflictDetected';
+  accountId: string;
+  sessionId: string;
+  device1Id: string;
+  device2Id: string;
+  conflictType: string;
+  resolution: string;
+}
+
+/**
+ * Published when device handoff is initiated.
+ */
+export interface DeviceHandoffStarted extends IntegrationEvent {
+  type: 'DeviceHandoffStarted';
+  accountId: string;
+  sessionId: string;
+  fromDeviceId: string;
+  toDeviceId: string;
+}
+
+/**
+ * Published when device handoff is completed.
+ */
+export interface DeviceHandoffCompleted extends IntegrationEvent {
+  type: 'DeviceHandoffCompleted';
+  accountId: string;
+  sessionId: string;
+  fromDeviceId: string;
+  toDeviceId: string;
+  handoffDurationMs: number;
+  success: boolean;
+}
+
+/**
+ * Published when push notification settings are updated.
+ */
+export interface PushSettingsUpdated extends IntegrationEvent {
+  type: 'PushSettingsUpdated';
+  accountId: string;
+  deviceId: string;
+  pushEnabled: boolean;
+  categories?: string[];
+}
+
+// =============================================================================
+// Discovery/Recommendation Events
+// =============================================================================
+
+/**
+ * Published when a search is performed.
+ */
+export interface SearchPerformed extends IntegrationEvent {
+  type: 'SearchPerformed';
+  accountId?: string;
+  searchId: string;
+  query: string;
+  filters?: Record<string, string>;
+  resultCount: number;
+  searchType: string;
+}
+
+/**
+ * Published when a search result is clicked.
+ */
+export interface SearchResultClicked extends IntegrationEvent {
+  type: 'SearchResultClicked';
+  accountId: string;
+  searchId: string;
+  resultId: string;
+  resultType: string;
+  position: number;
+}
+
+/**
+ * Published when a recommendation is shown.
+ */
+export interface RecommendationShown extends IntegrationEvent {
+  type: 'RecommendationShown';
+  accountId: string;
+  recommendationId: string;
+  itemIds: string[];
+  algorithm: string;
+  context: string;
+}
+
+/**
+ * Published when a recommendation is clicked.
+ */
+export interface RecommendationClicked extends IntegrationEvent {
+  type: 'RecommendationClicked';
+  accountId: string;
+  recommendationId: string;
+  itemId: string;
+  position: number;
+}
+
+/**
+ * Published when a recommendation is dismissed.
+ */
+export interface RecommendationDismissed extends IntegrationEvent {
+  type: 'RecommendationDismissed';
+  accountId: string;
+  recommendationId: string;
+  itemId?: string;
+  reason?: string;
+}
+
+/**
+ * Published when content is featured.
+ */
+export interface ContentFeatured extends IntegrationEvent {
+  type: 'ContentFeatured';
+  contentId: string;
+  contentType: string;
+  featuredBy: string;
+  featuredUntil?: string;
+  placement: string;
+}
+
+/**
+ * Published when a tag is followed.
+ */
+export interface TagFollowed extends IntegrationEvent {
+  type: 'TagFollowed';
+  accountId: string;
+  tagId: string;
+  tagName: string;
+}
+
+/**
+ * Published when a tag is unfollowed.
+ */
+export interface TagUnfollowed extends IntegrationEvent {
+  type: 'TagUnfollowed';
+  accountId: string;
+  tagId: string;
+  tagName: string;
+}
+
+// =============================================================================
+// Inventory Events
+// =============================================================================
+
+/**
+ * Published when an item is acquired.
+ */
+export interface ItemAcquired extends IntegrationEvent {
+  type: 'ItemAcquired';
+  accountId: string;
+  itemId: string;
+  itemType: string;
+  itemName: string;
+  quantity: number;
+  acquisitionMethod: string;
+  sourceId?: string;
+}
+
+/**
+ * Published when an item is used/consumed.
+ */
+export interface ItemUsed extends IntegrationEvent {
+  type: 'ItemUsed';
+  accountId: string;
+  itemId: string;
+  quantity: number;
+  contextId?: string;
+  remainingQuantity: number;
+}
+
+/**
+ * Published when a cosmetic item is equipped.
+ */
+export interface ItemEquipped extends IntegrationEvent {
+  type: 'ItemEquipped';
+  accountId: string;
+  itemId: string;
+  slot: string;
+  previousItemId?: string;
+}
+
+/**
+ * Published when an item is unequipped.
+ */
+export interface ItemUnequipped extends IntegrationEvent {
+  type: 'ItemUnequipped';
+  accountId: string;
+  itemId: string;
+  slot: string;
+}
+
+/**
+ * Published when virtual currency is earned.
+ */
+export interface CurrencyEarned extends IntegrationEvent {
+  type: 'CurrencyEarned';
+  accountId: string;
+  currencyType: string;
+  amount: number;
+  source: string;
+  newBalance: number;
+}
+
+/**
+ * Published when virtual currency is spent.
+ */
+export interface CurrencySpent extends IntegrationEvent {
+  type: 'CurrencySpent';
+  accountId: string;
+  currencyType: string;
+  amount: number;
+  spentOn: string;
+  itemId?: string;
+  newBalance: number;
+}
+
+/**
+ * Published when items are traded between users.
+ */
+export interface ItemTraded extends IntegrationEvent {
+  type: 'ItemTraded';
+  tradeId: string;
+  user1AccountId: string;
+  user2AccountId: string;
+  user1ItemIds: string[];
+  user2ItemIds: string[];
+}
+
+/**
+ * Published when daily/login reward is claimed.
+ */
+export interface DailyRewardClaimed extends IntegrationEvent {
+  type: 'DailyRewardClaimed';
+  accountId: string;
+  streakDay: number;
+  rewardType: string;
+  rewardValue: string;
+  streakBonusApplied: boolean;
+}
+
+// =============================================================================
+// Preference Events
+// =============================================================================
+
+/**
+ * Published when user preferences are updated.
+ */
+export interface PreferencesUpdated extends IntegrationEvent {
+  type: 'PreferencesUpdated';
+  accountId: string;
+  category: string;
+  key: string;
+  newValue: string;
+  previousValue?: string;
+}
+
+/**
+ * Published when theme is changed.
+ */
+export interface ThemeChanged extends IntegrationEvent {
+  type: 'ThemeChanged';
+  accountId: string;
+  fromTheme: string;
+  toTheme: string;
+}
+
+/**
+ * Published when language is changed.
+ */
+export interface LanguageChanged extends IntegrationEvent {
+  type: 'LanguageChanged';
+  accountId: string;
+  fromLanguage: string;
+  toLanguage: string;
+}
+
+/**
+ * Published when accessibility settings change.
+ */
+export interface AccessibilitySettingChanged extends IntegrationEvent {
+  type: 'AccessibilitySettingChanged';
+  accountId: string;
+  setting: string;
+  enabled: boolean;
+  value?: string;
+}
+
+/**
+ * Published when privacy settings change.
+ */
+export interface PrivacySettingChanged extends IntegrationEvent {
+  type: 'PrivacySettingChanged';
+  accountId: string;
+  setting: string;
+  newValue: string;
+}
+
+/**
+ * Published when notification preferences change.
+ */
+export interface NotificationPreferenceChanged extends IntegrationEvent {
+  type: 'NotificationPreferenceChanged';
+  accountId: string;
+  channel: string;
+  category: string;
+  enabled: boolean;
+}
+
+/**
+ * Published when content preferences change.
+ */
+export interface ContentPreferenceUpdated extends IntegrationEvent {
+  type: 'ContentPreferenceUpdated';
+  accountId: string;
+  preferenceType: string;
+  values: string[];
+}
+
+/**
+ * Published when parental controls are updated.
+ */
+export interface ParentalControlsUpdated extends IntegrationEvent {
+  type: 'ParentalControlsUpdated';
+  parentAccountId: string;
+  childAccountId?: string;
+  controlType: string;
+  restrictionValue: string;
+}
+
+// =============================================================================
 // Union Types
 // =============================================================================
 
@@ -864,7 +1574,107 @@ export type ModerationEvent =
   | AppealResolved;
 
 /**
- * All Mystira domain events.
+ * All onboarding-related events.
+ */
+export type OnboardingEvent =
+  | EmailVerified
+  | OnboardingStarted
+  | OnboardingStepCompleted
+  | OnboardingCompleted
+  | OnboardingSkipped
+  | ProfileCompleted
+  | ReferralSignup
+  | ReferralRewardGranted;
+
+/**
+ * All bundle-related events.
+ */
+export type BundleEvent =
+  | BundleCreated
+  | BundlePurchased
+  | BundleActivated
+  | BundleGifted
+  | PromoCodeRedeemed;
+
+/**
+ * All co-op/partner-related events.
+ */
+export type CoopEvent =
+  | PartnerInviteSent
+  | PartnerInviteAccepted
+  | PartnerInviteDeclined
+  | CoopSessionStarted
+  | PartnerJoinedSession
+  | PartnerLeftSession
+  | CoopSessionEnded
+  | TurnPassed;
+
+/**
+ * All chat/messaging-related events.
+ */
+export type ChatEvent =
+  | ConversationStarted
+  | MessageSent
+  | MessageDelivered
+  | MessageRead
+  | MessageDeleted
+  | TypingStarted
+  | ConversationArchived
+  | UserMutedInConversation;
+
+/**
+ * All device/sync-related events.
+ */
+export type DeviceEvent =
+  | DeviceRegistered
+  | DeviceRemoved
+  | SessionSynced
+  | SyncConflictDetected
+  | DeviceHandoffStarted
+  | DeviceHandoffCompleted
+  | PushSettingsUpdated;
+
+/**
+ * All discovery/recommendation-related events.
+ */
+export type DiscoveryEvent =
+  | SearchPerformed
+  | SearchResultClicked
+  | RecommendationShown
+  | RecommendationClicked
+  | RecommendationDismissed
+  | ContentFeatured
+  | TagFollowed
+  | TagUnfollowed;
+
+/**
+ * All inventory-related events.
+ */
+export type InventoryEvent =
+  | ItemAcquired
+  | ItemUsed
+  | ItemEquipped
+  | ItemUnequipped
+  | CurrencyEarned
+  | CurrencySpent
+  | ItemTraded
+  | DailyRewardClaimed;
+
+/**
+ * All preference-related events.
+ */
+export type PreferenceEvent =
+  | PreferencesUpdated
+  | ThemeChanged
+  | LanguageChanged
+  | AccessibilitySettingChanged
+  | PrivacySettingChanged
+  | NotificationPreferenceChanged
+  | ContentPreferenceUpdated
+  | ParentalControlsUpdated;
+
+/**
+ * All Mystira domain events (118 total across 20 categories).
  */
 export type MystiraEvent =
   | AccountEvent
@@ -878,7 +1688,15 @@ export type MystiraEvent =
   | GamificationEvent
   | PaymentEvent
   | SocialEvent
-  | ModerationEvent;
+  | ModerationEvent
+  | OnboardingEvent
+  | BundleEvent
+  | CoopEvent
+  | ChatEvent
+  | DeviceEvent
+  | DiscoveryEvent
+  | InventoryEvent
+  | PreferenceEvent;
 
 /**
  * Event type discriminator values.
