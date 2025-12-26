@@ -12,26 +12,79 @@ namespace Mystira.Shared.Telemetry;
 public interface IBusinessMetrics
 {
     // Session metrics
+    /// <summary>Tracks when a new session is started.</summary>
+    /// <param name="scenarioId">The scenario identifier.</param>
+    /// <param name="accountId">Optional account identifier.</param>
     void TrackSessionStarted(string scenarioId, string? accountId = null);
+    
+    /// <summary>Tracks when a session is completed successfully.</summary>
+    /// <param name="sessionId">The session identifier.</param>
+    /// <param name="durationSeconds">Duration in seconds.</param>
+    /// <param name="outcome">Optional outcome description.</param>
     void TrackSessionCompleted(string sessionId, int durationSeconds, string? outcome = null);
+    
+    /// <summary>Tracks when a session is abandoned before completion.</summary>
+    /// <param name="sessionId">The session identifier.</param>
+    /// <param name="durationSeconds">Duration in seconds before abandonment.</param>
     void TrackSessionAbandoned(string sessionId, int durationSeconds);
 
     // Cache metrics
+    /// <summary>Tracks a cache hit.</summary>
+    /// <param name="cacheType">Type of cache.</param>
+    /// <param name="key">Cache key.</param>
     void TrackCacheHit(string cacheType, string key);
+    
+    /// <summary>Tracks a cache miss.</summary>
+    /// <param name="cacheType">Type of cache.</param>
+    /// <param name="key">Cache key.</param>
     void TrackCacheMiss(string cacheType, string key);
+    
+    /// <summary>Tracks a cache eviction.</summary>
+    /// <param name="cacheType">Type of cache.</param>
+    /// <param name="key">Cache key.</param>
+    /// <param name="reason">Reason for eviction.</param>
     void TrackCacheEviction(string cacheType, string key, string reason);
+    
+    /// <summary>Tracks cache operation latency.</summary>
+    /// <param name="cacheType">Type of cache.</param>
+    /// <param name="operation">Operation performed.</param>
+    /// <param name="milliseconds">Duration in milliseconds.</param>
     void TrackCacheLatency(string cacheType, string operation, double milliseconds);
 
     // Event processing metrics
+    /// <summary>Tracks when an event is published.</summary>
+    /// <param name="eventType">Type of event.</param>
     void TrackEventPublished(string eventType);
+    
+    /// <summary>Tracks when an event is processed.</summary>
+    /// <param name="eventType">Type of event.</param>
+    /// <param name="processingTimeMs">Processing time in milliseconds.</param>
+    /// <param name="success">Whether processing was successful.</param>
     void TrackEventProcessed(string eventType, double processingTimeMs, bool success);
+    
+    /// <summary>Tracks when event processing fails.</summary>
+    /// <param name="eventType">Type of event.</param>
+    /// <param name="error">Error description.</param>
     void TrackEventFailed(string eventType, string error);
 
     // API metrics
+    /// <summary>Tracks an API call.</summary>
+    /// <param name="endpoint">API endpoint.</param>
+    /// <param name="method">HTTP method.</param>
+    /// <param name="statusCode">HTTP status code.</param>
+    /// <param name="durationMs">Duration in milliseconds.</param>
     void TrackApiCall(string endpoint, string method, int statusCode, double durationMs);
 
     // Custom business metrics
+    /// <summary>Tracks a custom metric.</summary>
+    /// <param name="name">Metric name.</param>
+    /// <param name="value">Metric value.</param>
+    /// <param name="properties">Optional properties.</param>
     void TrackMetric(string name, double value, IDictionary<string, string>? properties = null);
+    
+    /// <summary>Tracks a custom event.</summary>
+    /// <param name="name">Event name.</param>
+    /// <param name="properties">Optional properties.</param>
     void TrackEvent(string name, IDictionary<string, string>? properties = null);
 }
 
@@ -45,6 +98,13 @@ public class BusinessMetrics : IBusinessMetrics
     private readonly string _serviceName;
     private readonly string _environment;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="BusinessMetrics"/> class.
+    /// </summary>
+    /// <param name="telemetryClient">Optional Application Insights telemetry client.</param>
+    /// <param name="logger">Logger instance.</param>
+    /// <param name="serviceName">Name of the service.</param>
+    /// <param name="environment">Environment name.</param>
     public BusinessMetrics(
         TelemetryClient? telemetryClient,
         ILogger<BusinessMetrics> logger,
@@ -59,6 +119,7 @@ public class BusinessMetrics : IBusinessMetrics
 
     #region Session Metrics
 
+    /// <inheritdoc />
     public void TrackSessionStarted(string scenarioId, string? accountId = null)
     {
         var properties = CreateBaseProperties();
@@ -71,6 +132,7 @@ public class BusinessMetrics : IBusinessMetrics
         _logger.LogInformation("Session started for scenario {ScenarioId}", scenarioId);
     }
 
+    /// <inheritdoc />
     public void TrackSessionCompleted(string sessionId, int durationSeconds, string? outcome = null)
     {
         var properties = CreateBaseProperties();
@@ -86,6 +148,7 @@ public class BusinessMetrics : IBusinessMetrics
             sessionId, durationSeconds, outcome ?? "N/A");
     }
 
+    /// <inheritdoc />
     public void TrackSessionAbandoned(string sessionId, int durationSeconds)
     {
         var properties = CreateBaseProperties();
@@ -103,6 +166,7 @@ public class BusinessMetrics : IBusinessMetrics
 
     #region Cache Metrics
 
+    /// <inheritdoc />
     public void TrackCacheHit(string cacheType, string key)
     {
         var properties = CreateBaseProperties();
@@ -112,6 +176,7 @@ public class BusinessMetrics : IBusinessMetrics
         InternalTrackMetric("Cache.HitCount", 1, properties);
     }
 
+    /// <inheritdoc />
     public void TrackCacheMiss(string cacheType, string key)
     {
         var properties = CreateBaseProperties();
@@ -121,6 +186,7 @@ public class BusinessMetrics : IBusinessMetrics
         InternalTrackMetric("Cache.MissCount", 1, properties);
     }
 
+    /// <inheritdoc />
     public void TrackCacheEviction(string cacheType, string key, string reason)
     {
         var properties = CreateBaseProperties();
@@ -132,6 +198,7 @@ public class BusinessMetrics : IBusinessMetrics
         InternalTrackMetric("Cache.EvictionCount", 1, properties);
     }
 
+    /// <inheritdoc />
     public void TrackCacheLatency(string cacheType, string operation, double milliseconds)
     {
         var properties = CreateBaseProperties();
@@ -145,6 +212,7 @@ public class BusinessMetrics : IBusinessMetrics
 
     #region Event Processing Metrics
 
+    /// <inheritdoc />
     public void TrackEventPublished(string eventType)
     {
         var properties = CreateBaseProperties();
@@ -153,6 +221,7 @@ public class BusinessMetrics : IBusinessMetrics
         InternalTrackMetric("Event.PublishedCount", 1, properties);
     }
 
+    /// <inheritdoc />
     public void TrackEventProcessed(string eventType, double processingTimeMs, bool success)
     {
         var properties = CreateBaseProperties();
@@ -168,6 +237,7 @@ public class BusinessMetrics : IBusinessMetrics
         }
     }
 
+    /// <inheritdoc />
     public void TrackEventFailed(string eventType, string error)
     {
         var properties = CreateBaseProperties();
@@ -184,6 +254,7 @@ public class BusinessMetrics : IBusinessMetrics
 
     #region API Metrics
 
+    /// <inheritdoc />
     public void TrackApiCall(string endpoint, string method, int statusCode, double durationMs)
     {
         var properties = CreateBaseProperties();
@@ -205,6 +276,7 @@ public class BusinessMetrics : IBusinessMetrics
 
     #region Custom Metrics
 
+    /// <inheritdoc />
     public void TrackMetric(string name, double value, IDictionary<string, string>? properties = null)
     {
         var mergedProperties = CreateBaseProperties();
@@ -219,6 +291,7 @@ public class BusinessMetrics : IBusinessMetrics
         InternalTrackMetric(name, value, mergedProperties);
     }
 
+    /// <inheritdoc />
     public void TrackEvent(string name, IDictionary<string, string>? properties = null)
     {
         var mergedProperties = CreateBaseProperties();

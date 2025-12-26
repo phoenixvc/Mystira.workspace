@@ -43,6 +43,12 @@ public sealed class RateLimitingMiddleware
     private readonly RateLimitOptions _options;
     private readonly ConcurrentDictionary<string, RateLimitEntry> _entries = new();
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="RateLimitingMiddleware"/> class.
+    /// </summary>
+    /// <param name="next">The next middleware in the pipeline.</param>
+    /// <param name="logger">Logger instance.</param>
+    /// <param name="options">Rate limiting options.</param>
     public RateLimitingMiddleware(
         RequestDelegate next,
         ILogger<RateLimitingMiddleware> logger,
@@ -53,6 +59,11 @@ public sealed class RateLimitingMiddleware
         _options = options.Value;
     }
 
+    /// <summary>
+    /// Invokes the middleware to check rate limits and process the request.
+    /// </summary>
+    /// <param name="context">The HTTP context.</param>
+    /// <returns>A task representing the asynchronous operation.</returns>
     public async Task InvokeAsync(HttpContext context)
     {
         var path = context.Request.Path.Value ?? "";
