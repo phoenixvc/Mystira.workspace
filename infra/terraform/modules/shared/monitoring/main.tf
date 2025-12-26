@@ -305,6 +305,207 @@ resource "azurerm_monitor_scheduled_query_rules_alert_v2" "dependency_failures" 
   tags = local.common_tags
 }
 
+# =============================================================================
+# Availability Tests (Synthetic Monitoring)
+# =============================================================================
+
+variable "availability_test_urls" {
+  description = "Map of service name to URL for availability testing"
+  type        = map(string)
+  default     = {}
+}
+
+resource "azurerm_application_insights_standard_web_test" "availability" {
+  for_each = var.availability_test_urls
+
+  name                    = "${local.name_prefix}-avail-${each.key}"
+  resource_group_name     = var.resource_group_name
+  location                = var.location
+  application_insights_id = azurerm_application_insights.shared.id
+  enabled                 = var.environment == "prod"
+  frequency               = 300 # 5 minutes
+  timeout                 = 30
+  retry_enabled           = true
+
+  geo_locations = ["us-tx-sn1-azr", "us-il-ch1-azr", "us-va-ash-azr"]
+
+  request {
+    url = each.value
+  }
+
+  validation_rules {
+    expected_status_code = 200
+  }
+
+  tags = local.common_tags
+}
+
+# Alert for failed availability tests
+resource "azurerm_monitor_metric_alert" "availability_failed" {
+  for_each = var.availability_test_urls
+
+  name                = "${local.name_prefix}-avail-failed-${each.key}"
+  resource_group_name = var.resource_group_name
+  scopes              = [azurerm_application_insights.shared.id]
+  description         = "Alert when ${each.key} availability test fails"
+  severity            = 1
+  enabled             = var.environment == "prod"
+  frequency           = "PT5M"
+  window_size         = "PT15M"
+
+  criteria {
+    metric_namespace = "microsoft.insights/components"
+    metric_name      = "availabilityResults/availabilityPercentage"
+    aggregation      = "Average"
+    operator         = "LessThan"
+    threshold        = 90
+
+    dimension {
+      name     = "availabilityResult/name"
+      operator = "Include"
+      values   = [azurerm_application_insights_standard_web_test.availability[each.key].name]
+    }
+  }
+
+  action {
+    action_group_id = azurerm_monitor_action_group.default.id
+  }
+
+  tags = local.common_tags
+}
+
+# =============================================================================
+# Cache (Redis) Alerts - Optional
+# =============================================================================
+
+variable "redis_cache_id" {
+  description = "Azure Redis Cache resource ID for monitoring"
+  type        = string
+  default     = null
+}
+
+resource "azurerm_monitor_metric_alert" "redis_memory" {
+  count = var.redis_cache_id != null ? 1 : 0
+
+  name                = "${local.name_prefix}-redis-memory"
+  resource_group_name = var.resource_group_name
+  scopes              = [var.redis_cache_id]
+  description         = "Alert when Redis memory usage is high"
+  severity            = 2
+  enabled             = var.environment == "prod"
+  frequency           = "PT5M"
+  window_size         = "PT15M"
+
+  criteria {
+    metric_namespace = "Microsoft.Cache/redis"
+    metric_name      = "usedmemorypercentage"
+    aggregation      = "Average"
+    operator         = "GreaterThan"
+    threshold        = 80
+  }
+
+  action {
+    action_group_id = azurerm_monitor_action_group.default.id
+  }
+
+  tags = local.common_tags
+}
+
+resource "azurerm_monitor_metric_alert" "redis_connections" {
+  count = var.redis_cache_id != null ? 1 : 0
+
+  name                = "${local.name_prefix}-redis-connections"
+  resource_group_name = var.resource_group_name
+  scopes              = [var.redis_cache_id]
+  description         = "Alert when Redis connections are exhausted"
+  severity            = 1
+  enabled             = var.environment == "prod"
+  frequency           = "PT5M"
+  window_size         = "PT15M"
+
+  criteria {
+    metric_namespace = "Microsoft.Cache/redis"
+    metric_name      = "connectedclients"
+    aggregation      = "Maximum"
+    operator         = "GreaterThan"
+    threshold        = 950 # Near 1000 default limit
+  }
+
+  action {
+    action_group_id = azurerm_monitor_action_group.default.id
+  }
+
+  tags = local.common_tags
+}
+
+# =============================================================================
+# Service Bus Alerts - Optional
+# =============================================================================
+
+variable "servicebus_namespace_id" {
+  description = "Azure Service Bus namespace resource ID for monitoring"
+  type        = string
+  default     = null
+}
+
+resource "azurerm_monitor_metric_alert" "servicebus_deadletter" {
+  count = var.servicebus_namespace_id != null ? 1 : 0
+
+  name                = "${local.name_prefix}-sb-deadletter"
+  resource_group_name = var.resource_group_name
+  scopes              = [var.servicebus_namespace_id]
+  description         = "Alert when Service Bus has dead-letter messages"
+  severity            = 2
+  enabled             = var.environment == "prod"
+  frequency           = "PT5M"
+  window_size         = "PT15M"
+
+  criteria {
+    metric_namespace = "Microsoft.ServiceBus/namespaces"
+    metric_name      = "DeadletteredMessages"
+    aggregation      = "Total"
+    operator         = "GreaterThan"
+    threshold        = 10
+  }
+
+  action {
+    action_group_id = azurerm_monitor_action_group.default.id
+  }
+
+  tags = local.common_tags
+}
+
+resource "azurerm_monitor_metric_alert" "servicebus_throttled" {
+  count = var.servicebus_namespace_id != null ? 1 : 0
+
+  name                = "${local.name_prefix}-sb-throttled"
+  resource_group_name = var.resource_group_name
+  scopes              = [var.servicebus_namespace_id]
+  description         = "Alert when Service Bus requests are being throttled"
+  severity            = 2
+  enabled             = var.environment == "prod"
+  frequency           = "PT5M"
+  window_size         = "PT15M"
+
+  criteria {
+    metric_namespace = "Microsoft.ServiceBus/namespaces"
+    metric_name      = "ThrottledRequests"
+    aggregation      = "Total"
+    operator         = "GreaterThan"
+    threshold        = 5
+  }
+
+  action {
+    action_group_id = azurerm_monitor_action_group.default.id
+  }
+
+  tags = local.common_tags
+}
+
+# =============================================================================
+# Outputs
+# =============================================================================
+
 output "log_analytics_workspace_id" {
   description = "Log Analytics Workspace ID"
   value       = azurerm_log_analytics_workspace.shared.id

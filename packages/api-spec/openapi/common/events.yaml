@@ -184,6 +184,28 @@ components:
               type: boolean
               default: false
 
+    ScenarioUpdated:
+      allOf:
+        - $ref: '#/components/schemas/IntegrationEvent'
+        - type: object
+          required:
+            - type
+            - scenarioId
+            - updatedFields
+          properties:
+            type:
+              type: string
+              const: ScenarioUpdated
+            scenarioId:
+              type: string
+            updatedFields:
+              type: array
+              items:
+                type: string
+            version:
+              type: integer
+              nullable: true
+
     ScenarioPublished:
       allOf:
         - $ref: '#/components/schemas/IntegrationEvent'
@@ -203,6 +225,23 @@ components:
               type: string
             authorId:
               type: string
+
+    ScenarioUnpublished:
+      allOf:
+        - $ref: '#/components/schemas/IntegrationEvent'
+        - type: object
+          required:
+            - type
+            - scenarioId
+          properties:
+            type:
+              type: string
+              const: ScenarioUnpublished
+            scenarioId:
+              type: string
+            reason:
+              type: string
+              nullable: true
 
     MediaUploaded:
       allOf:
@@ -253,6 +292,31 @@ components:
             sourceService:
               type: string
 
+    CacheWarmupRequested:
+      allOf:
+        - $ref: '#/components/schemas/IntegrationEvent'
+        - type: object
+          required:
+            - type
+            - entityType
+          properties:
+            type:
+              type: string
+              const: CacheWarmupRequested
+            entityType:
+              type: string
+              description: The entity type to warm
+            entityIds:
+              type: array
+              items:
+                type: string
+              nullable: true
+              description: Specific entity IDs to warm (null = all)
+            priority:
+              type: integer
+              default: 0
+              description: Priority level (higher = more urgent)
+
     # Union type for all events
     MystiraEvent:
       oneOf:
@@ -263,9 +327,12 @@ components:
         - $ref: '#/components/schemas/SessionCompleted'
         - $ref: '#/components/schemas/SessionAbandoned'
         - $ref: '#/components/schemas/ScenarioCreated'
+        - $ref: '#/components/schemas/ScenarioUpdated'
         - $ref: '#/components/schemas/ScenarioPublished'
+        - $ref: '#/components/schemas/ScenarioUnpublished'
         - $ref: '#/components/schemas/MediaUploaded'
         - $ref: '#/components/schemas/CacheInvalidated'
+        - $ref: '#/components/schemas/CacheWarmupRequested'
       discriminator:
         propertyName: type
         mapping:
@@ -276,6 +343,9 @@ components:
           SessionCompleted: '#/components/schemas/SessionCompleted'
           SessionAbandoned: '#/components/schemas/SessionAbandoned'
           ScenarioCreated: '#/components/schemas/ScenarioCreated'
+          ScenarioUpdated: '#/components/schemas/ScenarioUpdated'
           ScenarioPublished: '#/components/schemas/ScenarioPublished'
+          ScenarioUnpublished: '#/components/schemas/ScenarioUnpublished'
           MediaUploaded: '#/components/schemas/MediaUploaded'
           CacheInvalidated: '#/components/schemas/CacheInvalidated'
+          CacheWarmupRequested: '#/components/schemas/CacheWarmupRequested'
