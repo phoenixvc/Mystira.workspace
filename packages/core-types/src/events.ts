@@ -897,6 +897,7 @@ export interface BundleGifted extends IntegrationEvent {
   senderAccountId: string;
   recipientAccountId: string;
   bundleId: string;
+  paymentId: string;
   giftMessage?: string;
 }
 
