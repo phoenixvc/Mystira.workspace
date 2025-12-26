@@ -1,181 +1,173 @@
 # Mystira 2026 Roadmap
 
 **Last Updated**: December 2025
-**Status**: Active
+**Production Go-Live**: January 1, 2026
 **Owner**: jurie@phoenixvc.tech (Technical), eben@phoenixvc.tech (Business)
 
 ---
 
 ## Overview
 
-This is the single source of truth for all Mystira platform development priorities in 2026. It consolidates all planning documents into one clear path forward.
+This is the single source of truth for all Mystira platform development. We go live January 1, 2026.
 
 ---
 
 ## Current Status (December 2025)
 
-### Completed
+### Infrastructure - DONE ✅
 
-- **Infrastructure Foundation**: Azure resources migrated to v2.2 naming convention
-- **ADR-0017**: 3-tier resource group organization implemented
-- **Workload Identity**: All services use Azure managed identity
-- **Microsoft Entra External ID**: Terraform modules ready (replacing B2C)
-- **Azure AI Foundry**: Integrated with gpt-4o and gpt-4o-mini models
-- **API Domain Standardization**: `{env}.{service}.mystira.app` pattern
-- **Distributed CI Model**: Component repos handle dev CI workflows
-- **Mystira.Shared Package**: Published to NuGet (v0.2.0+)
-- **@mystira/core-types**: Published to NPM
+| Component | Status | Details |
+|-----------|--------|---------|
+| Azure Resources v2.2 | ✅ Done | Naming convention migrated |
+| ADR-0017 Resource Groups | ✅ Done | 3-tier organization |
+| Workload Identity | ✅ Done | Managed identity for all services |
+| Microsoft Entra External ID | ✅ Done | Terraform modules (replacing B2C) |
+| Azure AI Foundry | ✅ Done | gpt-4o and gpt-4o-mini integrated |
+| API Domain Pattern | ✅ Done | `{env}.{service}.mystira.app` |
+| Distributed CI Model | ✅ Done | Component repos handle dev CI |
+| Azure Service Bus | ✅ Done | Terraform module in all environments |
+| Service-to-service Auth | ✅ Done | Managed Identity via Terraform |
 
-### In Progress
+### Mystira.Shared Package - DONE ✅
 
-- **Unified Type System (Migration 001)**: OpenAPI specs + code generation
-- **Admin API/UI Extraction**: Phase 3 (70% complete)
-- **Service Migrations**: Adopting Mystira.Shared across all services
+All core infrastructure is implemented in `packages/shared/Mystira.Shared`:
 
----
+| Component | Version | Status |
+|-----------|---------|--------|
+| Polly v8 Resilience | 8.6.5 | ✅ Done |
+| Wolverine + Azure Service Bus | 5.9.2 | ✅ Done |
+| Ardalis.Specification | 9.3.1 | ✅ Done |
+| Redis Caching | 9.0.11 | ✅ Done |
+| Polyglot Repository | - | ✅ Done |
+| Distributed Locking | - | ✅ Done |
+| Source Generators | - | ✅ Done |
+| Entity Framework Core | 9.0.11 | ✅ Done |
 
-## Q1 2026: Core Infrastructure
+### OpenAPI & Type System - IN PROGRESS 🔄
 
-### Priority 1: Complete Unified Type System
-
-| Task | Status | Owner |
-|------|--------|-------|
-| Migrate existing ErrorResponse types | Pending | TBD |
-| Update consuming services to use core-types | Pending | TBD |
-| CI/CD for OpenAPI spec validation | Done | - |
-| Publish Mystira.Core NuGet package | Done | - |
-
-### Priority 2: Polyglot Persistence (ADR-0014)
-
-Implement hybrid data strategy for Cosmos DB to PostgreSQL migration.
-
-| Task | Status | Details |
-|------|--------|---------|
-| Add Ardalis.Specification 8.0.0 | Pending | Application layer |
-| Create PostgreSQL Infrastructure.Data project | Pending | Mystira.App |
-| Implement DualWriteRepository pattern | Pending | Phase-aware routing |
-| Redis caching layer | Pending | StackExchange.Redis |
-| Polly v8 resilience pipelines | Done | Mystira.Shared.Resilience |
-
-### Priority 3: Wolverine Event-Driven Architecture (ADR-0015)
-
-Replace MediatR with Wolverine for unified messaging.
-
-| Task | Status | Details |
-|------|--------|---------|
-| Azure Service Bus provisioning | Pending | Terraform module |
-| Add Wolverine packages | Pending | All .NET projects |
-| Define domain events | Pending | AccountCreated, SessionCompleted, etc. |
-| Migrate simple query handlers | Pending | GetAccountById, etc. |
-| Migrate command handlers | Pending | CreateAccount, etc. |
+| Component | Status | Details |
+|-----------|--------|---------|
+| OpenAPI specs | ✅ Done | `packages/api-spec/openapi/` |
+| CI/CD spec validation | ✅ Done | `generate-contracts.yml` |
+| ErrorResponse types migration | 🔄 Pending | Move to shared types |
+| @mystira/core-types (NPM) | 🔄 Pending | TypeScript package needed |
 
 ---
 
-## Q2 2026: Service Migrations
+## January 2026: Production Launch
 
-### Complete Service Migrations
+### Week 1-2: Service Migrations
 
 All services adopt Mystira.Shared infrastructure:
 
 | Service | Priority | Key Changes | Status |
 |---------|----------|-------------|--------|
-| Mystira.App | High | PostgreSQL dual-write, Wolverine | Pending |
-| Mystira.Admin.Api | High | Read-only PostgreSQL access | Pending |
-| Mystira.StoryGenerator | Medium | Shared PostgreSQL, Wolverine events | Pending |
-| Mystira.Publisher | Medium | Event subscription, blockchain | Pending |
-| Mystira.Chain | Medium | gRPC endpoints, event subscription | Pending |
-| Mystira.Admin.UI | Low | API contract updates | Pending |
-| Mystira.DevHub | Low | Minimal changes | Pending |
+| Mystira.App | High | Add Mystira.Shared, Wolverine handlers | 🔄 Pending |
+| Mystira.Admin.Api | High | Add Mystira.Shared, PostgreSQL read | 🔄 Pending |
+| Mystira.StoryGenerator | Medium | Add Mystira.Shared, Wolverine events | 🔄 Pending |
+| Mystira.Publisher | Medium | Event subscription via Service Bus | 🔄 Pending |
+| Mystira.Chain | Medium | gRPC endpoints, event subscription | 🔄 Pending |
+| Mystira.Admin.UI | Low | API contract updates | 🔄 Pending |
+| Mystira.DevHub | Low | Minimal changes | 🔄 Pending |
 
-### Cross-Service Integration
+### Week 2-3: Cross-Service Integration
 
 | Task | Status | Details |
 |------|--------|---------|
-| Publish/subscribe events via Service Bus | Pending | Wolverine |
-| Cross-instance cache invalidation | Pending | Redis pub/sub |
-| Service-to-service auth (Managed Identity) | Done | Terraform |
+| Publish/subscribe events | 🔄 Pending | Wolverine + Azure Service Bus |
+| Cache invalidation | 🔄 Pending | Redis pub/sub |
+| Domain events defined | 🔄 Pending | AccountCreated, SessionCompleted, etc. |
+
+### Week 3-4: Performance & Monitoring
+
+| Task | Status | Details |
+|------|--------|---------|
+| Unified monitoring dashboards | 🔄 Pending | Azure Monitor |
+| Cache hit/miss metrics | 🔄 Pending | Application Insights |
+| Load testing | 🔄 Pending | Performance baselines |
+| Production hardening | 🔄 Pending | Security review, rate limiting |
 
 ---
 
-## Q3 2026: PostgreSQL Primary & Optimization
+## Post-Launch (2026 TBD)
 
-### Data Migration Completion
+### Polyglot Persistence (NOT Full PostgreSQL Migration)
 
-| Task | Status | Details |
-|------|--------|---------|
-| Switch read operations to PostgreSQL | Pending | Phase 2→3 |
-| Data reconciliation validation | Pending | 99.99% accuracy |
-| Disable Cosmos DB writes | Pending | Phase 3 |
-| Archive Cosmos DB data | Pending | Blob storage |
-| Remove Cosmos code paths | Pending | Cleanup |
+We're going **polyglot** - keeping both Cosmos DB and PostgreSQL based on use case:
 
-### Performance & Monitoring
+| Database | Use Case | Status |
+|----------|----------|--------|
+| Cosmos DB | Complex documents, scenarios, sessions | Current |
+| PostgreSQL | Relational data, analytics, reporting | Available |
+| Redis | Caching, distributed locks, pub/sub | Available |
 
-| Task | Status | Details |
-|------|--------|---------|
-| Unified monitoring dashboards | Pending | Azure Monitor |
-| Cache hit/miss metrics | Pending | Application Insights |
-| Query performance optimization | Pending | PostgreSQL indexes |
-| Load testing | Pending | Performance baselines |
+The `PolyglotRepository` in Mystira.Shared routes to appropriate database based on entity annotations.
+
+### Future Enhancements
+
+| Task | Timeline | Details |
+|------|----------|---------|
+| Data warehouse (Azure Synapse) | TBD | Analytics & reporting |
+| ML recommendations | TBD | User preferences |
+| Multi-region expansion | TBD | Geo-replication |
 
 ---
 
-## Technical Debt & Bug Fixes
+## Technical Debt (Fix in January)
 
-### Critical (Fix in Q1)
+### Critical
 
-| Issue | Source | Description |
-|-------|--------|-------------|
-| `Guid.Parse` crashes on string IDs | Repository pattern | Use string IDs consistently |
-| Missing `CancellationToken` propagation | Async methods | Add to all async signatures |
-| Fire-and-forget patterns | Background services | Add proper error handling |
-| Dual-write transaction safety | Data sync | Wrap in TransactionScope |
+| Issue | Description | Action |
+|-------|-------------|--------|
+| `Guid.Parse` crashes | String IDs cause crashes | Use string IDs consistently |
+| Missing `CancellationToken` | Async methods missing ct | Add to all async signatures |
+| Fire-and-forget patterns | No error handling | Add proper error handling |
 
 ### High Priority
 
-| Issue | Source | Description |
-|-------|--------|-------------|
-| Missing rollback procedures | Documentation | Create per-phase guides |
-| Performance baselines missing | Monitoring | Establish before migration |
-| Feature flag documentation | Operations | Create usage guides |
+| Issue | Description | Action |
+|-------|-------------|--------|
+| Rollback procedures | Missing per-phase guides | Create before launch |
+| Performance baselines | No benchmarks | Establish before launch |
 
 ---
 
 ## Architecture Decisions
 
-All architecture decisions are documented as ADRs:
-
 | ADR | Status | Description |
 |-----|--------|-------------|
-| ADR-0014 | Active | Polyglot Persistence (Ardalis.Specification) |
-| ADR-0015 | Active | Event-Driven Architecture (Wolverine) |
-| ADR-0017 | Implemented | Resource Group Organization |
-| ADR-0019 | Implemented | Dockerfile Location Standardization |
-| ADR-0020 | Active | Package Consolidation |
-
-See [docs/architecture/adr/](./docs/architecture/adr/) for full list.
+| ADR-0014 | ✅ Implemented | Polyglot Persistence (Ardalis.Specification) |
+| ADR-0015 | ✅ Implemented | Event-Driven Architecture (Wolverine) |
+| ADR-0017 | ✅ Implemented | Resource Group Organization |
+| ADR-0019 | ✅ Implemented | Dockerfile Location Standardization |
+| ADR-0020 | ✅ Implemented | Package Consolidation |
 
 ---
 
-## Success Metrics
+## Migration Guides
 
-### Q1 2026
+Each service has a detailed migration guide:
 
-- [ ] All services reference Mystira.Core types
-- [ ] OpenAPI spec validation in CI/CD
-- [ ] Wolverine packages added to all .NET projects
+| Service | Guide | Priority |
+|---------|-------|----------|
+| Mystira.App | [mystira-app-migration.md](./docs/migrations/mystira-app-migration.md) | High |
+| Mystira.Admin.Api | [mystira-admin-migration.md](./docs/migrations/mystira-admin-migration.md) | High |
+| Mystira.StoryGenerator | [mystira-storygenerator-migration.md](./docs/migrations/mystira-storygenerator-migration.md) | Medium |
+| Mystira.Publisher | [mystira-publisher-migration.md](./docs/migrations/mystira-publisher-migration.md) | Medium |
+| Mystira.Chain | [mystira-chain-migration.md](./docs/migrations/mystira-chain-migration.md) | Medium |
+| Mystira.Admin.UI | [mystira-admin-ui-migration.md](./docs/migrations/mystira-admin-ui-migration.md) | Low |
+| Mystira.DevHub | [mystira-devhub-migration.md](./docs/migrations/mystira-devhub-migration.md) | Low |
 
-### Q2 2026
+---
 
-- [ ] All services migrated to Mystira.Shared patterns
-- [ ] Event-driven messaging operational
-- [ ] Cross-service integration tested
+## Success Criteria (January 1, 2026)
 
-### Q3 2026
-
-- [ ] PostgreSQL serving 100% reads
-- [ ] Cosmos DB decommissioned
-- [ ] 30% reduction in database costs
+- [ ] All services using Mystira.Shared
+- [ ] Wolverine event handlers operational
+- [ ] Cross-service events working via Azure Service Bus
+- [ ] Redis caching active
+- [ ] Monitoring dashboards live
+- [ ] Zero critical bugs
 
 ---
 
@@ -192,5 +184,5 @@ See [docs/architecture/adr/](./docs/architecture/adr/) for full list.
 
 - [Migration Index](./docs/migrations/MIGRATION_INDEX.md) - Detailed migration status
 - [Architecture ADRs](./docs/architecture/adr/) - Decision records
-- [Implementation Roadmap](./docs/planning/implementation-roadmap.md) - Detailed technical phases
-- [Operations Runbooks](./docs/operations/runbooks/) - Operational procedures
+- [Mystira.Shared](./packages/shared/Mystira.Shared/) - Core infrastructure package
+- [OpenAPI Specs](./packages/api-spec/openapi/) - API specifications

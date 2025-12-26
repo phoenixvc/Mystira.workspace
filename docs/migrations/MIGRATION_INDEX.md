@@ -137,23 +137,26 @@ The following documents are superseded or archived:
 
 ## 2026 Roadmap
 
-```
-Q1 2026
-├── Migration 001: Unified Type System (OpenAPI + Mystira.Core)
-├── API Domain Standardization (mystira.app)
-├── Admin API/UI Extraction (complete Phase 3+)
-└── Documentation consolidation
+**Production Go-Live: January 1, 2026**
 
-Q2 2026
+```
+January 2026 (Week 1-2)
 ├── Complete service migrations (all 7 services)
-├── Wolverine event bus integration
-└── Cross-service integration
+├── Wolverine event handlers operational
+└── Cross-service integration via Azure Service Bus
 
-Q3 2026
-├── Full PostgreSQL migration
-├── Performance optimization
-└── Production hardening
+January 2026 (Week 3-4)
+├── Performance optimization & monitoring
+├── Production hardening
+└── Load testing & baselines
+
+Post-Launch (TBD)
+├── Polyglot persistence (Cosmos + PostgreSQL per use case)
+├── Data warehouse (Azure Synapse)
+└── ML recommendations
 ```
+
+> **Note**: We're going **polyglot** - keeping both Cosmos DB and PostgreSQL based on entity use case, NOT migrating fully to PostgreSQL.
 
 ---
 

@@ -2,7 +2,12 @@
 
 ## Executive Summary
 
-This roadmap outlines the implementation of ADR-0013 (Data Management and Storage Strategy) across all Mystira platform components. The strategy transitions from a Cosmos DB-only architecture to a hybrid polyglot persistence model using Cosmos DB, PostgreSQL, and Redis.
+**Last Updated**: December 2025
+**Production Go-Live**: January 1, 2026
+
+This roadmap outlines the implementation of ADR-0013 (Data Management and Storage Strategy) across all Mystira platform components. The strategy implements a **polyglot persistence model** using Cosmos DB, PostgreSQL, and Redis - each database for its optimal use case.
+
+> **Important**: We are NOT migrating fully to PostgreSQL. We are going **polyglot** - keeping both Cosmos DB and PostgreSQL based on entity type and use case. The `PolyglotRepository` in Mystira.Shared handles routing.
 
 ---
 
@@ -47,11 +52,11 @@ This roadmap outlines the implementation of ADR-0013 (Data Management and Storag
 │  • Cross-service data contracts                                                  │
 │  • Publisher/Chain integration                                                   │
 │                                                                                  │
-│  LONG-TERM (6-18 months)                                                         │
+│  POST-LAUNCH (TBD)                                                               │
 │  ═══════════════════════                                                         │
 │  Phase 4: Evolution            ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░████ │
-│  • PostgreSQL primary cutover                                                    │
-│  • Cosmos DB decommission                                                        │
+│  • Polyglot persistence (Cosmos + PostgreSQL per use case)                       │
+│  • Data warehouse (Azure Synapse)                                                │
 │  • Advanced analytics & ML                                                       │
 │                                                                                  │
 └─────────────────────────────────────────────────────────────────────────────────┘
@@ -298,31 +303,23 @@ public record ScenarioPurchasedEvent(string AccountId, string ScenarioId, decima
 
 ---
 
-# MEDIUM-LONG TERM (6-18 Months)
+# POST-LAUNCH (TBD)
 
-## Phase 4: PostgreSQL Primary (Months 7-12)
+## Phase 4: Polyglot Persistence Optimization
 
-### 4.1 Full PostgreSQL Cutover
+> **Note**: We are staying **polyglot** - Cosmos DB for complex documents, PostgreSQL for relational/analytics data. No full migration.
 
-| Task                                  | Component      | Priority | Effort |
-| ------------------------------------- | -------------- | -------- | ------ |
-| Switch read to PostgreSQL (Phase 2→3) | Mystira.App    | P1       | 1 day  |
-| Validate all queries work correctly   | Mystira.App    | P0       | 3 days |
-| Disable Cosmos DB writes              | Mystira.App    | P1       | 1 day  |
-| Archive Cosmos DB data                | Infrastructure | P2       | 2 days |
-| Update disaster recovery plan         | Documentation  | P1       | 1 day  |
+### 4.1 Database Routing Strategy
 
-### 4.2 Cosmos DB Decommission
+| Database | Use Case | Entities |
+|----------|----------|----------|
+| Cosmos DB | Complex nested documents | Scenarios, Sessions, Story branches |
+| PostgreSQL | Relational, analytics, reporting | Accounts, Analytics events, Audit logs |
+| Redis | Caching, locks, pub/sub | Session cache, distributed locks |
 
-| Task                                   | Priority | Effort |
-| -------------------------------------- | -------- | ------ |
-| Export all Cosmos data to blob storage | P1       | 2 days |
-| Verify PostgreSQL data completeness    | P0       | 2 days |
-| Remove Cosmos DB resources (Terraform) | P2       | 1 day  |
-| Update documentation                   | P2       | 1 day  |
-| Remove Cosmos code paths               | P3       | 3 days |
+The `PolyglotRepository` in Mystira.Shared routes automatically based on `[DatabaseTarget]` attribute.
 
-### 4.3 Advanced Caching
+### 4.2 Advanced Caching
 
 | Task                                        | Component      | Priority | Effort |
 | ------------------------------------------- | -------------- | -------- | ------ |

@@ -13,14 +13,16 @@
 This guide covers migrating Mystira.App from its current infrastructure to the consolidated `Mystira.Shared` package, including:
 
 1. **.NET 9.0 upgrade** (required)
-2. MediatR → Wolverine migration
-3. Custom resilience → `Mystira.Shared.Resilience` (Polly v8)
-4. IMemoryCache → `Mystira.Shared.Caching` (Redis + WASM)
+2. MediatR → Wolverine migration (v5.9.2)
+3. Custom resilience → `Mystira.Shared.Resilience` (Polly v8.6.5)
+4. IMemoryCache → `Mystira.Shared.Caching` (Redis)
 5. Custom exceptions → `Mystira.Shared.Exceptions`
-6. Repository pattern → Ardalis.Specification 8.0.0
+6. Repository pattern → Ardalis.Specification 9.3.1
 7. **Distributed locking** for concurrent operations
 8. **Microsoft Entra External ID** authentication (optional)
 9. **Source generators** for repositories and validators
+
+> **Note**: All these components are already implemented in `Mystira.Shared` (v0.1.0-alpha). This migration is about adopting the shared package, not building new infrastructure.
 
 ---
 
@@ -40,16 +42,15 @@ This guide covers migrating Mystira.App from its current infrastructure to the c
 <PackageReference Include="MediatR" Version="12.4.1" />
 
 <!-- Add -->
-<PackageReference Include="Mystira.Shared" Version="0.2.0" />
-<PackageReference Include="Ardalis.Specification" Version="8.0.0" />
-<PackageReference Include="Ardalis.Specification.EntityFrameworkCore" Version="8.0.0" />
+<PackageReference Include="Mystira.Shared" Version="0.1.0-alpha" />
+<!-- Ardalis.Specification 9.3.1 is included via Mystira.Shared -->
 ```
 
 ### 1.3 Update Mystira.App.Api.csproj
 
 ```xml
 <!-- Add -->
-<PackageReference Include="Mystira.Shared" Version="0.2.0" />
+<PackageReference Include="Mystira.Shared" Version="0.1.0-alpha" />
 <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.0" />
 ```
 
@@ -57,7 +58,7 @@ This guide covers migrating Mystira.App from its current infrastructure to the c
 
 ```xml
 <!-- Add -->
-<PackageReference Include="Mystira.Shared" Version="0.2.0" />
+<PackageReference Include="Mystira.Shared" Version="0.1.0-alpha" />
 
 <!-- For WASM caching support -->
 <PackageReference Include="Blazored.LocalStorage" Version="4.5.0" />
@@ -66,8 +67,7 @@ This guide covers migrating Mystira.App from its current infrastructure to the c
 ### 1.5 Update Mystira.App.Domain.csproj
 
 ```xml
-<!-- Add for specification pattern -->
-<PackageReference Include="Ardalis.Specification" Version="8.0.0" />
+<!-- Ardalis.Specification 9.3.1 is included via Mystira.Shared -->
 ```
 
 ---
