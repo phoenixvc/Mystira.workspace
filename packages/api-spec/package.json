@@ -7,6 +7,7 @@
     "generate": "pnpm run generate:csharp && pnpm run generate:typescript",
     "generate:csharp": "bash scripts/generate-csharp.sh",
     "generate:typescript": "bash scripts/generate-typescript.sh",
+    "generate:ts": "bash scripts/generate-typescript.sh",
     "validate": "redocly lint openapi/*.yaml",
     "validate:app": "redocly lint openapi/app-api.yaml",
     "validate:story": "redocly lint openapi/story-generator-api.yaml",

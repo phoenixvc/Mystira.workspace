@@ -25,7 +25,12 @@ components:
           description: Name of the health check
           example: "database"
         status:
-          $ref: '#/components/schemas/HealthStatus'
+          type: string
+          enum:
+            - Healthy
+            - Degraded
+            - Unhealthy
+          description: Health status of a service or component
         description:
           type: [string, "null"]
           description: Additional description
@@ -52,7 +57,12 @@ components:
         - timestamp
       properties:
         status:
-          $ref: '#/components/schemas/HealthStatus'
+          type: string
+          enum:
+            - Healthy
+            - Degraded
+            - Unhealthy
+          description: Health status of a service or component
         timestamp:
           type: string
           format: date-time
@@ -63,5 +73,38 @@ components:
         checks:
           type: array
           items:
-            $ref: '#/components/schemas/HealthCheckEntry'
+            type: object
+            required:
+              - name
+              - status
+            properties:
+              name:
+                type: string
+                description: Name of the health check
+                example: "database"
+              status:
+                type: string
+                enum:
+                  - Healthy
+                  - Degraded
+                  - Unhealthy
+                description: Health status of a service or component
+              description:
+                type: [string, "null"]
+                description: Additional description
+              duration:
+                type: [string, "null"]
+                description: Duration of the health check
+                example: "00:00:00.0234567"
+              tags:
+                type: array
+                items:
+                  type: string
+                description: Tags associated with this check
+              data:
+                oneOf:
+                  - type: object
+                    additionalProperties: true
+                  - type: "null"
+                description: Additional health check data
           description: Individual health check results

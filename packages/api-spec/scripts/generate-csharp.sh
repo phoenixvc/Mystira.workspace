@@ -20,12 +20,17 @@ if ! command -v nswag &> /dev/null; then
 fi
 
 echo ""
-echo "Generating C# contracts from OpenAPI specs..."
+echo "Bundling OpenAPI specs to resolve references..."
+cd "$API_SPEC_DIR"
+npm run bundle || pnpm run bundle
+
+echo ""
+echo "Generating C# contracts from bundled OpenAPI specs..."
 
 # Generate from App API
 echo "  → Generating App API contracts..."
 nswag openapi2csclient \
-  /input:"$API_SPEC_DIR/openapi/app-api.yaml" \
+  /input:"$API_SPEC_DIR/dist/app-api.yaml" \
   /output:"$OUTPUT_DIR/AppApiContracts.cs" \
   /namespace:Mystira.Contracts.Generated.App \
   /className:AppApiClient \
@@ -40,7 +45,7 @@ nswag openapi2csclient \
 # Generate from Story Generator API
 echo "  → Generating Story Generator API contracts..."
 nswag openapi2csclient \
-  /input:"$API_SPEC_DIR/openapi/story-generator-api.yaml" \
+  /input:"$API_SPEC_DIR/dist/story-generator-api.yaml" \
   /output:"$OUTPUT_DIR/StoryGeneratorApiContracts.cs" \
   /namespace:Mystira.Contracts.Generated.StoryGenerator \
   /className:StoryGeneratorApiClient \
