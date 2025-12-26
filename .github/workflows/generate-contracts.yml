@@ -174,7 +174,7 @@ jobs:
           dotnet-version: '9.0.x'
 
       - name: Build Mystira.Core
-        run: dotnet build packages/core/Mystira.Core --configuration Release
+        run: dotnet build packages/core/Mystira.Core.Tests --configuration Release
 
       - name: Test Mystira.Core
         run: dotnet test packages/core/Mystira.Core.Tests --configuration Release --no-build
