@@ -58,6 +58,12 @@ paths:
             application/json:
               schema:
                 $ref: './common/health.yaml#/components/schemas/HealthCheckResult'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: './common/errors.yaml#/components/schemas/ErrorResponse'
 
   /health/ready:
     get:
@@ -71,6 +77,8 @@ paths:
           description: Service is ready
         '503':
           description: Service is not ready
+        '500':
+          description: Internal server error
 
   /health/live:
     get:
@@ -82,6 +90,8 @@ paths:
       responses:
         '200':
           description: Service is alive
+        '500':
+          description: Internal server error
 
 components:
   schemas:

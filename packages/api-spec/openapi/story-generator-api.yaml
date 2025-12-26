@@ -48,6 +48,18 @@ paths:
             application/json:
               schema:
                 $ref: './common/health.yaml#/components/schemas/HealthCheckResult'
+        '503':
+          description: Service is unhealthy
+          content:
+            application/json:
+              schema:
+                $ref: './common/health.yaml#/components/schemas/HealthCheckResult'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: './common/errors.yaml#/components/schemas/ErrorResponse'
 
   /stories/generate:
     post:
@@ -177,8 +189,7 @@ components:
           type: string
           description: Generated story content
         title:
-          type: string
-          nullable: true
+          type: [string, "null"]
           description: Generated story title
         entities:
           type: array
@@ -210,8 +221,7 @@ components:
             - organization
           description: Entity type
         description:
-          type: string
-          nullable: true
+          type: [string, "null"]
         firstMentionedAt:
           type: integer
           description: Character position of first mention

@@ -17,8 +17,7 @@ components:
           description: Human-readable error message
           example: "The requested resource was not found"
         details:
-          type: string
-          nullable: true
+          type: [string, "null"]
           description: Additional error details
         timestamp:
           type: string
@@ -26,18 +25,15 @@ components:
           description: When the error occurred (UTC)
           example: "2024-01-15T10:30:00Z"
         traceId:
-          type: string
-          nullable: true
+          type: [string, "null"]
           description: Correlation ID for distributed tracing
           example: "abc123-def456-ghi789"
         errorCode:
-          type: string
-          nullable: true
+          type: [string, "null"]
           description: Unique error code for lookup
           example: "AUTH_001"
         category:
-          type: string
-          nullable: true
+          type: [string, "null"]
           description: Error category
           enum:
             - Authentication
@@ -47,9 +43,9 @@ components:
             - Conflict
             - RateLimit
             - Internal
+            - null
         statusCode:
-          type: integer
-          nullable: true
+          type: [integer, "null"]
           description: HTTP status code
           example: 404
         isRecoverable:
@@ -57,8 +53,7 @@ components:
           default: true
           description: Whether the error is recoverable by the user
         suggestedAction:
-          type: string
-          nullable: true
+          type: [string, "null"]
           description: Suggested action for the user
           enum:
             - retry
@@ -67,6 +62,7 @@ components:
             - fix-input
             - check-id
             - request-access
+            - null
 
     ValidationErrorResponse:
       allOf:
@@ -92,13 +88,11 @@ components:
         - type: object
           properties:
             resourceType:
-              type: string
-              nullable: true
+              type: [string, "null"]
               description: Type of resource that was not found
               example: "Story"
             resourceId:
-              type: string
-              nullable: true
+              type: [string, "null"]
               description: ID of the resource that was not found
               example: "story-123"
 
@@ -108,8 +102,7 @@ components:
         - type: object
           properties:
             authScheme:
-              type: string
-              nullable: true
+              type: [string, "null"]
               description: The authentication scheme that failed
               example: "Bearer"
 
@@ -119,8 +112,7 @@ components:
         - type: object
           properties:
             requiredPermission:
-              type: string
-              nullable: true
+              type: [string, "null"]
               description: The permission that was required
               example: "stories:write"
 
@@ -130,10 +122,8 @@ components:
         - type: object
           properties:
             conflictingResource:
-              type: string
-              nullable: true
+              type: [string, "null"]
               description: The resource that caused the conflict
             conflictReason:
-              type: string
-              nullable: true
+              type: [string, "null"]
               description: Reason for the conflict
