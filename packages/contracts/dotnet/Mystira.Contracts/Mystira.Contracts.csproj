@@ -5,10 +5,12 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <!-- Suppress XML documentation warnings for migrated StoryGenerator contracts -->
+    <NoWarn>$(NoWarn);CS1591;CS1587</NoWarn>
 
     <!-- Package metadata -->
     <PackageId>Mystira.Contracts</PackageId>
-    <Version>0.2.0-alpha</Version>
+    <Version>0.3.0-alpha</Version>
     <Authors>Mystira Team</Authors>
     <Company>PhoenixVC</Company>
     <Description>Unified API contracts for Mystira platform - consolidates Mystira.App.Contracts and Mystira.StoryGenerator.Contracts</Description>
@@ -34,6 +36,9 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All"/>
+    <!-- StoryGenerator contracts dependencies -->
+    <PackageReference Include="OpenAI" Version="2.0.0" />
+    <PackageReference Include="System.ComponentModel.Annotations" Version="5.0.0" />
   </ItemGroup>
 
 </Project>
