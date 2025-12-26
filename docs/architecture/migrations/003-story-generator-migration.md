@@ -238,6 +238,6 @@ try {
 ## Support
 
 For migration assistance:
-- Engineering: engineering@mystira.app
-- Documentation: https://docs.mystira.app/story-generator
+- Technical: jurie@phoenixvc.tech
+- Business/Admin: eben@phoenixvc.tech
 - Issues: https://github.com/phoenixvc/Mystira.workspace/issues

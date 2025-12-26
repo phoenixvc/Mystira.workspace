@@ -127,7 +127,7 @@ Procedures for investigating and resolving monitoring alerts.
 | On-call Lead | PagerDuty rotation | - | PagerDuty |
 | Engineering Manager | @eng-manager | @eng-director | Slack + Phone |
 | DBA | @dba-team | @platform-team | Slack |
-| Security | @security-team | security@mystira.app | Slack + Email |
+| Security | @security-team | eben@phoenixvc.tech | Slack + Email |
 
 ---
 

@@ -259,6 +259,6 @@ jobs:
 ## Contact
 
 For questions or assistance:
-- Engineering: engineering@mystira.app
-- DevOps: devops@mystira.app
+- Technical: jurie@phoenixvc.tech
+- Business/Admin: eben@phoenixvc.tech
 - Issues: https://github.com/phoenixvc/Mystira.workspace/issues

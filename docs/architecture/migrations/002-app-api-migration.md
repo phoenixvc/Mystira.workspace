@@ -142,20 +142,20 @@ If issues arise, the legacy domains will be maintained for a transition period:
 
 1. Legacy endpoints will redirect to new domains (HTTP 301)
 2. Set `X-Mystira-Legacy-Domain: true` header to bypass redirect temporarily
-3. Contact support@mystira.app for extended legacy support
+3. Contact eben@phoenixvc.tech for extended legacy support
 
 ## Timeline
 
 | Phase | Date | Description |
 |-------|------|-------------|
-| Announcement | 2024-Q4 | Migration guide published |
-| New Domains Active | 2024-Q4 | New domains available alongside legacy |
-| Legacy Redirect | 2025-Q1 | Legacy domains redirect to new |
-| Legacy Sunset | 2025-Q2 | Legacy domains removed |
+| Announcement | 2026-Q1 | Migration guide published |
+| New Domains Active | 2026-Q1 | New domains available alongside legacy |
+| Legacy Redirect | 2026-Q2 | Legacy domains redirect to new |
+| Legacy Sunset | 2026-Q3 | Legacy domains removed |
 
 ## Support
 
 For migration assistance:
-- Engineering: engineering@mystira.app
-- Documentation: https://docs.mystira.app
+- Technical: jurie@phoenixvc.tech
+- Business/Admin: eben@phoenixvc.tech
 - Issues: https://github.com/phoenixvc/Mystira.workspace/issues
