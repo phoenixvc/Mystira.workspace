@@ -39,7 +39,7 @@
       "args": ["watch", "${workspaceFolder}/packages/admin-api/src/index.ts"],
       "cwd": "${workspaceFolder}/packages/admin-api",
       "console": "integratedTerminal",
-      "envFile": "${workspaceFolder}/packages/admin-api/.env"
+      "envFile": "${workspaceFolder}/.env.admin-api"
     },
     {
       "name": "Debug Publisher",
@@ -49,7 +49,7 @@
       "args": ["watch", "${workspaceFolder}/packages/publisher/src/index.ts"],
       "cwd": "${workspaceFolder}/packages/publisher",
       "console": "integratedTerminal",
-      "envFile": "${workspaceFolder}/packages/publisher/.env"
+      "envFile": "${workspaceFolder}/.env.publisher"
     },
     {
       "name": "Debug Story Generator",
@@ -59,7 +59,7 @@
       "args": ["watch", "${workspaceFolder}/packages/story-generator/src/index.ts"],
       "cwd": "${workspaceFolder}/packages/story-generator",
       "console": "integratedTerminal",
-      "envFile": "${workspaceFolder}/packages/story-generator/.env"
+      "envFile": "${workspaceFolder}/.env.story-generator"
     },
     {
       "name": "Attach to Node Process",
