@@ -374,7 +374,7 @@ app.UseExceptionHandler();
 
 ---
 
-## Phase 6: Ardalis.Specification 8.0.0 Migration
+## Phase 6: Ardalis.Specification 9.3.1 Migration
 
 ### 6.1 Create Specification Classes
 
@@ -589,7 +589,7 @@ builder.Services.AddGameSessionOptionsValidation();
 ### Phase 1: .NET 9.0 Upgrade
 - [ ] Update all .csproj files to net9.0
 - [ ] Update package references to latest compatible versions
-- [ ] Add Ardalis.Specification 8.0.0 packages
+- [ ] Add Ardalis.Specification 9.3.1 (via Mystira.Shared)
 - [ ] Verify build succeeds
 
 ### Phase 2: Wolverine
@@ -692,6 +692,6 @@ If migration causes issues:
 - [ADR-0014: Polyglot Persistence](../architecture/adr/0014-polyglot-persistence-framework-selection.md)
 - [ADR-0015: Wolverine Migration](../architecture/adr/0015-event-driven-architecture-framework.md)
 - [ADR-0017: Resource Group Organization](../architecture/adr/0017-resource-group-organization-strategy.md)
-- [Ardalis.Specification 8.0.0 Guide](../architecture/specifications/ardalis-specification-migration.md)
+- [Ardalis.Specification 9.3.1 Guide](../architecture/specifications/ardalis-specification-migration.md)
 - [Mystira.Shared Migration Guide](../guides/mystira-shared-migration.md)
 - [Mystira.Shared README](../../packages/shared/Mystira.Shared/README.md)

@@ -210,6 +210,6 @@ Publisher's migration is simpler than backend services since it primarily:
 
 ## Related Documentation
 
-- [ADR-0019: Dockerfile Location Standardization](../architecture/adr/ADR-0019-dockerfile-location-standardization.md)
+- [ADR-0019: Dockerfile Location Standardization](../../adr/ADR-0019-dockerfile-location-standardization.md)
 - [@mystira/core-types](../../packages/core-types/README.md)
 - [Mystira.App Migration Guide](./mystira-app-migration.md)
