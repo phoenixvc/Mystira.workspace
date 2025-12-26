@@ -1,0 +1,94 @@
+# Mystira Workspace - Windsurf AI Rules
+
+## Project Overview
+TypeScript monorepo for the Mystira platform using Turborepo and pnpm.
+
+## Tech Stack
+- **Runtime**: Node.js 18+
+- **Package Manager**: pnpm 8+
+- **Build System**: Turborepo
+- **Language**: TypeScript (ES2022 target)
+- **Bundler**: tsup
+- **Testing**: Vitest
+- **Linting**: ESLint (legacy .eslintrc.json config)
+- **Formatting**: Prettier (printWidth: 80)
+- **Styling**: Tailwind CSS
+- **AI/ML**: Python (when applicable)
+- **Blockchain**: Solidity/Hardhat (packages/chain)
+
+## Windsurf-Specific Guidelines
+
+### Cascade Flow
+- When using Cascade, break complex tasks into steps
+- Verify each step before proceeding to the next
+- Use terminal commands to validate changes work
+
+### Code Changes
+- Prefer small, incremental changes over large rewrites
+- Always show diffs clearly when proposing changes
+- Test changes locally before suggesting commits
+
+### Context Awareness
+- Check related files before making changes
+- Look for existing utilities before creating new ones
+- Follow patterns established in similar files
+
+### Terminal Usage
+- Run builds after TypeScript changes: `pnpm build`
+- Run tests after logic changes: `pnpm test`
+- Check for lint errors: `pnpm lint`
+
+## Code Style Guidelines
+
+### TypeScript
+- Use strict TypeScript - no `any` types unless absolutely necessary
+- Prefer `interface` over `type` for object shapes
+- Use explicit return types for public functions
+- Prefer named exports over default exports
+
+### Imports
+- Use relative imports within packages
+- Use workspace imports (@mystira/*) for cross-package dependencies
+- Order: external libs → workspace packages → relative imports
+
+### Naming Conventions
+- Files: kebab-case (e.g., `user-service.ts`)
+- Types/Interfaces: PascalCase (e.g., `UserProfile`)
+- Functions/Variables: camelCase (e.g., `getUserById`)
+- Constants: SCREAMING_SNAKE_CASE (e.g., `MAX_RETRIES`)
+
+### Testing
+- Use Vitest for unit tests
+- Follow AAA pattern (Arrange, Act, Assert)
+- Name test files as `*.test.ts` or `*.spec.ts`
+
+## Monorepo Structure
+```
+packages/
+├── contracts/      # Shared API contracts and types
+├── shared/         # Shared utilities and services
+├── shared-utils/   # Common utility functions
+├── design-tokens/  # Design system tokens
+├── app/            # Main application
+├── admin-api/      # Admin API service
+├── admin-ui/       # Admin dashboard
+├── chain/          # Blockchain integration (Solidity)
+├── devhub/         # Developer portal
+├── publisher/      # Content publishing
+└── story-generator/# AI story generation
+```
+
+## Common Commands
+```bash
+pnpm install        # Install dependencies
+pnpm build          # Build all packages
+pnpm dev            # Start development mode
+pnpm test           # Run tests
+pnpm lint           # Run linting
+pnpm format         # Format code
+```
+
+## Important Notes
+- Run `pnpm build` before committing to ensure types are valid
+- Use conventional commits (feat:, fix:, chore:, docs:)
+- Keep packages loosely coupled
