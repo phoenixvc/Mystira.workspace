@@ -9,11 +9,11 @@
 
     <!-- Package metadata -->
     <PackageId>Mystira.Shared</PackageId>
-    <Version>0.3.0-alpha</Version>
+    <Version>0.4.0-alpha</Version>
     <Authors>Mystira Team</Authors>
     <Company>PhoenixVC</Company>
-    <Description>Shared infrastructure for Mystira platform services - authentication, authorization, middleware, and cross-cutting concerns</Description>
-    <PackageTags>mystira;shared;authentication;authorization;middleware</PackageTags>
+    <Description>Shared infrastructure for Mystira platform services - CQRS patterns, validation, object mapping, authentication, authorization, and cross-cutting concerns</Description>
+    <PackageTags>mystira;shared;cqrs;validation;mapping;wolverine;fluentvalidation;mapperly</PackageTags>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/phoenixvc/Mystira.workspace</PackageProjectUrl>
     <PackageReadmeFile>README.md</PackageReadmeFile>
@@ -67,6 +67,10 @@
     <PackageReference Include="FluentValidation" Version="11.11.0" />
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="11.11.0" />
     <PackageReference Include="WolverineFx.AzureServiceBus" Version="5.9.2" />
+    <!-- Wave 4: CQRS, Validation, Mapping -->
+    <PackageReference Include="FluentValidation" Version="11.11.0" />
+    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="11.11.0" />
+    <PackageReference Include="Riok.Mapperly" Version="4.1.1" />
     <!-- Wave 2 Data: Entity Framework Core -->
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.11" />
     <!-- Polyglot Persistence: Ardalis.Specification -->
