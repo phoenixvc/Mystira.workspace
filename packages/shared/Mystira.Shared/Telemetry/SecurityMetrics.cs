@@ -90,6 +90,12 @@ public class SecurityMetrics : ISecurityMetrics
     private DateTime _lastCleanup = DateTime.UtcNow;
     private static readonly TimeSpan CleanupInterval = TimeSpan.FromMinutes(5);
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="SecurityMetrics"/> class.
+    /// </summary>
+    /// <param name="telemetryClient">Optional Application Insights telemetry client.</param>
+    /// <param name="logger">Logger for diagnostic information.</param>
+    /// <param name="environment">The environment name.</param>
     public SecurityMetrics(TelemetryClient? telemetryClient, ILogger<SecurityMetrics> logger, string environment)
     {
         _telemetryClient = telemetryClient;
@@ -197,6 +203,7 @@ public class SecurityMetrics : ISecurityMetrics
         }
     }
 
+    /// <inheritdoc />
     public void TrackAuthenticationFailed(string method, string? clientIp, string? reason = null)
     {
         var properties = new Dictionary<string, string>
@@ -221,6 +228,7 @@ public class SecurityMetrics : ISecurityMetrics
         CheckAndTrackBruteForce(clientIp);
     }
 
+    /// <inheritdoc />
     public void TrackAuthenticationSuccess(string method, string? userId = null)
     {
         var properties = new Dictionary<string, string>
@@ -239,6 +247,7 @@ public class SecurityMetrics : ISecurityMetrics
         _logger.LogInformation("Authentication succeeded via {Method} for user {UserId}", method, userId ?? "Unknown");
     }
 
+    /// <inheritdoc />
     public void TrackTokenValidationFailed(string? clientIp, string reason)
     {
         var properties = new Dictionary<string, string>
@@ -258,6 +267,7 @@ public class SecurityMetrics : ISecurityMetrics
         CheckAndTrackBruteForce(clientIp);
     }
 
+    /// <inheritdoc />
     public void TrackRateLimitHit(string? clientIp, string endpoint)
     {
         var properties = new Dictionary<string, string>
@@ -277,6 +287,7 @@ public class SecurityMetrics : ISecurityMetrics
         CheckAndTrackSustainedRateLimit(clientIp);
     }
 
+    /// <inheritdoc />
     public void TrackRateLimitSustained(string? clientIp, int hitCount, TimeSpan window)
     {
         var properties = new Dictionary<string, string>
@@ -297,6 +308,7 @@ public class SecurityMetrics : ISecurityMetrics
             PiiRedactor.MaskIp(clientIp), hitCount, window);
     }
 
+    /// <inheritdoc />
     public void TrackSuspiciousRequest(string? clientIp, string pattern, string? details = null)
     {
         var properties = new Dictionary<string, string>
@@ -319,6 +331,7 @@ public class SecurityMetrics : ISecurityMetrics
             PiiRedactor.MaskIp(clientIp), pattern, details ?? "No details");
     }
 
+    /// <inheritdoc />
     public void TrackAuthorizationFailed(string? userId, string resource, string? reason = null)
     {
         var properties = new Dictionary<string, string>
@@ -341,6 +354,7 @@ public class SecurityMetrics : ISecurityMetrics
             userId ?? "Unknown", resource, reason ?? "Unknown");
     }
 
+    /// <inheritdoc />
     public void TrackBruteForceDetected(string? clientIp, int attemptCount, TimeSpan window)
     {
         var properties = new Dictionary<string, string>
@@ -361,6 +375,7 @@ public class SecurityMetrics : ISecurityMetrics
             PiiRedactor.MaskIp(clientIp), attemptCount, window);
     }
 
+    /// <inheritdoc />
     public void TrackInvalidInput(string inputType, string? clientIp, string? details = null)
     {
         var properties = new Dictionary<string, string>
@@ -382,6 +397,7 @@ public class SecurityMetrics : ISecurityMetrics
         _logger.LogWarning("Invalid input detected ({InputType}) from {ClientIp}", inputType, PiiRedactor.MaskIp(clientIp));
     }
 
+    /// <inheritdoc />
     public void TrackCorsViolation(string? origin, string? clientIp)
     {
         var properties = new Dictionary<string, string>

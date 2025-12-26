@@ -34,6 +34,7 @@ public class ActivityListenerHostedService : IHostedService, IDisposable
         _activitySourcePrefix = activitySourcePrefix;
     }
 
+    /// <inheritdoc />
     public Task StartAsync(CancellationToken cancellationToken)
     {
         _logger.LogInformation("Starting ActivityListener for distributed tracing (prefix: {Prefix})", _activitySourcePrefix);
@@ -78,6 +79,7 @@ public class ActivityListenerHostedService : IHostedService, IDisposable
         return Task.CompletedTask;
     }
 
+    /// <inheritdoc />
     public Task StopAsync(CancellationToken cancellationToken)
     {
         _logger.LogInformation("Stopping ActivityListener");
@@ -85,6 +87,7 @@ public class ActivityListenerHostedService : IHostedService, IDisposable
         return Task.CompletedTask;
     }
 
+    /// <inheritdoc />
     public void Dispose()
     {
         if (_listener != null)

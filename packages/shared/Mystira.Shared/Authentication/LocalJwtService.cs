@@ -122,6 +122,11 @@ public class LocalJwtService : ILocalJwtService
     private readonly SecurityKey _validationKey;
     private readonly bool _useAsymmetric;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="LocalJwtService"/> class.
+    /// </summary>
+    /// <param name="options">JWT configuration options.</param>
+    /// <param name="logger">Logger instance for diagnostics.</param>
     public LocalJwtService(LocalJwtOptions options, ILogger<LocalJwtService> logger)
     {
         _options = options ?? throw new ArgumentNullException(nameof(options));
@@ -187,6 +192,7 @@ public class LocalJwtService : ILocalJwtService
         }
     }
 
+    /// <inheritdoc />
     public string GenerateAccessToken(string userId, string email, string displayName, string? role = null)
     {
         var claims = new List<Claim>
@@ -203,6 +209,7 @@ public class LocalJwtService : ILocalJwtService
         return GenerateAccessToken(claims);
     }
 
+    /// <inheritdoc />
     public string GenerateAccessToken(IEnumerable<Claim> claims)
     {
         var tokenHandler = new JwtSecurityTokenHandler();
@@ -220,6 +227,7 @@ public class LocalJwtService : ILocalJwtService
         return tokenHandler.WriteToken(token);
     }
 
+    /// <inheritdoc />
     public string GenerateRefreshToken()
     {
         var randomNumber = new byte[64];
@@ -228,6 +236,7 @@ public class LocalJwtService : ILocalJwtService
         return Convert.ToBase64String(randomNumber);
     }
 
+    /// <inheritdoc />
     public bool ValidateToken(string token)
     {
         try
@@ -247,6 +256,7 @@ public class LocalJwtService : ILocalJwtService
         }
     }
 
+    /// <inheritdoc />
     public bool ValidateRefreshToken(string token, string storedRefreshToken)
     {
         if (string.IsNullOrEmpty(token) || string.IsNullOrEmpty(storedRefreshToken))
@@ -255,6 +265,7 @@ public class LocalJwtService : ILocalJwtService
         return token == storedRefreshToken;
     }
 
+    /// <inheritdoc />
     public string? GetUserIdFromToken(string token)
     {
         try
@@ -278,6 +289,7 @@ public class LocalJwtService : ILocalJwtService
         }
     }
 
+    /// <inheritdoc />
     public (bool IsValid, string? UserId) ValidateAndExtractUserId(string token)
     {
         try
@@ -298,6 +310,7 @@ public class LocalJwtService : ILocalJwtService
         }
     }
 
+    /// <inheritdoc />
     public (bool IsValid, string? UserId) ExtractUserIdIgnoringExpiry(string token)
     {
         try
@@ -318,6 +331,7 @@ public class LocalJwtService : ILocalJwtService
         }
     }
 
+    /// <inheritdoc />
     public ClaimsPrincipal? ValidateAndGetPrincipal(string token)
     {
         try
