@@ -156,7 +156,7 @@ public class SceneRequest
     public string Title { get; set; } = string.Empty;
 
     /// <summary>
-    /// The type of scene (e.g., "narrative", "choice", "ending").
+    /// The type of scene (narrative, choice, or ending).
     /// </summary>
     public string Type { get; set; } = string.Empty;
 
