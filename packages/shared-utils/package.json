@@ -52,10 +52,14 @@
     "vitest": "^4.0.0"
   },
   "peerDependencies": {
-    "typescript": ">=4.7.0"
+    "typescript": ">=4.7.0",
+    "@microsoft/signalr": ">=8.0.0"
   },
   "peerDependenciesMeta": {
     "typescript": {
+      "optional": true
+    },
+    "@microsoft/signalr": {
       "optional": true
     }
   }
