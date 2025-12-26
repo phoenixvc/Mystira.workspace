@@ -65,7 +65,7 @@ public class BranchRequest
     /// <summary>
     /// The text displayed for this branch/choice.
     /// </summary>
-    public string? Text { get; set; }
+    public string Text { get; set; } = string.Empty;
 
     /// <summary>
     /// The identifier of the scene this branch leads to.
@@ -125,6 +125,21 @@ public class CharacterRequest
     public string Name { get; set; } = string.Empty;
 
     /// <summary>
+    /// A description of the character.
+    /// </summary>
+    public string? Description { get; set; }
+
+    /// <summary>
+    /// The role of the character in the story.
+    /// </summary>
+    public string? Role { get; set; }
+
+    /// <summary>
+    /// The archetype classification of the character.
+    /// </summary>
+    public string? Archetype { get; set; }
+
+    /// <summary>
     /// Optional URL or identifier for the character's image.
     /// </summary>
     public string? Image { get; set; }
@@ -138,6 +153,15 @@ public class CharacterRequest
     /// Character metadata including role, archetype, species, etc.
     /// </summary>
     public CharacterMetadataRequest? Metadata { get; set; }
+  
+    /// Optional list of traits associated with the character.
+    /// </summary>
+    public List<string>? Traits { get; set; }
+
+    /// <summary>
+    /// Whether this character is a player character.
+    /// </summary>
+    public bool IsPlayerCharacter { get; set; } = true;
 }
 
 /// <summary>
@@ -166,6 +190,16 @@ public class SceneRequest
     public string Description { get; set; } = string.Empty;
 
     /// <summary>
+    /// The narrative content of the scene.
+    /// </summary>
+    public string? Content { get; set; }
+
+    /// <summary>
+    /// The order of this scene in the scenario.
+    /// </summary>
+    public int Order { get; set; }
+
+    /// <summary>
     /// The identifier of the next scene (for linear progression).
     /// </summary>
     public string? NextSceneId { get; set; }
@@ -184,6 +218,21 @@ public class SceneRequest
     /// Media references for this scene.
     /// </summary>
     public MediaReferencesRequest? Media { get; set; }
+
+    /// <summary>
+    /// Optional URL or identifier for the scene's background image.
+    /// </summary>
+    public string? BackgroundImage { get; set; }
+
+    /// <summary>
+    /// Optional URL or identifier for the scene's background music.
+    /// </summary>
+    public string? BackgroundMusic { get; set; }
+
+    /// <summary>
+    /// Optional list of choices available in this scene.
+    /// </summary>
+    public List<ChoiceRequest>? Choices { get; set; }
 
     /// <summary>
     /// Optional list of branches (choices) in this scene.
