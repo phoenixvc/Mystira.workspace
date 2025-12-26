@@ -41,7 +41,7 @@ This Terraform module deploys the infrastructure for [Mystira.App](https://githu
 | Resource                   | Purpose                      | Notes                                             |
 | -------------------------- | ---------------------------- | ------------------------------------------------- |
 | **Cosmos DB**              | Document database            | Serverless mode, 7 containers                     |
-| **App Service**            | API backend                  | Linux, .NET 9.0, System Managed Identity          |
+| **App Service**            | API backend                  | Linux, .NET 9.0, System Managed Identity, WebSockets enabled |
 | **Static Web App**         | Blazor WASM PWA              | Deployed to fallback region (not available in ZA) |
 | **Storage Account**        | Media blobs                  | With CORS support                                 |
 | **Key Vault**              | Secrets management           | Stores connection strings, JWT keys               |
@@ -197,3 +197,5 @@ Example: `mys-dev-mystira-cosmos-san`
 4. **Managed Identity**: App Service uses System Assigned Managed Identity for secure access to Key Vault and other resources.
 
 5. **Container Migration**: If importing existing containers deployed with old Bicep templates, partition keys may differ. Cosmos DB partition keys cannot be changed after creation - containers must be recreated with correct keys. The EF Core DbContext `ToJsonProperty` mappings are the source of truth.
+
+6. **WebSocket Support**: The App Service has WebSocket support enabled (`websockets_enabled = true`) to support SignalR real-time communication. This allows the backend to push events to connected clients without polling. No additional infrastructure configuration is required for WebSocket/SignalR functionality.

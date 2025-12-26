@@ -319,6 +319,19 @@ resource "azurerm_cdn_frontdoor_security_policy" "main" {
             cdn_frontdoor_domain_id = azurerm_cdn_frontdoor_custom_domain.story_generator_swa[0].id
           }
         }
+        # Conditionally include Mystira.App domains when enabled
+        dynamic "domain" {
+          for_each = var.enable_mystira_app ? [1] : []
+          content {
+            cdn_frontdoor_domain_id = azurerm_cdn_frontdoor_custom_domain.mystira_app_api[0].id
+          }
+        }
+        dynamic "domain" {
+          for_each = var.enable_mystira_app ? [1] : []
+          content {
+            cdn_frontdoor_domain_id = azurerm_cdn_frontdoor_custom_domain.mystira_app_swa[0].id
+          }
+        }
         patterns_to_match = ["/*"]
       }
     }
@@ -698,6 +711,189 @@ resource "azurerm_cdn_frontdoor_route" "story_generator_swa" {
       content_types_to_compress = [
         "application/javascript",
         "application/json",
+        "text/css",
+        "text/html",
+        "text/javascript",
+        "text/plain",
+      ]
+    }
+  }
+}
+
+# =============================================================================
+# Mystira.App Services (Optional)
+# =============================================================================
+
+# Mystira.App API Endpoint
+resource "azurerm_cdn_frontdoor_endpoint" "mystira_app_api" {
+  count                    = var.enable_mystira_app ? 1 : 0
+  name                     = "${var.project_name}-${var.environment}-app-api"
+  cdn_frontdoor_profile_id = azurerm_cdn_frontdoor_profile.main.id
+
+  tags = local.common_tags
+}
+
+# Mystira.App SWA Endpoint
+resource "azurerm_cdn_frontdoor_endpoint" "mystira_app_swa" {
+  count                    = var.enable_mystira_app ? 1 : 0
+  name                     = "${var.project_name}-${var.environment}-app-swa"
+  cdn_frontdoor_profile_id = azurerm_cdn_frontdoor_profile.main.id
+
+  tags = local.common_tags
+}
+
+# Mystira.App API Origin Group
+resource "azurerm_cdn_frontdoor_origin_group" "mystira_app_api" {
+  count                    = var.enable_mystira_app ? 1 : 0
+  name                     = "mystira-app-api-origin-group"
+  cdn_frontdoor_profile_id = azurerm_cdn_frontdoor_profile.main.id
+  session_affinity_enabled = var.session_affinity_enabled
+
+  load_balancing {
+    sample_size                        = 4
+    successful_samples_required        = 3
+    additional_latency_in_milliseconds = 50
+  }
+
+  health_probe {
+    path                = var.health_probe_path
+    request_type        = "HEAD"
+    protocol            = "Https"
+    interval_in_seconds = var.health_probe_interval
+  }
+}
+
+# Mystira.App SWA Origin Group
+resource "azurerm_cdn_frontdoor_origin_group" "mystira_app_swa" {
+  count                    = var.enable_mystira_app ? 1 : 0
+  name                     = "mystira-app-swa-origin-group"
+  cdn_frontdoor_profile_id = azurerm_cdn_frontdoor_profile.main.id
+  session_affinity_enabled = false  # SWA/PWA is stateless
+
+  load_balancing {
+    sample_size                        = 4
+    successful_samples_required        = 3
+    additional_latency_in_milliseconds = 50
+  }
+
+  health_probe {
+    path                = "/"  # SWA health check at root
+    request_type        = "HEAD"
+    protocol            = "Https"
+    interval_in_seconds = var.health_probe_interval
+  }
+}
+
+# Mystira.App API Origin
+resource "azurerm_cdn_frontdoor_origin" "mystira_app_api" {
+  count                         = var.enable_mystira_app ? 1 : 0
+  name                          = "mystira-app-api-origin"
+  cdn_frontdoor_origin_group_id = azurerm_cdn_frontdoor_origin_group.mystira_app_api[0].id
+
+  enabled                        = true
+  host_name                      = var.mystira_app_api_backend_address
+  http_port                      = 80
+  https_port                     = 443
+  origin_host_header             = var.mystira_app_api_backend_address
+  priority                       = 1
+  weight                         = 1000
+  certificate_name_check_enabled = true
+}
+
+# Mystira.App SWA Origin
+resource "azurerm_cdn_frontdoor_origin" "mystira_app_swa" {
+  count                         = var.enable_mystira_app ? 1 : 0
+  name                          = "mystira-app-swa-origin"
+  cdn_frontdoor_origin_group_id = azurerm_cdn_frontdoor_origin_group.mystira_app_swa[0].id
+
+  enabled                        = true
+  host_name                      = var.mystira_app_swa_backend_address
+  http_port                      = 80
+  https_port                     = 443
+  origin_host_header             = var.mystira_app_swa_backend_address
+  priority                       = 1
+  weight                         = 1000
+  certificate_name_check_enabled = true
+}
+
+# Mystira.App API Custom Domain
+resource "azurerm_cdn_frontdoor_custom_domain" "mystira_app_api" {
+  count                    = var.enable_mystira_app ? 1 : 0
+  name                     = "${var.project_name}-${var.environment}-app-api-domain"
+  cdn_frontdoor_profile_id = azurerm_cdn_frontdoor_profile.main.id
+  dns_zone_id              = null
+  host_name                = var.custom_domain_mystira_app_api
+
+  tls {
+    certificate_type = "ManagedCertificate"
+  }
+}
+
+# Mystira.App SWA Custom Domain
+resource "azurerm_cdn_frontdoor_custom_domain" "mystira_app_swa" {
+  count                    = var.enable_mystira_app ? 1 : 0
+  name                     = "${var.project_name}-${var.environment}-app-swa-domain"
+  cdn_frontdoor_profile_id = azurerm_cdn_frontdoor_profile.main.id
+  dns_zone_id              = null
+  host_name                = var.custom_domain_mystira_app_swa
+
+  tls {
+    certificate_type = "ManagedCertificate"
+  }
+}
+
+# Mystira.App API Route
+resource "azurerm_cdn_frontdoor_route" "mystira_app_api" {
+  count                           = var.enable_mystira_app ? 1 : 0
+  name                            = "mystira-app-api-route"
+  cdn_frontdoor_endpoint_id       = azurerm_cdn_frontdoor_endpoint.mystira_app_api[0].id
+  cdn_frontdoor_origin_group_id   = azurerm_cdn_frontdoor_origin_group.mystira_app_api[0].id
+  cdn_frontdoor_origin_ids        = [azurerm_cdn_frontdoor_origin.mystira_app_api[0].id]
+  cdn_frontdoor_custom_domain_ids = [azurerm_cdn_frontdoor_custom_domain.mystira_app_api[0].id]
+
+  supported_protocols    = ["Http", "Https"]
+  patterns_to_match      = ["/*"]
+  forwarding_protocol    = "HttpsOnly"
+  https_redirect_enabled = true
+  link_to_default_domain = true
+
+  # No caching for API endpoints - important for SignalR WebSocket connections
+  cache {
+    query_string_caching_behavior = "UseQueryString"
+    compression_enabled           = true
+    content_types_to_compress = [
+      "application/json",
+      "text/plain",
+    ]
+  }
+}
+
+# Mystira.App SWA Route
+resource "azurerm_cdn_frontdoor_route" "mystira_app_swa" {
+  count                           = var.enable_mystira_app ? 1 : 0
+  name                            = "mystira-app-swa-route"
+  cdn_frontdoor_endpoint_id       = azurerm_cdn_frontdoor_endpoint.mystira_app_swa[0].id
+  cdn_frontdoor_origin_group_id   = azurerm_cdn_frontdoor_origin_group.mystira_app_swa[0].id
+  cdn_frontdoor_origin_ids        = [azurerm_cdn_frontdoor_origin.mystira_app_swa[0].id]
+  cdn_frontdoor_custom_domain_ids = [azurerm_cdn_frontdoor_custom_domain.mystira_app_swa[0].id]
+
+  supported_protocols    = ["Http", "Https"]
+  patterns_to_match      = ["/*"]
+  forwarding_protocol    = "HttpsOnly"
+  https_redirect_enabled = true
+  link_to_default_domain = true
+
+  # Cache static assets from PWA/SWA
+  dynamic "cache" {
+    for_each = var.enable_caching ? [1] : []
+    content {
+      query_string_caching_behavior = "IgnoreQueryString"
+      query_strings                 = []
+      compression_enabled           = true
+      content_types_to_compress = [
+        "application/javascript",
+        "application/json",
+        "application/wasm",
         "text/css",
         "text/html",
         "text/javascript",

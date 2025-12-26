@@ -39,8 +39,8 @@
     "api",
     "types"
   ],
-  "author": "Mystira Team",
-  "license": "MIT",
+  "author": "Mystira <jurie@phoenixvc.tech>",
+  "license": "SEE LICENSE IN LICENSE",
   "repository": {
     "type": "git",
     "url": "https://github.com/phoenixvc/Mystira.workspace.git",

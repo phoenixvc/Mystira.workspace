@@ -1,0 +1,31 @@
+{
+  "name": "@mystira/api-spec",
+  "version": "1.0.0",
+  "private": true,
+  "description": "OpenAPI specifications for Mystira platform APIs",
+  "scripts": {
+    "generate": "pnpm run generate:csharp && pnpm run generate:typescript",
+    "generate:csharp": "bash scripts/generate-csharp.sh",
+    "generate:typescript": "bash scripts/generate-typescript.sh",
+    "generate:ts": "bash scripts/generate-typescript.sh",
+    "validate": "redocly lint openapi/*.yaml",
+    "validate:app": "redocly lint openapi/app-api.yaml",
+    "validate:story": "redocly lint openapi/story-generator-api.yaml",
+    "preview": "redocly preview-docs openapi/app-api.yaml",
+    "preview:story": "redocly preview-docs openapi/story-generator-api.yaml",
+    "bundle": "redocly bundle openapi/app-api.yaml -o dist/app-api.yaml && redocly bundle openapi/story-generator-api.yaml -o dist/story-generator-api.yaml"
+  },
+  "devDependencies": {
+    "@redocly/cli": "^1.25.0",
+    "nswag": "^14.0.0",
+    "openapi-typescript": "^7.0.0"
+  },
+  "keywords": [
+    "mystira",
+    "openapi",
+    "api",
+    "contracts"
+  ],
+  "author": "Mystira <jurie@phoenixvc.tech>",
+  "license": "SEE LICENSE IN LICENSE"
+}

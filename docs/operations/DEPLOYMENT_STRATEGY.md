@@ -582,26 +582,23 @@ Issue Detected?
 
 **1 Week Before:**
 
-- Email to all stakeholders with maintenance window
-- Post in Slack #engineering channel
+- Email to all stakeholders with maintenance window (`jurie@phoenixvc.tech`)
 - Update status page
 
 **24 Hours Before:**
 
 - Reminder email
-- Reminder in Slack
-- Pre-deployment briefing with on-call team
+- Pre-deployment briefing
 
 **1 Hour Before:**
 
-- Final reminder in Slack
+- Final reminder email
 - Set status page to "Scheduled Maintenance"
 
 ### During Deployment
 
-- Real-time updates in Slack #incidents channel
 - Status page updates at each phase
-- Escalation to management if issues arise
+- Email escalation if issues arise
 
 ### Post-Deployment
 

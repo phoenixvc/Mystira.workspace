@@ -3,7 +3,9 @@
 This directory contains migration guides for adopting `Mystira.Shared` infrastructure and consolidated packages across all Mystira services.
 
 **Last Updated**: December 2025
-**Current Target Runtime**: .NET 9.0 / Node.js 20+ / Python 3.12+
+**Current Target Runtime**: .NET 9.0 / Node.js 22+ / Python 3.12+
+
+> **📋 See [MIGRATION_INDEX.md](./MIGRATION_INDEX.md)** for the consolidated migration status dashboard and document hierarchy.
 
 ---
 

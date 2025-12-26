@@ -22,10 +22,25 @@ Azure Front Door (Global Edge)
   ├─ SSL Termination (Managed Certificates)
   └─ Edge Caching (Static Content)
       ↓
-Backend Services (Publisher, Chain)
+Backend Services (Publisher, Chain, Admin API/UI, Story Generator, Mystira.App)
   ↓
-NGINX Ingress → Kubernetes Pods
+Kubernetes Pods (Publisher, Chain, Admin API)
+App Service (Mystira.App API)
+Static Web Apps (Admin UI, Story Generator SWA, Mystira.App SWA)
 ```
+
+## Supported Services
+
+Front Door can be configured to route traffic to:
+
+- **Publisher** - Content publishing service (Kubernetes)
+- **Chain** - Blockchain integration service (Kubernetes)
+- **Admin API** - Admin backend API (Kubernetes)
+- **Admin UI** - Admin dashboard frontend (Static Web App)
+- **Story Generator API** - Story generation backend (Kubernetes)
+- **Story Generator SWA** - Story generation frontend (Static Web App)
+- **Mystira.App API** - Main application API (Azure App Service) - **Supports WebSockets/SignalR**
+- **Mystira.App SWA** - Main application PWA (Static Web App)
 
 ## Usage
 
@@ -88,6 +103,72 @@ module "front_door" {
   }
 }
 ```
+
+### Full Example with All Services
+
+```terraform
+module "front_door" {
+  source = "../../modules/front-door"
+
+  environment         = "prod"
+  resource_group_name = azurerm_resource_group.main.name
+  location            = "eastus"
+  project_name        = "mystira"
+
+  # Core services (always required)
+  publisher_backend_address = "publisher.mystira.app"
+  chain_backend_address     = "chain.mystira.app"
+  custom_domain_publisher   = "publisher.mystira.app"
+  custom_domain_chain       = "chain.mystira.app"
+
+  # Enable Admin services
+  enable_admin_services       = true
+  admin_api_backend_address   = "admin-api.mystira.app"
+  admin_ui_backend_address    = "admin.mystira.app"
+  custom_domain_admin_api     = "admin-api.mystira.app"
+  custom_domain_admin_ui      = "admin.mystira.app"
+
+  # Enable Story Generator services
+  enable_story_generator                = true
+  story_generator_api_backend_address   = "story-api.mystira.app"
+  story_generator_swa_backend_address   = "story.mystira.app"
+  custom_domain_story_generator_api     = "story-api.mystira.app"
+  custom_domain_story_generator_swa     = "story.mystira.app"
+
+  # Enable Mystira.App services (API + PWA)
+  enable_mystira_app              = true
+  mystira_app_api_backend_address = "mys-prod-app-api-san.azurewebsites.net"  # App Service hostname
+  mystira_app_swa_backend_address = "mys-prod-app-swa-eus2.azurestaticapps.net"  # Static Web App hostname
+  custom_domain_mystira_app_api   = "api.mystira.app"
+  custom_domain_mystira_app_swa   = "app.mystira.app"
+
+  enable_waf              = true
+  waf_mode                = "Prevention"
+  enable_caching          = true
+  cache_duration_seconds  = 7200  # 2 hours
+  rate_limit_threshold    = 500   # Higher for production
+  health_probe_interval   = 30
+  session_affinity_enabled = false
+
+  tags = {
+    Project     = "Mystira"
+    Environment = "prod"
+    CostCenter  = "Infrastructure"
+  }
+}
+```
+
+## Important Notes
+
+### WebSocket Support for Mystira.App API
+
+Azure Front Door **fully supports WebSockets** for SignalR and other real-time connections. The Mystira.App API endpoint configuration:
+
+- Uses `forwarding_protocol = "HttpsOnly"` which maintains WebSocket upgrades
+- Has minimal caching (`query_string_caching_behavior = "UseQueryString"`) to avoid interfering with persistent connections
+- The backend Azure App Service has `websockets_enabled = true` configured
+
+No additional configuration is needed for WebSocket/SignalR to work through Front Door.
 
 ## Inputs
 

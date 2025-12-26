@@ -1,9 +1,9 @@
 import type {
   SignalROptions,
-  SignalRConnectionState,
   SignalREventHandler,
   ISignalRConnection,
-} from './signalr.types';
+} from "./signalr.types";
+import { SignalRConnectionState } from "./signalr.types";
 
 /**
  * SignalR connection implementation that works with @microsoft/signalr
@@ -22,7 +22,9 @@ export class SignalRConnection implements ISignalRConnection {
   constructor(private options: SignalROptions) {
     // Ensure we have either accessToken or accessTokenFactory
     if (!options.accessToken && !options.accessTokenFactory) {
-      console.warn('SignalR: No authentication configured. Connection may fail if server requires auth.');
+      console.warn(
+        "SignalR: No authentication configured. Connection may fail if server requires auth."
+      );
     }
   }
 
@@ -53,12 +55,13 @@ export class SignalRConnection implements ISignalRConnection {
 
     try {
       // Dynamic import to support lazy loading
-      const signalR = await import('@microsoft/signalr');
+      const signalR = await import("@microsoft/signalr");
 
       const builder = new signalR.HubConnectionBuilder()
         .withUrl(this.options.hubUrl, {
-          accessTokenFactory: this.options.accessTokenFactory 
-            || (() => this.options.accessToken || ''),
+          accessTokenFactory:
+            this.options.accessTokenFactory ||
+            (() => this.options.accessToken || ""),
           skipNegotiation: false,
           transport: signalR.HttpTransportType.WebSockets,
         })
@@ -76,7 +79,7 @@ export class SignalRConnection implements ISignalRConnection {
       // Configure logging
       if (this.options.debug) {
         builder.configureLogging(signalR.LogLevel.Debug);
-      } else if (process.env.NODE_ENV === 'development') {
+      } else if (process.env.NODE_ENV === "development") {
         builder.configureLogging(signalR.LogLevel.Information);
       } else {
         builder.configureLogging(signalR.LogLevel.Warning);
@@ -86,25 +89,25 @@ export class SignalRConnection implements ISignalRConnection {
 
       // Setup connection event handlers
       this._connection.onreconnecting((error?: Error) => {
-        this.log('Reconnecting...', error);
+        this.log("Reconnecting...", error);
         this._state = SignalRConnectionState.Reconnecting;
         this._error = error || null;
         this._reconnectAttempts++;
       });
 
       this._connection.onreconnected((connectionId?: string) => {
-        this.log('Reconnected:', connectionId);
+        this.log("Reconnected:", connectionId);
         this._state = SignalRConnectionState.Connected;
         this._connectionId = connectionId || null;
         this._error = null;
         this._reconnectAttempts = 0;
-        
+
         // Re-register all event handlers
         this.reregisterEventHandlers();
       });
 
       this._connection.onclose((error?: Error) => {
-        this.log('Connection closed', error);
+        this.log("Connection closed", error);
         this._state = SignalRConnectionState.Disconnected;
         this._connectionId = null;
         this._error = error || null;
@@ -112,12 +115,12 @@ export class SignalRConnection implements ISignalRConnection {
         // Attempt manual reconnection if within retry limit
         if (
           this.options.autoConnect !== false &&
-          this._reconnectAttempts < (this.options.maxReconnectAttempts || Infinity)
+          this._reconnectAttempts <
+            (this.options.maxReconnectAttempts || Infinity)
         ) {
           this.scheduleReconnect();
         }
       });
-
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error));
       this._error = err;
@@ -131,12 +134,14 @@ export class SignalRConnection implements ISignalRConnection {
     }
 
     const delay = this.options.reconnectDelay || 5000;
-    this.log(`Scheduling reconnect in ${delay}ms (attempt ${this._reconnectAttempts + 1})`);
+    this.log(
+      `Scheduling reconnect in ${delay}ms (attempt ${this._reconnectAttempts + 1})`
+    );
 
     this._reconnectTimer = setTimeout(() => {
       this._reconnectTimer = null;
       this.connect().catch((error) => {
-        this.log('Reconnect attempt failed:', error);
+        this.log("Reconnect attempt failed:", error);
       });
     }, delay);
   }
@@ -152,19 +157,19 @@ export class SignalRConnection implements ISignalRConnection {
   }
 
   private log(message: string, ...args: any[]): void {
-    if (this.options.debug || process.env.NODE_ENV === 'development') {
+    if (this.options.debug || process.env.NODE_ENV === "development") {
       console.log(`[SignalR] ${message}`, ...args);
     }
   }
 
   async connect(): Promise<void> {
     if (this._state === SignalRConnectionState.Connected) {
-      this.log('Already connected');
+      this.log("Already connected");
       return;
     }
 
     if (this._state === SignalRConnectionState.Connecting) {
-      this.log('Connection already in progress');
+      this.log("Connection already in progress");
       return;
     }
 
@@ -175,7 +180,7 @@ export class SignalRConnection implements ISignalRConnection {
       await this.initializeConnection();
 
       if (!this._connection) {
-        throw new Error('Failed to initialize connection');
+        throw new Error("Failed to initialize connection");
       }
 
       await this._connection.start();
@@ -183,12 +188,12 @@ export class SignalRConnection implements ISignalRConnection {
       this._connectionId = this._connection.connectionId || null;
       this._reconnectAttempts = 0;
 
-      this.log('Connected:', this._connectionId);
+      this.log("Connected:", this._connectionId);
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error));
       this._error = err;
       this._state = SignalRConnectionState.Disconnected;
-      this.log('Connection failed:', err);
+      this.log("Connection failed:", err);
       throw err;
     }
   }
@@ -207,9 +212,9 @@ export class SignalRConnection implements ISignalRConnection {
       await this._connection.stop();
       this._state = SignalRConnectionState.Disconnected;
       this._connectionId = null;
-      this.log('Disconnected');
+      this.log("Disconnected");
     } catch (error) {
-      this.log('Error during disconnect:', error);
+      this.log("Error during disconnect:", error);
     }
   }
 
@@ -254,15 +259,15 @@ export class SignalRConnection implements ISignalRConnection {
 
   async invoke<T = any>(methodName: string, ...args: any[]): Promise<T> {
     if (!this._connection) {
-      throw new Error('SignalR connection not initialized');
+      throw new Error("SignalR connection not initialized");
     }
 
     if (this._state !== SignalRConnectionState.Connected) {
-      throw new Error('SignalR connection not connected');
+      throw new Error("SignalR connection not connected");
     }
 
     try {
-      return await this._connection.invoke<T>(methodName, ...args);
+      return (await this._connection.invoke(methodName, ...args)) as T;
     } catch (error) {
       this.log(`Error invoking ${methodName}:`, error);
       throw error;
@@ -271,11 +276,11 @@ export class SignalRConnection implements ISignalRConnection {
 
   async send(methodName: string, ...args: any[]): Promise<void> {
     if (!this._connection) {
-      throw new Error('SignalR connection not initialized');
+      throw new Error("SignalR connection not initialized");
     }
 
     if (this._state !== SignalRConnectionState.Connected) {
-      throw new Error('SignalR connection not connected');
+      throw new Error("SignalR connection not connected");
     }
 
     try {
@@ -287,11 +292,11 @@ export class SignalRConnection implements ISignalRConnection {
   }
 
   async joinGroup(groupName: string): Promise<void> {
-    return this.invoke('JoinGroup', groupName);
+    return this.invoke("JoinGroup", groupName);
   }
 
   async leaveGroup(groupName: string): Promise<void> {
-    return this.invoke('LeaveGroup', groupName);
+    return this.invoke("LeaveGroup", groupName);
   }
 }
 
@@ -300,14 +305,16 @@ export class SignalRConnection implements ISignalRConnection {
  * @param options Connection options
  * @returns SignalR connection instance
  */
-export function createSignalRConnection(options: SignalROptions): ISignalRConnection {
+export function createSignalRConnection(
+  options: SignalROptions
+): ISignalRConnection {
   const connection = new SignalRConnection(options);
-  
+
   if (options.autoConnect !== false) {
     connection.connect().catch((error) => {
-      console.error('Failed to auto-connect SignalR:', error);
+      console.error("Failed to auto-connect SignalR:", error);
     });
   }
-  
+
   return connection;
 }
