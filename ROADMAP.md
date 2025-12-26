@@ -2,7 +2,7 @@
 
 **Last Updated**: December 2025
 **Production Go-Live**: January 1, 2026
-**Owner**: jurie@phoenixvc.tech (Technical), eben@phoenixvc.tech (Business)
+**Owner**: <jurie@phoenixvc.tech> (Technical), <eben@phoenixvc.tech> (Business)
 
 ---
 
