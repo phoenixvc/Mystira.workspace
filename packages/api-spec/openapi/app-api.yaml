@@ -94,25 +94,6 @@ paths:
           description: Internal server error
 
 components:
-  schemas:
-    # Import common types
-    ErrorResponse:
-      $ref: './common/errors.yaml#/components/schemas/ErrorResponse'
-    ValidationErrorResponse:
-      $ref: './common/errors.yaml#/components/schemas/ValidationErrorResponse'
-    NotFoundErrorResponse:
-      $ref: './common/errors.yaml#/components/schemas/NotFoundErrorResponse'
-    UnauthorizedErrorResponse:
-      $ref: './common/errors.yaml#/components/schemas/UnauthorizedErrorResponse'
-    ForbiddenErrorResponse:
-      $ref: './common/errors.yaml#/components/schemas/ForbiddenErrorResponse'
-    PagedResponse:
-      $ref: './common/pagination.yaml#/components/schemas/PagedResponse'
-    PaginationMetadata:
-      $ref: './common/pagination.yaml#/components/schemas/PaginationMetadata'
-    HealthCheckResult:
-      $ref: './common/health.yaml#/components/schemas/HealthCheckResult'
-
   securitySchemes:
     bearerAuth:
       type: http
