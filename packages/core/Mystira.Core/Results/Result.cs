@@ -117,6 +117,7 @@ public readonly struct Result<T> : IEquatable<Result<T>>
         return IsSuccess ? _value! : defaultFactory(_error!);
     }
 
+    /// <inheritdoc />
     public bool Equals(Result<T> other)
     {
         if (IsSuccess != other.IsSuccess) return false;
@@ -124,15 +125,25 @@ public readonly struct Result<T> : IEquatable<Result<T>>
         return _error!.Equals(other._error);
     }
 
+    /// <inheritdoc />
     public override bool Equals(object? obj) => obj is Result<T> other && Equals(other);
 
+    /// <inheritdoc />
     public override int GetHashCode() => IsSuccess
         ? HashCode.Combine(true, _value)
         : HashCode.Combine(false, _error);
 
+    /// <summary>
+    /// Determines whether two results are equal.
+    /// </summary>
     public static bool operator ==(Result<T> left, Result<T> right) => left.Equals(right);
+    
+    /// <summary>
+    /// Determines whether two results are not equal.
+    /// </summary>
     public static bool operator !=(Result<T> left, Result<T> right) => !left.Equals(right);
 
+    /// <inheritdoc />
     public override string ToString() => IsSuccess
         ? $"Success({_value})"
         : $"Failure({_error})";
@@ -193,14 +204,26 @@ public readonly struct Result : IEquatable<Result>
     /// </summary>
     public static implicit operator Result(Error error) => Failure(error);
 
+    /// <inheritdoc />
     public bool Equals(Result other) => IsSuccess == other.IsSuccess &&
         (IsSuccess || _error!.Equals(other._error));
 
+    /// <inheritdoc />
     public override bool Equals(object? obj) => obj is Result other && Equals(other);
+    
+    /// <inheritdoc />
     public override int GetHashCode() => IsSuccess ? HashCode.Combine(true) : HashCode.Combine(false, _error);
 
+    /// <summary>
+    /// Determines whether two results are equal.
+    /// </summary>
     public static bool operator ==(Result left, Result right) => left.Equals(right);
+    
+    /// <summary>
+    /// Determines whether two results are not equal.
+    /// </summary>
     public static bool operator !=(Result left, Result right) => !left.Equals(right);
 
+    /// <inheritdoc />
     public override string ToString() => IsSuccess ? "Success" : $"Failure({_error})";
 }

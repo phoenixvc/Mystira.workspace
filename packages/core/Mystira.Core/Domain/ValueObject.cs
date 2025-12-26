@@ -10,6 +10,7 @@ public abstract class ValueObject : IEquatable<ValueObject>
     /// </summary>
     protected abstract IEnumerable<object?> GetEqualityComponents();
 
+    /// <inheritdoc />
     public bool Equals(ValueObject? other)
     {
         if (other is null) return false;
@@ -19,8 +20,10 @@ public abstract class ValueObject : IEquatable<ValueObject>
         return GetEqualityComponents().SequenceEqual(other.GetEqualityComponents());
     }
 
+    /// <inheritdoc />
     public override bool Equals(object? obj) => Equals(obj as ValueObject);
 
+    /// <inheritdoc />
     public override int GetHashCode()
     {
         return GetEqualityComponents()
@@ -28,9 +31,15 @@ public abstract class ValueObject : IEquatable<ValueObject>
                 HashCode.Combine(hash, component?.GetHashCode() ?? 0));
     }
 
+    /// <summary>
+    /// Determines whether two value objects are equal.
+    /// </summary>
     public static bool operator ==(ValueObject? left, ValueObject? right) =>
         left is null ? right is null : left.Equals(right);
 
+    /// <summary>
+    /// Determines whether two value objects are not equal.
+    /// </summary>
     public static bool operator !=(ValueObject? left, ValueObject? right) => !(left == right);
 }
 
@@ -46,17 +55,26 @@ public abstract class SingleValueObject<T> : ValueObject
     /// </summary>
     public T Value { get; }
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="SingleValueObject{T}"/> class.
+    /// </summary>
+    /// <param name="value">The value to wrap.</param>
     protected SingleValueObject(T value)
     {
         Value = value;
     }
 
+    /// <inheritdoc />
     protected override IEnumerable<object?> GetEqualityComponents()
     {
         yield return Value;
     }
 
+    /// <inheritdoc />
     public override string ToString() => Value.ToString() ?? string.Empty;
 
+    /// <summary>
+    /// Implicitly converts a <see cref="SingleValueObject{T}"/> to its underlying value.
+    /// </summary>
     public static implicit operator T(SingleValueObject<T> valueObject) => valueObject.Value;
 }

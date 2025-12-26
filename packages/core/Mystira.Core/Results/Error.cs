@@ -17,8 +17,12 @@ public sealed record Error(string Code, string Message, Exception? Exception = n
     /// <summary>
     /// Creates an error with metadata.
     /// </summary>
-    public Error WithMetadata(string key, object value) =>
-        this with { Metadata = new Dictionary<string, object>(Metadata ?? new()) { [key] = value } };
+    public Error WithMetadata(string key, object value)
+    {
+        var existingMetadata = Metadata ?? new Dictionary<string, object>();
+        var newMetadata = new Dictionary<string, object>(existingMetadata) { [key] = value };
+        return this with { Metadata = newMetadata };
+    }
 
     /// <summary>
     /// Creates a "not found" error.
@@ -91,6 +95,7 @@ public sealed record Error(string Code, string Message, Exception? Exception = n
     public static Error FromException(Exception ex) =>
         new("EXCEPTION", ex.Message, ex);
 
+    /// <inheritdoc />
     public override string ToString() =>
         Exception is null ? $"[{Code}] {Message}" : $"[{Code}] {Message} (Exception: {Exception.GetType().Name})";
 }

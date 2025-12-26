@@ -22,8 +22,15 @@ public abstract class Entity<TId> : IEquatable<Entity<TId>>
     /// </summary>
     public DateTimeOffset? ModifiedAt { get; protected set; }
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="Entity{TId}"/> class.
+    /// </summary>
     protected Entity() { }
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="Entity{TId}"/> class with the specified identifier.
+    /// </summary>
+    /// <param name="id">The entity identifier.</param>
     protected Entity(TId id)
     {
         Id = id;
@@ -37,6 +44,7 @@ public abstract class Entity<TId> : IEquatable<Entity<TId>>
         ModifiedAt = DateTimeOffset.UtcNow;
     }
 
+    /// <inheritdoc />
     public bool Equals(Entity<TId>? other)
     {
         if (other is null) return false;
@@ -44,14 +52,22 @@ public abstract class Entity<TId> : IEquatable<Entity<TId>>
         return EqualityComparer<TId>.Default.Equals(Id, other.Id);
     }
 
+    /// <inheritdoc />
     public override bool Equals(object? obj) => Equals(obj as Entity<TId>);
 
+    /// <inheritdoc />
     public override int GetHashCode() => 
         Id is null ? 0 : Id.GetHashCode();
 
+    /// <summary>
+    /// Determines whether two entities are equal.
+    /// </summary>
     public static bool operator ==(Entity<TId>? left, Entity<TId>? right) =>
         left is null ? right is null : left.Equals(right);
 
+    /// <summary>
+    /// Determines whether two entities are not equal.
+    /// </summary>
     public static bool operator !=(Entity<TId>? left, Entity<TId>? right) => !(left == right);
 }
 
@@ -60,7 +76,14 @@ public abstract class Entity<TId> : IEquatable<Entity<TId>>
 /// </summary>
 public abstract class Entity : Entity<Guid>
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="Entity"/> class with a new GUID.
+    /// </summary>
     protected Entity() : base(Guid.NewGuid()) { }
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="Entity"/> class with the specified GUID.
+    /// </summary>
+    /// <param name="id">The entity identifier.</param>
     protected Entity(Guid id) : base(id) { }
 }
