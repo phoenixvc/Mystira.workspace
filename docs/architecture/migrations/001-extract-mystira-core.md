@@ -235,7 +235,7 @@ info:
   description: Main Mystira application API
 
 servers:
-  - url: https://api.mystira.io/v1
+  - url: https://api.mystira.app/v1
 
 paths:
   /health:

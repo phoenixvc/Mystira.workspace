@@ -14,14 +14,16 @@ info:
     name: Mystira Team
     url: https://github.com/phoenixvc/Mystira.workspace
   license:
-    name: MIT
-    url: https://opensource.org/licenses/MIT
+    name: Proprietary
+    identifier: LicenseRef-Mystira
 
 servers:
-  - url: https://api.mystira.io/v1
+  - url: https://api.mystira.app/v1
     description: Production
-  - url: https://api.staging.mystira.io/v1
+  - url: https://staging.api.mystira.app/v1
     description: Staging
+  - url: https://dev.api.mystira.app/v1
+    description: Development
   - url: http://localhost:5000/v1
     description: Local development
 

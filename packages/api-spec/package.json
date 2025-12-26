@@ -23,5 +23,7 @@
     "openapi",
     "api",
     "contracts"
-  ]
+  ],
+  "author": "Mystira <engineering@mystira.app>",
+  "license": "SEE LICENSE IN LICENSE"
 }

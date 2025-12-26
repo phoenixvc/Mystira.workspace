@@ -14,7 +14,7 @@ We actively support security updates for the following versions:
 If you discover a security vulnerability, please follow these steps:
 
 1. **Do NOT** create a public GitHub issue
-2. Email security details to: security@mystira.io
+2. Email security details to: security@mystira.app
 3. Include:
    - Description of the vulnerability
    - Steps to reproduce
@@ -197,7 +197,7 @@ For EU users:
 - Right to erasure ("right to be forgotten")
 - Data portability
 - Consent management
-- Data Protection Officer contact: dpo@mystira.io
+- Data Protection Officer contact: dpo@mystira.app
 
 ---
 
@@ -213,8 +213,8 @@ We follow responsible disclosure practices. Please allow us time to address vuln
 
 ## Security Contacts
 
-- **Security Team**: security@mystira.io
-- **Data Protection Officer**: dpo@mystira.io
+- **Security Team**: security@mystira.app
+- **Data Protection Officer**: dpo@mystira.app
 - **Emergency**: [On-call procedure for critical issues]
 
 ## Related Documentation
