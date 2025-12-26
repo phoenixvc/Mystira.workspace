@@ -288,6 +288,478 @@ export interface NotificationFailed extends IntegrationEvent {
 }
 
 // =============================================================================
+// Progression Events
+// =============================================================================
+
+/**
+ * Published when a user makes a choice in a story.
+ */
+export interface ChoiceMade extends IntegrationEvent {
+  type: 'ChoiceMade';
+  sessionId: string;
+  scenarioId: string;
+  accountId: string;
+  nodeId: string;
+  choiceId: string;
+  decisionTimeSeconds?: number;
+}
+
+/**
+ * Published when a user starts a chapter.
+ */
+export interface ChapterStarted extends IntegrationEvent {
+  type: 'ChapterStarted';
+  sessionId: string;
+  scenarioId: string;
+  accountId: string;
+  chapterId: string;
+  chapterNumber: number;
+  isFirstPlay: boolean;
+}
+
+/**
+ * Published when a user completes a chapter.
+ */
+export interface ChapterCompleted extends IntegrationEvent {
+  type: 'ChapterCompleted';
+  sessionId: string;
+  scenarioId: string;
+  accountId: string;
+  chapterId: string;
+  chapterNumber: number;
+  durationSeconds: number;
+  choicesMade: number;
+  outcome?: string;
+}
+
+/**
+ * Published when a user reaches a checkpoint.
+ */
+export interface CheckpointReached extends IntegrationEvent {
+  type: 'CheckpointReached';
+  sessionId: string;
+  scenarioId: string;
+  accountId: string;
+  checkpointId: string;
+  checkpointName?: string;
+  progressPercent: number;
+}
+
+/**
+ * Published when user takes a specific story branch.
+ */
+export interface StoryBranchTaken extends IntegrationEvent {
+  type: 'StoryBranchTaken';
+  sessionId: string;
+  scenarioId: string;
+  accountId: string;
+  branchId: string;
+  branchName?: string;
+  fromNodeId: string;
+  toNodeId: string;
+}
+
+/**
+ * Published when user explicitly saves their progress.
+ */
+export interface ProgressSaved extends IntegrationEvent {
+  type: 'ProgressSaved';
+  sessionId: string;
+  scenarioId: string;
+  accountId: string;
+  saveSlotId: string;
+  currentNodeId: string;
+  progressPercent: number;
+  isOverwrite: boolean;
+}
+
+// =============================================================================
+// Gamification Events
+// =============================================================================
+
+/**
+ * Published when a user unlocks an achievement.
+ */
+export interface AchievementUnlocked extends IntegrationEvent {
+  type: 'AchievementUnlocked';
+  accountId: string;
+  achievementId: string;
+  achievementName: string;
+  category: string;
+  rarity?: string;
+  xpReward: number;
+  scenarioId?: string;
+}
+
+/**
+ * Published when a user earns a badge.
+ */
+export interface BadgeEarned extends IntegrationEvent {
+  type: 'BadgeEarned';
+  accountId: string;
+  badgeId: string;
+  badgeName: string;
+  tier?: string;
+  earnedVia?: string;
+}
+
+/**
+ * Published when a user earns experience points.
+ */
+export interface XPEarned extends IntegrationEvent {
+  type: 'XPEarned';
+  accountId: string;
+  amount: number;
+  source: string;
+  totalXP: number;
+  multiplier: number;
+  relatedEntityId?: string;
+}
+
+/**
+ * Published when a user levels up.
+ */
+export interface LevelUp extends IntegrationEvent {
+  type: 'LevelUp';
+  accountId: string;
+  fromLevel: number;
+  toLevel: number;
+  totalXP: number;
+  unlockedRewards?: string[];
+}
+
+/**
+ * Published when a user's streak is updated.
+ */
+export interface StreakUpdated extends IntegrationEvent {
+  type: 'StreakUpdated';
+  accountId: string;
+  streakType: string;
+  currentStreak: number;
+  previousStreak: number;
+  longestStreak: number;
+  wasBroken: boolean;
+  bonusXP: number;
+}
+
+/**
+ * Published when leaderboard position changes.
+ */
+export interface LeaderboardUpdated extends IntegrationEvent {
+  type: 'LeaderboardUpdated';
+  accountId: string;
+  leaderboardId: string;
+  previousRank: number;
+  newRank: number;
+  score: number;
+  period: string;
+}
+
+// =============================================================================
+// Payment Events
+// =============================================================================
+
+/**
+ * Published when a subscription is started.
+ */
+export interface SubscriptionStarted extends IntegrationEvent {
+  type: 'SubscriptionStarted';
+  accountId: string;
+  subscriptionId: string;
+  planId: string;
+  planName: string;
+  billingInterval: string;
+  amountCents: number;
+  currency: string;
+  isTrial: boolean;
+  trialEndsAt?: string;
+}
+
+/**
+ * Published when a subscription is renewed.
+ */
+export interface SubscriptionRenewed extends IntegrationEvent {
+  type: 'SubscriptionRenewed';
+  accountId: string;
+  subscriptionId: string;
+  paymentId: string;
+  amountCents: number;
+  currency: string;
+  nextBillingDate: string;
+}
+
+/**
+ * Published when a subscription is cancelled.
+ */
+export interface SubscriptionCancelled extends IntegrationEvent {
+  type: 'SubscriptionCancelled';
+  accountId: string;
+  subscriptionId: string;
+  reason?: string;
+  isImmediate: boolean;
+  accessEndsAt: string;
+  refundRequested: boolean;
+}
+
+/**
+ * Published when a payment succeeds.
+ */
+export interface PaymentSucceeded extends IntegrationEvent {
+  type: 'PaymentSucceeded';
+  accountId: string;
+  paymentId: string;
+  amountCents: number;
+  currency: string;
+  paymentMethod: string;
+  productType: string;
+  productId: string;
+  externalTransactionId?: string;
+}
+
+/**
+ * Published when a payment fails.
+ */
+export interface PaymentFailed extends IntegrationEvent {
+  type: 'PaymentFailed';
+  accountId: string;
+  paymentId: string;
+  amountCents: number;
+  currency: string;
+  failureCode: string;
+  failureMessage: string;
+  isRetryable: boolean;
+  retryAttempt: number;
+}
+
+/**
+ * Published when a refund is processed.
+ */
+export interface RefundProcessed extends IntegrationEvent {
+  type: 'RefundProcessed';
+  accountId: string;
+  refundId: string;
+  originalPaymentId: string;
+  amountCents: number;
+  currency: string;
+  reason: string;
+  isPartial: boolean;
+}
+
+/**
+ * Published when premium content is unlocked.
+ */
+export interface PremiumContentUnlocked extends IntegrationEvent {
+  type: 'PremiumContentUnlocked';
+  accountId: string;
+  contentType: string;
+  contentId: string;
+  unlockMethod: string;
+  paymentId?: string;
+}
+
+// =============================================================================
+// Social Events
+// =============================================================================
+
+/**
+ * Published when a user rates a scenario.
+ */
+export interface ScenarioRated extends IntegrationEvent {
+  type: 'ScenarioRated';
+  accountId: string;
+  scenarioId: string;
+  rating: number;
+  previousRating?: number;
+}
+
+/**
+ * Published when a user reviews a scenario.
+ */
+export interface ScenarioReviewed extends IntegrationEvent {
+  type: 'ScenarioReviewed';
+  reviewId: string;
+  accountId: string;
+  scenarioId: string;
+  rating: number;
+  hasTextContent: boolean;
+  textLength: number;
+  hasCompletedScenario: boolean;
+}
+
+/**
+ * Published when a user shares a scenario.
+ */
+export interface ScenarioShared extends IntegrationEvent {
+  type: 'ScenarioShared';
+  accountId: string;
+  scenarioId: string;
+  platform: string;
+  shareId: string;
+}
+
+/**
+ * Published when a user follows another user.
+ */
+export interface UserFollowed extends IntegrationEvent {
+  type: 'UserFollowed';
+  followerAccountId: string;
+  followedAccountId: string;
+  isMutual: boolean;
+}
+
+/**
+ * Published when a user unfollows another user.
+ */
+export interface UserUnfollowed extends IntegrationEvent {
+  type: 'UserUnfollowed';
+  followerAccountId: string;
+  unfollowedAccountId: string;
+}
+
+/**
+ * Published when a comment is posted.
+ */
+export interface CommentPosted extends IntegrationEvent {
+  type: 'CommentPosted';
+  commentId: string;
+  accountId: string;
+  targetType: string;
+  targetId: string;
+  parentCommentId?: string;
+  textLength: number;
+}
+
+/**
+ * Published when a comment is deleted.
+ */
+export interface CommentDeleted extends IntegrationEvent {
+  type: 'CommentDeleted';
+  commentId: string;
+  accountId: string;
+  deletedBy: string;
+  reason?: string;
+}
+
+/**
+ * Published when a user likes content.
+ */
+export interface ContentLiked extends IntegrationEvent {
+  type: 'ContentLiked';
+  accountId: string;
+  contentType: string;
+  contentId: string;
+  contentOwnerId: string;
+}
+
+/**
+ * Published when a user unlikes content.
+ */
+export interface ContentUnliked extends IntegrationEvent {
+  type: 'ContentUnliked';
+  accountId: string;
+  contentType: string;
+  contentId: string;
+}
+
+// =============================================================================
+// Moderation Events
+// =============================================================================
+
+/**
+ * Published when content is reported by a user.
+ */
+export interface ContentReported extends IntegrationEvent {
+  type: 'ContentReported';
+  reportId: string;
+  reporterAccountId: string;
+  contentType: string;
+  contentId: string;
+  contentOwnerId: string;
+  category: string;
+  hasDetails: boolean;
+}
+
+/**
+ * Published when content is moderated.
+ */
+export interface ContentModerated extends IntegrationEvent {
+  type: 'ContentModerated';
+  actionId: string;
+  contentType: string;
+  contentId: string;
+  contentOwnerId: string;
+  moderatorId: string;
+  action: string;
+  reason: string;
+  relatedReportIds?: string[];
+}
+
+/**
+ * Published when a user receives a warning.
+ */
+export interface UserWarned extends IntegrationEvent {
+  type: 'UserWarned';
+  warningId: string;
+  accountId: string;
+  moderatorId: string;
+  category: string;
+  severity: string;
+  warningCount: number;
+  relatedContentId?: string;
+}
+
+/**
+ * Published when a user is suspended.
+ */
+export interface UserSuspended extends IntegrationEvent {
+  type: 'UserSuspended';
+  suspensionId: string;
+  accountId: string;
+  moderatorId: string;
+  reason: string;
+  durationHours?: number;
+  endsAt?: string;
+  canAppeal: boolean;
+}
+
+/**
+ * Published when a user is banned.
+ */
+export interface UserBanned extends IntegrationEvent {
+  type: 'UserBanned';
+  banId: string;
+  accountId: string;
+  moderatorId: string;
+  reason: string;
+  isPermanent: boolean;
+  endsAt?: string;
+  canAppeal: boolean;
+}
+
+/**
+ * Published when a user submits an appeal.
+ */
+export interface AppealSubmitted extends IntegrationEvent {
+  type: 'AppealSubmitted';
+  appealId: string;
+  accountId: string;
+  appealType: string;
+  relatedActionId: string;
+}
+
+/**
+ * Published when an appeal is resolved.
+ */
+export interface AppealResolved extends IntegrationEvent {
+  type: 'AppealResolved';
+  appealId: string;
+  accountId: string;
+  moderatorId: string;
+  outcome: string;
+  notes?: string;
+}
+
+// =============================================================================
 // Union Types
 // =============================================================================
 
@@ -332,6 +804,66 @@ export type UserEvent = UserLoggedIn | UserLoggedOut | PasswordResetRequested | 
 export type NotificationEvent = NotificationSent | EmailSent | NotificationFailed;
 
 /**
+ * All progression-related events.
+ */
+export type ProgressionEvent =
+  | ChoiceMade
+  | ChapterStarted
+  | ChapterCompleted
+  | CheckpointReached
+  | StoryBranchTaken
+  | ProgressSaved;
+
+/**
+ * All gamification-related events.
+ */
+export type GamificationEvent =
+  | AchievementUnlocked
+  | BadgeEarned
+  | XPEarned
+  | LevelUp
+  | StreakUpdated
+  | LeaderboardUpdated;
+
+/**
+ * All payment-related events.
+ */
+export type PaymentEvent =
+  | SubscriptionStarted
+  | SubscriptionRenewed
+  | SubscriptionCancelled
+  | PaymentSucceeded
+  | PaymentFailed
+  | RefundProcessed
+  | PremiumContentUnlocked;
+
+/**
+ * All social-related events.
+ */
+export type SocialEvent =
+  | ScenarioRated
+  | ScenarioReviewed
+  | ScenarioShared
+  | UserFollowed
+  | UserUnfollowed
+  | CommentPosted
+  | CommentDeleted
+  | ContentLiked
+  | ContentUnliked;
+
+/**
+ * All moderation-related events.
+ */
+export type ModerationEvent =
+  | ContentReported
+  | ContentModerated
+  | UserWarned
+  | UserSuspended
+  | UserBanned
+  | AppealSubmitted
+  | AppealResolved;
+
+/**
  * All Mystira domain events.
  */
 export type MystiraEvent =
@@ -341,7 +873,12 @@ export type MystiraEvent =
   | CacheEvent
   | AIEvent
   | UserEvent
-  | NotificationEvent;
+  | NotificationEvent
+  | ProgressionEvent
+  | GamificationEvent
+  | PaymentEvent
+  | SocialEvent
+  | ModerationEvent;
 
 /**
  * Event type discriminator values.
