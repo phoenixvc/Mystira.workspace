@@ -33,22 +33,6 @@ public record PasswordlessVerifyRequest
 }
 
 /// <summary>
-/// Request to sign in using a passwordless token.
-/// </summary>
-public class PasswordlessSigninRequest
-{
-    /// <summary>
-    /// The email address for authentication.
-    /// </summary>
-    public string Email { get; set; } = string.Empty;
-
-    /// <summary>
-    /// The authentication token received via email.
-    /// </summary>
-    public string Token { get; set; } = string.Empty;
-}
-
-/// <summary>
 /// Request to refresh an authentication token.
 /// </summary>
 public class RefreshTokenRequest
