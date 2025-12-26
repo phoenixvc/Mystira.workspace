@@ -100,28 +100,28 @@ public class StoryGenerationService
 ### Example Prompts for Different Story Types
 
 **Adventure Story:**
-```
+```text
 Generate a fantasy adventure story about a young mage discovering an ancient artifact. 
 Include: 3 main characters, a quest structure, and a plot twist. 
 Length: ~1500 words. Tone: Epic and mysterious.
 ```
 
 **Character-Driven Story:**
-```
+```text
 Write a character-focused drama about two estranged siblings reuniting after 10 years. 
 Focus on dialogue and internal conflict. Include a resolution scene.
 Length: ~1000 words. Tone: Emotional and introspective.
 ```
 
 **Short-Form Narrative:**
-```
+```text
 Create a brief horror story set in an abandoned space station.
 Atmosphere: Tense and claustrophobic. Include a single protagonist.
 Length: ~500 words. End with a cliffhanger.
 ```
 
 **Branching Narrative:**
-```
+```text
 Generate a choice-driven story segment where the protagonist faces a moral dilemma.
 Present 3 distinct choices with consequences. Style: Interactive fiction.
 Length: ~800 words per branch.
