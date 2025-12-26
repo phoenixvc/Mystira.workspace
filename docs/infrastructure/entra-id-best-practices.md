@@ -37,7 +37,7 @@ module "entra_id" {
 
   admin_ui_redirect_uris = [
     "http://localhost:7001/auth/callback",    # Local development
-    "https://admin.dev.mystira.app/auth/callback"
+    "https://dev.admin.mystira.app/auth/callback"
   ]
 
   tags = {
@@ -51,7 +51,7 @@ module "entra_id" {
 
 | Environment | Redirect URIs |
 |-------------|---------------|
-| Dev | `http://localhost:*`, `https://admin.dev.mystira.app/*` |
+| Dev | `http://localhost:*`, `https://dev.admin.mystira.app/*` |
 | Staging | `https://admin.staging.mystira.app/*` |
 | Prod | `https://admin.mystira.app/*` |
 
@@ -275,7 +275,7 @@ module "entra_external_id" {
 
   pwa_redirect_uris = [
     "http://localhost:5173/auth/callback",
-    "https://app.dev.mystira.app/auth/callback"
+    "https://dev.mystira.app/auth/callback"
   ]
 }
 ```

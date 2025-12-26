@@ -334,7 +334,7 @@ module "entra_external_id" {
 
   pwa_redirect_uris = [
     "http://localhost:5173/auth/callback",
-    "https://app.dev.mystira.app/auth/callback"  # Environment-specific URLs
+    "https://dev.mystira.app/auth/callback"  # Environment-specific URLs
   ]
 }
 ```
