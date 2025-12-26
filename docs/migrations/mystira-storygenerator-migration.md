@@ -1,10 +1,12 @@
 # Mystira.StoryGenerator Migration Guide
 
 **Target**: Migrate StoryGenerator to use `Mystira.Shared` infrastructure
-**Prerequisites**: Mystira.Shared v0.2.0+ published to NuGet feed
+**Prerequisites**: Mystira.Shared v0.1.0-alpha published to NuGet feed
 **Estimated Effort**: 2 days
 **Last Updated**: December 2025
 **Status**: 🔄 In Progress
+
+> **Note**: All infrastructure components (Polly v8.6.5, Wolverine 5.9.2, Ardalis.Specification 9.3.1) are already implemented in `Mystira.Shared`. This migration is about adopting the shared package.
 
 ---
 
@@ -13,11 +15,11 @@
 StoryGenerator migration includes:
 
 1. **.NET 9.0 upgrade** (required for Mystira.Shared)
-2. MediatR → Wolverine migration
-3. Custom `RetryPolicyService` → `Mystira.Shared.Resilience` (Polly v8)
+2. MediatR → Wolverine migration (5.9.2, included in Mystira.Shared)
+3. Custom `RetryPolicyService` → `Mystira.Shared.Resilience` (Polly v8.6.5)
 4. In-memory stores → Redis caching
 5. Contracts migration to unified package
-6. **Ardalis.Specification 8.0.0** for data access
+6. **Ardalis.Specification 9.3.1** for data access (included in Mystira.Shared)
 7. **Distributed locking** for LLM operations
 8. **Dockerfile migration** to submodule repo (ADR-0019)
 

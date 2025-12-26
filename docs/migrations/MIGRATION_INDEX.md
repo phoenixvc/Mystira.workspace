@@ -123,9 +123,9 @@ These informed decisions but are not implementation guides:
 
 ---
 
-## Deprecated Documents
+## Removed Documents
 
-The following documents are superseded or archived:
+The following redundant documents were deleted (December 2025):
 
 | Document | Superseded By | Reason |
 |----------|---------------|--------|

@@ -1,0 +1,47 @@
+{
+  "name": "@mystira/core-types",
+  "version": "0.1.0-alpha",
+  "description": "Core TypeScript types for Mystira platform - mirrors Mystira.Shared C# patterns",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup src/index.ts --format cjs,esm --dts",
+    "dev": "tsup src/index.ts --format cjs,esm --dts --watch",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "author": "Mystira <jurie@phoenixvc.tech>",
+  "license": "SEE LICENSE IN LICENSE",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/phoenixvc/Mystira.workspace.git",
+    "directory": "packages/core-types"
+  },
+  "keywords": [
+    "mystira",
+    "types",
+    "typescript",
+    "result-pattern",
+    "error-handling"
+  ],
+  "devDependencies": {
+    "tsup": "^8.0.0",
+    "typescript": "^5.7.0",
+    "vitest": "^2.0.0"
+  },
+  "peerDependencies": {
+    "typescript": ">=5.0.0"
+  }
+}

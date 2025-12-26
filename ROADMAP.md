@@ -43,14 +43,14 @@ All core infrastructure is implemented in `packages/shared/Mystira.Shared`:
 | Source Generators | - | ✅ Done |
 | Entity Framework Core | 9.0.11 | ✅ Done |
 
-### OpenAPI & Type System - IN PROGRESS 🔄
+### OpenAPI & Type System - DONE ✅
 
 | Component | Status | Details |
 |-----------|--------|---------|
 | OpenAPI specs | ✅ Done | `packages/api-spec/openapi/` |
 | CI/CD spec validation | ✅ Done | `generate-contracts.yml` |
-| ErrorResponse types migration | 🔄 Pending | Move to shared types |
-| @mystira/core-types (NPM) | 🔄 Pending | TypeScript package needed |
+| ErrorResponse types | ✅ Done | `@mystira/core-types` |
+| @mystira/core-types (NPM) | ✅ Done | `packages/core-types/` |
 
 ---
 
