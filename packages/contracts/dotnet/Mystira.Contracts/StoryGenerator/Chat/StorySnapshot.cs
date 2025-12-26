@@ -43,21 +43,18 @@ public static class StoryJsonRepairHelper
                 continue;
             }
 
-            if (!inString)
+            if (!inString && (c == '{' || c == '['))
             {
-                if (c == '{' || c == '[')
+                stack.Push(c);
+            }
+            else if (!inString && (c == '}' || c == ']'))
+            {
+                if (stack.Count > 0)
                 {
-                    stack.Push(c);
-                }
-                else if (c == '}' || c == ']')
-                {
-                    if (stack.Count > 0)
+                    var open = stack.Peek();
+                    if ((c == '}' && open == '{') || (c == ']' && open == '['))
                     {
-                        var open = stack.Peek();
-                        if ((c == '}' && open == '{') || (c == ']' && open == '['))
-                        {
-                            stack.Pop();
-                        }
+                        stack.Pop();
                     }
                 }
             }
@@ -104,7 +101,7 @@ public class StorySnapshot
                     return ageGroupElement.GetString();
                 }
             }
-            catch
+            catch (JsonException)
             {
                 return null;
             }
