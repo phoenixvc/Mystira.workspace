@@ -12,6 +12,41 @@ This is the single source of truth for all Mystira platform development. We go l
 
 ---
 
+## 2-Week Action Plan (Dec 26 - Jan 8)
+
+### This Repo (Mystira.workspace)
+
+| Task | Owner | Status |
+|------|-------|--------|
+| ✅ Consolidate redundant planning docs | - | Done |
+| ✅ Create @mystira/core-types package | - | Done |
+| ✅ Update all migration guides with correct versions | - | Done |
+| Define domain events schema (AccountCreated, SessionCompleted, etc.) | jurie | 🔄 TODO |
+| Create rollback procedures per service | jurie | 🔄 TODO |
+| Finalize OpenAPI specs for all services | jurie | 🔄 TODO |
+
+### Service Repos (in priority order)
+
+| Service | Action | Target |
+|---------|--------|--------|
+| Mystira.App | Add Mystira.Shared 0.1.0-alpha, implement Wolverine handlers | Week 1 |
+| Mystira.Admin.Api | Add Mystira.Shared 0.1.0-alpha, enable PostgreSQL read | Week 1 |
+| Mystira.StoryGenerator | Add Mystira.Shared 0.1.0-alpha, Wolverine events | Week 2 |
+| Mystira.Publisher | Add Service Bus subscription, event handlers | Week 2 |
+| Mystira.Chain | gRPC endpoints, event subscription | Week 2 |
+| Mystira.Admin.UI | Complete Phase 3, test auth flow | Week 2 |
+| Mystira.DevHub | Minimal - update if needed | As needed |
+
+### Critical Pre-Launch
+
+- [ ] Fix `Guid.Parse` crashes (use string IDs consistently)
+- [ ] Add `CancellationToken` to all async methods
+- [ ] Replace fire-and-forget patterns with proper error handling
+- [ ] Create performance baselines (load testing)
+- [ ] Security review and rate limiting
+
+---
+
 ## Current Status (December 2025)
 
 ### Infrastructure - DONE ✅
