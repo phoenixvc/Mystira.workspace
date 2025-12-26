@@ -64,7 +64,7 @@
       "**/.turbo": true,
       "**/pnpm-lock.yaml": true
     },
-    "typescript.tsdk": "Root/node_modules/typescript/lib",
+    "typescript.tsdk": "node_modules/typescript/lib",
     "eslint.workingDirectories": [
       { "mode": "auto" }
     ]
