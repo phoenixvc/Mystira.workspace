@@ -197,7 +197,7 @@ jobs:
 
       - name: Build core-types
         run: |
-          cd packages/core/core-types
+          cd packages/core-types
           pnpm run build
 
   commit-changes:
@@ -286,5 +286,5 @@ jobs:
           echo "│" >> $GITHUB_STEP_SUMMARY
           echo "└── Internal Types (Not Generated)" >> $GITHUB_STEP_SUMMARY
           echo "    ├── packages/core/Mystira.Core/" >> $GITHUB_STEP_SUMMARY
-          echo "    └── packages/core/core-types/" >> $GITHUB_STEP_SUMMARY
+          echo "    └── packages/core-types/" >> $GITHUB_STEP_SUMMARY
           echo "```" >> $GITHUB_STEP_SUMMARY

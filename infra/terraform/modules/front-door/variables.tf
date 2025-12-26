@@ -106,6 +106,37 @@ variable "custom_domain_story_generator_swa" {
   default     = ""
 }
 
+# Mystira.App services (optional)
+variable "enable_mystira_app" {
+  description = "Enable Mystira.App API and SWA endpoints in Front Door"
+  type        = bool
+  default     = false
+}
+
+variable "mystira_app_api_backend_address" {
+  description = "Backend address for Mystira.App API (e.g., mys-dev-app-api-san.azurewebsites.net)"
+  type        = string
+  default     = ""
+}
+
+variable "mystira_app_swa_backend_address" {
+  description = "Backend address for Mystira.App SWA (Blazor WASM PWA)"
+  type        = string
+  default     = ""
+}
+
+variable "custom_domain_mystira_app_api" {
+  description = "Custom domain for Mystira.App API (e.g., api.mystira.app or dev.api.mystira.app)"
+  type        = string
+  default     = ""
+}
+
+variable "custom_domain_mystira_app_swa" {
+  description = "Custom domain for Mystira.App SWA (e.g., app.mystira.app or dev.app.mystira.app)"
+  type        = string
+  default     = ""
+}
+
 variable "enable_waf" {
   description = "Enable Web Application Firewall"
   type        = bool

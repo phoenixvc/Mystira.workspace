@@ -36,6 +36,13 @@ module "front_door" {
   custom_domain_story_generator_api   = "dev.story-api.mystira.app"
   custom_domain_story_generator_swa   = "dev.story.mystira.app"
 
+  # Mystira.App services (API + SWA/PWA)
+  enable_mystira_app              = true
+  mystira_app_api_backend_address = module.mystira_app.api_hostname  # App Service hostname from mystira-app module
+  mystira_app_swa_backend_address = module.mystira_app.swa_hostname  # Static Web App hostname from mystira-app module
+  custom_domain_mystira_app_api   = "dev.api.mystira.app"
+  custom_domain_mystira_app_swa   = "dev.app.mystira.app"
+
   # WAF Configuration
   enable_waf           = true
   waf_mode             = "Detection" # Use Detection mode for dev to avoid blocking legitimate test traffic
@@ -94,10 +101,22 @@ output "front_door_story_generator_swa_endpoint" {
   value       = module.front_door.story_generator_swa_endpoint_hostname
 }
 
+output "front_door_mystira_app_api_endpoint" {
+  description = "Front Door endpoint for Mystira.App API - use this for CNAME"
+  value       = module.front_door.mystira_app_api_endpoint_hostname
+}
+
+output "front_door_mystira_app_swa_endpoint" {
+  description = "Front Door endpoint for Mystira.App SWA - use this for CNAME"
+  value       = module.front_door.mystira_app_swa_endpoint_hostname
+}
+
 # After deploying, update DNS with:
 # 1. Change dev.publisher.mystira.app A record to CNAME pointing to Front Door endpoint
 # 2. Change dev.chain.mystira.app A record to CNAME pointing to Front Door endpoint
-# 3. Add _dnsauth TXT records for domain validation
+# 3. Change dev.api.mystira.app to CNAME pointing to Front Door endpoint
+# 4. Change dev.app.mystira.app to CNAME pointing to Front Door endpoint
+# 5. Add _dnsauth TXT records for domain validation
 #
 # Example DNS changes:
 # Before: dev.publisher.mystira.app -> A record -> <NGINX LB IP>

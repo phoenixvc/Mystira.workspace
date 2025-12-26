@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace Mystira.Shared.Messaging.Events;
 
 /// <summary>
@@ -93,9 +95,9 @@ public sealed record BundleActivated : IntegrationEventBase
     public required string AcquisitionMethod { get; init; }
 
     /// <summary>
-    /// Number of items unlocked.
+    /// List of item IDs that were unlocked.
     /// </summary>
-    public required int ItemsUnlocked { get; init; }
+    public required string[] ItemsUnlocked { get; init; }
 }
 
 /// <summary>
@@ -106,26 +108,31 @@ public sealed record BundleGifted : IntegrationEventBase
     /// <summary>
     /// The gifter's account ID.
     /// </summary>
+    [JsonPropertyName("senderAccountId")]
     public required string GifterAccountId { get; init; }
 
     /// <summary>
     /// The recipient's account ID.
     /// </summary>
+    [JsonPropertyName("recipientAccountId")]
     public required string RecipientAccountId { get; init; }
 
     /// <summary>
     /// The bundle ID.
     /// </summary>
+    [JsonPropertyName("bundleId")]
     public required string BundleId { get; init; }
 
     /// <summary>
     /// Payment ID.
     /// </summary>
+    [JsonPropertyName("paymentId")]
     public required string PaymentId { get; init; }
 
     /// <summary>
     /// Gift message if any.
     /// </summary>
+    [JsonPropertyName("giftMessage")]
     public string? Message { get; init; }
 }
 
@@ -140,22 +147,22 @@ public sealed record PromoCodeRedeemed : IntegrationEventBase
     public required string AccountId { get; init; }
 
     /// <summary>
-    /// The promo code.
+    /// The promo code that was redeemed.
     /// </summary>
-    public required string Code { get; init; }
+    public required string PromoCode { get; init; }
 
     /// <summary>
-    /// What the code unlocked (bundle, discount, premium_days).
+    /// The type of discount applied (e.g., percentage, fixed_amount, bundle_unlock).
     /// </summary>
-    public required string RewardType { get; init; }
+    public required string DiscountType { get; init; }
 
     /// <summary>
-    /// Reward details (bundle ID, discount %, days).
+    /// The numeric value of the discount (e.g., 20 for 20% off, 5.99 for $5.99 off).
     /// </summary>
-    public required string RewardValue { get; init; }
+    public required decimal DiscountValue { get; init; }
 
     /// <summary>
-    /// Campaign the code belongs to.
+    /// Optional identifier of what the discount was applied to (e.g., bundle ID, subscription tier).
     /// </summary>
-    public string? Campaign { get; init; }
+    public string? AppliedTo { get; init; }
 }

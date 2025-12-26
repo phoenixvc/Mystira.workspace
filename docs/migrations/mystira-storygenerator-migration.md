@@ -60,6 +60,115 @@ StoryGenerator migration includes:
 
 ---
 
+## LLM Integration Examples
+
+### Sample Story Generation Prompt
+
+```csharp
+public class StoryGenerationService
+{
+    private readonly IMessageBus _messageBus;
+    private readonly ILogger<StoryGenerationService> _logger;
+    
+    public StoryGenerationService(
+        IMessageBus messageBus, 
+        ILogger<StoryGenerationService> logger)
+    {
+        _messageBus = messageBus;
+        _logger = logger;
+    }
+    
+    public async Task<StoryResult> GenerateStoryAsync(
+        string prompt, 
+        StoryContext context,
+        CancellationToken ct)
+    {
+        var command = new GenerateStoryCommand
+        {
+            UserPrompt = prompt,
+            SessionId = context.SessionId,
+            MaxTokens = 2000,
+            Temperature = 0.7m, // Balance creativity and coherence
+            Model = "gpt-4-turbo"
+        };
+        
+        return await _messageBus.InvokeAsync<StoryResult>(command, ct);
+    }
+}
+```
+
+### Example Prompts for Different Story Types
+
+**Adventure Story:**
+```
+Generate a fantasy adventure story about a young mage discovering an ancient artifact. 
+Include: 3 main characters, a quest structure, and a plot twist. 
+Length: ~1500 words. Tone: Epic and mysterious.
+```
+
+**Character-Driven Story:**
+```
+Write a character-focused drama about two estranged siblings reuniting after 10 years. 
+Focus on dialogue and internal conflict. Include a resolution scene.
+Length: ~1000 words. Tone: Emotional and introspective.
+```
+
+**Short-Form Narrative:**
+```
+Create a brief horror story set in an abandoned space station.
+Atmosphere: Tense and claustrophobic. Include a single protagonist.
+Length: ~500 words. End with a cliffhanger.
+```
+
+**Branching Narrative:**
+```
+Generate a choice-driven story segment where the protagonist faces a moral dilemma.
+Present 3 distinct choices with consequences. Style: Interactive fiction.
+Length: ~800 words per branch.
+```
+
+### Recommended Model Configurations
+
+#### GPT-4 Turbo (Recommended for Production)
+- **Use Case**: High-quality, creative storytelling with complex narratives
+- **Parameters**:
+  - `Temperature`: 0.7-0.8 (balanced creativity)
+  - `MaxTokens`: 2000-4000 (depending on story length)
+  - `TopP`: 0.9
+- **Trade-offs**: Higher cost, slower response (~20-40s), best quality
+- **Deployment**: Azure OpenAI Service (recommended) or OpenAI API
+
+#### GPT-3.5 Turbo
+- **Use Case**: Faster generation for shorter stories or drafts
+- **Parameters**:
+  - `Temperature`: 0.6-0.7
+  - `MaxTokens`: 1000-2000
+  - `TopP`: 0.85
+- **Trade-offs**: Lower cost, faster (~5-10s), good quality for simple narratives
+- **Deployment**: Azure OpenAI Service or OpenAI API
+
+#### Local LLMs (On-Premises/Self-Hosted)
+- **Models**: LLaMA 2 (13B/70B), Mistral (7B), or similar open-source models
+- **Use Case**: Data privacy requirements, cost optimization for high volume
+- **Infrastructure Notes**:
+  - Requires GPU acceleration (NVIDIA A100/H100 recommended)
+  - Use vLLM or TGI (Text Generation Inference) for optimized serving
+  - Consider Kubernetes deployment with GPU node pools
+  - See `infra/terraform/modules/gpu-nodes/` for Azure configuration
+- **Parameters**:
+  - `Temperature`: 0.7-0.9 (may need tuning per model)
+  - `MaxTokens`: Model-dependent (typically 2048-4096)
+- **Trade-offs**: Infrastructure overhead, requires fine-tuning for quality, full control over data
+
+#### Integration Tips
+- Always set a **timeout** of at least 60 seconds for LLM calls (up to 300s for long-form content)
+- Use **streaming responses** for better UX when generating longer stories
+- Implement **prompt caching** (Azure OpenAI feature) to reduce costs for repeated context
+- Monitor **token usage** and implement rate limiting per user/session
+- Use **distributed locking** (Phase 8) to prevent duplicate generations
+
+---
+
 ## Phase 1: .NET 9.0 Upgrade
 
 ### 1.1 Update All Project Files

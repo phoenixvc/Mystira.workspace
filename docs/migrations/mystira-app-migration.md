@@ -94,14 +94,24 @@ var result = await _mediator.Send(new GetAccountQuery(id));
 
 ```csharp
 // Target: Wolverine handler (convention-based)
-public static class GetAccountQueryHandler
+public class GetAccountQueryHandler
 {
-    public static async Task<AccountDto> Handle(
+    public async Task<AccountDto> Handle(
         GetAccountQuery query,
         IAccountRepository repository,
         CancellationToken ct)
     {
         // handler logic - dependencies injected as parameters
+        var account = await repository.GetByIdAsync(query.Id, ct);
+        if (account == null)
+            throw new NotFoundException($"Account {query.Id} not found");
+        
+        return new AccountDto
+        {
+            Id = account.Id,
+            Name = account.Name,
+            // ... map other properties
+        };
     }
 }
 

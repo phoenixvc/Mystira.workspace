@@ -37,6 +37,14 @@ module "front_door" {
   custom_domain_story_generator_api   = "story-api.mystira.app"
   custom_domain_story_generator_swa   = "story.mystira.app"
 
+  # Mystira.App services (API + SWA/PWA)
+  # NOTE: Mystira.App API backend uses App Service hostname, not custom domain
+  enable_mystira_app              = true
+  mystira_app_api_backend_address = module.mystira_app.api_hostname  # App Service hostname from mystira-app module
+  mystira_app_swa_backend_address = module.mystira_app.swa_hostname  # Static Web App hostname from mystira-app module
+  custom_domain_mystira_app_api   = "api.mystira.app"
+  custom_domain_mystira_app_swa   = "app.mystira.app"
+
   # WAF Configuration - PRODUCTION SETTINGS
   enable_waf           = true
   waf_mode             = "Prevention" # BLOCK malicious traffic in production
@@ -102,11 +110,29 @@ output "front_door_story_generator_swa_endpoint" {
   value       = module.front_door.story_generator_swa_endpoint_hostname
 }
 
+output "front_door_mystira_app_api_endpoint" {
+  description = "Front Door endpoint for Mystira.App API - use this for CNAME"
+  value       = module.front_door.mystira_app_api_endpoint_hostname
+}
+
+output "front_door_mystira_app_swa_endpoint" {
+  description = "Front Door endpoint for Mystira.App SWA - use this for CNAME"
+  value       = module.front_door.mystira_app_swa_endpoint_hostname
+}
+
 # After deploying, update DNS with:
 # 1. Change publisher.mystira.app A record to CNAME pointing to Front Door endpoint
 # 2. Change chain.mystira.app A record to CNAME pointing to Front Door endpoint
-# 3. Add _dnsauth TXT records for domain validation
+# 3. Change api.mystira.app to CNAME pointing to Front Door endpoint (Mystira.App API)
+# 4. Change app.mystira.app to CNAME pointing to Front Door endpoint (Mystira.App SWA)
+# 5. Add _dnsauth TXT records for domain validation
 #
 # Example DNS changes:
 # Before: publisher.mystira.app -> A record -> <NGINX LB IP>
 # After:  publisher.mystira.app -> CNAME -> mystira-prod-publisher.azurefd.net
+#
+# Before: api.mystira.app -> CNAME -> mys-prod-app-api-san.azurewebsites.net
+# After:  api.mystira.app -> CNAME -> mystira-prod-app-api.azurefd.net
+#
+# Before: app.mystira.app -> CNAME -> mys-prod-app-swa-eus2.azurestaticapps.net
+# After:  app.mystira.app -> CNAME -> mystira-prod-app-swa.azurefd.net
