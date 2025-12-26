@@ -111,6 +111,16 @@ public class CompleteScenarioRequest
     public string SessionId { get; set; } = string.Empty;
 
     /// <summary>
+    /// The unique identifier of the account.
+    /// </summary>
+    public string AccountId { get; set; } = string.Empty;
+
+    /// <summary>
+    /// The unique identifier of the scenario.
+    /// </summary>
+    public string ScenarioId { get; set; } = string.Empty;
+
+    /// <summary>
     /// Optional final scores for compass axes.
     /// </summary>
     public Dictionary<string, double>? FinalScores { get; set; }

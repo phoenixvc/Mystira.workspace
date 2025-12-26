@@ -119,6 +119,16 @@ public record ScenarioQueryRequest
     public string? SearchTerm { get; set; }
 
     /// <summary>
+    /// Optional search query (alias for SearchTerm).
+    /// </summary>
+    public string? Search { get; set; }
+
+    /// <summary>
+    /// Optional filter by genre.
+    /// </summary>
+    public string? Genre { get; set; }
+
+    /// <summary>
     /// Optional list of archetypes to filter scenarios.
     /// </summary>
     public List<string>? Archetypes { get; set; }
