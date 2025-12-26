@@ -61,6 +61,11 @@
     <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="9.0.11" />
     <!-- Wave 3: Wolverine (replaces MediatR) -->
     <PackageReference Include="WolverineFx" Version="5.9.2" />
+    <!-- Wave 4: Mapperly (compile-time object mapping) -->
+    <PackageReference Include="Riok.Mapperly" Version="4.1.1" />
+    <!-- Wave 4: FluentValidation (command/query validation) -->
+    <PackageReference Include="FluentValidation" Version="11.11.0" />
+    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="11.11.0" />
     <PackageReference Include="WolverineFx.AzureServiceBus" Version="5.9.2" />
     <!-- Wave 4: CQRS, Validation, Mapping -->
     <PackageReference Include="FluentValidation" Version="11.11.0" />
