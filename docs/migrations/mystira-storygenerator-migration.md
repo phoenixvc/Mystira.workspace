@@ -1,7 +1,7 @@
 # Mystira.StoryGenerator Migration Guide
 
 **Target**: Migrate StoryGenerator to use `Mystira.Shared` infrastructure
-**Prerequisites**: Mystira.Shared v0.2.0-alpha published to NuGet feed
+**Prerequisites**: Mystira.Shared v0.4.* published to NuGet feed
 **Estimated Effort**: 2 days
 **Last Updated**: December 2025
 **Status**: 🔄 In Progress
@@ -207,7 +207,7 @@ dotnet test
 <PackageReference Include="MediatR" Version="12.1.1" />
 
 <!-- Add -->
-<PackageReference Include="Mystira.Shared" Version="0.2.0" />
+<PackageReference Include="Mystira.Shared" Version="0.4.*" />
 <PackageReference Include="Ardalis.Specification" Version="8.0.0" />
 <PackageReference Include="Ardalis.Specification.EntityFrameworkCore" Version="8.0.0" />
 ```
@@ -216,7 +216,7 @@ dotnet test
 
 ```xml
 <!-- Add -->
-<PackageReference Include="Mystira.Shared" Version="0.2.0" />
+<PackageReference Include="Mystira.Shared" Version="0.4.*" />
 <PackageReference Include="Ardalis.Specification" Version="8.0.0" />
 ```
 
@@ -224,7 +224,7 @@ dotnet test
 
 ```xml
 <!-- Add for resilience -->
-<PackageReference Include="Mystira.Shared" Version="0.2.0" />
+<PackageReference Include="Mystira.Shared" Version="0.4.*" />
 ```
 
 ### 2.4 Update Mystira.StoryGenerator.Domain.csproj
@@ -611,7 +611,7 @@ jobs:
 ## Migration Checklist
 
 ### Pre-Migration
-- [ ] Ensure Mystira.Shared v0.2.0+ is published
+- [ ] Ensure Mystira.Shared v0.4.* is published
 - [ ] Create feature branch
 - [ ] Document current handler count
 - [ ] Backup Key Vault secrets
