@@ -1,0 +1,85 @@
+{
+  "folders": [
+    {
+      "name": "Root",
+      "path": "."
+    },
+    {
+      "name": "packages/contracts",
+      "path": "packages/contracts"
+    },
+    {
+      "name": "packages/shared",
+      "path": "packages/shared"
+    },
+    {
+      "name": "packages/shared-utils",
+      "path": "packages/shared-utils"
+    },
+    {
+      "name": "packages/design-tokens",
+      "path": "packages/design-tokens"
+    },
+    {
+      "name": "packages/app",
+      "path": "packages/app"
+    },
+    {
+      "name": "packages/admin-api",
+      "path": "packages/admin-api"
+    },
+    {
+      "name": "packages/admin-ui",
+      "path": "packages/admin-ui"
+    },
+    {
+      "name": "packages/chain",
+      "path": "packages/chain"
+    },
+    {
+      "name": "packages/devhub",
+      "path": "packages/devhub"
+    },
+    {
+      "name": "packages/publisher",
+      "path": "packages/publisher"
+    },
+    {
+      "name": "packages/story-generator",
+      "path": "packages/story-generator"
+    },
+    {
+      "name": "infra",
+      "path": "infra"
+    }
+  ],
+  "settings": {
+    "files.exclude": {
+      "**/node_modules": true,
+      "**/.turbo": true
+    },
+    "search.exclude": {
+      "**/node_modules": true,
+      "**/dist": true,
+      "**/.turbo": true,
+      "**/pnpm-lock.yaml": true
+    },
+    "typescript.tsdk": "Root/node_modules/typescript/lib",
+    "eslint.workingDirectories": [
+      { "mode": "auto" }
+    ]
+  },
+  "extensions": {
+    "recommendations": [
+      "esbenp.prettier-vscode",
+      "dbaeumer.vscode-eslint",
+      "vercel.turbo-vsc",
+      "vitest.explorer"
+    ]
+  },
+  "launch": {
+    "version": "0.2.0",
+    "configurations": [],
+    "compounds": []
+  }
+}

@@ -1,46 +1,38 @@
 {
   "recommendations": [
-    // Core
     "esbenp.prettier-vscode",
     "dbaeumer.vscode-eslint",
     "editorconfig.editorconfig",
 
-    // TypeScript
     "ms-vscode.vscode-typescript-next",
 
-    // React/Frontend
     "dsznajder.es7-react-js-snippets",
     "bradlc.vscode-tailwindcss",
     "styled-components.vscode-styled-components",
 
-    // Git
     "eamodio.gitlens",
     "mhutchie.git-graph",
 
-    // Testing
     "vitest.explorer",
 
-    // Monorepo
     "vercel.turbo-vsc",
 
-    // Python (for AI/ML)
     "ms-python.python",
     "ms-python.vscode-pylance",
     "ms-python.black-formatter",
 
-    // Utilities
+    "NomicFoundation.hardhat-solidity",
+
     "christian-kohler.path-intellisense",
     "usernamehw.errorlens",
     "streetsidesoftware.code-spell-checker",
     "pkief.material-icon-theme",
+    "mikestead.dotenv",
 
-    // Docker
     "ms-azuretools.vscode-docker",
 
-    // API/REST
     "humao.rest-client",
 
-    // Markdown
     "yzhang.markdown-all-in-one"
   ],
   "unwantedRecommendations": []
