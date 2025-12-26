@@ -90,9 +90,21 @@ public static class MimeTypeRegistry
         if (string.IsNullOrWhiteSpace(fileNameOrExtension))
             return "application/octet-stream";
 
-        var extension = fileNameOrExtension.StartsWith('.')
-            ? fileNameOrExtension
-            : Path.GetExtension(fileNameOrExtension);
+        string extension;
+        if (fileNameOrExtension.StartsWith('.'))
+        {
+            extension = fileNameOrExtension;
+        }
+        else
+        {
+            // Try to get extension from filename (e.g., "file.json" -> ".json")
+            extension = Path.GetExtension(fileNameOrExtension);
+            // If empty, the input might be just an extension without dot (e.g., "json")
+            if (string.IsNullOrEmpty(extension))
+            {
+                extension = "." + fileNameOrExtension;
+            }
+        }
 
         return AllTypes.TryGetValue(extension, out var mimeType)
             ? mimeType
