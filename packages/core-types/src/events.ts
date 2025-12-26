@@ -1589,7 +1589,7 @@ export interface MatchmakingStarted extends IntegrationEvent {
   accountId: string;
   queueId: string;
   gameMode: string;
-  preferences?: Record<string, any>;
+  preferences?: Record<string, string | number | boolean>;
 }
 
 /**
