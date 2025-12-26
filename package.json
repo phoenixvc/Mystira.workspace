@@ -49,8 +49,10 @@
     "pnpm": ">=8.0.0"
   },
   "lint-staged": {
+    "package.json": [
+      "prettier --write"
+    ],
     "*.{ts,tsx}": [
-      "eslint --fix",
       "prettier --write"
     ],
     "*.{json,md}": [
