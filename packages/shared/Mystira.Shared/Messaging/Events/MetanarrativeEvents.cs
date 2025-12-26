@@ -237,9 +237,9 @@ public sealed record StorySequenceUnlocked : IntegrationEventBase
 public sealed record UniverseEventOccurred : IntegrationEventBase
 {
     /// <summary>
-    /// Universe event ID.
+    /// Universe event ID (domain-specific identifier).
     /// </summary>
-    public required string EventId { get; init; }
+    public required string UniverseEventId { get; init; }
 
     /// <summary>
     /// Event name.
