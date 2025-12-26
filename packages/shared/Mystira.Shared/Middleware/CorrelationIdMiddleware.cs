@@ -30,12 +30,21 @@ public class CorrelationIdMiddleware
         "traceparent"
     };
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="CorrelationIdMiddleware"/> class.
+    /// </summary>
+    /// <param name="next">The next middleware in the pipeline.</param>
+    /// <param name="logger">Logger for diagnostic information.</param>
     public CorrelationIdMiddleware(RequestDelegate next, ILogger<CorrelationIdMiddleware> logger)
     {
         _next = next ?? throw new ArgumentNullException(nameof(next));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
+    /// <summary>
+    /// Invokes the middleware to extract or generate a correlation ID.
+    /// </summary>
+    /// <param name="context">The HTTP context for the current request.</param>
     public async Task InvokeAsync(HttpContext context)
     {
         // Try to get correlation ID from request headers

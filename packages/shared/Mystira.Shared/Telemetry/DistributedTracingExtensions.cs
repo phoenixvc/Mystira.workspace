@@ -111,6 +111,11 @@ public class DistributedTracingInitializer : ITelemetryInitializer
     private readonly string _environment;
     private readonly string _serviceVersion;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="DistributedTracingInitializer"/> class.
+    /// </summary>
+    /// <param name="serviceName">The name of the service.</param>
+    /// <param name="environment">The environment name (e.g., "Production", "Staging").</param>
     public DistributedTracingInitializer(string serviceName, string environment)
     {
         _serviceName = serviceName;
@@ -119,6 +124,7 @@ public class DistributedTracingInitializer : ITelemetryInitializer
             .GetName().Version?.ToString() ?? "1.0.0";
     }
 
+    /// <inheritdoc />
     public void Initialize(Microsoft.ApplicationInsights.Channel.ITelemetry telemetry)
     {
         // Set cloud role for Application Map

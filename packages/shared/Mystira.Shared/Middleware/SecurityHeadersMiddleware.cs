@@ -51,12 +51,21 @@ public class SecurityHeadersMiddleware
     private readonly RequestDelegate _next;
     private readonly SecurityHeadersOptions _options;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="SecurityHeadersMiddleware"/> class.
+    /// </summary>
+    /// <param name="next">The next middleware in the pipeline.</param>
+    /// <param name="options">Configuration options for security headers.</param>
     public SecurityHeadersMiddleware(RequestDelegate next, IOptions<SecurityHeadersOptions>? options = null)
     {
         _next = next;
         _options = options?.Value ?? new SecurityHeadersOptions();
     }
 
+    /// <summary>
+    /// Invokes the middleware to add security headers to the response.
+    /// </summary>
+    /// <param name="context">The HTTP context for the current request.</param>
     public async Task InvokeAsync(HttpContext context)
     {
         // Generate a per-request nonce if enabled
