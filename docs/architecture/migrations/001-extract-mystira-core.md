@@ -1,365 +1,643 @@
-# Migration 001: Extract Mystira.Core Package
+# Migration 001: Unified Type System with OpenAPI + Mystira.Core
 
 ## Status: Proposed
 
 ## Summary
 
-Extract shared foundational types from `Mystira.Contracts` and `Mystira.Shared` into a new `Mystira.Core` package to eliminate duplication and establish a single source of truth for cross-cutting types.
+Establish a unified type system using:
+1. **OpenAPI specs** as the single source of truth for API contracts (generates both C# and TypeScript)
+2. **Mystira.Core** for internal/shared types not exposed via APIs (Result, domain errors, etc.)
+
+All .NET projects target **net9.0**.
 
 ## Problem Statement
 
 ### Current Duplication
-
-We have duplicate `ErrorResponse` types in two locations:
 
 | Aspect | `Mystira.Contracts` | `Mystira.Shared` |
 |--------|---------------------|------------------|
 | **Namespace** | `Mystira.Contracts.App.Responses.Common` | `Mystira.Shared.Exceptions` |
 | **Type** | `record` (immutable) | `class` (mutable) |
 | **Framework** | net8.0 | net9.0 |
-| **StatusCode** | ✅ Has property | ❌ Missing |
-| **UnauthorizedErrorResponse** | ✅ Has type | ❌ Missing |
-| **Timestamp type** | `DateTimeOffset` | `DateTime` |
+| **StatusCode** | ✅ Has | ❌ Missing |
 
 ### Issues
 
-1. **Type Confusion**: Developers don't know which `ErrorResponse` to use
-2. **Inconsistent Behavior**: Different implementations have different features
-3. **Serialization Mismatch**: `class` vs `record` serialize differently
-4. **Framework Split**: Different .NET versions prevent easy reference
+1. Types drift apart between C# and TypeScript
+2. No single source of truth
+3. Manual synchronization is error-prone
+4. Mixed .NET versions cause compatibility issues
 
-## Proposed Solution
+## Proposed Solution: Hybrid Approach
+
+### Architecture Overview
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                        SINGLE SOURCE OF TRUTH                        │
+├─────────────────────────────────────────────────────────────────────┤
+│  packages/api-spec/                                                  │
+│  └── openapi/                                                        │
+│      ├── app-api.yaml          # App API contracts                   │
+│      ├── story-generator.yaml  # Story Generator API                 │
+│      └── common/                                                     │
+│          ├── errors.yaml       # ErrorResponse, ValidationError      │
+│          └── pagination.yaml   # PagedResponse, etc.                 │
+└─────────────────────────────────────────────────────────────────────┘
+                                    │
+                    ┌───────────────┴───────────────┐
+                    │         CODE GENERATION        │
+                    ▼                               ▼
+        ┌───────────────────┐           ┌───────────────────┐
+        │  C# (NSwag)       │           │  TypeScript       │
+        │  Mystira.Contracts│           │  @mystira/contracts│
+        │  (net9.0)         │           │                   │
+        └───────────────────┘           └───────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────┐
+│                        INTERNAL TYPES                                │
+├─────────────────────────────────────────────────────────────────────┤
+│  packages/core/                                                      │
+│  ├── Mystira.Core/          # C# internal types (net9.0)            │
+│  │   ├── Results/           # Result<T>, Error handling             │
+│  │   ├── Domain/            # Domain primitives                      │
+│  │   └── Extensions/        # Common extensions                      │
+│  └── @mystira/core-types/   # TypeScript equivalents                 │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+### What Goes Where?
+
+| Type | Location | Reason |
+|------|----------|--------|
+| `ErrorResponse` | **api-spec/** (OpenAPI) | Exposed in API responses |
+| `ValidationErrorResponse` | **api-spec/** (OpenAPI) | Exposed in API responses |
+| `StoryRequest` | **api-spec/** (OpenAPI) | API request body |
+| `Result<T>` | **Mystira.Core** | Internal only, not serialized to API |
+| `DomainException` | **Mystira.Core** | Internal error handling |
+| `ISpecification<T>` | **Mystira.Core** | Internal query pattern |
 
 ### New Package Structure
 
 ```
 packages/
-├── core/                           # NEW: Foundation layer
-│   ├── Mystira.Core/               # C# base types
-│   │   ├── Errors/
-│   │   │   ├── ErrorResponse.cs
-│   │   │   ├── ValidationErrorResponse.cs
-│   │   │   ├── NotFoundErrorResponse.cs
-│   │   │   ├── ForbiddenErrorResponse.cs
-│   │   │   └── UnauthorizedErrorResponse.cs
+├── api-spec/                      # NEW: OpenAPI specifications
+│   ├── openapi/
+│   │   ├── app-api.yaml
+│   │   ├── story-generator.yaml
+│   │   └── common/
+│   │       ├── errors.yaml
+│   │       ├── pagination.yaml
+│   │       └── health.yaml
+│   ├── scripts/
+│   │   ├── generate-csharp.sh
+│   │   └── generate-typescript.sh
+│   └── package.json
+│
+├── core/                          # NEW: Internal shared types
+│   ├── Mystira.Core/              # C# (net9.0)
 │   │   ├── Results/
-│   │   │   └── Result.cs
+│   │   │   ├── Result.cs
+│   │   │   └── ResultExtensions.cs
+│   │   ├── Domain/
+│   │   │   ├── Entity.cs
+│   │   │   └── ValueObject.cs
 │   │   └── Mystira.Core.csproj
 │   ├── Mystira.Core.Tests/
-│   └── core-types/                 # TypeScript equivalent
-│       ├── src/
-│       │   ├── errors.ts
-│       │   └── index.ts
+│   └── core-types/                # TypeScript internal types
 │       └── package.json
 │
-├── contracts/                      # App-specific contracts
+├── contracts/                     # GENERATED from OpenAPI
 │   ├── dotnet/
-│   │   └── Mystira.Contracts/      # References Mystira.Core
-│   └── src/                        # TypeScript (references @mystira/core-types)
+│   │   └── Mystira.Contracts/     # Generated C# (net9.0)
+│   └── src/                       # Generated TypeScript
 │
-└── shared/                         # Infrastructure services
-    └── Mystira.Shared/             # References Mystira.Core
+└── shared/                        # Infrastructure (net9.0)
+    └── Mystira.Shared/            # References Mystira.Core
 ```
 
-### Dependency Graph
+## Phase 1: OpenAPI Specification (Week 1)
 
-```
-                    ┌─────────────────┐
-                    │  Mystira.Core   │
-                    │  (net8.0/net9.0)│
-                    └────────┬────────┘
-                             │
-              ┌──────────────┼──────────────┐
-              │              │              │
-              ▼              ▼              ▼
-    ┌─────────────────┐ ┌─────────────┐ ┌─────────────┐
-    │Mystira.Contracts│ │Mystira.Shared│ │ Other Pkgs  │
-    │   (net8.0)      │ │   (net9.0)   │ │             │
-    └─────────────────┘ └──────────────┘ └─────────────┘
-```
-
-## Migration Steps
-
-### Phase 1: Create Mystira.Core (Week 1)
-
-#### Step 1.1: Create C# Project
+### Step 1.1: Create OpenAPI Directory Structure
 
 ```bash
-# Create project structure
-mkdir -p packages/core/Mystira.Core/Errors
-mkdir -p packages/core/Mystira.Core/Results
-mkdir -p packages/core/Mystira.Core.Tests
-
-# Create project file
+mkdir -p packages/api-spec/openapi/common
+mkdir -p packages/api-spec/scripts
 ```
 
-**Mystira.Core.csproj:**
+### Step 1.2: Define Common Error Types
+
+**packages/api-spec/openapi/common/errors.yaml:**
+```yaml
+openapi: 3.1.0
+info:
+  title: Mystira Common Types - Errors
+  version: 1.0.0
+
+components:
+  schemas:
+    ErrorResponse:
+      type: object
+      required:
+        - message
+        - isRecoverable
+      properties:
+        message:
+          type: string
+          description: Human-readable error message
+        details:
+          type: string
+          nullable: true
+          description: Additional error details
+        timestamp:
+          type: string
+          format: date-time
+          description: When the error occurred (UTC)
+        traceId:
+          type: string
+          nullable: true
+          description: Correlation ID for distributed tracing
+        errorCode:
+          type: string
+          nullable: true
+          description: Unique error code (e.g., "AUTH_001")
+        category:
+          type: string
+          nullable: true
+          description: Error category (e.g., "Authentication")
+        statusCode:
+          type: integer
+          nullable: true
+          description: HTTP status code
+        isRecoverable:
+          type: boolean
+          default: true
+          description: Whether the error is recoverable
+        suggestedAction:
+          type: string
+          nullable: true
+          description: Suggested action (e.g., "retry", "login")
+
+    ValidationErrorResponse:
+      allOf:
+        - $ref: '#/components/schemas/ErrorResponse'
+        - type: object
+          required:
+            - errors
+          properties:
+            errors:
+              type: object
+              additionalProperties:
+                type: array
+                items:
+                  type: string
+              description: Field-level validation errors
+
+    NotFoundErrorResponse:
+      allOf:
+        - $ref: '#/components/schemas/ErrorResponse'
+        - type: object
+          properties:
+            resourceType:
+              type: string
+              nullable: true
+            resourceId:
+              type: string
+              nullable: true
+
+    UnauthorizedErrorResponse:
+      allOf:
+        - $ref: '#/components/schemas/ErrorResponse'
+        - type: object
+          properties:
+            authScheme:
+              type: string
+              nullable: true
+
+    ForbiddenErrorResponse:
+      allOf:
+        - $ref: '#/components/schemas/ErrorResponse'
+        - type: object
+          properties:
+            requiredPermission:
+              type: string
+              nullable: true
+```
+
+### Step 1.3: Create App API Spec
+
+**packages/api-spec/openapi/app-api.yaml:**
+```yaml
+openapi: 3.1.0
+info:
+  title: Mystira App API
+  version: 1.0.0
+  description: Main Mystira application API
+
+servers:
+  - url: https://api.mystira.io/v1
+
+paths:
+  /health:
+    get:
+      operationId: getHealth
+      summary: Health check endpoint
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthCheckResult'
+
+components:
+  schemas:
+    # Import common types
+    ErrorResponse:
+      $ref: './common/errors.yaml#/components/schemas/ErrorResponse'
+    ValidationErrorResponse:
+      $ref: './common/errors.yaml#/components/schemas/ValidationErrorResponse'
+
+    # App-specific types
+    HealthCheckResult:
+      type: object
+      required:
+        - status
+        - timestamp
+      properties:
+        status:
+          type: string
+          enum: [Healthy, Degraded, Unhealthy]
+        timestamp:
+          type: string
+          format: date-time
+        checks:
+          type: array
+          items:
+            $ref: '#/components/schemas/HealthCheckEntry'
+
+    HealthCheckEntry:
+      type: object
+      required:
+        - name
+        - status
+      properties:
+        name:
+          type: string
+        status:
+          type: string
+          enum: [Healthy, Degraded, Unhealthy]
+        description:
+          type: string
+          nullable: true
+        duration:
+          type: string
+          nullable: true
+```
+
+### Step 1.4: Create Generation Scripts
+
+**packages/api-spec/scripts/generate-csharp.sh:**
+```bash
+#!/bin/bash
+set -e
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ROOT_DIR="$SCRIPT_DIR/../.."
+OUTPUT_DIR="$ROOT_DIR/contracts/dotnet/Mystira.Contracts.Generated"
+
+echo "Generating C# contracts from OpenAPI..."
+
+# Using NSwag
+npx nswag openapi2csclient \
+  /input:"$SCRIPT_DIR/../openapi/app-api.yaml" \
+  /output:"$OUTPUT_DIR/AppApiClient.cs" \
+  /namespace:Mystira.Contracts.Generated \
+  /generateClientInterfaces:true \
+  /generateDtoTypes:true \
+  /dateType:System.DateTimeOffset \
+  /dateTimeType:System.DateTimeOffset \
+  /arrayType:System.Collections.Generic.IReadOnlyList \
+  /generateOptionalParameters:true
+
+echo "C# contracts generated at $OUTPUT_DIR"
+```
+
+**packages/api-spec/scripts/generate-typescript.sh:**
+```bash
+#!/bin/bash
+set -e
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ROOT_DIR="$SCRIPT_DIR/../.."
+OUTPUT_DIR="$ROOT_DIR/contracts/src/generated"
+
+echo "Generating TypeScript contracts from OpenAPI..."
+
+npx openapi-typescript "$SCRIPT_DIR/../openapi/app-api.yaml" \
+  --output "$OUTPUT_DIR/app-api.ts"
+
+npx openapi-typescript "$SCRIPT_DIR/../openapi/story-generator.yaml" \
+  --output "$OUTPUT_DIR/story-generator.ts"
+
+echo "TypeScript contracts generated at $OUTPUT_DIR"
+```
+
+### Step 1.5: Package Configuration
+
+**packages/api-spec/package.json:**
+```json
+{
+  "name": "@mystira/api-spec",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "generate": "npm run generate:csharp && npm run generate:typescript",
+    "generate:csharp": "bash scripts/generate-csharp.sh",
+    "generate:typescript": "bash scripts/generate-typescript.sh",
+    "validate": "npx @redocly/cli lint openapi/*.yaml",
+    "preview": "npx @redocly/cli preview-docs openapi/app-api.yaml"
+  },
+  "devDependencies": {
+    "@redocly/cli": "^1.25.0",
+    "nswag": "^14.0.0",
+    "openapi-typescript": "^7.0.0"
+  }
+}
+```
+
+## Phase 2: Create Mystira.Core (Week 1-2)
+
+### Step 2.1: Core Project (net9.0)
+
+**packages/core/Mystira.Core/Mystira.Core.csproj:**
 ```xml
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
+    <TargetFramework>net9.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
 
     <PackageId>Mystira.Core</PackageId>
     <Version>0.1.0-alpha</Version>
-    <Description>Core types for Mystira platform - errors, results, and foundational abstractions</Description>
+    <Authors>Mystira Team</Authors>
+    <Description>Core internal types for Mystira platform - Result pattern, domain primitives</Description>
   </PropertyGroup>
 </Project>
 ```
 
-#### Step 1.2: Move ErrorResponse to Core
+### Step 2.2: Result Pattern (Internal Only)
 
-Take the best of both implementations:
-
+**packages/core/Mystira.Core/Results/Result.cs:**
 ```csharp
-namespace Mystira.Core.Errors;
+namespace Mystira.Core.Results;
 
 /// <summary>
-/// Standard error response for API errors.
-/// Single source of truth for all Mystira services.
+/// Represents the result of an operation that can fail.
+/// Internal use only - not exposed via APIs.
 /// </summary>
-public record ErrorResponse
+public readonly struct Result<T>
 {
-    /// <summary>Human-readable error message.</summary>
-    public required string Message { get; init; }
+    private readonly T? _value;
+    private readonly Error? _error;
 
-    /// <summary>Additional details about the error.</summary>
-    public string? Details { get; init; }
+    public bool IsSuccess { get; }
+    public bool IsFailure => !IsSuccess;
 
-    /// <summary>When the error occurred (UTC).</summary>
-    public DateTimeOffset Timestamp { get; init; } = DateTimeOffset.UtcNow;
+    public T Value => IsSuccess
+        ? _value!
+        : throw new InvalidOperationException("Cannot access Value on a failed Result");
 
-    /// <summary>Correlation ID for distributed tracing.</summary>
-    public string? TraceId { get; init; }
+    public Error Error => IsFailure
+        ? _error!
+        : throw new InvalidOperationException("Cannot access Error on a successful Result");
 
-    /// <summary>Unique error code (e.g., "AUTH_001", "VALIDATION_002").</summary>
-    public string? ErrorCode { get; init; }
-
-    /// <summary>Error category (e.g., "Authentication", "Validation").</summary>
-    public string? Category { get; init; }
-
-    /// <summary>HTTP status code associated with this error.</summary>
-    public int? StatusCode { get; init; }
-
-    /// <summary>Whether the error is recoverable by the user.</summary>
-    public bool IsRecoverable { get; init; } = true;
-
-    /// <summary>Suggested action (e.g., "retry", "login").</summary>
-    public string? SuggestedAction { get; init; }
-}
-```
-
-#### Step 1.3: Create TypeScript Equivalent
-
-**packages/core/core-types/src/errors.ts:**
-```typescript
-export interface ErrorResponse {
-  message: string;
-  details?: string;
-  timestamp: string; // ISO 8601
-  traceId?: string;
-  errorCode?: string;
-  category?: string;
-  statusCode?: number;
-  isRecoverable: boolean;
-  suggestedAction?: string;
-}
-
-export interface ValidationErrorResponse extends ErrorResponse {
-  errors: Record<string, string[]>;
-}
-
-export interface NotFoundErrorResponse extends ErrorResponse {
-  resourceType?: string;
-  resourceId?: string;
-}
-```
-
-### Phase 2: Update References (Week 2)
-
-#### Step 2.1: Update Mystira.Contracts
-
-```xml
-<!-- Mystira.Contracts.csproj -->
-<ItemGroup>
-  <ProjectReference Include="..\..\core\Mystira.Core\Mystira.Core.csproj" />
-</ItemGroup>
-```
-
-**Replace local ErrorResponse with re-export:**
-```csharp
-// Mystira.Contracts/App/Responses/Common/ErrorResponse.cs
-// DEPRECATED: Use Mystira.Core.Errors.ErrorResponse directly
-
-global using Mystira.Core.Errors;
-
-namespace Mystira.Contracts.App.Responses.Common;
-
-[Obsolete("Use Mystira.Core.Errors.ErrorResponse instead")]
-public record ErrorResponseLegacy : Mystira.Core.Errors.ErrorResponse;
-```
-
-#### Step 2.2: Update Mystira.Shared
-
-```xml
-<!-- Mystira.Shared.csproj -->
-<ItemGroup>
-  <ProjectReference Include="..\..\core\Mystira.Core\Mystira.Core.csproj" />
-</ItemGroup>
-```
-
-**Update GlobalExceptionHandler:**
-```csharp
-using Mystira.Core.Errors;
-
-public class GlobalExceptionHandler
-{
-    public ErrorResponse HandleException(Exception ex)
+    private Result(T value)
     {
-        return ErrorResponse.FromException(ex);
+        IsSuccess = true;
+        _value = value;
+        _error = null;
     }
+
+    private Result(Error error)
+    {
+        IsSuccess = false;
+        _value = default;
+        _error = error;
+    }
+
+    public static Result<T> Success(T value) => new(value);
+    public static Result<T> Failure(Error error) => new(error);
+
+    public static implicit operator Result<T>(T value) => Success(value);
+    public static implicit operator Result<T>(Error error) => Failure(error);
+
+    public TResult Match<TResult>(
+        Func<T, TResult> onSuccess,
+        Func<Error, TResult> onFailure)
+        => IsSuccess ? onSuccess(_value!) : onFailure(_error!);
 }
-```
 
-#### Step 2.3: Update TypeScript contracts
-
-**packages/contracts/package.json:**
-```json
+/// <summary>
+/// Represents an error in the Result pattern.
+/// </summary>
+public sealed record Error(string Code, string Message, Exception? Exception = null)
 {
-  "dependencies": {
-    "@mystira/core-types": "workspace:*"
-  }
+    public static Error NotFound(string resource, string? id = null)
+        => new("NOT_FOUND", id is null ? $"{resource} not found" : $"{resource} '{id}' not found");
+
+    public static Error Validation(string message)
+        => new("VALIDATION", message);
+
+    public static Error Unauthorized(string? reason = null)
+        => new("UNAUTHORIZED", reason ?? "Authentication required");
+
+    public static Error Forbidden(string? permission = null)
+        => new("FORBIDDEN", permission is null ? "Access denied" : $"Missing permission: {permission}");
+
+    public static Error Conflict(string message)
+        => new("CONFLICT", message);
+
+    public static Error Internal(string message, Exception? ex = null)
+        => new("INTERNAL", message, ex);
 }
 ```
 
-**Re-export from contracts:**
+### Step 2.3: TypeScript Core Types
+
+**packages/core/core-types/src/results.ts:**
 ```typescript
-// packages/contracts/src/app/types.ts
-export type { ErrorResponse, ValidationErrorResponse } from '@mystira/core-types';
+export type Result<T, E = Error> =
+  | { success: true; value: T }
+  | { success: false; error: E };
+
+export interface Error {
+  code: string;
+  message: string;
+}
+
+export const Result = {
+  success: <T>(value: T): Result<T> => ({ success: true, value }),
+  failure: <E = Error>(error: E): Result<never, E> => ({ success: false, error }),
+
+  map: <T, U, E>(result: Result<T, E>, fn: (value: T) => U): Result<U, E> =>
+    result.success ? Result.success(fn(result.value)) : result,
+
+  flatMap: <T, U, E>(result: Result<T, E>, fn: (value: T) => Result<U, E>): Result<U, E> =>
+    result.success ? fn(result.value) : result,
+};
 ```
 
-### Phase 3: Deprecation & Cleanup (Week 3)
+## Phase 3: Update Existing Projects to net9.0 (Week 2)
 
-#### Step 3.1: Add Obsolete Attributes
+### Step 3.1: Update Mystira.Contracts
 
-```csharp
-// In Mystira.Shared
-namespace Mystira.Shared.Exceptions;
+**packages/contracts/dotnet/Mystira.Contracts/Mystira.Contracts.csproj:**
+```xml
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <!-- ... rest of config ... -->
+  </PropertyGroup>
 
-[Obsolete("Use Mystira.Core.Errors.ErrorResponse instead. Will be removed in v1.0.")]
-public class ErrorResponse { /* ... */ }
+  <!-- Generated types from OpenAPI -->
+  <ItemGroup>
+    <Compile Include="..\Mystira.Contracts.Generated\**\*.cs" LinkBase="Generated" />
+  </ItemGroup>
+</Project>
 ```
 
-#### Step 3.2: Update Consuming Applications
+### Step 3.2: Update Mystira.Shared
 
-```csharp
-// Before
-using Mystira.Shared.Exceptions;
-// or
-using Mystira.Contracts.App.Responses.Common;
+Already net9.0, just add reference to Core:
 
-// After
-using Mystira.Core.Errors;
+```xml
+<ItemGroup>
+  <ProjectReference Include="..\..\core\Mystira.Core\Mystira.Core.csproj" />
+</ItemGroup>
 ```
 
-#### Step 3.3: Remove Duplicates
+### Step 3.3: Remove Duplicate ErrorResponse
 
-After all consumers are updated:
+1. Delete `Mystira.Shared/Exceptions/ErrorResponse.cs` (use generated from OpenAPI)
+2. Delete manual `Mystira.Contracts/App/Responses/Common/ErrorResponse.cs` (use generated)
+3. Update `GlobalExceptionHandler` to use generated types
 
-1. Delete `Mystira.Shared/Exceptions/ErrorResponse.cs`
-2. Delete `Mystira.Contracts/App/Responses/Common/ErrorResponse.cs`
+## Phase 4: CI/CD Integration (Week 3)
 
-## Update Solution File
+### Step 4.1: Add Generation to Build Pipeline
 
-Add to `Mystira.sln`:
+**.github/workflows/generate-contracts.yml:**
+```yaml
+name: Generate API Contracts
+
+on:
+  push:
+    paths:
+      - 'packages/api-spec/openapi/**'
+  workflow_dispatch:
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+
+      - name: Install dependencies
+        run: cd packages/api-spec && npm ci
+
+      - name: Validate OpenAPI specs
+        run: cd packages/api-spec && npm run validate
+
+      - name: Generate contracts
+        run: cd packages/api-spec && npm run generate
+
+      - name: Commit generated files
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore: regenerate API contracts from OpenAPI"
+          file_pattern: "packages/contracts/**"
+```
+
+## Dependency Graph (Final)
 
 ```
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mystira.Core", "packages\core\Mystira.Core\Mystira.Core.csproj", "{NEW-GUID}"
-EndProject
+                     ┌──────────────────┐
+                     │   api-spec/      │
+                     │   (OpenAPI YAML) │
+                     └────────┬─────────┘
+                              │ generates
+              ┌───────────────┴───────────────┐
+              ▼                               ▼
+   ┌─────────────────────┐        ┌─────────────────────┐
+   │ Mystira.Contracts   │        │ @mystira/contracts  │
+   │ (Generated C#)      │        │ (Generated TS)      │
+   │ net9.0              │        │                     │
+   └─────────────────────┘        └─────────────────────┘
+              │                               │
+              │ references                    │ imports
+              ▼                               ▼
+   ┌─────────────────────┐        ┌─────────────────────┐
+   │   Mystira.Core      │        │ @mystira/core-types │
+   │   (Internal types)  │        │ (Internal types)    │
+   │   net9.0            │        │                     │
+   └─────────────────────┘        └─────────────────────┘
+              │
+              │ references
+              ▼
+   ┌─────────────────────┐
+   │   Mystira.Shared    │
+   │   (Infrastructure)  │
+   │   net9.0            │
+   └─────────────────────┘
 ```
 
-## Breaking Changes
+## Benefits of Hybrid Approach
 
-### C# Consumers
+| Benefit | Description |
+|---------|-------------|
+| **Single Source of Truth** | OpenAPI spec defines all API types once |
+| **Auto-sync** | C# and TypeScript always match |
+| **API Documentation** | OpenAPI gives free Swagger/Redoc docs |
+| **Contract Testing** | Can validate against spec |
+| **Internal Flexibility** | Mystira.Core can have C#-specific patterns (Result<T>) |
+| **net9.0 Everywhere** | Consistent runtime, latest features |
 
-| Before | After |
-|--------|-------|
-| `Mystira.Shared.Exceptions.ErrorResponse` | `Mystira.Core.Errors.ErrorResponse` |
-| `class ErrorResponse` | `record ErrorResponse` |
-| `DateTime Timestamp` | `DateTimeOffset Timestamp` |
+## Tools Used
 
-### TypeScript Consumers
+| Tool | Purpose |
+|------|---------|
+| **NSwag** | Generate C# clients/types from OpenAPI |
+| **openapi-typescript** | Generate TypeScript types from OpenAPI |
+| **Redocly CLI** | Validate and preview OpenAPI specs |
 
-| Before | After |
-|--------|-------|
-| `@mystira/contracts` ApiError | `@mystira/core-types` ErrorResponse |
+## Migration Checklist
 
-## Rollback Plan
-
-If issues arise:
-
-1. Revert the `<ProjectReference>` changes
-2. Keep both packages temporarily
-3. Add `[Obsolete]` warnings instead of removing
-
-## Testing Strategy
-
-1. **Unit Tests**: All error types have construction/serialization tests
-2. **Integration Tests**: Verify API responses match expected shape
-3. **Contract Tests**: Pact tests between services
-
-## Timeline
-
-| Phase | Duration | Tasks |
-|-------|----------|-------|
-| Phase 1 | Week 1 | Create Mystira.Core package |
-| Phase 2 | Week 2 | Update references, add deprecation warnings |
-| Phase 3 | Week 3 | Remove duplicates, update docs |
-
-## Decision Record
-
-**Chosen approach**: Extract to `Mystira.Core`
-
-**Alternatives considered**:
-
-1. **Keep Contracts as source of truth**: Would require Shared to reference Contracts, creating awkward dependency
-2. **Keep Shared as source of truth**: Contracts should be lighter weight, shouldn't depend on infrastructure
-3. **OpenAPI-first generation**: More complex tooling, overkill for current scale
-
-## Appendix: Files to Create
-
-```
-packages/core/
-├── Mystira.Core/
-│   ├── Errors/
-│   │   ├── ErrorResponse.cs
-│   │   ├── ValidationErrorResponse.cs
-│   │   ├── NotFoundErrorResponse.cs
-│   │   ├── ForbiddenErrorResponse.cs
-│   │   └── UnauthorizedErrorResponse.cs
-│   ├── Results/
-│   │   ├── Result.cs
-│   │   └── ResultExtensions.cs
-│   ├── Mystira.Core.csproj
-│   └── README.md
-├── Mystira.Core.Tests/
-│   ├── Errors/
-│   │   └── ErrorResponseTests.cs
-│   └── Mystira.Core.Tests.csproj
-└── core-types/
-    ├── src/
-    │   ├── errors.ts
-    │   ├── results.ts
-    │   └── index.ts
-    ├── package.json
-    ├── tsconfig.json
-    └── README.md
-```
+- [ ] Create `packages/api-spec/` structure
+- [ ] Write OpenAPI specs for common types
+- [ ] Write OpenAPI specs for App API
+- [ ] Write OpenAPI specs for Story Generator API
+- [ ] Set up NSwag for C# generation
+- [ ] Set up openapi-typescript for TS generation
+- [ ] Create `packages/core/Mystira.Core/`
+- [ ] Move Result<T> to Core
+- [ ] Update Mystira.Contracts to net9.0
+- [ ] Update Mystira.Shared to reference Core
+- [ ] Remove duplicate ErrorResponse files
+- [ ] Add CI/CD generation workflow
+- [ ] Update consuming applications
 
 ## Questions for Team
 
-1. Should `Mystira.Core` be published to NuGet, or kept as internal package?
-2. Do we need backwards-compatible type aliases during migration?
-3. Should we add JSON serialization tests to ensure API compatibility?
+1. Should we use NSwag or Kiota for C# generation?
+2. Do we need runtime validation (e.g., Zod for TypeScript)?
+3. Should OpenAPI specs be versioned separately?
