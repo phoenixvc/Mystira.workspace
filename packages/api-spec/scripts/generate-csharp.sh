@@ -4,7 +4,7 @@ set -e
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$SCRIPT_DIR/../../.."
 API_SPEC_DIR="$SCRIPT_DIR/.."
-OUTPUT_DIR="$ROOT_DIR/packages/contracts/dotnet/Mystira.Contracts.Generated"
+OUTPUT_DIR="$ROOT_DIR/packages/contracts/dotnet/Mystira.Contracts/Generated"
 
 echo "=== Mystira C# Contract Generation ==="
 echo "API Spec Dir: $API_SPEC_DIR"

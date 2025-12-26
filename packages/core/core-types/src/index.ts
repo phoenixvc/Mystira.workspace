@@ -9,4 +9,4 @@
  * @packageDocumentation
  */
 
-export * from './results';
+export * from './results.js';
