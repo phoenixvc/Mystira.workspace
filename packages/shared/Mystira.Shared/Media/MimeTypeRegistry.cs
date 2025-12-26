@@ -47,6 +47,21 @@ public static class MimeTypeRegistry
     };
 
     /// <summary>
+    /// Document and text file extensions and their MIME types
+    /// </summary>
+    public static readonly IReadOnlyDictionary<string, string> DocumentTypes = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+    {
+        { ".pdf", "application/pdf" },
+        { ".json", "application/json" },
+        { ".xml", "application/xml" },
+        { ".txt", "text/plain" },
+        { ".html", "text/html" },
+        { ".htm", "text/html" },
+        { ".css", "text/css" },
+        { ".js", "application/javascript" }
+    };
+
+    /// <summary>
     /// Combined dictionary of all supported MIME types
     /// </summary>
     private static readonly Lazy<IReadOnlyDictionary<string, string>> _allTypes = new(() =>
@@ -55,6 +70,7 @@ public static class MimeTypeRegistry
         foreach (var kvp in AudioTypes) combined[kvp.Key] = kvp.Value;
         foreach (var kvp in VideoTypes) combined[kvp.Key] = kvp.Value;
         foreach (var kvp in ImageTypes) combined[kvp.Key] = kvp.Value;
+        foreach (var kvp in DocumentTypes) combined[kvp.Key] = kvp.Value;
         return combined;
     });
 
@@ -85,17 +101,19 @@ public static class MimeTypeRegistry
 
     /// <summary>
     /// Gets the file extension for a given MIME type.
-    /// Returns null if the MIME type is not recognized.
+    /// Returns empty string if the MIME type is not recognized.
     /// </summary>
     /// <param name="mimeType">The MIME type</param>
-    /// <returns>The file extension with leading dot, or null</returns>
-    public static string? GetExtension(string mimeType)
+    /// <returns>The file extension with leading dot, or empty string</returns>
+    public static string GetExtension(string? mimeType)
     {
         if (string.IsNullOrWhiteSpace(mimeType))
-            return null;
+            return string.Empty;
 
-        return AllTypes.FirstOrDefault(kvp =>
-            kvp.Value.Equals(mimeType, StringComparison.OrdinalIgnoreCase)).Key;
+        var match = AllTypes.FirstOrDefault(kvp =>
+            kvp.Value.Equals(mimeType, StringComparison.OrdinalIgnoreCase));
+
+        return match.Key ?? string.Empty;
     }
 
     /// <summary>
