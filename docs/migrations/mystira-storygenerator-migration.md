@@ -1,7 +1,7 @@
 # Mystira.StoryGenerator Migration Guide
 
 **Target**: Migrate StoryGenerator to use `Mystira.Shared` infrastructure
-**Prerequisites**: Mystira.Shared v0.1.0-alpha published to NuGet feed
+**Prerequisites**: Mystira.Shared v0.2.0-alpha published to NuGet feed
 **Estimated Effort**: 2 days
 **Last Updated**: December 2025
 **Status**: 🔄 In Progress

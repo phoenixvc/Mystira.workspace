@@ -9,7 +9,7 @@
 
     <!-- Package metadata -->
     <PackageId>Mystira.Shared</PackageId>
-    <Version>0.1.0-alpha</Version>
+    <Version>0.2.0-alpha</Version>
     <Authors>Mystira Team</Authors>
     <Company>PhoenixVC</Company>
     <Description>Shared infrastructure for Mystira platform services - authentication, authorization, middleware, and cross-cutting concerns</Description>

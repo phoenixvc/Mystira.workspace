@@ -1,7 +1,7 @@
 # Mystira.Admin Migration Guide
 
 **Target**: Migrate Mystira.Admin.Api to use `Mystira.Shared` infrastructure
-**Prerequisites**: Mystira.Shared v0.1.0-alpha published to NuGet feed
+**Prerequisites**: Mystira.Shared v0.2.0-alpha published to NuGet feed
 **Estimated Effort**: 1 day
 **Last Updated**: December 2025
 **Status**: 🔄 In Progress
@@ -19,7 +19,7 @@ Admin.Api is already well-positioned for migration with:
 
 Migration focuses on:
 1. **.NET 9.0 upgrade** (required)
-2. Replace `Mystira.App.Shared` → `Mystira.Shared` (v0.1.0-alpha)
+2. Replace `Mystira.App.Shared` → `Mystira.Shared` (v0.2.0-alpha)
 3. Adopt `Mystira.Shared.Resilience` for HTTP policies (Polly v8.6.5)
 4. Adopt Ardalis.Specification 9.3.1 for data access (included in Mystira.Shared)
 5. Standardize exception handling

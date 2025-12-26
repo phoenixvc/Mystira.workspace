@@ -22,7 +22,7 @@ This guide covers migrating Mystira.App from its current infrastructure to the c
 8. **Microsoft Entra External ID** authentication (optional)
 9. **Source generators** for repositories and validators
 
-> **Note**: All these components are already implemented in `Mystira.Shared` (v0.1.0-alpha). This migration is about adopting the shared package, not building new infrastructure.
+> **Note**: All these components are already implemented in `Mystira.Shared` (v0.2.0-alpha). This migration is about adopting the shared package, not building new infrastructure.
 
 ---
 
@@ -42,7 +42,7 @@ This guide covers migrating Mystira.App from its current infrastructure to the c
 <PackageReference Include="MediatR" Version="12.4.1" />
 
 <!-- Add -->
-<PackageReference Include="Mystira.Shared" Version="0.1.0-alpha" />
+<PackageReference Include="Mystira.Shared" Version="0.2.0-alpha" />
 <!-- Ardalis.Specification 9.3.1 is included via Mystira.Shared -->
 ```
 
@@ -50,7 +50,7 @@ This guide covers migrating Mystira.App from its current infrastructure to the c
 
 ```xml
 <!-- Add -->
-<PackageReference Include="Mystira.Shared" Version="0.1.0-alpha" />
+<PackageReference Include="Mystira.Shared" Version="0.2.0-alpha" />
 <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.0" />
 ```
 
@@ -58,7 +58,7 @@ This guide covers migrating Mystira.App from its current infrastructure to the c
 
 ```xml
 <!-- Add -->
-<PackageReference Include="Mystira.Shared" Version="0.1.0-alpha" />
+<PackageReference Include="Mystira.Shared" Version="0.2.0-alpha" />
 
 <!-- For WASM caching support -->
 <PackageReference Include="Blazored.LocalStorage" Version="4.5.0" />

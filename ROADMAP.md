@@ -21,29 +21,31 @@ This is the single source of truth for all Mystira platform development. We go l
 | ✅ Consolidate redundant planning docs | - | Done |
 | ✅ Create @mystira/core-types package | - | Done |
 | ✅ Update all migration guides with correct versions | - | Done |
-| Define domain events schema (AccountCreated, SessionCompleted, etc.) | jurie | 🔄 TODO |
-| Create rollback procedures per service | jurie | 🔄 TODO |
-| Finalize OpenAPI specs for all services | jurie | 🔄 TODO |
+| ✅ Define domain events schema (AccountCreated, SessionCompleted, etc.) | - | Done |
+| ✅ Create rollback procedures per service | - | Done |
+| ✅ Finalize OpenAPI specs (events.yaml added) | - | Done |
+| ✅ Add pre-launch patterns (AsyncExtensions, EntityId, RateLimiting) | - | Done |
+| ✅ Update to Mystira.Shared 0.2.0-alpha | - | Done |
 
 ### Service Repos (in priority order)
 
 | Service | Action | Target |
 |---------|--------|--------|
-| Mystira.App | Add Mystira.Shared 0.1.0-alpha, implement Wolverine handlers | Week 1 |
-| Mystira.Admin.Api | Add Mystira.Shared 0.1.0-alpha, enable PostgreSQL read | Week 1 |
-| Mystira.StoryGenerator | Add Mystira.Shared 0.1.0-alpha, Wolverine events | Week 2 |
+| Mystira.App | Add Mystira.Shared 0.2.0-alpha, implement Wolverine handlers | Week 1 |
+| Mystira.Admin.Api | Add Mystira.Shared 0.2.0-alpha, enable PostgreSQL read | Week 1 |
+| Mystira.StoryGenerator | Add Mystira.Shared 0.2.0-alpha, Wolverine events | Week 2 |
 | Mystira.Publisher | Add Service Bus subscription, event handlers | Week 2 |
 | Mystira.Chain | gRPC endpoints, event subscription | Week 2 |
 | Mystira.Admin.UI | Complete Phase 3, test auth flow | Week 2 |
 | Mystira.DevHub | Minimal - update if needed | As needed |
 
-### Critical Pre-Launch
+### Critical Pre-Launch (patterns now in Mystira.Shared 0.2.0)
 
-- [ ] Fix `Guid.Parse` crashes (use string IDs consistently)
-- [ ] Add `CancellationToken` to all async methods
-- [ ] Replace fire-and-forget patterns with proper error handling
-- [ ] Create performance baselines (load testing)
-- [ ] Security review and rate limiting
+- [x] Fix `Guid.Parse` crashes → Use `EntityId` class (string IDs)
+- [x] Add `CancellationToken` → Use `AsyncExtensions.EnsureToken()`
+- [x] Replace fire-and-forget → Use `AsyncExtensions.SafeExecuteAsync()`
+- [x] Security review → Use `RateLimitingMiddleware`
+- [ ] Create performance baselines (load testing) - remaining
 
 ---
 
@@ -111,7 +113,7 @@ All services adopt Mystira.Shared infrastructure:
 |------|--------|---------|
 | Publish/subscribe events | 🔄 Pending | Wolverine + Azure Service Bus |
 | Cache invalidation | 🔄 Pending | Redis pub/sub |
-| Domain events defined | 🔄 Pending | AccountCreated, SessionCompleted, etc. |
+| Domain events defined | ✅ Done | AccountCreated, SessionCompleted, etc. |
 
 ### Week 3-4: Performance & Monitoring
 
@@ -150,20 +152,21 @@ The `PolyglotRepository` in Mystira.Shared routes to appropriate database based 
 
 ## Technical Debt (Fix in January)
 
-### Critical
+### Critical - RESOLVED in Mystira.Shared 0.2.0 ✅
 
-| Issue | Description | Action |
-|-------|-------------|--------|
-| `Guid.Parse` crashes | String IDs cause crashes | Use string IDs consistently |
-| Missing `CancellationToken` | Async methods missing ct | Add to all async signatures |
-| Fire-and-forget patterns | No error handling | Add proper error handling |
+| Issue | Solution | Location |
+|-------|----------|----------|
+| `Guid.Parse` crashes | `EntityId` class with string IDs | `Mystira.Shared.Data.EntityId` |
+| Missing `CancellationToken` | `EnsureToken()` extension | `Mystira.Shared.Extensions.AsyncExtensions` |
+| Fire-and-forget patterns | `SafeExecuteAsync()` extension | `Mystira.Shared.Extensions.AsyncExtensions` |
+| Rate limiting | `RateLimitingMiddleware` | `Mystira.Shared.Middleware.RateLimitingMiddleware` |
 
 ### High Priority
 
-| Issue | Description | Action |
-|-------|-------------|--------|
-| Rollback procedures | Missing per-phase guides | Create before launch |
-| Performance baselines | No benchmarks | Establish before launch |
+| Issue | Status | Action |
+|-------|--------|--------|
+| Rollback procedures | ✅ Done | `docs/operations/runbooks/service-rollback.md` |
+| Performance baselines | 🔄 Pending | Establish before launch |
 
 ---
 

@@ -1,0 +1,281 @@
+openapi: 3.1.0
+info:
+  title: Mystira Common Types - Events
+  version: 1.0.0
+  description: Domain event schemas for Mystira platform
+
+components:
+  schemas:
+    # Base Event Types
+    DomainEvent:
+      type: object
+      required:
+        - occurredAt
+      properties:
+        occurredAt:
+          type: string
+          format: date-time
+          description: When the event occurred (UTC)
+
+    IntegrationEvent:
+      allOf:
+        - $ref: '#/components/schemas/DomainEvent'
+        - type: object
+          required:
+            - eventId
+          properties:
+            eventId:
+              type: string
+              format: uuid
+              description: Unique event ID for idempotency
+
+    # Account Events
+    AccountCreated:
+      allOf:
+        - $ref: '#/components/schemas/IntegrationEvent'
+        - type: object
+          required:
+            - type
+            - accountId
+            - email
+          properties:
+            type:
+              type: string
+              const: AccountCreated
+            accountId:
+              type: string
+              description: The unique account ID
+            email:
+              type: string
+              format: email
+              description: The user's email address
+            provider:
+              type: string
+              nullable: true
+              description: Authentication provider (e.g., "entra", "google")
+
+    AccountUpdated:
+      allOf:
+        - $ref: '#/components/schemas/IntegrationEvent'
+        - type: object
+          required:
+            - type
+            - accountId
+            - updatedFields
+          properties:
+            type:
+              type: string
+              const: AccountUpdated
+            accountId:
+              type: string
+            updatedFields:
+              type: array
+              items:
+                type: string
+
+    AccountDeleted:
+      allOf:
+        - $ref: '#/components/schemas/IntegrationEvent'
+        - type: object
+          required:
+            - type
+            - accountId
+          properties:
+            type:
+              type: string
+              const: AccountDeleted
+            accountId:
+              type: string
+            isSoftDelete:
+              type: boolean
+              default: true
+
+    # Session Events
+    SessionStarted:
+      allOf:
+        - $ref: '#/components/schemas/IntegrationEvent'
+        - type: object
+          required:
+            - type
+            - sessionId
+            - accountId
+            - scenarioId
+          properties:
+            type:
+              type: string
+              const: SessionStarted
+            sessionId:
+              type: string
+            accountId:
+              type: string
+            scenarioId:
+              type: string
+
+    SessionCompleted:
+      allOf:
+        - $ref: '#/components/schemas/IntegrationEvent'
+        - type: object
+          required:
+            - type
+            - sessionId
+            - accountId
+            - scenarioId
+            - durationSeconds
+          properties:
+            type:
+              type: string
+              const: SessionCompleted
+            sessionId:
+              type: string
+            accountId:
+              type: string
+            scenarioId:
+              type: string
+            durationSeconds:
+              type: integer
+            outcome:
+              type: string
+              nullable: true
+
+    SessionAbandoned:
+      allOf:
+        - $ref: '#/components/schemas/IntegrationEvent'
+        - type: object
+          required:
+            - type
+            - sessionId
+            - accountId
+            - durationSeconds
+          properties:
+            type:
+              type: string
+              const: SessionAbandoned
+            sessionId:
+              type: string
+            accountId:
+              type: string
+            durationSeconds:
+              type: integer
+            lastProgressPoint:
+              type: string
+              nullable: true
+
+    # Content Events
+    ScenarioCreated:
+      allOf:
+        - $ref: '#/components/schemas/IntegrationEvent'
+        - type: object
+          required:
+            - type
+            - scenarioId
+            - title
+            - authorId
+          properties:
+            type:
+              type: string
+              const: ScenarioCreated
+            scenarioId:
+              type: string
+            title:
+              type: string
+            authorId:
+              type: string
+            isPublished:
+              type: boolean
+              default: false
+
+    ScenarioPublished:
+      allOf:
+        - $ref: '#/components/schemas/IntegrationEvent'
+        - type: object
+          required:
+            - type
+            - scenarioId
+            - title
+            - authorId
+          properties:
+            type:
+              type: string
+              const: ScenarioPublished
+            scenarioId:
+              type: string
+            title:
+              type: string
+            authorId:
+              type: string
+
+    MediaUploaded:
+      allOf:
+        - $ref: '#/components/schemas/IntegrationEvent'
+        - type: object
+          required:
+            - type
+            - mediaId
+            - uploaderId
+            - mimeType
+            - sizeBytes
+          properties:
+            type:
+              type: string
+              const: MediaUploaded
+            mediaId:
+              type: string
+            uploaderId:
+              type: string
+            mimeType:
+              type: string
+            sizeBytes:
+              type: integer
+              format: int64
+
+    # Cache Events
+    CacheInvalidated:
+      allOf:
+        - $ref: '#/components/schemas/IntegrationEvent'
+        - type: object
+          required:
+            - type
+            - keyPattern
+            - entityType
+            - sourceService
+          properties:
+            type:
+              type: string
+              const: CacheInvalidated
+            keyPattern:
+              type: string
+              description: Cache key pattern to invalidate (supports wildcards)
+            entityType:
+              type: string
+            entityId:
+              type: string
+              nullable: true
+            sourceService:
+              type: string
+
+    # Union type for all events
+    MystiraEvent:
+      oneOf:
+        - $ref: '#/components/schemas/AccountCreated'
+        - $ref: '#/components/schemas/AccountUpdated'
+        - $ref: '#/components/schemas/AccountDeleted'
+        - $ref: '#/components/schemas/SessionStarted'
+        - $ref: '#/components/schemas/SessionCompleted'
+        - $ref: '#/components/schemas/SessionAbandoned'
+        - $ref: '#/components/schemas/ScenarioCreated'
+        - $ref: '#/components/schemas/ScenarioPublished'
+        - $ref: '#/components/schemas/MediaUploaded'
+        - $ref: '#/components/schemas/CacheInvalidated'
+      discriminator:
+        propertyName: type
+        mapping:
+          AccountCreated: '#/components/schemas/AccountCreated'
+          AccountUpdated: '#/components/schemas/AccountUpdated'
+          AccountDeleted: '#/components/schemas/AccountDeleted'
+          SessionStarted: '#/components/schemas/SessionStarted'
+          SessionCompleted: '#/components/schemas/SessionCompleted'
+          SessionAbandoned: '#/components/schemas/SessionAbandoned'
+          ScenarioCreated: '#/components/schemas/ScenarioCreated'
+          ScenarioPublished: '#/components/schemas/ScenarioPublished'
+          MediaUploaded: '#/components/schemas/MediaUploaded'
+          CacheInvalidated: '#/components/schemas/CacheInvalidated'
