@@ -9,9 +9,10 @@ using Xunit;
 
 namespace Mystira.Shared.Tests.Telemetry;
 
-public class SecurityMetricsTests
+public class SecurityMetricsTests : IDisposable
 {
     private readonly TelemetryClient _telemetryClient;
+    private readonly TelemetryConfiguration _configuration;
     private readonly Mock<ILogger<SecurityMetrics>> _loggerMock;
     private readonly SecurityMetrics _sut;
     private readonly List<ITelemetry> _sentTelemetry;
@@ -19,13 +20,18 @@ public class SecurityMetricsTests
     public SecurityMetricsTests()
     {
         _sentTelemetry = new List<ITelemetry>();
-        var configuration = new TelemetryConfiguration
+        _configuration = new TelemetryConfiguration
         {
             TelemetryChannel = new FakeTelemetryChannel(_sentTelemetry)
         };
-        _telemetryClient = new TelemetryClient(configuration);
+        _telemetryClient = new TelemetryClient(_configuration);
         _loggerMock = new Mock<ILogger<SecurityMetrics>>();
         _sut = new SecurityMetrics(_telemetryClient, _loggerMock.Object, "Test");
+    }
+
+    public void Dispose()
+    {
+        _configuration?.Dispose();
     }
 
     [Fact]

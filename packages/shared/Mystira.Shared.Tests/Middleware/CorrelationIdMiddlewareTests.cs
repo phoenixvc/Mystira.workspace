@@ -31,9 +31,14 @@ public class CorrelationIdMiddlewareTests
 
         // Assert
         context.Items.Should().ContainKey("CorrelationId");
-        var correlationId = context.Items["CorrelationId"] as string;
-        correlationId.Should().NotBeNullOrWhiteSpace();
-        correlationId.Should().HaveLength(32); // GUID without hyphens
+        context.Items["CorrelationId"]
+            .Should()
+            .BeOfType<string>()
+            .Which
+            .Should()
+            .NotBeNullOrWhiteSpace()
+            .And
+            .HaveLength(32); // GUID without hyphens
     }
 
     [Fact]
@@ -172,6 +177,8 @@ public class CorrelationIdMiddlewareTests
         // Assert
         var id1 = context1.Items["CorrelationId"] as string;
         var id2 = context2.Items["CorrelationId"] as string;
+        id1.Should().NotBeNullOrWhiteSpace();
+        id2.Should().NotBeNullOrWhiteSpace();
         id1.Should().NotBe(id2);
     }
 
@@ -190,6 +197,7 @@ public class CorrelationIdMiddlewareTests
 
         // Assert
         var correlationId = context.Items["CorrelationId"] as string;
+        correlationId.Should().NotBeNull();
         correlationId.Should().NotBeNullOrWhiteSpace();
         correlationId.Should().NotBe(whitespaceId.Trim());
     }

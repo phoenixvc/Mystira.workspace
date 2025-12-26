@@ -154,9 +154,10 @@ public class SecurityHeadersMiddlewareTests
 
         // Assert
         context.Items.Should().ContainKey("CspNonce");
-        var nonce = context.Items["CspNonce"] as string;
-        nonce.Should().NotBeNullOrWhiteSpace();
+        context.Items["CspNonce"].Should().BeOfType<string>()
+            .Which.Should().NotBeNullOrWhiteSpace();
         
+        var nonce = (string)context.Items["CspNonce"]!;
         var csp = context.Response.Headers["Content-Security-Policy"].ToString();
         csp.Should().Contain($"nonce-{nonce}");
     }
@@ -264,6 +265,8 @@ public class SecurityHeadersMiddlewareTests
         // Assert
         var nonce1 = context1.Items["CspNonce"] as string;
         var nonce2 = context2.Items["CspNonce"] as string;
+        nonce1.Should().NotBeNull();
+        nonce2.Should().NotBeNull();
         nonce1.Should().NotBe(nonce2);
     }
 }
