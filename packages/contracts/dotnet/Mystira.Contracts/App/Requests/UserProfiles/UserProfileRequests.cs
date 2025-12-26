@@ -170,14 +170,24 @@ public record CreateGuestProfileRequest
     public string Id { get; set; } = Guid.NewGuid().ToString();
 
     /// <summary>
-    /// Optional display name for the guest.
+    /// Display name for the guest. Required for PWA flow, optional for API flow with UseAdjectiveNames.
     /// </summary>
-    public string? Name { get; set; }
+    public string Name { get; set; } = string.Empty;
 
     /// <summary>
-    /// The age group/range for content filtering.
+    /// The age group for content filtering. Primary property name.
     /// </summary>
     public string AgeGroup { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Alias for AgeGroup. Used by PWA for backward compatibility.
+    /// Setting this also sets AgeGroup.
+    /// </summary>
+    public string? AgeRange
+    {
+        get => AgeGroup;
+        set => AgeGroup = value ?? string.Empty;
+    }
 
     /// <summary>
     /// Whether to generate a name using adjective-based naming (e.g., "Brave Explorer").
@@ -190,7 +200,12 @@ public record CreateGuestProfileRequest
     public string? Avatar { get; set; }
 
     /// <summary>
-    /// Optional account identifier if linking to an account.
+    /// Account identifier to link the guest profile to.
     /// </summary>
     public string? AccountId { get; set; }
+
+    /// <summary>
+    /// Indicates this is a guest profile. Always true for this request type.
+    /// </summary>
+    public bool IsGuest { get; set; } = true;
 }

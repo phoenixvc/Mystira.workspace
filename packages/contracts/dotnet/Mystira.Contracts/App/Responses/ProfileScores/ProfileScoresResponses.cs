@@ -5,6 +5,8 @@ namespace Mystira.Contracts.App.Responses.ProfileScores;
 /// </summary>
 public record AxisScoreItem
 {
+    private Dictionary<string, float>? _axisScores;
+
     /// <summary>
     /// The scenario identifier.
     /// </summary>
@@ -22,8 +24,15 @@ public record AxisScoreItem
 
     /// <summary>
     /// Dictionary of axis names to their scores.
+    /// Uses case-insensitive key comparison for axis name matching.
     /// </summary>
-    public Dictionary<string, float> AxisScores { get; set; } = new();
+    public Dictionary<string, float> AxisScores
+    {
+        get => _axisScores ??= new Dictionary<string, float>(StringComparer.OrdinalIgnoreCase);
+        set => _axisScores = value != null
+            ? new Dictionary<string, float>(value, StringComparer.OrdinalIgnoreCase)
+            : new Dictionary<string, float>(StringComparer.OrdinalIgnoreCase);
+    }
 }
 
 /// <summary>

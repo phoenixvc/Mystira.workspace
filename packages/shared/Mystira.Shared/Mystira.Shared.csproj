@@ -35,6 +35,9 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <!-- Mystira packages -->
+    <PackageReference Include="Mystira.Contracts" Version="0.3.0-*" />
+
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.11" />
     <PackageReference Include="Microsoft.Identity.Web" Version="4.2.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.11" />
