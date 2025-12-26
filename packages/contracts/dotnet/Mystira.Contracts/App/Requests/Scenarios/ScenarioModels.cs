@@ -154,6 +154,7 @@ public class CharacterRequest
     /// </summary>
     public CharacterMetadataRequest? Metadata { get; set; }
   
+    /// <summary>
     /// Optional list of traits associated with the character.
     /// </summary>
     public List<string>? Traits { get; set; }
