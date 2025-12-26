@@ -37,7 +37,7 @@ public class SecurityHeadersOptions
 
     /// <summary>
     /// When true, generate a per-request nonce and add it to script-src and style-src policies.
-    /// Add the same nonce to inline <script> and <style> tags to allow them.
+    /// Add the same nonce to inline &lt;script&gt; and &lt;style&gt; tags to allow them.
     /// </summary>
     public bool UseNonce { get; set; } = false;
 }

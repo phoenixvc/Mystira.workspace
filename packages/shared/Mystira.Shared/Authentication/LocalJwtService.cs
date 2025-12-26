@@ -140,7 +140,7 @@ public class LocalJwtService : ILocalJwtService
         {
             try
             {
-                var rsa = RSA.Create();
+                using var rsa = RSA.Create();
                 rsa.ImportFromPem(_options.RsaPrivateKey!);
                 var rsaSecurityKey = new RsaSecurityKey(rsa);
                 _signingCredentials = new SigningCredentials(rsaSecurityKey, SecurityAlgorithms.RsaSha256);
@@ -148,7 +148,7 @@ public class LocalJwtService : ILocalJwtService
                 // For validation, use public key if available, otherwise use private key
                 if (!string.IsNullOrEmpty(_options.RsaPublicKey))
                 {
-                    var rsaPublic = RSA.Create();
+                    using var rsaPublic = RSA.Create();
                     rsaPublic.ImportFromPem(_options.RsaPublicKey);
                     _validationKey = new RsaSecurityKey(rsaPublic);
                 }
@@ -159,7 +159,12 @@ public class LocalJwtService : ILocalJwtService
 
                 _logger.LogInformation("LocalJwtService initialized with RS256 asymmetric signing");
             }
-            catch (Exception ex)
+            catch (CryptographicException ex)
+            {
+                _logger.LogError(ex, "Failed to load RSA private key for asymmetric signing");
+                throw new InvalidOperationException("Failed to load RSA private key.", ex);
+            }
+            catch (ArgumentException ex)
             {
                 _logger.LogError(ex, "Failed to load RSA private key for asymmetric signing");
                 throw new InvalidOperationException("Failed to load RSA private key.", ex);
@@ -232,7 +237,11 @@ public class LocalJwtService : ILocalJwtService
             tokenHandler.ValidateToken(token, parameters, out _);
             return true;
         }
-        catch
+        catch (SecurityTokenException)
+        {
+            return false;
+        }
+        catch (ArgumentException)
         {
             return false;
         }
@@ -255,7 +264,15 @@ public class LocalJwtService : ILocalJwtService
             var userIdClaim = jwtToken.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier || c.Type == "sub");
             return userIdClaim?.Value;
         }
-        catch
+        catch (ArgumentException)
+        {
+            return null;
+        }
+        catch (SecurityTokenException)
+        {
+            return null;
+        }
+        catch (FormatException)
         {
             return null;
         }
@@ -271,7 +288,11 @@ public class LocalJwtService : ILocalJwtService
             var userId = principal.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? principal.FindFirst("sub")?.Value;
             return (true, userId);
         }
-        catch
+        catch (SecurityTokenException)
+        {
+            return (false, null);
+        }
+        catch (ArgumentException)
         {
             return (false, null);
         }
@@ -287,7 +308,11 @@ public class LocalJwtService : ILocalJwtService
             var userId = principal.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? principal.FindFirst("sub")?.Value;
             return (true, userId);
         }
-        catch
+        catch (SecurityTokenException)
+        {
+            return (false, null);
+        }
+        catch (ArgumentException)
         {
             return (false, null);
         }
@@ -301,7 +326,11 @@ public class LocalJwtService : ILocalJwtService
             var parameters = GetValidationParameters(validateLifetime: true);
             return tokenHandler.ValidateToken(token, parameters, out _);
         }
-        catch
+        catch (SecurityTokenException)
+        {
+            return null;
+        }
+        catch (ArgumentException)
         {
             return null;
         }
