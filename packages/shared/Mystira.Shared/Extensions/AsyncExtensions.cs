@@ -30,6 +30,14 @@ public static class AsyncExtensions
         {
             logger.LogInformation("Operation '{OperationName}' was cancelled", operationName);
         }
+        catch (TaskCanceledException ex)
+        {
+            logger.LogWarning(ex, "Operation '{OperationName}' was cancelled unexpectedly", operationName);
+        }
+        catch (TimeoutException ex)
+        {
+            logger.LogWarning(ex, "Operation '{OperationName}' timed out", operationName);
+        }
         catch (Exception ex)
         {
             logger.LogError(ex, "Operation '{OperationName}' failed", operationName);
@@ -60,6 +68,16 @@ public static class AsyncExtensions
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
             logger.LogInformation("Operation '{OperationName}' was cancelled", operationName);
+            return defaultValue;
+        }
+        catch (TaskCanceledException ex)
+        {
+            logger.LogWarning(ex, "Operation '{OperationName}' was cancelled unexpectedly", operationName);
+            return defaultValue;
+        }
+        catch (TimeoutException ex)
+        {
+            logger.LogWarning(ex, "Operation '{OperationName}' timed out", operationName);
             return defaultValue;
         }
         catch (Exception ex)
@@ -123,20 +141,26 @@ public static class AsyncExtensions
 
     /// <summary>
     /// Ensures a CancellationToken is provided, using a default timeout if none.
+    /// Note: The returned CancellationTokenSource should be disposed by the caller.
     /// </summary>
     /// <param name="cancellationToken">The provided token.</param>
     /// <param name="defaultTimeout">Default timeout if no token provided.</param>
+    /// <param name="cts">Output parameter for the created CancellationTokenSource (null if input token was used).</param>
     /// <returns>A valid cancellation token.</returns>
     public static CancellationToken EnsureToken(
         this CancellationToken cancellationToken,
-        TimeSpan? defaultTimeout = null)
+        TimeSpan? defaultTimeout,
+        out CancellationTokenSource? cts)
     {
         if (cancellationToken != default)
+        {
+            cts = null;
             return cancellationToken;
+        }
 
         // Create a token with default 30 second timeout
         var timeout = defaultTimeout ?? TimeSpan.FromSeconds(30);
-        var cts = new CancellationTokenSource(timeout);
+        cts = new CancellationTokenSource(timeout);
         return cts.Token;
     }
 }

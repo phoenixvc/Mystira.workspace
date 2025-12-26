@@ -46,7 +46,8 @@ public abstract class Entity<TId> : IEquatable<Entity<TId>>
 
     public override bool Equals(object? obj) => Equals(obj as Entity<TId>);
 
-    public override int GetHashCode() => Id.GetHashCode();
+    public override int GetHashCode() => 
+        Id is null ? 0 : Id.GetHashCode();
 
     public static bool operator ==(Entity<TId>? left, Entity<TId>? right) =>
         left is null ? right is null : left.Equals(right);
