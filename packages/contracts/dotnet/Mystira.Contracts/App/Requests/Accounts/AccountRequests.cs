@@ -75,3 +75,14 @@ public record UpdateSubscriptionRequest
     /// </summary>
     public List<string>? PurchasedScenarios { get; set; }
 }
+
+/// <summary>
+/// Request to link user profiles to an account.
+/// </summary>
+public record LinkProfilesRequest
+{
+    /// <summary>
+    /// List of user profile identifiers to link to the account.
+    /// </summary>
+    public List<string> UserProfileIds { get; set; } = new();
+}
