@@ -3,17 +3,17 @@ namespace Mystira.Contracts.App.Requests.Scenarios;
 /// <summary>
 /// Request model representing character metadata.
 /// </summary>
-public record CharacterMetadataRequest
+public class CharacterMetadataRequest
 {
     /// <summary>
-    /// The role of the character in the story.
+    /// The roles of the character in the story.
     /// </summary>
-    public string? Role { get; set; }
+    public List<string>? Role { get; set; }
 
     /// <summary>
-    /// The archetype classification of the character.
+    /// The archetype classifications of the character.
     /// </summary>
-    public string? Archetype { get; set; }
+    public List<string>? Archetype { get; set; }
 
     /// <summary>
     /// The species of the character.
@@ -23,7 +23,7 @@ public record CharacterMetadataRequest
     /// <summary>
     /// The age of the character.
     /// </summary>
-    public string? Age { get; set; }
+    public int? Age { get; set; }
 
     /// <summary>
     /// List of character traits.
@@ -39,7 +39,7 @@ public record CharacterMetadataRequest
 /// <summary>
 /// Request model representing media references.
 /// </summary>
-public record MediaReferencesRequest
+public class MediaReferencesRequest
 {
     /// <summary>
     /// Image URL or identifier.
@@ -60,12 +60,12 @@ public record MediaReferencesRequest
 /// <summary>
 /// Request model representing a branch (choice) in a scene.
 /// </summary>
-public record BranchRequest
+public class BranchRequest
 {
     /// <summary>
     /// The text displayed for this branch/choice.
     /// </summary>
-    public string Text { get; set; } = string.Empty;
+    public string? Text { get; set; }
 
     /// <summary>
     /// The identifier of the scene this branch leads to.
@@ -91,7 +91,7 @@ public record BranchRequest
 /// <summary>
 /// Request model representing an echo reveal condition.
 /// </summary>
-public record EchoRevealRequest
+public class EchoRevealRequest
 {
     /// <summary>
     /// The condition that triggers the echo reveal.
@@ -112,32 +112,17 @@ public record EchoRevealRequest
 /// <summary>
 /// Request model representing a character definition in a scenario.
 /// </summary>
-public record CharacterRequest
+public class CharacterRequest
 {
     /// <summary>
-    /// Optional unique identifier for the character.
+    /// Unique identifier for the character.
     /// </summary>
-    public string? Id { get; set; }
+    public string Id { get; set; } = string.Empty;
 
     /// <summary>
     /// The name of the character.
     /// </summary>
     public string Name { get; set; } = string.Empty;
-
-    /// <summary>
-    /// A description of the character.
-    /// </summary>
-    public string? Description { get; set; }
-
-    /// <summary>
-    /// The role of the character in the story.
-    /// </summary>
-    public string? Role { get; set; }
-
-    /// <summary>
-    /// The archetype classification of the character.
-    /// </summary>
-    public string? Archetype { get; set; }
 
     /// <summary>
     /// Optional URL or identifier for the character's image.
@@ -150,30 +135,20 @@ public record CharacterRequest
     public string? Audio { get; set; }
 
     /// <summary>
-    /// Optional list of traits associated with the character.
+    /// Character metadata including role, archetype, species, etc.
     /// </summary>
-    public List<string>? Traits { get; set; }
-
-    /// <summary>
-    /// Whether this character is a player character.
-    /// </summary>
-    public bool IsPlayerCharacter { get; set; } = true;
-
-    /// <summary>
-    /// Additional metadata for the character.
-    /// </summary>
-    public Dictionary<string, object>? Metadata { get; set; }
+    public CharacterMetadataRequest? Metadata { get; set; }
 }
 
 /// <summary>
 /// Request model representing a scene definition in a scenario.
 /// </summary>
-public record SceneRequest
+public class SceneRequest
 {
     /// <summary>
-    /// Optional unique identifier for the scene.
+    /// Unique identifier for the scene.
     /// </summary>
-    public string? Id { get; set; }
+    public string Id { get; set; } = string.Empty;
 
     /// <summary>
     /// The title of the scene.
@@ -181,24 +156,14 @@ public record SceneRequest
     public string Title { get; set; } = string.Empty;
 
     /// <summary>
-    /// A description of the scene.
-    /// </summary>
-    public string? Description { get; set; }
-
-    /// <summary>
-    /// The narrative content of the scene.
-    /// </summary>
-    public string? Content { get; set; }
-
-    /// <summary>
-    /// The order of this scene in the scenario.
-    /// </summary>
-    public int Order { get; set; }
-
-    /// <summary>
     /// The type of scene (e.g., "narrative", "choice", "ending").
     /// </summary>
-    public string? Type { get; set; }
+    public string Type { get; set; } = string.Empty;
+
+    /// <summary>
+    /// A description of the scene.
+    /// </summary>
+    public string Description { get; set; } = string.Empty;
 
     /// <summary>
     /// The identifier of the next scene (for linear progression).
@@ -221,21 +186,6 @@ public record SceneRequest
     public MediaReferencesRequest? Media { get; set; }
 
     /// <summary>
-    /// Optional URL or identifier for the scene's background image.
-    /// </summary>
-    public string? BackgroundImage { get; set; }
-
-    /// <summary>
-    /// Optional URL or identifier for the scene's background music.
-    /// </summary>
-    public string? BackgroundMusic { get; set; }
-
-    /// <summary>
-    /// Optional list of choices available in this scene.
-    /// </summary>
-    public List<ChoiceRequest>? Choices { get; set; }
-
-    /// <summary>
     /// Optional list of branches (choices) in this scene.
     /// </summary>
     public List<BranchRequest>? Branches { get; set; }
@@ -244,17 +194,12 @@ public record SceneRequest
     /// Optional list of echo reveals in this scene.
     /// </summary>
     public List<EchoRevealRequest>? EchoReveals { get; set; }
-
-    /// <summary>
-    /// Additional metadata for the scene.
-    /// </summary>
-    public Dictionary<string, object>? Metadata { get; set; }
 }
 
 /// <summary>
 /// Request model representing a choice within a scene.
 /// </summary>
-public record ChoiceRequest
+public class ChoiceRequest
 {
     /// <summary>
     /// Optional unique identifier for the choice.
