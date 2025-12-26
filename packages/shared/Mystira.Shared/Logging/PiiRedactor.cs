@@ -11,8 +11,8 @@ namespace Mystira.Shared.Logging;
 public static partial class PiiRedactor
 {
     /// <summary>
-    /// Redacts an email address by showing only the domain.
-    /// Example: john.doe@example.com → ***@example.com
+    /// Redacts an email address completely.
+    /// Example: john.doe@example.com → ***@***.***
     /// </summary>
     public static string RedactEmail(string? email)
     {
@@ -27,8 +27,7 @@ public static partial class PiiRedactor
             return "[invalid-email]";
         }
 
-        var domain = email.Substring(atIndex);
-        return $"***{domain}";
+        return "***@***.***";
     }
 
     /// <summary>
