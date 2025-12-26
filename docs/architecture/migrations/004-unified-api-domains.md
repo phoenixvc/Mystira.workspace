@@ -15,7 +15,7 @@ All Mystira services follow the pattern:
 Where:
 - **environment**: `dev`, `staging`, or omitted for production
 - **service**: The service identifier (e.g., `api`, `story-api`, `publisher`)
-- **domain**: Always `mystira.app`
+- **domain**: Always [`mystira.app`](https://mystira.app)
 
 ## Complete Domain Reference
 
