@@ -42,7 +42,7 @@ out/
 .windsurf/*
 !.windsurf/rules
 
-# PyCharm / JetBrains - Keep shared settings, ignore user-specific
+# PyCharm / Rider / JetBrains - Keep shared settings, ignore user-specific
 .idea/*
 !.idea/modules.xml
 !.idea/misc.xml
@@ -52,6 +52,8 @@ out/
 !.idea/prettier.xml
 !.idea/jsLinters/
 !.idea/vcs.xml
+!.idea/runConfigurations/
+!.idea/.idea.Mystira/
 # User-specific JetBrains files (always ignore)
 .idea/workspace.xml
 .idea/tasks.xml
@@ -62,6 +64,7 @@ out/
 .idea/httpRequests/
 .idea/dataSources/
 .idea/dataSources.local.xml
+.idea/.idea.Mystira/.idea/workspace.xml
 
 # Logs
 logs/
