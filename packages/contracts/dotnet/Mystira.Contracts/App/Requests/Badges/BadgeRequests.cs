@@ -30,3 +30,20 @@ public record AwardBadgeRequest
     /// </summary>
     public string? ScenarioId { get; set; }
 }
+
+/// <summary>
+/// Request for calculating badge score thresholds per tier based on scenario data.
+/// </summary>
+public record CalculateBadgeScoresRequest
+{
+    /// <summary>
+    /// The ID of the content bundle containing scenarios to analyze.
+    /// </summary>
+    public string ContentBundleId { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Array of percentile values (0-100) to calculate score thresholds for.
+    /// Example: [50, 75, 90, 95] for bronze, silver, gold, platinum tiers.
+    /// </summary>
+    public List<double> Percentiles { get; set; } = new();
+}
