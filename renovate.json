@@ -21,6 +21,18 @@
       "matchDatasources": ["docker", "dotnet-sdk", "nuget"],
       "matchPackagePatterns": ["^mcr.microsoft.com/dotnet", "^dotnet-sdk$", "^dotnet-runtime$"],
       "allowedVersions": "<10.0.0"
+    },
+    {
+      "description": "Ignore private ACR Docker images (managed via CI/CD)",
+      "matchDatasources": ["docker"],
+      "matchPackageNames": [
+        "myssharedacr.azurecr.io/admin-api",
+        "myssharedacr.azurecr.io/admin-ui",
+        "myssharedacr.azurecr.io/chain",
+        "myssharedacr.azurecr.io/publisher",
+        "myssharedacr.azurecr.io/story-generator"
+      ],
+      "enabled": false
     }
   ]
 }
