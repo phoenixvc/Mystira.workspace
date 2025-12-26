@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace Mystira.Shared.Messaging.Events;
 
 /// <summary>
@@ -106,26 +108,31 @@ public sealed record BundleGifted : IntegrationEventBase
     /// <summary>
     /// The gifter's account ID.
     /// </summary>
+    [JsonPropertyName("senderAccountId")]
     public required string GifterAccountId { get; init; }
 
     /// <summary>
     /// The recipient's account ID.
     /// </summary>
+    [JsonPropertyName("recipientAccountId")]
     public required string RecipientAccountId { get; init; }
 
     /// <summary>
     /// The bundle ID.
     /// </summary>
+    [JsonPropertyName("bundleId")]
     public required string BundleId { get; init; }
 
     /// <summary>
     /// Payment ID.
     /// </summary>
+    [JsonPropertyName("paymentId")]
     public required string PaymentId { get; init; }
 
     /// <summary>
     /// Gift message if any.
     /// </summary>
+    [JsonPropertyName("giftMessage")]
     public string? Message { get; init; }
 }
 

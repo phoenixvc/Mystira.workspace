@@ -1858,6 +1858,7 @@ components:
             - senderAccountId
             - recipientAccountId
             - bundleId
+            - paymentId
           properties:
             type:
               type: string
@@ -1867,6 +1868,8 @@ components:
             recipientAccountId:
               type: string
             bundleId:
+              type: string
+            paymentId:
               type: string
             giftMessage:
               type: string
