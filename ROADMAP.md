@@ -113,7 +113,7 @@ All services adopt Mystira.Shared infrastructure:
 |------|--------|---------|
 | Publish/subscribe events | 🔄 Pending | Wolverine + Azure Service Bus |
 | Cache invalidation | 🔄 Pending | Redis pub/sub |
-| Domain events defined | ✅ Done | 118 events across 20 categories (see events.yaml) |
+| Domain events defined | ✅ Done | 178+ events across 26 categories (see events.yaml) |
 
 ### Week 3-4: Performance & Monitoring
 
