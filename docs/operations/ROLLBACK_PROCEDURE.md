@@ -460,7 +460,7 @@ done
 
 **Immediate** (within 5 minutes of decision):
 
-- [ ] Email notification to team (jurie@phoenixvc.tech)
+- [ ] Email notification to team ([jurie@phoenixvc.tech](mailto:jurie@phoenixvc.tech))
 - [ ] Update status page: "Investigating issue"
 
 **After Rollback Initiated** (within 15 minutes):
