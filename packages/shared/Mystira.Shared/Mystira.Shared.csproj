@@ -35,6 +35,9 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <!-- NOTE: Mystira.Contracts dependency is added by consuming projects that need both packages.
+         This avoids circular dependency issues during package publishing. -->
+
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.11" />
     <PackageReference Include="Microsoft.Identity.Web" Version="4.2.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.11" />

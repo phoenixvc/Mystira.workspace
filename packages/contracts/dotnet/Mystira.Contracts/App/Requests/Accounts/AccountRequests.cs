@@ -9,6 +9,11 @@ namespace Mystira.Contracts.App.Requests.Accounts;
 public record CreateAccountRequest
 {
     /// <summary>
+    /// Auth0 user identifier for linking to external authentication.
+    /// </summary>
+    public string Auth0UserId { get; set; } = string.Empty;
+
+    /// <summary>
     /// The email address for the account.
     /// </summary>
     public string Email { get; set; } = string.Empty;
@@ -19,9 +24,19 @@ public record CreateAccountRequest
     public string? DisplayName { get; set; }
 
     /// <summary>
-    /// Optional Auth0 user identifier for linking to external authentication.
+    /// Optional list of user profile IDs to associate with the account.
     /// </summary>
-    public string? Auth0UserId { get; set; }
+    public List<string>? UserProfileIds { get; set; }
+
+    /// <summary>
+    /// Optional subscription details for the account.
+    /// </summary>
+    public SubscriptionDetails? Subscription { get; set; }
+
+    /// <summary>
+    /// Optional account settings.
+    /// </summary>
+    public AccountSettings? Settings { get; set; }
 }
 
 /// <summary>
@@ -35,9 +50,14 @@ public record UpdateAccountRequest
     public string? DisplayName { get; set; }
 
     /// <summary>
-    /// Optional updated email address.
+    /// Optional list of user profile IDs to associate with the account.
     /// </summary>
-    public string? Email { get; set; }
+    public List<string>? UserProfileIds { get; set; }
+
+    /// <summary>
+    /// Optional subscription details to update.
+    /// </summary>
+    public SubscriptionDetails? Subscription { get; set; }
 
     /// <summary>
     /// Optional account settings to update.
@@ -74,4 +94,15 @@ public record UpdateSubscriptionRequest
     /// Optional list of individually purchased scenario identifiers.
     /// </summary>
     public List<string>? PurchasedScenarios { get; set; }
+}
+
+/// <summary>
+/// Request to link user profiles to an account.
+/// </summary>
+public record LinkProfilesRequest
+{
+    /// <summary>
+    /// List of user profile identifiers to link to the account.
+    /// </summary>
+    public List<string> UserProfileIds { get; set; } = new();
 }

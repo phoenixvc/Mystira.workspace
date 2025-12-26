@@ -21,6 +21,11 @@ out/
 .env.development
 .env.production
 
+# Allow template .env files for debug configurations at workspace root
+!.env.admin-api
+!.env.publisher
+!.env.story-generator
+
 # IDE - User-specific files (keep shared configs)
 *.swp
 *.swo

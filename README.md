@@ -125,6 +125,16 @@ pnpm dev
 pnpm --filter mystira-publisher dev
 ```
 
+### Debugging
+
+The workspace includes VS Code debug configurations for TypeScript/Node.js services. Template environment files are provided:
+
+- `.env.admin-api` - Admin API environment variables
+- `.env.publisher` - Publisher service environment variables
+- `.env.story-generator` - Story Generator service environment variables
+
+Before debugging, update these files with your local configuration values. The debug configurations will automatically load these environment files.
+
 ## CI/CD Pipeline
 
 The workspace uses a distributed CI/CD model:
