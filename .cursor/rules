@@ -1,0 +1,80 @@
+# Mystira Workspace - Cursor AI Rules
+
+## Project Overview
+This is a TypeScript monorepo for the Mystira platform using Turborepo and pnpm.
+
+## Tech Stack
+- **Runtime**: Node.js 18+
+- **Package Manager**: pnpm 8+
+- **Build System**: Turborepo
+- **Language**: TypeScript (ES2022 target)
+- **Bundler**: tsup
+- **Testing**: Vitest
+- **Linting**: ESLint 9 (flat config)
+- **Formatting**: Prettier
+- **Styling**: Tailwind CSS
+- **AI/ML**: Python (when applicable)
+
+## Code Style Guidelines
+
+### TypeScript
+- Use strict TypeScript - no `any` types unless absolutely necessary
+- Prefer `interface` over `type` for object shapes
+- Use explicit return types for public functions
+- Use `const` assertions where appropriate
+- Prefer named exports over default exports
+
+### Imports
+- Use relative imports within packages
+- Use workspace imports (@mystira/*) for cross-package dependencies
+- Order imports: external libs → workspace packages → relative imports
+- Avoid circular dependencies
+
+### Naming Conventions
+- Files: kebab-case (e.g., `user-service.ts`)
+- Types/Interfaces: PascalCase (e.g., `UserProfile`)
+- Functions/Variables: camelCase (e.g., `getUserById`)
+- Constants: SCREAMING_SNAKE_CASE (e.g., `MAX_RETRIES`)
+- React Components: PascalCase matching filename
+
+### Error Handling
+- Use typed errors with descriptive messages
+- Prefer Result types over throwing for expected failures
+- Always handle async errors properly
+- Log errors with context
+
+### Testing
+- Use Vitest for unit tests
+- Follow AAA pattern (Arrange, Act, Assert)
+- Name test files as `*.test.ts` or `*.spec.ts`
+- Mock external dependencies
+
+## Monorepo Structure
+```
+packages/
+├── contracts/      # Shared API contracts and types
+├── shared/         # Shared utilities and services
+├── shared-utils/   # Common utility functions
+├── design-tokens/  # Design system tokens
+├── app/            # Main application
+├── admin-api/      # Admin API service
+├── admin-ui/       # Admin dashboard
+├── chain/          # Blockchain integration
+├── devhub/         # Developer portal
+├── publisher/      # Content publishing
+└── story-generator/# AI story generation
+```
+
+## Common Commands
+- `pnpm install` - Install dependencies
+- `pnpm build` - Build all packages
+- `pnpm dev` - Start development mode
+- `pnpm test` - Run tests
+- `pnpm lint` - Run linting
+- `pnpm format` - Format code
+
+## Important Notes
+- Always run `pnpm build` before committing to ensure types are valid
+- Use conventional commits (feat:, fix:, chore:, docs:, etc.)
+- Keep packages loosely coupled
+- Document public APIs with JSDoc comments

@@ -21,12 +21,47 @@ out/
 .env.development
 .env.production
 
-# IDE
-.idea/
-.vscode/
+# IDE - User-specific files (keep shared configs)
 *.swp
 *.swo
 .DS_Store
+
+# VS Code / Cursor / Windsurf - Keep shared settings, ignore user-specific
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+!.vscode/*.code-snippets
+
+# Cursor - Keep rules
+.cursor/*
+!.cursor/rules
+
+# Windsurf - Keep rules
+.windsurf/*
+!.windsurf/rules
+
+# PyCharm / JetBrains - Keep shared settings, ignore user-specific
+.idea/*
+!.idea/modules.xml
+!.idea/misc.xml
+!.idea/*.iml
+!.idea/codeStyles/
+!.idea/inspectionProfiles/
+!.idea/prettier.xml
+!.idea/jsLinters/
+!.idea/vcs.xml
+# User-specific JetBrains files (always ignore)
+.idea/workspace.xml
+.idea/tasks.xml
+.idea/usage.statistics.xml
+.idea/dictionaries/
+.idea/shelf/
+.idea/*.iws
+.idea/httpRequests/
+.idea/dataSources/
+.idea/dataSources.local.xml
 
 # Logs
 logs/
