@@ -80,7 +80,8 @@ public class SecurityHeadersMiddleware
         context.Response.Headers.Append("X-Content-Type-Options", "nosniff");
 
         // X-Frame-Options: Prevents clickjacking attacks
-        context.Response.Headers.Append("X-Frame-Options", "DENY");
+        var frameOptions = _options.FrameAncestors == "'none'" ? "DENY" : "SAMEORIGIN";
+        context.Response.Headers.Append("X-Frame-Options", frameOptions);
 
         // X-XSS-Protection: Legacy XSS filter (mostly superseded by CSP)
         context.Response.Headers.Append("X-XSS-Protection", "1; mode=block");
