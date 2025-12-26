@@ -67,6 +67,8 @@ public class MystiraException : Exception
 /// </summary>
 public class ValidationException : MystiraException
 {
+    private const string DefaultMessage = "One or more validation errors occurred.";
+
     /// <summary>
     /// Dictionary of field names to their validation errors.
     /// </summary>
@@ -77,8 +79,18 @@ public class ValidationException : MystiraException
     /// </summary>
     /// <param name="errors">Dictionary of field names to validation error messages.</param>
     public ValidationException(IDictionary<string, string[]> errors)
-        : base("VALIDATION_FAILED", "One or more validation errors occurred.",
-            HttpStatusCode.BadRequest)
+        : base("VALIDATION_FAILED", DefaultMessage, HttpStatusCode.BadRequest)
+    {
+        Errors = errors;
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ValidationException"/> class with a custom message.
+    /// </summary>
+    /// <param name="message">Custom error message.</param>
+    /// <param name="errors">Dictionary of field names to validation error messages.</param>
+    public ValidationException(string message, IDictionary<string, string[]> errors)
+        : base("VALIDATION_FAILED", message, HttpStatusCode.BadRequest)
     {
         Errors = errors;
     }
@@ -89,7 +101,7 @@ public class ValidationException : MystiraException
     /// <param name="field">The field name.</param>
     /// <param name="error">The error message.</param>
     public ValidationException(string field, string error)
-        : this(new Dictionary<string, string[]> { { field, new[] { error } } })
+        : this(new Dictionary<string, string[]> { { field, [error] } })
     {
     }
 }

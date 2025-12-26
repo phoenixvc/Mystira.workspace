@@ -17,6 +17,13 @@ CQRS separates read operations (queries) from write operations (commands):
 | `ICommand<TResponse>` | Write operation with result | TResponse |
 | `IQuery<TResponse>` | Read operation | TResponse |
 
+## Required Imports
+
+```csharp
+using Mystira.Shared.CQRS;           // ICommand, ICommand<T>, IQuery<T>
+using Mystira.Shared.Validation;     // IValidatable (for automatic validation)
+```
+
 ## Why Use These Interfaces?
 
 Wolverine discovers handlers by convention, so these interfaces are **optional**. However, they provide:
