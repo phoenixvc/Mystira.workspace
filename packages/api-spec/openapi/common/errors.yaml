@@ -1,0 +1,139 @@
+openapi: 3.1.0
+info:
+  title: Mystira Common Types - Errors
+  version: 1.0.0
+  description: Shared error response types for all Mystira APIs
+
+components:
+  schemas:
+    ErrorResponse:
+      type: object
+      required:
+        - message
+        - isRecoverable
+      properties:
+        message:
+          type: string
+          description: Human-readable error message
+          example: "The requested resource was not found"
+        details:
+          type: string
+          nullable: true
+          description: Additional error details
+        timestamp:
+          type: string
+          format: date-time
+          description: When the error occurred (UTC)
+          example: "2024-01-15T10:30:00Z"
+        traceId:
+          type: string
+          nullable: true
+          description: Correlation ID for distributed tracing
+          example: "abc123-def456-ghi789"
+        errorCode:
+          type: string
+          nullable: true
+          description: Unique error code for lookup
+          example: "AUTH_001"
+        category:
+          type: string
+          nullable: true
+          description: Error category
+          enum:
+            - Authentication
+            - Authorization
+            - Validation
+            - NotFound
+            - Conflict
+            - RateLimit
+            - Internal
+        statusCode:
+          type: integer
+          nullable: true
+          description: HTTP status code
+          example: 404
+        isRecoverable:
+          type: boolean
+          default: true
+          description: Whether the error is recoverable by the user
+        suggestedAction:
+          type: string
+          nullable: true
+          description: Suggested action for the user
+          enum:
+            - retry
+            - login
+            - contact-support
+            - fix-input
+            - check-id
+            - request-access
+
+    ValidationErrorResponse:
+      allOf:
+        - $ref: '#/components/schemas/ErrorResponse'
+        - type: object
+          required:
+            - errors
+          properties:
+            errors:
+              type: object
+              additionalProperties:
+                type: array
+                items:
+                  type: string
+              description: Field-level validation errors
+              example:
+                email: ["Invalid email format", "Email is required"]
+                password: ["Password must be at least 8 characters"]
+
+    NotFoundErrorResponse:
+      allOf:
+        - $ref: '#/components/schemas/ErrorResponse'
+        - type: object
+          properties:
+            resourceType:
+              type: string
+              nullable: true
+              description: Type of resource that was not found
+              example: "Story"
+            resourceId:
+              type: string
+              nullable: true
+              description: ID of the resource that was not found
+              example: "story-123"
+
+    UnauthorizedErrorResponse:
+      allOf:
+        - $ref: '#/components/schemas/ErrorResponse'
+        - type: object
+          properties:
+            authScheme:
+              type: string
+              nullable: true
+              description: The authentication scheme that failed
+              example: "Bearer"
+
+    ForbiddenErrorResponse:
+      allOf:
+        - $ref: '#/components/schemas/ErrorResponse'
+        - type: object
+          properties:
+            requiredPermission:
+              type: string
+              nullable: true
+              description: The permission that was required
+              example: "stories:write"
+
+    ConflictErrorResponse:
+      allOf:
+        - $ref: '#/components/schemas/ErrorResponse'
+        - type: object
+          properties:
+            conflictingResource:
+              type: string
+              nullable: true
+              description: The resource that caused the conflict
+            conflictReason:
+              type: string
+              nullable: true
+              description: Reason for the conflict

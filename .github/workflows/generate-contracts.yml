@@ -1,0 +1,290 @@
+name: "Packages - API Spec: Generate Contracts"
+
+# Generates TypeScript and C# contract types from OpenAPI specifications
+# This ensures API contracts stay in sync across all languages
+#
+# Source of truth: packages/api-spec/openapi/
+# Generated outputs:
+#   - TypeScript: packages/contracts/src/generated/
+#   - C#: packages/contracts/dotnet/Mystira.Contracts/Generated/
+#
+# See: docs/architecture/migrations/001-extract-mystira-core.md
+
+on:
+  push:
+    branches: [dev, main]
+    paths:
+      - 'packages/api-spec/openapi/**'
+      - 'packages/api-spec/scripts/**'
+      - '.github/workflows/generate-contracts.yml'
+
+  pull_request:
+    branches: [dev, main]
+    paths:
+      - 'packages/api-spec/openapi/**'
+      - 'packages/api-spec/scripts/**'
+      - '.github/workflows/generate-contracts.yml'
+
+  workflow_dispatch:
+    inputs:
+      commit_changes:
+        description: 'Commit generated changes to the branch'
+        required: false
+        type: boolean
+        default: false
+
+concurrency:
+  group: generate-contracts-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+  NODE_AUTH_TOKEN: ""
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  validate-specs:
+    name: Validate OpenAPI Specs
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Validate OpenAPI specs
+        run: |
+          cd packages/api-spec
+          pnpm run validate
+
+  generate-typescript:
+    name: Generate TypeScript Types
+    runs-on: ubuntu-latest
+    needs: validate-specs
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Generate TypeScript types
+        run: |
+          cd packages/api-spec
+          pnpm run generate:ts
+
+      - name: Upload TypeScript artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: typescript-contracts
+          path: packages/contracts/src/generated/
+          retention-days: 5
+
+      - name: Check for changes
+        id: changes
+        run: |
+          if [ -n "$(git status --porcelain packages/contracts/src/generated/)" ]; then
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+            echo "TypeScript contracts have changes"
+          else
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+            echo "TypeScript contracts are up to date"
+          fi
+
+    outputs:
+      has_changes: ${{ steps.changes.outputs.has_changes }}
+
+  generate-csharp:
+    name: Generate C# Types
+    runs-on: ubuntu-latest
+    needs: validate-specs
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+          cache: "pnpm"
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: '9.0.x'
+
+      - name: Install NSwag
+        run: dotnet tool install -g NSwag.ConsoleCore
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Generate C# types
+        run: |
+          cd packages/api-spec
+          pnpm run generate:csharp
+
+      - name: Upload C# artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: csharp-contracts
+          path: packages/contracts/dotnet/Mystira.Contracts/Generated/
+          retention-days: 5
+
+      - name: Check for changes
+        id: changes
+        run: |
+          if [ -n "$(git status --porcelain packages/contracts/dotnet/Mystira.Contracts/Generated/)" ]; then
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+            echo "C# contracts have changes"
+          else
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+            echo "C# contracts are up to date"
+          fi
+
+    outputs:
+      has_changes: ${{ steps.changes.outputs.has_changes }}
+
+  build-core:
+    name: Build Mystira.Core
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: '9.0.x'
+
+      - name: Build Mystira.Core
+        run: dotnet build packages/core/Mystira.Core --configuration Release
+
+      - name: Test Mystira.Core
+        run: dotnet test packages/core/Mystira.Core.Tests --configuration Release --no-build
+
+  build-core-types:
+    name: Build @mystira/core-types
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Build core-types
+        run: |
+          cd packages/core/core-types
+          pnpm run build
+
+  commit-changes:
+    name: Commit Generated Changes
+    runs-on: ubuntu-latest
+    needs: [generate-typescript, generate-csharp, build-core, build-core-types]
+    if: |
+      github.event_name == 'push' ||
+      (github.event_name == 'workflow_dispatch' && github.event.inputs.commit_changes == 'true')
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Download TypeScript artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: typescript-contracts
+          path: packages/contracts/src/generated/
+
+      - name: Download C# artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: csharp-contracts
+          path: packages/contracts/dotnet/Mystira.Contracts/Generated/
+
+      - name: Commit changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          # Check if there are changes to commit
+          if [ -n "$(git status --porcelain packages/contracts/)" ]; then
+            git add packages/contracts/
+            git commit -m "chore(contracts): regenerate from OpenAPI specs
+
+            Auto-generated by generate-contracts workflow
+            Source: packages/api-spec/openapi/"
+            git push
+            echo "Changes committed and pushed"
+          else
+            echo "No changes to commit"
+          fi
+
+  summary:
+    name: Generation Summary
+    runs-on: ubuntu-latest
+    needs: [generate-typescript, generate-csharp, build-core, build-core-types]
+    if: always()
+    steps:
+      - name: Generate Summary
+        run: |
+          echo "# Contract Generation Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Component | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|-----------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| TypeScript Generation | ${{ needs.generate-typescript.result == 'success' && '✅' || '❌' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| C# Generation | ${{ needs.generate-csharp.result == 'success' && '✅' || '❌' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Mystira.Core Build | ${{ needs.build-core.result == 'success' && '✅' || '❌' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| @mystira/core-types Build | ${{ needs.build-core-types.result == 'success' && '✅' || '❌' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          echo "## Changes Detected" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Language | Has Changes |" >> $GITHUB_STEP_SUMMARY
+          echo "|----------|-------------|" >> $GITHUB_STEP_SUMMARY
+          echo "| TypeScript | ${{ needs.generate-typescript.outputs.has_changes == 'true' && '🔄 Yes' || '✓ Up to date' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| C# | ${{ needs.generate-csharp.outputs.has_changes == 'true' && '🔄 Yes' || '✓ Up to date' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          echo "## Architecture" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "```" >> $GITHUB_STEP_SUMMARY
+          echo "OpenAPI Specs (Source of Truth)" >> $GITHUB_STEP_SUMMARY
+          echo "├── packages/api-spec/openapi/" >> $GITHUB_STEP_SUMMARY
+          echo "│   ├── common/errors.yaml" >> $GITHUB_STEP_SUMMARY
+          echo "│   ├── common/pagination.yaml" >> $GITHUB_STEP_SUMMARY
+          echo "│   ├── app-api.yaml" >> $GITHUB_STEP_SUMMARY
+          echo "│   └── story-generator-api.yaml" >> $GITHUB_STEP_SUMMARY
+          echo "│" >> $GITHUB_STEP_SUMMARY
+          echo "├── Generated: TypeScript" >> $GITHUB_STEP_SUMMARY
+          echo "│   └── packages/contracts/src/generated/" >> $GITHUB_STEP_SUMMARY
+          echo "│" >> $GITHUB_STEP_SUMMARY
+          echo "├── Generated: C#" >> $GITHUB_STEP_SUMMARY
+          echo "│   └── packages/contracts/dotnet/Mystira.Contracts/Generated/" >> $GITHUB_STEP_SUMMARY
+          echo "│" >> $GITHUB_STEP_SUMMARY
+          echo "└── Internal Types (Not Generated)" >> $GITHUB_STEP_SUMMARY
+          echo "    ├── packages/core/Mystira.Core/" >> $GITHUB_STEP_SUMMARY
+          echo "    └── packages/core/core-types/" >> $GITHUB_STEP_SUMMARY
+          echo "```" >> $GITHUB_STEP_SUMMARY

@@ -1,0 +1,69 @@
+openapi: 3.1.0
+info:
+  title: Mystira Common Types - Health
+  version: 1.0.0
+  description: Shared health check types for all Mystira APIs
+
+components:
+  schemas:
+    HealthStatus:
+      type: string
+      enum:
+        - Healthy
+        - Degraded
+        - Unhealthy
+      description: Health status of a service or component
+
+    HealthCheckEntry:
+      type: object
+      required:
+        - name
+        - status
+      properties:
+        name:
+          type: string
+          description: Name of the health check
+          example: "database"
+        status:
+          $ref: '#/components/schemas/HealthStatus'
+        description:
+          type: string
+          nullable: true
+          description: Additional description
+        duration:
+          type: string
+          nullable: true
+          description: Duration of the health check
+          example: "00:00:00.0234567"
+        tags:
+          type: array
+          items:
+            type: string
+          description: Tags associated with this check
+        data:
+          type: object
+          additionalProperties: true
+          nullable: true
+          description: Additional health check data
+
+    HealthCheckResult:
+      type: object
+      required:
+        - status
+        - timestamp
+      properties:
+        status:
+          $ref: '#/components/schemas/HealthStatus'
+        timestamp:
+          type: string
+          format: date-time
+          description: When the health check was performed
+        totalDuration:
+          type: string
+          nullable: true
+          description: Total duration of all health checks
+        checks:
+          type: array
+          items:
+            $ref: '#/components/schemas/HealthCheckEntry'
+          description: Individual health check results
