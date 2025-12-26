@@ -93,9 +93,9 @@ public sealed record BundleActivated : IntegrationEventBase
     public required string AcquisitionMethod { get; init; }
 
     /// <summary>
-    /// Number of items unlocked.
+    /// List of item IDs that were unlocked.
     /// </summary>
-    public required int ItemsUnlocked { get; init; }
+    public required string[] ItemsUnlocked { get; init; }
 }
 
 /// <summary>
