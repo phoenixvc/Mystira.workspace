@@ -1470,6 +1470,328 @@ export interface ParentalControlsUpdated extends IntegrationEvent {
 }
 
 // =============================================================================
+// Season/Battle Pass Events
+// =============================================================================
+
+/**
+ * Published when a new season starts.
+ */
+export interface SeasonStarted extends IntegrationEvent {
+  type: 'SeasonStarted';
+  seasonId: string;
+  seasonName: string;
+  startDate: string;
+  endDate: string;
+  seasonNumber?: number;
+}
+
+/**
+ * Published when a season ends.
+ */
+export interface SeasonEnded extends IntegrationEvent {
+  type: 'SeasonEnded';
+  seasonId: string;
+  totalParticipants?: number;
+}
+
+/**
+ * Published when a user purchases a battle pass.
+ */
+export interface BattlePassPurchased extends IntegrationEvent {
+  type: 'BattlePassPurchased';
+  accountId: string;
+  seasonId: string;
+  passType: string;
+  purchasePrice?: number;
+}
+
+/**
+ * Published when a user completes a battle pass tier.
+ */
+export interface BattlePassTierCompleted extends IntegrationEvent {
+  type: 'BattlePassTierCompleted';
+  accountId: string;
+  seasonId: string;
+  tier: number;
+  rewardsUnlocked: string[];
+}
+
+/**
+ * Published when a seasonal reward is claimed.
+ */
+export interface SeasonalRewardClaimed extends IntegrationEvent {
+  type: 'SeasonalRewardClaimed';
+  accountId: string;
+  seasonId: string;
+  rewardId: string;
+  rewardType: string;
+  tier?: number;
+}
+
+// =============================================================================
+// Tutorial Events
+// =============================================================================
+
+/**
+ * Published when a tutorial is started.
+ */
+export interface TutorialStarted extends IntegrationEvent {
+  type: 'TutorialStarted';
+  accountId: string;
+  tutorialId: string;
+  tutorialName?: string;
+}
+
+/**
+ * Published when a tutorial step is completed.
+ */
+export interface TutorialStepCompleted extends IntegrationEvent {
+  type: 'TutorialStepCompleted';
+  accountId: string;
+  tutorialId: string;
+  stepId: string;
+  stepNumber: number;
+  durationSeconds?: number;
+}
+
+/**
+ * Published when a tutorial is fully completed.
+ */
+export interface TutorialCompleted extends IntegrationEvent {
+  type: 'TutorialCompleted';
+  accountId: string;
+  tutorialId: string;
+  totalDurationSeconds: number;
+  stepsCompleted: number;
+}
+
+/**
+ * Published when a tutorial is skipped.
+ */
+export interface TutorialSkipped extends IntegrationEvent {
+  type: 'TutorialSkipped';
+  accountId: string;
+  tutorialId: string;
+  lastCompletedStep?: string;
+  reason?: string;
+}
+
+// =============================================================================
+// Matchmaking Events
+// =============================================================================
+
+/**
+ * Published when matchmaking queue is entered.
+ */
+export interface MatchmakingStarted extends IntegrationEvent {
+  type: 'MatchmakingStarted';
+  accountId: string;
+  queueId: string;
+  gameMode: string;
+  preferences?: Record<string, any>;
+}
+
+/**
+ * Published when a match is found.
+ */
+export interface MatchFound extends IntegrationEvent {
+  type: 'MatchFound';
+  matchId: string;
+  participants: string[];
+  waitTimeSeconds: number;
+  averageSkillLevel?: number;
+}
+
+/**
+ * Published when a player accepts a match.
+ */
+export interface MatchAccepted extends IntegrationEvent {
+  type: 'MatchAccepted';
+  accountId: string;
+  matchId: string;
+}
+
+/**
+ * Published when a player declines a match.
+ */
+export interface MatchDeclined extends IntegrationEvent {
+  type: 'MatchDeclined';
+  accountId: string;
+  matchId: string;
+  reason?: string;
+}
+
+/**
+ * Published when matchmaking is cancelled.
+ */
+export interface MatchmakingCancelled extends IntegrationEvent {
+  type: 'MatchmakingCancelled';
+  accountId: string;
+  queueId: string;
+  timeInQueueSeconds: number;
+}
+
+// =============================================================================
+// Voice/Audio Events
+// =============================================================================
+
+/**
+ * Published when a user joins voice chat.
+ */
+export interface VoiceChatJoined extends IntegrationEvent {
+  type: 'VoiceChatJoined';
+  accountId: string;
+  channelId: string;
+  sessionId?: string;
+}
+
+/**
+ * Published when a user leaves voice chat.
+ */
+export interface VoiceChatLeft extends IntegrationEvent {
+  type: 'VoiceChatLeft';
+  accountId: string;
+  channelId: string;
+  durationSeconds: number;
+}
+
+/**
+ * Published when voice chat is muted.
+ */
+export interface VoiceChatMuted extends IntegrationEvent {
+  type: 'VoiceChatMuted';
+  accountId: string;
+  channelId: string;
+  mutedByAccountId?: string;
+}
+
+/**
+ * Published when voice chat is unmuted.
+ */
+export interface VoiceChatUnmuted extends IntegrationEvent {
+  type: 'VoiceChatUnmuted';
+  accountId: string;
+  channelId: string;
+}
+
+/**
+ * Published when audio settings are changed.
+ */
+export interface AudioSettingsChanged extends IntegrationEvent {
+  type: 'AudioSettingsChanged';
+  accountId: string;
+  setting: string;
+  newValue: string;
+}
+
+// =============================================================================
+// Localization Events
+// =============================================================================
+
+/**
+ * Published when content translation is requested.
+ */
+export interface ContentTranslationRequested extends IntegrationEvent {
+  type: 'ContentTranslationRequested';
+  contentId: string;
+  contentType: string;
+  sourceLanguage: string;
+  targetLanguage: string;
+  requestedBy?: string;
+}
+
+/**
+ * Published when content translation is completed.
+ */
+export interface ContentTranslationCompleted extends IntegrationEvent {
+  type: 'ContentTranslationCompleted';
+  contentId: string;
+  targetLanguage: string;
+  translationQuality?: string;
+}
+
+/**
+ * Published when a localization string is updated.
+ */
+export interface LocalizationStringUpdated extends IntegrationEvent {
+  type: 'LocalizationStringUpdated';
+  stringKey: string;
+  language: string;
+  oldValue?: string;
+  newValue: string;
+}
+
+/**
+ * Published when translation feedback is submitted.
+ */
+export interface TranslationFeedbackSubmitted extends IntegrationEvent {
+  type: 'TranslationFeedbackSubmitted';
+  accountId: string;
+  contentId: string;
+  language: string;
+  feedbackType: string;
+  comment?: string;
+}
+
+// =============================================================================
+// AI Quality Feedback Events
+// =============================================================================
+
+/**
+ * Published when AI-generated content is rated.
+ */
+export interface AIContentRated extends IntegrationEvent {
+  type: 'AIContentRated';
+  accountId: string;
+  contentId: string;
+  rating: number;
+  ratingCategory?: string;
+}
+
+/**
+ * Published when feedback on AI generation is submitted.
+ */
+export interface AIGenerationFeedbackSubmitted extends IntegrationEvent {
+  type: 'AIGenerationFeedbackSubmitted';
+  accountId: string;
+  generationId: string;
+  feedbackType: string;
+  comment?: string;
+  tags?: string[];
+}
+
+/**
+ * Published when AI response regeneration is requested.
+ */
+export interface AIResponseRegenerationRequested extends IntegrationEvent {
+  type: 'AIResponseRegenerationRequested';
+  accountId: string;
+  originalGenerationId: string;
+  reason?: string;
+}
+
+/**
+ * Published when AI output is accepted by user.
+ */
+export interface AIOutputAccepted extends IntegrationEvent {
+  type: 'AIOutputAccepted';
+  accountId: string;
+  generationId: string;
+  editsMade: boolean;
+}
+
+/**
+ * Published when AI hallucination is reported.
+ */
+export interface AIHallucinationReported extends IntegrationEvent {
+  type: 'AIHallucinationReported';
+  accountId: string;
+  generationId: string;
+  hallucinationType?: string;
+  excerpt?: string;
+}
+
+// =============================================================================
 // Union Types
 // =============================================================================
 
@@ -1674,7 +1996,65 @@ export type PreferenceEvent =
   | ParentalControlsUpdated;
 
 /**
- * All Mystira domain events (118 total across 20 categories).
+ * All season/battle pass-related events.
+ */
+export type SeasonEvent =
+  | SeasonStarted
+  | SeasonEnded
+  | BattlePassPurchased
+  | BattlePassTierCompleted
+  | SeasonalRewardClaimed;
+
+/**
+ * All tutorial-related events.
+ */
+export type TutorialEvent =
+  | TutorialStarted
+  | TutorialStepCompleted
+  | TutorialCompleted
+  | TutorialSkipped;
+
+/**
+ * All matchmaking-related events.
+ */
+export type MatchmakingEvent =
+  | MatchmakingStarted
+  | MatchFound
+  | MatchAccepted
+  | MatchDeclined
+  | MatchmakingCancelled;
+
+/**
+ * All voice/audio-related events.
+ */
+export type VoiceAudioEvent =
+  | VoiceChatJoined
+  | VoiceChatLeft
+  | VoiceChatMuted
+  | VoiceChatUnmuted
+  | AudioSettingsChanged;
+
+/**
+ * All localization-related events.
+ */
+export type LocalizationEvent =
+  | ContentTranslationRequested
+  | ContentTranslationCompleted
+  | LocalizationStringUpdated
+  | TranslationFeedbackSubmitted;
+
+/**
+ * All AI quality feedback-related events.
+ */
+export type AIFeedbackEvent =
+  | AIContentRated
+  | AIGenerationFeedbackSubmitted
+  | AIResponseRegenerationRequested
+  | AIOutputAccepted
+  | AIHallucinationReported;
+
+/**
+ * All Mystira domain events (149 total across 26 categories).
  */
 export type MystiraEvent =
   | AccountEvent
@@ -1696,7 +2076,13 @@ export type MystiraEvent =
   | DeviceEvent
   | DiscoveryEvent
   | InventoryEvent
-  | PreferenceEvent;
+  | PreferenceEvent
+  | SeasonEvent
+  | TutorialEvent
+  | MatchmakingEvent
+  | VoiceAudioEvent
+  | LocalizationEvent
+  | AIFeedbackEvent;
 
 /**
  * Event type discriminator values.
