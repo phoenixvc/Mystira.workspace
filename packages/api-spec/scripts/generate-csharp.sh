@@ -40,7 +40,8 @@ nswag openapi2csclient \
   /dateTimeType:System.DateTimeOffset \
   /arrayType:System.Collections.Generic.IReadOnlyList \
   /generateOptionalParameters:true \
-  /generateNullableReferenceTypes:true
+  /generateNullableReferenceTypes:true \
+  /jsonLibrary:SystemTextJson
 
 # Generate from Story Generator API
 echo "  → Generating Story Generator API contracts..."
@@ -55,7 +56,8 @@ nswag openapi2csclient \
   /dateTimeType:System.DateTimeOffset \
   /arrayType:System.Collections.Generic.IReadOnlyList \
   /generateOptionalParameters:true \
-  /generateNullableReferenceTypes:true
+  /generateNullableReferenceTypes:true \
+  /jsonLibrary:SystemTextJson
 
 echo ""
 echo "✓ C# contracts generated successfully at $OUTPUT_DIR"
