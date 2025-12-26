@@ -19,6 +19,11 @@ public class PayRoyaltyRequest
     /// The currency for payment (default: ETH).
     /// </summary>
     public string Currency { get; set; } = "ETH";
+
+    /// <summary>
+    /// Optional reference identifier for the payer.
+    /// </summary>
+    public string? PayerReference { get; set; }
 }
 
 /// <summary>
@@ -35,4 +40,9 @@ public class ClaimRoyaltiesRequest
     /// The wallet address to receive the royalties.
     /// </summary>
     public string WalletAddress { get; set; } = string.Empty;
+
+    /// <summary>
+    /// The wallet address of the contributor claiming royalties.
+    /// </summary>
+    public string ContributorWallet { get; set; } = string.Empty;
 }
