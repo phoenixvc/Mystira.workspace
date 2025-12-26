@@ -180,7 +180,7 @@ public class SceneRequest
     public string Title { get; set; } = string.Empty;
 
     /// <summary>
-    /// The type of scene (e.g., "narrative", "choice", "ending").
+    /// The type of scene (narrative, choice, or ending).
     /// </summary>
     public string Type { get; set; } = string.Empty;
 
@@ -220,12 +220,12 @@ public class SceneRequest
     public MediaReferencesRequest? Media { get; set; }
 
     /// <summary>
-    /// Optional URL or identifier for the scene's background image.
+    /// Optional URL or identifier for the scene background image.
     /// </summary>
     public string? BackgroundImage { get; set; }
 
     /// <summary>
-    /// Optional URL or identifier for the scene's background music.
+    /// Optional URL or identifier for the scene background music.
     /// </summary>
     public string? BackgroundMusic { get; set; }
 
