@@ -13,7 +13,7 @@
   "dependencyDashboard": true,
   "dependencyDashboardTitle": "Renovate Dependency Dashboard",
   "timezone": "Africa/Johannesburg",
-  "schedule": ["after 8am and before 6pm on weekdays"],
+  "schedule": ["after 8am and before 6pm every weekday"],
   "packageRules": [
     {
       "description": "Group all Mystira packages together",
