@@ -88,6 +88,17 @@ __pycache__/
 venv/
 ENV/
 
+# .NET
+bin/
+obj/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
 # Misc
 *.bak
 *.tmp
