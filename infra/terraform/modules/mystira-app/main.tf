@@ -464,6 +464,9 @@ resource "azurerm_linux_web_app" "api" {
 
     always_on = var.app_service_sku != "F1" && var.app_service_sku != "D1"
 
+    # Enable WebSockets for SignalR real-time communication
+    websockets_enabled = true
+
     cors {
       allowed_origins = var.cors_allowed_origins
     }

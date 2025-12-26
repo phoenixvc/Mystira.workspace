@@ -117,3 +117,26 @@ output "story_generator_swa_custom_domain_validation_token" {
   value       = var.enable_story_generator ? azurerm_cdn_frontdoor_custom_domain.story_generator_swa[0].validation_token : null
   sensitive   = true
 }
+
+# Mystira.App Outputs (conditional)
+output "mystira_app_api_endpoint_hostname" {
+  description = "Hostname of the Mystira.App API endpoint"
+  value       = var.enable_mystira_app ? azurerm_cdn_frontdoor_endpoint.mystira_app_api[0].host_name : null
+}
+
+output "mystira_app_swa_endpoint_hostname" {
+  description = "Hostname of the Mystira.App SWA endpoint"
+  value       = var.enable_mystira_app ? azurerm_cdn_frontdoor_endpoint.mystira_app_swa[0].host_name : null
+}
+
+output "mystira_app_api_custom_domain_validation_token" {
+  description = "Validation token for Mystira.App API custom domain"
+  value       = var.enable_mystira_app ? azurerm_cdn_frontdoor_custom_domain.mystira_app_api[0].validation_token : null
+  sensitive   = true
+}
+
+output "mystira_app_swa_custom_domain_validation_token" {
+  description = "Validation token for Mystira.App SWA custom domain"
+  value       = var.enable_mystira_app ? azurerm_cdn_frontdoor_custom_domain.mystira_app_swa[0].validation_token : null
+  sensitive   = true
+}

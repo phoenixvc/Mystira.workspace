@@ -129,20 +129,57 @@ function handleEvent(event: MystiraEvent) {
 }
 ```
 
-### 3.2 WebSocket Connection (Future)
+### 3.2 Real-Time Events Strategy
+
+**Current Status**: The infrastructure (Azure App Service) has WebSocket support enabled via Terraform. Backend SignalR hub implementation is pending.
+
+**Interim Approach** (Use until SignalR is available):
+- Use REST polling for updates (e.g., every 30 seconds)
+- Implement manual refresh button for users
+- Use optimistic UI updates where possible
 
 ```typescript
-// Connect to real-time events (when backend implements SignalR hub)
+// Interim: Polling approach
 import { MystiraEvent } from '@mystira/core-types';
+
+function setupPolling() {
+  setInterval(async () => {
+    const result = await fetchRecentEvents();
+    if (isOk(result)) {
+      result.value.forEach(handleEvent);
+    }
+  }, 30000); // Poll every 30 seconds
+}
+```
+
+**Future: SignalR WebSocket Connection** (Ready when backend implements hub):
+
+The infrastructure is ready for WebSocket/SignalR. Once the backend SignalR hub is implemented at `/hubs/events`, replace the polling code with:
+
+```typescript
+// Future: SignalR real-time connection
+import { MystiraEvent } from '@mystira/core-types';
+import * as signalR from '@microsoft/signalr';
 
 const connection = new signalR.HubConnectionBuilder()
   .withUrl('/hubs/events')
+  .withAutomaticReconnect()
   .build();
 
 connection.on('ReceiveEvent', (event: MystiraEvent) => {
   handleEvent(event);
 });
+
+await connection.start();
 ```
+
+**Migration Path**:
+1. **Now**: Implement polling approach (Phase 3.2 interim code)
+2. **When backend is ready**: 
+   - Install `@microsoft/signalr` package: `pnpm add @microsoft/signalr`
+   - Replace polling code with SignalR connection (Phase 3.2 future code)
+   - Remove polling interval
+   - Test real-time event delivery
 
 ---
 

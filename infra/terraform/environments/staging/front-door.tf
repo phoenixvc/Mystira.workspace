@@ -30,6 +30,13 @@ module "front_door" {
   custom_domain_story_generator_api   = "staging.story-api.mystira.app"
   custom_domain_story_generator_swa   = "staging.story.mystira.app"
 
+  # Mystira.App services (API + SWA/PWA)
+  enable_mystira_app              = true
+  mystira_app_api_backend_address = module.mystira_app.api_hostname  # App Service hostname from mystira-app module
+  mystira_app_swa_backend_address = module.mystira_app.swa_hostname  # Static Web App hostname from mystira-app module
+  custom_domain_mystira_app_api   = "staging.api.mystira.app"
+  custom_domain_mystira_app_swa   = "staging.app.mystira.app"
+
   # WAF Configuration - Staging Settings
   enable_waf           = true
   waf_mode             = "Detection" # Detection mode for staging (non-blocking)
@@ -86,4 +93,14 @@ output "front_door_story_generator_api_endpoint" {
 output "front_door_story_generator_swa_endpoint" {
   description = "Front Door endpoint for Story Generator SWA - use this for CNAME"
   value       = module.front_door.story_generator_swa_endpoint_hostname
+}
+
+output "front_door_mystira_app_api_endpoint" {
+  description = "Front Door endpoint for Mystira.App API - use this for CNAME"
+  value       = module.front_door.mystira_app_api_endpoint_hostname
+}
+
+output "front_door_mystira_app_swa_endpoint" {
+  description = "Front Door endpoint for Mystira.App SWA - use this for CNAME"
+  value       = module.front_door.mystira_app_swa_endpoint_hostname
 }
