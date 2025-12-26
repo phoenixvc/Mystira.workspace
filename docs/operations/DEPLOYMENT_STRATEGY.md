@@ -582,7 +582,7 @@ Issue Detected?
 
 **1 Week Before:**
 
-- Email to all stakeholders with maintenance window (jurie@phoenixvc.tech)
+- Email to all stakeholders with maintenance window (`jurie@phoenixvc.tech`)
 - Update status page
 
 **24 Hours Before:**

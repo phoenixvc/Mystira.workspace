@@ -397,7 +397,7 @@ resource "azurerm_monitor_metric_alert" "redis_memory" {
   window_size         = "PT15M"
 
   criteria {
-    metric_namespace = "Microsoft.Cache/redis"
+    metric_namespace = "Microsoft.Cache/Redis"
     metric_name      = "usedmemorypercentage"
     aggregation      = "Average"
     operator         = "GreaterThan"
@@ -424,7 +424,7 @@ resource "azurerm_monitor_metric_alert" "redis_connections" {
   window_size         = "PT15M"
 
   criteria {
-    metric_namespace = "Microsoft.Cache/redis"
+    metric_namespace = "Microsoft.Cache/Redis"
     metric_name      = "connectedclients"
     aggregation      = "Maximum"
     operator         = "GreaterThan"

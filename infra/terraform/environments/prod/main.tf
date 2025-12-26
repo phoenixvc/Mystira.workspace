@@ -59,7 +59,7 @@ variable "external_id_tenant_id" {
 variable "alert_email_addresses" {
   description = "Email addresses for monitoring alerts"
   type        = list(string)
-  default     = ["jurie@phoenixvc.tech"]
+  default     = ["jurie@phoenixvc.tech", "eben@phoenixvc.tech"]
 }
 
 variable "oidc_issuer_enabled" {

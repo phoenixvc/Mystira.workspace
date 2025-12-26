@@ -150,7 +150,7 @@ az postgres flexible-server restore \
 ### Before Rollback
 
 - [ ] Confirm the issue requires rollback
-- [ ] Notify team (jurie@phoenixvc.tech)
+- [ ] Notify team (`jurie@phoenixvc.tech`)
 - [ ] Document current state
 - [ ] Check for data migrations that need reverting
 
@@ -174,5 +174,5 @@ az postgres flexible-server restore \
 
 | Role | Contact |
 |------|---------|
-| Technical Lead | jurie@phoenixvc.tech |
-| Business/Escalation | eben@phoenixvc.tech |
+| Technical Lead | `jurie@phoenixvc.tech` |
+| Business/Escalation | `eben@phoenixvc.tech` |

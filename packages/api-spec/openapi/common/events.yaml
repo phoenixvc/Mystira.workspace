@@ -3051,6 +3051,630 @@ components:
             restrictionValue:
               type: string
 
+    # Season/Battle Pass Events
+    SeasonStarted:
+      allOf:
+        - $ref: '#/components/schemas/IntegrationEvent'
+        - type: object
+          required:
+            - type
+            - seasonId
+            - seasonName
+            - startDate
+            - endDate
+          properties:
+            type:
+              type: string
+              const: SeasonStarted
+            seasonId:
+              type: string
+            seasonName:
+              type: string
+            startDate:
+              type: string
+              format: date-time
+            endDate:
+              type: string
+              format: date-time
+            seasonNumber:
+              type: integer
+              nullable: true
+
+    SeasonEnded:
+      allOf:
+        - $ref: '#/components/schemas/IntegrationEvent'
+        - type: object
+          required:
+            - type
+            - seasonId
+          properties:
+            type:
+              type: string
+              const: SeasonEnded
+            seasonId:
+              type: string
+            totalParticipants:
+              type: integer
+              nullable: true
+
+    BattlePassPurchased:
+      allOf:
+        - $ref: '#/components/schemas/IntegrationEvent'
+        - type: object
+          required:
+            - type
+            - accountId
+            - seasonId
+            - passType
+          properties:
+            type:
+              type: string
+              const: BattlePassPurchased
+            accountId:
+              type: string
+            seasonId:
+              type: string
+            passType:
+              type: string
+              description: e.g., "free", "premium", "deluxe"
+            purchasePrice:
+              type: number
+              nullable: true
+
+    BattlePassTierCompleted:
+      allOf:
+        - $ref: '#/components/schemas/IntegrationEvent'
+        - type: object
+          required:
+            - type
+            - accountId
+            - seasonId
+            - tier
+          properties:
+            type:
+              type: string
+              const: BattlePassTierCompleted
+            accountId:
+              type: string
+            seasonId:
+              type: string
+            tier:
+              type: integer
+            rewardsUnlocked:
+              type: array
+              items:
+                type: string
+
+    SeasonalRewardClaimed:
+      allOf:
+        - $ref: '#/components/schemas/IntegrationEvent'
+        - type: object
+          required:
+            - type
+            - accountId
+            - seasonId
+            - rewardId
+          properties:
+            type:
+              type: string
+              const: SeasonalRewardClaimed
+            accountId:
+              type: string
+            seasonId:
+              type: string
+            rewardId:
+              type: string
+            rewardType:
+              type: string
+            tier:
+              type: integer
+              nullable: true
+
+    # Tutorial Events
+    TutorialStarted:
+      allOf:
+        - $ref: '#/components/schemas/IntegrationEvent'
+        - type: object
+          required:
+            - type
+            - accountId
+            - tutorialId
+          properties:
+            type:
+              type: string
+              const: TutorialStarted
+            accountId:
+              type: string
+            tutorialId:
+              type: string
+            tutorialName:
+              type: string
+              nullable: true
+
+    TutorialStepCompleted:
+      allOf:
+        - $ref: '#/components/schemas/IntegrationEvent'
+        - type: object
+          required:
+            - type
+            - accountId
+            - tutorialId
+            - stepId
+          properties:
+            type:
+              type: string
+              const: TutorialStepCompleted
+            accountId:
+              type: string
+            tutorialId:
+              type: string
+            stepId:
+              type: string
+            stepNumber:
+              type: integer
+            durationSeconds:
+              type: number
+              nullable: true
+
+    TutorialCompleted:
+      allOf:
+        - $ref: '#/components/schemas/IntegrationEvent'
+        - type: object
+          required:
+            - type
+            - accountId
+            - tutorialId
+          properties:
+            type:
+              type: string
+              const: TutorialCompleted
+            accountId:
+              type: string
+            tutorialId:
+              type: string
+            totalDurationSeconds:
+              type: number
+            stepsCompleted:
+              type: integer
+
+    TutorialSkipped:
+      allOf:
+        - $ref: '#/components/schemas/IntegrationEvent'
+        - type: object
+          required:
+            - type
+            - accountId
+            - tutorialId
+          properties:
+            type:
+              type: string
+              const: TutorialSkipped
+            accountId:
+              type: string
+            tutorialId:
+              type: string
+            lastCompletedStep:
+              type: string
+              nullable: true
+            reason:
+              type: string
+              nullable: true
+
+    # Matchmaking Events
+    MatchmakingStarted:
+      allOf:
+        - $ref: '#/components/schemas/IntegrationEvent'
+        - type: object
+          required:
+            - type
+            - accountId
+            - queueId
+          properties:
+            type:
+              type: string
+              const: MatchmakingStarted
+            accountId:
+              type: string
+            queueId:
+              type: string
+            gameMode:
+              type: string
+            preferences:
+              type: object
+              nullable: true
+
+    MatchFound:
+      allOf:
+        - $ref: '#/components/schemas/IntegrationEvent'
+        - type: object
+          required:
+            - type
+            - matchId
+            - participants
+          properties:
+            type:
+              type: string
+              const: MatchFound
+            matchId:
+              type: string
+            participants:
+              type: array
+              items:
+                type: string
+            waitTimeSeconds:
+              type: number
+            averageSkillLevel:
+              type: number
+              nullable: true
+
+    MatchAccepted:
+      allOf:
+        - $ref: '#/components/schemas/IntegrationEvent'
+        - type: object
+          required:
+            - type
+            - accountId
+            - matchId
+          properties:
+            type:
+              type: string
+              const: MatchAccepted
+            accountId:
+              type: string
+            matchId:
+              type: string
+
+    MatchDeclined:
+      allOf:
+        - $ref: '#/components/schemas/IntegrationEvent'
+        - type: object
+          required:
+            - type
+            - accountId
+            - matchId
+          properties:
+            type:
+              type: string
+              const: MatchDeclined
+            accountId:
+              type: string
+            matchId:
+              type: string
+            reason:
+              type: string
+              nullable: true
+
+    MatchmakingCancelled:
+      allOf:
+        - $ref: '#/components/schemas/IntegrationEvent'
+        - type: object
+          required:
+            - type
+            - accountId
+            - queueId
+          properties:
+            type:
+              type: string
+              const: MatchmakingCancelled
+            accountId:
+              type: string
+            queueId:
+              type: string
+            timeInQueueSeconds:
+              type: number
+
+    # Voice/Audio Events
+    VoiceChatJoined:
+      allOf:
+        - $ref: '#/components/schemas/IntegrationEvent'
+        - type: object
+          required:
+            - type
+            - accountId
+            - channelId
+          properties:
+            type:
+              type: string
+              const: VoiceChatJoined
+            accountId:
+              type: string
+            channelId:
+              type: string
+            sessionId:
+              type: string
+              nullable: true
+
+    VoiceChatLeft:
+      allOf:
+        - $ref: '#/components/schemas/IntegrationEvent'
+        - type: object
+          required:
+            - type
+            - accountId
+            - channelId
+          properties:
+            type:
+              type: string
+              const: VoiceChatLeft
+            accountId:
+              type: string
+            channelId:
+              type: string
+            durationSeconds:
+              type: number
+
+    VoiceChatMuted:
+      allOf:
+        - $ref: '#/components/schemas/IntegrationEvent'
+        - type: object
+          required:
+            - type
+            - accountId
+            - channelId
+          properties:
+            type:
+              type: string
+              const: VoiceChatMuted
+            accountId:
+              type: string
+            channelId:
+              type: string
+            mutedByAccountId:
+              type: string
+              nullable: true
+              description: If null, self-muted
+
+    VoiceChatUnmuted:
+      allOf:
+        - $ref: '#/components/schemas/IntegrationEvent'
+        - type: object
+          required:
+            - type
+            - accountId
+            - channelId
+          properties:
+            type:
+              type: string
+              const: VoiceChatUnmuted
+            accountId:
+              type: string
+            channelId:
+              type: string
+
+    AudioSettingsChanged:
+      allOf:
+        - $ref: '#/components/schemas/IntegrationEvent'
+        - type: object
+          required:
+            - type
+            - accountId
+            - setting
+          properties:
+            type:
+              type: string
+              const: AudioSettingsChanged
+            accountId:
+              type: string
+            setting:
+              type: string
+            newValue:
+              type: string
+
+    # Localization Events
+    ContentTranslationRequested:
+      allOf:
+        - $ref: '#/components/schemas/IntegrationEvent'
+        - type: object
+          required:
+            - type
+            - contentId
+            - contentType
+            - targetLanguage
+          properties:
+            type:
+              type: string
+              const: ContentTranslationRequested
+            contentId:
+              type: string
+            contentType:
+              type: string
+            sourceLanguage:
+              type: string
+            targetLanguage:
+              type: string
+            requestedBy:
+              type: string
+              nullable: true
+
+    ContentTranslationCompleted:
+      allOf:
+        - $ref: '#/components/schemas/IntegrationEvent'
+        - type: object
+          required:
+            - type
+            - contentId
+            - targetLanguage
+          properties:
+            type:
+              type: string
+              const: ContentTranslationCompleted
+            contentId:
+              type: string
+            targetLanguage:
+              type: string
+            translationQuality:
+              type: string
+              nullable: true
+
+    LocalizationStringUpdated:
+      allOf:
+        - $ref: '#/components/schemas/IntegrationEvent'
+        - type: object
+          required:
+            - type
+            - stringKey
+            - language
+          properties:
+            type:
+              type: string
+              const: LocalizationStringUpdated
+            stringKey:
+              type: string
+            language:
+              type: string
+            oldValue:
+              type: string
+              nullable: true
+            newValue:
+              type: string
+
+    TranslationFeedbackSubmitted:
+      allOf:
+        - $ref: '#/components/schemas/IntegrationEvent'
+        - type: object
+          required:
+            - type
+            - accountId
+            - contentId
+            - language
+            - feedbackType
+          properties:
+            type:
+              type: string
+              const: TranslationFeedbackSubmitted
+            accountId:
+              type: string
+            contentId:
+              type: string
+            language:
+              type: string
+            feedbackType:
+              type: string
+              description: e.g., "poor_quality", "inaccurate", "offensive"
+            comment:
+              type: string
+              nullable: true
+
+    # AI Quality Feedback Events
+    AIContentRated:
+      allOf:
+        - $ref: '#/components/schemas/IntegrationEvent'
+        - type: object
+          required:
+            - type
+            - accountId
+            - contentId
+            - rating
+          properties:
+            type:
+              type: string
+              const: AIContentRated
+            accountId:
+              type: string
+            contentId:
+              type: string
+            rating:
+              type: integer
+              minimum: 1
+              maximum: 5
+            ratingCategory:
+              type: string
+              nullable: true
+              description: e.g., "coherence", "creativity", "relevance"
+
+    AIGenerationFeedbackSubmitted:
+      allOf:
+        - $ref: '#/components/schemas/IntegrationEvent'
+        - type: object
+          required:
+            - type
+            - accountId
+            - generationId
+            - feedbackType
+          properties:
+            type:
+              type: string
+              const: AIGenerationFeedbackSubmitted
+            accountId:
+              type: string
+            generationId:
+              type: string
+            feedbackType:
+              type: string
+              description: e.g., "thumbs_up", "thumbs_down", "flag_inappropriate"
+            comment:
+              type: string
+              nullable: true
+            tags:
+              type: array
+              items:
+                type: string
+              nullable: true
+
+    AIResponseRegenerationRequested:
+      allOf:
+        - $ref: '#/components/schemas/IntegrationEvent'
+        - type: object
+          required:
+            - type
+            - accountId
+            - originalGenerationId
+          properties:
+            type:
+              type: string
+              const: AIResponseRegenerationRequested
+            accountId:
+              type: string
+            originalGenerationId:
+              type: string
+            reason:
+              type: string
+              nullable: true
+
+    AIOutputAccepted:
+      allOf:
+        - $ref: '#/components/schemas/IntegrationEvent'
+        - type: object
+          required:
+            - type
+            - accountId
+            - generationId
+          properties:
+            type:
+              type: string
+              const: AIOutputAccepted
+            accountId:
+              type: string
+            generationId:
+              type: string
+            editsMade:
+              type: boolean
+              default: false
+
+    AIHallucinationReported:
+      allOf:
+        - $ref: '#/components/schemas/IntegrationEvent'
+        - type: object
+          required:
+            - type
+            - accountId
+            - generationId
+          properties:
+            type:
+              type: string
+              const: AIHallucinationReported
+            accountId:
+              type: string
+            generationId:
+              type: string
+            hallucinationType:
+              type: string
+              nullable: true
+              description: e.g., "factual_error", "inconsistent_lore", "out_of_character"
+            excerpt:
+              type: string
+              nullable: true
+
     # Union type for all events (118 total across 20 categories)
     MystiraEvent:
       oneOf:
@@ -3333,3 +3957,37 @@ components:
           NotificationPreferenceChanged: '#/components/schemas/NotificationPreferenceChanged'
           ContentPreferenceUpdated: '#/components/schemas/ContentPreferenceUpdated'
           ParentalControlsUpdated: '#/components/schemas/ParentalControlsUpdated'
+          # Season/Battle Pass Events
+          SeasonStarted: '#/components/schemas/SeasonStarted'
+          SeasonEnded: '#/components/schemas/SeasonEnded'
+          BattlePassPurchased: '#/components/schemas/BattlePassPurchased'
+          BattlePassTierCompleted: '#/components/schemas/BattlePassTierCompleted'
+          SeasonalRewardClaimed: '#/components/schemas/SeasonalRewardClaimed'
+          # Tutorial Events
+          TutorialStarted: '#/components/schemas/TutorialStarted'
+          TutorialStepCompleted: '#/components/schemas/TutorialStepCompleted'
+          TutorialCompleted: '#/components/schemas/TutorialCompleted'
+          TutorialSkipped: '#/components/schemas/TutorialSkipped'
+          # Matchmaking Events
+          MatchmakingStarted: '#/components/schemas/MatchmakingStarted'
+          MatchFound: '#/components/schemas/MatchFound'
+          MatchAccepted: '#/components/schemas/MatchAccepted'
+          MatchDeclined: '#/components/schemas/MatchDeclined'
+          MatchmakingCancelled: '#/components/schemas/MatchmakingCancelled'
+          # Voice/Audio Events
+          VoiceChatJoined: '#/components/schemas/VoiceChatJoined'
+          VoiceChatLeft: '#/components/schemas/VoiceChatLeft'
+          VoiceChatMuted: '#/components/schemas/VoiceChatMuted'
+          VoiceChatUnmuted: '#/components/schemas/VoiceChatUnmuted'
+          AudioSettingsChanged: '#/components/schemas/AudioSettingsChanged'
+          # Localization Events
+          ContentTranslationRequested: '#/components/schemas/ContentTranslationRequested'
+          ContentTranslationCompleted: '#/components/schemas/ContentTranslationCompleted'
+          LocalizationStringUpdated: '#/components/schemas/LocalizationStringUpdated'
+          TranslationFeedbackSubmitted: '#/components/schemas/TranslationFeedbackSubmitted'
+          # AI Quality Feedback Events
+          AIContentRated: '#/components/schemas/AIContentRated'
+          AIGenerationFeedbackSubmitted: '#/components/schemas/AIGenerationFeedbackSubmitted'
+          AIResponseRegenerationRequested: '#/components/schemas/AIResponseRegenerationRequested'
+          AIOutputAccepted: '#/components/schemas/AIOutputAccepted'
+          AIHallucinationReported: '#/components/schemas/AIHallucinationReported'
