@@ -31,3 +31,14 @@ public record PasswordlessVerifyRequest
     /// </summary>
     public string Code { get; set; } = string.Empty;
 }
+
+/// <summary>
+/// Request to refresh an authentication token.
+/// </summary>
+public class RefreshTokenRequest
+{
+    /// <summary>
+    /// The refresh token to exchange for a new access token.
+    /// </summary>
+    public string RefreshToken { get; set; } = string.Empty;
+}

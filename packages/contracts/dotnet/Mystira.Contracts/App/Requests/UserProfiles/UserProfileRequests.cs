@@ -132,3 +132,19 @@ public record CreateMultipleProfilesRequest
     /// </summary>
     public List<CreateUserProfileRequest> Profiles { get; set; } = new();
 }
+
+/// <summary>
+/// Request to assign a profile to an account.
+/// </summary>
+public class ProfileAssignmentRequest
+{
+    /// <summary>
+    /// The unique identifier of the profile.
+    /// </summary>
+    public string ProfileId { get; set; } = string.Empty;
+
+    /// <summary>
+    /// The unique identifier of the account.
+    /// </summary>
+    public string AccountId { get; set; } = string.Empty;
+}

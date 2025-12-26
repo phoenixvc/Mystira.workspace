@@ -99,3 +99,19 @@ public record ProgressSceneRequest
     /// </summary>
     public string SceneId { get; set; } = string.Empty;
 }
+
+/// <summary>
+/// Request to complete a scenario session.
+/// </summary>
+public class CompleteScenarioRequest
+{
+    /// <summary>
+    /// The unique identifier of the session to complete.
+    /// </summary>
+    public string SessionId { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Optional final scores for compass axes.
+    /// </summary>
+    public Dictionary<string, double>? FinalScores { get; set; }
+}
