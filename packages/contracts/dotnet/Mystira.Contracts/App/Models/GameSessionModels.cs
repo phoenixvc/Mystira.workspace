@@ -62,7 +62,32 @@ public record PlayerAssignmentDto
     public string? ProfileName { get; set; }
 
     /// <summary>
+    /// Optional URL or identifier for the profile's image.
+    /// </summary>
+    public string? ProfileImage { get; set; }
+
+    /// <summary>
+    /// Optional identifier for the selected avatar media.
+    /// </summary>
+    public string? SelectedAvatarMediaId { get; set; }
+
+    /// <summary>
     /// Optional guest name if assigned to a guest player.
     /// </summary>
     public string? GuestName { get; set; }
+
+    /// <summary>
+    /// Optional age range for guest players.
+    /// </summary>
+    public string? GuestAgeRange { get; set; }
+
+    /// <summary>
+    /// Optional avatar identifier for guest players.
+    /// </summary>
+    public string? GuestAvatar { get; set; }
+
+    /// <summary>
+    /// Indicates whether to save the guest as a new profile.
+    /// </summary>
+    public bool SaveAsProfile { get; set; }
 }
