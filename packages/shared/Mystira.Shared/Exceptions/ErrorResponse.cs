@@ -1,14 +1,9 @@
-using ContractsErrorResponse = Mystira.Contracts.App.Responses.Common.ErrorResponse;
-using ContractsValidationErrorResponse = Mystira.Contracts.App.Responses.Common.ValidationErrorResponse;
-using ContractsNotFoundErrorResponse = Mystira.Contracts.App.Responses.Common.NotFoundErrorResponse;
-using ContractsForbiddenErrorResponse = Mystira.Contracts.App.Responses.Common.ForbiddenErrorResponse;
-
 namespace Mystira.Shared.Exceptions;
 
 // ============================================================================
-// DEPRECATION NOTICE
+// MIGRATION NOTICE
 // ============================================================================
-// These ErrorResponse types are deprecated. Use Mystira.Contracts types instead:
+// For API response DTOs, prefer using Mystira.Contracts types:
 //
 //   using Mystira.Contracts.App.Responses.Common;
 //
@@ -18,7 +13,7 @@ namespace Mystira.Shared.Exceptions;
 //   - ForbiddenErrorResponse     -> Mystira.Contracts.App.Responses.Common.ForbiddenErrorResponse
 //
 // The Contracts versions are immutable records with init-only properties.
-// These classes are retained for backward compatibility only.
+// These classes are provided for internal infrastructure use (e.g., GlobalExceptionHandler).
 // ============================================================================
 
 /// <summary>
@@ -26,9 +21,8 @@ namespace Mystira.Shared.Exceptions;
 /// Provides consistent error structure across all Mystira services.
 /// </summary>
 /// <remarks>
-/// DEPRECATED: Use <see cref="Mystira.Contracts.App.Responses.Common.ErrorResponse"/> instead.
+/// For API DTOs, consider using Mystira.Contracts.App.Responses.Common.ErrorResponse instead.
 /// </remarks>
-[Obsolete("Use Mystira.Contracts.App.Responses.Common.ErrorResponse instead. This type will be removed in a future version.")]
 public class ErrorResponse
 {
     /// <summary>
@@ -100,9 +94,8 @@ public class ErrorResponse
 /// Error response with validation errors.
 /// </summary>
 /// <remarks>
-/// DEPRECATED: Use <see cref="Mystira.Contracts.App.Responses.Common.ValidationErrorResponse"/> instead.
+/// For API DTOs, consider using Mystira.Contracts.App.Responses.Common.ValidationErrorResponse instead.
 /// </remarks>
-[Obsolete("Use Mystira.Contracts.App.Responses.Common.ValidationErrorResponse instead. This type will be removed in a future version.")]
 public class ValidationErrorResponse : ErrorResponse
 {
     /// <summary>
@@ -125,9 +118,8 @@ public class ValidationErrorResponse : ErrorResponse
 /// Error response for not found resources.
 /// </summary>
 /// <remarks>
-/// DEPRECATED: Use <see cref="Mystira.Contracts.App.Responses.Common.NotFoundErrorResponse"/> instead.
+/// For API DTOs, consider using Mystira.Contracts.App.Responses.Common.NotFoundErrorResponse instead.
 /// </remarks>
-[Obsolete("Use Mystira.Contracts.App.Responses.Common.NotFoundErrorResponse instead. This type will be removed in a future version.")]
 public class NotFoundErrorResponse : ErrorResponse
 {
     /// <summary>
@@ -163,9 +155,8 @@ public class NotFoundErrorResponse : ErrorResponse
 /// Error response for authorization failures.
 /// </summary>
 /// <remarks>
-/// DEPRECATED: Use <see cref="Mystira.Contracts.App.Responses.Common.ForbiddenErrorResponse"/> instead.
+/// For API DTOs, consider using Mystira.Contracts.App.Responses.Common.ForbiddenErrorResponse instead.
 /// </remarks>
-[Obsolete("Use Mystira.Contracts.App.Responses.Common.ForbiddenErrorResponse instead. This type will be removed in a future version.")]
 public class ForbiddenErrorResponse : ErrorResponse
 {
     /// <summary>
