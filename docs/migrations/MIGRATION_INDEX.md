@@ -1,6 +1,6 @@
 # Mystira Migration Index
 
-**Last Updated**: December 2026
+**Last Updated**: December 2025
 **Status**: Active
 **Owner**: jurie@phoenixvc.tech (Technical), eben@phoenixvc.tech (Business)
 
@@ -135,29 +135,24 @@ The following documents are superseded or archived:
 
 ---
 
-## Migration Timeline
+## 2026 Roadmap
 
 ```
-Q4 2025 (Completed)
-├── Infrastructure foundation (Azure naming v2.2)
-├── Package publishing (Mystira.Shared, Contracts)
-└── Initial service migrations started
-
-Q1 2026 (Current)
-├── Migration 001: Unified Type System
-├── API Domain Standardization
-├── Admin API/UI Extraction (Phase 3+)
+Q1 2026
+├── Migration 001: Unified Type System (OpenAPI + Mystira.Core)
+├── API Domain Standardization (mystira.app)
+├── Admin API/UI Extraction (complete Phase 3+)
 └── Documentation consolidation
 
-Q2 2026 (Planned)
+Q2 2026
 ├── Complete service migrations (all 7 services)
-├── Wolverine event bus migration
+├── Wolverine event bus integration
 └── Cross-service integration
 
-Q3 2026 (Planned)
-├── Legacy domain sunset
+Q3 2026
 ├── Full PostgreSQL migration
-└── Performance optimization
+├── Performance optimization
+└── Production hardening
 ```
 
 ---
@@ -173,6 +168,7 @@ Q3 2026 (Planned)
 
 ## Related Documents
 
+- [2026 Roadmap](../../ROADMAP.md) - Consolidated planning and priorities
 - [ADR Index](../architecture/adr/) - Architectural Decision Records
 - [Guides](../guides/) - Implementation guides
 - [Operations](../operations/) - Runbooks and procedures

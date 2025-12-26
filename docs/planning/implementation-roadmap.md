@@ -190,7 +190,7 @@ This roadmap outlines the strategic implementation plan for the Mystira workspac
 - [ ] Implement blue-green deployment for critical services
 - [ ] Add automated rollback triggers
 - [ ] Create deployment approval workflows
-- [ ] Integrate deployment notifications (Slack/Teams)
+- [ ] Integrate deployment notifications (Email)
 
 **Deliverables**:
 

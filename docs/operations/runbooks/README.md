@@ -123,11 +123,8 @@ Procedures for investigating and resolving monitoring alerts.
 
 | Role | Primary | Backup | Method |
 |------|---------|--------|--------|
-| On-call Engineer | PagerDuty rotation | - | PagerDuty |
-| On-call Lead | PagerDuty rotation | - | PagerDuty |
-| Engineering Manager | @eng-manager | @eng-director | Slack + Phone |
-| DBA | @dba-team | @platform-team | Slack |
-| Security | @security-team | eben@phoenixvc.tech | Slack + Email |
+| Technical Lead | jurie@phoenixvc.tech | eben@phoenixvc.tech | Email |
+| Founder/Business | eben@phoenixvc.tech | jurie@phoenixvc.tech | Email |
 
 ---
 

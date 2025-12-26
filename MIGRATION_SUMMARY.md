@@ -5,12 +5,12 @@
 All infrastructure resources have been updated to comply with Azure Naming Convention v2.2:
 **Pattern:** `[org]-[env]-[project]-[type]-[region]`
 
-**Last Updated:** December 2026
+**Last Updated:** December 2025
 **Status:** ✅ Complete - All environments aligned
 
 ---
 
-## 📋 Recent Updates (December 2026)
+## 📋 Recent Updates (December 2025)
 
 ### Environment Alignment
 - **Staging/Prod aligned with Dev**: Added missing admin-api module, subnets, PostgreSQL AAD auth

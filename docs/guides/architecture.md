@@ -226,4 +226,4 @@ For detailed implementation, see:
 - **Visualization**: Grafana
 - **Logging**: Centralized logging system
 - **Tracing**: Distributed tracing (OpenTelemetry)
-- **Alerting**: PagerDuty / Slack integration
+- **Alerting**: Email notifications

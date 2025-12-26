@@ -136,26 +136,9 @@ module "mystira_app" {
 - [ ] Update monitoring/alerting URLs
 - [ ] Update CI/CD deployment configurations
 
-## Rollback Plan
-
-If issues arise, the legacy domains will be maintained for a transition period:
-
-1. Legacy endpoints will redirect to new domains (HTTP 301)
-2. Set `X-Mystira-Legacy-Domain: true` header to bypass redirect temporarily
-3. Contact eben@phoenixvc.tech for extended legacy support
-
-## Timeline
-
-| Phase | Date | Description |
-|-------|------|-------------|
-| Announcement | 2026-Q1 | Migration guide published |
-| New Domains Active | 2026-Q1 | New domains available alongside legacy |
-| Legacy Redirect | 2026-Q2 | Legacy domains redirect to new |
-| Legacy Sunset | 2026-Q3 | Legacy domains removed |
-
 ## Support
 
-For migration assistance:
+For questions or issues:
 - Technical: jurie@phoenixvc.tech
 - Business/Admin: eben@phoenixvc.tech
 - Issues: https://github.com/phoenixvc/Mystira.workspace/issues
