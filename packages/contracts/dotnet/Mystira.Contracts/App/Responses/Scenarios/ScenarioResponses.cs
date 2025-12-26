@@ -1,6 +1,27 @@
 namespace Mystira.Contracts.App.Responses.Scenarios;
 
 /// <summary>
+/// Represents the current state of a scenario game.
+/// </summary>
+public enum ScenarioGameState
+{
+    /// <summary>
+    /// The game has not been started yet.
+    /// </summary>
+    NotStarted,
+
+    /// <summary>
+    /// The game is currently in progress.
+    /// </summary>
+    InProgress,
+
+    /// <summary>
+    /// The game has been completed.
+    /// </summary>
+    Completed
+}
+
+/// <summary>
 /// Response containing a paginated list of scenarios.
 /// </summary>
 public record ScenarioListResponse
