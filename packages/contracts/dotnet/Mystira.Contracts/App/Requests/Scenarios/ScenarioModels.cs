@@ -65,7 +65,7 @@ public class BranchRequest
     /// <summary>
     /// The text displayed for this branch/choice.
     /// </summary>
-    public string Text { get; set; } = string.Empty;
+    public string? Text { get; set; }
 
     /// <summary>
     /// The identifier of the scene this branch leads to.
@@ -153,7 +153,7 @@ public class CharacterRequest
     /// Character metadata including role, archetype, species, etc.
     /// </summary>
     public CharacterMetadataRequest? Metadata { get; set; }
-  
+
     /// <summary>
     /// Optional list of traits associated with the character.
     /// </summary>
