@@ -466,7 +466,7 @@ public sealed record Error(string Code, string Message, Exception? Exception = n
 
 ### Step 2.3: TypeScript Core Types
 
-**packages/core/core-types/src/results.ts:**
+**packages/core-types/src/result.ts:**
 ```typescript
 export type Result<T, E = Error> =
   | { success: true; value: T }
