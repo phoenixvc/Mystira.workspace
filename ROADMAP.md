@@ -113,16 +113,19 @@ All services adopt Mystira.Shared infrastructure:
 |------|--------|---------|
 | Publish/subscribe events | 🔄 Pending | Wolverine + Azure Service Bus |
 | Cache invalidation | 🔄 Pending | Redis pub/sub |
-| Domain events defined | ✅ Done | AccountCreated, SessionCompleted, etc. |
+| Domain events defined | ✅ Done | 23 events (Account, Session, Content, Cache, AI, User, Notification) |
 
 ### Week 3-4: Performance & Monitoring
 
 | Task | Status | Details |
 |------|--------|---------|
-| Unified monitoring dashboards | 🔄 Pending | Azure Monitor |
-| Cache hit/miss metrics | 🔄 Pending | Application Insights |
+| Unified monitoring dashboards | ✅ Done | Terraform: Log Analytics + App Insights |
+| Cache hit/miss metrics | ✅ Done | BusinessMetrics.cs + Application Insights |
+| Alerting rules | ✅ Done | High error rate, slow response, exceptions, dependencies |
+| Redis/ServiceBus monitoring | ✅ Done | Terraform metric alerts |
+| Availability tests | ✅ Done | Synthetic monitoring per service |
 | Load testing | 🔄 Pending | Performance baselines |
-| Production hardening | 🔄 Pending | Security review, rate limiting |
+| Production hardening | ✅ Done | RateLimitingMiddleware in Mystira.Shared |
 
 ---
 

@@ -169,6 +169,125 @@ export interface CacheWarmupRequested extends IntegrationEvent {
 }
 
 // =============================================================================
+// AI Events
+// =============================================================================
+
+/**
+ * Published when story generation is requested.
+ */
+export interface StoryGenerationRequested extends IntegrationEvent {
+  type: 'StoryGenerationRequested';
+  requestId: string;
+  scenarioId: string;
+  accountId: string;
+  prompt?: string;
+}
+
+/**
+ * Published when story generation completes successfully.
+ */
+export interface StoryGenerationCompleted extends IntegrationEvent {
+  type: 'StoryGenerationCompleted';
+  requestId: string;
+  scenarioId: string;
+  durationMs: number;
+  tokensUsed?: number;
+  model?: string;
+}
+
+/**
+ * Published when story generation fails.
+ */
+export interface StoryGenerationFailed extends IntegrationEvent {
+  type: 'StoryGenerationFailed';
+  requestId: string;
+  scenarioId: string;
+  errorCode: string;
+  errorMessage: string;
+  isRetryable: boolean;
+}
+
+// =============================================================================
+// User Events
+// =============================================================================
+
+/**
+ * Published when a user logs in.
+ */
+export interface UserLoggedIn extends IntegrationEvent {
+  type: 'UserLoggedIn';
+  accountId: string;
+  provider: string;
+  clientIp?: string;
+  userAgent?: string;
+}
+
+/**
+ * Published when a user logs out.
+ */
+export interface UserLoggedOut extends IntegrationEvent {
+  type: 'UserLoggedOut';
+  accountId: string;
+  isExplicit: boolean;
+}
+
+/**
+ * Published when a password reset is requested.
+ */
+export interface PasswordResetRequested extends IntegrationEvent {
+  type: 'PasswordResetRequested';
+  accountId: string;
+  email: string;
+  expiresAt: string;
+}
+
+/**
+ * Published when a password is successfully changed.
+ */
+export interface PasswordChanged extends IntegrationEvent {
+  type: 'PasswordChanged';
+  accountId: string;
+  viaReset: boolean;
+}
+
+// =============================================================================
+// Notification Events
+// =============================================================================
+
+/**
+ * Published when a notification is sent.
+ */
+export interface NotificationSent extends IntegrationEvent {
+  type: 'NotificationSent';
+  notificationId: string;
+  recipientId: string;
+  notificationType: string;
+  template: string;
+}
+
+/**
+ * Published when an email is sent.
+ */
+export interface EmailSent extends IntegrationEvent {
+  type: 'EmailSent';
+  emailId: string;
+  recipientEmail: string;
+  template: string;
+  subject: string;
+}
+
+/**
+ * Published when a notification delivery fails.
+ */
+export interface NotificationFailed extends IntegrationEvent {
+  type: 'NotificationFailed';
+  notificationId: string;
+  recipientId: string;
+  reason: string;
+  isRetryable: boolean;
+}
+
+// =============================================================================
 // Union Types
 // =============================================================================
 
@@ -198,9 +317,31 @@ export type ContentEvent =
 export type CacheEvent = CacheInvalidated | CacheWarmupRequested;
 
 /**
+ * All AI-related events.
+ */
+export type AIEvent = StoryGenerationRequested | StoryGenerationCompleted | StoryGenerationFailed;
+
+/**
+ * All user authentication events.
+ */
+export type UserEvent = UserLoggedIn | UserLoggedOut | PasswordResetRequested | PasswordChanged;
+
+/**
+ * All notification-related events.
+ */
+export type NotificationEvent = NotificationSent | EmailSent | NotificationFailed;
+
+/**
  * All Mystira domain events.
  */
-export type MystiraEvent = AccountEvent | SessionEvent | ContentEvent | CacheEvent;
+export type MystiraEvent =
+  | AccountEvent
+  | SessionEvent
+  | ContentEvent
+  | CacheEvent
+  | AIEvent
+  | UserEvent
+  | NotificationEvent;
 
 /**
  * Event type discriminator values.

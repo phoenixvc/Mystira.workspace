@@ -4,174 +4,111 @@
 **Status**: Active
 **Owner**: jurie@phoenixvc.tech (Technical), eben@phoenixvc.tech (Business)
 
-## Overview
-
-This document serves as the single source of truth for all migration activities in the Mystira platform. It consolidates and cross-references all migration documentation to prevent redundancy and ensure clarity.
+---
 
 ## Quick Status Dashboard
 
-| Area | Status | Progress | Primary Doc |
-|------|--------|----------|-------------|
-| **Infrastructure Foundation** | ✅ Complete | 100% | [MIGRATION_SUMMARY.md](../../MIGRATION_SUMMARY.md) |
-| **Unified Type System** | 🔄 In Progress | 70% | [001-extract-mystira-core.md](../architecture/migrations/001-extract-mystira-core.md) |
-| **API Domain Standardization** | ✅ Complete | 100% | [004-unified-api-domains.md](../architecture/migrations/004-unified-api-domains.md) |
-| **Admin API/UI Extraction** | 🔄 In Progress | 70% | [phases.md](../migration/phases.md) |
-| **Service Migrations** | 📋 Planned | 30% | [README.md](./README.md) |
-| **Data Architecture** | ⚠️ Needs Review | 60% | See note below |
-
-> **⚠️ Data Architecture Note**: The `repository-architecture.md` document contains known issues identified in code reviews. See [Action Items](#action-items) below.
-
-## Document Hierarchy
-
-### Tier 1: Authoritative Guides (Single Source of Truth)
-
-These documents are the canonical references for their respective areas:
-
-| Document | Purpose | Status |
-|----------|---------|--------|
-| [004-unified-api-domains.md](../architecture/migrations/004-unified-api-domains.md) | Domain naming convention | ✅ Definitive |
-| [phases.md](../migration/phases.md) | Admin API/UI extraction progress | 🔄 Active |
-| [001-extract-mystira-core.md](../architecture/migrations/001-extract-mystira-core.md) | Unified type system | 🔄 Active |
-
-### Tier 2: Service-Specific Guides
-
-One guide per service, following consistent structure:
-
-| Service | Guide | Status |
-|---------|-------|--------|
-| Mystira.App | [mystira-app-migration.md](./mystira-app-migration.md) | 🔄 In Progress |
-| Mystira.Admin | [mystira-admin-migration.md](./mystira-admin-migration.md) | 🔄 In Progress |
-| Mystira.StoryGenerator | [mystira-storygenerator-migration.md](./mystira-storygenerator-migration.md) | 🔄 In Progress |
-| Mystira.Publisher | [mystira-publisher-migration.md](./mystira-publisher-migration.md) | 📋 Planned |
-| Mystira.Chain | [mystira-chain-migration.md](./mystira-chain-migration.md) | 📋 Planned |
-| Mystira.DevHub | [mystira-devhub-migration.md](./mystira-devhub-migration.md) | 📋 Planned |
-| Admin UI | [mystira-admin-ui-migration.md](./mystira-admin-ui-migration.md) | 📋 Planned |
-
-### Tier 3: Technical Reference (Supporting)
-
-These provide implementation details:
-
-| Document | Purpose | Notes |
-|----------|---------|-------|
-| [user-domain-postgresql-migration.md](../architecture/migrations/user-domain-postgresql-migration.md) | PostgreSQL schema | ✅ Reference |
-| [repository-architecture.md](../architecture/migrations/repository-architecture.md) | Dual-DB pattern | ⚠️ Contains known bugs |
-| Subproject guides in `subprojects/` | Implementation details | Supporting only |
-
-### Tier 4: Analysis Documents (Archive)
-
-These informed decisions but are not implementation guides:
-
-| Document | Purpose | Action |
-|----------|---------|--------|
-| [code-review-improvements.md](../architecture/migrations/code-review-improvements.md) | Bug identification | → Action items extracted below |
-| [pr-analysis-hybrid-data-strategy.md](../architecture/migrations/pr-analysis-hybrid-data-strategy.md) | PR review | → Action items extracted |
-| [mpr-analysis-review.md](../architecture/migrations/mpr-analysis-review.md) | Doc review | → Action items extracted |
-| [remaining-issues-and-opportunities.md](../architecture/migrations/remaining-issues-and-opportunities.md) | Issue tracking | → Action items extracted |
+| Area | Status | Progress | Details |
+|------|--------|----------|---------|
+| **Infrastructure Foundation** | ✅ Complete | 100% | Azure, Terraform, CI/CD |
+| **Mystira.Shared Package** | ✅ Complete | 100% | v0.2.0-alpha released |
+| **@mystira/core-types** | ✅ Complete | 100% | v0.2.0-alpha released |
+| **Domain Events** | ✅ Complete | 100% | 13 events defined |
+| **API Domain Standardization** | ✅ Complete | 100% | `{env}.{service}.mystira.app` |
+| **Service Migrations** | 🔄 In Progress | 0% | Week 1-2 target |
+| **Monitoring & Alerts** | ✅ Complete | 100% | App Insights, availability tests |
 
 ---
 
-## Current Phase: Q1 2026
+## Service Migration Guides
 
-### Active Work Items
+Each service has a detailed migration guide for adopting `Mystira.Shared 0.2.0-alpha`:
 
-1. **Complete Migration 001**: Unified Type System with OpenAPI + Mystira.Core
-   - [x] Create OpenAPI spec structure
-   - [x] Create Mystira.Core C# package
-   - [x] Create @mystira/core-types TypeScript package
-   - [x] Update CI/CD workflows
-   - [ ] Migrate existing ErrorResponse types
-   - [ ] Update consuming services
-
-2. **API Domain Standardization**
-   - [x] Define naming convention
-   - [x] Update OpenAPI specs
-   - [x] Create migration guides
-   - [ ] Update Terraform DNS records (if needed)
-   - [ ] Update application configurations
-
-3. **Admin API/UI Extraction (Phase 3+)**
-   - See [phases.md](../migration/phases.md) for detailed checklist
+| Service | Guide | Priority | Status |
+|---------|-------|----------|--------|
+| Mystira.App | [mystira-app-migration.md](./mystira-app-migration.md) | High | 📋 Ready to start |
+| Mystira.Admin.Api | [mystira-admin-migration.md](./mystira-admin-migration.md) | High | 📋 Ready to start |
+| Mystira.StoryGenerator | [mystira-storygenerator-migration.md](./mystira-storygenerator-migration.md) | Medium | 📋 Ready to start |
+| Mystira.Publisher | [mystira-publisher-migration.md](./mystira-publisher-migration.md) | Medium | 📋 Needs update |
+| Mystira.Chain | [mystira-chain-migration.md](./mystira-chain-migration.md) | Medium | 📋 Planned |
+| Mystira.DevHub | [mystira-devhub-migration.md](./mystira-devhub-migration.md) | Low | 📋 Planned |
+| Admin UI | [mystira-admin-ui-migration.md](./mystira-admin-ui-migration.md) | Low | 📋 Planned |
 
 ---
 
-## Action Items (From Analysis Docs)
+## What's Been Completed
 
-### Critical (Fix Now)
+### Mystira.Shared 0.2.0-alpha
 
-| Issue | Source | Action | Owner |
-|-------|--------|--------|-------|
-| `Guid.Parse` crashes on string IDs | code-review-improvements.md | Fix in Repository pattern | TBD |
-| Missing `CancellationToken` propagation | code-review-improvements.md | Add to async methods | TBD |
-| `SyncItem` mutability issues | code-review-improvements.md | Make immutable or redesign | TBD |
-| Fire-and-forget patterns | code-review-improvements.md | Add proper error handling | TBD |
+All infrastructure patterns are implemented:
 
-### High Priority
+| Component | Status | Location |
+|-----------|--------|----------|
+| Polly v8 Resilience | ✅ | `Mystira.Shared.Resilience` |
+| Wolverine + Service Bus | ✅ | `Mystira.Shared.Messaging` |
+| Ardalis.Specification | ✅ | `Mystira.Shared.Data` |
+| Redis Caching | ✅ | `Mystira.Shared.Caching` |
+| EntityId (string IDs) | ✅ | `Mystira.Shared.Data.EntityId` |
+| AsyncExtensions | ✅ | `Mystira.Shared.Extensions.AsyncExtensions` |
+| RateLimitingMiddleware | ✅ | `Mystira.Shared.Middleware` |
+| SecurityMetrics | ✅ | `Mystira.Shared.Telemetry` |
+| BusinessMetrics | ✅ | `Mystira.Shared.Telemetry` |
 
-| Issue | Source | Action | Owner |
-|-------|--------|--------|-------|
-| Repository architecture doc has bugs | mpr-analysis-review.md | Update doc or mark as draft | TBD |
-| Wolverine dependency on PostgreSQL | ADR analysis | Document sequence | TBD |
-| Feature flag documentation missing | remaining-issues.md | Create docs | TBD |
+### Domain Events (13 events)
+
+| Category | Events |
+|----------|--------|
+| Account | `AccountCreated`, `AccountUpdated`, `AccountDeleted` |
+| Session | `SessionStarted`, `SessionCompleted`, `SessionAbandoned` |
+| Content | `ScenarioCreated`, `ScenarioUpdated`, `ScenarioPublished`, `ScenarioUnpublished`, `MediaUploaded` |
+| Cache | `CacheInvalidated`, `CacheWarmupRequested` |
+
+---
+
+## Technical Debt - RESOLVED
+
+These issues were identified in code reviews and have been addressed:
+
+| Issue | Solution | Location |
+|-------|----------|----------|
+| `Guid.Parse` crashes | `EntityId` class | `Mystira.Shared.Data.EntityId` |
+| Missing `CancellationToken` | `EnsureToken()` | `Mystira.Shared.Extensions.AsyncExtensions` |
+| Fire-and-forget patterns | `SafeExecuteAsync()` | `Mystira.Shared.Extensions.AsyncExtensions` |
+| Rate limiting | `RateLimitingMiddleware` | `Mystira.Shared.Middleware` |
+| Rollback procedures | Service runbook | `docs/operations/runbooks/service-rollback.md` |
+
+---
+
+## Remaining Work
+
+### High Priority (Before Jan 1, 2026)
+
+- [ ] Migrate Mystira.App to Mystira.Shared 0.2.0-alpha
+- [ ] Migrate Mystira.Admin.Api to Mystira.Shared 0.2.0-alpha
+- [ ] Implement Wolverine event handlers
+- [ ] Test cross-service events via Azure Service Bus
+- [ ] Performance baselines (load testing)
 
 ### Medium Priority
 
-| Issue | Source | Action | Owner |
-|-------|--------|--------|-------|
-| 40% documentation redundancy | This analysis | Consolidate as planned | TBD |
-| Missing rollback procedures | remaining-issues.md | Create per-phase | TBD |
-| Missing performance baselines | remaining-issues.md | Establish baseline | TBD |
-
----
-
-## Removed Documents
-
-The following redundant documents were deleted (December 2025):
-
-| Document | Superseded By | Reason |
-|----------|---------------|--------|
-| `admin-api-extraction-plan.md` | `phases.md` | Duplicate content |
-| `002-app-api-migration.md` | `004-unified-api-domains.md` | Less comprehensive |
-| `003-story-generator-migration.md` | `004-unified-api-domains.md` | Less comprehensive |
-
----
-
-## 2026 Roadmap
-
-**Production Go-Live: January 1, 2026**
-
-```
-January 2026 (Week 1-2)
-├── Complete service migrations (all 7 services)
-├── Wolverine event handlers operational
-└── Cross-service integration via Azure Service Bus
-
-January 2026 (Week 3-4)
-├── Performance optimization & monitoring
-├── Production hardening
-└── Load testing & baselines
-
-Post-Launch (TBD)
-├── Polyglot persistence (Cosmos + PostgreSQL per use case)
-├── Data warehouse (Azure Synapse)
-└── ML recommendations
-```
-
-> **Note**: We're going **polyglot** - keeping both Cosmos DB and PostgreSQL based on entity use case, NOT migrating fully to PostgreSQL.
-
----
-
-## Contacts
-
-| Role | Contact | Scope |
-|------|---------|-------|
-| Technical Lead | jurie@phoenixvc.tech | Architecture, implementation |
-| Founder/Business | eben@phoenixvc.tech | Decisions, priorities |
+- [ ] Migrate StoryGenerator, Publisher, Chain
+- [ ] Add missing events (AI, notification, payment)
+- [ ] Add unit tests for Mystira.Shared components
 
 ---
 
 ## Related Documents
 
-- [2026 Roadmap](../../ROADMAP.md) - Consolidated planning and priorities
-- [ADR Index](../architecture/adr/) - Architectural Decision Records
-- [Guides](../guides/) - Implementation guides
-- [Operations](../operations/) - Runbooks and procedures
+- [2026 Roadmap](../../ROADMAP.md) - Single source of truth for planning
+- [Architecture ADRs](../architecture/adr/) - Decision records
+- [Architecture Migrations](../architecture/migrations/) - Technical specifications
+- [Service Rollback](../operations/runbooks/service-rollback.md) - Rollback procedures
+
+---
+
+## Contacts
+
+| Role | Contact |
+|------|---------|
+| Technical Lead | jurie@phoenixvc.tech |
+| Business | eben@phoenixvc.tech |

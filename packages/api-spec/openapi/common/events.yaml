@@ -317,35 +317,315 @@ components:
               default: 0
               description: Priority level (higher = more urgent)
 
+    # AI Events
+    StoryGenerationRequested:
+      allOf:
+        - $ref: '#/components/schemas/IntegrationEvent'
+        - type: object
+          required:
+            - type
+            - requestId
+            - scenarioId
+            - accountId
+          properties:
+            type:
+              type: string
+              const: StoryGenerationRequested
+            requestId:
+              type: string
+              description: The request ID for tracking
+            scenarioId:
+              type: string
+              description: The scenario being generated for
+            accountId:
+              type: string
+              description: The requesting user's account ID
+            prompt:
+              type: string
+              nullable: true
+              description: The prompt or context for generation
+
+    StoryGenerationCompleted:
+      allOf:
+        - $ref: '#/components/schemas/IntegrationEvent'
+        - type: object
+          required:
+            - type
+            - requestId
+            - scenarioId
+            - durationMs
+          properties:
+            type:
+              type: string
+              const: StoryGenerationCompleted
+            requestId:
+              type: string
+            scenarioId:
+              type: string
+            durationMs:
+              type: integer
+              description: Time taken in milliseconds
+            tokensUsed:
+              type: integer
+              nullable: true
+              description: Token count used
+            model:
+              type: string
+              nullable: true
+              description: Model used for generation
+
+    StoryGenerationFailed:
+      allOf:
+        - $ref: '#/components/schemas/IntegrationEvent'
+        - type: object
+          required:
+            - type
+            - requestId
+            - scenarioId
+            - errorCode
+            - errorMessage
+          properties:
+            type:
+              type: string
+              const: StoryGenerationFailed
+            requestId:
+              type: string
+            scenarioId:
+              type: string
+            errorCode:
+              type: string
+            errorMessage:
+              type: string
+            isRetryable:
+              type: boolean
+              default: false
+
+    # User Events
+    UserLoggedIn:
+      allOf:
+        - $ref: '#/components/schemas/IntegrationEvent'
+        - type: object
+          required:
+            - type
+            - accountId
+            - provider
+          properties:
+            type:
+              type: string
+              const: UserLoggedIn
+            accountId:
+              type: string
+            provider:
+              type: string
+              description: Authentication provider used
+            clientIp:
+              type: string
+              nullable: true
+              description: Client IP address (masked for privacy)
+            userAgent:
+              type: string
+              nullable: true
+
+    UserLoggedOut:
+      allOf:
+        - $ref: '#/components/schemas/IntegrationEvent'
+        - type: object
+          required:
+            - type
+            - accountId
+          properties:
+            type:
+              type: string
+              const: UserLoggedOut
+            accountId:
+              type: string
+            isExplicit:
+              type: boolean
+              default: true
+              description: Whether this was an explicit logout or session expiry
+
+    PasswordResetRequested:
+      allOf:
+        - $ref: '#/components/schemas/IntegrationEvent'
+        - type: object
+          required:
+            - type
+            - accountId
+            - email
+            - expiresAt
+          properties:
+            type:
+              type: string
+              const: PasswordResetRequested
+            accountId:
+              type: string
+            email:
+              type: string
+              format: email
+            expiresAt:
+              type: string
+              format: date-time
+              description: Expiry time for the reset token
+
+    PasswordChanged:
+      allOf:
+        - $ref: '#/components/schemas/IntegrationEvent'
+        - type: object
+          required:
+            - type
+            - accountId
+          properties:
+            type:
+              type: string
+              const: PasswordChanged
+            accountId:
+              type: string
+            viaReset:
+              type: boolean
+              default: false
+              description: Whether this was via reset flow or user-initiated
+
+    # Notification Events
+    NotificationSent:
+      allOf:
+        - $ref: '#/components/schemas/IntegrationEvent'
+        - type: object
+          required:
+            - type
+            - notificationId
+            - recipientId
+            - notificationType
+            - template
+          properties:
+            type:
+              type: string
+              const: NotificationSent
+            notificationId:
+              type: string
+            recipientId:
+              type: string
+              description: The recipient's account ID
+            notificationType:
+              type: string
+              description: Notification type (email, push, in-app)
+            template:
+              type: string
+              description: Template or category
+
+    EmailSent:
+      allOf:
+        - $ref: '#/components/schemas/IntegrationEvent'
+        - type: object
+          required:
+            - type
+            - emailId
+            - recipientEmail
+            - template
+            - subject
+          properties:
+            type:
+              type: string
+              const: EmailSent
+            emailId:
+              type: string
+              description: The email ID for tracking
+            recipientEmail:
+              type: string
+              description: The recipient's email (masked)
+            template:
+              type: string
+              description: Email template used
+            subject:
+              type: string
+              description: Subject line
+
+    NotificationFailed:
+      allOf:
+        - $ref: '#/components/schemas/IntegrationEvent'
+        - type: object
+          required:
+            - type
+            - notificationId
+            - recipientId
+            - reason
+          properties:
+            type:
+              type: string
+              const: NotificationFailed
+            notificationId:
+              type: string
+            recipientId:
+              type: string
+            reason:
+              type: string
+              description: Error reason
+            isRetryable:
+              type: boolean
+              default: false
+
     # Union type for all events
     MystiraEvent:
       oneOf:
+        # Account Events
         - $ref: '#/components/schemas/AccountCreated'
         - $ref: '#/components/schemas/AccountUpdated'
         - $ref: '#/components/schemas/AccountDeleted'
+        # Session Events
         - $ref: '#/components/schemas/SessionStarted'
         - $ref: '#/components/schemas/SessionCompleted'
         - $ref: '#/components/schemas/SessionAbandoned'
+        # Content Events
         - $ref: '#/components/schemas/ScenarioCreated'
         - $ref: '#/components/schemas/ScenarioUpdated'
         - $ref: '#/components/schemas/ScenarioPublished'
         - $ref: '#/components/schemas/ScenarioUnpublished'
         - $ref: '#/components/schemas/MediaUploaded'
+        # Cache Events
         - $ref: '#/components/schemas/CacheInvalidated'
         - $ref: '#/components/schemas/CacheWarmupRequested'
+        # AI Events
+        - $ref: '#/components/schemas/StoryGenerationRequested'
+        - $ref: '#/components/schemas/StoryGenerationCompleted'
+        - $ref: '#/components/schemas/StoryGenerationFailed'
+        # User Events
+        - $ref: '#/components/schemas/UserLoggedIn'
+        - $ref: '#/components/schemas/UserLoggedOut'
+        - $ref: '#/components/schemas/PasswordResetRequested'
+        - $ref: '#/components/schemas/PasswordChanged'
+        # Notification Events
+        - $ref: '#/components/schemas/NotificationSent'
+        - $ref: '#/components/schemas/EmailSent'
+        - $ref: '#/components/schemas/NotificationFailed'
       discriminator:
         propertyName: type
         mapping:
+          # Account Events
           AccountCreated: '#/components/schemas/AccountCreated'
           AccountUpdated: '#/components/schemas/AccountUpdated'
           AccountDeleted: '#/components/schemas/AccountDeleted'
+          # Session Events
           SessionStarted: '#/components/schemas/SessionStarted'
           SessionCompleted: '#/components/schemas/SessionCompleted'
           SessionAbandoned: '#/components/schemas/SessionAbandoned'
+          # Content Events
           ScenarioCreated: '#/components/schemas/ScenarioCreated'
           ScenarioUpdated: '#/components/schemas/ScenarioUpdated'
           ScenarioPublished: '#/components/schemas/ScenarioPublished'
           ScenarioUnpublished: '#/components/schemas/ScenarioUnpublished'
           MediaUploaded: '#/components/schemas/MediaUploaded'
+          # Cache Events
           CacheInvalidated: '#/components/schemas/CacheInvalidated'
           CacheWarmupRequested: '#/components/schemas/CacheWarmupRequested'
+          # AI Events
+          StoryGenerationRequested: '#/components/schemas/StoryGenerationRequested'
+          StoryGenerationCompleted: '#/components/schemas/StoryGenerationCompleted'
+          StoryGenerationFailed: '#/components/schemas/StoryGenerationFailed'
+          # User Events
+          UserLoggedIn: '#/components/schemas/UserLoggedIn'
+          UserLoggedOut: '#/components/schemas/UserLoggedOut'
+          PasswordResetRequested: '#/components/schemas/PasswordResetRequested'
+          PasswordChanged: '#/components/schemas/PasswordChanged'
+          # Notification Events
+          NotificationSent: '#/components/schemas/NotificationSent'
+          EmailSent: '#/components/schemas/EmailSent'
+          NotificationFailed: '#/components/schemas/NotificationFailed'
