@@ -147,4 +147,14 @@ public class ProfileAssignmentRequest
     /// The unique identifier of the account.
     /// </summary>
     public string AccountId { get; set; } = string.Empty;
+
+    /// <summary>
+    /// The unique identifier of the character to assign.
+    /// </summary>
+    public string CharacterId { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Indicates whether this is an NPC assignment.
+    /// </summary>
+    public bool IsNpcAssignment { get; set; } = false;
 }
