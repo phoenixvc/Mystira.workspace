@@ -41,7 +41,7 @@ module "front_door" {
   mystira_app_api_backend_address = module.mystira_app.api_hostname  # App Service hostname from mystira-app module
   mystira_app_swa_backend_address = module.mystira_app.swa_hostname  # Static Web App hostname from mystira-app module
   custom_domain_mystira_app_api   = "dev.api.mystira.app"
-  custom_domain_mystira_app_swa   = "dev.app.mystira.app"
+  custom_domain_mystira_app_swa   = "dev.mystira.app"
 
   # WAF Configuration
   enable_waf           = true
@@ -115,7 +115,7 @@ output "front_door_mystira_app_swa_endpoint" {
 # 1. Change dev.publisher.mystira.app A record to CNAME pointing to Front Door endpoint
 # 2. Change dev.chain.mystira.app A record to CNAME pointing to Front Door endpoint
 # 3. Change dev.api.mystira.app to CNAME pointing to Front Door endpoint
-# 4. Change dev.app.mystira.app to CNAME pointing to Front Door endpoint
+# 4. Change dev.mystira.app to CNAME pointing to Front Door endpoint
 # 5. Add _dnsauth TXT records for domain validation
 #
 # Example DNS changes:

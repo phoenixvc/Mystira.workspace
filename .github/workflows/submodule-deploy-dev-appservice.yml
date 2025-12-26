@@ -204,7 +204,7 @@ jobs:
                 echo "- Dev API: https://dev.api.mystira.app" >> $GITHUB_STEP_SUMMARY
                 ;;
               app-swa-deploy)
-                echo "- Static Web App: https://dev.app.mystira.app" >> $GITHUB_STEP_SUMMARY
+                echo "- Static Web App: https://dev.mystira.app" >> $GITHUB_STEP_SUMMARY
                 ;;
               devhub-deploy)
                 echo "- DevHub: https://dev.devhub.mystira.app" >> $GITHUB_STEP_SUMMARY

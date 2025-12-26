@@ -132,7 +132,7 @@ variable "custom_domain_mystira_app_api" {
 }
 
 variable "custom_domain_mystira_app_swa" {
-  description = "Custom domain for Mystira.App SWA (e.g., app.mystira.app or dev.app.mystira.app)"
+  description = "Custom domain for Mystira.App SWA (e.g., app.mystira.app or dev.mystira.app)"
   type        = string
   default     = ""
 }

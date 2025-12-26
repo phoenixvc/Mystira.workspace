@@ -90,7 +90,7 @@ kind: ConfigMap
 metadata:
   name: mys-admin-ui-config
 data:
-  api_url: "https://admin-api.dev.mystira.app"
+  api_url: "https://dev.admin-api.mystira.app"
   azure_ad_client_id: ""
   azure_ad_tenant_id: ""
 ---

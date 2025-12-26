@@ -48,7 +48,7 @@ module "entra_id" {
 
   admin_ui_redirect_uris = [
     "http://localhost:7001/auth/callback",
-    "https://admin.dev.mystira.app/auth/callback"
+    "https://dev.admin.mystira.app/auth/callback"
   ]
 
   tags = {
