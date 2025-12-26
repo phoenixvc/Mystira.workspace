@@ -331,32 +331,32 @@ public enum ErrorCategory
     /// Azure-related errors.
     /// </summary>
     Azure,
-    
+
     /// <summary>
     /// Authentication and authorization errors.
     /// </summary>
     Authentication,
-    
+
     /// <summary>
     /// Database connection and query errors.
     /// </summary>
     Database,
-    
+
     /// <summary>
     /// Network connectivity errors.
     /// </summary>
     Network,
-    
+
     /// <summary>
     /// Configuration and settings errors.
     /// </summary>
     Configuration,
-    
+
     /// <summary>
     /// Build and compilation errors.
     /// </summary>
     Build,
-    
+
     /// <summary>
     /// Unclassified errors.
     /// </summary>
@@ -372,32 +372,32 @@ public class ErrorPattern
     /// Unique error code identifier.
     /// </summary>
     public required string Code { get; init; }
-    
+
     /// <summary>
     /// Regular expression pattern for matching the error.
     /// </summary>
     public required string Pattern { get; init; }
-    
+
     /// <summary>
     /// Human-readable title for the error.
     /// </summary>
     public required string Title { get; init; }
-    
+
     /// <summary>
     /// Category of the error.
     /// </summary>
     public required ErrorCategory Category { get; init; }
-    
+
     /// <summary>
     /// Detailed description of the error.
     /// </summary>
     public required string Description { get; init; }
-    
+
     /// <summary>
     /// Array of potential solutions.
     /// </summary>
     public required string[] Solutions { get; init; }
-    
+
     /// <summary>
     /// Optional related documentation links.
     /// </summary>
@@ -413,37 +413,37 @@ public class TroubleshootingResult
     /// Indicates whether the error matched a known pattern.
     /// </summary>
     public bool Matched { get; init; }
-    
+
     /// <summary>
     /// Error code identifier.
     /// </summary>
     public required string ErrorCode { get; init; }
-    
+
     /// <summary>
     /// Title of the error.
     /// </summary>
     public required string Title { get; init; }
-    
+
     /// <summary>
     /// Category of the error.
     /// </summary>
     public required ErrorCategory Category { get; init; }
-    
+
     /// <summary>
     /// Description of the error.
     /// </summary>
     public required string Description { get; init; }
-    
+
     /// <summary>
     /// Original error message.
     /// </summary>
     public required string OriginalError { get; init; }
-    
+
     /// <summary>
     /// List of potential solutions.
     /// </summary>
     public required List<string> Solutions { get; init; }
-    
+
     /// <summary>
     /// Related documentation links.
     /// </summary>
