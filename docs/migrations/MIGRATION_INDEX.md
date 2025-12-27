@@ -11,7 +11,7 @@
 | Area | Status | Progress | Details |
 |------|--------|----------|---------|
 | **Infrastructure Foundation** | ✅ Complete | 100% | Azure, Terraform, CI/CD |
-| **Mystira.Shared Package** | ✅ Complete | 100% | v0.2.0-alpha released |
+| **Mystira.Shared Package** | ✅ Complete | 100% | v0.4.* released |
 | **@mystira/core-types** | ✅ Complete | 100% | v0.2.0-alpha released |
 | **Domain Events** | ✅ Complete | 100% | 13 events defined |
 | **API Domain Standardization** | ✅ Complete | 100% | `{env}.{service}.mystira.app` |
@@ -22,7 +22,7 @@
 
 ## Service Migration Guides
 
-Each service has a detailed migration guide for adopting `Mystira.Shared 0.2.0-alpha`:
+Each service has a detailed migration guide for adopting `Mystira.Shared 0.4.*`:
 
 | Service | Guide | Priority | Status |
 |---------|-------|----------|--------|
@@ -38,7 +38,7 @@ Each service has a detailed migration guide for adopting `Mystira.Shared 0.2.0-a
 
 ## What's Been Completed
 
-### Mystira.Shared 0.2.0-alpha
+### Mystira.Shared 0.4.*
 
 All infrastructure patterns are implemented:
 
@@ -83,8 +83,8 @@ These issues were identified in code reviews and have been addressed:
 
 ### High Priority (Before Jan 1, 2026)
 
-- [ ] Migrate Mystira.App to Mystira.Shared 0.2.0-alpha
-- [ ] Migrate Mystira.Admin.Api to Mystira.Shared 0.2.0-alpha
+- [ ] Migrate Mystira.App to Mystira.Shared 0.4.*
+- [ ] Migrate Mystira.Admin.Api to Mystira.Shared 0.4.*
 - [ ] Implement Wolverine event handlers
 - [ ] Test cross-service events via Azure Service Bus
 - [ ] Performance baselines (load testing)
