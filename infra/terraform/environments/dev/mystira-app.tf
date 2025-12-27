@@ -4,8 +4,9 @@
 # Converted from Bicep: https://github.com/phoenixvc/Mystira.App/infrastructure
 # =============================================================================
 #
-# NOTE: Mystira.App resources are deployed to the dedicated app resource group
-# and use shared monitoring (Log Analytics + App Insights) to reduce duplication.
+# NOTE: Mystira.App resources are deployed to the shared core resource group
+# for shared resources (Cosmos DB, Storage) and uses shared monitoring.
+# App-specific compute (App Service, SWA) could be split to app-rg in future.
 #
 # =============================================================================
 
@@ -15,7 +16,7 @@ module "mystira_app" {
   environment         = "dev"
   location            = var.location
   fallback_location   = "eastus2"  # Static Web Apps not available in South Africa North
-  resource_group_name = azurerm_resource_group.app.name  # Use dedicated app resource group
+  resource_group_name = azurerm_resource_group.main.name  # Core RG for shared resources (Cosmos, Storage)
   project_name        = "mystira"
   org                 = "mys"
 
