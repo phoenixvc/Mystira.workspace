@@ -761,8 +761,8 @@ jobs:
           SUCCESS_COUNT=0
           FAILED_COUNT=0
 
-          # Check each AI Services account
-          for AI_NAME in "mys-shared-ai-san" "mys-shared-ai-uks"; do
+          # Check each AI Services account (primary + all secondary regions)
+          for AI_NAME in "mys-shared-ai-san" "mys-shared-ai-uks" "mys-shared-ai-eus" "mys-shared-ai-swc" "mys-shared-ai-ncus"; do
             if az cognitiveservices account show --name "$AI_NAME" --resource-group ${{ env.AZURE_RESOURCE_GROUP }} &>/dev/null; then
               LOCATION=$(az cognitiveservices account show --name "$AI_NAME" --resource-group ${{ env.AZURE_RESOURCE_GROUP }} --query "location" -o tsv 2>/dev/null)
 
@@ -794,7 +794,7 @@ jobs:
           echo "### Deployment Details" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
 
-          for AI_NAME in "mys-shared-ai-san" "mys-shared-ai-uks"; do
+          for AI_NAME in "mys-shared-ai-san" "mys-shared-ai-uks" "mys-shared-ai-eus" "mys-shared-ai-swc" "mys-shared-ai-ncus"; do
             if az cognitiveservices account show --name "$AI_NAME" --resource-group ${{ env.AZURE_RESOURCE_GROUP }} &>/dev/null; then
               ENDPOINT=$(az cognitiveservices account show --name "$AI_NAME" --resource-group ${{ env.AZURE_RESOURCE_GROUP }} --query "properties.endpoint" -o tsv 2>/dev/null)
               LOCATION=$(az cognitiveservices account show --name "$AI_NAME" --resource-group ${{ env.AZURE_RESOURCE_GROUP }} --query "location" -o tsv 2>/dev/null)
