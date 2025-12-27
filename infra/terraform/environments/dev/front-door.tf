@@ -111,13 +111,36 @@ output "front_door_mystira_app_swa_endpoint" {
   value       = module.front_door.mystira_app_swa_endpoint_hostname
 }
 
-# After deploying, update DNS with:
-# 1. Change dev.publisher.mystira.app A record to CNAME pointing to Front Door endpoint
-# 2. Change dev.chain.mystira.app A record to CNAME pointing to Front Door endpoint
-# 3. Change dev.api.mystira.app to CNAME pointing to Front Door endpoint
-# 4. Change dev.mystira.app to CNAME pointing to Front Door endpoint
-# 5. Add _dnsauth TXT records for domain validation
+# =============================================================================
+# DNS Configuration Requirements for Custom Domains
+# =============================================================================
 #
-# Example DNS changes:
-# Before: dev.publisher.mystira.app -> A record -> <NGINX LB IP>
-# After:  dev.publisher.mystira.app -> CNAME -> mystira-dev-publisher.azurefd.net
+# IMPORTANT: Custom domains require proper DNS configuration before SSL certificates
+# can be provisioned by Front Door. Without this, you'll see ERR_CERT_COMMON_NAME_INVALID.
+#
+# For each custom domain, you need:
+# 1. CNAME record pointing to the Front Door endpoint
+# 2. TXT record for domain validation (_dnsauth.<subdomain>)
+#
+# Required DNS Records for dev.mystira.app:
+# -----------------------------------------
+# | Type  | Name                    | Value                                    |
+# |-------|-------------------------|------------------------------------------|
+# | CNAME | dev                     | mystira-dev-app-swa.azurefd.net          |
+# | TXT   | _dnsauth.dev            | <validation_token from terraform output> |
+# | CNAME | api.dev                 | mystira-dev-app-api.azurefd.net          |
+# | TXT   | _dnsauth.api.dev        | <validation_token from terraform output> |
+#
+# After deploying, run: terraform output -json | jq '.front_door_mystira_app_swa_custom_domain_validation_token'
+# to get the validation tokens.
+#
+# Legacy DNS Records (publisher/chain):
+# -------------------------------------
+# | Type  | Name                    | Value                                    |
+# |-------|-------------------------|------------------------------------------|
+# | CNAME | dev.publisher           | mystira-dev-publisher.azurefd.net        |
+# | CNAME | dev.chain               | mystira-dev-chain.azurefd.net            |
+# | TXT   | _dnsauth.dev.publisher  | <validation_token from terraform output> |
+# | TXT   | _dnsauth.dev.chain      | <validation_token from terraform output> |
+#
+# =============================================================================

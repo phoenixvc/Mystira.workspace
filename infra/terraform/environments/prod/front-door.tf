@@ -120,19 +120,60 @@ output "front_door_mystira_app_swa_endpoint" {
   value       = module.front_door.mystira_app_swa_endpoint_hostname
 }
 
-# After deploying, update DNS with:
-# 1. Change publisher.mystira.app A record to CNAME pointing to Front Door endpoint
-# 2. Change chain.mystira.app A record to CNAME pointing to Front Door endpoint
-# 3. Change api.mystira.app to CNAME pointing to Front Door endpoint (Mystira.App API)
-# 4. Change app.mystira.app to CNAME pointing to Front Door endpoint (Mystira.App SWA)
-# 5. Add _dnsauth TXT records for domain validation
+# =============================================================================
+# DNS Configuration Requirements for Custom Domains (Production)
+# =============================================================================
 #
-# Example DNS changes:
+# IMPORTANT: Custom domains require proper DNS configuration before SSL certificates
+# can be provisioned by Front Door. Without this, you'll see ERR_CERT_COMMON_NAME_INVALID.
+#
+# For each custom domain, you need:
+# 1. CNAME record pointing to the Front Door endpoint
+# 2. TXT record for domain validation (_dnsauth.<subdomain>)
+#
+# Required DNS Records for Production Environment:
+# ================================================
+#
+# Mystira.App (PWA + API):
+# | Type  | Name              | Value                                    |
+# |-------|-------------------|------------------------------------------|
+# | CNAME | app               | <front_door_mystira_app_swa_endpoint>    |
+# | TXT   | _dnsauth.app      | <validation_token from terraform output> |
+# | CNAME | api               | <front_door_mystira_app_api_endpoint>    |
+# | TXT   | _dnsauth.api      | <validation_token from terraform output> |
+#
+# Admin Services:
+# | Type  | Name              | Value                                    |
+# |-------|-------------------|------------------------------------------|
+# | CNAME | admin             | <front_door_admin_ui_endpoint>           |
+# | TXT   | _dnsauth.admin    | <validation_token from terraform output> |
+# | CNAME | admin-api         | <front_door_admin_api_endpoint>          |
+# | TXT   | _dnsauth.admin-api| <validation_token from terraform output> |
+#
+# Story Generator:
+# | Type  | Name              | Value                                    |
+# |-------|-------------------|------------------------------------------|
+# | CNAME | story             | <front_door_story_generator_swa_endpoint>|
+# | TXT   | _dnsauth.story    | <validation_token from terraform output> |
+# | CNAME | story-api         | <front_door_story_generator_api_endpoint>|
+# | TXT   | _dnsauth.story-api| <validation_token from terraform output> |
+#
+# Publisher/Chain (Legacy AKS Services):
+# | Type  | Name              | Value                                    |
+# |-------|-------------------|------------------------------------------|
+# | CNAME | publisher         | <front_door_publisher_endpoint>          |
+# | TXT   | _dnsauth.publisher| <validation_token from terraform output> |
+# | CNAME | chain             | <front_door_chain_endpoint>              |
+# | TXT   | _dnsauth.chain    | <validation_token from terraform output> |
+#
+# After deploying, get validation tokens with:
+#   terraform output -json | jq '.front_door_custom_domain_verification'
+#
+# Example DNS Migration:
 # Before: publisher.mystira.app -> A record -> <NGINX LB IP>
 # After:  publisher.mystira.app -> CNAME -> mystira-prod-publisher.azurefd.net
 #
 # Before: api.mystira.app -> CNAME -> mys-prod-app-api-san.azurewebsites.net
 # After:  api.mystira.app -> CNAME -> mystira-prod-app-api.azurefd.net
 #
-# Before: app.mystira.app -> CNAME -> mys-prod-app-swa-eus2.azurestaticapps.net
-# After:  app.mystira.app -> CNAME -> mystira-prod-app-swa.azurefd.net
+# =============================================================================

@@ -104,3 +104,54 @@ output "front_door_mystira_app_swa_endpoint" {
   description = "Front Door endpoint for Mystira.App SWA - use this for CNAME"
   value       = module.front_door.mystira_app_swa_endpoint_hostname
 }
+
+# =============================================================================
+# DNS Configuration Requirements for Custom Domains (Staging)
+# =============================================================================
+#
+# IMPORTANT: Custom domains require proper DNS configuration before SSL certificates
+# can be provisioned by Front Door. Without this, you'll see ERR_CERT_COMMON_NAME_INVALID.
+#
+# For each custom domain, you need:
+# 1. CNAME record pointing to the Front Door endpoint
+# 2. TXT record for domain validation (_dnsauth.<subdomain>)
+#
+# Required DNS Records for Staging Environment:
+# =============================================
+#
+# Mystira.App (PWA + API):
+# | Type  | Name                         | Value                                    |
+# |-------|------------------------------|------------------------------------------|
+# | CNAME | staging.app                  | <front_door_mystira_app_swa_endpoint>    |
+# | TXT   | _dnsauth.staging.app         | <validation_token from terraform output> |
+# | CNAME | staging.api                  | <front_door_mystira_app_api_endpoint>    |
+# | TXT   | _dnsauth.staging.api         | <validation_token from terraform output> |
+#
+# Admin Services:
+# | Type  | Name                         | Value                                    |
+# |-------|------------------------------|------------------------------------------|
+# | CNAME | staging.admin                | <front_door_admin_ui_endpoint>           |
+# | TXT   | _dnsauth.staging.admin       | <validation_token from terraform output> |
+# | CNAME | staging.admin-api            | <front_door_admin_api_endpoint>          |
+# | TXT   | _dnsauth.staging.admin-api   | <validation_token from terraform output> |
+#
+# Story Generator:
+# | Type  | Name                         | Value                                    |
+# |-------|------------------------------|------------------------------------------|
+# | CNAME | staging.story                | <front_door_story_generator_swa_endpoint>|
+# | TXT   | _dnsauth.staging.story       | <validation_token from terraform output> |
+# | CNAME | staging.story-api            | <front_door_story_generator_api_endpoint>|
+# | TXT   | _dnsauth.staging.story-api   | <validation_token from terraform output> |
+#
+# Publisher/Chain (Legacy AKS Services):
+# | Type  | Name                         | Value                                    |
+# |-------|------------------------------|------------------------------------------|
+# | CNAME | staging.publisher            | <front_door_publisher_endpoint>          |
+# | TXT   | _dnsauth.staging.publisher   | <validation_token from terraform output> |
+# | CNAME | staging.chain                | <front_door_chain_endpoint>              |
+# | TXT   | _dnsauth.staging.chain       | <validation_token from terraform output> |
+#
+# After deploying, get validation tokens with:
+#   terraform output -json | jq '.front_door_custom_domain_verification'
+#
+# =============================================================================
