@@ -29,6 +29,13 @@ on:
     types:
       - contracts-nuget-publish
 
+  # Allow being called from shared-publish workflow
+  workflow_call:
+    outputs:
+      version:
+        description: "Published package version"
+        value: ${{ jobs.publish-nuget.outputs.version }}
+
   workflow_dispatch:
     inputs:
       version_suffix:
