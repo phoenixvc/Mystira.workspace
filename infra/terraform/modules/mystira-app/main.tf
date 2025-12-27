@@ -482,12 +482,12 @@ resource "azurerm_linux_web_app" "api" {
     "ApplicationInsightsAgent_EXTENSION_VERSION" = "~3"
     "XDT_MicrosoftApplicationInsights_Mode"      = "recommended"
 
-    # Connection Strings (matching Bicep naming)
-    "ConnectionStrings__CosmosDb"      = var.skip_cosmos_creation ? var.existing_cosmos_connection_string : "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault.main.vault_uri}secrets/cosmos-connection-string/)"
-    "ConnectionStrings__AzureStorage"  = var.skip_storage_creation ? "" : "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault.main.vault_uri}secrets/storage-connection-string/)"
+    # Connection Strings (matching Bicep naming) - Always use Key Vault references
+    "ConnectionStrings__CosmosDb"      = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault.main.vault_uri}secrets/cosmos-connection-string/)"
+    "ConnectionStrings__AzureStorage"  = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault.main.vault_uri}secrets/storage-connection-string/)"
 
     # Azure Resource Settings (matching Bicep naming)
-    "Azure__CosmosDb__DatabaseName"    = "MystiraAppDb"
+    "Azure__CosmosDb__DatabaseName"    = var.skip_cosmos_creation ? var.shared_cosmos_database_name : "MystiraAppDb"
     "Azure__BlobStorage__ContainerName" = "mystira-app-media"
 
     # CORS Settings
@@ -499,8 +499,8 @@ resource "azurerm_linux_web_app" "api" {
     "JwtSettings__RsaPrivateKey" = var.jwt_private_key != "" ? "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault.main.vault_uri}secrets/jwt-rsa-private-key/)" : ""
     "JwtSettings__RsaPublicKey"  = var.jwt_public_key != "" ? "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault.main.vault_uri}secrets/jwt-rsa-public-key/)" : ""
 
-    # Azure Communication Services
-    "AzureCommunicationServices__ConnectionString" = var.enable_communication_services ? "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault.main.vault_uri}secrets/acs-connection-string/)" : ""
+    # Azure Communication Services - use Key Vault ref if either created or shared ACS is configured
+    "AzureCommunicationServices__ConnectionString" = (var.enable_communication_services || var.shared_acs_connection_string != "") ? "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault.main.vault_uri}secrets/acs-connection-string/)" : ""
     "AzureCommunicationServices__SenderEmail"      = var.sender_email
 
     # PostgreSQL (for hybrid data strategy)
@@ -526,11 +526,29 @@ resource "azurerm_key_vault_secret" "cosmos_connection_string" {
   key_vault_id = azurerm_key_vault.main.id
 }
 
+# Store shared Cosmos DB connection string when using shared resources
+resource "azurerm_key_vault_secret" "shared_cosmos_connection_string" {
+  count = var.skip_cosmos_creation && var.existing_cosmos_connection_string != "" ? 1 : 0
+
+  name         = "cosmos-connection-string"
+  value        = var.existing_cosmos_connection_string
+  key_vault_id = azurerm_key_vault.main.id
+}
+
 resource "azurerm_key_vault_secret" "storage_connection_string" {
   count = var.skip_storage_creation ? 0 : 1
 
   name         = "storage-connection-string"
   value        = azurerm_storage_account.main[0].primary_connection_string
+  key_vault_id = azurerm_key_vault.main.id
+}
+
+# Store shared Storage connection string when using shared resources
+resource "azurerm_key_vault_secret" "shared_storage_connection_string" {
+  count = var.skip_storage_creation && var.shared_storage_connection_string != "" ? 1 : 0
+
+  name         = "storage-connection-string"
+  value        = var.shared_storage_connection_string
   key_vault_id = azurerm_key_vault.main.id
 }
 
@@ -571,6 +589,15 @@ resource "azurerm_key_vault_secret" "acs_connection_string" {
 
   name         = "acs-connection-string"
   value        = azurerm_communication_service.main[0].primary_connection_string
+  key_vault_id = azurerm_key_vault.main.id
+}
+
+# Store shared ACS connection string when using shared resources
+resource "azurerm_key_vault_secret" "shared_acs_connection_string" {
+  count = !var.enable_communication_services && var.shared_acs_connection_string != "" ? 1 : 0
+
+  name         = "acs-connection-string"
+  value        = var.shared_acs_connection_string
   key_vault_id = azurerm_key_vault.main.id
 }
 

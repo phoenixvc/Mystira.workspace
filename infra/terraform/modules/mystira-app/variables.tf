@@ -80,6 +80,18 @@ variable "existing_cosmos_connection_string" {
   sensitive   = true
 }
 
+variable "shared_cosmos_endpoint" {
+  description = "Endpoint of shared Cosmos DB account (when skip_cosmos_creation is true)"
+  type        = string
+  default     = ""
+}
+
+variable "shared_cosmos_database_name" {
+  description = "Database name in shared Cosmos DB (when skip_cosmos_creation is true)"
+  type        = string
+  default     = "MystiraAppDb"
+}
+
 # -----------------------------------------------------------------------------
 # App Service Settings
 # -----------------------------------------------------------------------------
@@ -169,6 +181,19 @@ variable "skip_storage_creation" {
   default     = false
 }
 
+variable "shared_storage_connection_string" {
+  description = "Connection string for shared Storage Account (when skip_storage_creation is true)"
+  type        = string
+  default     = ""
+  sensitive   = true
+}
+
+variable "shared_storage_blob_endpoint" {
+  description = "Primary blob endpoint for shared Storage Account (when skip_storage_creation is true)"
+  type        = string
+  default     = ""
+}
+
 variable "cors_allowed_origins" {
   description = "CORS allowed origins for storage"
   type        = list(string)
@@ -204,9 +229,16 @@ variable "storage_delete_after_days" {
 # -----------------------------------------------------------------------------
 
 variable "enable_communication_services" {
-  description = "Deploy Azure Communication Services"
+  description = "Deploy Azure Communication Services (set to false to use shared)"
   type        = bool
   default     = true
+}
+
+variable "shared_acs_connection_string" {
+  description = "Connection string for shared Azure Communication Services (when enable_communication_services is false)"
+  type        = string
+  default     = ""
+  sensitive   = true
 }
 
 variable "sender_email" {
