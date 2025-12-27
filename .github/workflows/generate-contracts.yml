@@ -1,4 +1,4 @@
-name: "Packages: Generate Contracts"
+name: "Codegen: API Contracts"
 
 # Generates TypeScript and C# contract types from OpenAPI specifications
 # This ensures API contracts stay in sync across all languages

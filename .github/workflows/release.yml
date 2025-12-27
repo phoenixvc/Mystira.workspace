@@ -1,4 +1,4 @@
-name: "Packages: Release"
+name: "Publish: NPM (Changesets)"
 
 # Unified Package Releases: Manages versioning and publishing via Changesets
 # Handles: Creating release PRs and publishing to npm registry + triggering NuGet releases
