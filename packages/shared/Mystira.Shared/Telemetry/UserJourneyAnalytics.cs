@@ -91,6 +91,12 @@ public class UserJourneyAnalytics : IUserJourneyAnalytics
         "Onboarding", "Registration", "Purchase", "ProfileSetup", "Tutorial", "FirstScenario", "Checkout"
     };
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="UserJourneyAnalytics"/> class.
+    /// </summary>
+    /// <param name="telemetryClient">The Application Insights telemetry client, or null if not available.</param>
+    /// <param name="logger">The logger instance.</param>
+    /// <param name="environment">The environment name (e.g., Development, Production).</param>
     public UserJourneyAnalytics(
         TelemetryClient? telemetryClient,
         ILogger<UserJourneyAnalytics> logger,
@@ -134,6 +140,7 @@ public class UserJourneyAnalytics : IUserJourneyAnalytics
         return AllowedFlowNames.Contains(flowName) ? flowName : SanitizeMetricComponent(flowName, "flow");
     }
 
+    /// <inheritdoc/>
     public void TrackSessionStart(string? userId, string? deviceType = null, string? appVersion = null)
     {
         var properties = CreateBaseProperties(userId);
@@ -148,6 +155,7 @@ public class UserJourneyAnalytics : IUserJourneyAnalytics
         _logger.LogInformation("Session started for user {UserId} on {DeviceType}", userId ?? "anonymous", deviceType ?? "unknown");
     }
 
+    /// <inheritdoc/>
     public void TrackLogin(string? userId, string loginMethod, bool isNewUser = false)
     {
         var properties = CreateBaseProperties(userId);
@@ -165,6 +173,7 @@ public class UserJourneyAnalytics : IUserJourneyAnalytics
         _logger.LogInformation("User {UserId} logged in via {Method} (new: {IsNew})", userId, loginMethod, isNewUser);
     }
 
+    /// <inheritdoc/>
     public void TrackProfileView(string? userId, bool isOwnProfile = true)
     {
         var properties = CreateBaseProperties(userId);
@@ -175,6 +184,7 @@ public class UserJourneyAnalytics : IUserJourneyAnalytics
         _logger.LogDebug("User {UserId} viewed profile (own: {IsOwn})", userId, isOwnProfile);
     }
 
+    /// <inheritdoc/>
     public void TrackScenarioStart(string? userId, string scenarioId, string? scenarioName = null)
     {
         var properties = CreateBaseProperties(userId);
@@ -188,6 +198,7 @@ public class UserJourneyAnalytics : IUserJourneyAnalytics
         _logger.LogInformation("User {UserId} started scenario {ScenarioId}", userId, scenarioId);
     }
 
+    /// <inheritdoc/>
     public void TrackScenarioComplete(string? userId, string scenarioId, TimeSpan duration, int? score = null)
     {
         var properties = CreateBaseProperties(userId);
@@ -204,6 +215,7 @@ public class UserJourneyAnalytics : IUserJourneyAnalytics
             userId, scenarioId, duration.TotalSeconds);
     }
 
+    /// <inheritdoc/>
     public void TrackScenarioAbandon(string? userId, string scenarioId, TimeSpan timeSpent, string? abandonReason = null)
     {
         var properties = CreateBaseProperties(userId);
@@ -219,6 +231,7 @@ public class UserJourneyAnalytics : IUserJourneyAnalytics
             userId, scenarioId, timeSpent.TotalSeconds, abandonReason ?? "unknown");
     }
 
+    /// <inheritdoc/>
     public void TrackContentInteraction(string? userId, string contentId, string interactionType)
     {
         var properties = CreateBaseProperties(userId);
@@ -233,6 +246,7 @@ public class UserJourneyAnalytics : IUserJourneyAnalytics
         _logger.LogDebug("User {UserId} {Interaction} content {ContentId}", userId, interactionType, contentId);
     }
 
+    /// <inheritdoc/>
     public void TrackNavigation(string? userId, string fromPage, string toPage)
     {
         var properties = CreateBaseProperties(userId);
@@ -244,6 +258,7 @@ public class UserJourneyAnalytics : IUserJourneyAnalytics
         _logger.LogDebug("User {UserId} navigated from {From} to {To}", userId, fromPage, toPage);
     }
 
+    /// <inheritdoc/>
     public void TrackFeatureUsage(string? userId, string featureName, IDictionary<string, string>? properties = null)
     {
         var eventProperties = CreateBaseProperties(userId);
@@ -265,6 +280,7 @@ public class UserJourneyAnalytics : IUserJourneyAnalytics
         _logger.LogDebug("User {UserId} used feature {Feature}", userId, featureName);
     }
 
+    /// <inheritdoc/>
     public void TrackFlowComplete(string? userId, string flowName, TimeSpan duration, bool success)
     {
         var properties = CreateBaseProperties(userId);
@@ -282,6 +298,7 @@ public class UserJourneyAnalytics : IUserJourneyAnalytics
             userId, success ? "completed" : "failed", flowName, duration.TotalSeconds);
     }
 
+    /// <inheritdoc/>
     public void TrackMilestone(string? userId, string milestoneName, IDictionary<string, string>? properties = null)
     {
         var eventProperties = CreateBaseProperties(userId);
