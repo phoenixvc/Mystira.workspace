@@ -2,11 +2,21 @@
 # Deploy Anthropic Claude models via Azure ML Serverless Endpoints
 # This script deploys Claude models from the Azure AI Model Catalog
 #
+# Implements: ADR-0020 AI Model Selection Strategy (Claude Models)
+# Updated: December 2025
+#
+# Claude 4.5 Models (all support hybrid reasoning: Auto/Fast/Thinking modes):
+#   - claude-haiku-4-5:  Fast, $1/$5 per 1M tokens (200K context)
+#   - claude-sonnet-4-5: Balanced, $3/$15 per 1M tokens (1M context!)
+#   - claude-opus-4-5:   Premium, $15/$75 per 1M tokens (Nov 2025, 200K context)
+#
+# Note: Claude 3 Opus is deprecated (Jun 2025) and retiring Jan 2026
+#
 # Prerequisites:
 #   - Azure CLI installed and logged in
 #   - Azure ML extension installed: az extension add -n ml
 #   - Marketplace terms accepted for Anthropic models
-#   - Sufficient quota in the target region
+#   - Sufficient quota in the target region (UK South recommended)
 #
 # Usage:
 #   ./deploy-claude-models.sh [environment]
@@ -23,16 +33,24 @@ set -e
 # =============================================================================
 
 ENVIRONMENT="${1:-dev}"
-LOCATION="${AZURE_LOCATION:-uksouth}"  # Claude only available in specific regions
+LOCATION="${AZURE_LOCATION:-uksouth}"  # Claude only available in UK South, East US 2, Sweden Central
 RESOURCE_GROUP="${AZURE_RESOURCE_GROUP:-mys-${ENVIRONMENT}-core-rg-san}"
 AI_SERVICES_NAME="${AZURE_AI_SERVICES_NAME:-mys-shared-ai-san}"
 
-# Claude models to deploy
+# Claude 4.5 models to deploy (per ADR-0020)
+# Model versions from Azure AI Model Catalog as of December 2025
 declare -A CLAUDE_MODELS=(
-  ["claude-haiku-4-5"]="Anthropic-claude-3-5-haiku"
-  ["claude-sonnet-4-5"]="Anthropic-claude-sonnet-4-5"
-  ["claude-opus-4-5"]="Anthropic-claude-opus-4-5"
+  ["claude-haiku-4-5"]="Anthropic-claude-3-5-haiku"       # Version: 20241022
+  ["claude-sonnet-4-5"]="Anthropic-claude-sonnet-4-5"    # Version: 20250514
+  ["claude-opus-4-5"]="Anthropic-claude-opus-4-5"        # Version: 20251124
 )
+
+# Model versions for reference (used in Terraform, not needed here)
+# declare -A CLAUDE_VERSIONS=(
+#   ["claude-haiku-4-5"]="20241022"
+#   ["claude-sonnet-4-5"]="20250514"
+#   ["claude-opus-4-5"]="20251124"
+# )
 
 # =============================================================================
 # Helper Functions

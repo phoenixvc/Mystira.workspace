@@ -1,9 +1,10 @@
 # ADR-0020: AI Model Selection Strategy
 
 **Status**: Accepted
-**Date**: 2024-12-24
+**Date**: 2025-12-27 (Updated)
 **Decision Makers**: Platform Team, AI/ML Team
 **Supersedes**: None
+**Last Review**: December 2025
 
 ## Context
 
@@ -35,30 +36,38 @@ Mystira will deploy models from multiple providers to optimize for:
 |-------|----------|----------|--------|-----|----------|
 | gpt-4o | OpenAI | Flagship | SAN | GlobalStandard | General content generation |
 | gpt-4o-mini | OpenAI | Cost-optimized | SAN | GlobalStandard | Chat, high-volume tasks |
-| gpt-4.1 | OpenAI | Reasoning | SAN | GlobalStandard | Structured data extraction |
-| gpt-4.1-mini | OpenAI | Reasoning | SAN | GlobalStandard | Lightweight reasoning |
-| gpt-4.1-nano | OpenAI | Reasoning | SAN | GlobalStandard | Classification, routing |
+| gpt-4.1 | OpenAI | Reasoning | SAN | GlobalStandard | Structured data extraction (1M context) |
+| gpt-4.1-mini | OpenAI | Reasoning | SAN | GlobalStandard | Lightweight reasoning (1M context) |
+| gpt-4.1-nano | OpenAI | Reasoning | SAN | GlobalStandard | Classification, routing (1M context) |
 | gpt-5-nano | OpenAI | Next-gen | SAN | GlobalStandard | Advanced reasoning (cost-effective) |
 | gpt-5.1 | OpenAI | Next-gen | SAN | GlobalStandard | Complex multi-step tasks |
 | gpt-5.1-codex | OpenAI | Code | SAN | GlobalStandard | Code generation/review |
+| gpt-5.2 | OpenAI | Latest | SAN | GlobalStandard | Smartest model (400K context) |
+| o3 | OpenAI | Reasoning | SAN | GlobalStandard | Advanced chain-of-thought |
 | o3-mini | OpenAI | Reasoning | SAN | GlobalStandard | Chain-of-thought analysis |
+| o4-mini | OpenAI | Reasoning | SAN | GlobalStandard | Fast reasoning |
 | text-embedding-3-large | OpenAI | Embedding | SAN | GlobalStandard | Production RAG |
 | text-embedding-3-small | OpenAI | Embedding | SAN | GlobalStandard | Draft/test embeddings |
 | dall-e-3 | OpenAI | Image | SAN | Standard | Story illustrations |
+| gpt-image-1 | OpenAI | Image | SAN | Standard | Advanced image generation |
 | whisper | OpenAI | Audio | SAN | Standard | Speech-to-text |
 | tts | OpenAI | Audio | SAN | Standard | Text-to-speech |
 | tts-hd | OpenAI | Audio | SAN | Standard | High-quality TTS |
-| claude-haiku-4-5 | Anthropic | Fast | UK South | Serverless | High-volume analysis |
-| claude-sonnet-4-5 | Anthropic | Balanced | UK South | Serverless | Deep analysis, code review |
-| claude-opus-4-5 | Anthropic | Premium | UK South | Serverless | Complex research |
+| claude-haiku-4-5 | Anthropic | Fast | UK South | Serverless | High-volume analysis ($1/$5 per 1M) |
+| claude-sonnet-4-5 | Anthropic | Balanced | UK South | Serverless | Deep analysis, code review (1M context) |
+| claude-opus-4-5 | Anthropic | Premium | UK South | Serverless | Complex research ($15/$75 per 1M) |
 | cohere-rerank-v3 | Cohere | RAG | UK South | Serverless | Search reranking |
 | cohere-embed-multilingual | Cohere | Embedding | UK South | Serverless | Multilingual RAG |
-| codestral-2501 | Mistral | Code | UK South | Serverless | Code generation |
+| codestral-2501 | Mistral | Code | UK South | Serverless | Code generation (256K context) |
+| deepseek-v3.1 | DeepSeek | Reasoning | UK South | Serverless | Advanced reasoning |
+| deepseek-r1 | DeepSeek | Reasoning | UK South | Serverless | Chain-of-thought reasoning |
 | deepseek-coder-v2 | DeepSeek | Code | UK South | Serverless | Cost-effective code |
 | jamba-1.5-large | AI21 | Long Context | UK South | Serverless | 256K context |
 | jamba-1.5-mini | AI21 | Long Context | UK South | Serverless | Efficient long context |
+| grok-3 | xAI | Reasoning | UK South | Serverless | Alternative reasoning |
+| llama-4-maverick | Meta | Next-gen | UK South | Serverless | Latest Llama model |
 
-**Total: 24 models deployed**
+**Total: 32 models deployed**
 
 See [ADR-0021](./ADR-0021-specialized-edge-case-models.md) for additional specialized model considerations.
 
@@ -75,19 +84,28 @@ See [ADR-0021](./ADR-0021-specialized-edge-case-models.md) for additional specia
 | gpt-4-turbo | Yes | No | Not needed | Superseded by gpt-4o |
 | gpt-4 | Yes | No | Not needed | Legacy, use gpt-4o |
 | gpt-3.5-turbo | Yes | No | Not needed | Legacy, use gpt-4o-mini |
-| gpt-4.1 | Yes | Yes | Deployed | Enhanced reasoning |
-| gpt-4.1-mini | Yes | Yes | Deployed | Lightweight reasoning |
-| gpt-4.1-nano | Yes | Yes | Deployed | Ultra-lightweight |
+| gpt-4.1 | Yes | Yes | Deployed | Enhanced reasoning, 1M context |
+| gpt-4.1-mini | Yes | Yes | Deployed | Lightweight reasoning, 1M context |
+| gpt-4.1-nano | Yes | Yes | Deployed | Ultra-lightweight, 1M context |
 | gpt-5-nano | Yes | Yes | Deployed | Next-gen efficient |
 | gpt-5.1 | Yes | Yes | Deployed | Next-gen flagship |
 | gpt-5.1-codex | Yes | Yes | Deployed | Code specialized |
-| o1-preview | Yes | No | Not needed | Superseded by o3-mini |
+| gpt-5.2 | Yes | Yes | Deployed | Latest (Dec 2025), 400K context |
+| gpt-5.2-chat | Yes | No | Consider | Optimized for chat, 400K context |
+| gpt-5-codex-mini | Yes | No | Consider | Cost-effective code (4x cheaper) |
+| o1-preview | Yes | No | Not needed | Superseded by o3 |
 | o1-mini | Yes | No | Not needed | Superseded by o3-mini |
+| o3 | Yes | Yes | Deployed | Advanced reasoning |
 | o3-mini | Yes | Yes | Deployed | Latest reasoning |
+| o4-mini | Yes | Yes | Deployed | Fast reasoning |
 | dall-e-3 | Yes | Yes | Deployed | Image generation |
+| gpt-image-1 | Yes | Yes | Deployed | Advanced image gen |
+| sora | Yes | No | Consider | Video generation |
+| sora-2 | Yes | No | Consider | Latest video gen |
 | whisper | Yes | Yes | Deployed | Speech-to-text |
 | tts | Yes | Yes | Deployed | Text-to-speech |
 | tts-hd | Yes | Yes | Deployed | High-quality TTS |
+| gpt-4o-realtime-preview | Yes | No | Consider | Real-time audio |
 | text-embedding-3-large | Yes | Yes | Deployed | Production embeddings |
 | text-embedding-3-small | Yes | Yes | Deployed | Efficient embeddings |
 | text-embedding-ada-002 | Yes | No | Not needed | Legacy, use v3 |
@@ -96,16 +114,21 @@ See [ADR-0021](./ADR-0021-specialized-edge-case-models.md) for additional specia
 
 | Model | Available | Configured | Status | Notes |
 |-------|-----------|------------|--------|-------|
-| claude-3-5-haiku | Yes | Yes | Deployed | Fast, cost-effective |
+| claude-haiku-4-5 | Yes | Yes | Deployed | Fast ($1/$5 per 1M), hybrid reasoning |
+| claude-sonnet-4-5 | Yes | Yes | Deployed | Balanced ($3/$15 per 1M), 1M context |
+| claude-opus-4-5 | Yes | Yes | Deployed | Premium ($15/$75 per 1M), Nov 2025 |
+| claude-3-5-haiku | Yes | No | Superseded | Use claude-haiku-4-5 |
 | claude-3-5-sonnet | Yes | No | Superseded | Use claude-sonnet-4-5 |
-| claude-sonnet-4-5 | Yes | Yes | Deployed | Latest balanced |
-| claude-opus-4-5 | Yes | Yes | Deployed | Maximum capability |
-| claude-3-opus | Yes | No | Superseded | Use claude-opus-4-5 |
+| claude-3-opus | Yes | No | Retiring | Deprecated Jun 2025, retiring Jan 2026 |
+| claude-3-sonnet | No | No | Retired | Retired Jul 2025 |
+
+**Note**: All Claude 4.5 models support hybrid reasoning with "Auto", "Fast", and "Thinking" modes.
 
 ### Available Meta Llama Models
 
 | Model | Available | Configured | Status | Notes |
 |-------|-----------|------------|--------|-------|
+| Llama-4-Maverick-17B-128E-Instruct | Yes | Yes | Deployed | Latest Llama 4, MoE architecture |
 | Llama-3.3-70B-Instruct | Yes | No | **Consider** | Open-source, no licensing |
 | Llama-3.2-90B-Vision | Yes | No | **Consider** | Vision + text |
 | Llama-3.2-11B-Vision | Yes | No | **Consider** | Efficient vision |
@@ -137,9 +160,23 @@ See [ADR-0021](./ADR-0021-specialized-edge-case-models.md) for additional specia
 
 | Model | Available | Configured | Status | Notes |
 |-------|-----------|------------|--------|-------|
-| DeepSeek-V3 | Yes | No | **Consider** | Strong reasoning |
-| DeepSeek-Coder-V2 | Yes | No | **Consider** | Code specialized |
-| DeepSeek-R1-Distill | Yes | No | **Consider** | Reasoning distilled |
+| DeepSeek-V3.1 | Yes | Yes | Deployed | Latest V3, strong reasoning |
+| DeepSeek-V3-0324 | Yes | No | Consider | March 2024 version |
+| DeepSeek-R1 | Yes | Yes | Deployed | Chain-of-thought reasoning |
+| DeepSeek-R1-0528 | Yes | No | Consider | May 2025 version |
+| DeepSeek-Coder-V2 | Yes | Yes | Deployed | Code specialized |
+| DeepSeek-R1-Distill | Yes | No | Consider | Reasoning distilled |
+
+### Available xAI Grok Models
+
+| Model | Available | Configured | Status | Notes |
+|-------|-----------|------------|--------|-------|
+| grok-4 | Yes | No | **Consider** | Latest flagship |
+| grok-4-fast-reasoning | Yes | No | **Consider** | Fast reasoning mode |
+| grok-4-fast-non-reasoning | Yes | No | **Consider** | Fast general mode |
+| grok-3 | Yes | Yes | Deployed | Strong reasoning |
+| grok-3-mini | Yes | No | Consider | Cost-effective |
+| grok-code-fast-1 | Yes | No | **Consider** | Code specialized |
 
 ### Available AI21 Models
 
@@ -217,32 +254,41 @@ See [ADR-0021](./ADR-0021-specialized-edge-case-models.md) for additional specia
 
 ### Current Model Costs (per 1M tokens)
 
-| Model | Input | Output | Monthly Est.* |
-|-------|-------|--------|---------------|
-| gpt-4o | $2.50 | $10.00 | $500 |
-| gpt-4o-mini | $0.15 | $0.60 | $50 |
-| gpt-4.1 | $2.00 | $8.00 | $400 |
-| gpt-4.1-nano | $0.10 | $0.40 | $30 |
-| gpt-5.1 | $5.00 | $15.00 | $800 |
-| gpt-5.1-codex | $5.00 | $15.00 | $400 |
-| text-embedding-3-large | $0.13 | - | $100 |
-| text-embedding-3-small | $0.02 | - | $20 |
-| claude-haiku-4-5 | $0.25 | $1.25 | $100 |
-| claude-sonnet-4-5 | $3.00 | $15.00 | $600 |
-| claude-opus-4-5 | $15.00 | $75.00 | $1,500 |
+| Model | Input | Output | Context | Monthly Est.* |
+|-------|-------|--------|---------|---------------|
+| gpt-4o | $2.50 | $10.00 | 128K | $500 |
+| gpt-4o-mini | $0.15 | $0.60 | 128K | $50 |
+| gpt-4.1 | $2.00 | $8.00 | 1M | $400 |
+| gpt-4.1-nano | $0.10 | $0.40 | 1M | $30 |
+| gpt-5.1 | $5.00 | $15.00 | 200K | $800 |
+| gpt-5.1-codex | $5.00 | $15.00 | 200K | $400 |
+| gpt-5.2 | $7.50 | $22.50 | 400K | $1,000 |
+| o3-mini | $1.10 | $4.40 | 200K | $200 |
+| o3 | $10.00 | $40.00 | 200K | $800 |
+| o4-mini | $1.10 | $4.40 | 128K | $200 |
+| text-embedding-3-large | $0.13 | - | 8K | $100 |
+| text-embedding-3-small | $0.02 | - | 8K | $20 |
+| claude-haiku-4-5 | $1.00 | $5.00 | 200K | $150 |
+| claude-sonnet-4-5 | $3.00 | $15.00 | 1M | $600 |
+| claude-opus-4-5 | $15.00 | $75.00 | 200K | $1,500 |
+| deepseek-v3.1 | $0.27 | $1.10 | 64K | $50 |
+| deepseek-r1 | $0.55 | $2.19 | 64K | $80 |
+| grok-3 | $3.00 | $15.00 | 131K | $600 |
 
 *Estimated based on moderate usage
 
-### Gap Model Costs
+### Media Model Costs
 
-| Model | Input | Output | Priority |
-|-------|-------|--------|----------|
-| o1-mini | $3.00 | $12.00 | High |
-| o3-mini | $1.10 | $4.40 | High |
-| dall-e-3 | $0.04/image (1024x1024) | - | High |
-| whisper | $0.006/minute | - | Medium |
-| tts | $15.00/1M chars | - | Medium |
-| Cohere Rerank | $2.00/1K queries | - | Medium |
+| Model | Pricing | Notes |
+|-------|---------|-------|
+| dall-e-3 | $0.04/image (1024x1024) | Standard quality |
+| gpt-image-1 | $0.08/image | Advanced features |
+| whisper | $0.006/minute | Speech-to-text |
+| tts | $15.00/1M chars | Standard TTS |
+| tts-hd | $30.00/1M chars | High-quality TTS |
+| sora | $0.05/sec (720p) | Video generation |
+| sora-2 | $0.10/sec (1080p) | HD video generation |
+| Cohere Rerank | $2.00/1K queries | Search reranking |
 
 ---
 
@@ -309,60 +355,97 @@ Azure AI Services pricing is generally **consistent globally** for the same SKU 
 
 ## Recommended Model Additions
 
-### Phase 1: Critical (Immediate)
+### Phase 1: Latest Models (Immediate) ✅ Complete
 
 ```hcl
-# Add to variables.tf model_deployments
-
-# Reasoning models for complex analysis
-"o3-mini" = {
-  model_name    = "o3-mini"
-  model_version = "2025-01-31"
+# GPT-5.2 - Latest and smartest OpenAI model
+"gpt-5.2" = {
+  model_name    = "gpt-5.2"
+  model_version = "2025-12-11"
   model_format  = "OpenAI"
   sku_name      = "GlobalStandard"
   capacity      = 10
 }
 
-# Image generation for story illustrations
-"dall-e-3" = {
-  model_name    = "dall-e-3"
-  model_version = "3.0"
+# o3 - Advanced reasoning model
+"o3" = {
+  model_name    = "o3"
+  model_version = "2025-04-16"
   model_format  = "OpenAI"
-  sku_name      = "Standard"
-  capacity      = 1
+  sku_name      = "GlobalStandard"
+  capacity      = 10
+}
+
+# o4-mini - Fast reasoning
+"o4-mini" = {
+  model_name    = "o4-mini"
+  model_version = "2025-04-16"
+  model_format  = "OpenAI"
+  sku_name      = "GlobalStandard"
+  capacity      = 10
 }
 ```
 
-### Phase 2: Accessibility (Next Sprint)
+### Phase 2: New Providers (Current Sprint)
 
 ```hcl
-# Speech-to-text for voice input
-"whisper" = {
-  model_name    = "whisper"
-  model_version = "001"
-  model_format  = "OpenAI"
-  sku_name      = "Standard"
-  capacity      = 1
-}
-
-# Text-to-speech for audio narration
-"tts" = {
-  model_name    = "tts"
-  model_version = "001"
-  model_format  = "OpenAI"
-  sku_name      = "Standard"
-  capacity      = 1
-}
-```
-
-### Phase 3: RAG Enhancement (Future)
-
-```hcl
-# Cohere Rerank for improved search quality
-"cohere-rerank-v3" = {
-  model_name    = "rerank-v3.5"
+# xAI Grok-3 for alternative reasoning
+"grok-3" = {
+  model_name    = "grok-3"
   model_version = "1"
-  model_format  = "Cohere"
+  model_format  = "xAI"
+  sku_name      = "GlobalStandard"
+  capacity      = 1
+  location      = "uksouth"
+}
+
+# DeepSeek R1 for chain-of-thought
+"deepseek-r1" = {
+  model_name    = "DeepSeek-R1"
+  model_version = "1"
+  model_format  = "DeepSeek"
+  sku_name      = "GlobalStandard"
+  capacity      = 1
+  location      = "uksouth"
+}
+
+# Llama 4 Maverick
+"llama-4-maverick" = {
+  model_name    = "Llama-4-Maverick-17B-128E-Instruct-FP8"
+  model_version = "1"
+  model_format  = "Meta"
+  sku_name      = "GlobalStandard"
+  capacity      = 1
+  location      = "uksouth"
+}
+```
+
+### Phase 3: Video & Advanced Media (Future)
+
+```hcl
+# Sora video generation
+"sora" = {
+  model_name    = "sora"
+  model_version = "1"
+  model_format  = "OpenAI"
+  sku_name      = "Standard"
+  capacity      = 1
+}
+
+# Sora-2 HD video
+"sora-2" = {
+  model_name    = "sora-2"
+  model_version = "1"
+  model_format  = "OpenAI"
+  sku_name      = "Standard"
+  capacity      = 1
+}
+
+# Real-time audio
+"gpt-4o-realtime-preview" = {
+  model_name    = "gpt-4o-realtime-preview"
+  model_version = "2024-12-17"
+  model_format  = "OpenAI"
   sku_name      = "GlobalStandard"
   capacity      = 1
 }
@@ -382,12 +465,18 @@ def select_model(request: Request) -> str:
     complexity = request.complexity
     volume = request.volume_tier
 
+    # Critical/Premium tasks → Latest models
+    if complexity == "critical":
+        return "gpt-5.2"  # Latest and smartest
+
     # Reasoning tasks → o-series or Claude
     if task in ["analysis", "reasoning", "planning"]:
         if complexity == "extreme":
             return "claude-opus-4-5"
         elif complexity == "high":
-            return "o3-mini"
+            return "o3"  # Advanced reasoning
+        elif volume == "high":
+            return "o4-mini"  # Fast reasoning
         else:
             return "claude-sonnet-4-5"
 
@@ -398,9 +487,15 @@ def select_model(request: Request) -> str:
         else:
             return "gpt-5.1-codex"
 
-    # Creative writing → GPT-4o or Claude
+    # Creative writing → GPT-4o or Claude (hybrid reasoning)
     if task in ["story", "creative", "narrative"]:
         return "gpt-4o" if volume == "high" else "claude-sonnet-4-5"
+
+    # Long context tasks (>200K tokens) → 1M context models
+    if request.context_length > 200000:
+        return "claude-sonnet-4-5"  # 1M context
+    elif request.context_length > 128000:
+        return "gpt-5.2"  # 400K context
 
     # High-volume tasks → Mini/Nano models
     if volume == "high":
@@ -414,9 +509,12 @@ def select_model(request: Request) -> str:
 
 ```
 Primary → Secondary → Tertiary
+gpt-5.2 → gpt-5.1 → gpt-4o
 gpt-4o → claude-sonnet-4-5 → gpt-4o-mini
-gpt-5.1-codex → claude-sonnet-4-5 → gpt-4.1
-claude-opus-4-5 → o3-mini → claude-sonnet-4-5
+gpt-5.1-codex → claude-sonnet-4-5 → codestral-2501
+claude-opus-4-5 → o3 → claude-sonnet-4-5
+o3 → o3-mini → claude-sonnet-4-5
+deepseek-r1 → o3-mini → gpt-4.1
 ```
 
 ---
@@ -425,41 +523,52 @@ claude-opus-4-5 → o3-mini → claude-sonnet-4-5
 
 ### Positive
 
-- **Comprehensive coverage**: 13+ models for all use cases
-- **Cost optimization**: Tier-based model selection
-- **Quality options**: Premium models for critical tasks
-- **Fallback resilience**: Multi-provider strategy
-- **Future-ready**: Easy to add new models
+- **Comprehensive coverage**: 32 models for all use cases
+- **Cost optimization**: Tier-based model selection with budget options
+- **Quality options**: Premium models (GPT-5.2, Claude Opus 4.5) for critical tasks
+- **Fallback resilience**: Multi-provider strategy (OpenAI, Anthropic, Meta, xAI, DeepSeek)
+- **Future-ready**: Easy to add new models, video generation ready
+- **Long context**: Up to 1M tokens (Claude Sonnet 4.5, GPT-4.1 series)
+- **Hybrid reasoning**: Claude 4.5 models support Auto/Fast/Thinking modes
 
 ### Negative
 
-- **Complexity**: Multiple models to manage
-- **Cost monitoring**: Need to track per-model usage
-- **Regional split**: Some models only in UK South
+- **Complexity**: 32 models to manage and monitor
+- **Cost monitoring**: Need to track per-model usage across providers
+- **Regional split**: Some models only available in UK South
+- **Provider diversity**: Different APIs and behaviors across providers
 
 ### Risks
 
-- **Model deprecation**: OpenAI may retire models
-- **Quota limits**: May need to request increases
-- **Pricing changes**: Costs may increase
+- **Model deprecation**: Claude 3 Opus retiring Jan 2026, legacy models being phased out
+- **Quota limits**: May need to request increases for new models
+- **Pricing changes**: Costs may change, especially for new models
+- **Provider stability**: Newer providers (xAI, DeepSeek) may have API changes
 
 ---
 
 ## Action Items
 
 - [x] Configure OpenAI GPT models (gpt-4o, gpt-4o-mini, gpt-4.1/5.x)
+- [x] Configure GPT-5.2 (latest December 2025 model)
+- [x] Configure o-series reasoning models (o3, o3-mini, o4-mini)
 - [x] Configure embedding models (text-embedding-3-large/small)
-- [x] Configure Anthropic Claude models (haiku, sonnet, opus)
+- [x] Configure Anthropic Claude 4.5 models (haiku, sonnet, opus)
 - [x] Add Claude deployment script for automation
-- [x] Add o3-mini for reasoning tasks
-- [x] Add dall-e-3 for image generation
+- [x] Add dall-e-3 and gpt-image-1 for image generation
 - [x] Add whisper for speech-to-text
 - [x] Add tts/tts-hd for text-to-speech
 - [x] Add Cohere Rerank for RAG improvement (see ADR-0021)
-- [x] Add specialized models (Codestral, DeepSeek-Coder, Jamba) - see ADR-0021
+- [x] Add specialized models (Codestral, DeepSeek, Jamba) - see ADR-0021
+- [x] Add xAI Grok-3 for alternative reasoning
+- [x] Add Meta Llama 4 Maverick
+- [x] Add DeepSeek V3.1 and R1 for cost-effective reasoning
 - [x] Implement model routing logic (see azure-ai-foundry-rag-guide.md#model-router)
 - [x] Document model selection in developer guide
 - [ ] Set up cost monitoring per model
+- [ ] Evaluate Sora/Sora-2 for video generation
+- [ ] Evaluate gpt-4o-realtime-preview for real-time audio
+- [ ] Migrate away from Claude 3 Opus before Jan 2026 retirement
 
 ---
 

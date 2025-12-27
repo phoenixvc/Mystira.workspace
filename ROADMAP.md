@@ -59,7 +59,7 @@ This is the single source of truth for all Mystira platform development. We go l
 | ADR-0017 Resource Groups | ✅ Done | 3-tier organization |
 | Workload Identity | ✅ Done | Managed identity for all services |
 | Microsoft Entra External ID | ✅ Done | Terraform modules (replacing B2C) |
-| Azure AI Foundry | ✅ Done | gpt-4o and gpt-4o-mini integrated |
+| Azure AI Foundry | ✅ Done | 32 models deployed (see [ADR-0020](./docs/adr/ADR-0020-ai-model-selection-strategy.md)) |
 | API Domain Pattern | ✅ Done | `{env}.{service}.mystira.app` |
 | Distributed CI Model | ✅ Done | Component repos handle dev CI |
 | Azure Service Bus | ✅ Done | Terraform module in all environments |
@@ -181,7 +181,8 @@ The `PolyglotRepository` in Mystira.Shared routes to appropriate database based 
 | ADR-0015 | ✅ Implemented | Event-Driven Architecture (Wolverine) |
 | ADR-0017 | ✅ Implemented | Resource Group Organization |
 | ADR-0019 | ✅ Implemented | Dockerfile Location Standardization |
-| ADR-0020 | ✅ Implemented | Package Consolidation |
+| ADR-0020 | ✅ Implemented | AI Model Selection Strategy (32 models) |
+| ADR-0021 | ✅ Implemented | Specialized & Edge Case Models |
 
 ---
 

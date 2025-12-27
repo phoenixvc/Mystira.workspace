@@ -427,20 +427,35 @@ Choose the right model for your use case based on capability, cost, and latency 
 
 ### Mystira Model Deployment
 
+*Last updated: December 2025 - See [ADR-0020](../adr/ADR-0020-ai-model-selection-strategy.md) for full details*
+
 | Model | Region | SKU | Use Case in Mystira |
 |-------|--------|-----|---------------------|
 | gpt-4o | SAN | GlobalStandard | General content generation |
 | gpt-4o-mini | SAN | GlobalStandard | Chat, high-volume tasks |
-| gpt-4.1 | SAN | GlobalStandard | Structured data extraction |
-| gpt-4.1-nano | SAN | GlobalStandard | Classification, routing |
+| gpt-4.1 | SAN | GlobalStandard | Structured data extraction (1M ctx) |
+| gpt-4.1-nano | SAN | GlobalStandard | Classification, routing (1M ctx) |
 | gpt-5-nano | SAN | GlobalStandard | Advanced reasoning (cost-effective) |
-| gpt-5.1 | UK South | GlobalStandard | Complex analysis (not in SAN) |
-| gpt-5.1-codex | UK South | GlobalStandard | Code generation/review |
+| gpt-5.1 | SAN | GlobalStandard | Complex analysis |
+| gpt-5.1-codex | SAN | GlobalStandard | Code generation/review |
+| gpt-5.2 | SAN | GlobalStandard | Latest model (400K ctx) |
+| o3 | SAN | GlobalStandard | Advanced chain-of-thought |
+| o3-mini | SAN | GlobalStandard | Chain-of-thought analysis |
+| o4-mini | SAN | GlobalStandard | Fast reasoning |
 | text-embedding-3-large | SAN | GlobalStandard | Production RAG embeddings |
 | text-embedding-3-small | SAN | GlobalStandard | Draft/test embeddings |
-| claude-haiku-4-5 | UK South | Standard | High-volume analysis |
-| claude-sonnet-4-5 | UK South | Standard | Deep analysis, code review |
-| claude-opus-4-5 | UK South | Standard | Complex research tasks |
+| dall-e-3 | SAN | Standard | Story illustrations |
+| gpt-image-1 | SAN | Standard | Advanced image generation |
+| whisper | SAN | Standard | Speech-to-text |
+| tts / tts-hd | SAN | Standard | Text-to-speech / HD |
+| claude-haiku-4-5 | UK South | Serverless | High-volume analysis ($1/$5) |
+| claude-sonnet-4-5 | UK South | Serverless | Deep analysis (1M ctx) |
+| claude-opus-4-5 | UK South | Serverless | Complex research tasks |
+| cohere-rerank-v3 | UK South | Serverless | RAG reranking |
+| deepseek-v3.1 | UK South | Serverless | Budget reasoning |
+| deepseek-r1 | UK South | Serverless | Chain-of-thought |
+| grok-3 | UK South | Serverless | Alternative reasoning |
+| llama-4-maverick | UK South | Serverless | Latest open-source |
 
 ---
 
@@ -703,39 +718,63 @@ response = client.chat.completions.create(
 )
 ```
 
-### Claude-Specific Features
+### Claude-Specific Features (Claude 4.5)
 
 | Feature | Claude Advantage |
 |---------|-----------------|
-| **Context Window** | 200K tokens (vs 128K for GPT-4) |
+| **Context Window** | 1M tokens (Sonnet 4.5) vs 400K for GPT-5.2 |
+| **Hybrid Reasoning** | Auto/Fast/Thinking modes for flexible reasoning |
 | **Constitutional AI** | Built-in safety guardrails |
 | **Artifacts** | Can generate interactive components |
 | **XML Handling** | Excellent at structured XML output |
 | **Long-form Analysis** | Superior at maintaining coherence |
+| **SWE-bench** | 77.2% (Sonnet 4.5), 73.3% (Haiku 4.5) |
 
-### When to Route to Claude vs GPT
+**Note**: All Claude 4.5 models support hybrid reasoning. Claude 3 Opus is deprecated (Jun 2025) and retiring Jan 2026.
+
+### When to Route to Claude vs GPT vs Others
 
 ```python
-def select_model(task_type: str, complexity: str, volume: str) -> str:
+def select_model(task_type: str, complexity: str, volume: str, context_size: int = 0) -> str:
     """Route requests to optimal model based on task characteristics."""
 
-    # High-volume, simple tasks → GPT-4o-mini
+    # Critical tasks → GPT-5.2 (latest and smartest)
+    if complexity == "critical":
+        return "gpt-5.2"
+
+    # Very long context (>200K tokens) → Claude Sonnet (1M ctx)
+    if context_size > 200000:
+        return "claude-sonnet-4-5"
+
+    # High-volume, simple tasks → GPT-4o-mini or Claude Haiku
     if volume == "high" and complexity == "low":
         return "gpt-4o-mini"
+    if volume == "high" and complexity == "medium":
+        return "claude-haiku-4-5"
+
+    # Chain-of-thought reasoning → o3 or DeepSeek R1
+    if task_type in ["reasoning", "planning", "step_by_step"]:
+        if complexity == "high":
+            return "o3"
+        return "o3-mini"  # or "deepseek-r1" for budget
 
     # Code-related tasks → Claude Sonnet or GPT-5.1-codex
     if task_type in ["code_review", "code_generation", "debugging"]:
         return "claude-sonnet-4-5" if complexity == "high" else "gpt-5.1-codex"
 
     # Complex analysis → Claude
-    if task_type in ["analysis", "research", "reasoning"]:
-        if complexity == "critical":
+    if task_type in ["analysis", "research"]:
+        if complexity == "extreme":
             return "claude-opus-4-5"
         return "claude-sonnet-4-5"
 
-    # Creative writing → Claude Sonnet
+    # Creative writing → Claude Sonnet (hybrid reasoning)
     if task_type in ["creative", "narrative", "storytelling"]:
         return "claude-sonnet-4-5"
+
+    # Budget reasoning → DeepSeek or Grok
+    if task_type in ["budget_analysis", "cost_effective"]:
+        return "deepseek-v3.1"  # or "grok-3"
 
     # Default to GPT-4o for general tasks
     return "gpt-4o"
@@ -745,33 +784,43 @@ def select_model(task_type: str, complexity: str, volume: str) -> str:
 
 ## Model Router & Decision Guide
 
-### Complete Model Inventory (25 Models)
+### Complete Model Inventory (32 Models)
+
+*Last updated: December 2025*
 
 | Model | Provider | Category | Region | Primary Use Case |
 |-------|----------|----------|--------|------------------|
 | gpt-4o | OpenAI | Flagship | SAN | General content generation |
 | gpt-4o-mini | OpenAI | Cost-optimized | SAN | High-volume chat |
-| gpt-4.1 | OpenAI | Reasoning | SAN | Structured extraction |
-| gpt-4.1-mini | OpenAI | Reasoning | SAN | Lightweight reasoning |
-| gpt-4.1-nano | OpenAI | Reasoning | SAN | Classification, routing |
+| gpt-4.1 | OpenAI | Reasoning | SAN | Structured extraction (1M ctx) |
+| gpt-4.1-mini | OpenAI | Reasoning | SAN | Lightweight reasoning (1M ctx) |
+| gpt-4.1-nano | OpenAI | Reasoning | SAN | Classification, routing (1M ctx) |
 | gpt-5-nano | OpenAI | Next-gen | SAN | Advanced reasoning |
 | gpt-5.1 | OpenAI | Next-gen | SAN | Complex multi-step |
 | gpt-5.1-codex | OpenAI | Code | SAN | Code generation |
+| gpt-5.2 | OpenAI | Latest | SAN | Smartest model (400K ctx) |
+| o3 | OpenAI | Reasoning | SAN | Advanced chain-of-thought |
 | o3-mini | OpenAI | Reasoning | SAN | Chain-of-thought |
+| o4-mini | OpenAI | Reasoning | SAN | Fast reasoning |
 | text-embedding-3-large | OpenAI | Embedding | SAN | Production RAG |
 | text-embedding-3-small | OpenAI | Embedding | SAN | Draft embeddings |
 | dall-e-3 | OpenAI | Image | SAN | Story illustrations |
+| gpt-image-1 | OpenAI | Image | SAN | Advanced image gen |
 | whisper | OpenAI | Audio | SAN | Speech-to-text |
 | tts / tts-hd | OpenAI | Audio | SAN | Text-to-speech |
-| claude-haiku-4-5 | Anthropic | Fast | UK South | High-volume analysis |
-| claude-sonnet-4-5 | Anthropic | Balanced | UK South | Deep analysis |
+| claude-haiku-4-5 | Anthropic | Fast | UK South | High-volume ($1/$5 per 1M) |
+| claude-sonnet-4-5 | Anthropic | Balanced | UK South | Deep analysis (1M ctx) |
 | claude-opus-4-5 | Anthropic | Premium | UK South | Complex research |
 | cohere-rerank-v3 | Cohere | RAG | UK South | Search reranking |
 | cohere-embed-multilingual | Cohere | Embedding | UK South | 100+ languages |
 | codestral-2501 | Mistral | Code | UK South | Code (256K context) |
+| deepseek-v3.1 | DeepSeek | Reasoning | UK South | Budget reasoning |
+| deepseek-r1 | DeepSeek | Reasoning | UK South | Chain-of-thought |
 | deepseek-coder-v2 | DeepSeek | Code | UK South | Budget code |
 | jamba-1.5-large | AI21 | Long-context | UK South | 256K context |
 | jamba-1.5-mini | AI21 | Long-context | UK South | Budget long-context |
+| grok-3 | xAI | Reasoning | UK South | Alternative reasoning |
+| llama-4-maverick | Meta | Next-gen | UK South | Latest open-source |
 
 ---
 
@@ -1500,6 +1549,8 @@ def select_model(
 
 ### Quick Reference Card
 
+*Last updated: December 2025*
+
 ```
 ┌─────────────────────────────────────────────────────────────────────────────────────┐
 │                          MODEL QUICK REFERENCE                                       │
@@ -1507,10 +1558,10 @@ def select_model(
 │                                                                                     │
 │  COST TIERS (per 1M tokens):                                                        │
 │  ─────────────────────────────                                                      │
-│  💚 Budget     ($0.10-$0.30)  gpt-4.1-nano, deepseek-coder, jamba-mini             │
-│  💛 Standard   ($0.15-$2.00)  gpt-4o-mini, claude-haiku, gpt-4.1, o3-mini          │
-│  🟠 Premium    ($2.50-$5.00)  gpt-4o, gpt-5.1, claude-sonnet, jamba-large          │
-│  🔴 Maximum    ($15.00+)      claude-opus                                           │
+│  💚 Budget     ($0.10-$0.60)  gpt-4.1-nano, deepseek-v3.1, deepseek-r1, jamba-mini │
+│  💛 Standard   ($0.15-$2.00)  gpt-4o-mini, claude-haiku, gpt-4.1, o3-mini, o4-mini │
+│  🟠 Premium    ($2.50-$7.50)  gpt-4o, gpt-5.1, gpt-5.2, claude-sonnet, grok-3     │
+│  🔴 Maximum    ($15.00+)      claude-opus, o3                                       │
 │                                                                                     │
 │  TASK SHORTCUTS:                                                                    │
 │  ─────────────────────────────                                                      │
@@ -1519,21 +1570,27 @@ def select_model(
 │  Code generation     → gpt-5.1-codex or codestral-2501                             │
 │  Code review         → claude-sonnet-4-5                                           │
 │  Analysis            → claude-sonnet-4-5                                           │
-│  Critical tasks      → claude-opus-4-5                                             │
-│  Reasoning/planning  → o3-mini                                                     │
-│  Creative writing    → claude-sonnet-4-5                                           │
+│  Critical tasks      → gpt-5.2 (latest) or claude-opus-4-5                         │
+│  Reasoning (adv)     → o3                                                          │
+│  Reasoning (fast)    → o3-mini or o4-mini                                          │
+│  Chain-of-thought    → deepseek-r1 (budget) or o3-mini                             │
+│  Creative writing    → claude-sonnet-4-5 (hybrid reasoning)                        │
 │  Classification      → gpt-4.1-nano                                                │
-│  Data extraction     → gpt-4.1                                                     │
+│  Data extraction     → gpt-4.1 (1M context)                                        │
 │  Long docs (256K)    → jamba-1.5-large                                             │
+│  Long docs (1M)      → claude-sonnet-4-5 or gpt-4.1                                │
 │  Multilingual embed  → cohere-embed-multilingual                                   │
 │  Search reranking    → cohere-rerank-v3                                            │
+│  Budget reasoning    → deepseek-v3.1 or grok-3                                     │
 │                                                                                     │
 │  FALLBACK CHAINS:                                                                   │
 │  ─────────────────────────────                                                      │
+│  gpt-5.2        → gpt-5.1 → gpt-4o                                                 │
 │  gpt-4o         → claude-sonnet → gpt-4o-mini                                      │
-│  claude-opus    → claude-sonnet → gpt-5.1                                          │
+│  claude-opus    → o3 → claude-sonnet                                               │
 │  gpt-5.1-codex  → claude-sonnet → codestral → gpt-4.1                             │
-│  o3-mini        → claude-sonnet → gpt-4.1                                          │
+│  o3             → o3-mini → claude-sonnet                                          │
+│  deepseek-r1    → o3-mini → gpt-4.1                                                │
 │                                                                                     │
 └─────────────────────────────────────────────────────────────────────────────────────┘
 ```
