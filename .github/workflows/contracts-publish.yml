@@ -72,40 +72,23 @@ jobs:
       - name: Determine version details
         id: version
         run: |
-          # Check if this is a dev branch push
+          # Always use build.123 format for consistency
+          VERSION_SUFFIX="build.${{ github.run_number }}"
+
+          # Determine other settings based on trigger
           if [ "${{ github.event_name }}" = "push" ] && [ "${{ github.ref }}" = "refs/heads/dev" ]; then
-            # Dev push: generate pre-release version suffix, GitHub Packages only
-            VERSION_SUFFIX="dev.${{ github.run_number }}"
             IS_PRERELEASE="true"
             PUBLISH_TO_NUGET_ORG="false"
             TRIGGER_SOURCE="dev-push"
-            echo "Dev branch push detected - publishing pre-release to GitHub Packages only"
           elif [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            # Manual trigger: user controls everything, but always include build number
-            USER_SUFFIX="${{ github.event.inputs.version_suffix }}"
-            if [ -n "$USER_SUFFIX" ]; then
-              VERSION_SUFFIX="${USER_SUFFIX}.${{ github.run_number }}"
-            else
-              VERSION_SUFFIX="build.${{ github.run_number }}"
-            fi
             IS_PRERELEASE="true"
             PUBLISH_TO_NUGET_ORG="${{ github.event.inputs.publish_to_nuget_org }}"
             TRIGGER_SOURCE="manual"
-            echo "Manual trigger - publishing to $([ "$PUBLISH_TO_NUGET_ORG" = "true" ] && echo "GitHub + NuGet.org" || echo "GitHub Packages only")"
           elif [ "${{ github.event_name }}" = "repository_dispatch" ]; then
-            # repository_dispatch (from Changesets release) - include build number
-            PAYLOAD_SUFFIX="${{ github.event.client_payload.version_suffix }}"
-            if [ -n "$PAYLOAD_SUFFIX" ]; then
-              VERSION_SUFFIX="${PAYLOAD_SUFFIX}.${{ github.run_number }}"
-            else
-              VERSION_SUFFIX="build.${{ github.run_number }}"
-            fi
             IS_PRERELEASE="${{ github.event.client_payload.is_prerelease || 'true' }}"
             PUBLISH_TO_NUGET_ORG="${{ github.event.client_payload.publish_to_nuget_org || 'true' }}"
             TRIGGER_SOURCE="${{ github.event.client_payload.triggered_by || 'changesets' }}"
           else
-            # workflow_call or unknown - always include build number
-            VERSION_SUFFIX="build.${{ github.run_number }}"
             IS_PRERELEASE="true"
             PUBLISH_TO_NUGET_ORG="false"
             TRIGGER_SOURCE="workflow-call"
