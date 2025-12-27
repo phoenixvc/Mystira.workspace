@@ -1,7 +1,7 @@
 # Scheduled Security Scanning Workflow
 # Runs security scans across all components on a schedule and on-demand
 
-name: Security Scan
+name: "Security: Scheduled Scan"
 
 on:
   schedule:

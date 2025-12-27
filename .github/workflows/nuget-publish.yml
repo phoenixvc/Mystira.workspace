@@ -1,4 +1,4 @@
-name: "Packages - Legacy: Submodule NuGet"
+name: "Packages: Legacy NuGet"
 
 # ⚠️ DEPRECATED - This workflow is being phased out
 # Use "Packages - Contracts: Publish NuGet" for the new unified Mystira.Contracts package

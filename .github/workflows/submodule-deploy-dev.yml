@@ -1,4 +1,4 @@
-name: "Submodule: Deploy to Dev"
+name: "Deploy: Dev (K8s)"
 
 # Handler for repository_dispatch events from submodule repositories
 # When a submodule (Admin.Api, Admin.UI, etc.) builds and pushes to ACR,
