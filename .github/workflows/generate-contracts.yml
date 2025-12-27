@@ -246,23 +246,17 @@ jobs:
             git push -u origin "$BRANCH_NAME"
 
             # Create PR
+            PR_BODY="Auto-generated contract updates from OpenAPI specifications.
+
+            This PR was automatically created by the generate-contracts workflow.
+
+            **Changes:**
+            - TypeScript contracts regenerated
+            - C# contracts regenerated"
+
             gh pr create \
               --title "chore(contracts): regenerate from OpenAPI specs" \
-              --body "$(cat <<'EOF'
-## Summary
-Auto-generated contract updates from OpenAPI specifications.
-
-This PR was automatically created by the generate-contracts workflow.
-
-## Changes
-- TypeScript contracts regenerated
-- C# contracts regenerated
-
-## Test Plan
-- [ ] CI passes
-- [ ] Contracts build successfully
-EOF
-)" \
+              --body "$PR_BODY" \
               --base "${{ github.ref_name }}"
 
             echo "PR created successfully"
