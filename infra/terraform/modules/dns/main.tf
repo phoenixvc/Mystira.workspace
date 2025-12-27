@@ -99,6 +99,60 @@ variable "front_door_mystira_app_api_validation_token" {
   sensitive   = true
 }
 
+# Admin Services Front Door Configuration
+variable "front_door_admin_api_endpoint" {
+  description = "Front Door Admin API endpoint hostname (for CNAME)"
+  type        = string
+  default     = ""
+}
+
+variable "front_door_admin_ui_endpoint" {
+  description = "Front Door Admin UI endpoint hostname (for CNAME)"
+  type        = string
+  default     = ""
+}
+
+variable "front_door_admin_api_validation_token" {
+  description = "Front Door Admin API custom domain validation token"
+  type        = string
+  default     = ""
+  sensitive   = true
+}
+
+variable "front_door_admin_ui_validation_token" {
+  description = "Front Door Admin UI custom domain validation token"
+  type        = string
+  default     = ""
+  sensitive   = true
+}
+
+# Story Generator Front Door Configuration
+variable "front_door_story_api_endpoint" {
+  description = "Front Door Story Generator API endpoint hostname (for CNAME)"
+  type        = string
+  default     = ""
+}
+
+variable "front_door_story_swa_endpoint" {
+  description = "Front Door Story Generator SWA endpoint hostname (for CNAME)"
+  type        = string
+  default     = ""
+}
+
+variable "front_door_story_api_validation_token" {
+  description = "Front Door Story Generator API custom domain validation token"
+  type        = string
+  default     = ""
+  sensitive   = true
+}
+
+variable "front_door_story_swa_validation_token" {
+  description = "Front Door Story Generator SWA custom domain validation token"
+  type        = string
+  default     = ""
+  sensitive   = true
+}
+
 variable "tags" {
   description = "Tags to apply to all resources"
   type        = map(string)
@@ -117,7 +171,13 @@ locals {
   chain_subdomain     = var.environment == "prod" ? "chain" : "${var.environment}.chain"
   # Mystira.App subdomains (dev.mystira.app for dev, mystira.app for prod)
   mystira_app_swa_subdomain = var.environment == "prod" ? "@" : var.environment
-  mystira_app_api_subdomain = var.environment == "prod" ? "api" : "api.${var.environment}"
+  mystira_app_api_subdomain = var.environment == "prod" ? "api" : "${var.environment}.api"
+  # Admin subdomains (dev.admin.mystira.app for dev, admin.mystira.app for prod)
+  admin_api_subdomain = var.environment == "prod" ? "admin-api" : "${var.environment}.admin-api"
+  admin_ui_subdomain  = var.environment == "prod" ? "admin" : "${var.environment}.admin"
+  # Story Generator subdomains (dev.story.mystira.app for dev, story.mystira.app for prod)
+  story_api_subdomain = var.environment == "prod" ? "story-api" : "${var.environment}.story-api"
+  story_swa_subdomain = var.environment == "prod" ? "story" : "${var.environment}.story"
 }
 
 # DNS Zone for mystira.app
@@ -280,6 +340,122 @@ resource "azurerm_dns_txt_record" "mystira_app_api_fd_validation" {
   tags = local.common_tags
 }
 
+# =============================================================================
+# Admin Services DNS Records
+# =============================================================================
+
+# CNAME Record for Admin API (when using Front Door)
+resource "azurerm_dns_cname_record" "admin_api_fd" {
+  count               = var.use_front_door && var.front_door_admin_api_endpoint != "" ? 1 : 0
+  name                = local.admin_api_subdomain
+  zone_name           = azurerm_dns_zone.main.name
+  resource_group_name = var.resource_group_name
+  ttl                 = 300
+  record              = var.front_door_admin_api_endpoint
+
+  tags = local.common_tags
+}
+
+# CNAME Record for Admin UI (when using Front Door)
+resource "azurerm_dns_cname_record" "admin_ui_fd" {
+  count               = var.use_front_door && var.front_door_admin_ui_endpoint != "" ? 1 : 0
+  name                = local.admin_ui_subdomain
+  zone_name           = azurerm_dns_zone.main.name
+  resource_group_name = var.resource_group_name
+  ttl                 = 300
+  record              = var.front_door_admin_ui_endpoint
+
+  tags = local.common_tags
+}
+
+# TXT Record for Front Door Admin API domain validation
+resource "azurerm_dns_txt_record" "admin_api_fd_validation" {
+  count               = var.front_door_admin_api_validation_token != "" ? 1 : 0
+  name                = "_dnsauth.${local.admin_api_subdomain}"
+  zone_name           = azurerm_dns_zone.main.name
+  resource_group_name = var.resource_group_name
+  ttl                 = 300
+
+  record {
+    value = var.front_door_admin_api_validation_token
+  }
+
+  tags = local.common_tags
+}
+
+# TXT Record for Front Door Admin UI domain validation
+resource "azurerm_dns_txt_record" "admin_ui_fd_validation" {
+  count               = var.front_door_admin_ui_validation_token != "" ? 1 : 0
+  name                = "_dnsauth.${local.admin_ui_subdomain}"
+  zone_name           = azurerm_dns_zone.main.name
+  resource_group_name = var.resource_group_name
+  ttl                 = 300
+
+  record {
+    value = var.front_door_admin_ui_validation_token
+  }
+
+  tags = local.common_tags
+}
+
+# =============================================================================
+# Story Generator DNS Records
+# =============================================================================
+
+# CNAME Record for Story Generator API (when using Front Door)
+resource "azurerm_dns_cname_record" "story_api_fd" {
+  count               = var.use_front_door && var.front_door_story_api_endpoint != "" ? 1 : 0
+  name                = local.story_api_subdomain
+  zone_name           = azurerm_dns_zone.main.name
+  resource_group_name = var.resource_group_name
+  ttl                 = 300
+  record              = var.front_door_story_api_endpoint
+
+  tags = local.common_tags
+}
+
+# CNAME Record for Story Generator SWA (when using Front Door)
+resource "azurerm_dns_cname_record" "story_swa_fd" {
+  count               = var.use_front_door && var.front_door_story_swa_endpoint != "" ? 1 : 0
+  name                = local.story_swa_subdomain
+  zone_name           = azurerm_dns_zone.main.name
+  resource_group_name = var.resource_group_name
+  ttl                 = 300
+  record              = var.front_door_story_swa_endpoint
+
+  tags = local.common_tags
+}
+
+# TXT Record for Front Door Story Generator API domain validation
+resource "azurerm_dns_txt_record" "story_api_fd_validation" {
+  count               = var.front_door_story_api_validation_token != "" ? 1 : 0
+  name                = "_dnsauth.${local.story_api_subdomain}"
+  zone_name           = azurerm_dns_zone.main.name
+  resource_group_name = var.resource_group_name
+  ttl                 = 300
+
+  record {
+    value = var.front_door_story_api_validation_token
+  }
+
+  tags = local.common_tags
+}
+
+# TXT Record for Front Door Story Generator SWA domain validation
+resource "azurerm_dns_txt_record" "story_swa_fd_validation" {
+  count               = var.front_door_story_swa_validation_token != "" ? 1 : 0
+  name                = "_dnsauth.${local.story_swa_subdomain}"
+  zone_name           = azurerm_dns_zone.main.name
+  resource_group_name = var.resource_group_name
+  ttl                 = 300
+
+  record {
+    value = var.front_door_story_swa_validation_token
+  }
+
+  tags = local.common_tags
+}
+
 output "dns_zone_id" {
   description = "DNS Zone ID"
   value       = azurerm_dns_zone.main.id
@@ -313,4 +489,24 @@ output "mystira_app_swa_fqdn" {
 output "mystira_app_api_fqdn" {
   description = "Fully qualified domain name for Mystira.App API"
   value       = "${local.mystira_app_api_subdomain}.${var.domain_name}"
+}
+
+output "admin_api_fqdn" {
+  description = "Fully qualified domain name for Admin API"
+  value       = "${local.admin_api_subdomain}.${var.domain_name}"
+}
+
+output "admin_ui_fqdn" {
+  description = "Fully qualified domain name for Admin UI"
+  value       = "${local.admin_ui_subdomain}.${var.domain_name}"
+}
+
+output "story_api_fqdn" {
+  description = "Fully qualified domain name for Story Generator API"
+  value       = "${local.story_api_subdomain}.${var.domain_name}"
+}
+
+output "story_swa_fqdn" {
+  description = "Fully qualified domain name for Story Generator SWA"
+  value       = "${local.story_swa_subdomain}.${var.domain_name}"
 }
