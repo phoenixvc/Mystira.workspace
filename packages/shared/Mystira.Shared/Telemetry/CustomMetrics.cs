@@ -104,6 +104,12 @@ public partial class CustomMetrics : ICustomMetrics
     private readonly ILogger<CustomMetrics> _logger;
     private readonly string _environment;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="CustomMetrics"/> class.
+    /// </summary>
+    /// <param name="telemetryClient">The Application Insights telemetry client, or null if not available.</param>
+    /// <param name="logger">The logger instance.</param>
+    /// <param name="environment">The environment name (e.g., Development, Production).</param>
     public CustomMetrics(TelemetryClient? telemetryClient, ILogger<CustomMetrics> logger, string environment)
     {
         _telemetryClient = telemetryClient;
@@ -111,6 +117,7 @@ public partial class CustomMetrics : ICustomMetrics
         _environment = environment ?? "Unknown";
     }
 
+    /// <inheritdoc/>
     public void TrackGameSessionStarted(string scenarioId, string profileId, string? accountId = null)
     {
         var properties = new Dictionary<string, string>
@@ -130,6 +137,7 @@ public partial class CustomMetrics : ICustomMetrics
             scenarioId, profileId);
     }
 
+    /// <inheritdoc/>
     public void TrackGameSessionCompleted(string sessionId, string scenarioId, TimeSpan duration, int choicesMade)
     {
         var properties = new Dictionary<string, string>
@@ -153,6 +161,7 @@ public partial class CustomMetrics : ICustomMetrics
             sessionId, scenarioId, duration, choicesMade);
     }
 
+    /// <inheritdoc/>
     public void TrackUserSignUp(string method)
     {
         var properties = new Dictionary<string, string>
@@ -167,6 +176,7 @@ public partial class CustomMetrics : ICustomMetrics
         _logger.LogInformation("User signed up via {Method}", method);
     }
 
+    /// <inheritdoc/>
     public void TrackUserSignIn(string method, bool success)
     {
         var properties = new Dictionary<string, string>
@@ -189,6 +199,7 @@ public partial class CustomMetrics : ICustomMetrics
         }
     }
 
+    /// <inheritdoc/>
     public void TrackScenarioViewed(string scenarioId, string? profileId = null)
     {
         var properties = new Dictionary<string, string>
@@ -204,6 +215,7 @@ public partial class CustomMetrics : ICustomMetrics
         TrackMetric("Scenarios.Views", 1, properties);
     }
 
+    /// <inheritdoc/>
     public void TrackMediaAccessed(string mediaType, string? contentId = null)
     {
         var properties = new Dictionary<string, string>
@@ -219,6 +231,7 @@ public partial class CustomMetrics : ICustomMetrics
         TrackMetric("Media.Accesses", 1, properties);
     }
 
+    /// <inheritdoc/>
     public void TrackContentPlays(string contentType, string contentId, string? profileId = null)
     {
         var properties = new Dictionary<string, string>
@@ -238,6 +251,7 @@ public partial class CustomMetrics : ICustomMetrics
             contentType, contentId, profileId ?? "anonymous");
     }
 
+    /// <inheritdoc/>
     public void TrackMetric(string name, double value, IDictionary<string, string>? properties = null)
     {
         if (_telemetryClient == null)
@@ -259,6 +273,7 @@ public partial class CustomMetrics : ICustomMetrics
         _telemetryClient.TrackMetric(metric);
     }
 
+    /// <inheritdoc/>
     public void TrackEvent(string name, IDictionary<string, string>? properties = null, IDictionary<string, double>? metrics = null)
     {
         if (_telemetryClient == null)
@@ -288,6 +303,7 @@ public partial class CustomMetrics : ICustomMetrics
         _telemetryClient.TrackEvent(eventTelemetry);
     }
 
+    /// <inheritdoc/>
     public void TrackDependency(string type, string name, string data, DateTimeOffset startTime, TimeSpan duration, bool success)
     {
         if (_telemetryClient == null)
@@ -311,6 +327,7 @@ public partial class CustomMetrics : ICustomMetrics
         _telemetryClient.TrackDependency(dependency);
     }
 
+    /// <inheritdoc/>
     public void TrackException(Exception exception, IDictionary<string, string>? properties = null)
     {
         if (_telemetryClient == null)
@@ -334,6 +351,7 @@ public partial class CustomMetrics : ICustomMetrics
         _telemetryClient.TrackException(exceptionTelemetry);
     }
 
+    /// <inheritdoc/>
     public void TrackDatabaseQuery(string queryName, string? collection, TimeSpan duration, bool success, double? requestUnits = null)
     {
         var properties = new Dictionary<string, string>
@@ -369,6 +387,7 @@ public partial class CustomMetrics : ICustomMetrics
         }
     }
 
+    /// <inheritdoc/>
     public void TrackBlobOperation(string operation, string containerName, long? bytesTransferred, TimeSpan duration, bool success)
     {
         var properties = new Dictionary<string, string>
@@ -403,6 +422,7 @@ public partial class CustomMetrics : ICustomMetrics
         }
     }
 
+    /// <inheritdoc/>
     public void TrackCacheAccess(string cacheKey, bool hit)
     {
         var properties = new Dictionary<string, string>
@@ -417,6 +437,7 @@ public partial class CustomMetrics : ICustomMetrics
         _logger.LogDebug("Cache {Result} for key: {CacheKey}", hit ? "hit" : "miss", cacheKey);
     }
 
+    /// <inheritdoc/>
     public void TrackTokenRefresh(string? userId, bool success, string? failureReason = null)
     {
         var properties = new Dictionary<string, string>
@@ -440,6 +461,7 @@ public partial class CustomMetrics : ICustomMetrics
         }
     }
 
+    /// <inheritdoc/>
     public void TrackDualWriteFailure(string entityType, string operation, string errorMessage, bool compensationEnabled)
     {
         // Sanitize error message to prevent sensitive data leakage
