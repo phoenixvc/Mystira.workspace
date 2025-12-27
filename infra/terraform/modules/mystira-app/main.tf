@@ -528,7 +528,7 @@ resource "azurerm_key_vault_secret" "cosmos_connection_string" {
 
 # Store shared Cosmos DB connection string when using shared resources
 resource "azurerm_key_vault_secret" "shared_cosmos_connection_string" {
-  count = var.skip_cosmos_creation && var.existing_cosmos_connection_string != "" ? 1 : 0
+  count = var.skip_cosmos_creation ? 1 : 0
 
   name         = "cosmos-connection-string"
   value        = var.existing_cosmos_connection_string
@@ -545,7 +545,7 @@ resource "azurerm_key_vault_secret" "storage_connection_string" {
 
 # Store shared Storage connection string when using shared resources
 resource "azurerm_key_vault_secret" "shared_storage_connection_string" {
-  count = var.skip_storage_creation && var.shared_storage_connection_string != "" ? 1 : 0
+  count = var.skip_storage_creation ? 1 : 0
 
   name         = "storage-connection-string"
   value        = var.shared_storage_connection_string
