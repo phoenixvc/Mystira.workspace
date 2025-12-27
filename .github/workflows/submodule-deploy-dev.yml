@@ -24,8 +24,29 @@ on:
       - publisher-deploy
       - chain-deploy
 
+  workflow_dispatch:
+    inputs:
+      service:
+        description: 'Service to deploy'
+        required: true
+        type: choice
+        options:
+          - admin-api-deploy
+          - admin-ui-deploy
+          - story-generator-deploy
+          - publisher-deploy
+          - chain-deploy
+      image_tag:
+        description: 'Image tag to deploy (default: latest from dev)'
+        required: false
+        type: string
+      ref:
+        description: 'Git ref for submodule (default: dev HEAD)'
+        required: false
+        type: string
+
 concurrency:
-  group: submodule-deploy-dev-${{ github.event.action }}
+  group: submodule-deploy-dev-${{ github.event.action || inputs.service }}
   cancel-in-progress: false
 
 env:
@@ -40,7 +61,7 @@ permissions:
 
 jobs:
   deploy:
-    name: Deploy ${{ github.event.action }} to Dev
+    name: Deploy ${{ github.event.action || inputs.service }} to Dev
     runs-on: ubuntu-latest
     environment: dev
     outputs:
@@ -53,21 +74,32 @@ jobs:
           token: ${{ secrets.MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN }}
           fetch-depth: 0
 
-      - name: Log dispatch payload
+      - name: Set action type
+        id: action
+        run: |
+          # Use input for manual trigger, event.action for repository_dispatch
+          ACTION="${{ inputs.service || github.event.action }}"
+          IMAGE_TAG="${{ inputs.image_tag || github.event.client_payload.image_tag }}"
+          echo "type=$ACTION" >> $GITHUB_OUTPUT
+          echo "image_tag=$IMAGE_TAG" >> $GITHUB_OUTPUT
+          echo "Action type: $ACTION"
+          echo "Image tag: $IMAGE_TAG"
+
+      - name: Log deployment info
         run: |
           echo "## Submodule Deployment Triggered" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "| Property | Value |" >> $GITHUB_STEP_SUMMARY
           echo "|----------|-------|" >> $GITHUB_STEP_SUMMARY
-          echo "| Event Type | ${{ github.event.action }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Environment | ${{ github.event.client_payload.environment }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Source Commit | ${{ github.event.client_payload.ref }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Triggered By | ${{ github.event.client_payload.triggered_by }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Image Tag | ${{ github.event.client_payload.image_tag }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Source Run ID | ${{ github.event.client_payload.run_id }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| PR Number | ${{ github.event.client_payload.pr_number }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Trigger | ${{ github.event_name }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Service | ${{ steps.action.outputs.type }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Environment | dev |" >> $GITHUB_STEP_SUMMARY
+          echo "| Source Commit | ${{ inputs.ref || github.event.client_payload.ref || 'dev HEAD' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Triggered By | ${{ github.event.client_payload.triggered_by || github.actor }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Image Tag | ${{ steps.action.outputs.image_tag || 'latest' }} |" >> $GITHUB_STEP_SUMMARY
 
       - name: Validate environment
+        if: github.event_name == 'repository_dispatch'
         run: |
           # Only allow dev deployments via this workflow
           if [ "${{ github.event.client_payload.environment }}" != "dev" ]; then
@@ -93,7 +125,7 @@ jobs:
       - name: Determine deployment target
         id: target
         run: |
-          case "${{ github.event.action }}" in
+          case "${{ steps.action.outputs.type }}" in
             admin-api-deploy)
               echo "deployment=mys-admin-api" >> $GITHUB_OUTPUT
               echo "image=admin-api" >> $GITHUB_OUTPUT
@@ -121,15 +153,16 @@ jobs:
               echo "is_statefulset=true" >> $GITHUB_OUTPUT
               ;;
             *)
-              echo "::error::Unknown event type: ${{ github.event.action }}"
+              echo "::error::Unknown service type: ${{ steps.action.outputs.type }}"
               exit 1
               ;;
           esac
 
       - name: Verify image exists in ACR
+        if: steps.action.outputs.image_tag != ''
         run: |
           IMAGE="${{ steps.target.outputs.image }}"
-          TAG="${{ github.event.client_payload.image_tag }}"
+          TAG="${{ steps.action.outputs.image_tag }}"
 
           echo "Verifying image $IMAGE:$TAG exists in ACR..."
 
@@ -151,7 +184,7 @@ jobs:
         id: deploy
         run: |
           NAMESPACE="mys-${{ env.ENVIRONMENT }}"
-          IMAGE="${{ env.ACR_NAME }}.azurecr.io/${{ steps.target.outputs.image }}:${{ github.event.client_payload.image_tag }}"
+          IMAGE="${{ env.ACR_NAME }}.azurecr.io/${{ steps.target.outputs.image }}:${{ steps.action.outputs.image_tag }}"
 
           echo "Updating ${{ steps.target.outputs.deployment }} to use image: $IMAGE"
 
@@ -219,7 +252,7 @@ jobs:
             mystira.app/deployed-at="$(date -u +"%Y-%m-%dT%H:%M:%SZ")" \
             mystira.app/source-commit="${{ github.event.client_payload.ref }}" \
             mystira.app/source-repo="${{ github.event.client_payload.repository }}" \
-            mystira.app/image-tag="${{ github.event.client_payload.image_tag }}" \
+            mystira.app/image-tag="${{ steps.action.outputs.image_tag }}" \
             mystira.app/workflow-run="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
 
           echo "✓ Deployment annotated with tracking metadata"
@@ -281,7 +314,7 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           if [ "${{ job.status }}" == "success" ]; then
             echo "Deployment successful! Service available at:" >> $GITHUB_STEP_SUMMARY
-            case "${{ github.event.action }}" in
+            case "${{ steps.action.outputs.type }}" in
               admin-api-deploy)
                 echo "- https://dev.admin-api.mystira.app" >> $GITHUB_STEP_SUMMARY
                 ;;
@@ -320,7 +353,7 @@ jobs:
               "activityTitle": "✅ ${{ steps.target.outputs.deployment }} deployed to dev",
               "facts": [
                 {"name": "Service", "value": "${{ steps.target.outputs.deployment }}"},
-                {"name": "Image", "value": "${{ github.event.client_payload.image_tag }}"},
+                {"name": "Image", "value": "${{ steps.action.outputs.image_tag }}"},
                 {"name": "Deployed by", "value": "${{ github.event.client_payload.triggered_by }}"},
                 {"name": "Commit", "value": "${{ github.event.client_payload.ref }}"}
               ],
@@ -347,7 +380,7 @@ jobs:
               "activityTitle": "❌ ${{ steps.target.outputs.deployment }} deployment FAILED",
               "facts": [
                 {"name": "Service", "value": "${{ steps.target.outputs.deployment }}"},
-                {"name": "Image", "value": "${{ github.event.client_payload.image_tag }}"},
+                {"name": "Image", "value": "${{ steps.action.outputs.image_tag }}"},
                 {"name": "Triggered by", "value": "${{ github.event.client_payload.triggered_by }}"},
                 {"name": "Rollback", "value": "Automatic rollback attempted"}
               ],
