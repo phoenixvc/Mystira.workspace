@@ -1,4 +1,4 @@
-name: "Deploy: Prod App API Rollback"
+name: "[Deploy] Prod App API Rollback"
 
 # Manual Rollback Workflow for Mystira App API
 # Purpose: Emergency rollback by swapping slots back

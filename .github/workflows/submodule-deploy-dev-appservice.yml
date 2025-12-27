@@ -1,4 +1,4 @@
-name: "Deploy: Dev (App Service)"
+name: "[Deploy] Dev (App Service)"
 
 # Handler for repository_dispatch events from App Service/SWA submodules
 # - app-deploy: Deploy API to Azure App Service (Mystira.App)

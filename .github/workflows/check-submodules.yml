@@ -1,4 +1,4 @@
-name: "CI: Check Submodules"
+name: "[CI] Check Submodules"
 
 # Submodule Validation: Verifies all submodule commits exist on their remote repositories
 # Purpose: Prevents broken submodule references before merging
