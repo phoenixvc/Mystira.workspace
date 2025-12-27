@@ -105,9 +105,9 @@ module "mystira_app" {
   app_service_sku = "B1"
   dotnet_version  = "9.0"
 
-  # Custom domain (enable after initial deployment)
-  enable_api_custom_domain = false
-  api_custom_domain        = "api.mystira.app"
+  # Custom domain for dev API
+  enable_api_custom_domain = true
+  api_custom_domain        = "dev.api.mystira.app"
 
   # -----------------------------------------------------------------------------
   # Static Web App Configuration (Blazor WASM PWA)
@@ -117,9 +117,9 @@ module "mystira_app" {
   github_repository_url = "https://github.com/phoenixvc/Mystira.App"
   github_branch         = "dev"
 
-  # Custom domain (enable after initial deployment)
-  enable_app_custom_domain = false
-  app_custom_domain        = "app.mystira.app"
+  # Custom domain for dev environment
+  enable_app_custom_domain = true
+  app_custom_domain        = "dev.mystira.app"
 
   # -----------------------------------------------------------------------------
   # Storage Configuration - USE SHARED
