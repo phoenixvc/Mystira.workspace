@@ -273,13 +273,89 @@ terraform output front_door_custom_domain_verification
 
 ## Submodule Changes Required
 
-The following submodules may need service worker or PWA manifest updates to handle offline scenarios gracefully:
+The following submodules need service worker updates to handle offline scenarios gracefully (e.g., `ERR_CERT_COMMON_NAME_INVALID` errors).
 
 ### packages/app (Mystira.App)
 
-The service worker has been updated to show a friendly offline page when network errors occur (including certificate errors). Changes are in:
-- `src/Mystira.App.PWA/wwwroot/service-worker.js`
-- `src/Mystira.App.PWA/wwwroot/service-worker.published.js`
+Add the following changes to improve offline error handling:
+
+**File: `src/Mystira.App.PWA/wwwroot/service-worker.js` and `service-worker.published.js`**
+
+1. Add the `OFFLINE_HTML` constant after `LOG_PREFIX`:
+
+```javascript
+const LOG_PREFIX = '[Mystira ServiceWorker]';
+
+// Offline fallback HTML page
+const OFFLINE_HTML = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mystira - Offline</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #e0e0e0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .container { text-align: center; max-width: 500px; }
+        .icon { font-size: 80px; margin-bottom: 20px; opacity: 0.8; }
+        h1 { font-size: 2rem; margin-bottom: 16px; color: #fff; }
+        p { font-size: 1.1rem; line-height: 1.6; margin-bottom: 24px; opacity: 0.9; }
+        .btn {
+            display: inline-block; padding: 12px 32px; background: #6366f1;
+            color: white; border-radius: 8px; font-weight: 500; border: none;
+            cursor: pointer; font-size: 1rem;
+        }
+        .btn:hover { background: #4f46e5; }
+        .hint { margin-top: 32px; font-size: 0.9rem; opacity: 0.7; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="icon">⚔️</div>
+        <h1>Connection Lost</h1>
+        <p>Unable to connect to Mystira. Please check your internet connection and try again.</p>
+        <button class="btn" onclick="window.location.reload()">Try Again</button>
+        <p class="hint">If this problem persists, the service may be temporarily unavailable.</p>
+    </div>
+</body>
+</html>`;
+```
+
+2. Update the network error catch block to return the offline page for HTML requests:
+
+```javascript
+.catch((error) => {
+    console.warn(`${LOG_PREFIX} Network request failed for`, event.request.url, error);
+    return caches.match(event.request)
+        .then(response => {
+            if (response) {
+                console.log(`${LOG_PREFIX} Serving from cache fallback:`, event.request.url);
+                return response;
+            }
+            // Return a friendly offline page for HTML requests
+            if (isHtmlFile) {
+                return new Response(OFFLINE_HTML, {
+                    status: 503,
+                    statusText: 'Service Unavailable',
+                    headers: {
+                        'Content-Type': 'text/html; charset=utf-8',
+                        'Cache-Control': 'no-cache'
+                    }
+                });
+            }
+            return new Response('Network error', { status: 503 });
+        });
+})
+```
 
 ### Other PWA Submodules
 
