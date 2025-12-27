@@ -893,7 +893,7 @@ resource "azurerm_cdn_frontdoor_route" "mystira_app_swa" {
       content_types_to_compress = [
         "application/javascript",
         "application/json",
-        "application/wasm",
+        "image/svg+xml",
         "text/css",
         "text/html",
         "text/javascript",
