@@ -32,8 +32,8 @@ Before starting any migration, ensure the following packages are published:
 
 | Package | Registry | Version | Status |
 |---------|----------|---------|--------|
-| `Mystira.Shared` | NuGet | 0.2.0+ | ✅ Published |
-| `Mystira.Contracts` | NuGet | 0.2.0+ | ✅ Published |
+| `Mystira.Shared` | NuGet | 0.4.* | ✅ Published |
+| `Mystira.Contracts` | NuGet | 0.4.* | ✅ Published |
 | `@mystira/design-tokens` | NPM | 0.2.0+ | ✅ Published |
 | `@mystira/shared-utils` | NPM | 0.2.0+ | ✅ Published |
 
@@ -84,9 +84,9 @@ Migrate each service independently:
 
 ## Migration Scope by Package
 
-### Mystira.Shared (NuGet) v0.2.0+
+### Mystira.Shared (NuGet) v0.4.*
 
-| Namespace | What It Provides | Services Using | New in v0.2.0 |
+| Namespace | What It Provides | Services Using | New in v0.4.0 |
 |-----------|------------------|----------------|---------------|
 | `Mystira.Shared.Auth` | JWT, Entra External ID authentication | App, Admin | ✅ Entra External ID |
 | `Mystira.Shared.Resilience` | Polly v8 resilience pipelines | App, StoryGen, Admin | ✅ Polly v8 |

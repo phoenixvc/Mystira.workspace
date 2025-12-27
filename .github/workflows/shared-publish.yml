@@ -76,6 +76,8 @@ jobs:
         run: |
           dotnet restore ${{ env.PACKAGE_PATH }}
           dotnet restore packages/shared/Mystira.Shared.Tests
+        env:
+          NUGET_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build
         run: |
@@ -159,6 +161,8 @@ jobs:
 
       - name: Restore dependencies
         run: dotnet restore ${{ env.PACKAGE_PATH }}
+        env:
+          NUGET_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Read version from .csproj
         id: csproj_version
