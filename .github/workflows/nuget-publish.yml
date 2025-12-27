@@ -1,4 +1,4 @@
-name: "Publish: Legacy NuGet"
+name: "[Publish] Legacy NuGet"
 
 # ⚠️ DEPRECATED - This workflow is being phased out
 # Use "Packages - Contracts: Publish NuGet" for the new unified Mystira.Contracts package

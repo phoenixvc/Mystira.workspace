@@ -1,4 +1,4 @@
-name: "Publish: Shared (NuGet)"
+name: "[Publish] Shared (NuGet)"
 
 # Mystira.Shared NuGet package publishing
 # Publishes to GitHub Packages and NuGet.org

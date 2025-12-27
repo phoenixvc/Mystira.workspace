@@ -1,4 +1,4 @@
-name: "Deploy: Production"
+name: "[Deploy] Production"
 
 # Production Environment Deployment: Deploys infrastructure and services to production
 # Security: Requires manual confirmation "DEPLOY TO PRODUCTION"

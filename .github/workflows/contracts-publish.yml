@@ -1,4 +1,4 @@
-name: "Publish: Contracts (NuGet)"
+name: "[Publish] Contracts (NuGet)"
 
 # Unified contracts NuGet package publishing
 # Publishes Mystira.Contracts to GitHub Packages and NuGet.org
