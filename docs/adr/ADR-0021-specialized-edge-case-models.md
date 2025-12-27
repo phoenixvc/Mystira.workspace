@@ -1,21 +1,24 @@
 # ADR-0021: Specialized & Edge Case Models
 
-**Status**: Proposed
-**Date**: 2024-12-24
+**Status**: Accepted
+**Date**: 2025-12-27 (Updated)
 **Decision Makers**: Platform Team, AI/ML Team
 **Related**: [ADR-0020: AI Model Selection Strategy](./ADR-0020-ai-model-selection-strategy.md)
+**Last Review**: December 2025
 
 ## Context
 
-ADR-0020 established Mystira's core model strategy with 18 models covering primary use cases. This ADR addresses specialized models for edge cases, alternative providers, and emerging capabilities not covered by the core deployment.
+ADR-0020 established Mystira's core model strategy with 32 models covering primary use cases. This ADR addresses specialized models for edge cases, alternative providers, and emerging capabilities not covered by the core deployment.
 
 These models are categorized as:
 1. **RAG Enhancement** - Models specifically designed for search and retrieval
 2. **Code Specialization** - Dedicated code models beyond GPT-5.1-codex
-3. **Long Context** - Models for processing documents >128K tokens
+3. **Long Context** - Models for processing documents >128K tokens (up to 1M)
 4. **Vision** - Multimodal models for image understanding
-5. **Open Source** - Provider-agnostic alternatives (Meta Llama, etc.)
-6. **Emerging Providers** - DeepSeek, AI21, Mistral for cost or capability advantages
+5. **Video Generation** - Sora and emerging video models
+6. **Open Source** - Provider-agnostic alternatives (Meta Llama 4, etc.)
+7. **Emerging Providers** - DeepSeek, AI21, Mistral, xAI for cost or capability advantages
+8. **Real-time** - Audio streaming and real-time interaction models
 
 ---
 
@@ -345,21 +348,40 @@ reranked = cohere_client.rerank(
 
 ### 6. Reasoning & Research Models
 
-#### DeepSeek-V3
+#### DeepSeek-V3.1 ✅ Deployed
 
-**Purpose**: Advanced reasoning model with strong benchmarks.
+**Purpose**: Latest advanced reasoning model with strong benchmarks.
 
 | Property | Value |
 |----------|-------|
 | Provider | DeepSeek |
-| Model ID | `DeepSeek-V3` |
+| Model ID | `DeepSeek-V3.1` |
 | Context | 64K tokens |
 | Pricing | ~$0.27 input / $1.10 output (per 1M tokens) |
+| Status | **Deployed** in UK South |
 
-**Why Consider**:
+**Why Deployed**:
 - Near Claude/GPT reasoning at fraction of cost
 - Strong on math and logic
 - Good for complex analysis tasks
+- Excellent cost-to-performance ratio
+
+#### DeepSeek-R1 ✅ Deployed
+
+**Purpose**: Chain-of-thought reasoning model.
+
+| Property | Value |
+|----------|-------|
+| Provider | DeepSeek |
+| Model ID | `DeepSeek-R1` |
+| Context | 64K tokens |
+| Pricing | ~$0.55 input / $2.19 output (per 1M tokens) |
+| Status | **Deployed** in UK South |
+
+**Why Deployed**:
+- Explicit chain-of-thought reasoning
+- Alternative to o3-mini for step-by-step analysis
+- Excellent for complex problem-solving
 
 #### DeepSeek-R1-Distill-Llama-70B
 
@@ -373,47 +395,159 @@ reranked = cohere_client.rerank(
 | Pricing | Very low |
 
 **Why Consider**:
-- Chain-of-thought reasoning
+- Smaller and faster than full R1
 - Cheaper alternative to o3-mini
-- Good for step-by-step analysis
+- Good for batch step-by-step analysis
+
+### 7. xAI Grok Models
+
+#### Grok-3 ✅ Deployed
+
+**Purpose**: Strong reasoning model from xAI.
+
+| Property | Value |
+|----------|-------|
+| Provider | xAI |
+| Model ID | `grok-3` |
+| Context | 131K tokens |
+| Pricing | ~$3.00 input / $15.00 output (per 1M tokens) |
+| Status | **Deployed** in UK South |
+
+**Why Deployed**:
+- Strong reasoning capabilities
+- Alternative to Claude Sonnet for analysis
+- Good performance on complex tasks
+
+#### Grok-4 (Consider)
+
+**Purpose**: Latest flagship from xAI.
+
+| Property | Value |
+|----------|-------|
+| Provider | xAI |
+| Model ID | `grok-4` |
+| Context | 131K tokens |
+| Availability | Available in Azure AI Foundry |
+
+**Why Consider**:
+- Latest xAI model
+- Multiple modes: fast-reasoning, fast-non-reasoning
+- Potential alternative to GPT-5.2
+
+#### Grok-Code-Fast-1 (Consider)
+
+**Purpose**: Code-specialized Grok model.
+
+| Property | Value |
+|----------|-------|
+| Provider | xAI |
+| Model ID | `grok-code-fast-1` |
+
+**Why Consider**:
+- Specialized for code generation
+- Alternative to gpt-5.1-codex
+- Optimized for speed
+
+### 8. Video Generation Models
+
+#### Sora (Consider)
+
+**Purpose**: Video generation from text prompts.
+
+| Property | Value |
+|----------|-------|
+| Provider | OpenAI |
+| Model ID | `sora` |
+| Pricing | ~$0.05 per second (720p) |
+| Availability | Available in East US 2 |
+
+**Why Consider**:
+- Generate story visualizations
+- Create animated content for Mystira stories
+- Marketing and promotional content
+
+#### Sora-2 (Consider)
+
+**Purpose**: HD video generation.
+
+| Property | Value |
+|----------|-------|
+| Provider | OpenAI |
+| Model ID | `sora-2` |
+| Pricing | ~$0.10 per second (1080p) |
+| Availability | Available in East US 2 |
+
+**Why Consider**:
+- Higher resolution video
+- Better quality for production content
+- Extended duration support
+
+### 9. Real-time Audio Models
+
+#### GPT-4o-Realtime-Preview (Consider)
+
+**Purpose**: Real-time audio streaming and conversation.
+
+| Property | Value |
+|----------|-------|
+| Provider | OpenAI |
+| Model ID | `gpt-4o-realtime-preview` |
+| Features | Streaming audio, voice activity detection |
+| Availability | Available in Global Standard |
+
+**Why Consider**:
+- Real-time voice interactions for Mystira
+- Live narration capabilities
+- Interactive storytelling experiences
 
 ---
 
 ## Prioritization Matrix
 
-| Model | Priority | Phase | Use Case | Monthly Est. |
-|-------|----------|-------|----------|--------------|
-| Cohere Rerank v3.5 | **High** | Phase 1 | RAG quality | $100 |
-| Codestral-2501 | Medium | Phase 2 | Code tasks | $50 |
-| Jamba-1.5-Large | Medium | Phase 2 | Long docs | $100 |
-| Llama-3.2-90B-Vision | Low | Phase 3 | Image analysis | $50 |
-| Llama-3.3-70B | Low | Phase 3 | Fallback | $50 |
-| DeepSeek-V3 | Low | Phase 3 | Cost savings | $30 |
-| Cohere Embed Multilingual | Low | Future | i18n | TBD |
+| Model | Priority | Phase | Use Case | Status | Monthly Est. |
+|-------|----------|-------|----------|--------|--------------|
+| Cohere Rerank v3.5 | **High** | Phase 1 | RAG quality | ✅ Deployed | $100 |
+| Codestral-2501 | **High** | Phase 1 | Code tasks | ✅ Deployed | $50 |
+| DeepSeek-V3.1 | **High** | Phase 1 | Cost-effective reasoning | ✅ Deployed | $50 |
+| DeepSeek-R1 | **High** | Phase 1 | Chain-of-thought | ✅ Deployed | $80 |
+| Grok-3 | Medium | Phase 2 | Alternative reasoning | ✅ Deployed | $100 |
+| Jamba-1.5-Large | Medium | Phase 2 | Long docs (256K) | ✅ Deployed | $100 |
+| Jamba-1.5-Mini | Medium | Phase 2 | Efficient long context | ✅ Deployed | $30 |
+| Llama-4-Maverick | Medium | Phase 2 | Latest open-source | ✅ Deployed | $50 |
+| Cohere Embed Multilingual | Medium | Phase 2 | i18n | ✅ Deployed | $20 |
+| Grok-4 | Low | Phase 3 | Latest xAI | Consider | TBD |
+| Sora | Low | Phase 3 | Video generation | Consider | $200 |
+| Sora-2 | Low | Phase 3 | HD video | Consider | $400 |
+| GPT-4o-Realtime | Low | Phase 3 | Real-time audio | Consider | $150 |
+| Llama-3.2-90B-Vision | Low | Future | Image analysis | Consider | $50 |
 
 ---
 
 ## Decision
 
-### Immediate (Phase 1)
+### Completed (Phase 1) ✅
 
-Add **Cohere Rerank v3.5** to the Terraform configuration:
-- Critical for RAG search quality
-- Low cost ($2/1K queries)
-- Significant relevance improvement
+All high-priority models have been deployed:
+- **Cohere Rerank v3.5** - RAG search quality improvement
+- **Codestral-2501** - Cost-effective code generation (256K context)
+- **DeepSeek-V3.1** - Budget-friendly reasoning
+- **DeepSeek-R1** - Chain-of-thought reasoning
 
-### Near-term (Phase 2)
+### Completed (Phase 2) ✅
 
-Consider adding:
-1. **Codestral-2501** - If code generation costs become significant
-2. **Jamba-1.5-Large** - If full-story processing is needed
+Medium-priority models deployed:
+1. **Grok-3** - Alternative reasoning from xAI
+2. **Jamba-1.5-Large/Mini** - 256K context for long documents
+3. **Llama-4-Maverick** - Latest Meta model with MoE architecture
+4. **Cohere Embed Multilingual** - International content support
 
-### Future (Phase 3)
+### Upcoming (Phase 3)
 
 Evaluate based on usage patterns:
-- Vision models if image analysis demand grows
-- Llama models as cost-saving alternatives
-- DeepSeek for budget-conscious reasoning
+- **Sora/Sora-2** - Video generation for story visualizations
+- **GPT-4o-Realtime** - Real-time audio interactions
+- **Grok-4** - Latest xAI flagship when available
+- **Vision models** - If image analysis demand grows
 
 ---
 
@@ -478,15 +612,30 @@ Edge Case Request
 
 ## Action Items
 
+### Completed ✅
+
 - [x] Add Cohere Rerank v3.5 to Terraform (Phase 1)
 - [x] Add Cohere Embed Multilingual to Terraform
-- [x] Add Codestral-2501 to Terraform (Phase 2)
-- [x] Add DeepSeek-Coder-V2 to Terraform (Phase 2)
+- [x] Add Codestral-2501 to Terraform (Phase 1)
+- [x] Add DeepSeek-V3.1 to Terraform (Phase 1)
+- [x] Add DeepSeek-R1 to Terraform (Phase 1)
+- [x] Add DeepSeek-Coder-V2 to Terraform (Phase 1)
 - [x] Add Jamba-1.5-Large/Mini to Terraform (Phase 2)
+- [x] Add Grok-3 to Terraform (Phase 2)
+- [x] Add Llama-4-Maverick to Terraform (Phase 2)
 - [x] Implement model routing logic for specialized models (see azure-ai-foundry-rag-guide.md#model-router)
+
+### In Progress
+
 - [ ] Create reranking integration in RAG pipeline
 - [ ] Monitor costs and usage monthly
-- [ ] Review this ADR quarterly for relevance
+
+### Future
+
+- [ ] Evaluate Sora/Sora-2 for video generation when demand arises
+- [ ] Evaluate GPT-4o-Realtime for interactive storytelling
+- [ ] Consider Grok-4 when generally available
+- [ ] Review this ADR quarterly for relevance (Next: March 2026)
 
 ---
 
