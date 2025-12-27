@@ -146,9 +146,14 @@ jobs:
             TRIGGER_SOURCE="main-push"
             echo "Main branch push detected - publishing stable to GitHub + NuGet.org"
           else
-            # workflow_dispatch: user controls everything
-            VERSION_SUFFIX="${{ github.event.inputs.version_suffix }}"
-            IS_PRERELEASE="${{ github.event.inputs.version_suffix && 'true' || 'false' }}"
+            # workflow_dispatch: user controls everything, but always include build number
+            USER_SUFFIX="${{ github.event.inputs.version_suffix }}"
+            if [ -n "$USER_SUFFIX" ]; then
+              VERSION_SUFFIX="${USER_SUFFIX}.${{ github.run_number }}"
+            else
+              VERSION_SUFFIX="build.${{ github.run_number }}"
+            fi
+            IS_PRERELEASE="true"
             PUBLISH_TO_NUGET_ORG="${{ github.event.inputs.publish_to_nuget_org }}"
             TRIGGER_SOURCE="manual"
             echo "Manual trigger - publishing to $([ "$PUBLISH_TO_NUGET_ORG" = "true" ] && echo "GitHub + NuGet.org" || echo "GitHub Packages only")"
