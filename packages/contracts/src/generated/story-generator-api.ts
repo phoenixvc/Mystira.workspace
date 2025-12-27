@@ -4,420 +4,394 @@
  */
 
 export type paths = {
-  readonly "/health": {
-    readonly parameters: {
-      readonly query?: never;
-      readonly header?: never;
-      readonly path?: never;
-      readonly cookie?: never;
+    readonly "/health": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        /** Health check endpoint */
+        readonly get: operations["getHealth"];
+        readonly put?: never;
+        readonly post?: never;
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
     };
-    /** Health check endpoint */
-    readonly get: operations["getHealth"];
-    readonly put?: never;
-    readonly post?: never;
-    readonly delete?: never;
-    readonly options?: never;
-    readonly head?: never;
-    readonly patch?: never;
-    readonly trace?: never;
-  };
-  readonly "/stories/generate": {
-    readonly parameters: {
-      readonly query?: never;
-      readonly header?: never;
-      readonly path?: never;
-      readonly cookie?: never;
+    readonly "/stories/generate": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get?: never;
+        readonly put?: never;
+        /**
+         * Generate a new story
+         * @description Generates a new story based on the provided parameters
+         */
+        readonly post: operations["generateStory"];
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
     };
-    readonly get?: never;
-    readonly put?: never;
-    /**
-     * Generate a new story
-     * @description Generates a new story based on the provided parameters
-     */
-    readonly post: operations["generateStory"];
-    readonly delete?: never;
-    readonly options?: never;
-    readonly head?: never;
-    readonly patch?: never;
-    readonly trace?: never;
-  };
-  readonly "/chat/complete": {
-    readonly parameters: {
-      readonly query?: never;
-      readonly header?: never;
-      readonly path?: never;
-      readonly cookie?: never;
+    readonly "/chat/complete": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get?: never;
+        readonly put?: never;
+        /**
+         * Continue story via chat
+         * @description Continues the story based on user input in a chat format
+         */
+        readonly post: operations["chatComplete"];
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
     };
-    readonly get?: never;
-    readonly put?: never;
-    /**
-     * Continue story via chat
-     * @description Continues the story based on user input in a chat format
-     */
-    readonly post: operations["chatComplete"];
-    readonly delete?: never;
-    readonly options?: never;
-    readonly head?: never;
-    readonly patch?: never;
-    readonly trace?: never;
-  };
 };
 export type webhooks = Record<string, never>;
 export type components = {
-  schemas: {
-    readonly ErrorResponse: {
-      /**
-       * @description Human-readable error message
-       * @example The requested resource was not found
-       */
-      readonly message: string;
-      /** @description Additional error details */
-      readonly details?: string | null;
-      /**
-       * Format: date-time
-       * @description When the error occurred (UTC)
-       * @example 2024-01-15T10:30:00Z
-       */
-      readonly timestamp?: string;
-      /**
-       * @description Correlation ID for distributed tracing
-       * @example abc123-def456-ghi789
-       */
-      readonly traceId?: string | null;
-      /**
-       * @description Unique error code for lookup
-       * @example AUTH_001
-       */
-      readonly errorCode?: string | null;
-      /**
-       * @description Error category
-       * @enum {string|null}
-       */
-      readonly category?:
-        | "Authentication"
-        | "Authorization"
-        | "Validation"
-        | "NotFound"
-        | "Conflict"
-        | "RateLimit"
-        | "Internal"
-        | null;
-      /**
-       * @description HTTP status code
-       * @example 404
-       */
-      readonly statusCode?: number | null;
-      /**
-       * @description Whether the error is recoverable by the user
-       * @default true
-       */
-      readonly isRecoverable: boolean;
-      /**
-       * @description Suggested action for the user
-       * @enum {string|null}
-       */
-      readonly suggestedAction?:
-        | "retry"
-        | "login"
-        | "contact-support"
-        | "fix-input"
-        | "check-id"
-        | "request-access"
-        | null;
+    schemas: {
+        readonly ErrorResponse: {
+            /**
+             * @description Human-readable error message
+             * @example The requested resource was not found
+             */
+            readonly message: string;
+            /** @description Additional error details */
+            readonly details?: string | null;
+            /**
+             * Format: date-time
+             * @description When the error occurred (UTC)
+             * @example 2024-01-15T10:30:00Z
+             */
+            readonly timestamp?: string;
+            /**
+             * @description Correlation ID for distributed tracing
+             * @example abc123-def456-ghi789
+             */
+            readonly traceId?: string | null;
+            /**
+             * @description Unique error code for lookup
+             * @example AUTH_001
+             */
+            readonly errorCode?: string | null;
+            /**
+             * @description Error category
+             * @enum {string|null}
+             */
+            readonly category?: "Authentication" | "Authorization" | "Validation" | "NotFound" | "Conflict" | "RateLimit" | "Internal" | null;
+            /**
+             * @description HTTP status code
+             * @example 404
+             */
+            readonly statusCode?: number | null;
+            /**
+             * @description Whether the error is recoverable by the user
+             * @default true
+             */
+            readonly isRecoverable: boolean;
+            /**
+             * @description Suggested action for the user
+             * @enum {string|null}
+             */
+            readonly suggestedAction?: "retry" | "login" | "contact-support" | "fix-input" | "check-id" | "request-access" | null;
+        };
+        readonly ValidationErrorResponse: components["schemas"]["ErrorResponse"] & {
+            /**
+             * @description Field-level validation errors
+             * @example {
+             *       "email": [
+             *         "Invalid email format",
+             *         "Email is required"
+             *       ],
+             *       "password": [
+             *         "Password must be at least 8 characters"
+             *       ]
+             *     }
+             */
+            readonly errors: {
+                readonly [key: string]: readonly string[];
+            };
+        };
+        readonly GenerateStoryRequest: {
+            /** @description The story prompt or starting point */
+            readonly prompt: string;
+            /**
+             * @description Story genre
+             * @enum {string}
+             */
+            readonly genre?: "fantasy" | "sci-fi" | "mystery" | "romance" | "adventure" | "horror";
+            /**
+             * @description Story tone
+             * @enum {string}
+             */
+            readonly tone?: "serious" | "humorous" | "dark" | "light-hearted";
+            /**
+             * @default adult
+             * @enum {string}
+             */
+            readonly targetAgeGroup: "children" | "young-adult" | "adult";
+            /**
+             * @description Maximum tokens in response
+             * @default 1000
+             */
+            readonly maxTokens: number;
+            /**
+             * @description Creativity parameter
+             * @default 0.7
+             */
+            readonly temperature: number;
+        };
+        readonly GenerateStoryResponse: {
+            /**
+             * Format: uuid
+             * @description Unique story ID
+             */
+            readonly id: string;
+            /** @description Generated story content */
+            readonly content: string;
+            /** @description Generated story title */
+            readonly title?: string | null;
+            /** @description Extracted entities from the story */
+            readonly entities?: readonly components["schemas"]["StoryEntity"][];
+            readonly metadata?: components["schemas"]["StoryMetadata"];
+            /** Format: date-time */
+            readonly createdAt: string;
+        };
+        readonly StoryEntity: {
+            /** @description Entity name */
+            readonly name: string;
+            /**
+             * @description Entity type
+             * @enum {string}
+             */
+            readonly type: "character" | "location" | "item" | "event" | "organization";
+            readonly description?: string | null;
+            /** @description Character position of first mention */
+            readonly firstMentionedAt?: number;
+        };
+        readonly StoryMetadata: {
+            readonly wordCount?: number;
+            /** @description Estimated reading time (e.g., "5 min") */
+            readonly estimatedReadingTime?: string;
+            readonly tokensUsed?: number;
+            readonly modelUsed?: string;
+        };
+        readonly ChatCompletionRequest: {
+            /**
+             * Format: uuid
+             * @description Chat session ID
+             */
+            readonly sessionId: string;
+            /** @description User message */
+            readonly message: string;
+            /** @description Additional context */
+            readonly context?: {
+                readonly [key: string]: unknown;
+            };
+        };
+        readonly ChatCompletionResponse: {
+            /** Format: uuid */
+            readonly sessionId: string;
+            /** @description AI response */
+            readonly response: string;
+            readonly storySnapshot?: components["schemas"]["StorySnapshot"];
+            /** @description Suggested next actions for the user */
+            readonly suggestedActions?: readonly string[];
+        };
+        readonly StorySnapshot: {
+            readonly currentScene?: string;
+            readonly activeCharacters?: readonly string[];
+            readonly mood?: string;
+            /** @description Story progress percentage */
+            readonly plotProgress?: number;
+        };
+        readonly HealthCheckResult: {
+            /**
+             * @description Health status of a service or component
+             * @enum {string}
+             */
+            readonly status: "Healthy" | "Degraded" | "Unhealthy";
+            /**
+             * Format: date-time
+             * @description When the health check was performed
+             */
+            readonly timestamp: string;
+            /** @description Total duration of all health checks */
+            readonly totalDuration?: string | null;
+            /** @description Individual health check results */
+            readonly checks?: readonly {
+                /**
+                 * @description Name of the health check
+                 * @example database
+                 */
+                readonly name: string;
+                /**
+                 * @description Health status of a service or component
+                 * @enum {string}
+                 */
+                readonly status: "Healthy" | "Degraded" | "Unhealthy";
+                /** @description Additional description */
+                readonly description?: string | null;
+                /**
+                 * @description Duration of the health check
+                 * @example 00:00:00.0234567
+                 */
+                readonly duration?: string | null;
+                /** @description Tags associated with this check */
+                readonly tags?: readonly string[];
+                /** @description Additional health check data */
+                readonly data?: {
+                    readonly [key: string]: unknown;
+                } | null;
+            }[];
+        };
+        readonly UnauthorizedErrorResponse: components["schemas"]["ErrorResponse"] & {
+            /**
+             * @description The authentication scheme that failed
+             * @example Bearer
+             */
+            readonly authScheme?: string | null;
+        };
     };
-    readonly ValidationErrorResponse: components["schemas"]["ErrorResponse"] & {
-      /**
-       * @description Field-level validation errors
-       * @example {
-       *       "email": [
-       *         "Invalid email format",
-       *         "Email is required"
-       *       ],
-       *       "password": [
-       *         "Password must be at least 8 characters"
-       *       ]
-       *     }
-       */
-      readonly errors: {
-        readonly [key: string]: readonly string[];
-      };
+    responses: {
+        /** @description Bad request */
+        readonly BadRequest: {
+            headers: {
+                readonly [name: string]: unknown;
+            };
+            content: {
+                readonly "application/json": components["schemas"]["ValidationErrorResponse"];
+            };
+        };
+        /** @description Unauthorized */
+        readonly Unauthorized: {
+            headers: {
+                readonly [name: string]: unknown;
+            };
+            content: {
+                readonly "application/json": components["schemas"]["UnauthorizedErrorResponse"];
+            };
+        };
     };
-    readonly GenerateStoryRequest: {
-      /** @description The story prompt or starting point */
-      readonly prompt: string;
-      /**
-       * @description Story genre
-       * @enum {string}
-       */
-      readonly genre?:
-        | "fantasy"
-        | "sci-fi"
-        | "mystery"
-        | "romance"
-        | "adventure"
-        | "horror";
-      /**
-       * @description Story tone
-       * @enum {string}
-       */
-      readonly tone?: "serious" | "humorous" | "dark" | "light-hearted";
-      /**
-       * @default adult
-       * @enum {string}
-       */
-      readonly targetAgeGroup: "children" | "young-adult" | "adult";
-      /**
-       * @description Maximum tokens in response
-       * @default 1000
-       */
-      readonly maxTokens: number;
-      /**
-       * @description Creativity parameter
-       * @default 0.7
-       */
-      readonly temperature: number;
-    };
-    readonly GenerateStoryResponse: {
-      /**
-       * Format: uuid
-       * @description Unique story ID
-       */
-      readonly id: string;
-      /** @description Generated story content */
-      readonly content: string;
-      /** @description Generated story title */
-      readonly title?: string | null;
-      /** @description Extracted entities from the story */
-      readonly entities?: readonly components["schemas"]["StoryEntity"][];
-      readonly metadata?: components["schemas"]["StoryMetadata"];
-      /** Format: date-time */
-      readonly createdAt: string;
-    };
-    readonly StoryEntity: {
-      /** @description Entity name */
-      readonly name: string;
-      /**
-       * @description Entity type
-       * @enum {string}
-       */
-      readonly type:
-        | "character"
-        | "location"
-        | "item"
-        | "event"
-        | "organization";
-      readonly description?: string | null;
-      /** @description Character position of first mention */
-      readonly firstMentionedAt?: number;
-    };
-    readonly StoryMetadata: {
-      readonly wordCount?: number;
-      /** @description Estimated reading time (e.g., "5 min") */
-      readonly estimatedReadingTime?: string;
-      readonly tokensUsed?: number;
-      readonly modelUsed?: string;
-    };
-    readonly ChatCompletionRequest: {
-      /**
-       * Format: uuid
-       * @description Chat session ID
-       */
-      readonly sessionId: string;
-      /** @description User message */
-      readonly message: string;
-      /** @description Additional context */
-      readonly context?: {
-        readonly [key: string]: unknown;
-      };
-    };
-    readonly ChatCompletionResponse: {
-      /** Format: uuid */
-      readonly sessionId: string;
-      /** @description AI response */
-      readonly response: string;
-      readonly storySnapshot?: components["schemas"]["StorySnapshot"];
-      /** @description Suggested next actions for the user */
-      readonly suggestedActions?: readonly string[];
-    };
-    readonly StorySnapshot: {
-      readonly currentScene?: string;
-      readonly activeCharacters?: readonly string[];
-      readonly mood?: string;
-      /** @description Story progress percentage */
-      readonly plotProgress?: number;
-    };
-    readonly HealthCheckResult: {
-      /**
-       * @description Health status of a service or component
-       * @enum {string}
-       */
-      readonly status: "Healthy" | "Degraded" | "Unhealthy";
-      /**
-       * Format: date-time
-       * @description When the health check was performed
-       */
-      readonly timestamp: string;
-      /** @description Total duration of all health checks */
-      readonly totalDuration?: string | null;
-      /** @description Individual health check results */
-      readonly checks?: readonly {
-        /**
-         * @description Name of the health check
-         * @example database
-         */
-        readonly name: string;
-        /**
-         * @description Health status of a service or component
-         * @enum {string}
-         */
-        readonly status: "Healthy" | "Degraded" | "Unhealthy";
-        /** @description Additional description */
-        readonly description?: string | null;
-        /**
-         * @description Duration of the health check
-         * @example 00:00:00.0234567
-         */
-        readonly duration?: string | null;
-        /** @description Tags associated with this check */
-        readonly tags?: readonly string[];
-        /** @description Additional health check data */
-        readonly data?: {
-          readonly [key: string]: unknown;
-        } | null;
-      }[];
-    };
-    readonly UnauthorizedErrorResponse: components["schemas"]["ErrorResponse"] & {
-      /**
-       * @description The authentication scheme that failed
-       * @example Bearer
-       */
-      readonly authScheme?: string | null;
-    };
-  };
-  responses: {
-    /** @description Bad request */
-    readonly BadRequest: {
-      headers: {
-        readonly [name: string]: unknown;
-      };
-      content: {
-        readonly "application/json": components["schemas"]["ValidationErrorResponse"];
-      };
-    };
-    /** @description Unauthorized */
-    readonly Unauthorized: {
-      headers: {
-        readonly [name: string]: unknown;
-      };
-      content: {
-        readonly "application/json": components["schemas"]["UnauthorizedErrorResponse"];
-      };
-    };
-  };
-  parameters: never;
-  requestBodies: never;
-  headers: never;
-  pathItems: never;
+    parameters: never;
+    requestBodies: never;
+    headers: never;
+    pathItems: never;
 };
 export type $defs = Record<string, never>;
 export interface operations {
-  readonly getHealth: {
-    readonly parameters: {
-      readonly query?: never;
-      readonly header?: never;
-      readonly path?: never;
-      readonly cookie?: never;
+    readonly getHealth: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description Service is healthy */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["HealthCheckResult"];
+                };
+            };
+            /** @description Internal server error */
+            readonly 500: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Service is unhealthy */
+            readonly 503: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["HealthCheckResult"];
+                };
+            };
+        };
     };
-    readonly requestBody?: never;
-    readonly responses: {
-      /** @description Service is healthy */
-      readonly 200: {
-        headers: {
-          readonly [name: string]: unknown;
+    readonly generateStory: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
         };
-        content: {
-          readonly "application/json": components["schemas"]["HealthCheckResult"];
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": components["schemas"]["GenerateStoryRequest"];
+            };
         };
-      };
-      /** @description Internal server error */
-      readonly 500: {
-        headers: {
-          readonly [name: string]: unknown;
+        readonly responses: {
+            /** @description Story generated successfully */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["GenerateStoryResponse"];
+                };
+            };
+            readonly 400: components["responses"]["BadRequest"];
+            readonly 401: components["responses"]["Unauthorized"];
+            /** @description Rate limit exceeded */
+            readonly 429: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
         };
-        content: {
-          readonly "application/json": components["schemas"]["ErrorResponse"];
-        };
-      };
-      /** @description Service is unhealthy */
-      readonly 503: {
-        headers: {
-          readonly [name: string]: unknown;
-        };
-        content: {
-          readonly "application/json": components["schemas"]["HealthCheckResult"];
-        };
-      };
     };
-  };
-  readonly generateStory: {
-    readonly parameters: {
-      readonly query?: never;
-      readonly header?: never;
-      readonly path?: never;
-      readonly cookie?: never;
-    };
-    readonly requestBody: {
-      readonly content: {
-        readonly "application/json": components["schemas"]["GenerateStoryRequest"];
-      };
-    };
-    readonly responses: {
-      /** @description Story generated successfully */
-      readonly 200: {
-        headers: {
-          readonly [name: string]: unknown;
+    readonly chatComplete: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
         };
-        content: {
-          readonly "application/json": components["schemas"]["GenerateStoryResponse"];
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": components["schemas"]["ChatCompletionRequest"];
+            };
         };
-      };
-      readonly 400: components["responses"]["BadRequest"];
-      readonly 401: components["responses"]["Unauthorized"];
-      /** @description Rate limit exceeded */
-      readonly 429: {
-        headers: {
-          readonly [name: string]: unknown;
+        readonly responses: {
+            /** @description Chat completion successful */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["ChatCompletionResponse"];
+                };
+            };
+            readonly 400: components["responses"]["BadRequest"];
+            readonly 401: components["responses"]["Unauthorized"];
         };
-        content: {
-          readonly "application/json": components["schemas"]["ErrorResponse"];
-        };
-      };
     };
-  };
-  readonly chatComplete: {
-    readonly parameters: {
-      readonly query?: never;
-      readonly header?: never;
-      readonly path?: never;
-      readonly cookie?: never;
-    };
-    readonly requestBody: {
-      readonly content: {
-        readonly "application/json": components["schemas"]["ChatCompletionRequest"];
-      };
-    };
-    readonly responses: {
-      /** @description Chat completion successful */
-      readonly 200: {
-        headers: {
-          readonly [name: string]: unknown;
-        };
-        content: {
-          readonly "application/json": components["schemas"]["ChatCompletionResponse"];
-        };
-      };
-      readonly 400: components["responses"]["BadRequest"];
-      readonly 401: components["responses"]["Unauthorized"];
-    };
-  };
 }
