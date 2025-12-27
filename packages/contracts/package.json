@@ -1,6 +1,6 @@
 {
   "name": "@mystira/contracts",
-  "version": "0.4.1-alpha",
+  "version": "0.4.2-alpha",
   "type": "module",
   "description": "Unified API contracts for Mystira platform",
   "main": "dist/index.js",
