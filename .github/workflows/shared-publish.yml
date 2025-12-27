@@ -130,28 +130,24 @@ jobs:
       - name: Determine version details
         id: version
         run: |
-          # Check if this is a dev branch push
-          if [ "${{ github.event_name }}" = "push" ] && [ "${{ github.ref }}" = "refs/heads/dev" ]; then
-            # Dev push: generate pre-release version suffix, GitHub Packages only
-            VERSION_SUFFIX="dev.${{ github.run_number }}"
-            IS_PRERELEASE="true"
-            PUBLISH_TO_NUGET_ORG="false"
-            TRIGGER_SOURCE="dev-push"
-            echo "Dev branch push detected - publishing pre-release to GitHub Packages only"
-          elif [ "${{ github.event_name }}" = "push" ] && [ "${{ github.ref }}" = "refs/heads/main" ]; then
-            # Main push: stable release to both registries
+          # Determine version suffix and settings based on trigger
+          if [ "${{ github.event_name }}" = "push" ] && [ "${{ github.ref }}" = "refs/heads/main" ]; then
+            # Main push: stable release (no suffix) to both registries
             VERSION_SUFFIX=""
             IS_PRERELEASE="false"
             PUBLISH_TO_NUGET_ORG="true"
             TRIGGER_SOURCE="main-push"
-            echo "Main branch push detected - publishing stable to GitHub + NuGet.org"
           else
-            # workflow_dispatch: user controls everything
-            VERSION_SUFFIX="${{ github.event.inputs.version_suffix }}"
-            IS_PRERELEASE="${{ github.event.inputs.version_suffix && 'true' || 'false' }}"
-            PUBLISH_TO_NUGET_ORG="${{ github.event.inputs.publish_to_nuget_org }}"
-            TRIGGER_SOURCE="manual"
-            echo "Manual trigger - publishing to $([ "$PUBLISH_TO_NUGET_ORG" = "true" ] && echo "GitHub + NuGet.org" || echo "GitHub Packages only")"
+            # All other triggers: use build.123 format for consistency
+            VERSION_SUFFIX="build.${{ github.run_number }}"
+            IS_PRERELEASE="true"
+            if [ "${{ github.event_name }}" = "push" ] && [ "${{ github.ref }}" = "refs/heads/dev" ]; then
+              PUBLISH_TO_NUGET_ORG="false"
+              TRIGGER_SOURCE="dev-push"
+            else
+              PUBLISH_TO_NUGET_ORG="${{ github.event.inputs.publish_to_nuget_org }}"
+              TRIGGER_SOURCE="manual"
+            fi
           fi
 
           echo "version_suffix=$VERSION_SUFFIX" >> $GITHUB_OUTPUT
