@@ -371,50 +371,55 @@ public record BadgeTierProgressResponse
 /// <summary>
 /// Represents a user's score on a compass axis.
 /// </summary>
-public record CompassAxisScoreResult
+public class CompassAxisScoreResult
 {
     /// <summary>
     /// The compass axis identifier.
     /// </summary>
-    public string CompassAxisId { get; init; } = string.Empty;
+    public string CompassAxisId { get; set; } = string.Empty;
 
     /// <summary>
     /// Display name of the axis.
     /// </summary>
-    public string AxisName { get; init; } = string.Empty;
+    public string AxisName { get; set; } = string.Empty;
 
     /// <summary>
     /// The calculated score for this axis.
     /// </summary>
-    public double Score { get; init; }
+    public double Score { get; set; }
 
     /// <summary>
     /// Normalized score (0-1 range).
     /// </summary>
-    public double NormalizedScore { get; init; }
+    public double NormalizedScore { get; set; }
 
     /// <summary>
     /// Percentile rank compared to other users.
     /// </summary>
-    public double? Percentile { get; init; }
+    public double? Percentile { get; set; }
+
+    /// <summary>
+    /// Percentile scores at various thresholds (key: percentile, value: score).
+    /// </summary>
+    public Dictionary<double, double> PercentileScores { get; set; } = new();
 
     /// <summary>
     /// Description of what this score means.
     /// </summary>
-    public string? Interpretation { get; init; }
+    public string? Interpretation { get; set; }
 
     /// <summary>
     /// Strength level based on score (e.g., "low", "medium", "high", "exceptional").
     /// </summary>
-    public string? StrengthLevel { get; init; }
+    public string? StrengthLevel { get; set; }
 
     /// <summary>
     /// Related traits or characteristics for this axis.
     /// </summary>
-    public List<string> RelatedTraits { get; init; } = new();
+    public List<string> RelatedTraits { get; set; } = new();
 
     /// <summary>
     /// When this score was last calculated.
     /// </summary>
-    public DateTimeOffset CalculatedAt { get; init; }
+    public DateTimeOffset CalculatedAt { get; set; }
 }

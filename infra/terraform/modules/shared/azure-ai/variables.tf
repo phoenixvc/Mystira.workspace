@@ -158,12 +158,14 @@ variable "model_deployments" {
       location      = "swedencentral"
     }
     # GPT-5.2 - Latest and smartest (December 2025, 400K context)
+    # NOTE: GlobalStandard not available in South Africa North, using Sweden Central
     "gpt-5.2" = {
       model_name    = "gpt-5.2"
       model_version = "2025-12-11"
       model_format  = "OpenAI"
       sku_name      = "GlobalStandard"
       capacity      = 10
+      location      = "swedencentral"
     }
 
     # ==========================================================================
@@ -221,6 +223,7 @@ variable "model_deployments" {
       capacity      = 1
       location      = "eastus"
     }
+    # gpt-image-1 - Not yet available in Azure OpenAI
     "gpt-image-1" = {
       model_name    = "gpt-image-1"
       model_version = "1"
@@ -228,6 +231,7 @@ variable "model_deployments" {
       sku_name      = "Standard"
       capacity      = 1
       location      = "eastus"
+      enabled       = false # Not available in Azure OpenAI yet
     }
 
     # ==========================================================================
