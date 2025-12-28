@@ -475,8 +475,7 @@ module "story_generator" {
   fallback_location        = "eastus2"   # SWA not available in South Africa North
   github_repository_url    = "https://github.com/phoenixvc/Mystira.StoryGenerator"
   github_branch            = "main"
-  # Custom domain disabled for initial deployment - enable after DNS records created
-  enable_swa_custom_domain = false
+  enable_swa_custom_domain = true
   swa_custom_domain        = "story.mystira.app"
 
   tags = {
