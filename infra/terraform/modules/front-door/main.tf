@@ -155,7 +155,7 @@ resource "azurerm_cdn_frontdoor_route" "publisher" {
   patterns_to_match      = ["/*"]
   forwarding_protocol    = "HttpsOnly"
   https_redirect_enabled = true
-  link_to_default_domain = true
+  link_to_default_domain = false
 
   dynamic "cache" {
     for_each = var.enable_caching ? [1] : []
@@ -188,7 +188,7 @@ resource "azurerm_cdn_frontdoor_route" "chain" {
   patterns_to_match      = ["/*"]
   forwarding_protocol    = "HttpsOnly"
   https_redirect_enabled = true
-  link_to_default_domain = true
+  link_to_default_domain = false
 
   # No caching for Chain service (blockchain RPC)
   cache {
@@ -525,7 +525,7 @@ resource "azurerm_cdn_frontdoor_route" "admin_api" {
   patterns_to_match      = ["/*"]
   forwarding_protocol    = "HttpsOnly"
   https_redirect_enabled = true
-  link_to_default_domain = true
+  link_to_default_domain = false
 
   # No caching for API endpoints
   cache {
@@ -551,7 +551,7 @@ resource "azurerm_cdn_frontdoor_route" "admin_ui" {
   patterns_to_match      = ["/*"]
   forwarding_protocol    = "HttpsOnly"
   https_redirect_enabled = true
-  link_to_default_domain = true
+  link_to_default_domain = false
 
   dynamic "cache" {
     for_each = var.enable_caching ? [1] : []
@@ -694,7 +694,7 @@ resource "azurerm_cdn_frontdoor_route" "story_generator_api" {
   patterns_to_match      = ["/*"]
   forwarding_protocol    = "HttpsOnly"
   https_redirect_enabled = true
-  link_to_default_domain = true
+  link_to_default_domain = false
 
   # No caching for API endpoints
   cache {
@@ -720,7 +720,7 @@ resource "azurerm_cdn_frontdoor_route" "story_generator_swa" {
   patterns_to_match      = ["/*"]
   forwarding_protocol    = "HttpsOnly"
   https_redirect_enabled = true
-  link_to_default_domain = true
+  link_to_default_domain = false
 
   # Cache static assets from SWA
   dynamic "cache" {
@@ -860,7 +860,7 @@ resource "azurerm_cdn_frontdoor_route" "mystira_app_api" {
   patterns_to_match      = ["/*"]
   forwarding_protocol    = "HttpsOnly"
   https_redirect_enabled = true
-  link_to_default_domain = true
+  link_to_default_domain = false
 
   # No caching for API endpoints - important for SignalR WebSocket connections
   cache {
@@ -886,7 +886,7 @@ resource "azurerm_cdn_frontdoor_route" "mystira_app_swa" {
   patterns_to_match      = ["/*"]
   forwarding_protocol    = "HttpsOnly"
   https_redirect_enabled = true
-  link_to_default_domain = true
+  link_to_default_domain = false
 
   # Cache static assets from PWA/SWA
   dynamic "cache" {
@@ -1039,7 +1039,7 @@ resource "azurerm_cdn_frontdoor_route" "secondary_publisher" {
   patterns_to_match      = ["/*"]
   forwarding_protocol    = "HttpsOnly"
   https_redirect_enabled = true
-  link_to_default_domain = true
+  link_to_default_domain = false
 
   dynamic "cache" {
     for_each = var.enable_caching ? [1] : []
@@ -1073,7 +1073,7 @@ resource "azurerm_cdn_frontdoor_route" "secondary_chain" {
   patterns_to_match      = ["/*"]
   forwarding_protocol    = "HttpsOnly"
   https_redirect_enabled = true
-  link_to_default_domain = true
+  link_to_default_domain = false
 
   cache {
     query_string_caching_behavior = "IgnoreQueryString"
@@ -1193,7 +1193,7 @@ resource "azurerm_cdn_frontdoor_route" "secondary_admin_api" {
   patterns_to_match      = ["/*"]
   forwarding_protocol    = "HttpsOnly"
   https_redirect_enabled = true
-  link_to_default_domain = true
+  link_to_default_domain = false
 
   cache {
     query_string_caching_behavior = "UseQueryString"
@@ -1218,7 +1218,7 @@ resource "azurerm_cdn_frontdoor_route" "secondary_admin_ui" {
   patterns_to_match      = ["/*"]
   forwarding_protocol    = "HttpsOnly"
   https_redirect_enabled = true
-  link_to_default_domain = true
+  link_to_default_domain = false
 
   dynamic "cache" {
     for_each = var.enable_caching ? [1] : []
@@ -1350,7 +1350,7 @@ resource "azurerm_cdn_frontdoor_route" "secondary_story_generator_api" {
   patterns_to_match      = ["/*"]
   forwarding_protocol    = "HttpsOnly"
   https_redirect_enabled = true
-  link_to_default_domain = true
+  link_to_default_domain = false
 
   cache {
     query_string_caching_behavior = "UseQueryString"
@@ -1375,7 +1375,7 @@ resource "azurerm_cdn_frontdoor_route" "secondary_story_generator_swa" {
   patterns_to_match      = ["/*"]
   forwarding_protocol    = "HttpsOnly"
   https_redirect_enabled = true
-  link_to_default_domain = true
+  link_to_default_domain = false
 
   dynamic "cache" {
     for_each = var.enable_caching ? [1] : []
@@ -1507,7 +1507,7 @@ resource "azurerm_cdn_frontdoor_route" "secondary_mystira_app_api" {
   patterns_to_match      = ["/*"]
   forwarding_protocol    = "HttpsOnly"
   https_redirect_enabled = true
-  link_to_default_domain = true
+  link_to_default_domain = false
 
   cache {
     query_string_caching_behavior = "UseQueryString"
@@ -1532,7 +1532,7 @@ resource "azurerm_cdn_frontdoor_route" "secondary_mystira_app_swa" {
   patterns_to_match      = ["/*"]
   forwarding_protocol    = "HttpsOnly"
   https_redirect_enabled = true
-  link_to_default_domain = true
+  link_to_default_domain = false
 
   dynamic "cache" {
     for_each = var.enable_caching ? [1] : []
