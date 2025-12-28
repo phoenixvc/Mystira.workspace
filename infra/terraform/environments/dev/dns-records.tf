@@ -53,6 +53,32 @@ import {
   id = "/subscriptions/22f9eb18-6553-4b7d-9451-47d0195085fe/resourceGroups/mys-shared-terraform-rg-san/providers/Microsoft.Network/dnsZones/mystira.app/CNAME/dev.admin"
 }
 
+# Import existing staging CNAME records
+import {
+  to = azurerm_dns_cname_record.staging_publisher_fd
+  id = "/subscriptions/22f9eb18-6553-4b7d-9451-47d0195085fe/resourceGroups/mys-shared-terraform-rg-san/providers/Microsoft.Network/dnsZones/mystira.app/CNAME/staging.publisher"
+}
+
+import {
+  to = azurerm_dns_cname_record.staging_chain_fd
+  id = "/subscriptions/22f9eb18-6553-4b7d-9451-47d0195085fe/resourceGroups/mys-shared-terraform-rg-san/providers/Microsoft.Network/dnsZones/mystira.app/CNAME/staging.chain"
+}
+
+import {
+  to = azurerm_dns_cname_record.staging_admin_api_fd
+  id = "/subscriptions/22f9eb18-6553-4b7d-9451-47d0195085fe/resourceGroups/mys-shared-terraform-rg-san/providers/Microsoft.Network/dnsZones/mystira.app/CNAME/staging.admin-api"
+}
+
+import {
+  to = azurerm_dns_cname_record.staging_admin_ui_fd
+  id = "/subscriptions/22f9eb18-6553-4b7d-9451-47d0195085fe/resourceGroups/mys-shared-terraform-rg-san/providers/Microsoft.Network/dnsZones/mystira.app/CNAME/staging.admin"
+}
+
+import {
+  to = azurerm_dns_cname_record.staging_story_api_fd
+  id = "/subscriptions/22f9eb18-6553-4b7d-9451-47d0195085fe/resourceGroups/mys-shared-terraform-rg-san/providers/Microsoft.Network/dnsZones/mystira.app/CNAME/staging.story-api"
+}
+
 # Import existing staging TXT validation records
 import {
   to = azurerm_dns_txt_record.fd_staging_publisher
@@ -484,6 +510,70 @@ resource "azurerm_dns_txt_record" "fd_dev_chain" {
 # Staging Environment TXT Validation Records
 # The shared non-prod Front Door handles staging domains too
 # =============================================================================
+
+# -----------------------------------------------------------------------------
+# STAGING CNAME RECORDS (for Front Door custom domains)
+# These are managed here because the Front Door module is in dev terraform
+# -----------------------------------------------------------------------------
+
+# CNAME for staging.publisher.mystira.app -> Front Door
+resource "azurerm_dns_cname_record" "staging_publisher_fd" {
+  name                = "staging.publisher"
+  zone_name           = data.azurerm_dns_zone.mystira.name
+  resource_group_name = data.azurerm_dns_zone.mystira.resource_group_name
+  ttl                 = 300
+  record              = module.front_door.primary_endpoint_hostname
+
+  tags = local.common_tags
+}
+
+# CNAME for staging.chain.mystira.app -> Front Door
+resource "azurerm_dns_cname_record" "staging_chain_fd" {
+  name                = "staging.chain"
+  zone_name           = data.azurerm_dns_zone.mystira.name
+  resource_group_name = data.azurerm_dns_zone.mystira.resource_group_name
+  ttl                 = 300
+  record              = module.front_door.primary_endpoint_hostname
+
+  tags = local.common_tags
+}
+
+# CNAME for staging.admin-api.mystira.app -> Front Door
+resource "azurerm_dns_cname_record" "staging_admin_api_fd" {
+  name                = "staging.admin-api"
+  zone_name           = data.azurerm_dns_zone.mystira.name
+  resource_group_name = data.azurerm_dns_zone.mystira.resource_group_name
+  ttl                 = 300
+  record              = module.front_door.primary_endpoint_hostname
+
+  tags = local.common_tags
+}
+
+# CNAME for staging.admin.mystira.app -> Front Door
+resource "azurerm_dns_cname_record" "staging_admin_ui_fd" {
+  name                = "staging.admin"
+  zone_name           = data.azurerm_dns_zone.mystira.name
+  resource_group_name = data.azurerm_dns_zone.mystira.resource_group_name
+  ttl                 = 300
+  record              = module.front_door.primary_endpoint_hostname
+
+  tags = local.common_tags
+}
+
+# CNAME for staging.story-api.mystira.app -> Front Door
+resource "azurerm_dns_cname_record" "staging_story_api_fd" {
+  name                = "staging.story-api"
+  zone_name           = data.azurerm_dns_zone.mystira.name
+  resource_group_name = data.azurerm_dns_zone.mystira.resource_group_name
+  ttl                 = 300
+  record              = module.front_door.primary_endpoint_hostname
+
+  tags = local.common_tags
+}
+
+# -----------------------------------------------------------------------------
+# STAGING TXT VALIDATION RECORDS
+# -----------------------------------------------------------------------------
 
 # TXT validation for staging.publisher.mystira.app (Front Door)
 resource "azurerm_dns_txt_record" "fd_staging_publisher" {

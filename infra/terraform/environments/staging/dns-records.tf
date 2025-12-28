@@ -2,6 +2,8 @@
 # DNS Records for Staging Environment
 # References existing DNS zone in shared terraform RG (managed by CI/CD bootstrap)
 # =============================================================================
+# NOTE: Front Door CNAME and TXT validation records are managed in the dev
+# environment terraform since the shared non-prod Front Door is defined there.
 
 # =============================================================================
 # Import blocks for existing DNS records
@@ -327,13 +329,13 @@ resource "azurerm_dns_cname_record" "staging_story_api_fd" {
 }
 
 # =============================================================================
-# Front Door TXT Validation Records (handled by dev non-prod Front Door)
-# Staging uses shared Front Door with dev, so validation tokens come from dev
+# Front Door DNS Records
 # =============================================================================
-
-# Note: Staging DNS validation for Front Door is managed through the
-# dev environment's shared non-prod Front Door configuration.
-# See infra/terraform/environments/dev/front-door.tf for staging endpoints.
+# NOTE: Front Door CNAME and TXT validation records are managed in the dev
+# environment terraform since the shared non-prod Front Door is defined there.
+# See infra/terraform/environments/dev/dns-records.tf for:
+# - staging.publisher, staging.chain, staging.admin-api, staging.admin, staging.story-api CNAMEs
+# - _dnsauth.staging.* TXT validation records
 
 # =============================================================================
 # Outputs
