@@ -64,14 +64,14 @@ public class MigrationService : IMigrationService
                 return result;
             }
 
-            // Get the actual partition key path from the destination container if it exists
+            // Get the actual partition key paths from the destination container if it exists
             // This prevents mismatches when the destination was created with a different partition key
-            string actualPartitionKeyPath = partitionKeyPath;
+            List<string> actualPartitionKeyPaths = new List<string> { partitionKeyPath };
             if (!options.DryRun)
             {
-                actualPartitionKeyPath = await EnsureContainerExistsAndGetPartitionKey(destClient, destDatabaseName, containerName, partitionKeyPath);
-                _logger.LogInformation("Using partition key path: {PartitionKeyPath} for container {Container}",
-                    actualPartitionKeyPath, containerName);
+                actualPartitionKeyPaths = await EnsureContainerExistsAndGetPartitionKeys(destClient, destDatabaseName, containerName, partitionKeyPath);
+                _logger.LogInformation("Using partition key paths: [{PartitionKeyPaths}] for container {Container}",
+                    string.Join(", ", actualPartitionKeyPaths), containerName);
             }
 
             var sourceContainer = sourceClient.GetContainer(sourceDatabaseName, containerName);
@@ -111,11 +111,11 @@ public class MigrationService : IMigrationService
 
             if (options.UseBulkOperations && items.Count > 10)
             {
-                await MigrateBulkDynamicAsync(destContainer, items, actualPartitionKeyPath, result, options, containerName);
+                await MigrateBulkDynamicAsync(destContainer, items, actualPartitionKeyPaths, result, options, containerName);
             }
             else
             {
-                await MigrateSequentialDynamicAsync(destContainer, items, actualPartitionKeyPath, result, options, containerName);
+                await MigrateSequentialDynamicAsync(destContainer, items, actualPartitionKeyPaths, result, options, containerName);
             }
 
             result.Success = result.FailureCount == 0;
@@ -333,7 +333,7 @@ public class MigrationService : IMigrationService
     private async Task MigrateBulkDynamicAsync(
         Container destContainer,
         List<dynamic> items,
-        string partitionKeyPath,
+        List<string> partitionKeyPaths,
         MigrationResult result,
         MigrationOptions options,
         string containerName)
@@ -346,11 +346,11 @@ public class MigrationService : IMigrationService
         {
             try
             {
-                string partitionKeyValue = GetPartitionKeyValue(item, partitionKeyPath);
+                PartitionKey partitionKey = BuildPartitionKey(item, partitionKeyPaths);
                 // Capture itemId before the lambda to avoid dynamic dispatch issues
                 string itemId = item?.id?.ToString() ?? "unknown";
                 // Cast to Task to break the dynamic dispatch chain
-                Task upsertTask = (Task)destContainer.UpsertItemAsync(item, new PartitionKey(partitionKeyValue));
+                Task upsertTask = (Task)destContainer.UpsertItemAsync(item, partitionKey);
                 tasks.Add(upsertTask.ContinueWith(t =>
                     {
                         if (t.IsCompletedSuccessfully)
@@ -397,7 +397,7 @@ public class MigrationService : IMigrationService
     private async Task MigrateSequentialDynamicAsync(
         Container destContainer,
         List<dynamic> items,
-        string partitionKeyPath,
+        List<string> partitionKeyPaths,
         MigrationResult result,
         MigrationOptions options,
         string containerName)
@@ -411,8 +411,8 @@ public class MigrationService : IMigrationService
             {
                 try
                 {
-                    string partitionKeyValue = GetPartitionKeyValue(item, partitionKeyPath);
-                    await destContainer.UpsertItemAsync(item, new PartitionKey(partitionKeyValue));
+                    PartitionKey partitionKey = BuildPartitionKey(item, partitionKeyPaths);
+                    await destContainer.UpsertItemAsync(item, partitionKey);
                     result.SuccessCount++;
                     success = true;
                 }
@@ -533,10 +533,11 @@ public class MigrationService : IMigrationService
     }
 
     /// <summary>
-    /// Ensures the container exists and returns the actual partition key path.
-    /// If the container already exists, reads its partition key path to avoid mismatches.
+    /// Ensures the container exists and returns the actual partition key paths.
+    /// If the container already exists, reads its partition key configuration to avoid mismatches.
+    /// Returns a list of paths to support hierarchical partition keys.
     /// </summary>
-    private async Task<string> EnsureContainerExistsAndGetPartitionKey(CosmosClient client, string databaseName, string containerName, string defaultPartitionKeyPath)
+    private async Task<List<string>> EnsureContainerExistsAndGetPartitionKeys(CosmosClient client, string databaseName, string containerName, string defaultPartitionKeyPath)
     {
         try
         {
@@ -546,18 +547,28 @@ public class MigrationService : IMigrationService
 
             var database = client.GetDatabase(databaseName);
 
-            // First, check if container already exists and get its partition key
+            // First, check if container already exists and get its partition key configuration
             try
             {
                 var container = database.GetContainer(containerName);
                 var containerProperties = await container.ReadContainerAsync();
-                var existingPartitionKeyPath = containerProperties.Resource.PartitionKeyPath;
 
+                // Check for hierarchical partition keys first (PartitionKeyPaths collection)
+                var partitionKeyPaths = containerProperties.Resource.PartitionKeyPaths;
+                if (partitionKeyPaths != null && partitionKeyPaths.Count > 0)
+                {
+                    _logger.LogInformation("Container {Container} has partition key paths: [{PartitionKeys}] (count: {Count})",
+                        containerName, string.Join(", ", partitionKeyPaths), partitionKeyPaths.Count);
+                    return partitionKeyPaths.ToList();
+                }
+
+                // Fall back to singular PartitionKeyPath for older containers
+                var existingPartitionKeyPath = containerProperties.Resource.PartitionKeyPath;
                 if (!string.IsNullOrEmpty(existingPartitionKeyPath))
                 {
-                    _logger.LogInformation("Container {Container} already exists with partition key: {PartitionKey}",
+                    _logger.LogInformation("Container {Container} already exists with single partition key: {PartitionKey}",
                         containerName, existingPartitionKeyPath);
-                    return existingPartitionKeyPath;
+                    return new List<string> { existingPartitionKeyPath };
                 }
             }
             catch (CosmosException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
@@ -571,14 +582,37 @@ public class MigrationService : IMigrationService
             _logger.LogInformation("Container {Container} ready (created: {Created})",
                 containerName, containerResponse.StatusCode == System.Net.HttpStatusCode.Created);
 
-            return defaultPartitionKeyPath;
+            return new List<string> { defaultPartitionKeyPath };
         }
         catch (Exception ex)
         {
             _logger.LogWarning(ex, "Could not ensure container {Container} exists in database {Database}, using default partition key",
                 containerName, databaseName);
-            return defaultPartitionKeyPath;
+            return new List<string> { defaultPartitionKeyPath };
         }
+    }
+
+    /// <summary>
+    /// Builds a PartitionKey from item values based on one or more partition key paths.
+    /// Supports hierarchical partition keys.
+    /// </summary>
+    private PartitionKey BuildPartitionKey(dynamic item, List<string> partitionKeyPaths)
+    {
+        if (partitionKeyPaths.Count == 1)
+        {
+            // Single partition key - use simple PartitionKey
+            var value = GetPartitionKeyValue(item, partitionKeyPaths[0]);
+            return new PartitionKey(value);
+        }
+
+        // Hierarchical partition key - use PartitionKeyBuilder
+        var builder = new PartitionKeyBuilder();
+        foreach (var path in partitionKeyPaths)
+        {
+            var value = GetPartitionKeyValue(item, path);
+            builder.Add(value);
+        }
+        return builder.Build();
     }
 
     #endregion
