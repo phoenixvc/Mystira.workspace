@@ -500,7 +500,7 @@ resource "azurerm_linux_web_app" "api" {
     "JwtSettings__RsaPublicKey"  = var.jwt_public_key != "" ? "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault.main.vault_uri}secrets/jwt-rsa-public-key/)" : ""
 
     # Azure Communication Services - use Key Vault ref if either created or shared ACS is configured
-    "AzureCommunicationServices__ConnectionString" = (var.enable_communication_services || var.shared_acs_connection_string != "") ? "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault.main.vault_uri}secrets/acs-connection-string/)" : ""
+    "AzureCommunicationServices__ConnectionString" = (var.enable_communication_services || var.use_shared_acs) ? "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault.main.vault_uri}secrets/acs-connection-string/)" : ""
     "AzureCommunicationServices__SenderEmail"      = var.sender_email
 
     # PostgreSQL (for hybrid data strategy)
@@ -594,7 +594,7 @@ resource "azurerm_key_vault_secret" "acs_connection_string" {
 
 # Store shared ACS connection string when using shared resources
 resource "azurerm_key_vault_secret" "shared_acs_connection_string" {
-  count = !var.enable_communication_services && var.shared_acs_connection_string != "" ? 1 : 0
+  count = var.use_shared_acs ? 1 : 0
 
   name         = "acs-connection-string"
   value        = var.shared_acs_connection_string

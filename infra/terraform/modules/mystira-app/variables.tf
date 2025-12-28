@@ -241,6 +241,12 @@ variable "shared_acs_connection_string" {
   sensitive   = true
 }
 
+variable "use_shared_acs" {
+  description = "Use shared Azure Communication Services (set to true when providing shared_acs_connection_string)"
+  type        = bool
+  default     = false
+}
+
 variable "sender_email" {
   description = "Sender email address for Communication Services"
   type        = string
