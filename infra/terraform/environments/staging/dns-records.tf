@@ -109,19 +109,11 @@ resource "azurerm_app_service_certificate_binding" "staging_api" {
 # =============================================================================
 # Admin Services DNS Records
 # =============================================================================
+# NOTE: Admin services now route through the shared non-prod Front Door.
+# The CNAME record is created in the K8s DNS section below.
+# App Service verification TXT record kept for potential direct binding if needed.
 
-# CNAME record for staging.admin.mystira.app -> Admin API App Service
-resource "azurerm_dns_cname_record" "staging_admin" {
-  name                = "staging.admin"
-  zone_name           = data.azurerm_dns_zone.mystira.name
-  resource_group_name = data.azurerm_dns_zone.mystira.resource_group_name
-  ttl                 = 300
-  record              = module.admin_api.app_service_default_hostname
-
-  tags = local.common_tags
-}
-
-# TXT record for Admin App Service domain verification
+# TXT record for Admin App Service domain verification (optional, for direct binding)
 resource "azurerm_dns_txt_record" "staging_admin_verification" {
   name                = "asuid.staging.admin"
   zone_name           = data.azurerm_dns_zone.mystira.name
@@ -161,18 +153,9 @@ resource "azurerm_static_web_app_custom_domain" "staging_story" {
   depends_on = [azurerm_dns_cname_record.staging_story_swa]
 }
 
-# CNAME record for staging.story-api.mystira.app -> Story Generator API
-resource "azurerm_dns_cname_record" "staging_story_api" {
-  name                = "staging.story-api"
-  zone_name           = data.azurerm_dns_zone.mystira.name
-  resource_group_name = data.azurerm_dns_zone.mystira.resource_group_name
-  ttl                 = 300
-  record              = module.story_generator.app_service_default_hostname
+# NOTE: staging.story-api CNAME now points to Front Door (defined in K8s DNS section below)
 
-  tags = local.common_tags
-}
-
-# TXT record for Story API App Service domain verification
+# TXT record for Story API App Service domain verification (optional, for direct binding)
 resource "azurerm_dns_txt_record" "staging_story_api_verification" {
   name                = "asuid.staging.story-api"
   zone_name           = data.azurerm_dns_zone.mystira.name
@@ -187,14 +170,24 @@ resource "azurerm_dns_txt_record" "staging_story_api_verification" {
 }
 
 # =============================================================================
-# Kubernetes Services DNS Records (A records to ingress IP)
+# Kubernetes Services DNS Records
+#
+# ARCHITECTURE:
+# - Backend A records (*-k8s.mystira.app) -> K8s ingress IP (for Front Door origins)
+# - Public CNAME records (*.mystira.app) -> Front Door endpoint (for custom domains)
+#
+# The shared non-prod Front Door (managed in dev environment) routes traffic.
 # =============================================================================
 
-# A record for staging.publisher.mystira.app -> K8s ingress
-resource "azurerm_dns_a_record" "staging_publisher" {
+# -----------------------------------------------------------------------------
+# BACKEND A RECORDS (for Front Door to reach K8s)
+# -----------------------------------------------------------------------------
+
+# Backend A record for Publisher service
+resource "azurerm_dns_a_record" "staging_publisher_k8s" {
   count = var.k8s_ingress_ip != "" ? 1 : 0
 
-  name                = "staging.publisher"
+  name                = "staging.publisher-k8s"
   zone_name           = data.azurerm_dns_zone.mystira.name
   resource_group_name = data.azurerm_dns_zone.mystira.resource_group_name
   ttl                 = 300
@@ -203,15 +196,128 @@ resource "azurerm_dns_a_record" "staging_publisher" {
   tags = local.common_tags
 }
 
-# A record for staging.chain.mystira.app -> K8s ingress
-resource "azurerm_dns_a_record" "staging_chain" {
+# Backend A record for Chain service
+resource "azurerm_dns_a_record" "staging_chain_k8s" {
   count = var.k8s_ingress_ip != "" ? 1 : 0
 
-  name                = "staging.chain"
+  name                = "staging.chain-k8s"
   zone_name           = data.azurerm_dns_zone.mystira.name
   resource_group_name = data.azurerm_dns_zone.mystira.resource_group_name
   ttl                 = 300
   records             = [var.k8s_ingress_ip]
+
+  tags = local.common_tags
+}
+
+# Backend A record for Admin API service
+resource "azurerm_dns_a_record" "staging_admin_api_k8s" {
+  count = var.k8s_ingress_ip != "" ? 1 : 0
+
+  name                = "staging.admin-api-k8s"
+  zone_name           = data.azurerm_dns_zone.mystira.name
+  resource_group_name = data.azurerm_dns_zone.mystira.resource_group_name
+  ttl                 = 300
+  records             = [var.k8s_ingress_ip]
+
+  tags = local.common_tags
+}
+
+# Backend A record for Admin UI service
+resource "azurerm_dns_a_record" "staging_admin_ui_k8s" {
+  count = var.k8s_ingress_ip != "" ? 1 : 0
+
+  name                = "staging.admin-k8s"
+  zone_name           = data.azurerm_dns_zone.mystira.name
+  resource_group_name = data.azurerm_dns_zone.mystira.resource_group_name
+  ttl                 = 300
+  records             = [var.k8s_ingress_ip]
+
+  tags = local.common_tags
+}
+
+# Backend A record for Story API service
+resource "azurerm_dns_a_record" "staging_story_api_k8s" {
+  count = var.k8s_ingress_ip != "" ? 1 : 0
+
+  name                = "staging.story-api-k8s"
+  zone_name           = data.azurerm_dns_zone.mystira.name
+  resource_group_name = data.azurerm_dns_zone.mystira.resource_group_name
+  ttl                 = 300
+  records             = [var.k8s_ingress_ip]
+
+  tags = local.common_tags
+}
+
+# -----------------------------------------------------------------------------
+# PUBLIC CNAME RECORDS (for Front Door custom domains)
+# These point to the shared non-prod Front Door for SSL termination
+# -----------------------------------------------------------------------------
+
+# Note: Front Door endpoint hostname is from the shared non-prod Front Door in dev.
+# We use a data source to reference the Front Door profile.
+
+data "azurerm_cdn_frontdoor_profile" "nonprod" {
+  name                = "mystira-nonprod-fd"
+  resource_group_name = "mys-dev-rg-san"
+}
+
+data "azurerm_cdn_frontdoor_endpoint" "nonprod_primary" {
+  name                     = "mystira-nonprod"
+  profile_name             = data.azurerm_cdn_frontdoor_profile.nonprod.name
+  resource_group_name      = "mys-dev-rg-san"
+}
+
+# CNAME for staging.publisher.mystira.app -> Front Door
+resource "azurerm_dns_cname_record" "staging_publisher_fd" {
+  name                = "staging.publisher"
+  zone_name           = data.azurerm_dns_zone.mystira.name
+  resource_group_name = data.azurerm_dns_zone.mystira.resource_group_name
+  ttl                 = 300
+  record              = data.azurerm_cdn_frontdoor_endpoint.nonprod_primary.host_name
+
+  tags = local.common_tags
+}
+
+# CNAME for staging.chain.mystira.app -> Front Door
+resource "azurerm_dns_cname_record" "staging_chain_fd" {
+  name                = "staging.chain"
+  zone_name           = data.azurerm_dns_zone.mystira.name
+  resource_group_name = data.azurerm_dns_zone.mystira.resource_group_name
+  ttl                 = 300
+  record              = data.azurerm_cdn_frontdoor_endpoint.nonprod_primary.host_name
+
+  tags = local.common_tags
+}
+
+# CNAME for staging.admin-api.mystira.app -> Front Door
+resource "azurerm_dns_cname_record" "staging_admin_api_fd" {
+  name                = "staging.admin-api"
+  zone_name           = data.azurerm_dns_zone.mystira.name
+  resource_group_name = data.azurerm_dns_zone.mystira.resource_group_name
+  ttl                 = 300
+  record              = data.azurerm_cdn_frontdoor_endpoint.nonprod_primary.host_name
+
+  tags = local.common_tags
+}
+
+# CNAME for staging.admin.mystira.app -> Front Door
+resource "azurerm_dns_cname_record" "staging_admin_ui_fd" {
+  name                = "staging.admin"
+  zone_name           = data.azurerm_dns_zone.mystira.name
+  resource_group_name = data.azurerm_dns_zone.mystira.resource_group_name
+  ttl                 = 300
+  record              = data.azurerm_cdn_frontdoor_endpoint.nonprod_primary.host_name
+
+  tags = local.common_tags
+}
+
+# CNAME for staging.story-api.mystira.app -> Front Door
+resource "azurerm_dns_cname_record" "staging_story_api_fd" {
+  name                = "staging.story-api"
+  zone_name           = data.azurerm_dns_zone.mystira.name
+  resource_group_name = data.azurerm_dns_zone.mystira.resource_group_name
+  ttl                 = 300
+  record              = data.azurerm_cdn_frontdoor_endpoint.nonprod_primary.host_name
 
   tags = local.common_tags
 }

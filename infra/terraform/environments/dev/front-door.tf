@@ -45,25 +45,33 @@ module "front_door" {
   # ==========================================================================
   # Primary Environment (Dev) Configuration
   # ==========================================================================
+  #
+  # IMPORTANT: Backend addresses use the "-k8s" hostnames which have A records
+  # pointing to K8s ingress. Custom domains use the public hostnames which have
+  # CNAME records pointing to Front Door. This separation is required because:
+  # - Front Door custom domains need CNAME -> Front Door endpoint
+  # - Front Door backends need to reach the actual K8s services (A record -> IP)
+  # - You cannot have both A and CNAME for the same hostname
+  # ==========================================================================
 
-  # Backend addresses (current NGINX ingress endpoints)
-  publisher_backend_address = "dev.publisher.mystira.app"
-  chain_backend_address     = "dev.chain.mystira.app"
+  # Backend addresses (K8s backend hostnames with A records to ingress IP)
+  publisher_backend_address = "dev.publisher-k8s.mystira.app"
+  chain_backend_address     = "dev.chain-k8s.mystira.app"
 
-  # Custom domains (same as backend for dev)
+  # Custom domains (public hostnames with CNAME to Front Door)
   custom_domain_publisher = "dev.publisher.mystira.app"
   custom_domain_chain     = "dev.chain.mystira.app"
 
   # Admin services
   enable_admin_services     = true
-  admin_api_backend_address = "dev.admin-api.mystira.app"
-  admin_ui_backend_address  = "dev.admin.mystira.app"
+  admin_api_backend_address = "dev.admin-api-k8s.mystira.app"
+  admin_ui_backend_address  = "dev.admin-k8s.mystira.app"
   custom_domain_admin_api   = "dev.admin-api.mystira.app"
   custom_domain_admin_ui    = "dev.admin.mystira.app"
 
   # Story Generator services (API + SWA)
   enable_story_generator              = true
-  story_generator_api_backend_address = "dev.story-api.mystira.app"
+  story_generator_api_backend_address = "dev.story-api-k8s.mystira.app"
   story_generator_swa_backend_address = module.story_generator.static_web_app_default_hostname
   custom_domain_story_generator_api   = "dev.story-api.mystira.app"
   custom_domain_story_generator_swa   = "dev.story.mystira.app"
@@ -79,33 +87,36 @@ module "front_door" {
   # Secondary Environment (Staging) Configuration
   # ==========================================================================
   # Enable this to also handle staging domains from this Front Door instance
+  #
+  # IMPORTANT: Same pattern as dev - backend addresses use "-k8s" hostnames
+  # with A records, custom domains use public hostnames with CNAME to Front Door.
 
   enable_secondary_environment = true
   secondary_environment        = "staging"
 
-  # Staging backend addresses (AKS services use NGINX ingress)
-  secondary_publisher_backend_address = "staging.publisher.mystira.app"
-  secondary_chain_backend_address     = "staging.chain.mystira.app"
+  # Staging backend addresses (K8s backend hostnames with A records to ingress IP)
+  secondary_publisher_backend_address = "staging.publisher-k8s.mystira.app"
+  secondary_chain_backend_address     = "staging.chain-k8s.mystira.app"
 
-  # Staging custom domains
+  # Staging custom domains (public hostnames with CNAME to Front Door)
   secondary_custom_domain_publisher = "staging.publisher.mystira.app"
   secondary_custom_domain_chain     = "staging.chain.mystira.app"
 
   # Staging Admin services
-  secondary_admin_api_backend_address = "staging.admin-api.mystira.app"
-  secondary_admin_ui_backend_address  = "staging.admin.mystira.app"
+  secondary_admin_api_backend_address = "staging.admin-api-k8s.mystira.app"
+  secondary_admin_ui_backend_address  = "staging.admin-k8s.mystira.app"
   secondary_custom_domain_admin_api   = "staging.admin-api.mystira.app"
   secondary_custom_domain_admin_ui    = "staging.admin.mystira.app"
 
   # Staging Story Generator services
-  # For SWA backends, use the actual Azure hostname or current domain before migration
-  secondary_story_generator_api_backend_address = "staging.story-api.mystira.app"
+  # API uses K8s backend, SWA uses Azure hostname directly (no K8s)
+  secondary_story_generator_api_backend_address = "staging.story-api-k8s.mystira.app"
   secondary_story_generator_swa_backend_address = var.staging_story_generator_swa_backend != "" ? var.staging_story_generator_swa_backend : "staging.story.mystira.app"
   secondary_custom_domain_story_generator_api   = "staging.story-api.mystira.app"
   secondary_custom_domain_story_generator_swa   = "staging.story.mystira.app"
 
   # Staging Mystira.App services
-  # For App Service/SWA backends, use actual Azure hostnames or current domains
+  # These use App Service/SWA backends directly (not K8s), so no -k8s suffix needed
   secondary_mystira_app_api_backend_address = var.staging_mystira_app_api_backend != "" ? var.staging_mystira_app_api_backend : "staging.api.mystira.app"
   secondary_mystira_app_swa_backend_address = var.staging_mystira_app_swa_backend != "" ? var.staging_mystira_app_swa_backend : "staging.app.mystira.app"
   secondary_custom_domain_mystira_app_api   = "staging.api.mystira.app"
