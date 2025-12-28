@@ -498,7 +498,9 @@ module "entra_external_id" {
   tenant_name   = "mystirastaging"
 
   pwa_redirect_uris = [
-    "https://app.staging.mystira.app/auth/callback"
+    # Staging environment
+    "https://staging.mystira.app/authentication/login-callback",
+    "https://staging.app.mystira.app/authentication/login-callback",
   ]
 }
 

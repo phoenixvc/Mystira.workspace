@@ -819,9 +819,13 @@ module "entra_external_id" {
   tenant_name   = "mystiradev"
 
   pwa_redirect_uris = [
-    "http://localhost:5173/auth/callback",
-    "http://localhost:3000/auth/callback",
-    "https://dev.mystira.app/auth/callback"
+    # Localhost development
+    "http://localhost:5173/authentication/login-callback",
+    "http://localhost:7000/authentication/login-callback",
+    "http://localhost:3000/authentication/login-callback",
+    # Dev environment
+    "https://dev.mystira.app/authentication/login-callback",
+    "https://dev.app.mystira.app/authentication/login-callback",
   ]
 }
 
