@@ -260,11 +260,18 @@ EOF
 
     log_info "Executing migration command..."
 
-    # Run the CLI and capture output
-    # Use printf to avoid issues with echo on different platforms
+    # Write JSON to a temp file to avoid stdin piping issues on Windows/Git Bash
+    local temp_file
+    temp_file=$(mktemp 2>/dev/null || mktemp -t migration)
+    printf '%s' "$json_command" > "$temp_file"
+
+    # Run the CLI with the JSON file as input via stdin redirection
     local result
-    result=$(printf '%s' "$json_command" | dotnet run --configuration Release --no-build 2>&1)
+    result=$(dotnet run --configuration Release --no-build < "$temp_file" 2>&1)
     local exit_code=$?
+
+    # Clean up temp file
+    rm -f "$temp_file" 2>/dev/null
 
     # Always show the result
     echo ""
