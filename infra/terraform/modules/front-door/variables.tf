@@ -1,10 +1,128 @@
 variable "environment" {
-  description = "Deployment environment (dev, staging, prod)"
+  description = "Deployment environment (dev, staging, prod, nonprod)"
   type        = string
   validation {
-    condition     = contains(["dev", "staging", "prod"], var.environment)
-    error_message = "Environment must be dev, staging, or prod."
+    condition     = contains(["dev", "staging", "prod", "nonprod"], var.environment)
+    error_message = "Environment must be dev, staging, prod, or nonprod."
   }
+}
+
+# =============================================================================
+# Secondary Environment Support (for shared non-prod Front Door)
+# =============================================================================
+# When enable_secondary_environment is true, this Front Door instance will
+# also handle domains/backends for a second environment (e.g., dev + staging)
+
+variable "enable_secondary_environment" {
+  description = "Enable secondary environment support (e.g., dev Front Door also handles staging)"
+  type        = bool
+  default     = false
+}
+
+variable "secondary_environment" {
+  description = "Secondary environment name (e.g., staging when primary is dev)"
+  type        = string
+  default     = ""
+}
+
+# Secondary Publisher/Chain
+variable "secondary_publisher_backend_address" {
+  description = "Backend address for Publisher service in secondary environment"
+  type        = string
+  default     = ""
+}
+
+variable "secondary_chain_backend_address" {
+  description = "Backend address for Chain service in secondary environment"
+  type        = string
+  default     = ""
+}
+
+variable "secondary_custom_domain_publisher" {
+  description = "Custom domain for Publisher in secondary environment"
+  type        = string
+  default     = ""
+}
+
+variable "secondary_custom_domain_chain" {
+  description = "Custom domain for Chain in secondary environment"
+  type        = string
+  default     = ""
+}
+
+# Secondary Admin Services
+variable "secondary_admin_api_backend_address" {
+  description = "Backend address for Admin API in secondary environment"
+  type        = string
+  default     = ""
+}
+
+variable "secondary_admin_ui_backend_address" {
+  description = "Backend address for Admin UI in secondary environment"
+  type        = string
+  default     = ""
+}
+
+variable "secondary_custom_domain_admin_api" {
+  description = "Custom domain for Admin API in secondary environment"
+  type        = string
+  default     = ""
+}
+
+variable "secondary_custom_domain_admin_ui" {
+  description = "Custom domain for Admin UI in secondary environment"
+  type        = string
+  default     = ""
+}
+
+# Secondary Story Generator
+variable "secondary_story_generator_api_backend_address" {
+  description = "Backend address for Story Generator API in secondary environment"
+  type        = string
+  default     = ""
+}
+
+variable "secondary_story_generator_swa_backend_address" {
+  description = "Backend address for Story Generator SWA in secondary environment"
+  type        = string
+  default     = ""
+}
+
+variable "secondary_custom_domain_story_generator_api" {
+  description = "Custom domain for Story Generator API in secondary environment"
+  type        = string
+  default     = ""
+}
+
+variable "secondary_custom_domain_story_generator_swa" {
+  description = "Custom domain for Story Generator SWA in secondary environment"
+  type        = string
+  default     = ""
+}
+
+# Secondary Mystira.App
+variable "secondary_mystira_app_api_backend_address" {
+  description = "Backend address for Mystira.App API in secondary environment"
+  type        = string
+  default     = ""
+}
+
+variable "secondary_mystira_app_swa_backend_address" {
+  description = "Backend address for Mystira.App SWA in secondary environment"
+  type        = string
+  default     = ""
+}
+
+variable "secondary_custom_domain_mystira_app_api" {
+  description = "Custom domain for Mystira.App API in secondary environment"
+  type        = string
+  default     = ""
+}
+
+variable "secondary_custom_domain_mystira_app_swa" {
+  description = "Custom domain for Mystira.App SWA in secondary environment"
+  type        = string
+  default     = ""
 }
 
 variable "resource_group_name" {
