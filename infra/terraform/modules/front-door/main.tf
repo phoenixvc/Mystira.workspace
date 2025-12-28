@@ -29,17 +29,21 @@ resource "azurerm_cdn_frontdoor_profile" "main" {
   tags = local.common_tags
 }
 
-# Publisher Endpoint
-resource "azurerm_cdn_frontdoor_endpoint" "publisher" {
-  name                     = "${var.project_name}-${var.environment}-publisher"
-  cdn_frontdoor_profile_id = azurerm_cdn_frontdoor_profile.main.id
+# =============================================================================
+# CONSOLIDATED ENDPOINT ARCHITECTURE
+# =============================================================================
+# Instead of separate endpoints per service (which hit Azure quota limits),
+# we use a single consolidated endpoint per environment. Custom domains and
+# routes handle routing to different origin groups based on the hostname.
+#
+# This reduces endpoints from 16 (with secondary environment) to just 2:
+# - Primary endpoint: handles all primary environment traffic
+# - Secondary endpoint: handles all secondary environment traffic (if enabled)
+# =============================================================================
 
-  tags = local.common_tags
-}
-
-# Chain Endpoint
-resource "azurerm_cdn_frontdoor_endpoint" "chain" {
-  name                     = "${var.project_name}-${var.environment}-chain"
+# Primary Consolidated Endpoint - handles all primary environment services
+resource "azurerm_cdn_frontdoor_endpoint" "primary" {
+  name                     = "${var.project_name}-${var.environment}"
   cdn_frontdoor_profile_id = azurerm_cdn_frontdoor_profile.main.id
 
   tags = local.common_tags
@@ -139,10 +143,10 @@ resource "azurerm_cdn_frontdoor_custom_domain" "chain" {
   }
 }
 
-# Publisher Route
+# Publisher Route - uses consolidated primary endpoint
 resource "azurerm_cdn_frontdoor_route" "publisher" {
   name                            = "publisher-route"
-  cdn_frontdoor_endpoint_id       = azurerm_cdn_frontdoor_endpoint.publisher.id
+  cdn_frontdoor_endpoint_id       = azurerm_cdn_frontdoor_endpoint.primary.id
   cdn_frontdoor_origin_group_id   = azurerm_cdn_frontdoor_origin_group.publisher.id
   cdn_frontdoor_origin_ids        = [azurerm_cdn_frontdoor_origin.publisher.id]
   cdn_frontdoor_custom_domain_ids = [azurerm_cdn_frontdoor_custom_domain.publisher.id]
@@ -172,10 +176,10 @@ resource "azurerm_cdn_frontdoor_route" "publisher" {
   }
 }
 
-# Chain Route
+# Chain Route - uses consolidated primary endpoint
 resource "azurerm_cdn_frontdoor_route" "chain" {
   name                            = "chain-route"
-  cdn_frontdoor_endpoint_id       = azurerm_cdn_frontdoor_endpoint.chain.id
+  cdn_frontdoor_endpoint_id       = azurerm_cdn_frontdoor_endpoint.primary.id
   cdn_frontdoor_origin_group_id   = azurerm_cdn_frontdoor_origin_group.chain.id
   cdn_frontdoor_origin_ids        = [azurerm_cdn_frontdoor_origin.chain.id]
   cdn_frontdoor_custom_domain_ids = [azurerm_cdn_frontdoor_custom_domain.chain.id]
@@ -405,24 +409,8 @@ resource "azurerm_cdn_frontdoor_security_policy" "main" {
 # =============================================================================
 # Admin Services (Optional)
 # =============================================================================
-
-# Admin API Endpoint
-resource "azurerm_cdn_frontdoor_endpoint" "admin_api" {
-  count                    = var.enable_admin_services ? 1 : 0
-  name                     = "${var.project_name}-${var.environment}-admin-api"
-  cdn_frontdoor_profile_id = azurerm_cdn_frontdoor_profile.main.id
-
-  tags = local.common_tags
-}
-
-# Admin UI Endpoint
-resource "azurerm_cdn_frontdoor_endpoint" "admin_ui" {
-  count                    = var.enable_admin_services ? 1 : 0
-  name                     = "${var.project_name}-${var.environment}-admin-ui"
-  cdn_frontdoor_profile_id = azurerm_cdn_frontdoor_profile.main.id
-
-  tags = local.common_tags
-}
+# Note: Admin services use the consolidated primary endpoint instead of
+# individual endpoints to stay within Azure Front Door quota limits.
 
 # Admin API Origin Group
 resource "azurerm_cdn_frontdoor_origin_group" "admin_api" {
@@ -524,11 +512,11 @@ resource "azurerm_cdn_frontdoor_custom_domain" "admin_ui" {
   }
 }
 
-# Admin API Route
+# Admin API Route - uses consolidated primary endpoint
 resource "azurerm_cdn_frontdoor_route" "admin_api" {
   count                           = var.enable_admin_services ? 1 : 0
   name                            = "admin-api-route"
-  cdn_frontdoor_endpoint_id       = azurerm_cdn_frontdoor_endpoint.admin_api[0].id
+  cdn_frontdoor_endpoint_id       = azurerm_cdn_frontdoor_endpoint.primary.id
   cdn_frontdoor_origin_group_id   = azurerm_cdn_frontdoor_origin_group.admin_api[0].id
   cdn_frontdoor_origin_ids        = [azurerm_cdn_frontdoor_origin.admin_api[0].id]
   cdn_frontdoor_custom_domain_ids = [azurerm_cdn_frontdoor_custom_domain.admin_api[0].id]
@@ -550,11 +538,11 @@ resource "azurerm_cdn_frontdoor_route" "admin_api" {
   }
 }
 
-# Admin UI Route
+# Admin UI Route - uses consolidated primary endpoint
 resource "azurerm_cdn_frontdoor_route" "admin_ui" {
   count                           = var.enable_admin_services ? 1 : 0
   name                            = "admin-ui-route"
-  cdn_frontdoor_endpoint_id       = azurerm_cdn_frontdoor_endpoint.admin_ui[0].id
+  cdn_frontdoor_endpoint_id       = azurerm_cdn_frontdoor_endpoint.primary.id
   cdn_frontdoor_origin_group_id   = azurerm_cdn_frontdoor_origin_group.admin_ui[0].id
   cdn_frontdoor_origin_ids        = [azurerm_cdn_frontdoor_origin.admin_ui[0].id]
   cdn_frontdoor_custom_domain_ids = [azurerm_cdn_frontdoor_custom_domain.admin_ui[0].id]
@@ -590,24 +578,8 @@ resource "azurerm_cdn_frontdoor_route" "admin_ui" {
 # =============================================================================
 # Story Generator Services (Optional)
 # =============================================================================
-
-# Story Generator API Endpoint
-resource "azurerm_cdn_frontdoor_endpoint" "story_generator_api" {
-  count                    = var.enable_story_generator ? 1 : 0
-  name                     = "${var.project_name}-${var.environment}-story-api"
-  cdn_frontdoor_profile_id = azurerm_cdn_frontdoor_profile.main.id
-
-  tags = local.common_tags
-}
-
-# Story Generator SWA Endpoint
-resource "azurerm_cdn_frontdoor_endpoint" "story_generator_swa" {
-  count                    = var.enable_story_generator ? 1 : 0
-  name                     = "${var.project_name}-${var.environment}-story-swa"
-  cdn_frontdoor_profile_id = azurerm_cdn_frontdoor_profile.main.id
-
-  tags = local.common_tags
-}
+# Note: Story Generator services use the consolidated primary endpoint instead
+# of individual endpoints to stay within Azure Front Door quota limits.
 
 # Story Generator API Origin Group
 resource "azurerm_cdn_frontdoor_origin_group" "story_generator_api" {
@@ -709,11 +681,11 @@ resource "azurerm_cdn_frontdoor_custom_domain" "story_generator_swa" {
   }
 }
 
-# Story Generator API Route
+# Story Generator API Route - uses consolidated primary endpoint
 resource "azurerm_cdn_frontdoor_route" "story_generator_api" {
   count                           = var.enable_story_generator ? 1 : 0
   name                            = "story-generator-api-route"
-  cdn_frontdoor_endpoint_id       = azurerm_cdn_frontdoor_endpoint.story_generator_api[0].id
+  cdn_frontdoor_endpoint_id       = azurerm_cdn_frontdoor_endpoint.primary.id
   cdn_frontdoor_origin_group_id   = azurerm_cdn_frontdoor_origin_group.story_generator_api[0].id
   cdn_frontdoor_origin_ids        = [azurerm_cdn_frontdoor_origin.story_generator_api[0].id]
   cdn_frontdoor_custom_domain_ids = [azurerm_cdn_frontdoor_custom_domain.story_generator_api[0].id]
@@ -735,11 +707,11 @@ resource "azurerm_cdn_frontdoor_route" "story_generator_api" {
   }
 }
 
-# Story Generator SWA Route
+# Story Generator SWA Route - uses consolidated primary endpoint
 resource "azurerm_cdn_frontdoor_route" "story_generator_swa" {
   count                           = var.enable_story_generator ? 1 : 0
   name                            = "story-generator-swa-route"
-  cdn_frontdoor_endpoint_id       = azurerm_cdn_frontdoor_endpoint.story_generator_swa[0].id
+  cdn_frontdoor_endpoint_id       = azurerm_cdn_frontdoor_endpoint.primary.id
   cdn_frontdoor_origin_group_id   = azurerm_cdn_frontdoor_origin_group.story_generator_swa[0].id
   cdn_frontdoor_origin_ids        = [azurerm_cdn_frontdoor_origin.story_generator_swa[0].id]
   cdn_frontdoor_custom_domain_ids = [azurerm_cdn_frontdoor_custom_domain.story_generator_swa[0].id]
@@ -772,24 +744,8 @@ resource "azurerm_cdn_frontdoor_route" "story_generator_swa" {
 # =============================================================================
 # Mystira.App Services (Optional)
 # =============================================================================
-
-# Mystira.App API Endpoint
-resource "azurerm_cdn_frontdoor_endpoint" "mystira_app_api" {
-  count                    = var.enable_mystira_app ? 1 : 0
-  name                     = "${var.project_name}-${var.environment}-app-api"
-  cdn_frontdoor_profile_id = azurerm_cdn_frontdoor_profile.main.id
-
-  tags = local.common_tags
-}
-
-# Mystira.App SWA Endpoint
-resource "azurerm_cdn_frontdoor_endpoint" "mystira_app_swa" {
-  count                    = var.enable_mystira_app ? 1 : 0
-  name                     = "${var.project_name}-${var.environment}-app-swa"
-  cdn_frontdoor_profile_id = azurerm_cdn_frontdoor_profile.main.id
-
-  tags = local.common_tags
-}
+# Note: Mystira.App services use the consolidated primary endpoint instead
+# of individual endpoints to stay within Azure Front Door quota limits.
 
 # Mystira.App API Origin Group
 resource "azurerm_cdn_frontdoor_origin_group" "mystira_app_api" {
@@ -891,11 +847,11 @@ resource "azurerm_cdn_frontdoor_custom_domain" "mystira_app_swa" {
   }
 }
 
-# Mystira.App API Route
+# Mystira.App API Route - uses consolidated primary endpoint
 resource "azurerm_cdn_frontdoor_route" "mystira_app_api" {
   count                           = var.enable_mystira_app ? 1 : 0
   name                            = "mystira-app-api-route"
-  cdn_frontdoor_endpoint_id       = azurerm_cdn_frontdoor_endpoint.mystira_app_api[0].id
+  cdn_frontdoor_endpoint_id       = azurerm_cdn_frontdoor_endpoint.primary.id
   cdn_frontdoor_origin_group_id   = azurerm_cdn_frontdoor_origin_group.mystira_app_api[0].id
   cdn_frontdoor_origin_ids        = [azurerm_cdn_frontdoor_origin.mystira_app_api[0].id]
   cdn_frontdoor_custom_domain_ids = [azurerm_cdn_frontdoor_custom_domain.mystira_app_api[0].id]
@@ -917,11 +873,11 @@ resource "azurerm_cdn_frontdoor_route" "mystira_app_api" {
   }
 }
 
-# Mystira.App SWA Route
+# Mystira.App SWA Route - uses consolidated primary endpoint
 resource "azurerm_cdn_frontdoor_route" "mystira_app_swa" {
   count                           = var.enable_mystira_app ? 1 : 0
   name                            = "mystira-app-swa-route"
-  cdn_frontdoor_endpoint_id       = azurerm_cdn_frontdoor_endpoint.mystira_app_swa[0].id
+  cdn_frontdoor_endpoint_id       = azurerm_cdn_frontdoor_endpoint.primary.id
   cdn_frontdoor_origin_group_id   = azurerm_cdn_frontdoor_origin_group.mystira_app_swa[0].id
   cdn_frontdoor_origin_ids        = [azurerm_cdn_frontdoor_origin.mystira_app_swa[0].id]
   cdn_frontdoor_custom_domain_ids = [azurerm_cdn_frontdoor_custom_domain.mystira_app_swa[0].id]
@@ -957,20 +913,14 @@ resource "azurerm_cdn_frontdoor_route" "mystira_app_swa" {
 # =============================================================================
 # These resources are only created when enable_secondary_environment is true
 # They handle domains/backends for the secondary environment (e.g., staging)
+#
+# Like the primary environment, secondary uses a consolidated endpoint to stay
+# within Azure Front Door quota limits.
 
-# Secondary Publisher Endpoint
-resource "azurerm_cdn_frontdoor_endpoint" "secondary_publisher" {
+# Secondary Consolidated Endpoint - handles all secondary environment services
+resource "azurerm_cdn_frontdoor_endpoint" "secondary" {
   count                    = var.enable_secondary_environment ? 1 : 0
-  name                     = "${var.project_name}-${var.secondary_environment}-publisher"
-  cdn_frontdoor_profile_id = azurerm_cdn_frontdoor_profile.main.id
-
-  tags = merge(local.common_tags, { SecondaryEnvironment = var.secondary_environment })
-}
-
-# Secondary Chain Endpoint
-resource "azurerm_cdn_frontdoor_endpoint" "secondary_chain" {
-  count                    = var.enable_secondary_environment ? 1 : 0
-  name                     = "${var.project_name}-${var.secondary_environment}-chain"
+  name                     = "${var.project_name}-${var.secondary_environment}"
   cdn_frontdoor_profile_id = azurerm_cdn_frontdoor_profile.main.id
 
   tags = merge(local.common_tags, { SecondaryEnvironment = var.secondary_environment })
@@ -1076,11 +1026,11 @@ resource "azurerm_cdn_frontdoor_custom_domain" "secondary_chain" {
   }
 }
 
-# Secondary Publisher Route
+# Secondary Publisher Route - uses consolidated secondary endpoint
 resource "azurerm_cdn_frontdoor_route" "secondary_publisher" {
   count                           = var.enable_secondary_environment ? 1 : 0
   name                            = "secondary-publisher-route"
-  cdn_frontdoor_endpoint_id       = azurerm_cdn_frontdoor_endpoint.secondary_publisher[0].id
+  cdn_frontdoor_endpoint_id       = azurerm_cdn_frontdoor_endpoint.secondary[0].id
   cdn_frontdoor_origin_group_id   = azurerm_cdn_frontdoor_origin_group.secondary_publisher[0].id
   cdn_frontdoor_origin_ids        = [azurerm_cdn_frontdoor_origin.secondary_publisher[0].id]
   cdn_frontdoor_custom_domain_ids = [azurerm_cdn_frontdoor_custom_domain.secondary_publisher[0].id]
@@ -1110,11 +1060,11 @@ resource "azurerm_cdn_frontdoor_route" "secondary_publisher" {
   }
 }
 
-# Secondary Chain Route
+# Secondary Chain Route - uses consolidated secondary endpoint
 resource "azurerm_cdn_frontdoor_route" "secondary_chain" {
   count                           = var.enable_secondary_environment ? 1 : 0
   name                            = "secondary-chain-route"
-  cdn_frontdoor_endpoint_id       = azurerm_cdn_frontdoor_endpoint.secondary_chain[0].id
+  cdn_frontdoor_endpoint_id       = azurerm_cdn_frontdoor_endpoint.secondary[0].id
   cdn_frontdoor_origin_group_id   = azurerm_cdn_frontdoor_origin_group.secondary_chain[0].id
   cdn_frontdoor_origin_ids        = [azurerm_cdn_frontdoor_origin.secondary_chain[0].id]
   cdn_frontdoor_custom_domain_ids = [azurerm_cdn_frontdoor_custom_domain.secondary_chain[0].id]
@@ -1134,22 +1084,7 @@ resource "azurerm_cdn_frontdoor_route" "secondary_chain" {
 # =============================================================================
 # Secondary Admin Services
 # =============================================================================
-
-resource "azurerm_cdn_frontdoor_endpoint" "secondary_admin_api" {
-  count                    = var.enable_secondary_environment && var.enable_admin_services ? 1 : 0
-  name                     = "${var.project_name}-${var.secondary_environment}-admin-api"
-  cdn_frontdoor_profile_id = azurerm_cdn_frontdoor_profile.main.id
-
-  tags = merge(local.common_tags, { SecondaryEnvironment = var.secondary_environment })
-}
-
-resource "azurerm_cdn_frontdoor_endpoint" "secondary_admin_ui" {
-  count                    = var.enable_secondary_environment && var.enable_admin_services ? 1 : 0
-  name                     = "${var.project_name}-${var.secondary_environment}-admin-ui"
-  cdn_frontdoor_profile_id = azurerm_cdn_frontdoor_profile.main.id
-
-  tags = merge(local.common_tags, { SecondaryEnvironment = var.secondary_environment })
-}
+# Note: Secondary admin services use the consolidated secondary endpoint.
 
 resource "azurerm_cdn_frontdoor_origin_group" "secondary_admin_api" {
   count                    = var.enable_secondary_environment && var.enable_admin_services ? 1 : 0
@@ -1245,10 +1180,11 @@ resource "azurerm_cdn_frontdoor_custom_domain" "secondary_admin_ui" {
   }
 }
 
+# Secondary Admin API Route - uses consolidated secondary endpoint
 resource "azurerm_cdn_frontdoor_route" "secondary_admin_api" {
   count                           = var.enable_secondary_environment && var.enable_admin_services ? 1 : 0
   name                            = "secondary-admin-api-route"
-  cdn_frontdoor_endpoint_id       = azurerm_cdn_frontdoor_endpoint.secondary_admin_api[0].id
+  cdn_frontdoor_endpoint_id       = azurerm_cdn_frontdoor_endpoint.secondary[0].id
   cdn_frontdoor_origin_group_id   = azurerm_cdn_frontdoor_origin_group.secondary_admin_api[0].id
   cdn_frontdoor_origin_ids        = [azurerm_cdn_frontdoor_origin.secondary_admin_api[0].id]
   cdn_frontdoor_custom_domain_ids = [azurerm_cdn_frontdoor_custom_domain.secondary_admin_api[0].id]
@@ -1269,10 +1205,11 @@ resource "azurerm_cdn_frontdoor_route" "secondary_admin_api" {
   }
 }
 
+# Secondary Admin UI Route - uses consolidated secondary endpoint
 resource "azurerm_cdn_frontdoor_route" "secondary_admin_ui" {
   count                           = var.enable_secondary_environment && var.enable_admin_services ? 1 : 0
   name                            = "secondary-admin-ui-route"
-  cdn_frontdoor_endpoint_id       = azurerm_cdn_frontdoor_endpoint.secondary_admin_ui[0].id
+  cdn_frontdoor_endpoint_id       = azurerm_cdn_frontdoor_endpoint.secondary[0].id
   cdn_frontdoor_origin_group_id   = azurerm_cdn_frontdoor_origin_group.secondary_admin_ui[0].id
   cdn_frontdoor_origin_ids        = [azurerm_cdn_frontdoor_origin.secondary_admin_ui[0].id]
   cdn_frontdoor_custom_domain_ids = [azurerm_cdn_frontdoor_custom_domain.secondary_admin_ui[0].id]
@@ -1304,22 +1241,7 @@ resource "azurerm_cdn_frontdoor_route" "secondary_admin_ui" {
 # =============================================================================
 # Secondary Story Generator Services
 # =============================================================================
-
-resource "azurerm_cdn_frontdoor_endpoint" "secondary_story_generator_api" {
-  count                    = var.enable_secondary_environment && var.enable_story_generator ? 1 : 0
-  name                     = "${var.project_name}-${var.secondary_environment}-story-api"
-  cdn_frontdoor_profile_id = azurerm_cdn_frontdoor_profile.main.id
-
-  tags = merge(local.common_tags, { SecondaryEnvironment = var.secondary_environment })
-}
-
-resource "azurerm_cdn_frontdoor_endpoint" "secondary_story_generator_swa" {
-  count                    = var.enable_secondary_environment && var.enable_story_generator ? 1 : 0
-  name                     = "${var.project_name}-${var.secondary_environment}-story-swa"
-  cdn_frontdoor_profile_id = azurerm_cdn_frontdoor_profile.main.id
-
-  tags = merge(local.common_tags, { SecondaryEnvironment = var.secondary_environment })
-}
+# Note: Secondary story generator services use the consolidated secondary endpoint.
 
 resource "azurerm_cdn_frontdoor_origin_group" "secondary_story_generator_api" {
   count                    = var.enable_secondary_environment && var.enable_story_generator ? 1 : 0
@@ -1415,10 +1337,11 @@ resource "azurerm_cdn_frontdoor_custom_domain" "secondary_story_generator_swa" {
   }
 }
 
+# Secondary Story Generator API Route - uses consolidated secondary endpoint
 resource "azurerm_cdn_frontdoor_route" "secondary_story_generator_api" {
   count                           = var.enable_secondary_environment && var.enable_story_generator ? 1 : 0
   name                            = "secondary-story-generator-api-route"
-  cdn_frontdoor_endpoint_id       = azurerm_cdn_frontdoor_endpoint.secondary_story_generator_api[0].id
+  cdn_frontdoor_endpoint_id       = azurerm_cdn_frontdoor_endpoint.secondary[0].id
   cdn_frontdoor_origin_group_id   = azurerm_cdn_frontdoor_origin_group.secondary_story_generator_api[0].id
   cdn_frontdoor_origin_ids        = [azurerm_cdn_frontdoor_origin.secondary_story_generator_api[0].id]
   cdn_frontdoor_custom_domain_ids = [azurerm_cdn_frontdoor_custom_domain.secondary_story_generator_api[0].id]
@@ -1439,10 +1362,11 @@ resource "azurerm_cdn_frontdoor_route" "secondary_story_generator_api" {
   }
 }
 
+# Secondary Story Generator SWA Route - uses consolidated secondary endpoint
 resource "azurerm_cdn_frontdoor_route" "secondary_story_generator_swa" {
   count                           = var.enable_secondary_environment && var.enable_story_generator ? 1 : 0
   name                            = "secondary-story-generator-swa-route"
-  cdn_frontdoor_endpoint_id       = azurerm_cdn_frontdoor_endpoint.secondary_story_generator_swa[0].id
+  cdn_frontdoor_endpoint_id       = azurerm_cdn_frontdoor_endpoint.secondary[0].id
   cdn_frontdoor_origin_group_id   = azurerm_cdn_frontdoor_origin_group.secondary_story_generator_swa[0].id
   cdn_frontdoor_origin_ids        = [azurerm_cdn_frontdoor_origin.secondary_story_generator_swa[0].id]
   cdn_frontdoor_custom_domain_ids = [azurerm_cdn_frontdoor_custom_domain.secondary_story_generator_swa[0].id]
@@ -1474,22 +1398,7 @@ resource "azurerm_cdn_frontdoor_route" "secondary_story_generator_swa" {
 # =============================================================================
 # Secondary Mystira.App Services
 # =============================================================================
-
-resource "azurerm_cdn_frontdoor_endpoint" "secondary_mystira_app_api" {
-  count                    = var.enable_secondary_environment && var.enable_mystira_app ? 1 : 0
-  name                     = "${var.project_name}-${var.secondary_environment}-app-api"
-  cdn_frontdoor_profile_id = azurerm_cdn_frontdoor_profile.main.id
-
-  tags = merge(local.common_tags, { SecondaryEnvironment = var.secondary_environment })
-}
-
-resource "azurerm_cdn_frontdoor_endpoint" "secondary_mystira_app_swa" {
-  count                    = var.enable_secondary_environment && var.enable_mystira_app ? 1 : 0
-  name                     = "${var.project_name}-${var.secondary_environment}-app-swa"
-  cdn_frontdoor_profile_id = azurerm_cdn_frontdoor_profile.main.id
-
-  tags = merge(local.common_tags, { SecondaryEnvironment = var.secondary_environment })
-}
+# Note: Secondary Mystira.App services use the consolidated secondary endpoint.
 
 resource "azurerm_cdn_frontdoor_origin_group" "secondary_mystira_app_api" {
   count                    = var.enable_secondary_environment && var.enable_mystira_app ? 1 : 0
@@ -1585,10 +1494,11 @@ resource "azurerm_cdn_frontdoor_custom_domain" "secondary_mystira_app_swa" {
   }
 }
 
+# Secondary Mystira.App API Route - uses consolidated secondary endpoint
 resource "azurerm_cdn_frontdoor_route" "secondary_mystira_app_api" {
   count                           = var.enable_secondary_environment && var.enable_mystira_app ? 1 : 0
   name                            = "secondary-mystira-app-api-route"
-  cdn_frontdoor_endpoint_id       = azurerm_cdn_frontdoor_endpoint.secondary_mystira_app_api[0].id
+  cdn_frontdoor_endpoint_id       = azurerm_cdn_frontdoor_endpoint.secondary[0].id
   cdn_frontdoor_origin_group_id   = azurerm_cdn_frontdoor_origin_group.secondary_mystira_app_api[0].id
   cdn_frontdoor_origin_ids        = [azurerm_cdn_frontdoor_origin.secondary_mystira_app_api[0].id]
   cdn_frontdoor_custom_domain_ids = [azurerm_cdn_frontdoor_custom_domain.secondary_mystira_app_api[0].id]
@@ -1609,10 +1519,11 @@ resource "azurerm_cdn_frontdoor_route" "secondary_mystira_app_api" {
   }
 }
 
+# Secondary Mystira.App SWA Route - uses consolidated secondary endpoint
 resource "azurerm_cdn_frontdoor_route" "secondary_mystira_app_swa" {
   count                           = var.enable_secondary_environment && var.enable_mystira_app ? 1 : 0
   name                            = "secondary-mystira-app-swa-route"
-  cdn_frontdoor_endpoint_id       = azurerm_cdn_frontdoor_endpoint.secondary_mystira_app_swa[0].id
+  cdn_frontdoor_endpoint_id       = azurerm_cdn_frontdoor_endpoint.secondary[0].id
   cdn_frontdoor_origin_group_id   = azurerm_cdn_frontdoor_origin_group.secondary_mystira_app_swa[0].id
   cdn_frontdoor_origin_ids        = [azurerm_cdn_frontdoor_origin.secondary_mystira_app_swa[0].id]
   cdn_frontdoor_custom_domain_ids = [azurerm_cdn_frontdoor_custom_domain.secondary_mystira_app_swa[0].id]
