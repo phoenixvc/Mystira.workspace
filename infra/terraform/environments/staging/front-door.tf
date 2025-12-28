@@ -31,10 +31,9 @@ module "front_door" {
   custom_domain_story_generator_swa   = "staging.story.mystira.app"
 
   # Mystira.App services (API + SWA/PWA)
-  # TODO: Enable after mystira_app module is added to staging/main.tf
-  enable_mystira_app              = false
-  mystira_app_api_backend_address = ""  # module.mystira_app.app_service_default_hostname
-  mystira_app_swa_backend_address = ""  # module.mystira_app.static_web_app_default_hostname
+  enable_mystira_app              = true
+  mystira_app_api_backend_address = module.mystira_app.app_service_default_hostname
+  mystira_app_swa_backend_address = module.mystira_app.static_web_app_default_hostname
   custom_domain_mystira_app_api   = "staging.api.mystira.app"
   custom_domain_mystira_app_swa   = "staging.app.mystira.app"
 
