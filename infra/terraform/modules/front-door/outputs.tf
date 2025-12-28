@@ -140,3 +140,95 @@ output "mystira_app_swa_custom_domain_validation_token" {
   value       = var.enable_mystira_app ? azurerm_cdn_frontdoor_custom_domain.mystira_app_swa[0].validation_token : null
   sensitive   = true
 }
+
+# =============================================================================
+# Secondary Environment Outputs (for shared non-prod Front Door)
+# =============================================================================
+
+output "secondary_publisher_endpoint_hostname" {
+  description = "Hostname of the secondary Publisher endpoint"
+  value       = var.enable_secondary_environment ? azurerm_cdn_frontdoor_endpoint.secondary_publisher[0].host_name : null
+}
+
+output "secondary_chain_endpoint_hostname" {
+  description = "Hostname of the secondary Chain endpoint"
+  value       = var.enable_secondary_environment ? azurerm_cdn_frontdoor_endpoint.secondary_chain[0].host_name : null
+}
+
+output "secondary_publisher_custom_domain_validation_token" {
+  description = "Validation token for secondary Publisher custom domain"
+  value       = var.enable_secondary_environment ? azurerm_cdn_frontdoor_custom_domain.secondary_publisher[0].validation_token : null
+  sensitive   = true
+}
+
+output "secondary_chain_custom_domain_validation_token" {
+  description = "Validation token for secondary Chain custom domain"
+  value       = var.enable_secondary_environment ? azurerm_cdn_frontdoor_custom_domain.secondary_chain[0].validation_token : null
+  sensitive   = true
+}
+
+output "secondary_admin_api_endpoint_hostname" {
+  description = "Hostname of the secondary Admin API endpoint"
+  value       = var.enable_secondary_environment && var.enable_admin_services ? azurerm_cdn_frontdoor_endpoint.secondary_admin_api[0].host_name : null
+}
+
+output "secondary_admin_ui_endpoint_hostname" {
+  description = "Hostname of the secondary Admin UI endpoint"
+  value       = var.enable_secondary_environment && var.enable_admin_services ? azurerm_cdn_frontdoor_endpoint.secondary_admin_ui[0].host_name : null
+}
+
+output "secondary_admin_api_custom_domain_validation_token" {
+  description = "Validation token for secondary Admin API custom domain"
+  value       = var.enable_secondary_environment && var.enable_admin_services ? azurerm_cdn_frontdoor_custom_domain.secondary_admin_api[0].validation_token : null
+  sensitive   = true
+}
+
+output "secondary_admin_ui_custom_domain_validation_token" {
+  description = "Validation token for secondary Admin UI custom domain"
+  value       = var.enable_secondary_environment && var.enable_admin_services ? azurerm_cdn_frontdoor_custom_domain.secondary_admin_ui[0].validation_token : null
+  sensitive   = true
+}
+
+output "secondary_story_generator_api_endpoint_hostname" {
+  description = "Hostname of the secondary Story Generator API endpoint"
+  value       = var.enable_secondary_environment && var.enable_story_generator ? azurerm_cdn_frontdoor_endpoint.secondary_story_generator_api[0].host_name : null
+}
+
+output "secondary_story_generator_swa_endpoint_hostname" {
+  description = "Hostname of the secondary Story Generator SWA endpoint"
+  value       = var.enable_secondary_environment && var.enable_story_generator ? azurerm_cdn_frontdoor_endpoint.secondary_story_generator_swa[0].host_name : null
+}
+
+output "secondary_story_generator_api_custom_domain_validation_token" {
+  description = "Validation token for secondary Story Generator API custom domain"
+  value       = var.enable_secondary_environment && var.enable_story_generator ? azurerm_cdn_frontdoor_custom_domain.secondary_story_generator_api[0].validation_token : null
+  sensitive   = true
+}
+
+output "secondary_story_generator_swa_custom_domain_validation_token" {
+  description = "Validation token for secondary Story Generator SWA custom domain"
+  value       = var.enable_secondary_environment && var.enable_story_generator ? azurerm_cdn_frontdoor_custom_domain.secondary_story_generator_swa[0].validation_token : null
+  sensitive   = true
+}
+
+output "secondary_mystira_app_api_endpoint_hostname" {
+  description = "Hostname of the secondary Mystira.App API endpoint"
+  value       = var.enable_secondary_environment && var.enable_mystira_app ? azurerm_cdn_frontdoor_endpoint.secondary_mystira_app_api[0].host_name : null
+}
+
+output "secondary_mystira_app_swa_endpoint_hostname" {
+  description = "Hostname of the secondary Mystira.App SWA endpoint"
+  value       = var.enable_secondary_environment && var.enable_mystira_app ? azurerm_cdn_frontdoor_endpoint.secondary_mystira_app_swa[0].host_name : null
+}
+
+output "secondary_mystira_app_api_custom_domain_validation_token" {
+  description = "Validation token for secondary Mystira.App API custom domain"
+  value       = var.enable_secondary_environment && var.enable_mystira_app ? azurerm_cdn_frontdoor_custom_domain.secondary_mystira_app_api[0].validation_token : null
+  sensitive   = true
+}
+
+output "secondary_mystira_app_swa_custom_domain_validation_token" {
+  description = "Validation token for secondary Mystira.App SWA custom domain"
+  value       = var.enable_secondary_environment && var.enable_mystira_app ? azurerm_cdn_frontdoor_custom_domain.secondary_mystira_app_swa[0].validation_token : null
+  sensitive   = true
+}

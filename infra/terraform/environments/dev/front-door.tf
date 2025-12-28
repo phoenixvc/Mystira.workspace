@@ -1,18 +1,50 @@
-# Azure Front Door Example Configuration for Dev Environment
-# Rename this file to front-door.tf to enable Front Door
+# Azure Front Door Configuration for Non-Production Environments
+# This shared Front Door handles both dev and staging traffic to save costs
 
 # IMPORTANT: Before enabling, ensure:
 # 1. Backend services (Publisher, Chain) are deployed and healthy
 # 2. DNS is properly configured
-# 3. Budget is allocated (~$150/month for dev)
+# 3. Budget is allocated (~$150/month for shared non-prod)
+
+# =============================================================================
+# Variables for Staging Backend Addresses
+# =============================================================================
+# These are needed because staging module outputs aren't available in dev terraform.
+# Set via terraform.tfvars or workflow inputs.
+
+variable "staging_story_generator_swa_backend" {
+  description = "Staging Story Generator SWA backend hostname (azurestaticapps.net)"
+  type        = string
+  default     = "" # Will be set after staging SWA is deployed
+}
+
+variable "staging_mystira_app_api_backend" {
+  description = "Staging Mystira.App API backend hostname (azurewebsites.net)"
+  type        = string
+  default     = "" # Will be set after staging App Service is deployed
+}
+
+variable "staging_mystira_app_swa_backend" {
+  description = "Staging Mystira.App SWA backend hostname (azurestaticapps.net)"
+  type        = string
+  default     = "" # Will be set after staging SWA is deployed
+}
+
+# =============================================================================
+# Front Door Module Configuration
+# =============================================================================
 
 module "front_door" {
   source = "../../modules/front-door"
 
-  environment         = "dev"
+  environment         = "nonprod"
   resource_group_name = azurerm_resource_group.main.name
   location            = var.location
   project_name        = "mystira"
+
+  # ==========================================================================
+  # Primary Environment (Dev) Configuration
+  # ==========================================================================
 
   # Backend addresses (current NGINX ingress endpoints)
   publisher_backend_address = "dev.publisher.mystira.app"
@@ -38,19 +70,57 @@ module "front_door" {
 
   # Mystira.App services (API + SWA/PWA)
   enable_mystira_app              = true
-  mystira_app_api_backend_address = module.mystira_app.app_service_default_hostname  # App Service hostname from mystira-app module
-  mystira_app_swa_backend_address = module.mystira_app.static_web_app_default_hostname  # Static Web App hostname from mystira-app module
+  mystira_app_api_backend_address = module.mystira_app.app_service_default_hostname
+  mystira_app_swa_backend_address = module.mystira_app.static_web_app_default_hostname
   custom_domain_mystira_app_api   = "dev.api.mystira.app"
   custom_domain_mystira_app_swa   = "dev.mystira.app"
 
-  # WAF Configuration
+  # ==========================================================================
+  # Secondary Environment (Staging) Configuration
+  # ==========================================================================
+  # Enable this to also handle staging domains from this Front Door instance
+
+  enable_secondary_environment = true
+  secondary_environment        = "staging"
+
+  # Staging backend addresses (AKS services use NGINX ingress)
+  secondary_publisher_backend_address = "staging.publisher.mystira.app"
+  secondary_chain_backend_address     = "staging.chain.mystira.app"
+
+  # Staging custom domains
+  secondary_custom_domain_publisher = "staging.publisher.mystira.app"
+  secondary_custom_domain_chain     = "staging.chain.mystira.app"
+
+  # Staging Admin services
+  secondary_admin_api_backend_address = "staging.admin-api.mystira.app"
+  secondary_admin_ui_backend_address  = "staging.admin.mystira.app"
+  secondary_custom_domain_admin_api   = "staging.admin-api.mystira.app"
+  secondary_custom_domain_admin_ui    = "staging.admin.mystira.app"
+
+  # Staging Story Generator services
+  # For SWA backends, use the actual Azure hostname or current domain before migration
+  secondary_story_generator_api_backend_address = "staging.story-api.mystira.app"
+  secondary_story_generator_swa_backend_address = var.staging_story_generator_swa_backend != "" ? var.staging_story_generator_swa_backend : "staging.story.mystira.app"
+  secondary_custom_domain_story_generator_api   = "staging.story-api.mystira.app"
+  secondary_custom_domain_story_generator_swa   = "staging.story.mystira.app"
+
+  # Staging Mystira.App services
+  # For App Service/SWA backends, use actual Azure hostnames or current domains
+  secondary_mystira_app_api_backend_address = var.staging_mystira_app_api_backend != "" ? var.staging_mystira_app_api_backend : "staging.api.mystira.app"
+  secondary_mystira_app_swa_backend_address = var.staging_mystira_app_swa_backend != "" ? var.staging_mystira_app_swa_backend : "staging.app.mystira.app"
+  secondary_custom_domain_mystira_app_api   = "staging.api.mystira.app"
+  secondary_custom_domain_mystira_app_swa   = "staging.app.mystira.app"
+
+  # ==========================================================================
+  # WAF Configuration - Non-Production Settings
+  # ==========================================================================
   enable_waf           = true
-  waf_mode             = "Detection" # Use Detection mode for dev to avoid blocking legitimate test traffic
-  rate_limit_threshold = 100         # Lower threshold for dev
+  waf_mode             = "Detection" # Use Detection mode for non-prod to avoid blocking test traffic
+  rate_limit_threshold = 100         # Lower threshold for non-prod
 
   # Caching Configuration
   enable_caching         = true
-  cache_duration_seconds = 1800 # 30 minutes for dev
+  cache_duration_seconds = 1800 # 30 minutes for non-prod
 
   # Health Probes
   health_probe_path     = "/health"
@@ -60,12 +130,17 @@ module "front_door" {
   session_affinity_enabled = false # Disabled for stateless apps
 
   tags = merge(local.common_tags, {
-    Component = "front-door"
-    Purpose   = "cdn-waf"
+    Component   = "front-door"
+    Purpose     = "cdn-waf"
+    Environment = "nonprod"
+    Handles     = "dev,staging"
   })
 }
 
-# Outputs for DNS configuration
+# =============================================================================
+# Dev Environment Outputs
+# =============================================================================
+
 output "front_door_publisher_endpoint" {
   description = "Front Door endpoint for Publisher - use this for CNAME"
   value       = module.front_door.publisher_endpoint_hostname
@@ -111,7 +186,7 @@ output "front_door_mystira_app_swa_endpoint" {
   value       = module.front_door.mystira_app_swa_endpoint_hostname
 }
 
-# Validation token outputs for TXT records
+# Dev Validation token outputs
 output "front_door_publisher_validation_token" {
   description = "Validation token for Publisher custom domain"
   value       = module.front_door.publisher_custom_domain_validation_token
@@ -161,6 +236,99 @@ output "front_door_mystira_app_swa_validation_token" {
 }
 
 # =============================================================================
+# Staging Environment Outputs (from shared Front Door)
+# =============================================================================
+
+output "front_door_staging_publisher_endpoint" {
+  description = "Front Door endpoint for Staging Publisher - use this for CNAME"
+  value       = module.front_door.secondary_publisher_endpoint_hostname
+}
+
+output "front_door_staging_chain_endpoint" {
+  description = "Front Door endpoint for Staging Chain - use this for CNAME"
+  value       = module.front_door.secondary_chain_endpoint_hostname
+}
+
+output "front_door_staging_admin_api_endpoint" {
+  description = "Front Door endpoint for Staging Admin API - use this for CNAME"
+  value       = module.front_door.secondary_admin_api_endpoint_hostname
+}
+
+output "front_door_staging_admin_ui_endpoint" {
+  description = "Front Door endpoint for Staging Admin UI - use this for CNAME"
+  value       = module.front_door.secondary_admin_ui_endpoint_hostname
+}
+
+output "front_door_staging_story_generator_api_endpoint" {
+  description = "Front Door endpoint for Staging Story Generator API - use this for CNAME"
+  value       = module.front_door.secondary_story_generator_api_endpoint_hostname
+}
+
+output "front_door_staging_story_generator_swa_endpoint" {
+  description = "Front Door endpoint for Staging Story Generator SWA - use this for CNAME"
+  value       = module.front_door.secondary_story_generator_swa_endpoint_hostname
+}
+
+output "front_door_staging_mystira_app_api_endpoint" {
+  description = "Front Door endpoint for Staging Mystira.App API - use this for CNAME"
+  value       = module.front_door.secondary_mystira_app_api_endpoint_hostname
+}
+
+output "front_door_staging_mystira_app_swa_endpoint" {
+  description = "Front Door endpoint for Staging Mystira.App SWA - use this for CNAME"
+  value       = module.front_door.secondary_mystira_app_swa_endpoint_hostname
+}
+
+# Staging Validation token outputs
+output "front_door_staging_publisher_validation_token" {
+  description = "Validation token for Staging Publisher custom domain"
+  value       = module.front_door.secondary_publisher_custom_domain_validation_token
+  sensitive   = true
+}
+
+output "front_door_staging_chain_validation_token" {
+  description = "Validation token for Staging Chain custom domain"
+  value       = module.front_door.secondary_chain_custom_domain_validation_token
+  sensitive   = true
+}
+
+output "front_door_staging_admin_api_validation_token" {
+  description = "Validation token for Staging Admin API custom domain"
+  value       = module.front_door.secondary_admin_api_custom_domain_validation_token
+  sensitive   = true
+}
+
+output "front_door_staging_admin_ui_validation_token" {
+  description = "Validation token for Staging Admin UI custom domain"
+  value       = module.front_door.secondary_admin_ui_custom_domain_validation_token
+  sensitive   = true
+}
+
+output "front_door_staging_story_generator_api_validation_token" {
+  description = "Validation token for Staging Story Generator API custom domain"
+  value       = module.front_door.secondary_story_generator_api_custom_domain_validation_token
+  sensitive   = true
+}
+
+output "front_door_staging_story_generator_swa_validation_token" {
+  description = "Validation token for Staging Story Generator SWA custom domain"
+  value       = module.front_door.secondary_story_generator_swa_custom_domain_validation_token
+  sensitive   = true
+}
+
+output "front_door_staging_mystira_app_api_validation_token" {
+  description = "Validation token for Staging Mystira.App API custom domain"
+  value       = module.front_door.secondary_mystira_app_api_custom_domain_validation_token
+  sensitive   = true
+}
+
+output "front_door_staging_mystira_app_swa_validation_token" {
+  description = "Validation token for Staging Mystira.App SWA custom domain"
+  value       = module.front_door.secondary_mystira_app_swa_custom_domain_validation_token
+  sensitive   = true
+}
+
+# =============================================================================
 # DNS Configuration Requirements for Custom Domains
 # =============================================================================
 #
@@ -171,25 +339,33 @@ output "front_door_mystira_app_swa_validation_token" {
 # 1. CNAME record pointing to the Front Door endpoint
 # 2. TXT record for domain validation (_dnsauth.<subdomain>)
 #
-# Required DNS Records for dev.mystira.app:
-# -----------------------------------------
+# Dev Environment DNS Records:
+# ----------------------------
 # | Type  | Name                    | Value                                    |
 # |-------|-------------------------|------------------------------------------|
-# | CNAME | dev                     | mystira-dev-app-swa.azurefd.net          |
+# | CNAME | dev                     | mystira-nonprod-app-swa.azurefd.net      |
 # | TXT   | _dnsauth.dev            | <validation_token from terraform output> |
-# | CNAME | api.dev                 | mystira-dev-app-api.azurefd.net          |
-# | TXT   | _dnsauth.api.dev        | <validation_token from terraform output> |
+# | CNAME | dev.api                 | mystira-nonprod-app-api.azurefd.net      |
+# | TXT   | _dnsauth.dev.api        | <validation_token from terraform output> |
+# | CNAME | dev.publisher           | mystira-nonprod-publisher.azurefd.net    |
+# | TXT   | _dnsauth.dev.publisher  | <validation_token from terraform output> |
+# | CNAME | dev.chain               | mystira-nonprod-chain.azurefd.net        |
+# | TXT   | _dnsauth.dev.chain      | <validation_token from terraform output> |
+#
+# Staging Environment DNS Records:
+# --------------------------------
+# | Type  | Name                        | Value                                        |
+# |-------|-----------------------------|----------------------------------------------|
+# | CNAME | staging.app                 | mystira-staging-app-swa.azurefd.net          |
+# | TXT   | _dnsauth.staging.app        | <validation_token from terraform output>     |
+# | CNAME | staging.api                 | mystira-staging-app-api.azurefd.net          |
+# | TXT   | _dnsauth.staging.api        | <validation_token from terraform output>     |
+# | CNAME | staging.publisher           | mystira-staging-publisher.azurefd.net        |
+# | TXT   | _dnsauth.staging.publisher  | <validation_token from terraform output>     |
+# | CNAME | staging.chain               | mystira-staging-chain.azurefd.net            |
+# | TXT   | _dnsauth.staging.chain      | <validation_token from terraform output>     |
 #
 # After deploying, run: terraform output -json | jq '.front_door_mystira_app_swa_custom_domain_validation_token'
 # to get the validation tokens.
-#
-# Legacy DNS Records (publisher/chain):
-# -------------------------------------
-# | Type  | Name                    | Value                                    |
-# |-------|-------------------------|------------------------------------------|
-# | CNAME | dev.publisher           | mystira-dev-publisher.azurefd.net        |
-# | CNAME | dev.chain               | mystira-dev-chain.azurefd.net            |
-# | TXT   | _dnsauth.dev.publisher  | <validation_token from terraform output> |
-# | TXT   | _dnsauth.dev.chain      | <validation_token from terraform output> |
 #
 # =============================================================================
