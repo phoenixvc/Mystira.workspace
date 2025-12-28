@@ -346,11 +346,13 @@ public class MigrationService : IMigrationService
         {
             try
             {
+                // Ensure the document has partition key fields (inject if missing)
+                var docWithPartitionKey = EnsurePartitionKeyField(item, partitionKeyPaths);
                 PartitionKey partitionKey = BuildPartitionKey(item, partitionKeyPaths);
                 // Capture itemId before the lambda to avoid dynamic dispatch issues
                 string itemId = item?.id?.ToString() ?? "unknown";
                 // Cast to Task to break the dynamic dispatch chain
-                Task upsertTask = (Task)destContainer.UpsertItemAsync(item, partitionKey);
+                Task upsertTask = (Task)destContainer.UpsertItemAsync(docWithPartitionKey, partitionKey);
                 tasks.Add(upsertTask.ContinueWith(t =>
                     {
                         if (t.IsCompletedSuccessfully)
@@ -411,8 +413,10 @@ public class MigrationService : IMigrationService
             {
                 try
                 {
+                    // Ensure the document has partition key fields (inject if missing)
+                    var docWithPartitionKey = EnsurePartitionKeyField(item, partitionKeyPaths);
                     PartitionKey partitionKey = BuildPartitionKey(item, partitionKeyPaths);
-                    await destContainer.UpsertItemAsync(item, partitionKey);
+                    await destContainer.UpsertItemAsync(docWithPartitionKey, partitionKey);
                     result.SuccessCount++;
                     success = true;
                 }
@@ -463,6 +467,10 @@ public class MigrationService : IMigrationService
         }
     }
 
+    /// <summary>
+    /// Gets the partition key value from a document, or derives it from the id pattern.
+    /// For documents with id like "EntityType|guid", extracts "EntityType" if the partition key path doesn't exist.
+    /// </summary>
     private string GetPartitionKeyValue(dynamic item, string partitionKeyPath)
     {
         var propertyName = partitionKeyPath.TrimStart('/');
@@ -479,12 +487,8 @@ public class MigrationService : IMigrationService
                 }
                 else
                 {
-                    // Fallback to id
-                    if (item is System.Text.Json.JsonElement rootElement && rootElement.TryGetProperty("id", out var idProp))
-                    {
-                        return idProp.ToString();
-                    }
-                    throw new InvalidOperationException($"Partition key path '{partitionKeyPath}' not found in item and no 'id' fallback available");
+                    // Partition key path not found - try to derive from id pattern
+                    return DerivePartitionKeyFromId(item, partitionKeyPath);
                 }
             }
             else
@@ -493,33 +497,18 @@ public class MigrationService : IMigrationService
                 {
                     if (current == null)
                     {
-                        string? itemId = item?.id?.ToString();
-                        if (!string.IsNullOrEmpty(itemId))
-                        {
-                            return itemId;
-                        }
-                        throw new InvalidOperationException($"Partition key path '{partitionKeyPath}' is null and no 'id' fallback available");
+                        return DerivePartitionKeyFromId(item, partitionKeyPath);
                     }
                     current = ((IDictionary<string, object>)current)[part];
                 }
                 catch (KeyNotFoundException)
                 {
-                    string? itemId = item?.id?.ToString();
-                    if (!string.IsNullOrEmpty(itemId))
-                    {
-                        return itemId;
-                    }
-                    throw new InvalidOperationException($"Partition key path '{partitionKeyPath}' not found in item and no 'id' fallback available");
+                    return DerivePartitionKeyFromId(item, partitionKeyPath);
                 }
                 catch (Exception ex) when (ex is not InvalidOperationException)
                 {
                     _logger.LogWarning(ex, "Unexpected exception when traversing partition key path '{PartitionKeyPath}'", partitionKeyPath);
-                    string? itemId = item?.id?.ToString();
-                    if (!string.IsNullOrEmpty(itemId))
-                    {
-                        return itemId;
-                    }
-                    throw new InvalidOperationException($"Unexpected exception traversing partition key path '{partitionKeyPath}' and no 'id' fallback available", ex);
+                    return DerivePartitionKeyFromId(item, partitionKeyPath);
                 }
             }
         }
@@ -527,9 +516,85 @@ public class MigrationService : IMigrationService
         var result = current?.ToString();
         if (string.IsNullOrEmpty(result))
         {
-            throw new InvalidOperationException($"Partition key value at path '{partitionKeyPath}' is null or empty");
+            return DerivePartitionKeyFromId(item, partitionKeyPath);
         }
         return result!;
+    }
+
+    /// <summary>
+    /// Derives a partition key value from the document's id.
+    /// If id follows pattern "EntityType|guid", extracts "EntityType".
+    /// Otherwise, returns the full id.
+    /// </summary>
+    private string DerivePartitionKeyFromId(dynamic item, string partitionKeyPath)
+    {
+        string? itemId = null;
+
+        if (item is System.Text.Json.JsonElement rootElement && rootElement.TryGetProperty("id", out var idProp))
+        {
+            itemId = idProp.ToString();
+        }
+        else
+        {
+            itemId = item?.id?.ToString();
+        }
+
+        if (string.IsNullOrEmpty(itemId))
+        {
+            throw new InvalidOperationException($"Partition key path '{partitionKeyPath}' not found and no 'id' available to derive from");
+        }
+
+        // Check for discriminator pattern: "EntityType|guid"
+        var pipeIndex = itemId.IndexOf('|');
+        if (pipeIndex > 0)
+        {
+            var entityType = itemId.Substring(0, pipeIndex);
+            _logger.LogDebug("Derived partition key '{PartitionKey}' from id pattern '{Id}'", entityType, itemId);
+            return entityType;
+        }
+
+        // No discriminator pattern, use full id
+        return itemId;
+    }
+
+    /// <summary>
+    /// Ensures the document has the partition key field(s).
+    /// If the partition key field doesn't exist, adds it with the derived value.
+    /// Returns a dictionary representation of the document with the partition key field.
+    /// </summary>
+    private Dictionary<string, object?> EnsurePartitionKeyField(dynamic item, List<string> partitionKeyPaths)
+    {
+        Dictionary<string, object?> doc;
+
+        if (item is System.Text.Json.JsonElement jsonElement)
+        {
+            // Convert JsonElement to mutable dictionary
+            doc = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object?>>(jsonElement.GetRawText())
+                  ?? new Dictionary<string, object?>();
+        }
+        else
+        {
+            // Try to serialize and deserialize to get a clean dictionary
+            var json = System.Text.Json.JsonSerializer.Serialize(item);
+            doc = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object?>>(json)
+                  ?? new Dictionary<string, object?>();
+        }
+
+        foreach (var path in partitionKeyPaths)
+        {
+            var propertyName = path.TrimStart('/');
+
+            // Only handle simple (non-nested) partition key paths for injection
+            if (!propertyName.Contains('/') && !doc.ContainsKey(propertyName))
+            {
+                // Get the value we would use for this partition key
+                var value = GetPartitionKeyValue(item, path);
+                doc[propertyName] = value;
+                _logger.LogDebug("Injected partition key field '{Field}' with value '{Value}'", propertyName, value);
+            }
+        }
+
+        return doc;
     }
 
     /// <summary>
