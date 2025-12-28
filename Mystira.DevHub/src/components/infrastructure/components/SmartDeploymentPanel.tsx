@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import {
-  Play,
   Square,
   SkipForward,
   RefreshCw,
@@ -21,7 +20,6 @@ import {
 import {
   useSmartDeploymentStore,
   AZURE_REGIONS,
-  type RegionId,
   type RegionStatus,
 } from '../../../stores/smartDeploymentStore';
 import {
@@ -40,18 +38,16 @@ interface SmartDeploymentPanelProps {
   repoRoot: string;
 }
 
-export function SmartDeploymentPanel({ repoRoot }: SmartDeploymentPanelProps) {
+export function SmartDeploymentPanel({ repoRoot: _repoRoot }: SmartDeploymentPanelProps) {
   const {
     regionPriority,
     environment,
     isDeploying,
-    isCancelled,
     currentRegionIndex,
     regionStatuses,
     deploymentResult,
     allAttemptsFailed,
     logs,
-    setRegionPriority,
     moveRegionUp,
     moveRegionDown,
     setEnvironment,
@@ -60,6 +56,8 @@ export function SmartDeploymentPanel({ repoRoot }: SmartDeploymentPanelProps) {
     skipToNextRegion,
     reset,
   } = useSmartDeploymentStore();
+
+  const [_azureAccount, setAzureAccount] = useState<{ name: string; id: string } | null>(null);
 
   const [copiedField, setCopiedField] = useState<string | null>(null);
   const [prerequisitesReady, setPrerequisitesReady] = useState(false);

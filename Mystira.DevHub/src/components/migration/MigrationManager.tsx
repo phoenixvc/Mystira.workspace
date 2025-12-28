@@ -18,8 +18,10 @@ function MigrationManager() {
     destCosmosConnection: '',
     sourceStorageConnection: '',
     destStorageConnection: '',
-    databaseName: 'MystiraAppDb',
+    sourceDatabaseName: 'MystiraAppDb',
+    destDatabaseName: 'MystiraAppDb',
     containerName: 'media-assets',
+    dryRun: false,
   });
 
   const [selectedResources, setSelectedResources] = useState<ResourceSelection>({
@@ -38,13 +40,15 @@ function MigrationManager() {
     characterMediaMetadataFiles: true,
     avatarConfigurationFiles: true,
     badgeConfigurations: true,
+    // Master data
+    masterData: false,
     // Storage
     blobStorage: false,
   });
 
-  const { currentOperation, migrationResults, validateConfig, runMigration } = useMigration();
+  const { progress, migrationResults, validateConfig, runMigration } = useMigration();
 
-  const handleConfigChange = (field: keyof MigrationConfig, value: string) => {
+  const handleConfigChange = (field: keyof MigrationConfig, value: string | boolean) => {
     setConfig((prev) => ({ ...prev, [field]: value }));
   };
 
@@ -66,6 +70,7 @@ function MigrationManager() {
       characterMediaMetadataFiles: true,
       avatarConfigurationFiles: true,
       badgeConfigurations: true,
+      masterData: true,
       blobStorage: true,
     });
   };
@@ -84,6 +89,7 @@ function MigrationManager() {
       characterMediaMetadataFiles: false,
       avatarConfigurationFiles: false,
       badgeConfigurations: false,
+      masterData: false,
       blobStorage: false,
     });
   };
@@ -109,8 +115,10 @@ function MigrationManager() {
       destCosmosConnection: '',
       sourceStorageConnection: '',
       destStorageConnection: '',
-      databaseName: 'MystiraAppDb',
+      sourceDatabaseName: 'MystiraAppDb',
+      destDatabaseName: 'MystiraAppDb',
       containerName: 'media-assets',
+      dryRun: false,
     });
     setSelectedResources({
       // Core content
@@ -128,6 +136,8 @@ function MigrationManager() {
       characterMediaMetadataFiles: true,
       avatarConfigurationFiles: true,
       badgeConfigurations: true,
+      // Master data
+      masterData: false,
       // Storage
       blobStorage: false,
     });
@@ -167,7 +177,7 @@ function MigrationManager() {
         )}
 
         {currentStep === 'running' && (
-          <MigrationProgress currentOperation={currentOperation} />
+          <MigrationProgress currentOperation={progress.currentOperation} />
         )}
 
         {currentStep === 'complete' && migrationResults && (
@@ -179,4 +189,3 @@ function MigrationManager() {
 }
 
 export default MigrationManager;
-

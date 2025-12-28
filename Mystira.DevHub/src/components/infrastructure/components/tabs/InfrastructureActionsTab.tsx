@@ -80,7 +80,8 @@ export default function InfrastructureActionsTab({
   const step2Complete = hasPreviewed;
   const step3Complete = hasDeployedInfrastructure;
 
-  const steps = [
+  // Steps data for potential future stepper UI
+  const _steps = [
     {
       id: 1,
       name: 'Plan',
