@@ -1,7 +1,17 @@
 # =============================================================================
 # DNS Zone and Records for Dev Environment
 # Creates DNS zone in dev core-rg (shared across all environments)
+#
+# Two-step deployment:
+#   1. terraform apply                                    (creates DNS zone + records)
+#   2. terraform apply -var="bind_custom_domains=true"    (binds custom domains)
 # =============================================================================
+
+variable "bind_custom_domains" {
+  description = "Set to true to bind custom domains (run after DNS propagates)"
+  type        = bool
+  default     = false
+}
 
 # DNS Zone for mystira.app (created in dev, shared by all environments)
 resource "azurerm_dns_zone" "mystira" {
@@ -26,19 +36,15 @@ resource "azurerm_dns_cname_record" "dev_app_swa" {
   tags = local.common_tags
 }
 
-# Wait for DNS propagation before binding custom domain
-resource "time_sleep" "wait_for_swa_dns" {
-  depends_on      = [azurerm_dns_cname_record.dev_app_swa]
-  create_duration = "60s"
-}
-
-# Custom domain binding for SWA (depends on DNS record + propagation delay)
+# Custom domain binding for SWA (only when bind_custom_domains=true)
 resource "azurerm_static_web_app_custom_domain" "dev_app" {
+  count = var.bind_custom_domains ? 1 : 0
+
   static_web_app_id = module.mystira_app.static_web_app_id
   domain_name       = "dev.mystira.app"
   validation_type   = "cname-delegation"
 
-  depends_on = [time_sleep.wait_for_swa_dns]
+  depends_on = [azurerm_dns_cname_record.dev_app_swa]
 }
 
 # =============================================================================
@@ -70,22 +76,18 @@ resource "azurerm_dns_txt_record" "dev_api_verification" {
   tags = local.common_tags
 }
 
-# Wait for DNS propagation before binding custom domain
-resource "time_sleep" "wait_for_api_dns" {
-  depends_on = [
-    azurerm_dns_cname_record.dev_api,
-    azurerm_dns_txt_record.dev_api_verification
-  ]
-  create_duration = "60s"
-}
-
-# Custom hostname binding for App Service (depends on DNS records + propagation delay)
+# Custom hostname binding for App Service (only when bind_custom_domains=true)
 resource "azurerm_app_service_custom_hostname_binding" "dev_api" {
+  count = var.bind_custom_domains ? 1 : 0
+
   hostname            = "dev.api.mystira.app"
   app_service_name    = module.mystira_app.app_service_name
   resource_group_name = azurerm_resource_group.app.name
 
-  depends_on = [time_sleep.wait_for_api_dns]
+  depends_on = [
+    azurerm_dns_cname_record.dev_api,
+    azurerm_dns_txt_record.dev_api_verification
+  ]
 }
 
 # =============================================================================
@@ -95,4 +97,9 @@ resource "azurerm_app_service_custom_hostname_binding" "dev_api" {
 output "dns_zone_name_servers" {
   description = "Name servers for mystira.app DNS zone - update your domain registrar"
   value       = azurerm_dns_zone.mystira.name_servers
+}
+
+output "next_step" {
+  description = "Instructions for binding custom domains"
+  value       = var.bind_custom_domains ? "Custom domains bound!" : "Run: terraform apply -var='bind_custom_domains=true'"
 }
