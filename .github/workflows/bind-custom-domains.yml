@@ -1,0 +1,262 @@
+name: "[Deploy] Bind Custom Domains"
+
+# Binds custom domains to SWAs and App Services after DNS propagation
+# Run this AFTER infra-deploy.yml completes and DNS records have propagated
+#
+# Prerequisites:
+#   1. DNS zone exists with CNAME/A records
+#   2. DNS records resolve correctly (nslookup <domain>)
+#   3. AKS ingress IP known (for K8s services)
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Environment to bind domains for"
+        required: true
+        default: "dev"
+        type: choice
+        options:
+          - dev
+          - staging
+          - prod
+      skip_dns_check:
+        description: "Skip DNS propagation check"
+        required: false
+        default: false
+        type: boolean
+
+concurrency:
+  group: bind-domains-${{ github.event.inputs.environment }}
+  cancel-in-progress: false
+
+env:
+  TF_VERSION: "1.5.0"
+  ENVIRONMENT: ${{ github.event.inputs.environment }}
+  AZURE_RESOURCE_GROUP: mys-${{ github.event.inputs.environment }}-core-rg-san
+  AKS_CLUSTER_NAME: mys-${{ github.event.inputs.environment }}-core-aks-san
+
+jobs:
+  # ============================================
+  # Check DNS Propagation
+  # ============================================
+  check-dns:
+    name: Check DNS Propagation
+    runs-on: ubuntu-latest
+    if: ${{ github.event.inputs.skip_dns_check != 'true' }}
+    outputs:
+      dns-ready: ${{ steps.check.outputs.ready }}
+      ingress-ip: ${{ steps.get-ingress-ip.outputs.ip }}
+    steps:
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.MYSTIRA_AZURE_CREDENTIALS }}
+
+      - name: Get K8s Ingress IP
+        id: get-ingress-ip
+        run: |
+          # Try to get ingress IP from AKS
+          if az aks show --name ${{ env.AKS_CLUSTER_NAME }} --resource-group ${{ env.AZURE_RESOURCE_GROUP }} &>/dev/null; then
+            az aks get-credentials --name ${{ env.AKS_CLUSTER_NAME }} --resource-group ${{ env.AZURE_RESOURCE_GROUP }} --overwrite-existing
+            INGRESS_IP=$(kubectl get svc -n ingress-nginx ingress-nginx-controller -o jsonpath='{.status.loadBalancer.ingress[0].ip}' 2>/dev/null || echo "")
+            echo "ip=$INGRESS_IP" >> $GITHUB_OUTPUT
+            echo "Ingress IP: $INGRESS_IP"
+          else
+            echo "ip=" >> $GITHUB_OUTPUT
+            echo "AKS not found - K8s DNS records will be skipped"
+          fi
+
+      - name: Check DNS Records
+        id: check
+        run: |
+          ENV="${{ env.ENVIRONMENT }}"
+          FAILED=0
+
+          echo "## DNS Propagation Check - $ENV" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Domain | Status | Resolution |" >> $GITHUB_STEP_SUMMARY
+          echo "|--------|--------|------------|" >> $GITHUB_STEP_SUMMARY
+
+          # Determine domain prefix
+          if [ "$ENV" == "prod" ]; then
+            PREFIX=""
+          else
+            PREFIX="${ENV}."
+          fi
+
+          # Check SWA domains (CNAME)
+          for domain in "${PREFIX}mystira.app" "${PREFIX}story.mystira.app"; do
+            RESULT=$(nslookup "$domain" 2>&1 || true)
+            if echo "$RESULT" | grep -q "NXDOMAIN\|server can't find"; then
+              echo "| $domain | ❌ Not found | - |" >> $GITHUB_STEP_SUMMARY
+              FAILED=1
+            else
+              RESOLVED=$(echo "$RESULT" | grep -A1 "canonical name" | tail -1 | awk '{print $NF}' || echo "OK")
+              echo "| $domain | ✅ OK | $RESOLVED |" >> $GITHUB_STEP_SUMMARY
+            fi
+          done
+
+          # Check API domain (CNAME)
+          API_DOMAIN="${PREFIX}api.mystira.app"
+          RESULT=$(nslookup "$API_DOMAIN" 2>&1 || true)
+          if echo "$RESULT" | grep -q "NXDOMAIN\|server can't find"; then
+            echo "| $API_DOMAIN | ❌ Not found | - |" >> $GITHUB_STEP_SUMMARY
+            FAILED=1
+          else
+            echo "| $API_DOMAIN | ✅ OK | - |" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [ "$FAILED" -eq 1 ]; then
+            echo "::warning::Some DNS records have not propagated yet"
+            echo "ready=false" >> $GITHUB_OUTPUT
+          else
+            echo "ready=true" >> $GITHUB_OUTPUT
+          fi
+
+  # ============================================
+  # Bind Custom Domains
+  # ============================================
+  bind-domains:
+    name: Bind Custom Domains
+    runs-on: ubuntu-latest
+    needs: [check-dns]
+    if: |
+      always() &&
+      (needs.check-dns.result == 'success' || needs.check-dns.result == 'skipped') &&
+      (needs.check-dns.outputs.dns-ready == 'true' || github.event.inputs.skip_dns_check == 'true')
+    environment: ${{ github.event.inputs.environment }}
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+          terraform_wrapper: false
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.MYSTIRA_AZURE_CREDENTIALS }}
+
+      - name: Set Azure credentials for Terraform
+        run: |
+          ARM_CLIENT_ID=$(echo '${{ secrets.MYSTIRA_AZURE_CREDENTIALS }}' | jq -r '.clientId')
+          ARM_CLIENT_SECRET=$(echo '${{ secrets.MYSTIRA_AZURE_CREDENTIALS }}' | jq -r '.clientSecret')
+          ARM_SUBSCRIPTION_ID=$(echo '${{ secrets.MYSTIRA_AZURE_CREDENTIALS }}' | jq -r '.subscriptionId')
+          ARM_TENANT_ID=$(echo '${{ secrets.MYSTIRA_AZURE_CREDENTIALS }}' | jq -r '.tenantId')
+          echo "::add-mask::$ARM_CLIENT_SECRET"
+          {
+            echo "ARM_CLIENT_ID=$ARM_CLIENT_ID"
+            echo "ARM_CLIENT_SECRET=$ARM_CLIENT_SECRET"
+            echo "ARM_SUBSCRIPTION_ID=$ARM_SUBSCRIPTION_ID"
+            echo "ARM_TENANT_ID=$ARM_TENANT_ID"
+            echo "ARM_USE_CLI=false"
+          } >> "$GITHUB_ENV"
+
+      - name: Get K8s Ingress IP
+        id: ingress-ip
+        run: |
+          # Get ingress IP if AKS exists
+          if az aks show --name ${{ env.AKS_CLUSTER_NAME }} --resource-group ${{ env.AZURE_RESOURCE_GROUP }} &>/dev/null; then
+            az aks get-credentials --name ${{ env.AKS_CLUSTER_NAME }} --resource-group ${{ env.AZURE_RESOURCE_GROUP }} --overwrite-existing
+            INGRESS_IP=$(kubectl get svc -n ingress-nginx ingress-nginx-controller -o jsonpath='{.status.loadBalancer.ingress[0].ip}' 2>/dev/null || echo "")
+            echo "ip=$INGRESS_IP" >> $GITHUB_OUTPUT
+          else
+            echo "ip=" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Terraform Init
+        run: |
+          cd infra/terraform/environments/${{ env.ENVIRONMENT }}
+          terraform init -upgrade
+
+      - name: Terraform Apply - Bind Custom Domains
+        run: |
+          cd infra/terraform/environments/${{ env.ENVIRONMENT }}
+
+          INGRESS_IP="${{ steps.ingress-ip.outputs.ip }}"
+
+          # Build terraform args
+          TF_ARGS="-var=bind_custom_domains=true"
+          if [ -n "$INGRESS_IP" ]; then
+            TF_ARGS="$TF_ARGS -var=k8s_ingress_ip=$INGRESS_IP"
+          fi
+
+          echo "Running: terraform apply $TF_ARGS -auto-approve"
+          terraform apply $TF_ARGS -auto-approve
+
+      - name: Binding Summary
+        run: |
+          ENV="${{ env.ENVIRONMENT }}"
+
+          echo "## Custom Domain Binding - $ENV" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Domains Bound" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [ "$ENV" == "prod" ]; then
+            PREFIX=""
+          else
+            PREFIX="${ENV}."
+          fi
+
+          echo "| Domain | Service | SSL |" >> $GITHUB_STEP_SUMMARY
+          echo "|--------|---------|-----|" >> $GITHUB_STEP_SUMMARY
+          echo "| ${PREFIX}mystira.app | Static Web App | ✅ Auto |" >> $GITHUB_STEP_SUMMARY
+          echo "| ${PREFIX}api.mystira.app | App Service | ✅ Azure Managed |" >> $GITHUB_STEP_SUMMARY
+          echo "| ${PREFIX}story.mystira.app | Static Web App | ✅ Auto |" >> $GITHUB_STEP_SUMMARY
+
+          INGRESS_IP="${{ steps.ingress-ip.outputs.ip }}"
+          if [ -n "$INGRESS_IP" ]; then
+            echo "| ${PREFIX}publisher.mystira.app | K8s Ingress | ✅ cert-manager |" >> $GITHUB_STEP_SUMMARY
+            echo "| ${PREFIX}chain.mystira.app | K8s Ingress | ✅ cert-manager |" >> $GITHUB_STEP_SUMMARY
+            echo "| ${PREFIX}story-api.mystira.app | K8s Ingress | ✅ cert-manager |" >> $GITHUB_STEP_SUMMARY
+            echo "| ${PREFIX}admin-api.mystira.app | K8s Ingress | ✅ cert-manager |" >> $GITHUB_STEP_SUMMARY
+            echo "| ${PREFIX}admin.mystira.app | K8s Ingress | ✅ cert-manager |" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### SSL Certificate Status" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **SWA domains**: SSL provisioned automatically by Azure (1-5 min)" >> $GITHUB_STEP_SUMMARY
+          echo "- **App Service**: Azure Managed Certificate provisioned (1-5 min)" >> $GITHUB_STEP_SUMMARY
+          echo "- **K8s domains**: cert-manager will provision via Let's Encrypt HTTP-01 (2-10 min)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Verify" >> $GITHUB_STEP_SUMMARY
+          echo '```bash' >> $GITHUB_STEP_SUMMARY
+          echo "curl -I https://${PREFIX}mystira.app" >> $GITHUB_STEP_SUMMARY
+          echo "curl -I https://${PREFIX}api.mystira.app" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+
+  # ============================================
+  # DNS Not Ready
+  # ============================================
+  dns-not-ready:
+    name: DNS Not Ready
+    runs-on: ubuntu-latest
+    needs: [check-dns]
+    if: |
+      needs.check-dns.outputs.dns-ready == 'false' &&
+      github.event.inputs.skip_dns_check != 'true'
+    steps:
+      - name: DNS Not Ready
+        run: |
+          echo "## ⚠️ DNS Not Ready" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Some DNS records have not propagated yet." >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Options:" >> $GITHUB_STEP_SUMMARY
+          echo "1. **Wait** - DNS propagation can take up to 48 hours (usually 5-30 min)" >> $GITHUB_STEP_SUMMARY
+          echo "2. **Force** - Re-run with 'Skip DNS propagation check' enabled" >> $GITHUB_STEP_SUMMARY
+          echo "3. **Check manually**:" >> $GITHUB_STEP_SUMMARY
+          echo '```bash' >> $GITHUB_STEP_SUMMARY
+          echo "nslookup ${{ env.ENVIRONMENT }}.mystira.app" >> $GITHUB_STEP_SUMMARY
+          echo "nslookup ${{ env.ENVIRONMENT }}.api.mystira.app" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+
+          echo "::error::DNS records not propagated. Re-run with skip_dns_check=true to force binding."
+          exit 1
