@@ -1,9 +1,9 @@
 # =============================================================================
-# DNS Zone and Records for Dev Environment
-# Creates DNS zone in dev core-rg (shared across all environments)
+# DNS Records for Dev Environment
+# References existing DNS zone in shared terraform RG (managed by CI/CD bootstrap)
 #
 # Two-step deployment:
-#   1. terraform apply                                    (creates DNS zone + records)
+#   1. terraform apply                                    (creates DNS records)
 #   2. terraform apply -var="bind_custom_domains=true"    (binds custom domains)
 # =============================================================================
 
@@ -19,12 +19,10 @@ variable "k8s_ingress_ip" {
   default     = ""  # Set after AKS is deployed
 }
 
-# DNS Zone for mystira.app (created in dev, shared by all environments)
-resource "azurerm_dns_zone" "mystira" {
+# Reference existing DNS Zone (created by CI/CD bootstrap in shared terraform RG)
+data "azurerm_dns_zone" "mystira" {
   name                = "mystira.app"
-  resource_group_name = azurerm_resource_group.main.name
-
-  tags = local.common_tags
+  resource_group_name = "mys-shared-terraform-rg-san"
 }
 
 # =============================================================================
@@ -34,8 +32,8 @@ resource "azurerm_dns_zone" "mystira" {
 # CNAME record for dev.mystira.app -> SWA
 resource "azurerm_dns_cname_record" "dev_app_swa" {
   name                = "dev"
-  zone_name           = azurerm_dns_zone.mystira.name
-  resource_group_name = azurerm_dns_zone.mystira.resource_group_name
+  zone_name           = data.azurerm_dns_zone.mystira.name
+  resource_group_name = data.azurerm_dns_zone.mystira.resource_group_name
   ttl                 = 300
   record              = module.mystira_app.static_web_app_default_hostname
 
@@ -60,8 +58,8 @@ resource "azurerm_static_web_app_custom_domain" "dev_app" {
 # CNAME record for dev.api.mystira.app -> App Service
 resource "azurerm_dns_cname_record" "dev_api" {
   name                = "dev.api"
-  zone_name           = azurerm_dns_zone.mystira.name
-  resource_group_name = azurerm_dns_zone.mystira.resource_group_name
+  zone_name           = data.azurerm_dns_zone.mystira.name
+  resource_group_name = data.azurerm_dns_zone.mystira.resource_group_name
   ttl                 = 300
   record              = module.mystira_app.app_service_default_hostname
 
@@ -71,8 +69,8 @@ resource "azurerm_dns_cname_record" "dev_api" {
 # TXT record for App Service domain verification
 resource "azurerm_dns_txt_record" "dev_api_verification" {
   name                = "asuid.dev.api"
-  zone_name           = azurerm_dns_zone.mystira.name
-  resource_group_name = azurerm_dns_zone.mystira.resource_group_name
+  zone_name           = data.azurerm_dns_zone.mystira.name
+  resource_group_name = data.azurerm_dns_zone.mystira.resource_group_name
   ttl                 = 300
 
   record {
@@ -122,8 +120,8 @@ resource "azurerm_dns_a_record" "dev_publisher" {
   count = var.k8s_ingress_ip != "" ? 1 : 0
 
   name                = "dev.publisher"
-  zone_name           = azurerm_dns_zone.mystira.name
-  resource_group_name = azurerm_dns_zone.mystira.resource_group_name
+  zone_name           = data.azurerm_dns_zone.mystira.name
+  resource_group_name = data.azurerm_dns_zone.mystira.resource_group_name
   ttl                 = 300
   records             = [var.k8s_ingress_ip]
 
@@ -135,8 +133,8 @@ resource "azurerm_dns_a_record" "dev_chain" {
   count = var.k8s_ingress_ip != "" ? 1 : 0
 
   name                = "dev.chain"
-  zone_name           = azurerm_dns_zone.mystira.name
-  resource_group_name = azurerm_dns_zone.mystira.resource_group_name
+  zone_name           = data.azurerm_dns_zone.mystira.name
+  resource_group_name = data.azurerm_dns_zone.mystira.resource_group_name
   ttl                 = 300
   records             = [var.k8s_ingress_ip]
 
@@ -148,8 +146,8 @@ resource "azurerm_dns_a_record" "dev_story_api" {
   count = var.k8s_ingress_ip != "" ? 1 : 0
 
   name                = "dev.story-api"
-  zone_name           = azurerm_dns_zone.mystira.name
-  resource_group_name = azurerm_dns_zone.mystira.resource_group_name
+  zone_name           = data.azurerm_dns_zone.mystira.name
+  resource_group_name = data.azurerm_dns_zone.mystira.resource_group_name
   ttl                 = 300
   records             = [var.k8s_ingress_ip]
 
@@ -161,8 +159,8 @@ resource "azurerm_dns_a_record" "dev_admin_api" {
   count = var.k8s_ingress_ip != "" ? 1 : 0
 
   name                = "dev.admin-api"
-  zone_name           = azurerm_dns_zone.mystira.name
-  resource_group_name = azurerm_dns_zone.mystira.resource_group_name
+  zone_name           = data.azurerm_dns_zone.mystira.name
+  resource_group_name = data.azurerm_dns_zone.mystira.resource_group_name
   ttl                 = 300
   records             = [var.k8s_ingress_ip]
 
@@ -174,8 +172,8 @@ resource "azurerm_dns_a_record" "dev_admin_ui" {
   count = var.k8s_ingress_ip != "" ? 1 : 0
 
   name                = "dev.admin"
-  zone_name           = azurerm_dns_zone.mystira.name
-  resource_group_name = azurerm_dns_zone.mystira.resource_group_name
+  zone_name           = data.azurerm_dns_zone.mystira.name
+  resource_group_name = data.azurerm_dns_zone.mystira.resource_group_name
   ttl                 = 300
   records             = [var.k8s_ingress_ip]
 
@@ -189,8 +187,8 @@ resource "azurerm_dns_a_record" "dev_admin_ui" {
 # CNAME record for dev.story.mystira.app -> Story Generator SWA
 resource "azurerm_dns_cname_record" "dev_story_swa" {
   name                = "dev.story"
-  zone_name           = azurerm_dns_zone.mystira.name
-  resource_group_name = azurerm_dns_zone.mystira.resource_group_name
+  zone_name           = data.azurerm_dns_zone.mystira.name
+  resource_group_name = data.azurerm_dns_zone.mystira.resource_group_name
   ttl                 = 300
   record              = module.story_generator.static_web_app_default_hostname
 
@@ -214,7 +212,7 @@ resource "azurerm_static_web_app_custom_domain" "dev_story" {
 
 output "dns_zone_name_servers" {
   description = "Name servers for mystira.app DNS zone - update your domain registrar"
-  value       = azurerm_dns_zone.mystira.name_servers
+  value       = data.azurerm_dns_zone.mystira.name_servers
 }
 
 output "next_step" {
