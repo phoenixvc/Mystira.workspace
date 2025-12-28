@@ -142,21 +142,7 @@ resource "azurerm_app_service_certificate_binding" "staging_api" {
 # =============================================================================
 # NOTE: Admin services now route through the shared non-prod Front Door.
 # The CNAME record is created in the K8s DNS section below.
-# App Service verification TXT record kept for potential direct binding if needed.
-
-# TXT record for Admin App Service domain verification (optional, for direct binding)
-resource "azurerm_dns_txt_record" "staging_admin_verification" {
-  name                = "asuid.staging.admin"
-  zone_name           = data.azurerm_dns_zone.mystira.name
-  resource_group_name = data.azurerm_dns_zone.mystira.resource_group_name
-  ttl                 = 300
-
-  record {
-    value = module.admin_api.app_service_custom_domain_verification_id
-  }
-
-  tags = local.common_tags
-}
+# Direct App Service verification not needed when using Front Door.
 
 # =============================================================================
 # Story Generator DNS Records
@@ -185,20 +171,7 @@ resource "azurerm_static_web_app_custom_domain" "staging_story" {
 }
 
 # NOTE: staging.story-api CNAME now points to Front Door (defined in K8s DNS section below)
-
-# TXT record for Story API App Service domain verification (optional, for direct binding)
-resource "azurerm_dns_txt_record" "staging_story_api_verification" {
-  name                = "asuid.staging.story-api"
-  zone_name           = data.azurerm_dns_zone.mystira.name
-  resource_group_name = data.azurerm_dns_zone.mystira.resource_group_name
-  ttl                 = 300
-
-  record {
-    value = module.story_generator.app_service_custom_domain_verification_id
-  }
-
-  tags = local.common_tags
-}
+# Direct App Service verification not needed when using Front Door.
 
 # =============================================================================
 # Kubernetes Services DNS Records
