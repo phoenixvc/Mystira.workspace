@@ -27,6 +27,73 @@ import {
   id = "/subscriptions/22f9eb18-6553-4b7d-9451-47d0195085fe/resourceGroups/mys-shared-terraform-rg-san/providers/Microsoft.Network/dnsZones/mystira.app/CNAME/dev.story"
 }
 
+# Import existing Front Door CNAME records
+import {
+  to = azurerm_dns_cname_record.dev_publisher_fd
+  id = "/subscriptions/22f9eb18-6553-4b7d-9451-47d0195085fe/resourceGroups/mys-shared-terraform-rg-san/providers/Microsoft.Network/dnsZones/mystira.app/CNAME/dev.publisher"
+}
+
+import {
+  to = azurerm_dns_cname_record.dev_chain_fd
+  id = "/subscriptions/22f9eb18-6553-4b7d-9451-47d0195085fe/resourceGroups/mys-shared-terraform-rg-san/providers/Microsoft.Network/dnsZones/mystira.app/CNAME/dev.chain"
+}
+
+import {
+  to = azurerm_dns_cname_record.dev_story_api_fd
+  id = "/subscriptions/22f9eb18-6553-4b7d-9451-47d0195085fe/resourceGroups/mys-shared-terraform-rg-san/providers/Microsoft.Network/dnsZones/mystira.app/CNAME/dev.story-api"
+}
+
+import {
+  to = azurerm_dns_cname_record.dev_admin_api_fd
+  id = "/subscriptions/22f9eb18-6553-4b7d-9451-47d0195085fe/resourceGroups/mys-shared-terraform-rg-san/providers/Microsoft.Network/dnsZones/mystira.app/CNAME/dev.admin-api"
+}
+
+import {
+  to = azurerm_dns_cname_record.dev_admin_ui_fd
+  id = "/subscriptions/22f9eb18-6553-4b7d-9451-47d0195085fe/resourceGroups/mys-shared-terraform-rg-san/providers/Microsoft.Network/dnsZones/mystira.app/CNAME/dev.admin"
+}
+
+# Import existing staging TXT validation records
+import {
+  to = azurerm_dns_txt_record.fd_staging_publisher
+  id = "/subscriptions/22f9eb18-6553-4b7d-9451-47d0195085fe/resourceGroups/mys-shared-terraform-rg-san/providers/Microsoft.Network/dnsZones/mystira.app/TXT/_dnsauth.staging.publisher"
+}
+
+import {
+  to = azurerm_dns_txt_record.fd_staging_chain
+  id = "/subscriptions/22f9eb18-6553-4b7d-9451-47d0195085fe/resourceGroups/mys-shared-terraform-rg-san/providers/Microsoft.Network/dnsZones/mystira.app/TXT/_dnsauth.staging.chain"
+}
+
+import {
+  to = azurerm_dns_txt_record.fd_staging_admin_api
+  id = "/subscriptions/22f9eb18-6553-4b7d-9451-47d0195085fe/resourceGroups/mys-shared-terraform-rg-san/providers/Microsoft.Network/dnsZones/mystira.app/TXT/_dnsauth.staging.admin-api"
+}
+
+import {
+  to = azurerm_dns_txt_record.fd_staging_admin_ui
+  id = "/subscriptions/22f9eb18-6553-4b7d-9451-47d0195085fe/resourceGroups/mys-shared-terraform-rg-san/providers/Microsoft.Network/dnsZones/mystira.app/TXT/_dnsauth.staging.admin"
+}
+
+import {
+  to = azurerm_dns_txt_record.fd_staging_story_api
+  id = "/subscriptions/22f9eb18-6553-4b7d-9451-47d0195085fe/resourceGroups/mys-shared-terraform-rg-san/providers/Microsoft.Network/dnsZones/mystira.app/TXT/_dnsauth.staging.story-api"
+}
+
+import {
+  to = azurerm_dns_txt_record.fd_staging_story_swa
+  id = "/subscriptions/22f9eb18-6553-4b7d-9451-47d0195085fe/resourceGroups/mys-shared-terraform-rg-san/providers/Microsoft.Network/dnsZones/mystira.app/TXT/_dnsauth.staging.story"
+}
+
+import {
+  to = azurerm_dns_txt_record.fd_staging_api
+  id = "/subscriptions/22f9eb18-6553-4b7d-9451-47d0195085fe/resourceGroups/mys-shared-terraform-rg-san/providers/Microsoft.Network/dnsZones/mystira.app/TXT/_dnsauth.staging.api"
+}
+
+import {
+  to = azurerm_dns_txt_record.fd_staging_app
+  id = "/subscriptions/22f9eb18-6553-4b7d-9451-47d0195085fe/resourceGroups/mys-shared-terraform-rg-san/providers/Microsoft.Network/dnsZones/mystira.app/TXT/_dnsauth.staging.app"
+}
+
 variable "bind_custom_domains" {
   description = "Set to true to bind custom domains (run after DNS propagates)"
   type        = bool
