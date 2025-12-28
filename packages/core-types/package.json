@@ -36,6 +36,9 @@
     "result-pattern",
     "error-handling"
   ],
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
   "devDependencies": {
     "tsup": "^8.0.0",
     "typescript": "^5.7.0",
