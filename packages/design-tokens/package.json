@@ -38,6 +38,9 @@
     "url": "https://github.com/phoenixvc/Mystira.workspace.git",
     "directory": "packages/design-tokens"
   },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
   "devDependencies": {
     "typescript": "^5.7.2"
   },

@@ -38,7 +38,7 @@
     "directory": "packages/shared-utils"
   },
   "publishConfig": {
-    "access": "public"
+    "registry": "https://npm.pkg.github.com"
   },
   "devDependencies": {
     "@eslint/js": "^9.0.0",
