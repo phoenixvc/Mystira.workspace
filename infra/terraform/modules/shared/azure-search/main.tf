@@ -19,7 +19,7 @@ terraform {
 
 # Local variables
 locals {
-  name = "mys-shared-search-${var.region_code}"
+  name = "mys-${var.environment}-search-${var.region_code}"
 
   common_tags = merge(var.tags, {
     Component   = "azure-ai-search"

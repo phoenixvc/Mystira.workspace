@@ -178,7 +178,7 @@ resource "azurerm_subnet" "aks" {
   name                 = "aks-subnet"
   resource_group_name  = azurerm_resource_group.main.name
   virtual_network_name = azurerm_virtual_network.main.name
-  address_prefixes     = ["10.2.10.0/22"]
+  address_prefixes     = ["10.2.8.0/22"]
 }
 
 resource "azurerm_subnet" "postgresql" {
@@ -475,7 +475,8 @@ module "story_generator" {
   fallback_location        = "eastus2"   # SWA not available in South Africa North
   github_repository_url    = "https://github.com/phoenixvc/Mystira.StoryGenerator"
   github_branch            = "main"
-  enable_swa_custom_domain = true
+  # Custom domain disabled for initial deployment - enable after DNS records created
+  enable_swa_custom_domain = false
   swa_custom_domain        = "story.mystira.app"
 
   tags = {

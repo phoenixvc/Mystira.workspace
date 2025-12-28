@@ -76,6 +76,7 @@ module "shared_comms" {
 
   resource_group_name = azurerm_resource_group.shared_comms.name
   location            = azurerm_resource_group.shared_comms.location
+  name_prefix         = "mys-prod"  # Use prod-specific prefix to avoid name conflicts
 
   tags = local.common_tags
 }
