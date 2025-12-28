@@ -342,6 +342,8 @@ public class MigrationService : IMigrationService
             try
             {
                 string partitionKeyValue = GetPartitionKeyValue(item, partitionKeyPath);
+                // Capture itemId before the lambda to avoid dynamic dispatch issues
+                string itemId = item?.id?.ToString() ?? "unknown";
                 tasks.Add(destContainer.UpsertItemAsync(item, new PartitionKey(partitionKeyValue))
                     .ContinueWith(t =>
                     {
@@ -352,7 +354,6 @@ public class MigrationService : IMigrationService
                         else
                         {
                             Interlocked.Increment(ref failureCount);
-                            string itemId = item?.id?.ToString() ?? "unknown";
                             lock (result.Errors)
                             {
                                 result.Errors.Add($"Failed to migrate item {itemId}: {t.Exception?.InnerException?.Message}");
@@ -522,7 +523,7 @@ public class MigrationService : IMigrationService
         {
             throw new InvalidOperationException($"Partition key value at path '{partitionKeyPath}' is null or empty");
         }
-        return result;
+        return result!;
     }
 
     private async Task EnsureContainerExists(CosmosClient client, string databaseName, string containerName, string partitionKeyPath)
