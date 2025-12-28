@@ -39,6 +39,11 @@ on:
         required: false
         default: false
         type: boolean
+      skip_ai_deployment:
+        description: "Skip AI/Claude model deployment"
+        required: false
+        default: false
+        type: boolean
 
 concurrency:
   group: infra-deploy-${{ github.event.inputs.environment || 'dev' }}
@@ -845,6 +850,7 @@ jobs:
     if: |
       always() &&
       needs.apply-terraform.result == 'success' &&
+      github.event.inputs.skip_ai_deployment != 'true' &&
       (github.event.inputs.components == 'all' || github.event.inputs.components == 'terraform-only' || github.event.inputs.components == '')
     environment: ${{ github.event.inputs.environment || 'dev' }}
     continue-on-error: true  # Don't fail the whole pipeline if Claude deployment fails
