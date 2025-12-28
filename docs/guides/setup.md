@@ -183,11 +183,15 @@ All secrets must be configured in GitHub repository settings: `Settings → Secr
 }
 ```
 
-#### NPM Package Publishing (Optional)
+#### GitHub Packages (NPM & NuGet)
 
-| Secret Name | Description                              | How to Create                                                                          |
-| ----------- | ---------------------------------------- | -------------------------------------------------------------------------------------- |
-| `NPM_TOKEN` | NPM access token for publishing packages | npm → Account Settings → Access Tokens → Generate New Token → Select "Automation" type |
+All Mystira packages are published to GitHub Packages. The following secrets enable package publishing and consumption:
+
+| Secret Name          | Description                              | How to Create                                                                                          |
+| -------------------- | ---------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| `GH_PACKAGES_TOKEN`  | GitHub PAT for package read/write access | GitHub → Settings → Developer settings → PATs → New token → Scopes: `read:packages`, `write:packages` |
+
+**Note**: CI/CD workflows use `secrets.GITHUB_TOKEN` for publishing, but consuming packages in submodules requires `GH_PACKAGES_TOKEN`.
 
 ### Required Secrets for Mystira.Admin.Api
 
@@ -514,6 +518,195 @@ dotnet run --project src/Mystira.App.Admin.Api
 
 ---
 
+## GitHub Packages Authentication
+
+Mystira uses GitHub Packages for both NPM (`@mystira/*`) and NuGet packages. This section covers authentication setup for CI/CD and local development.
+
+### NPM Packages (@mystira/*)
+
+The workspace `.npmrc` is pre-configured to use GitHub Packages for the `@mystira` scope:
+
+```ini
+@mystira:registry=https://npm.pkg.github.com
+//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}
+```
+
+#### CI/CD (Automatic)
+
+CI workflows automatically authenticate using `secrets.GITHUB_TOKEN`:
+
+```yaml
+- uses: actions/setup-node@v4
+  with:
+    registry-url: "https://npm.pkg.github.com"
+    scope: "@mystira"
+env:
+  NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+```
+
+#### Local Development
+
+**Option 1: Environment Variable (Recommended)**
+
+```bash
+# Add to your shell profile (~/.bashrc, ~/.zshrc, etc.)
+export NODE_AUTH_TOKEN=ghp_your_token_here
+
+# Or set per-session
+export NODE_AUTH_TOKEN=$(gh auth token)  # If using GitHub CLI
+```
+
+**Option 2: Global npm config**
+
+```bash
+npm config set //npm.pkg.github.com/:_authToken ghp_your_token_here
+```
+
+### NuGet Packages (GitHub Packages)
+
+NuGet packages are published to GitHub Packages at `https://nuget.pkg.github.com/phoenixvc/index.json`.
+
+#### CI/CD Configuration
+
+Submodule `nuget.config` files use environment variables for authentication:
+
+```xml
+<packageSources>
+  <add key="nuget.org" value="https://api.nuget.org/v3/index.json" />
+  <add key="github" value="https://nuget.pkg.github.com/phoenixvc/index.json" />
+</packageSources>
+
+<packageSourceCredentials>
+  <github>
+    <add key="Username" value="phoenixvc" />
+    <add key="ClearTextPassword" value="%GH_PACKAGES_TOKEN%" />
+  </github>
+</packageSourceCredentials>
+```
+
+CI workflows set `GH_PACKAGES_TOKEN` from secrets:
+
+```yaml
+- name: Restore NuGet packages
+  run: dotnet restore
+  env:
+    GH_PACKAGES_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN }}
+```
+
+#### Local Development Options
+
+**Option 1: Environment Variable**
+
+```bash
+# Add to your shell profile
+export GH_PACKAGES_TOKEN=ghp_your_token_here
+```
+
+**Option 2: Global NuGet Config (Recommended for Local Dev)**
+
+Store credentials once in your user profile so they persist across all projects:
+
+```bash
+# Add the GitHub Packages source globally
+dotnet nuget add source https://nuget.pkg.github.com/phoenixvc/index.json \
+  --name github-global \
+  --username phoenixvc \
+  --password ghp_your_token_here \
+  --store-password-in-clear-text \
+  --configfile ~/.nuget/NuGet/NuGet.Config
+```
+
+This way:
+- No environment variable needed locally
+- CI uses `GH_PACKAGES_TOKEN` from secrets
+- Token isn't stored in the repo
+
+**Option 3: dotnet user-secrets (For App Configuration Only)**
+
+Note: User secrets work for reading tokens in app code but **not** for NuGet package restore (NuGet uses environment variables or NuGet.Config).
+
+```bash
+# Initialize user secrets for a project
+cd src/Mystira.App.PWA
+dotnet user-secrets init
+
+# Store token (for app use only, not NuGet restore)
+dotnet user-secrets set "GH_PACKAGES_TOKEN" "ghp_your_token_here"
+```
+
+### Creating a GitHub Personal Access Token (PAT)
+
+1. Go to GitHub → Settings → Developer settings → Personal access tokens → Tokens (classic)
+2. Click "Generate new token (classic)"
+3. Configure:
+   - **Name**: `Mystira Packages Access`
+   - **Expiration**: 90 days (or custom)
+   - **Scopes**:
+     - `read:packages` (required for consuming packages)
+     - `write:packages` (required for publishing)
+     - `repo` (if accessing private repos)
+4. Click "Generate token"
+5. Copy the token immediately (you won't see it again)
+
+### Verifying Package Access
+
+**NPM Packages:**
+
+```bash
+# List available @mystira packages
+npm search @mystira --registry=https://npm.pkg.github.com
+
+# Install a package
+pnpm add @mystira/contracts
+```
+
+**NuGet Packages:**
+
+```bash
+# List sources
+dotnet nuget list source
+
+# Search for packages
+dotnet package search Mystira --source github
+
+# Restore packages
+dotnet restore
+```
+
+### Troubleshooting
+
+**Problem**: `401 Unauthorized` when installing npm packages
+
+```bash
+# Verify token is set
+echo $NODE_AUTH_TOKEN
+
+# Re-authenticate
+npm login --scope=@mystira --registry=https://npm.pkg.github.com
+```
+
+**Problem**: `401 Unauthorized` when restoring NuGet packages
+
+```bash
+# Verify token is set
+echo $GH_PACKAGES_TOKEN
+
+# Check NuGet sources
+dotnet nuget list source
+
+# Clear NuGet cache and retry
+dotnet nuget locals all --clear
+dotnet restore
+```
+
+**Problem**: CI fails with package authentication errors
+
+- Verify `GH_PACKAGES_TOKEN` secret is set in repository settings
+- Verify the token has `read:packages` and `write:packages` scopes
+- For private repos, ensure `repo` scope is also included
+
+---
+
 ## CI/CD Configuration
 
 ### Workflow Overview
@@ -812,4 +1005,4 @@ kubectl get events -n mystira-dev --sort-by='.lastTimestamp'
 
 ---
 
-**Last Updated**: 2025-12-14
+**Last Updated**: 2025-12-28

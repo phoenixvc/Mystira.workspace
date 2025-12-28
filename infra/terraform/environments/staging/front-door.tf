@@ -105,6 +105,55 @@ output "front_door_mystira_app_swa_endpoint" {
   value       = module.front_door.mystira_app_swa_endpoint_hostname
 }
 
+# Validation token outputs for TXT records
+output "front_door_publisher_validation_token" {
+  description = "Validation token for Publisher custom domain"
+  value       = module.front_door.publisher_custom_domain_validation_token
+  sensitive   = true
+}
+
+output "front_door_chain_validation_token" {
+  description = "Validation token for Chain custom domain"
+  value       = module.front_door.chain_custom_domain_validation_token
+  sensitive   = true
+}
+
+output "front_door_admin_api_validation_token" {
+  description = "Validation token for Admin API custom domain"
+  value       = module.front_door.admin_api_custom_domain_validation_token
+  sensitive   = true
+}
+
+output "front_door_admin_ui_validation_token" {
+  description = "Validation token for Admin UI custom domain"
+  value       = module.front_door.admin_ui_custom_domain_validation_token
+  sensitive   = true
+}
+
+output "front_door_story_generator_api_validation_token" {
+  description = "Validation token for Story Generator API custom domain"
+  value       = module.front_door.story_generator_api_custom_domain_validation_token
+  sensitive   = true
+}
+
+output "front_door_story_generator_swa_validation_token" {
+  description = "Validation token for Story Generator SWA custom domain"
+  value       = module.front_door.story_generator_swa_custom_domain_validation_token
+  sensitive   = true
+}
+
+output "front_door_mystira_app_api_validation_token" {
+  description = "Validation token for Mystira.App API custom domain"
+  value       = module.front_door.mystira_app_api_custom_domain_validation_token
+  sensitive   = true
+}
+
+output "front_door_mystira_app_swa_validation_token" {
+  description = "Validation token for Mystira.App SWA custom domain"
+  value       = module.front_door.mystira_app_swa_custom_domain_validation_token
+  sensitive   = true
+}
+
 # =============================================================================
 # DNS Configuration Requirements for Custom Domains (Staging)
 # =============================================================================
