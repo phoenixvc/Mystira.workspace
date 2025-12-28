@@ -111,109 +111,180 @@ resource "azurerm_app_service_certificate_binding" "prod_api" {
 # =============================================================================
 # Admin Services DNS Records
 # =============================================================================
-
-# CNAME record for admin.mystira.app -> Admin API App Service
-resource "azurerm_dns_cname_record" "prod_admin" {
-  name                = "admin"
-  zone_name           = data.azurerm_dns_zone.mystira.name
-  resource_group_name = data.azurerm_dns_zone.mystira.resource_group_name
-  ttl                 = 300
-  record              = module.admin_api.app_service_default_hostname
-
-  tags = local.common_tags
-}
-
-# TXT record for Admin App Service domain verification
-resource "azurerm_dns_txt_record" "prod_admin_verification" {
-  name                = "asuid.admin"
-  zone_name           = data.azurerm_dns_zone.mystira.name
-  resource_group_name = data.azurerm_dns_zone.mystira.resource_group_name
-  ttl                 = 300
-
-  record {
-    value = module.admin_api.app_service_custom_domain_verification_id
-  }
-
-  tags = local.common_tags
-}
+# NOTE: Admin services now route through Front Door. The CNAME records pointing
+# to Front Door are in the "Front Door CNAME Records" section below.
+# The backend A records (*-k8s) for K8s ingress are in the K8s section above.
 
 # =============================================================================
 # Story Generator DNS Records
 # =============================================================================
-
-# CNAME record for story.mystira.app -> Story Generator SWA
-resource "azurerm_dns_cname_record" "prod_story_swa" {
-  name                = "story"
-  zone_name           = data.azurerm_dns_zone.mystira.name
-  resource_group_name = data.azurerm_dns_zone.mystira.resource_group_name
-  ttl                 = 300
-  record              = module.story_generator.static_web_app_default_hostname
-
-  tags = local.common_tags
-}
-
-# Custom domain binding for Story Generator SWA
-resource "azurerm_static_web_app_custom_domain" "prod_story" {
-  count = var.bind_custom_domains ? 1 : 0
-
-  static_web_app_id = module.story_generator.static_web_app_id
-  domain_name       = "story.mystira.app"
-  validation_type   = "cname-delegation"
-
-  depends_on = [azurerm_dns_cname_record.prod_story_swa]
-}
-
-# CNAME record for story-api.mystira.app -> Story Generator API
-resource "azurerm_dns_cname_record" "prod_story_api" {
-  name                = "story-api"
-  zone_name           = data.azurerm_dns_zone.mystira.name
-  resource_group_name = data.azurerm_dns_zone.mystira.resource_group_name
-  ttl                 = 300
-  record              = module.story_generator.app_service_default_hostname
-
-  tags = local.common_tags
-}
-
-# TXT record for Story API App Service domain verification
-resource "azurerm_dns_txt_record" "prod_story_api_verification" {
-  name                = "asuid.story-api"
-  zone_name           = data.azurerm_dns_zone.mystira.name
-  resource_group_name = data.azurerm_dns_zone.mystira.resource_group_name
-  ttl                 = 300
-
-  record {
-    value = module.story_generator.app_service_custom_domain_verification_id
-  }
-
-  tags = local.common_tags
-}
+# NOTE: Story Generator services now route through Front Door.
+# - story.mystira.app and story-api.mystira.app CNAME records are in the
+#   "Front Door CNAME Records" section below
+# - The backend A record (story-api-k8s) for K8s ingress is in the K8s section above
+# - Story SWA backend uses the Azure Static Web App hostname directly (no -k8s)
 
 # =============================================================================
-# Kubernetes Services DNS Records (A records to ingress IP)
+# Kubernetes Services DNS Records
+#
+# ARCHITECTURE:
+# - Backend A records (*-k8s.mystira.app) -> K8s ingress IP (for Front Door origins)
+# - Public CNAME records (*.mystira.app) -> Front Door endpoint (for custom domains)
+#
+# This separation is required because:
+# - Front Door custom domains need CNAME -> Front Door endpoint
+# - Front Door backends need to reach the actual K8s services (A record -> IP)
+# - You cannot have both A and CNAME for the same hostname
 # =============================================================================
 
-# A record for publisher.mystira.app -> K8s ingress
-resource "azurerm_dns_a_record" "prod_publisher" {
+# -----------------------------------------------------------------------------
+# BACKEND A RECORDS (for Front Door to reach K8s)
+# -----------------------------------------------------------------------------
+
+# Backend A record for Publisher service
+resource "azurerm_dns_a_record" "prod_publisher_k8s" {
   count = var.k8s_ingress_ip != "" ? 1 : 0
+
+  name                = "publisher-k8s"
+  zone_name           = data.azurerm_dns_zone.mystira.name
+  resource_group_name = data.azurerm_dns_zone.mystira.resource_group_name
+  ttl                 = 300
+  records             = [var.k8s_ingress_ip]
+
+  tags = local.common_tags
+}
+
+# Backend A record for Chain service
+resource "azurerm_dns_a_record" "prod_chain_k8s" {
+  count = var.k8s_ingress_ip != "" ? 1 : 0
+
+  name                = "chain-k8s"
+  zone_name           = data.azurerm_dns_zone.mystira.name
+  resource_group_name = data.azurerm_dns_zone.mystira.resource_group_name
+  ttl                 = 300
+  records             = [var.k8s_ingress_ip]
+
+  tags = local.common_tags
+}
+
+# Backend A record for Admin API service
+resource "azurerm_dns_a_record" "prod_admin_api_k8s" {
+  count = var.k8s_ingress_ip != "" ? 1 : 0
+
+  name                = "admin-api-k8s"
+  zone_name           = data.azurerm_dns_zone.mystira.name
+  resource_group_name = data.azurerm_dns_zone.mystira.resource_group_name
+  ttl                 = 300
+  records             = [var.k8s_ingress_ip]
+
+  tags = local.common_tags
+}
+
+# Backend A record for Admin UI service
+resource "azurerm_dns_a_record" "prod_admin_k8s" {
+  count = var.k8s_ingress_ip != "" ? 1 : 0
+
+  name                = "admin-k8s"
+  zone_name           = data.azurerm_dns_zone.mystira.name
+  resource_group_name = data.azurerm_dns_zone.mystira.resource_group_name
+  ttl                 = 300
+  records             = [var.k8s_ingress_ip]
+
+  tags = local.common_tags
+}
+
+# Backend A record for Story API service
+resource "azurerm_dns_a_record" "prod_story_api_k8s" {
+  count = var.k8s_ingress_ip != "" ? 1 : 0
+
+  name                = "story-api-k8s"
+  zone_name           = data.azurerm_dns_zone.mystira.name
+  resource_group_name = data.azurerm_dns_zone.mystira.resource_group_name
+  ttl                 = 300
+  records             = [var.k8s_ingress_ip]
+
+  tags = local.common_tags
+}
+
+# -----------------------------------------------------------------------------
+# FRONT DOOR CNAME RECORDS (for custom domain validation)
+# These point public hostnames to Front Door endpoints
+# -----------------------------------------------------------------------------
+
+# CNAME for publisher.mystira.app -> Front Door
+resource "azurerm_dns_cname_record" "prod_publisher_fd" {
+  count = length(try(module.front_door.publisher_endpoint_hostname, "")) > 0 ? 1 : 0
 
   name                = "publisher"
   zone_name           = data.azurerm_dns_zone.mystira.name
   resource_group_name = data.azurerm_dns_zone.mystira.resource_group_name
   ttl                 = 300
-  records             = [var.k8s_ingress_ip]
+  record              = module.front_door.publisher_endpoint_hostname
 
   tags = local.common_tags
 }
 
-# A record for chain.mystira.app -> K8s ingress
-resource "azurerm_dns_a_record" "prod_chain" {
-  count = var.k8s_ingress_ip != "" ? 1 : 0
+# CNAME for chain.mystira.app -> Front Door
+resource "azurerm_dns_cname_record" "prod_chain_fd" {
+  count = length(try(module.front_door.chain_endpoint_hostname, "")) > 0 ? 1 : 0
 
   name                = "chain"
   zone_name           = data.azurerm_dns_zone.mystira.name
   resource_group_name = data.azurerm_dns_zone.mystira.resource_group_name
   ttl                 = 300
-  records             = [var.k8s_ingress_ip]
+  record              = module.front_door.chain_endpoint_hostname
+
+  tags = local.common_tags
+}
+
+# CNAME for admin-api.mystira.app -> Front Door
+resource "azurerm_dns_cname_record" "prod_admin_api_fd" {
+  count = length(try(module.front_door.admin_api_endpoint_hostname, "")) > 0 ? 1 : 0
+
+  name                = "admin-api"
+  zone_name           = data.azurerm_dns_zone.mystira.name
+  resource_group_name = data.azurerm_dns_zone.mystira.resource_group_name
+  ttl                 = 300
+  record              = module.front_door.admin_api_endpoint_hostname
+
+  tags = local.common_tags
+}
+
+# CNAME for admin.mystira.app -> Front Door
+resource "azurerm_dns_cname_record" "prod_admin_fd" {
+  count = length(try(module.front_door.admin_ui_endpoint_hostname, "")) > 0 ? 1 : 0
+
+  name                = "admin"
+  zone_name           = data.azurerm_dns_zone.mystira.name
+  resource_group_name = data.azurerm_dns_zone.mystira.resource_group_name
+  ttl                 = 300
+  record              = module.front_door.admin_ui_endpoint_hostname
+
+  tags = local.common_tags
+}
+
+# CNAME for story.mystira.app -> Front Door
+resource "azurerm_dns_cname_record" "prod_story_fd" {
+  count = length(try(module.front_door.story_generator_swa_endpoint_hostname, "")) > 0 ? 1 : 0
+
+  name                = "story"
+  zone_name           = data.azurerm_dns_zone.mystira.name
+  resource_group_name = data.azurerm_dns_zone.mystira.resource_group_name
+  ttl                 = 300
+  record              = module.front_door.story_generator_swa_endpoint_hostname
+
+  tags = local.common_tags
+}
+
+# CNAME for story-api.mystira.app -> Front Door
+resource "azurerm_dns_cname_record" "prod_story_api_fd" {
+  count = length(try(module.front_door.story_generator_api_endpoint_hostname, "")) > 0 ? 1 : 0
+
+  name                = "story-api"
+  zone_name           = data.azurerm_dns_zone.mystira.name
+  resource_group_name = data.azurerm_dns_zone.mystira.resource_group_name
+  ttl                 = 300
+  record              = module.front_door.story_generator_api_endpoint_hostname
 
   tags = local.common_tags
 }
@@ -362,13 +433,19 @@ output "dns_zone_name_servers" {
 output "prod_dns_records_created" {
   description = "List of DNS records created for prod"
   value = {
-    apex_swa    = "mystira.app"
-    api         = "api.mystira.app"
-    admin       = "admin.mystira.app"
-    story       = "story.mystira.app"
-    story_api   = "story-api.mystira.app"
-    publisher   = var.k8s_ingress_ip != "" ? "publisher.mystira.app" : "Not created (no k8s_ingress_ip)"
-    chain       = var.k8s_ingress_ip != "" ? "chain.mystira.app" : "Not created (no k8s_ingress_ip)"
+    apex_swa       = "mystira.app"
+    api            = "api.mystira.app"
+    admin          = "admin.mystira.app (via Front Door)"
+    admin_api      = "admin-api.mystira.app (via Front Door)"
+    story          = "story.mystira.app (via Front Door)"
+    story_api      = "story-api.mystira.app (via Front Door)"
+    publisher      = "publisher.mystira.app (via Front Door)"
+    chain          = "chain.mystira.app (via Front Door)"
+    publisher_k8s  = var.k8s_ingress_ip != "" ? "publisher-k8s.mystira.app" : "Not created (no k8s_ingress_ip)"
+    chain_k8s      = var.k8s_ingress_ip != "" ? "chain-k8s.mystira.app" : "Not created (no k8s_ingress_ip)"
+    admin_api_k8s  = var.k8s_ingress_ip != "" ? "admin-api-k8s.mystira.app" : "Not created (no k8s_ingress_ip)"
+    admin_k8s      = var.k8s_ingress_ip != "" ? "admin-k8s.mystira.app" : "Not created (no k8s_ingress_ip)"
+    story_api_k8s  = var.k8s_ingress_ip != "" ? "story-api-k8s.mystira.app" : "Not created (no k8s_ingress_ip)"
   }
 }
 
