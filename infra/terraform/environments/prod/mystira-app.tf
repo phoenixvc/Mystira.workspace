@@ -64,21 +64,10 @@ module "shared_storage" {
   tags = local.common_tags
 }
 
-# Shared Communication Services
-resource "azurerm_resource_group" "shared_comms" {
-  name     = "mys-prod-comms-rg-${local.region_code}"
-  location = var.location
-  tags     = merge(local.common_tags, { Service = "communication-services" })
-}
-
-module "shared_comms" {
-  source = "../../modules/shared/communications"
-
-  resource_group_name = azurerm_resource_group.shared_comms.name
-  location            = azurerm_resource_group.shared_comms.location
-  name_prefix         = "mys-prod"  # Use prod-specific prefix to avoid name conflicts
-
-  tags = local.common_tags
+# Shared Communication Services - Reference existing shared resource (created by dev)
+data "azurerm_communication_service" "shared" {
+  name                = "mys-shared-acs"
+  resource_group_name = "mys-dev-comms-rg-san"
 }
 
 # =============================================================================
@@ -129,10 +118,10 @@ module "mystira_app" {
     "https://app.mystira.app",
   ]
 
-  # Communication Services - USE SHARED
+  # Communication Services - USE SHARED (from dev environment)
   enable_communication_services = false
   use_shared_acs                = true
-  shared_acs_connection_string  = module.shared_comms.communication_service_primary_connection_string
+  shared_acs_connection_string  = data.azurerm_communication_service.shared.primary_connection_string
   sender_email                  = "DoNotReply@mystira.app"
 
   # Azure Bot - Enable for production
@@ -157,8 +146,7 @@ module "mystira_app" {
   depends_on = [
     module.shared_monitoring,
     module.shared_cosmos_db,
-    module.shared_storage,
-    module.shared_comms
+    module.shared_storage
   ]
 }
 
