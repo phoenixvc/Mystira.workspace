@@ -26,13 +26,19 @@ resource "azurerm_dns_cname_record" "dev_app_swa" {
   tags = local.common_tags
 }
 
-# Custom domain binding for SWA (depends on DNS record)
+# Wait for DNS propagation before binding custom domain
+resource "time_sleep" "wait_for_swa_dns" {
+  depends_on      = [azurerm_dns_cname_record.dev_app_swa]
+  create_duration = "60s"
+}
+
+# Custom domain binding for SWA (depends on DNS record + propagation delay)
 resource "azurerm_static_web_app_custom_domain" "dev_app" {
   static_web_app_id = module.mystira_app.static_web_app_id
   domain_name       = "dev.mystira.app"
   validation_type   = "cname-delegation"
 
-  depends_on = [azurerm_dns_cname_record.dev_app_swa]
+  depends_on = [time_sleep.wait_for_swa_dns]
 }
 
 # =============================================================================
@@ -64,16 +70,22 @@ resource "azurerm_dns_txt_record" "dev_api_verification" {
   tags = local.common_tags
 }
 
-# Custom hostname binding for App Service (depends on DNS records)
+# Wait for DNS propagation before binding custom domain
+resource "time_sleep" "wait_for_api_dns" {
+  depends_on = [
+    azurerm_dns_cname_record.dev_api,
+    azurerm_dns_txt_record.dev_api_verification
+  ]
+  create_duration = "60s"
+}
+
+# Custom hostname binding for App Service (depends on DNS records + propagation delay)
 resource "azurerm_app_service_custom_hostname_binding" "dev_api" {
   hostname            = "dev.api.mystira.app"
   app_service_name    = module.mystira_app.app_service_name
   resource_group_name = azurerm_resource_group.app.name
 
-  depends_on = [
-    azurerm_dns_cname_record.dev_api,
-    azurerm_dns_txt_record.dev_api_verification
-  ]
+  depends_on = [time_sleep.wait_for_api_dns]
 }
 
 # =============================================================================
