@@ -105,8 +105,9 @@ module "mystira_app" {
   app_service_sku = "B1"
   dotnet_version  = "9.0"
 
-  # Custom domain for dev API
-  enable_api_custom_domain = true
+  # Custom domains - DISABLED in module, created separately in dns-records.tf
+  # This ensures DNS records exist before custom domain bindings are created
+  enable_api_custom_domain = false
   api_custom_domain        = "dev.api.mystira.app"
 
   # -----------------------------------------------------------------------------
@@ -117,8 +118,8 @@ module "mystira_app" {
   github_repository_url = "https://github.com/phoenixvc/Mystira.App"
   github_branch         = "dev"
 
-  # Custom domain for dev environment
-  enable_app_custom_domain = true
+  # Custom domain - DISABLED in module, created separately in dns-records.tf
+  enable_app_custom_domain = false
   app_custom_domain        = "dev.mystira.app"
 
   # -----------------------------------------------------------------------------
