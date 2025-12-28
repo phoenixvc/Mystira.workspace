@@ -344,8 +344,9 @@ public class MigrationService : IMigrationService
                 string partitionKeyValue = GetPartitionKeyValue(item, partitionKeyPath);
                 // Capture itemId before the lambda to avoid dynamic dispatch issues
                 string itemId = item?.id?.ToString() ?? "unknown";
-                tasks.Add(destContainer.UpsertItemAsync(item, new PartitionKey(partitionKeyValue))
-                    .ContinueWith(t =>
+                // Cast to Task to break the dynamic dispatch chain
+                Task upsertTask = (Task)destContainer.UpsertItemAsync(item, new PartitionKey(partitionKeyValue));
+                tasks.Add(upsertTask.ContinueWith(t =>
                     {
                         if (t.IsCompletedSuccessfully)
                         {
