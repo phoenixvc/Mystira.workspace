@@ -1,4 +1,4 @@
-# Azure Front Door Example Configuration for Production Environment
+# Azure Front Door Configuration for Production Environment
 # Rename this file to front-door.tf to enable Front Door
 
 # IMPORTANT: Before enabling, ensure:
@@ -15,24 +15,36 @@ module "front_door" {
   location            = var.location
   project_name        = "mystira"
 
-  # Backend addresses (current NGINX ingress endpoints)
-  publisher_backend_address = "publisher.mystira.app"
-  chain_backend_address     = "chain.mystira.app"
+  # ==========================================================================
+  # Production Configuration
+  # ==========================================================================
+  #
+  # IMPORTANT: Backend addresses use the "-k8s" hostnames which have A records
+  # pointing to K8s ingress. Custom domains use the public hostnames which have
+  # CNAME records pointing to Front Door. This separation is required because:
+  # - Front Door custom domains need CNAME -> Front Door endpoint
+  # - Front Door backends need to reach the actual K8s services (A record -> IP)
+  # - You cannot have both A and CNAME for the same hostname
+  # ==========================================================================
 
-  # Custom domains
+  # Backend addresses (K8s backend hostnames with A records to ingress IP)
+  publisher_backend_address = "publisher-k8s.mystira.app"
+  chain_backend_address     = "chain-k8s.mystira.app"
+
+  # Custom domains (public hostnames with CNAME to Front Door)
   custom_domain_publisher = "publisher.mystira.app"
   custom_domain_chain     = "chain.mystira.app"
 
   # Admin services
   enable_admin_services     = true
-  admin_api_backend_address = "admin-api.mystira.app"
-  admin_ui_backend_address  = "admin.mystira.app"
+  admin_api_backend_address = "admin-api-k8s.mystira.app"
+  admin_ui_backend_address  = "admin-k8s.mystira.app"
   custom_domain_admin_api   = "admin-api.mystira.app"
   custom_domain_admin_ui    = "admin.mystira.app"
 
   # Story Generator services (API + SWA)
   enable_story_generator              = true
-  story_generator_api_backend_address = "story-api.mystira.app"
+  story_generator_api_backend_address = "story-api-k8s.mystira.app"
   story_generator_swa_backend_address = module.story_generator.static_web_app_default_hostname
   custom_domain_story_generator_api   = "story-api.mystira.app"
   custom_domain_story_generator_swa   = "story.mystira.app"
