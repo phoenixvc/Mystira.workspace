@@ -38,7 +38,7 @@ interface SmartDeploymentPanelProps {
   repoRoot: string;
 }
 
-export function SmartDeploymentPanel({ repoRoot: _repoRoot }: SmartDeploymentPanelProps) {
+export function SmartDeploymentPanel({ repoRoot }: SmartDeploymentPanelProps) {
   const {
     regionPriority,
     environment,
