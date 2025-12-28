@@ -966,9 +966,27 @@ jobs:
           PUBLISHER_ENDPOINT=$(terraform output -raw front_door_publisher_endpoint 2>/dev/null || echo "")
           CHAIN_ENDPOINT=$(terraform output -raw front_door_chain_endpoint 2>/dev/null || echo "")
 
-          # Get validation tokens (sensitive)
-          VERIFICATION=$(terraform output -json front_door_custom_domain_verification 2>/dev/null || echo "{}")
+          # Get validation tokens for TXT records (sensitive - mask them)
+          MYSTIRA_SWA_TOKEN=$(terraform output -raw front_door_mystira_app_swa_validation_token 2>/dev/null || echo "")
+          MYSTIRA_API_TOKEN=$(terraform output -raw front_door_mystira_app_api_validation_token 2>/dev/null || echo "")
+          ADMIN_UI_TOKEN=$(terraform output -raw front_door_admin_ui_validation_token 2>/dev/null || echo "")
+          ADMIN_API_TOKEN=$(terraform output -raw front_door_admin_api_validation_token 2>/dev/null || echo "")
+          STORY_SWA_TOKEN=$(terraform output -raw front_door_story_generator_swa_validation_token 2>/dev/null || echo "")
+          STORY_API_TOKEN=$(terraform output -raw front_door_story_generator_api_validation_token 2>/dev/null || echo "")
+          PUBLISHER_TOKEN=$(terraform output -raw front_door_publisher_validation_token 2>/dev/null || echo "")
+          CHAIN_TOKEN=$(terraform output -raw front_door_chain_validation_token 2>/dev/null || echo "")
 
+          # Mask tokens in logs
+          [ -n "$MYSTIRA_SWA_TOKEN" ] && echo "::add-mask::$MYSTIRA_SWA_TOKEN"
+          [ -n "$MYSTIRA_API_TOKEN" ] && echo "::add-mask::$MYSTIRA_API_TOKEN"
+          [ -n "$ADMIN_UI_TOKEN" ] && echo "::add-mask::$ADMIN_UI_TOKEN"
+          [ -n "$ADMIN_API_TOKEN" ] && echo "::add-mask::$ADMIN_API_TOKEN"
+          [ -n "$STORY_SWA_TOKEN" ] && echo "::add-mask::$STORY_SWA_TOKEN"
+          [ -n "$STORY_API_TOKEN" ] && echo "::add-mask::$STORY_API_TOKEN"
+          [ -n "$PUBLISHER_TOKEN" ] && echo "::add-mask::$PUBLISHER_TOKEN"
+          [ -n "$CHAIN_TOKEN" ] && echo "::add-mask::$CHAIN_TOKEN"
+
+          # Output endpoints
           echo "mystira_swa_endpoint=$MYSTIRA_SWA_ENDPOINT" >> $GITHUB_OUTPUT
           echo "mystira_api_endpoint=$MYSTIRA_API_ENDPOINT" >> $GITHUB_OUTPUT
           echo "admin_ui_endpoint=$ADMIN_UI_ENDPOINT" >> $GITHUB_OUTPUT
@@ -977,6 +995,16 @@ jobs:
           echo "story_api_endpoint=$STORY_API_ENDPOINT" >> $GITHUB_OUTPUT
           echo "publisher_endpoint=$PUBLISHER_ENDPOINT" >> $GITHUB_OUTPUT
           echo "chain_endpoint=$CHAIN_ENDPOINT" >> $GITHUB_OUTPUT
+
+          # Output validation tokens
+          echo "mystira_swa_token=$MYSTIRA_SWA_TOKEN" >> $GITHUB_OUTPUT
+          echo "mystira_api_token=$MYSTIRA_API_TOKEN" >> $GITHUB_OUTPUT
+          echo "admin_ui_token=$ADMIN_UI_TOKEN" >> $GITHUB_OUTPUT
+          echo "admin_api_token=$ADMIN_API_TOKEN" >> $GITHUB_OUTPUT
+          echo "story_swa_token=$STORY_SWA_TOKEN" >> $GITHUB_OUTPUT
+          echo "story_api_token=$STORY_API_TOKEN" >> $GITHUB_OUTPUT
+          echo "publisher_token=$PUBLISHER_TOKEN" >> $GITHUB_OUTPUT
+          echo "chain_token=$CHAIN_TOKEN" >> $GITHUB_OUTPUT
 
       - name: Configure Front Door DNS Records
         run: |
@@ -1006,36 +1034,59 @@ jobs:
             fi
           }
 
-          # Mystira.App
+          # Helper function to create/update TXT validation record for Front Door
+          create_txt() {
+            local name=$1
+            local value=$2
+            if [ -n "$value" ]; then
+              echo "Creating TXT: _dnsauth.$name -> (validation token)"
+              # Create or update TXT record
+              az network dns record-set txt add-record --record-set-name "_dnsauth.$name" --zone-name "$DNS_ZONE" --resource-group "$DNS_RG" --value "$value" 2>/dev/null || \
+              az network dns record-set txt create --name "_dnsauth.$name" --zone-name "$DNS_ZONE" --resource-group "$DNS_RG" --ttl 3600 && \
+              az network dns record-set txt add-record --record-set-name "_dnsauth.$name" --zone-name "$DNS_ZONE" --resource-group "$DNS_RG" --value "$value" || true
+            fi
+          }
+
+          # Mystira.App (CNAME + TXT validation)
           if [ -n "${{ steps.get-fd-outputs.outputs.mystira_swa_endpoint }}" ]; then
             if [ "$ENV" == "prod" ]; then
               create_cname "app" "${{ steps.get-fd-outputs.outputs.mystira_swa_endpoint }}"
+              create_txt "app" "${{ steps.get-fd-outputs.outputs.mystira_swa_token }}"
               create_cname "api" "${{ steps.get-fd-outputs.outputs.mystira_api_endpoint }}"
+              create_txt "api" "${{ steps.get-fd-outputs.outputs.mystira_api_token }}"
             else
               create_cname "${PREFIX}app" "${{ steps.get-fd-outputs.outputs.mystira_swa_endpoint }}"
+              create_txt "${PREFIX}app" "${{ steps.get-fd-outputs.outputs.mystira_swa_token }}"
               create_cname "${PREFIX}api" "${{ steps.get-fd-outputs.outputs.mystira_api_endpoint }}"
+              create_txt "${PREFIX}api" "${{ steps.get-fd-outputs.outputs.mystira_api_token }}"
             fi
           fi
 
-          # Admin Services
+          # Admin Services (CNAME + TXT validation)
           if [ -n "${{ steps.get-fd-outputs.outputs.admin_ui_endpoint }}" ]; then
             create_cname "${PREFIX}admin" "${{ steps.get-fd-outputs.outputs.admin_ui_endpoint }}"
+            create_txt "${PREFIX}admin" "${{ steps.get-fd-outputs.outputs.admin_ui_token }}"
             create_cname "${PREFIX}admin-api" "${{ steps.get-fd-outputs.outputs.admin_api_endpoint }}"
+            create_txt "${PREFIX}admin-api" "${{ steps.get-fd-outputs.outputs.admin_api_token }}"
           fi
 
-          # Story Generator
+          # Story Generator (CNAME + TXT validation)
           if [ -n "${{ steps.get-fd-outputs.outputs.story_swa_endpoint }}" ]; then
             create_cname "${PREFIX}story" "${{ steps.get-fd-outputs.outputs.story_swa_endpoint }}"
+            create_txt "${PREFIX}story" "${{ steps.get-fd-outputs.outputs.story_swa_token }}"
             create_cname "${PREFIX}story-api" "${{ steps.get-fd-outputs.outputs.story_api_endpoint }}"
+            create_txt "${PREFIX}story-api" "${{ steps.get-fd-outputs.outputs.story_api_token }}"
           fi
 
-          # Publisher/Chain
+          # Publisher/Chain (CNAME + TXT validation)
           if [ -n "${{ steps.get-fd-outputs.outputs.publisher_endpoint }}" ]; then
             create_cname "${PREFIX}publisher" "${{ steps.get-fd-outputs.outputs.publisher_endpoint }}"
+            create_txt "${PREFIX}publisher" "${{ steps.get-fd-outputs.outputs.publisher_token }}"
             create_cname "${PREFIX}chain" "${{ steps.get-fd-outputs.outputs.chain_endpoint }}"
+            create_txt "${PREFIX}chain" "${{ steps.get-fd-outputs.outputs.chain_token }}"
           fi
 
-          echo "::notice::Front Door DNS CNAME records configured for $ENV"
+          echo "::notice::Front Door DNS records (CNAME + TXT validation) configured for $ENV"
 
       - name: Front Door DNS Summary
         run: |
