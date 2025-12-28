@@ -64,9 +64,14 @@ public class MigrationService : IMigrationService
                 return result;
             }
 
+            // Get the actual partition key path from the destination container if it exists
+            // This prevents mismatches when the destination was created with a different partition key
+            string actualPartitionKeyPath = partitionKeyPath;
             if (!options.DryRun)
             {
-                await EnsureContainerExists(destClient, destDatabaseName, containerName, partitionKeyPath);
+                actualPartitionKeyPath = await EnsureContainerExistsAndGetPartitionKey(destClient, destDatabaseName, containerName, partitionKeyPath);
+                _logger.LogInformation("Using partition key path: {PartitionKeyPath} for container {Container}",
+                    actualPartitionKeyPath, containerName);
             }
 
             var sourceContainer = sourceClient.GetContainer(sourceDatabaseName, containerName);
@@ -106,11 +111,11 @@ public class MigrationService : IMigrationService
 
             if (options.UseBulkOperations && items.Count > 10)
             {
-                await MigrateBulkDynamicAsync(destContainer, items, partitionKeyPath, result, options, containerName);
+                await MigrateBulkDynamicAsync(destContainer, items, actualPartitionKeyPath, result, options, containerName);
             }
             else
             {
-                await MigrateSequentialDynamicAsync(destContainer, items, partitionKeyPath, result, options, containerName);
+                await MigrateSequentialDynamicAsync(destContainer, items, actualPartitionKeyPath, result, options, containerName);
             }
 
             result.Success = result.FailureCount == 0;
@@ -527,7 +532,11 @@ public class MigrationService : IMigrationService
         return result!;
     }
 
-    private async Task EnsureContainerExists(CosmosClient client, string databaseName, string containerName, string partitionKeyPath)
+    /// <summary>
+    /// Ensures the container exists and returns the actual partition key path.
+    /// If the container already exists, reads its partition key path to avoid mismatches.
+    /// </summary>
+    private async Task<string> EnsureContainerExistsAndGetPartitionKey(CosmosClient client, string databaseName, string containerName, string defaultPartitionKeyPath)
     {
         try
         {
@@ -536,14 +545,39 @@ public class MigrationService : IMigrationService
                 databaseName, databaseResponse.StatusCode == System.Net.HttpStatusCode.Created);
 
             var database = client.GetDatabase(databaseName);
-            var containerResponse = await database.CreateContainerIfNotExistsAsync(containerName, partitionKeyPath);
+
+            // First, check if container already exists and get its partition key
+            try
+            {
+                var container = database.GetContainer(containerName);
+                var containerProperties = await container.ReadContainerAsync();
+                var existingPartitionKeyPath = containerProperties.Resource.PartitionKeyPath;
+
+                if (!string.IsNullOrEmpty(existingPartitionKeyPath))
+                {
+                    _logger.LogInformation("Container {Container} already exists with partition key: {PartitionKey}",
+                        containerName, existingPartitionKeyPath);
+                    return existingPartitionKeyPath;
+                }
+            }
+            catch (CosmosException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                // Container doesn't exist, create it with the default partition key
+                _logger.LogInformation("Container {Container} does not exist, creating with partition key: {PartitionKey}",
+                    containerName, defaultPartitionKeyPath);
+            }
+
+            var containerResponse = await database.CreateContainerIfNotExistsAsync(containerName, defaultPartitionKeyPath);
             _logger.LogInformation("Container {Container} ready (created: {Created})",
                 containerName, containerResponse.StatusCode == System.Net.HttpStatusCode.Created);
+
+            return defaultPartitionKeyPath;
         }
         catch (Exception ex)
         {
-            _logger.LogWarning(ex, "Could not ensure container {Container} exists in database {Database}",
+            _logger.LogWarning(ex, "Could not ensure container {Container} exists in database {Database}, using default partition key",
                 containerName, databaseName);
+            return defaultPartitionKeyPath;
         }
     }
 
