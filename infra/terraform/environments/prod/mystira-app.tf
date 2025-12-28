@@ -130,6 +130,7 @@ module "mystira_app" {
 
   # Communication Services - USE SHARED
   enable_communication_services = false
+  use_shared_acs                = true
   shared_acs_connection_string  = module.shared_comms.communication_service_primary_connection_string
   sender_email                  = "DoNotReply@mystira.app"
 

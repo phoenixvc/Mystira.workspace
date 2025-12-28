@@ -289,18 +289,11 @@ module "shared_postgresql" {
   backup_retention_days        = 35
   geo_redundant_backup_enabled = true
 
-  # Enable Azure AD authentication for passwordless access
-  aad_auth_enabled = true
-  aad_admin_identities = {
-    "admin-api" = {
-      principal_name = "mys-prod-admin-api-identity-san"
-      principal_type = "ServicePrincipal"
-    }
-    "story-generator" = {
-      principal_name = "mys-prod-story-identity-san"
-      principal_type = "ServicePrincipal"
-    }
-  }
+  # Azure AD authentication - disabled for initial deployment
+  # Enable after managed identities are created (circular dependency)
+  # Re-enable with aad_admin_identities after first successful deployment
+  aad_auth_enabled     = false
+  aad_admin_identities = {}
 
   tags = {
     CostCenter = "production"
