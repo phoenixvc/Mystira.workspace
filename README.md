@@ -464,6 +464,33 @@ Mystira.DevHub/
 - ✅ Media Assets Metadata (Cosmos DB)
 - ✅ Blob Storage Files (Azure Storage)
 
+### Standalone Migration Scripts
+
+For one-time migrations or CI/CD integration, use the command-line scripts:
+
+**Linux/macOS:**
+```bash
+# Dry-run migration to dev environment
+./scripts/migrate-cosmos-db.sh --environment dev --dry-run
+
+# Run actual migration to dev
+./scripts/migrate-cosmos-db.sh --environment dev
+
+# Migrate only scenarios to production
+./scripts/migrate-cosmos-db.sh --environment prod --type scenarios
+```
+
+**Windows (PowerShell):**
+```powershell
+# Dry-run migration to dev environment
+.\scripts\migrate-cosmos-db.ps1 -Environment dev -DryRun
+
+# Run actual migration to dev
+.\scripts\migrate-cosmos-db.ps1 -Environment dev
+```
+
+See **[docs/guides/cosmos-db-migration.md](docs/guides/cosmos-db-migration.md)** for complete migration documentation.
+
 ### Infrastructure Panel
 
 **Navigate**: Dashboard → Infrastructure (sidebar)
