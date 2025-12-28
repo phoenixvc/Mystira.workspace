@@ -786,7 +786,7 @@ resource "azurerm_kubernetes_cluster" "main" {
     node_count          = 3
     vm_size             = "Standard_D4s_v3"
     vnet_subnet_id      = azurerm_subnet.aks.id
-    enable_auto_scaling = true
+    auto_scaling_enabled = true
     min_count           = 3
     max_count           = 10
     zones               = ["1", "2", "3"]
@@ -809,7 +809,6 @@ resource "azurerm_kubernetes_cluster" "main" {
   }
 
   azure_active_directory_role_based_access_control {
-    managed            = true
     azure_rbac_enabled = true
   }
 
@@ -827,7 +826,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "chain" {
   vm_size               = "Standard_D4s_v3"
   node_count            = 3
   vnet_subnet_id        = azurerm_subnet.aks.id
-  enable_auto_scaling   = true
+  auto_scaling_enabled  = true
   min_count             = 3
   max_count             = 6
   zones                 = ["1", "2", "3"]
@@ -853,7 +852,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "publisher" {
   vm_size               = "Standard_D2s_v3"
   node_count            = 3
   vnet_subnet_id        = azurerm_subnet.aks.id
-  enable_auto_scaling   = true
+  auto_scaling_enabled  = true
   min_count             = 3
   max_count             = 10
   zones                 = ["1", "2", "3"]
