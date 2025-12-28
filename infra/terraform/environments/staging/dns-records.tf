@@ -3,6 +3,37 @@
 # References existing DNS zone in shared terraform RG (managed by CI/CD bootstrap)
 # =============================================================================
 
+# =============================================================================
+# Import blocks for existing DNS records
+# These records were created by previous CI/CD runs and need to be imported
+# =============================================================================
+
+# Import existing Front Door CNAME records (if they exist)
+import {
+  to = azurerm_dns_cname_record.staging_publisher_fd
+  id = "/subscriptions/22f9eb18-6553-4b7d-9451-47d0195085fe/resourceGroups/mys-shared-terraform-rg-san/providers/Microsoft.Network/dnsZones/mystira.app/CNAME/staging.publisher"
+}
+
+import {
+  to = azurerm_dns_cname_record.staging_chain_fd
+  id = "/subscriptions/22f9eb18-6553-4b7d-9451-47d0195085fe/resourceGroups/mys-shared-terraform-rg-san/providers/Microsoft.Network/dnsZones/mystira.app/CNAME/staging.chain"
+}
+
+import {
+  to = azurerm_dns_cname_record.staging_admin_api_fd
+  id = "/subscriptions/22f9eb18-6553-4b7d-9451-47d0195085fe/resourceGroups/mys-shared-terraform-rg-san/providers/Microsoft.Network/dnsZones/mystira.app/CNAME/staging.admin-api"
+}
+
+import {
+  to = azurerm_dns_cname_record.staging_admin_ui_fd
+  id = "/subscriptions/22f9eb18-6553-4b7d-9451-47d0195085fe/resourceGroups/mys-shared-terraform-rg-san/providers/Microsoft.Network/dnsZones/mystira.app/CNAME/staging.admin"
+}
+
+import {
+  to = azurerm_dns_cname_record.staging_story_api_fd
+  id = "/subscriptions/22f9eb18-6553-4b7d-9451-47d0195085fe/resourceGroups/mys-shared-terraform-rg-san/providers/Microsoft.Network/dnsZones/mystira.app/CNAME/staging.story-api"
+}
+
 variable "bind_custom_domains" {
   description = "Set to true to bind custom domains (run after DNS propagates)"
   type        = bool
