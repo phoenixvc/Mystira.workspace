@@ -623,8 +623,18 @@ jobs:
         id: plan
         run: |
           cd infra/terraform/environments/${{ env.ENVIRONMENT }}
+
+          # Build terraform plan command with optional flags
+          TF_ARGS="-out=tfplan -detailed-exitcode"
+
+          # Skip Azure AI Foundry infrastructure if requested
+          if [ "${{ github.event.inputs.skip_ai_deployment }}" == "true" ]; then
+            echo "::notice::Planning without Azure AI Foundry (enable_azure_ai=false)"
+            TF_ARGS="$TF_ARGS -var=enable_azure_ai=false"
+          fi
+
           set +e
-          terraform plan -out=tfplan -detailed-exitcode
+          terraform plan $TF_ARGS
           PLAN_EXIT=$?
           echo "Terraform plan exit code: $PLAN_EXIT"
           if [ $PLAN_EXIT -eq 1 ]; then
@@ -726,7 +736,17 @@ jobs:
         id: apply
         run: |
           cd infra/terraform/environments/${{ env.ENVIRONMENT }}
-          terraform apply -auto-approve
+
+          # Build terraform apply command with optional flags
+          TF_ARGS="-auto-approve"
+
+          # Skip Azure AI Foundry infrastructure if requested
+          if [ "${{ github.event.inputs.skip_ai_deployment }}" == "true" ]; then
+            echo "::notice::Skipping Azure AI Foundry infrastructure (enable_azure_ai=false)"
+            TF_ARGS="$TF_ARGS -var=enable_azure_ai=false"
+          fi
+
+          terraform apply $TF_ARGS
 
       - name: Check AKS Cluster After Apply
         id: check-aks-post-apply
