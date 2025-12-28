@@ -72,7 +72,7 @@ resource "azurerm_resource_group" "shared_comms" {
 }
 
 module "shared_comms" {
-  source = "../../modules/shared/communication-services"
+  source = "../../modules/shared/communications"
 
   resource_group_name = azurerm_resource_group.shared_comms.name
   location            = azurerm_resource_group.shared_comms.location
