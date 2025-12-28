@@ -526,7 +526,9 @@ module "entra_external_id" {
   tenant_name   = "mystira"
 
   pwa_redirect_uris = [
-    "https://app.mystira.app/auth/callback"
+    # Production environment
+    "https://mystira.app/authentication/login-callback",
+    "https://app.mystira.app/authentication/login-callback",
   ]
 }
 
