@@ -261,13 +261,16 @@ EOF
     log_info "Executing migration command..."
 
     # Run the CLI and capture output
+    # Use printf to avoid issues with echo on different platforms
     local result
-    result=$(echo "$json_command" | dotnet run --configuration Release --no-build 2>&1)
+    result=$(printf '%s' "$json_command" | dotnet run --configuration Release --no-build 2>&1)
+    local exit_code=$?
 
-    if [[ $? -eq 0 ]]; then
-        # Parse and display results
-        echo ""
+    # Always show the result
+    echo ""
+    if [[ -n "$result" ]]; then
         echo -e "${GREEN}Migration Results:${NC}"
+        # Try to pretty-print JSON, fall back to raw output
         echo "$result" | jq '.' 2>/dev/null || echo "$result"
         echo ""
 
@@ -280,12 +283,14 @@ EOF
                 log_success "Migration completed successfully!"
             fi
         else
-            log_warning "Migration completed with some failures. Check the results above."
+            log_warning "Migration completed with some issues. Check the results above."
         fi
     else
-        log_error "Migration failed!"
-        echo "$result"
-        exit 1
+        log_warning "No output received from CLI. Exit code: $exit_code"
+        if [[ $exit_code -ne 0 ]]; then
+            log_error "Migration command failed with exit code $exit_code"
+            exit 1
+        fi
     fi
 }
 
