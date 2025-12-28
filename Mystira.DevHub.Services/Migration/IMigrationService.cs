@@ -11,38 +11,33 @@ public class MigrationOptions
     public int BulkBatchSize { get; set; } = 100;
 }
 
+/// <summary>
+/// Interface for Cosmos DB and Blob Storage migration operations.
+/// Uses dynamic/generic approach to avoid external domain dependencies.
+/// </summary>
 public interface IMigrationService
 {
     /// <summary>
-    /// Migrates scenarios from source to destination Cosmos DB
+    /// Generic container migration - migrates any container using dynamic JSON documents.
+    /// Works with any document schema without requiring typed models.
     /// </summary>
-    Task<MigrationResult> MigrateScenariosAsync(string sourceConnectionString, string destConnectionString, string sourceDatabaseName, string destDatabaseName, MigrationOptions? options = null);
-
-    /// <summary>
-    /// Migrates content bundles from source to destination Cosmos DB
-    /// </summary>
-    Task<MigrationResult> MigrateContentBundlesAsync(string sourceConnectionString, string destConnectionString, string sourceDatabaseName, string destDatabaseName, MigrationOptions? options = null);
-
-    /// <summary>
-    /// Migrates media assets metadata from source to destination Cosmos DB
-    /// </summary>
-    Task<MigrationResult> MigrateMediaAssetsAsync(string sourceConnectionString, string destConnectionString, string sourceDatabaseName, string destDatabaseName, MigrationOptions? options = null);
-
-    /// <summary>
-    /// Generic container migration - migrates any container using dynamic JSON documents
-    /// </summary>
-    Task<MigrationResult> MigrateContainerAsync(string sourceConnectionString, string destConnectionString, string sourceDatabaseName, string destDatabaseName, string containerName, string partitionKeyPath = "/id", MigrationOptions? options = null);
+    Task<MigrationResult> MigrateContainerAsync(
+        string sourceConnectionString,
+        string destConnectionString,
+        string sourceDatabaseName,
+        string destDatabaseName,
+        string containerName,
+        string partitionKeyPath = "/id",
+        MigrationOptions? options = null);
 
     /// <summary>
     /// Copies blob files from source storage to destination storage
     /// </summary>
-    Task<MigrationResult> MigrateBlobStorageAsync(string sourceStorageConnectionString, string destStorageConnectionString, string containerName, MigrationOptions? options = null);
-
-    /// <summary>
-    /// Seeds master data (CompassAxes, Archetypes, EchoTypes, FantasyThemes, AgeGroups)
-    /// from JSON files into production Cosmos DB
-    /// </summary>
-    Task<MigrationResult> SeedMasterDataAsync(string destConnectionString, string databaseName, string jsonFilesPath, MigrationOptions? options = null);
+    Task<MigrationResult> MigrateBlobStorageAsync(
+        string sourceStorageConnectionString,
+        string destStorageConnectionString,
+        string containerName,
+        MigrationOptions? options = null);
 }
 
 public class MigrationResult
