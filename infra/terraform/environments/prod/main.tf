@@ -856,17 +856,11 @@ resource "azurerm_kubernetes_cluster_node_pool" "publisher" {
 }
 
 # DNS Configuration
-module "dns" {
-  source = "../../modules/dns"
-
-  environment         = "prod"
-  resource_group_name = azurerm_resource_group.main.name
-  domain_name         = "mystira.app"
-
-  tags = {
-    CostCenter = "production"
-    Critical   = "true"
-  }
+# NOTE: DNS zone is created in dev environment and shared across all environments
+# Reference it via data source instead of creating a duplicate
+data "azurerm_dns_zone" "mystira" {
+  name                = "mystira.app"
+  resource_group_name = "mys-dev-core-rg-san"  # Zone is in dev core-rg
 }
 
 output "resource_group_name" {
@@ -898,17 +892,17 @@ output "acr_name" {
 
 output "dns_name_servers" {
   description = "Name servers for DNS zone - configure these in your domain registrar"
-  value       = module.dns.name_servers
+  value       = data.azurerm_dns_zone.mystira.name_servers
 }
 
 output "publisher_domain" {
   description = "Publisher service domain"
-  value       = module.dns.publisher_fqdn
+  value       = "publisher.mystira.app"
 }
 
 output "chain_domain" {
   description = "Chain service domain"
-  value       = module.dns.chain_fqdn
+  value       = "chain.mystira.app"
 }
 
 # Shared Infrastructure Outputs
