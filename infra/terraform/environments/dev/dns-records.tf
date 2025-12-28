@@ -13,6 +13,12 @@ variable "bind_custom_domains" {
   default     = false
 }
 
+variable "k8s_ingress_ip" {
+  description = "Kubernetes NGINX ingress controller external IP (get with: kubectl get svc -n ingress-nginx)"
+  type        = string
+  default     = ""  # Set after AKS is deployed
+}
+
 # DNS Zone for mystira.app (created in dev, shared by all environments)
 resource "azurerm_dns_zone" "mystira" {
   name                = "mystira.app"
@@ -107,6 +113,102 @@ resource "azurerm_app_service_certificate_binding" "dev_api" {
 }
 
 # =============================================================================
+# Kubernetes Services DNS Records (A records to ingress IP)
+# Cert-manager auto-provisions Let's Encrypt certs via HTTP-01 challenge
+# =============================================================================
+
+# A record for dev.publisher.mystira.app -> K8s ingress
+resource "azurerm_dns_a_record" "dev_publisher" {
+  count = var.k8s_ingress_ip != "" ? 1 : 0
+
+  name                = "dev.publisher"
+  zone_name           = azurerm_dns_zone.mystira.name
+  resource_group_name = azurerm_dns_zone.mystira.resource_group_name
+  ttl                 = 300
+  records             = [var.k8s_ingress_ip]
+
+  tags = local.common_tags
+}
+
+# A record for dev.chain.mystira.app -> K8s ingress
+resource "azurerm_dns_a_record" "dev_chain" {
+  count = var.k8s_ingress_ip != "" ? 1 : 0
+
+  name                = "dev.chain"
+  zone_name           = azurerm_dns_zone.mystira.name
+  resource_group_name = azurerm_dns_zone.mystira.resource_group_name
+  ttl                 = 300
+  records             = [var.k8s_ingress_ip]
+
+  tags = local.common_tags
+}
+
+# A record for dev.story-api.mystira.app -> K8s ingress
+resource "azurerm_dns_a_record" "dev_story_api" {
+  count = var.k8s_ingress_ip != "" ? 1 : 0
+
+  name                = "dev.story-api"
+  zone_name           = azurerm_dns_zone.mystira.name
+  resource_group_name = azurerm_dns_zone.mystira.resource_group_name
+  ttl                 = 300
+  records             = [var.k8s_ingress_ip]
+
+  tags = local.common_tags
+}
+
+# A record for dev.admin-api.mystira.app -> K8s ingress
+resource "azurerm_dns_a_record" "dev_admin_api" {
+  count = var.k8s_ingress_ip != "" ? 1 : 0
+
+  name                = "dev.admin-api"
+  zone_name           = azurerm_dns_zone.mystira.name
+  resource_group_name = azurerm_dns_zone.mystira.resource_group_name
+  ttl                 = 300
+  records             = [var.k8s_ingress_ip]
+
+  tags = local.common_tags
+}
+
+# A record for dev.admin.mystira.app -> K8s ingress
+resource "azurerm_dns_a_record" "dev_admin_ui" {
+  count = var.k8s_ingress_ip != "" ? 1 : 0
+
+  name                = "dev.admin"
+  zone_name           = azurerm_dns_zone.mystira.name
+  resource_group_name = azurerm_dns_zone.mystira.resource_group_name
+  ttl                 = 300
+  records             = [var.k8s_ingress_ip]
+
+  tags = local.common_tags
+}
+
+# =============================================================================
+# Story Generator SWA DNS Records
+# =============================================================================
+
+# CNAME record for dev.story.mystira.app -> Story Generator SWA
+resource "azurerm_dns_cname_record" "dev_story_swa" {
+  name                = "dev.story"
+  zone_name           = azurerm_dns_zone.mystira.name
+  resource_group_name = azurerm_dns_zone.mystira.resource_group_name
+  ttl                 = 300
+  record              = module.story_generator.static_web_app_default_hostname
+
+  tags = local.common_tags
+}
+
+# Custom domain binding for Story Generator SWA
+resource "azurerm_static_web_app_custom_domain" "dev_story" {
+  count = var.bind_custom_domains ? 1 : 0
+
+  static_web_app_id = module.story_generator.static_web_app_id
+  domain_name       = "dev.story.mystira.app"
+  validation_type   = "cname-delegation"
+
+  depends_on = [azurerm_dns_cname_record.dev_story_swa]
+}
+
+# =============================================================================
 # Outputs
 # =============================================================================
 
@@ -118,4 +220,9 @@ output "dns_zone_name_servers" {
 output "next_step" {
   description = "Instructions for binding custom domains"
   value       = var.bind_custom_domains ? "Custom domains bound!" : "Run: terraform apply -var='bind_custom_domains=true'"
+}
+
+output "k8s_dns_records_note" {
+  description = "K8s DNS records status"
+  value       = var.k8s_ingress_ip != "" ? "K8s A records created for ingress IP ${var.k8s_ingress_ip}" : "Set k8s_ingress_ip to create K8s DNS records: kubectl get svc -n ingress-nginx -o jsonpath='{.items[0].status.loadBalancer.ingress[0].ip}'"
 }
