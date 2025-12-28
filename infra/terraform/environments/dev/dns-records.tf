@@ -207,6 +207,123 @@ resource "azurerm_static_web_app_custom_domain" "dev_story" {
 }
 
 # =============================================================================
+# Front Door TXT Validation Records
+# These records validate domain ownership for Azure Front Door custom domains
+# =============================================================================
+
+# TXT validation for dev.mystira.app (Front Door)
+resource "azurerm_dns_txt_record" "fd_dev_app" {
+  name                = "_dnsauth.dev"
+  zone_name           = data.azurerm_dns_zone.mystira.name
+  resource_group_name = data.azurerm_dns_zone.mystira.resource_group_name
+  ttl                 = 3600
+
+  record {
+    value = module.front_door.mystira_app_swa_custom_domain_validation_token
+  }
+
+  tags = local.common_tags
+}
+
+# TXT validation for dev.api.mystira.app (Front Door)
+resource "azurerm_dns_txt_record" "fd_dev_api" {
+  name                = "_dnsauth.dev.api"
+  zone_name           = data.azurerm_dns_zone.mystira.name
+  resource_group_name = data.azurerm_dns_zone.mystira.resource_group_name
+  ttl                 = 3600
+
+  record {
+    value = module.front_door.mystira_app_api_custom_domain_validation_token
+  }
+
+  tags = local.common_tags
+}
+
+# TXT validation for dev.admin-api.mystira.app (Front Door)
+resource "azurerm_dns_txt_record" "fd_dev_admin_api" {
+  name                = "_dnsauth.dev.admin-api"
+  zone_name           = data.azurerm_dns_zone.mystira.name
+  resource_group_name = data.azurerm_dns_zone.mystira.resource_group_name
+  ttl                 = 3600
+
+  record {
+    value = module.front_door.admin_api_custom_domain_validation_token
+  }
+
+  tags = local.common_tags
+}
+
+# TXT validation for dev.admin.mystira.app (Front Door)
+resource "azurerm_dns_txt_record" "fd_dev_admin_ui" {
+  name                = "_dnsauth.dev.admin"
+  zone_name           = data.azurerm_dns_zone.mystira.name
+  resource_group_name = data.azurerm_dns_zone.mystira.resource_group_name
+  ttl                 = 3600
+
+  record {
+    value = module.front_door.admin_ui_custom_domain_validation_token
+  }
+
+  tags = local.common_tags
+}
+
+# TXT validation for dev.story.mystira.app (Front Door)
+resource "azurerm_dns_txt_record" "fd_dev_story_swa" {
+  name                = "_dnsauth.dev.story"
+  zone_name           = data.azurerm_dns_zone.mystira.name
+  resource_group_name = data.azurerm_dns_zone.mystira.resource_group_name
+  ttl                 = 3600
+
+  record {
+    value = module.front_door.story_generator_swa_custom_domain_validation_token
+  }
+
+  tags = local.common_tags
+}
+
+# TXT validation for dev.story-api.mystira.app (Front Door)
+resource "azurerm_dns_txt_record" "fd_dev_story_api" {
+  name                = "_dnsauth.dev.story-api"
+  zone_name           = data.azurerm_dns_zone.mystira.name
+  resource_group_name = data.azurerm_dns_zone.mystira.resource_group_name
+  ttl                 = 3600
+
+  record {
+    value = module.front_door.story_generator_api_custom_domain_validation_token
+  }
+
+  tags = local.common_tags
+}
+
+# TXT validation for dev.publisher.mystira.app (Front Door)
+resource "azurerm_dns_txt_record" "fd_dev_publisher" {
+  name                = "_dnsauth.dev.publisher"
+  zone_name           = data.azurerm_dns_zone.mystira.name
+  resource_group_name = data.azurerm_dns_zone.mystira.resource_group_name
+  ttl                 = 3600
+
+  record {
+    value = module.front_door.publisher_custom_domain_validation_token
+  }
+
+  tags = local.common_tags
+}
+
+# TXT validation for dev.chain.mystira.app (Front Door)
+resource "azurerm_dns_txt_record" "fd_dev_chain" {
+  name                = "_dnsauth.dev.chain"
+  zone_name           = data.azurerm_dns_zone.mystira.name
+  resource_group_name = data.azurerm_dns_zone.mystira.resource_group_name
+  ttl                 = 3600
+
+  record {
+    value = module.front_door.chain_custom_domain_validation_token
+  }
+
+  tags = local.common_tags
+}
+
+# =============================================================================
 # Outputs
 # =============================================================================
 
