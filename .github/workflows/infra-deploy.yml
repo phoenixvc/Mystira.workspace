@@ -475,21 +475,26 @@ jobs:
           fi
 
           # Check if ACR exists in Azure but not in state (ACR is shared across environments)
-          # Note: ACR is now managed via module.shared_acr (see ADR-0017)
-          if az acr show --name ${{ env.ACR_NAME }} &> /dev/null; then
-            echo "ACR exists in Azure, checking if in state..."
-            # Check for both old direct resource and new module resource
-            if terraform state list 2>/dev/null | grep -q "module.shared_acr.azurerm_container_registry.shared"; then
-              echo "ACR already in state via shared_acr module"
-            elif terraform state list 2>/dev/null | grep -q "azurerm_container_registry.shared"; then
-              echo "ACR in state as direct resource - migration to module may be needed"
-            else
-              # Get the resource group where ACR actually exists
-              ACR_RG=$(az acr show --name ${{ env.ACR_NAME }} --query resourceGroup -o tsv)
-              echo "ACR not in state, importing from resource group ${ACR_RG} into shared_acr module..."
-              terraform import 'module.shared_acr.azurerm_container_registry.shared' "/subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${ACR_RG}/providers/Microsoft.ContainerRegistry/registries/${{ env.ACR_NAME }}"
-              echo "::notice::Imported existing ACR into Terraform state via shared_acr module"
+          # Note: ACR is managed via module.shared_acr in DEV only (see ADR-0017)
+          # Staging and prod use data sources to reference the shared ACR
+          if [ "${{ env.ENVIRONMENT }}" == "dev" ]; then
+            if az acr show --name ${{ env.ACR_NAME }} &> /dev/null; then
+              echo "ACR exists in Azure, checking if in state..."
+              # Check for both old direct resource and new module resource
+              if terraform state list 2>/dev/null | grep -q "module.shared_acr.azurerm_container_registry.shared"; then
+                echo "ACR already in state via shared_acr module"
+              elif terraform state list 2>/dev/null | grep -q "azurerm_container_registry.shared"; then
+                echo "ACR in state as direct resource - migration to module may be needed"
+              else
+                # Get the resource group where ACR actually exists
+                ACR_RG=$(az acr show --name ${{ env.ACR_NAME }} --query resourceGroup -o tsv)
+                echo "ACR not in state, importing from resource group ${ACR_RG} into shared_acr module..."
+                terraform import 'module.shared_acr.azurerm_container_registry.shared' "/subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${ACR_RG}/providers/Microsoft.ContainerRegistry/registries/${{ env.ACR_NAME }}"
+                echo "::notice::Imported existing ACR into Terraform state via shared_acr module"
+              fi
             fi
+          else
+            echo "Skipping ACR import for ${{ env.ENVIRONMENT }} - ACR is managed by dev environment and referenced via data source"
           fi
 
           # Import admin_api module resources if they exist in Azure but not in state
