@@ -7,6 +7,26 @@
 #   2. terraform apply -var="bind_custom_domains=true"    (binds custom domains)
 # =============================================================================
 
+# =============================================================================
+# Import blocks for existing DNS records
+# These records were created by previous CI/CD runs and need to be imported
+# =============================================================================
+
+import {
+  to = azurerm_dns_cname_record.dev_app_swa
+  id = "/subscriptions/22f9eb18-6553-4b7d-9451-47d0195085fe/resourceGroups/mys-shared-terraform-rg-san/providers/Microsoft.Network/dnsZones/mystira.app/CNAME/dev"
+}
+
+import {
+  to = azurerm_dns_cname_record.dev_api
+  id = "/subscriptions/22f9eb18-6553-4b7d-9451-47d0195085fe/resourceGroups/mys-shared-terraform-rg-san/providers/Microsoft.Network/dnsZones/mystira.app/CNAME/dev.api"
+}
+
+import {
+  to = azurerm_dns_cname_record.dev_story_swa
+  id = "/subscriptions/22f9eb18-6553-4b7d-9451-47d0195085fe/resourceGroups/mys-shared-terraform-rg-san/providers/Microsoft.Network/dnsZones/mystira.app/CNAME/dev.story"
+}
+
 variable "bind_custom_domains" {
   description = "Set to true to bind custom domains (run after DNS propagates)"
   type        = bool
