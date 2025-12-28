@@ -74,6 +74,12 @@ variable "workload_identity_enabled" {
   default     = true
 }
 
+variable "enable_azure_ai" {
+  description = "Enable Azure AI Foundry infrastructure (can be disabled to speed up initial deployment)"
+  type        = bool
+  default     = true
+}
+
 # Common tags for all resources
 locals {
   common_tags = {
@@ -374,8 +380,10 @@ module "shared_monitoring" {
 
 # Shared Azure AI Foundry Infrastructure (in core-rg)
 # Updated to use AIServices (Azure AI Foundry) instead of legacy OpenAI
+# Can be disabled with enable_azure_ai=false to speed up initial deployment
 module "shared_azure_ai" {
   source = "../../modules/shared/azure-ai"
+  count  = var.enable_azure_ai ? 1 : 0
 
   environment         = "prod"
   location            = var.location
@@ -664,17 +672,20 @@ resource "azurerm_key_vault_secret" "story_appinsights" {
 }
 
 # Story-Generator Azure AI Foundry Secrets (auto-populated from shared_azure_ai module)
+# Only created when enable_azure_ai=true
 resource "azurerm_key_vault_secret" "story_azure_ai_endpoint" {
+  count        = var.enable_azure_ai ? 1 : 0
   name         = "azure-ai-endpoint"
-  value        = module.shared_azure_ai.endpoint
+  value        = module.shared_azure_ai[0].endpoint
   key_vault_id = module.story_generator.key_vault_id
   content_type = "azure-ai"
   tags         = { AutoPopulated = "true", Source = "shared-azure-ai" }
 }
 
 resource "azurerm_key_vault_secret" "story_azure_ai_key" {
+  count        = var.enable_azure_ai ? 1 : 0
   name         = "azure-ai-api-key"
-  value        = module.shared_azure_ai.primary_access_key
+  value        = module.shared_azure_ai[0].primary_access_key
   key_vault_id = module.story_generator.key_vault_id
   content_type = "azure-ai"
   tags         = { AutoPopulated = "true", Source = "shared-azure-ai" }
