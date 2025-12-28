@@ -1,29 +1,21 @@
 # =============================================================================
-# Mystira.App Infrastructure
+# Mystira.App Infrastructure - Staging
 # Blazor WASM PWA + ASP.NET Core API + Cosmos DB
-# Converted from Bicep: https://github.com/phoenixvc/Mystira.App/infrastructure
-# =============================================================================
-#
-# Resource Distribution (per ADR-0017):
-# - Shared resources (Cosmos DB, Storage) → core-rg
-# - App-specific compute (App Service, SWA, Key Vault) → app-rg
-# - Communication Services → mys-shared-comms-rg-glob (cross-environment)
-#
 # =============================================================================
 
 # =============================================================================
-# Shared Resources (in core-rg)
+# Shared Resources for Mystira.App (in core-rg)
 # =============================================================================
 
-# Shared Cosmos DB for Mystira.App and Admin API
+# Shared Cosmos DB for Mystira.App
 module "shared_cosmos_db" {
   source = "../../modules/shared/cosmos-db"
 
-  environment         = "dev"
+  environment         = "staging"
   location            = var.location
-  resource_group_name = azurerm_resource_group.main.name  # core-rg
+  resource_group_name = azurerm_resource_group.main.name
 
-  serverless        = true  # Cost-effective for dev
+  serverless        = true
   consistency_level = "Session"
 
   databases = {
@@ -47,20 +39,16 @@ module "shared_cosmos_db" {
 module "shared_storage" {
   source = "../../modules/shared/storage"
 
-  environment         = "dev"
+  environment         = "staging"
   location            = var.location
-  resource_group_name = azurerm_resource_group.main.name  # core-rg
+  resource_group_name = azurerm_resource_group.main.name
 
   storage_sku = "Standard_LRS"
 
   cors_allowed_origins = [
-    "https://app.mystira.app",
-    "https://dev.mystira.app",
-    "http://localhost:5000",
-    "http://localhost:5001",
-    "http://localhost:5173",
-    "http://127.0.0.1:5000",
-    "http://127.0.0.1:5001",
+    "https://staging.mystira.app",
+    "https://staging.app.mystira.app",
+    "https://mystira.app",
   ]
 
   containers = {
@@ -77,103 +65,96 @@ module "shared_storage" {
   tags = local.common_tags
 }
 
+# Shared Communication Services
+resource "azurerm_resource_group" "shared_comms" {
+  name     = "mys-staging-comms-rg-${local.region_code}"
+  location = var.location
+  tags     = merge(local.common_tags, { Service = "communication-services" })
+}
+
+module "shared_comms" {
+  source = "../../modules/shared/communication-services"
+
+  resource_group_name = azurerm_resource_group.shared_comms.name
+  location            = azurerm_resource_group.shared_comms.location
+  environment         = "staging"
+
+  tags = local.common_tags
+}
+
 # =============================================================================
-# App-Specific Resources (in app-rg)
+# Mystira.App Module (in app-rg)
 # =============================================================================
 
 module "mystira_app" {
   source = "../../modules/mystira-app"
 
-  environment         = "dev"
+  environment         = "staging"
   location            = var.location
   fallback_location   = "eastus2"  # Static Web Apps not available in South Africa North
-  resource_group_name = azurerm_resource_group.app.name  # app-rg for app-specific resources
+  resource_group_name = azurerm_resource_group.app.name
   project_name        = "mystira"
   org                 = "mys"
 
-  # -----------------------------------------------------------------------------
-  # Cosmos DB Configuration - USE SHARED
-  # -----------------------------------------------------------------------------
-  skip_cosmos_creation           = true
+  # Cosmos DB - USE SHARED
+  skip_cosmos_creation              = true
   existing_cosmos_connection_string = module.shared_cosmos_db.primary_sql_connection_string
-  shared_cosmos_endpoint         = module.shared_cosmos_db.endpoint
-  shared_cosmos_database_name    = "MystiraAppDb"
+  shared_cosmos_endpoint            = module.shared_cosmos_db.endpoint
+  shared_cosmos_database_name       = "MystiraAppDb"
 
-  # -----------------------------------------------------------------------------
-  # App Service Configuration (API Backend)
-  # -----------------------------------------------------------------------------
+  # App Service Configuration
   app_service_sku = "B1"
   dotnet_version  = "9.0"
 
-  # Custom domain for dev API
+  # Custom domain for staging API
   enable_api_custom_domain = true
-  api_custom_domain        = "dev.api.mystira.app"
+  api_custom_domain        = "staging.api.mystira.app"
 
-  # -----------------------------------------------------------------------------
-  # Static Web App Configuration (Blazor WASM PWA)
-  # -----------------------------------------------------------------------------
+  # Static Web App Configuration
   enable_static_web_app = true
   static_web_app_sku    = "Free"
   github_repository_url = "https://github.com/phoenixvc/Mystira.App"
-  github_branch         = "dev"
+  github_branch         = "main"
 
-  # Custom domain for dev environment
+  # Custom domain for staging
   enable_app_custom_domain = true
-  app_custom_domain        = "dev.mystira.app"
+  app_custom_domain        = "staging.app.mystira.app"
 
-  # -----------------------------------------------------------------------------
-  # Storage Configuration - USE SHARED
-  # -----------------------------------------------------------------------------
+  # Storage - USE SHARED
   skip_storage_creation            = true
   shared_storage_connection_string = module.shared_storage.primary_connection_string
   shared_storage_blob_endpoint     = module.shared_storage.primary_blob_endpoint
 
   cors_allowed_origins = [
-    "https://app.mystira.app",
-    "https://dev.mystira.app",
-    "http://localhost:5000",
-    "http://localhost:5001",
-    "http://localhost:5173",
-    "http://127.0.0.1:5000",
-    "http://127.0.0.1:5001",
+    "https://staging.mystira.app",
+    "https://staging.app.mystira.app",
+    "https://mystira.app",
   ]
 
-  # -----------------------------------------------------------------------------
-  # Communication Services - USE SHARED (cross-environment)
-  # -----------------------------------------------------------------------------
-  enable_communication_services = false  # Use shared
+  # Communication Services - USE SHARED
+  enable_communication_services = false
   shared_acs_connection_string  = module.shared_comms.communication_service_primary_connection_string
   sender_email                  = "DoNotReply@mystira.app"
 
-  # -----------------------------------------------------------------------------
-  # Azure Bot (Teams Integration) - Disabled for dev
-  # -----------------------------------------------------------------------------
+  # Azure Bot - Disabled for staging
   enable_azure_bot     = false
   bot_microsoft_app_id = ""
 
-  # -----------------------------------------------------------------------------
-  # Monitoring Configuration - USE SHARED MONITORING
-  # -----------------------------------------------------------------------------
+  # Monitoring - USE SHARED
   use_shared_monitoring                         = true
   shared_log_analytics_workspace_id             = module.shared_monitoring.log_analytics_workspace_id
   shared_application_insights_id                = module.shared_monitoring.application_insights_id
   shared_application_insights_connection_string = module.shared_monitoring.application_insights_connection_string
 
-  enable_alerts = false  # Disabled for dev to reduce noise
+  enable_alerts = true
 
-  # -----------------------------------------------------------------------------
-  # Budget Configuration
-  # -----------------------------------------------------------------------------
-  enable_budget       = false  # Enable in prod
-  monthly_budget      = 50
+  # Budget
+  enable_budget       = false
+  monthly_budget      = 100
   budget_alert_emails = []
 
-  # -----------------------------------------------------------------------------
-  # Tags
-  # -----------------------------------------------------------------------------
   tags = local.common_tags
 
-  # Ensure shared resources are created first
   depends_on = [
     module.shared_monitoring,
     module.shared_cosmos_db,
@@ -197,7 +178,7 @@ output "mystira_app_web_url" {
 }
 
 output "mystira_app_cosmos_endpoint" {
-  description = "Mystira.App Cosmos DB endpoint (shared)"
+  description = "Mystira.App Cosmos DB endpoint"
   value       = module.shared_cosmos_db.endpoint
 }
 
@@ -206,7 +187,12 @@ output "mystira_app_key_vault_uri" {
   value       = module.mystira_app.key_vault_uri
 }
 
-output "shared_storage_blob_endpoint" {
-  description = "Shared Storage blob endpoint"
-  value       = module.shared_storage.primary_blob_endpoint
+output "mystira_app_swa_default_hostname" {
+  description = "Mystira.App SWA default hostname (for Front Door)"
+  value       = module.mystira_app.static_web_app_default_hostname
+}
+
+output "mystira_app_api_default_hostname" {
+  description = "Mystira.App API default hostname (for Front Door)"
+  value       = module.mystira_app.app_service_default_hostname
 }
