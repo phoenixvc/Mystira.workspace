@@ -90,6 +90,22 @@ resource "azurerm_app_service_custom_hostname_binding" "dev_api" {
   ]
 }
 
+# Free managed SSL certificate for App Service API
+resource "azurerm_app_service_managed_certificate" "dev_api" {
+  count = var.bind_custom_domains ? 1 : 0
+
+  custom_hostname_binding_id = azurerm_app_service_custom_hostname_binding.dev_api[0].id
+}
+
+# Bind the certificate to the hostname
+resource "azurerm_app_service_certificate_binding" "dev_api" {
+  count = var.bind_custom_domains ? 1 : 0
+
+  hostname_binding_id = azurerm_app_service_custom_hostname_binding.dev_api[0].id
+  certificate_id      = azurerm_app_service_managed_certificate.dev_api[0].id
+  ssl_state           = "SniEnabled"
+}
+
 # =============================================================================
 # Outputs
 # =============================================================================
