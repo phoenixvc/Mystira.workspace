@@ -1,10 +1,10 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Mystira.App.Application.UseCases.Contributors;
+using Mystira.App.Domain.Models;
 using Mystira.Contracts.App.Requests.Contributors;
 using Mystira.Contracts.App.Responses.Common;
 using Mystira.Contracts.App.Responses.Contributors;
-using Mystira.App.Domain.Models;
 
 namespace Mystira.App.Admin.Api.Controllers;
 
