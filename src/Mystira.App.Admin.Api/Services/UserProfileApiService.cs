@@ -1,7 +1,6 @@
+using Mystira.App.Admin.Api.Models;
 using Mystira.App.Domain.Models;
 using Mystira.App.Infrastructure.Data;
-using Mystira.Shared.Models;
-using Mystira.Shared.Services;
 using ContractsCreateGuestProfileRequest = Mystira.Contracts.App.Requests.UserProfiles.CreateGuestProfileRequest;
 using ContractsCreateMultipleProfilesRequest = Mystira.Contracts.App.Requests.UserProfiles.CreateMultipleProfilesRequest;
 using ContractsCreateUserProfileRequest = Mystira.Contracts.App.Requests.UserProfiles.CreateUserProfileRequest;
@@ -11,11 +10,11 @@ namespace Mystira.App.Admin.Api.Services;
 
 public class UserProfileApiService : IUserProfileApiService
 {
-    private readonly UserProfileService<MystiraAppDbContext> _userProfileService;
+    private readonly UserProfileService _userProfileService;
 
-    public UserProfileApiService(MystiraAppDbContext context, ILogger<UserProfileService<MystiraAppDbContext>> logger)
+    public UserProfileApiService(MystiraAppDbContext context, ILogger<UserProfileService> logger)
     {
-        _userProfileService = new UserProfileService<MystiraAppDbContext>(context, logger);
+        _userProfileService = new UserProfileService(context, logger);
     }
 
     private static CreateUserProfileRequest MapToShared(ContractsCreateUserProfileRequest req) => new()

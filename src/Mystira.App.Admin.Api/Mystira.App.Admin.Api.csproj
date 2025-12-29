@@ -55,13 +55,6 @@
     <PackageReference Include="Ardalis.Specification.EntityFrameworkCore" Version="9.3.1" />
   </ItemGroup>
 
-  <!-- Exclude legacy types moved to Shared library -->
-  <ItemGroup>
-    <Compile Remove="Services\JwtService.cs" />
-    <Compile Remove="Services\IJwtService.cs" />
-    <Compile Remove="Adapters\HealthCheckPortAdapter.cs" />
-  </ItemGroup>
-
   <ItemGroup>
     <Content Include="..\..\.dockerignore">
       <Link>.dockerignore</Link>

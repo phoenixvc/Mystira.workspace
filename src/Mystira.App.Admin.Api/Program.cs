@@ -7,12 +7,10 @@ using Microsoft.Identity.Web;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Mystira.App.Admin.Api.Configuration;
-using Mystira.App.Admin.Api.Adapters;
 using Mystira.App.Admin.Api.Services;
 using Mystira.App.Admin.Api.Services.Caching;
 using Mystira.App.Application.Behaviors;
 using Mystira.App.Application.Services;
-// Note: Avoid unqualified IJwtService to prevent ambiguity with Application port interface
 using Mystira.App.Application.Ports.Messaging;
 using Mystira.App.Application.Ports.Data;
 using Mystira.App.Application.Ports.Media;
@@ -498,10 +496,6 @@ builder.Services.AddScoped<IEchoTypeRepository, EchoTypeRepository>();
 builder.Services.AddScoped<IFantasyThemeRepository, FantasyThemeRepository>();
 builder.Services.AddScoped<IAgeGroupRepository, AgeGroupRepository>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
-
-// Auth and application ports/adapters
-builder.Services.AddScoped<Mystira.Shared.Services.IJwtService, Mystira.Shared.Services.JwtService>();
-builder.Services.AddScoped<Mystira.App.Application.Ports.Auth.IJwtService, Mystira.App.Admin.Api.Adapters.JwtServiceAdapter>();
 
 // Discord/Messaging: keep as No-Op in this environment
 builder.Services.AddSingleton<NoOpChatBotService>();

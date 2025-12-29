@@ -1,8 +1,7 @@
+using Mystira.App.Admin.Api.Models;
 using Mystira.App.Domain.Models;
 using CreateScenarioRequest = Mystira.Contracts.App.Requests.Scenarios.CreateScenarioRequest;
-using ScenarioListResponse = Mystira.Contracts.App.Responses.Scenarios.ScenarioListResponse;
 using ScenarioQueryRequest = Mystira.Contracts.App.Requests.Scenarios.ScenarioQueryRequest;
-using ScenarioReferenceValidation = Mystira.Contracts.App.Responses.Scenarios.ScenarioReferenceValidation;
 
 namespace Mystira.App.Admin.Api.Services;
 

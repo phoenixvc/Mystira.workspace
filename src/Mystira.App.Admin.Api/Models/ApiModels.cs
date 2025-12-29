@@ -6,6 +6,11 @@ namespace Mystira.App.Admin.Api.Models;
 // Request DTOs
 public class CreateUserProfileRequest
 {
+    /// <summary>
+    /// Optional ID for the profile. If not provided, one will be generated.
+    /// </summary>
+    public string? Id { get; set; }
+
     [Required]
     [StringLength(100, MinimumLength = 2)]
     public string Name { get; set; } = string.Empty;
@@ -50,6 +55,11 @@ public class CreateUserProfileRequest
     /// Bio or description for the profile
     /// </summary>
     public string? Bio { get; set; }
+
+    /// <summary>
+    /// Selected avatar media ID
+    /// </summary>
+    public string? SelectedAvatarMediaId { get; set; }
 }
 
 public class UpdateUserProfileRequest
@@ -63,10 +73,16 @@ public class UpdateUserProfileRequest
     public string? AccountId { get; set; }
     public string? Pronouns { get; set; }
     public string? Bio { get; set; }
+    public string? SelectedAvatarMediaId { get; set; }
 }
 
 public class CreateGuestProfileRequest
 {
+    /// <summary>
+    /// Optional ID for the guest profile. If not provided, one will be generated.
+    /// </summary>
+    public string? Id { get; set; }
+
     /// <summary>
     /// Optional name for guest profile. If not provided, a random name will be generated.
     /// </summary>
@@ -696,4 +712,62 @@ public class AvatarConfigurationResponse
 {
     public string AgeGroup { get; set; } = string.Empty;
     public List<string> AvatarMediaIds { get; set; } = new();
+}
+
+// API Version Info Models (previously in Mystira.Shared.Models)
+public class ApiVersionInfo
+{
+    public string ApiVersion { get; set; } = string.Empty;
+    public string BuildVersion { get; set; } = string.Empty;
+    public string MasterDataVersion { get; set; } = string.Empty;
+    public bool SupportsLegacyEnums { get; set; }
+    public MasterDataEntityInfo[] MasterDataEntities { get; set; } = Array.Empty<MasterDataEntityInfo>();
+    public DeprecatedApiInfo[] DeprecatedApis { get; set; } = Array.Empty<DeprecatedApiInfo>();
+}
+
+public class MasterDataEntityInfo
+{
+    public string Name { get; set; } = string.Empty;
+    public string Endpoint { get; set; } = string.Empty;
+    public int? Count { get; set; }
+}
+
+public class DeprecatedApiInfo
+{
+    public string Endpoint { get; set; } = string.Empty;
+    public string ReplacedBy { get; set; } = string.Empty;
+    public string DeprecationDate { get; set; } = string.Empty;
+    public string RemovalDate { get; set; } = string.Empty;
+}
+
+public class LegacyMappings
+{
+    public string Message { get; set; } = string.Empty;
+    public Dictionary<string, string> CoreAxisMappings { get; set; } = new();
+    public Dictionary<string, string> ArchetypeMappings { get; set; } = new();
+}
+
+// Story Protocol Response Models (previously in Mystira.Contracts.App.Responses.Contributors)
+public class StoryProtocolResponse
+{
+    public string? IpAssetId { get; set; }
+    public string? RegistrationTxHash { get; set; }
+    public DateTime? RegisteredAt { get; set; }
+    public string? RoyaltyModuleId { get; set; }
+    public bool IsRegistered { get; set; }
+    public List<ContributorResponse> Contributors { get; set; } = new();
+    public int ContributorCount { get; set; }
+    public decimal TotalPercentage { get; set; }
+}
+
+public class ContributorResponse
+{
+    public string Id { get; set; } = string.Empty;
+    public string Name { get; set; } = string.Empty;
+    public string WalletAddress { get; set; } = string.Empty;
+    public string Role { get; set; } = string.Empty;
+    public decimal ContributionPercentage { get; set; }
+    public string? Email { get; set; }
+    public string? Notes { get; set; }
+    public DateTime CreatedAt { get; set; }
 }
