@@ -1,7 +1,7 @@
 # Contracts Package Migration Guide
 
-**Last Updated:** 2025-12-24
-**Status:** Phase 1 Complete - Migration Period Active
+**Last Updated:** 2025-12-29
+**Status:** Phase 1 Complete - Migration Period Active (Alpha packages available)
 
 This guide covers migrating from the legacy contracts packages to the unified `@mystira/contracts` and `Mystira.Contracts` packages.
 
@@ -94,7 +94,8 @@ dotnet add package Mystira.Contracts
 Or in your `.csproj`:
 
 ```xml
-<PackageReference Include="Mystira.Contracts" Version="0.1.0" />
+<!-- Note: Only alpha versions are currently available -->
+<PackageReference Include="Mystira.Contracts" Version="0.4.3-alpha-build.70" />
 ```
 
 #### Step 2: Update Using Statements
