@@ -23,6 +23,46 @@ variable "create_dns_records" {
   default     = true
 }
 
+# =============================================================================
+# Import blocks for existing DNS records
+# These records were created by previous runs and need to be imported
+# =============================================================================
+
+import {
+  to = azurerm_dns_cname_record.staging_api
+  id = "/subscriptions/22f9eb18-6553-4b7d-9451-47d0195085fe/resourceGroups/mys-shared-terraform-rg-san/providers/Microsoft.Network/dnsZones/mystira.app/CNAME/staging.api"
+}
+
+import {
+  to = azurerm_dns_cname_record.staging_story_swa[0]
+  id = "/subscriptions/22f9eb18-6553-4b7d-9451-47d0195085fe/resourceGroups/mys-shared-terraform-rg-san/providers/Microsoft.Network/dnsZones/mystira.app/CNAME/staging.story"
+}
+
+import {
+  to = azurerm_dns_cname_record.staging_publisher_fd[0]
+  id = "/subscriptions/22f9eb18-6553-4b7d-9451-47d0195085fe/resourceGroups/mys-shared-terraform-rg-san/providers/Microsoft.Network/dnsZones/mystira.app/CNAME/staging.publisher"
+}
+
+import {
+  to = azurerm_dns_cname_record.staging_chain_fd[0]
+  id = "/subscriptions/22f9eb18-6553-4b7d-9451-47d0195085fe/resourceGroups/mys-shared-terraform-rg-san/providers/Microsoft.Network/dnsZones/mystira.app/CNAME/staging.chain"
+}
+
+import {
+  to = azurerm_dns_cname_record.staging_admin_api_fd[0]
+  id = "/subscriptions/22f9eb18-6553-4b7d-9451-47d0195085fe/resourceGroups/mys-shared-terraform-rg-san/providers/Microsoft.Network/dnsZones/mystira.app/CNAME/staging.admin-api"
+}
+
+import {
+  to = azurerm_dns_cname_record.staging_admin_ui_fd[0]
+  id = "/subscriptions/22f9eb18-6553-4b7d-9451-47d0195085fe/resourceGroups/mys-shared-terraform-rg-san/providers/Microsoft.Network/dnsZones/mystira.app/CNAME/staging.admin"
+}
+
+import {
+  to = azurerm_dns_cname_record.staging_story_api_fd[0]
+  id = "/subscriptions/22f9eb18-6553-4b7d-9451-47d0195085fe/resourceGroups/mys-shared-terraform-rg-san/providers/Microsoft.Network/dnsZones/mystira.app/CNAME/staging.story-api"
+}
+
 # Reference existing DNS Zone (created by CI/CD bootstrap in shared terraform RG)
 data "azurerm_dns_zone" "mystira" {
   name                = "mystira.app"
