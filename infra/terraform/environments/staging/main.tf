@@ -166,7 +166,7 @@ resource "azurerm_subnet" "aks" {
   name                 = "aks-subnet"
   resource_group_name  = azurerm_resource_group.main.name
   virtual_network_name = azurerm_virtual_network.main.name
-  address_prefixes     = ["10.1.10.0/22"]
+  address_prefixes     = ["10.1.8.0/22"]  # /22 requires 4-byte aligned address
 }
 
 resource "azurerm_subnet" "postgresql" {
@@ -285,31 +285,37 @@ module "shared_postgresql" {
 # - PostgreSQL server is created first (module.shared_postgresql)
 # - App modules are created next (they need server_id)
 # - AAD admins are added last (they need app identity principal_ids)
+#
+# NOTE: These are DISABLED until AAD authentication is enabled on the PostgreSQL server.
+# To enable: set aad_auth_enabled = true in the shared_postgresql module above.
 # =============================================================================
 
 data "azurerm_client_config" "current" {}
 
-resource "azurerm_postgresql_flexible_server_active_directory_administrator" "admin_api" {
-  server_name         = module.shared_postgresql.server_name
-  resource_group_name = azurerm_resource_group.main.name
-  tenant_id           = data.azurerm_client_config.current.tenant_id
-  object_id           = module.admin_api.identity_principal_id
-  principal_name      = "mys-staging-admin-api-identity-san"
-  principal_type      = "ServicePrincipal"
-
-  depends_on = [module.admin_api]
-}
-
-resource "azurerm_postgresql_flexible_server_active_directory_administrator" "story_generator" {
-  server_name         = module.shared_postgresql.server_name
-  resource_group_name = azurerm_resource_group.main.name
-  tenant_id           = data.azurerm_client_config.current.tenant_id
-  object_id           = module.story_generator.identity_principal_id
-  principal_name      = "mys-staging-story-identity-san"
-  principal_type      = "ServicePrincipal"
-
-  depends_on = [module.story_generator]
-}
+# DISABLED: Azure AD authentication must be enabled on the PostgreSQL server first.
+# Uncomment these resources after setting aad_auth_enabled = true in shared_postgresql module.
+#
+# resource "azurerm_postgresql_flexible_server_active_directory_administrator" "admin_api" {
+#   server_name         = module.shared_postgresql.server_name
+#   resource_group_name = azurerm_resource_group.main.name
+#   tenant_id           = data.azurerm_client_config.current.tenant_id
+#   object_id           = module.admin_api.identity_principal_id
+#   principal_name      = "mys-staging-admin-api-identity-san"
+#   principal_type      = "ServicePrincipal"
+#
+#   depends_on = [module.admin_api]
+# }
+#
+# resource "azurerm_postgresql_flexible_server_active_directory_administrator" "story_generator" {
+#   server_name         = module.shared_postgresql.server_name
+#   resource_group_name = azurerm_resource_group.main.name
+#   tenant_id           = data.azurerm_client_config.current.tenant_id
+#   object_id           = module.story_generator.identity_principal_id
+#   principal_name      = "mys-staging-story-identity-san"
+#   principal_type      = "ServicePrincipal"
+#
+#   depends_on = [module.story_generator]
+# }
 
 # Shared Redis Infrastructure
 # Note: Standard SKU does not support VNet integration (subnet_id)
@@ -477,7 +483,7 @@ module "story_generator" {
   fallback_location        = "eastus2"  # SWA not available in South Africa North
   github_repository_url    = "https://github.com/phoenixvc/Mystira.StoryGenerator"
   github_branch            = "main"  # staging uses main branch
-  enable_swa_custom_domain = true
+  enable_swa_custom_domain = false  # Disabled until CNAME DNS records are created
   swa_custom_domain        = "staging.story.mystira.app"
 
   tags = {

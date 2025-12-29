@@ -17,6 +17,12 @@ variable "k8s_ingress_ip" {
   default     = ""  # Set after AKS is deployed
 }
 
+variable "create_dns_records" {
+  description = "Set to false if DNS records already exist in Azure (to avoid conflicts)"
+  type        = bool
+  default     = false  # Default false since records exist - use terraform import to manage them
+}
+
 # Reference existing DNS Zone (created by CI/CD bootstrap in shared terraform RG)
 data "azurerm_dns_zone" "mystira" {
   name                = "mystira.app"
@@ -120,7 +126,10 @@ resource "azurerm_app_service_certificate_binding" "staging_api" {
 # =============================================================================
 
 # CNAME record for staging.story.mystira.app -> Story Generator SWA
+# Skip if record already exists in Azure (use terraform import to manage existing records)
 resource "azurerm_dns_cname_record" "staging_story_swa" {
+  count = var.create_dns_records ? 1 : 0
+
   name                = "staging.story"
   zone_name           = data.azurerm_dns_zone.mystira.name
   resource_group_name = data.azurerm_dns_zone.mystira.resource_group_name
@@ -132,7 +141,7 @@ resource "azurerm_dns_cname_record" "staging_story_swa" {
 
 # Custom domain binding for Story Generator SWA
 resource "azurerm_static_web_app_custom_domain" "staging_story" {
-  count = var.bind_custom_domains ? 1 : 0
+  count = var.bind_custom_domains && var.create_dns_records ? 1 : 0
 
   static_web_app_id = module.story_generator.static_web_app_id
   domain_name       = "staging.story.mystira.app"
@@ -242,7 +251,10 @@ data "azurerm_cdn_frontdoor_endpoint" "nonprod_primary" {
 }
 
 # CNAME for staging.publisher.mystira.app -> Front Door
+# Skip if record already exists in Azure (use terraform import to manage existing records)
 resource "azurerm_dns_cname_record" "staging_publisher_fd" {
+  count = var.create_dns_records ? 1 : 0
+
   name                = "staging.publisher"
   zone_name           = data.azurerm_dns_zone.mystira.name
   resource_group_name = data.azurerm_dns_zone.mystira.resource_group_name
@@ -254,6 +266,8 @@ resource "azurerm_dns_cname_record" "staging_publisher_fd" {
 
 # CNAME for staging.chain.mystira.app -> Front Door
 resource "azurerm_dns_cname_record" "staging_chain_fd" {
+  count = var.create_dns_records ? 1 : 0
+
   name                = "staging.chain"
   zone_name           = data.azurerm_dns_zone.mystira.name
   resource_group_name = data.azurerm_dns_zone.mystira.resource_group_name
@@ -265,6 +279,8 @@ resource "azurerm_dns_cname_record" "staging_chain_fd" {
 
 # CNAME for staging.admin-api.mystira.app -> Front Door
 resource "azurerm_dns_cname_record" "staging_admin_api_fd" {
+  count = var.create_dns_records ? 1 : 0
+
   name                = "staging.admin-api"
   zone_name           = data.azurerm_dns_zone.mystira.name
   resource_group_name = data.azurerm_dns_zone.mystira.resource_group_name
@@ -276,6 +292,8 @@ resource "azurerm_dns_cname_record" "staging_admin_api_fd" {
 
 # CNAME for staging.admin.mystira.app -> Front Door
 resource "azurerm_dns_cname_record" "staging_admin_ui_fd" {
+  count = var.create_dns_records ? 1 : 0
+
   name                = "staging.admin"
   zone_name           = data.azurerm_dns_zone.mystira.name
   resource_group_name = data.azurerm_dns_zone.mystira.resource_group_name
@@ -287,6 +305,8 @@ resource "azurerm_dns_cname_record" "staging_admin_ui_fd" {
 
 # CNAME for staging.story-api.mystira.app -> Front Door
 resource "azurerm_dns_cname_record" "staging_story_api_fd" {
+  count = var.create_dns_records ? 1 : 0
+
   name                = "staging.story-api"
   zone_name           = data.azurerm_dns_zone.mystira.name
   resource_group_name = data.azurerm_dns_zone.mystira.resource_group_name
