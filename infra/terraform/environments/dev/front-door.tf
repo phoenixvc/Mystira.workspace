@@ -1,42 +1,15 @@
-# Azure Front Door Configuration for Non-Production Environments
-# This shared Front Door handles both dev and staging traffic to save costs
+# Azure Front Door Configuration for Non-Prod Environment (dev + staging)
+# This shared Front Door handles both dev and staging traffic to save costs.
 
 # IMPORTANT: Before enabling, ensure:
 # 1. Backend services (Publisher, Chain) are deployed and healthy
 # 2. DNS is properly configured
-# 3. Budget is allocated (~$150/month for shared non-prod)
-
-# =============================================================================
-# Variables for Staging Backend Addresses
-# =============================================================================
-# These are needed because staging module outputs aren't available in dev terraform.
-# Set via terraform.tfvars or workflow inputs.
-
-variable "staging_story_generator_swa_backend" {
-  description = "Staging Story Generator SWA backend hostname (azurestaticapps.net)"
-  type        = string
-  default     = "" # Will be set after staging SWA is deployed
-}
-
-variable "staging_mystira_app_api_backend" {
-  description = "Staging Mystira.App API backend hostname (azurewebsites.net)"
-  type        = string
-  default     = "" # Will be set after staging App Service is deployed
-}
-
-variable "staging_mystira_app_swa_backend" {
-  description = "Staging Mystira.App SWA backend hostname (azurestaticapps.net)"
-  type        = string
-  default     = "" # Will be set after staging SWA is deployed
-}
-
-# =============================================================================
-# Front Door Module Configuration
-# =============================================================================
+# 3. Budget is allocated (~$150/month for non-prod)
 
 module "front_door" {
   source = "../../modules/front-door"
 
+  # Using "nonprod" to match existing Azure resource name: mystira-nonprod-fd
   environment         = "nonprod"
   resource_group_name = azurerm_resource_group.main.name
   location            = var.location
