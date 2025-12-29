@@ -96,6 +96,11 @@
       "matchManagers": ["github-actions"],
       "groupName": "GitHub Actions",
       "automerge": true
+    },
+    {
+      "description": "Pin Npgsql to 9.x - v10 requires .NET 10",
+      "matchPackagePatterns": ["^Npgsql"],
+      "allowedVersions": "<10.0.0"
     }
   ],
   "vulnerabilityAlerts": {
