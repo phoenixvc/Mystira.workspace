@@ -63,6 +63,12 @@ import {
   id = "/subscriptions/22f9eb18-6553-4b7d-9451-47d0195085fe/resourceGroups/mys-shared-terraform-rg-san/providers/Microsoft.Network/dnsZones/mystira.app/CNAME/staging.story-api"
 }
 
+# Import existing App Service hostname binding (created by module previously)
+import {
+  to = azurerm_app_service_custom_hostname_binding.staging_api[0]
+  id = "/subscriptions/22f9eb18-6553-4b7d-9451-47d0195085fe/resourceGroups/mys-staging-app-rg-san/providers/Microsoft.Web/sites/mys-staging-mystira-api-san/hostNameBindings/staging.api.mystira.app"
+}
+
 # Reference existing DNS Zone (created by CI/CD bootstrap in shared terraform RG)
 data "azurerm_dns_zone" "mystira" {
   name                = "mystira.app"
