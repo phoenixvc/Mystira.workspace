@@ -744,7 +744,7 @@ public class PolyglotRepository<TEntity> : IPolyglotRepository<TEntity> where TE
     {
         var syncLog = new PolyglotSyncLog
         {
-            Id = Entities.EntityId.NewId(),
+            Id = EntityId.NewId(),
             SyncedEntityId = entityId,
             EntityType = typeof(TEntity).FullName ?? typeof(TEntity).Name,
             Operation = operation,

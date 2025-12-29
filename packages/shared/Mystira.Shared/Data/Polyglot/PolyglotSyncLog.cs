@@ -142,7 +142,7 @@ public class PolyglotSyncLog : Entity
         BackendType target,
         string? correlationId = null) => new()
     {
-        Id = Entities.EntityId.NewId(),
+        Id = EntityId.NewId(),
         SyncedEntityId = entityId,
         EntityType = typeof(TEntity).FullName ?? typeof(TEntity).Name,
         Operation = SyncOperation.Insert,
@@ -161,7 +161,7 @@ public class PolyglotSyncLog : Entity
         BackendType target,
         string? correlationId = null) => new()
     {
-        Id = Entities.EntityId.NewId(),
+        Id = EntityId.NewId(),
         SyncedEntityId = entityId,
         EntityType = typeof(TEntity).FullName ?? typeof(TEntity).Name,
         Operation = SyncOperation.Update,
@@ -180,7 +180,7 @@ public class PolyglotSyncLog : Entity
         BackendType target,
         string? correlationId = null) => new()
     {
-        Id = Entities.EntityId.NewId(),
+        Id = EntityId.NewId(),
         SyncedEntityId = entityId,
         EntityType = typeof(TEntity).FullName ?? typeof(TEntity).Name,
         Operation = SyncOperation.Delete,
