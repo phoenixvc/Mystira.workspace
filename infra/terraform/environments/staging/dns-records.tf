@@ -63,10 +63,10 @@ import {
   id = "/subscriptions/22f9eb18-6553-4b7d-9451-47d0195085fe/resourceGroups/mys-shared-terraform-rg-san/providers/Microsoft.Network/dnsZones/mystira.app/CNAME/staging.story-api"
 }
 
-# Import existing App Service hostname binding (created by module previously)
-import {
-  to = azurerm_app_service_custom_hostname_binding.staging_api[0]
-  id = "/subscriptions/22f9eb18-6553-4b7d-9451-47d0195085fe/resourceGroups/mys-staging-app-rg-san/providers/Microsoft.Web/sites/mys-staging-mystira-api-san/hostNameBindings/staging.api.mystira.app"
+# Move hostname binding from module to dns-records.tf (transfers state without destroy/recreate)
+moved {
+  from = module.mystira_app.azurerm_app_service_custom_hostname_binding.api[0]
+  to   = azurerm_app_service_custom_hostname_binding.staging_api[0]
 }
 
 # Reference existing DNS Zone (created by CI/CD bootstrap in shared terraform RG)
@@ -158,11 +158,27 @@ resource "azurerm_app_service_custom_hostname_binding" "staging_api" {
   ]
 }
 
+# Wait for Azure to fully register the hostname binding before creating certificate
+resource "time_sleep" "hostname_binding_stabilization" {
+  count = var.bind_custom_domains ? 1 : 0
+
+  depends_on = [azurerm_app_service_custom_hostname_binding.staging_api]
+
+  create_duration = "30s"
+}
+
 # Free managed SSL certificate for App Service API
+# Note: Certificate creation requires the hostname binding to be fully registered in Azure
 resource "azurerm_app_service_managed_certificate" "staging_api" {
   count = var.bind_custom_domains ? 1 : 0
 
   custom_hostname_binding_id = azurerm_app_service_custom_hostname_binding.staging_api[0].id
+
+  # Explicit dependency to ensure hostname binding is fully ready before certificate creation
+  depends_on = [
+    azurerm_app_service_custom_hostname_binding.staging_api,
+    time_sleep.hostname_binding_stabilization
+  ]
 }
 
 # Bind the certificate to the hostname
