@@ -32,8 +32,8 @@ using Mystira.App.Infrastructure.Data.UnitOfWork;
 using Mystira.App.Infrastructure.StoryProtocol;
 using Mystira.App.Infrastructure.Discord.Services;
 using Microsoft.ApplicationInsights.Extensibility;
-using Mystira.App.Shared.Middleware;
-using Mystira.App.Shared.Telemetry;
+using Mystira.Shared.Middleware;
+using Mystira.Shared.Telemetry;
 using Serilog;
 using Serilog.Events;
 using IUnitOfWork = Mystira.App.Application.Ports.Data.IUnitOfWork;
@@ -500,7 +500,7 @@ builder.Services.AddScoped<IAgeGroupRepository, AgeGroupRepository>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 // Auth and application ports/adapters
-builder.Services.AddScoped<Mystira.App.Shared.Services.IJwtService, Mystira.App.Shared.Services.JwtService>();
+builder.Services.AddScoped<Mystira.Shared.Services.IJwtService, Mystira.Shared.Services.JwtService>();
 builder.Services.AddScoped<Mystira.App.Application.Ports.Auth.IJwtService, Mystira.App.Admin.Api.Adapters.JwtServiceAdapter>();
 
 // Discord/Messaging: keep as No-Op in this environment

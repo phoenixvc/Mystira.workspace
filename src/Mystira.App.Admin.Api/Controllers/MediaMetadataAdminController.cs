@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Mystira.App.Admin.Api.Models;
 using Mystira.App.Admin.Api.Services;
-using ErrorResponse = Mystira.App.Contracts.Responses.Common.ErrorResponse;
+using ErrorResponse = Mystira.Contracts.App.Responses.Common.ErrorResponse;
 
 namespace Mystira.App.Admin.Api.Controllers;
 

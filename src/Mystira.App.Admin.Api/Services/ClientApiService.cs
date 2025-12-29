@@ -1,6 +1,6 @@
 using System.Text.RegularExpressions;
-using Mystira.App.Contracts.Responses.Media;
-using ScenarioQueryRequest = Mystira.App.Contracts.Requests.Scenarios.ScenarioQueryRequest;
+using Mystira.Contracts.App.Responses.Media;
+using ScenarioQueryRequest = Mystira.Contracts.App.Requests.Scenarios.ScenarioQueryRequest;
 
 namespace Mystira.App.Admin.Api.Services;
 

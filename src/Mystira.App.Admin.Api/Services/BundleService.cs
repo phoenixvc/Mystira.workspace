@@ -5,7 +5,7 @@ using Mystira.App.Admin.Api.Models;
 using Mystira.App.Domain.Models;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
-using CreateScenarioRequest = Mystira.App.Contracts.Requests.Scenarios.CreateScenarioRequest;
+using CreateScenarioRequest = Mystira.Contracts.App.Requests.Scenarios.CreateScenarioRequest;
 
 namespace Mystira.App.Admin.Api.Services;
 
