@@ -69,7 +69,7 @@
     <!-- Wave 4: CQRS, Validation, Mapping -->
     <PackageReference Include="FluentValidation" Version="12.1.1" />
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.1" />
-    <PackageReference Include="Riok.Mapperly" Version="4.1.1" />
+    <PackageReference Include="Riok.Mapperly" Version="4.3.1" />
     <!-- Wave 2 Data: Entity Framework Core -->
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.11" />
     <!-- Polyglot Persistence: Ardalis.Specification -->
