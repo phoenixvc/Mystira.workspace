@@ -34,6 +34,7 @@ public class PolyglotRepository<TEntity> : IPolyglotRepository<TEntity> where TE
     private readonly JsonSerializerOptions _jsonOptions;
     private readonly ResiliencePipeline _retryPipeline;
     private readonly ResiliencePipeline _circuitBreakerPipeline;
+    private readonly IDbContextResolver _contextResolver;
 
     /// <inheritdoc />
     public DatabaseTarget Target { get; }
