@@ -744,8 +744,8 @@ public class PolyglotRepository<TEntity> : IPolyglotRepository<TEntity> where TE
     {
         var syncLog = new PolyglotSyncLog
         {
-            Id = EntityId.NewId(),
-            EntityId = entityId,
+            Id = Entities.EntityId.NewId(),
+            SyncedEntityId = entityId,
             EntityType = typeof(TEntity).FullName ?? typeof(TEntity).Name,
             Operation = operation,
             Status = SyncStatus.Pending,
@@ -765,7 +765,7 @@ public class PolyglotRepository<TEntity> : IPolyglotRepository<TEntity> where TE
                 "Sync {Operation} for {EntityType} {EntityId}: {Status}",
                 syncLog.Operation,
                 syncLog.EntityType,
-                syncLog.EntityId,
+                syncLog.SyncedEntityId,
                 syncLog.Status);
         }
         catch (Exception ex)

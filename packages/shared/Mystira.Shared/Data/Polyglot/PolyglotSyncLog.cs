@@ -11,7 +11,7 @@ public class PolyglotSyncLog : Entity
     /// <summary>
     /// The ID of the entity being synced.
     /// </summary>
-    public required string EntityId { get; set; }
+    public required string SyncedEntityId { get; set; }
 
     /// <summary>
     /// The fully qualified type name of the entity.
@@ -142,8 +142,8 @@ public class PolyglotSyncLog : Entity
         BackendType target,
         string? correlationId = null) => new()
     {
-        Id = EntityId.NewId(),
-        EntityId = entityId,
+        Id = Entities.EntityId.NewId(),
+        SyncedEntityId = entityId,
         EntityType = typeof(TEntity).FullName ?? typeof(TEntity).Name,
         Operation = SyncOperation.Insert,
         Status = SyncStatus.Pending,
@@ -161,8 +161,8 @@ public class PolyglotSyncLog : Entity
         BackendType target,
         string? correlationId = null) => new()
     {
-        Id = EntityId.NewId(),
-        EntityId = entityId,
+        Id = Entities.EntityId.NewId(),
+        SyncedEntityId = entityId,
         EntityType = typeof(TEntity).FullName ?? typeof(TEntity).Name,
         Operation = SyncOperation.Update,
         Status = SyncStatus.Pending,
@@ -180,8 +180,8 @@ public class PolyglotSyncLog : Entity
         BackendType target,
         string? correlationId = null) => new()
     {
-        Id = EntityId.NewId(),
-        EntityId = entityId,
+        Id = Entities.EntityId.NewId(),
+        SyncedEntityId = entityId,
         EntityType = typeof(TEntity).FullName ?? typeof(TEntity).Name,
         Operation = SyncOperation.Delete,
         Status = SyncStatus.Pending,
