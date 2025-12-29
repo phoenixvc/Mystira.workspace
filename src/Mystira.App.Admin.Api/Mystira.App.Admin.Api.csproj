@@ -28,7 +28,7 @@
     <PackageReference Include="Microsoft.ApplicationInsights.DependencyCollector" Version="2.23.0" />
 
     <!-- PostgreSQL support for hybrid data strategy (Phase 2+) -->
-    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.2" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
     <PackageReference Include="AspNetCore.HealthChecks.NpgSql" Version="9.0.0" />
 
     <!-- Redis caching for content and distributed cache -->
