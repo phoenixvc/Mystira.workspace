@@ -1,4 +1,4 @@
-name: "Mystira App API: Production Blue-Green Deployment"
+name: "[Deploy] Prod App API"
 
 # Production Blue-Green Deployment for Mystira App API
 # Strategy: Deploy to staging slot, health check, then swap to production
@@ -86,7 +86,10 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v5
         with:
-          dotnet-version: '8.0.x'
+          dotnet-version: '9.0.x'
+          source-url: https://nuget.pkg.github.com/phoenixvc/index.json
+        env:
+          NUGET_AUTH_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN }}
 
       - name: Build Application
         run: |
@@ -94,6 +97,8 @@ jobs:
           dotnet restore
           dotnet build --configuration Release --no-restore
           dotnet publish --configuration Release --no-build --output ./publish
+        env:
+          NUGET_AUTH_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN }}
 
       - name: Deploy to Staging Slot
         id: deploy

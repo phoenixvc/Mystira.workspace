@@ -1,4 +1,4 @@
-name: "Reusable: Docker Build"
+name: "[Build] Docker"
 
 # Reusable workflow for building and pushing Docker images to Azure Container Registry
 # Usage: Call from other workflows with workflow_call trigger

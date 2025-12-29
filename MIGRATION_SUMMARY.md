@@ -7,7 +7,6 @@ All infrastructure resources have been updated to comply with Azure Naming Conve
 
 **Last Updated:** December 2025
 **Status:** ✅ Complete - All environments aligned
-**Current Branch:** `claude/update-readme-ci-badge-jWXQm`
 
 ---
 

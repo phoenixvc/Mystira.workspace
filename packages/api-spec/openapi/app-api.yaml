@@ -1,0 +1,137 @@
+openapi: 3.1.0
+info:
+  title: Mystira App API
+  version: 1.0.0
+  description: |
+    Main Mystira application API for story creation, game sessions, and user management.
+
+    ## Authentication
+    Most endpoints require Bearer token authentication.
+
+    ## Rate Limiting
+    API requests are rate limited to 100 requests per minute per user.
+  contact:
+    name: Mystira Team
+    url: https://github.com/phoenixvc/Mystira.workspace
+  license:
+    name: Proprietary
+    identifier: LicenseRef-Mystira
+
+servers:
+  - url: https://api.mystira.app/v1
+    description: Production
+  - url: https://staging.api.mystira.app/v1
+    description: Staging
+  - url: https://dev.api.mystira.app/v1
+    description: Development
+  - url: http://localhost:5000/v1
+    description: Local development
+
+tags:
+  - name: Health
+    description: Health check endpoints
+  - name: Scenarios
+    description: Story scenario management
+  - name: GameSessions
+    description: Game session management
+  - name: Auth
+    description: Authentication endpoints
+
+paths:
+  /health:
+    get:
+      operationId: getHealth
+      summary: Health check endpoint
+      description: Returns the health status of the API and its dependencies
+      tags:
+        - Health
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                $ref: './common/health.yaml#/components/schemas/HealthCheckResult'
+        '503':
+          description: Service is unhealthy
+          content:
+            application/json:
+              schema:
+                $ref: './common/health.yaml#/components/schemas/HealthCheckResult'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: './common/errors.yaml#/components/schemas/ErrorResponse'
+
+  /health/ready:
+    get:
+      operationId: getReadiness
+      summary: Readiness probe
+      description: Returns whether the service is ready to accept traffic
+      tags:
+        - Health
+      responses:
+        '200':
+          description: Service is ready
+        '503':
+          description: Service is not ready
+        '500':
+          description: Internal server error
+
+  /health/live:
+    get:
+      operationId: getLiveness
+      summary: Liveness probe
+      description: Returns whether the service is alive
+      tags:
+        - Health
+      responses:
+        '200':
+          description: Service is alive
+        '500':
+          description: Internal server error
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token from authentication
+
+  responses:
+    BadRequest:
+      description: Bad request - validation errors
+      content:
+        application/json:
+          schema:
+            $ref: './common/errors.yaml#/components/schemas/ValidationErrorResponse'
+    Unauthorized:
+      description: Unauthorized - authentication required
+      content:
+        application/json:
+          schema:
+            $ref: './common/errors.yaml#/components/schemas/UnauthorizedErrorResponse'
+    Forbidden:
+      description: Forbidden - insufficient permissions
+      content:
+        application/json:
+          schema:
+            $ref: './common/errors.yaml#/components/schemas/ForbiddenErrorResponse'
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: './common/errors.yaml#/components/schemas/NotFoundErrorResponse'
+    InternalError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: './common/errors.yaml#/components/schemas/ErrorResponse'
+
+security:
+  - bearerAuth: []

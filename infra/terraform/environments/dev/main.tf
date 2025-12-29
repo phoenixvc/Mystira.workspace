@@ -19,7 +19,7 @@ terraform {
     }
     azuread = {
       source  = "hashicorp/azuread"
-      version = "~> 2.47"
+      version = "~> 3.0"
     }
     azapi = {
       source  = "Azure/azapi"
@@ -53,7 +53,7 @@ variable "external_id_tenant_id" {
 variable "alert_email_addresses" {
   description = "Email addresses for monitoring alerts"
   type        = list(string)
-  default     = ["devops@mystira.app"]
+  default     = ["jurie@phoenixvc.tech"]
 }
 
 variable "oidc_issuer_enabled" {
@@ -64,6 +64,12 @@ variable "oidc_issuer_enabled" {
 
 variable "workload_identity_enabled" {
   description = "Enable workload identity for AKS"
+  type        = bool
+  default     = true
+}
+
+variable "enable_azure_ai" {
+  description = "Enable Azure AI Foundry infrastructure (can be disabled to speed up initial deployment)"
   type        = bool
   default     = true
 }
@@ -405,8 +411,10 @@ module "shared_monitoring" {
 
 # Shared Azure AI Foundry Infrastructure (in core-rg)
 # Updated to use AIServices (Azure AI Foundry) instead of legacy OpenAI
+# Can be disabled with enable_azure_ai=false to speed up initial deployment
 module "shared_azure_ai" {
   source = "../../modules/shared/azure-ai"
+  count  = var.enable_azure_ai ? 1 : 0
 
   environment         = "dev"
   location            = var.location
@@ -513,7 +521,7 @@ module "entra_id" {
   admin_ui_redirect_uris = [
     "http://localhost:7001/auth/callback",
     "http://localhost:3000/auth/callback",
-    "https://admin.dev.mystira.app/auth/callback"
+    "https://dev.admin.mystira.app/auth/callback"
   ]
 
   tags = {
@@ -716,17 +724,20 @@ resource "azurerm_key_vault_secret" "story_appinsights" {
 }
 
 # Story-Generator Azure AI Foundry Secrets (auto-populated from shared_azure_ai module)
+# Only created when enable_azure_ai=true
 resource "azurerm_key_vault_secret" "story_azure_ai_endpoint" {
+  count        = var.enable_azure_ai ? 1 : 0
   name         = "azure-ai-endpoint"
-  value        = module.shared_azure_ai.endpoint
+  value        = module.shared_azure_ai[0].endpoint
   key_vault_id = module.story_generator.key_vault_id
   content_type = "azure-ai"
   tags         = { AutoPopulated = "true", Source = "shared-azure-ai" }
 }
 
 resource "azurerm_key_vault_secret" "story_azure_ai_key" {
+  count        = var.enable_azure_ai ? 1 : 0
   name         = "azure-ai-api-key"
-  value        = module.shared_azure_ai.primary_access_key
+  value        = module.shared_azure_ai[0].primary_access_key
   key_vault_id = module.story_generator.key_vault_id
   content_type = "azure-ai"
   tags         = { AutoPopulated = "true", Source = "shared-azure-ai" }
@@ -819,9 +830,13 @@ module "entra_external_id" {
   tenant_name   = "mystiradev"
 
   pwa_redirect_uris = [
-    "http://localhost:5173/auth/callback",
-    "http://localhost:3000/auth/callback",
-    "https://app.dev.mystira.app/auth/callback"
+    # Localhost development
+    "http://localhost:5173/authentication/login-callback",
+    "http://localhost:7000/authentication/login-callback",
+    "http://localhost:3000/authentication/login-callback",
+    # Dev environment
+    "https://dev.mystira.app/authentication/login-callback",
+    "https://dev.app.mystira.app/authentication/login-callback",
   ]
 }
 
@@ -1113,22 +1128,27 @@ output "servicebus_queue_ids" {
 }
 
 # =============================================================================
-# Shared Azure AI Foundry Outputs
+# Shared Azure AI Foundry Outputs (only populated when enable_azure_ai=true)
 # =============================================================================
 
 output "azure_ai_account_id" {
   description = "Azure AI Foundry cognitive account ID"
-  value       = module.shared_azure_ai.cognitive_account_id
+  value       = var.enable_azure_ai ? module.shared_azure_ai[0].cognitive_account_id : null
 }
 
 output "azure_ai_endpoint" {
   description = "Azure AI Foundry endpoint URL"
-  value       = module.shared_azure_ai.endpoint
+  value       = var.enable_azure_ai ? module.shared_azure_ai[0].endpoint : null
 }
 
 output "azure_ai_model_deployments" {
   description = "Map of deployed AI models"
-  value       = module.shared_azure_ai.model_deployments
+  value       = var.enable_azure_ai ? module.shared_azure_ai[0].model_deployments : {}
+}
+
+output "azure_ai_enabled" {
+  description = "Whether Azure AI Foundry is enabled"
+  value       = var.enable_azure_ai
 }
 
 # =============================================================================

@@ -1,22 +1,108 @@
+using Mystira.Contracts.App.Enums;
+using Mystira.Contracts.App.Models;
+
 namespace Mystira.Contracts.App.Requests.Accounts;
 
+/// <summary>
+/// Request to create a new user account.
+/// </summary>
 public record CreateAccountRequest
 {
+    /// <summary>
+    /// Auth0 user identifier for linking to external authentication.
+    /// </summary>
+    public string Auth0UserId { get; set; } = string.Empty;
+
+    /// <summary>
+    /// The email address for the account.
+    /// </summary>
     public string Email { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Optional display name for the account.
+    /// </summary>
     public string? DisplayName { get; set; }
+
+    /// <summary>
+    /// Optional list of user profile IDs to associate with the account.
+    /// </summary>
+    public List<string>? UserProfileIds { get; set; }
+
+    /// <summary>
+    /// Optional subscription details for the account.
+    /// </summary>
+    public SubscriptionDetails? Subscription { get; set; }
+
+    /// <summary>
+    /// Optional account settings.
+    /// </summary>
+    public AccountSettings? Settings { get; set; }
 }
 
+/// <summary>
+/// Request to update an existing user account.
+/// </summary>
 public record UpdateAccountRequest
 {
+    /// <summary>
+    /// Optional updated display name.
+    /// </summary>
     public string? DisplayName { get; set; }
-    public string? Email { get; set; }
+
+    /// <summary>
+    /// Optional list of user profile IDs to associate with the account.
+    /// </summary>
+    public List<string>? UserProfileIds { get; set; }
+
+    /// <summary>
+    /// Optional subscription details to update.
+    /// </summary>
+    public SubscriptionDetails? Subscription { get; set; }
+
+    /// <summary>
+    /// Optional account settings to update.
+    /// </summary>
+    public AccountSettings? Settings { get; set; }
 }
 
+/// <summary>
+/// Request to update subscription information for an account.
+/// </summary>
 public record UpdateSubscriptionRequest
 {
-    public string Type { get; set; } = string.Empty;
+    /// <summary>
+    /// The subscription type.
+    /// </summary>
+    public SubscriptionType Type { get; set; }
+
+    /// <summary>
+    /// Optional product identifier from the app store.
+    /// </summary>
     public string? ProductId { get; set; }
+
+    /// <summary>
+    /// Optional expiration date of the subscription.
+    /// </summary>
     public DateTime? ValidUntil { get; set; }
+
+    /// <summary>
+    /// Optional purchase token for verification.
+    /// </summary>
     public string? PurchaseToken { get; set; }
+
+    /// <summary>
+    /// Optional list of individually purchased scenario identifiers.
+    /// </summary>
     public List<string>? PurchasedScenarios { get; set; }
+}
+
+/// <summary>
+/// Request to link user profiles to an account.
+/// </summary>
+public record LinkProfilesRequest
+{
+    /// <summary>
+    /// List of user profile identifiers to link to the account.
+    /// </summary>
+    public List<string> UserProfileIds { get; set; } = new();
 }

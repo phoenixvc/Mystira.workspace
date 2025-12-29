@@ -177,3 +177,29 @@ public record UnauthorizedErrorResponse : ErrorResponse
         StatusCode = 401
     };
 }
+
+/// <summary>
+/// Simple validation result for field-level validation.
+/// </summary>
+public class ValidationResult
+{
+    /// <summary>
+    /// Whether the validation passed.
+    /// </summary>
+    public bool IsValid { get; set; }
+
+    /// <summary>
+    /// Optional message describing the validation result.
+    /// </summary>
+    public string? Message { get; set; }
+
+    /// <summary>
+    /// Creates a successful validation result.
+    /// </summary>
+    public static ValidationResult Success() => new() { IsValid = true };
+
+    /// <summary>
+    /// Creates a failed validation result with a message.
+    /// </summary>
+    public static ValidationResult Failure(string message) => new() { IsValid = false, Message = message };
+}

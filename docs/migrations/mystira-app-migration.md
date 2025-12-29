@@ -1,7 +1,7 @@
 # Mystira.App Migration Guide
 
 **Target**: Migrate Mystira.App to use `Mystira.Shared` infrastructure
-**Prerequisites**: Mystira.Shared v0.2.0+ published to NuGet feed
+**Prerequisites**: Mystira.Shared v0.4.* published to NuGet feed
 **Estimated Effort**: 2-3 days
 **Last Updated**: December 2025
 **Status**: 🔄 In Progress
@@ -13,14 +13,16 @@
 This guide covers migrating Mystira.App from its current infrastructure to the consolidated `Mystira.Shared` package, including:
 
 1. **.NET 9.0 upgrade** (required)
-2. MediatR → Wolverine migration
-3. Custom resilience → `Mystira.Shared.Resilience` (Polly v8)
-4. IMemoryCache → `Mystira.Shared.Caching` (Redis + WASM)
+2. MediatR → Wolverine migration (v5.9.2)
+3. Custom resilience → `Mystira.Shared.Resilience` (Polly v8.6.5)
+4. IMemoryCache → `Mystira.Shared.Caching` (Redis)
 5. Custom exceptions → `Mystira.Shared.Exceptions`
-6. Repository pattern → Ardalis.Specification 8.0.0
+6. Repository pattern → Ardalis.Specification 9.3.1
 7. **Distributed locking** for concurrent operations
 8. **Microsoft Entra External ID** authentication (optional)
 9. **Source generators** for repositories and validators
+
+> **Note**: All these components are already implemented in `Mystira.Shared` (v0.4.*). This migration is about adopting the shared package, not building new infrastructure.
 
 ---
 
@@ -40,16 +42,15 @@ This guide covers migrating Mystira.App from its current infrastructure to the c
 <PackageReference Include="MediatR" Version="12.4.1" />
 
 <!-- Add -->
-<PackageReference Include="Mystira.Shared" Version="0.2.0" />
-<PackageReference Include="Ardalis.Specification" Version="8.0.0" />
-<PackageReference Include="Ardalis.Specification.EntityFrameworkCore" Version="8.0.0" />
+<PackageReference Include="Mystira.Shared" Version="0.4.*" />
+<!-- Ardalis.Specification 9.3.1 is included via Mystira.Shared -->
 ```
 
 ### 1.3 Update Mystira.App.Api.csproj
 
 ```xml
 <!-- Add -->
-<PackageReference Include="Mystira.Shared" Version="0.2.0" />
+<PackageReference Include="Mystira.Shared" Version="0.4.*" />
 <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.0" />
 ```
 
@@ -57,7 +58,7 @@ This guide covers migrating Mystira.App from its current infrastructure to the c
 
 ```xml
 <!-- Add -->
-<PackageReference Include="Mystira.Shared" Version="0.2.0" />
+<PackageReference Include="Mystira.Shared" Version="0.4.*" />
 
 <!-- For WASM caching support -->
 <PackageReference Include="Blazored.LocalStorage" Version="4.5.0" />
@@ -66,8 +67,7 @@ This guide covers migrating Mystira.App from its current infrastructure to the c
 ### 1.5 Update Mystira.App.Domain.csproj
 
 ```xml
-<!-- Add for specification pattern -->
-<PackageReference Include="Ardalis.Specification" Version="8.0.0" />
+<!-- Ardalis.Specification 9.3.1 is included via Mystira.Shared -->
 ```
 
 ---
@@ -94,14 +94,24 @@ var result = await _mediator.Send(new GetAccountQuery(id));
 
 ```csharp
 // Target: Wolverine handler (convention-based)
-public static class GetAccountQueryHandler
+public class GetAccountQueryHandler
 {
-    public static async Task<AccountDto> Handle(
+    public async Task<AccountDto> Handle(
         GetAccountQuery query,
         IAccountRepository repository,
         CancellationToken ct)
     {
         // handler logic - dependencies injected as parameters
+        var account = await repository.GetByIdAsync(query.Id, ct);
+        if (account == null)
+            throw new NotFoundException($"Account {query.Id} not found");
+        
+        return new AccountDto
+        {
+            Id = account.Id,
+            Name = account.Name,
+            // ... map other properties
+        };
     }
 }
 
@@ -374,7 +384,7 @@ app.UseExceptionHandler();
 
 ---
 
-## Phase 6: Ardalis.Specification 8.0.0 Migration
+## Phase 6: Ardalis.Specification 9.3.1 Migration
 
 ### 6.1 Create Specification Classes
 
@@ -580,7 +590,7 @@ builder.Services.AddGameSessionOptionsValidation();
 ## Migration Checklist
 
 ### Pre-Migration
-- [ ] Ensure Mystira.Shared v0.2.0+ is published to NuGet feed
+- [ ] Ensure Mystira.Shared v0.4.* is published to NuGet feed
 - [ ] Create feature branch for migration
 - [ ] Review current MediatR handlers count
 - [ ] Review current HTTP clients count
@@ -589,7 +599,7 @@ builder.Services.AddGameSessionOptionsValidation();
 ### Phase 1: .NET 9.0 Upgrade
 - [ ] Update all .csproj files to net9.0
 - [ ] Update package references to latest compatible versions
-- [ ] Add Ardalis.Specification 8.0.0 packages
+- [ ] Add Ardalis.Specification 9.3.1 (via Mystira.Shared)
 - [ ] Verify build succeeds
 
 ### Phase 2: Wolverine
@@ -692,6 +702,6 @@ If migration causes issues:
 - [ADR-0014: Polyglot Persistence](../architecture/adr/0014-polyglot-persistence-framework-selection.md)
 - [ADR-0015: Wolverine Migration](../architecture/adr/0015-event-driven-architecture-framework.md)
 - [ADR-0017: Resource Group Organization](../architecture/adr/0017-resource-group-organization-strategy.md)
-- [Ardalis.Specification 8.0.0 Guide](../architecture/specifications/ardalis-specification-migration.md)
+- [Ardalis.Specification 9.3.1 Guide](../architecture/specifications/ardalis-specification-migration.md)
 - [Mystira.Shared Migration Guide](../guides/mystira-shared-migration.md)
 - [Mystira.Shared README](../../packages/shared/Mystira.Shared/README.md)

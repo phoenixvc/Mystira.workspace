@@ -183,7 +183,7 @@ export const loginRequest = {
 ```bash
 VITE_AZURE_CLIENT_ID=<admin-ui-client-id>
 VITE_AZURE_TENANT_ID=<tenant-id>
-VITE_REDIRECT_URI=https://admin.dev.mystira.app/auth/callback
+VITE_REDIRECT_URI=https://dev.admin.mystira.app/auth/callback
 ```
 
 ### PWA (Consumer App)
@@ -341,7 +341,7 @@ envsubst < infra/kubernetes/base/service-accounts.yaml | kubectl apply -f -
 az account get-access-token --resource api://mystira-admin-api-dev
 
 # Test API
-curl -H "Authorization: Bearer $TOKEN" https://admin-api.dev.mystira.app/api/health
+curl -H "Authorization: Bearer $TOKEN" https://dev.admin-api.mystira.app/api/health
 ```
 
 **PostgreSQL (Azure AD):**

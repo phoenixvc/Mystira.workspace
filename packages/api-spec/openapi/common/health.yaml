@@ -1,0 +1,110 @@
+openapi: 3.1.0
+info:
+  title: Mystira Common Types - Health
+  version: 1.0.0
+  description: Shared health check types for all Mystira APIs
+
+components:
+  schemas:
+    HealthStatus:
+      type: string
+      enum:
+        - Healthy
+        - Degraded
+        - Unhealthy
+      description: Health status of a service or component
+
+    HealthCheckEntry:
+      type: object
+      required:
+        - name
+        - status
+      properties:
+        name:
+          type: string
+          description: Name of the health check
+          example: "database"
+        status:
+          type: string
+          enum:
+            - Healthy
+            - Degraded
+            - Unhealthy
+          description: Health status of a service or component
+        description:
+          type: [string, "null"]
+          description: Additional description
+        duration:
+          type: [string, "null"]
+          description: Duration of the health check
+          example: "00:00:00.0234567"
+        tags:
+          type: array
+          items:
+            type: string
+          description: Tags associated with this check
+        data:
+          oneOf:
+            - type: object
+              additionalProperties: true
+            - type: "null"
+          description: Additional health check data
+
+    HealthCheckResult:
+      type: object
+      required:
+        - status
+        - timestamp
+      properties:
+        status:
+          type: string
+          enum:
+            - Healthy
+            - Degraded
+            - Unhealthy
+          description: Health status of a service or component
+        timestamp:
+          type: string
+          format: date-time
+          description: When the health check was performed
+        totalDuration:
+          type: [string, "null"]
+          description: Total duration of all health checks
+        checks:
+          type: array
+          items:
+            type: object
+            required:
+              - name
+              - status
+            properties:
+              name:
+                type: string
+                description: Name of the health check
+                example: "database"
+              status:
+                type: string
+                enum:
+                  - Healthy
+                  - Degraded
+                  - Unhealthy
+                description: Health status of a service or component
+              description:
+                type: [string, "null"]
+                description: Additional description
+              duration:
+                type: [string, "null"]
+                description: Duration of the health check
+                example: "00:00:00.0234567"
+              tags:
+                type: array
+                items:
+                  type: string
+                description: Tags associated with this check
+              data:
+                oneOf:
+                  - type: object
+                    additionalProperties: true
+                  - type: "null"
+                description: Additional health check data
+          description: Individual health check results

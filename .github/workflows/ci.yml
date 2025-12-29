@@ -1,4 +1,4 @@
-name: "Workspace: CI"
+name: "[CI] Build & Test"
 
 # Workspace-level CI: Runs linting, testing, and building across all packages
 # This is the main CI pipeline that validates code quality and functionality
@@ -116,13 +116,31 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+      packages: read
     steps:
       - uses: actions/checkout@v6
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v5
         with:
-          dotnet-version: '8.0.x'
+          dotnet-version: '9.0.x'
+          source-url: https://nuget.pkg.github.com/phoenixvc/index.json
+        env:
+          NUGET_AUTH_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN }}
+
+      - name: Build Mystira.Core
+        id: build-core
+        run: |
+          echo "Building Mystira.Core..."
+          dotnet build packages/core/Mystira.Core --configuration Release
+          echo "core=success" >> $GITHUB_OUTPUT
+
+      - name: Test Mystira.Core
+        id: test-core
+        run: |
+          echo "Testing Mystira.Core..."
+          dotnet test packages/core/Mystira.Core.Tests --configuration Release
+          echo "core_tests=success" >> $GITHUB_OUTPUT
 
       - name: Build Mystira.Contracts
         id: build-contracts
@@ -151,8 +169,22 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "| Package | Build | Test |" >> $GITHUB_STEP_SUMMARY
           echo "|---------|-------|------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Mystira.Core | ${{ steps.build-core.outputs.core == 'success' && '✅' || '❌' }} | ${{ steps.test-core.outputs.core_tests == 'success' && '✅' || '❌' }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Mystira.Contracts | ${{ steps.build-contracts.outputs.contracts == 'success' && '✅' || '❌' }} | N/A |" >> $GITHUB_STEP_SUMMARY
           echo "| Mystira.Shared | ${{ steps.build-shared.outputs.shared == 'success' && '✅' || '❌' }} | ${{ steps.test-shared.outputs.tests == 'success' && '✅' || '⏭️' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # List types in Mystira.Core
+          echo "### Mystira.Core Types" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "<details>" >> $GITHUB_STEP_SUMMARY
+          echo "<summary>Click to expand</summary>" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          grep -rh "^public \(class\|record\|interface\|enum\|struct\)" --include="*.cs" packages/core/Mystira.Core/ | \
+            sed 's/^public //' | sed 's/{.*//' | sed 's/ :.*//' | sort | uniq >> $GITHUB_STEP_SUMMARY || echo "(none found)" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          echo "</details>" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
 
           # List types in Mystira.Contracts

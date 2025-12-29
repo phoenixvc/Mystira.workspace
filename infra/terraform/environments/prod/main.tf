@@ -19,7 +19,7 @@ terraform {
     }
     azuread = {
       source  = "hashicorp/azuread"
-      version = "~> 2.47"
+      version = "~> 3.0"
     }
     azapi = {
       source  = "Azure/azapi"
@@ -37,6 +37,9 @@ provider "azurerm" {
     }
   }
 }
+
+# Get current Azure client configuration
+data "azurerm_client_config" "current" {}
 
 variable "location" {
   description = "Azure region for deployment"
@@ -59,7 +62,7 @@ variable "external_id_tenant_id" {
 variable "alert_email_addresses" {
   description = "Email addresses for monitoring alerts"
   type        = list(string)
-  default     = ["devops@mystira.app"]
+  default     = ["jurie@phoenixvc.tech", "eben@phoenixvc.tech"]
 }
 
 variable "oidc_issuer_enabled" {
@@ -70,6 +73,12 @@ variable "oidc_issuer_enabled" {
 
 variable "workload_identity_enabled" {
   description = "Enable workload identity for AKS"
+  type        = bool
+  default     = true
+}
+
+variable "enable_azure_ai" {
+  description = "Enable Azure AI Foundry infrastructure (can be disabled to speed up initial deployment)"
   type        = bool
   default     = true
 }
@@ -169,7 +178,7 @@ resource "azurerm_subnet" "aks" {
   name                 = "aks-subnet"
   resource_group_name  = azurerm_resource_group.main.name
   virtual_network_name = azurerm_virtual_network.main.name
-  address_prefixes     = ["10.2.10.0/22"]
+  address_prefixes     = ["10.2.8.0/22"]
 }
 
 resource "azurerm_subnet" "postgresql" {
@@ -280,23 +289,44 @@ module "shared_postgresql" {
   backup_retention_days        = 35
   geo_redundant_backup_enabled = true
 
-  # Enable Azure AD authentication for passwordless access
-  aad_auth_enabled = true
-  aad_admin_identities = {
-    "admin-api" = {
-      principal_name = "mys-prod-admin-api-identity-san"
-      principal_type = "ServicePrincipal"
-    }
-    "story-generator" = {
-      principal_name = "mys-prod-story-identity-san"
-      principal_type = "ServicePrincipal"
-    }
-  }
+  # AAD authentication is configured separately below to avoid circular dependencies
+  # (app modules need server_id, AAD admins need app identity principal_ids)
+  aad_auth_enabled = false
 
   tags = {
     CostCenter = "production"
     Critical   = "true"
   }
+}
+
+# =============================================================================
+# PostgreSQL Azure AD Administrators
+# Configured separately from the module to avoid circular dependencies:
+# - PostgreSQL server is created first (module.shared_postgresql)
+# - App modules are created next (they need server_id)
+# - AAD admins are added last (they need app identity principal_ids)
+# =============================================================================
+
+resource "azurerm_postgresql_flexible_server_active_directory_administrator" "admin_api" {
+  server_name         = module.shared_postgresql.server_name
+  resource_group_name = azurerm_resource_group.main.name
+  tenant_id           = data.azurerm_client_config.current.tenant_id
+  object_id           = module.admin_api.identity_principal_id
+  principal_name      = "mys-prod-admin-api-identity-san"
+  principal_type      = "ServicePrincipal"
+
+  depends_on = [module.admin_api]
+}
+
+resource "azurerm_postgresql_flexible_server_active_directory_administrator" "story_generator" {
+  server_name         = module.shared_postgresql.server_name
+  resource_group_name = azurerm_resource_group.main.name
+  tenant_id           = data.azurerm_client_config.current.tenant_id
+  object_id           = module.story_generator.identity_principal_id
+  principal_name      = "mys-prod-story-identity-san"
+  principal_type      = "ServicePrincipal"
+
+  depends_on = [module.story_generator]
 }
 
 # Shared Redis Infrastructure
@@ -374,8 +404,10 @@ module "shared_monitoring" {
 
 # Shared Azure AI Foundry Infrastructure (in core-rg)
 # Updated to use AIServices (Azure AI Foundry) instead of legacy OpenAI
+# Can be disabled with enable_azure_ai=false to speed up initial deployment
 module "shared_azure_ai" {
   source = "../../modules/shared/azure-ai"
+  count  = var.enable_azure_ai ? 1 : 0
 
   environment         = "prod"
   location            = var.location
@@ -423,26 +455,10 @@ module "shared_azure_ai" {
   }
 }
 
-# Shared Azure AI Search Infrastructure (in core-rg)
-# Provides RAG, vector search, and semantic search capabilities
-module "shared_azure_search" {
-  source = "../../modules/shared/azure-search"
-
-  environment         = "prod"
-  location            = var.location
-  region_code         = local.region_code
-  resource_group_name = azurerm_resource_group.main.name
-
-  # Use standard tier for production (semantic search, higher capacity)
-  sku                 = "standard"
-  replica_count       = 2  # High availability
-  partition_count     = 1
-  semantic_search_sku = "standard" # Standard semantic search for production
-
-  tags = {
-    CostCenter = "production"
-    Critical   = "true"
-  }
+# Shared Azure AI Search Infrastructure - Reference existing shared resource (created by dev)
+data "azurerm_search_service" "shared" {
+  name                = "mys-shared-search-san"
+  resource_group_name = "mys-dev-core-rg-san"
 }
 
 # Story-Generator Infrastructure (in story-rg per ADR-0017)
@@ -471,7 +487,7 @@ module "story_generator" {
   fallback_location        = "eastus2"   # SWA not available in South Africa North
   github_repository_url    = "https://github.com/phoenixvc/Mystira.StoryGenerator"
   github_branch            = "main"
-  enable_swa_custom_domain = false  # Enable after DNS is configured
+  enable_swa_custom_domain = true
   swa_custom_domain        = "story.mystira.app"
 
   tags = {
@@ -526,7 +542,9 @@ module "entra_external_id" {
   tenant_name   = "mystira"
 
   pwa_redirect_uris = [
-    "https://app.mystira.app/auth/callback"
+    # Production environment
+    "https://mystira.app/authentication/login-callback",
+    "https://app.mystira.app/authentication/login-callback",
   ]
 }
 
@@ -662,17 +680,20 @@ resource "azurerm_key_vault_secret" "story_appinsights" {
 }
 
 # Story-Generator Azure AI Foundry Secrets (auto-populated from shared_azure_ai module)
+# Only created when enable_azure_ai=true
 resource "azurerm_key_vault_secret" "story_azure_ai_endpoint" {
+  count        = var.enable_azure_ai ? 1 : 0
   name         = "azure-ai-endpoint"
-  value        = module.shared_azure_ai.endpoint
+  value        = module.shared_azure_ai[0].endpoint
   key_vault_id = module.story_generator.key_vault_id
   content_type = "azure-ai"
   tags         = { AutoPopulated = "true", Source = "shared-azure-ai" }
 }
 
 resource "azurerm_key_vault_secret" "story_azure_ai_key" {
+  count        = var.enable_azure_ai ? 1 : 0
   name         = "azure-ai-api-key"
-  value        = module.shared_azure_ai.primary_access_key
+  value        = module.shared_azure_ai[0].primary_access_key
   key_vault_id = module.story_generator.key_vault_id
   content_type = "azure-ai"
   tags         = { AutoPopulated = "true", Source = "shared-azure-ai" }
@@ -773,7 +794,7 @@ resource "azurerm_kubernetes_cluster" "main" {
     node_count          = 3
     vm_size             = "Standard_D4s_v3"
     vnet_subnet_id      = azurerm_subnet.aks.id
-    enable_auto_scaling = true
+    auto_scaling_enabled = true
     min_count           = 3
     max_count           = 10
     zones               = ["1", "2", "3"]
@@ -796,7 +817,7 @@ resource "azurerm_kubernetes_cluster" "main" {
   }
 
   azure_active_directory_role_based_access_control {
-    managed            = true
+    tenant_id          = data.azurerm_client_config.current.tenant_id
     azure_rbac_enabled = true
   }
 
@@ -814,7 +835,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "chain" {
   vm_size               = "Standard_D4s_v3"
   node_count            = 3
   vnet_subnet_id        = azurerm_subnet.aks.id
-  enable_auto_scaling   = true
+  auto_scaling_enabled  = true
   min_count             = 3
   max_count             = 6
   zones                 = ["1", "2", "3"]
@@ -840,7 +861,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "publisher" {
   vm_size               = "Standard_D2s_v3"
   node_count            = 3
   vnet_subnet_id        = azurerm_subnet.aks.id
-  enable_auto_scaling   = true
+  auto_scaling_enabled  = true
   min_count             = 3
   max_count             = 10
   zones                 = ["1", "2", "3"]
@@ -856,17 +877,11 @@ resource "azurerm_kubernetes_cluster_node_pool" "publisher" {
 }
 
 # DNS Configuration
-module "dns" {
-  source = "../../modules/dns"
-
-  environment         = "prod"
-  resource_group_name = azurerm_resource_group.main.name
-  domain_name         = "mystira.app"
-
-  tags = {
-    CostCenter = "production"
-    Critical   = "true"
-  }
+# NOTE: DNS zone is created by CI/CD bootstrap in shared terraform RG
+# Reference it via data source instead of creating a duplicate
+data "azurerm_dns_zone" "mystira" {
+  name                = "mystira.app"
+  resource_group_name = "mys-shared-terraform-rg-san"
 }
 
 output "resource_group_name" {
@@ -898,17 +913,17 @@ output "acr_name" {
 
 output "dns_name_servers" {
   description = "Name servers for DNS zone - configure these in your domain registrar"
-  value       = module.dns.name_servers
+  value       = data.azurerm_dns_zone.mystira.name_servers
 }
 
 output "publisher_domain" {
   description = "Publisher service domain"
-  value       = module.dns.publisher_fqdn
+  value       = "publisher.mystira.app"
 }
 
 output "chain_domain" {
   description = "Chain service domain"
-  value       = module.dns.chain_fqdn
+  value       = "chain.mystira.app"
 }
 
 # Shared Infrastructure Outputs

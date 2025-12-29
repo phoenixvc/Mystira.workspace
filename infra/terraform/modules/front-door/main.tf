@@ -29,17 +29,21 @@ resource "azurerm_cdn_frontdoor_profile" "main" {
   tags = local.common_tags
 }
 
-# Publisher Endpoint
-resource "azurerm_cdn_frontdoor_endpoint" "publisher" {
-  name                     = "${var.project_name}-${var.environment}-publisher"
-  cdn_frontdoor_profile_id = azurerm_cdn_frontdoor_profile.main.id
+# =============================================================================
+# CONSOLIDATED ENDPOINT ARCHITECTURE
+# =============================================================================
+# Instead of separate endpoints per service (which hit Azure quota limits),
+# we use a single consolidated endpoint per environment. Custom domains and
+# routes handle routing to different origin groups based on the hostname.
+#
+# This reduces endpoints from 16 (with secondary environment) to just 2:
+# - Primary endpoint: handles all primary environment traffic
+# - Secondary endpoint: handles all secondary environment traffic (if enabled)
+# =============================================================================
 
-  tags = local.common_tags
-}
-
-# Chain Endpoint
-resource "azurerm_cdn_frontdoor_endpoint" "chain" {
-  name                     = "${var.project_name}-${var.environment}-chain"
+# Primary Consolidated Endpoint - handles all primary environment services
+resource "azurerm_cdn_frontdoor_endpoint" "primary" {
+  name                     = "${var.project_name}-${var.environment}"
   cdn_frontdoor_profile_id = azurerm_cdn_frontdoor_profile.main.id
 
   tags = local.common_tags
@@ -139,10 +143,10 @@ resource "azurerm_cdn_frontdoor_custom_domain" "chain" {
   }
 }
 
-# Publisher Route
+# Publisher Route - uses consolidated primary endpoint
 resource "azurerm_cdn_frontdoor_route" "publisher" {
   name                            = "publisher-route"
-  cdn_frontdoor_endpoint_id       = azurerm_cdn_frontdoor_endpoint.publisher.id
+  cdn_frontdoor_endpoint_id       = azurerm_cdn_frontdoor_endpoint.primary.id
   cdn_frontdoor_origin_group_id   = azurerm_cdn_frontdoor_origin_group.publisher.id
   cdn_frontdoor_origin_ids        = [azurerm_cdn_frontdoor_origin.publisher.id]
   cdn_frontdoor_custom_domain_ids = [azurerm_cdn_frontdoor_custom_domain.publisher.id]
@@ -151,7 +155,7 @@ resource "azurerm_cdn_frontdoor_route" "publisher" {
   patterns_to_match      = ["/*"]
   forwarding_protocol    = "HttpsOnly"
   https_redirect_enabled = true
-  link_to_default_domain = true
+  link_to_default_domain = false
 
   dynamic "cache" {
     for_each = var.enable_caching ? [1] : []
@@ -172,10 +176,10 @@ resource "azurerm_cdn_frontdoor_route" "publisher" {
   }
 }
 
-# Chain Route
+# Chain Route - uses consolidated primary endpoint
 resource "azurerm_cdn_frontdoor_route" "chain" {
   name                            = "chain-route"
-  cdn_frontdoor_endpoint_id       = azurerm_cdn_frontdoor_endpoint.chain.id
+  cdn_frontdoor_endpoint_id       = azurerm_cdn_frontdoor_endpoint.primary.id
   cdn_frontdoor_origin_group_id   = azurerm_cdn_frontdoor_origin_group.chain.id
   cdn_frontdoor_origin_ids        = [azurerm_cdn_frontdoor_origin.chain.id]
   cdn_frontdoor_custom_domain_ids = [azurerm_cdn_frontdoor_custom_domain.chain.id]
@@ -184,7 +188,7 @@ resource "azurerm_cdn_frontdoor_route" "chain" {
   patterns_to_match      = ["/*"]
   forwarding_protocol    = "HttpsOnly"
   https_redirect_enabled = true
-  link_to_default_domain = true
+  link_to_default_domain = false
 
   # No caching for Chain service (blockchain RPC)
   cache {
@@ -319,6 +323,68 @@ resource "azurerm_cdn_frontdoor_security_policy" "main" {
             cdn_frontdoor_domain_id = azurerm_cdn_frontdoor_custom_domain.story_generator_swa[0].id
           }
         }
+        # Conditionally include Mystira.App domains when enabled
+        dynamic "domain" {
+          for_each = var.enable_mystira_app ? [1] : []
+          content {
+            cdn_frontdoor_domain_id = azurerm_cdn_frontdoor_custom_domain.mystira_app_api[0].id
+          }
+        }
+        dynamic "domain" {
+          for_each = var.enable_mystira_app ? [1] : []
+          content {
+            cdn_frontdoor_domain_id = azurerm_cdn_frontdoor_custom_domain.mystira_app_swa[0].id
+          }
+        }
+        # Secondary environment domains (when shared non-prod Front Door is enabled)
+        dynamic "domain" {
+          for_each = var.enable_secondary_environment ? [1] : []
+          content {
+            cdn_frontdoor_domain_id = azurerm_cdn_frontdoor_custom_domain.secondary_publisher[0].id
+          }
+        }
+        dynamic "domain" {
+          for_each = var.enable_secondary_environment ? [1] : []
+          content {
+            cdn_frontdoor_domain_id = azurerm_cdn_frontdoor_custom_domain.secondary_chain[0].id
+          }
+        }
+        dynamic "domain" {
+          for_each = var.enable_secondary_environment && var.enable_admin_services ? [1] : []
+          content {
+            cdn_frontdoor_domain_id = azurerm_cdn_frontdoor_custom_domain.secondary_admin_api[0].id
+          }
+        }
+        dynamic "domain" {
+          for_each = var.enable_secondary_environment && var.enable_admin_services ? [1] : []
+          content {
+            cdn_frontdoor_domain_id = azurerm_cdn_frontdoor_custom_domain.secondary_admin_ui[0].id
+          }
+        }
+        dynamic "domain" {
+          for_each = var.enable_secondary_environment && var.enable_story_generator ? [1] : []
+          content {
+            cdn_frontdoor_domain_id = azurerm_cdn_frontdoor_custom_domain.secondary_story_generator_api[0].id
+          }
+        }
+        dynamic "domain" {
+          for_each = var.enable_secondary_environment && var.enable_story_generator ? [1] : []
+          content {
+            cdn_frontdoor_domain_id = azurerm_cdn_frontdoor_custom_domain.secondary_story_generator_swa[0].id
+          }
+        }
+        dynamic "domain" {
+          for_each = var.enable_secondary_environment && var.enable_mystira_app ? [1] : []
+          content {
+            cdn_frontdoor_domain_id = azurerm_cdn_frontdoor_custom_domain.secondary_mystira_app_api[0].id
+          }
+        }
+        dynamic "domain" {
+          for_each = var.enable_secondary_environment && var.enable_mystira_app ? [1] : []
+          content {
+            cdn_frontdoor_domain_id = azurerm_cdn_frontdoor_custom_domain.secondary_mystira_app_swa[0].id
+          }
+        }
         patterns_to_match = ["/*"]
       }
     }
@@ -343,24 +409,8 @@ resource "azurerm_cdn_frontdoor_security_policy" "main" {
 # =============================================================================
 # Admin Services (Optional)
 # =============================================================================
-
-# Admin API Endpoint
-resource "azurerm_cdn_frontdoor_endpoint" "admin_api" {
-  count                    = var.enable_admin_services ? 1 : 0
-  name                     = "${var.project_name}-${var.environment}-admin-api"
-  cdn_frontdoor_profile_id = azurerm_cdn_frontdoor_profile.main.id
-
-  tags = local.common_tags
-}
-
-# Admin UI Endpoint
-resource "azurerm_cdn_frontdoor_endpoint" "admin_ui" {
-  count                    = var.enable_admin_services ? 1 : 0
-  name                     = "${var.project_name}-${var.environment}-admin-ui"
-  cdn_frontdoor_profile_id = azurerm_cdn_frontdoor_profile.main.id
-
-  tags = local.common_tags
-}
+# Note: Admin services use the consolidated primary endpoint instead of
+# individual endpoints to stay within Azure Front Door quota limits.
 
 # Admin API Origin Group
 resource "azurerm_cdn_frontdoor_origin_group" "admin_api" {
@@ -462,11 +512,11 @@ resource "azurerm_cdn_frontdoor_custom_domain" "admin_ui" {
   }
 }
 
-# Admin API Route
+# Admin API Route - uses consolidated primary endpoint
 resource "azurerm_cdn_frontdoor_route" "admin_api" {
   count                           = var.enable_admin_services ? 1 : 0
   name                            = "admin-api-route"
-  cdn_frontdoor_endpoint_id       = azurerm_cdn_frontdoor_endpoint.admin_api[0].id
+  cdn_frontdoor_endpoint_id       = azurerm_cdn_frontdoor_endpoint.primary.id
   cdn_frontdoor_origin_group_id   = azurerm_cdn_frontdoor_origin_group.admin_api[0].id
   cdn_frontdoor_origin_ids        = [azurerm_cdn_frontdoor_origin.admin_api[0].id]
   cdn_frontdoor_custom_domain_ids = [azurerm_cdn_frontdoor_custom_domain.admin_api[0].id]
@@ -475,7 +525,7 @@ resource "azurerm_cdn_frontdoor_route" "admin_api" {
   patterns_to_match      = ["/*"]
   forwarding_protocol    = "HttpsOnly"
   https_redirect_enabled = true
-  link_to_default_domain = true
+  link_to_default_domain = false
 
   # No caching for API endpoints
   cache {
@@ -488,11 +538,11 @@ resource "azurerm_cdn_frontdoor_route" "admin_api" {
   }
 }
 
-# Admin UI Route
+# Admin UI Route - uses consolidated primary endpoint
 resource "azurerm_cdn_frontdoor_route" "admin_ui" {
   count                           = var.enable_admin_services ? 1 : 0
   name                            = "admin-ui-route"
-  cdn_frontdoor_endpoint_id       = azurerm_cdn_frontdoor_endpoint.admin_ui[0].id
+  cdn_frontdoor_endpoint_id       = azurerm_cdn_frontdoor_endpoint.primary.id
   cdn_frontdoor_origin_group_id   = azurerm_cdn_frontdoor_origin_group.admin_ui[0].id
   cdn_frontdoor_origin_ids        = [azurerm_cdn_frontdoor_origin.admin_ui[0].id]
   cdn_frontdoor_custom_domain_ids = [azurerm_cdn_frontdoor_custom_domain.admin_ui[0].id]
@@ -501,7 +551,7 @@ resource "azurerm_cdn_frontdoor_route" "admin_ui" {
   patterns_to_match      = ["/*"]
   forwarding_protocol    = "HttpsOnly"
   https_redirect_enabled = true
-  link_to_default_domain = true
+  link_to_default_domain = false
 
   dynamic "cache" {
     for_each = var.enable_caching ? [1] : []
@@ -528,24 +578,8 @@ resource "azurerm_cdn_frontdoor_route" "admin_ui" {
 # =============================================================================
 # Story Generator Services (Optional)
 # =============================================================================
-
-# Story Generator API Endpoint
-resource "azurerm_cdn_frontdoor_endpoint" "story_generator_api" {
-  count                    = var.enable_story_generator ? 1 : 0
-  name                     = "${var.project_name}-${var.environment}-story-api"
-  cdn_frontdoor_profile_id = azurerm_cdn_frontdoor_profile.main.id
-
-  tags = local.common_tags
-}
-
-# Story Generator SWA Endpoint
-resource "azurerm_cdn_frontdoor_endpoint" "story_generator_swa" {
-  count                    = var.enable_story_generator ? 1 : 0
-  name                     = "${var.project_name}-${var.environment}-story-swa"
-  cdn_frontdoor_profile_id = azurerm_cdn_frontdoor_profile.main.id
-
-  tags = local.common_tags
-}
+# Note: Story Generator services use the consolidated primary endpoint instead
+# of individual endpoints to stay within Azure Front Door quota limits.
 
 # Story Generator API Origin Group
 resource "azurerm_cdn_frontdoor_origin_group" "story_generator_api" {
@@ -647,11 +681,11 @@ resource "azurerm_cdn_frontdoor_custom_domain" "story_generator_swa" {
   }
 }
 
-# Story Generator API Route
+# Story Generator API Route - uses consolidated primary endpoint
 resource "azurerm_cdn_frontdoor_route" "story_generator_api" {
   count                           = var.enable_story_generator ? 1 : 0
   name                            = "story-generator-api-route"
-  cdn_frontdoor_endpoint_id       = azurerm_cdn_frontdoor_endpoint.story_generator_api[0].id
+  cdn_frontdoor_endpoint_id       = azurerm_cdn_frontdoor_endpoint.primary.id
   cdn_frontdoor_origin_group_id   = azurerm_cdn_frontdoor_origin_group.story_generator_api[0].id
   cdn_frontdoor_origin_ids        = [azurerm_cdn_frontdoor_origin.story_generator_api[0].id]
   cdn_frontdoor_custom_domain_ids = [azurerm_cdn_frontdoor_custom_domain.story_generator_api[0].id]
@@ -660,7 +694,7 @@ resource "azurerm_cdn_frontdoor_route" "story_generator_api" {
   patterns_to_match      = ["/*"]
   forwarding_protocol    = "HttpsOnly"
   https_redirect_enabled = true
-  link_to_default_domain = true
+  link_to_default_domain = false
 
   # No caching for API endpoints
   cache {
@@ -673,11 +707,11 @@ resource "azurerm_cdn_frontdoor_route" "story_generator_api" {
   }
 }
 
-# Story Generator SWA Route
+# Story Generator SWA Route - uses consolidated primary endpoint
 resource "azurerm_cdn_frontdoor_route" "story_generator_swa" {
   count                           = var.enable_story_generator ? 1 : 0
   name                            = "story-generator-swa-route"
-  cdn_frontdoor_endpoint_id       = azurerm_cdn_frontdoor_endpoint.story_generator_swa[0].id
+  cdn_frontdoor_endpoint_id       = azurerm_cdn_frontdoor_endpoint.primary.id
   cdn_frontdoor_origin_group_id   = azurerm_cdn_frontdoor_origin_group.story_generator_swa[0].id
   cdn_frontdoor_origin_ids        = [azurerm_cdn_frontdoor_origin.story_generator_swa[0].id]
   cdn_frontdoor_custom_domain_ids = [azurerm_cdn_frontdoor_custom_domain.story_generator_swa[0].id]
@@ -686,7 +720,7 @@ resource "azurerm_cdn_frontdoor_route" "story_generator_swa" {
   patterns_to_match      = ["/*"]
   forwarding_protocol    = "HttpsOnly"
   https_redirect_enabled = true
-  link_to_default_domain = true
+  link_to_default_domain = false
 
   # Cache static assets from SWA
   dynamic "cache" {
@@ -698,6 +732,818 @@ resource "azurerm_cdn_frontdoor_route" "story_generator_swa" {
       content_types_to_compress = [
         "application/javascript",
         "application/json",
+        "text/css",
+        "text/html",
+        "text/javascript",
+        "text/plain",
+      ]
+    }
+  }
+}
+
+# =============================================================================
+# Mystira.App Services (Optional)
+# =============================================================================
+# Note: Mystira.App services use the consolidated primary endpoint instead
+# of individual endpoints to stay within Azure Front Door quota limits.
+
+# Mystira.App API Origin Group
+resource "azurerm_cdn_frontdoor_origin_group" "mystira_app_api" {
+  count                    = var.enable_mystira_app ? 1 : 0
+  name                     = "mystira-app-api-origin-group"
+  cdn_frontdoor_profile_id = azurerm_cdn_frontdoor_profile.main.id
+  session_affinity_enabled = var.session_affinity_enabled
+
+  load_balancing {
+    sample_size                        = 4
+    successful_samples_required        = 3
+    additional_latency_in_milliseconds = 50
+  }
+
+  health_probe {
+    path                = var.health_probe_path
+    request_type        = "HEAD"
+    protocol            = "Https"
+    interval_in_seconds = var.health_probe_interval
+  }
+}
+
+# Mystira.App SWA Origin Group
+resource "azurerm_cdn_frontdoor_origin_group" "mystira_app_swa" {
+  count                    = var.enable_mystira_app ? 1 : 0
+  name                     = "mystira-app-swa-origin-group"
+  cdn_frontdoor_profile_id = azurerm_cdn_frontdoor_profile.main.id
+  session_affinity_enabled = false  # SWA/PWA is stateless
+
+  load_balancing {
+    sample_size                        = 4
+    successful_samples_required        = 3
+    additional_latency_in_milliseconds = 50
+  }
+
+  health_probe {
+    path                = "/"  # SWA health check at root
+    request_type        = "HEAD"
+    protocol            = "Https"
+    interval_in_seconds = var.health_probe_interval
+  }
+}
+
+# Mystira.App API Origin
+resource "azurerm_cdn_frontdoor_origin" "mystira_app_api" {
+  count                         = var.enable_mystira_app ? 1 : 0
+  name                          = "mystira-app-api-origin"
+  cdn_frontdoor_origin_group_id = azurerm_cdn_frontdoor_origin_group.mystira_app_api[0].id
+
+  enabled                        = true
+  host_name                      = var.mystira_app_api_backend_address
+  http_port                      = 80
+  https_port                     = 443
+  origin_host_header             = var.mystira_app_api_backend_address
+  priority                       = 1
+  weight                         = 1000
+  certificate_name_check_enabled = true
+}
+
+# Mystira.App SWA Origin
+resource "azurerm_cdn_frontdoor_origin" "mystira_app_swa" {
+  count                         = var.enable_mystira_app ? 1 : 0
+  name                          = "mystira-app-swa-origin"
+  cdn_frontdoor_origin_group_id = azurerm_cdn_frontdoor_origin_group.mystira_app_swa[0].id
+
+  enabled                        = true
+  host_name                      = var.mystira_app_swa_backend_address
+  http_port                      = 80
+  https_port                     = 443
+  origin_host_header             = var.mystira_app_swa_backend_address
+  priority                       = 1
+  weight                         = 1000
+  certificate_name_check_enabled = true
+}
+
+# Mystira.App API Custom Domain
+resource "azurerm_cdn_frontdoor_custom_domain" "mystira_app_api" {
+  count                    = var.enable_mystira_app ? 1 : 0
+  name                     = "${var.project_name}-${var.environment}-app-api-domain"
+  cdn_frontdoor_profile_id = azurerm_cdn_frontdoor_profile.main.id
+  dns_zone_id              = null
+  host_name                = var.custom_domain_mystira_app_api
+
+  tls {
+    certificate_type = "ManagedCertificate"
+  }
+}
+
+# Mystira.App SWA Custom Domain
+resource "azurerm_cdn_frontdoor_custom_domain" "mystira_app_swa" {
+  count                    = var.enable_mystira_app ? 1 : 0
+  name                     = "${var.project_name}-${var.environment}-app-swa-domain"
+  cdn_frontdoor_profile_id = azurerm_cdn_frontdoor_profile.main.id
+  dns_zone_id              = null
+  host_name                = var.custom_domain_mystira_app_swa
+
+  tls {
+    certificate_type = "ManagedCertificate"
+  }
+}
+
+# Mystira.App API Route - uses consolidated primary endpoint
+resource "azurerm_cdn_frontdoor_route" "mystira_app_api" {
+  count                           = var.enable_mystira_app ? 1 : 0
+  name                            = "mystira-app-api-route"
+  cdn_frontdoor_endpoint_id       = azurerm_cdn_frontdoor_endpoint.primary.id
+  cdn_frontdoor_origin_group_id   = azurerm_cdn_frontdoor_origin_group.mystira_app_api[0].id
+  cdn_frontdoor_origin_ids        = [azurerm_cdn_frontdoor_origin.mystira_app_api[0].id]
+  cdn_frontdoor_custom_domain_ids = [azurerm_cdn_frontdoor_custom_domain.mystira_app_api[0].id]
+
+  supported_protocols    = ["Http", "Https"]
+  patterns_to_match      = ["/*"]
+  forwarding_protocol    = "HttpsOnly"
+  https_redirect_enabled = true
+  link_to_default_domain = false
+
+  # No caching for API endpoints - important for SignalR WebSocket connections
+  cache {
+    query_string_caching_behavior = "UseQueryString"
+    compression_enabled           = true
+    content_types_to_compress = [
+      "application/json",
+      "text/plain",
+    ]
+  }
+}
+
+# Mystira.App SWA Route - uses consolidated primary endpoint
+resource "azurerm_cdn_frontdoor_route" "mystira_app_swa" {
+  count                           = var.enable_mystira_app ? 1 : 0
+  name                            = "mystira-app-swa-route"
+  cdn_frontdoor_endpoint_id       = azurerm_cdn_frontdoor_endpoint.primary.id
+  cdn_frontdoor_origin_group_id   = azurerm_cdn_frontdoor_origin_group.mystira_app_swa[0].id
+  cdn_frontdoor_origin_ids        = [azurerm_cdn_frontdoor_origin.mystira_app_swa[0].id]
+  cdn_frontdoor_custom_domain_ids = [azurerm_cdn_frontdoor_custom_domain.mystira_app_swa[0].id]
+
+  supported_protocols    = ["Http", "Https"]
+  patterns_to_match      = ["/*"]
+  forwarding_protocol    = "HttpsOnly"
+  https_redirect_enabled = true
+  link_to_default_domain = false
+
+  # Cache static assets from PWA/SWA
+  dynamic "cache" {
+    for_each = var.enable_caching ? [1] : []
+    content {
+      query_string_caching_behavior = "IgnoreQueryString"
+      query_strings                 = []
+      compression_enabled           = true
+      content_types_to_compress = [
+        "application/javascript",
+        "application/json",
+        "image/svg+xml",
+        "text/css",
+        "text/html",
+        "text/javascript",
+        "text/plain",
+      ]
+    }
+  }
+}
+
+# =============================================================================
+# Secondary Environment Resources (for shared non-prod Front Door)
+# =============================================================================
+# These resources are only created when enable_secondary_environment is true
+# They handle domains/backends for the secondary environment (e.g., staging)
+#
+# Like the primary environment, secondary uses a consolidated endpoint to stay
+# within Azure Front Door quota limits.
+
+# Secondary Consolidated Endpoint - handles all secondary environment services
+resource "azurerm_cdn_frontdoor_endpoint" "secondary" {
+  count                    = var.enable_secondary_environment ? 1 : 0
+  name                     = "${var.project_name}-${var.secondary_environment}"
+  cdn_frontdoor_profile_id = azurerm_cdn_frontdoor_profile.main.id
+
+  tags = merge(local.common_tags, { SecondaryEnvironment = var.secondary_environment })
+}
+
+# Secondary Publisher Origin Group
+resource "azurerm_cdn_frontdoor_origin_group" "secondary_publisher" {
+  count                    = var.enable_secondary_environment ? 1 : 0
+  name                     = "secondary-publisher-origin-group"
+  cdn_frontdoor_profile_id = azurerm_cdn_frontdoor_profile.main.id
+  session_affinity_enabled = var.session_affinity_enabled
+
+  load_balancing {
+    sample_size                        = 4
+    successful_samples_required        = 3
+    additional_latency_in_milliseconds = 50
+  }
+
+  health_probe {
+    path                = var.health_probe_path
+    request_type        = "HEAD"
+    protocol            = "Https"
+    interval_in_seconds = var.health_probe_interval
+  }
+}
+
+# Secondary Chain Origin Group
+resource "azurerm_cdn_frontdoor_origin_group" "secondary_chain" {
+  count                    = var.enable_secondary_environment ? 1 : 0
+  name                     = "secondary-chain-origin-group"
+  cdn_frontdoor_profile_id = azurerm_cdn_frontdoor_profile.main.id
+  session_affinity_enabled = var.session_affinity_enabled
+
+  load_balancing {
+    sample_size                        = 4
+    successful_samples_required        = 3
+    additional_latency_in_milliseconds = 50
+  }
+
+  health_probe {
+    path                = var.health_probe_path
+    request_type        = "HEAD"
+    protocol            = "Https"
+    interval_in_seconds = var.health_probe_interval
+  }
+}
+
+# Secondary Publisher Origin
+resource "azurerm_cdn_frontdoor_origin" "secondary_publisher" {
+  count                         = var.enable_secondary_environment ? 1 : 0
+  name                          = "secondary-publisher-origin"
+  cdn_frontdoor_origin_group_id = azurerm_cdn_frontdoor_origin_group.secondary_publisher[0].id
+
+  enabled                        = true
+  host_name                      = var.secondary_publisher_backend_address
+  http_port                      = 80
+  https_port                     = 443
+  origin_host_header             = var.secondary_publisher_backend_address
+  priority                       = 1
+  weight                         = 1000
+  certificate_name_check_enabled = true
+}
+
+# Secondary Chain Origin
+resource "azurerm_cdn_frontdoor_origin" "secondary_chain" {
+  count                         = var.enable_secondary_environment ? 1 : 0
+  name                          = "secondary-chain-origin"
+  cdn_frontdoor_origin_group_id = azurerm_cdn_frontdoor_origin_group.secondary_chain[0].id
+
+  enabled                        = true
+  host_name                      = var.secondary_chain_backend_address
+  http_port                      = 80
+  https_port                     = 443
+  origin_host_header             = var.secondary_chain_backend_address
+  priority                       = 1
+  weight                         = 1000
+  certificate_name_check_enabled = true
+}
+
+# Secondary Publisher Custom Domain
+resource "azurerm_cdn_frontdoor_custom_domain" "secondary_publisher" {
+  count                    = var.enable_secondary_environment ? 1 : 0
+  name                     = "${var.project_name}-${var.secondary_environment}-publisher-domain"
+  cdn_frontdoor_profile_id = azurerm_cdn_frontdoor_profile.main.id
+  dns_zone_id              = null
+  host_name                = var.secondary_custom_domain_publisher
+
+  tls {
+    certificate_type = "ManagedCertificate"
+  }
+}
+
+# Secondary Chain Custom Domain
+resource "azurerm_cdn_frontdoor_custom_domain" "secondary_chain" {
+  count                    = var.enable_secondary_environment ? 1 : 0
+  name                     = "${var.project_name}-${var.secondary_environment}-chain-domain"
+  cdn_frontdoor_profile_id = azurerm_cdn_frontdoor_profile.main.id
+  dns_zone_id              = null
+  host_name                = var.secondary_custom_domain_chain
+
+  tls {
+    certificate_type = "ManagedCertificate"
+  }
+}
+
+# Secondary Publisher Route - uses consolidated secondary endpoint
+resource "azurerm_cdn_frontdoor_route" "secondary_publisher" {
+  count                           = var.enable_secondary_environment ? 1 : 0
+  name                            = "secondary-publisher-route"
+  cdn_frontdoor_endpoint_id       = azurerm_cdn_frontdoor_endpoint.secondary[0].id
+  cdn_frontdoor_origin_group_id   = azurerm_cdn_frontdoor_origin_group.secondary_publisher[0].id
+  cdn_frontdoor_origin_ids        = [azurerm_cdn_frontdoor_origin.secondary_publisher[0].id]
+  cdn_frontdoor_custom_domain_ids = [azurerm_cdn_frontdoor_custom_domain.secondary_publisher[0].id]
+
+  supported_protocols    = ["Http", "Https"]
+  patterns_to_match      = ["/*"]
+  forwarding_protocol    = "HttpsOnly"
+  https_redirect_enabled = true
+  link_to_default_domain = false
+
+  dynamic "cache" {
+    for_each = var.enable_caching ? [1] : []
+    content {
+      query_string_caching_behavior = "IgnoreQueryString"
+      query_strings                 = []
+      compression_enabled           = true
+      content_types_to_compress = [
+        "application/javascript",
+        "application/json",
+        "application/xml",
+        "text/css",
+        "text/html",
+        "text/javascript",
+        "text/plain",
+      ]
+    }
+  }
+}
+
+# Secondary Chain Route - uses consolidated secondary endpoint
+resource "azurerm_cdn_frontdoor_route" "secondary_chain" {
+  count                           = var.enable_secondary_environment ? 1 : 0
+  name                            = "secondary-chain-route"
+  cdn_frontdoor_endpoint_id       = azurerm_cdn_frontdoor_endpoint.secondary[0].id
+  cdn_frontdoor_origin_group_id   = azurerm_cdn_frontdoor_origin_group.secondary_chain[0].id
+  cdn_frontdoor_origin_ids        = [azurerm_cdn_frontdoor_origin.secondary_chain[0].id]
+  cdn_frontdoor_custom_domain_ids = [azurerm_cdn_frontdoor_custom_domain.secondary_chain[0].id]
+
+  supported_protocols    = ["Http", "Https"]
+  patterns_to_match      = ["/*"]
+  forwarding_protocol    = "HttpsOnly"
+  https_redirect_enabled = true
+  link_to_default_domain = false
+
+  cache {
+    query_string_caching_behavior = "IgnoreQueryString"
+    compression_enabled           = false
+  }
+}
+
+# =============================================================================
+# Secondary Admin Services
+# =============================================================================
+# Note: Secondary admin services use the consolidated secondary endpoint.
+
+resource "azurerm_cdn_frontdoor_origin_group" "secondary_admin_api" {
+  count                    = var.enable_secondary_environment && var.enable_admin_services ? 1 : 0
+  name                     = "secondary-admin-api-origin-group"
+  cdn_frontdoor_profile_id = azurerm_cdn_frontdoor_profile.main.id
+  session_affinity_enabled = var.session_affinity_enabled
+
+  load_balancing {
+    sample_size                        = 4
+    successful_samples_required        = 3
+    additional_latency_in_milliseconds = 50
+  }
+
+  health_probe {
+    path                = var.health_probe_path
+    request_type        = "HEAD"
+    protocol            = "Https"
+    interval_in_seconds = var.health_probe_interval
+  }
+}
+
+resource "azurerm_cdn_frontdoor_origin_group" "secondary_admin_ui" {
+  count                    = var.enable_secondary_environment && var.enable_admin_services ? 1 : 0
+  name                     = "secondary-admin-ui-origin-group"
+  cdn_frontdoor_profile_id = azurerm_cdn_frontdoor_profile.main.id
+  session_affinity_enabled = var.session_affinity_enabled
+
+  load_balancing {
+    sample_size                        = 4
+    successful_samples_required        = 3
+    additional_latency_in_milliseconds = 50
+  }
+
+  health_probe {
+    path                = "/"
+    request_type        = "HEAD"
+    protocol            = "Https"
+    interval_in_seconds = var.health_probe_interval
+  }
+}
+
+resource "azurerm_cdn_frontdoor_origin" "secondary_admin_api" {
+  count                         = var.enable_secondary_environment && var.enable_admin_services ? 1 : 0
+  name                          = "secondary-admin-api-origin"
+  cdn_frontdoor_origin_group_id = azurerm_cdn_frontdoor_origin_group.secondary_admin_api[0].id
+
+  enabled                        = true
+  host_name                      = var.secondary_admin_api_backend_address
+  http_port                      = 80
+  https_port                     = 443
+  origin_host_header             = var.secondary_admin_api_backend_address
+  priority                       = 1
+  weight                         = 1000
+  certificate_name_check_enabled = true
+}
+
+resource "azurerm_cdn_frontdoor_origin" "secondary_admin_ui" {
+  count                         = var.enable_secondary_environment && var.enable_admin_services ? 1 : 0
+  name                          = "secondary-admin-ui-origin"
+  cdn_frontdoor_origin_group_id = azurerm_cdn_frontdoor_origin_group.secondary_admin_ui[0].id
+
+  enabled                        = true
+  host_name                      = var.secondary_admin_ui_backend_address
+  http_port                      = 80
+  https_port                     = 443
+  origin_host_header             = var.secondary_admin_ui_backend_address
+  priority                       = 1
+  weight                         = 1000
+  certificate_name_check_enabled = true
+}
+
+resource "azurerm_cdn_frontdoor_custom_domain" "secondary_admin_api" {
+  count                    = var.enable_secondary_environment && var.enable_admin_services ? 1 : 0
+  name                     = "${var.project_name}-${var.secondary_environment}-admin-api-domain"
+  cdn_frontdoor_profile_id = azurerm_cdn_frontdoor_profile.main.id
+  dns_zone_id              = null
+  host_name                = var.secondary_custom_domain_admin_api
+
+  tls {
+    certificate_type = "ManagedCertificate"
+  }
+}
+
+resource "azurerm_cdn_frontdoor_custom_domain" "secondary_admin_ui" {
+  count                    = var.enable_secondary_environment && var.enable_admin_services ? 1 : 0
+  name                     = "${var.project_name}-${var.secondary_environment}-admin-ui-domain"
+  cdn_frontdoor_profile_id = azurerm_cdn_frontdoor_profile.main.id
+  dns_zone_id              = null
+  host_name                = var.secondary_custom_domain_admin_ui
+
+  tls {
+    certificate_type = "ManagedCertificate"
+  }
+}
+
+# Secondary Admin API Route - uses consolidated secondary endpoint
+resource "azurerm_cdn_frontdoor_route" "secondary_admin_api" {
+  count                           = var.enable_secondary_environment && var.enable_admin_services ? 1 : 0
+  name                            = "secondary-admin-api-route"
+  cdn_frontdoor_endpoint_id       = azurerm_cdn_frontdoor_endpoint.secondary[0].id
+  cdn_frontdoor_origin_group_id   = azurerm_cdn_frontdoor_origin_group.secondary_admin_api[0].id
+  cdn_frontdoor_origin_ids        = [azurerm_cdn_frontdoor_origin.secondary_admin_api[0].id]
+  cdn_frontdoor_custom_domain_ids = [azurerm_cdn_frontdoor_custom_domain.secondary_admin_api[0].id]
+
+  supported_protocols    = ["Http", "Https"]
+  patterns_to_match      = ["/*"]
+  forwarding_protocol    = "HttpsOnly"
+  https_redirect_enabled = true
+  link_to_default_domain = false
+
+  cache {
+    query_string_caching_behavior = "UseQueryString"
+    compression_enabled           = true
+    content_types_to_compress = [
+      "application/json",
+      "text/plain",
+    ]
+  }
+}
+
+# Secondary Admin UI Route - uses consolidated secondary endpoint
+resource "azurerm_cdn_frontdoor_route" "secondary_admin_ui" {
+  count                           = var.enable_secondary_environment && var.enable_admin_services ? 1 : 0
+  name                            = "secondary-admin-ui-route"
+  cdn_frontdoor_endpoint_id       = azurerm_cdn_frontdoor_endpoint.secondary[0].id
+  cdn_frontdoor_origin_group_id   = azurerm_cdn_frontdoor_origin_group.secondary_admin_ui[0].id
+  cdn_frontdoor_origin_ids        = [azurerm_cdn_frontdoor_origin.secondary_admin_ui[0].id]
+  cdn_frontdoor_custom_domain_ids = [azurerm_cdn_frontdoor_custom_domain.secondary_admin_ui[0].id]
+
+  supported_protocols    = ["Http", "Https"]
+  patterns_to_match      = ["/*"]
+  forwarding_protocol    = "HttpsOnly"
+  https_redirect_enabled = true
+  link_to_default_domain = false
+
+  dynamic "cache" {
+    for_each = var.enable_caching ? [1] : []
+    content {
+      query_string_caching_behavior = "IgnoreQueryString"
+      query_strings                 = []
+      compression_enabled           = true
+      content_types_to_compress = [
+        "application/javascript",
+        "application/json",
+        "text/css",
+        "text/html",
+        "text/javascript",
+        "text/plain",
+      ]
+    }
+  }
+}
+
+# =============================================================================
+# Secondary Story Generator Services
+# =============================================================================
+# Note: Secondary story generator services use the consolidated secondary endpoint.
+
+resource "azurerm_cdn_frontdoor_origin_group" "secondary_story_generator_api" {
+  count                    = var.enable_secondary_environment && var.enable_story_generator ? 1 : 0
+  name                     = "secondary-story-generator-api-origin-group"
+  cdn_frontdoor_profile_id = azurerm_cdn_frontdoor_profile.main.id
+  session_affinity_enabled = var.session_affinity_enabled
+
+  load_balancing {
+    sample_size                        = 4
+    successful_samples_required        = 3
+    additional_latency_in_milliseconds = 50
+  }
+
+  health_probe {
+    path                = var.health_probe_path
+    request_type        = "HEAD"
+    protocol            = "Https"
+    interval_in_seconds = var.health_probe_interval
+  }
+}
+
+resource "azurerm_cdn_frontdoor_origin_group" "secondary_story_generator_swa" {
+  count                    = var.enable_secondary_environment && var.enable_story_generator ? 1 : 0
+  name                     = "secondary-story-generator-swa-origin-group"
+  cdn_frontdoor_profile_id = azurerm_cdn_frontdoor_profile.main.id
+  session_affinity_enabled = false
+
+  load_balancing {
+    sample_size                        = 4
+    successful_samples_required        = 3
+    additional_latency_in_milliseconds = 50
+  }
+
+  health_probe {
+    path                = "/"
+    request_type        = "HEAD"
+    protocol            = "Https"
+    interval_in_seconds = var.health_probe_interval
+  }
+}
+
+resource "azurerm_cdn_frontdoor_origin" "secondary_story_generator_api" {
+  count                         = var.enable_secondary_environment && var.enable_story_generator ? 1 : 0
+  name                          = "secondary-story-generator-api-origin"
+  cdn_frontdoor_origin_group_id = azurerm_cdn_frontdoor_origin_group.secondary_story_generator_api[0].id
+
+  enabled                        = true
+  host_name                      = var.secondary_story_generator_api_backend_address
+  http_port                      = 80
+  https_port                     = 443
+  origin_host_header             = var.secondary_story_generator_api_backend_address
+  priority                       = 1
+  weight                         = 1000
+  certificate_name_check_enabled = true
+}
+
+resource "azurerm_cdn_frontdoor_origin" "secondary_story_generator_swa" {
+  count                         = var.enable_secondary_environment && var.enable_story_generator ? 1 : 0
+  name                          = "secondary-story-generator-swa-origin"
+  cdn_frontdoor_origin_group_id = azurerm_cdn_frontdoor_origin_group.secondary_story_generator_swa[0].id
+
+  enabled                        = true
+  host_name                      = var.secondary_story_generator_swa_backend_address
+  http_port                      = 80
+  https_port                     = 443
+  origin_host_header             = var.secondary_story_generator_swa_backend_address
+  priority                       = 1
+  weight                         = 1000
+  certificate_name_check_enabled = true
+}
+
+resource "azurerm_cdn_frontdoor_custom_domain" "secondary_story_generator_api" {
+  count                    = var.enable_secondary_environment && var.enable_story_generator ? 1 : 0
+  name                     = "${var.project_name}-${var.secondary_environment}-story-api-domain"
+  cdn_frontdoor_profile_id = azurerm_cdn_frontdoor_profile.main.id
+  dns_zone_id              = null
+  host_name                = var.secondary_custom_domain_story_generator_api
+
+  tls {
+    certificate_type = "ManagedCertificate"
+  }
+}
+
+resource "azurerm_cdn_frontdoor_custom_domain" "secondary_story_generator_swa" {
+  count                    = var.enable_secondary_environment && var.enable_story_generator ? 1 : 0
+  name                     = "${var.project_name}-${var.secondary_environment}-story-swa-domain"
+  cdn_frontdoor_profile_id = azurerm_cdn_frontdoor_profile.main.id
+  dns_zone_id              = null
+  host_name                = var.secondary_custom_domain_story_generator_swa
+
+  tls {
+    certificate_type = "ManagedCertificate"
+  }
+}
+
+# Secondary Story Generator API Route - uses consolidated secondary endpoint
+resource "azurerm_cdn_frontdoor_route" "secondary_story_generator_api" {
+  count                           = var.enable_secondary_environment && var.enable_story_generator ? 1 : 0
+  name                            = "secondary-story-generator-api-route"
+  cdn_frontdoor_endpoint_id       = azurerm_cdn_frontdoor_endpoint.secondary[0].id
+  cdn_frontdoor_origin_group_id   = azurerm_cdn_frontdoor_origin_group.secondary_story_generator_api[0].id
+  cdn_frontdoor_origin_ids        = [azurerm_cdn_frontdoor_origin.secondary_story_generator_api[0].id]
+  cdn_frontdoor_custom_domain_ids = [azurerm_cdn_frontdoor_custom_domain.secondary_story_generator_api[0].id]
+
+  supported_protocols    = ["Http", "Https"]
+  patterns_to_match      = ["/*"]
+  forwarding_protocol    = "HttpsOnly"
+  https_redirect_enabled = true
+  link_to_default_domain = false
+
+  cache {
+    query_string_caching_behavior = "UseQueryString"
+    compression_enabled           = true
+    content_types_to_compress = [
+      "application/json",
+      "text/plain",
+    ]
+  }
+}
+
+# Secondary Story Generator SWA Route - uses consolidated secondary endpoint
+resource "azurerm_cdn_frontdoor_route" "secondary_story_generator_swa" {
+  count                           = var.enable_secondary_environment && var.enable_story_generator ? 1 : 0
+  name                            = "secondary-story-generator-swa-route"
+  cdn_frontdoor_endpoint_id       = azurerm_cdn_frontdoor_endpoint.secondary[0].id
+  cdn_frontdoor_origin_group_id   = azurerm_cdn_frontdoor_origin_group.secondary_story_generator_swa[0].id
+  cdn_frontdoor_origin_ids        = [azurerm_cdn_frontdoor_origin.secondary_story_generator_swa[0].id]
+  cdn_frontdoor_custom_domain_ids = [azurerm_cdn_frontdoor_custom_domain.secondary_story_generator_swa[0].id]
+
+  supported_protocols    = ["Http", "Https"]
+  patterns_to_match      = ["/*"]
+  forwarding_protocol    = "HttpsOnly"
+  https_redirect_enabled = true
+  link_to_default_domain = false
+
+  dynamic "cache" {
+    for_each = var.enable_caching ? [1] : []
+    content {
+      query_string_caching_behavior = "IgnoreQueryString"
+      query_strings                 = []
+      compression_enabled           = true
+      content_types_to_compress = [
+        "application/javascript",
+        "application/json",
+        "text/css",
+        "text/html",
+        "text/javascript",
+        "text/plain",
+      ]
+    }
+  }
+}
+
+# =============================================================================
+# Secondary Mystira.App Services
+# =============================================================================
+# Note: Secondary Mystira.App services use the consolidated secondary endpoint.
+
+resource "azurerm_cdn_frontdoor_origin_group" "secondary_mystira_app_api" {
+  count                    = var.enable_secondary_environment && var.enable_mystira_app ? 1 : 0
+  name                     = "secondary-mystira-app-api-origin-group"
+  cdn_frontdoor_profile_id = azurerm_cdn_frontdoor_profile.main.id
+  session_affinity_enabled = var.session_affinity_enabled
+
+  load_balancing {
+    sample_size                        = 4
+    successful_samples_required        = 3
+    additional_latency_in_milliseconds = 50
+  }
+
+  health_probe {
+    path                = var.health_probe_path
+    request_type        = "HEAD"
+    protocol            = "Https"
+    interval_in_seconds = var.health_probe_interval
+  }
+}
+
+resource "azurerm_cdn_frontdoor_origin_group" "secondary_mystira_app_swa" {
+  count                    = var.enable_secondary_environment && var.enable_mystira_app ? 1 : 0
+  name                     = "secondary-mystira-app-swa-origin-group"
+  cdn_frontdoor_profile_id = azurerm_cdn_frontdoor_profile.main.id
+  session_affinity_enabled = false
+
+  load_balancing {
+    sample_size                        = 4
+    successful_samples_required        = 3
+    additional_latency_in_milliseconds = 50
+  }
+
+  health_probe {
+    path                = "/"
+    request_type        = "HEAD"
+    protocol            = "Https"
+    interval_in_seconds = var.health_probe_interval
+  }
+}
+
+resource "azurerm_cdn_frontdoor_origin" "secondary_mystira_app_api" {
+  count                         = var.enable_secondary_environment && var.enable_mystira_app ? 1 : 0
+  name                          = "secondary-mystira-app-api-origin"
+  cdn_frontdoor_origin_group_id = azurerm_cdn_frontdoor_origin_group.secondary_mystira_app_api[0].id
+
+  enabled                        = true
+  host_name                      = var.secondary_mystira_app_api_backend_address
+  http_port                      = 80
+  https_port                     = 443
+  origin_host_header             = var.secondary_mystira_app_api_backend_address
+  priority                       = 1
+  weight                         = 1000
+  certificate_name_check_enabled = true
+}
+
+resource "azurerm_cdn_frontdoor_origin" "secondary_mystira_app_swa" {
+  count                         = var.enable_secondary_environment && var.enable_mystira_app ? 1 : 0
+  name                          = "secondary-mystira-app-swa-origin"
+  cdn_frontdoor_origin_group_id = azurerm_cdn_frontdoor_origin_group.secondary_mystira_app_swa[0].id
+
+  enabled                        = true
+  host_name                      = var.secondary_mystira_app_swa_backend_address
+  http_port                      = 80
+  https_port                     = 443
+  origin_host_header             = var.secondary_mystira_app_swa_backend_address
+  priority                       = 1
+  weight                         = 1000
+  certificate_name_check_enabled = true
+}
+
+resource "azurerm_cdn_frontdoor_custom_domain" "secondary_mystira_app_api" {
+  count                    = var.enable_secondary_environment && var.enable_mystira_app ? 1 : 0
+  name                     = "${var.project_name}-${var.secondary_environment}-app-api-domain"
+  cdn_frontdoor_profile_id = azurerm_cdn_frontdoor_profile.main.id
+  dns_zone_id              = null
+  host_name                = var.secondary_custom_domain_mystira_app_api
+
+  tls {
+    certificate_type = "ManagedCertificate"
+  }
+}
+
+resource "azurerm_cdn_frontdoor_custom_domain" "secondary_mystira_app_swa" {
+  count                    = var.enable_secondary_environment && var.enable_mystira_app ? 1 : 0
+  name                     = "${var.project_name}-${var.secondary_environment}-app-swa-domain"
+  cdn_frontdoor_profile_id = azurerm_cdn_frontdoor_profile.main.id
+  dns_zone_id              = null
+  host_name                = var.secondary_custom_domain_mystira_app_swa
+
+  tls {
+    certificate_type = "ManagedCertificate"
+  }
+}
+
+# Secondary Mystira.App API Route - uses consolidated secondary endpoint
+resource "azurerm_cdn_frontdoor_route" "secondary_mystira_app_api" {
+  count                           = var.enable_secondary_environment && var.enable_mystira_app ? 1 : 0
+  name                            = "secondary-mystira-app-api-route"
+  cdn_frontdoor_endpoint_id       = azurerm_cdn_frontdoor_endpoint.secondary[0].id
+  cdn_frontdoor_origin_group_id   = azurerm_cdn_frontdoor_origin_group.secondary_mystira_app_api[0].id
+  cdn_frontdoor_origin_ids        = [azurerm_cdn_frontdoor_origin.secondary_mystira_app_api[0].id]
+  cdn_frontdoor_custom_domain_ids = [azurerm_cdn_frontdoor_custom_domain.secondary_mystira_app_api[0].id]
+
+  supported_protocols    = ["Http", "Https"]
+  patterns_to_match      = ["/*"]
+  forwarding_protocol    = "HttpsOnly"
+  https_redirect_enabled = true
+  link_to_default_domain = false
+
+  cache {
+    query_string_caching_behavior = "UseQueryString"
+    compression_enabled           = true
+    content_types_to_compress = [
+      "application/json",
+      "text/plain",
+    ]
+  }
+}
+
+# Secondary Mystira.App SWA Route - uses consolidated secondary endpoint
+resource "azurerm_cdn_frontdoor_route" "secondary_mystira_app_swa" {
+  count                           = var.enable_secondary_environment && var.enable_mystira_app ? 1 : 0
+  name                            = "secondary-mystira-app-swa-route"
+  cdn_frontdoor_endpoint_id       = azurerm_cdn_frontdoor_endpoint.secondary[0].id
+  cdn_frontdoor_origin_group_id   = azurerm_cdn_frontdoor_origin_group.secondary_mystira_app_swa[0].id
+  cdn_frontdoor_origin_ids        = [azurerm_cdn_frontdoor_origin.secondary_mystira_app_swa[0].id]
+  cdn_frontdoor_custom_domain_ids = [azurerm_cdn_frontdoor_custom_domain.secondary_mystira_app_swa[0].id]
+
+  supported_protocols    = ["Http", "Https"]
+  patterns_to_match      = ["/*"]
+  forwarding_protocol    = "HttpsOnly"
+  https_redirect_enabled = true
+  link_to_default_domain = false
+
+  dynamic "cache" {
+    for_each = var.enable_caching ? [1] : []
+    content {
+      query_string_caching_behavior = "IgnoreQueryString"
+      query_strings                 = []
+      compression_enabled           = true
+      content_types_to_compress = [
+        "application/javascript",
+        "application/json",
+        "image/svg+xml",
         "text/css",
         "text/html",
         "text/javascript",

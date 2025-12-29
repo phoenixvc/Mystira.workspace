@@ -1,20 +1,23 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net9.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <!-- Suppress XML documentation warnings for migrated StoryGenerator contracts -->
+    <NoWarn>$(NoWarn);CS1591;CS1587</NoWarn>
 
     <!-- Package metadata -->
     <PackageId>Mystira.Contracts</PackageId>
-    <Version>0.2.0-alpha</Version>
+    <Version>0.4.3-alpha</Version>
     <Authors>Mystira Team</Authors>
     <Company>PhoenixVC</Company>
-    <Description>Unified API contracts for Mystira platform - consolidates Mystira.App.Contracts and Mystira.StoryGenerator.Contracts</Description>
-    <PackageTags>mystira;contracts;api;types</PackageTags>
+    <Description>Unified API contracts for Mystira platform - includes App API (scenarios, game sessions, badges) and StoryGenerator API (chat, story generation, entity recognition) contracts</Description>
+    <PackageTags>mystira;contracts;api;dto;requests;responses;storygenerator;gamedev</PackageTags>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/phoenixvc/Mystira.workspace</PackageProjectUrl>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
     <RepositoryUrl>https://github.com/phoenixvc/Mystira.workspace.git</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
 
@@ -34,6 +37,13 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All"/>
+    <!-- StoryGenerator contracts dependencies -->
+    <PackageReference Include="OpenAI" Version="2.8.0" />
+    <PackageReference Include="System.ComponentModel.Annotations" Version="5.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="\" />
   </ItemGroup>
 
 </Project>

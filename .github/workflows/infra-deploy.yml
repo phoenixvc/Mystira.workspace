@@ -1,4 +1,4 @@
-name: "Infrastructure: Deploy"
+name: "[Deploy] Infrastructure"
 
 # Infrastructure Deployment: Flexible deployment to dev/staging/prod environments
 # Steps: Validate prerequisites, bootstrap infrastructure, Terraform apply, build images, deploy K8s
@@ -36,6 +36,11 @@ on:
           - publisher
       skip_validation:
         description: "Skip pre-deployment validation"
+        required: false
+        default: false
+        type: boolean
+      skip_ai_deployment:
+        description: "Skip AI/Claude model deployment"
         required: false
         default: false
         type: boolean
@@ -470,21 +475,26 @@ jobs:
           fi
 
           # Check if ACR exists in Azure but not in state (ACR is shared across environments)
-          # Note: ACR is now managed via module.shared_acr (see ADR-0017)
-          if az acr show --name ${{ env.ACR_NAME }} &> /dev/null; then
-            echo "ACR exists in Azure, checking if in state..."
-            # Check for both old direct resource and new module resource
-            if terraform state list 2>/dev/null | grep -q "module.shared_acr.azurerm_container_registry.shared"; then
-              echo "ACR already in state via shared_acr module"
-            elif terraform state list 2>/dev/null | grep -q "azurerm_container_registry.shared"; then
-              echo "ACR in state as direct resource - migration to module may be needed"
-            else
-              # Get the resource group where ACR actually exists
-              ACR_RG=$(az acr show --name ${{ env.ACR_NAME }} --query resourceGroup -o tsv)
-              echo "ACR not in state, importing from resource group ${ACR_RG} into shared_acr module..."
-              terraform import 'module.shared_acr.azurerm_container_registry.shared' "/subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${ACR_RG}/providers/Microsoft.ContainerRegistry/registries/${{ env.ACR_NAME }}"
-              echo "::notice::Imported existing ACR into Terraform state via shared_acr module"
+          # Note: ACR is managed via module.shared_acr in DEV only (see ADR-0017)
+          # Staging and prod use data sources to reference the shared ACR
+          if [ "${{ env.ENVIRONMENT }}" == "dev" ]; then
+            if az acr show --name ${{ env.ACR_NAME }} &> /dev/null; then
+              echo "ACR exists in Azure, checking if in state..."
+              # Check for both old direct resource and new module resource
+              if terraform state list 2>/dev/null | grep -q "module.shared_acr.azurerm_container_registry.shared"; then
+                echo "ACR already in state via shared_acr module"
+              elif terraform state list 2>/dev/null | grep -q "azurerm_container_registry.shared"; then
+                echo "ACR in state as direct resource - migration to module may be needed"
+              else
+                # Get the resource group where ACR actually exists
+                ACR_RG=$(az acr show --name ${{ env.ACR_NAME }} --query resourceGroup -o tsv)
+                echo "ACR not in state, importing from resource group ${ACR_RG} into shared_acr module..."
+                terraform import 'module.shared_acr.azurerm_container_registry.shared' "/subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${ACR_RG}/providers/Microsoft.ContainerRegistry/registries/${{ env.ACR_NAME }}"
+                echo "::notice::Imported existing ACR into Terraform state via shared_acr module"
+              fi
             fi
+          else
+            echo "Skipping ACR import for ${{ env.ENVIRONMENT }} - ACR is managed by dev environment and referenced via data source"
           fi
 
           # Import admin_api module resources if they exist in Azure but not in state
@@ -618,8 +628,18 @@ jobs:
         id: plan
         run: |
           cd infra/terraform/environments/${{ env.ENVIRONMENT }}
+
+          # Build terraform plan command with optional flags
+          TF_ARGS="-out=tfplan -detailed-exitcode"
+
+          # Skip Azure AI Foundry infrastructure if requested
+          if [ "${{ github.event.inputs.skip_ai_deployment }}" == "true" ]; then
+            echo "::notice::Planning without Azure AI Foundry (enable_azure_ai=false)"
+            TF_ARGS="$TF_ARGS -var=enable_azure_ai=false"
+          fi
+
           set +e
-          terraform plan -out=tfplan -detailed-exitcode
+          terraform plan $TF_ARGS
           PLAN_EXIT=$?
           echo "Terraform plan exit code: $PLAN_EXIT"
           if [ $PLAN_EXIT -eq 1 ]; then
@@ -721,7 +741,17 @@ jobs:
         id: apply
         run: |
           cd infra/terraform/environments/${{ env.ENVIRONMENT }}
-          terraform apply -auto-approve
+
+          # Build terraform apply command with optional flags
+          TF_ARGS="-auto-approve"
+
+          # Skip Azure AI Foundry infrastructure if requested
+          if [ "${{ github.event.inputs.skip_ai_deployment }}" == "true" ]; then
+            echo "::notice::Skipping Azure AI Foundry infrastructure (enable_azure_ai=false)"
+            TF_ARGS="$TF_ARGS -var=enable_azure_ai=false"
+          fi
+
+          terraform apply $TF_ARGS
 
       - name: Check AKS Cluster After Apply
         id: check-aks-post-apply
@@ -761,8 +791,8 @@ jobs:
           SUCCESS_COUNT=0
           FAILED_COUNT=0
 
-          # Check each AI Services account
-          for AI_NAME in "mys-shared-ai-san" "mys-shared-ai-uks"; do
+          # Check each AI Services account (primary + all secondary regions)
+          for AI_NAME in "mys-shared-ai-san" "mys-shared-ai-uks" "mys-shared-ai-eus" "mys-shared-ai-swc" "mys-shared-ai-ncus"; do
             if az cognitiveservices account show --name "$AI_NAME" --resource-group ${{ env.AZURE_RESOURCE_GROUP }} &>/dev/null; then
               LOCATION=$(az cognitiveservices account show --name "$AI_NAME" --resource-group ${{ env.AZURE_RESOURCE_GROUP }} --query "location" -o tsv 2>/dev/null)
 
@@ -794,7 +824,7 @@ jobs:
           echo "### Deployment Details" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
 
-          for AI_NAME in "mys-shared-ai-san" "mys-shared-ai-uks"; do
+          for AI_NAME in "mys-shared-ai-san" "mys-shared-ai-uks" "mys-shared-ai-eus" "mys-shared-ai-swc" "mys-shared-ai-ncus"; do
             if az cognitiveservices account show --name "$AI_NAME" --resource-group ${{ env.AZURE_RESOURCE_GROUP }} &>/dev/null; then
               ENDPOINT=$(az cognitiveservices account show --name "$AI_NAME" --resource-group ${{ env.AZURE_RESOURCE_GROUP }} --query "properties.endpoint" -o tsv 2>/dev/null)
               LOCATION=$(az cognitiveservices account show --name "$AI_NAME" --resource-group ${{ env.AZURE_RESOURCE_GROUP }} --query "location" -o tsv 2>/dev/null)
@@ -845,6 +875,7 @@ jobs:
     if: |
       always() &&
       needs.apply-terraform.result == 'success' &&
+      github.event.inputs.skip_ai_deployment != 'true' &&
       (github.event.inputs.components == 'all' || github.event.inputs.components == 'terraform-only' || github.event.inputs.components == '')
     environment: ${{ github.event.inputs.environment || 'dev' }}
     continue-on-error: true  # Don't fail the whole pipeline if Claude deployment fails
@@ -898,6 +929,360 @@ jobs:
           echo "**Endpoint:** \`$ENDPOINT\`" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "For manual deployment, see: \`docs/infrastructure/azure-ai-foundry-rag-guide.md\`" >> $GITHUB_STEP_SUMMARY
+
+  # ============================================
+  # Configure Front Door DNS Records
+  # ============================================
+  # Creates CNAME and TXT validation records for Front Door custom domains
+  # NOTE: Staging Front Door DNS is now handled by the dev deployment (shared non-prod Front Door)
+  # See: infra/terraform/environments/dev/front-door.tf for the shared configuration
+  configure-front-door-dns:
+    name: Configure Front Door DNS
+    runs-on: ubuntu-latest
+    needs: [apply-terraform]
+    if: |
+      always() &&
+      needs.apply-terraform.result == 'success' &&
+      (github.event.inputs.components == 'all' || github.event.inputs.components == 'terraform-only' || github.event.inputs.components == '') &&
+      github.event.inputs.environment != 'staging'
+    environment: ${{ github.event.inputs.environment || 'dev' }}
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+          terraform_wrapper: false
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.MYSTIRA_AZURE_CREDENTIALS }}
+
+      - name: Set Azure credentials for Terraform
+        run: |
+          ARM_CLIENT_ID=$(echo '${{ secrets.MYSTIRA_AZURE_CREDENTIALS }}' | jq -r '.clientId')
+          ARM_CLIENT_SECRET=$(echo '${{ secrets.MYSTIRA_AZURE_CREDENTIALS }}' | jq -r '.clientSecret')
+          ARM_SUBSCRIPTION_ID=$(echo '${{ secrets.MYSTIRA_AZURE_CREDENTIALS }}' | jq -r '.subscriptionId')
+          ARM_TENANT_ID=$(echo '${{ secrets.MYSTIRA_AZURE_CREDENTIALS }}' | jq -r '.tenantId')
+          echo "::add-mask::$ARM_CLIENT_SECRET"
+          {
+            echo "ARM_CLIENT_ID=$ARM_CLIENT_ID"
+            echo "ARM_CLIENT_SECRET=$ARM_CLIENT_SECRET"
+            echo "ARM_SUBSCRIPTION_ID=$ARM_SUBSCRIPTION_ID"
+            echo "ARM_TENANT_ID=$ARM_TENANT_ID"
+            echo "ARM_USE_CLI=false"
+          } >> "$GITHUB_ENV"
+
+      - name: Get Front Door Endpoints and Validation Tokens
+        id: get-fd-outputs
+        run: |
+          cd infra/terraform/environments/${{ env.ENVIRONMENT }}
+          terraform init -upgrade
+
+          # Get Front Door outputs
+          echo "Getting Front Door endpoints and validation tokens..."
+
+          # Mystira.App
+          MYSTIRA_SWA_ENDPOINT=$(terraform output -raw front_door_mystira_app_swa_endpoint 2>/dev/null || echo "")
+          MYSTIRA_API_ENDPOINT=$(terraform output -raw front_door_mystira_app_api_endpoint 2>/dev/null || echo "")
+
+          # Admin
+          ADMIN_UI_ENDPOINT=$(terraform output -raw front_door_admin_ui_endpoint 2>/dev/null || echo "")
+          ADMIN_API_ENDPOINT=$(terraform output -raw front_door_admin_api_endpoint 2>/dev/null || echo "")
+
+          # Story Generator
+          STORY_SWA_ENDPOINT=$(terraform output -raw front_door_story_generator_swa_endpoint 2>/dev/null || echo "")
+          STORY_API_ENDPOINT=$(terraform output -raw front_door_story_generator_api_endpoint 2>/dev/null || echo "")
+
+          # Publisher/Chain
+          PUBLISHER_ENDPOINT=$(terraform output -raw front_door_publisher_endpoint 2>/dev/null || echo "")
+          CHAIN_ENDPOINT=$(terraform output -raw front_door_chain_endpoint 2>/dev/null || echo "")
+
+          # Get validation tokens for TXT records (sensitive - mask them)
+          MYSTIRA_SWA_TOKEN=$(terraform output -raw front_door_mystira_app_swa_validation_token 2>/dev/null || echo "")
+          MYSTIRA_API_TOKEN=$(terraform output -raw front_door_mystira_app_api_validation_token 2>/dev/null || echo "")
+          ADMIN_UI_TOKEN=$(terraform output -raw front_door_admin_ui_validation_token 2>/dev/null || echo "")
+          ADMIN_API_TOKEN=$(terraform output -raw front_door_admin_api_validation_token 2>/dev/null || echo "")
+          STORY_SWA_TOKEN=$(terraform output -raw front_door_story_generator_swa_validation_token 2>/dev/null || echo "")
+          STORY_API_TOKEN=$(terraform output -raw front_door_story_generator_api_validation_token 2>/dev/null || echo "")
+          PUBLISHER_TOKEN=$(terraform output -raw front_door_publisher_validation_token 2>/dev/null || echo "")
+          CHAIN_TOKEN=$(terraform output -raw front_door_chain_validation_token 2>/dev/null || echo "")
+
+          # Mask tokens in logs
+          [ -n "$MYSTIRA_SWA_TOKEN" ] && echo "::add-mask::$MYSTIRA_SWA_TOKEN"
+          [ -n "$MYSTIRA_API_TOKEN" ] && echo "::add-mask::$MYSTIRA_API_TOKEN"
+          [ -n "$ADMIN_UI_TOKEN" ] && echo "::add-mask::$ADMIN_UI_TOKEN"
+          [ -n "$ADMIN_API_TOKEN" ] && echo "::add-mask::$ADMIN_API_TOKEN"
+          [ -n "$STORY_SWA_TOKEN" ] && echo "::add-mask::$STORY_SWA_TOKEN"
+          [ -n "$STORY_API_TOKEN" ] && echo "::add-mask::$STORY_API_TOKEN"
+          [ -n "$PUBLISHER_TOKEN" ] && echo "::add-mask::$PUBLISHER_TOKEN"
+          [ -n "$CHAIN_TOKEN" ] && echo "::add-mask::$CHAIN_TOKEN"
+
+          # Output endpoints
+          echo "mystira_swa_endpoint=$MYSTIRA_SWA_ENDPOINT" >> $GITHUB_OUTPUT
+          echo "mystira_api_endpoint=$MYSTIRA_API_ENDPOINT" >> $GITHUB_OUTPUT
+          echo "admin_ui_endpoint=$ADMIN_UI_ENDPOINT" >> $GITHUB_OUTPUT
+          echo "admin_api_endpoint=$ADMIN_API_ENDPOINT" >> $GITHUB_OUTPUT
+          echo "story_swa_endpoint=$STORY_SWA_ENDPOINT" >> $GITHUB_OUTPUT
+          echo "story_api_endpoint=$STORY_API_ENDPOINT" >> $GITHUB_OUTPUT
+          echo "publisher_endpoint=$PUBLISHER_ENDPOINT" >> $GITHUB_OUTPUT
+          echo "chain_endpoint=$CHAIN_ENDPOINT" >> $GITHUB_OUTPUT
+
+          # Output validation tokens
+          echo "mystira_swa_token=$MYSTIRA_SWA_TOKEN" >> $GITHUB_OUTPUT
+          echo "mystira_api_token=$MYSTIRA_API_TOKEN" >> $GITHUB_OUTPUT
+          echo "admin_ui_token=$ADMIN_UI_TOKEN" >> $GITHUB_OUTPUT
+          echo "admin_api_token=$ADMIN_API_TOKEN" >> $GITHUB_OUTPUT
+          echo "story_swa_token=$STORY_SWA_TOKEN" >> $GITHUB_OUTPUT
+          echo "story_api_token=$STORY_API_TOKEN" >> $GITHUB_OUTPUT
+          echo "publisher_token=$PUBLISHER_TOKEN" >> $GITHUB_OUTPUT
+          echo "chain_token=$CHAIN_TOKEN" >> $GITHUB_OUTPUT
+
+          # For dev environment, also get staging outputs (shared non-prod Front Door)
+          if [ "${{ env.ENVIRONMENT }}" == "dev" ]; then
+            echo "Getting staging Front Door outputs from shared non-prod Front Door..."
+
+            # Staging endpoints
+            STAGING_MYSTIRA_SWA_ENDPOINT=$(terraform output -raw front_door_staging_mystira_app_swa_endpoint 2>/dev/null || echo "")
+            STAGING_MYSTIRA_API_ENDPOINT=$(terraform output -raw front_door_staging_mystira_app_api_endpoint 2>/dev/null || echo "")
+            STAGING_ADMIN_UI_ENDPOINT=$(terraform output -raw front_door_staging_admin_ui_endpoint 2>/dev/null || echo "")
+            STAGING_ADMIN_API_ENDPOINT=$(terraform output -raw front_door_staging_admin_api_endpoint 2>/dev/null || echo "")
+            STAGING_STORY_SWA_ENDPOINT=$(terraform output -raw front_door_staging_story_generator_swa_endpoint 2>/dev/null || echo "")
+            STAGING_STORY_API_ENDPOINT=$(terraform output -raw front_door_staging_story_generator_api_endpoint 2>/dev/null || echo "")
+            STAGING_PUBLISHER_ENDPOINT=$(terraform output -raw front_door_staging_publisher_endpoint 2>/dev/null || echo "")
+            STAGING_CHAIN_ENDPOINT=$(terraform output -raw front_door_staging_chain_endpoint 2>/dev/null || echo "")
+
+            # Staging validation tokens
+            STAGING_MYSTIRA_SWA_TOKEN=$(terraform output -raw front_door_staging_mystira_app_swa_validation_token 2>/dev/null || echo "")
+            STAGING_MYSTIRA_API_TOKEN=$(terraform output -raw front_door_staging_mystira_app_api_validation_token 2>/dev/null || echo "")
+            STAGING_ADMIN_UI_TOKEN=$(terraform output -raw front_door_staging_admin_ui_validation_token 2>/dev/null || echo "")
+            STAGING_ADMIN_API_TOKEN=$(terraform output -raw front_door_staging_admin_api_validation_token 2>/dev/null || echo "")
+            STAGING_STORY_SWA_TOKEN=$(terraform output -raw front_door_staging_story_generator_swa_validation_token 2>/dev/null || echo "")
+            STAGING_STORY_API_TOKEN=$(terraform output -raw front_door_staging_story_generator_api_validation_token 2>/dev/null || echo "")
+            STAGING_PUBLISHER_TOKEN=$(terraform output -raw front_door_staging_publisher_validation_token 2>/dev/null || echo "")
+            STAGING_CHAIN_TOKEN=$(terraform output -raw front_door_staging_chain_validation_token 2>/dev/null || echo "")
+
+            # Mask staging tokens
+            [ -n "$STAGING_MYSTIRA_SWA_TOKEN" ] && echo "::add-mask::$STAGING_MYSTIRA_SWA_TOKEN"
+            [ -n "$STAGING_MYSTIRA_API_TOKEN" ] && echo "::add-mask::$STAGING_MYSTIRA_API_TOKEN"
+            [ -n "$STAGING_ADMIN_UI_TOKEN" ] && echo "::add-mask::$STAGING_ADMIN_UI_TOKEN"
+            [ -n "$STAGING_ADMIN_API_TOKEN" ] && echo "::add-mask::$STAGING_ADMIN_API_TOKEN"
+            [ -n "$STAGING_STORY_SWA_TOKEN" ] && echo "::add-mask::$STAGING_STORY_SWA_TOKEN"
+            [ -n "$STAGING_STORY_API_TOKEN" ] && echo "::add-mask::$STAGING_STORY_API_TOKEN"
+            [ -n "$STAGING_PUBLISHER_TOKEN" ] && echo "::add-mask::$STAGING_PUBLISHER_TOKEN"
+            [ -n "$STAGING_CHAIN_TOKEN" ] && echo "::add-mask::$STAGING_CHAIN_TOKEN"
+
+            # Output staging endpoints
+            echo "staging_mystira_swa_endpoint=$STAGING_MYSTIRA_SWA_ENDPOINT" >> $GITHUB_OUTPUT
+            echo "staging_mystira_api_endpoint=$STAGING_MYSTIRA_API_ENDPOINT" >> $GITHUB_OUTPUT
+            echo "staging_admin_ui_endpoint=$STAGING_ADMIN_UI_ENDPOINT" >> $GITHUB_OUTPUT
+            echo "staging_admin_api_endpoint=$STAGING_ADMIN_API_ENDPOINT" >> $GITHUB_OUTPUT
+            echo "staging_story_swa_endpoint=$STAGING_STORY_SWA_ENDPOINT" >> $GITHUB_OUTPUT
+            echo "staging_story_api_endpoint=$STAGING_STORY_API_ENDPOINT" >> $GITHUB_OUTPUT
+            echo "staging_publisher_endpoint=$STAGING_PUBLISHER_ENDPOINT" >> $GITHUB_OUTPUT
+            echo "staging_chain_endpoint=$STAGING_CHAIN_ENDPOINT" >> $GITHUB_OUTPUT
+
+            # Output staging validation tokens
+            echo "staging_mystira_swa_token=$STAGING_MYSTIRA_SWA_TOKEN" >> $GITHUB_OUTPUT
+            echo "staging_mystira_api_token=$STAGING_MYSTIRA_API_TOKEN" >> $GITHUB_OUTPUT
+            echo "staging_admin_ui_token=$STAGING_ADMIN_UI_TOKEN" >> $GITHUB_OUTPUT
+            echo "staging_admin_api_token=$STAGING_ADMIN_API_TOKEN" >> $GITHUB_OUTPUT
+            echo "staging_story_swa_token=$STAGING_STORY_SWA_TOKEN" >> $GITHUB_OUTPUT
+            echo "staging_story_api_token=$STAGING_STORY_API_TOKEN" >> $GITHUB_OUTPUT
+            echo "staging_publisher_token=$STAGING_PUBLISHER_TOKEN" >> $GITHUB_OUTPUT
+            echo "staging_chain_token=$STAGING_CHAIN_TOKEN" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Configure Front Door DNS Records
+        run: |
+          ENV="${{ env.ENVIRONMENT }}"
+          DNS_ZONE="${{ env.DNS_ZONE }}"
+          DNS_RG="${{ env.DNS_ZONE_RG }}"
+
+          # Determine subdomain prefix based on environment
+          if [ "$ENV" == "prod" ]; then
+            PREFIX=""
+          else
+            PREFIX="${ENV}."
+          fi
+
+          echo "Configuring Front Door DNS records for $ENV environment..."
+
+          # Helper function to create/update CNAME record
+          create_cname() {
+            local name=$1
+            local target=$2
+            if [ -n "$target" ]; then
+              echo "Creating CNAME: $name -> $target"
+              # Delete existing A record if present (can't have both A and CNAME)
+              az network dns record-set a delete --name "$name" --zone-name "$DNS_ZONE" --resource-group "$DNS_RG" --yes 2>/dev/null || true
+              # Create or update CNAME
+              az network dns record-set cname set-record --record-set-name "$name" --zone-name "$DNS_ZONE" --resource-group "$DNS_RG" --cname "$target" || true
+            fi
+          }
+
+          # Helper function to create/update TXT validation record for Front Door
+          create_txt() {
+            local name=$1
+            local value=$2
+            if [ -n "$value" ]; then
+              echo "Creating TXT: _dnsauth.$name -> (validation token)"
+              # Create or update TXT record
+              az network dns record-set txt add-record --record-set-name "_dnsauth.$name" --zone-name "$DNS_ZONE" --resource-group "$DNS_RG" --value "$value" 2>/dev/null || \
+              az network dns record-set txt create --name "_dnsauth.$name" --zone-name "$DNS_ZONE" --resource-group "$DNS_RG" --ttl 3600 && \
+              az network dns record-set txt add-record --record-set-name "_dnsauth.$name" --zone-name "$DNS_ZONE" --resource-group "$DNS_RG" --value "$value" || true
+            fi
+          }
+
+          # Mystira.App (CNAME + TXT validation)
+          if [ -n "${{ steps.get-fd-outputs.outputs.mystira_swa_endpoint }}" ]; then
+            if [ "$ENV" == "prod" ]; then
+              create_cname "app" "${{ steps.get-fd-outputs.outputs.mystira_swa_endpoint }}"
+              create_txt "app" "${{ steps.get-fd-outputs.outputs.mystira_swa_token }}"
+              create_cname "api" "${{ steps.get-fd-outputs.outputs.mystira_api_endpoint }}"
+              create_txt "api" "${{ steps.get-fd-outputs.outputs.mystira_api_token }}"
+            else
+              create_cname "${PREFIX}app" "${{ steps.get-fd-outputs.outputs.mystira_swa_endpoint }}"
+              create_txt "${PREFIX}app" "${{ steps.get-fd-outputs.outputs.mystira_swa_token }}"
+              create_cname "${PREFIX}api" "${{ steps.get-fd-outputs.outputs.mystira_api_endpoint }}"
+              create_txt "${PREFIX}api" "${{ steps.get-fd-outputs.outputs.mystira_api_token }}"
+            fi
+          fi
+
+          # Admin Services (CNAME + TXT validation)
+          if [ -n "${{ steps.get-fd-outputs.outputs.admin_ui_endpoint }}" ]; then
+            create_cname "${PREFIX}admin" "${{ steps.get-fd-outputs.outputs.admin_ui_endpoint }}"
+            create_txt "${PREFIX}admin" "${{ steps.get-fd-outputs.outputs.admin_ui_token }}"
+            create_cname "${PREFIX}admin-api" "${{ steps.get-fd-outputs.outputs.admin_api_endpoint }}"
+            create_txt "${PREFIX}admin-api" "${{ steps.get-fd-outputs.outputs.admin_api_token }}"
+          fi
+
+          # Story Generator (CNAME + TXT validation)
+          if [ -n "${{ steps.get-fd-outputs.outputs.story_swa_endpoint }}" ]; then
+            create_cname "${PREFIX}story" "${{ steps.get-fd-outputs.outputs.story_swa_endpoint }}"
+            create_txt "${PREFIX}story" "${{ steps.get-fd-outputs.outputs.story_swa_token }}"
+            create_cname "${PREFIX}story-api" "${{ steps.get-fd-outputs.outputs.story_api_endpoint }}"
+            create_txt "${PREFIX}story-api" "${{ steps.get-fd-outputs.outputs.story_api_token }}"
+          fi
+
+          # Publisher/Chain (CNAME + TXT validation)
+          if [ -n "${{ steps.get-fd-outputs.outputs.publisher_endpoint }}" ]; then
+            create_cname "${PREFIX}publisher" "${{ steps.get-fd-outputs.outputs.publisher_endpoint }}"
+            create_txt "${PREFIX}publisher" "${{ steps.get-fd-outputs.outputs.publisher_token }}"
+            create_cname "${PREFIX}chain" "${{ steps.get-fd-outputs.outputs.chain_endpoint }}"
+            create_txt "${PREFIX}chain" "${{ steps.get-fd-outputs.outputs.chain_token }}"
+          fi
+
+          echo "::notice::Front Door DNS records (CNAME + TXT validation) configured for $ENV"
+
+          # ================================================================
+          # For dev environment: Also configure staging DNS records
+          # (shared non-prod Front Door handles both dev and staging)
+          # ================================================================
+          if [ "$ENV" == "dev" ]; then
+            echo ""
+            echo "Configuring staging DNS records from shared non-prod Front Door..."
+
+            # Staging Mystira.App
+            if [ -n "${{ steps.get-fd-outputs.outputs.staging_mystira_swa_endpoint }}" ]; then
+              create_cname "staging.app" "${{ steps.get-fd-outputs.outputs.staging_mystira_swa_endpoint }}"
+              create_txt "staging.app" "${{ steps.get-fd-outputs.outputs.staging_mystira_swa_token }}"
+              create_cname "staging.api" "${{ steps.get-fd-outputs.outputs.staging_mystira_api_endpoint }}"
+              create_txt "staging.api" "${{ steps.get-fd-outputs.outputs.staging_mystira_api_token }}"
+            fi
+
+            # Staging Admin Services
+            if [ -n "${{ steps.get-fd-outputs.outputs.staging_admin_ui_endpoint }}" ]; then
+              create_cname "staging.admin" "${{ steps.get-fd-outputs.outputs.staging_admin_ui_endpoint }}"
+              create_txt "staging.admin" "${{ steps.get-fd-outputs.outputs.staging_admin_ui_token }}"
+              create_cname "staging.admin-api" "${{ steps.get-fd-outputs.outputs.staging_admin_api_endpoint }}"
+              create_txt "staging.admin-api" "${{ steps.get-fd-outputs.outputs.staging_admin_api_token }}"
+            fi
+
+            # Staging Story Generator
+            if [ -n "${{ steps.get-fd-outputs.outputs.staging_story_swa_endpoint }}" ]; then
+              create_cname "staging.story" "${{ steps.get-fd-outputs.outputs.staging_story_swa_endpoint }}"
+              create_txt "staging.story" "${{ steps.get-fd-outputs.outputs.staging_story_swa_token }}"
+              create_cname "staging.story-api" "${{ steps.get-fd-outputs.outputs.staging_story_api_endpoint }}"
+              create_txt "staging.story-api" "${{ steps.get-fd-outputs.outputs.staging_story_api_token }}"
+            fi
+
+            # Staging Publisher/Chain
+            if [ -n "${{ steps.get-fd-outputs.outputs.staging_publisher_endpoint }}" ]; then
+              create_cname "staging.publisher" "${{ steps.get-fd-outputs.outputs.staging_publisher_endpoint }}"
+              create_txt "staging.publisher" "${{ steps.get-fd-outputs.outputs.staging_publisher_token }}"
+              create_cname "staging.chain" "${{ steps.get-fd-outputs.outputs.staging_chain_endpoint }}"
+              create_txt "staging.chain" "${{ steps.get-fd-outputs.outputs.staging_chain_token }}"
+            fi
+
+            echo "::notice::Staging DNS records configured from shared non-prod Front Door"
+          fi
+
+      - name: Front Door DNS Summary
+        run: |
+          ENV="${{ env.ENVIRONMENT }}"
+
+          echo "## Front Door DNS Configuration - $ENV" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # Note about shared non-prod Front Door
+          if [ "$ENV" == "dev" ]; then
+            echo "> **Note:** Using shared non-prod Front Door for dev and staging environments" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          echo "### CNAME Records Created" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Domain | Front Door Endpoint |" >> $GITHUB_STEP_SUMMARY
+          echo "|--------|---------------------|" >> $GITHUB_STEP_SUMMARY
+
+          if [ "$ENV" == "prod" ]; then
+            echo "| app.mystira.app | ${{ steps.get-fd-outputs.outputs.mystira_swa_endpoint }} |" >> $GITHUB_STEP_SUMMARY
+            echo "| api.mystira.app | ${{ steps.get-fd-outputs.outputs.mystira_api_endpoint }} |" >> $GITHUB_STEP_SUMMARY
+            echo "| admin.mystira.app | ${{ steps.get-fd-outputs.outputs.admin_ui_endpoint }} |" >> $GITHUB_STEP_SUMMARY
+            echo "| admin-api.mystira.app | ${{ steps.get-fd-outputs.outputs.admin_api_endpoint }} |" >> $GITHUB_STEP_SUMMARY
+            echo "| story.mystira.app | ${{ steps.get-fd-outputs.outputs.story_swa_endpoint }} |" >> $GITHUB_STEP_SUMMARY
+            echo "| story-api.mystira.app | ${{ steps.get-fd-outputs.outputs.story_api_endpoint }} |" >> $GITHUB_STEP_SUMMARY
+            echo "| publisher.mystira.app | ${{ steps.get-fd-outputs.outputs.publisher_endpoint }} |" >> $GITHUB_STEP_SUMMARY
+            echo "| chain.mystira.app | ${{ steps.get-fd-outputs.outputs.chain_endpoint }} |" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "| ${ENV}.app.mystira.app | ${{ steps.get-fd-outputs.outputs.mystira_swa_endpoint }} |" >> $GITHUB_STEP_SUMMARY
+            echo "| ${ENV}.api.mystira.app | ${{ steps.get-fd-outputs.outputs.mystira_api_endpoint }} |" >> $GITHUB_STEP_SUMMARY
+            echo "| ${ENV}.admin.mystira.app | ${{ steps.get-fd-outputs.outputs.admin_ui_endpoint }} |" >> $GITHUB_STEP_SUMMARY
+            echo "| ${ENV}.admin-api.mystira.app | ${{ steps.get-fd-outputs.outputs.admin_api_endpoint }} |" >> $GITHUB_STEP_SUMMARY
+            echo "| ${ENV}.story.mystira.app | ${{ steps.get-fd-outputs.outputs.story_swa_endpoint }} |" >> $GITHUB_STEP_SUMMARY
+            echo "| ${ENV}.story-api.mystira.app | ${{ steps.get-fd-outputs.outputs.story_api_endpoint }} |" >> $GITHUB_STEP_SUMMARY
+            echo "| ${ENV}.publisher.mystira.app | ${{ steps.get-fd-outputs.outputs.publisher_endpoint }} |" >> $GITHUB_STEP_SUMMARY
+            echo "| ${ENV}.chain.mystira.app | ${{ steps.get-fd-outputs.outputs.chain_endpoint }} |" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          # For dev, also show staging records
+          if [ "$ENV" == "dev" ]; then
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "### Staging CNAME Records (from shared non-prod Front Door)" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "| Domain | Front Door Endpoint |" >> $GITHUB_STEP_SUMMARY
+            echo "|--------|---------------------|" >> $GITHUB_STEP_SUMMARY
+            echo "| staging.app.mystira.app | ${{ steps.get-fd-outputs.outputs.staging_mystira_swa_endpoint }} |" >> $GITHUB_STEP_SUMMARY
+            echo "| staging.api.mystira.app | ${{ steps.get-fd-outputs.outputs.staging_mystira_api_endpoint }} |" >> $GITHUB_STEP_SUMMARY
+            echo "| staging.admin.mystira.app | ${{ steps.get-fd-outputs.outputs.staging_admin_ui_endpoint }} |" >> $GITHUB_STEP_SUMMARY
+            echo "| staging.admin-api.mystira.app | ${{ steps.get-fd-outputs.outputs.staging_admin_api_endpoint }} |" >> $GITHUB_STEP_SUMMARY
+            echo "| staging.story.mystira.app | ${{ steps.get-fd-outputs.outputs.staging_story_swa_endpoint }} |" >> $GITHUB_STEP_SUMMARY
+            echo "| staging.story-api.mystira.app | ${{ steps.get-fd-outputs.outputs.staging_story_api_endpoint }} |" >> $GITHUB_STEP_SUMMARY
+            echo "| staging.publisher.mystira.app | ${{ steps.get-fd-outputs.outputs.staging_publisher_endpoint }} |" >> $GITHUB_STEP_SUMMARY
+            echo "| staging.chain.mystira.app | ${{ steps.get-fd-outputs.outputs.staging_chain_endpoint }} |" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Next Steps" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "1. Wait for Azure Front Door to validate domains (5-15 minutes)" >> $GITHUB_STEP_SUMMARY
+          echo "2. SSL certificates will be provisioned automatically" >> $GITHUB_STEP_SUMMARY
+          echo "3. Full propagation may take up to 1 hour" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "For troubleshooting, see: \`docs/infrastructure/front-door-dns-setup.md\`" >> $GITHUB_STEP_SUMMARY
 
   # ============================================
   # Configure DNS Records (AKS-based)
@@ -1215,7 +1600,7 @@ jobs:
   summary:
     name: Deployment Summary
     runs-on: ubuntu-latest
-    needs: [validate, bootstrap, plan-terraform, apply-terraform, deploy-claude-models, deploy-kubernetes, configure-dns]
+    needs: [validate, bootstrap, plan-terraform, apply-terraform, deploy-claude-models, configure-front-door-dns, deploy-kubernetes, configure-dns]
     if: always()
     steps:
       - name: Final Summary
@@ -1229,7 +1614,8 @@ jobs:
           echo "| Terraform Plan | ${{ needs.plan-terraform.result == 'success' && '✅' || needs.plan-terraform.result == 'skipped' && '⏭️' || '❌' }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Terraform Apply | ${{ needs.apply-terraform.result == 'success' && '✅' || needs.apply-terraform.result == 'skipped' && '⏭️' || '❌' }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Claude Models | ${{ needs.deploy-claude-models.result == 'success' && '✅' || needs.deploy-claude-models.result == 'skipped' && '⏭️' || '⚠️' }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| DNS Config | ${{ needs.configure-dns.result == 'success' && '✅' || needs.configure-dns.result == 'skipped' && '⏭️' || '❌' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Front Door DNS | ${{ needs.configure-front-door-dns.result == 'success' && '✅' || needs.configure-front-door-dns.result == 'skipped' && '⏭️' || '❌' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| AKS DNS Config | ${{ needs.configure-dns.result == 'success' && '✅' || needs.configure-dns.result == 'skipped' && '⏭️' || '❌' }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Deploy K8s | ${{ needs.deploy-kubernetes.result == 'success' && '✅' || needs.deploy-kubernetes.result == 'skipped' && '⏭️' || '❌' }} |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "## Environment URLs" >> $GITHUB_STEP_SUMMARY

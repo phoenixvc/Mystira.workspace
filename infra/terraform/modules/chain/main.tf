@@ -10,7 +10,7 @@ terraform {
     }
     azuread = {
       source  = "hashicorp/azuread"
-      version = "~> 2.45"
+      version = "~> 3.0"
     }
     azapi = {
       source  = "Azure/azapi"
@@ -162,7 +162,7 @@ resource "azurerm_user_assigned_identity" "chain" {
 
 # Storage Account for Chain Data
 resource "azurerm_storage_account" "chain" {
-  name                          = replace("mys${var.environment}mystirachainstg${local.region_code}", "-", "")
+  name                          = replace("mys${var.environment}chainstg${local.region_code}", "-", "")
   resource_group_name           = var.resource_group_name
   location                      = var.location
   account_tier                  = "Premium"

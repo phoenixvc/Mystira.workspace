@@ -1,0 +1,320 @@
+openapi: 3.1.0
+info:
+  title: Mystira Story Generator API
+  version: 1.0.0
+  description: |
+    AI-powered story generation API for creating interactive narratives.
+
+    ## Features
+    - Story generation with customizable parameters
+    - Chat-based story continuation
+    - Entity extraction and consistency checking
+  contact:
+    name: Mystira Team
+    url: https://github.com/phoenixvc/Mystira.workspace
+  license:
+    name: Proprietary
+    identifier: LicenseRef-Mystira
+
+servers:
+  - url: https://story-api.mystira.app/v1
+    description: Production
+  - url: https://staging.story-api.mystira.app/v1
+    description: Staging
+  - url: https://dev.story-api.mystira.app/v1
+    description: Development
+  - url: http://localhost:5001/v1
+    description: Local development
+
+tags:
+  - name: Health
+    description: Health check endpoints
+  - name: Stories
+    description: Story generation endpoints
+  - name: Chat
+    description: Chat-based story interaction
+
+paths:
+  /health:
+    get:
+      operationId: getHealth
+      summary: Health check endpoint
+      tags:
+        - Health
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                $ref: './common/health.yaml#/components/schemas/HealthCheckResult'
+        '503':
+          description: Service is unhealthy
+          content:
+            application/json:
+              schema:
+                $ref: './common/health.yaml#/components/schemas/HealthCheckResult'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: './common/errors.yaml#/components/schemas/ErrorResponse'
+
+  /stories/generate:
+    post:
+      operationId: generateStory
+      summary: Generate a new story
+      description: Generates a new story based on the provided parameters
+      tags:
+        - Stories
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenerateStoryRequest'
+      responses:
+        '200':
+          description: Story generated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenerateStoryResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          description: Rate limit exceeded
+          content:
+            application/json:
+              schema:
+                $ref: './common/errors.yaml#/components/schemas/ErrorResponse'
+
+  /chat/complete:
+    post:
+      operationId: chatComplete
+      summary: Continue story via chat
+      description: Continues the story based on user input in a chat format
+      tags:
+        - Chat
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChatCompletionRequest'
+      responses:
+        '200':
+          description: Chat completion successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChatCompletionResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+components:
+  schemas:
+    # Import common types
+    ErrorResponse:
+      $ref: './common/errors.yaml#/components/schemas/ErrorResponse'
+    ValidationErrorResponse:
+      $ref: './common/errors.yaml#/components/schemas/ValidationErrorResponse'
+
+    # Story generation types
+    GenerateStoryRequest:
+      type: object
+      required:
+        - prompt
+      properties:
+        prompt:
+          type: string
+          minLength: 10
+          maxLength: 2000
+          description: The story prompt or starting point
+        genre:
+          type: string
+          enum:
+            - fantasy
+            - sci-fi
+            - mystery
+            - romance
+            - adventure
+            - horror
+          description: Story genre
+        tone:
+          type: string
+          enum:
+            - serious
+            - humorous
+            - dark
+            - light-hearted
+          description: Story tone
+        targetAgeGroup:
+          type: string
+          enum:
+            - children
+            - young-adult
+            - adult
+          default: adult
+        maxTokens:
+          type: integer
+          minimum: 100
+          maximum: 4000
+          default: 1000
+          description: Maximum tokens in response
+        temperature:
+          type: number
+          minimum: 0
+          maximum: 2
+          default: 0.7
+          description: Creativity parameter
+
+    GenerateStoryResponse:
+      type: object
+      required:
+        - id
+        - content
+        - createdAt
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique story ID
+        content:
+          type: string
+          description: Generated story content
+        title:
+          type: [string, "null"]
+          description: Generated story title
+        entities:
+          type: array
+          items:
+            $ref: '#/components/schemas/StoryEntity'
+          description: Extracted entities from the story
+        metadata:
+          $ref: '#/components/schemas/StoryMetadata'
+        createdAt:
+          type: string
+          format: date-time
+
+    StoryEntity:
+      type: object
+      required:
+        - name
+        - type
+      properties:
+        name:
+          type: string
+          description: Entity name
+        type:
+          type: string
+          enum:
+            - character
+            - location
+            - item
+            - event
+            - organization
+          description: Entity type
+        description:
+          type: [string, "null"]
+        firstMentionedAt:
+          type: integer
+          description: Character position of first mention
+
+    StoryMetadata:
+      type: object
+      properties:
+        wordCount:
+          type: integer
+        estimatedReadingTime:
+          type: string
+          description: Estimated reading time (e.g., "5 min")
+        tokensUsed:
+          type: integer
+        modelUsed:
+          type: string
+
+    ChatCompletionRequest:
+      type: object
+      required:
+        - sessionId
+        - message
+      properties:
+        sessionId:
+          type: string
+          format: uuid
+          description: Chat session ID
+        message:
+          type: string
+          minLength: 1
+          maxLength: 1000
+          description: User message
+        context:
+          type: object
+          additionalProperties: true
+          description: Additional context
+
+    ChatCompletionResponse:
+      type: object
+      required:
+        - sessionId
+        - response
+      properties:
+        sessionId:
+          type: string
+          format: uuid
+        response:
+          type: string
+          description: AI response
+        storySnapshot:
+          $ref: '#/components/schemas/StorySnapshot'
+        suggestedActions:
+          type: array
+          items:
+            type: string
+          description: Suggested next actions for the user
+
+    StorySnapshot:
+      type: object
+      properties:
+        currentScene:
+          type: string
+        activeCharacters:
+          type: array
+          items:
+            type: string
+        mood:
+          type: string
+        plotProgress:
+          type: number
+          minimum: 0
+          maximum: 100
+          description: Story progress percentage
+
+  responses:
+    BadRequest:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: './common/errors.yaml#/components/schemas/ValidationErrorResponse'
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: './common/errors.yaml#/components/schemas/UnauthorizedErrorResponse'
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+security:
+  - bearerAuth: []

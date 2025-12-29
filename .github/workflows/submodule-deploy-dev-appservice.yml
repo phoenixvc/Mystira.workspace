@@ -1,4 +1,4 @@
-name: "Submodule: Deploy to Dev (App Service/SWA)"
+name: "[Deploy] Dev (App Service)"
 
 # Handler for repository_dispatch events from App Service/SWA submodules
 # - app-deploy: Deploy API to Azure App Service (Mystira.App)
@@ -17,8 +17,24 @@ on:
       - devhub-deploy
       - story-generator-swa-deploy
 
+  workflow_dispatch:
+    inputs:
+      service:
+        description: 'Service to deploy'
+        required: true
+        type: choice
+        options:
+          - app-deploy
+          - app-swa-deploy
+          - devhub-deploy
+          - story-generator-swa-deploy
+      ref:
+        description: 'Git ref to deploy (default: dev branch HEAD)'
+        required: false
+        type: string
+
 concurrency:
-  group: submodule-deploy-dev-appservice-${{ github.event.action }}
+  group: submodule-deploy-dev-appservice-${{ github.event.action || inputs.service }}
   cancel-in-progress: false
 
 env:
@@ -29,6 +45,7 @@ env:
 permissions:
   id-token: write
   contents: write
+  packages: read
 
 jobs:
   deploy:
@@ -43,19 +60,28 @@ jobs:
           token: ${{ secrets.MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN }}
           fetch-depth: 0
 
-      - name: Log dispatch payload
+      - name: Set action type
+        id: action
+        run: |
+          # Use input for manual trigger, event.action for repository_dispatch
+          ACTION="${{ inputs.service || github.event.action }}"
+          echo "type=$ACTION" >> $GITHUB_OUTPUT
+          echo "Action type: $ACTION"
+
+      - name: Log deployment info
         run: |
           echo "## App Service Deployment Triggered" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "| Property | Value |" >> $GITHUB_STEP_SUMMARY
           echo "|----------|-------|" >> $GITHUB_STEP_SUMMARY
-          echo "| Event Type | ${{ github.event.action }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Environment | ${{ github.event.client_payload.environment }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Source Commit | ${{ github.event.client_payload.ref }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Triggered By | ${{ github.event.client_payload.triggered_by }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Source Run ID | ${{ github.event.client_payload.run_id }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Trigger | ${{ github.event_name }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Service | ${{ steps.action.outputs.type }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Environment | dev |" >> $GITHUB_STEP_SUMMARY
+          echo "| Source Commit | ${{ inputs.ref || github.event.client_payload.ref || 'dev HEAD' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Triggered By | ${{ github.event.client_payload.triggered_by || github.actor }} |" >> $GITHUB_STEP_SUMMARY
 
       - name: Validate environment
+        if: github.event_name == 'repository_dispatch'
         run: |
           if [ "${{ github.event.client_payload.environment }}" != "dev" ]; then
             echo "::error::This workflow only supports dev deployments. For production, use mystira-app-api-cicd-prod.yml."
@@ -65,7 +91,7 @@ jobs:
       - name: Determine target
         id: target
         run: |
-          case "${{ github.event.action }}" in
+          case "${{ steps.action.outputs.type }}" in
             app-deploy|app-swa-deploy)
               echo "submodule_path=packages/app" >> $GITHUB_OUTPUT
               ;;
@@ -76,7 +102,7 @@ jobs:
               echo "submodule_path=packages/story-generator" >> $GITHUB_OUTPUT
               ;;
             *)
-              echo "::error::Unknown event type: ${{ github.event.action }}"
+              echo "::error::Unknown service type: ${{ steps.action.outputs.type }}"
               exit 1
               ;;
           esac
@@ -90,53 +116,57 @@ jobs:
       # App Service Deployment (skip for SWA events)
       # ============================================
       - name: Setup .NET
-        if: github.event.action == 'app-deploy'
+        if: steps.action.outputs.type == 'app-deploy'
         uses: actions/setup-dotnet@v5
         with:
-          dotnet-version: '8.0.x'
+          dotnet-version: '9.0.x'
+          source-url: https://nuget.pkg.github.com/phoenixvc/index.json
+        env:
+          NUGET_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Update submodule to latest
         run: |
           cd ${{ steps.target.outputs.submodule_path }}
           git fetch origin dev
-          git checkout ${{ github.event.client_payload.ref || 'dev' }}
+          REF="${{ inputs.ref || github.event.client_payload.ref || 'origin/dev' }}"
+          git checkout $REF
           echo "Checked out commit: $(git rev-parse HEAD)"
 
       - name: Restore dependencies
-        if: github.event.action == 'app-deploy'
+        if: steps.action.outputs.type == 'app-deploy'
         run: |
           cd packages/app
           dotnet restore
         env:
-          NUGET_AUTH_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN }}
+          NUGET_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build application
-        if: github.event.action == 'app-deploy'
+        if: steps.action.outputs.type == 'app-deploy'
         run: |
           cd packages/app
           dotnet build --configuration Release --no-restore
 
       - name: Publish application
-        if: github.event.action == 'app-deploy'
+        if: steps.action.outputs.type == 'app-deploy'
         run: |
           cd packages/app
           dotnet publish --configuration Release --no-build --output ./publish
 
       - name: Deploy to App Service
-        if: github.event.action == 'app-deploy'
+        if: steps.action.outputs.type == 'app-deploy'
         uses: azure/webapps-deploy@v3
         with:
           app-name: ${{ env.APP_SERVICE_NAME }}
           package: packages/app/publish
 
       - name: Wait for deployment
-        if: github.event.action == 'app-deploy'
+        if: steps.action.outputs.type == 'app-deploy'
         run: |
           echo "Waiting for App Service to restart..."
           sleep 30
 
       - name: Health check
-        if: github.event.action == 'app-deploy'
+        if: steps.action.outputs.type == 'app-deploy'
         run: |
           APP_URL="https://${{ env.APP_SERVICE_NAME }}.azurewebsites.net/health"
           echo "Checking health at: $APP_URL"
@@ -198,13 +228,13 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           if [ "${{ job.status }}" == "success" ]; then
             echo "Deployment successful!" >> $GITHUB_STEP_SUMMARY
-            case "${{ github.event.action }}" in
+            case "${{ steps.action.outputs.type }}" in
               app-deploy)
                 echo "- App Service: https://${{ env.APP_SERVICE_NAME }}.azurewebsites.net" >> $GITHUB_STEP_SUMMARY
                 echo "- Dev API: https://dev.api.mystira.app" >> $GITHUB_STEP_SUMMARY
                 ;;
               app-swa-deploy)
-                echo "- Static Web App: https://dev.app.mystira.app" >> $GITHUB_STEP_SUMMARY
+                echo "- Static Web App: https://dev.mystira.app" >> $GITHUB_STEP_SUMMARY
                 ;;
               devhub-deploy)
                 echo "- DevHub: https://dev.devhub.mystira.app" >> $GITHUB_STEP_SUMMARY
@@ -225,7 +255,7 @@ jobs:
         env:
           MS_TEAMS_WEBHOOK_URL: ${{ secrets.MS_TEAMS_WEBHOOK_URL }}
         run: |
-          case "${{ github.event.action }}" in
+          case "${{ steps.action.outputs.type }}" in
             app-deploy) SERVICE_NAME="App API" ;;
             app-swa-deploy) SERVICE_NAME="App SWA" ;;
             devhub-deploy) SERVICE_NAME="DevHub" ;;
@@ -240,9 +270,9 @@ jobs:
             "sections": [{
               "activityTitle": "✅ '"$SERVICE_NAME"' deployed to dev",
               "facts": [
-                {"name": "Event", "value": "${{ github.event.action }}"},
+                {"name": "Service", "value": "${{ steps.action.outputs.type }}"},
                 {"name": "Submodule", "value": "${{ steps.target.outputs.submodule_path }}"},
-                {"name": "Deployed by", "value": "${{ github.event.client_payload.triggered_by }}"},
+                {"name": "Deployed by", "value": "${{ github.event.client_payload.triggered_by || github.actor }}"},
                 {"name": "Commit", "value": "${{ github.event.client_payload.ref }}"}
               ],
               "markdown": true
@@ -259,7 +289,7 @@ jobs:
         env:
           MS_TEAMS_WEBHOOK_URL: ${{ secrets.MS_TEAMS_WEBHOOK_URL }}
         run: |
-          case "${{ github.event.action }}" in
+          case "${{ steps.action.outputs.type }}" in
             app-deploy) SERVICE_NAME="App API" ;;
             app-swa-deploy) SERVICE_NAME="App SWA" ;;
             devhub-deploy) SERVICE_NAME="DevHub" ;;
@@ -274,9 +304,9 @@ jobs:
             "sections": [{
               "activityTitle": "❌ '"$SERVICE_NAME"' deployment FAILED",
               "facts": [
-                {"name": "Event", "value": "${{ github.event.action }}"},
+                {"name": "Service", "value": "${{ steps.action.outputs.type }}"},
                 {"name": "Submodule", "value": "${{ steps.target.outputs.submodule_path }}"},
-                {"name": "Triggered by", "value": "${{ github.event.client_payload.triggered_by }}"}
+                {"name": "Triggered by", "value": "${{ github.event.client_payload.triggered_by || github.actor }}"}
               ],
               "markdown": true
             }],

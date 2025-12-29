@@ -1,4 +1,4 @@
-name: "Packages - Contracts: Publish NuGet"
+name: "[Publish] Contracts (NuGet)"
 
 # Unified contracts NuGet package publishing
 # Publishes Mystira.Contracts to GitHub Packages and NuGet.org
@@ -28,6 +28,13 @@ on:
   repository_dispatch:
     types:
       - contracts-nuget-publish
+
+  # Allow being called from shared-publish workflow
+  workflow_call:
+    outputs:
+      version:
+        description: "Published package version"
+        value: ${{ jobs.publish-nuget.outputs.version }}
 
   workflow_dispatch:
     inputs:
@@ -65,27 +72,26 @@ jobs:
       - name: Determine version details
         id: version
         run: |
-          # Check if this is a dev branch push
+          # Always use build.123 format for consistency
+          VERSION_SUFFIX="build.${{ github.run_number }}"
+
+          # Determine other settings based on trigger
           if [ "${{ github.event_name }}" = "push" ] && [ "${{ github.ref }}" = "refs/heads/dev" ]; then
-            # Dev push: generate pre-release version suffix, GitHub Packages only
-            VERSION_SUFFIX="dev.${{ github.run_number }}"
             IS_PRERELEASE="true"
             PUBLISH_TO_NUGET_ORG="false"
             TRIGGER_SOURCE="dev-push"
-            echo "Dev branch push detected - publishing pre-release to GitHub Packages only"
           elif [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            # Manual trigger: user controls everything
-            VERSION_SUFFIX="${{ github.event.inputs.version_suffix }}"
-            IS_PRERELEASE="${{ github.event.inputs.version_suffix && 'true' || 'false' }}"
+            IS_PRERELEASE="true"
             PUBLISH_TO_NUGET_ORG="${{ github.event.inputs.publish_to_nuget_org }}"
             TRIGGER_SOURCE="manual"
-            echo "Manual trigger - publishing to $([ "$PUBLISH_TO_NUGET_ORG" = "true" ] && echo "GitHub + NuGet.org" || echo "GitHub Packages only")"
-          else
-            # repository_dispatch (from Changesets release)
-            VERSION_SUFFIX="${{ github.event.client_payload.version_suffix }}"
-            IS_PRERELEASE="${{ github.event.client_payload.is_prerelease || 'false' }}"
+          elif [ "${{ github.event_name }}" = "repository_dispatch" ]; then
+            IS_PRERELEASE="${{ github.event.client_payload.is_prerelease || 'true' }}"
             PUBLISH_TO_NUGET_ORG="${{ github.event.client_payload.publish_to_nuget_org || 'true' }}"
             TRIGGER_SOURCE="${{ github.event.client_payload.triggered_by || 'changesets' }}"
+          else
+            IS_PRERELEASE="true"
+            PUBLISH_TO_NUGET_ORG="false"
+            TRIGGER_SOURCE="workflow-call"
           fi
 
           echo "version_suffix=$VERSION_SUFFIX" >> $GITHUB_OUTPUT
@@ -122,7 +128,10 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v5
         with:
-          dotnet-version: '8.0.x'
+          dotnet-version: '9.0.x'
+          source-url: https://nuget.pkg.github.com/phoenixvc/index.json
+        env:
+          NUGET_AUTH_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN }}
 
       - name: Restore dependencies
         run: |

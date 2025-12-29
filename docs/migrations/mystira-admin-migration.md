@@ -1,10 +1,12 @@
 # Mystira.Admin Migration Guide
 
 **Target**: Migrate Mystira.Admin.Api to use `Mystira.Shared` infrastructure
-**Prerequisites**: Mystira.Shared v0.2.0+ published to NuGet feed
+**Prerequisites**: Mystira.Shared v0.4.* published to NuGet feed
 **Estimated Effort**: 1 day
 **Last Updated**: December 2025
 **Status**: 🔄 In Progress
+
+> **Note**: All infrastructure components (Polly v8.6.5, Wolverine 5.9.2, Ardalis.Specification 9.3.1) are already implemented in `Mystira.Shared`. This migration is about adopting the shared package.
 
 ---
 
@@ -17,11 +19,11 @@ Admin.Api is already well-positioned for migration with:
 
 Migration focuses on:
 1. **.NET 9.0 upgrade** (required)
-2. Replace `Mystira.App.Shared` → `Mystira.Shared`
-3. Adopt `Mystira.Shared.Resilience` for HTTP policies (Polly v8)
-4. Adopt Ardalis.Specification 8.0.0 for data access
+2. Replace `Mystira.App.Shared` → `Mystira.Shared` (v0.4.*)
+3. Adopt `Mystira.Shared.Resilience` for HTTP policies (Polly v8.6.5)
+4. Adopt Ardalis.Specification 9.3.1 for data access (included in Mystira.Shared)
 5. Standardize exception handling
-6. (Optional) Add Wolverine for future event handling
+6. (Optional) Add Wolverine 5.9.2 for future event handling (included in Mystira.Shared)
 7. (Optional) Add distributed locking for concurrent admin operations
 8. Migrate to Microsoft Entra External ID (if applicable)
 
@@ -64,8 +66,8 @@ Migration focuses on:
 <PackageReference Include="Mystira.App.Contracts" Version="1.0.0" />
 
 <!-- Add -->
-<PackageReference Include="Mystira.Shared" Version="0.2.0" />
-<PackageReference Include="Mystira.Contracts" Version="0.2.0" />
+<PackageReference Include="Mystira.Shared" Version="0.4.*" />
+<PackageReference Include="Mystira.Contracts" Version="0.4.*" />
 <PackageReference Include="Ardalis.Specification" Version="8.0.0" />
 <PackageReference Include="Ardalis.Specification.EntityFrameworkCore" Version="8.0.0" />
 <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.0" />
@@ -343,7 +345,7 @@ builder.Host.UseWolverine(opts =>
 ## Migration Checklist
 
 ### Pre-Migration
-- [ ] Ensure Mystira.Shared v0.2.0+ is published
+- [ ] Ensure Mystira.Shared v0.4.* is published
 - [ ] Create feature branch
 - [ ] Backup current appsettings.json
 - [ ] Backup Key Vault secrets

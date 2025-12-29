@@ -1,4 +1,5 @@
 # Azure AI Foundry Module Variables
+# Updated: December 2025 - Implements ADR-0020 AI Model Selection Strategy
 
 variable "environment" {
   description = "Deployment environment (dev, staging, prod)"
@@ -38,26 +39,27 @@ variable "enable_project" {
 }
 
 # =============================================================================
-# Model Deployments
+# Model Deployments (ADR-0020: 32 Models)
 # =============================================================================
-# Supports both OpenAI models and Azure AI Model Catalog models (Anthropic, etc.)
+# Supports both OpenAI models and Azure AI Model Catalog models
 # model_format: "OpenAI" for GPT models, "Anthropic" for Claude, etc.
 #
 # Supported model formats:
-#   - OpenAI: GPT, DALL-E, Whisper, TTS, embedding models
+#   - OpenAI: GPT, DALL-E, Whisper, TTS, embedding models, o-series
 #   - Anthropic: Claude models (haiku, sonnet, opus)
 #   - Cohere: Rerank, Embed, Command models
 #   - Meta: Llama models
 #   - Mistral: Mistral, Codestral, Pixtral models
-#   - DeepSeek: DeepSeek-V3, DeepSeek-Coder models
+#   - DeepSeek: DeepSeek-V3, DeepSeek-R1, DeepSeek-Coder models
 #   - AI21: Jamba models
+#   - xAI: Grok models
 
 variable "model_deployments" {
   description = "Map of model deployments to create"
   type = map(object({
     model_name      = string
     model_version   = string
-    model_format    = optional(string, "OpenAI") # OpenAI, Anthropic, Cohere, Meta, Mistral, DeepSeek, AI21
+    model_format    = optional(string, "OpenAI") # OpenAI, Anthropic, Cohere, Meta, Mistral, DeepSeek, AI21, xAI
     sku_name        = optional(string, "Standard")
     capacity        = optional(number, 10)
     rai_policy_name = optional(string, null)   # Responsible AI policy name
@@ -68,9 +70,9 @@ variable "model_deployments" {
   validation {
     condition = alltrue([
       for k, v in var.model_deployments :
-      contains(["OpenAI", "Anthropic", "Cohere", "Meta", "Mistral", "DeepSeek", "AI21"], v.model_format)
+      contains(["OpenAI", "Anthropic", "Cohere", "Meta", "Mistral", "DeepSeek", "AI21", "xAI"], v.model_format)
     ])
-    error_message = "model_format must be one of: OpenAI, Anthropic, Cohere, Meta, Mistral, DeepSeek, AI21"
+    error_message = "model_format must be one of: OpenAI, Anthropic, Cohere, Meta, Mistral, DeepSeek, AI21, xAI"
   }
 
   validation {
@@ -83,9 +85,10 @@ variable "model_deployments" {
   default = {
     # ==========================================================================
     # OpenAI Models (GPT Series) - Flagship & Latest
+    # See ADR-0020 for model selection rationale
     # ==========================================================================
 
-    # GPT-4o - Flagship multimodal model (request quota increase if exceeded)
+    # GPT-4o - Flagship multimodal model
     "gpt-4o" = {
       model_name    = "gpt-4o"
       model_version = "2024-11-20"
@@ -104,7 +107,7 @@ variable "model_deployments" {
     }
 
     # ==========================================================================
-    # GPT-4.1 Series - Enhanced reasoning models
+    # GPT-4.1 Series - Enhanced reasoning models (1M context)
     # ==========================================================================
     "gpt-4.1" = {
       model_name    = "gpt-4.1"
@@ -131,8 +134,6 @@ variable "model_deployments" {
     # ==========================================================================
     # GPT-5 Series - Latest flagship models
     # ==========================================================================
-    # Note: gpt-5.1 and gpt-5.1-codex require registration for access
-    # Available via GlobalStandard in East US2/Sweden Central
     "gpt-5-nano" = {
       model_name    = "gpt-5-nano"
       model_version = "2025-08-07"
@@ -146,7 +147,7 @@ variable "model_deployments" {
       model_format  = "OpenAI"
       sku_name      = "GlobalStandard"
       capacity      = 20
-      location      = "swedencentral" # Not available in SAN
+      location      = "swedencentral"
     }
     "gpt-5.1-codex" = {
       model_name    = "gpt-5.1-codex"
@@ -154,17 +155,40 @@ variable "model_deployments" {
       model_format  = "OpenAI"
       sku_name      = "GlobalStandard"
       capacity      = 20
-      location      = "swedencentral" # Not available in SAN
+      location      = "swedencentral"
+    }
+    # GPT-5.2 - Latest and smartest (December 2025, 400K context)
+    # NOTE: GlobalStandard not available in South Africa North, using Sweden Central
+    "gpt-5.2" = {
+      model_name    = "gpt-5.2"
+      model_version = "2025-12-11"
+      model_format  = "OpenAI"
+      sku_name      = "GlobalStandard"
+      capacity      = 10
+      location      = "swedencentral"
     }
 
     # ==========================================================================
     # Reasoning Models (o-series) - Chain of Thought
-    # ==========================================================================
     # Advanced reasoning with explicit thinking process
-    # Best for complex analysis, planning, and multi-step problems
+    # ==========================================================================
+    "o3" = {
+      model_name    = "o3"
+      model_version = "2025-04-16"
+      model_format  = "OpenAI"
+      sku_name      = "GlobalStandard"
+      capacity      = 10
+    }
     "o3-mini" = {
       model_name    = "o3-mini"
       model_version = "2025-01-31"
+      model_format  = "OpenAI"
+      sku_name      = "GlobalStandard"
+      capacity      = 10
+    }
+    "o4-mini" = {
+      model_name    = "o4-mini"
+      model_version = "2025-04-16"
       model_format  = "OpenAI"
       sku_name      = "GlobalStandard"
       capacity      = 10
@@ -173,29 +197,24 @@ variable "model_deployments" {
     # ==========================================================================
     # Embedding Models (for RAG / Vector Search)
     # ==========================================================================
-    # Used to convert text to vectors before sending to AI Search
-    # Reduces token usage by ~20x compared to sending raw text
-    # Note: Must use GlobalStandard - Standard not available in SAN
     "text-embedding-3-large" = {
       model_name    = "text-embedding-3-large"
       model_version = "1"
       model_format  = "OpenAI"
-      sku_name      = "GlobalStandard" # Required for SAN region
+      sku_name      = "GlobalStandard"
       capacity      = 120
     }
     "text-embedding-3-small" = {
       model_name    = "text-embedding-3-small"
       model_version = "1"
       model_format  = "OpenAI"
-      sku_name      = "GlobalStandard" # Required for SAN region
+      sku_name      = "GlobalStandard"
       capacity      = 120
     }
 
     # ==========================================================================
-    # Image Generation (DALL-E)
+    # Image Generation (DALL-E, gpt-image-1)
     # ==========================================================================
-    # For story illustrations, visual content creation
-    # Deployed to East US (Standard SKU not available in South Africa North)
     "dall-e-3" = {
       model_name    = "dall-e-3"
       model_version = "3.0"
@@ -204,13 +223,20 @@ variable "model_deployments" {
       capacity      = 1
       location      = "eastus"
     }
+    # gpt-image-1 - Not yet available in Azure OpenAI
+    "gpt-image-1" = {
+      model_name    = "gpt-image-1"
+      model_version = "1"
+      model_format  = "OpenAI"
+      sku_name      = "Standard"
+      capacity      = 1
+      location      = "eastus"
+      enabled       = false # Not available in Azure OpenAI yet
+    }
 
     # ==========================================================================
     # Audio Models (Whisper & TTS)
     # ==========================================================================
-    # Speech-to-text for voice input, text-to-speech for narration
-    # Deployed to North Central US (only region with Whisper/TTS support)
-    # NOTE: Disabled by default - enable when audio features needed
     "whisper" = {
       model_name    = "whisper"
       model_version = "001"
@@ -241,51 +267,48 @@ variable "model_deployments" {
 
     # ==========================================================================
     # Anthropic Claude Models (via Azure AI Model Catalog)
+    # Claude 4.5 with hybrid reasoning (Auto/Fast/Thinking modes)
+    # NOTE: Requires marketplace subscription - deploy via script
     # ==========================================================================
-    # Note: Claude models are deployed via Azure AI Model Catalog (Serverless API)
-    # They require marketplace subscription and use pay-as-you-go billing
-    # Deploy via: az ml serverless-endpoint create or Azure AI Foundry portal
-    # NOTE: Disabled - requires marketplace subscription first
     "claude-haiku-4-5" = {
       model_name    = "claude-3-5-haiku"
       model_version = "20241022"
       model_format  = "Anthropic"
       sku_name      = "GlobalStandard"
-      capacity      = 1  # Serverless - capacity is token-based
-      enabled       = false # Requires marketplace subscription
+      capacity      = 1
+      location      = "uksouth"
+      enabled       = false # Deploy via deploy-claude-models.sh
     }
     "claude-sonnet-4-5" = {
       model_name    = "claude-sonnet-4-5"
       model_version = "20250514"
       model_format  = "Anthropic"
       sku_name      = "GlobalStandard"
-      capacity      = 1  # Serverless - capacity is token-based
-      enabled       = false # Requires marketplace subscription
+      capacity      = 1
+      location      = "uksouth"
+      enabled       = false # Deploy via deploy-claude-models.sh
     }
     "claude-opus-4-5" = {
       model_name    = "claude-opus-4-5"
-      model_version = "20250514"
+      model_version = "20251124"
       model_format  = "Anthropic"
       sku_name      = "GlobalStandard"
-      capacity      = 1  # Serverless - capacity is token-based
-      enabled       = false # Requires marketplace subscription
+      capacity      = 1
+      location      = "uksouth"
+      enabled       = false # Deploy via deploy-claude-models.sh
     }
 
     # ==========================================================================
     # Cohere Models (via Azure AI Model Catalog)
     # ==========================================================================
-    # Specialized models for RAG enhancement
-    # Rerank: Improves search relevance by 10-30% for complex queries
-    # Embed: Multi-language support including African languages
-    # NOTE: Disabled by default - enable individually after core deployment
     "cohere-rerank-v4" = {
       model_name    = "Cohere-rerank-v4.0-pro"
       model_version = "1"
       model_format  = "Cohere"
       sku_name      = "GlobalStandard"
-      capacity      = 1  # Serverless - pay per query
-      location      = "uksouth" # Not available in SAN
-      enabled       = false # Enable after core deployment succeeds
+      capacity      = 1
+      location      = "uksouth"
+      enabled       = false
     }
     "cohere-embed-v4" = {
       model_name    = "embed-v-4-0"
@@ -293,66 +316,104 @@ variable "model_deployments" {
       model_format  = "Cohere"
       sku_name      = "GlobalStandard"
       capacity      = 1
-      location      = "uksouth" # Not available in SAN
-      enabled       = false # Enable after core deployment succeeds
+      location      = "uksouth"
+      enabled       = false
     }
 
     # ==========================================================================
     # Mistral Models (via Azure AI Model Catalog)
     # ==========================================================================
-    # Codestral: Dedicated code model, 256K context, 80+ languages
-    # Much cheaper than gpt-5.1-codex for code tasks
-    # NOTE: Disabled by default - enable individually after core deployment
     "codestral" = {
       model_name    = "Codestral"
       model_version = "2501"
       model_format  = "Mistral"
       sku_name      = "GlobalStandard"
       capacity      = 1
-      location      = "uksouth" # Not available in SAN
-      enabled       = false # Enable after core deployment succeeds
+      location      = "uksouth"
+      enabled       = false
     }
 
     # ==========================================================================
     # DeepSeek Models (via Azure AI Model Catalog)
+    # Cost-effective reasoning alternatives
     # ==========================================================================
-    # DeepSeek-V3: Advanced reasoning and agent performance
-    # Strong benchmarks on code generation and understanding
-    # NOTE: Disabled by default - enable individually after core deployment
-    "deepseek-v3" = {
-      model_name    = "DeepSeek-V3.2"
+    "deepseek-v3.1" = {
+      model_name    = "DeepSeek-V3.1"
       model_version = "1"
       model_format  = "DeepSeek"
       sku_name      = "GlobalStandard"
       capacity      = 1
-      location      = "uksouth" # Not available in SAN
-      enabled       = false # Enable after core deployment succeeds
+      location      = "uksouth"
+      enabled       = false
+    }
+    "deepseek-r1" = {
+      model_name    = "DeepSeek-R1"
+      model_version = "1"
+      model_format  = "DeepSeek"
+      sku_name      = "GlobalStandard"
+      capacity      = 1
+      location      = "uksouth"
+      enabled       = false
+    }
+    "deepseek-coder-v2" = {
+      model_name    = "DeepSeek-Coder-V2-236B"
+      model_version = "1"
+      model_format  = "DeepSeek"
+      sku_name      = "GlobalStandard"
+      capacity      = 1
+      location      = "uksouth"
+      enabled       = false
     }
 
     # ==========================================================================
     # AI21 Jamba Models (via Azure AI Model Catalog)
+    # Long context (256K tokens)
     # ==========================================================================
-    # Jamba: Hybrid Mamba-Transformer architecture with long context
-    # Linear scaling with context - efficient for long documents
-    # Use for full story manuscript analysis, cross-chapter consistency
-    # NOTE: Disabled by default - enable individually after core deployment
     "jamba-1.5-large" = {
       model_name    = "AI21-Jamba-1.5-Large"
       model_version = "1"
       model_format  = "AI21"
       sku_name      = "GlobalStandard"
       capacity      = 1
-      location      = "uksouth" # Not available in SAN
-      enabled       = false # Enable after core deployment succeeds
+      location      = "uksouth"
+      enabled       = false
     }
     "jamba-1.5-mini" = {
       model_name    = "AI21-Jamba-1.5-Mini"
       model_version = "1"
       model_format  = "AI21"
       sku_name      = "GlobalStandard"
-      capacity      = 1  # 10x cheaper than large for simpler long-context tasks
-      location      = "uksouth" # Not available in SAN
-      enabled       = false # Enable after core deployment succeeds
+      capacity      = 1
+      location      = "uksouth"
+      enabled       = false
+    }
+
+    # ==========================================================================
+    # xAI Grok Models (via Azure AI Model Catalog)
+    # Alternative reasoning models
+    # ==========================================================================
+    "grok-3" = {
+      model_name    = "grok-3"
+      model_version = "1"
+      model_format  = "xAI"
+      sku_name      = "GlobalStandard"
+      capacity      = 1
+      location      = "uksouth"
+      enabled       = false
+    }
+
+    # ==========================================================================
+    # Meta Llama Models (via Azure AI Model Catalog)
+    # Latest open-source models
+    # ==========================================================================
+    "llama-4-maverick" = {
+      model_name    = "Llama-4-Maverick-17B-128E-Instruct-FP8"
+      model_version = "1"
+      model_format  = "Meta"
+      sku_name      = "GlobalStandard"
+      capacity      = 1
+      location      = "uksouth"
+      enabled       = false
     }
   }
 }

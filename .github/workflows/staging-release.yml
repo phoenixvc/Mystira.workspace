@@ -1,4 +1,4 @@
-name: "Deployment: Staging"
+name: "[Deploy] Staging"
 
 # Staging Environment Deployment: Deploys infrastructure and services to staging
 # Steps: Verify CI, deploy Terraform infrastructure, deploy Kubernetes services

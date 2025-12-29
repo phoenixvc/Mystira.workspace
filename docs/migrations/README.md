@@ -3,7 +3,9 @@
 This directory contains migration guides for adopting `Mystira.Shared` infrastructure and consolidated packages across all Mystira services.
 
 **Last Updated**: December 2025
-**Current Target Runtime**: .NET 9.0 / Node.js 20+ / Python 3.12+
+**Current Target Runtime**: .NET 9.0 / Node.js 22+ / Python 3.12+
+
+> **📋 See [MIGRATION_INDEX.md](./MIGRATION_INDEX.md)** for the consolidated migration status dashboard and document hierarchy.
 
 ---
 
@@ -30,8 +32,8 @@ Before starting any migration, ensure the following packages are published:
 
 | Package | Registry | Version | Status |
 |---------|----------|---------|--------|
-| `Mystira.Shared` | NuGet | 0.2.0+ | ✅ Published |
-| `Mystira.Contracts` | NuGet | 0.2.0+ | ✅ Published |
+| `Mystira.Shared` | NuGet | 0.4.* | ✅ Published |
+| `Mystira.Contracts` | NuGet | 0.4.* | ✅ Published |
 | `@mystira/design-tokens` | NPM | 0.2.0+ | ✅ Published |
 | `@mystira/shared-utils` | NPM | 0.2.0+ | ✅ Published |
 
@@ -82,9 +84,9 @@ Migrate each service independently:
 
 ## Migration Scope by Package
 
-### Mystira.Shared (NuGet) v0.2.0+
+### Mystira.Shared (NuGet) v0.4.*
 
-| Namespace | What It Provides | Services Using | New in v0.2.0 |
+| Namespace | What It Provides | Services Using | New in v0.4.0 |
 |-----------|------------------|----------------|---------------|
 | `Mystira.Shared.Auth` | JWT, Entra External ID authentication | App, Admin | ✅ Entra External ID |
 | `Mystira.Shared.Resilience` | Polly v8 resilience pipelines | App, StoryGen, Admin | ✅ Polly v8 |

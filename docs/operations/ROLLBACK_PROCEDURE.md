@@ -460,15 +460,13 @@ done
 
 **Immediate** (within 5 minutes of decision):
 
-- [ ] Post in #incidents Slack channel
+- [ ] Email notification to team ([jurie@phoenixvc.tech](mailto:jurie@phoenixvc.tech))
 - [ ] Update status page: "Investigating issue"
-- [ ] Page on-call team
 
 **After Rollback Initiated** (within 15 minutes):
 
 - [ ] Email to stakeholders: "Rollback in progress"
 - [ ] Update status page: "Service degradation - rollback initiated"
-- [ ] Post update in #incidents every 15 minutes
 
 **After Rollback Complete**:
 

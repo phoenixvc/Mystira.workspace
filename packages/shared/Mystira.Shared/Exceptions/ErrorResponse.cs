@@ -1,9 +1,28 @@
 namespace Mystira.Shared.Exceptions;
 
+// ============================================================================
+// MIGRATION NOTICE
+// ============================================================================
+// For API response DTOs, prefer using Mystira.Contracts types:
+//
+//   using Mystira.Contracts.App.Responses.Common;
+//
+//   - ErrorResponse              -> Mystira.Contracts.App.Responses.Common.ErrorResponse
+//   - ValidationErrorResponse    -> Mystira.Contracts.App.Responses.Common.ValidationErrorResponse
+//   - NotFoundErrorResponse      -> Mystira.Contracts.App.Responses.Common.NotFoundErrorResponse
+//   - ForbiddenErrorResponse     -> Mystira.Contracts.App.Responses.Common.ForbiddenErrorResponse
+//
+// The Contracts versions are immutable records with init-only properties.
+// These classes are provided for internal infrastructure use (e.g., GlobalExceptionHandler).
+// ============================================================================
+
 /// <summary>
 /// Standard error response for API errors.
 /// Provides consistent error structure across all Mystira services.
 /// </summary>
+/// <remarks>
+/// For API DTOs, consider using Mystira.Contracts.App.Responses.Common.ErrorResponse instead.
+/// </remarks>
 public class ErrorResponse
 {
     /// <summary>
@@ -74,6 +93,9 @@ public class ErrorResponse
 /// <summary>
 /// Error response with validation errors.
 /// </summary>
+/// <remarks>
+/// For API DTOs, consider using Mystira.Contracts.App.Responses.Common.ValidationErrorResponse instead.
+/// </remarks>
 public class ValidationErrorResponse : ErrorResponse
 {
     /// <summary>
@@ -95,6 +117,9 @@ public class ValidationErrorResponse : ErrorResponse
 /// <summary>
 /// Error response for not found resources.
 /// </summary>
+/// <remarks>
+/// For API DTOs, consider using Mystira.Contracts.App.Responses.Common.NotFoundErrorResponse instead.
+/// </remarks>
 public class NotFoundErrorResponse : ErrorResponse
 {
     /// <summary>
@@ -129,6 +154,9 @@ public class NotFoundErrorResponse : ErrorResponse
 /// <summary>
 /// Error response for authorization failures.
 /// </summary>
+/// <remarks>
+/// For API DTOs, consider using Mystira.Contracts.App.Responses.Common.ForbiddenErrorResponse instead.
+/// </remarks>
 public class ForbiddenErrorResponse : ErrorResponse
 {
     /// <summary>

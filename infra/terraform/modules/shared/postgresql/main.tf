@@ -104,10 +104,11 @@ variable "aad_auth_enabled" {
 }
 
 variable "aad_admin_identities" {
-  description = "Map of managed identities to add as Azure AD administrators (principal_name is used to look up the identity)"
+  description = "Map of managed identities to add as Azure AD administrators. If principal_id is provided, it's used directly; otherwise principal_name is used to look up the identity."
   type = map(object({
     principal_name = string
     principal_type = string # ServicePrincipal, User, or Group
+    principal_id   = optional(string) # If provided, skip data lookup (avoids circular dependencies)
   }))
   default = {}
 }
@@ -207,6 +208,33 @@ resource "azurerm_postgresql_flexible_server_firewall_rule" "allow_azure_service
 # Enables managed identities and Azure AD users to authenticate without passwords
 # =============================================================================
 
+data "azurerm_client_config" "current" {}
+
+# Local to separate identities that need lookup vs those with principal_id provided
+locals {
+  # Identities that need data source lookup (no principal_id provided)
+  aad_identities_needing_lookup = var.aad_auth_enabled ? {
+    for k, v in var.aad_admin_identities : k => v if v.principal_id == null
+  } : {}
+
+  # All identities with resolved principal_id
+  aad_admin_principal_ids = var.aad_auth_enabled ? {
+    for k, v in var.aad_admin_identities : k => coalesce(
+      v.principal_id,
+      try(data.azurerm_user_assigned_identity.aad_admins[k].principal_id, null)
+    )
+  } : {}
+}
+
+# Look up managed identities by name ONLY when principal_id is not provided directly
+# This avoids circular dependencies when the identity is created in the same terraform run
+data "azurerm_user_assigned_identity" "aad_admins" {
+  for_each = local.aad_identities_needing_lookup
+
+  name                = each.value.principal_name
+  resource_group_name = var.resource_group_name
+}
+
 # Configure Azure AD authentication on the PostgreSQL server
 resource "azurerm_postgresql_flexible_server_active_directory_administrator" "aad_admins" {
   for_each = var.aad_auth_enabled ? var.aad_admin_identities : {}
@@ -214,24 +242,19 @@ resource "azurerm_postgresql_flexible_server_active_directory_administrator" "aa
   server_name         = azurerm_postgresql_flexible_server.shared.name
   resource_group_name = var.resource_group_name
   tenant_id           = data.azurerm_client_config.current.tenant_id
-  object_id           = data.azurerm_user_assigned_identity.aad_admins[each.key].principal_id
+  object_id           = local.aad_admin_principal_ids[each.key]
   principal_name      = each.value.principal_name
   principal_type      = each.value.principal_type
-}
-
-data "azurerm_client_config" "current" {}
-
-# Look up managed identities by name to avoid circular dependencies
-data "azurerm_user_assigned_identity" "aad_admins" {
-  for_each = var.aad_auth_enabled ? var.aad_admin_identities : {}
-
-  name                = each.value.principal_name
-  resource_group_name = var.resource_group_name
 }
 
 output "server_id" {
   description = "PostgreSQL server ID"
   value       = azurerm_postgresql_flexible_server.shared.id
+}
+
+output "server_name" {
+  description = "PostgreSQL server name"
+  value       = azurerm_postgresql_flexible_server.shared.name
 }
 
 output "server_fqdn" {

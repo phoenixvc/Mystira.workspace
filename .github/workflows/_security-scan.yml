@@ -5,7 +5,7 @@
 # scanning, consider using Trivy's misconfig mode instead of tfsec-action.
 # See: https://aquasecurity.github.io/trivy/latest/docs/scanner/misconfiguration/
 
-name: Security Scan
+name: "[Build] Security Scan"
 
 on:
   workflow_call:

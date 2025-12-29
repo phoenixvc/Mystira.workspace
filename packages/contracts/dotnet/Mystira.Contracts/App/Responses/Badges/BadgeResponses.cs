@@ -12,17 +12,17 @@ public record BadgeResponse
     /// <summary>
     /// Unique identifier for the badge.
     /// </summary>
-    public required string Id { get; init; }
+    public string Id { get; init; } = string.Empty;
 
     /// <summary>
     /// Display name of the badge.
     /// </summary>
-    public required string Name { get; init; }
+    public string Name { get; init; } = string.Empty;
 
     /// <summary>
     /// Description of how to earn the badge.
     /// </summary>
-    public required string Description { get; init; }
+    public string Description { get; init; } = string.Empty;
 
     /// <summary>
     /// URL to the badge icon/image.
@@ -93,17 +93,17 @@ public record BadgeProgressResponse
     /// <summary>
     /// The badge being tracked.
     /// </summary>
-    public required BadgeResponse Badge { get; init; }
+    public BadgeResponse? Badge { get; init; }
 
     /// <summary>
     /// Current progress value.
     /// </summary>
-    public required int CurrentValue { get; init; }
+    public int CurrentValue { get; init; }
 
     /// <summary>
     /// Target value to earn the badge.
     /// </summary>
-    public required int TargetValue { get; init; }
+    public int TargetValue { get; init; }
 
     /// <summary>
     /// Progress as a percentage (0-100).
@@ -130,7 +130,7 @@ public record BadgeProgressResponse
     /// <summary>
     /// Progress on each compass axis related to this badge.
     /// </summary>
-    public IReadOnlyList<AxisProgressResponse> AxisProgresses { get; init; } = [];
+    public List<AxisProgressResponse> AxisProgresses { get; init; } = new();
 }
 
 /// <summary>
@@ -141,7 +141,7 @@ public record AxisAchievementResponse
     /// <summary>
     /// Unique identifier for the achievement.
     /// </summary>
-    public required string Id { get; init; }
+    public string Id { get; init; } = string.Empty;
 
     /// <summary>
     /// Age group identifier for age-appropriate achievement tracking.
@@ -151,7 +151,7 @@ public record AxisAchievementResponse
     /// <summary>
     /// The compass axis this achievement belongs to.
     /// </summary>
-    public required string CompassAxisId { get; init; }
+    public string CompassAxisId { get; init; } = string.Empty;
 
     /// <summary>
     /// Name of the compass axis.
@@ -161,7 +161,7 @@ public record AxisAchievementResponse
     /// <summary>
     /// Name of the axis (e.g., "Creativity", "Logic", "Empathy").
     /// </summary>
-    public required string AxisName { get; init; }
+    public string AxisName { get; init; } = string.Empty;
 
     /// <summary>
     /// Direction on the compass axis (e.g., "positive", "negative").
@@ -171,22 +171,22 @@ public record AxisAchievementResponse
     /// <summary>
     /// Display name of the achievement.
     /// </summary>
-    public required string Name { get; init; }
+    public string Name { get; init; } = string.Empty;
 
     /// <summary>
     /// Description of the achievement.
     /// </summary>
-    public required string Description { get; init; }
+    public string Description { get; init; } = string.Empty;
 
     /// <summary>
     /// Level or tier of this achievement within the axis.
     /// </summary>
-    public required int Level { get; init; }
+    public int Level { get; init; }
 
     /// <summary>
     /// Score threshold required to unlock this achievement.
     /// </summary>
-    public required int ScoreThreshold { get; init; }
+    public int ScoreThreshold { get; init; }
 
     /// <summary>
     /// URL to the achievement icon.
@@ -212,7 +212,7 @@ public record AxisProgressResponse
     /// <summary>
     /// The compass axis identifier.
     /// </summary>
-    public required string CompassAxisId { get; init; }
+    public string CompassAxisId { get; init; } = string.Empty;
 
     /// <summary>
     /// Name of the compass axis.
@@ -222,12 +222,12 @@ public record AxisProgressResponse
     /// <summary>
     /// Display name of the axis.
     /// </summary>
-    public required string AxisName { get; init; }
+    public string AxisName { get; init; } = string.Empty;
 
     /// <summary>
     /// Current score on this axis.
     /// </summary>
-    public required int CurrentScore { get; init; }
+    public int CurrentScore { get; init; }
 
     /// <summary>
     /// Maximum possible score on this axis.
@@ -237,7 +237,7 @@ public record AxisProgressResponse
     /// <summary>
     /// Current level achieved on this axis.
     /// </summary>
-    public required int CurrentLevel { get; init; }
+    public int CurrentLevel { get; init; }
 
     /// <summary>
     /// Score needed to reach the next level.
@@ -252,12 +252,12 @@ public record AxisProgressResponse
     /// <summary>
     /// Achievements earned on this axis.
     /// </summary>
-    public IReadOnlyList<AxisAchievementResponse> Achievements { get; init; } = [];
+    public List<AxisAchievementResponse> Achievements { get; init; } = new();
 
     /// <summary>
     /// Badge tier progress for this axis.
     /// </summary>
-    public IReadOnlyList<BadgeTierProgressResponse> Tiers { get; init; } = [];
+    public List<BadgeTierProgressResponse> Tiers { get; init; } = new();
 
     /// <summary>
     /// Color associated with this axis for UI display.
@@ -278,7 +278,7 @@ public record BadgeTierProgressResponse
     /// <summary>
     /// The tier name (e.g., "bronze", "silver", "gold", "platinum").
     /// </summary>
-    public required string TierName { get; init; }
+    public string TierName { get; init; } = string.Empty;
 
     /// <summary>
     /// Tier identifier (e.g., "bronze", "silver", "gold").
@@ -288,7 +288,7 @@ public record BadgeTierProgressResponse
     /// <summary>
     /// Display order of this tier.
     /// </summary>
-    public required int TierOrder { get; init; }
+    public int TierOrder { get; init; }
 
     /// <summary>
     /// Title of the badge tier.
@@ -333,12 +333,12 @@ public record BadgeTierProgressResponse
     /// <summary>
     /// Total badges available in this tier.
     /// </summary>
-    public required int TotalBadges { get; init; }
+    public int TotalBadges { get; init; }
 
     /// <summary>
     /// Number of badges earned in this tier.
     /// </summary>
-    public required int EarnedBadges { get; init; }
+    public int EarnedBadges { get; init; }
 
     /// <summary>
     /// Completion percentage for this tier (0-100).
@@ -355,7 +355,7 @@ public record BadgeTierProgressResponse
     /// <summary>
     /// Badges in this tier.
     /// </summary>
-    public IReadOnlyList<BadgeResponse> Badges { get; init; } = [];
+    public List<BadgeResponse> Badges { get; init; } = new();
 
     /// <summary>
     /// Color associated with this tier for UI display.
@@ -371,50 +371,55 @@ public record BadgeTierProgressResponse
 /// <summary>
 /// Represents a user's score on a compass axis.
 /// </summary>
-public record CompassAxisScoreResult
+public class CompassAxisScoreResult
 {
     /// <summary>
     /// The compass axis identifier.
     /// </summary>
-    public required string CompassAxisId { get; init; }
+    public string CompassAxisId { get; set; } = string.Empty;
 
     /// <summary>
     /// Display name of the axis.
     /// </summary>
-    public required string AxisName { get; init; }
+    public string AxisName { get; set; } = string.Empty;
 
     /// <summary>
     /// The calculated score for this axis.
     /// </summary>
-    public required double Score { get; init; }
+    public double Score { get; set; }
 
     /// <summary>
     /// Normalized score (0-1 range).
     /// </summary>
-    public required double NormalizedScore { get; init; }
+    public double NormalizedScore { get; set; }
 
     /// <summary>
     /// Percentile rank compared to other users.
     /// </summary>
-    public double? Percentile { get; init; }
+    public double? Percentile { get; set; }
+
+    /// <summary>
+    /// Percentile scores at various thresholds (key: percentile, value: score).
+    /// </summary>
+    public Dictionary<double, double> PercentileScores { get; set; } = new();
 
     /// <summary>
     /// Description of what this score means.
     /// </summary>
-    public string? Interpretation { get; init; }
+    public string? Interpretation { get; set; }
 
     /// <summary>
     /// Strength level based on score (e.g., "low", "medium", "high", "exceptional").
     /// </summary>
-    public string? StrengthLevel { get; init; }
+    public string? StrengthLevel { get; set; }
 
     /// <summary>
     /// Related traits or characteristics for this axis.
     /// </summary>
-    public IReadOnlyList<string> RelatedTraits { get; init; } = [];
+    public List<string> RelatedTraits { get; set; } = new();
 
     /// <summary>
     /// When this score was last calculated.
     /// </summary>
-    public DateTimeOffset CalculatedAt { get; init; }
+    public DateTimeOffset CalculatedAt { get; set; }
 }

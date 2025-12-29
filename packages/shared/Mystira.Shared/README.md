@@ -105,7 +105,7 @@ builder.AddMystiraMessaging();
 // Handler (convention-based, no interfaces needed)
 public static class CreateAccountHandler
 {
-    public static async Task<AccountDto> HandleAsync(
+    public static async Task<AccountDto> Handle(
         CreateAccountCommand command,
         IAccountRepository repo)
     {

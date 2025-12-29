@@ -1,6 +1,6 @@
 {
   "name": "@mystira/contracts",
-  "version": "0.2.0-alpha",
+  "version": "0.4.3-alpha",
   "type": "module",
   "description": "Unified API contracts for Mystira platform",
   "main": "dist/index.js",
@@ -39,15 +39,15 @@
     "api",
     "types"
   ],
-  "author": "Mystira Team",
-  "license": "MIT",
+  "author": "Mystira <jurie@phoenixvc.tech>",
+  "license": "SEE LICENSE IN LICENSE",
   "repository": {
     "type": "git",
     "url": "https://github.com/phoenixvc/Mystira.workspace.git",
     "directory": "packages/contracts"
   },
   "publishConfig": {
-    "access": "public"
+    "registry": "https://npm.pkg.github.com"
   },
   "devDependencies": {
     "@eslint/js": "^9.0.0",
