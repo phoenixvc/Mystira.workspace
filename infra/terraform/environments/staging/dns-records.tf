@@ -229,15 +229,15 @@ resource "azurerm_dns_a_record" "staging_story_api_k8s" {
 # Staging uses the shared non-prod Front Door deployed from dev environment.
 # These CNAMEs point staging hostnames to the dev Front Door endpoint.
 
-# Reference the dev Front Door (must exist before staging can use it)
-data "azurerm_cdn_frontdoor_profile" "dev" {
-  name                = "mystira-dev-fd"
+# Reference the non-prod Front Door (must exist before staging can use it)
+data "azurerm_cdn_frontdoor_profile" "nonprod" {
+  name                = "mystira-nonprod-fd"
   resource_group_name = "mys-dev-core-rg-san"
 }
 
-data "azurerm_cdn_frontdoor_endpoint" "dev_primary" {
-  name                     = "mystira-dev"
-  profile_name             = data.azurerm_cdn_frontdoor_profile.dev.name
+data "azurerm_cdn_frontdoor_endpoint" "nonprod_primary" {
+  name                     = "mystira-nonprod"
+  profile_name             = data.azurerm_cdn_frontdoor_profile.nonprod.name
   resource_group_name      = "mys-dev-core-rg-san"
 }
 
@@ -247,7 +247,7 @@ resource "azurerm_dns_cname_record" "staging_publisher_fd" {
   zone_name           = data.azurerm_dns_zone.mystira.name
   resource_group_name = data.azurerm_dns_zone.mystira.resource_group_name
   ttl                 = 300
-  record              = data.azurerm_cdn_frontdoor_endpoint.dev_primary.host_name
+  record              = data.azurerm_cdn_frontdoor_endpoint.nonprod_primary.host_name
 
   tags = local.common_tags
 }
@@ -258,7 +258,7 @@ resource "azurerm_dns_cname_record" "staging_chain_fd" {
   zone_name           = data.azurerm_dns_zone.mystira.name
   resource_group_name = data.azurerm_dns_zone.mystira.resource_group_name
   ttl                 = 300
-  record              = data.azurerm_cdn_frontdoor_endpoint.dev_primary.host_name
+  record              = data.azurerm_cdn_frontdoor_endpoint.nonprod_primary.host_name
 
   tags = local.common_tags
 }
@@ -269,7 +269,7 @@ resource "azurerm_dns_cname_record" "staging_admin_api_fd" {
   zone_name           = data.azurerm_dns_zone.mystira.name
   resource_group_name = data.azurerm_dns_zone.mystira.resource_group_name
   ttl                 = 300
-  record              = data.azurerm_cdn_frontdoor_endpoint.dev_primary.host_name
+  record              = data.azurerm_cdn_frontdoor_endpoint.nonprod_primary.host_name
 
   tags = local.common_tags
 }
@@ -280,7 +280,7 @@ resource "azurerm_dns_cname_record" "staging_admin_ui_fd" {
   zone_name           = data.azurerm_dns_zone.mystira.name
   resource_group_name = data.azurerm_dns_zone.mystira.resource_group_name
   ttl                 = 300
-  record              = data.azurerm_cdn_frontdoor_endpoint.dev_primary.host_name
+  record              = data.azurerm_cdn_frontdoor_endpoint.nonprod_primary.host_name
 
   tags = local.common_tags
 }
@@ -291,7 +291,7 @@ resource "azurerm_dns_cname_record" "staging_story_api_fd" {
   zone_name           = data.azurerm_dns_zone.mystira.name
   resource_group_name = data.azurerm_dns_zone.mystira.resource_group_name
   ttl                 = 300
-  record              = data.azurerm_cdn_frontdoor_endpoint.dev_primary.host_name
+  record              = data.azurerm_cdn_frontdoor_endpoint.nonprod_primary.host_name
 
   tags = local.common_tags
 }

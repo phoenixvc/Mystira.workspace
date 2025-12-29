@@ -1,15 +1,16 @@
-# Azure Front Door Example Configuration for Dev Environment
-# Rename this file to front-door.tf to enable Front Door
+# Azure Front Door Configuration for Non-Prod Environment (dev + staging)
+# This shared Front Door handles both dev and staging traffic to save costs.
 
 # IMPORTANT: Before enabling, ensure:
 # 1. Backend services (Publisher, Chain) are deployed and healthy
 # 2. DNS is properly configured
-# 3. Budget is allocated (~$150/month for dev)
+# 3. Budget is allocated (~$150/month for non-prod)
 
 module "front_door" {
   source = "../../modules/front-door"
 
-  environment         = "dev"
+  # Using "nonprod" to match existing Azure resource name: mystira-nonprod-fd
+  environment         = "nonprod"
   resource_group_name = azurerm_resource_group.main.name
   location            = var.location
   project_name        = "mystira"
