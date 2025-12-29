@@ -223,23 +223,22 @@ resource "azurerm_dns_a_record" "staging_story_api_k8s" {
   tags = local.common_tags
 }
 
-# -----------------------------------------------------------------------------
-# PUBLIC CNAME RECORDS (for Front Door custom domains)
-# These point to the shared non-prod Front Door for SSL termination
-# -----------------------------------------------------------------------------
+# =============================================================================
+# Front Door CNAME Records
+# =============================================================================
+# Staging uses the shared non-prod Front Door deployed from dev environment.
+# These CNAMEs point staging hostnames to the dev Front Door endpoint.
 
-# Note: Front Door endpoint hostname is from the shared non-prod Front Door in dev.
-# We use a data source to reference the Front Door profile.
-
+# Reference the non-prod Front Door (must exist before staging can use it)
 data "azurerm_cdn_frontdoor_profile" "nonprod" {
   name                = "mystira-nonprod-fd"
-  resource_group_name = "mys-dev-rg-san"
+  resource_group_name = "mys-dev-core-rg-san"
 }
 
 data "azurerm_cdn_frontdoor_endpoint" "nonprod_primary" {
   name                     = "mystira-nonprod"
   profile_name             = data.azurerm_cdn_frontdoor_profile.nonprod.name
-  resource_group_name      = "mys-dev-rg-san"
+  resource_group_name      = "mys-dev-core-rg-san"
 }
 
 # CNAME for staging.publisher.mystira.app -> Front Door
@@ -296,15 +295,6 @@ resource "azurerm_dns_cname_record" "staging_story_api_fd" {
 
   tags = local.common_tags
 }
-
-# =============================================================================
-# Front Door DNS Records
-# =============================================================================
-# NOTE: Front Door CNAME and TXT validation records are managed in the dev
-# environment terraform since the shared non-prod Front Door is defined there.
-# See infra/terraform/environments/dev/dns-records.tf for:
-# - staging.publisher, staging.chain, staging.admin-api, staging.admin, staging.story-api CNAMEs
-# - _dnsauth.staging.* TXT validation records
 
 # =============================================================================
 # Outputs

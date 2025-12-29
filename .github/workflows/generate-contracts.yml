@@ -91,7 +91,7 @@ jobs:
           pnpm run generate:ts
 
       - name: Upload TypeScript artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: typescript-contracts
           path: packages/contracts/src/generated/
@@ -142,7 +142,7 @@ jobs:
           pnpm run generate:csharp
 
       - name: Upload C# artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: csharp-contracts
           path: packages/contracts/dotnet/Mystira.Contracts/Generated/
@@ -213,13 +213,13 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Download TypeScript artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: typescript-contracts
           path: packages/contracts/src/generated/
 
       - name: Download C# artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: csharp-contracts
           path: packages/contracts/dotnet/Mystira.Contracts/Generated/
