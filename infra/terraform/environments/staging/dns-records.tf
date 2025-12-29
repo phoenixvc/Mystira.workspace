@@ -44,6 +44,19 @@ resource "azurerm_dns_cname_record" "staging_app_swa" {
   tags = local.common_tags
 }
 
+# Wait for DNS propagation before binding custom domains
+resource "time_sleep" "dns_propagation" {
+  count = var.bind_custom_domains ? 1 : 0
+
+  depends_on = [
+    azurerm_dns_cname_record.staging_app_swa,
+    azurerm_dns_cname_record.staging_api,
+    azurerm_dns_txt_record.staging_api_verification
+  ]
+
+  create_duration = "60s"
+}
+
 # Custom domain binding for SWA (only when bind_custom_domains=true)
 resource "azurerm_static_web_app_custom_domain" "staging_app" {
   count = var.bind_custom_domains ? 1 : 0
@@ -52,7 +65,7 @@ resource "azurerm_static_web_app_custom_domain" "staging_app" {
   domain_name       = "staging.mystira.app"
   validation_type   = "cname-delegation"
 
-  depends_on = [azurerm_dns_cname_record.staging_app_swa]
+  depends_on = [azurerm_dns_cname_record.staging_app_swa, time_sleep.dns_propagation]
 }
 
 # =============================================================================
@@ -94,7 +107,8 @@ resource "azurerm_app_service_custom_hostname_binding" "staging_api" {
 
   depends_on = [
     azurerm_dns_cname_record.staging_api,
-    azurerm_dns_txt_record.staging_api_verification
+    azurerm_dns_txt_record.staging_api_verification,
+    time_sleep.dns_propagation
   ]
 }
 
@@ -147,7 +161,7 @@ resource "azurerm_static_web_app_custom_domain" "staging_story" {
   domain_name       = "staging.story.mystira.app"
   validation_type   = "cname-delegation"
 
-  depends_on = [azurerm_dns_cname_record.staging_story_swa]
+  depends_on = [azurerm_dns_cname_record.staging_story_swa, time_sleep.dns_propagation]
 }
 
 # NOTE: staging.story-api CNAME now points to Front Door (defined in K8s DNS section below)
