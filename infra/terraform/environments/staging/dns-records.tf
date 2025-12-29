@@ -8,7 +8,7 @@
 variable "bind_custom_domains" {
   description = "Set to true to bind custom domains (run after DNS propagates)"
   type        = bool
-  default     = false
+  default     = true
 }
 
 variable "k8s_ingress_ip" {
@@ -18,9 +18,9 @@ variable "k8s_ingress_ip" {
 }
 
 variable "create_dns_records" {
-  description = "Set to false if DNS records already exist in Azure (to avoid conflicts)"
+  description = "Set to true to create DNS records (false if they already exist in Azure)"
   type        = bool
-  default     = false  # Default false since records exist - use terraform import to manage them
+  default     = true
 }
 
 # Reference existing DNS Zone (created by CI/CD bootstrap in shared terraform RG)
