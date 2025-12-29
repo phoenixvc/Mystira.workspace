@@ -50,6 +50,7 @@ public class PolyglotRepository<TEntity> : IPolyglotRepository<TEntity> where TE
         IOptions<PolyglotOptions> options,
         ILogger<PolyglotRepository<TEntity>> logger)
     {
+        _contextResolver = contextResolver;
         _options = options.Value;
         _logger = logger;
         _cache = _options.EnableCaching ? cache : null;
