@@ -27,7 +27,7 @@ terraform {
     }
     time = {
       source  = "hashicorp/time"
-      version = "~> 0.9"
+      version = "~> 0.13"
     }
   }
 }
@@ -487,7 +487,7 @@ module "story_generator" {
   fallback_location        = "eastus2"  # SWA not available in South Africa North
   github_repository_url    = "https://github.com/phoenixvc/Mystira.StoryGenerator"
   github_branch            = "main"  # staging uses main branch
-  enable_swa_custom_domain = true
+  enable_swa_custom_domain = false  # Disabled until CNAME DNS records are created
   swa_custom_domain        = "staging.story.mystira.app"
 
   tags = {
