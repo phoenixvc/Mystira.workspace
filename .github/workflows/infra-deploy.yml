@@ -45,8 +45,10 @@ on:
         default: false
         type: boolean
 
+# Use shared K8s concurrency group for dev to prevent conflicts with submodule-deploy-dev
+# Other environments use isolated groups
 concurrency:
-  group: infra-deploy-${{ github.event.inputs.environment || 'dev' }}
+  group: ${{ (github.event.inputs.environment || 'dev') == 'dev' && 'k8s-deploy-dev' || format('infra-deploy-{0}', github.event.inputs.environment) }}
   cancel-in-progress: false
 
 env:
