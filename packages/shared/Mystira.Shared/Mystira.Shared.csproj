@@ -67,7 +67,7 @@
     <PackageReference Include="WolverineFx" Version="5.9.2" />
     <PackageReference Include="WolverineFx.AzureServiceBus" Version="5.9.2" />
     <!-- Wave 4: CQRS, Validation, Mapping -->
-    <PackageReference Include="FluentValidation" Version="11.11.0" />
+    <PackageReference Include="FluentValidation" Version="12.1.1" />
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="11.11.0" />
     <PackageReference Include="Riok.Mapperly" Version="4.1.1" />
     <!-- Wave 2 Data: Entity Framework Core -->
