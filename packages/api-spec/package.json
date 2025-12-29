@@ -16,7 +16,7 @@
     "bundle": "redocly bundle openapi/app-api.yaml -o dist/app-api.yaml && redocly bundle openapi/story-generator-api.yaml -o dist/story-generator-api.yaml"
   },
   "devDependencies": {
-    "@redocly/cli": "^1.25.0",
+    "@redocly/cli": "^2.0.0",
     "nswag": "^14.0.0",
     "openapi-typescript": "^7.0.0"
   },
