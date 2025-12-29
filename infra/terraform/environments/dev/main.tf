@@ -74,6 +74,29 @@ variable "enable_azure_ai" {
   default     = true
 }
 
+# =============================================================================
+# Staging Environment Backend Overrides
+# Used by Front Door to route staging traffic. Leave empty to use defaults.
+# =============================================================================
+
+variable "staging_story_generator_swa_backend" {
+  description = "Staging Story Generator SWA backend address (leave empty for default)"
+  type        = string
+  default     = ""
+}
+
+variable "staging_mystira_app_api_backend" {
+  description = "Staging Mystira.App API backend address (leave empty for default)"
+  type        = string
+  default     = ""
+}
+
+variable "staging_mystira_app_swa_backend" {
+  description = "Staging Mystira.App SWA backend address (leave empty for default)"
+  type        = string
+  default     = ""
+}
+
 # Common tags for all resources
 locals {
   common_tags = {
