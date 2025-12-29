@@ -34,7 +34,6 @@ public class PolyglotRepository<TEntity> : IPolyglotRepository<TEntity> where TE
     private readonly JsonSerializerOptions _jsonOptions;
     private readonly ResiliencePipeline _retryPipeline;
     private readonly ResiliencePipeline _circuitBreakerPipeline;
-    private readonly IDbContextResolver _contextResolver;
 
     /// <inheritdoc />
     public DatabaseTarget Target { get; }
@@ -142,6 +141,7 @@ public class PolyglotRepository<TEntity> : IPolyglotRepository<TEntity> where TE
         ArgumentNullException.ThrowIfNull(entity);
 
         var id = GetEntityId(entity);
+        var correlationId = Activity.Current?.Id;
         activity?.SetTag("mystira.entity_id", id);
         activity?.SetTag("mystira.polyglot_mode", _options.Mode.ToString());
 
@@ -154,13 +154,24 @@ public class PolyglotRepository<TEntity> : IPolyglotRepository<TEntity> where TE
             await _primaryDbSet.AddAsync(entity, cancellationToken);
             await _primaryContext.SaveChangesAsync(cancellationToken);
 
+            // Cache the newly added entity
+            if (id is not null && _cache is not null)
+            {
+                await SetCacheAsync(id, entity, cancellationToken);
+            }
+
             // Dual-write to secondary if enabled
             if (_options.Mode == PolyglotMode.DualWrite && _secondaryDbSet is not null)
             {
-                syncLog = await CreateSyncLogAsync(id!, SyncOperation.Insert, cancellationToken);
+                syncLog = await CreateSyncLogAsync(id!, SyncOperation.Insert, correlationId, cancellationToken);
 
                 try
                 {
+                    using var secondaryActivity = MystiraActivitySource.StartRepositoryActivity(
+                        "Add.Secondary", typeof(TEntity).Name);
+                    secondaryActivity?.SetTag("mystira.entity_id", id);
+                    secondaryActivity?.SetTag("mystira.backend", "secondary");
+
                     await ExecuteWithResilienceAsync(async ct =>
                     {
                         // Detach and re-add to secondary context
@@ -170,10 +181,12 @@ public class PolyglotRepository<TEntity> : IPolyglotRepository<TEntity> where TE
                     }, cancellationToken);
 
                     syncLog?.MarkSynced(stopwatch.ElapsedMilliseconds);
+                    activity?.SetTag("mystira.sync_status", "synced");
                 }
                 catch (Exception ex)
                 {
                     syncLog?.MarkFailed(ex.Message, ex.StackTrace);
+                    activity?.SetTag("mystira.sync_status", "failed");
                     _logger.LogWarning(ex,
                         "Failed to sync {EntityType} {Id} to secondary. Compensation: {Enabled}",
                         typeof(TEntity).Name, id, _options.EnableCompensation);
@@ -213,7 +226,9 @@ public class PolyglotRepository<TEntity> : IPolyglotRepository<TEntity> where TE
         ArgumentNullException.ThrowIfNull(entity);
 
         var id = GetEntityId(entity);
+        var correlationId = Activity.Current?.Id;
         activity?.SetTag("mystira.entity_id", id);
+        activity?.SetTag("mystira.polyglot_mode", _options.Mode.ToString());
 
         var stopwatch = Stopwatch.StartNew();
         PolyglotSyncLog? syncLog = null;
@@ -235,19 +250,24 @@ public class PolyglotRepository<TEntity> : IPolyglotRepository<TEntity> where TE
 
             await _primaryContext.SaveChangesAsync(cancellationToken);
 
-            // Invalidate cache
-            if (id is not null)
+            // Update cache with new values
+            if (id is not null && _cache is not null)
             {
-                await InvalidateCacheInternalAsync(id, cancellationToken);
+                await SetCacheAsync(id, entity, cancellationToken);
             }
 
             // Dual-write to secondary
             if (_options.Mode == PolyglotMode.DualWrite && _secondaryDbSet is not null && id is not null)
             {
-                syncLog = await CreateSyncLogAsync(id, SyncOperation.Update, cancellationToken);
+                syncLog = await CreateSyncLogAsync(id, SyncOperation.Update, correlationId, cancellationToken);
 
                 try
                 {
+                    using var secondaryActivity = MystiraActivitySource.StartRepositoryActivity(
+                        "Update.Secondary", typeof(TEntity).Name);
+                    secondaryActivity?.SetTag("mystira.entity_id", id);
+                    secondaryActivity?.SetTag("mystira.backend", "secondary");
+
                     await ExecuteWithResilienceAsync(async ct =>
                     {
                         var clone = CloneEntity(entity);
@@ -256,10 +276,12 @@ public class PolyglotRepository<TEntity> : IPolyglotRepository<TEntity> where TE
                     }, cancellationToken);
 
                     syncLog?.MarkSynced(stopwatch.ElapsedMilliseconds);
+                    activity?.SetTag("mystira.sync_status", "synced");
                 }
                 catch (Exception ex)
                 {
                     syncLog?.MarkFailed(ex.Message, ex.StackTrace);
+                    activity?.SetTag("mystira.sync_status", "failed");
                     _logger.LogWarning(ex, "Failed to sync update for {EntityType} {Id}", typeof(TEntity).Name, id);
                 }
             }
@@ -296,7 +318,9 @@ public class PolyglotRepository<TEntity> : IPolyglotRepository<TEntity> where TE
         ArgumentNullException.ThrowIfNull(entity);
 
         var id = GetEntityId(entity);
+        var correlationId = Activity.Current?.Id;
         activity?.SetTag("mystira.entity_id", id);
+        activity?.SetTag("mystira.polyglot_mode", _options.Mode.ToString());
 
         var stopwatch = Stopwatch.StartNew();
         PolyglotSyncLog? syncLog = null;
@@ -315,10 +339,15 @@ public class PolyglotRepository<TEntity> : IPolyglotRepository<TEntity> where TE
             // Dual-write to secondary
             if (_options.Mode == PolyglotMode.DualWrite && _secondaryDbSet is not null && id is not null)
             {
-                syncLog = await CreateSyncLogAsync(id, SyncOperation.Delete, cancellationToken);
+                syncLog = await CreateSyncLogAsync(id, SyncOperation.Delete, correlationId, cancellationToken);
 
                 try
                 {
+                    using var secondaryActivity = MystiraActivitySource.StartRepositoryActivity(
+                        "Delete.Secondary", typeof(TEntity).Name);
+                    secondaryActivity?.SetTag("mystira.entity_id", id);
+                    secondaryActivity?.SetTag("mystira.backend", "secondary");
+
                     await ExecuteWithResilienceAsync(async ct =>
                     {
                         var secondaryEntity = await _secondaryDbSet.FindAsync(new object[] { id }, ct);
@@ -330,10 +359,12 @@ public class PolyglotRepository<TEntity> : IPolyglotRepository<TEntity> where TE
                     }, cancellationToken);
 
                     syncLog?.MarkSynced(stopwatch.ElapsedMilliseconds);
+                    activity?.SetTag("mystira.sync_status", "synced");
                 }
                 catch (Exception ex)
                 {
                     syncLog?.MarkFailed(ex.Message, ex.StackTrace);
+                    activity?.SetTag("mystira.sync_status", "failed");
                     _logger.LogWarning(ex, "Failed to sync delete for {EntityType} {Id}", typeof(TEntity).Name, id);
                 }
             }
@@ -740,6 +771,7 @@ public class PolyglotRepository<TEntity> : IPolyglotRepository<TEntity> where TE
     private Task<PolyglotSyncLog> CreateSyncLogAsync(
         string entityId,
         string operation,
+        string? correlationId,
         CancellationToken cancellationToken)
     {
         var syncLog = new PolyglotSyncLog
@@ -750,7 +782,8 @@ public class PolyglotRepository<TEntity> : IPolyglotRepository<TEntity> where TE
             Operation = operation,
             Status = SyncStatus.Pending,
             SourceBackend = BackendType.Primary,
-            TargetBackend = BackendType.Secondary
+            TargetBackend = BackendType.Secondary,
+            CorrelationId = correlationId
         };
 
         return Task.FromResult(syncLog);
