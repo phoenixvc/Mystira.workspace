@@ -106,9 +106,9 @@ module "mystira_app" {
   app_service_sku = "B1"
   dotnet_version  = "9.0"
 
-  # Custom domain for staging API
-  enable_api_custom_domain = true
-  api_custom_domain        = "staging.api.mystira.app"
+  # Custom domain for staging API - managed by dns-records.tf
+  # (dns-records.tf handles DNS propagation and binding for staging.api.mystira.app)
+  enable_api_custom_domain = false
 
   # Static Web App Configuration
   enable_static_web_app = true
@@ -116,9 +116,9 @@ module "mystira_app" {
   github_repository_url = "https://github.com/phoenixvc/Mystira.App"
   github_branch         = "main"
 
-  # Custom domain for staging
-  enable_app_custom_domain = true
-  app_custom_domain        = "staging.app.mystira.app"
+  # Custom domain for staging - managed by dns-records.tf
+  # (dns-records.tf handles DNS propagation and binding for staging.mystira.app)
+  enable_app_custom_domain = false
 
   # Storage - USE SHARED
   skip_storage_creation            = true
