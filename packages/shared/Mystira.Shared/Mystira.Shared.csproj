@@ -9,11 +9,11 @@
 
     <!-- Package metadata -->
     <PackageId>Mystira.Shared</PackageId>
-    <Version>0.4.3-alpha</Version>
+    <Version>0.5.0-alpha</Version>
     <Authors>Mystira Team</Authors>
     <Company>PhoenixVC</Company>
-    <Description>Shared infrastructure for Mystira platform services - CQRS patterns, validation, object mapping, authentication, authorization, and cross-cutting concerns</Description>
-    <PackageTags>mystira;shared;cqrs;validation;mapping;wolverine;fluentvalidation;mapperly</PackageTags>
+    <Description>Shared infrastructure for Mystira platform services - polyglot persistence, CQRS patterns, validation, object mapping, authentication, authorization, and cross-cutting concerns</Description>
+    <PackageTags>mystira;shared;polyglot;cqrs;validation;mapping;wolverine;fluentvalidation;mapperly</PackageTags>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/phoenixvc/Mystira.workspace</PackageProjectUrl>
     <PackageReadmeFile>README.md</PackageReadmeFile>
