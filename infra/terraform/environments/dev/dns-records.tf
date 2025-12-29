@@ -153,6 +153,21 @@ resource "azurerm_dns_cname_record" "dev_app_swa" {
   tags = local.common_tags
 }
 
+# Wait for DNS propagation before binding custom domains
+# Azure validates DNS records synchronously, so we need to wait
+resource "time_sleep" "dns_propagation" {
+  count = var.bind_custom_domains ? 1 : 0
+
+  depends_on = [
+    azurerm_dns_cname_record.dev_app_swa,
+    azurerm_dns_cname_record.dev_api,
+    azurerm_dns_txt_record.dev_api_verification,
+    azurerm_dns_cname_record.dev_story_swa
+  ]
+
+  create_duration = "60s"
+}
+
 # Custom domain binding for SWA (only when bind_custom_domains=true)
 resource "azurerm_static_web_app_custom_domain" "dev_app" {
   count = var.bind_custom_domains ? 1 : 0
@@ -161,7 +176,7 @@ resource "azurerm_static_web_app_custom_domain" "dev_app" {
   domain_name       = "dev.mystira.app"
   validation_type   = "cname-delegation"
 
-  depends_on = [azurerm_dns_cname_record.dev_app_swa]
+  depends_on = [azurerm_dns_cname_record.dev_app_swa, time_sleep.dns_propagation]
 }
 
 # =============================================================================
@@ -203,7 +218,8 @@ resource "azurerm_app_service_custom_hostname_binding" "dev_api" {
 
   depends_on = [
     azurerm_dns_cname_record.dev_api,
-    azurerm_dns_txt_record.dev_api_verification
+    azurerm_dns_txt_record.dev_api_verification,
+    time_sleep.dns_propagation
   ]
 }
 
@@ -386,7 +402,7 @@ resource "azurerm_static_web_app_custom_domain" "dev_story" {
   domain_name       = "dev.story.mystira.app"
   validation_type   = "cname-delegation"
 
-  depends_on = [azurerm_dns_cname_record.dev_story_swa]
+  depends_on = [azurerm_dns_cname_record.dev_story_swa, time_sleep.dns_propagation]
 }
 
 # =============================================================================

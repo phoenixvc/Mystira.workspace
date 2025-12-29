@@ -25,6 +25,10 @@ terraform {
       source  = "Azure/azapi"
       version = "~> 2.0"  # Required for AI Foundry projects and catalog models
     }
+    time = {
+      source  = "hashicorp/time"
+      version = "~> 0.9"
+    }
   }
 }
 
