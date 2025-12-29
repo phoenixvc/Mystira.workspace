@@ -19,7 +19,7 @@ terraform {
     }
     azuread = {
       source  = "hashicorp/azuread"
-      version = "~> 2.47"
+      version = "~> 3.0"
     }
     azapi = {
       source  = "Azure/azapi"
@@ -53,7 +53,7 @@ variable "external_id_tenant_id" {
 variable "alert_email_addresses" {
   description = "Email addresses for monitoring alerts"
   type        = list(string)
-  default     = ["devops@mystira.app"]
+  default     = ["jurie@phoenixvc.tech"]
 }
 
 variable "oidc_issuer_enabled" {
@@ -64,6 +64,12 @@ variable "oidc_issuer_enabled" {
 
 variable "workload_identity_enabled" {
   description = "Enable workload identity for AKS"
+  type        = bool
+  default     = true
+}
+
+variable "enable_azure_ai" {
+  description = "Enable Azure AI Foundry infrastructure (can be disabled to speed up initial deployment)"
   type        = bool
   default     = true
 }
@@ -264,22 +270,45 @@ module "shared_postgresql" {
     "adminapi"
   ]
 
-  # Enable Azure AD authentication for passwordless access
-  aad_auth_enabled = true
-  aad_admin_identities = {
-    "admin-api" = {
-      principal_name = "mys-staging-admin-api-identity-san"
-      principal_type = "ServicePrincipal"
-    }
-    "story-generator" = {
-      principal_name = "mys-staging-story-identity-san"
-      principal_type = "ServicePrincipal"
-    }
-  }
+  # AAD authentication is configured separately below to avoid circular dependencies
+  # (app modules need server_id, AAD admins need app identity principal_ids)
+  aad_auth_enabled = false
 
   tags = {
     CostCenter = "staging"
   }
+}
+
+# =============================================================================
+# PostgreSQL Azure AD Administrators
+# Configured separately from the module to avoid circular dependencies:
+# - PostgreSQL server is created first (module.shared_postgresql)
+# - App modules are created next (they need server_id)
+# - AAD admins are added last (they need app identity principal_ids)
+# =============================================================================
+
+data "azurerm_client_config" "current" {}
+
+resource "azurerm_postgresql_flexible_server_active_directory_administrator" "admin_api" {
+  server_name         = module.shared_postgresql.server_name
+  resource_group_name = azurerm_resource_group.main.name
+  tenant_id           = data.azurerm_client_config.current.tenant_id
+  object_id           = module.admin_api.identity_principal_id
+  principal_name      = "mys-staging-admin-api-identity-san"
+  principal_type      = "ServicePrincipal"
+
+  depends_on = [module.admin_api]
+}
+
+resource "azurerm_postgresql_flexible_server_active_directory_administrator" "story_generator" {
+  server_name         = module.shared_postgresql.server_name
+  resource_group_name = azurerm_resource_group.main.name
+  tenant_id           = data.azurerm_client_config.current.tenant_id
+  object_id           = module.story_generator.identity_principal_id
+  principal_name      = "mys-staging-story-identity-san"
+  principal_type      = "ServicePrincipal"
+
+  depends_on = [module.story_generator]
 }
 
 # Shared Redis Infrastructure
@@ -352,8 +381,10 @@ module "shared_monitoring" {
 
 # Shared Azure AI Foundry Infrastructure (in core-rg)
 # Updated to use AIServices (Azure AI Foundry) instead of legacy OpenAI
+# Can be disabled with enable_azure_ai=false to speed up initial deployment
 module "shared_azure_ai" {
   source = "../../modules/shared/azure-ai"
+  count  = var.enable_azure_ai ? 1 : 0
 
   environment         = "staging"
   location            = var.location
@@ -446,7 +477,7 @@ module "story_generator" {
   fallback_location        = "eastus2"  # SWA not available in South Africa North
   github_repository_url    = "https://github.com/phoenixvc/Mystira.StoryGenerator"
   github_branch            = "main"  # staging uses main branch
-  enable_swa_custom_domain = false   # Enable after DNS is configured
+  enable_swa_custom_domain = true
   swa_custom_domain        = "staging.story.mystira.app"
 
   tags = {
@@ -498,7 +529,9 @@ module "entra_external_id" {
   tenant_name   = "mystirastaging"
 
   pwa_redirect_uris = [
-    "https://app.staging.mystira.app/auth/callback"
+    # Staging environment
+    "https://staging.mystira.app/authentication/login-callback",
+    "https://staging.app.mystira.app/authentication/login-callback",
   ]
 }
 
@@ -633,17 +666,20 @@ resource "azurerm_key_vault_secret" "story_appinsights" {
 }
 
 # Story-Generator Azure AI Foundry Secrets (auto-populated from shared_azure_ai module)
+# Only created when enable_azure_ai=true
 resource "azurerm_key_vault_secret" "story_azure_ai_endpoint" {
+  count        = var.enable_azure_ai ? 1 : 0
   name         = "azure-ai-endpoint"
-  value        = module.shared_azure_ai.endpoint
+  value        = module.shared_azure_ai[0].endpoint
   key_vault_id = module.story_generator.key_vault_id
   content_type = "azure-ai"
   tags         = { AutoPopulated = "true", Source = "shared-azure-ai" }
 }
 
 resource "azurerm_key_vault_secret" "story_azure_ai_key" {
+  count        = var.enable_azure_ai ? 1 : 0
   name         = "azure-ai-api-key"
-  value        = module.shared_azure_ai.primary_access_key
+  value        = module.shared_azure_ai[0].primary_access_key
   key_vault_id = module.story_generator.key_vault_id
   content_type = "azure-ai"
   tags         = { AutoPopulated = "true", Source = "shared-azure-ai" }
