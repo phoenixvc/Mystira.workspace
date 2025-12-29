@@ -123,7 +123,7 @@ import {
 variable "bind_custom_domains" {
   description = "Set to true to bind custom domains (run after DNS propagates)"
   type        = bool
-  default     = false
+  default     = true
 }
 
 variable "k8s_ingress_ip" {
