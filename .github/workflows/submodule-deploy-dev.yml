@@ -45,8 +45,11 @@ on:
         required: false
         type: string
 
+# Two-level concurrency control:
+# 1. Shared group prevents conflicts with infra-deploy workflow
+# 2. Service-specific group prevents duplicate deployments of same service
 concurrency:
-  group: submodule-deploy-dev-${{ github.event.action || inputs.service }}
+  group: k8s-deploy-dev
   cancel-in-progress: false
 
 env:
