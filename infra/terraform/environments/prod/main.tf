@@ -289,16 +289,44 @@ module "shared_postgresql" {
   backup_retention_days        = 35
   geo_redundant_backup_enabled = true
 
-  # Azure AD authentication - disabled for initial deployment
-  # Enable after managed identities are created (circular dependency)
-  # Re-enable with aad_admin_identities after first successful deployment
-  aad_auth_enabled     = false
-  aad_admin_identities = {}
+  # AAD authentication is configured separately below to avoid circular dependencies
+  # (app modules need server_id, AAD admins need app identity principal_ids)
+  aad_auth_enabled = false
 
   tags = {
     CostCenter = "production"
     Critical   = "true"
   }
+}
+
+# =============================================================================
+# PostgreSQL Azure AD Administrators
+# Configured separately from the module to avoid circular dependencies:
+# - PostgreSQL server is created first (module.shared_postgresql)
+# - App modules are created next (they need server_id)
+# - AAD admins are added last (they need app identity principal_ids)
+# =============================================================================
+
+resource "azurerm_postgresql_flexible_server_active_directory_administrator" "admin_api" {
+  server_name         = module.shared_postgresql.server_name
+  resource_group_name = azurerm_resource_group.main.name
+  tenant_id           = data.azurerm_client_config.current.tenant_id
+  object_id           = module.admin_api.identity_principal_id
+  principal_name      = "mys-prod-admin-api-identity-san"
+  principal_type      = "ServicePrincipal"
+
+  depends_on = [module.admin_api]
+}
+
+resource "azurerm_postgresql_flexible_server_active_directory_administrator" "story_generator" {
+  server_name         = module.shared_postgresql.server_name
+  resource_group_name = azurerm_resource_group.main.name
+  tenant_id           = data.azurerm_client_config.current.tenant_id
+  object_id           = module.story_generator.identity_principal_id
+  principal_name      = "mys-prod-story-identity-san"
+  principal_type      = "ServicePrincipal"
+
+  depends_on = [module.story_generator]
 }
 
 # Shared Redis Infrastructure
