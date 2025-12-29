@@ -270,22 +270,45 @@ module "shared_postgresql" {
     "adminapi"
   ]
 
-  # Enable Azure AD authentication for passwordless access
-  aad_auth_enabled = true
-  aad_admin_identities = {
-    "admin-api" = {
-      principal_name = "mys-staging-admin-api-identity-san"
-      principal_type = "ServicePrincipal"
-    }
-    "story-generator" = {
-      principal_name = "mys-staging-story-identity-san"
-      principal_type = "ServicePrincipal"
-    }
-  }
+  # AAD authentication is configured separately below to avoid circular dependencies
+  # (app modules need server_id, AAD admins need app identity principal_ids)
+  aad_auth_enabled = false
 
   tags = {
     CostCenter = "staging"
   }
+}
+
+# =============================================================================
+# PostgreSQL Azure AD Administrators
+# Configured separately from the module to avoid circular dependencies:
+# - PostgreSQL server is created first (module.shared_postgresql)
+# - App modules are created next (they need server_id)
+# - AAD admins are added last (they need app identity principal_ids)
+# =============================================================================
+
+data "azurerm_client_config" "current" {}
+
+resource "azurerm_postgresql_flexible_server_active_directory_administrator" "admin_api" {
+  server_name         = module.shared_postgresql.server_name
+  resource_group_name = azurerm_resource_group.main.name
+  tenant_id           = data.azurerm_client_config.current.tenant_id
+  object_id           = module.admin_api.identity_principal_id
+  principal_name      = "mys-staging-admin-api-identity-san"
+  principal_type      = "ServicePrincipal"
+
+  depends_on = [module.admin_api]
+}
+
+resource "azurerm_postgresql_flexible_server_active_directory_administrator" "story_generator" {
+  server_name         = module.shared_postgresql.server_name
+  resource_group_name = azurerm_resource_group.main.name
+  tenant_id           = data.azurerm_client_config.current.tenant_id
+  object_id           = module.story_generator.identity_principal_id
+  principal_name      = "mys-staging-story-identity-san"
+  principal_type      = "ServicePrincipal"
+
+  depends_on = [module.story_generator]
 }
 
 # Shared Redis Infrastructure
