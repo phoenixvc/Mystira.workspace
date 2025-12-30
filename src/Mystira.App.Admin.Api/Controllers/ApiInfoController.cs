@@ -1,6 +1,6 @@
 using System.Reflection;
 using Microsoft.AspNetCore.Mvc;
-using Mystira.App.Admin.Api.Models;
+using Mystira.App.Contracts.Responses.Common;
 
 namespace Mystira.App.Admin.Api.Controllers;
 

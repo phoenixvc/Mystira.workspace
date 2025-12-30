@@ -4,17 +4,12 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Mystira.App.Admin.Api.Models;
 using Mystira.App.Admin.Api.Services;
+using Mystira.App.Contracts.Requests.Scenarios;
 using Mystira.App.Domain.Models;
 using Mystira.App.Infrastructure.Data;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
-using Character = Mystira.App.Admin.Api.Models.Character;
-using CharacterMediaMetadataEntry = Mystira.App.Domain.Models.CharacterMediaMetadataEntry;
-using CharacterMediaMetadataFile = Mystira.App.Domain.Models.CharacterMediaMetadataFile;
-using CharacterMetadata = Mystira.App.Admin.Api.Models.CharacterMetadata;
-using MediaMetadataEntry = Mystira.App.Domain.Models.MediaMetadataEntry;
-using MediaMetadataFile = Mystira.App.Domain.Models.MediaMetadataFile;
-using ScenarioQueryRequest = Mystira.App.Contracts.Requests.Scenarios.ScenarioQueryRequest;
+using AdminCharacter = Mystira.App.Admin.Api.Models.Character;
 
 namespace Mystira.App.Admin.Api.Controllers;
 
@@ -509,9 +504,9 @@ public class AdminController : Controller
         }
 
         // Add sample characters
-        existingCharacterMap.Characters = new List<Character>
+        existingCharacterMap.Characters = new List<AdminCharacter>
         {
-            new Character
+            new AdminCharacter
             {
                 Id = "bear-maple-younger-kids",
                 Name = "Maple",
@@ -526,7 +521,7 @@ public class AdminController : Controller
                     Backstory = "Maple is a young bear whose quiet strength comes not from his size, but from his immense patience and kindness."
                 }
             },
-            new Character
+            new AdminCharacter
             {
                 Id = "fox-jinx-younger-kids",
                 Name = "Jinx",
