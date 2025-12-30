@@ -1,0 +1,8 @@
+using Mystira.Contracts.App.Responses.GameSessions;
+
+namespace Mystira.Application.CQRS.GameSessions.Queries;
+
+/// <summary>
+/// Query to retrieve all game sessions for a specific account
+/// </summary>
+public record GetSessionsByAccountQuery(string AccountId) : IQuery<List<GameSessionResponse>>;

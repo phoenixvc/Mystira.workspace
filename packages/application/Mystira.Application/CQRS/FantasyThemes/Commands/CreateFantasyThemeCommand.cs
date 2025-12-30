@@ -1,0 +1,8 @@
+using Mystira.Domain.Models;
+
+namespace Mystira.Application.CQRS.FantasyThemes.Commands;
+
+/// <summary>
+/// Command to create a new fantasy theme.
+/// </summary>
+public record CreateFantasyThemeCommand(string Name, string Description) : ICommand<FantasyThemeDefinition>;
