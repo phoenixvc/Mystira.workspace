@@ -8,36 +8,35 @@ namespace Mystira.Contracts.App.Enums;
 /// Represents the role of a contributor in content creation.
 /// </summary>
 /// <remarks>
-/// This type is re-exported from Mystira.Domain.Enums for backward compatibility.
-/// New code should use Mystira.Domain.Enums.ContributorRole directly.
+/// This type mirrors Mystira.Domain.Enums.ContributorRole for backward compatibility.
 /// </remarks>
 public enum ContributorRole
 {
-    /// <inheritdoc cref="DomainContributorRole.Author"/>
+    /// <summary>Primary author/creator.</summary>
     Author = 0,
 
-    /// <inheritdoc cref="DomainContributorRole.Artist"/>
+    /// <summary>Visual artist or illustrator.</summary>
     Artist = 1,
 
-    /// <inheritdoc cref="DomainContributorRole.Editor"/>
+    /// <summary>Content editor.</summary>
     Editor = 2,
 
-    /// <inheritdoc cref="DomainContributorRole.Writer"/>
+    /// <summary>Narrative writer.</summary>
     Writer = 3,
 
-    /// <inheritdoc cref="DomainContributorRole.Designer"/>
+    /// <summary>Game or experience designer.</summary>
     Designer = 4,
 
-    /// <inheritdoc cref="DomainContributorRole.Composer"/>
+    /// <summary>Music composer.</summary>
     Composer = 5,
 
-    /// <inheritdoc cref="DomainContributorRole.VoiceActor"/>
+    /// <summary>Voice actor.</summary>
     VoiceActor = 6,
 
-    /// <inheritdoc cref="DomainContributorRole.Translator"/>
+    /// <summary>Language translator.</summary>
     Translator = 7,
 
-    /// <inheritdoc cref="DomainContributorRole.Other"/>
+    /// <summary>Other role not specified above.</summary>
     Other = 99
 }
 
@@ -45,21 +44,20 @@ public enum ContributorRole
 /// Represents the verification status of a contributor.
 /// </summary>
 /// <remarks>
-/// This type is re-exported from Mystira.Domain.Enums for backward compatibility.
-/// New code should use Mystira.Domain.Enums.ContributorVerificationStatus directly.
+/// This type mirrors Mystira.Domain.Enums.ContributorVerificationStatus for backward compatibility.
 /// </remarks>
 public enum ContributorVerificationStatus
 {
-    /// <inheritdoc cref="DomainContributorVerificationStatus.Pending"/>
+    /// <summary>Verification pending review.</summary>
     Pending = 0,
 
-    /// <inheritdoc cref="DomainContributorVerificationStatus.Verified"/>
+    /// <summary>Contributor is verified.</summary>
     Verified = 1,
 
-    /// <inheritdoc cref="DomainContributorVerificationStatus.Rejected"/>
+    /// <summary>Verification was rejected.</summary>
     Rejected = 2,
 
-    /// <inheritdoc cref="DomainContributorVerificationStatus.Expired"/>
+    /// <summary>Verification has expired.</summary>
     Expired = 3
 }
 
@@ -68,27 +66,19 @@ public enum ContributorVerificationStatus
 /// </summary>
 public static class ContributorEnumExtensions
 {
-    /// <summary>
-    /// Converts Contracts ContributorRole to Domain ContributorRole.
-    /// </summary>
+    /// <summary>Converts Contracts ContributorRole to Domain ContributorRole.</summary>
     public static DomainContributorRole ToDomain(this ContributorRole value)
         => (DomainContributorRole)(int)value;
 
-    /// <summary>
-    /// Converts Domain ContributorRole to Contracts ContributorRole.
-    /// </summary>
+    /// <summary>Converts Domain ContributorRole to Contracts ContributorRole.</summary>
     public static ContributorRole ToContracts(this DomainContributorRole value)
         => (ContributorRole)(int)value;
 
-    /// <summary>
-    /// Converts Contracts ContributorVerificationStatus to Domain ContributorVerificationStatus.
-    /// </summary>
+    /// <summary>Converts Contracts ContributorVerificationStatus to Domain.</summary>
     public static DomainContributorVerificationStatus ToDomain(this ContributorVerificationStatus value)
         => (DomainContributorVerificationStatus)(int)value;
 
-    /// <summary>
-    /// Converts Domain ContributorVerificationStatus to Contracts ContributorVerificationStatus.
-    /// </summary>
+    /// <summary>Converts Domain ContributorVerificationStatus to Contracts.</summary>
     public static ContributorVerificationStatus ToContracts(this DomainContributorVerificationStatus value)
         => (ContributorVerificationStatus)(int)value;
 }
