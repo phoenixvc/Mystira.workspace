@@ -26,14 +26,33 @@ public record StoryProtocolResponse
     public string? TransactionHash { get; set; }
 
     /// <summary>
+    /// The registration transaction hash (alias for TransactionHash).
+    /// </summary>
+    public string? RegistrationTxHash
+    {
+        get => TransactionHash;
+        set => TransactionHash = value;
+    }
+
+    /// <summary>
     /// The registration status.
     /// </summary>
     public string Status { get; set; } = string.Empty;
 
     /// <summary>
+    /// Whether the content is registered on Story Protocol.
+    /// </summary>
+    public bool IsRegistered { get; set; }
+
+    /// <summary>
     /// When the registration was created.
     /// </summary>
     public DateTime CreatedAt { get; set; }
+
+    /// <summary>
+    /// When the content was registered on Story Protocol.
+    /// </summary>
+    public DateTime? RegisteredAt { get; set; }
 
     /// <summary>
     /// When the registration was last updated.
@@ -54,6 +73,26 @@ public record StoryProtocolResponse
     /// Metadata URI for the IP asset.
     /// </summary>
     public string? MetadataUri { get; set; }
+
+    /// <summary>
+    /// The royalty module identifier.
+    /// </summary>
+    public string? RoyaltyModuleId { get; set; }
+
+    /// <summary>
+    /// List of contributors for this IP asset.
+    /// </summary>
+    public List<ContributorResponse> Contributors { get; set; } = new();
+
+    /// <summary>
+    /// Number of contributors.
+    /// </summary>
+    public int ContributorCount { get; set; }
+
+    /// <summary>
+    /// Total percentage allocated to contributors.
+    /// </summary>
+    public decimal TotalPercentage { get; set; }
 }
 
 /// <summary>
@@ -87,6 +126,15 @@ public record ContributorResponse
     public decimal SharePercentage { get; set; }
 
     /// <summary>
+    /// The contribution percentage (alias for SharePercentage).
+    /// </summary>
+    public decimal ContributionPercentage
+    {
+        get => SharePercentage;
+        set => SharePercentage = value;
+    }
+
+    /// <summary>
     /// The wallet address for receiving royalties.
     /// </summary>
     public string? WalletAddress { get; set; }
@@ -100,6 +148,11 @@ public record ContributorResponse
     /// Biography or description of the contributor.
     /// </summary>
     public string? Bio { get; set; }
+
+    /// <summary>
+    /// Notes about the contributor or their contribution.
+    /// </summary>
+    public string? Notes { get; set; }
 
     /// <summary>
     /// URL to the contributor's profile image.

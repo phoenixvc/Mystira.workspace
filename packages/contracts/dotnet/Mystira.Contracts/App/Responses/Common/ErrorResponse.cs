@@ -81,6 +81,11 @@ public record ValidationErrorResponse : ErrorResponse
     public required IDictionary<string, IReadOnlyList<string>> Errors { get; init; }
 
     /// <summary>
+    /// Alias for Errors property for backward compatibility.
+    /// </summary>
+    public IDictionary<string, IReadOnlyList<string>> ValidationErrors => Errors;
+
+    /// <summary>
     /// Creates a validation error response from field errors.
     /// </summary>
     public static ValidationErrorResponse FromErrors(IDictionary<string, IReadOnlyList<string>> errors) => new()
