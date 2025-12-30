@@ -826,7 +826,7 @@ public class ScenarioStoryProtocol
             return false;
         }
 
-        var totalSplit = Contributors.Sum(c => c.Split);
+        var totalSplit = Contributors.Sum(c => c.ContributionPercentage);
         if (Math.Abs(totalSplit - 100) > 0.01m)
         {
             errors.Add($"Contributor splits must sum to 100%, currently {totalSplit}%");
