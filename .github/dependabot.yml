@@ -1,0 +1,64 @@
+version: 2
+updates:
+  # Rust (Cargo) dependencies
+  - package-ecosystem: "cargo"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "rust"
+    groups:
+      rust-dependencies:
+        patterns:
+          - "*"
+
+  # GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 3
+    labels:
+      - "dependencies"
+      - "ci"
+
+  # npm (Leptos Tailwind)
+  - package-ecosystem: "npm"
+    directory: "/Mystira.Leptos"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 3
+    labels:
+      - "dependencies"
+      - "npm"
+
+  # npm (React DevHub)
+  - package-ecosystem: "npm"
+    directory: "/Mystira.DevHub"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "npm"
+
+  # NuGet (.NET)
+  - package-ecosystem: "nuget"
+    directory: "/Mystira.DevHub.CLI"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 3
+    labels:
+      - "dependencies"
+      - "dotnet"
+
+  - package-ecosystem: "nuget"
+    directory: "/Mystira.DevHub.Services"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 3
+    labels:
+      - "dependencies"
+      - "dotnet"
