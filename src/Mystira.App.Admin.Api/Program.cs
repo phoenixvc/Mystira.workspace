@@ -454,6 +454,7 @@ builder.Services.Configure<RedisCacheOptions>(
 builder.Services.AddContentCaching(builder.Configuration);
 
 // Register application services - Admin API services
+builder.Services.AddScoped<IUserProfileService, UserProfileService>();
 builder.Services.AddScoped<IScenarioApiService, ScenarioApiService>();
 builder.Services.AddScoped<ICharacterMapApiService, CharacterMapApiService>();
 builder.Services.AddScoped<Mystira.App.Admin.Api.Services.IAppStatusService, Mystira.App.Admin.Api.Services.AppStatusService>();
