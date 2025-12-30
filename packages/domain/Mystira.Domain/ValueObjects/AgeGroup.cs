@@ -71,12 +71,31 @@ public sealed record AgeGroup
     };
 
     /// <summary>
+    /// Gets the value/ID (alias for Id for DTO compatibility).
+    /// </summary>
+    public string Value => Id;
+
+    /// <summary>
     /// Gets an age group by ID.
     /// </summary>
     /// <param name="id">The age group ID.</param>
     /// <returns>The age group or null if not found.</returns>
     public static AgeGroup? FromId(string? id) =>
         All.FirstOrDefault(ag => ag.Id.Equals(id, StringComparison.OrdinalIgnoreCase));
+
+    /// <summary>
+    /// Gets an age group by value/ID (alias for FromId).
+    /// </summary>
+    /// <param name="value">The age group value/ID.</param>
+    /// <returns>The age group or null if not found.</returns>
+    public static AgeGroup? FromValue(string? value) => FromId(value);
+
+    /// <summary>
+    /// Parses an age group from a string value.
+    /// </summary>
+    /// <param name="value">The value to parse.</param>
+    /// <returns>The age group or null if not found.</returns>
+    public static AgeGroup? Parse(string? value) => FromId(value);
 
     /// <summary>
     /// Gets the appropriate age group for a given age.

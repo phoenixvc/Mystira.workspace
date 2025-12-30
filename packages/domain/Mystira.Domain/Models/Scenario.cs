@@ -564,6 +564,25 @@ public class EchoLog : Entity
     public bool IsMajor { get; set; }
 
     /// <summary>
+    /// Gets or sets the echo description (alias for Content for DTO compatibility).
+    /// </summary>
+    public string Description
+    {
+        get => Content;
+        set => Content = value;
+    }
+
+    /// <summary>
+    /// Gets or sets the echo strength (0.0 to 1.0).
+    /// </summary>
+    public double Strength { get; set; } = 1.0;
+
+    /// <summary>
+    /// Gets or sets the timestamp when this echo was created.
+    /// </summary>
+    public DateTime Timestamp { get; set; } = DateTime.UtcNow;
+
+    /// <summary>
     /// Gets the echo type.
     /// </summary>
     public EchoType? EchoType => EchoType.FromValue(EchoTypeId);

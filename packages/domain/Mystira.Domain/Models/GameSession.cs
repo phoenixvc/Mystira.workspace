@@ -97,6 +97,41 @@ public class GameSession : SoftDeletableEntity
     public List<CompassTracking> CompassValues { get; set; } = new();
 
     /// <summary>
+    /// Gets or sets the choice history for this session.
+    /// </summary>
+    public List<SessionChoice> ChoiceHistory { get; set; } = new();
+
+    /// <summary>
+    /// Gets or sets the echo history for this session.
+    /// </summary>
+    public List<EchoLog> EchoHistory { get; set; } = new();
+
+    /// <summary>
+    /// Gets or sets the player compass progress totals.
+    /// </summary>
+    public Dictionary<string, int> PlayerCompassProgressTotals { get; set; } = new();
+
+    /// <summary>
+    /// Gets or sets whether the session is paused.
+    /// </summary>
+    public bool IsPaused { get; set; }
+
+    /// <summary>
+    /// Gets or sets when the session was paused.
+    /// </summary>
+    public DateTime? PausedAt { get; set; }
+
+    /// <summary>
+    /// Gets or sets the target age group for this session.
+    /// </summary>
+    public string? TargetAgeGroup { get; set; }
+
+    /// <summary>
+    /// Gets or sets the selected character ID.
+    /// </summary>
+    public string? SelectedCharacterId { get; set; }
+
+    /// <summary>
     /// Gets or sets the end reason.
     /// </summary>
     public SessionEndReason? EndReason { get; set; }
@@ -280,6 +315,46 @@ public class GameSession : SoftDeletableEntity
         ScenesVisited++;
         LastActivityAt = DateTime.UtcNow;
     }
+
+    /// <summary>
+    /// Gets the total elapsed time for this session.
+    /// </summary>
+    /// <returns>The total elapsed time.</returns>
+    public TimeSpan GetTotalElapsedTime()
+    {
+        if (ElapsedTime.HasValue)
+            return ElapsedTime.Value;
+
+        if (StartedAt.HasValue)
+        {
+            var endTime = EndedAt ?? DateTime.UtcNow;
+            return endTime - StartedAt.Value;
+        }
+
+        return TimeSpan.Zero;
+    }
+
+    /// <summary>
+    /// Recalculates compass progress from the choice history.
+    /// </summary>
+    public void RecalculateCompassProgressFromHistory()
+    {
+        PlayerCompassProgressTotals.Clear();
+
+        foreach (var choice in ChoiceHistory)
+        {
+            if (choice.CompassChange != null)
+            {
+                var axis = choice.CompassChange.Axis;
+                var delta = choice.CompassChange.Delta;
+
+                if (!PlayerCompassProgressTotals.ContainsKey(axis))
+                    PlayerCompassProgressTotals[axis] = 0;
+
+                PlayerCompassProgressTotals[axis] += delta;
+            }
+        }
+    }
 }
 
 /// <summary>
@@ -296,6 +371,51 @@ public class SessionPlayerAssignment : Entity
     /// Gets or sets the player's profile ID.
     /// </summary>
     public string PlayerId { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Gets or sets the player type (Profile or Guest).
+    /// </summary>
+    public PlayerType Type { get; set; } = PlayerType.Profile;
+
+    /// <summary>
+    /// Gets or sets the profile ID.
+    /// </summary>
+    public string? ProfileId { get; set; }
+
+    /// <summary>
+    /// Gets or sets the profile name.
+    /// </summary>
+    public string? ProfileName { get; set; }
+
+    /// <summary>
+    /// Gets or sets the profile image.
+    /// </summary>
+    public string? ProfileImage { get; set; }
+
+    /// <summary>
+    /// Gets or sets the selected avatar media ID.
+    /// </summary>
+    public string? SelectedAvatarMediaId { get; set; }
+
+    /// <summary>
+    /// Gets or sets the guest name (for guest players).
+    /// </summary>
+    public string? GuestName { get; set; }
+
+    /// <summary>
+    /// Gets or sets the guest age range.
+    /// </summary>
+    public string? GuestAgeRange { get; set; }
+
+    /// <summary>
+    /// Gets or sets the guest avatar.
+    /// </summary>
+    public string? GuestAvatar { get; set; }
+
+    /// <summary>
+    /// Gets or sets whether to save this guest as a profile.
+    /// </summary>
+    public bool SaveAsProfile { get; set; }
 
     /// <summary>
     /// Gets or sets the player's display name.
@@ -349,6 +469,41 @@ public class SessionCharacterAssignment : Entity
     public string CharacterId { get; set; } = string.Empty;
 
     /// <summary>
+    /// Gets or sets the character name.
+    /// </summary>
+    public string CharacterName { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Gets or sets the character image.
+    /// </summary>
+    public string? Image { get; set; }
+
+    /// <summary>
+    /// Gets or sets the character audio.
+    /// </summary>
+    public string? Audio { get; set; }
+
+    /// <summary>
+    /// Gets or sets the character role.
+    /// </summary>
+    public string? Role { get; set; }
+
+    /// <summary>
+    /// Gets or sets the character archetype.
+    /// </summary>
+    public string? Archetype { get; set; }
+
+    /// <summary>
+    /// Gets or sets whether this character is unused.
+    /// </summary>
+    public bool IsUnused { get; set; }
+
+    /// <summary>
+    /// Gets or sets the player assignment for this character.
+    /// </summary>
+    public SessionPlayerAssignment? PlayerAssignment { get; set; }
+
+    /// <summary>
     /// Gets or sets the assigned player ID (null for AI).
     /// </summary>
     public string? PlayerId { get; set; }
@@ -400,9 +555,49 @@ public class SessionChoice : Entity
     public string SceneId { get; set; } = string.Empty;
 
     /// <summary>
+    /// Gets or sets the scene title.
+    /// </summary>
+    public string? SceneTitle { get; set; }
+
+    /// <summary>
     /// Gets or sets the branch ID that was chosen.
     /// </summary>
     public string BranchId { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Gets or sets the choice text.
+    /// </summary>
+    public string? ChoiceText { get; set; }
+
+    /// <summary>
+    /// Gets or sets the next scene ID.
+    /// </summary>
+    public string? NextScene { get; set; }
+
+    /// <summary>
+    /// Gets or sets the compass axis affected.
+    /// </summary>
+    public string? CompassAxis { get; set; }
+
+    /// <summary>
+    /// Gets or sets the compass direction.
+    /// </summary>
+    public string? CompassDirection { get; set; }
+
+    /// <summary>
+    /// Gets or sets the compass delta value.
+    /// </summary>
+    public double CompassDelta { get; set; }
+
+    /// <summary>
+    /// Gets or sets the compass change for this choice.
+    /// </summary>
+    public CompassChange? CompassChange { get; set; }
+
+    /// <summary>
+    /// Gets or sets whether an echo was generated.
+    /// </summary>
+    public bool EchoGenerated { get; set; }
 
     /// <summary>
     /// Gets or sets the player who made the choice.
@@ -479,6 +674,21 @@ public class SessionAchievement : Entity
     /// Gets or sets an optional badge ID associated with this achievement.
     /// </summary>
     public string? BadgeId { get; set; }
+
+    /// <summary>
+    /// Gets or sets the icon name for this achievement.
+    /// </summary>
+    public string? IconName { get; set; }
+
+    /// <summary>
+    /// Gets or sets the compass axis related to this achievement.
+    /// </summary>
+    public string? CompassAxis { get; set; }
+
+    /// <summary>
+    /// Gets or sets the threshold value for threshold-based achievements.
+    /// </summary>
+    public int? ThresholdValue { get; set; }
 
     /// <summary>
     /// Gets or sets additional metadata as JSON.

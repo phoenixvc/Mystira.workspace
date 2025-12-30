@@ -175,7 +175,12 @@ public enum SceneType
     /// <summary>
     /// Tutorial scene.
     /// </summary>
-    Tutorial = 12
+    Tutorial = 12,
+
+    /// <summary>
+    /// Choice scene (alias for Decision for DTO compatibility).
+    /// </summary>
+    Choice = 2
 }
 
 /// <summary>
@@ -253,4 +258,20 @@ public enum SessionEndReason
     /// Parent/guardian ended the session.
     /// </summary>
     ParentalControl = 5
+}
+
+/// <summary>
+/// Represents the type of player in a session.
+/// </summary>
+public enum PlayerType
+{
+    /// <summary>
+    /// Player with a saved profile.
+    /// </summary>
+    Profile = 0,
+
+    /// <summary>
+    /// Guest player without a saved profile.
+    /// </summary>
+    Guest = 1
 }
