@@ -6,11 +6,22 @@ namespace Mystira.Domain.Models;
 /// </summary>
 public class AgeGroupDefinition
 {
+    /// <summary>Gets or sets the unique identifier.</summary>
     public string Id { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets the display name.</summary>
     public string Name { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets the internal value/code.</summary>
     public string Value { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets the minimum age for this group.</summary>
     public int MinimumAge { get; set; }
+
+    /// <summary>Gets or sets the maximum age for this group.</summary>
     public int MaximumAge { get; set; }
+
+    /// <summary>Gets or sets the description.</summary>
     public string Description { get; set; } = string.Empty;
 
     /// <summary>
@@ -18,8 +29,11 @@ public class AgeGroupDefinition
     /// </summary>
     public bool IsDeleted { get; set; } = false;
 
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-    public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+    /// <summary>Gets or sets the creation timestamp.</summary>
+    public DateTime CreatedAt { get; set; }
+
+    /// <summary>Gets or sets the last update timestamp.</summary>
+    public DateTime UpdatedAt { get; set; }
 }
 
 /// <summary>
@@ -27,8 +41,13 @@ public class AgeGroupDefinition
 /// </summary>
 public class ArchetypeDefinition
 {
+    /// <summary>Gets or sets the unique identifier.</summary>
     public string Id { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets the display name.</summary>
     public string Name { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets the description.</summary>
     public string Description { get; set; } = string.Empty;
 
     /// <summary>
@@ -36,8 +55,11 @@ public class ArchetypeDefinition
     /// </summary>
     public bool IsDeleted { get; set; } = false;
 
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-    public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+    /// <summary>Gets or sets the creation timestamp.</summary>
+    public DateTime CreatedAt { get; set; }
+
+    /// <summary>Gets or sets the last update timestamp.</summary>
+    public DateTime UpdatedAt { get; set; }
 }
 
 /// <summary>
@@ -46,8 +68,13 @@ public class ArchetypeDefinition
 /// </summary>
 public class EchoTypeDefinition
 {
+    /// <summary>Gets or sets the unique identifier.</summary>
     public string Id { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets the display name.</summary>
     public string Name { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets the description.</summary>
     public string Description { get; set; } = string.Empty;
 
     /// <summary>
@@ -60,8 +87,11 @@ public class EchoTypeDefinition
     /// </summary>
     public bool IsDeleted { get; set; } = false;
 
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-    public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+    /// <summary>Gets or sets the creation timestamp.</summary>
+    public DateTime CreatedAt { get; set; }
+
+    /// <summary>Gets or sets the last update timestamp.</summary>
+    public DateTime UpdatedAt { get; set; }
 }
 
 /// <summary>
@@ -70,8 +100,13 @@ public class EchoTypeDefinition
 /// </summary>
 public class FantasyThemeDefinition
 {
+    /// <summary>Gets or sets the unique identifier.</summary>
     public string Id { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets the display name.</summary>
     public string Name { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets the description.</summary>
     public string Description { get; set; } = string.Empty;
 
     /// <summary>
@@ -79,8 +114,11 @@ public class FantasyThemeDefinition
     /// </summary>
     public bool IsDeleted { get; set; } = false;
 
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-    public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+    /// <summary>Gets or sets the creation timestamp.</summary>
+    public DateTime CreatedAt { get; set; }
+
+    /// <summary>Gets or sets the last update timestamp.</summary>
+    public DateTime UpdatedAt { get; set; }
 }
 
 /// <summary>
@@ -89,8 +127,13 @@ public class FantasyThemeDefinition
 /// </summary>
 public class CompassAxisDefinition
 {
+    /// <summary>Gets or sets the unique identifier.</summary>
     public string Id { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets the display name.</summary>
     public string Name { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets the description.</summary>
     public string Description { get; set; } = string.Empty;
 
     /// <summary>
@@ -98,6 +141,9 @@ public class CompassAxisDefinition
     /// </summary>
     public bool IsDeleted { get; set; } = false;
 
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-    public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+    /// <summary>Gets or sets the creation timestamp.</summary>
+    public DateTime CreatedAt { get; set; }
+
+    /// <summary>Gets or sets the last update timestamp.</summary>
+    public DateTime UpdatedAt { get; set; }
 }

@@ -25,7 +25,8 @@ public static partial class ScenarioMapper
     /// <summary>
     /// Maps CharacterMetadataRequest to ScenarioCharacterMetadata.
     /// </summary>
-    [MapProperty(nameof(CharacterMetadataRequest.Archetype), nameof(ScenarioCharacterMetadata.Archetype), Use = nameof(MapArchetypes))]
+    [MapProperty(nameof(CharacterMetadataRequest.Archetype), nameof(ScenarioCharacterMetadata.Archetypes), Use = nameof(MapArchetypes))]
+    [MapProperty(nameof(CharacterMetadataRequest.Role), nameof(ScenarioCharacterMetadata.Roles))]
     private static partial ScenarioCharacterMetadata ToScenarioCharacterMetadata(CharacterMetadataRequest request);
 
     /// <summary>
