@@ -10,6 +10,7 @@ name: "[Deploy] Dev (K8s)"
 #   - story-generator-deploy: Mystira.StoryGenerator.Api → K8s (API only, not Blazor WASM)
 #   - publisher-deploy:       Mystira.Publisher → K8s
 #   - chain-deploy:           Mystira.Chain → K8s
+#   - devhub-deploy:          Mystira.DevHub → K8s (Leptos frontend)
 #
 # NOTE: This is for DEV environment ONLY.
 # Staging and production deployments are managed through the workspace directly
@@ -23,6 +24,7 @@ on:
       - story-generator-deploy
       - publisher-deploy
       - chain-deploy
+      - devhub-deploy
 
   workflow_dispatch:
     inputs:
@@ -36,6 +38,7 @@ on:
           - story-generator-deploy
           - publisher-deploy
           - chain-deploy
+          - devhub-deploy
       image_tag:
         description: 'Image tag to deploy (default: latest from dev)'
         required: false
@@ -154,6 +157,11 @@ jobs:
               echo "image=chain" >> $GITHUB_OUTPUT
               echo "submodule_path=packages/chain" >> $GITHUB_OUTPUT
               echo "is_statefulset=true" >> $GITHUB_OUTPUT
+              ;;
+            devhub-deploy)
+              echo "deployment=mys-devhub" >> $GITHUB_OUTPUT
+              echo "image=devhub" >> $GITHUB_OUTPUT
+              echo "submodule_path=packages/devhub" >> $GITHUB_OUTPUT
               ;;
             *)
               echo "::error::Unknown service type: ${{ steps.action.outputs.type }}"
@@ -332,6 +340,9 @@ jobs:
                 ;;
               chain-deploy)
                 echo "- https://dev.chain.mystira.app" >> $GITHUB_STEP_SUMMARY
+                ;;
+              devhub-deploy)
+                echo "- https://dev.devhub.mystira.app" >> $GITHUB_STEP_SUMMARY
                 ;;
             esac
           else

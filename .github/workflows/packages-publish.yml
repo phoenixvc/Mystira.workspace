@@ -1,0 +1,363 @@
+name: "[Publish] NuGet Packages"
+
+# Unified NuGet package publishing for Domain, Contracts, and Shared
+# Publishes packages in dependency order: Domain → Contracts → Shared
+#
+# Triggered by:
+# - Push to dev branch (publishes pre-release: 0.5.0-alpha-build.123)
+# - Push to main branch (publishes stable: 0.5.0-alpha)
+# - Manual workflow_dispatch
+#
+# Version Strategy:
+# - Dev push: Pre-release to GitHub Packages only
+# - Main push: Stable to GitHub Packages + NuGet.org
+#
+# Package Dependencies:
+#   Mystira.Domain    (no dependencies)
+#   Mystira.Contracts (depends on Domain)
+#   Mystira.Shared    (depends on Domain, optionally Contracts)
+
+on:
+  push:
+    branches:
+      - dev
+      - main
+    paths:
+      - 'packages/domain/**'
+      - 'packages/contracts/dotnet/**'
+      - 'packages/shared/**'
+      - '.github/workflows/packages-publish.yml'
+
+  workflow_dispatch:
+    inputs:
+      packages:
+        description: 'Packages to publish (comma-separated or "all")'
+        required: false
+        type: string
+        default: 'all'
+      version_suffix:
+        description: 'Version suffix (e.g., beta.1, rc.1 - leave empty for auto)'
+        required: false
+        type: string
+      publish_to_nuget_org:
+        description: 'Also publish to NuGet.org'
+        required: false
+        type: boolean
+        default: false
+
+concurrency:
+  group: nuget-packages-publish
+  cancel-in-progress: false
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+
+permissions:
+  id-token: write
+  contents: read
+  packages: write
+
+jobs:
+  # ==========================================================================
+  # Determine what to publish
+  # ==========================================================================
+  detect-changes:
+    name: Detect Changes
+    runs-on: ubuntu-latest
+    outputs:
+      domain_changed: ${{ steps.changes.outputs.domain }}
+      contracts_changed: ${{ steps.changes.outputs.contracts }}
+      shared_changed: ${{ steps.changes.outputs.shared }}
+      version_suffix: ${{ steps.version.outputs.suffix }}
+      is_prerelease: ${{ steps.version.outputs.is_prerelease }}
+      publish_to_nuget: ${{ steps.version.outputs.publish_to_nuget }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Detect file changes
+        id: changes
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            PACKAGES="${{ inputs.packages }}"
+            if [ "$PACKAGES" = "all" ] || [ -z "$PACKAGES" ]; then
+              echo "domain=true" >> $GITHUB_OUTPUT
+              echo "contracts=true" >> $GITHUB_OUTPUT
+              echo "shared=true" >> $GITHUB_OUTPUT
+            else
+              echo "domain=$(echo $PACKAGES | grep -q domain && echo true || echo false)" >> $GITHUB_OUTPUT
+              echo "contracts=$(echo $PACKAGES | grep -q contracts && echo true || echo false)" >> $GITHUB_OUTPUT
+              echo "shared=$(echo $PACKAGES | grep -q shared && echo true || echo false)" >> $GITHUB_OUTPUT
+            fi
+          else
+            # Check which packages have changes
+            CHANGED_FILES=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} 2>/dev/null || git diff --name-only HEAD~1)
+
+            echo "domain=$(echo "$CHANGED_FILES" | grep -q '^packages/domain/' && echo true || echo false)" >> $GITHUB_OUTPUT
+            echo "contracts=$(echo "$CHANGED_FILES" | grep -q '^packages/contracts/dotnet/' && echo true || echo false)" >> $GITHUB_OUTPUT
+            echo "shared=$(echo "$CHANGED_FILES" | grep -q '^packages/shared/' && echo true || echo false)" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Determine version settings
+        id: version
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ -n "${{ inputs.version_suffix }}" ]; then
+            echo "suffix=${{ inputs.version_suffix }}" >> $GITHUB_OUTPUT
+            echo "is_prerelease=true" >> $GITHUB_OUTPUT
+            echo "publish_to_nuget=${{ inputs.publish_to_nuget_org }}" >> $GITHUB_OUTPUT
+          elif [ "${{ github.ref }}" = "refs/heads/main" ]; then
+            echo "suffix=" >> $GITHUB_OUTPUT
+            echo "is_prerelease=false" >> $GITHUB_OUTPUT
+            echo "publish_to_nuget=true" >> $GITHUB_OUTPUT
+          else
+            echo "suffix=build.${{ github.run_number }}" >> $GITHUB_OUTPUT
+            echo "is_prerelease=true" >> $GITHUB_OUTPUT
+            echo "publish_to_nuget=false" >> $GITHUB_OUTPUT
+          fi
+
+  # ==========================================================================
+  # Publish Domain (no dependencies)
+  # ==========================================================================
+  publish-domain:
+    name: Publish Domain
+    runs-on: ubuntu-latest
+    needs: detect-changes
+    if: needs.detect-changes.outputs.domain_changed == 'true'
+    outputs:
+      version: ${{ steps.pack.outputs.version }}
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: '9.0.x'
+          source-url: https://nuget.pkg.github.com/phoenixvc/index.json
+        env:
+          NUGET_AUTH_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN }}
+
+      - name: Calculate version
+        id: calc_version
+        run: |
+          BASE_VERSION=$(grep -oP '(?<=<Version>)[^<]+' packages/domain/Mystira.Domain/Mystira.Domain.csproj)
+          SUFFIX="${{ needs.detect-changes.outputs.version_suffix }}"
+          if [ -n "$SUFFIX" ]; then
+            FULL_VERSION="${BASE_VERSION}-${SUFFIX}"
+          else
+            FULL_VERSION="$BASE_VERSION"
+          fi
+          echo "version=$FULL_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Restore, Build, Pack
+        run: |
+          dotnet restore packages/domain/Mystira.Domain
+          dotnet build packages/domain/Mystira.Domain -c Release --no-restore -p:Version=${{ steps.calc_version.outputs.version }}
+          dotnet pack packages/domain/Mystira.Domain -c Release --no-build -o ./nupkg -p:Version=${{ steps.calc_version.outputs.version }}
+
+      - name: Push to GitHub Packages
+        id: pack
+        run: |
+          dotnet nuget push "./nupkg/*.nupkg" \
+            --source "https://nuget.pkg.github.com/phoenixvc/index.json" \
+            --api-key ${{ secrets.GITHUB_TOKEN }} \
+            --skip-duplicate
+          echo "version=${{ steps.calc_version.outputs.version }}" >> $GITHUB_OUTPUT
+
+      - name: Push to NuGet.org
+        if: needs.detect-changes.outputs.publish_to_nuget == 'true'
+        run: |
+          dotnet nuget push "./nupkg/*.nupkg" \
+            --source "https://api.nuget.org/v3/index.json" \
+            --api-key ${{ secrets.NUGET_API_KEY }} \
+            --skip-duplicate
+
+  # ==========================================================================
+  # Publish Contracts (depends on Domain)
+  # ==========================================================================
+  publish-contracts:
+    name: Publish Contracts
+    runs-on: ubuntu-latest
+    needs: [detect-changes, publish-domain]
+    if: always() && needs.detect-changes.outputs.contracts_changed == 'true' && (needs.publish-domain.result == 'success' || needs.publish-domain.result == 'skipped')
+    outputs:
+      version: ${{ steps.pack.outputs.version }}
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: '9.0.x'
+          source-url: https://nuget.pkg.github.com/phoenixvc/index.json
+        env:
+          NUGET_AUTH_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN }}
+
+      - name: Wait for Domain package to be available
+        if: needs.publish-domain.result == 'success'
+        run: |
+          echo "Waiting for Mystira.Domain ${{ needs.publish-domain.outputs.version }} to be available..."
+          sleep 30
+
+      - name: Calculate version
+        id: calc_version
+        run: |
+          # Read from package.json for NPM sync
+          BASE_VERSION=$(jq -r '.version' packages/contracts/package.json)
+          SUFFIX="${{ needs.detect-changes.outputs.version_suffix }}"
+          if [ -n "$SUFFIX" ]; then
+            FULL_VERSION="${BASE_VERSION}-${SUFFIX}"
+          else
+            FULL_VERSION="$BASE_VERSION"
+          fi
+          # Ensure alpha suffix for NuGet.org API key
+          if [[ ! "$FULL_VERSION" == *"alpha"* ]]; then
+            FULL_VERSION="${FULL_VERSION}-alpha"
+          fi
+          echo "version=$FULL_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Restore, Build, Pack
+        run: |
+          dotnet restore packages/contracts/dotnet/Mystira.Contracts
+          dotnet build packages/contracts/dotnet/Mystira.Contracts -c Release --no-restore -p:Version=${{ steps.calc_version.outputs.version }}
+          dotnet pack packages/contracts/dotnet/Mystira.Contracts -c Release --no-build -o ./nupkg -p:Version=${{ steps.calc_version.outputs.version }}
+        env:
+          NUGET_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Push to GitHub Packages
+        id: pack
+        run: |
+          dotnet nuget push "./nupkg/*.nupkg" \
+            --source "https://nuget.pkg.github.com/phoenixvc/index.json" \
+            --api-key ${{ secrets.GITHUB_TOKEN }} \
+            --skip-duplicate
+          echo "version=${{ steps.calc_version.outputs.version }}" >> $GITHUB_OUTPUT
+
+      - name: Push to NuGet.org
+        if: needs.detect-changes.outputs.publish_to_nuget == 'true'
+        run: |
+          dotnet nuget push "./nupkg/*.nupkg" \
+            --source "https://api.nuget.org/v3/index.json" \
+            --api-key ${{ secrets.NUGET_API_KEY }} \
+            --skip-duplicate
+
+  # ==========================================================================
+  # Publish Shared (depends on Domain and Contracts)
+  # ==========================================================================
+  publish-shared:
+    name: Publish Shared
+    runs-on: ubuntu-latest
+    needs: [detect-changes, publish-domain, publish-contracts]
+    if: always() && needs.detect-changes.outputs.shared_changed == 'true' && (needs.publish-contracts.result == 'success' || needs.publish-contracts.result == 'skipped')
+    outputs:
+      version: ${{ steps.pack.outputs.version }}
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: '9.0.x'
+          source-url: https://nuget.pkg.github.com/phoenixvc/index.json
+        env:
+          NUGET_AUTH_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN }}
+
+      - name: Wait for Contracts package to be available
+        if: needs.publish-contracts.result == 'success'
+        run: |
+          echo "Waiting for Mystira.Contracts ${{ needs.publish-contracts.outputs.version }} to be available..."
+          sleep 30
+
+      - name: Calculate version
+        id: calc_version
+        run: |
+          BASE_VERSION=$(grep -oP '(?<=<Version>)[^<]+' packages/shared/Mystira.Shared/Mystira.Shared.csproj)
+          SUFFIX="${{ needs.detect-changes.outputs.version_suffix }}"
+          if [ -n "$SUFFIX" ]; then
+            FULL_VERSION="${BASE_VERSION}-${SUFFIX}"
+          else
+            FULL_VERSION="$BASE_VERSION"
+          fi
+          # Ensure alpha suffix for NuGet.org API key
+          if [[ ! "$FULL_VERSION" == *"alpha"* ]]; then
+            FULL_VERSION="${FULL_VERSION}-alpha"
+          fi
+          echo "version=$FULL_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Restore, Build, Test, Pack
+        run: |
+          dotnet restore packages/shared/Mystira.Shared
+          dotnet restore packages/shared/Mystira.Shared.Tests
+          dotnet build packages/shared/Mystira.Shared -c Release --no-restore -p:Version=${{ steps.calc_version.outputs.version }}
+          dotnet build packages/shared/Mystira.Shared.Tests -c Release --no-restore
+          dotnet test packages/shared/Mystira.Shared.Tests -c Release --no-build
+          dotnet pack packages/shared/Mystira.Shared -c Release --no-build -o ./nupkg -p:Version=${{ steps.calc_version.outputs.version }}
+        env:
+          NUGET_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Push to GitHub Packages
+        id: pack
+        run: |
+          dotnet nuget push "./nupkg/*.nupkg" \
+            --source "https://nuget.pkg.github.com/phoenixvc/index.json" \
+            --api-key ${{ secrets.GITHUB_TOKEN }} \
+            --skip-duplicate
+          echo "version=${{ steps.calc_version.outputs.version }}" >> $GITHUB_OUTPUT
+
+      - name: Push to NuGet.org
+        if: needs.detect-changes.outputs.publish_to_nuget == 'true'
+        run: |
+          dotnet nuget push "./nupkg/*.nupkg" \
+            --source "https://api.nuget.org/v3/index.json" \
+            --api-key ${{ secrets.NUGET_API_KEY }} \
+            --skip-duplicate
+
+  # ==========================================================================
+  # Summary
+  # ==========================================================================
+  summary:
+    name: Generate Summary
+    runs-on: ubuntu-latest
+    needs: [detect-changes, publish-domain, publish-contracts, publish-shared]
+    if: always()
+    steps:
+      - name: Generate summary
+        run: |
+          echo "## NuGet Packages Published" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Package | Version | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|---------|---------|--------|" >> $GITHUB_STEP_SUMMARY
+
+          if [ "${{ needs.publish-domain.result }}" = "success" ]; then
+            echo "| Mystira.Domain | ${{ needs.publish-domain.outputs.version }} | ✅ Published |" >> $GITHUB_STEP_SUMMARY
+          elif [ "${{ needs.detect-changes.outputs.domain_changed }}" = "true" ]; then
+            echo "| Mystira.Domain | - | ❌ Failed |" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "| Mystira.Domain | - | ⏭️ Skipped |" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          if [ "${{ needs.publish-contracts.result }}" = "success" ]; then
+            echo "| Mystira.Contracts | ${{ needs.publish-contracts.outputs.version }} | ✅ Published |" >> $GITHUB_STEP_SUMMARY
+          elif [ "${{ needs.detect-changes.outputs.contracts_changed }}" = "true" ]; then
+            echo "| Mystira.Contracts | - | ❌ Failed |" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "| Mystira.Contracts | - | ⏭️ Skipped |" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          if [ "${{ needs.publish-shared.result }}" = "success" ]; then
+            echo "| Mystira.Shared | ${{ needs.publish-shared.outputs.version }} | ✅ Published |" >> $GITHUB_STEP_SUMMARY
+          elif [ "${{ needs.detect-changes.outputs.shared_changed }}" = "true" ]; then
+            echo "| Mystira.Shared | - | ❌ Failed |" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "| Mystira.Shared | - | ⏭️ Skipped |" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Registry" >> $GITHUB_STEP_SUMMARY
+          echo "- GitHub Packages: \`https://nuget.pkg.github.com/phoenixvc/index.json\`" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ needs.detect-changes.outputs.publish_to_nuget }}" = "true" ]; then
+            echo "- NuGet.org: Published ✅" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "- NuGet.org: Skipped (dev/pre-release)" >> $GITHUB_STEP_SUMMARY
+          fi

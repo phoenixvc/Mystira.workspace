@@ -1,0 +1,6 @@
+{
+  "name": "@mystira/domain",
+  "version": "0.5.0-alpha",
+  "private": true,
+  "description": "Core domain types for Mystira platform (NuGet package only)"
+}
