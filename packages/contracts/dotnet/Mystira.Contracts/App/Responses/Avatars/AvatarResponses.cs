@@ -54,6 +54,11 @@ public record AvatarResponse
     /// Optional tags for categorization.
     /// </summary>
     public List<string>? Tags { get; set; }
+
+    /// <summary>
+    /// Avatars grouped by age group.
+    /// </summary>
+    public Dictionary<string, List<AvatarResponse>>? AgeGroupAvatars { get; set; }
 }
 
 /// <summary>
@@ -90,6 +95,16 @@ public record AvatarConfigurationResponse
     /// Allowed file types for custom avatars.
     /// </summary>
     public List<string>? AllowedFileTypes { get; set; }
+
+    /// <summary>
+    /// The age group for this configuration.
+    /// </summary>
+    public string? AgeGroup { get; set; }
+
+    /// <summary>
+    /// List of avatar media IDs.
+    /// </summary>
+    public List<string>? AvatarMediaIds { get; set; }
 }
 
 /// <summary>

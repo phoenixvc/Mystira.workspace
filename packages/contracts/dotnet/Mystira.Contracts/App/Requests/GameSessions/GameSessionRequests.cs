@@ -117,6 +117,15 @@ public record AdminProgressSceneRequest
     public string TargetSceneId { get; set; } = string.Empty;
 
     /// <summary>
+    /// Alias for TargetSceneId for backward compatibility.
+    /// </summary>
+    public string NewSceneId
+    {
+        get => TargetSceneId;
+        set => TargetSceneId = value;
+    }
+
+    /// <summary>
     /// Optional reason for the manual progression (for audit logging).
     /// </summary>
     public string? Reason { get; set; }
