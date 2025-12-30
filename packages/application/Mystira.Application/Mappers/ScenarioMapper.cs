@@ -13,13 +13,32 @@ public static partial class ScenarioMapper
 {
     /// <summary>
     /// Maps a CharacterRequest to a ScenarioCharacter domain model.
-    /// Note: Description, Role, Archetype, Traits, IsPlayerCharacter are in Metadata, not directly on ScenarioCharacter.
+    /// Note: Many properties exist only on the entity side (for persistence) or request side.
     /// </summary>
+    // Ignore source properties that don't exist on target
     [MapperIgnoreSource(nameof(CharacterRequest.Description))]
     [MapperIgnoreSource(nameof(CharacterRequest.Role))]
     [MapperIgnoreSource(nameof(CharacterRequest.Archetype))]
     [MapperIgnoreSource(nameof(CharacterRequest.Traits))]
     [MapperIgnoreSource(nameof(CharacterRequest.IsPlayerCharacter))]
+    [MapperIgnoreSource(nameof(CharacterRequest.Image))]
+    [MapperIgnoreSource(nameof(CharacterRequest.Audio))]
+    [MapperIgnoreSource(nameof(CharacterRequest.Metadata))]
+    // Ignore target properties that don't exist on source (Entity-specific)
+    [MapperIgnoreTarget(nameof(ScenarioCharacter.ScenarioId))]
+    [MapperIgnoreTarget(nameof(ScenarioCharacter.Description))]
+    [MapperIgnoreTarget(nameof(ScenarioCharacter.Role))]
+    [MapperIgnoreTarget(nameof(ScenarioCharacter.ArchetypeId))]
+    [MapperIgnoreTarget(nameof(ScenarioCharacter.AvatarUrl))]
+    [MapperIgnoreTarget(nameof(ScenarioCharacter.IsPlayable))]
+    [MapperIgnoreTarget(nameof(ScenarioCharacter.IsProtagonist))]
+    [MapperIgnoreTarget(nameof(ScenarioCharacter.PersonalityTraitsJson))]
+    [MapperIgnoreTarget(nameof(ScenarioCharacter.Backstory))]
+    [MapperIgnoreTarget(nameof(ScenarioCharacter.DisplayOrder))]
+    [MapperIgnoreTarget(nameof(ScenarioCharacter.CreatedAt))]
+    [MapperIgnoreTarget(nameof(ScenarioCharacter.UpdatedAt))]
+    [MapperIgnoreTarget(nameof(ScenarioCharacter.CreatedBy))]
+    [MapperIgnoreTarget(nameof(ScenarioCharacter.UpdatedBy))]
     public static partial ScenarioCharacter ToScenarioCharacter(CharacterRequest request);
 
     /// <summary>
@@ -31,35 +50,64 @@ public static partial class ScenarioMapper
 
     /// <summary>
     /// Maps a SceneRequest to a Scene domain model.
-    /// Note: Content, Order, BackgroundImage, BackgroundMusic, Choices are handled differently or not needed.
-    /// Music and SoundEffects are set separately as they don't exist in SceneRequest.
+    /// Note: Many properties exist only on the entity side (for persistence) or request side.
     /// </summary>
     [MapProperty(nameof(SceneRequest.Type), nameof(Scene.Type), Use = nameof(ParseSceneType))]
     [MapProperty(nameof(SceneRequest.Difficulty), nameof(Scene.Difficulty), Use = nameof(ParseDifficulty))]
     [MapProperty(nameof(SceneRequest.Media), nameof(Scene.Media), Use = nameof(MapMedia))]
     [MapProperty(nameof(SceneRequest.Branches), nameof(Scene.Branches), Use = nameof(MapBranches))]
     [MapProperty(nameof(SceneRequest.EchoReveals), nameof(Scene.EchoReveals), Use = nameof(MapEchoReveals))]
+    // Ignore source properties that don't exist on target or are handled differently
     [MapperIgnoreSource(nameof(SceneRequest.Content))]
     [MapperIgnoreSource(nameof(SceneRequest.Order))]
     [MapperIgnoreSource(nameof(SceneRequest.BackgroundImage))]
     [MapperIgnoreSource(nameof(SceneRequest.BackgroundMusic))]
     [MapperIgnoreSource(nameof(SceneRequest.Choices))]
+    // Ignore target properties that don't exist on source (Entity-specific)
     [MapperIgnoreTarget(nameof(Scene.Music))]
     [MapperIgnoreTarget(nameof(Scene.SoundEffects))]
+    [MapperIgnoreTarget(nameof(Scene.ScenarioId))]
+    [MapperIgnoreTarget(nameof(Scene.Content))]
+    [MapperIgnoreTarget(nameof(Scene.Slug))]
+    [MapperIgnoreTarget(nameof(Scene.BackgroundUrl))]
+    [MapperIgnoreTarget(nameof(Scene.MusicUrl))]
+    [MapperIgnoreTarget(nameof(Scene.AmbientSoundUrl))]
+    [MapperIgnoreTarget(nameof(Scene.DisplayOrder))]
+    [MapperIgnoreTarget(nameof(Scene.IsEnding))]
+    [MapperIgnoreTarget(nameof(Scene.EndingType))]
+    [MapperIgnoreTarget(nameof(Scene.CompassChanges))]
+    [MapperIgnoreTarget(nameof(Scene.CreatedAt))]
+    [MapperIgnoreTarget(nameof(Scene.UpdatedAt))]
+    [MapperIgnoreTarget(nameof(Scene.CreatedBy))]
+    [MapperIgnoreTarget(nameof(Scene.UpdatedBy))]
     public static partial Scene ToScene(SceneRequest request);
 
     /// <summary>
     /// Maps a BranchRequest to a Branch domain model.
-    /// Note: Text, CompassAxis, CompassDirection, CompassDelta are handled via MapBranches.
-    /// Choice, EchoLog, CompassChange are set via the manual mapping in MapBranches.
+    /// Note: Many properties exist only on the entity side (for persistence) or request side.
     /// </summary>
+    // Ignore source properties that don't exist on target or are handled via manual mapping
     [MapperIgnoreSource(nameof(BranchRequest.Text))]
     [MapperIgnoreSource(nameof(BranchRequest.CompassAxis))]
     [MapperIgnoreSource(nameof(BranchRequest.CompassDirection))]
     [MapperIgnoreSource(nameof(BranchRequest.CompassDelta))]
+    // Ignore target properties that don't exist on source (Entity-specific)
     [MapperIgnoreTarget(nameof(Branch.Choice))]
     [MapperIgnoreTarget(nameof(Branch.EchoLog))]
     [MapperIgnoreTarget(nameof(Branch.CompassChange))]
+    [MapperIgnoreTarget(nameof(Branch.SceneId))]
+    [MapperIgnoreTarget(nameof(Branch.TargetSceneId))]
+    [MapperIgnoreTarget(nameof(Branch.Text))]
+    [MapperIgnoreTarget(nameof(Branch.Description))]
+    [MapperIgnoreTarget(nameof(Branch.DisplayOrder))]
+    [MapperIgnoreTarget(nameof(Branch.ConditionsJson))]
+    [MapperIgnoreTarget(nameof(Branch.IsHidden))]
+    [MapperIgnoreTarget(nameof(Branch.CompassChanges))]
+    [MapperIgnoreTarget(nameof(Branch.Id))]
+    [MapperIgnoreTarget(nameof(Branch.CreatedAt))]
+    [MapperIgnoreTarget(nameof(Branch.UpdatedAt))]
+    [MapperIgnoreTarget(nameof(Branch.CreatedBy))]
+    [MapperIgnoreTarget(nameof(Branch.UpdatedBy))]
     public static partial Branch ToBranch(BranchRequest request);
 
     /// <summary>
@@ -157,7 +205,7 @@ public static partial class ScenarioMapper
             Video = media.Video
         } : null;
 
-    private static List<Branch> MapBranches(List<BranchRequest>? branches)
+    private static ICollection<Branch> MapBranches(List<BranchRequest>? branches)
         => branches?.Select(b => new Branch
         {
             Choice = b.Text ?? string.Empty,
@@ -171,7 +219,7 @@ public static partial class ScenarioMapper
                 : null
         }).ToList() ?? new List<Branch>();
 
-    private static List<EchoReveal> MapEchoReveals(List<EchoRevealRequest>? echoReveals)
+    private static ICollection<EchoReveal> MapEchoReveals(List<EchoRevealRequest>? echoReveals)
         => echoReveals?.Select(e => new EchoReveal
         {
             EchoType = e.Tone ?? "honesty",
