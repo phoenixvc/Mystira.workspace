@@ -131,6 +131,36 @@ public class Scenario : SoftDeletableEntity
     public string? TagsJson { get; set; }
 
     /// <summary>
+    /// Gets or sets the tags list (for DTO compatibility).
+    /// </summary>
+    public List<string> Tags { get; set; } = new();
+
+    /// <summary>
+    /// Gets or sets the archetypes used in this scenario.
+    /// </summary>
+    public List<string> Archetypes { get; set; } = new();
+
+    /// <summary>
+    /// Gets or sets the minimum age requirement.
+    /// </summary>
+    public int MinimumAge { get; set; }
+
+    /// <summary>
+    /// Gets or sets the core axes featured in this scenario.
+    /// </summary>
+    public List<string> CoreAxes { get; set; } = new();
+
+    /// <summary>
+    /// Gets or sets whether the scenario is active.
+    /// </summary>
+    public bool IsActive { get; set; } = true;
+
+    /// <summary>
+    /// Gets or sets the Story Protocol metadata.
+    /// </summary>
+    public StoryProtocolMetadata? StoryProtocol { get; set; }
+
+    /// <summary>
     /// Gets or sets the characters in this scenario.
     /// </summary>
     public virtual ICollection<ScenarioCharacter> Characters { get; set; } = new List<ScenarioCharacter>();
@@ -216,6 +246,21 @@ public class ScenarioCharacter : Entity
     /// Gets or sets the character's avatar image URL.
     /// </summary>
     public string? AvatarUrl { get; set; }
+
+    /// <summary>
+    /// Gets or sets the character image reference (for DTO compatibility).
+    /// </summary>
+    public string? Image { get; set; }
+
+    /// <summary>
+    /// Gets or sets the character audio reference (for DTO compatibility).
+    /// </summary>
+    public string? Audio { get; set; }
+
+    /// <summary>
+    /// Gets or sets the character metadata (for DTO compatibility).
+    /// </summary>
+    public ScenarioCharacterMetadata? Metadata { get; set; }
 
     /// <summary>
     /// Gets or sets whether this is a player-controlled character.
@@ -629,7 +674,22 @@ public class CompassChangeDto
 public class CompassTracking
 {
     /// <summary>
-    /// Gets or sets the axis values (axis ID -> value).
+    /// Gets or sets the axis being tracked (for single-axis tracking).
+    /// </summary>
+    public string Axis { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Gets or sets the current value on this axis.
+    /// </summary>
+    public double CurrentValue { get; set; }
+
+    /// <summary>
+    /// Gets or sets when this tracking was last updated.
+    /// </summary>
+    public DateTime LastUpdated { get; set; }
+
+    /// <summary>
+    /// Gets or sets the axis values (axis ID -> value) for multi-axis tracking.
     /// </summary>
     public Dictionary<string, int> AxisValues { get; set; } = new();
 
@@ -665,6 +725,8 @@ public class CompassTracking
             Reason = change.Reason,
             Timestamp = DateTime.UtcNow
         });
+
+        LastUpdated = DateTime.UtcNow;
     }
 }
 
@@ -707,4 +769,40 @@ public class CompassChangeRecord
     /// Gets or sets when the change occurred.
     /// </summary>
     public DateTime Timestamp { get; set; }
+}
+
+/// <summary>
+/// Represents Story Protocol metadata for IP asset registration.
+/// </summary>
+public class StoryProtocolMetadata
+{
+    /// <summary>
+    /// Gets or sets the IP Asset ID on Story Protocol.
+    /// </summary>
+    public string? IpAssetId { get; set; }
+
+    /// <summary>
+    /// Gets or sets the transaction hash of registration.
+    /// </summary>
+    public string? TransactionHash { get; set; }
+
+    /// <summary>
+    /// Gets or sets when the IP asset was registered.
+    /// </summary>
+    public DateTime? RegisteredAt { get; set; }
+
+    /// <summary>
+    /// Gets or sets whether the registration is complete.
+    /// </summary>
+    public bool IsRegistered { get; set; }
+
+    /// <summary>
+    /// Gets or sets the license terms ID.
+    /// </summary>
+    public string? LicenseTermsId { get; set; }
+
+    /// <summary>
+    /// Gets or sets the royalty policy ID.
+    /// </summary>
+    public string? RoyaltyPolicyId { get; set; }
 }

@@ -115,6 +115,21 @@ public class ContentBundle : SoftDeletableEntity
     public virtual ICollection<Scenario> Scenarios { get; set; } = new List<Scenario>();
 
     /// <summary>
+    /// Gets or sets the list of scenario IDs in this bundle.
+    /// </summary>
+    public List<string> ScenarioIds { get; set; } = new();
+
+    /// <summary>
+    /// Gets or sets the prices for this bundle.
+    /// </summary>
+    public List<BundlePrice> Prices { get; set; } = new();
+
+    /// <summary>
+    /// Gets or sets the Story Protocol metadata.
+    /// </summary>
+    public StoryProtocolMetadata? StoryProtocol { get; set; }
+
+    /// <summary>
     /// Gets the target age group.
     /// </summary>
     public AgeGroup? AgeGroup => AgeGroup.FromId(AgeGroupId);

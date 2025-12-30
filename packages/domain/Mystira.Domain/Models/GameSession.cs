@@ -14,6 +14,16 @@ public class GameSession : SoftDeletableEntity
     public string ScenarioId { get; set; } = string.Empty;
 
     /// <summary>
+    /// Gets or sets the account ID that owns this session.
+    /// </summary>
+    public string AccountId { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Gets or sets the user profile ID for this session.
+    /// </summary>
+    public string ProfileId { get; set; } = string.Empty;
+
+    /// <summary>
     /// Gets or sets the host player's profile ID.
     /// </summary>
     public string HostPlayerId { get; set; } = string.Empty;
@@ -42,6 +52,49 @@ public class GameSession : SoftDeletableEntity
     /// Gets or sets when the session ended.
     /// </summary>
     public DateTime? EndedAt { get; set; }
+
+    /// <summary>
+    /// Gets or sets the start time (alias for StartedAt for DTO compatibility).
+    /// </summary>
+    public DateTime? StartTime
+    {
+        get => StartedAt;
+        set => StartedAt = value;
+    }
+
+    /// <summary>
+    /// Gets or sets the end time (alias for EndedAt for DTO compatibility).
+    /// </summary>
+    public DateTime? EndTime
+    {
+        get => EndedAt;
+        set => EndedAt = value;
+    }
+
+    /// <summary>
+    /// Gets or sets the elapsed time in the session.
+    /// </summary>
+    public TimeSpan? ElapsedTime { get; set; }
+
+    /// <summary>
+    /// Gets or sets the player names in this session.
+    /// </summary>
+    public List<string> PlayerNames { get; set; } = new();
+
+    /// <summary>
+    /// Gets or sets the target age group name.
+    /// </summary>
+    public string? TargetAgeGroupName { get; set; }
+
+    /// <summary>
+    /// Gets or sets the scene count.
+    /// </summary>
+    public int SceneCount { get; set; }
+
+    /// <summary>
+    /// Gets or sets the compass tracking values for this session.
+    /// </summary>
+    public List<CompassTracking> CompassValues { get; set; } = new();
 
     /// <summary>
     /// Gets or sets the end reason.
@@ -432,3 +485,4 @@ public class SessionAchievement : Entity
     /// </summary>
     public string? MetadataJson { get; set; }
 }
+
