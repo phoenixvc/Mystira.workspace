@@ -9,12 +9,13 @@ This guide covers migrating from the legacy contracts packages to the unified `@
 
 We are consolidating scattered API contracts into unified packages:
 
-| Old Package | New Package | Status |
-|-------------|-------------|--------|
-| `@mystira/app-contracts` | `@mystira/contracts/app` | Deprecated |
-| `@mystira/story-generator-contracts` | `@mystira/contracts/story-generator` | Deprecated |
-| `Mystira.App.Contracts` | `Mystira.Contracts.App` | Deprecated |
-| `Mystira.StoryGenerator.Contracts` | `Mystira.Contracts.StoryGenerator` | Deprecated |
+| Ecosystem | Old Package | New Package | Status |
+|-----------|-------------|-------------|--------|
+| TypeScript | `@mystira/app-contracts` | `@mystira/contracts/app` | Deprecated |
+| TypeScript | `@mystira/story-generator-contracts` | `@mystira/contracts/story-generator` | Deprecated |
+| C#/.NET | `Mystira.App.Contracts` | `Mystira.Contracts.App` | Deprecated |
+| C#/.NET | `Mystira.StoryGenerator.Contracts` | `Mystira.Contracts.StoryGenerator` | Deprecated |
+| Rust | N/A | `mystira-contracts` | New |
 
 See [ADR-0020: Package Consolidation Strategy](../adr/0020-package-consolidation-strategy.md) for rationale.
 
@@ -123,6 +124,51 @@ using Mystira.Contracts.StoryGenerator;
 dotnet remove package Mystira.App.Contracts
 dotnet remove package Mystira.StoryGenerator.Contracts
 ```
+
+---
+
+### Rust/Cargo
+
+For Rust projects, use the `mystira-contracts` crate which provides equivalent types.
+
+#### Step 1: Add Dependency
+
+```toml
+# In your Cargo.toml (workspace member)
+[dependencies]
+mystira-contracts = { workspace = true }
+
+# Or direct path reference
+[dependencies]
+mystira-contracts = { path = "crates/mystira-contracts" }
+```
+
+#### Step 2: Import Types
+
+```rust
+// App contracts
+use mystira_contracts::app::{StoryRequest, StoryResponse, ApiResponse, ApiError};
+
+// Story generator contracts
+use mystira_contracts::story_generator::{GeneratorConfig, GeneratorRequest, GeneratorResult};
+
+// DevHub-specific contracts
+use mystira_contracts::devhub::{CommandResponse, AzureResource, WhatIfChange};
+
+// Or import common types from crate root
+use mystira_contracts::{ApiResponse, ApiError, CommandResponse};
+```
+
+#### Optional: TypeScript Bindings
+
+Enable the `typescript` feature to generate TypeScript definitions via `ts-rs`:
+
+```toml
+[dependencies]
+mystira-contracts = { path = "crates/mystira-contracts", features = ["typescript"] }
+```
+
+Then run your build to generate `.ts` files in the output directory.
 
 ---
 
