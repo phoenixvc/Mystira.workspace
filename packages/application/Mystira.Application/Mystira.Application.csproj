@@ -1,5 +1,5 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <!-- Trigger package publish -->
+  <!-- Trigger package publish - Domain types updated 2024-12-30 -->
 
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
