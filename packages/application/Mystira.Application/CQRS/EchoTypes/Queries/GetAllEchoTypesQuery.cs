@@ -1,0 +1,13 @@
+using Mystira.Application.Interfaces;
+using Mystira.Domain.Models;
+
+namespace Mystira.Application.CQRS.EchoTypes.Queries;
+
+/// <summary>
+/// Query to retrieve all echo types.
+/// </summary>
+public record GetAllEchoTypesQuery : IQuery<List<EchoTypeDefinition>>, ICacheableQuery
+{
+    public string CacheKey => "MasterData:EchoTypes:All";
+    public int CacheDurationSeconds => 3600; // 1 hour - master data rarely changes
+}

@@ -1,0 +1,8 @@
+using Mystira.Domain.Models;
+
+namespace Mystira.Application.CQRS.GameSessions.Commands;
+
+/// <summary>
+/// Command to end an active game session
+/// </summary>
+public record EndGameSessionCommand(string SessionId) : ICommand<GameSession?>;

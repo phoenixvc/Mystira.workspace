@@ -1,0 +1,63 @@
+using Microsoft.Extensions.Logging;
+using Mystira.Application.Helpers;
+using Mystira.Application.Ports.Data;
+using Mystira.Contracts.App.Responses.Attribution;
+using Mystira.Domain.Models;
+
+namespace Mystira.Application.CQRS.Attribution.Queries;
+
+/// <summary>
+/// Wolverine handler for GetBundleAttributionQuery - retrieves creator credits for a content bundle
+/// </summary>
+public static class GetBundleAttributionQueryHandler
+{
+    public static async Task<ContentAttributionResponse?> Handle(
+        GetBundleAttributionQuery request,
+        IContentBundleRepository repository,
+        ILogger<GetBundleAttributionQuery> logger,
+        CancellationToken ct)
+    {
+        if (string.IsNullOrWhiteSpace(request.BundleId))
+        {
+            throw new ArgumentException("Bundle ID cannot be null or empty", nameof(request.BundleId));
+        }
+
+        var bundle = await repository.GetByIdAsync(request.BundleId);
+
+        if (bundle == null)
+        {
+            logger.LogWarning("Content bundle not found for attribution: {BundleId}", request.BundleId);
+            return null;
+        }
+
+        return MapToAttributionResponse(bundle);
+    }
+
+    private static ContentAttributionResponse MapToAttributionResponse(ContentBundle bundle)
+    {
+        var response = new ContentAttributionResponse
+        {
+            ContentId = bundle.Id,
+            ContentTitle = bundle.Title,
+            IsIpRegistered = bundle.StoryProtocol?.IsRegistered ?? false,
+            IpAssetId = bundle.StoryProtocol?.IpAssetId,
+            RegisteredAt = bundle.StoryProtocol?.RegisteredAt,
+            Credits = new List<CreatorCredit>()
+        };
+
+        if (bundle.StoryProtocol?.Contributors != null)
+        {
+            foreach (var contributor in bundle.StoryProtocol.Contributors)
+            {
+                response.Credits.Add(new CreatorCredit
+                {
+                    Name = contributor.Name,
+                    Role = ContributorHelpers.GetRoleDisplayName(contributor.Role),
+                    ContributionPercentage = contributor.ContributionPercentage
+                });
+            }
+        }
+
+        return response;
+    }
+}
