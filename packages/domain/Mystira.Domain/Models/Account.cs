@@ -49,6 +49,40 @@ public class Account : SoftDeletableEntity
     public string? ExternalProviderId { get; set; }
 
     /// <summary>
+    /// Gets or sets the external user ID (alias for ExternalProviderId for DTO compatibility).
+    /// </summary>
+    public string? ExternalUserId
+    {
+        get => ExternalProviderId;
+        set => ExternalProviderId = value;
+    }
+
+    /// <summary>
+    /// Gets or sets the display name for the account.
+    /// </summary>
+    public string DisplayName { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Gets or sets the list of user profile IDs associated with this account.
+    /// </summary>
+    public List<string> UserProfileIds { get; set; } = new();
+
+    /// <summary>
+    /// Gets or sets the list of completed scenario IDs.
+    /// </summary>
+    public List<string>? CompletedScenarioIds { get; set; }
+
+    /// <summary>
+    /// Gets or sets the subscription details.
+    /// </summary>
+    public SubscriptionDetails Subscription { get; set; } = new();
+
+    /// <summary>
+    /// Gets or sets the account settings.
+    /// </summary>
+    public AccountSettings? Settings { get; set; }
+
+    /// <summary>
     /// Gets or sets when the account was last logged in.
     /// </summary>
     public DateTime? LastLoginAt { get; set; }

@@ -214,9 +214,23 @@ public class UserBadge : Entity
     public string UserId { get; set; } = string.Empty;
 
     /// <summary>
+    /// Gets or sets the user profile ID (alias for UserId for DTO compatibility).
+    /// </summary>
+    public string UserProfileId
+    {
+        get => UserId;
+        set => UserId = value;
+    }
+
+    /// <summary>
     /// Gets or sets the badge ID.
     /// </summary>
     public string BadgeId { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Gets or sets the compass axis ID (for axis-related badges).
+    /// </summary>
+    public string? Axis { get; set; }
 
     /// <summary>
     /// Gets or sets the tier achieved.

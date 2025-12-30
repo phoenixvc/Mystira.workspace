@@ -21,6 +21,11 @@ public enum SessionStatus
     Active = 2,
 
     /// <summary>
+    /// Alias for Active - session is currently in progress.
+    /// </summary>
+    InProgress = 2,
+
+    /// <summary>
     /// Session has been paused.
     /// </summary>
     Paused = 3,
