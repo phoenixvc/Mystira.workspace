@@ -4,7 +4,6 @@ using Mystira.App.Admin.Api.Models;
 using Mystira.App.Admin.Api.Services;
 using Mystira.Contracts.App.Responses.Common;
 using AdminCharacter = Mystira.App.Admin.Api.Models.Character;
-using DomainCharacterMapFile = Mystira.App.Domain.Models.CharacterMapFile;
 
 namespace Mystira.App.Admin.Api.Controllers;
 
@@ -27,7 +26,7 @@ public class CharacterAdminController : ControllerBase
     /// Updates an existing character
     /// </summary>
     [HttpPut("{id}")]
-    public async Task<ActionResult<DomainCharacterMapFile>> UpdateCharacter(string id, [FromBody] AdminCharacter character)
+    public async Task<ActionResult<CharacterMapFile>> UpdateCharacter(string id, [FromBody] AdminCharacter character)
     {
         try
         {
@@ -57,7 +56,7 @@ public class CharacterAdminController : ControllerBase
     /// Removes a character
     /// </summary>
     [HttpDelete("{id}")]
-    public async Task<ActionResult<DomainCharacterMapFile>> DeleteCharacter(string id)
+    public async Task<ActionResult<CharacterMapFile>> DeleteCharacter(string id)
     {
         try
         {
@@ -87,7 +86,7 @@ public class CharacterAdminController : ControllerBase
     /// Adds a new character
     /// </summary>
     [HttpPost]
-    public async Task<ActionResult<DomainCharacterMapFile>> AddCharacter([FromBody] AdminCharacter character)
+    public async Task<ActionResult<CharacterMapFile>> AddCharacter([FromBody] AdminCharacter character)
     {
         try
         {
