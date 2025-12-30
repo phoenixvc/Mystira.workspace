@@ -43,14 +43,14 @@
     <!-- NuGet Package References (replacing project references) -->
     <PackageReference Include="Mystira.App.Domain" Version="1.0.0" />
     <PackageReference Include="Mystira.App.Application" Version="1.0.0" />
-    <PackageReference Include="Mystira.Contracts" Version="0.4.3-alpha-build.70" />
+    <PackageReference Include="Mystira.Contracts" Version="0.4.3-alpha-*" />
     <!-- Legacy contracts package needed until Mystira.App.Application is updated to use unified Mystira.Contracts -->
     <PackageReference Include="Mystira.App.Contracts" Version="1.0.0" />
     <PackageReference Include="Mystira.App.Infrastructure.Azure" Version="1.0.0" />
     <PackageReference Include="Mystira.App.Infrastructure.Data" Version="1.0.0" />
     <PackageReference Include="Mystira.App.Infrastructure.Discord" Version="1.0.0" />
     <PackageReference Include="Mystira.App.Infrastructure.StoryProtocol" Version="1.0.0" />
-    <PackageReference Include="Mystira.Shared" Version="0.5.0-alpha-build.71" />
+    <PackageReference Include="Mystira.Shared" Version="0.5.0-alpha-*" />
 
     <!-- Ardalis.Specification for data access patterns (version matches Mystira.App.Application dependency) -->
     <PackageReference Include="Ardalis.Specification" Version="9.3.1" />
