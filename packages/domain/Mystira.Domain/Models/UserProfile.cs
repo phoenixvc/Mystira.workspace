@@ -4,7 +4,7 @@ using Mystira.Domain.ValueObjects;
 namespace Mystira.Domain.Models;
 
 /// <summary>
-/// Represents a user's profile information.
+/// Represents a user's profile information including preferences and progress.
 /// </summary>
 public class UserProfile : Entity
 {
