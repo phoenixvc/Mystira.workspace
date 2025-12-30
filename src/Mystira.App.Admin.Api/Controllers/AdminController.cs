@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Mystira.App.Admin.Api.Models;
 using Mystira.App.Admin.Api.Services;
-using Mystira.App.Contracts.Requests.Scenarios;
+using Mystira.Contracts.Requests.Scenarios;
 using Mystira.App.Domain.Models;
 using Mystira.App.Infrastructure.Data;
 using YamlDotNet.Serialization;

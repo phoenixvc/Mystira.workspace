@@ -1,8 +1,8 @@
 using Mystira.App.Domain.Models;
-using ContractsGameSessionResponse = Mystira.App.Contracts.Responses.GameSessions.GameSessionResponse;
-using ContractsMakeChoiceRequest = Mystira.App.Contracts.Requests.GameSessions.MakeChoiceRequest;
-using ContractsSessionStatsResponse = Mystira.App.Contracts.Responses.GameSessions.SessionStatsResponse;
-using ContractsStartGameSessionRequest = Mystira.App.Contracts.Requests.GameSessions.StartGameSessionRequest;
+using ContractsGameSessionResponse = Mystira.Contracts.Responses.GameSessions.GameSessionResponse;
+using ContractsMakeChoiceRequest = Mystira.Contracts.Requests.GameSessions.MakeChoiceRequest;
+using ContractsSessionStatsResponse = Mystira.Contracts.Responses.GameSessions.SessionStatsResponse;
+using ContractsStartGameSessionRequest = Mystira.Contracts.Requests.GameSessions.StartGameSessionRequest;
 
 namespace Mystira.App.Admin.Api.Services;
 
