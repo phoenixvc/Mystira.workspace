@@ -16,7 +16,7 @@ public interface IStoryProtocolService
     /// <param name="metadataUri">Optional URI to additional metadata</param>
     /// <param name="licenseTermsId">Optional license terms ID</param>
     /// <returns>Story Protocol metadata including IP Asset ID</returns>
-    Task<StoryProtocolMetadata> RegisterIpAssetAsync(
+    Task<ScenarioStoryProtocol> RegisterIpAssetAsync(
         string contentId,
         string contentTitle,
         List<Contributor> contributors,
@@ -35,7 +35,7 @@ public interface IStoryProtocolService
     /// </summary>
     /// <param name="ipAssetId">Story Protocol IP Asset ID</param>
     /// <returns>Current royalty configuration</returns>
-    Task<StoryProtocolMetadata?> GetRoyaltyConfigurationAsync(string ipAssetId);
+    Task<ScenarioStoryProtocol?> GetRoyaltyConfigurationAsync(string ipAssetId);
 
     /// <summary>
     /// Updates the royalty split for an existing IP Asset
@@ -44,7 +44,7 @@ public interface IStoryProtocolService
     /// <param name="ipAssetId">Story Protocol IP Asset ID</param>
     /// <param name="contributors">Updated list of contributors</param>
     /// <returns>Updated Story Protocol metadata</returns>
-    Task<StoryProtocolMetadata> UpdateRoyaltySplitAsync(string ipAssetId, List<Contributor> contributors);
+    Task<ScenarioStoryProtocol> UpdateRoyaltySplitAsync(string ipAssetId, List<Contributor> contributors);
 
     /// <summary>
     /// Pays royalties to an IP Asset, distributing to all contributors based on their splits

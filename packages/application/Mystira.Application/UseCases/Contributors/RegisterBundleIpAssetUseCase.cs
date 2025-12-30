@@ -28,7 +28,7 @@ public class RegisterBundleIpAssetUseCase
         _logger = logger;
     }
 
-    public async Task<StoryProtocolMetadata> ExecuteAsync(string bundleId, RegisterIpAssetRequest request)
+    public async Task<ScenarioStoryProtocol> ExecuteAsync(string bundleId, RegisterIpAssetRequest request)
     {
         // Get the bundle
         var bundle = await _bundleRepository.GetByIdAsync(bundleId);

@@ -158,8 +158,22 @@ public class CharacterMetadata
     /// <summary>Gets or sets the character roles (e.g., mentor, trickster).</summary>
     public List<string> Roles { get; set; } = new();
 
+    /// <summary>Gets or sets the character role (alias for Roles for compatibility).</summary>
+    public List<string> Role
+    {
+        get => Roles;
+        set => Roles = value;
+    }
+
     /// <summary>Gets or sets the character archetypes (e.g., guardian, the listener).</summary>
     public List<string> Archetypes { get; set; } = new();
+
+    /// <summary>Gets or sets the character archetype (alias for Archetypes for compatibility).</summary>
+    public List<string> Archetype
+    {
+        get => Archetypes;
+        set => Archetypes = value;
+    }
 
     /// <summary>Gets or sets the species (e.g., elf, goblin).</summary>
     public string Species { get; set; } = string.Empty;

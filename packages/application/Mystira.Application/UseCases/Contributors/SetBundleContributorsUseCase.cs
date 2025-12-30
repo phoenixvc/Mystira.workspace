@@ -24,7 +24,7 @@ public class SetBundleContributorsUseCase
         _logger = logger;
     }
 
-    public async Task<StoryProtocolMetadata> ExecuteAsync(string bundleId, SetContributorsRequest request)
+    public async Task<ScenarioStoryProtocol> ExecuteAsync(string bundleId, SetContributorsRequest request)
     {
         // Get the bundle
         var bundle = await _bundleRepository.GetByIdAsync(bundleId);
@@ -49,7 +49,7 @@ public class SetBundleContributorsUseCase
         // Initialize Story Protocol metadata if it doesn't exist
         if (bundle.StoryProtocol == null)
         {
-            bundle.StoryProtocol = new StoryProtocolMetadata();
+            bundle.StoryProtocol = new ScenarioStoryProtocol();
         }
 
         // Set the contributors
