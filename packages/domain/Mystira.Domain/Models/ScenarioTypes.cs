@@ -17,17 +17,6 @@ public class ScenarioCharacterMetadata
 }
 
 /// <summary>
-/// Echo log entry for tracking player choices.
-/// </summary>
-public class EchoLog
-{
-    public string EchoType { get; set; } = "honesty";
-    public string Description { get; set; } = string.Empty;
-    public double Strength { get; set; }
-    public DateTime Timestamp { get; set; } = DateTime.UtcNow;
-}
-
-/// <summary>
 /// Scene music settings for scenarios.
 /// </summary>
 public class SceneMusicSettings
