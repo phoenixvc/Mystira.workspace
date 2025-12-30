@@ -1,7 +1,7 @@
 # Contracts Package Migration Guide
 
-**Last Updated:** 2025-12-29
-**Status:** Phase 1 Complete - Migration Period Active (Alpha packages available)
+**Last Updated:** 2025-12-30
+**Status:** Phase 1 Complete - Migration to Mystira.Contracts 0.5.0 namespace complete
 
 This guide covers migrating from the legacy contracts packages to the unified `@mystira/contracts` and `Mystira.Contracts` packages.
 
@@ -94,8 +94,8 @@ dotnet add package Mystira.Contracts
 Or in your `.csproj`:
 
 ```xml
-<!-- Note: Only alpha versions are currently available -->
-<PackageReference Include="Mystira.Contracts" Version="0.4.3-alpha-build.70" />
+<!-- Use floating version for alpha builds -->
+<PackageReference Include="Mystira.Contracts" Version="0.5.0-alpha-*" />
 ```
 
 #### Step 2: Update Using Statements
@@ -110,8 +110,28 @@ using Mystira.StoryGenerator.Contracts;
 **After:**
 
 ```csharp
-using Mystira.Contracts.App;
-using Mystira.Contracts.StoryGenerator;
+// App-level types (user profiles, game sessions, avatars, common responses)
+using Mystira.Contracts.App.Requests.UserProfiles;
+using Mystira.Contracts.App.Requests.GameSessions;
+using Mystira.Contracts.App.Requests.Contributors;
+using Mystira.Contracts.App.Requests.Characters;
+using Mystira.Contracts.App.Responses.Common;
+using Mystira.Contracts.App.Responses.GameSessions;
+using Mystira.Contracts.App.Responses.Avatars;
+using Mystira.Contracts.App.Responses.Contributors;
+
+// Story/content types (scenarios, character maps)
+using Mystira.Contracts.Story.Requests.Scenarios;
+using Mystira.Contracts.Story.Requests.CharacterMaps;
+using Mystira.Contracts.Story.Responses.Scenarios;
+```
+
+**Using aliases for clarity:**
+
+```csharp
+using ScenarioQueryRequest = Mystira.Contracts.Story.Requests.Scenarios.ScenarioQueryRequest;
+using CreateScenarioRequest = Mystira.Contracts.Story.Requests.Scenarios.CreateScenarioRequest;
+using ContractsStartGameSessionRequest = Mystira.Contracts.App.Requests.GameSessions.StartGameSessionRequest;
 ```
 
 #### Step 3: Remove Old Packages

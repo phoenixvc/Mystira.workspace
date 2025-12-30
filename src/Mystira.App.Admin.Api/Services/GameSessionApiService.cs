@@ -1,10 +1,10 @@
 using Microsoft.EntityFrameworkCore;
 using Mystira.App.Domain.Models;
 using Mystira.App.Infrastructure.Data;
-using ContractsGameSessionResponse = Mystira.Contracts.Responses.GameSessions.GameSessionResponse;
-using ContractsMakeChoiceRequest = Mystira.Contracts.Requests.GameSessions.MakeChoiceRequest;
-using ContractsSessionStatsResponse = Mystira.Contracts.Responses.GameSessions.SessionStatsResponse;
-using ContractsStartGameSessionRequest = Mystira.Contracts.Requests.GameSessions.StartGameSessionRequest;
+using ContractsGameSessionResponse = Mystira.Contracts.App.Responses.GameSessions.GameSessionResponse;
+using ContractsMakeChoiceRequest = Mystira.Contracts.App.Requests.GameSessions.MakeChoiceRequest;
+using ContractsSessionStatsResponse = Mystira.Contracts.App.Responses.GameSessions.SessionStatsResponse;
+using ContractsStartGameSessionRequest = Mystira.Contracts.App.Requests.GameSessions.StartGameSessionRequest;
 
 namespace Mystira.App.Admin.Api.Services;
 

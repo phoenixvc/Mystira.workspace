@@ -196,7 +196,10 @@ public class Character
 {
     public string Id { get; set; } = string.Empty;
     public string Name { get; set; } = string.Empty;
-    public string Image { get; set; } = string.Empty; // Media ID reference
+    public string? Description { get; set; }
+    public string? ImageId { get; set; }
+    public string? AudioId { get; set; }
+    public string Image { get; set; } = string.Empty; // Media ID reference (legacy)
     public CharacterMetadata Metadata { get; set; } = new();
 }
 

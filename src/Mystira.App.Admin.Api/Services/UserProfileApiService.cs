@@ -1,9 +1,9 @@
 using Mystira.App.Admin.Api.Models;
 using Mystira.App.Domain.Models;
-using ContractsCreateGuestProfileRequest = Mystira.Contracts.Requests.UserProfiles.CreateGuestProfileRequest;
-using ContractsCreateMultipleProfilesRequest = Mystira.Contracts.Requests.UserProfiles.CreateMultipleProfilesRequest;
-using ContractsCreateUserProfileRequest = Mystira.Contracts.Requests.UserProfiles.CreateUserProfileRequest;
-using ContractsUpdateUserProfileRequest = Mystira.Contracts.Requests.UserProfiles.UpdateUserProfileRequest;
+using ContractsCreateGuestProfileRequest = Mystira.Contracts.App.Requests.UserProfiles.CreateGuestProfileRequest;
+using ContractsCreateMultipleProfilesRequest = Mystira.Contracts.App.Requests.UserProfiles.CreateMultipleProfilesRequest;
+using ContractsCreateUserProfileRequest = Mystira.Contracts.App.Requests.UserProfiles.CreateUserProfileRequest;
+using ContractsUpdateUserProfileRequest = Mystira.Contracts.App.Requests.UserProfiles.UpdateUserProfileRequest;
 
 namespace Mystira.App.Admin.Api.Services;
 

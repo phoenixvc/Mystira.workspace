@@ -1,5 +1,5 @@
 using Mystira.App.Domain.Models;
-using Mystira.Contracts.Requests.CharacterMaps;
+using Mystira.Contracts.Story.Requests.CharacterMaps;
 
 namespace Mystira.App.Admin.Api.Services;
 
