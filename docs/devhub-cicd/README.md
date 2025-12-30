@@ -134,6 +134,30 @@ cd src-tauri && cargo test   # Rust tests
 
 ---
 
+## Template Files
+
+Copy these template files to the DevHub repository's `.github/workflows/` directory:
+
+| Template File | Target | Description |
+|---------------|--------|-------------|
+| `tauri-ci.yml` | `.github/workflows/ci.yml` | Main CI workflow |
+| `tauri-ci-dotnet.yml` | `.github/workflows/ci-dotnet.yml` | .NET components CI |
+| `tauri-build-deploy.yml` | `.github/workflows/build-deploy.yml` | Dev builds |
+| `tauri-release.yml` | `.github/workflows/release.yml` | Desktop releases |
+
+### Setup Instructions
+
+```bash
+# In the DevHub repository
+mkdir -p .github/workflows
+cp tauri-ci.yml .github/workflows/ci.yml
+cp tauri-ci-dotnet.yml .github/workflows/ci-dotnet.yml
+cp tauri-build-deploy.yml .github/workflows/build-deploy.yml
+cp tauri-release.yml .github/workflows/release.yml
+```
+
+---
+
 ## Legacy Notes
 
-The original templates in this directory (`ci.yml`, `build-deploy.yml`, `release.yml`, `Dockerfile`) were designed for a **Leptos SSR** web application. The actual DevHub project uses **Tauri** for desktop deployment. The updated workflows in the DevHub repository reflect the correct architecture.
+The original templates (`ci.yml`, `build-deploy.yml`, `release.yml`, `Dockerfile`) were designed for a **Leptos SSR** web application. The actual DevHub project uses **Tauri** for desktop deployment. The `tauri-*.yml` templates reflect the correct architecture.
