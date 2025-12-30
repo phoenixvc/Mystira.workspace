@@ -1,6 +1,5 @@
 using System.Reflection;
 using Microsoft.AspNetCore.Mvc;
-using Mystira.App.Admin.Api.Models;
 using Mystira.Contracts.App.Responses;
 
 namespace Mystira.App.Admin.Api.Controllers;
@@ -26,8 +25,8 @@ public class ApiInfoController : ControllerBase
         {
             ApiVersion = "v1",
             BuildVersion = version,
-            MasterDataVersion = "2.0.0", // DB-backed master data version
-            SupportsLegacyEnums = true, // Backward compatibility for enum-based values
+            MasterDataVersion = "2.0.0",
+            SupportsLegacyEnums = false,
             MasterDataEntities = new[]
             {
                 new MasterDataEntityInfo { Name = "CompassAxis", Endpoint = "/api/compassaxes", Count = null },
@@ -36,45 +35,7 @@ public class ApiInfoController : ControllerBase
                 new MasterDataEntityInfo { Name = "FantasyTheme", Endpoint = "/api/fantasythemes", Count = null },
                 new MasterDataEntityInfo { Name = "AgeGroup", Endpoint = "/api/agegroups", Count = null }
             },
-            DeprecatedApis = new[]
-            {
-                new DeprecatedApiInfo
-                {
-                    Endpoint = "Legacy JSON files",
-                    ReplacedBy = "DB-backed master data APIs",
-                    DeprecationDate = "2024-12-01",
-                    RemovalDate = "2025-06-01"
-                }
-            }
-        });
-    }
-
-    /// <summary>
-    /// Gets backward compatibility mapping for legacy enum values.
-    /// </summary>
-    [HttpGet("legacy-mappings")]
-    [ProducesResponseType(typeof(LegacyMappings), StatusCodes.Status200OK)]
-    public ActionResult<LegacyMappings> GetLegacyMappings()
-    {
-        return Ok(new LegacyMappings
-        {
-            Message = "Use the DB-backed APIs for current values. Legacy enum values are still accepted for backward compatibility.",
-            CoreAxisMappings = new Dictionary<string, string>
-            {
-                { "bravery_vs_caution", "Bravery_vs_Caution" },
-                { "honesty_vs_deception", "Honesty_vs_Deception" },
-                { "compassion_vs_logic", "Compassion_vs_Logic" },
-                { "loyalty_vs_independence", "Loyalty_vs_Independence" }
-            },
-            ArchetypeMappings = new Dictionary<string, string>
-            {
-                { "rule_checker", "Rule Checker" },
-                { "what_if_scientist", "What-If Scientist" },
-                { "try_again_hero", "Try Again Hero" },
-                { "tidy_expert", "Tidy Expert" },
-                { "helper_captain_coop", "Helper Captain Coop" },
-                { "rhythm_explorer", "Rhythm Explorer" }
-            }
+            DeprecatedApis = Array.Empty<DeprecatedApiInfo>()
         });
     }
 }
