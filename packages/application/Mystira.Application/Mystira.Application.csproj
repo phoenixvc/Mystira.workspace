@@ -1,4 +1,5 @@
 <Project Sdk="Microsoft.NET.Sdk">
+  <!-- Trigger package publish -->
 
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
