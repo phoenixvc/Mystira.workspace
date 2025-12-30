@@ -1,52 +1,94 @@
+// Re-export domain enums for backward compatibility
+global using DomainContributorRole = Mystira.Domain.Enums.ContributorRole;
+global using DomainContributorVerificationStatus = Mystira.Domain.Enums.ContributorVerificationStatus;
+
 namespace Mystira.Contracts.App.Enums;
 
 /// <summary>
 /// Represents the role of a contributor in content creation.
 /// </summary>
+/// <remarks>
+/// This type is re-exported from Mystira.Domain.Enums for backward compatibility.
+/// New code should use Mystira.Domain.Enums.ContributorRole directly.
+/// </remarks>
 public enum ContributorRole
 {
-    /// <summary>
-    /// The primary author of the content.
-    /// </summary>
+    /// <inheritdoc cref="DomainContributorRole.Author"/>
     Author = 0,
 
-    /// <summary>
-    /// An artist who created visual assets.
-    /// </summary>
+    /// <inheritdoc cref="DomainContributorRole.Artist"/>
     Artist = 1,
 
-    /// <summary>
-    /// An editor who reviewed and refined the content.
-    /// </summary>
+    /// <inheritdoc cref="DomainContributorRole.Editor"/>
     Editor = 2,
 
-    /// <summary>
-    /// A writer who contributed to the narrative.
-    /// </summary>
+    /// <inheritdoc cref="DomainContributorRole.Writer"/>
     Writer = 3,
 
-    /// <summary>
-    /// A designer who created game mechanics or layouts.
-    /// </summary>
+    /// <inheritdoc cref="DomainContributorRole.Designer"/>
     Designer = 4,
 
-    /// <summary>
-    /// A composer who created musical content.
-    /// </summary>
+    /// <inheritdoc cref="DomainContributorRole.Composer"/>
     Composer = 5,
 
-    /// <summary>
-    /// A voice actor who provided voice recordings.
-    /// </summary>
+    /// <inheritdoc cref="DomainContributorRole.VoiceActor"/>
     VoiceActor = 6,
 
-    /// <summary>
-    /// A translator who localized the content.
-    /// </summary>
+    /// <inheritdoc cref="DomainContributorRole.Translator"/>
     Translator = 7,
 
-    /// <summary>
-    /// Other contributor role not specified above.
-    /// </summary>
+    /// <inheritdoc cref="DomainContributorRole.Other"/>
     Other = 99
+}
+
+/// <summary>
+/// Represents the verification status of a contributor.
+/// </summary>
+/// <remarks>
+/// This type is re-exported from Mystira.Domain.Enums for backward compatibility.
+/// New code should use Mystira.Domain.Enums.ContributorVerificationStatus directly.
+/// </remarks>
+public enum ContributorVerificationStatus
+{
+    /// <inheritdoc cref="DomainContributorVerificationStatus.Pending"/>
+    Pending = 0,
+
+    /// <inheritdoc cref="DomainContributorVerificationStatus.Verified"/>
+    Verified = 1,
+
+    /// <inheritdoc cref="DomainContributorVerificationStatus.Rejected"/>
+    Rejected = 2,
+
+    /// <inheritdoc cref="DomainContributorVerificationStatus.Expired"/>
+    Expired = 3
+}
+
+/// <summary>
+/// Extension methods for contributor enum conversions between Contracts and Domain.
+/// </summary>
+public static class ContributorEnumExtensions
+{
+    /// <summary>
+    /// Converts Contracts ContributorRole to Domain ContributorRole.
+    /// </summary>
+    public static DomainContributorRole ToDomain(this ContributorRole value)
+        => (DomainContributorRole)(int)value;
+
+    /// <summary>
+    /// Converts Domain ContributorRole to Contracts ContributorRole.
+    /// </summary>
+    public static ContributorRole ToContracts(this DomainContributorRole value)
+        => (ContributorRole)(int)value;
+
+    /// <summary>
+    /// Converts Contracts ContributorVerificationStatus to Domain ContributorVerificationStatus.
+    /// </summary>
+    public static DomainContributorVerificationStatus ToDomain(this ContributorVerificationStatus value)
+        => (DomainContributorVerificationStatus)(int)value;
+
+    /// <summary>
+    /// Converts Domain ContributorVerificationStatus to Contracts ContributorVerificationStatus.
+    /// </summary>
+    public static ContributorVerificationStatus ToContracts(this DomainContributorVerificationStatus value)
+        => (ContributorVerificationStatus)(int)value;
 }
