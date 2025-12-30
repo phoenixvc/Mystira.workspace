@@ -1,4 +1,4 @@
-namespace Mystira.Shared.Data.Polyglot;
+namespace Mystira.Shared.Polyglot;
 
 /// <summary>
 /// Summary of a batch backfill operation.

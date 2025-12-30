@@ -14,7 +14,7 @@ using Polly;
 using Polly.CircuitBreaker;
 using Polly.Retry;
 
-namespace Mystira.Shared.Data.Polyglot;
+namespace Mystira.Shared.Polyglot;
 
 /// <summary>
 /// Repository implementation with polyglot persistence, dual-write pattern,

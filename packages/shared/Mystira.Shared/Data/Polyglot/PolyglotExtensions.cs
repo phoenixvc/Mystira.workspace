@@ -3,7 +3,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
-namespace Mystira.Shared.Data.Polyglot;
+namespace Mystira.Shared.Polyglot;
 
 /// <summary>
 /// Extension methods for configuring polyglot persistence.
