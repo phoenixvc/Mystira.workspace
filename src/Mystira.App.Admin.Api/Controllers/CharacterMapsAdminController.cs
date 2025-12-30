@@ -1,11 +1,10 @@
 using System.Text;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Mystira.App.Admin.Api.Models;
 using Mystira.App.Admin.Api.Services;
 using Mystira.App.Domain.Models;
-using Mystira.Contracts.App.Requests.CharacterMaps;
-using ErrorResponse = Mystira.Contracts.App.Responses.Common.ErrorResponse;
-using ValidationErrorResponse = Mystira.Contracts.App.Responses.Common.ValidationErrorResponse;
+using Mystira.App.Contracts.Requests.CharacterMaps;
 
 namespace Mystira.App.Admin.Api.Controllers;
 

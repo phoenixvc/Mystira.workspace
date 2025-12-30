@@ -1,9 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
+using Mystira.App.Admin.Api.Models;
 using Mystira.App.Admin.Api.Services;
 using Mystira.App.Domain.Models;
-using ErrorResponse = Mystira.Contracts.App.Responses.Common.ErrorResponse;
-using ScenarioListResponse = Mystira.Contracts.App.Responses.Scenarios.ScenarioListResponse;
-using ScenarioQueryRequest = Mystira.Contracts.App.Requests.Scenarios.ScenarioQueryRequest;
+using ScenarioQueryRequest = Mystira.App.Contracts.Requests.Scenarios.ScenarioQueryRequest;
 
 namespace Mystira.App.Admin.Api.Controllers;
 

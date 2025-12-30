@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Identity.Web;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Mystira.App.Admin.Api.Adapters;
 using Mystira.App.Admin.Api.Configuration;
 using Mystira.App.Admin.Api.Services;
 using Mystira.App.Admin.Api.Services.Caching;

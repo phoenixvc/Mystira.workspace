@@ -14,7 +14,7 @@ using CharacterMediaMetadataFile = Mystira.App.Domain.Models.CharacterMediaMetad
 using CharacterMetadata = Mystira.App.Admin.Api.Models.CharacterMetadata;
 using MediaMetadataEntry = Mystira.App.Domain.Models.MediaMetadataEntry;
 using MediaMetadataFile = Mystira.App.Domain.Models.MediaMetadataFile;
-using ScenarioQueryRequest = Mystira.Contracts.App.Requests.Scenarios.ScenarioQueryRequest;
+using ScenarioQueryRequest = Mystira.App.Contracts.Requests.Scenarios.ScenarioQueryRequest;
 
 namespace Mystira.App.Admin.Api.Controllers;
 

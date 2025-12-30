@@ -2,9 +2,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Mystira.App.Admin.Api.Models;
 using Mystira.App.Application.UseCases.Contributors;
+using Mystira.App.Contracts.Requests.Contributors;
 using Mystira.App.Domain.Models;
-using Mystira.Contracts.App.Requests.Contributors;
-using Mystira.Contracts.App.Responses.Common;
 
 namespace Mystira.App.Admin.Api.Controllers;
 
@@ -272,7 +271,7 @@ public class ContributorsController : ControllerBase
                 Id = c.Id,
                 Name = c.Name,
                 WalletAddress = c.WalletAddress,
-                Role = c.Role,
+                Role = c.Role.ToString(),
                 ContributionPercentage = c.ContributionPercentage,
                 Email = c.Email,
                 Notes = c.Notes,

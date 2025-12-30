@@ -4,13 +4,11 @@ using Mystira.App.Admin.Api.Models;
 using Mystira.App.Admin.Api.Services;
 using Mystira.App.Domain.Models;
 using AdminProgressSceneRequest = Mystira.App.Admin.Api.Models.ProgressSceneRequest;
-using ContractsGameSessionResponse = Mystira.Contracts.App.Responses.GameSessions.GameSessionResponse;
-using ContractsMakeChoiceRequest = Mystira.Contracts.App.Requests.GameSessions.MakeChoiceRequest;
+using ContractsGameSessionResponse = Mystira.App.Contracts.Responses.GameSessions.GameSessionResponse;
+using ContractsMakeChoiceRequest = Mystira.App.Contracts.Requests.GameSessions.MakeChoiceRequest;
 using ContractsSelectCharacterRequest = Mystira.App.Admin.Api.Models.SelectCharacterRequest;
-using ContractsSessionStatsResponse = Mystira.Contracts.App.Responses.GameSessions.SessionStatsResponse;
-using ContractsStartGameSessionRequest = Mystira.Contracts.App.Requests.GameSessions.StartGameSessionRequest;
-using ErrorResponse = Mystira.Contracts.App.Responses.Common.ErrorResponse;
-using ValidationErrorResponse = Mystira.Contracts.App.Responses.Common.ValidationErrorResponse;
+using ContractsSessionStatsResponse = Mystira.App.Contracts.Responses.GameSessions.SessionStatsResponse;
+using ContractsStartGameSessionRequest = Mystira.App.Contracts.Requests.GameSessions.StartGameSessionRequest;
 
 namespace Mystira.App.Admin.Api.Controllers;
 
