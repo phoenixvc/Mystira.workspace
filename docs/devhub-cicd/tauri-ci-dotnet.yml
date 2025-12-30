@@ -1,0 +1,79 @@
+name: CI (.NET)
+
+on:
+  push:
+    branches: [dev, main]
+    paths:
+      - "Mystira.DevHub.CLI/**"
+      - "Mystira.DevHub.Services/**"
+      - "Mystira.App.CosmosConsole/**"
+      - ".github/workflows/ci-dotnet.yml"
+  pull_request:
+    branches: [dev, main]
+  workflow_dispatch:
+
+concurrency:
+  group: ci-dotnet-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "9.0.x"
+
+      - name: Restore CLI
+        run: dotnet restore Mystira.DevHub.CLI/Mystira.DevHub.CLI.csproj
+
+      - name: Restore Services
+        run: dotnet restore Mystira.DevHub.Services/Mystira.DevHub.Services.csproj
+
+      - name: Restore CosmosConsole
+        run: dotnet restore Mystira.App.CosmosConsole/Mystira.App.CosmosConsole.csproj
+
+      - name: Format check
+        run: |
+          dotnet format Mystira.DevHub.CLI/Mystira.DevHub.CLI.csproj --verify-no-changes --verbosity diagnostic || true
+          dotnet format Mystira.DevHub.Services/Mystira.DevHub.Services.csproj --verify-no-changes --verbosity diagnostic || true
+          dotnet format Mystira.App.CosmosConsole/Mystira.App.CosmosConsole.csproj --verify-no-changes --verbosity diagnostic || true
+        continue-on-error: ${{ github.ref != 'refs/heads/main' }}
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    needs: [lint]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "9.0.x"
+
+      - name: Restore
+        run: |
+          dotnet restore Mystira.DevHub.CLI/Mystira.DevHub.CLI.csproj
+          dotnet restore Mystira.DevHub.Services/Mystira.DevHub.Services.csproj
+          dotnet restore Mystira.App.CosmosConsole/Mystira.App.CosmosConsole.csproj
+
+      - name: Build CLI
+        run: dotnet build Mystira.DevHub.CLI/Mystira.DevHub.CLI.csproj --configuration Release --no-restore
+
+      - name: Build Services
+        run: dotnet build Mystira.DevHub.Services/Mystira.DevHub.Services.csproj --configuration Release --no-restore
+
+      - name: Build CosmosConsole
+        run: dotnet build Mystira.App.CosmosConsole/Mystira.App.CosmosConsole.csproj --configuration Release --no-restore
+
+      - name: Publish CLI
+        run: dotnet publish Mystira.DevHub.CLI/Mystira.DevHub.CLI.csproj --configuration Release --no-build --output ./publish/cli
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: devhub-cli
+          path: ./publish/cli
+          retention-days: 7
