@@ -28,7 +28,7 @@ public class RegisterScenarioIpAssetUseCase
         _logger = logger;
     }
 
-    public async Task<StoryProtocolMetadata> ExecuteAsync(string scenarioId, RegisterIpAssetRequest request)
+    public async Task<ScenarioStoryProtocol> ExecuteAsync(string scenarioId, RegisterIpAssetRequest request)
     {
         // Get the scenario
         var scenario = await _scenarioRepository.GetByIdAsync(scenarioId);

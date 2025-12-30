@@ -127,7 +127,7 @@ public class ContentBundle : SoftDeletableEntity
     /// <summary>
     /// Gets or sets the Story Protocol metadata.
     /// </summary>
-    public StoryProtocolMetadata? StoryProtocol { get; set; }
+    public ScenarioStoryProtocol? StoryProtocol { get; set; }
 
     /// <summary>
     /// Gets the target age group.

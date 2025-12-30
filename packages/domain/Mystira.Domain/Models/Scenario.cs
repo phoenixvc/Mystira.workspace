@@ -158,7 +158,7 @@ public class Scenario : SoftDeletableEntity
     /// <summary>
     /// Gets or sets the Story Protocol metadata.
     /// </summary>
-    public StoryProtocolMetadata? StoryProtocol { get; set; }
+    public ScenarioStoryProtocol? StoryProtocol { get; set; }
 
     /// <summary>
     /// Gets or sets the characters in this scenario.
@@ -772,9 +772,9 @@ public class CompassChangeRecord
 }
 
 /// <summary>
-/// Represents Story Protocol metadata for IP asset registration.
+/// Represents Story Protocol metadata for IP asset registration on scenarios/bundles.
 /// </summary>
-public class StoryProtocolMetadata
+public class ScenarioStoryProtocol
 {
     /// <summary>
     /// Gets or sets the IP Asset ID on Story Protocol.
@@ -805,4 +805,34 @@ public class StoryProtocolMetadata
     /// Gets or sets the royalty policy ID.
     /// </summary>
     public string? RoyaltyPolicyId { get; set; }
+
+    /// <summary>
+    /// Gets or sets the contributors for this IP asset.
+    /// </summary>
+    public List<Contributor> Contributors { get; set; } = new();
+
+    /// <summary>
+    /// Validates that contributor splits sum to 100%.
+    /// </summary>
+    /// <param name="errors">Output list of validation errors.</param>
+    /// <returns>True if valid, false otherwise.</returns>
+    public bool ValidateContributorSplits(out List<string> errors)
+    {
+        errors = new List<string>();
+
+        if (Contributors == null || !Contributors.Any())
+        {
+            errors.Add("At least one contributor is required");
+            return false;
+        }
+
+        var totalSplit = Contributors.Sum(c => c.Split);
+        if (Math.Abs(totalSplit - 100) > 0.01m)
+        {
+            errors.Add($"Contributor splits must sum to 100%, currently {totalSplit}%");
+            return false;
+        }
+
+        return true;
+    }
 }

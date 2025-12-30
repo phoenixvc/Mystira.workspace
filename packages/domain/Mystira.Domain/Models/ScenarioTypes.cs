@@ -42,44 +42,6 @@ public class ScenarioCharacterMetadata
 }
 
 /// <summary>
-/// Character metadata for YAML import/export.
-/// </summary>
-public class CharacterMetadata
-{
-    /// <summary>Gets or sets the character roles.</summary>
-    public List<string> Roles { get; set; } = new();
-
-    /// <summary>Gets or sets the character role (alias for Roles for compatibility).</summary>
-    public List<string> Role
-    {
-        get => Roles;
-        set => Roles = value;
-    }
-
-    /// <summary>Gets or sets the character archetypes as strings.</summary>
-    public List<string> Archetypes { get; set; } = new();
-
-    /// <summary>Gets or sets the character archetype (alias for Archetypes for compatibility).</summary>
-    public List<string> Archetype
-    {
-        get => Archetypes;
-        set => Archetypes = value;
-    }
-
-    /// <summary>Gets or sets the species.</summary>
-    public string Species { get; set; } = string.Empty;
-
-    /// <summary>Gets or sets the age.</summary>
-    public int Age { get; set; }
-
-    /// <summary>Gets or sets the character traits.</summary>
-    public List<string> Traits { get; set; } = new();
-
-    /// <summary>Gets or sets the backstory.</summary>
-    public string Backstory { get; set; } = string.Empty;
-}
-
-/// <summary>
 /// Scene music settings for scenarios.
 /// </summary>
 public class SceneMusicSettings

@@ -24,7 +24,7 @@ public class SetScenarioContributorsUseCase
         _logger = logger;
     }
 
-    public async Task<StoryProtocolMetadata> ExecuteAsync(string scenarioId, SetContributorsRequest request)
+    public async Task<ScenarioStoryProtocol> ExecuteAsync(string scenarioId, SetContributorsRequest request)
     {
         // Get the scenario
         var scenario = await _scenarioRepository.GetByIdAsync(scenarioId);
@@ -49,7 +49,7 @@ public class SetScenarioContributorsUseCase
         // Initialize Story Protocol metadata if it doesn't exist
         if (scenario.StoryProtocol == null)
         {
-            scenario.StoryProtocol = new StoryProtocolMetadata();
+            scenario.StoryProtocol = new ScenarioStoryProtocol();
         }
 
         // Set the contributors
