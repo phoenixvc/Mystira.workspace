@@ -1,20 +1,17 @@
 using Mystira.App.Domain.Models;
-using ContractsCreateGuestProfileRequest = Mystira.Contracts.App.Requests.UserProfiles.CreateGuestProfileRequest;
-using ContractsCreateMultipleProfilesRequest = Mystira.Contracts.App.Requests.UserProfiles.CreateMultipleProfilesRequest;
-using ContractsCreateUserProfileRequest = Mystira.Contracts.App.Requests.UserProfiles.CreateUserProfileRequest;
-using ContractsUpdateUserProfileRequest = Mystira.Contracts.App.Requests.UserProfiles.UpdateUserProfileRequest;
+using Mystira.Contracts.App.Requests.UserProfiles;
 
 namespace Mystira.App.Admin.Api.Services;
 
 public interface IUserProfileApiService
 {
-    Task<UserProfile> CreateProfileAsync(ContractsCreateUserProfileRequest request);
-    Task<UserProfile> CreateGuestProfileAsync(ContractsCreateGuestProfileRequest request);
-    Task<List<UserProfile>> CreateMultipleProfilesAsync(ContractsCreateMultipleProfilesRequest request);
+    Task<UserProfile> CreateProfileAsync(CreateUserProfileRequest request);
+    Task<UserProfile> CreateGuestProfileAsync(CreateGuestProfileRequest request);
+    Task<List<UserProfile>> CreateMultipleProfilesAsync(CreateMultipleProfilesRequest request);
     Task<UserProfile?> GetProfileAsync(string name);
     Task<UserProfile?> GetProfileByIdAsync(string id);
-    Task<UserProfile?> UpdateProfileAsync(string name, ContractsUpdateUserProfileRequest request);
-    Task<UserProfile?> UpdateProfileByIdAsync(string id, ContractsUpdateUserProfileRequest request);
+    Task<UserProfile?> UpdateProfileAsync(string name, UpdateUserProfileRequest request);
+    Task<UserProfile?> UpdateProfileByIdAsync(string id, UpdateUserProfileRequest request);
     Task<bool> DeleteProfileAsync(string name);
     Task<bool> CompleteOnboardingAsync(string name);
     Task<List<UserProfile>> GetAllProfilesAsync();

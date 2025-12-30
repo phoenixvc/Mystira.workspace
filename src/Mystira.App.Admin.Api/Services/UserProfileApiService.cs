@@ -1,9 +1,5 @@
-using Mystira.App.Admin.Api.Models;
 using Mystira.App.Domain.Models;
-using ContractsCreateGuestProfileRequest = Mystira.Contracts.App.Requests.UserProfiles.CreateGuestProfileRequest;
-using ContractsCreateMultipleProfilesRequest = Mystira.Contracts.App.Requests.UserProfiles.CreateMultipleProfilesRequest;
-using ContractsCreateUserProfileRequest = Mystira.Contracts.App.Requests.UserProfiles.CreateUserProfileRequest;
-using ContractsUpdateUserProfileRequest = Mystira.Contracts.App.Requests.UserProfiles.UpdateUserProfileRequest;
+using Mystira.Contracts.App.Requests.UserProfiles;
 
 namespace Mystira.App.Admin.Api.Services;
 
@@ -16,54 +12,13 @@ public class UserProfileApiService : IUserProfileApiService
         _userProfileService = userProfileService;
     }
 
-    private static CreateUserProfileRequest MapToShared(ContractsCreateUserProfileRequest req) => new()
-    {
-        Id = req.Id,
-        Name = req.Name,
-        PreferredFantasyThemes = req.PreferredFantasyThemes,
-        AgeGroup = req.AgeGroup,
-        DateOfBirth = req.DateOfBirth,
-        IsGuest = req.IsGuest,
-        IsNpc = req.IsNpc,
-        AccountId = req.AccountId,
-        HasCompletedOnboarding = req.HasCompletedOnboarding,
-        SelectedAvatarMediaId = req.SelectedAvatarMediaId
-    };
-
-    private static UpdateUserProfileRequest MapToShared(ContractsUpdateUserProfileRequest req) => new()
-    {
-        PreferredFantasyThemes = req.PreferredFantasyThemes,
-        AgeGroup = req.AgeGroup,
-        DateOfBirth = req.DateOfBirth,
-        HasCompletedOnboarding = req.HasCompletedOnboarding,
-        IsGuest = req.IsGuest,
-        IsNpc = req.IsNpc,
-        AccountId = req.AccountId,
-        Pronouns = req.Pronouns,
-        Bio = req.Bio,
-        SelectedAvatarMediaId = req.SelectedAvatarMediaId
-    };
-
-    private static CreateGuestProfileRequest MapToShared(ContractsCreateGuestProfileRequest req) => new()
-    {
-        Id = req.Id,
-        Name = req.Name,
-        AgeGroup = req.AgeGroup,
-        UseAdjectiveNames = req.UseAdjectiveNames
-    };
-
-    private static CreateMultipleProfilesRequest MapToShared(ContractsCreateMultipleProfilesRequest req) => new()
-    {
-        Profiles = req.Profiles.Select(MapToShared).ToList()
-    };
-
-    public async Task<UserProfile> CreateProfileAsync(ContractsCreateUserProfileRequest request) => await _userProfileService.CreateProfileAsync(MapToShared(request));
-    public async Task<UserProfile> CreateGuestProfileAsync(ContractsCreateGuestProfileRequest request) => await _userProfileService.CreateGuestProfileAsync(MapToShared(request));
-    public async Task<List<UserProfile>> CreateMultipleProfilesAsync(ContractsCreateMultipleProfilesRequest request) => await _userProfileService.CreateMultipleProfilesAsync(MapToShared(request));
+    public async Task<UserProfile> CreateProfileAsync(CreateUserProfileRequest request) => await _userProfileService.CreateProfileAsync(request);
+    public async Task<UserProfile> CreateGuestProfileAsync(CreateGuestProfileRequest request) => await _userProfileService.CreateGuestProfileAsync(request);
+    public async Task<List<UserProfile>> CreateMultipleProfilesAsync(CreateMultipleProfilesRequest request) => await _userProfileService.CreateMultipleProfilesAsync(request);
     public async Task<UserProfile?> GetProfileAsync(string name) => await _userProfileService.GetProfileAsync(name);
     public async Task<UserProfile?> GetProfileByIdAsync(string id) => await _userProfileService.GetProfileByIdAsync(id);
-    public async Task<UserProfile?> UpdateProfileAsync(string name, ContractsUpdateUserProfileRequest request) => await _userProfileService.UpdateProfileAsync(name, MapToShared(request));
-    public async Task<UserProfile?> UpdateProfileByIdAsync(string id, ContractsUpdateUserProfileRequest request) => await _userProfileService.UpdateProfileByIdAsync(id, MapToShared(request));
+    public async Task<UserProfile?> UpdateProfileAsync(string name, UpdateUserProfileRequest request) => await _userProfileService.UpdateProfileAsync(name, request);
+    public async Task<UserProfile?> UpdateProfileByIdAsync(string id, UpdateUserProfileRequest request) => await _userProfileService.UpdateProfileByIdAsync(id, request);
     public async Task<bool> DeleteProfileAsync(string name) => await _userProfileService.DeleteProfileAsync(name);
     public async Task<bool> CompleteOnboardingAsync(string name) => await _userProfileService.CompleteOnboardingAsync(name);
     public async Task<List<UserProfile>> GetAllProfilesAsync() => await _userProfileService.GetAllProfilesAsync();
