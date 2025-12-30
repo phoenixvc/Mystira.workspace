@@ -110,27 +110,25 @@ using Mystira.StoryGenerator.Contracts;
 **After:**
 
 ```csharp
-// App-level types (user profiles, game sessions, avatars, common responses)
+// All types are under Mystira.Contracts.App namespace
 using Mystira.Contracts.App.Requests.UserProfiles;
 using Mystira.Contracts.App.Requests.GameSessions;
 using Mystira.Contracts.App.Requests.Contributors;
 using Mystira.Contracts.App.Requests.Characters;
+using Mystira.Contracts.App.Requests.Scenarios;
+using Mystira.Contracts.App.Requests.CharacterMaps;
 using Mystira.Contracts.App.Responses.Common;
 using Mystira.Contracts.App.Responses.GameSessions;
 using Mystira.Contracts.App.Responses.Avatars;
 using Mystira.Contracts.App.Responses.Contributors;
-
-// Story/content types (scenarios, character maps)
-using Mystira.Contracts.Story.Requests.Scenarios;
-using Mystira.Contracts.Story.Requests.CharacterMaps;
-using Mystira.Contracts.Story.Responses.Scenarios;
+using Mystira.Contracts.App.Responses.Scenarios;
 ```
 
 **Using aliases for clarity:**
 
 ```csharp
-using ScenarioQueryRequest = Mystira.Contracts.Story.Requests.Scenarios.ScenarioQueryRequest;
-using CreateScenarioRequest = Mystira.Contracts.Story.Requests.Scenarios.CreateScenarioRequest;
+using ScenarioQueryRequest = Mystira.Contracts.App.Requests.Scenarios.ScenarioQueryRequest;
+using CreateScenarioRequest = Mystira.Contracts.App.Requests.Scenarios.CreateScenarioRequest;
 using ContractsStartGameSessionRequest = Mystira.Contracts.App.Requests.GameSessions.StartGameSessionRequest;
 ```
 

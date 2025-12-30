@@ -10,11 +10,11 @@ using CharacterMediaMetadataEntry = Mystira.App.Domain.Models.CharacterMediaMeta
 using CharacterMediaMetadataFile = Mystira.App.Domain.Models.CharacterMediaMetadataFile;
 using CharacterMetadata = Mystira.App.Domain.Models.CharacterMetadata;
 using ClassificationTag = Mystira.App.Domain.Models.ClassificationTag;
-using CreateScenarioRequest = Mystira.Contracts.Story.Requests.Scenarios.CreateScenarioRequest;
+using CreateScenarioRequest = Mystira.Contracts.App.Requests.Scenarios.CreateScenarioRequest;
 using MediaMetadataEntry = Mystira.App.Domain.Models.MediaMetadataEntry;
 using MediaMetadataFile = Mystira.App.Domain.Models.MediaMetadataFile;
 using Modifier = Mystira.App.Domain.Models.Modifier;
-using ScenarioQueryRequest = Mystira.Contracts.Story.Requests.Scenarios.ScenarioQueryRequest;
+using ScenarioQueryRequest = Mystira.Contracts.App.Requests.Scenarios.ScenarioQueryRequest;
 
 namespace Mystira.App.Admin.Api.Services;
 

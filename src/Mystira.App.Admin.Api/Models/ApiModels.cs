@@ -4,7 +4,5 @@ namespace Mystira.App.Admin.Api.Models;
 // Import from:
 //   - Mystira.Contracts.App.Requests.*
 //   - Mystira.Contracts.App.Responses.*
-//   - Mystira.Contracts.Story.Requests.*
-//   - Mystira.Contracts.Story.Responses.*
 
 // Character and CharacterMapFile are defined in MediaModels.cs

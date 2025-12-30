@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Mystira.App.Admin.Api.Services;
-using Mystira.Contracts.Story.Requests.Scenarios;
+using Mystira.Contracts.App.Requests.Scenarios;
 using Mystira.Contracts.App.Responses.Common;
-using Mystira.Contracts.Story.Responses.Scenarios;
+using Mystira.Contracts.App.Responses.Scenarios;
 using Mystira.App.Domain.Models;
 
 namespace Mystira.App.Admin.Api.Controllers;
