@@ -8,7 +8,12 @@ public record ClientStatusRequest
     /// <summary>
     /// The client's current app version.
     /// </summary>
-    public string? AppVersion { get; set; }
+    public string ClientVersion { get; set; } = string.Empty;
+
+    /// <summary>
+    /// The client's current content version (optional).
+    /// </summary>
+    public string? ContentVersion { get; set; }
 
     /// <summary>
     /// The client's platform (e.g., "ios", "android", "web").
