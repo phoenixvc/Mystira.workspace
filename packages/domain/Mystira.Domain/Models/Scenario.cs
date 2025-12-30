@@ -269,6 +269,15 @@ public class Scene : Entity
     public string Content { get; set; } = string.Empty;
 
     /// <summary>
+    /// Gets or sets the scene description (alias for Content for DTO compatibility).
+    /// </summary>
+    public string Description
+    {
+        get => Content;
+        set => Content = value;
+    }
+
+    /// <summary>
     /// Gets or sets the scene type.
     /// </summary>
     public SceneType Type { get; set; } = SceneType.Standard;
@@ -277,6 +286,11 @@ public class Scene : Entity
     /// Gets or sets the scene slug.
     /// </summary>
     public string? Slug { get; set; }
+
+    /// <summary>
+    /// Gets or sets the next scene ID for linear progression.
+    /// </summary>
+    public string? NextSceneId { get; set; }
 
     /// <summary>
     /// Gets or sets the background image URL.
@@ -297,6 +311,31 @@ public class Scene : Entity
     /// Gets or sets the display order.
     /// </summary>
     public int DisplayOrder { get; set; }
+
+    /// <summary>
+    /// Gets or sets the difficulty level (0-3, nullable).
+    /// </summary>
+    public int? Difficulty { get; set; }
+
+    /// <summary>
+    /// Gets or sets media references for this scene.
+    /// </summary>
+    public MediaReferences? Media { get; set; }
+
+    /// <summary>
+    /// Gets or sets music settings for this scene.
+    /// </summary>
+    public SceneMusicSettings? Music { get; set; }
+
+    /// <summary>
+    /// Gets or sets sound effects for this scene.
+    /// </summary>
+    public List<SceneSoundEffect> SoundEffects { get; set; } = new();
+
+    /// <summary>
+    /// Gets or sets the active character ID for choice scenes.
+    /// </summary>
+    public string? ActiveCharacter { get; set; }
 
     /// <summary>
     /// Gets or sets whether this is an ending scene.
@@ -340,9 +379,27 @@ public class Branch : Entity
     public string TargetSceneId { get; set; } = string.Empty;
 
     /// <summary>
+    /// Gets or sets the next scene ID (alias for TargetSceneId for DTO compatibility).
+    /// </summary>
+    public string NextSceneId
+    {
+        get => TargetSceneId;
+        set => TargetSceneId = value;
+    }
+
+    /// <summary>
     /// Gets or sets the branch text (what the player sees).
     /// </summary>
     public string Text { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Gets or sets the choice text (alias for Text for DTO compatibility).
+    /// </summary>
+    public string Choice
+    {
+        get => Text;
+        set => Text = value;
+    }
 
     /// <summary>
     /// Gets or sets an optional description/hint.
@@ -363,6 +420,16 @@ public class Branch : Entity
     /// Gets or sets whether this is a hidden/secret branch.
     /// </summary>
     public bool IsHidden { get; set; }
+
+    /// <summary>
+    /// Gets or sets the echo log for this branch.
+    /// </summary>
+    public EchoLog? EchoLog { get; set; }
+
+    /// <summary>
+    /// Gets or sets a single compass change for this branch (DTO compatibility).
+    /// </summary>
+    public CompassChangeDto? CompassChange { get; set; }
 
     /// <summary>
     /// Gets or sets compass changes when this branch is taken.
@@ -468,9 +535,39 @@ public class EchoReveal
     public string EchoLogId { get; set; } = string.Empty;
 
     /// <summary>
+    /// Gets or sets the echo type (for DTO compatibility).
+    /// </summary>
+    public string EchoType { get; set; } = "honesty";
+
+    /// <summary>
     /// Gets or sets the reveal trigger type.
     /// </summary>
     public string TriggerType { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Gets or sets the trigger scene ID (for DTO compatibility).
+    /// </summary>
+    public string TriggerSceneId { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Gets or sets the minimum echo strength required.
+    /// </summary>
+    public double MinStrength { get; set; }
+
+    /// <summary>
+    /// Gets or sets the maximum age (in scenes) for this echo.
+    /// </summary>
+    public int? MaxAgeScenes { get; set; }
+
+    /// <summary>
+    /// Gets or sets the reveal mechanic description.
+    /// </summary>
+    public string? RevealMechanic { get; set; }
+
+    /// <summary>
+    /// Gets or sets whether this echo reveal is required.
+    /// </summary>
+    public bool? Required { get; set; }
 
     /// <summary>
     /// Gets or sets the reveal conditions as JSON.
@@ -479,7 +576,7 @@ public class EchoReveal
 }
 
 /// <summary>
-/// Represents a compass value change.
+/// Represents a compass value change (entity model).
 /// </summary>
 public class CompassChange
 {
@@ -502,6 +599,28 @@ public class CompassChange
     /// Gets the core axis.
     /// </summary>
     public CoreAxis? Axis => CoreAxis.FromValue(AxisId);
+}
+
+/// <summary>
+/// Represents a compass value change (DTO model for Application layer compatibility).
+/// Uses Axis as string and Delta as double to match request/response patterns.
+/// </summary>
+public class CompassChangeDto
+{
+    /// <summary>
+    /// Gets or sets the axis name/ID.
+    /// </summary>
+    public string Axis { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Gets or sets the change amount.
+    /// </summary>
+    public double Delta { get; set; }
+
+    /// <summary>
+    /// Gets or sets the developmental link description.
+    /// </summary>
+    public string? DevelopmentalLink { get; set; }
 }
 
 /// <summary>

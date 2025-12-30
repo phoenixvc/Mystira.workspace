@@ -143,7 +143,7 @@ public static partial class ScenarioMapper
     private static SceneType ParseSceneType(string? type)
         => Enum.TryParse<SceneType>(type, true, out var sceneType)
             ? sceneType
-            : SceneType.Narrative;
+            : SceneType.Standard;
 
     private static int? ParseDifficulty(string? difficulty)
         => string.IsNullOrEmpty(difficulty) ? null : int.TryParse(difficulty, out var diff) ? diff : null;
@@ -162,7 +162,7 @@ public static partial class ScenarioMapper
             Choice = b.Text ?? string.Empty,
             NextSceneId = b.NextSceneId ?? string.Empty,
             CompassChange = (b.CompassAxis != null || b.CompassDelta.HasValue)
-                ? new CompassChange
+                ? new CompassChangeDto
                 {
                     Axis = b.CompassAxis ?? string.Empty,
                     Delta = b.CompassDelta ?? 0.0
