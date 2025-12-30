@@ -10,29 +10,15 @@ namespace Mystira.Contracts.App.Enums;
 /// </summary>
 public enum SubscriptionType
 {
-    /// <summary>
-    /// Free tier with basic features.
-    /// </summary>
+    /// <summary>Free tier with basic features.</summary>
     Free = 0,
-
-    /// <summary>
-    /// Basic paid subscription.
-    /// </summary>
+    /// <summary>Basic paid subscription.</summary>
     Basic = 1,
-
-    /// <summary>
-    /// Premium subscription with advanced features.
-    /// </summary>
+    /// <summary>Premium subscription with advanced features.</summary>
     Premium = 2,
-
-    /// <summary>
-    /// Family subscription for multiple profiles.
-    /// </summary>
+    /// <summary>Family subscription for multiple profiles.</summary>
     Family = 3,
-
-    /// <summary>
-    /// Enterprise subscription for organizations.
-    /// </summary>
+    /// <summary>Enterprise subscription for organizations.</summary>
     Enterprise = 4
 }
 
@@ -40,24 +26,19 @@ public enum SubscriptionType
 /// Represents the status of a user account.
 /// </summary>
 /// <remarks>
-/// This type is re-exported from Mystira.Domain.Enums for backward compatibility.
-/// New code should use Mystira.Domain.Enums.AccountStatus directly.
+/// This type mirrors Mystira.Domain.Enums.AccountStatus for backward compatibility.
 /// </remarks>
 public enum AccountStatus
 {
-    /// <inheritdoc cref="DomainAccountStatus.Active"/>
+    /// <summary>The account is active and in good standing.</summary>
     Active = 0,
-
-    /// <inheritdoc cref="DomainAccountStatus.PendingVerification"/>
+    /// <summary>The account is pending email verification.</summary>
     PendingVerification = 1,
-
-    /// <inheritdoc cref="DomainAccountStatus.Suspended"/>
+    /// <summary>The account has been suspended.</summary>
     Suspended = 2,
-
-    /// <inheritdoc cref="DomainAccountStatus.Deactivated"/>
+    /// <summary>The account has been deactivated by the user.</summary>
     Deactivated = 3,
-
-    /// <inheritdoc cref="DomainAccountStatus.Deleted"/>
+    /// <summary>The account has been deleted.</summary>
     Deleted = 4
 }
 
@@ -65,21 +46,17 @@ public enum AccountStatus
 /// Represents the type of user account.
 /// </summary>
 /// <remarks>
-/// This type is re-exported from Mystira.Domain.Enums for backward compatibility.
-/// New code should use Mystira.Domain.Enums.AccountType directly.
+/// This type mirrors Mystira.Domain.Enums.AccountType for backward compatibility.
 /// </remarks>
 public enum AccountType
 {
-    /// <inheritdoc cref="DomainAccountType.Free"/>
+    /// <summary>A free tier account.</summary>
     Free = 0,
-
-    /// <inheritdoc cref="DomainAccountType.Premium"/>
+    /// <summary>A premium subscription account.</summary>
     Premium = 1,
-
-    /// <inheritdoc cref="DomainAccountType.Educational"/>
+    /// <summary>An educational institution account.</summary>
     Educational = 2,
-
-    /// <inheritdoc cref="DomainAccountType.Enterprise"/>
+    /// <summary>An enterprise/business account.</summary>
     Enterprise = 3
 }
 
@@ -87,24 +64,19 @@ public enum AccountType
 /// Represents the authentication provider used.
 /// </summary>
 /// <remarks>
-/// This type is re-exported from Mystira.Domain.Enums for backward compatibility.
-/// New code should use Mystira.Domain.Enums.AuthProvider directly.
+/// This type mirrors Mystira.Domain.Enums.AuthProvider for backward compatibility.
 /// </remarks>
 public enum AuthProvider
 {
-    /// <inheritdoc cref="DomainAuthProvider.Local"/>
+    /// <summary>Local email/password authentication.</summary>
     Local = 0,
-
-    /// <inheritdoc cref="DomainAuthProvider.Google"/>
+    /// <summary>Google OAuth.</summary>
     Google = 1,
-
-    /// <inheritdoc cref="DomainAuthProvider.Apple"/>
+    /// <summary>Apple Sign In.</summary>
     Apple = 2,
-
-    /// <inheritdoc cref="DomainAuthProvider.Microsoft"/>
+    /// <summary>Microsoft/Azure AD.</summary>
     Microsoft = 3,
-
-    /// <inheritdoc cref="DomainAuthProvider.Passwordless"/>
+    /// <summary>Passwordless magic link.</summary>
     Passwordless = 4
 }
 
@@ -113,39 +85,18 @@ public enum AuthProvider
 /// </summary>
 public static class AccountEnumExtensions
 {
-    /// <summary>
-    /// Converts Contracts AccountStatus to Domain AccountStatus.
-    /// </summary>
-    public static DomainAccountStatus ToDomain(this AccountStatus value)
-        => (DomainAccountStatus)(int)value;
+    /// <summary>Converts to Domain AccountStatus.</summary>
+    public static DomainAccountStatus ToDomain(this AccountStatus value) => (DomainAccountStatus)(int)value;
+    /// <summary>Converts to Contracts AccountStatus.</summary>
+    public static AccountStatus ToContracts(this DomainAccountStatus value) => (AccountStatus)(int)value;
 
-    /// <summary>
-    /// Converts Domain AccountStatus to Contracts AccountStatus.
-    /// </summary>
-    public static AccountStatus ToContracts(this DomainAccountStatus value)
-        => (AccountStatus)(int)value;
+    /// <summary>Converts to Domain AccountType.</summary>
+    public static DomainAccountType ToDomain(this AccountType value) => (DomainAccountType)(int)value;
+    /// <summary>Converts to Contracts AccountType.</summary>
+    public static AccountType ToContracts(this DomainAccountType value) => (AccountType)(int)value;
 
-    /// <summary>
-    /// Converts Contracts AccountType to Domain AccountType.
-    /// </summary>
-    public static DomainAccountType ToDomain(this AccountType value)
-        => (DomainAccountType)(int)value;
-
-    /// <summary>
-    /// Converts Domain AccountType to Contracts AccountType.
-    /// </summary>
-    public static AccountType ToContracts(this DomainAccountType value)
-        => (AccountType)(int)value;
-
-    /// <summary>
-    /// Converts Contracts AuthProvider to Domain AuthProvider.
-    /// </summary>
-    public static DomainAuthProvider ToDomain(this AuthProvider value)
-        => (DomainAuthProvider)(int)value;
-
-    /// <summary>
-    /// Converts Domain AuthProvider to Contracts AuthProvider.
-    /// </summary>
-    public static AuthProvider ToContracts(this DomainAuthProvider value)
-        => (AuthProvider)(int)value;
+    /// <summary>Converts to Domain AuthProvider.</summary>
+    public static DomainAuthProvider ToDomain(this AuthProvider value) => (DomainAuthProvider)(int)value;
+    /// <summary>Converts to Contracts AuthProvider.</summary>
+    public static AuthProvider ToContracts(this DomainAuthProvider value) => (AuthProvider)(int)value;
 }
