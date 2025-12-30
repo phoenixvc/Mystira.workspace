@@ -101,6 +101,33 @@ public record ProgressSceneRequest
 }
 
 /// <summary>
+/// Request for admin to manually progress to a specific scene.
+/// Used for debugging, testing, or bypassing normal flow.
+/// </summary>
+public record AdminProgressSceneRequest
+{
+    /// <summary>
+    /// The unique identifier of the current session.
+    /// </summary>
+    public string SessionId { get; set; } = string.Empty;
+
+    /// <summary>
+    /// The unique identifier of the target scene to jump to.
+    /// </summary>
+    public string TargetSceneId { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Optional reason for the manual progression (for audit logging).
+    /// </summary>
+    public string? Reason { get; set; }
+
+    /// <summary>
+    /// Whether to skip any validation or prerequisite checks.
+    /// </summary>
+    public bool SkipValidation { get; set; }
+}
+
+/// <summary>
 /// Request to complete a scenario session.
 /// </summary>
 public class CompleteScenarioRequest
