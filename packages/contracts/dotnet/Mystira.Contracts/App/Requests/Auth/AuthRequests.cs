@@ -42,24 +42,3 @@ public class RefreshTokenRequest
     /// </summary>
     public string RefreshToken { get; set; } = string.Empty;
 }
-
-/// <summary>
-/// Request to sign in with passwordless authentication.
-/// </summary>
-public record PasswordlessSigninRequest
-{
-    /// <summary>
-    /// The email address for signin.
-    /// </summary>
-    public string Email { get; set; } = string.Empty;
-
-    /// <summary>
-    /// Optional device identifier for multi-device tracking.
-    /// </summary>
-    public string? DeviceId { get; set; }
-
-    /// <summary>
-    /// Optional platform identifier (e.g., "ios", "android", "web").
-    /// </summary>
-    public string? Platform { get; set; }
-}
