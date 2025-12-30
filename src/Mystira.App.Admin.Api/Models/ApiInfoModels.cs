@@ -1,41 +1,7 @@
 namespace Mystira.App.Admin.Api.Models;
 
 /// <summary>
-/// API version and compatibility information
-/// </summary>
-public class ApiVersionInfo
-{
-    public string ApiVersion { get; set; } = string.Empty;
-    public string BuildVersion { get; set; } = string.Empty;
-    public string MasterDataVersion { get; set; } = string.Empty;
-    public bool SupportsLegacyEnums { get; set; }
-    public MasterDataEntityInfo[] MasterDataEntities { get; set; } = Array.Empty<MasterDataEntityInfo>();
-    public DeprecatedApiInfo[] DeprecatedApis { get; set; } = Array.Empty<DeprecatedApiInfo>();
-}
-
-/// <summary>
-/// Information about a master data entity endpoint
-/// </summary>
-public class MasterDataEntityInfo
-{
-    public string Name { get; set; } = string.Empty;
-    public string Endpoint { get; set; } = string.Empty;
-    public int? Count { get; set; }
-}
-
-/// <summary>
-/// Information about deprecated API endpoints
-/// </summary>
-public class DeprecatedApiInfo
-{
-    public string Endpoint { get; set; } = string.Empty;
-    public string ReplacedBy { get; set; } = string.Empty;
-    public string DeprecationDate { get; set; } = string.Empty;
-    public string RemovalDate { get; set; } = string.Empty;
-}
-
-/// <summary>
-/// Legacy value mappings for backward compatibility
+/// Legacy value mappings for backward compatibility (admin-specific)
 /// </summary>
 public class LegacyMappings
 {

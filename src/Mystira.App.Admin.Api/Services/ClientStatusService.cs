@@ -1,4 +1,4 @@
-using Mystira.App.Admin.Api.Models;
+using Mystira.Contracts.App.Requests.Client;
 using Mystira.Contracts.App.Requests.Scenarios;
 using Mystira.Contracts.App.Responses.Client;
 
