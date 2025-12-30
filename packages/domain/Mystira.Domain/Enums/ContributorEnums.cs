@@ -36,6 +36,11 @@ public enum ContributorRole
     Composer = 5,
 
     /// <summary>
+    /// Music composer (alias for Composer for DTO compatibility).
+    /// </summary>
+    MusicComposer = 5,
+
+    /// <summary>
     /// Voice actor.
     /// </summary>
     VoiceActor = 6,
@@ -44,6 +49,21 @@ public enum ContributorRole
     /// Language translator.
     /// </summary>
     Translator = 7,
+
+    /// <summary>
+    /// Sound designer.
+    /// </summary>
+    SoundDesigner = 8,
+
+    /// <summary>
+    /// Game designer.
+    /// </summary>
+    GameDesigner = 9,
+
+    /// <summary>
+    /// Quality assurance tester.
+    /// </summary>
+    QualityAssurance = 10,
 
     /// <summary>
     /// Other role not specified above.

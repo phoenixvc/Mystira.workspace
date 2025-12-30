@@ -104,7 +104,22 @@ public enum AchievementType
     /// <summary>
     /// Achievement for character relationship milestones.
     /// </summary>
-    CharacterBond = 9
+    CharacterBond = 9,
+
+    /// <summary>
+    /// Achievement for reaching a compass threshold.
+    /// </summary>
+    CompassThreshold = 10,
+
+    /// <summary>
+    /// Achievement for making the first choice.
+    /// </summary>
+    FirstChoice = 11,
+
+    /// <summary>
+    /// Achievement for completing a session.
+    /// </summary>
+    SessionComplete = 12
 }
 
 /// <summary>

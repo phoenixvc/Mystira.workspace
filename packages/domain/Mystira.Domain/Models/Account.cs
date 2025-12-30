@@ -39,6 +39,11 @@ public class Account : SoftDeletableEntity
     public AccountType Type { get; set; } = AccountType.Free;
 
     /// <summary>
+    /// Gets or sets the account role.
+    /// </summary>
+    public string? Role { get; set; }
+
+    /// <summary>
     /// Gets or sets the primary authentication provider.
     /// </summary>
     public AuthProvider AuthProvider { get; set; } = AuthProvider.Local;

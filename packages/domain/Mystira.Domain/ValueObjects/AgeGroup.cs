@@ -115,3 +115,34 @@ public sealed record AgeGroup
     /// <inheritdoc />
     public override string ToString() => Name;
 }
+
+/// <summary>
+/// Constants for age group identifiers.
+/// </summary>
+public static class AgeGroupConstants
+{
+    /// <summary>
+    /// Early childhood age group ID.
+    /// </summary>
+    public const string EarlyChildhood = "early_childhood";
+
+    /// <summary>
+    /// Middle childhood age group ID.
+    /// </summary>
+    public const string MiddleChildhood = "middle_childhood";
+
+    /// <summary>
+    /// Preteen age group ID.
+    /// </summary>
+    public const string Preteen = "preteen";
+
+    /// <summary>
+    /// Teen age group ID.
+    /// </summary>
+    public const string Teen = "teen";
+
+    /// <summary>
+    /// Adult age group ID.
+    /// </summary>
+    public const string Adult = "adult";
+}
