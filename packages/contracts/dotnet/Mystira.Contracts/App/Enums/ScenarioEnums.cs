@@ -1,6 +1,4 @@
 // Re-export domain enums for backward compatibility
-// Consumers can use either Mystira.Contracts.App.Enums or Mystira.Domain.Enums
-
 global using DomainDifficultyLevel = Mystira.Domain.Enums.DifficultyLevel;
 global using DomainSessionLength = Mystira.Domain.Enums.SessionLength;
 global using DomainScenarioGameState = Mystira.Domain.Enums.ScenarioGameState;
@@ -15,21 +13,17 @@ namespace Mystira.Contracts.App.Enums;
 /// Represents the difficulty level of a scenario.
 /// </summary>
 /// <remarks>
-/// This type is re-exported from Mystira.Domain.Enums for backward compatibility.
-/// New code should use Mystira.Domain.Enums.DifficultyLevel directly.
+/// This type mirrors Mystira.Domain.Enums.DifficultyLevel for backward compatibility.
 /// </remarks>
 public enum DifficultyLevel
 {
-    /// <inheritdoc cref="DomainDifficultyLevel.Easy"/>
+    /// <summary>Easy difficulty for beginners.</summary>
     Easy = 0,
-
-    /// <inheritdoc cref="DomainDifficultyLevel.Medium"/>
+    /// <summary>Medium difficulty for intermediate players.</summary>
     Medium = 1,
-
-    /// <inheritdoc cref="DomainDifficultyLevel.Hard"/>
+    /// <summary>Hard difficulty for experienced players.</summary>
     Hard = 2,
-
-    /// <inheritdoc cref="DomainDifficultyLevel.Expert"/>
+    /// <summary>Expert difficulty for advanced players.</summary>
     Expert = 3
 }
 
@@ -37,24 +31,19 @@ public enum DifficultyLevel
 /// Represents the expected duration of a game session.
 /// </summary>
 /// <remarks>
-/// This type is re-exported from Mystira.Domain.Enums for backward compatibility.
-/// New code should use Mystira.Domain.Enums.SessionLength directly.
+/// This type mirrors Mystira.Domain.Enums.SessionLength for backward compatibility.
 /// </remarks>
 public enum SessionLength
 {
-    /// <inheritdoc cref="DomainSessionLength.Quick"/>
+    /// <summary>A quick session, typically 15-30 minutes.</summary>
     Quick = 0,
-
-    /// <inheritdoc cref="DomainSessionLength.Short"/>
+    /// <summary>A short session, typically 30-60 minutes.</summary>
     Short = 1,
-
-    /// <inheritdoc cref="DomainSessionLength.Medium"/>
+    /// <summary>A medium session, typically 1-2 hours.</summary>
     Medium = 2,
-
-    /// <inheritdoc cref="DomainSessionLength.Long"/>
+    /// <summary>A long session, typically 2-4 hours.</summary>
     Long = 3,
-
-    /// <inheritdoc cref="DomainSessionLength.Extended"/>
+    /// <summary>An extended session, typically 4+ hours.</summary>
     Extended = 4
 }
 
@@ -62,24 +51,19 @@ public enum SessionLength
 /// Represents the current state of a scenario game.
 /// </summary>
 /// <remarks>
-/// This type is re-exported from Mystira.Domain.Enums for backward compatibility.
-/// New code should use Mystira.Domain.Enums.ScenarioGameState directly.
+/// This type mirrors Mystira.Domain.Enums.ScenarioGameState for backward compatibility.
 /// </remarks>
 public enum ScenarioGameState
 {
-    /// <inheritdoc cref="DomainScenarioGameState.NotStarted"/>
+    /// <summary>The game has not been started yet.</summary>
     NotStarted = 0,
-
-    /// <inheritdoc cref="DomainScenarioGameState.InProgress"/>
+    /// <summary>The game is currently in progress.</summary>
     InProgress = 1,
-
-    /// <inheritdoc cref="DomainScenarioGameState.Paused"/>
+    /// <summary>The game has been paused.</summary>
     Paused = 2,
-
-    /// <inheritdoc cref="DomainScenarioGameState.Completed"/>
+    /// <summary>The game has been completed.</summary>
     Completed = 3,
-
-    /// <inheritdoc cref="DomainScenarioGameState.Abandoned"/>
+    /// <summary>The game was abandoned before completion.</summary>
     Abandoned = 4
 }
 
@@ -87,24 +71,19 @@ public enum ScenarioGameState
 /// Represents the publication status of a scenario.
 /// </summary>
 /// <remarks>
-/// This type is re-exported from Mystira.Domain.Enums for backward compatibility.
-/// New code should use Mystira.Domain.Enums.PublicationStatus directly.
+/// This type mirrors Mystira.Domain.Enums.PublicationStatus for backward compatibility.
 /// </remarks>
 public enum PublicationStatus
 {
-    /// <inheritdoc cref="DomainPublicationStatus.Draft"/>
+    /// <summary>The scenario is in draft state.</summary>
     Draft = 0,
-
-    /// <inheritdoc cref="DomainPublicationStatus.UnderReview"/>
+    /// <summary>The scenario is under review.</summary>
     UnderReview = 1,
-
-    /// <inheritdoc cref="DomainPublicationStatus.Published"/>
+    /// <summary>The scenario is published and available.</summary>
     Published = 2,
-
-    /// <inheritdoc cref="DomainPublicationStatus.Archived"/>
+    /// <summary>The scenario has been archived.</summary>
     Archived = 3,
-
-    /// <inheritdoc cref="DomainPublicationStatus.Rejected"/>
+    /// <summary>The scenario has been rejected.</summary>
     Rejected = 4
 }
 
@@ -112,48 +91,35 @@ public enum PublicationStatus
 /// Represents the type of a scene in a scenario.
 /// </summary>
 /// <remarks>
-/// This type is re-exported from Mystira.Domain.Enums for backward compatibility.
-/// New code should use Mystira.Domain.Enums.SceneType directly.
+/// This type mirrors Mystira.Domain.Enums.SceneType for backward compatibility.
 /// </remarks>
 public enum SceneType
 {
-    /// <inheritdoc cref="DomainSceneType.Standard"/>
+    /// <summary>Standard narrative scene with choices.</summary>
     Standard = 0,
-
-    /// <inheritdoc cref="DomainSceneType.Intro"/>
+    /// <summary>Introduction/opening scene.</summary>
     Intro = 1,
-
-    /// <inheritdoc cref="DomainSceneType.Decision"/>
+    /// <summary>Decision point with multiple branches.</summary>
     Decision = 2,
-
-    /// <inheritdoc cref="DomainSceneType.Action"/>
+    /// <summary>Action or challenge scene.</summary>
     Action = 3,
-
-    /// <inheritdoc cref="DomainSceneType.Dialogue"/>
+    /// <summary>Dialogue-focused scene.</summary>
     Dialogue = 4,
-
-    /// <inheritdoc cref="DomainSceneType.Puzzle"/>
+    /// <summary>Puzzle or problem-solving scene.</summary>
     Puzzle = 5,
-
-    /// <inheritdoc cref="DomainSceneType.Exploration"/>
+    /// <summary>Exploration or discovery scene.</summary>
     Exploration = 6,
-
-    /// <inheritdoc cref="DomainSceneType.EchoReveal"/>
+    /// <summary>Scene revealing an echo (past event).</summary>
     EchoReveal = 7,
-
-    /// <inheritdoc cref="DomainSceneType.Ending"/>
+    /// <summary>Ending/conclusion scene.</summary>
     Ending = 8,
-
-    /// <inheritdoc cref="DomainSceneType.Checkpoint"/>
+    /// <summary>Checkpoint or save point scene.</summary>
     Checkpoint = 9,
-
-    /// <inheritdoc cref="DomainSceneType.Cutscene"/>
+    /// <summary>Cutscene or cinematic.</summary>
     Cutscene = 10,
-
-    /// <inheritdoc cref="DomainSceneType.MiniGame"/>
+    /// <summary>Mini-game scene.</summary>
     MiniGame = 11,
-
-    /// <inheritdoc cref="DomainSceneType.Tutorial"/>
+    /// <summary>Tutorial scene.</summary>
     Tutorial = 12
 }
 
@@ -161,33 +127,25 @@ public enum SceneType
 /// Represents the status of a game session.
 /// </summary>
 /// <remarks>
-/// This type is re-exported from Mystira.Domain.Enums for backward compatibility.
-/// New code should use Mystira.Domain.Enums.SessionStatus directly.
+/// This type mirrors Mystira.Domain.Enums.SessionStatus for backward compatibility.
 /// </remarks>
 public enum SessionStatus
 {
-    /// <inheritdoc cref="DomainSessionStatus.Creating"/>
+    /// <summary>Session is being created/initialized.</summary>
     Creating = 0,
-
-    /// <inheritdoc cref="DomainSessionStatus.Pending"/>
+    /// <summary>Session is ready to start, waiting for players.</summary>
     Pending = 1,
-
-    /// <inheritdoc cref="DomainSessionStatus.Active"/>
+    /// <summary>Session is currently active and in progress.</summary>
     Active = 2,
-
-    /// <inheritdoc cref="DomainSessionStatus.Paused"/>
+    /// <summary>Session has been paused.</summary>
     Paused = 3,
-
-    /// <inheritdoc cref="DomainSessionStatus.Completed"/>
+    /// <summary>Session completed successfully.</summary>
     Completed = 4,
-
-    /// <inheritdoc cref="DomainSessionStatus.Abandoned"/>
+    /// <summary>Session was abandoned before completion.</summary>
     Abandoned = 5,
-
-    /// <inheritdoc cref="DomainSessionStatus.Failed"/>
+    /// <summary>Session failed due to an error.</summary>
     Failed = 6,
-
-    /// <inheritdoc cref="DomainSessionStatus.Expired"/>
+    /// <summary>Session expired due to inactivity.</summary>
     Expired = 7
 }
 
@@ -195,39 +153,29 @@ public enum SessionStatus
 /// Represents the type of achievement earned in a session.
 /// </summary>
 /// <remarks>
-/// This type is re-exported from Mystira.Domain.Enums for backward compatibility.
-/// New code should use Mystira.Domain.Enums.AchievementType directly.
+/// This type mirrors Mystira.Domain.Enums.AchievementType for backward compatibility.
 /// </remarks>
 public enum AchievementType
 {
-    /// <inheritdoc cref="DomainAchievementType.ScenarioCompletion"/>
+    /// <summary>Achievement for completing a scenario.</summary>
     ScenarioCompletion = 0,
-
-    /// <inheritdoc cref="DomainAchievementType.StoryChoice"/>
+    /// <summary>Achievement for making specific story choices.</summary>
     StoryChoice = 1,
-
-    /// <inheritdoc cref="DomainAchievementType.CompassMilestone"/>
+    /// <summary>Achievement for reaching a compass milestone.</summary>
     CompassMilestone = 2,
-
-    /// <inheritdoc cref="DomainAchievementType.Discovery"/>
+    /// <summary>Achievement for discovering hidden content.</summary>
     Discovery = 3,
-
-    /// <inheritdoc cref="DomainAchievementType.SpeedRun"/>
+    /// <summary>Achievement for speed/time-based goals.</summary>
     SpeedRun = 4,
-
-    /// <inheritdoc cref="DomainAchievementType.Perfect"/>
+    /// <summary>Achievement for perfect completion.</summary>
     Perfect = 5,
-
-    /// <inheritdoc cref="DomainAchievementType.Cooperative"/>
+    /// <summary>Achievement for helping other players.</summary>
     Cooperative = 6,
-
-    /// <inheritdoc cref="DomainAchievementType.Special"/>
+    /// <summary>Special event or seasonal achievement.</summary>
     Special = 7,
-
-    /// <inheritdoc cref="DomainAchievementType.EchoDiscovery"/>
+    /// <summary>Achievement for echo-related discoveries.</summary>
     EchoDiscovery = 8,
-
-    /// <inheritdoc cref="DomainAchievementType.CharacterBond"/>
+    /// <summary>Achievement for character relationship milestones.</summary>
     CharacterBond = 9
 }
 
@@ -236,51 +184,23 @@ public enum AchievementType
 /// </summary>
 public static class ScenarioEnumExtensions
 {
-    /// <summary>
-    /// Converts Contracts DifficultyLevel to Domain DifficultyLevel.
-    /// </summary>
-    public static DomainDifficultyLevel ToDomain(this DifficultyLevel value)
-        => (DomainDifficultyLevel)(int)value;
+    /// <summary>Converts to Domain DifficultyLevel.</summary>
+    public static DomainDifficultyLevel ToDomain(this DifficultyLevel value) => (DomainDifficultyLevel)(int)value;
+    /// <summary>Converts to Contracts DifficultyLevel.</summary>
+    public static DifficultyLevel ToContracts(this DomainDifficultyLevel value) => (DifficultyLevel)(int)value;
 
-    /// <summary>
-    /// Converts Domain DifficultyLevel to Contracts DifficultyLevel.
-    /// </summary>
-    public static DifficultyLevel ToContracts(this DomainDifficultyLevel value)
-        => (DifficultyLevel)(int)value;
+    /// <summary>Converts to Domain SessionLength.</summary>
+    public static DomainSessionLength ToDomain(this SessionLength value) => (DomainSessionLength)(int)value;
+    /// <summary>Converts to Contracts SessionLength.</summary>
+    public static SessionLength ToContracts(this DomainSessionLength value) => (SessionLength)(int)value;
 
-    /// <summary>
-    /// Converts Contracts SessionLength to Domain SessionLength.
-    /// </summary>
-    public static DomainSessionLength ToDomain(this SessionLength value)
-        => (DomainSessionLength)(int)value;
+    /// <summary>Converts to Domain ScenarioGameState.</summary>
+    public static DomainScenarioGameState ToDomain(this ScenarioGameState value) => (DomainScenarioGameState)(int)value;
+    /// <summary>Converts to Contracts ScenarioGameState.</summary>
+    public static ScenarioGameState ToContracts(this DomainScenarioGameState value) => (ScenarioGameState)(int)value;
 
-    /// <summary>
-    /// Converts Domain SessionLength to Contracts SessionLength.
-    /// </summary>
-    public static SessionLength ToContracts(this DomainSessionLength value)
-        => (SessionLength)(int)value;
-
-    /// <summary>
-    /// Converts Contracts ScenarioGameState to Domain ScenarioGameState.
-    /// </summary>
-    public static DomainScenarioGameState ToDomain(this ScenarioGameState value)
-        => (DomainScenarioGameState)(int)value;
-
-    /// <summary>
-    /// Converts Domain ScenarioGameState to Contracts ScenarioGameState.
-    /// </summary>
-    public static ScenarioGameState ToContracts(this DomainScenarioGameState value)
-        => (ScenarioGameState)(int)value;
-
-    /// <summary>
-    /// Converts Contracts SessionStatus to Domain SessionStatus.
-    /// </summary>
-    public static DomainSessionStatus ToDomain(this SessionStatus value)
-        => (DomainSessionStatus)(int)value;
-
-    /// <summary>
-    /// Converts Domain SessionStatus to Contracts SessionStatus.
-    /// </summary>
-    public static SessionStatus ToContracts(this DomainSessionStatus value)
-        => (SessionStatus)(int)value;
+    /// <summary>Converts to Domain SessionStatus.</summary>
+    public static DomainSessionStatus ToDomain(this SessionStatus value) => (DomainSessionStatus)(int)value;
+    /// <summary>Converts to Contracts SessionStatus.</summary>
+    public static SessionStatus ToContracts(this DomainSessionStatus value) => (SessionStatus)(int)value;
 }
