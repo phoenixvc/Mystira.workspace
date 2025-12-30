@@ -19,6 +19,26 @@ public class CharacterMap : Entity
     public string CharacterId { get; set; } = string.Empty;
 
     /// <summary>
+    /// Gets or sets the character name.
+    /// </summary>
+    public string Name { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Gets or sets the character image reference.
+    /// </summary>
+    public string? Image { get; set; }
+
+    /// <summary>
+    /// Gets or sets the character audio reference.
+    /// </summary>
+    public string? Audio { get; set; }
+
+    /// <summary>
+    /// Gets or sets the character metadata.
+    /// </summary>
+    public CharacterMetadata? Metadata { get; set; }
+
+    /// <summary>
     /// Gets or sets the player's user profile ID.
     /// </summary>
     public string? PlayerId { get; set; }

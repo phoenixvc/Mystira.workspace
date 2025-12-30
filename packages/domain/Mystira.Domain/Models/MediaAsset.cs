@@ -93,6 +93,52 @@ public class MediaAsset : Entity
     public string? MetadataJson { get; set; }
 
     /// <summary>
+    /// Gets or sets the media ID (alias for Id for DTO compatibility).
+    /// </summary>
+    public string MediaId
+    {
+        get => Id;
+        set => Id = value;
+    }
+
+    /// <summary>
+    /// Gets or sets the file size in bytes (alias for SizeBytes for DTO compatibility).
+    /// </summary>
+    public long FileSizeBytes
+    {
+        get => SizeBytes;
+        set => SizeBytes = value;
+    }
+
+    /// <summary>
+    /// Gets or sets the description (alias for AltText for DTO compatibility).
+    /// </summary>
+    public string? Description
+    {
+        get => AltText;
+        set => AltText = value;
+    }
+
+    /// <summary>
+    /// Gets or sets the content hash (alias for ContentHash for DTO compatibility).
+    /// </summary>
+    public string? Hash
+    {
+        get => ContentHash;
+        set => ContentHash = value;
+    }
+
+    /// <summary>
+    /// Gets or sets the asset version.
+    /// </summary>
+    public int Version { get; set; } = 1;
+
+    /// <summary>
+    /// Gets or sets the tags list (for DTO compatibility, backed by TagsJson).
+    /// </summary>
+    public List<string> Tags { get; set; } = new();
+
+    /// <summary>
     /// Gets the file extension.
     /// </summary>
     public string? Extension => Key.Contains('.') ? Key.Split('.').Last() : null;

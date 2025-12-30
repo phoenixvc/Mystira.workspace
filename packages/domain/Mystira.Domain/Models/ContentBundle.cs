@@ -40,6 +40,15 @@ public class ContentBundle : SoftDeletableEntity
     public string? CoverImageUrl { get; set; }
 
     /// <summary>
+    /// Gets or sets the image ID (alias for cover image for DTO compatibility).
+    /// </summary>
+    public string? ImageId
+    {
+        get => CoverImageUrl;
+        set => CoverImageUrl = value;
+    }
+
+    /// <summary>
     /// Gets or sets the thumbnail URL.
     /// </summary>
     public string? ThumbnailUrl { get; set; }

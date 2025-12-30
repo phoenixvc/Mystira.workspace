@@ -19,6 +19,15 @@ public class UserProfile : Entity
     public string DisplayName { get; set; } = string.Empty;
 
     /// <summary>
+    /// Gets or sets the name (alias for DisplayName for DTO compatibility).
+    /// </summary>
+    public string Name
+    {
+        get => DisplayName;
+        set => DisplayName = value;
+    }
+
+    /// <summary>
     /// Gets or sets the user's first name.
     /// </summary>
     public string? FirstName { get; set; }
@@ -124,6 +133,11 @@ public class UserProfile : Entity
     public virtual Account? Account { get; set; }
 
     /// <summary>
+    /// Gets or sets the earned badges for this user.
+    /// </summary>
+    public virtual ICollection<UserBadge> EarnedBadges { get; set; } = new List<UserBadge>();
+
+    /// <summary>
     /// Gets the user's age group based on AgeGroupId.
     /// </summary>
     public AgeGroup? AgeGroup => AgeGroup.FromId(AgeGroupId);
@@ -195,5 +209,29 @@ public class UserProfile : Entity
     private static int CalculateLevel(long xp)
     {
         return 1 + (int)Math.Sqrt(xp / 100.0);
+    }
+
+    /// <summary>
+    /// Adds a badge to the user's earned badges.
+    /// </summary>
+    /// <param name="badge">The badge to add.</param>
+    /// <param name="sessionId">Optional session where it was earned.</param>
+    /// <param name="scenarioId">Optional scenario where it was earned.</param>
+    /// <returns>The created UserBadge.</returns>
+    public UserBadge AddEarnedBadge(Badge badge, string? sessionId = null, string? scenarioId = null)
+    {
+        var userBadge = new UserBadge
+        {
+            UserId = Id,
+            BadgeId = badge.Id,
+            SessionId = sessionId,
+            ScenarioId = scenarioId,
+            EarnedAt = DateTime.UtcNow,
+            Badge = badge,
+            User = this
+        };
+
+        EarnedBadges.Add(userBadge);
+        return userBadge;
     }
 }
