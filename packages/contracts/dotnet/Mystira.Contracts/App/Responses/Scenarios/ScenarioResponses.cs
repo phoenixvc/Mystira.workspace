@@ -73,44 +73,49 @@ public record ScenarioSummary
     public string Description { get; set; } = string.Empty;
 
     /// <summary>
+    /// Optional list of tags for categorization.
+    /// </summary>
+    public List<string> Tags { get; set; } = new();
+
+    /// <summary>
+    /// The difficulty level of the scenario.
+    /// </summary>
+    public int Difficulty { get; set; }
+
+    /// <summary>
+    /// The expected session length in minutes.
+    /// </summary>
+    public int SessionLength { get; set; }
+
+    /// <summary>
+    /// List of character archetypes available in this scenario.
+    /// </summary>
+    public List<string> Archetypes { get; set; } = new();
+
+    /// <summary>
+    /// The minimum recommended age for players.
+    /// </summary>
+    public int MinimumAge { get; set; }
+
+    /// <summary>
     /// The target age group for this scenario.
     /// </summary>
     public string AgeGroup { get; set; } = string.Empty;
 
     /// <summary>
-    /// The difficulty level of the scenario.
+    /// List of core moral compass axes explored in this scenario.
     /// </summary>
-    public string Difficulty { get; set; } = string.Empty;
-
-    /// <summary>
-    /// Optional list of tags for categorization.
-    /// </summary>
-    public List<string>? Tags { get; set; }
-
-    /// <summary>
-    /// The expected duration of a session.
-    /// </summary>
-    public string? SessionLength { get; set; }
-
-    /// <summary>
-    /// Optional list of character archetypes available in this scenario.
-    /// </summary>
-    public List<string>? Archetypes { get; set; }
-
-    /// <summary>
-    /// The minimum recommended age for players.
-    /// </summary>
-    public int? MinimumAge { get; set; }
-
-    /// <summary>
-    /// Optional list of core moral compass axes explored in this scenario.
-    /// </summary>
-    public List<string>? CoreAxes { get; set; }
+    public List<string> CoreAxes { get; set; } = new();
 
     /// <summary>
     /// The date and time when the scenario was created.
     /// </summary>
     public DateTime CreatedAt { get; set; }
+
+    /// <summary>
+    /// Optional URL or identifier for the scenario's cover image.
+    /// </summary>
+    public string? Image { get; set; }
 
     /// <summary>
     /// Optional music palette identifier for the scenario.
@@ -216,29 +221,29 @@ public record ScenarioReferenceValidation
     public string ScenarioId { get; set; } = string.Empty;
 
     /// <summary>
+    /// The title of the validated scenario.
+    /// </summary>
+    public string ScenarioTitle { get; set; } = string.Empty;
+
+    /// <summary>
     /// Whether the scenario is valid (no missing references).
     /// </summary>
-    public bool IsValid { get; set; }
+    public bool IsValid => MissingReferences.Count == 0;
 
     /// <summary>
-    /// List of missing media references.
+    /// List of media references in the scenario.
     /// </summary>
-    public List<MissingReference> MissingMedia { get; set; } = new();
+    public List<MediaReference> MediaReferences { get; set; } = new();
 
     /// <summary>
-    /// List of missing character references.
+    /// List of character references in the scenario.
     /// </summary>
-    public List<MissingReference> MissingCharacters { get; set; } = new();
+    public List<CharacterReference> CharacterReferences { get; set; } = new();
 
     /// <summary>
-    /// List of broken scene connections.
+    /// List of missing references found during validation.
     /// </summary>
-    public List<MissingReference> BrokenSceneConnections { get; set; } = new();
-
-    /// <summary>
-    /// Total count of missing references.
-    /// </summary>
-    public int TotalMissingCount => MissingMedia.Count + MissingCharacters.Count + BrokenSceneConnections.Count;
+    public List<MissingReference> MissingReferences { get; set; } = new();
 
     /// <summary>
     /// Validation timestamp.
@@ -252,29 +257,34 @@ public record ScenarioReferenceValidation
 public record MediaReference
 {
     /// <summary>
+    /// The ID of the scene containing this reference.
+    /// </summary>
+    public string SceneId { get; set; } = string.Empty;
+
+    /// <summary>
+    /// The title of the scene containing this reference.
+    /// </summary>
+    public string SceneTitle { get; set; } = string.Empty;
+
+    /// <summary>
     /// The unique identifier of the media.
     /// </summary>
-    public string Id { get; set; } = string.Empty;
+    public string MediaId { get; set; } = string.Empty;
 
     /// <summary>
     /// The type of media (e.g., "image", "audio", "video").
     /// </summary>
-    public string Type { get; set; } = string.Empty;
+    public string MediaType { get; set; } = string.Empty;
 
     /// <summary>
-    /// The URL of the media.
+    /// Whether the referenced media exists.
     /// </summary>
-    public string? Url { get; set; }
+    public bool MediaExists { get; set; }
 
     /// <summary>
-    /// The scene ID where this media is used.
+    /// Whether the media has associated metadata.
     /// </summary>
-    public string? SceneId { get; set; }
-
-    /// <summary>
-    /// Whether the media reference is valid.
-    /// </summary>
-    public bool IsValid { get; set; }
+    public bool HasMetadata { get; set; }
 }
 
 /// <summary>
@@ -283,24 +293,34 @@ public record MediaReference
 public record CharacterReference
 {
     /// <summary>
+    /// The ID of the scene containing this reference.
+    /// </summary>
+    public string SceneId { get; set; } = string.Empty;
+
+    /// <summary>
+    /// The title of the scene containing this reference.
+    /// </summary>
+    public string SceneTitle { get; set; } = string.Empty;
+
+    /// <summary>
     /// The unique identifier of the character.
     /// </summary>
-    public string Id { get; set; } = string.Empty;
+    public string CharacterId { get; set; } = string.Empty;
 
     /// <summary>
     /// The name of the character.
     /// </summary>
-    public string Name { get; set; } = string.Empty;
+    public string CharacterName { get; set; } = string.Empty;
 
     /// <summary>
-    /// The scene IDs where this character appears.
+    /// Whether the referenced character exists.
     /// </summary>
-    public List<string> SceneIds { get; set; } = new();
+    public bool CharacterExists { get; set; }
 
     /// <summary>
-    /// Whether the character reference is valid.
+    /// Whether the character has associated metadata.
     /// </summary>
-    public bool IsValid { get; set; }
+    public bool HasMetadata { get; set; }
 }
 
 /// <summary>
@@ -309,19 +329,34 @@ public record CharacterReference
 public record MissingReference
 {
     /// <summary>
-    /// The type of reference (e.g., "media", "character", "scene").
-    /// </summary>
-    public string ReferenceType { get; set; } = string.Empty;
-
-    /// <summary>
     /// The ID that was referenced but not found.
     /// </summary>
     public string ReferenceId { get; set; } = string.Empty;
 
     /// <summary>
-    /// The location where the reference was made (e.g., scene ID).
+    /// The type of reference (e.g., "media", "character", "scene").
     /// </summary>
-    public string? Location { get; set; }
+    public string ReferenceType { get; set; } = string.Empty;
+
+    /// <summary>
+    /// The ID of the scene where the reference was made.
+    /// </summary>
+    public string SceneId { get; set; } = string.Empty;
+
+    /// <summary>
+    /// The title of the scene where the reference was made.
+    /// </summary>
+    public string SceneTitle { get; set; } = string.Empty;
+
+    /// <summary>
+    /// The type of issue (e.g., "missing", "invalid", "orphaned").
+    /// </summary>
+    public string IssueType { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Description of the issue.
+    /// </summary>
+    public string Description { get; set; } = string.Empty;
 
     /// <summary>
     /// Additional context about the missing reference.

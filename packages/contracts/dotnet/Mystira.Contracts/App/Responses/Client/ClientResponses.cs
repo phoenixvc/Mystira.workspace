@@ -6,29 +6,44 @@ namespace Mystira.Contracts.App.Responses.Client;
 public record ClientStatusResponse
 {
     /// <summary>
-    /// Whether the client is up to date.
+    /// Whether the client should force a content refresh.
     /// </summary>
-    public bool IsUpToDate { get; set; }
+    public bool ForceRefresh { get; set; }
 
     /// <summary>
-    /// Whether an app update is required.
+    /// The minimum supported app version.
     /// </summary>
-    public bool RequiresUpdate { get; set; }
-
-    /// <summary>
-    /// The minimum required app version.
-    /// </summary>
-    public string? MinimumVersion { get; set; }
+    public string MinSupportedVersion { get; set; } = string.Empty;
 
     /// <summary>
     /// The latest available app version.
     /// </summary>
-    public string? LatestVersion { get; set; }
+    public string LatestVersion { get; set; } = string.Empty;
 
     /// <summary>
-    /// URL to download the latest version.
+    /// Message to display to the user (e.g., update instructions).
     /// </summary>
-    public string? UpdateUrl { get; set; }
+    public string Message { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Content manifest for synchronization.
+    /// </summary>
+    public ContentManifest ContentManifest { get; set; } = new();
+
+    /// <summary>
+    /// The current content bundle version.
+    /// </summary>
+    public string BundleVersion { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Whether an app update is required.
+    /// </summary>
+    public bool UpdateRequired { get; set; }
+
+    /// <summary>
+    /// Whether the client is up to date.
+    /// </summary>
+    public bool IsUpToDate { get; set; }
 
     /// <summary>
     /// Whether content updates are available.
@@ -36,9 +51,9 @@ public record ClientStatusResponse
     public bool HasContentUpdates { get; set; }
 
     /// <summary>
-    /// Content manifest for synchronization.
+    /// URL to download the latest version.
     /// </summary>
-    public ContentManifest? ContentManifest { get; set; }
+    public string? UpdateUrl { get; set; }
 
     /// <summary>
     /// Server timestamp for synchronization.
@@ -62,24 +77,24 @@ public record ClientStatusResponse
 public record ContentManifest
 {
     /// <summary>
+    /// Changes to scenarios since last sync.
+    /// </summary>
+    public ScenarioChanges Scenarios { get; set; } = new();
+
+    /// <summary>
+    /// Changes to media since last sync.
+    /// </summary>
+    public MediaChanges Media { get; set; } = new();
+
+    /// <summary>
     /// The content bundle version.
     /// </summary>
-    public string Version { get; set; } = string.Empty;
+    public string BundleVersion { get; set; } = string.Empty;
 
     /// <summary>
     /// Timestamp when the manifest was generated.
     /// </summary>
     public DateTime GeneratedAt { get; set; }
-
-    /// <summary>
-    /// Changes to scenarios since last sync.
-    /// </summary>
-    public ScenarioChanges? ScenarioChanges { get; set; }
-
-    /// <summary>
-    /// Changes to media since last sync.
-    /// </summary>
-    public MediaChanges? MediaChanges { get; set; }
 
     /// <summary>
     /// Total download size in bytes.
@@ -147,27 +162,37 @@ public record MediaItem
     /// <summary>
     /// The unique identifier of the media item.
     /// </summary>
-    public string Id { get; set; } = string.Empty;
+    public string MediaId { get; set; } = string.Empty;
+
+    /// <summary>
+    /// The file path of the media.
+    /// </summary>
+    public string FilePath { get; set; } = string.Empty;
+
+    /// <summary>
+    /// The version of this media item.
+    /// </summary>
+    public string Version { get; set; } = string.Empty;
+
+    /// <summary>
+    /// The content hash for integrity verification.
+    /// </summary>
+    public string Hash { get; set; } = string.Empty;
 
     /// <summary>
     /// The type of media (e.g., "image", "audio", "video").
     /// </summary>
-    public string Type { get; set; } = string.Empty;
+    public string? Type { get; set; }
 
     /// <summary>
     /// The URL to download the media.
     /// </summary>
-    public string Url { get; set; } = string.Empty;
+    public string? Url { get; set; }
 
     /// <summary>
     /// The file size in bytes.
     /// </summary>
     public long Size { get; set; }
-
-    /// <summary>
-    /// The content hash for integrity verification.
-    /// </summary>
-    public string? Hash { get; set; }
 
     /// <summary>
     /// The MIME type of the media.
