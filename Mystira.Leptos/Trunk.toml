@@ -1,0 +1,17 @@
+[build]
+target = "index.html"
+dist = "dist"
+
+[watch]
+watch = ["src", "index.html", "styles"]
+ignore = ["dist"]
+
+[serve]
+address = "127.0.0.1"
+port = 1420
+open = false
+
+[[hooks]]
+stage = "pre_build"
+command = "sh"
+command_arguments = ["-c", "npx tailwindcss -i ./styles/input.css -o ./styles/output.css --minify"]

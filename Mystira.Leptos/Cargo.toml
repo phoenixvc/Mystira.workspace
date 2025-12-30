@@ -1,0 +1,42 @@
+[package]
+name = "mystira-leptos"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Leptos frontend for Mystira DevHub"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+# Workspace dependencies
+mystira-contracts = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+chrono = { workspace = true }
+thiserror = { workspace = true }
+
+# Leptos
+leptos = { workspace = true }
+leptos_router = { workspace = true }
+leptos_meta = { workspace = true }
+
+# WASM
+wasm-bindgen = { workspace = true }
+wasm-bindgen-futures = { workspace = true }
+web-sys = { workspace = true, features = ["console", "Window", "Document"] }
+js-sys = { workspace = true }
+console_error_panic_hook = { workspace = true }
+
+# Logging
+tracing = { workspace = true }
+tracing-wasm = "0.2"
+
+# Tauri API bindings
+tauri-wasm = { git = "https://github.com/nicholasVilela/tauri-wasm.git", branch = "main", optional = true }
+
+[features]
+default = []
+tauri = ["dep:tauri-wasm"]
+hydrate = []
+ssr = []

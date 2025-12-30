@@ -1,0 +1,42 @@
+[package]
+name = "mystira-leptos-tauri"
+version.workspace = true
+edition.workspace = true
+description = "Tauri backend for Mystira Leptos DevHub"
+build = "build.rs"
+
+[lib]
+name = "mystira_leptos_tauri_lib"
+crate-type = ["lib", "cdylib", "staticlib"]
+
+[[bin]]
+name = "mystira-leptos-tauri"
+path = "src/main.rs"
+
+[build-dependencies]
+tauri-build = { workspace = true, features = [] }
+
+[dependencies]
+# Workspace dependencies
+mystira-contracts = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+tokio = { workspace = true }
+thiserror = { workspace = true }
+anyhow = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+chrono = { workspace = true }
+
+# Tauri
+tauri = { workspace = true, features = ["protocol-asset"] }
+tauri-plugin-shell = "2.0"
+tauri-plugin-fs = "2.0"
+tauri-plugin-dialog = "2.0"
+
+# Async utilities
+futures = "0.3"
+
+[features]
+default = ["custom-protocol"]
+custom-protocol = ["tauri/custom-protocol"]

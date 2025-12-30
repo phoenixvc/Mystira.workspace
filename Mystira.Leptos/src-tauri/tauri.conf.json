@@ -1,0 +1,80 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "Mystira DevHub",
+  "version": "0.1.0",
+  "identifier": "com.phoenixvc.mystira.devhub",
+  "build": {
+    "beforeBuildCommand": "trunk build",
+    "beforeDevCommand": "trunk serve --port 1420",
+    "frontendDist": "../dist",
+    "devUrl": "http://localhost:1420"
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "Mystira DevHub",
+        "width": 1400,
+        "height": 900,
+        "minWidth": 1000,
+        "minHeight": 600,
+        "resizable": true,
+        "fullscreen": false,
+        "decorations": true,
+        "transparent": false
+      }
+    ],
+    "security": {
+      "csp": null
+    }
+  },
+  "bundle": {
+    "active": true,
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ],
+    "targets": "all",
+    "windows": {
+      "wix": {}
+    },
+    "macOS": {
+      "minimumSystemVersion": "10.13"
+    },
+    "linux": {
+      "appimage": {
+        "bundleMediaFramework": true
+      }
+    }
+  },
+  "plugins": {
+    "shell": {
+      "open": true,
+      "scope": [
+        {
+          "name": "dotnet",
+          "cmd": "dotnet",
+          "args": true
+        },
+        {
+          "name": "az",
+          "cmd": "az",
+          "args": true
+        },
+        {
+          "name": "gh",
+          "cmd": "gh",
+          "args": true
+        }
+      ]
+    },
+    "fs": {
+      "scope": ["$APPDATA", "$DOCUMENT", "$HOME/.azure", "$HOME/.config/gh"]
+    },
+    "dialog": {
+      "all": true
+    }
+  }
+}

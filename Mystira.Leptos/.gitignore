@@ -1,0 +1,25 @@
+# Build artifacts
+/dist
+/target
+
+# Node modules
+node_modules
+
+# Generated CSS
+styles/output.css
+
+# Tauri build outputs
+src-tauri/target
+
+# IDE
+.idea
+.vscode
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log

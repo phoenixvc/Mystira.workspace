@@ -1,0 +1,16 @@
+{
+  "name": "mystira-leptos",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "css": "npx tailwindcss -i ./styles/input.css -o ./styles/output.css",
+    "css:watch": "npx tailwindcss -i ./styles/input.css -o ./styles/output.css --watch",
+    "dev": "trunk serve",
+    "build": "trunk build --release",
+    "tauri:dev": "tauri dev",
+    "tauri:build": "tauri build"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.0"
+  }
+}
