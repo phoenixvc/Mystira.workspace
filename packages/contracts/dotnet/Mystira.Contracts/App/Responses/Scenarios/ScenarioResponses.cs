@@ -204,3 +204,132 @@ public record ScenarioWithGameState
     /// </summary>
     public string? Image { get; set; }
 }
+
+/// <summary>
+/// Response containing scenario reference validation results.
+/// </summary>
+public record ScenarioReferenceValidation
+{
+    /// <summary>
+    /// The unique identifier of the validated scenario.
+    /// </summary>
+    public string ScenarioId { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Whether the scenario is valid (no missing references).
+    /// </summary>
+    public bool IsValid { get; set; }
+
+    /// <summary>
+    /// List of missing media references.
+    /// </summary>
+    public List<MissingReference> MissingMedia { get; set; } = new();
+
+    /// <summary>
+    /// List of missing character references.
+    /// </summary>
+    public List<MissingReference> MissingCharacters { get; set; } = new();
+
+    /// <summary>
+    /// List of broken scene connections.
+    /// </summary>
+    public List<MissingReference> BrokenSceneConnections { get; set; } = new();
+
+    /// <summary>
+    /// Total count of missing references.
+    /// </summary>
+    public int TotalMissingCount => MissingMedia.Count + MissingCharacters.Count + BrokenSceneConnections.Count;
+
+    /// <summary>
+    /// Validation timestamp.
+    /// </summary>
+    public DateTime ValidatedAt { get; set; }
+}
+
+/// <summary>
+/// Represents a media reference within a scenario.
+/// </summary>
+public record MediaReference
+{
+    /// <summary>
+    /// The unique identifier of the media.
+    /// </summary>
+    public string Id { get; set; } = string.Empty;
+
+    /// <summary>
+    /// The type of media (e.g., "image", "audio", "video").
+    /// </summary>
+    public string Type { get; set; } = string.Empty;
+
+    /// <summary>
+    /// The URL of the media.
+    /// </summary>
+    public string? Url { get; set; }
+
+    /// <summary>
+    /// The scene ID where this media is used.
+    /// </summary>
+    public string? SceneId { get; set; }
+
+    /// <summary>
+    /// Whether the media reference is valid.
+    /// </summary>
+    public bool IsValid { get; set; }
+}
+
+/// <summary>
+/// Represents a character reference within a scenario.
+/// </summary>
+public record CharacterReference
+{
+    /// <summary>
+    /// The unique identifier of the character.
+    /// </summary>
+    public string Id { get; set; } = string.Empty;
+
+    /// <summary>
+    /// The name of the character.
+    /// </summary>
+    public string Name { get; set; } = string.Empty;
+
+    /// <summary>
+    /// The scene IDs where this character appears.
+    /// </summary>
+    public List<string> SceneIds { get; set; } = new();
+
+    /// <summary>
+    /// Whether the character reference is valid.
+    /// </summary>
+    public bool IsValid { get; set; }
+}
+
+/// <summary>
+/// Represents a missing reference in a scenario.
+/// </summary>
+public record MissingReference
+{
+    /// <summary>
+    /// The type of reference (e.g., "media", "character", "scene").
+    /// </summary>
+    public string ReferenceType { get; set; } = string.Empty;
+
+    /// <summary>
+    /// The ID that was referenced but not found.
+    /// </summary>
+    public string ReferenceId { get; set; } = string.Empty;
+
+    /// <summary>
+    /// The location where the reference was made (e.g., scene ID).
+    /// </summary>
+    public string? Location { get; set; }
+
+    /// <summary>
+    /// Additional context about the missing reference.
+    /// </summary>
+    public string? Context { get; set; }
+
+    /// <summary>
+    /// Suggested fix for the missing reference.
+    /// </summary>
+    public string? SuggestedFix { get; set; }
+}
