@@ -10,14 +10,9 @@ WORKDIR /src
 
 # Copy csproj files and restore dependencies
 # NOTE: Build context should be the repository root, so paths are relative to /
+# Dependencies are pulled from NuGet packages (Mystira.Shared, Mystira.Contracts, etc.)
 COPY ["src/Mystira.App.Admin.Api/Mystira.App.Admin.Api.csproj", "Mystira.App.Admin.Api/"]
-COPY ["src/Mystira.App.Domain/Mystira.App.Domain.csproj", "Mystira.App.Domain/"]
-COPY ["src/Mystira.App.Infrastructure.Azure/Mystira.App.Infrastructure.Azure.csproj", "Mystira.App.Infrastructure.Azure/"]
-COPY ["src/Mystira.App.Infrastructure.Data/Mystira.App.Infrastructure.Data.csproj", "Mystira.App.Infrastructure.Data/"]
-COPY ["src/Mystira.App.Infrastructure.StoryProtocol/Mystira.App.Infrastructure.StoryProtocol.csproj", "Mystira.App.Infrastructure.StoryProtocol/"]
-COPY ["src/Mystira.App.Shared/Mystira.App.Shared.csproj", "Mystira.App.Shared/"]
-COPY ["src/Mystira.App.Contracts/Mystira.App.Contracts.csproj", "Mystira.App.Contracts/"]
-COPY ["src/Mystira.App.Application/Mystira.App.Application.csproj", "Mystira.App.Application/"]
+COPY ["NuGet.config", "."]
 
 # Restore dependencies
 RUN dotnet restore "Mystira.App.Admin.Api/Mystira.App.Admin.Api.csproj"

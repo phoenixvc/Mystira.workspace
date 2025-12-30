@@ -85,7 +85,7 @@ Mystira.App.Admin.Api/
 ```csharp
 // Location: Admin.Api/Controllers/MediaAdminController.cs
 using Mystira.App.Application.UseCases.Media;  // Use cases ✅
-using Mystira.App.Contracts.Requests.Media;
+using Mystira.Contracts.App.Requests.Media;
 
 [Authorize(Roles = "Admin")]
 [ApiController]

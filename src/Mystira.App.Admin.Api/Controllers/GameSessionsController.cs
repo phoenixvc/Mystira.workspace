@@ -1,15 +1,14 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Mystira.App.Admin.Api.Models;
 using Mystira.App.Admin.Api.Services;
 using Mystira.App.Domain.Models;
 using AdminProgressSceneRequest = Mystira.App.Admin.Api.Models.ProgressSceneRequest;
 using ContractsGameSessionResponse = Mystira.App.Contracts.Responses.GameSessions.GameSessionResponse;
 using ContractsMakeChoiceRequest = Mystira.App.Contracts.Requests.GameSessions.MakeChoiceRequest;
-using ContractsSelectCharacterRequest = Mystira.App.Contracts.Requests.CharacterMaps.SelectCharacterRequest;
+using ContractsSelectCharacterRequest = Mystira.App.Admin.Api.Models.SelectCharacterRequest;
 using ContractsSessionStatsResponse = Mystira.App.Contracts.Responses.GameSessions.SessionStatsResponse;
 using ContractsStartGameSessionRequest = Mystira.App.Contracts.Requests.GameSessions.StartGameSessionRequest;
-using ErrorResponse = Mystira.App.Contracts.Responses.Common.ErrorResponse;
-using ValidationErrorResponse = Mystira.App.Contracts.Responses.Common.ValidationErrorResponse;
 
 namespace Mystira.App.Admin.Api.Controllers;
 

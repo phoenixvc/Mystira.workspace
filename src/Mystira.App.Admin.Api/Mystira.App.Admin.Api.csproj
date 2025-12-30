@@ -15,10 +15,10 @@
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.9.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Cosmos" Version="9.0.8" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="9.0.8" />
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Authorization" Version="9.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="9.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore" Version="9.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.11" />
+    <PackageReference Include="Microsoft.AspNetCore.Authorization" Version="9.0.11" />
+    <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="9.0.11" />
+    <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore" Version="9.0.11" />
     <PackageReference Include="Microsoft.AspNetCore.Diagnostics.HealthChecks" Version="2.2.0" />
     <PackageReference Include="YamlDotNet" Version="16.3.0" />
     <PackageReference Include="NJsonSchema" Version="11.1.0" />
@@ -32,30 +32,29 @@
     <PackageReference Include="AspNetCore.HealthChecks.NpgSql" Version="9.0.0" />
 
     <!-- Redis caching for content and distributed cache -->
-    <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="9.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="9.0.11" />
     <PackageReference Include="AspNetCore.HealthChecks.Redis" Version="9.0.0" />
 
     <!-- Microsoft Entra ID (Azure AD) authentication -->
-    <PackageReference Include="Microsoft.Identity.Web" Version="3.8.2" />
+    <PackageReference Include="Microsoft.Identity.Web" Version="4.2.0" />
   </ItemGroup>
 
   <ItemGroup>
     <!-- NuGet Package References (replacing project references) -->
     <PackageReference Include="Mystira.App.Domain" Version="1.0.0" />
     <PackageReference Include="Mystira.App.Application" Version="1.0.0" />
+    <PackageReference Include="Mystira.Contracts" Version="0.4.3-alpha-*" />
+    <!-- Legacy contracts package needed until Mystira.App.Application is updated to use unified Mystira.Contracts -->
     <PackageReference Include="Mystira.App.Contracts" Version="1.0.0" />
     <PackageReference Include="Mystira.App.Infrastructure.Azure" Version="1.0.0" />
     <PackageReference Include="Mystira.App.Infrastructure.Data" Version="1.0.0" />
     <PackageReference Include="Mystira.App.Infrastructure.Discord" Version="1.0.0" />
     <PackageReference Include="Mystira.App.Infrastructure.StoryProtocol" Version="1.0.0" />
-    <PackageReference Include="Mystira.App.Shared" Version="1.0.0" />
-  </ItemGroup>
+    <PackageReference Include="Mystira.Shared" Version="0.5.0-alpha-*" />
 
-  <!-- Exclude legacy types moved to Shared library -->
-  <ItemGroup>
-    <Compile Remove="Services\JwtService.cs" />
-    <Compile Remove="Services\IJwtService.cs" />
-    <Compile Remove="Adapters\HealthCheckPortAdapter.cs" />
+    <!-- Ardalis.Specification for data access patterns (version matches Mystira.App.Application dependency) -->
+    <PackageReference Include="Ardalis.Specification" Version="9.3.1" />
+    <PackageReference Include="Ardalis.Specification.EntityFrameworkCore" Version="9.3.1" />
   </ItemGroup>
 
   <ItemGroup>
