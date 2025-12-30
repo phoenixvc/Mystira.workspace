@@ -6,52 +6,47 @@ namespace Mystira.Domain.Enums;
 public enum ContributorRole
 {
     /// <summary>
-    /// Primary author/writer.
+    /// Primary author/creator.
     /// </summary>
     Author = 0,
 
     /// <summary>
-    /// Illustrator or artist.
+    /// Visual artist or illustrator.
     /// </summary>
-    Illustrator = 1,
+    Artist = 1,
 
     /// <summary>
-    /// Editor.
+    /// Content editor.
     /// </summary>
     Editor = 2,
 
     /// <summary>
-    /// Voice actor.
+    /// Narrative writer.
     /// </summary>
-    VoiceActor = 3,
+    Writer = 3,
+
+    /// <summary>
+    /// Game or experience designer.
+    /// </summary>
+    Designer = 4,
 
     /// <summary>
     /// Music composer.
     /// </summary>
-    Composer = 4,
+    Composer = 5,
 
     /// <summary>
-    /// Sound designer.
+    /// Voice actor.
     /// </summary>
-    SoundDesigner = 5,
+    VoiceActor = 6,
 
     /// <summary>
-    /// Translator.
+    /// Language translator.
     /// </summary>
-    Translator = 6,
+    Translator = 7,
 
     /// <summary>
-    /// Game designer.
-    /// </summary>
-    GameDesigner = 7,
-
-    /// <summary>
-    /// Technical contributor.
-    /// </summary>
-    Technical = 8,
-
-    /// <summary>
-    /// Other role.
+    /// Other role not specified above.
     /// </summary>
     Other = 99
 }
@@ -62,22 +57,22 @@ public enum ContributorRole
 public enum ContributorVerificationStatus
 {
     /// <summary>
-    /// Not yet verified.
-    /// </summary>
-    Unverified = 0,
-
-    /// <summary>
     /// Verification pending review.
     /// </summary>
-    Pending = 1,
+    Pending = 0,
 
     /// <summary>
-    /// Verified contributor.
+    /// Contributor is verified.
     /// </summary>
-    Verified = 2,
+    Verified = 1,
 
     /// <summary>
-    /// Verification rejected.
+    /// Verification was rejected.
     /// </summary>
-    Rejected = 3
+    Rejected = 2,
+
+    /// <summary>
+    /// Verification has expired.
+    /// </summary>
+    Expired = 3
 }
