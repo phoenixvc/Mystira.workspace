@@ -49,6 +49,8 @@
     <PackageReference Include="NJsonSchema" Version="11.5.2" />
     <!-- Ardalis.Specification for composable query patterns (ADR-0014) -->
     <PackageReference Include="Ardalis.Specification" Version="9.3.1" />
+    <!-- YAML serialization for character maps -->
+    <PackageReference Include="YamlDotNet" Version="16.3.0" />
     <!-- Source Link -->
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />
   </ItemGroup>
