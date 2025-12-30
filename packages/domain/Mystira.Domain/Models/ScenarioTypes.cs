@@ -8,11 +8,22 @@ namespace Mystira.Domain.Models;
 /// </summary>
 public class ScenarioCharacterMetadata
 {
-    public List<string> Role { get; set; } = new();
-    public List<Archetype> Archetype { get; set; } = new();
+    /// <summary>Gets or sets the character roles.</summary>
+    public List<string> Roles { get; set; } = new();
+
+    /// <summary>Gets or sets the character archetypes.</summary>
+    public List<Archetype> Archetypes { get; set; } = new();
+
+    /// <summary>Gets or sets the species.</summary>
     public string Species { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets the age.</summary>
     public int Age { get; set; }
+
+    /// <summary>Gets or sets the character traits.</summary>
     public List<string> Traits { get; set; } = new();
+
+    /// <summary>Gets or sets the backstory.</summary>
     public string Backstory { get; set; } = string.Empty;
 }
 
@@ -21,11 +32,22 @@ public class ScenarioCharacterMetadata
 /// </summary>
 public class SceneMusicSettings
 {
+    /// <summary>Gets or sets the mood profile.</summary>
     public string? MoodProfile { get; set; }
+
+    /// <summary>Gets or sets the track ID.</summary>
     public string? TrackId { get; set; }
+
+    /// <summary>Gets or sets the volume level.</summary>
     public float? Volume { get; set; }
+
+    /// <summary>Gets or sets whether to loop.</summary>
     public bool? Loop { get; set; }
+
+    /// <summary>Gets or sets the fade in duration in seconds.</summary>
     public float? FadeInSeconds { get; set; }
+
+    /// <summary>Gets or sets the fade out duration in seconds.</summary>
     public float? FadeOutSeconds { get; set; }
 }
 
@@ -34,11 +56,22 @@ public class SceneMusicSettings
 /// </summary>
 public class SceneSoundEffect
 {
+    /// <summary>Gets or sets the sound effect ID.</summary>
     public string Id { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets the track ID.</summary>
     public string? TrackId { get; set; }
+
+    /// <summary>Gets or sets the volume level.</summary>
     public float? Volume { get; set; }
+
+    /// <summary>Gets or sets whether to loop.</summary>
     public bool? Loop { get; set; }
+
+    /// <summary>Gets or sets the trigger type.</summary>
     public string? TriggerType { get; set; }
+
+    /// <summary>Gets or sets the delay in seconds.</summary>
     public float? DelaySeconds { get; set; }
 }
 
@@ -47,26 +80,39 @@ public class SceneSoundEffect
 /// </summary>
 public class MusicPalette
 {
+    /// <summary>Gets or sets the mood to tracks mapping.</summary>
     public Dictionary<string, List<string>> MoodTracks { get; set; } = new();
+
+    /// <summary>Gets or sets the default mood.</summary>
     public string? DefaultMood { get; set; }
 }
 
 /// <summary>
-/// YAML structure for character map export/import
+/// YAML structure for character map export/import.
 /// </summary>
 public class CharacterMapYaml
 {
+    /// <summary>Gets or sets the characters.</summary>
     public List<CharacterMapYamlEntry> Characters { get; set; } = new();
 }
 
 /// <summary>
-/// YAML entry for character map
+/// YAML entry for character map.
 /// </summary>
 public class CharacterMapYamlEntry
 {
+    /// <summary>Gets or sets the character ID.</summary>
     public string Id { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets the character name.</summary>
     public string Name { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets the character image reference.</summary>
     public string Image { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets the character audio reference.</summary>
     public string? Audio { get; set; }
+
+    /// <summary>Gets or sets the character metadata.</summary>
     public CharacterMetadata Metadata { get; set; } = new();
 }

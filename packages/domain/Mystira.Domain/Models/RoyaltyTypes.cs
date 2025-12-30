@@ -47,7 +47,7 @@ public class RoyaltyPaymentResult
     /// <summary>
     /// When the payment was made
     /// </summary>
-    public DateTime PaidAt { get; set; } = DateTime.UtcNow;
+    public DateTime PaidAt { get; set; }
 
     /// <summary>
     /// When the payment was processed (alias for PaidAt, for compatibility)
@@ -143,7 +143,7 @@ public class RoyaltyBalance
     /// <summary>
     /// Last updated timestamp
     /// </summary>
-    public DateTime LastUpdated { get; set; } = DateTime.UtcNow;
+    public DateTime LastUpdated { get; set; }
 }
 
 /// <summary>

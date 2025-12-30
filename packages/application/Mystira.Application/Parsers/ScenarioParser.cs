@@ -142,8 +142,8 @@ public static class ScenarioParser
             Audio = character.Audio,
             Metadata = new CharacterMetadataRequest
             {
-                Role = character.Metadata.Role,
-                Archetype = character.Metadata.Archetype.Select(a => a.Value).ToList(),
+                Role = character.Metadata.Roles,
+                Archetype = character.Metadata.Archetypes.Select(a => a.Value).ToList(),
                 Species = character.Metadata.Species,
                 Age = character.Metadata.Age,
                 Traits = character.Metadata.Traits,
