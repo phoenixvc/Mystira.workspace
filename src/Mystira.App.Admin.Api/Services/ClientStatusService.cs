@@ -1,5 +1,5 @@
-using Mystira.App.Admin.Api.Models;
-using ScenarioQueryRequest = Mystira.Contracts.App.Requests.Scenarios.ScenarioQueryRequest;
+using Mystira.Contracts.App.Requests.Scenarios;
+using Mystira.Contracts.App.Responses.Client;
 
 namespace Mystira.App.Admin.Api.Services;
 

@@ -5,16 +5,16 @@ using Mystira.App.Admin.Api.Models;
 using Mystira.App.Admin.Api.Validation;
 using Mystira.App.Domain.Models;
 using Mystira.App.Infrastructure.Data;
+using Mystira.Contracts.App.Requests.Scenarios;
+using Mystira.Contracts.App.Responses.Scenarios;
 using NJsonSchema;
 using CharacterMediaMetadataEntry = Mystira.App.Domain.Models.CharacterMediaMetadataEntry;
 using CharacterMediaMetadataFile = Mystira.App.Domain.Models.CharacterMediaMetadataFile;
 using CharacterMetadata = Mystira.App.Domain.Models.CharacterMetadata;
 using ClassificationTag = Mystira.App.Domain.Models.ClassificationTag;
-using CreateScenarioRequest = Mystira.Contracts.App.Requests.Scenarios.CreateScenarioRequest;
 using MediaMetadataEntry = Mystira.App.Domain.Models.MediaMetadataEntry;
 using MediaMetadataFile = Mystira.App.Domain.Models.MediaMetadataFile;
 using Modifier = Mystira.App.Domain.Models.Modifier;
-using ScenarioQueryRequest = Mystira.Contracts.App.Requests.Scenarios.ScenarioQueryRequest;
 
 namespace Mystira.App.Admin.Api.Services;
 
