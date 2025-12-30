@@ -38,7 +38,7 @@ public interface IPaymentService
     /// </summary>
     /// <param name="transactionId">Payment transaction ID</param>
     /// <returns>Payment status details</returns>
-    Task<PaymentStatus> GetPaymentStatusAsync(string transactionId);
+    Task<Mystira.Contracts.App.Responses.Payments.PaymentStatus> GetPaymentStatusAsync(string transactionId);
 
     /// <summary>
     /// Refunds a payment partially or fully.
