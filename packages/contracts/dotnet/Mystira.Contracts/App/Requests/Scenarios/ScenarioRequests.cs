@@ -138,3 +138,34 @@ public record ScenarioQueryRequest
     /// </summary>
     public List<string>? CoreAxes { get; set; }
 }
+
+/// <summary>
+/// Request to validate scenario references (media, characters, etc.).
+/// </summary>
+public record ValidateScenarioReferencesRequest
+{
+    /// <summary>
+    /// The unique identifier of the scenario to validate.
+    /// </summary>
+    public string ScenarioId { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Whether to validate media references.
+    /// </summary>
+    public bool ValidateMedia { get; set; } = true;
+
+    /// <summary>
+    /// Whether to validate character references.
+    /// </summary>
+    public bool ValidateCharacters { get; set; } = true;
+
+    /// <summary>
+    /// Whether to validate scene connections.
+    /// </summary>
+    public bool ValidateSceneConnections { get; set; } = true;
+
+    /// <summary>
+    /// Whether to include detailed error information.
+    /// </summary>
+    public bool IncludeDetails { get; set; } = true;
+}
