@@ -1,6 +1,7 @@
+using Mystira.Shared.Data;
 using Mystira.Shared.Data.Entities;
 
-namespace Mystira.Shared.Data.Polyglot;
+namespace Mystira.Shared.Polyglot;
 
 /// <summary>
 /// Entity for tracking sync operations between primary and secondary backends.

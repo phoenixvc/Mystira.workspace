@@ -8,13 +8,14 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Mystira.Shared.Data;
 using Mystira.Shared.Data.Entities;
 using Mystira.Shared.Telemetry;
 using Polly;
 using Polly.CircuitBreaker;
 using Polly.Retry;
 
-namespace Mystira.Shared.Data.Polyglot;
+namespace Mystira.Shared.Polyglot;
 
 /// <summary>
 /// Repository implementation with polyglot persistence, dual-write pattern,

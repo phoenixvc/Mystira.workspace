@@ -1,7 +1,7 @@
 using Ardalis.Specification;
 using Mystira.Shared.Data.Repositories;
 
-namespace Mystira.Shared.Data.Polyglot;
+namespace Mystira.Shared.Polyglot;
 
 /// <summary>
 /// Repository interface for polyglot persistence with automatic database routing,

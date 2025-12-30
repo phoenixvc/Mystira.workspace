@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Mystira.Shared.Caching;
-using Mystira.Shared.Data.Polyglot;
+using Mystira.Shared.Polyglot;
 using Mystira.Shared.Messaging;
 using Mystira.Shared.Resilience;
 

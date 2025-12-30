@@ -1,4 +1,4 @@
-namespace Mystira.Shared.Data.Polyglot;
+namespace Mystira.Shared.Polyglot;
 
 /// <summary>
 /// Represents the type of backend in a polyglot persistence setup.
