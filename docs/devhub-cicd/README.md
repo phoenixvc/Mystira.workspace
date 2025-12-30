@@ -1,83 +1,42 @@
-# DevHub CI/CD Templates
+# DevHub CI/CD Documentation
 
-This directory contains CI/CD workflow templates for the Mystira.DevHub repository (Leptos/Rust frontend).
+This directory contains CI/CD documentation for the Mystira.DevHub repository (Tauri desktop application).
 
-## Files
+## Project Overview
+
+DevHub is a **Tauri desktop application** that combines:
+- **Frontend**: React/TypeScript with Vite
+- **Backend**: Rust (Tauri native bindings)
+- **Additional .NET Components**: CLI tools and services
+
+## Workflow Files (in DevHub repo)
 
 | File | Description |
 |------|-------------|
-| `ci.yml` | Continuous integration - runs on PRs and pushes |
-| `build-deploy.yml` | Build Docker image and deploy to dev |
-| `release.yml` | Build versioned releases for staging/production |
-| `Dockerfile` | Multi-stage Docker build for Leptos SSR app |
+| `ci.yml` | Main CI - builds Tauri app for all platforms (Linux, Windows, macOS) |
+| `ci-dotnet.yml` | CI for .NET CLI and Services components |
+| `build-deploy.yml` | Dev builds with workspace notification |
+| `release.yml` | Creates GitHub releases with desktop binaries |
 
-## Setup Instructions
-
-### 1. Copy workflows to DevHub repo
-
-```bash
-# In the DevHub repository
-mkdir -p .github/workflows
-cp ci.yml .github/workflows/
-cp build-deploy.yml .github/workflows/
-cp release.yml .github/workflows/
-cp Dockerfile ./
-```
-
-### 2. Required Secrets
-
-Configure these secrets in the DevHub repository settings:
-
-| Secret | Description |
-|--------|-------------|
-| `MYSTIRA_AZURE_CREDENTIALS` | Azure service principal credentials for ACR access |
-| `MYSTIRA_WORKSPACE_DISPATCH_TOKEN` | GitHub PAT with `repo` scope for triggering workspace workflows |
-
-### 3. Required Leptos Configuration
-
-Ensure your `Cargo.toml` has the SSR feature:
-
-```toml
-[features]
-ssr = ["leptos/ssr", "leptos_actix"]  # or leptos_axum
-hydrate = ["leptos/hydrate"]
-
-[[bin]]
-name = "devhub"
-path = "src/main.rs"
-```
-
-### 4. Health Endpoint
-
-Add a `/health` endpoint for Kubernetes probes:
-
-```rust
-// Using Actix-web
-#[get("/health")]
-async fn health() -> impl Responder {
-    HttpResponse::Ok().body("OK")
-}
-
-// Using Axum
-async fn health() -> &'static str {
-    "OK"
-}
-```
-
-## Workflow Flow
+## CI/CD Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
 │                         DevHub Repo                             │
 ├─────────────────────────────────────────────────────────────────┤
 │                                                                 │
-│   PR/Push to dev ──► ci.yml ──► Check, Test, Build              │
+│   PR/Push ──► ci.yml ──► Lint (TS + Rust) ──► Test ──► Build    │
 │                                                                 │
-│   Push to dev ──► build-deploy.yml ──► Build Image ──► Push ACR │
+│   Push to dev ──► build-deploy.yml ──► Build all platforms      │
 │                           │                                     │
 │                           ▼                                     │
 │              repository_dispatch (devhub-deploy)                │
 │                           │                                     │
+│   Tag (v*) ──► release.yml ──► Build ──► GitHub Release         │
+│                           │                                     │
+│                           ▼                                     │
+│              repository_dispatch (devhub-release)               │
+│                                                                 │
 └───────────────────────────┼─────────────────────────────────────┘
                             │
                             ▼
@@ -85,47 +44,120 @@ async fn health() -> &'static str {
 │                     Mystira.workspace                           │
 ├─────────────────────────────────────────────────────────────────┤
 │                                                                 │
-│   submodule-deploy-dev.yml ──► Deploy to K8s (dev)              │
-│                                                                 │
-│   staging-release.yml ──► Deploy to K8s (staging)               │
-│                                                                 │
-│   production-release.yml ──► Deploy to K8s (production)         │
+│   submodule-deploy-dev-appservice.yml                           │
+│     ──► Updates submodule reference                             │
+│     ──► Tracks deployed version                                 │
 │                                                                 │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
-## Environment URLs
+## Build Matrix
 
-| Environment | URL |
-|-------------|-----|
-| Dev | https://dev.devhub.mystira.app |
-| Staging | https://staging.devhub.mystira.app |
-| Production | https://devhub.mystira.app |
+### Tauri Desktop App
 
-## Docker Build Notes
+| Platform | Target | Artifacts |
+|----------|--------|-----------|
+| Linux x64 | `x86_64-unknown-linux-gnu` | `.AppImage`, `.deb` |
+| Windows x64 | `x86_64-pc-windows-msvc` | `.msi`, `.exe` |
+| macOS Intel | `x86_64-apple-darwin` | `.dmg`, `.app.tar.gz` |
+| macOS ARM | `aarch64-apple-darwin` | `.dmg`, `.app.tar.gz` |
 
-The Dockerfile uses a multi-stage build:
+## Required Secrets
 
-1. **Builder stage**: Compiles Rust binary and WASM assets using trunk
-2. **Runtime stage**: Minimal Debian image with only the compiled binary and assets
+Configure these secrets in the DevHub repository settings:
 
-Build arguments:
-- `LEPTOS_ENV`: Set to `production` for release builds
+| Secret | Description |
+|--------|-------------|
+| `MYSTIRA_WORKSPACE_DISPATCH_TOKEN` | GitHub PAT with `repo` scope for triggering workspace workflows |
+| `TAURI_PRIVATE_KEY` | (Optional) Tauri signing key for auto-updates |
+| `TAURI_KEY_PASSWORD` | (Optional) Password for Tauri signing key |
 
-## Trunk Configuration
+## Project Structure
 
-Create a `Trunk.toml` in the DevHub repo root:
-
-```toml
-[build]
-target = "index.html"
-dist = "dist"
-
-[watch]
-watch = ["src", "style", "assets"]
-
-[[hooks]]
-stage = "post_build"
-command = "sh"
-command_arguments = ["-c", "cp -r assets/* dist/ 2>/dev/null || true"]
 ```
+Mystira.DevHub/
+├── packages/devhub/
+│   ├── .github/workflows/
+│   │   ├── ci.yml                  # Main Tauri CI
+│   │   ├── ci-dotnet.yml           # .NET components CI
+│   │   ├── build-deploy.yml        # Dev deployment
+│   │   └── release.yml             # Desktop releases
+│   │
+│   ├── Mystira.DevHub/             # Tauri app
+│   │   ├── src/                    # React/TypeScript frontend
+│   │   ├── src-tauri/              # Rust backend
+│   │   │   ├── Cargo.toml
+│   │   │   └── src/
+│   │   ├── package.json
+│   │   └── vite.config.ts
+│   │
+│   ├── Mystira.DevHub.CLI/         # .NET CLI tool
+│   ├── Mystira.DevHub.Services/    # .NET services
+│   └── Mystira.App.CosmosConsole/  # .NET console app
+```
+
+## Local Development
+
+```bash
+# Install dependencies
+cd Mystira.DevHub
+pnpm install
+
+# Development mode (hot reload)
+pnpm tauri dev
+
+# Build for current platform
+pnpm tauri build
+
+# Run tests
+pnpm test                    # Frontend tests
+cd src-tauri && cargo test   # Rust tests
+```
+
+## Release Process
+
+1. Create a version tag: `git tag v1.0.0`
+2. Push the tag: `git push origin v1.0.0`
+3. The `release.yml` workflow will:
+   - Build binaries for all platforms
+   - Create a GitHub Release with all artifacts
+   - Notify the workspace
+
+## Comparison with Other Projects
+
+| Feature | DevHub (Tauri) | Other Projects |
+|---------|---------------|----------------|
+| Type | Desktop App | Web Services |
+| Deployment | GitHub Releases | K8s / App Service |
+| Artifacts | Desktop binaries | Docker images |
+| Runtime | Native + WASM | Container / Serverless |
+
+---
+
+## Template Files
+
+Copy these template files to the DevHub repository's `.github/workflows/` directory:
+
+| Template File | Target | Description |
+|---------------|--------|-------------|
+| `tauri-ci.yml` | `.github/workflows/ci.yml` | Main CI workflow |
+| `tauri-ci-dotnet.yml` | `.github/workflows/ci-dotnet.yml` | .NET components CI |
+| `tauri-build-deploy.yml` | `.github/workflows/build-deploy.yml` | Dev builds |
+| `tauri-release.yml` | `.github/workflows/release.yml` | Desktop releases |
+
+### Setup Instructions
+
+```bash
+# In the DevHub repository
+mkdir -p .github/workflows
+cp tauri-ci.yml .github/workflows/ci.yml
+cp tauri-ci-dotnet.yml .github/workflows/ci-dotnet.yml
+cp tauri-build-deploy.yml .github/workflows/build-deploy.yml
+cp tauri-release.yml .github/workflows/release.yml
+```
+
+---
+
+## Legacy Notes
+
+The original templates (`ci.yml`, `build-deploy.yml`, `release.yml`, `Dockerfile`) were designed for a **Leptos SSR** web application. The actual DevHub project uses **Tauri** for desktop deployment. The `tauri-*.yml` templates reflect the correct architecture.
