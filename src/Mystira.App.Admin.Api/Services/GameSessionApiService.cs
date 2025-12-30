@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using Mystira.App.Domain.Models;
+using Mystira.Domain.Models;
 using Mystira.App.Infrastructure.Data;
 using ContractsGameSessionResponse = Mystira.Contracts.App.Responses.GameSessions.GameSessionResponse;
 using ContractsMakeChoiceRequest = Mystira.Contracts.App.Requests.GameSessions.MakeChoiceRequest;

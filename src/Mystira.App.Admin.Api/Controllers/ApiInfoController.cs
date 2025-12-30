@@ -26,7 +26,6 @@ public class ApiInfoController : ControllerBase
             ApiVersion = "v1",
             BuildVersion = version,
             MasterDataVersion = "2.0.0",
-            SupportsLegacyEnums = false,
             MasterDataEntities = new[]
             {
                 new MasterDataEntityInfo { Name = "CompassAxis", Endpoint = "/api/compassaxes", Count = null },

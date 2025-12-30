@@ -2,8 +2,9 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Mystira.App.Admin.Api.Models;
 using Mystira.App.Admin.Api.Services;
-using Mystira.App.Domain.Models;
+using Mystira.Domain.Models;
 using Mystira.Contracts.App.Responses.Common;
+using ApiMediaMetadataEntry = Mystira.App.Admin.Api.Models.MediaMetadataEntry;
 
 namespace Mystira.App.Admin.Api.Controllers;
 
@@ -108,7 +109,7 @@ public class MediaAdminController : ControllerBase
             }
 
             // Resolve media ID and type from metadata
-            MediaMetadataEntry? metadataEntry = null;
+            ApiMediaMetadataEntry? metadataEntry = null;
 
             if (!string.IsNullOrEmpty(mediaId))
             {

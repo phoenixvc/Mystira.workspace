@@ -3,18 +3,18 @@ using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore;
 using Mystira.App.Admin.Api.Models;
 using Mystira.App.Admin.Api.Validation;
-using Mystira.App.Domain.Models;
+using Mystira.Domain.Models;
 using Mystira.App.Infrastructure.Data;
 using Mystira.Contracts.App.Requests.Scenarios;
 using Mystira.Contracts.App.Responses.Scenarios;
 using NJsonSchema;
-using CharacterMediaMetadataEntry = Mystira.App.Domain.Models.CharacterMediaMetadataEntry;
-using CharacterMediaMetadataFile = Mystira.App.Domain.Models.CharacterMediaMetadataFile;
-using CharacterMetadata = Mystira.App.Domain.Models.CharacterMetadata;
-using ClassificationTag = Mystira.App.Domain.Models.ClassificationTag;
-using MediaMetadataEntry = Mystira.App.Domain.Models.MediaMetadataEntry;
-using MediaMetadataFile = Mystira.App.Domain.Models.MediaMetadataFile;
-using Modifier = Mystira.App.Domain.Models.Modifier;
+using CharacterMediaMetadataEntry = Mystira.Domain.Models.CharacterMediaMetadataEntry;
+using CharacterMediaMetadataFile = Mystira.Domain.Models.CharacterMediaMetadataFile;
+using CharacterMetadata = Mystira.Domain.Models.CharacterMetadata;
+using ClassificationTag = Mystira.Domain.Models.ClassificationTag;
+using MediaMetadataEntry = Mystira.Domain.Models.MediaMetadataEntry;
+using MediaMetadataFile = Mystira.Domain.Models.MediaMetadataFile;
+using Modifier = Mystira.Domain.Models.Modifier;
 
 namespace Mystira.App.Admin.Api.Services;
 

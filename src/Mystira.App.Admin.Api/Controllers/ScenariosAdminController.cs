@@ -4,7 +4,7 @@ using Mystira.App.Admin.Api.Services;
 using Mystira.Contracts.App.Requests.Scenarios;
 using Mystira.Contracts.App.Responses.Common;
 using Mystira.Contracts.App.Responses.Scenarios;
-using Mystira.App.Domain.Models;
+using Mystira.Domain.Models;
 
 namespace Mystira.App.Admin.Api.Controllers;
 
@@ -36,7 +36,7 @@ public class ScenariosAdminController : ControllerBase
                 return BadRequest(new ValidationErrorResponse
                 {
                     Message = "Validation failed",
-                    ValidationErrors = ModelState.ToDictionary(
+                    Errors = ModelState.ToDictionary(
                         kvp => kvp.Key,
                         kvp => kvp.Value?.Errors.Select(e => e.ErrorMessage).ToList() ?? new List<string>()
                     ),
@@ -80,7 +80,7 @@ public class ScenariosAdminController : ControllerBase
                 return BadRequest(new ValidationErrorResponse
                 {
                     Message = "Validation failed",
-                    ValidationErrors = ModelState.ToDictionary(
+                    Errors = ModelState.ToDictionary(
                         kvp => kvp.Key,
                         kvp => kvp.Value?.Errors.Select(e => e.ErrorMessage).ToList() ?? new List<string>()
                     ),

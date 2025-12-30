@@ -2,7 +2,7 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Mystira.App.Application.CQRS.FantasyThemes.Commands;
 using Mystira.App.Application.CQRS.FantasyThemes.Queries;
-using Mystira.App.Domain.Models;
+using Mystira.Domain.Models;
 
 namespace Mystira.App.Admin.Api.Controllers;
 

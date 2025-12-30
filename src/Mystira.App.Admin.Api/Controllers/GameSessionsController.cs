@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Mystira.App.Admin.Api.Models;
 using Mystira.App.Admin.Api.Services;
-using Mystira.App.Domain.Models;
+using Mystira.Domain.Models;
 using Mystira.Contracts.App.Requests.Characters;
 using Mystira.Contracts.App.Requests.GameSessions;
 using Mystira.Contracts.App.Responses.Common;
@@ -42,7 +42,7 @@ public class GameSessionsController : ControllerBase
                 return BadRequest(new ValidationErrorResponse
                 {
                     Message = "Validation failed",
-                    ValidationErrors = ModelState.ToDictionary(
+                    Errors = ModelState.ToDictionary(
                         kvp => kvp.Key,
                         kvp => kvp.Value?.Errors.Select(e => e.ErrorMessage).ToList() ?? new List<string>()
                     ),
@@ -165,7 +165,7 @@ public class GameSessionsController : ControllerBase
                 return BadRequest(new ValidationErrorResponse
                 {
                     Message = "Validation failed",
-                    ValidationErrors = ModelState.ToDictionary(
+                    Errors = ModelState.ToDictionary(
                         kvp => kvp.Key,
                         kvp => kvp.Value?.Errors.Select(e => e.ErrorMessage).ToList() ?? new List<string>()
                     ),
@@ -437,7 +437,7 @@ public class GameSessionsController : ControllerBase
                 return BadRequest(new ValidationErrorResponse
                 {
                     Message = "Validation failed",
-                    ValidationErrors = ModelState.ToDictionary(
+                    Errors = ModelState.ToDictionary(
                         kvp => kvp.Key,
                         kvp => kvp.Value?.Errors.Select(e => e.ErrorMessage).ToList() ?? new List<string>()
                     ),

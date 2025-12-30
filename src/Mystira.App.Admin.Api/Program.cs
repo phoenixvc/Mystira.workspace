@@ -20,7 +20,7 @@ using Mystira.App.Application.UseCases.GameSessions;
 using Mystira.App.Application.UseCases.Media;
 using Mystira.App.Application.UseCases.Scenarios;
 using Mystira.App.Application.UseCases.UserProfiles;
-using Mystira.App.Domain.Models;
+using Mystira.Domain.Models;
 using Mystira.App.Infrastructure.Azure;
 using Mystira.App.Infrastructure.Azure.HealthChecks;
 using Mystira.App.Infrastructure.Azure.Services;

@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Mystira.App.Admin.Api.Services;
 using Mystira.Contracts.App.Responses.Avatars;
 using Mystira.Contracts.App.Responses.Common;
-using Mystira.App.Domain.Models;
+using Mystira.Domain.Models;
 
 namespace Mystira.App.Admin.Api.Controllers;
 

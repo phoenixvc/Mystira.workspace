@@ -1,10 +1,12 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Mystira.App.Application.UseCases.Contributors;
-using Mystira.Contracts.App.Requests.Contributors;
 using Mystira.Contracts.App.Responses.Common;
 using Mystira.Contracts.App.Responses.Contributors;
-using Mystira.App.Domain.Models;
+using Mystira.Domain.Models;
+// Use legacy contracts for Application layer compatibility until it's updated
+using LegacySetContributorsRequest = Mystira.App.Contracts.Requests.Contributors.SetContributorsRequest;
+using LegacyRegisterIpAssetRequest = Mystira.App.Contracts.Requests.Contributors.RegisterIpAssetRequest;
 
 namespace Mystira.App.Admin.Api.Controllers;
 
@@ -45,7 +47,7 @@ public class ContributorsController : ControllerBase
     [HttpPost("scenarios/{scenarioId}")]
     public async Task<ActionResult<StoryProtocolResponse>> SetScenarioContributors(
         string scenarioId,
-        [FromBody] SetContributorsRequest request)
+        [FromBody] LegacySetContributorsRequest request)
     {
         try
         {
@@ -54,7 +56,7 @@ public class ContributorsController : ControllerBase
                 return BadRequest(new ValidationErrorResponse
                 {
                     Message = "Validation failed",
-                    ValidationErrors = ModelState.ToDictionary(
+                    Errors = ModelState.ToDictionary(
                         kvp => kvp.Key,
                         kvp => kvp.Value?.Errors.Select(e => e.ErrorMessage).ToList() ?? new List<string>()
                     ),
@@ -95,7 +97,7 @@ public class ContributorsController : ControllerBase
     [HttpPost("bundles/{bundleId}")]
     public async Task<ActionResult<StoryProtocolResponse>> SetBundleContributors(
         string bundleId,
-        [FromBody] SetContributorsRequest request)
+        [FromBody] LegacySetContributorsRequest request)
     {
         try
         {
@@ -104,7 +106,7 @@ public class ContributorsController : ControllerBase
                 return BadRequest(new ValidationErrorResponse
                 {
                     Message = "Validation failed",
-                    ValidationErrors = ModelState.ToDictionary(
+                    Errors = ModelState.ToDictionary(
                         kvp => kvp.Key,
                         kvp => kvp.Value?.Errors.Select(e => e.ErrorMessage).ToList() ?? new List<string>()
                     ),
@@ -145,7 +147,7 @@ public class ContributorsController : ControllerBase
     [HttpPost("scenarios/{scenarioId}/register")]
     public async Task<ActionResult<StoryProtocolResponse>> RegisterScenarioIpAsset(
         string scenarioId,
-        [FromBody] RegisterIpAssetRequest request)
+        [FromBody] LegacyRegisterIpAssetRequest request)
     {
         try
         {
@@ -154,7 +156,7 @@ public class ContributorsController : ControllerBase
                 return BadRequest(new ValidationErrorResponse
                 {
                     Message = "Validation failed",
-                    ValidationErrors = ModelState.ToDictionary(
+                    Errors = ModelState.ToDictionary(
                         kvp => kvp.Key,
                         kvp => kvp.Value?.Errors.Select(e => e.ErrorMessage).ToList() ?? new List<string>()
                     ),
@@ -204,7 +206,7 @@ public class ContributorsController : ControllerBase
     [HttpPost("bundles/{bundleId}/register")]
     public async Task<ActionResult<StoryProtocolResponse>> RegisterBundleIpAsset(
         string bundleId,
-        [FromBody] RegisterIpAssetRequest request)
+        [FromBody] LegacyRegisterIpAssetRequest request)
     {
         try
         {
@@ -213,7 +215,7 @@ public class ContributorsController : ControllerBase
                 return BadRequest(new ValidationErrorResponse
                 {
                     Message = "Validation failed",
-                    ValidationErrors = ModelState.ToDictionary(
+                    Errors = ModelState.ToDictionary(
                         kvp => kvp.Key,
                         kvp => kvp.Value?.Errors.Select(e => e.ErrorMessage).ToList() ?? new List<string>()
                     ),

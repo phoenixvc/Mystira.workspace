@@ -5,7 +5,7 @@ using Mystira.App.Admin.Api.Models;
 using Mystira.App.Application.Ports.Media;
 using Mystira.App.Application.Ports.Storage;
 using Mystira.App.Application.UseCases.Media;
-using Mystira.App.Domain.Models;
+using Mystira.Domain.Models;
 using Mystira.App.Infrastructure.Data;
 
 namespace Mystira.App.Admin.Api.Services;

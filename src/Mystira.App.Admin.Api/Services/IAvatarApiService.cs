@@ -1,4 +1,4 @@
-using Mystira.App.Domain.Models;
+using Mystira.Domain.Models;
 using ContractsAvatarConfigurationResponse = Mystira.Contracts.App.Responses.Avatars.AvatarConfigurationResponse;
 using ContractsAvatarResponse = Mystira.Contracts.App.Responses.Avatars.AvatarResponse;
 

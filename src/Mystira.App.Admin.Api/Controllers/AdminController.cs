@@ -5,11 +5,16 @@ using Microsoft.EntityFrameworkCore;
 using Mystira.App.Admin.Api.Models;
 using Mystira.App.Admin.Api.Services;
 using Mystira.Contracts.App.Requests.Scenarios;
-using Mystira.App.Domain.Models;
 using Mystira.App.Infrastructure.Data;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 using AdminCharacter = Mystira.App.Admin.Api.Models.Character;
+using ApiCharacterMetadata = Mystira.App.Admin.Api.Models.CharacterMetadata;
+// Domain model aliases for database operations
+using DomainMediaMetadataFile = Mystira.Domain.Models.MediaMetadataFile;
+using DomainMediaMetadataEntry = Mystira.Domain.Models.MediaMetadataEntry;
+using DomainCharacterMediaMetadataFile = Mystira.Domain.Models.CharacterMediaMetadataFile;
+using DomainCharacterMediaMetadataEntry = Mystira.Domain.Models.CharacterMediaMetadataEntry;
 
 namespace Mystira.App.Admin.Api.Controllers;
 
@@ -463,19 +468,19 @@ public class AdminController : Controller
             }
 
             // Create fresh metadata files
-            var mediaMetadataFile = new MediaMetadataFile
+            var mediaMetadataFile = new DomainMediaMetadataFile
             {
                 Id = "media-metadata",
-                Entries = new List<MediaMetadataEntry>(),
+                Entries = new List<DomainMediaMetadataEntry>(),
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow,
                 Version = "1.0"
             };
 
-            var characterMediaMetadataFile = new CharacterMediaMetadataFile
+            var characterMediaMetadataFile = new DomainCharacterMediaMetadataFile
             {
                 Id = "character-media-metadata",
-                Entries = new List<CharacterMediaMetadataEntry>(),
+                Entries = new List<DomainCharacterMediaMetadataEntry>(),
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow,
                 Version = "1.0"
@@ -511,7 +516,7 @@ public class AdminController : Controller
                 Id = "bear-maple-younger-kids",
                 Name = "Maple",
                 Image = "image-bear-maple-younger-kids--ede14750",
-                Metadata = new CharacterMetadata
+                Metadata = new ApiCharacterMetadata
                 {
                     Roles = new List<string> { "Peacemaker", "Emotion Mender", "The Bridge" },
                     Archetypes = new List<string> { "The Heart Warmer", "The Comfort Giver", "The Listener" },
@@ -526,7 +531,7 @@ public class AdminController : Controller
                 Id = "fox-jinx-younger-kids",
                 Name = "Jinx",
                 Image = "image-fox-jinx-younger-kids-bf9d103d",
-                Metadata = new CharacterMetadata
+                Metadata = new ApiCharacterMetadata
                 {
                     Roles = new List<string> { "Bold Striker", "Risk Taker", "The First to Try" },
                     Archetypes = new List<string> { "The Brave Buddy", "The Explorer", "The Trickster" },
