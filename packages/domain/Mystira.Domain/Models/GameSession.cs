@@ -343,9 +343,9 @@ public class GameSession : SoftDeletableEntity
 
         foreach (var choice in ChoiceHistory)
         {
-            if (choice.CompassChange != null)
+            if (choice.CompassChange != null && !string.IsNullOrEmpty(choice.CompassChange.AxisId))
             {
-                var axis = choice.CompassChange.Axis;
+                var axis = choice.CompassChange.AxisId;
                 var delta = choice.CompassChange.Delta;
 
                 if (!PlayerCompassProgressTotals.ContainsKey(axis))
