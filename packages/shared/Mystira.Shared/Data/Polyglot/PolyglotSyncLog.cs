@@ -1,3 +1,4 @@
+using Mystira.Shared.Data;
 using Mystira.Shared.Data.Entities;
 
 namespace Mystira.Shared.Polyglot;
