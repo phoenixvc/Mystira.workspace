@@ -1,132 +1,72 @@
 # DevHub CI/CD Documentation
 
-This directory contains CI/CD documentation for the Mystira.DevHub repository (Tauri desktop application).
+This directory contains reference documentation for the Mystira.DevHub repository CI/CD setup.
 
-## Project Overview
+## Current Status
 
-DevHub is a **Tauri desktop application** that combines:
-- **Frontend**: React/TypeScript with Vite
-- **Backend**: Rust (Tauri native bindings)
-- **Additional .NET Components**: CLI tools and services
+**DevHub now has its own comprehensive CI/CD workflows** directly in the repository. The workflows support both the current React-based Tauri app and the upcoming Leptos frontend.
 
-## Workflow Files (in DevHub repo)
+## DevHub Workflows (in repository)
 
-| File | Description |
-|------|-------------|
-| `ci.yml` | Main CI - builds Tauri app for all platforms (Linux, Windows, macOS) |
-| `ci-dotnet.yml` | CI for .NET CLI and Services components |
-| `build-deploy.yml` | Dev builds with workspace notification |
-| `release.yml` | Creates GitHub releases with desktop binaries |
+| Workflow | Description |
+|----------|-------------|
+| `ci.yml` | Full CI for Rust workspace, React frontend, and .NET components |
+| `build-tauri.yml` | Cross-platform Tauri builds for React and Leptos |
+| `release.yml` | GitHub Releases with desktop binaries |
 
-## CI/CD Architecture
+## Project Architecture
+
+DevHub is a **Tauri desktop application** with:
+- **React Frontend** (current): TypeScript/Vite + Tauri 1.x
+- **Leptos Frontend** (upcoming): Rust/WASM + Tauri 2.0
+- **.NET Components**: CLI tools and services
+
+## CI Pipeline
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│                         DevHub Repo                             │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                 │
-│   PR/Push ──► ci.yml ──► Lint (TS + Rust) ──► Test ──► Build    │
-│                                                                 │
-│   Push to dev ──► build-deploy.yml ──► Build all platforms      │
-│                           │                                     │
-│                           ▼                                     │
-│              repository_dispatch (devhub-deploy)                │
-│                           │                                     │
-│   Tag (v*) ──► release.yml ──► Build ──► GitHub Release         │
-│                           │                                     │
-│                           ▼                                     │
-│              repository_dispatch (devhub-release)               │
-│                                                                 │
-└───────────────────────────┼─────────────────────────────────────┘
-                            │
-                            ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                     Mystira.workspace                           │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                 │
-│   submodule-deploy-dev-appservice.yml                           │
-│     ──► Updates submodule reference                             │
-│     ──► Tracks deployed version                                 │
-│                                                                 │
-└─────────────────────────────────────────────────────────────────┘
+Rust Workspace:
+├── lint-rust (clippy, rustfmt)
+├── test-rust (contracts, tauri backend)
+└── build-leptos-wasm (trunk build)
+
+React DevHub:
+├── lint-react (tsc, eslint)
+├── test-react (vitest)
+└── build-react
+
+.NET:
+└── build-dotnet (CLI + Services)
 ```
 
 ## Build Matrix
 
-### Tauri Desktop App
+| Platform | React (Tauri 1.x) | Leptos (Tauri 2.0) |
+|----------|-------------------|---------------------|
+| Linux x64 | AppImage, deb | AppImage, deb |
+| Windows x64 | msi, exe | msi, exe |
+| macOS Intel | dmg | dmg |
+| macOS ARM | - | dmg |
 
-| Platform | Target | Artifacts |
-|----------|--------|-----------|
-| Linux x64 | `x86_64-unknown-linux-gnu` | `.AppImage`, `.deb` |
-| Windows x64 | `x86_64-pc-windows-msvc` | `.msi`, `.exe` |
-| macOS Intel | `x86_64-apple-darwin` | `.dmg`, `.app.tar.gz` |
-| macOS ARM | `aarch64-apple-darwin` | `.dmg`, `.app.tar.gz` |
+## Release Tags
 
-## Required Secrets
+| Tag Pattern | Builds |
+|-------------|--------|
+| `v*` | Both React and Leptos |
+| `leptos-v*` | Leptos only |
+| `react-v*` | React only |
 
-Configure these secrets in the DevHub repository settings:
+## Required Secrets (in DevHub repo)
 
 | Secret | Description |
 |--------|-------------|
-| `MYSTIRA_WORKSPACE_DISPATCH_TOKEN` | GitHub PAT with `repo` scope for triggering workspace workflows |
+| `MYSTIRA_WORKSPACE_DISPATCH_TOKEN` | GitHub PAT for workspace notifications |
 | `TAURI_PRIVATE_KEY` | (Optional) Tauri signing key for auto-updates |
-| `TAURI_KEY_PASSWORD` | (Optional) Password for Tauri signing key |
-
-## Project Structure
-
-```
-Mystira.DevHub/
-├── packages/devhub/
-│   ├── .github/workflows/
-│   │   ├── ci.yml                  # Main Tauri CI
-│   │   ├── ci-dotnet.yml           # .NET components CI
-│   │   ├── build-deploy.yml        # Dev deployment
-│   │   └── release.yml             # Desktop releases
-│   │
-│   ├── Mystira.DevHub/             # Tauri app
-│   │   ├── src/                    # React/TypeScript frontend
-│   │   ├── src-tauri/              # Rust backend
-│   │   │   ├── Cargo.toml
-│   │   │   └── src/
-│   │   ├── package.json
-│   │   └── vite.config.ts
-│   │
-│   ├── Mystira.DevHub.CLI/         # .NET CLI tool
-│   ├── Mystira.DevHub.Services/    # .NET services
-│   └── Mystira.App.CosmosConsole/  # .NET console app
-```
-
-## Local Development
-
-```bash
-# Install dependencies
-cd Mystira.DevHub
-pnpm install
-
-# Development mode (hot reload)
-pnpm tauri dev
-
-# Build for current platform
-pnpm tauri build
-
-# Run tests
-pnpm test                    # Frontend tests
-cd src-tauri && cargo test   # Rust tests
-```
-
-## Release Process
-
-1. Create a version tag: `git tag v1.0.0`
-2. Push the tag: `git push origin v1.0.0`
-3. The `release.yml` workflow will:
-   - Build binaries for all platforms
-   - Create a GitHub Release with all artifacts
-   - Notify the workspace
+| `TAURI_KEY_PASSWORD` | (Optional) Password for signing key |
 
 ## Comparison with Other Projects
 
 | Feature | DevHub (Tauri) | Other Projects |
-|---------|---------------|----------------|
+|---------|----------------|----------------|
 | Type | Desktop App | Web Services |
 | Deployment | GitHub Releases | K8s / App Service |
 | Artifacts | Desktop binaries | Docker images |
@@ -134,30 +74,8 @@ cd src-tauri && cargo test   # Rust tests
 
 ---
 
-## Template Files
+## Legacy Files
 
-Copy these template files to the DevHub repository's `.github/workflows/` directory:
+The files in this directory (`ci.yml`, `build-deploy.yml`, `release.yml`, `Dockerfile`) are legacy templates that were originally designed for a Leptos SSR web application. They are kept for reference only.
 
-| Template File | Target | Description |
-|---------------|--------|-------------|
-| `tauri-ci.yml` | `.github/workflows/ci.yml` | Main CI workflow |
-| `tauri-ci-dotnet.yml` | `.github/workflows/ci-dotnet.yml` | .NET components CI |
-| `tauri-build-deploy.yml` | `.github/workflows/build-deploy.yml` | Dev builds |
-| `tauri-release.yml` | `.github/workflows/release.yml` | Desktop releases |
-
-### Setup Instructions
-
-```bash
-# In the DevHub repository
-mkdir -p .github/workflows
-cp tauri-ci.yml .github/workflows/ci.yml
-cp tauri-ci-dotnet.yml .github/workflows/ci-dotnet.yml
-cp tauri-build-deploy.yml .github/workflows/build-deploy.yml
-cp tauri-release.yml .github/workflows/release.yml
-```
-
----
-
-## Legacy Notes
-
-The original templates (`ci.yml`, `build-deploy.yml`, `release.yml`, `Dockerfile`) were designed for a **Leptos SSR** web application. The actual DevHub project uses **Tauri** for desktop deployment. The `tauri-*.yml` templates reflect the correct architecture.
+**For current DevHub CI/CD, see the workflows in the DevHub repository directly.**
