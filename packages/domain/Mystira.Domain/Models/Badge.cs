@@ -318,8 +318,9 @@ public class UserBadge : Entity
 
     /// <summary>
     /// Gets or sets the trigger value that earned this badge.
+    /// Stored as float to preserve decimal precision from scoring calculations.
     /// </summary>
-    public int? TriggerValue { get; set; }
+    public float? TriggerValue { get; set; }
 
     /// <summary>
     /// Gets or sets the threshold value for this badge.

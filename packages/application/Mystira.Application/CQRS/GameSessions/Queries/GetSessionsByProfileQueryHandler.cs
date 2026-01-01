@@ -55,7 +55,7 @@ public static class GetSessionsByProfileQueryHandler
                 ChoiceCount = s.ChoiceHistory?.Count ?? 0,
                 EchoCount = s.EchoHistory?.Count ?? 0,
                 AchievementCount = s.Achievements?.Count ?? 0,
-                StartTime = s.StartTime ?? DateTime.MinValue,
+                StartTime = s.StartTime,
                 EndTime = s.EndTime,
                 ElapsedTime = s.GetTotalElapsedTime(),
                 IsPaused = s.Status == SessionStatus.Paused,

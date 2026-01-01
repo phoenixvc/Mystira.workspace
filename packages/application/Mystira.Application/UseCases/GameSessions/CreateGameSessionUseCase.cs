@@ -129,8 +129,9 @@ public class CreateGameSessionUseCase
             }
         }
 
-        // If we can't parse, assume compatible
-        return true;
+        // If we can't parse, use the most restrictive age group (Early Childhood, age 3)
+        // to ensure child-safe behavior when age group data is malformed or missing
+        return scenarioMinimumAge <= AgeGroup.EarlyChildhood.MinAge;
     }
 }
 

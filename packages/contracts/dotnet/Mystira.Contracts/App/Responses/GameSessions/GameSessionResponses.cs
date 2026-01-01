@@ -49,8 +49,9 @@ public record GameSessionResponse
 
     /// <summary>
     /// The date and time when the session started.
+    /// Null indicates the session has not yet started.
     /// </summary>
-    public DateTime StartTime { get; set; }
+    public DateTime? StartTime { get; set; }
 
     /// <summary>
     /// The date and time when the session ended, if completed.

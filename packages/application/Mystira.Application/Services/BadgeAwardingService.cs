@@ -129,7 +129,7 @@ public class BadgeAwardingService : IBadgeAwardingService
                         BadgeName = badge.Title,
                         BadgeMessage = badge.Description,
                         Axis = axis,
-                        TriggerValue = (int)Math.Round(score),
+                        TriggerValue = score,
                         Threshold = badge.RequiredScore,
                         EarnedAt = DateTime.UtcNow,
                         ImageId = badge.ImageId
