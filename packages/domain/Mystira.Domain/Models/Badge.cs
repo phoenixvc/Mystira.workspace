@@ -35,9 +35,43 @@ public class Badge : SoftDeletableEntity
     public string? Tier { get; set; }
 
     /// <summary>
+    /// Gets or sets the tier order for sorting.
+    /// </summary>
+    public int TierOrder { get; set; }
+
+    /// <summary>
     /// Gets or sets the rarity level.
     /// </summary>
     public string? Rarity { get; set; }
+
+    /// <summary>
+    /// Gets or sets the title (alias for Name for DTO compatibility).
+    /// </summary>
+    public string Title
+    {
+        get => Name;
+        set => Name = value;
+    }
+
+    /// <summary>
+    /// Gets or sets the compass axis ID for this badge.
+    /// </summary>
+    public string? CompassAxisId { get; set; }
+
+    /// <summary>
+    /// Gets or sets the age group ID for this badge.
+    /// </summary>
+    public string? AgeGroupId { get; set; }
+
+    /// <summary>
+    /// Gets or sets the required score to earn this badge.
+    /// </summary>
+    public int? RequiredScore { get; set; }
+
+    /// <summary>
+    /// Gets or sets the primary image ID.
+    /// </summary>
+    public string? ImageId { get; set; }
 
     /// <summary>
     /// Gets or sets the points value of the badge.
@@ -104,6 +138,16 @@ public class BadgeImage : Entity
     /// Gets or sets whether this is the primary image.
     /// </summary>
     public bool IsPrimary { get; set; }
+
+    /// <summary>
+    /// Gets or sets the raw image data.
+    /// </summary>
+    public byte[]? ImageData { get; set; }
+
+    /// <summary>
+    /// Gets or sets the content type of the image.
+    /// </summary>
+    public string? ContentType { get; set; }
 }
 
 /// <summary>
@@ -117,6 +161,26 @@ public class BadgeConfiguration : Entity
     public string BadgeId { get; set; } = string.Empty;
 
     /// <summary>
+    /// Gets or sets the configuration name.
+    /// </summary>
+    public string Name { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Gets or sets the configuration message.
+    /// </summary>
+    public string? Message { get; set; }
+
+    /// <summary>
+    /// Gets or sets the threshold value.
+    /// </summary>
+    public int? Threshold { get; set; }
+
+    /// <summary>
+    /// Gets or sets the image ID.
+    /// </summary>
+    public string? ImageId { get; set; }
+
+    /// <summary>
     /// Gets or sets the achievement type required.
     /// </summary>
     public AchievementType? RequiredAchievementType { get; set; }
@@ -126,10 +190,16 @@ public class BadgeConfiguration : Entity
     /// </summary>
     public string? ScenarioId { get; set; }
 
+    private string? _axisId;
+
     /// <summary>
     /// Gets or sets the core axis ID (for compass badges).
     /// </summary>
-    public string? AxisId { get; set; }
+    public string? AxisId
+    {
+        get => _axisId;
+        set => _axisId = value;
+    }
 
     /// <summary>
     /// Gets or sets the archetype ID (for archetype badges).
@@ -162,9 +232,13 @@ public class BadgeConfiguration : Entity
     public int? CooldownDays { get; set; }
 
     /// <summary>
-    /// Gets the core axis if configured.
+    /// Gets or sets the core axis (writable for DTO compatibility).
     /// </summary>
-    public CoreAxis? Axis => CoreAxis.FromValue(AxisId);
+    public CoreAxis? Axis
+    {
+        get => CoreAxis.FromValue(_axisId);
+        set => _axisId = value?.Id;
+    }
 
     /// <summary>
     /// Gets the archetype if configured.
@@ -226,6 +300,41 @@ public class UserBadge : Entity
     /// Gets or sets the badge ID.
     /// </summary>
     public string BadgeId { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Gets or sets the badge configuration ID.
+    /// </summary>
+    public string? BadgeConfigurationId { get; set; }
+
+    /// <summary>
+    /// Gets or sets the badge name (denormalized for display).
+    /// </summary>
+    public string? BadgeName { get; set; }
+
+    /// <summary>
+    /// Gets or sets the badge message (denormalized for display).
+    /// </summary>
+    public string? BadgeMessage { get; set; }
+
+    /// <summary>
+    /// Gets or sets the trigger value that earned this badge.
+    /// </summary>
+    public int? TriggerValue { get; set; }
+
+    /// <summary>
+    /// Gets or sets the threshold value for this badge.
+    /// </summary>
+    public int? Threshold { get; set; }
+
+    /// <summary>
+    /// Gets or sets the game session ID where it was earned.
+    /// </summary>
+    public string? GameSessionId { get; set; }
+
+    /// <summary>
+    /// Gets or sets the image ID.
+    /// </summary>
+    public string? ImageId { get; set; }
 
     /// <summary>
     /// Gets or sets the compass axis ID (for axis-related badges).
@@ -292,6 +401,15 @@ public class AxisAchievement : Entity
     /// Gets or sets the core axis ID.
     /// </summary>
     public string AxisId { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Gets or sets the compass axis ID (alias for AxisId for DTO compatibility).
+    /// </summary>
+    public string CompassAxisId
+    {
+        get => AxisId;
+        set => AxisId = value;
+    }
 
     /// <summary>
     /// Gets or sets the current value on this axis.

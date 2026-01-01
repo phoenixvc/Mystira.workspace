@@ -14,9 +14,28 @@ public class PlayerScenarioScore : Entity
     public string UserId { get; set; } = string.Empty;
 
     /// <summary>
+    /// Gets or sets the profile ID (alias for UserId for DTO compatibility).
+    /// </summary>
+    public string ProfileId
+    {
+        get => UserId;
+        set => UserId = value;
+    }
+
+    /// <summary>
+    /// Gets or sets the game session ID.
+    /// </summary>
+    public string? GameSessionId { get; set; }
+
+    /// <summary>
     /// Gets or sets the scenario ID.
     /// </summary>
     public string ScenarioId { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Gets or sets the axis scores as a dictionary.
+    /// </summary>
+    public Dictionary<string, int> AxisScores { get; set; } = new();
 
     /// <summary>
     /// Gets or sets the best score achieved.

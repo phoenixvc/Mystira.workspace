@@ -4,7 +4,7 @@ using Mystira.Domain.ValueObjects;
 namespace Mystira.Domain.Models;
 
 /// <summary>
-/// Represents a user's profile information.
+/// Represents a user's profile information including preferences and progress.
 /// </summary>
 public class UserProfile : Entity
 {
@@ -118,6 +118,54 @@ public class UserProfile : Entity
     public bool OnboardingCompleted { get; set; }
 
     /// <summary>
+    /// Gets or sets whether the user has completed onboarding (alias for DTO compatibility).
+    /// </summary>
+    public bool HasCompletedOnboarding
+    {
+        get => OnboardingCompleted;
+        set => OnboardingCompleted = value;
+    }
+
+    /// <summary>
+    /// Gets or sets whether this is a guest profile.
+    /// </summary>
+    public bool IsGuest { get; set; }
+
+    /// <summary>
+    /// Gets or sets whether this is an NPC profile.
+    /// </summary>
+    public bool IsNpc { get; set; }
+
+    /// <summary>
+    /// Gets or sets the user's preferred pronouns.
+    /// </summary>
+    public string? Pronouns { get; set; }
+
+    /// <summary>
+    /// Gets or sets the user's preferred fantasy themes.
+    /// </summary>
+    public List<string> PreferredFantasyThemes { get; set; } = new();
+
+    /// <summary>
+    /// Gets or sets the avatar media asset ID.
+    /// </summary>
+    public string? AvatarMediaId { get; set; }
+
+    /// <summary>
+    /// Gets or sets the selected avatar media asset ID (alias for AvatarMediaId).
+    /// </summary>
+    public string? SelectedAvatarMediaId
+    {
+        get => AvatarMediaId;
+        set => AvatarMediaId = value;
+    }
+
+    /// <summary>
+    /// Gets the age group name from the AgeGroup value object.
+    /// </summary>
+    public string? AgeGroupName => AgeGroup?.Name;
+
+    /// <summary>
     /// Gets or sets when the user last played.
     /// </summary>
     public DateTime? LastPlayedAt { get; set; }
@@ -179,6 +227,14 @@ public class UserProfile : Entity
         {
             AgeGroupId = ValueObjects.AgeGroup.ForAge(Age.Value).Id;
         }
+    }
+
+    /// <summary>
+    /// Updates the age group based on the date of birth.
+    /// </summary>
+    public void UpdateAgeGroupFromBirthDate()
+    {
+        UpdateAgeGroup();
     }
 
     /// <summary>

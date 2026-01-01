@@ -76,6 +76,20 @@ public class Scenario : SoftDeletableEntity
     public string? ThumbnailUrl { get; set; }
 
     /// <summary>
+    /// Gets or sets the image reference (alias for CoverImageUrl for DTO compatibility).
+    /// </summary>
+    public string? Image
+    {
+        get => CoverImageUrl;
+        set => CoverImageUrl = value;
+    }
+
+    /// <summary>
+    /// Gets or sets the music palette/theme for this scenario.
+    /// </summary>
+    public string? MusicPalette { get; set; }
+
+    /// <summary>
     /// Gets or sets the starting scene ID.
     /// </summary>
     public string? StartSceneId { get; set; }
@@ -698,9 +712,28 @@ public class CompassTracking
     public string Axis { get; set; } = string.Empty;
 
     /// <summary>
+    /// Gets or sets the key identifier.
+    /// </summary>
+    public string? Key { get; set; }
+
+    /// <summary>
     /// Gets or sets the current value on this axis.
     /// </summary>
     public double CurrentValue { get; set; }
+
+    /// <summary>
+    /// Gets or sets the value (alias for CurrentValue as int for DTO compatibility).
+    /// </summary>
+    public int Value
+    {
+        get => (int)CurrentValue;
+        set => CurrentValue = value;
+    }
+
+    /// <summary>
+    /// Gets or sets the starting value for this tracking.
+    /// </summary>
+    public int StartingValue { get; set; }
 
     /// <summary>
     /// Gets or sets when this tracking was last updated.
@@ -824,6 +857,24 @@ public class ScenarioStoryProtocol
     /// Gets or sets the royalty policy ID.
     /// </summary>
     public string? RoyaltyPolicyId { get; set; }
+
+    /// <summary>
+    /// Gets or sets the registration transaction hash (alias for TransactionHash for DTO compatibility).
+    /// </summary>
+    public string? RegistrationTxHash
+    {
+        get => TransactionHash;
+        set => TransactionHash = value;
+    }
+
+    /// <summary>
+    /// Gets or sets the royalty module ID (alias for RoyaltyPolicyId for DTO compatibility).
+    /// </summary>
+    public string? RoyaltyModuleId
+    {
+        get => RoyaltyPolicyId;
+        set => RoyaltyPolicyId = value;
+    }
 
     /// <summary>
     /// Gets or sets the contributors for this IP asset.
