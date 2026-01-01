@@ -22,6 +22,19 @@ namespace Mystira.Shared.Polyglot;
 /// Polly resilience, and automatic database routing.
 /// </summary>
 /// <typeparam name="TEntity">The entity type.</typeparam>
+/// <remarks>
+/// <para>
+/// <b>DEPRECATED:</b> This implementation is deprecated. Use
+/// <c>Mystira.Infrastructure.Data.Polyglot.PolyglotRepository&lt;T&gt;</c> instead.
+/// </para>
+/// <para>
+/// The canonical polyglot persistence implementation is now in the
+/// <c>Mystira.Infrastructure.Data</c> package, which follows the ports/adapters architecture:
+/// - Interfaces: <c>Mystira.Application.Ports.Data.IPolyglotRepository&lt;T&gt;</c>
+/// - Implementation: <c>Mystira.Infrastructure.Data.Polyglot.PolyglotRepository&lt;T&gt;</c>
+/// </para>
+/// </remarks>
+[Obsolete("Use Mystira.Infrastructure.Data.Polyglot.PolyglotRepository<T> instead. This will be removed in a future version.")]
 public class PolyglotRepository<TEntity> : IPolyglotRepository<TEntity> where TEntity : class
 {
     private readonly DbContext _primaryContext;
