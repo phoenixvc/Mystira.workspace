@@ -15,6 +15,13 @@ public class ProgressSceneUseCase
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<ProgressSceneUseCase> _logger;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ProgressSceneUseCase"/> class.
+    /// </summary>
+    /// <param name="repository">The game session repository.</param>
+    /// <param name="scenarioRepository">The scenario repository.</param>
+    /// <param name="unitOfWork">The unit of work for transaction management.</param>
+    /// <param name="logger">The logger instance.</param>
     public ProgressSceneUseCase(
         IGameSessionRepository repository,
         IScenarioRepository scenarioRepository,
@@ -27,6 +34,11 @@ public class ProgressSceneUseCase
         _logger = logger;
     }
 
+    /// <summary>
+    /// Progresses a game session to a specific scene.
+    /// </summary>
+    /// <param name="request">The request containing session and scene details.</param>
+    /// <returns>The updated game session if successful; otherwise, null.</returns>
     public async Task<GameSession?> ExecuteAsync(ProgressSceneRequest request)
     {
         var session = await _repository.GetByIdAsync(request.SessionId);

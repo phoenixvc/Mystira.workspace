@@ -14,6 +14,11 @@ public class ListMediaUseCase
     private readonly IMediaAssetRepository _repository;
     private readonly ILogger<ListMediaUseCase> _logger;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ListMediaUseCase"/> class.
+    /// </summary>
+    /// <param name="repository">The media asset repository.</param>
+    /// <param name="logger">The logger instance.</param>
     public ListMediaUseCase(
         IMediaAssetRepository repository,
         ILogger<ListMediaUseCase> logger)
@@ -22,6 +27,11 @@ public class ListMediaUseCase
         _logger = logger;
     }
 
+    /// <summary>
+    /// Lists media assets with filtering and pagination.
+    /// </summary>
+    /// <param name="request">The query request containing filter and pagination options.</param>
+    /// <returns>A paginated response containing media items.</returns>
     public async Task<MediaQueryResponse> ExecuteAsync(MediaQueryRequest request)
     {
         var query = _repository.GetQueryable();

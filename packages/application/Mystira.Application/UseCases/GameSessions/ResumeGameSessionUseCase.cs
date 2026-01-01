@@ -13,6 +13,12 @@ public class ResumeGameSessionUseCase
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<ResumeGameSessionUseCase> _logger;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ResumeGameSessionUseCase"/> class.
+    /// </summary>
+    /// <param name="repository">The game session repository.</param>
+    /// <param name="unitOfWork">The unit of work for transaction management.</param>
+    /// <param name="logger">The logger instance.</param>
     public ResumeGameSessionUseCase(
         IGameSessionRepository repository,
         IUnitOfWork unitOfWork,
@@ -23,6 +29,11 @@ public class ResumeGameSessionUseCase
         _logger = logger;
     }
 
+    /// <summary>
+    /// Resumes a paused game session.
+    /// </summary>
+    /// <param name="sessionId">The session identifier.</param>
+    /// <returns>The resumed game session.</returns>
     public async Task<GameSession> ExecuteAsync(string sessionId)
     {
         if (string.IsNullOrWhiteSpace(sessionId))

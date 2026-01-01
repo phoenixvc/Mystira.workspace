@@ -14,6 +14,12 @@ public class UpdateMediaMetadataUseCase
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<UpdateMediaMetadataUseCase> _logger;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="UpdateMediaMetadataUseCase"/> class.
+    /// </summary>
+    /// <param name="repository">The media asset repository.</param>
+    /// <param name="unitOfWork">The unit of work for transaction management.</param>
+    /// <param name="logger">The logger instance.</param>
     public UpdateMediaMetadataUseCase(
         IMediaAssetRepository repository,
         IUnitOfWork unitOfWork,
@@ -24,6 +30,12 @@ public class UpdateMediaMetadataUseCase
         _logger = logger;
     }
 
+    /// <summary>
+    /// Updates metadata for a media asset.
+    /// </summary>
+    /// <param name="mediaId">The media identifier.</param>
+    /// <param name="updateData">The update request containing new metadata.</param>
+    /// <returns>The updated media asset.</returns>
     public async Task<MediaAsset> ExecuteAsync(string mediaId, MediaUpdateRequest updateData)
     {
         if (string.IsNullOrWhiteSpace(mediaId))

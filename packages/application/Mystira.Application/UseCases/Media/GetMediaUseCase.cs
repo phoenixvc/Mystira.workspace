@@ -12,6 +12,11 @@ public class GetMediaUseCase
     private readonly IMediaAssetRepository _repository;
     private readonly ILogger<GetMediaUseCase> _logger;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="GetMediaUseCase"/> class.
+    /// </summary>
+    /// <param name="repository">The media asset repository.</param>
+    /// <param name="logger">The logger instance.</param>
     public GetMediaUseCase(
         IMediaAssetRepository repository,
         ILogger<GetMediaUseCase> logger)
@@ -20,6 +25,11 @@ public class GetMediaUseCase
         _logger = logger;
     }
 
+    /// <summary>
+    /// Retrieves a media asset by its identifier.
+    /// </summary>
+    /// <param name="mediaId">The media identifier.</param>
+    /// <returns>The media asset if found; otherwise, null.</returns>
     public async Task<MediaAsset?> ExecuteAsync(string mediaId)
     {
         if (string.IsNullOrWhiteSpace(mediaId))

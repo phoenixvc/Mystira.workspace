@@ -20,6 +20,14 @@ public class UploadMediaUseCase
     private readonly IMediaMetadataService _mediaMetadataService;
     private readonly ILogger<UploadMediaUseCase> _logger;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="UploadMediaUseCase"/> class.
+    /// </summary>
+    /// <param name="repository">The media asset repository.</param>
+    /// <param name="unitOfWork">The unit of work for transaction management.</param>
+    /// <param name="blobStorageService">The blob storage service.</param>
+    /// <param name="mediaMetadataService">The media metadata service.</param>
+    /// <param name="logger">The logger instance.</param>
     public UploadMediaUseCase(
         IMediaAssetRepository repository,
         IUnitOfWork unitOfWork,
@@ -34,6 +42,11 @@ public class UploadMediaUseCase
         _logger = logger;
     }
 
+    /// <summary>
+    /// Uploads a new media asset.
+    /// </summary>
+    /// <param name="request">The upload request containing file and metadata.</param>
+    /// <returns>The created media asset.</returns>
     public async Task<MediaAsset> ExecuteAsync(UploadMediaRequest request)
     {
         ValidateMediaFile(request);

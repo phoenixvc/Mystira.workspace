@@ -14,6 +14,12 @@ public class GetMediaByFilenameUseCase
     private readonly IMediaMetadataService _mediaMetadataService;
     private readonly ILogger<GetMediaByFilenameUseCase> _logger;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="GetMediaByFilenameUseCase"/> class.
+    /// </summary>
+    /// <param name="repository">The media asset repository.</param>
+    /// <param name="mediaMetadataService">The media metadata service.</param>
+    /// <param name="logger">The logger instance.</param>
     public GetMediaByFilenameUseCase(
         IMediaAssetRepository repository,
         IMediaMetadataService mediaMetadataService,
@@ -24,6 +30,11 @@ public class GetMediaByFilenameUseCase
         _logger = logger;
     }
 
+    /// <summary>
+    /// Retrieves a media asset by its filename.
+    /// </summary>
+    /// <param name="fileName">The file name to search for.</param>
+    /// <returns>The media asset if found; otherwise, null.</returns>
     public async Task<MediaAsset?> ExecuteAsync(string fileName)
     {
         if (string.IsNullOrWhiteSpace(fileName))

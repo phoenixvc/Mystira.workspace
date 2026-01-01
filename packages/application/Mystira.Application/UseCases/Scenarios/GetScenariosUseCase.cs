@@ -15,6 +15,11 @@ public class GetScenariosUseCase
     private readonly IScenarioRepository _repository;
     private readonly ILogger<GetScenariosUseCase> _logger;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="GetScenariosUseCase"/> class.
+    /// </summary>
+    /// <param name="repository">The scenario repository.</param>
+    /// <param name="logger">The logger instance.</param>
     public GetScenariosUseCase(
         IScenarioRepository repository,
         ILogger<GetScenariosUseCase> logger)
@@ -23,6 +28,11 @@ public class GetScenariosUseCase
         _logger = logger;
     }
 
+    /// <summary>
+    /// Retrieves scenarios with filtering and pagination.
+    /// </summary>
+    /// <param name="request">The query request containing filter and pagination options.</param>
+    /// <returns>A paginated response containing scenario summaries.</returns>
     public async Task<ScenarioListResponse> ExecuteAsync(ScenarioQueryRequest request)
     {
         var query = _repository.GetQueryable();

@@ -14,6 +14,13 @@ public class DeleteMediaUseCase
     private readonly IBlobService _blobStorageService;
     private readonly ILogger<DeleteMediaUseCase> _logger;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="DeleteMediaUseCase"/> class.
+    /// </summary>
+    /// <param name="repository">The media asset repository.</param>
+    /// <param name="unitOfWork">The unit of work for transaction management.</param>
+    /// <param name="blobStorageService">The blob storage service.</param>
+    /// <param name="logger">The logger instance.</param>
     public DeleteMediaUseCase(
         IMediaAssetRepository repository,
         IUnitOfWork unitOfWork,
@@ -26,6 +33,11 @@ public class DeleteMediaUseCase
         _logger = logger;
     }
 
+    /// <summary>
+    /// Deletes a media asset by its identifier.
+    /// </summary>
+    /// <param name="mediaId">The media identifier.</param>
+    /// <returns>True if the media was deleted; false if not found.</returns>
     public async Task<bool> ExecuteAsync(string mediaId)
     {
         if (string.IsNullOrWhiteSpace(mediaId))
