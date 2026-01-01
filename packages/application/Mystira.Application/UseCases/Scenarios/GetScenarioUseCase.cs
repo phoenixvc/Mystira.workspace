@@ -12,6 +12,11 @@ public class GetScenarioUseCase
     private readonly IScenarioRepository _repository;
     private readonly ILogger<GetScenarioUseCase> _logger;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="GetScenarioUseCase"/> class.
+    /// </summary>
+    /// <param name="repository">The scenario repository.</param>
+    /// <param name="logger">The logger instance.</param>
     public GetScenarioUseCase(
         IScenarioRepository repository,
         ILogger<GetScenarioUseCase> logger)
@@ -20,6 +25,11 @@ public class GetScenarioUseCase
         _logger = logger;
     }
 
+    /// <summary>
+    /// Retrieves a scenario by its unique identifier.
+    /// </summary>
+    /// <param name="scenarioId">The scenario identifier.</param>
+    /// <returns>The scenario if found; otherwise, null.</returns>
     public async Task<Scenario?> ExecuteAsync(string scenarioId)
     {
         if (string.IsNullOrWhiteSpace(scenarioId))

@@ -13,6 +13,12 @@ public class ValidateScenarioUseCase
     private readonly ICompassAxisRepository _compassAxisRepository;
     private readonly IArchetypeRepository _archetypeRepository;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ValidateScenarioUseCase"/> class.
+    /// </summary>
+    /// <param name="logger">The logger instance.</param>
+    /// <param name="compassAxisRepository">The compass axis repository for validation.</param>
+    /// <param name="archetypeRepository">The archetype repository for validation.</param>
     public ValidateScenarioUseCase(
         ILogger<ValidateScenarioUseCase> logger,
         ICompassAxisRepository compassAxisRepository,
@@ -23,6 +29,11 @@ public class ValidateScenarioUseCase
         _archetypeRepository = archetypeRepository;
     }
 
+    /// <summary>
+    /// Validates a scenario against business rules and reference data.
+    /// </summary>
+    /// <param name="scenario">The scenario to validate.</param>
+    /// <returns>A task representing the asynchronous validation operation.</returns>
     public async Task ExecuteAsync(Scenario scenario)
     {
         // Validate CoreAxes against DB

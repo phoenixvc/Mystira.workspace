@@ -15,6 +15,12 @@ public class CreateUserProfileUseCase
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<CreateUserProfileUseCase> _logger;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="CreateUserProfileUseCase"/> class.
+    /// </summary>
+    /// <param name="repository">The user profile repository.</param>
+    /// <param name="unitOfWork">The unit of work for transaction management.</param>
+    /// <param name="logger">The logger instance.</param>
     public CreateUserProfileUseCase(
         IUserProfileRepository repository,
         IUnitOfWork unitOfWork,
@@ -25,6 +31,11 @@ public class CreateUserProfileUseCase
         _logger = logger;
     }
 
+    /// <summary>
+    /// Creates a new user profile based on the provided request.
+    /// </summary>
+    /// <param name="request">The request containing user profile data.</param>
+    /// <returns>The newly created user profile.</returns>
     public async Task<UserProfile> ExecuteAsync(CreateUserProfileRequest request)
     {
         // Check if profile already exists (using Id from request)
