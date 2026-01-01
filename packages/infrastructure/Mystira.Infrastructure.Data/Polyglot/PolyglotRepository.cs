@@ -67,7 +67,7 @@ public class PolyglotRepository<T> : EfSpecificationRepository<T>, IPolyglotRepo
         {
             return await DualWriteAsync(
                 () => base.AddAsync(entity, cancellationToken),
-                () => AddToSecondaryAsync(entity, cancellationToken),
+                ct => AddToSecondaryAsync(entity, ct),
                 cancellationToken,
                 SyncOperation.Insert);
         }
@@ -86,7 +86,7 @@ public class PolyglotRepository<T> : EfSpecificationRepository<T>, IPolyglotRepo
 
             // Perform secondary write (fire-and-forget with logging on failure)
             await PerformSecondaryWriteAsync(
-                () => UpdateInSecondaryAsync(entity, cancellationToken),
+                ct => UpdateInSecondaryAsync(entity, ct),
                 cancellationToken,
                 SyncOperation.Update,
                 entityId);
@@ -108,7 +108,7 @@ public class PolyglotRepository<T> : EfSpecificationRepository<T>, IPolyglotRepo
 
             // Perform secondary write (fire-and-forget with logging on failure)
             await PerformSecondaryWriteAsync(
-                () => DeleteFromSecondaryAsync(entity, cancellationToken),
+                ct => DeleteFromSecondaryAsync(entity, ct),
                 cancellationToken,
                 SyncOperation.Delete,
                 entityId);
@@ -318,7 +318,7 @@ public class PolyglotRepository<T> : EfSpecificationRepository<T>, IPolyglotRepo
 
     private async Task<T> DualWriteAsync(
         Func<Task<T>> primaryWrite,
-        Func<Task<T>> secondaryWrite,
+        Func<CancellationToken, Task<T>> secondaryWrite,
         CancellationToken cancellationToken,
         string operation = SyncOperation.Insert,
         string? entityId = null)
@@ -341,7 +341,7 @@ public class PolyglotRepository<T> : EfSpecificationRepository<T>, IPolyglotRepo
         try
         {
             await _resiliencePipeline.ExecuteAsync(
-                async token => await secondaryWrite(),
+                async token => await secondaryWrite(token),
                 cts.Token);
 
             // Track successful secondary writes via Meter
@@ -385,7 +385,7 @@ public class PolyglotRepository<T> : EfSpecificationRepository<T>, IPolyglotRepo
     /// Performs a secondary write operation with resilience and proper cancellation token handling.
     /// </summary>
     private async Task PerformSecondaryWriteAsync(
-        Func<Task<int>> secondaryWrite,
+        Func<CancellationToken, Task<int>> secondaryWrite,
         CancellationToken cancellationToken,
         string operation,
         string? entityId)
@@ -402,7 +402,7 @@ public class PolyglotRepository<T> : EfSpecificationRepository<T>, IPolyglotRepo
                 async token =>
                 {
                     // Pass the timeout-linked token to the secondary write
-                    await secondaryWrite();
+                    await secondaryWrite(token);
                 },
                 cts.Token);
 

@@ -227,8 +227,8 @@ public class PostgresDbContext : DbContext
                 .HasColumnType("jsonb")
                 .HasConversion(
                     v => JsonSerializer.Serialize(v, (JsonSerializerOptions?)null),
-                    v => JsonSerializer.Deserialize<List<PlayerCompassProgress>>(v, (JsonSerializerOptions?)null) ?? new List<PlayerCompassProgress>())
-                .Metadata.SetValueComparer(CreateListComparer<PlayerCompassProgress>());
+                    v => JsonSerializer.Deserialize<Dictionary<string, int>>(v, (JsonSerializerOptions?)null) ?? new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase))
+                .Metadata.SetValueComparer(CreateDictionaryComparer<string, int>());
 
             entity.Property(e => e.Achievements)
                 .HasColumnName("achievements")
