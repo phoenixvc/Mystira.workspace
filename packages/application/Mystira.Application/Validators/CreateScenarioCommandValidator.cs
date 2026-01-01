@@ -8,6 +8,9 @@ namespace Mystira.Application.Validators;
 /// </summary>
 public class CreateScenarioCommandValidator : AbstractValidator<CreateScenarioCommand>
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="CreateScenarioCommandValidator"/> class.
+    /// </summary>
     public CreateScenarioCommandValidator()
     {
         RuleFor(x => x.Request)

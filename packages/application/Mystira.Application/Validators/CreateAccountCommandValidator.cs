@@ -8,6 +8,9 @@ namespace Mystira.Application.Validators;
 /// </summary>
 public class CreateAccountCommandValidator : AbstractValidator<CreateAccountCommand>
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="CreateAccountCommandValidator"/> class.
+    /// </summary>
     public CreateAccountCommandValidator()
     {
         RuleFor(x => x.ExternalUserId)

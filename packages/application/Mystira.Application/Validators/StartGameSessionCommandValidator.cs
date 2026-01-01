@@ -8,6 +8,9 @@ namespace Mystira.Application.Validators;
 /// </summary>
 public class StartGameSessionCommandValidator : AbstractValidator<StartGameSessionCommand>
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="StartGameSessionCommandValidator"/> class.
+    /// </summary>
     public StartGameSessionCommandValidator()
     {
         RuleFor(x => x.Request)
