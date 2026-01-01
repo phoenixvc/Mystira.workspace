@@ -21,6 +21,7 @@ public class DiscordBotService : IMessagingService, IChatBotService, IBotCommand
     private readonly IServiceProvider _serviceProvider;
     private readonly ILogger<DiscordBotService> _logger;
     private readonly DiscordOptions _options;
+    private readonly TaskCompletionSource<bool> _connectionTcs = new(TaskCreationOptions.RunContinuationsAsynchronously);
     private bool _disposed;
     private bool _commandsRegistered;
 
@@ -77,6 +78,17 @@ public class DiscordBotService : IMessagingService, IChatBotService, IBotCommand
     /// Gets a value indicating whether the Discord bot is currently connected.
     /// </summary>
     public bool IsConnected => _client.ConnectionState == ConnectionState.Connected;
+
+    /// <summary>
+    /// Waits for the Discord bot to connect. Returns immediately if already connected.
+    /// </summary>
+    /// <param name="cancellationToken">Cancellation token to cancel waiting.</param>
+    /// <returns>A task that completes when the bot is connected.</returns>
+    public async Task WaitForConnectionAsync(CancellationToken cancellationToken = default)
+    {
+        if (IsConnected) return;
+        await _connectionTcs.Task.WaitAsync(cancellationToken);
+    }
 
     /// <summary>
     /// Gets the platform identifier for this service.
@@ -291,6 +303,9 @@ public class DiscordBotService : IMessagingService, IChatBotService, IBotCommand
     {
         _logger.LogInformation("Discord bot is ready! Logged in as {Username}",
             _client.CurrentUser?.Username);
+
+        // Signal that the connection is ready
+        _connectionTcs.TrySetResult(true);
 
         // Auto-register commands if configured
         if (_options.EnableSlashCommands && !_commandsRegistered)

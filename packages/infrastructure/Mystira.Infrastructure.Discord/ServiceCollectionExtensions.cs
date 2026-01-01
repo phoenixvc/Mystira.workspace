@@ -112,12 +112,13 @@ public static class ServiceCollectionExtensions
     /// <summary>
     /// Adds ticket support services (SampleTicketStartupService).
     /// The TicketModule is auto-discovered when RegisterCommandsAsync is called.
+    /// Registers as a hosted service for automatic startup invocation.
     /// </summary>
     /// <param name="services">The service collection</param>
     /// <returns>The service collection for chaining</returns>
     public static IServiceCollection AddDiscordTicketSupport(this IServiceCollection services)
     {
-        services.AddSingleton<SampleTicketStartupService>();
+        services.AddHostedService<SampleTicketStartupService>();
         return services;
     }
 }

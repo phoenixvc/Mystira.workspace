@@ -904,7 +904,12 @@ public partial class MystiraAppDbContext : DbContext
             return new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
 
         if (input is Dictionary<string, List<string>> dict)
-            return dict;
+        {
+            // Wrap with case-insensitive comparer if not already
+            return dict.Comparer == StringComparer.OrdinalIgnoreCase
+                ? dict
+                : new Dictionary<string, List<string>>(dict, StringComparer.OrdinalIgnoreCase);
+        }
 
         string? s;
         try
@@ -914,8 +919,8 @@ public partial class MystiraAppDbContext : DbContext
             {
                 if (token.Type == Newtonsoft.Json.Linq.JTokenType.Object)
                 {
-                    return token.ToObject<Dictionary<string, List<string>>>()
-                           ?? new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
+                    var deserialized = token.ToObject<Dictionary<string, List<string>>>();
+                    return WrapWithCaseInsensitiveComparer(deserialized);
                 }
                 s = token.ToString();
             }
@@ -931,8 +936,8 @@ public partial class MystiraAppDbContext : DbContext
             var trimmed = s.Trim();
             if (trimmed.StartsWith("{"))
             {
-                return Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, List<string>>>(s)
-                       ?? new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
+                var deserialized = Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, List<string>>>(s);
+                return WrapWithCaseInsensitiveComparer(deserialized);
             }
 
             // Otherwise, it might be a JSON-serialized string containing JSON
@@ -940,13 +945,23 @@ public partial class MystiraAppDbContext : DbContext
             if (string.IsNullOrWhiteSpace(innerJson))
                 return new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
 
-            return Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, List<string>>>(innerJson)
-                   ?? new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
+            var innerDeserialized = Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, List<string>>>(innerJson);
+            return WrapWithCaseInsensitiveComparer(innerDeserialized);
         }
-        catch
+        catch (Exception ex)
         {
+            // Log the deserialization error for troubleshooting
+            System.Diagnostics.Debug.WriteLine(
+                $"[MystiraAppDbContext] Failed to deserialize Dictionary<string, List<string>> from input type {input?.GetType().Name ?? "null"}: {ex.Message}");
             return new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
         }
+    }
+
+    private static Dictionary<string, List<string>> WrapWithCaseInsensitiveComparer(Dictionary<string, List<string>>? dict)
+    {
+        if (dict == null)
+            return new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
+        return new Dictionary<string, List<string>>(dict, StringComparer.OrdinalIgnoreCase);
     }
 
     private class CosmosDictionaryConverter : ValueConverter<Dictionary<string, List<string>>, Newtonsoft.Json.Linq.JObject>

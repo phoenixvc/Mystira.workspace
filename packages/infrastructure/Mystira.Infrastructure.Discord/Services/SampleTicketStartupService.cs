@@ -1,4 +1,5 @@
 using Discord;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Mystira.Infrastructure.Discord.Configuration;
@@ -6,10 +7,11 @@ using Mystira.Infrastructure.Discord.Configuration;
 namespace Mystira.Infrastructure.Discord.Services;
 
 /// <summary>
-/// Service that creates a sample ticket channel on startup for testing.
+/// Background service that creates a sample ticket channel on startup for testing.
 /// Only runs if PostSampleTicketOnStartup is enabled in configuration.
+/// Implements IHostedService for automatic startup invocation.
 /// </summary>
-public sealed class SampleTicketStartupService
+public sealed class SampleTicketStartupService : IHostedService
 {
     private readonly DiscordBotService _botService;
     private readonly DiscordOptions _options;
@@ -32,11 +34,22 @@ public sealed class SampleTicketStartupService
         _logger = logger;
     }
 
+    /// <inheritdoc/>
+    public async Task StartAsync(CancellationToken cancellationToken)
+    {
+        // Wait for bot to connect before attempting to create the sample ticket
+        await _botService.WaitForConnectionAsync(cancellationToken);
+        await PostSampleTicketIfEnabledAsync();
+    }
+
+    /// <inheritdoc/>
+    public Task StopAsync(CancellationToken cancellationToken) => Task.CompletedTask;
+
     /// <summary>
     /// Posts a sample ticket channel if enabled in configuration.
     /// Safe to call multiple times - will only execute once.
     /// </summary>
-    public async Task PostSampleTicketIfEnabledAsync()
+    private async Task PostSampleTicketIfEnabledAsync()
     {
         if (!_options.PostSampleTicketOnStartup)
         {

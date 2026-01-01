@@ -80,13 +80,17 @@ public class PolyglotRepository<T> : EfSpecificationRepository<T>, IPolyglotRepo
         if (IsDualWriteMode)
         {
             var entityId = TryGetEntityId(entity);
-            await DualWriteAsync(
-                async () => { var result = await base.UpdateAsync(entity, cancellationToken); return entity; },
-                async () => { await UpdateInSecondaryAsync(entity, cancellationToken); return entity; },
+            // Capture the actual affected row count from primary update
+            var affectedRows = await base.UpdateAsync(entity, cancellationToken);
+
+            // Perform secondary write (fire-and-forget with logging on failure)
+            await PerformSecondaryWriteAsync(
+                () => UpdateInSecondaryAsync(entity, cancellationToken),
                 cancellationToken,
                 SyncOperation.Update,
                 entityId);
-            return 1; // Assuming single entity update
+
+            return affectedRows;
         }
 
         return await base.UpdateAsync(entity, cancellationToken);
@@ -98,13 +102,17 @@ public class PolyglotRepository<T> : EfSpecificationRepository<T>, IPolyglotRepo
         if (IsDualWriteMode)
         {
             var entityId = TryGetEntityId(entity);
-            await DualWriteAsync(
-                async () => { var result = await base.DeleteAsync(entity, cancellationToken); return entity; },
-                async () => { await DeleteFromSecondaryAsync(entity, cancellationToken); return entity; },
+            // Capture the actual affected row count from primary delete
+            var affectedRows = await base.DeleteAsync(entity, cancellationToken);
+
+            // Perform secondary write (fire-and-forget with logging on failure)
+            await PerformSecondaryWriteAsync(
+                () => DeleteFromSecondaryAsync(entity, cancellationToken),
                 cancellationToken,
                 SyncOperation.Delete,
                 entityId);
-            return 1; // Assuming single entity delete
+
+            return affectedRows;
         }
 
         return await base.DeleteAsync(entity, cancellationToken);
@@ -372,6 +380,59 @@ public class PolyglotRepository<T> : EfSpecificationRepository<T>, IPolyglotRepo
         return result;
     }
 
+    /// <summary>
+    /// Performs a secondary write operation with resilience and proper cancellation token handling.
+    /// </summary>
+    private async Task PerformSecondaryWriteAsync(
+        Func<Task<int>> secondaryWrite,
+        CancellationToken cancellationToken,
+        string operation,
+        string? entityId)
+    {
+        if (_secondaryContext == null) return;
+
+        // Attempt secondary write with timeout
+        using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        cts.CancelAfter(_options.SecondaryWriteTimeoutMs);
+
+        try
+        {
+            await _resiliencePipeline.ExecuteAsync(
+                async token =>
+                {
+                    // Pass the timeout-linked token to the secondary write
+                    await secondaryWrite();
+                },
+                cts.Token);
+
+            // Track successful secondary writes
+            _secondaryWriteSuccesses.Add(1,
+                new KeyValuePair<string, object?>("entity_type", typeof(T).Name),
+                new KeyValuePair<string, object?>("mode", _options.Mode.ToString()));
+
+            await LogSyncAsync(entityId, operation, SyncStatus.Synced, null, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            _secondaryWriteFailures.Add(1,
+                new KeyValuePair<string, object?>("entity_type", typeof(T).Name),
+                new KeyValuePair<string, object?>("mode", _options.Mode.ToString()),
+                new KeyValuePair<string, object?>("exception_type", ex.GetType().Name));
+
+            _logger.LogError(ex,
+                "Secondary write failed for {EntityType}. Mode: {Mode}. Operation: {Operation}",
+                typeof(T).Name, _options.Mode, operation);
+
+            await LogSyncAsync(entityId, operation, SyncStatus.Failed, ex.Message, cancellationToken);
+
+            _metrics?.TrackDualWriteFailure(
+                typeof(T).Name,
+                operation,
+                ex.Message,
+                _options.EnableCompensation);
+        }
+    }
+
     private async Task LogSyncAsync(
         string? entityId,
         string operation,
@@ -420,13 +481,40 @@ public class PolyglotRepository<T> : EfSpecificationRepository<T>, IPolyglotRepo
         return idProperty?.GetValue(entity)?.ToString();
     }
 
+    /// <summary>
+    /// Finds tracked entity with the same primary key (not reference equality).
+    /// This prevents tracking conflicts when the same entity is modified in different contexts.
+    /// </summary>
+    private EntityEntry<T>? FindTrackedEntityByKey(DbContext context, T entity)
+    {
+        var entityType = context.Model.FindEntityType(typeof(T));
+        if (entityType == null) return null;
+
+        var primaryKey = entityType.FindPrimaryKey();
+        if (primaryKey == null) return null;
+
+        var keyProperties = primaryKey.Properties;
+        var keyValues = keyProperties.Select(p => p.PropertyInfo?.GetValue(entity) ?? p.FieldInfo?.GetValue(entity)).ToArray();
+
+        // Find any tracked entity with the same key values
+        foreach (var entry in context.ChangeTracker.Entries<T>())
+        {
+            var trackedKeyValues = keyProperties.Select(p => p.PropertyInfo?.GetValue(entry.Entity) ?? p.FieldInfo?.GetValue(entry.Entity)).ToArray();
+            if (keyValues.Length == trackedKeyValues.Length && keyValues.Zip(trackedKeyValues).All(pair => Equals(pair.First, pair.Second)))
+            {
+                return entry;
+            }
+        }
+
+        return null;
+    }
+
     private async Task<T> AddToSecondaryAsync(T entity, CancellationToken cancellationToken)
     {
         if (_secondaryContext == null) return entity;
 
-        // Detach from secondary context if already tracked (prevents tracking conflicts)
-        var existingEntry = _secondaryContext.ChangeTracker.Entries<T>()
-            .FirstOrDefault(e => e.Entity == entity);
+        // Detach from secondary context if already tracked with same key (prevents tracking conflicts)
+        var existingEntry = FindTrackedEntityByKey(_secondaryContext, entity);
         if (existingEntry != null)
         {
             existingEntry.State = EntityState.Detached;
@@ -445,8 +533,7 @@ public class PolyglotRepository<T> : EfSpecificationRepository<T>, IPolyglotRepo
         if (_secondaryContext == null) return 0;
 
         // Detach any existing tracked instance with same key
-        var existingEntry = _secondaryContext.ChangeTracker.Entries<T>()
-            .FirstOrDefault(e => e.Entity == entity);
+        var existingEntry = FindTrackedEntityByKey(_secondaryContext, entity);
         if (existingEntry != null)
         {
             existingEntry.State = EntityState.Detached;
@@ -464,9 +551,8 @@ public class PolyglotRepository<T> : EfSpecificationRepository<T>, IPolyglotRepo
     {
         if (_secondaryContext == null) return 0;
 
-        // Detach any existing tracked instance
-        var existingEntry = _secondaryContext.ChangeTracker.Entries<T>()
-            .FirstOrDefault(e => e.Entity == entity);
+        // Detach any existing tracked instance with same key
+        var existingEntry = FindTrackedEntityByKey(_secondaryContext, entity);
         if (existingEntry != null)
         {
             existingEntry.State = EntityState.Detached;

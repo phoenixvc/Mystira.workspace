@@ -80,6 +80,7 @@ public class CompassAxisRepository : ICompassAxisRepository
     /// <returns>A task representing the asynchronous operation.</returns>
     public Task UpdateAsync(CompassAxisDefinition axis)
     {
+        axis.UpdatedAt = DateTime.UtcNow;
         _context.CompassAxes.Update(axis);
         return Task.CompletedTask;
     }
