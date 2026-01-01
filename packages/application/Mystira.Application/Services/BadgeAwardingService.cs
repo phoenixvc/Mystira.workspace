@@ -108,8 +108,17 @@ public class BadgeAwardingService : IBadgeAwardingService
                     continue;
                 }
 
+                // Skip badges with no configured threshold - they need configuration
+                if (!badge.RequiredScore.HasValue)
+                {
+                    _logger.LogWarning(
+                        "Badge {BadgeId} ({BadgeTitle}) on axis {Axis} has no RequiredScore configured - skipping",
+                        badge.Id, badge.Title, axis);
+                    continue;
+                }
+
                 // Check if score meets the threshold
-                var requiredScore = badge.RequiredScore ?? 0;
+                var requiredScore = badge.RequiredScore.Value;
                 if (score >= requiredScore)
                 {
                     var userBadge = new UserBadge

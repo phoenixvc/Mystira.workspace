@@ -132,9 +132,13 @@ jobs:
         id: lint-dotnet
         run: |
           echo "Checking .NET code formatting..."
-          dotnet format packages/domain/Mystira.Domain --verify-no-changes --verbosity diagnostic || echo "Format issues found in Domain"
-          dotnet format packages/application/Mystira.Application --verify-no-changes --verbosity diagnostic || echo "Format issues found in Application"
-          echo "lint=success" >> $GITHUB_OUTPUT
+          LINT_STATUS="success"
+          dotnet format packages/domain/Mystira.Domain --verify-no-changes --verbosity diagnostic || LINT_STATUS="failure"
+          dotnet format packages/application/Mystira.Application --verify-no-changes --verbosity diagnostic || LINT_STATUS="failure"
+          echo "lint=$LINT_STATUS" >> $GITHUB_OUTPUT
+          if [ "$LINT_STATUS" = "failure" ]; then
+            echo "::warning::Format issues found. Run 'dotnet format' to fix."
+          fi
         continue-on-error: true
 
       - name: Build Mystira.Core
