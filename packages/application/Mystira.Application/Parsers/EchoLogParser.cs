@@ -7,6 +7,11 @@ namespace Mystira.Application.Parsers;
 /// </summary>
 public static class EchoLogParser
 {
+    /// <summary>
+    /// Parses the dictionary data into an EchoLog object.
+    /// </summary>
+    /// <param name="echoLogDict">The dictionary containing the raw data.</param>
+    /// <returns>The parsed EchoLog object.</returns>
     public static EchoLog Parse(IDictionary<object, object> echoLogDict)
     {
         var echoLog = new EchoLog

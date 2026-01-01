@@ -11,6 +11,11 @@ namespace Mystira.Application.Parsers;
 /// </summary>
 public static class ScenarioParser
 {
+    /// <summary>
+    /// Parses the dictionary data into a CreateScenarioRequest object.
+    /// </summary>
+    /// <param name="scenarioData">The dictionary containing the raw data.</param>
+    /// <returns>The parsed CreateScenarioRequest object.</returns>
     public static CreateScenarioRequest Create(Dictionary<object, object> scenarioData)
     {
         ValidateScenarioData(scenarioData);

@@ -7,6 +7,11 @@ namespace Mystira.Application.Parsers;
 /// </summary>
 public static class SceneParser
 {
+    /// <summary>
+    /// Parses the dictionary data into a Scene object.
+    /// </summary>
+    /// <param name="sceneDict">The dictionary containing the raw data.</param>
+    /// <returns>The parsed Scene object.</returns>
     public static Scene Parse(IDictionary<object, object> sceneDict)
     {
         var scene = new Scene();

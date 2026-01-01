@@ -7,8 +7,25 @@ namespace Mystira.Application.Ports.Data;
 /// </summary>
 public interface IGameSessionRepository : IRepository<GameSession>
 {
+    /// <summary>
+    /// Gets all game sessions for a specific account.
+    /// </summary>
+    /// <param name="accountId">The account identifier.</param>
+    /// <returns>A collection of game sessions for the specified account.</returns>
     Task<IEnumerable<GameSession>> GetByAccountIdAsync(string accountId);
+
+    /// <summary>
+    /// Gets all game sessions for a specific profile.
+    /// </summary>
+    /// <param name="profileId">The profile identifier.</param>
+    /// <returns>A collection of game sessions for the specified profile.</returns>
     Task<IEnumerable<GameSession>> GetByProfileIdAsync(string profileId);
+
+    /// <summary>
+    /// Gets all in-progress game sessions for a specific account.
+    /// </summary>
+    /// <param name="accountId">The account identifier.</param>
+    /// <returns>A collection of in-progress game sessions for the specified account.</returns>
     Task<IEnumerable<GameSession>> GetInProgressSessionsAsync(string accountId);
 
     /// <summary>
