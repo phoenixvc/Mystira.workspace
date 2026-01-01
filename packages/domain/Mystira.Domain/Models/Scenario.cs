@@ -87,7 +87,7 @@ public class Scenario : SoftDeletableEntity
     /// <summary>
     /// Gets or sets the music palette/theme for this scenario.
     /// </summary>
-    public string? MusicPalette { get; set; }
+    public MusicPalette? MusicPalette { get; set; }
 
     /// <summary>
     /// Gets or sets the starting scene ID.
