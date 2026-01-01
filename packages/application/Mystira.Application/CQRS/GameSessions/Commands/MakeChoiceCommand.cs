@@ -6,4 +6,5 @@ namespace Mystira.Application.CQRS.GameSessions.Commands;
 /// <summary>
 /// Command to record a choice made during a game session
 /// </summary>
+/// <param name="Request">The request containing the player's choice data.</param>
 public record MakeChoiceCommand(MakeChoiceRequest Request) : ICommand<GameSession?>;

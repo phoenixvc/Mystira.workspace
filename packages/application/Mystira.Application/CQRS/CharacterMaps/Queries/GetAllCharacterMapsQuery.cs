@@ -9,6 +9,13 @@ namespace Mystira.Application.CQRS.CharacterMaps.Queries;
 /// </summary>
 public record GetAllCharacterMapsQuery : IQuery<List<CharacterMap>>, ICacheableQuery
 {
+    /// <summary>
+    /// Gets the cache key for storing this query result.
+    /// </summary>
     public string CacheKey => "AllCharacterMaps";
+
+    /// <summary>
+    /// Gets the cache duration in seconds.
+    /// </summary>
     public int CacheDurationSeconds => 300; // 5 minutes
 }
