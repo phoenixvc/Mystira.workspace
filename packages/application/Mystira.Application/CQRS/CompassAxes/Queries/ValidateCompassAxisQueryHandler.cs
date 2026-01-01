@@ -8,6 +8,14 @@ namespace Mystira.Application.CQRS.CompassAxes.Queries;
 /// </summary>
 public static class ValidateCompassAxisQueryHandler
 {
+    /// <summary>
+    /// Handles the ValidateCompassAxisQuery.
+    /// </summary>
+    /// <param name="query">The query to handle.</param>
+    /// <param name="repository">The compass axis repository.</param>
+    /// <param name="logger">The logger instance.</param>
+    /// <param name="ct">The cancellation token.</param>
+    /// <returns>True if the compass axis name exists; otherwise, false.</returns>
     public static async Task<bool> Handle(
         ValidateCompassAxisQuery query,
         ICompassAxisRepository repository,

@@ -10,6 +10,16 @@ namespace Mystira.Application.CQRS.CompassAxes.Commands;
 /// </summary>
 public static class UpdateCompassAxisCommandHandler
 {
+    /// <summary>
+    /// Handles the UpdateCompassAxisCommand.
+    /// </summary>
+    /// <param name="command">The command to handle.</param>
+    /// <param name="repository">The compass axis repository.</param>
+    /// <param name="unitOfWork">The unit of work for transaction management.</param>
+    /// <param name="cacheInvalidation">The cache invalidation service.</param>
+    /// <param name="logger">The logger instance.</param>
+    /// <param name="ct">The cancellation token.</param>
+    /// <returns>The updated compass axis definition if found; otherwise, null.</returns>
     public static async Task<CompassAxisDefinition?> Handle(
         UpdateCompassAxisCommand command,
         ICompassAxisRepository repository,

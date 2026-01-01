@@ -9,6 +9,14 @@ namespace Mystira.Application.CQRS.Royalties.Queries;
 /// </summary>
 public static class GetClaimableRoyaltiesQueryHandler
 {
+    /// <summary>
+    /// Handles the GetClaimableRoyaltiesQuery.
+    /// </summary>
+    /// <param name="request">The query to handle.</param>
+    /// <param name="storyProtocolService">The Story Protocol service.</param>
+    /// <param name="logger">The logger instance.</param>
+    /// <param name="ct">The cancellation token.</param>
+    /// <returns>The royalty balance information.</returns>
     public static async Task<RoyaltyBalance> Handle(
         GetClaimableRoyaltiesQuery request,
         IStoryProtocolService storyProtocolService,

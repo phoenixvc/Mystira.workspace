@@ -10,6 +10,16 @@ namespace Mystira.Application.CQRS.EchoTypes.Commands;
 /// </summary>
 public static class CreateEchoTypeCommandHandler
 {
+    /// <summary>
+    /// Handles the CreateEchoTypeCommand.
+    /// </summary>
+    /// <param name="command">The command to handle.</param>
+    /// <param name="repository">The echo type repository.</param>
+    /// <param name="unitOfWork">The unit of work for transaction management.</param>
+    /// <param name="cacheInvalidation">The cache invalidation service.</param>
+    /// <param name="logger">The logger instance.</param>
+    /// <param name="ct">The cancellation token.</param>
+    /// <returns>The created echo type definition.</returns>
     public static async Task<EchoTypeDefinition> Handle(
         CreateEchoTypeCommand command,
         IEchoTypeRepository repository,

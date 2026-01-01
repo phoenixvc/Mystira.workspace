@@ -7,6 +7,11 @@ namespace Mystira.Application.Parsers;
 /// </summary>
 public static class BranchParser
 {
+    /// <summary>
+    /// Parses a dictionary representation of a branch into a Branch domain object.
+    /// </summary>
+    /// <param name="branchDict">The dictionary containing branch data.</param>
+    /// <returns>A parsed Branch object.</returns>
     public static Branch Parse(IDictionary<object, object> branchDict)
     {
         var branch = new Branch();

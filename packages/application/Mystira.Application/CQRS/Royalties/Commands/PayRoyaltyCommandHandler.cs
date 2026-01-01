@@ -9,6 +9,14 @@ namespace Mystira.Application.CQRS.Royalties.Commands;
 /// </summary>
 public static class PayRoyaltyCommandHandler
 {
+    /// <summary>
+    /// Handles the PayRoyaltyCommand.
+    /// </summary>
+    /// <param name="request">The command to handle.</param>
+    /// <param name="storyProtocolService">The Story Protocol service.</param>
+    /// <param name="logger">The logger instance.</param>
+    /// <param name="ct">The cancellation token.</param>
+    /// <returns>The royalty payment result.</returns>
     public static async Task<RoyaltyPaymentResult> Handle(
         PayRoyaltyCommand request,
         IStoryProtocolService storyProtocolService,

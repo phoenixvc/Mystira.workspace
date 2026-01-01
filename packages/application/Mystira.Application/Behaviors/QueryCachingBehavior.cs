@@ -17,6 +17,12 @@ public class QueryCachingMiddleware
     private readonly IQueryCacheInvalidationService _cacheInvalidation;
     private readonly ILogger<QueryCachingMiddleware> _logger;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="QueryCachingMiddleware"/> class.
+    /// </summary>
+    /// <param name="cache">The memory cache for storing query results.</param>
+    /// <param name="cacheInvalidation">The cache invalidation service for tracking and invalidating cache keys.</param>
+    /// <param name="logger">The logger instance.</param>
     public QueryCachingMiddleware(
         IMemoryCache cache,
         IQueryCacheInvalidationService cacheInvalidation,

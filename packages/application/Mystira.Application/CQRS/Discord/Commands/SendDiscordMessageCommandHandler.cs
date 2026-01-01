@@ -10,6 +10,14 @@ namespace Mystira.Application.CQRS.Discord.Commands;
 /// </summary>
 public static class SendDiscordMessageCommandHandler
 {
+    /// <summary>
+    /// Handles the SendDiscordMessageCommand.
+    /// </summary>
+    /// <param name="command">The command to handle.</param>
+    /// <param name="chatBotService">The chat bot service.</param>
+    /// <param name="logger">The logger instance.</param>
+    /// <param name="ct">The cancellation token.</param>
+    /// <returns>A command response indicating success or failure.</returns>
     public static async Task<CommandResponse> Handle(
         SendDiscordMessageCommand command,
         IChatBotService chatBotService,

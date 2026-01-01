@@ -11,6 +11,14 @@ namespace Mystira.Application.CQRS.ContentBundles.Queries;
 /// </summary>
 public static class GetContentBundlesByAgeGroupQueryHandler
 {
+    /// <summary>
+    /// Handles the GetContentBundlesByAgeGroupQuery.
+    /// </summary>
+    /// <param name="request">The query to handle.</param>
+    /// <param name="repository">The content bundle repository.</param>
+    /// <param name="logger">The logger instance.</param>
+    /// <param name="ct">The cancellation token.</param>
+    /// <returns>A collection of content bundles filtered by the specified age group.</returns>
     public static async Task<IEnumerable<ContentBundle>> Handle(
         GetContentBundlesByAgeGroupQuery request,
         IContentBundleRepository repository,

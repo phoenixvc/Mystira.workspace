@@ -10,6 +10,14 @@ namespace Mystira.Application.CQRS.CharacterMediaMetadata.Queries;
 /// </summary>
 public static class GetCharacterMediaMetadataEntryQueryHandler
 {
+    /// <summary>
+    /// Handles the GetCharacterMediaMetadataEntryQuery.
+    /// </summary>
+    /// <param name="request">The query to handle.</param>
+    /// <param name="repository">The character media metadata file repository.</param>
+    /// <param name="logger">The logger instance.</param>
+    /// <param name="ct">The cancellation token.</param>
+    /// <returns>The character media metadata entry if found; otherwise, null.</returns>
     public static async Task<CharacterMediaMetadataEntry?> Handle(
         GetCharacterMediaMetadataEntryQuery request,
         ICharacterMediaMetadataFileRepository repository,

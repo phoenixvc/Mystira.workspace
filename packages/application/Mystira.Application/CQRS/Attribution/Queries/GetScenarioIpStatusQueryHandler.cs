@@ -12,6 +12,15 @@ namespace Mystira.Application.CQRS.Attribution.Queries;
 /// </summary>
 public static class GetScenarioIpStatusQueryHandler
 {
+    /// <summary>
+    /// Handles the GetScenarioIpStatusQuery.
+    /// </summary>
+    /// <param name="request">The query to handle.</param>
+    /// <param name="repository">The scenario repository.</param>
+    /// <param name="logger">The logger instance.</param>
+    /// <param name="options">The Story Protocol configuration options.</param>
+    /// <param name="ct">The cancellation token.</param>
+    /// <returns>The IP verification response if the scenario is found; otherwise, null.</returns>
     public static async Task<IpVerificationResponse?> Handle(
         GetScenarioIpStatusQuery request,
         IScenarioRepository repository,

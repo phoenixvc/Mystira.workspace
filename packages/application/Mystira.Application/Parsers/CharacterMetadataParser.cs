@@ -8,6 +8,11 @@ namespace Mystira.Application.Parsers;
 /// </summary>
 public static class CharacterMetadataParser
 {
+    /// <summary>
+    /// Parses a dictionary representation of character metadata into a ScenarioCharacterMetadata domain object.
+    /// </summary>
+    /// <param name="metadataDict">The dictionary containing character metadata.</param>
+    /// <returns>A parsed ScenarioCharacterMetadata object.</returns>
     public static ScenarioCharacterMetadata Parse(IDictionary<object, object> metadataDict)
     {
         metadataDict.TryGetValue("role", out var roleObj);

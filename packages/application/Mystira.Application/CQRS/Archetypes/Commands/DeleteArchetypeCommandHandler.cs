@@ -9,6 +9,16 @@ namespace Mystira.Application.CQRS.Archetypes.Commands;
 /// </summary>
 public static class DeleteArchetypeCommandHandler
 {
+    /// <summary>
+    /// Handles the DeleteArchetypeCommand.
+    /// </summary>
+    /// <param name="command">The command to handle.</param>
+    /// <param name="repository">The archetype repository.</param>
+    /// <param name="unitOfWork">The unit of work for transaction management.</param>
+    /// <param name="cacheInvalidation">The cache invalidation service.</param>
+    /// <param name="logger">The logger instance.</param>
+    /// <param name="ct">The cancellation token.</param>
+    /// <returns>True if the archetype was deleted; otherwise, false.</returns>
     public static async Task<bool> Handle(
         DeleteArchetypeCommand command,
         IArchetypeRepository repository,

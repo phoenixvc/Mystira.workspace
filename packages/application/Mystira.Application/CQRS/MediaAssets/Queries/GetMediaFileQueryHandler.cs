@@ -10,6 +10,15 @@ namespace Mystira.Application.CQRS.MediaAssets.Queries;
 /// </summary>
 public static class GetMediaFileQueryHandler
 {
+    /// <summary>
+    /// Handles the GetMediaFileQuery.
+    /// </summary>
+    /// <param name="request">The query to handle.</param>
+    /// <param name="repository">The media asset repository.</param>
+    /// <param name="blobService">The blob storage service.</param>
+    /// <param name="logger">The logger instance.</param>
+    /// <param name="ct">The cancellation token.</param>
+    /// <returns>A tuple containing the file stream, content type, and file name if found; otherwise, null.</returns>
     public static async Task<(Stream stream, string contentType, string fileName)?> Handle(
         GetMediaFileQuery request,
         IMediaAssetRepository repository,

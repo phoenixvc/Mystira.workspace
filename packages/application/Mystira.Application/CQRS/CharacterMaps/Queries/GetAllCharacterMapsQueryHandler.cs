@@ -10,6 +10,15 @@ namespace Mystira.Application.CQRS.CharacterMaps.Queries;
 /// </summary>
 public static class GetAllCharacterMapsQueryHandler
 {
+    /// <summary>
+    /// Handles the GetAllCharacterMapsQuery.
+    /// </summary>
+    /// <param name="query">The query to handle.</param>
+    /// <param name="repository">The character map repository.</param>
+    /// <param name="unitOfWork">The unit of work for transaction management.</param>
+    /// <param name="logger">The logger instance.</param>
+    /// <param name="ct">The cancellation token.</param>
+    /// <returns>A list of all character maps.</returns>
     public static async Task<List<CharacterMap>> Handle(
         GetAllCharacterMapsQuery query,
         ICharacterMapRepository repository,

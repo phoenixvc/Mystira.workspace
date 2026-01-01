@@ -11,6 +11,14 @@ namespace Mystira.Application.CQRS.Attribution.Queries;
 /// </summary>
 public static class GetScenarioAttributionQueryHandler
 {
+    /// <summary>
+    /// Handles the GetScenarioAttributionQuery.
+    /// </summary>
+    /// <param name="request">The query to handle.</param>
+    /// <param name="repository">The scenario repository.</param>
+    /// <param name="logger">The logger instance.</param>
+    /// <param name="ct">The cancellation token.</param>
+    /// <returns>The content attribution response if the scenario is found; otherwise, null.</returns>
     public static async Task<ContentAttributionResponse?> Handle(
         GetScenarioAttributionQuery request,
         IScenarioRepository repository,
