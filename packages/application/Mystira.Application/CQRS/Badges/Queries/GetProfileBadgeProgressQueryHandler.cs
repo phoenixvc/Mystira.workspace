@@ -33,7 +33,8 @@ public static class GetProfileBadgeProgressQueryHandler
         var allBadges = await badgeRepository.GetByAgeGroupAsync(ageGroupId);
 
         var badgesByAxis = allBadges
-            .GroupBy(b => b.CompassAxisId)
+            .Where(b => !string.IsNullOrEmpty(b.CompassAxisId))
+            .GroupBy(b => b.CompassAxisId!)
             .ToDictionary(
                 g => g.Key,
                 g => g.OrderBy(b => b.TierOrder).ToList()
@@ -52,7 +53,7 @@ public static class GetProfileBadgeProgressQueryHandler
 
         foreach (var (axisId, badges) in badgesByAxis.OrderBy(x => x.Key))
         {
-            var axis = axisDictionary.TryGetValue(axisId, out var a) ? a : null;
+            var axis = axisDictionary.TryGetValue(axisId ?? string.Empty, out var a) ? a : null;
             var axisName = axis?.Name ?? axisId;
 
             // Derive current score for this axis from earned badges' values (max of TriggerValue/Threshold)
@@ -95,9 +96,9 @@ public static class GetProfileBadgeProgressQueryHandler
 
             response.AxisProgresses.Add(new AxisProgressResponse
             {
-                CompassAxisId = axisId,
+                CompassAxisId = axisId ?? string.Empty,
                 CompassAxisName = axisName,
-                CurrentScore = (int)Math.Round(currentScore, MidpointRounding.AwayFromZero),
+                CurrentScore = (int)Math.Round((double)currentScore, MidpointRounding.AwayFromZero),
                 Tiers = axisTiers
             });
         }

@@ -193,8 +193,18 @@ public static partial class ScenarioMapper
 
     // Custom mapping methods for complex scenarios
 
-    private static List<string> MapArchetypes(List<string>? archetypes)
-        => ParseArchetypes(archetypes);
+    private static List<Archetype> MapArchetypes(List<string>? archetypes)
+    {
+        if (archetypes == null)
+        {
+            return new List<Archetype>();
+        }
+
+        return archetypes
+            .Select(Archetype.Parse)
+            .OfType<Archetype>()
+            .ToList();
+    }
 
     private static SceneType ParseSceneType(string? type)
         => Enum.TryParse<SceneType>(type, true, out var sceneType)

@@ -32,9 +32,9 @@ public class ExportCharacterMapUseCase
             {
                 Id = cm.Id,
                 Name = cm.Name,
-                Image = cm.Image,
+                Image = cm.Image ?? string.Empty,
                 Audio = cm.Audio,
-                Metadata = cm.Metadata
+                Metadata = cm.Metadata ?? new CharacterMetadata()
             }).ToList()
         };
 

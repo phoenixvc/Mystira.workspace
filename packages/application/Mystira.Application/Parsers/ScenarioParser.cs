@@ -140,7 +140,7 @@ public static class ScenarioParser
             Name = character.Name,
             Image = character.Image,
             Audio = character.Audio,
-            Metadata = new CharacterMetadataRequest
+            Metadata = character.Metadata != null ? new CharacterMetadataRequest
             {
                 Role = character.Metadata.Roles,
                 Archetype = character.Metadata.Archetypes.Select(a => a.Value).ToList(),
@@ -148,7 +148,7 @@ public static class ScenarioParser
                 Age = character.Metadata.Age,
                 Traits = character.Metadata.Traits,
                 Backstory = character.Metadata.Backstory
-            }
+            } : new CharacterMetadataRequest()
         };
     }
 

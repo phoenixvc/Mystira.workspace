@@ -70,7 +70,7 @@ public class UploadMediaUseCase
             Description = request.Description,
             Tags = request.Tags ?? new List<string>(),
             Hash = hash,
-            Version = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ"),
+            Version = 1,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
         };

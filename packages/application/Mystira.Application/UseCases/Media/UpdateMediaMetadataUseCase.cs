@@ -24,6 +24,16 @@ public class UpdateMediaMetadataUseCase
         _logger = logger;
     }
 
+    /// <summary>
+    /// Updates metadata for a media asset with optimistic concurrency control.
+    /// </summary>
+    /// <param name="mediaId">The unique identifier of the media asset to update.</param>
+    /// <param name="updateData">The update request containing new metadata values.</param>
+    /// <returns>The updated media asset.</returns>
+    /// <exception cref="ArgumentException">Thrown when mediaId is null or empty.</exception>
+    /// <exception cref="ArgumentNullException">Thrown when updateData is null.</exception>
+    /// <exception cref="KeyNotFoundException">Thrown when the media asset is not found.</exception>
+    /// <exception cref="InvalidOperationException">Thrown when a concurrency conflict is detected.</exception>
     public async Task<MediaAsset> ExecuteAsync(string mediaId, MediaUpdateRequest updateData)
     {
         if (string.IsNullOrWhiteSpace(mediaId))
@@ -42,6 +52,9 @@ public class UpdateMediaMetadataUseCase
             throw new KeyNotFoundException($"Media with ID '{mediaId}' not found");
         }
 
+        // Capture original version for optimistic concurrency check
+        var originalVersion = mediaAsset.Version;
+
         // Update properties
         if (updateData.Description != null)
         {
@@ -59,12 +72,25 @@ public class UpdateMediaMetadataUseCase
         }
 
         mediaAsset.UpdatedAt = DateTime.UtcNow;
-        mediaAsset.Version = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ");
+        mediaAsset.Version = originalVersion + 1;
 
-        await _repository.UpdateAsync(mediaAsset);
-        await _unitOfWork.SaveChangesAsync();
+        // Perform update with optimistic concurrency - the repository/EF should be
+        // configured with Version as a concurrency token. If another process modified
+        // the record, SaveChangesAsync will throw DbUpdateConcurrencyException.
+        try
+        {
+            await _repository.UpdateAsync(mediaAsset);
+            await _unitOfWork.SaveChangesAsync();
+        }
+        catch (Exception ex) when (ex.GetType().Name.Contains("Concurrency") ||
+                                    ex.InnerException?.GetType().Name.Contains("Concurrency") == true)
+        {
+            _logger.LogWarning("Concurrency conflict updating media {MediaId}. Version {Version} was stale.", mediaId, originalVersion);
+            throw new InvalidOperationException(
+                $"Media asset '{mediaId}' was modified by another process. Please refresh and try again.", ex);
+        }
 
-        _logger.LogInformation("Media updated successfully: {MediaId}", mediaId);
+        _logger.LogInformation("Media updated successfully: {MediaId} (version {Version})", mediaId, mediaAsset.Version);
 
         return mediaAsset;
     }

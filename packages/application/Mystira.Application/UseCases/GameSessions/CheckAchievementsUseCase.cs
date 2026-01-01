@@ -51,7 +51,7 @@ public class CheckAchievementsUseCase
         foreach (var compassTracking in session.CompassValues)
         {
             // Find badge configuration for this axis
-            var axisBadge = badgeConfigs.FirstOrDefault(b => b.Axis.Equals(compassTracking.Axis, StringComparison.OrdinalIgnoreCase));
+            var axisBadge = badgeConfigs.FirstOrDefault(b => string.Equals(b.AxisId, compassTracking.Axis, StringComparison.OrdinalIgnoreCase));
 
             // Use configured threshold or fallback to 3.0f if not found
             var threshold = axisBadge?.Threshold ?? 3.0f;
@@ -69,7 +69,7 @@ public class CheckAchievementsUseCase
                         IconName = !string.IsNullOrEmpty(axisBadge?.ImageId) ? axisBadge.ImageId : $"badge_{compassTracking.Axis}",
                         Type = AchievementType.CompassThreshold,
                         CompassAxis = compassTracking.Axis,
-                        ThresholdValue = threshold,
+                        ThresholdValue = (int)threshold,
                         EarnedAt = DateTime.UtcNow
                     });
                 }

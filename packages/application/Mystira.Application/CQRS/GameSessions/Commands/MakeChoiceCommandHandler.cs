@@ -82,7 +82,7 @@ public static class MakeChoiceCommandHandler
             PlayerId = playerId ?? string.Empty,
             CompassAxis = compassAxis,
             CompassDirection = compassDirection,
-            CompassDelta = compassDelta,
+            CompassDelta = compassDelta ?? 0.0,
             ChosenAt = DateTime.UtcNow,
             CompassChange = !string.IsNullOrWhiteSpace(compassAxis) && compassDelta.HasValue
                 ? new CompassChange { AxisId = compassAxis, Delta = (int)compassDelta.Value }
