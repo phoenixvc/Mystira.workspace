@@ -237,7 +237,7 @@ public class BadgeConfiguration : Entity
     public CoreAxis? Axis
     {
         get => CoreAxis.FromValue(_axisId);
-        set => _axisId = value?.Id;
+        set => _axisId = value?.Value;
     }
 
     /// <summary>
