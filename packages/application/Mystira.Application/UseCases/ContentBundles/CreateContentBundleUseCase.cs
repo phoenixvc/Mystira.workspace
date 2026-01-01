@@ -50,7 +50,7 @@ public class CreateContentBundleUseCase
             ScenarioIds = scenarioIds,
             ImageId = imageId ?? string.Empty,
             Prices = prices ?? new List<BundlePrice>(),
-            PriceCents = isFree ? 0 : (int)((prices?.FirstOrDefault()?.Value ?? 0) * 100),
+            PriceCents = isFree ? 0 : (int)Math.Round((prices?.FirstOrDefault()?.Value ?? 0) * 100),
             AgeGroupId = ageGroup ?? string.Empty
         };
 
