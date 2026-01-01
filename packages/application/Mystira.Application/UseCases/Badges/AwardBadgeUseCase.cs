@@ -65,7 +65,7 @@ public class AwardBadgeUseCase
             BadgeName = badge.Title,
             BadgeMessage = badge.Description,
             Axis = badge.CompassAxisId,
-            TriggerValue = request.TriggerValue,
+            TriggerValue = (int)request.TriggerValue, // Cast for int?/float? compatibility
             Threshold = badge.RequiredScore ?? 0,
             GameSessionId = request.GameSessionId,
             ScenarioId = request.ScenarioId,
