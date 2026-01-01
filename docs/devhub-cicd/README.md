@@ -1,18 +1,15 @@
 # DevHub CI/CD Documentation
 
-This directory contains reference documentation for the Mystira.DevHub repository CI/CD setup.
+This directory contains the **canonical CI/CD workflow templates** for the Mystira.DevHub repository. Copy these files to `.github/workflows/` in the DevHub repository.
 
-## Current Status
+## Workflow Files to Copy
 
-**DevHub now has its own comprehensive CI/CD workflows** directly in the repository. The workflows support both the current React-based Tauri app and the upcoming Leptos frontend.
-
-## DevHub Workflows (in repository)
-
-| Workflow | Description |
-|----------|-------------|
-| `ci.yml` | Full CI for Rust workspace, React frontend, and .NET components |
-| `build-tauri.yml` | Cross-platform Tauri builds for React and Leptos |
-| `release.yml` | GitHub Releases with desktop binaries |
+| File | Destination | Description |
+|------|-------------|-------------|
+| `ci.yml` | `.github/workflows/ci.yml` | Full CI for Tauri (React/Leptos frontend + Rust backend) |
+| `ci-dotnet.yml` | `.github/workflows/ci-dotnet.yml` | .NET components CI (CLI, Services, CosmosConsole) |
+| `build-deploy.yml` | `.github/workflows/build-deploy.yml` | Dev branch builds with workspace notification |
+| `release.yml` | `.github/workflows/release.yml` | GitHub Releases with desktop binaries |
 
 ## Project Architecture
 
@@ -21,47 +18,57 @@ DevHub is a **Tauri desktop application** with:
 - **Leptos Frontend** (upcoming): Rust/WASM + Tauri 2.0
 - **.NET Components**: CLI tools and services
 
-## CI Pipeline
+## CI Pipeline Overview
 
 ```
-Rust Workspace:
+ci.yml:
+├── lint-frontend (tsc, eslint)
 ├── lint-rust (clippy, rustfmt)
-├── test-rust (contracts, tauri backend)
-└── build-leptos-wasm (trunk build)
+├── test-frontend (vitest)
+├── test-rust (cargo test)
+└── build (cross-platform Tauri builds)
+    ├── Linux x64
+    ├── Windows x64
+    └── macOS x64
 
-React DevHub:
-├── lint-react (tsc, eslint)
-├── test-react (vitest)
-└── build-react
+ci-dotnet.yml:
+├── lint (dotnet format)
+└── build
+    ├── CLI
+    ├── Services
+    └── CosmosConsole
 
-.NET:
-└── build-dotnet (CLI + Services)
+build-deploy.yml:
+├── build (multi-platform)
+└── notify (workspace dispatch)
+
+release.yml:
+├── build (multi-platform + ARM)
+└── release (GitHub Release + workspace notify)
 ```
 
 ## Build Matrix
 
-| Platform | React (Tauri 1.x) | Leptos (Tauri 2.0) |
-|----------|-------------------|---------------------|
-| Linux x64 | AppImage, deb | AppImage, deb |
-| Windows x64 | msi, exe | msi, exe |
-| macOS Intel | dmg | dmg |
-| macOS ARM | - | dmg |
+| Platform | CI Build | Release Build |
+|----------|----------|---------------|
+| Linux x64 | AppImage | AppImage, .deb |
+| Windows x64 | .msi | .msi, .exe |
+| macOS Intel | .dmg | .dmg, .app.tar.gz |
+| macOS ARM | - | .dmg, .app.tar.gz |
 
 ## Release Tags
 
-| Tag Pattern | Builds |
-|-------------|--------|
-| `v*` | Both React and Leptos |
-| `leptos-v*` | Leptos only |
-| `react-v*` | React only |
+| Tag Pattern | Description |
+|-------------|-------------|
+| `v*` | Creates GitHub Release with all platform binaries |
 
 ## Required Secrets (in DevHub repo)
 
-| Secret | Description |
-|--------|-------------|
-| `MYSTIRA_WORKSPACE_DISPATCH_TOKEN` | GitHub PAT for workspace notifications |
-| `TAURI_PRIVATE_KEY` | (Optional) Tauri signing key for auto-updates |
-| `TAURI_KEY_PASSWORD` | (Optional) Password for signing key |
+| Secret | Required | Description |
+|--------|----------|-------------|
+| `MYSTIRA_WORKSPACE_DISPATCH_TOKEN` | Yes | GitHub PAT for workspace notifications |
+| `TAURI_PRIVATE_KEY` | Optional | Tauri signing key for auto-updates |
+| `TAURI_KEY_PASSWORD` | Optional | Password for signing key |
 
 ## Comparison with Other Projects
 
@@ -72,10 +79,21 @@ React DevHub:
 | Artifacts | Desktop binaries | Docker images |
 | Runtime | Native + WASM | Container / Serverless |
 
----
+## Workspace Integration
 
-## Legacy Files
+DevHub integrates with the workspace via `repository_dispatch` events:
 
-The files in this directory (`ci.yml`, `build-deploy.yml`, `release.yml`, `Dockerfile`) are legacy templates that were originally designed for a Leptos SSR web application. They are kept for reference only.
+1. **`devhub-deploy`** - Triggered by `build-deploy.yml` after successful dev builds
+2. **`devhub-release`** - Triggered by `release.yml` after creating a GitHub Release
 
-**For current DevHub CI/CD, see the workflows in the DevHub repository directly.**
+The workspace handles:
+- Submodule reference updates
+- MS Teams notifications
+- Deployment tracking
+
+## Additional Files
+
+| File | Description |
+|------|-------------|
+| `Dockerfile` | Leptos SSR Docker build (for future web deployment) |
+| `tauri-*.yml` | Legacy template variants (kept for reference) |
