@@ -691,12 +691,6 @@ public partial class MystiraAppDbContext : DbContext
             }
         });
 
-        }
-    });
-
-    // Configure MediaMetadataFile
-    modelBuilder.Entity<MediaMetadataFile>(entity =>
-
         // Configure MediaMetadataFile
         modelBuilder.Entity<MediaMetadataFile>(entity =>
         {
