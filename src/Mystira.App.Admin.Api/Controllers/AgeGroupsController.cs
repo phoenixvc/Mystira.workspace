@@ -1,7 +1,7 @@
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using Mystira.App.Application.CQRS.AgeGroups.Commands;
-using Mystira.App.Application.CQRS.AgeGroups.Queries;
+using Mystira.Application.CQRS.AgeGroups.Commands;
+using Mystira.Application.CQRS.AgeGroups.Queries;
 using Mystira.Domain.Models;
 
 namespace Mystira.App.Admin.Api.Controllers;

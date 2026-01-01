@@ -10,16 +10,16 @@ using Mystira.App.Admin.Api.Adapters;
 using Mystira.App.Admin.Api.Configuration;
 using Mystira.App.Admin.Api.Services;
 using Mystira.App.Admin.Api.Services.Caching;
-using Mystira.App.Application.Behaviors;
-using Mystira.App.Application.Services;
-using Mystira.App.Application.Ports.Messaging;
-using Mystira.App.Application.Ports.Data;
-using Mystira.App.Application.Ports.Media;
-using Mystira.App.Application.UseCases.Contributors;
-using Mystira.App.Application.UseCases.GameSessions;
-using Mystira.App.Application.UseCases.Media;
-using Mystira.App.Application.UseCases.Scenarios;
-using Mystira.App.Application.UseCases.UserProfiles;
+using Mystira.Application.Behaviors;
+using Mystira.Application.Services;
+using Mystira.Application.Ports.Messaging;
+using Mystira.Application.Ports.Data;
+using Mystira.Application.Ports.Media;
+using Mystira.Application.UseCases.Contributors;
+using Mystira.Application.UseCases.GameSessions;
+using Mystira.Application.UseCases.Media;
+using Mystira.Application.UseCases.Scenarios;
+using Mystira.Application.UseCases.UserProfiles;
 using Mystira.Domain.Models;
 using Mystira.App.Infrastructure.Azure;
 using Mystira.App.Infrastructure.Azure.HealthChecks;
@@ -35,7 +35,7 @@ using Mystira.Shared.Middleware;
 using Mystira.Shared.Telemetry;
 using Serilog;
 using Serilog.Events;
-using IUnitOfWork = Mystira.App.Application.Ports.Data.IUnitOfWork;
+using IUnitOfWork = Mystira.Application.Ports.Data.IUnitOfWork;
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // SERILOG BOOTSTRAP LOGGING (before host is built)
@@ -182,7 +182,7 @@ builder.Services.AddMemoryCache(options =>
 builder.Services.AddMediatR(cfg =>
 {
     // Register all handlers from Application assembly
-    cfg.RegisterServicesFromAssembly(typeof(Mystira.App.Application.CQRS.ICommand<>).Assembly);
+    cfg.RegisterServicesFromAssembly(typeof(Mystira.Application.CQRS.ICommand<>).Assembly);
 
     // Add query caching pipeline behavior
     cfg.AddOpenBehavior(typeof(QueryCachingBehavior<,>));
@@ -471,7 +471,7 @@ builder.Services.AddScoped<Mystira.App.Admin.Api.Services.IBadgeAdminService, My
 // Register email service for consistency across all APIs
 builder.Services.AddAzureEmailService(builder.Configuration);
 // Register Application.Ports.IMediaMetadataService for use cases
-builder.Services.AddScoped<Mystira.App.Application.Ports.IMediaMetadataService, MediaMetadataServiceAdapter>();
+builder.Services.AddScoped<Mystira.Application.Ports.IMediaMetadataService, MediaMetadataServiceAdapter>();
 // Register repositories
 builder.Services.AddScoped<IRepository<GameSession>, Repository<GameSession>>();
 builder.Services.AddScoped<IGameSessionRepository, GameSessionRepository>();

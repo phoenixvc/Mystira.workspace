@@ -1,7 +1,7 @@
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using Mystira.App.Application.CQRS.CompassAxes.Commands;
-using Mystira.App.Application.CQRS.CompassAxes.Queries;
+using Mystira.Application.CQRS.CompassAxes.Commands;
+using Mystira.Application.CQRS.CompassAxes.Queries;
 using Mystira.Domain.Models;
 
 namespace Mystira.App.Admin.Api.Controllers;
