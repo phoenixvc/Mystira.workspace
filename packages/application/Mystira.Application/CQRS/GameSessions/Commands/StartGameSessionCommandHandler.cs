@@ -267,7 +267,9 @@ public static class StartGameSessionCommandHandler
                 ? null
                 : new SessionPlayerAssignment
                 {
-                    Type = Enum.Parse<PlayerType>(dto.PlayerAssignment.Type ?? nameof(PlayerType.Profile)),
+                    Type = Enum.TryParse<PlayerType>(dto.PlayerAssignment.Type, out var playerType) 
+                        ? playerType 
+                        : PlayerType.Profile,
                     ProfileId = dto.PlayerAssignment.ProfileId,
                     ProfileName = dto.PlayerAssignment.ProfileName,
                     ProfileImage = dto.PlayerAssignment.ProfileImage,
