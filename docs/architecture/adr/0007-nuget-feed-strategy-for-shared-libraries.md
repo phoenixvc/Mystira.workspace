@@ -12,14 +12,14 @@ As we extract services from the `Mystira.App` monorepo (starting with Admin API)
 
 **Shared Libraries in Mystira.App**:
 
-- `Mystira.App.Domain` - Core domain models and business logic
-- `Mystira.App.Application` - Application layer (CQRS, MediatR handlers)
-- `Mystira.App.Infrastructure.Azure` - Azure-specific infrastructure
-- `Mystira.App.Infrastructure.Data` - Data access layer
-- `Mystira.App.Infrastructure.Discord` - Discord integration
-- `Mystira.App.Infrastructure.StoryProtocol` - Story Protocol integration
-- `Mystira.App.Shared` - Shared services (JWT, telemetry, middleware)
-- `Mystira.App.Contracts` - Shared request/response DTOs
+- `Mystira.Domain` - Core domain models and business logic
+- `Mystira.Application` - Application layer (CQRS, MediatR handlers)
+- `Mystira.Infrastructure.Azure` - Azure-specific infrastructure
+- `Mystira.Infrastructure.Data` - Data access layer
+- `Mystira.Infrastructure.Discord` - Discord integration
+- `Mystira.Infrastructure.StoryProtocol` - Story Protocol integration
+- `Mystira.Shared` - Shared services (JWT, telemetry, middleware)
+- `Mystira.Contracts` - Shared request/response DTOs
 
 **Current Usage**:
 
@@ -85,14 +85,14 @@ We will use **NuGet packages** hosted on an **internal NuGet feed** for shared l
 
 **Examples**:
 
-- `Mystira.App.Domain`
-- `Mystira.App.Application`
-- `Mystira.App.Infrastructure.Azure`
-- `Mystira.App.Infrastructure.Data`
-- `Mystira.App.Infrastructure.Discord`
-- `Mystira.App.Infrastructure.StoryProtocol`
-- `Mystira.App.Shared`
-- `Mystira.App.Contracts`
+- `Mystira.Domain`
+- `Mystira.Application`
+- `Mystira.Infrastructure.Azure`
+- `Mystira.Infrastructure.Data`
+- `Mystira.Infrastructure.Discord`
+- `Mystira.Infrastructure.StoryProtocol`
+- `Mystira.Shared`
+- `Mystira.Contracts`
 
 **Rationale**:
 
@@ -151,7 +151,7 @@ We will use **NuGet packages** hosted on an **internal NuGet feed** for shared l
 **Command**:
 
 ```bash
-dotnet pack src/Mystira.App.Domain/Mystira.App.Domain.csproj -c Release
+dotnet pack src/Mystira.Domain/Mystira.Domain.csproj -c Release
 dotnet nuget push **/*.nupkg --source "Mystira-Internal" --api-key {PAT}
 ```
 
@@ -203,7 +203,7 @@ Each shared library `.csproj` should include:
 
 ```xml
 <PropertyGroup>
-  <PackageId>Mystira.App.Domain</PackageId>
+  <PackageId>Mystira.Domain</PackageId>
   <Version>1.0.0</Version>
   <Authors>Mystira Team</Authors>
   <Company>Phoenix VC</Company>
@@ -230,7 +230,7 @@ Each shared library `.csproj` should include:
   <PackageReference Include="MediatR" Version="12.4.1" />
 
   <!-- Internal dependencies -->
-  <PackageReference Include="Mystira.App.Domain" Version="1.0.0" />
+  <PackageReference Include="Mystira.Domain" Version="1.0.0" />
 </ItemGroup>
 ```
 
@@ -269,8 +269,8 @@ Each shared library `.csproj` should include:
 
 ```xml
 <ItemGroup>
-  <PackageReference Include="Mystira.App.Domain" Version="1.0.0" />
-  <PackageReference Include="Mystira.App.Application" Version="1.0.0" />
+  <PackageReference Include="Mystira.Domain" Version="1.0.0" />
+  <PackageReference Include="Mystira.Application" Version="1.0.0" />
 </ItemGroup>
 ```
 

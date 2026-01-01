@@ -51,18 +51,18 @@ See [docs/README.md](docs/README.md) for the complete documentation index.
 
 ## Dependencies
 
-This project depends on NuGet packages published from `Mystira.App`:
+This project depends on NuGet packages published from shared Mystira repositories:
 
 | Package | Version | Purpose |
 |---------|---------|---------|
-| `Mystira.App.Domain` | 1.0.0 | Domain models and entities |
-| `Mystira.App.Application` | 1.0.0 | CQRS handlers and use cases |
-| `Mystira.App.Contracts` | 1.0.0 | API contracts and DTOs |
-| `Mystira.App.Infrastructure.Azure` | 1.0.0 | Azure Cosmos DB, Blob Storage |
-| `Mystira.App.Infrastructure.Data` | 1.0.0 | Repository implementations |
-| `Mystira.App.Infrastructure.Discord` | 1.0.0 | Discord bot integration |
-| `Mystira.App.Infrastructure.StoryProtocol` | 1.0.0 | Blockchain/IP integration |
-| `Mystira.App.Shared` | 1.0.0 | Shared services and middleware |
+| `Mystira.Domain` | 0.5.0-alpha | Domain models and entities |
+| `Mystira.Application` | 0.5.0-alpha | CQRS handlers and use cases |
+| `Mystira.Contracts` | 0.5.0-alpha | API contracts and DTOs |
+| `Mystira.Infrastructure.Azure` | 1.0.0 | Azure Cosmos DB, Blob Storage |
+| `Mystira.Infrastructure.Data` | 1.0.0 | Repository implementations |
+| `Mystira.Infrastructure.Discord` | 1.0.0 | Discord bot integration |
+| `Mystira.Infrastructure.StoryProtocol` | 1.0.0 | Blockchain/IP integration |
+| `Mystira.Shared` | 0.5.0-alpha | Shared services and middleware |
 
 ## Setup
 
@@ -103,7 +103,7 @@ This project depends on NuGet packages published from `Mystira.App`:
 
 4. **Run** (uses in-memory database by default):
    ```bash
-   dotnet run --project src/Mystira.App.Admin.Api
+   dotnet run --project src/Mystira.Admin.Api
    ```
 
 5. **Access API**:

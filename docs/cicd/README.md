@@ -62,7 +62,7 @@ dotnet test --collect:"XPlat Code Coverage"
 dotnet build --configuration Release
 
 # Publish
-dotnet publish src/Mystira.App.Admin.Api/Mystira.App.Admin.Api.csproj -c Release -o ./publish
+dotnet publish src/Mystira.Admin.Api/Mystira.Admin.Api.csproj -c Release -o ./publish
 ```
 
 ### NuGet Feed Configuration (Optional)

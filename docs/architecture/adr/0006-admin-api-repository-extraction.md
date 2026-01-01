@@ -9,17 +9,17 @@
 The `Mystira.App` repository currently contains:
 
 1. **Public API** (`Mystira.App.Api`) - Public-facing REST API
-2. **Admin API** (`Mystira.App.Admin.Api`) - Internal admin REST API with Razor Pages UI
+2. **Admin API** (`Mystira.Admin.Api`) - Internal admin REST API with Razor Pages UI
 3. **PWA** (`Mystira.App.PWA`) - Blazor WebAssembly frontend
 4. **Shared Libraries**: Domain, Application, Infrastructure, Contracts, Shared
 
 Both APIs share extensive code dependencies:
 
-- `Mystira.App.Domain` - Core domain models
-- `Mystira.App.Application` - Application layer (CQRS, MediatR)
-- `Mystira.App.Infrastructure.*` - Infrastructure libraries
-- `Mystira.App.Shared` - Shared services
-- `Mystira.App.Contracts` - Shared DTOs
+- `Mystira.Domain` - Core domain models
+- `Mystira.Application` - Application layer (CQRS, MediatR)
+- `Mystira.Infrastructure.*` - Infrastructure libraries
+- `Mystira.Shared` - Shared services
+- `Mystira.Contracts` - Shared DTOs
 
 ### Current State
 
@@ -178,82 +178,82 @@ All shared libraries from `Mystira.App` will be published as NuGet packages to t
 
 #### Core Libraries
 
-1. **`Mystira.App.Domain`**
-   - **Package ID**: `Mystira.App.Domain`
+1. **`Mystira.Domain`**
+   - **Package ID**: `Mystira.Domain`
    - **Purpose**: Core domain models, entities, enumerations, business logic
    - **Dependencies**: Minimal (only external NuGet packages, no internal dependencies)
    - **Usage**: Base layer, referenced by all other libraries
    - **Initial Version**: `1.0.0`
 
-2. **`Mystira.App.Application`**
-   - **Package ID**: `Mystira.App.Application`
+2. **`Mystira.Application`**
+   - **Package ID**: `Mystira.Application`
    - **Purpose**: Application layer - CQRS handlers, MediatR, use cases, business orchestration
-   - **Dependencies**: `Mystira.App.Domain`, external packages (MediatR, etc.)
+   - **Dependencies**: `Mystira.Domain`, external packages (MediatR, etc.)
    - **Usage**: Application logic, referenced by API projects
    - **Initial Version**: `1.0.0`
 
-3. **`Mystira.App.Contracts`**
-   - **Package ID**: `Mystira.App.Contracts`
+3. **`Mystira.Contracts`**
+   - **Package ID**: `Mystira.Contracts`
    - **Purpose**: Shared request/response DTOs, API contracts
-   - **Dependencies**: `Mystira.App.Domain` (for domain models in DTOs)
+   - **Dependencies**: `Mystira.Domain` (for domain models in DTOs)
    - **Usage**: API contracts, referenced by API projects and potentially clients
    - **Initial Version**: `1.0.0`
 
 #### Infrastructure Libraries
 
-1. **`Mystira.App.Infrastructure.Azure`**
-   - **Package ID**: `Mystira.App.Infrastructure.Azure`
+1. **`Mystira.Infrastructure.Azure`**
+   - **Package ID**: `Mystira.Infrastructure.Azure`
    - **Purpose**: Azure-specific infrastructure (Cosmos DB, Blob Storage, health checks)
-   - **Dependencies**: `Mystira.App.Domain`, Azure SDK packages
+   - **Dependencies**: `Mystira.Domain`, Azure SDK packages
    - **Usage**: Azure PaaS service implementations
    - **Initial Version**: `1.0.0`
 
-2. **`Mystira.App.Infrastructure.Data`**
-   - **Package ID**: `Mystira.App.Infrastructure.Data`
+2. **`Mystira.Infrastructure.Data`**
+   - **Package ID**: `Mystira.Infrastructure.Data`
    - **Purpose**: Data access layer (repositories, unit of work, specifications)
-   - **Dependencies**: `Mystira.App.Domain`, `Mystira.App.Application`, Entity Framework Core
+   - **Dependencies**: `Mystira.Domain`, `Mystira.Application`, Entity Framework Core
    - **Usage**: Data persistence implementations
    - **Initial Version**: `1.0.0`
 
-3. **`Mystira.App.Infrastructure.Discord`**
-   - **Package ID**: `Mystira.App.Infrastructure.Discord`
+3. **`Mystira.Infrastructure.Discord`**
+   - **Package ID**: `Mystira.Infrastructure.Discord`
    - **Purpose**: Discord bot integration
-   - **Dependencies**: `Mystira.App.Domain`, Discord.NET
+   - **Dependencies**: `Mystira.Domain`, Discord.NET
    - **Usage**: Discord bot functionality
    - **Initial Version**: `1.0.0`
 
-4. **`Mystira.App.Infrastructure.StoryProtocol`**
-   - **Package ID**: `Mystira.App.Infrastructure.StoryProtocol`
+4. **`Mystira.Infrastructure.StoryProtocol`**
+   - **Package ID**: `Mystira.Infrastructure.StoryProtocol`
    - **Purpose**: Story Protocol blockchain integration
-   - **Dependencies**: `Mystira.App.Domain`, Story Protocol SDK
+   - **Dependencies**: `Mystira.Domain`, Story Protocol SDK
    - **Usage**: Blockchain/IP asset management
    - **Initial Version**: `1.0.0`
 
 #### Shared Services
 
-1. **`Mystira.App.Shared`**
-   - **Package ID**: `Mystira.App.Shared`
+1. **`Mystira.Shared`**
+   - **Package ID**: `Mystira.Shared`
    - **Purpose**: Shared services and utilities (JWT, telemetry, middleware, logging)
-   - **Dependencies**: `Mystira.App.Domain` (minimal), ASP.NET Core packages
+   - **Dependencies**: `Mystira.Domain` (minimal), ASP.NET Core packages
    - **Usage**: Cross-cutting concerns, used by all API projects
    - **Initial Version**: `1.0.0`
 
 ### Package Dependency Graph
 
 ```text
-Mystira.App.Domain (base, no internal deps)
+Mystira.Domain (base, no internal deps)
     ↑
-    ├── Mystira.App.Application
-    ├── Mystira.App.Contracts
-    ├── Mystira.App.Infrastructure.Azure
-    ├── Mystira.App.Infrastructure.Data
-    ├── Mystira.App.Infrastructure.Discord
-    ├── Mystira.App.Infrastructure.StoryProtocol
-    └── Mystira.App.Shared
+    ├── Mystira.Application
+    ├── Mystira.Contracts
+    ├── Mystira.Infrastructure.Azure
+    ├── Mystira.Infrastructure.Data
+    ├── Mystira.Infrastructure.Discord
+    ├── Mystira.Infrastructure.StoryProtocol
+    └── Mystira.Shared
 
-Mystira.App.Application
+Mystira.Application
     ↑
-    └── Mystira.App.Infrastructure.Data (implements application interfaces)
+    └── Mystira.Infrastructure.Data (implements application interfaces)
 ```
 
 **Key Rules**:
@@ -300,7 +300,7 @@ Each package `.csproj` must include:
 
 ```xml
 <PropertyGroup>
-  <PackageId>Mystira.App.Domain</PackageId>
+  <PackageId>Mystira.Domain</PackageId>
   <Version>1.0.0</Version>
   <Authors>Mystira Team</Authors>
   <Company>Phoenix VC</Company>
@@ -322,18 +322,18 @@ After extraction, Admin API will reference packages like:
 ```xml
 <ItemGroup>
   <!-- Core packages -->
-  <PackageReference Include="Mystira.App.Domain" Version="1.0.0" />
-  <PackageReference Include="Mystira.App.Application" Version="1.0.0" />
-  <PackageReference Include="Mystira.App.Contracts" Version="1.0.0" />
+  <PackageReference Include="Mystira.Domain" Version="1.0.0" />
+  <PackageReference Include="Mystira.Application" Version="1.0.0" />
+  <PackageReference Include="Mystira.Contracts" Version="1.0.0" />
 
   <!-- Infrastructure packages -->
-  <PackageReference Include="Mystira.App.Infrastructure.Azure" Version="1.0.0" />
-  <PackageReference Include="Mystira.App.Infrastructure.Data" Version="1.0.0" />
-  <PackageReference Include="Mystira.App.Infrastructure.Discord" Version="1.0.0" />
-  <PackageReference Include="Mystira.App.Infrastructure.StoryProtocol" Version="1.0.0" />
+  <PackageReference Include="Mystira.Infrastructure.Azure" Version="1.0.0" />
+  <PackageReference Include="Mystira.Infrastructure.Data" Version="1.0.0" />
+  <PackageReference Include="Mystira.Infrastructure.Discord" Version="1.0.0" />
+  <PackageReference Include="Mystira.Infrastructure.StoryProtocol" Version="1.0.0" />
 
   <!-- Shared services -->
-  <PackageReference Include="Mystira.App.Shared" Version="1.0.0" />
+  <PackageReference Include="Mystira.Shared" Version="1.0.0" />
 </ItemGroup>
 ```
 
@@ -455,4 +455,4 @@ When Admin API is separate:
 - [NuGet Package Management](https://docs.microsoft.com/en-us/nuget/)
 - [Semantic Versioning](https://semver.org/)
 - [Microservices Architecture](https://microservices.io/)
-- [Admin API README](../../packages/app/src/Mystira.App.Admin.Api/README.md) - Current separation rationale
+- [Admin API README](../../packages/app/src/Mystira.Admin.Api/README.md) - Current separation rationale

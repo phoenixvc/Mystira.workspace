@@ -5,7 +5,7 @@ VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{99C66FBE-9BDF-4A68-BC8C-8A779ABED1A8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mystira.App.Admin.Api", "src\Mystira.App.Admin.Api\Mystira.App.Admin.Api.csproj", "{7335E4EA-AF75-4DA5-903F-EA187A97F611}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mystira.Admin.Api", "src\Mystira.Admin.Api\Mystira.Admin.Api.csproj", "{7335E4EA-AF75-4DA5-903F-EA187A97F611}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -9,7 +9,7 @@
 │                                                                          │
 │  ┌──────────────────────────────────────────────────────────────────┐   │
 │  │                    APPLICATION LAYER                              │   │
-│  │  Mystira.App.Application                                         │   │
+│  │  Mystira.Application                                         │   │
 │  │  ┌──────────────────────────────────────────────────────────┐    │   │
 │  │  │  Ports/Data/                                              │    │   │
 │  │  │  • IRepository<T>           (Generic base)               │    │   │
@@ -24,7 +24,7 @@
 │                                  ▼                                       │
 │  ┌──────────────────────────────────────────────────────────────────┐   │
 │  │                    INFRASTRUCTURE LAYER                           │   │
-│  │  Mystira.App.Infrastructure.Data (Cosmos DB)                     │   │
+│  │  Mystira.Infrastructure.Data (Cosmos DB)                     │   │
 │  │  ┌──────────────────────────────────────────────────────────┐    │   │
 │  │  │  Repositories/                                            │    │   │
 │  │  │  • Repository<T>            (Generic Cosmos implementation)│    │   │
@@ -48,7 +48,7 @@
 │                                                                          │
 │  ┌──────────────────────────────────────────────────────────────────┐   │
 │  │                    APPLICATION LAYER                              │   │
-│  │  Mystira.App.Application                                         │   │
+│  │  Mystira.Application                                         │   │
 │  │  ┌──────────────────────────────────────────────────────────┐    │   │
 │  │  │  Ports/Data/                                              │    │   │
 │  │  │  • IRepository<T>           (UNCHANGED)                  │    │   │
@@ -69,7 +69,7 @@
 │  │                    INFRASTRUCTURE LAYER                           │   │
 │  │                                                                   │   │
 │  │  ┌────────────────────────────────────────────────────────────┐  │   │
-│  │  │  Mystira.App.Infrastructure.Hybrid (NEW - Coordinator)     │  │   │
+│  │  │  Mystira.Infrastructure.Hybrid (NEW - Coordinator)     │  │   │
 │  │  │  ┌─────────────────────────────────────────────────────┐   │  │   │
 │  │  │  │  DualWriteAccountRepository     : IAccountRepository │   │  │   │
 │  │  │  │  DualWriteUserProfileRepository : IUserProfileRepository│  │   │
@@ -99,20 +99,20 @@
 
 ```
 Mystira.App/src/
-├── Mystira.App.Application/                    # Domain layer (unchanged)
+├── Mystira.Application/                    # Domain layer (unchanged)
 │   └── Ports/
 │       └── Data/
 │           ├── IRepository.cs
 │           ├── IAccountRepository.cs
 │           └── ...
 │
-├── Mystira.App.Domain/                         # Entities (unchanged)
+├── Mystira.Domain/                         # Entities (unchanged)
 │   └── Models/
 │       ├── Account.cs
 │       ├── UserProfile.cs
 │       └── ...
 │
-├── Mystira.App.Infrastructure.Data/            # Cosmos DB (existing)
+├── Mystira.Infrastructure.Data/            # Cosmos DB (existing)
 │   ├── MystiraAppDbContext.cs
 │   └── Repositories/
 │       ├── Cosmos/                             # Rename existing repos
@@ -121,7 +121,7 @@ Mystira.App/src/
 │       │   └── ...
 │       └── Repository.cs                       # Base class
 │
-├── Mystira.App.Infrastructure.PostgreSQL/      # NEW: PostgreSQL
+├── Mystira.Infrastructure.PostgreSQL/      # NEW: PostgreSQL
 │   ├── PostgreSqlDbContext.cs
 │   ├── Migrations/                             # EF Core migrations
 │   │   └── 20251222_InitialCreate.cs
@@ -131,7 +131,7 @@ Mystira.App/src/
 │       ├── PgPendingSignupRepository.cs
 │       └── PgRepository.cs                     # Base class
 │
-├── Mystira.App.Infrastructure.Hybrid/          # NEW: Coordination layer
+├── Mystira.Infrastructure.Hybrid/          # NEW: Coordination layer
 │   ├── DualWrite/
 │   │   ├── DualWriteAccountRepository.cs
 │   │   ├── DualWriteUserProfileRepository.cs
@@ -147,7 +147,7 @@ Mystira.App/src/
 │   └── DependencyInjection/
 │       └── HybridDataServiceExtensions.cs
 │
-└── Mystira.App.Infrastructure.Redis/           # NEW: Caching (Phase 2)
+└── Mystira.Infrastructure.Redis/           # NEW: Caching (Phase 2)
     ├── RedisCacheService.cs
     ├── CachedAccountRepository.cs              # Decorator pattern
     └── RedisConnectionFactory.cs

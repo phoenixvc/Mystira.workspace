@@ -435,12 +435,12 @@ Implement a hybrid solution combining:
 ### Implementation Phases
 
 #### Phase 1: Foundation (Week 1-2)
-- Add Ardalis.Specification to `Mystira.App.Application`
+- Add Ardalis.Specification to `Mystira.Application`
 - Create base `IPolyglotRepository<T>` interface
 - Migrate existing specifications to Ardalis format
 
 #### Phase 2: Dual-Write Infrastructure (Week 2-3)
-- Implement `PolyglotRepository<T>` in `Mystira.App.Infrastructure.Data`
+- Implement `PolyglotRepository<T>` in `Mystira.Infrastructure.Data`
 - Add migration phase configuration
 - Create health checks for each backend
 
