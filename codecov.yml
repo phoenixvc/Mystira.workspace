@@ -1,4 +1,4 @@
-# Codecov configuration for Mystira.Shared
+# Codecov Configuration for Mystira Workspace
 # https://docs.codecov.io/docs/codecovyml-reference
 
 coverage:
@@ -9,13 +9,13 @@ coverage:
   status:
     project:
       default:
-        target: 70%
-        threshold: 5%
+        target: 80%
+        threshold: 2%  # Allow 2% drop before failing
         informational: false
     patch:
       default:
         target: 80%
-        threshold: 5%
+        threshold: 5%  # Allow more flexibility on individual PRs
         informational: false
 
 parsers:
@@ -27,28 +27,98 @@ parsers:
       macro: no
 
 comment:
-  layout: "reach,diff,flags,files,footer"
+  layout: "header, diff, flags, components, tree, footer"
   behavior: default
   require_changes: false
-  require_base: no
-  require_head: yes
+  require_base: true
+  require_head: true
+  hide_project_coverage: false
 
 # Ignore generated code and test files
 ignore:
+  # .NET ignores
   - "**/*.g.cs"
   - "**/*Tests*/**"
   - "**/obj/**"
   - "**/bin/**"
   - "**/*.Designer.cs"
+  - "**/Migrations/**"
+  # TypeScript ignores
+  - "**/*.test.ts"
+  - "**/*.test.tsx"
+  - "**/*.spec.ts"
+  - "**/*.spec.tsx"
+  - "**/node_modules/**"
+  - "**/dist/**"
+  - "**/coverage/**"
+  - "**/*.d.ts"
 
 # Flag configurations for different components
 flags:
-  mystira-shared:
+  # TypeScript packages
+  typescript:
+    paths:
+      - packages/shared-utils/
+      - packages/admin-ui/
+      - packages/publisher/
+    carryforward: true
+
+  # .NET packages
+  dotnet-core:
+    paths:
+      - packages/core/Mystira.Core/
+    carryforward: true
+
+  dotnet-shared:
     paths:
       - packages/shared/Mystira.Shared/
     carryforward: true
 
-  mystira-shared-generators:
+  dotnet-domain:
     paths:
-      - packages/shared/Mystira.Shared.Generators/
+      - packages/domain/Mystira.Domain/
     carryforward: true
+
+  dotnet-application:
+    paths:
+      - packages/application/Mystira.Application/
+    carryforward: true
+
+  dotnet-contracts:
+    paths:
+      - packages/contracts/dotnet/Mystira.Contracts/
+    carryforward: true
+
+# Component configuration for better PR comments
+component_management:
+  default_rules:
+    statuses:
+      - type: project
+        target: 80%
+  individual_components:
+    - component_id: typescript-packages
+      name: TypeScript Packages
+      paths:
+        - packages/shared-utils/**
+        - packages/admin-ui/**
+        - packages/publisher/**
+    - component_id: dotnet-core
+      name: .NET Core
+      paths:
+        - packages/core/**
+    - component_id: dotnet-shared
+      name: .NET Shared
+      paths:
+        - packages/shared/**
+    - component_id: dotnet-domain
+      name: .NET Domain
+      paths:
+        - packages/domain/**
+    - component_id: dotnet-application
+      name: .NET Application
+      paths:
+        - packages/application/**
+    - component_id: dotnet-contracts
+      name: .NET Contracts
+      paths:
+        - packages/contracts/**

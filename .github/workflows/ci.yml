@@ -82,8 +82,18 @@ jobs:
           # Copy workspace Vitest configs to submodules (adds passWithNoTests for packages without tests)
           cp configs/admin-ui.vite.config.ts packages/admin-ui/vite.config.ts
 
-      - name: Run tests
-        run: pnpm test
+      - name: Run tests with coverage
+        run: pnpm test -- --coverage
+
+      - name: Upload TypeScript coverage to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          flags: typescript
+          directory: ./
+          files: "**/coverage/lcov.info,**/coverage/cobertura-coverage.xml"
+          fail_ci_if_error: false
+          verbose: true
 
   build:
     name: Build
@@ -132,9 +142,13 @@ jobs:
         id: lint-dotnet
         run: |
           echo "Checking .NET code formatting..."
-          dotnet format packages/domain/Mystira.Domain --verify-no-changes --verbosity diagnostic || echo "Format issues found in Domain"
-          dotnet format packages/application/Mystira.Application --verify-no-changes --verbosity diagnostic || echo "Format issues found in Application"
-          echo "lint=success" >> $GITHUB_OUTPUT
+          LINT_STATUS="success"
+          dotnet format packages/domain/Mystira.Domain --verify-no-changes --verbosity diagnostic || LINT_STATUS="failure"
+          dotnet format packages/application/Mystira.Application --verify-no-changes --verbosity diagnostic || LINT_STATUS="failure"
+          echo "lint=$LINT_STATUS" >> $GITHUB_OUTPUT
+          if [ "$LINT_STATUS" = "failure" ]; then
+            echo "::warning::Format issues found. Run 'dotnet format' to fix."
+          fi
         continue-on-error: true
 
       - name: Build Mystira.Core
@@ -144,11 +158,14 @@ jobs:
           dotnet build packages/core/Mystira.Core --configuration Release
           echo "core=success" >> $GITHUB_OUTPUT
 
-      - name: Test Mystira.Core
+      - name: Test Mystira.Core with coverage
         id: test-core
         run: |
-          echo "Testing Mystira.Core..."
-          dotnet test packages/core/Mystira.Core.Tests --configuration Release
+          echo "Testing Mystira.Core with coverage..."
+          dotnet test packages/core/Mystira.Core.Tests --configuration Release \
+            --collect:"XPlat Code Coverage" \
+            --results-directory ./coverage/core \
+            -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=cobertura
           echo "core_tests=success" >> $GITHUB_OUTPUT
 
       - name: Build Mystira.Contracts
@@ -165,11 +182,15 @@ jobs:
           dotnet build packages/shared/Mystira.Shared --configuration Release
           echo "shared=success" >> $GITHUB_OUTPUT
 
-      - name: Test Mystira.Shared
+      - name: Test Mystira.Shared with coverage
         id: test-shared
         run: |
-          echo "Testing Mystira.Shared..."
-          dotnet test packages/shared/Mystira.Shared.Tests --configuration Release --no-build 2>/dev/null || echo "No tests or tests skipped"
+          echo "Testing Mystira.Shared with coverage..."
+          dotnet test packages/shared/Mystira.Shared.Tests --configuration Release \
+            --collect:"XPlat Code Coverage" \
+            --results-directory ./coverage/shared \
+            -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=cobertura \
+            2>/dev/null || echo "No tests or tests skipped"
           echo "tests=success" >> $GITHUB_OUTPUT
 
       - name: Build Mystira.Domain
@@ -185,6 +206,26 @@ jobs:
           echo "Building Mystira.Application..."
           dotnet build packages/application/Mystira.Application --configuration Release
           echo "application=success" >> $GITHUB_OUTPUT
+
+      - name: Upload .NET Core coverage to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          flags: dotnet-core
+          directory: ./coverage/core
+          files: "**/coverage.cobertura.xml"
+          fail_ci_if_error: false
+          verbose: true
+
+      - name: Upload .NET Shared coverage to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          flags: dotnet-shared
+          directory: ./coverage/shared
+          files: "**/coverage.cobertura.xml"
+          fail_ci_if_error: false
+          verbose: true
 
       - name: Build Summary
         run: |

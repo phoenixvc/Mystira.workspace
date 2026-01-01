@@ -80,17 +80,18 @@ public class BadgeAwardingService : IBadgeAwardingService
 
         // Group badges by axis and tier, sorted by tier order
         var badgesByAxis = availableBadges
-            .GroupBy(b => b.CompassAxisId, StringComparer.OrdinalIgnoreCase)
+            .Where(b => !string.IsNullOrEmpty(b.CompassAxisId))
+            .GroupBy(b => b.CompassAxisId!, StringComparer.OrdinalIgnoreCase)
             .ToDictionary(g => g.Key, g => g.OrderBy(b => b.TierOrder).ToList(), StringComparer.OrdinalIgnoreCase);
 
         // Evaluate each axis
         foreach (var (axis, badges) in badgesByAxis)
         {
             // Get the score for this axis (try direct key first, then normalized)
-            var hasScore = axisScores.TryGetValue(axis, out var score);
+            var hasScore = axisScores.TryGetValue(axis ?? string.Empty, out var score);
             if (!hasScore)
             {
-                var normalized = NormalizeAxisKey(axis);
+                var normalized = NormalizeAxisKey(axis ?? string.Empty);
                 hasScore = normalizedAxisScores.TryGetValue(normalized, out score);
             }
             if (!hasScore)
@@ -107,8 +108,17 @@ public class BadgeAwardingService : IBadgeAwardingService
                     continue;
                 }
 
+                // Skip badges with no configured threshold - they need configuration
+                if (!badge.RequiredScore.HasValue)
+                {
+                    _logger.LogWarning(
+                        "Badge {BadgeId} ({BadgeTitle}) on axis {Axis} has no RequiredScore configured - skipping",
+                        badge.Id, badge.Title, axis);
+                    continue;
+                }
+
                 // Check if score meets the threshold
-                var requiredScore = badge.RequiredScore ?? 0;
+                var requiredScore = badge.RequiredScore.Value;
                 if (score >= requiredScore)
                 {
                     var userBadge = new UserBadge
@@ -119,7 +129,7 @@ public class BadgeAwardingService : IBadgeAwardingService
                         BadgeName = badge.Title,
                         BadgeMessage = badge.Description,
                         Axis = axis,
-                        TriggerValue = (int)Math.Round(score),
+                        TriggerValue = (int)score, // Cast for int?/float? compatibility
                         Threshold = badge.RequiredScore,
                         EarnedAt = DateTime.UtcNow,
                         ImageId = badge.ImageId

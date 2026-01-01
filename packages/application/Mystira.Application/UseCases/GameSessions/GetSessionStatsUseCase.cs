@@ -75,7 +75,9 @@ public class GetSessionStatsUseCase
             RecentEchoes = recentEchoes,
             Achievements = session.Achievements?.Cast<object>().ToList() ?? new List<object>(),
             TotalChoices = session.ChoiceHistory?.Count ?? 0,
-            SessionDuration = session.EndTime?.Subtract(session.StartTime) ?? DateTime.UtcNow.Subtract(session.StartTime)
+            SessionDuration = session.EndTime.HasValue
+                ? session.EndTime.Value.Subtract(session.StartTime ?? DateTime.UtcNow)
+                : DateTime.UtcNow.Subtract(session.StartTime ?? DateTime.UtcNow)
         };
 
         _logger.LogDebug("Retrieved stats for game session: {SessionId}", sessionId);

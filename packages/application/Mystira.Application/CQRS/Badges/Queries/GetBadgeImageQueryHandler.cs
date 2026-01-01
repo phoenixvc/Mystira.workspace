@@ -24,6 +24,6 @@ public static class GetBadgeImageQueryHandler
 
         if (image?.ImageData is not { Length: > 0 }) return null;
 
-        return new BadgeImageResult(image.ImageData, image.ContentType);
+        return new BadgeImageResult(image.ImageData, image.ContentType ?? "image/png");
     }
 }
