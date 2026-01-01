@@ -82,7 +82,7 @@ public class AxisScoringService : IAxisScoringService
         axis = string.Empty;
         delta = 0.0;
 
-        if (!string.IsNullOrWhiteSpace(choice.CompassAxis) && choice.CompassDelta != 0)
+        if (!string.IsNullOrWhiteSpace(choice.CompassAxis) && Math.Abs(choice.CompassDelta) > 1e-9)
         {
             axis = choice.CompassAxis;
             delta = choice.CompassDelta;
