@@ -1,5 +1,5 @@
-using Mystira.App.Domain.Models;
-using Mystira.App.Contracts.Requests.Badges;
+using Mystira.Domain.Models;
+using Mystira.Contracts.App.Requests.Badges;
 
 namespace Mystira.App.Admin.Api.Services;
 

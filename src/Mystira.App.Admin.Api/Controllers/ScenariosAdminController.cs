@@ -1,9 +1,10 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Mystira.App.Admin.Api.Models;
 using Mystira.App.Admin.Api.Services;
-using Mystira.App.Domain.Models;
-using CreateScenarioRequest = Mystira.App.Contracts.Requests.Scenarios.CreateScenarioRequest;
+using Mystira.Contracts.App.Requests.Scenarios;
+using Mystira.Contracts.App.Responses.Common;
+using Mystira.Contracts.App.Responses.Scenarios;
+using Mystira.Domain.Models;
 
 namespace Mystira.App.Admin.Api.Controllers;
 
@@ -35,7 +36,7 @@ public class ScenariosAdminController : ControllerBase
                 return BadRequest(new ValidationErrorResponse
                 {
                     Message = "Validation failed",
-                    ValidationErrors = ModelState.ToDictionary(
+                    Errors = ModelState.ToDictionary(
                         kvp => kvp.Key,
                         kvp => kvp.Value?.Errors.Select(e => e.ErrorMessage).ToList() ?? new List<string>()
                     ),
@@ -79,7 +80,7 @@ public class ScenariosAdminController : ControllerBase
                 return BadRequest(new ValidationErrorResponse
                 {
                     Message = "Validation failed",
-                    ValidationErrors = ModelState.ToDictionary(
+                    Errors = ModelState.ToDictionary(
                         kvp => kvp.Key,
                         kvp => kvp.Value?.Errors.Select(e => e.ErrorMessage).ToList() ?? new List<string>()
                     ),

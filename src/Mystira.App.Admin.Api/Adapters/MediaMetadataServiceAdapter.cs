@@ -1,5 +1,5 @@
-using Mystira.App.Application.Ports;
-using Mystira.App.Domain.Models;
+using Mystira.Application.Ports;
+using Mystira.Domain.Models;
 using ApiModels = Mystira.App.Admin.Api.Models;
 
 namespace Mystira.App.Admin.Api.Adapters;

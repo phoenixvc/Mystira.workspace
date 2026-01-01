@@ -2,7 +2,7 @@ using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Mystira.App.Infrastructure.Data;
 using ApiModels = Mystira.App.Admin.Api.Models;
-using DomainModels = Mystira.App.Domain.Models;
+using DomainModels = Mystira.Domain.Models;
 
 namespace Mystira.App.Admin.Api.Services;
 

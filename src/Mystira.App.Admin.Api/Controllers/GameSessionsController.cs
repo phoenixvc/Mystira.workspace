@@ -2,13 +2,11 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Mystira.App.Admin.Api.Models;
 using Mystira.App.Admin.Api.Services;
-using Mystira.App.Domain.Models;
-using AdminProgressSceneRequest = Mystira.App.Admin.Api.Models.ProgressSceneRequest;
-using ContractsGameSessionResponse = Mystira.App.Contracts.Responses.GameSessions.GameSessionResponse;
-using ContractsMakeChoiceRequest = Mystira.App.Contracts.Requests.GameSessions.MakeChoiceRequest;
-using ContractsSelectCharacterRequest = Mystira.App.Admin.Api.Models.SelectCharacterRequest;
-using ContractsSessionStatsResponse = Mystira.App.Contracts.Responses.GameSessions.SessionStatsResponse;
-using ContractsStartGameSessionRequest = Mystira.App.Contracts.Requests.GameSessions.StartGameSessionRequest;
+using Mystira.Domain.Models;
+using Mystira.Contracts.App.Requests.Characters;
+using Mystira.Contracts.App.Requests.GameSessions;
+using Mystira.Contracts.App.Responses.Common;
+using Mystira.Contracts.App.Responses.GameSessions;
 
 namespace Mystira.App.Admin.Api.Controllers;
 
@@ -35,7 +33,7 @@ public class GameSessionsController : ControllerBase
     /// Start a new game session
     /// </summary>
     [HttpPost]
-    public async Task<ActionResult<GameSession>> StartSession([FromBody] ContractsStartGameSessionRequest request)
+    public async Task<ActionResult<GameSession>> StartSession([FromBody] StartGameSessionRequest request)
     {
         try
         {
@@ -44,7 +42,7 @@ public class GameSessionsController : ControllerBase
                 return BadRequest(new ValidationErrorResponse
                 {
                     Message = "Validation failed",
-                    ValidationErrors = ModelState.ToDictionary(
+                    Errors = ModelState.ToDictionary(
                         kvp => kvp.Key,
                         kvp => kvp.Value?.Errors.Select(e => e.ErrorMessage).ToList() ?? new List<string>()
                     ),
@@ -112,7 +110,7 @@ public class GameSessionsController : ControllerBase
     /// </summary>
     [HttpGet("account/{accountId}")]
     [Authorize] // Requires authentication
-    public async Task<ActionResult<List<ContractsGameSessionResponse>>> GetSessionsByAccount(string accountId)
+    public async Task<ActionResult<List<GameSessionResponse>>> GetSessionsByAccount(string accountId)
     {
         try
         {
@@ -135,7 +133,7 @@ public class GameSessionsController : ControllerBase
     /// </summary>
     [HttpGet("profile/{profileId}")]
     [Authorize] // Requires authentication
-    public async Task<ActionResult<List<ContractsGameSessionResponse>>> GetSessionsByProfile(string profileId)
+    public async Task<ActionResult<List<GameSessionResponse>>> GetSessionsByProfile(string profileId)
     {
         try
         {
@@ -158,7 +156,7 @@ public class GameSessionsController : ControllerBase
     /// </summary>
     [HttpPost("choice")]
     [Authorize] // Requires DM authentication
-    public async Task<ActionResult<GameSession>> MakeChoice([FromBody] ContractsMakeChoiceRequest request)
+    public async Task<ActionResult<GameSession>> MakeChoice([FromBody] MakeChoiceRequest request)
     {
         try
         {
@@ -167,7 +165,7 @@ public class GameSessionsController : ControllerBase
                 return BadRequest(new ValidationErrorResponse
                 {
                     Message = "Validation failed",
-                    ValidationErrors = ModelState.ToDictionary(
+                    Errors = ModelState.ToDictionary(
                         kvp => kvp.Key,
                         kvp => kvp.Value?.Errors.Select(e => e.ErrorMessage).ToList() ?? new List<string>()
                     ),
@@ -335,7 +333,7 @@ public class GameSessionsController : ControllerBase
     /// </summary>
     [HttpGet("{id}/stats")]
     [Authorize] // Requires DM authentication
-    public async Task<ActionResult<ContractsSessionStatsResponse>> GetSessionStats(string id)
+    public async Task<ActionResult<SessionStatsResponse>> GetSessionStats(string id)
     {
         try
         {
@@ -430,7 +428,7 @@ public class GameSessionsController : ControllerBase
     /// </summary>
     [HttpPost("{id}/select-character")]
     [Authorize] // Requires DM authentication
-    public async Task<ActionResult<GameSession>> SelectCharacter(string id, [FromBody] ContractsSelectCharacterRequest request)
+    public async Task<ActionResult<GameSession>> SelectCharacter(string id, [FromBody] SelectCharacterRequest request)
     {
         try
         {
@@ -439,7 +437,7 @@ public class GameSessionsController : ControllerBase
                 return BadRequest(new ValidationErrorResponse
                 {
                     Message = "Validation failed",
-                    ValidationErrors = ModelState.ToDictionary(
+                    Errors = ModelState.ToDictionary(
                         kvp => kvp.Key,
                         kvp => kvp.Value?.Errors.Select(e => e.ErrorMessage).ToList() ?? new List<string>()
                     ),

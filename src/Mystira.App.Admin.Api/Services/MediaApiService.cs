@@ -2,10 +2,10 @@ using System.IO.Compression;
 using System.Security.Cryptography;
 using Microsoft.EntityFrameworkCore;
 using Mystira.App.Admin.Api.Models;
-using Mystira.App.Application.Ports.Media;
-using Mystira.App.Application.Ports.Storage;
-using Mystira.App.Application.UseCases.Media;
-using Mystira.App.Domain.Models;
+using Mystira.Application.Ports.Media;
+using Mystira.Application.Ports.Storage;
+using Mystira.Application.UseCases.Media;
+using Mystira.Domain.Models;
 using Mystira.App.Infrastructure.Data;
 
 namespace Mystira.App.Admin.Api.Services;

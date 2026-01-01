@@ -1,6 +1,6 @@
-using Mystira.App.Domain.Models;
-using ContractsAvatarConfigurationResponse = Mystira.App.Contracts.Responses.Media.AvatarConfigurationResponse;
-using ContractsAvatarResponse = Mystira.App.Contracts.Responses.Media.AvatarResponse;
+using Mystira.Domain.Models;
+using ContractsAvatarConfigurationResponse = Mystira.Contracts.App.Responses.Avatars.AvatarConfigurationResponse;
+using ContractsAvatarResponse = Mystira.Contracts.App.Responses.Avatars.AvatarResponse;
 
 namespace Mystira.App.Admin.Api.Services;
 

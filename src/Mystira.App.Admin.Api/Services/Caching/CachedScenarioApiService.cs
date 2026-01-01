@@ -1,7 +1,6 @@
-using Mystira.App.Admin.Api.Models;
-using Mystira.App.Domain.Models;
-using CreateScenarioRequest = Mystira.App.Contracts.Requests.Scenarios.CreateScenarioRequest;
-using ScenarioQueryRequest = Mystira.App.Contracts.Requests.Scenarios.ScenarioQueryRequest;
+using Mystira.Domain.Models;
+using Mystira.Contracts.App.Requests.Scenarios;
+using Mystira.Contracts.App.Responses.Scenarios;
 
 namespace Mystira.App.Admin.Api.Services.Caching;
 

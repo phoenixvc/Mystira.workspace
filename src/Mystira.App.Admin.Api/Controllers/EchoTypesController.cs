@@ -1,8 +1,8 @@
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using Mystira.App.Application.CQRS.EchoTypes.Commands;
-using Mystira.App.Application.CQRS.EchoTypes.Queries;
-using Mystira.App.Domain.Models;
+using Mystira.Application.CQRS.EchoTypes.Commands;
+using Mystira.Application.CQRS.EchoTypes.Queries;
+using Mystira.Domain.Models;
 
 namespace Mystira.App.Admin.Api.Controllers;
 
