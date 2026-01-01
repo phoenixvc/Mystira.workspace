@@ -75,7 +75,7 @@ public class AwardBadgeUseCase
 
         await _badgeRepository.AddAsync(newBadge);
 
-        userProfile.AddEarnedBadge(newBadge);
+        userProfile.AddEarnedBadge(badge);
         await _userProfileRepository.UpdateAsync(userProfile);
 
         await _unitOfWork.SaveChangesAsync();

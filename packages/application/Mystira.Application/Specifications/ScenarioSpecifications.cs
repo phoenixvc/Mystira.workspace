@@ -97,7 +97,7 @@ public sealed class ScenariosByArchetypeSpec : BaseEntitySpecification<Scenario>
 {
     public ScenariosByArchetypeSpec(string archetypeName)
     {
-        Query.Where(s => s.Archetypes != null && s.Archetypes.Any(a => a.Value == archetypeName))
+        Query.Where(s => s.Archetypes != null && s.Archetypes.Any(a => a == archetypeName))
              .OrderBy(s => s.Title);
     }
 }
