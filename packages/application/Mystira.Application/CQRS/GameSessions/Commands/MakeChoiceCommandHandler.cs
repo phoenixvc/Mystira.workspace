@@ -85,7 +85,7 @@ public static class MakeChoiceCommandHandler
             CompassDelta = compassDelta,
             ChosenAt = DateTime.UtcNow,
             CompassChange = !string.IsNullOrWhiteSpace(compassAxis) && compassDelta.HasValue
-                ? new CompassChange { Axis = compassAxis, Delta = compassDelta.Value }
+                ? new CompassChange { AxisId = compassAxis, Delta = (int)compassDelta.Value }
                 : null
         };
 

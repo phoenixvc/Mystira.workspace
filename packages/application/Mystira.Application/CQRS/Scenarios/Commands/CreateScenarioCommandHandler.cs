@@ -52,7 +52,7 @@ public static class CreateScenarioCommandHandler
             Difficulty = ScenarioMapper.MapDifficultyLevel((int)request.Difficulty),
             SessionLength = ScenarioMapper.MapSessionLength((int)request.SessionLength),
             Archetypes = ScenarioMapper.ParseArchetypes(request.Archetypes),
-            AgeGroup = request.AgeGroup,
+            AgeGroupId = request.AgeGroup,
             MinimumAge = request.MinimumAge,
             CoreAxes = ScenarioMapper.ParseCoreAxes(request.CoreAxes),
             Characters = request.Characters?.Select(ScenarioMapper.ToScenarioCharacter).ToList() ?? new List<ScenarioCharacter>(),

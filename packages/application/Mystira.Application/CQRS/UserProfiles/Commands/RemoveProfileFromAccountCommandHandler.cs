@@ -59,7 +59,7 @@ public static class RemoveProfileFromAccountCommandHandler
         }
 
         // Clear profile's account ID
-        profile.AccountId = null;
+        profile.AccountId = string.Empty;
         profile.UpdatedAt = DateTime.UtcNow;
         await profileRepository.UpdateAsync(profile);
 

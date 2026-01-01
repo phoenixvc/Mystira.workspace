@@ -10,7 +10,7 @@ namespace Mystira.Application.CQRS.CompassAxes.Commands;
 /// </summary>
 public static class UpdateCompassAxisCommandHandler
 {
-    public static async Task<CompassAxis?> Handle(
+    public static async Task<CompassAxisDefinition?> Handle(
         UpdateCompassAxisCommand command,
         ICompassAxisRepository repository,
         IUnitOfWork unitOfWork,
@@ -28,7 +28,7 @@ public static class UpdateCompassAxisCommandHandler
         }
 
         existingAxis.Name = command.Name;
-        existingAxis.Description = command.Description;
+        existingAxis.Description = command.Description ?? string.Empty;
         existingAxis.UpdatedAt = DateTime.UtcNow;
 
         await repository.UpdateAsync(existingAxis);

@@ -33,9 +33,9 @@ public class ValidateScenarioUseCase
 
             foreach (var axis in scenario.CoreAxes)
             {
-                if (!validAxisNames.Contains(axis.Value))
+                if (!validAxisNames.Contains(axis))
                 {
-                    throw new ArgumentException($"Invalid compass axis: '{axis.Value}'. Valid values: {string.Join(", ", validAxisNames)}");
+                    throw new ArgumentException($"Invalid compass axis: '{axis}'. Valid values: {string.Join(", ", validAxisNames)}");
                 }
             }
         }
@@ -48,9 +48,9 @@ public class ValidateScenarioUseCase
 
             foreach (var archetype in scenario.Archetypes)
             {
-                if (!validArchetypeNames.Contains(archetype.Value))
+                if (!validArchetypeNames.Contains(archetype))
                 {
-                    throw new ArgumentException($"Invalid archetype: '{archetype.Value}'. Valid values: {string.Join(", ", validArchetypeNames)}");
+                    throw new ArgumentException($"Invalid archetype: '{archetype}'. Valid values: {string.Join(", ", validArchetypeNames)}");
                 }
             }
         }

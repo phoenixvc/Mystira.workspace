@@ -55,7 +55,7 @@ public class UpdateScenarioUseCase
         scenario.Difficulty = ScenarioMapper.MapDifficultyLevel((int)request.Difficulty);
         scenario.SessionLength = ScenarioMapper.MapSessionLength((int)request.SessionLength);
         scenario.Archetypes = ScenarioMapper.ParseArchetypes(request.Archetypes);
-        scenario.AgeGroup = request.AgeGroup;
+        scenario.AgeGroupId = request.AgeGroup;
         scenario.MinimumAge = request.MinimumAge;
         scenario.CoreAxes = ScenarioMapper.ParseCoreAxes(request.CoreAxes);
         scenario.Characters = request.Characters?.Select(ScenarioMapper.ToScenarioCharacter).ToList() ?? new List<ScenarioCharacter>();

@@ -72,12 +72,12 @@ public class UpdateContentBundleUseCase
 
         if (isFree.HasValue)
         {
-            bundle.IsFree = isFree.Value;
+            bundle.PriceCents = isFree.Value ? 0 : bundle.PriceCents;
         }
 
         if (ageGroup != null)
         {
-            bundle.AgeGroup = ageGroup;
+            bundle.AgeGroupId = ageGroup;
         }
 
         await _repository.UpdateAsync(bundle);

@@ -47,7 +47,7 @@ public class GetScenariosUseCase
 
         if (!string.IsNullOrWhiteSpace(request.AgeGroup))
         {
-            query = query.Where(s => s.AgeGroup == request.AgeGroup);
+            query = query.Where(s => s.AgeGroupId == request.AgeGroup);
         }
 
         if (request.Tags != null && request.Tags.Count > 0)
@@ -57,14 +57,14 @@ public class GetScenariosUseCase
 
         if (request.Archetypes != null && request.Archetypes.Count > 0)
         {
-            var archetypeValues = request.Archetypes.Where(a => Archetype.Parse(a)?.Value != null).Select(a => Archetype.Parse(a)!.Value).ToList();
-            query = query.Where(s => s.Archetypes.Any(a => archetypeValues.Contains(a.Value)));
+            var archetypeValues = request.Archetypes.Where(a => Archetype.Parse(a) != null).Select(a => Archetype.Parse(a)!.Value).ToList();
+            query = query.Where(s => s.Archetypes.Any(a => archetypeValues.Contains(a)));
         }
 
         if (request.CoreAxes != null && request.CoreAxes.Count > 0)
         {
-            var axisValues = request.CoreAxes.Where(a => CoreAxis.Parse(a)?.Value != null).Select(a => CoreAxis.Parse(a)!.Value).ToList();
-            query = query.Where(s => s.CoreAxes.Any(a => axisValues.Contains(a.Value)));
+            var axisValues = request.CoreAxes.Where(a => CoreAxis.Parse(a) != null).Select(a => CoreAxis.Parse(a)!.Value).ToList();
+            query = query.Where(s => s.CoreAxes.Any(a => axisValues.Contains(a)));
         }
 
         // Get total count before pagination
@@ -83,10 +83,10 @@ public class GetScenariosUseCase
                 Tags = s.Tags,
                 Difficulty = s.Difficulty.ToString(),
                 SessionLength = s.SessionLength.ToString(),
-                Archetypes = s.Archetypes.Select(a => a.Value).ToList(),
+                Archetypes = s.Archetypes,
                 MinimumAge = s.MinimumAge,
-                AgeGroup = s.AgeGroup,
-                CoreAxes = s.CoreAxes.Select(a => a.Value).ToList(),
+                AgeGroup = s.AgeGroupId,
+                CoreAxes = s.CoreAxes,
                 CreatedAt = s.CreatedAt,
                 MusicPalette = s.MusicPalette != null ? s.MusicPalette.DefaultMood : null
             })

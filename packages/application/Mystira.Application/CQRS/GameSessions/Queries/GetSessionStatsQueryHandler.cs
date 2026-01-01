@@ -33,8 +33,8 @@ public static class GetSessionStatsQueryHandler
         session.RecalculateCompassProgressFromHistory();
 
         var compassValues = session.CompassValues?.ToDictionary(
-            kvp => kvp.Key,
-            kvp => kvp.Value.CurrentValue
+            ct => ct.Axis,
+            ct => ct.CurrentValue
         ) ?? new Dictionary<string, double>();
 
         var playerProgress = session.PlayerCompassProgressTotals

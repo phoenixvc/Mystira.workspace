@@ -83,7 +83,7 @@ public class MakeChoiceUseCase
             ? playerId
             : (!string.IsNullOrWhiteSpace(request.PlayerId) ? request.PlayerId : session.ProfileId);
 
-        var compassAxis = request.CompassAxis ?? branch.CompassChange?.Axis;
+        var compassAxis = request.CompassAxis ?? branch.CompassChange?.AxisId;
         var compassDelta = request.CompassDelta ?? branch.CompassChange?.Delta;
         var compassDirection = request.CompassDirection;
 
@@ -100,7 +100,7 @@ public class MakeChoiceUseCase
             ChosenAt = DateTime.UtcNow,
             EchoGenerated = branch.EchoLog,
             CompassChange = !string.IsNullOrWhiteSpace(compassAxis) && compassDelta.HasValue
-                ? new CompassChange { Axis = compassAxis, Delta = compassDelta.Value }
+                ? new CompassChange { AxisId = compassAxis, Delta = (int)compassDelta.Value }
                 : null
         };
 
@@ -117,19 +117,18 @@ public class MakeChoiceUseCase
             });
         }
 
-        session.CompassValues ??= new Dictionary<string, CompassTracking>();
+        session.CompassValues ??= new List<CompassTracking>();
         foreach (var axis in scenario.CoreAxes)
         {
-            if (!session.CompassValues.ContainsKey(axis.Value))
+            if (!session.CompassValues.Any(ct => ct.Axis == axis))
             {
-                session.CompassValues[axis.Value] = new CompassTracking
+                session.CompassValues.Add(new CompassTracking
                 {
-                    Axis = axis.Value,
+                    Axis = axis,
                     CurrentValue = 0.0,
-                    StartingValue = 0.0,
-                    History = new List<CompassChange>(),
+                    StartingValue = 0,
                     LastUpdated = DateTime.UtcNow
-                };
+                });
             }
         }
 

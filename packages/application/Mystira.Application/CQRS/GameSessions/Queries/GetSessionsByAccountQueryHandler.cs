@@ -79,7 +79,7 @@ public static class GetSessionsByAccountQueryHandler
                 StartTime = s.StartTime,
                 EndTime = s.EndTime,
                 ElapsedTime = s.GetTotalElapsedTime(),
-                IsPaused = s.Status == Domain.Models.SessionStatus.Paused,
+                IsPaused = s.Status == SessionStatus.Paused,
                 SceneCount = s.ChoiceHistory?.Select(c => c.SceneId).Distinct().Count() ?? 0,
                 TargetAgeGroup = s.TargetAgeGroup.Value
             };

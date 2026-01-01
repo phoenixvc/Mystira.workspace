@@ -66,7 +66,7 @@ public class AwardBadgeUseCase
             BadgeMessage = badge.Description,
             Axis = badge.CompassAxisId,
             TriggerValue = request.TriggerValue,
-            Threshold = badge.RequiredScore,
+            Threshold = badge.RequiredScore ?? 0,
             GameSessionId = request.GameSessionId,
             ScenarioId = request.ScenarioId,
             ImageId = badge.ImageId,

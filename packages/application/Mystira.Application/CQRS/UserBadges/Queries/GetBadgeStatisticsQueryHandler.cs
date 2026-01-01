@@ -26,7 +26,7 @@ public static class GetBadgeStatisticsQueryHandler
 
         var statistics = badges
             .Where(b => !string.IsNullOrEmpty(b.Axis))
-            .GroupBy(b => b.Axis)
+            .GroupBy(b => b.Axis!)
             .ToDictionary(g => g.Key, g => g.Count());
 
         logger.LogInformation("Found badge statistics for {AxisCount} axes", statistics.Count);

@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 using Mystira.Application.Ports.Data;
 using Mystira.Domain.Models;
+using Mystira.Domain.ValueObjects;
 
 namespace Mystira.Application.CQRS.UserProfiles.Commands;
 
@@ -41,32 +42,30 @@ public static class CreateUserProfileCommandHandler
             throw new ArgumentException("Age group is required");
         }
 
-        if (!AgeGroupConstants.AllAgeGroups.Contains(request.AgeGroup))
+        var allAgeGroupIds = AgeGroup.All.Select(a => a.Id).ToList();
+        if (!allAgeGroupIds.Contains(request.AgeGroup))
         {
-            throw new ArgumentException($"Invalid age group: {request.AgeGroup}. Must be one of: {string.Join(", ", AgeGroupConstants.AllAgeGroups)}");
+            throw new ArgumentException($"Invalid age group: {request.AgeGroup}. Must be one of: {string.Join(", ", allAgeGroupIds)}");
         }
 
         var profile = new UserProfile
         {
             Id = Guid.NewGuid().ToString(),
             Name = request.Name,
-            DateOfBirth = request.DateOfBirth,
+            DateOfBirth = request.DateOfBirth.HasValue ? DateOnly.FromDateTime(request.DateOfBirth.Value) : null,
             IsGuest = request.IsGuest,
             IsNpc = request.IsNpc,
-            AccountId = request.AccountId,
+            AccountId = request.AccountId ?? string.Empty,
             Pronouns = request.Pronouns,
             Bio = request.Bio,
-            PreferredFantasyThemes = request.PreferredFantasyThemes?
-                .Select(t => new FantasyTheme(t))
-                .ToList() ?? new List<FantasyTheme>(),
+            PreferredFantasyThemes = request.PreferredFantasyThemes?.ToList() ?? new List<string>(),
             AvatarMediaId = request.SelectedAvatarMediaId,
             SelectedAvatarMediaId = request.SelectedAvatarMediaId,
             HasCompletedOnboarding = request.HasCompletedOnboarding,
             CreatedAt = DateTime.UtcNow,
-            UpdatedAt = DateTime.UtcNow
+            UpdatedAt = DateTime.UtcNow,
+            AgeGroupId = request.AgeGroup
         };
-
-        profile.AgeGroupName = request.AgeGroup;
 
         // Update age group from date of birth if provided
         if (request.DateOfBirth.HasValue)

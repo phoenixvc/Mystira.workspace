@@ -2,6 +2,7 @@ using Microsoft.Extensions.Logging;
 using Mystira.Application.Ports.Data;
 using Mystira.Contracts.App.Requests.UserProfiles;
 using Mystira.Domain.Models;
+using Mystira.Domain.ValueObjects;
 
 namespace Mystira.Application.UseCases.UserProfiles;
 
@@ -42,23 +43,24 @@ public class UpdateUserProfileUseCase
                 throw new ArgumentException($"Invalid fantasy themes: {string.Join(", ", invalidThemes)}");
             }
 
-            profile.PreferredFantasyThemes = request.PreferredFantasyThemes.Select(t => FantasyTheme.Parse(t)!).ToList();
+            profile.PreferredFantasyThemes = request.PreferredFantasyThemes.ToList();
         }
 
         if (request.AgeGroup != null)
         {
             // Validate age group
-            if (!AgeGroupConstants.AllAgeGroups.Contains(request.AgeGroup))
+            var allAgeGroupIds = AgeGroup.All.Select(a => a.Id).ToList();
+            if (!allAgeGroupIds.Contains(request.AgeGroup))
             {
-                throw new ArgumentException($"Invalid age group: {request.AgeGroup}. Must be one of: {string.Join(", ", AgeGroupConstants.AllAgeGroups)}");
+                throw new ArgumentException($"Invalid age group: {request.AgeGroup}. Must be one of: {string.Join(", ", allAgeGroupIds)}");
             }
 
-            profile.AgeGroupName = request.AgeGroup;
+            profile.AgeGroupId = request.AgeGroup;
         }
 
         if (request.DateOfBirth.HasValue)
         {
-            profile.DateOfBirth = request.DateOfBirth;
+            profile.DateOfBirth = DateOnly.FromDateTime(request.DateOfBirth.Value);
             // Update age group automatically if date of birth is provided
             profile.UpdateAgeGroupFromBirthDate();
         }

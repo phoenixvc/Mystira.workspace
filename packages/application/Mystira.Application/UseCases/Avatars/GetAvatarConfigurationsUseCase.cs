@@ -31,7 +31,7 @@ public class GetAvatarConfigurationsUseCase
         };
 
         // Ensure all age groups are present
-        var allAgeGroups = AgeGroup.ValueMap.Values.Select(a => a.Value).ToList();
+        var allAgeGroups = AgeGroup.All.Select(a => a.Id).ToList();
         foreach (var ageGroup in allAgeGroups)
         {
             response.AgeGroupAvatars.TryAdd(ageGroup, new List<string>());

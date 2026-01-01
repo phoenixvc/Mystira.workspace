@@ -31,7 +31,7 @@ public static class GetBadgesByAgeGroupQueryHandler
                 TierOrder = b.TierOrder,
                 Title = b.Title,
                 Description = b.Description,
-                RequiredScore = b.RequiredScore,
+                RequiredScore = b.RequiredScore ?? 0,
                 ImageId = b.ImageId
             })
             .ToList();

@@ -108,7 +108,8 @@ public class BadgeAwardingService : IBadgeAwardingService
                 }
 
                 // Check if score meets the threshold
-                if (score >= badge.RequiredScore)
+                var requiredScore = badge.RequiredScore ?? 0;
+                if (score >= requiredScore)
                 {
                     var userBadge = new UserBadge
                     {
@@ -118,7 +119,7 @@ public class BadgeAwardingService : IBadgeAwardingService
                         BadgeName = badge.Title,
                         BadgeMessage = badge.Description,
                         Axis = axis,
-                        TriggerValue = score,
+                        TriggerValue = (int)Math.Round(score),
                         Threshold = badge.RequiredScore,
                         EarnedAt = DateTime.UtcNow,
                         ImageId = badge.ImageId

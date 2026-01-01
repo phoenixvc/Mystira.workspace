@@ -24,7 +24,7 @@ public sealed class ContentBundlesByAgeGroupSpec : BaseEntitySpecification<Conte
 {
     public ContentBundlesByAgeGroupSpec(string ageGroup)
     {
-        Query.Where(b => b.AgeGroup == ageGroup)
+        Query.Where(b => b.AgeGroupId == ageGroup)
              .OrderBy(b => b.Title);
     }
 }
