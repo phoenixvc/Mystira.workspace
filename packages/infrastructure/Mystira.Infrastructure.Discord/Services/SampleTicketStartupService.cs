@@ -37,9 +37,17 @@ public sealed class SampleTicketStartupService : IHostedService
     /// <inheritdoc/>
     public async Task StartAsync(CancellationToken cancellationToken)
     {
-        // Wait for bot to connect before attempting to create the sample ticket
-        await _botService.WaitForConnectionAsync(cancellationToken);
-        await PostSampleTicketIfEnabledAsync();
+        try
+        {
+            // Wait for bot to connect before attempting to create the sample ticket
+            await _botService.WaitForConnectionAsync(cancellationToken);
+            await PostSampleTicketIfEnabledAsync();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to create sample ticket channel on startup.");
+            // Don't rethrow - allow the service to start even if ticket creation fails
+        }
     }
 
     /// <inheritdoc/>
