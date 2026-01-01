@@ -116,7 +116,7 @@ public class CreateGameSessionUseCase
         var targetAgeGroupObj = AgeGroup.Parse(targetAgeGroup);
         if (targetAgeGroupObj != null)
         {
-            return scenarioMinimumAge <= targetAgeGroupObj.MinimumAge;
+            return scenarioMinimumAge <= targetAgeGroupObj.MinAge;
         }
 
         // Fallback: try to parse age range (e.g., "6-9" -> 6)

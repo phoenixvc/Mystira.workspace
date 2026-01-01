@@ -59,7 +59,7 @@ public class UpdateMediaMetadataUseCase
         }
 
         mediaAsset.UpdatedAt = DateTime.UtcNow;
-        mediaAsset.Version = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ");
+        mediaAsset.Version = mediaAsset.Version + 1;
 
         await _repository.UpdateAsync(mediaAsset);
         await _unitOfWork.SaveChangesAsync();
