@@ -170,7 +170,7 @@ public static class StartGameSessionCommandHandler
             AccountId = request.AccountId,
             ProfileId = request.ProfileId,
             PlayerNames = request.PlayerNames ?? new List<string>(),
-            TargetAgeGroup = targetAgeGroup,
+            TargetAgeGroup = targetAgeGroup.Value,
             Status = SessionStatus.InProgress,
             StartTime = DateTime.UtcNow,
             CurrentSceneId = scenarioEntity == null ? string.Empty : DetermineStartingSceneId(scenarioEntity),

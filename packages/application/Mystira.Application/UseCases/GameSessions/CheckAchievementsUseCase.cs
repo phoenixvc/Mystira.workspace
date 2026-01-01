@@ -69,7 +69,7 @@ public class CheckAchievementsUseCase
                         IconName = !string.IsNullOrEmpty(axisBadge?.ImageId) ? axisBadge.ImageId : $"badge_{compassTracking.Axis}",
                         Type = AchievementType.CompassThreshold,
                         CompassAxis = compassTracking.Axis,
-                        ThresholdValue = threshold,
+                        ThresholdValue = (int)threshold,
                         EarnedAt = DateTime.UtcNow
                     });
                 }

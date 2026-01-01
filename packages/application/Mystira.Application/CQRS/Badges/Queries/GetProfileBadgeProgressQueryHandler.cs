@@ -96,7 +96,7 @@ public static class GetProfileBadgeProgressQueryHandler
 
             response.AxisProgresses.Add(new AxisProgressResponse
             {
-                CompassAxisId = axisId,
+                CompassAxisId = axisId ?? string.Empty,
                 CompassAxisName = axisName,
                 CurrentScore = (int)Math.Round((double)currentScore, MidpointRounding.AwayFromZero),
                 Tiers = axisTiers

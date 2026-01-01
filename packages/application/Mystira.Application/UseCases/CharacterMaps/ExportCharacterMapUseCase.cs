@@ -34,7 +34,7 @@ public class ExportCharacterMapUseCase
                 Name = cm.Name,
                 Image = cm.Image ?? string.Empty,
                 Audio = cm.Audio,
-                Metadata = cm.Metadata
+                Metadata = cm.Metadata ?? new Dictionary<string, object>()
             }).ToList()
         };
 

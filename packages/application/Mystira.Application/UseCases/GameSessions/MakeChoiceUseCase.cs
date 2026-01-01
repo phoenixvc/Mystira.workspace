@@ -96,11 +96,11 @@ public class MakeChoiceUseCase
             PlayerId = playerId ?? string.Empty,
             CompassAxis = compassAxis,
             CompassDirection = compassDirection,
-            CompassDelta = compassDelta.HasValue ? (double)compassDelta.Value : null,
+            CompassDelta = compassDelta.HasValue ? (double)compassDelta.Value : 0.0,
             ChosenAt = DateTime.UtcNow,
             EchoGenerated = branch.EchoLog != null,
             CompassChange = !string.IsNullOrWhiteSpace(compassAxis) && compassDelta.HasValue
-                ? new CompassChange { Axis = compassAxis, Delta = (int)compassDelta.Value }
+                ? new CompassChange { AxisId = compassAxis, Delta = (int)compassDelta.Value }
                 : null
         };
 

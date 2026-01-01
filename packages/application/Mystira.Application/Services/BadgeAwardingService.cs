@@ -91,7 +91,7 @@ public class BadgeAwardingService : IBadgeAwardingService
             var hasScore = axisScores.TryGetValue(axis ?? string.Empty, out var score);
             if (!hasScore)
             {
-                var normalized = NormalizeAxisKey(axis);
+                var normalized = NormalizeAxisKey(axis ?? string.Empty);
                 hasScore = normalizedAxisScores.TryGetValue(normalized, out score);
             }
             if (!hasScore)
