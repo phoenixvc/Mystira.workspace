@@ -10,7 +10,7 @@ namespace Mystira.Application.CQRS.CompassAxes.Commands;
 /// </summary>
 public static class CreateCompassAxisCommandHandler
 {
-    public static async Task<CompassAxis> Handle(
+    public static async Task<CompassAxisDefinition> Handle(
         CreateCompassAxisCommand command,
         ICompassAxisRepository repository,
         IUnitOfWork unitOfWork,
@@ -25,11 +25,11 @@ public static class CreateCompassAxisCommandHandler
             throw new ArgumentException("Name is required");
         }
 
-        var axis = new CompassAxis
+        var axis = new CompassAxisDefinition
         {
             Id = Guid.NewGuid().ToString(),
             Name = command.Name,
-            Description = command.Description,
+            Description = command.Description ?? string.Empty,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
         };

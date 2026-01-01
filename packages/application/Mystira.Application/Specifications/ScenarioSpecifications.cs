@@ -22,7 +22,7 @@ public sealed class ScenariosByAgeGroupSpec : BaseEntitySpecification<Scenario>
 {
     public ScenariosByAgeGroupSpec(string ageGroup)
     {
-        Query.Where(s => s.AgeGroup == ageGroup)
+        Query.Where(s => s.AgeGroupId == ageGroup)
              .OrderBy(s => s.Title);
     }
 }
@@ -70,7 +70,7 @@ public sealed class ScenariosPaginatedSpec : BaseEntitySpecification<Scenario>
 
         if (!string.IsNullOrWhiteSpace(ageGroup))
         {
-            query = query.Where(s => s.AgeGroup == ageGroup);
+            query = query.Where(s => s.AgeGroupId == ageGroup);
         }
 
         if (difficulty.HasValue)

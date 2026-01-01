@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 using Mystira.Application.Ports.Data;
 using Mystira.Domain.Models;
+using Mystira.Domain.ValueObjects;
 
 namespace Mystira.Application.CQRS.UserProfiles.Commands;
 
@@ -33,24 +34,23 @@ public static class UpdateUserProfileCommandHandler
         // Update profile fields
         if (request.PreferredFantasyThemes != null)
         {
-            profile.PreferredFantasyThemes = request.PreferredFantasyThemes
-                .Select(t => new FantasyTheme(t))
-                .ToList();
+            profile.PreferredFantasyThemes = request.PreferredFantasyThemes.ToList();
         }
 
         if (!string.IsNullOrWhiteSpace(request.AgeGroup))
         {
-            if (!AgeGroupConstants.AllAgeGroups.Contains(request.AgeGroup))
+            var allAgeGroupIds = AgeGroup.All.Select(a => a.Id).ToList();
+            if (!allAgeGroupIds.Contains(request.AgeGroup))
             {
-                throw new ArgumentException($"Invalid age group: {request.AgeGroup}. Must be one of: {string.Join(", ", AgeGroupConstants.AllAgeGroups)}");
+                throw new ArgumentException($"Invalid age group: {request.AgeGroup}. Must be one of: {string.Join(", ", allAgeGroupIds)}");
             }
 
-            profile.AgeGroupName = request.AgeGroup;
+            profile.AgeGroupId = request.AgeGroup;
         }
 
         if (request.DateOfBirth.HasValue)
         {
-            profile.DateOfBirth = request.DateOfBirth;
+            profile.DateOfBirth = DateOnly.FromDateTime(request.DateOfBirth.Value);
             profile.UpdateAgeGroupFromBirthDate();
         }
 

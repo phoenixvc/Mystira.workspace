@@ -50,8 +50,8 @@ public class CreateContentBundleUseCase
             ScenarioIds = scenarioIds,
             ImageId = imageId ?? string.Empty,
             Prices = prices ?? new List<BundlePrice>(),
-            IsFree = isFree,
-            AgeGroup = ageGroup ?? string.Empty
+            PriceCents = isFree ? 0 : (prices?.FirstOrDefault()?.Value ?? 0) * 100,
+            AgeGroupId = ageGroup ?? string.Empty
         };
 
         await _repository.AddAsync(bundle);

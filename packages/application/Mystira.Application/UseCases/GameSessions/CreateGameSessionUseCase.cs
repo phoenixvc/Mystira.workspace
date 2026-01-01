@@ -93,13 +93,13 @@ public class CreateGameSessionUseCase
         // Initialize compass tracking for scenario axes
         foreach (var axis in scenario.CoreAxes)
         {
-            session.CompassValues[axis.Value] = new CompassTracking
+            session.CompassValues.Add(new CompassTracking
             {
-                Axis = axis.Value,
-                CurrentValue = 0.0f,
-                History = new List<CompassChange>(),
+                Axis = axis,
+                CurrentValue = 0.0,
+                StartingValue = 0,
                 LastUpdated = DateTime.UtcNow
-            };
+            });
         }
 
         await _repository.AddAsync(session);

@@ -39,6 +39,9 @@ public static partial class ScenarioMapper
     [MapperIgnoreTarget(nameof(ScenarioCharacter.UpdatedAt))]
     [MapperIgnoreTarget(nameof(ScenarioCharacter.CreatedBy))]
     [MapperIgnoreTarget(nameof(ScenarioCharacter.UpdatedBy))]
+    [MapperIgnoreTarget(nameof(ScenarioCharacter.Image))]
+    [MapperIgnoreTarget(nameof(ScenarioCharacter.Audio))]
+    [MapperIgnoreTarget(nameof(ScenarioCharacter.Metadata))]
     public static partial ScenarioCharacter ToScenarioCharacter(CharacterRequest request);
 
     /// <summary>
@@ -154,39 +157,43 @@ public static partial class ScenarioMapper
 
     /// <summary>
     /// Safely parses a list of archetype strings, filtering out any null results.
+    /// Returns string values for storage in Scenario.Archetypes (List&lt;string&gt;).
     /// </summary>
-    public static List<Archetype> ParseArchetypes(IEnumerable<string>? archetypes)
+    public static List<string> ParseArchetypes(IEnumerable<string>? archetypes)
     {
         if (archetypes == null)
         {
-            return new List<Archetype>();
+            return new List<string>();
         }
 
         return archetypes
             .Select(Archetype.Parse)
             .OfType<Archetype>()
+            .Select(a => a.Value)
             .ToList();
     }
 
     /// <summary>
     /// Safely parses a list of core axis strings, filtering out any null results.
+    /// Returns string values for storage in Scenario.CoreAxes (List&lt;string&gt;).
     /// </summary>
-    public static List<CoreAxis> ParseCoreAxes(IEnumerable<string>? coreAxes)
+    public static List<string> ParseCoreAxes(IEnumerable<string>? coreAxes)
     {
         if (coreAxes == null)
         {
-            return new List<CoreAxis>();
+            return new List<string>();
         }
 
         return coreAxes
             .Select(CoreAxis.Parse)
             .OfType<CoreAxis>()
+            .Select(a => a.Value)
             .ToList();
     }
 
     // Custom mapping methods for complex scenarios
 
-    private static List<Archetype> MapArchetypes(List<string>? archetypes)
+    private static List<string> MapArchetypes(List<string>? archetypes)
         => ParseArchetypes(archetypes);
 
     private static SceneType ParseSceneType(string? type)

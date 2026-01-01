@@ -48,7 +48,7 @@ public class CheckAchievementsUseCase
         var badgeConfigs = await _badgeRepository.ListAsync(new AllBadgeConfigurationsSpec());
 
         // Check compass threshold achievements
-        foreach (var compassTracking in session.CompassValues.Values)
+        foreach (var compassTracking in session.CompassValues)
         {
             // Find badge configuration for this axis
             var axisBadge = badgeConfigs.FirstOrDefault(b => b.Axis.Equals(compassTracking.Axis, StringComparison.OrdinalIgnoreCase));

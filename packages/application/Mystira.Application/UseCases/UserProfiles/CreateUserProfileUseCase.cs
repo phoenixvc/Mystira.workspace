@@ -2,6 +2,7 @@ using Microsoft.Extensions.Logging;
 using Mystira.Application.Ports.Data;
 using Mystira.Contracts.App.Requests.UserProfiles;
 using Mystira.Domain.Models;
+using Mystira.Domain.ValueObjects;
 
 namespace Mystira.Application.UseCases.UserProfiles;
 
@@ -41,19 +42,20 @@ public class CreateUserProfileUseCase
         }
 
         // Validate age group
-        if (!AgeGroupConstants.AllAgeGroups.Contains(request.AgeGroup))
+        var allAgeGroupIds = AgeGroup.All.Select(a => a.Id).ToList();
+        if (!allAgeGroupIds.Contains(request.AgeGroup))
         {
-            throw new ArgumentException($"Invalid age group: {request.AgeGroup}. Must be one of: {string.Join(", ", AgeGroupConstants.AllAgeGroups)}");
+            throw new ArgumentException($"Invalid age group: {request.AgeGroup}. Must be one of: {string.Join(", ", allAgeGroupIds)}");
         }
 
         var profile = new UserProfile
         {
             Id = request.Id,
             Name = request.Name,
-            AccountId = request.AccountId,
-            PreferredFantasyThemes = request.PreferredFantasyThemes?.Select(t => FantasyTheme.Parse(t)!).ToList() ?? new List<FantasyTheme>(),
-            AgeGroupName = request.AgeGroup,
-            DateOfBirth = request.DateOfBirth,
+            AccountId = request.AccountId ?? string.Empty,
+            PreferredFantasyThemes = request.PreferredFantasyThemes?.ToList() ?? new List<string>(),
+            AgeGroupId = request.AgeGroup,
+            DateOfBirth = request.DateOfBirth.HasValue ? DateOnly.FromDateTime(request.DateOfBirth.Value) : null,
             IsGuest = request.IsGuest,
             IsNpc = request.IsNpc,
             HasCompletedOnboarding = request.HasCompletedOnboarding,

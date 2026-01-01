@@ -22,7 +22,9 @@ public sealed class GetBadgeConfigurationsByAxisQueryHandler
 
     public async Task<List<BadgeConfiguration>> Handle(GetBadgeConfigurationsByAxisQuery request, CancellationToken cancellationToken)
     {
-        var list = await _repository.FindAsync(b => b.Axis == request.Axis);
+        // BadgeConfiguration.Axis is CoreAxis?, but we're comparing with AxisId (string)
+        // Use AxisId property instead which is the string value
+        var list = await _repository.FindAsync(b => b.AxisId == request.Axis);
         return list.OrderBy(b => b.Name).ToList();
     }
 }

@@ -9,7 +9,7 @@ namespace Mystira.Application.CQRS.CompassAxes.Queries;
 /// </summary>
 public static class GetAllCompassAxesQueryHandler
 {
-    public static async Task<List<CompassAxis>> Handle(
+    public static async Task<List<CompassAxisDefinition>> Handle(
         GetAllCompassAxesQuery query,
         ICompassAxisRepository repository,
         ILogger<GetAllCompassAxesQuery> logger,

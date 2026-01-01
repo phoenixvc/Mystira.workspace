@@ -177,7 +177,7 @@ public static class StartGameSessionCommandHandler
             ChoiceHistory = new List<SessionChoice>(),
             EchoHistory = new List<EchoLog>(),
             Achievements = new List<SessionAchievement>(),
-            CompassValues = new Dictionary<string, CompassTracking>(StringComparer.OrdinalIgnoreCase),
+            CompassValues = new List<CompassTracking>(),
             SceneCount = scenarioEntity?.Scenes?.Count ?? 0
         };
 
@@ -200,14 +200,13 @@ public static class StartGameSessionCommandHandler
         {
             foreach (var axis in scenarioEntity.CoreAxes)
             {
-                session.CompassValues[axis.Value] = new CompassTracking
+                session.CompassValues.Add(new CompassTracking
                 {
-                    Axis = axis.Value,
+                    Axis = axis,
                     CurrentValue = 0.0,
-                    StartingValue = 0.0,
-                    History = new List<CompassChange>(),
+                    StartingValue = 0,
                     LastUpdated = DateTime.UtcNow
-                };
+                });
             }
         }
 

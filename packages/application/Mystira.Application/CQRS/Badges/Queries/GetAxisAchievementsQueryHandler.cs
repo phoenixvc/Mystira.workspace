@@ -20,16 +20,16 @@ public static class GetAxisAchievementsQueryHandler
         CancellationToken ct)
     {
         var achievements = await axisAchievementRepository.GetByAgeGroupAsync(query.AgeGroupId);
-        var axes = await axisRepository.GetAllAsync();
+        var axisDefinitions = await axisRepository.GetAllAsync();
 
-        var axisLookup = axes
+        var axisLookup = axisDefinitions
             .SelectMany(a => new[] { (Key: a.Id, Value: a), (Key: a.Name, Value: a) })
             .Where(x => !string.IsNullOrWhiteSpace(x.Key))
             .ToDictionary(x => x.Key, x => x.Value, StringComparer.OrdinalIgnoreCase);
 
         return achievements
             .OrderBy(a => a.CompassAxisId)
-            .ThenBy(a => a.AxesDirection)
+            .ThenBy(a => a.CurrentValue)
             .Select(a =>
             {
                 axisLookup.TryGetValue(a.CompassAxisId, out var axis);
@@ -37,14 +37,17 @@ public static class GetAxisAchievementsQueryHandler
                     ? axis.Name
                     : (axis?.Id ?? a.CompassAxisId);
 
+                // Determine direction based on current value
+                var direction = a.CurrentValue >= 0 ? "positive" : "negative";
+
                 return new AxisAchievementResponse
                 {
                     Id = a.Id,
-                    AgeGroupId = a.AgeGroupId,
+                    AgeGroupId = string.Empty, // AxisAchievement doesn't have AgeGroupId
                     CompassAxisId = a.CompassAxisId,
                     CompassAxisName = axisName,
-                    AxesDirection = a.AxesDirection,
-                    Description = a.Description
+                    AxesDirection = direction,
+                    Description = $"Highest: {a.HighestValue}, Lowest: {a.LowestValue}, Current: {a.CurrentValue}"
                 };
             })
             .ToList();

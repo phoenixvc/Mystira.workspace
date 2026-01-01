@@ -53,7 +53,7 @@ public class RemoveUserProfileFromAccountUseCase
         // Unlink profile from account
         if (profile.AccountId == accountId)
         {
-            profile.AccountId = null;
+            profile.AccountId = string.Empty;
             await _userProfileRepository.UpdateAsync(profile);
         }
 

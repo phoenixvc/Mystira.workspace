@@ -48,7 +48,7 @@ public static class AwardBadgeCommandHandler
             BadgeId = badgeConfig.Id,
             BadgeName = badgeConfig.Name,
             BadgeMessage = badgeConfig.Message,
-            Axis = badgeConfig.Axis,
+            Axis = badgeConfig.Axis?.Value,
             TriggerValue = request.TriggerValue,
             Threshold = badgeConfig.Threshold,
             GameSessionId = request.GameSessionId,
