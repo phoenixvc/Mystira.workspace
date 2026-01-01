@@ -5,7 +5,7 @@ using Mystira.Domain.Models;
 namespace Mystira.Infrastructure.Data.Repositories;
 
 /// <summary>
-/// Repository implementation for CompassAxis entity with domain-specific queries.
+/// Repository implementation for CompassAxisDefinition entity with domain-specific queries.
 /// Supports soft-delete pattern for compass axis management.
 /// </summary>
 public class CompassAxisRepository : ICompassAxisRepository
@@ -24,8 +24,8 @@ public class CompassAxisRepository : ICompassAxisRepository
     /// <summary>
     /// Retrieves all non-deleted compass axes, ordered by name.
     /// </summary>
-    /// <returns>A list of compass axes.</returns>
-    public async Task<List<CompassAxis>> GetAllAsync()
+    /// <returns>A list of compass axis definitions.</returns>
+    public async Task<List<CompassAxisDefinition>> GetAllAsync()
     {
         return await _context.CompassAxes
             .Where(x => !x.IsDeleted)
@@ -34,27 +34,27 @@ public class CompassAxisRepository : ICompassAxisRepository
     }
 
     /// <summary>
-    /// Retrieves a compass axis by its unique identifier.
+    /// Retrieves a compass axis definition by its unique identifier.
     /// </summary>
     /// <param name="id">The compass axis ID.</param>
-    /// <returns>The compass axis, or null if not found or deleted.</returns>
-    public async Task<CompassAxis?> GetByIdAsync(string id)
+    /// <returns>The compass axis definition, or null if not found or deleted.</returns>
+    public async Task<CompassAxisDefinition?> GetByIdAsync(string id)
     {
         return await _context.CompassAxes.FirstOrDefaultAsync(x => x.Id == id && !x.IsDeleted);
     }
 
     /// <summary>
-    /// Retrieves a compass axis by its name (case-insensitive).
+    /// Retrieves a compass axis definition by its name (case-insensitive).
     /// </summary>
     /// <param name="name">The compass axis name.</param>
-    /// <returns>The compass axis, or null if not found or deleted.</returns>
-    public async Task<CompassAxis?> GetByNameAsync(string name)
+    /// <returns>The compass axis definition, or null if not found or deleted.</returns>
+    public async Task<CompassAxisDefinition?> GetByNameAsync(string name)
     {
         return await _context.CompassAxes.FirstOrDefaultAsync(x => x.Name.Equals(name, StringComparison.OrdinalIgnoreCase) && !x.IsDeleted);
     }
 
     /// <summary>
-    /// Checks if a compass axis with the specified name exists (case-insensitive).
+    /// Checks if a compass axis definition with the specified name exists (case-insensitive).
     /// </summary>
     /// <param name="name">The compass axis name to check.</param>
     /// <returns>True if the compass axis exists and is not deleted; otherwise, false.</returns>
@@ -64,30 +64,30 @@ public class CompassAxisRepository : ICompassAxisRepository
     }
 
     /// <summary>
-    /// Adds a new compass axis to the repository.
+    /// Adds a new compass axis definition to the repository.
     /// </summary>
-    /// <param name="axis">The compass axis to add.</param>
+    /// <param name="axis">The compass axis definition to add.</param>
     /// <returns>A task representing the asynchronous operation.</returns>
-    public async Task AddAsync(CompassAxis axis)
+    public async Task AddAsync(CompassAxisDefinition axis)
     {
         await _context.CompassAxes.AddAsync(axis);
     }
 
     /// <summary>
-    /// Updates an existing compass axis in the repository.
+    /// Updates an existing compass axis definition in the repository.
     /// </summary>
-    /// <param name="axis">The compass axis to update.</param>
+    /// <param name="axis">The compass axis definition to update.</param>
     /// <returns>A task representing the asynchronous operation.</returns>
-    public Task UpdateAsync(CompassAxis axis)
+    public Task UpdateAsync(CompassAxisDefinition axis)
     {
         _context.CompassAxes.Update(axis);
         return Task.CompletedTask;
     }
 
     /// <summary>
-    /// Soft deletes a compass axis by marking it as deleted.
+    /// Soft deletes a compass axis definition by marking it as deleted.
     /// </summary>
-    /// <param name="id">The ID of the compass axis to delete.</param>
+    /// <param name="id">The ID of the compass axis definition to delete.</param>
     /// <returns>A task representing the asynchronous operation.</returns>
     public async Task DeleteAsync(string id)
     {

@@ -141,14 +141,14 @@ public class PolyglotRepository<T> : EfSpecificationRepository<T>, IPolyglotRepo
     }
 
     /// <inheritdoc />
-    public override async Task UpdateRangeAsync(IEnumerable<T> entities, CancellationToken cancellationToken = default)
+    public override async Task<int> UpdateRangeAsync(IEnumerable<T> entities, CancellationToken cancellationToken = default)
     {
         var entityList = entities.ToList();
 
         if (IsDualWriteMode)
         {
             // Update primary first
-            await base.UpdateRangeAsync(entityList, cancellationToken);
+            var result = await base.UpdateRangeAsync(entityList, cancellationToken);
 
             // Then update secondary with resilience
             foreach (var entity in entityList)
@@ -164,21 +164,21 @@ public class PolyglotRepository<T> : EfSpecificationRepository<T>, IPolyglotRepo
                 }
             }
 
-            return;
+            return result;
         }
 
-        await base.UpdateRangeAsync(entityList, cancellationToken);
+        return await base.UpdateRangeAsync(entityList, cancellationToken);
     }
 
     /// <inheritdoc />
-    public override async Task DeleteRangeAsync(IEnumerable<T> entities, CancellationToken cancellationToken = default)
+    public override async Task<int> DeleteRangeAsync(IEnumerable<T> entities, CancellationToken cancellationToken = default)
     {
         var entityList = entities.ToList();
 
         if (IsDualWriteMode)
         {
             // Delete from primary first
-            await base.DeleteRangeAsync(entityList, cancellationToken);
+            var result = await base.DeleteRangeAsync(entityList, cancellationToken);
 
             // Then delete from secondary with resilience
             foreach (var entity in entityList)
@@ -194,10 +194,10 @@ public class PolyglotRepository<T> : EfSpecificationRepository<T>, IPolyglotRepo
                 }
             }
 
-            return;
+            return result;
         }
 
-        await base.DeleteRangeAsync(entityList, cancellationToken);
+        return await base.DeleteRangeAsync(entityList, cancellationToken);
     }
 
     /// <inheritdoc />
