@@ -51,7 +51,13 @@ public static class BranchParser
              branchDict.TryGetValue("compass_impact", out compassChangeObj)) &&
             compassChangeObj is IDictionary<object, object> compassChangeDict)
         {
-            branch.CompassChange = CompassChangeParser.Parse(compassChangeDict);
+            var compassChange = CompassChangeParser.Parse(compassChangeDict);
+            branch.CompassChange = new CompassChangeDto
+            {
+                Axis = compassChange.AxisId,
+                Delta = compassChange.Delta,
+                DevelopmentalLink = compassChange.Reason
+            };
         }
 
         return branch;
