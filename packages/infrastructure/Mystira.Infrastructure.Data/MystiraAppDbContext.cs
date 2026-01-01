@@ -2,7 +2,9 @@ using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using Mystira.Domain.Enums;
 using Mystira.Domain.Models;
+using Mystira.Domain.ValueObjects;
 
 namespace Mystira.Infrastructure.Data;
 
@@ -311,8 +313,8 @@ public partial class MystiraAppDbContext : DbContext
             }
         });
 
-        // Configure CompassAxis
-        modelBuilder.Entity<CompassAxis>(entity =>
+        // Configure CompassAxisDefinition
+        modelBuilder.Entity<CompassAxisDefinition>(entity =>
         {
             entity.HasKey(e => e.Id);
 

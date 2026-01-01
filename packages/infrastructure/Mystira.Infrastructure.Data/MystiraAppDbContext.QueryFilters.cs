@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using Mystira.Domain.Models;
+using Mystira.Domain.Entities;
 
 namespace Mystira.Infrastructure.Data;
 

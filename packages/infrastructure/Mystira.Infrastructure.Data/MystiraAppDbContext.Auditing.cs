@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using Mystira.Domain.Models;
+using Mystira.Domain.Entities;
 
 namespace Mystira.Infrastructure.Data;
 
@@ -28,7 +28,7 @@ public partial class MystiraAppDbContext
     private void ApplyAuditInformation()
     {
         var entries = ChangeTracker.Entries()
-            .Where(e => e.Entity is AuditableEntity && (
+            .Where(e => e.Entity is IAuditableEntity && (
                 e.State == EntityState.Added ||
                 e.State == EntityState.Modified ||
                 e.State == EntityState.Deleted));
@@ -37,7 +37,7 @@ public partial class MystiraAppDbContext
 
         foreach (var entry in entries)
         {
-            var entity = (AuditableEntity)entry.Entity;
+            var entity = (IAuditableEntity)entry.Entity;
 
             switch (entry.State)
             {
@@ -56,7 +56,9 @@ public partial class MystiraAppDbContext
                     if (entity is SoftDeletableEntity softDeletableEntity)
                     {
                         entry.State = EntityState.Modified;  // Don't actually delete
-                        softDeletableEntity.Delete(CurrentUserId);
+                        softDeletableEntity.IsDeleted = true;
+                        softDeletableEntity.DeletedAt = utcNow;
+                        softDeletableEntity.DeletedBy = CurrentUserId;
                     }
                     break;
             }
