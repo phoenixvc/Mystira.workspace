@@ -100,11 +100,12 @@ public static class GetInProgressSessionsQueryHandler
                         SaveAsProfile = ca.PlayerAssignment.SaveAsProfile
                     }
                 }).ToList() ?? new List<CharacterAssignmentDto>(),
-                PlayerCompassProgressTotals = s.PlayerCompassProgressTotals.Select(p => new PlayerCompassProgressDto
+                // PlayerCompassProgressTotals is Dictionary<string, int> where key is axis, value is total
+                PlayerCompassProgressTotals = s.PlayerCompassProgressTotals.Select(kvp => new PlayerCompassProgressDto
                 {
-                    PlayerId = p.PlayerId,
-                    Axis = p.Axis,
-                    Total = (int)p.Total
+                    PlayerId = string.Empty,
+                    Axis = kvp.Key,
+                    Total = kvp.Value
                 }).ToList(),
                 Status = s.Status.ToString(),
                 CurrentSceneId = s.CurrentSceneId,
@@ -116,7 +117,7 @@ public static class GetInProgressSessionsQueryHandler
                 ElapsedTime = s.GetTotalElapsedTime(),
                 IsPaused = s.Status == SessionStatus.Paused,
                 SceneCount = s.ChoiceHistory?.Select(c => c.SceneId).Distinct().Count() ?? 0,
-                TargetAgeGroup = s.TargetAgeGroup.Value
+                TargetAgeGroup = s.TargetAgeGroupName
             };
         }).ToList();
 

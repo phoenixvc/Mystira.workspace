@@ -110,7 +110,7 @@ public class MakeChoiceUseCase
         {
             session.EchoHistory.Add(new EchoLog
             {
-                EchoType = branch.EchoLog.EchoType,
+                EchoTypeId = branch.EchoLog.EchoTypeId,
                 Description = branch.EchoLog.Description,
                 Strength = branch.EchoLog.Strength,
                 Timestamp = DateTime.UtcNow

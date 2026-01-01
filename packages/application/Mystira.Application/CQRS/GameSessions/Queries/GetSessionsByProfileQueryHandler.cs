@@ -43,11 +43,12 @@ public static class GetSessionsByProfileQueryHandler
                 AccountId = s.AccountId,
                 ProfileId = s.ProfileId,
                 PlayerNames = s.PlayerNames,
-                PlayerCompassProgressTotals = s.PlayerCompassProgressTotals.Select(p => new PlayerCompassProgressDto
+                // PlayerCompassProgressTotals is Dictionary<string, int> where key is axis, value is total
+                PlayerCompassProgressTotals = s.PlayerCompassProgressTotals.Select(kvp => new PlayerCompassProgressDto
                 {
-                    PlayerId = p.PlayerId,
-                    Axis = p.Axis,
-                    Total = (int)p.Total
+                    PlayerId = string.Empty,
+                    Axis = kvp.Key,
+                    Total = kvp.Value
                 }).ToList(),
                 Status = s.Status.ToString(),
                 CurrentSceneId = s.CurrentSceneId,
@@ -59,7 +60,7 @@ public static class GetSessionsByProfileQueryHandler
                 ElapsedTime = s.GetTotalElapsedTime(),
                 IsPaused = s.Status == SessionStatus.Paused,
                 SceneCount = s.ChoiceHistory?.Select(c => c.SceneId).Distinct().Count() ?? 0,
-                TargetAgeGroup = s.TargetAgeGroup.Value
+                TargetAgeGroup = s.TargetAgeGroupName
             };
         }).ToList();
 
