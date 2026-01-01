@@ -213,13 +213,14 @@ public class PostgresDbContext : DbContext
                     v => JsonSerializer.Deserialize<List<EchoLog>>(v, (JsonSerializerOptions?)null) ?? new List<EchoLog>())
                 .Metadata.SetValueComparer(CreateListComparer<EchoLog>());
 
+            // CompassValues is List<CompassTracking> in the domain model
             entity.Property(e => e.CompassValues)
                 .HasColumnName("compass_values")
                 .HasColumnType("jsonb")
                 .HasConversion(
                     v => JsonSerializer.Serialize(v, (JsonSerializerOptions?)null),
-                    v => JsonSerializer.Deserialize<Dictionary<string, CompassTracking>>(v, (JsonSerializerOptions?)null) ?? new Dictionary<string, CompassTracking>())
-                .Metadata.SetValueComparer(CreateDictionaryComparer<string, CompassTracking>());
+                    v => JsonSerializer.Deserialize<List<CompassTracking>>(v, (JsonSerializerOptions?)null) ?? new List<CompassTracking>())
+                .Metadata.SetValueComparer(CreateListComparer<CompassTracking>());
 
             entity.Property(e => e.PlayerCompassProgressTotals)
                 .HasColumnName("player_compass_progress_totals")
@@ -309,8 +310,8 @@ public class PostgresDbContext : DbContext
     {
         return new ValueComparer<List<T>>(
             (c1, c2) => (c1 == null && c2 == null) || (c1 != null && c2 != null && c1.SequenceEqual(c2)),
-            c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v != null ? v.GetHashCode() : 0)),
-            c => c.ToList());
+            c => c == null ? 0 : c.Aggregate(0, (a, v) => HashCode.Combine(a, v != null ? v.GetHashCode() : 0)),
+            c => c == null ? null! : c.ToList());
     }
 
     private static ValueComparer<Dictionary<TKey, TValue>> CreateDictionaryComparer<TKey, TValue>()
@@ -333,7 +334,8 @@ public class PostgresDbContext : DbContext
             },
             d =>
             {
-                if (d == null) return new Dictionary<TKey, TValue>();
+                // Return null when input is null to preserve null vs empty semantics
+                if (d == null) return null!;
                 // Preserve the source dictionary's comparer in the snapshot
                 return new Dictionary<TKey, TValue>(d, d.Comparer);
             });

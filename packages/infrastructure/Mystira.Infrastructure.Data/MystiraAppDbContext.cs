@@ -92,12 +92,9 @@ public partial class MystiraAppDbContext : DbContext
 
             entity.Property(e => e.PreferredFantasyThemes)
                   .HasConversion(
-                        v => string.Join(',', v.Select(e => e.Value)),
-                        v => v.Split(',', StringSplitOptions.RemoveEmptyEntries)
-                            .Select(s => FantasyTheme.Parse(s))
-                            .Where(x => x != null)
-                            .ToList()!)
-                  .Metadata.SetValueComparer(new ValueComparer<List<FantasyTheme>>(
+                        v => string.Join(',', v),
+                        v => v.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList())
+                  .Metadata.SetValueComparer(new ValueComparer<List<string>>(
                       (c1, c2) => c1 != null && c2 != null && c1.SequenceEqual(c2),
                       c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
                       c => c.ToList()));
@@ -427,24 +424,18 @@ public partial class MystiraAppDbContext : DbContext
 
             entity.Property(e => e.Archetypes)
                   .HasConversion(
-                        v => string.Join(',', v.Select(e => e.Value)),
-                        v => v.Split(',', StringSplitOptions.RemoveEmptyEntries)
-                            .Select(s => Archetype.Parse(s))
-                            .Where(x => x != null)
-                            .ToList()!)
-                  .Metadata.SetValueComparer(new ValueComparer<List<Archetype>>(
+                        v => string.Join(',', v),
+                        v => v.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList())
+                  .Metadata.SetValueComparer(new ValueComparer<List<string>>(
                         (c1, c2) => c1 != null && c2 != null && c1.SequenceEqual(c2),
                         c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
                         c => c.ToList()));
 
             entity.Property(e => e.CoreAxes)
                   .HasConversion(
-                        v => string.Join(',', v.Select(e => e.Value)),
-                        v => v.Split(',', StringSplitOptions.RemoveEmptyEntries)
-                            .Select(s => CoreAxis.Parse(s))
-                            .Where(x => x != null)
-                            .ToList()!)
-                  .Metadata.SetValueComparer(new ValueComparer<List<CoreAxis>>(
+                        v => string.Join(',', v),
+                        v => v.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList())
+                  .Metadata.SetValueComparer(new ValueComparer<List<string>>(
                         (c1, c2) => c1 != null && c2 != null && c1.SequenceEqual(c2),
                         c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
                         c => c.ToList()));
@@ -452,14 +443,11 @@ public partial class MystiraAppDbContext : DbContext
             entity.OwnsOne(e => e.MusicPalette, palette =>
             {
                 palette.ToJsonProperty("MusicPalette");
-                palette.Property(p => p.DefaultProfile)
-                       .ToJsonProperty("DefaultProfile")
-                       .HasConversion(
-                           v => v.ToString(),
-                           v => Enum.Parse<MusicProfile>(v, true));
+                palette.Property(p => p.DefaultMood)
+                       .ToJsonProperty("DefaultMood");
 
-                palette.Property(p => p.TracksByProfile)
-                       .ToJsonProperty("TracksByProfile")
+                palette.Property(p => p.MoodTracks)
+                       .ToJsonProperty("MoodTracks")
                        .HasConversion(isInMemoryDatabase
                            ? (ValueConverter)new InMemoryDictionaryConverter()
                            : (ValueConverter)new CosmosDictionaryConverter())
@@ -484,12 +472,9 @@ public partial class MystiraAppDbContext : DbContext
 
                     metadata.Property(m => m.Archetype)
                             .HasConversion(
-                                v => string.Join(',', v.Select(e => e.Value)),
-                                v => v.Split(',', StringSplitOptions.RemoveEmptyEntries)
-                                    .Select(s => Archetype.Parse(s))
-                                    .Where(x => x != null)
-                                    .ToList()!)
-                            .Metadata.SetValueComparer(new ValueComparer<List<Archetype>>(
+                                v => string.Join(',', v),
+                                v => v.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList())
+                            .Metadata.SetValueComparer(new ValueComparer<List<string>>(
                                 (c1, c2) => c1 != null && c2 != null && c1.SequenceEqual(c2),
                                 c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
                                 c => c.ToList()));
@@ -511,31 +496,28 @@ public partial class MystiraAppDbContext : DbContext
                 scene.OwnsOne(s => s.Music, music =>
                 {
                     music.ToJsonProperty("Music");
-                    music.Property(m => m.Profile).ToJsonProperty("Profile")
-                         .HasConversion(v => v.ToString(), v => Enum.Parse<MusicProfile>(v, true));
-                    music.Property(m => m.Energy).ToJsonProperty("Energy");
-                    music.Property(m => m.Continuity).ToJsonProperty("Continuity")
-                         .HasConversion(v => v.ToString(), v => Enum.Parse<MusicContinuity>(v, true));
-                    music.Property(m => m.TransitionHint).ToJsonProperty("TransitionHint")
-                         .HasConversion(v => v.ToString(), v => Enum.Parse<MusicTransitionHint>(v, true));
-                    music.Property(m => m.Priority).ToJsonProperty("Priority")
-                         .HasConversion(v => v.ToString(), v => Enum.Parse<MusicPriority>(v, true));
-                    music.Property(m => m.Ducking).ToJsonProperty("Ducking")
-                         .HasConversion(v => v.ToString(), v => Enum.Parse<MusicDucking>(v, true));
+                    music.Property(m => m.MoodProfile).ToJsonProperty("MoodProfile");
+                    music.Property(m => m.TrackId).ToJsonProperty("TrackId");
+                    music.Property(m => m.Volume).ToJsonProperty("Volume");
+                    music.Property(m => m.Loop).ToJsonProperty("Loop");
+                    music.Property(m => m.FadeInSeconds).ToJsonProperty("FadeInSeconds");
+                    music.Property(m => m.FadeOutSeconds).ToJsonProperty("FadeOutSeconds");
                 });
                 scene.OwnsMany(s => s.SoundEffects, sfx =>
                 {
                     sfx.ToJsonProperty("SoundEffects");
-                    sfx.Property(s => s.Track).ToJsonProperty("Track");
-                    sfx.Property(s => s.Loopable).ToJsonProperty("Loopable");
-                    sfx.Property(s => s.Energy).ToJsonProperty("Energy");
+                    sfx.Property(s => s.TrackId).ToJsonProperty("TrackId");
+                    sfx.Property(s => s.Volume).ToJsonProperty("Volume");
+                    sfx.Property(s => s.Loop).ToJsonProperty("Loop");
+                    sfx.Property(s => s.TriggerType).ToJsonProperty("TriggerType");
+                    sfx.Property(s => s.DelaySeconds).ToJsonProperty("DelaySeconds");
                 });
                 scene.OwnsMany(s => s.Branches, branch =>
                 {
                     branch.OwnsOne(b => b.EchoLog, echoLog =>
                     {
                         // EchoType is now a plain string
-                        echoLog.Property(e => e.EchoType);
+                        echoLog.Property(el => el.EchoType);
                     });
                     branch.OwnsOne(b => b.CompassChange);
                 });
@@ -629,16 +611,16 @@ public partial class MystiraAppDbContext : DbContext
                 });
             });
 
-            // Configure CompassValues as a JSON property
+            // Configure CompassValues as a JSON property (it's a List, not Dictionary)
             entity.Property(e => e.CompassValues)
                   .HasConversion(
                       v => JsonSerializer.Serialize(v, (JsonSerializerOptions?)null),
-                      v => JsonSerializer.Deserialize<Dictionary<string, CompassTracking>>(v, (JsonSerializerOptions?)null) ?? new()
+                      v => JsonSerializer.Deserialize<List<CompassTracking>>(v, (JsonSerializerOptions?)null) ?? new()
                   )
-                  .Metadata.SetValueComparer(new ValueComparer<Dictionary<string, CompassTracking>>(
+                  .Metadata.SetValueComparer(new ValueComparer<List<CompassTracking>>(
                       (c1, c2) => c1 != null && c2 != null && c1.SequenceEqual(c2),
-                      c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.Key.GetHashCode(), v.Value.GetHashCode())),
-                      c => new Dictionary<string, CompassTracking>(c)));
+                      c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
+                      c => c.ToList()));
         });
 
         // Configure PlayerScenarioScore
@@ -698,19 +680,7 @@ public partial class MystiraAppDbContext : DbContext
                       v => v.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList()
                   );
 
-            entity.OwnsOne(e => e.Metadata, metadata =>
-            {
-                metadata.Property(m => m.AdditionalProperties)
-                        .HasConversion(
-                            v => JsonSerializer.Serialize(v, (JsonSerializerOptions?)null),
-                            v => JsonSerializer.Deserialize<Dictionary<string, object>>(v, (JsonSerializerOptions?)null) ?? new Dictionary<string, object>(),
-                            new ValueComparer<Dictionary<string, object>>(
-                                (c1, c2) => c1 != null && c2 != null && c1.Count == c2.Count && !c1.Except(c2).Any(),
-                                c => c != null ? c.Aggregate(0, (a, v) => HashCode.Combine(a, v.Key.GetHashCode(), v.Value != null ? v.Value.GetHashCode() : 0)) : 0,
-                                c => c != null ? new Dictionary<string, object>(c) : new Dictionary<string, object>()
-                            )
-                        );
-            });
+            // MediaAsset uses MetadataJson (string) for metadata storage, not an owned entity
 
             // Only apply indexes when using in-memory database (Cosmos DB doesn't support HasIndex)
             if (isInMemoryDatabase)

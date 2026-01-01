@@ -130,26 +130,27 @@ public class AxisAchievementRepository : IAxisAchievementRepository
     }
 
     /// <summary>
-    /// Retrieves all axis achievements for a specific age group.
+    /// Retrieves all axis achievements for a specific user.
     /// </summary>
-    /// <param name="ageGroupId">The age group ID.</param>
-    /// <returns>A collection of axis achievements for the specified age group.</returns>
-    public async Task<IEnumerable<AxisAchievement>> GetByAgeGroupAsync(string ageGroupId)
+    /// <param name="userId">The user ID.</param>
+    /// <returns>A collection of axis achievements for the specified user.</returns>
+    public async Task<IEnumerable<AxisAchievement>> GetByUserIdAsync(string userId)
     {
         return await _context.AxisAchievements
-            .Where(x => x.AgeGroupId == ageGroupId)
+            .Where(x => x.UserId == userId)
             .ToListAsync();
     }
 
     /// <summary>
     /// Retrieves all axis achievements for a specific compass axis.
     /// </summary>
-    /// <param name="compassAxisId">The compass axis ID.</param>
+    /// <param name="axisId">The axis ID (compass axis identifier).</param>
     /// <returns>A collection of axis achievements for the specified compass axis.</returns>
-    public async Task<IEnumerable<AxisAchievement>> GetByCompassAxisAsync(string compassAxisId)
+    public async Task<IEnumerable<AxisAchievement>> GetByAxisIdAsync(string axisId)
     {
+        // AxisAchievement uses AxisId (with CompassAxisId as an alias)
         return await _context.AxisAchievements
-            .Where(x => x.CompassAxisId == compassAxisId)
+            .Where(x => x.AxisId == axisId)
             .ToListAsync();
     }
 

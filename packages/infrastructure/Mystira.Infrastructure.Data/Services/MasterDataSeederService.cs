@@ -78,7 +78,7 @@ public class MasterDataSeederService
             return;
         }
 
-        var entities = items.Select(item => new CompassAxis
+        var entities = items.Select(item => new CompassAxisDefinition
         {
             Id = GenerateDeterministicId("compass-axis", item.Value),
             Name = item.Value,

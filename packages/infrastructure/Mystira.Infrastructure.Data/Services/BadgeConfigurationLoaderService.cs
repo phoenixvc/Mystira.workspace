@@ -119,11 +119,10 @@ public class BadgeConfigurationLoaderService
                 return;
             }
 
-            await SeedAxisAchievementsAsync(context, config);
             await SeedBadgesAsync(context, config);
 
-            _logger.LogInformation("Loaded badge configuration for age group {AgeGroup}: {AxisCount} axis achievements, {BadgeCount} badges",
-                ageGroupId, config.AxisAchievements.Count, config.Badges.Count);
+            _logger.LogInformation("Loaded badge configuration for age group {AgeGroup}: {BadgeCount} badges",
+                ageGroupId, config.Badges.Count);
         }
         catch (Exception ex)
         {
@@ -131,26 +130,9 @@ public class BadgeConfigurationLoaderService
         }
     }
 
-    private async Task SeedAxisAchievementsAsync(MystiraAppDbContext context, BadgeConfigurationJson config)
-    {
-        foreach (var achievement in config.AxisAchievements)
-        {
-            var entity = new AxisAchievement
-            {
-                Id = GenerateDeterministicId("axis-achievement", config.AgeGroupId, achievement.CompassAxisId, achievement.AxesDirection),
-                AgeGroupId = config.AgeGroupId,
-                CompassAxisId = achievement.CompassAxisId,
-                AxesDirection = achievement.AxesDirection,
-                Description = achievement.Description,
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow
-            };
-
-            await context.AxisAchievements.AddAsync(entity);
-        }
-
-        await context.SaveChangesAsync();
-    }
+    // Note: SeedAxisAchievementsAsync was removed - AxisAchievement in the domain model
+    // is for tracking user compass axis progress, not for storing achievement definitions.
+    // Axis achievement definitions are now derived from badge configurations.
 
     private async Task SeedBadgesAsync(MystiraAppDbContext context, BadgeConfigurationJson config)
     {
@@ -163,12 +145,10 @@ public class BadgeConfigurationLoaderService
                 CompassAxisId = badge.CompassAxisId,
                 Tier = badge.Tier,
                 TierOrder = badge.TierOrder,
-                Title = badge.Title,
+                Name = badge.Title, // Title maps to Name in domain
                 Description = badge.Description,
-                RequiredScore = badge.RequiredScore,
-                ImageId = badge.ImageId,
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow
+                RequiredScore = (int)badge.RequiredScore, // Cast from float to int
+                ImageId = badge.ImageId
             };
 
             await context.Badges.AddAsync(entity);

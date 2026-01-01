@@ -130,14 +130,15 @@ public class BadgeImageRepository : IBadgeImageRepository
     }
 
     /// <summary>
-    /// Retrieves a badge image by its image ID.
+    /// Retrieves a badge image by its ID.
     /// </summary>
     /// <param name="imageId">The image ID.</param>
     /// <returns>The badge image, or null if not found.</returns>
     public async Task<BadgeImage?> GetByImageIdAsync(string imageId)
     {
+        // BadgeImage uses Id as its identifier (there's no separate ImageId property)
         return await _context.BadgeImages
-            .FirstOrDefaultAsync(x => x.ImageId == imageId);
+            .FirstOrDefaultAsync(x => x.Id == imageId);
     }
 
     private IQueryable<BadgeImage> ApplySpecification(ISpecification<BadgeImage> spec)

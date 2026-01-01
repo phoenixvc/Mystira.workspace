@@ -16,7 +16,8 @@ public class ScenarioRepository : Repository<Scenario>, IScenarioRepository
 
     public async Task<IEnumerable<Scenario>> GetByAgeGroupAsync(string ageGroup)
     {
-        return await _dbSet.Where(s => s.AgeGroup == ageGroup).ToListAsync();
+        // Compare against AgeGroupId (the string property), not the computed AgeGroup value object
+        return await _dbSet.Where(s => s.AgeGroupId == ageGroup).ToListAsync();
     }
 
     public async Task<Scenario?> GetByTitleAsync(string title)
