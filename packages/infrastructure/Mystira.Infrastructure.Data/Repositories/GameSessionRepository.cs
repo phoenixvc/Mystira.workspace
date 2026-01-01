@@ -30,8 +30,17 @@ public class GameSessionRepository : Repository<GameSession>, IGameSessionReposi
             .ToListAsync();
     }
 
+    /// <summary>
+    /// Retrieves all in-progress or paused game sessions for a specific account.
+    /// </summary>
+    /// <param name="accountId">The account identifier to filter sessions by.</param>
+    /// <returns>A collection of active game sessions for the specified account.</returns>
+    /// <exception cref="ArgumentException">Thrown when accountId is null or empty.</exception>
     public async Task<IEnumerable<GameSession>> GetInProgressSessionsAsync(string accountId)
     {
+        if (string.IsNullOrWhiteSpace(accountId))
+            throw new ArgumentException("Account ID cannot be null or empty.", nameof(accountId));
+
         return await _dbSet
             .Where(s => s.AccountId == accountId &&
                        (s.Status == SessionStatus.InProgress || s.Status == SessionStatus.Paused))
