@@ -5,6 +5,9 @@ using Mystira.Domain.Models;
 
 namespace Mystira.Application.UseCases.Badges;
 
+/// <summary>
+/// Use case for awarding a badge to a user profile
+/// </summary>
 public class AwardBadgeUseCase
 {
     private readonly IUserBadgeRepository _badgeRepository;
@@ -13,6 +16,12 @@ public class AwardBadgeUseCase
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<AwardBadgeUseCase> _logger;
 
+    /// <summary>Initializes a new instance of the <see cref="AwardBadgeUseCase"/> class.</summary>
+    /// <param name="badgeRepository">The user badge repository.</param>
+    /// <param name="userProfileRepository">The user profile repository.</param>
+    /// <param name="newBadgeRepository">The badge repository.</param>
+    /// <param name="unitOfWork">The unit of work.</param>
+    /// <param name="logger">The logger.</param>
     public AwardBadgeUseCase(
         IUserBadgeRepository badgeRepository,
         IUserProfileRepository userProfileRepository,
@@ -27,6 +36,9 @@ public class AwardBadgeUseCase
         _logger = logger;
     }
 
+    /// <summary>Awards a badge to a user profile.</summary>
+    /// <param name="request">The award badge request.</param>
+    /// <returns>The awarded user badge.</returns>
     public async Task<UserBadge> ExecuteAsync(AwardBadgeRequest request)
     {
         if (request == null)

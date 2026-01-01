@@ -12,6 +12,10 @@ public class DeleteAvatarConfigurationUseCase
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<DeleteAvatarConfigurationUseCase> _logger;
 
+    /// <summary>Initializes a new instance of the <see cref="DeleteAvatarConfigurationUseCase"/> class.</summary>
+    /// <param name="repository">The avatar configuration file repository.</param>
+    /// <param name="unitOfWork">The unit of work.</param>
+    /// <param name="logger">The logger.</param>
     public DeleteAvatarConfigurationUseCase(
         IAvatarConfigurationFileRepository repository,
         IUnitOfWork unitOfWork,
@@ -22,6 +26,8 @@ public class DeleteAvatarConfigurationUseCase
         _logger = logger;
     }
 
+    /// <summary>Deletes the avatar configuration file.</summary>
+    /// <returns>True if the configuration file was deleted successfully; otherwise, false.</returns>
     public async Task<bool> ExecuteAsync()
     {
         var configFile = await _repository.GetAsync();

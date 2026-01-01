@@ -14,6 +14,12 @@ public class UpdateSubscriptionUseCase
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<UpdateSubscriptionUseCase> _logger;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="UpdateSubscriptionUseCase"/> class.
+    /// </summary>
+    /// <param name="repository">The account repository.</param>
+    /// <param name="unitOfWork">The unit of work for transaction management.</param>
+    /// <param name="logger">The logger instance.</param>
     public UpdateSubscriptionUseCase(
         IAccountRepository repository,
         IUnitOfWork unitOfWork,
@@ -24,6 +30,12 @@ public class UpdateSubscriptionUseCase
         _logger = logger;
     }
 
+    /// <summary>
+    /// Updates subscription details for an account.
+    /// </summary>
+    /// <param name="accountId">The account identifier.</param>
+    /// <param name="request">The request containing subscription update details.</param>
+    /// <returns>The updated account.</returns>
     public async Task<Account> ExecuteAsync(string accountId, UpdateSubscriptionRequest request)
     {
         if (string.IsNullOrWhiteSpace(accountId))

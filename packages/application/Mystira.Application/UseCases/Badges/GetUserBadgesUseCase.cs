@@ -12,6 +12,9 @@ public class GetUserBadgesUseCase
     private readonly IUserBadgeRepository _repository;
     private readonly ILogger<GetUserBadgesUseCase> _logger;
 
+    /// <summary>Initializes a new instance of the <see cref="GetUserBadgesUseCase"/> class.</summary>
+    /// <param name="repository">The user badge repository.</param>
+    /// <param name="logger">The logger.</param>
     public GetUserBadgesUseCase(
         IUserBadgeRepository repository,
         ILogger<GetUserBadgesUseCase> logger)
@@ -20,6 +23,9 @@ public class GetUserBadgesUseCase
         _logger = logger;
     }
 
+    /// <summary>Retrieves all badges for the specified user profile.</summary>
+    /// <param name="userProfileId">The user profile identifier.</param>
+    /// <returns>A list of user badges.</returns>
     public async Task<List<UserBadge>> ExecuteAsync(string userProfileId)
     {
         if (string.IsNullOrWhiteSpace(userProfileId))

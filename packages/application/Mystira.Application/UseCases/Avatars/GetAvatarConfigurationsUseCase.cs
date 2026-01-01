@@ -13,6 +13,9 @@ public class GetAvatarConfigurationsUseCase
     private readonly IAvatarConfigurationFileRepository _repository;
     private readonly ILogger<GetAvatarConfigurationsUseCase> _logger;
 
+    /// <summary>Initializes a new instance of the <see cref="GetAvatarConfigurationsUseCase"/> class.</summary>
+    /// <param name="repository">The avatar configuration file repository.</param>
+    /// <param name="logger">The logger.</param>
     public GetAvatarConfigurationsUseCase(
         IAvatarConfigurationFileRepository repository,
         ILogger<GetAvatarConfigurationsUseCase> logger)
@@ -21,6 +24,8 @@ public class GetAvatarConfigurationsUseCase
         _logger = logger;
     }
 
+    /// <summary>Retrieves all avatar configurations for all age groups.</summary>
+    /// <returns>The avatar response containing avatar configurations for all age groups.</returns>
     public async Task<AvatarResponse> ExecuteAsync()
     {
         var configFile = await _repository.GetAsync();

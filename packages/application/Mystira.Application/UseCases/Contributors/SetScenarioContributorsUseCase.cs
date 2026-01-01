@@ -14,6 +14,12 @@ public class SetScenarioContributorsUseCase
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<SetScenarioContributorsUseCase> _logger;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="SetScenarioContributorsUseCase"/> class.
+    /// </summary>
+    /// <param name="scenarioRepository">The scenario repository.</param>
+    /// <param name="unitOfWork">The unit of work for transaction management.</param>
+    /// <param name="logger">The logger instance.</param>
     public SetScenarioContributorsUseCase(
         IScenarioRepository scenarioRepository,
         IUnitOfWork unitOfWork,
@@ -24,6 +30,12 @@ public class SetScenarioContributorsUseCase
         _logger = logger;
     }
 
+    /// <summary>
+    /// Sets the contributors for a scenario.
+    /// </summary>
+    /// <param name="scenarioId">The scenario identifier.</param>
+    /// <param name="request">The request containing contributor information.</param>
+    /// <returns>The updated Story Protocol metadata.</returns>
     public async Task<ScenarioStoryProtocol> ExecuteAsync(string scenarioId, SetContributorsRequest request)
     {
         // Get the scenario

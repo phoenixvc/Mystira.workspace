@@ -13,6 +13,12 @@ public class EndGameSessionUseCase
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<EndGameSessionUseCase> _logger;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="EndGameSessionUseCase"/> class.
+    /// </summary>
+    /// <param name="repository">The game session repository.</param>
+    /// <param name="unitOfWork">The unit of work for transaction management.</param>
+    /// <param name="logger">The logger instance.</param>
     public EndGameSessionUseCase(
         IGameSessionRepository repository,
         IUnitOfWork unitOfWork,
@@ -23,6 +29,11 @@ public class EndGameSessionUseCase
         _logger = logger;
     }
 
+    /// <summary>
+    /// Ends a game session manually.
+    /// </summary>
+    /// <param name="sessionId">The session identifier.</param>
+    /// <returns>The ended game session.</returns>
     public async Task<GameSession> ExecuteAsync(string sessionId)
     {
         if (string.IsNullOrWhiteSpace(sessionId))

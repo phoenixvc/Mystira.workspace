@@ -12,6 +12,10 @@ public class DeleteCharacterMapUseCase
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<DeleteCharacterMapUseCase> _logger;
 
+    /// <summary>Initializes a new instance of the <see cref="DeleteCharacterMapUseCase"/> class.</summary>
+    /// <param name="repository">The character map repository.</param>
+    /// <param name="unitOfWork">The unit of work.</param>
+    /// <param name="logger">The logger.</param>
     public DeleteCharacterMapUseCase(
         ICharacterMapRepository repository,
         IUnitOfWork unitOfWork,
@@ -22,6 +26,9 @@ public class DeleteCharacterMapUseCase
         _logger = logger;
     }
 
+    /// <summary>Deletes a character map by its identifier.</summary>
+    /// <param name="characterMapId">The character map identifier.</param>
+    /// <returns>True if the character map was deleted successfully; otherwise, false.</returns>
     public async Task<bool> ExecuteAsync(string characterMapId)
     {
         if (string.IsNullOrWhiteSpace(characterMapId))

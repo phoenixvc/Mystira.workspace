@@ -16,6 +16,13 @@ public class RegisterScenarioIpAssetUseCase
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<RegisterScenarioIpAssetUseCase> _logger;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="RegisterScenarioIpAssetUseCase"/> class.
+    /// </summary>
+    /// <param name="scenarioRepository">The scenario repository.</param>
+    /// <param name="storyProtocolService">The Story Protocol service.</param>
+    /// <param name="unitOfWork">The unit of work for transaction management.</param>
+    /// <param name="logger">The logger instance.</param>
     public RegisterScenarioIpAssetUseCase(
         IScenarioRepository scenarioRepository,
         IStoryProtocolService storyProtocolService,
@@ -28,6 +35,12 @@ public class RegisterScenarioIpAssetUseCase
         _logger = logger;
     }
 
+    /// <summary>
+    /// Registers a scenario as an IP Asset on Story Protocol.
+    /// </summary>
+    /// <param name="scenarioId">The scenario identifier.</param>
+    /// <param name="request">The registration request.</param>
+    /// <returns>The Story Protocol metadata for the registered asset.</returns>
     public async Task<ScenarioStoryProtocol> ExecuteAsync(string scenarioId, RegisterIpAssetRequest request)
     {
         // Get the scenario

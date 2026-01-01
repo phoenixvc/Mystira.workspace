@@ -13,6 +13,10 @@ public class AddCompletedScenarioUseCase
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<AddCompletedScenarioUseCase> _logger;
 
+    /// <summary>Initializes a new instance of the <see cref="AddCompletedScenarioUseCase"/> class.</summary>
+    /// <param name="repository">The account repository.</param>
+    /// <param name="unitOfWork">The unit of work.</param>
+    /// <param name="logger">The logger.</param>
     public AddCompletedScenarioUseCase(
         IAccountRepository repository,
         IUnitOfWork unitOfWork,
@@ -23,6 +27,10 @@ public class AddCompletedScenarioUseCase
         _logger = logger;
     }
 
+    /// <summary>Marks a scenario as completed for the specified account.</summary>
+    /// <param name="accountId">The account identifier.</param>
+    /// <param name="scenarioId">The scenario identifier.</param>
+    /// <returns>The updated account.</returns>
     public async Task<Account> ExecuteAsync(string accountId, string scenarioId)
     {
         if (string.IsNullOrWhiteSpace(accountId))

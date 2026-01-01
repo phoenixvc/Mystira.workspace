@@ -12,6 +12,9 @@ public class GetContentBundlesByAgeGroupUseCase
     private readonly IContentBundleRepository _repository;
     private readonly ILogger<GetContentBundlesByAgeGroupUseCase> _logger;
 
+    /// <summary>Initializes a new instance of the <see cref="GetContentBundlesByAgeGroupUseCase"/> class.</summary>
+    /// <param name="repository">The content bundle repository.</param>
+    /// <param name="logger">The logger.</param>
     public GetContentBundlesByAgeGroupUseCase(
         IContentBundleRepository repository,
         ILogger<GetContentBundlesByAgeGroupUseCase> logger)
@@ -20,6 +23,9 @@ public class GetContentBundlesByAgeGroupUseCase
         _logger = logger;
     }
 
+    /// <summary>Retrieves content bundles filtered by age group.</summary>
+    /// <param name="ageGroup">The age group identifier.</param>
+    /// <returns>A list of content bundles for the specified age group.</returns>
     public async Task<List<ContentBundle>> ExecuteAsync(string ageGroup)
     {
         if (string.IsNullOrWhiteSpace(ageGroup))

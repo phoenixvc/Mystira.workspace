@@ -16,6 +16,13 @@ public class CheckAchievementsUseCase
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<CheckAchievementsUseCase> _logger;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="CheckAchievementsUseCase"/> class.
+    /// </summary>
+    /// <param name="repository">The game session repository.</param>
+    /// <param name="badgeRepository">The badge configuration repository.</param>
+    /// <param name="unitOfWork">The unit of work for transaction management.</param>
+    /// <param name="logger">The logger instance.</param>
     public CheckAchievementsUseCase(
         IGameSessionRepository repository,
         IRepository<BadgeConfiguration> badgeRepository,
@@ -28,6 +35,11 @@ public class CheckAchievementsUseCase
         _logger = logger;
     }
 
+    /// <summary>
+    /// Checks and awards achievements for a game session.
+    /// </summary>
+    /// <param name="sessionId">The session identifier.</param>
+    /// <returns>A list of newly awarded achievements.</returns>
     public async Task<List<SessionAchievement>> ExecuteAsync(string sessionId)
     {
         if (string.IsNullOrWhiteSpace(sessionId))
