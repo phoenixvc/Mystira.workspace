@@ -12,11 +12,17 @@ using Mystira.Infrastructure.Azure.Services;
 
 namespace Mystira.Infrastructure.Azure;
 
+/// <summary>
+/// Extension methods for configuring Azure infrastructure services.
+/// </summary>
 public static class ServiceCollectionExtensions
 {
     /// <summary>
     /// Add Azure infrastructure services to the service collection
     /// </summary>
+    /// <param name="services">The service collection.</param>
+    /// <param name="configuration">The application configuration.</param>
+    /// <returns>The service collection for chaining.</returns>
     public static IServiceCollection AddAzureInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
         // Configure Azure options
@@ -42,6 +48,10 @@ public static class ServiceCollectionExtensions
     /// <summary>
     /// Add Cosmos DB services
     /// </summary>
+    /// <typeparam name="TContext">The DbContext type for Cosmos DB.</typeparam>
+    /// <param name="services">The service collection.</param>
+    /// <param name="configuration">The application configuration.</param>
+    /// <returns>The service collection for chaining.</returns>
     public static IServiceCollection AddCosmosDb<TContext>(this IServiceCollection services, IConfiguration configuration)
         where TContext : DbContext
     {
@@ -65,6 +75,10 @@ public static class ServiceCollectionExtensions
     /// <summary>
     /// Add Cosmos DB services (internal method for infrastructure setup)
     /// </summary>
+    /// <param name="services">The service collection.</param>
+    /// <param name="configuration">The application configuration.</param>
+    /// <param name="options">The Cosmos DB configuration options.</param>
+    /// <returns>The service collection for chaining.</returns>
     private static IServiceCollection AddCosmosDb(this IServiceCollection services, IConfiguration configuration, CosmosDbOptions options)
     {
         var cosmosConnectionString = configuration.GetConnectionString("CosmosDb");
@@ -81,6 +95,10 @@ public static class ServiceCollectionExtensions
     /// <summary>
     /// Add Azure Blob Storage services
     /// </summary>
+    /// <param name="services">The service collection.</param>
+    /// <param name="configuration">The application configuration.</param>
+    /// <param name="options">The Blob Storage configuration options.</param>
+    /// <returns>The service collection for chaining.</returns>
     private static IServiceCollection AddBlobStorage(this IServiceCollection services, IConfiguration configuration, BlobStorageOptions options)
     {
         var blobConnectionString = configuration.GetConnectionString("AzureStorage");
@@ -109,6 +127,8 @@ public static class ServiceCollectionExtensions
     /// <summary>
     /// Add Azure health checks
     /// </summary>
+    /// <param name="services">The service collection.</param>
+    /// <returns>The service collection for chaining.</returns>
     private static IServiceCollection AddAzureHealthChecks(this IServiceCollection services)
     {
         services.AddHealthChecks()
@@ -121,6 +141,9 @@ public static class ServiceCollectionExtensions
     /// <summary>
     /// Add Azure Blob Storage services with explicit configuration
     /// </summary>
+    /// <param name="services">The service collection.</param>
+    /// <param name="configuration">The application configuration.</param>
+    /// <returns>The service collection for chaining.</returns>
     public static IServiceCollection AddAzureBlobStorage(this IServiceCollection services, IConfiguration configuration)
     {
         var blobConnectionString = configuration.GetConnectionString("AzureStorage");

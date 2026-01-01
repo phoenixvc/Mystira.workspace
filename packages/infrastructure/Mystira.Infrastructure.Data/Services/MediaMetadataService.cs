@@ -15,6 +15,11 @@ public class MediaMetadataService : IMediaMetadataService
     private readonly IMediaMetadataFileRepository _repository;
     private readonly ILogger<MediaMetadataService> _logger;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="MediaMetadataService"/> class.
+    /// </summary>
+    /// <param name="repository">The repository for accessing media metadata files.</param>
+    /// <param name="logger">The logger instance.</param>
     public MediaMetadataService(
         IMediaMetadataFileRepository repository,
         ILogger<MediaMetadataService> logger)
@@ -23,6 +28,11 @@ public class MediaMetadataService : IMediaMetadataService
         _logger = logger;
     }
 
+    /// <summary>
+    /// Retrieves the media metadata file from the repository.
+    /// Ensures that the Entries collection is initialized.
+    /// </summary>
+    /// <returns>The media metadata file, or null if not found.</returns>
     public async Task<MediaMetadataFile?> GetMediaMetadataFileAsync()
     {
         try
@@ -41,6 +51,12 @@ public class MediaMetadataService : IMediaMetadataService
         }
     }
 
+    /// <summary>
+    /// Updates the media metadata file in the repository.
+    /// Sets the UpdatedAt timestamp and ensures Entries collection is initialized.
+    /// </summary>
+    /// <param name="metadataFile">The metadata file to update.</param>
+    /// <returns>The updated media metadata file.</returns>
     public async Task<MediaMetadataFile> UpdateMediaMetadataFileAsync(MediaMetadataFile metadataFile)
     {
         try
@@ -59,6 +75,13 @@ public class MediaMetadataService : IMediaMetadataService
         }
     }
 
+    /// <summary>
+    /// Adds a new media metadata entry to the metadata file.
+    /// Creates a new metadata file if one doesn't exist.
+    /// Throws an exception if an entry with the same ID already exists.
+    /// </summary>
+    /// <param name="entry">The media metadata entry to add.</param>
+    /// <returns>The updated media metadata file.</returns>
     public async Task<MediaMetadataFile> AddMediaMetadataEntryAsync(MediaMetadataEntry entry)
     {
         try
@@ -97,6 +120,13 @@ public class MediaMetadataService : IMediaMetadataService
         }
     }
 
+    /// <summary>
+    /// Updates an existing media metadata entry in the metadata file.
+    /// Throws an exception if the metadata file or entry is not found.
+    /// </summary>
+    /// <param name="entryId">The ID of the entry to update.</param>
+    /// <param name="entry">The updated entry data.</param>
+    /// <returns>The updated media metadata file.</returns>
     public async Task<MediaMetadataFile> UpdateMediaMetadataEntryAsync(string entryId, MediaMetadataEntry entry)
     {
         try
@@ -131,6 +161,12 @@ public class MediaMetadataService : IMediaMetadataService
         }
     }
 
+    /// <summary>
+    /// Removes a media metadata entry from the metadata file.
+    /// Throws an exception if the metadata file or entry is not found.
+    /// </summary>
+    /// <param name="entryId">The ID of the entry to remove.</param>
+    /// <returns>The updated media metadata file.</returns>
     public async Task<MediaMetadataFile> RemoveMediaMetadataEntryAsync(string entryId)
     {
         try
@@ -162,6 +198,11 @@ public class MediaMetadataService : IMediaMetadataService
         }
     }
 
+    /// <summary>
+    /// Retrieves a specific media metadata entry by its ID.
+    /// </summary>
+    /// <param name="entryId">The ID of the entry to retrieve.</param>
+    /// <returns>The media metadata entry, or null if not found.</returns>
     public async Task<MediaMetadataEntry?> GetMediaMetadataEntryAsync(string entryId)
     {
         try
@@ -181,6 +222,14 @@ public class MediaMetadataService : IMediaMetadataService
         }
     }
 
+    /// <summary>
+    /// Imports media metadata entries from JSON data.
+    /// Creates a new metadata file if one doesn't exist.
+    /// Can optionally overwrite existing entries with the same ID.
+    /// </summary>
+    /// <param name="jsonData">The JSON string containing the metadata entries to import.</param>
+    /// <param name="overwriteExisting">Whether to overwrite existing entries. Default is false.</param>
+    /// <returns>The updated media metadata file.</returns>
     public async Task<MediaMetadataFile> ImportMediaMetadataEntriesAsync(string jsonData, bool overwriteExisting = false)
     {
         try

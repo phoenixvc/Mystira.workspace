@@ -16,12 +16,21 @@ public class MockPaymentService : IPaymentService
     private readonly Dictionary<string, PaymentStatus> _transactions = new();
     private readonly Dictionary<string, SubscriptionStatus> _subscriptions = new();
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="MockPaymentService"/> class.
+    /// </summary>
+    /// <param name="logger">The logger instance.</param>
     public MockPaymentService(ILogger<MockPaymentService> logger)
     {
         _logger = logger;
         _logger.LogInformation("MockPaymentService initialized - payments will be simulated");
     }
 
+    /// <summary>
+    /// Creates a mock checkout session for testing purposes.
+    /// </summary>
+    /// <param name="request">The checkout request details.</param>
+    /// <returns>A mock checkout result with simulated redirect URL.</returns>
     public Task<CheckoutResult> CreateCheckoutAsync(CheckoutRequest request)
     {
         var checkoutId = $"mock_checkout_{Guid.NewGuid():N}";
@@ -51,6 +60,11 @@ public class MockPaymentService : IPaymentService
         return Task.FromResult(result);
     }
 
+    /// <summary>
+    /// Processes a mock payment with simulated success/failure (90% success rate).
+    /// </summary>
+    /// <param name="request">The payment request details.</param>
+    /// <returns>A mock payment result.</returns>
     public Task<PaymentResult> ProcessPaymentAsync(PaymentRequest request)
     {
         var transactionId = $"mock_txn_{Guid.NewGuid():N}";
@@ -86,6 +100,12 @@ public class MockPaymentService : IPaymentService
         return Task.FromResult(result);
     }
 
+    /// <summary>
+    /// Verifies a mock webhook signature (always succeeds in mock mode).
+    /// </summary>
+    /// <param name="payload">The webhook payload.</param>
+    /// <param name="signature">The webhook signature.</param>
+    /// <returns>A simulated successful payment webhook event.</returns>
     public Task<WebhookEvent> VerifyWebhookAsync(string payload, string signature)
     {
         _logger.LogInformation("Mock webhook verification - always returns success");
@@ -105,6 +125,11 @@ public class MockPaymentService : IPaymentService
         return Task.FromResult(webhookEvent);
     }
 
+    /// <summary>
+    /// Gets the payment status for a mock transaction.
+    /// </summary>
+    /// <param name="transactionId">The transaction identifier.</param>
+    /// <returns>The mock payment status.</returns>
     public Task<PaymentStatus> GetPaymentStatusAsync(string transactionId)
     {
         if (_transactions.TryGetValue(transactionId, out var status))
@@ -124,6 +149,11 @@ public class MockPaymentService : IPaymentService
         });
     }
 
+    /// <summary>
+    /// Processes a mock refund (always succeeds in mock mode).
+    /// </summary>
+    /// <param name="request">The refund request details.</param>
+    /// <returns>A mock refund result.</returns>
     public Task<RefundResult> RefundPaymentAsync(RefundRequest request)
     {
         var refundId = $"mock_refund_{Guid.NewGuid():N}";
@@ -153,6 +183,11 @@ public class MockPaymentService : IPaymentService
         return Task.FromResult(result);
     }
 
+    /// <summary>
+    /// Creates a mock subscription for testing purposes.
+    /// </summary>
+    /// <param name="request">The subscription request details.</param>
+    /// <returns>A mock subscription result.</returns>
     public Task<SubscriptionResult> CreateSubscriptionAsync(SubscriptionRequest request)
     {
         var subscriptionId = $"mock_sub_{Guid.NewGuid():N}";
@@ -184,6 +219,12 @@ public class MockPaymentService : IPaymentService
         return Task.FromResult(result);
     }
 
+    /// <summary>
+    /// Cancels a mock subscription (always succeeds in mock mode).
+    /// </summary>
+    /// <param name="subscriptionId">The subscription identifier to cancel.</param>
+    /// <param name="cancelImmediately">If true, cancels immediately; otherwise cancels at period end.</param>
+    /// <returns>A mock subscription cancellation result.</returns>
     public Task<SubscriptionCancellationResult> CancelSubscriptionAsync(string subscriptionId, bool cancelImmediately = false)
     {
         _logger.LogInformation(
@@ -210,6 +251,11 @@ public class MockPaymentService : IPaymentService
         });
     }
 
+    /// <summary>
+    /// Gets the status of a mock subscription.
+    /// </summary>
+    /// <param name="subscriptionId">The subscription identifier.</param>
+    /// <returns>The mock subscription status.</returns>
     public Task<SubscriptionStatus> GetSubscriptionStatusAsync(string subscriptionId)
     {
         if (_subscriptions.TryGetValue(subscriptionId, out var status))
@@ -228,6 +274,10 @@ public class MockPaymentService : IPaymentService
         });
     }
 
+    /// <summary>
+    /// Performs a health check on the mock payment service (always healthy).
+    /// </summary>
+    /// <returns>Always returns true for mock implementation.</returns>
     public Task<bool> IsHealthyAsync()
     {
         _logger.LogDebug("Mock payment service health check - always healthy");

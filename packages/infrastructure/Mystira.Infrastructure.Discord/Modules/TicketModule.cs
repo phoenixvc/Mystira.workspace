@@ -13,8 +13,19 @@ namespace Mystira.Infrastructure.Discord.Modules;
 /// </summary>
 internal sealed class UserLockEntry
 {
+    /// <summary>
+    /// Gets the semaphore used for synchronizing access.
+    /// </summary>
     public SemaphoreSlim Semaphore { get; } = new(1, 1);
+
+    /// <summary>
+    /// Gets or sets the last access time for this lock entry.
+    /// </summary>
     public DateTime LastAccess { get; set; } = DateTime.UtcNow;
+
+    /// <summary>
+    /// Gets or sets the number of active operations using this lock.
+    /// </summary>
     public int ActiveCount;
 }
 
@@ -55,6 +66,11 @@ public class TicketModule : InteractionModuleBase<SocketInteractionContext>
         }
     }
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="TicketModule"/> class.
+    /// </summary>
+    /// <param name="options">The Discord configuration options.</param>
+    /// <param name="logger">The logger instance.</param>
     public TicketModule(
         IOptions<DiscordOptions> options,
         ILogger<TicketModule> logger)
@@ -63,6 +79,10 @@ public class TicketModule : InteractionModuleBase<SocketInteractionContext>
         _logger = logger;
     }
 
+    /// <summary>
+    /// Creates a new private support ticket channel for the user.
+    /// </summary>
+    /// <param name="subject">Optional short summary of the issue.</param>
     [SlashCommand("ticket", "Create a private support ticket channel")]
     public async Task CreateTicketAsync(
         [Summary("subject", "Short summary of your issue")] string? subject = null)
@@ -194,6 +214,9 @@ public class TicketModule : InteractionModuleBase<SocketInteractionContext>
         }
     }
 
+    /// <summary>
+    /// Closes the current ticket channel (support staff only).
+    /// </summary>
     [SlashCommand("ticket-close", "Close this ticket (support only)")]
     public async Task CloseTicketAsync()
     {

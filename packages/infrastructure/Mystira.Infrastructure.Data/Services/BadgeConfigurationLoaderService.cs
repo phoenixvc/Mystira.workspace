@@ -8,6 +8,10 @@ using Mystira.Domain.Models;
 
 namespace Mystira.Infrastructure.Data.Services;
 
+/// <summary>
+/// Service for loading and seeding badge configurations from JSON files into the database.
+/// Validates badge configuration JSON against schema before seeding.
+/// </summary>
 public class BadgeConfigurationLoaderService
 {
     private readonly IServiceProvider _serviceProvider;
@@ -21,6 +25,11 @@ public class BadgeConfigurationLoaderService
         return await query.Select(_ => 1).Take(1).FirstOrDefaultAsync(cancellationToken) == 1;
     }
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="BadgeConfigurationLoaderService"/> class.
+    /// </summary>
+    /// <param name="serviceProvider">The service provider for creating scoped contexts.</param>
+    /// <param name="logger">The logger instance.</param>
     public BadgeConfigurationLoaderService(
         IServiceProvider serviceProvider,
         ILogger<BadgeConfigurationLoaderService> logger)
@@ -29,6 +38,12 @@ public class BadgeConfigurationLoaderService
         _logger = logger;
     }
 
+    /// <summary>
+    /// Loads badge configuration files for all age groups and seeds them into the database.
+    /// Validates each configuration file against the JSON schema before seeding.
+    /// Skips seeding if badge data already exists in the database.
+    /// </summary>
+    /// <returns>A task representing the asynchronous operation.</returns>
     public async Task LoadAndSeedAsync()
     {
         using var scope = _serviceProvider.CreateScope();

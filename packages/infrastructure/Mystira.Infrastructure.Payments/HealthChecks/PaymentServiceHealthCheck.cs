@@ -15,6 +15,12 @@ public class PaymentServiceHealthCheck : IHealthCheck
     private readonly PaymentOptions _options;
     private readonly ILogger<PaymentServiceHealthCheck> _logger;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="PaymentServiceHealthCheck"/> class.
+    /// </summary>
+    /// <param name="paymentService">The payment service to check.</param>
+    /// <param name="options">The payment configuration options.</param>
+    /// <param name="logger">The logger instance.</param>
     public PaymentServiceHealthCheck(
         IPaymentService paymentService,
         IOptions<PaymentOptions> options,
@@ -25,6 +31,12 @@ public class PaymentServiceHealthCheck : IHealthCheck
         _logger = logger;
     }
 
+    /// <summary>
+    /// Checks the health of the payment service by verifying connectivity and configuration.
+    /// </summary>
+    /// <param name="context">The health check context.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>A health check result indicating the service status.</returns>
     public async Task<HealthCheckResult> CheckHealthAsync(
         HealthCheckContext context,
         CancellationToken cancellationToken = default)

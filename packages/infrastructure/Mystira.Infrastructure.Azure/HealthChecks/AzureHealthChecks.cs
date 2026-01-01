@@ -7,15 +7,28 @@ using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 namespace Mystira.Infrastructure.Azure.HealthChecks;
 
+/// <summary>
+/// Health check for Azure Cosmos DB connectivity.
+/// </summary>
 public class CosmosDbHealthCheck : IHealthCheck
 {
     private readonly DbContext _context;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="CosmosDbHealthCheck"/> class.
+    /// </summary>
+    /// <param name="context">The database context for Cosmos DB.</param>
     public CosmosDbHealthCheck(DbContext context)
     {
         _context = context ?? throw new ArgumentNullException(nameof(context));
     }
 
+    /// <summary>
+    /// Checks the health of the Cosmos DB connection.
+    /// </summary>
+    /// <param name="context">The health check context.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>The health check result indicating whether the connection is healthy.</returns>
     public async Task<HealthCheckResult> CheckHealthAsync(
         HealthCheckContext context,
         CancellationToken cancellationToken = default)
@@ -40,15 +53,28 @@ public class CosmosDbHealthCheck : IHealthCheck
     }
 }
 
+/// <summary>
+/// Health check for Azure Blob Storage connectivity.
+/// </summary>
 public class BlobStorageHealthCheck : IHealthCheck
 {
     private readonly BlobServiceClient _blobServiceClient;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="BlobStorageHealthCheck"/> class.
+    /// </summary>
+    /// <param name="blobServiceClient">The Azure Blob Service client.</param>
     public BlobStorageHealthCheck(BlobServiceClient blobServiceClient)
     {
         _blobServiceClient = blobServiceClient ?? throw new ArgumentNullException(nameof(blobServiceClient));
     }
 
+    /// <summary>
+    /// Checks the health of the Blob Storage connection.
+    /// </summary>
+    /// <param name="context">The health check context.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>The health check result indicating whether the connection is healthy.</returns>
     public async Task<HealthCheckResult> CheckHealthAsync(
         HealthCheckContext context,
         CancellationToken cancellationToken = default)

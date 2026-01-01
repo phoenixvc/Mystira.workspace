@@ -18,6 +18,11 @@ public sealed class FfmpegAudioTranscodingService : IAudioTranscodingService
     private readonly AudioTranscodingOptions _options;
     private readonly string _workingDirectory;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="FfmpegAudioTranscodingService"/> class.
+    /// </summary>
+    /// <param name="options">The audio transcoding options.</param>
+    /// <param name="logger">The logger instance.</param>
     public FfmpegAudioTranscodingService(
         IOptions<AudioTranscodingOptions> options,
         ILogger<FfmpegAudioTranscodingService> logger)

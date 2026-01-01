@@ -36,6 +36,11 @@ public class TeamsBotService : IMessagingService, IChatBotService, IBotCommandSe
     private readonly ConcurrentDictionary<string, ulong> _keyToId = new();
     private readonly object _idLock = new();
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="TeamsBotService"/> class.
+    /// </summary>
+    /// <param name="options">The Teams configuration options.</param>
+    /// <param name="logger">The logger instance.</param>
     public TeamsBotService(
         IOptions<TeamsOptions> options,
         ILogger<TeamsBotService> logger)
@@ -49,8 +54,14 @@ public class TeamsBotService : IMessagingService, IChatBotService, IBotCommandSe
             _options.MicrosoftAppPassword);
     }
 
+    /// <summary>
+    /// Gets a value indicating whether the service is connected and ready.
+    /// </summary>
     public bool IsConnected => _isConnected && !string.IsNullOrWhiteSpace(_options.MicrosoftAppId);
 
+    /// <summary>
+    /// Gets a value indicating whether the service is enabled in configuration.
+    /// </summary>
     public bool IsEnabled => _options.Enabled;
 
     /// <summary>
@@ -58,8 +69,16 @@ public class TeamsBotService : IMessagingService, IChatBotService, IBotCommandSe
     /// </summary>
     public ChatPlatform Platform => ChatPlatform.Teams;
 
+    /// <summary>
+    /// Gets the count of registered command modules.
+    /// </summary>
     public int RegisteredModuleCount => 0; // Teams uses different command registration
 
+    /// <summary>
+    /// Starts the Teams bot service and establishes connection.
+    /// </summary>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>A task representing the asynchronous operation.</returns>
     public Task StartAsync(CancellationToken cancellationToken = default)
     {
         if (!_options.Enabled)
@@ -78,6 +97,11 @@ public class TeamsBotService : IMessagingService, IChatBotService, IBotCommandSe
         return Task.CompletedTask;
     }
 
+    /// <summary>
+    /// Stops the Teams bot service.
+    /// </summary>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>A task representing the asynchronous operation.</returns>
     public Task StopAsync(CancellationToken cancellationToken = default)
     {
         _logger.LogInformation("Teams bot service stopped");
@@ -85,6 +109,13 @@ public class TeamsBotService : IMessagingService, IChatBotService, IBotCommandSe
         return Task.CompletedTask;
     }
 
+    /// <summary>
+    /// Sends a text message to the specified Teams channel.
+    /// </summary>
+    /// <param name="channelId">The channel identifier.</param>
+    /// <param name="message">The message text to send.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>A task representing the asynchronous operation.</returns>
     public async Task SendMessageAsync(ulong channelId, string message, CancellationToken cancellationToken = default)
     {
         if (!IsConnected)
@@ -134,6 +165,13 @@ public class TeamsBotService : IMessagingService, IChatBotService, IBotCommandSe
         }
     }
 
+    /// <summary>
+    /// Sends an embed (Hero Card) to the specified Teams channel.
+    /// </summary>
+    /// <param name="channelId">The channel identifier.</param>
+    /// <param name="embed">The embed data to send.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>A task representing the asynchronous operation.</returns>
     public async Task SendEmbedAsync(ulong channelId, EmbedData embed, CancellationToken cancellationToken = default)
     {
         if (!IsConnected)
@@ -190,6 +228,14 @@ public class TeamsBotService : IMessagingService, IChatBotService, IBotCommandSe
         }
     }
 
+    /// <summary>
+    /// Sends a threaded reply to a specific message in a Teams channel.
+    /// </summary>
+    /// <param name="messageId">The message identifier to reply to.</param>
+    /// <param name="channelId">The channel identifier.</param>
+    /// <param name="reply">The reply text.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>A task representing the asynchronous operation.</returns>
     // FIX: Actually create threaded reply using ReplyToId (Phase 4)
     public async Task ReplyToMessageAsync(ulong messageId, ulong channelId, string reply, CancellationToken cancellationToken = default)
     {
@@ -246,6 +292,10 @@ public class TeamsBotService : IMessagingService, IChatBotService, IBotCommandSe
         }
     }
 
+    /// <summary>
+    /// Gets the current status of the Teams bot service.
+    /// </summary>
+    /// <returns>The bot status information.</returns>
     public BotStatus GetStatus()
     {
         return new BotStatus
@@ -262,6 +312,15 @@ public class TeamsBotService : IMessagingService, IChatBotService, IBotCommandSe
     // Broadcast / First Responder (Limited support for Teams)
     // ─────────────────────────────────────────────────────────────────
 
+    /// <summary>
+    /// Sends a message to multiple channels and awaits the first response.
+    /// Note: Teams does not support real-time response monitoring like Discord.
+    /// </summary>
+    /// <param name="channelIds">The channel identifiers to broadcast to.</param>
+    /// <param name="message">The message to send.</param>
+    /// <param name="timeout">The timeout duration for waiting for responses.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>The first responder result (always times out for Teams).</returns>
     public async Task<FirstResponderResult> SendAndAwaitFirstResponseAsync(
         IEnumerable<ulong> channelIds,
         string message,
@@ -294,6 +353,15 @@ public class TeamsBotService : IMessagingService, IChatBotService, IBotCommandSe
         };
     }
 
+    /// <summary>
+    /// Sends an embed to multiple channels and awaits the first response.
+    /// Note: Teams does not support real-time response monitoring like Discord.
+    /// </summary>
+    /// <param name="channelIds">The channel identifiers to broadcast to.</param>
+    /// <param name="embed">The embed data to send.</param>
+    /// <param name="timeout">The timeout duration for waiting for responses.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>The first responder result (always times out for Teams).</returns>
     public async Task<FirstResponderResult> SendEmbedAndAwaitFirstResponseAsync(
         IEnumerable<ulong> channelIds,
         EmbedData embed,
@@ -322,6 +390,16 @@ public class TeamsBotService : IMessagingService, IChatBotService, IBotCommandSe
         };
     }
 
+    /// <summary>
+    /// Broadcasts a message to multiple channels with a custom response handler.
+    /// Note: Teams does not support real-time response monitoring via this method.
+    /// </summary>
+    /// <param name="channelIds">The channel identifiers to broadcast to.</param>
+    /// <param name="message">The message to send.</param>
+    /// <param name="onResponse">Callback function for handling responses.</param>
+    /// <param name="timeout">The timeout duration for waiting for responses.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>A task representing the asynchronous operation.</returns>
     public async Task BroadcastWithResponseHandlerAsync(
         IEnumerable<ulong> channelIds,
         string message,
@@ -348,6 +426,13 @@ public class TeamsBotService : IMessagingService, IChatBotService, IBotCommandSe
     // IBotCommandService Implementation
     // ─────────────────────────────────────────────────────────────────
 
+    /// <summary>
+    /// Registers commands from the specified assembly.
+    /// Note: Teams uses Adaptive Cards or message extensions instead of slash commands.
+    /// </summary>
+    /// <param name="assembly">The assembly containing command modules.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>A task representing the asynchronous operation.</returns>
     public Task RegisterCommandsAsync(Assembly assembly, CancellationToken cancellationToken = default)
     {
         // Teams bot commands are typically handled via Adaptive Cards or message extensions
@@ -356,12 +441,25 @@ public class TeamsBotService : IMessagingService, IChatBotService, IBotCommandSe
         return Task.CompletedTask;
     }
 
+    /// <summary>
+    /// Registers commands to a specific server/team.
+    /// Note: Teams does not support server-specific command registration.
+    /// </summary>
+    /// <param name="serverId">The server identifier.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>A task representing the asynchronous operation.</returns>
     public Task RegisterCommandsToServerAsync(ulong serverId, CancellationToken cancellationToken = default)
     {
         _logger.LogWarning("Teams does not support server-specific command registration");
         return Task.CompletedTask;
     }
 
+    /// <summary>
+    /// Registers commands globally across all servers.
+    /// Note: Teams commands are registered via the Bot Framework portal.
+    /// </summary>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>A task representing the asynchronous operation.</returns>
     public Task RegisterCommandsGloballyAsync(CancellationToken cancellationToken = default)
     {
         _logger.LogInformation("Teams commands are registered via the Bot Framework portal, not programmatically");
@@ -504,6 +602,9 @@ public class TeamsBotService : IMessagingService, IChatBotService, IBotCommandSe
         return card.ToAttachment();
     }
 
+    /// <summary>
+    /// Disposes the Teams bot service and cleans up resources.
+    /// </summary>
     public void Dispose()
     {
         if (_disposed)

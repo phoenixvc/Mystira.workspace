@@ -11,13 +11,21 @@ public class DiscordBotHealthCheck : IHealthCheck
 {
     private readonly DiscordBotService _discordBotService;
 
-    // FIX: Inject concrete DiscordBotService instead of IChatBotService
-    // to avoid incorrect service resolution in multi-platform DI container
+    /// <summary>
+    /// Initializes a new instance of the <see cref="DiscordBotHealthCheck"/> class.
+    /// </summary>
+    /// <param name="discordBotService">The Discord bot service instance.</param>
     public DiscordBotHealthCheck(DiscordBotService discordBotService)
     {
         _discordBotService = discordBotService;
     }
 
+    /// <summary>
+    /// Checks the health status of the Discord bot.
+    /// </summary>
+    /// <param name="context">The health check context.</param>
+    /// <param name="cancellationToken">Cancellation token to cancel the operation.</param>
+    /// <returns>The health check result indicating the bot's status.</returns>
     public Task<HealthCheckResult> CheckHealthAsync(
         HealthCheckContext context,
         CancellationToken cancellationToken = default)

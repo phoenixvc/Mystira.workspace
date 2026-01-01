@@ -13,8 +13,11 @@ public class DiscordBotHostedService : BackgroundService
     private readonly DiscordBotService _discordBotService;
     private readonly ILogger<DiscordBotHostedService> _logger;
 
-    // FIX: Inject concrete DiscordBotService instead of IChatBotService
-    // to avoid incorrect service resolution in multi-platform DI container
+    /// <summary>
+    /// Initializes a new instance of the <see cref="DiscordBotHostedService"/> class.
+    /// </summary>
+    /// <param name="discordBotService">The Discord bot service instance.</param>
+    /// <param name="logger">The logger instance.</param>
     public DiscordBotHostedService(
         DiscordBotService discordBotService,
         ILogger<DiscordBotHostedService> logger)
@@ -23,6 +26,10 @@ public class DiscordBotHostedService : BackgroundService
         _logger = logger;
     }
 
+    /// <summary>
+    /// Executes the background service, starting the Discord bot and keeping it running.
+    /// </summary>
+    /// <param name="stoppingToken">Cancellation token to signal when the service should stop.</param>
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         _logger.LogInformation("Discord bot hosted service is starting");
@@ -45,6 +52,10 @@ public class DiscordBotHostedService : BackgroundService
         }
     }
 
+    /// <summary>
+    /// Stops the hosted service and gracefully shuts down the Discord bot.
+    /// </summary>
+    /// <param name="cancellationToken">Cancellation token to cancel the stop operation.</param>
     public override async Task StopAsync(CancellationToken cancellationToken)
     {
         _logger.LogInformation("Discord bot hosted service is stopping");

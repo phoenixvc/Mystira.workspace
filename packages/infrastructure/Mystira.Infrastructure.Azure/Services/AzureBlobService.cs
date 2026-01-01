@@ -9,18 +9,33 @@ using Mystira.Application.Ports.Storage;
 
 namespace Mystira.Infrastructure.Azure.Services;
 
+/// <summary>
+/// Azure Blob Storage implementation of the blob service for media file management.
+/// </summary>
 public class AzureBlobService : IBlobService
 {
     private readonly BlobServiceClient _blobServiceClient;
     private readonly ILogger<AzureBlobService> _logger;
     private readonly string _containerName = "mystira-app-media";
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="AzureBlobService"/> class.
+    /// </summary>
+    /// <param name="blobServiceClient">The Azure Blob Service client.</param>
+    /// <param name="logger">The logger instance.</param>
     public AzureBlobService(BlobServiceClient blobServiceClient, ILogger<AzureBlobService> logger)
     {
         _blobServiceClient = blobServiceClient;
         _logger = logger;
     }
 
+    /// <summary>
+    /// Uploads a media file to Azure Blob Storage.
+    /// </summary>
+    /// <param name="fileStream">The file stream to upload.</param>
+    /// <param name="fileName">The original file name.</param>
+    /// <param name="contentType">The content type of the file.</param>
+    /// <returns>The URI of the uploaded blob.</returns>
     public async Task<string> UploadMediaAsync(Stream fileStream, string fileName, string contentType)
     {
         try
@@ -53,6 +68,11 @@ public class AzureBlobService : IBlobService
         }
     }
 
+    /// <summary>
+    /// Gets the URL for a media file stored in Azure Blob Storage.
+    /// </summary>
+    /// <param name="blobName">The name of the blob.</param>
+    /// <returns>The URL of the blob.</returns>
     public Task<string> GetMediaUrlAsync(string blobName)
     {
         try
@@ -70,6 +90,11 @@ public class AzureBlobService : IBlobService
         }
     }
 
+    /// <summary>
+    /// Deletes a media file from Azure Blob Storage.
+    /// </summary>
+    /// <param name="blobName">The name of the blob to delete.</param>
+    /// <returns>True if the blob was deleted; otherwise, false.</returns>
     public async Task<bool> DeleteMediaAsync(string blobName)
     {
         try
@@ -97,6 +122,11 @@ public class AzureBlobService : IBlobService
         }
     }
 
+    /// <summary>
+    /// Lists all media files in Azure Blob Storage with an optional prefix filter.
+    /// </summary>
+    /// <param name="prefix">The optional prefix to filter blob names.</param>
+    /// <returns>A list of blob names matching the prefix.</returns>
     public async Task<List<string>> ListMediaAsync(string prefix = "")
     {
         try
@@ -118,6 +148,11 @@ public class AzureBlobService : IBlobService
         }
     }
 
+    /// <summary>
+    /// Downloads a media file from Azure Blob Storage.
+    /// </summary>
+    /// <param name="blobName">The name of the blob to download.</param>
+    /// <returns>A stream containing the blob content, or null if the blob does not exist.</returns>
     public async Task<Stream?> DownloadMediaAsync(string blobName)
     {
         try

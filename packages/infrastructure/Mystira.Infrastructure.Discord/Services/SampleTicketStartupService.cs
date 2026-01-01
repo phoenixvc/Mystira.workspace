@@ -16,6 +16,12 @@ public sealed class SampleTicketStartupService
     private readonly ILogger<SampleTicketStartupService> _logger;
     private int _hasRun;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="SampleTicketStartupService"/> class.
+    /// </summary>
+    /// <param name="botService">The Discord bot service instance.</param>
+    /// <param name="options">The Discord configuration options.</param>
+    /// <param name="logger">The logger instance.</param>
     public SampleTicketStartupService(
         DiscordBotService botService,
         IOptions<DiscordOptions> options,

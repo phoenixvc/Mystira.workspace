@@ -24,6 +24,11 @@ public class MasterDataSeederService
         return list.Count > 0;
     }
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="MasterDataSeederService"/> class.
+    /// </summary>
+    /// <param name="serviceProvider">The service provider for creating scoped contexts.</param>
+    /// <param name="logger">The logger instance.</param>
     public MasterDataSeederService(
         IServiceProvider serviceProvider,
         ILogger<MasterDataSeederService> logger)
@@ -32,6 +37,11 @@ public class MasterDataSeederService
         _logger = logger;
     }
 
+    /// <summary>
+    /// Seeds all master data entities (CompassAxes, Archetypes, EchoTypes, FantasyThemes, AgeGroups)
+    /// from JSON files into the database. Skips seeding for entities that already exist.
+    /// </summary>
+    /// <returns>A task representing the asynchronous operation.</returns>
     public async Task SeedAllAsync()
     {
         using var scope = _serviceProvider.CreateScope();

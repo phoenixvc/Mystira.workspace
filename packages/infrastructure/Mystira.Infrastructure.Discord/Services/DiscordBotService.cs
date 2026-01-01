@@ -24,6 +24,12 @@ public class DiscordBotService : IMessagingService, IChatBotService, IBotCommand
     private bool _disposed;
     private bool _commandsRegistered;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="DiscordBotService"/> class.
+    /// </summary>
+    /// <param name="options">The Discord configuration options.</param>
+    /// <param name="logger">The logger instance.</param>
+    /// <param name="serviceProvider">The service provider for dependency injection.</param>
     public DiscordBotService(
         IOptions<DiscordOptions> options,
         ILogger<DiscordBotService> logger,
@@ -67,6 +73,9 @@ public class DiscordBotService : IMessagingService, IChatBotService, IBotCommand
         _client.InteractionCreated += HandleInteractionAsync;
     }
 
+    /// <summary>
+    /// Gets a value indicating whether the Discord bot is currently connected.
+    /// </summary>
     public bool IsConnected => _client.ConnectionState == ConnectionState.Connected;
 
     /// <summary>
@@ -80,6 +89,10 @@ public class DiscordBotService : IMessagingService, IChatBotService, IBotCommand
     /// </summary>
     internal DiscordSocketClient Client => _client;
 
+    /// <summary>
+    /// Starts the Discord bot and connects to Discord services.
+    /// </summary>
+    /// <param name="cancellationToken">Cancellation token to cancel the operation.</param>
     public async Task StartAsync(CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(_options.BotToken))
@@ -103,6 +116,10 @@ public class DiscordBotService : IMessagingService, IChatBotService, IBotCommand
         }
     }
 
+    /// <summary>
+    /// Stops the Discord bot and disconnects from Discord services.
+    /// </summary>
+    /// <param name="cancellationToken">Cancellation token to cancel the operation.</param>
     public async Task StopAsync(CancellationToken cancellationToken = default)
     {
         try
@@ -121,6 +138,12 @@ public class DiscordBotService : IMessagingService, IChatBotService, IBotCommand
         }
     }
 
+    /// <summary>
+    /// Sends a text message to the specified Discord channel.
+    /// </summary>
+    /// <param name="channelId">The Discord channel ID.</param>
+    /// <param name="message">The message text to send.</param>
+    /// <param name="cancellationToken">Cancellation token to cancel the operation.</param>
     public async Task SendMessageAsync(ulong channelId, string message, CancellationToken cancellationToken = default)
     {
         var channel = await GetMessageChannelAsync(channelId);
@@ -135,6 +158,12 @@ public class DiscordBotService : IMessagingService, IChatBotService, IBotCommand
             cancellationToken);
     }
 
+    /// <summary>
+    /// Sends a Discord embed to the specified channel.
+    /// </summary>
+    /// <param name="channelId">The Discord channel ID.</param>
+    /// <param name="embed">The embed to send.</param>
+    /// <param name="cancellationToken">Cancellation token to cancel the operation.</param>
     public async Task SendEmbedAsync(ulong channelId, Embed embed, CancellationToken cancellationToken = default)
     {
         var channel = await GetMessageChannelAsync(channelId);
@@ -149,6 +178,13 @@ public class DiscordBotService : IMessagingService, IChatBotService, IBotCommand
             cancellationToken);
     }
 
+    /// <summary>
+    /// Replies to a specific message in a Discord channel.
+    /// </summary>
+    /// <param name="messageId">The ID of the message to reply to.</param>
+    /// <param name="channelId">The Discord channel ID.</param>
+    /// <param name="reply">The reply text to send.</param>
+    /// <param name="cancellationToken">Cancellation token to cancel the operation.</param>
     public async Task ReplyToMessageAsync(ulong messageId, ulong channelId, string reply, CancellationToken cancellationToken = default)
     {
         var channel = await GetMessageChannelAsync(channelId);
@@ -173,6 +209,9 @@ public class DiscordBotService : IMessagingService, IChatBotService, IBotCommand
     /// Executes an action with retry logic for Discord rate limiting.
     /// DRY: Extracted from SendMessageAsync, SendEmbedAsync, and ReplyToMessageAsync.
     /// </summary>
+    /// <param name="action">The action to execute.</param>
+    /// <param name="operationDescription">Description of the operation for logging purposes.</param>
+    /// <param name="cancellationToken">Cancellation token to cancel the operation.</param>
     private async Task ExecuteWithRetryAsync(
         Func<Task> action,
         string operationDescription,
@@ -342,6 +381,9 @@ public class DiscordBotService : IMessagingService, IChatBotService, IBotCommand
         return Task.CompletedTask;
     }
 
+    /// <summary>
+    /// Disposes the Discord bot service and releases all resources.
+    /// </summary>
     public void Dispose()
     {
         if (_disposed)
@@ -356,8 +398,11 @@ public class DiscordBotService : IMessagingService, IChatBotService, IBotCommand
     }
 
     /// <summary>
-    /// Send an embed using platform-agnostic EmbedData (implements IChatBotService)
+    /// Send an embed using platform-agnostic EmbedData (implements IChatBotService).
     /// </summary>
+    /// <param name="channelId">The Discord channel ID.</param>
+    /// <param name="embedData">Platform-agnostic embed data.</param>
+    /// <param name="cancellationToken">Cancellation token to cancel the operation.</param>
     public async Task SendEmbedAsync(ulong channelId, EmbedData embedData, CancellationToken cancellationToken = default)
     {
         var embedBuilder = new EmbedBuilder()
@@ -382,8 +427,9 @@ public class DiscordBotService : IMessagingService, IChatBotService, IBotCommand
     }
 
     /// <summary>
-    /// Get bot status information (implements IChatBotService)
+    /// Get bot status information (implements IChatBotService).
     /// </summary>
+    /// <returns>The current status of the Discord bot.</returns>
     public BotStatus GetStatus()
     {
         return new BotStatus
@@ -400,13 +446,21 @@ public class DiscordBotService : IMessagingService, IChatBotService, IBotCommand
     // IBotCommandService Implementation
     // ─────────────────────────────────────────────────────────────────
 
-    /// <inheritdoc />
+    /// <summary>
+    /// Gets a value indicating whether slash commands are enabled.
+    /// </summary>
     public bool IsEnabled => _options.EnableSlashCommands;
 
-    /// <inheritdoc />
+    /// <summary>
+    /// Gets the count of registered command modules.
+    /// </summary>
     public int RegisteredModuleCount => _interactions.Modules.Count;
 
-    /// <inheritdoc />
+    /// <summary>
+    /// Registers command modules from the specified assembly.
+    /// </summary>
+    /// <param name="assembly">The assembly containing command modules to register.</param>
+    /// <param name="cancellationToken">Cancellation token to cancel the operation.</param>
     public async Task RegisterCommandsAsync(Assembly assembly, CancellationToken cancellationToken = default)
     {
         if (!_options.EnableSlashCommands)
@@ -427,7 +481,11 @@ public class DiscordBotService : IMessagingService, IChatBotService, IBotCommand
         }
     }
 
-    /// <inheritdoc />
+    /// <summary>
+    /// Registers slash commands to a specific Discord server (guild).
+    /// </summary>
+    /// <param name="serverId">The Discord server (guild) ID.</param>
+    /// <param name="cancellationToken">Cancellation token to cancel the operation.</param>
     public async Task RegisterCommandsToServerAsync(ulong serverId, CancellationToken cancellationToken = default)
     {
         if (!_options.EnableSlashCommands)
@@ -451,7 +509,10 @@ public class DiscordBotService : IMessagingService, IChatBotService, IBotCommand
         }
     }
 
-    /// <inheritdoc />
+    /// <summary>
+    /// Registers slash commands globally across all Discord servers the bot is in.
+    /// </summary>
+    /// <param name="cancellationToken">Cancellation token to cancel the operation.</param>
     public async Task RegisterCommandsGloballyAsync(CancellationToken cancellationToken = default)
     {
         if (!_options.EnableSlashCommands)
@@ -483,7 +544,14 @@ public class DiscordBotService : IMessagingService, IChatBotService, IBotCommand
     // Broadcast / First Responder Implementation
     // ─────────────────────────────────────────────────────────────────
 
-    /// <inheritdoc />
+    /// <summary>
+    /// Sends a message to multiple channels and waits for the first response from any channel.
+    /// </summary>
+    /// <param name="channelIds">The collection of channel IDs to send the message to.</param>
+    /// <param name="message">The message text to send.</param>
+    /// <param name="timeout">How long to wait for a response.</param>
+    /// <param name="cancellationToken">Cancellation token to cancel the operation.</param>
+    /// <returns>The result containing information about the first responder or timeout.</returns>
     public async Task<FirstResponderResult> SendAndAwaitFirstResponseAsync(
         IEnumerable<ulong> channelIds,
         string message,
@@ -605,7 +673,14 @@ public class DiscordBotService : IMessagingService, IChatBotService, IBotCommand
         };
     }
 
-    /// <inheritdoc />
+    /// <summary>
+    /// Sends an embed to multiple channels and waits for the first response from any channel.
+    /// </summary>
+    /// <param name="channelIds">The collection of channel IDs to send the embed to.</param>
+    /// <param name="embedData">Platform-agnostic embed data to send.</param>
+    /// <param name="timeout">How long to wait for a response.</param>
+    /// <param name="cancellationToken">Cancellation token to cancel the operation.</param>
+    /// <returns>The result containing information about the first responder or timeout.</returns>
     public async Task<FirstResponderResult> SendEmbedAndAwaitFirstResponseAsync(
         IEnumerable<ulong> channelIds,
         EmbedData embedData,
@@ -719,7 +794,14 @@ public class DiscordBotService : IMessagingService, IChatBotService, IBotCommand
         return new FirstResponderResult { TimedOut = true, SentMessages = sentMessages };
     }
 
-    /// <inheritdoc />
+    /// <summary>
+    /// Broadcasts a message to multiple channels and invokes a handler for each response received.
+    /// </summary>
+    /// <param name="channelIds">The collection of channel IDs to send the message to.</param>
+    /// <param name="message">The message text to send.</param>
+    /// <param name="onResponse">The handler to invoke for each response. Return true to stop listening.</param>
+    /// <param name="timeout">How long to listen for responses.</param>
+    /// <param name="cancellationToken">Cancellation token to cancel the operation.</param>
     public async Task BroadcastWithResponseHandlerAsync(
         IEnumerable<ulong> channelIds,
         string message,

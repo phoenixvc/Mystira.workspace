@@ -33,6 +33,11 @@ public class WhatsAppBotService : IMessagingService, IChatBotService, IBotComman
     // FIX: Use ConcurrentDictionary for thread safety (Phase 2)
     private readonly ConcurrentDictionary<ulong, string> _activeConversations = new();
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="WhatsAppBotService"/> class.
+    /// </summary>
+    /// <param name="options">The WhatsApp configuration options.</param>
+    /// <param name="logger">The logger instance.</param>
     public WhatsAppBotService(
         IOptions<WhatsAppOptions> options,
         ILogger<WhatsAppBotService> logger)
@@ -41,8 +46,14 @@ public class WhatsAppBotService : IMessagingService, IChatBotService, IBotComman
         _logger = logger;
     }
 
+    /// <summary>
+    /// Gets a value indicating whether the service is connected and ready.
+    /// </summary>
     public bool IsConnected => _isConnected && _client != null;
 
+    /// <summary>
+    /// Gets a value indicating whether the service is enabled in configuration.
+    /// </summary>
     public bool IsEnabled => _options.Enabled;
 
     /// <summary>
@@ -50,8 +61,16 @@ public class WhatsAppBotService : IMessagingService, IChatBotService, IBotComman
     /// </summary>
     public ChatPlatform Platform => ChatPlatform.WhatsApp;
 
+    /// <summary>
+    /// Gets the count of registered command modules.
+    /// </summary>
     public int RegisteredModuleCount => 0; // WhatsApp doesn't have command modules like Discord
 
+    /// <summary>
+    /// Starts the WhatsApp bot service and initializes the Azure Communication Services client.
+    /// </summary>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>A task representing the asynchronous operation.</returns>
     public Task StartAsync(CancellationToken cancellationToken = default)
     {
         if (!_options.Enabled)
@@ -85,6 +104,11 @@ public class WhatsAppBotService : IMessagingService, IChatBotService, IBotComman
         return Task.CompletedTask;
     }
 
+    /// <summary>
+    /// Stops the WhatsApp bot service.
+    /// </summary>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>A task representing the asynchronous operation.</returns>
     public Task StopAsync(CancellationToken cancellationToken = default)
     {
         _logger.LogInformation("WhatsApp bot service stopped");
@@ -93,6 +117,13 @@ public class WhatsAppBotService : IMessagingService, IChatBotService, IBotComman
         return Task.CompletedTask;
     }
 
+    /// <summary>
+    /// Sends a text message to the specified WhatsApp phone number.
+    /// </summary>
+    /// <param name="channelId">The channel identifier (phone number hash).</param>
+    /// <param name="message">The message text to send.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>A task representing the asynchronous operation.</returns>
     public async Task SendMessageAsync(ulong channelId, string message, CancellationToken cancellationToken = default)
     {
         if (!IsConnected || _client == null)
@@ -161,6 +192,14 @@ public class WhatsAppBotService : IMessagingService, IChatBotService, IBotComman
         return ex.Status == 429 || (ex.Status >= 500 && ex.Status < 600);
     }
 
+    /// <summary>
+    /// Sends an embed as formatted text to the specified WhatsApp phone number.
+    /// Note: WhatsApp does not support rich embeds; content is converted to formatted text.
+    /// </summary>
+    /// <param name="channelId">The channel identifier (phone number hash).</param>
+    /// <param name="embed">The embed data to send.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>A task representing the asynchronous operation.</returns>
     public async Task SendEmbedAsync(ulong channelId, EmbedData embed, CancellationToken cancellationToken = default)
     {
         // WhatsApp doesn't support rich embeds like Discord
@@ -175,6 +214,15 @@ public class WhatsAppBotService : IMessagingService, IChatBotService, IBotComman
         await SendMessageAsync(channelId, messageText, cancellationToken);
     }
 
+    /// <summary>
+    /// Sends a reply to a specific message in WhatsApp.
+    /// Note: WhatsApp via ACS doesn't support threaded replies; sends as regular message.
+    /// </summary>
+    /// <param name="messageId">The message identifier to reply to.</param>
+    /// <param name="channelId">The channel identifier (phone number hash).</param>
+    /// <param name="reply">The reply text.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>A task representing the asynchronous operation.</returns>
     public async Task ReplyToMessageAsync(ulong messageId, ulong channelId, string reply, CancellationToken cancellationToken = default)
     {
         // WhatsApp via ACS doesn't support threaded replies in the same way
@@ -182,6 +230,10 @@ public class WhatsAppBotService : IMessagingService, IChatBotService, IBotComman
         await SendMessageAsync(channelId, reply, cancellationToken);
     }
 
+    /// <summary>
+    /// Gets the current status of the WhatsApp bot service.
+    /// </summary>
+    /// <returns>The bot status information.</returns>
     public BotStatus GetStatus()
     {
         return new BotStatus
@@ -198,6 +250,15 @@ public class WhatsAppBotService : IMessagingService, IChatBotService, IBotComman
     // Broadcast / First Responder (Limited support for WhatsApp)
     // ─────────────────────────────────────────────────────────────────
 
+    /// <summary>
+    /// Sends a message to multiple phone numbers and awaits the first response.
+    /// Note: WhatsApp does not support real-time response monitoring; use webhooks instead.
+    /// </summary>
+    /// <param name="channelIds">The channel identifiers (phone number hashes) to broadcast to.</param>
+    /// <param name="message">The message to send.</param>
+    /// <param name="timeout">The timeout duration for waiting for responses.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>The first responder result (always times out for WhatsApp).</returns>
     public async Task<FirstResponderResult> SendAndAwaitFirstResponseAsync(
         IEnumerable<ulong> channelIds,
         string message,
@@ -228,6 +289,15 @@ public class WhatsAppBotService : IMessagingService, IChatBotService, IBotComman
         };
     }
 
+    /// <summary>
+    /// Sends an embed to multiple phone numbers and awaits the first response.
+    /// Note: WhatsApp does not support real-time response monitoring; use webhooks instead.
+    /// </summary>
+    /// <param name="channelIds">The channel identifiers (phone number hashes) to broadcast to.</param>
+    /// <param name="embed">The embed data to send.</param>
+    /// <param name="timeout">The timeout duration for waiting for responses.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>The first responder result (always times out for WhatsApp).</returns>
     public async Task<FirstResponderResult> SendEmbedAndAwaitFirstResponseAsync(
         IEnumerable<ulong> channelIds,
         EmbedData embed,
@@ -256,6 +326,16 @@ public class WhatsAppBotService : IMessagingService, IChatBotService, IBotComman
         };
     }
 
+    /// <summary>
+    /// Broadcasts a message to multiple phone numbers with a custom response handler.
+    /// Note: WhatsApp does not support real-time response monitoring via this method.
+    /// </summary>
+    /// <param name="channelIds">The channel identifiers (phone number hashes) to broadcast to.</param>
+    /// <param name="message">The message to send.</param>
+    /// <param name="onResponse">Callback function for handling responses.</param>
+    /// <param name="timeout">The timeout duration for waiting for responses.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>A task representing the asynchronous operation.</returns>
     public async Task BroadcastWithResponseHandlerAsync(
         IEnumerable<ulong> channelIds,
         string message,
@@ -282,18 +362,38 @@ public class WhatsAppBotService : IMessagingService, IChatBotService, IBotComman
     // IBotCommandService Implementation
     // ─────────────────────────────────────────────────────────────────
 
+    /// <summary>
+    /// Registers commands from the specified assembly.
+    /// Note: WhatsApp does not support slash commands; handle commands via message parsing.
+    /// </summary>
+    /// <param name="assembly">The assembly containing command modules.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>A task representing the asynchronous operation.</returns>
     public Task RegisterCommandsAsync(Assembly assembly, CancellationToken cancellationToken = default)
     {
         _logger.LogInformation("WhatsApp does not support slash commands. Handle commands via message parsing.");
         return Task.CompletedTask;
     }
 
+    /// <summary>
+    /// Registers commands to a specific server.
+    /// Note: WhatsApp does not support server-specific command registration.
+    /// </summary>
+    /// <param name="serverId">The server identifier.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>A task representing the asynchronous operation.</returns>
     public Task RegisterCommandsToServerAsync(ulong serverId, CancellationToken cancellationToken = default)
     {
         _logger.LogWarning("WhatsApp does not support server-specific command registration");
         return Task.CompletedTask;
     }
 
+    /// <summary>
+    /// Registers commands globally across all servers.
+    /// Note: WhatsApp commands should be handled via message content parsing.
+    /// </summary>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>A task representing the asynchronous operation.</returns>
     public Task RegisterCommandsGloballyAsync(CancellationToken cancellationToken = default)
     {
         _logger.LogInformation("WhatsApp commands should be handled via message content parsing");
@@ -431,6 +531,9 @@ public class WhatsAppBotService : IMessagingService, IChatBotService, IBotComman
         return string.Join("\n", lines);
     }
 
+    /// <summary>
+    /// Disposes the WhatsApp bot service and cleans up resources.
+    /// </summary>
     public void Dispose()
     {
         if (_disposed)

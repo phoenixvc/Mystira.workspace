@@ -29,6 +29,12 @@ public class PeachPaymentsService : IPaymentService
         PropertyNameCaseInsensitive = true
     };
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="PeachPaymentsService"/> class.
+    /// </summary>
+    /// <param name="httpClient">The HTTP client for API communication.</param>
+    /// <param name="options">The payment configuration options.</param>
+    /// <param name="logger">The logger instance.</param>
     public PeachPaymentsService(
         HttpClient httpClient,
         IOptions<PaymentOptions> options,
@@ -42,6 +48,9 @@ public class PeachPaymentsService : IPaymentService
         ConfigureHttpClient();
     }
 
+    /// <summary>
+    /// Configures the HTTP client with base URL, authentication, and timeout settings.
+    /// </summary>
     private void ConfigureHttpClient()
     {
         _httpClient.BaseAddress = new Uri(_peachOptions.BaseUrl);
@@ -50,6 +59,11 @@ public class PeachPaymentsService : IPaymentService
         _httpClient.Timeout = TimeSpan.FromSeconds(_options.TimeoutSeconds);
     }
 
+    /// <summary>
+    /// Creates a checkout session with PeachPayments.
+    /// </summary>
+    /// <param name="request">The checkout request details.</param>
+    /// <returns>A checkout result containing the checkout ID and redirect URL.</returns>
     public async Task<CheckoutResult> CreateCheckoutAsync(CheckoutRequest request)
     {
         try
@@ -130,6 +144,11 @@ public class PeachPaymentsService : IPaymentService
         }
     }
 
+    /// <summary>
+    /// Processes a direct payment using PeachPayments API.
+    /// </summary>
+    /// <param name="request">The payment request details.</param>
+    /// <returns>A payment result indicating success or failure.</returns>
     public async Task<PaymentResult> ProcessPaymentAsync(PaymentRequest request)
     {
         try
@@ -185,6 +204,12 @@ public class PeachPaymentsService : IPaymentService
         }
     }
 
+    /// <summary>
+    /// Verifies a webhook signature and parses the webhook payload from PeachPayments.
+    /// </summary>
+    /// <param name="payload">The webhook payload JSON.</param>
+    /// <param name="signature">The HMAC-SHA256 signature to verify.</param>
+    /// <returns>The parsed and verified webhook event.</returns>
     public Task<WebhookEvent> VerifyWebhookAsync(string payload, string signature)
     {
         try
@@ -227,6 +252,11 @@ public class PeachPaymentsService : IPaymentService
         }
     }
 
+    /// <summary>
+    /// Gets the current status of a payment transaction from PeachPayments.
+    /// </summary>
+    /// <param name="transactionId">The transaction identifier.</param>
+    /// <returns>The payment status details.</returns>
     public async Task<PaymentStatus> GetPaymentStatusAsync(string transactionId)
     {
         try
@@ -260,6 +290,11 @@ public class PeachPaymentsService : IPaymentService
         }
     }
 
+    /// <summary>
+    /// Processes a full or partial refund for a payment transaction.
+    /// </summary>
+    /// <param name="request">The refund request details.</param>
+    /// <returns>A refund result indicating success or failure.</returns>
     public async Task<RefundResult> RefundPaymentAsync(RefundRequest request)
     {
         try
@@ -311,6 +346,12 @@ public class PeachPaymentsService : IPaymentService
         }
     }
 
+    /// <summary>
+    /// Creates a recurring subscription (not yet implemented for PeachPayments).
+    /// Note: PeachPayments uses Card on File (COF) for recurring payments.
+    /// </summary>
+    /// <param name="request">The subscription request details.</param>
+    /// <returns>A subscription result (currently incomplete).</returns>
     public Task<SubscriptionResult> CreateSubscriptionAsync(SubscriptionRequest request)
     {
         // PeachPayments uses recurring payments via COF (Card on File)
@@ -326,6 +367,12 @@ public class PeachPaymentsService : IPaymentService
         });
     }
 
+    /// <summary>
+    /// Cancels a recurring subscription (not yet implemented for PeachPayments).
+    /// </summary>
+    /// <param name="subscriptionId">The subscription identifier to cancel.</param>
+    /// <param name="cancelImmediately">If true, cancels immediately; otherwise cancels at period end.</param>
+    /// <returns>A subscription cancellation result (currently not implemented).</returns>
     public Task<SubscriptionCancellationResult> CancelSubscriptionAsync(string subscriptionId, bool cancelImmediately = false)
     {
         // Would need to be implemented with recurring payment management
@@ -339,6 +386,11 @@ public class PeachPaymentsService : IPaymentService
         });
     }
 
+    /// <summary>
+    /// Gets the status of a subscription (not yet implemented for PeachPayments).
+    /// </summary>
+    /// <param name="subscriptionId">The subscription identifier.</param>
+    /// <returns>A subscription status (currently returns mock data).</returns>
     public Task<SubscriptionStatus> GetSubscriptionStatusAsync(string subscriptionId)
     {
         _logger.LogWarning("PeachPayments subscription status not yet implemented");
@@ -353,6 +405,10 @@ public class PeachPaymentsService : IPaymentService
         });
     }
 
+    /// <summary>
+    /// Performs a health check by verifying connectivity to the PeachPayments API.
+    /// </summary>
+    /// <returns>True if the API is reachable; otherwise false.</returns>
     public async Task<bool> IsHealthyAsync()
     {
         try
@@ -373,18 +429,34 @@ public class PeachPaymentsService : IPaymentService
 
     #region Private Helpers
 
+    /// <summary>
+    /// Builds the checkout widget URL for the hosted payment form.
+    /// </summary>
+    /// <param name="checkoutId">The checkout identifier.</param>
+    /// <returns>The complete widget script URL.</returns>
     private string BuildCheckoutUrl(string checkoutId)
     {
         // Build the widget script URL for PeachPayments hosted payment form
         return $"{_peachOptions.BaseUrl}/v1/paymentWidgets.js?checkoutId={checkoutId}";
     }
 
+    /// <summary>
+    /// Determines if a PeachPayments result code indicates success.
+    /// </summary>
+    /// <param name="resultCode">The result code from the API response.</param>
+    /// <returns>True if the result code starts with "000."; otherwise false.</returns>
     private static bool IsSuccessfulResult(string? resultCode)
     {
         // PeachPayments result codes: 000.xxx.xxx are successful
         return resultCode != null && resultCode.StartsWith("000.");
     }
 
+    /// <summary>
+    /// Computes an HMAC-SHA256 signature for webhook verification.
+    /// </summary>
+    /// <param name="payload">The payload to sign.</param>
+    /// <param name="secret">The secret key for signing.</param>
+    /// <returns>The hex-encoded HMAC-SHA256 signature.</returns>
     private static string ComputeHmacSha256(string payload, string secret)
     {
         using var hmac = new HMACSHA256(Encoding.UTF8.GetBytes(secret));
@@ -392,6 +464,11 @@ public class PeachPaymentsService : IPaymentService
         return Convert.ToHexString(hash).ToLowerInvariant();
     }
 
+    /// <summary>
+    /// Maps a PeachPayments payment type to a webhook event type.
+    /// </summary>
+    /// <param name="type">The payment type from PeachPayments.</param>
+    /// <returns>The corresponding webhook event type.</returns>
     private static WebhookEventType MapWebhookEventType(string? type)
     {
         return type?.ToUpperInvariant() switch
@@ -403,6 +480,11 @@ public class PeachPaymentsService : IPaymentService
         };
     }
 
+    /// <summary>
+    /// Maps a PeachPayments result code to a payment status.
+    /// </summary>
+    /// <param name="resultCode">The result code from PeachPayments.</param>
+    /// <returns>The corresponding payment status, or null if code is empty.</returns>
     private static PaymentResultStatus? MapPaymentStatus(string? resultCode)
     {
         if (string.IsNullOrEmpty(resultCode)) return null;
