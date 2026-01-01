@@ -65,7 +65,7 @@ public class AwardBadgeUseCase
             BadgeName = badge.Title,
             BadgeMessage = badge.Description,
             Axis = badge.CompassAxisId,
-            TriggerValue = request.TriggerValue,
+            TriggerValue = (int?)request.TriggerValue,
             Threshold = badge.RequiredScore ?? 0,
             GameSessionId = request.GameSessionId,
             ScenarioId = request.ScenarioId,
@@ -75,7 +75,7 @@ public class AwardBadgeUseCase
 
         await _badgeRepository.AddAsync(newBadge);
 
-        userProfile.AddEarnedBadge(newBadge);
+        userProfile.AddEarnedBadge(badge);
         await _userProfileRepository.UpdateAsync(userProfile);
 
         await _unitOfWork.SaveChangesAsync();
