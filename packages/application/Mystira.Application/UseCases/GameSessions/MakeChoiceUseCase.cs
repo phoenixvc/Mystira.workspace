@@ -83,7 +83,7 @@ public class MakeChoiceUseCase
             ? playerId
             : (!string.IsNullOrWhiteSpace(request.PlayerId) ? request.PlayerId : session.ProfileId);
 
-        var compassAxis = request.CompassAxis ?? branch.CompassChange?.AxisId;
+        var compassAxis = request.CompassAxis ?? branch.CompassChange?.Axis;
         var compassDelta = request.CompassDelta ?? branch.CompassChange?.Delta;
         var compassDirection = request.CompassDirection;
 

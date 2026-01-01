@@ -42,12 +42,13 @@ public class GetSessionStatsUseCase
             ct => ct.CurrentValue
         );
 
+        // PlayerCompassProgressTotals is Dictionary<string, int> where key is axis, value is total
         var progress = session.PlayerCompassProgressTotals
-            .Select(p => new PlayerCompassProgressDto
+            .Select(kvp => new PlayerCompassProgressDto
             {
-                PlayerId = p.PlayerId,
-                Axis = p.Axis,
-                Total = (int)p.Total
+                PlayerId = string.Empty, // Dictionary doesn't track individual players
+                Axis = kvp.Key,
+                Total = kvp.Value
             })
             .ToList();
 

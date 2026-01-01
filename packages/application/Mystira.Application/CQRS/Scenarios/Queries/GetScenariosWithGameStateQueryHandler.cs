@@ -56,17 +56,17 @@ public static class GetScenariosWithGameStateQueryHandler
             var hasCompletedSession = sessions.Any(gs => gs.Status == SessionStatus.Completed);
 
             var gameState = hasActiveSession
-                ? ScenarioGameState.InProgress
+                ? Mystira.Domain.Enums.ScenarioGameState.InProgress
                 : hasCompletedSession
-                    ? ScenarioGameState.Completed
-                    : ScenarioGameState.NotStarted;
+                    ? Mystira.Domain.Enums.ScenarioGameState.Completed
+                    : Mystira.Domain.Enums.ScenarioGameState.NotStarted;
 
             return new ScenarioWithGameState
             {
                 ScenarioId = scenario.Id,
                 Title = scenario.Title,
                 Description = scenario.Description,
-                AgeGroup = scenario.AgeGroup,
+                AgeGroup = scenario.AgeGroupId,
                 Difficulty = scenario.Difficulty.ToString(),
                 SessionLength = scenario.SessionLength.ToString(),
                 CoreAxes = scenario.CoreAxes ?? new List<string>(),

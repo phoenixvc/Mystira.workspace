@@ -37,12 +37,13 @@ public static class GetSessionStatsQueryHandler
             ct => ct.CurrentValue
         ) ?? new Dictionary<string, double>();
 
+        // PlayerCompassProgressTotals is Dictionary<string, int> where key is axis, value is total
         var playerProgress = session.PlayerCompassProgressTotals
-            .Select(p => new PlayerCompassProgressDto
+            .Select(kvp => new PlayerCompassProgressDto
             {
-                PlayerId = p.PlayerId,
-                Axis = p.Axis,
-                Total = (int)p.Total
+                PlayerId = string.Empty, // Dictionary doesn't track individual players
+                Axis = kvp.Key,
+                Total = kvp.Value
             })
             .ToList();
 

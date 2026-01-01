@@ -89,9 +89,9 @@ public class AxisScoringService : IAxisScoringService
             return true;
         }
 
-        if (choice.CompassChange != null && !string.IsNullOrWhiteSpace(choice.CompassChange.Axis))
+        if (choice.CompassChange != null && !string.IsNullOrWhiteSpace(choice.CompassChange.AxisId))
         {
-            axis = choice.CompassChange.Axis;
+            axis = choice.CompassChange.AxisId;
             delta = choice.CompassChange.Delta;
             return true;
         }
