@@ -119,12 +119,39 @@ public interface IChatBotService
 /// </summary>
 public class EmbedData
 {
+    /// <summary>
+    /// Gets or sets the embed title.
+    /// </summary>
     public string Title { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Gets or sets the embed description.
+    /// </summary>
     public string Description { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Gets or sets the red component of the embed color (0-255).
+    /// </summary>
     public int ColorRed { get; set; }
+
+    /// <summary>
+    /// Gets or sets the green component of the embed color (0-255).
+    /// </summary>
     public int ColorGreen { get; set; }
+
+    /// <summary>
+    /// Gets or sets the blue component of the embed color (0-255).
+    /// </summary>
     public int ColorBlue { get; set; }
+
+    /// <summary>
+    /// Gets or sets the optional footer text.
+    /// </summary>
     public string? Footer { get; set; }
+
+    /// <summary>
+    /// Gets or sets the optional list of embed fields.
+    /// </summary>
     public List<EmbedFieldData>? Fields { get; set; }
 }
 
@@ -133,8 +160,19 @@ public class EmbedData
 /// </summary>
 public class EmbedFieldData
 {
+    /// <summary>
+    /// Gets or sets the field name.
+    /// </summary>
     public string Name { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Gets or sets the field value.
+    /// </summary>
     public string Value { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Gets or sets whether the field should be displayed inline.
+    /// </summary>
     public bool Inline { get; set; }
 }
 
@@ -143,10 +181,26 @@ public class EmbedFieldData
 /// </summary>
 public class BotStatus
 {
+    /// <summary>
+    /// Gets or sets whether the bot is enabled.
+    /// </summary>
     public bool IsEnabled { get; set; }
+
+    /// <summary>
+    /// Gets or sets whether the bot is currently connected.
+    /// </summary>
     public bool IsConnected { get; set; }
+
+    /// <summary>
+    /// Gets or sets the bot's display name.
+    /// </summary>
     public string? BotName { get; set; }
+
+    /// <summary>
+    /// Gets or sets the bot's unique identifier.
+    /// </summary>
     public ulong? BotId { get; set; }
+
     /// <summary>
     /// Number of servers/guilds/workspaces the bot is connected to
     /// </summary>
@@ -213,7 +267,14 @@ public class FirstResponderResult
 /// </summary>
 public class SentMessage
 {
+    /// <summary>
+    /// Gets or sets the channel identifier where the message was sent.
+    /// </summary>
     public ulong ChannelId { get; set; }
+
+    /// <summary>
+    /// Gets or sets the message identifier.
+    /// </summary>
     public ulong MessageId { get; set; }
 }
 

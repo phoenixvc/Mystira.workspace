@@ -14,6 +14,13 @@ public class BadgeAwardingService : IBadgeAwardingService
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<BadgeAwardingService> _logger;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="BadgeAwardingService"/> class.
+    /// </summary>
+    /// <param name="badgeRepository">The badge repository.</param>
+    /// <param name="userBadgeRepository">The user badge repository.</param>
+    /// <param name="unitOfWork">The unit of work for transaction management.</param>
+    /// <param name="logger">The logger instance.</param>
     public BadgeAwardingService(
         IBadgeRepository badgeRepository,
         IUserBadgeRepository userBadgeRepository,
@@ -26,6 +33,12 @@ public class BadgeAwardingService : IBadgeAwardingService
         _logger = logger;
     }
 
+    /// <summary>
+    /// Awards badges to a user profile based on axis score thresholds.
+    /// </summary>
+    /// <param name="profile">The user profile to award badges to.</param>
+    /// <param name="axisScores">Dictionary of axis names to their scores.</param>
+    /// <returns>List of newly awarded badges.</returns>
     public async Task<List<UserBadge>> AwardBadgesAsync(UserProfile profile, Dictionary<string, float> axisScores)
     {
         var newBadges = new List<UserBadge>();

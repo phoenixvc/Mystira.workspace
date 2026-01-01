@@ -13,6 +13,12 @@ public class AxisScoringService : IAxisScoringService
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<AxisScoringService> _logger;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="AxisScoringService"/> class.
+    /// </summary>
+    /// <param name="scoreRepository">The player scenario score repository.</param>
+    /// <param name="unitOfWork">The unit of work for transaction management.</param>
+    /// <param name="logger">The logger instance.</param>
     public AxisScoringService(
         IPlayerScenarioScoreRepository scoreRepository,
         IUnitOfWork unitOfWork,
@@ -23,6 +29,12 @@ public class AxisScoringService : IAxisScoringService
         _logger = logger;
     }
 
+    /// <summary>
+    /// Scores a completed game session by aggregating per-choice axis deltas.
+    /// </summary>
+    /// <param name="session">The game session to score.</param>
+    /// <param name="profile">The user profile associated with the session.</param>
+    /// <returns>The player scenario score, or null if already scored.</returns>
     public async Task<PlayerScenarioScore?> ScoreSessionAsync(GameSession session, UserProfile profile)
     {
         // Check if this profile/scenario pair has already been scored
