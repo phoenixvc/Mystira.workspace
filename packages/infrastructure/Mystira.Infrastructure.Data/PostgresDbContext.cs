@@ -317,9 +317,26 @@ public class PostgresDbContext : DbContext
         where TKey : notnull
     {
         return new ValueComparer<Dictionary<TKey, TValue>>(
-            (d1, d2) => d1 != null && d2 != null && d1.Count == d2.Count && !d1.Except(d2).Any(),
-            d => d != null ? d.Aggregate(0, (a, kv) => HashCode.Combine(a, kv.Key.GetHashCode(), kv.Value != null ? kv.Value.GetHashCode() : 0)) : 0,
-            d => d != null ? new Dictionary<TKey, TValue>(d) : new Dictionary<TKey, TValue>());
+            (d1, d2) =>
+            {
+                if (d1 == null || d2 == null) return d1 == d2;
+                if (d1.Count != d2.Count) return false;
+                // Use the comparer from d1 for proper key comparison
+                var comparer = d1.Comparer;
+                return d1.All(kv => d2.TryGetValue(kv.Key, out var value) && EqualityComparer<TValue>.Default.Equals(kv.Value, value));
+            },
+            d =>
+            {
+                if (d == null) return 0;
+                // Use the dictionary's comparer for consistent key hashing
+                return d.Aggregate(0, (a, kv) => HashCode.Combine(a, d.Comparer.GetHashCode(kv.Key), kv.Value != null ? kv.Value.GetHashCode() : 0));
+            },
+            d =>
+            {
+                if (d == null) return new Dictionary<TKey, TValue>();
+                // Preserve the source dictionary's comparer in the snapshot
+                return new Dictionary<TKey, TValue>(d, d.Comparer);
+            });
     }
 
     #endregion

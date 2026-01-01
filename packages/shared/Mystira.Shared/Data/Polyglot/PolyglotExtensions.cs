@@ -3,10 +3,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
-// Suppress obsolete warnings within this file - these extension methods
-// register the deprecated types and must reference them internally.
-#pragma warning disable CS0618
-
 namespace Mystira.Shared.Polyglot;
 
 /// <summary>
@@ -151,7 +147,9 @@ public static class PolyglotExtensions
         this IServiceCollection services)
         where TEntity : class
     {
+#pragma warning disable CS0618 // IPolyglotRepository and PolyglotRepository are deprecated; this method registers them for backwards compatibility
         services.TryAddScoped<IPolyglotRepository<TEntity>, PolyglotRepository<TEntity>>();
+#pragma warning restore CS0618
         return services;
     }
 
@@ -165,9 +163,11 @@ public static class PolyglotExtensions
     public static IServiceCollection AddPolyglotRepository<TEntity, TRepository>(
         this IServiceCollection services)
         where TEntity : class
+#pragma warning disable CS0618 // IPolyglotRepository is deprecated; this method registers it for backwards compatibility
         where TRepository : class, IPolyglotRepository<TEntity>
     {
         services.AddScoped<IPolyglotRepository<TEntity>, TRepository>();
+#pragma warning restore CS0618
         return services;
     }
 
@@ -205,8 +205,10 @@ public static class PolyglotExtensions
 
         foreach (var entityType in entityTypes)
         {
+#pragma warning disable CS0618 // IPolyglotRepository and PolyglotRepository are deprecated; this method registers them for backwards compatibility
             var repositoryInterface = typeof(IPolyglotRepository<>).MakeGenericType(entityType);
             var repositoryImplementation = typeof(PolyglotRepository<>).MakeGenericType(entityType);
+#pragma warning restore CS0618
             services.TryAddScoped(repositoryInterface, repositoryImplementation);
         }
 
@@ -239,8 +241,10 @@ public static class PolyglotExtensions
 
         foreach (var entityType in entityTypes)
         {
+#pragma warning disable CS0618 // IPolyglotRepository and PolyglotRepository are deprecated; this method registers them for backwards compatibility
             var repositoryInterface = typeof(IPolyglotRepository<>).MakeGenericType(entityType);
             var repositoryImplementation = typeof(PolyglotRepository<>).MakeGenericType(entityType);
+#pragma warning restore CS0618
             services.TryAddScoped(repositoryInterface, repositoryImplementation);
         }
 

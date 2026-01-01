@@ -764,12 +764,12 @@ public partial class MystiraAppDbContext : DbContext
 
                 entry.Property(e => e.Modifiers)
                     .HasConversion(new ModifierListConverter())
-                    .Metadata.SetValueComparer(new ValueComparer<List<Modifier>>(
+                    .Metadata.SetValueComparer(new ValueComparer<List<MetadataModifier>>(
                         (c1, c2) => c1 != null && c2 != null &&
                                     c1.Count == c2.Count &&
                                     !c1.Except(c2, new ModifierComparer()).Any(),
                         c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.Key.GetHashCode(), v.Value.GetHashCode())),
-                        c => c.Select(x => new Modifier { Key = x.Key, Value = x.Value }).ToList()
+                        c => c.Select(x => new MetadataModifier { Key = x.Key, Value = x.Value }).ToList()
                     ));
             });
 
@@ -1063,18 +1063,18 @@ public class ClassificationTagComparer : IEqualityComparer<ClassificationTag>
     }
 }
 
-public class ModifierListConverter : ValueConverter<List<Modifier>, string>
+public class ModifierListConverter : ValueConverter<List<MetadataModifier>, string>
 {
     public ModifierListConverter()
         : base(
-            // Convert to DB type (List<Modifier> -> string)
+            // Convert to DB type (List<MetadataModifier> -> string)
             modifiers => ConvertToString(modifiers),
-            // Convert from DB type (string -> List<Modifier>)
+            // Convert from DB type (string -> List<MetadataModifier>)
             dbString => ConvertFromString(dbString))
     {
     }
 
-    private static string ConvertToString(List<Modifier> modifiers)
+    private static string ConvertToString(List<MetadataModifier> modifiers)
     {
         if (modifiers == null || !modifiers.Any())
         {
@@ -1084,18 +1084,18 @@ public class ModifierListConverter : ValueConverter<List<Modifier>, string>
         return string.Join("|", modifiers.Select(mod => $"{mod.Key}:{mod.Value}"));
     }
 
-    private static List<Modifier> ConvertFromString(string dbString)
+    private static List<MetadataModifier> ConvertFromString(string dbString)
     {
         if (string.IsNullOrEmpty(dbString))
         {
-            return new List<Modifier>();
+            return new List<MetadataModifier>();
         }
 
         return dbString.Split('|', StringSplitOptions.RemoveEmptyEntries)
             .Select(s =>
             {
                 var parts = s.Split(':', 2);
-                return new Modifier
+                return new MetadataModifier
                 {
                     Key = parts[0],
                     Value = parts.Length > 1 ? parts[1] : string.Empty
@@ -1105,9 +1105,9 @@ public class ModifierListConverter : ValueConverter<List<Modifier>, string>
     }
 }
 
-public class ModifierComparer : IEqualityComparer<Modifier>
+public class ModifierComparer : IEqualityComparer<MetadataModifier>
 {
-    public bool Equals(Modifier? x, Modifier? y)
+    public bool Equals(MetadataModifier? x, MetadataModifier? y)
     {
         if (x == null && y == null)
         {
@@ -1122,7 +1122,7 @@ public class ModifierComparer : IEqualityComparer<Modifier>
         return x.Key == y.Key && x.Value == y.Value;
     }
 
-    public int GetHashCode(Modifier obj)
+    public int GetHashCode(MetadataModifier obj)
     {
         return HashCode.Combine(obj.Key, obj.Value);
     }
