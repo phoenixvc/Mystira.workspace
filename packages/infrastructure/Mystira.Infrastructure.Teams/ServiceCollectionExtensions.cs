@@ -67,18 +67,19 @@ public static class ServiceCollectionExtensions
     /// <summary>
     /// Adds Teams bot as a keyed service (for multi-platform scenarios).
     /// Use this when you have multiple chat platforms (Discord + Teams).
-    /// FIX: Added IMessagingService registration for consistency with Discord.
     /// </summary>
     /// <param name="services">The service collection</param>
     /// <param name="configuration">The configuration instance</param>
     /// <param name="serviceKey">The key to use for the keyed service (default: "teams")</param>
+    /// <param name="configureOptions">Optional action to configure Teams options</param>
     /// <returns>The service collection for chaining</returns>
     public static IServiceCollection AddTeamsBotKeyed(
         this IServiceCollection services,
         IConfiguration configuration,
-        string serviceKey = "teams")
+        string serviceKey = "teams",
+        Action<TeamsOptions>? configureOptions = null)
     {
-        services.AddTeamsBot(configuration);
+        services.AddTeamsBot(configuration, configureOptions);
 
         // Register as keyed services for multi-platform scenarios
         services.AddKeyedSingleton<IMessagingService>(serviceKey,

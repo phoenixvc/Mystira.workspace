@@ -58,6 +58,9 @@ public partial class MystiraAppDbContext : DbContext
     {
         base.OnModelCreating(modelBuilder);
 
+        // Apply global query filters for soft-deletable entities
+        ApplyGlobalQueryFilters(modelBuilder);
+
         // Check if we're using in-memory database (for testing)
         var isInMemoryDatabase = Database.ProviderName == "Microsoft.EntityFrameworkCore.InMemory";
 
@@ -654,18 +657,18 @@ public partial class MystiraAppDbContext : DbContext
             }
 
             // Store AxisScores as JSON string to work with both Cosmos and InMemory providers
-            var dictComparer = new ValueComparer<Dictionary<string, float>>(
+            var dictComparer = new ValueComparer<Dictionary<string, int>>(
                 (d1, d2) =>
                     d1 != null && d2 != null && d1.Count == d2.Count &&
                     d1.OrderBy(kv => kv.Key, StringComparer.OrdinalIgnoreCase)
                       .SequenceEqual(d2.OrderBy(kv => kv.Key, StringComparer.OrdinalIgnoreCase)),
                 d => d == null ? 0 : d.Aggregate(0, (a, kv) => HashCode.Combine(a,
                     StringComparer.OrdinalIgnoreCase.GetHashCode(kv.Key), kv.Value.GetHashCode())),
-                d => d == null ? new Dictionary<string, float>(StringComparer.OrdinalIgnoreCase)
-                                : new Dictionary<string, float>(d, StringComparer.OrdinalIgnoreCase));
+                d => d == null ? new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase)
+                                : new Dictionary<string, int>(d, StringComparer.OrdinalIgnoreCase));
 
             entity.Property(e => e.AxisScores)
-                  .HasConversion(new ValueConverter<Dictionary<string, float>, string>(
+                  .HasConversion(new ValueConverter<Dictionary<string, int>, string>(
                       v => AxisScoresSerializer.Serialize(v),
                       v => AxisScoresSerializer.Deserialize(v)))
                   .Metadata.SetValueComparer(dictComparer);
@@ -908,18 +911,18 @@ public partial class MystiraAppDbContext : DbContext
     {
         private static readonly System.Text.Json.JsonSerializerOptions Options = new();
 
-        public static string Serialize(Dictionary<string, float> value)
+        public static string Serialize(Dictionary<string, int> value)
             => System.Text.Json.JsonSerializer.Serialize(value, Options);
 
-        public static Dictionary<string, float> Deserialize(string json)
+        public static Dictionary<string, int> Deserialize(string json)
         {
             if (string.IsNullOrWhiteSpace(json))
-                return new Dictionary<string, float>(StringComparer.OrdinalIgnoreCase);
+                return new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
 
-            var dict = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, float>>(json, Options);
+            var dict = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, int>>(json, Options);
             return dict == null
-                ? new Dictionary<string, float>(StringComparer.OrdinalIgnoreCase)
-                : new Dictionary<string, float>(dict, StringComparer.OrdinalIgnoreCase);
+                ? new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase)
+                : new Dictionary<string, int>(dict, StringComparer.OrdinalIgnoreCase);
         }
     }
 

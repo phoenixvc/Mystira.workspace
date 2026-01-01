@@ -35,26 +35,61 @@ public static class PolyglotServiceCollectionExtensions
 
     /// <summary>
     /// Add polyglot persistence with dual-write support between two DbContexts.
+    /// Both contexts must be registered separately with their connection strings before calling this method.
+    ///
+    /// Note: After calling this method, use <see cref="AddPolyglotEntityWithDualWrite{TEntity, TPrimaryContext, TSecondaryContext}"/>
+    /// to register specific entities that need dual-write support.
     /// </summary>
-    /// <typeparam name="TPrimaryContext">The primary DbContext (Cosmos DB)</typeparam>
-    /// <typeparam name="TSecondaryContext">The secondary DbContext (PostgreSQL)</typeparam>
+    /// <typeparam name="TPrimaryContext">The primary DbContext (e.g., Cosmos DB)</typeparam>
+    /// <typeparam name="TSecondaryContext">The secondary DbContext (e.g., PostgreSQL)</typeparam>
+    /// <param name="services">The service collection</param>
+    /// <param name="configuration">The configuration instance</param>
+    /// <returns>The service collection for chaining</returns>
     public static IServiceCollection AddPolyglotPersistenceWithDualWrite<TPrimaryContext, TSecondaryContext>(
         this IServiceCollection services,
         IConfiguration configuration)
         where TPrimaryContext : DbContext
         where TSecondaryContext : DbContext
     {
-        // Configure migration options
+        // Configure migration options with dual-write mode
         services.Configure<MigrationOptions>(
             configuration.GetSection(MigrationOptions.SectionName));
 
-        // Register both contexts
-        // Note: Individual DbContexts should be registered separately with their connection strings
+        services.Configure<PolyglotOptions>(opts => opts.Mode = PolyglotMode.DualWrite);
 
-        // Register repositories with awareness of both contexts
+        // Register standard repositories using primary context
         services.AddScoped(typeof(ISpecRepository<>), typeof(EfSpecificationRepository<>));
         services.AddScoped(typeof(IReadRepository<>), typeof(EfSpecificationRepository<>));
-        services.AddScoped(typeof(IPolyglotRepository<>), typeof(PolyglotRepository<>));
+
+        // Register DbContext as the primary context type for default resolution
+        services.AddScoped<DbContext>(sp => sp.GetRequiredService<TPrimaryContext>());
+
+        return services;
+    }
+
+    /// <summary>
+    /// Add a specific entity type to use polyglot repository with dual-write across two contexts.
+    /// </summary>
+    /// <typeparam name="TEntity">The entity type</typeparam>
+    /// <typeparam name="TPrimaryContext">The primary DbContext type</typeparam>
+    /// <typeparam name="TSecondaryContext">The secondary DbContext type</typeparam>
+    /// <param name="services">The service collection</param>
+    /// <returns>The service collection for chaining</returns>
+    public static IServiceCollection AddPolyglotEntityWithDualWrite<TEntity, TPrimaryContext, TSecondaryContext>(
+        this IServiceCollection services)
+        where TEntity : class
+        where TPrimaryContext : DbContext
+        where TSecondaryContext : DbContext
+    {
+        services.AddScoped<IPolyglotRepository<TEntity>>(sp =>
+        {
+            var primaryContext = sp.GetRequiredService<TPrimaryContext>();
+            var secondaryContext = sp.GetRequiredService<TSecondaryContext>();
+            var options = sp.GetRequiredService<Microsoft.Extensions.Options.IOptions<PolyglotOptions>>();
+            var logger = sp.GetRequiredService<Microsoft.Extensions.Logging.ILogger<PolyglotRepository<TEntity>>>();
+
+            return new PolyglotRepository<TEntity>(primaryContext, options, logger, secondaryContext);
+        });
 
         return services;
     }
