@@ -23,7 +23,7 @@ interface SmartDeployDecisionProps {
 export function SmartDeployDecision({
   hasInfrastructure,
   selectedResourceGroup,
-  selectedStaticWebApp,
+  selectedStaticWebApp: _selectedStaticWebApp,
   onDeployModeSelect,
   selectedMode,
 }: SmartDeployDecisionProps) {

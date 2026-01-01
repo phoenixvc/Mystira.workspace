@@ -200,7 +200,7 @@ export function useMigration() {
       let totalFailures = 0;
       const completedOps: string[] = [];
 
-      const migrateResource = async (type: string, operationName: string): Promise<MigrationResult | null> => {
+      const migrateResource = async (type: string, _operationName: string): Promise<MigrationResult | null> => {
         if (abortRef.current) {
           return null;
         }

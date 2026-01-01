@@ -1,17 +1,17 @@
 using System.Text.Json;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Mystira.DevHub.CLI.Commands;
 using Mystira.DevHub.CLI.Models;
-using Mystira.DevHub.Services.Cosmos;
-using Mystira.DevHub.Services.Data;
-using Mystira.DevHub.Services.Infrastructure;
 using Mystira.DevHub.Services.Migration;
 
 namespace Mystira.DevHub.CLI;
 
+/// <summary>
+/// CLI entry point for Cosmos DB migration operations.
+/// Simplified to focus on migration functionality without external dependencies.
+/// </summary>
 internal class Program
 {
     private static async Task<int> Main(string[] args)
@@ -28,42 +28,21 @@ internal class Program
             // Setup dependency injection
             var services = new ServiceCollection();
 
-            // Add logging (only errors to console, rest to file/debug)
+            // Add logging (only errors to console)
             services.AddLogging(builder =>
             {
                 builder.AddConsole();
-                builder.SetMinimumLevel(LogLevel.Error); // Only show errors in console
+                builder.SetMinimumLevel(LogLevel.Warning);
             });
 
             // Add configuration
             services.AddSingleton<IConfiguration>(configuration);
 
-            // Add DbContext (connection string can be overridden by environment)
-            var connectionString = Environment.GetEnvironmentVariable("COSMOS_CONNECTION_STRING")
-                ?? configuration.GetConnectionString("CosmosDb")
-                ?? "";
-            var databaseName = Environment.GetEnvironmentVariable("COSMOS_DATABASE_NAME")
-                ?? configuration["Database:Name"]
-                ?? "MystiraAppDb";
-
-            if (!string.IsNullOrEmpty(connectionString))
-            {
-                services.AddDbContext<DevHubDbContext>(options =>
-                    options.UseCosmos(connectionString, databaseName));
-            }
-
-            // Add services
-            services.AddScoped<ICosmosReportingService, CosmosReportingService>();
+            // Add migration service
             services.AddScoped<IMigrationService, MigrationService>();
-            services.AddScoped<IInfrastructureService, InfrastructureService>();
 
-            // Add command handlers
-            services.AddScoped<CosmosCommands>();
+            // Add command handler
             services.AddScoped<MigrationCommands>();
-            services.AddScoped<InfrastructureCommands>();
-            services.AddScoped<AzureCommands>();
-            services.AddScoped<GitHubCommands>();
-            services.AddScoped<ConnectionCommands>();
 
             var serviceProvider = services.BuildServiceProvider();
 
@@ -112,18 +91,8 @@ internal class Program
             {
                 response = request.Command.ToLower() switch
                 {
-                    "cosmos.export" => await serviceProvider.GetRequiredService<CosmosCommands>().ExportAsync(request.Args),
-                    "cosmos.stats" => await serviceProvider.GetRequiredService<CosmosCommands>().StatsAsync(request.Args),
                     "migration.run" => await serviceProvider.GetRequiredService<MigrationCommands>().RunAsync(request.Args),
-                    "infrastructure.validate" => await serviceProvider.GetRequiredService<InfrastructureCommands>().ValidateAsync(request.Args),
-                    "infrastructure.preview" => await serviceProvider.GetRequiredService<InfrastructureCommands>().PreviewAsync(request.Args),
-                    "infrastructure.deploy" => await serviceProvider.GetRequiredService<InfrastructureCommands>().DeployAsync(request.Args),
-                    "infrastructure.destroy" => await serviceProvider.GetRequiredService<InfrastructureCommands>().DestroyAsync(request.Args),
-                    "infrastructure.status" => await serviceProvider.GetRequiredService<InfrastructureCommands>().StatusAsync(request.Args),
-                    "azure.list-resources" => await serviceProvider.GetRequiredService<AzureCommands>().ListResourcesAsync(request.Args),
-                    "github.list-deployments" => await serviceProvider.GetRequiredService<GitHubCommands>().ListDeploymentsAsync(request.Args),
-                    "connection.test" => await serviceProvider.GetRequiredService<ConnectionCommands>().TestAsync(request.Args),
-                    _ => CommandResponse.Fail($"Unknown command: {request.Command}")
+                    _ => CommandResponse.Fail($"Unknown command: {request.Command}. Available commands: migration.run")
                 };
             }
             catch (Exception ex)
