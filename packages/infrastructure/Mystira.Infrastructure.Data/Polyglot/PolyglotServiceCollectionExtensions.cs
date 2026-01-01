@@ -26,6 +26,9 @@ public static class PolyglotServiceCollectionExtensions
         services.Configure<PolyglotOptions>(
             configuration.GetSection(PolyglotOptions.SectionName));
 
+        // Register DbContext as the specified context type for default resolution
+        services.AddScoped<DbContext>(sp => sp.GetRequiredService<TContext>());
+
         // Register the EF specification repository for standard use
         services.AddScoped(typeof(ISpecRepository<>), typeof(EfSpecificationRepository<>));
         services.AddScoped(typeof(IReadRepository<>), typeof(EfSpecificationRepository<>));
