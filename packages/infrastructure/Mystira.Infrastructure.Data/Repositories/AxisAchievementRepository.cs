@@ -154,6 +154,29 @@ public class AxisAchievementRepository : IAxisAchievementRepository
             .ToListAsync();
     }
 
+    /// <inheritdoc/>
+    public async Task<IEnumerable<AxisAchievement>> GetByAgeGroupAsync(string ageGroupId)
+    {
+        // AxisAchievement doesn't have a direct AgeGroupId property.
+        // To filter by age group, we would need to join with UserProfile.
+        // For now, return achievements for users in the specified age group.
+        return await _context.AxisAchievements
+            .Join(_context.UserProfiles,
+                achievement => achievement.UserId,
+                profile => profile.Id,
+                (achievement, profile) => new { achievement, profile })
+            .Where(x => x.profile.AgeGroupId == ageGroupId)
+            .Select(x => x.achievement)
+            .ToListAsync();
+    }
+
+    /// <inheritdoc/>
+    public async Task<IEnumerable<AxisAchievement>> GetByCompassAxisAsync(string compassAxisId)
+    {
+        // CompassAxisId is an alias for AxisId in the AxisAchievement model
+        return await GetByAxisIdAsync(compassAxisId);
+    }
+
     private IQueryable<AxisAchievement> ApplySpecification(ISpecification<AxisAchievement> spec)
     {
         return SpecificationEvaluator.Default.GetQuery(_context.AxisAchievements.AsQueryable(), spec);
