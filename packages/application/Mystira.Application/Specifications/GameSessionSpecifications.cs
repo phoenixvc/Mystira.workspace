@@ -8,6 +8,10 @@ namespace Mystira.Application.Specifications;
 /// </summary>
 public sealed class GameSessionByIdSpec : SingleEntitySpecification<GameSession>
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="GameSessionByIdSpec"/> class.
+    /// </summary>
+    /// <param name="id">The game session identifier.</param>
     public GameSessionByIdSpec(string id)
     {
         Query.Where(s => s.Id == id);
@@ -20,6 +24,10 @@ public sealed class GameSessionByIdSpec : SingleEntitySpecification<GameSession>
 /// </summary>
 public sealed class SessionsByAccountSpec : BaseEntitySpecification<GameSession>
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="SessionsByAccountSpec"/> class.
+    /// </summary>
+    /// <param name="accountId">The account identifier to filter by.</param>
     public SessionsByAccountSpec(string accountId)
     {
         Query.Where(s => s.AccountId == accountId)
@@ -33,6 +41,10 @@ public sealed class SessionsByAccountSpec : BaseEntitySpecification<GameSession>
 /// </summary>
 public sealed class SessionsByProfileSpec : BaseEntitySpecification<GameSession>
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="SessionsByProfileSpec"/> class.
+    /// </summary>
+    /// <param name="profileId">The profile identifier to filter by.</param>
     public SessionsByProfileSpec(string profileId)
     {
         Query.Where(s => s.ProfileId == profileId)
@@ -46,6 +58,10 @@ public sealed class SessionsByProfileSpec : BaseEntitySpecification<GameSession>
 /// </summary>
 public sealed class InProgressSessionsSpec : BaseEntitySpecification<GameSession>
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="InProgressSessionsSpec"/> class.
+    /// </summary>
+    /// <param name="accountId">The account identifier to filter by.</param>
     public InProgressSessionsSpec(string accountId)
     {
         Query.Where(s => s.AccountId == accountId &&
@@ -60,6 +76,10 @@ public sealed class InProgressSessionsSpec : BaseEntitySpecification<GameSession
 /// </summary>
 public sealed class SessionsByScenarioSpec : BaseEntitySpecification<GameSession>
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="SessionsByScenarioSpec"/> class.
+    /// </summary>
+    /// <param name="scenarioId">The scenario identifier to filter by.</param>
     public SessionsByScenarioSpec(string scenarioId)
     {
         Query.Where(s => s.ScenarioId == scenarioId)
@@ -73,6 +93,9 @@ public sealed class SessionsByScenarioSpec : BaseEntitySpecification<GameSession
 /// </summary>
 public sealed class ActiveSessionsSpec : BaseEntitySpecification<GameSession>
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ActiveSessionsSpec"/> class.
+    /// </summary>
     public ActiveSessionsSpec()
     {
         Query.Where(s => s.Status == SessionStatus.InProgress || s.Status == SessionStatus.Paused)
@@ -86,6 +109,9 @@ public sealed class ActiveSessionsSpec : BaseEntitySpecification<GameSession>
 /// </summary>
 public sealed class CompletedSessionsSpec : BaseEntitySpecification<GameSession>
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="CompletedSessionsSpec"/> class.
+    /// </summary>
     public CompletedSessionsSpec()
     {
         Query.Where(s => s.Status == SessionStatus.Completed)
@@ -99,6 +125,10 @@ public sealed class CompletedSessionsSpec : BaseEntitySpecification<GameSession>
 /// </summary>
 public sealed class SessionsByStatusSpec : BaseEntitySpecification<GameSession>
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="SessionsByStatusSpec"/> class.
+    /// </summary>
+    /// <param name="status">The session status to filter by.</param>
     public SessionsByStatusSpec(SessionStatus status)
     {
         Query.Where(s => s.Status == status)
@@ -112,6 +142,11 @@ public sealed class SessionsByStatusSpec : BaseEntitySpecification<GameSession>
 /// </summary>
 public sealed class SessionsByAccountAndScenarioSpec : BaseEntitySpecification<GameSession>
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="SessionsByAccountAndScenarioSpec"/> class.
+    /// </summary>
+    /// <param name="accountId">The account identifier to filter by.</param>
+    /// <param name="scenarioId">The scenario identifier to filter by.</param>
     public SessionsByAccountAndScenarioSpec(string accountId, string scenarioId)
     {
         Query.Where(s => s.AccountId == accountId && s.ScenarioId == scenarioId)
@@ -124,6 +159,14 @@ public sealed class SessionsByAccountAndScenarioSpec : BaseEntitySpecification<G
 /// </summary>
 public sealed class GameSessionsPaginatedSpec : BaseEntitySpecification<GameSession>
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="GameSessionsPaginatedSpec"/> class.
+    /// </summary>
+    /// <param name="skip">The number of records to skip.</param>
+    /// <param name="take">The number of records to take.</param>
+    /// <param name="accountId">Optional account identifier to filter by.</param>
+    /// <param name="profileId">Optional profile identifier to filter by.</param>
+    /// <param name="status">Optional session status to filter by.</param>
     public GameSessionsPaginatedSpec(
         int skip,
         int take,

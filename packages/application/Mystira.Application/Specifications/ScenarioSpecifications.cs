@@ -8,6 +8,10 @@ namespace Mystira.Application.Specifications;
 /// </summary>
 public sealed class ScenarioByIdSpec : SingleEntitySpecification<Scenario>
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ScenarioByIdSpec"/> class.
+    /// </summary>
+    /// <param name="id">The scenario identifier.</param>
     public ScenarioByIdSpec(string id)
     {
         Query.Where(s => s.Id == id);
@@ -20,6 +24,10 @@ public sealed class ScenarioByIdSpec : SingleEntitySpecification<Scenario>
 /// </summary>
 public sealed class ScenariosByAgeGroupSpec : BaseEntitySpecification<Scenario>
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ScenariosByAgeGroupSpec"/> class.
+    /// </summary>
+    /// <param name="ageGroup">The age group to filter by.</param>
     public ScenariosByAgeGroupSpec(string ageGroup)
     {
         Query.Where(s => s.AgeGroupId == ageGroup)
@@ -33,6 +41,10 @@ public sealed class ScenariosByAgeGroupSpec : BaseEntitySpecification<Scenario>
 /// </summary>
 public sealed class ScenariosByTagSpec : BaseEntitySpecification<Scenario>
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ScenariosByTagSpec"/> class.
+    /// </summary>
+    /// <param name="tag">The tag to filter by.</param>
     public ScenariosByTagSpec(string tag)
     {
         Query.Where(s => s.Tags != null && s.Tags.Contains(tag))
@@ -46,6 +58,10 @@ public sealed class ScenariosByTagSpec : BaseEntitySpecification<Scenario>
 /// </summary>
 public sealed class ScenariosByDifficultySpec : BaseEntitySpecification<Scenario>
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ScenariosByDifficultySpec"/> class.
+    /// </summary>
+    /// <param name="difficulty">The difficulty level to filter by.</param>
     public ScenariosByDifficultySpec(DifficultyLevel difficulty)
     {
         Query.Where(s => s.Difficulty == difficulty)
@@ -59,6 +75,14 @@ public sealed class ScenariosByDifficultySpec : BaseEntitySpecification<Scenario
 /// </summary>
 public sealed class ScenariosPaginatedSpec : BaseEntitySpecification<Scenario>
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ScenariosPaginatedSpec"/> class.
+    /// </summary>
+    /// <param name="skip">The number of records to skip.</param>
+    /// <param name="take">The number of records to take.</param>
+    /// <param name="ageGroup">Optional age group to filter by.</param>
+    /// <param name="difficulty">Optional difficulty level to filter by.</param>
+    /// <param name="tag">Optional tag to filter by.</param>
     public ScenariosPaginatedSpec(
         int skip,
         int take,
@@ -95,6 +119,10 @@ public sealed class ScenariosPaginatedSpec : BaseEntitySpecification<Scenario>
 /// </summary>
 public sealed class ScenariosByArchetypeSpec : BaseEntitySpecification<Scenario>
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ScenariosByArchetypeSpec"/> class.
+    /// </summary>
+    /// <param name="archetypeName">The archetype name to filter by.</param>
     public ScenariosByArchetypeSpec(string archetypeName)
     {
         Query.Where(s => s.Archetypes != null && s.Archetypes.Any(a => a == archetypeName))
@@ -108,6 +136,9 @@ public sealed class ScenariosByArchetypeSpec : BaseEntitySpecification<Scenario>
 /// </summary>
 public sealed class FeaturedScenariosSpec : BaseEntitySpecification<Scenario>
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="FeaturedScenariosSpec"/> class.
+    /// </summary>
     public FeaturedScenariosSpec()
     {
         Query.Where(s => s.Tags != null && s.Tags.Contains("featured"))
@@ -120,6 +151,10 @@ public sealed class FeaturedScenariosSpec : BaseEntitySpecification<Scenario>
 /// </summary>
 public sealed class ScenariosByTitlePatternSpec : BaseEntitySpecification<Scenario>
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ScenariosByTitlePatternSpec"/> class.
+    /// </summary>
+    /// <param name="titlePattern">The title pattern to search for.</param>
     public ScenariosByTitlePatternSpec(string titlePattern)
     {
         Query.Where(s => s.Title.ToLower().Contains(titlePattern.ToLower()))
@@ -132,6 +167,9 @@ public sealed class ScenariosByTitlePatternSpec : BaseEntitySpecification<Scenar
 /// </summary>
 public sealed class PublishedScenariosSpec : BaseEntitySpecification<Scenario>
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="PublishedScenariosSpec"/> class.
+    /// </summary>
     public PublishedScenariosSpec()
     {
         Query.Where(s => s.IsActive)

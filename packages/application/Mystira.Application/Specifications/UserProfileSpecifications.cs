@@ -8,6 +8,10 @@ namespace Mystira.Application.Specifications;
 /// </summary>
 public sealed class UserProfileByIdSpec : SingleEntitySpecification<UserProfile>
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="UserProfileByIdSpec"/> class.
+    /// </summary>
+    /// <param name="id">The user profile identifier.</param>
     public UserProfileByIdSpec(string id)
     {
         Query.Where(p => p.Id == id);
@@ -20,6 +24,10 @@ public sealed class UserProfileByIdSpec : SingleEntitySpecification<UserProfile>
 /// </summary>
 public sealed class ProfilesByAccountSpec : BaseEntitySpecification<UserProfile>
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ProfilesByAccountSpec"/> class.
+    /// </summary>
+    /// <param name="accountId">The account identifier to filter by.</param>
     public ProfilesByAccountSpec(string accountId)
     {
         Query.Where(p => p.AccountId == accountId)
@@ -33,6 +41,9 @@ public sealed class ProfilesByAccountSpec : BaseEntitySpecification<UserProfile>
 /// </summary>
 public sealed class GuestProfilesSpec : BaseEntitySpecification<UserProfile>
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="GuestProfilesSpec"/> class.
+    /// </summary>
     public GuestProfilesSpec()
     {
         Query.Where(p => p.IsGuest)
@@ -46,6 +57,9 @@ public sealed class GuestProfilesSpec : BaseEntitySpecification<UserProfile>
 /// </summary>
 public sealed class NonGuestProfilesSpec : BaseEntitySpecification<UserProfile>
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="NonGuestProfilesSpec"/> class.
+    /// </summary>
     public NonGuestProfilesSpec()
     {
         Query.Where(p => !p.IsGuest)
@@ -59,6 +73,9 @@ public sealed class NonGuestProfilesSpec : BaseEntitySpecification<UserProfile>
 /// </summary>
 public sealed class NpcProfilesSpec : BaseEntitySpecification<UserProfile>
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="NpcProfilesSpec"/> class.
+    /// </summary>
     public NpcProfilesSpec()
     {
         Query.Where(p => p.IsNpc)
@@ -72,6 +89,9 @@ public sealed class NpcProfilesSpec : BaseEntitySpecification<UserProfile>
 /// </summary>
 public sealed class OnboardedProfilesSpec : BaseEntitySpecification<UserProfile>
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="OnboardedProfilesSpec"/> class.
+    /// </summary>
     public OnboardedProfilesSpec()
     {
         Query.Where(p => p.HasCompletedOnboarding)
@@ -85,6 +105,10 @@ public sealed class OnboardedProfilesSpec : BaseEntitySpecification<UserProfile>
 /// </summary>
 public sealed class ProfilesByAgeGroupSpec : BaseEntitySpecification<UserProfile>
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ProfilesByAgeGroupSpec"/> class.
+    /// </summary>
+    /// <param name="ageGroup">The age group to filter by.</param>
     public ProfilesByAgeGroupSpec(string ageGroup)
     {
         Query.Where(p => p.AgeGroupName == ageGroup)
@@ -97,6 +121,13 @@ public sealed class ProfilesByAgeGroupSpec : BaseEntitySpecification<UserProfile
 /// </summary>
 public sealed class ProfilesPaginatedSpec : BaseEntitySpecification<UserProfile>
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ProfilesPaginatedSpec"/> class.
+    /// </summary>
+    /// <param name="skip">The number of records to skip.</param>
+    /// <param name="take">The number of records to take.</param>
+    /// <param name="accountId">Optional account identifier to filter by.</param>
+    /// <param name="isGuest">Optional guest status to filter by.</param>
     public ProfilesPaginatedSpec(int skip, int take, string? accountId = null, bool? isGuest = null)
     {
         var query = Query.AsTracking();
@@ -122,6 +153,10 @@ public sealed class ProfilesPaginatedSpec : BaseEntitySpecification<UserProfile>
 /// </summary>
 public sealed class ProfilesByNamePatternSpec : BaseEntitySpecification<UserProfile>
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ProfilesByNamePatternSpec"/> class.
+    /// </summary>
+    /// <param name="namePattern">The name pattern to search for.</param>
     public ProfilesByNamePatternSpec(string namePattern)
     {
         Query.Where(p => p.Name.ToLower().Contains(namePattern.ToLower()))
