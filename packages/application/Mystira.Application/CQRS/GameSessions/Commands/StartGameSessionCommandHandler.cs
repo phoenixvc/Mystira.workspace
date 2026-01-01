@@ -156,8 +156,8 @@ public static class StartGameSessionCommandHandler
                 request.ScenarioId);
         }
 
-        var targetAgeGroup = AgeGroup.Parse(request.TargetAgeGroup) ?? new AgeGroup(6, 9);
-        if (scenarioEntity != null && scenarioEntity.MinimumAge > targetAgeGroup.MinimumAge)
+        var targetAgeGroup = AgeGroup.Parse(request.TargetAgeGroup) ?? AgeGroup.MiddleChildhood;
+        if (scenarioEntity != null && scenarioEntity.MinimumAge > targetAgeGroup.MinAge)
         {
             throw new ArgumentException(
                 $"Scenario minimum age ({scenarioEntity.MinimumAge}) exceeds target age group ({request.TargetAgeGroup})");
@@ -267,7 +267,7 @@ public static class StartGameSessionCommandHandler
                 ? null
                 : new SessionPlayerAssignment
                 {
-                    Type = dto.PlayerAssignment.Type,
+                    Type = Enum.Parse<PlayerType>(dto.PlayerAssignment.Type ?? nameof(PlayerType.Profile)),
                     ProfileId = dto.PlayerAssignment.ProfileId,
                     ProfileName = dto.PlayerAssignment.ProfileName,
                     ProfileImage = dto.PlayerAssignment.ProfileImage,

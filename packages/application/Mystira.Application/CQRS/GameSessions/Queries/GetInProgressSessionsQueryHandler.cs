@@ -89,7 +89,7 @@ public static class GetInProgressSessionsQueryHandler
                     IsUnused = ca.IsUnused,
                     PlayerAssignment = ca.PlayerAssignment == null ? null : new PlayerAssignmentDto
                     {
-                        Type = ca.PlayerAssignment.Type,
+                        Type = ca.PlayerAssignment.Type.ToString(),
                         ProfileId = ca.PlayerAssignment.ProfileId,
                         ProfileName = ca.PlayerAssignment.ProfileName,
                         ProfileImage = ca.PlayerAssignment.ProfileImage,
@@ -108,16 +108,16 @@ public static class GetInProgressSessionsQueryHandler
                     Total = kvp.Value
                 }).ToList(),
                 Status = s.Status.ToString(),
-                CurrentSceneId = s.CurrentSceneId,
+                CurrentSceneId = s.CurrentSceneId ?? string.Empty,
                 ChoiceCount = s.ChoiceHistory?.Count ?? 0,
                 EchoCount = s.EchoHistory?.Count ?? 0,
                 AchievementCount = s.Achievements?.Count ?? 0,
-                StartTime = s.StartTime,
+                StartTime = s.StartTime ?? DateTime.MinValue,
                 EndTime = s.EndTime,
                 ElapsedTime = s.GetTotalElapsedTime(),
                 IsPaused = s.Status == SessionStatus.Paused,
                 SceneCount = s.ChoiceHistory?.Select(c => c.SceneId).Distinct().Count() ?? 0,
-                TargetAgeGroup = s.TargetAgeGroupName
+                TargetAgeGroup = s.TargetAgeGroupName ?? string.Empty
             };
         }).ToList();
 

@@ -28,7 +28,7 @@ public static class GetAchievementsQueryHandler
             return new List<SessionAchievement>();
         }
 
-        var achievements = session.Achievements ?? new List<SessionAchievement>();
+        var achievements = session.Achievements?.ToList() ?? new List<SessionAchievement>();
 
         logger.LogDebug("Retrieved {Count} achievements for session {SessionId}",
             achievements.Count, request.SessionId);
