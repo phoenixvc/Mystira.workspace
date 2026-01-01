@@ -14,14 +14,17 @@ public static class PolyglotServiceCollectionExtensions
     /// Add polyglot persistence services with the specified DbContext as primary.
     /// </summary>
     /// <typeparam name="TContext">The primary DbContext type</typeparam>
+    /// <param name="services">The service collection</param>
+    /// <param name="configuration">The configuration instance</param>
+    /// <returns>The service collection for chaining</returns>
     public static IServiceCollection AddPolyglotPersistence<TContext>(
         this IServiceCollection services,
         IConfiguration configuration)
         where TContext : DbContext
     {
-        // Configure migration options
-        services.Configure<MigrationOptions>(
-            configuration.GetSection(MigrationOptions.SectionName));
+        // Configure polyglot options
+        services.Configure<PolyglotOptions>(
+            configuration.GetSection(PolyglotOptions.SectionName));
 
         // Register the EF specification repository for standard use
         services.AddScoped(typeof(ISpecRepository<>), typeof(EfSpecificationRepository<>));
@@ -51,9 +54,9 @@ public static class PolyglotServiceCollectionExtensions
         where TPrimaryContext : DbContext
         where TSecondaryContext : DbContext
     {
-        // Configure migration options with dual-write mode
-        services.Configure<MigrationOptions>(
-            configuration.GetSection(MigrationOptions.SectionName));
+        // Configure polyglot options with dual-write mode
+        services.Configure<PolyglotOptions>(
+            configuration.GetSection(PolyglotOptions.SectionName));
 
         services.Configure<PolyglotOptions>(opts => opts.Mode = PolyglotMode.DualWrite);
 
@@ -97,6 +100,10 @@ public static class PolyglotServiceCollectionExtensions
     /// <summary>
     /// Add a specific entity type to use polyglot repository with dual-write.
     /// </summary>
+    /// <typeparam name="TEntity">The entity type</typeparam>
+    /// <typeparam name="TContext">The DbContext type</typeparam>
+    /// <param name="services">The service collection</param>
+    /// <returns>The service collection for chaining</returns>
     public static IServiceCollection AddPolyglotEntity<TEntity, TContext>(
         this IServiceCollection services)
         where TEntity : class
@@ -105,7 +112,7 @@ public static class PolyglotServiceCollectionExtensions
         services.AddScoped<IPolyglotRepository<TEntity>>(sp =>
         {
             var context = sp.GetRequiredService<TContext>();
-            var options = sp.GetRequiredService<Microsoft.Extensions.Options.IOptions<MigrationOptions>>();
+            var options = sp.GetRequiredService<Microsoft.Extensions.Options.IOptions<PolyglotOptions>>();
             var logger = sp.GetRequiredService<Microsoft.Extensions.Logging.ILogger<PolyglotRepository<TEntity>>>();
 
             return new PolyglotRepository<TEntity>(context, options, logger);
