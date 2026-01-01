@@ -3,6 +3,10 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
+// Suppress obsolete warnings within this file - these extension methods
+// register the deprecated types and must reference them internally.
+#pragma warning disable CS0618
+
 namespace Mystira.Shared.Polyglot;
 
 /// <summary>
