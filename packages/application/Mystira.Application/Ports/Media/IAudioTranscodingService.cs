@@ -21,6 +21,9 @@ public interface IAudioTranscodingService
 /// </summary>
 public sealed record AudioTranscodingResult(Stream Stream, string FileName, string ContentType) : IDisposable
 {
+    /// <summary>
+    /// Disposes the underlying stream resource.
+    /// </summary>
     public void Dispose()
     {
         Stream.Dispose();

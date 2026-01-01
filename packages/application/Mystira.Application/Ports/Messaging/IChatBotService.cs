@@ -5,9 +5,24 @@ namespace Mystira.Application.Ports.Messaging;
 /// </summary>
 public enum ChatPlatform
 {
+    /// <summary>
+    /// Discord chat platform.
+    /// </summary>
     Discord,
+
+    /// <summary>
+    /// Microsoft Teams chat platform.
+    /// </summary>
     Teams,
+
+    /// <summary>
+    /// WhatsApp messaging platform.
+    /// </summary>
     WhatsApp,
+
+    /// <summary>
+    /// Slack workspace platform.
+    /// </summary>
     Slack
 }
 
