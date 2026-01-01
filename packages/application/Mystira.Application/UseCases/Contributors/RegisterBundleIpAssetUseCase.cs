@@ -16,6 +16,13 @@ public class RegisterBundleIpAssetUseCase
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<RegisterBundleIpAssetUseCase> _logger;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="RegisterBundleIpAssetUseCase"/> class.
+    /// </summary>
+    /// <param name="bundleRepository">The content bundle repository.</param>
+    /// <param name="storyProtocolService">The Story Protocol service.</param>
+    /// <param name="unitOfWork">The unit of work for transaction management.</param>
+    /// <param name="logger">The logger instance.</param>
     public RegisterBundleIpAssetUseCase(
         IContentBundleRepository bundleRepository,
         IStoryProtocolService storyProtocolService,
@@ -28,6 +35,12 @@ public class RegisterBundleIpAssetUseCase
         _logger = logger;
     }
 
+    /// <summary>
+    /// Registers a content bundle as an IP Asset on Story Protocol.
+    /// </summary>
+    /// <param name="bundleId">The bundle identifier.</param>
+    /// <param name="request">The registration request.</param>
+    /// <returns>The Story Protocol metadata for the registered asset.</returns>
     public async Task<ScenarioStoryProtocol> ExecuteAsync(string bundleId, RegisterIpAssetRequest request)
     {
         // Get the bundle

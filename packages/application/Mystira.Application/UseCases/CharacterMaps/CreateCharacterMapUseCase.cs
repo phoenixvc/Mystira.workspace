@@ -14,6 +14,10 @@ public class CreateCharacterMapUseCase
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<CreateCharacterMapUseCase> _logger;
 
+    /// <summary>Initializes a new instance of the <see cref="CreateCharacterMapUseCase"/> class.</summary>
+    /// <param name="repository">The character map repository.</param>
+    /// <param name="unitOfWork">The unit of work.</param>
+    /// <param name="logger">The logger.</param>
     public CreateCharacterMapUseCase(
         ICharacterMapRepository repository,
         IUnitOfWork unitOfWork,
@@ -24,6 +28,9 @@ public class CreateCharacterMapUseCase
         _logger = logger;
     }
 
+    /// <summary>Creates a new character map.</summary>
+    /// <param name="request">The create character map request.</param>
+    /// <returns>The created character map.</returns>
     public async Task<CharacterMap> ExecuteAsync(CreateCharacterMapRequest request)
     {
         if (request == null)

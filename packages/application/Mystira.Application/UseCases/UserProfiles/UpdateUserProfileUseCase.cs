@@ -15,6 +15,12 @@ public class UpdateUserProfileUseCase
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<UpdateUserProfileUseCase> _logger;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="UpdateUserProfileUseCase"/> class.
+    /// </summary>
+    /// <param name="repository">The user profile repository.</param>
+    /// <param name="unitOfWork">The unit of work for transaction management.</param>
+    /// <param name="logger">The logger instance.</param>
     public UpdateUserProfileUseCase(
         IUserProfileRepository repository,
         IUnitOfWork unitOfWork,
@@ -25,6 +31,12 @@ public class UpdateUserProfileUseCase
         _logger = logger;
     }
 
+    /// <summary>
+    /// Updates an existing user profile with the provided request data.
+    /// </summary>
+    /// <param name="id">The user profile identifier.</param>
+    /// <param name="request">The update request containing new profile data.</param>
+    /// <returns>The updated user profile if found; otherwise, null.</returns>
     public async Task<UserProfile?> ExecuteAsync(string id, UpdateUserProfileRequest request)
     {
         var profile = await _repository.GetByIdAsync(id);

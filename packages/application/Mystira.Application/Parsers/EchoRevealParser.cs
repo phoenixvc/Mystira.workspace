@@ -7,6 +7,11 @@ namespace Mystira.Application.Parsers;
 /// </summary>
 public static class EchoRevealParser
 {
+    /// <summary>
+    /// Parses the dictionary data into an EchoReveal object.
+    /// </summary>
+    /// <param name="revealDict">The dictionary containing the raw data.</param>
+    /// <returns>The parsed EchoReveal object.</returns>
     public static EchoReveal Parse(IDictionary<object, object> revealDict)
     {
         var reveal = new EchoReveal();

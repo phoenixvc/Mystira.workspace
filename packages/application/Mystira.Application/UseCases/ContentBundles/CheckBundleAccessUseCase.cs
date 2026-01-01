@@ -12,6 +12,10 @@ public class CheckBundleAccessUseCase
     private readonly IAccountRepository _accountRepository;
     private readonly ILogger<CheckBundleAccessUseCase> _logger;
 
+    /// <summary>Initializes a new instance of the <see cref="CheckBundleAccessUseCase"/> class.</summary>
+    /// <param name="bundleRepository">The content bundle repository.</param>
+    /// <param name="accountRepository">The account repository.</param>
+    /// <param name="logger">The logger.</param>
     public CheckBundleAccessUseCase(
         IContentBundleRepository bundleRepository,
         IAccountRepository accountRepository,
@@ -22,6 +26,10 @@ public class CheckBundleAccessUseCase
         _logger = logger;
     }
 
+    /// <summary>Checks if an account has access to a content bundle.</summary>
+    /// <param name="accountId">The account identifier.</param>
+    /// <param name="bundleId">The bundle identifier.</param>
+    /// <returns>True if the account has access to the bundle; otherwise, false.</returns>
     public async Task<bool> ExecuteAsync(string accountId, string bundleId)
     {
         if (string.IsNullOrWhiteSpace(accountId))

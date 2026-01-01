@@ -12,6 +12,9 @@ public class GetCharacterMapUseCase
     private readonly ICharacterMapRepository _repository;
     private readonly ILogger<GetCharacterMapUseCase> _logger;
 
+    /// <summary>Initializes a new instance of the <see cref="GetCharacterMapUseCase"/> class.</summary>
+    /// <param name="repository">The character map repository.</param>
+    /// <param name="logger">The logger.</param>
     public GetCharacterMapUseCase(
         ICharacterMapRepository repository,
         ILogger<GetCharacterMapUseCase> logger)
@@ -20,6 +23,9 @@ public class GetCharacterMapUseCase
         _logger = logger;
     }
 
+    /// <summary>Retrieves a character map by its identifier.</summary>
+    /// <param name="characterMapId">The character map identifier.</param>
+    /// <returns>The character map if found; otherwise, null.</returns>
     public async Task<CharacterMap?> ExecuteAsync(string characterMapId)
     {
         if (string.IsNullOrWhiteSpace(characterMapId))

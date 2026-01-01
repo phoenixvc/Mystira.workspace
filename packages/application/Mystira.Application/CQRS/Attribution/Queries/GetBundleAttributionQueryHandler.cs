@@ -11,6 +11,14 @@ namespace Mystira.Application.CQRS.Attribution.Queries;
 /// </summary>
 public static class GetBundleAttributionQueryHandler
 {
+    /// <summary>
+    /// Handles the GetBundleAttributionQuery.
+    /// </summary>
+    /// <param name="request">The query to handle.</param>
+    /// <param name="repository">The content bundle repository.</param>
+    /// <param name="logger">The logger instance.</param>
+    /// <param name="ct">The cancellation token.</param>
+    /// <returns>The content attribution response if the bundle is found; otherwise, null.</returns>
     public static async Task<ContentAttributionResponse?> Handle(
         GetBundleAttributionQuery request,
         IContentBundleRepository repository,

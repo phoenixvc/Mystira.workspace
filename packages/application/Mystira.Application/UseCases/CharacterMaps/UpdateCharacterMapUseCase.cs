@@ -14,6 +14,10 @@ public class UpdateCharacterMapUseCase
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<UpdateCharacterMapUseCase> _logger;
 
+    /// <summary>Initializes a new instance of the <see cref="UpdateCharacterMapUseCase"/> class.</summary>
+    /// <param name="repository">The character map repository.</param>
+    /// <param name="unitOfWork">The unit of work.</param>
+    /// <param name="logger">The logger.</param>
     public UpdateCharacterMapUseCase(
         ICharacterMapRepository repository,
         IUnitOfWork unitOfWork,
@@ -24,6 +28,10 @@ public class UpdateCharacterMapUseCase
         _logger = logger;
     }
 
+    /// <summary>Updates an existing character map.</summary>
+    /// <param name="characterMapId">The character map identifier.</param>
+    /// <param name="request">The update character map request.</param>
+    /// <returns>The updated character map.</returns>
     public async Task<CharacterMap> ExecuteAsync(string characterMapId, UpdateCharacterMapRequest request)
     {
         if (string.IsNullOrWhiteSpace(characterMapId))

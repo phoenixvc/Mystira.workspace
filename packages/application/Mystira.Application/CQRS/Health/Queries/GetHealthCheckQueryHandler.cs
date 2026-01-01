@@ -10,6 +10,14 @@ namespace Mystira.Application.CQRS.Health.Queries;
 /// </summary>
 public static class GetHealthCheckQueryHandler
 {
+    /// <summary>
+    /// Handles the GetHealthCheckQuery.
+    /// </summary>
+    /// <param name="request">The query to handle.</param>
+    /// <param name="healthCheckPort">The health check port.</param>
+    /// <param name="logger">The logger instance.</param>
+    /// <param name="ct">The cancellation token.</param>
+    /// <returns>The health check result.</returns>
     public static async Task<HealthCheckResult> Handle(
         GetHealthCheckQuery request,
         IHealthCheckPort healthCheckPort,

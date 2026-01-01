@@ -9,6 +9,14 @@ namespace Mystira.Application.CQRS.MediaAssets.Queries;
 /// </summary>
 public static class ValidateMediaReferencesQueryHandler
 {
+    /// <summary>
+    /// Handles the ValidateMediaReferencesQuery.
+    /// </summary>
+    /// <param name="request">The query to handle.</param>
+    /// <param name="repository">The media asset repository.</param>
+    /// <param name="logger">The logger instance.</param>
+    /// <param name="ct">The cancellation token.</param>
+    /// <returns>The media validation result.</returns>
     public static async Task<MediaValidationResult> Handle(
         ValidateMediaReferencesQuery request,
         IMediaAssetRepository repository,

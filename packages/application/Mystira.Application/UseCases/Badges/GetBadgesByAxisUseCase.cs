@@ -12,6 +12,9 @@ public class GetBadgesByAxisUseCase
     private readonly IUserBadgeRepository _repository;
     private readonly ILogger<GetBadgesByAxisUseCase> _logger;
 
+    /// <summary>Initializes a new instance of the <see cref="GetBadgesByAxisUseCase"/> class.</summary>
+    /// <param name="repository">The user badge repository.</param>
+    /// <param name="logger">The logger.</param>
     public GetBadgesByAxisUseCase(
         IUserBadgeRepository repository,
         ILogger<GetBadgesByAxisUseCase> logger)
@@ -20,6 +23,10 @@ public class GetBadgesByAxisUseCase
         _logger = logger;
     }
 
+    /// <summary>Retrieves badges for the specified user profile filtered by axis.</summary>
+    /// <param name="userProfileId">The user profile identifier.</param>
+    /// <param name="axis">The axis identifier.</param>
+    /// <returns>A list of user badges for the specified axis.</returns>
     public async Task<List<UserBadge>> ExecuteAsync(string userProfileId, string axis)
     {
         if (string.IsNullOrWhiteSpace(userProfileId))

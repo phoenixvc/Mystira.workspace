@@ -13,6 +13,9 @@ public class ExportCharacterMapUseCase
     private readonly ICharacterMapRepository _repository;
     private readonly ILogger<ExportCharacterMapUseCase> _logger;
 
+    /// <summary>Initializes a new instance of the <see cref="ExportCharacterMapUseCase"/> class.</summary>
+    /// <param name="repository">The character map repository.</param>
+    /// <param name="logger">The logger.</param>
     public ExportCharacterMapUseCase(
         ICharacterMapRepository repository,
         ILogger<ExportCharacterMapUseCase> logger)
@@ -21,6 +24,8 @@ public class ExportCharacterMapUseCase
         _logger = logger;
     }
 
+    /// <summary>Exports all character maps to YAML format.</summary>
+    /// <returns>A YAML string representation of all character maps.</returns>
     public async Task<string> ExecuteAsync()
     {
         var characterMaps = await _repository.GetAllAsync();

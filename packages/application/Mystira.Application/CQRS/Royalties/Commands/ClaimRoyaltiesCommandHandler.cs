@@ -8,6 +8,14 @@ namespace Mystira.Application.CQRS.Royalties.Commands;
 /// </summary>
 public static class ClaimRoyaltiesCommandHandler
 {
+    /// <summary>
+    /// Handles the ClaimRoyaltiesCommand.
+    /// </summary>
+    /// <param name="request">The command to handle.</param>
+    /// <param name="storyProtocolService">The Story Protocol service.</param>
+    /// <param name="logger">The logger instance.</param>
+    /// <param name="ct">The cancellation token.</param>
+    /// <returns>The transaction hash of the royalty claim.</returns>
     public static async Task<string> Handle(
         ClaimRoyaltiesCommand request,
         IStoryProtocolService storyProtocolService,

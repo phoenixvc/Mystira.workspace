@@ -8,6 +8,14 @@ namespace Mystira.Application.CQRS.Archetypes.Queries;
 /// </summary>
 public static class ValidateArchetypeQueryHandler
 {
+    /// <summary>
+    /// Handles the ValidateArchetypeQuery.
+    /// </summary>
+    /// <param name="query">The query to handle.</param>
+    /// <param name="repository">The archetype repository.</param>
+    /// <param name="logger">The logger instance.</param>
+    /// <param name="ct">The cancellation token.</param>
+    /// <returns>True if the archetype name exists; otherwise, false.</returns>
     public static async Task<bool> Handle(
         ValidateArchetypeQuery query,
         IArchetypeRepository repository,

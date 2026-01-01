@@ -14,6 +14,13 @@ public class RemoveUserProfileFromAccountUseCase
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<RemoveUserProfileFromAccountUseCase> _logger;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="RemoveUserProfileFromAccountUseCase"/> class.
+    /// </summary>
+    /// <param name="accountRepository">The account repository.</param>
+    /// <param name="userProfileRepository">The user profile repository.</param>
+    /// <param name="unitOfWork">The unit of work for transaction management.</param>
+    /// <param name="logger">The logger instance.</param>
     public RemoveUserProfileFromAccountUseCase(
         IAccountRepository accountRepository,
         IUserProfileRepository userProfileRepository,
@@ -26,6 +33,12 @@ public class RemoveUserProfileFromAccountUseCase
         _logger = logger;
     }
 
+    /// <summary>
+    /// Unlinks a user profile from an account.
+    /// </summary>
+    /// <param name="accountId">The account identifier.</param>
+    /// <param name="profileId">The profile identifier to unlink.</param>
+    /// <returns>The updated account.</returns>
     public async Task<Account> ExecuteAsync(string accountId, string profileId)
     {
         if (string.IsNullOrWhiteSpace(accountId))

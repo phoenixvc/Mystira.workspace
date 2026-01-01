@@ -45,12 +45,28 @@ public interface IBotCommandService
 /// </summary>
 public class BotCommandStatus
 {
+    /// <summary>
+    /// Gets or sets a value indicating whether the bot command service is enabled.
+    /// </summary>
     public bool IsEnabled { get; set; }
+
+    /// <summary>
+    /// Gets or sets the number of registered command modules.
+    /// </summary>
     public int ModuleCount { get; set; }
+
+    /// <summary>
+    /// Gets or sets the total number of registered commands.
+    /// </summary>
     public int CommandCount { get; set; }
+
     /// <summary>
     /// Server/guild/workspace ID where commands are registered
     /// </summary>
     public ulong? ServerId { get; set; }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether commands are registered globally.
+    /// </summary>
     public bool IsGloballyRegistered { get; set; }
 }

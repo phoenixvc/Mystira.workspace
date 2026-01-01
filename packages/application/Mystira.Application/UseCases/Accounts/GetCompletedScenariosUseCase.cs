@@ -13,6 +13,10 @@ public class GetCompletedScenariosUseCase
     private readonly IScenarioRepository _scenarioRepository;
     private readonly ILogger<GetCompletedScenariosUseCase> _logger;
 
+    /// <summary>Initializes a new instance of the <see cref="GetCompletedScenariosUseCase"/> class.</summary>
+    /// <param name="accountRepository">The account repository.</param>
+    /// <param name="scenarioRepository">The scenario repository.</param>
+    /// <param name="logger">The logger.</param>
     public GetCompletedScenariosUseCase(
         IAccountRepository accountRepository,
         IScenarioRepository scenarioRepository,
@@ -23,6 +27,9 @@ public class GetCompletedScenariosUseCase
         _logger = logger;
     }
 
+    /// <summary>Retrieves all completed scenarios for the specified account.</summary>
+    /// <param name="accountId">The account identifier.</param>
+    /// <returns>A list of completed scenarios.</returns>
     public async Task<List<Scenario>> ExecuteAsync(string accountId)
     {
         if (string.IsNullOrWhiteSpace(accountId))

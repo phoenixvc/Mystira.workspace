@@ -14,6 +14,12 @@ public class UpdateMediaMetadataUseCase
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<UpdateMediaMetadataUseCase> _logger;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="UpdateMediaMetadataUseCase"/> class.
+    /// </summary>
+    /// <param name="repository">The media asset repository.</param>
+    /// <param name="unitOfWork">The unit of work for transaction management.</param>
+    /// <param name="logger">The logger instance.</param>
     public UpdateMediaMetadataUseCase(
         IMediaAssetRepository repository,
         IUnitOfWork unitOfWork,

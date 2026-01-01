@@ -12,6 +12,9 @@ public class GetAvatarsByAgeGroupUseCase
     private readonly IAvatarConfigurationFileRepository _repository;
     private readonly ILogger<GetAvatarsByAgeGroupUseCase> _logger;
 
+    /// <summary>Initializes a new instance of the <see cref="GetAvatarsByAgeGroupUseCase"/> class.</summary>
+    /// <param name="repository">The avatar configuration file repository.</param>
+    /// <param name="logger">The logger.</param>
     public GetAvatarsByAgeGroupUseCase(
         IAvatarConfigurationFileRepository repository,
         ILogger<GetAvatarsByAgeGroupUseCase> logger)
@@ -20,6 +23,9 @@ public class GetAvatarsByAgeGroupUseCase
         _logger = logger;
     }
 
+    /// <summary>Retrieves avatars for the specified age group.</summary>
+    /// <param name="ageGroup">The age group identifier.</param>
+    /// <returns>The avatar configuration response containing avatar media IDs for the age group.</returns>
     public async Task<AvatarConfigurationResponse> ExecuteAsync(string ageGroup)
     {
         if (string.IsNullOrWhiteSpace(ageGroup))

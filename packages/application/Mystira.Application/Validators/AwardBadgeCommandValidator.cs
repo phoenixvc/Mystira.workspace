@@ -8,6 +8,9 @@ namespace Mystira.Application.Validators;
 /// </summary>
 public class AwardBadgeCommandValidator : AbstractValidator<AwardBadgeCommand>
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="AwardBadgeCommandValidator"/> class.
+    /// </summary>
     public AwardBadgeCommandValidator()
     {
         RuleFor(x => x.Request)

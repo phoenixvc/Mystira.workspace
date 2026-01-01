@@ -31,6 +31,10 @@ public interface IQueryCacheInvalidationService
     void ClearTrackedKeys();
 }
 
+/// <summary>
+/// Service for invalidating query caches.
+/// Use this after commands that modify data to ensure cache consistency.
+/// </summary>
 public class QueryCacheInvalidationService : IQueryCacheInvalidationService
 {
     private readonly IMemoryCache _cache;
@@ -38,6 +42,11 @@ public class QueryCacheInvalidationService : IQueryCacheInvalidationService
     private readonly HashSet<string> _cacheKeys = new();
     private readonly object _lock = new();
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="QueryCacheInvalidationService"/> class.
+    /// </summary>
+    /// <param name="cache">The memory cache instance.</param>
+    /// <param name="logger">The logger instance.</param>
     public QueryCacheInvalidationService(
         IMemoryCache cache,
         ILogger<QueryCacheInvalidationService> logger)
@@ -46,6 +55,10 @@ public class QueryCacheInvalidationService : IQueryCacheInvalidationService
         _logger = logger;
     }
 
+    /// <summary>
+    /// Removes a specific cache entry by key.
+    /// </summary>
+    /// <param name="cacheKey">The cache key to invalidate.</param>
     public void InvalidateCache(string cacheKey)
     {
         _cache.Remove(cacheKey);
@@ -58,6 +71,10 @@ public class QueryCacheInvalidationService : IQueryCacheInvalidationService
         _logger.LogDebug("Invalidated cache entry: {CacheKey}", cacheKey);
     }
 
+    /// <summary>
+    /// Removes all cache entries matching a prefix.
+    /// </summary>
+    /// <param name="prefix">The prefix to match cache keys against.</param>
     public void InvalidateCacheByPrefix(string prefix)
     {
         HashSet<string> keysToRemove;

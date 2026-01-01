@@ -13,6 +13,10 @@ public class CreateContentBundleUseCase
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<CreateContentBundleUseCase> _logger;
 
+    /// <summary>Initializes a new instance of the <see cref="CreateContentBundleUseCase"/> class.</summary>
+    /// <param name="repository">The content bundle repository.</param>
+    /// <param name="unitOfWork">The unit of work.</param>
+    /// <param name="logger">The logger.</param>
     public CreateContentBundleUseCase(
         IContentBundleRepository repository,
         IUnitOfWork unitOfWork,
@@ -23,6 +27,15 @@ public class CreateContentBundleUseCase
         _logger = logger;
     }
 
+    /// <summary>Creates a new content bundle.</summary>
+    /// <param name="title">The bundle title.</param>
+    /// <param name="description">The bundle description.</param>
+    /// <param name="scenarioIds">The list of scenario identifiers.</param>
+    /// <param name="imageId">The image identifier.</param>
+    /// <param name="prices">The list of bundle prices.</param>
+    /// <param name="isFree">Indicates whether the bundle is free.</param>
+    /// <param name="ageGroup">The age group identifier.</param>
+    /// <returns>The created content bundle.</returns>
     public async Task<ContentBundle> ExecuteAsync(
         string title,
         string description,

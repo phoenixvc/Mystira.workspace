@@ -1,7 +1,13 @@
 namespace Mystira.Application.Validation;
 
+/// <summary>
+/// Contains JSON schema definitions for scenario validation.
+/// </summary>
 public static class ScenarioSchemaDefinitions
 {
+    /// <summary>
+    /// JSON schema for validating Mystira story YAML/JSON payloads.
+    /// </summary>
     public const string StorySchema = """
 {
   "$schema": "http://json-schema.org/draft-07/schema#",

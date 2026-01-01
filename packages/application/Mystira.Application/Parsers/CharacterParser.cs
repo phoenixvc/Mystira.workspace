@@ -7,6 +7,11 @@ namespace Mystira.Application.Parsers;
 /// </summary>
 public static class CharacterParser
 {
+    /// <summary>
+    /// Parses the dictionary data into a ScenarioCharacter object.
+    /// </summary>
+    /// <param name="characterDict">The dictionary containing the raw data.</param>
+    /// <returns>The parsed ScenarioCharacter object.</returns>
     public static ScenarioCharacter Parse(IDictionary<object, object> characterDict)
     {
         if (!characterDict.TryGetValue("id", out var idObj) || idObj == null)

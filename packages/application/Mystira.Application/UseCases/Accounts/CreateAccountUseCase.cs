@@ -14,6 +14,12 @@ public class CreateAccountUseCase
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<CreateAccountUseCase> _logger;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="CreateAccountUseCase"/> class.
+    /// </summary>
+    /// <param name="repository">The account repository.</param>
+    /// <param name="unitOfWork">The unit of work for transaction management.</param>
+    /// <param name="logger">The logger instance.</param>
     public CreateAccountUseCase(
         IAccountRepository repository,
         IUnitOfWork unitOfWork,
@@ -24,6 +30,11 @@ public class CreateAccountUseCase
         _logger = logger;
     }
 
+    /// <summary>
+    /// Creates a new account.
+    /// </summary>
+    /// <param name="request">The request containing account creation details.</param>
+    /// <returns>The newly created account.</returns>
     public async Task<Account> ExecuteAsync(CreateAccountRequest request)
     {
         if (request == null)

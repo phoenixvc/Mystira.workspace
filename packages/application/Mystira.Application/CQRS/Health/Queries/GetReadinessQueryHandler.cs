@@ -8,6 +8,13 @@ namespace Mystira.Application.CQRS.Health.Queries;
 /// </summary>
 public static class GetReadinessQueryHandler
 {
+    /// <summary>
+    /// Handles the GetReadinessQuery.
+    /// </summary>
+    /// <param name="request">The query to handle.</param>
+    /// <param name="logger">The logger instance.</param>
+    /// <param name="ct">The cancellation token.</param>
+    /// <returns>The probe result indicating readiness status.</returns>
     public static Task<ProbeResult> Handle(
         GetReadinessQuery request,
         ILogger<GetReadinessQuery> logger,

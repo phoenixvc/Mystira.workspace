@@ -34,6 +34,9 @@ public enum PolyglotMode
 /// </summary>
 public class PolyglotOptions
 {
+    /// <summary>
+    /// The configuration section name for polyglot persistence options.
+    /// </summary>
     public const string SectionName = "PolyglotPersistence";
 
     /// <summary>

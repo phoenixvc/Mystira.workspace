@@ -14,6 +14,12 @@ public class SetBundleContributorsUseCase
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<SetBundleContributorsUseCase> _logger;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="SetBundleContributorsUseCase"/> class.
+    /// </summary>
+    /// <param name="bundleRepository">The content bundle repository.</param>
+    /// <param name="unitOfWork">The unit of work for transaction management.</param>
+    /// <param name="logger">The logger instance.</param>
     public SetBundleContributorsUseCase(
         IContentBundleRepository bundleRepository,
         IUnitOfWork unitOfWork,
@@ -24,6 +30,12 @@ public class SetBundleContributorsUseCase
         _logger = logger;
     }
 
+    /// <summary>
+    /// Sets the contributors for a content bundle.
+    /// </summary>
+    /// <param name="bundleId">The bundle identifier.</param>
+    /// <param name="request">The request containing contributor information.</param>
+    /// <returns>The updated Story Protocol metadata.</returns>
     public async Task<ScenarioStoryProtocol> ExecuteAsync(string bundleId, SetContributorsRequest request)
     {
         // Get the bundle

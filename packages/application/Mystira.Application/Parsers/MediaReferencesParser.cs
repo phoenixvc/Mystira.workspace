@@ -7,6 +7,11 @@ namespace Mystira.Application.Parsers;
 /// </summary>
 public static class MediaReferencesParser
 {
+    /// <summary>
+    /// Parses the dictionary data into a MediaReferences object.
+    /// </summary>
+    /// <param name="mediaDict">The dictionary containing the raw data.</param>
+    /// <returns>The parsed MediaReferences object.</returns>
     public static MediaReferences Parse(IDictionary<object, object> mediaDict)
     {
         var media = new MediaReferences();

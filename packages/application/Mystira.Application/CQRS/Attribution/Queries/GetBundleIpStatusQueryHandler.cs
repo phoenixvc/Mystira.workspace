@@ -12,6 +12,15 @@ namespace Mystira.Application.CQRS.Attribution.Queries;
 /// </summary>
 public static class GetBundleIpStatusQueryHandler
 {
+    /// <summary>
+    /// Handles the GetBundleIpStatusQuery.
+    /// </summary>
+    /// <param name="request">The query to handle.</param>
+    /// <param name="repository">The content bundle repository.</param>
+    /// <param name="logger">The logger instance.</param>
+    /// <param name="options">The Story Protocol configuration options.</param>
+    /// <param name="ct">The cancellation token.</param>
+    /// <returns>The IP verification response if the bundle is found; otherwise, null.</returns>
     public static async Task<IpVerificationResponse?> Handle(
         GetBundleIpStatusQuery request,
         IContentBundleRepository repository,

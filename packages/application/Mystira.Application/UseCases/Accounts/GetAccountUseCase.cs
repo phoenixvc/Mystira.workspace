@@ -12,6 +12,11 @@ public class GetAccountUseCase
     private readonly IAccountRepository _repository;
     private readonly ILogger<GetAccountUseCase> _logger;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="GetAccountUseCase"/> class.
+    /// </summary>
+    /// <param name="repository">The account repository.</param>
+    /// <param name="logger">The logger instance.</param>
     public GetAccountUseCase(
         IAccountRepository repository,
         ILogger<GetAccountUseCase> logger)
@@ -20,6 +25,11 @@ public class GetAccountUseCase
         _logger = logger;
     }
 
+    /// <summary>
+    /// Retrieves an account by its identifier.
+    /// </summary>
+    /// <param name="accountId">The account identifier.</param>
+    /// <returns>The account if found; otherwise, null.</returns>
     public async Task<Account?> ExecuteAsync(string accountId)
     {
         if (string.IsNullOrWhiteSpace(accountId))

@@ -10,6 +10,14 @@ namespace Mystira.Application.CQRS.MediaMetadata.Queries;
 /// </summary>
 public static class GetMediaMetadataFileQueryHandler
 {
+    /// <summary>
+    /// Handles the GetMediaMetadataFileQuery.
+    /// </summary>
+    /// <param name="request">The query to handle.</param>
+    /// <param name="repository">The media metadata file repository.</param>
+    /// <param name="logger">The logger instance.</param>
+    /// <param name="ct">The cancellation token.</param>
+    /// <returns>The media metadata file if found; otherwise, null.</returns>
     public static async Task<MediaMetadataFile?> Handle(
         GetMediaMetadataFileQuery request,
         IMediaMetadataFileRepository repository,

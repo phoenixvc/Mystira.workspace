@@ -27,6 +27,13 @@ public class CreateScenarioUseCase
         Converters = { new System.Text.Json.Serialization.JsonStringEnumConverter() }
     };
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="CreateScenarioUseCase"/> class.
+    /// </summary>
+    /// <param name="repository">The scenario repository.</param>
+    /// <param name="unitOfWork">The unit of work for transaction management.</param>
+    /// <param name="logger">The logger instance.</param>
+    /// <param name="validateScenarioUseCase">The scenario validation use case.</param>
     public CreateScenarioUseCase(
         IScenarioRepository repository,
         IUnitOfWork unitOfWork,
@@ -39,6 +46,11 @@ public class CreateScenarioUseCase
         _validateScenarioUseCase = validateScenarioUseCase;
     }
 
+    /// <summary>
+    /// Creates a new scenario from the provided request.
+    /// </summary>
+    /// <param name="request">The request containing scenario data.</param>
+    /// <returns>The newly created scenario.</returns>
     public async Task<Scenario> ExecuteAsync(CreateScenarioRequest request)
     {
         ValidateAgainstSchema(request);

@@ -13,6 +13,10 @@ public class UpdateAvatarConfigurationUseCase
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<UpdateAvatarConfigurationUseCase> _logger;
 
+    /// <summary>Initializes a new instance of the <see cref="UpdateAvatarConfigurationUseCase"/> class.</summary>
+    /// <param name="repository">The avatar configuration file repository.</param>
+    /// <param name="unitOfWork">The unit of work.</param>
+    /// <param name="logger">The logger.</param>
     public UpdateAvatarConfigurationUseCase(
         IAvatarConfigurationFileRepository repository,
         IUnitOfWork unitOfWork,
@@ -23,6 +27,9 @@ public class UpdateAvatarConfigurationUseCase
         _logger = logger;
     }
 
+    /// <summary>Updates the avatar configuration file with the specified age group avatars.</summary>
+    /// <param name="ageGroupAvatars">The dictionary mapping age groups to avatar media IDs.</param>
+    /// <returns>The updated avatar configuration file.</returns>
     public async Task<AvatarConfigurationFile> ExecuteAsync(Dictionary<string, List<string>> ageGroupAvatars)
     {
         if (ageGroupAvatars == null)

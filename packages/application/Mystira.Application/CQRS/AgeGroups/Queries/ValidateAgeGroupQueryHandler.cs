@@ -8,6 +8,14 @@ namespace Mystira.Application.CQRS.AgeGroups.Queries;
 /// </summary>
 public static class ValidateAgeGroupQueryHandler
 {
+    /// <summary>
+    /// Handles the ValidateAgeGroupQuery.
+    /// </summary>
+    /// <param name="query">The query to handle.</param>
+    /// <param name="repository">The age group repository.</param>
+    /// <param name="logger">The logger instance.</param>
+    /// <param name="ct">The cancellation token.</param>
+    /// <returns>True if the age group value exists; otherwise, false.</returns>
     public static async Task<bool> Handle(
         ValidateAgeGroupQuery query,
         IAgeGroupRepository repository,

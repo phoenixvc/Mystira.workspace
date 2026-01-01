@@ -11,6 +11,14 @@ namespace Mystira.Application.CQRS.Avatars.Queries;
 /// </summary>
 public static class GetAvatarsQueryHandler
 {
+    /// <summary>
+    /// Handles the GetAvatarsQuery.
+    /// </summary>
+    /// <param name="query">The query to handle.</param>
+    /// <param name="repository">The avatar configuration file repository.</param>
+    /// <param name="logger">The logger instance.</param>
+    /// <param name="ct">The cancellation token.</param>
+    /// <returns>The avatar response containing all avatars grouped by age group.</returns>
     public static async Task<AvatarResponse> Handle(
         GetAvatarsQuery query,
         IAvatarConfigurationFileRepository repository,

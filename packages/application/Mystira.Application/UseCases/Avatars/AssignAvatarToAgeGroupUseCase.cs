@@ -13,6 +13,10 @@ public class AssignAvatarToAgeGroupUseCase
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<AssignAvatarToAgeGroupUseCase> _logger;
 
+    /// <summary>Initializes a new instance of the <see cref="AssignAvatarToAgeGroupUseCase"/> class.</summary>
+    /// <param name="repository">The avatar configuration file repository.</param>
+    /// <param name="unitOfWork">The unit of work.</param>
+    /// <param name="logger">The logger.</param>
     public AssignAvatarToAgeGroupUseCase(
         IAvatarConfigurationFileRepository repository,
         IUnitOfWork unitOfWork,
@@ -23,6 +27,10 @@ public class AssignAvatarToAgeGroupUseCase
         _logger = logger;
     }
 
+    /// <summary>Assigns a list of avatar media IDs to the specified age group.</summary>
+    /// <param name="ageGroup">The age group identifier.</param>
+    /// <param name="mediaIds">The list of avatar media identifiers.</param>
+    /// <returns>The updated avatar configuration file.</returns>
     public async Task<AvatarConfigurationFile> ExecuteAsync(string ageGroup, List<string> mediaIds)
     {
         if (string.IsNullOrWhiteSpace(ageGroup))

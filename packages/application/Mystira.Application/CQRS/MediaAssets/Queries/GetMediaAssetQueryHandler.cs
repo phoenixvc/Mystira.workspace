@@ -9,6 +9,14 @@ namespace Mystira.Application.CQRS.MediaAssets.Queries;
 /// </summary>
 public static class GetMediaAssetQueryHandler
 {
+    /// <summary>
+    /// Handles the GetMediaAssetQuery.
+    /// </summary>
+    /// <param name="request">The query to handle.</param>
+    /// <param name="repository">The media asset repository.</param>
+    /// <param name="logger">The logger instance.</param>
+    /// <param name="ct">The cancellation token.</param>
+    /// <returns>The media asset if found; otherwise, null.</returns>
     public static async Task<MediaAsset?> Handle(
         GetMediaAssetQuery request,
         IMediaAssetRepository repository,

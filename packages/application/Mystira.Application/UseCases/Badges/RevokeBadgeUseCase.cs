@@ -13,6 +13,11 @@ public class RevokeBadgeUseCase
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<RevokeBadgeUseCase> _logger;
 
+    /// <summary>Initializes a new instance of the <see cref="RevokeBadgeUseCase"/> class.</summary>
+    /// <param name="badgeRepository">The user badge repository.</param>
+    /// <param name="userProfileRepository">The user profile repository.</param>
+    /// <param name="unitOfWork">The unit of work.</param>
+    /// <param name="logger">The logger.</param>
     public RevokeBadgeUseCase(
         IUserBadgeRepository badgeRepository,
         IUserProfileRepository userProfileRepository,
@@ -25,6 +30,9 @@ public class RevokeBadgeUseCase
         _logger = logger;
     }
 
+    /// <summary>Revokes a badge from a user profile.</summary>
+    /// <param name="badgeId">The badge identifier.</param>
+    /// <returns>True if the badge was revoked successfully; otherwise, false.</returns>
     public async Task<bool> ExecuteAsync(string badgeId)
     {
         if (string.IsNullOrWhiteSpace(badgeId))

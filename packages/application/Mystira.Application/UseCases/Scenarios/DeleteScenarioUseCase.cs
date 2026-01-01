@@ -12,6 +12,12 @@ public class DeleteScenarioUseCase
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<DeleteScenarioUseCase> _logger;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="DeleteScenarioUseCase"/> class.
+    /// </summary>
+    /// <param name="repository">The scenario repository.</param>
+    /// <param name="unitOfWork">The unit of work for transaction management.</param>
+    /// <param name="logger">The logger instance.</param>
     public DeleteScenarioUseCase(
         IScenarioRepository repository,
         IUnitOfWork unitOfWork,
@@ -22,6 +28,11 @@ public class DeleteScenarioUseCase
         _logger = logger;
     }
 
+    /// <summary>
+    /// Deletes a scenario by its identifier.
+    /// </summary>
+    /// <param name="id">The scenario identifier.</param>
+    /// <returns>True if the scenario was deleted; false if not found.</returns>
     public async Task<bool> ExecuteAsync(string id)
     {
         var scenario = await _repository.GetByIdAsync(id);

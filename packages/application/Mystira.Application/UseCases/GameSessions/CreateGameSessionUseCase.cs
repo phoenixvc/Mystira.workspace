@@ -15,6 +15,13 @@ public class CreateGameSessionUseCase
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<CreateGameSessionUseCase> _logger;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="CreateGameSessionUseCase"/> class.
+    /// </summary>
+    /// <param name="repository">The game session repository.</param>
+    /// <param name="scenarioRepository">The scenario repository.</param>
+    /// <param name="unitOfWork">The unit of work for transaction management.</param>
+    /// <param name="logger">The logger instance.</param>
     public CreateGameSessionUseCase(
         IGameSessionRepository repository,
         IScenarioRepository scenarioRepository,
@@ -27,6 +34,11 @@ public class CreateGameSessionUseCase
         _logger = logger;
     }
 
+    /// <summary>
+    /// Creates a new game session for a scenario.
+    /// </summary>
+    /// <param name="request">The request containing session creation details.</param>
+    /// <returns>The newly created game session.</returns>
     public async Task<GameSession> ExecuteAsync(StartGameSessionRequest request)
     {
         // Validate scenario exists

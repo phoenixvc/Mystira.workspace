@@ -81,9 +81,28 @@ public enum BackendType
 /// </summary>
 public class ConsistencyResult
 {
+    /// <summary>
+    /// Gets or sets a value indicating whether the data is consistent between both backends.
+    /// </summary>
     public bool IsConsistent { get; set; }
+
+    /// <summary>
+    /// Gets or sets the serialized value from the primary backend.
+    /// </summary>
     public string? PrimaryValue { get; set; }
+
+    /// <summary>
+    /// Gets or sets the serialized value from the secondary backend.
+    /// </summary>
     public string? SecondaryValue { get; set; }
+
+    /// <summary>
+    /// Gets or sets the list of differences found between the two backends.
+    /// </summary>
     public List<string> Differences { get; set; } = new();
+
+    /// <summary>
+    /// Gets or sets the timestamp when the consistency validation was performed.
+    /// </summary>
     public DateTime ValidatedAt { get; set; } = DateTime.UtcNow;
 }

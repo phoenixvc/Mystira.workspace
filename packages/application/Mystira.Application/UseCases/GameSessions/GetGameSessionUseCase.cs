@@ -12,6 +12,11 @@ public class GetGameSessionUseCase
     private readonly IGameSessionRepository _repository;
     private readonly ILogger<GetGameSessionUseCase> _logger;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="GetGameSessionUseCase"/> class.
+    /// </summary>
+    /// <param name="repository">The game session repository.</param>
+    /// <param name="logger">The logger instance.</param>
     public GetGameSessionUseCase(
         IGameSessionRepository repository,
         ILogger<GetGameSessionUseCase> logger)
@@ -20,6 +25,11 @@ public class GetGameSessionUseCase
         _logger = logger;
     }
 
+    /// <summary>
+    /// Retrieves a game session by its unique identifier.
+    /// </summary>
+    /// <param name="sessionId">The session identifier.</param>
+    /// <returns>The game session if found; otherwise, null.</returns>
     public async Task<GameSession?> ExecuteAsync(string sessionId)
     {
         if (string.IsNullOrWhiteSpace(sessionId))

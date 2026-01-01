@@ -13,6 +13,10 @@ public class AddScenarioToBundleUseCase
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<AddScenarioToBundleUseCase> _logger;
 
+    /// <summary>Initializes a new instance of the <see cref="AddScenarioToBundleUseCase"/> class.</summary>
+    /// <param name="repository">The content bundle repository.</param>
+    /// <param name="unitOfWork">The unit of work.</param>
+    /// <param name="logger">The logger.</param>
     public AddScenarioToBundleUseCase(
         IContentBundleRepository repository,
         IUnitOfWork unitOfWork,
@@ -23,6 +27,10 @@ public class AddScenarioToBundleUseCase
         _logger = logger;
     }
 
+    /// <summary>Adds a scenario to a content bundle.</summary>
+    /// <param name="bundleId">The bundle identifier.</param>
+    /// <param name="scenarioId">The scenario identifier.</param>
+    /// <returns>The updated content bundle.</returns>
     public async Task<ContentBundle> ExecuteAsync(string bundleId, string scenarioId)
     {
         if (string.IsNullOrWhiteSpace(bundleId))

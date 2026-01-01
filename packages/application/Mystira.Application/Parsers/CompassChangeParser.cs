@@ -7,6 +7,11 @@ namespace Mystira.Application.Parsers;
 /// </summary>
 public static class CompassChangeParser
 {
+    /// <summary>
+    /// Parses the dictionary data into a CompassChange object.
+    /// </summary>
+    /// <param name="compassChangeDict">The dictionary containing the raw data.</param>
+    /// <returns>The parsed CompassChange object.</returns>
     public static CompassChange Parse(IDictionary<object, object> compassChangeDict)
     {
         var compassChange = new CompassChange();
