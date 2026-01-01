@@ -457,38 +457,8 @@ public partial class MystiraAppDbContext : DbContext
                            d => new Dictionary<string, List<string>>(d, StringComparer.OrdinalIgnoreCase)));
             });
 
-            entity.OwnsMany(e => e.Characters, character =>
-            {
-                character.OwnsOne(c => c.Metadata, metadata =>
-                {
-                    metadata.Property(m => m.Role)
-                            .HasConversion(
-                                v => string.Join(',', v),
-                                v => v.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList())
-                            .Metadata.SetValueComparer(new ValueComparer<List<string>>(
-                                (c1, c2) => c1 != null && c2 != null && c1.SequenceEqual(c2),
-                                c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
-                                c => c.ToList()));
-
-                    metadata.Property(m => m.Archetype)
-                            .HasConversion(
-                                v => string.Join(',', v),
-                                v => v.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList())
-                            .Metadata.SetValueComparer(new ValueComparer<List<string>>(
-                                (c1, c2) => c1 != null && c2 != null && c1.SequenceEqual(c2),
-                                c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
-                                c => c.ToList()));
-
-                    metadata.Property(m => m.Traits)
-                            .HasConversion(
-                                v => string.Join(',', v),
-                                v => v.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList())
-                            .Metadata.SetValueComparer(new ValueComparer<List<string>>(
-                                (c1, c2) => c1 != null && c2 != null && c1.SequenceEqual(c2),
-                                c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
-                                c => c.ToList()));
-                });
-            });
+            // Characters - ScenarioCharacter entities with simple properties (no Metadata complex type)
+            entity.OwnsMany(e => e.Characters);
 
             entity.OwnsMany(e => e.Scenes, scene =>
             {
@@ -561,29 +531,29 @@ public partial class MystiraAppDbContext : DbContext
                       c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
                       c => c.ToList()));
 
+            // ChoiceHistory - SessionChoice entities stored as owned JSON array
             entity.OwnsMany(e => e.ChoiceHistory, choice =>
             {
-                choice.OwnsOne(c => c.EchoGenerated, echo =>
-                {
-                    // EchoType is now a plain string
-                    echo.Property(e => e.EchoType);
-                });
+                // EchoGenerated is a bool property, not a complex type
+                // CompassChange is a complex type that should be owned
                 choice.OwnsOne(c => c.CompassChange);
             });
 
-            entity.OwnsMany(e => e.EchoHistory, echo =>
-            {
-                // EchoType is now a plain string
-                echo.Property(e => e.EchoType);
-            });
+            // EchoHistory - EchoLog entities stored as owned JSON array
+            entity.OwnsMany(e => e.EchoHistory);
+
+            // Achievements - SessionAchievement entities stored as owned JSON array
             entity.OwnsMany(e => e.Achievements);
 
-            entity.OwnsMany(e => e.PlayerCompassProgressTotals, progress =>
-            {
-                progress.WithOwner();
-                progress.Property(p => p.PlayerId).IsRequired();
-                progress.Property(p => p.Axis).IsRequired();
-            });
+            // PlayerCompassProgressTotals is a Dictionary<string, int>, use JSON conversion
+            entity.Property(e => e.PlayerCompassProgressTotals)
+                .HasConversion(
+                    v => System.Text.Json.JsonSerializer.Serialize(v, (System.Text.Json.JsonSerializerOptions?)null),
+                    v => System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, int>>(v, (System.Text.Json.JsonSerializerOptions?)null) ?? new Dictionary<string, int>())
+                .Metadata.SetValueComparer(new ValueComparer<Dictionary<string, int>>(
+                    (d1, d2) => d1 != null && d2 != null && d1.Count == d2.Count && d1.All(kv => d2.ContainsKey(kv.Key) && d2[kv.Key] == kv.Value),
+                    d => d == null ? 0 : d.Aggregate(0, (a, kv) => HashCode.Combine(a, kv.Key.GetHashCode(), kv.Value.GetHashCode())),
+                    d => d == null ? new Dictionary<string, int>() : new Dictionary<string, int>(d)));
 
             // CharacterAssignments owned collection with nested owned PlayerAssignment
             entity.OwnsMany(e => e.CharacterAssignments, assignment =>

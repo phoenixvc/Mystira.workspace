@@ -318,27 +318,9 @@ public class PostgresDbContext : DbContext
         where TKey : notnull
     {
         return new ValueComparer<Dictionary<TKey, TValue>>(
-            (d1, d2) =>
-            {
-                if (d1 == null || d2 == null) return d1 == d2;
-                if (d1.Count != d2.Count) return false;
-                // Use the comparer from d1 for proper key comparison
-                var comparer = d1.Comparer;
-                return d1.All(kv => d2.TryGetValue(kv.Key, out var value) && EqualityComparer<TValue>.Default.Equals(kv.Value, value));
-            },
-            d =>
-            {
-                if (d == null) return 0;
-                // Use the dictionary's comparer for consistent key hashing
-                return d.Aggregate(0, (a, kv) => HashCode.Combine(a, d.Comparer.GetHashCode(kv.Key), kv.Value != null ? kv.Value.GetHashCode() : 0));
-            },
-            d =>
-            {
-                // Return null when input is null to preserve null vs empty semantics
-                if (d == null) return null!;
-                // Preserve the source dictionary's comparer in the snapshot
-                return new Dictionary<TKey, TValue>(d, d.Comparer);
-            });
+            (d1, d2) => d1 == null && d2 == null || d1 != null && d2 != null && d1.Count == d2.Count && d1.All(kv => d2.ContainsKey(kv.Key) && EqualityComparer<TValue>.Default.Equals(d2[kv.Key], kv.Value)),
+            d => d == null ? 0 : d.Aggregate(0, (a, kv) => HashCode.Combine(a, kv.Key.GetHashCode(), kv.Value != null ? kv.Value.GetHashCode() : 0)),
+            d => d == null ? null! : new Dictionary<TKey, TValue>(d));
     }
 
     #endregion
