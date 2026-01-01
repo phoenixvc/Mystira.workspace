@@ -691,18 +691,11 @@ public partial class MystiraAppDbContext : DbContext
             }
         });
 
-        // Configure MediaAsset.Tags
-        modelBuilder.Entity<MediaAsset>()
-            .Property(m => m.Tags)
-            .HasConversion(
-                v => string.Join(',', v),
-                v => v.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList(),
-                new ValueComparer<List<string>>(
-                    (c1, c2) => (c1 == null && c2 == null) || (c1 != null && c2 != null && c1.SequenceEqual(c2)),
-                    c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
-                    c => c.ToList()
-                )
-            );
+        }
+    });
+
+    // Configure MediaMetadataFile
+    modelBuilder.Entity<MediaMetadataFile>(entity =>
 
         // Configure MediaMetadataFile
         modelBuilder.Entity<MediaMetadataFile>(entity =>
