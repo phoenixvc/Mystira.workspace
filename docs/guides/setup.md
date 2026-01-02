@@ -568,21 +568,38 @@ NuGet packages are published to GitHub Packages at `https://nuget.pkg.github.com
 
 #### CI/CD Configuration
 
-Submodule `nuget.config` files use environment variables for authentication:
+Submodule `nuget.config` files use environment variables for authentication and **Package Source Mapping** to ensure Mystira packages are resolved from GitHub Packages (not nuget.org):
 
 ```xml
-<packageSources>
-  <add key="nuget.org" value="https://api.nuget.org/v3/index.json" />
-  <add key="github" value="https://nuget.pkg.github.com/phoenixvc/index.json" />
-</packageSources>
+<?xml version="1.0" encoding="utf-8"?>
+<configuration>
+  <packageSources>
+    <clear />
+    <add key="nuget.org" value="https://api.nuget.org/v3/index.json" />
+    <add key="github" value="https://nuget.pkg.github.com/phoenixvc/index.json" />
+  </packageSources>
 
-<packageSourceCredentials>
-  <github>
-    <add key="Username" value="phoenixvc" />
-    <add key="ClearTextPassword" value="%GH_PACKAGES_TOKEN%" />
-  </github>
-</packageSourceCredentials>
+  <!-- IMPORTANT: Package Source Mapping tells NuGet where to find each package -->
+  <packageSourceMapping>
+    <packageSource key="nuget.org">
+      <package pattern="*" />
+    </packageSource>
+    <packageSource key="github">
+      <package pattern="Mystira.*" />
+      <package pattern="PhoenixVC.*" />
+    </packageSource>
+  </packageSourceMapping>
+
+  <packageSourceCredentials>
+    <github>
+      <add key="Username" value="phoenixvc" />
+      <add key="ClearTextPassword" value="%GH_PACKAGES_TOKEN%" />
+    </github>
+  </packageSourceCredentials>
+</configuration>
 ```
+
+> **Why Package Source Mapping?** Without it, NuGet may try to resolve `Mystira.*` packages from nuget.org and fail with "Unable to resolve package" errors. The mapping ensures private packages are only fetched from GitHub Packages.
 
 CI workflows set `GH_PACKAGES_TOKEN` from secrets:
 
@@ -695,6 +712,31 @@ echo $GH_PACKAGES_TOKEN
 dotnet nuget list source
 
 # Clear NuGet cache and retry
+dotnet nuget locals all --clear
+dotnet restore
+```
+
+**Problem**: `Unable to resolve 'Mystira.Contracts'` or similar package errors
+
+This usually means NuGet is trying to find Mystira packages on nuget.org instead of GitHub Packages.
+
+**Solution**: Add Package Source Mapping to your `nuget.config`:
+
+```xml
+<packageSourceMapping>
+  <packageSource key="nuget.org">
+    <package pattern="*" />
+  </packageSource>
+  <packageSource key="github">
+    <package pattern="Mystira.*" />
+    <package pattern="PhoenixVC.*" />
+  </packageSource>
+</packageSourceMapping>
+```
+
+Then clear cache and retry:
+
+```bash
 dotnet nuget locals all --clear
 dotnet restore
 ```
