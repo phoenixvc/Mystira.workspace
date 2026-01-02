@@ -17,9 +17,10 @@ public static class EntityId
     {
         // ULID format: 01ARZ3NDEKTSV4RRFFQ69G5FAV (26 chars, Crockford Base32)
         // For now, use a timestamp + random approach that's sortable
+        // X12 for timestamp (12 chars) + X16 for random (16 chars) = 28 chars, take first 26
         var timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
         var random = Random.Shared.NextInt64();
-        return $"{timestamp:X12}{random:X8}"[..26].ToUpperInvariant();
+        return $"{timestamp:X12}{random:X16}"[..26].ToUpperInvariant();
     }
 
     /// <summary>
