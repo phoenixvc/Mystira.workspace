@@ -11,6 +11,8 @@ using Mystira.Domain.Enums;
 using Mystira.Domain.Models;
 using Polly;
 using Polly.Retry;
+using DomainContributor = Mystira.Domain.Models.Contributor;
+using GrpcContributor = Mystira.Chain.V1.Contributor;
 
 namespace Mystira.Infrastructure.StoryProtocol.Services.Grpc;
 
@@ -61,7 +63,7 @@ public class GrpcStoryProtocolService : IStoryProtocolService, IDisposable
     public async Task<ScenarioStoryProtocol> RegisterIpAssetAsync(
         string contentId,
         string contentTitle,
-        List<Contributor> contributors,
+        List<DomainContributor> contributors,
         string? metadataUri = null,
         string? licenseTermsId = null)
     {
@@ -88,7 +90,7 @@ public class GrpcStoryProtocolService : IStoryProtocolService, IDisposable
         // Map contributors to proto messages
         foreach (var contributor in contributors)
         {
-            request.Contributors.Add(new Chain.V1.Contributor
+            request.Contributors.Add(new GrpcContributor
             {
                 WalletAddress = contributor.WalletAddress ?? string.Empty,
                 ContributorType = MapContributorRole(contributor.Role),
@@ -187,7 +189,7 @@ public class GrpcStoryProtocolService : IStoryProtocolService, IDisposable
             return null;
         }
 
-        var contributors = response.Recipients.Select(r => new Contributor
+        var contributors = response.Recipients.Select(r => new DomainContributor
         {
             WalletAddress = r.WalletAddress,
             ContributionPercentage = r.ShareBasisPoints / 100m, // Convert basis points to %
@@ -205,7 +207,7 @@ public class GrpcStoryProtocolService : IStoryProtocolService, IDisposable
 
     /// <inheritdoc />
     /// <exception cref="ArgumentException">Thrown when ipAssetId is null/empty or contributors is null/empty.</exception>
-    public async Task<ScenarioStoryProtocol> UpdateRoyaltySplitAsync(string ipAssetId, List<Contributor> contributors)
+    public async Task<ScenarioStoryProtocol> UpdateRoyaltySplitAsync(string ipAssetId, List<DomainContributor> contributors)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(ipAssetId, nameof(ipAssetId));
         ArgumentNullException.ThrowIfNull(contributors, nameof(contributors));
@@ -227,7 +229,7 @@ public class GrpcStoryProtocolService : IStoryProtocolService, IDisposable
 
         foreach (var contributor in contributors)
         {
-            request.Contributors.Add(new Chain.V1.Contributor
+            request.Contributors.Add(new GrpcContributor
             {
                 WalletAddress = contributor.WalletAddress ?? string.Empty,
                 ContributorType = MapContributorRole(contributor.Role),
