@@ -5,6 +5,9 @@ namespace Mystira.Infrastructure.WhatsApp.Configuration;
 /// </summary>
 public class WhatsAppOptions
 {
+    /// <summary>
+    /// The configuration section name for WhatsApp options.
+    /// </summary>
     public const string SectionName = "WhatsApp";
 
     /// <summary>
