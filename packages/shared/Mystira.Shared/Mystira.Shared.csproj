@@ -94,8 +94,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <!-- Domain package for shared enums, entities, and value objects (local workspace reference) -->
-    <ProjectReference Include="../../domain/Mystira.Domain/Mystira.Domain.csproj" />
+    <!-- Domain package: ProjectReference for local build, PackageReference for NuGet pack -->
+    <ProjectReference Include="../../domain/Mystira.Domain/Mystira.Domain.csproj" PrivateAssets="all" />
+    <PackageReference Include="Mystira.Domain" Version="0.5.0-alpha" />
   </ItemGroup>
 
   <!--
