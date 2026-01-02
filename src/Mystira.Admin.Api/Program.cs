@@ -28,7 +28,6 @@ using Mystira.Infrastructure.Data;
 using Mystira.Infrastructure.Data.Repositories;
 using Mystira.Infrastructure.Data.Services;
 using Mystira.Infrastructure.Data.UnitOfWork;
-using Mystira.Infrastructure.StoryProtocol;
 using Mystira.Infrastructure.Discord.Services;
 using Microsoft.ApplicationInsights.Extensibility;
 using Mystira.Shared.Middleware;
@@ -233,8 +232,8 @@ builder.Services.Configure<AudioTranscodingOptions>(builder.Configuration.GetSec
 // Register Application.Ports.Media.IAudioTranscodingService for use cases
 builder.Services.AddSingleton<IAudioTranscodingService, FfmpegAudioTranscodingService>();
 
-// Add Story Protocol Services
-builder.Services.AddStoryProtocolServices(builder.Configuration);
+// TODO: Story Protocol services not yet migrated - add when Mystira.Infrastructure.StoryProtocol package is published
+// builder.Services.AddStoryProtocolServices(builder.Configuration);
 
 // Register Content Bundle admin service
 builder.Services.AddScoped<IContentBundleAdminService, ContentBundleAdminService>();
