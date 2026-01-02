@@ -1,5 +1,6 @@
 name: Publish NuGet Packages
 
+# Publishes packages to GitHub Packages on tag push or manual trigger
 on:
   push:
     tags:
