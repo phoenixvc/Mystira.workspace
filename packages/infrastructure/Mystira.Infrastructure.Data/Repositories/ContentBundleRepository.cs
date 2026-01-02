@@ -9,15 +9,15 @@ namespace Mystira.Infrastructure.Data.Repositories;
 /// </summary>
 public class ContentBundleRepository : Repository<ContentBundle>, IContentBundleRepository
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ContentBundleRepository"/> class.
+    /// </summary>
+    /// <param name="context">The database context.</param>
     public ContentBundleRepository(DbContext context) : base(context)
     {
     }
 
-    /// <summary>
-    /// Gets content bundles for a specific age group.
-    /// </summary>
-    /// <param name="ageGroupId">The age group identifier.</param>
-    /// <returns>Content bundles matching the age group.</returns>
+    /// <inheritdoc/>
     public async Task<IEnumerable<ContentBundle>> GetByAgeGroupAsync(string ageGroupId)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(ageGroupId);

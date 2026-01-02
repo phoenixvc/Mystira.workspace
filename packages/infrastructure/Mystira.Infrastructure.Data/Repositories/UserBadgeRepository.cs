@@ -13,11 +13,16 @@ public class UserBadgeRepository : Repository<UserBadge>, IUserBadgeRepository
 {
     private readonly bool _isInMemory;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="UserBadgeRepository"/> class.
+    /// </summary>
+    /// <param name="context">The database context.</param>
     public UserBadgeRepository(DbContext context) : base(context)
     {
         _isInMemory = context.Database.ProviderName == "Microsoft.EntityFrameworkCore.InMemory";
     }
 
+    /// <inheritdoc/>
     public async Task<IEnumerable<UserBadge>> GetByUserProfileIdAsync(string userProfileId)
     {
         var badges = await QueryBadgesAsync(
@@ -32,6 +37,7 @@ public class UserBadgeRepository : Repository<UserBadge>, IUserBadgeRepository
         return OrderByEarnedAtDescending(badges);
     }
 
+    /// <inheritdoc/>
     public async Task<UserBadge?> GetByUserProfileIdAndBadgeConfigIdAsync(string userProfileId, string badgeConfigurationId)
     {
         if (_isInMemory)
@@ -48,6 +54,7 @@ public class UserBadgeRepository : Repository<UserBadge>, IUserBadgeRepository
             .FirstOrDefaultAsync(b => b.BadgeConfigurationId == badgeConfigurationId);
     }
 
+    /// <inheritdoc/>
     public async Task<IEnumerable<UserBadge>> GetByGameSessionIdAsync(string gameSessionId)
     {
         var badges = await QueryBadgesAsync(
@@ -62,6 +69,7 @@ public class UserBadgeRepository : Repository<UserBadge>, IUserBadgeRepository
         return OrderByEarnedAtDescending(badges);
     }
 
+    /// <inheritdoc/>
     public async Task<IEnumerable<UserBadge>> GetByScenarioIdAsync(string scenarioId)
     {
         var badges = await QueryBadgesAsync(
@@ -76,6 +84,7 @@ public class UserBadgeRepository : Repository<UserBadge>, IUserBadgeRepository
         return OrderByEarnedAtDescending(badges);
     }
 
+    /// <inheritdoc/>
     public async Task<IEnumerable<UserBadge>> GetByUserProfileIdAndAxisAsync(string userProfileId, string axis)
     {
         var badges = await QueryBadgesAsync(
@@ -91,6 +100,7 @@ public class UserBadgeRepository : Repository<UserBadge>, IUserBadgeRepository
         return OrderByEarnedAtDescending(badges);
     }
 
+    /// <inheritdoc/>
     public override async Task<UserBadge> AddAsync(UserBadge entity)
     {
         if (entity == null) throw new ArgumentNullException(nameof(entity));
