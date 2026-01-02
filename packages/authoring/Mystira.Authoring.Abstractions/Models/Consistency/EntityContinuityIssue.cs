@@ -48,10 +48,16 @@ public class EntityContinuityIssue
 /// </summary>
 public enum EntityContinuityIssueType
 {
+    /// <summary>Unknown issue type.</summary>
     Unknown = 0,
+    /// <summary>Entity referenced before being introduced.</summary>
     NotIntroduced = 1,
+    /// <summary>Entity attribute changed inconsistently.</summary>
     InconsistentAttribute = 2,
+    /// <summary>Entity unexpectedly absent from a scene.</summary>
     UnexpectedAbsence = 3,
+    /// <summary>Entity unexpectedly present in a scene.</summary>
     UnexpectedPresence = 4,
+    /// <summary>Entity name varies across scenes.</summary>
     NameVariation = 5
 }

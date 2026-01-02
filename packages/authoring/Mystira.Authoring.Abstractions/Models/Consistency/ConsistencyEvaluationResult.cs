@@ -72,12 +72,19 @@ public class ConsistencyIssue
 /// </summary>
 public enum ConsistencyIssueType
 {
+    /// <summary>Unknown issue type.</summary>
     Unknown = 0,
+    /// <summary>Entity attribute or state inconsistency.</summary>
     EntityInconsistency = 1,
+    /// <summary>Timeline or chronological conflict.</summary>
     TimelineConflict = 2,
+    /// <summary>Character behavior or trait inconsistency.</summary>
     CharacterInconsistency = 3,
+    /// <summary>Location or setting inconsistency.</summary>
     LocationInconsistency = 4,
+    /// <summary>Unresolved plot thread or unexplained event.</summary>
     PlotHole = 5,
+    /// <summary>Logical contradiction in the narrative.</summary>
     LogicalContradiction = 6
 }
 
@@ -86,8 +93,12 @@ public enum ConsistencyIssueType
 /// </summary>
 public enum IssueSeverity
 {
+    /// <summary>Informational note, no action required.</summary>
     Info = 0,
+    /// <summary>Warning that may need attention.</summary>
     Warning = 1,
+    /// <summary>Error that should be addressed.</summary>
     Error = 2,
+    /// <summary>Critical issue that must be fixed.</summary>
     Critical = 3
 }

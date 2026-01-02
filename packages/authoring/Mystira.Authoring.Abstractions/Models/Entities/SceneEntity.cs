@@ -34,12 +34,19 @@ public class SceneEntity
 /// </summary>
 public enum SceneEntityType
 {
+    /// <summary>Unknown entity type.</summary>
     Unknown = 0,
+    /// <summary>A character or person.</summary>
     Character = 1,
+    /// <summary>A location or place.</summary>
     Location = 2,
+    /// <summary>An item or object.</summary>
     Item = 3,
+    /// <summary>An abstract concept.</summary>
     Concept = 4,
+    /// <summary>An event or occurrence.</summary>
     Event = 5,
+    /// <summary>An organization or group.</summary>
     Organization = 6
 }
 
@@ -48,8 +55,12 @@ public enum SceneEntityType
 /// </summary>
 public enum Confidence
 {
+    /// <summary>Confidence level unknown.</summary>
     Unknown = 0,
+    /// <summary>Low confidence.</summary>
     Low = 1,
+    /// <summary>Medium confidence.</summary>
     Medium = 2,
+    /// <summary>High confidence.</summary>
     High = 3
 }

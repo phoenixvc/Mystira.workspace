@@ -81,8 +81,11 @@ public class Scenario
 /// </summary>
 public enum DifficultyLevel
 {
+    /// <summary>Easy difficulty level.</summary>
     Easy,
+    /// <summary>Medium difficulty level.</summary>
     Medium,
+    /// <summary>Hard difficulty level.</summary>
     Hard
 }
 
@@ -91,7 +94,10 @@ public enum DifficultyLevel
 /// </summary>
 public enum SessionLength
 {
+    /// <summary>Short session (15-30 minutes).</summary>
     Short,
+    /// <summary>Medium session (30-60 minutes).</summary>
     Medium,
+    /// <summary>Long session (60+ minutes).</summary>
     Long
 }
