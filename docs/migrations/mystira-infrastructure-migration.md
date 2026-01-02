@@ -28,15 +28,28 @@ This guide covers migrating from the `Mystira.App.Infrastructure.*` packages (pr
 
 ### Step 1: Update NuGet Sources
 
-Ensure your `nuget.config` includes the GitHub Packages feed:
+Ensure your `nuget.config` includes the GitHub Packages feed with Package Source Mapping:
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
 <configuration>
   <packageSources>
+    <clear />
     <add key="nuget.org" value="https://api.nuget.org/v3/index.json" />
     <add key="github" value="https://nuget.pkg.github.com/phoenixvc/index.json" />
   </packageSources>
+
+  <!-- IMPORTANT: Package Source Mapping ensures Mystira packages are resolved from GitHub -->
+  <packageSourceMapping>
+    <packageSource key="nuget.org">
+      <package pattern="*" />
+    </packageSource>
+    <packageSource key="github">
+      <package pattern="Mystira.*" />
+      <package pattern="PhoenixVC.*" />
+    </packageSource>
+  </packageSourceMapping>
+
   <packageSourceCredentials>
     <github>
       <add key="Username" value="YOUR_GITHUB_USERNAME" />
@@ -45,6 +58,8 @@ Ensure your `nuget.config` includes the GitHub Packages feed:
   </packageSourceCredentials>
 </configuration>
 ```
+
+> **Note**: Without `packageSourceMapping`, NuGet may try to resolve `Mystira.*` packages from nuget.org and fail.
 
 ### Step 2: Update Package References
 

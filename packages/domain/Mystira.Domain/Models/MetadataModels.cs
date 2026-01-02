@@ -61,6 +61,18 @@ public class MetadataModifier
 }
 
 /// <summary>
+/// Represents a generic modifier with key-value pair.
+/// </summary>
+public class Modifier
+{
+    /// <summary>Gets or sets the modifier key.</summary>
+    public string Key { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets the modifier value.</summary>
+    public string Value { get; set; } = string.Empty;
+}
+
+/// <summary>
 /// Single media metadata file containing all media metadata entries.
 /// </summary>
 public class MediaMetadataFile

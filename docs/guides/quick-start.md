@@ -11,9 +11,14 @@ node --version
 # Check pnpm version (should be 8+)
 pnpm --version
 
+# Check .NET SDK version (should be 9.0+, required for C# components)
+dotnet --version
+
 # Check Docker (optional, for local services)
 docker --version
 ```
+
+> **Note**: If you'll be working with .NET components, see [Setup Guide](./setup.md#nuget-packages-github-packages) for GitHub Packages authentication.
 
 ## Step 1: Clone the Workspace
 

@@ -80,10 +80,12 @@ Mystira.workspace/
 ### Prerequisites
 
 - **Node.js** >= 18.x with **pnpm** >= 8.x (TypeScript components)
-- **.NET SDK** 8.0+ (C# components)
+- **.NET SDK** 9.0+ (C# components)
 - **Python** 3.11+ (Chain component)
 - **Docker** (local development)
 - **Git** with submodule support
+
+> **Note**: For .NET development, you'll need to configure GitHub Packages authentication. See [Setup Guide](./docs/guides/setup.md#nuget-packages-github-packages) for NuGet configuration including Package Source Mapping.
 
 ### Working with Submodules
 
