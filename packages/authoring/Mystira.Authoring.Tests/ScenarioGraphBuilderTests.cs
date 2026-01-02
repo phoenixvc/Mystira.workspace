@@ -1,5 +1,6 @@
 using Mystira.Authoring.Abstractions.Models.Scenario;
 using Mystira.Authoring.Graph;
+using Xunit;
 
 namespace Mystira.Authoring.Tests;
 
@@ -63,12 +64,12 @@ public class ScenarioGraphBuilderTests
         // Assert
         var startEdges = graph.GetOutgoingEdges("start").ToList();
         Assert.Single(startEdges);
-        Assert.Equal("choice1", startEdges[0].Target);
+        Assert.Equal("choice1", startEdges[0].To);
 
         var choiceEdges = graph.GetOutgoingEdges("choice1").ToList();
         Assert.Equal(2, choiceEdges.Count);
-        Assert.Contains(choiceEdges, e => e.Target == "path_a");
-        Assert.Contains(choiceEdges, e => e.Target == "path_b");
+        Assert.Contains(choiceEdges, e => e.To == "path_a");
+        Assert.Contains(choiceEdges, e => e.To == "path_b");
     }
 
     [Fact]
