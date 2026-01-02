@@ -1,26 +1,30 @@
 using System.Diagnostics.CodeAnalysis;
+using System.Security.Cryptography;
 
 namespace Mystira.Domain.Entities;
 
 /// <summary>
 /// Utility class for working with entity IDs.
-/// Mystira uses string IDs (ULID format) - never use Guid.Parse on entity IDs.
+/// Mystira uses custom sortable string IDs (hex timestamp + random) - never use Guid.Parse on entity IDs.
 /// </summary>
 public static class EntityId
 {
     /// <summary>
-    /// Generates a new ULID-format entity ID.
-    /// ULIDs are sortable, URL-safe, and avoid Guid.Parse issues.
+    /// Generates a new sortable entity ID.
+    /// Format: 12-char uppercase hex timestamp + 14-char uppercase hex random = 26 chars total.
+    /// IDs are time-sortable, URL-safe, and avoid Guid.Parse issues.
     /// </summary>
-    /// <returns>A new ULID string.</returns>
+    /// <returns>A new 26-character sortable ID string.</returns>
     public static string NewId()
     {
-        // ULID format: 01ARZ3NDEKTSV4RRFFQ69G5FAV (26 chars, Crockford Base32)
-        // For now, use a timestamp + random approach that's sortable
-        // X12 for timestamp (12 chars) + X16 for random (16 chars) = 28 chars, take first 26
+        // Custom sortable ID format: 12-char hex timestamp + 14-char hex random = 26 chars
+        // Timestamp: Unix milliseconds as uppercase hex, zero-padded to 12 chars
+        // Random: Cryptographically secure random bytes as uppercase hex
         var timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
-        var random = Random.Shared.NextInt64();
-        return $"{timestamp:X12}{random:X16}"[..26].ToUpperInvariant();
+        Span<byte> randomBytes = stackalloc byte[7];
+        RandomNumberGenerator.Fill(randomBytes);
+        var randomHex = Convert.ToHexString(randomBytes);
+        return $"{timestamp:X12}{randomHex}"[..26].ToUpperInvariant();
     }
 
     /// <summary>
@@ -33,7 +37,7 @@ public static class EntityId
         if (string.IsNullOrWhiteSpace(id))
             return false;
 
-        // Accept both ULID format (26 chars) and legacy formats
+        // Accept both current format (26 chars) and legacy formats
         // Do NOT validate as Guid - that's the whole point
         return id.Length >= 20 && id.Length <= 40;
     }
