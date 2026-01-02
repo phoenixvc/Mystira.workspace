@@ -23,7 +23,7 @@ public interface IConsistencyEvaluationService
     /// <param name="path">Scene IDs representing the path to evaluate.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Evaluation result for the path.</returns>
-    Task<ConsistencyEvaluationResult> EvaluatePathAsync(
+    Task<PathConsistencyResult> EvaluatePathAsync(
         Scenario scenario,
         IEnumerable<string> path,
         CancellationToken cancellationToken = default);
@@ -52,7 +52,7 @@ public class ScenarioConsistencyResult
     /// <summary>
     /// Results for each path evaluated.
     /// </summary>
-    public List<ConsistencyEvaluationResult> PathResults { get; set; } = new();
+    public List<PathConsistencyResult> PathResults { get; set; } = new();
 
     /// <summary>
     /// Entity continuity issues found.

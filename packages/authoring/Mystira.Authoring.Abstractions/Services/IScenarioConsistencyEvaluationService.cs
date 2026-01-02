@@ -1,7 +1,6 @@
+using Mystira.Authoring.Abstractions.Models.Consistency;
 using Mystira.Authoring.Abstractions.Models.Scenario;
 using Mystira.Contracts.StoryGenerator.StoryConsistency;
-
-using ConsistencyResult = Mystira.Authoring.Abstractions.Models.Consistency.ConsistencyEvaluationResult;
 
 namespace Mystira.Authoring.Abstractions.Services;
 
@@ -30,7 +29,7 @@ public interface IScenarioConsistencyEvaluationService
     /// <param name="path">Scene IDs representing the path to evaluate.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Consistency evaluation result for the path.</returns>
-    Task<ConsistencyResult> EvaluatePathConsistencyAsync(
+    Task<PathConsistencyResult> EvaluatePathConsistencyAsync(
         Scenario scenario,
         IEnumerable<string> path,
         CancellationToken cancellationToken = default);
