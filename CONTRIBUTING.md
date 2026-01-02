@@ -198,17 +198,32 @@ NuGet packages are published to `https://nuget.pkg.github.com/phoenixvc/index.js
 **Local Development Authentication:**
 
 ```bash
-# Option 1: Global NuGet config (recommended)
+# Add the GitHub Packages source globally
 dotnet nuget add source https://nuget.pkg.github.com/phoenixvc/index.json \
   --name github-mystira \
   --username phoenixvc \
   --password ghp_your_github_pat_here \
   --store-password-in-clear-text \
   --configfile ~/.nuget/NuGet/NuGet.Config
-
-# Option 2: Environment variable
-export GH_PACKAGES_TOKEN=ghp_your_github_pat_here
 ```
+
+**Package Source Mapping (Required in nuget.config):**
+
+To ensure NuGet resolves Mystira packages from GitHub (not nuget.org), add package source mapping:
+
+```xml
+<packageSourceMapping>
+  <packageSource key="nuget.org">
+    <package pattern="*" />
+  </packageSource>
+  <packageSource key="github">
+    <package pattern="Mystira.*" />
+    <package pattern="PhoenixVC.*" />
+  </packageSource>
+</packageSourceMapping>
+```
+
+> **Note**: Without this mapping, you may see "Unable to resolve 'Mystira.*'" errors.
 
 **Verifying Access:**
 
@@ -219,7 +234,8 @@ dotnet nuget list source
 # Search for packages
 dotnet package search Mystira --source github-mystira
 
-# Restore packages
+# Restore packages (clear cache if issues)
+dotnet nuget locals all --clear
 dotnet restore
 ```
 
