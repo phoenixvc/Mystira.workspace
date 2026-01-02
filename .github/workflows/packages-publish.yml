@@ -1,6 +1,10 @@
 name: Publish NuGet Packages
 
-# Publishes packages to GitHub Packages on tag push or manual trigger
+# Publishes packages to GitHub Packages
+# Triggered by:
+#   - Tag push (v*)
+#   - Manual workflow dispatch
+#   - Repository dispatch from release.yml (nuget-publish, contracts-nuget-publish)
 on:
   push:
     tags:
@@ -11,6 +15,10 @@ on:
         description: 'Version to publish (e.g., 1.0.0, 1.0.0-beta.1)'
         required: true
         type: string
+  repository_dispatch:
+    types:
+      - nuget-publish
+      - contracts-nuget-publish
 
 jobs:
   build-and-publish:
@@ -21,8 +29,7 @@ jobs:
       packages: write
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v5

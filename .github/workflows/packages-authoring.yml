@@ -25,33 +25,29 @@ jobs:
   build-test:
     name: Build and Test
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v5
         with:
           dotnet-version: '9.0.x'
+          source-url: https://nuget.pkg.github.com/phoenixvc/index.json
+        env:
+          NUGET_AUTH_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN }}
 
-      - name: Restore Abstractions
-        run: dotnet restore packages/authoring/Mystira.Authoring.Abstractions/Mystira.Authoring.Abstractions.csproj
+      - name: Build Mystira.Authoring.Abstractions
+        run: dotnet build packages/authoring/Mystira.Authoring.Abstractions --configuration Release
 
-      - name: Build Abstractions
-        run: dotnet build packages/authoring/Mystira.Authoring.Abstractions/Mystira.Authoring.Abstractions.csproj --no-restore --configuration Release
+      - name: Build Mystira.Authoring
+        run: dotnet build packages/authoring/Mystira.Authoring --configuration Release
 
-      - name: Restore Implementation
-        run: dotnet restore packages/authoring/Mystira.Authoring/Mystira.Authoring.csproj
-
-      - name: Build Implementation
-        run: dotnet build packages/authoring/Mystira.Authoring/Mystira.Authoring.csproj --no-restore --configuration Release
-
-      - name: Restore Tests
-        run: dotnet restore packages/authoring/Mystira.Authoring.Tests/Mystira.Authoring.Tests.csproj
-
-      - name: Test
-        run: dotnet test packages/authoring/Mystira.Authoring.Tests/Mystira.Authoring.Tests.csproj --no-restore --configuration Release --collect:"XPlat Code Coverage" --results-directory ./coverage
+      - name: Test Mystira.Authoring
+        run: dotnet test packages/authoring/Mystira.Authoring.Tests --configuration Release --collect:"XPlat Code Coverage" --results-directory ./coverage
 
       - name: Upload coverage
         uses: codecov/codecov-action@v4

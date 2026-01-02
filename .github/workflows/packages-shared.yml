@@ -19,27 +19,26 @@ jobs:
   build-test:
     name: Build and Test
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v5
         with:
           dotnet-version: '9.0.x'
+          source-url: https://nuget.pkg.github.com/phoenixvc/index.json
+        env:
+          NUGET_AUTH_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN }}
 
-      - name: Restore dependencies
-        run: dotnet restore packages/shared/Mystira.Shared/Mystira.Shared.csproj
+      - name: Build Mystira.Shared
+        run: dotnet build packages/shared/Mystira.Shared --configuration Release
 
-      - name: Build
-        run: dotnet build packages/shared/Mystira.Shared/Mystira.Shared.csproj --no-restore --configuration Release
-
-      - name: Restore test dependencies
-        run: dotnet restore packages/shared/Mystira.Shared.Tests/Mystira.Shared.Tests.csproj
-
-      - name: Test
-        run: dotnet test packages/shared/Mystira.Shared.Tests/Mystira.Shared.Tests.csproj --no-restore --configuration Release --collect:"XPlat Code Coverage" --results-directory ./coverage
+      - name: Test Mystira.Shared
+        run: dotnet test packages/shared/Mystira.Shared.Tests --configuration Release --collect:"XPlat Code Coverage" --results-directory ./coverage
 
       - name: Upload coverage
         uses: codecov/codecov-action@v4
