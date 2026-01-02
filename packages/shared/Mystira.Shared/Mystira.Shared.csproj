@@ -35,11 +35,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <!-- Domain package for shared enums, entities, and value objects -->
-    <PackageReference Include="Mystira.Domain" Version="0.5.0-alpha-*" />
     <!-- NOTE: Mystira.Contracts dependency is added by consuming projects that need both packages.
          This avoids circular dependency issues during package publishing. -->
-
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.11" />
     <PackageReference Include="Microsoft.Identity.Web" Version="4.2.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.11" />
@@ -94,6 +91,11 @@
 
   <ItemGroup>
     <None Include="README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Domain package for shared enums, entities, and value objects (local workspace reference) -->
+    <ProjectReference Include="../../domain/Mystira.Domain/Mystira.Domain.csproj" />
   </ItemGroup>
 
   <!--

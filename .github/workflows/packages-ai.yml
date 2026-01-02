@@ -5,6 +5,7 @@ on:
     paths:
       - 'packages/ai/**'
       - 'packages/contracts/**'
+      - 'packages/domain/**'
       - '.github/workflows/packages-ai.yml'
     branches:
       - main
@@ -13,6 +14,7 @@ on:
     paths:
       - 'packages/ai/**'
       - 'packages/contracts/**'
+      - 'packages/domain/**'
       - '.github/workflows/packages-ai.yml'
 
 jobs:
