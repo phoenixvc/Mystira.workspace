@@ -1,0 +1,48 @@
+name: Mystira.Contracts CI
+
+on:
+  push:
+    paths:
+      - 'packages/contracts/**'
+      - 'packages/domain/**'
+      - '.github/workflows/packages-contracts.yml'
+    branches:
+      - main
+      - 'release/**'
+  pull_request:
+    paths:
+      - 'packages/contracts/**'
+      - 'packages/domain/**'
+      - '.github/workflows/packages-contracts.yml'
+
+jobs:
+  build-test:
+    name: Build and Test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: '9.0.x'
+          source-url: https://nuget.pkg.github.com/phoenixvc/index.json
+        env:
+          NUGET_AUTH_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN }}
+
+      - name: Build Mystira.Contracts
+        run: dotnet build packages/contracts/dotnet/Mystira.Contracts --configuration Release
+
+      - name: Pack Mystira.Contracts
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          mkdir -p ./nupkg
+          dotnet pack packages/contracts/dotnet/Mystira.Contracts --no-build --configuration Release -o ./nupkg
+
+      - name: Push to GitHub Packages
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: dotnet nuget push ./nupkg/*.nupkg --source "https://nuget.pkg.github.com/phoenixvc/index.json" --api-key ${{ secrets.GH_PACKAGES_TOKEN }} --skip-duplicate
