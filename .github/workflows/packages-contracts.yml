@@ -16,12 +16,12 @@ on:
       - '.github/workflows/packages-contracts.yml'
 
 jobs:
-  build-test:
-    name: Build and Test
+  build:
+    name: Build
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      packages: write
+      packages: read
 
     steps:
       - uses: actions/checkout@v6
@@ -36,13 +36,3 @@ jobs:
 
       - name: Build Mystira.Contracts
         run: dotnet build packages/contracts/dotnet/Mystira.Contracts --configuration Release
-
-      - name: Pack Mystira.Contracts
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        run: |
-          mkdir -p ./nupkg
-          dotnet pack packages/contracts/dotnet/Mystira.Contracts --no-build --configuration Release -o ./nupkg
-
-      - name: Push to GitHub Packages
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        run: dotnet nuget push ./nupkg/*.nupkg --source "https://nuget.pkg.github.com/phoenixvc/index.json" --api-key ${{ secrets.GH_PACKAGES_TOKEN }} --skip-duplicate

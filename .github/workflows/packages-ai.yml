@@ -23,7 +23,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      packages: write
+      packages: read
 
     steps:
       - uses: actions/checkout@v6
@@ -50,13 +50,3 @@ jobs:
           flags: ai
           name: mystira-ai
           fail_ci_if_error: false
-
-      - name: Pack Mystira.Ai
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        run: |
-          mkdir -p ./nupkg
-          dotnet pack packages/ai/Mystira.Ai --no-build --configuration Release -o ./nupkg
-
-      - name: Push to GitHub Packages
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        run: dotnet nuget push ./nupkg/*.nupkg --source "https://nuget.pkg.github.com/phoenixvc/index.json" --api-key ${{ secrets.GH_PACKAGES_TOKEN }} --skip-duplicate
