@@ -37,12 +37,19 @@ public interface IPolyglotBackfillService
 /// </summary>
 public class BackfillResult
 {
+    /// <summary>Gets or sets the entity type name.</summary>
     public string EntityType { get; set; } = string.Empty;
+    /// <summary>Gets or sets the total entities processed.</summary>
     public int TotalProcessed { get; set; }
+    /// <summary>Gets or sets the number of successful syncs.</summary>
     public int SuccessCount { get; set; }
+    /// <summary>Gets or sets the number of failed syncs.</summary>
     public int FailureCount { get; set; }
-    public int SkippedCount { get; set; } // Already existed in secondary
+    /// <summary>Gets or sets the number skipped (already existed).</summary>
+    public int SkippedCount { get; set; }
+    /// <summary>Gets or sets the operation duration.</summary>
     public TimeSpan Duration { get; set; }
+    /// <summary>Gets or sets the error messages.</summary>
     public List<string> Errors { get; set; } = new();
 }
 
@@ -51,10 +58,15 @@ public class BackfillResult
 /// </summary>
 public class BackfillSummary
 {
+    /// <summary>Gets or sets when the backfill started.</summary>
     public DateTime StartedAt { get; set; }
+    /// <summary>Gets or sets when the backfill completed.</summary>
     public DateTime CompletedAt { get; set; }
+    /// <summary>Gets or sets the total operation duration.</summary>
     public TimeSpan TotalDuration { get; set; }
+    /// <summary>Gets or sets the results per entity type.</summary>
     public List<BackfillResult> Results { get; set; } = new();
+    /// <summary>Gets whether all backfills succeeded.</summary>
     public bool IsSuccess => Results.All(r => r.FailureCount == 0);
 }
 
@@ -67,6 +79,12 @@ public class PolyglotBackfillService : IPolyglotBackfillService
     private readonly PostgresDbContext _postgresContext;
     private readonly ILogger<PolyglotBackfillService> _logger;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="PolyglotBackfillService"/> class.
+    /// </summary>
+    /// <param name="cosmosContext">The Cosmos DB context (primary).</param>
+    /// <param name="postgresContext">The PostgreSQL context (secondary).</param>
+    /// <param name="logger">The logger instance.</param>
     public PolyglotBackfillService(
         MystiraAppDbContext cosmosContext,
         PostgresDbContext postgresContext,
@@ -77,6 +95,7 @@ public class PolyglotBackfillService : IPolyglotBackfillService
         _logger = logger;
     }
 
+    /// <inheritdoc/>
     public async Task<BackfillResult> BackfillAccountsAsync(int batchSize = 100, CancellationToken cancellationToken = default)
     {
         return await BackfillEntityAsync<Account>(
@@ -86,6 +105,7 @@ public class PolyglotBackfillService : IPolyglotBackfillService
             cancellationToken);
     }
 
+    /// <inheritdoc/>
     public async Task<BackfillResult> BackfillGameSessionsAsync(int batchSize = 100, CancellationToken cancellationToken = default)
     {
         return await BackfillEntityAsync<GameSession>(
@@ -95,6 +115,7 @@ public class PolyglotBackfillService : IPolyglotBackfillService
             cancellationToken);
     }
 
+    /// <inheritdoc/>
     public async Task<BackfillResult> BackfillPlayerScenarioScoresAsync(int batchSize = 100, CancellationToken cancellationToken = default)
     {
         return await BackfillEntityAsync<PlayerScenarioScore>(
@@ -104,6 +125,7 @@ public class PolyglotBackfillService : IPolyglotBackfillService
             cancellationToken);
     }
 
+    /// <inheritdoc/>
     public async Task<BackfillSummary> BackfillAllAsync(int batchSize = 100, CancellationToken cancellationToken = default)
     {
         var summary = new BackfillSummary

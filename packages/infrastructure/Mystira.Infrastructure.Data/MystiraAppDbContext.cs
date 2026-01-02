@@ -14,48 +14,69 @@ namespace Mystira.Infrastructure.Data;
 /// </summary>
 public partial class MystiraAppDbContext : DbContext
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="MystiraAppDbContext"/> class.
+    /// </summary>
+    /// <param name="options">The options to configure the context.</param>
     public MystiraAppDbContext(DbContextOptions<MystiraAppDbContext> options)
         : base(options)
     {
     }
 
-    // User and Profile Data
+    /// <summary>Gets or sets the user profiles.</summary>
     public DbSet<UserProfile> UserProfiles { get; set; }
+    /// <summary>Gets or sets the user badges.</summary>
     public DbSet<UserBadge> UserBadges { get; set; }
+    /// <summary>Gets or sets the accounts.</summary>
     public DbSet<Account> Accounts { get; set; }
 
-    // Scenario Management
+    /// <summary>Gets or sets the scenarios.</summary>
     public DbSet<Scenario> Scenarios { get; set; }
+    /// <summary>Gets or sets the content bundles.</summary>
     public DbSet<ContentBundle> ContentBundles { get; set; }
+    /// <summary>Gets or sets the character maps.</summary>
     public DbSet<CharacterMap> CharacterMaps { get; set; }
+    /// <summary>Gets or sets the badge configurations.</summary>
     public DbSet<BadgeConfiguration> BadgeConfigurations { get; set; }
+    /// <summary>Gets or sets the compass axis definitions.</summary>
     public DbSet<CompassAxisDefinition> CompassAxes { get; set; }
+    /// <summary>Gets or sets the archetype definitions.</summary>
     public DbSet<ArchetypeDefinition> ArchetypeDefinitions { get; set; }
+    /// <summary>Gets or sets the echo type definitions.</summary>
     public DbSet<EchoTypeDefinition> EchoTypeDefinitions { get; set; }
+    /// <summary>Gets or sets the fantasy theme definitions.</summary>
     public DbSet<FantasyThemeDefinition> FantasyThemeDefinitions { get; set; }
+    /// <summary>Gets or sets the age group definitions.</summary>
     public DbSet<AgeGroupDefinition> AgeGroupDefinitions { get; set; }
 
-    // Badge System
+    /// <summary>Gets or sets the axis achievements.</summary>
     public DbSet<AxisAchievement> AxisAchievements { get; set; }
+    /// <summary>Gets or sets the badges.</summary>
     public DbSet<Badge> Badges { get; set; }
+    /// <summary>Gets or sets the badge images.</summary>
     public DbSet<BadgeImage> BadgeImages { get; set; }
 
-    // Media Management
+    /// <summary>Gets or sets the media assets.</summary>
     public DbSet<MediaAsset> MediaAssets { get; set; }
+    /// <summary>Gets or sets the media metadata files.</summary>
     public DbSet<MediaMetadataFile> MediaMetadataFiles { get; set; }
+    /// <summary>Gets or sets the character media metadata files.</summary>
     public DbSet<CharacterMediaMetadataFile> CharacterMediaMetadataFiles { get; set; }
+    /// <summary>Gets or sets the character map files.</summary>
     public DbSet<CharacterMapFile> CharacterMapFiles { get; set; }
+    /// <summary>Gets or sets the avatar configuration files.</summary>
     public DbSet<AvatarConfigurationFile> AvatarConfigurationFiles { get; set; }
 
-    // Game Session Management
+    /// <summary>Gets or sets the game sessions.</summary>
     public DbSet<GameSession> GameSessions { get; set; }
 
-    // Scoring and Analytics
+    /// <summary>Gets or sets the player scenario scores.</summary>
     public DbSet<PlayerScenarioScore> PlayerScenarioScores { get; set; }
 
-    // Tracking and Analytics
+    /// <summary>Gets or sets the compass trackings.</summary>
     public DbSet<CompassTracking> CompassTrackings { get; set; }
 
+    /// <inheritdoc/>
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);

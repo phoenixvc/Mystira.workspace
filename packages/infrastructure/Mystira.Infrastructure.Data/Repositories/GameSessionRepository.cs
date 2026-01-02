@@ -10,10 +10,15 @@ namespace Mystira.Infrastructure.Data.Repositories;
 /// </summary>
 public class GameSessionRepository : Repository<GameSession>, IGameSessionRepository
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="GameSessionRepository"/> class.
+    /// </summary>
+    /// <param name="context">The database context.</param>
     public GameSessionRepository(DbContext context) : base(context)
     {
     }
 
+    /// <inheritdoc/>
     public async Task<IEnumerable<GameSession>> GetByAccountIdAsync(string accountId)
     {
         return await _dbSet
@@ -22,6 +27,7 @@ public class GameSessionRepository : Repository<GameSession>, IGameSessionReposi
             .ToListAsync();
     }
 
+    /// <inheritdoc/>
     public async Task<IEnumerable<GameSession>> GetByProfileIdAsync(string profileId)
     {
         return await _dbSet
@@ -30,12 +36,7 @@ public class GameSessionRepository : Repository<GameSession>, IGameSessionReposi
             .ToListAsync();
     }
 
-    /// <summary>
-    /// Retrieves all in-progress or paused game sessions for a specific account.
-    /// </summary>
-    /// <param name="accountId">The account identifier to filter sessions by.</param>
-    /// <returns>A collection of active game sessions for the specified account.</returns>
-    /// <exception cref="ArgumentException">Thrown when accountId is null or empty.</exception>
+    /// <inheritdoc/>
     public async Task<IEnumerable<GameSession>> GetInProgressSessionsAsync(string accountId)
     {
         if (string.IsNullOrWhiteSpace(accountId))
@@ -48,6 +49,7 @@ public class GameSessionRepository : Repository<GameSession>, IGameSessionReposi
             .ToListAsync();
     }
 
+    /// <inheritdoc/>
     public async Task<GameSession?> GetActiveSessionForScenarioAsync(string accountId, string scenarioId)
     {
         return await _dbSet
@@ -56,6 +58,7 @@ public class GameSessionRepository : Repository<GameSession>, IGameSessionReposi
                                       (s.Status == SessionStatus.InProgress || s.Status == SessionStatus.Paused));
     }
 
+    /// <inheritdoc/>
     public async Task<IEnumerable<GameSession>> GetActiveSessionsByScenarioAndAccountAsync(string scenarioId, string accountId)
     {
         return await _dbSet
@@ -65,6 +68,7 @@ public class GameSessionRepository : Repository<GameSession>, IGameSessionReposi
             .ToListAsync();
     }
 
+    /// <inheritdoc/>
     public async Task<int> GetActiveSessionsCountAsync()
     {
         return await _dbSet

@@ -43,6 +43,14 @@ public class PolyglotRepository<T> : EfSpecificationRepository<T>, IPolyglotRepo
     private readonly ResiliencePipeline _resiliencePipeline;
     private readonly ICustomMetrics? _metrics;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="PolyglotRepository{T}"/> class.
+    /// </summary>
+    /// <param name="primaryContext">The primary database context (Cosmos DB).</param>
+    /// <param name="options">The polyglot configuration options.</param>
+    /// <param name="logger">The logger instance.</param>
+    /// <param name="secondaryContext">The optional secondary database context (PostgreSQL).</param>
+    /// <param name="metrics">The optional custom metrics provider.</param>
     public PolyglotRepository(
         DbContext primaryContext,
         IOptions<PolyglotOptions> options,

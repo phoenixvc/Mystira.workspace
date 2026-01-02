@@ -18,19 +18,36 @@ namespace Mystira.Infrastructure.Data;
 /// </summary>
 public class PostgresDbContext : DbContext
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="PostgresDbContext"/> class.
+    /// </summary>
+    /// <param name="options">The options to configure the context.</param>
     public PostgresDbContext(DbContextOptions<PostgresDbContext> options)
         : base(options)
     {
     }
 
-    // Migration candidate entities
+    /// <summary>
+    /// Gets or sets the accounts DbSet.
+    /// </summary>
     public DbSet<Account> Accounts { get; set; }
+
+    /// <summary>
+    /// Gets or sets the game sessions DbSet.
+    /// </summary>
     public DbSet<GameSession> GameSessions { get; set; }
+
+    /// <summary>
+    /// Gets or sets the player scenario scores DbSet.
+    /// </summary>
     public DbSet<PlayerScenarioScore> PlayerScenarioScores { get; set; }
 
-    // Sync tracking
+    /// <summary>
+    /// Gets or sets the polyglot sync logs DbSet.
+    /// </summary>
     public DbSet<PolyglotSyncLog> SyncLogs { get; set; }
 
+    /// <inheritdoc/>
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);

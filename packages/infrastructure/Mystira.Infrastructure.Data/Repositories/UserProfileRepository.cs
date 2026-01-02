@@ -9,10 +9,15 @@ namespace Mystira.Infrastructure.Data.Repositories;
 /// </summary>
 public class UserProfileRepository : Repository<UserProfile>, IUserProfileRepository
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="UserProfileRepository"/> class.
+    /// </summary>
+    /// <param name="context">The database context.</param>
     public UserProfileRepository(DbContext context) : base(context)
     {
     }
 
+    /// <inheritdoc/>
     public async Task<IEnumerable<UserProfile>> GetByAccountIdAsync(string accountId)
     {
         return await _dbSet
@@ -22,6 +27,7 @@ public class UserProfileRepository : Repository<UserProfile>, IUserProfileReposi
             .ToListAsync();
     }
 
+    /// <inheritdoc/>
     public async Task<IEnumerable<UserProfile>> GetGuestProfilesAsync()
     {
         return await _dbSet
@@ -31,6 +37,7 @@ public class UserProfileRepository : Repository<UserProfile>, IUserProfileReposi
             .ToListAsync();
     }
 
+    /// <inheritdoc/>
     public async Task<IEnumerable<UserProfile>> GetNonGuestProfilesAsync()
     {
         return await _dbSet

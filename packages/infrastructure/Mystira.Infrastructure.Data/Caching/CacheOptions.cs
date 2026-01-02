@@ -5,6 +5,7 @@ namespace Mystira.Infrastructure.Data.Caching;
 /// </summary>
 public class CacheOptions
 {
+    /// <summary>The configuration section name.</summary>
     public const string SectionName = "Caching";
 
     /// <summary>

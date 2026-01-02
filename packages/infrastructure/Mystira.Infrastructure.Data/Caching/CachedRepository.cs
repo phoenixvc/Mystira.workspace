@@ -45,6 +45,13 @@ public class CachedRepository<T> : ISpecRepository<T> where T : class
         WriteIndented = false
     };
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="CachedRepository{T}"/> class.
+    /// </summary>
+    /// <param name="inner">The inner repository to wrap.</param>
+    /// <param name="cache">The distributed cache instance.</param>
+    /// <param name="options">The cache options.</param>
+    /// <param name="logger">The logger instance.</param>
     public CachedRepository(
         ISpecRepository<T> inner,
         IDistributedCache cache,

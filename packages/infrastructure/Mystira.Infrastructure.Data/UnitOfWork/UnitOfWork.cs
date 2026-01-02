@@ -10,21 +10,28 @@ public class UnitOfWork : Application.Ports.Data.IUnitOfWork
     private readonly DbContext _context;
     private Microsoft.EntityFrameworkCore.Storage.IDbContextTransaction? _transaction;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="UnitOfWork"/> class.
+    /// </summary>
+    /// <param name="context">The database context.</param>
     public UnitOfWork(DbContext context)
     {
         _context = context ?? throw new ArgumentNullException(nameof(context));
     }
 
+    /// <inheritdoc/>
     public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         return await _context.SaveChangesAsync(cancellationToken);
     }
 
+    /// <inheritdoc/>
     public async Task BeginTransactionAsync()
     {
         _transaction = await _context.Database.BeginTransactionAsync();
     }
 
+    /// <inheritdoc/>
     public async Task CommitTransactionAsync()
     {
         if (_transaction == null)
@@ -52,6 +59,7 @@ public class UnitOfWork : Application.Ports.Data.IUnitOfWork
         }
     }
 
+    /// <inheritdoc/>
     public async Task RollbackTransactionAsync()
     {
         if (_transaction != null)
@@ -62,6 +70,7 @@ public class UnitOfWork : Application.Ports.Data.IUnitOfWork
         }
     }
 
+    /// <inheritdoc/>
     public void Dispose()
     {
         _transaction?.Dispose();

@@ -15,9 +15,17 @@ namespace Mystira.Infrastructure.Data.Polyglot;
 /// <typeparam name="T">The entity type</typeparam>
 public class EfSpecificationRepository<T> : RepositoryBase<T>, ISpecRepository<T> where T : class
 {
+    /// <summary>The database context.</summary>
     protected readonly DbContext _dbContext;
+
+    /// <summary>The logger instance.</summary>
     protected readonly ILogger _logger;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="EfSpecificationRepository{T}"/> class.
+    /// </summary>
+    /// <param name="dbContext">The database context.</param>
+    /// <param name="logger">The logger instance.</param>
     public EfSpecificationRepository(DbContext dbContext, ILogger<EfSpecificationRepository<T>> logger)
         : base(dbContext)
     {
