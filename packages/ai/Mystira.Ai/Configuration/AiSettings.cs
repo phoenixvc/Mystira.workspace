@@ -7,6 +7,9 @@ namespace Mystira.Ai.Configuration;
 /// </summary>
 public class AiSettings
 {
+    /// <summary>
+    /// Configuration section name for AI settings.
+    /// </summary>
     public const string SectionName = "Ai";
 
     /// <summary>
