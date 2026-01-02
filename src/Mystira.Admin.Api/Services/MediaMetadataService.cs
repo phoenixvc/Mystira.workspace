@@ -334,7 +334,7 @@ public class MediaMetadataService : IMediaMetadataService
                 Key = t.Key,
                 Value = t.Value
             }).ToList(),
-            Modifiers = apiEntry.Modifiers.Select(m => new DomainModels.Modifier
+            Modifiers = apiEntry.Modifiers.Select(m => new DomainModels.MetadataModifier
             {
                 Key = m.Key,
                 Value = m.Value

@@ -15,6 +15,7 @@ using CharacterMetadata = Mystira.Domain.Models.CharacterMetadata;
 using ClassificationTag = Mystira.Domain.Models.ClassificationTag;
 using MediaMetadataEntry = Mystira.Domain.Models.MediaMetadataEntry;
 using MediaMetadataFile = Mystira.Domain.Models.MediaMetadataFile;
+using MetadataModifier = Mystira.Domain.Models.MetadataModifier;
 
 namespace Mystira.Admin.Api.Services;
 
@@ -639,7 +640,7 @@ public class ScenarioApiService : IScenarioApiService
                             AgeRating = e.AgeRating,
                             SubjectReferenceId = e.SubjectReferenceId,
                             ClassificationTags = e.ClassificationTags.Select(t => new ClassificationTag { Key = t.Key, Value = t.Value }).ToList(),
-                            Modifiers = e.Modifiers.Select(m => new Modifier { Key = m.Key, Value = m.Value }).ToList(),
+                            Modifiers = e.Modifiers.Select(m => new MetadataModifier { Key = m.Key, Value = m.Value }).ToList(),
                             Loopable = e.Loopable
                         }).ToList(),
                         CreatedAt = apiMediaMetadata.CreatedAt,

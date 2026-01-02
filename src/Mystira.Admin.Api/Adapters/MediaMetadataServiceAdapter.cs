@@ -126,7 +126,7 @@ public class MediaMetadataServiceAdapter : IMediaMetadataService
                 Key = t.Key,
                 Value = t.Value
             }).ToList(),
-            Modifiers = apiEntry.Modifiers.Select(m => new Modifier
+            Modifiers = apiEntry.Modifiers.Select(m => new MetadataModifier
             {
                 Key = m.Key,
                 Value = m.Value
