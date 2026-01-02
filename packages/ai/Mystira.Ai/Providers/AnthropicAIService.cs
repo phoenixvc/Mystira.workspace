@@ -1,8 +1,8 @@
 using System.Globalization;
+using System.Net.Http.Json;
 using System.Text;
-using Anthropic;
-using Anthropic.Core;
-using Anthropic.Models.Messages;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Mystira.Ai.Abstractions;
@@ -12,13 +12,17 @@ using Mystira.Contracts.StoryGenerator.Chat;
 namespace Mystira.Ai.Providers;
 
 /// <summary>
-/// Anthropic Claude implementation of ILLMService.
+/// Anthropic Claude implementation of ILLMService using the official REST API.
 /// </summary>
 public class AnthropicAIService : ILLMService
 {
     private readonly AiSettings _settings;
     private readonly ILogger<AnthropicAIService> _logger;
+    private readonly HttpClient _httpClient;
     private string? _modelNameOrId;
+
+    private const string DefaultBaseUrl = "https://api.anthropic.com";
+    private const string ApiVersion = "2023-06-01";
 
     /// <inheritdoc />
     public string ProviderName => "anthropic";
@@ -30,9 +34,19 @@ public class AnthropicAIService : ILLMService
     /// Creates a new Anthropic AI service.
     /// </summary>
     public AnthropicAIService(IOptions<AiSettings> options, ILogger<AnthropicAIService> logger)
+        : this(options, logger, new HttpClient())
+    {
+    }
+
+    /// <summary>
+    /// Creates a new Anthropic AI service with a custom HttpClient.
+    /// </summary>
+    public AnthropicAIService(IOptions<AiSettings> options, ILogger<AnthropicAIService> logger, HttpClient httpClient)
     {
         _settings = options.Value;
         _logger = logger;
+        _httpClient = httpClient;
+        _httpClient.Timeout = TimeSpan.FromSeconds(300);
     }
 
     /// <summary>
@@ -156,51 +170,43 @@ public class AnthropicAIService : ILLMService
         try
         {
             var modelName = ResolveModelName(request);
+            var baseUrl = !string.IsNullOrWhiteSpace(_settings.Anthropic.BaseUrl)
+                ? _settings.Anthropic.BaseUrl.TrimEnd('/')
+                : DefaultBaseUrl;
 
-            var clientOptions = new ClientOptions
+            var messages = request.Messages.Select(msg => new AnthropicMessage
             {
-                APIKey = _settings.Anthropic.ApiKey,
-                Timeout = TimeSpan.FromSeconds(300)
-            };
+                Role = msg.MessageType == ChatMessageType.User ? "user" : "assistant",
+                Content = msg.Content
+            }).ToList();
 
-            // Use custom base URL if configured
-            if (!string.IsNullOrWhiteSpace(_settings.Anthropic.BaseUrl))
-            {
-                clientOptions.BaseUrl = new Uri(_settings.Anthropic.BaseUrl);
-            }
-
-            var client = new AnthropicClient(clientOptions);
-
-            var messages = new List<MessageParam>();
-            foreach (var msg in request.Messages)
-            {
-                var contentBlocks = new List<ContentBlockParam>
-                {
-                    new TextBlockParam { Text = msg.Content }
-                };
-
-                messages.Add(new MessageParam
-                {
-                    Role = msg.MessageType == ChatMessageType.User ? "user" : "assistant",
-                    Content = contentBlocks
-                });
-            }
-
-            var systemPrompt = request.SystemPrompt ?? string.Empty;
-
-            var response = await client.Messages.Create(new MessageCreateParams
+            var apiRequest = new AnthropicMessagesRequest
             {
                 Model = modelName,
                 MaxTokens = request.MaxTokens,
-                Temperature = (float)request.Temperature,
+                Temperature = request.Temperature,
                 Messages = messages,
-                System = string.IsNullOrWhiteSpace(systemPrompt)
-                    ? null
-                    : new SystemModel(new List<TextBlockParam>
-                    {
-                        new TextBlockParam { Text = systemPrompt }
-                    })
-            }, cancellationToken: cancellationToken);
+                System = string.IsNullOrWhiteSpace(request.SystemPrompt) ? null : request.SystemPrompt
+            };
+
+            using var httpRequest = new HttpRequestMessage(HttpMethod.Post, $"{baseUrl}/v1/messages");
+            httpRequest.Headers.Add("x-api-key", _settings.Anthropic.ApiKey);
+            httpRequest.Headers.Add("anthropic-version", ApiVersion);
+            httpRequest.Content = JsonContent.Create(apiRequest, options: JsonOptions);
+
+            var httpResponse = await _httpClient.SendAsync(httpRequest, cancellationToken);
+
+            if (!httpResponse.IsSuccessStatusCode)
+            {
+                var errorBody = await httpResponse.Content.ReadAsStringAsync(cancellationToken);
+                _logger.LogError("Anthropic API error: {StatusCode} - {Body}", httpResponse.StatusCode, errorBody);
+                return CreateErrorResponse($"Anthropic API error: {httpResponse.StatusCode}");
+            }
+
+            var response = await httpResponse.Content.ReadFromJsonAsync<AnthropicMessagesResponse>(JsonOptions, cancellationToken);
+
+            if (response == null)
+                return CreateErrorResponse("Failed to parse Anthropic response");
 
             var content = ExtractTextContent(response.Content);
             var cleanContent = Sanitize(content);
@@ -216,9 +222,9 @@ public class AnthropicAIService : ILLMService
                 Usage = response.Usage != null
                     ? new ChatCompletionUsage
                     {
-                        PromptTokens = (int)response.Usage.InputTokens,
-                        CompletionTokens = (int)response.Usage.OutputTokens,
-                        TotalTokens = (int)(response.Usage.InputTokens + response.Usage.OutputTokens)
+                        PromptTokens = response.Usage.InputTokens,
+                        CompletionTokens = response.Usage.OutputTokens,
+                        TotalTokens = response.Usage.InputTokens + response.Usage.OutputTokens
                     }
                     : null,
                 Success = true,
@@ -248,20 +254,17 @@ public class AnthropicAIService : ILLMService
         return _settings.Anthropic.ModelName;
     }
 
-    private static string ExtractTextContent(IEnumerable<ContentBlock>? contentBlocks)
+    private static string ExtractTextContent(List<AnthropicContentBlock>? contentBlocks)
     {
-        if (contentBlocks == null)
+        if (contentBlocks == null || contentBlocks.Count == 0)
             return string.Empty;
 
-        var first = contentBlocks.FirstOrDefault();
-        if (first == null)
-            return string.Empty;
+        var textBlocks = contentBlocks
+            .Where(b => b.Type == "text")
+            .Select(b => b.Text)
+            .Where(t => t != null);
 
-        if (first.Value is TextBlock tb)
-            return tb.Text ?? string.Empty;
-
-        throw new NotSupportedException(
-            $"Unsupported content block type: {first.Value?.GetType().Name ?? first.GetType().Name}");
+        return string.Join("", textBlocks);
     }
 
     private static string? Sanitize(string? input)
@@ -292,4 +295,52 @@ public class AnthropicAIService : ILLMService
             Provider = "anthropic"
         };
     }
+
+    private static readonly JsonSerializerOptions JsonOptions = new()
+    {
+        PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+    };
+
+    #region Anthropic API DTOs
+
+    private sealed class AnthropicMessagesRequest
+    {
+        public string Model { get; set; } = string.Empty;
+        public int MaxTokens { get; set; }
+        public double Temperature { get; set; }
+        public List<AnthropicMessage> Messages { get; set; } = new();
+        public string? System { get; set; }
+    }
+
+    private sealed class AnthropicMessage
+    {
+        public string Role { get; set; } = string.Empty;
+        public string Content { get; set; } = string.Empty;
+    }
+
+    private sealed class AnthropicMessagesResponse
+    {
+        public string Id { get; set; } = string.Empty;
+        public string Type { get; set; } = string.Empty;
+        public string Role { get; set; } = string.Empty;
+        public List<AnthropicContentBlock>? Content { get; set; }
+        public string Model { get; set; } = string.Empty;
+        public string? StopReason { get; set; }
+        public AnthropicUsage? Usage { get; set; }
+    }
+
+    private sealed class AnthropicContentBlock
+    {
+        public string Type { get; set; } = string.Empty;
+        public string? Text { get; set; }
+    }
+
+    private sealed class AnthropicUsage
+    {
+        public int InputTokens { get; set; }
+        public int OutputTokens { get; set; }
+    }
+
+    #endregion
 }

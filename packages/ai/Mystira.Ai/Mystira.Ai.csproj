@@ -29,7 +29,7 @@
   <ItemGroup>
     <!-- LLM Provider SDKs -->
     <PackageReference Include="Azure.AI.OpenAI" Version="2.5.0-beta.1" />
-    <PackageReference Include="Anthropic.SDK" Version="4.0.0" />
+    <!-- Anthropic.SDK removed - using direct HttpClient REST API calls instead -->
 
     <!-- Microsoft Extensions -->
     <PackageReference Include="Microsoft.Extensions.Options" Version="9.0.11" />

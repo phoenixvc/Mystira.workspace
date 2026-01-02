@@ -85,16 +85,16 @@ public class LLMServiceFactory : ILlmServiceFactory
     }
 
     /// <inheritdoc />
-    public IEnumerable<ProviderModels> GetAvailableModels()
+    public IEnumerable<Abstractions.ProviderModels> GetAvailableModels()
     {
-        var providerModels = new List<ProviderModels>();
+        var providerModels = new List<Abstractions.ProviderModels>();
 
         foreach (var service in _services.Values)
         {
             var isAvailable = service.IsAvailable();
             var models = isAvailable ? service.GetAvailableModels() : Enumerable.Empty<ChatModelInfo>();
 
-            providerModels.Add(new ProviderModels(service.ProviderName, models));
+            providerModels.Add(new Abstractions.ProviderModels(service.ProviderName, models));
         }
 
         return providerModels;
