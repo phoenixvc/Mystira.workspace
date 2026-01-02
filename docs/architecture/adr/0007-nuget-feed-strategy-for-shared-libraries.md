@@ -250,6 +250,18 @@ Each shared library `.csproj` should include:
     <add key="nuget.org" value="https://api.nuget.org/v3/index.json" />
     <add key="github" value="https://nuget.pkg.github.com/phoenixvc/index.json" />
   </packageSources>
+
+  <!-- IMPORTANT: Package Source Mapping ensures Mystira packages are resolved from GitHub -->
+  <packageSourceMapping>
+    <packageSource key="nuget.org">
+      <package pattern="*" />
+    </packageSource>
+    <packageSource key="github">
+      <package pattern="Mystira.*" />
+      <package pattern="PhoenixVC.*" />
+    </packageSource>
+  </packageSourceMapping>
+
   <packageSourceCredentials>
     <github>
       <add key="Username" value="USERNAME" />
@@ -258,6 +270,8 @@ Each shared library `.csproj` should include:
   </packageSourceCredentials>
 </configuration>
 ```
+
+> **Why Package Source Mapping?** Without it, NuGet may try to resolve `Mystira.*` packages from nuget.org and fail with "Unable to resolve package" errors. The mapping ensures private packages are only fetched from GitHub Packages.
 
 **For CI/CD**: Use `GITHUB_TOKEN` secret (automatically available in GitHub Actions)
 
