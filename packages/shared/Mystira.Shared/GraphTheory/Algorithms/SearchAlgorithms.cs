@@ -6,6 +6,80 @@ namespace Mystira.Shared.GraphTheory.Algorithms;
 public static class SearchAlgorithms
 {
     /// <summary>
+    /// Performs a breadth-first search starting from a single node with a visitor callback.
+    /// </summary>
+    /// <typeparam name="TNode">The node identifier type.</typeparam>
+    /// <typeparam name="TEdgeLabel">The edge label type.</typeparam>
+    /// <param name="graph">The directed graph to traverse.</param>
+    /// <param name="start">The starting node for the traversal.</param>
+    /// <param name="visitor">A callback invoked for each visited node. Return true to continue, false to stop.</param>
+    public static void BreadthFirstSearch<TNode, TEdgeLabel>(
+        DirectedGraph<TNode, TEdgeLabel> graph,
+        TNode start,
+        Func<TNode, bool> visitor)
+        where TNode : notnull
+    {
+        if (!graph.Nodes.Contains(start))
+            return;
+
+        var visited = new HashSet<TNode>();
+        var queue = new Queue<TNode>();
+
+        if (visited.Add(start))
+            queue.Enqueue(start);
+
+        while (queue.Count > 0)
+        {
+            var node = queue.Dequeue();
+            if (!visitor(node))
+                return;
+
+            foreach (var succ in graph.GetSuccessors(node))
+            {
+                if (visited.Add(succ))
+                    queue.Enqueue(succ);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Performs a depth-first search starting from a single node with a visitor callback.
+    /// </summary>
+    /// <typeparam name="TNode">The node identifier type.</typeparam>
+    /// <typeparam name="TEdgeLabel">The edge label type.</typeparam>
+    /// <param name="graph">The directed graph to traverse.</param>
+    /// <param name="start">The starting node for the traversal.</param>
+    /// <param name="visitor">A callback invoked for each visited node. Return true to continue, false to stop.</param>
+    public static void DepthFirstSearch<TNode, TEdgeLabel>(
+        DirectedGraph<TNode, TEdgeLabel> graph,
+        TNode start,
+        Func<TNode, bool> visitor)
+        where TNode : notnull
+    {
+        if (!graph.Nodes.Contains(start))
+            return;
+
+        var visited = new HashSet<TNode>();
+        var stack = new Stack<TNode>();
+
+        if (visited.Add(start))
+            stack.Push(start);
+
+        while (stack.Count > 0)
+        {
+            var node = stack.Pop();
+            if (!visitor(node))
+                return;
+
+            foreach (var succ in graph.GetSuccessors(node))
+            {
+                if (visited.Add(succ))
+                    stack.Push(succ);
+            }
+        }
+    }
+
+    /// <summary>
     /// Performs a breadth-first traversal starting from the specified nodes.
     /// Each node is visited at most once.
     /// </summary>

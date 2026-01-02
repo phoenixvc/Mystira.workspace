@@ -107,18 +107,15 @@ public class ConsistencyEvaluationService : IConsistencyEvaluationService
         var issues = new List<ConsistencyIssue>();
 
         // Basic structural validation
-        foreach (var sceneId in pathList)
+        foreach (var sceneId in pathList.Where(sceneId => !sceneMap.ContainsKey(sceneId)))
         {
-            if (!sceneMap.ContainsKey(sceneId))
+            issues.Add(new ConsistencyIssue
             {
-                issues.Add(new ConsistencyIssue
-                {
-                    Type = ConsistencyIssueType.PlotHole,
-                    Severity = IssueSeverity.Error,
-                    Description = $"Scene '{sceneId}' referenced in path but not found in scenario",
-                    SceneId = sceneId
-                });
-            }
+                Type = ConsistencyIssueType.PlotHole,
+                Severity = IssueSeverity.Error,
+                Description = $"Scene '{sceneId}' referenced in path but not found in scenario",
+                SceneId = sceneId
+            });
         }
 
         // Entity continuity check (if classifier available)
@@ -126,18 +123,14 @@ public class ConsistencyEvaluationService : IConsistencyEvaluationService
         {
             var entitiesIntroduced = new Dictionary<string, string>(); // entity name -> scene introduced
 
-            foreach (var sceneId in pathList)
+            foreach (var sceneId in pathList.Where(sceneId => sceneMap.ContainsKey(sceneId)))
             {
-                if (!sceneMap.TryGetValue(sceneId, out var scene)) continue;
-
+                var scene = sceneMap[sceneId];
                 var classification = await _entityClassifier.ClassifyAsync(scene, cancellationToken);
 
-                foreach (var entity in classification.Entities)
+                foreach (var entity in classification.Entities.Where(entity => !entitiesIntroduced.ContainsKey(entity.Name)))
                 {
-                    if (!entitiesIntroduced.ContainsKey(entity.Name))
-                    {
-                        entitiesIntroduced[entity.Name] = sceneId;
-                    }
+                    entitiesIntroduced[entity.Name] = sceneId;
                 }
             }
         }

@@ -33,7 +33,7 @@ public class PerMinuteRateLimiterTests
     {
         // Arrange
         var limiter = new PerMinuteRateLimiter(60);
-        var cts = new CancellationTokenSource(TimeSpan.FromMilliseconds(100));
+        using var cts = new CancellationTokenSource(TimeSpan.FromMilliseconds(100));
 
         // Act & Assert - should complete almost immediately
         await limiter.WaitAsync(cts.Token);
@@ -66,7 +66,7 @@ public class PerMinuteRateLimiterTests
         var limiter = new PerMinuteRateLimiter(1); // 1 per minute
         await limiter.WaitAsync(); // Use up first permit
 
-        var cts = new CancellationTokenSource();
+        using var cts = new CancellationTokenSource();
 
         // Act - start waiting then cancel
         var waitTask = limiter.WaitAsync(cts.Token);

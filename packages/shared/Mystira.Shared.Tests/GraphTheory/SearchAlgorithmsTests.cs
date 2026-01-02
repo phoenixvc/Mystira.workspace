@@ -1,4 +1,5 @@
 using Mystira.Shared.GraphTheory;
+using Mystira.Shared.GraphTheory.Algorithms;
 
 namespace Mystira.Shared.Tests.GraphTheory;
 

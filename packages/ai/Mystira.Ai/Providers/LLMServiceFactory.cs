@@ -133,16 +133,9 @@ public class LLMServiceFactory : ILlmServiceFactory
 
     private static ILLMService Adapt(ILLMService service, string? deploymentNameOrModelId = null)
     {
-        if (service is AzureOpenAIService azureService && !string.IsNullOrWhiteSpace(deploymentNameOrModelId))
-        {
-            azureService.SetDeploymentNameOrModelId(deploymentNameOrModelId);
-        }
-
-        if (service is AnthropicAIService anthropicService && !string.IsNullOrWhiteSpace(deploymentNameOrModelId))
-        {
-            anthropicService.SetModelNameOrId(deploymentNameOrModelId);
-        }
-
+        // NOTE: We intentionally do NOT mutate the original service instance here.
+        // The adapter handles model selection per-request to avoid race conditions
+        // when the same service instance is used concurrently with different models.
         return new LlmServiceAdapter(service, deploymentNameOrModelId);
     }
 
@@ -163,7 +156,16 @@ public class LLMServiceFactory : ILlmServiceFactory
         public Task<ChatCompletionResponse> CompleteAsync(
             ChatCompletionRequest request,
             CancellationToken cancellationToken = default)
-            => _inner.CompleteAsync(request, cancellationToken);
+        {
+            // Set the model on the request if we have a specific deployment/model configured
+            // and the request doesn't already specify one. This avoids mutating shared service state.
+            if (!string.IsNullOrWhiteSpace(_deploymentNameOrModelId) && string.IsNullOrWhiteSpace(request.Model))
+            {
+                request.Model = _deploymentNameOrModelId;
+            }
+
+            return _inner.CompleteAsync(request, cancellationToken);
+        }
 
         public bool IsAvailable() => _inner.IsAvailable();
         public IEnumerable<ChatModelInfo> GetAvailableModels() => _inner.GetAvailableModels();

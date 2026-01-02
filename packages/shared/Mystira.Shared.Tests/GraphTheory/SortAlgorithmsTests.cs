@@ -1,4 +1,5 @@
 using Mystira.Shared.GraphTheory;
+using Mystira.Shared.GraphTheory.Algorithms;
 
 namespace Mystira.Shared.Tests.GraphTheory;
 
@@ -17,11 +18,9 @@ public class SortAlgorithmsTests
         graph.AddEdge(new Edge<string, string>("C", "D", "e4"));
 
         // Act
-        var result = SortAlgorithms.TopologicalSort(graph);
+        var sorted = graph.TopologicalSort().ToList();
 
         // Assert
-        Assert.True(result.IsAcyclic);
-        var sorted = result.SortedNodes.ToList();
         Assert.Equal(4, sorted.Count);
 
         // A must come before B and C
@@ -42,11 +41,8 @@ public class SortAlgorithmsTests
         graph.AddEdge(new Edge<string, string>("B", "C", "e2"));
         graph.AddEdge(new Edge<string, string>("C", "A", "e3")); // Creates cycle
 
-        // Act
-        var result = SortAlgorithms.TopologicalSort(graph);
-
-        // Assert
-        Assert.False(result.IsAcyclic);
+        // Act & Assert - TopologicalSort throws when graph contains a cycle
+        Assert.Throws<InvalidOperationException>(() => graph.TopologicalSort());
     }
 
     [Fact]
@@ -56,11 +52,10 @@ public class SortAlgorithmsTests
         var graph = new DirectedGraph<string, string>();
 
         // Act
-        var result = SortAlgorithms.TopologicalSort(graph);
+        var sorted = graph.TopologicalSort();
 
         // Assert
-        Assert.True(result.IsAcyclic);
-        Assert.Empty(result.SortedNodes);
+        Assert.Empty(sorted);
     }
 
     [Fact]
@@ -71,12 +66,11 @@ public class SortAlgorithmsTests
         graph.AddNode("A");
 
         // Act
-        var result = SortAlgorithms.TopologicalSort(graph);
+        var sorted = graph.TopologicalSort();
 
         // Assert
-        Assert.True(result.IsAcyclic);
-        Assert.Single(result.SortedNodes);
-        Assert.Equal("A", result.SortedNodes.First());
+        Assert.Single(sorted);
+        Assert.Equal("A", sorted.First());
     }
 
     [Fact]
@@ -88,15 +82,38 @@ public class SortAlgorithmsTests
         graph.AddEdge(new Edge<string, string>("C", "D", "e2"));
 
         // Act
-        var result = SortAlgorithms.TopologicalSort(graph);
+        var sorted = graph.TopologicalSort().ToList();
 
         // Assert
-        Assert.True(result.IsAcyclic);
-        var sorted = result.SortedNodes.ToList();
         Assert.Equal(4, sorted.Count);
 
         // A before B, C before D
         Assert.True(sorted.IndexOf("A") < sorted.IndexOf("B"));
         Assert.True(sorted.IndexOf("C") < sorted.IndexOf("D"));
+    }
+
+    [Fact]
+    public void HasCycle_ReturnsTrueForCyclicGraph()
+    {
+        // Arrange
+        var graph = new DirectedGraph<string, string>();
+        graph.AddEdge(new Edge<string, string>("A", "B", "e1"));
+        graph.AddEdge(new Edge<string, string>("B", "C", "e2"));
+        graph.AddEdge(new Edge<string, string>("C", "A", "e3")); // Creates cycle
+
+        // Act & Assert
+        Assert.True(graph.HasCycle());
+    }
+
+    [Fact]
+    public void HasCycle_ReturnsFalseForAcyclicGraph()
+    {
+        // Arrange
+        var graph = new DirectedGraph<string, string>();
+        graph.AddEdge(new Edge<string, string>("A", "B", "e1"));
+        graph.AddEdge(new Edge<string, string>("B", "C", "e2"));
+
+        // Act & Assert
+        Assert.False(graph.HasCycle());
     }
 }

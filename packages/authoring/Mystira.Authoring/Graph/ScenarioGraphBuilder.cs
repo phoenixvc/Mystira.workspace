@@ -59,7 +59,6 @@ public class ScenarioGraphBuilder
     {
         if (scenario.Scenes.Count == 0) return null;
 
-        var graph = Build(scenario);
         var allTargets = new HashSet<string>();
 
         foreach (var scene in scenario.Scenes)
