@@ -21,27 +21,26 @@ jobs:
   build-test:
     name: Build and Test
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v5
         with:
           dotnet-version: '9.0.x'
+          source-url: https://nuget.pkg.github.com/phoenixvc/index.json
+        env:
+          NUGET_AUTH_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN }}
 
-      - name: Restore dependencies
-        run: dotnet restore packages/ai/Mystira.Ai/Mystira.Ai.csproj
+      - name: Build Mystira.Ai
+        run: dotnet build packages/ai/Mystira.Ai --configuration Release
 
-      - name: Build
-        run: dotnet build packages/ai/Mystira.Ai/Mystira.Ai.csproj --no-restore --configuration Release
-
-      - name: Restore test dependencies
-        run: dotnet restore packages/ai/Mystira.Ai.Tests/Mystira.Ai.Tests.csproj
-
-      - name: Test
-        run: dotnet test packages/ai/Mystira.Ai.Tests/Mystira.Ai.Tests.csproj --no-restore --configuration Release --collect:"XPlat Code Coverage" --results-directory ./coverage
+      - name: Test Mystira.Ai
+        run: dotnet test packages/ai/Mystira.Ai.Tests --configuration Release --collect:"XPlat Code Coverage" --results-directory ./coverage
 
       - name: Upload coverage
         uses: codecov/codecov-action@v4
@@ -51,3 +50,13 @@ jobs:
           flags: ai
           name: mystira-ai
           fail_ci_if_error: false
+
+      - name: Pack Mystira.Ai
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          mkdir -p ./nupkg
+          dotnet pack packages/ai/Mystira.Ai --no-build --configuration Release -o ./nupkg
+
+      - name: Push to GitHub Packages
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: dotnet nuget push ./nupkg/*.nupkg --source "https://nuget.pkg.github.com/phoenixvc/index.json" --api-key ${{ secrets.GH_PACKAGES_TOKEN }} --skip-duplicate
