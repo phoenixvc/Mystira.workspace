@@ -452,11 +452,24 @@ public class GrpcStoryProtocolService : IStoryProtocolService, IDisposable
     /// <returns>Service info response.</returns>
     public async Task<ServiceInfoResponse> GetServiceInfoAsync()
     {
-        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
-        return await _client.GetServiceInfoAsync(
-            new Google.Protobuf.WellKnownTypes.Empty(),
-            headers: CreateAuthHeaders(),
-            cancellationToken: cts.Token);
+        try
+        {
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+            return await _client.GetServiceInfoAsync(
+                new Google.Protobuf.WellKnownTypes.Empty(),
+                headers: CreateAuthHeaders(),
+                cancellationToken: cts.Token);
+        }
+        catch (RpcException ex)
+        {
+            _logger.LogError(ex, "Failed to get service info from Chain service");
+            throw;
+        }
+        catch (OperationCanceledException ex)
+        {
+            _logger.LogError(ex, "Timeout getting service info from Chain service");
+            throw;
+        }
     }
 
     private IAsyncPolicy BuildRetryPolicy()
