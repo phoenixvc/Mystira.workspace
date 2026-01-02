@@ -10,7 +10,8 @@ using Mystira.Admin.Api.Adapters;
 using Mystira.Admin.Api.Configuration;
 using Mystira.Admin.Api.Services;
 using Mystira.Admin.Api.Services.Caching;
-using Mystira.Application.Behaviors;
+// TODO: Re-enable when Behaviors namespace is available
+// using Mystira.Application.Behaviors;
 using Mystira.Application.Services;
 using Mystira.Application.Ports.Messaging;
 using Mystira.Application.Ports.Data;
@@ -182,10 +183,10 @@ builder.Services.AddMemoryCache(options =>
 builder.Services.AddMediatR(cfg =>
 {
     // Register all handlers from Application assembly
-    cfg.RegisterServicesFromAssembly(typeof(Mystira.Application.CQRS.ICommand<>).Assembly);
+    cfg.RegisterServicesFromAssembly(typeof(Mystira.Application.UseCases.Scenarios.GetScenarioByIdQuery).Assembly);
 
-    // Add query caching pipeline behavior
-    cfg.AddOpenBehavior(typeof(QueryCachingBehavior<,>));
+    // TODO: Re-enable query caching when QueryCachingBehavior is added to Application package
+    // cfg.AddOpenBehavior(typeof(QueryCachingBehavior<,>));
 });
 
 // Register query cache invalidation service
@@ -468,8 +469,8 @@ builder.Services.AddScoped<IAvatarApiService, AvatarApiService>();
 builder.Services.AddScoped<Mystira.Admin.Api.Services.IHealthCheckService, Mystira.Admin.Api.Adapters.HealthCheckServiceAdapter>();
 // Badges admin service
 builder.Services.AddScoped<Mystira.Admin.Api.Services.IBadgeAdminService, Mystira.Admin.Api.Services.BadgeAdminService>();
-// Register email service for consistency across all APIs
-builder.Services.AddAzureEmailService(builder.Configuration);
+// TODO: Re-enable email service when AddAzureEmailService is available in Infrastructure.Azure
+// builder.Services.AddAzureEmailService(builder.Configuration);
 // Register Application.Ports.IMediaMetadataService for use cases
 builder.Services.AddScoped<Mystira.Application.Ports.IMediaMetadataService, MediaMetadataServiceAdapter>();
 // Register repositories
@@ -486,7 +487,8 @@ builder.Services.AddScoped<IBadgeRepository, BadgeRepository>();
 builder.Services.AddScoped<IBadgeImageRepository, BadgeImageRepository>();
 builder.Services.AddScoped<IAxisAchievementRepository, AxisAchievementRepository>();
 builder.Services.AddScoped<IUserBadgeRepository, UserBadgeRepository>();
-builder.Services.AddScoped<IPendingSignupRepository, PendingSignupRepository>();
+// TODO: Re-enable when PendingSignupRepository is added to Infrastructure.Data
+// builder.Services.AddScoped<IPendingSignupRepository, PendingSignupRepository>();
 builder.Services.AddScoped<IMediaAssetRepository, MediaAssetRepository>();
 builder.Services.AddScoped<IMediaMetadataFileRepository, MediaMetadataFileRepository>();
 builder.Services.AddScoped<ICharacterMediaMetadataFileRepository, CharacterMediaMetadataFileRepository>();
