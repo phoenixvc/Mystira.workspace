@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
-using System.Security.Claims;
+using Mystira.Shared.Extensions;
 
 namespace Mystira.Infrastructure.Data;
 
@@ -76,23 +76,13 @@ public class AuditInterceptor : SaveChangesInterceptor
     private string? GetCurrentUserIdFromHttpContext()
     {
         var httpContext = _httpContextAccessor?.HttpContext;
-        if (httpContext == null)
+        if (httpContext?.User == null)
         {
             return null;
         }
 
-        var user = httpContext.User;
-        if (user?.Identity?.IsAuthenticated != true)
-        {
-            return null;
-        }
-
-        // Try common claim types for user ID
-        var userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value
-            ?? user.FindFirst("sub")?.Value  // JWT subject claim
-            ?? user.FindFirst("oid")?.Value  // Azure AD object ID
-            ?? user.FindFirst("user_id")?.Value;
-
-        return userId;
+        // Use centralized claim extraction from ClaimsPrincipalExtensions
+        // This covers custom Mystira claims, standard claims, and Azure AD claims
+        return httpContext.User.GetAccountId();
     }
 }

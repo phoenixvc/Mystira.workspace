@@ -28,6 +28,11 @@ public class UnitOfWork : Application.Ports.Data.IUnitOfWork
     /// <inheritdoc/>
     public async Task BeginTransactionAsync()
     {
+        if (_transaction != null)
+        {
+            throw new InvalidOperationException("A transaction is already in progress");
+        }
+
         _transaction = await _context.Database.BeginTransactionAsync();
     }
 
@@ -46,7 +51,15 @@ public class UnitOfWork : Application.Ports.Data.IUnitOfWork
         }
         catch
         {
-            await RollbackTransactionAsync();
+            // Rollback but don't mask the original exception
+            try
+            {
+                await _transaction.RollbackAsync();
+            }
+            catch
+            {
+                // Log rollback failure if needed, but preserve original exception
+            }
             throw;
         }
         finally

@@ -43,6 +43,11 @@ public sealed class SampleTicketStartupService : IHostedService
             await _botService.WaitForConnectionAsync(cancellationToken);
             await PostSampleTicketIfEnabledAsync();
         }
+        catch (OperationCanceledException)
+        {
+            // Rethrow cancellation to respect shutdown semantics
+            throw;
+        }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to create sample ticket channel on startup.");

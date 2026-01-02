@@ -156,6 +156,11 @@ public class PolyglotBackfillService : IPolyglotBackfillService
         int batchSize,
         CancellationToken cancellationToken) where T : class
     {
+        if (batchSize <= 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(batchSize), batchSize, "Batch size must be greater than zero.");
+        }
+
         var result = new BackfillResult
         {
             EntityType = typeof(T).Name
@@ -270,9 +275,10 @@ public class PolyglotBackfillService : IPolyglotBackfillService
             await _postgresContext.SaveChangesAsync(cancellationToken);
             _postgresContext.Entry(syncLog).State = EntityState.Detached;
         }
-        catch
+        catch (Exception ex)
         {
-            // Don't fail the backfill if logging fails
+            // Don't fail the backfill if logging fails, but log the error
+            _logger.LogWarning(ex, "Failed to log backfill sync for {EntityType} {EntityId}", entityType, entityId);
         }
     }
 }
