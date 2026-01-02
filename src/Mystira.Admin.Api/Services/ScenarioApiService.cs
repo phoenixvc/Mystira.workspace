@@ -5,9 +5,11 @@ using Mystira.Admin.Api.Models;
 using Mystira.Admin.Api.Validation;
 using Mystira.Domain.Models;
 using Mystira.Domain.ValueObjects;
+using Mystira.Domain.Enums;
 using Mystira.Infrastructure.Data;
 using Mystira.Contracts.App.Requests.Scenarios;
 using Mystira.Contracts.App.Responses.Scenarios;
+using ContractEnums = Mystira.Contracts.App.Enums;
 using NJsonSchema;
 using CharacterMediaMetadataEntry = Mystira.Domain.Models.CharacterMediaMetadataEntry;
 using CharacterMediaMetadataFile = Mystira.Domain.Models.CharacterMediaMetadataFile;
@@ -60,12 +62,14 @@ public class ScenarioApiService : IScenarioApiService
 
         if (request.Difficulty.HasValue)
         {
-            baseQuery = baseQuery.Where(s => s.Difficulty == request.Difficulty.Value);
+            var difficulty = (DifficultyLevel)(int)request.Difficulty.Value;
+            baseQuery = baseQuery.Where(s => s.Difficulty == difficulty);
         }
 
         if (request.SessionLength.HasValue)
         {
-            baseQuery = baseQuery.Where(s => s.SessionLength == request.SessionLength.Value);
+            var sessionLength = (SessionLength)(int)request.SessionLength.Value;
+            baseQuery = baseQuery.Where(s => s.SessionLength == sessionLength);
         }
 
         if (request.MinimumAge.HasValue)
@@ -82,7 +86,7 @@ public class ScenarioApiService : IScenarioApiService
             }
             else
             {
-                baseQuery = baseQuery.Where(s => s.AgeGroup == request.AgeGroup);
+                baseQuery = baseQuery.Where(s => s.AgeGroup != null && s.AgeGroup.Value == request.AgeGroup);
             }
         }
 
@@ -104,7 +108,7 @@ public class ScenarioApiService : IScenarioApiService
         {
             foreach (var archetype in request.Archetypes)
             {
-                filtered = filtered.Where(s => s.Archetypes != null && s.Archetypes.Any(a => a.Value == archetype));
+                filtered = filtered.Where(s => s.Archetypes != null && s.Archetypes.Contains(archetype));
             }
         }
 
@@ -112,7 +116,7 @@ public class ScenarioApiService : IScenarioApiService
         {
             foreach (var axis in request.CoreAxes)
             {
-                filtered = filtered.Where(s => s.CoreAxes != null && s.CoreAxes.Any(a => a.Value == axis));
+                filtered = filtered.Where(s => s.CoreAxes != null && s.CoreAxes.Contains(axis));
             }
         }
 
@@ -128,12 +132,12 @@ public class ScenarioApiService : IScenarioApiService
                  Title = s.Title,
                  Description = s.Description,
                  Tags = s.Tags,
-                 Difficulty = s.Difficulty,
-                 SessionLength = s.SessionLength,
-                 Archetypes = s.Archetypes.Select(a => a.Value).ToList(),
+                 Difficulty = (int)s.Difficulty,
+                 SessionLength = (int)s.SessionLength,
+                 Archetypes = s.Archetypes?.ToList() ?? new List<string>(),
                  MinimumAge = s.MinimumAge,
-                 AgeGroup = s.AgeGroup,
-                 CoreAxes = s.CoreAxes.Select(a => a.Value).ToList(),
+                 AgeGroup = s.AgeGroup?.Value,
+                 CoreAxes = s.CoreAxes?.ToList() ?? new List<string>(),
                  CreatedAt = s.CreatedAt,
                  Image = s.Image
              })
@@ -227,14 +231,14 @@ public class ScenarioApiService : IScenarioApiService
         return scenario;
     }
 
-    private static List<Archetype> ParseArchetypesOrThrow(List<string>? values)
+    private static List<string> ParseArchetypesOrThrow(List<string>? values)
     {
-        var result = new List<Archetype>();
         if (values == null)
         {
-            return result;
+            return new List<string>();
         }
 
+        // Validate archetypes exist
         foreach (var v in values)
         {
             var parsed = Archetype.Parse(v);
@@ -242,20 +246,19 @@ public class ScenarioApiService : IScenarioApiService
             {
                 throw new ArgumentException($"Unknown archetype '{v}'.");
             }
-            result.Add(parsed);
         }
 
-        return result;
+        return values.ToList();
     }
 
-    private static List<CoreAxis> ParseCoreAxesOrThrow(List<string>? values)
+    private static List<string> ParseCoreAxesOrThrow(List<string>? values)
     {
-        var result = new List<CoreAxis>();
         if (values == null)
         {
-            return result;
+            return new List<string>();
         }
 
+        // Validate core axes exist
         foreach (var v in values)
         {
             var parsed = CoreAxis.Parse(v);
@@ -263,10 +266,9 @@ public class ScenarioApiService : IScenarioApiService
             {
                 throw new ArgumentException($"Unknown core axis '{v}'.");
             }
-            result.Add(parsed);
         }
 
-        return result;
+        return values.ToList();
     }
 
     public async Task<bool> DeleteScenarioAsync(string id)
