@@ -91,13 +91,13 @@ public class ConsistencyEvaluationService : IConsistencyEvaluationService
     }
 
     /// <inheritdoc />
-    public async Task<ConsistencyEvaluationResult> EvaluatePathAsync(
+    public async Task<PathConsistencyResult> EvaluatePathAsync(
         Scenario scenario,
         IEnumerable<string> path,
         CancellationToken cancellationToken = default)
     {
         var pathList = path.ToList();
-        var result = new ConsistencyEvaluationResult
+        var result = new PathConsistencyResult
         {
             EvaluatedPath = pathList,
             EvaluatedAt = DateTime.UtcNow

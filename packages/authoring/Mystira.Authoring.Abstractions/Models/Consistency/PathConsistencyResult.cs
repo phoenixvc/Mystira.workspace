@@ -3,7 +3,7 @@ namespace Mystira.Authoring.Abstractions.Models.Consistency;
 /// <summary>
 /// Result of consistency evaluation for a scenario path.
 /// </summary>
-public class ConsistencyEvaluationResult
+public class PathConsistencyResult
 {
     /// <summary>
     /// Whether the path is consistent.

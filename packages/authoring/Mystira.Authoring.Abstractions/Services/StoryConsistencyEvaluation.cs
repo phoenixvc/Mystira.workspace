@@ -24,5 +24,5 @@ public class StoryConsistencyEvaluation
     /// The LLM-produced consistency evaluation result for this path.
     /// </summary>
     [JsonPropertyName("result")]
-    public ConsistencyEvaluationResult? Result { get; set; }
+    public PathConsistencyResult? Result { get; set; }
 }
