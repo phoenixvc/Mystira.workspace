@@ -4,6 +4,7 @@ using Moq;
 using Mystira.Ai.Abstractions;
 using Mystira.Ai.Configuration;
 using Mystira.Ai.Providers;
+using Xunit;
 
 namespace Mystira.Ai.Tests;
 

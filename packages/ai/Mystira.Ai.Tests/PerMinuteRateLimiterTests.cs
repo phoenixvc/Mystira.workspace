@@ -1,4 +1,5 @@
 using Mystira.Ai.RateLimiting;
+using Xunit;
 
 namespace Mystira.Ai.Tests;
 
