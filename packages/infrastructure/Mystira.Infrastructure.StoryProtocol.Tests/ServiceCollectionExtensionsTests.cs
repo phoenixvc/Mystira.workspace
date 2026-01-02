@@ -192,6 +192,124 @@ public class ServiceCollectionExtensionsTests
 
     #endregion
 
+    #region GrpcEndpoint Validation Tests
+
+    [Fact]
+    public void AddStoryProtocolServices_WithUseGrpcAndNullEndpoint_ThrowsInvalidOperationException()
+    {
+        // Arrange
+        var services = new ServiceCollection();
+        services.AddLogging();
+
+        var configuration = CreateConfiguration(new Dictionary<string, string?>
+        {
+            ["ChainService:UseGrpc"] = "true",
+            ["ChainService:GrpcEndpoint"] = null
+        });
+
+        // Act & Assert
+        var act = () => services.AddStoryProtocolServices(configuration);
+        act.Should().Throw<InvalidOperationException>()
+            .WithMessage("*GrpcEndpoint is required*");
+    }
+
+    [Fact]
+    public void AddStoryProtocolServices_WithUseGrpcAndEmptyEndpoint_ThrowsInvalidOperationException()
+    {
+        // Arrange
+        var services = new ServiceCollection();
+        services.AddLogging();
+
+        var configuration = CreateConfiguration(new Dictionary<string, string?>
+        {
+            ["ChainService:UseGrpc"] = "true",
+            ["ChainService:GrpcEndpoint"] = ""
+        });
+
+        // Act & Assert
+        var act = () => services.AddStoryProtocolServices(configuration);
+        act.Should().Throw<InvalidOperationException>()
+            .WithMessage("*GrpcEndpoint is required*");
+    }
+
+    [Fact]
+    public void AddStoryProtocolServices_WithUseGrpcAndInvalidUri_ThrowsInvalidOperationException()
+    {
+        // Arrange
+        var services = new ServiceCollection();
+        services.AddLogging();
+
+        var configuration = CreateConfiguration(new Dictionary<string, string?>
+        {
+            ["ChainService:UseGrpc"] = "true",
+            ["ChainService:GrpcEndpoint"] = "not-a-valid-uri"
+        });
+
+        // Act & Assert
+        var act = () => services.AddStoryProtocolServices(configuration);
+        act.Should().Throw<InvalidOperationException>()
+            .WithMessage("*is not a valid URI*");
+    }
+
+    [Fact]
+    public void AddStoryProtocolServices_WithUseGrpcAndInvalidScheme_ThrowsInvalidOperationException()
+    {
+        // Arrange
+        var services = new ServiceCollection();
+        services.AddLogging();
+
+        var configuration = CreateConfiguration(new Dictionary<string, string?>
+        {
+            ["ChainService:UseGrpc"] = "true",
+            ["ChainService:GrpcEndpoint"] = "ftp://localhost:50051"
+        });
+
+        // Act & Assert
+        var act = () => services.AddStoryProtocolServices(configuration);
+        act.Should().Throw<InvalidOperationException>()
+            .WithMessage("*scheme*is not supported*");
+    }
+
+    [Fact]
+    public void AddStoryProtocolServices_WithActionAndUseGrpcAndNullEndpoint_ThrowsInvalidOperationException()
+    {
+        // Arrange
+        var services = new ServiceCollection();
+        services.AddLogging();
+
+        // Act & Assert
+        var act = () => services.AddStoryProtocolServices(options =>
+        {
+            options.UseGrpc = true;
+            options.GrpcEndpoint = null!;
+        });
+        act.Should().Throw<InvalidOperationException>()
+            .WithMessage("*GrpcEndpoint is required*");
+    }
+
+    [Theory]
+    [InlineData("http://localhost:50051")]
+    [InlineData("https://chain.example.com:443")]
+    [InlineData("http://192.168.1.1:8080")]
+    public void AddStoryProtocolServices_WithValidGrpcEndpoints_DoesNotThrow(string endpoint)
+    {
+        // Arrange
+        var services = new ServiceCollection();
+        services.AddLogging();
+
+        var configuration = CreateConfiguration(new Dictionary<string, string?>
+        {
+            ["ChainService:UseGrpc"] = "true",
+            ["ChainService:GrpcEndpoint"] = endpoint
+        });
+
+        // Act & Assert
+        var act = () => services.AddStoryProtocolServices(configuration);
+        act.Should().NotThrow();
+    }
+
+    #endregion
+
     #region Fluent Chaining Tests
 
     [Fact]

@@ -35,6 +35,11 @@
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
   </PropertyGroup>
 
+  <!-- Make internals visible to test project -->
+  <ItemGroup>
+    <InternalsVisibleTo Include="Mystira.Infrastructure.StoryProtocol.Tests" />
+  </ItemGroup>
+
   <!-- gRPC code generation -->
   <ItemGroup>
     <Protobuf Include="..\..\..\protos\mystira\chain\v1\*.proto" GrpcServices="Client" ProtoRoot="..\..\..\protos" />
@@ -55,9 +60,8 @@
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.11" />
     <PackageReference Include="Microsoft.Extensions.Options" Version="9.0.11" />
     <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="9.0.11" />
-    <!-- Polly for resilience -->
-    <PackageReference Include="Polly" Version="8.5.0" />
-    <PackageReference Include="Polly.Extensions.Http" Version="3.0.0" />
+    <!-- Resilience (compatible with Polly 8.x via Microsoft.Extensions.Http.Resilience) -->
+    <PackageReference Include="Microsoft.Extensions.Http.Resilience" Version="9.10.0" />
     <!-- Source Link -->
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />
   </ItemGroup>

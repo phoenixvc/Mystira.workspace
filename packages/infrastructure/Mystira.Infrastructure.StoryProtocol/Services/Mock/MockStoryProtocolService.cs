@@ -226,17 +226,14 @@ public class MockStoryProtocolService : IStoryProtocolService
         }
 
         // Track payment (thread-safe)
-        _payments.AddOrUpdate(
-            ipAssetId,
-            _ => new List<RoyaltyPaymentResult> { result },
-            (_, existing) =>
-            {
-                lock (_paymentLock)
-                {
-                    existing.Add(result);
-                    return existing;
-                }
-            });
+        // Use GetOrAdd to obtain the list, then lock and add the result
+        // This avoids the concurrency issue where AddOrUpdate's update factory
+        // can be called multiple times under contention
+        var paymentList = _payments.GetOrAdd(ipAssetId, _ => new List<RoyaltyPaymentResult>());
+        lock (_paymentLock)
+        {
+            paymentList.Add(result);
+        }
 
         _logger.LogInformation(
             "Mock: Royalty paid: PaymentId={PaymentId}, TxHash={TxHash}, Distributions={Count}",

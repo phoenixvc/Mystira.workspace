@@ -21,6 +21,9 @@ public static class ServiceCollectionExtensions
     /// <param name="services">The service collection.</param>
     /// <param name="configuration">The configuration instance.</param>
     /// <returns>The service collection for chaining.</returns>
+    /// <exception cref="InvalidOperationException">
+    /// Thrown when UseGrpc is true but GrpcEndpoint is null, empty, or not a valid URI.
+    /// </exception>
     public static IServiceCollection AddStoryProtocolServices(
         this IServiceCollection services,
         IConfiguration configuration)
@@ -31,19 +34,8 @@ public static class ServiceCollectionExtensions
 
         var options = chainSection.Get<ChainServiceOptions>() ?? new ChainServiceOptions();
 
-        // Register appropriate implementation based on configuration
-        if (options.UseGrpc)
-        {
-            // Use gRPC implementation for production
-            services.AddSingleton<GrpcStoryProtocolService>();
-            services.AddSingleton<IStoryProtocolService>(sp =>
-                sp.GetRequiredService<GrpcStoryProtocolService>());
-        }
-        else
-        {
-            // Use mock implementation for development/testing
-            services.AddSingleton<IStoryProtocolService, MockStoryProtocolService>();
-        }
+        // Validate and register services
+        ConfigureStoryProtocolServices(services, options);
 
         return services;
     }
@@ -54,6 +46,9 @@ public static class ServiceCollectionExtensions
     /// <param name="services">The service collection.</param>
     /// <param name="configureOptions">Action to configure options.</param>
     /// <returns>The service collection for chaining.</returns>
+    /// <exception cref="InvalidOperationException">
+    /// Thrown when UseGrpc is true but GrpcEndpoint is null, empty, or not a valid URI.
+    /// </exception>
     public static IServiceCollection AddStoryProtocolServices(
         this IServiceCollection services,
         Action<ChainServiceOptions> configureOptions)
@@ -76,16 +71,8 @@ public static class ServiceCollectionExtensions
             opts.ApiKeyHeaderName = options.ApiKeyHeaderName;
         });
 
-        if (options.UseGrpc)
-        {
-            services.AddSingleton<GrpcStoryProtocolService>();
-            services.AddSingleton<IStoryProtocolService>(sp =>
-                sp.GetRequiredService<GrpcStoryProtocolService>());
-        }
-        else
-        {
-            services.AddSingleton<IStoryProtocolService, MockStoryProtocolService>();
-        }
+        // Validate and register services
+        ConfigureStoryProtocolServices(services, options);
 
         return services;
     }
@@ -108,5 +95,65 @@ public static class ServiceCollectionExtensions
             name ?? "chain_service",
             failureStatus ?? HealthStatus.Degraded,
             tags ?? new[] { "blockchain", "grpc", "ready" });
+    }
+
+    /// <summary>
+    /// Configures Story Protocol services based on options.
+    /// Validates GrpcEndpoint when UseGrpc is enabled and registers the appropriate implementation.
+    /// </summary>
+    /// <param name="services">The service collection.</param>
+    /// <param name="options">The chain service options.</param>
+    /// <exception cref="InvalidOperationException">
+    /// Thrown when UseGrpc is true but GrpcEndpoint is null, empty, or not a valid URI.
+    /// </exception>
+    private static void ConfigureStoryProtocolServices(IServiceCollection services, ChainServiceOptions options)
+    {
+        if (options.UseGrpc)
+        {
+            // Validate GrpcEndpoint before registering gRPC implementation
+            ValidateGrpcEndpoint(options.GrpcEndpoint);
+
+            // Use gRPC implementation for production
+            services.AddSingleton<GrpcStoryProtocolService>();
+            services.AddSingleton<IStoryProtocolService>(sp =>
+                sp.GetRequiredService<GrpcStoryProtocolService>());
+        }
+        else
+        {
+            // Use mock implementation for development/testing
+            services.AddSingleton<IStoryProtocolService, MockStoryProtocolService>();
+        }
+    }
+
+    /// <summary>
+    /// Validates that the GrpcEndpoint is not null/empty and is a valid URI.
+    /// </summary>
+    /// <param name="grpcEndpoint">The gRPC endpoint to validate.</param>
+    /// <exception cref="InvalidOperationException">
+    /// Thrown when the endpoint is null, empty, or not a valid URI.
+    /// </exception>
+    private static void ValidateGrpcEndpoint(string grpcEndpoint)
+    {
+        if (string.IsNullOrWhiteSpace(grpcEndpoint))
+        {
+            throw new InvalidOperationException(
+                "ChainServiceOptions.GrpcEndpoint is required when UseGrpc is enabled. " +
+                "Please configure 'ChainService:GrpcEndpoint' in your application settings.");
+        }
+
+        if (!Uri.TryCreate(grpcEndpoint, UriKind.Absolute, out var uri))
+        {
+            throw new InvalidOperationException(
+                $"ChainServiceOptions.GrpcEndpoint '{grpcEndpoint}' is not a valid URI. " +
+                "Expected format: 'http://host:port' or 'https://host:port'.");
+        }
+
+        // Validate scheme (gRPC requires http or https)
+        if (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps)
+        {
+            throw new InvalidOperationException(
+                $"ChainServiceOptions.GrpcEndpoint scheme '{uri.Scheme}' is not supported. " +
+                "gRPC requires 'http' or 'https' scheme.");
+        }
     }
 }
