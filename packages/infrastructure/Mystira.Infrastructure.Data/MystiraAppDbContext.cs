@@ -963,8 +963,14 @@ public partial class MystiraAppDbContext : DbContext
     }
 }
 
+/// <summary>
+/// Value converter for converting List of ClassificationTag to/from a delimited string for database storage.
+/// </summary>
 public class ClassificationTagListConverter : ValueConverter<List<ClassificationTag>, string>
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ClassificationTagListConverter"/> class.
+    /// </summary>
     public ClassificationTagListConverter()
         : base(
             // Convert to DB type (List<ClassificationTag> -> string)
@@ -1005,8 +1011,12 @@ public class ClassificationTagListConverter : ValueConverter<List<Classification
     }
 }
 
+/// <summary>
+/// Equality comparer for ClassificationTag objects.
+/// </summary>
 public class ClassificationTagComparer : IEqualityComparer<ClassificationTag>
 {
+    /// <inheritdoc/>
     public bool Equals(ClassificationTag? x, ClassificationTag? y)
     {
         if (x == null && y == null)
@@ -1022,14 +1032,21 @@ public class ClassificationTagComparer : IEqualityComparer<ClassificationTag>
         return x.Key == y.Key && x.Value == y.Value;
     }
 
+    /// <inheritdoc/>
     public int GetHashCode(ClassificationTag obj)
     {
         return HashCode.Combine(obj.Key, obj.Value);
     }
 }
 
+/// <summary>
+/// Value converter for converting List of MetadataModifier to/from a delimited string for database storage.
+/// </summary>
 public class ModifierListConverter : ValueConverter<List<MetadataModifier>, string>
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ModifierListConverter"/> class.
+    /// </summary>
     public ModifierListConverter()
         : base(
             // Convert to DB type (List<MetadataModifier> -> string)
@@ -1070,8 +1087,12 @@ public class ModifierListConverter : ValueConverter<List<MetadataModifier>, stri
     }
 }
 
+/// <summary>
+/// Equality comparer for MetadataModifier objects.
+/// </summary>
 public class ModifierComparer : IEqualityComparer<MetadataModifier>
 {
+    /// <inheritdoc/>
     public bool Equals(MetadataModifier? x, MetadataModifier? y)
     {
         if (x == null && y == null)
@@ -1087,6 +1108,7 @@ public class ModifierComparer : IEqualityComparer<MetadataModifier>
         return x.Key == y.Key && x.Value == y.Value;
     }
 
+    /// <inheritdoc/>
     public int GetHashCode(MetadataModifier obj)
     {
         return HashCode.Combine(obj.Key, obj.Value);

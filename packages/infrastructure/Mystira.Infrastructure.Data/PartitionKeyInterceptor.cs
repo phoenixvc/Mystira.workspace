@@ -9,6 +9,7 @@ namespace Mystira.Infrastructure.Data;
 /// </summary>
 public class PartitionKeyInterceptor : SaveChangesInterceptor
 {
+    /// <inheritdoc/>
     public override InterceptionResult<int> SavingChanges(DbContextEventData eventData, InterceptionResult<int> result)
     {
         if (eventData.Context is MystiraAppDbContext dbContext)
@@ -18,6 +19,7 @@ public class PartitionKeyInterceptor : SaveChangesInterceptor
         return base.SavingChanges(eventData, result);
     }
 
+    /// <inheritdoc/>
     public override ValueTask<InterceptionResult<int>> SavingChangesAsync(
         DbContextEventData eventData,
         InterceptionResult<int> result,

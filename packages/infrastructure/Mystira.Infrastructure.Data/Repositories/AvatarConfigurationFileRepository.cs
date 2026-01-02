@@ -12,17 +12,23 @@ public class AvatarConfigurationFileRepository : IAvatarConfigurationFileReposit
     private readonly DbContext _context;
     private readonly DbSet<AvatarConfigurationFile> _dbSet;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="AvatarConfigurationFileRepository"/> class.
+    /// </summary>
+    /// <param name="context">The database context.</param>
     public AvatarConfigurationFileRepository(DbContext context)
     {
         _context = context ?? throw new ArgumentNullException(nameof(context));
         _dbSet = context.Set<AvatarConfigurationFile>();
     }
 
+    /// <inheritdoc/>
     public async Task<AvatarConfigurationFile?> GetAsync()
     {
         return await _dbSet.FirstOrDefaultAsync();
     }
 
+    /// <inheritdoc/>
     public async Task<AvatarConfigurationFile> AddOrUpdateAsync(AvatarConfigurationFile entity)
     {
         var existing = await GetAsync();
@@ -39,6 +45,7 @@ public class AvatarConfigurationFileRepository : IAvatarConfigurationFileReposit
         return entity;
     }
 
+    /// <inheritdoc/>
     public async Task DeleteAsync()
     {
         var existing = await GetAsync();

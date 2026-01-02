@@ -13,12 +13,14 @@ public partial class MystiraAppDbContext
     /// </summary>
     public string? CurrentUserId { get; set; }
 
+    /// <inheritdoc/>
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         ApplyAuditInformation();
         return await base.SaveChangesAsync(cancellationToken);
     }
 
+    /// <inheritdoc/>
     public override int SaveChanges()
     {
         ApplyAuditInformation();
