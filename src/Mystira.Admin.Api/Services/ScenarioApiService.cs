@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Mystira.Admin.Api.Models;
 using Mystira.Admin.Api.Validation;
 using Mystira.Domain.Models;
+using Mystira.Domain.ValueObjects;
 using Mystira.Infrastructure.Data;
 using Mystira.Contracts.App.Requests.Scenarios;
 using Mystira.Contracts.App.Responses.Scenarios;
@@ -14,7 +15,7 @@ using CharacterMetadata = Mystira.Domain.Models.CharacterMetadata;
 using ClassificationTag = Mystira.Domain.Models.ClassificationTag;
 using MediaMetadataEntry = Mystira.Domain.Models.MediaMetadataEntry;
 using MediaMetadataFile = Mystira.Domain.Models.MediaMetadataFile;
-using Modifier = Mystira.Domain.Models.Modifier;
+using Modifier = Mystira.Admin.Api.Models.Modifier;
 
 namespace Mystira.Admin.Api.Services;
 

@@ -37,6 +37,9 @@
 
     <!-- Microsoft Entra ID (Azure AD) authentication -->
     <PackageReference Include="Microsoft.Identity.Web" Version="4.2.0" />
+
+    <!-- MediatR for CQRS pattern -->
+    <PackageReference Include="MediatR" Version="12.4.1" />
   </ItemGroup>
 
   <ItemGroup>
