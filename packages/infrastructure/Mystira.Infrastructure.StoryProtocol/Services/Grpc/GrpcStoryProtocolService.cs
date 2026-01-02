@@ -7,12 +7,11 @@ using Microsoft.Extensions.Options;
 using Mystira.Application.Configuration.StoryProtocol;
 using Mystira.Application.Ports;
 using Mystira.Chain.V1;
-using Mystira.Domain.Enums;
 using Mystira.Domain.Models;
 using Polly;
-using Polly.Retry;
 using DomainContributor = Mystira.Domain.Models.Contributor;
 using GrpcContributor = Mystira.Chain.V1.Contributor;
+using GrpcPaymentStatus = Mystira.Chain.V1.PaymentStatus;
 
 namespace Mystira.Infrastructure.StoryProtocol.Services.Grpc;
 
@@ -26,7 +25,7 @@ public class GrpcStoryProtocolService : IStoryProtocolService, IDisposable
     private readonly ChainServiceOptions _options;
     private readonly GrpcChannel _channel;
     private readonly ChainService.ChainServiceClient _client;
-    private readonly AsyncRetryPolicy _retryPolicy;
+    private readonly IAsyncPolicy _retryPolicy;
     private bool _disposed;
 
     /// <summary>
@@ -315,7 +314,7 @@ public class GrpcStoryProtocolService : IStoryProtocolService, IDisposable
             TokenAddress = _options.WipTokenAddress,
             PayerReference = payerReference,
             PaidAt = response.PaidAt?.ToDateTime() ?? DateTime.UtcNow,
-            Success = response.Status == PaymentStatus.Confirmed,
+            Success = response.Status == GrpcPaymentStatus.Confirmed,
             ErrorMessage = response.ErrorMessage
         };
 
@@ -410,7 +409,7 @@ public class GrpcStoryProtocolService : IStoryProtocolService, IDisposable
                 cancellationToken: cts.Token);
         });
 
-        if (response.Status == PaymentStatus.Failed)
+        if (response.Status == GrpcPaymentStatus.Failed)
         {
             _logger.LogError("Royalty claim failed: {Error}", response.ErrorMessage);
             throw new InvalidOperationException($"Royalty claim failed: {response.ErrorMessage}");
@@ -459,7 +458,7 @@ public class GrpcStoryProtocolService : IStoryProtocolService, IDisposable
             cancellationToken: cts.Token);
     }
 
-    private AsyncRetryPolicy BuildRetryPolicy()
+    private IAsyncPolicy BuildRetryPolicy()
     {
         if (!_options.EnableRetry)
         {
