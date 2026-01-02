@@ -12,11 +12,14 @@ public class SortAlgorithmsTests
         // Arrange - create a DAG
         // A -> B -> D
         //  \-> C ->/
-        var graph = new DirectedGraph<string, string>();
-        graph.AddEdge(new Edge<string, string>("A", "B", "e1"));
-        graph.AddEdge(new Edge<string, string>("A", "C", "e2"));
-        graph.AddEdge(new Edge<string, string>("B", "D", "e3"));
-        graph.AddEdge(new Edge<string, string>("C", "D", "e4"));
+        var edges = new[]
+        {
+            new Edge<string, string>("A", "B", "e1"),
+            new Edge<string, string>("A", "C", "e2"),
+            new Edge<string, string>("B", "D", "e3"),
+            new Edge<string, string>("C", "D", "e4")
+        };
+        var graph = DirectedGraph<string, string>.FromEdges(edges);
 
         // Act
         var sorted = graph.TopologicalSort().ToList();
@@ -37,10 +40,13 @@ public class SortAlgorithmsTests
     public void TopologicalSort_DetectsCycle()
     {
         // Arrange - create a cycle: A -> B -> C -> A
-        var graph = new DirectedGraph<string, string>();
-        graph.AddEdge(new Edge<string, string>("A", "B", "e1"));
-        graph.AddEdge(new Edge<string, string>("B", "C", "e2"));
-        graph.AddEdge(new Edge<string, string>("C", "A", "e3")); // Creates cycle
+        var edges = new[]
+        {
+            new Edge<string, string>("A", "B", "e1"),
+            new Edge<string, string>("B", "C", "e2"),
+            new Edge<string, string>("C", "A", "e3") // Creates cycle
+        };
+        var graph = DirectedGraph<string, string>.FromEdges(edges);
 
         // Act & Assert - TopologicalSort throws when graph contains a cycle
         Assert.Throws<InvalidOperationException>(() => graph.TopologicalSort());
@@ -50,7 +56,7 @@ public class SortAlgorithmsTests
     public void TopologicalSort_HandlesEmptyGraph()
     {
         // Arrange
-        var graph = new DirectedGraph<string, string>();
+        var graph = DirectedGraph<string, string>.FromEdges(Array.Empty<Edge<string, string>>());
 
         // Act
         var sorted = graph.TopologicalSort();
@@ -63,8 +69,9 @@ public class SortAlgorithmsTests
     public void TopologicalSort_HandlesSingleNode()
     {
         // Arrange
-        var graph = new DirectedGraph<string, string>();
-        graph.AddNode("A");
+        var graph = DirectedGraph<string, string>.FromEdges(
+            Array.Empty<Edge<string, string>>(),
+            new[] { "A" });
 
         // Act
         var sorted = graph.TopologicalSort();
@@ -78,9 +85,12 @@ public class SortAlgorithmsTests
     public void TopologicalSort_HandlesDisconnectedComponents()
     {
         // Arrange - two separate chains
-        var graph = new DirectedGraph<string, string>();
-        graph.AddEdge(new Edge<string, string>("A", "B", "e1"));
-        graph.AddEdge(new Edge<string, string>("C", "D", "e2"));
+        var edges = new[]
+        {
+            new Edge<string, string>("A", "B", "e1"),
+            new Edge<string, string>("C", "D", "e2")
+        };
+        var graph = DirectedGraph<string, string>.FromEdges(edges);
 
         // Act
         var sorted = graph.TopologicalSort().ToList();
@@ -97,10 +107,13 @@ public class SortAlgorithmsTests
     public void HasCycle_ReturnsTrueForCyclicGraph()
     {
         // Arrange
-        var graph = new DirectedGraph<string, string>();
-        graph.AddEdge(new Edge<string, string>("A", "B", "e1"));
-        graph.AddEdge(new Edge<string, string>("B", "C", "e2"));
-        graph.AddEdge(new Edge<string, string>("C", "A", "e3")); // Creates cycle
+        var edges = new[]
+        {
+            new Edge<string, string>("A", "B", "e1"),
+            new Edge<string, string>("B", "C", "e2"),
+            new Edge<string, string>("C", "A", "e3") // Creates cycle
+        };
+        var graph = DirectedGraph<string, string>.FromEdges(edges);
 
         // Act & Assert
         Assert.True(graph.HasCycle());
@@ -110,9 +123,12 @@ public class SortAlgorithmsTests
     public void HasCycle_ReturnsFalseForAcyclicGraph()
     {
         // Arrange
-        var graph = new DirectedGraph<string, string>();
-        graph.AddEdge(new Edge<string, string>("A", "B", "e1"));
-        graph.AddEdge(new Edge<string, string>("B", "C", "e2"));
+        var edges = new[]
+        {
+            new Edge<string, string>("A", "B", "e1"),
+            new Edge<string, string>("B", "C", "e2")
+        };
+        var graph = DirectedGraph<string, string>.FromEdges(edges);
 
         // Act & Assert
         Assert.False(graph.HasCycle());

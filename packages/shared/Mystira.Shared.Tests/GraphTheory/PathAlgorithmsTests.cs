@@ -1,4 +1,5 @@
 using Mystira.Shared.GraphTheory;
+using Mystira.Shared.GraphTheory.Algorithms;
 using Xunit;
 
 namespace Mystira.Shared.Tests.GraphTheory;
@@ -9,22 +10,24 @@ public class PathAlgorithmsTests
     {
         // Create diamond: A -> B -> D
         //                  \-> C ->/
-        var graph = new DirectedGraph<string, string>();
-        graph.AddEdge(new Edge<string, string>("A", "B", "e1"));
-        graph.AddEdge(new Edge<string, string>("A", "C", "e2"));
-        graph.AddEdge(new Edge<string, string>("B", "D", "e3"));
-        graph.AddEdge(new Edge<string, string>("C", "D", "e4"));
-        return graph;
+        var edges = new[]
+        {
+            new Edge<string, string>("A", "B", "e1"),
+            new Edge<string, string>("A", "C", "e2"),
+            new Edge<string, string>("B", "D", "e3"),
+            new Edge<string, string>("C", "D", "e4")
+        };
+        return DirectedGraph<string, string>.FromEdges(edges);
     }
 
     [Fact]
-    public void EnumerateAllPaths_FindsAllPathsInDiamond()
+    public void EnumeratePaths_FindsAllPathsToTerminal()
     {
         // Arrange
         var graph = CreateDiamondGraph();
 
-        // Act
-        var paths = PathAlgorithms.EnumerateAllPaths(graph, "A", "D").ToList();
+        // Act - enumerate paths from A to terminal node D
+        var paths = graph.EnumeratePaths("A", node => node == "D").ToList();
 
         // Assert
         Assert.Equal(2, paths.Count);
@@ -33,26 +36,26 @@ public class PathAlgorithmsTests
     }
 
     [Fact]
-    public void EnumerateAllPaths_ReturnsEmptyWhenNoPath()
+    public void EnumeratePaths_ReturnsEmptyWhenStartNotInGraph()
     {
         // Arrange
         var graph = CreateDiamondGraph();
 
-        // Act
-        var paths = PathAlgorithms.EnumerateAllPaths(graph, "D", "A").ToList();
+        // Act - start from nonexistent node
+        var paths = graph.EnumeratePaths("Z", node => node == "D").ToList();
 
         // Assert
         Assert.Empty(paths);
     }
 
     [Fact]
-    public void EnumerateAllPaths_ReturnsPathWithSameStartAndEnd()
+    public void EnumeratePaths_FindsPathWhenStartIsTerminal()
     {
         // Arrange
         var graph = CreateDiamondGraph();
 
-        // Act
-        var paths = PathAlgorithms.EnumerateAllPaths(graph, "A", "A").ToList();
+        // Act - A is both start and terminal
+        var paths = graph.EnumeratePaths("A", node => node == "A").ToList();
 
         // Assert
         Assert.Single(paths);
@@ -60,29 +63,32 @@ public class PathAlgorithmsTests
     }
 
     [Fact]
-    public void EnumerateAllPaths_RespectsMaxPaths()
+    public void EnumeratePaths_RespectsMaxDepth()
     {
         // Arrange
         var graph = CreateDiamondGraph();
 
-        // Act
-        var paths = PathAlgorithms.EnumerateAllPaths(graph, "A", "D", maxPaths: 1).ToList();
+        // Act - limit depth to 1 (only A -> B or A -> C)
+        var paths = graph.EnumeratePaths("A", maxDepth: 1).ToList();
 
-        // Assert
-        Assert.Single(paths);
+        // Assert - all paths should be length 2 (A plus one neighbor)
+        Assert.All(paths, p => Assert.Equal(2, p.Count));
     }
 
     [Fact]
-    public void EnumerateAllPaths_HandlesLinearPath()
+    public void EnumeratePaths_HandlesLinearPath()
     {
         // Arrange
-        var graph = new DirectedGraph<string, string>();
-        graph.AddEdge(new Edge<string, string>("A", "B", "e1"));
-        graph.AddEdge(new Edge<string, string>("B", "C", "e2"));
-        graph.AddEdge(new Edge<string, string>("C", "D", "e3"));
+        var edges = new[]
+        {
+            new Edge<string, string>("A", "B", "e1"),
+            new Edge<string, string>("B", "C", "e2"),
+            new Edge<string, string>("C", "D", "e3")
+        };
+        var graph = DirectedGraph<string, string>.FromEdges(edges);
 
-        // Act
-        var paths = PathAlgorithms.EnumerateAllPaths(graph, "A", "D").ToList();
+        // Act - D has no outgoing edges so it's naturally terminal
+        var paths = graph.EnumeratePaths("A").ToList();
 
         // Assert
         Assert.Single(paths);
@@ -90,20 +96,23 @@ public class PathAlgorithmsTests
     }
 
     [Fact]
-    public void EnumerateAllPaths_HandlesComplexGraph()
+    public void EnumeratePaths_HandlesComplexGraph()
     {
         // Arrange - multiple branching paths
-        var graph = new DirectedGraph<string, string>();
-        graph.AddEdge(new Edge<string, string>("start", "a", "e1"));
-        graph.AddEdge(new Edge<string, string>("start", "b", "e2"));
-        graph.AddEdge(new Edge<string, string>("a", "c", "e3"));
-        graph.AddEdge(new Edge<string, string>("a", "d", "e4"));
-        graph.AddEdge(new Edge<string, string>("b", "c", "e5"));
-        graph.AddEdge(new Edge<string, string>("c", "end", "e6"));
-        graph.AddEdge(new Edge<string, string>("d", "end", "e7"));
+        var edges = new[]
+        {
+            new Edge<string, string>("start", "a", "e1"),
+            new Edge<string, string>("start", "b", "e2"),
+            new Edge<string, string>("a", "c", "e3"),
+            new Edge<string, string>("a", "d", "e4"),
+            new Edge<string, string>("b", "c", "e5"),
+            new Edge<string, string>("c", "end", "e6"),
+            new Edge<string, string>("d", "end", "e7")
+        };
+        var graph = DirectedGraph<string, string>.FromEdges(edges);
 
-        // Act
-        var paths = PathAlgorithms.EnumerateAllPaths(graph, "start", "end").ToList();
+        // Act - enumerate paths to terminal node "end"
+        var paths = graph.EnumeratePaths("start", node => node == "end").ToList();
 
         // Assert
         Assert.Equal(3, paths.Count);

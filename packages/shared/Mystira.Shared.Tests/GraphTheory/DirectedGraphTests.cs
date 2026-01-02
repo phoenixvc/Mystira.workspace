@@ -6,31 +6,31 @@ namespace Mystira.Shared.Tests.GraphTheory;
 public class DirectedGraphTests
 {
     [Fact]
-    public void AddEdge_AddsNodeAndEdge()
+    public void FromEdges_CreatesGraphWithNodesAndEdges()
     {
         // Arrange
-        var graph = new DirectedGraph<string, string>();
-        var edge = new Edge<string, string>("A", "B", "edge1");
+        var edges = new[] { new Edge<string, string>("A", "B", "edge1") };
 
         // Act
-        graph.AddEdge(edge);
+        var graph = DirectedGraph<string, string>.FromEdges(edges);
 
         // Assert
         Assert.Contains("A", graph.Nodes);
         Assert.Contains("B", graph.Nodes);
         var outEdges = graph.GetOutgoingEdges("A").ToList();
         Assert.Single(outEdges);
-        Assert.Equal("B", outEdges[0].Target);
+        Assert.Equal("B", outEdges[0].To);
     }
 
     [Fact]
-    public void AddNode_AddsNodeWithoutEdges()
+    public void FromEdges_WithExplicitNodes_IncludesIsolatedNodes()
     {
         // Arrange
-        var graph = new DirectedGraph<string, string>();
+        var edges = Array.Empty<Edge<string, string>>();
+        var nodes = new[] { "A" };
 
         // Act
-        graph.AddNode("A");
+        var graph = DirectedGraph<string, string>.FromEdges(edges, nodes);
 
         // Assert
         Assert.Contains("A", graph.Nodes);
@@ -41,7 +41,7 @@ public class DirectedGraphTests
     public void GetOutgoingEdges_ReturnsEmptyForUnknownNode()
     {
         // Arrange
-        var graph = new DirectedGraph<string, string>();
+        var graph = DirectedGraph<string, string>.FromEdges(Array.Empty<Edge<string, string>>());
 
         // Act
         var edges = graph.GetOutgoingEdges("nonexistent");
@@ -54,27 +54,32 @@ public class DirectedGraphTests
     public void GetIncomingEdges_ReturnsCorrectEdges()
     {
         // Arrange
-        var graph = new DirectedGraph<string, string>();
-        graph.AddEdge(new Edge<string, string>("A", "C", "e1"));
-        graph.AddEdge(new Edge<string, string>("B", "C", "e2"));
+        var edges = new[]
+        {
+            new Edge<string, string>("A", "C", "e1"),
+            new Edge<string, string>("B", "C", "e2")
+        };
+        var graph = DirectedGraph<string, string>.FromEdges(edges);
 
         // Act
         var incoming = graph.GetIncomingEdges("C").ToList();
 
         // Assert
         Assert.Equal(2, incoming.Count);
-        Assert.Contains(incoming, e => e.Source == "A");
-        Assert.Contains(incoming, e => e.Source == "B");
+        Assert.Contains(incoming, e => e.From == "A");
+        Assert.Contains(incoming, e => e.From == "B");
     }
 
     [Fact]
     public void Nodes_ReturnsAllNodes()
     {
         // Arrange
-        var graph = new DirectedGraph<string, string>();
-        graph.AddEdge(new Edge<string, string>("A", "B", "e1"));
-        graph.AddEdge(new Edge<string, string>("B", "C", "e2"));
-        graph.AddNode("D");
+        var edges = new[]
+        {
+            new Edge<string, string>("A", "B", "e1"),
+            new Edge<string, string>("B", "C", "e2")
+        };
+        var graph = DirectedGraph<string, string>.FromEdges(edges, new[] { "D" });
 
         // Act
         var nodes = graph.Nodes.ToList();
@@ -88,14 +93,15 @@ public class DirectedGraphTests
     }
 
     [Fact]
-    public void ContainsNode_ReturnsTrueForExistingNode()
+    public void Nodes_Contains_ReturnsTrueForExistingNode()
     {
         // Arrange
-        var graph = new DirectedGraph<string, string>();
-        graph.AddNode("A");
+        var graph = DirectedGraph<string, string>.FromEdges(
+            Array.Empty<Edge<string, string>>(),
+            new[] { "A" });
 
         // Act & Assert
-        Assert.True(graph.ContainsNode("A"));
-        Assert.False(graph.ContainsNode("B"));
+        Assert.Contains("A", graph.Nodes);
+        Assert.DoesNotContain("B", graph.Nodes);
     }
 }

@@ -12,12 +12,14 @@ public class SearchAlgorithmsTests
         //              |
         //              v
         //              E
-        var graph = new DirectedGraph<string, string>();
-        graph.AddEdge(new Edge<string, string>("A", "B", "e1"));
-        graph.AddEdge(new Edge<string, string>("B", "C", "e2"));
-        graph.AddEdge(new Edge<string, string>("C", "D", "e3"));
-        graph.AddEdge(new Edge<string, string>("B", "E", "e4"));
-        return graph;
+        var edges = new[]
+        {
+            new Edge<string, string>("A", "B", "e1"),
+            new Edge<string, string>("B", "C", "e2"),
+            new Edge<string, string>("C", "D", "e3"),
+            new Edge<string, string>("B", "E", "e4")
+        };
+        return DirectedGraph<string, string>.FromEdges(edges);
     }
 
     [Fact]
