@@ -1,7 +1,13 @@
 namespace Mystira.Infrastructure.Azure.Configuration;
 
+/// <summary>
+/// Configuration options for Azure services.
+/// </summary>
 public class AzureOptions
 {
+    /// <summary>
+    /// The configuration section name for Azure options.
+    /// </summary>
     public const string SectionName = "Azure";
 
     /// <summary>
@@ -17,6 +23,9 @@ public class AzureOptions
     public BlobStorageOptions BlobStorage { get; set; } = new();
 }
 
+/// <summary>
+/// Configuration options for Azure Cosmos DB.
+/// </summary>
 public class CosmosDbOptions
 {
     /// <summary>
@@ -38,6 +47,9 @@ public class CosmosDbOptions
     public bool UseInMemoryDatabase { get; set; } = false;
 }
 
+/// <summary>
+/// Configuration options for Azure Blob Storage.
+/// </summary>
 public class BlobStorageOptions
 {
     /// <summary>

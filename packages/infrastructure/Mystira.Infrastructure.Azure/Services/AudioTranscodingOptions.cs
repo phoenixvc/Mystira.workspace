@@ -5,6 +5,9 @@ namespace Mystira.Infrastructure.Azure.Services;
 /// </summary>
 public class AudioTranscodingOptions
 {
+    /// <summary>
+    /// The configuration section name for audio transcoding options.
+    /// </summary>
     public const string SectionName = "AudioTranscoding";
 
     /// <summary>
