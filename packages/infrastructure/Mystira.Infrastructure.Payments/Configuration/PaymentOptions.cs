@@ -6,6 +6,9 @@ namespace Mystira.Infrastructure.Payments.Configuration;
 /// </summary>
 public class PaymentOptions
 {
+    /// <summary>
+    /// The configuration section name for payment options.
+    /// </summary>
     public const string SectionName = "Payments";
 
     /// <summary>
@@ -52,7 +55,15 @@ public class PaymentOptions
     /// Retry configuration for transient failures.
     /// </summary>
     public int MaxRetryAttempts { get; set; } = 3;
+
+    /// <summary>
+    /// Base delay in milliseconds between retry attempts.
+    /// </summary>
     public int RetryBaseDelayMs { get; set; } = 1000;
+
+    /// <summary>
+    /// Timeout in seconds for payment operations.
+    /// </summary>
     public int TimeoutSeconds { get; set; } = 30;
 }
 
@@ -61,8 +72,19 @@ public class PaymentOptions
 /// </summary>
 public enum PaymentProvider
 {
+    /// <summary>
+    /// PeachPayments provider (South Africa focused).
+    /// </summary>
     PeachPayments,
+
+    /// <summary>
+    /// Stripe payment provider.
+    /// </summary>
     Stripe,
+
+    /// <summary>
+    /// PayFast payment provider (South Africa).
+    /// </summary>
     PayFast
 }
 
