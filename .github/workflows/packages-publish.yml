@@ -17,12 +17,13 @@ name: "[Publish] NuGet Packages"
 #   Mystira.Contracts               (depends on Domain)
 #   Mystira.Shared                  (depends on Domain, optionally Contracts)
 #   Mystira.Application             (depends on Domain, Contracts, Shared)
-#   Mystira.Infrastructure.Data     (depends on Domain, Application, Shared)
-#   Mystira.Infrastructure.Azure    (depends on Application)
-#   Mystira.Infrastructure.Discord  (depends on Application)
-#   Mystira.Infrastructure.Teams    (depends on Application)
-#   Mystira.Infrastructure.WhatsApp (depends on Application)
-#   Mystira.Infrastructure.Payments (depends on Application, Contracts)
+#   Mystira.Infrastructure.Data          (depends on Domain, Application, Shared)
+#   Mystira.Infrastructure.Azure         (depends on Application)
+#   Mystira.Infrastructure.Discord       (depends on Application)
+#   Mystira.Infrastructure.Teams         (depends on Application)
+#   Mystira.Infrastructure.WhatsApp      (depends on Application)
+#   Mystira.Infrastructure.Payments      (depends on Application, Contracts)
+#   Mystira.Infrastructure.StoryProtocol (depends on Application, Domain)
 
 on:
   push:
@@ -453,6 +454,7 @@ jobs:
             "packages/infrastructure/Mystira.Infrastructure.Teams"
             "packages/infrastructure/Mystira.Infrastructure.WhatsApp"
             "packages/infrastructure/Mystira.Infrastructure.Payments"
+            "packages/infrastructure/Mystira.Infrastructure.StoryProtocol"
           )
 
           for PKG in "${PACKAGES[@]}"; do
@@ -530,11 +532,11 @@ jobs:
           fi
 
           if [ "${{ needs.publish-infrastructure.result }}" = "success" ]; then
-            echo "| Mystira.Infrastructure.* (6 packages) | ${{ needs.publish-infrastructure.outputs.version }} | ✅ Published |" >> $GITHUB_STEP_SUMMARY
+            echo "| Mystira.Infrastructure.* (7 packages) | ${{ needs.publish-infrastructure.outputs.version }} | ✅ Published |" >> $GITHUB_STEP_SUMMARY
           elif [ "${{ needs.detect-changes.outputs.infrastructure_changed }}" = "true" ]; then
-            echo "| Mystira.Infrastructure.* (6 packages) | - | ❌ Failed |" >> $GITHUB_STEP_SUMMARY
+            echo "| Mystira.Infrastructure.* (7 packages) | - | ❌ Failed |" >> $GITHUB_STEP_SUMMARY
           else
-            echo "| Mystira.Infrastructure.* (6 packages) | - | ⏭️ Skipped |" >> $GITHUB_STEP_SUMMARY
+            echo "| Mystira.Infrastructure.* (7 packages) | - | ⏭️ Skipped |" >> $GITHUB_STEP_SUMMARY
           fi
 
           echo "" >> $GITHUB_STEP_SUMMARY
