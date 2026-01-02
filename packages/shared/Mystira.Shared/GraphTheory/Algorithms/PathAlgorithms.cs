@@ -31,7 +31,7 @@ public static class PathAlgorithms
 
         path.Add(start);
         var rootSucc = graph.GetSuccessors(start).GetEnumerator();
-        stack.Push((start, rootSucc, depth: 0));
+        stack.Push((start, rootSucc, 0));
 
         while (stack.Count > 0)
         {

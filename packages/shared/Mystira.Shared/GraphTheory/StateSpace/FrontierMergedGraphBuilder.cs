@@ -52,7 +52,7 @@ public static class FrontierMergedGraphBuilder
 
         nodes.Add(initialNode);
         representativeState[initialNode] = initialState;
-        queue.Enqueue((initialNode, initialState, depth: 0));
+        queue.Enqueue((initialNode, initialState, 0));
 
         while (queue.Count > 0)
         {
