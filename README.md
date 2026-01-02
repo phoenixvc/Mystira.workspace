@@ -61,6 +61,7 @@ This project depends on NuGet packages published from shared Mystira repositorie
 | `Mystira.Infrastructure.Azure` | 1.0.0 | Azure Cosmos DB, Blob Storage |
 | `Mystira.Infrastructure.Data` | 1.0.0 | Repository implementations |
 | `Mystira.Infrastructure.Discord` | 1.0.0 | Discord bot integration |
+| `Mystira.Infrastructure.StoryProtocol` | 1.0.0 | Story Protocol blockchain/IP integration |
 | `Mystira.Shared` | 0.5.0-alpha | Shared services and middleware |
 
 ## Setup
