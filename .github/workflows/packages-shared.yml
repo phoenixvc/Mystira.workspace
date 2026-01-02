@@ -1,0 +1,49 @@
+name: Mystira.Shared CI
+
+on:
+  push:
+    paths:
+      - 'packages/shared/**'
+      - '.github/workflows/packages-shared.yml'
+    branches:
+      - main
+      - 'release/**'
+  pull_request:
+    paths:
+      - 'packages/shared/**'
+      - '.github/workflows/packages-shared.yml'
+
+jobs:
+  build-test:
+    name: Build and Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+
+      - name: Restore dependencies
+        run: dotnet restore packages/shared/Mystira.Shared/Mystira.Shared.csproj
+
+      - name: Build
+        run: dotnet build packages/shared/Mystira.Shared/Mystira.Shared.csproj --no-restore --configuration Release
+
+      - name: Restore test dependencies
+        run: dotnet restore packages/shared/Mystira.Shared.Tests/Mystira.Shared.Tests.csproj
+
+      - name: Test
+        run: dotnet test packages/shared/Mystira.Shared.Tests/Mystira.Shared.Tests.csproj --no-restore --configuration Release --collect:"XPlat Code Coverage" --results-directory ./coverage
+
+      - name: Upload coverage
+        uses: codecov/codecov-action@v4
+        if: success()
+        with:
+          files: ./coverage/**/coverage.cobertura.xml
+          flags: shared
+          name: mystira-shared
+          fail_ci_if_error: false

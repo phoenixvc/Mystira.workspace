@@ -1,0 +1,61 @@
+name: Mystira.Authoring CI
+
+on:
+  push:
+    paths:
+      - 'packages/authoring/**'
+      - 'packages/shared/**'
+      - 'packages/ai/**'
+      - 'packages/contracts/**'
+      - '.github/workflows/packages-authoring.yml'
+    branches:
+      - main
+      - 'release/**'
+  pull_request:
+    paths:
+      - 'packages/authoring/**'
+      - 'packages/shared/**'
+      - 'packages/ai/**'
+      - 'packages/contracts/**'
+      - '.github/workflows/packages-authoring.yml'
+
+jobs:
+  build-test:
+    name: Build and Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+
+      - name: Restore Abstractions
+        run: dotnet restore packages/authoring/Mystira.Authoring.Abstractions/Mystira.Authoring.Abstractions.csproj
+
+      - name: Build Abstractions
+        run: dotnet build packages/authoring/Mystira.Authoring.Abstractions/Mystira.Authoring.Abstractions.csproj --no-restore --configuration Release
+
+      - name: Restore Implementation
+        run: dotnet restore packages/authoring/Mystira.Authoring/Mystira.Authoring.csproj
+
+      - name: Build Implementation
+        run: dotnet build packages/authoring/Mystira.Authoring/Mystira.Authoring.csproj --no-restore --configuration Release
+
+      - name: Restore Tests
+        run: dotnet restore packages/authoring/Mystira.Authoring.Tests/Mystira.Authoring.Tests.csproj
+
+      - name: Test
+        run: dotnet test packages/authoring/Mystira.Authoring.Tests/Mystira.Authoring.Tests.csproj --no-restore --configuration Release --collect:"XPlat Code Coverage" --results-directory ./coverage
+
+      - name: Upload coverage
+        uses: codecov/codecov-action@v4
+        if: success()
+        with:
+          files: ./coverage/**/coverage.cobertura.xml
+          flags: authoring
+          name: mystira-authoring
+          fail_ci_if_error: false
