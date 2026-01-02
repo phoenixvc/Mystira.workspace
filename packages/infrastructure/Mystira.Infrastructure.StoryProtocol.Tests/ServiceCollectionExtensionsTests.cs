@@ -195,22 +195,22 @@ public class ServiceCollectionExtensionsTests
     #region GrpcEndpoint Validation Tests
 
     [Fact]
-    public void AddStoryProtocolServices_WithUseGrpcAndNullEndpoint_ThrowsInvalidOperationException()
+    public void AddStoryProtocolServices_WithUseGrpcAndNullEndpointConfig_UsesDefaultEndpoint()
     {
         // Arrange
+        // When GrpcEndpoint is null in config, the default value ("https://localhost:50051") is used
         var services = new ServiceCollection();
         services.AddLogging();
 
         var configuration = CreateConfiguration(new Dictionary<string, string?>
         {
             ["ChainService:UseGrpc"] = "true",
-            ["ChainService:GrpcEndpoint"] = null
+            ["ChainService:GrpcEndpoint"] = null // Null means "use default"
         });
 
-        // Act & Assert
+        // Act & Assert - should not throw because default is a valid URI
         var act = () => services.AddStoryProtocolServices(configuration);
-        act.Should().Throw<InvalidOperationException>()
-            .WithMessage("*GrpcEndpoint is required*");
+        act.Should().NotThrow();
     }
 
     [Fact]
