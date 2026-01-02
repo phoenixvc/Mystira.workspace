@@ -517,7 +517,171 @@ All files in this package have exact copies in the main Contracts package. Delet
    - `Mystira.StoryGenerator.GraphTheory`
    - `Mystira.StoryGenerator.RagIndexer`
 
-2. Update documentation
+2. Clean up solution files and project references
+
+### Phase 5: Documentation & Tests
+
+1. **XML Documentation Comments**
+   - Add `<summary>` to all public types and members
+   - Add `<param>` and `<returns>` to all public methods
+   - Add `<remarks>` for complex algorithms (especially GraphTheory)
+   - Add `<example>` blocks for key APIs
+   - Enable `<GenerateDocumentationFile>true</GenerateDocumentationFile>` in all .csproj files
+   - Enable `<TreatWarningsAsErrors>true</TreatWarningsAsErrors>` for CS1591 (missing XML comments)
+
+2. **README Documentation**
+   - `packages/ai/README.md` - Mystira.Ai usage guide
+   - `packages/authoring/README.md` - Mystira.Authoring usage guide
+   - `packages/shared/Mystira.Shared/GraphTheory/README.md` - Graph algorithms guide
+   - Update root `README.md` with new package structure
+
+3. **Unit Tests**
+   ```
+   packages/
+   ├── ai/
+   │   └── Mystira.Ai.Tests/
+   │       ├── Providers/
+   │       │   ├── AzureOpenAIServiceTests.cs
+   │       │   └── LLMServiceFactoryTests.cs
+   │       └── RateLimiting/
+   │           └── PerMinuteRateLimiterTests.cs
+   ├── authoring/
+   │   ├── Mystira.Authoring.Abstractions.Tests/
+   │   │   ├── Stories/
+   │   │   │   └── ScenarioTests.cs
+   │   │   └── Commands/
+   │   │       └── CommandTests.cs
+   │   └── Mystira.Authoring.Tests/
+   │       ├── Handlers/
+   │       │   ├── GenerateStoryCommandHandlerTests.cs
+   │       │   └── ValidateStoryCommandHandlerTests.cs
+   │       ├── Services/
+   │       │   └── ChatOrchestrationServiceTests.cs
+   │       └── Analysis/
+   │           ├── EntityContinuityAnalyzerTests.cs
+   │           └── ScenarioConsistencyTests.cs
+   └── shared/
+       └── Mystira.Shared.Tests/
+           └── GraphTheory/
+               ├── DirectedGraphTests.cs
+               ├── Algorithms/
+               │   ├── PathAlgorithmsTests.cs
+               │   ├── SearchAlgorithmsTests.cs
+               │   └── SortAlgorithmsTests.cs
+               └── StateSpace/
+                   └── FrontierMergedGraphTests.cs
+   ```
+
+4. **Integration Tests**
+   - LLM provider integration tests (with test doubles)
+   - End-to-end story generation tests
+   - Consistency analysis integration tests
+
+5. **Test Coverage Targets**
+   | Package | Target Coverage |
+   |---------|-----------------|
+   | `Mystira.Shared.GraphTheory` | 90%+ (algorithms are critical) |
+   | `Mystira.Ai` | 80%+ |
+   | `Mystira.Authoring.Abstractions` | 70%+ (mostly POCOs) |
+   | `Mystira.Authoring` | 85%+ |
+
+### Phase 6: CI/CD Integration
+
+1. **GitHub Actions Workflows**
+   ```yaml
+   # .github/workflows/packages-ai.yml
+   name: Mystira.Ai CI/CD
+   on:
+     push:
+       paths:
+         - 'packages/ai/**'
+     pull_request:
+       paths:
+         - 'packages/ai/**'
+   jobs:
+     build-test-publish:
+       # Build, test, and conditionally publish
+   ```
+
+2. **Workflow Files to Create**
+   | Workflow | Trigger Paths | Purpose |
+   |----------|---------------|---------|
+   | `packages-shared.yml` | `packages/shared/**` | Build/test Mystira.Shared |
+   | `packages-ai.yml` | `packages/ai/**` | Build/test Mystira.Ai |
+   | `packages-authoring.yml` | `packages/authoring/**` | Build/test Mystira.Authoring.* |
+   | `packages-publish.yml` | Tags `v*` | Publish all packages to NuGet |
+
+3. **Build Pipeline Steps**
+   ```yaml
+   steps:
+     - name: Checkout
+       uses: actions/checkout@v4
+
+     - name: Setup .NET
+       uses: actions/setup-dotnet@v4
+       with:
+         dotnet-version: '9.0.x'
+
+     - name: Restore
+       run: dotnet restore
+
+     - name: Build
+       run: dotnet build --no-restore --configuration Release
+
+     - name: Test
+       run: dotnet test --no-build --configuration Release --collect:"XPlat Code Coverage"
+
+     - name: Upload Coverage
+       uses: codecov/codecov-action@v4
+
+     - name: Pack (on tag)
+       if: startsWith(github.ref, 'refs/tags/v')
+       run: dotnet pack --no-build --configuration Release -o ./nupkg
+
+     - name: Publish (on tag)
+       if: startsWith(github.ref, 'refs/tags/v')
+       run: dotnet nuget push ./nupkg/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json
+   ```
+
+4. **Package Versioning Strategy**
+   - Use GitVersion or MinVer for automatic versioning
+   - Version format: `{major}.{minor}.{patch}[-{prerelease}]`
+   - Pre-release tags: `-alpha`, `-beta`, `-rc`
+   - Example: `1.0.0-alpha.1`, `1.0.0-beta.2`, `1.0.0`
+
+5. **Dependency Build Order**
+   ```
+   1. Mystira.Shared        (no deps)
+   2. Mystira.Contracts     (no deps)
+   3. Mystira.Ai            (depends on Contracts)
+   4. Mystira.Authoring.Abstractions (depends on Shared, Contracts)
+   5. Mystira.Authoring     (depends on Abstractions, Ai)
+   ```
+
+6. **Quality Gates**
+   | Gate | Requirement |
+   |------|-------------|
+   | Build | Must pass |
+   | Unit Tests | Must pass |
+   | Code Coverage | Must meet target thresholds |
+   | XML Docs | No CS1591 warnings |
+   | Security Scan | No high/critical vulnerabilities |
+
+7. **NuGet Package Metadata**
+   ```xml
+   <PropertyGroup>
+     <PackageId>Mystira.Ai</PackageId>
+     <Version>1.0.0</Version>
+     <Authors>Phoenix VC</Authors>
+     <Company>Mystira</Company>
+     <PackageProjectUrl>https://github.com/phoenixvc/Mystira.workspace</PackageProjectUrl>
+     <RepositoryUrl>https://github.com/phoenixvc/Mystira.workspace</RepositoryUrl>
+     <PackageTags>ai;llm;openai;anthropic</PackageTags>
+     <PackageLicenseExpression>MIT</PackageLicenseExpression>
+     <PackageReadmeFile>README.md</PackageReadmeFile>
+     <GenerateDocumentationFile>true</GenerateDocumentationFile>
+   </PropertyGroup>
+   ```
 
 ---
 
@@ -551,15 +715,21 @@ All files in this package have exact copies in the main Contracts package. Delet
 
 ## Estimated Effort
 
-| Task | Complexity | Files |
-|------|------------|-------|
-| Add GraphTheory to Mystira.Shared | Low | ~11 files |
-| Create Mystira.Ai | Medium | ~6 files |
-| Create Mystira.Authoring.Abstractions | Medium | ~25 files |
-| Create Mystira.Authoring | High | ~35 files |
-| Update StoryGenerator submodule | Medium | Namespace updates |
-| Update admin-api | Low | Package refs only |
-| Testing & validation | Medium | Integration tests |
+| Phase | Task | Complexity | Estimate |
+|-------|------|------------|----------|
+| **1** | Add GraphTheory to Mystira.Shared | Low | ~11 files |
+| **1** | Create Mystira.Ai | Medium | ~6 files |
+| **1** | Create Mystira.Authoring.Abstractions | Medium | ~25 files |
+| **1** | Create Mystira.Authoring | High | ~35 files |
+| **2** | Update StoryGenerator submodule | Medium | Namespace updates |
+| **3** | Update admin-api | Low | Package refs only |
+| **4** | Cleanup deprecated packages | Low | Remove from feed |
+| **5** | XML documentation comments | Medium | All public APIs |
+| **5** | README documentation | Low | 4 README files |
+| **5** | Unit tests | High | ~50 test files |
+| **5** | Integration tests | Medium | ~10 test files |
+| **6** | CI/CD workflows | Medium | 4 workflow files |
+| **6** | Quality gates setup | Low | Config files |
 
 ---
 
