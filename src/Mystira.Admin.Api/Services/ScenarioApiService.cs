@@ -15,7 +15,6 @@ using CharacterMetadata = Mystira.Domain.Models.CharacterMetadata;
 using ClassificationTag = Mystira.Domain.Models.ClassificationTag;
 using MediaMetadataEntry = Mystira.Domain.Models.MediaMetadataEntry;
 using MediaMetadataFile = Mystira.Domain.Models.MediaMetadataFile;
-using Modifier = Mystira.Domain.Models.Modifier;
 
 namespace Mystira.Admin.Api.Services;
 
