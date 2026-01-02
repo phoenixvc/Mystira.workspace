@@ -4,15 +4,23 @@
 
 This document outlines the migration of `Mystira.StoryGenerator.*` packages into the main workspace as shared libraries that can be consumed by `admin-api`, `publisher`, and other services.
 
+## Decisions Made
+
+| Decision | Choice | Rationale |
+|----------|--------|-----------|
+| AI package naming | `Mystira.Ai` | Clean, follows `Microsoft.Extensions.AI` convention |
+| Graph Theory location | `Mystira.Shared.GraphTheory` | Generic algorithms reusable beyond stories |
+| Authoring structure | Split with Abstractions | Long-term maintainability, follows Microsoft patterns |
+
 ## Current State
 
 ```
 packages/story-generator/src/
 ├── Mystira.StoryGenerator.Contracts/    → DELETE (duplicated in Mystira.Contracts)
-├── Mystira.StoryGenerator.Domain/       → Split into Mystira.Ai + Mystira.Authoring
+├── Mystira.StoryGenerator.Domain/       → Split into Mystira.Ai + Mystira.Authoring.Abstractions
 ├── Mystira.StoryGenerator.Application/  → Migrate to Mystira.Authoring
-├── Mystira.StoryGenerator.Llm/          → Migrate to Mystira.Ai
-├── Mystira.StoryGenerator.GraphTheory/  → Migrate to Mystira.Authoring
+├── Mystira.StoryGenerator.Llm/          → Split into Mystira.Ai + Mystira.Authoring
+├── Mystira.StoryGenerator.GraphTheory/  → Migrate to Mystira.Shared.GraphTheory
 ├── Mystira.StoryGenerator.RagIndexer/   → Migrate to Mystira.Authoring
 ├── Mystira.StoryGenerator.Api/          → Keep (references new packages)
 ├── Mystira.StoryGenerator.Console/      → Keep (references new packages)
@@ -25,12 +33,46 @@ packages/story-generator/src/
 ```
 packages/
 ├── ai/
-│   └── Mystira.Ai/                      ← Generic LLM infrastructure
+│   └── Mystira.Ai/                           ← Generic LLM infrastructure
 ├── authoring/
-│   └── Mystira.Authoring/               ← Story generation & analysis
+│   ├── Mystira.Authoring.Abstractions/       ← Interfaces, commands, POCOs
+│   └── Mystira.Authoring/                    ← Implementations, handlers, services
+├── shared/
+│   └── Mystira.Shared/                       ← Add GraphTheory namespace
 ├── contracts/
-│   └── Mystira.Contracts/               ← Already has StoryGenerator/* (keep)
-└── story-generator/                     ← Submodule references new packages
+│   └── Mystira.Contracts/                    ← Already has StoryGenerator/* (keep)
+└── story-generator/                          ← Submodule references new packages
+```
+
+## Dependency Graph
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                         Consumers                                │
+│         (admin-api, publisher, story-generator-api)             │
+└─────────────────────────────────────────────────────────────────┘
+                                │
+                ┌───────────────┼───────────────┐
+                ▼               ▼               ▼
+        ┌───────────┐   ┌─────────────┐   ┌───────────┐
+        │Mystira.Ai │   │  Mystira.   │   │ Mystira.  │
+        │           │   │  Authoring  │   │ Contracts │
+        └─────┬─────┘   └──────┬──────┘   └───────────┘
+              │                │                 ▲
+              │         ┌──────┴──────┐          │
+              │         ▼             │          │
+              │   ┌───────────┐       │          │
+              │   │ Mystira.  │       │          │
+              │   │ Authoring.│       │          │
+              │   │Abstractions│      │          │
+              │   └─────┬─────┘       │          │
+              │         │             │          │
+              └────┬────┴─────────────┘          │
+                   ▼                             │
+            ┌─────────────┐                      │
+            │  Mystira.   │──────────────────────┘
+            │   Shared    │
+            └─────────────┘
 ```
 
 ---
@@ -93,9 +135,68 @@ packages/ai/Mystira.Ai/
 
 ---
 
-## Package 2: Mystira.Authoring
+## Package 2: Mystira.Shared.GraphTheory
 
-**Purpose**: Story generation, validation, and consistency analysis.
+**Purpose**: Generic graph algorithms reusable across projects (not story-specific).
+
+### Files to Include
+
+#### From `Mystira.StoryGenerator.GraphTheory/`
+
+**Generic Graph (fully reusable)**
+| Source | Target Namespace |
+|--------|------------------|
+| `Graph/DirectedGraph.cs` | `Mystira.Shared.GraphTheory` |
+| `Graph/Edge.cs` | `Mystira.Shared.GraphTheory` |
+| `Algorithms/PathAlgorithms.cs` | `Mystira.Shared.GraphTheory.Algorithms` |
+| `Algorithms/SearchAlgorithms.cs` | `Mystira.Shared.GraphTheory.Algorithms` |
+| `Algorithms/SortAlgorithms.cs` | `Mystira.Shared.GraphTheory.Algorithms` |
+| `DataFlowAnalysis/DataFlowNode.cs` | `Mystira.Shared.GraphTheory.DataFlow` |
+| `DataFlowAnalysis/DataFlowAnalysis.cs` | `Mystira.Shared.GraphTheory.DataFlow` |
+| `FrontierMergedGraph/SceneStateNode.cs` | `Mystira.Shared.GraphTheory.StateSpace` |
+| `FrontierMergedGraph/FrontierMergedGraphBuilder.cs` | `Mystira.Shared.GraphTheory.StateSpace` |
+| `FrontierMergedGraph/FrontierMergedGraphResult.cs` | `Mystira.Shared.GraphTheory.StateSpace` |
+| `FrontierMergedGraph/SceneTransition.cs` | `Mystira.Shared.GraphTheory.StateSpace` |
+
+#### From `Mystira.StoryGenerator.Domain/Graph/`
+
+**Graph Interfaces**
+| Source | Target Namespace |
+|--------|------------------|
+| `IGraph.cs` | `Mystira.Shared.GraphTheory` |
+| `IDirectedGraph.cs` | `Mystira.Shared.GraphTheory` |
+| `IEdge.cs` | `Mystira.Shared.GraphTheory` |
+
+### Add to Existing Project
+```
+packages/shared/Mystira.Shared/
+├── Mystira.Shared.csproj          (existing)
+├── GraphTheory/                   ← NEW
+│   ├── IGraph.cs
+│   ├── IDirectedGraph.cs
+│   ├── IEdge.cs
+│   ├── DirectedGraph.cs
+│   ├── Edge.cs
+│   ├── Algorithms/
+│   │   ├── PathAlgorithms.cs
+│   │   ├── SearchAlgorithms.cs
+│   │   └── SortAlgorithms.cs
+│   ├── DataFlow/
+│   │   ├── DataFlowNode.cs
+│   │   └── DataFlowAnalysis.cs
+│   └── StateSpace/
+│       ├── SceneStateNode.cs
+│       ├── FrontierMergedGraphBuilder.cs
+│       ├── FrontierMergedGraphResult.cs
+│       └── SceneTransition.cs
+└── ... (existing files)
+```
+
+---
+
+## Package 3: Mystira.Authoring.Abstractions
+
+**Purpose**: Interfaces, commands, and POCOs for story authoring. Minimal dependencies.
 
 ### Files to Include
 
@@ -104,57 +205,96 @@ packages/ai/Mystira.Ai/
 **Stories (POCOs)**
 | Source | Target Namespace |
 |--------|------------------|
-| `Stories/Scenario.cs` | `Mystira.Authoring.Stories` |
-| `Stories/SceneExtensions.cs` | `Mystira.Authoring.Stories` |
-| `Stories/ScenarioExtensions.cs` | `Mystira.Authoring.Stories` |
-| `Stories/ScenarioDominatorPathAnalysis.cs` | `Mystira.Authoring.Stories` |
-| `Stories/StoryContinuityIssue.cs` | `Mystira.Authoring.Stories` |
-| `Stories/StoryContinuityAsyncContracts.cs` | `Mystira.Authoring.Stories` |
+| `Stories/Scenario.cs` | `Mystira.Authoring.Abstractions.Stories` |
+| `Stories/SceneExtensions.cs` | `Mystira.Authoring.Abstractions.Stories` |
+| `Stories/ScenarioExtensions.cs` | `Mystira.Authoring.Abstractions.Stories` |
+| `Stories/ScenarioDominatorPathAnalysis.cs` | `Mystira.Authoring.Abstractions.Stories` |
+| `Stories/StoryContinuityIssue.cs` | `Mystira.Authoring.Abstractions.Stories` |
+| `Stories/StoryContinuityAsyncContracts.cs` | `Mystira.Authoring.Abstractions.Stories` |
 
-**Graph**
+**Story-Specific Graph (uses generic graph)**
 | Source | Target Namespace |
 |--------|------------------|
-| `Graph/IGraph.cs` | `Mystira.Authoring.Graph` |
-| `Graph/IDirectedGraph.cs` | `Mystira.Authoring.Graph` |
-| `Graph/IEdge.cs` | `Mystira.Authoring.Graph` |
-| `Graph/IScenarioGraph.cs` | `Mystira.Authoring.Graph` |
-| `Graph/SceneEdge.cs` | `Mystira.Authoring.Graph` |
+| `Graph/IScenarioGraph.cs` | `Mystira.Authoring.Abstractions.Graph` |
+| `Graph/SceneEdge.cs` | `Mystira.Authoring.Abstractions.Graph` |
 
 **Commands**
 | Source | Target Namespace |
 |--------|------------------|
-| `Commands/ICommand.cs` | `Mystira.Authoring.Commands` |
-| `Commands/ICommandHandler.cs` | `Mystira.Authoring.Commands` |
-| `Commands/Stories/*.cs` | `Mystira.Authoring.Commands.Stories` |
-| `Commands/Chat/*.cs` | `Mystira.Authoring.Commands.Chat` |
+| `Commands/ICommand.cs` | `Mystira.Authoring.Abstractions.Commands` |
+| `Commands/ICommandHandler.cs` | `Mystira.Authoring.Abstractions.Commands` |
+| `Commands/Stories/*.cs` | `Mystira.Authoring.Abstractions.Commands.Stories` |
+| `Commands/Chat/*.cs` | `Mystira.Authoring.Abstractions.Commands.Chat` |
 
 **Service Interfaces**
 | Source | Target Namespace |
 |--------|------------------|
-| `Services/IChatOrchestrationService.cs` | `Mystira.Authoring.Services` |
-| `Services/IScenarioFactory.cs` | `Mystira.Authoring.Services` |
-| `Services/IStoryValidationService.cs` | `Mystira.Authoring.Services` |
-| `Services/IStoryContinuityService.cs` | `Mystira.Authoring.Services` |
-| `Services/IScenarioConsistencyEvaluationService.cs` | `Mystira.Authoring.Services` |
-| `Services/IScenarioEntityConsistencyEvaluationService.cs` | `Mystira.Authoring.Services` |
-| `Services/IScenarioDominatorPathConsistencyEvaluationService.cs` | `Mystira.Authoring.Services` |
-| `Services/IScenarioSrlAnalysisService.cs` | `Mystira.Authoring.Services` |
-| `Services/IPrefixSummaryService.cs` | `Mystira.Authoring.Services` |
-| `Services/IStorySchemaProvider.cs` | `Mystira.Authoring.Services` |
-| `Services/ICommandRouter.cs` | `Mystira.Authoring.Services` |
-| `Services/IInstructionBlockService.cs` | `Mystira.Authoring.Services` |
-| `Services/ChatContext.cs` | `Mystira.Authoring.Services` |
-| `Services/StoryConsistencyEvaluation.cs` | `Mystira.Authoring.Services` |
+| `Services/IChatOrchestrationService.cs` | `Mystira.Authoring.Abstractions.Services` |
+| `Services/IScenarioFactory.cs` | `Mystira.Authoring.Abstractions.Services` |
+| `Services/IStoryValidationService.cs` | `Mystira.Authoring.Abstractions.Services` |
+| `Services/IStoryContinuityService.cs` | `Mystira.Authoring.Abstractions.Services` |
+| `Services/IScenarioConsistencyEvaluationService.cs` | `Mystira.Authoring.Abstractions.Services` |
+| `Services/IScenarioEntityConsistencyEvaluationService.cs` | `Mystira.Authoring.Abstractions.Services` |
+| `Services/IScenarioDominatorPathConsistencyEvaluationService.cs` | `Mystira.Authoring.Abstractions.Services` |
+| `Services/IScenarioSrlAnalysisService.cs` | `Mystira.Authoring.Abstractions.Services` |
+| `Services/IPrefixSummaryService.cs` | `Mystira.Authoring.Abstractions.Services` |
+| `Services/IStorySchemaProvider.cs` | `Mystira.Authoring.Abstractions.Services` |
+| `Services/ICommandRouter.cs` | `Mystira.Authoring.Abstractions.Services` |
+| `Services/IInstructionBlockService.cs` | `Mystira.Authoring.Abstractions.Services` |
+| `Services/ChatContext.cs` | `Mystira.Authoring.Abstractions.Services` |
+| `Services/StoryConsistencyEvaluation.cs` | `Mystira.Authoring.Abstractions.Services` |
 
 **LLM Service Interfaces (story-specific)**
 | Source | Target Namespace |
 |--------|------------------|
-| `Services/ILlmClassificationService.cs` | `Mystira.Authoring.Llm` |
-| `Services/ILlmIntentLlmClassificationService.cs` | `Mystira.Authoring.Llm` |
-| `Services/IEntityLlmClassificationService.cs` | `Mystira.Authoring.Llm` |
-| `Services/ISemanticRoleLabellingLlmService.cs` | `Mystira.Authoring.Llm` |
-| `Services/IPrefixSummaryLlmService.cs` | `Mystira.Authoring.Llm` |
-| `Services/IDominatorPathConsistencyLlmService.cs` | `Mystira.Authoring.Llm` |
+| `Services/ILlmClassificationService.cs` | `Mystira.Authoring.Abstractions.Llm` |
+| `Services/ILlmIntentLlmClassificationService.cs` | `Mystira.Authoring.Abstractions.Llm` |
+| `Services/IEntityLlmClassificationService.cs` | `Mystira.Authoring.Abstractions.Llm` |
+| `Services/ISemanticRoleLabellingLlmService.cs` | `Mystira.Authoring.Abstractions.Llm` |
+| `Services/IPrefixSummaryLlmService.cs` | `Mystira.Authoring.Abstractions.Llm` |
+| `Services/IDominatorPathConsistencyLlmService.cs` | `Mystira.Authoring.Abstractions.Llm` |
+
+### Project Structure
+```
+packages/authoring/Mystira.Authoring.Abstractions/
+├── Mystira.Authoring.Abstractions.csproj
+├── Stories/
+│   ├── Scenario.cs
+│   ├── Scene.cs
+│   ├── Branch.cs
+│   └── ...
+├── Graph/
+│   ├── IScenarioGraph.cs
+│   └── SceneEdge.cs
+├── Commands/
+│   ├── ICommand.cs
+│   ├── ICommandHandler.cs
+│   ├── Stories/
+│   └── Chat/
+├── Services/
+│   ├── IChatOrchestrationService.cs
+│   ├── IScenarioFactory.cs
+│   └── ...
+└── Llm/
+    ├── ILlmClassificationService.cs
+    └── ...
+```
+
+### Dependencies (minimal!)
+```xml
+<ItemGroup>
+  <ProjectReference Include="../../shared/Mystira.Shared/Mystira.Shared.csproj" />
+  <ProjectReference Include="../../contracts/dotnet/Mystira.Contracts/Mystira.Contracts.csproj" />
+</ItemGroup>
+```
+
+---
+
+## Package 4: Mystira.Authoring
+
+**Purpose**: Implementations, handlers, and services for story authoring.
+
+### Files to Include
 
 #### From `Mystira.StoryGenerator.Application/`
 
@@ -204,11 +344,6 @@ packages/ai/Mystira.Ai/
 | `Services/StoryInstructionsRag/*.cs` | `Mystira.Authoring.Llm.Rag` |
 | `Services/StoryIntentClassification/*.cs` | `Mystira.Authoring.Llm.IntentClassification` |
 
-#### From `Mystira.StoryGenerator.GraphTheory/`
-| Source | Target Namespace |
-|--------|------------------|
-| All files | `Mystira.Authoring.GraphTheory` |
-
 #### From `Mystira.StoryGenerator.RagIndexer/`
 | Source | Target Namespace |
 |--------|------------------|
@@ -218,27 +353,24 @@ packages/ai/Mystira.Ai/
 ```
 packages/authoring/Mystira.Authoring/
 ├── Mystira.Authoring.csproj
-├── Stories/
-│   ├── Scenario.cs
-│   ├── Scene.cs
-│   ├── Branch.cs
-│   └── ...
-├── Graph/
-│   ├── IGraph.cs
-│   ├── IScenarioGraph.cs
-│   └── ...
-├── Commands/
-│   ├── ICommand.cs
-│   ├── Stories/
-│   └── Chat/
 ├── Handlers/
 │   ├── Stories/
+│   │   ├── GenerateStoryCommandHandler.cs
+│   │   ├── ValidateStoryCommandHandler.cs
+│   │   └── ...
 │   └── Chat/
+│       ├── FreeTextCommandHandler.cs
+│       └── ...
 ├── Services/
 │   ├── ChatOrchestrationService.cs
 │   ├── ScenarioFactory.cs
 │   └── ...
+├── Scenarios/
+│   ├── ScenarioFactory.cs
+│   ├── ScenarioGraph.cs
+│   └── ScenarioExtensions.cs
 ├── Analysis/
+│   ├── SceneNode.cs
 │   ├── EntityConsistency/
 │   ├── Continuity/
 │   └── PrefixSummary/
@@ -246,10 +378,8 @@ packages/authoring/Mystira.Authoring/
 │   ├── ConsistencyEvaluators/
 │   ├── Rag/
 │   └── IntentClassification/
-├── GraphTheory/
-│   └── ...
 ├── Rag/
-│   └── ...
+│   └── ... (from RagIndexer)
 ├── Utilities/
 │   └── StoryTextSanitizer.cs
 └── DependencyInjection.cs
@@ -260,8 +390,8 @@ packages/authoring/Mystira.Authoring/
 <ItemGroup>
   <PackageReference Include="MediatR" Version="12.1.1" />
   <PackageReference Include="NJsonSchema" Version="11.5.1" />
+  <ProjectReference Include="../Mystira.Authoring.Abstractions/Mystira.Authoring.Abstractions.csproj" />
   <ProjectReference Include="../../ai/Mystira.Ai/Mystira.Ai.csproj" />
-  <ProjectReference Include="../../contracts/dotnet/Mystira.Contracts/Mystira.Contracts.csproj" />
 </ItemGroup>
 ```
 
@@ -279,19 +409,21 @@ All files in this package have exact copies in the main Contracts package. Delet
 
 | Old Namespace | New Namespace |
 |---------------|---------------|
-| `Mystira.StoryGenerator.Contracts.Chat` | `Mystira.Contracts.StoryGenerator.Chat` |
-| `Mystira.StoryGenerator.Contracts.Stories` | `Mystira.Contracts.StoryGenerator.Stories` |
-| `Mystira.StoryGenerator.Contracts.Configuration` | `Mystira.Contracts.StoryGenerator.Configuration` |
-| `Mystira.StoryGenerator.Contracts.StoryConsistency` | `Mystira.Contracts.StoryGenerator.StoryConsistency` |
-| `Mystira.StoryGenerator.Contracts.Intent` | `Mystira.Contracts.StoryGenerator.Intent` |
-| `Mystira.StoryGenerator.Contracts.Entities` | `Mystira.Contracts.StoryGenerator.Entities` |
-| `Mystira.StoryGenerator.Domain.Stories` | `Mystira.Authoring.Stories` |
-| `Mystira.StoryGenerator.Domain.Services` | `Mystira.Authoring.Services` or `Mystira.Ai.Abstractions` |
-| `Mystira.StoryGenerator.Domain.Graph` | `Mystira.Authoring.Graph` |
-| `Mystira.StoryGenerator.Domain.Commands` | `Mystira.Authoring.Commands` |
+| `Mystira.StoryGenerator.Contracts.*` | `Mystira.Contracts.StoryGenerator.*` |
+| `Mystira.StoryGenerator.Domain.Stories` | `Mystira.Authoring.Abstractions.Stories` |
+| `Mystira.StoryGenerator.Domain.Services` (interfaces) | `Mystira.Authoring.Abstractions.Services` |
+| `Mystira.StoryGenerator.Domain.Services` (ILLMService) | `Mystira.Ai.Abstractions` |
+| `Mystira.StoryGenerator.Domain.Graph` (generic) | `Mystira.Shared.GraphTheory` |
+| `Mystira.StoryGenerator.Domain.Graph` (story-specific) | `Mystira.Authoring.Abstractions.Graph` |
+| `Mystira.StoryGenerator.Domain.Commands` | `Mystira.Authoring.Abstractions.Commands` |
+| `Mystira.StoryGenerator.GraphTheory.Graph` | `Mystira.Shared.GraphTheory` |
+| `Mystira.StoryGenerator.GraphTheory.Algorithms` | `Mystira.Shared.GraphTheory.Algorithms` |
+| `Mystira.StoryGenerator.GraphTheory.DataFlowAnalysis` | `Mystira.Shared.GraphTheory.DataFlow` |
+| `Mystira.StoryGenerator.GraphTheory.FrontierMergedGraph` | `Mystira.Shared.GraphTheory.StateSpace` |
 | `Mystira.StoryGenerator.Application.Services` | `Mystira.Authoring.Services` |
 | `Mystira.StoryGenerator.Application.Handlers` | `Mystira.Authoring.Handlers` |
 | `Mystira.StoryGenerator.Llm.Services.LLM` | `Mystira.Ai.Providers` |
+| `Mystira.StoryGenerator.Llm.Services.ConsistencyEvaluators` | `Mystira.Authoring.Llm.ConsistencyEvaluators` |
 
 ---
 
@@ -299,7 +431,14 @@ All files in this package have exact copies in the main Contracts package. Delet
 
 ### Phase 1: Create New Packages (No Breaking Changes)
 
-1. **Create `Mystira.Ai` package**
+1. **Add GraphTheory to `Mystira.Shared`**
+   ```bash
+   mkdir -p packages/shared/Mystira.Shared/GraphTheory
+   ```
+   - Copy graph interfaces and implementations
+   - Update namespaces to `Mystira.Shared.GraphTheory`
+
+2. **Create `Mystira.Ai` package**
    ```bash
    mkdir -p packages/ai/Mystira.Ai
    ```
@@ -307,23 +446,32 @@ All files in this package have exact copies in the main Contracts package. Delet
    - Add project references to `Mystira.Contracts`
    - Create `DependencyInjection.cs` for service registration
 
-2. **Create `Mystira.Authoring` package**
+3. **Create `Mystira.Authoring.Abstractions` package**
+   ```bash
+   mkdir -p packages/authoring/Mystira.Authoring.Abstractions
+   ```
+   - Copy interfaces, commands, POCOs
+   - Add project references to `Mystira.Shared` and `Mystira.Contracts`
+   - Keep dependencies minimal
+
+4. **Create `Mystira.Authoring` package**
    ```bash
    mkdir -p packages/authoring/Mystira.Authoring
    ```
-   - Copy story/command/handler files with new namespaces
-   - Add project references to `Mystira.Ai` and `Mystira.Contracts`
+   - Copy handlers, services, implementations
+   - Add project references to `Mystira.Authoring.Abstractions` and `Mystira.Ai`
    - Create `DependencyInjection.cs` for service registration
 
-3. **Publish new packages**
+5. **Publish new packages**
    - Add to CI/CD pipeline
-   - Publish `Mystira.Ai` and `Mystira.Authoring` to NuGet feed
+   - Publish in order: `Mystira.Shared` → `Mystira.Ai` → `Mystira.Authoring.Abstractions` → `Mystira.Authoring`
 
 ### Phase 2: Migrate StoryGenerator Submodule
 
 1. **Update `Mystira.StoryGenerator.Api`**
    - Replace project references with package references:
      ```xml
+     <PackageReference Include="Mystira.Shared" Version="1.0.0" />
      <PackageReference Include="Mystira.Ai" Version="1.0.0" />
      <PackageReference Include="Mystira.Authoring" Version="1.0.0" />
      <PackageReference Include="Mystira.Contracts" Version="1.0.0" />
@@ -336,10 +484,10 @@ All files in this package have exact copies in the main Contracts package. Delet
 
 3. **Delete old packages from submodule**
    - `Mystira.StoryGenerator.Contracts` (use `Mystira.Contracts`)
-   - `Mystira.StoryGenerator.Domain` (migrated to `Mystira.Authoring`)
+   - `Mystira.StoryGenerator.Domain` (split into `Mystira.Authoring.Abstractions` + `Mystira.Ai`)
    - `Mystira.StoryGenerator.Application` (migrated to `Mystira.Authoring`)
    - `Mystira.StoryGenerator.Llm` (split into `Mystira.Ai` + `Mystira.Authoring`)
-   - `Mystira.StoryGenerator.GraphTheory` (migrated to `Mystira.Authoring`)
+   - `Mystira.StoryGenerator.GraphTheory` (migrated to `Mystira.Shared.GraphTheory`)
    - `Mystira.StoryGenerator.RagIndexer` (migrated to `Mystira.Authoring`)
 
 4. **Upgrade to .NET 9.0**
@@ -349,8 +497,11 @@ All files in this package have exact copies in the main Contracts package. Delet
 
 1. **Update `admin-api`**
    ```xml
-   <PackageReference Include="Mystira.Ai" Version="1.0.0" />
+   <!-- For full authoring capabilities -->
    <PackageReference Include="Mystira.Authoring" Version="1.0.0" />
+
+   <!-- Or just abstractions if only using interfaces -->
+   <PackageReference Include="Mystira.Authoring.Abstractions" Version="1.0.0" />
    ```
 
 2. **Update `publisher`** (if .NET backend exists)
@@ -378,33 +529,46 @@ All files in this package have exact copies in the main Contracts package. Delet
 | Package renames | NuGet references | Update package references |
 | .NET 8 → 9 upgrade | StoryGenerator submodule | Required for compatibility |
 | `ILLMService` moved to `Mystira.Ai` | LLM consumers | Reference `Mystira.Ai` package |
+| Graph interfaces moved to `Mystira.Shared` | Graph consumers | Reference `Mystira.Shared` package |
+| Abstractions split | Existing references | Reference `Mystira.Authoring.Abstractions` for interfaces |
 
 ---
 
 ## Benefits After Migration
 
-1. **Reusability**: `admin-api` and `publisher` can use `Mystira.Ai` and `Mystira.Authoring`
+1. **Reusability**: `admin-api` and `publisher` can use shared packages
 2. **No duplication**: Single source of truth for contracts and services
-3. **Clear boundaries**: AI infrastructure vs. story-specific logic
+3. **Clear boundaries**:
+   - `Mystira.Ai` → Generic LLM infrastructure
+   - `Mystira.Authoring.Abstractions` → Interfaces only (light dependency)
+   - `Mystira.Authoring` → Full implementations
+   - `Mystira.Shared.GraphTheory` → Reusable algorithms
 4. **Consistent versioning**: All packages on .NET 9.0
-5. **Simpler dependency graph**: Fewer packages to manage
+5. **Flexible consumption**: Consumers can reference just abstractions or full implementations
+6. **Future-proof**: Abstractions pattern allows independent evolution
 
 ---
 
 ## Estimated Effort
 
-| Task | Complexity |
-|------|------------|
-| Create Mystira.Ai | Medium |
-| Create Mystira.Authoring | High (many files) |
-| Update StoryGenerator submodule | Medium |
-| Update admin-api | Low |
-| Testing & validation | Medium |
+| Task | Complexity | Files |
+|------|------------|-------|
+| Add GraphTheory to Mystira.Shared | Low | ~11 files |
+| Create Mystira.Ai | Medium | ~6 files |
+| Create Mystira.Authoring.Abstractions | Medium | ~25 files |
+| Create Mystira.Authoring | High | ~35 files |
+| Update StoryGenerator submodule | Medium | Namespace updates |
+| Update admin-api | Low | Package refs only |
+| Testing & validation | Medium | Integration tests |
 
 ---
 
-## Questions to Resolve
+## Final Package Summary
 
-1. Should `Mystira.Authoring` be split further (e.g., `Mystira.Authoring.Analysis`)?
-2. Should graph theory utilities move to `Mystira.Shared` or stay in `Mystira.Authoring`?
-3. NuGet package naming: `Mystira.Ai` or `Mystira.App.Ai` for consistency?
+| Package | Purpose | Dependencies |
+|---------|---------|--------------|
+| `Mystira.Shared` | Core utilities + GraphTheory | None |
+| `Mystira.Contracts` | API contracts (existing) | None |
+| `Mystira.Ai` | LLM providers, rate limiting | Contracts |
+| `Mystira.Authoring.Abstractions` | Interfaces, commands, POCOs | Shared, Contracts |
+| `Mystira.Authoring` | Implementations, handlers | Abstractions, Ai |
