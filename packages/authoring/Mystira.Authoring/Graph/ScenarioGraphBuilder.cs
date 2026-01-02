@@ -1,5 +1,6 @@
 using Mystira.Authoring.Abstractions.Models.Scenario;
 using Mystira.Shared.GraphTheory;
+using Mystira.Shared.GraphTheory.Algorithms;
 
 namespace Mystira.Authoring.Graph;
 
@@ -15,7 +16,7 @@ public class ScenarioGraphBuilder
     /// <returns>A directed graph with scene IDs as nodes.</returns>
     public IDirectedGraph<string, SceneTransition> Build(Scenario scenario)
     {
-        var graph = new DirectedGraph<string, SceneTransition>();
+        var edges = new List<Edge<string, SceneTransition>>();
 
         foreach (var scene in scenario.Scenes)
         {
@@ -28,7 +29,7 @@ public class ScenarioGraphBuilder
                     ToSceneId = scene.NextSceneId,
                     TransitionType = TransitionType.Linear
                 };
-                graph.AddEdge(new Edge<string, SceneTransition>(scene.Id, scene.NextSceneId, transition));
+                edges.Add(new Edge<string, SceneTransition>(scene.Id, scene.NextSceneId, transition));
             }
 
             // Add edges for branches
@@ -43,11 +44,11 @@ public class ScenarioGraphBuilder
                     TransitionType = TransitionType.Branch,
                     ChoiceText = branch.Choice
                 };
-                graph.AddEdge(new Edge<string, SceneTransition>(scene.Id, branch.NextSceneId, transition));
+                edges.Add(new Edge<string, SceneTransition>(scene.Id, branch.NextSceneId, transition));
             }
         }
 
-        return graph;
+        return DirectedGraph<string, SceneTransition>.FromEdges(edges);
     }
 
     /// <summary>
@@ -124,11 +125,11 @@ public class ScenarioGraphBuilder
         var allPaths = new List<List<string>>();
 
         // Use path enumeration from GraphTheory
-        foreach (var ending in endings)
+        // EnumeratePaths finds paths from start to terminal nodes
+        var paths = graph.EnumeratePaths(start, node => endings.Contains(node), maxPaths);
+        foreach (var path in paths)
         {
-            var paths = PathAlgorithms.EnumerateAllPaths(graph, start, ending, maxPaths - allPaths.Count);
-            allPaths.AddRange(paths);
-
+            allPaths.Add(path.ToList());
             if (allPaths.Count >= maxPaths)
                 break;
         }
