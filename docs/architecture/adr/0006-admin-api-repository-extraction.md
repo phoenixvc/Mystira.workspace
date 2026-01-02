@@ -455,4 +455,4 @@ When Admin API is separate:
 - [NuGet Package Management](https://docs.microsoft.com/en-us/nuget/)
 - [Semantic Versioning](https://semver.org/)
 - [Microservices Architecture](https://microservices.io/)
-- [Admin API README](../../packages/app/src/Mystira.Admin.Api/README.md) - Current separation rationale
+- [Admin API README](https://github.com/phoenixvc/Mystira.Admin.Api/blob/main/README.md) - Current separation rationale
