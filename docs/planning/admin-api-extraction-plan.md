@@ -220,13 +220,13 @@ rm -rf ./src/Mystira.Admin.Api/Views
 
 **For CI/CD**: Use secrets instead of hardcoded credentials.
 
-### 2.5 Update Namespace (Optional)
+### 2.5 Update Namespace (Completed)
 
-Consider renaming namespaces from `Mystira.Admin.Api` to `Mystira.Admin.Api`:
+Namespaces were renamed from `Mystira.App.Admin.Api` to `Mystira.Admin.Api`:
 
 ```bash
 # Use IDE refactoring tools or:
-find . -type f -name "*.cs" -exec sed -i 's/Mystira.Admin.Api/Mystira.Admin.Api/g' {} +
+find . -type f -name "*.cs" -exec sed -i 's/Mystira.App.Admin.Api/Mystira.Admin.Api/g' {} +
 ```
 
 ## Phase 3: Setup CI/CD (Week 2)
