@@ -4,6 +4,48 @@
 
 This document outlines the migration of `Mystira.StoryGenerator.*` packages into the main workspace as shared libraries that can be consumed by `admin-api`, `publisher`, and other services.
 
+## Phase 1 Progress
+
+| Task | Status | Commit |
+|------|--------|--------|
+| Add GraphTheory to `Mystira.Shared` | ✅ Complete | 14 files added |
+| Create `Mystira.Ai` package | ✅ Complete | 9 files added |
+| Create `Mystira.Authoring.Abstractions` package | ✅ Complete | 16 files added |
+| Create `Mystira.Authoring` package | ✅ Complete | 7 files added |
+| Verify packages build | ⏳ Pending | Requires dotnet CLI |
+
+### Files Created
+
+**Mystira.Shared.GraphTheory** (14 files):
+- `IGraph.cs`, `IDirectedGraph.cs`, `IEdge.cs`, `Edge.cs`, `DirectedGraph.cs`
+- `SearchAlgorithms.cs`, `SortAlgorithms.cs`, `PathAlgorithms.cs`
+- `DataFlowNode.cs`, `DataFlowAnalysis.cs`
+- `StateNode.cs`, `StateTransition.cs`, `FrontierMergedGraphBuilder.cs`, `FrontierMergedGraphResult.cs`
+
+**Mystira.Ai** (9 files):
+- `Abstractions/ILLMService.cs`, `Abstractions/ILlmServiceFactory.cs`
+- `Configuration/AiSettings.cs`
+- `Providers/AzureOpenAIService.cs`, `Providers/AnthropicAIService.cs`, `Providers/LLMServiceFactory.cs`
+- `RateLimiting/PerMinuteRateLimiter.cs`
+- `Extensions/ServiceCollectionExtensions.cs`
+- `Mystira.Ai.csproj`
+
+**Mystira.Authoring.Abstractions** (16 files):
+- `Commands/ICommand.cs`, `Commands/ICommandHandler.cs`
+- `Models/Scenario/Scenario.cs`, `Scene.cs`, `Branch.cs`, `ScenarioCharacter.cs`
+- `Models/Entities/SceneEntity.cs`, `EntityClassification.cs`
+- `Models/Consistency/ConsistencyEvaluationResult.cs`, `EntityContinuityIssue.cs`
+- `Services/AuthoringContext.cs`, `IChatOrchestrationService.cs`, `IStoryValidationService.cs`, `IConsistencyEvaluationService.cs`, `IEntityClassificationService.cs`, `IStorySchemaProvider.cs`
+- `Mystira.Authoring.Abstractions.csproj`
+
+**Mystira.Authoring** (7 files):
+- `Commands/Stories/GenerateStoryCommand.cs`, `ValidateStoryCommand.cs`
+- `Commands/Chat/FreeTextCommand.cs`
+- `Graph/ScenarioGraphBuilder.cs`
+- `Services/ConsistencyEvaluationService.cs`
+- `Extensions/ServiceCollectionExtensions.cs`
+- `Mystira.Authoring.csproj`
+
 ## Decisions Made
 
 | Decision | Choice | Rationale |
