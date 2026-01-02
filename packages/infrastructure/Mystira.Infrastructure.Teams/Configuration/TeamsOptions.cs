@@ -5,6 +5,9 @@ namespace Mystira.Infrastructure.Teams.Configuration;
 /// </summary>
 public class TeamsOptions
 {
+    /// <summary>
+    /// The configuration section name for Teams options.
+    /// </summary>
     public const string SectionName = "Teams";
 
     /// <summary>
