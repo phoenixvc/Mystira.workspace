@@ -47,12 +47,12 @@
 
   <ItemGroup>
     <!-- gRPC dependencies -->
-    <PackageReference Include="Grpc.Net.Client" Version="2.67.0" />
-    <PackageReference Include="Grpc.Tools" Version="2.68.1">
+    <PackageReference Include="Grpc.Net.Client" Version="2.76.0" />
+    <PackageReference Include="Grpc.Tools" Version="2.76.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Google.Protobuf" Version="3.29.3" />
+    <PackageReference Include="Google.Protobuf" Version="3.33.2" />
     <!-- Microsoft extensions -->
     <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="9.0.11" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.11" />
