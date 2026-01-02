@@ -1,3 +1,5 @@
+using System.Globalization;
+using System.Numerics;
 using Grpc.Core;
 using Grpc.Net.Client;
 using Microsoft.Extensions.Logging;
@@ -55,6 +57,7 @@ public class GrpcStoryProtocolService : IStoryProtocolService, IDisposable
     }
 
     /// <inheritdoc />
+    /// <exception cref="ArgumentException">Thrown when contentId, contentTitle is null/empty or contributors is null/empty.</exception>
     public async Task<ScenarioStoryProtocol> RegisterIpAssetAsync(
         string contentId,
         string contentTitle,
@@ -62,6 +65,15 @@ public class GrpcStoryProtocolService : IStoryProtocolService, IDisposable
         string? metadataUri = null,
         string? licenseTermsId = null)
     {
+        ArgumentException.ThrowIfNullOrWhiteSpace(contentId, nameof(contentId));
+        ArgumentException.ThrowIfNullOrWhiteSpace(contentTitle, nameof(contentTitle));
+        ArgumentNullException.ThrowIfNull(contributors, nameof(contributors));
+
+        if (contributors.Count == 0)
+        {
+            throw new ArgumentException("At least one contributor is required.", nameof(contributors));
+        }
+
         _logger.LogInformation(
             "Registering IP Asset: ContentId={ContentId}, Title={Title}, Contributors={Count}",
             contentId, contentTitle, contributors.Count);
@@ -126,8 +138,11 @@ public class GrpcStoryProtocolService : IStoryProtocolService, IDisposable
     }
 
     /// <inheritdoc />
+    /// <exception cref="ArgumentException">Thrown when contentId is null or empty.</exception>
     public async Task<bool> IsRegisteredAsync(string contentId)
     {
+        ArgumentException.ThrowIfNullOrWhiteSpace(contentId, nameof(contentId));
+
         _logger.LogDebug("Checking registration status for ContentId={ContentId}", contentId);
 
         var request = new IsRegisteredRequest { ContentId = contentId };
@@ -149,8 +164,11 @@ public class GrpcStoryProtocolService : IStoryProtocolService, IDisposable
     }
 
     /// <inheritdoc />
+    /// <exception cref="ArgumentException">Thrown when ipAssetId is null or empty.</exception>
     public async Task<ScenarioStoryProtocol?> GetRoyaltyConfigurationAsync(string ipAssetId)
     {
+        ArgumentException.ThrowIfNullOrWhiteSpace(ipAssetId, nameof(ipAssetId));
+
         _logger.LogDebug("Getting royalty configuration for IpAssetId={IpAssetId}", ipAssetId);
 
         var request = new GetRoyaltyConfigurationRequest { IpAssetId = ipAssetId };
@@ -186,8 +204,17 @@ public class GrpcStoryProtocolService : IStoryProtocolService, IDisposable
     }
 
     /// <inheritdoc />
+    /// <exception cref="ArgumentException">Thrown when ipAssetId is null/empty or contributors is null/empty.</exception>
     public async Task<ScenarioStoryProtocol> UpdateRoyaltySplitAsync(string ipAssetId, List<Contributor> contributors)
     {
+        ArgumentException.ThrowIfNullOrWhiteSpace(ipAssetId, nameof(ipAssetId));
+        ArgumentNullException.ThrowIfNull(contributors, nameof(contributors));
+
+        if (contributors.Count == 0)
+        {
+            throw new ArgumentException("At least one contributor is required.", nameof(contributors));
+        }
+
         _logger.LogInformation(
             "Updating royalty split for IpAssetId={IpAssetId}, Contributors={Count}",
             ipAssetId, contributors.Count);
@@ -238,8 +265,16 @@ public class GrpcStoryProtocolService : IStoryProtocolService, IDisposable
     }
 
     /// <inheritdoc />
+    /// <exception cref="ArgumentException">Thrown when ipAssetId is null/empty or amount is invalid.</exception>
     public async Task<RoyaltyPaymentResult> PayRoyaltyAsync(string ipAssetId, decimal amount, string? payerReference = null)
     {
+        ArgumentException.ThrowIfNullOrWhiteSpace(ipAssetId, nameof(ipAssetId));
+
+        if (amount <= 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(amount), amount, "Amount must be greater than zero.");
+        }
+
         _logger.LogInformation(
             "Paying royalty: IpAssetId={IpAssetId}, Amount={Amount}, Reference={Reference}",
             ipAssetId, amount, payerReference);
@@ -297,8 +332,11 @@ public class GrpcStoryProtocolService : IStoryProtocolService, IDisposable
     }
 
     /// <inheritdoc />
+    /// <exception cref="ArgumentException">Thrown when ipAssetId is null or empty.</exception>
     public async Task<RoyaltyBalance> GetClaimableRoyaltiesAsync(string ipAssetId)
     {
+        ArgumentException.ThrowIfNullOrWhiteSpace(ipAssetId, nameof(ipAssetId));
+
         _logger.LogDebug("Getting claimable royalties for IpAssetId={IpAssetId}", ipAssetId);
 
         // Note: The proto expects wallet_address, but we need by IP Asset
@@ -333,7 +371,9 @@ public class GrpcStoryProtocolService : IStoryProtocolService, IDisposable
             balance.ContributorBalances.Add(new ContributorBalance
             {
                 WalletAddress = response.WalletAddress,
-                ClaimableAmount = claimable
+                ClaimableAmount = claimable,
+                // Include IP Asset ID from the balance for proper tracking
+                ContributorId = b.IpAssetId
             });
         }
 
@@ -341,8 +381,12 @@ public class GrpcStoryProtocolService : IStoryProtocolService, IDisposable
     }
 
     /// <inheritdoc />
+    /// <exception cref="ArgumentException">Thrown when ipAssetId or contributorWallet is null or empty.</exception>
     public async Task<string> ClaimRoyaltiesAsync(string ipAssetId, string contributorWallet)
     {
+        ArgumentException.ThrowIfNullOrWhiteSpace(ipAssetId, nameof(ipAssetId));
+        ArgumentException.ThrowIfNullOrWhiteSpace(contributorWallet, nameof(contributorWallet));
+
         _logger.LogInformation(
             "Claiming royalties: IpAssetId={IpAssetId}, Wallet={Wallet}",
             ipAssetId, contributorWallet);
@@ -454,32 +498,93 @@ public class GrpcStoryProtocolService : IStoryProtocolService, IDisposable
         return metadata;
     }
 
+    /// <summary>
+    /// Maps domain ContributorRole to gRPC ContributorType.
+    /// </summary>
+    /// <param name="role">The domain contributor role.</param>
+    /// <returns>The corresponding gRPC contributor type.</returns>
     private static ContributorType MapContributorRole(ContributorRole role)
     {
         return role switch
         {
             ContributorRole.Author => ContributorType.Author,
+            ContributorRole.Writer => ContributorType.Author,
             ContributorRole.Artist => ContributorType.Artist,
             ContributorRole.Editor => ContributorType.Curator,
-            ContributorRole.Writer => ContributorType.Author,
+            ContributorRole.Designer => ContributorType.Other,
+            ContributorRole.Composer => ContributorType.Other,
+            ContributorRole.VoiceActor => ContributorType.Other,
+            ContributorRole.Translator => ContributorType.Other,
+            ContributorRole.SoundDesigner => ContributorType.Other,
+            ContributorRole.GameDesigner => ContributorType.Other,
+            ContributorRole.QualityAssurance => ContributorType.Other,
+            ContributorRole.Other => ContributorType.Other,
             _ => ContributorType.Other
         };
     }
 
-    private static string ConvertToWei(decimal amount)
+    /// <summary>
+    /// Converts a decimal token amount to wei string representation.
+    /// Uses BigInteger to handle amounts larger than long.MaxValue.
+    /// </summary>
+    /// <param name="amount">Token amount (e.g., 1.5 for 1.5 tokens).</param>
+    /// <returns>Wei amount as string.</returns>
+    /// <remarks>
+    /// 1 token = 10^18 wei. Using BigInteger prevents overflow for large amounts.
+    /// </remarks>
+    internal static string ConvertToWei(decimal amount)
     {
         // Convert from token amount (with 18 decimals) to wei string
-        var wei = amount * 1_000_000_000_000_000_000m;
-        return ((long)wei).ToString();
+        // Use BigInteger to handle large values that exceed long.MaxValue
+        const decimal weiPerToken = 1_000_000_000_000_000_000m;
+
+        // Handle the conversion carefully to avoid decimal precision issues
+        var wholeTokens = decimal.Truncate(amount);
+        var fractionalTokens = amount - wholeTokens;
+
+        // Calculate wei for whole tokens using BigInteger
+        var wholeTokensWei = new BigInteger(wholeTokens) * new BigInteger(weiPerToken);
+
+        // Calculate wei for fractional part (safe because it's < 10^18)
+        var fractionalWei = (long)(fractionalTokens * weiPerToken);
+
+        var totalWei = wholeTokensWei + fractionalWei;
+        return totalWei.ToString();
     }
 
-    private static decimal ConvertFromWei(string weiString)
+    /// <summary>
+    /// Converts a wei string representation to decimal token amount.
+    /// Uses BigInteger to handle amounts larger than long.MaxValue.
+    /// </summary>
+    /// <param name="weiString">Wei amount as string.</param>
+    /// <returns>Token amount as decimal.</returns>
+    internal static decimal ConvertFromWei(string weiString)
     {
-        if (!long.TryParse(weiString, out var wei))
+        if (string.IsNullOrWhiteSpace(weiString))
         {
             return 0;
         }
-        return wei / 1_000_000_000_000_000_000m;
+
+        if (!BigInteger.TryParse(weiString, NumberStyles.None, CultureInfo.InvariantCulture, out var wei))
+        {
+            return 0;
+        }
+
+        const decimal weiPerToken = 1_000_000_000_000_000_000m;
+
+        // For values that fit in decimal, convert directly
+        // Decimal.MaxValue is approximately 7.9 x 10^28, so we're safe for reasonable token amounts
+        if (wei <= new BigInteger(decimal.MaxValue))
+        {
+            return (decimal)wei / weiPerToken;
+        }
+
+        // For extremely large values, we need to handle carefully
+        // This should be rare in practice
+        var wholeTokens = wei / new BigInteger(weiPerToken);
+        var remainderWei = wei % new BigInteger(weiPerToken);
+
+        return (decimal)wholeTokens + (decimal)remainderWei / weiPerToken;
     }
 
     /// <inheritdoc />

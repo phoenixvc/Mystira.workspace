@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using Microsoft.Extensions.Logging;
 using Mystira.Application.Ports;
 using Mystira.Domain.Models;
@@ -8,12 +9,17 @@ namespace Mystira.Infrastructure.StoryProtocol.Services.Mock;
 /// Mock implementation of IStoryProtocolService for development and testing.
 /// Simulates Story Protocol operations without actual blockchain calls.
 /// </summary>
+/// <remarks>
+/// This implementation is thread-safe and can be used in concurrent scenarios.
+/// All state is stored in memory and will be lost when the service is disposed.
+/// </remarks>
 public class MockStoryProtocolService : IStoryProtocolService
 {
     private readonly ILogger<MockStoryProtocolService> _logger;
-    private readonly Dictionary<string, ScenarioStoryProtocol> _registeredAssets = new();
-    private readonly Dictionary<string, RoyaltyBalance> _balances = new();
-    private readonly Dictionary<string, List<RoyaltyPaymentResult>> _payments = new();
+    private readonly ConcurrentDictionary<string, ScenarioStoryProtocol> _registeredAssets = new();
+    private readonly ConcurrentDictionary<string, RoyaltyBalance> _balances = new();
+    private readonly ConcurrentDictionary<string, List<RoyaltyPaymentResult>> _payments = new();
+    private readonly object _paymentLock = new();
 
     /// <summary>
     /// Initializes a new instance of the <see cref="MockStoryProtocolService"/> class.
@@ -26,6 +32,7 @@ public class MockStoryProtocolService : IStoryProtocolService
     }
 
     /// <inheritdoc />
+    /// <exception cref="ArgumentException">Thrown when contentId, contentTitle is null/empty or contributors is null/empty.</exception>
     public Task<ScenarioStoryProtocol> RegisterIpAssetAsync(
         string contentId,
         string contentTitle,
@@ -33,6 +40,15 @@ public class MockStoryProtocolService : IStoryProtocolService
         string? metadataUri = null,
         string? licenseTermsId = null)
     {
+        ArgumentException.ThrowIfNullOrWhiteSpace(contentId, nameof(contentId));
+        ArgumentException.ThrowIfNullOrWhiteSpace(contentTitle, nameof(contentTitle));
+        ArgumentNullException.ThrowIfNull(contributors, nameof(contributors));
+
+        if (contributors.Count == 0)
+        {
+            throw new ArgumentException("At least one contributor is required.", nameof(contributors));
+        }
+
         _logger.LogInformation(
             "Mock: Registering IP Asset: ContentId={ContentId}, Title={Title}, Contributors={Count}",
             contentId, contentTitle, contributors.Count);
@@ -83,8 +99,11 @@ public class MockStoryProtocolService : IStoryProtocolService
     }
 
     /// <inheritdoc />
+    /// <exception cref="ArgumentException">Thrown when contentId is null or empty.</exception>
     public Task<bool> IsRegisteredAsync(string contentId)
     {
+        ArgumentException.ThrowIfNullOrWhiteSpace(contentId, nameof(contentId));
+
         var isRegistered = _registeredAssets.ContainsKey(contentId);
         _logger.LogDebug(
             "Mock: Checking registration: ContentId={ContentId}, IsRegistered={IsRegistered}",
@@ -93,8 +112,11 @@ public class MockStoryProtocolService : IStoryProtocolService
     }
 
     /// <inheritdoc />
+    /// <exception cref="ArgumentException">Thrown when ipAssetId is null or empty.</exception>
     public Task<ScenarioStoryProtocol?> GetRoyaltyConfigurationAsync(string ipAssetId)
     {
+        ArgumentException.ThrowIfNullOrWhiteSpace(ipAssetId, nameof(ipAssetId));
+
         _logger.LogDebug("Mock: Getting royalty configuration for IpAssetId={IpAssetId}", ipAssetId);
 
         var asset = _registeredAssets.Values.FirstOrDefault(a => a.IpAssetId == ipAssetId);
@@ -102,8 +124,17 @@ public class MockStoryProtocolService : IStoryProtocolService
     }
 
     /// <inheritdoc />
+    /// <exception cref="ArgumentException">Thrown when ipAssetId is null/empty or contributors is null/empty.</exception>
     public Task<ScenarioStoryProtocol> UpdateRoyaltySplitAsync(string ipAssetId, List<Contributor> contributors)
     {
+        ArgumentException.ThrowIfNullOrWhiteSpace(ipAssetId, nameof(ipAssetId));
+        ArgumentNullException.ThrowIfNull(contributors, nameof(contributors));
+
+        if (contributors.Count == 0)
+        {
+            throw new ArgumentException("At least one contributor is required.", nameof(contributors));
+        }
+
         _logger.LogInformation(
             "Mock: Updating royalty split for IpAssetId={IpAssetId}, Contributors={Count}",
             ipAssetId, contributors.Count);
@@ -136,8 +167,16 @@ public class MockStoryProtocolService : IStoryProtocolService
     }
 
     /// <inheritdoc />
+    /// <exception cref="ArgumentException">Thrown when ipAssetId is null/empty or amount is invalid.</exception>
     public Task<RoyaltyPaymentResult> PayRoyaltyAsync(string ipAssetId, decimal amount, string? payerReference = null)
     {
+        ArgumentException.ThrowIfNullOrWhiteSpace(ipAssetId, nameof(ipAssetId));
+
+        if (amount <= 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(amount), amount, "Amount must be greater than zero.");
+        }
+
         _logger.LogInformation(
             "Mock: Paying royalty: IpAssetId={IpAssetId}, Amount={Amount}, Reference={Reference}",
             ipAssetId, amount, payerReference);
@@ -158,37 +197,46 @@ public class MockStoryProtocolService : IStoryProtocolService
             Distributions = new List<RoyaltyDistribution>()
         };
 
-        // Update balances and create distributions
+        // Update balances and create distributions (thread-safe)
         if (_balances.TryGetValue(ipAssetId, out var balance))
         {
-            balance.TotalReceived += amount;
-
-            foreach (var cb in balance.ContributorBalances)
+            lock (_paymentLock)
             {
-                var distributedAmount = amount * (cb.SharePercentage / 100m);
-                cb.ClaimableAmount += distributedAmount;
-                cb.TotalEarned += distributedAmount;
+                balance.TotalReceived += amount;
 
-                result.Distributions.Add(new RoyaltyDistribution
+                foreach (var cb in balance.ContributorBalances)
                 {
-                    ContributorId = cb.ContributorId,
-                    WalletAddress = cb.WalletAddress,
-                    ContributorName = cb.ContributorName,
-                    SharePercentage = cb.SharePercentage,
-                    Amount = distributedAmount
-                });
+                    var distributedAmount = amount * (cb.SharePercentage / 100m);
+                    cb.ClaimableAmount += distributedAmount;
+                    cb.TotalEarned += distributedAmount;
+
+                    result.Distributions.Add(new RoyaltyDistribution
+                    {
+                        ContributorId = cb.ContributorId,
+                        WalletAddress = cb.WalletAddress,
+                        ContributorName = cb.ContributorName,
+                        SharePercentage = cb.SharePercentage,
+                        Amount = distributedAmount
+                    });
+                }
+
+                balance.TotalClaimable = balance.ContributorBalances.Sum(cb => cb.ClaimableAmount);
+                balance.LastUpdated = DateTime.UtcNow;
             }
-
-            balance.TotalClaimable = balance.ContributorBalances.Sum(cb => cb.ClaimableAmount);
-            balance.LastUpdated = DateTime.UtcNow;
         }
 
-        // Track payment
-        if (!_payments.ContainsKey(ipAssetId))
-        {
-            _payments[ipAssetId] = new List<RoyaltyPaymentResult>();
-        }
-        _payments[ipAssetId].Add(result);
+        // Track payment (thread-safe)
+        _payments.AddOrUpdate(
+            ipAssetId,
+            _ => new List<RoyaltyPaymentResult> { result },
+            (_, existing) =>
+            {
+                lock (_paymentLock)
+                {
+                    existing.Add(result);
+                    return existing;
+                }
+            });
 
         _logger.LogInformation(
             "Mock: Royalty paid: PaymentId={PaymentId}, TxHash={TxHash}, Distributions={Count}",
@@ -198,8 +246,11 @@ public class MockStoryProtocolService : IStoryProtocolService
     }
 
     /// <inheritdoc />
+    /// <exception cref="ArgumentException">Thrown when ipAssetId is null or empty.</exception>
     public Task<RoyaltyBalance> GetClaimableRoyaltiesAsync(string ipAssetId)
     {
+        ArgumentException.ThrowIfNullOrWhiteSpace(ipAssetId, nameof(ipAssetId));
+
         _logger.LogDebug("Mock: Getting claimable royalties for IpAssetId={IpAssetId}", ipAssetId);
 
         if (_balances.TryGetValue(ipAssetId, out var balance))
@@ -221,31 +272,38 @@ public class MockStoryProtocolService : IStoryProtocolService
     }
 
     /// <inheritdoc />
+    /// <exception cref="ArgumentException">Thrown when ipAssetId or contributorWallet is null or empty.</exception>
     public Task<string> ClaimRoyaltiesAsync(string ipAssetId, string contributorWallet)
     {
+        ArgumentException.ThrowIfNullOrWhiteSpace(ipAssetId, nameof(ipAssetId));
+        ArgumentException.ThrowIfNullOrWhiteSpace(contributorWallet, nameof(contributorWallet));
+
         _logger.LogInformation(
             "Mock: Claiming royalties: IpAssetId={IpAssetId}, Wallet={Wallet}",
             ipAssetId, contributorWallet);
 
         var txHash = $"0x{Guid.NewGuid():N}";
 
-        // Update balances
+        // Update balances (thread-safe)
         if (_balances.TryGetValue(ipAssetId, out var balance))
         {
-            var contributorBalance = balance.ContributorBalances
-                .FirstOrDefault(cb => cb.WalletAddress == contributorWallet);
-
-            if (contributorBalance != null)
+            lock (_paymentLock)
             {
-                contributorBalance.ClaimedAmount += contributorBalance.ClaimableAmount;
-                balance.TotalClaimed += contributorBalance.ClaimableAmount;
-                balance.TotalClaimable -= contributorBalance.ClaimableAmount;
-                contributorBalance.ClaimableAmount = 0;
-                balance.LastUpdated = DateTime.UtcNow;
+                var contributorBalance = balance.ContributorBalances
+                    .FirstOrDefault(cb => cb.WalletAddress == contributorWallet);
 
-                _logger.LogInformation(
-                    "Mock: Royalties claimed: TxHash={TxHash}, TotalClaimed={TotalClaimed}",
-                    txHash, contributorBalance.ClaimedAmount);
+                if (contributorBalance != null)
+                {
+                    contributorBalance.ClaimedAmount += contributorBalance.ClaimableAmount;
+                    balance.TotalClaimed += contributorBalance.ClaimableAmount;
+                    balance.TotalClaimable -= contributorBalance.ClaimableAmount;
+                    contributorBalance.ClaimableAmount = 0;
+                    balance.LastUpdated = DateTime.UtcNow;
+
+                    _logger.LogInformation(
+                        "Mock: Royalties claimed: TxHash={TxHash}, TotalClaimed={TotalClaimed}",
+                        txHash, contributorBalance.ClaimedAmount);
+                }
             }
         }
 

@@ -226,6 +226,16 @@ jobs:
           done
           echo "infrastructure=success" >> $GITHUB_OUTPUT
 
+      - name: Test Mystira.Infrastructure.StoryProtocol with coverage
+        id: test-storyprotocol
+        run: |
+          echo "Testing Mystira.Infrastructure.StoryProtocol with coverage..."
+          dotnet test packages/infrastructure/Mystira.Infrastructure.StoryProtocol.Tests --configuration Release \
+            --collect:"XPlat Code Coverage" \
+            --results-directory ./coverage/storyprotocol \
+            -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=cobertura
+          echo "storyprotocol_tests=success" >> $GITHUB_OUTPUT
+
       - name: Upload .NET Core coverage to Codecov
         uses: codecov/codecov-action@v5
         with:
@@ -246,6 +256,16 @@ jobs:
           fail_ci_if_error: false
           verbose: true
 
+      - name: Upload .NET StoryProtocol coverage to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          flags: dotnet-storyprotocol
+          directory: ./coverage/storyprotocol
+          files: "**/coverage.cobertura.xml"
+          fail_ci_if_error: false
+          verbose: true
+
       - name: Build Summary
         run: |
           echo "## .NET Build Summary" >> $GITHUB_STEP_SUMMARY
@@ -258,6 +278,7 @@ jobs:
           echo "| Mystira.Domain | ${{ steps.build-domain.outputs.domain == 'success' && '✅' || '❌' }} | N/A |" >> $GITHUB_STEP_SUMMARY
           echo "| Mystira.Application | ${{ steps.build-application.outputs.application == 'success' && '✅' || '❌' }} | N/A |" >> $GITHUB_STEP_SUMMARY
           echo "| Mystira.Infrastructure.* (7) | ${{ steps.build-infrastructure.outputs.infrastructure == 'success' && '✅' || '❌' }} | N/A |" >> $GITHUB_STEP_SUMMARY
+          echo "| Mystira.Infrastructure.StoryProtocol.Tests | N/A | ${{ steps.test-storyprotocol.outputs.storyprotocol_tests == 'success' && '✅' || '❌' }} |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### .NET Lint" >> $GITHUB_STEP_SUMMARY
           echo "| Status |" >> $GITHUB_STEP_SUMMARY
