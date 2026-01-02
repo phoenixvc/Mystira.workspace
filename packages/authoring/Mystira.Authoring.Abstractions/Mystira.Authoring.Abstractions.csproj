@@ -37,6 +37,7 @@
 
     <!-- Project References -->
     <ProjectReference Include="../../contracts/dotnet/Mystira.Contracts/Mystira.Contracts.csproj" />
+    <ProjectReference Include="../../shared/Mystira.Shared/Mystira.Shared.csproj" />
   </ItemGroup>
 
 </Project>
