@@ -2,14 +2,14 @@ name: Publish NuGet Packages
 
 # Publishes packages to GitHub Packages
 # Triggered by:
-#   - Push to main (with package path changes)
+#   - Push to dev (with package path changes)
 #   - Tag push (v*)
 #   - Manual workflow dispatch
 #   - Repository dispatch from release.yml (nuget-publish, contracts-nuget-publish)
 on:
   push:
     branches:
-      - main
+      - dev
     paths:
       - 'packages/shared/**'
       - 'packages/contracts/dotnet/**'
