@@ -7,6 +7,7 @@ using Microsoft.Extensions.Options;
 using Mystira.Application.Configuration.StoryProtocol;
 using Mystira.Application.Ports;
 using Mystira.Chain.V1;
+using Mystira.Domain.Enums;
 using Mystira.Domain.Models;
 using Polly;
 using DomainContributor = Mystira.Domain.Models.Contributor;
