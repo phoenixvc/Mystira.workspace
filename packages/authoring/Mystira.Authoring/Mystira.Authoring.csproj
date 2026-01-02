@@ -1,0 +1,48 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <RootNamespace>Mystira.Authoring</RootNamespace>
+
+    <!-- Package metadata -->
+    <PackageId>Mystira.Authoring</PackageId>
+    <Version>0.1.0-alpha</Version>
+    <Authors>Mystira Team</Authors>
+    <Company>PhoenixVC</Company>
+    <Description>Implementation package for Mystira story authoring - services, handlers, and graph analysis</Description>
+    <PackageTags>mystira;authoring;story;implementation</PackageTags>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/phoenixvc/Mystira.workspace</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/phoenixvc/Mystira.workspace.git</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+
+    <!-- Build configuration -->
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <IsPackable>true</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- MediatR for command pattern -->
+    <PackageReference Include="MediatR" Version="12.4.1" />
+
+    <!-- Microsoft Extensions -->
+    <PackageReference Include="Microsoft.Extensions.Options" Version="9.0.11" />
+    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="9.0.11" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.11" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.11" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="9.0.11" />
+
+    <!-- JSON serialization -->
+    <PackageReference Include="System.Text.Json" Version="9.0.11" />
+
+    <!-- Project References -->
+    <ProjectReference Include="../Mystira.Authoring.Abstractions/Mystira.Authoring.Abstractions.csproj" />
+    <ProjectReference Include="../../ai/Mystira.Ai/Mystira.Ai.csproj" />
+    <ProjectReference Include="../../shared/Mystira.Shared/Mystira.Shared.csproj" />
+  </ItemGroup>
+
+</Project>

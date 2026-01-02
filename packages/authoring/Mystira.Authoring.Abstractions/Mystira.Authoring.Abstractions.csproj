@@ -1,0 +1,43 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <RootNamespace>Mystira.Authoring.Abstractions</RootNamespace>
+
+    <!-- Package metadata -->
+    <PackageId>Mystira.Authoring.Abstractions</PackageId>
+    <Version>0.1.0-alpha</Version>
+    <Authors>Mystira Team</Authors>
+    <Company>PhoenixVC</Company>
+    <Description>Abstractions for Mystira story authoring - interfaces, commands, and domain models</Description>
+    <PackageTags>mystira;authoring;story;abstractions</PackageTags>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/phoenixvc/Mystira.workspace</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/phoenixvc/Mystira.workspace.git</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+
+    <!-- Build configuration -->
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <IsPackable>true</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- MediatR for command pattern -->
+    <PackageReference Include="MediatR" Version="12.4.1" />
+
+    <!-- JSON serialization -->
+    <PackageReference Include="System.Text.Json" Version="9.0.11" />
+
+    <!-- Data annotations for validation -->
+    <PackageReference Include="System.ComponentModel.Annotations" Version="5.0.0" />
+
+    <!-- Project References -->
+    <ProjectReference Include="../../contracts/dotnet/Mystira.Contracts/Mystira.Contracts.csproj" />
+    <ProjectReference Include="../../shared/Mystira.Shared/Mystira.Shared.csproj" />
+  </ItemGroup>
+
+</Project>

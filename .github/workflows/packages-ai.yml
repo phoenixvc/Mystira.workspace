@@ -1,0 +1,53 @@
+name: Mystira.Ai CI
+
+on:
+  push:
+    paths:
+      - 'packages/ai/**'
+      - 'packages/contracts/**'
+      - 'packages/domain/**'
+      - '.github/workflows/packages-ai.yml'
+    branches:
+      - main
+      - 'release/**'
+  pull_request:
+    paths:
+      - 'packages/ai/**'
+      - 'packages/contracts/**'
+      - 'packages/domain/**'
+      - '.github/workflows/packages-ai.yml'
+
+jobs:
+  build-test:
+    name: Build and Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+
+      - name: Restore dependencies
+        run: dotnet restore packages/ai/Mystira.Ai/Mystira.Ai.csproj
+
+      - name: Build
+        run: dotnet build packages/ai/Mystira.Ai/Mystira.Ai.csproj --no-restore --configuration Release
+
+      - name: Restore test dependencies
+        run: dotnet restore packages/ai/Mystira.Ai.Tests/Mystira.Ai.Tests.csproj
+
+      - name: Test
+        run: dotnet test packages/ai/Mystira.Ai.Tests/Mystira.Ai.Tests.csproj --no-restore --configuration Release --collect:"XPlat Code Coverage" --results-directory ./coverage
+
+      - name: Upload coverage
+        uses: codecov/codecov-action@v4
+        if: success()
+        with:
+          files: ./coverage/**/coverage.cobertura.xml
+          flags: ai
+          name: mystira-ai
+          fail_ci_if_error: false
