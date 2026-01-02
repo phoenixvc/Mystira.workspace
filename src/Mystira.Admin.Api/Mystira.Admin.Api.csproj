@@ -44,10 +44,10 @@
     <PackageReference Include="Mystira.Domain" Version="0.5.0-alpha-*" />
     <PackageReference Include="Mystira.Application" Version="0.5.0-alpha-*" />
     <PackageReference Include="Mystira.Contracts" Version="0.5.0-alpha-*" />
-    <PackageReference Include="Mystira.Infrastructure.Azure" Version="1.0.0" />
-    <PackageReference Include="Mystira.Infrastructure.Data" Version="1.0.0" />
-    <PackageReference Include="Mystira.Infrastructure.Discord" Version="1.0.0" />
-    <PackageReference Include="Mystira.Infrastructure.StoryProtocol" Version="1.0.0" />
+    <PackageReference Include="Mystira.Infrastructure.Azure" Version="0.5.0-alpha-*" />
+    <PackageReference Include="Mystira.Infrastructure.Data" Version="0.5.0-alpha-*" />
+    <PackageReference Include="Mystira.Infrastructure.Discord" Version="0.5.0-alpha-*" />
+    <PackageReference Include="Mystira.Infrastructure.StoryProtocol" Version="0.5.0-alpha-*" />
     <PackageReference Include="Mystira.Shared" Version="0.5.0-alpha-*" />
 
     <!-- Ardalis.Specification for data access patterns (version matches Mystira.Application dependency) -->

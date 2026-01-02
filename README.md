@@ -58,10 +58,10 @@ This project depends on NuGet packages published from shared Mystira repositorie
 | `Mystira.Domain` | 0.5.0-alpha | Domain models and entities |
 | `Mystira.Application` | 0.5.0-alpha | CQRS handlers and use cases |
 | `Mystira.Contracts` | 0.5.0-alpha | API contracts and DTOs |
-| `Mystira.Infrastructure.Azure` | 1.0.0 | Azure Cosmos DB, Blob Storage |
-| `Mystira.Infrastructure.Data` | 1.0.0 | Repository implementations |
-| `Mystira.Infrastructure.Discord` | 1.0.0 | Discord bot integration |
-| `Mystira.Infrastructure.StoryProtocol` | 1.0.0 | Story Protocol blockchain/IP integration |
+| `Mystira.Infrastructure.Azure` | 0.5.0-alpha | Azure Cosmos DB, Blob Storage |
+| `Mystira.Infrastructure.Data` | 0.5.0-alpha | Repository implementations |
+| `Mystira.Infrastructure.Discord` | 0.5.0-alpha | Discord bot integration |
+| `Mystira.Infrastructure.StoryProtocol` | 0.5.0-alpha | Story Protocol blockchain/IP integration |
 | `Mystira.Shared` | 0.5.0-alpha | Shared services and middleware |
 
 ## Setup
