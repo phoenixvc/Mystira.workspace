@@ -16,6 +16,9 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "core", "core", "{01234567-89AB-CDEF-0123-456789ABCDEF}"
 EndProject
 
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "infrastructure", "infrastructure", "{11111111-1111-1111-1111-111111111111}"
+EndProject
+
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mystira.Shared", "packages\shared\Mystira.Shared\Mystira.Shared.csproj", "{D4E5F6A7-B8C9-0123-DEF0-234567890123}"
 EndProject
 
@@ -35,6 +38,39 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mystira.Core", "packages\co
 EndProject
 
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mystira.Core.Tests", "packages\core\Mystira.Core.Tests\Mystira.Core.Tests.csproj", "{D0E1F2A3-B4C5-6789-3456-890123456789}"
+EndProject
+
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mystira.Infrastructure.Data", "packages\infrastructure\Mystira.Infrastructure.Data\Mystira.Infrastructure.Data.csproj", "{22222222-2222-2222-2222-222222222222}"
+EndProject
+
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mystira.Infrastructure.Azure", "packages\infrastructure\Mystira.Infrastructure.Azure\Mystira.Infrastructure.Azure.csproj", "{33333333-3333-3333-3333-333333333333}"
+EndProject
+
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mystira.Infrastructure.Discord", "packages\infrastructure\Mystira.Infrastructure.Discord\Mystira.Infrastructure.Discord.csproj", "{44444444-4444-4444-4444-444444444444}"
+EndProject
+
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mystira.Infrastructure.Teams", "packages\infrastructure\Mystira.Infrastructure.Teams\Mystira.Infrastructure.Teams.csproj", "{55555555-5555-5555-5555-555555555555}"
+EndProject
+
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mystira.Infrastructure.WhatsApp", "packages\infrastructure\Mystira.Infrastructure.WhatsApp\Mystira.Infrastructure.WhatsApp.csproj", "{66666666-6666-6666-6666-666666666666}"
+EndProject
+
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mystira.Infrastructure.Payments", "packages\infrastructure\Mystira.Infrastructure.Payments\Mystira.Infrastructure.Payments.csproj", "{77777777-7777-7777-7777-777777777777}"
+EndProject
+
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mystira.Infrastructure.Data.Tests", "packages\infrastructure\Mystira.Infrastructure.Data.Tests\Mystira.Infrastructure.Data.Tests.csproj", "{88888888-8888-8888-8888-888888888888}"
+EndProject
+
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mystira.Infrastructure.Discord.Tests", "packages\infrastructure\Mystira.Infrastructure.Discord.Tests\Mystira.Infrastructure.Discord.Tests.csproj", "{99999999-9999-9999-9999-999999999999}"
+EndProject
+
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mystira.Infrastructure.Teams.Tests", "packages\infrastructure\Mystira.Infrastructure.Teams.Tests\Mystira.Infrastructure.Teams.Tests.csproj", "{AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAAA}"
+EndProject
+
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mystira.Infrastructure.WhatsApp.Tests", "packages\infrastructure\Mystira.Infrastructure.WhatsApp.Tests\Mystira.Infrastructure.WhatsApp.Tests.csproj", "{BBBBBBBB-BBBB-BBBB-BBBB-BBBBBBBBBBBB}"
+EndProject
+
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mystira.Infrastructure.Payments.Tests", "packages\infrastructure\Mystira.Infrastructure.Payments.Tests\Mystira.Infrastructure.Payments.Tests.csproj", "{CCCCCCCC-CCCC-CCCC-CCCC-CCCCCCCCCCCC}"
 EndProject
 
 Global
@@ -71,11 +107,56 @@ Global
 		{D0E1F2A3-B4C5-6789-3456-890123456789}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D0E1F2A3-B4C5-6789-3456-890123456789}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D0E1F2A3-B4C5-6789-3456-890123456789}.Release|Any CPU.Build.0 = Release|Any CPU
+		{22222222-2222-2222-2222-222222222222}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{22222222-2222-2222-2222-222222222222}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{22222222-2222-2222-2222-222222222222}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{22222222-2222-2222-2222-222222222222}.Release|Any CPU.Build.0 = Release|Any CPU
+		{33333333-3333-3333-3333-333333333333}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{33333333-3333-3333-3333-333333333333}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{33333333-3333-3333-3333-333333333333}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{33333333-3333-3333-3333-333333333333}.Release|Any CPU.Build.0 = Release|Any CPU
+		{44444444-4444-4444-4444-444444444444}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{44444444-4444-4444-4444-444444444444}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{44444444-4444-4444-4444-444444444444}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{44444444-4444-4444-4444-444444444444}.Release|Any CPU.Build.0 = Release|Any CPU
+		{55555555-5555-5555-5555-555555555555}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{55555555-5555-5555-5555-555555555555}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{55555555-5555-5555-5555-555555555555}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{55555555-5555-5555-5555-555555555555}.Release|Any CPU.Build.0 = Release|Any CPU
+		{66666666-6666-6666-6666-666666666666}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{66666666-6666-6666-6666-666666666666}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{66666666-6666-6666-6666-666666666666}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{66666666-6666-6666-6666-666666666666}.Release|Any CPU.Build.0 = Release|Any CPU
+		{77777777-7777-7777-7777-777777777777}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{77777777-7777-7777-7777-777777777777}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{77777777-7777-7777-7777-777777777777}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{77777777-7777-7777-7777-777777777777}.Release|Any CPU.Build.0 = Release|Any CPU
+		{88888888-8888-8888-8888-888888888888}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{88888888-8888-8888-8888-888888888888}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{88888888-8888-8888-8888-888888888888}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{88888888-8888-8888-8888-888888888888}.Release|Any CPU.Build.0 = Release|Any CPU
+		{99999999-9999-9999-9999-999999999999}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{99999999-9999-9999-9999-999999999999}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{99999999-9999-9999-9999-999999999999}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{99999999-9999-9999-9999-999999999999}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAAA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAAA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAAA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAAA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BBBBBBBB-BBBB-BBBB-BBBB-BBBBBBBBBBBB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BBBBBBBB-BBBB-BBBB-BBBB-BBBBBBBBBBBB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BBBBBBBB-BBBB-BBBB-BBBB-BBBBBBBBBBBB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BBBBBBBB-BBBB-BBBB-BBBB-BBBBBBBBBBBB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CCCCCCCC-CCCC-CCCC-CCCC-CCCCCCCCCCCC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CCCCCCCC-CCCC-CCCC-CCCC-CCCCCCCCCCCC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CCCCCCCC-CCCC-CCCC-CCCC-CCCCCCCCCCCC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CCCCCCCC-CCCC-CCCC-CCCC-CCCCCCCCCCCC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{B2C3D4E5-F6A7-8901-BCDE-F12345678901} = {A1B2C3D4-E5F6-7890-ABCD-EF1234567890}
 		{C3D4E5F6-A7B8-9012-CDEF-123456789012} = {A1B2C3D4-E5F6-7890-ABCD-EF1234567890}
 		{01234567-89AB-CDEF-0123-456789ABCDEF} = {A1B2C3D4-E5F6-7890-ABCD-EF1234567890}
+		{11111111-1111-1111-1111-111111111111} = {A1B2C3D4-E5F6-7890-ABCD-EF1234567890}
 		{D4E5F6A7-B8C9-0123-DEF0-234567890123} = {B2C3D4E5-F6A7-8901-BCDE-F12345678901}
 		{E5F6A7B8-C9D0-1234-EF01-345678901234} = {B2C3D4E5-F6A7-8901-BCDE-F12345678901}
 		{F6A7B8C9-D0E1-2345-F012-456789012345} = {B2C3D4E5-F6A7-8901-BCDE-F12345678901}
@@ -83,6 +164,17 @@ Global
 		{B8C9D0E1-F2A3-4567-1234-678901234567} = {C3D4E5F6-A7B8-9012-CDEF-123456789012}
 		{C9D0E1F2-A3B4-5678-2345-789012345678} = {01234567-89AB-CDEF-0123-456789ABCDEF}
 		{D0E1F2A3-B4C5-6789-3456-890123456789} = {01234567-89AB-CDEF-0123-456789ABCDEF}
+		{22222222-2222-2222-2222-222222222222} = {11111111-1111-1111-1111-111111111111}
+		{33333333-3333-3333-3333-333333333333} = {11111111-1111-1111-1111-111111111111}
+		{44444444-4444-4444-4444-444444444444} = {11111111-1111-1111-1111-111111111111}
+		{55555555-5555-5555-5555-555555555555} = {11111111-1111-1111-1111-111111111111}
+		{66666666-6666-6666-6666-666666666666} = {11111111-1111-1111-1111-111111111111}
+		{77777777-7777-7777-7777-777777777777} = {11111111-1111-1111-1111-111111111111}
+		{88888888-8888-8888-8888-888888888888} = {11111111-1111-1111-1111-111111111111}
+		{99999999-9999-9999-9999-999999999999} = {11111111-1111-1111-1111-111111111111}
+		{AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAAA} = {11111111-1111-1111-1111-111111111111}
+		{BBBBBBBB-BBBB-BBBB-BBBB-BBBBBBBBBBBB} = {11111111-1111-1111-1111-111111111111}
+		{CCCCCCCC-CCCC-CCCC-CCCC-CCCCCCCCCCCC} = {11111111-1111-1111-1111-111111111111}
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

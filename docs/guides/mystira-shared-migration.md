@@ -23,8 +23,49 @@ This guide covers migrating to `Mystira.Shared` and adopting its new features.
 - Update NuGet package reference:
 
 ```xml
-<PackageReference Include="Mystira.Shared" Version="0.2.0" />
+<PackageReference Include="Mystira.Shared" Version="0.4.*" />
 ```
+
+---
+
+## Important: Polyglot Deprecation Notice
+
+The polyglot persistence interfaces in `Mystira.Shared.Data.Polyglot` are **deprecated** as of January 2026.
+
+### What's Deprecated
+
+| Deprecated Interface | Location |
+|---------------------|----------|
+| `IPolyglotRepository<T>` | `Mystira.Shared.Data.Polyglot` |
+| `DatabaseTargetAttribute` | `Mystira.Shared.Data.Polyglot` |
+| `DatabaseTarget` enum | `Mystira.Shared.Data.Polyglot` |
+
+### Migration Path
+
+Use the new consolidated packages instead:
+
+| Use Instead | Package |
+|-------------|---------|
+| `Mystira.Application.Ports.Data.IPolyglotRepository<T>` | `Mystira.Application` |
+| `Mystira.Infrastructure.Data.Polyglot.PolyglotRepository<T>` | `Mystira.Infrastructure.Data` |
+
+### Code Migration
+
+```csharp
+// Before (deprecated)
+using Mystira.Shared.Data.Polyglot;
+
+[DatabaseTarget(DatabaseTarget.CosmosDb)]
+public class Scenario : AuditableEntity { }
+
+// After
+using Mystira.Application.Ports.Data;
+
+[DatabaseTarget(DatabaseTarget.CosmosDb)]
+public class Scenario : AuditableEntity { }
+```
+
+For full infrastructure migration details, see the [Infrastructure Migration Guide](../migrations/mystira-infrastructure-migration.md).
 
 ---
 

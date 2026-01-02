@@ -9,6 +9,18 @@ namespace Mystira.Shared.Polyglot;
 /// Extends IRepository with polyglot-specific capabilities.
 /// </summary>
 /// <typeparam name="TEntity">The entity type.</typeparam>
+/// <remarks>
+/// <para>
+/// <b>DEPRECATED:</b> This interface is deprecated in favor of
+/// <c>Mystira.Application.Ports.Data.IPolyglotRepository&lt;T&gt;</c> and the implementation in
+/// <c>Mystira.Infrastructure.Data.Polyglot.PolyglotRepository&lt;T&gt;</c>.
+/// </para>
+/// <para>
+/// New code should use <c>Mystira.Infrastructure.Data</c> package which provides the canonical
+/// polyglot persistence implementation following the ports/adapters architecture pattern.
+/// </para>
+/// </remarks>
+[Obsolete("Use Mystira.Application.Ports.Data.IPolyglotRepository<T> and Mystira.Infrastructure.Data instead. This will be removed in a future version.")]
 public interface IPolyglotRepository<TEntity> : IRepository<TEntity> where TEntity : class
 {
     /// <summary>

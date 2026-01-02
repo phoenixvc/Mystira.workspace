@@ -207,6 +207,24 @@ jobs:
           dotnet build packages/application/Mystira.Application --configuration Release
           echo "application=success" >> $GITHUB_OUTPUT
 
+      - name: Build Mystira.Infrastructure packages
+        id: build-infrastructure
+        run: |
+          echo "Building Mystira.Infrastructure packages..."
+          PACKAGES=(
+            "packages/infrastructure/Mystira.Infrastructure.Data"
+            "packages/infrastructure/Mystira.Infrastructure.Azure"
+            "packages/infrastructure/Mystira.Infrastructure.Discord"
+            "packages/infrastructure/Mystira.Infrastructure.Teams"
+            "packages/infrastructure/Mystira.Infrastructure.WhatsApp"
+            "packages/infrastructure/Mystira.Infrastructure.Payments"
+          )
+          for PKG in "${PACKAGES[@]}"; do
+            echo "Building $PKG..."
+            dotnet build "$PKG" --configuration Release
+          done
+          echo "infrastructure=success" >> $GITHUB_OUTPUT
+
       - name: Upload .NET Core coverage to Codecov
         uses: codecov/codecov-action@v5
         with:
@@ -238,6 +256,7 @@ jobs:
           echo "| Mystira.Shared | ${{ steps.build-shared.outputs.shared == 'success' && '✅' || '❌' }} | ${{ steps.test-shared.outputs.tests == 'success' && '✅' || '⏭️' }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Mystira.Domain | ${{ steps.build-domain.outputs.domain == 'success' && '✅' || '❌' }} | N/A |" >> $GITHUB_STEP_SUMMARY
           echo "| Mystira.Application | ${{ steps.build-application.outputs.application == 'success' && '✅' || '❌' }} | N/A |" >> $GITHUB_STEP_SUMMARY
+          echo "| Mystira.Infrastructure.* (6) | ${{ steps.build-infrastructure.outputs.infrastructure == 'success' && '✅' || '❌' }} | N/A |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### .NET Lint" >> $GITHUB_STEP_SUMMARY
           echo "| Status |" >> $GITHUB_STEP_SUMMARY

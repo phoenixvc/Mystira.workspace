@@ -1,7 +1,7 @@
 name: "[Publish] NuGet Packages"
 
-# Unified NuGet package publishing for Domain, Contracts, Shared, and Application
-# Publishes packages in dependency order: Domain → Contracts → Shared → Application
+# Unified NuGet package publishing for Domain, Contracts, Shared, Application, and Infrastructure
+# Publishes packages in dependency order: Domain → Contracts → Shared → Application → Infrastructure.*
 #
 # Triggered by:
 # - Push to dev branch (publishes pre-release: 0.5.0-alpha-build.123)
@@ -13,10 +13,16 @@ name: "[Publish] NuGet Packages"
 # - Main push: Stable to GitHub Packages + NuGet.org
 #
 # Package Dependencies:
-#   Mystira.Domain      (no dependencies)
-#   Mystira.Contracts   (depends on Domain)
-#   Mystira.Shared      (depends on Domain, optionally Contracts)
-#   Mystira.Application (depends on Domain, Contracts, Shared)
+#   Mystira.Domain                  (no dependencies)
+#   Mystira.Contracts               (depends on Domain)
+#   Mystira.Shared                  (depends on Domain, optionally Contracts)
+#   Mystira.Application             (depends on Domain, Contracts, Shared)
+#   Mystira.Infrastructure.Data     (depends on Domain, Application, Shared)
+#   Mystira.Infrastructure.Azure    (depends on Application)
+#   Mystira.Infrastructure.Discord  (depends on Application)
+#   Mystira.Infrastructure.Teams    (depends on Application)
+#   Mystira.Infrastructure.WhatsApp (depends on Application)
+#   Mystira.Infrastructure.Payments (depends on Application, Contracts)
 
 on:
   push:
@@ -28,6 +34,7 @@ on:
       - 'packages/contracts/dotnet/**'
       - 'packages/shared/**'
       - 'packages/application/**'
+      - 'packages/infrastructure/**'
       - '.github/workflows/packages-publish.yml'
 
   workflow_dispatch:
@@ -72,6 +79,7 @@ jobs:
       contracts_changed: ${{ steps.changes.outputs.contracts }}
       shared_changed: ${{ steps.changes.outputs.shared }}
       application_changed: ${{ steps.changes.outputs.application }}
+      infrastructure_changed: ${{ steps.changes.outputs.infrastructure }}
       version_suffix: ${{ steps.version.outputs.suffix }}
       is_prerelease: ${{ steps.version.outputs.is_prerelease }}
       publish_to_nuget: ${{ steps.version.outputs.publish_to_nuget }}
@@ -90,11 +98,13 @@ jobs:
               echo "contracts=true" >> $GITHUB_OUTPUT
               echo "shared=true" >> $GITHUB_OUTPUT
               echo "application=true" >> $GITHUB_OUTPUT
+              echo "infrastructure=true" >> $GITHUB_OUTPUT
             else
               echo "domain=$(echo $PACKAGES | grep -q domain && echo true || echo false)" >> $GITHUB_OUTPUT
               echo "contracts=$(echo $PACKAGES | grep -q contracts && echo true || echo false)" >> $GITHUB_OUTPUT
               echo "shared=$(echo $PACKAGES | grep -q shared && echo true || echo false)" >> $GITHUB_OUTPUT
               echo "application=$(echo $PACKAGES | grep -q application && echo true || echo false)" >> $GITHUB_OUTPUT
+              echo "infrastructure=$(echo $PACKAGES | grep -q infrastructure && echo true || echo false)" >> $GITHUB_OUTPUT
             fi
           else
             # Check which packages have changes
@@ -104,6 +114,7 @@ jobs:
             echo "contracts=$(echo "$CHANGED_FILES" | grep -q '^packages/contracts/dotnet/' && echo true || echo false)" >> $GITHUB_OUTPUT
             echo "shared=$(echo "$CHANGED_FILES" | grep -q '^packages/shared/' && echo true || echo false)" >> $GITHUB_OUTPUT
             echo "application=$(echo "$CHANGED_FILES" | grep -q '^packages/application/' && echo true || echo false)" >> $GITHUB_OUTPUT
+            echo "infrastructure=$(echo "$CHANGED_FILES" | grep -q '^packages/infrastructure/' && echo true || echo false)" >> $GITHUB_OUTPUT
           fi
 
       - name: Determine version settings
@@ -388,12 +399,95 @@ jobs:
             --skip-duplicate
 
   # ==========================================================================
+  # Publish Infrastructure (depends on Application)
+  # ==========================================================================
+  publish-infrastructure:
+    name: Publish Infrastructure
+    runs-on: ubuntu-latest
+    needs: [detect-changes, publish-application]
+    if: always() && needs.detect-changes.outputs.infrastructure_changed == 'true' && (needs.publish-application.result == 'success' || needs.publish-application.result == 'skipped')
+    outputs:
+      version: ${{ steps.pack.outputs.version }}
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: '9.0.x'
+          source-url: https://nuget.pkg.github.com/phoenixvc/index.json
+        env:
+          NUGET_AUTH_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN }}
+
+      - name: Wait for Application package to be available
+        if: needs.publish-application.result == 'success'
+        run: |
+          echo "Waiting for Mystira.Application ${{ needs.publish-application.outputs.version }} to be available..."
+          sleep 30
+
+      - name: Calculate version
+        id: calc_version
+        run: |
+          BASE_VERSION=$(grep -oP '(?<=<Version>)[^<]+' packages/infrastructure/Mystira.Infrastructure.Data/Mystira.Infrastructure.Data.csproj)
+          SUFFIX="${{ needs.detect-changes.outputs.version_suffix }}"
+          if [ -n "$SUFFIX" ]; then
+            FULL_VERSION="${BASE_VERSION}-${SUFFIX}"
+          else
+            FULL_VERSION="$BASE_VERSION"
+          fi
+          # Ensure alpha suffix for NuGet.org API key
+          if [[ ! "$FULL_VERSION" == *"alpha"* ]]; then
+            FULL_VERSION="${FULL_VERSION}-alpha"
+          fi
+          echo "version=$FULL_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Build and Pack All Infrastructure Packages
+        run: |
+          VERSION="${{ steps.calc_version.outputs.version }}"
+
+          # Build all infrastructure packages
+          PACKAGES=(
+            "packages/infrastructure/Mystira.Infrastructure.Data"
+            "packages/infrastructure/Mystira.Infrastructure.Azure"
+            "packages/infrastructure/Mystira.Infrastructure.Discord"
+            "packages/infrastructure/Mystira.Infrastructure.Teams"
+            "packages/infrastructure/Mystira.Infrastructure.WhatsApp"
+            "packages/infrastructure/Mystira.Infrastructure.Payments"
+          )
+
+          for PKG in "${PACKAGES[@]}"; do
+            echo "Building $PKG..."
+            dotnet restore "$PKG"
+            dotnet build "$PKG" -c Release --no-restore -p:Version=$VERSION
+            dotnet pack "$PKG" -c Release --no-build -o ./nupkg -p:Version=$VERSION
+          done
+        env:
+          NUGET_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Push to GitHub Packages
+        id: pack
+        run: |
+          dotnet nuget push "./nupkg/*.nupkg" \
+            --source "https://nuget.pkg.github.com/phoenixvc/index.json" \
+            --api-key ${{ secrets.GITHUB_TOKEN }} \
+            --skip-duplicate
+          echo "version=${{ steps.calc_version.outputs.version }}" >> $GITHUB_OUTPUT
+
+      - name: Push to NuGet.org
+        if: needs.detect-changes.outputs.publish_to_nuget == 'true'
+        run: |
+          dotnet nuget push "./nupkg/*.nupkg" \
+            --source "https://api.nuget.org/v3/index.json" \
+            --api-key ${{ secrets.NUGET_API_KEY }} \
+            --skip-duplicate
+
+  # ==========================================================================
   # Summary
   # ==========================================================================
   summary:
     name: Generate Summary
     runs-on: ubuntu-latest
-    needs: [detect-changes, publish-domain, publish-contracts, publish-shared, publish-application]
+    needs: [detect-changes, publish-domain, publish-contracts, publish-shared, publish-application, publish-infrastructure]
     if: always()
     steps:
       - name: Generate summary
@@ -433,6 +527,14 @@ jobs:
             echo "| Mystira.Application | - | ❌ Failed |" >> $GITHUB_STEP_SUMMARY
           else
             echo "| Mystira.Application | - | ⏭️ Skipped |" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          if [ "${{ needs.publish-infrastructure.result }}" = "success" ]; then
+            echo "| Mystira.Infrastructure.* (6 packages) | ${{ needs.publish-infrastructure.outputs.version }} | ✅ Published |" >> $GITHUB_STEP_SUMMARY
+          elif [ "${{ needs.detect-changes.outputs.infrastructure_changed }}" = "true" ]; then
+            echo "| Mystira.Infrastructure.* (6 packages) | - | ❌ Failed |" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "| Mystira.Infrastructure.* (6 packages) | - | ⏭️ Skipped |" >> $GITHUB_STEP_SUMMARY
           fi
 
           echo "" >> $GITHUB_STEP_SUMMARY

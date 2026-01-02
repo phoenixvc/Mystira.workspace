@@ -1,28 +1,74 @@
 # Mystira.App Migration Guide
 
-**Target**: Migrate Mystira.App to use `Mystira.Shared` infrastructure
-**Prerequisites**: Mystira.Shared v0.4.* published to NuGet feed
+**Target**: Migrate Mystira.App to use consolidated Mystira packages
+**Prerequisites**: Mystira.Shared v0.4.*, Mystira.Infrastructure.* v0.5.0-alpha
 **Estimated Effort**: 2-3 days
-**Last Updated**: December 2025
+**Last Updated**: January 2026
 **Status**: 🔄 In Progress
 
 ---
 
 ## Overview
 
-This guide covers migrating Mystira.App from its current infrastructure to the consolidated `Mystira.Shared` package, including:
+This guide covers migrating Mystira.App from its current infrastructure to the consolidated packages, including:
 
 1. **.NET 9.0 upgrade** (required)
-2. MediatR → Wolverine migration (v5.9.2)
-3. Custom resilience → `Mystira.Shared.Resilience` (Polly v8.6.5)
-4. IMemoryCache → `Mystira.Shared.Caching` (Redis)
-5. Custom exceptions → `Mystira.Shared.Exceptions`
-6. Repository pattern → Ardalis.Specification 9.3.1
-7. **Distributed locking** for concurrent operations
-8. **Microsoft Entra External ID** authentication (optional)
-9. **Source generators** for repositories and validators
+2. **Infrastructure packages migration** (Mystira.App.Infrastructure.* → Mystira.Infrastructure.*)
+3. MediatR → Wolverine migration (v5.9.2)
+4. Custom resilience → `Mystira.Shared.Resilience` (Polly v8.6.5)
+5. IMemoryCache → `Mystira.Shared.Caching` (Redis)
+6. Custom exceptions → `Mystira.Shared.Exceptions`
+7. Repository pattern → Ardalis.Specification 9.3.1
+8. **Distributed locking** for concurrent operations
+9. **Microsoft Entra External ID** authentication (optional)
+10. **Source generators** for repositories and validators
 
-> **Note**: All these components are already implemented in `Mystira.Shared` (v0.4.*). This migration is about adopting the shared package, not building new infrastructure.
+> **Note**: All these components are already implemented in the consolidated packages. This migration is about adopting the shared packages, not building new infrastructure.
+
+---
+
+## Phase 0: Infrastructure Package Migration
+
+Before proceeding with other migrations, update your infrastructure package references.
+
+### 0.1 Package Reference Updates
+
+```xml
+<!-- Before: Project references to app submodule -->
+<ProjectReference Include="../Mystira.App.Infrastructure.Data/Mystira.App.Infrastructure.Data.csproj" />
+<ProjectReference Include="../Mystira.App.Infrastructure.Azure/Mystira.App.Infrastructure.Azure.csproj" />
+
+<!-- After: NuGet package references -->
+<PackageReference Include="Mystira.Infrastructure.Data" Version="0.5.0-alpha" />
+<PackageReference Include="Mystira.Infrastructure.Azure" Version="0.5.0-alpha" />
+```
+
+### 0.2 Available Infrastructure Packages
+
+| Old Package | New Package |
+|-------------|-------------|
+| `Mystira.App.Infrastructure.Data` | `Mystira.Infrastructure.Data` |
+| `Mystira.App.Infrastructure.Azure` | `Mystira.Infrastructure.Azure` |
+| `Mystira.App.Infrastructure.Discord` | `Mystira.Infrastructure.Discord` |
+| `Mystira.App.Infrastructure.Teams` | `Mystira.Infrastructure.Teams` |
+| `Mystira.App.Infrastructure.WhatsApp` | `Mystira.Infrastructure.WhatsApp` |
+| `Mystira.App.Infrastructure.Payments` | `Mystira.Infrastructure.Payments` |
+
+### 0.3 Namespace Updates
+
+```csharp
+// Before
+using Mystira.App.Infrastructure.Data;
+using Mystira.App.Infrastructure.Data.Polyglot;
+using Mystira.App.Infrastructure.Azure;
+
+// After
+using Mystira.Infrastructure.Data;
+using Mystira.Infrastructure.Data.Polyglot;
+using Mystira.Infrastructure.Azure;
+```
+
+> **Full Details**: See the [Infrastructure Migration Guide](./mystira-infrastructure-migration.md)
 
 ---
 
@@ -458,14 +504,17 @@ public class AccountService
 
 ---
 
-## Phase 7: Polyglot Repository (Optional)
+## Phase 7: Polyglot Repository
 
-If you want to use the new `PolyglotRepository`:
+Use the new `Mystira.Infrastructure.Data` package for polyglot persistence.
+
+> **Important**: The polyglot interfaces in `Mystira.Shared.Data.Polyglot` are deprecated. Use `Mystira.Application.Ports.Data` interfaces with `Mystira.Infrastructure.Data` implementations.
 
 ### 7.1 Entity Annotation
 
 ```csharp
-using Mystira.Shared.Data.Polyglot;
+// Use Mystira.Application.Ports.Data (NOT Mystira.Shared.Data.Polyglot)
+using Mystira.Application.Ports.Data;
 
 [DatabaseTarget(DatabaseTarget.CosmosDb, Rationale = "Complex nested document")]
 public class Scenario : AuditableEntity
@@ -484,9 +533,21 @@ public class AnalyticsEvent : Entity
 
 ```csharp
 // Program.cs
+// Implementations come from Mystira.Infrastructure.Data
 builder.Services.AddPolyglotPersistence<CosmosDbContext, PostgresDbContext>(builder.Configuration);
 builder.Services.AddPolyglotRepository<Scenario>();
 builder.Services.AddPolyglotRepository<AnalyticsEvent>();
+```
+
+### 7.3 Migration from Deprecated Interfaces
+
+```csharp
+// Before (deprecated)
+using Mystira.Shared.Data.Polyglot;
+
+// After
+using Mystira.Application.Ports.Data;  // For interfaces
+using Mystira.Infrastructure.Data.Polyglot;  // For implementations
 ```
 
 ---
@@ -699,9 +760,11 @@ If migration causes issues:
 
 ## Related Documentation
 
+- [Infrastructure Migration Guide](./mystira-infrastructure-migration.md) - Migrate from Mystira.App.Infrastructure.* to Mystira.Infrastructure.*
 - [ADR-0014: Polyglot Persistence](../architecture/adr/0014-polyglot-persistence-framework-selection.md)
 - [ADR-0015: Wolverine Migration](../architecture/adr/0015-event-driven-architecture-framework.md)
 - [ADR-0017: Resource Group Organization](../architecture/adr/0017-resource-group-organization-strategy.md)
+- [ADR-0020: Package Consolidation Strategy](../architecture/adr/0020-package-consolidation-strategy.md)
 - [Ardalis.Specification 9.3.1 Guide](../architecture/specifications/ardalis-specification-migration.md)
 - [Mystira.Shared Migration Guide](../guides/mystira-shared-migration.md)
 - [Mystira.Shared README](../../packages/shared/Mystira.Shared/README.md)
