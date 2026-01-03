@@ -210,7 +210,7 @@ public class GameSessionApiService : IGameSessionApiService
         if (branch.EchoLog != null)
         {
             var echo = EchoLog.Create(
-                branch.EchoLog.EchoType,
+                branch.EchoLog.EchoType?.Value ?? string.Empty,
                 branch.EchoLog.Description,
                 branch.EchoLog.Strength,
                 DateTime.UtcNow

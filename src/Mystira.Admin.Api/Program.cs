@@ -62,7 +62,6 @@ try
         .Enrich.FromLogContext()
         .Enrich.WithMachineName()
         .Enrich.WithThreadId()
-        .Enrich.WithCorrelationId()
         .Enrich.WithProperty("Application", "Mystira.Admin.Api")
         .Enrich.WithProperty("Environment", context.HostingEnvironment.EnvironmentName)
         .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj} {Properties:j}{NewLine}{Exception}")

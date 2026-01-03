@@ -10,9 +10,9 @@ using CreateScenarioRequest = Mystira.Contracts.App.Requests.Scenarios.CreateSce
 using CharacterRequest = Mystira.Contracts.App.Requests.Scenarios.CharacterRequest;
 using SceneRequest = Mystira.Contracts.App.Requests.Scenarios.SceneRequest;
 using CharacterMetadataRequest = Mystira.Contracts.App.Requests.Scenarios.CharacterMetadataRequest;
-using BranchRequest = Mystira.Contracts.App.Requests.Scenarios.BranchRequest;
-using EchoRevealRequest = Mystira.Contracts.App.Requests.Scenarios.EchoRevealRequest;
-// Use local models for missing Contracts types
+// Use local models for types with incompatible Contracts definitions
+using BranchRequest = Mystira.Admin.Api.Models.BranchRequest;
+using EchoRevealRequest = Mystira.Admin.Api.Models.EchoRevealRequest;
 using SceneMediaRequest = Mystira.Admin.Api.Models.SceneMediaRequest;
 using EchoLogRequest = Mystira.Admin.Api.Models.EchoLogRequest;
 using CompassChangeRequest = Mystira.Admin.Api.Models.CompassChangeRequest;

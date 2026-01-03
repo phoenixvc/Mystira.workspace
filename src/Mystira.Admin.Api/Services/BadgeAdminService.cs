@@ -617,7 +617,7 @@ public class BadgeAdminService : IBadgeAdminService
     {
         var list = badges.ToList();
         Dictionary<string, AgeGroupDefinition>? ageGroupLookup = null;
-        Dictionary<string, CompassAxis>? axisLookup = null;
+        Dictionary<string, CompassAxisDefinition>? axisLookup = null;
         Dictionary<string, BadgeImage>? imageLookup = null;
 
         if (includeAxisMetadata)
@@ -648,7 +648,7 @@ public class BadgeAdminService : IBadgeAdminService
     private static BadgeDto MapBadge(
         Badge badge,
         Dictionary<string, AgeGroupDefinition>? ageGroupLookup,
-        Dictionary<string, CompassAxis>? axisLookup,
+        Dictionary<string, CompassAxisDefinition>? axisLookup,
         Dictionary<string, BadgeImage>? imageLookup)
     {
         var dto = new BadgeDto
@@ -691,7 +691,7 @@ public class BadgeAdminService : IBadgeAdminService
         return dto;
     }
 
-    private static AxisAchievementDto MapAxisAchievement(AxisAchievement entity, Dictionary<string, CompassAxis> axisLookup)
+    private static AxisAchievementDto MapAxisAchievement(AxisAchievement entity, Dictionary<string, CompassAxisDefinition> axisLookup)
     {
         var dto = new AxisAchievementDto
         {
@@ -774,7 +774,7 @@ public class BadgeAdminService : IBadgeAdminService
         return ageGroup;
     }
 
-    private async Task<CompassAxis> RequireAxisAsync(string axisId)
+    private async Task<CompassAxisDefinition> RequireAxisAsync(string axisId)
     {
         var axis = await ResolveAxisAsync(axisId);
         if (axis == null)
@@ -808,7 +808,7 @@ public class BadgeAdminService : IBadgeAdminService
         return group?.Value ?? ageGroupId.Trim();
     }
 
-    private async Task<CompassAxis?> ResolveAxisAsync(string axisId)
+    private async Task<CompassAxisDefinition?> ResolveAxisAsync(string axisId)
     {
         if (string.IsNullOrWhiteSpace(axisId))
         {
@@ -820,7 +820,7 @@ public class BadgeAdminService : IBadgeAdminService
                ?? await _compassAxisRepository.GetByNameAsync(trimmed);
     }
 
-    private static string NormalizeAxisValue(CompassAxis? axis, string fallback)
+    private static string NormalizeAxisValue(CompassAxisDefinition? axis, string fallback)
     {
         if (axis == null)
         {
@@ -881,10 +881,10 @@ public class BadgeAdminService : IBadgeAdminService
         return normalized;
     }
 
-    private async Task<Dictionary<string, CompassAxis>> GetAxisLookupAsync(bool includeDeleted = false)
+    private async Task<Dictionary<string, CompassAxisDefinition>> GetAxisLookupAsync(bool includeDeleted = false)
     {
         var axes = await _compassAxisRepository.GetAllAsync();
-        var lookup = new Dictionary<string, CompassAxis>(StringComparer.OrdinalIgnoreCase);
+        var lookup = new Dictionary<string, CompassAxisDefinition>(StringComparer.OrdinalIgnoreCase);
 
         foreach (var axis in axes)
         {

@@ -121,3 +121,67 @@ public class SceneMedia
     /// </summary>
     public string? Video { get; set; }
 }
+
+/// <summary>
+/// Request model for scene branches.
+/// Used when the Contracts BranchRequest type has incompatible properties.
+/// </summary>
+public class BranchRequest
+{
+    /// <summary>
+    /// The choice text for this branch
+    /// </summary>
+    public string? Choice { get; set; }
+
+    /// <summary>
+    /// The next scene ID to navigate to
+    /// </summary>
+    public string? NextSceneId { get; set; }
+
+    /// <summary>
+    /// Echo log for this branch
+    /// </summary>
+    public EchoLogRequest? EchoLog { get; set; }
+
+    /// <summary>
+    /// Compass change for this branch
+    /// </summary>
+    public CompassChangeRequest? CompassChange { get; set; }
+}
+
+/// <summary>
+/// Request model for echo reveals.
+/// Used when the Contracts EchoRevealRequest type has incompatible properties.
+/// </summary>
+public class EchoRevealRequest
+{
+    /// <summary>
+    /// The type of echo to reveal
+    /// </summary>
+    public string? EchoType { get; set; }
+
+    /// <summary>
+    /// Minimum strength required to trigger
+    /// </summary>
+    public float MinStrength { get; set; }
+
+    /// <summary>
+    /// Scene ID that triggers the reveal
+    /// </summary>
+    public string? TriggerSceneId { get; set; }
+
+    /// <summary>
+    /// Maximum age in scenes before reveal expires
+    /// </summary>
+    public int? MaxAgeScenes { get; set; }
+
+    /// <summary>
+    /// Mechanic used for the reveal
+    /// </summary>
+    public string? RevealMechanic { get; set; }
+
+    /// <summary>
+    /// Whether this reveal is required
+    /// </summary>
+    public bool Required { get; set; }
+}

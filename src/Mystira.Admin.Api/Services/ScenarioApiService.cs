@@ -177,18 +177,13 @@ public class ScenarioApiService : IScenarioApiService
             SessionLength = (SessionLength)(int)request.SessionLength,
             Archetypes = ParseArchetypesOrThrow(request.Archetypes),
             MinimumAge = request.MinimumAge,
+            AgeGroup = !string.IsNullOrEmpty(request.AgeGroup) ? AgeGroup.Parse(request.AgeGroup) : null,
             CoreAxes = ParseCoreAxesOrThrow(request.CoreAxes),
             Characters = MapCharactersFromRequest(request.Characters),
             Scenes = MapScenesFromRequest(request.Scenes),
             Image = request.Image,
             CreatedAt = DateTime.UtcNow
         };
-
-        // Set age group using value object parse
-        if (!string.IsNullOrEmpty(request.AgeGroup))
-        {
-            scenario.AgeGroup = AgeGroup.Parse(request.AgeGroup);
-        }
 
         _context.Scenarios.Add(scenario);
 
@@ -231,10 +226,10 @@ public class ScenarioApiService : IScenarioApiService
         scenario.Scenes = MapScenesFromRequest(request.Scenes);
         scenario.Image = request.Image;
 
-        // Set age group using value object parse
-        if (!string.IsNullOrEmpty(request.AgeGroup))
+        // Note: AgeGroup is immutable after creation; changes require recreating the scenario
+        if (!string.IsNullOrEmpty(request.AgeGroup) && scenario.AgeGroup?.Value != request.AgeGroup)
         {
-            scenario.AgeGroup = AgeGroup.Parse(request.AgeGroup);
+            _logger.LogWarning("AgeGroup change requested for scenario {ScenarioId} but AgeGroup is immutable after creation", id);
         }
 
         await ValidateScenarioAsync(scenario);
