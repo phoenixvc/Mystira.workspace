@@ -487,8 +487,6 @@ builder.Services.AddScoped<IBadgeRepository, BadgeRepository>();
 builder.Services.AddScoped<IBadgeImageRepository, BadgeImageRepository>();
 builder.Services.AddScoped<IAxisAchievementRepository, AxisAchievementRepository>();
 builder.Services.AddScoped<IUserBadgeRepository, UserBadgeRepository>();
-// TODO: Re-enable when PendingSignupRepository is added to Infrastructure.Data
-// builder.Services.AddScoped<IPendingSignupRepository, PendingSignupRepository>();
 builder.Services.AddScoped<IMediaAssetRepository, MediaAssetRepository>();
 builder.Services.AddScoped<IMediaMetadataFileRepository, MediaMetadataFileRepository>();
 builder.Services.AddScoped<ICharacterMediaMetadataFileRepository, CharacterMediaMetadataFileRepository>();
@@ -947,7 +945,7 @@ if (initializeDatabaseOnStartup || isInMemory)
     catch (Exception ex)
     {
         // Log error but don't crash the app in production - allow health checks to detect the issue
-        startupLogger.LogError(ex, "Failed to initialize database during startup. The application will start in degraded mode. Ensure Azure Cosmos DB database 'MystiraAppDb' exists and app identity has permissions to create/read containers. Expected containers include: CompassAxes (PK /Id), BadgeConfigurations (PK /Id), CharacterMaps (PK /Id), ContentBundles (PK /Id), Scenarios (PK /Id), MediaMetadataFiles (PK /Id), CharacterMediaMetadataFiles (PK /Id), CharacterMapFiles (PK /Id), UserProfiles (PK /Id), Accounts (PK /Id), PendingSignups (PK /email). Set 'InitializeDatabaseOnStartup'=false to skip this check.");
+        startupLogger.LogError(ex, "Failed to initialize database during startup. The application will start in degraded mode. Ensure Azure Cosmos DB database 'MystiraAppDb' exists and app identity has permissions to create/read containers. Expected containers include: CompassAxes (PK /Id), BadgeConfigurations (PK /Id), CharacterMaps (PK /Id), ContentBundles (PK /Id), Scenarios (PK /Id), MediaMetadataFiles (PK /Id), CharacterMediaMetadataFiles (PK /Id), CharacterMapFiles (PK /Id), UserProfiles (PK /Id), Accounts (PK /Id). Set 'InitializeDatabaseOnStartup'=false to skip this check.");
 
         // Only fail fast in development/local environments where we expect the database to work
         if (isInMemory)
