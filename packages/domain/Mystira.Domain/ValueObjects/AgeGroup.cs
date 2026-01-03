@@ -145,4 +145,55 @@ public static class AgeGroupConstants
     /// Adult age group ID.
     /// </summary>
     public const string Adult = "adult";
+
+    /// <summary>
+    /// Gets the display name for an age group ID.
+    /// </summary>
+    /// <param name="ageGroupId">The age group identifier.</param>
+    /// <returns>The display name for the age group, or the ID if not found.</returns>
+    public static string GetDisplayName(string? ageGroupId)
+    {
+        return ageGroupId switch
+        {
+            EarlyChildhood => "Early Childhood (4-6)",
+            MiddleChildhood => "Middle Childhood (7-9)",
+            Preteen => "Preteen (10-12)",
+            Teen => "Teen (13-17)",
+            Adult => "Adult (18+)",
+            null => "Unknown",
+            _ => ageGroupId
+        };
+    }
+
+    /// <summary>
+    /// Gets the short display name for an age group ID.
+    /// </summary>
+    /// <param name="ageGroupId">The age group identifier.</param>
+    /// <returns>The short display name for the age group, or the ID if not found.</returns>
+    public static string GetShortDisplayName(string? ageGroupId)
+    {
+        return ageGroupId switch
+        {
+            EarlyChildhood => "Early Childhood",
+            MiddleChildhood => "Middle Childhood",
+            Preteen => "Preteen",
+            Teen => "Teen",
+            Adult => "Adult",
+            null => "Unknown",
+            _ => ageGroupId
+        };
+    }
+
+    /// <summary>
+    /// Gets all age group IDs.
+    /// </summary>
+    /// <returns>A collection of all age group identifiers.</returns>
+    public static IReadOnlyList<string> GetAll() => new[]
+    {
+        EarlyChildhood,
+        MiddleChildhood,
+        Preteen,
+        Teen,
+        Adult
+    };
 }
