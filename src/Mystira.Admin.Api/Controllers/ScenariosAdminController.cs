@@ -38,7 +38,7 @@ public class ScenariosAdminController : ControllerBase
                     Message = "Validation failed",
                     Errors = ModelState.ToDictionary(
                         kvp => kvp.Key,
-                        kvp => kvp.Value?.Errors.Select(e => e.ErrorMessage).ToList() ?? new List<string>()
+                        kvp => (IReadOnlyList<string>)(kvp.Value?.Errors.Select(e => e.ErrorMessage).ToList() ?? new List<string>())
                     ),
                     TraceId = HttpContext.TraceIdentifier
                 });
@@ -82,7 +82,7 @@ public class ScenariosAdminController : ControllerBase
                     Message = "Validation failed",
                     Errors = ModelState.ToDictionary(
                         kvp => kvp.Key,
-                        kvp => kvp.Value?.Errors.Select(e => e.ErrorMessage).ToList() ?? new List<string>()
+                        kvp => (IReadOnlyList<string>)(kvp.Value?.Errors.Select(e => e.ErrorMessage).ToList() ?? new List<string>())
                     ),
                     TraceId = HttpContext.TraceIdentifier
                 });

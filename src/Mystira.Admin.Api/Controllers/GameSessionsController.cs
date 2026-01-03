@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Mystira.Admin.Api.Models;
 using Mystira.Admin.Api.Services;
 using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
 using Mystira.Contracts.App.Requests.Characters;
 using Mystira.Contracts.App.Requests.GameSessions;
 using Mystira.Contracts.App.Responses.Common;
@@ -44,7 +45,7 @@ public class GameSessionsController : ControllerBase
                     Message = "Validation failed",
                     Errors = ModelState.ToDictionary(
                         kvp => kvp.Key,
-                        kvp => kvp.Value?.Errors.Select(e => e.ErrorMessage).ToList() ?? new List<string>()
+                        kvp => (IReadOnlyList<string>)(kvp.Value?.Errors.Select(e => e.ErrorMessage).ToList() ?? new List<string>())
                     ),
                     TraceId = HttpContext.TraceIdentifier
                 });
@@ -167,7 +168,7 @@ public class GameSessionsController : ControllerBase
                     Message = "Validation failed",
                     Errors = ModelState.ToDictionary(
                         kvp => kvp.Key,
-                        kvp => kvp.Value?.Errors.Select(e => e.ErrorMessage).ToList() ?? new List<string>()
+                        kvp => (IReadOnlyList<string>)(kvp.Value?.Errors.Select(e => e.ErrorMessage).ToList() ?? new List<string>())
                     ),
                     TraceId = HttpContext.TraceIdentifier
                 });
@@ -439,7 +440,7 @@ public class GameSessionsController : ControllerBase
                     Message = "Validation failed",
                     Errors = ModelState.ToDictionary(
                         kvp => kvp.Key,
-                        kvp => kvp.Value?.Errors.Select(e => e.ErrorMessage).ToList() ?? new List<string>()
+                        kvp => (IReadOnlyList<string>)(kvp.Value?.Errors.Select(e => e.ErrorMessage).ToList() ?? new List<string>())
                     ),
                     TraceId = HttpContext.TraceIdentifier
                 });
@@ -552,7 +553,7 @@ public class GameSessionsController : ControllerBase
             {
                 TotalSessions = uniqueSessions.Count,
                 CompletedSessions = uniqueSessions.Count(s => s.Status == SessionStatus.Completed),
-                TotalPlaytime = uniqueSessions.Sum(s => s.ElapsedTime.TotalMinutes),
+                TotalPlaytime = uniqueSessions.Sum(s => s.ElapsedTime?.TotalMinutes ?? 0),
                 FavoriteScenarios = uniqueSessions
                     .GroupBy(s => s.ScenarioId)
                     .OrderByDescending(g => g.Count())
