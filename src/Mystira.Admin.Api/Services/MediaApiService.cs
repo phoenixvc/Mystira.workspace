@@ -88,7 +88,7 @@ public class MediaApiService : IMediaApiService
     public async Task<MediaQueryResponse> GetMediaAsync(MediaQueryRequest request)
     {
         // Convert Admin.Api.Models.MediaQueryRequest to Contracts.MediaQueryRequest
-        var contractsRequest = new Contracts.Requests.Media.MediaQueryRequest
+        var contractsRequest = new Mystira.Contracts.App.Requests.Media.MediaQueryRequest
         {
             Page = request.Page,
             PageSize = request.PageSize,
@@ -239,7 +239,7 @@ public class MediaApiService : IMediaApiService
     public async Task<MediaAsset> UpdateMediaAsync(string mediaId, MediaUpdateRequest updateData)
     {
         // Convert Admin.Api.Models.MediaUpdateRequest to Contracts.MediaUpdateRequest
-        var contractsRequest = new Contracts.Requests.Media.MediaUpdateRequest
+        var contractsRequest = new Mystira.Contracts.App.Requests.Media.MediaUpdateRequest
         {
             Description = updateData.Description,
             Tags = updateData.Tags,

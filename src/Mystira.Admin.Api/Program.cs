@@ -60,8 +60,7 @@ try
         .ReadFrom.Configuration(context.Configuration)
         .ReadFrom.Services(services)
         .Enrich.FromLogContext()
-        // Note: WithMachineName requires Serilog.Enrichers.Environment package
-        // .Enrich.WithMachineName()
+        .Enrich.WithMachineName()
         .Enrich.WithThreadId()
         .Enrich.WithCorrelationId()
         .Enrich.WithProperty("Application", "Mystira.Admin.Api")

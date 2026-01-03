@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Mystira.Admin.Api.Models;
 using Mystira.Domain.Models;
 using Mystira.Infrastructure.Data;
 using ContractsAvatarConfigurationResponse = Mystira.Contracts.App.Responses.Avatars.AvatarConfigurationResponse;

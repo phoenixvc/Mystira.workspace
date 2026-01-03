@@ -14,7 +14,6 @@ public class UserProfileService : IUserProfileService
     // Simple guest name generation
     private static readonly string[] Adjectives = { "Happy", "Brave", "Swift", "Clever", "Mighty", "Noble", "Gentle", "Bold", "Wise", "Lucky" };
     private static readonly string[] Nouns = { "Explorer", "Adventurer", "Traveler", "Wanderer", "Seeker", "Knight", "Hero", "Champion", "Guardian", "Pioneer" };
-    private static readonly Random Random = new();
 
     public UserProfileService(MystiraAppDbContext context, ILogger<UserProfileService> logger)
     {
@@ -377,13 +376,13 @@ public class UserProfileService : IUserProfileService
     {
         if (useAdjectiveNames)
         {
-            var adjective = Adjectives[Random.Next(Adjectives.Length)];
-            var noun = Nouns[Random.Next(Nouns.Length)];
+            var adjective = Adjectives[Random.Shared.Next(Adjectives.Length)];
+            var noun = Nouns[Random.Shared.Next(Nouns.Length)];
             return $"{adjective} {noun}";
         }
         else
         {
-            return $"Guest_{Random.Next(10000, 99999)}";
+            return $"Guest_{Random.Shared.Next(10000, 99999)}";
         }
     }
 }

@@ -8,6 +8,7 @@ using Mystira.Domain.Models;
 using Mystira.Domain.ValueObjects;
 using Mystira.Infrastructure.Data;
 using NJsonSchema;
+using AgeGroupConstants = Mystira.Admin.Api.Models.AgeGroupConstants;
 
 namespace Mystira.Admin.Api.Services;
 
