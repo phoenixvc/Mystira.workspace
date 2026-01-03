@@ -19,6 +19,9 @@ using MediaMetadataEntry = Mystira.Domain.Models.MediaMetadataEntry;
 using MediaMetadataFile = Mystira.Domain.Models.MediaMetadataFile;
 using MetadataModifier = Mystira.Domain.Models.MetadataModifier;
 using ScenarioMediaReference = Mystira.Contracts.App.Responses.Scenarios.MediaReference;
+// Use local models for types not in Domain package
+using CharacterScenarioMetadata = Mystira.Admin.Api.Models.CharacterScenarioMetadata;
+using SceneMedia = Mystira.Admin.Api.Models.SceneMedia;
 
 namespace Mystira.Admin.Api.Services;
 
@@ -181,10 +184,10 @@ public class ScenarioApiService : IScenarioApiService
             CreatedAt = DateTime.UtcNow
         };
 
-        // Set age group using method (read-only property)
+        // Set age group using value object parse
         if (!string.IsNullOrEmpty(request.AgeGroup))
         {
-            scenario.SetAgeGroup(request.AgeGroup);
+            scenario.AgeGroup = AgeGroup.Parse(request.AgeGroup);
         }
 
         _context.Scenarios.Add(scenario);
@@ -228,10 +231,10 @@ public class ScenarioApiService : IScenarioApiService
         scenario.Scenes = MapScenesFromRequest(request.Scenes);
         scenario.Image = request.Image;
 
-        // Set age group using method (read-only property)
+        // Set age group using value object parse
         if (!string.IsNullOrEmpty(request.AgeGroup))
         {
-            scenario.SetAgeGroup(request.AgeGroup);
+            scenario.AgeGroup = AgeGroup.Parse(request.AgeGroup);
         }
 
         await ValidateScenarioAsync(scenario);
@@ -330,10 +333,19 @@ public class ScenarioApiService : IScenarioApiService
             return null;
         }
 
-        var knownGroup = AgeGroup.Parse(ageGroup);
-        if (knownGroup != null)
+        // Map known age group values to their minimum ages
+        var minimumAge = ageGroup.ToLowerInvariant() switch
         {
-            return knownGroup.MinimumAge;
+            "younger-kids" => 5,
+            "older-kids" => 8,
+            "teens" => 11,
+            "adults" => 15,
+            _ => (int?)null
+        };
+
+        if (minimumAge.HasValue)
+        {
+            return minimumAge;
         }
 
         if (TryParseAgeRangeMinimum(ageGroup, out var parsedMinimum))

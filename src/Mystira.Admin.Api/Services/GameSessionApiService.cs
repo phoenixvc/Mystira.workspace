@@ -486,10 +486,19 @@ public class GameSessionApiService : IGameSessionApiService
             return true;
         }
 
-        var target = AgeGroup.Parse(targetAgeGroup);
-        if (target != null)
+        // Map known age group values to their minimum ages
+        var minimumAge = targetAgeGroup.ToLowerInvariant() switch
         {
-            return target.MinimumAge >= scenarioMinimumAge;
+            "younger-kids" => 5,
+            "older-kids" => 8,
+            "teens" => 11,
+            "adults" => 15,
+            _ => (int?)null
+        };
+
+        if (minimumAge.HasValue)
+        {
+            return minimumAge.Value >= scenarioMinimumAge;
         }
 
         if (TryParseAgeRangeMinimum(targetAgeGroup, out var parsedMinimum))

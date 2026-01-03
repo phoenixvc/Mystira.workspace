@@ -47,7 +47,7 @@ public class UserProfileService : IUserProfileService
                 throw new ArgumentException($"Invalid age group: {request.AgeGroup}. Must be one of: {string.Join(", ", AgeGroup.All)}");
             }
 
-            profile.SetAgeGroup(request.AgeGroup);
+            profile.AgeGroup = AgeGroup.Parse(request.AgeGroup);
         }
         if (request.DateOfBirth.HasValue)
         {
@@ -239,7 +239,7 @@ public class UserProfileService : IUserProfileService
                 throw new ArgumentException($"Invalid age group: {request.AgeGroup}. Must be one of: {string.Join(", ", AgeGroup.All)}");
             }
 
-            profile.SetAgeGroup(request.AgeGroup);
+            profile.AgeGroup = AgeGroup.Parse(request.AgeGroup);
         }
 
         if (request.DateOfBirth.HasValue)

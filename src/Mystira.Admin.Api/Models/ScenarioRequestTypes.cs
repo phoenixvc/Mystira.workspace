@@ -1,3 +1,5 @@
+using Mystira.Domain.ValueObjects;
+
 namespace Mystira.Admin.Api.Models;
 
 /// <summary>
@@ -59,4 +61,63 @@ public class CompassChangeRequest
     /// The delta change value
     /// </summary>
     public float Delta { get; set; }
+}
+
+/// <summary>
+/// Metadata for a character within a scenario.
+/// Used when the Domain CharacterScenarioMetadata type is not available.
+/// </summary>
+public class CharacterScenarioMetadata
+{
+    /// <summary>
+    /// Character roles
+    /// </summary>
+    public List<string>? Role { get; set; }
+
+    /// <summary>
+    /// Character archetypes
+    /// </summary>
+    public List<Archetype>? Archetype { get; set; }
+
+    /// <summary>
+    /// Character species
+    /// </summary>
+    public string? Species { get; set; }
+
+    /// <summary>
+    /// Character age
+    /// </summary>
+    public string? Age { get; set; }
+
+    /// <summary>
+    /// Character traits
+    /// </summary>
+    public List<string>? Traits { get; set; }
+
+    /// <summary>
+    /// Character backstory
+    /// </summary>
+    public string? Backstory { get; set; }
+}
+
+/// <summary>
+/// Media references for a scene.
+/// Used when the Domain SceneMedia type is not available.
+/// </summary>
+public class SceneMedia
+{
+    /// <summary>
+    /// Image media reference ID
+    /// </summary>
+    public string? Image { get; set; }
+
+    /// <summary>
+    /// Audio media reference ID
+    /// </summary>
+    public string? Audio { get; set; }
+
+    /// <summary>
+    /// Video media reference ID
+    /// </summary>
+    public string? Video { get; set; }
 }
