@@ -115,6 +115,11 @@ public class BadgeImage : Entity
     public string BadgeId { get; set; } = string.Empty;
 
     /// <summary>
+    /// Gets or sets the media asset image ID.
+    /// </summary>
+    public string? ImageId { get; set; }
+
+    /// <summary>
     /// Gets or sets the image URL.
     /// </summary>
     public string Url { get; set; } = string.Empty;
@@ -148,6 +153,11 @@ public class BadgeImage : Entity
     /// Gets or sets the content type of the image.
     /// </summary>
     public string? ContentType { get; set; }
+
+    /// <summary>
+    /// Gets or sets the file size in bytes.
+    /// </summary>
+    public long? FileSizeBytes { get; set; }
 }
 
 /// <summary>
@@ -413,6 +423,21 @@ public class AxisAchievement : Entity
     }
 
     /// <summary>
+    /// Gets or sets the age group ID for this achievement.
+    /// </summary>
+    public string? AgeGroupId { get; set; }
+
+    /// <summary>
+    /// Gets or sets the direction on the axis (positive or negative).
+    /// </summary>
+    public string? AxesDirection { get; set; }
+
+    /// <summary>
+    /// Gets or sets the description of this achievement.
+    /// </summary>
+    public string? Description { get; set; }
+
+    /// <summary>
     /// Gets or sets the current value on this axis.
     /// </summary>
     public int CurrentValue { get; set; }
@@ -441,6 +466,11 @@ public class AxisAchievement : Entity
     /// Gets the core axis.
     /// </summary>
     public CoreAxis? Axis => CoreAxis.FromValue(AxisId);
+
+    /// <summary>
+    /// Gets the age group for this achievement.
+    /// </summary>
+    public AgeGroup? AgeGroup => AgeGroup.FromId(AgeGroupId);
 
     /// <summary>
     /// Navigation to the user profile.
