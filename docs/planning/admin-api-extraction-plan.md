@@ -2,7 +2,7 @@
 
 **Date**: 2025-12-14  
 **Status**: In Progress  
-**Target**: Extract `Mystira.App.Admin.Api` to separate repositories `Mystira.Admin.Api` and `Mystira.Admin.UI`
+**Target**: Extract `Mystira.Admin.Api` to separate repositories `Mystira.Admin.Api` and `Mystira.Admin.UI`
 
 ## Executive Summary
 
@@ -43,14 +43,14 @@ dotnet nuget add source https://pkgs.dev.azure.com/{org}/{project}/_packaging/{f
 
 **Libraries to Package**:
 
-1. `Mystira.App.Domain`
-2. `Mystira.App.Application`
-3. `Mystira.App.Infrastructure.Azure`
-4. `Mystira.App.Infrastructure.Data`
-5. `Mystira.App.Infrastructure.Discord`
-6. `Mystira.App.Infrastructure.StoryProtocol`
-7. `Mystira.App.Shared`
-8. `Mystira.App.Contracts`
+1. `Mystira.Domain`
+2. `Mystira.Application`
+3. `Mystira.Infrastructure.Azure`
+4. `Mystira.Infrastructure.Data`
+5. `Mystira.Infrastructure.Discord`
+6. `Mystira.Infrastructure.StoryProtocol`
+7. `Mystira.Shared`
+8. `Mystira.Contracts`
 
 **For each library** (see [ADR-0006](./../architecture/adr/0006-admin-api-repository-extraction.md) for complete list):
 
@@ -58,7 +58,7 @@ dotnet nuget add source https://pkgs.dev.azure.com/{org}/{project}/_packaging/{f
 
 ```xml
 <PropertyGroup>
-  <PackageId>Mystira.App.Domain</PackageId>
+  <PackageId>Mystira.Domain</PackageId>
   <Version>1.0.0</Version>
   <Authors>Mystira Team</Authors>
   <Company>Phoenix VC</Company>
@@ -73,11 +73,11 @@ dotnet nuget add source https://pkgs.dev.azure.com/{org}/{project}/_packaging/{f
 3. **Build and publish**:
 
 ```bash
-dotnet pack src/Mystira.App.Domain/Mystira.App.Domain.csproj \
+dotnet pack src/Mystira.Domain/Mystira.Domain.csproj \
   --configuration Release \
   --output ./nupkg
 
-dotnet nuget push ./nupkg/Mystira.App.Domain.1.0.0.nupkg \
+dotnet nuget push ./nupkg/Mystira.Domain.1.0.0.nupkg \
   --source "Mystira-Internal" \
   --api-key {api-key}
 ```
@@ -94,8 +94,8 @@ on:
   push:
     branches: [main]
     paths:
-      - "src/Mystira.App.Domain/**"
-      - "src/Mystira.App.Application/**"
+      - "src/Mystira.Domain/**"
+      - "src/Mystira.Application/**"
       # ... other shared libraries
 
 jobs:
@@ -116,8 +116,8 @@ jobs:
 
       - name: Pack libraries
         run: |
-          dotnet pack src/Mystira.App.Domain/Mystira.App.Domain.csproj -c Release
-          dotnet pack src/Mystira.App.Application/Mystira.App.Application.csproj -c Release
+          dotnet pack src/Mystira.Domain/Mystira.Domain.csproj -c Release
+          dotnet pack src/Mystira.Application/Mystira.Application.csproj -c Release
           # ... pack other libraries
 
       - name: Publish to NuGet
@@ -150,10 +150,10 @@ cd ../Mystira.Admin.Api
 git init
 
 # Copy Admin API project (excluding Razor Pages Views)
-cp -r ../Mystira.App/src/Mystira.App.Admin.Api ./src/Mystira.App.Admin.Api
+cp -r ../Mystira.App/src/Mystira.Admin.Api ./src/Mystira.Admin.Api
 
 # Remove Razor Pages Views folder (will be migrated to Mystira.Admin.UI)
-rm -rf ./src/Mystira.App.Admin.Api/Views
+rm -rf ./src/Mystira.Admin.Api/Views
 
 # Copy solution file and create new one if needed
 # Copy relevant configuration files
@@ -161,7 +161,7 @@ rm -rf ./src/Mystira.App.Admin.Api/Views
 
 **Files to Copy**:
 
-- `src/Mystira.App.Admin.Api/` (entire project, **excluding `Views/` folder**)
+- `src/Mystira.Admin.Api/` (entire project, **excluding `Views/` folder**)
 - Solution file (or create new)
 - `.editorconfig`
 - `.gitattributes`
@@ -175,24 +175,24 @@ rm -rf ./src/Mystira.App.Admin.Api/Views
 
 ```xml
 <!-- Before -->
-<ProjectReference Include="..\Mystira.App.Domain\Mystira.App.Domain.csproj" />
+<ProjectReference Include="..\Mystira.Domain\Mystira.Domain.csproj" />
 
 <!-- After -->
-<PackageReference Include="Mystira.App.Domain" Version="1.0.0" />
+<PackageReference Include="Mystira.Domain" Version="1.0.0" />
 ```
 
-**Update `Mystira.App.Admin.Api.csproj`**:
+**Update `Mystira.Admin.Api.csproj`**:
 
 ```xml
 <ItemGroup>
-  <PackageReference Include="Mystira.App.Domain" Version="1.0.0" />
-  <PackageReference Include="Mystira.App.Application" Version="1.0.0" />
-  <PackageReference Include="Mystira.App.Infrastructure.Azure" Version="1.0.0" />
-  <PackageReference Include="Mystira.App.Infrastructure.Data" Version="1.0.0" />
-  <PackageReference Include="Mystira.App.Infrastructure.Discord" Version="1.0.0" />
-  <PackageReference Include="Mystira.App.Infrastructure.StoryProtocol" Version="1.0.0" />
-  <PackageReference Include="Mystira.App.Shared" Version="1.0.0" />
-  <PackageReference Include="Mystira.App.Contracts" Version="1.0.0" />
+  <PackageReference Include="Mystira.Domain" Version="1.0.0" />
+  <PackageReference Include="Mystira.Application" Version="1.0.0" />
+  <PackageReference Include="Mystira.Infrastructure.Azure" Version="1.0.0" />
+  <PackageReference Include="Mystira.Infrastructure.Data" Version="1.0.0" />
+  <PackageReference Include="Mystira.Infrastructure.Discord" Version="1.0.0" />
+  <PackageReference Include="Mystira.Infrastructure.StoryProtocol" Version="1.0.0" />
+  <PackageReference Include="Mystira.Shared" Version="1.0.0" />
+  <PackageReference Include="Mystira.Contracts" Version="1.0.0" />
 </ItemGroup>
 ```
 
@@ -220,9 +220,9 @@ rm -rf ./src/Mystira.App.Admin.Api/Views
 
 **For CI/CD**: Use secrets instead of hardcoded credentials.
 
-### 2.5 Update Namespace (Optional)
+### 2.5 Update Namespace (Completed)
 
-Consider renaming namespaces from `Mystira.App.Admin.Api` to `Mystira.Admin.Api`:
+Namespaces were renamed from `Mystira.App.Admin.Api` to `Mystira.Admin.Api`:
 
 ```bash
 # Use IDE refactoring tools or:
@@ -301,14 +301,14 @@ jobs:
         # ... (same as CI)
 
       - name: Build
-        run: dotnet publish src/Mystira.App.Admin.Api/Mystira.App.Admin.Api.csproj -c Release
+        run: dotnet publish src/Mystira.Admin.Api/Mystira.Admin.Api.csproj -c Release
 
       - name: Deploy to Azure
         uses: azure/webapps-deploy@v3
         with:
           app-name: "prod-wus-app-mystira-api-admin"
           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
-          package: "./src/Mystira.App.Admin.Api/bin/Release/net9.0/publish"
+          package: "./src/Mystira.Admin.Api/bin/Release/net9.0/publish"
 ```
 
 ### 3.2 Update Infrastructure
@@ -329,7 +329,7 @@ jobs:
 
 ### 4.2 Migrate Razor Pages to Modern Frontend
 
-**Current**: Razor Pages in `Mystira.App.Admin.Api/Views/`
+**Current**: Razor Pages in `Mystira.Admin.Api/Views/`
 
 **Target**: Modern SPA (e.g., React + TypeScript) in `Mystira.Admin.UI`
 
@@ -415,7 +415,7 @@ If issues occur:
 
 **After successful migration** (1-2 weeks):
 
-1. Remove `src/Mystira.App.Admin.Api/` directory
+1. Remove `src/Mystira.Admin.Api/` directory
 2. Update solution file
 3. Update documentation
 4. Commit changes

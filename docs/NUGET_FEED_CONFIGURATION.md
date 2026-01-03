@@ -6,7 +6,7 @@ This document explains the NuGet feed configuration for the Mystira Admin API pr
 
 ## Problem Statement
 
-The project references internal Mystira packages (e.g., `Mystira.App.Domain`, `Mystira.App.Application`, etc.) that are hosted in GitHub Packages. The repository has migrated from Azure DevOps to GitHub for package hosting, following [ADR-0007: NuGet Feed Strategy for Shared Libraries](https://github.com/phoenixvc/Mystira.workspace/blob/dev/docs/architecture/adr/0007-nuget-feed-strategy-for-shared-libraries.md).
+The project references internal Mystira packages (e.g., `Mystira.Domain`, `Mystira.Application`, etc.) that are hosted in GitHub Packages. The repository has migrated from Azure DevOps to GitHub for package hosting, following [ADR-0007: NuGet Feed Strategy for Shared Libraries](https://github.com/phoenixvc/Mystira.workspace/blob/dev/docs/architecture/adr/0007-nuget-feed-strategy-for-shared-libraries.md).
 
 ## Solution
 
@@ -135,14 +135,14 @@ You can also configure credentials in your user-level `NuGet.config`:
 
 The following packages are hosted on GitHub Packages:
 
-- `Mystira.App.Domain`
-- `Mystira.App.Application`
-- `Mystira.App.Contracts`
-- `Mystira.App.Infrastructure.Azure`
-- `Mystira.App.Infrastructure.Data`
-- `Mystira.App.Infrastructure.Discord`
-- `Mystira.App.Infrastructure.StoryProtocol`
-- `Mystira.App.Shared`
+- `Mystira.Domain`
+- `Mystira.Application`
+- `Mystira.Contracts`
+- `Mystira.Infrastructure.Azure`
+- `Mystira.Infrastructure.Data`
+- `Mystira.Infrastructure.Discord`
+- `Mystira.Infrastructure.StoryProtocol`
+- `Mystira.Shared`
 
 ## Error Messages
 
@@ -162,7 +162,7 @@ error NU1301: Response status code does not indicate success: 401 (Unauthorized)
 
 **NU1101:**
 ```
-error NU1101: Unable to find package Mystira.App.Domain. No packages exist with this id in source(s): nuget.org, github
+error NU1101: Unable to find package Mystira.Domain. No packages exist with this id in source(s): nuget.org, github
 ```
 
 **Solution:** 

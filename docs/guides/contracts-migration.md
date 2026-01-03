@@ -13,7 +13,7 @@ We are consolidating scattered API contracts into unified packages:
 |-------------|-------------|--------|
 | `@mystira/app-contracts` | `@mystira/contracts/app` | Deprecated |
 | `@mystira/story-generator-contracts` | `@mystira/contracts/story-generator` | Deprecated |
-| `Mystira.App.Contracts` | `Mystira.Contracts.App` | Deprecated |
+| `Mystira.Contracts` | `Mystira.Contracts.App` | Deprecated |
 | `Mystira.StoryGenerator.Contracts` | `Mystira.Contracts.StoryGenerator` | Deprecated |
 
 See [ADR-0020: Package Consolidation Strategy](../architecture/adr/0020-package-consolidation-strategy.md) for rationale.
@@ -103,7 +103,7 @@ Or in your `.csproj`:
 **Before:**
 
 ```csharp
-using Mystira.App.Contracts;
+using Mystira.Contracts;
 using Mystira.StoryGenerator.Contracts;
 ```
 
@@ -135,7 +135,7 @@ using ContractsStartGameSessionRequest = Mystira.Contracts.App.Requests.GameSess
 #### Step 3: Remove Old Packages
 
 ```bash
-dotnet remove package Mystira.App.Contracts
+dotnet remove package Mystira.Contracts
 dotnet remove package Mystira.StoryGenerator.Contracts
 ```
 

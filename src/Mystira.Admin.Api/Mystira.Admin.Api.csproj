@@ -1,0 +1,72 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <!-- Suppress NU1608: Nethereum packages haven't updated constraints for .NET 9 yet, but work fine -->
+    <NoWarn>$(NoWarn);NU1608</NoWarn>
+    <UserSecretsId>ee1f7a64-08f0-43a7-8f4e-aea874c81036</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Grpc.AspNetCore" Version="2.76.0" />
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.11" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.9.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Cosmos" Version="9.0.11" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="9.0.11" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.11" />
+    <PackageReference Include="Microsoft.AspNetCore.Authorization" Version="9.0.11" />
+    <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="9.0.11" />
+    <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore" Version="9.0.11" />
+    <PackageReference Include="Microsoft.AspNetCore.Diagnostics.HealthChecks" Version="2.2.0" />
+    <PackageReference Include="YamlDotNet" Version="16.3.0" />
+    <PackageReference Include="NJsonSchema" Version="11.5.2" />
+    <PackageReference Include="Azure.Communication.Email" Version="1.1.0" />
+    <!-- Application Insights for monitoring and telemetry -->
+    <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.23.0" />
+    <PackageReference Include="Microsoft.ApplicationInsights.DependencyCollector" Version="2.23.0" />
+
+    <!-- PostgreSQL support for hybrid data strategy (Phase 2+) -->
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
+    <PackageReference Include="AspNetCore.HealthChecks.NpgSql" Version="9.0.0" />
+
+    <!-- Redis caching for content and distributed cache -->
+    <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="9.0.11" />
+    <PackageReference Include="AspNetCore.HealthChecks.Redis" Version="9.0.0" />
+
+    <!-- Microsoft Entra ID (Azure AD) authentication -->
+    <PackageReference Include="Microsoft.Identity.Web" Version="4.2.0" />
+
+    <!-- MediatR for CQRS pattern -->
+    <PackageReference Include="MediatR" Version="12.4.1" />
+
+    <!-- Serilog for structured logging -->
+    <PackageReference Include="Serilog.AspNetCore" Version="9.0.0" />
+    <PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
+    <PackageReference Include="Serilog.Sinks.ApplicationInsights" Version="4.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- NuGet Package References (replacing project references) -->
+    <PackageReference Include="Mystira.Domain" Version="0.5.0-alpha-*" />
+    <PackageReference Include="Mystira.Application" Version="0.5.0-alpha-*" />
+    <PackageReference Include="Mystira.Contracts" Version="0.5.0-alpha-*" />
+    <PackageReference Include="Mystira.Infrastructure.Azure" Version="0.5.0-alpha-*" />
+    <PackageReference Include="Mystira.Infrastructure.Data" Version="0.5.0-alpha-*" />
+    <PackageReference Include="Mystira.Infrastructure.Discord" Version="0.5.0-alpha-*" />
+    <PackageReference Include="Mystira.Infrastructure.StoryProtocol" Version="0.5.0-alpha-*" />
+    <PackageReference Include="Mystira.Shared" Version="0.5.0-alpha-*" />
+
+    <!-- Ardalis.Specification for data access patterns (version matches Mystira.Application dependency) -->
+    <PackageReference Include="Ardalis.Specification" Version="9.3.1" />
+    <PackageReference Include="Ardalis.Specification.EntityFrameworkCore" Version="9.3.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="..\..\.dockerignore">
+      <Link>.dockerignore</Link>
+    </Content>
+  </ItemGroup>
+
+</Project>

@@ -110,7 +110,7 @@ public virtual async Task<TEntity> AddAsync(TEntity entity)
 
 **Location**: `mystira-app-admin-api-migration.md`
 
-**Issue**: Document references `IAccountQueryService` but doesn't exist in current codebase. Need to add to `Mystira.App.Application/Ports/Data/`.
+**Issue**: Document references `IAccountQueryService` but doesn't exist in current codebase. Need to add to `Mystira.Application/Ports/Data/`.
 
 ---
 
@@ -369,7 +369,7 @@ public class Entity(TimeProvider timeProvider)
 
 ```csharp
 // Application/Ports/Data/IRepository.cs
-namespace Mystira.App.Application.Ports.Data;
+namespace Mystira.Application.Ports.Data;
 
 /// <summary>
 /// Marker interface for entities with string ID (Cosmos compatible).

@@ -94,25 +94,25 @@ This roadmap outlines the implementation of ADR-0013 (Data Management and Storag
 
 ```
 Mystira.App/src/
-├── Mystira.App.Application/           # MODIFY
+├── Mystira.Application/           # MODIFY
 │   └── Ports/Data/
 │       ├── IRepository.cs             # Add CancellationToken, IEntity constraint
 │       ├── IReadRepository.cs         # NEW: CQRS read interface
 │       ├── IAccountQueryService.cs    # NEW: Read-only query service
 │       └── IProfileQueryService.cs    # NEW: Read-only query service
 │
-├── Mystira.App.Domain/                # MODIFY
+├── Mystira.Domain/                # MODIFY
 │   └── Models/
 │       └── Base/
 │           ├── Entity.cs              # Add audit fields
 │           └── IEntity.cs             # NEW: Interface for entities
 │
-├── Mystira.App.Infrastructure.Data/   # MODIFY (rename repos)
+├── Mystira.Infrastructure.Data/   # MODIFY (rename repos)
 │   └── Repositories/
 │       ├── CosmosRepository.cs        # Rename from Repository.cs
 │       └── CosmosAccountRepository.cs # Rename from AccountRepository.cs
 │
-├── Mystira.App.Infrastructure.PostgreSQL/  # NEW PROJECT
+├── Mystira.Infrastructure.PostgreSQL/  # NEW PROJECT
 │   ├── PostgreSqlDbContext.cs
 │   ├── Configuration/
 │   │   └── AccountConfiguration.cs
@@ -122,7 +122,7 @@ Mystira.App/src/
 │   └── Migrations/
 │       └── 20251222_InitialCreate.cs
 │
-├── Mystira.App.Infrastructure.Hybrid/     # NEW PROJECT
+├── Mystira.Infrastructure.Hybrid/     # NEW PROJECT
 │   ├── DualWrite/
 │   │   ├── DualWriteAccountRepository.cs
 │   │   └── DualWriteUserProfileRepository.cs
@@ -133,7 +133,7 @@ Mystira.App/src/
 │   └── Migration/
 │       └── MigrationPhaseManager.cs
 │
-└── Mystira.App.Infrastructure.Redis/      # NEW PROJECT
+└── Mystira.Infrastructure.Redis/      # NEW PROJECT
     ├── RedisCacheService.cs
     └── CachedAccountRepository.cs
 ```
@@ -252,8 +252,8 @@ Phase 3: PostgresOnly (Production - Long Term)
 #### Event Contracts (Shared NuGet Package)
 
 ```csharp
-// Mystira.App.Contracts (New or existing)
-namespace Mystira.App.Contracts.Events;
+// Mystira.Contracts (New or existing)
+namespace Mystira.Contracts.Events;
 
 public record AccountCreatedEvent(string AccountId, string Email, DateTimeOffset CreatedAt);
 public record ProfileUpdatedEvent(string ProfileId, string AccountId, string[] ChangedProperties);
@@ -468,7 +468,7 @@ public record ScenarioPurchasedEvent(string AccountId, string ScenarioId, decima
 │  └──────────────┘     └──────────────┘     └──────────────┘                     │
 │                                                                                  │
 │  ─────────────────────────────────────────────────────────────────              │
-│  Shared: Mystira.App.Contracts (NuGet) - Event definitions                      │
+│  Shared: Mystira.Contracts (NuGet) - Event definitions                      │
 │  Shared: @mystira/shared-utils (NPM) - TypeScript utilities                     │
 └─────────────────────────────────────────────────────────────────────────────────┘
 ```

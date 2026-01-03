@@ -1,13 +1,13 @@
-# Mystira.App.Admin.Api Migration Guide
+# Mystira.Admin.Api Migration Guide
 
 ## Overview
 
-This document outlines the changes required in `Mystira.App.Admin.Api` to support the hybrid data strategy. The Admin API manages content (scenarios, characters, badges) which will primarily remain in Cosmos DB, but requires read access to PostgreSQL for user/account data.
+This document outlines the changes required in `Mystira.Admin.Api` to support the hybrid data strategy. The Admin API manages content (scenarios, characters, badges) which will primarily remain in Cosmos DB, but requires read access to PostgreSQL for user/account data.
 
 ## Current State
 
 ```
-Mystira.App.Admin.Api/
+Mystira.Admin.Api/
 ├── Program.cs
 ├── appsettings.json
 ├── Controllers/
@@ -35,7 +35,7 @@ Mystira.App.Admin.Api/
 
 #### 1.1 Update NuGet Packages
 
-Same as App API, add to `Mystira.App.Admin.Api.csproj`:
+Same as App API, add to `Mystira.Admin.Api.csproj`:
 
 ```xml
 <ItemGroup>
@@ -72,7 +72,7 @@ Same as App API, add to `Mystira.App.Admin.Api.csproj`:
 
 ```csharp
 // Configuration/AdminDataMigrationOptions.cs
-namespace Mystira.App.Admin.Api.Configuration;
+namespace Mystira.Admin.Api.Configuration;
 
 public class AdminDataMigrationOptions
 {
@@ -131,7 +131,7 @@ app.Run();
 
 ```csharp
 // Extensions/AdminDataServiceExtensions.cs
-namespace Mystira.App.Admin.Api.Extensions;
+namespace Mystira.Admin.Api.Extensions;
 
 public static class AdminDataServiceExtensions
 {
@@ -193,11 +193,11 @@ public static class AdminDataServiceExtensions
 
 #### 2.1 Create Read-Only Interfaces
 
-**Note**: Add these interfaces to `Mystira.App.Application/Ports/Data/` (BUG-6 fix).
+**Note**: Add these interfaces to `Mystira.Application/Ports/Data/` (BUG-6 fix).
 
 ```csharp
 // Application/Ports/Data/IAccountQueryService.cs
-namespace Mystira.App.Application.Ports.Data;
+namespace Mystira.Application.Ports.Data;
 
 /// <summary>
 /// Read-only access to account data for Admin API.
@@ -228,7 +228,7 @@ public interface IProfileQueryService
 
 ```csharp
 // Infrastructure.PostgreSQL/Services/PostgresAccountQueryService.cs
-namespace Mystira.App.Infrastructure.PostgreSQL.Services;
+namespace Mystira.Infrastructure.PostgreSQL.Services;
 
 /// <summary>
 /// Read-only PostgreSQL implementation of IAccountQueryService.
@@ -285,7 +285,7 @@ public class PostgresAccountQueryService(PostgreSqlDbContext context) : IAccount
 
 ```csharp
 // Extensions/ContentCachingExtensions.cs
-namespace Mystira.App.Admin.Api.Extensions;
+namespace Mystira.Admin.Api.Extensions;
 
 public static class ContentCachingExtensions
 {
@@ -463,10 +463,10 @@ az webapp config appsettings set --name mys-staging-mystira-admin-api-san \
 
 | Dependency | Version | Purpose |
 |------------|---------|---------|
-| `Mystira.App.Application` | * | Query interfaces |
-| `Mystira.App.Infrastructure.Data` | * | Cosmos repositories |
-| `Mystira.App.Infrastructure.PostgreSQL` | * | Read-only PostgreSQL access |
-| `Mystira.App.Infrastructure.Redis` | * | Content caching |
+| `Mystira.Application` | * | Query interfaces |
+| `Mystira.Infrastructure.Data` | * | Cosmos repositories |
+| `Mystira.Infrastructure.PostgreSQL` | * | Read-only PostgreSQL access |
+| `Mystira.Infrastructure.Redis` | * | Content caching |
 
 ## See Also
 
