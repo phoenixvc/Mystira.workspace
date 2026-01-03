@@ -181,7 +181,7 @@ public class ScenarioApiService : IScenarioApiService
             SessionLength = (SessionLength)(int)request.SessionLength,
             Archetypes = ParseArchetypesOrThrow(request.Archetypes),
             MinimumAge = request.MinimumAge,
-            AgeGroup = !string.IsNullOrEmpty(request.AgeGroup) ? AgeGroup.Parse(request.AgeGroup) : null,
+            // Note: AgeGroup is read-only, derived from MinimumAge in domain model
             CoreAxes = ParseCoreAxesOrThrow(request.CoreAxes),
             Characters = MapCharactersFromRequest(request.Characters),
             Scenes = MapScenesFromRequest(request.Scenes),

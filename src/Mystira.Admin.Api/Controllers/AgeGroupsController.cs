@@ -45,12 +45,13 @@ public class AgeGroupsController : ControllerBase
     {
         _logger.LogInformation("POST: Creating age group with name: {Name}", request.Name);
 
-        var created = await _mediator.Send(new CreateAgeGroupCommand(
+        var result = await _mediator.Send(new CreateAgeGroupCommand(
             request.Name,
             request.Value,
             request.MinimumAge,
             request.MaximumAge,
             request.Description));
+        var created = (AgeGroupDefinition)result;
         return CreatedAtAction(nameof(GetAgeGroupById), new { id = created.Id }, created);
     }
 
@@ -79,7 +80,8 @@ public class AgeGroupsController : ControllerBase
     {
         _logger.LogInformation("DELETE: Deleting age group with id: {Id}", id);
 
-        var success = await _mediator.Send(new DeleteAgeGroupCommand(id));
+        var result = await _mediator.Send(new DeleteAgeGroupCommand(id));
+        var success = (bool)result;
         if (!success)
         {
             _logger.LogWarning("Age group with id {Id} not found", id);

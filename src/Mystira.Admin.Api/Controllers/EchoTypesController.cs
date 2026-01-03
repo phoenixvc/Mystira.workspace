@@ -45,7 +45,8 @@ public class EchoTypesController : ControllerBase
     {
         _logger.LogInformation("POST: Creating echo type with name: {Name}", request.Name);
 
-        var created = await _mediator.Send(new CreateEchoTypeCommand(request.Name, request.Description));
+        var result = await _mediator.Send(new CreateEchoTypeCommand(request.Name, request.Description));
+        var created = (EchoTypeDefinition)result;
         return CreatedAtAction(nameof(GetEchoTypeById), new { id = created.Id }, created);
     }
 
@@ -68,7 +69,8 @@ public class EchoTypesController : ControllerBase
     {
         _logger.LogInformation("DELETE: Deleting echo type with id: {Id}", id);
 
-        var success = await _mediator.Send(new DeleteEchoTypeCommand(id));
+        var result = await _mediator.Send(new DeleteEchoTypeCommand(id));
+        var success = (bool)result;
         if (!success)
         {
             _logger.LogWarning("Echo type with id {Id} not found", id);

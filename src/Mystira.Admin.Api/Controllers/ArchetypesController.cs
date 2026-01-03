@@ -45,7 +45,8 @@ public class ArchetypesController : ControllerBase
     {
         _logger.LogInformation("POST: Creating archetype with name: {Name}", request.Name);
 
-        var created = await _mediator.Send(new CreateArchetypeCommand(request.Name, request.Description));
+        var result = await _mediator.Send(new CreateArchetypeCommand(request.Name, request.Description));
+        var created = (ArchetypeDefinition)result;
         return CreatedAtAction(nameof(GetArchetypeById), new { id = created.Id }, created);
     }
 
@@ -68,7 +69,8 @@ public class ArchetypesController : ControllerBase
     {
         _logger.LogInformation("DELETE: Deleting archetype with id: {Id}", id);
 
-        var success = await _mediator.Send(new DeleteArchetypeCommand(id));
+        var result = await _mediator.Send(new DeleteArchetypeCommand(id));
+        var success = (bool)result;
         if (!success)
         {
             _logger.LogWarning("Archetype with id {Id} not found", id);
