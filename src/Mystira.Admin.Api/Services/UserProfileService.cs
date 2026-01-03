@@ -38,7 +38,7 @@ public class UserProfileService : IUserProfileService
                 throw new ArgumentException($"Invalid fantasy themes: {string.Join(", ", invalidThemes)}");
             }
 
-            profile.PreferredFantasyThemes = request.PreferredFantasyThemes.Select(t => FantasyTheme.Parse(t)!).ToList();
+            profile.PreferredFantasyThemes = request.PreferredFantasyThemes.ToList();
         }
         if (request.DateOfBirth.HasValue)
         {
@@ -116,7 +116,7 @@ public class UserProfileService : IUserProfileService
         var profile = new UserProfile
         {
             Name = request.Name,
-            PreferredFantasyThemes = request.PreferredFantasyThemes.Select(t => FantasyTheme.Parse(t)!).ToList(),
+            PreferredFantasyThemes = request.PreferredFantasyThemes.ToList(),
             DateOfBirth = dateOfBirth,
             IsGuest = request.IsGuest,
             IsNpc = request.IsNpc,
@@ -167,7 +167,7 @@ public class UserProfileService : IUserProfileService
         var profile = new UserProfile
         {
             Name = name,
-            PreferredFantasyThemes = new List<FantasyTheme>(), // Empty for guest profiles
+            PreferredFantasyThemes = new List<string>(), // Empty for guest profiles
             DateOfBirth = dateOfBirth,
             IsGuest = true,
             IsNpc = false,
@@ -243,7 +243,7 @@ public class UserProfileService : IUserProfileService
                 throw new ArgumentException($"Invalid fantasy themes: {string.Join(", ", invalidThemes)}");
             }
 
-            profile.PreferredFantasyThemes = request.PreferredFantasyThemes.Select(t => FantasyTheme.Parse(t)!).ToList();
+            profile.PreferredFantasyThemes = request.PreferredFantasyThemes.ToList();
         }
 
         if (request.DateOfBirth.HasValue)

@@ -121,7 +121,7 @@ public class BadgeAdminService : IBadgeAdminService
             CompassAxisId = NormalizeAxisValue(axis, request.CompassAxisId),
             Tier = tier,
             TierOrder = request.TierOrder,
-            RequiredScore = request.RequiredScore,
+            RequiredScore = (int)request.RequiredScore,
             Title = request.Title.Trim(),
             Description = request.Description.Trim(),
             ImageId = request.ImageId.Trim(),
@@ -177,7 +177,7 @@ public class BadgeAdminService : IBadgeAdminService
             {
                 throw new ArgumentException("Required score must be greater than zero");
             }
-            badge.RequiredScore = request.RequiredScore.Value;
+            badge.RequiredScore = (int)request.RequiredScore.Value;
         }
 
         if (!string.IsNullOrWhiteSpace(request.Title))
@@ -491,7 +491,7 @@ public class BadgeAdminService : IBadgeAdminService
                     TierOrder = badgeConfig.Tier_Order,
                     Title = badgeConfig.Title.Trim(),
                     Description = badgeConfig.Description.Trim(),
-                    RequiredScore = badgeConfig.Required_Score,
+                    RequiredScore = (int)badgeConfig.Required_Score,
                     ImageId = badgeConfig.Image_Id.Trim(),
                     CreatedAt = DateTime.UtcNow,
                     UpdatedAt = DateTime.UtcNow
@@ -504,7 +504,7 @@ public class BadgeAdminService : IBadgeAdminService
             {
                 existing.Title = badgeConfig.Title.Trim();
                 existing.Description = badgeConfig.Description.Trim();
-                existing.RequiredScore = badgeConfig.Required_Score;
+                existing.RequiredScore = (int)badgeConfig.Required_Score;
                 existing.ImageId = badgeConfig.Image_Id.Trim();
                 existing.UpdatedAt = DateTime.UtcNow;
                 await _badgeRepository.UpdateAsync(existing);
@@ -658,12 +658,12 @@ public class BadgeAdminService : IBadgeAdminService
             CompassAxisId = badge.CompassAxisId,
             Tier = badge.Tier,
             TierOrder = badge.TierOrder,
-            RequiredScore = badge.RequiredScore,
+            RequiredScore = badge.RequiredScore ?? 0,
             Title = badge.Title,
             Description = badge.Description,
             ImageId = badge.ImageId,
-            CreatedAt = badge.CreatedAt,
-            UpdatedAt = badge.UpdatedAt
+            CreatedAt = badge.CreatedAt ?? DateTime.MinValue,
+            UpdatedAt = badge.UpdatedAt ?? DateTime.MinValue
         };
 
         if (ageGroupLookup != null && ageGroupLookup.TryGetValue(badge.AgeGroupId, out var ageGroup))
@@ -700,8 +700,8 @@ public class BadgeAdminService : IBadgeAdminService
             CompassAxisId = entity.CompassAxisId,
             AxesDirection = entity.AxesDirection,
             Description = entity.Description,
-            CreatedAt = entity.CreatedAt,
-            UpdatedAt = entity.UpdatedAt
+            CreatedAt = entity.CreatedAt ?? DateTime.MinValue,
+            UpdatedAt = entity.UpdatedAt ?? DateTime.MinValue
         };
 
         dto.CompassAxisName = axisLookup.TryGetValue(entity.CompassAxisId, out var axis)
@@ -718,9 +718,9 @@ public class BadgeAdminService : IBadgeAdminService
             Id = entity.Id,
             ImageId = entity.ImageId,
             ContentType = entity.ContentType,
-            FileSizeBytes = entity.FileSizeBytes,
-            CreatedAt = entity.CreatedAt,
-            UpdatedAt = entity.UpdatedAt
+            FileSizeBytes = entity.FileSizeBytes ?? 0,
+            CreatedAt = entity.CreatedAt ?? DateTime.MinValue,
+            UpdatedAt = entity.UpdatedAt ?? DateTime.MinValue
         };
 
         if (includeData && entity.ImageData is { Length: > 0 })

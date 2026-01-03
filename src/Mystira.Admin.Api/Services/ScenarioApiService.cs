@@ -22,6 +22,10 @@ using ScenarioMediaReference = Mystira.Contracts.App.Responses.Scenarios.MediaRe
 // Use local models for types not in Domain package
 using CharacterScenarioMetadata = Mystira.Admin.Api.Models.CharacterScenarioMetadata;
 using SceneMedia = Mystira.Admin.Api.Models.SceneMedia;
+using LocalBranchRequest = Mystira.Admin.Api.Models.BranchRequest;
+using LocalEchoRevealRequest = Mystira.Admin.Api.Models.EchoRevealRequest;
+using LocalEchoLogRequest = Mystira.Admin.Api.Models.EchoLogRequest;
+using LocalCompassChangeRequest = Mystira.Admin.Api.Models.CompassChangeRequest;
 
 namespace Mystira.Admin.Api.Services;
 
