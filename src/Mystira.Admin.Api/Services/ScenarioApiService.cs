@@ -539,7 +539,7 @@ public class ScenarioApiService : IScenarioApiService
                         throw new ScenarioValidationException($"Compass axis cannot be empty (Scene ID: {scene.Id}, Choice: {branch.Choice})");
                     }
 
-                    if (!scenario.CoreAxes.Select(a => a.Value).Contains(change.Axis))
+                    if (!scenario.CoreAxes.Contains(change.Axis))
                     {
                         // TODO: Enhancement - Re-enable strict validation when master axis list is finalized
                         // This will ensure all compass axes referenced in scenarios are valid according to the domain model

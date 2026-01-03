@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
 using Mystira.Infrastructure.Data;
 using ContractsGameSessionResponse = Mystira.Contracts.App.Responses.GameSessions.GameSessionResponse;
 using ContractsMakeChoiceRequest = Mystira.Contracts.App.Requests.GameSessions.MakeChoiceRequest;
@@ -79,9 +80,9 @@ public class GameSessionApiService : IGameSessionApiService
         // Initialize compass tracking for scenario axes
         foreach (var axis in scenario.CoreAxes)
         {
-            session.CompassValues[axis.Value] = new CompassTracking
+            session.CompassValues[axis] = new CompassTracking
             {
-                Axis = axis.Value,
+                Axis = axis,
                 CurrentValue = 0.0f,
                 History = new List<CompassChange>(),
                 LastUpdated = DateTime.UtcNow
