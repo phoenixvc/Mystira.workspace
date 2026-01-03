@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Mystira.Domain.Models;
+using Mystira.Domain.ValueObjects;
 using Mystira.Infrastructure.Data;
 using Mystira.Contracts.App.Requests.UserProfiles;
 
@@ -9,6 +10,11 @@ public class UserProfileService : IUserProfileService
 {
     private readonly MystiraAppDbContext _context;
     private readonly ILogger<UserProfileService> _logger;
+
+    // Simple guest name generation
+    private static readonly string[] Adjectives = { "Happy", "Brave", "Swift", "Clever", "Mighty", "Noble", "Gentle", "Bold", "Wise", "Lucky" };
+    private static readonly string[] Nouns = { "Explorer", "Adventurer", "Traveler", "Wanderer", "Seeker", "Knight", "Hero", "Champion", "Guardian", "Pioneer" };
+    private static readonly Random Random = new();
 
     public UserProfileService(MystiraAppDbContext context, ILogger<UserProfileService> logger)
     {
@@ -42,11 +48,11 @@ public class UserProfileService : IUserProfileService
                 throw new ArgumentException($"Invalid age group: {request.AgeGroup}. Must be one of: {string.Join(", ", AgeGroup.All)}");
             }
 
-            profile.AgeGroupName = request.AgeGroup;
+            profile.SetAgeGroup(request.AgeGroup);
         }
         if (request.DateOfBirth.HasValue)
         {
-            profile.DateOfBirth = request.DateOfBirth;
+            profile.DateOfBirth = DateOnly.FromDateTime(request.DateOfBirth.Value);
             profile.UpdateAgeGroupFromBirthDate();
         }
         if (request.HasCompletedOnboarding.HasValue)
@@ -101,14 +107,16 @@ public class UserProfileService : IUserProfileService
         {
             Name = request.Name,
             PreferredFantasyThemes = request.PreferredFantasyThemes.Select(t => FantasyTheme.Parse(t)!).ToList(),
-            AgeGroupName = request.AgeGroup,
-            DateOfBirth = request.DateOfBirth,
+            DateOfBirth = request.DateOfBirth.HasValue ? DateOnly.FromDateTime(request.DateOfBirth.Value) : null,
             IsGuest = request.IsGuest,
             IsNpc = request.IsNpc,
             HasCompletedOnboarding = false,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
         };
+
+        // Set age group using the method
+        profile.SetAgeGroup(request.AgeGroup);
 
         // If date of birth is provided, update age group automatically
         if (profile.DateOfBirth.HasValue)
@@ -129,7 +137,7 @@ public class UserProfileService : IUserProfileService
         // Generate random name if not provided
         var name = !string.IsNullOrEmpty(request.Name)
             ? request.Name
-            : RandomNameGenerator.GenerateGuestName(request.UseAdjectiveNames);
+            : GenerateGuestName(request.UseAdjectiveNames);
 
         // Ensure name is unique for guest profiles
         var baseName = name;
@@ -150,13 +158,15 @@ public class UserProfileService : IUserProfileService
         {
             Name = name,
             PreferredFantasyThemes = new List<FantasyTheme>(), // Empty for guest profiles
-            AgeGroupName = request.AgeGroup,
             IsGuest = true,
             IsNpc = false,
             HasCompletedOnboarding = true, // Guests don't need onboarding
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
         };
+
+        // Set age group using the method
+        profile.SetAgeGroup(request.AgeGroup);
 
         _context.UserProfiles.Add(profile);
         await _context.SaveChangesAsync();
@@ -230,12 +240,12 @@ public class UserProfileService : IUserProfileService
                 throw new ArgumentException($"Invalid age group: {request.AgeGroup}. Must be one of: {string.Join(", ", AgeGroup.All)}");
             }
 
-            profile.AgeGroupName = request.AgeGroup;
+            profile.SetAgeGroup(request.AgeGroup);
         }
 
         if (request.DateOfBirth.HasValue)
         {
-            profile.DateOfBirth = request.DateOfBirth;
+            profile.DateOfBirth = DateOnly.FromDateTime(request.DateOfBirth.Value);
             // Update age group automatically if date of birth is provided
             profile.UpdateAgeGroupFromBirthDate();
         }
@@ -361,5 +371,19 @@ public class UserProfileService : IUserProfileService
             characterId, profileId, isNpc);
 
         return true;
+    }
+
+    private static string GenerateGuestName(bool useAdjectiveNames)
+    {
+        if (useAdjectiveNames)
+        {
+            var adjective = Adjectives[Random.Next(Adjectives.Length)];
+            var noun = Nouns[Random.Next(Nouns.Length)];
+            return $"{adjective} {noun}";
+        }
+        else
+        {
+            return $"Guest_{Random.Next(10000, 99999)}";
+        }
     }
 }

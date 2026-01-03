@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Mystira.Domain.Models;
 using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 using Mystira.Infrastructure.Data;
 using ContractsGameSessionResponse = Mystira.Contracts.App.Responses.GameSessions.GameSessionResponse;
 using ContractsMakeChoiceRequest = Mystira.Contracts.App.Requests.GameSessions.MakeChoiceRequest;
@@ -57,7 +58,10 @@ public class GameSessionApiService : IGameSessionApiService
             {
                 existingSession.Status = SessionStatus.Completed;
                 existingSession.EndTime = DateTime.UtcNow;
-                existingSession.ElapsedTime = existingSession.EndTime.Value - existingSession.StartTime;
+                if (existingSession.EndTime.HasValue)
+                {
+                    existingSession.ElapsedTime = existingSession.EndTime.Value - existingSession.StartTime;
+                }
             }
 
             await _context.SaveChangesAsync();
@@ -78,16 +82,13 @@ public class GameSessionApiService : IGameSessionApiService
         };
 
         // Initialize compass tracking for scenario axes
-        foreach (var axis in scenario.CoreAxes)
+        session.CompassValues = scenario.CoreAxes.Select(axis => new CompassTracking
         {
-            session.CompassValues[axis] = new CompassTracking
-            {
-                Axis = axis,
-                CurrentValue = 0.0f,
-                History = new List<CompassChange>(),
-                LastUpdated = DateTime.UtcNow
-            };
-        }
+            Axis = axis,
+            CurrentValue = 0.0f,
+            History = new List<CompassChangeRecord>(),
+            LastUpdated = DateTime.UtcNow
+        }).ToList();
 
         _context.GameSessions.Add(session);
         await _context.SaveChangesAsync();
@@ -105,56 +106,45 @@ public class GameSessionApiService : IGameSessionApiService
 
     public async Task<List<ContractsGameSessionResponse>> GetSessionsByAccountAsync(string accountId)
     {
-        return await _context.GameSessions
+        var sessions = await _context.GameSessions
             .Where(s => s.AccountId == accountId)
             .OrderByDescending(s => s.StartTime)
-            .Select(s => new ContractsGameSessionResponse
-            {
-                Id = s.Id,
-                ScenarioId = s.ScenarioId,
-                AccountId = s.AccountId,
-                ProfileId = s.ProfileId,
-                PlayerNames = s.PlayerNames,
-                Status = s.Status,
-                CurrentSceneId = s.CurrentSceneId,
-                ChoiceCount = s.ChoiceHistory.Count,
-                EchoCount = s.EchoHistory.Count,
-                AchievementCount = s.Achievements.Count,
-                StartTime = s.StartTime,
-                EndTime = s.EndTime,
-                ElapsedTime = s.ElapsedTime,
-                IsPaused = s.IsPaused,
-                SceneCount = s.SceneCount,
-                TargetAgeGroup = s.TargetAgeGroupName
-            })
             .ToListAsync();
+
+        return sessions.Select(s => MapToResponse(s)).ToList();
     }
 
     public async Task<List<ContractsGameSessionResponse>> GetSessionsByProfileAsync(string profileId)
     {
-        return await _context.GameSessions
+        var sessions = await _context.GameSessions
             .Where(s => s.ProfileId == profileId)
             .OrderByDescending(s => s.StartTime)
-            .Select(s => new ContractsGameSessionResponse
-            {
-                Id = s.Id,
-                ScenarioId = s.ScenarioId,
-                AccountId = s.AccountId,
-                ProfileId = s.ProfileId,
-                PlayerNames = s.PlayerNames,
-                Status = s.Status,
-                CurrentSceneId = s.CurrentSceneId,
-                ChoiceCount = s.ChoiceHistory.Count,
-                EchoCount = s.EchoHistory.Count,
-                AchievementCount = s.Achievements.Count,
-                StartTime = s.StartTime,
-                EndTime = s.EndTime,
-                ElapsedTime = s.ElapsedTime,
-                IsPaused = s.IsPaused,
-                SceneCount = s.SceneCount,
-                TargetAgeGroup = s.TargetAgeGroupName
-            })
             .ToListAsync();
+
+        return sessions.Select(s => MapToResponse(s)).ToList();
+    }
+
+    private static ContractsGameSessionResponse MapToResponse(GameSession s)
+    {
+        return new ContractsGameSessionResponse
+        {
+            Id = s.Id,
+            ScenarioId = s.ScenarioId,
+            AccountId = s.AccountId,
+            ProfileId = s.ProfileId,
+            PlayerNames = s.PlayerNames,
+            Status = s.Status.ToString(),
+            CurrentSceneId = s.CurrentSceneId,
+            ChoiceCount = s.ChoiceHistory?.Count ?? 0,
+            EchoCount = s.EchoHistory?.Count ?? 0,
+            AchievementCount = s.Achievements?.Count ?? 0,
+            StartTime = s.StartTime,
+            EndTime = s.EndTime ?? DateTime.MinValue,
+            ElapsedTime = s.ElapsedTime,
+            IsPaused = s.IsPaused,
+            SceneCount = s.SceneCount,
+            TargetAgeGroup = s.TargetAgeGroupName
+        };
     }
 
     public async Task<GameSession?> MakeChoiceAsync(ContractsMakeChoiceRequest request)
@@ -206,11 +196,11 @@ public class GameSessionApiService : IGameSessionApiService
             PlayerId = playerId ?? string.Empty,
             CompassAxis = compassAxis,
             CompassDirection = compassDirection,
-            CompassDelta = compassDelta,
+            CompassDelta = compassDelta ?? 0.0,
             ChosenAt = DateTime.UtcNow,
-            EchoGenerated = branch.EchoLog,
+            EchoGenerated = branch.EchoLog != null,
             CompassChange = !string.IsNullOrWhiteSpace(compassAxis) && compassDelta.HasValue
-                ? new CompassChange { Axis = compassAxis, Delta = compassDelta.Value }
+                ? CompassChange.Create(compassAxis, (int)compassDelta.Value)
                 : branch.CompassChange
         };
 
@@ -219,13 +209,12 @@ public class GameSessionApiService : IGameSessionApiService
         // Process echo log if present
         if (branch.EchoLog != null)
         {
-            var echo = new EchoLog
-            {
-                EchoType = branch.EchoLog.EchoType,
-                Description = branch.EchoLog.Description,
-                Strength = branch.EchoLog.Strength,
-                Timestamp = DateTime.UtcNow
-            };
+            var echo = EchoLog.Create(
+                branch.EchoLog.EchoType,
+                branch.EchoLog.Description,
+                branch.EchoLog.Strength,
+                DateTime.UtcNow
+            );
             session.EchoHistory.Add(echo);
         }
 
@@ -314,7 +303,10 @@ public class GameSessionApiService : IGameSessionApiService
 
         session.Status = SessionStatus.Completed;
         session.EndTime = DateTime.UtcNow;
-        session.ElapsedTime = session.EndTime.Value - session.StartTime;
+        if (session.EndTime.HasValue)
+        {
+            session.ElapsedTime = session.EndTime.Value - session.StartTime;
+        }
         session.IsPaused = false;
 
         await _context.SaveChangesAsync();
@@ -331,23 +323,27 @@ public class GameSessionApiService : IGameSessionApiService
             return null;
         }
 
-        var compassValues = session.CompassValues.ToDictionary(
-            kvp => kvp.Key,
-            kvp => kvp.Value.CurrentValue
-        );
+        var compassValues = session.CompassValues
+            .ToDictionary(ct => ct.Axis, ct => ct.CurrentValue);
 
         var recentEchoes = session.EchoHistory
             .OrderByDescending(e => e.Timestamp)
             .Take(5)
+            .Cast<object>()
             .ToList();
+
+        var achievements = session.Achievements?.Cast<object>().ToList() ?? new List<object>();
+
+        var endTime = session.EndTime ?? DateTime.UtcNow;
+        var duration = endTime.Subtract(session.StartTime);
 
         return new ContractsSessionStatsResponse
         {
             CompassValues = compassValues,
             RecentEchoes = recentEchoes,
-            Achievements = session.Achievements,
-            TotalChoices = session.ChoiceHistory.Count,
-            SessionDuration = session.EndTime?.Subtract(session.StartTime) ?? DateTime.UtcNow.Subtract(session.StartTime)
+            Achievements = achievements,
+            TotalChoices = session.ChoiceHistory?.Count ?? 0,
+            SessionDuration = duration
         };
     }
 
@@ -365,7 +361,7 @@ public class GameSessionApiService : IGameSessionApiService
         var defaultThreshold = 3.0f;
 
         // Check compass threshold achievements
-        foreach (var compassTracking in session.CompassValues.Values)
+        foreach (var compassTracking in session.CompassValues)
         {
             if (Math.Abs(compassTracking.CurrentValue) >= defaultThreshold)
             {
@@ -380,7 +376,7 @@ public class GameSessionApiService : IGameSessionApiService
                         IconName = $"badge_{compassTracking.Axis}",
                         Type = AchievementType.CompassThreshold,
                         CompassAxis = compassTracking.Axis,
-                        ThresholdValue = defaultThreshold,
+                        ThresholdValue = (int)defaultThreshold,
                         EarnedAt = DateTime.UtcNow
                     });
                 }

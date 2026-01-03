@@ -18,6 +18,7 @@ using ClassificationTag = Mystira.Domain.Models.ClassificationTag;
 using MediaMetadataEntry = Mystira.Domain.Models.MediaMetadataEntry;
 using MediaMetadataFile = Mystira.Domain.Models.MediaMetadataFile;
 using MetadataModifier = Mystira.Domain.Models.MetadataModifier;
+using ScenarioMediaReference = Mystira.Contracts.App.Responses.Scenarios.MediaReference;
 
 namespace Mystira.Admin.Api.Services;
 
@@ -169,17 +170,22 @@ public class ScenarioApiService : IScenarioApiService
             Title = request.Title,
             Description = request.Description,
             Tags = request.Tags,
-            Difficulty = request.Difficulty,
-            SessionLength = request.SessionLength,
+            Difficulty = (DifficultyLevel)(int)request.Difficulty,
+            SessionLength = (SessionLength)(int)request.SessionLength,
             Archetypes = ParseArchetypesOrThrow(request.Archetypes),
-            AgeGroup = request.AgeGroup,
             MinimumAge = request.MinimumAge,
             CoreAxes = ParseCoreAxesOrThrow(request.CoreAxes),
-            Characters = request.Characters,
-            Scenes = request.Scenes,
+            Characters = MapCharactersFromRequest(request.Characters),
+            Scenes = MapScenesFromRequest(request.Scenes),
             Image = request.Image,
             CreatedAt = DateTime.UtcNow
         };
+
+        // Set age group using method (read-only property)
+        if (!string.IsNullOrEmpty(request.AgeGroup))
+        {
+            scenario.SetAgeGroup(request.AgeGroup);
+        }
 
         _context.Scenarios.Add(scenario);
 
@@ -213,15 +219,20 @@ public class ScenarioApiService : IScenarioApiService
         scenario.Title = request.Title;
         scenario.Description = request.Description;
         scenario.Tags = request.Tags;
-        scenario.Difficulty = request.Difficulty;
-        scenario.SessionLength = request.SessionLength;
+        scenario.Difficulty = (DifficultyLevel)(int)request.Difficulty;
+        scenario.SessionLength = (SessionLength)(int)request.SessionLength;
         scenario.Archetypes = ParseArchetypesOrThrow(request.Archetypes);
-        scenario.AgeGroup = request.AgeGroup;
         scenario.MinimumAge = request.MinimumAge;
         scenario.CoreAxes = ParseCoreAxesOrThrow(request.CoreAxes);
-        scenario.Characters = request.Characters;
-        scenario.Scenes = request.Scenes;
+        scenario.Characters = MapCharactersFromRequest(request.Characters);
+        scenario.Scenes = MapScenesFromRequest(request.Scenes);
         scenario.Image = request.Image;
+
+        // Set age group using method (read-only property)
+        if (!string.IsNullOrEmpty(request.AgeGroup))
+        {
+            scenario.SetAgeGroup(request.AgeGroup);
+        }
 
         await ValidateScenarioAsync(scenario);
 
@@ -307,7 +318,7 @@ public class ScenarioApiService : IScenarioApiService
         }
 
         return scenarios
-            .Where(s => string.Equals(s.AgeGroup, ageGroup, StringComparison.OrdinalIgnoreCase))
+            .Where(s => s.AgeGroup != null && string.Equals(s.AgeGroup.Value, ageGroup, StringComparison.OrdinalIgnoreCase))
             .OrderBy(s => s.Title)
             .ToList();
     }
@@ -346,6 +357,76 @@ public class ScenarioApiService : IScenarioApiService
         return false;
     }
 
+    private static ICollection<ScenarioCharacter> MapCharactersFromRequest(List<Mystira.Contracts.App.Requests.Scenarios.CharacterRequest>? characters)
+    {
+        if (characters == null || !characters.Any())
+        {
+            return new List<ScenarioCharacter>();
+        }
+
+        return characters.Select(c => new ScenarioCharacter
+        {
+            Id = c.Id,
+            Name = c.Name,
+            Image = c.Image,
+            Audio = c.Audio,
+            Metadata = c.Metadata == null ? null : new CharacterScenarioMetadata
+            {
+                Role = c.Metadata.Role,
+                Archetype = c.Metadata.Archetype?.Select(a => Archetype.Parse(a)).Where(a => a != null).ToList()!,
+                Species = c.Metadata.Species,
+                Age = c.Metadata.Age,
+                Traits = c.Metadata.Traits,
+                Backstory = c.Metadata.Backstory
+            }
+        }).ToList();
+    }
+
+    private static ICollection<Scene> MapScenesFromRequest(List<Mystira.Contracts.App.Requests.Scenarios.SceneRequest>? scenes)
+    {
+        if (scenes == null || !scenes.Any())
+        {
+            return new List<Scene>();
+        }
+
+        return scenes.Select(s => new Scene
+        {
+            Id = s.Id,
+            Title = s.Title,
+            Type = (SceneType)(int)s.Type,
+            Description = s.Description,
+            NextSceneId = s.NextSceneId,
+            Difficulty = s.Difficulty,
+            Media = s.Media == null ? null : new SceneMedia
+            {
+                Image = s.Media.Image,
+                Audio = s.Media.Audio,
+                Video = s.Media.Video
+            },
+            Branches = s.Branches?.Select(b => new Branch
+            {
+                Choice = b.Choice,
+                NextSceneId = b.NextSceneId,
+                EchoLog = b.EchoLog == null ? null : EchoLog.Create(
+                    EchoType.Parse(b.EchoLog.EchoType),
+                    b.EchoLog.Description,
+                    b.EchoLog.Strength,
+                    DateTime.UtcNow
+                ),
+                CompassChange = b.CompassChange == null ? null : CompassChange.Create(b.CompassChange.Axis, (int)b.CompassChange.Delta)
+            }).ToList() ?? new List<Branch>(),
+            EchoReveals = s.EchoReveals?.Select(e => new EchoReveal
+            {
+                EchoType = EchoType.Parse(e.EchoType),
+                MinStrength = e.MinStrength,
+                TriggerSceneId = e.TriggerSceneId,
+                MaxAgeScenes = e.MaxAgeScenes,
+                RevealMechanic = e.RevealMechanic,
+                Required = e.Required
+            }).ToList() ?? new List<EchoReveal>()
+        }).ToList();
+    }
+
     private void ValidateAgainstSchema(CreateScenarioRequest request)
     {
         ArgumentNullException.ThrowIfNull(request);
@@ -353,8 +434,8 @@ public class ScenarioApiService : IScenarioApiService
         var tags = request.Tags ?? new List<string>();
         var coreAxes = request.CoreAxes ?? new List<string>();
         var archetypes = request.Archetypes ?? new List<string>();
-        var characters = request.Characters ?? new List<ScenarioCharacter>();
-        var scenes = request.Scenes ?? new List<Scene>();
+        var characters = MapCharactersFromRequest(request.Characters);
+        var scenes = MapScenesFromRequest(request.Scenes);
 
         var payload = new
         {
@@ -660,7 +741,7 @@ public class ScenarioApiService : IScenarioApiService
                             FileName = e.FileName,
                             Type = e.Type,
                             Description = e.Description,
-                            AgeRating = e.AgeRating,
+                            AgeRating = int.TryParse(e.AgeRating, out var ageRating) ? ageRating : 0,
                             Tags = e.Tags,
                             Loopable = e.Loopable
                         }).ToList(),
@@ -753,7 +834,7 @@ public class ScenarioApiService : IScenarioApiService
         var mediaExists = allMedia.ContainsKey(mediaId);
         var hasMetadata = includeMetadataValidation && mediaMetadata?.Entries.Any(e => e.Id == mediaId) == true;
 
-        var mediaRef = new MediaReference
+        var mediaRef = new ScenarioMediaReference
         {
             SceneId = scene.Id,
             SceneTitle = scene.Title,

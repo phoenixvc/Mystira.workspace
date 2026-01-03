@@ -60,7 +60,8 @@ try
         .ReadFrom.Configuration(context.Configuration)
         .ReadFrom.Services(services)
         .Enrich.FromLogContext()
-        .Enrich.WithMachineName()
+        // Note: WithMachineName requires Serilog.Enrichers.Environment package
+        // .Enrich.WithMachineName()
         .Enrich.WithThreadId()
         .Enrich.WithCorrelationId()
         .Enrich.WithProperty("Application", "Mystira.Admin.Api")
@@ -183,7 +184,7 @@ builder.Services.AddMemoryCache(options =>
 builder.Services.AddMediatR(cfg =>
 {
     // Register all handlers from Application assembly
-    cfg.RegisterServicesFromAssembly(typeof(Mystira.Application.UseCases.Scenarios.GetScenarioByIdQuery).Assembly);
+    cfg.RegisterServicesFromAssembly(typeof(Mystira.Application.UseCases.Scenarios.GetScenariosUseCase).Assembly);
 
     // TODO: Re-enable query caching when QueryCachingBehavior is added to Application package
     // cfg.AddOpenBehavior(typeof(QueryCachingBehavior<,>));
