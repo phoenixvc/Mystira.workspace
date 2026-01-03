@@ -386,7 +386,7 @@ public class ScenarioApiService : IScenarioApiService
                 Role = c.Metadata.Role,
                 Archetype = c.Metadata.Archetype?.Select(a => Archetype.Parse(a)).Where(a => a != null).ToList()!,
                 Species = c.Metadata.Species,
-                Age = c.Metadata.Age,
+                Age = c.Metadata.Age?.ToString(),
                 Traits = c.Metadata.Traits,
                 Backstory = c.Metadata.Backstory
             }
@@ -404,11 +404,11 @@ public class ScenarioApiService : IScenarioApiService
         {
             Id = s.Id,
             Title = s.Title,
-            Type = (SceneType)(int)s.Type,
+            Type = ParseSceneType(s.Type),
             Description = s.Description,
-            NextSceneId = s.NextSceneId,
+            NextSceneId = s.NextSceneId?.ToString(),
             Difficulty = s.Difficulty,
-            Media = s.Media == null ? null : new SceneMedia
+            Media = s.Media == null ? null : new MediaReferences
             {
                 Image = s.Media.Image,
                 Audio = s.Media.Audio,
@@ -416,26 +416,36 @@ public class ScenarioApiService : IScenarioApiService
             },
             Branches = s.Branches?.Select(b => new Branch
             {
-                Choice = b.Choice,
-                NextSceneId = b.NextSceneId,
-                EchoLog = b.EchoLog == null ? null : EchoLog.Create(
-                    EchoType.Parse(b.EchoLog.EchoType),
-                    b.EchoLog.Description,
-                    b.EchoLog.Strength,
+                Choice = b.ChoiceText ?? string.Empty,
+                NextSceneId = b.TargetSceneId,
+                EchoLog = b.Echo == null ? null : EchoLog.Create(
+                    EchoType.Parse(b.Echo.Type),
+                    b.Echo.Description,
+                    (float)(b.Echo.Strength ?? 0),
                     DateTime.UtcNow
                 ),
-                CompassChange = b.CompassChange == null ? null : CompassChange.Create(b.CompassChange.Axis, (int)b.CompassChange.Delta)
+                CompassChange = b.Compass == null ? null : CompassChange.Create(b.Compass.Axis ?? string.Empty, (int)(b.Compass.Delta ?? 0))
             }).ToList() ?? new List<Branch>(),
             EchoReveals = s.EchoReveals?.Select(e => new EchoReveal
             {
-                EchoType = EchoType.Parse(e.EchoType),
-                MinStrength = e.MinStrength,
-                TriggerSceneId = e.TriggerSceneId,
-                MaxAgeScenes = e.MaxAgeScenes,
-                RevealMechanic = e.RevealMechanic,
-                Required = e.Required
+                EchoType = EchoType.Parse(e.Type),
+                MinStrength = (float)(e.MinimumStrength ?? 0),
+                TriggerSceneId = e.TriggerScene,
+                MaxAgeScenes = e.MaxAge,
+                RevealMechanic = e.Mechanic,
+                Required = e.IsRequired ?? false
             }).ToList() ?? new List<EchoReveal>()
         }).ToList();
+    }
+
+    private static SceneType ParseSceneType(string? typeString)
+    {
+        if (string.IsNullOrEmpty(typeString))
+            return SceneType.Standard;
+
+        return Enum.TryParse<SceneType>(typeString, true, out var result)
+            ? result
+            : SceneType.Standard;
     }
 
     private void ValidateAgainstSchema(CreateScenarioRequest request)
@@ -528,7 +538,7 @@ public class ScenarioApiService : IScenarioApiService
                     EchoReveals = echoReveals.Select(reveal => new
                     {
                         // Schema expects a string for echo_type
-                        EchoType = reveal.EchoType?.Value,
+                        EchoType = reveal.EchoType,
                         reveal.MinStrength,
                         reveal.TriggerSceneId,
                         reveal.MaxAgeScenes,
