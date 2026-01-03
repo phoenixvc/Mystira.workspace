@@ -5,7 +5,16 @@ using Mystira.Admin.Api.Models;
 using Mystira.Domain.Models;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
+using ContractEnums = Mystira.Contracts.App.Enums;
 using CreateScenarioRequest = Mystira.Contracts.App.Requests.Scenarios.CreateScenarioRequest;
+using CharacterRequest = Mystira.Contracts.App.Requests.Scenarios.CharacterRequest;
+using SceneRequest = Mystira.Contracts.App.Requests.Scenarios.SceneRequest;
+using CharacterMetadataRequest = Mystira.Contracts.App.Requests.Scenarios.CharacterMetadataRequest;
+using SceneMediaRequest = Mystira.Contracts.App.Requests.Scenarios.SceneMediaRequest;
+using BranchRequest = Mystira.Contracts.App.Requests.Scenarios.BranchRequest;
+using EchoRevealRequest = Mystira.Contracts.App.Requests.Scenarios.EchoRevealRequest;
+using EchoLogRequest = Mystira.Contracts.App.Requests.Scenarios.EchoLogRequest;
+using CompassChangeRequest = Mystira.Contracts.App.Requests.Scenarios.CompassChangeRequest;
 
 namespace Mystira.Admin.Api.Services;
 
@@ -299,14 +308,14 @@ public class BundleService : IBundleService
             Title = scenario.Title,
             Description = scenario.Description,
             Tags = scenario.Tags,
-            Difficulty = scenario.Difficulty,
-            SessionLength = scenario.SessionLength,
-            Archetypes = scenario.Archetypes?.Select(a => a.Value).ToList() ?? new List<string>(),
-            AgeGroup = scenario.AgeGroup,
+            Difficulty = (ContractEnums.DifficultyLevel)(int)scenario.Difficulty,
+            SessionLength = (ContractEnums.SessionLength)(int)scenario.SessionLength,
+            Archetypes = scenario.Archetypes?.ToList() ?? new List<string>(),
+            AgeGroup = scenario.AgeGroup?.Value,
             MinimumAge = scenario.MinimumAge,
-            CoreAxes = scenario.CoreAxes?.Select(a => a.Value).ToList() ?? new List<string>(),
-            Characters = scenario.Characters,
-            Scenes = scenario.Scenes
+            CoreAxes = scenario.CoreAxes?.ToList() ?? new List<string>(),
+            Characters = MapScenarioCharactersToRequest(scenario.Characters),
+            Scenes = MapScenesToRequest(scenario.Scenes)
         };
 
         createRequest.CompassAxes = createRequest.CoreAxes;
@@ -364,5 +373,79 @@ public class BundleService : IBundleService
         var nameWithoutExtension = Path.GetFileNameWithoutExtension(fileName);
         var hash = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(fileName)))[..8];
         return $"{nameWithoutExtension.ToLowerInvariant().Replace(" ", "-")}-{hash}";
+    }
+
+    private static List<CharacterRequest> MapScenarioCharactersToRequest(ICollection<ScenarioCharacter>? characters)
+    {
+        if (characters == null || !characters.Any())
+        {
+            return new List<CharacterRequest>();
+        }
+
+        return characters.Select(c => new CharacterRequest
+        {
+            Id = c.Id,
+            Name = c.Name,
+            Image = c.Image,
+            Audio = c.Audio,
+            Metadata = c.Metadata == null ? null : new CharacterMetadataRequest
+            {
+                Role = c.Metadata.Role,
+                Archetype = c.Metadata.Archetype?.Select(a => a.Value).ToList(),
+                Species = c.Metadata.Species,
+                Age = c.Metadata.Age,
+                Traits = c.Metadata.Traits,
+                Backstory = c.Metadata.Backstory
+            }
+        }).ToList();
+    }
+
+    private static List<SceneRequest> MapScenesToRequest(ICollection<Scene>? scenes)
+    {
+        if (scenes == null || !scenes.Any())
+        {
+            return new List<SceneRequest>();
+        }
+
+        return scenes.Select(s => new SceneRequest
+        {
+            Id = s.Id,
+            Title = s.Title,
+            Type = (ContractEnums.SceneType)(int)s.Type,
+            Description = s.Description,
+            NextSceneId = s.NextSceneId,
+            Difficulty = s.Difficulty,
+            Media = s.Media == null ? null : new SceneMediaRequest
+            {
+                Image = s.Media.Image,
+                Audio = s.Media.Audio,
+                Video = s.Media.Video
+            },
+            Branches = s.Branches?.Select(b => new BranchRequest
+            {
+                Choice = b.Choice,
+                NextSceneId = b.NextSceneId,
+                EchoLog = b.EchoLog == null ? null : new EchoLogRequest
+                {
+                    EchoType = b.EchoLog.EchoType?.Value,
+                    Description = b.EchoLog.Description,
+                    Strength = b.EchoLog.Strength
+                },
+                CompassChange = b.CompassChange == null ? null : new CompassChangeRequest
+                {
+                    Axis = b.CompassChange.Axis,
+                    Delta = b.CompassChange.Delta
+                }
+            }).ToList() ?? new List<BranchRequest>(),
+            EchoReveals = s.EchoReveals?.Select(e => new EchoRevealRequest
+            {
+                EchoType = e.EchoType?.Value,
+                MinStrength = e.MinStrength,
+                TriggerSceneId = e.TriggerSceneId,
+                MaxAgeScenes = e.MaxAgeScenes,
+                RevealMechanic = e.RevealMechanic,
+                Required = e.Required
+            }).ToList() ?? new List<EchoRevealRequest>()
+        }).ToList();
     }
 }

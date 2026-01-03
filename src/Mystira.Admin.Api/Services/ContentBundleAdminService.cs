@@ -49,8 +49,8 @@ public class ContentBundleAdminService : IContentBundleAdminService
         existing.ImageId = bundle.ImageId;
         existing.ScenarioIds = bundle.ScenarioIds?.ToList() ?? new List<string>();
         existing.Prices = bundle.Prices?.Select(p => new BundlePrice { Value = p.Value, Currency = p.Currency }).ToList() ?? new List<BundlePrice>();
-        existing.IsFree = bundle.IsFree;
-        existing.AgeGroup = bundle.AgeGroup;
+        // IsFree and AgeGroup are computed/read-only properties based on Prices and scenarios
+        // They cannot be directly set - the values are derived from the underlying data
 
         await _context.SaveChangesAsync();
         return existing;
