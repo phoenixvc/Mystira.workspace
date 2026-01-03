@@ -10,12 +10,12 @@ using CreateScenarioRequest = Mystira.Contracts.App.Requests.Scenarios.CreateSce
 using CharacterRequest = Mystira.Contracts.App.Requests.Scenarios.CharacterRequest;
 using SceneRequest = Mystira.Contracts.App.Requests.Scenarios.SceneRequest;
 using CharacterMetadataRequest = Mystira.Contracts.App.Requests.Scenarios.CharacterMetadataRequest;
-// Use local models for types with incompatible Contracts definitions
-using BranchRequest = Mystira.Admin.Api.Models.BranchRequest;
-using EchoRevealRequest = Mystira.Admin.Api.Models.EchoRevealRequest;
-using SceneMediaRequest = Mystira.Admin.Api.Models.SceneMediaRequest;
-using EchoLogRequest = Mystira.Admin.Api.Models.EchoLogRequest;
-using CompassChangeRequest = Mystira.Admin.Api.Models.CompassChangeRequest;
+// Use Contracts types for request models
+using BranchRequest = Mystira.Contracts.App.Requests.Scenarios.BranchRequest;
+using EchoRevealRequest = Mystira.Contracts.App.Requests.Scenarios.EchoRevealRequest;
+using MediaReferencesRequest = Mystira.Contracts.App.Requests.Scenarios.MediaReferencesRequest;
+using EchoLogRequest = Mystira.Contracts.App.Requests.Scenarios.EchoLogRequest;
+using CompassChangeRequest = Mystira.Contracts.App.Requests.Scenarios.CompassChangeRequest;
 
 namespace Mystira.Admin.Api.Services;
 
@@ -415,8 +415,8 @@ public class BundleService : IBundleService
             Type = s.Type.ToString(),
             Description = s.Description,
             NextSceneId = s.NextSceneId?.ToString(),
-            Difficulty = s.Difficulty,
-            Media = s.Media == null ? null : new SceneMediaRequest
+            Difficulty = s.Difficulty?.ToString(),
+            Media = s.Media == null ? null : new MediaReferencesRequest
             {
                 Image = s.Media.Image,
                 Audio = s.Media.Audio,

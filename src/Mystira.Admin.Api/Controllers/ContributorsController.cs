@@ -267,7 +267,7 @@ public class ContributorsController : ControllerBase
             RegisteredAt = metadata.RegisteredAt,
             RoyaltyModuleId = metadata.RoyaltyModuleId,
             IsRegistered = metadata.IsRegistered,
-            Contributors = metadata.RoyaltySplits?.Select(c => new ContributorResponse
+            Contributors = metadata.Contributors?.Select(c => new ContributorResponse
             {
                 Id = c.Id,
                 Name = c.ContributorName ?? string.Empty,
@@ -278,8 +278,8 @@ public class ContributorsController : ControllerBase
                 Notes = null,
                 CreatedAt = c.CreatedAt
             }).ToList() ?? new List<ContributorResponse>(),
-            ContributorCount = metadata.RoyaltySplits?.Count ?? 0,
-            TotalPercentage = metadata.RoyaltySplits?.Sum(c => c.Percentage) ?? 0
+            ContributorCount = metadata.Contributors?.Count ?? 0,
+            TotalPercentage = metadata.Contributors?.Sum(c => c.Percentage) ?? 0
         };
     }
 }

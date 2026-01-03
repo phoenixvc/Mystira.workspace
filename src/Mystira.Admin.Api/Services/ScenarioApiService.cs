@@ -19,8 +19,8 @@ using MediaMetadataEntry = Mystira.Domain.Models.MediaMetadataEntry;
 using MediaMetadataFile = Mystira.Domain.Models.MediaMetadataFile;
 using MetadataModifier = Mystira.Domain.Models.MetadataModifier;
 using ScenarioMediaReference = Mystira.Contracts.App.Responses.Scenarios.MediaReference;
-// Use local models for types not in Domain package
-using CharacterScenarioMetadata = Mystira.Admin.Api.Models.CharacterScenarioMetadata;
+// Use Domain types
+using ScenarioCharacterMetadata = Mystira.Domain.Models.ScenarioCharacterMetadata;
 using SceneMedia = Mystira.Admin.Api.Models.SceneMedia;
 using LocalBranchRequest = Mystira.Admin.Api.Models.BranchRequest;
 using LocalEchoRevealRequest = Mystira.Admin.Api.Models.EchoRevealRequest;
@@ -381,7 +381,7 @@ public class ScenarioApiService : IScenarioApiService
             Name = c.Name,
             Image = c.Image,
             Audio = c.Audio,
-            Metadata = c.Metadata == null ? null : new CharacterScenarioMetadata
+            Metadata = c.Metadata == null ? null : new ScenarioCharacterMetadata
             {
                 Role = c.Metadata.Role,
                 Archetype = c.Metadata.Archetype?.Select(a => Archetype.Parse(a)).Where(a => a != null).ToList()!,
@@ -407,7 +407,7 @@ public class ScenarioApiService : IScenarioApiService
             Type = ParseSceneType(s.Type),
             Description = s.Description,
             NextSceneId = s.NextSceneId?.ToString(),
-            Difficulty = s.Difficulty,
+            Difficulty = int.TryParse(s.Difficulty, out var diff) ? diff : null,
             Media = s.Media == null ? null : new MediaReferences
             {
                 Image = s.Media.Image,
@@ -416,24 +416,24 @@ public class ScenarioApiService : IScenarioApiService
             },
             Branches = s.Branches?.Select(b => new Branch
             {
-                Choice = b.ChoiceText ?? string.Empty,
-                NextSceneId = b.TargetSceneId,
-                EchoLog = b.Echo == null ? null : EchoLog.Create(
-                    EchoType.Parse(b.Echo.Type),
-                    b.Echo.Description,
-                    (float)(b.Echo.Strength ?? 0),
+                Choice = b.Choice ?? string.Empty,
+                NextSceneId = b.NextSceneId,
+                EchoLog = b.EchoLog == null ? null : EchoLog.Create(
+                    EchoType.Parse(b.EchoLog.EchoType),
+                    b.EchoLog.Description,
+                    (float)(b.EchoLog.Strength ?? 0),
                     DateTime.UtcNow
                 ),
-                CompassChange = b.Compass == null ? null : CompassChange.Create(b.Compass.Axis ?? string.Empty, (int)(b.Compass.Delta ?? 0))
+                CompassChange = b.CompassChange == null ? null : CompassChange.Create(b.CompassChange.Axis ?? string.Empty, (int)(b.CompassChange.Delta ?? 0))
             }).ToList() ?? new List<Branch>(),
             EchoReveals = s.EchoReveals?.Select(e => new EchoReveal
             {
-                EchoType = EchoType.Parse(e.Type),
-                MinStrength = (float)(e.MinimumStrength ?? 0),
-                TriggerSceneId = e.TriggerScene,
-                MaxAgeScenes = e.MaxAge,
-                RevealMechanic = e.Mechanic,
-                Required = e.IsRequired ?? false
+                EchoType = EchoType.Parse(e.EchoType),
+                MinStrength = (float)(e.MinStrength ?? 0),
+                TriggerSceneId = e.TriggerSceneId,
+                MaxAgeScenes = e.MaxAgeScenes,
+                RevealMechanic = e.RevealMechanic,
+                Required = e.Required ?? false
             }).ToList() ?? new List<EchoReveal>()
         }).ToList();
     }
