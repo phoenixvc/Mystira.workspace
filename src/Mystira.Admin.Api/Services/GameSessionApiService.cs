@@ -138,7 +138,7 @@ public class GameSessionApiService : IGameSessionApiService
             ChoiceCount = s.ChoiceHistory?.Count ?? 0,
             EchoCount = s.EchoHistory?.Count ?? 0,
             AchievementCount = s.Achievements?.Count ?? 0,
-            StartTime = s.StartTime,
+            StartTime = s.StartTime ?? DateTime.MinValue,
             EndTime = s.EndTime ?? DateTime.MinValue,
             ElapsedTime = s.ElapsedTime,
             IsPaused = s.IsPaused,
@@ -335,7 +335,8 @@ public class GameSessionApiService : IGameSessionApiService
         var achievements = session.Achievements?.Cast<object>().ToList() ?? new List<object>();
 
         var endTime = session.EndTime ?? DateTime.UtcNow;
-        var duration = endTime.Subtract(session.StartTime);
+        var startTime = session.StartTime ?? DateTime.UtcNow;
+        var duration = endTime.Subtract(startTime);
 
         return new ContractsSessionStatsResponse
         {

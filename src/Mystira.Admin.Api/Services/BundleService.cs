@@ -412,9 +412,9 @@ public class BundleService : IBundleService
         {
             Id = s.Id,
             Title = s.Title,
-            Type = (ContractEnums.SceneType)(int)s.Type,
+            Type = s.Type.ToString(),
             Description = s.Description,
-            NextSceneId = s.NextSceneId,
+            NextSceneId = s.NextSceneId?.ToString(),
             Difficulty = s.Difficulty,
             Media = s.Media == null ? null : new SceneMediaRequest
             {
@@ -428,24 +428,24 @@ public class BundleService : IBundleService
                 NextSceneId = b.NextSceneId,
                 EchoLog = b.EchoLog == null ? null : new EchoLogRequest
                 {
-                    EchoType = b.EchoLog.EchoType?.Value,
+                    EchoType = b.EchoLog.EchoType,
                     Description = b.EchoLog.Description,
-                    Strength = b.EchoLog.Strength
+                    Strength = (float)b.EchoLog.Strength
                 },
                 CompassChange = b.CompassChange == null ? null : new CompassChangeRequest
                 {
                     Axis = b.CompassChange.Axis,
-                    Delta = b.CompassChange.Delta
+                    Delta = (float)b.CompassChange.Delta
                 }
             }).ToList() ?? new List<BranchRequest>(),
             EchoReveals = s.EchoReveals?.Select(e => new EchoRevealRequest
             {
-                EchoType = e.EchoType?.Value,
-                MinStrength = e.MinStrength,
+                EchoType = e.EchoType,
+                MinStrength = (float)e.MinStrength,
                 TriggerSceneId = e.TriggerSceneId,
                 MaxAgeScenes = e.MaxAgeScenes,
                 RevealMechanic = e.RevealMechanic,
-                Required = e.Required
+                Required = e.Required ?? false
             }).ToList() ?? new List<EchoRevealRequest>()
         }).ToList();
     }

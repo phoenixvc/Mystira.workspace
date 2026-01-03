@@ -102,9 +102,26 @@ public class MediaApiService : IMediaApiService
         var contractsResponse = await _listMediaUseCase.ExecuteAsync(contractsRequest);
 
         // Convert Contracts.MediaQueryResponse back to Admin.Api.Models.MediaQueryResponse
+        // Map MediaItem to MediaAsset
+        var mediaAssets = contractsResponse.Media?.Select(m => new MediaAsset
+        {
+            Id = m.Id,
+            MediaId = m.MediaId,
+            Url = m.Url,
+            MediaType = m.MediaType,
+            MimeType = m.MimeType,
+            FileSizeBytes = m.FileSizeBytes,
+            Description = m.Description,
+            Tags = m.Tags?.ToList() ?? new List<string>(),
+            Hash = m.Hash,
+            Version = 1,
+            CreatedAt = m.CreatedAt ?? DateTime.UtcNow,
+            UpdatedAt = m.UpdatedAt ?? DateTime.UtcNow
+        }).ToList() ?? new List<MediaAsset>();
+
         return new MediaQueryResponse
         {
-            Media = contractsResponse.Media,
+            Media = mediaAssets,
             TotalCount = contractsResponse.TotalCount,
             Page = contractsResponse.Page,
             PageSize = contractsResponse.PageSize,
@@ -152,7 +169,7 @@ public class MediaApiService : IMediaApiService
             Description = description,
             Tags = tags ?? new List<string>(),
             Hash = hash,
-            Version = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ"),
+            Version = 1,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
         };
@@ -660,7 +677,7 @@ public class MediaApiService : IMediaApiService
                             Description = metadataEntry.Description,
                             Tags = metadataEntry.ClassificationTags.Select(t => $"{t.Key}:{t.Value}").ToList(),
                             Hash = hash,
-                            Version = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ"),
+                            Version = 1,
                             CreatedAt = DateTime.UtcNow,
                             UpdatedAt = DateTime.UtcNow
                         };

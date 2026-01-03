@@ -91,7 +91,7 @@ public class CharacterMapApiService : ICharacterMapApiService
             Name = request.Name,
             Image = request.Image,
             Audio = request.Audio,
-            Metadata = request.Metadata,
+            Metadata = MapDictionaryToMetadata(request.Metadata),
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
         };
@@ -128,7 +128,7 @@ public class CharacterMapApiService : ICharacterMapApiService
 
         if (request.Metadata != null)
         {
-            characterMap.Metadata = request.Metadata;
+            characterMap.Metadata = MapDictionaryToMetadata(request.Metadata);
         }
 
         characterMap.UpdatedAt = DateTime.UtcNow;
@@ -217,5 +217,33 @@ public class CharacterMapApiService : ICharacterMapApiService
         await _context.SaveChangesAsync();
         _logger.LogInformation("Imported {Count} character maps from YAML", importedCharacterMaps.Count);
         return importedCharacterMaps;
+    }
+
+    private static CharacterMetadata? MapDictionaryToMetadata(Dictionary<string, object>? metadata)
+    {
+        if (metadata == null)
+            return null;
+
+        var result = new CharacterMetadata();
+
+        if (metadata.TryGetValue("Roles", out var roles) && roles is IEnumerable<object> roleList)
+            result.Roles = roleList.Select(r => r?.ToString() ?? string.Empty).ToList();
+
+        if (metadata.TryGetValue("Archetypes", out var archetypes) && archetypes is IEnumerable<object> archetypeList)
+            result.Archetypes = archetypeList.Select(a => a?.ToString() ?? string.Empty).ToList();
+
+        if (metadata.TryGetValue("Species", out var species))
+            result.Species = species?.ToString() ?? string.Empty;
+
+        if (metadata.TryGetValue("Age", out var age) && age != null)
+            result.Age = Convert.ToInt32(age);
+
+        if (metadata.TryGetValue("Traits", out var traits) && traits is IEnumerable<object> traitList)
+            result.Traits = traitList.Select(t => t?.ToString() ?? string.Empty).ToList();
+
+        if (metadata.TryGetValue("Backstory", out var backstory))
+            result.Backstory = backstory?.ToString() ?? string.Empty;
+
+        return result;
     }
 }
