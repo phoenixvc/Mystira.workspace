@@ -14,8 +14,6 @@ using CharacterMetadataRequest = Mystira.Contracts.App.Requests.Scenarios.Charac
 using BranchRequest = Mystira.Contracts.App.Requests.Scenarios.BranchRequest;
 using EchoRevealRequest = Mystira.Contracts.App.Requests.Scenarios.EchoRevealRequest;
 using MediaReferencesRequest = Mystira.Contracts.App.Requests.Scenarios.MediaReferencesRequest;
-using EchoLogRequest = Mystira.Contracts.App.Requests.Scenarios.EchoLogRequest;
-using CompassChangeRequest = Mystira.Contracts.App.Requests.Scenarios.CompassChangeRequest;
 
 namespace Mystira.Admin.Api.Services;
 
@@ -425,18 +423,7 @@ public class BundleService : IBundleService
             Branches = s.Branches?.Select(b => new BranchRequest
             {
                 Choice = b.Choice,
-                NextSceneId = b.NextSceneId,
-                EchoLog = b.EchoLog == null ? null : new EchoLogRequest
-                {
-                    EchoType = b.EchoLog.EchoType,
-                    Description = b.EchoLog.Description,
-                    Strength = (float)b.EchoLog.Strength
-                },
-                CompassChange = b.CompassChange == null ? null : new CompassChangeRequest
-                {
-                    Axis = b.CompassChange.Axis,
-                    Delta = (float)b.CompassChange.Delta
-                }
+                NextSceneId = b.NextSceneId
             }).ToList() ?? new List<BranchRequest>(),
             EchoReveals = s.EchoReveals?.Select(e => new EchoRevealRequest
             {
