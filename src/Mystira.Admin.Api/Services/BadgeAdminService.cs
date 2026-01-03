@@ -121,7 +121,7 @@ public class BadgeAdminService : IBadgeAdminService
             CompassAxisId = NormalizeAxisValue(axis, request.CompassAxisId),
             Tier = tier,
             TierOrder = request.TierOrder,
-            RequiredScore = (int)request.RequiredScore,
+            RequiredScore = (int)Math.Round(request.RequiredScore),
             Title = request.Title.Trim(),
             Description = request.Description.Trim(),
             ImageId = request.ImageId.Trim(),
@@ -177,7 +177,7 @@ public class BadgeAdminService : IBadgeAdminService
             {
                 throw new ArgumentException("Required score must be greater than zero");
             }
-            badge.RequiredScore = (int)request.RequiredScore.Value;
+            badge.RequiredScore = (int)Math.Round(request.RequiredScore.Value);
         }
 
         if (!string.IsNullOrWhiteSpace(request.Title))
@@ -491,7 +491,7 @@ public class BadgeAdminService : IBadgeAdminService
                     TierOrder = badgeConfig.Tier_Order,
                     Title = badgeConfig.Title.Trim(),
                     Description = badgeConfig.Description.Trim(),
-                    RequiredScore = (int)badgeConfig.Required_Score,
+                    RequiredScore = (int)Math.Round(badgeConfig.Required_Score),
                     ImageId = badgeConfig.Image_Id.Trim(),
                     CreatedAt = DateTime.UtcNow,
                     UpdatedAt = DateTime.UtcNow
@@ -504,7 +504,7 @@ public class BadgeAdminService : IBadgeAdminService
             {
                 existing.Title = badgeConfig.Title.Trim();
                 existing.Description = badgeConfig.Description.Trim();
-                existing.RequiredScore = (int)badgeConfig.Required_Score;
+                existing.RequiredScore = (int)Math.Round(badgeConfig.Required_Score);
                 existing.ImageId = badgeConfig.Image_Id.Trim();
                 existing.UpdatedAt = DateTime.UtcNow;
                 await _badgeRepository.UpdateAsync(existing);
@@ -658,7 +658,7 @@ public class BadgeAdminService : IBadgeAdminService
             CompassAxisId = badge.CompassAxisId,
             Tier = badge.Tier,
             TierOrder = badge.TierOrder,
-            RequiredScore = badge.RequiredScore ?? 0,
+            RequiredScore = badge.RequiredScore ?? throw new InvalidOperationException($"Badge '{badge.Id}' has null RequiredScore"),
             Title = badge.Title,
             Description = badge.Description,
             ImageId = badge.ImageId,

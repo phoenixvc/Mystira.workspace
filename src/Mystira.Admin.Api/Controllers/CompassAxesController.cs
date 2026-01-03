@@ -21,7 +21,7 @@ public class CompassAxesController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<List<CompassAxis>>> GetAllCompassAxes()
+    public async Task<ActionResult<List<CompassAxisDefinition>>> GetAllCompassAxes()
     {
         _logger.LogInformation("GET: Retrieving all compass axes");
         var axes = await _mediator.Send(new GetAllCompassAxesQuery());
@@ -29,7 +29,7 @@ public class CompassAxesController : ControllerBase
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<CompassAxis>> GetCompassAxisById(string id)
+    public async Task<ActionResult<CompassAxisDefinition>> GetCompassAxisById(string id)
     {
         _logger.LogInformation("GET: Retrieving compass axis with id: {Id}", id);
         var axis = await _mediator.Send(new GetCompassAxisByIdQuery(id));
@@ -42,7 +42,7 @@ public class CompassAxesController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<CompassAxis>> CreateCompassAxis([FromBody] CreateCompassAxisRequest request)
+    public async Task<ActionResult<CompassAxisDefinition>> CreateCompassAxis([FromBody] CreateCompassAxisRequest request)
     {
         _logger.LogInformation("POST: Creating compass axis with name: {Name}", request.Name);
 
@@ -51,7 +51,7 @@ public class CompassAxesController : ControllerBase
     }
 
     [HttpPut("{id}")]
-    public async Task<ActionResult<CompassAxis>> UpdateCompassAxis(string id, [FromBody] UpdateCompassAxisRequest request)
+    public async Task<ActionResult<CompassAxisDefinition>> UpdateCompassAxis(string id, [FromBody] UpdateCompassAxisRequest request)
     {
         _logger.LogInformation("PUT: Updating compass axis with id: {Id}", id);
 
