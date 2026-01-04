@@ -50,7 +50,12 @@ public class AgeGroupsController : ControllerBase
             request.Value,
             request.MinimumAge,
             request.MaximumAge,
-            request.Description));
+            request.Description)) as AgeGroupDefinition;
+        if (created == null)
+        {
+            _logger.LogError("Failed to create age group - mediator returned unexpected type");
+            return StatusCode(500, new { message = "Internal server error" });
+        }
         return CreatedAtAction(nameof(GetAgeGroupById), new { id = created.Id }, created);
     }
 
@@ -79,8 +84,8 @@ public class AgeGroupsController : ControllerBase
     {
         _logger.LogInformation("DELETE: Deleting age group with id: {Id}", id);
 
-        var success = await _mediator.Send(new DeleteAgeGroupCommand(id));
-        if (!success)
+        var result = await _mediator.Send(new DeleteAgeGroupCommand(id));
+        if (result is not bool success || !success)
         {
             _logger.LogWarning("Age group with id {Id} not found", id);
             return NotFound(new { message = "Age group not found" });

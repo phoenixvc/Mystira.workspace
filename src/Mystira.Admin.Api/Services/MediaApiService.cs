@@ -88,7 +88,7 @@ public class MediaApiService : IMediaApiService
     public async Task<MediaQueryResponse> GetMediaAsync(MediaQueryRequest request)
     {
         // Convert Admin.Api.Models.MediaQueryRequest to Contracts.MediaQueryRequest
-        var contractsRequest = new Contracts.Requests.Media.MediaQueryRequest
+        var contractsRequest = new Mystira.Contracts.App.Requests.Media.MediaQueryRequest
         {
             Page = request.Page,
             PageSize = request.PageSize,
@@ -102,9 +102,26 @@ public class MediaApiService : IMediaApiService
         var contractsResponse = await _listMediaUseCase.ExecuteAsync(contractsRequest);
 
         // Convert Contracts.MediaQueryResponse back to Admin.Api.Models.MediaQueryResponse
+        // Map MediaItem to MediaAsset - MediaItem only has Id, Url, MediaType properties
+        var mediaAssets = contractsResponse.Media?.Select(m => new MediaAsset
+        {
+            Id = m.Id,
+            MediaId = m.Id,
+            Url = m.Url ?? string.Empty,
+            MediaType = m.MediaType,
+            MimeType = string.Empty,
+            FileSizeBytes = 0,
+            Description = string.Empty,
+            Tags = new List<string>(),
+            Hash = string.Empty,
+            Version = 1,
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow
+        }).ToList() ?? new List<MediaAsset>();
+
         return new MediaQueryResponse
         {
-            Media = contractsResponse.Media,
+            Media = mediaAssets,
             TotalCount = contractsResponse.TotalCount,
             Page = contractsResponse.Page,
             PageSize = contractsResponse.PageSize,
@@ -152,7 +169,7 @@ public class MediaApiService : IMediaApiService
             Description = description,
             Tags = tags ?? new List<string>(),
             Hash = hash,
-            Version = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ"),
+            Version = 1,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
         };
@@ -239,7 +256,7 @@ public class MediaApiService : IMediaApiService
     public async Task<MediaAsset> UpdateMediaAsync(string mediaId, MediaUpdateRequest updateData)
     {
         // Convert Admin.Api.Models.MediaUpdateRequest to Contracts.MediaUpdateRequest
-        var contractsRequest = new Contracts.Requests.Media.MediaUpdateRequest
+        var contractsRequest = new Mystira.Contracts.App.Requests.Media.MediaUpdateRequest
         {
             Description = updateData.Description,
             Tags = updateData.Tags,
@@ -660,7 +677,7 @@ public class MediaApiService : IMediaApiService
                             Description = metadataEntry.Description,
                             Tags = metadataEntry.ClassificationTags.Select(t => $"{t.Key}:{t.Value}").ToList(),
                             Hash = hash,
-                            Version = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ"),
+                            Version = 1,
                             CreatedAt = DateTime.UtcNow,
                             UpdatedAt = DateTime.UtcNow
                         };

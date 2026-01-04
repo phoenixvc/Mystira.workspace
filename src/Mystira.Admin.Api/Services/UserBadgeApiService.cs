@@ -108,7 +108,7 @@ public class UserBadgeApiService : IUserBadgeApiService
         {
             return await _context.UserBadges
                 .Where(b => b.UserProfileId == userProfileId
-                         && b.Axis.Equals(axis, StringComparison.OrdinalIgnoreCase))
+                         && (b.Axis ?? string.Empty).Equals(axis, StringComparison.OrdinalIgnoreCase))
                 .OrderByDescending(b => b.EarnedAt)
                 .ToListAsync();
         }
@@ -178,7 +178,7 @@ public class UserBadgeApiService : IUserBadgeApiService
             };
 
             // Group by axis
-            var axisCounts = badges.GroupBy(b => b.Axis)
+            var axisCounts = badges.GroupBy(b => b.Axis ?? string.Empty)
                 .ToDictionary(g => g.Key.ToLower(), g => g.Count());
 
             foreach (var axisCount in axisCounts)

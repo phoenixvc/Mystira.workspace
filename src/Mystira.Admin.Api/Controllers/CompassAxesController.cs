@@ -21,7 +21,7 @@ public class CompassAxesController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<List<CompassAxis>>> GetAllCompassAxes()
+    public async Task<ActionResult<List<CompassAxisDefinition>>> GetAllCompassAxes()
     {
         _logger.LogInformation("GET: Retrieving all compass axes");
         var axes = await _mediator.Send(new GetAllCompassAxesQuery());
@@ -29,7 +29,7 @@ public class CompassAxesController : ControllerBase
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<CompassAxis>> GetCompassAxisById(string id)
+    public async Task<ActionResult<CompassAxisDefinition>> GetCompassAxisById(string id)
     {
         _logger.LogInformation("GET: Retrieving compass axis with id: {Id}", id);
         var axis = await _mediator.Send(new GetCompassAxisByIdQuery(id));
@@ -42,16 +42,20 @@ public class CompassAxesController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<CompassAxis>> CreateCompassAxis([FromBody] CreateCompassAxisRequest request)
+    public async Task<ActionResult<CompassAxisDefinition>> CreateCompassAxis([FromBody] CreateCompassAxisRequest request)
     {
         _logger.LogInformation("POST: Creating compass axis with name: {Name}", request.Name);
 
-        var created = await _mediator.Send(new CreateCompassAxisCommand(request.Name, request.Description));
+        var result = await _mediator.Send(new CreateCompassAxisCommand(request.Name, request.Description));
+        if (result is not CompassAxisDefinition created)
+        {
+            return StatusCode(500, new { message = "Unexpected result from mediator" });
+        }
         return CreatedAtAction(nameof(GetCompassAxisById), new { id = created.Id }, created);
     }
 
     [HttpPut("{id}")]
-    public async Task<ActionResult<CompassAxis>> UpdateCompassAxis(string id, [FromBody] UpdateCompassAxisRequest request)
+    public async Task<ActionResult<CompassAxisDefinition>> UpdateCompassAxis(string id, [FromBody] UpdateCompassAxisRequest request)
     {
         _logger.LogInformation("PUT: Updating compass axis with id: {Id}", id);
 
@@ -69,8 +73,8 @@ public class CompassAxesController : ControllerBase
     {
         _logger.LogInformation("DELETE: Deleting compass axis with id: {Id}", id);
 
-        var success = await _mediator.Send(new DeleteCompassAxisCommand(id));
-        if (!success)
+        var result = await _mediator.Send(new DeleteCompassAxisCommand(id));
+        if (result is not bool success || !success)
         {
             _logger.LogWarning("Compass axis with id {Id} not found", id);
             return NotFound(new { message = "Compass axis not found" });

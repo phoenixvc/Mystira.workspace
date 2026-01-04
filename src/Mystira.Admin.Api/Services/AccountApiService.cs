@@ -122,7 +122,7 @@ public class AccountApiService : IAccountApiService
 
             foreach (var profile in userProfiles)
             {
-                profile.AccountId = null;
+                profile.AccountId = null!; // Intentionally unlinking profile from account
             }
 
             // Remove the account

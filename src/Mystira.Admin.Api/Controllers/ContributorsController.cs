@@ -256,9 +256,9 @@ public class ContributorsController : ControllerBase
     }
 
     /// <summary>
-    /// Maps domain StoryProtocolMetadata to API response
+    /// Maps domain ScenarioStoryProtocol to API response
     /// </summary>
-    private StoryProtocolResponse MapToResponse(StoryProtocolMetadata metadata)
+    private StoryProtocolResponse MapToResponse(ScenarioStoryProtocol metadata)
     {
         return new StoryProtocolResponse
         {
@@ -267,19 +267,20 @@ public class ContributorsController : ControllerBase
             RegisteredAt = metadata.RegisteredAt,
             RoyaltyModuleId = metadata.RoyaltyModuleId,
             IsRegistered = metadata.IsRegistered,
-            Contributors = metadata.Contributors.Select(c => new ContributorResponse
+            Contributors = metadata.Contributors?.Select(c => new ContributorResponse
             {
                 Id = c.Id,
-                Name = c.Name,
+                Name = c.Name ?? string.Empty,
                 WalletAddress = c.WalletAddress,
                 Role = c.Role.ToString(),
                 ContributionPercentage = c.ContributionPercentage,
-                Email = c.Email,
-                Notes = c.Notes,
+                // Email and Notes are not available in Domain.Contributor model
+                Email = string.Empty,
+                Notes = string.Empty,
                 CreatedAt = c.CreatedAt
-            }).ToList(),
-            ContributorCount = metadata.ContributorCount,
-            TotalPercentage = metadata.Contributors.Sum(c => c.ContributionPercentage)
+            }).ToList() ?? new List<ContributorResponse>(),
+            ContributorCount = metadata.Contributors?.Count ?? 0,
+            TotalPercentage = metadata.Contributors?.Sum(c => c.ContributionPercentage) ?? 0
         };
     }
 }

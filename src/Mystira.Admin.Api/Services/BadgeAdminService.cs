@@ -8,6 +8,7 @@ using Mystira.Domain.Models;
 using Mystira.Domain.ValueObjects;
 using Mystira.Infrastructure.Data;
 using NJsonSchema;
+using AgeGroupConstants = Mystira.Admin.Api.Models.AgeGroupConstants;
 
 namespace Mystira.Admin.Api.Services;
 
@@ -120,7 +121,7 @@ public class BadgeAdminService : IBadgeAdminService
             CompassAxisId = NormalizeAxisValue(axis, request.CompassAxisId),
             Tier = tier,
             TierOrder = request.TierOrder,
-            RequiredScore = request.RequiredScore,
+            RequiredScore = (int)Math.Round(request.RequiredScore),
             Title = request.Title.Trim(),
             Description = request.Description.Trim(),
             ImageId = request.ImageId.Trim(),
@@ -176,7 +177,7 @@ public class BadgeAdminService : IBadgeAdminService
             {
                 throw new ArgumentException("Required score must be greater than zero");
             }
-            badge.RequiredScore = request.RequiredScore.Value;
+            badge.RequiredScore = (int)Math.Round(request.RequiredScore.Value);
         }
 
         if (!string.IsNullOrWhiteSpace(request.Title))
@@ -490,7 +491,7 @@ public class BadgeAdminService : IBadgeAdminService
                     TierOrder = badgeConfig.Tier_Order,
                     Title = badgeConfig.Title.Trim(),
                     Description = badgeConfig.Description.Trim(),
-                    RequiredScore = badgeConfig.Required_Score,
+                    RequiredScore = (int)Math.Round(badgeConfig.Required_Score),
                     ImageId = badgeConfig.Image_Id.Trim(),
                     CreatedAt = DateTime.UtcNow,
                     UpdatedAt = DateTime.UtcNow
@@ -503,7 +504,7 @@ public class BadgeAdminService : IBadgeAdminService
             {
                 existing.Title = badgeConfig.Title.Trim();
                 existing.Description = badgeConfig.Description.Trim();
-                existing.RequiredScore = badgeConfig.Required_Score;
+                existing.RequiredScore = (int)Math.Round(badgeConfig.Required_Score);
                 existing.ImageId = badgeConfig.Image_Id.Trim();
                 existing.UpdatedAt = DateTime.UtcNow;
                 await _badgeRepository.UpdateAsync(existing);
@@ -526,7 +527,7 @@ public class BadgeAdminService : IBadgeAdminService
         if (!string.IsNullOrWhiteSpace(imageId))
         {
             var search = imageId.Trim().ToLowerInvariant();
-            query = query.Where(i => i.ImageId.ToLower().Contains(search));
+            query = query.Where(i => (i.ImageId ?? string.Empty).ToLower().Contains(search));
         }
 
         var images = await query
@@ -616,7 +617,7 @@ public class BadgeAdminService : IBadgeAdminService
     {
         var list = badges.ToList();
         Dictionary<string, AgeGroupDefinition>? ageGroupLookup = null;
-        Dictionary<string, CompassAxis>? axisLookup = null;
+        Dictionary<string, CompassAxisDefinition>? axisLookup = null;
         Dictionary<string, BadgeImage>? imageLookup = null;
 
         if (includeAxisMetadata)
@@ -636,8 +637,8 @@ public class BadgeAdminService : IBadgeAdminService
             if (imageIds.Any())
             {
                 imageLookup = await _context.BadgeImages
-                    .Where(img => imageIds.Contains(img.ImageId))
-                    .ToDictionaryAsync(img => img.ImageId, StringComparer.OrdinalIgnoreCase);
+                    .Where(img => img.ImageId != null && imageIds.Contains(img.ImageId))
+                    .ToDictionaryAsync(img => img.ImageId!, StringComparer.OrdinalIgnoreCase);
             }
         }
 
@@ -647,25 +648,25 @@ public class BadgeAdminService : IBadgeAdminService
     private static BadgeDto MapBadge(
         Badge badge,
         Dictionary<string, AgeGroupDefinition>? ageGroupLookup,
-        Dictionary<string, CompassAxis>? axisLookup,
+        Dictionary<string, CompassAxisDefinition>? axisLookup,
         Dictionary<string, BadgeImage>? imageLookup)
     {
         var dto = new BadgeDto
         {
-            Id = badge.Id,
-            AgeGroupId = badge.AgeGroupId,
-            CompassAxisId = badge.CompassAxisId,
-            Tier = badge.Tier,
+            Id = badge.Id ?? string.Empty,
+            AgeGroupId = badge.AgeGroupId ?? string.Empty,
+            CompassAxisId = badge.CompassAxisId ?? string.Empty,
+            Tier = badge.Tier ?? string.Empty,
             TierOrder = badge.TierOrder,
-            RequiredScore = badge.RequiredScore,
-            Title = badge.Title,
-            Description = badge.Description,
-            ImageId = badge.ImageId,
+            RequiredScore = badge.RequiredScore ?? throw new InvalidOperationException($"Badge '{badge.Id}' has null RequiredScore"),
+            Title = badge.Title ?? string.Empty,
+            Description = badge.Description ?? string.Empty,
+            ImageId = badge.ImageId ?? string.Empty,
             CreatedAt = badge.CreatedAt,
-            UpdatedAt = badge.UpdatedAt
+            UpdatedAt = badge.UpdatedAt ?? badge.CreatedAt
         };
 
-        if (ageGroupLookup != null && ageGroupLookup.TryGetValue(badge.AgeGroupId, out var ageGroup))
+        if (ageGroupLookup != null && badge.AgeGroupId != null && ageGroupLookup.TryGetValue(badge.AgeGroupId, out var ageGroup))
         {
             dto.AgeGroupName = string.IsNullOrWhiteSpace(ageGroup.Name)
                 ? AgeGroupConstants.GetDisplayName(ageGroup.Value)
@@ -675,14 +676,14 @@ public class BadgeAdminService : IBadgeAdminService
         }
         else
         {
-            dto.AgeGroupName = AgeGroupConstants.GetDisplayName(badge.AgeGroupId);
+            dto.AgeGroupName = AgeGroupConstants.GetDisplayName(badge.AgeGroupId ?? string.Empty);
         }
 
-        dto.CompassAxisName = (axisLookup != null && axisLookup.TryGetValue(badge.CompassAxisId, out var axis))
+        dto.CompassAxisName = (axisLookup != null && badge.CompassAxisId != null && axisLookup.TryGetValue(badge.CompassAxisId, out var axis))
             ? (string.IsNullOrWhiteSpace(axis.Name) ? axis.Id : axis.Name)
-            : badge.CompassAxisId;
+            : badge.CompassAxisId ?? string.Empty;
 
-        if (imageLookup != null && imageLookup.TryGetValue(badge.ImageId, out var image))
+        if (imageLookup != null && badge.ImageId != null && imageLookup.TryGetValue(badge.ImageId, out var image))
         {
             dto.Image = MapBadgeImage(image, includeData: true);
         }
@@ -690,22 +691,22 @@ public class BadgeAdminService : IBadgeAdminService
         return dto;
     }
 
-    private static AxisAchievementDto MapAxisAchievement(AxisAchievement entity, Dictionary<string, CompassAxis> axisLookup)
+    private static AxisAchievementDto MapAxisAchievement(AxisAchievement entity, Dictionary<string, CompassAxisDefinition> axisLookup)
     {
         var dto = new AxisAchievementDto
         {
-            Id = entity.Id,
-            AgeGroupId = entity.AgeGroupId,
-            CompassAxisId = entity.CompassAxisId,
-            AxesDirection = entity.AxesDirection,
-            Description = entity.Description,
+            Id = entity.Id ?? string.Empty,
+            AgeGroupId = entity.AgeGroupId ?? string.Empty,
+            CompassAxisId = entity.CompassAxisId ?? string.Empty,
+            AxesDirection = entity.AxesDirection ?? string.Empty,
+            Description = entity.Description ?? string.Empty,
             CreatedAt = entity.CreatedAt,
-            UpdatedAt = entity.UpdatedAt
+            UpdatedAt = entity.UpdatedAt ?? entity.CreatedAt
         };
 
-        dto.CompassAxisName = axisLookup.TryGetValue(entity.CompassAxisId, out var axis)
+        dto.CompassAxisName = (entity.CompassAxisId != null && axisLookup.TryGetValue(entity.CompassAxisId, out var axis))
             ? (string.IsNullOrWhiteSpace(axis.Name) ? axis.Id : axis.Name)
-            : entity.CompassAxisId;
+            : entity.CompassAxisId ?? string.Empty;
 
         return dto;
     }
@@ -714,12 +715,12 @@ public class BadgeAdminService : IBadgeAdminService
     {
         var dto = new BadgeImageDto
         {
-            Id = entity.Id,
-            ImageId = entity.ImageId,
-            ContentType = entity.ContentType,
-            FileSizeBytes = entity.FileSizeBytes,
+            Id = entity.Id ?? string.Empty,
+            ImageId = entity.ImageId ?? string.Empty,
+            ContentType = entity.ContentType ?? "image/png",
+            FileSizeBytes = entity.FileSizeBytes ?? 0,
             CreatedAt = entity.CreatedAt,
-            UpdatedAt = entity.UpdatedAt
+            UpdatedAt = entity.UpdatedAt ?? entity.CreatedAt
         };
 
         if (includeData && entity.ImageData is { Length: > 0 })
@@ -773,7 +774,7 @@ public class BadgeAdminService : IBadgeAdminService
         return ageGroup;
     }
 
-    private async Task<CompassAxis> RequireAxisAsync(string axisId)
+    private async Task<CompassAxisDefinition> RequireAxisAsync(string axisId)
     {
         var axis = await ResolveAxisAsync(axisId);
         if (axis == null)
@@ -807,7 +808,7 @@ public class BadgeAdminService : IBadgeAdminService
         return group?.Value ?? ageGroupId.Trim();
     }
 
-    private async Task<CompassAxis?> ResolveAxisAsync(string axisId)
+    private async Task<CompassAxisDefinition?> ResolveAxisAsync(string axisId)
     {
         if (string.IsNullOrWhiteSpace(axisId))
         {
@@ -819,7 +820,7 @@ public class BadgeAdminService : IBadgeAdminService
                ?? await _compassAxisRepository.GetByNameAsync(trimmed);
     }
 
-    private static string NormalizeAxisValue(CompassAxis? axis, string fallback)
+    private static string NormalizeAxisValue(CompassAxisDefinition? axis, string fallback)
     {
         if (axis == null)
         {
@@ -880,10 +881,10 @@ public class BadgeAdminService : IBadgeAdminService
         return normalized;
     }
 
-    private async Task<Dictionary<string, CompassAxis>> GetAxisLookupAsync(bool includeDeleted = false)
+    private async Task<Dictionary<string, CompassAxisDefinition>> GetAxisLookupAsync(bool includeDeleted = false)
     {
         var axes = await _compassAxisRepository.GetAllAsync();
-        var lookup = new Dictionary<string, CompassAxis>(StringComparer.OrdinalIgnoreCase);
+        var lookup = new Dictionary<string, CompassAxisDefinition>(StringComparer.OrdinalIgnoreCase);
 
         foreach (var axis in axes)
         {

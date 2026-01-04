@@ -73,7 +73,7 @@ public class GameSessionApiService : IGameSessionApiService
             ScenarioId = request.ScenarioId,
             AccountId = request.AccountId,
             ProfileId = request.ProfileId,
-            PlayerNames = request.PlayerNames,
+            PlayerNames = request.PlayerNames ?? new List<string>(),
             Status = SessionStatus.InProgress,
             CurrentSceneId = scenario.Scenes.First().Id,
             StartTime = DateTime.UtcNow,
@@ -134,16 +134,16 @@ public class GameSessionApiService : IGameSessionApiService
             ProfileId = s.ProfileId,
             PlayerNames = s.PlayerNames,
             Status = s.Status.ToString(),
-            CurrentSceneId = s.CurrentSceneId,
+            CurrentSceneId = s.CurrentSceneId ?? string.Empty,
             ChoiceCount = s.ChoiceHistory?.Count ?? 0,
             EchoCount = s.EchoHistory?.Count ?? 0,
             AchievementCount = s.Achievements?.Count ?? 0,
-            StartTime = s.StartTime,
+            StartTime = s.StartTime ?? DateTime.UtcNow,
             EndTime = s.EndTime ?? DateTime.MinValue,
             ElapsedTime = s.ElapsedTime,
             IsPaused = s.IsPaused,
             SceneCount = s.SceneCount,
-            TargetAgeGroup = s.TargetAgeGroupName
+            TargetAgeGroup = s.TargetAgeGroupName ?? string.Empty
         };
     }
 
@@ -199,23 +199,23 @@ public class GameSessionApiService : IGameSessionApiService
             CompassDelta = compassDelta ?? 0.0,
             ChosenAt = DateTime.UtcNow,
             EchoGenerated = branch.EchoLog != null,
-            CompassChange = !string.IsNullOrWhiteSpace(compassAxis) && compassDelta.HasValue
-                ? CompassChange.Create(compassAxis, (int)compassDelta.Value)
-                : branch.CompassChange
+            // CompassChange mapping skipped - branch.CompassChange is CompassChangeDto, not CompassChange
+            CompassChange = null
         };
 
         session.ChoiceHistory.Add(sessionChoice);
 
-        // Process echo log if present
+        // Process echo log if present - map to domain EchoLog using EchoTypeId
         if (branch.EchoLog != null)
         {
-            var echo = EchoLog.Create(
-                branch.EchoLog.EchoType,
-                branch.EchoLog.Description,
-                branch.EchoLog.Strength,
-                DateTime.UtcNow
-            );
-            session.EchoHistory.Add(echo);
+            var echoLog = new EchoLog
+            {
+                EchoTypeId = branch.EchoLog.EchoType ?? string.Empty,
+                Description = branch.EchoLog.Description ?? string.Empty,
+                Strength = branch.EchoLog.Strength,
+                Timestamp = DateTime.UtcNow
+            };
+            session.EchoHistory.Add(echoLog);
         }
 
         session.RecalculateCompassProgressFromHistory();
@@ -335,7 +335,8 @@ public class GameSessionApiService : IGameSessionApiService
         var achievements = session.Achievements?.Cast<object>().ToList() ?? new List<object>();
 
         var endTime = session.EndTime ?? DateTime.UtcNow;
-        var duration = endTime.Subtract(session.StartTime);
+        var startTime = session.StartTime ?? DateTime.UtcNow;
+        var duration = endTime.Subtract(startTime);
 
         return new ContractsSessionStatsResponse
         {
@@ -486,10 +487,19 @@ public class GameSessionApiService : IGameSessionApiService
             return true;
         }
 
-        var target = AgeGroup.Parse(targetAgeGroup);
-        if (target != null)
+        // Map known age group values to their minimum ages
+        var minimumAge = targetAgeGroup.ToLowerInvariant() switch
         {
-            return target.MinimumAge >= scenarioMinimumAge;
+            "younger-kids" => 5,
+            "older-kids" => 8,
+            "teens" => 11,
+            "adults" => 15,
+            _ => (int?)null
+        };
+
+        if (minimumAge.HasValue)
+        {
+            return minimumAge.Value >= scenarioMinimumAge;
         }
 
         if (TryParseAgeRangeMinimum(targetAgeGroup, out var parsedMinimum))

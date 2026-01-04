@@ -14,7 +14,6 @@ public class UserProfileService : IUserProfileService
     // Simple guest name generation
     private static readonly string[] Adjectives = { "Happy", "Brave", "Swift", "Clever", "Mighty", "Noble", "Gentle", "Bold", "Wise", "Lucky" };
     private static readonly string[] Nouns = { "Explorer", "Adventurer", "Traveler", "Wanderer", "Seeker", "Knight", "Hero", "Champion", "Guardian", "Pioneer" };
-    private static readonly Random Random = new();
 
     public UserProfileService(MystiraAppDbContext context, ILogger<UserProfileService> logger)
     {
@@ -39,21 +38,27 @@ public class UserProfileService : IUserProfileService
                 throw new ArgumentException($"Invalid fantasy themes: {string.Join(", ", invalidThemes)}");
             }
 
-            profile.PreferredFantasyThemes = request.PreferredFantasyThemes.Select(t => FantasyTheme.Parse(t)!).ToList();
+            profile.PreferredFantasyThemes = request.PreferredFantasyThemes.ToList();
         }
-        if (request.AgeGroup != null)
+        if (request.DateOfBirth.HasValue)
+        {
+            profile.DateOfBirth = DateOnly.FromDateTime(request.DateOfBirth.Value);
+            profile.UpdateAgeGroupFromBirthDate();
+        }
+        else if (request.AgeGroup != null)
         {
             if (AgeGroup.Parse(request.AgeGroup) == null)
             {
                 throw new ArgumentException($"Invalid age group: {request.AgeGroup}. Must be one of: {string.Join(", ", AgeGroup.All)}");
             }
 
-            profile.SetAgeGroup(request.AgeGroup);
-        }
-        if (request.DateOfBirth.HasValue)
-        {
-            profile.DateOfBirth = DateOnly.FromDateTime(request.DateOfBirth.Value);
-            profile.UpdateAgeGroupFromBirthDate();
+            // AgeGroup is derived from DateOfBirth - set a representative DOB for the age group
+            var representativeDob = GetRepresentativeDateOfBirth(request.AgeGroup);
+            if (representativeDob.HasValue)
+            {
+                profile.DateOfBirth = representativeDob.Value;
+                profile.UpdateAgeGroupFromBirthDate();
+            }
         }
         if (request.HasCompletedOnboarding.HasValue)
         {
@@ -103,11 +108,16 @@ public class UserProfileService : IUserProfileService
             throw new ArgumentException($"Invalid age group: {request.AgeGroup}. Must be one of: {string.Join(", ", AgeGroup.All)}");
         }
 
+        // Determine DateOfBirth - use provided value or derive from age group
+        DateOnly? dateOfBirth = request.DateOfBirth.HasValue
+            ? DateOnly.FromDateTime(request.DateOfBirth.Value)
+            : GetRepresentativeDateOfBirth(request.AgeGroup);
+
         var profile = new UserProfile
         {
             Name = request.Name,
-            PreferredFantasyThemes = request.PreferredFantasyThemes.Select(t => FantasyTheme.Parse(t)!).ToList(),
-            DateOfBirth = request.DateOfBirth.HasValue ? DateOnly.FromDateTime(request.DateOfBirth.Value) : null,
+            PreferredFantasyThemes = request.PreferredFantasyThemes.ToList(),
+            DateOfBirth = dateOfBirth,
             IsGuest = request.IsGuest,
             IsNpc = request.IsNpc,
             HasCompletedOnboarding = false,
@@ -115,10 +125,7 @@ public class UserProfileService : IUserProfileService
             UpdatedAt = DateTime.UtcNow
         };
 
-        // Set age group using the method
-        profile.SetAgeGroup(request.AgeGroup);
-
-        // If date of birth is provided, update age group automatically
+        // Update age group from date of birth
         if (profile.DateOfBirth.HasValue)
         {
             profile.UpdateAgeGroupFromBirthDate();
@@ -154,10 +161,14 @@ public class UserProfileService : IUserProfileService
             throw new ArgumentException($"Invalid age group: {request.AgeGroup}. Must be one of: {string.Join(", ", AgeGroup.All)}");
         }
 
+        // Derive DateOfBirth from age group for guests
+        var dateOfBirth = GetRepresentativeDateOfBirth(request.AgeGroup);
+
         var profile = new UserProfile
         {
             Name = name,
-            PreferredFantasyThemes = new List<FantasyTheme>(), // Empty for guest profiles
+            PreferredFantasyThemes = new List<string>(), // Empty for guest profiles
+            DateOfBirth = dateOfBirth,
             IsGuest = true,
             IsNpc = false,
             HasCompletedOnboarding = true, // Guests don't need onboarding
@@ -165,8 +176,11 @@ public class UserProfileService : IUserProfileService
             UpdatedAt = DateTime.UtcNow
         };
 
-        // Set age group using the method
-        profile.SetAgeGroup(request.AgeGroup);
+        // Update age group from date of birth
+        if (profile.DateOfBirth.HasValue)
+        {
+            profile.UpdateAgeGroupFromBirthDate();
+        }
 
         _context.UserProfiles.Add(profile);
         await _context.SaveChangesAsync();
@@ -229,18 +243,7 @@ public class UserProfileService : IUserProfileService
                 throw new ArgumentException($"Invalid fantasy themes: {string.Join(", ", invalidThemes)}");
             }
 
-            profile.PreferredFantasyThemes = request.PreferredFantasyThemes.Select(t => FantasyTheme.Parse(t)!).ToList();
-        }
-
-        if (request.AgeGroup != null)
-        {
-            // Validate age group
-            if (AgeGroup.Parse(request.AgeGroup) == null)
-            {
-                throw new ArgumentException($"Invalid age group: {request.AgeGroup}. Must be one of: {string.Join(", ", AgeGroup.All)}");
-            }
-
-            profile.SetAgeGroup(request.AgeGroup);
+            profile.PreferredFantasyThemes = request.PreferredFantasyThemes.ToList();
         }
 
         if (request.DateOfBirth.HasValue)
@@ -248,6 +251,22 @@ public class UserProfileService : IUserProfileService
             profile.DateOfBirth = DateOnly.FromDateTime(request.DateOfBirth.Value);
             // Update age group automatically if date of birth is provided
             profile.UpdateAgeGroupFromBirthDate();
+        }
+        else if (request.AgeGroup != null)
+        {
+            // Validate age group
+            if (AgeGroup.Parse(request.AgeGroup) == null)
+            {
+                throw new ArgumentException($"Invalid age group: {request.AgeGroup}. Must be one of: {string.Join(", ", AgeGroup.All)}");
+            }
+
+            // AgeGroup is derived from DateOfBirth - set a representative DOB for the age group
+            var representativeDob = GetRepresentativeDateOfBirth(request.AgeGroup);
+            if (representativeDob.HasValue)
+            {
+                profile.DateOfBirth = representativeDob.Value;
+                profile.UpdateAgeGroupFromBirthDate();
+            }
         }
 
         if (request.HasCompletedOnboarding.HasValue)
@@ -377,13 +396,39 @@ public class UserProfileService : IUserProfileService
     {
         if (useAdjectiveNames)
         {
-            var adjective = Adjectives[Random.Next(Adjectives.Length)];
-            var noun = Nouns[Random.Next(Nouns.Length)];
+            var adjective = Adjectives[Random.Shared.Next(Adjectives.Length)];
+            var noun = Nouns[Random.Shared.Next(Nouns.Length)];
             return $"{adjective} {noun}";
         }
         else
         {
-            return $"Guest_{Random.Next(10000, 99999)}";
+            return $"Guest_{Random.Shared.Next(10000, 99999)}";
         }
+    }
+
+    /// <summary>
+    /// Gets a representative date of birth for a given age group.
+    /// This is used when a user provides an age group but no date of birth.
+    /// </summary>
+    private static DateOnly? GetRepresentativeDateOfBirth(string ageGroup)
+    {
+        // Map age groups to representative ages (middle of each range)
+        var representativeAge = ageGroup.ToLowerInvariant() switch
+        {
+            "younger-kids" => 6,   // Ages 5-7, use 6
+            "older-kids" => 9,     // Ages 8-10, use 9
+            "teens" => 13,         // Ages 11-14, use 13
+            "adults" => 18,        // Ages 15+, use 18
+            _ => (int?)null
+        };
+
+        if (!representativeAge.HasValue)
+        {
+            return null;
+        }
+
+        // Calculate date of birth based on representative age
+        var today = DateOnly.FromDateTime(DateTime.UtcNow);
+        return today.AddYears(-representativeAge.Value);
     }
 }

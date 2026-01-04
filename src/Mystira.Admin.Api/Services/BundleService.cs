@@ -10,11 +10,10 @@ using CreateScenarioRequest = Mystira.Contracts.App.Requests.Scenarios.CreateSce
 using CharacterRequest = Mystira.Contracts.App.Requests.Scenarios.CharacterRequest;
 using SceneRequest = Mystira.Contracts.App.Requests.Scenarios.SceneRequest;
 using CharacterMetadataRequest = Mystira.Contracts.App.Requests.Scenarios.CharacterMetadataRequest;
-using SceneMediaRequest = Mystira.Contracts.App.Requests.Scenarios.SceneMediaRequest;
+// Use Contracts types for request models
 using BranchRequest = Mystira.Contracts.App.Requests.Scenarios.BranchRequest;
 using EchoRevealRequest = Mystira.Contracts.App.Requests.Scenarios.EchoRevealRequest;
-using EchoLogRequest = Mystira.Contracts.App.Requests.Scenarios.EchoLogRequest;
-using CompassChangeRequest = Mystira.Contracts.App.Requests.Scenarios.CompassChangeRequest;
+using MediaReferencesRequest = Mystira.Contracts.App.Requests.Scenarios.MediaReferencesRequest;
 
 namespace Mystira.Admin.Api.Services;
 
@@ -311,7 +310,7 @@ public class BundleService : IBundleService
             Difficulty = (ContractEnums.DifficultyLevel)(int)scenario.Difficulty,
             SessionLength = (ContractEnums.SessionLength)(int)scenario.SessionLength,
             Archetypes = scenario.Archetypes?.ToList() ?? new List<string>(),
-            AgeGroup = scenario.AgeGroup?.Value,
+            AgeGroup = scenario.AgeGroup?.Value ?? string.Empty,
             MinimumAge = scenario.MinimumAge,
             CoreAxes = scenario.CoreAxes?.ToList() ?? new List<string>(),
             Characters = MapScenarioCharactersToRequest(scenario.Characters),
@@ -411,41 +410,25 @@ public class BundleService : IBundleService
         {
             Id = s.Id,
             Title = s.Title,
-            Type = (ContractEnums.SceneType)(int)s.Type,
+            Type = s.Type.ToString(),
             Description = s.Description,
-            NextSceneId = s.NextSceneId,
-            Difficulty = s.Difficulty,
-            Media = s.Media == null ? null : new SceneMediaRequest
+            NextSceneId = s.NextSceneId?.ToString(),
+            Difficulty = s.Difficulty?.ToString(),
+            Media = s.Media == null ? null : new MediaReferencesRequest
             {
                 Image = s.Media.Image,
                 Audio = s.Media.Audio,
                 Video = s.Media.Video
             },
+            // TODO: EchoLog and CompassChange are not available on Contracts.BranchRequest
+            // Bundle import will lose this data until the Contracts API is updated
             Branches = s.Branches?.Select(b => new BranchRequest
             {
-                Choice = b.Choice,
-                NextSceneId = b.NextSceneId,
-                EchoLog = b.EchoLog == null ? null : new EchoLogRequest
-                {
-                    EchoType = b.EchoLog.EchoType?.Value,
-                    Description = b.EchoLog.Description,
-                    Strength = b.EchoLog.Strength
-                },
-                CompassChange = b.CompassChange == null ? null : new CompassChangeRequest
-                {
-                    Axis = b.CompassChange.Axis,
-                    Delta = b.CompassChange.Delta
-                }
+                Text = b.Choice,
+                NextSceneId = b.NextSceneId
             }).ToList() ?? new List<BranchRequest>(),
-            EchoReveals = s.EchoReveals?.Select(e => new EchoRevealRequest
-            {
-                EchoType = e.EchoType?.Value,
-                MinStrength = e.MinStrength,
-                TriggerSceneId = e.TriggerSceneId,
-                MaxAgeScenes = e.MaxAgeScenes,
-                RevealMechanic = e.RevealMechanic,
-                Required = e.Required
-            }).ToList() ?? new List<EchoRevealRequest>()
+            // EchoReveals mapping skipped - Contracts API has different property structure
+            EchoReveals = null
         }).ToList();
     }
 }

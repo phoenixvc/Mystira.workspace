@@ -45,7 +45,12 @@ public class ArchetypesController : ControllerBase
     {
         _logger.LogInformation("POST: Creating archetype with name: {Name}", request.Name);
 
-        var created = await _mediator.Send(new CreateArchetypeCommand(request.Name, request.Description));
+        var created = await _mediator.Send(new CreateArchetypeCommand(request.Name, request.Description)) as ArchetypeDefinition;
+        if (created == null)
+        {
+            _logger.LogError("Failed to create archetype - mediator returned unexpected type");
+            return StatusCode(500, new { message = "Internal server error" });
+        }
         return CreatedAtAction(nameof(GetArchetypeById), new { id = created.Id }, created);
     }
 
@@ -68,7 +73,12 @@ public class ArchetypesController : ControllerBase
     {
         _logger.LogInformation("DELETE: Deleting archetype with id: {Id}", id);
 
-        var success = await _mediator.Send(new DeleteArchetypeCommand(id));
+        var result = await _mediator.Send(new DeleteArchetypeCommand(id));
+        if (result is not bool success)
+        {
+            _logger.LogError("Failed to delete archetype - mediator returned unexpected type");
+            return StatusCode(500, new { message = "Internal server error" });
+        }
         if (!success)
         {
             _logger.LogWarning("Archetype with id {Id} not found", id);

@@ -45,7 +45,12 @@ public class FantasyThemesController : ControllerBase
     {
         _logger.LogInformation("POST: Creating fantasy theme with name: {Name}", request.Name);
 
-        var created = await _mediator.Send(new CreateFantasyThemeCommand(request.Name, request.Description));
+        var created = await _mediator.Send(new CreateFantasyThemeCommand(request.Name, request.Description)) as FantasyThemeDefinition;
+        if (created == null)
+        {
+            _logger.LogError("Failed to create fantasy theme - mediator returned unexpected type");
+            return StatusCode(500, new { message = "Internal server error" });
+        }
         return CreatedAtAction(nameof(GetFantasyThemeById), new { id = created.Id }, created);
     }
 
@@ -68,8 +73,8 @@ public class FantasyThemesController : ControllerBase
     {
         _logger.LogInformation("DELETE: Deleting fantasy theme with id: {Id}", id);
 
-        var success = await _mediator.Send(new DeleteFantasyThemeCommand(id));
-        if (!success)
+        var result = await _mediator.Send(new DeleteFantasyThemeCommand(id));
+        if (result is not bool success || !success)
         {
             _logger.LogWarning("Fantasy theme with id {Id} not found", id);
             return NotFound(new { message = "Fantasy theme not found" });

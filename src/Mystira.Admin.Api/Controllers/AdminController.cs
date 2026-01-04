@@ -15,6 +15,7 @@ using DomainMediaMetadataFile = Mystira.Domain.Models.MediaMetadataFile;
 using DomainMediaMetadataEntry = Mystira.Domain.Models.MediaMetadataEntry;
 using DomainCharacterMediaMetadataFile = Mystira.Domain.Models.CharacterMediaMetadataFile;
 using DomainCharacterMediaMetadataEntry = Mystira.Domain.Models.CharacterMediaMetadataEntry;
+using Scenario = Mystira.Domain.Models.Scenario;
 
 namespace Mystira.Admin.Api.Controllers;
 

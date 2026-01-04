@@ -60,10 +60,8 @@ try
         .ReadFrom.Configuration(context.Configuration)
         .ReadFrom.Services(services)
         .Enrich.FromLogContext()
-        // Note: WithMachineName requires Serilog.Enrichers.Environment package
-        // .Enrich.WithMachineName()
+        .Enrich.WithMachineName()
         .Enrich.WithThreadId()
-        .Enrich.WithCorrelationId()
         .Enrich.WithProperty("Application", "Mystira.Admin.Api")
         .Enrich.WithProperty("Environment", context.HostingEnvironment.EnvironmentName)
         .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj} {Properties:j}{NewLine}{Exception}")
@@ -807,9 +805,9 @@ app.UseSerilogRequestLogging(options =>
 {
     options.EnrichDiagnosticContext = (diagnosticContext, httpContext) =>
     {
-        diagnosticContext.Set("RequestHost", httpContext.Request.Host.Value);
-        diagnosticContext.Set("UserAgent", httpContext.Request.Headers["User-Agent"].FirstOrDefault());
-        if (httpContext.Items.TryGetValue("CorrelationId", out var correlationId))
+        diagnosticContext.Set("RequestHost", httpContext.Request.Host.Value ?? string.Empty);
+        diagnosticContext.Set("UserAgent", httpContext.Request.Headers["User-Agent"].FirstOrDefault() ?? string.Empty);
+        if (httpContext.Items.TryGetValue("CorrelationId", out var correlationId) && correlationId != null)
         {
             diagnosticContext.Set("CorrelationId", correlationId);
         }

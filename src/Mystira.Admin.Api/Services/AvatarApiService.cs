@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Mystira.Admin.Api.Models;
 using Mystira.Domain.Models;
 using Mystira.Infrastructure.Data;
 using ContractsAvatarConfigurationResponse = Mystira.Contracts.App.Responses.Avatars.AvatarConfigurationResponse;
@@ -29,15 +30,30 @@ public class AvatarApiService : IAvatarApiService
         {
             var configFile = await GetAvatarConfigurationFileAsync();
 
+            // Convert string lists to AvatarResponse lists
+            var ageGroupAvatars = new Dictionary<string, List<Mystira.Contracts.App.Responses.Avatars.AvatarResponse>>();
+            if (configFile?.AgeGroupAvatars != null)
+            {
+                foreach (var kvp in configFile.AgeGroupAvatars)
+                {
+                    ageGroupAvatars[kvp.Key] = kvp.Value.Select(avatarId => new Mystira.Contracts.App.Responses.Avatars.AvatarResponse
+                    {
+                        Id = avatarId,
+                        Name = avatarId,
+                        ImageUrl = avatarId
+                    }).ToList();
+                }
+            }
+
             var response = new ContractsAvatarResponse
             {
-                AgeGroupAvatars = configFile?.AgeGroupAvatars ?? new Dictionary<string, List<string>>()
+                AgeGroupAvatars = ageGroupAvatars
             };
 
             // Ensure all age groups are present
             foreach (var ageGroup in AgeGroupConstants.AllAgeGroups)
             {
-                response.AgeGroupAvatars.TryAdd(ageGroup, new List<string>());
+                response.AgeGroupAvatars.TryAdd(ageGroup, new List<Mystira.Contracts.App.Responses.Avatars.AvatarResponse>());
             }
 
             return response;

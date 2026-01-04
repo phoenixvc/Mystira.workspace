@@ -270,7 +270,7 @@ public class CharacterMediaMetadataService : ICharacterMediaMetadataService
             FileName = domainEntry.FileName,
             Type = domainEntry.Type,
             Description = domainEntry.Description,
-            AgeRating = domainEntry.AgeRating,
+            AgeRating = domainEntry.AgeRating.ToString(),
             Tags = domainEntry.Tags,
             Loopable = domainEntry.Loopable
         };
@@ -285,7 +285,7 @@ public class CharacterMediaMetadataService : ICharacterMediaMetadataService
             FileName = apiEntry.FileName,
             Type = apiEntry.Type,
             Description = apiEntry.Description,
-            AgeRating = apiEntry.AgeRating,
+            AgeRating = int.TryParse(apiEntry.AgeRating, out var ageRating) ? ageRating : 0,
             Tags = apiEntry.Tags,
             Loopable = apiEntry.Loopable
         };
