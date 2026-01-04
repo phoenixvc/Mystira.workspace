@@ -590,7 +590,7 @@ public partial class MystiraAppDbContext : DbContext
 
                 assignment.OwnsOne(a => a.PlayerAssignment, pa =>
                 {
-                    pa.Property(p => p.Type).IsRequired(false);
+                    pa.Property(p => p.Type).IsRequired();
                     pa.Property(p => p.ProfileId).IsRequired(false);
                     pa.Property(p => p.ProfileName).IsRequired(false);
                     pa.Property(p => p.ProfileImage).IsRequired(false);
