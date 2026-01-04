@@ -205,10 +205,17 @@ public class GameSessionApiService : IGameSessionApiService
 
         session.ChoiceHistory.Add(sessionChoice);
 
-        // Process echo log if present
+        // Process echo log if present - map from DTO to domain EchoLog
         if (branch.EchoLog != null)
         {
-            session.EchoHistory.Add(branch.EchoLog);
+            var echoLog = new EchoLog
+            {
+                EchoType = branch.EchoLog.EchoType,
+                Description = branch.EchoLog.Description,
+                Strength = branch.EchoLog.Strength,
+                Timestamp = DateTime.UtcNow
+            };
+            session.EchoHistory.Add(echoLog);
         }
 
         session.RecalculateCompassProgressFromHistory();
