@@ -91,9 +91,12 @@ public partial class MystiraAppDbContext : DbContext
         // They are stored as string IDs (e.g., ArchetypeId) with computed properties for the value objects
         modelBuilder.Ignore<AgeGroup>();
         modelBuilder.Ignore<Archetype>();
+        modelBuilder.Ignore<CharacterRole>();
+        modelBuilder.Ignore<CharacterTrait>();
         modelBuilder.Ignore<CoreAxis>();
         modelBuilder.Ignore<EchoType>();
         modelBuilder.Ignore<FantasyTheme>();
+        modelBuilder.Ignore<Species>();
 
         // Configure UserProfile
 
@@ -507,11 +510,23 @@ public partial class MystiraAppDbContext : DbContext
                 // Configure Metadata as owned entity with proper conversions
                 character.OwnsOne(c => c.Metadata, metadata =>
                 {
-                    // Ignore computed value object properties (derived from ArchetypeIds)
+                    // Ignore computed value object properties
                     metadata.Ignore(m => m.Archetypes);
                     metadata.Ignore(m => m.Archetype);
-                    // Ignore Role alias (getter for Roles)
+                    metadata.Ignore(m => m.Roles);
                     metadata.Ignore(m => m.Role);
+                    metadata.Ignore(m => m.Species);
+                    metadata.Ignore(m => m.Traits);
+
+                    // RoleIds - store as comma-separated strings
+                    metadata.Property(m => m.RoleIds)
+                        .HasConversion(
+                            v => string.Join(',', v),
+                            v => v.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList())
+                        .Metadata.SetValueComparer(new ValueComparer<List<string>>(
+                            (c1, c2) => c1 != null && c2 != null && c1.SequenceEqual(c2),
+                            c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
+                            c => c.ToList()));
 
                     // ArchetypeIds - store as comma-separated strings
                     metadata.Property(m => m.ArchetypeIds)
@@ -523,8 +538,8 @@ public partial class MystiraAppDbContext : DbContext
                             c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
                             c => c.ToList()));
 
-                    // Roles - store as comma-separated strings
-                    metadata.Property(m => m.Roles)
+                    // TraitIds - store as comma-separated strings
+                    metadata.Property(m => m.TraitIds)
                         .HasConversion(
                             v => string.Join(',', v),
                             v => v.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList())
@@ -533,17 +548,7 @@ public partial class MystiraAppDbContext : DbContext
                             c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
                             c => c.ToList()));
 
-                    // Traits - store as comma-separated strings
-                    metadata.Property(m => m.Traits)
-                        .HasConversion(
-                            v => string.Join(',', v),
-                            v => v.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList())
-                        .Metadata.SetValueComparer(new ValueComparer<List<string>>(
-                            (c1, c2) => c1 != null && c2 != null && c1.SequenceEqual(c2),
-                            c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
-                            c => c.ToList()));
-
-                    // Simple properties: Species, Age, Backstory - mapped automatically
+                    // Simple properties: SpeciesId, Age, Backstory - mapped automatically
                 });
             });
 
