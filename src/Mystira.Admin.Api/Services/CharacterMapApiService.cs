@@ -163,8 +163,8 @@ public class CharacterMapApiService : ICharacterMapApiService
             {
                 Id = cm.Id,
                 Name = cm.Name,
-                Image = cm.Image,
-                Audio = cm.Audio,
+                Image = cm.Image ?? string.Empty,
+                Audio = cm.Audio ?? string.Empty,
                 Metadata = cm.Metadata
             }).ToList()
         };

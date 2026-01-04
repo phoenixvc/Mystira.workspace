@@ -527,7 +527,7 @@ public class BadgeAdminService : IBadgeAdminService
         if (!string.IsNullOrWhiteSpace(imageId))
         {
             var search = imageId.Trim().ToLowerInvariant();
-            query = query.Where(i => i.ImageId.ToLower().Contains(search));
+            query = query.Where(i => (i.ImageId ?? string.Empty).ToLower().Contains(search));
         }
 
         var images = await query
@@ -637,8 +637,8 @@ public class BadgeAdminService : IBadgeAdminService
             if (imageIds.Any())
             {
                 imageLookup = await _context.BadgeImages
-                    .Where(img => imageIds.Contains(img.ImageId))
-                    .ToDictionaryAsync(img => img.ImageId, StringComparer.OrdinalIgnoreCase);
+                    .Where(img => img.ImageId != null && imageIds.Contains(img.ImageId))
+                    .ToDictionaryAsync(img => img.ImageId!, StringComparer.OrdinalIgnoreCase);
             }
         }
 
@@ -653,20 +653,20 @@ public class BadgeAdminService : IBadgeAdminService
     {
         var dto = new BadgeDto
         {
-            Id = badge.Id,
-            AgeGroupId = badge.AgeGroupId,
-            CompassAxisId = badge.CompassAxisId,
-            Tier = badge.Tier,
+            Id = badge.Id ?? string.Empty,
+            AgeGroupId = badge.AgeGroupId ?? string.Empty,
+            CompassAxisId = badge.CompassAxisId ?? string.Empty,
+            Tier = badge.Tier ?? string.Empty,
             TierOrder = badge.TierOrder,
             RequiredScore = badge.RequiredScore ?? throw new InvalidOperationException($"Badge '{badge.Id}' has null RequiredScore"),
-            Title = badge.Title,
-            Description = badge.Description,
-            ImageId = badge.ImageId,
+            Title = badge.Title ?? string.Empty,
+            Description = badge.Description ?? string.Empty,
+            ImageId = badge.ImageId ?? string.Empty,
             CreatedAt = badge.CreatedAt,
             UpdatedAt = badge.UpdatedAt ?? badge.CreatedAt
         };
 
-        if (ageGroupLookup != null && ageGroupLookup.TryGetValue(badge.AgeGroupId, out var ageGroup))
+        if (ageGroupLookup != null && badge.AgeGroupId != null && ageGroupLookup.TryGetValue(badge.AgeGroupId, out var ageGroup))
         {
             dto.AgeGroupName = string.IsNullOrWhiteSpace(ageGroup.Name)
                 ? AgeGroupConstants.GetDisplayName(ageGroup.Value)
@@ -676,14 +676,14 @@ public class BadgeAdminService : IBadgeAdminService
         }
         else
         {
-            dto.AgeGroupName = AgeGroupConstants.GetDisplayName(badge.AgeGroupId);
+            dto.AgeGroupName = AgeGroupConstants.GetDisplayName(badge.AgeGroupId ?? string.Empty);
         }
 
-        dto.CompassAxisName = (axisLookup != null && axisLookup.TryGetValue(badge.CompassAxisId, out var axis))
+        dto.CompassAxisName = (axisLookup != null && badge.CompassAxisId != null && axisLookup.TryGetValue(badge.CompassAxisId, out var axis))
             ? (string.IsNullOrWhiteSpace(axis.Name) ? axis.Id : axis.Name)
-            : badge.CompassAxisId;
+            : badge.CompassAxisId ?? string.Empty;
 
-        if (imageLookup != null && imageLookup.TryGetValue(badge.ImageId, out var image))
+        if (imageLookup != null && badge.ImageId != null && imageLookup.TryGetValue(badge.ImageId, out var image))
         {
             dto.Image = MapBadgeImage(image, includeData: true);
         }
@@ -695,11 +695,11 @@ public class BadgeAdminService : IBadgeAdminService
     {
         var dto = new AxisAchievementDto
         {
-            Id = entity.Id,
-            AgeGroupId = entity.AgeGroupId,
-            CompassAxisId = entity.CompassAxisId,
-            AxesDirection = entity.AxesDirection,
-            Description = entity.Description,
+            Id = entity.Id ?? string.Empty,
+            AgeGroupId = entity.AgeGroupId ?? string.Empty,
+            CompassAxisId = entity.CompassAxisId ?? string.Empty,
+            AxesDirection = entity.AxesDirection ?? string.Empty,
+            Description = entity.Description ?? string.Empty,
             CreatedAt = entity.CreatedAt,
             UpdatedAt = entity.UpdatedAt ?? entity.CreatedAt
         };
@@ -715,9 +715,9 @@ public class BadgeAdminService : IBadgeAdminService
     {
         var dto = new BadgeImageDto
         {
-            Id = entity.Id,
-            ImageId = entity.ImageId,
-            ContentType = entity.ContentType,
+            Id = entity.Id ?? string.Empty,
+            ImageId = entity.ImageId ?? string.Empty,
+            ContentType = entity.ContentType ?? "image/png",
             FileSizeBytes = entity.FileSizeBytes ?? 0,
             CreatedAt = entity.CreatedAt,
             UpdatedAt = entity.UpdatedAt ?? entity.CreatedAt

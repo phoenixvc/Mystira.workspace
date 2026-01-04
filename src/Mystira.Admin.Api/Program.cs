@@ -805,9 +805,9 @@ app.UseSerilogRequestLogging(options =>
 {
     options.EnrichDiagnosticContext = (diagnosticContext, httpContext) =>
     {
-        diagnosticContext.Set("RequestHost", httpContext.Request.Host.Value);
-        diagnosticContext.Set("UserAgent", httpContext.Request.Headers["User-Agent"].FirstOrDefault());
-        if (httpContext.Items.TryGetValue("CorrelationId", out var correlationId))
+        diagnosticContext.Set("RequestHost", httpContext.Request.Host.Value ?? string.Empty);
+        diagnosticContext.Set("UserAgent", httpContext.Request.Headers["User-Agent"].FirstOrDefault() ?? string.Empty);
+        if (httpContext.Items.TryGetValue("CorrelationId", out var correlationId) && correlationId != null)
         {
             diagnosticContext.Set("CorrelationId", correlationId);
         }

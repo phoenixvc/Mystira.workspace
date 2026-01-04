@@ -310,7 +310,7 @@ public class BundleService : IBundleService
             Difficulty = (ContractEnums.DifficultyLevel)(int)scenario.Difficulty,
             SessionLength = (ContractEnums.SessionLength)(int)scenario.SessionLength,
             Archetypes = scenario.Archetypes?.ToList() ?? new List<string>(),
-            AgeGroup = scenario.AgeGroup?.Value,
+            AgeGroup = scenario.AgeGroup?.Value ?? string.Empty,
             MinimumAge = scenario.MinimumAge,
             CoreAxes = scenario.CoreAxes?.ToList() ?? new List<string>(),
             Characters = MapScenarioCharactersToRequest(scenario.Characters),

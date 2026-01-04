@@ -73,7 +73,7 @@ public class GameSessionApiService : IGameSessionApiService
             ScenarioId = request.ScenarioId,
             AccountId = request.AccountId,
             ProfileId = request.ProfileId,
-            PlayerNames = request.PlayerNames,
+            PlayerNames = request.PlayerNames ?? new List<string>(),
             Status = SessionStatus.InProgress,
             CurrentSceneId = scenario.Scenes.First().Id,
             StartTime = DateTime.UtcNow,
@@ -134,7 +134,7 @@ public class GameSessionApiService : IGameSessionApiService
             ProfileId = s.ProfileId,
             PlayerNames = s.PlayerNames,
             Status = s.Status.ToString(),
-            CurrentSceneId = s.CurrentSceneId,
+            CurrentSceneId = s.CurrentSceneId ?? string.Empty,
             ChoiceCount = s.ChoiceHistory?.Count ?? 0,
             EchoCount = s.EchoHistory?.Count ?? 0,
             AchievementCount = s.Achievements?.Count ?? 0,
@@ -143,7 +143,7 @@ public class GameSessionApiService : IGameSessionApiService
             ElapsedTime = s.ElapsedTime,
             IsPaused = s.IsPaused,
             SceneCount = s.SceneCount,
-            TargetAgeGroup = s.TargetAgeGroupName
+            TargetAgeGroup = s.TargetAgeGroupName ?? string.Empty
         };
     }
 

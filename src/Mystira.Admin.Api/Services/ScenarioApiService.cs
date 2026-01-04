@@ -144,7 +144,7 @@ public class ScenarioApiService : IScenarioApiService
                  SessionLength = (int)s.SessionLength,
                  Archetypes = s.Archetypes?.ToList() ?? new List<string>(),
                  MinimumAge = s.MinimumAge,
-                 AgeGroup = s.AgeGroup?.Value,
+                 AgeGroup = s.AgeGroup?.Value ?? string.Empty,
                  CoreAxes = s.CoreAxes?.ToList() ?? new List<string>(),
                  CreatedAt = s.CreatedAt,
                  Image = s.Image
@@ -176,7 +176,7 @@ public class ScenarioApiService : IScenarioApiService
             Id = Guid.NewGuid().ToString(),
             Title = request.Title,
             Description = request.Description,
-            Tags = request.Tags,
+            Tags = request.Tags ?? new List<string>(),
             Difficulty = (DifficultyLevel)(int)request.Difficulty,
             SessionLength = (SessionLength)(int)request.SessionLength,
             Archetypes = ParseArchetypesOrThrow(request.Archetypes),
@@ -220,7 +220,7 @@ public class ScenarioApiService : IScenarioApiService
 
         scenario.Title = request.Title;
         scenario.Description = request.Description;
-        scenario.Tags = request.Tags;
+        scenario.Tags = request.Tags ?? new List<string>();
         scenario.Difficulty = (DifficultyLevel)(int)request.Difficulty;
         scenario.SessionLength = (SessionLength)(int)request.SessionLength;
         scenario.Archetypes = ParseArchetypesOrThrow(request.Archetypes);
@@ -383,12 +383,12 @@ public class ScenarioApiService : IScenarioApiService
             Audio = c.Audio,
             Metadata = c.Metadata == null ? null : new ScenarioCharacterMetadata
             {
-                Role = c.Metadata.Role,
+                Role = c.Metadata.Role ?? string.Empty,
                 Archetype = c.Metadata.Archetype?.Select(a => Archetype.Parse(a)).Where(a => a != null).ToList()!,
-                Species = c.Metadata.Species,
+                Species = c.Metadata.Species ?? string.Empty,
                 Age = int.TryParse(c.Metadata.Age?.ToString(), out var age) ? age : 0,
-                Traits = c.Metadata.Traits,
-                Backstory = c.Metadata.Backstory
+                Traits = c.Metadata.Traits ?? new List<string>(),
+                Backstory = c.Metadata.Backstory ?? string.Empty
             }
         }).ToList();
     }
@@ -417,7 +417,7 @@ public class ScenarioApiService : IScenarioApiService
             Branches = s.Branches?.Select(b => new Branch
             {
                 Choice = b.Text ?? string.Empty,
-                NextSceneId = b.NextSceneId
+                NextSceneId = b.NextSceneId ?? string.Empty
             }).ToList() ?? new List<Branch>(),
             // EchoReveals mapping skipped - Contracts API has different property structure
             EchoReveals = new List<EchoReveal>()
@@ -602,7 +602,7 @@ public class ScenarioApiService : IScenarioApiService
                         throw new ScenarioValidationException($"Echo log strength must be between 0.1 and 1.0 (Scene ID: {scene.Id}, Choice: {branch.Choice})");
                     }
 
-                    if (EchoType.Parse(echo.EchoType.Value) == null)
+                    if (echo.EchoType?.Value == null || EchoType.Parse(echo.EchoType.Value) == null)
                     {
                         throw new ScenarioValidationException($"Invalid echo type '{echo.EchoType}' (Scene ID: {scene.Id}, Choice: {branch.Choice})");
                     }

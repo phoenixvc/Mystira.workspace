@@ -107,7 +107,7 @@ public class MediaApiService : IMediaApiService
         {
             Id = m.Id,
             MediaId = m.Id,
-            Url = m.Url,
+            Url = m.Url ?? string.Empty,
             MediaType = m.MediaType,
             MimeType = string.Empty,
             FileSizeBytes = 0,
