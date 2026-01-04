@@ -1,8 +1,9 @@
 using Microsoft.EntityFrameworkCore;
+
 using Mystira.Application.Ports.Data;
+using Mystira.Contracts.App.Requests.Badges;
 using Mystira.Domain.Models;
 using Mystira.Infrastructure.Data;
-using Mystira.Contracts.App.Requests.Badges;
 
 namespace Mystira.Admin.Api.Services;
 

@@ -1,7 +1,9 @@
 using Microsoft.EntityFrameworkCore;
+
+using Mystira.Contracts.App.Requests.CharacterMaps;
 using Mystira.Domain.Models;
 using Mystira.Infrastructure.Data;
-using Mystira.Contracts.App.Requests.CharacterMaps;
+
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 
