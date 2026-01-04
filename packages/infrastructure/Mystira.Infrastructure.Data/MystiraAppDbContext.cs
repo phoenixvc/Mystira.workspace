@@ -633,7 +633,11 @@ public partial class MystiraAppDbContext : DbContext
             });
 
             // EchoHistory - EchoLog entities stored as owned JSON array
-            entity.OwnsMany(e => e.EchoHistory);
+            entity.OwnsMany(e => e.EchoHistory, echoLog =>
+            {
+                // Ignore computed EchoType property (value object derived from EchoTypeId)
+                echoLog.Ignore(el => el.EchoType);
+            });
 
             // Achievements - SessionAchievement entities stored as owned JSON array
             entity.OwnsMany(e => e.Achievements);
