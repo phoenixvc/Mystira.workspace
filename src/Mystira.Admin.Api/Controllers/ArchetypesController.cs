@@ -1,7 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
+
 using Mystira.Application.CQRS.Archetypes.Commands;
 using Mystira.Application.CQRS.Archetypes.Queries;
 using Mystira.Domain.Models;
+
 using Wolverine;
 
 namespace Mystira.Admin.Api.Controllers;
