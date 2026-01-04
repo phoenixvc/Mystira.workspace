@@ -102,21 +102,21 @@ public class MediaApiService : IMediaApiService
         var contractsResponse = await _listMediaUseCase.ExecuteAsync(contractsRequest);
 
         // Convert Contracts.MediaQueryResponse back to Admin.Api.Models.MediaQueryResponse
-        // Map MediaItem to MediaAsset - MediaItem may have limited properties available
+        // Map MediaItem to MediaAsset - MediaItem only has Id, Url, MediaType properties
         var mediaAssets = contractsResponse.Media?.Select(m => new MediaAsset
         {
             Id = m.Id,
             MediaId = m.Id,
             Url = m.Url,
             MediaType = m.MediaType,
-            MimeType = m.ContentType ?? string.Empty,
-            FileSizeBytes = m.Size ?? 0,
-            Description = m.Name ?? string.Empty,
-            Tags = m.Tags?.ToList() ?? new List<string>(),
-            Hash = m.Hash ?? string.Empty,
+            MimeType = string.Empty,
+            FileSizeBytes = 0,
+            Description = string.Empty,
+            Tags = new List<string>(),
+            Hash = string.Empty,
             Version = 1,
-            CreatedAt = m.CreatedAt ?? DateTime.UtcNow,
-            UpdatedAt = m.UpdatedAt ?? DateTime.UtcNow
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow
         }).ToList() ?? new List<MediaAsset>();
 
         return new MediaQueryResponse

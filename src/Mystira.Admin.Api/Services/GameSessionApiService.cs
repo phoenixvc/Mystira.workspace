@@ -199,7 +199,8 @@ public class GameSessionApiService : IGameSessionApiService
             CompassDelta = compassDelta ?? 0.0,
             ChosenAt = DateTime.UtcNow,
             EchoGenerated = branch.EchoLog != null,
-            CompassChange = branch.CompassChange
+            // CompassChange mapping skipped - branch.CompassChange is CompassChangeDto, not CompassChange
+            CompassChange = null
         };
 
         session.ChoiceHistory.Add(sessionChoice);
