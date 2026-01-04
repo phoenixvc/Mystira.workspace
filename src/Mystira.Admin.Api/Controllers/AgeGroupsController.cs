@@ -45,13 +45,17 @@ public class AgeGroupsController : ControllerBase
     {
         _logger.LogInformation("POST: Creating age group with name: {Name}", request.Name);
 
-        var result = await _mediator.Send(new CreateAgeGroupCommand(
+        var created = await _mediator.Send(new CreateAgeGroupCommand(
             request.Name,
             request.Value,
             request.MinimumAge,
             request.MaximumAge,
-            request.Description));
-        var created = (AgeGroupDefinition)result;
+            request.Description)) as AgeGroupDefinition;
+        if (created == null)
+        {
+            _logger.LogError("Failed to create age group - mediator returned unexpected type");
+            return StatusCode(500, new { message = "Internal server error" });
+        }
         return CreatedAtAction(nameof(GetAgeGroupById), new { id = created.Id }, created);
     }
 
