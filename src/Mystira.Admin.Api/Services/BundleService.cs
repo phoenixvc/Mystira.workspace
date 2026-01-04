@@ -420,6 +420,8 @@ public class BundleService : IBundleService
                 Audio = s.Media.Audio,
                 Video = s.Media.Video
             },
+            // TODO: EchoLog and CompassChange are not available on Contracts.BranchRequest
+            // Bundle import will lose this data until the Contracts API is updated
             Branches = s.Branches?.Select(b => new BranchRequest
             {
                 Text = b.Choice,

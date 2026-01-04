@@ -138,7 +138,7 @@ public class GameSessionApiService : IGameSessionApiService
             ChoiceCount = s.ChoiceHistory?.Count ?? 0,
             EchoCount = s.EchoHistory?.Count ?? 0,
             AchievementCount = s.Achievements?.Count ?? 0,
-            StartTime = s.StartTime ?? DateTime.MinValue,
+            StartTime = s.StartTime ?? DateTime.UtcNow,
             EndTime = s.EndTime ?? DateTime.MinValue,
             ElapsedTime = s.ElapsedTime,
             IsPaused = s.IsPaused,

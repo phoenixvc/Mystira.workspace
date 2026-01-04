@@ -274,8 +274,9 @@ public class ContributorsController : ControllerBase
                 WalletAddress = c.WalletAddress,
                 Role = c.Role.ToString(),
                 ContributionPercentage = c.ContributionPercentage,
-                Email = null,
-                Notes = null,
+                // Email and Notes are not available in Domain.Contributor model
+                Email = string.Empty,
+                Notes = string.Empty,
                 CreatedAt = c.CreatedAt
             }).ToList() ?? new List<ContributorResponse>(),
             ContributorCount = metadata.Contributors?.Count ?? 0,

@@ -230,10 +230,10 @@ public class ScenarioApiService : IScenarioApiService
         scenario.Scenes = MapScenesFromRequest(request.Scenes);
         scenario.Image = request.Image;
 
-        // Note: AgeGroup is immutable after creation; changes require recreating the scenario
+        // AgeGroup is immutable after creation; reject any attempt to change it
         if (!string.IsNullOrEmpty(request.AgeGroup) && scenario.AgeGroup?.Value != request.AgeGroup)
         {
-            _logger.LogWarning("AgeGroup change requested for scenario {ScenarioId} but AgeGroup is immutable after creation", id);
+            throw new InvalidOperationException($"AgeGroup cannot be changed after scenario creation. Current: {scenario.AgeGroup?.Value}, Requested: {request.AgeGroup}");
         }
 
         await ValidateScenarioAsync(scenario);

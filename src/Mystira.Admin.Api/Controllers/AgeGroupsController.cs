@@ -85,8 +85,7 @@ public class AgeGroupsController : ControllerBase
         _logger.LogInformation("DELETE: Deleting age group with id: {Id}", id);
 
         var result = await _mediator.Send(new DeleteAgeGroupCommand(id));
-        var success = (bool)result;
-        if (!success)
+        if (result is not bool success || !success)
         {
             _logger.LogWarning("Age group with id {Id} not found", id);
             return NotFound(new { message = "Age group not found" });

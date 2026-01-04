@@ -46,7 +46,10 @@ public class EchoTypesController : ControllerBase
         _logger.LogInformation("POST: Creating echo type with name: {Name}", request.Name);
 
         var result = await _mediator.Send(new CreateEchoTypeCommand(request.Name, request.Description));
-        var created = (EchoTypeDefinition)result;
+        if (result is not EchoTypeDefinition created)
+        {
+            return StatusCode(500, new { message = "Unexpected result from mediator" });
+        }
         return CreatedAtAction(nameof(GetEchoTypeById), new { id = created.Id }, created);
     }
 
@@ -70,8 +73,7 @@ public class EchoTypesController : ControllerBase
         _logger.LogInformation("DELETE: Deleting echo type with id: {Id}", id);
 
         var result = await _mediator.Send(new DeleteEchoTypeCommand(id));
-        var success = (bool)result;
-        if (!success)
+        if (result is not bool success || !success)
         {
             _logger.LogWarning("Echo type with id {Id} not found", id);
             return NotFound(new { message = "Echo type not found" });
