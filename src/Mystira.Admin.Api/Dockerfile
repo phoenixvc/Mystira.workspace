@@ -8,6 +8,10 @@ EXPOSE 443
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 WORKDIR /src
 
+# Accept GitHub token for authenticating to GitHub Packages NuGet feed
+ARG NUGET_AUTH_TOKEN
+ENV GITHUB_TOKEN=${NUGET_AUTH_TOKEN}
+
 # Copy csproj files and restore dependencies
 # NOTE: Build context should be the repository root, so paths are relative to /
 # Dependencies are pulled from NuGet packages (Mystira.Shared, Mystira.Contracts, etc.)
