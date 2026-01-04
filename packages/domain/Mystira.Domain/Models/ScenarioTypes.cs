@@ -35,17 +35,17 @@ public class ScenarioCharacterMetadata
     public List<string> ArchetypeIds { get; set; } = new();
 
     /// <summary>Gets the character archetypes (computed from ArchetypeIds).</summary>
-    public List<Archetype> Archetypes => ArchetypeIds
-        .Select(id => Archetype.FromValue(id))
+    public List<ValueObjects.Archetype> Archetypes => ArchetypeIds
+        .Select(id => ValueObjects.Archetype.FromValue(id))
         .Where(a => a != null)
-        .Cast<Archetype>()
+        .Cast<ValueObjects.Archetype>()
         .ToList();
 
     /// <summary>Gets the character archetype (alias for Archetypes for compatibility).</summary>
-    public List<Archetype> Archetype => Archetypes;
+    public List<ValueObjects.Archetype> Archetype => Archetypes;
 
     /// <summary>Sets archetypes by converting to ArchetypeIds.</summary>
-    public void SetArchetypes(IEnumerable<Archetype> archetypes)
+    public void SetArchetypes(IEnumerable<ValueObjects.Archetype> archetypes)
     {
         ArchetypeIds = archetypes.Select(a => a.Value).ToList();
     }
@@ -56,10 +56,10 @@ public class ScenarioCharacterMetadata
     public string SpeciesId { get; set; } = string.Empty;
 
     /// <summary>Gets the species (computed from SpeciesId).</summary>
-    public Species? Species => Species.FromValue(SpeciesId);
+    public ValueObjects.Species? Species => ValueObjects.Species.FromValue(SpeciesId);
 
     /// <summary>Sets species by converting to SpeciesId.</summary>
-    public void SetSpecies(Species species)
+    public void SetSpecies(ValueObjects.Species species)
     {
         SpeciesId = species.Value;
     }
