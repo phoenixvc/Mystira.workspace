@@ -1,9 +1,11 @@
-using MediatR;
 using Microsoft.AspNetCore.Mvc;
+
 using Mystira.Application.CQRS.CompassAxes.Commands;
 using Mystira.Application.CQRS.CompassAxes.Queries;
 using Mystira.Domain.Models;
 using Mystira.Domain.ValueObjects;
+
+using Wolverine;
 
 namespace Mystira.Admin.Api.Controllers;
 
@@ -11,12 +13,12 @@ namespace Mystira.Admin.Api.Controllers;
 [Route("api/admin/[controller]")]
 public class CompassAxesController : ControllerBase
 {
-    private readonly IMediator _mediator;
+    private readonly IMessageBus _bus;
     private readonly ILogger<CompassAxesController> _logger;
 
-    public CompassAxesController(IMediator mediator, ILogger<CompassAxesController> logger)
+    public CompassAxesController(IMessageBus bus, ILogger<CompassAxesController> logger)
     {
-        _mediator = mediator;
+        _bus = bus;
         _logger = logger;
     }
 
@@ -24,7 +26,7 @@ public class CompassAxesController : ControllerBase
     public async Task<ActionResult<List<CompassAxisDefinition>>> GetAllCompassAxes()
     {
         _logger.LogInformation("GET: Retrieving all compass axes");
-        var axes = await _mediator.Send(new GetAllCompassAxesQuery());
+        var axes = await _bus.InvokeAsync<List<CompassAxisDefinition>>(new GetAllCompassAxesQuery());
         return Ok(axes);
     }
 
@@ -32,7 +34,7 @@ public class CompassAxesController : ControllerBase
     public async Task<ActionResult<CompassAxisDefinition>> GetCompassAxisById(string id)
     {
         _logger.LogInformation("GET: Retrieving compass axis with id: {Id}", id);
-        var axis = await _mediator.Send(new GetCompassAxisByIdQuery(id));
+        var axis = await _bus.InvokeAsync<CompassAxisDefinition?>(new GetCompassAxisByIdQuery(id));
         if (axis == null)
         {
             _logger.LogWarning("Compass axis with id {Id} not found", id);
@@ -46,11 +48,7 @@ public class CompassAxesController : ControllerBase
     {
         _logger.LogInformation("POST: Creating compass axis with name: {Name}", request.Name);
 
-        var result = await _mediator.Send(new CreateCompassAxisCommand(request.Name, request.Description));
-        if (result is not CompassAxisDefinition created)
-        {
-            return StatusCode(500, new { message = "Unexpected result from mediator" });
-        }
+        var created = await _bus.InvokeAsync<CompassAxisDefinition>(new CreateCompassAxisCommand(request.Name, request.Description));
         return CreatedAtAction(nameof(GetCompassAxisById), new { id = created.Id }, created);
     }
 
@@ -59,7 +57,7 @@ public class CompassAxesController : ControllerBase
     {
         _logger.LogInformation("PUT: Updating compass axis with id: {Id}", id);
 
-        var updated = await _mediator.Send(new UpdateCompassAxisCommand(id, request.Name, request.Description));
+        var updated = await _bus.InvokeAsync<CompassAxisDefinition?>(new UpdateCompassAxisCommand(id, request.Name, request.Description));
         if (updated == null)
         {
             _logger.LogWarning("Compass axis with id {Id} not found", id);
@@ -73,8 +71,8 @@ public class CompassAxesController : ControllerBase
     {
         _logger.LogInformation("DELETE: Deleting compass axis with id: {Id}", id);
 
-        var result = await _mediator.Send(new DeleteCompassAxisCommand(id));
-        if (result is not bool success || !success)
+        var success = await _bus.InvokeAsync<bool>(new DeleteCompassAxisCommand(id));
+        if (!success)
         {
             _logger.LogWarning("Compass axis with id {Id} not found", id);
             return NotFound(new { message = "Compass axis not found" });
