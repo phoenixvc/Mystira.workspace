@@ -1,8 +1,8 @@
-using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Mystira.Application.CQRS.AgeGroups.Commands;
 using Mystira.Application.CQRS.AgeGroups.Queries;
 using Mystira.Domain.Models;
+using Wolverine;
 
 namespace Mystira.Admin.Api.Controllers;
 
@@ -10,12 +10,12 @@ namespace Mystira.Admin.Api.Controllers;
 [Route("api/admin/[controller]")]
 public class AgeGroupsController : ControllerBase
 {
-    private readonly IMediator _mediator;
+    private readonly IMessageBus _bus;
     private readonly ILogger<AgeGroupsController> _logger;
 
-    public AgeGroupsController(IMediator mediator, ILogger<AgeGroupsController> logger)
+    public AgeGroupsController(IMessageBus bus, ILogger<AgeGroupsController> logger)
     {
-        _mediator = mediator;
+        _bus = bus;
         _logger = logger;
     }
 
@@ -23,7 +23,7 @@ public class AgeGroupsController : ControllerBase
     public async Task<ActionResult<List<AgeGroupDefinition>>> GetAllAgeGroups()
     {
         _logger.LogInformation("GET: Retrieving all age groups");
-        var ageGroups = await _mediator.Send(new GetAllAgeGroupsQuery());
+        var ageGroups = await _bus.InvokeAsync<List<AgeGroupDefinition>>(new GetAllAgeGroupsQuery());
         return Ok(ageGroups);
     }
 
@@ -31,7 +31,7 @@ public class AgeGroupsController : ControllerBase
     public async Task<ActionResult<AgeGroupDefinition>> GetAgeGroupById(string id)
     {
         _logger.LogInformation("GET: Retrieving age group with id: {Id}", id);
-        var ageGroup = await _mediator.Send(new GetAgeGroupByIdQuery(id));
+        var ageGroup = await _bus.InvokeAsync<AgeGroupDefinition?>(new GetAgeGroupByIdQuery(id));
         if (ageGroup == null)
         {
             _logger.LogWarning("Age group with id {Id} not found", id);
@@ -45,17 +45,12 @@ public class AgeGroupsController : ControllerBase
     {
         _logger.LogInformation("POST: Creating age group with name: {Name}", request.Name);
 
-        var created = await _mediator.Send(new CreateAgeGroupCommand(
+        var created = await _bus.InvokeAsync<AgeGroupDefinition>(new CreateAgeGroupCommand(
             request.Name,
             request.Value,
             request.MinimumAge,
             request.MaximumAge,
-            request.Description)) as AgeGroupDefinition;
-        if (created == null)
-        {
-            _logger.LogError("Failed to create age group - mediator returned unexpected type");
-            return StatusCode(500, new { message = "Internal server error" });
-        }
+            request.Description));
         return CreatedAtAction(nameof(GetAgeGroupById), new { id = created.Id }, created);
     }
 
@@ -64,7 +59,7 @@ public class AgeGroupsController : ControllerBase
     {
         _logger.LogInformation("PUT: Updating age group with id: {Id}", id);
 
-        var updated = await _mediator.Send(new UpdateAgeGroupCommand(
+        var updated = await _bus.InvokeAsync<AgeGroupDefinition?>(new UpdateAgeGroupCommand(
             id,
             request.Name,
             request.Value,
@@ -84,8 +79,8 @@ public class AgeGroupsController : ControllerBase
     {
         _logger.LogInformation("DELETE: Deleting age group with id: {Id}", id);
 
-        var result = await _mediator.Send(new DeleteAgeGroupCommand(id));
-        if (result is not bool success || !success)
+        var success = await _bus.InvokeAsync<bool>(new DeleteAgeGroupCommand(id));
+        if (!success)
         {
             _logger.LogWarning("Age group with id {Id} not found", id);
             return NotFound(new { message = "Age group not found" });

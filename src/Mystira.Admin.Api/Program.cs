@@ -36,6 +36,7 @@ using Mystira.Shared.Middleware;
 using Mystira.Shared.Telemetry;
 using Serilog;
 using Serilog.Events;
+using Wolverine;
 using IUnitOfWork = Mystira.Application.Ports.Data.IUnitOfWork;
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -171,21 +172,18 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-// Configure Memory Cache for query caching (used by MediatR behaviors)
+// Configure Memory Cache for query caching
 builder.Services.AddMemoryCache(options =>
 {
     options.SizeLimit = 1024; // Limit cache to 1024 entries
     options.CompactionPercentage = 0.25; // Compact 25% when size limit reached
 });
 
-// Configure MediatR for CQRS handlers from Application assembly
-builder.Services.AddMediatR(cfg =>
+// Configure Wolverine for messaging and CQRS handlers from Application assembly
+builder.Host.UseWolverine(opts =>
 {
-    // Register all handlers from Application assembly
-    cfg.RegisterServicesFromAssembly(typeof(Mystira.Application.UseCases.Scenarios.GetScenariosUseCase).Assembly);
-
-    // TODO: Re-enable query caching when QueryCachingBehavior is added to Application package
-    // cfg.AddOpenBehavior(typeof(QueryCachingBehavior<,>));
+    // Discover handlers from the Application assembly
+    opts.Discovery.IncludeAssembly(typeof(Mystira.Application.UseCases.Scenarios.GetScenariosUseCase).Assembly);
 });
 
 // Register query cache invalidation service

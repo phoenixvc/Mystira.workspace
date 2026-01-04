@@ -38,12 +38,12 @@
     <!-- Microsoft Entra ID (Azure AD) authentication -->
     <PackageReference Include="Microsoft.Identity.Web" Version="4.2.0" />
 
-    <!-- MediatR for CQRS pattern -->
-    <PackageReference Include="MediatR" Version="14.1.0" />
+    <!-- Wolverine for messaging and CQRS pattern -->
+    <PackageReference Include="WolverineFx" Version="3.8.3" />
 
     <!-- Serilog for structured logging -->
-    <PackageReference Include="Serilog.AspNetCore" Version="9.0.0" />
-    <PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
+    <PackageReference Include="Serilog.AspNetCore" Version="10.0.0" />
+    <PackageReference Include="Serilog.Sinks.Console" Version="6.1.1" />
     <PackageReference Include="Serilog.Sinks.ApplicationInsights" Version="4.1.0" />
     <PackageReference Include="Serilog.Enrichers.Environment" Version="3.0.1" />
     <PackageReference Include="Serilog.Enrichers.Thread" Version="4.0.0" />

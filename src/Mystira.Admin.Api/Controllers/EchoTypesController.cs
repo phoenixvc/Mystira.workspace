@@ -1,8 +1,8 @@
-using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Mystira.Application.CQRS.EchoTypes.Commands;
 using Mystira.Application.CQRS.EchoTypes.Queries;
 using Mystira.Domain.Models;
+using Wolverine;
 
 namespace Mystira.Admin.Api.Controllers;
 
@@ -10,12 +10,12 @@ namespace Mystira.Admin.Api.Controllers;
 [Route("api/admin/[controller]")]
 public class EchoTypesController : ControllerBase
 {
-    private readonly IMediator _mediator;
+    private readonly IMessageBus _bus;
     private readonly ILogger<EchoTypesController> _logger;
 
-    public EchoTypesController(IMediator mediator, ILogger<EchoTypesController> logger)
+    public EchoTypesController(IMessageBus bus, ILogger<EchoTypesController> logger)
     {
-        _mediator = mediator;
+        _bus = bus;
         _logger = logger;
     }
 
@@ -23,7 +23,7 @@ public class EchoTypesController : ControllerBase
     public async Task<ActionResult<List<EchoTypeDefinition>>> GetAllEchoTypes()
     {
         _logger.LogInformation("GET: Retrieving all echo types");
-        var echoTypes = await _mediator.Send(new GetAllEchoTypesQuery());
+        var echoTypes = await _bus.InvokeAsync<List<EchoTypeDefinition>>(new GetAllEchoTypesQuery());
         return Ok(echoTypes);
     }
 
@@ -31,7 +31,7 @@ public class EchoTypesController : ControllerBase
     public async Task<ActionResult<EchoTypeDefinition>> GetEchoTypeById(string id)
     {
         _logger.LogInformation("GET: Retrieving echo type with id: {Id}", id);
-        var echoType = await _mediator.Send(new GetEchoTypeByIdQuery(id));
+        var echoType = await _bus.InvokeAsync<EchoTypeDefinition?>(new GetEchoTypeByIdQuery(id));
         if (echoType == null)
         {
             _logger.LogWarning("Echo type with id {Id} not found", id);
@@ -45,11 +45,7 @@ public class EchoTypesController : ControllerBase
     {
         _logger.LogInformation("POST: Creating echo type with name: {Name}", request.Name);
 
-        var result = await _mediator.Send(new CreateEchoTypeCommand(request.Name, request.Description));
-        if (result is not EchoTypeDefinition created)
-        {
-            return StatusCode(500, new { message = "Unexpected result from mediator" });
-        }
+        var created = await _bus.InvokeAsync<EchoTypeDefinition>(new CreateEchoTypeCommand(request.Name, request.Description));
         return CreatedAtAction(nameof(GetEchoTypeById), new { id = created.Id }, created);
     }
 
@@ -58,7 +54,7 @@ public class EchoTypesController : ControllerBase
     {
         _logger.LogInformation("PUT: Updating echo type with id: {Id}", id);
 
-        var updated = await _mediator.Send(new UpdateEchoTypeCommand(id, request.Name, request.Description));
+        var updated = await _bus.InvokeAsync<EchoTypeDefinition?>(new UpdateEchoTypeCommand(id, request.Name, request.Description));
         if (updated == null)
         {
             _logger.LogWarning("Echo type with id {Id} not found", id);
@@ -72,8 +68,8 @@ public class EchoTypesController : ControllerBase
     {
         _logger.LogInformation("DELETE: Deleting echo type with id: {Id}", id);
 
-        var result = await _mediator.Send(new DeleteEchoTypeCommand(id));
-        if (result is not bool success || !success)
+        var success = await _bus.InvokeAsync<bool>(new DeleteEchoTypeCommand(id));
+        if (!success)
         {
             _logger.LogWarning("Echo type with id {Id} not found", id);
             return NotFound(new { message = "Echo type not found" });
