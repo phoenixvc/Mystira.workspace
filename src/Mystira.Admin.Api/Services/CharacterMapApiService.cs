@@ -165,7 +165,7 @@ public class CharacterMapApiService : ICharacterMapApiService
                 Name = cm.Name,
                 Image = cm.Image ?? string.Empty,
                 Audio = cm.Audio ?? string.Empty,
-                Metadata = cm.Metadata
+                Metadata = cm.Metadata!
             }).ToList()
         };
 

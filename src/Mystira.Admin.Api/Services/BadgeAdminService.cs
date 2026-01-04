@@ -704,9 +704,9 @@ public class BadgeAdminService : IBadgeAdminService
             UpdatedAt = entity.UpdatedAt ?? entity.CreatedAt
         };
 
-        dto.CompassAxisName = axisLookup.TryGetValue(entity.CompassAxisId, out var axis)
+        dto.CompassAxisName = (entity.CompassAxisId != null && axisLookup.TryGetValue(entity.CompassAxisId, out var axis))
             ? (string.IsNullOrWhiteSpace(axis.Name) ? axis.Id : axis.Name)
-            : entity.CompassAxisId;
+            : entity.CompassAxisId ?? string.Empty;
 
         return dto;
     }

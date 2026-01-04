@@ -383,7 +383,7 @@ public class ScenarioApiService : IScenarioApiService
             Audio = c.Audio,
             Metadata = c.Metadata == null ? null : new ScenarioCharacterMetadata
             {
-                Role = c.Metadata.Role ?? string.Empty,
+                Role = c.Metadata.Role,
                 Archetype = c.Metadata.Archetype?.Select(a => Archetype.Parse(a)).Where(a => a != null).ToList()!,
                 Species = c.Metadata.Species ?? string.Empty,
                 Age = int.TryParse(c.Metadata.Age?.ToString(), out var age) ? age : 0,
