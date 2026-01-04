@@ -41,8 +41,8 @@
     <PackageReference Include="Microsoft.Extensions.Azure" Version="1.13.1" />
     <PackageReference Include="Azure.Communication.Email" Version="1.1.0" />
     <PackageReference Include="FFMpegCore" Version="5.4.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Cosmos" Version="9.0.11" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="9.0.11" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Cosmos" Version="10.0.1" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="10.0.1" />
     <!-- Source Link -->
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />
   </ItemGroup>
