@@ -38,8 +38,7 @@
     <!-- Microsoft Entra ID (Azure AD) authentication -->
     <PackageReference Include="Microsoft.Identity.Web" Version="4.2.0" />
 
-    <!-- Wolverine for messaging and CQRS pattern -->
-    <PackageReference Include="WolverineFx" Version="3.8.3" />
+    <!-- Wolverine is provided transitively via Mystira.Application -->
 
     <!-- Serilog for structured logging -->
     <PackageReference Include="Serilog.AspNetCore" Version="10.0.0" />
