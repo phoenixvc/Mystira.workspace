@@ -1,3 +1,4 @@
+using System.Linq;
 using Microsoft.Extensions.Logging;
 using Mystira.Application.Ports.Data;
 using Mystira.Domain.Models;
@@ -52,11 +53,11 @@ public static class GetCharacterQueryHandler
             Image = domainCharacter.Image,
             Metadata = new CharacterMetadata
             {
-                Roles = domainCharacter.Metadata.Roles,
-                Archetypes = domainCharacter.Metadata.Archetypes,
-                Species = domainCharacter.Metadata.Species,
+                Roles = domainCharacter.Metadata.Roles.Select(r => r.Value).ToList(),
+                Archetypes = domainCharacter.Metadata.Archetypes.Select(a => a.Value).ToList(),
+                Species = domainCharacter.Metadata.Species?.Value ?? string.Empty,
                 Age = domainCharacter.Metadata.Age,
-                Traits = domainCharacter.Metadata.Traits,
+                Traits = domainCharacter.Metadata.Traits.Select(t => t.Value).ToList(),
                 Backstory = domainCharacter.Metadata.Backstory
             }
         };
