@@ -47,7 +47,7 @@ public static partial class ScenarioMapper
     /// <summary>
     /// Maps CharacterMetadataRequest to ScenarioCharacterMetadata.
     /// </summary>
-    [MapProperty(nameof(CharacterMetadataRequest.Archetype), nameof(ScenarioCharacterMetadata.Archetypes), Use = nameof(MapArchetypes))]
+    [MapProperty(nameof(CharacterMetadataRequest.Archetype), nameof(ScenarioCharacterMetadata.ArchetypeIds), Use = nameof(MapArchetypeIds))]
     [MapProperty(nameof(CharacterMetadataRequest.Role), nameof(ScenarioCharacterMetadata.Roles))]
     private static partial ScenarioCharacterMetadata ToScenarioCharacterMetadata(CharacterMetadataRequest request);
 
@@ -194,17 +194,15 @@ public static partial class ScenarioMapper
 
     // Custom mapping methods for complex scenarios
 
-    private static List<Archetype> MapArchetypes(List<string>? archetypes)
+    private static List<string> MapArchetypeIds(List<string>? archetypes)
     {
         if (archetypes == null)
         {
-            return new List<Archetype>();
+            return new List<string>();
         }
 
-        return archetypes
-            .Select(Archetype.Parse)
-            .OfType<Archetype>()
-            .ToList();
+        // Return the archetype strings as-is for storage in ArchetypeIds
+        return archetypes.Where(a => !string.IsNullOrWhiteSpace(a)).ToList();
     }
 
     private static SceneType ParseSceneType(string? type)

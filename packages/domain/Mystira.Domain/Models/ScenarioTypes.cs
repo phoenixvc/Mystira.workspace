@@ -18,14 +18,26 @@ public class ScenarioCharacterMetadata
         set => Roles = value;
     }
 
-    /// <summary>Gets or sets the character archetypes.</summary>
-    public List<Archetype> Archetypes { get; set; } = new();
+    /// <summary>Gets or sets the archetype IDs (stored in database).</summary>
+    public List<string> ArchetypeIds { get; set; } = new();
 
-    /// <summary>Gets or sets the character archetype (alias for Archetypes for compatibility).</summary>
-    public List<Archetype> Archetype
+    /// <summary>Gets the character archetypes (computed from ArchetypeIds).</summary>
+    public List<Archetype> Archetypes => ArchetypeIds
+        .Select(id => Archetype.FromValue(id))
+        .Where(a => a != null)
+        .Cast<Archetype>()
+        .ToList();
+
+    /// <summary>Gets the character archetype (alias for Archetypes for compatibility).</summary>
+    public List<Archetype> Archetype => Archetypes;
+
+    /// <summary>
+    /// Sets archetypes by converting to ArchetypeIds.
+    /// </summary>
+    /// <param name="archetypes">The archetypes to set.</param>
+    public void SetArchetypes(IEnumerable<Archetype> archetypes)
     {
-        get => Archetypes;
-        set => Archetypes = value;
+        ArchetypeIds = archetypes.Select(a => a.Value).ToList();
     }
 
     /// <summary>Gets or sets the species.</summary>

@@ -21,8 +21,8 @@ public static class CharacterMetadataParser
 
         var metadata = new ScenarioCharacterMetadata
         {
-            Role = ToStringList(roleObj),
-            Archetype = ToStringList(archetypeObj).Select(a => Archetype.Parse(a)!).ToList(),
+            Roles = ToStringList(roleObj),
+            ArchetypeIds = ToStringList(archetypeObj),
             Traits = ToStringList(traitsObj)
         };
 

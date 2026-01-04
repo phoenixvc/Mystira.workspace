@@ -498,12 +498,53 @@ public partial class MystiraAppDbContext : DbContext
                            d => new Dictionary<string, List<string>>(d, StringComparer.OrdinalIgnoreCase)));
             });
 
-            // Characters - ScenarioCharacter entities with simple properties
-            // Ignore Metadata (contains List<Archetype>) and computed Archetype property
+            // Characters - ScenarioCharacter entities with Metadata
             entity.OwnsMany(e => e.Characters, character =>
             {
-                character.Ignore(c => c.Metadata);
+                // Ignore computed Archetype property (value object derived from ArchetypeId)
                 character.Ignore(c => c.Archetype);
+
+                // Configure Metadata as owned entity with proper conversions
+                character.OwnsOne(c => c.Metadata, metadata =>
+                {
+                    // Ignore computed value object properties (derived from ArchetypeIds)
+                    metadata.Ignore(m => m.Archetypes);
+                    metadata.Ignore(m => m.Archetype);
+                    // Ignore Role alias (getter for Roles)
+                    metadata.Ignore(m => m.Role);
+
+                    // ArchetypeIds - store as comma-separated strings
+                    metadata.Property(m => m.ArchetypeIds)
+                        .HasConversion(
+                            v => string.Join(',', v),
+                            v => v.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList())
+                        .Metadata.SetValueComparer(new ValueComparer<List<string>>(
+                            (c1, c2) => c1 != null && c2 != null && c1.SequenceEqual(c2),
+                            c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
+                            c => c.ToList()));
+
+                    // Roles - store as comma-separated strings
+                    metadata.Property(m => m.Roles)
+                        .HasConversion(
+                            v => string.Join(',', v),
+                            v => v.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList())
+                        .Metadata.SetValueComparer(new ValueComparer<List<string>>(
+                            (c1, c2) => c1 != null && c2 != null && c1.SequenceEqual(c2),
+                            c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
+                            c => c.ToList()));
+
+                    // Traits - store as comma-separated strings
+                    metadata.Property(m => m.Traits)
+                        .HasConversion(
+                            v => string.Join(',', v),
+                            v => v.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList())
+                        .Metadata.SetValueComparer(new ValueComparer<List<string>>(
+                            (c1, c2) => c1 != null && c2 != null && c1.SequenceEqual(c2),
+                            c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
+                            c => c.ToList()));
+
+                    // Simple properties: Species, Age, Backstory - mapped automatically
+                });
             });
 
             entity.OwnsMany(e => e.Scenes, scene =>
