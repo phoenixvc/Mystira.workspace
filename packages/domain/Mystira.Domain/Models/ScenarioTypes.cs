@@ -3,9 +3,43 @@ using Mystira.Domain.ValueObjects;
 namespace Mystira.Domain.Models;
 
 /// <summary>
-/// Character metadata for scenarios - DTO-style for request/response handling.
-/// This is distinct from the entity-style ScenarioCharacter.
+/// Character metadata for scenarios - stores string IDs for persistence, exposes value objects for type safety.
 /// </summary>
+/// <remarks>
+/// <para>
+/// This class uses a "store IDs, expose value objects" pattern for EF Core compatibility:
+/// </para>
+/// <list type="bullet">
+///   <item><description>String ID properties (<c>RoleIds</c>, <c>ArchetypeIds</c>, <c>SpeciesId</c>, <c>TraitIds</c>) are persisted to the database</description></item>
+///   <item><description>Value object properties (<c>Roles</c>, <c>Archetypes</c>, <c>Species</c>, <c>Traits</c>) are computed getters for type-safe access</description></item>
+/// </list>
+/// <para>
+/// <b>Usage Examples:</b>
+/// </para>
+/// <code>
+/// // Option 1: Set string IDs directly (for deserialization/database)
+/// var metadata = new ScenarioCharacterMetadata
+/// {
+///     RoleIds = new List&lt;string&gt; { "mentor", "guardian" },
+///     ArchetypeIds = new List&lt;string&gt; { "the_listener" },
+///     SpeciesId = "elf",
+///     TraitIds = new List&lt;string&gt; { "wise", "calm" },
+///     Age = 150,
+///     Backstory = "An ancient elf sage..."
+/// };
+///
+/// // Option 2: Use setter methods with value objects (for type-safe code)
+/// var metadata = new ScenarioCharacterMetadata { Age = 150, Backstory = "..." };
+/// metadata.SetRoles(new[] { CharacterRole.Mentor, CharacterRole.Guardian });
+/// metadata.SetArchetypes(new[] { Archetype.TheListener });
+/// metadata.SetSpecies(Species.Elf);
+/// metadata.SetTraits(new[] { CharacterTrait.Wise, CharacterTrait.Calm });
+///
+/// // Read value objects (always use these for type safety)
+/// CharacterRole firstRole = metadata.Roles.First();
+/// Species? species = metadata.Species;
+/// </code>
+/// </remarks>
 public class ScenarioCharacterMetadata
 {
     // === Role IDs (stored in database) ===
