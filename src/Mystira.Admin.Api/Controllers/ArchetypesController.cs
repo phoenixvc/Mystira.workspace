@@ -74,7 +74,11 @@ public class ArchetypesController : ControllerBase
         _logger.LogInformation("DELETE: Deleting archetype with id: {Id}", id);
 
         var result = await _mediator.Send(new DeleteArchetypeCommand(id));
-        var success = (bool)result;
+        if (result is not bool success)
+        {
+            _logger.LogError("Failed to delete archetype - mediator returned unexpected type");
+            return StatusCode(500, new { message = "Internal server error" });
+        }
         if (!success)
         {
             _logger.LogWarning("Archetype with id {Id} not found", id);
