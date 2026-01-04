@@ -94,6 +94,7 @@ public static partial class ScenarioMapper
     [MapperIgnoreSource(nameof(BranchRequest.CompassAxis))]
     [MapperIgnoreSource(nameof(BranchRequest.CompassDirection))]
     [MapperIgnoreSource(nameof(BranchRequest.CompassDelta))]
+    [MapperIgnoreSource(nameof(BranchRequest.EchoLog))]
     // Ignore target properties that don't exist on source (Entity-specific)
     [MapperIgnoreTarget(nameof(Branch.Choice))]
     [MapperIgnoreTarget(nameof(Branch.EchoLog))]
@@ -233,8 +234,20 @@ public static partial class ScenarioMapper
                     Axis = b.CompassAxis ?? string.Empty,
                     Delta = b.CompassDelta ?? 0.0
                 }
-                : null
+                : null,
+            EchoLog = MapEchoLog(b.EchoLog)
         }).ToList() ?? new List<Branch>();
+
+    private static EchoLog? MapEchoLog(EchoLogRequest? echoLog)
+        => echoLog != null
+            ? new EchoLog
+            {
+                EchoTypeId = echoLog.EchoType ?? string.Empty,
+                Description = echoLog.Description ?? string.Empty,
+                Strength = Math.Clamp(echoLog.Strength ?? 1.0, 0.0, 1.0),
+                Timestamp = DateTime.UtcNow
+            }
+            : null;
 
     private static ICollection<EchoReveal> MapEchoReveals(List<EchoRevealRequest>? echoReveals)
         => echoReveals?.Select(e => new EchoReveal

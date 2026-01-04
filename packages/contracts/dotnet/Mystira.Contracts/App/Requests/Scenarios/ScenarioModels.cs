@@ -86,6 +86,32 @@ public class BranchRequest
     /// The delta value for the compass axis.
     /// </summary>
     public double? CompassDelta { get; set; }
+
+    /// <summary>
+    /// Optional echo log entry for this branch.
+    /// </summary>
+    public EchoLogRequest? EchoLog { get; set; }
+}
+
+/// <summary>
+/// Request model representing an echo log entry.
+/// </summary>
+public class EchoLogRequest
+{
+    /// <summary>
+    /// The type of echo (e.g., Memory, Vision, Secret, Emotion, etc.).
+    /// </summary>
+    public string? EchoType { get; set; }
+
+    /// <summary>
+    /// Description of the echo event.
+    /// </summary>
+    public string? Description { get; set; }
+
+    /// <summary>
+    /// Strength of the echo (0.0 to 1.0).
+    /// </summary>
+    public double? Strength { get; set; }
 }
 
 /// <summary>
