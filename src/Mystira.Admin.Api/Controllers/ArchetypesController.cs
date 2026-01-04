@@ -45,8 +45,12 @@ public class ArchetypesController : ControllerBase
     {
         _logger.LogInformation("POST: Creating archetype with name: {Name}", request.Name);
 
-        var result = await _mediator.Send(new CreateArchetypeCommand(request.Name, request.Description));
-        var created = (ArchetypeDefinition)result;
+        var created = await _mediator.Send(new CreateArchetypeCommand(request.Name, request.Description)) as ArchetypeDefinition;
+        if (created == null)
+        {
+            _logger.LogError("Failed to create archetype - mediator returned unexpected type");
+            return StatusCode(500, new { message = "Internal server error" });
+        }
         return CreatedAtAction(nameof(GetArchetypeById), new { id = created.Id }, created);
     }
 
