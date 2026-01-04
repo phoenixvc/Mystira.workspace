@@ -74,8 +74,7 @@ public class FantasyThemesController : ControllerBase
         _logger.LogInformation("DELETE: Deleting fantasy theme with id: {Id}", id);
 
         var result = await _mediator.Send(new DeleteFantasyThemeCommand(id));
-        var success = (bool)result;
-        if (!success)
+        if (result is not bool success || !success)
         {
             _logger.LogWarning("Fantasy theme with id {Id} not found", id);
             return NotFound(new { message = "Fantasy theme not found" });

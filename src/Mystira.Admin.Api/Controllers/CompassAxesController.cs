@@ -47,7 +47,10 @@ public class CompassAxesController : ControllerBase
         _logger.LogInformation("POST: Creating compass axis with name: {Name}", request.Name);
 
         var result = await _mediator.Send(new CreateCompassAxisCommand(request.Name, request.Description));
-        var created = (CompassAxisDefinition)result;
+        if (result is not CompassAxisDefinition created)
+        {
+            return StatusCode(500, new { message = "Unexpected result from mediator" });
+        }
         return CreatedAtAction(nameof(GetCompassAxisById), new { id = created.Id }, created);
     }
 
@@ -71,8 +74,7 @@ public class CompassAxesController : ControllerBase
         _logger.LogInformation("DELETE: Deleting compass axis with id: {Id}", id);
 
         var result = await _mediator.Send(new DeleteCompassAxisCommand(id));
-        var success = (bool)result;
-        if (!success)
+        if (result is not bool success || !success)
         {
             _logger.LogWarning("Compass axis with id {Id} not found", id);
             return NotFound(new { message = "Compass axis not found" });
