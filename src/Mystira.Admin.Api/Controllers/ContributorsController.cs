@@ -270,16 +270,16 @@ public class ContributorsController : ControllerBase
             Contributors = metadata.Contributors?.Select(c => new ContributorResponse
             {
                 Id = c.Id,
-                Name = c.ContributorName ?? string.Empty,
+                Name = c.Name ?? string.Empty,
                 WalletAddress = c.WalletAddress,
-                Role = c.Role?.ToString() ?? string.Empty,
-                ContributionPercentage = c.Percentage,
+                Role = c.Role.ToString(),
+                ContributionPercentage = c.ContributionPercentage,
                 Email = null,
                 Notes = null,
                 CreatedAt = c.CreatedAt
             }).ToList() ?? new List<ContributorResponse>(),
             ContributorCount = metadata.Contributors?.Count ?? 0,
-            TotalPercentage = metadata.Contributors?.Sum(c => c.Percentage) ?? 0
+            TotalPercentage = metadata.Contributors?.Sum(c => c.ContributionPercentage) ?? 0
         };
     }
 }

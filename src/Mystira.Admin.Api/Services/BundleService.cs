@@ -422,17 +422,15 @@ public class BundleService : IBundleService
             },
             Branches = s.Branches?.Select(b => new BranchRequest
             {
-                Choice = b.Choice,
+                Text = b.Choice,
                 NextSceneId = b.NextSceneId
             }).ToList() ?? new List<BranchRequest>(),
             EchoReveals = s.EchoReveals?.Select(e => new EchoRevealRequest
             {
-                EchoType = e.EchoType,
-                MinStrength = (float)e.MinStrength,
-                TriggerSceneId = e.TriggerSceneId,
-                MaxAgeScenes = e.MaxAgeScenes,
-                RevealMechanic = e.RevealMechanic,
-                Required = e.Required ?? false
+                Type = e.EchoType,
+                Threshold = (float)e.MinStrength,
+                SceneId = e.TriggerSceneId,
+                IsRequired = e.Required ?? false
             }).ToList() ?? new List<EchoRevealRequest>()
         }).ToList();
     }

@@ -386,7 +386,7 @@ public class ScenarioApiService : IScenarioApiService
                 Role = c.Metadata.Role,
                 Archetype = c.Metadata.Archetype?.Select(a => Archetype.Parse(a)).Where(a => a != null).ToList()!,
                 Species = c.Metadata.Species,
-                Age = c.Metadata.Age?.ToString(),
+                Age = int.TryParse(c.Metadata.Age?.ToString(), out var age) ? age : 0,
                 Traits = c.Metadata.Traits,
                 Backstory = c.Metadata.Backstory
             }
@@ -416,24 +416,15 @@ public class ScenarioApiService : IScenarioApiService
             },
             Branches = s.Branches?.Select(b => new Branch
             {
-                Choice = b.Choice ?? string.Empty,
-                NextSceneId = b.NextSceneId,
-                EchoLog = b.EchoLog == null ? null : EchoLog.Create(
-                    EchoType.Parse(b.EchoLog.EchoType),
-                    b.EchoLog.Description,
-                    (float)(b.EchoLog.Strength ?? 0),
-                    DateTime.UtcNow
-                ),
-                CompassChange = b.CompassChange == null ? null : CompassChange.Create(b.CompassChange.Axis ?? string.Empty, (int)(b.CompassChange.Delta ?? 0))
+                Choice = b.Text ?? string.Empty,
+                NextSceneId = b.NextSceneId
             }).ToList() ?? new List<Branch>(),
             EchoReveals = s.EchoReveals?.Select(e => new EchoReveal
             {
-                EchoType = EchoType.Parse(e.EchoType),
-                MinStrength = (float)(e.MinStrength ?? 0),
-                TriggerSceneId = e.TriggerSceneId,
-                MaxAgeScenes = e.MaxAgeScenes,
-                RevealMechanic = e.RevealMechanic,
-                Required = e.Required ?? false
+                EchoType = EchoType.Parse(e.Type),
+                MinStrength = (float)(e.Threshold ?? 0),
+                TriggerSceneId = e.SceneId,
+                Required = e.IsRequired ?? false
             }).ToList() ?? new List<EchoReveal>()
         }).ToList();
     }

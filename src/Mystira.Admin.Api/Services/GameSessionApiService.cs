@@ -200,7 +200,7 @@ public class GameSessionApiService : IGameSessionApiService
             ChosenAt = DateTime.UtcNow,
             EchoGenerated = branch.EchoLog != null,
             CompassChange = !string.IsNullOrWhiteSpace(compassAxis) && compassDelta.HasValue
-                ? Mystira.Domain.ValueObjects.CompassChange.Create(compassAxis, (int)compassDelta.Value)
+                ? CompassChange.Create(compassAxis, (int)compassDelta.Value)
                 : branch.CompassChange
         };
 
@@ -209,7 +209,7 @@ public class GameSessionApiService : IGameSessionApiService
         // Process echo log if present
         if (branch.EchoLog != null)
         {
-            var echo = Mystira.Domain.ValueObjects.EchoLog.Create(
+            var echo = EchoLog.Create(
                 branch.EchoLog.EchoType?.Value ?? string.Empty,
                 branch.EchoLog.Description,
                 branch.EchoLog.Strength,
