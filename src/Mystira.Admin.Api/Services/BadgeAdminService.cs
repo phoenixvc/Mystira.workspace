@@ -663,7 +663,7 @@ public class BadgeAdminService : IBadgeAdminService
             Description = badge.Description,
             ImageId = badge.ImageId,
             CreatedAt = badge.CreatedAt,
-            UpdatedAt = badge.UpdatedAt
+            UpdatedAt = badge.UpdatedAt ?? badge.CreatedAt
         };
 
         if (ageGroupLookup != null && ageGroupLookup.TryGetValue(badge.AgeGroupId, out var ageGroup))
@@ -701,7 +701,7 @@ public class BadgeAdminService : IBadgeAdminService
             AxesDirection = entity.AxesDirection,
             Description = entity.Description,
             CreatedAt = entity.CreatedAt,
-            UpdatedAt = entity.UpdatedAt
+            UpdatedAt = entity.UpdatedAt ?? entity.CreatedAt
         };
 
         dto.CompassAxisName = axisLookup.TryGetValue(entity.CompassAxisId, out var axis)
@@ -720,7 +720,7 @@ public class BadgeAdminService : IBadgeAdminService
             ContentType = entity.ContentType,
             FileSizeBytes = entity.FileSizeBytes ?? 0,
             CreatedAt = entity.CreatedAt,
-            UpdatedAt = entity.UpdatedAt
+            UpdatedAt = entity.UpdatedAt ?? entity.CreatedAt
         };
 
         if (includeData && entity.ImageData is { Length: > 0 })

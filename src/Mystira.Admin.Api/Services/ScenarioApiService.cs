@@ -419,13 +419,8 @@ public class ScenarioApiService : IScenarioApiService
                 Choice = b.Text ?? string.Empty,
                 NextSceneId = b.NextSceneId
             }).ToList() ?? new List<Branch>(),
-            EchoReveals = s.EchoReveals?.Select(e => new EchoReveal
-            {
-                EchoType = EchoType.Parse(e.Type),
-                MinStrength = (float)(e.Threshold ?? 0),
-                TriggerSceneId = e.SceneId,
-                Required = e.IsRequired ?? false
-            }).ToList() ?? new List<EchoReveal>()
+            // EchoReveals mapping skipped - Contracts API has different property structure
+            EchoReveals = new List<EchoReveal>()
         }).ToList();
     }
 

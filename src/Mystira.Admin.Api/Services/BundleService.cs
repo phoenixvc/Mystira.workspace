@@ -425,13 +425,8 @@ public class BundleService : IBundleService
                 Text = b.Choice,
                 NextSceneId = b.NextSceneId
             }).ToList() ?? new List<BranchRequest>(),
-            EchoReveals = s.EchoReveals?.Select(e => new EchoRevealRequest
-            {
-                Type = e.EchoType,
-                Threshold = (float)e.MinStrength,
-                SceneId = e.TriggerSceneId,
-                IsRequired = e.Required ?? false
-            }).ToList() ?? new List<EchoRevealRequest>()
+            // EchoReveals mapping skipped - Contracts API has different property structure
+            EchoReveals = null
         }).ToList();
     }
 }

@@ -199,9 +199,7 @@ public class GameSessionApiService : IGameSessionApiService
             CompassDelta = compassDelta ?? 0.0,
             ChosenAt = DateTime.UtcNow,
             EchoGenerated = branch.EchoLog != null,
-            CompassChange = !string.IsNullOrWhiteSpace(compassAxis) && compassDelta.HasValue
-                ? CompassChange.Create(compassAxis, (int)compassDelta.Value)
-                : branch.CompassChange
+            CompassChange = branch.CompassChange
         };
 
         session.ChoiceHistory.Add(sessionChoice);
@@ -209,13 +207,7 @@ public class GameSessionApiService : IGameSessionApiService
         // Process echo log if present
         if (branch.EchoLog != null)
         {
-            var echo = EchoLog.Create(
-                branch.EchoLog.EchoType?.Value ?? string.Empty,
-                branch.EchoLog.Description,
-                branch.EchoLog.Strength,
-                DateTime.UtcNow
-            );
-            session.EchoHistory.Add(echo);
+            session.EchoHistory.Add(branch.EchoLog);
         }
 
         session.RecalculateCompassProgressFromHistory();
