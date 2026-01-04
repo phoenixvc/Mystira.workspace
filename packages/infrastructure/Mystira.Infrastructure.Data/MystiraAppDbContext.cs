@@ -87,12 +87,18 @@ public partial class MystiraAppDbContext : DbContext
         // Check if we're using in-memory database (for testing)
         var isInMemoryDatabase = Database.ProviderName == "Microsoft.EntityFrameworkCore.InMemory";
 
+        // Ignore StringEnum value objects globally - these have private constructors that EF cannot materialize
+        // They are stored as string IDs (e.g., ArchetypeId) with computed properties for the value objects
+        modelBuilder.Ignore<AgeGroup>();
+        modelBuilder.Ignore<Archetype>();
+        modelBuilder.Ignore<CharacterRole>();
+        modelBuilder.Ignore<CharacterTrait>();
+        modelBuilder.Ignore<CoreAxis>();
+        modelBuilder.Ignore<EchoType>();
+        modelBuilder.Ignore<FantasyTheme>();
+        modelBuilder.Ignore<Species>();
+
         // Configure UserProfile
-        // In in-memory provider used by tests, ensure EF doesn't try to map value objects like AgeGroup as entities
-        if (isInMemoryDatabase)
-        {
-            modelBuilder.Ignore<AgeGroup>();
-        }
 
         modelBuilder.Entity<UserProfile>(entity =>
         {
@@ -202,6 +208,9 @@ public partial class MystiraAppDbContext : DbContext
         {
             entity.HasKey(e => e.Id);
 
+            // Ignore computed Theme property (value object derived from ThemeId)
+            entity.Ignore(e => e.Theme);
+
             if (!isInMemoryDatabase)
             {
                 // Map Id property to lowercase 'id' to match container partition key path /id
@@ -243,6 +252,9 @@ public partial class MystiraAppDbContext : DbContext
         {
             entity.HasKey(e => e.Id);
 
+            // Ignore computed Archetype property (value object derived from ArchetypeId)
+            entity.Ignore(e => e.Archetype);
+
             // Only apply Cosmos DB configurations when not using in-memory database
             if (!isInMemoryDatabase)
             {
@@ -273,6 +285,10 @@ public partial class MystiraAppDbContext : DbContext
         {
             entity.HasKey(e => e.Id);
 
+            // Ignore computed value object properties
+            entity.Ignore(e => e.Archetype);
+            entity.Ignore(e => e.Axis);
+
             // Only apply Cosmos DB configurations when not using in-memory database
             if (!isInMemoryDatabase)
             {
@@ -290,6 +306,10 @@ public partial class MystiraAppDbContext : DbContext
         modelBuilder.Entity<AxisAchievement>(entity =>
         {
             entity.HasKey(e => e.Id);
+
+            // Ignore computed value object properties
+            entity.Ignore(e => e.Axis);
+            entity.Ignore(e => e.AgeGroup);
 
             if (!isInMemoryDatabase)
             {
@@ -421,6 +441,9 @@ public partial class MystiraAppDbContext : DbContext
         {
             entity.HasKey(e => e.Id);
 
+            // Ignore computed Theme property (value object derived from ThemeId)
+            entity.Ignore(e => e.Theme);
+
             // Only apply Cosmos DB configurations when not using in-memory database
             if (!isInMemoryDatabase)
             {
@@ -478,8 +501,56 @@ public partial class MystiraAppDbContext : DbContext
                            d => new Dictionary<string, List<string>>(d, StringComparer.OrdinalIgnoreCase)));
             });
 
-            // Characters - ScenarioCharacter entities with simple properties (no Metadata complex type)
-            entity.OwnsMany(e => e.Characters);
+            // Characters - ScenarioCharacter entities with Metadata
+            entity.OwnsMany(e => e.Characters, character =>
+            {
+                // Ignore computed Archetype property (value object derived from ArchetypeId)
+                character.Ignore(c => c.Archetype);
+
+                // Configure Metadata as owned entity with proper conversions
+                character.OwnsOne(c => c.Metadata, metadata =>
+                {
+                    // Ignore computed value object properties
+                    metadata.Ignore(m => m.Archetypes);
+                    metadata.Ignore(m => m.Archetype);
+                    metadata.Ignore(m => m.Roles);
+                    metadata.Ignore(m => m.Role);
+                    metadata.Ignore(m => m.Species);
+                    metadata.Ignore(m => m.Traits);
+
+                    // RoleIds - store as comma-separated strings
+                    metadata.Property(m => m.RoleIds)
+                        .HasConversion(
+                            v => string.Join(',', v),
+                            v => v.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList())
+                        .Metadata.SetValueComparer(new ValueComparer<List<string>>(
+                            (c1, c2) => c1 != null && c2 != null && c1.SequenceEqual(c2),
+                            c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
+                            c => c.ToList()));
+
+                    // ArchetypeIds - store as comma-separated strings
+                    metadata.Property(m => m.ArchetypeIds)
+                        .HasConversion(
+                            v => string.Join(',', v),
+                            v => v.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList())
+                        .Metadata.SetValueComparer(new ValueComparer<List<string>>(
+                            (c1, c2) => c1 != null && c2 != null && c1.SequenceEqual(c2),
+                            c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
+                            c => c.ToList()));
+
+                    // TraitIds - store as comma-separated strings
+                    metadata.Property(m => m.TraitIds)
+                        .HasConversion(
+                            v => string.Join(',', v),
+                            v => v.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList())
+                        .Metadata.SetValueComparer(new ValueComparer<List<string>>(
+                            (c1, c2) => c1 != null && c2 != null && c1.SequenceEqual(c2),
+                            c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
+                            c => c.ToList()));
+
+                    // Simple properties: SpeciesId, Age, Backstory - mapped automatically
+                });
+            });
 
             entity.OwnsMany(e => e.Scenes, scene =>
             {
@@ -507,10 +578,13 @@ public partial class MystiraAppDbContext : DbContext
                 {
                     branch.OwnsOne(b => b.EchoLog, echoLog =>
                     {
-                        // EchoType is now a plain string
-                        echoLog.Property(el => el.EchoType);
+                        // Ignore computed EchoType property (value object derived from EchoTypeId)
+                        echoLog.Ignore(el => el.EchoType);
                     });
-                    branch.OwnsOne(b => b.CompassChange);
+                    branch.OwnsOne(b => b.CompassChange, cc =>
+                    {
+                        cc.Ignore(c => c.Axis);
+                    });
                 });
                 scene.OwnsMany(s => s.EchoReveals, reveal =>
                 {
@@ -557,11 +631,18 @@ public partial class MystiraAppDbContext : DbContext
             {
                 // EchoGenerated is a bool property, not a complex type
                 // CompassChange is a complex type that should be owned
-                choice.OwnsOne(c => c.CompassChange);
+                choice.OwnsOne(c => c.CompassChange, cc =>
+                {
+                    cc.Ignore(c => c.Axis);
+                });
             });
 
             // EchoHistory - EchoLog entities stored as owned JSON array
-            entity.OwnsMany(e => e.EchoHistory);
+            entity.OwnsMany(e => e.EchoHistory, echoLog =>
+            {
+                // Ignore computed EchoType property (value object derived from EchoTypeId)
+                echoLog.Ignore(el => el.EchoType);
+            });
 
             // Achievements - SessionAchievement entities stored as owned JSON array
             entity.OwnsMany(e => e.Achievements);

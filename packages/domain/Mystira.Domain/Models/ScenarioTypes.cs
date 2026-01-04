@@ -8,34 +8,86 @@ namespace Mystira.Domain.Models;
 /// </summary>
 public class ScenarioCharacterMetadata
 {
-    /// <summary>Gets or sets the character roles.</summary>
-    public List<string> Roles { get; set; } = new();
+    // === Role IDs (stored in database) ===
 
-    /// <summary>Gets or sets the character role (alias for Roles for compatibility).</summary>
-    public List<string> Role
+    /// <summary>Gets or sets the role IDs (stored in database).</summary>
+    public List<string> RoleIds { get; set; } = new();
+
+    /// <summary>Gets the character roles (computed from RoleIds).</summary>
+    public List<CharacterRole> Roles => RoleIds
+        .Select(id => CharacterRole.FromValue(id))
+        .Where(r => r != null)
+        .Cast<CharacterRole>()
+        .ToList();
+
+    /// <summary>Gets the character role (alias for Roles for compatibility).</summary>
+    public List<CharacterRole> Role => Roles;
+
+    /// <summary>Sets roles by converting to RoleIds.</summary>
+    public void SetRoles(IEnumerable<CharacterRole> roles)
     {
-        get => Roles;
-        set => Roles = value;
+        RoleIds = roles.Select(r => r.Value).ToList();
     }
 
-    /// <summary>Gets or sets the character archetypes.</summary>
-    public List<Archetype> Archetypes { get; set; } = new();
+    // === Archetype IDs (stored in database) ===
 
-    /// <summary>Gets or sets the character archetype (alias for Archetypes for compatibility).</summary>
-    public List<Archetype> Archetype
+    /// <summary>Gets or sets the archetype IDs (stored in database).</summary>
+    public List<string> ArchetypeIds { get; set; } = new();
+
+    /// <summary>Gets the character archetypes (computed from ArchetypeIds).</summary>
+    public List<ValueObjects.Archetype> Archetypes => ArchetypeIds
+        .Select(id => ValueObjects.Archetype.FromValue(id))
+        .Where(a => a != null)
+        .Cast<ValueObjects.Archetype>()
+        .ToList();
+
+    /// <summary>Gets the character archetype (alias for Archetypes for compatibility).</summary>
+    public List<ValueObjects.Archetype> Archetype => Archetypes;
+
+    /// <summary>Sets archetypes by converting to ArchetypeIds.</summary>
+    public void SetArchetypes(IEnumerable<ValueObjects.Archetype> archetypes)
     {
-        get => Archetypes;
-        set => Archetypes = value;
+        ArchetypeIds = archetypes.Select(a => a.Value).ToList();
     }
 
-    /// <summary>Gets or sets the species.</summary>
-    public string Species { get; set; } = string.Empty;
+    // === Species ID (stored in database) ===
+
+    /// <summary>Gets or sets the species ID (stored in database).</summary>
+    public string SpeciesId { get; set; } = string.Empty;
+
+    /// <summary>Gets the species (computed from SpeciesId).</summary>
+    public ValueObjects.Species? Species => ValueObjects.Species.FromValue(SpeciesId);
+
+    /// <summary>Sets species by converting to SpeciesId.</summary>
+    public void SetSpecies(ValueObjects.Species species)
+    {
+        SpeciesId = species.Value;
+    }
+
+    // === Age (simple value) ===
 
     /// <summary>Gets or sets the age.</summary>
     public int Age { get; set; }
 
-    /// <summary>Gets or sets the character traits.</summary>
-    public List<string> Traits { get; set; } = new();
+    // === Trait IDs (stored in database) ===
+
+    /// <summary>Gets or sets the trait IDs (stored in database).</summary>
+    public List<string> TraitIds { get; set; } = new();
+
+    /// <summary>Gets the character traits (computed from TraitIds).</summary>
+    public List<CharacterTrait> Traits => TraitIds
+        .Select(id => CharacterTrait.FromValue(id))
+        .Where(t => t != null)
+        .Cast<CharacterTrait>()
+        .ToList();
+
+    /// <summary>Sets traits by converting to TraitIds.</summary>
+    public void SetTraits(IEnumerable<CharacterTrait> traits)
+    {
+        TraitIds = traits.Select(t => t.Value).ToList();
+    }
+
+    // === Backstory (simple value) ===
 
     /// <summary>Gets or sets the backstory.</summary>
     public string Backstory { get; set; } = string.Empty;

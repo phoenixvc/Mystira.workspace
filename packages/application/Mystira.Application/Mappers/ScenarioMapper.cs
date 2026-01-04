@@ -47,8 +47,10 @@ public static partial class ScenarioMapper
     /// <summary>
     /// Maps CharacterMetadataRequest to ScenarioCharacterMetadata.
     /// </summary>
-    [MapProperty(nameof(CharacterMetadataRequest.Archetype), nameof(ScenarioCharacterMetadata.Archetypes), Use = nameof(MapArchetypes))]
-    [MapProperty(nameof(CharacterMetadataRequest.Role), nameof(ScenarioCharacterMetadata.Roles))]
+    [MapProperty(nameof(CharacterMetadataRequest.Archetype), nameof(ScenarioCharacterMetadata.ArchetypeIds), Use = nameof(MapArchetypeIds))]
+    [MapProperty(nameof(CharacterMetadataRequest.Role), nameof(ScenarioCharacterMetadata.RoleIds), Use = nameof(MapRoleIds))]
+    [MapProperty(nameof(CharacterMetadataRequest.Species), nameof(ScenarioCharacterMetadata.SpeciesId))]
+    [MapProperty(nameof(CharacterMetadataRequest.Traits), nameof(ScenarioCharacterMetadata.TraitIds), Use = nameof(MapTraitIds))]
     private static partial ScenarioCharacterMetadata ToScenarioCharacterMetadata(CharacterMetadataRequest request);
 
     /// <summary>
@@ -194,17 +196,37 @@ public static partial class ScenarioMapper
 
     // Custom mapping methods for complex scenarios
 
-    private static List<Archetype> MapArchetypes(List<string>? archetypes)
+    private static List<string> MapArchetypeIds(List<string>? archetypes)
     {
         if (archetypes == null)
         {
-            return new List<Archetype>();
+            return new List<string>();
         }
 
-        return archetypes
-            .Select(Archetype.Parse)
-            .OfType<Archetype>()
-            .ToList();
+        // Return the archetype strings as-is for storage in ArchetypeIds
+        return archetypes.Where(a => !string.IsNullOrWhiteSpace(a)).ToList();
+    }
+
+    private static List<string> MapRoleIds(List<string>? roles)
+    {
+        if (roles == null)
+        {
+            return new List<string>();
+        }
+
+        // Return the role strings as-is for storage in RoleIds
+        return roles.Where(r => !string.IsNullOrWhiteSpace(r)).ToList();
+    }
+
+    private static List<string> MapTraitIds(List<string>? traits)
+    {
+        if (traits == null)
+        {
+            return new List<string>();
+        }
+
+        // Return the trait strings as-is for storage in TraitIds
+        return traits.Where(t => !string.IsNullOrWhiteSpace(t)).ToList();
     }
 
     private static SceneType ParseSceneType(string? type)

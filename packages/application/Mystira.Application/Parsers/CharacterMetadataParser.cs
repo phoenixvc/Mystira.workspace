@@ -21,9 +21,9 @@ public static class CharacterMetadataParser
 
         var metadata = new ScenarioCharacterMetadata
         {
-            Role = ToStringList(roleObj),
-            Archetype = ToStringList(archetypeObj).Select(a => Archetype.Parse(a)!).ToList(),
-            Traits = ToStringList(traitsObj)
+            RoleIds = ToStringList(roleObj),
+            ArchetypeIds = ToStringList(archetypeObj),
+            TraitIds = ToStringList(traitsObj)
         };
 
         if (!metadataDict.TryGetValue("species", out var speciesObj) || speciesObj == null)
@@ -31,7 +31,7 @@ public static class CharacterMetadataParser
             throw new ArgumentException("Required field 'species' is missing or null in character metadata");
         }
 
-        metadata.Species = speciesObj.ToString() ?? string.Empty;
+        metadata.SpeciesId = speciesObj.ToString() ?? string.Empty;
 
         if (!metadataDict.TryGetValue("age", out var ageObj) || ageObj == null || !int.TryParse(ageObj.ToString(), out var age))
         {

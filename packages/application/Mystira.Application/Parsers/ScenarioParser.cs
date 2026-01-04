@@ -147,11 +147,11 @@ public static class ScenarioParser
             Audio = character.Audio,
             Metadata = character.Metadata != null ? new CharacterMetadataRequest
             {
-                Role = character.Metadata.Roles,
+                Role = character.Metadata.Roles.Select(r => r.Value).ToList(),
                 Archetype = character.Metadata.Archetypes.Select(a => a.Value).ToList(),
-                Species = character.Metadata.Species,
+                Species = character.Metadata.Species?.Value,
                 Age = character.Metadata.Age,
-                Traits = character.Metadata.Traits,
+                Traits = character.Metadata.Traits.Select(t => t.Value).ToList(),
                 Backstory = character.Metadata.Backstory
             } : new CharacterMetadataRequest()
         };
