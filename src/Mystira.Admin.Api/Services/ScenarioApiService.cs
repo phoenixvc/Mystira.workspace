@@ -1,31 +1,34 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
+
 using Microsoft.EntityFrameworkCore;
+
 using Mystira.Admin.Api.Models;
 using Mystira.Admin.Api.Validation;
-using Mystira.Domain.Models;
-using Mystira.Domain.ValueObjects;
-using Mystira.Domain.Enums;
-using Mystira.Infrastructure.Data;
 using Mystira.Contracts.App.Requests.Scenarios;
 using Mystira.Contracts.App.Responses.Scenarios;
-using ContractEnums = Mystira.Contracts.App.Enums;
+using Mystira.Domain.Enums;
+using Mystira.Domain.Models;
+using Mystira.Domain.ValueObjects;
+using Mystira.Infrastructure.Data;
+
 using NJsonSchema;
+
 using CharacterMediaMetadataEntry = Mystira.Domain.Models.CharacterMediaMetadataEntry;
 using CharacterMediaMetadataFile = Mystira.Domain.Models.CharacterMediaMetadataFile;
 using CharacterMetadata = Mystira.Domain.Models.CharacterMetadata;
 using ClassificationTag = Mystira.Domain.Models.ClassificationTag;
+using ContractEnums = Mystira.Contracts.App.Enums;
+using LocalBranchRequest = Mystira.Admin.Api.Models.BranchRequest;
+using LocalCompassChangeRequest = Mystira.Admin.Api.Models.CompassChangeRequest;
+using LocalEchoLogRequest = Mystira.Admin.Api.Models.EchoLogRequest;
+using LocalEchoRevealRequest = Mystira.Admin.Api.Models.EchoRevealRequest;
 using MediaMetadataEntry = Mystira.Domain.Models.MediaMetadataEntry;
 using MediaMetadataFile = Mystira.Domain.Models.MediaMetadataFile;
 using MetadataModifier = Mystira.Domain.Models.MetadataModifier;
-using ScenarioMediaReference = Mystira.Contracts.App.Responses.Scenarios.MediaReference;
-// Use Domain types
 using ScenarioCharacterMetadata = Mystira.Domain.Models.ScenarioCharacterMetadata;
+using ScenarioMediaReference = Mystira.Contracts.App.Responses.Scenarios.MediaReference;
 using SceneMedia = Mystira.Admin.Api.Models.SceneMedia;
-using LocalBranchRequest = Mystira.Admin.Api.Models.BranchRequest;
-using LocalEchoRevealRequest = Mystira.Admin.Api.Models.EchoRevealRequest;
-using LocalEchoLogRequest = Mystira.Admin.Api.Models.EchoLogRequest;
-using LocalCompassChangeRequest = Mystira.Admin.Api.Models.CompassChangeRequest;
 
 namespace Mystira.Admin.Api.Services;
 
@@ -427,7 +430,9 @@ public class ScenarioApiService : IScenarioApiService
     private static SceneType ParseSceneType(string? typeString)
     {
         if (string.IsNullOrEmpty(typeString))
+        {
             return SceneType.Standard;
+        }
 
         return Enum.TryParse<SceneType>(typeString, true, out var result)
             ? result

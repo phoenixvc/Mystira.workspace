@@ -1,8 +1,9 @@
 using Microsoft.EntityFrameworkCore;
+
+using Mystira.Contracts.App.Requests.UserProfiles;
 using Mystira.Domain.Models;
 using Mystira.Domain.ValueObjects;
 using Mystira.Infrastructure.Data;
-using Mystira.Contracts.App.Requests.UserProfiles;
 
 namespace Mystira.Admin.Api.Services;
 

@@ -1,19 +1,21 @@
 using System.IO.Compression;
 using System.Security.Cryptography;
 using System.Text;
+
 using Mystira.Admin.Api.Models;
 using Mystira.Domain.Models;
+
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
+
+using BranchRequest = Mystira.Contracts.App.Requests.Scenarios.BranchRequest;
+using CharacterMetadataRequest = Mystira.Contracts.App.Requests.Scenarios.CharacterMetadataRequest;
+using CharacterRequest = Mystira.Contracts.App.Requests.Scenarios.CharacterRequest;
 using ContractEnums = Mystira.Contracts.App.Enums;
 using CreateScenarioRequest = Mystira.Contracts.App.Requests.Scenarios.CreateScenarioRequest;
-using CharacterRequest = Mystira.Contracts.App.Requests.Scenarios.CharacterRequest;
-using SceneRequest = Mystira.Contracts.App.Requests.Scenarios.SceneRequest;
-using CharacterMetadataRequest = Mystira.Contracts.App.Requests.Scenarios.CharacterMetadataRequest;
-// Use Contracts types for request models
-using BranchRequest = Mystira.Contracts.App.Requests.Scenarios.BranchRequest;
 using EchoRevealRequest = Mystira.Contracts.App.Requests.Scenarios.EchoRevealRequest;
 using MediaReferencesRequest = Mystira.Contracts.App.Requests.Scenarios.MediaReferencesRequest;
+using SceneRequest = Mystira.Contracts.App.Requests.Scenarios.SceneRequest;
 
 namespace Mystira.Admin.Api.Services;
 
