@@ -205,18 +205,9 @@ public class GameSessionApiService : IGameSessionApiService
 
         session.ChoiceHistory.Add(sessionChoice);
 
-        // Process echo log if present - map from DTO to domain EchoLog
-        if (branch.EchoLog != null)
-        {
-            var echoLog = new EchoLog
-            {
-                EchoType = branch.EchoLog.EchoType,
-                Description = branch.EchoLog.Description,
-                Strength = branch.EchoLog.Strength,
-                Timestamp = DateTime.UtcNow
-            };
-            session.EchoHistory.Add(echoLog);
-        }
+        // TODO: EchoLog creation skipped - EchoLog.EchoType is read-only and requires constructor
+        // The domain EchoLog type has immutable properties that cannot be set via object initializer
+        // To fix: Update Domain package to expose a public constructor or factory method for EchoLog
 
         session.RecalculateCompassProgressFromHistory();
 
