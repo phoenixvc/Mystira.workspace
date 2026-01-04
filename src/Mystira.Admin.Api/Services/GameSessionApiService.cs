@@ -212,7 +212,7 @@ public class GameSessionApiService : IGameSessionApiService
             {
                 EchoTypeId = branch.EchoLog.EchoType ?? string.Empty,
                 Description = branch.EchoLog.Description ?? string.Empty,
-                Strength = branch.EchoLog.Strength ?? 1.0,
+                Strength = branch.EchoLog.Strength,
                 Timestamp = DateTime.UtcNow
             };
             session.EchoHistory.Add(echoLog);
