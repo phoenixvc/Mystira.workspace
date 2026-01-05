@@ -139,7 +139,7 @@ public class ValidateScenarioUseCase
             var characterIds = scenario.Characters.Select(c => c.Id).ToHashSet(StringComparer.OrdinalIgnoreCase);
             foreach (var scene in scenario.Scenes)
             {
-                if (scene.Type == SceneType.Choice)
+                if (scene.Type == SceneType.Decision)
                 {
                     if (string.IsNullOrWhiteSpace(scene.ActiveCharacter))
                     {

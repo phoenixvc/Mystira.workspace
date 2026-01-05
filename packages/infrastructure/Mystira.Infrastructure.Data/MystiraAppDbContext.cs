@@ -163,6 +163,11 @@ public partial class MystiraAppDbContext : DbContext
             modelBuilder.Entity<UserBadge>(entity =>
             {
                 entity.HasKey(b => b.Id);
+
+                // Ignore navigation properties to avoid relationship warnings with soft-deletable entities
+                entity.Ignore(b => b.Badge);
+                entity.Ignore(b => b.User);
+
                 entity.Property(b => b.UserProfileId).IsRequired();
                 entity.Property(b => b.BadgeConfigurationId).IsRequired();
                 entity.Property(b => b.BadgeName).IsRequired();
@@ -288,9 +293,8 @@ public partial class MystiraAppDbContext : DbContext
 
             entity.OwnsOne(e => e.Metadata, metadata =>
             {
-                // Ignore alias properties (backed by Roles/Archetypes)
-                metadata.Ignore(m => m.Role);
-                metadata.Ignore(m => m.Archetype);
+                // Note: Role and Archetype are write-only alias properties (no getter)
+                // EF Core automatically ignores properties without getters
 
                 metadata.Property(m => m.Roles)
                     .HasConversion(
@@ -866,7 +870,11 @@ public partial class MystiraAppDbContext : DbContext
                   .HasConversion(
                       v => string.Join(',', v),
                       v => v.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList()
-                  );
+                  )
+                  .Metadata.SetValueComparer(new ValueComparer<List<string>>(
+                      (c1, c2) => c1 != null && c2 != null && c1.SequenceEqual(c2),
+                      c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
+                      c => c.ToList()));
 
             // MediaAsset uses MetadataJson (string) for metadata storage, not an owned entity
 
