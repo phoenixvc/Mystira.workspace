@@ -321,8 +321,24 @@ public partial class MystiraAppDbContext : DbContext
             });
 
             // Own CompassTracking as embedded document
-            // Note: CompassTracking.Axis is a plain string identifier, not a computed value object
-            entity.OwnsOne(e => e.CompassTracking);
+            entity.OwnsOne(e => e.CompassTracking, ct =>
+            {
+                // Ignore alias property (backed by CurrentValue)
+                ct.Ignore(c => c.Value);
+
+                // Store AxisValues dictionary as JSON
+                ct.Property(c => c.AxisValues)
+                    .HasConversion(
+                        v => JsonSerializer.Serialize(v, (JsonSerializerOptions?)null),
+                        v => JsonSerializer.Deserialize<Dictionary<string, int>>(v, (JsonSerializerOptions?)null) ?? new Dictionary<string, int>())
+                    .Metadata.SetValueComparer(new ValueComparer<Dictionary<string, int>>(
+                        (d1, d2) => d1 != null && d2 != null && d1.Count == d2.Count && d1.All(kv => d2.ContainsKey(kv.Key) && d2[kv.Key] == kv.Value),
+                        d => d == null ? 0 : d.Aggregate(0, (a, kv) => HashCode.Combine(a, kv.Key.GetHashCode(), kv.Value.GetHashCode())),
+                        d => d == null ? new Dictionary<string, int>() : new Dictionary<string, int>(d)));
+
+                // Own History as embedded collection
+                ct.OwnsMany(c => c.History);
+            });
         });
 
         // Configure BadgeConfiguration
