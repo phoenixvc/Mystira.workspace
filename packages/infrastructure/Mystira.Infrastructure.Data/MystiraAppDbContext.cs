@@ -255,6 +255,9 @@ public partial class MystiraAppDbContext : DbContext
             // Ignore computed Archetype property (value object derived from ArchetypeId)
             entity.Ignore(e => e.Archetype);
 
+            // Ignore navigation property - not a database relationship
+            entity.Ignore(e => e.Character);
+
             // Only apply Cosmos DB configurations when not using in-memory database
             if (!isInMemoryDatabase)
             {
@@ -269,6 +272,28 @@ public partial class MystiraAppDbContext : DbContext
 
             entity.OwnsOne(e => e.Metadata, metadata =>
             {
+                // Ignore alias properties (backed by Roles/Archetypes)
+                metadata.Ignore(m => m.Role);
+                metadata.Ignore(m => m.Archetype);
+
+                metadata.Property(m => m.Roles)
+                    .HasConversion(
+                        v => string.Join(',', v),
+                        v => v.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList())
+                    .Metadata.SetValueComparer(new ValueComparer<List<string>>(
+                        (c1, c2) => c1 != null && c2 != null && c1.SequenceEqual(c2),
+                        c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
+                        c => c.ToList()));
+
+                metadata.Property(m => m.Archetypes)
+                    .HasConversion(
+                        v => string.Join(',', v),
+                        v => v.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList())
+                    .Metadata.SetValueComparer(new ValueComparer<List<string>>(
+                        (c1, c2) => c1 != null && c2 != null && c1.SequenceEqual(c2),
+                        c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
+                        c => c.ToList()));
+
                 metadata.Property(m => m.Traits)
                     .HasConversion(
                         v => string.Join(',', v),
@@ -277,6 +302,12 @@ public partial class MystiraAppDbContext : DbContext
                         (c1, c2) => c1 != null && c2 != null && c1.SequenceEqual(c2),
                         c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
                         c => c.ToList()));
+            });
+
+            // Own CompassTracking as embedded document
+            entity.OwnsOne(e => e.CompassTracking, ct =>
+            {
+                ct.Ignore(c => c.Axis);
             });
         });
 
