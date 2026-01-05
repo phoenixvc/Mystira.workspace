@@ -321,10 +321,8 @@ public partial class MystiraAppDbContext : DbContext
             });
 
             // Own CompassTracking as embedded document
-            entity.OwnsOne(e => e.CompassTracking, ct =>
-            {
-                ct.Ignore(c => c.Axis);
-            });
+            // Note: CompassTracking.Axis is a plain string identifier, not a computed value object
+            entity.OwnsOne(e => e.CompassTracking);
         });
 
         // Configure BadgeConfiguration

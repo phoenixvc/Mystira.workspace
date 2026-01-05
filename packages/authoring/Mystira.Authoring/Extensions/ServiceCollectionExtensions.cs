@@ -27,9 +27,8 @@ public static class ServiceCollectionExtensions
         // Register services
         services.AddScoped<IConsistencyEvaluationService, ConsistencyEvaluationService>();
 
-        // Register MediatR handlers from this assembly
-        services.AddMediatR(cfg =>
-            cfg.RegisterServicesFromAssembly(typeof(ServiceCollectionExtensions).Assembly));
+        // Note: Command handlers are discovered by Wolverine via convention
+        // No explicit registration needed
 
         return services;
     }

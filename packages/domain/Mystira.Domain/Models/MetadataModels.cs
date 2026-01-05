@@ -175,11 +175,11 @@ public class CharacterMetadata
 
     /// <summary>Gets or sets the character role (alias for Roles for compatibility).</summary>
     [JsonPropertyName("role")]
-    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
-    public List<string> Role
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public List<string>? Role
     {
-        get => Roles;
-        set => Roles = value;
+        get => Roles.Count == 0 ? null : Roles;
+        set => Roles = value ?? new List<string>();
     }
 
     /// <summary>Gets or sets the character archetypes (e.g., guardian, the listener).</summary>
@@ -188,11 +188,11 @@ public class CharacterMetadata
 
     /// <summary>Gets or sets the character archetype (alias for Archetypes for compatibility).</summary>
     [JsonPropertyName("archetype")]
-    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
-    public List<string> Archetype
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public List<string>? Archetype
     {
-        get => Archetypes;
-        set => Archetypes = value;
+        get => Archetypes.Count == 0 ? null : Archetypes;
+        set => Archetypes = value ?? new List<string>();
     }
 
     /// <summary>Gets or sets the species (e.g., elf, goblin).</summary>
