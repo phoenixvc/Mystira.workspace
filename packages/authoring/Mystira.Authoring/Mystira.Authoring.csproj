@@ -28,7 +28,7 @@
 
   <ItemGroup>
     <!-- MediatR for command pattern -->
-    <PackageReference Include="MediatR" Version="12.4.1" />
+    <PackageReference Include="MediatR" Version="14.0.0" />
 
     <!-- Microsoft Extensions -->
     <PackageReference Include="Microsoft.Extensions.Options" Version="9.0.11" />
