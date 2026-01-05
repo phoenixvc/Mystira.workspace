@@ -1,5 +1,6 @@
 using Mystira.Authoring.Abstractions.Models.Scenario;
 using Mystira.Authoring.Graph;
+using Mystira.Domain.Enums;
 using Xunit;
 
 namespace Mystira.Authoring.Tests;
