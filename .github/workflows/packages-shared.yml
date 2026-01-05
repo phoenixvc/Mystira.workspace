@@ -41,7 +41,7 @@ jobs:
         run: dotnet test packages/shared/Mystira.Shared.Tests --configuration Release --collect:"XPlat Code Coverage" --results-directory ./coverage
 
       - name: Upload coverage
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v5
         if: success()
         with:
           files: ./coverage/**/coverage.cobertura.xml
