@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.Extensions.Options;
 using Mystira.StoryGenerator.Api.Services;
 using Mystira.StoryGenerator.Application;
@@ -19,7 +20,40 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
+    {
+        Title = "Story Generator Agent API",
+        Version = "v1",
+        Description = "API for agentic story generation with Foundry agents"
+    });
+    
+    // Add API key authentication if needed
+    c.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+    {
+        Description = "Authorization header using the Bearer scheme",
+        Name = "Authorization",
+        In = Microsoft.OpenApi.Models.ParameterLocation.Header,
+        Type = Microsoft.OpenApi.Models.SecuritySchemeType.ApiKey,
+        Scheme = "Bearer"
+    });
+    
+    c.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
+    {
+        {
+            new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+            {
+                Reference = new Microsoft.OpenApi.Models.OpenApiReference
+                {
+                    Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            Array.Empty<string>()
+        }
+    });
+});
 
 builder.Services.AddMediatR(cfg =>
     cfg.RegisterServicesFromAssemblyContaining(typeof(Mystira.StoryGenerator.Application.Handlers.Stories.GenerateStoryCommandHandler)));
@@ -79,6 +113,14 @@ builder.Services.AddCors(options =>
                   .AllowAnyMethod();
         }
     });
+    
+    options.AddPolicy("BlazerOrigin", policy =>
+    {
+        policy.WithOrigins("https://localhost:7043")
+               .AllowAnyMethod()
+               .AllowAnyHeader()
+               .AllowCredentials();
+    });
 });
 
 builder.Services.AddHealthChecks();
@@ -133,6 +175,16 @@ builder.Services.AddScoped<IAgentOrchestrator, AgentOrchestrator>();
 builder.Services.AddSingleton<IAgentStreamPublisher>(sp => 
     isDevelopment ? new InMemoryStreamPublisher() : new InMemoryStreamPublisher() /* TODO: SignalRStreamPublisher for production */);
 
+// Rate limiting for story agent endpoints
+builder.Services.AddRateLimiter(options =>
+{
+    options.AddFixedWindowLimiter("story-agent", config =>
+    {
+        config.Window = TimeSpan.FromMinutes(1);
+        config.PermitLimit = 10;
+    });
+});
+
 var app = builder.Build();
 
 app.UseCors("AllowFrontend");
@@ -144,6 +196,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseRateLimiter();
 
 app.MapControllers();
 app.MapHealthChecks("/health").WithName("Health");

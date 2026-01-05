@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
+using System.Runtime.CompilerServices;
 
 namespace Mystira.StoryGenerator.Application.Infrastructure.Agents;
 
@@ -9,10 +10,10 @@ namespace Mystira.StoryGenerator.Application.Infrastructure.Agents;
 /// </summary>
 public class SignalRStreamPublisher : IAgentStreamPublisher
 {
-    private readonly IHubContext<SessionHub> _hubContext;
+    private readonly IHubContext<AgentStreamHub> _hubContext;
     private readonly ILogger<SignalRStreamPublisher> _logger;
 
-    public SignalRStreamPublisher(IHubContext<SessionHub> hubContext, ILogger<SignalRStreamPublisher> logger)
+    public SignalRStreamPublisher(IHubContext<AgentStreamHub> hubContext, ILogger<SignalRStreamPublisher> logger)
     {
         _hubContext = hubContext;
         _logger = logger;
@@ -23,7 +24,7 @@ public class SignalRStreamPublisher : IAgentStreamPublisher
         try
         {
             // Broadcast to all clients in the session group
-            await _hubContext.Clients.Group(sessionId).SendAsync("AgentEvent", new
+            await _hubContext.Clients.Group($"session-{sessionId}").SendAsync("AgentEvent", new
             {
                 SessionId = sessionId,
                 EventType = evt.Type.ToString(),
@@ -41,22 +42,32 @@ public class SignalRStreamPublisher : IAgentStreamPublisher
             throw;
         }
     }
+
+    public async IAsyncEnumerable<AgentStreamEvent> SubscribeAsync(
+        string sessionId,
+        [EnumeratorCancellation] CancellationToken ct = default)
+    {
+        // SignalR is push-based, so this method is not used for SignalR implementation
+        // Clients connect via SignalR hub methods instead
+        await Task.CompletedTask;
+        yield break;
+    }
 }
 
 /// <summary>
 /// SignalR Hub for agent session events.
 /// </summary>
-public class SessionHub : Hub
+public class AgentStreamHub : Hub
 {
     public async Task JoinSession(string sessionId)
     {
-        await Groups.AddToGroupAsync(Context.ConnectionId, sessionId);
+        await Groups.AddToGroupAsync(Context.ConnectionId, $"session-{sessionId}");
         await Clients.Caller.SendAsync("JoinedSession", sessionId);
     }
 
     public async Task LeaveSession(string sessionId)
     {
-        await Groups.RemoveFromGroupAsync(Context.ConnectionId, sessionId);
+        await Groups.RemoveFromGroupAsync(Context.ConnectionId, $"session-{sessionId}");
         await Clients.Caller.SendAsync("LeftSession", sessionId);
     }
 
