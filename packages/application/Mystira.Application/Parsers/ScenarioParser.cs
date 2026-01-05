@@ -178,8 +178,9 @@ public static class ScenarioParser
             {
                 Text = b.Choice,
                 NextSceneId = b.NextSceneId,
-                CompassAxis = b.CompassChange?.Axis,
-                CompassDelta = b.CompassChange?.Delta
+                CompassAxis = b.CompassChange?.AxisId,
+                // Convert storage delta (-100 to 100) to API delta (-1.0 to 1.0)
+                CompassDelta = b.CompassChange != null ? b.CompassChange.Delta / 100.0 : null
             }).ToList(),
             EchoReveals = scene.EchoReveals.Select(e => new EchoRevealRequest
             {
