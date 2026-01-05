@@ -25,7 +25,7 @@ public class Branch
 
     /// <summary>
     /// Compass change triggered by this choice (if any).
-    /// Uses Domain CompassChangeDto for API-style fields (Axis, double Delta).
+    /// Uses Domain CompassChange entity (AxisId, int Delta, Reason).
     /// </summary>
-    public CompassChangeDto? CompassChange { get; set; }
+    public CompassChange? CompassChange { get; set; }
 }

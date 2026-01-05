@@ -50,19 +50,13 @@ public static class BranchParser
             }
         }
 
-        // Parse CompassChange if available
+        // Parse CompassChange if available - use entity directly
         if ((branchDict.TryGetValue("compassChange", out var compassChangeObj) ||
              branchDict.TryGetValue("compass_change", out compassChangeObj) ||
              branchDict.TryGetValue("compass_impact", out compassChangeObj)) &&
             compassChangeObj is IDictionary<object, object> compassChangeDict)
         {
-            var compassChange = CompassChangeParser.Parse(compassChangeDict);
-            branch.CompassChange = new CompassChangeDto
-            {
-                Axis = compassChange.AxisId,
-                Delta = compassChange.Delta,
-                DevelopmentalLink = compassChange.Reason
-            };
+            branch.CompassChange = CompassChangeParser.Parse(compassChangeDict);
         }
 
         return branch;
