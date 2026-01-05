@@ -98,13 +98,12 @@ public class ChatController : ControllerBase
     {
         try
         {
-            var providers = new List<object>();
-
-            var defaultService = _llmServiceFactory.GetDefaultService();
-            if (defaultService != null)
-            {
-                providers.Add(new { Name = defaultService.ProviderName, Available = true });
-            }
+            var providerModels = _llmServiceFactory.GetAvailableModels().ToList();
+            var providers = providerModels.Select(pm => new 
+            { 
+                Name = pm.Provider, 
+                Available = pm.Available 
+            }).ToList();
 
             return Ok(new
             {
