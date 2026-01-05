@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Options;
 using Mystira.StoryGenerator.Api.Services;
 using Mystira.StoryGenerator.Application;
+using Mystira.StoryGenerator.Application.Infrastructure.Agents;
 using Mystira.StoryGenerator.Application.Scenarios;
 using Mystira.StoryGenerator.Application.Services;
 using Mystira.StoryGenerator.Application.StoryConsistencyAnalysis.Legacy;
@@ -125,6 +126,12 @@ if (foundryConfig != null)
 {
     builder.Services.AddFoundryAgentServices(foundryConfig);
 }
+
+// Register Agent Orchestrator services
+var isDevelopment = builder.Environment.IsDevelopment();
+builder.Services.AddScoped<IAgentOrchestrator, AgentOrchestrator>();
+builder.Services.AddSingleton<IAgentStreamPublisher>(sp => 
+    isDevelopment ? new InMemoryStreamPublisher() : new InMemoryStreamPublisher() /* TODO: SignalRStreamPublisher for production */);
 
 var app = builder.Build();
 
