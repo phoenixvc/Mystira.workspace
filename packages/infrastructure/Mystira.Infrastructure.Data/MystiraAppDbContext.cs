@@ -585,6 +585,14 @@ public partial class MystiraAppDbContext : DbContext
                     {
                         cc.Ignore(c => c.Axis);
                     });
+                    branch.OwnsMany(b => b.CompassChanges, cc =>
+                    {
+                        cc.Ignore(c => c.Axis);
+                    });
+                });
+                scene.OwnsMany(s => s.CompassChanges, cc =>
+                {
+                    cc.Ignore(c => c.Axis);
                 });
                 scene.OwnsMany(s => s.EchoReveals, reveal =>
                 {

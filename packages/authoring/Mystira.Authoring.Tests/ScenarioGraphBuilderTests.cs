@@ -1,5 +1,6 @@
 using Mystira.Authoring.Abstractions.Models.Scenario;
 using Mystira.Authoring.Graph;
+using Mystira.Domain.Enums;
 using Xunit;
 
 namespace Mystira.Authoring.Tests;
@@ -14,21 +15,21 @@ public class ScenarioGraphBuilderTests
             Title = "Test Scenario",
             Scenes = new List<Scene>
             {
-                new Scene { Id = "start", Title = "Start", Type = SceneType.Narrative, NextSceneId = "choice1" },
+                new Scene { Id = "start", Title = "Start", Type = SceneType.Standard, NextSceneId = "choice1" },
                 new Scene
                 {
                     Id = "choice1",
                     Title = "First Choice",
-                    Type = SceneType.Choice,
+                    Type = SceneType.Decision,
                     Branches = new List<Branch>
                     {
                         new Branch { Choice = "Option A", NextSceneId = "path_a" },
                         new Branch { Choice = "Option B", NextSceneId = "path_b" }
                     }
                 },
-                new Scene { Id = "path_a", Title = "Path A", Type = SceneType.Narrative, NextSceneId = "ending" },
-                new Scene { Id = "path_b", Title = "Path B", Type = SceneType.Narrative, NextSceneId = "ending" },
-                new Scene { Id = "ending", Title = "The End", Type = SceneType.Special }
+                new Scene { Id = "path_a", Title = "Path A", Type = SceneType.Standard, NextSceneId = "ending" },
+                new Scene { Id = "path_b", Title = "Path B", Type = SceneType.Standard, NextSceneId = "ending" },
+                new Scene { Id = "ending", Title = "The End", Type = SceneType.Standard }
             }
         };
     }
@@ -110,13 +111,13 @@ public class ScenarioGraphBuilderTests
             Id = "multi-ending",
             Scenes = new List<Scene>
             {
-                new Scene { Id = "start", Type = SceneType.Choice, Branches = new List<Branch>
+                new Scene { Id = "start", Type = SceneType.Decision, Branches = new List<Branch>
                 {
                     new Branch { NextSceneId = "good_end" },
                     new Branch { NextSceneId = "bad_end" }
                 }},
-                new Scene { Id = "good_end", Type = SceneType.Special },
-                new Scene { Id = "bad_end", Type = SceneType.Special }
+                new Scene { Id = "good_end", Type = SceneType.Standard },
+                new Scene { Id = "bad_end", Type = SceneType.Standard }
             }
         };
         var builder = new ScenarioGraphBuilder();

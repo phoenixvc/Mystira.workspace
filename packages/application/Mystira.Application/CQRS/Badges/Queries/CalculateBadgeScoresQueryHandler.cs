@@ -202,9 +202,9 @@ public static class CalculateBadgeScoresQueryHandler
                 var branchPath = new Dictionary<string, double>(currentPath, StringComparer.OrdinalIgnoreCase);
 
                 // Apply compass changes from this branch
-                if (branch.CompassChange != null && !string.IsNullOrWhiteSpace(branch.CompassChange.Axis))
+                if (branch.CompassChange != null && !string.IsNullOrWhiteSpace(branch.CompassChange.AxisId))
                 {
-                    var axis = branch.CompassChange.Axis;
+                    var axis = branch.CompassChange.AxisId;
                     if (!branchPath.ContainsKey(axis))
                     {
                         branchPath[axis] = 0;

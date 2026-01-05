@@ -36,6 +36,7 @@
     <PackageReference Include="System.ComponentModel.Annotations" Version="5.0.0" />
 
     <!-- Project References -->
+    <ProjectReference Include="../../domain/Mystira.Domain/Mystira.Domain.csproj" />
     <ProjectReference Include="../../contracts/dotnet/Mystira.Contracts/Mystira.Contracts.csproj" />
     <ProjectReference Include="../../shared/Mystira.Shared/Mystira.Shared.csproj" />
   </ItemGroup>

@@ -486,9 +486,10 @@ public class Branch : Entity
     public EchoLog? EchoLog { get; set; }
 
     /// <summary>
-    /// Gets or sets a single compass change for this branch (DTO compatibility).
+    /// Gets or sets a single compass change for this branch.
+    /// Uses the same CompassChange entity type as CompassChanges collection.
     /// </summary>
-    public CompassChangeDto? CompassChange { get; set; }
+    public CompassChange? CompassChange { get; set; }
 
     /// <summary>
     /// Gets or sets compass changes when this branch is taken.
@@ -677,28 +678,6 @@ public class CompassChange
     /// Gets the core axis.
     /// </summary>
     public CoreAxis? Axis => CoreAxis.FromValue(AxisId);
-}
-
-/// <summary>
-/// Represents a compass value change (DTO model for Application layer compatibility).
-/// Uses Axis as string and Delta as double to match request/response patterns.
-/// </summary>
-public class CompassChangeDto
-{
-    /// <summary>
-    /// Gets or sets the axis name/ID.
-    /// </summary>
-    public string Axis { get; set; } = string.Empty;
-
-    /// <summary>
-    /// Gets or sets the change amount.
-    /// </summary>
-    public double Delta { get; set; }
-
-    /// <summary>
-    /// Gets or sets the developmental link description.
-    /// </summary>
-    public string? DevelopmentalLink { get; set; }
 }
 
 /// <summary>

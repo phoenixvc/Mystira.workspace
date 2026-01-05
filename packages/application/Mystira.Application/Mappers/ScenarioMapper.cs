@@ -251,10 +251,11 @@ public static partial class ScenarioMapper
             Choice = b.Text ?? string.Empty,
             NextSceneId = b.NextSceneId ?? string.Empty,
             CompassChange = (b.CompassAxis != null || b.CompassDelta.HasValue)
-                ? new CompassChangeDto
+                ? new CompassChange
                 {
-                    Axis = b.CompassAxis ?? string.Empty,
-                    Delta = b.CompassDelta ?? 0.0
+                    AxisId = b.CompassAxis ?? string.Empty,
+                    // Convert API delta (-1.0 to 1.0) to storage delta (-100 to 100)
+                    Delta = (int)(Math.Clamp(b.CompassDelta ?? 0.0, -1.0, 1.0) * 100)
                 }
                 : null,
             EchoLog = MapEchoLog(b.EchoLog)

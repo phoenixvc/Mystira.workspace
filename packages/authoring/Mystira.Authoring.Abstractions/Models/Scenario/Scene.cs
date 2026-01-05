@@ -1,4 +1,7 @@
 using System.ComponentModel.DataAnnotations;
+using Mystira.Domain.Enums;
+using Mystira.Domain.Models;
+using DomainMediaReferences = Mystira.Domain.Models.MediaReferences;
 
 namespace Mystira.Authoring.Abstractions.Models.Scenario;
 
@@ -39,7 +42,7 @@ public class Scene
     /// <summary>
     /// Media references for the scene.
     /// </summary>
-    public MediaReferences? Media { get; set; }
+    public DomainMediaReferences? Media { get; set; }
 
     /// <summary>
     /// Branching choices available in this scene.
@@ -55,51 +58,4 @@ public class Scene
     /// Optional difficulty rating for this scene.
     /// </summary>
     public int? Difficulty { get; set; }
-}
-
-/// <summary>
-/// Type of scene interaction.
-/// </summary>
-public enum SceneType
-{
-    /// <summary>
-    /// Narrative-only scene with no player interaction.
-    /// </summary>
-    Narrative = 0,
-
-    /// <summary>
-    /// Scene presenting player choices.
-    /// </summary>
-    Choice = 1,
-
-    /// <summary>
-    /// Scene with dice roll or chance mechanics.
-    /// </summary>
-    Roll = 2,
-
-    /// <summary>
-    /// Special scene type (puzzle, minigame, etc.).
-    /// </summary>
-    Special = 3
-}
-
-/// <summary>
-/// Media references for a scene.
-/// </summary>
-public class MediaReferences
-{
-    /// <summary>
-    /// Path or URL to image asset.
-    /// </summary>
-    public string? Image { get; set; }
-
-    /// <summary>
-    /// Path or URL to audio asset.
-    /// </summary>
-    public string? Audio { get; set; }
-
-    /// <summary>
-    /// Path or URL to video asset.
-    /// </summary>
-    public string? Video { get; set; }
 }

@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace Mystira.Domain.Models;
 
 /// <summary>
@@ -168,9 +170,12 @@ public class Character
 public class CharacterMetadata
 {
     /// <summary>Gets or sets the character roles (e.g., mentor, trickster).</summary>
+    [JsonPropertyName("roles")]
     public List<string> Roles { get; set; } = new();
 
     /// <summary>Gets or sets the character role (alias for Roles for compatibility).</summary>
+    [JsonPropertyName("role")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public List<string> Role
     {
         get => Roles;
@@ -178,9 +183,12 @@ public class CharacterMetadata
     }
 
     /// <summary>Gets or sets the character archetypes (e.g., guardian, the listener).</summary>
+    [JsonPropertyName("archetypes")]
     public List<string> Archetypes { get; set; } = new();
 
     /// <summary>Gets or sets the character archetype (alias for Archetypes for compatibility).</summary>
+    [JsonPropertyName("archetype")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public List<string> Archetype
     {
         get => Archetypes;
