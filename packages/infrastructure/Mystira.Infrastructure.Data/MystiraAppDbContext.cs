@@ -73,8 +73,6 @@ public partial class MystiraAppDbContext : DbContext
     /// <summary>Gets or sets the player scenario scores.</summary>
     public DbSet<PlayerScenarioScore> PlayerScenarioScores { get; set; }
 
-    /// <summary>Gets or sets the compass trackings.</summary>
-    public DbSet<CompassTracking> CompassTrackings { get; set; }
 
     /// <inheritdoc/>
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -1021,23 +1019,6 @@ public partial class MystiraAppDbContext : DbContext
                                   c1.Keys.All(k => c2.ContainsKey(k) && c1[k].SequenceEqual(c2[k])),
                       c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.Key.GetHashCode(), v.Value.Aggregate(0, (a2, s) => HashCode.Combine(a2, s.GetHashCode())))),
                       c => new Dictionary<string, List<string>>(c.ToDictionary(kvp => kvp.Key, kvp => new List<string>(kvp.Value)))));
-        });
-
-        // Configure CompassTracking as a separate container for analytics
-        modelBuilder.Entity<CompassTracking>(entity =>
-        {
-            entity.HasKey(e => e.Axis);
-
-            if (!isInMemoryDatabase)
-            {
-                // Cosmos DB requires an 'id' JSON property. Map Axis to 'id' so the key aligns with Cosmos expectations.
-                entity.Property(e => e.Axis).ToJsonProperty("id");
-
-                entity.ToContainer("CompassTrackings")
-                      .HasPartitionKey(e => e.Axis);
-            }
-
-            entity.OwnsMany(e => e.History);
         });
     }
 
