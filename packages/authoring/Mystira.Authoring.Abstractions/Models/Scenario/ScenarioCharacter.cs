@@ -1,7 +1,10 @@
+using Mystira.Domain.Models;
+
 namespace Mystira.Authoring.Abstractions.Models.Scenario;
 
 /// <summary>
-/// Represents a character in a scenario.
+/// Represents a character in a scenario for authoring purposes.
+/// Uses Domain's CharacterMetadata for string-based metadata.
 /// </summary>
 public class ScenarioCharacter
 {
@@ -27,42 +30,7 @@ public class ScenarioCharacter
 
     /// <summary>
     /// Additional metadata about the character.
+    /// Uses Domain CharacterMetadata (string-based).
     /// </summary>
-    public ScenarioCharacterMetadata Metadata { get; set; } = new();
-}
-
-/// <summary>
-/// Metadata for a scenario character.
-/// </summary>
-public class ScenarioCharacterMetadata
-{
-    /// <summary>
-    /// Roles the character plays in the story.
-    /// </summary>
-    public List<string> Role { get; set; } = new();
-
-    /// <summary>
-    /// Archetypes the character represents.
-    /// </summary>
-    public List<string> Archetype { get; set; } = new();
-
-    /// <summary>
-    /// Species or race of the character.
-    /// </summary>
-    public string Species { get; set; } = string.Empty;
-
-    /// <summary>
-    /// Age of the character.
-    /// </summary>
-    public int Age { get; set; }
-
-    /// <summary>
-    /// Personality traits.
-    /// </summary>
-    public List<string> Traits { get; set; } = new();
-
-    /// <summary>
-    /// Character's backstory.
-    /// </summary>
-    public string Backstory { get; set; } = string.Empty;
+    public CharacterMetadata Metadata { get; set; } = new();
 }

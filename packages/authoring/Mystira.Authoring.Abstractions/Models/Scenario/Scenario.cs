@@ -1,7 +1,9 @@
+using Mystira.Domain.Enums;
+
 namespace Mystira.Authoring.Abstractions.Models.Scenario;
 
 /// <summary>
-/// Represents a complete interactive story scenario.
+/// Represents a complete interactive story scenario for authoring.
 /// </summary>
 public class Scenario
 {
@@ -74,30 +76,4 @@ public class Scenario
     /// When the scenario was created.
     /// </summary>
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-}
-
-/// <summary>
-/// Difficulty level for a scenario.
-/// </summary>
-public enum DifficultyLevel
-{
-    /// <summary>Easy difficulty level.</summary>
-    Easy,
-    /// <summary>Medium difficulty level.</summary>
-    Medium,
-    /// <summary>Hard difficulty level.</summary>
-    Hard
-}
-
-/// <summary>
-/// Expected session length for a scenario.
-/// </summary>
-public enum SessionLength
-{
-    /// <summary>Short session (15-30 minutes).</summary>
-    Short,
-    /// <summary>Medium session (30-60 minutes).</summary>
-    Medium,
-    /// <summary>Long session (60+ minutes).</summary>
-    Long
 }
