@@ -197,6 +197,16 @@ output "uksouth_account_id" {
   value       = local.needs_uksouth ? azurerm_cognitive_account.ai_foundry_uksouth[0].id : null
 }
 
+output "uksouth_project_id" {
+  description = "UK South AI Foundry project ID (if created)"
+  value       = local.needs_uksouth && var.enable_project ? azapi_resource.ai_project_uksouth[0].id : null
+}
+
+output "uksouth_project_name" {
+  description = "UK South AI Foundry project name (if created)"
+  value       = local.needs_uksouth && var.enable_project ? azapi_resource.ai_project_uksouth[0].name : null
+}
+
 output "uksouth_endpoint" {
   description = "UK South AI Foundry endpoint URL (if created)"
   value       = local.needs_uksouth ? azurerm_cognitive_account.ai_foundry_uksouth[0].endpoint : null
@@ -267,6 +277,16 @@ output "connection_config_eastus" {
 output "swedencentral_account_id" {
   description = "Sweden Central AI Foundry account ID (if created)"
   value       = local.needs_swedencentral ? azurerm_cognitive_account.ai_foundry_swedencentral[0].id : null
+}
+
+output "swedencentral_project_id" {
+  description = "Sweden Central AI Foundry project ID (if created)"
+  value       = local.needs_swedencentral && var.enable_project ? azapi_resource.ai_project_swedencentral[0].id : null
+}
+
+output "swedencentral_project_name" {
+  description = "Sweden Central AI Foundry project name (if created)"
+  value       = local.needs_swedencentral && var.enable_project ? azapi_resource.ai_project_swedencentral[0].name : null
 }
 
 output "swedencentral_endpoint" {

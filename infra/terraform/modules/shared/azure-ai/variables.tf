@@ -197,6 +197,13 @@ variable "model_deployments" {
     # ==========================================================================
     # Embedding Models (for RAG / Vector Search)
     # ==========================================================================
+    "text-embedding-ada-002" = {
+      model_name    = "text-embedding-ada-002"
+      model_version = "2"
+      model_format  = "OpenAI"
+      sku_name      = "GlobalStandard"
+      capacity      = 120
+    }
     "text-embedding-3-large" = {
       model_name    = "text-embedding-3-large"
       model_version = "1"
