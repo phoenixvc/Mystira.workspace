@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Options;
 using Mystira.StoryGenerator.Api.Services;
+using Mystira.StoryGenerator.Application;
 using Mystira.StoryGenerator.Application.Scenarios;
 using Mystira.StoryGenerator.Application.Services;
 using Mystira.StoryGenerator.Application.StoryConsistencyAnalysis.Legacy;
@@ -109,6 +110,21 @@ builder.Services.AddSingleton<ISemanticRoleLabellingLlmService, SemanticRoleLabe
 builder.Services.AddSingleton<IContinuityOperationStore, InMemoryContinuityOperationStore>();
 builder.Services.AddSingleton<IContinuityBackgroundQueue, ContinuityBackgroundQueue>();
 builder.Services.AddHostedService<ContinuityWorker>();
+
+// Register Azure AI Foundry Agent services
+builder.Services.AddOptions<FoundryAgentConfig>()
+    .Bind(builder.Configuration.GetSection(FoundryAgentConfig.SectionName))
+    .ValidateDataAnnotations()
+    .ValidateOnStart();
+
+builder.Services.AddCosmosDbConfiguration();
+
+// Register Foundry services using the configuration
+var foundryConfig = builder.Configuration.GetSection(FoundryAgentConfig.SectionName).Get<FoundryAgentConfig>();
+if (foundryConfig != null)
+{
+    builder.Services.AddFoundryAgentServices(foundryConfig);
+}
 
 var app = builder.Build();
 
