@@ -22,6 +22,11 @@ public enum KnowledgeMode
 public enum StorySessionStage
 {
     /// <summary>
+    /// Session has been created but not yet initialized.
+    /// </summary>
+    Uninitialized,
+
+    /// <summary>
     /// Initial story generation in progress.
     /// </summary>
     Generating,
@@ -37,19 +42,34 @@ public enum StorySessionStage
     Evaluating,
 
     /// <summary>
+    /// Story has passed evaluation and is complete.
+    /// </summary>
+    Evaluated,
+
+    /// <summary>
     /// User has requested refinements to the story.
     /// </summary>
     RefinementRequested,
 
     /// <summary>
-    /// Story has been refined based on feedback.
+    /// Story has been refined based on feedback and is being re-evaluated.
     /// </summary>
     Refined,
 
     /// <summary>
     /// Story generation is complete.
     /// </summary>
-    Complete
+    Complete,
+
+    /// <summary>
+    /// Story generation has failed and needs attention.
+    /// </summary>
+    Failed,
+
+    /// <summary>
+    /// Story is stuck in refinement loop and needs human review.
+    /// </summary>
+    StuckNeedsReview
 }
 
 /// <summary>
