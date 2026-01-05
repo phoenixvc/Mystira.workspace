@@ -103,8 +103,23 @@ public partial class MystiraAppDbContext : DbContext
         modelBuilder.Entity<UserProfile>(entity =>
         {
             entity.HasKey(e => e.Id);
-            // Do not map computed value-object property AgeGroup; only persist AgeGroupName (string)
+
+            // Ignore navigation property - not a database relationship
+            entity.Ignore(e => e.Account);
+
+            // Ignore computed value-object property AgeGroup; only persist AgeGroupId (string)
             entity.Ignore(e => e.AgeGroup);
+
+            // Ignore alias properties
+            entity.Ignore(e => e.Name);
+            entity.Ignore(e => e.HasCompletedOnboarding);
+            entity.Ignore(e => e.SelectedAvatarMediaId);
+
+            // Ignore computed properties
+            entity.Ignore(e => e.AgeGroupName);
+            entity.Ignore(e => e.FullName);
+            entity.Ignore(e => e.Age);
+
             // Only apply Cosmos DB configurations when not using in-memory database
             if (!isInMemoryDatabase)
             {
@@ -166,6 +181,9 @@ public partial class MystiraAppDbContext : DbContext
         modelBuilder.Entity<Account>(entity =>
         {
             entity.HasKey(e => e.Id);
+
+            // Ignore navigation property - not a database relationship
+            entity.Ignore(e => e.Profile);
 
             // Only apply Cosmos DB configurations when not using in-memory database
             if (!isInMemoryDatabase)
@@ -342,6 +360,12 @@ public partial class MystiraAppDbContext : DbContext
             entity.Ignore(e => e.Axis);
             entity.Ignore(e => e.AgeGroup);
 
+            // Ignore navigation property - not a database relationship
+            entity.Ignore(e => e.User);
+
+            // Ignore alias property (backed by AxisId)
+            entity.Ignore(e => e.CompassAxisId);
+
             if (!isInMemoryDatabase)
             {
                 // Map Id property to lowercase 'id' to match container partition key path /id
@@ -356,6 +380,14 @@ public partial class MystiraAppDbContext : DbContext
         modelBuilder.Entity<Badge>(entity =>
         {
             entity.HasKey(e => e.Id);
+
+            // Ignore navigation properties - these are not database relationships in Cosmos
+            entity.Ignore(e => e.Configuration);
+            entity.Ignore(e => e.Images);
+            entity.Ignore(e => e.Thresholds);
+
+            // Ignore alias property (backed by Name)
+            entity.Ignore(e => e.Title);
 
             if (!isInMemoryDatabase)
             {
@@ -644,6 +676,21 @@ public partial class MystiraAppDbContext : DbContext
         {
             entity.HasKey(e => e.Id);
 
+            // Ignore navigation property - not a database relationship
+            entity.Ignore(e => e.Scenario);
+
+            // Ignore collection navigations that duplicate owned collections
+            entity.Ignore(e => e.PlayerAssignments);
+            entity.Ignore(e => e.Choices);
+
+            // Ignore alias properties (backed by StartedAt/EndedAt)
+            entity.Ignore(e => e.StartTime);
+            entity.Ignore(e => e.EndTime);
+
+            // Ignore computed properties
+            entity.Ignore(e => e.IsActive);
+            entity.Ignore(e => e.Duration);
+
             // Only apply Cosmos DB configurations when not using in-memory database
             if (!isInMemoryDatabase)
             {
@@ -700,6 +747,11 @@ public partial class MystiraAppDbContext : DbContext
             entity.OwnsMany(e => e.CharacterAssignments, assignment =>
             {
                 assignment.WithOwner();
+
+                // Ignore navigation properties - not database relationships
+                assignment.Ignore(a => a.Character);
+                assignment.Ignore(a => a.Player);
+
                 assignment.Property(a => a.CharacterId).IsRequired();
                 assignment.Property(a => a.CharacterName).IsRequired(false);
                 assignment.Property(a => a.Role).IsRequired(false);
@@ -710,6 +762,9 @@ public partial class MystiraAppDbContext : DbContext
 
                 assignment.OwnsOne(a => a.PlayerAssignment, pa =>
                 {
+                    // Ignore navigation property - not a database relationship
+                    pa.Ignore(p => p.Player);
+
                     pa.Property(p => p.Type).IsRequired();
                     pa.Property(p => p.ProfileId).IsRequired(false);
                     pa.Property(p => p.ProfileName).IsRequired(false);
@@ -739,16 +794,26 @@ public partial class MystiraAppDbContext : DbContext
         {
             entity.HasKey(e => e.Id);
 
+            // Ignore navigation properties - not database relationships
+            entity.Ignore(e => e.User);
+            entity.Ignore(e => e.Scenario);
+
+            // Ignore alias property (backed by UserId)
+            entity.Ignore(e => e.ProfileId);
+
+            // Ignore computed property
+            entity.Ignore(e => e.TotalPlayTime);
+
             // Cosmos container mapping (only when not using in-memory provider)
             if (!isInMemoryDatabase)
             {
                 // Map Id property to lowercase 'id' as required by Cosmos
                 entity.Property(e => e.Id).ToJsonProperty("id");
 
-                // Store PlayerScenarioScore items in their own container, partitioned by ProfileId
+                // Store PlayerScenarioScore items in their own container, partitioned by UserId
                 // This optimizes lookups like GetByProfileIdAsync and aligns with the API endpoint usage
                 entity.ToContainer("PlayerScenarioScores")
-                      .HasPartitionKey(e => e.ProfileId);
+                      .HasPartitionKey(e => e.UserId);
             }
 
             // Store AxisScores as JSON string to work with both Cosmos and InMemory providers
