@@ -16,6 +16,13 @@ public class AiSettings
     public int DefaultMaxTokens { get; set; } = 25000;
 
     public AzureOpenAISettings AzureOpenAI { get; set; } = new();
+    
+    /// <summary>
+    /// Additional Azure OpenAI regions (e.g., AzureOpenAI-SouthAfrica, AzureOpenAI-Sweden)
+    /// Models from all regions will be aggregated under the single azure-openai provider
+    /// </summary>
+    public Dictionary<string, AzureOpenAISettings> AzureOpenAIRegions { get; set; } = new();
+    
     public AnthropicSettings Anthropic { get; set; } = new();
     public IntentRouterSettings IntentRouter { get; set; } = new();
     public EntityClassifierSettings EntityClassifier { get; set; } = new();

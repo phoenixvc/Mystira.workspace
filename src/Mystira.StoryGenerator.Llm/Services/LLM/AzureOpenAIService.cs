@@ -49,59 +49,56 @@ public class AzureOpenAIService : ILLMService
             return Enumerable.Empty<ChatModelInfo>();
         }
 
-        // Return models from the deployments list in configuration
-        // If no deployments are configured, fall back to the legacy single deployment
-        var deployments = _settings.AzureOpenAI.Deployments;
+        var allModels = new List<ChatModelInfo>();
+
+        // Collect models from the primary AzureOpenAI configuration
+        var primaryModels = GetModelsFromRegion(_settings.AzureOpenAI);
+        allModels.AddRange(primaryModels);
+
+        // Collect models from all regional configurations (e.g., SouthAfrica, Sweden)
+        if (_settings.AzureOpenAIRegions != null && _settings.AzureOpenAIRegions.Any())
+        {
+            foreach (var (regionName, regionSettings) in _settings.AzureOpenAIRegions)
+            {
+                if (IsRegionAvailable(regionSettings))
+                {
+                    var regionModels = GetModelsFromRegion(regionSettings);
+                    allModels.AddRange(regionModels);
+                    _logger.LogDebug("Loaded {Count} models from Azure OpenAI region: {Region}", regionModels.Count(), regionName);
+                }
+            }
+        }
+
+        // Remove duplicates based on model Id (in case same model is in multiple regions)
+        var uniqueModels = allModels
+            .GroupBy(m => m.Id)
+            .Select(g => g.First())
+            .ToList();
+
+        _logger.LogInformation("Total available Azure OpenAI models: {Count}", uniqueModels.Count);
+        return uniqueModels;
+    }
+
+    private bool IsRegionAvailable(AzureOpenAISettings regionSettings)
+    {
+        return !string.IsNullOrWhiteSpace(regionSettings.ApiKey) &&
+               !string.IsNullOrWhiteSpace(regionSettings.Endpoint) &&
+               regionSettings.Deployments != null &&
+               regionSettings.Deployments.Any();
+    }
+
+    private IEnumerable<ChatModelInfo> GetModelsFromRegion(AzureOpenAISettings regionSettings)
+    {
+        var deployments = regionSettings.Deployments;
         if (deployments == null || !deployments.Any())
         {
             // Fallback to legacy single deployment configuration
-            var model = new ChatModelInfo
+            if (!string.IsNullOrWhiteSpace(regionSettings.DeploymentName))
             {
-                Id = _settings.AzureOpenAI.DeploymentName,
-                DisplayName = GetDisplayNameForDeployment(_settings.AzureOpenAI.DeploymentName),
-                Description = "Azure OpenAI GPT model deployment",
-                MaxTokens = 4096,
-                DefaultTemperature = 0.7,
-                MinTemperature = 0.0,
-                MaxTemperature = 2.0,
-                SupportsJsonSchema = true,
-                Capabilities = new List<string> { "chat", "json-schema", "story-generation" }
-            };
-            return new List<ChatModelInfo> { model };
-        }
-
-        var configuredName = _settings.AzureOpenAI.DeploymentName;
-
-        // If a specific deployment is configured, prefer returning only that one
-        if (!string.IsNullOrWhiteSpace(configuredName))
-        {
-            var selected = deployments.FirstOrDefault(d => string.Equals(d.Name, configuredName, StringComparison.OrdinalIgnoreCase));
-            if (selected != null)
-            {
-                return new[]
+                var model = new ChatModelInfo
                 {
-                    new ChatModelInfo
-                    {
-                        Id = selected.Name,
-                        DisplayName = selected.DisplayName,
-                        Description = $"Azure OpenAI {selected.DisplayName} deployment",
-                        MaxTokens = selected.MaxTokens,
-                        DefaultTemperature = selected.DefaultTemperature,
-                        MinTemperature = 0.0,
-                        MaxTemperature = 2.0,
-                        SupportsJsonSchema = selected.SupportsJsonSchema,
-                        Capabilities = selected.Capabilities ?? new List<string> { "chat", "story-generation" }
-                    }
-                };
-            }
-
-            // Not found in list: return a synthetic single entry
-            return new[]
-            {
-                new ChatModelInfo
-                {
-                    Id = configuredName,
-                    DisplayName = GetDisplayNameForDeployment(configuredName),
+                    Id = regionSettings.DeploymentName,
+                    DisplayName = GetDisplayNameForDeployment(regionSettings.DeploymentName),
                     Description = "Azure OpenAI GPT model deployment",
                     MaxTokens = 4096,
                     DefaultTemperature = 0.7,
@@ -109,11 +106,13 @@ public class AzureOpenAIService : ILLMService
                     MaxTemperature = 2.0,
                     SupportsJsonSchema = true,
                     Capabilities = new List<string> { "chat", "json-schema", "story-generation" }
-                }
-            };
+                };
+                return new List<ChatModelInfo> { model };
+            }
+            return Enumerable.Empty<ChatModelInfo>();
         }
 
-        // No specific configured deployment: return all configured entries
+        // Return all deployments from this region
         return deployments.Select(deployment => new ChatModelInfo
         {
             Id = deployment.Name,
@@ -246,18 +245,42 @@ public class AzureOpenAIService : ILLMService
     private string ResolveEndpoint(string deploymentName)
     {
         // Priority order:
-        // 1. Endpoint configured for the specific deployment
-        // 2. Default endpoint from settings
+        // 1. Endpoint configured for the specific deployment in primary config
+        // 2. Endpoint configured for the specific deployment in any regional config
+        // 3. Default endpoint from primary settings
 
-        if (!string.IsNullOrWhiteSpace(deploymentName) && _settings.AzureOpenAI.Deployments != null)
+        if (!string.IsNullOrWhiteSpace(deploymentName))
         {
-            var deployment = _settings.AzureOpenAI.Deployments.FirstOrDefault(d => d.Name == deploymentName);
-            if (deployment != null && !string.IsNullOrWhiteSpace(deployment.Endpoint))
+            // Check primary AzureOpenAI configuration
+            if (_settings.AzureOpenAI.Deployments != null)
             {
-                return deployment.Endpoint;
+                var deployment = _settings.AzureOpenAI.Deployments.FirstOrDefault(d => d.Name == deploymentName);
+                if (deployment != null && !string.IsNullOrWhiteSpace(deployment.Endpoint))
+                {
+                    _logger.LogDebug("Resolved endpoint for deployment {Deployment} from primary config", deploymentName);
+                    return deployment.Endpoint;
+                }
+            }
+
+            // Check regional configurations
+            if (_settings.AzureOpenAIRegions != null && _settings.AzureOpenAIRegions.Any())
+            {
+                foreach (var (regionName, regionSettings) in _settings.AzureOpenAIRegions)
+                {
+                    if (regionSettings.Deployments != null)
+                    {
+                        var deployment = regionSettings.Deployments.FirstOrDefault(d => d.Name == deploymentName);
+                        if (deployment != null && !string.IsNullOrWhiteSpace(deployment.Endpoint))
+                        {
+                            _logger.LogDebug("Resolved endpoint for deployment {Deployment} from region {Region}", deploymentName, regionName);
+                            return deployment.Endpoint;
+                        }
+                    }
+                }
             }
         }
 
+        // Fallback to primary endpoint
         return _settings.AzureOpenAI.Endpoint;
     }
 
