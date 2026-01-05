@@ -11,12 +11,14 @@
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.3" />
     <PackageReference Include="Microsoft.Extensions.Options" Version="8.0.2" />
     <PackageReference Include="YamlDotNet" Version="16.3.0" />
+    <PackageReference Include="Azure.Search.Documents" Version="11.5.0" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Mystira.StoryGenerator.Contracts\Mystira.StoryGenerator.Contracts.csproj" />
     <ProjectReference Include="..\Mystira.StoryGenerator.Domain\Mystira.StoryGenerator.Domain.csproj" />
     <ProjectReference Include="..\Mystira.StoryGenerator.GraphTheory\Mystira.StoryGenerator.GraphTheory.csproj" />
+    <ProjectReference Include="..\Mystira.StoryGenerator.Infrastructure\Mystira.StoryGenerator.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>
