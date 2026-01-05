@@ -27,8 +27,8 @@ public static class ServiceCollectionExtensions
         // Register services
         services.AddScoped<IConsistencyEvaluationService, ConsistencyEvaluationService>();
 
-        // Note: Command handlers are discovered by Wolverine via convention
-        // No explicit registration needed
+        // Note: Use-case classes are registered individually above.
+        // For CQRS command/query handlers, consider configuring Wolverine in your host application.
 
         return services;
     }

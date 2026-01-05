@@ -173,12 +173,11 @@ public class CharacterMetadata
     [JsonPropertyName("roles")]
     public List<string> Roles { get; set; } = new();
 
-    /// <summary>Gets or sets the character role (alias for Roles for compatibility).</summary>
+    /// <summary>Sets the character role (write-only alias for Roles for compatibility during deserialization).</summary>
     [JsonPropertyName("role")]
-    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    [JsonIgnore(Condition = JsonIgnoreCondition.Always)]
     public List<string>? Role
     {
-        get => Roles.Count == 0 ? null : Roles;
         set => Roles = value ?? new List<string>();
     }
 
@@ -186,12 +185,11 @@ public class CharacterMetadata
     [JsonPropertyName("archetypes")]
     public List<string> Archetypes { get; set; } = new();
 
-    /// <summary>Gets or sets the character archetype (alias for Archetypes for compatibility).</summary>
+    /// <summary>Sets the character archetype (write-only alias for Archetypes for compatibility during deserialization).</summary>
     [JsonPropertyName("archetype")]
-    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    [JsonIgnore(Condition = JsonIgnoreCondition.Always)]
     public List<string>? Archetype
     {
-        get => Archetypes.Count == 0 ? null : Archetypes;
         set => Archetypes = value ?? new List<string>();
     }
 

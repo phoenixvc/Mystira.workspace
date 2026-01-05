@@ -72,7 +72,7 @@ public class MakeChoiceUseCase
 
         // Resolve the player who made the decision for choice scenes using ActiveCharacter assignment
         string? playerId = null;
-        if (currentScene.Type == SceneType.Choice && !string.IsNullOrWhiteSpace(currentScene.ActiveCharacter))
+        if (currentScene.Type == SceneType.Decision && !string.IsNullOrWhiteSpace(currentScene.ActiveCharacter))
         {
             var assignment = session.CharacterAssignments.FirstOrDefault(a =>
                 string.Equals(a.CharacterId, currentScene.ActiveCharacter, StringComparison.OrdinalIgnoreCase));
