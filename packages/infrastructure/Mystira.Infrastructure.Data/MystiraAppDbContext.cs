@@ -293,9 +293,8 @@ public partial class MystiraAppDbContext : DbContext
 
             entity.OwnsOne(e => e.Metadata, metadata =>
             {
-                // Ignore alias properties (backed by Roles/Archetypes)
-                metadata.Ignore(m => m.Role);
-                metadata.Ignore(m => m.Archetype);
+                // Note: Role and Archetype are write-only alias properties (no getter)
+                // EF Core automatically ignores properties without getters
 
                 metadata.Property(m => m.Roles)
                     .HasConversion(

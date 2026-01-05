@@ -151,7 +151,7 @@ public class MasterDataSeederService
             Id = GenerateDeterministicId("echo-type", echoType.Value),
             Name = echoType.DisplayName,
             Description = echoType.Description,
-            Category = echoType.Category,
+            Category = string.Empty, // EchoType value object doesn't have Category
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
         }).ToList();
