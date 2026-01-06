@@ -392,7 +392,7 @@ public class BundleService : IBundleService
             Metadata = c.Metadata == null ? null : new CharacterMetadataRequest
             {
                 Role = c.Metadata.Role?.Select(r => r.Value).ToList() ?? new List<string>(),
-                Archetype = c.Metadata.Archetype?.Select(a => a.Value).ToList(),
+                Archetype = c.Metadata.Archetype?.Select(a => a.Value).ToList() ?? new List<string>(),
                 Species = c.Metadata.Species?.Value ?? string.Empty,
                 Age = c.Metadata.Age,
                 Traits = c.Metadata.Traits?.Select(t => t.Value).ToList() ?? new List<string>(),

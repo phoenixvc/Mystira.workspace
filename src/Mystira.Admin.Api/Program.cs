@@ -181,20 +181,9 @@ try
             {
                 var namespaceParts = type.Namespace.Split('.');
                 
-                // For enums: prefix with Contracts or Domain
-                if (type.IsEnum)
-                {
-                    if (type.Namespace.Contains("Mystira.Contracts"))
-                    {
-                        return $"Contracts{type.Name}";
-                    }
-                    if (type.Namespace.Contains("Mystira.Domain"))
-                    {
-                        return $"Domain{type.Name}";
-                    }
-                }
-                
-                // For types in Contracts: include sub-namespace to avoid conflicts
+                // For types in Contracts.App: include sub-namespace to avoid conflicts
+                // This must run before the general Contracts/Domain enum handling
+                // to ensure enums in Contracts.App get sub-namespace prefixes
                 if (type.Namespace.Contains("Mystira.Contracts.App"))
                 {
                     // Extract sub-namespace after "App" (e.g., "Models.GameSessions" or "Responses.Scenarios")
@@ -215,6 +204,20 @@ try
                             var subNamespace = subParts[0];
                             return $"{subNamespace}{type.Name}";
                         }
+                    }
+                }
+                
+                // For enums: prefix with Contracts or Domain
+                // This handles enums in Mystira.Contracts (but not Contracts.App, which is handled above)
+                if (type.IsEnum)
+                {
+                    if (type.Namespace.Contains("Mystira.Contracts"))
+                    {
+                        return $"Contracts{type.Name}";
+                    }
+                    if (type.Namespace.Contains("Mystira.Domain"))
+                    {
+                        return $"Domain{type.Name}";
                     }
                 }
                 
