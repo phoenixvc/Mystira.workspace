@@ -71,6 +71,16 @@ public record CreateScenarioRequest
     /// Optional list of compass axes used in this scenario.
     /// </summary>
     public List<string>? CompassAxes { get; set; }
+
+    /// <summary>
+    /// Whether this scenario is featured.
+    /// </summary>
+    public bool IsFeatured { get; set; }
+
+    /// <summary>
+    /// Optional URL for the scenario's thumbnail image.
+    /// </summary>
+    public string? ThumbnailUrl { get; set; }
 }
 
 /// <summary>
@@ -219,6 +229,11 @@ public record ScenarioQueryRequest
     /// Optional list of core compass axes to filter scenarios.
     /// </summary>
     public List<string>? CoreAxes { get; set; }
+
+    /// <summary>
+    /// Optional filter by featured status.
+    /// </summary>
+    public bool? IsFeatured { get; set; }
 }
 
 /// <summary>
