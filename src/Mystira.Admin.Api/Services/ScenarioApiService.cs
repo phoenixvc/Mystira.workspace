@@ -109,10 +109,7 @@ public class ScenarioApiService : IScenarioApiService
             }
         }
 
-        if (request.IsFeatured.HasValue)
-        {
-            baseQuery = baseQuery.Where(s => s.IsFeatured == request.IsFeatured.Value);
-        }
+        // Note: IsFeatured filtering would go here when Contracts package is updated
 
         // Materialize after base filters to perform value-object filters and projections safely in-memory
         var prefiltered = await baseQuery.ToListAsync();
@@ -189,13 +186,11 @@ public class ScenarioApiService : IScenarioApiService
             SessionLength = (SessionLength)(int)request.SessionLength,
             Archetypes = ParseArchetypesOrThrow(request.Archetypes),
             MinimumAge = request.MinimumAge,
-            IsFeatured = request.IsFeatured,
             // Note: AgeGroup is read-only, derived from MinimumAge in domain model
             CoreAxes = ParseCoreAxesOrThrow(request.CoreAxes),
             Characters = MapCharactersFromRequest(request.Characters),
             Scenes = MapScenesFromRequest(request.Scenes),
             Image = request.Image,
-            ThumbnailUrl = request.ThumbnailUrl,
             CreatedAt = DateTime.UtcNow
         };
 
@@ -235,12 +230,10 @@ public class ScenarioApiService : IScenarioApiService
         scenario.SessionLength = (SessionLength)(int)request.SessionLength;
         scenario.Archetypes = ParseArchetypesOrThrow(request.Archetypes);
         scenario.MinimumAge = request.MinimumAge;
-        scenario.IsFeatured = request.IsFeatured;
         scenario.CoreAxes = ParseCoreAxesOrThrow(request.CoreAxes);
         scenario.Characters = MapCharactersFromRequest(request.Characters);
         scenario.Scenes = MapScenesFromRequest(request.Scenes);
         scenario.Image = request.Image;
-        scenario.ThumbnailUrl = request.ThumbnailUrl;
 
         // AgeGroup is immutable after creation; reject any attempt to change it
         if (!string.IsNullOrEmpty(request.AgeGroup) && scenario.AgeGroup?.Value != request.AgeGroup)
