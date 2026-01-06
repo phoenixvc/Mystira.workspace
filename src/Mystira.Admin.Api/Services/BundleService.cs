@@ -391,11 +391,11 @@ public class BundleService : IBundleService
             Audio = c.Audio,
             Metadata = c.Metadata == null ? null : new CharacterMetadataRequest
             {
-                Role = c.Metadata.Role,
+                Role = c.Metadata.Role?.Select(r => r.Value).ToList() ?? new List<string>(),
                 Archetype = c.Metadata.Archetype?.Select(a => a.Value).ToList(),
-                Species = c.Metadata.Species,
+                Species = c.Metadata.Species?.Value ?? string.Empty,
                 Age = c.Metadata.Age,
-                Traits = c.Metadata.Traits,
+                Traits = c.Metadata.Traits?.Select(t => t.Value).ToList() ?? new List<string>(),
                 Backstory = c.Metadata.Backstory
             }
         }).ToList();

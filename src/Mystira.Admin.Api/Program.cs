@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Identity.Web;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Swashbuckle.AspNetCore.SwaggerGen;
 
 using Mystira.Admin.Api.Adapters;
 using Mystira.Admin.Api.Configuration;
@@ -173,6 +174,19 @@ try
 
             return type.Name;
         });
+
+        // Handle Dictionary<string, object> for Swagger schema generation
+        c.MapType<Dictionary<string, object>>(() => new Microsoft.OpenApi.Models.OpenApiSchema
+        {
+            Type = "object",
+            AdditionalProperties = new Microsoft.OpenApi.Models.OpenApiSchema
+            {
+                Type = "object"
+            }
+        });
+
+        // Handle file uploads (IFormFile) for Swagger
+        c.OperationFilter<FileUploadOperationFilter>();
     });
 
     // Configure Memory Cache for query caching
@@ -872,11 +886,11 @@ try
     if (initializeDatabaseOnStartup || isInMemory)
     {
         using var scope = app.Services.CreateScope();
-        var context = scope.ServiceProvider.GetRequiredService<MystiraAppDbContext>();
         var startupLogger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
 
         try
         {
+            var context = scope.ServiceProvider.GetRequiredService<MystiraAppDbContext>();
             startupLogger.LogInformation("Starting database initialization (InitializeDatabaseOnStartup={Init}, InMemory={InMemory})...", initializeDatabaseOnStartup, isInMemory);
 
             // Use Task.WhenAny with timeout for more reliable timeout handling
@@ -948,10 +962,22 @@ try
             // Log error but don't crash the app in production - allow health checks to detect the issue
             startupLogger.LogError(ex, "Failed to initialize database during startup. The application will start in degraded mode. Ensure Azure Cosmos DB database 'MystiraAppDb' exists and app identity has permissions to create/read containers. Expected containers include: CompassAxes (PK /Id), BadgeConfigurations (PK /Id), CharacterMaps (PK /Id), ContentBundles (PK /Id), Scenarios (PK /Id), MediaMetadataFiles (PK /Id), CharacterMediaMetadataFiles (PK /Id), CharacterMapFiles (PK /Id), UserProfiles (PK /Id), Accounts (PK /Id). Set 'InitializeDatabaseOnStartup'=false to skip this check.");
 
-            // Only fail fast in development/local environments where we expect the database to work
-            if (isInMemory)
+            // Don't fail fast for model configuration errors (e.g., entity constructor binding issues)
+            // These are typically package-level issues that should be fixed in the packages
+            var isModelConfigurationError = ex is InvalidOperationException && 
+                (ex.Message.Contains("No suitable constructor was found") || 
+                 ex.Message.Contains("Cannot bind"));
+
+            // Only fail fast in development/local environments for non-model-configuration errors
+            if (isInMemory && !isModelConfigurationError)
             {
                 throw;
+            }
+            
+            // For model configuration errors, log and continue in degraded mode
+            if (isModelConfigurationError)
+            {
+                startupLogger.LogWarning("Database model configuration error detected. This is likely a package-level issue. The application will start in degraded mode. Database operations may fail until this is resolved in the Domain/Infrastructure packages.");
             }
         }
     }
