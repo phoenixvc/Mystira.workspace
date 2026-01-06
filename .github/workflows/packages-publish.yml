@@ -141,11 +141,6 @@ jobs:
             echo "suffix=" >> $GITHUB_OUTPUT
             echo "is_prerelease=false" >> $GITHUB_OUTPUT
             echo "publish_to_nuget=true" >> $GITHUB_OUTPUT
-          elif [ "${{ github.ref }}" = "refs/heads/dev" ]; then
-            # Dev branch: publish without build suffix so consumers can use stable version refs
-            echo "suffix=" >> $GITHUB_OUTPUT
-            echo "is_prerelease=true" >> $GITHUB_OUTPUT
-            echo "publish_to_nuget=false" >> $GITHUB_OUTPUT
           else
             echo "suffix=build.${{ github.run_number }}" >> $GITHUB_OUTPUT
             echo "is_prerelease=true" >> $GITHUB_OUTPUT
