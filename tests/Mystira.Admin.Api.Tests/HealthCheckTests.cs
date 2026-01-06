@@ -1,6 +1,7 @@
 using System.Net;
 using FluentAssertions;
 using Mystira.Admin.Api.Tests.Infrastructure;
+using Xunit;
 
 namespace Mystira.Admin.Api.Tests;
 
