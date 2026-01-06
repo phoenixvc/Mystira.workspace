@@ -13,7 +13,7 @@ public class FileUploadParameterFilter : IParameterFilter
     public void Apply(OpenApiParameter parameter, ParameterFilterContext context)
     {
         // Skip parameter generation for IFormFile - it will be handled by the operation filter
-        if (context.ApiParameterDescription.Type == typeof(IFormFile) || 
+        if (context.ApiParameterDescription.Type == typeof(IFormFile) ||
             context.ApiParameterDescription.Type == typeof(IFormFile[]))
         {
             // Set the parameter to null or mark it as ignored
