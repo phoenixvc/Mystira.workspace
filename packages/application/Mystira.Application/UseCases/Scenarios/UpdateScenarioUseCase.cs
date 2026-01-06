@@ -52,7 +52,7 @@ public class UpdateScenarioUseCase
     /// <param name="id">The scenario identifier.</param>
     /// <param name="request">The update request containing new scenario data.</param>
     /// <returns>The updated scenario if found; otherwise, null.</returns>
-    public async Task<Scenario?> ExecuteAsync(string id, CreateScenarioRequest request)
+    public async Task<Scenario?> ExecuteAsync(string id, UpdateScenarioRequest request)
     {
         var scenario = await _repository.GetByIdAsync(id);
         if (scenario == null)
@@ -73,6 +73,14 @@ public class UpdateScenarioUseCase
         scenario.CoreAxes = ScenarioMapper.ParseCoreAxes(request.CoreAxes);
         scenario.Characters = request.Characters?.Select(ScenarioMapper.ToScenarioCharacter).ToList() ?? new List<ScenarioCharacter>();
         scenario.Scenes = request.Scenes?.Select(ScenarioMapper.ToScene).ToList() ?? new List<Scene>();
+        scenario.Image = request.Image;
+        scenario.ThumbnailUrl = request.ThumbnailUrl;
+
+        // Only update IsFeatured if explicitly provided (admin-controlled)
+        if (request.IsFeatured.HasValue)
+        {
+            scenario.IsFeatured = request.IsFeatured.Value;
+        }
 
         await _validateScenarioUseCase.ExecuteAsync(scenario);
 
@@ -83,7 +91,7 @@ public class UpdateScenarioUseCase
         return scenario;
     }
 
-    private void ValidateAgainstSchema(CreateScenarioRequest request)
+    private void ValidateAgainstSchema(UpdateScenarioRequest request)
     {
         var json = System.Text.Json.JsonSerializer.Serialize(request, SchemaSerializerOptions);
         var errors = ScenarioJsonSchema.Validate(json);

@@ -268,6 +268,43 @@ export interface CreateScenarioRequest {
 }
 
 /**
+ * Request to update an existing scenario.
+ * Extends CreateScenarioRequest with additional admin-controllable fields.
+ */
+export interface UpdateScenarioRequest {
+  /** The title of the scenario */
+  title: string;
+  /** A description of the scenario content and objectives */
+  description: string;
+  /** The difficulty level of the scenario */
+  difficulty: DifficultyLevel;
+  /** The expected duration of a session */
+  sessionLength: SessionLength;
+  /** Optional list of tags for categorization */
+  tags?: string[];
+  /** Optional list of character archetypes available in this scenario */
+  archetypes?: string[];
+  /** The target age group for this scenario */
+  ageGroup: string;
+  /** The minimum recommended age for players */
+  minimumAge: number;
+  /** Optional list of core moral compass axes explored in this scenario */
+  coreAxes?: string[];
+  /** Optional list of characters in this scenario */
+  characters?: CharacterRequest[];
+  /** Optional list of scenes in this scenario */
+  scenes?: SceneRequest[];
+  /** Optional URL or identifier for the scenario's cover image */
+  image?: string;
+  /** Optional list of compass axes used in this scenario */
+  compassAxes?: string[];
+  /** Whether this scenario is featured (admin-controlled) */
+  isFeatured?: boolean;
+  /** Optional URL for the scenario's thumbnail image */
+  thumbnailUrl?: string;
+}
+
+/**
  * Request to query scenarios with filtering and pagination
  */
 export interface ScenarioQueryRequest {
