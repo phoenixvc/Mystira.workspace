@@ -17,16 +17,14 @@ public class FileUploadOperationFilter : IOperationFilter
         var actionParameters = context.ApiDescription.ActionDescriptor.Parameters;
         
         // Check if any parameters are IFormFile or have [FromForm]
-        var fileParameters = actionParameters
-            .Where(p => p.ParameterType == typeof(IFormFile) || p.ParameterType == typeof(IFormFile[]))
-            .ToList();
-
         var formParameters = actionParameters
-            .Where(p => p.BindingInfo?.BindingSource?.Id == "Form")
+            .Where(p => p.BindingInfo?.BindingSource?.Id == "Form" ||
+                        p.ParameterType == typeof(IFormFile) || 
+                        p.ParameterType == typeof(IFormFile[]))
             .ToList();
 
         // Only process if we have file or form parameters
-        if (!fileParameters.Any() && !formParameters.Any())
+        if (!formParameters.Any())
         {
             return;
         }
