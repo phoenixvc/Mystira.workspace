@@ -33,7 +33,7 @@
                 "watch",
                 "run",
                 "--project",
-                "${workspaceFolder}/Mystira.Admin.Api.sln"
+                "${workspaceFolder}/src/Mystira.Admin.Api/Mystira.Admin.Api.csproj"
             ],
             "problemMatcher": "$msCompile"
         }
