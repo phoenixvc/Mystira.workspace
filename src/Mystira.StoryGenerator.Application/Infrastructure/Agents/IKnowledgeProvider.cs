@@ -34,4 +34,9 @@ public interface IKnowledgeProvider
     /// </summary>
     /// <returns>The tool definition.</returns>
     ToolDefinition GetToolDefinition();
+
+    /// <summary>
+    /// Returns prompt-ready guidance on how the agent should use the configured knowledge source.
+    /// </summary>
+    string GetContextualGuidance();
 }

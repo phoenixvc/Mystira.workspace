@@ -2,6 +2,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Mystira.StoryGenerator.Application.Infrastructure.Agents;
+using Mystira.StoryGenerator.Application.Services.Prompting;
 using Mystira.StoryGenerator.Contracts.Configuration;
 using Mystira.StoryGenerator.Domain.Agents;
 using Mystira.StoryGenerator.Infrastructure.Agents;
@@ -84,6 +85,10 @@ public static class FoundryServiceCollectionExtensions
                 return new FileSearchKnowledgeProvider(client, fileSearchConfig, logger);
             });
         }
+
+        services.AddSingleton<IProjectGuidelinesService, ProjectGuidelinesService>();
+        services.AddScoped<IPromptGenerator, PromptGenerator>();
+        services.AddSingleton<StorySchemaValidator>();
 
         // Register story session repository
         services.AddScoped<IStorySessionRepository>(sp =>

@@ -81,6 +81,11 @@ public class FileSearchKnowledgeProvider : IKnowledgeProvider
         });
     }
 
+    public string GetContextualGuidance()
+    {
+        return "Use the file_search tool to look up any relevant project documents, safety guidance, or world lore before you write or revise. Only include information you can support from the tool results.";
+    }
+
     /// <summary>
     /// Configuration for File Search.
     /// </summary>

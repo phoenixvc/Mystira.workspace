@@ -1,8 +1,7 @@
 using System.Text.Json;
-using Azure.AI.Projects;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Mystira.StoryGenerator.Application.Services.Prompting;
 using Mystira.StoryGenerator.Contracts.Configuration;
 using Mystira.StoryGenerator.Domain.Agents;
 using Mystira.StoryGenerator.Infrastructure.Agents;
@@ -18,7 +17,8 @@ public class AgentOrchestrator : IAgentOrchestrator
     private readonly IAgentStreamPublisher _eventPublisher;
     private readonly IStorySessionRepository _sessionRepository;
     private readonly FoundryAgentClient _foundryClient;
-    private readonly IKnowledgeProvider _knowledgeProvider;
+    private readonly IPromptGenerator _promptGenerator;
+    private readonly StorySchemaValidator _schemaValidator;
     private readonly FoundryAgentConfig _config;
 
     public AgentOrchestrator(
@@ -26,14 +26,16 @@ public class AgentOrchestrator : IAgentOrchestrator
         IAgentStreamPublisher eventPublisher,
         IStorySessionRepository sessionRepository,
         FoundryAgentClient foundryClient,
-        IKnowledgeProvider knowledgeProvider,
+        IPromptGenerator promptGenerator,
+        StorySchemaValidator schemaValidator,
         IOptions<FoundryAgentConfig> config)
     {
         _logger = logger;
         _eventPublisher = eventPublisher;
         _sessionRepository = sessionRepository;
         _foundryClient = foundryClient;
-        _knowledgeProvider = knowledgeProvider;
+        _promptGenerator = promptGenerator;
+        _schemaValidator = schemaValidator;
         _config = config.Value;
     }
 
@@ -47,6 +49,7 @@ public class AgentOrchestrator : IAgentOrchestrator
         {
             SessionId = sessionId,
             KnowledgeMode = Enum.Parse<KnowledgeMode>(knowledgeMode, true),
+            AgeGroup = ageGroup,
             Stage = StorySessionStage.Uninitialized,
             IterationCount = 0,
             CreatedAt = DateTime.UtcNow,
@@ -55,27 +58,6 @@ public class AgentOrchestrator : IAgentOrchestrator
 
         try
         {
-            // Create Foundry thread with metadata
-            var threadMetadata = new Dictionary<string, string>
-            {
-                { "session_id", sessionId },
-                { "age_group", ageGroup },
-                { "knowledge_mode", knowledgeMode }
-            };
-
-            // Attach knowledge provider to thread based on mode
-            if (session.KnowledgeMode == KnowledgeMode.AISearch)
-            {
-                var searchContext = await _knowledgeProvider.SearchAsync("", new List<string> { ageGroup });
-                // Store search context for later use
-                session.CurrentStoryVersion = JsonSerializer.Serialize(searchContext);
-            }
-            else // FileSearch mode
-            {
-                // For FileSearch mode, we need to set up the vector store
-                // This would be configured in the thread creation
-            }
-
             // Create the thread via Foundry
             var threadResult = await _foundryClient.CreateThreadAsync(_config.WriterAgentId);
 
@@ -150,7 +132,10 @@ public class AgentOrchestrator : IAgentOrchestrator
             });
 
             // Build writer-agent prompt
-            var writerPrompt = BuildWriterPrompt(storyPrompt, session);
+            var writerPrompt = _promptGenerator.GenerateWriterPrompt(
+                storyPrompt,
+                session.AgeGroup,
+                session.TargetAxes);
 
             // Create and start the run
             var runResult = await _foundryClient.CreateRunAsync(
@@ -179,12 +164,26 @@ public class AgentOrchestrator : IAgentOrchestrator
                 throw new InvalidOperationException("No assistant response received from writer agent");
             }
 
-            var storyJson = assistantMessages.Last().Content;
+            var rawStoryResponse = assistantMessages.Last().Content;
+
+            var (storyParseOk, storyDoc, storyParseError) = AgentResponseParser.TryParseJsonResponse<JsonDocument>(rawStoryResponse);
+            if (!storyParseOk || storyDoc == null)
+            {
+                throw new InvalidOperationException($"Writer agent returned invalid JSON: {storyParseError}");
+            }
+
+            string storyJson;
+            using (storyDoc)
+            {
+                storyJson = storyDoc.RootElement.GetRawText();
+            }
 
             // Validate JSON schema
-            if (!await ValidateStorySchemaAsync(storyJson))
+            var (isValid, errors) = await _schemaValidator.ValidateAsync(storyJson, ct);
+            if (!isValid)
             {
-                throw new InvalidOperationException("Generated story failed schema validation");
+                var errorSummary = string.Join(" | ", errors.Take(10));
+                throw new InvalidOperationException($"Generated story failed schema validation: {errorSummary}");
             }
 
             // Store as current version and add to history
@@ -268,13 +267,19 @@ public class AgentOrchestrator : IAgentOrchestrator
                 Payload = new { Phase = "Schema and Safety Checks" }
             });
 
-            var schemaValid = await ValidateStorySchemaAsync(session.CurrentStoryVersion);
+            var (schemaValid, schemaErrors) = await _schemaValidator.ValidateAsync(session.CurrentStoryVersion, ct);
             var safetyGatePassed = await RunSafetyGateAsync(session.CurrentStoryVersion);
 
             if (!schemaValid || !safetyGatePassed)
             {
                 var findings = new List<string>();
-                if (!schemaValid) findings.Add("Story failed schema validation");
+
+                if (!schemaValid)
+                {
+                    findings.Add("Story failed schema validation");
+                    findings.AddRange(schemaErrors.Take(10));
+                }
+
                 if (!safetyGatePassed) findings.Add("Story failed safety gate checks");
 
                 session.Stage = StorySessionStage.RefinementRequested;
@@ -318,7 +323,12 @@ public class AgentOrchestrator : IAgentOrchestrator
                 Payload = new { Phase = "Judge Agent Evaluation" }
             });
 
-            var judgePrompt = BuildJudgePrompt(session, logicContext);
+            var judgePrompt = _promptGenerator.GenerateJudgePrompt(
+                session.CurrentStoryVersion,
+                session.AgeGroup,
+                session.TargetAxes);
+
+            judgePrompt += $"\n\n## Deterministic Story Structure Analysis\n{logicContext}\n";
 
             // Create and start the run
             var runResult = await _foundryClient.CreateRunAsync(
@@ -437,7 +447,15 @@ public class AgentOrchestrator : IAgentOrchestrator
             });
 
             // Build refiner-agent prompt
-            var refinerPrompt = BuildRefinerPrompt(session, focus);
+            if (session.LastEvaluationReport == null)
+            {
+                return (false, "Cannot refine without an evaluation report");
+            }
+
+            var refinerPrompt = _promptGenerator.GenerateRefinerPrompt(
+                session.CurrentStoryVersion,
+                session.LastEvaluationReport,
+                focus);
 
             // Create and start the run
             var runResult = await _foundryClient.CreateRunAsync(
@@ -460,11 +478,25 @@ public class AgentOrchestrator : IAgentOrchestrator
             }
 
             // Parse response and validate schema
-            var refinedStoryJson = completionResult.Messages.Last(m => m.Role == "assistant").Content;
-            
-            if (!await ValidateStorySchemaAsync(refinedStoryJson))
+            var rawRefinedResponse = completionResult.Messages.Last(m => m.Role == "assistant").Content;
+
+            var (refinedParseOk, refinedDoc, refinedParseError) = AgentResponseParser.TryParseJsonResponse<JsonDocument>(rawRefinedResponse);
+            if (!refinedParseOk || refinedDoc == null)
             {
-                throw new InvalidOperationException("Refined story failed schema validation");
+                throw new InvalidOperationException($"Refiner agent returned invalid JSON: {refinedParseError}");
+            }
+
+            string refinedStoryJson;
+            using (refinedDoc)
+            {
+                refinedStoryJson = refinedDoc.RootElement.GetRawText();
+            }
+
+            var (isValid, errors) = await _schemaValidator.ValidateAsync(refinedStoryJson, ct);
+            if (!isValid)
+            {
+                var errorSummary = string.Join(" | ", errors.Take(10));
+                throw new InvalidOperationException($"Refined story failed schema validation: {errorSummary}");
             }
 
             // Store new version
@@ -541,50 +573,19 @@ public class AgentOrchestrator : IAgentOrchestrator
 
     #region Private Helper Methods
 
-    private string BuildWriterPrompt(string storyPrompt, StorySession session)
-    {
-        var prompt = $@"You are a creative story writer for children's interactive stories. Generate a complete story that follows the provided schema.
 
-Story Prompt: {storyPrompt}
-
-Requirements:
-1. Create a story suitable for the target age group
-2. Follow the JSON schema exactly - all required fields must be present
-3. Include engaging characters and scenes
-4. Ensure age-appropriate content and difficulty
-5. Make the story interactive with meaningful choices
-
-Please generate a complete story in valid JSON format that matches the schema.";
-
-        return prompt;
-    }
-
-    private async Task<bool> ValidateStorySchemaAsync(string storyJson)
-    {
-        try
-        {
-            // For now, basic JSON validation - in production this would use JSON Schema validation
-            var doc = JsonDocument.Parse(storyJson);
-            return doc.RootElement.EnumerateObject().Any();
-        }
-        catch (JsonException)
-        {
-            return false;
-        }
-    }
-
-    private async Task<bool> RunSafetyGateAsync(string storyJson)
+    private Task<bool> RunSafetyGateAsync(string storyJson)
     {
         // TODO: Implement local safety gate checks
         // This would check for inappropriate content, age-appropriate language, etc.
-        return true;
+        return Task.FromResult(true);
     }
 
-    private async Task<object> AnalyzeStoryStructureAsync(string storyJson)
+    private Task<object> AnalyzeStoryStructureAsync(string storyJson)
     {
         // TODO: Implement SRL (Semantic Role Labelling) and story structure analysis
         // This would extract scenes, characters, state transitions
-        return new { Scenes = new List<object>(), Characters = new List<object>() };
+        return Task.FromResult<object>(new { Scenes = new List<object>(), Characters = new List<object>() });
     }
 
     private string ComputeNarrativeConsistencyContext(object storyStructure)
@@ -593,68 +594,15 @@ Please generate a complete story in valid JSON format that matches the schema.";
         return "Narrative consistency context";
     }
 
-    private string BuildJudgePrompt(StorySession session, string logicContext)
+
+    private Task<EvaluationReport> ParseEvaluationReportAsync(string judgeResponse, int iterationNumber)
     {
-        var prompt = $@"You are an expert judge evaluating children's interactive stories for quality, consistency, and age-appropriateness.
-
-Story to evaluate:
-{session.CurrentStoryVersion}
-
-Logic context:
-{logicContext}
-
-Please provide a comprehensive evaluation in the following JSON format:
-{{
-  ""iteration_number"": {session.IterationCount},
-  ""overall_status"": ""Pass|Fail|ReviewRequired"",
-  ""safety_gate_passed"": true,
-  ""axes_alignment_score"": 0.0-1.0,
-  ""dev_principles_score"": 0.0-1.0,
-  ""narrative_logic_score"": 0.0-1.0,
-  ""findings"": {{
-    ""category1"": [""finding1"", ""finding2""],
-    ""category2"": [""finding3""]
-  }},
-  ""recommendation"": ""Overall recommendation for improvement"",
-  ""token_usage"": 0
-}}
-
-Evaluate based on:
-1. Schema compliance and JSON validity
-2. Age-appropriateness and safety
-3. Character consistency and development
-4. Narrative logic and flow
-5. Educational value and engagement
-6. Interactive elements quality";
-
-        return prompt;
-    }
-
-    private async Task<EvaluationReport> ParseEvaluationReportAsync(string judgeResponse, int iterationNumber)
-    {
-        try
+        var (success, report, error) = AgentResponseParser.TryParseJsonResponse<EvaluationReport>(judgeResponse);
+        if (!success || report == null)
         {
-            var doc = JsonDocument.Parse(judgeResponse);
-            var root = doc.RootElement;
+            _logger.LogWarning("Failed to parse evaluation report JSON: {Error}. Raw response: {Response}", error, judgeResponse);
 
-            return new EvaluationReport
-            {
-                IterationNumber = iterationNumber,
-                OverallStatus = Enum.Parse<EvaluationStatus>(root.GetProperty("overall_status").GetString() ?? "Fail"),
-                SafetyGatePassed = root.GetProperty("safety_gate_passed").GetBoolean(),
-                AxesAlignmentScore = root.GetProperty("axes_alignment_score").GetSingle(),
-                DevPrinciplesScore = root.GetProperty("dev_principles_score").GetSingle(),
-                NarrativeLogicScore = root.GetProperty("narrative_logic_score").GetSingle(),
-                Findings = JsonSerializer.Deserialize<Dictionary<string, List<string>>>(root.GetProperty("findings").GetRawText()) ?? new(),
-                Recommendation = root.GetProperty("recommendation").GetString() ?? "",
-                TokenUsage = root.GetProperty("token_usage").GetInt32()
-            };
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Failed to parse evaluation report: {Response}", judgeResponse);
-            
-            return new EvaluationReport
+            return Task.FromResult(new EvaluationReport
             {
                 IterationNumber = iterationNumber,
                 OverallStatus = EvaluationStatus.Fail,
@@ -662,55 +610,33 @@ Evaluate based on:
                 AxesAlignmentScore = 0,
                 DevPrinciplesScore = 0,
                 NarrativeLogicScore = 0,
-                Findings = new Dictionary<string, List<string>> { { "parsing_error", new List<string> { ex.Message } } },
-                Recommendation = "Failed to parse evaluation report",
-                TokenUsage = 0
-            };
+                Findings = new Dictionary<string, List<string>>
+                {
+                    { "parsing_error", new List<string> { error ?? "Unknown parsing error" } }
+                },
+                Recommendation = "Failed to parse evaluation report"
+            });
         }
+
+        report.IterationNumber = iterationNumber;
+        report.EvaluationTimestamp = DateTime.UtcNow;
+
+        var computed = EvaluationReport.DetermineOverallStatus(
+            report.SafetyGatePassed,
+            report.AxesAlignmentScore,
+            report.DevPrinciplesScore,
+            report.NarrativeLogicScore);
+
+        if (report.OverallStatus != computed)
+        {
+            report.Findings.TryAdd("ScoringRules", new List<string>());
+            report.Findings["ScoringRules"].Add($"overall_status '{report.OverallStatus}' did not match scoring rules; expected '{computed}'.");
+            report.OverallStatus = computed;
+        }
+
+        return Task.FromResult(report);
     }
 
-    private string BuildRefinerPrompt(StorySession session, UserRefinementFocus focus)
-    {
-        var prompt = $@"You are an expert story refiner. Refine the existing story based on the evaluation feedback and user focus areas.
-
-Current Story:
-{session.CurrentStoryVersion}
-
-Evaluation Feedback:
-{JsonSerializer.Serialize(session.LastEvaluationReport, new JsonSerializerOptions { WriteIndented = true })}
-
-User Focus Areas:
-- Target Scenes: {string.Join(", ", focus.TargetSceneIds)}
-- Aspects to Focus On: {string.Join(", ", focus.Aspects)}
-- Constraints: {focus.Constraints}
-- Full Rewrite: {focus.IsFullRewrite}
-
-Refinement Instructions:
-";
-
-        if (focus.IsFullRewrite)
-        {
-            prompt += "1. Rewrite the entire story incorporating all feedback\n";
-            prompt += "2. Ensure all required schema fields are present and valid\n";
-            prompt += "3. Address all issues identified in the evaluation\n";
-        }
-        else
-        {
-            prompt += $"1. ONLY edit scenes: {string.Join(", ", focus.TargetSceneIds)}\n";
-            prompt += $"2. ONLY modify aspects: {string.Join(", ", focus.Aspects)}\n";
-            prompt += "3. Preserve all other scenes and aspects without change\n";
-            prompt += "4. Ensure schema validity is maintained\n";
-        }
-
-        if (!string.IsNullOrEmpty(focus.Constraints))
-        {
-            prompt += $"\nAdditional constraints:\n{focus.Constraints}\n";
-        }
-
-        prompt += "\nPlease provide the refined story as valid JSON matching the original schema.";
-
-        return prompt;
-    }
 
     #endregion
 }

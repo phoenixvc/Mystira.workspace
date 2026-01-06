@@ -31,6 +31,11 @@ public class StartSessionRequest
     public string AgeGroup { get; set; } = string.Empty;
 
     /// <summary>
+    /// Optional narrative axes to emphasize.
+    /// </summary>
+    public List<string> TargetAxes { get; set; } = new();
+
+    /// <summary>
     /// Validates that the knowledge mode is one of the allowed values.
     /// </summary>
     public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)

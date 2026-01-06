@@ -24,6 +24,16 @@ public class StorySession
     public KnowledgeMode KnowledgeMode { get; set; }
 
     /// <summary>
+    /// Target age group for this session.
+    /// </summary>
+    public string AgeGroup { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Target narrative axes for this session.
+    /// </summary>
+    public List<string> TargetAxes { get; set; } = new();
+
+    /// <summary>
     /// The current stage of the story generation process.
     /// </summary>
     public StorySessionStage Stage { get; set; }

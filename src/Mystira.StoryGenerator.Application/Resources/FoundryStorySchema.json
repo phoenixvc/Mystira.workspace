@@ -1,0 +1,134 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Mystira Foundry Story Schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "metadata",
+    "characters",
+    "scenes",
+    "narrative_summary",
+    "safety_annotations"
+  ],
+  "properties": {
+    "metadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "title",
+        "age_group",
+        "themes",
+        "target_axes",
+        "created_at",
+        "version"
+      ],
+      "properties": {
+        "title": { "type": "string" },
+        "age_group": { "type": "string" },
+        "themes": { "type": "array", "items": { "type": "string" } },
+        "target_axes": { "type": "array", "items": { "type": "string" } },
+        "created_at": { "type": "string", "format": "date-time" },
+        "version": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "characters": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "name",
+          "role",
+          "age",
+          "key_traits",
+          "initial_axes_state"
+        ],
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" },
+          "role": { "type": "string", "enum": ["protagonist", "antagonist", "support"] },
+          "age": { "type": "integer", "minimum": 0 },
+          "key_traits": { "type": "array", "items": { "type": "string" } },
+          "initial_axes_state": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "number",
+              "minimum": -1.0,
+              "maximum": 1.0
+            }
+          }
+        }
+      }
+    },
+    "scenes": {
+      "type": "array",
+      "minItems": 3,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "title",
+          "sequence",
+          "description",
+          "setting",
+          "characters_involved",
+          "choices",
+          "narrative"
+        ],
+        "properties": {
+          "id": { "type": "string" },
+          "title": { "type": "string" },
+          "sequence": { "type": "integer", "minimum": 1 },
+          "description": { "type": "string" },
+          "setting": { "type": "string" },
+          "characters_involved": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "choices": {
+            "type": "array",
+            "minItems": 2,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "id",
+                "text",
+                "consequence_axes_delta",
+                "narrative_impact"
+              ],
+              "properties": {
+                "id": { "type": "string" },
+                "text": { "type": "string" },
+                "consequence_axes_delta": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "number",
+                    "minimum": -1.0,
+                    "maximum": 1.0
+                  }
+                },
+                "narrative_impact": { "type": "string" }
+              }
+            }
+          },
+          "narrative": { "type": "string" }
+        }
+      }
+    },
+    "narrative_summary": { "type": "string" },
+    "safety_annotations": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["content_warnings", "age_appropriateness_notes", "themes_explored"],
+      "properties": {
+        "content_warnings": { "type": "array", "items": { "type": "string" } },
+        "age_appropriateness_notes": { "type": "string" },
+        "themes_explored": { "type": "array", "items": { "type": "string" } }
+      }
+    }
+  }
+}

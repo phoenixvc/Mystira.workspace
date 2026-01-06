@@ -81,6 +81,11 @@ public class AISearchKnowledgeProvider : IKnowledgeProvider
         return new ToolDefinition("azure_ai_search", parameters);
     }
 
+    public string GetContextualGuidance()
+    {
+        return $"Use the azure_ai_search tool to retrieve relevant instructions, safety guidance, and age-group-specific writing principles from the '{_config.IndexName}' index before you write or revise. Only incorporate information supported by the retrieved documents.";
+    }
+
     /// <summary>
     /// Searches the AI Search index for relevant documents.
     /// </summary>
