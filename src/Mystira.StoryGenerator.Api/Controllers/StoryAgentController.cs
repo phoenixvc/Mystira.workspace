@@ -5,6 +5,7 @@ using Mystira.StoryGenerator.Application.Infrastructure.Agents;
 using Mystira.StoryGenerator.Domain.Agents;
 using System.Text.Json;
 using System.Collections.Concurrent;
+using Mystira.StoryGenerator.Contracts.Models;
 
 namespace Mystira.StoryGenerator.Api.Controllers;
 
@@ -162,7 +163,7 @@ public class StoryAgentController : ControllerBase
 
             // Evaluate story
             var (success, evaluationReport) = await _agentOrchestrator.EvaluateStoryAsync(sessionId, cts.Token);
-            
+
             if (!success)
             {
                 return StatusCode(500, new { error = "Evaluation failed", sessionId });
@@ -190,7 +191,7 @@ public class StoryAgentController : ControllerBase
                 RecommendedAction = recommendedAction
             };
 
-            _logger.LogInformation("Evaluation complete for session {SessionId}. Status: {Status}, Action: {Action}", 
+            _logger.LogInformation("Evaluation complete for session {SessionId}. Status: {Status}, Action: {Action}",
                 sessionId, evaluationReport.OverallStatus, recommendedAction);
 
             return Ok(response);
@@ -281,8 +282,8 @@ public class StoryAgentController : ControllerBase
                 SessionId = sessionId,
                 Stage = session.Stage.ToString(),
                 IterationCount = session.IterationCount + 1,
-                RefinedStoryPreview = session.CurrentStoryVersion.Length > 500 
-                    ? session.CurrentStoryVersion[..500] + "..." 
+                RefinedStoryPreview = session.CurrentStoryVersion.Length > 500
+                    ? session.CurrentStoryVersion[..500] + "..."
                     : session.CurrentStoryVersion
             };
 
@@ -387,7 +388,7 @@ public class StoryAgentController : ControllerBase
                 {
                     var json = JsonSerializer.Serialize(evt, _jsonOptions);
                     var sseData = $"event: {evt.Type}\ndata: {json}\n\n";
-                    
+
                     await Response.WriteAsync(sseData);
                     await Response.Body.FlushAsync();
 

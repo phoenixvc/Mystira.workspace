@@ -22,9 +22,9 @@ public class InMemoryStreamPublisher : IAgentStreamPublisher
     public async Task PublishEventAsync(string sessionId, AgentStreamEvent evt)
     {
         // Add to event history
-        _eventHistory.AddOrUpdate(sessionId, 
+        _eventHistory.AddOrUpdate(sessionId,
             new List<AgentStreamEvent> { evt },
-            (key, existing) => 
+            (key, existing) =>
             {
                 existing.Add(evt);
                 // Keep only the last MaxEventsPerSession events
@@ -53,7 +53,7 @@ public class InMemoryStreamPublisher : IAgentStreamPublisher
         [EnumeratorCancellation] CancellationToken ct = default)
     {
         // Create or get the session channel
-        var channel = _sessionChannels.GetOrAdd(sessionId, _ => 
+        var channel = _sessionChannels.GetOrAdd(sessionId, _ =>
             SessionChannel.Create());
 
         // First, yield all existing events (replay)
@@ -88,8 +88,8 @@ public class InMemoryStreamPublisher : IAgentStreamPublisher
     /// <returns>List of events for the session.</returns>
     public List<AgentStreamEvent> GetEventHistory(string sessionId)
     {
-        return _eventHistory.TryGetValue(sessionId, out var events) 
-            ? new List<AgentStreamEvent>(events) 
+        return _eventHistory.TryGetValue(sessionId, out var events)
+            ? new List<AgentStreamEvent>(events)
             : new List<AgentStreamEvent>();
     }
 
@@ -127,7 +127,7 @@ public class InMemoryStreamPublisher : IAgentStreamPublisher
 
         public static SessionChannel Create()
         {
-            var channel = Channel.CreateUnbounded<AgentStreamEvent>(
+            var channel = System.Threading.Channels.Channel.CreateUnbounded<AgentStreamEvent>(
                 new UnboundedChannelOptions
                 {
                     SingleReader = false,

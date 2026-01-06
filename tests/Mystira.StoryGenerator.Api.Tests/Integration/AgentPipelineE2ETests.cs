@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Mystira.StoryGenerator.Api;
 using Mystira.StoryGenerator.Api.Models;
 using Mystira.StoryGenerator.Application.Infrastructure.Agents;
+using Mystira.StoryGenerator.Contracts.Models;
 using Mystira.StoryGenerator.Domain.Agents;
 using System.Net.Http.Json;
 using System.Text.Json;
@@ -76,8 +77,8 @@ public class AgentPipelineE2ETests : IClassFixture<WebApplicationFactory<Program
         var stateContent = await stateResponse.Content.ReadAsStringAsync();
         var stateResult = JsonSerializer.Deserialize<SessionStateResponse>(stateContent, _jsonOptions);
         Assert.NotNull(stateResult);
-        Assert.NotNull(stateResult.CurrentStoryVersion);
-        Assert.Contains("\"title\"", stateResult.CurrentStoryVersion);
+        Assert.NotNull(stateResult.CurrentStoryJson);
+        Assert.Contains("\"title\"", stateResult.CurrentStoryJson);
 
         // Step 4: Evaluate story
         var evaluateResponse = await _client.PostAsJsonAsync($"/api/story-agent/sessions/{sessionId}/evaluate", new EvaluateRequest());
@@ -86,14 +87,14 @@ public class AgentPipelineE2ETests : IClassFixture<WebApplicationFactory<Program
         var evaluateContent = await evaluateResponse.Content.ReadAsStringAsync();
         var evaluateResult = JsonSerializer.Deserialize<EvaluateResponse>(evaluateContent, _jsonOptions);
         Assert.NotNull(evaluateResult);
-        Assert.NotNull(evaluateResult.Report);
+        Assert.NotNull(evaluateResult.EvaluationReport);
 
         // Step 5: Verify evaluation passed
-        Assert.Equal("Pass", evaluateResult.Report.OverallStatus);
-        Assert.True(evaluateResult.Report.SafetyGatePassed);
-        Assert.True(evaluateResult.Report.AxesAlignmentScore >= 0.7f);
-        Assert.True(evaluateResult.Report.DevPrinciplesScore >= 0.7f);
-        Assert.True(evaluateResult.Report.NarrativeLogicScore >= 0.7f);
+        Assert.Equal(EvaluationStatus.Pass, evaluateResult.EvaluationReport.OverallStatus);
+        Assert.True(evaluateResult.EvaluationReport.SafetyGatePassed);
+        Assert.True(evaluateResult.EvaluationReport.AxesAlignmentScore >= 0.7f);
+        Assert.True(evaluateResult.EvaluationReport.DevPrinciplesScore >= 0.7f);
+        Assert.True(evaluateResult.EvaluationReport.NarrativeLogicScore >= 0.7f);
 
         // Step 6: Verify final state
         var finalState = await GetSessionStateAsync(sessionId);
@@ -129,18 +130,18 @@ public class AgentPipelineE2ETests : IClassFixture<WebApplicationFactory<Program
             await firstEvalResponse.Content.ReadAsStringAsync(), _jsonOptions);
         
         Assert.NotNull(firstEvalResult);
-        Assert.Equal("Fail", firstEvalResult.Report.OverallStatus);
+        Assert.Equal(EvaluationStatus.Fail, firstEvalResult.EvaluationReport.OverallStatus);
 
-        // Verify state transition to RequiresRefinement
+        // Verify state transition to RefinementRequested
         var stateAfterEval = await GetSessionStateAsync(sessionId);
-        Assert.Equal("RequiresRefinement", stateAfterEval.Stage);
+        Assert.Equal("RefinementRequested", stateAfterEval.Stage);
 
         // Step 3: Targeted refinement on specific scenes
         var refineRequest = new RefineRequest
         {
             TargetSceneIds = new List<string> { "scene_2", "scene_3" },
             Aspects = new List<string> { "dialogue", "tone" },
-            UserGuidance = "Make the dialogue more age-appropriate and improve the tone"
+            Constraints = "Make the dialogue more age-appropriate and improve the tone"
         };
 
         var refineResponse = await _client.PostAsJsonAsync($"/api/story-agent/sessions/{sessionId}/refine", refineRequest);
@@ -159,8 +160,8 @@ public class AgentPipelineE2ETests : IClassFixture<WebApplicationFactory<Program
             await secondEvalResponse.Content.ReadAsStringAsync(), _jsonOptions);
         
         Assert.NotNull(secondEvalResult);
-        Assert.Equal("Pass", secondEvalResult.Report.OverallStatus);
-        Assert.Equal(1, secondEvalResult.Report.IterationNumber);
+        Assert.Equal(EvaluationStatus.Pass, secondEvalResult.EvaluationReport.OverallStatus);
+        Assert.Equal(1, secondEvalResult.EvaluationReport.IterationNumber);
 
         // Verify story versions history
         var finalState = await GetSessionStateAsync(sessionId);
@@ -202,10 +203,10 @@ public class AgentPipelineE2ETests : IClassFixture<WebApplicationFactory<Program
             if (i < 4)
             {
                 // First 4 iterations should return Fail
-                Assert.Equal("Fail", evalResult.Report.OverallStatus);
-                
+                Assert.Equal(EvaluationStatus.Fail, evalResult.EvaluationReport.OverallStatus);
+
                 var state = await GetSessionStateAsync(sessionId);
-                Assert.Equal("RequiresRefinement", state.Stage);
+                Assert.Equal("RefinementRequested", state.Stage);
                 Assert.Equal(i, state.IterationCount);
 
                 // Refine
@@ -223,12 +224,12 @@ public class AgentPipelineE2ETests : IClassFixture<WebApplicationFactory<Program
             else
             {
                 // 5th iteration should escalate
-                Assert.Equal("Fail", evalResult.Report.OverallStatus);
-                
+                Assert.Equal(EvaluationStatus.Fail, evalResult.EvaluationReport.OverallStatus);
+
                 var finalState = await GetSessionStateAsync(sessionId);
                 Assert.Equal("StuckNeedsReview", finalState.Stage);
                 Assert.Equal(5, finalState.IterationCount);
-                Assert.Contains("maximum iterations", evalResult.Message, StringComparison.OrdinalIgnoreCase);
+                Assert.Contains("maximum iterations", evalResult.EvaluationReport.Recommendation ?? "", StringComparison.OrdinalIgnoreCase);
                 
                 // Further refinement should be rejected
                 var refineRequest = new RefineRequest { TargetSceneIds = new List<string> { "scene_1" } };
@@ -263,17 +264,17 @@ public class AgentPipelineE2ETests : IClassFixture<WebApplicationFactory<Program
 
         // 2. UI polls for generation completion
         var stateAfterGen = await PollUntilStageAsync(sessionId, "Validating", maxAttempts: 30);
-        Assert.NotNull(stateAfterGen.CurrentStoryVersion);
+        Assert.NotNull(stateAfterGen.CurrentStoryJson);
 
         // 3. UI automatically triggers evaluation
         var evalResponse = await _client.PostAsJsonAsync($"/api/story-agent/sessions/{sessionId}/evaluate", new EvaluateRequest());
         Assert.Equal(System.Net.HttpStatusCode.OK, evalResponse.StatusCode);
-        
+
         var evalResult = JsonSerializer.Deserialize<EvaluateResponse>(
             await evalResponse.Content.ReadAsStringAsync(), _jsonOptions);
 
         // 4. If failed, UI offers refinement option
-        if (evalResult!.Report.OverallStatus == "Fail")
+        if (evalResult!.EvaluationReport.OverallStatus == EvaluationStatus.Fail)
         {
             var refineRequest = new RefineRequest
             {
@@ -294,12 +295,12 @@ public class AgentPipelineE2ETests : IClassFixture<WebApplicationFactory<Program
 
         // 5. Verify final story is valid and ready to publish
         var finalState = await GetSessionStateAsync(sessionId);
-        Assert.NotNull(finalState.CurrentStoryVersion);
+        Assert.NotNull(finalState.CurrentStoryJson);
         Assert.NotNull(finalState.LastEvaluationReport);
         Assert.Contains(finalState.Stage, new[] { "Evaluated", "Complete" });
-        
+
         // Verify story is valid JSON
-        var storyJson = JsonSerializer.Deserialize<JsonDocument>(finalState.CurrentStoryVersion);
+        var storyJson = JsonSerializer.Deserialize<JsonDocument>(finalState.CurrentStoryJson);
         Assert.NotNull(storyJson);
     }
 
@@ -389,7 +390,7 @@ public class AgentPipelineE2ETests : IClassFixture<WebApplicationFactory<Program
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow,
                 ThreadId = $"thread-{Guid.NewGuid():N}",
-                StoryVersions = new List<StoryVersion>()
+                StoryVersions = new List<StoryVersionSnapshot>()
             };
             
             _sessions[sessionId] = session;
@@ -402,7 +403,7 @@ public class AgentPipelineE2ETests : IClassFixture<WebApplicationFactory<Program
                 
                 await Task.Delay(500);
                 session.CurrentStoryVersion = GenerateMockStory();
-                session.StoryVersions.Add(new StoryVersion
+                session.StoryVersions.Add(new StoryVersionSnapshot
                 {
                     VersionNumber = 1,
                     StoryJson = session.CurrentStoryVersion,
@@ -450,7 +451,7 @@ public class AgentPipelineE2ETests : IClassFixture<WebApplicationFactory<Program
                 }
                 else
                 {
-                    session.Stage = StorySessionStage.RequiresRefinement;
+                    session.Stage = StorySessionStage.RefinementRequested;
                     report = new EvaluationReport
                     {
                         IterationNumber = session.IterationCount,
@@ -465,7 +466,7 @@ public class AgentPipelineE2ETests : IClassFixture<WebApplicationFactory<Program
             else if (shouldFailInitially && session.IterationCount == 0)
             {
                 // Fail on first evaluation, pass on subsequent
-                session.Stage = StorySessionStage.RequiresRefinement;
+                session.Stage = StorySessionStage.RefinementRequested;
                 report = new EvaluationReport
                 {
                     IterationNumber = session.IterationCount,
@@ -512,7 +513,7 @@ public class AgentPipelineE2ETests : IClassFixture<WebApplicationFactory<Program
             
             var refinedStory = GenerateMockStory($" (refined v{session.IterationCount})");
             session.CurrentStoryVersion = refinedStory;
-            session.StoryVersions.Add(new StoryVersion
+            session.StoryVersions.Add(new StoryVersionSnapshot
             {
                 VersionNumber = session.IterationCount + 1,
                 StoryJson = refinedStory,

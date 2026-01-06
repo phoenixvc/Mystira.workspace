@@ -1,9 +1,10 @@
 @using Mystira.StoryGenerator.Api.Models
+@using Mystira.StoryGenerator.Contracts.Models
 @using System.Text.Json
 
 <div class="refinement-panel">
     <h3>Refine Story</h3>
-    
+
     <div class="refine-form">
         <div class="form-group">
             <label>
@@ -11,7 +12,7 @@
                 Full Rewrite (uncheck for targeted refinement)
             </label>
         </div>
-        
+
         @if (!isFullRewrite)
         {
             <div class="form-group">
@@ -22,9 +23,9 @@
                         @foreach (var scene in availableScenes)
                         {
                             <label>
-                                <input 
-                                    type="checkbox" 
-                                    @onchange="@((ChangeEventArgs e) => ToggleScene(scene, (bool)e.Value!))"
+                                <input
+                                    type="checkbox"
+                                    @onchange="@((Microsoft.AspNetCore.Components.ChangeEventArgs e) => ToggleScene(scene, (bool)e.Value!))"
                                     disabled="@IsLoading" />
                                 @scene.Title
                             </label>
@@ -36,16 +37,16 @@
                     }
                 </div>
             </div>
-            
+
             <div class="form-group">
                 <label>Aspects to Focus On</label>
                 <div class="checkbox-group">
                     @foreach (var aspect in availableAspects)
                     {
                         <label>
-                            <input 
-                                type="checkbox" 
-                                @onchange="@((ChangeEventArgs e) => ToggleAspect(aspect, (bool)e.Value!))"
+                            <input
+                                type="checkbox"
+                                @onchange="@((Microsoft.AspNetCore.Components.ChangeEventArgs e) => ToggleAspect(aspect, (bool)e.Value!))"
                                 disabled="@IsLoading" />
                             @FormatAspectName(aspect)
                         </label>
@@ -53,18 +54,18 @@
                 </div>
             </div>
         }
-        
+
         <div class="form-group">
             <label>Additional Instructions</label>
-            <textarea 
+            <textarea
                 @bind="customInstructions"
                 placeholder="e.g., Make the tone more humorous, Add more dialogue..."
                 rows="3"
                 disabled="@IsLoading" />
         </div>
-        
-        <button 
-            @onclick="Submit" 
+
+        <button
+            @onclick="Submit"
             disabled="@IsLoading"
             class="btn-primary">
             @if (IsLoading)
@@ -83,17 +84,17 @@
     [Parameter] public SessionStateResponse? Session { get; set; }
     [Parameter] public EventCallback<RefineRequest> OnRefine { get; set; }
     [Parameter] public bool IsLoading { get; set; }
-    
+
     private bool isFullRewrite = true;
     private List<SceneInfo> availableScenes = new();
     private List<string> selectedScenes = new();
-    private List<string> availableAspects = new() 
-    { 
-        "tone", "character_consistency", "pacing", "plot_logic", "dialogue", "descriptions" 
+    private List<string> availableAspects = new()
+    {
+        "tone", "character_consistency", "pacing", "plot_logic", "dialogue", "descriptions"
     };
     private List<string> selectedAspects = new();
     private string customInstructions = "";
-    
+
     protected override void OnParametersSet()
     {
         // Extract scenes from current story
@@ -109,11 +110,11 @@
                     int sceneIndex = 0;
                     foreach (var sceneElement in scenesElement.EnumerateArray())
                     {
-                        var sceneId = sceneElement.TryGetProperty("scene_id", out var idProp) 
+                        var sceneId = sceneElement.TryGetProperty("scene_id", out var idProp)
                             ? idProp.GetString() ?? $"scene_{sceneIndex}"
                             : $"scene_{sceneIndex}";
-                        
-                        var title = sceneElement.TryGetProperty("title", out var titleProp) 
+
+                        var title = sceneElement.TryGetProperty("title", out var titleProp)
                             ? titleProp.GetString() ?? $"Scene {sceneIndex + 1}"
                             : $"Scene {sceneIndex + 1}";
 
@@ -132,7 +133,7 @@
             }
         }
     }
-    
+
     private void ToggleScene(SceneInfo scene, bool selected)
     {
         if (selected && !selectedScenes.Contains(scene.Id))
@@ -140,7 +141,7 @@
         else
             selectedScenes.Remove(scene.Id);
     }
-    
+
     private void ToggleAspect(string aspect, bool selected)
     {
         if (selected && !selectedAspects.Contains(aspect))
@@ -156,7 +157,7 @@
             .Select(word => char.ToUpper(word[0]) + word.Substring(1))
             .Aggregate((a, b) => a + " " + b);
     }
-    
+
     private async Task Submit()
     {
         var request = new RefineRequest

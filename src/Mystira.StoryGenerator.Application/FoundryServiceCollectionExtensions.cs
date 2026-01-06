@@ -9,35 +9,24 @@ using Mystira.StoryGenerator.Infrastructure.Agents;
 
 namespace Mystira.StoryGenerator.Application;
 
-/// <summary>
-/// Extension methods for registering Azure AI Foundry services.
-/// </summary>
 public static class FoundryServiceCollectionExtensions
 {
-    /// <summary>
-    /// Adds Azure AI Foundry Agent services to the DI container.
-    /// </summary>
-    /// <param name="services">The service collection.</param>
-    /// <param name="configuration">The Foundry configuration.</param>
-    /// <returns>The service collection for method chaining.</returns>
     public static IServiceCollection AddFoundryAgentServices(
         this IServiceCollection services,
-        FoundryAgentConfig configuration)
+        FoundryAgentConfig foundryConfig)
     {
-        // Register configuration as singleton
-        services.AddSingleton(configuration);
+        services.AddSingleton(foundryConfig);
 
-        // Register Foundry Agent Client as singleton
         services.AddSingleton<FoundryAgentClient>(sp =>
         {
             var logger = sp.GetRequiredService<ILogger<FoundryAgentClient>>();
-            var client = new FoundryAgentClient();
+            var client = FoundryAgentClient.GetInstance(logger);
 
             var clientConfig = new FoundryAgentClientConfig
             {
-                Endpoint = configuration.Endpoint,
-                ApiKey = configuration.ApiKey,
-                ProjectId = configuration.ProjectId
+                Endpoint = foundryConfig.Endpoint,
+                ApiKey = foundryConfig.ApiKey,
+                ProjectId = foundryConfig.ProjectId
             };
 
             try
@@ -52,8 +41,7 @@ public static class FoundryServiceCollectionExtensions
             return client;
         });
 
-        // Register knowledge provider based on configuration
-        if (configuration.KnowledgeMode.Equals("AISearch", StringComparison.OrdinalIgnoreCase))
+        if (foundryConfig.KnowledgeMode.Equals("AISearch", StringComparison.OrdinalIgnoreCase))
         {
             services.AddScoped<IKnowledgeProvider>(sp =>
             {
@@ -62,9 +50,9 @@ public static class FoundryServiceCollectionExtensions
 
                 var aiSearchConfig = new AISearchKnowledgeProvider.AISearchConfiguration
                 {
-                    Endpoint = configuration.Endpoint,
-                    ApiKey = configuration.ApiKey,
-                    IndexName = configuration.SearchIndexName ?? "mystira-instructions"
+                    Endpoint = foundryConfig.Endpoint,
+                    ApiKey = foundryConfig.ApiKey,
+                    IndexName = foundryConfig.SearchIndexName ?? "mystira-instructions"
                 };
 
                 return new AISearchKnowledgeProvider(client, aiSearchConfig, logger);
@@ -79,7 +67,7 @@ public static class FoundryServiceCollectionExtensions
 
                 var fileSearchConfig = new FileSearchKnowledgeProvider.FileSearchConfiguration
                 {
-                    VectorStoreName = configuration.VectorStoreName ?? "mystira-story-knowledge"
+                    VectorStoreName = foundryConfig.VectorStoreName ?? "mystira-story-knowledge"
                 };
 
                 return new FileSearchKnowledgeProvider(client, fileSearchConfig, logger);
@@ -90,11 +78,11 @@ public static class FoundryServiceCollectionExtensions
         services.AddScoped<IPromptGenerator, PromptGenerator>();
         services.AddSingleton<StorySchemaValidator>();
 
-        // Register story session repository
         services.AddScoped<IStorySessionRepository>(sp =>
         {
             var logger = sp.GetRequiredService<ILogger<CosmosStorySessionRepository>>();
-            var cosmosConfig = sp.GetRequiredService<IOptions<CosmosDbConfig>>().Value;
+            var options = sp.GetRequiredService<IOptions<CosmosDbConfig>>();
+            var cosmosConfig = options.Value;
 
             var cosmosClient = new Microsoft.Azure.Cosmos.CosmosClient(
                 cosmosConfig.Endpoint,
@@ -110,21 +98,11 @@ public static class FoundryServiceCollectionExtensions
         return services;
     }
 
-    /// <summary>
-    /// Adds Cosmos DB configuration binding.
-    /// </summary>
-    /// <param name="services">The service collection.</param>
-    /// <param name="configuration">The configuration section name.</param>
-    /// <returns>The service collection for method chaining.</returns>
     public static IServiceCollection AddCosmosDbConfiguration(
         this IServiceCollection services,
-        string configurationSectionName = "CosmosDb")
+        CosmosDbConfig cosmosConfig)
     {
-        services.AddOptions<CosmosDbConfig>()
-            .Bind(configurationSectionName)
-            .ValidateDataAnnotations()
-            .ValidateOnStart();
-
+        services.AddSingleton(Options.Create(cosmosConfig));
         return services;
     }
 }

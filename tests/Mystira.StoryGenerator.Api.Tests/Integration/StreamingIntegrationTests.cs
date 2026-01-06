@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using Mystira.StoryGenerator.Api;
 using Mystira.StoryGenerator.Api.Models;
 using Mystira.StoryGenerator.Application.Infrastructure.Agents;
+using Mystira.StoryGenerator.Contracts.Models;
 using Mystira.StoryGenerator.Domain.Agents;
 using System.Net.Http.Json;
 using System.Text.Json;
@@ -339,10 +340,10 @@ public class StreamingIntegrationTests : IClassFixture<WebApplicationFactory<Pro
             // Simulate streaming events
             var events = new[]
             {
-                new AgentStreamEvent { Type = "SessionStarted", SessionId = sessionId, Timestamp = DateTime.UtcNow },
-                new AgentStreamEvent { Type = "GenerationStarted", SessionId = sessionId, Timestamp = DateTime.UtcNow },
-                new AgentStreamEvent { Type = "GenerationComplete", SessionId = sessionId, Timestamp = DateTime.UtcNow },
-                new AgentStreamEvent { Type = "ValidationStarted", SessionId = sessionId, Timestamp = DateTime.UtcNow }
+                new AgentStreamEvent { Type = AgentStreamEvent.EventType.PhaseStarted, Phase = "SessionStarted", Timestamp = DateTime.UtcNow },
+                new AgentStreamEvent { Type = AgentStreamEvent.EventType.PhaseStarted, Phase = "GenerationStarted", Timestamp = DateTime.UtcNow },
+                new AgentStreamEvent { Type = AgentStreamEvent.EventType.GenerationComplete, Phase = "GenerationComplete", Timestamp = DateTime.UtcNow },
+                new AgentStreamEvent { Type = AgentStreamEvent.EventType.PhaseStarted, Phase = "ValidationStarted", Timestamp = DateTime.UtcNow }
             };
 
             foreach (var evt in events)

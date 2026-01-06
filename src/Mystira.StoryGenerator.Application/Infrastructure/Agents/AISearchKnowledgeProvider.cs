@@ -1,9 +1,11 @@
 using System.Text.Json;
+using Azure;
 using Azure.AI.Projects;
 using Azure.Search.Documents;
 using Azure.Search.Documents.Models;
 using Microsoft.Extensions.Logging;
 using Mystira.StoryGenerator.Domain.Agents;
+using Mystira.StoryGenerator.Infrastructure.Agents;
 
 namespace Mystira.StoryGenerator.Application.Infrastructure.Agents;
 
@@ -65,20 +67,7 @@ public class AISearchKnowledgeProvider : IKnowledgeProvider
     /// </summary>
     public ToolDefinition GetToolDefinition()
     {
-        var parameters = new Dictionary<string, object>
-        {
-            { "index_name", _config.IndexName },
-            { "description", $"Search Azure AI Search index '{_config.IndexName}' for relevant story instructions and guidelines." }
-        };
-
-        // Add field mappings if configured
-        if (!string.IsNullOrEmpty(_config.ContentFieldName))
-            parameters["content_field"] = _config.ContentFieldName;
-
-        if (!string.IsNullOrEmpty(_config.TitleFieldName))
-            parameters["title_field"] = _config.TitleFieldName;
-
-        return new ToolDefinition("azure_ai_search", parameters);
+        return new AzureAISearchToolDefinition();
     }
 
     public string GetContextualGuidance()

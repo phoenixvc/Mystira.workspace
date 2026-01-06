@@ -1,6 +1,7 @@
 using Azure.AI.Projects;
 using Microsoft.Extensions.Logging;
 using Mystira.StoryGenerator.Domain.Agents;
+using Mystira.StoryGenerator.Infrastructure.Agents;
 
 namespace Mystira.StoryGenerator.Application.Infrastructure.Agents;
 
@@ -45,12 +46,7 @@ public class FileSearchKnowledgeProvider : IKnowledgeProvider
     {
         _logger.LogInformation("File search configured for agent: {AgentId}", agentId);
 
-        var toolDefinition = new ToolDefinition("file_search", new Dictionary<string, object>
-        {
-            { "description", "Search through uploaded files for relevant context and information." }
-        });
-
-        return Task.FromResult(toolDefinition);
+        return Task.FromResult<ToolDefinition>(new FileSearchToolDefinition());
     }
 
     /// <summary>
@@ -62,12 +58,7 @@ public class FileSearchKnowledgeProvider : IKnowledgeProvider
     {
         _logger.LogInformation("File search configured for thread: {ThreadId}", threadId);
 
-        var toolDefinition = new ToolDefinition("file_search", new Dictionary<string, object>
-        {
-            { "description", "Search through uploaded files for relevant context and information." }
-        });
-
-        return Task.FromResult(toolDefinition);
+        return Task.FromResult<ToolDefinition>(new FileSearchToolDefinition());
     }
 
     /// <summary>
@@ -75,10 +66,7 @@ public class FileSearchKnowledgeProvider : IKnowledgeProvider
     /// </summary>
     public ToolDefinition GetToolDefinition()
     {
-        return new ToolDefinition("file_search", new Dictionary<string, object>
-        {
-            { "description", "Search through uploaded files for relevant context and information." }
-        });
+        return new FileSearchToolDefinition();
     }
 
     public string GetContextualGuidance()

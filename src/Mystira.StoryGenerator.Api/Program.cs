@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.Extensions.Options;
 using Mystira.StoryGenerator.Api.Services;
 using Mystira.StoryGenerator.Application;
+using Mystira.StoryGenerator.Api.Infrastructure.Agents;
 using Mystira.StoryGenerator.Application.Infrastructure.Agents;
 using Mystira.StoryGenerator.Application.Scenarios;
 using Mystira.StoryGenerator.Application.Services;
@@ -28,7 +29,7 @@ builder.Services.AddSwaggerGen(c =>
         Version = "v1",
         Description = "API for agentic story generation with Foundry agents"
     });
-    
+
     // Add API key authentication if needed
     c.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
     {
@@ -38,7 +39,7 @@ builder.Services.AddSwaggerGen(c =>
         Type = Microsoft.OpenApi.Models.SecuritySchemeType.ApiKey,
         Scheme = "Bearer"
     });
-    
+
     c.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
     {
         {
@@ -113,7 +114,7 @@ builder.Services.AddCors(options =>
                   .AllowAnyMethod();
         }
     });
-    
+
     options.AddPolicy("BlazerOrigin", policy =>
     {
         policy.WithOrigins("https://localhost:7043")
@@ -155,24 +156,16 @@ builder.Services.AddSingleton<IContinuityBackgroundQueue, ContinuityBackgroundQu
 builder.Services.AddHostedService<ContinuityWorker>();
 
 // Register Azure AI Foundry Agent services
-builder.Services.AddOptions<FoundryAgentConfig>()
-    .Bind(builder.Configuration.GetSection(FoundryAgentConfig.SectionName))
-    .ValidateDataAnnotations()
-    .ValidateOnStart();
+var foundryConfig = builder.Configuration.GetSection(FoundryAgentConfig.SectionName).Get<FoundryAgentConfig>() ?? new FoundryAgentConfig();
+builder.Services.AddFoundryAgentServices(foundryConfig);
 
-builder.Services.AddCosmosDbConfiguration();
-
-// Register Foundry services using the configuration
-var foundryConfig = builder.Configuration.GetSection(FoundryAgentConfig.SectionName).Get<FoundryAgentConfig>();
-if (foundryConfig != null)
-{
-    builder.Services.AddFoundryAgentServices(foundryConfig);
-}
+var cosmosConfig = builder.Configuration.GetSection("CosmosDb").Get<CosmosDbConfig>() ?? new CosmosDbConfig();
+builder.Services.AddCosmosDbConfiguration(cosmosConfig);
 
 // Register Agent Orchestrator services
 var isDevelopment = builder.Environment.IsDevelopment();
 builder.Services.AddScoped<IAgentOrchestrator, AgentOrchestrator>();
-builder.Services.AddSingleton<IAgentStreamPublisher>(sp => 
+builder.Services.AddSingleton<IAgentStreamPublisher>(sp =>
     isDevelopment ? new InMemoryStreamPublisher() : new InMemoryStreamPublisher() /* TODO: SignalRStreamPublisher for production */);
 
 // Rate limiting for story agent endpoints

@@ -1,5 +1,7 @@
+using System.Runtime.CompilerServices;
 using Mystira.StoryGenerator.Api.Models;
 using Mystira.StoryGenerator.Application.Infrastructure.Agents;
+using Mystira.StoryGenerator.Contracts.Models;
 using Mystira.StoryGenerator.Domain.Agents;
 
 namespace Mystira.StoryGenerator.Web.Services;
@@ -32,5 +34,5 @@ public interface IAgentSessionService
     /// <summary>
     /// Subscribe to real-time event stream for a session.
     /// </summary>
-    IAsyncEnumerable<AgentStreamEvent> SubscribeToStreamAsync(string sessionId);
+    IAsyncEnumerable<AgentStreamEvent> SubscribeToStreamAsync(string sessionId, CancellationToken cancellationToken = default);
 }

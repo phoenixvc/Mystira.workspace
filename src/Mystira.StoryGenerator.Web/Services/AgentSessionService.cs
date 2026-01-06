@@ -3,6 +3,7 @@ using System.Runtime.CompilerServices;
 using System.Text.Json;
 using Mystira.StoryGenerator.Api.Models;
 using Mystira.StoryGenerator.Application.Infrastructure.Agents;
+using Mystira.StoryGenerator.Contracts.Models;
 using Mystira.StoryGenerator.Domain.Agents;
 
 namespace Mystira.StoryGenerator.Web.Services;
@@ -128,9 +129,10 @@ public class AgentSessionService : IAgentSessionService
 
                     if (!string.IsNullOrEmpty(currentEventType) && !string.IsNullOrEmpty(currentData))
                     {
+                        AgentStreamEvent? evt = null;
                         try
                         {
-                            var evt = JsonSerializer.Deserialize<AgentStreamEvent>(currentData, _jsonOptions);
+                            evt = JsonSerializer.Deserialize<AgentStreamEvent>(currentData, _jsonOptions);
                             if (evt != null)
                             {
                                 // Parse the event type from the SSE event field
@@ -138,14 +140,17 @@ public class AgentSessionService : IAgentSessionService
                                 {
                                     evt.Type = eventType;
                                 }
-
-                                _logger.LogDebug("Received SSE event: {EventType}", evt.Type);
-                                yield return evt;
                             }
                         }
                         catch (JsonException ex)
                         {
                             _logger.LogWarning(ex, "Failed to parse SSE event data: {Data}", currentData);
+                        }
+
+                        if (evt != null)
+                        {
+                            _logger.LogDebug("Received SSE event: {EventType}", evt.Type);
+                            yield return evt;
                         }
 
                         // Reset for next event

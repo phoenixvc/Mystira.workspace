@@ -29,11 +29,11 @@ Write a brief, non-technical summary of:
 
 Then provide a JSON scorecard:
 {{
-  "summary": "Combined narrative summary (150 words max)",
-  "strengths": ["strength1", "strength2"],
-  "concerns": ["concern1", "concern2"],
-  "suggested_focus": ["area1", "area2"],
-  "ready_for_publish": boolean
+  ""summary"": ""Combined narrative summary (150 words max)"",
+  ""strengths"": [""strength1"", ""strength2""],
+  ""concerns"": [""concern1"", ""concern2""],
+  ""suggested_focus"": [""area1"", ""area2""],
+  ""ready_for_publish"": boolean
 }}
 
 ## Tone

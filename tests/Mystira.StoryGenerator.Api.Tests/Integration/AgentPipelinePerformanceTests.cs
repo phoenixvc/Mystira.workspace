@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Mystira.StoryGenerator.Api;
 using Mystira.StoryGenerator.Api.Models;
 using Mystira.StoryGenerator.Application.Infrastructure.Agents;
+using Mystira.StoryGenerator.Contracts.Models;
 using Mystira.StoryGenerator.Domain.Agents;
 using System.Diagnostics;
 using System.Net.Http.Json;
@@ -215,7 +216,7 @@ public class AgentPipelinePerformanceTests : IClassFixture<WebApplicationFactory
 
         // Simulate a session in RequiresRefinement state
         var mockOrchestrator = _factory.Services.GetRequiredService<IAgentOrchestrator>() as PerformanceMockOrchestrator;
-        mockOrchestrator?.SetStage(sessionId, StorySessionStage.RequiresRefinement);
+        mockOrchestrator?.SetStage(sessionId, StorySessionStage.RefinementRequested);
 
         var refineRequest = new RefineRequest
         {
@@ -325,7 +326,7 @@ public class AgentPipelinePerformanceTests : IClassFixture<WebApplicationFactory
                 UpdatedAt = DateTime.UtcNow,
                 ThreadId = $"thread-{Guid.NewGuid():N}",
                 CurrentStoryVersion = "{\"title\": \"Test Story\"}",
-                StoryVersions = new List<StoryVersion>()
+                StoryVersions = new List<StoryVersionSnapshot>()
             };
             
             _sessions[sessionId] = session;
@@ -398,20 +399,20 @@ public class AgentPipelinePerformanceTests : IClassFixture<WebApplicationFactory
         public async IAsyncEnumerable<AgentStreamEvent> SubscribeAsync(string sessionId, CancellationToken ct = default)
         {
             // Yield events immediately for performance testing
-            yield return new AgentStreamEvent 
-            { 
-                Type = "SessionStarted", 
-                SessionId = sessionId, 
-                Timestamp = DateTime.UtcNow 
+            yield return new AgentStreamEvent
+            {
+                Type = AgentStreamEvent.EventType.PhaseStarted,
+                Phase = "SessionStarted",
+                Timestamp = DateTime.UtcNow
             };
-            
+
             await Task.Delay(50, ct);
-            
-            yield return new AgentStreamEvent 
-            { 
-                Type = "GenerationStarted", 
-                SessionId = sessionId, 
-                Timestamp = DateTime.UtcNow 
+
+            yield return new AgentStreamEvent
+            {
+                Type = AgentStreamEvent.EventType.PhaseStarted,
+                Phase = "GenerationStarted",
+                Timestamp = DateTime.UtcNow
             };
         }
     }

@@ -2,6 +2,7 @@
 @using Mystira.StoryGenerator.Web.Services
 @using Mystira.StoryGenerator.Api.Models
 @using Mystira.StoryGenerator.Application.Infrastructure.Agents
+@using Mystira.StoryGenerator.Contracts.Models
 @using System.Text.Json
 @inject IAgentSessionService sessionService
 @inject ILogger<AgentModeStoryPage> logger
@@ -11,26 +12,26 @@
 <div class="agent-story-container">
     @if (!sessionStarted)
     {
-        <AgentModePromptForm 
+        <AgentModePromptForm
             OnStartSession="HandleStartSession"
             IsLoading="isGenerating" />
     }
     else if (currentSession != null)
     {
         <div class="session-container">
-            <AgentModeProgressPanel 
+            <AgentModeProgressPanel
                 Session="currentSession"
                 EvaluationReport="lastEvaluation"
                 Events="streamEvents" />
-            
+
             @if (currentSession.Stage == "Evaluated" || currentSession.Stage == "RefinementRequested")
             {
-                <AgentModeRefinementPanel 
+                <AgentModeRefinementPanel
                     Session="currentSession"
                     OnRefine="HandleRefine"
                     IsLoading="isRefining" />
             }
-            
+
             @if (currentSession.Stage == "Complete" && !string.IsNullOrWhiteSpace(currentSession.CurrentStoryJson))
             {
                 <StoryDisplayPanel Story="@currentSession.CurrentStoryJson" />
@@ -55,17 +56,17 @@
     private List<AgentStreamEvent> streamEvents = new();
     private string? errorMessage;
     private CancellationTokenSource? streamCts;
-    
+
     private async Task HandleStartSession(StartSessionRequest request)
     {
         try
         {
             errorMessage = null;
             isGenerating = true;
-            
+
             var startResponse = await sessionService.StartSessionAsync(request);
             logger.LogInformation("Session started: {SessionId}", startResponse.SessionId);
-            
+
             // Initialize session state from start response
             currentSession = new SessionStateResponse
             {
@@ -75,17 +76,17 @@
                 IterationCount = 0,
                 CurrentStoryJson = string.Empty
             };
-            
+
             sessionStarted = true;
             StateHasChanged();
-            
+
             // Start SSE stream
             streamCts = new CancellationTokenSource();
             _ = StreamEventsAsync(startResponse.SessionId);
-            
+
             // Poll for generation completion
             await WaitForGenerationAsync(startResponse.SessionId);
-            
+
             isGenerating = false;
             StateHasChanged();
         }
@@ -97,7 +98,7 @@
             StateHasChanged();
         }
     }
-    
+
     private async Task StreamEventsAsync(string sessionId)
     {
         try
@@ -106,15 +107,15 @@
             {
                 streamEvents.Add(evt);
                 logger.LogDebug("Received event: {EventType}", evt.Type);
-                
+
                 // Handle specific event types
-                if (evt.Type == AgentStreamEvent.EventType.EvaluationPassed || 
+                if (evt.Type == AgentStreamEvent.EventType.EvaluationPassed ||
                     evt.Type == AgentStreamEvent.EventType.EvaluationFailed)
                 {
                     // Refresh session to get latest evaluation
                     await RefreshSessionAsync(sessionId);
                 }
-                
+
                 StateHasChanged();
             }
         }
@@ -127,7 +128,7 @@
             logger.LogError(ex, "Error streaming events");
         }
     }
-    
+
     private async Task WaitForGenerationAsync(string sessionId)
     {
         try
@@ -135,21 +136,21 @@
             // Poll for story generation completion
             var maxAttempts = 60; // 30 seconds
             var attempt = 0;
-            
+
             while (attempt < maxAttempts)
             {
                 await Task.Delay(500);
                 currentSession = await sessionService.GetSessionAsync(sessionId);
                 StateHasChanged();
-                
+
                 if (currentSession.Stage == "Validating" || currentSession.Stage == "Evaluating")
                 {
                     break;
                 }
-                
+
                 attempt++;
             }
-            
+
             // If we reached Validating stage, trigger evaluation
             if (currentSession?.Stage == "Validating")
             {
@@ -163,17 +164,17 @@
             errorMessage = $"Error during generation: {ex.Message}";
         }
     }
-    
+
     private async Task EvaluateStoryAsync(string sessionId)
     {
         try
         {
             var evalResponse = await sessionService.EvaluateAsync(sessionId);
             lastEvaluation = evalResponse.EvaluationReport;
-            
+
             // Refresh session state
             await RefreshSessionAsync(sessionId);
-            
+
             StateHasChanged();
         }
         catch (Exception ex)
@@ -182,7 +183,7 @@
             errorMessage = $"Error during evaluation: {ex.Message}";
         }
     }
-    
+
     private async Task HandleRefine(RefineRequest request)
     {
         if (currentSession == null)
@@ -193,12 +194,12 @@
             errorMessage = null;
             isRefining = true;
             StateHasChanged();
-            
+
             await sessionService.RefineAsync(currentSession.SessionId, request);
-            
+
             // Wait for refinement to complete
             await WaitForRefinementAsync(currentSession.SessionId);
-            
+
             isRefining = false;
             StateHasChanged();
         }
@@ -210,28 +211,28 @@
             StateHasChanged();
         }
     }
-    
+
     private async Task WaitForRefinementAsync(string sessionId)
     {
         try
         {
             var maxAttempts = 60; // 30 seconds
             var attempt = 0;
-            
+
             while (attempt < maxAttempts)
             {
                 await Task.Delay(500);
                 currentSession = await sessionService.GetSessionAsync(sessionId);
                 StateHasChanged();
-                
+
                 if (currentSession.Stage == "Validating" || currentSession.Stage == "Evaluating")
                 {
                     break;
                 }
-                
+
                 attempt++;
             }
-            
+
             // Trigger re-evaluation
             if (currentSession?.Stage == "Validating")
             {
@@ -244,13 +245,13 @@
             errorMessage = $"Error during refinement: {ex.Message}";
         }
     }
-    
+
     private async Task RefreshSessionAsync(string sessionId)
     {
         try
         {
             currentSession = await sessionService.GetSessionAsync(sessionId);
-            
+
             if (currentSession.LastEvaluationReport != null)
             {
                 lastEvaluation = currentSession.LastEvaluationReport;
@@ -261,7 +262,7 @@
             logger.LogError(ex, "Error refreshing session");
         }
     }
-    
+
     public void Dispose()
     {
         streamCts?.Cancel();

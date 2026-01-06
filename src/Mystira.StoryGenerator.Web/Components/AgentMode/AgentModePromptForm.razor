@@ -50,7 +50,7 @@
             {
                 <label>
                     <input type="checkbox" 
-                           @onchange="@((ChangeEventArgs e) => ToggleAxis(axis, (bool)e.Value!))"
+                           @onchange="@((Microsoft.AspNetCore.Components.ChangeEventArgs e) => ToggleAxis(axis, (bool)e.Value!))"
                            disabled="@IsLoading" />
                     @axis
                 </label>

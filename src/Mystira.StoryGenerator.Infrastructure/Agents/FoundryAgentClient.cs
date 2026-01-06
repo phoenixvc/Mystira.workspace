@@ -1,4 +1,5 @@
 using System.Text.Json;
+using Azure;
 using Azure.AI.Projects;
 using Azure.Core;
 using Microsoft.Extensions.Logging;
@@ -21,13 +22,13 @@ public class RunSubmissionResult
 {
     public string RunId { get; set; } = string.Empty;
     public string Status { get; set; } = string.Empty;
-    public List<ToolOutput> ToolOutputs { get; set; } = new();
+    public List<FoundryToolOutput> ToolOutputs { get; set; } = new();
 }
 
 /// <summary>
 /// Represents a tool output from the agent.
 /// </summary>
-public class ToolOutput
+public class FoundryToolOutput
 {
     public string ToolCallId { get; set; } = string.Empty;
     public string Output { get; set; } = string.Empty;
@@ -72,12 +73,26 @@ public class FoundryAgentClientConfig
 /// </summary>
 public sealed class FoundryAgentClient : IDisposable
 {
-    private static readonly Lazy<FoundryAgentClient> _instance = new(() => new FoundryAgentClient());
+    private static FoundryAgentClient? _instance;
+    private static readonly object _lock = new();
 
     /// <summary>
     /// Singleton instance of the Foundry Agent Client.
     /// </summary>
-    public static FoundryAgentClient Instance => _instance.Value;
+    public static FoundryAgentClient GetInstance(ILogger<FoundryAgentClient> logger)
+    {
+        if (_instance == null)
+        {
+            lock (_lock)
+            {
+                if (_instance == null)
+                {
+                    _instance = new FoundryAgentClient(logger);
+                }
+            }
+        }
+        return _instance;
+    }
 
     private AIProjectClient? _projectClient;
     private AgentsClient? _agentsClient;
@@ -93,10 +108,9 @@ public sealed class FoundryAgentClient : IDisposable
     /// </summary>
     private FoundryAgentClientConfig _config = new();
 
-    private FoundryAgentClient()
+    public FoundryAgentClient(ILogger<FoundryAgentClient> logger)
     {
-        _logger = LoggerFactory.Create(builder => builder.AddConsole())
-            .CreateLogger<FoundryAgentClient>();
+        _logger = logger;
     }
 
     /// <summary>
@@ -120,8 +134,7 @@ public sealed class FoundryAgentClient : IDisposable
         if (string.IsNullOrEmpty(config.ProjectId))
             throw new ArgumentException("ProjectId is required", nameof(config));
 
-        var credential = new AzureKeyCredential(config.ApiKey);
-        _projectClient = new AIProjectClient(new Uri(config.Endpoint), credential);
+        _projectClient = new AIProjectClient(config.Endpoint, new Azure.Identity.DefaultAzureCredential());
         _agentsClient = _projectClient.GetAgentsClient();
 
         _logger.LogInformation("FoundryAgentClient initialized with endpoint: {Endpoint}", config.Endpoint);
@@ -168,7 +181,7 @@ public sealed class FoundryAgentClient : IDisposable
     /// <param name="threadId">The thread ID.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>The thread details or null if not found.</returns>
-    public async Task<ThreadResponse?> GetThreadAsync(
+    public async Task<AgentThread?> GetThreadAsync(
         string threadId,
         CancellationToken cancellationToken = default)
     {
@@ -214,22 +227,29 @@ public sealed class FoundryAgentClient : IDisposable
         try
         {
             var messages = new List<Message>();
-            await foreach (var messagePage in _agentsClient!.GetMessagesAsync(threadId, limit: limit, cancellationToken: cancellationToken)
-                .ConfigureAwait(false))
+            var response = await _agentsClient!.GetMessagesAsync(threadId, limit: limit, cancellationToken: cancellationToken)
+                .ConfigureAwait(false);
+
+            foreach (var msg in response.Value.Data)
             {
-                foreach (var msg in messagePage.Data)
+                var content = msg.ContentItems.FirstOrDefault();
+                string textValue = string.Empty;
+
+                if (content is MessageTextContent textContent)
                 {
-                    messages.Add(new Message
-                    {
-                        Id = msg.Id,
-                        Role = msg.Role.ToString(),
-                        Content = msg.ContentItems.FirstOrDefault()?.Text?.Value ?? string.Empty,
-                        CreatedAt = msg.CreatedAt
-                    });
+                    textValue = textContent.Text;
                 }
+
+                messages.Add(new Message
+                {
+                    Id = msg.Id,
+                    Role = msg.Role.ToString(),
+                    Content = textValue,
+                    CreatedAt = msg.CreatedAt
+                });
             }
 
-            _logger.LogInformation("Retrieved {MessageCount} messages for thread {ThreadId}", threadId, messages.Count);
+            _logger.LogInformation("Retrieved {MessageCount} messages for thread {ThreadId}", messages.Count, threadId);
             return messages;
         }
         catch (Exception ex)
@@ -250,7 +270,7 @@ public sealed class FoundryAgentClient : IDisposable
     public async Task<RunSubmissionResult> SubmitToolOutputsAsync(
         string threadId,
         string runId,
-        List<ToolOutput> toolOutputs,
+        List<FoundryToolOutput> toolOutputs,
         CancellationToken cancellationToken = default)
     {
         EnsureInitialized();
@@ -260,19 +280,21 @@ public sealed class FoundryAgentClient : IDisposable
         try
         {
             var azureToolOutputs = toolOutputs.Select(toolOutput => new ToolOutput(
-                toolCallId: toolOutput.ToolCallId,
-                output: toolOutput.Output)).ToList();
+                toolOutput.ToolCallId,
+                toolOutput.Output)).ToList();
 
-            var runResponse = await _agentsClient!.SubmitToolOutputsToThreadAsync(
-                threadId,
-                runId,
+            var runResponse = await _agentsClient!.GetRunAsync(threadId, runId, cancellationToken).ConfigureAwait(false);
+            var run = runResponse.Value;
+
+            Response<ThreadRun> submissionResponse = await _agentsClient!.SubmitToolOutputsToRunAsync(
+                run,
                 azureToolOutputs,
-                cancellationToken: cancellationToken).ConfigureAwait(false);
+                cancellationToken).ConfigureAwait(false);
 
             return new RunSubmissionResult
             {
-                RunId = runResponse.Value.Id,
-                Status = runResponse.Value.Status.ToString(),
+                RunId = submissionResponse.Value.Id,
+                Status = submissionResponse.Value.Status.ToString(),
                 ToolOutputs = toolOutputs
             };
         }
@@ -325,8 +347,7 @@ public sealed class FoundryAgentClient : IDisposable
                 if (run.Status == RunStatus.Completed ||
                     run.Status == RunStatus.Failed ||
                     run.Status == RunStatus.Cancelled ||
-                    run.Status == RunStatus.Expired ||
-                    run.Status == RunStatus.Incomplete)
+                    run.Status == RunStatus.Expired)
                 {
                     var messages = new List<Message>();
 
@@ -416,10 +437,10 @@ public sealed class FoundryAgentClient : IDisposable
 
         try
         {
-            var runResponse = await _agentsClient!.CreateRunAsync(
+            Response<ThreadRun> runResponse = await _agentsClient!.CreateRunAsync(
                 threadId,
                 agentId,
-                instructions: instructions,
+                instructions,
                 cancellationToken: cancellationToken).ConfigureAwait(false);
 
             return new RunSubmissionResult
@@ -453,20 +474,11 @@ public sealed class FoundryAgentClient : IDisposable
 
         _logger.LogInformation("Starting streaming run for agent {AgentId} on thread {ThreadId}", agentId, threadId);
 
-        try
-        {
-            var runRequest = new CreateRunRequest(agentId, instructions: instructions);
-            var streamingResponse = _agentsClient!.CreateRunStreaming(threadId, runRequest, cancellationToken);
+        var streamingResponse = _agentsClient!.CreateRunStreamingAsync(threadId, agentId, instructions, cancellationToken: cancellationToken);
 
-            await foreach (var update in streamingResponse.WithCancellation(cancellationToken).ConfigureAwait(false))
-            {
-                yield return update;
-            }
-        }
-        catch (Exception ex)
+        await foreach (var update in streamingResponse.ConfigureAwait(false))
         {
-            _logger.LogError(ex, "Error during streaming run for agent {AgentId} on thread {ThreadId}", agentId, threadId);
-            throw;
+            yield return update;
         }
     }
 
@@ -543,8 +555,6 @@ public sealed class FoundryAgentClient : IDisposable
             return;
 
         _disposed = true;
-        _agentsClient?.Dispose();
-        _projectClient?.Dispose();
         _logger.LogInformation("FoundryAgentClient disposed");
     }
 }

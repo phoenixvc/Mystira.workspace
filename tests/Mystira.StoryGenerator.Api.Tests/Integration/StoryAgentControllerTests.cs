@@ -6,6 +6,7 @@ using Microsoft.Net.Http.Headers;
 using Mystira.StoryGenerator.Api;
 using Mystira.StoryGenerator.Api.Models;
 using Mystira.StoryGenerator.Application.Infrastructure.Agents;
+using Mystira.StoryGenerator.Contracts.Models;
 using Mystira.StoryGenerator.Domain.Agents;
 using System.Net.Http.Json;
 using System.Text.Json;

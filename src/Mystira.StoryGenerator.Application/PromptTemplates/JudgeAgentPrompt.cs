@@ -65,19 +65,19 @@ Score 0-1.
 ## Output Format
 Return ONLY a single JSON object:
 {{
-  "overall_status": "Pass" | "Fail" | "ReviewRequired",
-  "safety_gate_passed": boolean,
-  "axes_alignment_score": 0.0-1.0,
-  "dev_principles_score": 0.0-1.0,
-  "narrative_logic_score": 0.0-1.0,
-  "findings": {{
-    "Safety": ["issue1", "issue2"],
-    "AxesAlignment": ["missing axis impact"],
-    "DevelopmentPrinciples": ["principle violated"],
-    "NarrativeLogic": ["plot hole"],
-    "SchemaValidation": []
+  ""overall_status"": ""Pass"" | ""Fail"" | ""ReviewRequired"",
+  ""safety_gate_passed"": boolean,
+  ""axes_alignment_score"": 0.0-1.0,
+  ""dev_principles_score"": 0.0-1.0,
+  ""narrative_logic_score"": 0.0-1.0,
+  ""findings"": {{
+    ""Safety"": [""issue1"", ""issue2""],
+    ""AxesAlignment"": [""missing axis impact""],
+    ""DevelopmentPrinciples"": [""principle violated""],
+    ""NarrativeLogic"": [""plot hole""],
+    ""SchemaValidation"": []
   }},
-  "recommendation": "Specific guidance for improvement"
+  ""recommendation"": ""Specific guidance for improvement""
 }}
 
 ## Scoring Rules

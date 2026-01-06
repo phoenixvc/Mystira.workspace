@@ -1,5 +1,6 @@
 @using Mystira.StoryGenerator.Domain.Agents
 @using Mystira.StoryGenerator.Application.Infrastructure.Agents
+@using Mystira.StoryGenerator.Contracts.Models
 
 <div class="progress-panel">
     <div class="timeline">
@@ -24,34 +25,34 @@
             </div>
         }
     </div>
-    
+
     @if (EvaluationReport != null)
     {
         <div class="evaluation-scorecard">
             <h3>Evaluation Results</h3>
-            
+
             <div class="score-row">
                 <label>Safety Gate</label>
                 <span class="@(EvaluationReport.SafetyGatePassed ? "pass" : "fail")">
                     @(EvaluationReport.SafetyGatePassed ? "✅ Passed" : "⚠️ Failed")
                 </span>
             </div>
-            
+
             <div class="score-row">
                 <label>Axes Alignment</label>
                 <ProgressBar Value="@EvaluationReport.AxesAlignmentScore" Max="1.0" />
             </div>
-            
+
             <div class="score-row">
                 <label>Dev Principles</label>
                 <ProgressBar Value="@EvaluationReport.DevPrinciplesScore" Max="1.0" />
             </div>
-            
+
             <div class="score-row">
                 <label>Narrative Logic</label>
                 <ProgressBar Value="@EvaluationReport.NarrativeLogicScore" Max="1.0" />
             </div>
-            
+
             @if (EvaluationReport.Findings.Any())
             {
                 <div class="findings">
@@ -73,7 +74,7 @@
                     }
                 </div>
             }
-            
+
             @if (!string.IsNullOrEmpty(EvaluationReport.Recommendation))
             {
                 <div class="recommendation">
@@ -82,7 +83,7 @@
             }
         </div>
     }
-    
+
     @if (Events.Any())
     {
         <div class="event-log">
@@ -102,7 +103,7 @@
             </div>
         </div>
     }
-    
+
     @if (Session != null)
     {
         <div class="metadata">
@@ -115,15 +116,15 @@
     [Parameter] public SessionStateResponse? Session { get; set; }
     [Parameter] public EvaluationReport? EvaluationReport { get; set; }
     [Parameter] public List<AgentStreamEvent> Events { get; set; } = new();
-    
+
     private string currentPhase = "Writing";
     private List<string> phases = new() { "Writing", "Validating", "Evaluating", "Complete" };
-    
+
     private string GetPhaseStatus(string phase)
     {
         return phase == currentPhase ? "active" : IsPhaseComplete(phase) ? "complete" : "pending";
     }
-    
+
     private bool IsPhaseComplete(string phase)
     {
         var phaseIndex = phases.IndexOf(phase);
@@ -147,7 +148,7 @@
             _ => type.ToString()
         };
     }
-    
+
     protected override void OnParametersSet()
     {
         // Update current phase based on session stage
