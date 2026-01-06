@@ -10,7 +10,7 @@
 
     <!-- Package metadata -->
     <PackageId>Mystira.Authoring</PackageId>
-    <Version>0.1.0-alpha</Version>
+    <Version>0.1.1-alpha</Version>
     <Authors>Mystira Team</Authors>
     <Company>PhoenixVC</Company>
     <Description>Implementation package for Mystira story authoring - services, handlers, and graph analysis</Description>

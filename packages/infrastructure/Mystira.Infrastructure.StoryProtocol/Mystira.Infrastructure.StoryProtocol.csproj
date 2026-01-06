@@ -10,7 +10,7 @@
 
     <!-- NuGet Package Metadata -->
     <PackageId>Mystira.Infrastructure.StoryProtocol</PackageId>
-    <Version>0.5.0-alpha</Version>
+    <Version>0.5.1-alpha</Version>
     <Authors>Mystira Team</Authors>
     <Company>PhoenixVC</Company>
     <Description>Mystira platform Story Protocol blockchain integration. gRPC client for communicating with Mystira.Chain Python service.</Description>
