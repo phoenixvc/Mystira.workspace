@@ -33,6 +33,7 @@ public class ScenarioQueryRequestBuilder
     private int _pageSize = 10;
     private string? _searchTerm;
     private string? _ageGroup;
+    private int? _minimumAge;
     private bool? _isFeatured;
 
     public ScenarioQueryRequestBuilder WithPage(int page)
@@ -59,6 +60,12 @@ public class ScenarioQueryRequestBuilder
         return this;
     }
 
+    public ScenarioQueryRequestBuilder WithMinimumAge(int minimumAge)
+    {
+        _minimumAge = minimumAge;
+        return this;
+    }
+
     public ScenarioQueryRequestBuilder OnlyFeatured()
     {
         _isFeatured = true;
@@ -73,6 +80,7 @@ public class ScenarioQueryRequestBuilder
             PageSize = _pageSize,
             SearchTerm = _searchTerm,
             AgeGroup = _ageGroup,
+            MinimumAge = _minimumAge,
             IsFeatured = _isFeatured
         };
     }
@@ -85,7 +93,7 @@ public class CreateScenarioRequestBuilder
 {
     private string _title = "Test Scenario";
     private string _description = "A test scenario for unit testing";
-    private string _ageGroup = "all-ages";
+    private int _minimumAge = 0;
     private bool _isFeatured;
     private List<string> _tags = new() { "test", "integration" };
     private string? _thumbnailUrl;
@@ -102,9 +110,9 @@ public class CreateScenarioRequestBuilder
         return this;
     }
 
-    public CreateScenarioRequestBuilder WithAgeGroup(string ageGroup)
+    public CreateScenarioRequestBuilder WithMinimumAge(int minimumAge)
     {
-        _ageGroup = ageGroup;
+        _minimumAge = minimumAge;
         return this;
     }
 
@@ -132,7 +140,7 @@ public class CreateScenarioRequestBuilder
         {
             Title = _title,
             Description = _description,
-            AgeGroup = _ageGroup,
+            MinimumAge = _minimumAge,
             IsFeatured = _isFeatured,
             Tags = _tags,
             ThumbnailUrl = _thumbnailUrl
@@ -148,7 +156,7 @@ public class ScenarioBuilder
     private string _id = Guid.NewGuid().ToString();
     private string _title = "Test Scenario";
     private string _description = "A test scenario";
-    private string _ageGroup = "all-ages";
+    private int _minimumAge = 0;
     private bool _isFeatured;
     private List<string> _tags = new() { "test" };
     private DateTime _createdAt = DateTime.UtcNow;
@@ -172,9 +180,9 @@ public class ScenarioBuilder
         return this;
     }
 
-    public ScenarioBuilder WithAgeGroup(string ageGroup)
+    public ScenarioBuilder WithMinimumAge(int minimumAge)
     {
-        _ageGroup = ageGroup;
+        _minimumAge = minimumAge;
         return this;
     }
 
@@ -203,7 +211,7 @@ public class ScenarioBuilder
             Id = _id,
             Title = _title,
             Description = _description,
-            AgeGroup = _ageGroup,
+            MinimumAge = _minimumAge,
             IsFeatured = _isFeatured,
             Tags = _tags,
             CreatedAt = _createdAt,

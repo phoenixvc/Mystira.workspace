@@ -2,6 +2,7 @@ using System.Net;
 using System.Net.Http.Json;
 using FluentAssertions;
 using Mystira.Admin.Api.Tests.Infrastructure;
+using Xunit;
 
 namespace Mystira.Admin.Api.Tests.Controllers;
 
@@ -80,7 +81,7 @@ public class MigrationStatusControllerTests : ApiTestFixture
         var content = await response.Content.ReadAsStringAsync();
 
         // Assert
-        content.Should().Contain("currentPhase").Or.Contain("CurrentPhase");
+        (content.Contains("currentPhase") || content.Contains("CurrentPhase")).Should().BeTrue();
     }
 
     [Fact]
@@ -94,7 +95,7 @@ public class MigrationStatusControllerTests : ApiTestFixture
         var content = await response.Content.ReadAsStringAsync();
 
         // Assert
-        content.Should().Contain("infrastructure").Or.Contain("Infrastructure");
+        (content.Contains("infrastructure") || content.Contains("Infrastructure")).Should().BeTrue();
     }
 
     [Fact]
@@ -108,7 +109,7 @@ public class MigrationStatusControllerTests : ApiTestFixture
         var content = await response.Content.ReadAsStringAsync();
 
         // Assert
-        content.Should().Contain("timestamp").Or.Contain("Timestamp");
+        (content.Contains("timestamp") || content.Contains("Timestamp")).Should().BeTrue();
     }
 
     #endregion
@@ -139,7 +140,7 @@ public class MigrationStatusControllerTests : ApiTestFixture
         var content = await response.Content.ReadAsStringAsync();
 
         // Assert
-        content.Should().Contain("recommendations").Or.Contain("Recommendations");
+        (content.Contains("recommendations") || content.Contains("Recommendations")).Should().BeTrue();
     }
 
     [Fact]
@@ -153,7 +154,7 @@ public class MigrationStatusControllerTests : ApiTestFixture
         var content = await response.Content.ReadAsStringAsync();
 
         // Assert
-        content.Should().Contain("warnings").Or.Contain("Warnings");
+        (content.Contains("warnings") || content.Contains("Warnings")).Should().BeTrue();
     }
 
     [Fact]
@@ -167,7 +168,7 @@ public class MigrationStatusControllerTests : ApiTestFixture
         var content = await response.Content.ReadAsStringAsync();
 
         // Assert
-        content.Should().Contain("readyForNextPhase").Or.Contain("ReadyForNextPhase");
+        (content.Contains("readyForNextPhase") || content.Contains("ReadyForNextPhase")).Should().BeTrue();
     }
 
     #endregion

@@ -2,6 +2,7 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using Microsoft.Extensions.DependencyInjection;
 using Mystira.Infrastructure.Data;
+using Xunit;
 
 namespace Mystira.Admin.Api.Tests.Infrastructure;
 

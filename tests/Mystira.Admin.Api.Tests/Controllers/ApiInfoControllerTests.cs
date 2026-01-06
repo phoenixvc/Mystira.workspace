@@ -3,6 +3,7 @@ using System.Net.Http.Json;
 using FluentAssertions;
 using Mystira.Admin.Api.Tests.Infrastructure;
 using Mystira.Contracts.App.Responses;
+using Xunit;
 
 namespace Mystira.Admin.Api.Tests.Controllers;
 

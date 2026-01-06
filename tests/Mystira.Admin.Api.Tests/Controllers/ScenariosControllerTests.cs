@@ -4,6 +4,7 @@ using FluentAssertions;
 using Mystira.Admin.Api.Tests.Infrastructure;
 using Mystira.Contracts.App.Responses.Common;
 using Mystira.Contracts.App.Responses.Scenarios;
+using Xunit;
 
 namespace Mystira.Admin.Api.Tests.Controllers;
 

@@ -3,6 +3,7 @@ using System.Net.Http.Json;
 using FluentAssertions;
 using Mystira.Admin.Api.Controllers;
 using Mystira.Admin.Api.Tests.Infrastructure;
+using Xunit;
 
 namespace Mystira.Admin.Api.Tests.Controllers;
 
@@ -108,7 +109,7 @@ public class AuthControllerTests : ApiTestFixture
         var content = await response.Content.ReadAsStringAsync();
 
         // Assert
-        content.Should().Contain("Invalid").Or.Contain("not configured");
+        (content.Contains("Invalid") || content.Contains("not configured")).Should().BeTrue();
     }
 
     [Fact]
@@ -147,7 +148,7 @@ public class AuthControllerTests : ApiTestFixture
         var content = await response.Content.ReadAsStringAsync();
 
         // Assert
-        content.Should().Contain("success").Or.Contain("Logged out");
+        (content.Contains("success") || content.Contains("Logged out")).Should().BeTrue();
     }
 
     [Fact]
