@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using System.Linq;
@@ -12,75 +13,84 @@ public class FileUploadOperationFilter : IOperationFilter
 {
     public void Apply(OpenApiOperation operation, OperationFilterContext context)
     {
-        var fileParameters = context.ApiDescription.ActionDescriptor.Parameters
+        // Get all parameters from the action descriptor
+        var actionParameters = context.ApiDescription.ActionDescriptor.Parameters;
+        
+        // Check if any parameters are IFormFile or have [FromForm]
+        var fileParameters = actionParameters
             .Where(p => p.ParameterType == typeof(IFormFile) || p.ParameterType == typeof(IFormFile[]))
             .ToList();
 
-        if (fileParameters.Any())
+        var formParameters = actionParameters
+            .Where(p => p.BindingInfo?.BindingSource?.Id == "Form")
+            .ToList();
+
+        // Only process if we have file or form parameters
+        if (!fileParameters.Any() && !formParameters.Any())
         {
-            operation.RequestBody = new OpenApiRequestBody
+            return;
+        }
+
+        // Remove all form parameters from the operation parameters list
+        // They will be moved to the request body
+        if (operation.Parameters != null)
+        {
+            var paramNamesToRemove = formParameters.Select(p => p.Name).ToHashSet();
+            operation.Parameters = operation.Parameters
+                .Where(p => !paramNamesToRemove.Contains(p.Name))
+                .ToList();
+        }
+
+        // Create request body for multipart/form-data
+        var requestBody = new OpenApiRequestBody
+        {
+            Content = new Dictionary<string, OpenApiMediaType>
             {
-                Content = new Dictionary<string, OpenApiMediaType>
+                ["multipart/form-data"] = new OpenApiMediaType
                 {
-                    ["multipart/form-data"] = new OpenApiMediaType
+                    Schema = new OpenApiSchema
                     {
-                        Schema = new OpenApiSchema
-                        {
-                            Type = "object",
-                            Properties = new Dictionary<string, OpenApiSchema>()
-                        }
+                        Type = "object",
+                        Properties = new Dictionary<string, OpenApiSchema>()
                     }
-                }
-            };
-
-            // Remove IFormFile parameters from parameters list since they're now in the request body
-            if (operation.Parameters != null)
-            {
-                var formFileParams = operation.Parameters
-                    .Where(p => fileParameters.Any(fp => fp.Name == p.Name))
-                    .ToList();
-
-                foreach (var param in formFileParams)
-                {
-                    operation.Parameters.Remove(param);
                 }
             }
+        };
 
-            // Add form parameters to request body schema
-            foreach (var param in fileParameters)
+        // Add all form parameters (including IFormFile) to request body
+        foreach (var param in formParameters)
+        {
+            OpenApiSchema schema;
+            
+            if (param.ParameterType == typeof(IFormFile))
             {
-                var schema = param.ParameterType == typeof(IFormFile[])
-                    ? new OpenApiSchema
-                    {
-                        Type = "array",
-                        Items = new OpenApiSchema
-                        {
-                            Type = "string",
-                            Format = "binary"
-                        }
-                    }
-                    : new OpenApiSchema
+                schema = new OpenApiSchema
+                {
+                    Type = "string",
+                    Format = "binary"
+                };
+            }
+            else if (param.ParameterType == typeof(IFormFile[]))
+            {
+                schema = new OpenApiSchema
+                {
+                    Type = "array",
+                    Items = new OpenApiSchema
                     {
                         Type = "string",
                         Format = "binary"
-                    };
-
-                operation.RequestBody.Content["multipart/form-data"].Schema.Properties[param.Name] = schema;
+                    }
+                };
             }
-
-            // Add other [FromForm] parameters that aren't IFormFile
-            var otherFormParams = context.ApiDescription.ActionDescriptor.Parameters
-                .Where(p => p.BindingInfo?.BindingSource?.Id == "Form" && 
-                           p.ParameterType != typeof(IFormFile) && 
-                           p.ParameterType != typeof(IFormFile[]))
-                .ToList();
-
-            foreach (var param in otherFormParams)
+            else
             {
-                var schema = GetSchemaForType(param.ParameterType);
-                operation.RequestBody.Content["multipart/form-data"].Schema.Properties[param.Name] = schema;
+                schema = GetSchemaForType(param.ParameterType);
             }
+
+            requestBody.Content["multipart/form-data"].Schema.Properties[param.Name] = schema;
         }
+
+        operation.RequestBody = requestBody;
     }
 
     private static OpenApiSchema GetSchemaForType(Type type)

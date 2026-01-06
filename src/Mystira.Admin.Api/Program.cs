@@ -185,7 +185,14 @@ try
             }
         });
 
-        // Handle file uploads (IFormFile) for Swagger
+        // Configure to handle IFormFile as binary in schema (must be before operation filter)
+        c.MapType<IFormFile>(() => new OpenApiSchema
+        {
+            Type = "string",
+            Format = "binary"
+        });
+        
+        // Handle file uploads (IFormFile) for Swagger - converts parameters to request body
         c.OperationFilter<FileUploadOperationFilter>();
     });
 
