@@ -34,6 +34,7 @@ public class ScenarioQueryRequestBuilder
     private string? _searchTerm;
     private string? _ageGroup;
     private int? _minimumAge;
+    private bool? _isFeatured;
 
     public ScenarioQueryRequestBuilder WithPage(int page)
     {
@@ -65,6 +66,12 @@ public class ScenarioQueryRequestBuilder
         return this;
     }
 
+    public ScenarioQueryRequestBuilder OnlyFeatured()
+    {
+        _isFeatured = true;
+        return this;
+    }
+
     public ScenarioQueryRequest Build()
     {
         return new ScenarioQueryRequest
@@ -73,7 +80,8 @@ public class ScenarioQueryRequestBuilder
             PageSize = _pageSize,
             SearchTerm = _searchTerm,
             AgeGroup = _ageGroup,
-            MinimumAge = _minimumAge
+            MinimumAge = _minimumAge,
+            IsFeatured = _isFeatured
         };
     }
 }
@@ -86,7 +94,9 @@ public class CreateScenarioRequestBuilder
     private string _title = "Test Scenario";
     private string _description = "A test scenario for unit testing";
     private int _minimumAge = 0;
+    private bool _isFeatured;
     private List<string> _tags = new() { "test", "integration" };
+    private string? _thumbnailUrl;
 
     public CreateScenarioRequestBuilder WithTitle(string title)
     {
@@ -106,9 +116,21 @@ public class CreateScenarioRequestBuilder
         return this;
     }
 
+    public CreateScenarioRequestBuilder AsFeatured()
+    {
+        _isFeatured = true;
+        return this;
+    }
+
     public CreateScenarioRequestBuilder WithTags(params string[] tags)
     {
         _tags = tags.ToList();
+        return this;
+    }
+
+    public CreateScenarioRequestBuilder WithThumbnail(string thumbnailUrl)
+    {
+        _thumbnailUrl = thumbnailUrl;
         return this;
     }
 
@@ -119,7 +141,9 @@ public class CreateScenarioRequestBuilder
             Title = _title,
             Description = _description,
             MinimumAge = _minimumAge,
-            Tags = _tags
+            IsFeatured = _isFeatured,
+            Tags = _tags,
+            ThumbnailUrl = _thumbnailUrl
         };
     }
 }
