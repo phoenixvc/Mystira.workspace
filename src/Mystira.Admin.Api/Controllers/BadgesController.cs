@@ -138,7 +138,7 @@ public class BadgesController : ControllerBase
     }
 
     [HttpPost("import")]
-    public async Task<ActionResult<BadgeImportResult>> ImportBadges([FromForm] IFormFile configFile, [FromForm] bool overwrite = false)
+    public async Task<ActionResult<BadgeImportResult>> ImportBadges(IFormFile configFile, [FromForm] bool overwrite = false)
     {
         if (configFile == null || configFile.Length == 0)
         {

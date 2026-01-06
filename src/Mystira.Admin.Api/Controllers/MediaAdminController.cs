@@ -86,7 +86,7 @@ public class MediaAdminController : ControllerBase
     /// Media ID must match an existing entry in the media metadata file
     /// </summary>
     [HttpPost("upload")]
-    public async Task<ActionResult<MediaAsset>> UploadMedia([FromForm] IFormFile file, [FromForm] string? mediaId = null, [FromForm] string? mediaType = null, [FromForm] string? description = null, [FromForm] string? tags = null)
+    public async Task<ActionResult<MediaAsset>> UploadMedia(IFormFile file, [FromForm] string? mediaId = null, [FromForm] string? mediaType = null, [FromForm] string? description = null, [FromForm] string? tags = null)
     {
         try
         {
@@ -168,7 +168,7 @@ public class MediaAdminController : ControllerBase
     /// Filenames must match entries in the existing media metadata file
     /// </summary>
     [HttpPost("bulk-upload")]
-    public async Task<ActionResult<BulkUploadResult>> BulkUploadMedia([FromForm] IFormFile[] files, [FromForm] IFormFile? metadataFile = null, [FromForm] bool autoDetectType = true, [FromForm] bool overwriteExisting = false)
+    public async Task<ActionResult<BulkUploadResult>> BulkUploadMedia(IFormFile[] files, IFormFile? metadataFile = null, [FromForm] bool autoDetectType = true, [FromForm] bool overwriteExisting = false)
     {
         try
         {
@@ -329,7 +329,7 @@ public class MediaAdminController : ControllerBase
     /// </summary>
     [HttpPost("upload-zip")]
     public async Task<ActionResult<ZipUploadResult>> UploadMediaZip(
-        [FromForm] IFormFile zipFile,
+        IFormFile zipFile,
         [FromForm] bool overwriteMetadata = false,
         [FromForm] bool overwriteMedia = false)
     {

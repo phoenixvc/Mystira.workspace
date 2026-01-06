@@ -3,6 +3,7 @@ using System.Text.Json.Serialization;
 using System.Threading.RateLimiting;
 
 using Microsoft.ApplicationInsights.Extensibility;
+using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Identity.Web;
@@ -120,6 +121,9 @@ try
 
     // Configure OpenAPI/Swagger
     builder.Services.AddEndpointsApiExplorer();
+    // Register API description provider to handle IFormFile parameters
+    builder.Services.AddSingleton<IApiDescriptionProvider, FileUploadApiDescriptionProvider>();
+    
     builder.Services.AddSwaggerGen(c =>
     {
         c.SwaggerDoc("v1", new OpenApiInfo
@@ -170,6 +174,55 @@ try
             if (type == typeof(Mystira.Admin.Api.Models.CharacterMetadata))
             {
                 return "ApiCharacterMetadata";
+            }
+
+            // Handle conflicts by including namespace information
+            if (type.Namespace != null)
+            {
+                var namespaceParts = type.Namespace.Split('.');
+                
+                // For enums: prefix with Contracts or Domain
+                if (type.IsEnum)
+                {
+                    if (type.Namespace.Contains("Mystira.Contracts"))
+                    {
+                        return $"Contracts{type.Name}";
+                    }
+                    if (type.Namespace.Contains("Mystira.Domain"))
+                    {
+                        return $"Domain{type.Name}";
+                    }
+                }
+                
+                // For types in Contracts: include sub-namespace to avoid conflicts
+                if (type.Namespace.Contains("Mystira.Contracts.App"))
+                {
+                    // Extract sub-namespace after "App" (e.g., "Models.GameSessions" or "Responses.Scenarios")
+                    var appIndex = Array.IndexOf(namespaceParts, "App");
+                    if (appIndex >= 0 && appIndex < namespaceParts.Length - 1)
+                    {
+                        // Get the parts after "App" (e.g., ["Models", "GameSessions"] or ["Responses", "Scenarios"])
+                        var subParts = namespaceParts.Skip(appIndex + 1).ToList();
+                        if (subParts.Count > 1)
+                        {
+                            // Use the last sub-namespace part (e.g., "GameSessions" or "Scenarios")
+                            var subNamespace = subParts.Last();
+                            return $"{subNamespace}{type.Name}";
+                        }
+                        else if (subParts.Count == 1)
+                        {
+                            // Only one part after "App" (e.g., "Models" or "Responses")
+                            var subNamespace = subParts[0];
+                            return $"{subNamespace}{type.Name}";
+                        }
+                    }
+                }
+                
+                // For types in Domain: prefix with Domain to avoid conflicts with Contracts
+                if (type.Namespace.Contains("Mystira.Domain"))
+                {
+                    return $"Domain{type.Name}";
+                }
             }
 
             return type.Name;
