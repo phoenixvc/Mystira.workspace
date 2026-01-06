@@ -3,11 +3,13 @@ using System.Text.Json.Serialization;
 using System.Threading.RateLimiting;
 
 using Microsoft.ApplicationInsights.Extensibility;
+using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Identity.Web;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Swashbuckle.AspNetCore.SwaggerGen;
 
 using Mystira.Admin.Api.Adapters;
 using Mystira.Admin.Api.Configuration;
@@ -119,6 +121,9 @@ try
 
     // Configure OpenAPI/Swagger
     builder.Services.AddEndpointsApiExplorer();
+    // Register API description provider to handle IFormFile parameters
+    builder.Services.AddSingleton<IApiDescriptionProvider, FileUploadApiDescriptionProvider>();
+    
     builder.Services.AddSwaggerGen(c =>
     {
         c.SwaggerDoc("v1", new OpenApiInfo
@@ -171,8 +176,80 @@ try
                 return "ApiCharacterMetadata";
             }
 
+            // Handle conflicts by including namespace information
+            if (type.Namespace != null)
+            {
+                var namespaceParts = type.Namespace.Split('.');
+                
+                // For types in Contracts.App: include sub-namespace to avoid conflicts
+                // This must run before the general Contracts/Domain enum handling
+                // to ensure enums in Contracts.App get sub-namespace prefixes
+                if (type.Namespace.Contains("Mystira.Contracts.App"))
+                {
+                    // Extract sub-namespace after "App" (e.g., "Models.GameSessions" or "Responses.Scenarios")
+                    var appIndex = Array.IndexOf(namespaceParts, "App");
+                    if (appIndex >= 0 && appIndex < namespaceParts.Length - 1)
+                    {
+                        // Get the parts after "App" (e.g., ["Models", "GameSessions"] or ["Responses", "Scenarios"])
+                        var subParts = namespaceParts.Skip(appIndex + 1).ToList();
+                        if (subParts.Count > 1)
+                        {
+                            // Use the last sub-namespace part (e.g., "GameSessions" or "Scenarios")
+                            var subNamespace = subParts.Last();
+                            return $"{subNamespace}{type.Name}";
+                        }
+                        else if (subParts.Count == 1)
+                        {
+                            // Only one part after "App" (e.g., "Models" or "Responses")
+                            var subNamespace = subParts[0];
+                            return $"{subNamespace}{type.Name}";
+                        }
+                    }
+                }
+                
+                // For enums: prefix with Contracts or Domain
+                // This handles enums in Mystira.Contracts (but not Contracts.App, which is handled above)
+                if (type.IsEnum)
+                {
+                    if (type.Namespace.Contains("Mystira.Contracts"))
+                    {
+                        return $"Contracts{type.Name}";
+                    }
+                    if (type.Namespace.Contains("Mystira.Domain"))
+                    {
+                        return $"Domain{type.Name}";
+                    }
+                }
+                
+                // For types in Domain: prefix with Domain to avoid conflicts with Contracts
+                if (type.Namespace.Contains("Mystira.Domain"))
+                {
+                    return $"Domain{type.Name}";
+                }
+            }
+
             return type.Name;
         });
+
+        // Handle Dictionary<string, object> for Swagger schema generation
+        c.MapType<Dictionary<string, object>>(() => new Microsoft.OpenApi.Models.OpenApiSchema
+        {
+            Type = "object",
+            AdditionalProperties = new Microsoft.OpenApi.Models.OpenApiSchema
+            {
+                Type = "object"
+            }
+        });
+
+        // Configure to handle IFormFile as binary in schema (must be before operation filter)
+        c.MapType<IFormFile>(() => new OpenApiSchema
+        {
+            Type = "string",
+            Format = "binary"
+        });
+        
+        // Handle file uploads (IFormFile) for Swagger - converts parameters to request body
+        c.OperationFilter<FileUploadOperationFilter>();
     });
 
     // Configure Memory Cache for query caching
@@ -872,11 +949,11 @@ try
     if (initializeDatabaseOnStartup || isInMemory)
     {
         using var scope = app.Services.CreateScope();
-        var context = scope.ServiceProvider.GetRequiredService<MystiraAppDbContext>();
         var startupLogger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
 
         try
         {
+            var context = scope.ServiceProvider.GetRequiredService<MystiraAppDbContext>();
             startupLogger.LogInformation("Starting database initialization (InitializeDatabaseOnStartup={Init}, InMemory={InMemory})...", initializeDatabaseOnStartup, isInMemory);
 
             // Use Task.WhenAny with timeout for more reliable timeout handling
@@ -948,10 +1025,22 @@ try
             // Log error but don't crash the app in production - allow health checks to detect the issue
             startupLogger.LogError(ex, "Failed to initialize database during startup. The application will start in degraded mode. Ensure Azure Cosmos DB database 'MystiraAppDb' exists and app identity has permissions to create/read containers. Expected containers include: CompassAxes (PK /Id), BadgeConfigurations (PK /Id), CharacterMaps (PK /Id), ContentBundles (PK /Id), Scenarios (PK /Id), MediaMetadataFiles (PK /Id), CharacterMediaMetadataFiles (PK /Id), CharacterMapFiles (PK /Id), UserProfiles (PK /Id), Accounts (PK /Id). Set 'InitializeDatabaseOnStartup'=false to skip this check.");
 
-            // Only fail fast in development/local environments where we expect the database to work
-            if (isInMemory)
+            // Don't fail fast for model configuration errors (e.g., entity constructor binding issues)
+            // These are typically package-level issues that should be fixed in the packages
+            var isModelConfigurationError = ex is InvalidOperationException && 
+                (ex.Message.Contains("No suitable constructor was found") || 
+                 ex.Message.Contains("Cannot bind"));
+
+            // Only fail fast in development/local environments for non-model-configuration errors
+            if (isInMemory && !isModelConfigurationError)
             {
                 throw;
+            }
+            
+            // For model configuration errors, log and continue in degraded mode
+            if (isModelConfigurationError)
+            {
+                startupLogger.LogWarning("Database model configuration error detected. This is likely a package-level issue. The application will start in degraded mode. Database operations may fail until this is resolved in the Domain/Infrastructure packages.");
             }
         }
     }

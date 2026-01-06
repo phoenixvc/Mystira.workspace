@@ -237,7 +237,7 @@ public class CharacterMapsAdminController : ControllerBase
     /// </summary>
     [HttpPost("import")]
     [Authorize]
-    public async Task<ActionResult<List<CharacterMap>>> ImportCharacterMaps([FromForm] IFormFile file)
+    public async Task<ActionResult<List<CharacterMap>>> ImportCharacterMaps(IFormFile file)
     {
         try
         {
