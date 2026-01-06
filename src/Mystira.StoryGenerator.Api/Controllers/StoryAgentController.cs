@@ -79,7 +79,9 @@ public class StoryAgentController : ControllerBase
 
             // Initialize session
             var session = await _agentOrchestrator.InitializeSessionAsync(sessionId, request.KnowledgeMode, request.AgeGroup);
-            
+
+            session.TargetAxes = request.TargetAxes ?? new List<string>();
+
             // Save story prompt in the session for later use
             session.UserFocus = new UserRefinementFocus
             {

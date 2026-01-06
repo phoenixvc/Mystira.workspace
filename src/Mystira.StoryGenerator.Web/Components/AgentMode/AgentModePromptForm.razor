@@ -100,7 +100,8 @@
         {
             StoryPrompt = prompt,
             AgeGroup = selectedAgeGroup,
-            KnowledgeMode = knowledgeMode
+            KnowledgeMode = knowledgeMode,
+            TargetAxes = selectedAxes.ToList()
         };
         await OnStartSession.InvokeAsync(request);
     }

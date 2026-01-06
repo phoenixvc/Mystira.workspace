@@ -23,6 +23,38 @@ public class EvaluationReport
     /// </summary>
     public EvaluationStatus OverallStatus { get; set; }
 
+    public static EvaluationStatus DetermineOverallStatus(
+        bool safetyGatePassed,
+        float axesAlignmentScore,
+        float devPrinciplesScore,
+        float narrativeLogicScore)
+    {
+        if (!safetyGatePassed ||
+            axesAlignmentScore < 0.4f ||
+            devPrinciplesScore < 0.4f ||
+            narrativeLogicScore < 0.4f)
+        {
+            return EvaluationStatus.Fail;
+        }
+
+        if (axesAlignmentScore >= 0.7f &&
+            devPrinciplesScore >= 0.7f &&
+            narrativeLogicScore >= 0.7f)
+        {
+            return EvaluationStatus.Pass;
+        }
+
+        return EvaluationStatus.ReviewRequired;
+    }
+
+    public IReadOnlyList<string> GetAllFindings()
+    {
+        if (Findings.Count == 0)
+            return Array.Empty<string>();
+
+        return Findings.SelectMany(kvp => kvp.Value).ToList();
+    }
+
     /// <summary>
     /// Whether the safety gate checks passed.
     /// </summary>
