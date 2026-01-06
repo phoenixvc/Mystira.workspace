@@ -184,7 +184,7 @@ public class GameSessionApiService : IGameSessionApiService
             ? request.PlayerId
             : session.ProfileId;
 
-        var compassAxis = request.CompassAxis ?? branch.CompassChange?.Axis;
+        var compassAxis = request.CompassAxis ?? (branch.CompassChange?.Axis != null ? (string)branch.CompassChange!.Axis : null);
         var compassDelta = request.CompassDelta ?? branch.CompassChange?.Delta;
         var compassDirection = request.CompassDirection;
 

@@ -16,24 +16,28 @@ The project now uses **GitHub Packages** as the primary source for internal Myst
 
 ### NuGet.config
 
-The `NuGet.config` file at the repository root is configured with two package sources:
+The `NuGet.config` file at the repository root is configured with two package sources and package source mapping:
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
 <configuration>
   <packageSources>
     <clear />
-    <add key="nuget.org" value="https://api.nuget.org/v3/index.json" />
+    <add key="nuget.org" value="https://api.nuget.org/v3/index.json" protocolVersion="3" />
     <add key="github" value="https://nuget.pkg.github.com/phoenixvc/index.json" />
   </packageSources>
-  <packageSourceCredentials>
-    <github>
-      <add key="Username" value="phoenixvc" />
-      <add key="ClearTextPassword" value="%GITHUB_TOKEN%" />
-    </github>
-  </packageSourceCredentials>
+  <packageSourceMapping>
+    <packageSource key="nuget.org">
+      <package pattern="*" />
+    </packageSource>
+    <packageSource key="github">
+      <package pattern="Mystira.*" />
+    </packageSource>
+  </packageSourceMapping>
 </configuration>
 ```
+
+**Note:** The `NuGet.config` file does not include `packageSourceCredentials` to avoid committing sensitive tokens. Authentication is handled differently for CI/CD and local development (see sections below).
 
 ### CI Workflow Changes
 
@@ -84,19 +88,31 @@ For local development, you need to create a Personal Access Token (PAT) with `re
 4. Select the `read:packages` scope
 5. Click "Generate token" and copy the token
 
-#### Step 2: Configure Local NuGet
+#### Step 2: Configure Local NuGet Authentication
 
-Set the token as an environment variable:
+Since `NuGet.config` uses package source mapping without embedded credentials, you need to configure authentication separately. You have two options:
+
+**Option A: Environment Variable (Recommended)**
+
+Set the token as an environment variable. NuGet will automatically use it for authentication:
 
 **Windows (PowerShell):**
 ```powershell
+$env:NUGET_AUTH_TOKEN = "your-github-pat-here"
+# Or use GITHUB_TOKEN (both work)
 $env:GITHUB_TOKEN = "your-github-pat-here"
 ```
 
 **macOS/Linux (Bash):**
 ```bash
+export NUGET_AUTH_TOKEN="your-github-pat-here"
+# Or use GITHUB_TOKEN (both work)
 export GITHUB_TOKEN="your-github-pat-here"
 ```
+
+**Option B: User-Level NuGet.config**
+
+Add credentials to your user-level `NuGet.config` (see "Alternative: User-Level Configuration" section below).
 
 #### Step 3: Restore Packages
 
@@ -104,7 +120,7 @@ export GITHUB_TOKEN="your-github-pat-here"
 dotnet restore
 ```
 
-The `NuGet.config` will use the `GITHUB_TOKEN` environment variable to authenticate.
+NuGet will use the environment variable or user-level config to authenticate with GitHub Packages.
 
 #### Alternative: User-Level Configuration
 

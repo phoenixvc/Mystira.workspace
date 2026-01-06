@@ -345,7 +345,7 @@ public class AdminController : Controller
     /// Handle character map YAML file upload
     /// </summary>
     [HttpPost("charactermaps/import")]
-    public async Task<IActionResult> ImportCharacterMapYaml([FromForm] IFormFile yamlFile, [FromForm] string? name = null, [FromForm] bool validateReferences = true, [FromForm] bool overwriteExisting = false)
+    public async Task<IActionResult> ImportCharacterMapYaml(IFormFile yamlFile, [FromForm] string? name = null, [FromForm] bool validateReferences = true, [FromForm] bool overwriteExisting = false)
     {
         try
         {
@@ -376,7 +376,7 @@ public class AdminController : Controller
     /// Validates a bundle file
     /// </summary>
     [HttpPost("bundles/validate")]
-    public async Task<IActionResult> ValidateBundle([FromForm] IFormFile bundleFile)
+    public async Task<IActionResult> ValidateBundle(IFormFile bundleFile)
     {
         try
         {
@@ -399,7 +399,7 @@ public class AdminController : Controller
     /// Uploads and processes a bundle file
     /// </summary>
     [HttpPost("bundles/upload")]
-    public async Task<IActionResult> UploadBundle([FromForm] IFormFile bundleFile, [FromForm] bool validateReferences = true, [FromForm] bool overwriteExisting = false)
+    public async Task<IActionResult> UploadBundle(IFormFile bundleFile, [FromForm] bool validateReferences = true, [FromForm] bool overwriteExisting = false)
     {
         try
         {
@@ -679,7 +679,7 @@ public class AdminController : Controller
     /// Upload a scenario file for import
     /// </summary>
     [HttpPost("scenarios/upload")]
-    public async Task<IActionResult> UploadScenario([FromForm] IFormFile scenarioFile, [FromForm] bool overwriteExisting = false)
+    public async Task<IActionResult> UploadScenario(IFormFile scenarioFile, [FromForm] bool overwriteExisting = false)
     {
         try
         {

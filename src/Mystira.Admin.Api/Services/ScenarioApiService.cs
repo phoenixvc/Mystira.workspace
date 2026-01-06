@@ -378,21 +378,37 @@ public class ScenarioApiService : IScenarioApiService
             return new List<ScenarioCharacter>();
         }
 
-        return characters.Select(c => new ScenarioCharacter
+        return characters.Select(c =>
         {
-            Id = c.Id,
-            Name = c.Name,
-            Image = c.Image,
-            Audio = c.Audio,
-            Metadata = c.Metadata == null ? null : new ScenarioCharacterMetadata
+            ScenarioCharacterMetadata? metadata = null;
+
+            if (c.Metadata != null)
             {
-                Role = c.Metadata.Role,
-                Archetype = c.Metadata.Archetype?.Select(a => Archetype.Parse(a)).Where(a => a != null).ToList()!,
-                Species = c.Metadata.Species ?? string.Empty,
-                Age = int.TryParse(c.Metadata.Age?.ToString(), out var age) ? age : 0,
-                Traits = c.Metadata.Traits ?? new List<string>(),
-                Backstory = c.Metadata.Backstory ?? string.Empty
+                var age = int.TryParse(c.Metadata.Age?.ToString(), out var parsedAge) ? parsedAge : 0;
+                var backstory = c.Metadata.Backstory ?? string.Empty;
+
+                // Create metadata using ID properties - value object properties are computed from IDs
+                metadata = new ScenarioCharacterMetadata
+                {
+                    RoleIds = c.Metadata.Role?.ToList() ?? new List<string>(),
+                    ArchetypeIds = c.Metadata.Archetype?.ToList() ?? new List<string>(),
+                    SpeciesId = c.Metadata.Species ?? string.Empty,
+                    TraitIds = c.Metadata.Traits?.ToList() ?? new List<string>(),
+                    Age = age,
+                    Backstory = backstory
+                };
             }
+
+            var character = new ScenarioCharacter
+            {
+                Id = c.Id,
+                Name = c.Name,
+                Image = c.Image,
+                Audio = c.Audio,
+                Metadata = metadata
+            };
+
+            return character;
         }).ToList();
     }
 
@@ -472,14 +488,14 @@ public class ScenarioApiService : IScenarioApiService
                     character.Audio,
                     Metadata = meta == null ? null : new
                     {
-                        Role = meta.Role ?? new List<string>(),
+                        Role = meta.Role?.Select(r => r.Value).ToList() ?? new List<string>(),
                         Archetype = (meta.Archetype ?? new List<Archetype>())
                             .Where(a => a != null)
                             .Select(a => a.Value)
                             .ToList(),
-                        meta.Species,
+                        Species = meta.Species?.Value ?? string.Empty,
                         meta.Age,
-                        Traits = meta.Traits ?? new List<string>(),
+                        Traits = meta.Traits?.Select(t => t.Value).ToList() ?? new List<string>(),
                         meta.Backstory
                     }
                 };
@@ -522,8 +538,7 @@ public class ScenarioApiService : IScenarioApiService
                         CompassChange = branch.CompassChange == null ? null : new
                         {
                             branch.CompassChange.Axis,
-                            branch.CompassChange.Delta,
-                            branch.CompassChange.DevelopmentalLink
+                            branch.CompassChange.Delta
                         }
                     }).ToList(),
                     EchoReveals = echoReveals.Select(reveal => new
@@ -627,12 +642,13 @@ public class ScenarioApiService : IScenarioApiService
                         throw new ScenarioValidationException($"Compass change delta must be between -1.0 and 1.0 (Scene ID: {scene.Id}, Choice: {branch.Choice})");
                     }
 
-                    if (string.IsNullOrWhiteSpace(change.Axis))
+                    var axisValue = change.Axis != null ? (string)change.Axis : null;
+                    if (string.IsNullOrWhiteSpace(axisValue))
                     {
                         throw new ScenarioValidationException($"Compass axis cannot be empty (Scene ID: {scene.Id}, Choice: {branch.Choice})");
                     }
 
-                    if (!scenario.CoreAxes.Contains(change.Axis))
+                    if (!scenario.CoreAxes.Contains(axisValue))
                     {
                         // TODO: Enhancement - Re-enable strict validation when master axis list is finalized
                         // This will ensure all compass axes referenced in scenarios are valid according to the domain model
