@@ -204,6 +204,12 @@ public class ScenarioBuilder
         return this;
     }
 
+    public ScenarioBuilder UpdatedAt(DateTime updatedAt)
+    {
+        _updatedAt = updatedAt;
+        return this;
+    }
+
     public Scenario Build()
     {
         return new Scenario
