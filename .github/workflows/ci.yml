@@ -52,13 +52,22 @@ jobs:
         env:
           NUGET_AUTH_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN }}
       - run: dotnet restore
-      - run: dotnet test --no-restore --verbosity normal --collect:"XPlat Code Coverage" --results-directory ./coverage
+      - name: Run tests with coverage
+        run: |
+          dotnet test --no-restore --verbosity normal \
+            --settings tests/Mystira.Admin.Api.Tests/coverlet.runsettings \
+            --collect:"XPlat Code Coverage" \
+            --results-directory ./coverage \
+            -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover,cobertura
         continue-on-error: ${{ github.ref != 'refs/heads/main' }}
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           directory: ./coverage
+          files: "**/*.cobertura.xml,**/*.opencover.xml"
+          flags: unittests
+          name: mystira-admin-api
           fail_ci_if_error: false
           verbose: true
 
