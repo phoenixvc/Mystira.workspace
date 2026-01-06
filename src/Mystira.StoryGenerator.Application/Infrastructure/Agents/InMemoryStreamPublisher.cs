@@ -1,4 +1,6 @@
 using System.Collections.Concurrent;
+using System.Runtime.CompilerServices;
+using System.Threading.Channels;
 
 namespace Mystira.StoryGenerator.Application.Infrastructure.Agents;
 
@@ -8,7 +10,7 @@ namespace Mystira.StoryGenerator.Application.Infrastructure.Agents;
 /// </summary>
 public class InMemoryStreamPublisher : IAgentStreamPublisher
 {
-    private readonly ConcurrentDictionary<string, SessionObservers> _sessionObservers = new();
+    private readonly ConcurrentDictionary<string, SessionChannel> _sessionChannels = new();
     private readonly ConcurrentDictionary<string, List<AgentStreamEvent>> _eventHistory = new();
     private const int MaxEventsPerSession = 100;
 
@@ -33,12 +35,49 @@ public class InMemoryStreamPublisher : IAgentStreamPublisher
                 return existing;
             });
 
-        // Publish to observers
-        if (_sessionObservers.TryGetValue(sessionId, out var observers))
+        // Publish to subscribers via channel
+        if (_sessionChannels.TryGetValue(sessionId, out var channel))
         {
-            var tasks = observers.Observers.Select(observer => 
-                SafeInvokeObserver(observer, evt)).ToArray();
-            await Task.WhenAll(tasks);
+            await channel.Writer.WriteAsync(evt);
+        }
+    }
+
+    /// <summary>
+    /// Subscribe to events for a specific session.
+    /// </summary>
+    /// <param name="sessionId">The session identifier.</param>
+    /// <param name="ct">Cancellation token.</param>
+    /// <returns>Async enumerable of events.</returns>
+    public async IAsyncEnumerable<AgentStreamEvent> SubscribeAsync(
+        string sessionId,
+        [EnumeratorCancellation] CancellationToken ct = default)
+    {
+        // Create or get the session channel
+        var channel = _sessionChannels.GetOrAdd(sessionId, _ => 
+            SessionChannel.Create());
+
+        // First, yield all existing events (replay)
+        if (_eventHistory.TryGetValue(sessionId, out var existingEvents))
+        {
+            foreach (var evt in existingEvents)
+            {
+                if (ct.IsCancellationRequested)
+                    yield break;
+                yield return evt;
+            }
+        }
+
+        // Then stream new events
+        var reader = channel.Reader;
+        while (!ct.IsCancellationRequested)
+        {
+            if (await reader.WaitToReadAsync(ct))
+            {
+                if (reader.TryRead(out var evt))
+                {
+                    yield return evt;
+                }
+            }
         }
     }
 
@@ -64,55 +103,37 @@ public class InMemoryStreamPublisher : IAgentStreamPublisher
     }
 
     /// <summary>
-    /// Add an observer for a session.
+    /// Complete all channels for a session.
     /// </summary>
     /// <param name="sessionId">The session identifier.</param>
-    /// <param name="observer">The observer to add.</param>
-    public void AddObserver(string sessionId, IAsyncObserver<AgentStreamEvent> observer)
+    public void CompleteSession(string sessionId)
     {
-        _sessionObservers.AddOrUpdate(sessionId,
-            new SessionObservers { Observers = new List<IAsyncObserver<AgentStreamEvent>> { observer } },
-            (key, existing) =>
-            {
-                existing.Observers.Add(observer);
-                return existing;
-            });
-    }
-
-    /// <summary>
-    /// Remove an observer from a session.
-    /// </summary>
-    /// <param name="sessionId">The session identifier.</param>
-    /// <param name="observer">The observer to remove.</param>
-    public void RemoveObserver(string sessionId, IAsyncObserver<AgentStreamEvent> observer)
-    {
-        if (_sessionObservers.TryGetValue(sessionId, out var observers))
+        if (_sessionChannels.TryGetValue(sessionId, out var channel))
         {
-            observers.Observers.Remove(observer);
-            
-            // Clean up if no observers left
-            if (!observers.Observers.Any())
-            {
-                _sessionObservers.TryRemove(sessionId, out _);
-            }
+            channel.Writer.Complete();
         }
     }
 
-    private static async Task SafeInvokeObserver(IAsyncObserver<AgentStreamEvent> observer, AgentStreamEvent evt)
+    private class SessionChannel
     {
-        try
-        {
-            await observer.OnNextAsync(evt);
-        }
-        catch (Exception)
-        {
-            // Observer exceptions should not break the publishing flow
-            // In production, this would be logged
-        }
-    }
+        public Channel<AgentStreamEvent> Channel { get; }
+        public ChannelWriter<AgentStreamEvent> Writer => Channel.Writer;
+        public ChannelReader<AgentStreamEvent> Reader => Channel.Reader;
 
-    private class SessionObservers
-    {
-        public List<IAsyncObserver<AgentStreamEvent>> Observers { get; set; } = new();
+        private SessionChannel(Channel<AgentStreamEvent> channel)
+        {
+            Channel = channel;
+        }
+
+        public static SessionChannel Create()
+        {
+            var channel = Channel.CreateUnbounded<AgentStreamEvent>(
+                new UnboundedChannelOptions
+                {
+                    SingleReader = false,
+                    SingleWriter = false
+                });
+            return new SessionChannel(channel);
+        }
     }
 }

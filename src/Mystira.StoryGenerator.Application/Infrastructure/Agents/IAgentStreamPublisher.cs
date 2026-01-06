@@ -1,4 +1,4 @@
-using Mystira.StoryGenerator.Application.Infrastructure.Agents;
+using System.Runtime.CompilerServices;
 
 namespace Mystira.StoryGenerator.Application.Infrastructure.Agents;
 
@@ -13,4 +13,12 @@ public interface IAgentStreamPublisher
     /// <param name="sessionId">The session identifier.</param>
     /// <param name="evt">The event to publish.</param>
     Task PublishEventAsync(string sessionId, AgentStreamEvent evt);
+
+    /// <summary>
+    /// Subscribe to events for a specific session.
+    /// </summary>
+    /// <param name="sessionId">The session identifier.</param>
+    /// <param name="ct">Cancellation token.</param>
+    /// <returns>Async enumerable of events.</returns>
+    IAsyncEnumerable<AgentStreamEvent> SubscribeAsync(string sessionId, CancellationToken ct = default);
 }
