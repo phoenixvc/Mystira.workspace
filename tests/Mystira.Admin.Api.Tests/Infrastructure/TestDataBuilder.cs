@@ -33,7 +33,7 @@ public class ScenarioQueryRequestBuilder
     private int _pageSize = 10;
     private string? _searchTerm;
     private string? _ageGroup;
-    private bool? _isFeatured;
+    private int? _minimumAge;
 
     public ScenarioQueryRequestBuilder WithPage(int page)
     {
@@ -59,9 +59,9 @@ public class ScenarioQueryRequestBuilder
         return this;
     }
 
-    public ScenarioQueryRequestBuilder OnlyFeatured()
+    public ScenarioQueryRequestBuilder WithMinimumAge(int minimumAge)
     {
-        _isFeatured = true;
+        _minimumAge = minimumAge;
         return this;
     }
 
@@ -73,7 +73,7 @@ public class ScenarioQueryRequestBuilder
             PageSize = _pageSize,
             SearchTerm = _searchTerm,
             AgeGroup = _ageGroup,
-            IsFeatured = _isFeatured
+            MinimumAge = _minimumAge
         };
     }
 }
@@ -85,10 +85,8 @@ public class CreateScenarioRequestBuilder
 {
     private string _title = "Test Scenario";
     private string _description = "A test scenario for unit testing";
-    private string _ageGroup = "all-ages";
-    private bool _isFeatured;
+    private int _minimumAge = 0;
     private List<string> _tags = new() { "test", "integration" };
-    private string? _thumbnailUrl;
 
     public CreateScenarioRequestBuilder WithTitle(string title)
     {
@@ -102,15 +100,9 @@ public class CreateScenarioRequestBuilder
         return this;
     }
 
-    public CreateScenarioRequestBuilder WithAgeGroup(string ageGroup)
+    public CreateScenarioRequestBuilder WithMinimumAge(int minimumAge)
     {
-        _ageGroup = ageGroup;
-        return this;
-    }
-
-    public CreateScenarioRequestBuilder AsFeatured()
-    {
-        _isFeatured = true;
+        _minimumAge = minimumAge;
         return this;
     }
 
@@ -120,22 +112,14 @@ public class CreateScenarioRequestBuilder
         return this;
     }
 
-    public CreateScenarioRequestBuilder WithThumbnail(string thumbnailUrl)
-    {
-        _thumbnailUrl = thumbnailUrl;
-        return this;
-    }
-
     public CreateScenarioRequest Build()
     {
         return new CreateScenarioRequest
         {
             Title = _title,
             Description = _description,
-            AgeGroup = _ageGroup,
-            IsFeatured = _isFeatured,
-            Tags = _tags,
-            ThumbnailUrl = _thumbnailUrl
+            MinimumAge = _minimumAge,
+            Tags = _tags
         };
     }
 }
@@ -148,8 +132,7 @@ public class ScenarioBuilder
     private string _id = Guid.NewGuid().ToString();
     private string _title = "Test Scenario";
     private string _description = "A test scenario";
-    private string _ageGroup = "all-ages";
-    private bool _isFeatured;
+    private int _minimumAge = 0;
     private List<string> _tags = new() { "test" };
     private DateTime _createdAt = DateTime.UtcNow;
     private DateTime _updatedAt = DateTime.UtcNow;
@@ -172,15 +155,9 @@ public class ScenarioBuilder
         return this;
     }
 
-    public ScenarioBuilder WithAgeGroup(string ageGroup)
+    public ScenarioBuilder WithMinimumAge(int minimumAge)
     {
-        _ageGroup = ageGroup;
-        return this;
-    }
-
-    public ScenarioBuilder AsFeatured()
-    {
-        _isFeatured = true;
+        _minimumAge = minimumAge;
         return this;
     }
 
@@ -203,8 +180,7 @@ public class ScenarioBuilder
             Id = _id,
             Title = _title,
             Description = _description,
-            AgeGroup = _ageGroup,
-            IsFeatured = _isFeatured,
+            MinimumAge = _minimumAge,
             Tags = _tags,
             CreatedAt = _createdAt,
             UpdatedAt = _updatedAt
