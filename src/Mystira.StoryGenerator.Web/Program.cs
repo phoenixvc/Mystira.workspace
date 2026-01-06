@@ -46,6 +46,9 @@ builder.Services.AddScoped<WebStoryContinuityService>();
 // Add Scenario Dominator Path Analysis Service
 builder.Services.AddScoped<WebScenarioDominatorPathAnalysisService>();
 
+// Add Agent Session Service
+builder.Services.AddScoped<IAgentSessionService, AgentSessionService>();
+
 builder.Services.AddScoped(sp =>
 {
     var configuration = sp.GetRequiredService<IConfiguration>();

@@ -1,0 +1,174 @@
+@using Mystira.StoryGenerator.Domain.Agents
+@using Mystira.StoryGenerator.Application.Infrastructure.Agents
+
+<div class="progress-panel">
+    <div class="timeline">
+        @foreach (var phase in phases)
+        {
+            <div class="timeline-item @GetPhaseStatus(phase)">
+                <div class="timeline-marker">
+                    @if (phase == currentPhase)
+                    {
+                        <span class="spinner">⏳</span>
+                    }
+                    else if (IsPhaseComplete(phase))
+                    {
+                        <span>✅</span>
+                    }
+                    else
+                    {
+                        <span>○</span>
+                    }
+                </div>
+                <div class="timeline-label">@phase</div>
+            </div>
+        }
+    </div>
+    
+    @if (EvaluationReport != null)
+    {
+        <div class="evaluation-scorecard">
+            <h3>Evaluation Results</h3>
+            
+            <div class="score-row">
+                <label>Safety Gate</label>
+                <span class="@(EvaluationReport.SafetyGatePassed ? "pass" : "fail")">
+                    @(EvaluationReport.SafetyGatePassed ? "✅ Passed" : "⚠️ Failed")
+                </span>
+            </div>
+            
+            <div class="score-row">
+                <label>Axes Alignment</label>
+                <ProgressBar Value="@EvaluationReport.AxesAlignmentScore" Max="1.0" />
+            </div>
+            
+            <div class="score-row">
+                <label>Dev Principles</label>
+                <ProgressBar Value="@EvaluationReport.DevPrinciplesScore" Max="1.0" />
+            </div>
+            
+            <div class="score-row">
+                <label>Narrative Logic</label>
+                <ProgressBar Value="@EvaluationReport.NarrativeLogicScore" Max="1.0" />
+            </div>
+            
+            @if (EvaluationReport.Findings.Any())
+            {
+                <div class="findings">
+                    <h4>Key Findings</h4>
+                    @foreach (var category in EvaluationReport.Findings)
+                    {
+                        @if (category.Value.Any())
+                        {
+                            <div class="finding-category">
+                                <strong>@category.Key</strong>
+                                <ul>
+                                    @foreach (var finding in category.Value)
+                                    {
+                                        <li>@finding</li>
+                                    }
+                                </ul>
+                            </div>
+                        }
+                    }
+                </div>
+            }
+            
+            @if (!string.IsNullOrEmpty(EvaluationReport.Recommendation))
+            {
+                <div class="recommendation">
+                    <strong>Next Steps:</strong> @EvaluationReport.Recommendation
+                </div>
+            }
+        </div>
+    }
+    
+    @if (Events.Any())
+    {
+        <div class="event-log">
+            <h4>Progress Log</h4>
+            <div class="events">
+                @foreach (var evt in Events.TakeLast(10).Reverse())
+                {
+                    <div class="event @evt.Type.ToString().ToLower()">
+                        <span class="timestamp">@evt.Timestamp.ToString("HH:mm:ss")</span>
+                        <span class="type">@FormatEventType(evt.Type)</span>
+                        @if (evt.Type == AgentStreamEvent.EventType.PhaseStarted && !string.IsNullOrEmpty(evt.Phase))
+                        {
+                            <span class="phase">@evt.Phase</span>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    }
+    
+    @if (Session != null)
+    {
+        <div class="metadata">
+            Iteration: @Session.IterationCount | Tokens: ~@(Session.IterationCount * 1500)
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public SessionStateResponse? Session { get; set; }
+    [Parameter] public EvaluationReport? EvaluationReport { get; set; }
+    [Parameter] public List<AgentStreamEvent> Events { get; set; } = new();
+    
+    private string currentPhase = "Writing";
+    private List<string> phases = new() { "Writing", "Validating", "Evaluating", "Complete" };
+    
+    private string GetPhaseStatus(string phase)
+    {
+        return phase == currentPhase ? "active" : IsPhaseComplete(phase) ? "complete" : "pending";
+    }
+    
+    private bool IsPhaseComplete(string phase)
+    {
+        var phaseIndex = phases.IndexOf(phase);
+        var currentIndex = phases.IndexOf(currentPhase);
+        return phaseIndex < currentIndex;
+    }
+
+    private string FormatEventType(AgentStreamEvent.EventType type)
+    {
+        return type switch
+        {
+            AgentStreamEvent.EventType.PhaseStarted => "Phase Started",
+            AgentStreamEvent.EventType.GenerationComplete => "Generation Complete",
+            AgentStreamEvent.EventType.ValidationFailed => "Validation Failed",
+            AgentStreamEvent.EventType.EvaluationPassed => "Evaluation Passed",
+            AgentStreamEvent.EventType.EvaluationFailed => "Evaluation Failed",
+            AgentStreamEvent.EventType.RefinementComplete => "Refinement Complete",
+            AgentStreamEvent.EventType.MaxIterationsReached => "Max Iterations Reached",
+            AgentStreamEvent.EventType.Error => "Error",
+            AgentStreamEvent.EventType.TokenUsageUpdate => "Token Usage Update",
+            _ => type.ToString()
+        };
+    }
+    
+    protected override void OnParametersSet()
+    {
+        // Update current phase based on session stage
+        if (Session != null)
+        {
+            currentPhase = Session.Stage switch
+            {
+                "Generating" => "Writing",
+                "Validating" => "Validating",
+                "Evaluating" or "Evaluated" => "Evaluating",
+                "RefinementRequested" or "Refined" => "Evaluating",
+                "Complete" => "Complete",
+                _ => currentPhase
+            };
+        }
+
+        // Also update from latest phase event
+        var latestPhase = Events.LastOrDefault(e => e.Type == AgentStreamEvent.EventType.PhaseStarted);
+        if (latestPhase != null && !string.IsNullOrEmpty(latestPhase.Phase))
+        {
+            currentPhase = latestPhase.Phase;
+        }
+    }
+}
