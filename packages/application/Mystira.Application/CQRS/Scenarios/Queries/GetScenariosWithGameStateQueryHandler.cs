@@ -75,7 +75,9 @@ public static class GetScenariosWithGameStateQueryHandler
                 GameState = gameState.ToString(),
                 LastPlayedAt = lastSession?.StartTime,
                 PlayCount = sessions.Count,
-                Image = scenario.Image
+                Image = scenario.Image,
+                IsFeatured = scenario.IsFeatured,
+                ThumbnailUrl = scenario.ThumbnailUrl
             };
         }).ToList();
 

@@ -74,6 +74,88 @@ public record CreateScenarioRequest
 }
 
 /// <summary>
+/// Request to update an existing scenario.
+/// Extends CreateScenarioRequest with additional admin-controllable fields.
+/// </summary>
+public record UpdateScenarioRequest
+{
+    /// <summary>
+    /// The title of the scenario.
+    /// </summary>
+    public string Title { get; set; } = string.Empty;
+
+    /// <summary>
+    /// A description of the scenario content and objectives.
+    /// </summary>
+    public string Description { get; set; } = string.Empty;
+
+    /// <summary>
+    /// The difficulty level of the scenario.
+    /// </summary>
+    public DifficultyLevel Difficulty { get; set; }
+
+    /// <summary>
+    /// The expected duration of a session.
+    /// </summary>
+    public SessionLength SessionLength { get; set; }
+
+    /// <summary>
+    /// Optional list of tags for categorization.
+    /// </summary>
+    public List<string>? Tags { get; set; }
+
+    /// <summary>
+    /// Optional list of character archetypes available in this scenario.
+    /// </summary>
+    public List<string>? Archetypes { get; set; }
+
+    /// <summary>
+    /// The target age group for this scenario.
+    /// </summary>
+    public string AgeGroup { get; set; } = string.Empty;
+
+    /// <summary>
+    /// The minimum recommended age for players.
+    /// </summary>
+    public int MinimumAge { get; set; }
+
+    /// <summary>
+    /// Optional list of core moral compass axes explored in this scenario.
+    /// </summary>
+    public List<string>? CoreAxes { get; set; }
+
+    /// <summary>
+    /// Optional list of characters in this scenario.
+    /// </summary>
+    public List<CharacterRequest>? Characters { get; set; }
+
+    /// <summary>
+    /// Optional list of scenes in this scenario.
+    /// </summary>
+    public List<SceneRequest>? Scenes { get; set; }
+
+    /// <summary>
+    /// Optional URL or identifier for the scenario's cover image.
+    /// </summary>
+    public string? Image { get; set; }
+
+    /// <summary>
+    /// Optional list of compass axes used in this scenario.
+    /// </summary>
+    public List<string>? CompassAxes { get; set; }
+
+    /// <summary>
+    /// Whether this scenario is featured (admin-controlled).
+    /// </summary>
+    public bool? IsFeatured { get; set; }
+
+    /// <summary>
+    /// Optional URL for the scenario's thumbnail image.
+    /// </summary>
+    public string? ThumbnailUrl { get; set; }
+}
+
+/// <summary>
 /// Request to query scenarios with filtering and pagination.
 /// </summary>
 public record ScenarioQueryRequest

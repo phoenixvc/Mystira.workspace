@@ -132,7 +132,7 @@ public sealed class ScenariosByArchetypeSpec : BaseEntitySpecification<Scenario>
 
 /// <summary>
 /// Specification for featured scenarios.
-/// Migrated from FeaturedScenariosSpecification.
+/// Uses the IsFeatured boolean property to identify featured scenarios.
 /// </summary>
 public sealed class FeaturedScenariosSpec : BaseEntitySpecification<Scenario>
 {
@@ -141,7 +141,7 @@ public sealed class FeaturedScenariosSpec : BaseEntitySpecification<Scenario>
     /// </summary>
     public FeaturedScenariosSpec()
     {
-        Query.Where(s => s.Tags != null && s.Tags.Contains("featured"))
+        Query.Where(s => s.IsFeatured && s.IsActive)
              .OrderByDescending(s => s.CreatedAt);
     }
 }
