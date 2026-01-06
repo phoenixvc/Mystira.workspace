@@ -121,6 +121,16 @@ public record ScenarioSummary
     /// Optional music palette identifier for the scenario.
     /// </summary>
     public string? MusicPalette { get; set; }
+
+    /// <summary>
+    /// Whether this scenario is featured.
+    /// </summary>
+    public bool IsFeatured { get; set; }
+
+    /// <summary>
+    /// Optional URL for the scenario's thumbnail image.
+    /// </summary>
+    public string? ThumbnailUrl { get; set; }
 }
 
 /// <summary>
@@ -208,6 +218,16 @@ public record ScenarioWithGameState
     /// Optional URL or identifier for the scenario's cover image.
     /// </summary>
     public string? Image { get; set; }
+
+    /// <summary>
+    /// Whether this scenario is featured.
+    /// </summary>
+    public bool IsFeatured { get; set; }
+
+    /// <summary>
+    /// Optional URL for the scenario's thumbnail image.
+    /// </summary>
+    public string? ThumbnailUrl { get; set; }
 }
 
 /// <summary>

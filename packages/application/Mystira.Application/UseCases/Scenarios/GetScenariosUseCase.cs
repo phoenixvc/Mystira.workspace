@@ -98,7 +98,10 @@ public class GetScenariosUseCase
                 AgeGroup = s.AgeGroupId ?? string.Empty,
                 CoreAxes = s.CoreAxes,
                 CreatedAt = s.CreatedAt,
-                MusicPalette = s.MusicPalette != null ? s.MusicPalette.DefaultMood : null
+                Image = s.CoverImageUrl,
+                MusicPalette = s.MusicPalette != null ? s.MusicPalette.DefaultMood : null,
+                IsFeatured = s.IsFeatured,
+                ThumbnailUrl = s.ThumbnailUrl
             })
             .ToListAsync();
 

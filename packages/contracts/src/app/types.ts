@@ -443,6 +443,10 @@ export interface ScenarioSummary {
   createdAt: string;
   /** Optional music palette identifier for the scenario */
   musicPalette?: string;
+  /** Whether this scenario is featured */
+  isFeatured: boolean;
+  /** Optional URL for the scenario's thumbnail image */
+  thumbnailUrl?: string;
 }
 
 /**
@@ -491,6 +495,10 @@ export interface ScenarioWithGameState {
   playCount: number;
   /** Optional URL or identifier for the scenario's cover image */
   image?: string;
+  /** Whether this scenario is featured */
+  isFeatured: boolean;
+  /** Optional URL for the scenario's thumbnail image */
+  thumbnailUrl?: string;
 }
 
 /**
