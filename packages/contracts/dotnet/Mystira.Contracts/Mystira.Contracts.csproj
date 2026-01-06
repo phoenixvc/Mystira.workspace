@@ -10,7 +10,7 @@
 
     <!-- Package metadata -->
     <PackageId>Mystira.Contracts</PackageId>
-    <Version>0.5.0-alpha</Version>
+    <Version>0.5.1-alpha</Version>
     <Authors>Mystira Team</Authors>
     <Company>PhoenixVC</Company>
     <Description>Unified API contracts for Mystira platform - includes App API (scenarios, game sessions, badges) and StoryGenerator API (chat, story generation, entity recognition) contracts</Description>
@@ -45,7 +45,7 @@
   <ItemGroup>
     <!-- Domain package: ProjectReference for local build, PackageReference for NuGet pack -->
     <ProjectReference Include="../../../domain/Mystira.Domain/Mystira.Domain.csproj" PrivateAssets="all" />
-    <PackageReference Include="Mystira.Domain" Version="0.5.0-alpha" />
+    <PackageReference Include="Mystira.Domain" Version="0.5.1-alpha" />
   </ItemGroup>
 
   <ItemGroup>
