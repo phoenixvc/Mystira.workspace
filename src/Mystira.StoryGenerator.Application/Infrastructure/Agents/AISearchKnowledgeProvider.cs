@@ -52,11 +52,13 @@ public class AISearchKnowledgeProvider : IKnowledgeProvider
     /// </summary>
     public Task<ToolDefinition> AttachToThreadAsync(
         string threadId,
+        string? ageGroup = null,
         CancellationToken cancellationToken = default)
     {
-        _logger.LogInformation("Attaching AI Search to thread: {ThreadId}", threadId);
+        _logger.LogInformation("Attaching AI Search to thread: {ThreadId} for age group: {AgeGroup}",
+            threadId, ageGroup ?? "all");
 
-        var toolDefinition = GetToolDefinition();
+        var toolDefinition = GetToolDefinition(ageGroup);
         _logger.LogInformation("Attached AI Search tool to thread: {ThreadId}", threadId);
 
         return Task.FromResult(toolDefinition);
@@ -65,14 +67,24 @@ public class AISearchKnowledgeProvider : IKnowledgeProvider
     /// <summary>
     /// Gets the tool definition for Azure AI Search.
     /// </summary>
-    public ToolDefinition GetToolDefinition()
+    public ToolDefinition GetToolDefinition(string? ageGroup = null)
     {
         return new AzureAISearchToolDefinition();
     }
 
-    public string GetContextualGuidance()
+    /// <summary>
+    /// Gets age-aware contextual guidance for using AI Search.
+    /// </summary>
+    public string GetContextualGuidance(string? ageGroup = null)
     {
-        return $"Use the azure_ai_search tool to retrieve relevant instructions, safety guidance, and age-group-specific writing principles from the '{_config.IndexName}' index before you write or revise. Only incorporate information supported by the retrieved documents.";
+        var baseGuidance = $"Use the azure_ai_search tool to retrieve relevant instructions, safety guidance, and writing principles from the '{_config.IndexName}' index.";
+
+        if (!string.IsNullOrEmpty(ageGroup))
+        {
+            return $"{baseGuidance}\n\n**IMPORTANT**: Always include filter 'age_group eq {ageGroup}' in your searches to retrieve age-appropriate guidelines. Only use information from documents matching this age group.";
+        }
+
+        return baseGuidance;
     }
 
     /// <summary>

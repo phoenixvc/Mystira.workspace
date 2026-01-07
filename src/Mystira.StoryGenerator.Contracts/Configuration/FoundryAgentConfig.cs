@@ -69,7 +69,13 @@ public class FoundryAgentConfig
     public string? SearchIndexName { get; set; }
 
     /// <summary>
-    /// Vector store name for File Search mode.
+    /// Vector store name for File Search mode (legacy - single store).
     /// </summary>
     public string? VectorStoreName { get; set; }
+
+    /// <summary>
+    /// Vector store IDs mapped by age group for File Search mode.
+    /// Example: { "1-2": "vs_abc123", "3-5": "vs_def456", "6-9": "vs_ghi789" }
+    /// </summary>
+    public Dictionary<string, string>? VectorStoresByAgeGroup { get; set; }
 }

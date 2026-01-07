@@ -25,18 +25,21 @@ public interface IKnowledgeProvider
     /// Attaches the knowledge source to a thread.
     /// </summary>
     /// <param name="threadId">The thread ID.</param>
+    /// <param name="ageGroup">Optional age group for filtering knowledge sources.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>The tool definition for the thread.</returns>
-    Task<ToolDefinition> AttachToThreadAsync(string threadId, CancellationToken cancellationToken = default);
+    Task<ToolDefinition> AttachToThreadAsync(string threadId, string? ageGroup = null, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Gets the tool definition for this knowledge provider.
     /// </summary>
+    /// <param name="ageGroup">Optional age group for age-specific tool configuration.</param>
     /// <returns>The tool definition.</returns>
-    ToolDefinition GetToolDefinition();
+    ToolDefinition GetToolDefinition(string? ageGroup = null);
 
     /// <summary>
     /// Returns prompt-ready guidance on how the agent should use the configured knowledge source.
     /// </summary>
-    string GetContextualGuidance();
+    /// <param name="ageGroup">Optional age group for age-specific guidance.</param>
+    string GetContextualGuidance(string? ageGroup = null);
 }

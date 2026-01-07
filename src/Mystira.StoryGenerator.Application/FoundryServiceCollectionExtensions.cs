@@ -67,7 +67,8 @@ public static class FoundryServiceCollectionExtensions
 
                 var fileSearchConfig = new FileSearchKnowledgeProvider.FileSearchConfiguration
                 {
-                    VectorStoreName = foundryConfig.VectorStoreName ?? "mystira-story-knowledge"
+                    VectorStoreName = foundryConfig.VectorStoreName ?? "mystira-story-knowledge",
+                    VectorStoresByAgeGroup = foundryConfig.VectorStoresByAgeGroup
                 };
 
                 return new FileSearchKnowledgeProvider(client, fileSearchConfig, logger);

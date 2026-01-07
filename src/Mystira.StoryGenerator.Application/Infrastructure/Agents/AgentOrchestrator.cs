@@ -19,6 +19,7 @@ public class AgentOrchestrator : IAgentOrchestrator
     private readonly FoundryAgentClient _foundryClient;
     private readonly IPromptGenerator _promptGenerator;
     private readonly StorySchemaValidator _schemaValidator;
+    private readonly IKnowledgeProvider _knowledgeProvider;
     private readonly FoundryAgentConfig _config;
 
     public AgentOrchestrator(
@@ -28,6 +29,7 @@ public class AgentOrchestrator : IAgentOrchestrator
         FoundryAgentClient foundryClient,
         IPromptGenerator promptGenerator,
         StorySchemaValidator schemaValidator,
+        IKnowledgeProvider knowledgeProvider,
         IOptions<FoundryAgentConfig> config)
     {
         _logger = logger;
@@ -36,6 +38,7 @@ public class AgentOrchestrator : IAgentOrchestrator
         _foundryClient = foundryClient;
         _promptGenerator = promptGenerator;
         _schemaValidator = schemaValidator;
+        _knowledgeProvider = knowledgeProvider;
         _config = config.Value;
     }
 
@@ -59,7 +62,23 @@ public class AgentOrchestrator : IAgentOrchestrator
         try
         {
             // Create the thread via Foundry
-            var threadResult = await _foundryClient.CreateThreadAsync(_config.WriterAgentId);
+            // For FileSearch mode, attach age-specific vector store
+            ThreadCreationResult threadResult;
+
+            if (_knowledgeProvider is FileSearchKnowledgeProvider fileSearchProvider)
+            {
+                var vectorStoreId = fileSearchProvider.GetVectorStoreIdForAgeGroup(ageGroup);
+                threadResult = await _foundryClient.CreateThreadWithVectorStoresAsync(
+                    _config.WriterAgentId,
+                    new[] { vectorStoreId });
+
+                _logger.LogInformation("Created thread with vector store {VectorStoreId} for age group {AgeGroup}",
+                    vectorStoreId, ageGroup);
+            }
+            else
+            {
+                threadResult = await _foundryClient.CreateThreadAsync(_config.WriterAgentId);
+            }
 
             session.ThreadId = threadResult.ThreadId;
             session.Stage = StorySessionStage.Uninitialized;
