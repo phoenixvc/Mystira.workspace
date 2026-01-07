@@ -581,10 +581,11 @@ public class ScenarioApiService : IScenarioApiService
 
     public async Task<List<Scenario>> GetFeaturedScenariosAsync()
     {
-        // Return scenarios marked as featured
+        // TODO: Re-enable IsFeatured filter when Contracts package is updated
+        // For now, return newest scenarios as "featured"
         return await _context.Scenarios
-            .Where(s => s.IsFeatured)
-            .OrderBy(s => s.CreatedAt)
+            // .Where(s => s.IsFeatured)
+            .OrderByDescending(s => s.CreatedAt)
             .Take(6)
             .ToListAsync();
     }
