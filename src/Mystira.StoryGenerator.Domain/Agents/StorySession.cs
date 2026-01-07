@@ -49,6 +49,11 @@ public class StorySession
     public string CurrentStoryVersion { get; set; } = string.Empty;
 
     /// <summary>
+    /// The current story version as YAML string.
+    /// </summary>
+    public string CurrentStoryYaml { get; set; } = string.Empty;
+
+    /// <summary>
     /// Immutable history of all story versions.
     /// </summary>
     public List<StoryVersionSnapshot> StoryVersions { get; set; } = new();
