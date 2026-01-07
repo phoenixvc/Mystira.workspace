@@ -58,10 +58,7 @@ public static class FoundryServiceCollectionExtensions
                         ?? foundryConfig.ApiKey  // Backward compatibility
                         ?? throw new InvalidOperationException("AISearch API key is required. Set FoundryAgent:AISearch:ApiKey"),
                     IndexName = foundryConfig.AISearch?.IndexName
-#pragma warning disable CS0618 // Type or member is obsolete
-                        ?? foundryConfig.SearchIndexName  // Backward compatibility (deprecated)
-#pragma warning restore CS0618
-                        ?? "mystira-instructions",
+                        ?? throw new InvalidOperationException("AISearch index name is required. Set FoundryAgent:AISearch:IndexName"),
                     ContentFieldName = foundryConfig.AISearch?.ContentFieldName,
                     AgeGroupFieldName = foundryConfig.AISearch?.AgeGroupFieldName ?? "age_group",
                     TitleFieldName = foundryConfig.AISearch?.ContentFieldName
@@ -79,14 +76,6 @@ public static class FoundryServiceCollectionExtensions
 
                 // Use new nested config if available, otherwise fall back to legacy config
                 Dictionary<string, string>? vectorStoresByAgeGroup = foundryConfig.FileSearch?.VectorStoresByAgeGroup;
-
-                // Backward compatibility: check legacy config if new config not present
-                if (vectorStoresByAgeGroup == null || vectorStoresByAgeGroup.Count == 0)
-                {
-#pragma warning disable CS0618 // Type or member is obsolete
-                    vectorStoresByAgeGroup = foundryConfig.VectorStoresByAgeGroup;
-#pragma warning restore CS0618
-                }
 
                 var fileSearchConfig = new FileSearchKnowledgeProvider.FileSearchConfiguration
                 {

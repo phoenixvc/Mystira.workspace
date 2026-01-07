@@ -72,18 +72,6 @@ public class FoundryAgentConfig
     /// AI Search configuration (used when KnowledgeMode = "AISearch").
     /// </summary>
     public AISearchConfig? AISearch { get; set; }
-
-    /// <summary>
-    /// DEPRECATED: Use FileSearch.IndexName instead.
-    /// </summary>
-    [Obsolete("Use FileSearch.VectorStoreName instead")]
-    public string? VectorStoreName { get; set; }
-
-    /// <summary>
-    /// DEPRECATED: Use AISearch.IndexName instead.
-    /// </summary>
-    [Obsolete("Use AISearch.IndexName instead")]
-    public string? SearchIndexName { get; set; }
 }
 
 /// <summary>
