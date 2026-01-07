@@ -38,6 +38,11 @@ public class SessionStateResponse
     public string CurrentStoryJson { get; set; } = string.Empty;
 
     /// <summary>
+    /// Current story as YAML string.
+    /// </summary>
+    public string CurrentStoryYaml { get; set; } = string.Empty;
+
+    /// <summary>
     /// The latest evaluation report, if available.
     /// </summary>
     public EvaluationReport? LastEvaluationReport { get; set; }
