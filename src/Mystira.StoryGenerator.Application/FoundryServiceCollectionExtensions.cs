@@ -78,17 +78,19 @@ public static class FoundryServiceCollectionExtensions
                 var logger = sp.GetRequiredService<ILogger<FileSearchKnowledgeProvider>>();
 
                 // Use new nested config if available, otherwise fall back to legacy config
+                Dictionary<string, string>? vectorStoresByAgeGroup = foundryConfig.FileSearch?.VectorStoresByAgeGroup;
+
+                // Backward compatibility: check legacy config if new config not present
+                if (vectorStoresByAgeGroup == null || vectorStoresByAgeGroup.Count == 0)
+                {
+#pragma warning disable CS0618 // Type or member is obsolete
+                    vectorStoresByAgeGroup = foundryConfig.VectorStoresByAgeGroup;
+#pragma warning restore CS0618
+                }
+
                 var fileSearchConfig = new FileSearchKnowledgeProvider.FileSearchConfiguration
                 {
-                    VectorStoreName = foundryConfig.FileSearch?.DefaultVectorStoreId
-#pragma warning disable CS0618 // Type or member is obsolete
-                        ?? foundryConfig.VectorStoreName  // Backward compatibility (deprecated)
-#pragma warning restore CS0618
-                        ?? "mystira-story-knowledge",
-                    VectorStoresByAgeGroup = foundryConfig.FileSearch?.VectorStoresByAgeGroup
-#pragma warning disable CS0618 // Type or member is obsolete
-                        ?? foundryConfig.VectorStoresByAgeGroup,  // Backward compatibility (deprecated)
-#pragma warning restore CS0618
+                    VectorStoresByAgeGroup = vectorStoresByAgeGroup ?? new Dictionary<string, string>(),
                     MaxFiles = foundryConfig.FileSearch?.MaxFiles,
                     MaxTokens = foundryConfig.FileSearch?.MaxTokens
                 };

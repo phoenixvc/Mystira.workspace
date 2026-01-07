@@ -92,15 +92,11 @@ public class FoundryAgentConfig
 public class FileSearchConfig
 {
     /// <summary>
-    /// Default vector store ID (used if VectorStoresByAgeGroup not configured or age group not found).
-    /// </summary>
-    public string? DefaultVectorStoreId { get; set; }
-
-    /// <summary>
     /// Age-specific vector store IDs for targeted knowledge retrieval.
+    /// REQUIRED: All supported age groups must be explicitly configured.
     /// Example: { "1-2": "vs_toddler_abc123", "6-9": "vs_elementary_def456" }
     /// </summary>
-    public Dictionary<string, string>? VectorStoresByAgeGroup { get; set; }
+    public Dictionary<string, string> VectorStoresByAgeGroup { get; set; } = new();
 
     /// <summary>
     /// Maximum number of files to retrieve per search (optional).
