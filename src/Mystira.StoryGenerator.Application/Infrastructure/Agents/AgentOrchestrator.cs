@@ -224,6 +224,7 @@ public partial class AgentOrchestrator : IAgentOrchestrator
             };
 
             session.CurrentStoryVersion = storyJson;
+            session.CurrentStoryYaml = JsonToYamlConverter.ToYaml(storyJson);
             session.StoryVersions.Add(versionSnapshot);
             session.Stage = StorySessionStage.Validating;
             session.UpdatedAt = DateTime.UtcNow;
@@ -542,6 +543,7 @@ public partial class AgentOrchestrator : IAgentOrchestrator
             };
 
             session.CurrentStoryVersion = refinedStoryJson;
+            session.CurrentStoryYaml = JsonToYamlConverter.ToYaml(refinedStoryJson);
             session.StoryVersions.Add(versionSnapshot);
             session.Stage = StorySessionStage.Validating; // Re-evaluate after refinement
             session.UpdatedAt = DateTime.UtcNow;
