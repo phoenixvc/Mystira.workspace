@@ -475,12 +475,14 @@ public sealed class FoundryAgentClient : IDisposable
     /// <param name="threadId">The thread ID.</param>
     /// <param name="agentId">The agent ID.</param>
     /// <param name="instructions">The instructions for the run.</param>
+    /// <param name="responseFormat">Optional response format specification (e.g., JSON schema for structured outputs).</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>The run submission result.</returns>
     public async Task<RunSubmissionResult> CreateRunAsync(
         string threadId,
         string agentId,
         string instructions,
+        BinaryData? responseFormat = null,
         CancellationToken cancellationToken = default)
     {
         EnsureInitialized();
@@ -492,7 +494,8 @@ public sealed class FoundryAgentClient : IDisposable
             Response<ThreadRun> runResponse = await _agentsClient!.CreateRunAsync(
                 threadId,
                 agentId,
-                instructions,
+                additionalInstructions: instructions,
+                responseFormat: responseFormat,
                 cancellationToken: cancellationToken).ConfigureAwait(false);
 
             return new RunSubmissionResult
