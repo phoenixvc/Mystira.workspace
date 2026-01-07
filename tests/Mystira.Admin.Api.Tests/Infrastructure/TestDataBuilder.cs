@@ -93,6 +93,7 @@ public class CreateScenarioRequestBuilder
     private string _title = "Test Scenario";
     private string _description = "A test scenario for unit testing";
     private int _minimumAge = 0;
+    private string? _ageGroup;
     private List<string> _tags = new() { "test", "integration" };
 
     public CreateScenarioRequestBuilder WithTitle(string title)
@@ -110,6 +111,12 @@ public class CreateScenarioRequestBuilder
     public CreateScenarioRequestBuilder WithMinimumAge(int minimumAge)
     {
         _minimumAge = minimumAge;
+        return this;
+    }
+
+    public CreateScenarioRequestBuilder WithAgeGroup(string ageGroup)
+    {
+        _ageGroup = ageGroup;
         return this;
     }
 
@@ -140,6 +147,7 @@ public class CreateScenarioRequestBuilder
             Title = _title,
             Description = _description,
             MinimumAge = _minimumAge,
+            AgeGroup = _ageGroup,
             Tags = _tags
         };
     }
