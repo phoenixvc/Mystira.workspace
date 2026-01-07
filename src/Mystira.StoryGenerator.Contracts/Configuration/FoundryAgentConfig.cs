@@ -64,18 +64,83 @@ public class FoundryAgentConfig
     public string KnowledgeMode { get; set; } = "AISearch";
 
     /// <summary>
-    /// AI Search index name for knowledge retrieval.
+    /// File Search configuration (used when KnowledgeMode = "FileSearch").
     /// </summary>
-    public string? SearchIndexName { get; set; }
+    public FileSearchConfig? FileSearch { get; set; }
 
     /// <summary>
-    /// Vector store name for File Search mode (legacy - single store).
+    /// AI Search configuration (used when KnowledgeMode = "AISearch").
     /// </summary>
+    public AISearchConfig? AISearch { get; set; }
+
+    /// <summary>
+    /// DEPRECATED: Use FileSearch.IndexName instead.
+    /// </summary>
+    [Obsolete("Use FileSearch.VectorStoreName instead")]
     public string? VectorStoreName { get; set; }
 
     /// <summary>
-    /// Vector store IDs mapped by age group for File Search mode.
-    /// Example: { "1-2": "vs_abc123", "3-5": "vs_def456", "6-9": "vs_ghi789" }
+    /// DEPRECATED: Use AISearch.IndexName instead.
     /// </summary>
-    public Dictionary<string, string>? VectorStoresByAgeGroup { get; set; }
+    [Obsolete("Use AISearch.IndexName instead")]
+    public string? SearchIndexName { get; set; }
+}
+
+/// <summary>
+/// Configuration for File Search knowledge mode.
+/// </summary>
+public class FileSearchConfig
+{
+    /// <summary>
+    /// Age-specific vector store IDs for targeted knowledge retrieval.
+    /// REQUIRED: All supported age groups must be explicitly configured.
+    /// Example: { "1-2": "vs_toddler_abc123", "6-9": "vs_elementary_def456" }
+    /// </summary>
+    public Dictionary<string, string> VectorStoresByAgeGroup { get; set; } = new();
+
+    /// <summary>
+    /// Maximum number of files to retrieve per search (optional).
+    /// </summary>
+    public int? MaxFiles { get; set; }
+
+    /// <summary>
+    /// Maximum tokens to use for search results (optional).
+    /// </summary>
+    public int? MaxTokens { get; set; }
+}
+
+/// <summary>
+/// Configuration for AI Search knowledge mode.
+/// </summary>
+public class AISearchConfig
+{
+    /// <summary>
+    /// Azure AI Search endpoint URL.
+    /// </summary>
+    public string? Endpoint { get; set; }
+
+    /// <summary>
+    /// Azure AI Search API key.
+    /// </summary>
+    public string? ApiKey { get; set; }
+
+    /// <summary>
+    /// Search index name containing story guidelines and principles.
+    /// </summary>
+    public string IndexName { get; set; } = "mystira-instructions";
+
+    /// <summary>
+    /// Field name containing the main content (optional override).
+    /// </summary>
+    public string? ContentFieldName { get; set; }
+
+    /// <summary>
+    /// Field name containing the age group metadata (optional override).
+    /// </summary>
+    public string? AgeGroupFieldName { get; set; } = "age_group";
+
+    /// <summary>
+    /// Number of results to retrieve per search (default: 5).
+    /// </summary>
+    public int TopK { get; set; } = 5;
 }

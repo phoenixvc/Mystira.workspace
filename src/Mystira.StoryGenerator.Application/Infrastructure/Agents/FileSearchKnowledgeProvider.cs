@@ -83,30 +83,38 @@ public class FileSearchKnowledgeProvider : IKnowledgeProvider
 
     /// <summary>
     /// Gets the vector store ID for a specific age group.
+    /// Throws exception if age group is not configured.
     /// </summary>
     public string GetVectorStoreIdForAgeGroup(string? ageGroup)
     {
-        // If age-specific stores configured, use them
-        if (_config.VectorStoresByAgeGroup != null && !string.IsNullOrEmpty(ageGroup))
+        if (string.IsNullOrEmpty(ageGroup))
         {
-            if (_config.VectorStoresByAgeGroup.TryGetValue(ageGroup, out var vectorStoreId))
-            {
-                _logger.LogDebug("Using age-specific vector store {VectorStoreId} for age group {AgeGroup}",
-                    vectorStoreId, ageGroup);
-                return vectorStoreId;
-            }
-
-            _logger.LogWarning("No vector store configured for age group {AgeGroup}, falling back to default", ageGroup);
+            throw new ArgumentException(
+                "Age group is required for FileSearch knowledge mode. " +
+                "Ensure the session has a valid age group specified.",
+                nameof(ageGroup));
         }
 
-        // Fallback to default vector store
-        if (string.IsNullOrEmpty(_config.VectorStoreName))
+        if (_config.VectorStoresByAgeGroup == null || _config.VectorStoresByAgeGroup.Count == 0)
         {
             throw new InvalidOperationException(
-                "No vector store configured. Set either VectorStoreName or VectorStoresByAgeGroup in configuration.");
+                "No vector stores configured for FileSearch mode. " +
+                "Set FoundryAgent:FileSearch:VectorStoresByAgeGroup in configuration with age-specific vector store IDs.");
         }
 
-        return _config.VectorStoreName;
+        if (_config.VectorStoresByAgeGroup.TryGetValue(ageGroup, out var vectorStoreId))
+        {
+            _logger.LogDebug("Using age-specific vector store {VectorStoreId} for age group {AgeGroup}",
+                vectorStoreId, ageGroup);
+            return vectorStoreId;
+        }
+
+        // No vector store found for this age group - this is an error
+        var configuredAgeGroups = string.Join(", ", _config.VectorStoresByAgeGroup.Keys);
+        throw new InvalidOperationException(
+            $"No vector store configured for age group '{ageGroup}'. " +
+            $"Configured age groups: [{configuredAgeGroups}]. " +
+            $"Add a vector store for age group '{ageGroup}' to FoundryAgent:FileSearch:VectorStoresByAgeGroup configuration.");
     }
 
     /// <summary>
@@ -115,15 +123,11 @@ public class FileSearchKnowledgeProvider : IKnowledgeProvider
     public class FileSearchConfiguration
     {
         /// <summary>
-        /// Default vector store name (used if VectorStoresByAgeGroup not configured).
-        /// </summary>
-        public string VectorStoreName { get; set; } = "mystira-story-knowledge";
-
-        /// <summary>
         /// Age-specific vector store IDs.
+        /// REQUIRED: All supported age groups must be explicitly configured.
         /// Example: { "1-2": "vs_abc123", "6-9": "vs_def456" }
         /// </summary>
-        public Dictionary<string, string>? VectorStoresByAgeGroup { get; set; }
+        public Dictionary<string, string> VectorStoresByAgeGroup { get; set; } = new();
 
         public int? MaxFiles { get; set; }
         public int? MaxTokens { get; set; }
