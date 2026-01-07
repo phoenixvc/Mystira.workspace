@@ -4,6 +4,7 @@ using Microsoft.Extensions.Options;
 using Mystira.StoryGenerator.Application.Services.Prompting;
 using Mystira.StoryGenerator.Contracts.Configuration;
 using Mystira.StoryGenerator.Domain.Agents;
+using Mystira.StoryGenerator.Domain.Services;
 using Mystira.StoryGenerator.Infrastructure.Agents;
 
 namespace Mystira.StoryGenerator.Application.Infrastructure.Agents;
@@ -11,7 +12,7 @@ namespace Mystira.StoryGenerator.Application.Infrastructure.Agents;
 /// <summary>
 /// Orchestrates the stateful story generation loop, coordinating writer-agent → validation → judge-agent → refiner-agent flows.
 /// </summary>
-public class AgentOrchestrator : IAgentOrchestrator
+public partial class AgentOrchestrator : IAgentOrchestrator
 {
     private readonly ILogger<AgentOrchestrator> _logger;
     private readonly IAgentStreamPublisher _eventPublisher;
@@ -20,6 +21,7 @@ public class AgentOrchestrator : IAgentOrchestrator
     private readonly IPromptGenerator _promptGenerator;
     private readonly StorySchemaValidator _schemaValidator;
     private readonly IKnowledgeProvider _knowledgeProvider;
+    private readonly IStorySchemaProvider _schemaProvider;
     private readonly FoundryAgentConfig _config;
 
     public AgentOrchestrator(
@@ -30,6 +32,7 @@ public class AgentOrchestrator : IAgentOrchestrator
         IPromptGenerator promptGenerator,
         StorySchemaValidator schemaValidator,
         IKnowledgeProvider knowledgeProvider,
+        IStorySchemaProvider schemaProvider,
         IOptions<FoundryAgentConfig> config)
     {
         _logger = logger;
@@ -39,6 +42,7 @@ public class AgentOrchestrator : IAgentOrchestrator
         _promptGenerator = promptGenerator;
         _schemaValidator = schemaValidator;
         _knowledgeProvider = knowledgeProvider;
+        _schemaProvider = schemaProvider;
         _config = config.Value;
     }
 
@@ -156,11 +160,15 @@ public class AgentOrchestrator : IAgentOrchestrator
                 session.AgeGroup,
                 session.TargetAxes);
 
+            // Build response format with JSON schema for structured output
+            var responseFormat = await BuildResponseFormatAsync(ct);
+
             // Create and start the run
             var runResult = await _foundryClient.CreateRunAsync(
                 session.ThreadId!, 
                 _config.WriterAgentId, 
-                writerPrompt, 
+                writerPrompt,
+                responseFormat,
                 ct);
 
             // Wait for completion
@@ -476,11 +484,15 @@ public class AgentOrchestrator : IAgentOrchestrator
                 session.LastEvaluationReport,
                 focus);
 
+            // Build response format with JSON schema for structured output
+            var responseFormat = await BuildResponseFormatAsync(ct);
+
             // Create and start the run
             var runResult = await _foundryClient.CreateRunAsync(
                 session.ThreadId!, 
                 _config.RefinerAgentId, 
-                refinerPrompt, 
+                refinerPrompt,
+                responseFormat,
                 ct);
 
             // Wait for completion
