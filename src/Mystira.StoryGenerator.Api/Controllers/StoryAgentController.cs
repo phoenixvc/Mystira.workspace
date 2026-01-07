@@ -6,6 +6,7 @@ using Mystira.StoryGenerator.Domain.Agents;
 using System.Text.Json;
 using System.Collections.Concurrent;
 using Mystira.StoryGenerator.Contracts.Models;
+using SessionStateResponse = Mystira.StoryGenerator.Api.Models.SessionStateResponse;
 
 namespace Mystira.StoryGenerator.Api.Controllers;
 
@@ -330,7 +331,7 @@ public class StoryAgentController : ControllerBase
                 ThreadId = session.ThreadId ?? string.Empty,
                 Stage = session.Stage.ToString(),
                 IterationCount = session.IterationCount,
-                CostEstimate = session.CostEstimate,
+                CostEstimate = Convert.ToDouble(session.CostEstimate),
                 CurrentStoryJson = session.CurrentStoryVersion,
                 CurrentStoryYaml = session.CurrentStoryYaml ?? string.Empty,
                 LastEvaluationReport = session.LastEvaluationReport,
