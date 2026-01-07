@@ -48,7 +48,7 @@ public partial class AgentOrchestrator : IAgentOrchestrator
 
     public async Task<StorySession> InitializeSessionAsync(string sessionId, string knowledgeMode, string ageGroup)
     {
-        _logger.LogInformation("Initializing session {SessionId} with knowledge mode {KnowledgeMode} for age group {AgeGroup}", 
+        _logger.LogInformation("Initializing session {SessionId} with knowledge mode {KnowledgeMode} for age group {AgeGroup}",
             sessionId, knowledgeMode, ageGroup);
 
         // Create new StorySession
@@ -99,7 +99,7 @@ public partial class AgentOrchestrator : IAgentOrchestrator
                 IterationNumber = 0
             });
 
-            _logger.LogInformation("Session {SessionId} initialized successfully with thread ID {ThreadId}", 
+            _logger.LogInformation("Session {SessionId} initialized successfully with thread ID {ThreadId}",
                 sessionId, session.ThreadId);
 
             return session;
@@ -107,7 +107,7 @@ public partial class AgentOrchestrator : IAgentOrchestrator
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to initialize session {SessionId}", sessionId);
-            
+
             session.Stage = StorySessionStage.Failed;
             await _sessionRepository.UpdateAsync(session);
 
@@ -173,8 +173,8 @@ public partial class AgentOrchestrator : IAgentOrchestrator
 
             // Wait for completion
             var completionResult = await _foundryClient.WaitForRunCompletionAsync(
-                session.ThreadId!, 
-                runResult.RunId, 
+                session.ThreadId!,
+                runResult.RunId,
                 pollInterval: TimeSpan.FromSeconds(2),
                 maxWait: _config.RunTimeout,
                 cancellationToken: ct);
@@ -359,15 +359,15 @@ public partial class AgentOrchestrator : IAgentOrchestrator
 
             // Create and start the run
             var runResult = await _foundryClient.CreateRunAsync(
-                session.ThreadId!, 
-                _config.JudgeAgentId, 
-                judgePrompt, 
+                session.ThreadId!,
+                _config.JudgeAgentId,
+                judgePrompt,
                 ct);
 
             // Wait for completion
             var completionResult = await _foundryClient.WaitForRunCompletionAsync(
-                session.ThreadId!, 
-                runResult.RunId, 
+                session.ThreadId!,
+                runResult.RunId,
                 pollInterval: TimeSpan.FromSeconds(2),
                 maxWait: _config.RunTimeout,
                 cancellationToken: ct);
@@ -388,7 +388,7 @@ public partial class AgentOrchestrator : IAgentOrchestrator
             if (evaluationReport.OverallStatus == EvaluationStatus.Pass)
             {
                 session.Stage = StorySessionStage.Evaluated;
-                
+
                 await _eventPublisher.PublishEventAsync(sessionId, new AgentStreamEvent
                 {
                     Type = AgentStreamEvent.EventType.EvaluationPassed,
@@ -399,7 +399,7 @@ public partial class AgentOrchestrator : IAgentOrchestrator
             else
             {
                 session.Stage = StorySessionStage.RefinementRequested;
-                
+
                 await _eventPublisher.PublishEventAsync(sessionId, new AgentStreamEvent
                 {
                     Type = AgentStreamEvent.EventType.EvaluationFailed,
@@ -411,7 +411,7 @@ public partial class AgentOrchestrator : IAgentOrchestrator
             session.UpdatedAt = DateTime.UtcNow;
             await _sessionRepository.UpdateAsync(session, ct);
 
-            _logger.LogInformation("Story evaluation completed for session {SessionId} with status {Status}", 
+            _logger.LogInformation("Story evaluation completed for session {SessionId} with status {Status}",
                 sessionId, evaluationReport.OverallStatus);
 
             return (true, evaluationReport);
@@ -497,8 +497,8 @@ public partial class AgentOrchestrator : IAgentOrchestrator
 
             // Wait for completion
             var completionResult = await _foundryClient.WaitForRunCompletionAsync(
-                session.ThreadId!, 
-                runResult.RunId, 
+                session.ThreadId!,
+                runResult.RunId,
                 pollInterval: TimeSpan.FromSeconds(2),
                 maxWait: _config.RunTimeout,
                 cancellationToken: ct);
