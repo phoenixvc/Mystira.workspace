@@ -1,8 +1,10 @@
+using System.Linq;
+
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.OpenApi.Models;
+
 using Swashbuckle.AspNetCore.SwaggerGen;
-using System.Linq;
 
 namespace Mystira.Admin.Api.Configuration;
 
@@ -15,11 +17,11 @@ public class FileUploadOperationFilter : IOperationFilter
     {
         // Get all parameters from the action descriptor
         var actionParameters = context.ApiDescription.ActionDescriptor.Parameters;
-        
+
         // Check if any parameters are IFormFile or have [FromForm]
         var formParameters = actionParameters
             .Where(p => p.BindingInfo?.BindingSource?.Id == "Form" ||
-                        p.ParameterType == typeof(IFormFile) || 
+                        p.ParameterType == typeof(IFormFile) ||
                         p.ParameterType == typeof(IFormFile[]))
             .ToList();
 
@@ -59,7 +61,7 @@ public class FileUploadOperationFilter : IOperationFilter
         foreach (var param in formParameters)
         {
             OpenApiSchema schema;
-            
+
             if (param.ParameterType == typeof(IFormFile))
             {
                 schema = new OpenApiSchema

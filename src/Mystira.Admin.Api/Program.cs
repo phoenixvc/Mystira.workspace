@@ -123,7 +123,7 @@ try
     builder.Services.AddEndpointsApiExplorer();
     // Register API description provider to handle IFormFile parameters
     builder.Services.AddSingleton<IApiDescriptionProvider, FileUploadApiDescriptionProvider>();
-    
+
     builder.Services.AddSwaggerGen(c =>
     {
         c.SwaggerDoc("v1", new OpenApiInfo
@@ -180,7 +180,7 @@ try
             if (type.Namespace != null)
             {
                 var namespaceParts = type.Namespace.Split('.');
-                
+
                 // For types in Contracts.App: include sub-namespace to avoid conflicts
                 // This must run before the general Contracts/Domain enum handling
                 // to ensure enums in Contracts.App get sub-namespace prefixes
@@ -206,7 +206,7 @@ try
                         }
                     }
                 }
-                
+
                 // For enums: prefix with Contracts or Domain
                 // This handles enums in Mystira.Contracts (but not Contracts.App, which is handled above)
                 if (type.IsEnum)
@@ -220,7 +220,7 @@ try
                         return $"Domain{type.Name}";
                     }
                 }
-                
+
                 // For types in Domain: prefix with Domain to avoid conflicts with Contracts
                 if (type.Namespace.Contains("Mystira.Domain"))
                 {
@@ -247,7 +247,7 @@ try
             Type = "string",
             Format = "binary"
         });
-        
+
         // Handle file uploads (IFormFile) for Swagger - converts parameters to request body
         c.OperationFilter<FileUploadOperationFilter>();
     });
@@ -1036,7 +1036,7 @@ try
             {
                 throw;
             }
-            
+
             // For model configuration errors, log and continue in degraded mode
             if (isModelConfigurationError)
             {

@@ -109,10 +109,11 @@ public class ScenarioApiService : IScenarioApiService
             }
         }
 
-        if (request.IsFeatured.HasValue)
-        {
-            baseQuery = baseQuery.Where(s => s.IsFeatured == request.IsFeatured.Value);
-        }
+        // TODO: Add IsFeatured filter when Contracts package is updated
+        // if (request.IsFeatured.HasValue)
+        // {
+        //     baseQuery = baseQuery.Where(s => s.IsFeatured == request.IsFeatured.Value);
+        // }
 
         // Materialize after base filters to perform value-object filters and projections safely in-memory
         var prefiltered = await baseQuery.ToListAsync();
@@ -189,13 +190,15 @@ public class ScenarioApiService : IScenarioApiService
             SessionLength = (SessionLength)(int)request.SessionLength,
             Archetypes = ParseArchetypesOrThrow(request.Archetypes),
             MinimumAge = request.MinimumAge,
-            IsFeatured = request.IsFeatured,
+            // TODO: Add when Contracts package is updated
+            // IsFeatured = request.IsFeatured,
             // Note: AgeGroup is read-only, derived from MinimumAge in domain model
             CoreAxes = ParseCoreAxesOrThrow(request.CoreAxes),
             Characters = MapCharactersFromRequest(request.Characters),
             Scenes = MapScenesFromRequest(request.Scenes),
             Image = request.Image,
-            ThumbnailUrl = request.ThumbnailUrl,
+            // TODO: Add when Contracts package is updated
+            // ThumbnailUrl = request.ThumbnailUrl,
             CreatedAt = DateTime.UtcNow
         };
 
@@ -235,12 +238,14 @@ public class ScenarioApiService : IScenarioApiService
         scenario.SessionLength = (SessionLength)(int)request.SessionLength;
         scenario.Archetypes = ParseArchetypesOrThrow(request.Archetypes);
         scenario.MinimumAge = request.MinimumAge;
-        scenario.IsFeatured = request.IsFeatured;
+        // TODO: Add when Contracts package is updated
+        // scenario.IsFeatured = request.IsFeatured;
         scenario.CoreAxes = ParseCoreAxesOrThrow(request.CoreAxes);
         scenario.Characters = MapCharactersFromRequest(request.Characters);
         scenario.Scenes = MapScenesFromRequest(request.Scenes);
         scenario.Image = request.Image;
-        scenario.ThumbnailUrl = request.ThumbnailUrl;
+        // TODO: Add when Contracts package is updated
+        // scenario.ThumbnailUrl = request.ThumbnailUrl;
 
         // AgeGroup is immutable after creation; reject any attempt to change it
         if (!string.IsNullOrEmpty(request.AgeGroup) && scenario.AgeGroup?.Value != request.AgeGroup)
@@ -576,10 +581,11 @@ public class ScenarioApiService : IScenarioApiService
 
     public async Task<List<Scenario>> GetFeaturedScenariosAsync()
     {
-        // Return scenarios marked as featured
+        // TODO: Re-enable IsFeatured filter when Contracts package is updated
+        // For now, return newest scenarios as "featured"
         return await _context.Scenarios
-            .Where(s => s.IsFeatured)
-            .OrderBy(s => s.CreatedAt)
+            // .Where(s => s.IsFeatured)
+            .OrderByDescending(s => s.CreatedAt)
             .Take(6)
             .ToListAsync();
     }
