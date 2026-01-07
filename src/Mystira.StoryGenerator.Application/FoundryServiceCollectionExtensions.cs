@@ -48,11 +48,23 @@ public static class FoundryServiceCollectionExtensions
                 var client = sp.GetRequiredService<FoundryAgentClient>();
                 var logger = sp.GetRequiredService<ILogger<AISearchKnowledgeProvider>>();
 
+                // Use new nested config if available, otherwise fall back to legacy config
                 var aiSearchConfig = new AISearchKnowledgeProvider.AISearchConfiguration
                 {
-                    Endpoint = foundryConfig.Endpoint,
-                    ApiKey = foundryConfig.ApiKey,
-                    IndexName = foundryConfig.SearchIndexName ?? "mystira-instructions"
+                    Endpoint = foundryConfig.AISearch?.Endpoint
+                        ?? foundryConfig.Endpoint  // Backward compatibility
+                        ?? throw new InvalidOperationException("AISearch endpoint is required. Set FoundryAgent:AISearch:Endpoint"),
+                    ApiKey = foundryConfig.AISearch?.ApiKey
+                        ?? foundryConfig.ApiKey  // Backward compatibility
+                        ?? throw new InvalidOperationException("AISearch API key is required. Set FoundryAgent:AISearch:ApiKey"),
+                    IndexName = foundryConfig.AISearch?.IndexName
+#pragma warning disable CS0618 // Type or member is obsolete
+                        ?? foundryConfig.SearchIndexName  // Backward compatibility (deprecated)
+#pragma warning restore CS0618
+                        ?? "mystira-instructions",
+                    ContentFieldName = foundryConfig.AISearch?.ContentFieldName,
+                    AgeGroupFieldName = foundryConfig.AISearch?.AgeGroupFieldName ?? "age_group",
+                    TitleFieldName = foundryConfig.AISearch?.ContentFieldName
                 };
 
                 return new AISearchKnowledgeProvider(client, aiSearchConfig, logger);
@@ -65,10 +77,20 @@ public static class FoundryServiceCollectionExtensions
                 var client = sp.GetRequiredService<FoundryAgentClient>();
                 var logger = sp.GetRequiredService<ILogger<FileSearchKnowledgeProvider>>();
 
+                // Use new nested config if available, otherwise fall back to legacy config
                 var fileSearchConfig = new FileSearchKnowledgeProvider.FileSearchConfiguration
                 {
-                    VectorStoreName = foundryConfig.VectorStoreName ?? "mystira-story-knowledge",
-                    VectorStoresByAgeGroup = foundryConfig.VectorStoresByAgeGroup
+                    VectorStoreName = foundryConfig.FileSearch?.DefaultVectorStoreId
+#pragma warning disable CS0618 // Type or member is obsolete
+                        ?? foundryConfig.VectorStoreName  // Backward compatibility (deprecated)
+#pragma warning restore CS0618
+                        ?? "mystira-story-knowledge",
+                    VectorStoresByAgeGroup = foundryConfig.FileSearch?.VectorStoresByAgeGroup
+#pragma warning disable CS0618 // Type or member is obsolete
+                        ?? foundryConfig.VectorStoresByAgeGroup,  // Backward compatibility (deprecated)
+#pragma warning restore CS0618
+                    MaxFiles = foundryConfig.FileSearch?.MaxFiles,
+                    MaxTokens = foundryConfig.FileSearch?.MaxTokens
                 };
 
                 return new FileSearchKnowledgeProvider(client, fileSearchConfig, logger);
