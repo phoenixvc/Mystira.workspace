@@ -8,18 +8,21 @@ EXPOSE 443
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 WORKDIR /src
 
-# Accept GitHub token for authenticating to GitHub Packages NuGet feed
-ARG NUGET_AUTH_TOKEN
-ENV GITHUB_TOKEN=${NUGET_AUTH_TOKEN}
-
-# Copy csproj files and restore dependencies
+# Copy csproj files and NuGet config
 # NOTE: Build context should be the repository root, so paths are relative to /
 # Dependencies are pulled from NuGet packages (Mystira.Shared, Mystira.Contracts, etc.)
 COPY ["src/Mystira.Admin.Api/Mystira.Admin.Api.csproj", "Mystira.Admin.Api/"]
 COPY ["NuGet.config", "."]
 
-# Restore dependencies
-RUN dotnet restore "Mystira.Admin.Api/Mystira.Admin.Api.csproj"
+# Restore dependencies using BuildKit secret for GitHub Packages authentication
+# The secret is mounted at /run/secrets/nuget_auth_token and used inline
+RUN --mount=type=secret,id=nuget_auth_token \
+    dotnet nuget update source github \
+        --username "docker-build" \
+        --password "$(cat /run/secrets/nuget_auth_token)" \
+        --store-password-in-clear-text \
+        --configfile NuGet.config && \
+    dotnet restore "Mystira.Admin.Api/Mystira.Admin.Api.csproj"
 
 # Copy all source files from the src directory
 COPY src/ .

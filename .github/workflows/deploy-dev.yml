@@ -68,8 +68,8 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
-          build-args: |
-            NUGET_AUTH_TOKEN=${{ secrets.GH_PACKAGES_TOKEN }}
+          secrets: |
+            nuget_auth_token=${{ secrets.GH_PACKAGES_TOKEN }}
 
   trigger-workspace-deploy:
     name: Trigger Workspace Deployment
