@@ -165,8 +165,8 @@ public partial class AgentOrchestrator : IAgentOrchestrator
 
             // Create and start the run
             var runResult = await _foundryClient.CreateRunAsync(
-                session.ThreadId!, 
-                _config.WriterAgentId, 
+                session.ThreadId!,
+                _config.WriterAgentId,
                 writerPrompt,
                 responseFormat,
                 ct);
@@ -362,6 +362,7 @@ public partial class AgentOrchestrator : IAgentOrchestrator
                 session.ThreadId!,
                 _config.JudgeAgentId,
                 judgePrompt,
+                null,
                 ct);
 
             // Wait for completion
@@ -489,8 +490,8 @@ public partial class AgentOrchestrator : IAgentOrchestrator
 
             // Create and start the run
             var runResult = await _foundryClient.CreateRunAsync(
-                session.ThreadId!, 
-                _config.RefinerAgentId, 
+                session.ThreadId!,
+                _config.RefinerAgentId,
                 refinerPrompt,
                 responseFormat,
                 ct);
