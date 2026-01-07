@@ -176,6 +176,58 @@ public sealed class FoundryAgentClient : IDisposable
     }
 
     /// <summary>
+    /// Creates a new thread with vector store resources for FileSearch.
+    /// </summary>
+    /// <param name="agentId">The agent ID to associate with the thread.</param>
+    /// <param name="vectorStoreIds">Vector store IDs to attach for file search.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>The thread creation result.</returns>
+    public async Task<ThreadCreationResult> CreateThreadWithVectorStoresAsync(
+        string agentId,
+        IEnumerable<string> vectorStoreIds,
+        CancellationToken cancellationToken = default)
+    {
+        EnsureInitialized();
+
+        _logger.LogInformation("Creating thread for agent: {AgentId} with vector stores: {VectorStores}",
+            agentId, string.Join(", ", vectorStoreIds));
+
+        try
+        {
+            // Create thread options with tool resources
+            var toolResources = new ToolResources
+            {
+                FileSearch = new FileSearchToolResource()
+            };
+
+            foreach (var vectorStoreId in vectorStoreIds)
+            {
+                toolResources.FileSearch.VectorStoreIds.Add(vectorStoreId);
+            }
+
+            var threadResponse = await _agentsClient!.CreateThreadAsync(
+                toolResources: toolResources,
+                cancellationToken: cancellationToken)
+                .ConfigureAwait(false);
+
+            var threadId = threadResponse.Value.Id;
+            _logger.LogInformation("Created thread: {ThreadId} with {VectorStoreCount} vector stores",
+                threadId, vectorStoreIds.Count());
+
+            return new ThreadCreationResult
+            {
+                ThreadId = threadId,
+                AssistantId = agentId
+            };
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to create thread with vector stores for agent: {AgentId}", agentId);
+            throw;
+        }
+    }
+
+    /// <summary>
     /// Retrieves an existing thread.
     /// </summary>
     /// <param name="threadId">The thread ID.</param>

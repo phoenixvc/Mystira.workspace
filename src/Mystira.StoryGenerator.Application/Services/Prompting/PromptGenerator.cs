@@ -19,7 +19,7 @@ public class PromptGenerator : IPromptGenerator
     public string GenerateWriterPrompt(string storyPrompt, string ageGroup, List<string> axes)
     {
         var guidelines = _guidelines.GetForAgeGroup(ageGroup);
-        var knowledge = _knowledge.GetContextualGuidance();
+        var knowledge = _knowledge.GetContextualGuidance(ageGroup);  // Pass age group
         return WriterAgentPrompt.Build(storyPrompt, ageGroup, axes, knowledge, guidelines);
     }
 
