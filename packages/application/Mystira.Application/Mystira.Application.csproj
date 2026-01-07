@@ -45,7 +45,7 @@
     <PackageReference Include="FluentValidation" Version="12.1.1" />
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.1" />
     <!-- DI abstractions -->
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.11" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.1" />
     <!-- JSON Schema -->
     <PackageReference Include="NJsonSchema" Version="11.5.2" />
     <!-- Ardalis.Specification for composable query patterns (ADR-0014) -->
