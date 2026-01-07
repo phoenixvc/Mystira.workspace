@@ -34,7 +34,16 @@
 
             @if (currentSession.Stage == "Complete" && !string.IsNullOrWhiteSpace(currentSession.CurrentStoryJson))
             {
-                <StoryDisplayPanel Story="@currentSession.CurrentStoryJson" />
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    <div>
+                        <StoryDisplayPanel Story="@currentSession.CurrentStoryJson" />
+                    </div>
+                    <div>
+                        <YamlPreviewPanel 
+                            YamlContent="@currentSession.CurrentStoryYaml" 
+                            ValidationResult="null" />
+                    </div>
+                </div>
             }
 
             @if (!string.IsNullOrWhiteSpace(errorMessage))
