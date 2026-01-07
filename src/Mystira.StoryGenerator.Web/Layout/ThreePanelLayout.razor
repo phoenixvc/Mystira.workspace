@@ -57,6 +57,16 @@
                     </svg>
                 </button>
                 <button type="button"
+                        class="inline-flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm font-semibold transition-colors"
+                        style="background-color:#10b981;color:#ffffff;border:1px solid #059669;"
+                        title="Toggle Agentic View"
+                        @onclick="ToggleAgenticView">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                    </svg>
+                    <span>@(isAgenticMode ? "Standard" : "Agentic")</span>
+                </button>
+                <button type="button"
                         class="inline-flex items-center gap-2 rounded-lg ai-settings-btn px-3 py-1.5 text-sm font-semibold transition-colors"
                         style="background-color:#2563eb;color:#ffffff;border:1px solid #1d4ed8;"
                         title="AI Model Settings"
@@ -494,6 +504,7 @@
 @code {
     // Tracks whether the current route is one of the analysis pages that should render standalone
     private bool isAnalysisRoute;
+    private bool isAgenticMode;
 
     private void UpdateRouteState()
     {
@@ -502,10 +513,12 @@
             var relative = NavManager.ToBaseRelativePath(NavManager.Uri).Trim('/');
             isAnalysisRoute = relative.StartsWith("story-continuity", StringComparison.OrdinalIgnoreCase)
                               || relative.StartsWith("scenario-dominator-path-analysis", StringComparison.OrdinalIgnoreCase);
+            isAgenticMode = relative.StartsWith("story/agent", StringComparison.OrdinalIgnoreCase);
         }
         catch
         {
             isAnalysisRoute = false;
+            isAgenticMode = false;
         }
     }
 
@@ -696,6 +709,20 @@
         }
 
         await InvokeAsync(StateHasChanged);
+    }
+
+    private void ToggleAgenticView()
+    {
+        if (isAgenticMode)
+        {
+            // Navigate back to standard view
+            NavManager.NavigateTo("/");
+        }
+        else
+        {
+            // Navigate to agentic view
+            NavManager.NavigateTo("/story/agent");
+        }
     }
 
     private void CloseMobileMenu()

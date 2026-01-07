@@ -332,6 +332,7 @@ public class StoryAgentController : ControllerBase
                 IterationCount = session.IterationCount,
                 CostEstimate = session.CostEstimate,
                 CurrentStoryJson = session.CurrentStoryVersion,
+                CurrentStoryYaml = session.CurrentStoryYaml ?? string.Empty,
                 LastEvaluationReport = session.LastEvaluationReport,
                 StoryVersions = session.StoryVersions
             };
