@@ -539,6 +539,25 @@ module "admin_api" {
   }
 }
 
+# Admin UI Infrastructure (Static Web App)
+# React/Vite frontend served via Azure Static Web Apps + Front Door
+module "admin_ui" {
+  source = "../../modules/admin-ui"
+
+  environment         = "dev"
+  location            = var.location
+  fallback_location   = "eastus2" # SWA not available in South Africa North
+  region_code         = "san"
+  resource_group_name = azurerm_resource_group.admin.name
+
+  static_web_app_sku   = "Free"
+  enable_custom_domain = false # Custom domain managed via Front Door
+
+  tags = {
+    CostCenter = "development"
+  }
+}
+
 # Entra ID Authentication
 module "entra_id" {
   source = "../../modules/entra-id"
@@ -977,6 +996,28 @@ output "story_generator_swa_api_key" {
 output "story_generator_swa_default_hostname" {
   description = "Story-Generator Static Web App default hostname"
   value       = module.story_generator.static_web_app_default_hostname
+}
+
+# Admin-UI Static Web App Outputs
+output "admin_ui_swa_url" {
+  description = "Admin-UI Static Web App URL"
+  value       = module.admin_ui.static_web_app_url
+}
+
+output "admin_ui_swa_api_key" {
+  description = "Admin-UI Static Web App API key (for GitHub Actions deployments)"
+  value       = module.admin_ui.static_web_app_api_key
+  sensitive   = true
+}
+
+output "admin_ui_swa_default_hostname" {
+  description = "Admin-UI Static Web App default hostname"
+  value       = module.admin_ui.static_web_app_default_hostname
+}
+
+output "admin_ui_swa_name" {
+  description = "Admin-UI Static Web App name"
+  value       = module.admin_ui.static_web_app_name
 }
 
 # Connection string for Story-Generator (from shared PostgreSQL)
