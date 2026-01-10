@@ -52,7 +52,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Google.Protobuf" Version="3.33.2" />
+    <PackageReference Include="Google.Protobuf" Version="3.33.3" />
     <!-- Microsoft extensions -->
     <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="9.0.11" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.11" />
