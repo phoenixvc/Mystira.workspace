@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Text.Json;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
@@ -8,6 +9,7 @@ namespace Mystira.Shared.Caching;
 /// <summary>
 /// Implementation of ICacheService using IDistributedCache.
 /// Works with both Redis and in-memory cache providers.
+/// Includes observability metrics for cache hit/miss rates.
 /// </summary>
 public class DistributedCacheService : ICacheService
 {
@@ -15,6 +17,7 @@ public class DistributedCacheService : ICacheService
     private readonly CacheOptions _options;
     private readonly ILogger<DistributedCacheService> _logger;
     private readonly JsonSerializerOptions _jsonOptions;
+    private readonly CacheMetrics _metrics;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="DistributedCacheService"/> class.
@@ -30,6 +33,7 @@ public class DistributedCacheService : ICacheService
         _cache = cache;
         _options = options.Value;
         _logger = logger;
+        _metrics = CacheMetrics.Instance;
         _jsonOptions = new JsonSerializerOptions
         {
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
@@ -45,18 +49,28 @@ public class DistributedCacheService : ICacheService
             return default;
         }
 
+        var keyPattern = CacheMetrics.ExtractKeyPattern(key);
+        var stopwatch = Stopwatch.StartNew();
+
         try
         {
             var data = await _cache.GetStringAsync(key, cancellationToken);
+            stopwatch.Stop();
+            _metrics.RecordLatency(stopwatch.Elapsed.TotalMilliseconds, "get", keyPattern);
+
             if (data == null)
             {
+                _metrics.RecordMiss(keyPattern);
                 return default;
             }
 
+            _metrics.RecordHit(keyPattern);
             return JsonSerializer.Deserialize<T>(data, _jsonOptions);
         }
         catch (Exception ex)
         {
+            stopwatch.Stop();
+            _metrics.RecordError("get", keyPattern);
             _logger.LogWarning(ex, "Failed to get cache key {Key}", key);
             return default;
         }
@@ -70,19 +84,29 @@ public class DistributedCacheService : ICacheService
             return (false, default);
         }
 
+        var keyPattern = CacheMetrics.ExtractKeyPattern(key);
+        var stopwatch = Stopwatch.StartNew();
+
         try
         {
             var data = await _cache.GetStringAsync(key, cancellationToken);
+            stopwatch.Stop();
+            _metrics.RecordLatency(stopwatch.Elapsed.TotalMilliseconds, "get", keyPattern);
+
             if (data == null)
             {
+                _metrics.RecordMiss(keyPattern);
                 return (false, default);
             }
 
+            _metrics.RecordHit(keyPattern);
             var value = JsonSerializer.Deserialize<T>(data, _jsonOptions);
             return (true, value);
         }
         catch (Exception ex)
         {
+            stopwatch.Stop();
+            _metrics.RecordError("get", keyPattern);
             _logger.LogWarning(ex, "Failed to get cache key {Key}", key);
             return (false, default);
         }
@@ -106,6 +130,9 @@ public class DistributedCacheService : ICacheService
             return;
         }
 
+        var keyPattern = CacheMetrics.ExtractKeyPattern(key);
+        var stopwatch = Stopwatch.StartNew();
+
         try
         {
             var data = JsonSerializer.Serialize(value, _jsonOptions);
@@ -121,9 +148,14 @@ public class DistributedCacheService : ICacheService
             }
 
             await _cache.SetStringAsync(key, data, options, cancellationToken);
+            stopwatch.Stop();
+            _metrics.RecordSet(keyPattern);
+            _metrics.RecordLatency(stopwatch.Elapsed.TotalMilliseconds, "set", keyPattern);
         }
         catch (Exception ex)
         {
+            stopwatch.Stop();
+            _metrics.RecordError("set", keyPattern);
             _logger.LogWarning(ex, "Failed to set cache key {Key}", key);
         }
     }
@@ -169,12 +201,16 @@ public class DistributedCacheService : ICacheService
     /// <inheritdoc />
     public async Task RemoveAsync(string key, CancellationToken cancellationToken = default)
     {
+        var keyPattern = CacheMetrics.ExtractKeyPattern(key);
+
         try
         {
             await _cache.RemoveAsync(key, cancellationToken);
+            _metrics.RecordRemove(keyPattern);
         }
         catch (Exception ex)
         {
+            _metrics.RecordError("remove", keyPattern);
             _logger.LogWarning(ex, "Failed to remove cache key {Key}", key);
         }
     }
