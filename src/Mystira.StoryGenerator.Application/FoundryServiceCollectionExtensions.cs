@@ -16,6 +16,7 @@ public static class FoundryServiceCollectionExtensions
         FoundryAgentConfig foundryConfig)
     {
         services.AddSingleton(foundryConfig);
+        services.AddSingleton(Options.Create(foundryConfig));
 
         services.AddSingleton<FoundryAgentClient>(sp =>
         {
