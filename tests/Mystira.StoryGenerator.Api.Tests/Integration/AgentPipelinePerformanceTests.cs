@@ -61,7 +61,7 @@ public class AgentPipelinePerformanceTests : IClassFixture<WebApplicationFactory
 
         // Assert
         Assert.Equal(System.Net.HttpStatusCode.Accepted, response.StatusCode);
-        Assert.True(stopwatch.ElapsedMilliseconds < 500, 
+        Assert.True(stopwatch.ElapsedMilliseconds < 500,
             $"Stream startup took {stopwatch.ElapsedMilliseconds}ms, expected < 500ms");
     }
 
@@ -89,7 +89,7 @@ public class AgentPipelinePerformanceTests : IClassFixture<WebApplicationFactory
 
         var stopwatch = Stopwatch.StartNew();
         var streamResponse = await _client.SendAsync(requestMessage, HttpCompletionOption.ResponseHeadersRead);
-        
+
         // Read first event
         using var stream = await streamResponse.Content.ReadAsStreamAsync();
         using var reader = new StreamReader(stream);
@@ -152,16 +152,16 @@ public class AgentPipelinePerformanceTests : IClassFixture<WebApplicationFactory
 
         // Act - Create 5 sessions concurrently
         var stopwatch = Stopwatch.StartNew();
-        var tasks = requests.Select(req => 
+        var tasks = requests.Select(req =>
             _client.PostAsJsonAsync("/api/story-agent/sessions/start", req)).ToList();
-        
+
         var responses = await Task.WhenAll(tasks);
         stopwatch.Stop();
 
         // Assert
-        Assert.All(responses, response => 
+        Assert.All(responses, response =>
             Assert.Equal(System.Net.HttpStatusCode.Accepted, response.StatusCode));
-        
+
         // All 5 sessions should complete within 2.5 seconds (500ms each max)
         Assert.True(stopwatch.ElapsedMilliseconds < 2500,
             $"5 concurrent sessions took {stopwatch.ElapsedMilliseconds}ms, expected < 2500ms");
@@ -280,7 +280,7 @@ public class AgentPipelinePerformanceTests : IClassFixture<WebApplicationFactory
     {
         // Arrange & Act - Create 10 sessions
         var sessionIds = new List<string>();
-        
+
         for (int i = 0; i < 10; i++)
         {
             var request = new StartSessionRequest
@@ -293,7 +293,7 @@ public class AgentPipelinePerformanceTests : IClassFixture<WebApplicationFactory
             var response = await _client.PostAsJsonAsync("/api/story-agent/sessions/start", request);
             var sessionId = JsonSerializer.Deserialize<SessionStartResponse>(
                 await response.Content.ReadAsStringAsync(), _jsonOptions)!.SessionId;
-            
+
             sessionIds.Add(sessionId);
         }
 
@@ -328,7 +328,7 @@ public class AgentPipelinePerformanceTests : IClassFixture<WebApplicationFactory
                 CurrentStoryVersion = "{\"title\": \"Test Story\"}",
                 StoryVersions = new List<StoryVersionSnapshot>()
             };
-            
+
             _sessions[sessionId] = session;
             return await Task.FromResult(session);
         }
@@ -358,7 +358,7 @@ public class AgentPipelinePerformanceTests : IClassFixture<WebApplicationFactory
 
             session.LastEvaluationReport = report;
             session.Stage = StorySessionStage.Evaluated;
-            
+
             return (true, report);
         }
 
@@ -368,10 +368,10 @@ public class AgentPipelinePerformanceTests : IClassFixture<WebApplicationFactory
                 return (false, "Session not found");
 
             await Task.Delay(10, ct); // Minimal delay
-            
+
             session.IterationCount++;
             session.Stage = StorySessionStage.Validating;
-            
+
             return (true, "Refinement started");
         }
 
@@ -433,6 +433,12 @@ public class AgentPipelinePerformanceTests : IClassFixture<WebApplicationFactory
         }
 
         public Task<StorySession> UpdateAsync(StorySession session, CancellationToken cancellationToken = default)
+        {
+            _sessions[session.SessionId] = session;
+            return Task.FromResult(session);
+        }
+
+        public Task<StorySession> UpsertAsync(StorySession session, CancellationToken cancellationToken = default)
         {
             _sessions[session.SessionId] = session;
             return Task.FromResult(session);

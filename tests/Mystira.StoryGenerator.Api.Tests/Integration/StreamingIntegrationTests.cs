@@ -58,7 +58,7 @@ public class StreamingIntegrationTests : IClassFixture<WebApplicationFactory<Pro
         // Act
         var requestMessage = new HttpRequestMessage(HttpMethod.Get, $"/api/story-agent/sessions/{sessionId}/stream");
         requestMessage.Headers.Add("Accept", "text/event-stream");
-        
+
         var stopwatch = System.Diagnostics.Stopwatch.StartNew();
         var response = await _client.SendAsync(requestMessage);
         stopwatch.Stop();
@@ -66,11 +66,11 @@ public class StreamingIntegrationTests : IClassFixture<WebApplicationFactory<Pro
         // Assert
         Assert.Equal(System.Net.HttpStatusCode.OK, response.StatusCode);
         Assert.Equal("text/event-stream", response.Content.Headers.ContentType?.MediaType);
-        
+
         // First event should come within 500ms
         var content = await response.Content.ReadAsStringAsync();
         Assert.NotEmpty(content);
-        
+
         // Verify SSE format
         var lines = content.Split('\n');
         Assert.StartsWith("event: ", lines[0]);
@@ -96,29 +96,29 @@ public class StreamingIntegrationTests : IClassFixture<WebApplicationFactory<Pro
         // Act
         var requestMessage = new HttpRequestMessage(HttpMethod.Get, $"/api/story-agent/sessions/{sessionId}/stream");
         requestMessage.Headers.Add("Accept", "text/event-stream");
-        
+
         var response = await _client.SendAsync(requestMessage);
-        
+
         // Read the stream content
         var content = await response.Content.ReadAsStringAsync();
-        
+
         // Assert - Verify SSE format
         var eventBlocks = content.Split("\n\n", StringSplitOptions.RemoveEmptyEntries);
         Assert.True(eventBlocks.Length > 0);
-        
+
         foreach (var block in eventBlocks)
         {
             var lines = block.Split('\n', StringSplitOptions.RemoveEmptyEntries);
             Assert.True(lines.Length >= 2);
-            
+
             // Each event should have event: and data: lines
             Assert.StartsWith("event: ", lines[0]);
             Assert.StartsWith("data: ", lines[1]);
-            
+
             // Event type should be valid
             var eventType = lines[0]["event: ".Length..];
             Assert.False(string.IsNullOrWhiteSpace(eventType));
-            
+
             // Data should be valid JSON
             var jsonData = lines[1]["data: ".Length..];
             Assert.NotNull(JsonSerializer.Deserialize<object>(jsonData));
@@ -144,23 +144,23 @@ public class StreamingIntegrationTests : IClassFixture<WebApplicationFactory<Pro
         // Act - Start streaming
         var requestMessage = new HttpRequestMessage(HttpMethod.Get, $"/api/story-agent/sessions/{sessionId}/stream");
         requestMessage.Headers.Add("Accept", "text/event-stream");
-        
+
         var response = await _client.SendAsync(requestMessage);
-        
+
         // Read initial content
         var content = await response.Content.ReadAsStringAsync();
-        
+
         // Wait a bit for stream to process
         await Task.Delay(2000);
-        
+
         // Act - Try to continue reading (stream should be closed)
         var stream = await response.Content.ReadAsStreamAsync();
         var buffer = new byte[1024];
-        
+
         // This should not hang or throw
         var readTask = stream.ReadAsync(buffer, 0, buffer.Length);
         var completedTask = await Task.WhenAny(readTask, Task.Delay(1000));
-        
+
         // Assert - Stream should be closed (read should return 0 or timeout quickly)
         Assert.True(completedTask == readTask && readTask.Result == 0 || completedTask != readTask);
     }
@@ -174,7 +174,7 @@ public class StreamingIntegrationTests : IClassFixture<WebApplicationFactory<Pro
         // Act
         var requestMessage = new HttpRequestMessage(HttpMethod.Get, $"/api/story-agent/sessions/{sessionId}/stream");
         requestMessage.Headers.Add("Accept", "text/event-stream");
-        
+
         var response = await _client.SendAsync(requestMessage);
 
         // Assert
@@ -204,7 +204,7 @@ public class StreamingIntegrationTests : IClassFixture<WebApplicationFactory<Pro
         // Act
         var requestMessage = new HttpRequestMessage(HttpMethod.Get, $"/api/story-agent/sessions/{sessionId}/stream");
         requestMessage.Headers.Add("Accept", "text/event-stream");
-        
+
         var response = await _client.SendAsync(requestMessage);
 
         // Assert
@@ -230,19 +230,19 @@ public class StreamingIntegrationTests : IClassFixture<WebApplicationFactory<Pro
         // Act
         var requestMessage = new HttpRequestMessage(HttpMethod.Get, $"/api/story-agent/sessions/{sessionId}/stream");
         requestMessage.Headers.Add("Accept", "text/event-stream");
-        
+
         var response = await _client.SendAsync(requestMessage);
-        
+
         // Read all events for a few seconds
         var content = await response.Content.ReadAsStringAsync();
         await Task.Delay(3000); // Let more events come through
-        
+
         var finalContent = await response.Content.ReadAsStringAsync();
-        
+
         // Assert - Should have multiple event blocks
         var eventBlocks = finalContent.Split("\n\n", StringSplitOptions.RemoveEmptyEntries);
         Assert.True(eventBlocks.Length >= 1); // At least one event
-        
+
         // Verify each block is properly formatted
         foreach (var block in eventBlocks)
         {
@@ -270,25 +270,25 @@ public class StreamingIntegrationTests : IClassFixture<WebApplicationFactory<Pro
                 UpdatedAt = DateTime.UtcNow,
                 ThreadId = $"thread-{Guid.NewGuid():N}"
             };
-            
+
             _sessions[sessionId] = session;
-            
+
             // Simulate background work that updates stage
             _ = Task.Run(async () =>
             {
                 await Task.Delay(500);
                 session.Stage = StorySessionStage.Generating;
                 session.UpdatedAt = DateTime.UtcNow;
-                
+
                 await Task.Delay(1000);
                 session.Stage = StorySessionStage.Validating;
                 session.UpdatedAt = DateTime.UtcNow;
-                
+
                 await Task.Delay(2000);
                 session.Stage = StorySessionStage.Complete;
                 session.UpdatedAt = DateTime.UtcNow;
             });
-            
+
             return await Task.FromResult(session);
         }
 
@@ -375,6 +375,12 @@ public class StreamingIntegrationTests : IClassFixture<WebApplicationFactory<Pro
         }
 
         public Task<StorySession> UpdateAsync(StorySession session, CancellationToken cancellationToken = default)
+        {
+            _sessions[session.SessionId] = session;
+            return Task.FromResult(session);
+        }
+
+        public Task<StorySession> UpsertAsync(StorySession session, CancellationToken cancellationToken = default)
         {
             _sessions[session.SessionId] = session;
             return Task.FromResult(session);

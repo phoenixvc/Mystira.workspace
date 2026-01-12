@@ -89,7 +89,7 @@ public partial class AgentOrchestrator : IAgentOrchestrator
             session.UpdatedAt = DateTime.UtcNow;
 
             // Persist session
-            await _sessionRepository.UpdateAsync(session);
+            await _sessionRepository.CreateAsync(session);
 
             await _eventPublisher.PublishEventAsync(sessionId, new AgentStreamEvent
             {
@@ -109,7 +109,7 @@ public partial class AgentOrchestrator : IAgentOrchestrator
             _logger.LogError(ex, "Failed to initialize session {SessionId}", sessionId);
 
             session.Stage = StorySessionStage.Failed;
-            await _sessionRepository.UpdateAsync(session);
+            await _sessionRepository.UpsertAsync(session);
 
             await _eventPublisher.PublishEventAsync(sessionId, new AgentStreamEvent
             {
@@ -400,7 +400,17 @@ public partial class AgentOrchestrator : IAgentOrchestrator
             }
             else
             {
-                session.Stage = StorySessionStage.RefinementRequested;
+                // Check for max iterations escalation
+                if (session.IterationCount >= _config.MaxIterations)
+                {
+                    _logger.LogWarning("Session {SessionId} reached max iterations ({MaxIterations}). Escalating to StuckNeedsReview.",
+                        sessionId, _config.MaxIterations);
+                    session.Stage = StorySessionStage.StuckNeedsReview;
+                }
+                else
+                {
+                    session.Stage = StorySessionStage.RefinementRequested;
+                }
 
                 await _eventPublisher.PublishEventAsync(sessionId, new AgentStreamEvent
                 {

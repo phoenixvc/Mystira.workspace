@@ -237,6 +237,7 @@ public class StorySessionStateTransitionTests
     [InlineData(StorySessionStage.Validating)]
     [InlineData(StorySessionStage.Evaluating)]
     [InlineData(StorySessionStage.Evaluated)]
+    [InlineData(StorySessionStage.RefinementRequested)]
     [InlineData(StorySessionStage.RequiresRefinement)]
     [InlineData(StorySessionStage.Refining)]
     [InlineData(StorySessionStage.Refined)]
@@ -300,18 +301,18 @@ public class StorySessionStateTransitionTests
         var session = new StorySession
         {
             SessionId = "test-session",
-            StoryVersions = new List<StoryVersion>()
+            StoryVersions = new List<StoryVersionSnapshot>()
         };
 
         // Act - Add versions
-        session.StoryVersions.Add(new StoryVersion
+        session.StoryVersions.Add(new StoryVersionSnapshot
         {
             VersionNumber = 1,
             StoryJson = "{\"title\": \"Original\"}",
             CreatedAt = DateTime.UtcNow
         });
 
-        session.StoryVersions.Add(new StoryVersion
+        session.StoryVersions.Add(new StoryVersionSnapshot
         {
             VersionNumber = 2,
             StoryJson = "{\"title\": \"Refined\"}",

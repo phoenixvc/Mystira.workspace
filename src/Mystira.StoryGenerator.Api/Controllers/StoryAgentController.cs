@@ -89,7 +89,7 @@ public class StoryAgentController : ControllerBase
             {
                 Constraints = request.StoryPrompt
             };
-            await _sessionRepository.UpdateAsync(session, cancellationToken);
+            await _sessionRepository.UpsertAsync(session, cancellationToken);
 
             _logger.LogInformation("Session {SessionId} created with thread {ThreadId}", sessionId, session.ThreadId);
 
