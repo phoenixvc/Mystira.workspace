@@ -32,6 +32,14 @@ public interface IStorySessionRepository
     Task<StorySession> UpdateAsync(StorySession session, CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Upserts a story session (creates if not exists, updates if exists).
+    /// </summary>
+    /// <param name="session">The session to upsert.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>The upserted session.</returns>
+    Task<StorySession> UpsertAsync(StorySession session, CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Gets a story session by its Foundry thread ID.
     /// </summary>
     /// <param name="threadId">The Foundry thread ID.</param>

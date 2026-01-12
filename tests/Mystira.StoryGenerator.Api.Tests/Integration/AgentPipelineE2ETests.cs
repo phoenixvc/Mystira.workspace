@@ -8,6 +8,7 @@ using Mystira.StoryGenerator.Domain.Agents;
 using System.Net.Http.Json;
 using System.Text.Json;
 using Xunit;
+using SessionStateResponse = Mystira.StoryGenerator.Contracts.Models.SessionStateResponse;
 
 namespace Mystira.StoryGenerator.Api.Tests.Integration;
 
@@ -57,11 +58,11 @@ public class AgentPipelineE2ETests : IClassFixture<WebApplicationFactory<Program
 
         var startResponse = await _client.PostAsJsonAsync("/api/story-agent/sessions/start", startRequest);
         Assert.Equal(System.Net.HttpStatusCode.Accepted, startResponse.StatusCode);
-        
+
         var startContent = await startResponse.Content.ReadAsStringAsync();
         var startResult = JsonSerializer.Deserialize<SessionStartResponse>(startContent, _jsonOptions);
         Assert.NotNull(startResult);
-        
+
         var sessionId = startResult.SessionId;
         Assert.NotEmpty(sessionId);
         Assert.NotEmpty(startResult.ThreadId);
@@ -73,7 +74,7 @@ public class AgentPipelineE2ETests : IClassFixture<WebApplicationFactory<Program
         // Step 3: Get session state to verify story was generated
         var stateResponse = await _client.GetAsync($"/api/story-agent/sessions/{sessionId}");
         Assert.Equal(System.Net.HttpStatusCode.OK, stateResponse.StatusCode);
-        
+
         var stateContent = await stateResponse.Content.ReadAsStringAsync();
         var stateResult = JsonSerializer.Deserialize<SessionStateResponse>(stateContent, _jsonOptions);
         Assert.NotNull(stateResult);
@@ -83,7 +84,7 @@ public class AgentPipelineE2ETests : IClassFixture<WebApplicationFactory<Program
         // Step 4: Evaluate story
         var evaluateResponse = await _client.PostAsJsonAsync($"/api/story-agent/sessions/{sessionId}/evaluate", new EvaluateRequest());
         Assert.Equal(System.Net.HttpStatusCode.OK, evaluateResponse.StatusCode);
-        
+
         var evaluateContent = await evaluateResponse.Content.ReadAsStringAsync();
         var evaluateResult = JsonSerializer.Deserialize<EvaluateResponse>(evaluateContent, _jsonOptions);
         Assert.NotNull(evaluateResult);
@@ -128,7 +129,7 @@ public class AgentPipelineE2ETests : IClassFixture<WebApplicationFactory<Program
         var firstEvalResponse = await _client.PostAsJsonAsync($"/api/story-agent/sessions/{sessionId}/evaluate", new EvaluateRequest());
         var firstEvalResult = JsonSerializer.Deserialize<EvaluateResponse>(
             await firstEvalResponse.Content.ReadAsStringAsync(), _jsonOptions);
-        
+
         Assert.NotNull(firstEvalResult);
         Assert.Equal(EvaluationStatus.Fail, firstEvalResult.EvaluationReport.OverallStatus);
 
@@ -158,7 +159,7 @@ public class AgentPipelineE2ETests : IClassFixture<WebApplicationFactory<Program
         var secondEvalResponse = await _client.PostAsJsonAsync($"/api/story-agent/sessions/{sessionId}/evaluate", new EvaluateRequest());
         var secondEvalResult = JsonSerializer.Deserialize<EvaluateResponse>(
             await secondEvalResponse.Content.ReadAsStringAsync(), _jsonOptions);
-        
+
         Assert.NotNull(secondEvalResult);
         Assert.Equal(EvaluationStatus.Pass, secondEvalResult.EvaluationReport.OverallStatus);
         Assert.Equal(1, secondEvalResult.EvaluationReport.IterationNumber);
@@ -197,9 +198,9 @@ public class AgentPipelineE2ETests : IClassFixture<WebApplicationFactory<Program
             var evalResponse = await _client.PostAsJsonAsync($"/api/story-agent/sessions/{sessionId}/evaluate", new EvaluateRequest());
             var evalResult = JsonSerializer.Deserialize<EvaluateResponse>(
                 await evalResponse.Content.ReadAsStringAsync(), _jsonOptions);
-            
+
             Assert.NotNull(evalResult);
-            
+
             if (i < 4)
             {
                 // First 4 iterations should return Fail
@@ -230,7 +231,7 @@ public class AgentPipelineE2ETests : IClassFixture<WebApplicationFactory<Program
                 Assert.Equal("StuckNeedsReview", finalState.Stage);
                 Assert.Equal(5, finalState.IterationCount);
                 Assert.Contains("maximum iterations", evalResult.EvaluationReport.Recommendation ?? "", StringComparison.OrdinalIgnoreCase);
-                
+
                 // Further refinement should be rejected
                 var refineRequest = new RefineRequest { TargetSceneIds = new List<string> { "scene_1" } };
                 var refineResponse = await _client.PostAsJsonAsync($"/api/story-agent/sessions/{sessionId}/refine", refineRequest);
@@ -247,7 +248,7 @@ public class AgentPipelineE2ETests : IClassFixture<WebApplicationFactory<Program
     public async Task CompleteAgentPipeline_FromUIToFinalStory()
     {
         // Simulate complete user workflow
-        
+
         // 1. User starts session from UI
         var startRequest = new StartSessionRequest
         {
@@ -258,7 +259,7 @@ public class AgentPipelineE2ETests : IClassFixture<WebApplicationFactory<Program
 
         var startResponse = await _client.PostAsJsonAsync("/api/story-agent/sessions/start", startRequest);
         Assert.Equal(System.Net.HttpStatusCode.Accepted, startResponse.StatusCode);
-        
+
         var sessionId = JsonSerializer.Deserialize<SessionStartResponse>(
             await startResponse.Content.ReadAsStringAsync(), _jsonOptions)!.SessionId;
 
@@ -321,7 +322,7 @@ public class AgentPipelineE2ETests : IClassFixture<WebApplicationFactory<Program
         var fileSearchResponse = await _client.PostAsJsonAsync("/api/story-agent/sessions/start", fileSearchRequest);
         var fileSearchSession = JsonSerializer.Deserialize<SessionStartResponse>(
             await fileSearchResponse.Content.ReadAsStringAsync(), _jsonOptions);
-        
+
         Assert.Equal("FileSearch", fileSearchSession!.KnowledgeMode);
 
         // Create session with AISearch
@@ -335,7 +336,7 @@ public class AgentPipelineE2ETests : IClassFixture<WebApplicationFactory<Program
         var aiSearchResponse = await _client.PostAsJsonAsync("/api/story-agent/sessions/start", aiSearchRequest);
         var aiSearchSession = JsonSerializer.Deserialize<SessionStartResponse>(
             await aiSearchResponse.Content.ReadAsStringAsync(), _jsonOptions);
-        
+
         Assert.Equal("AISearch", aiSearchSession!.KnowledgeMode);
 
         // Both sessions should work independently
@@ -349,7 +350,7 @@ public class AgentPipelineE2ETests : IClassFixture<WebApplicationFactory<Program
     {
         var response = await _client.GetAsync($"/api/story-agent/sessions/{sessionId}");
         Assert.Equal(System.Net.HttpStatusCode.OK, response.StatusCode);
-        
+
         var content = await response.Content.ReadAsStringAsync();
         return JsonSerializer.Deserialize<SessionStateResponse>(content, _jsonOptions)!;
     }
@@ -357,14 +358,14 @@ public class AgentPipelineE2ETests : IClassFixture<WebApplicationFactory<Program
     private async Task<SessionStateResponse> PollUntilStageAsync(string sessionId, string targetStage, int maxAttempts = 20)
     {
         SessionStateResponse? state = null;
-        
+
         for (int i = 0; i < maxAttempts; i++)
         {
             state = await GetSessionStateAsync(sessionId);
-            
+
             if (state.Stage == targetStage)
                 return state;
-            
+
             await Task.Delay(500);
         }
 
@@ -392,15 +393,15 @@ public class AgentPipelineE2ETests : IClassFixture<WebApplicationFactory<Program
                 ThreadId = $"thread-{Guid.NewGuid():N}",
                 StoryVersions = new List<StoryVersionSnapshot>()
             };
-            
+
             _sessions[sessionId] = session;
-            
+
             // Simulate async generation
             _ = Task.Run(async () =>
             {
                 await Task.Delay(200);
                 session.Stage = StorySessionStage.Generating;
-                
+
                 await Task.Delay(500);
                 session.CurrentStoryVersion = GenerateMockStory();
                 session.StoryVersions.Add(new StoryVersionSnapshot
@@ -411,7 +412,7 @@ public class AgentPipelineE2ETests : IClassFixture<WebApplicationFactory<Program
                 });
                 session.Stage = StorySessionStage.Validating;
             });
-            
+
             return await Task.FromResult(session);
         }
 
@@ -507,10 +508,10 @@ public class AgentPipelineE2ETests : IClassFixture<WebApplicationFactory<Program
                 return (false, "Session stuck, cannot refine");
 
             session.IterationCount++;
-            
+
             // Simulate refinement
             await Task.Delay(100, ct);
-            
+
             var refinedStory = GenerateMockStory($" (refined v{session.IterationCount})");
             session.CurrentStoryVersion = refinedStory;
             session.StoryVersions.Add(new StoryVersionSnapshot
@@ -519,9 +520,9 @@ public class AgentPipelineE2ETests : IClassFixture<WebApplicationFactory<Program
                 StoryJson = refinedStory,
                 CreatedAt = DateTime.UtcNow
             });
-            
+
             session.Stage = StorySessionStage.Validating;
-            
+
             return (true, "Refinement completed");
         }
 
@@ -586,6 +587,12 @@ public class AgentPipelineE2ETests : IClassFixture<WebApplicationFactory<Program
         }
 
         public Task<StorySession> UpdateAsync(StorySession session, CancellationToken cancellationToken = default)
+        {
+            _sessions[session.SessionId] = session;
+            return Task.FromResult(session);
+        }
+
+        public Task<StorySession> UpsertAsync(StorySession session, CancellationToken cancellationToken = default)
         {
             _sessions[session.SessionId] = session;
             return Task.FromResult(session);

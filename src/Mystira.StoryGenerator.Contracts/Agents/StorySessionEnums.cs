@@ -57,6 +57,16 @@ public enum StorySessionStage
     Refined,
 
     /// <summary>
+    /// Story has failed evaluation and requires user refinement.
+    /// </summary>
+    RequiresRefinement,
+
+    /// <summary>
+    /// Story is currently being refined based on feedback.
+    /// </summary>
+    Refining,
+
+    /// <summary>
     /// Story generation is complete.
     /// </summary>
     Complete,

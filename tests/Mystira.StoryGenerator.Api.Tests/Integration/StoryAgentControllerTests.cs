@@ -10,6 +10,7 @@ using Mystira.StoryGenerator.Contracts.Models;
 using Mystira.StoryGenerator.Domain.Agents;
 using System.Net.Http.Json;
 using System.Text.Json;
+using SessionStateResponse = Mystira.StoryGenerator.Contracts.Models.SessionStateResponse;
 
 namespace Mystira.StoryGenerator.Api.Tests.Integration;
 
@@ -59,7 +60,7 @@ public class StoryAgentControllerTests : IClassFixture<WebApplicationFactory<Pro
         Assert.Equal(System.Net.HttpStatusCode.Accepted, response.StatusCode);
         var content = await response.Content.ReadAsStringAsync();
         var result = JsonSerializer.Deserialize<SessionStartResponse>(content, _jsonOptions);
-        
+
         Assert.NotNull(result);
         Assert.NotEmpty(result.SessionId);
         Assert.NotEmpty(result.ThreadId);
@@ -126,11 +127,11 @@ public class StoryAgentControllerTests : IClassFixture<WebApplicationFactory<Pro
             KnowledgeMode = "FileSearch",
             AgeGroup = "6-9"
         };
-        
+
         var startResponse = await _client.PostAsJsonAsync("/api/story-agent/sessions/start", request);
         var startContent = await startResponse.Content.ReadAsStringAsync();
         var startResult = JsonSerializer.Deserialize<SessionStartResponse>(startContent, _jsonOptions);
-        
+
         var sessionId = startResult!.SessionId;
 
         // Act - Try to evaluate when session is in wrong state
@@ -168,11 +169,11 @@ public class StoryAgentControllerTests : IClassFixture<WebApplicationFactory<Pro
             KnowledgeMode = "FileSearch",
             AgeGroup = "6-9"
         };
-        
+
         var startResponse = await _client.PostAsJsonAsync("/api/story-agent/sessions/start", request);
         var startContent = await startResponse.Content.ReadAsStringAsync();
         var startResult = JsonSerializer.Deserialize<SessionStartResponse>(startContent, _jsonOptions);
-        
+
         var sessionId = startResult!.SessionId;
 
         var refineRequest = new RefineRequest
@@ -198,11 +199,11 @@ public class StoryAgentControllerTests : IClassFixture<WebApplicationFactory<Pro
             KnowledgeMode = "FileSearch",
             AgeGroup = "6-9"
         };
-        
+
         var startResponse = await _client.PostAsJsonAsync("/api/story-agent/sessions/start", request);
         var startContent = await startResponse.Content.ReadAsStringAsync();
         var startResult = JsonSerializer.Deserialize<SessionStartResponse>(startContent, _jsonOptions);
-        
+
         var sessionId = startResult!.SessionId;
 
         // Act
@@ -212,7 +213,7 @@ public class StoryAgentControllerTests : IClassFixture<WebApplicationFactory<Pro
         Assert.Equal(System.Net.HttpStatusCode.OK, response.StatusCode);
         var content = await response.Content.ReadAsStringAsync();
         var result = JsonSerializer.Deserialize<SessionStateResponse>(content, _jsonOptions);
-        
+
         Assert.NotNull(result);
         Assert.Equal(sessionId, result.SessionId);
         Assert.NotNull(result.Stage);
@@ -249,7 +250,7 @@ public class StoryAgentControllerTests : IClassFixture<WebApplicationFactory<Pro
                 UpdatedAt = DateTime.UtcNow,
                 ThreadId = $"thread-{Guid.NewGuid():N}"
             };
-            
+
             _sessions[sessionId] = session;
             return await Task.FromResult(session);
         }
@@ -336,6 +337,12 @@ public class StoryAgentControllerTests : IClassFixture<WebApplicationFactory<Pro
         }
 
         public Task<StorySession> UpdateAsync(StorySession session, CancellationToken cancellationToken = default)
+        {
+            _sessions[session.SessionId] = session;
+            return Task.FromResult(session);
+        }
+
+        public Task<StorySession> UpsertAsync(StorySession session, CancellationToken cancellationToken = default)
         {
             _sessions[session.SessionId] = session;
             return Task.FromResult(session);

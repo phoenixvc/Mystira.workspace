@@ -11,6 +11,7 @@ public class StorySession
     /// <summary>
     /// Unique identifier for this story session.
     /// </summary>
+    [JsonPropertyName("sessionId")]
     public string SessionId { get; set; } = string.Empty;
 
     /// <summary>

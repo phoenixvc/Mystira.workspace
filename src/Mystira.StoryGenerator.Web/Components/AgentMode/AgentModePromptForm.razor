@@ -2,38 +2,40 @@
 
 <div class="prompt-form">
     <h2>Create a Story with AI</h2>
-    
+
     <div class="form-group">
         <label>Story Prompt</label>
-        <textarea 
+        <textarea
             @bind="prompt"
             placeholder="Describe the story you want to create..."
             rows="5"
             disabled="@IsLoading" />
     </div>
-    
+
     <div class="form-row">
         <div class="form-group">
             <label>Age Group</label>
             <select @bind="selectedAgeGroup" disabled="@IsLoading">
+                <option value="1-2">Ages 1-2</option>
+                <option value="3-5">Ages 3-5</option>
                 <option value="6-9">Ages 6-9</option>
                 <option value="10-12">Ages 10-12</option>
                 <option value="13-18">Ages 13-18</option>
             </select>
         </div>
-        
+
         <div class="form-group">
             <label>Knowledge Mode</label>
             <div class="radio-group">
                 <label>
-                    <input type="radio" name="knowledgeMode" value="FileSearch" 
+                    <input type="radio" name="knowledgeMode" value="FileSearch"
                            checked="@(knowledgeMode == "FileSearch")"
                            @onchange="@(() => knowledgeMode = "FileSearch")"
                            disabled="@IsLoading" />
                     File Search (Vector Store)
                 </label>
                 <label>
-                    <input type="radio" name="knowledgeMode" value="AISearch" 
+                    <input type="radio" name="knowledgeMode" value="AISearch"
                            checked="@(knowledgeMode == "AISearch")"
                            @onchange="@(() => knowledgeMode = "AISearch")"
                            disabled="@IsLoading" />
@@ -42,14 +44,14 @@
             </div>
         </div>
     </div>
-    
+
     <div class="form-group">
         <label>Target Narrative Axes</label>
         <div class="checkbox-group">
             @foreach (var axis in availableAxes)
             {
                 <label>
-                    <input type="checkbox" 
+                    <input type="checkbox"
                            @onchange="@((Microsoft.AspNetCore.Components.ChangeEventArgs e) => ToggleAxis(axis, (bool)e.Value!))"
                            disabled="@IsLoading" />
                     @axis
@@ -57,9 +59,9 @@
             }
         </div>
     </div>
-    
-    <button 
-        @onclick="Submit" 
+
+    <button
+        @onclick="Submit"
         disabled="@(IsLoading || string.IsNullOrWhiteSpace(prompt))"
         class="btn-primary">
         @if (IsLoading)
@@ -76,13 +78,13 @@
 @code {
     [Parameter] public EventCallback<StartSessionRequest> OnStartSession { get; set; }
     [Parameter] public bool IsLoading { get; set; }
-    
+
     private string prompt = "";
-    private string selectedAgeGroup = "6-9";
-    private string knowledgeMode = "AISearch";
+    private string selectedAgeGroup = "3-5";
+    private string knowledgeMode = "FileSearch";
     private List<string> availableAxes = new() { "Courage", "Wisdom", "Compassion" };
     private List<string> selectedAxes = new();
-    
+
     private void ToggleAxis(string axis, bool selected)
     {
         if (selected && !selectedAxes.Contains(axis))
@@ -90,7 +92,7 @@
         else
             selectedAxes.Remove(axis);
     }
-    
+
     private async Task Submit()
     {
         if (string.IsNullOrWhiteSpace(prompt))

@@ -20,7 +20,7 @@ public static class FoundryServiceCollectionExtensions
         services.AddSingleton<FoundryAgentClient>(sp =>
         {
             var logger = sp.GetRequiredService<ILogger<FoundryAgentClient>>();
-            var client = FoundryAgentClient.GetInstance(logger);
+            var client = new FoundryAgentClient(logger);
 
             var clientConfig = new FoundryAgentClientConfig
             {
@@ -52,7 +52,6 @@ public static class FoundryServiceCollectionExtensions
                 var aiSearchConfig = new AISearchKnowledgeProvider.AISearchConfiguration
                 {
                     Endpoint = foundryConfig.AISearch?.Endpoint
-                        ?? foundryConfig.Endpoint  // Backward compatibility
                         ?? throw new InvalidOperationException("AISearch endpoint is required. Set FoundryAgent:AISearch:Endpoint"),
                     ApiKey = foundryConfig.AISearch?.ApiKey
                         ?? foundryConfig.ApiKey  // Backward compatibility

@@ -110,6 +110,30 @@ public class CosmosStorySessionRepository : IStorySessionRepository
         }
     }
 
+    public async Task<StorySession> UpsertAsync(StorySession session, CancellationToken cancellationToken = default)
+    {
+        _logger.LogInformation("Upserting story session: {SessionId}", session.SessionId);
+
+        try
+        {
+            session.UpdatedAt = DateTime.UtcNow;
+
+            var response = await _container.UpsertItemAsync(
+                session,
+                new PartitionKey(session.SessionId),
+                cancellationToken: cancellationToken).ConfigureAwait(false);
+
+            _logger.LogInformation("Upserted story session: {SessionId}", session.SessionId);
+
+            return response.Resource;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to upsert story session: {SessionId}", session.SessionId);
+            throw;
+        }
+    }
+
     public async Task<StorySession?> GetByThreadIdAsync(string threadId, CancellationToken cancellationToken = default)
     {
         _logger.LogDebug("Getting story session by thread ID: {ThreadId}", threadId);
