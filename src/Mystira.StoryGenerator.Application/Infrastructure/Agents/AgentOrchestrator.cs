@@ -71,25 +71,11 @@ public partial class AgentOrchestrator : IAgentOrchestrator
 
             if (_knowledgeProvider is FileSearchKnowledgeProvider fileSearchProvider)
             {
-                // Attach vector stores for all agent types (Writer, Judge, Refiner, RubricSummary)
-                // Each agent will have access to its specific knowledge base for the age group
                 var vectorStoreIds = new List<string>();
 
                 try
                 {
                     vectorStoreIds.Add(fileSearchProvider.GetVectorStoreIdForAgeGroup(AgentType.Writer, ageGroup));
-                    vectorStoreIds.Add(fileSearchProvider.GetVectorStoreIdForAgeGroup(AgentType.Judge, ageGroup));
-                    vectorStoreIds.Add(fileSearchProvider.GetVectorStoreIdForAgeGroup(AgentType.Refiner, ageGroup));
-
-                    // RubricSummary is optional
-                    try
-                    {
-                        vectorStoreIds.Add(fileSearchProvider.GetVectorStoreIdForAgeGroup(AgentType.RubricSummary, ageGroup));
-                    }
-                    catch (InvalidOperationException)
-                    {
-                        _logger.LogWarning("RubricSummary vector store not configured for age group {AgeGroup}, skipping", ageGroup);
-                    }
                 }
                 catch (InvalidOperationException ex)
                 {
