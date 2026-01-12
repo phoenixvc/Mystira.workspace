@@ -97,9 +97,15 @@ public static class FoundryServiceCollectionExtensions
             var options = sp.GetRequiredService<IOptions<CosmosDbConfig>>();
             var cosmosConfig = options.Value;
 
-            var cosmosClient = new Microsoft.Azure.Cosmos.CosmosClient(
+            var cosmosClient = new Microsoft.Azure.Cosmos.Fluent.CosmosClientBuilder(
                 cosmosConfig.Endpoint,
-                cosmosConfig.ApiKey);
+                cosmosConfig.ApiKey)
+                .WithSystemTextJsonSerializerOptions(new System.Text.Json.JsonSerializerOptions
+                {
+                    PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase,
+                    DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
+                })
+                .Build();
 
             return new CosmosStorySessionRepository(
                 cosmosClient,
