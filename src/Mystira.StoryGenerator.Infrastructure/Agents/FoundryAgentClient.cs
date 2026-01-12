@@ -280,14 +280,15 @@ public sealed class FoundryAgentClient : IDisposable
         try
         {
             var messages = new List<Message>();
-            var response = await _agentsClient!.Messages.GetMessagesAsync(threadId, limit: limit, cancellationToken: cancellationToken)
-                .ConfigureAwait(false);
+            var response = _agentsClient!.Messages.GetMessagesAsync(threadId, limit: limit, cancellationToken: cancellationToken);
 
-            foreach (var msg in response.Value.Data)
+            await foreach (var page in response.AsPages().WithCancellation(cancellationToken))
             {
-                var content = msg.ContentItems.FirstOrDefault();
-                string textValue = string.Empty;
+                var msg = page.Values.FirstOrDefault();
+                if (msg == null) continue;
 
+                var content = msg.ContentItems.FirstOrDefault();
+                var textValue = string.Empty;
                 if (content is MessageTextContent textContent)
                 {
                     textValue = textContent.Text;
