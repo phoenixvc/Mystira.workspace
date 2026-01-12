@@ -1,3 +1,4 @@
+using Azure.AI.Agents.Persistent;
 using Azure.AI.Projects;
 using Microsoft.Extensions.Logging;
 using Mystira.StoryGenerator.Domain.Agents;
