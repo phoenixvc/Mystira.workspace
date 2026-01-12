@@ -1,4 +1,4 @@
-using Azure.AI.Projects;
+using Azure.AI.Agents.Persistent;
 
 namespace Mystira.StoryGenerator.Application.Infrastructure.Agents;
 

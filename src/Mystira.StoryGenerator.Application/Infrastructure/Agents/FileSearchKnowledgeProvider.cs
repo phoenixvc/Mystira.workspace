@@ -1,5 +1,7 @@
+using Azure.AI.Agents.Persistent;
 using Azure.AI.Projects;
 using Microsoft.Extensions.Logging;
+using Mystira.StoryGenerator.Contracts.Configuration;
 using Mystira.StoryGenerator.Domain.Agents;
 using Mystira.StoryGenerator.Infrastructure.Agents;
 
@@ -82,10 +84,13 @@ public class FileSearchKnowledgeProvider : IKnowledgeProvider
     }
 
     /// <summary>
-    /// Gets the vector store ID for a specific age group.
-    /// Throws exception if age group is not configured.
+    /// Gets the vector store ID for a specific agent type and age group.
+    /// Throws exception if the combination is not configured.
     /// </summary>
-    public string GetVectorStoreIdForAgeGroup(string? ageGroup)
+    /// <param name="agentType">The agent type (Writer, Judge, Refiner, RubricSummary).</param>
+    /// <param name="ageGroup">The age group (e.g., "3-5", "6-9").</param>
+    /// <returns>The vector store ID for the specified agent and age group.</returns>
+    public string GetVectorStoreIdForAgeGroup(AgentType agentType, string? ageGroup)
     {
         if (string.IsNullOrEmpty(ageGroup))
         {
@@ -95,38 +100,91 @@ public class FileSearchKnowledgeProvider : IKnowledgeProvider
                 nameof(ageGroup));
         }
 
-        if (_config.VectorStoresByAgeGroup == null || _config.VectorStoresByAgeGroup.Count == 0)
+        var agentTypeName = agentType.ToString();
+
+        // Try new agent-specific configuration first
+        if (_config.VectorStoresByAgentAndAge != null && _config.VectorStoresByAgentAndAge.Count > 0)
         {
+            if (_config.VectorStoresByAgentAndAge.TryGetValue(agentTypeName, out var ageGroupMap))
+            {
+                if (ageGroupMap.TryGetValue(ageGroup, out var vectorStoreId))
+                {
+                    _logger.LogDebug("Using agent-specific vector store {VectorStoreId} for {AgentType} agent and age group {AgeGroup}",
+                        vectorStoreId, agentTypeName, ageGroup);
+                    return vectorStoreId;
+                }
+
+                // Agent type exists but age group is missing
+                var configuredAgeGroups = string.Join(", ", ageGroupMap.Keys);
+                throw new InvalidOperationException(
+                    $"No vector store configured for {agentTypeName} agent with age group '{ageGroup}'. " +
+                    $"Configured age groups for {agentTypeName}: [{configuredAgeGroups}]. " +
+                    $"Add vector store for age group '{ageGroup}' to FoundryAgent:FileSearch:VectorStoresByAgentAndAge:{agentTypeName} configuration.");
+            }
+
+            // Agent type doesn't exist
+            var configuredAgents = string.Join(", ", _config.VectorStoresByAgentAndAge.Keys);
             throw new InvalidOperationException(
-                "No vector stores configured for FileSearch mode. " +
-                "Set FoundryAgent:FileSearch:VectorStoresByAgeGroup in configuration with age-specific vector store IDs.");
+                $"No vector stores configured for {agentTypeName} agent. " +
+                $"Configured agents: [{configuredAgents}]. " +
+                $"Add configuration for {agentTypeName} to FoundryAgent:FileSearch:VectorStoresByAgentAndAge configuration.");
         }
 
-        if (_config.VectorStoresByAgeGroup.TryGetValue(ageGroup, out var vectorStoreId))
+        // Fall back to legacy single-agent configuration
+        #pragma warning disable CS0618 // Type or member is obsolete
+        if (_config.VectorStoresByAgeGroup != null && _config.VectorStoresByAgeGroup.Count > 0)
         {
-            _logger.LogDebug("Using age-specific vector store {VectorStoreId} for age group {AgeGroup}",
-                vectorStoreId, ageGroup);
-            return vectorStoreId;
-        }
+            if (_config.VectorStoresByAgeGroup.TryGetValue(ageGroup, out var vectorStoreId))
+            {
+                _logger.LogWarning(
+                    "Using legacy VectorStoresByAgeGroup configuration. Consider migrating to VectorStoresByAgentAndAge for agent-specific vector stores.");
+                _logger.LogDebug("Using legacy age-specific vector store {VectorStoreId} for age group {AgeGroup}",
+                    vectorStoreId, ageGroup);
+                return vectorStoreId;
+            }
 
-        // No vector store found for this age group - this is an error
-        var configuredAgeGroups = string.Join(", ", _config.VectorStoresByAgeGroup.Keys);
+            var configuredAgeGroups = string.Join(", ", _config.VectorStoresByAgeGroup.Keys);
+            throw new InvalidOperationException(
+                $"No vector store configured for age group '{ageGroup}'. " +
+                $"Configured age groups: [{configuredAgeGroups}]. " +
+                $"Add a vector store for age group '{ageGroup}' to FoundryAgent:FileSearch:VectorStoresByAgeGroup configuration, " +
+                $"or migrate to VectorStoresByAgentAndAge for agent-specific configuration.");
+        }
+        #pragma warning restore CS0618 // Type or member is obsolete
+
+        // No configuration at all
         throw new InvalidOperationException(
-            $"No vector store configured for age group '{ageGroup}'. " +
-            $"Configured age groups: [{configuredAgeGroups}]. " +
-            $"Add a vector store for age group '{ageGroup}' to FoundryAgent:FileSearch:VectorStoresByAgeGroup configuration.");
+            "No vector stores configured for FileSearch mode. " +
+            "Set FoundryAgent:FileSearch:VectorStoresByAgentAndAge in configuration with agent-specific and age-specific vector store IDs.");
     }
 
     /// <summary>
-    /// Configuration for File Search.
+    /// [DEPRECATED] Gets the vector store ID for a specific age group using legacy configuration.
+    /// Use the overload that accepts AgentType for agent-specific vector stores.
     /// </summary>
+    [Obsolete("Use GetVectorStoreIdForAgeGroup(AgentType, string) for agent-specific vector stores")]
+    public string GetVectorStoreIdForAgeGroup(string? ageGroup)
+    {
+        // Default to Writer agent for backward compatibility
+        return GetVectorStoreIdForAgeGroup(AgentType.Writer, ageGroup);
+    }
+
+    /// <summary>
+    /// [DEPRECATED] Configuration for File Search.
+    /// Use FileSearchConfig from Mystira.StoryGenerator.Contracts.Configuration instead.
+    /// </summary>
+    [Obsolete("Use FileSearchConfig from Mystira.StoryGenerator.Contracts.Configuration")]
     public class FileSearchConfiguration
     {
         /// <summary>
-        /// Age-specific vector store IDs.
-        /// REQUIRED: All supported age groups must be explicitly configured.
-        /// Example: { "1-2": "vs_abc123", "6-9": "vs_def456" }
+        /// Agent-specific and age-specific vector store IDs.
         /// </summary>
+        public Dictionary<string, Dictionary<string, string>> VectorStoresByAgentAndAge { get; set; } = new();
+
+        /// <summary>
+        /// [DEPRECATED] Age-specific vector store IDs (legacy configuration).
+        /// </summary>
+        [Obsolete("Use VectorStoresByAgentAndAge")]
         public Dictionary<string, string> VectorStoresByAgeGroup { get; set; } = new();
 
         public int? MaxFiles { get; set; }

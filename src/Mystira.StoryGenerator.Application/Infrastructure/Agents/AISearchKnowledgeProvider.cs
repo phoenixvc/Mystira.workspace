@@ -1,10 +1,8 @@
-using System.Text.Json;
 using Azure;
-using Azure.AI.Projects;
+using Azure.AI.Agents.Persistent;
 using Azure.Search.Documents;
 using Azure.Search.Documents.Models;
 using Microsoft.Extensions.Logging;
-using Mystira.StoryGenerator.Domain.Agents;
 using Mystira.StoryGenerator.Infrastructure.Agents;
 
 namespace Mystira.StoryGenerator.Application.Infrastructure.Agents;

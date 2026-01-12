@@ -1,6 +1,7 @@
 using System.Text.Json;
 using Azure;
 using Azure.AI.Projects;
+using Azure.AI.Agents.Persistent;
 using Azure.Core;
 using Microsoft.Extensions.Logging;
 
@@ -95,7 +96,7 @@ public sealed class FoundryAgentClient : IDisposable
     }
 
     private AIProjectClient? _projectClient;
-    private AgentsClient? _agentsClient;
+    private PersistentAgentsClient? _agentsClient;
     private bool _disposed;
 
     /// <summary>
@@ -134,8 +135,8 @@ public sealed class FoundryAgentClient : IDisposable
         if (string.IsNullOrEmpty(config.ProjectId))
             throw new ArgumentException("ProjectId is required", nameof(config));
 
-        _projectClient = new AIProjectClient(config.Endpoint, new Azure.Identity.DefaultAzureCredential());
-        _agentsClient = _projectClient.GetAgentsClient();
+        _projectClient = new AIProjectClient(new Uri(config.Endpoint), new Azure.Identity.DefaultAzureCredential());
+        _agentsClient = _projectClient.GetPersistentAgentsClient();
 
         _logger.LogInformation("FoundryAgentClient initialized with endpoint: {Endpoint}", config.Endpoint);
     }
@@ -156,7 +157,7 @@ public sealed class FoundryAgentClient : IDisposable
 
         try
         {
-            var threadResponse = await _agentsClient!.CreateThreadAsync(cancellationToken: cancellationToken)
+            var threadResponse = await _agentsClient!.Threads.CreateThreadAsync(cancellationToken: cancellationToken)
                 .ConfigureAwait(false);
 
             var threadId = threadResponse.Value.Id;
@@ -205,7 +206,7 @@ public sealed class FoundryAgentClient : IDisposable
                 toolResources.FileSearch.VectorStoreIds.Add(vectorStoreId);
             }
 
-            var threadResponse = await _agentsClient!.CreateThreadAsync(
+            var threadResponse = await _agentsClient!.Threads.CreateThreadAsync(
                 toolResources: toolResources,
                 cancellationToken: cancellationToken)
                 .ConfigureAwait(false);
@@ -233,7 +234,7 @@ public sealed class FoundryAgentClient : IDisposable
     /// <param name="threadId">The thread ID.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>The thread details or null if not found.</returns>
-    public async Task<AgentThread?> GetThreadAsync(
+    public async Task<PersistentAgentThread?> GetThreadAsync(
         string threadId,
         CancellationToken cancellationToken = default)
     {
@@ -243,7 +244,7 @@ public sealed class FoundryAgentClient : IDisposable
 
         try
         {
-            var threadResponse = await _agentsClient!.GetThreadAsync(threadId, cancellationToken)
+            var threadResponse = await _agentsClient!.Threads.GetThreadAsync(threadId, cancellationToken)
                 .ConfigureAwait(false);
 
             return threadResponse.Value;
@@ -279,14 +280,15 @@ public sealed class FoundryAgentClient : IDisposable
         try
         {
             var messages = new List<Message>();
-            var response = await _agentsClient!.GetMessagesAsync(threadId, limit: limit, cancellationToken: cancellationToken)
-                .ConfigureAwait(false);
+            var response = _agentsClient!.Messages.GetMessagesAsync(threadId, limit: limit, cancellationToken: cancellationToken);
 
-            foreach (var msg in response.Value.Data)
+            await foreach (var page in response.AsPages().WithCancellation(cancellationToken))
             {
-                var content = msg.ContentItems.FirstOrDefault();
-                string textValue = string.Empty;
+                var msg = page.Values.FirstOrDefault();
+                if (msg == null) continue;
 
+                var content = msg.ContentItems.FirstOrDefault();
+                var textValue = string.Empty;
                 if (content is MessageTextContent textContent)
                 {
                     textValue = textContent.Text;
@@ -335,10 +337,10 @@ public sealed class FoundryAgentClient : IDisposable
                 toolOutput.ToolCallId,
                 toolOutput.Output)).ToList();
 
-            var runResponse = await _agentsClient!.GetRunAsync(threadId, runId, cancellationToken).ConfigureAwait(false);
+            var runResponse = await _agentsClient!.Runs.GetRunAsync(threadId, runId, cancellationToken).ConfigureAwait(false);
             var run = runResponse.Value;
 
-            Response<ThreadRun> submissionResponse = await _agentsClient!.SubmitToolOutputsToRunAsync(
+            Response<ThreadRun> submissionResponse = await _agentsClient!.Runs.SubmitToolOutputsToRunAsync(
                 run,
                 azureToolOutputs,
                 cancellationToken).ConfigureAwait(false);
@@ -387,7 +389,7 @@ public sealed class FoundryAgentClient : IDisposable
         {
             try
             {
-                var runResponse = await _agentsClient!.GetRunAsync(threadId, runId, cancellationToken)
+                var runResponse = await _agentsClient!.Runs.GetRunAsync(threadId, runId, cancellationToken)
                     .ConfigureAwait(false);
 
                 var run = runResponse.Value;
@@ -491,7 +493,7 @@ public sealed class FoundryAgentClient : IDisposable
 
         try
         {
-            Response<ThreadRun> runResponse = await _agentsClient!.CreateRunAsync(
+            Response<ThreadRun> runResponse = await _agentsClient!.Runs.CreateRunAsync(
                 threadId,
                 agentId,
                 additionalInstructions: instructions,
@@ -529,7 +531,7 @@ public sealed class FoundryAgentClient : IDisposable
 
         _logger.LogInformation("Starting streaming run for agent {AgentId} on thread {ThreadId}", agentId, threadId);
 
-        var streamingResponse = _agentsClient!.CreateRunStreamingAsync(threadId, agentId, instructions, cancellationToken: cancellationToken);
+        var streamingResponse = _agentsClient!.Runs.CreateRunStreamingAsync(threadId, agentId, instructions, cancellationToken: cancellationToken);
 
         await foreach (var update in streamingResponse.ConfigureAwait(false))
         {
@@ -553,7 +555,7 @@ public sealed class FoundryAgentClient : IDisposable
 
         try
         {
-            await _agentsClient!.DeleteThreadAsync(threadId, cancellationToken).ConfigureAwait(false);
+            await _agentsClient!.Threads.DeleteThreadAsync(threadId, cancellationToken).ConfigureAwait(false);
             _logger.LogInformation("Successfully deleted thread: {ThreadId}", threadId);
             return true;
         }
@@ -573,7 +575,7 @@ public sealed class FoundryAgentClient : IDisposable
     /// Gets the agents client for direct access.
     /// </summary>
     /// <returns>The agents client.</returns>
-    public AgentsClient GetAgentsClient()
+    public PersistentAgentsClient GetAgentsClient()
     {
         EnsureInitialized();
         return _agentsClient!;

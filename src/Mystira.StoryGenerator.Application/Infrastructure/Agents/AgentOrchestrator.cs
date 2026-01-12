@@ -66,18 +66,29 @@ public partial class AgentOrchestrator : IAgentOrchestrator
         try
         {
             // Create the thread via Foundry
-            // For FileSearch mode, attach age-specific vector store
+            // For FileSearch mode, attach age-specific and agent-specific vector stores
             ThreadCreationResult threadResult;
 
             if (_knowledgeProvider is FileSearchKnowledgeProvider fileSearchProvider)
             {
-                var vectorStoreId = fileSearchProvider.GetVectorStoreIdForAgeGroup(ageGroup);
+                var vectorStoreIds = new List<string>();
+
+                try
+                {
+                    vectorStoreIds.Add(fileSearchProvider.GetVectorStoreIdForAgeGroup(AgentType.Writer, ageGroup));
+                }
+                catch (InvalidOperationException ex)
+                {
+                    _logger.LogError(ex, "Failed to get vector store IDs for age group {AgeGroup}", ageGroup);
+                    throw;
+                }
+
                 threadResult = await _foundryClient.CreateThreadWithVectorStoresAsync(
                     _config.WriterAgentId,
-                    new[] { vectorStoreId });
+                    vectorStoreIds);
 
-                _logger.LogInformation("Created thread with vector store {VectorStoreId} for age group {AgeGroup}",
-                    vectorStoreId, ageGroup);
+                _logger.LogInformation("Created thread with {Count} vector stores for age group {AgeGroup}: {VectorStoreIds}",
+                    vectorStoreIds.Count, ageGroup, string.Join(", ", vectorStoreIds));
             }
             else
             {

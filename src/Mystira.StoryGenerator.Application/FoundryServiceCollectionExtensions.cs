@@ -16,6 +16,7 @@ public static class FoundryServiceCollectionExtensions
         FoundryAgentConfig foundryConfig)
     {
         services.AddSingleton(foundryConfig);
+        services.AddSingleton(Options.Create(foundryConfig));
 
         services.AddSingleton<FoundryAgentClient>(sp =>
         {
@@ -73,15 +74,18 @@ public static class FoundryServiceCollectionExtensions
                 var client = sp.GetRequiredService<FoundryAgentClient>();
                 var logger = sp.GetRequiredService<ILogger<FileSearchKnowledgeProvider>>();
 
-                // Use new nested config if available, otherwise fall back to legacy config
-                Dictionary<string, string>? vectorStoresByAgeGroup = foundryConfig.FileSearch?.VectorStoresByAgeGroup;
-
+                // Prefer new agent-specific config, fall back to legacy config
+                #pragma warning disable CS0618 // Type or member is obsolete
                 var fileSearchConfig = new FileSearchKnowledgeProvider.FileSearchConfiguration
                 {
-                    VectorStoresByAgeGroup = vectorStoresByAgeGroup ?? new Dictionary<string, string>(),
+                    VectorStoresByAgentAndAge = foundryConfig.FileSearch?.VectorStoresByAgentAndAge
+                        ?? new Dictionary<string, Dictionary<string, string>>(),
+                    VectorStoresByAgeGroup = foundryConfig.FileSearch?.VectorStoresByAgeGroup
+                        ?? new Dictionary<string, string>(),
                     MaxFiles = foundryConfig.FileSearch?.MaxFiles,
                     MaxTokens = foundryConfig.FileSearch?.MaxTokens
                 };
+                #pragma warning restore CS0618 // Type or member is obsolete
 
                 return new FileSearchKnowledgeProvider(client, fileSearchConfig, logger);
             });
@@ -97,9 +101,15 @@ public static class FoundryServiceCollectionExtensions
             var options = sp.GetRequiredService<IOptions<CosmosDbConfig>>();
             var cosmosConfig = options.Value;
 
-            var cosmosClient = new Microsoft.Azure.Cosmos.CosmosClient(
+            var cosmosClient = new Microsoft.Azure.Cosmos.Fluent.CosmosClientBuilder(
                 cosmosConfig.Endpoint,
-                cosmosConfig.ApiKey);
+                cosmosConfig.ApiKey)
+                .WithSystemTextJsonSerializerOptions(new System.Text.Json.JsonSerializerOptions
+                {
+                    PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase,
+                    DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
+                })
+                .Build();
 
             return new CosmosStorySessionRepository(
                 cosmosClient,
