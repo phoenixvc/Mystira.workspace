@@ -19,7 +19,9 @@ public class KnowledgeProviderTests
     public void IKnowledgeProvider_Interface_ShouldBeImplemented()
     {
         // Arrange
+        #pragma warning disable CS0618 // Type or member is obsolete
         var fileSearchConfig = new FileSearchKnowledgeProvider.FileSearchConfiguration();
+        #pragma warning restore CS0618 // Type or member is obsolete
         var aiSearchConfig = new AISearchKnowledgeProvider.AISearchConfiguration();
 
         // We can't instantiate the concrete classes without mocking the FoundryAgentClient
@@ -28,7 +30,7 @@ public class KnowledgeProviderTests
         // Assert
         Assert.NotNull(fileSearchConfig);
         Assert.NotNull(aiSearchConfig);
-        Assert.Equal("mystira-story-knowledge", fileSearchConfig.VectorStoreName);
+        Assert.NotNull(fileSearchConfig.VectorStoresByAgentAndAge);
         Assert.Equal("mystira-instructions", aiSearchConfig.IndexName);
     }
 
@@ -36,15 +38,29 @@ public class KnowledgeProviderTests
     public void FileSearchConfiguration_ShouldAcceptCustomValues()
     {
         // Arrange & Act
+        #pragma warning disable CS0618 // Type or member is obsolete
         var config = new FileSearchKnowledgeProvider.FileSearchConfiguration
         {
-            VectorStoreName = "custom-vector-store",
+            VectorStoresByAgentAndAge = new Dictionary<string, Dictionary<string, string>>
+            {
+                {
+                    "Writer", new Dictionary<string, string>
+                    {
+                        { "3-5", "vs_3_5_writer_v1" },
+                        { "6-9", "vs_6_9_writer_v1" }
+                    }
+                }
+            },
             MaxFiles = 50,
             MaxTokens = 10000
         };
+        #pragma warning restore CS0618 // Type or member is obsolete
 
         // Assert
-        Assert.Equal("custom-vector-store", config.VectorStoreName);
+        Assert.NotNull(config.VectorStoresByAgentAndAge);
+        Assert.Single(config.VectorStoresByAgentAndAge);
+        Assert.True(config.VectorStoresByAgentAndAge.ContainsKey("Writer"));
+        Assert.Equal("vs_3_5_writer_v1", config.VectorStoresByAgentAndAge["Writer"]["3-5"]);
         Assert.Equal(50, config.MaxFiles);
         Assert.Equal(10000, config.MaxTokens);
     }
@@ -128,7 +144,9 @@ public class KnowledgeProviderTests
     {
         // The ProviderName property should be implemented by concrete classes
         // We test that the configuration classes exist and can be used
+        #pragma warning disable CS0618 // Type or member is obsolete
         var fileSearchConfig = new FileSearchKnowledgeProvider.FileSearchConfiguration();
+        #pragma warning restore CS0618 // Type or member is obsolete
         var aiSearchConfig = new AISearchKnowledgeProvider.AISearchConfiguration();
 
         Assert.NotNull(fileSearchConfig);

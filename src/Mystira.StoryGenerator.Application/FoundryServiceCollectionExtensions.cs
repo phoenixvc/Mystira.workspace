@@ -74,15 +74,18 @@ public static class FoundryServiceCollectionExtensions
                 var client = sp.GetRequiredService<FoundryAgentClient>();
                 var logger = sp.GetRequiredService<ILogger<FileSearchKnowledgeProvider>>();
 
-                // Use new nested config if available, otherwise fall back to legacy config
-                Dictionary<string, string>? vectorStoresByAgeGroup = foundryConfig.FileSearch?.VectorStoresByAgeGroup;
-
+                // Prefer new agent-specific config, fall back to legacy config
+                #pragma warning disable CS0618 // Type or member is obsolete
                 var fileSearchConfig = new FileSearchKnowledgeProvider.FileSearchConfiguration
                 {
-                    VectorStoresByAgeGroup = vectorStoresByAgeGroup ?? new Dictionary<string, string>(),
+                    VectorStoresByAgentAndAge = foundryConfig.FileSearch?.VectorStoresByAgentAndAge
+                        ?? new Dictionary<string, Dictionary<string, string>>(),
+                    VectorStoresByAgeGroup = foundryConfig.FileSearch?.VectorStoresByAgeGroup
+                        ?? new Dictionary<string, string>(),
                     MaxFiles = foundryConfig.FileSearch?.MaxFiles,
                     MaxTokens = foundryConfig.FileSearch?.MaxTokens
                 };
+                #pragma warning restore CS0618 // Type or member is obsolete
 
                 return new FileSearchKnowledgeProvider(client, fileSearchConfig, logger);
             });

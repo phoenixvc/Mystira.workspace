@@ -80,10 +80,23 @@ public class FoundryAgentConfig
 public class FileSearchConfig
 {
     /// <summary>
-    /// Age-specific vector store IDs for targeted knowledge retrieval.
-    /// REQUIRED: All supported age groups must be explicitly configured.
-    /// Example: { "1-2": "vs_toddler_abc123", "6-9": "vs_elementary_def456" }
+    /// Agent-specific and age-specific vector store IDs for targeted knowledge retrieval.
+    /// REQUIRED: All supported agent types and age groups must be explicitly configured.
+    /// Example structure:
+    /// {
+    ///   "Writer": { "1-2": "vs_1_2_writer_v1", "3-5": "vs_3_5_writer_v1", ... },
+    ///   "Judge": { "1-2": "vs_1_2_judge_v1", "3-5": "vs_3_5_judge_v1", ... },
+    ///   "Refiner": { "1-2": "vs_1_2_refiner_v1", "3-5": "vs_3_5_refiner_v1", ... },
+    ///   "RubricSummary": { "1-2": "vs_1_2_rubric_v1", "3-5": "vs_3_5_rubric_v1", ... }
+    /// }
     /// </summary>
+    public Dictionary<string, Dictionary<string, string>> VectorStoresByAgentAndAge { get; set; } = new();
+
+    /// <summary>
+    /// [DEPRECATED] Age-specific vector store IDs (legacy single-agent configuration).
+    /// Use VectorStoresByAgentAndAge for agent-specific vector stores.
+    /// </summary>
+    [Obsolete("Use VectorStoresByAgentAndAge for agent-specific vector stores")]
     public Dictionary<string, string> VectorStoresByAgeGroup { get; set; } = new();
 
     /// <summary>
@@ -131,4 +144,30 @@ public class AISearchConfig
     /// Number of results to retrieve per search (default: 5).
     /// </summary>
     public int TopK { get; set; } = 5;
+}
+
+/// <summary>
+/// Agent types for vector store configuration.
+/// </summary>
+public enum AgentType
+{
+    /// <summary>
+    /// The Writer agent that generates initial story content.
+    /// </summary>
+    Writer,
+
+    /// <summary>
+    /// The Judge agent that evaluates story quality.
+    /// </summary>
+    Judge,
+
+    /// <summary>
+    /// The Refiner agent that improves stories based on feedback.
+    /// </summary>
+    Refiner,
+
+    /// <summary>
+    /// The Rubric Summary agent that generates evaluation summaries.
+    /// </summary>
+    RubricSummary
 }
