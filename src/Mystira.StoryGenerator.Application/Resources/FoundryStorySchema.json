@@ -1,133 +1,166 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "Mystira Foundry Story Schema",
+  "title": "Mystira Story Schema",
+  "description": "OpenAI strict-compatible schema for Mystira story generation",
   "type": "object",
   "additionalProperties": false,
   "required": [
-    "metadata",
+    "title",
+    "description",
+    "image",
+    "tags",
+    "difficulty",
+    "session_length",
+    "age_group",
+    "minimum_age",
+    "core_axes",
+    "archetypes",
     "characters",
-    "scenes",
-    "narrative_summary",
-    "safety_annotations"
+    "scenes"
   ],
   "properties": {
-    "metadata": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": [
-        "title",
-        "age_group",
-        "themes",
-        "target_axes",
-        "created_at",
-        "version"
-      ],
-      "properties": {
-        "title": { "type": "string" },
-        "age_group": { "type": "string" },
-        "themes": { "type": "array", "items": { "type": "string" } },
-        "target_axes": { "type": "array", "items": { "type": "string" } },
-        "created_at": { "type": "string", "format": "date-time" },
-        "version": { "type": "integer", "minimum": 1 }
-      }
-    },
+    "title": { "type": "string", "description": "The title of the story" },
+    "description": { "type": "string", "description": "Brief description of the story" },
+    "image": { "type": "string", "description": "Cover image id for the story" },
+    "tags": { "type": "array", "items": { "type": "string" }, "description": "Story tags/categories" },
+    "difficulty": { "type": "string", "enum": ["Easy", "Medium", "Hard"], "description": "Overall story difficulty" },
+    "session_length": { "type": "string", "enum": ["Short", "Medium", "Long"], "description": "Approximate play session length" },
+    "age_group": { "type": "string", "enum": ["1-2", "3-5", "6-9", "10-12", "13-18"], "description": "Target age group" },
+    "minimum_age": { "type": "integer", "description": "Minimum recommended age" },
+    "core_axes": { "type": "array", "items": { "type": "string" }, "description": "Core thematic axes" },
+    "archetypes": { "type": "array", "items": { "type": "string" }, "description": "Character archetypes featured" },
+
     "characters": {
       "type": "array",
-      "minItems": 1,
+      "description": "Story characters",
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": [
-          "id",
-          "name",
-          "role",
-          "age",
-          "key_traits",
-          "initial_axes_state"
-        ],
+        "required": ["id", "name", "image", "audio", "metadata"],
         "properties": {
-          "id": { "type": "string" },
-          "name": { "type": "string" },
-          "role": { "type": "string", "enum": ["protagonist", "antagonist", "support"] },
-          "age": { "type": "integer", "minimum": 0 },
-          "key_traits": { "type": "array", "items": { "type": "string" } },
-          "initial_axes_state": {
+          "id": { "type": "string", "description": "Unique lowercase snake_case character ID" },
+          "name": { "type": "string", "description": "Character name" },
+          "image": { "type": ["string", "null"], "description": "Image ID or path (null if unavailable)" },
+          "audio": { "type": ["string", "null"], "description": "Audio ID or path (null if unavailable)" },
+          "metadata": {
             "type": "object",
-            "additionalProperties": {
-              "type": "number",
-              "minimum": -1.0,
-              "maximum": 1.0
+            "additionalProperties": false,
+            "required": ["role", "archetype", "species", "age", "traits", "backstory"],
+            "properties": {
+              "role": { "type": "array", "items": { "type": "string" }, "description": "Story role(s)" },
+              "archetype": { "type": "array", "items": { "type": "string" }, "description": "Character archetype(s)" },
+              "species": { "type": "string", "description": "Character species" },
+              "age": { "type": "integer", "description": "Character age" },
+              "traits": { "type": "array", "items": { "type": "string" }, "description": "Character traits" },
+              "backstory": { "type": "string", "description": "Character backstory" }
             }
           }
         }
       }
     },
+
     "scenes": {
       "type": "array",
-      "minItems": 3,
+      "description": "Story scenes sequence",
       "items": {
         "type": "object",
         "additionalProperties": false,
         "required": [
           "id",
           "title",
-          "sequence",
+          "type",
+          "active_character",
           "description",
-          "setting",
-          "characters_involved",
-          "choices",
-          "narrative"
+          "next_scene",
+          "difficulty",
+          "media",
+          "branches",
+          "echo_reveals"
         ],
         "properties": {
-          "id": { "type": "string" },
-          "title": { "type": "string" },
-          "sequence": { "type": "integer", "minimum": 1 },
-          "description": { "type": "string" },
-          "setting": { "type": "string" },
-          "characters_involved": {
-            "type": "array",
-            "items": { "type": "string" }
+          "id": { "type": "string", "description": "Unique scene ID (snake_case)" },
+          "title": { "type": "string", "description": "Scene title" },
+          "type": {
+            "type": "string",
+            "enum": ["narrative", "choice", "roll", "special"],
+            "description": "Scene type"
           },
-          "choices": {
+          "active_character": {
+            "type": ["string", "null"],
+            "description": "Required per scene. May be null. Must be populated with a valid character in choice scenes."
+          },
+          "description": { "type": "string", "description": "Scene description or narration" },
+          "next_scene": { "type": ["string", "null"], "description": "Next scene ID (null if final/special)" },
+          "difficulty": { "type": ["number", "null"], "description": "Scene difficulty; numeric if roll type else null" },
+          "media": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["image", "audio", "video"],
+            "properties": {
+              "image": { "type": ["string", "null"], "description": "Image ID or null" },
+              "audio": { "type": ["string", "null"], "description": "Audio ID or null" },
+              "video": { "type": ["string", "null"], "description": "Video ID or null" }
+            },
+            "description": "Optional scene media; null fields if not used"
+          },
+          "branches": {
             "type": "array",
-            "minItems": 2,
+            "description": "Scene branches; set to empty if unused",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["choice", "next_scene", "echo_log", "compass_change"],
+              "properties": {
+                "choice": { "type": "string", "description": "Choice label" },
+                "next_scene": { "type": "string", "description": "Next scene ID" },
+                "echo_log": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["echo_type", "description", "strength"],
+                  "properties": {
+                    "echo_type": { "type": "string", "description": "Echo type" },
+                    "description": { "type": "string", "description": "Echo description" },
+                    "strength": { "type": "number", "description": "Echo strength (-1.0 to 1.0)" }
+                  }
+                },
+                "compass_change": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["axis", "delta", "developmental_link"],
+                  "properties": {
+                    "axis": { "type": "string", "description": "Compass axis name" },
+                    "delta": { "type": "number", "description": "Change applied to axis" },
+                    "developmental_link": { "type": ["string", "null"], "description": "Linked developmental construct or null" }
+                  }
+                }
+              }
+            }
+          },
+          "echo_reveals": {
+            "type": "array",
+            "description": "Echo reveal mechanics; set to empty if none",
             "items": {
               "type": "object",
               "additionalProperties": false,
               "required": [
-                "id",
-                "text",
-                "consequence_axes_delta",
-                "narrative_impact"
+                "echo_type",
+                "min_strength",
+                "trigger_scene_id",
+                "max_age_scenes",
+                "reveal_mechanic",
+                "is_required"
               ],
               "properties": {
-                "id": { "type": "string" },
-                "text": { "type": "string" },
-                "consequence_axes_delta": {
-                  "type": "object",
-                  "additionalProperties": {
-                    "type": "number",
-                    "minimum": -1.0,
-                    "maximum": 1.0
-                  }
-                },
-                "narrative_impact": { "type": "string" }
+                "echo_type": { "type": "string", "description": "Echo type" },
+                "min_strength": { "type": "number", "description": "Minimum echo strength required" },
+                "trigger_scene_id": { "type": "string", "description": "Trigger scene ID" },
+                "max_age_scenes": { "type": ["integer", "null"], "description": "Optional max age in scenes" },
+                "reveal_mechanic": { "type": ["string", "null"], "description": "Reveal mechanic" },
+                "is_required": { "type": "boolean", "description": "If true, must trigger when conditions met" }
               }
             }
-          },
-          "narrative": { "type": "string" }
+          }
         }
-      }
-    },
-    "narrative_summary": { "type": "string" },
-    "safety_annotations": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": ["content_warnings", "age_appropriateness_notes", "themes_explored"],
-      "properties": {
-        "content_warnings": { "type": "array", "items": { "type": "string" } },
-        "age_appropriateness_notes": { "type": "string" },
-        "themes_explored": { "type": "array", "items": { "type": "string" } }
       }
     }
   }

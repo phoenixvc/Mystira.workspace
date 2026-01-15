@@ -1,4 +1,4 @@
-﻿using System;
+﻿using Azure.AI.Agents.Persistent;
 using Azure.AI.Projects;
 using Azure.Identity;
 
@@ -7,7 +7,8 @@ var endpoint = new Uri("https://mys-shared-ai-san.services.ai.azure.com/api/proj
 AIProjectClient projectClient = new(endpoint, new DefaultAzureCredential());
 
 // Newer SDK path (persistent agents)
-var agents = projectClient.Agents.GetAgents();
+PersistentAgentsClient agentsClient = projectClient.GetPersistentAgentsClient();
+var agents = agentsClient.Administration.GetAgents();
 
 Console.WriteLine("Agent List:");
 Console.WriteLine("============================================");

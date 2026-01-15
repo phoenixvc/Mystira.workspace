@@ -1,354 +1,186 @@
+// Program.cs
+//
+// Mystira.StoryGenerator.AgentSetup — Persistent Agents (Azure.AI.Agents.Persistent)
+//
+// This tool creates/updates/list/deletes *Persistent* agents (the ones visible via:
+//   projectClient.GetPersistentAgentsClient().Administration.GetAgents()
+//
+// Packages you should have in the .csproj:
+//   - Azure.AI.Projects
+//   - Azure.AI.Agents.Persistent
+//   - Azure.Identity
+//   - System.CommandLine (optional but recommended)
+//
+// Docs (method signatures):
+//   PersistentAgentsAdministrationClient.CreateAgent / UpdateAgent / DeleteAgent
+//   https://learn.microsoft.com/en-us/dotnet/api/azure.ai.agents.persistent.persistentagentsadministrationclient.createagent
+//   https://learn.microsoft.com/en-us/dotnet/api/azure.ai.agents.persistent.persistentagentsadministrationclient.updateagent
+//   https://learn.microsoft.com/en-us/dotnet/api/azure.ai.agents.persistent.persistentagentsadministrationclient.deleteagent
+//
+
 using System.CommandLine;
+using Azure;
 using Azure.AI.Projects;
 using Azure.AI.Agents.Persistent;
 using Azure.Identity;
-using System.Text.Json;
-using System.ClientModel;
 
 var endpointOption = new Option<string>(
     name: "--endpoint",
-    description: "Azure AI Foundry endpoint URL")
-{
-    IsRequired = true
-};
+    description: "Azure AI Foundry Project endpoint URL, e.g. https://<resource>.services.ai.azure.com/api/projects/<project>")
+{ IsRequired = true };
 
 var modelOption = new Option<string>(
     name: "--model",
-    description: "Model deployment name (e.g., gpt-4, gpt-4-turbo)")
-{
-    IsRequired = true
-};
+    description: "Model deployment name as configured in Foundry (Models + endpoints), e.g. gpt-4.1")
+{ IsRequired = false };
 
-var rootCommand = new RootCommand("Manages Azure AI Foundry agents for Mystira Story Generator");
+var idOption = new Option<string>(
+    name: "--id",
+    description: "Agent ID (preferred when updating/deleting).")
+{ IsRequired = false };
 
-// List command
-var listCommand = new Command("list", "Lists all existing agents and their IDs");
-listCommand.AddOption(endpointOption);
-listCommand.SetHandler(async (endpoint) =>
+var nameOption = new Option<string>(
+    name: "--name",
+    description: "Agent name (used to find the agent if --id is not provided).")
+{ IsRequired = false };
+
+var instructionsOption = new Option<string>(
+    name: "--instructions",
+    description: "Agent instructions (string).")
+{ IsRequired = false };
+
+var descriptionOption = new Option<string>(
+    name: "--description",
+    description: "Agent description (string).")
+{ IsRequired = false };
+
+var forceOption = new Option<bool>(
+    name: "--force",
+    description: "Skip confirmation prompts.")
+{ IsRequired = false };
+
+var root = new RootCommand("Mystira Foundry AgentSetup (Persistent Agents)");
+
+// ----------------------
+// LIST
+// ----------------------
+var listCmd = new Command("list", "List persistent agents in the project");
+listCmd.AddOption(endpointOption);
+listCmd.SetHandler((string endpoint) =>
 {
-    await ListAgentsAsync(endpoint);
+    var client = CreatePersistentClient(endpoint);
+
+    Console.WriteLine("Persistent Agents (Administration.GetAgents):");
+    Console.WriteLine("====================================================");
+
+    int count = 0;
+    foreach (var a in client.Administration.GetAgents())
+    {
+        count++;
+        Console.WriteLine($"Id:          {a.Id}");
+        Console.WriteLine($"Name:        {a.Name}");
+        Console.WriteLine($"Model:       {a.Model}");
+        Console.WriteLine($"Description: {a.Description}");
+        Console.WriteLine("----------------------------------------------------");
+    }
+
+    if (count == 0)
+    {
+        Console.WriteLine("(none found)");
+        Console.WriteLine();
+        Console.WriteLine("If you see agents in the portal but none here, those were created in the *classic* agent plane.");
+        Console.WriteLine("This tool creates *persistent* agents, which are separate.");
+    }
 }, endpointOption);
 
-// Create command
-var createCommand = new Command("create", "Creates new agents");
-createCommand.AddOption(endpointOption);
-createCommand.AddOption(modelOption);
-createCommand.SetHandler(async (endpoint, model) =>
+root.AddCommand(listCmd);
+
+// ----------------------
+// CREATE (Mystira 4 agents)
+// ----------------------
+var createCmd = new Command("create", "Create the 4 Mystira persistent agents (writer/judge/refiner/rubric)");
+createCmd.AddOption(endpointOption);
+createCmd.AddOption(modelOption);
+createCmd.SetHandler((string endpoint, string? model) =>
 {
-    await CreateAgentsAsync(endpoint, model);
-}, endpointOption, modelOption);
-
-rootCommand.AddCommand(listCommand);
-rootCommand.AddCommand(createCommand);
-
-return await rootCommand.InvokeAsync(args);
-
-static Task ListAgentsAsync(string endpoint)
-{
-    Console.WriteLine("Connecting to Azure AI Foundry...");
-
-    var projectClient = new AIProjectClient(new Uri(endpoint), new DefaultAzureCredential());
-
-    Console.WriteLine("✓ Connected successfully");
-    Console.WriteLine();
-    Console.WriteLine("Retrieving agents...");
-    Console.WriteLine();
-
-    try
+    if (string.IsNullOrWhiteSpace(model))
     {
-        var agents = projectClient.Agents.GetAgents();
-
-        var agentList = new List<(string Id, string Name)>();
-
-        foreach (var agent in agents)
-        {
-            agentList.Add((agent.Id, agent.Name ?? "Unnamed"));
-        }
-
-        if (!agentList.Any())
-        {
-            Console.WriteLine("No agents found.");
-            Console.WriteLine();
-            Console.WriteLine("Run 'dotnet run create --endpoint <url> --model <model>' to create agents.");
-            return Task.CompletedTask;
-        }
-
-        Console.WriteLine($"Found {agentList.Count} agent(s):");
-        Console.WriteLine();
-        Console.WriteLine($"{"ID",-35} {"Name",-35}");
-        Console.WriteLine(new string('-', 75));
-
-        foreach (var agent in agentList.OrderBy(a => a.Name))
-        {
-            var isValid = agent.Id.StartsWith("asst_");
-            var status = isValid ? "" : " ⚠️  INVALID FORMAT";
-            Console.WriteLine($"{agent.Id,-35} {agent.Name,-35}{status}");
-        }
-
-        Console.WriteLine();
-
-        // Check for invalid agent IDs
-        var invalidAgents = agentList.Where(a => !a.Id.StartsWith("asst_")).ToList();
-        if (invalidAgents.Any())
-        {
-            Console.WriteLine();
-            Console.WriteLine("========================================");
-            Console.WriteLine("⚠️  WARNING: Invalid Agent IDs Detected");
-            Console.WriteLine("========================================");
-            Console.WriteLine();
-            Console.WriteLine($"Found {invalidAgents.Count} agent(s) with INVALID ID format:");
-            foreach (var agent in invalidAgents)
-            {
-                Console.WriteLine($"  - {agent.Id}");
-            }
-            Console.WriteLine();
-            Console.WriteLine("Azure AI Agents requires IDs in OpenAI format: asst_[random]");
-            Console.WriteLine("These agents will NOT work with the API.");
-            Console.WriteLine();
-            Console.WriteLine("SOLUTION:");
-            Console.WriteLine("  1. Create new agents with auto-generated IDs:");
-            Console.WriteLine($"     dotnet run create --endpoint {endpoint} --model <model>");
-            Console.WriteLine("  2. Update appsettings.json with the new IDs");
-            Console.WriteLine("  3. (Optional) Delete the invalid agents from Azure Portal");
-            Console.WriteLine();
-        }
-
-        Console.WriteLine("========================================");
-        Console.WriteLine("Configuration Mapping Suggestions");
-        Console.WriteLine("========================================");
-        Console.WriteLine();
-
-        // Try to map agents to configuration keys based on naming (only valid ones)
-        var validAgents = agentList.Where(a => a.Id.StartsWith("asst_")).ToList();
-        var mappings = new Dictionary<string, string>
-        {
-            ["WriterAgentId"] = validAgents.FirstOrDefault(a => a.Name.Contains("writer", StringComparison.OrdinalIgnoreCase)).Id ?? "",
-            ["JudgeAgentId"] = validAgents.FirstOrDefault(a => a.Name.Contains("judge", StringComparison.OrdinalIgnoreCase)).Id ?? "",
-            ["RefinerAgentId"] = validAgents.FirstOrDefault(a => a.Name.Contains("refiner", StringComparison.OrdinalIgnoreCase)).Id ?? "",
-            ["RubricSummaryAgentId"] = validAgents.FirstOrDefault(a => a.Name.Contains("rubric", StringComparison.OrdinalIgnoreCase)).Id ?? ""
-        };
-
-        Console.WriteLine("Update your appsettings.json with these agent IDs:");
-        Console.WriteLine();
-        Console.WriteLine("\"FoundryAgent\": {");
-        foreach (var kvp in mappings.Where(m => !string.IsNullOrEmpty(m.Value)))
-        {
-            Console.WriteLine($"  \"{kvp.Key}\": \"{kvp.Value}\",");
-        }
-        Console.WriteLine("  ...");
-        Console.WriteLine("}");
-        Console.WriteLine();
-
-        // Warn about missing mappings
-        var missing = mappings.Where(m => string.IsNullOrEmpty(m.Value)).Select(m => m.Key).ToList();
-        if (missing.Any())
-        {
-            Console.WriteLine("WARNING: Could not find agents for:");
-            foreach (var key in missing)
-            {
-                Console.WriteLine($"  - {key}");
-            }
-            Console.WriteLine();
-            Console.WriteLine("You may need to create these agents using:");
-            Console.WriteLine($"  dotnet run create --endpoint {endpoint} --model <model>");
-            Console.WriteLine();
-        }
-
-        return Task.CompletedTask;
-    }
-    catch (Exception ex)
-    {
-        Console.WriteLine($"✗ Failed to list agents: {ex.Message}");
-        Console.WriteLine();
-        Console.WriteLine("Common issues:");
-        Console.WriteLine("  1. Invalid Azure credentials (run 'az login')");
-        Console.WriteLine("  2. Insufficient permissions on the Azure AI Project");
-        Console.WriteLine("  3. Invalid endpoint URL");
-        Console.WriteLine("  4. Network connectivity issues");
-        Console.WriteLine();
+        Console.WriteLine("ERROR: --model is required for create.");
         Environment.Exit(1);
-        return Task.CompletedTask; // Unreachable, but required for compilation
     }
-}
 
-static Task CreateAgentsAsync(string endpoint, string modelDeployment)
-{
-    Console.WriteLine("Connecting to Azure AI Foundry...");
+    var client = CreatePersistentClient(endpoint);
 
-    var projectClient = new AIProjectClient(new Uri(endpoint), new DefaultAzureCredential());
-
+    Console.WriteLine("Connecting to Azure AI Foundry (Persistent Agents)...");
     Console.WriteLine("✓ Connected successfully");
     Console.WriteLine();
+    Console.WriteLine("Creating 4 persistent agents...");
+    Console.WriteLine();
 
-    // Define the agents to create
-    var agentDefinitions = new[]
+    var defs = new[]
     {
-        new
-        {
-            Name = "mystira-writer-v01",
-            Description = "Writer Agent - Generates initial story content based on prompts and age-appropriate guidelines",
-            Instructions = @"You are an expert children's story writer for the Mystira Story Generator.
+        new AgentDef(
+            Name: "mystira-writer-v01",
+            Description: "Writer Agent - Generates initial story content based on prompts and age-appropriate guidelines",
+            Instructions:
+@"You are the Mystira Story Writer Agent.
 
-Your role is to create engaging, age-appropriate stories that:
-1. Follow the provided story schema exactly (JSON format)
-2. Align with the specified narrative axes (wonder, discovery, transformation, courage, friendship, etc.)
-3. Use age-appropriate vocabulary, sentence structure, and themes
-4. Incorporate developmental principles for the target age group
-5. Create coherent, logically consistent narratives
-6. Include rich sensory details and emotional depth
+Generate the initial Mystira story JSON according to the provided schema and rules retrieved via RAG.
+- Always keep content age-appropriate for the target audience.
+- Always return valid JSON ONLY (no preamble, no markdown)."
+        ),
+        new AgentDef(
+            Name: "mystira-judge-v01",
+            Description: "Judge Agent - Evaluates story quality against safety, development, and logic requirements",
+            Instructions:
+@"You are the Mystira Story Judge Agent.
 
-When given a story prompt:
-1. Analyze the age group and adjust complexity accordingly
-2. Use the file_search tool to retrieve relevant writing guidelines
-3. Structure the story with clear beginning, middle, and end
-4. Develop characters that resonate with the target age group
-5. Ensure each scene advances the plot and character development
-6. Return a valid JSON document matching the story schema
+Evaluate a story JSON against the Mystira requirements retrieved via RAG.
+Return a structured JSON report ONLY (no preamble, no markdown)."
+        ),
+        new AgentDef(
+            Name: "mystira-refiner-v01",
+            Description: "Refiner Agent - Improves stories based on judge feedback while preserving core narrative",
+            Instructions:
+@"You are the Mystira Story Refiner Agent.
 
-CRITICAL: Always return valid JSON matching the required schema. Do not include any text before or after the JSON.",
-            ConfigKey = "WriterAgentId"
-        },
-        new
-        {
-            Name = "mystira-judge-v01",
-            Description = "Judge Agent - Evaluates story quality against developmental rubrics and narrative principles",
-            Instructions = @"You are an expert story evaluator for the Mystira Story Generator.
+Given (1) story JSON and (2) feedback, produce a refined story JSON that fixes issues while preserving intent.
+Return valid JSON ONLY (no preamble, no markdown)."
+        ),
+        new AgentDef(
+            Name: "mystira-rubric-v01",
+            Description: "Rubric Agent - Produces detailed scoring rubric/summary for a story",
+            Instructions:
+@"You are the Mystira Rubric Generator Agent.
 
-Your role is to assess stories against multiple criteria:
-
-1. **Safety Gate**: Verify content is age-appropriate, safe, and free of inappropriate themes
-2. **Axes Alignment**: Measure how well the story embodies the requested narrative themes
-3. **Development Principles**: Evaluate adherence to age-appropriate developmental guidelines
-4. **Narrative Logic**: Assess plot coherence, character consistency, and causal relationships
-
-When evaluating a story:
-1. Use the file_search tool to retrieve evaluation rubrics and criteria
-2. Analyze each scene for alignment with target axes
-3. Check vocabulary, sentence structure, and themes against age guidelines
-4. Identify logical inconsistencies or narrative gaps
-5. Provide specific, actionable feedback for improvements
-6. Assign scores (0.0 - 1.0) for each criterion
-7. Return an overall Pass/Fail recommendation
-
-Return your evaluation as a structured JSON report with:
-- safetyGatePassed (boolean)
-- axesAlignmentScore (0.0 - 1.0)
-- devPrinciplesScore (0.0 - 1.0)
-- narrativeLogicScore (0.0 - 1.0)
-- overallStatus (""Pass"" or ""Fail"")
-- findings (detailed feedback by category)
-- recommendation (next steps)
-
-CRITICAL: Always return valid JSON matching the evaluation report schema.",
-            ConfigKey = "JudgeAgentId"
-        },
-        new
-        {
-            Name = "mystira-refiner-v01",
-            Description = "Refiner Agent - Improves stories based on evaluation feedback while preserving core narrative",
-            Instructions = @"You are an expert story refiner for the Mystira Story Generator.
-
-Your role is to improve stories based on evaluation feedback while maintaining narrative coherence.
-
-When refining a story:
-1. Review the current story version (JSON format)
-2. Analyze the evaluation report to identify specific issues
-3. Consider user-provided refinement guidance
-4. Use the file_search tool to retrieve relevant improvement strategies
-5. Make targeted improvements to address identified issues
-6. Preserve existing strengths and successful elements
-7. Maintain consistency with the original story prompt and axes
-
-Refinement modes:
-- **Targeted**: Edit only specified scenes while preserving others
-- **Full Rewrite**: Regenerate the entire story with improvements
-
-Focus areas may include:
-- Tone: Adjust emotional register and atmosphere
-- Pacing: Improve story rhythm and scene timing
-- Dialogue: Enhance character voice and naturalness
-- Character Development: Deepen motivations and arcs
-- Plot Coherence: Strengthen causal connections and logic
-
-CRITICAL: Always return valid JSON matching the story schema. Maintain the same schema structure as the input.",
-            ConfigKey = "RefinerAgentId"
-        },
-        new
-        {
-            Name = "mystira-rubric-v01",
-            Description = "Rubric Summary Agent - Generates evaluation summaries and rubric reports",
-            Instructions = @"You are a rubric summary specialist for the Mystira Story Generator.
-
-Your role is to create clear, actionable summaries of evaluation criteria and results.
-
-When generating rubric summaries:
-1. Use the file_search tool to retrieve evaluation rubrics
-2. Organize criteria by category (safety, axes, development, narrative)
-3. Explain scoring methodology and thresholds
-4. Provide examples of what constitutes high vs. low scores
-5. Summarize overall evaluation results in accessible language
-6. Highlight strengths and areas for improvement
-
-Return summaries as structured text or JSON as appropriate for the use case.
-
-CRITICAL: Ensure summaries are clear, specific, and actionable for both developers and content reviewers.",
-            ConfigKey = "RubricSummaryAgentId"
-        }
+Generate scoring rubric outputs as required by Mystira (from RAG guidance).
+Return the required structured output ONLY (JSON if requested)."
+        ),
     };
 
-    Console.WriteLine($"Creating {agentDefinitions.Length} agents...");
-    Console.WriteLine();
+    var createdIds = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
-    var agentIds = new Dictionary<string, string>();
-
-    foreach (var agentDef in agentDefinitions)
+    foreach (var d in defs)
     {
-        Console.Write($"Creating {agentDef.Name}...");
-
+        Console.Write($"Creating {d.Name}... ");
         try
         {
-            // Create the agent using Azure AI Foundry schema
-            var agentData = new
-            {
-                name = agentDef.Name,  // Required at root level
-                definition = new
-                {
-                    kind = "prompt",  // Required: agent kind (prompt for OpenAI-style assistants)
-                    model = modelDeployment,
-                    name = agentDef.Name,
-                    instructions = agentDef.Instructions,
-                    description = agentDef.Description,
-                    tools = new[]
-                    {
-                        new {
-                            type = "file_search",
-                            vector_store_ids = new string[] { }  // Empty array, can be configured later
-                        }
-                    }
-                }
-            };
+            // Persistent agent creation — NOTE: ID may be human-readable; do NOT assume asst_*.
+            Response<PersistentAgent> resp = client.Administration.CreateAgent(
+                model: model!,
+                name: d.Name,
+                description: d.Description,
+                instructions: d.Instructions
+            );
 
-            var json = JsonSerializer.Serialize(agentData);
-            var content = BinaryContent.Create(BinaryData.FromString(json));
-
-            var response = projectClient.Agents.CreateAgent(content);
-            var agentResponse = JsonSerializer.Deserialize<JsonElement>(response.GetRawResponse().Content);
-            var agentId = agentResponse.GetProperty("id").GetString()!;
-
-            agentIds[agentDef.ConfigKey] = agentId;
-
-            Console.WriteLine($" ✓ Created: {agentId}");
+            var agent = resp.Value;
+            Console.WriteLine($"✓ Created: {agent.Id}");
+            createdIds[d.Name] = agent.Id;
         }
         catch (Exception ex)
         {
-            Console.WriteLine($" ✗ Failed: {ex.Message}");
-            Console.WriteLine();
-            Console.WriteLine("ERROR: Failed to create agent. Common issues:");
-            Console.WriteLine("  1. Invalid Azure credentials (run 'az login')");
-            Console.WriteLine("  2. Insufficient permissions on the Azure AI Project");
-            Console.WriteLine("  3. Model deployment not found");
-            Console.WriteLine("  4. Network connectivity issues");
-            Console.WriteLine();
+            Console.WriteLine("✗ Failed");
+            Console.WriteLine(ex);
             Environment.Exit(1);
         }
     }
@@ -356,24 +188,175 @@ CRITICAL: Ensure summaries are clear, specific, and actionable for both develope
     Console.WriteLine();
     Console.WriteLine("========================================");
     Console.WriteLine("Agent Creation Complete!");
-    Console.WriteLine("========================================");
-    Console.WriteLine();
     Console.WriteLine("Update your appsettings.json with these agent IDs:");
     Console.WriteLine();
+
+    // Map to your config keys
+    // (Change keys as needed to match your appsettings schema)
     Console.WriteLine("\"FoundryAgent\": {");
-    foreach (var kvp in agentIds)
-    {
-        Console.WriteLine($"  \"{kvp.Key}\": \"{kvp.Value}\",");
-    }
+    Console.WriteLine($"  \"WriterAgentId\": \"{createdIds["mystira-writer-v01"]}\",");
+    Console.WriteLine($"  \"JudgeAgentId\": \"{createdIds["mystira-judge-v01"]}\",");
+    Console.WriteLine($"  \"RefinerAgentId\": \"{createdIds["mystira-refiner-v01"]}\",");
+    Console.WriteLine($"  \"RubricSummaryAgentId\": \"{createdIds["mystira-rubric-v01"]}\",");
     Console.WriteLine("  ...");
     Console.WriteLine("}");
-    Console.WriteLine();
-    Console.WriteLine("Agent IDs (for reference):");
-    foreach (var kvp in agentIds)
-    {
-        Console.WriteLine($"  {kvp.Key,-25} = {kvp.Value}");
-    }
-    Console.WriteLine();
+}, endpointOption, modelOption);
 
-    return Task.CompletedTask;
+root.AddCommand(createCmd);
+
+// ----------------------
+// UPDATE
+// ----------------------
+var updateCmd = new Command("update", "Update a persistent agent (by --id or --name)");
+updateCmd.AddOption(endpointOption);
+updateCmd.AddOption(idOption);
+updateCmd.AddOption(nameOption);
+updateCmd.AddOption(modelOption);
+updateCmd.AddOption(instructionsOption);
+updateCmd.AddOption(descriptionOption);
+
+updateCmd.SetHandler((string endpoint, string? id, string? name, string? model, string? instructions, string? description) =>
+{
+    var client = CreatePersistentClient(endpoint);
+
+    var agent = ResolveAgent(client, id, name);
+    if (agent is null)
+    {
+        Console.WriteLine("ERROR: Agent not found. Provide --id or a --name that exists in Administration.GetAgents().");
+        Environment.Exit(1);
+    }
+
+    Console.WriteLine($"Updating agent: {agent.Id} ({agent.Name})");
+    Console.WriteLine("----------------------------------------------------");
+
+    // Only update fields you passed. Anything null means "leave unchanged".
+    var newModel = string.IsNullOrWhiteSpace(model) ? default : model;
+    var newName = default(string);
+    var newDescription = string.IsNullOrWhiteSpace(description) ? default : description;
+    var newInstructions = string.IsNullOrWhiteSpace(instructions) ? default : instructions;
+
+    try
+    {
+        Response<PersistentAgent> updated = client.Administration.UpdateAgent(
+            assistantId: agent.Id,
+            model: newModel,
+            name: newName,
+            description: newDescription,
+            instructions: newInstructions
+        );
+
+        Console.WriteLine("✓ Updated");
+        Console.WriteLine($"Id:          {updated.Value.Id}");
+        Console.WriteLine($"Name:        {updated.Value.Name}");
+        Console.WriteLine($"Model:       {updated.Value.Model}");
+        Console.WriteLine($"Description: {updated.Value.Description}");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine("✗ Update failed");
+        Console.WriteLine(ex);
+        Environment.Exit(1);
+    }
+}, endpointOption, idOption, nameOption, modelOption, instructionsOption, descriptionOption);
+
+root.AddCommand(updateCmd);
+
+// ----------------------
+// DELETE
+// ----------------------
+var deleteCmd = new Command("delete", "Delete a persistent agent (by --id or --name)");
+deleteCmd.AddOption(endpointOption);
+deleteCmd.AddOption(idOption);
+deleteCmd.AddOption(nameOption);
+deleteCmd.AddOption(forceOption);
+
+deleteCmd.SetHandler((string endpoint, string? id, string? name, bool force) =>
+{
+    var client = CreatePersistentClient(endpoint);
+
+    var agent = ResolveAgent(client, id, name);
+    if (agent is null)
+    {
+        Console.WriteLine("ERROR: Agent not found. Provide --id or a --name that exists in Administration.GetAgents().");
+        Environment.Exit(1);
+    }
+
+    if (!force)
+    {
+        Console.Write($"Delete agent {agent.Id} ({agent.Name})? Type 'yes' to confirm: ");
+        var confirm = Console.ReadLine();
+        if (!string.Equals(confirm, "yes", StringComparison.OrdinalIgnoreCase))
+        {
+            Console.WriteLine("Cancelled.");
+            return;
+        }
+    }
+
+    try
+    {
+        Response<bool> resp = client.Administration.DeleteAgent(agent.Id);
+        Console.WriteLine(resp.Value ? "✓ Deleted" : "✗ Delete returned false");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine("✗ Delete failed");
+        Console.WriteLine(ex);
+        Environment.Exit(1);
+    }
+}, endpointOption, idOption, nameOption, forceOption);
+
+root.AddCommand(deleteCmd);
+
+// ----------------------
+// Entrypoint
+// ----------------------
+return await root.InvokeAsync(args);
+
+// ----------------------
+// Helpers
+// ----------------------
+
+static PersistentAgentsClient CreatePersistentClient(string projectEndpoint)
+{
+    // You can swap to AzureCliCredential if you prefer:
+    // var cred = new AzureCliCredential();
+    var cred = new DefaultAzureCredential();
+
+    // AIProjectClient gives you the authenticated PersistentAgentsClient for that project endpoint.
+    var projectClient = new AIProjectClient(new Uri(projectEndpoint), cred);
+    return projectClient.GetPersistentAgentsClient();
 }
+
+static PersistentAgent? ResolveAgent(PersistentAgentsClient client, string? id, string? name)
+{
+    if (!string.IsNullOrWhiteSpace(id))
+    {
+        try
+        {
+            return client.Administration.GetAgent(id).Value;
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    if (!string.IsNullOrWhiteSpace(name))
+    {
+        // Exact match first, then case-insensitive match
+        PersistentAgent? exact = null;
+        PersistentAgent? ci = null;
+
+        foreach (var a in client.Administration.GetAgents())
+        {
+            if (a.Name == name) exact ??= a;
+            if (string.Equals(a.Name, name, StringComparison.OrdinalIgnoreCase)) ci ??= a;
+        }
+
+        return exact ?? ci;
+    }
+
+    return null;
+}
+
+internal readonly record struct AgentDef(string Name, string Description, string Instructions);
