@@ -122,6 +122,16 @@
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
+::deep .iteration-badge {
+    text-align: center;
+    margin-bottom: 1rem;
+    padding: 0.5rem;
+    background: #e3f2fd;
+    border-radius: 4px;
+    color: #1976d2;
+    font-size: 0.95rem;
+}
+
 ::deep .timeline {
     display: flex;
     gap: 1rem;

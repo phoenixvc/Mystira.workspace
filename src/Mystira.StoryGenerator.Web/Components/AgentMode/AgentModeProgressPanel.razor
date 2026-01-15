@@ -3,6 +3,13 @@
 @using Mystira.StoryGenerator.Contracts.Models
 
 <div class="progress-panel">
+    @if (Session != null && Session.IterationCount > 0)
+    {
+        <div class="iteration-badge">
+            <strong>Iteration:</strong> @Session.IterationCount
+        </div>
+    }
+
     <div class="timeline">
         @foreach (var phase in phases)
         {
@@ -263,7 +270,7 @@
                 "Validating" => "Validating",
                 "Evaluating" => "Evaluating",
                 "Evaluated" or "RefinementRequested" => "Evaluating", // Keep on Evaluating, but show as complete via IsEvaluatingCompleteWaitingForUser
-                "Refining" => "Writing",
+                "Refining" or "Refined" => "Writing",
                 "GeneratingRubric" => "Rubric",
                 "Complete" => "Complete",
                 "Failed" => "Failed",

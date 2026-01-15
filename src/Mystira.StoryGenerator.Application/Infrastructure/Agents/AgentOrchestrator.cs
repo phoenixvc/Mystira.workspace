@@ -570,7 +570,6 @@ public partial class AgentOrchestrator : IAgentOrchestrator
             session.CurrentStoryVersion = refinedStoryJson;
             session.CurrentStoryYaml = JsonToYamlConverter.ToYaml(refinedStoryJson);
             session.StoryVersions.Add(versionSnapshot);
-            session.Stage = StorySessionStage.Validating; // Re-evaluate after refinement
             session.UpdatedAt = DateTime.UtcNow;
 
             // Check max iterations
@@ -588,14 +587,25 @@ public partial class AgentOrchestrator : IAgentOrchestrator
                 return (false, $"Maximum iterations ({_config.MaxIterations}) reached");
             }
 
-            await _sessionRepository.UpdateAsync(session, ct);
-
             // Emit refinement complete event
             await _eventPublisher.PublishEventAsync(sessionId, new AgentStreamEvent
             {
                 Type = AgentStreamEvent.EventType.RefinementComplete,
                 Phase = "Refining",
                 Payload = new { RefinedStoryJson = refinedStoryJson, TokenUsage = completionResult.RunId },
+                IterationNumber = session.IterationCount
+            });
+
+            // Transition to Validating stage and publish event
+            session.Stage = StorySessionStage.Validating;
+            await _sessionRepository.UpdateAsync(session, ct);
+
+            // Emit phase started event for validating
+            await _eventPublisher.PublishEventAsync(sessionId, new AgentStreamEvent
+            {
+                Type = AgentStreamEvent.EventType.PhaseStarted,
+                Phase = "Validating",
+                Payload = new { IterationNumber = session.IterationCount },
                 IterationNumber = session.IterationCount
             });
 
