@@ -46,7 +46,6 @@ static async Task ListAgentsAsync(string endpoint)
     Console.WriteLine("Connecting to Azure AI Foundry...");
 
     var projectClient = new AIProjectClient(new Uri(endpoint), new DefaultAzureCredential());
-    var agentsClient = projectClient.GetPersistentAgentsClient();
 
     Console.WriteLine("✓ Connected successfully");
     Console.WriteLine();
@@ -55,11 +54,11 @@ static async Task ListAgentsAsync(string endpoint)
 
     try
     {
-        var agents = agentsClient.GetAgentsAsync();
+        var agents = projectClient.Agents.GetAgents();
 
         var agentList = new List<(string Id, string Name, DateTimeOffset CreatedAt)>();
 
-        await foreach (var agent in agents)
+        foreach (var agent in agents)
         {
             agentList.Add((agent.Id, agent.Name ?? "Unnamed", agent.CreatedAt));
         }
@@ -142,7 +141,6 @@ static async Task CreateAgentsAsync(string endpoint, string modelDeployment)
     Console.WriteLine("Connecting to Azure AI Foundry...");
 
     var projectClient = new AIProjectClient(new Uri(endpoint), new DefaultAzureCredential());
-    var agentsClient = projectClient.GetPersistentAgentsClient();
 
     Console.WriteLine("✓ Connected successfully");
     Console.WriteLine();
@@ -275,7 +273,7 @@ CRITICAL: Ensure summaries are clear, specific, and actionable for both develope
         try
         {
             // Create the agent
-            var response = await agentsClient.CreateAgentAsync(
+            var agent = projectClient.Agents.CreateAgent(
                 model: modelDeployment,
                 name: agentDef.Name,
                 instructions: agentDef.Instructions,
@@ -286,10 +284,9 @@ CRITICAL: Ensure summaries are clear, specific, and actionable for both develope
                 }
             );
 
-            var agent = response.Value;
-            agentIds[agentDef.ConfigKey] = agent.Id;
+            agentIds[agentDef.ConfigKey] = agent.Value.Id;
 
-            Console.WriteLine($" ✓ Created: {agent.Id}");
+            Console.WriteLine($" ✓ Created: {agent.Value.Id}");
         }
         catch (Exception ex)
         {
