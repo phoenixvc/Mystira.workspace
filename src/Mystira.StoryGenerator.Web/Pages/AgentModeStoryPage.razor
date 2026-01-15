@@ -6,6 +6,8 @@
 @using System.Text.Json
 @inject IAgentSessionService sessionService
 @inject ILogger<AgentModeStoryPage> logger
+@inject NavigationManager navigationManager
+@inject Blazored.LocalStorage.ILocalStorageService localStorage
 
 <PageTitle>AI Story Generator</PageTitle>
 
@@ -34,16 +36,38 @@
 
             @if (currentSession.Stage == "Complete" && !string.IsNullOrWhiteSpace(currentSession.CurrentStoryJson))
             {
+                <div class="complete-story-actions mb-4">
+                    <button @onclick="CompleteAndMoveToChat" class="btn btn-primary complete-btn">
+                        ✨ Complete & Continue in Chat
+                    </button>
+                </div>
+
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
                     <div>
                         <StoryDisplayPanel Story="@currentSession.CurrentStoryJson" />
                     </div>
                     <div>
-                        <YamlPreviewPanel 
-                            YamlContent="@currentSession.CurrentStoryYaml" 
+                        <YamlPreviewPanel
+                            YamlContent="@currentSession.CurrentStoryYaml"
                             ValidationResult="null" />
                     </div>
                 </div>
+            }
+
+            @* Show completion button on Evaluated stage as well *@
+            @if (currentSession.Stage == "Evaluated" && !string.IsNullOrWhiteSpace(currentSession.CurrentStoryYaml))
+            {
+                <div class="complete-story-actions mb-4">
+                    <button @onclick="CompleteAndMoveToChat" class="btn btn-primary complete-btn">
+                        ✨ Complete & Continue in Chat
+                    </button>
+                </div>
+            }
+
+            @* Show diff viewer if there are multiple versions *@
+            @if (currentSession.StoryVersions != null && currentSession.StoryVersions.Count > 1)
+            {
+                <StoryVersionDiffViewer Versions="@currentSession.StoryVersions" />
             }
 
             @if (!string.IsNullOrWhiteSpace(errorMessage))
@@ -305,9 +329,59 @@
         }
     }
 
+    private async Task CompleteAndMoveToChat()
+    {
+        if (currentSession == null || string.IsNullOrWhiteSpace(currentSession.CurrentStoryYaml))
+            return;
+
+        try
+        {
+            // Store the YAML in localStorage so the chat page can pick it up
+            await localStorage.SetItemAsStringAsync("prePopulatedMessage", currentSession.CurrentStoryYaml);
+
+            // Navigate to the chat page
+            navigationManager.NavigateTo("/story-generator");
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error navigating to chat");
+            errorMessage = $"Failed to navigate to chat: {ex.Message}";
+        }
+    }
+
     public void Dispose()
     {
         streamCts?.Cancel();
         streamCts?.Dispose();
     }
 }
+
+<style>
+    .complete-story-actions {
+        display: flex;
+        justify-content: center;
+        padding: 1rem 0;
+    }
+
+    .complete-btn {
+        padding: 0.75rem 2rem;
+        font-size: 1rem;
+        font-weight: 600;
+        border-radius: 0.5rem;
+        border: none;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    }
+
+    .complete-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+    }
+
+    .complete-btn:active {
+        transform: translateY(0);
+    }
+</style>
