@@ -291,9 +291,9 @@
         {
             currentPhase = Session.Stage switch
             {
-                "Generating" or "Refining" or "Refined" => "Writing",
+                "Generating" or "Refining" or "Refined" or "RefinementRequested" => "Writing",
                 "Validating" => "Validating",
-                "Evaluating" or "Evaluated" or "RefinementRequested" => "Evaluating", // Keep on Evaluating, but show as complete via IsEvaluatingCompleteWaitingForUser
+                "Evaluating" or "Evaluated" => "Evaluating", // Keep on Evaluating, but show as complete via IsEvaluatingCompleteWaitingForUser
                 "GeneratingRubric" or "Rubric" => "Rubric",
                 "Complete" => "Complete",
                 "Failed" => "Failed",
@@ -302,8 +302,10 @@
         }
 
         // Also update from latest phase event
+        // BUT: Don't override if we're explicitly in a state that should show a specific phase
+        // (e.g., RefinementRequested should stay on Writing, not get overridden by old Rubric event)
         var latestPhase = Events.LastOrDefault(e => e.Type == AgentStreamEvent.EventType.PhaseStarted);
-        if (latestPhase != null && !string.IsNullOrEmpty(latestPhase.Phase))
+        if (latestPhase != null && !string.IsNullOrEmpty(latestPhase.Phase) && Session?.Stage != "RefinementRequested")
         {
             // Map event phases to our local phase names if they differ
             var mappedPhase = latestPhase.Phase switch
