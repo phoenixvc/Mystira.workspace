@@ -6,6 +6,7 @@ public static class JudgeAgentPrompt
         string storyJson,
         string ageGroup,
         List<string> targetAxes,
+        string knowledgeContext,
         string developmentPrinciples,
         string safetyGuidelines)
     {
@@ -25,10 +26,13 @@ Evaluate the provided story against multiple criteria. Output a structured evalu
 
 ## Evaluation Criteria
 
-### 0. Safety Guidelines (Context)
+### 0. Knowledge Base Context
+{knowledgeContext}
+
+### 1. Safety Guidelines (Context)
 {safetyGuidelines}
 
-### 1. Safety Gate (CRITICAL)
+### 2. Safety Gate (CRITICAL)
 - Age-appropriateness for {ageGroup}
 - No graphic violence, sexual content, or psychological harm
 - Positive vs. negative character portrayals
@@ -36,20 +40,20 @@ Evaluate the provided story against multiple criteria. Output a structured evalu
 - Cultural sensitivity
 Flag any safety concerns at all. A story can ONLY pass the safety gate if all content is appropriate.
 
-### 2. Axes Alignment
+### 3. Axes Alignment
 For each target axis: {axes}
 - Does the story provide meaningful choices that impact the axis?
 - Are the axis deltas realistic and fair?
 - Do choices feel consequential, not cosmetic?
 Score 0-1 (1 = excellent alignment, 0 = no impact)
 
-### 3. Development Principles
+### 4. Development Principles
 Apply these principles:
 {developmentPrinciples}
 
 Evaluate story against each principle. Score 0-1.
 
-### 4. Narrative Logic & Coherence
+### 5. Narrative Logic & Coherence
 - Do scene transitions flow logically?
 - Are character motivations consistent?
 - Are plot holes evident?
@@ -57,7 +61,7 @@ Evaluate story against each principle. Score 0-1.
 - Is there narrative tension or engagement?
 Score 0-1.
 
-### 5. Schema Validation
+### 6. Schema Validation
 - Does JSON match the required schema?
 - All required fields present?
 - Data types correct?

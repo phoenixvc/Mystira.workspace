@@ -9,7 +9,8 @@ public static class RefinerAgentPrompt
         string currentStoryJson,
         EvaluationReport lastReport,
         UserRefinementFocus userFocus,
-        string ageGroup)
+        string ageGroup,
+        string knowledgeContext)
     {
         var scopeInstructions = userFocus.TargetSceneIds.Any()
             ? $@"
@@ -47,6 +48,9 @@ Aspects to focus on: {string.Join(", ", aspects)}
 User instructions: {userFocus.Constraints ?? "(no specific instructions)"}
 
 {scopeInstructions}
+
+## Knowledge Base Context
+{knowledgeContext}
 
 ## Refinement Instructions
 1. Address the evaluation findings directly
