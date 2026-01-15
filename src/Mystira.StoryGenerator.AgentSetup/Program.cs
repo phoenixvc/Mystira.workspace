@@ -169,12 +169,11 @@ static Task ListAgentsAsync(string endpoint)
     }
 }
 
-static async Task CreateAgentsAsync(string endpoint, string modelDeployment)
+static Task CreateAgentsAsync(string endpoint, string modelDeployment)
 {
     Console.WriteLine("Connecting to Azure AI Foundry...");
 
     var projectClient = new AIProjectClient(new Uri(endpoint), new DefaultAzureCredential());
-    var agentsClient = projectClient.GetPersistentAgentsClient();
 
     Console.WriteLine("✓ Connected successfully");
     Console.WriteLine();
@@ -306,22 +305,20 @@ CRITICAL: Ensure summaries are clear, specific, and actionable for both develope
 
         try
         {
-            // Create the agent
-            var response = await agentsClient.CreateAgentAsync(
-                model: modelDeployment,
-                name: agentDef.Name,
-                instructions: agentDef.Instructions,
-                description: agentDef.Description,
+            // Create the agent using Agents API
+            var agent = projectClient.Agents.CreateAgent(
+                modelDeployment,
+                agentDef.Name,
+                agentDef.Instructions,
+                agentDef.Description,
                 tools: new List<ToolDefinition>
                 {
                     new FileSearchToolDefinition()
-                }
-            );
+                });
 
-            var agent = response.Value;
-            agentIds[agentDef.ConfigKey] = agent.Id;
+            agentIds[agentDef.ConfigKey] = agent.Value.Id;
 
-            Console.WriteLine($" ✓ Created: {agent.Id}");
+            Console.WriteLine($" ✓ Created: {agent.Value.Id}");
         }
         catch (Exception ex)
         {
@@ -358,4 +355,6 @@ CRITICAL: Ensure summaries are clear, specific, and actionable for both develope
         Console.WriteLine($"  {kvp.Key,-25} = {kvp.Value}");
     }
     Console.WriteLine();
+
+    return Task.CompletedTask;
 }
