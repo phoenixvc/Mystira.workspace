@@ -300,6 +300,13 @@ public class StoryAgentController : ControllerBase
                 IsFullRewrite = request.TargetSceneIds.Count == 0
             };
 
+            // Set stage to Refining before starting the background task
+            session.Stage = StorySessionStage.Refining;
+            session.UpdatedAt = DateTime.UtcNow;
+            await _sessionRepository.UpdateAsync(session, cancellationToken);
+
+            _logger.LogInformation("Session {SessionId} stage set to Refining", sessionId);
+
             // Fire-and-forget: Start refinement in background
             _ = Task.Run(async () =>
             {

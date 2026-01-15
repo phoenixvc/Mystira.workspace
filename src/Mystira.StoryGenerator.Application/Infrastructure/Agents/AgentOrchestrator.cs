@@ -484,7 +484,10 @@ public partial class AgentOrchestrator : IAgentOrchestrator
                 return (false, "Session not found");
             }
 
-            if (session.Stage != StorySessionStage.RefinementRequested)
+            // Accept Refining, RefinementRequested, or Evaluated stages
+            if (session.Stage != StorySessionStage.Refining &&
+                session.Stage != StorySessionStage.RefinementRequested &&
+                session.Stage != StorySessionStage.Evaluated)
             {
                 return (false, $"Invalid session state for refinement: {session.Stage}");
             }
@@ -492,7 +495,7 @@ public partial class AgentOrchestrator : IAgentOrchestrator
             // Store user focus
             session.UserFocus = focus;
             session.IterationCount++;
-            session.Stage = StorySessionStage.Refined;
+            session.Stage = StorySessionStage.Refining;
             session.UpdatedAt = DateTime.UtcNow;
             await _sessionRepository.UpdateAsync(session, ct);
 
