@@ -48,18 +48,27 @@ public static class FoundryAgentConfigValidator
 
 Azure AI Agents requires agent IDs that begin with 'asst' (e.g., 'asst_abc123xyz').
 
-To fix this issue:
+QUICK FIX - If agents already exist in Azure:
+
+   List existing agents:
+   cd src/Mystira.StoryGenerator.AgentSetup
+   dotnet run list --endpoint ""https://your-project.azure.com/api/projects/your-project""
+
+   OR use the bash script:
+   ./scripts/list-agents.sh
+
+   Then copy the IDs shown and update appsettings.json.
+
+FULL SETUP - If agents don't exist yet:
 
 1. Create agents in Azure AI Foundry using the setup script:
 
    PowerShell:
    .\scripts\setup-agents.ps1 -Endpoint ""https://your-project.azure.com/api/projects/your-project"" -ModelDeployment ""gpt-4""
 
-   OR manually:
-   - Navigate to your Azure AI Foundry project
-   - Create four agents (Writer, Judge, Refiner, RubricSummary)
-   - Configure each with the file_search tool
-   - Copy their IDs (they will start with 'asst')
+   OR .NET tool:
+   cd src/Mystira.StoryGenerator.AgentSetup
+   dotnet run create --endpoint ""https://your-project.azure.com/api/projects/your-project"" --model ""gpt-4""
 
 2. Update appsettings.json with the actual agent IDs:
 
@@ -71,7 +80,9 @@ To fix this issue:
      ...
    }}
 
-For more information, see docs/AGENT_SETUP_GUIDE.md");
+For more information:
+- Quick Start: QUICKSTART_AGENT_IDS.md
+- Full Guide: docs/AGENT_SETUP_GUIDE.md");
         }
     }
 

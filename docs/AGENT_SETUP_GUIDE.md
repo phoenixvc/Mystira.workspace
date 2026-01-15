@@ -289,25 +289,79 @@ Edit `src/Mystira.StoryGenerator.Api/appsettings.json` with all four agent IDs:
 
 ---
 
-## Method 3: Using the Console Tool
+## Method 3: Listing Existing Agents
 
-You can also list existing agents to find their IDs:
+If you've already created agents in Azure AI Foundry and need to retrieve their IDs, you have several options:
+
+### Option A: Using the AgentSetup Tool (Recommended)
+
+The AgentSetup tool now includes a `list` command to retrieve existing agent IDs:
 
 ```bash
-cd src/Mystira.StoryGenerator.Console
-dotnet run
+cd src/Mystira.StoryGenerator.AgentSetup
+
+# List all agents and get configuration suggestions
+dotnet run list --endpoint "https://your-project.azure.com/api/projects/your-project"
 ```
 
-This will output all agents in your project:
+This will output:
 
 ```
-asst_abc123xyz456 | mystira-writer-v01
-asst_def789uvw012 | mystira-judge-v01
-asst_ghi345rst678 | mystira-refiner-v01
-asst_jkl901mno234 | mystira-rubric-v01
+Found 4 agent(s):
+
+ID                              Name                            Created
+------------------------------------------------------------------------------------------
+asst_abc123xyz456               mystira-writer-v01              2026-01-15 10:05:24
+asst_def789uvw012               mystira-judge-v01               2026-01-15 10:05:24
+asst_ghi345rst678               mystira-refiner-v01             2026-01-15 10:05:24
+asst_jkl901mno234               mystira-rubric-v01              2026-01-15 10:05:24
+
+========================================
+Configuration Mapping Suggestions
+========================================
+
+Update your appsettings.json with these agent IDs:
+
+"FoundryAgent": {
+  "WriterAgentId": "asst_abc123xyz456",
+  "JudgeAgentId": "asst_def789uvw012",
+  "RefinerAgentId": "asst_ghi345rst678",
+  "RubricSummaryAgentId": "asst_jkl901mno234",
+  ...
+}
 ```
 
-Copy the IDs and update your configuration.
+### Option B: Using the Bash Script
+
+For environments where .NET is not available:
+
+```bash
+# Make sure you're logged in to Azure
+az login
+
+# Run the list script
+./scripts/list-agents.sh
+```
+
+### Option C: Using the Python Script
+
+```bash
+# Install Azure SDK first
+pip install azure-identity azure-ai-projects
+
+# Run the list script
+python3 scripts/list-agents.py "https://your-project.azure.com/api/projects/your-project"
+```
+
+### Option D: From Azure Portal UI
+
+1. Go to [Azure Portal](https://portal.azure.com)
+2. Navigate to your Azure AI Foundry project
+3. Click **Agents** in the left menu
+4. Click on each agent name to view its details
+5. Copy the **Agent ID** from the details page (it starts with `asst_`)
+
+**Important**: The agent **Name** shown in the list is NOT the ID. You need to click on each agent to see its actual ID.
 
 ---
 
