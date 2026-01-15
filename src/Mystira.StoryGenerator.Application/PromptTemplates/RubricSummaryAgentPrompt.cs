@@ -10,7 +10,8 @@ public static class RubricSummaryAgentPrompt
         string storyJson,
         EvaluationReport evaluationReport,
         int iterationNumber,
-        string ageGroup)
+        string ageGroup,
+        string knowledgeContext)
     {
         return $@"
 You are a UX-friendly summary writer. Your task is to create a concise, user-facing progress report on the story's quality.
@@ -21,6 +22,9 @@ Story (iteration {iterationNumber}):
 
 Evaluation Report:
 {JsonSerializer.Serialize(evaluationReport)}
+
+## Knowledge Base Context
+{knowledgeContext}
 
 ## Your Task
 Write a brief, non-technical summary of:

@@ -9,7 +9,8 @@ public static class RefinerAgentPrompt
         string currentStoryJson,
         EvaluationReport lastReport,
         UserRefinementFocus userFocus,
-        string ageGroup)
+        string ageGroup,
+        string knowledgeContext)
     {
         var scopeInstructions = userFocus.TargetSceneIds.Any()
             ? $@"
@@ -50,6 +51,15 @@ User instructions: {userFocus.Constraints ?? "(no specific instructions)"}
 
 {scopeInstructions}
 
+## Knowledge Base Context
+{knowledgeContext}
+
+## Refinement Instructions
+1. Address the evaluation findings directly
+2. Maintain {ageGroup} age-appropriateness
+3. Keep character motivations and narrative arc intact
+4. Ensure new choices have realistic axes impacts
+5. Verify JSON schema compliance
 ## Your Goals:
     •   Apply the user's requested changes (tone, difficulty, developmental focus, length, etc.) without breaking structure.
     •   Preserve child safety and developmental objectives.

@@ -73,10 +73,17 @@ public class FileSearchKnowledgeProvider : IKnowledgeProvider
     /// </summary>
     public string GetContextualGuidance(string? ageGroup = null)
     {
+        _logger.LogInformation(
+            "Generating contextual guidance from FileSearch knowledge provider for age group: {AgeGroup}",
+            ageGroup ?? "default");
+
         var baseGuidance = "Use the file_search tool to retrieve age-appropriate guidelines, safety rules, and writing principles.";
 
         if (!string.IsNullOrEmpty(ageGroup))
         {
+            _logger.LogInformation(
+                "FileSearch contextual knowledge enabled: Vector store will be filtered for age group {AgeGroup}",
+                ageGroup);
             return $"{baseGuidance}\n\nThe vector store is pre-filtered for age group {ageGroup}. All retrieved documents are appropriate for this age range.";
         }
 

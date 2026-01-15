@@ -174,6 +174,10 @@ public partial class AgentOrchestrator : IAgentOrchestrator
                 session.AgeGroup,
                 session.TargetAxes);
 
+            _logger.LogInformation(
+                "Generated Writer agent prompt with contextual knowledge for age group {AgeGroup} (knowledge mode: {KnowledgeMode})",
+                session.AgeGroup, session.KnowledgeMode);
+
             // Build response format with JSON schema for structured output
             var responseFormat = await BuildResponseFormatAsync(ct);
 
@@ -375,6 +379,10 @@ public partial class AgentOrchestrator : IAgentOrchestrator
                 session.AgeGroup,
                 session.TargetAxes);
 
+            _logger.LogInformation(
+                "Generated Judge agent prompt with contextual knowledge for age group {AgeGroup} (knowledge mode: {KnowledgeMode})",
+                session.AgeGroup, session.KnowledgeMode);
+
             judgePrompt += $"\n\n## Deterministic Story Structure Analysis\n{logicContext}\n";
 
             // Create and start the run
@@ -518,6 +526,10 @@ public partial class AgentOrchestrator : IAgentOrchestrator
                 session.CurrentStoryVersion,
                 session.LastEvaluationReport,
                 focus);
+
+            _logger.LogInformation(
+                "Generated Refiner agent prompt with contextual knowledge for age group {AgeGroup} (knowledge mode: {KnowledgeMode})",
+                session.AgeGroup, session.KnowledgeMode);
 
             // Build response format with JSON schema for structured output
             var responseFormat = await BuildResponseFormatAsync(ct);

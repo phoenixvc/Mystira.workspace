@@ -75,10 +75,17 @@ public class AISearchKnowledgeProvider : IKnowledgeProvider
     /// </summary>
     public string GetContextualGuidance(string? ageGroup = null)
     {
+        _logger.LogInformation(
+            "Generating contextual guidance from AISearch knowledge provider for age group: {AgeGroup}, Index: {IndexName}",
+            ageGroup ?? "default", _config.IndexName);
+
         var baseGuidance = $"Use the azure_ai_search tool to retrieve relevant instructions, safety guidance, and writing principles from the '{_config.IndexName}' index.";
 
         if (!string.IsNullOrEmpty(ageGroup))
         {
+            _logger.LogInformation(
+                "AISearch contextual knowledge enabled: Index {IndexName} will be filtered for age group {AgeGroup}",
+                _config.IndexName, ageGroup);
             return $"{baseGuidance}\n\n**IMPORTANT**: Always include filter 'age_group eq {ageGroup}' in your searches to retrieve age-appropriate guidelines. Only use information from documents matching this age group.";
         }
 

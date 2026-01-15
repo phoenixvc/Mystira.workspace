@@ -27,19 +27,22 @@ public class PromptGenerator : IPromptGenerator
     {
         var developmentPrinciples = _guidelines.GetDevelopmentPrinciples(ageGroup);
         var safetyGuidelines = _guidelines.GetSafetyGuidelines(ageGroup);
-        return JudgeAgentPrompt.Build(storyJson, ageGroup, axes, developmentPrinciples, safetyGuidelines);
+        var knowledge = _knowledge.GetContextualGuidance(ageGroup);  // Pass age group
+        return JudgeAgentPrompt.Build(storyJson, ageGroup, axes, knowledge, developmentPrinciples, safetyGuidelines);
     }
 
     public string GenerateRefinerPrompt(string storyJson, EvaluationReport report, UserRefinementFocus focus)
     {
         var ageGroup = TryExtractAgeGroup(storyJson) ?? "6-9";
-        return RefinerAgentPrompt.Build(storyJson, report, focus, ageGroup);
+        var knowledge = _knowledge.GetContextualGuidance(ageGroup);  // Pass age group
+        return RefinerAgentPrompt.Build(storyJson, report, focus, ageGroup, knowledge);
     }
 
     public string GenerateRubricPrompt(string storyJson, EvaluationReport report, int iteration)
     {
         var ageGroup = TryExtractAgeGroup(storyJson) ?? "6-9";
-        return RubricSummaryAgentPrompt.Build(storyJson, report, iteration, ageGroup);
+        var knowledge = _knowledge.GetContextualGuidance(ageGroup);  // Pass age group
+        return RubricSummaryAgentPrompt.Build(storyJson, report, iteration, ageGroup, knowledge);
     }
 
     private static string? TryExtractAgeGroup(string storyJson)
