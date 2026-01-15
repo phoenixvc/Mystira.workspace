@@ -304,7 +304,98 @@ public class StoryAgentController : ControllerBase
     }
 
     /// <summary>
-    /// Complete the story generation session and optionally generate a rubric.
+    /// Generate a rubric for the story generation session.
+    /// </summary>
+    /// <param name="sessionId">The session identifier.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>Session state response.</returns>
+    [HttpPost("sessions/{sessionId}/rubric")]
+    [ProducesResponseType(typeof(SessionStateResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    [Produces("application/json")]
+    public async Task<IActionResult> GenerateRubric(string sessionId, CancellationToken cancellationToken = default)
+    {
+        _logger.LogInformation("Generating rubric for session {SessionId}", sessionId);
+
+        try
+        {
+            // Load session
+            var session = await _sessionRepository.GetAsync(sessionId, cancellationToken);
+            if (session == null)
+            {
+                return NotFound(new { error = "Session not found", sessionId });
+            }
+
+            // Verify session is in correct state
+            if (session.Stage != StorySessionStage.RefinementRequested && session.Stage != StorySessionStage.Evaluated)
+            {
+                return Conflict(new { error = "Session is not in RefinementRequested or Evaluated state", sessionId, currentStage = session.Stage.ToString() });
+            }
+
+            // Mark session as generating rubric
+            session.Stage = StorySessionStage.GeneratingRubric;
+            session.UpdatedAt = DateTime.UtcNow;
+            await _sessionRepository.UpsertAsync(session, cancellationToken);
+
+            // Publish rubric generation start event
+            await _streamPublisher.PublishEventAsync(sessionId, new AgentStreamEvent
+            {
+                Type = AgentStreamEvent.EventType.PhaseStarted,
+                Phase = "Rubric",
+                Payload = new { },
+                IterationNumber = session.IterationCount
+            });
+
+            // TODO: Call rubric generator here
+            // This should:
+            // 1. Call IPromptGenerator.GenerateRubricPrompt(session.CurrentStoryVersion, session.LastEvaluationReport, session.IterationCount)
+            // 2. Send the prompt to an LLM agent
+            // 3. Parse and store the rubric response in the session
+            // 4. Return the rubric to the frontend for display
+
+            // For now, just mark as complete
+            session.Stage = StorySessionStage.Complete;
+            session.UpdatedAt = DateTime.UtcNow;
+            await _sessionRepository.UpsertAsync(session, cancellationToken);
+
+            // Publish completion event
+            await _streamPublisher.PublishEventAsync(sessionId, new AgentStreamEvent
+            {
+                Type = AgentStreamEvent.EventType.PhaseStarted,
+                Phase = "Complete",
+                Payload = new { },
+                IterationNumber = session.IterationCount
+            });
+
+            _logger.LogInformation("Rubric generated for session {SessionId}", sessionId);
+
+            var response = new SessionStateResponse
+            {
+                SessionId = session.SessionId,
+                ThreadId = session.ThreadId ?? string.Empty,
+                Stage = session.Stage.ToString(),
+                IterationCount = session.IterationCount,
+                CostEstimate = Convert.ToDouble(session.CostEstimate),
+                CurrentStoryJson = session.CurrentStoryVersion,
+                CurrentStoryYaml = session.CurrentStoryYaml ?? string.Empty,
+                LastEvaluationReport = session.LastEvaluationReport,
+                StoryVersions = session.StoryVersions,
+                ErrorMessage = session.ErrorMessage
+            };
+
+            return Ok(response);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error generating rubric for session {SessionId}", sessionId);
+            return StatusCode(500, new { error = "An unexpected error occurred", sessionId });
+        }
+    }
+
+    /// <summary>
+    /// Complete the story generation session.
     /// </summary>
     /// <param name="sessionId">The session identifier.</param>
     /// <param name="cancellationToken">Cancellation token.</param>

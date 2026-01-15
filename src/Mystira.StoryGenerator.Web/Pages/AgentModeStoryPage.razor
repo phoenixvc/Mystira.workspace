@@ -29,6 +29,7 @@
                 <AgentModeRefinementPanel
                     Session="currentSession"
                     OnRefine="HandleRefine"
+                    OnProceedToRubric="HandleProceedToRubric"
                     OnComplete="HandleComplete"
                     IsLoading="isRefining" />
             }
@@ -289,6 +290,34 @@
         {
             logger.LogError(ex, "Error waiting for refinement");
             errorMessage = $"Error during refinement: {ex.Message}";
+        }
+    }
+
+    private async Task HandleProceedToRubric()
+    {
+        if (currentSession == null)
+            return;
+
+        try
+        {
+            errorMessage = null;
+            isRefining = true;
+            StateHasChanged();
+
+            // Call rubric generation endpoint
+            currentSession = await sessionService.GenerateRubricAsync(currentSession.SessionId);
+
+            logger.LogInformation("Rubric generated for session {SessionId}", currentSession.SessionId);
+
+            isRefining = false;
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error generating rubric");
+            errorMessage = $"Failed to generate rubric: {ex.Message}";
+            isRefining = false;
+            StateHasChanged();
         }
     }
 

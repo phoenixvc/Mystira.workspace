@@ -16,7 +16,7 @@
                     {
                         <span>✅</span>
                     }
-                    else if (phase == "Complete" && currentPhase == "Complete")
+                    else if ((phase == "Rubric" && currentPhase == "Rubric") || (phase == "Complete" && currentPhase == "Complete"))
                     {
                         <span>✅</span>
                     }
@@ -147,12 +147,12 @@
     [Parameter] public List<AgentStreamEvent> Events { get; set; } = new();
 
     private string currentPhase = "Writing";
-    private List<string> phases = new() { "Writing", "Validating", "Evaluating", "Complete" };
+    private List<string> phases = new() { "Writing", "Validating", "Evaluating", "Rubric", "Complete" };
 
     private string GetPhaseStatus(string phase)
     {
-        // Complete phase should show as complete, not active
-        if (phase == "Complete" && currentPhase == "Complete")
+        // Rubric and Complete phases should show as complete, not active
+        if ((phase == "Rubric" && currentPhase == "Rubric") || (phase == "Complete" && currentPhase == "Complete"))
             return "complete";
 
         return phase == currentPhase ? "active" : IsPhaseComplete(phase) ? "complete" : "pending";
@@ -202,6 +202,7 @@
                 "Evaluating" => "Evaluating",
                 "Evaluated" or "RefinementRequested" => "Evaluating", // Keep on Evaluating, but show as complete via IsEvaluatingCompleteWaitingForUser
                 "Refining" => "Writing",
+                "GeneratingRubric" => "Rubric",
                 "Complete" => "Complete",
                 "Failed" => "Failed",
                 _ => currentPhase

@@ -92,6 +92,22 @@ public class AgentSessionService : IAgentSessionService
         }
     }
 
+    public async Task<SessionStateResponse> GenerateRubricAsync(string sessionId)
+    {
+        try
+        {
+            var response = await _httpClient.PostAsync($"/api/story-agent/sessions/{sessionId}/rubric", null);
+            response.EnsureSuccessStatusCode();
+            var result = await response.Content.ReadFromJsonAsync<SessionStateResponse>(_jsonOptions);
+            return result ?? throw new InvalidOperationException("Failed to parse rubric response");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error generating rubric for session {SessionId}", sessionId);
+            throw;
+        }
+    }
+
     public async Task<SessionStateResponse> CompleteAsync(string sessionId)
     {
         try

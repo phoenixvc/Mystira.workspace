@@ -32,7 +32,12 @@ public interface IAgentSessionService
     Task<RefineResponse> RefineAsync(string sessionId, RefineRequest request);
 
     /// <summary>
-    /// Complete the session and optionally generate a rubric.
+    /// Generate a rubric for the current story.
+    /// </summary>
+    Task<SessionStateResponse> GenerateRubricAsync(string sessionId);
+
+    /// <summary>
+    /// Complete the session.
     /// </summary>
     Task<SessionStateResponse> CompleteAsync(string sessionId);
 

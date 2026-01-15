@@ -67,6 +67,11 @@ public enum StorySessionStage
     Refining,
 
     /// <summary>
+    /// Generating a rubric for the story.
+    /// </summary>
+    GeneratingRubric,
+
+    /// <summary>
     /// Story generation is complete.
     /// </summary>
     Complete,

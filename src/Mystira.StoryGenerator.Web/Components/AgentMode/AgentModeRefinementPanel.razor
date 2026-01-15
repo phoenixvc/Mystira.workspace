@@ -64,11 +64,12 @@
                 disabled="@IsLoading" />
         </div>
 
-        <div class="button-group">
+        <div class="button-group" style="display: flex; gap: 0.75rem; margin-top: 1rem;">
             <button
                 @onclick="Submit"
                 disabled="@IsLoading"
-                class="btn-primary">
+                class="btn-primary"
+                style="flex: 1;">
                 @if (IsLoading)
                 {
                     <span>🔄 Refining...</span>
@@ -79,10 +80,32 @@
                 }
             </button>
             <button
+                @onclick="ProceedToRubric"
+                disabled="@IsLoading"
+                class="btn-secondary"
+                style="flex: 1;">
+                @if (IsLoading)
+                {
+                    <span>⏳ Processing...</span>
+                }
+                else
+                {
+                    <span>📊 Proceed to Rubric</span>
+                }
+            </button>
+            <button
                 @onclick="Complete"
                 disabled="@IsLoading"
-                class="btn-secondary">
-                <span>✓ Complete</span>
+                class="btn-secondary"
+                style="flex: 1;">
+                @if (IsLoading)
+                {
+                    <span>⏳ Processing...</span>
+                }
+                else
+                {
+                    <span>✓ Complete</span>
+                }
             </button>
         </div>
     </div>
@@ -91,6 +114,7 @@
 @code {
     [Parameter] public SessionStateResponse? Session { get; set; }
     [Parameter] public EventCallback<RefineRequest> OnRefine { get; set; }
+    [Parameter] public EventCallback OnProceedToRubric { get; set; }
     [Parameter] public EventCallback OnComplete { get; set; }
     [Parameter] public bool IsLoading { get; set; }
 
@@ -176,6 +200,11 @@
             Constraints = customInstructions
         };
         await OnRefine.InvokeAsync(request);
+    }
+
+    private async Task ProceedToRubric()
+    {
+        await OnProceedToRubric.InvokeAsync();
     }
 
     private async Task Complete()
