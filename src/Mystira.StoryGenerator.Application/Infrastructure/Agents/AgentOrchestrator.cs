@@ -232,6 +232,7 @@ public partial class AgentOrchestrator : IAgentOrchestrator
             {
                 VersionNumber = session.StoryVersions.Count + 1,
                 StoryJson = storyJson,
+                StoryYaml = JsonToYamlConverter.ToYaml(storyJson),
                 CreatedAt = DateTime.UtcNow,
                 StageWhenCreated = "Generating",
                 IterationNumber = session.IterationCount
@@ -566,6 +567,7 @@ public partial class AgentOrchestrator : IAgentOrchestrator
             {
                 VersionNumber = session.StoryVersions.Count + 1,
                 StoryJson = refinedStoryJson,
+                StoryYaml = JsonToYamlConverter.ToYaml(refinedStoryJson),
                 CreatedAt = DateTime.UtcNow,
                 StageWhenCreated = "Refining",
                 IterationNumber = session.IterationCount

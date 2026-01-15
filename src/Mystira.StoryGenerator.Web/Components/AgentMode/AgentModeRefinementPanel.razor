@@ -116,6 +116,7 @@
     [Parameter] public EventCallback OnProceedToRubric { get; set; }
     [Parameter] public EventCallback OnComplete { get; set; }
     [Parameter] public bool IsLoading { get; set; }
+    [Parameter] public string? InitialRefinementText { get; set; }
 
     private bool isFullRewrite = true;
     private List<SceneInfo> availableScenes = new();
@@ -127,8 +128,21 @@
     private List<string> selectedAspects = new();
     private string customInstructions = "";
 
+    protected override void OnInitialized()
+    {
+        if (!string.IsNullOrEmpty(InitialRefinementText))
+        {
+            customInstructions = InitialRefinementText;
+        }
+    }
+
     protected override void OnParametersSet()
     {
+        if (!string.IsNullOrEmpty(InitialRefinementText) && string.IsNullOrEmpty(customInstructions))
+        {
+            customInstructions = InitialRefinementText;
+        }
+
         // Extract scenes from current story
         if (Session?.CurrentStoryJson != null && !string.IsNullOrWhiteSpace(Session.CurrentStoryJson))
         {

@@ -22,16 +22,19 @@
                 Session="currentSession"
                 EvaluationReport="lastEvaluation"
                 RubricSummary="currentSession?.RubricSummary"
-                Events="streamEvents" />
+                Events="streamEvents"
+                OnRefineRequested="HandleRefineFromRubric"
+                OnCompleteRequested="HandleComplete" />
 
-            @if (currentSession.Stage == "Evaluated" || currentSession.Stage == "RefinementRequested")
+            @if (currentSession.Stage == "Evaluated" || currentSession.Stage == "RefinementRequested" || currentSession.Stage == "Complete")
             {
                 <AgentModeRefinementPanel
                     Session="currentSession"
                     OnRefine="HandleRefine"
                     OnProceedToRubric="HandleProceedToRubric"
                     OnComplete="HandleComplete"
-                    IsLoading="isRefining" />
+                    IsLoading="isRefining"
+                    InitialRefinementText="@autoPopulatedRefinementText" />
             }
 
             @if (!string.IsNullOrWhiteSpace(currentSession.CurrentStoryJson) &&
@@ -69,6 +72,7 @@
     private EvaluationReport? lastEvaluation;
     private List<AgentStreamEvent> streamEvents = new();
     private string? errorMessage;
+    private string? autoPopulatedRefinementText;
     private CancellationTokenSource? streamCts;
 
     private async Task HandleStartSession(StartSessionRequest request)
@@ -208,6 +212,13 @@
 
             // Refresh session to show "Evaluating" state
             await RefreshSessionAsync(sessionId);
+
+            // Ensure rubric is cleared if we're doing a new evaluation after refinement
+            if (currentSession != null)
+            {
+                currentSession.RubricSummary = null;
+            }
+
             StateHasChanged();
 
             // Wait for evaluation to complete
@@ -225,6 +236,24 @@
         }
     }
 
+    private async Task HandleRefineFromRubric()
+    {
+        if (currentSession?.RubricSummary == null) return;
+
+        var concerns = string.Join("\n", currentSession.RubricSummary.Concerns.Select(c => "- " + c));
+        var nextSteps = string.Join("\n", currentSession.RubricSummary.SuggestedFocus.Select(s => "- " + s));
+
+        autoPopulatedRefinementText = $"What Needs Work:\n{concerns}\n\nNext Steps:\n{nextSteps}";
+
+        // If stage is already Complete, we must move it back to RefinementRequested
+        // so the API allows the RefineAsync call.
+        if (currentSession.Stage == "Complete" || currentSession.Stage == "Evaluated")
+        {
+            currentSession.Stage = "RefinementRequested";
+            StateHasChanged();
+        }
+    }
+
     private async Task HandleRefine(RefineRequest request)
     {
         if (currentSession == null)
@@ -234,9 +263,19 @@
         {
             errorMessage = null;
             isRefining = true;
+            currentSession.Stage = "Refining"; // Update local state for immediate feedback
+            currentSession.IterationCount++; // Increment local iteration count
+            currentSession.RubricSummary = null; // Clear old rubric
+            autoPopulatedRefinementText = null; // Clear auto-populated text
             StateHasChanged();
 
-            await sessionService.RefineAsync(currentSession.SessionId, request);
+            var response = await sessionService.RefineAsync(currentSession.SessionId, request);
+
+            // Sync with server iteration count if possible
+            if (response != null && response.IterationCount > 0)
+            {
+                currentSession.IterationCount = response.IterationCount;
+            }
 
             // Wait for refinement to complete
             await WaitForRefinementAsync(currentSession.SessionId);

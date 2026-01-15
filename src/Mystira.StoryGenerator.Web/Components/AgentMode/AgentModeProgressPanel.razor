@@ -23,7 +23,11 @@
                     {
                         <span>✅</span>
                     }
-                    else if ((phase == "Rubric" && currentPhase == "Rubric") || (phase == "Complete" && currentPhase == "Complete"))
+                    else if (phase == "Complete" && currentPhase == "Complete")
+                    {
+                        <span>✅</span>
+                    }
+                    else if (phase == "Rubric" && currentPhase == "Rubric" && RubricSummary != null)
                     {
                         <span>✅</span>
                     }
@@ -105,7 +109,7 @@
 
     @if (RubricSummary != null)
     {
-        <div class="rubric-summary">
+        <div class="rubric-summary evaluation-scorecard">
             <h3>📊 Story Quality Rubric</h3>
 
             <div class="rubric-header">
@@ -160,6 +164,15 @@
                     </ul>
                 </div>
             }
+
+            <div class="button-group mt-4" style="display: flex; gap: 0.75rem;">
+                <button @onclick="Refine" class="btn-primary" style="flex: 1;">
+                    ✨ Refine Story
+                </button>
+                <button @onclick="Complete" class="btn-secondary" style="flex: 1;">
+                    ✅ Complete Session
+                </button>
+            </div>
         </div>
     }
 
@@ -213,14 +226,26 @@
     [Parameter] public EvaluationReport? EvaluationReport { get; set; }
     [Parameter] public RubricSummary? RubricSummary { get; set; }
     [Parameter] public List<AgentStreamEvent> Events { get; set; } = new();
+    [Parameter] public EventCallback OnRefineRequested { get; set; }
+    [Parameter] public EventCallback OnCompleteRequested { get; set; }
 
     private string currentPhase = "Writing";
     private List<string> phases = new() { "Writing", "Validating", "Evaluating", "Rubric", "Complete" };
 
+    private async Task Refine() => await OnRefineRequested.InvokeAsync();
+    private async Task Complete() => await OnCompleteRequested.InvokeAsync();
+
     private string GetPhaseStatus(string phase)
     {
-        // Rubric and Complete phases should show as complete, not active
-        if ((phase == "Rubric" && currentPhase == "Rubric") || (phase == "Complete" && currentPhase == "Complete"))
+        // For Rubric phase, if we're currently in it, it should show as active (spinner)
+        if (phase == "Rubric" && currentPhase == "Rubric")
+        {
+            // If the rubric is already generated, it should show as complete
+            return RubricSummary != null ? "complete" : "active";
+        }
+
+        // For Complete phase
+        if (phase == "Complete" && currentPhase == "Complete")
             return "complete";
 
         return phase == currentPhase ? "active" : IsPhaseComplete(phase) ? "complete" : "pending";
@@ -266,12 +291,10 @@
         {
             currentPhase = Session.Stage switch
             {
-                "Generating" => "Writing",
+                "Generating" or "Refining" or "Refined" => "Writing",
                 "Validating" => "Validating",
-                "Evaluating" => "Evaluating",
-                "Evaluated" or "RefinementRequested" => "Evaluating", // Keep on Evaluating, but show as complete via IsEvaluatingCompleteWaitingForUser
-                "Refining" or "Refined" => "Writing",
-                "GeneratingRubric" => "Rubric",
+                "Evaluating" or "Evaluated" or "RefinementRequested" => "Evaluating", // Keep on Evaluating, but show as complete via IsEvaluatingCompleteWaitingForUser
+                "GeneratingRubric" or "Rubric" => "Rubric",
                 "Complete" => "Complete",
                 "Failed" => "Failed",
                 _ => currentPhase
@@ -282,7 +305,22 @@
         var latestPhase = Events.LastOrDefault(e => e.Type == AgentStreamEvent.EventType.PhaseStarted);
         if (latestPhase != null && !string.IsNullOrEmpty(latestPhase.Phase))
         {
-            currentPhase = latestPhase.Phase;
+            // Map event phases to our local phase names if they differ
+            var mappedPhase = latestPhase.Phase switch
+            {
+                "Rubric" => "Rubric",
+                "Writing" => "Writing",
+                "Refining" => "Writing",
+                "Validating" => "Validating",
+                "Evaluating" => "Evaluating",
+                "Complete" => "Complete",
+                _ => latestPhase.Phase
+            };
+
+            if (phases.Contains(mappedPhase))
+            {
+                currentPhase = mappedPhase;
+            }
         }
     }
 }
