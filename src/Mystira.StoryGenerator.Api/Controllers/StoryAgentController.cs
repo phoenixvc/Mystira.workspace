@@ -157,6 +157,22 @@ public class StoryAgentController : ControllerBase
                 return Conflict(new { error = "Session is not in Validating state", sessionId, currentStage = session.Stage.ToString() });
             }
 
+            // Update session to Evaluating stage
+            session.Stage = StorySessionStage.Evaluating;
+            session.UpdatedAt = DateTime.UtcNow;
+            await _sessionRepository.UpsertAsync(session, cancellationToken);
+
+            // Publish Evaluating phase event
+            await _streamPublisher.PublishEventAsync(sessionId, new AgentStreamEvent
+            {
+                Type = AgentStreamEvent.EventType.PhaseStarted,
+                Phase = "Evaluating",
+                Payload = new { },
+                IterationNumber = session.IterationCount
+            });
+
+            _logger.LogInformation("Session {SessionId} entered Evaluating stage", sessionId);
+
             // Set timeout
             var timeoutSeconds = request?.TimeoutSeconds ?? 300;
             using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);

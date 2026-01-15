@@ -200,12 +200,22 @@
     {
         try
         {
-            var evalResponse = await sessionService.EvaluateAsync(sessionId);
+            // Start the evaluation (this will set backend to "Evaluating" state)
+            var evaluateTask = sessionService.EvaluateAsync(sessionId);
+
+            // Give backend time to set state to "Evaluating" and publish event
+            await Task.Delay(500);
+
+            // Refresh session to show "Evaluating" state
+            await RefreshSessionAsync(sessionId);
+            StateHasChanged();
+
+            // Wait for evaluation to complete
+            var evalResponse = await evaluateTask;
             lastEvaluation = evalResponse.EvaluationReport;
 
-            // Refresh session state
+            // Refresh session state to show final evaluation result
             await RefreshSessionAsync(sessionId);
-
             StateHasChanged();
         }
         catch (Exception ex)
