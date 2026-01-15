@@ -313,7 +313,7 @@ CRITICAL: Ensure summaries are clear, specific, and actionable for both develope
                 name = agentDef.Name,  // Required at root level
                 definition = new
                 {
-                    kind = "assistant",  // Required: agent kind
+                    kind = "hosted",  // Required: agent kind (prompt, hosted, container_app, workflow)
                     model = modelDeployment,
                     name = agentDef.Name,
                     instructions = agentDef.Instructions,
