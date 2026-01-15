@@ -15,6 +15,9 @@ public static class FoundryServiceCollectionExtensions
         this IServiceCollection services,
         FoundryAgentConfig foundryConfig)
     {
+        // Validate agent IDs are properly configured (not placeholder values)
+        FoundryAgentConfigValidator.ValidateAgentIds(foundryConfig);
+
         services.AddSingleton(foundryConfig);
         services.AddSingleton(Options.Create(foundryConfig));
 
