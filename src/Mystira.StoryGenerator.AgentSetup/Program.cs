@@ -310,8 +310,10 @@ CRITICAL: Ensure summaries are clear, specific, and actionable for both develope
             // Create the agent using Azure AI Foundry schema
             var agentData = new
             {
+                name = agentDef.Name,  // Required at root level
                 definition = new
                 {
+                    kind = "assistant",  // Required: agent kind
                     model = modelDeployment,
                     name = agentDef.Name,
                     instructions = agentDef.Instructions,
