@@ -16,6 +16,10 @@
                     {
                         <span>✅</span>
                     }
+                    else if (phase == "Complete" && currentPhase == "Complete")
+                    {
+                        <span>✅</span>
+                    }
                     else if (phase == currentPhase)
                     {
                         <span class="spinner">⏳</span>
@@ -147,6 +151,10 @@
 
     private string GetPhaseStatus(string phase)
     {
+        // Complete phase should show as complete, not active
+        if (phase == "Complete" && currentPhase == "Complete")
+            return "complete";
+
         return phase == currentPhase ? "active" : IsPhaseComplete(phase) ? "complete" : "pending";
     }
 
