@@ -65,6 +65,11 @@ public class StorySession
     public EvaluationReport? LastEvaluationReport { get; set; }
 
     /// <summary>
+    /// The rubric summary for the current story. Nullable if no rubric has been generated.
+    /// </summary>
+    public RubricSummary? RubricSummary { get; set; }
+
+    /// <summary>
     /// User's refinement focus areas.
     /// </summary>
     public UserRefinementFocus? UserFocus { get; set; }

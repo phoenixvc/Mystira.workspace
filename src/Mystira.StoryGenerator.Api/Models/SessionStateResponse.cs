@@ -16,6 +16,7 @@ public class SessionStateResponse
     public string CurrentStoryJson { get; set; } = string.Empty;
     public string CurrentStoryYaml { get; set; } = string.Empty;
     public EvaluationReport? LastEvaluationReport { get; set; }
+    public RubricSummary? RubricSummary { get; set; }
     public List<StoryVersionSnapshot> StoryVersions { get; set; } = new();
     public string? ErrorMessage { get; set; }
 }

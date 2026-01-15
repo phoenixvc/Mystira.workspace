@@ -22,6 +22,7 @@
             <AgentModeProgressPanel
                 Session="currentSession"
                 EvaluationReport="lastEvaluation"
+                RubricSummary="currentSession?.RubricSummary"
                 Events="streamEvents" />
 
             @if (currentSession.Stage == "Evaluated" || currentSession.Stage == "RefinementRequested")

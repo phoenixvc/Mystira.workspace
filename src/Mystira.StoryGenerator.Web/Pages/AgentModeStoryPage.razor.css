@@ -290,6 +290,92 @@
     border-radius: 4px;
 }
 
+/* Rubric Summary Styles */
+::deep .rubric-summary {
+    background: #f0fff4;
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin: 1rem 0;
+    border: 1px solid #9ae6b4;
+}
+
+::deep .rubric-summary h3 {
+    margin-top: 0;
+    margin-bottom: 1rem;
+    color: #2f855a;
+}
+
+::deep .rubric-header {
+    margin-bottom: 1.5rem;
+    display: flex;
+    justify-content: center;
+}
+
+::deep .ready-badge {
+    padding: 0.5rem 1.5rem;
+    background: #28a745;
+    color: white;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+::deep .needs-work-badge {
+    padding: 0.5rem 1.5rem;
+    background: #ffc107;
+    color: #333;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+::deep .rubric-section {
+    margin-bottom: 1.5rem;
+}
+
+::deep .rubric-section:last-child {
+    margin-bottom: 0;
+}
+
+::deep .rubric-section h4 {
+    margin-top: 0;
+    margin-bottom: 0.75rem;
+    color: #2f855a;
+    font-size: 1.1rem;
+}
+
+::deep .rubric-section p {
+    line-height: 1.6;
+    color: #333;
+    margin: 0;
+}
+
+::deep .strength-list,
+::deep .concern-list,
+::deep .focus-list {
+    margin: 0.5rem 0 0 1.5rem;
+    padding: 0;
+}
+
+::deep .strength-list li,
+::deep .concern-list li,
+::deep .focus-list li {
+    margin-bottom: 0.5rem;
+    line-height: 1.5;
+}
+
+::deep .strength-list li {
+    color: #2f855a;
+}
+
+::deep .concern-list li {
+    color: #d97706;
+}
+
+::deep .focus-list li {
+    color: #0066cc;
+}
+
 /* Event Log Styles */
 ::deep .event-log {
     background: #f5f5f5;

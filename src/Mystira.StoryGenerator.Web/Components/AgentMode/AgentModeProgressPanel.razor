@@ -96,6 +96,66 @@
         </div>
     }
 
+    @if (RubricSummary != null)
+    {
+        <div class="rubric-summary">
+            <h3>📊 Story Quality Rubric</h3>
+
+            <div class="rubric-header">
+                <div class="@(RubricSummary.ReadyForPublish ? "ready-badge" : "needs-work-badge")">
+                    @(RubricSummary.ReadyForPublish ? "✅ Ready for Publish" : "⚠️ Needs Refinement")
+                </div>
+            </div>
+
+            @if (!string.IsNullOrEmpty(RubricSummary.Summary))
+            {
+                <div class="rubric-section">
+                    <h4>Summary</h4>
+                    <p>@RubricSummary.Summary</p>
+                </div>
+            }
+
+            @if (RubricSummary.Strengths.Any())
+            {
+                <div class="rubric-section">
+                    <h4>✨ What's Working</h4>
+                    <ul class="strength-list">
+                        @foreach (var strength in RubricSummary.Strengths)
+                        {
+                            <li>@strength</li>
+                        }
+                    </ul>
+                </div>
+            }
+
+            @if (RubricSummary.Concerns.Any())
+            {
+                <div class="rubric-section">
+                    <h4>🔍 What Needs Work</h4>
+                    <ul class="concern-list">
+                        @foreach (var concern in RubricSummary.Concerns)
+                        {
+                            <li>@concern</li>
+                        }
+                    </ul>
+                </div>
+            }
+
+            @if (RubricSummary.SuggestedFocus.Any())
+            {
+                <div class="rubric-section">
+                    <h4>🎯 Next Steps</h4>
+                    <ul class="focus-list">
+                        @foreach (var focus in RubricSummary.SuggestedFocus)
+                        {
+                            <li>@focus</li>
+                        }
+                    </ul>
+                </div>
+            }
+        </div>
+    }
+
     @if (Events.Any())
     {
         <div class="event-log">
@@ -144,6 +204,7 @@
 @code {
     [Parameter] public SessionStateResponse? Session { get; set; }
     [Parameter] public EvaluationReport? EvaluationReport { get; set; }
+    [Parameter] public RubricSummary? RubricSummary { get; set; }
     [Parameter] public List<AgentStreamEvent> Events { get; set; } = new();
 
     private string currentPhase = "Writing";
@@ -183,6 +244,7 @@
             AgentStreamEvent.EventType.EvaluationPassed => "Evaluation Passed",
             AgentStreamEvent.EventType.EvaluationFailed => "Evaluation Failed",
             AgentStreamEvent.EventType.RefinementComplete => "Refinement Complete",
+            AgentStreamEvent.EventType.RubricGenerated => "Rubric Generated",
             AgentStreamEvent.EventType.MaxIterationsReached => "Max Iterations Reached",
             AgentStreamEvent.EventType.Error => "Error",
             AgentStreamEvent.EventType.TokenUsageUpdate => "Token Usage Update",

@@ -355,35 +355,25 @@ public class StoryAgentController : ControllerBase
             session.UpdatedAt = DateTime.UtcNow;
             await _sessionRepository.UpsertAsync(session, cancellationToken);
 
-            // Publish rubric generation start event
-            await _streamPublisher.PublishEventAsync(sessionId, new AgentStreamEvent
+            // Call rubric generator
+            var (success, rubric) = await _orchestrator.GenerateRubricAsync(sessionId, cancellationToken);
+
+            if (!success)
             {
-                Type = AgentStreamEvent.EventType.PhaseStarted,
-                Phase = "Rubric",
-                Payload = new { },
-                IterationNumber = session.IterationCount
-            });
+                _logger.LogWarning("Rubric generation failed for session {SessionId}", sessionId);
+                session.Stage = StorySessionStage.Failed;
+                session.ErrorMessage = "Failed to generate rubric";
+                session.UpdatedAt = DateTime.UtcNow;
+                await _sessionRepository.UpsertAsync(session, cancellationToken);
+                return StatusCode(500, new { error = "Failed to generate rubric", sessionId });
+            }
 
-            // TODO: Call rubric generator here
-            // This should:
-            // 1. Call IPromptGenerator.GenerateRubricPrompt(session.CurrentStoryVersion, session.LastEvaluationReport, session.IterationCount)
-            // 2. Send the prompt to an LLM agent
-            // 3. Parse and store the rubric response in the session
-            // 4. Return the rubric to the frontend for display
-
-            // For now, just mark as complete
-            session.Stage = StorySessionStage.Complete;
-            session.UpdatedAt = DateTime.UtcNow;
-            await _sessionRepository.UpsertAsync(session, cancellationToken);
-
-            // Publish completion event
-            await _streamPublisher.PublishEventAsync(sessionId, new AgentStreamEvent
+            // Reload session to get updated state (orchestrator already updated it)
+            session = await _sessionRepository.GetAsync(sessionId, cancellationToken);
+            if (session == null)
             {
-                Type = AgentStreamEvent.EventType.PhaseStarted,
-                Phase = "Complete",
-                Payload = new { },
-                IterationNumber = session.IterationCount
-            });
+                return NotFound(new { error = "Session not found after rubric generation", sessionId });
+            }
 
             _logger.LogInformation("Rubric generated for session {SessionId}", sessionId);
 
@@ -397,6 +387,7 @@ public class StoryAgentController : ControllerBase
                 CurrentStoryJson = session.CurrentStoryVersion,
                 CurrentStoryYaml = session.CurrentStoryYaml ?? string.Empty,
                 LastEvaluationReport = session.LastEvaluationReport,
+                RubricSummary = session.RubricSummary,
                 StoryVersions = session.StoryVersions,
                 ErrorMessage = session.ErrorMessage
             };
@@ -474,6 +465,7 @@ public class StoryAgentController : ControllerBase
                 CurrentStoryJson = session.CurrentStoryVersion,
                 CurrentStoryYaml = session.CurrentStoryYaml ?? string.Empty,
                 LastEvaluationReport = session.LastEvaluationReport,
+                RubricSummary = session.RubricSummary,
                 StoryVersions = session.StoryVersions,
                 ErrorMessage = session.ErrorMessage
             };
@@ -519,6 +511,7 @@ public class StoryAgentController : ControllerBase
                 CurrentStoryJson = session.CurrentStoryVersion,
                 CurrentStoryYaml = session.CurrentStoryYaml ?? string.Empty,
                 LastEvaluationReport = session.LastEvaluationReport,
+                RubricSummary = session.RubricSummary,
                 StoryVersions = session.StoryVersions,
                 ErrorMessage = session.ErrorMessage
             };
