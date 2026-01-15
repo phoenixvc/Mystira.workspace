@@ -307,16 +307,19 @@ CRITICAL: Ensure summaries are clear, specific, and actionable for both develope
 
         try
         {
-            // Create the agent using the protocol API with JSON
+            // Create the agent using Azure AI Foundry schema
             var agentData = new
             {
-                model = modelDeployment,
-                name = agentDef.Name,
-                instructions = agentDef.Instructions,
-                description = agentDef.Description,
-                tools = new[]
+                definition = new
                 {
-                    new { type = "file_search" }
+                    model = modelDeployment,
+                    name = agentDef.Name,
+                    instructions = agentDef.Instructions,
+                    description = agentDef.Description,
+                    tools = new[]
+                    {
+                        new { type = "file_search" }
+                    }
                 }
             };
 
