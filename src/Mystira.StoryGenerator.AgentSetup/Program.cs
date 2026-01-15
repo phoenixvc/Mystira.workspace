@@ -313,14 +313,17 @@ CRITICAL: Ensure summaries are clear, specific, and actionable for both develope
                 name = agentDef.Name,  // Required at root level
                 definition = new
                 {
-                    kind = "hosted",  // Required: agent kind (prompt, hosted, container_app, workflow)
+                    kind = "prompt",  // Required: agent kind (prompt for OpenAI-style assistants)
                     model = modelDeployment,
                     name = agentDef.Name,
                     instructions = agentDef.Instructions,
                     description = agentDef.Description,
                     tools = new[]
                     {
-                        new { type = "file_search" }
+                        new {
+                            type = "file_search",
+                            vector_store_ids = new string[] { }  // Empty array, can be configured later
+                        }
                     }
                 }
             };
