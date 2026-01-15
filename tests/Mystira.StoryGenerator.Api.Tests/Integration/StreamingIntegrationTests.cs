@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Mystira.StoryGenerator.Api;
-using Mystira.StoryGenerator.Api.Models;
 using Mystira.StoryGenerator.Application.Infrastructure.Agents;
 using Mystira.StoryGenerator.Contracts.Models;
 using Mystira.StoryGenerator.Domain.Agents;
@@ -129,40 +128,35 @@ public class StreamingIntegrationTests : IClassFixture<WebApplicationFactory<Pro
     public async Task SSEStream_ClosesOnTerminalState()
     {
         // Arrange
-        var request = new StartSessionRequest
-        {
-            StoryPrompt = "Tell me a story",
-            KnowledgeMode = "FileSearch",
-            AgeGroup = "6-9"
-        };
+        var sessionId = "terminal-test-session";
 
-        var startResponse = await _client.PostAsJsonAsync("/api/story-agent/sessions/start", request);
-        var startContent = await startResponse.Content.ReadAsStringAsync();
-        var startResult = JsonSerializer.Deserialize<SessionStartResponse>(startContent, _jsonOptions);
-        var sessionId = startResult!.SessionId;
+        // Manually create the session in the mock repo
+        var mockRepo = _factory.Services.GetRequiredService<IStorySessionRepository>() as StreamingMockSessionRepository;
+        await mockRepo!.CreateAsync(new StorySession
+        {
+            SessionId = sessionId,
+            Stage = StorySessionStage.Validating,
+            ThreadId = "test-thread"
+        });
 
         // Act - Start streaming
         var requestMessage = new HttpRequestMessage(HttpMethod.Get, $"/api/story-agent/sessions/{sessionId}/stream");
         requestMessage.Headers.Add("Accept", "text/event-stream");
 
-        var response = await _client.SendAsync(requestMessage);
+        var response = await _client.SendAsync(requestMessage, HttpCompletionOption.ResponseHeadersRead);
+        Assert.Equal(System.Net.HttpStatusCode.OK, response.StatusCode);
 
-        // Read initial content
-        var content = await response.Content.ReadAsStringAsync();
+        // Act - Read the stream until it ends
+        using var stream = await response.Content.ReadAsStreamAsync();
+        using var reader = new StreamReader(stream);
 
-        // Wait a bit for stream to process
-        await Task.Delay(2000);
+        var content = await reader.ReadToEndAsync();
 
-        // Act - Try to continue reading (stream should be closed)
-        var stream = await response.Content.ReadAsStreamAsync();
-        var buffer = new byte[1024];
+        // Assert - Stream should contain the terminal event and then close
+        Assert.Contains("event: RubricGenerated", content);
 
-        // This should not hang or throw
-        var readTask = stream.ReadAsync(buffer, 0, buffer.Length);
-        var completedTask = await Task.WhenAny(readTask, Task.Delay(1000));
-
-        // Assert - Stream should be closed (read should return 0 or timeout quickly)
-        Assert.True(completedTask == readTask && readTask.Result == 0 || completedTask != readTask);
+        // If ReadToEndAsync finished, it means the stream was closed by the server
+        Assert.True(true);
     }
 
     [Fact]
@@ -319,6 +313,21 @@ public class StreamingIntegrationTests : IClassFixture<WebApplicationFactory<Pro
         {
             return await Task.FromResult(_sessions.TryGetValue(sessionId, out var session) ? session : null);
         }
+
+        public async Task<(bool Success, RubricSummary? Rubric)> GenerateRubricAsync(string sessionId, CancellationToken ct)
+        {
+            if (_sessions.TryGetValue(sessionId, out var session))
+            {
+                var rubric = new RubricSummary
+                {
+                    Summary = "Streaming mock rubric",
+                    ReadyForPublish = true
+                };
+                session.RubricSummary = rubric;
+                return (true, rubric);
+            }
+            return (false, null);
+        }
     }
 
     private class StreamingMockStreamPublisher : IAgentStreamPublisher
@@ -338,13 +347,19 @@ public class StreamingIntegrationTests : IClassFixture<WebApplicationFactory<Pro
         public async IAsyncEnumerable<AgentStreamEvent> SubscribeAsync(string sessionId, CancellationToken ct = default)
         {
             // Simulate streaming events
-            var events = new[]
+            var events = new List<AgentStreamEvent>
             {
                 new AgentStreamEvent { Type = AgentStreamEvent.EventType.PhaseStarted, Phase = "SessionStarted", Timestamp = DateTime.UtcNow },
                 new AgentStreamEvent { Type = AgentStreamEvent.EventType.PhaseStarted, Phase = "GenerationStarted", Timestamp = DateTime.UtcNow },
                 new AgentStreamEvent { Type = AgentStreamEvent.EventType.GenerationComplete, Phase = "GenerationComplete", Timestamp = DateTime.UtcNow },
                 new AgentStreamEvent { Type = AgentStreamEvent.EventType.PhaseStarted, Phase = "ValidationStarted", Timestamp = DateTime.UtcNow }
             };
+
+            // For SSEStream_ClosesOnTerminalState test, we need a terminal event
+            if (sessionId == "terminal-test-session")
+            {
+                events.Add(new AgentStreamEvent { Type = AgentStreamEvent.EventType.RubricGenerated, Phase = "Rubric", Timestamp = DateTime.UtcNow });
+            }
 
             foreach (var evt in events)
             {

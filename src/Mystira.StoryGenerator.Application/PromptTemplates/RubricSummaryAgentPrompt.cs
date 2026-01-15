@@ -1,4 +1,5 @@
 using System.Text.Json;
+using Mystira.StoryGenerator.Contracts.Models;
 using Mystira.StoryGenerator.Domain.Agents;
 
 namespace Mystira.StoryGenerator.Application.PromptTemplates;

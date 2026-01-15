@@ -1,6 +1,7 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
+using Mystira.StoryGenerator.Contracts.Models;
 
 namespace Mystira.StoryGenerator.Application.Infrastructure.Agents;
 

@@ -1,3 +1,4 @@
+using Mystira.StoryGenerator.Contracts.Models;
 using Mystira.StoryGenerator.Domain.Agents;
 
 namespace Mystira.StoryGenerator.Application.Infrastructure.Agents;
@@ -42,6 +43,14 @@ public interface IAgentOrchestrator
     /// <param name="ct">Cancellation token.</param>
     /// <returns>Success status and message.</returns>
     Task<(bool Success, string Message)> RefineStoryAsync(string sessionId, UserRefinementFocus focus, CancellationToken ct);
+
+    /// <summary>
+    /// Generate a user-friendly rubric summary for the current story.
+    /// </summary>
+    /// <param name="sessionId">The session identifier.</param>
+    /// <param name="ct">Cancellation token.</param>
+    /// <returns>Success status and rubric summary.</returns>
+    Task<(bool Success, RubricSummary? Rubric)> GenerateRubricAsync(string sessionId, CancellationToken ct);
 
     /// <summary>
     /// Get the current state of a story session.

@@ -1,4 +1,3 @@
-@using Mystira.StoryGenerator.Api.Models
 @using Mystira.StoryGenerator.Contracts.Models
 @using System.Text.Json
 
@@ -64,26 +63,60 @@
                 disabled="@IsLoading" />
         </div>
 
-        <button
-            @onclick="Submit"
-            disabled="@IsLoading"
-            class="btn-primary">
-            @if (IsLoading)
-            {
-                <span>🔄 Refining...</span>
-            }
-            else
-            {
-                <span>✨ Refine & Re-evaluate</span>
-            }
-        </button>
+        <div class="button-group" style="display: flex; gap: 0.75rem; margin-top: 1rem;">
+            <button
+                @onclick="Submit"
+                disabled="@IsLoading"
+                class="btn-primary"
+                style="flex: 1;">
+                @if (IsLoading)
+                {
+                    <span>🔄 Refining...</span>
+                }
+                else
+                {
+                    <span>✨ Refine & Re-evaluate</span>
+                }
+            </button>
+            <button
+                @onclick="ProceedToRubric"
+                disabled="@IsLoading"
+                class="btn-secondary"
+                style="flex: 1;">
+                @if (IsLoading)
+                {
+                    <span>⏳ Processing...</span>
+                }
+                else
+                {
+                    <span>📊 Proceed to Rubric</span>
+                }
+            </button>
+            <button
+                @onclick="Complete"
+                disabled="@IsLoading"
+                class="btn-secondary"
+                style="flex: 1;">
+                @if (IsLoading)
+                {
+                    <span>⏳ Processing...</span>
+                }
+                else
+                {
+                    <span>✓ Complete</span>
+                }
+            </button>
+        </div>
     </div>
 </div>
 
 @code {
     [Parameter] public SessionStateResponse? Session { get; set; }
     [Parameter] public EventCallback<RefineRequest> OnRefine { get; set; }
+    [Parameter] public EventCallback OnProceedToRubric { get; set; }
+    [Parameter] public EventCallback OnComplete { get; set; }
     [Parameter] public bool IsLoading { get; set; }
+    [Parameter] public string? InitialRefinementText { get; set; }
 
     private bool isFullRewrite = true;
     private List<SceneInfo> availableScenes = new();
@@ -95,8 +128,21 @@
     private List<string> selectedAspects = new();
     private string customInstructions = "";
 
+    protected override void OnInitialized()
+    {
+        if (!string.IsNullOrEmpty(InitialRefinementText))
+        {
+            customInstructions = InitialRefinementText;
+        }
+    }
+
     protected override void OnParametersSet()
     {
+        if (!string.IsNullOrEmpty(InitialRefinementText) && string.IsNullOrEmpty(customInstructions))
+        {
+            customInstructions = InitialRefinementText;
+        }
+
         // Extract scenes from current story
         if (Session?.CurrentStoryJson != null && !string.IsNullOrWhiteSpace(Session.CurrentStoryJson))
         {
@@ -167,6 +213,16 @@
             Constraints = customInstructions
         };
         await OnRefine.InvokeAsync(request);
+    }
+
+    private async Task ProceedToRubric()
+    {
+        await OnProceedToRubric.InvokeAsync();
+    }
+
+    private async Task Complete()
+    {
+        await OnComplete.InvokeAsync();
     }
 
     private class SceneInfo

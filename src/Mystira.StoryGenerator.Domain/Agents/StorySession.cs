@@ -1,5 +1,7 @@
 using System.Text.Json.Serialization;
 
+using Mystira.StoryGenerator.Contracts.Models;
+
 namespace Mystira.StoryGenerator.Domain.Agents;
 
 /// <summary>
@@ -63,6 +65,11 @@ public class StorySession
     /// The latest evaluation report. Nullable if no evaluation has been performed.
     /// </summary>
     public EvaluationReport? LastEvaluationReport { get; set; }
+
+    /// <summary>
+    /// The rubric summary for the current story. Nullable if no rubric has been generated.
+    /// </summary>
+    public RubricSummary? RubricSummary { get; set; }
 
     /// <summary>
     /// User's refinement focus areas.

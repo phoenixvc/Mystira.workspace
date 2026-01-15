@@ -4,7 +4,6 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Net.Http.Headers;
 using Mystira.StoryGenerator.Api;
-using Mystira.StoryGenerator.Api.Models;
 using Mystira.StoryGenerator.Application.Infrastructure.Agents;
 using Mystira.StoryGenerator.Contracts.Models;
 using Mystira.StoryGenerator.Domain.Agents;
@@ -305,6 +304,21 @@ public class StoryAgentControllerTests : IClassFixture<WebApplicationFactory<Pro
         public async Task<StorySession?> GetSessionAsync(string sessionId)
         {
             return await Task.FromResult(_sessions.TryGetValue(sessionId, out var session) ? session : null);
+        }
+
+        public async Task<(bool Success, RubricSummary? Rubric)> GenerateRubricAsync(string sessionId, CancellationToken ct)
+        {
+            if (_sessions.TryGetValue(sessionId, out var session))
+            {
+                var rubric = new RubricSummary
+                {
+                    Summary = "Mock rubric summary",
+                    ReadyForPublish = true
+                };
+                session.RubricSummary = rubric;
+                return (true, rubric);
+            }
+            return (false, null);
         }
     }
 
