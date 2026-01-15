@@ -113,6 +113,7 @@ Choice (""choice""):
 Roll (""roll""):
     •   Must have roll_requirements describing the mechanic (thresholds, difficulty) for a D20 dice.
     •   Must have a branches array with exactly two outcome branches, each with a next_scene id.
+    •   Must not have echo_log in any branch. Roll scenes should not include echo logs.
 
 Special (""special""):
     •   Used for endings, major reveals, or meta moments.
@@ -124,6 +125,11 @@ For every ""choice"" or ""roll"" scene:
     •   branches is required, with at least two entries.
     •   Within a single scene, each branch must have a unique next_scene id.
     •   No two branches from the same scene may point to the same next_scene.
+
+## Compass axes validation (critical)
+    •   All compass_change axis values throughout the story must be from the core_axes defined at the top level.
+    •   Never use axis values that are not in core_axes (e.g. if core_axes are [""problem-solving"", ""kindness"", ""perseverance""], you cannot use ""cooperation"" or any other axis).
+    •   Every compass_change.axis must exactly match one of the strings in the core_axes array.
 
 ## General consistency
     •   All next_scene and branch next_scene targets must reference existing scenes.
