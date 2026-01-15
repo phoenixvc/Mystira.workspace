@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using Mystira.StoryGenerator.Api;
-using Mystira.StoryGenerator.Api.Models;
 using Mystira.StoryGenerator.Application.Infrastructure.Agents;
 using Mystira.StoryGenerator.Contracts.Models;
 using Mystira.StoryGenerator.Domain.Agents;
@@ -191,8 +190,8 @@ public class AgentPipelineE2ETests : IClassFixture<WebApplicationFactory<Program
 
         await PollUntilStageAsync(sessionId, "Validating");
 
-        // Perform evaluation + refinement loop up to 5 times
-        for (int i = 0; i < 5; i++)
+        // Perform evaluation + refinement loop up to 6 times (0 to 5)
+        for (int i = 0; i < 6; i++)
         {
             // Evaluate
             var evalResponse = await _client.PostAsJsonAsync($"/api/story-agent/sessions/{sessionId}/evaluate", new EvaluateRequest());
@@ -201,9 +200,9 @@ public class AgentPipelineE2ETests : IClassFixture<WebApplicationFactory<Program
 
             Assert.NotNull(evalResult);
 
-            if (i < 4)
+            if (i < 5)
             {
-                // First 4 iterations should return Fail
+                // First 5 iterations (0 to 4) should return Fail
                 Assert.Equal(EvaluationStatus.Fail, evalResult.EvaluationReport.OverallStatus);
 
                 var state = await GetSessionStateAsync(sessionId);
@@ -224,7 +223,7 @@ public class AgentPipelineE2ETests : IClassFixture<WebApplicationFactory<Program
             }
             else
             {
-                // 5th iteration should escalate
+                // 6th evaluation (at iteration 5) should escalate
                 Assert.Equal(EvaluationStatus.Fail, evalResult.EvaluationReport.OverallStatus);
 
                 var finalState = await GetSessionStateAsync(sessionId);
@@ -441,7 +440,6 @@ public class AgentPipelineE2ETests : IClassFixture<WebApplicationFactory<Program
                 // Always fail until max iterations
                 if (session.IterationCount >= 5)
                 {
-                    session.Stage = StorySessionStage.StuckNeedsReview;
                     report = new EvaluationReport
                     {
                         IterationNumber = session.IterationCount,
@@ -452,7 +450,6 @@ public class AgentPipelineE2ETests : IClassFixture<WebApplicationFactory<Program
                 }
                 else
                 {
-                    session.Stage = StorySessionStage.RefinementRequested;
                     report = new EvaluationReport
                     {
                         IterationNumber = session.IterationCount,
@@ -467,7 +464,6 @@ public class AgentPipelineE2ETests : IClassFixture<WebApplicationFactory<Program
             else if (shouldFailInitially && session.IterationCount == 0)
             {
                 // Fail on first evaluation, pass on subsequent
-                session.Stage = StorySessionStage.RefinementRequested;
                 report = new EvaluationReport
                 {
                     IterationNumber = session.IterationCount,
@@ -482,7 +478,6 @@ public class AgentPipelineE2ETests : IClassFixture<WebApplicationFactory<Program
             else
             {
                 // Pass
-                session.Stage = StorySessionStage.Evaluated;
                 report = new EvaluationReport
                 {
                     IterationNumber = session.IterationCount,
@@ -529,6 +524,21 @@ public class AgentPipelineE2ETests : IClassFixture<WebApplicationFactory<Program
         public async Task<StorySession?> GetSessionAsync(string sessionId)
         {
             return await Task.FromResult(_sessions.TryGetValue(sessionId, out var session) ? session : null);
+        }
+
+        public async Task<(bool Success, RubricSummary? Rubric)> GenerateRubricAsync(string sessionId, CancellationToken ct)
+        {
+            if (_sessions.TryGetValue(sessionId, out var session))
+            {
+                var rubric = new RubricSummary
+                {
+                    Summary = "E2E mock rubric",
+                    ReadyForPublish = true
+                };
+                session.RubricSummary = rubric;
+                return (true, rubric);
+            }
+            return (false, null);
         }
 
         private string GenerateMockStory(string suffix = "")

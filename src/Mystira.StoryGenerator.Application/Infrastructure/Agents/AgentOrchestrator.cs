@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Mystira.StoryGenerator.Application.Services.Prompting;
 using Mystira.StoryGenerator.Contracts.Configuration;
+using Mystira.StoryGenerator.Contracts.Models;
 using Mystira.StoryGenerator.Domain.Agents;
 using Mystira.StoryGenerator.Domain.Services;
 using Mystira.StoryGenerator.Infrastructure.Agents;
@@ -292,14 +293,17 @@ public partial class AgentOrchestrator : IAgentOrchestrator
                 throw new InvalidOperationException("Session not found");
             }
 
-            if (session.Stage != StorySessionStage.Validating)
+            if (session.Stage != StorySessionStage.Validating && session.Stage != StorySessionStage.Evaluating)
             {
                 throw new InvalidOperationException($"Invalid session state for evaluation: {session.Stage}");
             }
 
-            session.Stage = StorySessionStage.Evaluating;
-            session.UpdatedAt = DateTime.UtcNow;
-            await _sessionRepository.UpdateAsync(session, ct);
+            if (session.Stage != StorySessionStage.Evaluating)
+            {
+                session.Stage = StorySessionStage.Evaluating;
+                session.UpdatedAt = DateTime.UtcNow;
+                await _sessionRepository.UpdateAsync(session, ct);
+            }
 
             // Phase A: Deterministic validation gates
             await _eventPublisher.PublishEventAsync(sessionId, new AgentStreamEvent

@@ -1,12 +1,10 @@
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
-using Mystira.StoryGenerator.Api.Models;
 using Mystira.StoryGenerator.Application.Infrastructure.Agents;
 using Mystira.StoryGenerator.Domain.Agents;
 using System.Text.Json;
 using System.Collections.Concurrent;
 using Mystira.StoryGenerator.Contracts.Models;
-using SessionStateResponse = Mystira.StoryGenerator.Api.Models.SessionStateResponse;
 
 namespace Mystira.StoryGenerator.Api.Controllers;
 
@@ -195,10 +193,31 @@ public class StoryAgentController : ControllerBase
             var recommendedAction = evaluationReport.OverallStatus switch
             {
                 EvaluationStatus.Pass => "Continue",
-                EvaluationStatus.Fail => "Refine",
+                EvaluationStatus.Fail => session.IterationCount >= 5 ? "ReviewRequired" : "Refine",
                 EvaluationStatus.ReviewRequired => "ReviewRequired",
                 _ => "Continue"
             };
+
+            // Update session stage based on evaluation status
+            if (evaluationReport.OverallStatus == EvaluationStatus.Fail)
+            {
+                if (session.IterationCount >= 5)
+                {
+                    session.Stage = StorySessionStage.StuckNeedsReview;
+                }
+                else
+                {
+                    session.Stage = StorySessionStage.RefinementRequested;
+                }
+            }
+            else if (evaluationReport.OverallStatus == EvaluationStatus.Pass)
+            {
+                session.Stage = StorySessionStage.Evaluated;
+            }
+
+            session.LastEvaluationReport = evaluationReport;
+            session.UpdatedAt = DateTime.UtcNow;
+            await _sessionRepository.UpsertAsync(session, cancellationToken);
 
             var response = new EvaluateResponse
             {
@@ -356,7 +375,7 @@ public class StoryAgentController : ControllerBase
             await _sessionRepository.UpsertAsync(session, cancellationToken);
 
             // Call rubric generator
-            var (success, rubric) = await _orchestrator.GenerateRubricAsync(sessionId, cancellationToken);
+            var (success, rubric) = await _agentOrchestrator.GenerateRubricAsync(sessionId, cancellationToken);
 
             if (!success)
             {
@@ -575,9 +594,11 @@ public class StoryAgentController : ControllerBase
                     _logger.LogDebug("SSE event streamed for session {SessionId}: {EventType}", sessionId, evt.Type);
 
                     // Check if this event indicates terminal state
-                    if (terminalStates.Contains(session.Stage))
+                    if (evt.Type == AgentStreamEvent.EventType.MaxIterationsReached ||
+                        evt.Type == AgentStreamEvent.EventType.Error ||
+                        evt.Type == AgentStreamEvent.EventType.RubricGenerated)
                     {
-                        _logger.LogInformation("SSE stream ending due to terminal state for session {SessionId}: {Stage}", sessionId, session.Stage);
+                        _logger.LogInformation("SSE stream ending due to terminal event for session {SessionId}: {EventType}", sessionId, evt.Type);
                         break;
                     }
                 }

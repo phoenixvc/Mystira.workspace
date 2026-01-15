@@ -1,5 +1,7 @@
 using System.Text.Json.Serialization;
 
+using Mystira.StoryGenerator.Contracts.Models;
+
 namespace Mystira.StoryGenerator.Domain.Agents;
 
 /// <summary>
