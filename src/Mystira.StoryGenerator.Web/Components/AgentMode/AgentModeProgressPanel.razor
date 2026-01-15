@@ -8,7 +8,11 @@
         {
             <div class="timeline-item @GetPhaseStatus(phase)">
                 <div class="timeline-marker">
-                    @if (phase == currentPhase)
+                    @if (currentPhase == "Failed" && phase == currentPhase)
+                    {
+                        <span>❌</span>
+                    }
+                    else if (phase == currentPhase)
                     {
                         <span class="spinner">⏳</span>
                     }
@@ -109,6 +113,23 @@
         <div class="metadata">
             Iteration: @Session.IterationCount | Tokens: ~@(Session.IterationCount * 1500)
         </div>
+
+        @if (Session.Stage == "Failed" && !string.IsNullOrEmpty(Session.ErrorMessage))
+        {
+            <div class="alert alert-danger mt-3">
+                <strong>Error:</strong> @Session.ErrorMessage
+            </div>
+        }
+
+        @if ((Session.Stage == "Generating" || Session.Stage == "Refining") && !string.IsNullOrEmpty(Session.CurrentStoryJson))
+        {
+            <div class="current-generation mt-3">
+                <h4>Current Generation Progress</h4>
+                <div class="story-preview">
+                    <pre class="json-preview">@Session.CurrentStoryJson</pre>
+                </div>
+            </div>
+        }
     }
 </div>
 
@@ -160,7 +181,9 @@
                 "Validating" => "Validating",
                 "Evaluating" or "Evaluated" => "Evaluating",
                 "RefinementRequested" or "Refined" => "Evaluating",
+                "Refining" => "Writing",
                 "Complete" => "Complete",
+                "Failed" => "Failed",
                 _ => currentPhase
             };
         }

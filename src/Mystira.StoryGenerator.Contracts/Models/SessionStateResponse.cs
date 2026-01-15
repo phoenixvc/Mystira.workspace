@@ -51,4 +51,9 @@ public class SessionStateResponse
     /// List of all story versions.
     /// </summary>
     public List<StoryVersionSnapshot> StoryVersions { get; set; } = new();
+
+    /// <summary>
+    /// Error message if the session failed.
+    /// </summary>
+    public string? ErrorMessage { get; set; }
 }

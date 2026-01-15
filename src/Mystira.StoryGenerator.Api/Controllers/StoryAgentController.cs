@@ -335,7 +335,8 @@ public class StoryAgentController : ControllerBase
                 CurrentStoryJson = session.CurrentStoryVersion,
                 CurrentStoryYaml = session.CurrentStoryYaml ?? string.Empty,
                 LastEvaluationReport = session.LastEvaluationReport,
-                StoryVersions = session.StoryVersions
+                StoryVersions = session.StoryVersions,
+                ErrorMessage = session.ErrorMessage
             };
 
             return Ok(response);

@@ -83,4 +83,9 @@ public class StorySession
     /// Estimated cost of the session in USD.
     /// </summary>
     public decimal CostEstimate { get; set; }
+
+    /// <summary>
+    /// Error message if the session failed.
+    /// </summary>
+    public string? ErrorMessage { get; set; }
 }

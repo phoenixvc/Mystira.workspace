@@ -120,6 +120,8 @@ public partial class AgentOrchestrator : IAgentOrchestrator
             _logger.LogError(ex, "Failed to initialize session {SessionId}", sessionId);
 
             session.Stage = StorySessionStage.Failed;
+            session.ErrorMessage = $"Failed to initialize session: {ex.Message}";
+            session.UpdatedAt = DateTime.UtcNow;
             await _sessionRepository.UpsertAsync(session);
 
             await _eventPublisher.PublishEventAsync(sessionId, new AgentStreamEvent
@@ -261,6 +263,7 @@ public partial class AgentOrchestrator : IAgentOrchestrator
             if (session != null)
             {
                 session.Stage = StorySessionStage.Failed;
+                session.ErrorMessage = $"Story generation failed: {ex.Message}";
                 session.UpdatedAt = DateTime.UtcNow;
                 await _sessionRepository.UpdateAsync(session, ct);
             }
@@ -447,6 +450,7 @@ public partial class AgentOrchestrator : IAgentOrchestrator
             if (session != null)
             {
                 session.Stage = StorySessionStage.Failed;
+                session.ErrorMessage = $"Story evaluation failed: {ex.Message}";
                 session.UpdatedAt = DateTime.UtcNow;
                 await _sessionRepository.UpdateAsync(session, ct);
             }
@@ -606,6 +610,7 @@ public partial class AgentOrchestrator : IAgentOrchestrator
             if (session != null)
             {
                 session.Stage = StorySessionStage.Failed;
+                session.ErrorMessage = $"Story refinement failed: {ex.Message}";
                 session.UpdatedAt = DateTime.UtcNow;
                 await _sessionRepository.UpdateAsync(session, ct);
             }
