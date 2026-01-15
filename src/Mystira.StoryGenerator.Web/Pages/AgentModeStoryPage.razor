@@ -83,7 +83,8 @@
                 ThreadId = startResponse.ThreadId,
                 Stage = startResponse.Stage,
                 IterationCount = 0,
-                CurrentStoryJson = string.Empty
+                CurrentStoryJson = string.Empty,
+                ErrorMessage = null
             };
 
             sessionStarted = true;
@@ -143,12 +144,12 @@
         try
         {
             // Poll for story generation completion
-            var maxAttempts = 60; // 30 seconds
+            var maxAttempts = 60; // 5 minutes (60 attempts * 5 seconds)
             var attempt = 0;
 
             while (attempt < maxAttempts)
             {
-                await Task.Delay(500);
+                await Task.Delay(5000); // Poll every 5 seconds
                 currentSession = await sessionService.GetSessionAsync(sessionId);
                 StateHasChanged();
 
@@ -157,7 +158,23 @@
                     break;
                 }
 
+                // Check if the session has failed
+                if (currentSession.Stage == "Failed")
+                {
+                    errorMessage = currentSession.ErrorMessage ?? "Story generation failed. Please try again.";
+                    logger.LogError("Session {SessionId} failed: {ErrorMessage}", sessionId, errorMessage);
+                    return;
+                }
+
                 attempt++;
+            }
+
+            // Check for timeout
+            if (attempt >= maxAttempts && currentSession?.Stage != "Validating" && currentSession?.Stage != "Evaluating")
+            {
+                errorMessage = "Story generation timed out after 5 minutes. Please try again.";
+                logger.LogWarning("Session {SessionId} timed out", sessionId);
+                return;
             }
 
             // If we reached Validating stage, trigger evaluation
@@ -225,12 +242,12 @@
     {
         try
         {
-            var maxAttempts = 60; // 30 seconds
+            var maxAttempts = 60; // 5 minutes (60 attempts * 5 seconds)
             var attempt = 0;
 
             while (attempt < maxAttempts)
             {
-                await Task.Delay(500);
+                await Task.Delay(5000); // Poll every 5 seconds
                 currentSession = await sessionService.GetSessionAsync(sessionId);
                 StateHasChanged();
 
@@ -239,7 +256,23 @@
                     break;
                 }
 
+                // Check if the session has failed
+                if (currentSession.Stage == "Failed")
+                {
+                    errorMessage = currentSession.ErrorMessage ?? "Story refinement failed. Please try again.";
+                    logger.LogError("Session {SessionId} failed during refinement: {ErrorMessage}", sessionId, errorMessage);
+                    return;
+                }
+
                 attempt++;
+            }
+
+            // Check for timeout
+            if (attempt >= maxAttempts && currentSession?.Stage != "Validating" && currentSession?.Stage != "Evaluating")
+            {
+                errorMessage = "Story refinement timed out after 5 minutes. Please try again.";
+                logger.LogWarning("Session {SessionId} refinement timed out", sessionId);
+                return;
             }
 
             // Trigger re-evaluation

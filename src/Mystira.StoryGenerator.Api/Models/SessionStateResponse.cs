@@ -17,4 +17,5 @@ public class SessionStateResponse
     public string CurrentStoryYaml { get; set; } = string.Empty;
     public EvaluationReport? LastEvaluationReport { get; set; }
     public List<StoryVersionSnapshot> StoryVersions { get; set; } = new();
+    public string? ErrorMessage { get; set; }
 }
