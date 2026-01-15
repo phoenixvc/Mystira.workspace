@@ -92,6 +92,22 @@ public class AgentSessionService : IAgentSessionService
         }
     }
 
+    public async Task<SessionStateResponse> CompleteAsync(string sessionId)
+    {
+        try
+        {
+            var response = await _httpClient.PostAsync($"/api/story-agent/sessions/{sessionId}/complete", null);
+            response.EnsureSuccessStatusCode();
+            var result = await response.Content.ReadFromJsonAsync<SessionStateResponse>(_jsonOptions);
+            return result ?? throw new InvalidOperationException("Failed to parse complete response");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error completing session {SessionId}", sessionId);
+            throw;
+        }
+    }
+
     public async IAsyncEnumerable<AgentStreamEvent> SubscribeToStreamAsync(
         string sessionId,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)

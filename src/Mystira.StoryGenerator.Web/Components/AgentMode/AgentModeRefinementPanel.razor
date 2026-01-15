@@ -64,25 +64,34 @@
                 disabled="@IsLoading" />
         </div>
 
-        <button
-            @onclick="Submit"
-            disabled="@IsLoading"
-            class="btn-primary">
-            @if (IsLoading)
-            {
-                <span>🔄 Refining...</span>
-            }
-            else
-            {
-                <span>✨ Refine & Re-evaluate</span>
-            }
-        </button>
+        <div class="button-group">
+            <button
+                @onclick="Submit"
+                disabled="@IsLoading"
+                class="btn-primary">
+                @if (IsLoading)
+                {
+                    <span>🔄 Refining...</span>
+                }
+                else
+                {
+                    <span>✨ Refine & Re-evaluate</span>
+                }
+            </button>
+            <button
+                @onclick="Complete"
+                disabled="@IsLoading"
+                class="btn-secondary">
+                <span>✓ Complete</span>
+            </button>
+        </div>
     </div>
 </div>
 
 @code {
     [Parameter] public SessionStateResponse? Session { get; set; }
     [Parameter] public EventCallback<RefineRequest> OnRefine { get; set; }
+    [Parameter] public EventCallback OnComplete { get; set; }
     [Parameter] public bool IsLoading { get; set; }
 
     private bool isFullRewrite = true;
@@ -167,6 +176,11 @@
             Constraints = customInstructions
         };
         await OnRefine.InvokeAsync(request);
+    }
+
+    private async Task Complete()
+    {
+        await OnComplete.InvokeAsync();
     }
 
     private class SceneInfo

@@ -63,7 +63,7 @@ builder.Services.AddScoped(sp =>
     return new HttpClient
     {
         BaseAddress = new Uri(apiBaseUrl),
-        Timeout = TimeSpan.FromSeconds(300)
+        Timeout = TimeSpan.FromSeconds(600)
     };
 });
 

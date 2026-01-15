@@ -29,18 +29,22 @@
                 <AgentModeRefinementPanel
                     Session="currentSession"
                     OnRefine="HandleRefine"
+                    OnComplete="HandleComplete"
                     IsLoading="isRefining" />
             }
 
-            @if (currentSession.Stage == "Complete" && !string.IsNullOrWhiteSpace(currentSession.CurrentStoryJson))
+            @if (!string.IsNullOrWhiteSpace(currentSession.CurrentStoryJson) &&
+                 (currentSession.Stage == "Validating" || currentSession.Stage == "Evaluating" ||
+                  currentSession.Stage == "Evaluated" || currentSession.Stage == "RefinementRequested" ||
+                  currentSession.Stage == "Complete"))
             {
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
                     <div>
                         <StoryDisplayPanel Story="@currentSession.CurrentStoryJson" />
                     </div>
                     <div>
-                        <YamlPreviewPanel 
-                            YamlContent="@currentSession.CurrentStoryYaml" 
+                        <YamlPreviewPanel
+                            YamlContent="@currentSession.CurrentStoryYaml"
                             ValidationResult="null" />
                     </div>
                 </div>
@@ -144,7 +148,7 @@
         try
         {
             // Poll for story generation completion
-            var maxAttempts = 60; // 5 minutes (60 attempts * 5 seconds)
+            var maxAttempts = 120; // 10 minutes (120 attempts * 5 seconds)
             var attempt = 0;
 
             while (attempt < maxAttempts)
@@ -172,7 +176,7 @@
             // Check for timeout
             if (attempt >= maxAttempts && currentSession?.Stage != "Validating" && currentSession?.Stage != "Evaluating")
             {
-                errorMessage = "Story generation timed out after 5 minutes. Please try again.";
+                errorMessage = "Story generation timed out after 10 minutes. Please try again.";
                 logger.LogWarning("Session {SessionId} timed out", sessionId);
                 return;
             }
@@ -242,7 +246,7 @@
     {
         try
         {
-            var maxAttempts = 60; // 5 minutes (60 attempts * 5 seconds)
+            var maxAttempts = 120; // 10 minutes (120 attempts * 5 seconds)
             var attempt = 0;
 
             while (attempt < maxAttempts)
@@ -270,7 +274,7 @@
             // Check for timeout
             if (attempt >= maxAttempts && currentSession?.Stage != "Validating" && currentSession?.Stage != "Evaluating")
             {
-                errorMessage = "Story refinement timed out after 5 minutes. Please try again.";
+                errorMessage = "Story refinement timed out after 10 minutes. Please try again.";
                 logger.LogWarning("Session {SessionId} refinement timed out", sessionId);
                 return;
             }
@@ -285,6 +289,34 @@
         {
             logger.LogError(ex, "Error waiting for refinement");
             errorMessage = $"Error during refinement: {ex.Message}";
+        }
+    }
+
+    private async Task HandleComplete()
+    {
+        if (currentSession == null)
+            return;
+
+        try
+        {
+            errorMessage = null;
+            isRefining = true;
+            StateHasChanged();
+
+            // Call complete endpoint
+            currentSession = await sessionService.CompleteAsync(currentSession.SessionId);
+
+            logger.LogInformation("Session {SessionId} completed successfully", currentSession.SessionId);
+
+            isRefining = false;
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error completing session");
+            errorMessage = $"Failed to complete session: {ex.Message}";
+            isRefining = false;
+            StateHasChanged();
         }
     }
 

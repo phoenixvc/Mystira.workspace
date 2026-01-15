@@ -32,6 +32,11 @@ public interface IAgentSessionService
     Task<RefineResponse> RefineAsync(string sessionId, RefineRequest request);
 
     /// <summary>
+    /// Complete the session and optionally generate a rubric.
+    /// </summary>
+    Task<SessionStateResponse> CompleteAsync(string sessionId);
+
+    /// <summary>
     /// Subscribe to real-time event stream for a session.
     /// </summary>
     IAsyncEnumerable<AgentStreamEvent> SubscribeToStreamAsync(string sessionId, CancellationToken cancellationToken = default);

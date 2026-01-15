@@ -304,6 +304,83 @@ public class StoryAgentController : ControllerBase
     }
 
     /// <summary>
+    /// Complete the story generation session and optionally generate a rubric.
+    /// </summary>
+    /// <param name="sessionId">The session identifier.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>Session state response.</returns>
+    [HttpPost("sessions/{sessionId}/complete")]
+    [ProducesResponseType(typeof(SessionStateResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    [Produces("application/json")]
+    public async Task<IActionResult> CompleteSession(string sessionId, CancellationToken cancellationToken = default)
+    {
+        _logger.LogInformation("Completing session {SessionId}", sessionId);
+
+        try
+        {
+            // Load session
+            var session = await _sessionRepository.GetAsync(sessionId, cancellationToken);
+            if (session == null)
+            {
+                return NotFound(new { error = "Session not found", sessionId });
+            }
+
+            // Verify session is in correct state
+            if (session.Stage != StorySessionStage.RefinementRequested && session.Stage != StorySessionStage.Evaluated)
+            {
+                return Conflict(new { error = "Session is not in RefinementRequested or Evaluated state", sessionId, currentStage = session.Stage.ToString() });
+            }
+
+            // TODO: Call rubric generator here before completing
+            // This should:
+            // 1. Call IPromptGenerator.GenerateRubricPrompt(session.CurrentStoryVersion, session.LastEvaluationReport, session.IterationCount)
+            // 2. Send the prompt to an LLM agent
+            // 3. Parse and store the rubric response in the session
+            // 4. Return the rubric to the frontend for display
+
+            // Mark session as complete
+            session.Stage = StorySessionStage.Complete;
+            session.UpdatedAt = DateTime.UtcNow;
+            await _sessionRepository.UpsertAsync(session, cancellationToken);
+
+            // Publish completion event
+            await _streamPublisher.PublishEventAsync(sessionId, new AgentStreamEvent
+            {
+                Type = AgentStreamEvent.EventType.PhaseStarted,
+                Phase = "Complete",
+                Payload = new { },
+                IterationNumber = session.IterationCount
+            });
+
+            _logger.LogInformation("Session {SessionId} marked as complete", sessionId);
+
+            var response = new SessionStateResponse
+            {
+                SessionId = session.SessionId,
+                ThreadId = session.ThreadId ?? string.Empty,
+                Stage = session.Stage.ToString(),
+                IterationCount = session.IterationCount,
+                CostEstimate = Convert.ToDouble(session.CostEstimate),
+                CurrentStoryJson = session.CurrentStoryVersion,
+                CurrentStoryYaml = session.CurrentStoryYaml ?? string.Empty,
+                LastEvaluationReport = session.LastEvaluationReport,
+                StoryVersions = session.StoryVersions,
+                ErrorMessage = session.ErrorMessage
+            };
+
+            return Ok(response);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error completing session {SessionId}", sessionId);
+            return StatusCode(500, new { error = "An unexpected error occurred", sessionId });
+        }
+    }
+
+    /// <summary>
     /// Get the current state of a story generation session.
     /// </summary>
     /// <param name="sessionId">The session identifier.</param>

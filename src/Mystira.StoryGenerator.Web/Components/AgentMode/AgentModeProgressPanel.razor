@@ -12,6 +12,10 @@
                     {
                         <span>❌</span>
                     }
+                    else if (IsEvaluatingCompleteWaitingForUser(phase))
+                    {
+                        <span>✅</span>
+                    }
                     else if (phase == currentPhase)
                     {
                         <span class="spinner">⏳</span>
@@ -153,6 +157,14 @@
         return phaseIndex < currentIndex;
     }
 
+    private bool IsEvaluatingCompleteWaitingForUser(string phase)
+    {
+        // When in Evaluated or RefinementRequested state, Evaluating phase should show as complete (✅) not active (⏳)
+        return phase == "Evaluating" &&
+               Session != null &&
+               (Session.Stage == "Evaluated" || Session.Stage == "RefinementRequested");
+    }
+
     private string FormatEventType(AgentStreamEvent.EventType type)
     {
         return type switch
@@ -179,8 +191,8 @@
             {
                 "Generating" => "Writing",
                 "Validating" => "Validating",
-                "Evaluating" or "Evaluated" => "Evaluating",
-                "RefinementRequested" or "Refined" => "Evaluating",
+                "Evaluating" => "Evaluating",
+                "Evaluated" or "RefinementRequested" => "Evaluating", // Keep on Evaluating, but show as complete via IsEvaluatingCompleteWaitingForUser
                 "Refining" => "Writing",
                 "Complete" => "Complete",
                 "Failed" => "Failed",
