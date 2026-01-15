@@ -2,6 +2,8 @@ using System.CommandLine;
 using Azure.AI.Projects;
 using Azure.AI.Agents.Persistent;
 using Azure.Identity;
+using System.Text.Json;
+using System.ClientModel;
 
 var endpointOption = new Option<string>(
     name: "--endpoint",
@@ -305,20 +307,29 @@ CRITICAL: Ensure summaries are clear, specific, and actionable for both develope
 
         try
         {
-            // Create the agent using Agents API
-            var agent = projectClient.Agents.CreateAgent(
-                modelDeployment,
-                agentDef.Name,
-                agentDef.Instructions,
-                agentDef.Description,
-                tools: new List<ToolDefinition>
+            // Create the agent using the protocol API with JSON
+            var agentData = new
+            {
+                model = modelDeployment,
+                name = agentDef.Name,
+                instructions = agentDef.Instructions,
+                description = agentDef.Description,
+                tools = new[]
                 {
-                    new FileSearchToolDefinition()
-                });
+                    new { type = "file_search" }
+                }
+            };
 
-            agentIds[agentDef.ConfigKey] = agent.Value.Id;
+            var json = JsonSerializer.Serialize(agentData);
+            var content = BinaryContent.Create(BinaryData.FromString(json));
 
-            Console.WriteLine($" ✓ Created: {agent.Value.Id}");
+            var response = projectClient.Agents.CreateAgent(content);
+            var agentResponse = JsonSerializer.Deserialize<JsonElement>(response.GetRawResponse().Content);
+            var agentId = agentResponse.GetProperty("id").GetString()!;
+
+            agentIds[agentDef.ConfigKey] = agentId;
+
+            Console.WriteLine($" ✓ Created: {agentId}");
         }
         catch (Exception ex)
         {
