@@ -19,7 +19,6 @@ foreach (var a in agents)
     Console.WriteLine($"ID:      {a.Id}");
     Console.WriteLine($"Name:    {a.Name}");
     Console.WriteLine($"Valid:   {(a.Id.StartsWith("asst_") ? "✓ YES" : "✗ NO - Invalid ID format!")}");
-    Console.WriteLine($"Created: {a.CreatedAt:yyyy-MM-dd HH:mm:ss}");
     Console.WriteLine();
 }
 

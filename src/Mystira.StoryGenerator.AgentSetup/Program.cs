@@ -41,7 +41,7 @@ rootCommand.AddCommand(createCommand);
 
 return await rootCommand.InvokeAsync(args);
 
-static async Task ListAgentsAsync(string endpoint)
+static Task ListAgentsAsync(string endpoint)
 {
     Console.WriteLine("Connecting to Azure AI Foundry...");
 
@@ -56,11 +56,11 @@ static async Task ListAgentsAsync(string endpoint)
     {
         var agents = projectClient.Agents.GetAgents();
 
-        var agentList = new List<(string Id, string Name, DateTimeOffset CreatedAt)>();
+        var agentList = new List<(string Id, string Name)>();
 
         foreach (var agent in agents)
         {
-            agentList.Add((agent.Id, agent.Name ?? "Unnamed", agent.CreatedAt));
+            agentList.Add((agent.Id, agent.Name ?? "Unnamed"));
         }
 
         if (!agentList.Any())
@@ -68,32 +68,62 @@ static async Task ListAgentsAsync(string endpoint)
             Console.WriteLine("No agents found.");
             Console.WriteLine();
             Console.WriteLine("Run 'dotnet run create --endpoint <url> --model <model>' to create agents.");
-            return;
+            return Task.CompletedTask;
         }
 
         Console.WriteLine($"Found {agentList.Count} agent(s):");
         Console.WriteLine();
-        Console.WriteLine($"{"ID",-30} {"Name",-30} {"Created",-25}");
-        Console.WriteLine(new string('-', 90));
+        Console.WriteLine($"{"ID",-35} {"Name",-35}");
+        Console.WriteLine(new string('-', 75));
 
         foreach (var agent in agentList.OrderBy(a => a.Name))
         {
-            Console.WriteLine($"{agent.Id,-30} {agent.Name,-30} {agent.CreatedAt:yyyy-MM-dd HH:mm:ss}");
+            var isValid = agent.Id.StartsWith("asst_");
+            var status = isValid ? "" : " ⚠️  INVALID FORMAT";
+            Console.WriteLine($"{agent.Id,-35} {agent.Name,-35}{status}");
         }
 
         Console.WriteLine();
+
+        // Check for invalid agent IDs
+        var invalidAgents = agentList.Where(a => !a.Id.StartsWith("asst_")).ToList();
+        if (invalidAgents.Any())
+        {
+            Console.WriteLine();
+            Console.WriteLine("========================================");
+            Console.WriteLine("⚠️  WARNING: Invalid Agent IDs Detected");
+            Console.WriteLine("========================================");
+            Console.WriteLine();
+            Console.WriteLine($"Found {invalidAgents.Count} agent(s) with INVALID ID format:");
+            foreach (var agent in invalidAgents)
+            {
+                Console.WriteLine($"  - {agent.Id}");
+            }
+            Console.WriteLine();
+            Console.WriteLine("Azure AI Agents requires IDs in OpenAI format: asst_[random]");
+            Console.WriteLine("These agents will NOT work with the API.");
+            Console.WriteLine();
+            Console.WriteLine("SOLUTION:");
+            Console.WriteLine("  1. Create new agents with auto-generated IDs:");
+            Console.WriteLine($"     dotnet run create --endpoint {endpoint} --model <model>");
+            Console.WriteLine("  2. Update appsettings.json with the new IDs");
+            Console.WriteLine("  3. (Optional) Delete the invalid agents from Azure Portal");
+            Console.WriteLine();
+        }
+
         Console.WriteLine("========================================");
         Console.WriteLine("Configuration Mapping Suggestions");
         Console.WriteLine("========================================");
         Console.WriteLine();
 
-        // Try to map agents to configuration keys based on naming
+        // Try to map agents to configuration keys based on naming (only valid ones)
+        var validAgents = agentList.Where(a => a.Id.StartsWith("asst_")).ToList();
         var mappings = new Dictionary<string, string>
         {
-            ["WriterAgentId"] = agentList.FirstOrDefault(a => a.Name.Contains("writer", StringComparison.OrdinalIgnoreCase)).Id ?? "",
-            ["JudgeAgentId"] = agentList.FirstOrDefault(a => a.Name.Contains("judge", StringComparison.OrdinalIgnoreCase)).Id ?? "",
-            ["RefinerAgentId"] = agentList.FirstOrDefault(a => a.Name.Contains("refiner", StringComparison.OrdinalIgnoreCase)).Id ?? "",
-            ["RubricSummaryAgentId"] = agentList.FirstOrDefault(a => a.Name.Contains("rubric", StringComparison.OrdinalIgnoreCase)).Id ?? ""
+            ["WriterAgentId"] = validAgents.FirstOrDefault(a => a.Name.Contains("writer", StringComparison.OrdinalIgnoreCase)).Id ?? "",
+            ["JudgeAgentId"] = validAgents.FirstOrDefault(a => a.Name.Contains("judge", StringComparison.OrdinalIgnoreCase)).Id ?? "",
+            ["RefinerAgentId"] = validAgents.FirstOrDefault(a => a.Name.Contains("refiner", StringComparison.OrdinalIgnoreCase)).Id ?? "",
+            ["RubricSummaryAgentId"] = validAgents.FirstOrDefault(a => a.Name.Contains("rubric", StringComparison.OrdinalIgnoreCase)).Id ?? ""
         };
 
         Console.WriteLine("Update your appsettings.json with these agent IDs:");
@@ -121,6 +151,8 @@ static async Task ListAgentsAsync(string endpoint)
             Console.WriteLine($"  dotnet run create --endpoint {endpoint} --model <model>");
             Console.WriteLine();
         }
+
+        return Task.CompletedTask;
     }
     catch (Exception ex)
     {
@@ -133,6 +165,7 @@ static async Task ListAgentsAsync(string endpoint)
         Console.WriteLine("  4. Network connectivity issues");
         Console.WriteLine();
         Environment.Exit(1);
+        return Task.CompletedTask; // Unreachable, but required for compilation
     }
 }
 
@@ -141,6 +174,7 @@ static async Task CreateAgentsAsync(string endpoint, string modelDeployment)
     Console.WriteLine("Connecting to Azure AI Foundry...");
 
     var projectClient = new AIProjectClient(new Uri(endpoint), new DefaultAzureCredential());
+    var agentsClient = projectClient.GetPersistentAgentsClient();
 
     Console.WriteLine("✓ Connected successfully");
     Console.WriteLine();
@@ -273,7 +307,7 @@ CRITICAL: Ensure summaries are clear, specific, and actionable for both develope
         try
         {
             // Create the agent
-            var agent = projectClient.Agents.CreateAgent(
+            var response = await agentsClient.CreateAgentAsync(
                 model: modelDeployment,
                 name: agentDef.Name,
                 instructions: agentDef.Instructions,
@@ -284,9 +318,10 @@ CRITICAL: Ensure summaries are clear, specific, and actionable for both develope
                 }
             );
 
-            agentIds[agentDef.ConfigKey] = agent.Value.Id;
+            var agent = response.Value;
+            agentIds[agentDef.ConfigKey] = agent.Id;
 
-            Console.WriteLine($" ✓ Created: {agent.Value.Id}");
+            Console.WriteLine($" ✓ Created: {agent.Id}");
         }
         catch (Exception ex)
         {
