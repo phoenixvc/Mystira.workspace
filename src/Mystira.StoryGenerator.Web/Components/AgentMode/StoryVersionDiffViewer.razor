@@ -1,0 +1,264 @@
+@using Mystira.StoryGenerator.Domain.Agents
+@using System.Text.Json
+@using System.Text
+
+<div class="diff-viewer">
+    <div class="diff-controls">
+        <h3>Compare Story Versions</h3>
+        <div class="version-selectors">
+            <div class="version-selector">
+                <label for="version-left">Version A:</label>
+                <select id="version-left" @bind="selectedVersionLeft" @bind:after="UpdateDiff">
+                    @foreach (var version in Versions)
+                    {
+                        <option value="@version.VersionNumber">
+                            v@(version.VersionNumber) - @version.StageWhenCreated (Iteration @(version.IterationNumber))
+                        </option>
+                    }
+                </select>
+            </div>
+            <div class="version-selector">
+                <label for="version-right">Version B:</label>
+                <select id="version-right" @bind="selectedVersionRight" @bind:after="UpdateDiff">
+                    @foreach (var version in Versions)
+                    {
+                        <option value="@version.VersionNumber">
+                            v@(version.VersionNumber) - @version.StageWhenCreated (Iteration @(version.IterationNumber))
+                        </option>
+                    }
+                </select>
+            </div>
+        </div>
+    </div>
+
+    @if (leftVersion != null && rightVersion != null)
+    {
+        <div class="diff-display">
+            <div class="diff-column">
+                <h4>Version @(leftVersion.VersionNumber) - @leftVersion.StageWhenCreated</h4>
+                <div class="diff-content">
+                    <pre>@FormatStoryForDisplay(leftVersion.StoryJson)</pre>
+                </div>
+            </div>
+            <div class="diff-column">
+                <h4>Version @(rightVersion.VersionNumber) - @rightVersion.StageWhenCreated</h4>
+                <div class="diff-content">
+                    <pre>@FormatStoryForDisplay(rightVersion.StoryJson)</pre>
+                </div>
+            </div>
+        </div>
+
+        <div class="diff-summary">
+            <h4>Changes Summary</h4>
+            <p>@GetChangesSummary()</p>
+        </div>
+    }
+</div>
+
+<style>
+    .diff-viewer {
+        margin-top: 2rem;
+        padding: 1rem;
+        border: 1px solid #dee2e6;
+        border-radius: 0.5rem;
+        background-color: #f8f9fa;
+    }
+
+    .diff-controls {
+        margin-bottom: 1rem;
+    }
+
+    .diff-controls h3 {
+        margin-bottom: 1rem;
+        font-size: 1.25rem;
+        font-weight: 600;
+    }
+
+    .version-selectors {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+    }
+
+    .version-selector {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .version-selector label {
+        font-weight: 500;
+        font-size: 0.875rem;
+    }
+
+    .version-selector select {
+        padding: 0.5rem;
+        border: 1px solid #ced4da;
+        border-radius: 0.25rem;
+        background-color: white;
+        font-size: 0.875rem;
+    }
+
+    .diff-display {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+
+    .diff-column {
+        border: 1px solid #dee2e6;
+        border-radius: 0.25rem;
+        background-color: white;
+        overflow: hidden;
+    }
+
+    .diff-column h4 {
+        padding: 0.75rem;
+        background-color: #e9ecef;
+        margin: 0;
+        font-size: 1rem;
+        font-weight: 600;
+        border-bottom: 1px solid #dee2e6;
+    }
+
+    .diff-content {
+        padding: 1rem;
+        overflow-x: auto;
+        max-height: 600px;
+        overflow-y: auto;
+    }
+
+    .diff-content pre {
+        margin: 0;
+        font-size: 0.875rem;
+        line-height: 1.5;
+        white-space: pre-wrap;
+        word-break: break-word;
+    }
+
+    .diff-summary {
+        margin-top: 1rem;
+        padding: 1rem;
+        background-color: #e7f3ff;
+        border: 1px solid #b3d9ff;
+        border-radius: 0.25rem;
+    }
+
+    .diff-summary h4 {
+        margin-top: 0;
+        margin-bottom: 0.5rem;
+        font-size: 1rem;
+        font-weight: 600;
+    }
+
+    .diff-summary p {
+        margin: 0;
+        font-size: 0.875rem;
+    }
+</style>
+
+@code {
+    [Parameter] public List<StoryVersionSnapshot> Versions { get; set; } = new();
+
+    private int selectedVersionLeft = 1;
+    private int selectedVersionRight = 2;
+    private StoryVersionSnapshot? leftVersion;
+    private StoryVersionSnapshot? rightVersion;
+
+    protected override void OnParametersSet()
+    {
+        if (Versions.Any())
+        {
+            // Default to comparing the first and last versions
+            selectedVersionLeft = Versions.First().VersionNumber;
+            selectedVersionRight = Versions.Last().VersionNumber;
+            UpdateDiff();
+        }
+    }
+
+    private void UpdateDiff()
+    {
+        leftVersion = Versions.FirstOrDefault(v => v.VersionNumber == selectedVersionLeft);
+        rightVersion = Versions.FirstOrDefault(v => v.VersionNumber == selectedVersionRight);
+    }
+
+    private string FormatStoryForDisplay(string storyJson)
+    {
+        try
+        {
+            // Pretty-print the JSON for better readability
+            var jsonDoc = JsonDocument.Parse(storyJson);
+            return JsonSerializer.Serialize(jsonDoc, new JsonSerializerOptions { WriteIndented = true });
+        }
+        catch
+        {
+            return storyJson;
+        }
+    }
+
+    private string GetChangesSummary()
+    {
+        if (leftVersion == null || rightVersion == null)
+            return "Select two versions to compare.";
+
+        try
+        {
+            var leftDoc = JsonDocument.Parse(leftVersion.StoryJson);
+            var rightDoc = JsonDocument.Parse(rightVersion.StoryJson);
+
+            var leftTitle = GetPropertyValue(leftDoc, "title");
+            var rightTitle = GetPropertyValue(rightDoc, "title");
+
+            var leftScenes = GetArrayLength(leftDoc, "scenes");
+            var rightScenes = GetArrayLength(rightDoc, "scenes");
+
+            var changes = new List<string>();
+
+            if (leftTitle != rightTitle)
+                changes.Add($"Title changed from \"{leftTitle}\" to \"{rightTitle}\"");
+
+            if (leftScenes != rightScenes)
+                changes.Add($"Scene count changed from {leftScenes} to {rightScenes}");
+
+            var leftLength = leftVersion.StoryJson.Length;
+            var rightLength = rightVersion.StoryJson.Length;
+            var sizeDiff = rightLength - leftLength;
+            var sizePercent = leftLength > 0 ? (sizeDiff * 100.0 / leftLength) : 0;
+
+            changes.Add($"Story size changed by {sizeDiff:+#;-#;0} characters ({sizePercent:+0.0;-0.0;0.0}%)");
+
+            return changes.Any() ? string.Join(" • ", changes) : "No significant structural changes detected.";
+        }
+        catch
+        {
+            return "Unable to analyze changes.";
+        }
+    }
+
+    private string GetPropertyValue(JsonDocument doc, string propertyName)
+    {
+        try
+        {
+            if (doc.RootElement.TryGetProperty(propertyName, out var property))
+            {
+                return property.GetString() ?? string.Empty;
+            }
+        }
+        catch { }
+        return string.Empty;
+    }
+
+    private int GetArrayLength(JsonDocument doc, string propertyName)
+    {
+        try
+        {
+            if (doc.RootElement.TryGetProperty(propertyName, out var property) && property.ValueKind == JsonValueKind.Array)
+            {
+                return property.GetArrayLength();
+            }
+        }
+        catch { }
+        return 0;
+    }
+}

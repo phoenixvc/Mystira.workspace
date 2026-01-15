@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using Mystira.StoryGenerator.Domain.Agents;
 
-namespace Mystira.StoryGenerator.Api.Models;
+namespace Mystira.StoryGenerator.Contracts.Models;
 
 /// <summary>
 /// Request for starting a new story generation session.

@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Mystira.StoryGenerator.Application.Services.Prompting;
 using Mystira.StoryGenerator.Contracts.Configuration;
+using Mystira.StoryGenerator.Contracts.Models;
 using Mystira.StoryGenerator.Domain.Agents;
 using Mystira.StoryGenerator.Domain.Services;
 using Mystira.StoryGenerator.Infrastructure.Agents;
@@ -235,6 +236,7 @@ public partial class AgentOrchestrator : IAgentOrchestrator
             {
                 VersionNumber = session.StoryVersions.Count + 1,
                 StoryJson = storyJson,
+                StoryYaml = JsonToYamlConverter.ToYaml(storyJson),
                 CreatedAt = DateTime.UtcNow,
                 StageWhenCreated = "Generating",
                 IterationNumber = session.IterationCount
@@ -296,14 +298,17 @@ public partial class AgentOrchestrator : IAgentOrchestrator
                 throw new InvalidOperationException("Session not found");
             }
 
-            if (session.Stage != StorySessionStage.Validating)
+            if (session.Stage != StorySessionStage.Validating && session.Stage != StorySessionStage.Evaluating)
             {
                 throw new InvalidOperationException($"Invalid session state for evaluation: {session.Stage}");
             }
 
-            session.Stage = StorySessionStage.Evaluating;
-            session.UpdatedAt = DateTime.UtcNow;
-            await _sessionRepository.UpdateAsync(session, ct);
+            if (session.Stage != StorySessionStage.Evaluating)
+            {
+                session.Stage = StorySessionStage.Evaluating;
+                session.UpdatedAt = DateTime.UtcNow;
+                await _sessionRepository.UpdateAsync(session, ct);
+            }
 
             // Phase A: Deterministic validation gates
             await _eventPublisher.PublishEventAsync(sessionId, new AgentStreamEvent
@@ -487,7 +492,10 @@ public partial class AgentOrchestrator : IAgentOrchestrator
                 return (false, "Session not found");
             }
 
-            if (session.Stage != StorySessionStage.RefinementRequested)
+            // Accept Refining, RefinementRequested, or Evaluated stages
+            if (session.Stage != StorySessionStage.Refining &&
+                session.Stage != StorySessionStage.RefinementRequested &&
+                session.Stage != StorySessionStage.Evaluated)
             {
                 return (false, $"Invalid session state for refinement: {session.Stage}");
             }
@@ -495,7 +503,7 @@ public partial class AgentOrchestrator : IAgentOrchestrator
             // Store user focus
             session.UserFocus = focus;
             session.IterationCount++;
-            session.Stage = StorySessionStage.Refined;
+            session.Stage = StorySessionStage.Refining;
             session.UpdatedAt = DateTime.UtcNow;
             await _sessionRepository.UpdateAsync(session, ct);
 
@@ -574,6 +582,7 @@ public partial class AgentOrchestrator : IAgentOrchestrator
             {
                 VersionNumber = session.StoryVersions.Count + 1,
                 StoryJson = refinedStoryJson,
+                StoryYaml = JsonToYamlConverter.ToYaml(refinedStoryJson),
                 CreatedAt = DateTime.UtcNow,
                 StageWhenCreated = "Refining",
                 IterationNumber = session.IterationCount
@@ -582,7 +591,6 @@ public partial class AgentOrchestrator : IAgentOrchestrator
             session.CurrentStoryVersion = refinedStoryJson;
             session.CurrentStoryYaml = JsonToYamlConverter.ToYaml(refinedStoryJson);
             session.StoryVersions.Add(versionSnapshot);
-            session.Stage = StorySessionStage.Validating; // Re-evaluate after refinement
             session.UpdatedAt = DateTime.UtcNow;
 
             // Check max iterations
@@ -600,14 +608,25 @@ public partial class AgentOrchestrator : IAgentOrchestrator
                 return (false, $"Maximum iterations ({_config.MaxIterations}) reached");
             }
 
-            await _sessionRepository.UpdateAsync(session, ct);
-
             // Emit refinement complete event
             await _eventPublisher.PublishEventAsync(sessionId, new AgentStreamEvent
             {
                 Type = AgentStreamEvent.EventType.RefinementComplete,
                 Phase = "Refining",
                 Payload = new { RefinedStoryJson = refinedStoryJson, TokenUsage = completionResult.RunId },
+                IterationNumber = session.IterationCount
+            });
+
+            // Transition to Validating stage and publish event
+            session.Stage = StorySessionStage.Validating;
+            await _sessionRepository.UpdateAsync(session, ct);
+
+            // Emit phase started event for validating
+            await _eventPublisher.PublishEventAsync(sessionId, new AgentStreamEvent
+            {
+                Type = AgentStreamEvent.EventType.PhaseStarted,
+                Phase = "Validating",
+                Payload = new { IterationNumber = session.IterationCount },
                 IterationNumber = session.IterationCount
             });
 
@@ -641,6 +660,115 @@ public partial class AgentOrchestrator : IAgentOrchestrator
     public async Task<StorySession?> GetSessionAsync(string sessionId)
     {
         return await _sessionRepository.GetAsync(sessionId);
+    }
+
+    public async Task<(bool Success, RubricSummary? Rubric)> GenerateRubricAsync(string sessionId, CancellationToken ct)
+    {
+        _logger.LogInformation("Starting rubric generation for session {SessionId}", sessionId);
+
+        try
+        {
+            // Load and validate session state
+            var session = await _sessionRepository.GetAsync(sessionId, ct);
+            if (session == null)
+            {
+                return (false, null);
+            }
+
+            if (session.LastEvaluationReport == null)
+            {
+                _logger.LogWarning("Cannot generate rubric without an evaluation report for session {SessionId}", sessionId);
+                return (false, null);
+            }
+
+            session.Stage = StorySessionStage.GeneratingRubric;
+            session.UpdatedAt = DateTime.UtcNow;
+            await _sessionRepository.UpdateAsync(session, ct);
+
+            // Emit phase started event
+            await _eventPublisher.PublishEventAsync(sessionId, new AgentStreamEvent
+            {
+                Type = AgentStreamEvent.EventType.PhaseStarted,
+                Phase = "Rubric",
+                Payload = new { IterationNumber = session.IterationCount }
+            });
+
+            // Build rubric prompt
+            var rubricPrompt = _promptGenerator.GenerateRubricPrompt(
+                session.CurrentStoryVersion,
+                session.LastEvaluationReport,
+                session.IterationCount);
+
+            // Create and start the run (use Writer agent for rubric generation)
+            var runResult = await _foundryClient.CreateRunAsync(
+                session.ThreadId!,
+                _config.WriterAgentId, // Reuse writer agent for rubric generation
+                rubricPrompt,
+                null,
+                ct);
+
+            // Wait for completion
+            var completionResult = await _foundryClient.WaitForRunCompletionAsync(
+                session.ThreadId!,
+                runResult.RunId,
+                pollInterval: TimeSpan.FromSeconds(2),
+                maxWait: _config.RunTimeout,
+                cancellationToken: ct);
+
+            if (!completionResult.Completed)
+            {
+                throw new InvalidOperationException($"Rubric generation run failed: {completionResult.ErrorMessage}");
+            }
+
+            // Parse rubric response
+            var rubricResponse = completionResult.Messages.Last(m => m.Role == "assistant").Content;
+            var (success, rubric, error) = AgentResponseParser.TryParseJsonResponse<RubricSummary>(rubricResponse);
+
+            if (!success || rubric == null)
+            {
+                _logger.LogWarning("Failed to parse rubric JSON: {Error}. Raw response: {Response}", error, rubricResponse);
+                return (false, null);
+            }
+
+            // Store rubric in session
+            session.RubricSummary = rubric;
+            session.Stage = StorySessionStage.Complete;
+            session.UpdatedAt = DateTime.UtcNow;
+            await _sessionRepository.UpdateAsync(session, ct);
+
+            // Emit rubric generation complete event
+            await _eventPublisher.PublishEventAsync(sessionId, new AgentStreamEvent
+            {
+                Type = AgentStreamEvent.EventType.RubricGenerated,
+                Phase = "Rubric",
+                Payload = new { Rubric = rubric }
+            });
+
+            _logger.LogInformation("Rubric generation completed for session {SessionId}", sessionId);
+            return (true, rubric);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Rubric generation failed for session {SessionId}", sessionId);
+
+            var session = await _sessionRepository.GetAsync(sessionId, ct);
+            if (session != null)
+            {
+                session.Stage = StorySessionStage.Failed;
+                session.ErrorMessage = $"Rubric generation failed: {ex.Message}";
+                session.UpdatedAt = DateTime.UtcNow;
+                await _sessionRepository.UpdateAsync(session, ct);
+            }
+
+            await _eventPublisher.PublishEventAsync(sessionId, new AgentStreamEvent
+            {
+                Type = AgentStreamEvent.EventType.Error,
+                Phase = "Rubric",
+                Payload = new { Error = ex.Message }
+            });
+
+            return (false, null);
+        }
     }
 
     #region Private Helper Methods

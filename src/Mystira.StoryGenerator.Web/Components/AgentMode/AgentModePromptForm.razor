@@ -1,4 +1,4 @@
-@using Mystira.StoryGenerator.Api.Models
+@using Mystira.StoryGenerator.Contracts.Models
 
 <div class="prompt-form">
     <h2>Create a Story with AI</h2>
@@ -45,21 +45,6 @@
         </div>
     </div>
 
-    <div class="form-group">
-        <label>Target Narrative Axes</label>
-        <div class="checkbox-group">
-            @foreach (var axis in availableAxes)
-            {
-                <label>
-                    <input type="checkbox"
-                           @onchange="@((Microsoft.AspNetCore.Components.ChangeEventArgs e) => ToggleAxis(axis, (bool)e.Value!))"
-                           disabled="@IsLoading" />
-                    @axis
-                </label>
-            }
-        </div>
-    </div>
-
     <button
         @onclick="Submit"
         disabled="@(IsLoading || string.IsNullOrWhiteSpace(prompt))"
@@ -82,16 +67,6 @@
     private string prompt = "";
     private string selectedAgeGroup = "3-5";
     private string knowledgeMode = "FileSearch";
-    private List<string> availableAxes = new() { "Courage", "Wisdom", "Compassion" };
-    private List<string> selectedAxes = new();
-
-    private void ToggleAxis(string axis, bool selected)
-    {
-        if (selected && !selectedAxes.Contains(axis))
-            selectedAxes.Add(axis);
-        else
-            selectedAxes.Remove(axis);
-    }
 
     private async Task Submit()
     {
@@ -103,7 +78,7 @@
             StoryPrompt = prompt,
             AgeGroup = selectedAgeGroup,
             KnowledgeMode = knowledgeMode,
-            TargetAxes = selectedAxes.ToList()
+            TargetAxes = new List<string>() // Empty list - no axes selected
         };
         await OnStartSession.InvokeAsync(request);
     }

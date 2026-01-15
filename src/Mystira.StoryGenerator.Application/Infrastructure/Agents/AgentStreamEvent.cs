@@ -16,6 +16,7 @@ public class AgentStreamEvent
         EvaluationPassed,
         EvaluationFailed,
         RefinementComplete,
+        RubricGenerated,
         MaxIterationsReached,
         Error,
         TokenUsageUpdate

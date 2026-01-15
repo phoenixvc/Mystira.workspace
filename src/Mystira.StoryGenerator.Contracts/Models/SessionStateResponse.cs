@@ -30,7 +30,7 @@ public class SessionStateResponse
     /// <summary>
     /// Estimated cost of the session in USD.
     /// </summary>
-    public decimal CostEstimate { get; set; }
+    public double CostEstimate { get; set; }
 
     /// <summary>
     /// Current story as JSON string.
@@ -46,6 +46,11 @@ public class SessionStateResponse
     /// The latest evaluation report, if available.
     /// </summary>
     public EvaluationReport? LastEvaluationReport { get; set; }
+
+    /// <summary>
+    /// Summary from the rubric agent.
+    /// </summary>
+    public RubricSummary? RubricSummary { get; set; }
 
     /// <summary>
     /// List of all story versions.

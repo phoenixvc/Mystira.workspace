@@ -1,4 +1,6 @@
 @using Mystira.StoryGenerator.Web.Components
+@inject Blazored.LocalStorage.ILocalStorageService LocalStorage
+@inject IJSRuntime JSRuntime
 
 <div class="panel h-full flex flex-col">
     <div class="panel-header flex items-center justify-between">
@@ -111,8 +113,9 @@
     [Parameter] public bool IsTyping { get; set; }
     [Parameter] public EventCallback<string> OnSendMessage { get; set; }
     [Parameter] public EventCallback OnClearChat { get; set; }
-    
+
     private string MessageText { get; set; } = string.Empty;
+    private bool hasCheckedPrePopulated = false;
     
     private readonly string[] RandomPrompts = new[]
     {
@@ -125,6 +128,28 @@
         "Pirates discover a map to a floating island made entirely of clouds",
         "A robot learns to dream and starts having visions of the future"
     };
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && !hasCheckedPrePopulated)
+        {
+            hasCheckedPrePopulated = true;
+            try
+            {
+                var prePopulated = await LocalStorage.GetItemAsStringAsync("prePopulatedMessage");
+                if (!string.IsNullOrEmpty(prePopulated))
+                {
+                    MessageText = prePopulated;
+                    await LocalStorage.RemoveItemAsync("prePopulatedMessage");
+                    StateHasChanged();
+                }
+            }
+            catch
+            {
+                // Ignore errors when checking for pre-populated message
+            }
+        }
+    }
 
     private async Task SendMessage()
     {

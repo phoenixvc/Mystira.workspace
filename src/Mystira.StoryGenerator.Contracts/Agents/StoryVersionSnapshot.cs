@@ -16,6 +16,11 @@ public class StoryVersionSnapshot
     public string StoryJson { get; set; } = string.Empty;
 
     /// <summary>
+    /// The story content as YAML string.
+    /// </summary>
+    public string StoryYaml { get; set; } = string.Empty;
+
+    /// <summary>
     /// Timestamp when this version was created.
     /// </summary>
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

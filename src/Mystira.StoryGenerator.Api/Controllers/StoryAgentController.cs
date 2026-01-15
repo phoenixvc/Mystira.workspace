@@ -1,12 +1,10 @@
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
-using Mystira.StoryGenerator.Api.Models;
 using Mystira.StoryGenerator.Application.Infrastructure.Agents;
 using Mystira.StoryGenerator.Domain.Agents;
 using System.Text.Json;
 using System.Collections.Concurrent;
 using Mystira.StoryGenerator.Contracts.Models;
-using SessionStateResponse = Mystira.StoryGenerator.Api.Models.SessionStateResponse;
 
 namespace Mystira.StoryGenerator.Api.Controllers;
 
@@ -157,6 +155,22 @@ public class StoryAgentController : ControllerBase
                 return Conflict(new { error = "Session is not in Validating state", sessionId, currentStage = session.Stage.ToString() });
             }
 
+            // Update session to Evaluating stage
+            session.Stage = StorySessionStage.Evaluating;
+            session.UpdatedAt = DateTime.UtcNow;
+            await _sessionRepository.UpsertAsync(session, cancellationToken);
+
+            // Publish Evaluating phase event
+            await _streamPublisher.PublishEventAsync(sessionId, new AgentStreamEvent
+            {
+                Type = AgentStreamEvent.EventType.PhaseStarted,
+                Phase = "Evaluating",
+                Payload = new { },
+                IterationNumber = session.IterationCount
+            });
+
+            _logger.LogInformation("Session {SessionId} entered Evaluating stage", sessionId);
+
             // Set timeout
             var timeoutSeconds = request?.TimeoutSeconds ?? 300;
             using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
@@ -179,10 +193,31 @@ public class StoryAgentController : ControllerBase
             var recommendedAction = evaluationReport.OverallStatus switch
             {
                 EvaluationStatus.Pass => "Continue",
-                EvaluationStatus.Fail => "Refine",
+                EvaluationStatus.Fail => session.IterationCount >= 5 ? "ReviewRequired" : "Refine",
                 EvaluationStatus.ReviewRequired => "ReviewRequired",
                 _ => "Continue"
             };
+
+            // Update session stage based on evaluation status
+            if (evaluationReport.OverallStatus == EvaluationStatus.Fail)
+            {
+                if (session.IterationCount >= 5)
+                {
+                    session.Stage = StorySessionStage.StuckNeedsReview;
+                }
+                else
+                {
+                    session.Stage = StorySessionStage.RefinementRequested;
+                }
+            }
+            else if (evaluationReport.OverallStatus == EvaluationStatus.Pass)
+            {
+                session.Stage = StorySessionStage.Evaluated;
+            }
+
+            session.LastEvaluationReport = evaluationReport;
+            session.UpdatedAt = DateTime.UtcNow;
+            await _sessionRepository.UpsertAsync(session, cancellationToken);
 
             var response = new EvaluateResponse
             {
@@ -265,6 +300,13 @@ public class StoryAgentController : ControllerBase
                 IsFullRewrite = request.TargetSceneIds.Count == 0
             };
 
+            // Set stage to Refining before starting the background task
+            session.Stage = StorySessionStage.Refining;
+            session.UpdatedAt = DateTime.UtcNow;
+            await _sessionRepository.UpdateAsync(session, cancellationToken);
+
+            _logger.LogInformation("Session {SessionId} stage set to Refining", sessionId);
+
             // Fire-and-forget: Start refinement in background
             _ = Task.Run(async () =>
             {
@@ -304,6 +346,166 @@ public class StoryAgentController : ControllerBase
     }
 
     /// <summary>
+    /// Generate a rubric for the story generation session.
+    /// </summary>
+    /// <param name="sessionId">The session identifier.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>Session state response.</returns>
+    [HttpPost("sessions/{sessionId}/rubric")]
+    [ProducesResponseType(typeof(SessionStateResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    [Produces("application/json")]
+    public async Task<IActionResult> GenerateRubric(string sessionId, CancellationToken cancellationToken = default)
+    {
+        _logger.LogInformation("Generating rubric for session {SessionId}", sessionId);
+
+        try
+        {
+            // Load session
+            var session = await _sessionRepository.GetAsync(sessionId, cancellationToken);
+            if (session == null)
+            {
+                return NotFound(new { error = "Session not found", sessionId });
+            }
+
+            // Verify session is in correct state
+            if (session.Stage != StorySessionStage.RefinementRequested && session.Stage != StorySessionStage.Evaluated)
+            {
+                return Conflict(new { error = "Session is not in RefinementRequested or Evaluated state", sessionId, currentStage = session.Stage.ToString() });
+            }
+
+            // Mark session as generating rubric
+            session.Stage = StorySessionStage.GeneratingRubric;
+            session.UpdatedAt = DateTime.UtcNow;
+            await _sessionRepository.UpsertAsync(session, cancellationToken);
+
+            // Call rubric generator
+            var (success, rubric) = await _agentOrchestrator.GenerateRubricAsync(sessionId, cancellationToken);
+
+            if (!success)
+            {
+                _logger.LogWarning("Rubric generation failed for session {SessionId}", sessionId);
+                session.Stage = StorySessionStage.Failed;
+                session.ErrorMessage = "Failed to generate rubric";
+                session.UpdatedAt = DateTime.UtcNow;
+                await _sessionRepository.UpsertAsync(session, cancellationToken);
+                return StatusCode(500, new { error = "Failed to generate rubric", sessionId });
+            }
+
+            // Reload session to get updated state (orchestrator already updated it)
+            session = await _sessionRepository.GetAsync(sessionId, cancellationToken);
+            if (session == null)
+            {
+                return NotFound(new { error = "Session not found after rubric generation", sessionId });
+            }
+
+            _logger.LogInformation("Rubric generated for session {SessionId}", sessionId);
+
+            var response = new SessionStateResponse
+            {
+                SessionId = session.SessionId,
+                ThreadId = session.ThreadId ?? string.Empty,
+                Stage = session.Stage.ToString(),
+                IterationCount = session.IterationCount,
+                CostEstimate = Convert.ToDouble(session.CostEstimate),
+                CurrentStoryJson = session.CurrentStoryVersion,
+                CurrentStoryYaml = session.CurrentStoryYaml ?? string.Empty,
+                LastEvaluationReport = session.LastEvaluationReport,
+                RubricSummary = session.RubricSummary,
+                StoryVersions = session.StoryVersions,
+                ErrorMessage = session.ErrorMessage
+            };
+
+            return Ok(response);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error generating rubric for session {SessionId}", sessionId);
+            return StatusCode(500, new { error = "An unexpected error occurred", sessionId });
+        }
+    }
+
+    /// <summary>
+    /// Complete the story generation session.
+    /// </summary>
+    /// <param name="sessionId">The session identifier.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>Session state response.</returns>
+    [HttpPost("sessions/{sessionId}/complete")]
+    [ProducesResponseType(typeof(SessionStateResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    [Produces("application/json")]
+    public async Task<IActionResult> CompleteSession(string sessionId, CancellationToken cancellationToken = default)
+    {
+        _logger.LogInformation("Completing session {SessionId}", sessionId);
+
+        try
+        {
+            // Load session
+            var session = await _sessionRepository.GetAsync(sessionId, cancellationToken);
+            if (session == null)
+            {
+                return NotFound(new { error = "Session not found", sessionId });
+            }
+
+            // Verify session is in correct state
+            if (session.Stage != StorySessionStage.RefinementRequested && session.Stage != StorySessionStage.Evaluated)
+            {
+                return Conflict(new { error = "Session is not in RefinementRequested or Evaluated state", sessionId, currentStage = session.Stage.ToString() });
+            }
+
+            // TODO: Call rubric generator here before completing
+            // This should:
+            // 1. Call IPromptGenerator.GenerateRubricPrompt(session.CurrentStoryVersion, session.LastEvaluationReport, session.IterationCount)
+            // 2. Send the prompt to an LLM agent
+            // 3. Parse and store the rubric response in the session
+            // 4. Return the rubric to the frontend for display
+
+            // Mark session as complete
+            session.Stage = StorySessionStage.Complete;
+            session.UpdatedAt = DateTime.UtcNow;
+            await _sessionRepository.UpsertAsync(session, cancellationToken);
+
+            // Publish completion event
+            await _streamPublisher.PublishEventAsync(sessionId, new AgentStreamEvent
+            {
+                Type = AgentStreamEvent.EventType.PhaseStarted,
+                Phase = "Complete",
+                Payload = new { },
+                IterationNumber = session.IterationCount
+            });
+
+            _logger.LogInformation("Session {SessionId} marked as complete", sessionId);
+
+            var response = new SessionStateResponse
+            {
+                SessionId = session.SessionId,
+                ThreadId = session.ThreadId ?? string.Empty,
+                Stage = session.Stage.ToString(),
+                IterationCount = session.IterationCount,
+                CostEstimate = Convert.ToDouble(session.CostEstimate),
+                CurrentStoryJson = session.CurrentStoryVersion,
+                CurrentStoryYaml = session.CurrentStoryYaml ?? string.Empty,
+                LastEvaluationReport = session.LastEvaluationReport,
+                RubricSummary = session.RubricSummary,
+                StoryVersions = session.StoryVersions,
+                ErrorMessage = session.ErrorMessage
+            };
+
+            return Ok(response);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error completing session {SessionId}", sessionId);
+            return StatusCode(500, new { error = "An unexpected error occurred", sessionId });
+        }
+    }
+
+    /// <summary>
     /// Get the current state of a story generation session.
     /// </summary>
     /// <param name="sessionId">The session identifier.</param>
@@ -335,6 +537,7 @@ public class StoryAgentController : ControllerBase
                 CurrentStoryJson = session.CurrentStoryVersion,
                 CurrentStoryYaml = session.CurrentStoryYaml ?? string.Empty,
                 LastEvaluationReport = session.LastEvaluationReport,
+                RubricSummary = session.RubricSummary,
                 StoryVersions = session.StoryVersions,
                 ErrorMessage = session.ErrorMessage
             };
@@ -398,9 +601,11 @@ public class StoryAgentController : ControllerBase
                     _logger.LogDebug("SSE event streamed for session {SessionId}: {EventType}", sessionId, evt.Type);
 
                     // Check if this event indicates terminal state
-                    if (terminalStates.Contains(session.Stage))
+                    if (evt.Type == AgentStreamEvent.EventType.MaxIterationsReached ||
+                        evt.Type == AgentStreamEvent.EventType.Error ||
+                        evt.Type == AgentStreamEvent.EventType.RubricGenerated)
                     {
-                        _logger.LogInformation("SSE stream ending due to terminal state for session {SessionId}: {Stage}", sessionId, session.Stage);
+                        _logger.LogInformation("SSE stream ending due to terminal event for session {SessionId}: {EventType}", sessionId, evt.Type);
                         break;
                     }
                 }

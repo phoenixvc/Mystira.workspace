@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using Mystira.StoryGenerator.Api;
-using Mystira.StoryGenerator.Api.Models;
 using Mystira.StoryGenerator.Application.Infrastructure.Agents;
 using Mystira.StoryGenerator.Contracts.Models;
 using Mystira.StoryGenerator.Domain.Agents;
@@ -320,7 +319,7 @@ public class AgentPipelinePerformanceTests : IClassFixture<WebApplicationFactory
             {
                 SessionId = sessionId,
                 KnowledgeMode = Enum.Parse<KnowledgeMode>(knowledgeMode),
-                Stage = StorySessionStage.Generating,
+                Stage = StorySessionStage.Validating,
                 IterationCount = 0,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow,
@@ -378,6 +377,21 @@ public class AgentPipelinePerformanceTests : IClassFixture<WebApplicationFactory
         public async Task<StorySession?> GetSessionAsync(string sessionId)
         {
             return await Task.FromResult(_sessions.TryGetValue(sessionId, out var session) ? session : null);
+        }
+
+        public async Task<(bool Success, RubricSummary? Rubric)> GenerateRubricAsync(string sessionId, CancellationToken ct)
+        {
+            if (_sessions.TryGetValue(sessionId, out var session))
+            {
+                var rubric = new RubricSummary
+                {
+                    Summary = "Performance mock rubric",
+                    ReadyForPublish = true
+                };
+                session.RubricSummary = rubric;
+                return (true, rubric);
+            }
+            return (false, null);
         }
 
         public void SetStage(string sessionId, StorySessionStage stage)

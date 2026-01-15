@@ -1,7 +1,6 @@
 using System.Net.Http.Json;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
-using Mystira.StoryGenerator.Api.Models;
 using Mystira.StoryGenerator.Application.Infrastructure.Agents;
 using Mystira.StoryGenerator.Contracts.Models;
 using Mystira.StoryGenerator.Domain.Agents;
@@ -88,6 +87,38 @@ public class AgentSessionService : IAgentSessionService
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error refining session {SessionId}", sessionId);
+            throw;
+        }
+    }
+
+    public async Task<SessionStateResponse> GenerateRubricAsync(string sessionId)
+    {
+        try
+        {
+            var response = await _httpClient.PostAsync($"/api/story-agent/sessions/{sessionId}/rubric", null);
+            response.EnsureSuccessStatusCode();
+            var result = await response.Content.ReadFromJsonAsync<SessionStateResponse>(_jsonOptions);
+            return result ?? throw new InvalidOperationException("Failed to parse rubric response");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error generating rubric for session {SessionId}", sessionId);
+            throw;
+        }
+    }
+
+    public async Task<SessionStateResponse> CompleteAsync(string sessionId)
+    {
+        try
+        {
+            var response = await _httpClient.PostAsync($"/api/story-agent/sessions/{sessionId}/complete", null);
+            response.EnsureSuccessStatusCode();
+            var result = await response.Content.ReadFromJsonAsync<SessionStateResponse>(_jsonOptions);
+            return result ?? throw new InvalidOperationException("Failed to parse complete response");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error completing session {SessionId}", sessionId);
             throw;
         }
     }

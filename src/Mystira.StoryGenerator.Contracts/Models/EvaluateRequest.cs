@@ -8,7 +8,7 @@ namespace Mystira.StoryGenerator.Contracts.Models;
 public class EvaluateRequest
 {
     /// <summary>
-    /// Optional timeout for the evaluation in seconds. Default is 300 seconds.
+    /// Optional timeout for the evaluation in seconds. Default is 600 seconds (10 minutes).
     /// </summary>
-    public int? TimeoutSeconds { get; set; } = 300;
+    public int? TimeoutSeconds { get; set; } = 600;
 }
