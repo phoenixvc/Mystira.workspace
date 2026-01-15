@@ -70,6 +70,113 @@ For detailed setup instructions, see [docs/AGENT_SETUP_GUIDE.md](../docs/AGENT_S
 
 ---
 
+### list-agents.sh
+
+Retrieves all agent IDs from your Azure AI Foundry project using the Azure REST API.
+
+**Usage:**
+
+```bash
+./scripts/list-agents.sh
+```
+
+The script will:
+1. Authenticate using Azure CLI credentials
+2. Query the Azure AI Foundry API for all agents
+3. Display a formatted table of agents with their IDs, names, and creation dates
+4. Provide configuration mapping suggestions for `appsettings.json`
+
+**Output Example:**
+
+```
+Found 4 agent(s):
+
+ID                              Name                            Created
+----------------------------------------------------------------------------------------------------
+asst_abc123xyz456               mystira-writer-v01              2026-01-15 10:05:24
+asst_def789uvw012               mystira-judge-v01               2026-01-15 10:05:24
+asst_ghi345rst678               mystira-refiner-v01             2026-01-15 10:05:24
+asst_jkl901mno234               mystira-rubric-v01              2026-01-15 10:05:24
+
+========================================
+Configuration Mapping Suggestions
+========================================
+
+Update your appsettings.json with these agent IDs:
+
+"FoundryAgent": {
+  "WriterAgentId": "asst_abc123xyz456",
+  "JudgeAgentId": "asst_def789uvw012",
+  "RefinerAgentId": "asst_ghi345rst678",
+  "RubricSummaryAgentId": "asst_jkl901mno234",
+  ...
+}
+```
+
+**Prerequisites:**
+
+- Azure CLI installed and authenticated (`az login`)
+- `curl` and `jq` installed
+- Access to the Azure AI Foundry project
+
+**Environment Variables:**
+
+You can override the default endpoint by setting:
+
+```bash
+export AZURE_AI_ENDPOINT="https://your-project.azure.com/api/projects/your-project"
+./scripts/list-agents.sh
+```
+
+---
+
+### list-agents.py
+
+Python alternative to the bash script for listing agents.
+
+**Prerequisites:**
+
+```bash
+pip install azure-identity azure-ai-projects
+az login
+```
+
+**Usage:**
+
+```bash
+python3 scripts/list-agents.py "https://your-project.azure.com/api/projects/your-project"
+```
+
+---
+
+## Troubleshooting
+
+### Error: "az: command not found"
+
+Install Azure CLI:
+- **macOS**: `brew install azure-cli`
+- **Ubuntu/Debian**: `curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash`
+- **Windows**: Download from https://aka.ms/installazurecliwindows
+
+Then run `az login` to authenticate.
+
+### Error: "jq: command not found"
+
+Install jq:
+- **macOS**: `brew install jq`
+- **Ubuntu/Debian**: `sudo apt-get install jq`
+- **Windows**: Download from https://stedolan.github.io/jq/
+
+### Error: "Failed to get Azure access token"
+
+Run `az login` to authenticate with Azure.
+
+### Error: "Failed to retrieve agents: 403 Forbidden"
+
+You don't have permissions to access the Azure AI project. Ask your Azure administrator to grant you "Contributor" or "Azure AI Developer" role on the project.
+
+---
+
 ## Future Scripts
 
 Additional scripts may be added for:

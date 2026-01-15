@@ -17,16 +17,125 @@ var modelOption = new Option<string>(
     IsRequired = true
 };
 
-var rootCommand = new RootCommand("Creates Azure AI Foundry agents for Mystira Story Generator");
-rootCommand.AddOption(endpointOption);
-rootCommand.AddOption(modelOption);
+var rootCommand = new RootCommand("Manages Azure AI Foundry agents for Mystira Story Generator");
 
-rootCommand.SetHandler(async (endpoint, model) =>
+// List command
+var listCommand = new Command("list", "Lists all existing agents and their IDs");
+listCommand.AddOption(endpointOption);
+listCommand.SetHandler(async (endpoint) =>
+{
+    await ListAgentsAsync(endpoint);
+}, endpointOption);
+
+// Create command
+var createCommand = new Command("create", "Creates new agents");
+createCommand.AddOption(endpointOption);
+createCommand.AddOption(modelOption);
+createCommand.SetHandler(async (endpoint, model) =>
 {
     await CreateAgentsAsync(endpoint, model);
 }, endpointOption, modelOption);
 
+rootCommand.AddCommand(listCommand);
+rootCommand.AddCommand(createCommand);
+
 return await rootCommand.InvokeAsync(args);
+
+static async Task ListAgentsAsync(string endpoint)
+{
+    Console.WriteLine("Connecting to Azure AI Foundry...");
+
+    var projectClient = new AIProjectClient(new Uri(endpoint), new DefaultAzureCredential());
+    var agentsClient = projectClient.GetPersistentAgentsClient();
+
+    Console.WriteLine("✓ Connected successfully");
+    Console.WriteLine();
+    Console.WriteLine("Retrieving agents...");
+    Console.WriteLine();
+
+    try
+    {
+        var agents = agentsClient.GetAgentsAsync();
+
+        var agentList = new List<(string Id, string Name, DateTimeOffset CreatedAt)>();
+
+        await foreach (var agent in agents)
+        {
+            agentList.Add((agent.Id, agent.Name ?? "Unnamed", agent.CreatedAt));
+        }
+
+        if (!agentList.Any())
+        {
+            Console.WriteLine("No agents found.");
+            Console.WriteLine();
+            Console.WriteLine("Run 'dotnet run create --endpoint <url> --model <model>' to create agents.");
+            return;
+        }
+
+        Console.WriteLine($"Found {agentList.Count} agent(s):");
+        Console.WriteLine();
+        Console.WriteLine($"{"ID",-30} {"Name",-30} {"Created",-25}");
+        Console.WriteLine(new string('-', 90));
+
+        foreach (var agent in agentList.OrderBy(a => a.Name))
+        {
+            Console.WriteLine($"{agent.Id,-30} {agent.Name,-30} {agent.CreatedAt:yyyy-MM-dd HH:mm:ss}");
+        }
+
+        Console.WriteLine();
+        Console.WriteLine("========================================");
+        Console.WriteLine("Configuration Mapping Suggestions");
+        Console.WriteLine("========================================");
+        Console.WriteLine();
+
+        // Try to map agents to configuration keys based on naming
+        var mappings = new Dictionary<string, string>
+        {
+            ["WriterAgentId"] = agentList.FirstOrDefault(a => a.Name.Contains("writer", StringComparison.OrdinalIgnoreCase)).Id ?? "",
+            ["JudgeAgentId"] = agentList.FirstOrDefault(a => a.Name.Contains("judge", StringComparison.OrdinalIgnoreCase)).Id ?? "",
+            ["RefinerAgentId"] = agentList.FirstOrDefault(a => a.Name.Contains("refiner", StringComparison.OrdinalIgnoreCase)).Id ?? "",
+            ["RubricSummaryAgentId"] = agentList.FirstOrDefault(a => a.Name.Contains("rubric", StringComparison.OrdinalIgnoreCase)).Id ?? ""
+        };
+
+        Console.WriteLine("Update your appsettings.json with these agent IDs:");
+        Console.WriteLine();
+        Console.WriteLine("\"FoundryAgent\": {");
+        foreach (var kvp in mappings.Where(m => !string.IsNullOrEmpty(m.Value)))
+        {
+            Console.WriteLine($"  \"{kvp.Key}\": \"{kvp.Value}\",");
+        }
+        Console.WriteLine("  ...");
+        Console.WriteLine("}");
+        Console.WriteLine();
+
+        // Warn about missing mappings
+        var missing = mappings.Where(m => string.IsNullOrEmpty(m.Value)).Select(m => m.Key).ToList();
+        if (missing.Any())
+        {
+            Console.WriteLine("WARNING: Could not find agents for:");
+            foreach (var key in missing)
+            {
+                Console.WriteLine($"  - {key}");
+            }
+            Console.WriteLine();
+            Console.WriteLine("You may need to create these agents using:");
+            Console.WriteLine($"  dotnet run create --endpoint {endpoint} --model <model>");
+            Console.WriteLine();
+        }
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"✗ Failed to list agents: {ex.Message}");
+        Console.WriteLine();
+        Console.WriteLine("Common issues:");
+        Console.WriteLine("  1. Invalid Azure credentials (run 'az login')");
+        Console.WriteLine("  2. Insufficient permissions on the Azure AI Project");
+        Console.WriteLine("  3. Invalid endpoint URL");
+        Console.WriteLine("  4. Network connectivity issues");
+        Console.WriteLine();
+        Environment.Exit(1);
+    }
+}
 
 static async Task CreateAgentsAsync(string endpoint, string modelDeployment)
 {
