@@ -1,15 +1,13 @@
-name: "StoryGenerator: Build & Deploy Dev"
+name: "[Deploy] Story Generator Dev"
 
 on:
   push:
     branches: [dev, main]
-  pull_request:
-    branches: [dev, main]
   workflow_dispatch:
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+  group: deploy-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
 
 env:
   DOTNET_NOLOGO: true
@@ -24,60 +22,12 @@ permissions:
 
 jobs:
   # ============================================
-  # CI Jobs (run in parallel for fast feedback)
-  # ============================================
-
-  lint:
-    name: Lint
-    runs-on: ubuntu-latest
-    if: github.event_name != 'pull_request' || !github.event.pull_request.draft
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: '8.0.x'
-
-      - name: Restore
-        run: dotnet restore
-
-      - name: Format check
-        run: dotnet format --verify-no-changes --verbosity diagnostic
-
-  test:
-    name: Test
-    runs-on: ubuntu-latest
-    if: github.event_name != 'pull_request' || !github.event.pull_request.draft
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: '8.0.x'
-
-      - name: Restore
-        run: dotnet restore
-        env:
-          NUGET_AUTH_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN }}
-
-      - name: Build
-        run: dotnet build --no-restore
-
-      - name: Test
-        run: dotnet test --no-build --verbosity normal
-
-  # ============================================
   # Build and Push Docker Image
   # ============================================
 
   build-and-push:
     name: Build & Push Image
     runs-on: ubuntu-latest
-    needs: [lint, test]
-    # Only build/push on push to branch (not PRs)
-    if: github.event_name != 'pull_request'
     outputs:
       image-tag: ${{ steps.meta.outputs.version }}
       image-digest: ${{ steps.build.outputs.digest }}
@@ -129,11 +79,9 @@ jobs:
     name: Trigger API Deployment
     runs-on: ubuntu-latest
     needs: build-and-push
-    # Only deploy on push to dev or manual dispatch
     if: |
       needs.build-and-push.result == 'success' &&
-      github.ref == 'refs/heads/dev' &&
-      (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+      github.ref == 'refs/heads/dev'
     steps:
       - name: Trigger API deployment via workspace
         uses: peter-evans/repository-dispatch@v3
@@ -159,18 +107,14 @@ jobs:
   build-and-deploy-swa:
     name: Build & Deploy SWA
     runs-on: ubuntu-latest
-    needs: [lint, test]
-    # Only deploy on push to dev or manual dispatch
-    if: |
-      github.ref == 'refs/heads/dev' &&
-      (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+    if: github.ref == 'refs/heads/dev'
     steps:
       - uses: actions/checkout@v4
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '8.0.x'
+          dotnet-version: "9.0.x"
 
       - name: Install wasm-tools workload
         run: dotnet workload install wasm-tools
@@ -223,7 +167,7 @@ jobs:
   notify:
     name: Deployment Summary
     runs-on: ubuntu-latest
-    needs: [lint, test, build-and-push, trigger-api-deploy, build-and-deploy-swa, trigger-swa-deploy]
+    needs: [build-and-push, trigger-api-deploy, build-and-deploy-swa, trigger-swa-deploy]
     if: always()
     steps:
       - name: Generate Summary
@@ -235,8 +179,6 @@ jobs:
           echo "| Branch | ${{ github.ref_name }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Commit | \`${{ github.sha }}\` |" >> $GITHUB_STEP_SUMMARY
           echo "| Actor | ${{ github.actor }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Lint | ${{ needs.lint.result }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Test | ${{ needs.test.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Build (API) | ${{ needs.build-and-push.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Deploy (API) | ${{ needs.trigger-api-deploy.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Build (SWA) | ${{ needs.build-and-deploy-swa.result }} |" >> $GITHUB_STEP_SUMMARY
@@ -254,11 +196,7 @@ jobs:
             echo "- **URL:** https://dev.story.mystira.app" >> $GITHUB_STEP_SUMMARY
           fi
 
-          if [ "${{ needs.trigger-api-deploy.result }}" == "skipped" ] && [ "${{ needs.trigger-swa-deploy.result }}" == "skipped" ]; then
-            echo "### No Deployment" >> $GITHUB_STEP_SUMMARY
-            echo "Deployment only runs on push to \`dev\` branch." >> $GITHUB_STEP_SUMMARY
-          fi
-
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "---" >> $GITHUB_STEP_SUMMARY
+          echo "_Lint and tests are handled by [CI] and [Test] workflows._" >> $GITHUB_STEP_SUMMARY
           echo "_Staging/prod deployments are managed through the workspace._" >> $GITHUB_STEP_SUMMARY
