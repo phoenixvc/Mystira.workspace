@@ -1,17 +1,19 @@
-name: "[CI] DevHub"
+name: "[Test] Unit"
 
 on:
   push:
     branches: [dev, main]
     paths:
-      - "Mystira.DevHub/**"
-      - ".github/workflows/ci.yml"
+      - "Mystira.DevHub/src/**"
+      - "Mystira.DevHub/package.json"
+      - "Mystira.DevHub/vitest.config.ts"
+      - ".github/workflows/test-unit.yml"
   pull_request:
     branches: [dev, main]
   workflow_dispatch:
 
 concurrency:
-  group: ci-${{ github.workflow }}-${{ github.ref }}
+  group: test-unit-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 defaults:
@@ -19,56 +21,62 @@ defaults:
     working-directory: Mystira.DevHub
 
 jobs:
-  lint:
-    name: Lint
+  unit-tests:
+    name: Unit Tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-node@v4
         with:
           node-version: "20"
           cache: "npm"
           cache-dependency-path: Mystira.DevHub/package-lock.json
-      - run: npm ci
-      - name: Check formatting (if prettier configured)
-        run: npx prettier --check "src/**/*.{ts,tsx,js,jsx,json,css}" || true
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run Vitest with coverage
+        run: npm run test:coverage -- --reporter=verbose
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-report
+          path: Mystira.DevHub/coverage
+          retention-days: 14
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        if: always()
+        with:
+          directory: Mystira.DevHub/coverage
+          flags: unit-tests
+          fail_ci_if_error: false
         continue-on-error: true
 
-  typecheck:
-    name: TypeCheck
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-          cache: "npm"
-          cache-dependency-path: Mystira.DevHub/package-lock.json
-      - run: npm ci
-      - name: TypeScript type check
-        run: npx tsc --noEmit
-
-  rust-check:
-    name: Rust Check
+  rust-tests:
+    name: Rust Unit Tests
     runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: Mystira.DevHub/src-tauri
     steps:
       - uses: actions/checkout@v4
+
       - name: Install Rust stable
         uses: dtolnay/rust-toolchain@stable
-        with:
-          components: clippy, rustfmt
+
       - name: Install Linux dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y libwebkit2gtk-4.0-dev libgtk-3-dev libappindicator3-dev librsvg2-dev patchelf
+
       - name: Rust cache
         uses: Swatinem/rust-cache@v2
         with:
           workspaces: Mystira.DevHub/src-tauri -> target
-      - name: Check formatting
-        run: cargo fmt --check
-      - name: Clippy
-        run: cargo clippy -- -D warnings
+
+      - name: Run Rust tests
+        run: cargo test --verbose
