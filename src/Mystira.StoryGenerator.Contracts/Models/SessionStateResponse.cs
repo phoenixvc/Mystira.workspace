@@ -1,4 +1,4 @@
-using Mystira.StoryGenerator.Domain.Agents;
+using Mystira.StoryGenerator.Contracts.Agents;
 
 namespace Mystira.StoryGenerator.Contracts.Models;
 
