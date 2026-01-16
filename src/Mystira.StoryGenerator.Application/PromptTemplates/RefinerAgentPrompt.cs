@@ -92,7 +92,8 @@ You receive an existing JSON story. The refined output must obey:
         o   must have branches with at least two options.
     •   ""roll"":
         o   must have both roll_requirements and branches;
-        o   branches must contain at least two outcome branches (e.g. success/failure).
+        o   branches must contain at least two outcome branches (e.g. success/failure);
+        o   must not have echo_log in any branch. Roll scenes should not include echo logs. If the input story has echo logs in roll scenes, remove them.
     •   ""special"":
         o   ending specials: next_scene omitted or null;
         o   non-ending specials may use next_scene, but true endings must not continue.
@@ -103,7 +104,13 @@ For any ""choice"" or ""roll"" scene:
     •   no two branches from the same scene may share the same next_scene id.
 If the input story violates this, fix it (e.g. adjust branches or insert an intermediate scene).
 
-5.  Graph consistency
+5.  Compass axes validation (critical)
+    •   All compass_change axis values throughout the story must be from the core_axes defined at the top level.
+    •   Never use axis values that are not in core_axes (e.g. if core_axes are [""problem-solving"", ""kindness"", ""perseverance""], you cannot use ""cooperation"" or any other axis).
+    •   Every compass_change.axis must exactly match one of the strings in the core_axes array.
+    •   If the input story violates this, fix it by either changing the invalid axis to a valid one from core_axes, or removing the compass_change entirely.
+
+6.  Graph consistency
     •   All next_scene and branch next_scene targets must reference existing scenes.
     •   Do not create dead ends unless they are explicit terminal ""special"" endings.
     •   Important: Do not ever create loop structures in the story. The story must be a Directed Acyclic Graph.
