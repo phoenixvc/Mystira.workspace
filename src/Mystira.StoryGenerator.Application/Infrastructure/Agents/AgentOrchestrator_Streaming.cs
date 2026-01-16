@@ -514,17 +514,10 @@ public partial class AgentOrchestrator
         try
         {
             // Handle different streaming update types
-            if (update is MessageDeltaUpdate messageDelta)
+            if (update is MessageContentUpdate contentUpdate)
             {
-                var content = new StringBuilder();
-                foreach (var contentItem in messageDelta.Delta.ContentItems)
-                {
-                    if (contentItem is MessageDeltaTextContent textContent)
-                    {
-                        content.Append(textContent.Text);
-                    }
-                }
-                return ("MessageDelta", content.ToString(), messageDelta.RunId ?? string.Empty);
+                // Extract text content from the message content update
+                return ("MessageContent", contentUpdate.Text ?? string.Empty, string.Empty);
             }
 
             if (update is RunUpdate runUpdate)
@@ -532,14 +525,25 @@ public partial class AgentOrchestrator
                 return ("RunUpdate", string.Empty, runUpdate.Value.Id);
             }
 
-            if (update is MessageUpdate messageUpdate)
+            if (update is MessageStatusUpdate messageStatusUpdate)
             {
-                return ("MessageUpdate", string.Empty, string.Empty);
+                return ("MessageStatus", string.Empty, string.Empty);
             }
 
             if (update is RunStepUpdate runStepUpdate)
             {
                 return ("RunStepUpdate", string.Empty, runStepUpdate.Value.RunId);
+            }
+
+            // Check for specific update kinds
+            if (update.UpdateKind == StreamingUpdateReason.RunCreated)
+            {
+                return ("RunCreated", string.Empty, string.Empty);
+            }
+
+            if (update.UpdateKind == StreamingUpdateReason.RunCompleted)
+            {
+                return ("RunCompleted", string.Empty, string.Empty);
             }
 
             return ("Unknown", string.Empty, string.Empty);
