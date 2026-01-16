@@ -20,7 +20,7 @@ public partial class AgentOrchestrator
         string storyPrompt,
         CancellationToken ct)
     {
-        _logger.LogInformation("Starting streaming story generation for session {SessionId}", sessionId);
+        _logger.LogInformation("========== STARTING STREAMING STORY GENERATION for session {SessionId} ==========", sessionId);
 
         try
         {
@@ -74,6 +74,8 @@ public partial class AgentOrchestrator
                 responseFormat,
                 ct))
             {
+                _logger.LogDebug("Received streaming update of type: {UpdateType}", update.GetType().Name);
+
                 var (updateType, content, currentRunId) = ProcessStreamingUpdate(update);
 
                 if (!string.IsNullOrEmpty(currentRunId))
@@ -83,6 +85,10 @@ public partial class AgentOrchestrator
 
                 if (!string.IsNullOrEmpty(content))
                 {
+                    _logger.LogInformation("Streaming content received ({Length} chars): {Preview}",
+                        content.Length,
+                        content.Length > 50 ? content[..50] + "..." : content);
+
                     responseBuilder.Append(content);
 
                     // Publish streaming update event
@@ -94,6 +100,12 @@ public partial class AgentOrchestrator
                         Payload = new { UpdateType = updateType, RunId = runId },
                         IterationNumber = session.IterationCount
                     });
+
+                    _logger.LogDebug("Published StreamingUpdate event for session {SessionId}", sessionId);
+                }
+                else
+                {
+                    _logger.LogDebug("Streaming update type {UpdateType} had no content", updateType);
                 }
             }
 
@@ -522,39 +534,53 @@ public partial class AgentOrchestrator
     {
         try
         {
+            _logger.LogDebug("Processing streaming update - Type: {Type}, UpdateKind: {UpdateKind}",
+                update.GetType().Name, update.UpdateKind);
+
             // Handle different streaming update types
             if (update is MessageContentUpdate contentUpdate)
             {
-                // Extract text content from the message content update
-                return ("MessageContent", contentUpdate.Text ?? string.Empty, string.Empty);
+                var text = contentUpdate.Text ?? string.Empty;
+                _logger.LogDebug("MessageContentUpdate - Text length: {Length}, Preview: {Preview}",
+                    text.Length,
+                    text.Length > 30 ? text[..30] + "..." : text);
+                return ("MessageContent", text, string.Empty);
             }
 
             if (update is RunUpdate runUpdate)
             {
+                _logger.LogDebug("RunUpdate - RunId: {RunId}, Status: {Status}",
+                    runUpdate.Value.Id, runUpdate.Value.Status);
                 return ("RunUpdate", string.Empty, runUpdate.Value.Id);
             }
 
             if (update is MessageStatusUpdate messageStatusUpdate)
             {
+                _logger.LogDebug("MessageStatusUpdate received");
                 return ("MessageStatus", string.Empty, string.Empty);
             }
 
             if (update is RunStepUpdate runStepUpdate)
             {
+                _logger.LogDebug("RunStepUpdate - RunId: {RunId}", runStepUpdate.Value.RunId);
                 return ("RunStepUpdate", string.Empty, runStepUpdate.Value.RunId);
             }
 
             // Check for specific update kinds
             if (update.UpdateKind == StreamingUpdateReason.RunCreated)
             {
+                _logger.LogDebug("RunCreated event");
                 return ("RunCreated", string.Empty, string.Empty);
             }
 
             if (update.UpdateKind == StreamingUpdateReason.RunCompleted)
             {
+                _logger.LogDebug("RunCompleted event");
                 return ("RunCompleted", string.Empty, string.Empty);
             }
 
+            _logger.LogWarning("Unknown streaming update type: {Type}, UpdateKind: {UpdateKind}",
+                update.GetType().Name, update.UpdateKind);
             return ("Unknown", string.Empty, string.Empty);
         }
         catch (Exception ex)
