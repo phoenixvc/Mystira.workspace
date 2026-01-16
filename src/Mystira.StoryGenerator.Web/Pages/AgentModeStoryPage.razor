@@ -25,6 +25,7 @@
                 EvaluationReport="lastEvaluation"
                 RubricSummary="currentSession?.RubricSummary"
                 Events="streamEvents"
+                StreamingContent="streamingContent"
                 OnRefineRequested="HandleRefineFromRubric"
                 OnCompleteRequested="HandleComplete" />
 
@@ -98,6 +99,7 @@
     private string? errorMessage;
     private string? autoPopulatedRefinementText;
     private CancellationTokenSource? streamCts;
+    private string streamingContent = string.Empty;
 
     private async Task HandleStartSession(StartSessionRequest request)
     {
@@ -150,6 +152,20 @@
             {
                 streamEvents.Add(evt);
                 logger.LogDebug("Received event: {EventType}", evt.Type);
+
+                // Accumulate streaming content
+                if (evt.Type == AgentStreamEvent.EventType.StreamingUpdate && !string.IsNullOrEmpty(evt.Message))
+                {
+                    streamingContent += evt.Message;
+                    logger.LogDebug("Accumulated {Length} chars of streaming content", streamingContent.Length);
+                }
+
+                // Clear streaming content when a new phase starts
+                if (evt.Type == AgentStreamEvent.EventType.PhaseStarted)
+                {
+                    streamingContent = string.Empty;
+                    logger.LogDebug("Cleared streaming content for new phase: {Phase}", evt.Phase);
+                }
 
                 // Handle specific event types
                 if (evt.Type == AgentStreamEvent.EventType.EvaluationPassed ||

@@ -176,6 +176,17 @@
         </div>
     }
 
+    @if (!string.IsNullOrEmpty(StreamingContent) && Session != null &&
+         (Session.Stage == "Generating" || Session.Stage == "Refining" || Session.Stage == "GeneratingRubric"))
+    {
+        <div class="streaming-content-panel">
+            <h4>Real-time Generation</h4>
+            <div class="streaming-content">
+                <pre>@StreamingContent</pre>
+            </div>
+        </div>
+    }
+
     @if (Events.Any())
     {
         <div class="event-log">
@@ -189,6 +200,10 @@
                         @if (evt.Type == AgentStreamEvent.EventType.PhaseStarted && !string.IsNullOrEmpty(evt.Phase))
                         {
                             <span class="phase">@evt.Phase</span>
+                        }
+                        @if (evt.Type == AgentStreamEvent.EventType.StreamingUpdate && !string.IsNullOrEmpty(evt.Message))
+                        {
+                            <span class="message-preview">@GetMessagePreview(evt.Message)</span>
                         }
                     </div>
                 }
@@ -226,6 +241,7 @@
     [Parameter] public EvaluationReport? EvaluationReport { get; set; }
     [Parameter] public RubricSummary? RubricSummary { get; set; }
     [Parameter] public List<AgentStreamEvent> Events { get; set; } = new();
+    [Parameter] public string StreamingContent { get; set; } = string.Empty;
     [Parameter] public EventCallback OnRefineRequested { get; set; }
     [Parameter] public EventCallback OnCompleteRequested { get; set; }
 
@@ -280,8 +296,19 @@
             AgentStreamEvent.EventType.MaxIterationsReached => "Max Iterations Reached",
             AgentStreamEvent.EventType.Error => "Error",
             AgentStreamEvent.EventType.TokenUsageUpdate => "Token Usage Update",
+            AgentStreamEvent.EventType.StreamingUpdate => "Streaming",
             _ => type.ToString()
         };
+    }
+
+    private string GetMessagePreview(string message)
+    {
+        if (string.IsNullOrEmpty(message))
+            return string.Empty;
+
+        // Show first 50 characters of the message
+        var preview = message.Length > 50 ? message.Substring(0, 50) + "..." : message;
+        return $"\"{preview}\"";
     }
 
     protected override void OnParametersSet()
