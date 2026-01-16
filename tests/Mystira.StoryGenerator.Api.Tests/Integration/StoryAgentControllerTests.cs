@@ -267,6 +267,19 @@ public class StoryAgentControllerTests : IClassFixture<WebApplicationFactory<Pro
             return (false, "Session not found");
         }
 
+        public async Task<(bool Success, string Message)> GenerateStoryStreamingAsync(string sessionId, string storyPrompt, CancellationToken ct)
+        {
+            if (_sessions.TryGetValue(sessionId, out var session))
+            {
+                session.Stage = StorySessionStage.Generating;
+                session.CurrentStoryVersion = "{\"title\": \"Generated Story\", \"content\": \"Story content here...\"}";
+                await Task.Delay(100, ct); // Simulate work
+                session.Stage = StorySessionStage.Validating;
+                return (true, "Streaming story generation started");
+            }
+            return (false, "Session not found");
+        }
+
         public async Task<(bool Success, EvaluationReport Report)> EvaluateStoryAsync(string sessionId, CancellationToken ct)
         {
             if (_sessions.TryGetValue(sessionId, out var session))
@@ -301,6 +314,18 @@ public class StoryAgentControllerTests : IClassFixture<WebApplicationFactory<Pro
             return (false, "Session not found");
         }
 
+        public async Task<(bool Success, string Message)> RefineStoryStreamingAsync(string sessionId, UserRefinementFocus focus, CancellationToken ct)
+        {
+            if (_sessions.TryGetValue(sessionId, out var session))
+            {
+                session.IterationCount++;
+                session.Stage = StorySessionStage.Refined;
+                await Task.Delay(50, ct);
+                return (true, "Streaming refinement completed");
+            }
+            return (false, "Session not found");
+        }
+
         public async Task<StorySession?> GetSessionAsync(string sessionId)
         {
             return await Task.FromResult(_sessions.TryGetValue(sessionId, out var session) ? session : null);
@@ -313,6 +338,21 @@ public class StoryAgentControllerTests : IClassFixture<WebApplicationFactory<Pro
                 var rubric = new RubricSummary
                 {
                     Summary = "Mock rubric summary",
+                    ReadyForPublish = true
+                };
+                session.RubricSummary = rubric;
+                return (true, rubric);
+            }
+            return (false, null);
+        }
+
+        public async Task<(bool Success, RubricSummary? Rubric)> GenerateRubricStreamingAsync(string sessionId, CancellationToken ct)
+        {
+            if (_sessions.TryGetValue(sessionId, out var session))
+            {
+                var rubric = new RubricSummary
+                {
+                    Summary = "Mock rubric summary (streaming)",
                     ReadyForPublish = true
                 };
                 session.RubricSummary = rubric;

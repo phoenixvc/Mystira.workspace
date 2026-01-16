@@ -19,7 +19,8 @@ public class AgentStreamEvent
         RubricGenerated,
         MaxIterationsReached,
         Error,
-        TokenUsageUpdate
+        TokenUsageUpdate,
+        StreamingUpdate
     }
 
     /// <summary>
@@ -46,4 +47,10 @@ public class AgentStreamEvent
     /// Optional iteration number this event relates to.
     /// </summary>
     public int? IterationNumber { get; set; }
+
+    /// <summary>
+    /// Streaming message content for real-time updates from OpenAI.
+    /// Populated when Type is StreamingUpdate.
+    /// </summary>
+    public string? Message { get; set; }
 }

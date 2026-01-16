@@ -91,12 +91,12 @@ public class StoryAgentController : ControllerBase
 
             _logger.LogInformation("Session {SessionId} created with thread {ThreadId}", sessionId, session.ThreadId);
 
-            // Fire-and-forget: Start story generation in background
+            // Fire-and-forget: Start story generation in background with streaming
             _ = Task.Run(async () =>
             {
                 try
                 {
-                    await _agentOrchestrator.GenerateStoryAsync(sessionId, request.StoryPrompt, cancellationToken);
+                    await _agentOrchestrator.GenerateStoryStreamingAsync(sessionId, request.StoryPrompt, cancellationToken);
                 }
                 catch (Exception ex)
                 {
@@ -307,12 +307,12 @@ public class StoryAgentController : ControllerBase
 
             _logger.LogInformation("Session {SessionId} stage set to Refining", sessionId);
 
-            // Fire-and-forget: Start refinement in background
+            // Fire-and-forget: Start refinement in background with streaming
             _ = Task.Run(async () =>
             {
                 try
                 {
-                    await _agentOrchestrator.RefineStoryAsync(sessionId, focus, cancellationToken);
+                    await _agentOrchestrator.RefineStoryStreamingAsync(sessionId, focus, cancellationToken);
                 }
                 catch (Exception ex)
                 {
@@ -381,8 +381,8 @@ public class StoryAgentController : ControllerBase
             session.UpdatedAt = DateTime.UtcNow;
             await _sessionRepository.UpsertAsync(session, cancellationToken);
 
-            // Call rubric generator
-            var (success, rubric) = await _agentOrchestrator.GenerateRubricAsync(sessionId, cancellationToken);
+            // Call rubric generator with streaming
+            var (success, rubric) = await _agentOrchestrator.GenerateRubricStreamingAsync(sessionId, cancellationToken);
 
             if (!success)
             {
