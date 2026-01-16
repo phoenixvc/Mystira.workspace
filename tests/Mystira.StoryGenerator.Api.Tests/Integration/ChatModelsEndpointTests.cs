@@ -69,7 +69,8 @@ public class ChatModelsEndpointTests : IClassFixture<WebApplicationFactory<Progr
         {
             builder.ConfigureServices(services =>
             {
-                services.AddScoped(_ => mockFactory.Object);
+                // Must be Singleton to match the lifetime of services that depend on it
+                services.AddSingleton<ILlmServiceFactory>(_ => mockFactory.Object);
             });
         }).CreateClient();
 
@@ -117,7 +118,8 @@ public class ChatModelsEndpointTests : IClassFixture<WebApplicationFactory<Progr
         {
             builder.ConfigureServices(services =>
             {
-                services.AddScoped(_ => mockFactory.Object);
+                // Must be Singleton to match the lifetime of services that depend on it
+                services.AddSingleton<ILlmServiceFactory>(_ => mockFactory.Object);
             });
         }).CreateClient();
 
