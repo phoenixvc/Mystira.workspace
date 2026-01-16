@@ -1,0 +1,226 @@
+name: "[Test] Integration"
+
+# Reusable workflow for running integration tests
+# Tests service interactions with real dependencies (databases, caches, queues)
+# Uses Docker Compose for service dependencies
+#
+# Usage:
+#   jobs:
+#     integration-tests:
+#       uses: ./.github/workflows/_test-integration.yml
+#       with:
+#         service: admin-api
+#         compose_file: docker-compose.test.yml
+
+on:
+  workflow_call:
+    inputs:
+      service:
+        description: 'Service to test (admin-api, story-generator, chain, publisher)'
+        required: true
+        type: string
+      compose_file:
+        description: 'Docker Compose file for test dependencies'
+        required: false
+        type: string
+        default: 'docker-compose.test.yml'
+      working_directory:
+        description: 'Working directory for tests'
+        required: false
+        type: string
+        default: '.'
+      test_timeout:
+        description: 'Test timeout in minutes'
+        required: false
+        type: number
+        default: 15
+      language:
+        description: 'Language/framework: typescript, dotnet, python'
+        required: false
+        type: string
+        default: 'dotnet'
+    outputs:
+      test_result:
+        description: 'Test result: success, failure'
+        value: ${{ jobs.integration-tests.outputs.result }}
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+
+jobs:
+  integration-tests:
+    name: Integration Tests (${{ inputs.service }})
+    runs-on: ubuntu-latest
+    timeout-minutes: ${{ inputs.test_timeout }}
+    outputs:
+      result: ${{ steps.result.outputs.status }}
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: mystira_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          submodules: recursive
+
+      # .NET setup
+      - name: Setup .NET
+        if: inputs.language == 'dotnet'
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: '9.0.x'
+          source-url: https://nuget.pkg.github.com/phoenixvc/index.json
+        env:
+          NUGET_AUTH_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN }}
+
+      # TypeScript setup
+      - name: Setup pnpm
+        if: inputs.language == 'typescript'
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        if: inputs.language == 'typescript'
+        uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+          cache: "pnpm"
+
+      - name: Install dependencies (TypeScript)
+        if: inputs.language == 'typescript'
+        run: pnpm install
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN || 'dummy' }}
+
+      # Python setup
+      - name: Setup Python
+        if: inputs.language == 'python'
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies (Python)
+        if: inputs.language == 'python'
+        working-directory: ${{ inputs.working_directory }}
+        run: |
+          pip install -r requirements.txt
+          pip install pytest pytest-asyncio
+
+      # Wait for services
+      - name: Wait for services
+        run: |
+          echo "Waiting for PostgreSQL..."
+          timeout 30 bash -c 'until pg_isready -h localhost -p 5432; do sleep 1; done' || true
+
+          echo "Waiting for Redis..."
+          timeout 30 bash -c 'until redis-cli -h localhost ping; do sleep 1; done' || true
+
+      # Run integration tests
+      - name: Run .NET integration tests
+        if: inputs.language == 'dotnet'
+        id: dotnet-tests
+        working-directory: ${{ inputs.working_directory }}
+        env:
+          ConnectionStrings__PostgreSQL: "Host=localhost;Database=mystira_test;Username=test;Password=test"
+          ConnectionStrings__Redis: "localhost:6379"
+          ASPNETCORE_ENVIRONMENT: Testing
+        run: |
+          dotnet test --configuration Release \
+            --filter "Category=Integration" \
+            --logger "trx;LogFileName=integration-results.trx" \
+            --results-directory ./test-results \
+            2>&1 | tee test-output.txt
+
+          echo "exit_code=$?" >> $GITHUB_OUTPUT
+
+      - name: Run TypeScript integration tests
+        if: inputs.language == 'typescript'
+        id: ts-tests
+        working-directory: ${{ inputs.working_directory }}
+        env:
+          DATABASE_URL: "postgresql://test:test@localhost:5432/mystira_test"
+          REDIS_URL: "redis://localhost:6379"
+          NODE_ENV: test
+        run: |
+          pnpm test:integration 2>&1 | tee test-output.txt
+          echo "exit_code=$?" >> $GITHUB_OUTPUT
+
+      - name: Run Python integration tests
+        if: inputs.language == 'python'
+        id: python-tests
+        working-directory: ${{ inputs.working_directory }}
+        env:
+          DATABASE_URL: "postgresql://test:test@localhost:5432/mystira_test"
+          REDIS_URL: "redis://localhost:6379"
+        run: |
+          pytest tests/integration -v --tb=short 2>&1 | tee test-output.txt
+          echo "exit_code=$?" >> $GITHUB_OUTPUT
+
+      # Set result
+      - name: Set test result
+        id: result
+        run: |
+          EXIT_CODE=0
+          if [ "${{ inputs.language }}" == "dotnet" ]; then
+            EXIT_CODE="${{ steps.dotnet-tests.outputs.exit_code }}"
+          elif [ "${{ inputs.language }}" == "typescript" ]; then
+            EXIT_CODE="${{ steps.ts-tests.outputs.exit_code }}"
+          elif [ "${{ inputs.language }}" == "python" ]; then
+            EXIT_CODE="${{ steps.python-tests.outputs.exit_code }}"
+          fi
+
+          if [ "$EXIT_CODE" == "0" ]; then
+            echo "status=success" >> $GITHUB_OUTPUT
+          else
+            echo "status=failure" >> $GITHUB_OUTPUT
+            exit 1
+          fi
+
+      # Upload test results
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: integration-test-results-${{ inputs.service }}
+          path: |
+            ${{ inputs.working_directory }}/test-results/
+            ${{ inputs.working_directory }}/test-output.txt
+          retention-days: 7
+
+      # Summary
+      - name: Test Summary
+        if: always()
+        run: |
+          echo "## Integration Test Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Metric | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Service | ${{ inputs.service }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Language | ${{ inputs.language }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Result | ${{ steps.result.outputs.status == 'success' && '✅ Passed' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Dependencies" >> $GITHUB_STEP_SUMMARY
+          echo "- PostgreSQL 16" >> $GITHUB_STEP_SUMMARY
+          echo "- Redis 7" >> $GITHUB_STEP_SUMMARY

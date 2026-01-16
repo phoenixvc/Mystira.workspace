@@ -1,0 +1,214 @@
+name: "[Test] E2E"
+
+# End-to-End test workflow
+# Runs full user journey tests against deployed environments
+# Validates complete system behavior from user perspective
+#
+# Triggered: After deployments to dev/staging, on schedule, manual
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target environment'
+        required: true
+        type: choice
+        options:
+          - dev
+          - staging
+      test_suite:
+        description: 'Test suite to run'
+        required: false
+        type: choice
+        default: 'all'
+        options:
+          - all
+          - smoke
+          - critical-path
+          - regression
+
+  # Run after deployments
+  workflow_run:
+    workflows: ["[Deploy] Dev (K8s)", "[Deploy] Staging"]
+    types: [completed]
+
+  # Scheduled runs
+  schedule:
+    - cron: '0 6 * * *'  # Daily at 6 AM UTC
+
+concurrency:
+  group: e2e-${{ github.event.inputs.environment || 'dev' }}
+  cancel-in-progress: false
+
+env:
+  PLAYWRIGHT_BROWSERS_PATH: /home/runner/.cache/ms-playwright
+
+jobs:
+  setup:
+    name: Determine Environment
+    runs-on: ubuntu-latest
+    outputs:
+      environment: ${{ steps.env.outputs.environment }}
+      base_url: ${{ steps.env.outputs.base_url }}
+      api_url: ${{ steps.env.outputs.api_url }}
+    steps:
+      - name: Set environment
+        id: env
+        run: |
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            ENV="${{ github.event.inputs.environment }}"
+          elif [ "${{ github.event_name }}" == "workflow_run" ]; then
+            # Determine from triggering workflow
+            if [[ "${{ github.event.workflow.name }}" == *"Dev"* ]]; then
+              ENV="dev"
+            else
+              ENV="staging"
+            fi
+          else
+            ENV="dev"
+          fi
+
+          echo "environment=$ENV" >> $GITHUB_OUTPUT
+
+          case "$ENV" in
+            dev)
+              echo "base_url=https://dev.mystira.app" >> $GITHUB_OUTPUT
+              echo "api_url=https://dev-api.mystira.app" >> $GITHUB_OUTPUT
+              ;;
+            staging)
+              echo "base_url=https://staging.mystira.app" >> $GITHUB_OUTPUT
+              echo "api_url=https://staging-api.mystira.app" >> $GITHUB_OUTPUT
+              ;;
+          esac
+
+  e2e-tests:
+    name: E2E Tests
+    runs-on: ubuntu-latest
+    needs: [setup]
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install
+        env:
+          NODE_AUTH_TOKEN: ""
+
+      - name: Install Playwright browsers
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Wait for environment readiness
+        run: |
+          echo "Checking environment readiness..."
+
+          # Check API health
+          for i in {1..30}; do
+            HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" "${{ needs.setup.outputs.api_url }}/health" || echo "000")
+            if [ "$HTTP_CODE" == "200" ]; then
+              echo "API is healthy"
+              break
+            fi
+            echo "Waiting for API... (attempt $i/30)"
+            sleep 10
+          done
+
+          # Check frontend
+          for i in {1..30}; do
+            HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" "${{ needs.setup.outputs.base_url }}" || echo "000")
+            if [ "$HTTP_CODE" == "200" ]; then
+              echo "Frontend is healthy"
+              break
+            fi
+            echo "Waiting for frontend... (attempt $i/30)"
+            sleep 10
+          done
+
+      - name: Run E2E tests
+        id: e2e
+        env:
+          BASE_URL: ${{ needs.setup.outputs.base_url }}
+          API_URL: ${{ needs.setup.outputs.api_url }}
+          TEST_SUITE: ${{ github.event.inputs.test_suite || 'smoke' }}
+        run: |
+          TEST_ARGS=""
+          case "$TEST_SUITE" in
+            smoke)
+              TEST_ARGS="--grep @smoke"
+              ;;
+            critical-path)
+              TEST_ARGS="--grep @critical"
+              ;;
+            regression)
+              TEST_ARGS="--grep @regression"
+              ;;
+          esac
+
+          pnpm exec playwright test $TEST_ARGS --reporter=html,github 2>&1 | tee e2e-output.txt
+          echo "exit_code=$?" >> $GITHUB_OUTPUT
+
+      - name: Upload test report
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: e2e-report-${{ needs.setup.outputs.environment }}
+          path: playwright-report/
+          retention-days: 14
+
+      - name: Upload screenshots on failure
+        if: failure()
+        uses: actions/upload-artifact@v6
+        with:
+          name: e2e-screenshots-${{ needs.setup.outputs.environment }}
+          path: test-results/
+          retention-days: 7
+
+      - name: Test Summary
+        if: always()
+        run: |
+          echo "## E2E Test Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Metric | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Environment | ${{ needs.setup.outputs.environment }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Base URL | ${{ needs.setup.outputs.base_url }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Test Suite | ${{ github.event.inputs.test_suite || 'smoke' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Result | ${{ steps.e2e.outputs.exit_code == '0' && '✅ Passed' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
+
+  notify-failure:
+    name: Notify on Failure
+    runs-on: ubuntu-latest
+    needs: [setup, e2e-tests]
+    if: failure() && needs.setup.outputs.environment == 'staging'
+    steps:
+      - name: Create issue on failure
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const title = `E2E Tests Failed on ${{ needs.setup.outputs.environment }}`;
+            const body = `
+            ## E2E Test Failure
+
+            | Field | Value |
+            |-------|-------|
+            | Environment | ${{ needs.setup.outputs.environment }} |
+            | Run | [#${{ github.run_number }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) |
+            | Triggered by | ${{ github.actor }} |
+            | Time | ${new Date().toISOString()} |
+
+            Please investigate the failure and check the test artifacts.
+            `;
+
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: title,
+              body: body,
+              labels: ['bug', 'e2e-failure', 'automated']
+            });

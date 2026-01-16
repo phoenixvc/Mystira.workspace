@@ -1,0 +1,198 @@
+name: "[Monitor] Health Checks"
+
+# Continuous health monitoring workflow
+# Layer 6 of the validation stack: Observability
+#
+# Monitors service health across environments and creates alerts on failures
+# Runs on schedule and can be triggered manually
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target environment'
+        required: true
+        type: choice
+        options:
+          - all
+          - dev
+          - staging
+          - prod
+
+  schedule:
+    # Every 5 minutes during business hours (6 AM - 10 PM UTC)
+    - cron: '*/5 6-22 * * *'
+    # Every 15 minutes overnight
+    - cron: '*/15 0-5,23 * * *'
+
+concurrency:
+  group: health-monitor
+  cancel-in-progress: true
+
+env:
+  SLACK_WEBHOOK_URL: ${{ secrets.SLACK_ALERTS_WEBHOOK }}
+
+jobs:
+  health-check:
+    name: Health Check (${{ matrix.environment }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        environment: ${{ github.event.inputs.environment == 'all' && fromJSON('["dev", "staging", "prod"]') || fromJSON(format('["{0}"]', github.event.inputs.environment || 'prod')) }}
+    outputs:
+      dev_status: ${{ steps.check.outputs.dev_status }}
+      staging_status: ${{ steps.check.outputs.staging_status }}
+      prod_status: ${{ steps.check.outputs.prod_status }}
+
+    steps:
+      - name: Define service endpoints
+        id: endpoints
+        run: |
+          ENV="${{ matrix.environment }}"
+
+          # Define endpoints based on environment
+          case "$ENV" in
+            dev)
+              echo 'endpoints=[
+                {"name": "App API", "url": "https://dev-api.mystira.app/health"},
+                {"name": "Story Generator", "url": "https://story-generator.dev.mystira.app/health"},
+                {"name": "Admin API", "url": "https://admin-api.dev.mystira.app/health"},
+                {"name": "Publisher", "url": "https://publisher.dev.mystira.app/health"},
+                {"name": "Chain", "url": "https://chain.dev.mystira.app/health"}
+              ]' >> $GITHUB_OUTPUT
+              ;;
+            staging)
+              echo 'endpoints=[
+                {"name": "App API", "url": "https://staging-api.mystira.app/health"},
+                {"name": "Story Generator", "url": "https://story-generator.staging.mystira.app/health"},
+                {"name": "Admin API", "url": "https://admin-api.staging.mystira.app/health"},
+                {"name": "Publisher", "url": "https://publisher.staging.mystira.app/health"},
+                {"name": "Chain", "url": "https://chain.staging.mystira.app/health"}
+              ]' >> $GITHUB_OUTPUT
+              ;;
+            prod)
+              echo 'endpoints=[
+                {"name": "App API", "url": "https://api.mystira.app/health"},
+                {"name": "Story Generator", "url": "https://story-generator.mystira.app/health"},
+                {"name": "Admin API", "url": "https://admin-api.mystira.app/health"},
+                {"name": "Publisher", "url": "https://publisher.mystira.app/health"},
+                {"name": "Chain", "url": "https://chain.mystira.app/health"}
+              ]' >> $GITHUB_OUTPUT
+              ;;
+          esac
+
+      - name: Check service health
+        id: check
+        run: |
+          ENV="${{ matrix.environment }}"
+          ENDPOINTS='${{ steps.endpoints.outputs.endpoints }}'
+
+          echo "## Health Check Results - $ENV" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Service | Status | Response Time | Details |" >> $GITHUB_STEP_SUMMARY
+          echo "|---------|--------|---------------|---------|" >> $GITHUB_STEP_SUMMARY
+
+          ALL_HEALTHY=true
+          FAILED_SERVICES=""
+
+          echo "$ENDPOINTS" | jq -c '.[]' | while read -r endpoint; do
+            NAME=$(echo "$endpoint" | jq -r '.name')
+            URL=$(echo "$endpoint" | jq -r '.url')
+
+            START_TIME=$(date +%s%N)
+            HTTP_STATUS=$(curl -s -o /tmp/response.txt -w "%{http_code}" --max-time 10 "$URL" 2>/dev/null || echo "000")
+            END_TIME=$(date +%s%N)
+
+            RESPONSE_TIME=$(( (END_TIME - START_TIME) / 1000000 ))
+
+            if [ "$HTTP_STATUS" == "200" ]; then
+              echo "| $NAME | ✅ $HTTP_STATUS | ${RESPONSE_TIME}ms | Healthy |" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "| $NAME | ❌ $HTTP_STATUS | ${RESPONSE_TIME}ms | Failed |" >> $GITHUB_STEP_SUMMARY
+              ALL_HEALTHY=false
+              FAILED_SERVICES="$FAILED_SERVICES $NAME"
+            fi
+          done
+
+          if [ "$ALL_HEALTHY" = true ]; then
+            echo "${ENV}_status=healthy" >> $GITHUB_OUTPUT
+          else
+            echo "${ENV}_status=unhealthy" >> $GITHUB_OUTPUT
+            echo "failed_services=$FAILED_SERVICES" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Alert on failure
+        if: failure() || contains(steps.check.outputs[format('{0}_status', matrix.environment)], 'unhealthy')
+        run: |
+          if [ -n "${{ env.SLACK_WEBHOOK_URL }}" ]; then
+            curl -X POST -H 'Content-type: application/json' \
+              --data '{
+                "text": "🚨 Health Check Alert",
+                "blocks": [
+                  {
+                    "type": "header",
+                    "text": {
+                      "type": "plain_text",
+                      "text": "🚨 Service Health Alert - ${{ matrix.environment }}"
+                    }
+                  },
+                  {
+                    "type": "section",
+                    "fields": [
+                      {"type": "mrkdwn", "text": "*Environment:*\n${{ matrix.environment }}"},
+                      {"type": "mrkdwn", "text": "*Time:*\n'"$(date -u +%Y-%m-%dT%H:%M:%SZ)"'"}
+                    ]
+                  },
+                  {
+                    "type": "section",
+                    "text": {
+                      "type": "mrkdwn",
+                      "text": "Some services are unhealthy. <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View Details>"
+                    }
+                  }
+                ]
+              }' \
+              "${{ env.SLACK_WEBHOOK_URL }}"
+          else
+            echo "::warning::SLACK_WEBHOOK_URL not configured, skipping notification"
+          fi
+
+  dependency-health:
+    name: Check Dependencies
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check external dependencies
+        run: |
+          echo "## External Dependency Health" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Dependency | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|------------|--------|" >> $GITHUB_STEP_SUMMARY
+
+          # Azure Status
+          AZURE_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "https://status.azure.com/en-us/status" || echo "000")
+          echo "| Azure | $([[ $AZURE_STATUS == 200 ]] && echo '✅' || echo '⚠️') |" >> $GITHUB_STEP_SUMMARY
+
+          # GitHub Status
+          GH_STATUS=$(curl -s "https://www.githubstatus.com/api/v2/status.json" | jq -r '.status.indicator' 2>/dev/null || echo "unknown")
+          echo "| GitHub | $([[ $GH_STATUS == "none" ]] && echo '✅' || echo '⚠️ '"$GH_STATUS") |" >> $GITHUB_STEP_SUMMARY
+
+  summary:
+    name: Health Summary
+    runs-on: ubuntu-latest
+    needs: [health-check, dependency-health]
+    if: always()
+    steps:
+      - name: Generate summary
+        run: |
+          echo "# Health Monitoring Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Timestamp:** $(date -u +%Y-%m-%dT%H:%M:%SZ)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          OVERALL="✅ All Systems Operational"
+          if [ "${{ needs.health-check.result }}" != "success" ]; then
+            OVERALL="⚠️ Some Services Degraded"
+          fi
+
+          echo "**Overall Status:** $OVERALL" >> $GITHUB_STEP_SUMMARY

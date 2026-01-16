@@ -1,0 +1,195 @@
+name: "[Test] Unit"
+
+# Reusable workflow for running unit tests
+# Supports both TypeScript (Vitest) and .NET (xUnit/NUnit) test frameworks
+#
+# Usage:
+#   jobs:
+#     unit-tests:
+#       uses: ./.github/workflows/_test-unit.yml
+#       with:
+#         language: typescript  # or 'dotnet'
+#         working_directory: packages/my-package
+
+on:
+  workflow_call:
+    inputs:
+      language:
+        description: 'Language/framework: typescript, dotnet'
+        required: true
+        type: string
+      working_directory:
+        description: 'Working directory for tests'
+        required: false
+        type: string
+        default: '.'
+      coverage_threshold:
+        description: 'Minimum coverage percentage (0-100)'
+        required: false
+        type: number
+        default: 0
+      test_filter:
+        description: 'Test filter pattern (dotnet) or test name pattern (vitest)'
+        required: false
+        type: string
+        default: ''
+      upload_coverage:
+        description: 'Upload coverage to Codecov'
+        required: false
+        type: boolean
+        default: true
+    outputs:
+      test_result:
+        description: 'Test result: success, failure, skipped'
+        value: ${{ jobs.unit-tests.outputs.result }}
+      coverage_percent:
+        description: 'Coverage percentage achieved'
+        value: ${{ jobs.unit-tests.outputs.coverage }}
+
+jobs:
+  unit-tests:
+    name: Unit Tests (${{ inputs.language }})
+    runs-on: ubuntu-latest
+    outputs:
+      result: ${{ steps.result.outputs.status }}
+      coverage: ${{ steps.coverage.outputs.percent }}
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          submodules: recursive
+
+      # TypeScript setup
+      - name: Setup pnpm
+        if: inputs.language == 'typescript'
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        if: inputs.language == 'typescript'
+        uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+          cache: "pnpm"
+
+      - name: Install dependencies (TypeScript)
+        if: inputs.language == 'typescript'
+        run: pnpm install
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN || 'dummy' }}
+
+      # .NET setup
+      - name: Setup .NET
+        if: inputs.language == 'dotnet'
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: '9.0.x'
+          source-url: https://nuget.pkg.github.com/phoenixvc/index.json
+        env:
+          NUGET_AUTH_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN }}
+
+      # Run TypeScript unit tests
+      - name: Run TypeScript unit tests
+        if: inputs.language == 'typescript'
+        id: ts-tests
+        working-directory: ${{ inputs.working_directory }}
+        run: |
+          TEST_ARGS="--coverage"
+          if [ -n "${{ inputs.test_filter }}" ]; then
+            TEST_ARGS="$TEST_ARGS --testNamePattern='${{ inputs.test_filter }}'"
+          fi
+
+          pnpm test -- $TEST_ARGS 2>&1 | tee test-output.txt
+          TEST_EXIT_CODE=${PIPESTATUS[0]}
+
+          echo "exit_code=$TEST_EXIT_CODE" >> $GITHUB_OUTPUT
+
+      # Run .NET unit tests
+      - name: Run .NET unit tests
+        if: inputs.language == 'dotnet'
+        id: dotnet-tests
+        working-directory: ${{ inputs.working_directory }}
+        run: |
+          TEST_ARGS="--configuration Release --collect:\"XPlat Code Coverage\" --results-directory ./coverage"
+          if [ -n "${{ inputs.test_filter }}" ]; then
+            TEST_ARGS="$TEST_ARGS --filter \"${{ inputs.test_filter }}\""
+          fi
+
+          dotnet test $TEST_ARGS -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=cobertura 2>&1 | tee test-output.txt
+          TEST_EXIT_CODE=${PIPESTATUS[0]}
+
+          echo "exit_code=$TEST_EXIT_CODE" >> $GITHUB_OUTPUT
+
+      # Extract coverage
+      - name: Extract coverage percentage
+        id: coverage
+        run: |
+          COVERAGE=0
+
+          if [ "${{ inputs.language }}" == "typescript" ]; then
+            # Extract from vitest coverage output
+            if [ -f "${{ inputs.working_directory }}/coverage/coverage-summary.json" ]; then
+              COVERAGE=$(jq '.total.lines.pct // 0' "${{ inputs.working_directory }}/coverage/coverage-summary.json")
+            fi
+          elif [ "${{ inputs.language }}" == "dotnet" ]; then
+            # Extract from cobertura XML
+            COBERTURA_FILE=$(find "${{ inputs.working_directory }}/coverage" -name "coverage.cobertura.xml" | head -1)
+            if [ -f "$COBERTURA_FILE" ]; then
+              COVERAGE=$(grep -oP 'line-rate="\K[^"]+' "$COBERTURA_FILE" | head -1 | awk '{printf "%.1f", $1 * 100}')
+            fi
+          fi
+
+          echo "percent=$COVERAGE" >> $GITHUB_OUTPUT
+          echo "Coverage: ${COVERAGE}%"
+
+      # Check coverage threshold
+      - name: Check coverage threshold
+        if: inputs.coverage_threshold > 0
+        run: |
+          COVERAGE=${{ steps.coverage.outputs.percent }}
+          THRESHOLD=${{ inputs.coverage_threshold }}
+
+          if (( $(echo "$COVERAGE < $THRESHOLD" | bc -l) )); then
+            echo "::error::Coverage ${COVERAGE}% is below threshold ${THRESHOLD}%"
+            exit 1
+          fi
+          echo "Coverage ${COVERAGE}% meets threshold ${THRESHOLD}%"
+
+      # Upload coverage
+      - name: Upload coverage to Codecov
+        if: inputs.upload_coverage
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          flags: unit-tests-${{ inputs.language }}
+          directory: ${{ inputs.working_directory }}/coverage
+          fail_ci_if_error: false
+
+      # Set result
+      - name: Set test result
+        id: result
+        run: |
+          if [ "${{ inputs.language }}" == "typescript" ]; then
+            EXIT_CODE="${{ steps.ts-tests.outputs.exit_code }}"
+          else
+            EXIT_CODE="${{ steps.dotnet-tests.outputs.exit_code }}"
+          fi
+
+          if [ "$EXIT_CODE" == "0" ]; then
+            echo "status=success" >> $GITHUB_OUTPUT
+          else
+            echo "status=failure" >> $GITHUB_OUTPUT
+            exit 1
+          fi
+
+      # Summary
+      - name: Test Summary
+        if: always()
+        run: |
+          echo "## Unit Test Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Metric | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Language | ${{ inputs.language }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Directory | ${{ inputs.working_directory }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Result | ${{ steps.result.outputs.status == 'success' && '✅ Passed' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Coverage | ${{ steps.coverage.outputs.percent }}% |" >> $GITHUB_STEP_SUMMARY
