@@ -1,0 +1,133 @@
+name: "[Test] Unit"
+
+on:
+  push:
+    branches: [dev, main]
+    paths:
+      - "src/**/*.cs"
+      - "tests/**/*.cs"
+      - "**/*.csproj"
+      - ".github/workflows/test-unit.yml"
+  pull_request:
+    branches: [dev, main]
+  workflow_dispatch:
+
+concurrency:
+  group: test-unit-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+
+jobs:
+  unit-tests:
+    name: Run Unit Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "9.0.x"
+
+      - name: Restore
+        run: dotnet restore
+
+      - name: Build
+        run: dotnet build --no-restore --configuration Release
+
+      - name: Test Application
+        run: |
+          dotnet test tests/Mystira.StoryGenerator.Application.Tests/Mystira.StoryGenerator.Application.Tests/Mystira.StoryGenerator.Application.Tests.csproj \
+            --no-build \
+            --configuration Release \
+            --verbosity normal \
+            --collect:"XPlat Code Coverage" \
+            --results-directory ./coverage/application \
+            --logger "trx;LogFileName=application-results.trx"
+
+      - name: Test Api
+        run: |
+          dotnet test tests/Mystira.StoryGenerator.Api.Tests/Mystira.StoryGenerator.Api.Tests.csproj \
+            --no-build \
+            --configuration Release \
+            --verbosity normal \
+            --collect:"XPlat Code Coverage" \
+            --results-directory ./coverage/api \
+            --logger "trx;LogFileName=api-results.trx"
+
+      - name: Test Domain
+        run: |
+          dotnet test tests/Mystira.StoryGenerator.Domain.Tests/Mystira.StoryGenerator.Domain.Tests.csproj \
+            --no-build \
+            --configuration Release \
+            --verbosity normal \
+            --collect:"XPlat Code Coverage" \
+            --results-directory ./coverage/domain \
+            --logger "trx;LogFileName=domain-results.trx"
+
+      - name: Test GraphTheory
+        run: |
+          dotnet test tests/Mystira.StoryGenerator.GraphTheory.Tests/Mystira.StoryGenerator.GraphTheory.Tests.csproj \
+            --no-build \
+            --configuration Release \
+            --verbosity normal \
+            --collect:"XPlat Code Coverage" \
+            --results-directory ./coverage/graphtheory \
+            --logger "trx;LogFileName=graphtheory-results.trx"
+
+      - name: Test Llm
+        run: |
+          dotnet test tests/Mystira.StoryGenerator.Llm.Tests/Mystira.StoryGenerator.Llm.Tests.csproj \
+            --no-build \
+            --configuration Release \
+            --verbosity normal \
+            --collect:"XPlat Code Coverage" \
+            --results-directory ./coverage/llm \
+            --logger "trx;LogFileName=llm-results.trx"
+
+      - name: Install ReportGenerator
+        run: dotnet tool install -g dotnet-reportgenerator-globaltool
+
+      - name: Merge Coverage Reports
+        run: |
+          reportgenerator \
+            -reports:"./coverage/**/coverage.cobertura.xml" \
+            -targetdir:"./coverage/merged" \
+            -reporttypes:"Cobertura;HtmlSummary;MarkdownSummaryGithub"
+
+      - name: Upload Coverage Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: ./coverage/merged
+          retention-days: 14
+
+      - name: Upload Test Results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results
+          path: ./coverage/**/*.trx
+          retention-days: 14
+
+      - name: Add Coverage Summary to PR
+        if: github.event_name == 'pull_request'
+        run: |
+          if [ -f "./coverage/merged/SummaryGithub.md" ]; then
+            cat ./coverage/merged/SummaryGithub.md >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Test Summary
+        run: |
+          echo "## Unit Test Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Test Project | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|--------------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Application.Tests | Completed |" >> $GITHUB_STEP_SUMMARY
+          echo "| Api.Tests | Completed |" >> $GITHUB_STEP_SUMMARY
+          echo "| Domain.Tests | Completed |" >> $GITHUB_STEP_SUMMARY
+          echo "| GraphTheory.Tests | Completed |" >> $GITHUB_STEP_SUMMARY
+          echo "| Llm.Tests | Completed |" >> $GITHUB_STEP_SUMMARY
