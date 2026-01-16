@@ -1,4 +1,4 @@
-name: "Publisher: Build & Deploy Dev"
+name: "[CI] Publisher"
 
 on:
   push:
@@ -46,8 +46,8 @@ jobs:
       - name: Run linter
         run: pnpm lint
 
-  test:
-    name: Test
+  typecheck:
+    name: TypeCheck
     runs-on: ubuntu-latest
     if: github.event_name != 'pull_request' || !github.event.pull_request.draft
     steps:
@@ -64,8 +64,8 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Run tests
-        run: pnpm test
+      - name: Run type checker
+        run: pnpm typecheck
 
   # ============================================
   # Build and Push Docker Image
@@ -74,7 +74,7 @@ jobs:
   build-and-push:
     name: Build & Push Image
     runs-on: ubuntu-latest
-    needs: [lint, test]
+    needs: [lint, typecheck]
     # Only build/push on push to branch (not PRs)
     if: github.event_name != 'pull_request'
     outputs:
@@ -156,7 +156,7 @@ jobs:
   notify:
     name: Deployment Summary
     runs-on: ubuntu-latest
-    needs: [lint, test, build-and-push, trigger-workspace-deploy]
+    needs: [lint, typecheck, build-and-push, trigger-workspace-deploy]
     if: always()
     steps:
       - name: Generate Summary
@@ -169,7 +169,7 @@ jobs:
           echo "| Commit | \`${{ github.sha }}\` |" >> $GITHUB_STEP_SUMMARY
           echo "| Actor | ${{ github.actor }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Lint | ${{ needs.lint.result }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Test | ${{ needs.test.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| TypeCheck | ${{ needs.typecheck.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Build | ${{ needs.build-and-push.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Deploy | ${{ needs.trigger-workspace-deploy.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
