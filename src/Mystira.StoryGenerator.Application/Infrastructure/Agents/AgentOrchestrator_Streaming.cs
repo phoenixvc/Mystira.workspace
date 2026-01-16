@@ -60,6 +60,9 @@ public partial class AgentOrchestrator
                 "Generated Writer agent prompt with contextual knowledge for age group {AgeGroup} (knowledge mode: {KnowledgeMode})",
                 session.AgeGroup, session.KnowledgeMode);
 
+            // Build response format with JSON schema for structured output
+            var responseFormat = await BuildResponseFormatAsync(ct);
+
             // Stream the run and collect the response
             var responseBuilder = new StringBuilder();
             var runId = string.Empty;
@@ -68,6 +71,7 @@ public partial class AgentOrchestrator
                 session.ThreadId!,
                 _config.WriterAgentId,
                 writerPrompt,
+                responseFormat,
                 ct))
             {
                 var (updateType, content, currentRunId) = ProcessStreamingUpdate(update);
@@ -233,6 +237,9 @@ public partial class AgentOrchestrator
                 "Generated Refiner agent prompt with contextual knowledge for age group {AgeGroup} (knowledge mode: {KnowledgeMode})",
                 session.AgeGroup, session.KnowledgeMode);
 
+            // Build response format with JSON schema for structured output
+            var responseFormat = await BuildResponseFormatAsync(ct);
+
             // Stream the run and collect the response
             var responseBuilder = new StringBuilder();
             var runId = string.Empty;
@@ -241,6 +248,7 @@ public partial class AgentOrchestrator
                 session.ThreadId!,
                 _config.RefinerAgentId,
                 refinerPrompt,
+                responseFormat,
                 ct))
             {
                 var (updateType, content, currentRunId) = ProcessStreamingUpdate(update);
@@ -423,6 +431,7 @@ public partial class AgentOrchestrator
                 session.ThreadId!,
                 _config.WriterAgentId, // Reuse writer agent for rubric generation
                 rubricPrompt,
+                null, // No structured output format for rubric
                 ct))
             {
                 var (updateType, content, currentRunId) = ProcessStreamingUpdate(update);

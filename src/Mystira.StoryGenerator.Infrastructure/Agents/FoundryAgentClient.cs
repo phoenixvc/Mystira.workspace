@@ -519,19 +519,26 @@ public sealed class FoundryAgentClient : IDisposable
     /// <param name="threadId">The thread ID.</param>
     /// <param name="agentId">The agent ID.</param>
     /// <param name="instructions">The instructions for the run.</param>
+    /// <param name="responseFormat">Optional response format for structured outputs.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>An async enumerable of streaming events.</returns>
     public async IAsyncEnumerable<StreamingUpdate> StreamRunAsync(
         string threadId,
         string agentId,
         string instructions,
+        BinaryData? responseFormat = null,
         [System.Runtime.CompilerServices.EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         EnsureInitialized();
 
         _logger.LogInformation("Starting streaming run for agent {AgentId} on thread {ThreadId}", agentId, threadId);
 
-        var streamingResponse = _agentsClient!.Runs.CreateRunStreamingAsync(threadId, agentId, instructions, cancellationToken: cancellationToken);
+        var streamingResponse = _agentsClient!.Runs.CreateRunStreamingAsync(
+            threadId,
+            agentId,
+            additionalInstructions: instructions,
+            responseFormat: responseFormat,
+            cancellationToken: cancellationToken);
 
         await foreach (var update in streamingResponse.ConfigureAwait(false))
         {
