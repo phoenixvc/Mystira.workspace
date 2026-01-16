@@ -176,13 +176,26 @@
         </div>
     }
 
-    @if (!string.IsNullOrEmpty(StreamingContent) && Session != null &&
-         (Session.Stage == "Generating" || Session.Stage == "Refining" || Session.Stage == "GeneratingRubric"))
+    @if (Session != null && (Session.Stage == "Generating" || Session.Stage == "Refining" || Session.Stage == "GeneratingRubric"))
     {
         <div class="streaming-content-panel">
             <h4>Real-time Generation</h4>
+            <div class="streaming-debug">
+                <small style="color: #999;">
+                    Debug: Length=@(StreamingContent?.Length ?? 0),
+                    IsNull=@(StreamingContent == null),
+                    IsEmpty=@(string.IsNullOrEmpty(StreamingContent))
+                </small>
+            </div>
             <div class="streaming-content">
-                <pre>@StreamingContent</pre>
+                @if (!string.IsNullOrEmpty(StreamingContent))
+                {
+                    <pre>@StreamingContent</pre>
+                }
+                else
+                {
+                    <div class="streaming-waiting">Waiting for streaming content...</div>
+                }
             </div>
         </div>
     }

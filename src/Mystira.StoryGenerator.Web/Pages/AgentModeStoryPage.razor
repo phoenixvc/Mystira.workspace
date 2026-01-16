@@ -148,23 +148,35 @@
     {
         try
         {
+            logger.LogInformation("Starting SSE stream for session {SessionId}", sessionId);
             await foreach (var evt in sessionService.SubscribeToStreamAsync(sessionId, streamCts?.Token ?? default))
             {
                 streamEvents.Add(evt);
-                logger.LogDebug("Received event: {EventType}", evt.Type);
+                logger.LogInformation("Received event: {EventType}, Message: {Message}", evt.Type, evt.Message ?? "<null>");
 
                 // Accumulate streaming content
-                if (evt.Type == AgentStreamEvent.EventType.StreamingUpdate && !string.IsNullOrEmpty(evt.Message))
+                if (evt.Type == AgentStreamEvent.EventType.StreamingUpdate)
                 {
-                    streamingContent += evt.Message;
-                    logger.LogDebug("Accumulated {Length} chars of streaming content", streamingContent.Length);
+                    if (!string.IsNullOrEmpty(evt.Message))
+                    {
+                        var oldLength = streamingContent.Length;
+                        streamingContent += evt.Message;
+                        logger.LogInformation("StreamingUpdate: Added {NewChars} chars ('{MessagePreview}'), total now {TotalChars} chars",
+                            evt.Message.Length,
+                            evt.Message.Length > 20 ? evt.Message.Substring(0, 20) + "..." : evt.Message,
+                            streamingContent.Length);
+                    }
+                    else
+                    {
+                        logger.LogWarning("StreamingUpdate event received but Message field is null or empty!");
+                    }
                 }
 
                 // Clear streaming content when a new phase starts
                 if (evt.Type == AgentStreamEvent.EventType.PhaseStarted)
                 {
                     streamingContent = string.Empty;
-                    logger.LogDebug("Cleared streaming content for new phase: {Phase}", evt.Phase);
+                    logger.LogInformation("Cleared streaming content for new phase: {Phase}", evt.Phase);
                 }
 
                 // Handle specific event types

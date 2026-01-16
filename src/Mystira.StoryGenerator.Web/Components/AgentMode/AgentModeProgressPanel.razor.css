@@ -65,3 +65,24 @@
     font-style: italic;
     font-size: 0.85rem;
 }
+
+.streaming-debug {
+    margin-bottom: 0.5rem;
+    padding: 0.25rem 0.5rem;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 0.25rem;
+    font-family: monospace;
+}
+
+.streaming-waiting {
+    color: #999;
+    font-style: italic;
+    text-align: center;
+    padding: 2rem;
+    animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 0.5; }
+    50% { opacity: 1; }
+}
