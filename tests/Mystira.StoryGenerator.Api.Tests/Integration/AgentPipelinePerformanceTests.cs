@@ -338,6 +338,12 @@ public class AgentPipelinePerformanceTests : IClassFixture<WebApplicationFactory
             return (true, "Generation started");
         }
 
+        public async Task<(bool Success, string Message)> GenerateStoryStreamingAsync(string sessionId, string storyPrompt, CancellationToken ct)
+        {
+            await Task.Delay(10, ct); // Minimal delay
+            return (true, "Streaming generation started");
+        }
+
         public async Task<(bool Success, EvaluationReport Report)> EvaluateStoryAsync(string sessionId, CancellationToken ct)
         {
             if (!_sessions.TryGetValue(sessionId, out var session))
@@ -374,6 +380,19 @@ public class AgentPipelinePerformanceTests : IClassFixture<WebApplicationFactory
             return (true, "Refinement started");
         }
 
+        public async Task<(bool Success, string Message)> RefineStoryStreamingAsync(string sessionId, UserRefinementFocus focus, CancellationToken ct)
+        {
+            if (!_sessions.TryGetValue(sessionId, out var session))
+                return (false, "Session not found");
+
+            await Task.Delay(10, ct); // Minimal delay
+
+            session.IterationCount++;
+            session.Stage = StorySessionStage.Validating;
+
+            return (true, "Streaming refinement started");
+        }
+
         public async Task<StorySession?> GetSessionAsync(string sessionId)
         {
             return await Task.FromResult(_sessions.TryGetValue(sessionId, out var session) ? session : null);
@@ -386,6 +405,21 @@ public class AgentPipelinePerformanceTests : IClassFixture<WebApplicationFactory
                 var rubric = new RubricSummary
                 {
                     Summary = "Performance mock rubric",
+                    ReadyForPublish = true
+                };
+                session.RubricSummary = rubric;
+                return (true, rubric);
+            }
+            return (false, null);
+        }
+
+        public async Task<(bool Success, RubricSummary? Rubric)> GenerateRubricStreamingAsync(string sessionId, CancellationToken ct)
+        {
+            if (_sessions.TryGetValue(sessionId, out var session))
+            {
+                var rubric = new RubricSummary
+                {
+                    Summary = "Performance mock rubric (streaming)",
                     ReadyForPublish = true
                 };
                 session.RubricSummary = rubric;

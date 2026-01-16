@@ -292,6 +292,12 @@ public class StreamingIntegrationTests : IClassFixture<WebApplicationFactory<Pro
             return (true, "Generation started");
         }
 
+        public async Task<(bool Success, string Message)> GenerateStoryStreamingAsync(string sessionId, string storyPrompt, CancellationToken ct)
+        {
+            await Task.Delay(100, ct);
+            return (true, "Streaming generation started");
+        }
+
         public async Task<(bool Success, EvaluationReport Report)> EvaluateStoryAsync(string sessionId, CancellationToken ct)
         {
             await Task.Delay(50, ct);
@@ -309,12 +315,33 @@ public class StreamingIntegrationTests : IClassFixture<WebApplicationFactory<Pro
             return (true, "Refinement started");
         }
 
+        public async Task<(bool Success, string Message)> RefineStoryStreamingAsync(string sessionId, UserRefinementFocus focus, CancellationToken ct)
+        {
+            await Task.Delay(50, ct);
+            return (true, "Streaming refinement started");
+        }
+
         public async Task<StorySession?> GetSessionAsync(string sessionId)
         {
             return await Task.FromResult(_sessions.TryGetValue(sessionId, out var session) ? session : null);
         }
 
         public async Task<(bool Success, RubricSummary? Rubric)> GenerateRubricAsync(string sessionId, CancellationToken ct)
+        {
+            if (_sessions.TryGetValue(sessionId, out var session))
+            {
+                var rubric = new RubricSummary
+                {
+                    Summary = "Streaming mock rubric",
+                    ReadyForPublish = true
+                };
+                session.RubricSummary = rubric;
+                return (true, rubric);
+            }
+            return (false, null);
+        }
+
+        public async Task<(bool Success, RubricSummary? Rubric)> GenerateRubricStreamingAsync(string sessionId, CancellationToken ct)
         {
             if (_sessions.TryGetValue(sessionId, out var session))
             {

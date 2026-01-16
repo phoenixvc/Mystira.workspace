@@ -422,6 +422,13 @@ public class AgentPipelineE2ETests : IClassFixture<WebApplicationFactory<Program
             return (true, "Generation started");
         }
 
+        public async Task<(bool Success, string Message)> GenerateStoryStreamingAsync(string sessionId, string storyPrompt, CancellationToken ct)
+        {
+            _prompts[sessionId] = storyPrompt;
+            await Task.Delay(100, ct);
+            return (true, "Streaming generation started");
+        }
+
         public async Task<(bool Success, EvaluationReport Report)> EvaluateStoryAsync(string sessionId, CancellationToken ct)
         {
             if (!_sessions.TryGetValue(sessionId, out var session))
@@ -521,6 +528,33 @@ public class AgentPipelineE2ETests : IClassFixture<WebApplicationFactory<Program
             return (true, "Refinement completed");
         }
 
+        public async Task<(bool Success, string Message)> RefineStoryStreamingAsync(string sessionId, UserRefinementFocus focus, CancellationToken ct)
+        {
+            if (!_sessions.TryGetValue(sessionId, out var session))
+                return (false, "Session not found");
+
+            if (session.Stage == StorySessionStage.StuckNeedsReview)
+                return (false, "Session stuck, cannot refine");
+
+            session.IterationCount++;
+
+            // Simulate refinement
+            await Task.Delay(100, ct);
+
+            var refinedStory = GenerateMockStory($" (refined v{session.IterationCount})");
+            session.CurrentStoryVersion = refinedStory;
+            session.StoryVersions.Add(new StoryVersionSnapshot
+            {
+                VersionNumber = session.IterationCount + 1,
+                StoryJson = refinedStory,
+                CreatedAt = DateTime.UtcNow
+            });
+
+            session.Stage = StorySessionStage.Validating;
+
+            return (true, "Streaming refinement completed");
+        }
+
         public async Task<StorySession?> GetSessionAsync(string sessionId)
         {
             return await Task.FromResult(_sessions.TryGetValue(sessionId, out var session) ? session : null);
@@ -533,6 +567,21 @@ public class AgentPipelineE2ETests : IClassFixture<WebApplicationFactory<Program
                 var rubric = new RubricSummary
                 {
                     Summary = "E2E mock rubric",
+                    ReadyForPublish = true
+                };
+                session.RubricSummary = rubric;
+                return (true, rubric);
+            }
+            return (false, null);
+        }
+
+        public async Task<(bool Success, RubricSummary? Rubric)> GenerateRubricStreamingAsync(string sessionId, CancellationToken ct)
+        {
+            if (_sessions.TryGetValue(sessionId, out var session))
+            {
+                var rubric = new RubricSummary
+                {
+                    Summary = "E2E mock rubric (streaming)",
                     ReadyForPublish = true
                 };
                 session.RubricSummary = rubric;
