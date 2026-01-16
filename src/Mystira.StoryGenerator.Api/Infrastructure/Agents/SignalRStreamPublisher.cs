@@ -32,7 +32,8 @@ public class SignalRStreamPublisher : IAgentStreamPublisher
                 Phase = evt.Phase,
                 Payload = evt.Payload,
                 Timestamp = evt.Timestamp,
-                IterationNumber = evt.IterationNumber
+                IterationNumber = evt.IterationNumber,
+                Message = evt.Message
             });
 
             _logger.LogDebug("Published event {EventType} for session {SessionId}", evt.Type, sessionId);
