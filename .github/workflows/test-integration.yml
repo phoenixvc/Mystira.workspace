@@ -29,18 +29,6 @@ jobs:
   integration-tests:
     name: Run Integration Tests
     runs-on: ubuntu-latest
-    services:
-      # Mock LLM service for testing
-      mock-llm:
-        image: wiremock/wiremock:latest
-        ports:
-          - 5100:8080
-        options: >-
-          --health-cmd "wget --spider http://localhost:8080/__admin/health || exit 1"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-
     steps:
       - uses: actions/checkout@v4
 
@@ -54,6 +42,19 @@ jobs:
 
       - name: Build
         run: dotnet build --no-restore --configuration Release
+
+      - name: Start WireMock container
+        run: |
+          docker run -d --name wiremock -p 5100:8080 wiremock/wiremock:latest
+          # Wait for WireMock to be ready
+          for i in {1..30}; do
+            if curl -s http://localhost:5100/__admin/health > /dev/null 2>&1; then
+              echo "WireMock is ready"
+              break
+            fi
+            echo "Waiting for WireMock... ($i/30)"
+            sleep 2
+          done
 
       - name: Setup WireMock stubs for Azure OpenAI
         run: |

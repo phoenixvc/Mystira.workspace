@@ -102,14 +102,27 @@ public class ChatOrchestrationServiceTests
         var parameterCheckResponse = new ChatCompletionResponse
         {
             Success = true,
-            Content = @"[""title"", ""agegroup""]", // Missing title and agegroup
+            Content = @"[""title"", ""ageGroup""]", // Missing title and ageGroup
             Provider = "test-llm"
         };
 
+        // Mock parameter check call (MaxTokens=100, Temperature=0.1)
         mockLlmService
             .Setup(x => x.CompleteAsync(It.Is<ChatCompletionRequest>(r =>
                 r.MaxTokens == 100 && r.Temperature == 0.1), It.IsAny<CancellationToken>()))
             .ReturnsAsync(parameterCheckResponse);
+
+        // Mock title generation call (MaxTokens=20, Temperature=0.3) - returns NO_IDEA so title stays missing
+        var titleGenerationResponse = new ChatCompletionResponse
+        {
+            Success = true,
+            Content = "NO_IDEA",
+            Provider = "test-llm"
+        };
+        mockLlmService
+            .Setup(x => x.CompleteAsync(It.Is<ChatCompletionRequest>(r =>
+                r.MaxTokens == 20 && r.Temperature == 0.3), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(titleGenerationResponse);
 
         _mockLlmServiceFactory
             .Setup(x => x.GetDefaultService())
@@ -123,8 +136,8 @@ public class ChatOrchestrationServiceTests
         Assert.True(result.RequiresClarification);
         Assert.Equal("story_generate_initial", result.Intent);
         Assert.Equal("GenerateStoryCommand", result.Handler);
-        Assert.Contains("title", result.Prompt);
-        Assert.Contains("agegroup", result.Prompt);
+        Assert.Contains("title", result.Prompt!);
+        Assert.Contains("age", result.Prompt!.ToLowerInvariant());
     }
 
     [Fact]
