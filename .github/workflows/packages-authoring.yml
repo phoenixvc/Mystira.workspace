@@ -1,4 +1,4 @@
-name: Mystira.Authoring CI
+name: "[CI] Mystira.Authoring"
 
 on:
   push:

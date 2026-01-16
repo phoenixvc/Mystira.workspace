@@ -1,4 +1,4 @@
-name: Mystira.Ai CI
+name: "[CI] Mystira.Ai"
 
 on:
   push:

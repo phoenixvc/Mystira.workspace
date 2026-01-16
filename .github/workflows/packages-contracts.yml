@@ -1,4 +1,4 @@
-name: Mystira.Contracts CI
+name: "[CI] Mystira.Contracts"
 
 on:
   push:

@@ -1,4 +1,4 @@
-name: Mystira.Shared CI
+name: "[CI] Mystira.Shared"
 
 on:
   push:
