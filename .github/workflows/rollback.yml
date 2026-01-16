@@ -1,0 +1,251 @@
+name: "[Rollback] Story Generator"
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Environment to rollback"
+        required: true
+        type: choice
+        options:
+          - dev
+          - staging
+          - prod
+      revision:
+        description: "Revision to rollback to (leave empty for previous)"
+        required: false
+        type: string
+      skip_health_check:
+        description: "Skip health verification after rollback"
+        required: false
+        type: boolean
+        default: false
+
+concurrency:
+  group: rollback-${{ github.event.inputs.environment }}
+  cancel-in-progress: false
+
+env:
+  AZURE_CONTAINER_REGISTRY: myssharedacr
+  AKS_CLUSTER_NAME: mystira-aks
+  AKS_RESOURCE_GROUP: mystira-rg
+  NAMESPACE_PREFIX: mystira
+  DEPLOYMENT_NAME: story-generator-api
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  validate:
+    name: Validate Rollback Request
+    runs-on: ubuntu-latest
+    outputs:
+      namespace: ${{ steps.config.outputs.namespace }}
+      health_url: ${{ steps.config.outputs.health_url }}
+    steps:
+      - name: Validate production rollback
+        if: github.event.inputs.environment == 'prod'
+        run: |
+          echo "::warning::Production rollback requested by ${{ github.actor }}"
+          echo "## Production Rollback Warning" >> $GITHUB_STEP_SUMMARY
+          echo "A production rollback has been initiated by **${{ github.actor }}**." >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Please ensure this is intentional and all stakeholders are notified." >> $GITHUB_STEP_SUMMARY
+
+      - name: Set environment configuration
+        id: config
+        run: |
+          case "${{ github.event.inputs.environment }}" in
+            dev)
+              echo "namespace=${{ env.NAMESPACE_PREFIX }}-dev" >> $GITHUB_OUTPUT
+              echo "health_url=https://dev.story-generator.mystira.app/health" >> $GITHUB_OUTPUT
+              ;;
+            staging)
+              echo "namespace=${{ env.NAMESPACE_PREFIX }}-staging" >> $GITHUB_OUTPUT
+              echo "health_url=https://staging.story-generator.mystira.app/health" >> $GITHUB_OUTPUT
+              ;;
+            prod)
+              echo "namespace=${{ env.NAMESPACE_PREFIX }}-prod" >> $GITHUB_OUTPUT
+              echo "health_url=https://story-generator.mystira.app/health" >> $GITHUB_OUTPUT
+              ;;
+          esac
+
+  rollback:
+    name: Execute Rollback
+    runs-on: ubuntu-latest
+    needs: validate
+    environment: ${{ github.event.inputs.environment }}
+    steps:
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Get AKS credentials
+        run: |
+          az aks get-credentials \
+            --resource-group ${{ env.AKS_RESOURCE_GROUP }} \
+            --name ${{ env.AKS_CLUSTER_NAME }} \
+            --overwrite-existing
+
+      - name: Get current deployment state
+        id: current
+        run: |
+          echo "## Pre-Rollback State" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # Get current revision
+          CURRENT_REVISION=$(kubectl rollout history deployment/${{ env.DEPLOYMENT_NAME }} \
+            -n ${{ needs.validate.outputs.namespace }} \
+            --output=jsonpath='{.metadata.generation}')
+          echo "Current revision: $CURRENT_REVISION"
+          echo "current_revision=$CURRENT_REVISION" >> $GITHUB_OUTPUT
+
+          # Get current image
+          CURRENT_IMAGE=$(kubectl get deployment/${{ env.DEPLOYMENT_NAME }} \
+            -n ${{ needs.validate.outputs.namespace }} \
+            -o jsonpath='{.spec.template.spec.containers[0].image}')
+          echo "Current image: $CURRENT_IMAGE"
+          echo "current_image=$CURRENT_IMAGE" >> $GITHUB_OUTPUT
+
+          echo "| Property | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|----------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Current Revision | $CURRENT_REVISION |" >> $GITHUB_STEP_SUMMARY
+          echo "| Current Image | \`$CURRENT_IMAGE\` |" >> $GITHUB_STEP_SUMMARY
+
+      - name: List available revisions
+        run: |
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Available Revisions" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          kubectl rollout history deployment/${{ env.DEPLOYMENT_NAME }} \
+            -n ${{ needs.validate.outputs.namespace }} >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+
+      - name: Execute rollback
+        id: rollback
+        run: |
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Rollback Execution" >> $GITHUB_STEP_SUMMARY
+
+          if [ -n "${{ github.event.inputs.revision }}" ]; then
+            echo "Rolling back to revision: ${{ github.event.inputs.revision }}"
+            kubectl rollout undo deployment/${{ env.DEPLOYMENT_NAME }} \
+              -n ${{ needs.validate.outputs.namespace }} \
+              --to-revision=${{ github.event.inputs.revision }}
+            echo "Rolled back to revision **${{ github.event.inputs.revision }}**" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "Rolling back to previous revision"
+            kubectl rollout undo deployment/${{ env.DEPLOYMENT_NAME }} \
+              -n ${{ needs.validate.outputs.namespace }}
+            echo "Rolled back to **previous revision**" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Wait for rollout to complete
+        run: |
+          echo "Waiting for rollout to complete..."
+          kubectl rollout status deployment/${{ env.DEPLOYMENT_NAME }} \
+            -n ${{ needs.validate.outputs.namespace }} \
+            --timeout=300s
+
+      - name: Get post-rollback state
+        run: |
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Post-Rollback State" >> $GITHUB_STEP_SUMMARY
+
+          NEW_IMAGE=$(kubectl get deployment/${{ env.DEPLOYMENT_NAME }} \
+            -n ${{ needs.validate.outputs.namespace }} \
+            -o jsonpath='{.spec.template.spec.containers[0].image}')
+
+          READY_REPLICAS=$(kubectl get deployment/${{ env.DEPLOYMENT_NAME }} \
+            -n ${{ needs.validate.outputs.namespace }} \
+            -o jsonpath='{.status.readyReplicas}')
+
+          DESIRED_REPLICAS=$(kubectl get deployment/${{ env.DEPLOYMENT_NAME }} \
+            -n ${{ needs.validate.outputs.namespace }} \
+            -o jsonpath='{.spec.replicas}')
+
+          echo "| Property | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|----------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| New Image | \`$NEW_IMAGE\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| Ready Replicas | $READY_REPLICAS / $DESIRED_REPLICAS |" >> $GITHUB_STEP_SUMMARY
+
+  health-check:
+    name: Health Verification
+    runs-on: ubuntu-latest
+    needs: [validate, rollback]
+    if: ${{ github.event.inputs.skip_health_check != 'true' }}
+    steps:
+      - name: Wait for service stabilization
+        run: sleep 30
+
+      - name: Verify health endpoint
+        id: health
+        run: |
+          echo "## Health Verification" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          MAX_RETRIES=5
+          RETRY_DELAY=10
+          HEALTH_URL="${{ needs.validate.outputs.health_url }}"
+
+          for i in $(seq 1 $MAX_RETRIES); do
+            echo "Health check attempt $i/$MAX_RETRIES..."
+
+            HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" "$HEALTH_URL" || echo "000")
+
+            if [ "$HTTP_CODE" = "200" ]; then
+              echo "Health check passed with HTTP $HTTP_CODE"
+              echo "Health check: **PASSED** (HTTP $HTTP_CODE)" >> $GITHUB_STEP_SUMMARY
+              exit 0
+            fi
+
+            echo "Health check returned HTTP $HTTP_CODE, retrying in ${RETRY_DELAY}s..."
+            sleep $RETRY_DELAY
+          done
+
+          echo "Health check: **FAILED** after $MAX_RETRIES attempts" >> $GITHUB_STEP_SUMMARY
+          echo "::error::Health check failed after $MAX_RETRIES attempts"
+          exit 1
+
+      - name: Verify API endpoints
+        run: |
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### API Endpoint Verification" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          BASE_URL="${{ needs.validate.outputs.health_url }}"
+          BASE_URL="${BASE_URL%/health}"
+
+          # Check Swagger/OpenAPI
+          SWAGGER_CODE=$(curl -s -o /dev/null -w "%{http_code}" "$BASE_URL/swagger/index.html" || echo "000")
+          echo "| Endpoint | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|----------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| /health | Verified |" >> $GITHUB_STEP_SUMMARY
+          echo "| /swagger | HTTP $SWAGGER_CODE |" >> $GITHUB_STEP_SUMMARY
+
+  summary:
+    name: Rollback Summary
+    runs-on: ubuntu-latest
+    needs: [validate, rollback, health-check]
+    if: always()
+    steps:
+      - name: Generate Summary
+        run: |
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "---" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## Rollback Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Step | Result |" >> $GITHUB_STEP_SUMMARY
+          echo "|------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Validation | ${{ needs.validate.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Rollback | ${{ needs.rollback.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Health Check | ${{ needs.health-check.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Environment:** ${{ github.event.inputs.environment }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Initiated by:** ${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Timestamp:** $(date -u +'%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_STEP_SUMMARY

@@ -1,0 +1,179 @@
+name: "[Test] Integration"
+
+on:
+  push:
+    branches: [dev, main]
+    paths:
+      - "src/**/*.cs"
+      - "tests/**/*.cs"
+      - "**/*.csproj"
+      - ".github/workflows/test-integration.yml"
+  pull_request:
+    branches: [dev, main]
+  workflow_dispatch:
+
+concurrency:
+  group: test-integration-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+  # Mock LLM configuration for integration tests
+  AZURE_OPENAI_ENDPOINT: "http://localhost:5100"
+  AZURE_OPENAI_API_KEY: "mock-api-key"
+  AZURE_OPENAI_DEPLOYMENT_NAME: "mock-deployment"
+  USE_MOCK_LLM: "true"
+
+jobs:
+  integration-tests:
+    name: Run Integration Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "9.0.x"
+
+      - name: Restore
+        run: dotnet restore
+
+      - name: Build
+        run: dotnet build --no-restore --configuration Release
+
+      - name: Start WireMock container
+        run: |
+          docker run -d --name wiremock -p 5100:8080 wiremock/wiremock:latest
+          # Wait for WireMock to be ready
+          for i in {1..30}; do
+            if curl -s http://localhost:5100/__admin/health > /dev/null 2>&1; then
+              echo "WireMock is ready"
+              break
+            fi
+            echo "Waiting for WireMock... ($i/30)"
+            sleep 2
+          done
+
+      - name: Setup WireMock stubs for Azure OpenAI
+        run: |
+          # Create mock responses for chat completions
+          curl -X POST "http://localhost:5100/__admin/mappings" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "request": {
+                "method": "POST",
+                "urlPathPattern": "/openai/deployments/.*/chat/completions.*"
+              },
+              "response": {
+                "status": 200,
+                "headers": {
+                  "Content-Type": "application/json"
+                },
+                "jsonBody": {
+                  "id": "mock-completion-id",
+                  "object": "chat.completion",
+                  "created": 1700000000,
+                  "model": "gpt-4",
+                  "choices": [
+                    {
+                      "index": 0,
+                      "message": {
+                        "role": "assistant",
+                        "content": "Mock story generation response for integration testing."
+                      },
+                      "finish_reason": "stop"
+                    }
+                  ],
+                  "usage": {
+                    "prompt_tokens": 100,
+                    "completion_tokens": 50,
+                    "total_tokens": 150
+                  }
+                }
+              }
+            }'
+
+          # Create mock for embeddings endpoint
+          curl -X POST "http://localhost:5100/__admin/mappings" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "request": {
+                "method": "POST",
+                "urlPathPattern": "/openai/deployments/.*/embeddings.*"
+              },
+              "response": {
+                "status": 200,
+                "headers": {
+                  "Content-Type": "application/json"
+                },
+                "jsonBody": {
+                  "object": "list",
+                  "data": [
+                    {
+                      "object": "embedding",
+                      "index": 0,
+                      "embedding": [0.1, 0.2, 0.3, 0.4, 0.5]
+                    }
+                  ],
+                  "model": "text-embedding-ada-002",
+                  "usage": {
+                    "prompt_tokens": 10,
+                    "total_tokens": 10
+                  }
+                }
+              }
+            }'
+
+      - name: Run Integration Tests
+        run: |
+          dotnet test \
+            --no-build \
+            --configuration Release \
+            --verbosity normal \
+            --filter "Category=Integration" \
+            --collect:"XPlat Code Coverage" \
+            --results-directory ./coverage/integration \
+            --logger "trx;LogFileName=integration-results.trx"
+        continue-on-error: true
+
+      - name: Run Infrastructure Integration Tests
+        run: |
+          dotnet test tests/Mystira.StoryGenerator.Infrastructure.Tests/Mystira.StoryGenerator.Infrastructure.Tests.csproj \
+            --no-build \
+            --configuration Release \
+            --verbosity normal \
+            --collect:"XPlat Code Coverage" \
+            --results-directory ./coverage/infrastructure \
+            --logger "trx;LogFileName=infrastructure-results.trx"
+        continue-on-error: true
+
+      - name: Upload Test Results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: integration-test-results
+          path: ./coverage/**/*.trx
+          retention-days: 14
+
+      - name: Upload Coverage Report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: integration-coverage
+          path: ./coverage/**/coverage.cobertura.xml
+          retention-days: 14
+
+      - name: Test Summary
+        if: always()
+        run: |
+          echo "## Integration Test Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Environment" >> $GITHUB_STEP_SUMMARY
+          echo "- Mock LLM: WireMock (localhost:5100)" >> $GITHUB_STEP_SUMMARY
+          echo "- Azure OpenAI: Mocked" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Test Categories" >> $GITHUB_STEP_SUMMARY
+          echo "- Integration tests with mocked external dependencies" >> $GITHUB_STEP_SUMMARY
+          echo "- Infrastructure tests for data layer" >> $GITHUB_STEP_SUMMARY

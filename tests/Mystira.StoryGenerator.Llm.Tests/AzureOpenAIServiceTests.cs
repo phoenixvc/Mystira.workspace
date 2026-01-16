@@ -81,7 +81,19 @@ public class AzureOpenAIServiceTests
     [Fact]
     public void GetAvailableModels_WithValidSettings_ReturnsSelectedModel()
     {
-        // Arrange
+        // Arrange - use only one deployment for this test
+        _aiSettings.AzureOpenAI.Deployments = new List<AzureOpenAIDeployment>
+        {
+            new()
+            {
+                Name = "gpt-4",
+                DisplayName = "GPT-4",
+                MaxTokens = 4096,
+                DefaultTemperature = 0.7,
+                SupportsJsonSchema = true,
+                Capabilities = new List<string> { "chat", "json-schema", "story-generation" }
+            }
+        };
         var service = new AzureOpenAIService(_optionsMock.Object, _loggerMock.Object);
 
         // Act
@@ -138,7 +150,8 @@ public class AzureOpenAIServiceTests
     [InlineData("custom-model", "custom-model")]
     public void GetAvailableModels_WithDifferentDeployments_ReturnsCorrectDisplayName(string deploymentName, string expectedDisplayName)
     {
-        // Arrange
+        // Arrange - clear deployments to test legacy fallback behavior
+        _aiSettings.AzureOpenAI.Deployments = new List<AzureOpenAIDeployment>();
         _aiSettings.AzureOpenAI.DeploymentName = deploymentName;
         var service = new AzureOpenAIService(_optionsMock.Object, _loggerMock.Object);
 
