@@ -1,0 +1,203 @@
+name: "[Rollback] Admin API"
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Target environment"
+        required: true
+        type: choice
+        options:
+          - dev
+          - staging
+          - prod
+      revision:
+        description: "Revision to rollback to (leave empty for previous)"
+        required: false
+        type: string
+      reason:
+        description: "Reason for rollback"
+        required: true
+        type: string
+
+concurrency:
+  group: rollback-${{ github.event.inputs.environment }}
+  cancel-in-progress: false
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  AZURE_RESOURCE_GROUP: mystira-${{ github.event.inputs.environment }}-rg
+  AKS_CLUSTER_NAME: mystira-${{ github.event.inputs.environment }}-aks
+  NAMESPACE: mystira
+  DEPLOYMENT_NAME: admin-api
+
+jobs:
+  validate:
+    name: Validate Rollback
+    runs-on: ubuntu-latest
+    outputs:
+      proceed: ${{ steps.confirm.outputs.proceed }}
+    steps:
+      - name: Validate environment
+        run: |
+          echo "## Rollback Request" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Parameter | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|-----------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Environment | ${{ github.event.inputs.environment }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Revision | ${{ github.event.inputs.revision || 'Previous' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Reason | ${{ github.event.inputs.reason }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Triggered by | ${{ github.actor }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Timestamp | $(date -u +"%Y-%m-%dT%H:%M:%SZ") |" >> $GITHUB_STEP_SUMMARY
+
+      - name: Confirm proceed
+        id: confirm
+        run: echo "proceed=true" >> $GITHUB_OUTPUT
+
+  rollback:
+    name: Execute Rollback
+    runs-on: ubuntu-latest
+    needs: [validate]
+    if: needs.validate.outputs.proceed == 'true'
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Set up kubectl
+        uses: azure/setup-kubectl@v4
+
+      - name: Get AKS credentials
+        run: |
+          az aks get-credentials \
+            --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
+            --name ${{ env.AKS_CLUSTER_NAME }} \
+            --overwrite-existing
+
+      - name: Get current deployment status
+        id: current
+        run: |
+          echo "## Current Deployment Status" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          kubectl rollout history deployment/${{ env.DEPLOYMENT_NAME }} -n ${{ env.NAMESPACE }} >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+
+          CURRENT_REVISION=$(kubectl rollout history deployment/${{ env.DEPLOYMENT_NAME }} -n ${{ env.NAMESPACE }} | tail -2 | head -1 | awk '{print $1}')
+          echo "current_revision=$CURRENT_REVISION" >> $GITHUB_OUTPUT
+
+      - name: Execute rollback
+        id: rollback
+        run: |
+          if [ -n "${{ github.event.inputs.revision }}" ]; then
+            echo "Rolling back to revision ${{ github.event.inputs.revision }}..."
+            kubectl rollout undo deployment/${{ env.DEPLOYMENT_NAME }} \
+              -n ${{ env.NAMESPACE }} \
+              --to-revision=${{ github.event.inputs.revision }}
+          else
+            echo "Rolling back to previous revision..."
+            kubectl rollout undo deployment/${{ env.DEPLOYMENT_NAME }} \
+              -n ${{ env.NAMESPACE }}
+          fi
+
+      - name: Wait for rollback to complete
+        run: |
+          kubectl rollout status deployment/${{ env.DEPLOYMENT_NAME }} \
+            -n ${{ env.NAMESPACE }} \
+            --timeout=300s
+
+      - name: Get new deployment status
+        run: |
+          echo "## Post-Rollback Status" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          kubectl get deployment/${{ env.DEPLOYMENT_NAME }} -n ${{ env.NAMESPACE }} -o wide >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+
+  health-check:
+    name: Verify Health
+    runs-on: ubuntu-latest
+    needs: [rollback]
+    steps:
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Set up kubectl
+        uses: azure/setup-kubectl@v4
+
+      - name: Get AKS credentials
+        run: |
+          az aks get-credentials \
+            --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
+            --name ${{ env.AKS_CLUSTER_NAME }} \
+            --overwrite-existing
+
+      - name: Wait for pods to stabilize
+        run: sleep 30
+
+      - name: Check pod health
+        run: |
+          echo "## Pod Health Check" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          READY_PODS=$(kubectl get pods -n ${{ env.NAMESPACE }} -l app=${{ env.DEPLOYMENT_NAME }} -o jsonpath='{.items[*].status.conditions[?(@.type=="Ready")].status}' | tr ' ' '\n' | grep -c True || echo "0")
+          TOTAL_PODS=$(kubectl get pods -n ${{ env.NAMESPACE }} -l app=${{ env.DEPLOYMENT_NAME }} --no-headers | wc -l)
+
+          echo "| Metric | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Ready Pods | $READY_PODS |" >> $GITHUB_STEP_SUMMARY
+          echo "| Total Pods | $TOTAL_PODS |" >> $GITHUB_STEP_SUMMARY
+
+          if [ "$READY_PODS" -lt "$TOTAL_PODS" ]; then
+            echo "::warning::Not all pods are ready: $READY_PODS/$TOTAL_PODS"
+          fi
+
+      - name: Verify health endpoint
+        run: |
+          # Get service endpoint or use port-forward
+          kubectl port-forward svc/${{ env.DEPLOYMENT_NAME }} 8080:80 -n ${{ env.NAMESPACE }} &
+          PF_PID=$!
+          sleep 5
+
+          # Check health endpoint
+          HEALTH_STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8080/health || echo "000")
+
+          kill $PF_PID 2>/dev/null || true
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Health Endpoint" >> $GITHUB_STEP_SUMMARY
+          echo "- Status Code: $HEALTH_STATUS" >> $GITHUB_STEP_SUMMARY
+
+          if [ "$HEALTH_STATUS" != "200" ]; then
+            echo "::error::Health endpoint returned non-200 status: $HEALTH_STATUS"
+            exit 1
+          fi
+
+  notify:
+    name: Send Notifications
+    runs-on: ubuntu-latest
+    needs: [rollback, health-check]
+    if: always()
+    steps:
+      - name: Generate final summary
+        run: |
+          echo "## Rollback Complete" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Result | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|--------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Rollback | ${{ needs.rollback.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Health Check | ${{ needs.health-check.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Reason:** ${{ github.event.inputs.reason }}" >> $GITHUB_STEP_SUMMARY

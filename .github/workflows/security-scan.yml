@@ -1,0 +1,165 @@
+name: "[Security] Scan"
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [dev, main]
+  schedule:
+    # Run weekly on Monday at 00:00 UTC
+    - cron: "0 0 * * 1"
+  workflow_dispatch:
+
+concurrency:
+  group: security-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  actions: read
+  contents: read
+  security-events: write
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+
+jobs:
+  codeql:
+    name: CodeQL Analysis
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: csharp
+          queries: security-extended,security-and-quality
+
+      - uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: "9.0.x"
+          source-url: https://nuget.pkg.github.com/phoenixvc/index.json
+        env:
+          NUGET_AUTH_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN }}
+
+      - name: Restore and build
+        run: |
+          dotnet restore
+          dotnet build --no-restore
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:csharp"
+
+  dependency-scan:
+    name: Dependency Scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: "fs"
+          scan-ref: "."
+          format: "sarif"
+          output: "trivy-results.sarif"
+          severity: "CRITICAL,HIGH"
+          vuln-type: "library"
+
+      - name: Upload Trivy scan results
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: "trivy-results.sarif"
+
+      - name: Trivy summary report
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: "fs"
+          scan-ref: "."
+          format: "table"
+          severity: "CRITICAL,HIGH,MEDIUM"
+          vuln-type: "library"
+
+  secret-scan:
+    name: Secret Scanning
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: TruffleHog secret scan
+        uses: trufflesecurity/trufflehog@main
+        with:
+          path: ./
+          base: ${{ github.event.repository.default_branch }}
+          head: HEAD
+          extra_args: --only-verified
+
+  container-scan:
+    name: Container Image Scan
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' || github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: "9.0.x"
+          source-url: https://nuget.pkg.github.com/phoenixvc/index.json
+        env:
+          NUGET_AUTH_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN }}
+
+      - name: Build Docker image for scanning
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./src/Mystira.Admin.Api/Dockerfile
+          push: false
+          load: true
+          tags: admin-api:scan
+          secrets: |
+            nuget_auth_token=${{ secrets.GH_PACKAGES_TOKEN }}
+
+      - name: Scan container image
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: "admin-api:scan"
+          format: "sarif"
+          output: "container-trivy-results.sarif"
+          severity: "CRITICAL,HIGH"
+
+      - name: Upload container scan results
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: "container-trivy-results.sarif"
+          category: "container-security"
+
+  summary:
+    name: Security Summary
+    runs-on: ubuntu-latest
+    needs: [codeql, dependency-scan, secret-scan, container-scan]
+    if: always()
+    steps:
+      - name: Generate security summary
+        run: |
+          echo "## Security Scan Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Scan Type | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|-----------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| CodeQL Analysis | ${{ needs.codeql.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Dependency Scan | ${{ needs.dependency-scan.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Secret Scan | ${{ needs.secret-scan.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Container Scan | ${{ needs.container-scan.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Notes" >> $GITHUB_STEP_SUMMARY
+          echo "- Results are uploaded to GitHub Security tab" >> $GITHUB_STEP_SUMMARY
+          echo "- Critical and High vulnerabilities should be addressed before merge" >> $GITHUB_STEP_SUMMARY
