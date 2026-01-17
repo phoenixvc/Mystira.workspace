@@ -1,6 +1,6 @@
 {
   "name": "@mystira/api-spec",
-  "version": "1.0.0",
+  "version": "0.5.2-alpha",
   "private": true,
   "description": "OpenAPI specifications for Mystira platform APIs",
   "scripts": {
