@@ -51,7 +51,7 @@ public class AgeGroupRepository : IAgeGroupRepository
     /// <returns>The age group definition, or null if not found or deleted.</returns>
     public async Task<AgeGroupDefinition?> GetByNameAsync(string name)
     {
-        return await _appContext.AgeGroupDefinitions.FirstOrDefaultAsync(x => x.Name.Equals(name, StringComparison.OrdinalIgnoreCase) && !x.IsDeleted);
+        return await _appContext.AgeGroupDefinitions.FirstOrDefaultAsync(x => x.Name.ToLower() == name.ToLower() && !x.IsDeleted);
     }
 
     /// <summary>
