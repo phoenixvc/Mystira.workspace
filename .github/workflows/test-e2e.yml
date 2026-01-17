@@ -27,9 +27,13 @@ on:
           - critical-path
           - regression
 
-  # Run after deployments
+  # Run after deployments (dev, staging, AND production)
   workflow_run:
-    workflows: ["[Deploy] Dev (K8s)", "[Deploy] Staging"]
+    workflows:
+      - "[Deploy] Dev (K8s)"
+      - "[Deploy] Staging"
+      - "[Deploy] Production"
+      - "[Deploy] Prod App API"
     types: [completed]
 
   # Scheduled runs
@@ -59,8 +63,11 @@ jobs:
             ENV="${{ github.event.inputs.environment }}"
           elif [ "${{ github.event_name }}" == "workflow_run" ]; then
             # Determine from triggering workflow
-            if [[ "${{ github.event.workflow.name }}" == *"Dev"* ]]; then
+            WORKFLOW_NAME="${{ github.event.workflow.name }}"
+            if [[ "$WORKFLOW_NAME" == *"Dev"* ]]; then
               ENV="dev"
+            elif [[ "$WORKFLOW_NAME" == *"Prod"* ]]; then
+              ENV="prod"
             else
               ENV="staging"
             fi
@@ -78,6 +85,10 @@ jobs:
             staging)
               echo "base_url=https://staging.mystira.app" >> $GITHUB_OUTPUT
               echo "api_url=https://staging-api.mystira.app" >> $GITHUB_OUTPUT
+              ;;
+            prod)
+              echo "base_url=https://mystira.app" >> $GITHUB_OUTPUT
+              echo "api_url=https://api.mystira.app" >> $GITHUB_OUTPUT
               ;;
           esac
 

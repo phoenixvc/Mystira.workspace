@@ -1,0 +1,31 @@
+name: "Setup .NET"
+description: "Composite action to setup .NET SDK with GitHub Packages authentication"
+
+inputs:
+  dotnet-version:
+    description: ".NET SDK version"
+    required: false
+    default: "9.0.x"
+  nuget-auth-token:
+    description: "Token for GitHub Packages NuGet feed"
+    required: false
+    default: ""
+
+runs:
+  using: "composite"
+  steps:
+    - name: Setup .NET SDK
+      uses: actions/setup-dotnet@v5
+      with:
+        dotnet-version: ${{ inputs.dotnet-version }}
+        source-url: https://nuget.pkg.github.com/phoenixvc/index.json
+      env:
+        NUGET_AUTH_TOKEN: ${{ inputs.nuget-auth-token }}
+
+    - name: Configure NuGet
+      shell: bash
+      run: |
+        dotnet nuget list source || true
+      env:
+        DOTNET_NOLOGO: true
+        DOTNET_CLI_TELEMETRY_OPTOUT: true
