@@ -1,6 +1,6 @@
 {
   "name": "@mystira/design-tokens",
-  "version": "0.1.0",
+  "version": "0.5.2-alpha",
   "description": "Unified design tokens for Mystira platform - colors, typography, spacing, and component styles",
   "type": "module",
   "main": "./dist/index.js",

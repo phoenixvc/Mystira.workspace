@@ -1,6 +1,6 @@
 {
   "name": "mystira-workspace",
-  "version": "0.1.0",
+  "version": "0.5.2-alpha",
   "private": true,
   "description": "Unified workspace for Mystira platform",
   "author": "Mystira <jurie@phoenixvc.tech>",
