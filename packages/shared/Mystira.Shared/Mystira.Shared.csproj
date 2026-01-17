@@ -63,8 +63,8 @@
     <!-- Wave 2: Caching -->
     <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="9.0.11" />
     <!-- Wave 3: Wolverine (replaces MediatR) -->
-    <PackageReference Include="WolverineFx" Version="5.9.2" />
-    <PackageReference Include="WolverineFx.AzureServiceBus" Version="5.9.2" />
+    <PackageReference Include="WolverineFx" Version="5.10.0" />
+    <PackageReference Include="WolverineFx.AzureServiceBus" Version="5.10.0" />
     <!-- Wave 4: CQRS, Validation, Mapping -->
     <PackageReference Include="FluentValidation" Version="12.1.1" />
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.1" />
@@ -75,7 +75,7 @@
     <PackageReference Include="Ardalis.Specification" Version="9.3.1" />
     <PackageReference Include="Ardalis.Specification.EntityFrameworkCore" Version="9.3.1" />
     <!-- Polyglot Persistence: Wolverine EF Core for saga/outbox -->
-    <PackageReference Include="WolverineFx.EntityFrameworkCore" Version="5.9.2" />
+    <PackageReference Include="WolverineFx.EntityFrameworkCore" Version="5.10.0" />
     <!-- CodeAnalysis version alignment: All pinned to 4.14.0 for JasperFx.RuntimeCompiler compatibility -->
     <PackageReference Include="Microsoft.CodeAnalysis" Version="4.14.0" />
     <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="4.14.0" />
