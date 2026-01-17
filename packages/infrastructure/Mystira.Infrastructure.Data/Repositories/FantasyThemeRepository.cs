@@ -50,7 +50,7 @@ public class FantasyThemeRepository : IFantasyThemeRepository
     /// <returns>The fantasy theme definition, or null if not found or deleted.</returns>
     public async Task<FantasyThemeDefinition?> GetByNameAsync(string name)
     {
-        return await _appContext.FantasyThemeDefinitions.FirstOrDefaultAsync(x => x.Name.Equals(name, StringComparison.OrdinalIgnoreCase) && !x.IsDeleted);
+        return await _appContext.FantasyThemeDefinitions.FirstOrDefaultAsync(x => x.Name.ToLower() == name.ToLower() && !x.IsDeleted);
     }
 
     /// <summary>
@@ -60,7 +60,7 @@ public class FantasyThemeRepository : IFantasyThemeRepository
     /// <returns>True if the fantasy theme exists and is not deleted; otherwise, false.</returns>
     public async Task<bool> ExistsByNameAsync(string name)
     {
-        return await _appContext.FantasyThemeDefinitions.AnyAsync(x => x.Name.Equals(name, StringComparison.OrdinalIgnoreCase) && !x.IsDeleted);
+        return await _appContext.FantasyThemeDefinitions.AnyAsync(x => x.Name.ToLower() == name.ToLower() && !x.IsDeleted);
     }
 
     /// <summary>

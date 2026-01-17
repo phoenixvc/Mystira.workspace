@@ -50,7 +50,7 @@ public class EchoTypeRepository : IEchoTypeRepository
     /// <returns>The echo type definition, or null if not found or deleted.</returns>
     public async Task<EchoTypeDefinition?> GetByNameAsync(string name)
     {
-        return await _appContext.EchoTypeDefinitions.FirstOrDefaultAsync(x => x.Name.Equals(name, StringComparison.OrdinalIgnoreCase) && !x.IsDeleted);
+        return await _appContext.EchoTypeDefinitions.FirstOrDefaultAsync(x => x.Name.ToLower() == name.ToLower() && !x.IsDeleted);
     }
 
     /// <summary>
@@ -60,7 +60,7 @@ public class EchoTypeRepository : IEchoTypeRepository
     /// <returns>True if the echo type exists and is not deleted; otherwise, false.</returns>
     public async Task<bool> ExistsByNameAsync(string name)
     {
-        return await _appContext.EchoTypeDefinitions.AnyAsync(x => x.Name.Equals(name, StringComparison.OrdinalIgnoreCase) && !x.IsDeleted);
+        return await _appContext.EchoTypeDefinitions.AnyAsync(x => x.Name.ToLower() == name.ToLower() && !x.IsDeleted);
     }
 
     /// <summary>

@@ -50,7 +50,7 @@ public class CompassAxisRepository : ICompassAxisRepository
     /// <returns>The compass axis definition, or null if not found or deleted.</returns>
     public async Task<CompassAxisDefinition?> GetByNameAsync(string name)
     {
-        return await _appContext.CompassAxes.FirstOrDefaultAsync(x => x.Name.Equals(name, StringComparison.OrdinalIgnoreCase) && !x.IsDeleted);
+        return await _appContext.CompassAxes.FirstOrDefaultAsync(x => x.Name.ToLower() == name.ToLower() && !x.IsDeleted);
     }
 
     /// <summary>
@@ -60,7 +60,7 @@ public class CompassAxisRepository : ICompassAxisRepository
     /// <returns>True if the compass axis exists and is not deleted; otherwise, false.</returns>
     public async Task<bool> ExistsByNameAsync(string name)
     {
-        return await _appContext.CompassAxes.AnyAsync(x => x.Name.Equals(name, StringComparison.OrdinalIgnoreCase) && !x.IsDeleted);
+        return await _appContext.CompassAxes.AnyAsync(x => x.Name.ToLower() == name.ToLower() && !x.IsDeleted);
     }
 
     /// <summary>

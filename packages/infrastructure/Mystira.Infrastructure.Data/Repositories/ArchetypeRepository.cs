@@ -50,7 +50,7 @@ public class ArchetypeRepository : IArchetypeRepository
     /// <returns>The archetype definition, or null if not found or deleted.</returns>
     public async Task<ArchetypeDefinition?> GetByNameAsync(string name)
     {
-        return await _appContext.ArchetypeDefinitions.FirstOrDefaultAsync(x => x.Name.Equals(name, StringComparison.OrdinalIgnoreCase) && !x.IsDeleted);
+        return await _appContext.ArchetypeDefinitions.FirstOrDefaultAsync(x => x.Name.ToLower() == name.ToLower() && !x.IsDeleted);
     }
 
     /// <summary>
@@ -60,7 +60,7 @@ public class ArchetypeRepository : IArchetypeRepository
     /// <returns>True if the archetype exists and is not deleted; otherwise, false.</returns>
     public async Task<bool> ExistsByNameAsync(string name)
     {
-        return await _appContext.ArchetypeDefinitions.AnyAsync(x => x.Name.Equals(name, StringComparison.OrdinalIgnoreCase) && !x.IsDeleted);
+        return await _appContext.ArchetypeDefinitions.AnyAsync(x => x.Name.ToLower() == name.ToLower() && !x.IsDeleted);
     }
 
     /// <summary>

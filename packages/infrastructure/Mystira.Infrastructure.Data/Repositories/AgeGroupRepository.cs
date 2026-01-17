@@ -71,7 +71,7 @@ public class AgeGroupRepository : IAgeGroupRepository
     /// <returns>True if the age group exists and is not deleted; otherwise, false.</returns>
     public async Task<bool> ExistsByNameAsync(string name)
     {
-        return await _appContext.AgeGroupDefinitions.AnyAsync(x => x.Name.Equals(name, StringComparison.OrdinalIgnoreCase) && !x.IsDeleted);
+        return await _appContext.AgeGroupDefinitions.AnyAsync(x => x.Name.ToLower() == name.ToLower() && !x.IsDeleted);
     }
 
     /// <summary>
