@@ -79,15 +79,19 @@ public class RepositoryBaseTests
 
         repositoryBaseInterface.Should().NotBeNull("IRepository should extend IRepositoryBase");
 
-        // Verify IRepositoryBase has the expected methods
+        // Verify IRepositoryBase has the expected write methods (declared directly on IRepositoryBase)
         var baseMethods = typeof(IRepositoryBase<>).GetMethods();
         baseMethods.Should().Contain(m => m.Name == "AddAsync");
         baseMethods.Should().Contain(m => m.Name == "AddRangeAsync");
         baseMethods.Should().Contain(m => m.Name == "UpdateAsync");
         baseMethods.Should().Contain(m => m.Name == "DeleteAsync");
         baseMethods.Should().Contain(m => m.Name == "SaveChangesAsync");
-        baseMethods.Should().Contain(m => m.Name == "ListAsync");
-        baseMethods.Should().Contain(m => m.Name == "CountAsync");
-        baseMethods.Should().Contain(m => m.Name == "FirstOrDefaultAsync");
+
+        // Verify IReadRepositoryBase has the expected read methods
+        // (IRepositoryBase extends IReadRepositoryBase, so these are inherited)
+        var readBaseMethods = typeof(IReadRepositoryBase<>).GetMethods();
+        readBaseMethods.Should().Contain(m => m.Name == "ListAsync");
+        readBaseMethods.Should().Contain(m => m.Name == "CountAsync");
+        readBaseMethods.Should().Contain(m => m.Name == "FirstOrDefaultAsync");
     }
 }
