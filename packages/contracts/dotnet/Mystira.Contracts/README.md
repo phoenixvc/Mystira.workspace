@@ -1,5 +1,7 @@
 # Mystira.Contracts
 
+[![NuGet](https://img.shields.io/nuget/v/Mystira.Contracts.svg)](https://www.nuget.org/packages/Mystira.Contracts/)
+
 Unified API contracts for the Mystira platform. This package consolidates all DTOs, requests, and responses for both the App API and StoryGenerator API.
 
 ## Installation
