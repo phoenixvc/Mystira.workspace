@@ -6,12 +6,27 @@ using Microsoft.EntityFrameworkCore;
 namespace Mystira.Shared.Data.Repositories;
 
 /// <summary>
-/// Generic repository implementation using Entity Framework Core.
-/// Supports both basic CRUD operations and specification-based queries.
-/// Uses Ardalis.Specification for specification pattern implementation.
+/// Generic repository base implementation using Entity Framework Core.
+/// Implements Ardalis.Specification's IRepositoryBase with additional convenience methods.
 /// </summary>
+/// <remarks>
+/// <para>
+/// This class provides a foundation for repository implementations. Infrastructure layer
+/// repositories should extend this class and implement <c>Mystira.Application.Ports.Data.IRepository&lt;TEntity&gt;</c>.
+/// </para>
+/// <para>
+/// Example:
+/// <code>
+/// public class Repository&lt;TEntity&gt; : RepositoryBase&lt;TEntity&gt;, IRepository&lt;TEntity&gt;
+///     where TEntity : class
+/// {
+///     public Repository(MyDbContext context) : base(context) { }
+/// }
+/// </code>
+/// </para>
+/// </remarks>
 /// <typeparam name="TEntity">The entity type.</typeparam>
-public class RepositoryBase<TEntity> : IRepository<TEntity> where TEntity : class
+public class RepositoryBase<TEntity> : IRepositoryBase<TEntity> where TEntity : class
 {
     /// <summary>
     /// The database context.
@@ -33,36 +48,7 @@ public class RepositoryBase<TEntity> : IRepository<TEntity> where TEntity : clas
         DbSet = context.Set<TEntity>();
     }
 
-    /// <inheritdoc />
-    public virtual async Task<TEntity?> GetByIdAsync(
-        string id,
-        CancellationToken cancellationToken = default)
-    {
-        return await DbSet.FindAsync(new object[] { id }, cancellationToken);
-    }
-
-    /// <inheritdoc />
-    public virtual async Task<TEntity?> GetByIdAsync(
-        Guid id,
-        CancellationToken cancellationToken = default)
-    {
-        return await DbSet.FindAsync(new object[] { id }, cancellationToken);
-    }
-
-    /// <inheritdoc />
-    public virtual async Task<IEnumerable<TEntity>> GetAllAsync(
-        CancellationToken cancellationToken = default)
-    {
-        return await DbSet.AsNoTracking().ToListAsync(cancellationToken);
-    }
-
-    /// <inheritdoc />
-    public virtual async Task<IEnumerable<TEntity>> FindAsync(
-        Expression<Func<TEntity, bool>> predicate,
-        CancellationToken cancellationToken = default)
-    {
-        return await DbSet.AsNoTracking().Where(predicate).ToListAsync(cancellationToken);
-    }
+    #region IRepositoryBase<T> methods (from Ardalis.Specification)
 
     /// <inheritdoc />
     public virtual async Task<TEntity> AddAsync(
@@ -75,25 +61,216 @@ public class RepositoryBase<TEntity> : IRepository<TEntity> where TEntity : clas
     }
 
     /// <inheritdoc />
-    public virtual async Task AddRangeAsync(
+    public virtual async Task<IEnumerable<TEntity>> AddRangeAsync(
         IEnumerable<TEntity> entities,
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(entities);
-        await DbSet.AddRangeAsync(entities, cancellationToken);
+        var entityList = entities.ToList();
+        await DbSet.AddRangeAsync(entityList, cancellationToken);
+        return entityList;
     }
 
     /// <inheritdoc />
-    public virtual Task UpdateAsync(
+    public virtual Task<int> UpdateAsync(
         TEntity entity,
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(entity);
         DbSet.Update(entity);
-        return Task.CompletedTask;
+        return Task.FromResult(1);
     }
 
     /// <inheritdoc />
+    public virtual Task<int> UpdateRangeAsync(
+        IEnumerable<TEntity> entities,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(entities);
+        var entityList = entities.ToList();
+        DbSet.UpdateRange(entityList);
+        return Task.FromResult(entityList.Count);
+    }
+
+    /// <inheritdoc />
+    public virtual Task<int> DeleteAsync(
+        TEntity entity,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(entity);
+        DbSet.Remove(entity);
+        return Task.FromResult(1);
+    }
+
+    /// <inheritdoc />
+    public virtual Task<int> DeleteRangeAsync(
+        IEnumerable<TEntity> entities,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(entities);
+        var entityList = entities.ToList();
+        DbSet.RemoveRange(entityList);
+        return Task.FromResult(entityList.Count);
+    }
+
+    /// <inheritdoc />
+    public virtual async Task<int> DeleteRangeAsync(
+        ISpecification<TEntity> specification,
+        CancellationToken cancellationToken = default)
+    {
+        var entities = await ApplySpecification(specification).ToListAsync(cancellationToken);
+        DbSet.RemoveRange(entities);
+        return entities.Count;
+    }
+
+    /// <inheritdoc />
+    public virtual async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    {
+        return await Context.SaveChangesAsync(cancellationToken);
+    }
+
+    /// <inheritdoc />
+    public virtual async Task<TEntity?> GetByIdAsync<TId>(
+        TId id,
+        CancellationToken cancellationToken = default) where TId : notnull
+    {
+        return await DbSet.FindAsync(new object[] { id }, cancellationToken);
+    }
+
+    /// <inheritdoc />
+    public virtual async Task<TEntity?> FirstOrDefaultAsync(
+        ISpecification<TEntity> specification,
+        CancellationToken cancellationToken = default)
+    {
+        return await ApplySpecification(specification).AsNoTracking().FirstOrDefaultAsync(cancellationToken);
+    }
+
+    /// <inheritdoc />
+    public virtual async Task<TResult?> FirstOrDefaultAsync<TResult>(
+        ISpecification<TEntity, TResult> specification,
+        CancellationToken cancellationToken = default)
+    {
+        return await ApplySpecification(specification).AsNoTracking().FirstOrDefaultAsync(cancellationToken);
+    }
+
+    /// <inheritdoc />
+    public virtual async Task<TEntity?> SingleOrDefaultAsync(
+        ISingleResultSpecification<TEntity> specification,
+        CancellationToken cancellationToken = default)
+    {
+        return await ApplySpecification(specification).AsNoTracking().SingleOrDefaultAsync(cancellationToken);
+    }
+
+    /// <inheritdoc />
+    public virtual async Task<TResult?> SingleOrDefaultAsync<TResult>(
+        ISingleResultSpecification<TEntity, TResult> specification,
+        CancellationToken cancellationToken = default)
+    {
+        return await ApplySpecification(specification).AsNoTracking().SingleOrDefaultAsync(cancellationToken);
+    }
+
+    /// <inheritdoc />
+    public virtual async Task<List<TEntity>> ListAsync(CancellationToken cancellationToken = default)
+    {
+        return await DbSet.AsNoTracking().ToListAsync(cancellationToken);
+    }
+
+    /// <inheritdoc />
+    public virtual async Task<List<TEntity>> ListAsync(
+        ISpecification<TEntity> specification,
+        CancellationToken cancellationToken = default)
+    {
+        return await ApplySpecification(specification).AsNoTracking().ToListAsync(cancellationToken);
+    }
+
+    /// <inheritdoc />
+    public virtual async Task<List<TResult>> ListAsync<TResult>(
+        ISpecification<TEntity, TResult> specification,
+        CancellationToken cancellationToken = default)
+    {
+        return await ApplySpecification(specification).AsNoTracking().ToListAsync(cancellationToken);
+    }
+
+    /// <inheritdoc />
+    public virtual async Task<int> CountAsync(CancellationToken cancellationToken = default)
+    {
+        return await DbSet.CountAsync(cancellationToken);
+    }
+
+    /// <inheritdoc />
+    public virtual async Task<int> CountAsync(
+        ISpecification<TEntity> specification,
+        CancellationToken cancellationToken = default)
+    {
+        return await ApplySpecification(specification).CountAsync(cancellationToken);
+    }
+
+    /// <inheritdoc />
+    public virtual async Task<bool> AnyAsync(CancellationToken cancellationToken = default)
+    {
+        return await DbSet.AnyAsync(cancellationToken);
+    }
+
+    /// <inheritdoc />
+    public virtual async Task<bool> AnyAsync(
+        ISpecification<TEntity> specification,
+        CancellationToken cancellationToken = default)
+    {
+        return await ApplySpecification(specification).AnyAsync(cancellationToken);
+    }
+
+    /// <inheritdoc />
+    public virtual IAsyncEnumerable<TEntity> AsAsyncEnumerable(ISpecification<TEntity> specification)
+    {
+        return ApplySpecification(specification).AsNoTracking().AsAsyncEnumerable();
+    }
+
+    #endregion
+
+    #region Convenience methods for IRepository<T> implementations
+
+    /// <summary>
+    /// Gets an entity by its string ID.
+    /// </summary>
+    public virtual async Task<TEntity?> GetByIdAsync(
+        string id,
+        CancellationToken cancellationToken = default)
+    {
+        return await DbSet.FindAsync(new object[] { id }, cancellationToken);
+    }
+
+    /// <summary>
+    /// Gets an entity by its Guid ID.
+    /// </summary>
+    public virtual async Task<TEntity?> GetByIdAsync(
+        Guid id,
+        CancellationToken cancellationToken = default)
+    {
+        return await DbSet.FindAsync(new object[] { id }, cancellationToken);
+    }
+
+    /// <summary>
+    /// Gets all entities (uses AsNoTracking for performance).
+    /// </summary>
+    public virtual async Task<IEnumerable<TEntity>> GetAllAsync(
+        CancellationToken cancellationToken = default)
+    {
+        return await DbSet.AsNoTracking().ToListAsync(cancellationToken);
+    }
+
+    /// <summary>
+    /// Finds entities matching a predicate (uses AsNoTracking for performance).
+    /// </summary>
+    public virtual async Task<IEnumerable<TEntity>> FindAsync(
+        Expression<Func<TEntity, bool>> predicate,
+        CancellationToken cancellationToken = default)
+    {
+        return await DbSet.AsNoTracking().Where(predicate).ToListAsync(cancellationToken);
+    }
+
+    /// <summary>
+    /// Deletes an entity by string ID.
+    /// </summary>
     public virtual async Task DeleteAsync(
         string id,
         CancellationToken cancellationToken = default)
@@ -105,7 +282,9 @@ public class RepositoryBase<TEntity> : IRepository<TEntity> where TEntity : clas
         }
     }
 
-    /// <inheritdoc />
+    /// <summary>
+    /// Deletes an entity by Guid ID.
+    /// </summary>
     public virtual async Task DeleteAsync(
         Guid id,
         CancellationToken cancellationToken = default)
@@ -117,17 +296,9 @@ public class RepositoryBase<TEntity> : IRepository<TEntity> where TEntity : clas
         }
     }
 
-    /// <inheritdoc />
-    public virtual Task DeleteAsync(
-        TEntity entity,
-        CancellationToken cancellationToken = default)
-    {
-        ArgumentNullException.ThrowIfNull(entity);
-        DbSet.Remove(entity);
-        return Task.CompletedTask;
-    }
-
-    /// <inheritdoc />
+    /// <summary>
+    /// Checks if an entity exists by string ID.
+    /// </summary>
     public virtual async Task<bool> ExistsAsync(
         string id,
         CancellationToken cancellationToken = default)
@@ -136,7 +307,9 @@ public class RepositoryBase<TEntity> : IRepository<TEntity> where TEntity : clas
         return entity != null;
     }
 
-    /// <inheritdoc />
+    /// <summary>
+    /// Checks if any entity matches a predicate.
+    /// </summary>
     public virtual async Task<bool> AnyAsync(
         Expression<Func<TEntity, bool>> predicate,
         CancellationToken cancellationToken = default)
@@ -144,36 +317,39 @@ public class RepositoryBase<TEntity> : IRepository<TEntity> where TEntity : clas
         return await DbSet.AnyAsync(predicate, cancellationToken);
     }
 
-    /// <inheritdoc />
-    public virtual async Task<int> CountAsync(
-        CancellationToken cancellationToken = default)
-    {
-        return await DbSet.CountAsync(cancellationToken);
-    }
-
-    /// <inheritdoc />
+    /// <summary>
+    /// Gets a single entity matching a specification (uses AsNoTracking).
+    /// Alias for FirstOrDefaultAsync.
+    /// </summary>
     public virtual async Task<TEntity?> GetBySpecAsync(
         ISpecification<TEntity> spec,
         CancellationToken cancellationToken = default)
     {
-        return await ApplySpecification(spec).AsNoTracking().FirstOrDefaultAsync(cancellationToken);
+        return await FirstOrDefaultAsync(spec, cancellationToken);
     }
 
-    /// <inheritdoc />
-    public virtual async Task<IEnumerable<TEntity>> ListAsync(
+    /// <summary>
+    /// Streams all entities asynchronously (uses AsNoTracking).
+    /// </summary>
+    public virtual IAsyncEnumerable<TEntity> StreamAllAsync(
+        CancellationToken cancellationToken = default)
+    {
+        return DbSet.AsNoTracking().AsAsyncEnumerable();
+    }
+
+    /// <summary>
+    /// Streams entities matching a specification asynchronously (uses AsNoTracking).
+    /// </summary>
+    public virtual IAsyncEnumerable<TEntity> StreamAsync(
         ISpecification<TEntity> spec,
         CancellationToken cancellationToken = default)
     {
-        return await ApplySpecification(spec).AsNoTracking().ToListAsync(cancellationToken);
+        return ApplySpecification(spec).AsNoTracking().AsAsyncEnumerable();
     }
 
-    /// <inheritdoc />
-    public virtual async Task<int> CountAsync(
-        ISpecification<TEntity> spec,
-        CancellationToken cancellationToken = default)
-    {
-        return await ApplySpecification(spec).CountAsync(cancellationToken);
-    }
+    #endregion
+
+    #region Protected helpers
 
     /// <summary>
     /// Apply an Ardalis.Specification to the query.
@@ -184,25 +360,14 @@ public class RepositoryBase<TEntity> : IRepository<TEntity> where TEntity : clas
     }
 
     /// <summary>
-    /// Streams all entities asynchronously for large datasets.
-    /// Uses AsNoTracking for performance.
+    /// Apply an Ardalis.Specification with projection to the query.
     /// </summary>
-    public virtual IAsyncEnumerable<TEntity> StreamAllAsync(
-        CancellationToken cancellationToken = default)
+    protected virtual IQueryable<TResult> ApplySpecification<TResult>(ISpecification<TEntity, TResult> spec)
     {
-        return DbSet.AsNoTracking().AsAsyncEnumerable();
+        return SpecificationEvaluator.Default.GetQuery(DbSet.AsQueryable(), spec);
     }
 
-    /// <summary>
-    /// Streams entities matching a specification asynchronously.
-    /// Uses AsNoTracking for performance.
-    /// </summary>
-    public virtual IAsyncEnumerable<TEntity> StreamAsync(
-        ISpecification<TEntity> spec,
-        CancellationToken cancellationToken = default)
-    {
-        return ApplySpecification(spec).AsNoTracking().AsAsyncEnumerable();
-    }
+    #endregion
 }
 
 /// <summary>
@@ -291,9 +456,7 @@ public class RepositoryBase<TEntity, TKey> : IRepository<TEntity, TKey>
         return entity != null;
     }
 
-    /// <summary>
-    /// Streams all entities asynchronously for large datasets.
-    /// </summary>
+    /// <inheritdoc />
     public virtual IAsyncEnumerable<TEntity> StreamAllAsync(
         CancellationToken cancellationToken = default)
     {

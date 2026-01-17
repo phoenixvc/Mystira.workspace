@@ -1,82 +1,96 @@
+using System.Linq.Expressions;
 using Ardalis.Specification;
 
 namespace Mystira.Application.Ports.Data;
 
 /// <summary>
-/// Generic repository interface following the Repository pattern
-/// Supports both basic operations and specification-based queries
+/// Extended repository interface that builds on Ardalis.Specification's IRepositoryBase
+/// with additional convenience methods for common operations.
 /// </summary>
-public interface IRepository<TEntity> where TEntity : class
+/// <remarks>
+/// This interface inherits from <see cref="IRepositoryBase{T}"/> which provides:
+/// <list type="bullet">
+///   <item><description>AddAsync, AddRangeAsync - Add entities</description></item>
+///   <item><description>UpdateAsync, UpdateRangeAsync - Update entities (returns Task&lt;int&gt;)</description></item>
+///   <item><description>DeleteAsync, DeleteRangeAsync - Delete entities (returns Task&lt;int&gt;)</description></item>
+///   <item><description>SaveChangesAsync - Persist changes</description></item>
+///   <item><description>GetByIdAsync&lt;TId&gt; - Get by typed ID</description></item>
+///   <item><description>ListAsync - List all or by specification (returns Task&lt;List&lt;T&gt;&gt;)</description></item>
+///   <item><description>FirstOrDefaultAsync, SingleOrDefaultAsync - Get single entity by specification</description></item>
+///   <item><description>CountAsync, AnyAsync - Count and existence checks by specification</description></item>
+///   <item><description>AsAsyncEnumerable - Stream entities by specification</description></item>
+/// </list>
+/// </remarks>
+/// <typeparam name="TEntity">The entity type.</typeparam>
+public interface IRepository<TEntity> : IRepositoryBase<TEntity> where TEntity : class
 {
-    // Basic CRUD operations
-    /// <summary>
-    /// Gets an entity by its identifier.
-    /// </summary>
-    /// <param name="id">The entity identifier.</param>
-    /// <returns>The entity if found; otherwise, null.</returns>
-    Task<TEntity?> GetByIdAsync(string id);
+    // String ID convenience methods (not in IRepositoryBase)
 
     /// <summary>
-    /// Gets all entities from the repository.
+    /// Gets an entity by its string ID.
     /// </summary>
-    /// <returns>A collection of all entities.</returns>
-    Task<IEnumerable<TEntity>> GetAllAsync();
+    Task<TEntity?> GetByIdAsync(string id, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Finds entities that match the specified predicate.
+    /// Gets an entity by its Guid ID.
     /// </summary>
-    /// <param name="predicate">The predicate expression to filter entities.</param>
-    /// <returns>A collection of entities matching the predicate.</returns>
-    Task<IEnumerable<TEntity>> FindAsync(System.Linq.Expressions.Expression<Func<TEntity, bool>> predicate);
+    Task<TEntity?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Adds a new entity to the repository.
+    /// Deletes an entity by string ID.
     /// </summary>
-    /// <param name="entity">The entity to add.</param>
-    /// <returns>The added entity.</returns>
-    Task<TEntity> AddAsync(TEntity entity);
+    Task DeleteAsync(string id, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Updates an existing entity in the repository.
+    /// Deletes an entity by Guid ID.
     /// </summary>
-    /// <param name="entity">The entity to update.</param>
-    /// <returns>A task representing the asynchronous operation.</returns>
-    Task UpdateAsync(TEntity entity);
+    Task DeleteAsync(Guid id, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Deletes an entity by its identifier.
+    /// Checks if an entity exists by string ID.
     /// </summary>
-    /// <param name="id">The entity identifier.</param>
-    /// <returns>A task representing the asynchronous operation.</returns>
-    Task DeleteAsync(string id);
+    Task<bool> ExistsAsync(string id, CancellationToken cancellationToken = default);
+
+    // Collection retrieval (convenience wrappers)
 
     /// <summary>
-    /// Checks whether an entity exists with the specified identifier.
+    /// Gets all entities (uses AsNoTracking for performance).
+    /// Returns IEnumerable for compatibility; consider using ListAsync() from IRepositoryBase for List&lt;T&gt;.
     /// </summary>
-    /// <param name="id">The entity identifier.</param>
-    /// <returns>True if the entity exists; otherwise, false.</returns>
-    Task<bool> ExistsAsync(string id);
-
-    // Specification pattern operations
-    /// <summary>
-    /// Gets a single entity that matches the specified specification.
-    /// </summary>
-    /// <param name="spec">The specification to apply.</param>
-    /// <returns>The entity if found; otherwise, null.</returns>
-    Task<TEntity?> GetBySpecAsync(ISpecification<TEntity> spec);
+    Task<IEnumerable<TEntity>> GetAllAsync(CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Gets all entities that match the specified specification.
+    /// Finds entities matching a predicate (uses AsNoTracking for performance).
     /// </summary>
-    /// <param name="spec">The specification to apply.</param>
-    /// <returns>A collection of entities matching the specification.</returns>
-    Task<IEnumerable<TEntity>> ListAsync(ISpecification<TEntity> spec);
+    Task<IEnumerable<TEntity>> FindAsync(
+        Expression<Func<TEntity, bool>> predicate,
+        CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Counts the number of entities that match the specified specification.
+    /// Checks if any entity matches a predicate.
     /// </summary>
-    /// <param name="spec">The specification to apply.</param>
-    /// <returns>The count of entities matching the specification.</returns>
-    Task<int> CountAsync(ISpecification<TEntity> spec);
+    Task<bool> AnyAsync(
+        Expression<Func<TEntity, bool>> predicate,
+        CancellationToken cancellationToken = default);
+
+    // Specification helpers
+
+    /// <summary>
+    /// Gets a single entity matching a specification (uses AsNoTracking).
+    /// Alias for FirstOrDefaultAsync from IRepositoryBase.
+    /// </summary>
+    Task<TEntity?> GetBySpecAsync(ISpecification<TEntity> specification, CancellationToken cancellationToken = default);
+
+    // Streaming/async enumeration
+
+    /// <summary>
+    /// Streams all entities asynchronously (uses AsNoTracking).
+    /// Use for large datasets where loading all into memory is not practical.
+    /// </summary>
+    IAsyncEnumerable<TEntity> StreamAllAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Streams entities matching a specification asynchronously (uses AsNoTracking).
+    /// </summary>
+    IAsyncEnumerable<TEntity> StreamAsync(ISpecification<TEntity> specification, CancellationToken cancellationToken = default);
 }
-

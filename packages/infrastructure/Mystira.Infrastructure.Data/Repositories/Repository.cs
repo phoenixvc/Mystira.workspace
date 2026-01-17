@@ -1,116 +1,82 @@
+using System.Linq.Expressions;
 using Ardalis.Specification;
 using Ardalis.Specification.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Mystira.Application.Ports.Data;
+using Mystira.Shared.Data.Repositories;
 
 namespace Mystira.Infrastructure.Data.Repositories;
 
 /// <summary>
-/// Generic repository implementation following the Repository pattern
-/// Supports both basic CRUD operations and specification-based queries
+/// Generic repository implementation following the Repository pattern.
+/// Extends RepositoryBase and implements the Application port interface.
+/// Supports both basic CRUD operations and specification-based queries.
 /// </summary>
-public class Repository<TEntity> : IRepository<TEntity> where TEntity : class
+public class Repository<TEntity> : RepositoryBase<TEntity>, IRepository<TEntity> where TEntity : class
 {
-    /// <summary>
-    /// The database context.
-    /// </summary>
-    protected readonly DbContext _context;
-
-    /// <summary>
-    /// The entity DbSet.
-    /// </summary>
-    protected readonly DbSet<TEntity> _dbSet;
-
     /// <summary>
     /// Initializes a new instance of the <see cref="Repository{TEntity}"/> class.
     /// </summary>
     /// <param name="context">The database context.</param>
-    public Repository(DbContext context)
+    public Repository(DbContext context) : base(context)
     {
-        _context = context ?? throw new ArgumentNullException(nameof(context));
-        _dbSet = context.Set<TEntity>();
     }
 
-    /// <inheritdoc/>
-    public virtual async Task<TEntity?> GetByIdAsync(string id)
-    {
-        return await _dbSet.FindAsync(id);
-    }
+    // All IRepositoryBase<T> methods are inherited from RepositoryBase<TEntity>
+    // All convenience methods (GetByIdAsync(string), GetByIdAsync(Guid), etc.) are inherited from RepositoryBase<TEntity>
 
-    /// <inheritdoc/>
-    public virtual async Task<IEnumerable<TEntity>> GetAllAsync()
-    {
-        return await _dbSet.ToListAsync();
-    }
+    // The following methods are explicitly implemented to satisfy IRepository<TEntity>
+    // They delegate to inherited methods from RepositoryBase<TEntity>
 
-    /// <inheritdoc/>
-    public virtual async Task<IEnumerable<TEntity>> FindAsync(System.Linq.Expressions.Expression<Func<TEntity, bool>> predicate)
-    {
-        return await _dbSet.Where(predicate).ToListAsync();
-    }
+    /// <inheritdoc />
+    Task<TEntity?> IRepository<TEntity>.GetByIdAsync(string id, CancellationToken cancellationToken)
+        => base.GetByIdAsync(id, cancellationToken);
 
-    /// <inheritdoc/>
-    public virtual async Task<TEntity> AddAsync(TEntity entity)
-    {
-        if (entity == null)
-        {
-            throw new ArgumentNullException(nameof(entity));
-        }
+    /// <inheritdoc />
+    Task<TEntity?> IRepository<TEntity>.GetByIdAsync(Guid id, CancellationToken cancellationToken)
+        => base.GetByIdAsync(id, cancellationToken);
 
-        await _dbSet.AddAsync(entity);
-        return entity;
-    }
+    /// <inheritdoc />
+    Task IRepository<TEntity>.DeleteAsync(string id, CancellationToken cancellationToken)
+        => base.DeleteAsync(id, cancellationToken);
 
-    /// <inheritdoc/>
-    public virtual Task UpdateAsync(TEntity entity)
-    {
-        if (entity == null)
-        {
-            throw new ArgumentNullException(nameof(entity));
-        }
+    /// <inheritdoc />
+    Task IRepository<TEntity>.DeleteAsync(Guid id, CancellationToken cancellationToken)
+        => base.DeleteAsync(id, cancellationToken);
 
-        _dbSet.Update(entity);
-        return Task.CompletedTask;
-    }
+    /// <inheritdoc />
+    Task<bool> IRepository<TEntity>.ExistsAsync(string id, CancellationToken cancellationToken)
+        => base.ExistsAsync(id, cancellationToken);
 
-    /// <inheritdoc/>
-    public virtual async Task DeleteAsync(string id)
-    {
-        var entity = await GetByIdAsync(id);
-        if (entity != null)
-        {
-            _dbSet.Remove(entity);
-        }
-    }
+    /// <inheritdoc />
+    Task<IEnumerable<TEntity>> IRepository<TEntity>.GetAllAsync(CancellationToken cancellationToken)
+        => base.GetAllAsync(cancellationToken);
 
-    /// <inheritdoc/>
-    public virtual async Task<bool> ExistsAsync(string id)
-    {
-        var entity = await GetByIdAsync(id);
-        return entity != null;
-    }
+    /// <inheritdoc />
+    Task<IEnumerable<TEntity>> IRepository<TEntity>.FindAsync(
+        Expression<Func<TEntity, bool>> predicate,
+        CancellationToken cancellationToken)
+        => base.FindAsync(predicate, cancellationToken);
 
-    /// <inheritdoc/>
-    public virtual async Task<TEntity?> GetBySpecAsync(ISpecification<TEntity> spec)
-    {
-        return await ApplySpecification(spec).FirstOrDefaultAsync();
-    }
+    /// <inheritdoc />
+    Task<bool> IRepository<TEntity>.AnyAsync(
+        Expression<Func<TEntity, bool>> predicate,
+        CancellationToken cancellationToken)
+        => base.AnyAsync(predicate, cancellationToken);
 
-    /// <inheritdoc/>
-    public virtual async Task<IEnumerable<TEntity>> ListAsync(ISpecification<TEntity> spec)
-    {
-        return await ApplySpecification(spec).ToListAsync();
-    }
+    /// <inheritdoc />
+    Task<TEntity?> IRepository<TEntity>.GetBySpecAsync(
+        ISpecification<TEntity> specification,
+        CancellationToken cancellationToken)
+        => base.GetBySpecAsync(specification, cancellationToken);
 
-    /// <inheritdoc/>
-    public virtual async Task<int> CountAsync(ISpecification<TEntity> spec)
-    {
-        return await ApplySpecification(spec).CountAsync();
-    }
+    /// <inheritdoc />
+    IAsyncEnumerable<TEntity> IRepository<TEntity>.StreamAllAsync(CancellationToken cancellationToken)
+        => base.StreamAllAsync(cancellationToken);
 
-    private IQueryable<TEntity> ApplySpecification(ISpecification<TEntity> spec)
-    {
-        return SpecificationEvaluator.Default.GetQuery(_dbSet.AsQueryable(), spec);
-    }
+    /// <inheritdoc />
+    IAsyncEnumerable<TEntity> IRepository<TEntity>.StreamAsync(
+        ISpecification<TEntity> specification,
+        CancellationToken cancellationToken)
+        => base.StreamAsync(specification, cancellationToken);
 }
-
