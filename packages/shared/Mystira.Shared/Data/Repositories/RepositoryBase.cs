@@ -150,7 +150,8 @@ public class RepositoryBase<TEntity> : IRepositoryBase<TEntity> where TEntity : 
         ISpecification<TEntity, TResult> specification,
         CancellationToken cancellationToken = default)
     {
-        return await ApplySpecification(specification).AsNoTracking().FirstOrDefaultAsync(cancellationToken);
+        // Note: AsNoTracking() not used here as TResult may be a value type
+        return await ApplySpecification(specification).FirstOrDefaultAsync(cancellationToken);
     }
 
     /// <inheritdoc />
@@ -166,7 +167,8 @@ public class RepositoryBase<TEntity> : IRepositoryBase<TEntity> where TEntity : 
         ISingleResultSpecification<TEntity, TResult> specification,
         CancellationToken cancellationToken = default)
     {
-        return await ApplySpecification(specification).AsNoTracking().SingleOrDefaultAsync(cancellationToken);
+        // Note: AsNoTracking() not used here as TResult may be a value type
+        return await ApplySpecification(specification).SingleOrDefaultAsync(cancellationToken);
     }
 
     /// <inheritdoc />
@@ -188,7 +190,8 @@ public class RepositoryBase<TEntity> : IRepositoryBase<TEntity> where TEntity : 
         ISpecification<TEntity, TResult> specification,
         CancellationToken cancellationToken = default)
     {
-        return await ApplySpecification(specification).AsNoTracking().ToListAsync(cancellationToken);
+        // Note: AsNoTracking() not used here as TResult may be a value type
+        return await ApplySpecification(specification).ToListAsync(cancellationToken);
     }
 
     /// <inheritdoc />

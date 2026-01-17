@@ -466,7 +466,8 @@ public class PolyglotRepository<TEntity> : IPolyglotRepository<TEntity> where TE
         ISpecification<TEntity, TResult> specification,
         CancellationToken cancellationToken = default)
     {
-        return await ApplySpecification(specification).AsNoTracking().FirstOrDefaultAsync(cancellationToken);
+        // Note: AsNoTracking() not used here as TResult may be a value type
+        return await ApplySpecification(specification).FirstOrDefaultAsync(cancellationToken);
     }
 
     /// <inheritdoc />
@@ -482,7 +483,8 @@ public class PolyglotRepository<TEntity> : IPolyglotRepository<TEntity> where TE
         ISingleResultSpecification<TEntity, TResult> specification,
         CancellationToken cancellationToken = default)
     {
-        return await ApplySpecification(specification).AsNoTracking().SingleOrDefaultAsync(cancellationToken);
+        // Note: AsNoTracking() not used here as TResult may be a value type
+        return await ApplySpecification(specification).SingleOrDefaultAsync(cancellationToken);
     }
 
     /// <inheritdoc />
@@ -504,7 +506,8 @@ public class PolyglotRepository<TEntity> : IPolyglotRepository<TEntity> where TE
         ISpecification<TEntity, TResult> specification,
         CancellationToken cancellationToken = default)
     {
-        return await ApplySpecification(specification).AsNoTracking().ToListAsync(cancellationToken);
+        // Note: AsNoTracking() not used here as TResult may be a value type
+        return await ApplySpecification(specification).ToListAsync(cancellationToken);
     }
 
     /// <inheritdoc />
