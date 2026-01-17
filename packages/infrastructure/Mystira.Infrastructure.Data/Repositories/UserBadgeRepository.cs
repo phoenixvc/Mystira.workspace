@@ -10,7 +10,6 @@ namespace Mystira.Infrastructure.Data.Repositories;
 /// </summary>
 public class UserBadgeRepository : Repository<UserBadge>, IUserBadgeRepository
 {
-    private readonly DbContext _context;
     private readonly bool _isInMemory;
 
     /// <summary>
@@ -19,7 +18,6 @@ public class UserBadgeRepository : Repository<UserBadge>, IUserBadgeRepository
     /// <param name="context">The database context.</param>
     public UserBadgeRepository(DbContext context) : base(context)
     {
-        _context = context;
         _isInMemory = context.Database.ProviderName == "Microsoft.EntityFrameworkCore.InMemory";
     }
 
@@ -27,10 +25,10 @@ public class UserBadgeRepository : Repository<UserBadge>, IUserBadgeRepository
     public async Task<IEnumerable<UserBadge>> GetByUserProfileIdAsync(string userProfileId)
     {
         var badges = await QueryBadgesAsync(
-            inMemoryQuery: () => _context.Set<UserBadge>()
+            inMemoryQuery: () => _dbContext.Set<UserBadge>()
                 .AsNoTracking()
                 .Where(b => b.UserProfileId == userProfileId),
-            cosmosQuery: () => _context.Set<UserProfile>()
+            cosmosQuery: () => _dbContext.Set<UserProfile>()
                 .AsNoTracking()
                 .Where(p => p.Id == userProfileId)
                 .SelectMany(p => p.EarnedBadges)
@@ -43,12 +41,12 @@ public class UserBadgeRepository : Repository<UserBadge>, IUserBadgeRepository
     {
         if (_isInMemory)
         {
-            return await _context.Set<UserBadge>()
+            return await _dbContext.Set<UserBadge>()
                 .AsNoTracking()
                 .FirstOrDefaultAsync(b => b.UserProfileId == userProfileId && b.BadgeConfigurationId == badgeConfigurationId);
         }
 
-        return await _context.Set<UserProfile>()
+        return await _dbContext.Set<UserProfile>()
             .AsNoTracking()
             .Where(p => p.Id == userProfileId)
             .SelectMany(p => p.EarnedBadges)
@@ -59,10 +57,10 @@ public class UserBadgeRepository : Repository<UserBadge>, IUserBadgeRepository
     public async Task<IEnumerable<UserBadge>> GetByGameSessionIdAsync(string gameSessionId)
     {
         var badges = await QueryBadgesAsync(
-            inMemoryQuery: () => _context.Set<UserBadge>()
+            inMemoryQuery: () => _dbContext.Set<UserBadge>()
                 .AsNoTracking()
                 .Where(b => b.GameSessionId == gameSessionId),
-            cosmosQuery: () => _context.Set<UserProfile>()
+            cosmosQuery: () => _dbContext.Set<UserProfile>()
                 .AsNoTracking()
                 .SelectMany(p => p.EarnedBadges)
                 .Where(b => b.GameSessionId == gameSessionId)
@@ -74,10 +72,10 @@ public class UserBadgeRepository : Repository<UserBadge>, IUserBadgeRepository
     public async Task<IEnumerable<UserBadge>> GetByScenarioIdAsync(string scenarioId)
     {
         var badges = await QueryBadgesAsync(
-            inMemoryQuery: () => _context.Set<UserBadge>()
+            inMemoryQuery: () => _dbContext.Set<UserBadge>()
                 .AsNoTracking()
                 .Where(b => b.ScenarioId == scenarioId),
-            cosmosQuery: () => _context.Set<UserProfile>()
+            cosmosQuery: () => _dbContext.Set<UserProfile>()
                 .AsNoTracking()
                 .SelectMany(p => p.EarnedBadges)
                 .Where(b => b.ScenarioId == scenarioId)
@@ -89,10 +87,10 @@ public class UserBadgeRepository : Repository<UserBadge>, IUserBadgeRepository
     public async Task<IEnumerable<UserBadge>> GetByUserProfileIdAndAxisAsync(string userProfileId, string axis)
     {
         var badges = await QueryBadgesAsync(
-            inMemoryQuery: () => _context.Set<UserBadge>()
+            inMemoryQuery: () => _dbContext.Set<UserBadge>()
                 .AsNoTracking()
                 .Where(b => b.UserProfileId == userProfileId && b.Axis == axis),
-            cosmosQuery: () => _context.Set<UserProfile>()
+            cosmosQuery: () => _dbContext.Set<UserProfile>()
                 .AsNoTracking()
                 .Where(p => p.Id == userProfileId)
                 .SelectMany(p => p.EarnedBadges)
@@ -108,12 +106,12 @@ public class UserBadgeRepository : Repository<UserBadge>, IUserBadgeRepository
 
         if (_isInMemory)
         {
-            await _context.Set<UserBadge>().AddAsync(entity, cancellationToken);
+            await _dbContext.Set<UserBadge>().AddAsync(entity, cancellationToken);
             return entity;
         }
 
         // For Cosmos DB: Add the owned entity to the owner's collection
-        var profile = await _context.Set<UserProfile>()
+        var profile = await _dbContext.Set<UserProfile>()
             .FirstOrDefaultAsync(p => p.Id == entity.UserProfileId, cancellationToken);
 
         if (profile == null)

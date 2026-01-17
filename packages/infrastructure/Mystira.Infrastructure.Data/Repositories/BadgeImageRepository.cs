@@ -12,7 +12,7 @@ namespace Mystira.Infrastructure.Data.Repositories;
 /// </summary>
 public class BadgeImageRepository : Repository<BadgeImage>, IBadgeImageRepository
 {
-    private readonly MystiraAppDbContext _context;
+    private readonly MystiraAppDbContext _appContext;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="BadgeImageRepository"/> class.
@@ -20,7 +20,7 @@ public class BadgeImageRepository : Repository<BadgeImage>, IBadgeImageRepositor
     /// <param name="context">The database context.</param>
     public BadgeImageRepository(MystiraAppDbContext context) : base(context)
     {
-        _context = context;
+        _appContext = context;
     }
 
     /// <summary>
@@ -31,7 +31,7 @@ public class BadgeImageRepository : Repository<BadgeImage>, IBadgeImageRepositor
     public async Task<BadgeImage?> GetByImageIdAsync(string imageId)
     {
         // BadgeImage uses Id as its identifier (there's no separate ImageId property)
-        return await _context.BadgeImages
+        return await _appContext.BadgeImages
             .FirstOrDefaultAsync(x => x.Id == imageId);
     }
 }

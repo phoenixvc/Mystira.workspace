@@ -10,7 +10,7 @@ namespace Mystira.Infrastructure.Data.Repositories;
 /// </summary>
 public class ArchetypeRepository : IArchetypeRepository
 {
-    private readonly MystiraAppDbContext _context;
+    private readonly MystiraAppDbContext _appContext;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ArchetypeRepository"/> class.
@@ -18,7 +18,7 @@ public class ArchetypeRepository : IArchetypeRepository
     /// <param name="context">The database context.</param>
     public ArchetypeRepository(MystiraAppDbContext context)
     {
-        _context = context;
+        _appContext = context;
     }
 
     /// <summary>
@@ -27,7 +27,7 @@ public class ArchetypeRepository : IArchetypeRepository
     /// <returns>A list of archetype definitions.</returns>
     public async Task<List<ArchetypeDefinition>> GetAllAsync()
     {
-        return await _context.ArchetypeDefinitions
+        return await _appContext.ArchetypeDefinitions
             .Where(x => !x.IsDeleted)
             .OrderBy(x => x.Name)
             .ToListAsync();
@@ -40,7 +40,7 @@ public class ArchetypeRepository : IArchetypeRepository
     /// <returns>The archetype definition, or null if not found or deleted.</returns>
     public async Task<ArchetypeDefinition?> GetByIdAsync(string id)
     {
-        return await _context.ArchetypeDefinitions.FirstOrDefaultAsync(x => x.Id == id && !x.IsDeleted);
+        return await _appContext.ArchetypeDefinitions.FirstOrDefaultAsync(x => x.Id == id && !x.IsDeleted);
     }
 
     /// <summary>
@@ -50,7 +50,7 @@ public class ArchetypeRepository : IArchetypeRepository
     /// <returns>The archetype definition, or null if not found or deleted.</returns>
     public async Task<ArchetypeDefinition?> GetByNameAsync(string name)
     {
-        return await _context.ArchetypeDefinitions.FirstOrDefaultAsync(x => x.Name.Equals(name, StringComparison.OrdinalIgnoreCase) && !x.IsDeleted);
+        return await _appContext.ArchetypeDefinitions.FirstOrDefaultAsync(x => x.Name.Equals(name, StringComparison.OrdinalIgnoreCase) && !x.IsDeleted);
     }
 
     /// <summary>
@@ -60,7 +60,7 @@ public class ArchetypeRepository : IArchetypeRepository
     /// <returns>True if the archetype exists and is not deleted; otherwise, false.</returns>
     public async Task<bool> ExistsByNameAsync(string name)
     {
-        return await _context.ArchetypeDefinitions.AnyAsync(x => x.Name.Equals(name, StringComparison.OrdinalIgnoreCase) && !x.IsDeleted);
+        return await _appContext.ArchetypeDefinitions.AnyAsync(x => x.Name.Equals(name, StringComparison.OrdinalIgnoreCase) && !x.IsDeleted);
     }
 
     /// <summary>
@@ -70,7 +70,7 @@ public class ArchetypeRepository : IArchetypeRepository
     /// <returns>A task representing the asynchronous operation.</returns>
     public async Task AddAsync(ArchetypeDefinition archetype)
     {
-        await _context.ArchetypeDefinitions.AddAsync(archetype);
+        await _appContext.ArchetypeDefinitions.AddAsync(archetype);
     }
 
     /// <summary>
@@ -80,7 +80,7 @@ public class ArchetypeRepository : IArchetypeRepository
     /// <returns>A task representing the asynchronous operation.</returns>
     public Task UpdateAsync(ArchetypeDefinition archetype)
     {
-        _context.ArchetypeDefinitions.Update(archetype);
+        _appContext.ArchetypeDefinitions.Update(archetype);
         return Task.CompletedTask;
     }
 
@@ -91,13 +91,13 @@ public class ArchetypeRepository : IArchetypeRepository
     /// <returns>A task representing the asynchronous operation.</returns>
     public async Task DeleteAsync(string id)
     {
-        var archetype = await _context.ArchetypeDefinitions.FirstOrDefaultAsync(x => x.Id == id);
+        var archetype = await _appContext.ArchetypeDefinitions.FirstOrDefaultAsync(x => x.Id == id);
         if (archetype != null)
         {
             // Soft delete instead of hard delete
             archetype.IsDeleted = true;
             archetype.UpdatedAt = DateTime.UtcNow;
-            _context.ArchetypeDefinitions.Update(archetype);
+            _appContext.ArchetypeDefinitions.Update(archetype);
         }
     }
 }

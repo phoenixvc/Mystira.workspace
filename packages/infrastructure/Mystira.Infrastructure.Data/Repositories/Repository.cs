@@ -15,7 +15,10 @@ namespace Mystira.Infrastructure.Data.Repositories;
 public class Repository<TEntity> : Ardalis.Specification.EntityFrameworkCore.RepositoryBase<TEntity>, IRepository<TEntity>
     where TEntity : class
 {
-    private readonly DbContext _dbContext;
+    /// <summary>
+    /// The database context. Protected for use by derived classes.
+    /// </summary>
+    protected readonly DbContext _dbContext;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="Repository{TEntity}"/> class.

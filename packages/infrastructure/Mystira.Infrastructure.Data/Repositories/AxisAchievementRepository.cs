@@ -12,7 +12,7 @@ namespace Mystira.Infrastructure.Data.Repositories;
 /// </summary>
 public class AxisAchievementRepository : Repository<AxisAchievement>, IAxisAchievementRepository
 {
-    private readonly MystiraAppDbContext _context;
+    private readonly MystiraAppDbContext _appContext;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="AxisAchievementRepository"/> class.
@@ -20,7 +20,7 @@ public class AxisAchievementRepository : Repository<AxisAchievement>, IAxisAchie
     /// <param name="context">The database context.</param>
     public AxisAchievementRepository(MystiraAppDbContext context) : base(context)
     {
-        _context = context;
+        _appContext = context;
     }
 
     /// <inheritdoc/>
@@ -28,8 +28,8 @@ public class AxisAchievementRepository : Repository<AxisAchievement>, IAxisAchie
     {
         // AxisAchievement doesn't have a direct AgeGroupId property.
         // To filter by age group, we join with UserProfile.
-        return await _context.AxisAchievements
-            .Join(_context.UserProfiles,
+        return await _appContext.AxisAchievements
+            .Join(_appContext.UserProfiles,
                 achievement => achievement.UserId,
                 profile => profile.Id,
                 (achievement, profile) => new { achievement, profile })
@@ -42,7 +42,7 @@ public class AxisAchievementRepository : Repository<AxisAchievement>, IAxisAchie
     public async Task<IEnumerable<AxisAchievement>> GetByCompassAxisAsync(string compassAxisId)
     {
         // CompassAxisId is an alias for AxisId in the AxisAchievement model
-        return await _context.AxisAchievements
+        return await _appContext.AxisAchievements
             .Where(x => x.AxisId == compassAxisId)
             .ToListAsync();
     }

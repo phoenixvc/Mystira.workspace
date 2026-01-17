@@ -21,7 +21,7 @@ public class GameSessionRepository : Repository<GameSession>, IGameSessionReposi
     /// <inheritdoc/>
     public async Task<IEnumerable<GameSession>> GetByAccountIdAsync(string accountId)
     {
-        return await _dbSet
+        return await DbSet
             .Where(s => s.AccountId == accountId)
             .OrderByDescending(s => s.StartTime)
             .ToListAsync();
@@ -30,7 +30,7 @@ public class GameSessionRepository : Repository<GameSession>, IGameSessionReposi
     /// <inheritdoc/>
     public async Task<IEnumerable<GameSession>> GetByProfileIdAsync(string profileId)
     {
-        return await _dbSet
+        return await DbSet
             .Where(s => s.ProfileId == profileId || s.PlayerNames.Contains(profileId))
             .OrderByDescending(s => s.StartTime)
             .ToListAsync();
@@ -42,7 +42,7 @@ public class GameSessionRepository : Repository<GameSession>, IGameSessionReposi
         if (string.IsNullOrWhiteSpace(accountId))
             throw new ArgumentException("Account ID cannot be null or empty.", nameof(accountId));
 
-        return await _dbSet
+        return await DbSet
             .Where(s => s.AccountId == accountId &&
                        (s.Status == SessionStatus.InProgress || s.Status == SessionStatus.Paused))
             .OrderByDescending(s => s.StartTime)
@@ -52,7 +52,7 @@ public class GameSessionRepository : Repository<GameSession>, IGameSessionReposi
     /// <inheritdoc/>
     public async Task<GameSession?> GetActiveSessionForScenarioAsync(string accountId, string scenarioId)
     {
-        return await _dbSet
+        return await DbSet
             .FirstOrDefaultAsync(s => s.AccountId == accountId &&
                                       s.ScenarioId == scenarioId &&
                                       (s.Status == SessionStatus.InProgress || s.Status == SessionStatus.Paused));
@@ -61,7 +61,7 @@ public class GameSessionRepository : Repository<GameSession>, IGameSessionReposi
     /// <inheritdoc/>
     public async Task<IEnumerable<GameSession>> GetActiveSessionsByScenarioAndAccountAsync(string scenarioId, string accountId)
     {
-        return await _dbSet
+        return await DbSet
             .Where(s => s.ScenarioId == scenarioId &&
                        s.AccountId == accountId &&
                        (s.Status == SessionStatus.InProgress || s.Status == SessionStatus.Paused))
@@ -71,7 +71,7 @@ public class GameSessionRepository : Repository<GameSession>, IGameSessionReposi
     /// <inheritdoc/>
     public async Task<int> GetActiveSessionsCountAsync()
     {
-        return await _dbSet
+        return await DbSet
             .CountAsync(s => s.Status == SessionStatus.InProgress || s.Status == SessionStatus.Paused);
     }
 }

@@ -10,7 +10,7 @@ namespace Mystira.Infrastructure.Data.Repositories;
 /// </summary>
 public class FantasyThemeRepository : IFantasyThemeRepository
 {
-    private readonly MystiraAppDbContext _context;
+    private readonly MystiraAppDbContext _appContext;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="FantasyThemeRepository"/> class.
@@ -18,7 +18,7 @@ public class FantasyThemeRepository : IFantasyThemeRepository
     /// <param name="context">The database context.</param>
     public FantasyThemeRepository(MystiraAppDbContext context)
     {
-        _context = context;
+        _appContext = context;
     }
 
     /// <summary>
@@ -27,7 +27,7 @@ public class FantasyThemeRepository : IFantasyThemeRepository
     /// <returns>A list of fantasy theme definitions.</returns>
     public async Task<List<FantasyThemeDefinition>> GetAllAsync()
     {
-        return await _context.FantasyThemeDefinitions
+        return await _appContext.FantasyThemeDefinitions
             .Where(x => !x.IsDeleted)
             .OrderBy(x => x.Name)
             .ToListAsync();
@@ -40,7 +40,7 @@ public class FantasyThemeRepository : IFantasyThemeRepository
     /// <returns>The fantasy theme definition, or null if not found or deleted.</returns>
     public async Task<FantasyThemeDefinition?> GetByIdAsync(string id)
     {
-        return await _context.FantasyThemeDefinitions.FirstOrDefaultAsync(x => x.Id == id && !x.IsDeleted);
+        return await _appContext.FantasyThemeDefinitions.FirstOrDefaultAsync(x => x.Id == id && !x.IsDeleted);
     }
 
     /// <summary>
@@ -50,7 +50,7 @@ public class FantasyThemeRepository : IFantasyThemeRepository
     /// <returns>The fantasy theme definition, or null if not found or deleted.</returns>
     public async Task<FantasyThemeDefinition?> GetByNameAsync(string name)
     {
-        return await _context.FantasyThemeDefinitions.FirstOrDefaultAsync(x => x.Name.Equals(name, StringComparison.OrdinalIgnoreCase) && !x.IsDeleted);
+        return await _appContext.FantasyThemeDefinitions.FirstOrDefaultAsync(x => x.Name.Equals(name, StringComparison.OrdinalIgnoreCase) && !x.IsDeleted);
     }
 
     /// <summary>
@@ -60,7 +60,7 @@ public class FantasyThemeRepository : IFantasyThemeRepository
     /// <returns>True if the fantasy theme exists and is not deleted; otherwise, false.</returns>
     public async Task<bool> ExistsByNameAsync(string name)
     {
-        return await _context.FantasyThemeDefinitions.AnyAsync(x => x.Name.Equals(name, StringComparison.OrdinalIgnoreCase) && !x.IsDeleted);
+        return await _appContext.FantasyThemeDefinitions.AnyAsync(x => x.Name.Equals(name, StringComparison.OrdinalIgnoreCase) && !x.IsDeleted);
     }
 
     /// <summary>
@@ -70,7 +70,7 @@ public class FantasyThemeRepository : IFantasyThemeRepository
     /// <returns>A task representing the asynchronous operation.</returns>
     public async Task AddAsync(FantasyThemeDefinition fantasyTheme)
     {
-        await _context.FantasyThemeDefinitions.AddAsync(fantasyTheme);
+        await _appContext.FantasyThemeDefinitions.AddAsync(fantasyTheme);
     }
 
     /// <summary>
@@ -80,7 +80,7 @@ public class FantasyThemeRepository : IFantasyThemeRepository
     /// <returns>A task representing the asynchronous operation.</returns>
     public Task UpdateAsync(FantasyThemeDefinition fantasyTheme)
     {
-        _context.FantasyThemeDefinitions.Update(fantasyTheme);
+        _appContext.FantasyThemeDefinitions.Update(fantasyTheme);
         return Task.CompletedTask;
     }
 
@@ -91,13 +91,13 @@ public class FantasyThemeRepository : IFantasyThemeRepository
     /// <returns>A task representing the asynchronous operation.</returns>
     public async Task DeleteAsync(string id)
     {
-        var fantasyTheme = await _context.FantasyThemeDefinitions.FirstOrDefaultAsync(x => x.Id == id);
+        var fantasyTheme = await _appContext.FantasyThemeDefinitions.FirstOrDefaultAsync(x => x.Id == id);
         if (fantasyTheme != null)
         {
             // Soft delete instead of hard delete
             fantasyTheme.IsDeleted = true;
             fantasyTheme.UpdatedAt = DateTime.UtcNow;
-            _context.FantasyThemeDefinitions.Update(fantasyTheme);
+            _appContext.FantasyThemeDefinitions.Update(fantasyTheme);
         }
     }
 }

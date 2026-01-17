@@ -12,7 +12,7 @@ namespace Mystira.Infrastructure.Data.Repositories;
 /// </summary>
 public class BadgeRepository : Repository<Badge>, IBadgeRepository
 {
-    private readonly MystiraAppDbContext _context;
+    private readonly MystiraAppDbContext _appContext;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="BadgeRepository"/> class.
@@ -20,7 +20,7 @@ public class BadgeRepository : Repository<Badge>, IBadgeRepository
     /// <param name="context">The database context.</param>
     public BadgeRepository(MystiraAppDbContext context) : base(context)
     {
-        _context = context;
+        _appContext = context;
     }
 
     /// <summary>
@@ -32,7 +32,7 @@ public class BadgeRepository : Repository<Badge>, IBadgeRepository
     public async Task<IEnumerable<Badge>> GetByAgeGroupAsync(string ageGroupId)
     {
         // Avoid Cosmos ORDER BY to prevent composite index requirement; sort in memory at caller.
-        return await _context.Badges
+        return await _appContext.Badges
             .Where(x => x.AgeGroupId == ageGroupId)
             .ToListAsync();
     }
@@ -44,7 +44,7 @@ public class BadgeRepository : Repository<Badge>, IBadgeRepository
     /// <returns>A collection of badges for the specified compass axis.</returns>
     public async Task<IEnumerable<Badge>> GetByCompassAxisAsync(string compassAxisId)
     {
-        return await _context.Badges
+        return await _appContext.Badges
             .Where(x => x.CompassAxisId == compassAxisId)
             .OrderBy(x => x.AgeGroupId)
             .ThenBy(x => x.Tier)
@@ -61,7 +61,7 @@ public class BadgeRepository : Repository<Badge>, IBadgeRepository
     /// <returns>The matching badge, or null if not found.</returns>
     public async Task<Badge?> GetByAgeGroupAxisAndTierAsync(string ageGroupId, string compassAxisId, int tierOrder)
     {
-        return await _context.Badges
+        return await _appContext.Badges
             .FirstOrDefaultAsync(x => x.AgeGroupId == ageGroupId
                                    && x.CompassAxisId == compassAxisId
                                    && x.TierOrder == tierOrder);
