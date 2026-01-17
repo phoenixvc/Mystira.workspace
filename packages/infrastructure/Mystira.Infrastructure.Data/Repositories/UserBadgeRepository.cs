@@ -1,7 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Mystira.Application.Ports.Data;
 using Mystira.Domain.Models;
-using Mystira.Infrastructure.Data;
 
 namespace Mystira.Infrastructure.Data.Repositories;
 
@@ -11,6 +10,7 @@ namespace Mystira.Infrastructure.Data.Repositories;
 /// </summary>
 public class UserBadgeRepository : Repository<UserBadge>, IUserBadgeRepository
 {
+    private readonly DbContext _context;
     private readonly bool _isInMemory;
 
     /// <summary>
@@ -19,6 +19,7 @@ public class UserBadgeRepository : Repository<UserBadge>, IUserBadgeRepository
     /// <param name="context">The database context.</param>
     public UserBadgeRepository(DbContext context) : base(context)
     {
+        _context = context;
         _isInMemory = context.Database.ProviderName == "Microsoft.EntityFrameworkCore.InMemory";
     }
 
@@ -101,19 +102,19 @@ public class UserBadgeRepository : Repository<UserBadge>, IUserBadgeRepository
     }
 
     /// <inheritdoc/>
-    public override async Task<UserBadge> AddAsync(UserBadge entity)
+    public override async Task<UserBadge> AddAsync(UserBadge entity, CancellationToken cancellationToken = default)
     {
         if (entity == null) throw new ArgumentNullException(nameof(entity));
 
         if (_isInMemory)
         {
-            await _context.Set<UserBadge>().AddAsync(entity);
+            await _context.Set<UserBadge>().AddAsync(entity, cancellationToken);
             return entity;
         }
 
         // For Cosmos DB: Add the owned entity to the owner's collection
         var profile = await _context.Set<UserProfile>()
-            .FirstOrDefaultAsync(p => p.Id == entity.UserProfileId);
+            .FirstOrDefaultAsync(p => p.Id == entity.UserProfileId, cancellationToken);
 
         if (profile == null)
         {
