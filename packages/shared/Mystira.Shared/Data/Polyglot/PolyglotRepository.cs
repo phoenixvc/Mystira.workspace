@@ -225,17 +225,18 @@ public class PolyglotRepository<TEntity> : IPolyglotRepository<TEntity> where TE
     }
 
     /// <inheritdoc />
-    public async Task AddRangeAsync(IEnumerable<TEntity> entities, CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<TEntity>> AddRangeAsync(IEnumerable<TEntity> entities, CancellationToken cancellationToken = default)
     {
         var entityList = entities.ToList();
         foreach (var entity in entityList)
         {
             await AddAsync(entity, cancellationToken);
         }
+        return entityList;
     }
 
     /// <inheritdoc />
-    public async Task UpdateAsync(TEntity entity, CancellationToken cancellationToken = default)
+    public async Task<int> UpdateAsync(TEntity entity, CancellationToken cancellationToken = default)
     {
         using var activity = MystiraActivitySource.StartRepositoryActivity("Update", typeof(TEntity).Name);
         ArgumentNullException.ThrowIfNull(entity);
@@ -308,6 +309,19 @@ public class PolyglotRepository<TEntity> : IPolyglotRepository<TEntity> where TE
                 await SaveSyncLogAsync(syncLog, cancellationToken);
             }
         }
+
+        return 1;
+    }
+
+    /// <inheritdoc />
+    public async Task<int> UpdateRangeAsync(IEnumerable<TEntity> entities, CancellationToken cancellationToken = default)
+    {
+        var entityList = entities.ToList();
+        foreach (var entity in entityList)
+        {
+            await UpdateAsync(entity, cancellationToken);
+        }
+        return entityList.Count;
     }
 
     /// <inheritdoc />
@@ -327,7 +341,7 @@ public class PolyglotRepository<TEntity> : IPolyglotRepository<TEntity> where TE
     }
 
     /// <inheritdoc />
-    public async Task DeleteAsync(TEntity entity, CancellationToken cancellationToken = default)
+    public async Task<int> DeleteAsync(TEntity entity, CancellationToken cancellationToken = default)
     {
         using var activity = MystiraActivitySource.StartRepositoryActivity("Delete", typeof(TEntity).Name);
         ArgumentNullException.ThrowIfNull(entity);
@@ -391,6 +405,26 @@ public class PolyglotRepository<TEntity> : IPolyglotRepository<TEntity> where TE
                 await SaveSyncLogAsync(syncLog, cancellationToken);
             }
         }
+
+        return 1;
+    }
+
+    /// <inheritdoc />
+    public async Task<int> DeleteRangeAsync(IEnumerable<TEntity> entities, CancellationToken cancellationToken = default)
+    {
+        var entityList = entities.ToList();
+        foreach (var entity in entityList)
+        {
+            await DeleteAsync(entity, cancellationToken);
+        }
+        return entityList.Count;
+    }
+
+    /// <inheritdoc />
+    public async Task<int> DeleteRangeAsync(ISpecification<TEntity> specification, CancellationToken cancellationToken = default)
+    {
+        var entities = await ApplySpecification(specification).ToListAsync(cancellationToken);
+        return await DeleteRangeAsync(entities, cancellationToken);
     }
 
     /// <inheritdoc />
@@ -422,19 +456,83 @@ public class PolyglotRepository<TEntity> : IPolyglotRepository<TEntity> where TE
     }
 
     /// <inheritdoc />
-    public async Task<IEnumerable<TEntity>> ListAsync(
-        ISpecification<TEntity> spec,
+    public async Task<TEntity?> GetByIdAsync<TId>(TId id, CancellationToken cancellationToken = default) where TId : notnull
+    {
+        return await _primaryDbSet.FindAsync(new object[] { id }, cancellationToken);
+    }
+
+    /// <inheritdoc />
+    public async Task<TResult?> FirstOrDefaultAsync<TResult>(
+        ISpecification<TEntity, TResult> specification,
         CancellationToken cancellationToken = default)
     {
-        return await ApplySpecification(spec).AsNoTracking().ToListAsync(cancellationToken);
+        return await ApplySpecification(specification).AsNoTracking().FirstOrDefaultAsync(cancellationToken);
+    }
+
+    /// <inheritdoc />
+    public async Task<TEntity?> SingleOrDefaultAsync(
+        ISingleResultSpecification<TEntity> specification,
+        CancellationToken cancellationToken = default)
+    {
+        return await ApplySpecification(specification).AsNoTracking().SingleOrDefaultAsync(cancellationToken);
+    }
+
+    /// <inheritdoc />
+    public async Task<TResult?> SingleOrDefaultAsync<TResult>(
+        ISingleResultSpecification<TEntity, TResult> specification,
+        CancellationToken cancellationToken = default)
+    {
+        return await ApplySpecification(specification).AsNoTracking().SingleOrDefaultAsync(cancellationToken);
+    }
+
+    /// <inheritdoc />
+    public async Task<List<TEntity>> ListAsync(CancellationToken cancellationToken = default)
+    {
+        return await _primaryDbSet.AsNoTracking().ToListAsync(cancellationToken);
+    }
+
+    /// <inheritdoc />
+    public async Task<List<TEntity>> ListAsync(
+        ISpecification<TEntity> specification,
+        CancellationToken cancellationToken = default)
+    {
+        return await ApplySpecification(specification).AsNoTracking().ToListAsync(cancellationToken);
+    }
+
+    /// <inheritdoc />
+    public async Task<List<TResult>> ListAsync<TResult>(
+        ISpecification<TEntity, TResult> specification,
+        CancellationToken cancellationToken = default)
+    {
+        return await ApplySpecification(specification).AsNoTracking().ToListAsync(cancellationToken);
     }
 
     /// <inheritdoc />
     public async Task<int> CountAsync(
-        ISpecification<TEntity> spec,
+        ISpecification<TEntity> specification,
         CancellationToken cancellationToken = default)
     {
-        return await ApplySpecification(spec).CountAsync(cancellationToken);
+        return await ApplySpecification(specification).CountAsync(cancellationToken);
+    }
+
+    /// <inheritdoc />
+    public async Task<bool> AnyAsync(CancellationToken cancellationToken = default)
+    {
+        return await _primaryDbSet.AnyAsync(cancellationToken);
+    }
+
+    /// <inheritdoc />
+    public async Task<bool> AnyAsync(
+        ISpecification<TEntity> specification,
+        CancellationToken cancellationToken = default)
+    {
+        return await ApplySpecification(specification).AnyAsync(cancellationToken);
+    }
+
+    /// <inheritdoc />
+    public IAsyncEnumerable<TEntity> AsAsyncEnumerable(ISpecification<TEntity> specification)
+    {
+        return ApplySpecification(specification).AsNoTracking().AsAsyncEnumerable();
     }
 
     /// <inheritdoc />
@@ -659,6 +757,11 @@ public class PolyglotRepository<TEntity> : IPolyglotRepository<TEntity> where TE
     }
 
     private IQueryable<TEntity> ApplySpecification(ISpecification<TEntity> specification)
+    {
+        return SpecificationEvaluator.Default.GetQuery(_primaryDbSet.AsQueryable(), specification);
+    }
+
+    private IQueryable<TResult> ApplySpecification<TResult>(ISpecification<TEntity, TResult> specification)
     {
         return SpecificationEvaluator.Default.GetQuery(_primaryDbSet.AsQueryable(), specification);
     }
