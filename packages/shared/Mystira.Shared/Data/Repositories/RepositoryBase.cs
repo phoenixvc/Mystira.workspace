@@ -150,8 +150,7 @@ public class RepositoryBase<TEntity> : IRepositoryBase<TEntity> where TEntity : 
         ISpecification<TEntity, TResult> specification,
         CancellationToken cancellationToken = default)
     {
-        // Note: AsNoTracking() not used here as TResult may be a value type
-        return await ApplySpecification(specification).FirstOrDefaultAsync(cancellationToken);
+        return await ApplySpecificationWithNoTracking(specification).FirstOrDefaultAsync(cancellationToken);
     }
 
     /// <inheritdoc />
@@ -167,8 +166,7 @@ public class RepositoryBase<TEntity> : IRepositoryBase<TEntity> where TEntity : 
         ISingleResultSpecification<TEntity, TResult> specification,
         CancellationToken cancellationToken = default)
     {
-        // Note: AsNoTracking() not used here as TResult may be a value type
-        return await ApplySpecification(specification).SingleOrDefaultAsync(cancellationToken);
+        return await ApplySpecificationWithNoTracking(specification).SingleOrDefaultAsync(cancellationToken);
     }
 
     /// <inheritdoc />
@@ -190,8 +188,7 @@ public class RepositoryBase<TEntity> : IRepositoryBase<TEntity> where TEntity : 
         ISpecification<TEntity, TResult> specification,
         CancellationToken cancellationToken = default)
     {
-        // Note: AsNoTracking() not used here as TResult may be a value type
-        return await ApplySpecification(specification).ToListAsync(cancellationToken);
+        return await ApplySpecificationWithNoTracking(specification).ToListAsync(cancellationToken);
     }
 
     /// <inheritdoc />
@@ -368,6 +365,15 @@ public class RepositoryBase<TEntity> : IRepositoryBase<TEntity> where TEntity : 
     protected virtual IQueryable<TResult> ApplySpecification<TResult>(ISpecification<TEntity, TResult> spec)
     {
         return SpecificationEvaluator.Default.GetQuery(DbSet.AsQueryable(), spec);
+    }
+
+    /// <summary>
+    /// Apply an Ardalis.Specification with projection to a no-tracking query.
+    /// AsNoTracking is applied to the source entities before projection.
+    /// </summary>
+    protected virtual IQueryable<TResult> ApplySpecificationWithNoTracking<TResult>(ISpecification<TEntity, TResult> spec)
+    {
+        return SpecificationEvaluator.Default.GetQuery(DbSet.AsNoTracking(), spec);
     }
 
     #endregion

@@ -466,8 +466,7 @@ public class PolyglotRepository<TEntity> : IPolyglotRepository<TEntity> where TE
         ISpecification<TEntity, TResult> specification,
         CancellationToken cancellationToken = default)
     {
-        // Note: AsNoTracking() not used here as TResult may be a value type
-        return await ApplySpecification(specification).FirstOrDefaultAsync(cancellationToken);
+        return await ApplySpecificationWithNoTracking(specification).FirstOrDefaultAsync(cancellationToken);
     }
 
     /// <inheritdoc />
@@ -483,8 +482,7 @@ public class PolyglotRepository<TEntity> : IPolyglotRepository<TEntity> where TE
         ISingleResultSpecification<TEntity, TResult> specification,
         CancellationToken cancellationToken = default)
     {
-        // Note: AsNoTracking() not used here as TResult may be a value type
-        return await ApplySpecification(specification).SingleOrDefaultAsync(cancellationToken);
+        return await ApplySpecificationWithNoTracking(specification).SingleOrDefaultAsync(cancellationToken);
     }
 
     /// <inheritdoc />
@@ -506,8 +504,7 @@ public class PolyglotRepository<TEntity> : IPolyglotRepository<TEntity> where TE
         ISpecification<TEntity, TResult> specification,
         CancellationToken cancellationToken = default)
     {
-        // Note: AsNoTracking() not used here as TResult may be a value type
-        return await ApplySpecification(specification).ToListAsync(cancellationToken);
+        return await ApplySpecificationWithNoTracking(specification).ToListAsync(cancellationToken);
     }
 
     /// <inheritdoc />
@@ -767,6 +764,11 @@ public class PolyglotRepository<TEntity> : IPolyglotRepository<TEntity> where TE
     private IQueryable<TResult> ApplySpecification<TResult>(ISpecification<TEntity, TResult> specification)
     {
         return SpecificationEvaluator.Default.GetQuery(_primaryDbSet.AsQueryable(), specification);
+    }
+
+    private IQueryable<TResult> ApplySpecificationWithNoTracking<TResult>(ISpecification<TEntity, TResult> specification)
+    {
+        return SpecificationEvaluator.Default.GetQuery(_primaryDbSet.AsNoTracking(), specification);
     }
 
     private async Task<TEntity?> GetFromCacheAsync(string id, CancellationToken cancellationToken)
