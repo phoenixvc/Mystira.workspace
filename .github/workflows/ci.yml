@@ -31,7 +31,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
         with:
-          token: ${{ secrets.GH_PACKAGES_TOKEN }}
+          token: ${{ secrets.GH_PAT || github.token }}
           submodules: recursive
 
       - uses: pnpm/action-setup@v4
@@ -65,7 +65,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
         with:
-          token: ${{ secrets.GH_PACKAGES_TOKEN }}
+          token: ${{ secrets.GH_PAT || github.token }}
           submodules: recursive
 
       - uses: pnpm/action-setup@v4
@@ -107,7 +107,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
         with:
-          token: ${{ secrets.GH_PACKAGES_TOKEN }}
+          token: ${{ secrets.GH_PAT || github.token }}
           submodules: recursive
 
       - uses: pnpm/action-setup@v4
@@ -133,7 +133,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
         with:
-          token: ${{ secrets.GH_PACKAGES_TOKEN }}
+          token: ${{ secrets.GH_PAT || github.token }}
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v5
