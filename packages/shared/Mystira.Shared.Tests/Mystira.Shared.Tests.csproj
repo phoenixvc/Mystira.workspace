@@ -25,6 +25,7 @@
 
   <ItemGroup>
     <ProjectReference Include="../Mystira.Shared/Mystira.Shared.csproj" />
+    <ProjectReference Include="../../application/Mystira.Application/Mystira.Application.csproj" />
   </ItemGroup>
 
 </Project>

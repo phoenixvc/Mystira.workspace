@@ -1,3 +1,4 @@
+using Ardalis.Specification;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Mystira.Shared.Data.Repositories;
@@ -10,18 +11,23 @@ namespace Mystira.Shared.Extensions;
 public static class DataExtensions
 {
     /// <summary>
-    /// Adds a generic repository for the specified entity type.
+    /// Adds a generic repository base for the specified entity type that implements IRepositoryBase.
     /// </summary>
+    /// <remarks>
+    /// This registers the repository as <see cref="IRepositoryBase{TEntity}"/> from Ardalis.Specification.
+    /// For full IRepository functionality, use <c>Mystira.Infrastructure.Data</c> package which provides
+    /// repositories implementing <c>Mystira.Application.Ports.Data.IRepository&lt;TEntity&gt;</c>.
+    /// </remarks>
     /// <typeparam name="TEntity">The entity type.</typeparam>
     /// <typeparam name="TContext">The DbContext type.</typeparam>
     /// <param name="services">The service collection.</param>
     /// <returns>The service collection for chaining.</returns>
-    public static IServiceCollection AddRepository<TEntity, TContext>(
+    public static IServiceCollection AddRepositoryBase<TEntity, TContext>(
         this IServiceCollection services)
         where TEntity : class
         where TContext : DbContext
     {
-        services.AddScoped<IRepository<TEntity>>(provider =>
+        services.AddScoped<IRepositoryBase<TEntity>>(provider =>
         {
             var context = provider.GetRequiredService<TContext>();
             return new RepositoryBase<TEntity>(context);

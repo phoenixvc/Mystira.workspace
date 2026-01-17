@@ -1,12 +1,11 @@
 using Ardalis.Specification;
-using Mystira.Shared.Data.Repositories;
 
 namespace Mystira.Shared.Polyglot;
 
 /// <summary>
 /// Repository interface for polyglot persistence with automatic database routing,
 /// dual-write support, and consistency validation.
-/// Extends IRepository with polyglot-specific capabilities.
+/// Extends IRepositoryBase with polyglot-specific capabilities.
 /// </summary>
 /// <typeparam name="TEntity">The entity type.</typeparam>
 /// <remarks>
@@ -21,7 +20,7 @@ namespace Mystira.Shared.Polyglot;
 /// </para>
 /// </remarks>
 [Obsolete("Use Mystira.Application.Ports.Data.IPolyglotRepository<T> and Mystira.Infrastructure.Data instead. This will be removed in a future version.")]
-public interface IPolyglotRepository<TEntity> : IRepository<TEntity> where TEntity : class
+public interface IPolyglotRepository<TEntity> : IRepositoryBase<TEntity> where TEntity : class
 {
     /// <summary>
     /// Gets the target database for this entity type.
@@ -34,16 +33,14 @@ public interface IPolyglotRepository<TEntity> : IRepository<TEntity> where TEnti
     PolyglotMode CurrentMode { get; }
 
     /// <summary>
+    /// Gets an entity by its string ID.
+    /// </summary>
+    Task<TEntity?> GetByIdAsync(string id, CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Gets an entity by its string ID with caching disabled.
     /// </summary>
     Task<TEntity?> GetByIdNoCacheAsync(string id, CancellationToken cancellationToken = default);
-
-    /// <summary>
-    /// Gets a single entity matching a specification (uses AsNoTracking).
-    /// </summary>
-    Task<TEntity?> FirstOrDefaultAsync(
-        ISpecification<TEntity> specification,
-        CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Checks if the primary backend is healthy and available.
@@ -80,11 +77,6 @@ public interface IPolyglotRepository<TEntity> : IRepository<TEntity> where TEnti
     Task<ConsistencyResult> ValidateConsistencyAsync(
         string id,
         CancellationToken cancellationToken = default);
-
-    /// <summary>
-    /// Saves all pending changes to the database.
-    /// </summary>
-    Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Invalidates cache for the specified entity ID.
