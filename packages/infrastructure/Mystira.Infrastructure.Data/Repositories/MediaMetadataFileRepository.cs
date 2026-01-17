@@ -18,7 +18,7 @@ public class MediaMetadataFileRepository : IMediaMetadataFileRepository
     /// <param name="context">The database context.</param>
     public MediaMetadataFileRepository(MystiraAppDbContext context)
     {
-        _dbContext = context ?? throw new ArgumentNullException(nameof(context));
+        _appContext = context ?? throw new ArgumentNullException(nameof(context));
         DbSet = context.Set<MediaMetadataFile>();
     }
 

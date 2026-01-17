@@ -18,7 +18,7 @@ public class CharacterMediaMetadataFileRepository : ICharacterMediaMetadataFileR
     /// <param name="context">The database context.</param>
     public CharacterMediaMetadataFileRepository(MystiraAppDbContext context)
     {
-        _dbContext = context ?? throw new ArgumentNullException(nameof(context));
+        _appContext = context ?? throw new ArgumentNullException(nameof(context));
         DbSet = context.Set<CharacterMediaMetadataFile>();
     }
 
