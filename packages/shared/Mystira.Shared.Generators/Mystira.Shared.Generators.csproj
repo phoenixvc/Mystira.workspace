@@ -10,7 +10,7 @@
 
     <!-- Package metadata -->
     <PackageId>Mystira.Shared.Generators</PackageId>
-    <Version>0.1.0</Version>
+    <Version>0.5.2-alpha</Version>
     <Authors>Mystira Team</Authors>
     <Company>PhoenixVC</Company>
     <Description>Source generators for Mystira.Shared - auto-generate repository implementations and options validators</Description>
