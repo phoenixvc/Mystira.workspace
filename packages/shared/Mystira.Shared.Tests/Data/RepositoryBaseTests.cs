@@ -11,7 +11,10 @@ public class RepositoryBaseTests
     public void IRepository_ExtendsIRepositoryBase()
     {
         // Verify that IRepository extends IRepositoryBase from Ardalis.Specification
-        typeof(IRepository<>).Should().Implement(typeof(IRepositoryBase<>));
+        // Note: For open generics, we check the interface hierarchy directly
+        var interfaces = typeof(IRepository<>).GetInterfaces();
+        interfaces.Should().Contain(i =>
+            i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IRepositoryBase<>));
     }
 
     [Fact]
@@ -67,18 +70,24 @@ public class RepositoryBaseTests
     [Fact]
     public void IRepository_InheritsIRepositoryBaseMethods()
     {
-        // Verify inherited IRepositoryBase methods are available
-        var repoType = typeof(IRepository<>);
-        var allMethods = repoType.GetMethods();
+        // Verify IRepositoryBase is in the inheritance chain
+        // Note: GetMethods() on an interface only returns directly declared methods,
+        // not inherited ones. We verify inheritance by checking the interface hierarchy.
+        var interfaces = typeof(IRepository<>).GetInterfaces();
+        var repositoryBaseInterface = interfaces.FirstOrDefault(i =>
+            i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IRepositoryBase<>));
 
-        // Methods from IRepositoryBase
-        allMethods.Should().Contain(m => m.Name == "AddAsync");
-        allMethods.Should().Contain(m => m.Name == "AddRangeAsync");
-        allMethods.Should().Contain(m => m.Name == "UpdateAsync");
-        allMethods.Should().Contain(m => m.Name == "DeleteAsync");
-        allMethods.Should().Contain(m => m.Name == "SaveChangesAsync");
-        allMethods.Should().Contain(m => m.Name == "ListAsync");
-        allMethods.Should().Contain(m => m.Name == "CountAsync");
-        allMethods.Should().Contain(m => m.Name == "FirstOrDefaultAsync");
+        repositoryBaseInterface.Should().NotBeNull("IRepository should extend IRepositoryBase");
+
+        // Verify IRepositoryBase has the expected methods
+        var baseMethods = typeof(IRepositoryBase<>).GetMethods();
+        baseMethods.Should().Contain(m => m.Name == "AddAsync");
+        baseMethods.Should().Contain(m => m.Name == "AddRangeAsync");
+        baseMethods.Should().Contain(m => m.Name == "UpdateAsync");
+        baseMethods.Should().Contain(m => m.Name == "DeleteAsync");
+        baseMethods.Should().Contain(m => m.Name == "SaveChangesAsync");
+        baseMethods.Should().Contain(m => m.Name == "ListAsync");
+        baseMethods.Should().Contain(m => m.Name == "CountAsync");
+        baseMethods.Should().Contain(m => m.Name == "FirstOrDefaultAsync");
     }
 }
