@@ -10,7 +10,7 @@ namespace Mystira.Infrastructure.Data.Repositories;
 /// </summary>
 public class EchoTypeRepository : IEchoTypeRepository
 {
-    private readonly MystiraAppDbContext _context;
+    private readonly MystiraAppDbContext _appContext;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="EchoTypeRepository"/> class.
@@ -18,7 +18,7 @@ public class EchoTypeRepository : IEchoTypeRepository
     /// <param name="context">The database context.</param>
     public EchoTypeRepository(MystiraAppDbContext context)
     {
-        _context = context;
+        _appContext = context;
     }
 
     /// <summary>
@@ -27,7 +27,7 @@ public class EchoTypeRepository : IEchoTypeRepository
     /// <returns>A list of echo type definitions.</returns>
     public async Task<List<EchoTypeDefinition>> GetAllAsync()
     {
-        return await _context.EchoTypeDefinitions
+        return await _appContext.EchoTypeDefinitions
             .Where(x => !x.IsDeleted)
             .OrderBy(x => x.Name)
             .ToListAsync();
@@ -40,7 +40,7 @@ public class EchoTypeRepository : IEchoTypeRepository
     /// <returns>The echo type definition, or null if not found or deleted.</returns>
     public async Task<EchoTypeDefinition?> GetByIdAsync(string id)
     {
-        return await _context.EchoTypeDefinitions.FirstOrDefaultAsync(x => x.Id == id && !x.IsDeleted);
+        return await _appContext.EchoTypeDefinitions.FirstOrDefaultAsync(x => x.Id == id && !x.IsDeleted);
     }
 
     /// <summary>
@@ -50,7 +50,7 @@ public class EchoTypeRepository : IEchoTypeRepository
     /// <returns>The echo type definition, or null if not found or deleted.</returns>
     public async Task<EchoTypeDefinition?> GetByNameAsync(string name)
     {
-        return await _context.EchoTypeDefinitions.FirstOrDefaultAsync(x => x.Name.Equals(name, StringComparison.OrdinalIgnoreCase) && !x.IsDeleted);
+        return await _appContext.EchoTypeDefinitions.FirstOrDefaultAsync(x => x.Name.ToLower() == name.ToLower() && !x.IsDeleted);
     }
 
     /// <summary>
@@ -60,7 +60,7 @@ public class EchoTypeRepository : IEchoTypeRepository
     /// <returns>True if the echo type exists and is not deleted; otherwise, false.</returns>
     public async Task<bool> ExistsByNameAsync(string name)
     {
-        return await _context.EchoTypeDefinitions.AnyAsync(x => x.Name.Equals(name, StringComparison.OrdinalIgnoreCase) && !x.IsDeleted);
+        return await _appContext.EchoTypeDefinitions.AnyAsync(x => x.Name.ToLower() == name.ToLower() && !x.IsDeleted);
     }
 
     /// <summary>
@@ -70,7 +70,7 @@ public class EchoTypeRepository : IEchoTypeRepository
     /// <returns>A task representing the asynchronous operation.</returns>
     public async Task AddAsync(EchoTypeDefinition echoType)
     {
-        await _context.EchoTypeDefinitions.AddAsync(echoType);
+        await _appContext.EchoTypeDefinitions.AddAsync(echoType);
     }
 
     /// <summary>
@@ -80,7 +80,7 @@ public class EchoTypeRepository : IEchoTypeRepository
     /// <returns>A task representing the asynchronous operation.</returns>
     public Task UpdateAsync(EchoTypeDefinition echoType)
     {
-        _context.EchoTypeDefinitions.Update(echoType);
+        _appContext.EchoTypeDefinitions.Update(echoType);
         return Task.CompletedTask;
     }
 
@@ -91,13 +91,13 @@ public class EchoTypeRepository : IEchoTypeRepository
     /// <returns>A task representing the asynchronous operation.</returns>
     public async Task DeleteAsync(string id)
     {
-        var echoType = await _context.EchoTypeDefinitions.FirstOrDefaultAsync(x => x.Id == id);
+        var echoType = await _appContext.EchoTypeDefinitions.FirstOrDefaultAsync(x => x.Id == id);
         if (echoType != null)
         {
             // Soft delete instead of hard delete
             echoType.IsDeleted = true;
             echoType.UpdatedAt = DateTime.UtcNow;
-            _context.EchoTypeDefinitions.Update(echoType);
+            _appContext.EchoTypeDefinitions.Update(echoType);
         }
     }
 }

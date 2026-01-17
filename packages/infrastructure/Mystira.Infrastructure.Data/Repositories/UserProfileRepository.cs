@@ -20,7 +20,7 @@ public class UserProfileRepository : Repository<UserProfile>, IUserProfileReposi
     /// <inheritdoc/>
     public async Task<IEnumerable<UserProfile>> GetByAccountIdAsync(string accountId)
     {
-        return await _dbSet
+        return await DbSet
             .Include(p => p.EarnedBadges)
             .Where(p => p.AccountId == accountId)
             .OrderBy(p => p.Name)
@@ -30,7 +30,7 @@ public class UserProfileRepository : Repository<UserProfile>, IUserProfileReposi
     /// <inheritdoc/>
     public async Task<IEnumerable<UserProfile>> GetGuestProfilesAsync()
     {
-        return await _dbSet
+        return await DbSet
             .Include(p => p.EarnedBadges)
             .Where(p => p.IsGuest)
             .OrderBy(p => p.CreatedAt)
@@ -40,7 +40,7 @@ public class UserProfileRepository : Repository<UserProfile>, IUserProfileReposi
     /// <inheritdoc/>
     public async Task<IEnumerable<UserProfile>> GetNonGuestProfilesAsync()
     {
-        return await _dbSet
+        return await DbSet
             .Include(p => p.EarnedBadges)
             .Where(p => !p.IsGuest)
             .OrderBy(p => p.Name)

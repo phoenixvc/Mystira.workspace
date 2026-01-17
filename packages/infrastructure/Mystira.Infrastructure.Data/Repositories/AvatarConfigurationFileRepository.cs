@@ -9,8 +9,8 @@ namespace Mystira.Infrastructure.Data.Repositories;
 /// </summary>
 public class AvatarConfigurationFileRepository : IAvatarConfigurationFileRepository
 {
-    private readonly DbContext _context;
-    private readonly DbSet<AvatarConfigurationFile> _dbSet;
+    private readonly DbContext _dbContext;
+    private readonly DbSet<AvatarConfigurationFile> DbSet;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="AvatarConfigurationFileRepository"/> class.
@@ -18,14 +18,14 @@ public class AvatarConfigurationFileRepository : IAvatarConfigurationFileReposit
     /// <param name="context">The database context.</param>
     public AvatarConfigurationFileRepository(DbContext context)
     {
-        _context = context ?? throw new ArgumentNullException(nameof(context));
-        _dbSet = context.Set<AvatarConfigurationFile>();
+        _dbContext = context ?? throw new ArgumentNullException(nameof(context));
+        DbSet = context.Set<AvatarConfigurationFile>();
     }
 
     /// <inheritdoc/>
     public async Task<AvatarConfigurationFile?> GetAsync()
     {
-        return await _dbSet.FirstOrDefaultAsync();
+        return await DbSet.FirstOrDefaultAsync();
     }
 
     /// <inheritdoc/>
@@ -37,11 +37,11 @@ public class AvatarConfigurationFileRepository : IAvatarConfigurationFileReposit
             existing.AgeGroupAvatars = entity.AgeGroupAvatars;
             existing.UpdatedAt = DateTime.UtcNow;
             existing.Version = entity.Version;
-            _dbSet.Update(existing);
+            DbSet.Update(existing);
             return existing;
         }
 
-        await _dbSet.AddAsync(entity);
+        await DbSet.AddAsync(entity);
         return entity;
     }
 
@@ -51,7 +51,7 @@ public class AvatarConfigurationFileRepository : IAvatarConfigurationFileReposit
         var existing = await GetAsync();
         if (existing != null)
         {
-            _dbSet.Remove(existing);
+            DbSet.Remove(existing);
         }
     }
 }

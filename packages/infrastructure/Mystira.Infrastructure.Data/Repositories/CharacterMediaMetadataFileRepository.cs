@@ -9,8 +9,8 @@ namespace Mystira.Infrastructure.Data.Repositories;
 /// </summary>
 public class CharacterMediaMetadataFileRepository : ICharacterMediaMetadataFileRepository
 {
-    private readonly MystiraAppDbContext _context;
-    private readonly DbSet<CharacterMediaMetadataFile> _dbSet;
+    private readonly MystiraAppDbContext _appContext;
+    private readonly DbSet<CharacterMediaMetadataFile> DbSet;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="CharacterMediaMetadataFileRepository"/> class.
@@ -18,14 +18,14 @@ public class CharacterMediaMetadataFileRepository : ICharacterMediaMetadataFileR
     /// <param name="context">The database context.</param>
     public CharacterMediaMetadataFileRepository(MystiraAppDbContext context)
     {
-        _context = context ?? throw new ArgumentNullException(nameof(context));
-        _dbSet = context.Set<CharacterMediaMetadataFile>();
+        _appContext = context ?? throw new ArgumentNullException(nameof(context));
+        DbSet = context.Set<CharacterMediaMetadataFile>();
     }
 
     /// <inheritdoc/>
     public async Task<CharacterMediaMetadataFile?> GetAsync()
     {
-        return await _dbSet.FirstOrDefaultAsync();
+        return await DbSet.FirstOrDefaultAsync();
     }
 
     /// <inheritdoc/>
@@ -37,11 +37,11 @@ public class CharacterMediaMetadataFileRepository : ICharacterMediaMetadataFileR
             existing.Entries = entity.Entries;
             existing.UpdatedAt = DateTime.UtcNow;
             existing.Version = entity.Version;
-            _dbSet.Update(existing);
+            DbSet.Update(existing);
             return existing;
         }
 
-        await _dbSet.AddAsync(entity);
+        await DbSet.AddAsync(entity);
         return entity;
     }
 
@@ -51,7 +51,7 @@ public class CharacterMediaMetadataFileRepository : ICharacterMediaMetadataFileR
         var existing = await GetAsync();
         if (existing != null)
         {
-            _dbSet.Remove(existing);
+            DbSet.Remove(existing);
         }
     }
 }

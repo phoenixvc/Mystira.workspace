@@ -20,19 +20,19 @@ public class MediaAssetRepository : Repository<MediaAsset>, IMediaAssetRepositor
     /// <inheritdoc/>
     public async Task<MediaAsset?> GetByMediaIdAsync(string mediaId)
     {
-        return await _dbSet.FirstOrDefaultAsync(m => m.MediaId == mediaId);
+        return await DbSet.FirstOrDefaultAsync(m => m.MediaId == mediaId);
     }
 
     /// <inheritdoc/>
     public async Task<bool> ExistsByMediaIdAsync(string mediaId)
     {
-        return await _dbSet.AnyAsync(m => m.MediaId == mediaId);
+        return await DbSet.AnyAsync(m => m.MediaId == mediaId);
     }
 
     /// <inheritdoc/>
     public async Task<IEnumerable<string>> GetMediaIdsAsync(IEnumerable<string> mediaIds)
     {
-        return await _dbSet
+        return await DbSet
             .Where(m => mediaIds.Contains(m.MediaId))
             .Select(m => m.MediaId)
             .ToListAsync();
@@ -41,7 +41,7 @@ public class MediaAssetRepository : Repository<MediaAsset>, IMediaAssetRepositor
     /// <inheritdoc/>
     public IQueryable<MediaAsset> GetQueryable()
     {
-        return _dbSet.AsQueryable();
+        return DbSet.AsQueryable();
     }
 }
 

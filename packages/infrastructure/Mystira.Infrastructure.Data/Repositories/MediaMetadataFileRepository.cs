@@ -9,8 +9,8 @@ namespace Mystira.Infrastructure.Data.Repositories;
 /// </summary>
 public class MediaMetadataFileRepository : IMediaMetadataFileRepository
 {
-    private readonly MystiraAppDbContext _context;
-    private readonly DbSet<MediaMetadataFile> _dbSet;
+    private readonly MystiraAppDbContext _appContext;
+    private readonly DbSet<MediaMetadataFile> DbSet;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="MediaMetadataFileRepository"/> class.
@@ -18,14 +18,14 @@ public class MediaMetadataFileRepository : IMediaMetadataFileRepository
     /// <param name="context">The database context.</param>
     public MediaMetadataFileRepository(MystiraAppDbContext context)
     {
-        _context = context ?? throw new ArgumentNullException(nameof(context));
-        _dbSet = context.Set<MediaMetadataFile>();
+        _appContext = context ?? throw new ArgumentNullException(nameof(context));
+        DbSet = context.Set<MediaMetadataFile>();
     }
 
     /// <inheritdoc/>
     public async Task<MediaMetadataFile?> GetAsync()
     {
-        return await _dbSet.FirstOrDefaultAsync();
+        return await DbSet.FirstOrDefaultAsync();
     }
 
     /// <inheritdoc/>
@@ -37,11 +37,11 @@ public class MediaMetadataFileRepository : IMediaMetadataFileRepository
             existing.Entries = entity.Entries;
             existing.UpdatedAt = DateTime.UtcNow;
             existing.Version = entity.Version;
-            _dbSet.Update(existing);
+            DbSet.Update(existing);
             return existing;
         }
 
-        await _dbSet.AddAsync(entity);
+        await DbSet.AddAsync(entity);
         return entity;
     }
 
@@ -51,7 +51,7 @@ public class MediaMetadataFileRepository : IMediaMetadataFileRepository
         var existing = await GetAsync();
         if (existing != null)
         {
-            _dbSet.Remove(existing);
+            DbSet.Remove(existing);
         }
     }
 }

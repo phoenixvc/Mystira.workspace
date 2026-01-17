@@ -22,25 +22,25 @@ public class ScenarioRepository : Repository<Scenario>, IScenarioRepository
     public async Task<IEnumerable<Scenario>> GetByAgeGroupAsync(string ageGroup)
     {
         // Compare against AgeGroupId (the string property), not the computed AgeGroup value object
-        return await _dbSet.Where(s => s.AgeGroupId == ageGroup).ToListAsync();
+        return await DbSet.Where(s => s.AgeGroupId == ageGroup).ToListAsync();
     }
 
     /// <inheritdoc/>
     public async Task<Scenario?> GetByTitleAsync(string title)
     {
-        return await _dbSet.FirstOrDefaultAsync(s => s.Title == title);
+        return await DbSet.FirstOrDefaultAsync(s => s.Title == title);
     }
 
     /// <inheritdoc/>
     public async Task<bool> ExistsByTitleAsync(string title)
     {
-        return await _dbSet.AnyAsync(s => s.Title == title);
+        return await DbSet.AnyAsync(s => s.Title == title);
     }
 
     /// <inheritdoc/>
     public IQueryable<Scenario> GetQueryable()
     {
-        return _dbSet.AsQueryable();
+        return DbSet.AsQueryable();
     }
 
     /// <inheritdoc/>
@@ -48,9 +48,9 @@ public class ScenarioRepository : Repository<Scenario>, IScenarioRepository
     {
         if (predicate == null)
         {
-            return await _dbSet.CountAsync();
+            return await DbSet.CountAsync();
         }
-        return await _dbSet.CountAsync(predicate);
+        return await DbSet.CountAsync(predicate);
     }
 }
 

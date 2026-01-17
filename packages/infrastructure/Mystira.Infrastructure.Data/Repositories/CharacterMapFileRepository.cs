@@ -9,8 +9,8 @@ namespace Mystira.Infrastructure.Data.Repositories;
 /// </summary>
 public class CharacterMapFileRepository : ICharacterMapFileRepository
 {
-    private readonly MystiraAppDbContext _context;
-    private readonly DbSet<CharacterMapFile> _dbSet;
+    private readonly MystiraAppDbContext _appContext;
+    private readonly DbSet<CharacterMapFile> DbSet;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="CharacterMapFileRepository"/> class.
@@ -18,14 +18,14 @@ public class CharacterMapFileRepository : ICharacterMapFileRepository
     /// <param name="context">The database context.</param>
     public CharacterMapFileRepository(MystiraAppDbContext context)
     {
-        _context = context ?? throw new ArgumentNullException(nameof(context));
-        _dbSet = context.Set<CharacterMapFile>();
+        _appContext = context ?? throw new ArgumentNullException(nameof(context));
+        DbSet = context.Set<CharacterMapFile>();
     }
 
     /// <inheritdoc/>
     public async Task<CharacterMapFile?> GetAsync()
     {
-        return await _dbSet.FirstOrDefaultAsync();
+        return await DbSet.FirstOrDefaultAsync();
     }
 
     /// <inheritdoc/>
@@ -37,11 +37,11 @@ public class CharacterMapFileRepository : ICharacterMapFileRepository
             existing.Characters = entity.Characters;
             existing.UpdatedAt = DateTime.UtcNow;
             existing.Version = entity.Version;
-            _dbSet.Update(existing);
+            DbSet.Update(existing);
             return existing;
         }
 
-        await _dbSet.AddAsync(entity);
+        await DbSet.AddAsync(entity);
         return entity;
     }
 
@@ -51,7 +51,7 @@ public class CharacterMapFileRepository : ICharacterMapFileRepository
         var existing = await GetAsync();
         if (existing != null)
         {
-            _dbSet.Remove(existing);
+            DbSet.Remove(existing);
         }
     }
 }

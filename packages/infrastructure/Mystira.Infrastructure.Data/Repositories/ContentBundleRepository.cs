@@ -21,7 +21,7 @@ public class ContentBundleRepository : Repository<ContentBundle>, IContentBundle
     public async Task<IEnumerable<ContentBundle>> GetByAgeGroupAsync(string ageGroupId)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(ageGroupId);
-        return await _dbSet.Where(b => b.AgeGroupId == ageGroupId).ToListAsync();
+        return await DbSet.Where(b => b.AgeGroupId == ageGroupId).ToListAsync();
     }
 }
 

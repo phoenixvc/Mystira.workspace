@@ -10,7 +10,7 @@ namespace Mystira.Infrastructure.Data.Repositories;
 /// </summary>
 public class AgeGroupRepository : IAgeGroupRepository
 {
-    private readonly MystiraAppDbContext _context;
+    private readonly MystiraAppDbContext _appContext;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="AgeGroupRepository"/> class.
@@ -18,7 +18,7 @@ public class AgeGroupRepository : IAgeGroupRepository
     /// <param name="context">The database context.</param>
     public AgeGroupRepository(MystiraAppDbContext context)
     {
-        _context = context;
+        _appContext = context;
     }
 
     /// <summary>
@@ -27,7 +27,7 @@ public class AgeGroupRepository : IAgeGroupRepository
     /// <returns>A list of age group definitions.</returns>
     public async Task<List<AgeGroupDefinition>> GetAllAsync()
     {
-        return await _context.AgeGroupDefinitions
+        return await _appContext.AgeGroupDefinitions
             .Where(x => !x.IsDeleted)
             .OrderBy(x => x.MinimumAge)
             .ToListAsync();
@@ -40,7 +40,7 @@ public class AgeGroupRepository : IAgeGroupRepository
     /// <returns>The age group definition, or null if not found or deleted.</returns>
     public async Task<AgeGroupDefinition?> GetByIdAsync(string id)
     {
-        return await _context.AgeGroupDefinitions
+        return await _appContext.AgeGroupDefinitions
             .FirstOrDefaultAsync(x => x.Id == id && !x.IsDeleted);
     }
 
@@ -51,7 +51,7 @@ public class AgeGroupRepository : IAgeGroupRepository
     /// <returns>The age group definition, or null if not found or deleted.</returns>
     public async Task<AgeGroupDefinition?> GetByNameAsync(string name)
     {
-        return await _context.AgeGroupDefinitions.FirstOrDefaultAsync(x => x.Name.Equals(name, StringComparison.OrdinalIgnoreCase) && !x.IsDeleted);
+        return await _appContext.AgeGroupDefinitions.FirstOrDefaultAsync(x => x.Name.ToLower() == name.ToLower() && !x.IsDeleted);
     }
 
     /// <summary>
@@ -61,7 +61,7 @@ public class AgeGroupRepository : IAgeGroupRepository
     /// <returns>The age group definition, or null if not found or deleted.</returns>
     public async Task<AgeGroupDefinition?> GetByValueAsync(string value)
     {
-        return await _context.AgeGroupDefinitions.FirstOrDefaultAsync(x => x.Value == value && !x.IsDeleted);
+        return await _appContext.AgeGroupDefinitions.FirstOrDefaultAsync(x => x.Value == value && !x.IsDeleted);
     }
 
     /// <summary>
@@ -71,7 +71,7 @@ public class AgeGroupRepository : IAgeGroupRepository
     /// <returns>True if the age group exists and is not deleted; otherwise, false.</returns>
     public async Task<bool> ExistsByNameAsync(string name)
     {
-        return await _context.AgeGroupDefinitions.AnyAsync(x => x.Name.Equals(name, StringComparison.OrdinalIgnoreCase) && !x.IsDeleted);
+        return await _appContext.AgeGroupDefinitions.AnyAsync(x => x.Name.ToLower() == name.ToLower() && !x.IsDeleted);
     }
 
     /// <summary>
@@ -81,7 +81,7 @@ public class AgeGroupRepository : IAgeGroupRepository
     /// <returns>True if the age group exists and is not deleted; otherwise, false.</returns>
     public async Task<bool> ExistsByValueAsync(string value)
     {
-        return await _context.AgeGroupDefinitions.AnyAsync(x => x.Value == value && !x.IsDeleted);
+        return await _appContext.AgeGroupDefinitions.AnyAsync(x => x.Value == value && !x.IsDeleted);
     }
 
     /// <summary>
@@ -91,7 +91,7 @@ public class AgeGroupRepository : IAgeGroupRepository
     /// <returns>A task representing the asynchronous operation.</returns>
     public async Task AddAsync(AgeGroupDefinition ageGroup)
     {
-        await _context.AgeGroupDefinitions.AddAsync(ageGroup);
+        await _appContext.AgeGroupDefinitions.AddAsync(ageGroup);
     }
 
     /// <summary>
@@ -101,7 +101,7 @@ public class AgeGroupRepository : IAgeGroupRepository
     /// <returns>A task representing the asynchronous operation.</returns>
     public Task UpdateAsync(AgeGroupDefinition ageGroup)
     {
-        _context.AgeGroupDefinitions.Update(ageGroup);
+        _appContext.AgeGroupDefinitions.Update(ageGroup);
         return Task.CompletedTask;
     }
 
@@ -112,13 +112,13 @@ public class AgeGroupRepository : IAgeGroupRepository
     /// <returns>A task representing the asynchronous operation.</returns>
     public async Task DeleteAsync(string id)
     {
-        var ageGroup = await _context.AgeGroupDefinitions.FirstOrDefaultAsync(x => x.Id == id);
+        var ageGroup = await _appContext.AgeGroupDefinitions.FirstOrDefaultAsync(x => x.Id == id);
         if (ageGroup != null)
         {
             // Soft delete instead of hard delete
             ageGroup.IsDeleted = true;
             ageGroup.UpdatedAt = DateTime.UtcNow;
-            _context.AgeGroupDefinitions.Update(ageGroup);
+            _appContext.AgeGroupDefinitions.Update(ageGroup);
         }
     }
 }

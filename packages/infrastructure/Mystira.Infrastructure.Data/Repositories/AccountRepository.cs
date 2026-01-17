@@ -20,20 +20,20 @@ public class AccountRepository : Repository<Account>, IAccountRepository
     /// <inheritdoc/>
     public async Task<Account?> GetByEmailAsync(string email)
     {
-        return await _dbSet
+        return await DbSet
             .FirstOrDefaultAsync(a => a.Email.ToLower() == email.ToLower());
     }
 
     /// <inheritdoc/>
     public async Task<Account?> GetByExternalUserIdAsync(string externalUserId)
     {
-        return await _dbSet.FirstOrDefaultAsync(a => a.ExternalUserId == externalUserId);
+        return await DbSet.FirstOrDefaultAsync(a => a.ExternalUserId == externalUserId);
     }
 
     /// <inheritdoc/>
     public async Task<bool> ExistsByEmailAsync(string email)
     {
-        return await _dbSet.AnyAsync(a => a.Email.ToLower() == email.ToLower());
+        return await DbSet.AnyAsync(a => a.Email.ToLower() == email.ToLower());
     }
 }
 
