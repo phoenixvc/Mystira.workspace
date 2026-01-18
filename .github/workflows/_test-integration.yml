@@ -110,6 +110,7 @@ jobs:
 
       - name: Install dependencies (TypeScript)
         if: inputs.language == 'typescript'
+        working-directory: ${{ inputs.working_directory }}
         run: pnpm install
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN || 'dummy' }}
@@ -147,13 +148,13 @@ jobs:
           ConnectionStrings__Redis: "localhost:6379"
           ASPNETCORE_ENVIRONMENT: Testing
         run: |
+          set -o pipefail
           dotnet test --configuration Release \
             --filter "Category=Integration" \
             --logger "trx;LogFileName=integration-results.trx" \
             --results-directory ./test-results \
             2>&1 | tee test-output.txt
-
-          echo "exit_code=$?" >> $GITHUB_OUTPUT
+          echo "exit_code=${PIPESTATUS[0]}" >> $GITHUB_OUTPUT
 
       - name: Run TypeScript integration tests
         if: inputs.language == 'typescript'
@@ -164,8 +165,9 @@ jobs:
           REDIS_URL: "redis://localhost:6379"
           NODE_ENV: test
         run: |
+          set -o pipefail
           pnpm test:integration 2>&1 | tee test-output.txt
-          echo "exit_code=$?" >> $GITHUB_OUTPUT
+          echo "exit_code=${PIPESTATUS[0]}" >> $GITHUB_OUTPUT
 
       - name: Run Python integration tests
         if: inputs.language == 'python'
@@ -175,8 +177,9 @@ jobs:
           DATABASE_URL: "postgresql://test:test@localhost:5432/mystira_test"
           REDIS_URL: "redis://localhost:6379"
         run: |
+          set -o pipefail
           pytest tests/integration -v --tb=short 2>&1 | tee test-output.txt
-          echo "exit_code=$?" >> $GITHUB_OUTPUT
+          echo "exit_code=${PIPESTATUS[0]}" >> $GITHUB_OUTPUT
 
       # Set result
       - name: Set test result

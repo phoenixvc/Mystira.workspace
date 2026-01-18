@@ -40,10 +40,8 @@ jobs:
       fail-fast: false
       matrix:
         environment: ${{ github.event.inputs.environment == 'all' && fromJSON('["dev", "staging", "prod"]') || fromJSON(format('["{0}"]', github.event.inputs.environment || 'prod')) }}
-    outputs:
-      dev_status: ${{ steps.check.outputs.dev_status }}
-      staging_status: ${{ steps.check.outputs.staging_status }}
-      prod_status: ${{ steps.check.outputs.prod_status }}
+    # Note: Matrix job outputs are determined by last-completing job, not aggregated
+    # Health status is tracked via step summary and alerts instead
 
     steps:
       - name: Define service endpoints
@@ -96,7 +94,8 @@ jobs:
           ALL_HEALTHY=true
           FAILED_SERVICES=""
 
-          echo "$ENDPOINTS" | jq -c '.[]' | while read -r endpoint; do
+          # Use process substitution to avoid subshell variable scope issue
+          while read -r endpoint; do
             NAME=$(echo "$endpoint" | jq -r '.name')
             URL=$(echo "$endpoint" | jq -r '.url')
 
@@ -113,7 +112,7 @@ jobs:
               ALL_HEALTHY=false
               FAILED_SERVICES="$FAILED_SERVICES $NAME"
             fi
-          done
+          done < <(echo "$ENDPOINTS" | jq -c '.[]')
 
           if [ "$ALL_HEALTHY" = true ]; then
             echo "${ENV}_status=healthy" >> $GITHUB_OUTPUT

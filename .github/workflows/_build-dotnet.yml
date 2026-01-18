@@ -155,5 +155,7 @@ jobs:
           echo "| Metric | Value |" >> $GITHUB_STEP_SUMMARY
           echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
           echo "| Build | ${{ steps.build.outputs.status == 'success' && '✅' || '❌' }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Tests | ${{ steps.test-result.outputs.status == 'success' && '✅' || steps.test-result.outputs.status == 'skipped' && '⏭️' || '❌' }} |" >> $GITHUB_STEP_SUMMARY
+          # Use nested ternary to fix precedence: success -> ✅, skipped -> ⏭️, else -> ❌
+          TEST_EMOJI="${{ steps.test-result.outputs.status == 'success' && '✅' || (steps.test-result.outputs.status == 'skipped' && '⏭️' || '❌') }}"
+          echo "| Tests | $TEST_EMOJI |" >> $GITHUB_STEP_SUMMARY
           echo "| Configuration | ${{ inputs.configuration }} |" >> $GITHUB_STEP_SUMMARY
