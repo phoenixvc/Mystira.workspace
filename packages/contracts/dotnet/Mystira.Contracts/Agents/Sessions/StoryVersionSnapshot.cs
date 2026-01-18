@@ -36,7 +36,7 @@ public record StoryVersionSnapshot
     /// Timestamp when this version was created.
     /// </summary>
     [JsonPropertyName("created_at")]
-    public required DateTime CreatedAt { get; init; }
+    public DateTime CreatedAt { get; init; }
 
     /// <summary>
     /// Description of changes in this version.
