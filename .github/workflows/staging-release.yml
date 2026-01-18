@@ -37,32 +37,29 @@ env:
   AKS_CLUSTER_NAME: mys-staging-core-aks-san
 
 jobs:
+  # Use reusable CI gate to verify builds passed
+  ci-gate:
+    name: CI Gate
+    uses: ./.github/workflows/_ci-gate.yml
+    with:
+      required_workflows: "[CI] Build & Test"
+    secrets: inherit
+
   ci-check:
     name: Verify CI Checks Passed
     runs-on: ubuntu-latest
+    needs: [ci-gate]
+    if: needs.ci-gate.outputs.passed == 'true' || github.event_name == 'workflow_dispatch'
     steps:
-      - uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
-
-      - name: Check if CI passed on PR
+      - name: CI Gate passed
         run: |
-          # Get the last commit SHA that was merged
-          LAST_COMMIT=${{ github.sha }}
-
-          # Check if there was a PR for this commit
-          PR_NUMBER=$(gh pr list --state merged --base main --search "$LAST_COMMIT" --json number --jq '.[0].number // empty')
-
-          if [ -n "$PR_NUMBER" ]; then
-            echo "Found merged PR #$PR_NUMBER"
-            # Verify CI checks passed (this is a basic check - GitHub branch protection should enforce this)
-            echo "CI checks should have passed via branch protection rules"
+          echo "## CI Gate Status" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ needs.ci-gate.outputs.passed }}" == "true" ]; then
+            echo "✅ All required CI checks passed" >> $GITHUB_STEP_SUMMARY
           else
-            echo "No PR found for commit $LAST_COMMIT - this may be a direct push to main"
-            echo "Branch protection should prevent direct pushes to main"
+            echo "⚠️ Workflow dispatch - skipping CI gate" >> $GITHUB_STEP_SUMMARY
           fi
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   deploy-infrastructure:
     name: Deploy Infrastructure to Staging

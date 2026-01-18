@@ -1,0 +1,295 @@
+name: "[Test] Load"
+
+# Load and performance testing workflow
+# Validates system behavior under stress and measures performance baselines
+# Uses k6 for load testing
+#
+# Layer 3 of the validation stack: Higher-level validation
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target environment'
+        required: true
+        type: choice
+        options:
+          - dev
+          - staging
+      test_type:
+        description: 'Type of load test'
+        required: true
+        type: choice
+        options:
+          - smoke
+          - load
+          - stress
+          - spike
+      duration:
+        description: 'Test duration (e.g., 1m, 5m, 10m)'
+        required: false
+        type: string
+        default: '2m'
+      vus:
+        description: 'Virtual users (concurrent)'
+        required: false
+        type: number
+        default: 10
+
+  # Run weekly load tests on staging
+  schedule:
+    - cron: '0 3 * * 0'  # Sunday at 3 AM UTC
+
+concurrency:
+  group: load-test-${{ github.event.inputs.environment || 'staging' }}
+  cancel-in-progress: false
+
+jobs:
+  setup:
+    name: Setup Load Test
+    runs-on: ubuntu-latest
+    outputs:
+      environment: ${{ steps.config.outputs.environment }}
+      api_url: ${{ steps.config.outputs.api_url }}
+      test_type: ${{ steps.config.outputs.test_type }}
+    steps:
+      - name: Configure test parameters
+        id: config
+        run: |
+          ENV="${{ github.event.inputs.environment || 'staging' }}"
+          TEST_TYPE="${{ github.event.inputs.test_type || 'smoke' }}"
+
+          echo "environment=$ENV" >> $GITHUB_OUTPUT
+          echo "test_type=$TEST_TYPE" >> $GITHUB_OUTPUT
+
+          case "$ENV" in
+            dev)
+              echo "api_url=https://dev-api.mystira.app" >> $GITHUB_OUTPUT
+              ;;
+            staging)
+              echo "api_url=https://staging-api.mystira.app" >> $GITHUB_OUTPUT
+              ;;
+          esac
+
+  load-test:
+    name: Run Load Test
+    runs-on: ubuntu-latest
+    needs: [setup]
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Install k6
+        run: |
+          sudo gpg -k
+          sudo gpg --no-default-keyring --keyring /usr/share/keyrings/k6-archive-keyring.gpg --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys C5AD17C747E3415A3642D57D77C6C491D6AC1D69
+          echo "deb [signed-by=/usr/share/keyrings/k6-archive-keyring.gpg] https://dl.k6.io/deb stable main" | sudo tee /etc/apt/sources.list.d/k6.list
+          sudo apt-get update
+          sudo apt-get install k6
+
+      - name: Create load test script
+        run: |
+          mkdir -p tests/load
+          cat > tests/load/api-load-test.js << 'EOF'
+          import http from 'k6/http';
+          import { check, sleep } from 'k6';
+          import { Rate, Trend } from 'k6/metrics';
+
+          // Custom metrics
+          const errorRate = new Rate('errors');
+          const apiLatency = new Trend('api_latency');
+
+          // Test configuration based on test type
+          const testConfigs = {
+            smoke: {
+              vus: 1,
+              duration: '1m',
+              thresholds: {
+                http_req_duration: ['p(95)<500'],
+                errors: ['rate<0.01'],
+              },
+            },
+            load: {
+              stages: [
+                { duration: '2m', target: __ENV.VUS || 10 },
+                { duration: __ENV.DURATION || '5m', target: __ENV.VUS || 10 },
+                { duration: '2m', target: 0 },
+              ],
+              thresholds: {
+                http_req_duration: ['p(95)<1000', 'p(99)<2000'],
+                errors: ['rate<0.05'],
+              },
+            },
+            stress: {
+              stages: [
+                { duration: '2m', target: 10 },
+                { duration: '5m', target: 50 },
+                { duration: '2m', target: 100 },
+                { duration: '5m', target: 100 },
+                { duration: '2m', target: 0 },
+              ],
+              thresholds: {
+                http_req_duration: ['p(95)<2000'],
+                errors: ['rate<0.10'],
+              },
+            },
+            spike: {
+              stages: [
+                { duration: '10s', target: 100 },
+                { duration: '1m', target: 100 },
+                { duration: '10s', target: 0 },
+              ],
+              thresholds: {
+                http_req_duration: ['p(95)<3000'],
+                errors: ['rate<0.15'],
+              },
+            },
+          };
+
+          const testType = __ENV.TEST_TYPE || 'smoke';
+          const config = testConfigs[testType];
+
+          export const options = {
+            ...config,
+            tags: {
+              environment: __ENV.ENVIRONMENT,
+              test_type: testType,
+            },
+          };
+
+          const BASE_URL = __ENV.API_URL;
+
+          export default function () {
+            // Health check endpoint
+            const healthRes = http.get(`${BASE_URL}/health`);
+            check(healthRes, {
+              'health check status is 200': (r) => r.status === 200,
+            });
+            errorRate.add(healthRes.status !== 200);
+            apiLatency.add(healthRes.timings.duration);
+
+            sleep(1);
+
+            // API endpoints (add your actual endpoints)
+            const endpoints = [
+              '/api/v1/scenarios',
+              '/api/v1/stories',
+            ];
+
+            for (const endpoint of endpoints) {
+              const res = http.get(`${BASE_URL}${endpoint}`, {
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+              });
+
+              check(res, {
+                [`${endpoint} status is 2xx`]: (r) => r.status >= 200 && r.status < 300,
+                [`${endpoint} response time < 1s`]: (r) => r.timings.duration < 1000,
+              });
+
+              errorRate.add(res.status >= 400);
+              apiLatency.add(res.timings.duration);
+
+              sleep(0.5);
+            }
+          }
+
+          export function handleSummary(data) {
+            return {
+              'stdout': textSummary(data, { indent: ' ', enableColors: true }),
+              'tests/load/summary.json': JSON.stringify(data),
+            };
+          }
+
+          function textSummary(data, opts) {
+            // Basic text summary
+            let summary = '\n=== Load Test Summary ===\n';
+            summary += `Total requests: ${data.metrics.http_reqs.values.count}\n`;
+            summary += `Failed requests: ${data.metrics.http_req_failed?.values.passes || 0}\n`;
+            summary += `Avg response time: ${data.metrics.http_req_duration.values.avg.toFixed(2)}ms\n`;
+            summary += `95th percentile: ${data.metrics.http_req_duration.values['p(95)'].toFixed(2)}ms\n`;
+            return summary;
+          }
+          EOF
+
+      - name: Run load test
+        id: load-test
+        env:
+          API_URL: ${{ needs.setup.outputs.api_url }}
+          ENVIRONMENT: ${{ needs.setup.outputs.environment }}
+          TEST_TYPE: ${{ needs.setup.outputs.test_type }}
+          DURATION: ${{ github.event.inputs.duration || '2m' }}
+          VUS: ${{ github.event.inputs.vus || '10' }}
+        run: |
+          k6 run tests/load/api-load-test.js \
+            --out json=tests/load/results.json \
+            2>&1 | tee load-test-output.txt
+
+          EXIT_CODE=${PIPESTATUS[0]}
+          echo "exit_code=$EXIT_CODE" >> $GITHUB_OUTPUT
+
+      - name: Upload results
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: load-test-results-${{ needs.setup.outputs.environment }}
+          path: |
+            tests/load/results.json
+            tests/load/summary.json
+            load-test-output.txt
+          retention-days: 30
+
+      - name: Parse and display results
+        if: always()
+        run: |
+          echo "## Load Test Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Metric | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Environment | ${{ needs.setup.outputs.environment }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Test Type | ${{ needs.setup.outputs.test_type }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Duration | ${{ github.event.inputs.duration || '2m' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Virtual Users | ${{ github.event.inputs.vus || '10' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Result | ${{ steps.load-test.outputs.exit_code == '0' && '✅ Passed' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [ -f "tests/load/summary.json" ]; then
+            echo "### Performance Metrics" >> $GITHUB_STEP_SUMMARY
+            echo '```json' >> $GITHUB_STEP_SUMMARY
+            cat tests/load/summary.json | jq '.metrics | {http_reqs: .http_reqs.values.count, avg_duration: .http_req_duration.values.avg, p95_duration: .http_req_duration.values["p(95)"]}' >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Check thresholds
+        if: steps.load-test.outputs.exit_code != '0'
+        run: |
+          echo "::error::Load test failed to meet performance thresholds"
+          exit 1
+
+  compare-baseline:
+    name: Compare with Baseline
+    runs-on: ubuntu-latest
+    needs: [setup, load-test]
+    if: always() && needs.load-test.result == 'success'
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Download current results
+        uses: actions/download-artifact@v7
+        with:
+          name: load-test-results-${{ needs.setup.outputs.environment }}
+          path: tests/load/current/
+
+      - name: Compare with baseline
+        run: |
+          echo "## Baseline Comparison" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # In a real scenario, you'd compare with stored baseline metrics
+          # This is a placeholder for demonstration
+          if [ -f "tests/load/baseline.json" ]; then
+            echo "Comparing with stored baseline..." >> $GITHUB_STEP_SUMMARY
+            # Add comparison logic here
+          else
+            echo "No baseline found. Current results will be used as reference." >> $GITHUB_STEP_SUMMARY
+          fi

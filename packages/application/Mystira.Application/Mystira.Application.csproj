@@ -45,7 +45,7 @@
     <PackageReference Include="FluentValidation" Version="12.1.1" />
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.1" />
     <!-- DI abstractions -->
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.12" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.8" />
     <!-- JSON Schema -->
     <PackageReference Include="NJsonSchema" Version="11.5.2" />
     <!-- Ardalis.Specification for composable query patterns (ADR-0014) -->
@@ -53,7 +53,7 @@
     <!-- YAML serialization for character maps -->
     <PackageReference Include="YamlDotNet" Version="16.3.0" />
     <!-- Source Link -->
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="10.0.102" PrivateAssets="All" />
   </ItemGroup>
 
   <!-- Workspace project references -->
