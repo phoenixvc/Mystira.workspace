@@ -138,8 +138,9 @@ public record SessionStateResponse
 
 /// <summary>
 /// Response from story evaluation.
+/// Note: Named StoryEvaluateResponse to avoid conflict with Mystira.Contracts.Agents.Sessions.EvaluateResponse.
 /// </summary>
-public record EvaluateResponse
+public record StoryEvaluateResponse
 {
     /// <summary>
     /// Whether evaluation passed.
@@ -180,8 +181,9 @@ public record StoryRefineRequest
 
 /// <summary>
 /// Response from story refinement.
+/// Note: Named StoryRefineResponse to avoid conflict with Mystira.Contracts.Agents.Sessions.RefineResponse.
 /// </summary>
-public record RefineResponse
+public record StoryRefineResponse
 {
     /// <summary>
     /// Whether refinement succeeded.
