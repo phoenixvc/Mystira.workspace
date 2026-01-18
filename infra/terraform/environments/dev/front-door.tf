@@ -38,7 +38,7 @@ module "front_door" {
   # Admin services
   enable_admin_services     = true
   admin_api_backend_address = "dev.admin-api-k8s.mystira.app"
-  admin_ui_backend_address  = "dev.admin-k8s.mystira.app"
+  admin_ui_backend_address  = module.admin_ui.static_web_app_default_hostname # SWA instead of K8s
   custom_domain_admin_api   = "dev.admin-api.mystira.app"
   custom_domain_admin_ui    = "dev.admin.mystira.app"
 

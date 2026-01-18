@@ -1,0 +1,155 @@
+name: "[Deploy] Admin UI to SWA"
+
+# Deploys Mystira.Admin.UI (React/Vite) to Azure Static Web App
+#
+# Triggers:
+#   - Push to dev branch (auto-deploy to dev environment)
+#   - Manual workflow dispatch
+#   - Repository dispatch from Admin.UI submodule
+
+on:
+  push:
+    branches:
+      - dev
+    paths:
+      - "packages/admin-ui/**"
+      - ".github/workflows/deploy-admin-ui-swa.yml"
+
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Environment to deploy to"
+        required: true
+        default: "dev"
+        type: choice
+        options:
+          - dev
+          - staging
+
+  repository_dispatch:
+    types:
+      - admin-ui-swa-deploy
+
+concurrency:
+  group: admin-ui-swa-${{ github.event.inputs.environment || 'dev' }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: "20"
+  PNPM_VERSION: "9"
+
+jobs:
+  build-and-deploy:
+    name: Build and Deploy Admin UI
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment || 'dev' }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install
+        working-directory: packages/admin-ui
+
+      - name: Set environment variables
+        run: |
+          ENV="${{ github.event.inputs.environment || 'dev' }}"
+
+          if [ "$ENV" == "dev" ]; then
+            echo "VITE_API_URL=https://dev.admin-api.mystira.app" >> $GITHUB_ENV
+            echo "VITE_AZURE_TENANT_ID=${{ secrets.AZURE_TENANT_ID }}" >> $GITHUB_ENV
+            echo "VITE_AZURE_CLIENT_ID=${{ secrets.DEV_ADMIN_UI_CLIENT_ID }}" >> $GITHUB_ENV
+            echo "VITE_API_SCOPE=api://mystira-admin-api-dev/Admin.Read" >> $GITHUB_ENV
+          elif [ "$ENV" == "staging" ]; then
+            echo "VITE_API_URL=https://staging.admin-api.mystira.app" >> $GITHUB_ENV
+            echo "VITE_AZURE_TENANT_ID=${{ secrets.AZURE_TENANT_ID }}" >> $GITHUB_ENV
+            echo "VITE_AZURE_CLIENT_ID=${{ secrets.STAGING_ADMIN_UI_CLIENT_ID }}" >> $GITHUB_ENV
+            echo "VITE_API_SCOPE=api://mystira-admin-api-staging/Admin.Read" >> $GITHUB_ENV
+          fi
+
+      - name: Build application
+        run: pnpm build
+        working-directory: packages/admin-ui
+        env:
+          VITE_API_URL: ${{ env.VITE_API_URL }}
+          VITE_AZURE_TENANT_ID: ${{ env.VITE_AZURE_TENANT_ID }}
+          VITE_AZURE_CLIENT_ID: ${{ env.VITE_AZURE_CLIENT_ID }}
+          VITE_API_SCOPE: ${{ env.VITE_API_SCOPE }}
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.MYSTIRA_AZURE_CREDENTIALS }}
+
+      - name: Get SWA deployment token
+        id: swa-token
+        run: |
+          ENV="${{ github.event.inputs.environment || 'dev' }}"
+
+          if [ "$ENV" == "dev" ]; then
+            RG="mys-dev-admin-rg-san"
+          elif [ "$ENV" == "staging" ]; then
+            RG="mys-staging-admin-rg-san"
+          fi
+
+          # Get SWA name
+          SWA_NAME=$(az staticwebapp list --resource-group "$RG" --query "[?contains(name, 'admin-ui')].name" -o tsv | head -1)
+
+          if [ -z "$SWA_NAME" ]; then
+            echo "::error::Could not find Admin UI SWA in resource group $RG"
+            exit 1
+          fi
+
+          echo "SWA Name: $SWA_NAME"
+          echo "swa_name=$SWA_NAME" >> $GITHUB_OUTPUT
+
+          # Get deployment token
+          TOKEN=$(az staticwebapp secrets list --name "$SWA_NAME" --query "properties.apiKey" -o tsv)
+          echo "::add-mask::$TOKEN"
+          echo "token=$TOKEN" >> $GITHUB_OUTPUT
+
+      - name: Deploy to Azure Static Web App
+        uses: Azure/static-web-apps-deploy@v1
+        with:
+          azure_static_web_apps_api_token: ${{ steps.swa-token.outputs.token }}
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          action: "upload"
+          app_location: "packages/admin-ui"
+          output_location: "dist"
+          skip_app_build: true # We already built it
+
+      - name: Deployment Summary
+        run: |
+          ENV="${{ github.event.inputs.environment || 'dev' }}"
+
+          echo "## Admin UI Deployment Complete" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Environment**: $ENV" >> $GITHUB_STEP_SUMMARY
+          echo "- **SWA Name**: ${{ steps.swa-token.outputs.swa_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Commit**: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### URLs" >> $GITHUB_STEP_SUMMARY
+
+          if [ "$ENV" == "dev" ]; then
+            echo "- **Front Door URL**: https://dev.admin.mystira.app" >> $GITHUB_STEP_SUMMARY
+          elif [ "$ENV" == "staging" ]; then
+            echo "- **Front Door URL**: https://staging.admin.mystira.app" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### API Configuration" >> $GITHUB_STEP_SUMMARY
+          echo "- API URL: ${{ env.VITE_API_URL }}" >> $GITHUB_STEP_SUMMARY
