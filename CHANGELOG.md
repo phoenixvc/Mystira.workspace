@@ -9,6 +9,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **StoryGenerator Contracts**: Comprehensive contracts for story generation
+  - Stories: SceneType, DifficultyLevel, SessionLength enums; Scenario, Scene, Branch, EchoLog, CompassChange classes
+  - Services: ICommandHandler, ILlmServiceFactory, ILLMService, IStorySchemaProvider, IStoryValidationService interfaces
+  - Commands.Chat: HelpCommand, RequirementsCommand, SafetyPolicyCommand, SchemaDocsCommand, GuidelinesCommand, FreeTextCommand
+  - Commands.Stories: GenerateStoryCommand, RefineStoryCommand, AutoFixStoryJsonCommand, SummarizeStoryCommand, ValidateStoryCommand
+  - Configuration: EmbeddingSettings for semantic search
+  - Graph: IScenarioGraph interface for scenario structure navigation
+  - StoryConsistency: ContinuityIssue, PrefixSummary, ScenarioConsistencyReport types
+  - Entities: EntityType, StoryEntity, EntityMention, EntityRelationship, EntityGraph types
+  - Common: TokenUsage shared type for LLM API usage tracking
 - **CI Workflows**: Added component CI workflows for Admin API, App, and Devhub
 - **Repository Metadata Tooling**: Created `scripts/sync-repo-metadata.sh` for syncing GitHub repository metadata
 - **Repository Metadata Config**: Added `scripts/repo-metadata.json` for centralized repository configuration
@@ -21,6 +31,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Mystira.Contracts Version**: Bumped to 0.6.0-alpha for breaking changes
 - **Workflow Naming**: Standardized all 14 GitHub workflow names using hierarchical "Category: Name" pattern:
   - Components: Admin API - CI, Admin UI - CI, App - CI, Chain - CI, Devhub - CI, Publisher - CI, Story Generator - CI
   - Infrastructure: Deploy, Validate
@@ -30,6 +41,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **ADR-0004**: Updated with complete list of current CI/CD workflows and cross-reference to ADR-0012
 - **Documentation Organization**: Consolidated and improved documentation structure across workspace
 - **Script Permissions**: Fixed executable permissions on all utility scripts (755)
+
+### Breaking (Mystira.Contracts 0.6.0-alpha)
+
+- **StoryGenerator.Sessions**: Renamed types to avoid namespace conflicts with Agents.Sessions:
+  - `RefineResponse` → `StoryRefineResponse`
+  - `EvaluateResponse` → `StoryEvaluateResponse`
+- **StoryGenerator.Stories**: Renamed `ValidationIssue` → `StoryValidationIssue` to avoid conflict with ValidationModels
 
 ### Removed
 
