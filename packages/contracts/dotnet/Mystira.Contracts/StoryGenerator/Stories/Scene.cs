@@ -93,6 +93,7 @@ public class Scene
     /// <returns>True if this is a final scene, false otherwise.</returns>
     public bool IsFinalScene()
     {
-        return IsEnd || Branches.Count == 0;
+        return IsEnd || (Branches?.Count ?? 0) == 0;
+    }
     }
 }
