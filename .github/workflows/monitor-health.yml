@@ -49,34 +49,16 @@ jobs:
         run: |
           ENV="${{ matrix.environment }}"
 
-          # Define endpoints based on environment
+          # Define endpoints based on environment (single-line JSON for GITHUB_OUTPUT compatibility)
           case "$ENV" in
             dev)
-              echo 'endpoints=[
-                {"name": "App API", "url": "https://dev-api.mystira.app/health"},
-                {"name": "Story Generator", "url": "https://story-generator.dev.mystira.app/health"},
-                {"name": "Admin API", "url": "https://admin-api.dev.mystira.app/health"},
-                {"name": "Publisher", "url": "https://publisher.dev.mystira.app/health"},
-                {"name": "Chain", "url": "https://chain.dev.mystira.app/health"}
-              ]' >> $GITHUB_OUTPUT
+              echo 'endpoints=[{"name": "App API", "url": "https://dev-api.mystira.app/health"},{"name": "Story Generator", "url": "https://story-generator.dev.mystira.app/health"},{"name": "Admin API", "url": "https://admin-api.dev.mystira.app/health"},{"name": "Publisher", "url": "https://publisher.dev.mystira.app/health"},{"name": "Chain", "url": "https://chain.dev.mystira.app/health"}]' >> $GITHUB_OUTPUT
               ;;
             staging)
-              echo 'endpoints=[
-                {"name": "App API", "url": "https://staging-api.mystira.app/health"},
-                {"name": "Story Generator", "url": "https://story-generator.staging.mystira.app/health"},
-                {"name": "Admin API", "url": "https://admin-api.staging.mystira.app/health"},
-                {"name": "Publisher", "url": "https://publisher.staging.mystira.app/health"},
-                {"name": "Chain", "url": "https://chain.staging.mystira.app/health"}
-              ]' >> $GITHUB_OUTPUT
+              echo 'endpoints=[{"name": "App API", "url": "https://staging-api.mystira.app/health"},{"name": "Story Generator", "url": "https://story-generator.staging.mystira.app/health"},{"name": "Admin API", "url": "https://admin-api.staging.mystira.app/health"},{"name": "Publisher", "url": "https://publisher.staging.mystira.app/health"},{"name": "Chain", "url": "https://chain.staging.mystira.app/health"}]' >> $GITHUB_OUTPUT
               ;;
             prod)
-              echo 'endpoints=[
-                {"name": "App API", "url": "https://api.mystira.app/health"},
-                {"name": "Story Generator", "url": "https://story-generator.mystira.app/health"},
-                {"name": "Admin API", "url": "https://admin-api.mystira.app/health"},
-                {"name": "Publisher", "url": "https://publisher.mystira.app/health"},
-                {"name": "Chain", "url": "https://chain.mystira.app/health"}
-              ]' >> $GITHUB_OUTPUT
+              echo 'endpoints=[{"name": "App API", "url": "https://api.mystira.app/health"},{"name": "Story Generator", "url": "https://story-generator.mystira.app/health"},{"name": "Admin API", "url": "https://admin-api.mystira.app/health"},{"name": "Publisher", "url": "https://publisher.mystira.app/health"},{"name": "Chain", "url": "https://chain.mystira.app/health"}]' >> $GITHUB_OUTPUT
               ;;
           esac
 
