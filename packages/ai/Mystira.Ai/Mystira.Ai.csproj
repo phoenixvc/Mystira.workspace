@@ -10,7 +10,7 @@
 
     <!-- Package metadata -->
     <PackageId>Mystira.Ai</PackageId>
-    <Version>0.5.2-alpha</Version>
+    <Version>0.6.0-alpha</Version>
     <Authors>Mystira Team</Authors>
     <Company>PhoenixVC</Company>
     <Description>Generic LLM/AI infrastructure for Mystira platform - Azure OpenAI, Anthropic providers, rate limiting</Description>
