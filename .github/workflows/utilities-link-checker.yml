@@ -22,11 +22,14 @@ jobs:
   check-links:
     name: Check Markdown Links
     runs-on: ubuntu-latest
+    # Don't fail PR builds during alpha - link checking is advisory
+    continue-on-error: ${{ github.event_name == 'pull_request' }}
     steps:
       - uses: actions/checkout@v6
         with:
-          submodules: recursive
-          token: ${{ secrets.MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN }}
+          # Try with submodules if token is available, otherwise checkout without
+          submodules: ${{ secrets.MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN && 'recursive' || 'false' }}
+          token: ${{ secrets.MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN || github.token }}
 
       - name: Link Checker
         uses: lycheeverse/lychee-action@v2
