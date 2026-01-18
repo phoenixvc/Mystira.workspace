@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using Mystira.Contracts.StoryGenerator.Stories;
 using Mystira.Contracts.StoryGenerator.StoryConsistency;
 
@@ -137,25 +138,30 @@ public class GraphValidationIssue
     /// <summary>
     /// Type of issue.
     /// </summary>
+    [JsonPropertyName("type")]
     public string Type { get; set; } = string.Empty;
 
     /// <summary>
     /// Affected scene IDs.
     /// </summary>
+    [JsonPropertyName("scene_ids")]
     public List<string> SceneIds { get; set; } = new();
 
     /// <summary>
     /// Description of the issue.
     /// </summary>
+    [JsonPropertyName("description")]
     public string Description { get; set; } = string.Empty;
 
     /// <summary>
     /// Severity of the issue.
     /// </summary>
+    [JsonPropertyName("severity")]
     public string Severity { get; set; } = string.Empty;
 
     /// <summary>
     /// Suggested fix.
     /// </summary>
+    [JsonPropertyName("suggested_fix")]
     public string? SuggestedFix { get; set; }
 }

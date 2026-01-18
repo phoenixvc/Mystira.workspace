@@ -1,5 +1,6 @@
 using System.Text.Json.Serialization;
 using Mystira.Contracts.StoryGenerator.Chat;
+using Mystira.Contracts.StoryGenerator.Common;
 
 namespace Mystira.Contracts.StoryGenerator.Commands.Stories;
 
@@ -151,28 +152,4 @@ public class StoryChange
     /// </summary>
     [JsonPropertyName("current")]
     public string? Current { get; set; }
-}
-
-/// <summary>
-/// Token usage statistics.
-/// </summary>
-public class TokenUsage
-{
-    /// <summary>
-    /// Tokens in the prompt.
-    /// </summary>
-    [JsonPropertyName("prompt_tokens")]
-    public int PromptTokens { get; set; }
-
-    /// <summary>
-    /// Tokens in the completion.
-    /// </summary>
-    [JsonPropertyName("completion_tokens")]
-    public int CompletionTokens { get; set; }
-
-    /// <summary>
-    /// Total tokens.
-    /// </summary>
-    [JsonPropertyName("total_tokens")]
-    public int TotalTokens { get; set; }
 }

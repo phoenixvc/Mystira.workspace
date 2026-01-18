@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using Mystira.Contracts.StoryGenerator.Common;
 
 namespace Mystira.Contracts.StoryGenerator.Commands.Stories;
 
