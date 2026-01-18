@@ -23,19 +23,19 @@ public class StoryValidationResult
     /// List of validation errors.
     /// </summary>
     [JsonPropertyName("errors")]
-    public List<ValidationIssue> Errors { get; set; } = new();
+    public List<StoryValidationIssue> Errors { get; set; } = new();
 
     /// <summary>
     /// List of validation warnings.
     /// </summary>
     [JsonPropertyName("warnings")]
-    public List<ValidationIssue> Warnings { get; set; } = new();
+    public List<StoryValidationIssue> Warnings { get; set; } = new();
 
     /// <summary>
     /// List of validation suggestions.
     /// </summary>
     [JsonPropertyName("suggestions")]
-    public List<ValidationIssue> Suggestions { get; set; } = new();
+    public List<StoryValidationIssue> Suggestions { get; set; } = new();
 
     /// <summary>
     /// Schema validation result.
@@ -76,8 +76,9 @@ public class StoryValidationResult
 
 /// <summary>
 /// Represents a single validation issue (error, warning, or suggestion).
+/// Note: Named StoryValidationIssue to avoid conflict with ValidationIssue in ValidationModels.cs.
 /// </summary>
-public class ValidationIssue
+public class StoryValidationIssue
 {
     /// <summary>
     /// Error/warning code for categorization.
