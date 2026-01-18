@@ -1,0 +1,51 @@
+name: "[Rollback] Chain"
+
+# Manual rollback workflow for Chain service
+# Supports Kubernetes rollbacks
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target environment'
+        required: true
+        type: choice
+        options:
+          - dev
+          - staging
+          - prod
+      confirm:
+        description: 'Type "ROLLBACK" to confirm'
+        required: true
+        type: string
+      reason:
+        description: 'Reason for rollback (required for audit trail)'
+        required: true
+        type: string
+      revision:
+        description: 'Specific revision to rollback to (leave empty for previous)'
+        required: false
+        type: string
+
+jobs:
+  validate-confirmation:
+    name: Validate Confirmation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check confirmation
+        if: github.event.inputs.confirm != 'ROLLBACK'
+        run: |
+          echo "::error::Invalid confirmation. You must type 'ROLLBACK' exactly."
+          exit 1
+
+  rollback:
+    name: Rollback Chain
+    needs: [validate-confirmation]
+    uses: ./.github/workflows/_rollback.yml
+    with:
+      service: chain
+      environment: ${{ github.event.inputs.environment }}
+      rollback_type: kubernetes
+      reason: ${{ github.event.inputs.reason }}
+      revision: ${{ github.event.inputs.revision }}
+    secrets: inherit

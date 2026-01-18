@@ -1,0 +1,159 @@
+name: "[Build] .NET"
+
+# Reusable workflow for building and testing .NET projects
+# Consolidates duplicated .NET build logic from ci.yml, packages-*.yml
+#
+# Usage:
+#   jobs:
+#     build:
+#       uses: ./.github/workflows/_build-dotnet.yml
+#       with:
+#         projects: "packages/core/Mystira.Core,packages/domain/Mystira.Domain"
+#       secrets: inherit
+
+on:
+  workflow_call:
+    inputs:
+      projects:
+        description: 'Comma-separated list of project paths to build'
+        required: true
+        type: string
+      test_projects:
+        description: 'Comma-separated list of test project paths (optional)'
+        required: false
+        type: string
+        default: ''
+      configuration:
+        description: 'Build configuration (Release, Debug)'
+        required: false
+        type: string
+        default: 'Release'
+      upload_coverage:
+        description: 'Upload coverage to Codecov'
+        required: false
+        type: boolean
+        default: true
+      coverage_flags:
+        description: 'Codecov flags'
+        required: false
+        type: string
+        default: 'dotnet'
+      dotnet_version:
+        description: '.NET SDK version'
+        required: false
+        type: string
+        default: '9.0.x'
+    outputs:
+      build_result:
+        description: 'Build result: success, failure'
+        value: ${{ jobs.build.outputs.result }}
+      test_result:
+        description: 'Test result: success, failure, skipped'
+        value: ${{ jobs.build.outputs.test_result }}
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+
+jobs:
+  build:
+    name: Build & Test .NET
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
+    outputs:
+      result: ${{ steps.build-result.outputs.status }}
+      test_result: ${{ steps.test-result.outputs.status }}
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: ${{ inputs.dotnet_version }}
+          source-url: https://nuget.pkg.github.com/phoenixvc/index.json
+        env:
+          NUGET_AUTH_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN }}
+
+      - name: Restore dependencies
+        run: |
+          IFS=',' read -ra PROJECTS <<< "${{ inputs.projects }}"
+          for project in "${PROJECTS[@]}"; do
+            project=$(echo "$project" | xargs)  # trim whitespace
+            echo "Restoring $project..."
+            dotnet restore "$project"
+          done
+
+      - name: Build projects
+        id: build
+        run: |
+          BUILD_STATUS="success"
+          IFS=',' read -ra PROJECTS <<< "${{ inputs.projects }}"
+          for project in "${PROJECTS[@]}"; do
+            project=$(echo "$project" | xargs)
+            echo "Building $project..."
+            if ! dotnet build "$project" --configuration ${{ inputs.configuration }} --no-restore; then
+              BUILD_STATUS="failure"
+            fi
+          done
+          echo "status=$BUILD_STATUS" >> $GITHUB_OUTPUT
+
+      - name: Set build result
+        id: build-result
+        run: echo "status=${{ steps.build.outputs.status }}" >> $GITHUB_OUTPUT
+
+      - name: Run tests
+        id: test
+        if: inputs.test_projects != ''
+        run: |
+          TEST_STATUS="success"
+          mkdir -p ./coverage
+
+          IFS=',' read -ra TEST_PROJECTS <<< "${{ inputs.test_projects }}"
+          for project in "${TEST_PROJECTS[@]}"; do
+            project=$(echo "$project" | xargs)
+            PROJECT_NAME=$(basename "$project" | sed 's/\.Tests$//')
+            echo "Testing $project..."
+
+            if ! dotnet test "$project" \
+              --configuration ${{ inputs.configuration }} \
+              --no-build \
+              --collect:"XPlat Code Coverage" \
+              --results-directory "./coverage/$PROJECT_NAME" \
+              -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=cobertura; then
+              TEST_STATUS="failure"
+            fi
+          done
+          echo "status=$TEST_STATUS" >> $GITHUB_OUTPUT
+
+      - name: Set test result
+        id: test-result
+        run: |
+          if [ -z "${{ inputs.test_projects }}" ]; then
+            echo "status=skipped" >> $GITHUB_OUTPUT
+          else
+            echo "status=${{ steps.test.outputs.status || 'success' }}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Upload coverage to Codecov
+        if: inputs.upload_coverage && inputs.test_projects != ''
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          flags: ${{ inputs.coverage_flags }}
+          directory: ./coverage
+          files: "**/coverage.cobertura.xml"
+          fail_ci_if_error: false
+
+      - name: Build Summary
+        if: always()
+        run: |
+          echo "## .NET Build Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Metric | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Build | ${{ steps.build.outputs.status == 'success' && '✅' || '❌' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Tests | ${{ steps.test-result.outputs.status == 'success' && '✅' || steps.test-result.outputs.status == 'skipped' && '⏭️' || '❌' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Configuration | ${{ inputs.configuration }} |" >> $GITHUB_STEP_SUMMARY

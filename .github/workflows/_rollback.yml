@@ -1,0 +1,328 @@
+name: "[Rollback] Service"
+
+# Reusable rollback workflow for Azure services
+# Supports App Service slot swaps and Kubernetes rollbacks
+# Layer 7 of the validation stack: Survivability
+#
+# Usage:
+#   jobs:
+#     rollback:
+#       uses: ./.github/workflows/_rollback.yml
+#       with:
+#         service: story-generator
+#         environment: prod
+#         rollback_type: slot-swap
+#       secrets: inherit
+
+on:
+  workflow_call:
+    inputs:
+      service:
+        description: 'Service to rollback (admin-api, story-generator, chain, publisher)'
+        required: true
+        type: string
+      environment:
+        description: 'Target environment (dev, staging, prod)'
+        required: true
+        type: string
+      rollback_type:
+        description: 'Rollback method: slot-swap, kubernetes, container-revision'
+        required: false
+        type: string
+        default: 'kubernetes'
+      reason:
+        description: 'Reason for rollback'
+        required: true
+        type: string
+      revision:
+        description: 'Specific revision to rollback to (optional, defaults to previous)'
+        required: false
+        type: string
+        default: ''
+      skip_verification:
+        description: 'Skip post-rollback health verification'
+        required: false
+        type: boolean
+        default: false
+    outputs:
+      rollback_id:
+        description: 'Unique rollback identifier'
+        value: ${{ jobs.execute-rollback.outputs.rollback_id }}
+      result:
+        description: 'Rollback result: success, failure'
+        value: ${{ jobs.verify-rollback.outputs.result }}
+
+env:
+  REGION_CODE: san
+
+jobs:
+  validate:
+    name: Validate Rollback Request
+    runs-on: ubuntu-latest
+    outputs:
+      rollback_id: ${{ steps.generate.outputs.rollback_id }}
+      resource_group: ${{ steps.config.outputs.resource_group }}
+      app_name: ${{ steps.config.outputs.app_name }}
+      k8s_namespace: ${{ steps.config.outputs.k8s_namespace }}
+      k8s_deployment: ${{ steps.config.outputs.k8s_deployment }}
+    steps:
+      - name: Generate rollback ID
+        id: generate
+        run: |
+          ROLLBACK_ID="rollback-${{ inputs.service }}-${{ inputs.environment }}-$(date +%Y%m%d-%H%M%S)"
+          echo "rollback_id=$ROLLBACK_ID" >> $GITHUB_OUTPUT
+
+      - name: Configure service parameters
+        id: config
+        run: |
+          ENV="${{ inputs.environment }}"
+          SERVICE="${{ inputs.service }}"
+          REGION="${{ env.REGION_CODE }}"
+
+          # Resource group
+          echo "resource_group=mys-${ENV}-core-rg-${REGION}" >> $GITHUB_OUTPUT
+
+          # Service-specific configuration
+          case "$SERVICE" in
+            admin-api)
+              echo "app_name=mys-${ENV}-admin-api-${REGION}" >> $GITHUB_OUTPUT
+              echo "k8s_namespace=mystira-${ENV}" >> $GITHUB_OUTPUT
+              echo "k8s_deployment=admin-api" >> $GITHUB_OUTPUT
+              ;;
+            story-generator)
+              echo "app_name=mys-${ENV}-story-gen-${REGION}" >> $GITHUB_OUTPUT
+              echo "k8s_namespace=mystira-${ENV}" >> $GITHUB_OUTPUT
+              echo "k8s_deployment=story-generator" >> $GITHUB_OUTPUT
+              ;;
+            chain)
+              echo "app_name=mys-${ENV}-chain-${REGION}" >> $GITHUB_OUTPUT
+              echo "k8s_namespace=mystira-${ENV}" >> $GITHUB_OUTPUT
+              echo "k8s_deployment=chain" >> $GITHUB_OUTPUT
+              ;;
+            publisher)
+              echo "app_name=mys-${ENV}-publisher-${REGION}" >> $GITHUB_OUTPUT
+              echo "k8s_namespace=mystira-${ENV}" >> $GITHUB_OUTPUT
+              echo "k8s_deployment=publisher" >> $GITHUB_OUTPUT
+              ;;
+            *)
+              echo "::error::Unknown service: $SERVICE"
+              exit 1
+              ;;
+          esac
+
+      - name: Record rollback initiation
+        run: |
+          echo "# Rollback Initiated" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Field | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Rollback ID | ${{ steps.generate.outputs.rollback_id }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Service | ${{ inputs.service }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Environment | ${{ inputs.environment }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Method | ${{ inputs.rollback_type }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Reason | ${{ inputs.reason }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Triggered by | ${{ github.actor }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Timestamp | $(date -u +%Y-%m-%dT%H:%M:%SZ) |" >> $GITHUB_STEP_SUMMARY
+
+  capture-state:
+    name: Capture Pre-Rollback State
+    runs-on: ubuntu-latest
+    needs: [validate]
+    permissions:
+      id-token: write
+      contents: read
+    outputs:
+      current_revision: ${{ steps.state.outputs.current_revision }}
+      health_status: ${{ steps.health.outputs.status }}
+    steps:
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Get AKS credentials
+        if: inputs.rollback_type == 'kubernetes'
+        run: |
+          az aks get-credentials \
+            --resource-group ${{ needs.validate.outputs.resource_group }} \
+            --name mys-${{ inputs.environment }}-aks-${{ env.REGION_CODE }} \
+            --overwrite-existing
+
+      - name: Capture current state
+        id: state
+        run: |
+          if [ "${{ inputs.rollback_type }}" == "kubernetes" ]; then
+            CURRENT=$(kubectl get deployment ${{ needs.validate.outputs.k8s_deployment }} \
+              -n ${{ needs.validate.outputs.k8s_namespace }} \
+              -o jsonpath='{.metadata.annotations.deployment\.kubernetes\.io/revision}' 2>/dev/null || echo "unknown")
+            echo "current_revision=$CURRENT" >> $GITHUB_OUTPUT
+          elif [ "${{ inputs.rollback_type }}" == "slot-swap" ]; then
+            # For App Service, get current deployment ID
+            CURRENT=$(az webapp show \
+              --resource-group ${{ needs.validate.outputs.resource_group }} \
+              --name ${{ needs.validate.outputs.app_name }} \
+              --query "siteConfig.linuxFxVersion" -o tsv 2>/dev/null || echo "unknown")
+            echo "current_revision=$CURRENT" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Check current health
+        id: health
+        run: |
+          # Determine health endpoint
+          case "${{ inputs.service }}" in
+            admin-api)
+              HEALTH_URL="https://${{ needs.validate.outputs.app_name }}.azurewebsites.net/health"
+              ;;
+            *)
+              HEALTH_URL="https://${{ inputs.service }}.${{ inputs.environment }}.mystira.app/health"
+              ;;
+          esac
+
+          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 10 "$HEALTH_URL" || echo "000")
+          echo "status=$HTTP_STATUS" >> $GITHUB_OUTPUT
+
+          echo "### Pre-Rollback Health" >> $GITHUB_STEP_SUMMARY
+          echo "- Endpoint: $HEALTH_URL" >> $GITHUB_STEP_SUMMARY
+          echo "- Status: HTTP $HTTP_STATUS" >> $GITHUB_STEP_SUMMARY
+
+  execute-rollback:
+    name: Execute Rollback
+    runs-on: ubuntu-latest
+    needs: [validate, capture-state]
+    permissions:
+      id-token: write
+      contents: read
+    outputs:
+      rollback_id: ${{ needs.validate.outputs.rollback_id }}
+    steps:
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Get AKS credentials
+        if: inputs.rollback_type == 'kubernetes'
+        run: |
+          az aks get-credentials \
+            --resource-group ${{ needs.validate.outputs.resource_group }} \
+            --name mys-${{ inputs.environment }}-aks-${{ env.REGION_CODE }} \
+            --overwrite-existing
+
+      # Kubernetes rollback
+      - name: Execute Kubernetes rollback
+        if: inputs.rollback_type == 'kubernetes'
+        run: |
+          NAMESPACE="${{ needs.validate.outputs.k8s_namespace }}"
+          DEPLOYMENT="${{ needs.validate.outputs.k8s_deployment }}"
+
+          echo "Rolling back $DEPLOYMENT in $NAMESPACE..."
+
+          if [ -n "${{ inputs.revision }}" ]; then
+            kubectl rollout undo deployment/$DEPLOYMENT -n $NAMESPACE --to-revision=${{ inputs.revision }}
+          else
+            kubectl rollout undo deployment/$DEPLOYMENT -n $NAMESPACE
+          fi
+
+          # Wait for rollout to complete
+          kubectl rollout status deployment/$DEPLOYMENT -n $NAMESPACE --timeout=300s
+
+          echo "## Kubernetes Rollback Executed" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          kubectl get deployment $DEPLOYMENT -n $NAMESPACE -o wide >> $GITHUB_STEP_SUMMARY
+
+      # App Service slot swap rollback
+      - name: Execute slot swap rollback
+        if: inputs.rollback_type == 'slot-swap'
+        run: |
+          echo "Swapping slots to rollback..."
+
+          az webapp deployment slot swap \
+            --resource-group ${{ needs.validate.outputs.resource_group }} \
+            --name ${{ needs.validate.outputs.app_name }} \
+            --slot staging \
+            --target-slot production
+
+          echo "## Slot Swap Rollback Executed" >> $GITHUB_STEP_SUMMARY
+
+  verify-rollback:
+    name: Verify Rollback
+    runs-on: ubuntu-latest
+    needs: [validate, execute-rollback]
+    if: ${{ !inputs.skip_verification }}
+    outputs:
+      result: ${{ steps.verify.outputs.result }}
+    steps:
+      - name: Wait for propagation
+        run: sleep 30
+
+      - name: Verify service health
+        id: verify
+        run: |
+          # Determine health endpoint
+          case "${{ inputs.service }}" in
+            admin-api)
+              HEALTH_URL="https://${{ needs.validate.outputs.app_name }}.azurewebsites.net/health"
+              ;;
+            *)
+              HEALTH_URL="https://${{ inputs.service }}.${{ inputs.environment }}.mystira.app/health"
+              ;;
+          esac
+
+          echo "## Post-Rollback Verification" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          HEALTHY=0
+          for i in {1..10}; do
+            HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 10 "$HEALTH_URL" || echo "000")
+
+            if [ "$HTTP_STATUS" == "200" ]; then
+              HEALTHY=$((HEALTHY + 1))
+              echo "- Check $i: HTTP $HTTP_STATUS ✓" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "- Check $i: HTTP $HTTP_STATUS ✗" >> $GITHUB_STEP_SUMMARY
+            fi
+
+            sleep 5
+          done
+
+          if [ $HEALTHY -ge 8 ]; then
+            echo "result=success" >> $GITHUB_OUTPUT
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "**Result: ROLLBACK SUCCESSFUL** ($HEALTHY/10 healthy)" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "result=failure" >> $GITHUB_OUTPUT
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "**Result: ROLLBACK VERIFICATION FAILED** ($HEALTHY/10 healthy)" >> $GITHUB_STEP_SUMMARY
+            exit 1
+          fi
+
+  incident-report:
+    name: Generate Incident Report
+    runs-on: ubuntu-latest
+    needs: [validate, capture-state, execute-rollback, verify-rollback]
+    if: always() && needs.execute-rollback.result == 'success'
+    steps:
+      - name: Generate report
+        run: |
+          echo "# Rollback Incident Report" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Field | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Rollback ID | ${{ needs.validate.outputs.rollback_id }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Service | ${{ inputs.service }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Environment | ${{ inputs.environment }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Reason | ${{ inputs.reason }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Previous Revision | ${{ needs.capture-state.outputs.current_revision }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Verification | ${{ needs.verify-rollback.outputs.result || 'skipped' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## Next Steps" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "1. Verify service functionality manually" >> $GITHUB_STEP_SUMMARY
+          echo "2. Investigate root cause of the issue" >> $GITHUB_STEP_SUMMARY
+          echo "3. Document findings in incident postmortem" >> $GITHUB_STEP_SUMMARY

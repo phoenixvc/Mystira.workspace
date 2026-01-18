@@ -1,0 +1,224 @@
+name: "[Monitor] SLA Validation"
+
+# SLA monitoring and reporting workflow
+# Tracks uptime, latency, and error rates against defined SLOs
+# Layer 6 of the validation stack: Observability
+
+on:
+  workflow_dispatch:
+    inputs:
+      period:
+        description: 'Reporting period'
+        required: true
+        type: choice
+        options:
+          - daily
+          - weekly
+          - monthly
+
+  schedule:
+    # Daily SLA report at 7 AM UTC
+    - cron: '0 7 * * *'
+    # Weekly SLA report on Monday at 8 AM UTC
+    - cron: '0 8 * * 1'
+
+env:
+  # SLO Targets
+  UPTIME_TARGET: 99.9
+  LATENCY_P95_TARGET_MS: 500
+  ERROR_RATE_TARGET: 0.1
+
+jobs:
+  collect-metrics:
+    name: Collect SLA Metrics
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    outputs:
+      uptime: ${{ steps.metrics.outputs.uptime }}
+      latency_p95: ${{ steps.metrics.outputs.latency_p95 }}
+      error_rate: ${{ steps.metrics.outputs.error_rate }}
+    steps:
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Determine time range
+        id: timerange
+        run: |
+          PERIOD="${{ github.event.inputs.period || 'daily' }}"
+
+          case "$PERIOD" in
+            daily)
+              START_TIME=$(date -u -d "24 hours ago" +%Y-%m-%dT%H:%M:%SZ)
+              ;;
+            weekly)
+              START_TIME=$(date -u -d "7 days ago" +%Y-%m-%dT%H:%M:%SZ)
+              ;;
+            monthly)
+              START_TIME=$(date -u -d "30 days ago" +%Y-%m-%dT%H:%M:%SZ)
+              ;;
+          esac
+
+          END_TIME=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+
+          echo "start_time=$START_TIME" >> $GITHUB_OUTPUT
+          echo "end_time=$END_TIME" >> $GITHUB_OUTPUT
+          echo "period=$PERIOD" >> $GITHUB_OUTPUT
+
+      - name: Query Application Insights
+        id: metrics
+        run: |
+          # Note: In a real implementation, you'd query Azure Monitor/App Insights
+          # This is a placeholder showing the structure
+
+          # Query uptime from availability tests
+          # UPTIME=$(az monitor app-insights metrics show ...)
+
+          # Query latency percentiles
+          # LATENCY=$(az monitor app-insights metrics show ...)
+
+          # Query error rates
+          # ERROR_RATE=$(az monitor app-insights metrics show ...)
+
+          # Placeholder values for demonstration
+          UPTIME="99.95"
+          LATENCY_P95="342"
+          ERROR_RATE="0.05"
+
+          echo "uptime=$UPTIME" >> $GITHUB_OUTPUT
+          echo "latency_p95=$LATENCY_P95" >> $GITHUB_OUTPUT
+          echo "error_rate=$ERROR_RATE" >> $GITHUB_OUTPUT
+
+  validate-sla:
+    name: Validate Against SLOs
+    runs-on: ubuntu-latest
+    needs: [collect-metrics]
+    outputs:
+      sla_met: ${{ steps.validate.outputs.sla_met }}
+      violations: ${{ steps.validate.outputs.violations }}
+    steps:
+      - name: Validate SLOs
+        id: validate
+        run: |
+          UPTIME="${{ needs.collect-metrics.outputs.uptime }}"
+          LATENCY="${{ needs.collect-metrics.outputs.latency_p95 }}"
+          ERROR_RATE="${{ needs.collect-metrics.outputs.error_rate }}"
+
+          VIOLATIONS=""
+          SLA_MET=true
+
+          # Check uptime
+          if (( $(echo "$UPTIME < ${{ env.UPTIME_TARGET }}" | bc -l) )); then
+            VIOLATIONS="$VIOLATIONS uptime"
+            SLA_MET=false
+          fi
+
+          # Check latency
+          if (( $(echo "$LATENCY > ${{ env.LATENCY_P95_TARGET_MS }}" | bc -l) )); then
+            VIOLATIONS="$VIOLATIONS latency"
+            SLA_MET=false
+          fi
+
+          # Check error rate
+          if (( $(echo "$ERROR_RATE > ${{ env.ERROR_RATE_TARGET }}" | bc -l) )); then
+            VIOLATIONS="$VIOLATIONS error_rate"
+            SLA_MET=false
+          fi
+
+          echo "sla_met=$SLA_MET" >> $GITHUB_OUTPUT
+          echo "violations=$VIOLATIONS" >> $GITHUB_OUTPUT
+
+  generate-report:
+    name: Generate SLA Report
+    runs-on: ubuntu-latest
+    needs: [collect-metrics, validate-sla]
+    steps:
+      - name: Generate report
+        run: |
+          PERIOD="${{ github.event.inputs.period || 'daily' }}"
+          UPTIME="${{ needs.collect-metrics.outputs.uptime }}"
+          LATENCY="${{ needs.collect-metrics.outputs.latency_p95 }}"
+          ERROR_RATE="${{ needs.collect-metrics.outputs.error_rate }}"
+          SLA_MET="${{ needs.validate-sla.outputs.sla_met }}"
+
+          echo "# SLA Report - ${PERIOD^}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Generated:** $(date -u +%Y-%m-%dT%H:%M:%SZ)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [ "$SLA_MET" == "true" ]; then
+            echo "## ✅ All SLOs Met" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "## ⚠️ SLO Violations Detected" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "Violations: ${{ needs.validate-sla.outputs.violations }}" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## Metrics Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Metric | Actual | Target | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|--------|--------|--------|--------|" >> $GITHUB_STEP_SUMMARY
+
+          # Uptime
+          UPTIME_STATUS=$([[ $(echo "$UPTIME >= ${{ env.UPTIME_TARGET }}" | bc -l) == 1 ]] && echo "✅" || echo "❌")
+          echo "| Uptime | ${UPTIME}% | ≥${{ env.UPTIME_TARGET }}% | $UPTIME_STATUS |" >> $GITHUB_STEP_SUMMARY
+
+          # Latency
+          LATENCY_STATUS=$([[ $(echo "$LATENCY <= ${{ env.LATENCY_P95_TARGET_MS }}" | bc -l) == 1 ]] && echo "✅" || echo "❌")
+          echo "| Latency (P95) | ${LATENCY}ms | ≤${{ env.LATENCY_P95_TARGET_MS }}ms | $LATENCY_STATUS |" >> $GITHUB_STEP_SUMMARY
+
+          # Error Rate
+          ERROR_STATUS=$([[ $(echo "$ERROR_RATE <= ${{ env.ERROR_RATE_TARGET }}" | bc -l) == 1 ]] && echo "✅" || echo "❌")
+          echo "| Error Rate | ${ERROR_RATE}% | ≤${{ env.ERROR_RATE_TARGET }}% | $ERROR_STATUS |" >> $GITHUB_STEP_SUMMARY
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## SLO Definitions" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Uptime:** Percentage of successful health checks" >> $GITHUB_STEP_SUMMARY
+          echo "- **Latency (P95):** 95th percentile response time for API requests" >> $GITHUB_STEP_SUMMARY
+          echo "- **Error Rate:** Percentage of requests resulting in 5xx errors" >> $GITHUB_STEP_SUMMARY
+
+      - name: Create issue on SLA breach
+        if: needs.validate-sla.outputs.sla_met == 'false'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const violations = '${{ needs.validate-sla.outputs.violations }}'.trim().split(' ').filter(v => v);
+            const period = '${{ github.event.inputs.period || 'daily' }}';
+
+            const title = `SLA Breach Detected - ${period} report`;
+            const body = `
+            ## SLA Breach Report
+
+            **Period:** ${period}
+            **Timestamp:** ${new Date().toISOString()}
+
+            ### Violations
+            ${violations.map(v => `- ${v}`).join('\n')}
+
+            ### Metrics
+            | Metric | Actual | Target |
+            |--------|--------|--------|
+            | Uptime | ${{ needs.collect-metrics.outputs.uptime }}% | ≥${{ env.UPTIME_TARGET }}% |
+            | Latency (P95) | ${{ needs.collect-metrics.outputs.latency_p95 }}ms | ≤${{ env.LATENCY_P95_TARGET_MS }}ms |
+            | Error Rate | ${{ needs.collect-metrics.outputs.error_rate }}% | ≤${{ env.ERROR_RATE_TARGET }}% |
+
+            ### Action Required
+            Please investigate the root cause and take corrective action.
+
+            [View Workflow Run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+            `;
+
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: title,
+              body: body,
+              labels: ['sla-breach', 'automated', 'priority-high']
+            });

@@ -1,0 +1,117 @@
+name: "[CI] Gate"
+
+# CI Gate - Validates that CI passed before allowing deployments
+# Used by deployment workflows to ensure code quality
+#
+# Usage in deployment workflows:
+#   jobs:
+#     ci-gate:
+#       uses: ./.github/workflows/_ci-gate.yml
+#       with:
+#         required_workflows: "[CI] Build & Test"
+#
+#     deploy:
+#       needs: [ci-gate]
+#       if: needs.ci-gate.outputs.passed == 'true'
+
+on:
+  workflow_call:
+    inputs:
+      required_workflows:
+        description: 'Comma-separated workflow names that must pass'
+        required: false
+        type: string
+        default: '[CI] Build & Test'
+      sha:
+        description: 'Git SHA to check (defaults to current)'
+        required: false
+        type: string
+        default: ''
+    outputs:
+      passed:
+        description: 'Whether all required checks passed'
+        value: ${{ jobs.check.outputs.passed }}
+      details:
+        description: 'JSON with check details'
+        value: ${{ jobs.check.outputs.details }}
+
+jobs:
+  check:
+    name: Verify CI Passed
+    runs-on: ubuntu-latest
+    outputs:
+      passed: ${{ steps.verify.outputs.passed }}
+      details: ${{ steps.verify.outputs.details }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Get commit SHA
+        id: sha
+        run: |
+          if [ -n "${{ inputs.sha }}" ]; then
+            echo "sha=${{ inputs.sha }}" >> $GITHUB_OUTPUT
+          else
+            echo "sha=${{ github.sha }}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Verify CI checks passed
+        id: verify
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          SHA="${{ steps.sha.outputs.sha }}"
+          REQUIRED="${{ inputs.required_workflows }}"
+
+          echo "Checking CI status for commit: $SHA"
+          echo "Required workflows: $REQUIRED"
+
+          # Get check runs for this commit
+          CHECKS=$(gh api "repos/${{ github.repository }}/commits/$SHA/check-runs" --jq '.check_runs')
+
+          ALL_PASSED=true
+          DETAILS='[]'
+
+          IFS=',' read -ra WORKFLOWS <<< "$REQUIRED"
+          for workflow in "${WORKFLOWS[@]}"; do
+            workflow=$(echo "$workflow" | xargs)  # trim
+
+            # Find matching check run
+            STATUS=$(echo "$CHECKS" | jq -r --arg name "$workflow" '.[] | select(.name == $name) | .conclusion // "pending"')
+
+            if [ -z "$STATUS" ] || [ "$STATUS" == "null" ]; then
+              STATUS="not_found"
+            fi
+
+            echo "  $workflow: $STATUS"
+
+            if [ "$STATUS" != "success" ]; then
+              ALL_PASSED=false
+            fi
+
+            DETAILS=$(echo "$DETAILS" | jq --arg name "$workflow" --arg status "$STATUS" '. + [{"workflow": $name, "status": $status}]')
+          done
+
+          echo "passed=$ALL_PASSED" >> $GITHUB_OUTPUT
+          echo "details=$DETAILS" >> $GITHUB_OUTPUT
+
+          if [ "$ALL_PASSED" != "true" ]; then
+            echo "::warning::Some required CI checks have not passed"
+          fi
+
+      - name: Summary
+        run: |
+          echo "## CI Gate Check" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Workflow | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|----------|--------|" >> $GITHUB_STEP_SUMMARY
+
+          echo '${{ steps.verify.outputs.details }}' | jq -r '.[] | "| \(.workflow) | \(if .status == "success" then "✅" elif .status == "pending" then "⏳" else "❌" end) |"' >> $GITHUB_STEP_SUMMARY
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ steps.verify.outputs.passed }}" == "true" ]; then
+            echo "**Result:** ✅ All checks passed" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "**Result:** ❌ Some checks failed or pending" >> $GITHUB_STEP_SUMMARY
+          fi

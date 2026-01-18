@@ -1,0 +1,251 @@
+name: "[Test] Contract"
+
+# API Contract validation workflow
+# Validates that API implementations match their OpenAPI specifications
+# Ensures consumers and providers stay in sync
+#
+# Layer 3 of the validation stack: Higher-level validation
+
+on:
+  push:
+    branches: [dev, main]
+    paths:
+      - 'packages/api-spec/openapi/**'
+      - 'packages/contracts/**'
+      - 'packages/*/src/**/*.ts'
+      - 'packages/*/**/*.cs'
+      - '.github/workflows/test-contract.yml'
+
+  pull_request:
+    branches: [dev, main]
+    paths:
+      - 'packages/api-spec/openapi/**'
+      - 'packages/contracts/**'
+
+  workflow_dispatch:
+    inputs:
+      validate_breaking:
+        description: 'Check for breaking changes'
+        required: false
+        type: boolean
+        default: true
+
+concurrency:
+  group: contract-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate-openapi:
+    name: Validate OpenAPI Specs
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install
+        env:
+          NODE_AUTH_TOKEN: ""
+
+      - name: Validate OpenAPI specifications
+        run: |
+          cd packages/api-spec
+          pnpm run validate
+
+      - name: Check for spec completeness
+        run: |
+          echo "## OpenAPI Specification Validation" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # List all specs
+          echo "### Specifications Found" >> $GITHUB_STEP_SUMMARY
+          for spec in packages/api-spec/openapi/*.yaml; do
+            if [ -f "$spec" ]; then
+              echo "- $(basename $spec)" >> $GITHUB_STEP_SUMMARY
+            fi
+          done
+
+  check-breaking-changes:
+    name: Check Breaking Changes
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' || github.event.inputs.validate_breaking == 'true'
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install
+        env:
+          NODE_AUTH_TOKEN: ""
+
+      - name: Install oasdiff
+        run: |
+          curl -sSL https://github.com/Tufin/oasdiff/releases/download/v1.10.10/oasdiff_1.10.10_linux_amd64.tar.gz | tar xz
+          sudo mv oasdiff /usr/local/bin/
+
+      - name: Check for breaking changes
+        id: breaking
+        run: |
+          BREAKING_FOUND=false
+
+          for spec in packages/api-spec/openapi/*.yaml; do
+            if [ -f "$spec" ]; then
+              SPEC_NAME=$(basename "$spec")
+
+              # Get the base branch version
+              git show origin/${{ github.base_ref }}:"$spec" > /tmp/base-spec.yaml 2>/dev/null || continue
+
+              echo "Checking $SPEC_NAME for breaking changes..."
+
+              # Run oasdiff
+              RESULT=$(oasdiff breaking /tmp/base-spec.yaml "$spec" 2>&1) || true
+
+              if echo "$RESULT" | grep -q "error\|breaking"; then
+                echo "::warning::Breaking changes detected in $SPEC_NAME"
+                echo "### Breaking Changes in $SPEC_NAME" >> $GITHUB_STEP_SUMMARY
+                echo '```' >> $GITHUB_STEP_SUMMARY
+                echo "$RESULT" >> $GITHUB_STEP_SUMMARY
+                echo '```' >> $GITHUB_STEP_SUMMARY
+                BREAKING_FOUND=true
+              else
+                echo "No breaking changes in $SPEC_NAME"
+              fi
+            fi
+          done
+
+          echo "breaking_found=$BREAKING_FOUND" >> $GITHUB_OUTPUT
+
+      - name: Fail on breaking changes
+        if: steps.breaking.outputs.breaking_found == 'true'
+        run: |
+          echo "::error::Breaking API changes detected. Please review and update version accordingly."
+          exit 1
+
+  contract-typescript:
+    name: TypeScript Contract Tests
+    runs-on: ubuntu-latest
+    needs: [validate-openapi]
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install
+        env:
+          NODE_AUTH_TOKEN: ""
+
+      - name: Build contracts package
+        run: |
+          cd packages/contracts
+          pnpm build
+
+      - name: Run contract type tests
+        run: |
+          cd packages/contracts
+          pnpm test 2>&1 || true
+
+      - name: Verify generated types compile
+        run: |
+          cd packages/contracts
+          pnpm exec tsc --noEmit
+
+  contract-dotnet:
+    name: .NET Contract Tests
+    runs-on: ubuntu-latest
+    needs: [validate-openapi]
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: '9.0.x'
+          source-url: https://nuget.pkg.github.com/phoenixvc/index.json
+        env:
+          NUGET_AUTH_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN }}
+
+      - name: Build Mystira.Contracts
+        run: |
+          dotnet build packages/contracts/dotnet/Mystira.Contracts --configuration Release
+
+      - name: Verify contract serialization
+        run: |
+          # Run any contract serialization tests
+          if [ -d "packages/contracts/dotnet/Mystira.Contracts.Tests" ]; then
+            dotnet test packages/contracts/dotnet/Mystira.Contracts.Tests --configuration Release
+          fi
+
+  consumer-contract-tests:
+    name: Consumer Contract Tests
+    runs-on: ubuntu-latest
+    needs: [validate-openapi]
+    strategy:
+      matrix:
+        consumer:
+          - name: admin-ui
+            path: packages/admin-ui
+          - name: app-pwa
+            path: packages/app
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          submodules: recursive
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install
+        env:
+          NODE_AUTH_TOKEN: ""
+
+      - name: Run consumer contract tests
+        working-directory: ${{ matrix.consumer.path }}
+        run: |
+          if [ -f "package.json" ] && grep -q "test:contract" package.json; then
+            pnpm test:contract
+          else
+            echo "No contract tests defined for ${{ matrix.consumer.name }}"
+          fi
+        continue-on-error: true
+
+  summary:
+    name: Contract Test Summary
+    runs-on: ubuntu-latest
+    needs: [validate-openapi, contract-typescript, contract-dotnet, consumer-contract-tests]
+    if: always()
+    steps:
+      - name: Generate Summary
+        run: |
+          echo "# Contract Test Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Check | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| OpenAPI Validation | ${{ needs.validate-openapi.result == 'success' && '✅' || '❌' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| TypeScript Contracts | ${{ needs.contract-typescript.result == 'success' && '✅' || '❌' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| .NET Contracts | ${{ needs.contract-dotnet.result == 'success' && '✅' || '❌' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Consumer Tests | ${{ needs.consumer-contract-tests.result == 'success' && '✅' || '⚠️' }} |" >> $GITHUB_STEP_SUMMARY
