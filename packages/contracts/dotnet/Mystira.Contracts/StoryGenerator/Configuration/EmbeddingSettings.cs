@@ -73,5 +73,6 @@ public class EmbeddingSettings
     public bool IsConfigured =>
         Enabled &&
         !string.IsNullOrWhiteSpace(Provider) &&
-        !string.IsNullOrWhiteSpace(DeploymentName);
+        (!string.IsNullOrWhiteSpace(DeploymentName) ||
+         !string.IsNullOrWhiteSpace(ModelName));
 }
