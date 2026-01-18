@@ -153,7 +153,7 @@ jobs:
             --results-directory ./test-results \
             2>&1 | tee test-output.txt
 
-          echo "exit_code=$?" >> $GITHUB_OUTPUT
+          echo "exit_code=${PIPESTATUS[0]}" >> $GITHUB_OUTPUT
 
       - name: Run TypeScript integration tests
         if: inputs.language == 'typescript'
@@ -165,7 +165,7 @@ jobs:
           NODE_ENV: test
         run: |
           pnpm test:integration 2>&1 | tee test-output.txt
-          echo "exit_code=$?" >> $GITHUB_OUTPUT
+          echo "exit_code=${PIPESTATUS[0]}" >> $GITHUB_OUTPUT
 
       - name: Run Python integration tests
         if: inputs.language == 'python'
@@ -176,7 +176,7 @@ jobs:
           REDIS_URL: "redis://localhost:6379"
         run: |
           pytest tests/integration -v --tb=short 2>&1 | tee test-output.txt
-          echo "exit_code=$?" >> $GITHUB_OUTPUT
+          echo "exit_code=${PIPESTATUS[0]}" >> $GITHUB_OUTPUT
 
       # Set result
       - name: Set test result

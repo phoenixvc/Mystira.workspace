@@ -102,12 +102,18 @@ jobs:
         run: |
           BREAKING_FOUND=false
 
+          # Use base_ref for PRs, fallback to dev for workflow_dispatch
+          BASE_REF="${{ github.base_ref }}"
+          if [ -z "$BASE_REF" ]; then
+            BASE_REF="dev"
+          fi
+
           for spec in packages/api-spec/openapi/*.yaml; do
             if [ -f "$spec" ]; then
               SPEC_NAME=$(basename "$spec")
 
               # Get the base branch version
-              git show origin/${{ github.base_ref }}:"$spec" > /tmp/base-spec.yaml 2>/dev/null || continue
+              git show "origin/${BASE_REF}:${spec}" > /tmp/base-spec.yaml 2>/dev/null || continue
 
               echo "Checking $SPEC_NAME for breaking changes..."
 
@@ -162,7 +168,7 @@ jobs:
       - name: Run contract type tests
         run: |
           cd packages/contracts
-          pnpm test 2>&1 || true
+          pnpm test 2>&1
 
       - name: Verify generated types compile
         run: |
