@@ -1,0 +1,257 @@
+name: "[Monitor] Health"
+
+on:
+  schedule:
+    # Run every 5 minutes
+    - cron: "*/5 * * * *"
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Environment to check"
+        required: false
+        type: choice
+        default: all
+        options:
+          - all
+          - dev
+          - staging
+          - prod
+
+concurrency:
+  group: monitor-health
+  cancel-in-progress: true
+
+permissions:
+  id-token: write
+  contents: read
+  issues: write
+
+env:
+  HEALTH_TIMEOUT: 30
+  RETRY_COUNT: 3
+  RETRY_DELAY: 5
+
+jobs:
+  check-dev:
+    name: Check Dev
+    runs-on: ubuntu-latest
+    if: github.event.inputs.environment == 'all' || github.event.inputs.environment == 'dev' || github.event_name == 'schedule'
+    outputs:
+      status: ${{ steps.health.outputs.status }}
+    steps:
+      - name: Health check
+        id: health
+        run: |
+          STATUS="unknown"
+          for i in $(seq 1 ${{ env.RETRY_COUNT }}); do
+            RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" \
+              --connect-timeout ${{ env.HEALTH_TIMEOUT }} \
+              "${{ secrets.ADMIN_API_DEV_URL }}/health" || echo "000")
+
+            if [ "$RESPONSE" = "200" ]; then
+              STATUS="healthy"
+              break
+            fi
+
+            if [ $i -lt ${{ env.RETRY_COUNT }} ]; then
+              sleep ${{ env.RETRY_DELAY }}
+            fi
+          done
+
+          if [ "$STATUS" != "healthy" ]; then
+            STATUS="unhealthy"
+          fi
+
+          echo "status=$STATUS" >> $GITHUB_OUTPUT
+          echo "response_code=$RESPONSE" >> $GITHUB_OUTPUT
+
+      - name: Report status
+        run: |
+          if [ "${{ steps.health.outputs.status }}" = "unhealthy" ]; then
+            echo "::error::Dev environment health check failed"
+          fi
+
+  check-staging:
+    name: Check Staging
+    runs-on: ubuntu-latest
+    if: github.event.inputs.environment == 'all' || github.event.inputs.environment == 'staging' || github.event_name == 'schedule'
+    outputs:
+      status: ${{ steps.health.outputs.status }}
+    steps:
+      - name: Health check
+        id: health
+        run: |
+          STATUS="unknown"
+          for i in $(seq 1 ${{ env.RETRY_COUNT }}); do
+            RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" \
+              --connect-timeout ${{ env.HEALTH_TIMEOUT }} \
+              "${{ secrets.ADMIN_API_STAGING_URL }}/health" || echo "000")
+
+            if [ "$RESPONSE" = "200" ]; then
+              STATUS="healthy"
+              break
+            fi
+
+            if [ $i -lt ${{ env.RETRY_COUNT }} ]; then
+              sleep ${{ env.RETRY_DELAY }}
+            fi
+          done
+
+          if [ "$STATUS" != "healthy" ]; then
+            STATUS="unhealthy"
+          fi
+
+          echo "status=$STATUS" >> $GITHUB_OUTPUT
+          echo "response_code=$RESPONSE" >> $GITHUB_OUTPUT
+
+      - name: Report status
+        run: |
+          if [ "${{ steps.health.outputs.status }}" = "unhealthy" ]; then
+            echo "::error::Staging environment health check failed"
+          fi
+
+  check-prod:
+    name: Check Prod
+    runs-on: ubuntu-latest
+    if: github.event.inputs.environment == 'all' || github.event.inputs.environment == 'prod' || github.event_name == 'schedule'
+    outputs:
+      status: ${{ steps.health.outputs.status }}
+    steps:
+      - name: Health check
+        id: health
+        run: |
+          STATUS="unknown"
+          for i in $(seq 1 ${{ env.RETRY_COUNT }}); do
+            RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" \
+              --connect-timeout ${{ env.HEALTH_TIMEOUT }} \
+              "${{ secrets.ADMIN_API_PROD_URL }}/health" || echo "000")
+
+            if [ "$RESPONSE" = "200" ]; then
+              STATUS="healthy"
+              break
+            fi
+
+            if [ $i -lt ${{ env.RETRY_COUNT }} ]; then
+              sleep ${{ env.RETRY_DELAY }}
+            fi
+          done
+
+          if [ "$STATUS" != "healthy" ]; then
+            STATUS="unhealthy"
+          fi
+
+          echo "status=$STATUS" >> $GITHUB_OUTPUT
+          echo "response_code=$RESPONSE" >> $GITHUB_OUTPUT
+
+      - name: Report status
+        run: |
+          if [ "${{ steps.health.outputs.status }}" = "unhealthy" ]; then
+            echo "::error::Production environment health check failed"
+          fi
+
+  summary:
+    name: Health Summary
+    runs-on: ubuntu-latest
+    needs: [check-dev, check-staging, check-prod]
+    if: always()
+    steps:
+      - name: Generate summary
+        run: |
+          echo "## Admin API Health Status" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Environment | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Dev | ${{ needs.check-dev.outputs.status || 'skipped' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Staging | ${{ needs.check-staging.outputs.status || 'skipped' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Prod | ${{ needs.check-prod.outputs.status || 'skipped' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Timestamp:** $(date -u +"%Y-%m-%dT%H:%M:%SZ")" >> $GITHUB_STEP_SUMMARY
+
+      - name: Check for failures
+        run: |
+          FAILURES=0
+
+          if [ "${{ needs.check-dev.outputs.status }}" = "unhealthy" ]; then
+            FAILURES=$((FAILURES + 1))
+          fi
+          if [ "${{ needs.check-staging.outputs.status }}" = "unhealthy" ]; then
+            FAILURES=$((FAILURES + 1))
+          fi
+          if [ "${{ needs.check-prod.outputs.status }}" = "unhealthy" ]; then
+            FAILURES=$((FAILURES + 1))
+          fi
+
+          if [ $FAILURES -gt 0 ]; then
+            echo "::warning::$FAILURES environment(s) reported unhealthy"
+          fi
+
+  alert:
+    name: Send Alerts
+    runs-on: ubuntu-latest
+    needs: [check-dev, check-staging, check-prod, summary]
+    if: |
+      always() && (
+        needs.check-dev.outputs.status == 'unhealthy' ||
+        needs.check-staging.outputs.status == 'unhealthy' ||
+        needs.check-prod.outputs.status == 'unhealthy'
+      )
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Create incident issue
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const unhealthyEnvs = [];
+            if ('${{ needs.check-dev.outputs.status }}' === 'unhealthy') unhealthyEnvs.push('Dev');
+            if ('${{ needs.check-staging.outputs.status }}' === 'unhealthy') unhealthyEnvs.push('Staging');
+            if ('${{ needs.check-prod.outputs.status }}' === 'unhealthy') unhealthyEnvs.push('Prod');
+
+            const title = `[Incident] Admin API Health Check Failed - ${unhealthyEnvs.join(', ')}`;
+            const body = `## Health Check Failure Alert
+
+            **Time:** ${new Date().toISOString()}
+            **Affected Environments:** ${unhealthyEnvs.join(', ')}
+
+            ### Status
+            | Environment | Status |
+            |-------------|--------|
+            | Dev | ${{ needs.check-dev.outputs.status || 'skipped' }} |
+            | Staging | ${{ needs.check-staging.outputs.status || 'skipped' }} |
+            | Prod | ${{ needs.check-prod.outputs.status || 'skipped' }} |
+
+            ### Actions
+            - [ ] Investigate root cause
+            - [ ] Check application logs
+            - [ ] Verify infrastructure status
+            - [ ] Consider rollback if needed
+
+            ### Links
+            - [Workflow Run](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
+            `;
+
+            // Check for existing open incident
+            const existingIssues = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              labels: 'incident,health-check',
+              state: 'open'
+            });
+
+            if (existingIssues.data.length === 0) {
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: title,
+                body: body,
+                labels: ['incident', 'health-check', 'admin-api']
+              });
+            } else {
+              // Add comment to existing issue
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: existingIssues.data[0].number,
+                body: `## Health Check Update\n\n**Time:** ${new Date().toISOString()}\n\nStill experiencing issues in: ${unhealthyEnvs.join(', ')}`
+              });
+            }
