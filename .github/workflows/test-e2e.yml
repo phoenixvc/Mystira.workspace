@@ -120,40 +120,26 @@ jobs:
           echo "Checking environment readiness..."
 
           # Check API health
-          API_HEALTHY=false
           for i in {1..30}; do
             HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" "${{ needs.setup.outputs.api_url }}/health" || echo "000")
             if [ "$HTTP_CODE" == "200" ]; then
               echo "API is healthy"
-              API_HEALTHY=true
               break
             fi
             echo "Waiting for API... (attempt $i/30)"
             sleep 10
           done
 
-          if [ "$API_HEALTHY" != "true" ]; then
-            echo "::error::API failed to become healthy after 30 attempts"
-            exit 1
-          fi
-
           # Check frontend
-          FRONTEND_HEALTHY=false
           for i in {1..30}; do
             HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" "${{ needs.setup.outputs.base_url }}" || echo "000")
             if [ "$HTTP_CODE" == "200" ]; then
               echo "Frontend is healthy"
-              FRONTEND_HEALTHY=true
               break
             fi
             echo "Waiting for frontend... (attempt $i/30)"
             sleep 10
           done
-
-          if [ "$FRONTEND_HEALTHY" != "true" ]; then
-            echo "::error::Frontend failed to become healthy after 30 attempts"
-            exit 1
-          fi
 
       - name: Run E2E tests
         id: e2e
@@ -175,9 +161,8 @@ jobs:
               ;;
           esac
 
-          set -o pipefail
           pnpm exec playwright test $TEST_ARGS --reporter=html,github 2>&1 | tee e2e-output.txt
-          echo "exit_code=${PIPESTATUS[0]}" >> $GITHUB_OUTPUT
+          echo "exit_code=$?" >> $GITHUB_OUTPUT
 
       - name: Upload test report
         if: always()

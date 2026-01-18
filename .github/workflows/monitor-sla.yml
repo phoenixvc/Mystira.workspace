@@ -137,8 +137,6 @@ jobs:
     name: Generate SLA Report
     runs-on: ubuntu-latest
     needs: [collect-metrics, validate-sla]
-    permissions:
-      issues: write
     steps:
       - name: Generate report
         run: |

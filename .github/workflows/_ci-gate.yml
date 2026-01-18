@@ -77,8 +77,8 @@ jobs:
           for workflow in "${WORKFLOWS[@]}"; do
             workflow=$(echo "$workflow" | xargs)  # trim
 
-            # Find matching check run - use startswith to match "Workflow / Job" format
-            STATUS=$(echo "$CHECKS" | jq -r --arg name "$workflow" '.[] | select(.name | startswith($name)) | .conclusion // "pending"' | head -1)
+            # Find matching check run
+            STATUS=$(echo "$CHECKS" | jq -r --arg name "$workflow" '.[] | select(.name == $name) | .conclusion // "pending"')
 
             if [ -z "$STATUS" ] || [ "$STATUS" == "null" ]; then
               STATUS="not_found"

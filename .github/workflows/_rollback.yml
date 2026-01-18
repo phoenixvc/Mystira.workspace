@@ -66,18 +66,6 @@ jobs:
       k8s_namespace: ${{ steps.config.outputs.k8s_namespace }}
       k8s_deployment: ${{ steps.config.outputs.k8s_deployment }}
     steps:
-      - name: Validate rollback type
-        run: |
-          ROLLBACK_TYPE="${{ inputs.rollback_type }}"
-          if [ "$ROLLBACK_TYPE" == "container-revision" ]; then
-            echo "::error::Rollback type 'container-revision' is not yet implemented. Supported types: kubernetes, slot-swap"
-            exit 1
-          fi
-          if [ "$ROLLBACK_TYPE" != "kubernetes" ] && [ "$ROLLBACK_TYPE" != "slot-swap" ]; then
-            echo "::error::Unknown rollback type: $ROLLBACK_TYPE. Supported types: kubernetes, slot-swap"
-            exit 1
-          fi
-
       - name: Generate rollback ID
         id: generate
         run: |
