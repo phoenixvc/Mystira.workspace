@@ -95,5 +95,4 @@ public class Scene
     {
         return IsEnd || (Branches?.Count ?? 0) == 0;
     }
-    }
 }
