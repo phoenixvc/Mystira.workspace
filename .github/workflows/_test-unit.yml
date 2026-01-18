@@ -93,12 +93,12 @@ jobs:
         id: ts-tests
         working-directory: ${{ inputs.working_directory }}
         run: |
-          TEST_ARGS="--coverage"
+          TEST_ARGS=(--coverage)
           if [ -n "${{ inputs.test_filter }}" ]; then
-            TEST_ARGS="$TEST_ARGS --testNamePattern='${{ inputs.test_filter }}'"
+            TEST_ARGS+=(--testNamePattern="${{ inputs.test_filter }}")
           fi
 
-          pnpm test -- $TEST_ARGS 2>&1 | tee test-output.txt
+          pnpm test -- "${TEST_ARGS[@]}" 2>&1 | tee test-output.txt
           TEST_EXIT_CODE=${PIPESTATUS[0]}
 
           echo "exit_code=$TEST_EXIT_CODE" >> $GITHUB_OUTPUT
@@ -109,12 +109,12 @@ jobs:
         id: dotnet-tests
         working-directory: ${{ inputs.working_directory }}
         run: |
-          TEST_ARGS="--configuration Release --collect:\"XPlat Code Coverage\" --results-directory ./coverage"
+          TEST_ARGS=(--configuration Release "--collect:XPlat Code Coverage" --results-directory ./coverage)
           if [ -n "${{ inputs.test_filter }}" ]; then
-            TEST_ARGS="$TEST_ARGS --filter \"${{ inputs.test_filter }}\""
+            TEST_ARGS+=(--filter "${{ inputs.test_filter }}")
           fi
 
-          dotnet test $TEST_ARGS -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=cobertura 2>&1 | tee test-output.txt
+          dotnet test "${TEST_ARGS[@]}" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=cobertura 2>&1 | tee test-output.txt
           TEST_EXIT_CODE=${PIPESTATUS[0]}
 
           echo "exit_code=$TEST_EXIT_CODE" >> $GITHUB_OUTPUT
