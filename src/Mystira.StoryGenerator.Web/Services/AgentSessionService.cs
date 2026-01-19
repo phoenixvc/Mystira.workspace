@@ -128,6 +128,7 @@ public class AgentSessionService : IAgentSessionService
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         _logger.LogInformation("Subscribing to SSE stream for session {SessionId}", sessionId);
+        Console.WriteLine($"[SSE] About to call HTTP GET /api/story-agent/sessions/{sessionId}/stream");
 
         HttpResponseMessage? response = null;
         Stream? contentStream = null;
@@ -135,12 +136,15 @@ public class AgentSessionService : IAgentSessionService
 
         try
         {
+            Console.WriteLine($"[SSE] Making HTTP request...");
             response = await _httpClient.GetAsync(
                 $"/api/story-agent/sessions/{sessionId}/stream",
                 HttpCompletionOption.ResponseHeadersRead,
                 cancellationToken);
 
+            Console.WriteLine($"[SSE] HTTP response received: {response.StatusCode}");
             response.EnsureSuccessStatusCode();
+            Console.WriteLine($"[SSE] Status code OK, reading stream...");
             contentStream = await response.Content.ReadAsStreamAsync(cancellationToken);
             reader = new StreamReader(contentStream);
 
@@ -148,6 +152,7 @@ public class AgentSessionService : IAgentSessionService
             string? currentEventType = null;
             string? currentData = null;
 
+            Console.WriteLine($"[SSE] Starting to read lines from stream...");
             while ((line = await reader.ReadLineAsync()) != null && !cancellationToken.IsCancellationRequested)
             {
                 if (line.StartsWith("event: "))
