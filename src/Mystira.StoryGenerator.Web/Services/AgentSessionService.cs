@@ -180,7 +180,16 @@ public class AgentSessionService : IAgentSessionService
 
                         if (evt != null)
                         {
-                            _logger.LogDebug("Received SSE event: {EventType}", evt.Type);
+                            if (evt.Type == AgentStreamEvent.EventType.StreamingUpdate)
+                            {
+                                _logger.LogInformation("Received SSE StreamingUpdate event - Message: '{Message}', Length: {Length}",
+                                    evt.Message ?? "<null>",
+                                    evt.Message?.Length ?? 0);
+                            }
+                            else
+                            {
+                                _logger.LogDebug("Received SSE event: {EventType}", evt.Type);
+                            }
                             yield return evt;
                         }
 
