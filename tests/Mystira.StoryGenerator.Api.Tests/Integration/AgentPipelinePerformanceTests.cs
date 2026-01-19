@@ -1,13 +1,12 @@
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
-using Mystira.StoryGenerator.Api;
 using Mystira.StoryGenerator.Application.Infrastructure.Agents;
 using Mystira.StoryGenerator.Contracts.Models;
 using Mystira.StoryGenerator.Domain.Agents;
 using System.Diagnostics;
 using System.Net.Http.Json;
 using System.Text.Json;
-using Xunit;
+using Mystira.StoryGenerator.Contracts.Agents;
 
 namespace Mystira.StoryGenerator.Api.Tests.Integration;
 

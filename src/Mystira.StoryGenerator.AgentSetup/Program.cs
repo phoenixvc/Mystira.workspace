@@ -20,9 +20,10 @@
 
 using System.CommandLine;
 using Azure;
-using Azure.AI.Projects;
 using Azure.AI.Agents.Persistent;
+using Azure.AI.Projects;
 using Azure.Identity;
+using Mystira.StoryGenerator.AgentSetup;
 
 var endpointOption = new Option<string>(
     name: "--endpoint",
@@ -359,4 +360,7 @@ static PersistentAgent? ResolveAgent(PersistentAgentsClient client, string? id, 
     return null;
 }
 
-internal readonly record struct AgentDef(string Name, string Description, string Instructions);
+namespace Mystira.StoryGenerator.AgentSetup
+{
+    internal readonly record struct AgentDef(string Name, string Description, string Instructions);
+}

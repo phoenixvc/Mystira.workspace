@@ -2,8 +2,7 @@ using System.Text;
 using System.Text.Json;
 using Azure.AI.Agents.Persistent;
 using Microsoft.Extensions.Logging;
-using Mystira.StoryGenerator.Contracts.Models;
-using Mystira.StoryGenerator.Domain.Agents;
+using Mystira.StoryGenerator.Contracts.Agents;
 
 namespace Mystira.StoryGenerator.Application.Infrastructure.Agents;
 

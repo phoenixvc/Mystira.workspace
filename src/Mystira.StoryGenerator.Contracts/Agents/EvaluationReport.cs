@@ -1,6 +1,4 @@
-using System.Text.Json.Serialization;
-
-namespace Mystira.StoryGenerator.Domain.Agents;
+namespace Mystira.StoryGenerator.Contracts.Agents;
 
 /// <summary>
 /// Represents an evaluation report for a story iteration.

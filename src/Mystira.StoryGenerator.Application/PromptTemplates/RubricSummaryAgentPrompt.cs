@@ -1,4 +1,5 @@
 using System.Text.Json;
+using Mystira.StoryGenerator.Contracts.Agents;
 using Mystira.StoryGenerator.Contracts.Models;
 using Mystira.StoryGenerator.Domain.Agents;
 

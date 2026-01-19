@@ -1,6 +1,4 @@
-using Mystira.StoryGenerator.Domain.Stories;
-
-namespace Mystira.StoryGenerator.Contracts.Stories;
+namespace Mystira.StoryGenerator.Domain.Stories;
 
 /// <summary>
 /// Represents a single consistency issue found in a path during dominator-based path analysis.

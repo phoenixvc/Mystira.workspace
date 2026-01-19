@@ -2,8 +2,8 @@ using System.Text.Json;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Mystira.StoryGenerator.Application.Services.Prompting;
+using Mystira.StoryGenerator.Contracts.Agents;
 using Mystira.StoryGenerator.Contracts.Configuration;
-using Mystira.StoryGenerator.Contracts.Models;
 using Mystira.StoryGenerator.Domain.Agents;
 using Mystira.StoryGenerator.Domain.Services;
 using Mystira.StoryGenerator.Infrastructure.Agents;
@@ -657,14 +657,9 @@ public partial class AgentOrchestrator : IAgentOrchestrator
         }
     }
 
-    public async Task<StorySession?> GetSessionAsync(string sessionId)
-    {
-        return await _sessionRepository.GetAsync(sessionId);
-    }
-
     public async Task<(bool Success, RubricSummary? Rubric)> GenerateRubricAsync(string sessionId, CancellationToken ct)
     {
-        _logger.LogInformation("Starting rubric generation for session {SessionId}", sessionId);
+                _logger.LogInformation("Starting rubric generation for session {SessionId}", sessionId);
 
         try
         {
@@ -769,6 +764,11 @@ public partial class AgentOrchestrator : IAgentOrchestrator
 
             return (false, null);
         }
+    }
+
+    public async Task<StorySession?> GetSessionAsync(string sessionId)
+    {
+        return await _sessionRepository.GetAsync(sessionId);
     }
 
     #region Private Helper Methods

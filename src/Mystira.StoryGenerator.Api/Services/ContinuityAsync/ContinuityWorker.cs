@@ -1,11 +1,8 @@
-using Mystira.StoryGenerator.Api.Services.ContinuityAsync;
-using Mystira.StoryGenerator.Contracts.Stories;
 using Mystira.StoryGenerator.Contracts.StoryConsistency;
 using Mystira.StoryGenerator.Domain.Services;
 using Mystira.StoryGenerator.Domain.Stories;
-using Microsoft.Extensions.DependencyInjection;
 
-namespace Mystira.StoryGenerator.Api.Services;
+namespace Mystira.StoryGenerator.Api.Services.ContinuityAsync;
 
 /// <summary>
 /// Background worker that executes long-running Story Continuity analyses.

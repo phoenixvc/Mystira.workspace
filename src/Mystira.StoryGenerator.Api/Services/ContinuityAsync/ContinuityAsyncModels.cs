@@ -1,6 +1,7 @@
 using System.Collections.Concurrent;
 using System.Threading.Channels;
 using Mystira.StoryGenerator.Contracts.Stories;
+using Mystira.StoryGenerator.Domain.Stories;
 
 namespace Mystira.StoryGenerator.Api.Services.ContinuityAsync;
 

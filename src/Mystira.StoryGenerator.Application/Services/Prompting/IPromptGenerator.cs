@@ -1,3 +1,4 @@
+using Mystira.StoryGenerator.Contracts.Agents;
 using Mystira.StoryGenerator.Domain.Agents;
 
 namespace Mystira.StoryGenerator.Application.Services.Prompting;

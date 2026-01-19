@@ -1,6 +1,4 @@
-using Mystira.StoryGenerator.Domain.Stories;
-
-namespace Mystira.StoryGenerator.Contracts.Stories;
+namespace Mystira.StoryGenerator.Domain.Stories;
 
 /// <summary>
 /// Represents a continuity issue found in a story scenario.

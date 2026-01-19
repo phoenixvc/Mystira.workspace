@@ -1,6 +1,7 @@
 using System.Text;
 using System.Text.Json;
 using Mystira.StoryGenerator.Contracts.Stories;
+using Mystira.StoryGenerator.Domain.Stories;
 
 namespace Mystira.StoryGenerator.Web.Services;
 

@@ -1,4 +1,4 @@
-namespace Mystira.StoryGenerator.Domain.Agents;
+namespace Mystira.StoryGenerator.Contracts.Agents;
 
 /// <summary>
 /// Represents the user's focus areas for story refinement.

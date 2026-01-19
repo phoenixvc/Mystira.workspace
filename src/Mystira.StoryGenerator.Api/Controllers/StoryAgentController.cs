@@ -4,6 +4,7 @@ using Mystira.StoryGenerator.Application.Infrastructure.Agents;
 using Mystira.StoryGenerator.Domain.Agents;
 using System.Text.Json;
 using System.Collections.Concurrent;
+using Mystira.StoryGenerator.Contracts.Agents;
 using Mystira.StoryGenerator.Contracts.Models;
 
 namespace Mystira.StoryGenerator.Api.Controllers;

@@ -1,4 +1,4 @@
-namespace Mystira.StoryGenerator.Contracts.Stories;
+namespace Mystira.StoryGenerator.Domain.Stories;
 
 /// <summary>
 /// Status values for long-running continuity operations.

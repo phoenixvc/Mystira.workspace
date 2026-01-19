@@ -1,4 +1,4 @@
-namespace Mystira.StoryGenerator.Domain.Agents;
+namespace Mystira.StoryGenerator.Contracts.Agents;
 
 /// <summary>
 /// Represents the knowledge retrieval mode for the story generation agent.

@@ -1,6 +1,7 @@
 using System.Text.Json;
 using Mystira.StoryGenerator.Application.Infrastructure.Agents;
 using Mystira.StoryGenerator.Application.PromptTemplates;
+using Mystira.StoryGenerator.Contracts.Agents;
 using Mystira.StoryGenerator.Domain.Agents;
 
 namespace Mystira.StoryGenerator.Application.Services.Prompting;

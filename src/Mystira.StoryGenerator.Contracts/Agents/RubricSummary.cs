@@ -1,4 +1,4 @@
-namespace Mystira.StoryGenerator.Domain.Agents;
+namespace Mystira.StoryGenerator.Contracts.Agents;
 
 /// <summary>
 /// Summary from the rubric agent evaluating story readiness for publication.

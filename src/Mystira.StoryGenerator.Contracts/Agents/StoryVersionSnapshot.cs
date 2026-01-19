@@ -1,4 +1,4 @@
-namespace Mystira.StoryGenerator.Domain.Agents;
+namespace Mystira.StoryGenerator.Contracts.Agents;
 
 /// <summary>
 /// Represents an immutable snapshot of a story version at a point in time.

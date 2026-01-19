@@ -1,6 +1,7 @@
 using System.Text.Json.Serialization;
-
+using Mystira.StoryGenerator.Contracts.Agents;
 using Mystira.StoryGenerator.Contracts.Models;
+using RubricSummary = Mystira.StoryGenerator.Contracts.Agents.RubricSummary;
 
 namespace Mystira.StoryGenerator.Domain.Agents;
 
