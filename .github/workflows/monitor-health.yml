@@ -19,7 +19,7 @@ on:
 
 concurrency:
   group: monitor-health
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 permissions:
   id-token: write
@@ -46,6 +46,7 @@ jobs:
           for i in $(seq 1 ${{ env.RETRY_COUNT }}); do
             RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" \
               --connect-timeout ${{ env.HEALTH_TIMEOUT }} \
+              --max-time ${{ env.HEALTH_TIMEOUT }} \
               "${{ secrets.ADMIN_API_DEV_URL }}/health" || echo "000")
 
             if [ "$RESPONSE" = "200" ]; then
@@ -85,6 +86,7 @@ jobs:
           for i in $(seq 1 ${{ env.RETRY_COUNT }}); do
             RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" \
               --connect-timeout ${{ env.HEALTH_TIMEOUT }} \
+              --max-time ${{ env.HEALTH_TIMEOUT }} \
               "${{ secrets.ADMIN_API_STAGING_URL }}/health" || echo "000")
 
             if [ "$RESPONSE" = "200" ]; then
@@ -124,6 +126,7 @@ jobs:
           for i in $(seq 1 ${{ env.RETRY_COUNT }}); do
             RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" \
               --connect-timeout ${{ env.HEALTH_TIMEOUT }} \
+              --max-time ${{ env.HEALTH_TIMEOUT }} \
               "${{ secrets.ADMIN_API_PROD_URL }}/health" || echo "000")
 
             if [ "$RESPONSE" = "200" ]; then
