@@ -176,7 +176,7 @@
         </div>
     }
 
-    @if (Session != null && (Session.Stage == "Generating" || Session.Stage == "Refining" || Session.Stage == "GeneratingRubric" || Session.Stage == "Validating" || Session.Stage == "Evaluating"))
+    @if (Session != null && (Session.Stage == "Writing" || Session.Stage == "Generating" || Session.Stage == "Refining" || Session.Stage == "GeneratingRubric" || Session.Stage == "Validating" || Session.Stage == "Evaluating"))
     {
         <div class="streaming-content-panel">
             <h4>Real-time Generation</h4>
