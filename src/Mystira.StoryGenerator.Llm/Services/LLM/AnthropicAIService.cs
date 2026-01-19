@@ -1,8 +1,7 @@
 using System.Globalization;
 using System.Text;
-using Anthropic.Core;
-using Anthropic.Models.Messages;
 using Anthropic;
+using Anthropic.Models.Messages;
 using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Logging;
 using Mystira.StoryGenerator.Contracts.Chat;
@@ -146,12 +145,12 @@ public class AnthropicAIService : ILLMService
         {
             var modelName = ResolveModelName(request);
 
-            var client = new AnthropicClient(new ClientOptions
+            var client = new AnthropicClient
             {
-                APIKey = _settings.Anthropic.ApiKey,
-                BaseUrl = new Uri("https://dev-swe-ai-mystira-stor-resource.services.ai.azure.com/anthropic"),
+                ApiKey = _settings.Anthropic.ApiKey,
+                BaseUrl = "https://dev-swe-ai-mystira-stor-resource.services.ai.azure.com/anthropic",
                 Timeout = TimeSpan.FromSeconds(300)
-            });
+            };
 
             var messages = new List<MessageParam>();
             foreach (var msg in request.Messages)
@@ -180,13 +179,7 @@ public class AnthropicAIService : ILLMService
                 MaxTokens = request.MaxTokens,
                 Temperature = (float)request.Temperature,
                 Messages = messages,
-                // Anthropic expects `System` as a SystemModel with content blocks
-                System = string.IsNullOrWhiteSpace(systemPrompt)
-                    ? null
-                    : new SystemModel(new List<TextBlockParam>
-                    {
-                        new TextBlockParam { Text = systemPrompt }
-                    })
+                System = string.IsNullOrWhiteSpace(systemPrompt) ? null : systemPrompt
             }, cancellationToken: cancellationToken);
 
             var content = ExtractTextContent(response.Content);
