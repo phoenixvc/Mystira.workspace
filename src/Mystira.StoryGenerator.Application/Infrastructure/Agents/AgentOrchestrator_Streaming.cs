@@ -209,10 +209,11 @@ public partial class AgentOrchestrator
                 return (false, "Session not found");
             }
 
-            // Accept Refining, RefinementRequested, or Evaluated stages
+            // Accept Refining, RefinementRequested, Evaluated, or Complete stages
             if (session.Stage != StorySessionStage.Refining &&
                 session.Stage != StorySessionStage.RefinementRequested &&
-                session.Stage != StorySessionStage.Evaluated)
+                session.Stage != StorySessionStage.Evaluated &&
+                session.Stage != StorySessionStage.Complete)
             {
                 return (false, $"Invalid session state for refinement: {session.Stage}");
             }
@@ -221,6 +222,7 @@ public partial class AgentOrchestrator
             session.UserFocus = focus;
             session.IterationCount++;
             session.Stage = StorySessionStage.Refining;
+            session.RubricSummary = null; // Also clear rubric here to be safe
             session.UpdatedAt = DateTime.UtcNow;
             await _sessionRepository.UpdateAsync(session, ct);
 

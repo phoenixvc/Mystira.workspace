@@ -6,12 +6,13 @@ window.sseClient = {
     dotNetRefs: {},
 
     connect: function (sessionId, url, dotNetRef) {
-        console.log(`[SSE-JS] Connecting to ${url}`);
+        console.log(`[SSE-JS] Connecting to session ${sessionId} at ${url}`);
         
         // Close existing connection if any
         if (this.eventSources[sessionId]) {
-            console.log(`[SSE-JS] Closing existing connection for session ${sessionId}`);
+            console.log(`[SSE-JS] Closing existing connection for session ${sessionId} before reconnecting`);
             this.eventSources[sessionId].close();
+            delete this.eventSources[sessionId];
         }
 
         const eventSource = new EventSource(url);
