@@ -129,7 +129,17 @@
 
             // Start SSE stream
             streamCts = new CancellationTokenSource();
-            _ = StreamEventsAsync(startResponse.SessionId);
+            _ = Task.Run(async () =>
+            {
+                try
+                {
+                    await StreamEventsAsync(startResponse.SessionId);
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(ex, "Error in StreamEventsAsync for session {SessionId}", startResponse.SessionId);
+                }
+            });
 
             // Poll for generation completion
             await WaitForGenerationAsync(startResponse.SessionId);
@@ -151,6 +161,7 @@
         try
         {
             logger.LogInformation("Starting SSE stream for session {SessionId}", sessionId);
+            Console.WriteLine($"[BLAZOR] Starting SSE stream for session {sessionId}");
             await foreach (var evt in sessionService.SubscribeToStreamAsync(sessionId, streamCts?.Token ?? default))
             {
                 streamEvents.Add(evt);
@@ -167,6 +178,7 @@
                             evt.Message.Length,
                             evt.Message.Length > 20 ? evt.Message.Substring(0, 20) + "..." : evt.Message,
                             streamingContent.Length);
+                        Console.WriteLine($"[BLAZOR] StreamingUpdate: Added {evt.Message.Length} chars, total now {streamingContent.Length} chars");
                     }
                     else
                     {
