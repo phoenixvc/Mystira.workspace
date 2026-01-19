@@ -26,7 +26,7 @@
                 EvaluationReport="lastEvaluation"
                 RubricSummary="currentSession?.RubricSummary"
                 Events="streamEvents"
-                StreamingContent="streamingContent"
+                StreamingContent="@streamingContent"
                 OnRefineRequested="HandleRefineFromRubric"
                 OnCompleteRequested="HandleComplete" />
 
@@ -188,7 +188,7 @@
                     await RefreshSessionAsync(sessionId);
                 }
 
-                StateHasChanged();
+                await InvokeAsync(StateHasChanged);
             }
         }
         catch (OperationCanceledException)
