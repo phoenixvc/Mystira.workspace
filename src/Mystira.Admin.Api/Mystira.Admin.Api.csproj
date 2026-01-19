@@ -56,7 +56,8 @@
     <PackageReference Include="Mystira.Infrastructure.Azure" Version="0.6.0-*" />
     <PackageReference Include="Mystira.Infrastructure.Data" Version="0.6.0-*" />
     <PackageReference Include="Mystira.Infrastructure.Discord" Version="0.6.0-*" />
-    <PackageReference Include="Mystira.Infrastructure.StoryProtocol" Version="0.6.0-*" />
+    <!-- StoryProtocol: pinned to 0.5.x until 0.6.0 is published -->
+    <PackageReference Include="Mystira.Infrastructure.StoryProtocol" Version="0.5.*-*" />
     <PackageReference Include="Mystira.Shared" Version="0.6.0-*" />
 
     <!-- Ardalis.Specification for data access patterns (version matches Mystira.Application dependency) -->
