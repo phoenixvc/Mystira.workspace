@@ -29,6 +29,8 @@ public class SseJsInteropService : IAsyncDisposable
 
     public async Task<IAsyncEnumerable<AgentStreamEvent>> ConnectAsync(string sessionId, string baseUrl, CancellationToken cancellationToken = default)
     {
+        // Ensure baseUrl doesn't end with slash to avoid double slashes
+        baseUrl = baseUrl.TrimEnd('/');
         var url = $"{baseUrl}/api/story-agent/sessions/{sessionId}/stream";
         _logger.LogInformation("Connecting to SSE stream via JavaScript: {Url}", url);
 
