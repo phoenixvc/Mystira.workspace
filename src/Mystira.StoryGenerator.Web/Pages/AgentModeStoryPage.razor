@@ -101,6 +101,7 @@
     private string? autoPopulatedRefinementText;
     private CancellationTokenSource? streamCts;
     private string streamingContent = string.Empty;
+    private string? currentStreamingPhase = null;
 
     private async Task HandleStartSession(StartSessionRequest request)
     {
@@ -173,11 +174,15 @@
                     }
                 }
 
-                // Clear streaming content when a new phase starts
+                // Clear streaming content when transitioning to a different phase
                 if (evt.Type == AgentStreamEvent.EventType.PhaseStarted)
                 {
-                    streamingContent = string.Empty;
-                    logger.LogInformation("Cleared streaming content for new phase: {Phase}", evt.Phase);
+                    if (currentStreamingPhase != null && currentStreamingPhase != evt.Phase)
+                    {
+                        streamingContent = string.Empty;
+                        logger.LogInformation("Cleared streaming content for phase transition: {OldPhase} -> {NewPhase}", currentStreamingPhase, evt.Phase);
+                    }
+                    currentStreamingPhase = evt.Phase;
                 }
 
                 // Handle specific event types
@@ -298,9 +303,9 @@
 
         autoPopulatedRefinementText = $"What Needs Work:\n{concerns}\n\nNext Steps:\n{nextSteps}";
 
-        // If stage is already Complete, we must move it back to RefinementRequested
+        // If stage is already Complete, Rubric, or Evaluated, we must move it back to RefinementRequested
         // so the API allows the RefineAsync call.
-        if (currentSession.Stage == "Complete" || currentSession.Stage == "Evaluated")
+        if (currentSession.Stage == "Complete" || currentSession.Stage == "Evaluated" || currentSession.Stage == "Rubric")
         {
             currentSession.Stage = "RefinementRequested";
             StateHasChanged();
@@ -451,6 +456,9 @@
         {
             errorMessage = null;
             isRefining = true;
+            
+            // Update stage to show spinner
+            currentSession.Stage = "GeneratingRubric";
             StateHasChanged();
 
             // Call rubric generation endpoint
