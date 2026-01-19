@@ -49,6 +49,9 @@ builder.Services.AddScoped<WebScenarioDominatorPathAnalysisService>();
 // Add Agent Session Service
 builder.Services.AddScoped<IAgentSessionService, AgentSessionService>();
 
+// Add SSE JavaScript Interop Service
+builder.Services.AddScoped<SseJsInteropService>();
+
 builder.Services.AddScoped(sp =>
 {
     var configuration = sp.GetRequiredService<IConfiguration>();

@@ -4,10 +4,14 @@
 @using Mystira.StoryGenerator.Contracts.Models
 @using Mystira.StoryGenerator.Contracts.Agents
 @using System.Text.Json
+@using System.Threading.Channels
+@using System.Runtime.CompilerServices
 @inject IAgentSessionService sessionService
+@inject SseJsInteropService sseService
 @inject ILogger<AgentModeStoryPage> logger
 @inject NavigationManager navigationManager
 @inject Blazored.LocalStorage.ILocalStorageService localStorage
+@inject IConfiguration configuration
 
 <PageTitle>AI Story Generator</PageTitle>
 
@@ -162,7 +166,20 @@
         {
             logger.LogInformation("Starting SSE stream for session {SessionId}", sessionId);
             Console.WriteLine($"[BLAZOR] Starting SSE stream for session {sessionId}");
-            await foreach (var evt in sessionService.SubscribeToStreamAsync(sessionId, streamCts?.Token ?? default))
+            
+            // Get base URL from configuration
+            var baseUrl = configuration["Api:BaseUrl"];
+            if (string.IsNullOrWhiteSpace(baseUrl))
+            {
+                baseUrl = navigationManager.BaseUri.TrimEnd('/');
+            }
+            
+            Console.WriteLine($"[BLAZOR] Using base URL: {baseUrl}");
+            
+            // Use JavaScript-based SSE connection
+            var eventStream = await sseService.ConnectAsync(sessionId, baseUrl, streamCts?.Token ?? default);
+            
+            await foreach (var evt in eventStream.WithCancellation(streamCts?.Token ?? default))
             {
                 streamEvents.Add(evt);
                 logger.LogInformation("Received event: {EventType}, Message: {Message}", evt.Type, evt.Message ?? "<null>");
@@ -215,6 +232,18 @@
         catch (Exception ex)
         {
             logger.LogError(ex, "Error streaming events");
+        }
+        finally
+        {
+            // Cleanup SSE connection
+            try
+            {
+                await sseService.DisconnectAsync(sessionId);
+                logger.LogInformation("SSE connection closed for session {SessionId}", sessionId);
+            }
+            catch (Exception ex)
+            {                logger.LogError(ex, "Error closing SSE connection");
+            }
         }
     }
 
