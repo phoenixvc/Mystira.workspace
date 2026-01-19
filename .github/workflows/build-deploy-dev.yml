@@ -84,7 +84,7 @@ jobs:
       github.ref == 'refs/heads/dev'
     steps:
       - name: Trigger API deployment via workspace
-        uses: peter-evans/repository-dispatch@v3
+        uses: peter-evans/repository-dispatch@v4
         with:
           token: ${{ secrets.MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN }}
           repository: phoenixvc/Mystira.workspace
@@ -146,7 +146,7 @@ jobs:
     if: needs.build-and-deploy-swa.result == 'success'
     steps:
       - name: Trigger SWA update via workspace
-        uses: peter-evans/repository-dispatch@v3
+        uses: peter-evans/repository-dispatch@v4
         with:
           token: ${{ secrets.MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN }}
           repository: phoenixvc/Mystira.workspace
