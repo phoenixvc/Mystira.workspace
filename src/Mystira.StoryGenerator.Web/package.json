@@ -9,7 +9,7 @@
     "build-css:prod": "tailwindcss -i ./Styles/input.css -o ./wwwroot/css/app.css --minify"
   },
   "devDependencies": {
-    "tailwindcss": "^3.4.0",
+    "tailwindcss": "^4.0.0",
     "postcss": "^8.4.32",
     "autoprefixer": "^10.4.16"
   }
