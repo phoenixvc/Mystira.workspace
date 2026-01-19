@@ -67,7 +67,7 @@ jobs:
         working-directory: src/Mystira.StoryGenerator.Api
 
       - name: Upload API artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: story-generator-api-build
           path: src/Mystira.StoryGenerator.Api/publish
