@@ -26,11 +26,14 @@ public class InMemoryStreamPublisher : IAgentStreamPublisher
             new List<AgentStreamEvent> { evt },
             (key, existing) =>
             {
-                existing.Add(evt);
-                // Keep only the last MaxEventsPerSession events
-                if (existing.Count > MaxEventsPerSession)
+                lock (existing)
                 {
-                    existing.RemoveRange(0, existing.Count - MaxEventsPerSession);
+                    existing.Add(evt);
+                    // Keep only the last MaxEventsPerSession events
+                    if (existing.Count > MaxEventsPerSession)
+                    {
+                        existing.RemoveRange(0, existing.Count - MaxEventsPerSession);
+                    }
                 }
                 return existing;
             });
@@ -59,7 +62,13 @@ public class InMemoryStreamPublisher : IAgentStreamPublisher
         // First, yield all existing events (replay)
         if (_eventHistory.TryGetValue(sessionId, out var existingEvents))
         {
-            foreach (var evt in existingEvents)
+            List<AgentStreamEvent> historyCopy;
+            lock (existingEvents)
+            {
+                historyCopy = new List<AgentStreamEvent>(existingEvents);
+            }
+
+            foreach (var evt in historyCopy)
             {
                 if (ct.IsCancellationRequested)
                     yield break;

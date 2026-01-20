@@ -272,13 +272,16 @@ public class StoryAgentController : ControllerBase
             }
 
             // Verify session is in correct state
-            if (session.Stage != StorySessionStage.RefinementRequested && session.Stage != StorySessionStage.Evaluated)
+            if (session.Stage != StorySessionStage.RefinementRequested &&
+                session.Stage != StorySessionStage.Evaluated &&
+                session.Stage != StorySessionStage.Complete &&
+                session.Stage != StorySessionStage.Refining) // Allow if already Refining
             {
-                return Conflict(new { error = "Session is not in RefinementRequested or Evaluated state", sessionId, currentStage = session.Stage.ToString() });
+                return Conflict(new { error = "Session is not in RefinementRequested, Evaluated, Complete, or Refining state", sessionId, currentStage = session.Stage.ToString() });
             }
 
-            // Check iteration limit (e.g., max 5 iterations)
-            if (session.IterationCount >= 5)
+            // Check iteration limit (e.g., max 50 iterations)
+            if (session.IterationCount >= 50)
             {
                 return Conflict(new { error = "Maximum iterations reached", sessionId, iterationCount = session.IterationCount });
             }
@@ -303,6 +306,7 @@ public class StoryAgentController : ControllerBase
 
             // Set stage to Refining before starting the background task
             session.Stage = StorySessionStage.Refining;
+            session.RubricSummary = null; // Clear rubric on refinement start
             session.UpdatedAt = DateTime.UtcNow;
             await _sessionRepository.UpdateAsync(session, cancellationToken);
 
@@ -372,9 +376,11 @@ public class StoryAgentController : ControllerBase
             }
 
             // Verify session is in correct state
-            if (session.Stage != StorySessionStage.RefinementRequested && session.Stage != StorySessionStage.Evaluated)
+            if (session.Stage != StorySessionStage.RefinementRequested &&
+                session.Stage != StorySessionStage.Evaluated &&
+                session.Stage != StorySessionStage.Complete)
             {
-                return Conflict(new { error = "Session is not in RefinementRequested or Evaluated state", sessionId, currentStage = session.Stage.ToString() });
+                return Conflict(new { error = "Session is not in RefinementRequested, Evaluated, or Complete state", sessionId, currentStage = session.Stage.ToString() });
             }
 
             // Mark session as generating rubric
@@ -454,9 +460,11 @@ public class StoryAgentController : ControllerBase
             }
 
             // Verify session is in correct state
-            if (session.Stage != StorySessionStage.RefinementRequested && session.Stage != StorySessionStage.Evaluated)
+            if (session.Stage != StorySessionStage.RefinementRequested &&
+                session.Stage != StorySessionStage.Evaluated &&
+                session.Stage != StorySessionStage.Complete)
             {
-                return Conflict(new { error = "Session is not in RefinementRequested or Evaluated state", sessionId, currentStage = session.Stage.ToString() });
+                return Conflict(new { error = "Session is not in RefinementRequested, Evaluated, or Complete state", sessionId, currentStage = session.Stage.ToString() });
             }
 
             // TODO: Call rubric generator here before completing
@@ -575,9 +583,10 @@ public class StoryAgentController : ControllerBase
             }
 
             // Check if session is already in terminal state
-            var terminalStates = new[] { StorySessionStage.Complete, StorySessionStage.StuckNeedsReview, StorySessionStage.Failed };
+            var terminalStates = new[] { StorySessionStage.StuckNeedsReview, StorySessionStage.Failed };
             if (terminalStates.Contains(session.Stage))
             {
+                _logger.LogInformation("SSE stream requested for session {SessionId} which is in terminal state {Stage}", sessionId, session.Stage);
                 Response.StatusCode = 204; // No Content
                 return;
             }
@@ -603,8 +612,7 @@ public class StoryAgentController : ControllerBase
 
                     // Check if this event indicates terminal state
                     if (evt.Type == AgentStreamEvent.EventType.MaxIterationsReached ||
-                        evt.Type == AgentStreamEvent.EventType.Error ||
-                        evt.Type == AgentStreamEvent.EventType.RubricGenerated)
+                        evt.Type == AgentStreamEvent.EventType.Error)
                     {
                         _logger.LogInformation("SSE stream ending due to terminal event for session {SessionId}: {EventType}", sessionId, evt.Type);
                         break;

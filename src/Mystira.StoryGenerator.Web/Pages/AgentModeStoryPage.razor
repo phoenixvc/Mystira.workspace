@@ -4,10 +4,14 @@
 @using Mystira.StoryGenerator.Contracts.Models
 @using Mystira.StoryGenerator.Contracts.Agents
 @using System.Text.Json
+@using System.Threading.Channels
+@using System.Runtime.CompilerServices
 @inject IAgentSessionService sessionService
+@inject SseJsInteropService sseService
 @inject ILogger<AgentModeStoryPage> logger
 @inject NavigationManager navigationManager
 @inject Blazored.LocalStorage.ILocalStorageService localStorage
+@inject IConfiguration configuration
 
 <PageTitle>AI Story Generator</PageTitle>
 
@@ -26,7 +30,7 @@
                 EvaluationReport="lastEvaluation"
                 RubricSummary="currentSession?.RubricSummary"
                 Events="streamEvents"
-                StreamingContent="streamingContent"
+                StreamingContent="@streamingContent"
                 OnRefineRequested="HandleRefineFromRubric"
                 OnCompleteRequested="HandleComplete" />
 
@@ -101,6 +105,7 @@
     private string? autoPopulatedRefinementText;
     private CancellationTokenSource? streamCts;
     private string streamingContent = string.Empty;
+    private string? currentStreamingPhase = null;
 
     private async Task HandleStartSession(StartSessionRequest request)
     {
@@ -127,8 +132,27 @@
             StateHasChanged();
 
             // Start SSE stream
+            if (streamCts != null)
+            {
+                await streamCts.CancelAsync();
+                streamCts.Dispose();
+            }
             streamCts = new CancellationTokenSource();
-            _ = StreamEventsAsync(startResponse.SessionId);
+            var cts = streamCts;
+            _ = Task.Run(async () =>
+            {
+                try
+                {
+                    await StreamEventsAsync(startResponse.SessionId);
+                }
+                catch (Exception ex)
+                {
+                    if (!cts.IsCancellationRequested)
+                    {
+                        logger.LogError(ex, "Error in StreamEventsAsync for session {SessionId}", startResponse.SessionId);
+                    }
+                }
+            });
 
             // Poll for generation completion
             await WaitForGenerationAsync(startResponse.SessionId);
@@ -150,7 +174,21 @@
         try
         {
             logger.LogInformation("Starting SSE stream for session {SessionId}", sessionId);
-            await foreach (var evt in sessionService.SubscribeToStreamAsync(sessionId, streamCts?.Token ?? default))
+            Console.WriteLine($"[BLAZOR] Starting SSE stream for session {sessionId}");
+
+            // Get base URL from configuration
+            var baseUrl = configuration["Api:BaseUrl"];
+            if (string.IsNullOrWhiteSpace(baseUrl))
+            {
+                baseUrl = navigationManager.BaseUri.TrimEnd('/');
+            }
+
+            Console.WriteLine($"[BLAZOR] Using base URL: {baseUrl}");
+
+            // Use JavaScript-based SSE connection
+            var eventStream = await sseService.ConnectAsync(sessionId, baseUrl, streamCts?.Token ?? default);
+
+            await foreach (var evt in eventStream.WithCancellation(streamCts?.Token ?? default))
             {
                 streamEvents.Add(evt);
                 logger.LogInformation("Received event: {EventType}, Message: {Message}", evt.Type, evt.Message ?? "<null>");
@@ -166,6 +204,7 @@
                             evt.Message.Length,
                             evt.Message.Length > 20 ? evt.Message.Substring(0, 20) + "..." : evt.Message,
                             streamingContent.Length);
+                        Console.WriteLine($"[BLAZOR] StreamingUpdate: Added {evt.Message.Length} chars, total now {streamingContent.Length} chars");
                     }
                     else
                     {
@@ -173,11 +212,15 @@
                     }
                 }
 
-                // Clear streaming content when a new phase starts
+                // Clear streaming content when transitioning to a different phase
                 if (evt.Type == AgentStreamEvent.EventType.PhaseStarted)
                 {
-                    streamingContent = string.Empty;
-                    logger.LogInformation("Cleared streaming content for new phase: {Phase}", evt.Phase);
+                    if (currentStreamingPhase != null && currentStreamingPhase != evt.Phase)
+                    {
+                        streamingContent = string.Empty;
+                        logger.LogInformation("Cleared streaming content for phase transition: {OldPhase} -> {NewPhase}", currentStreamingPhase, evt.Phase);
+                    }
+                    currentStreamingPhase = evt.Phase;
                 }
 
                 // Handle specific event types
@@ -188,7 +231,7 @@
                     await RefreshSessionAsync(sessionId);
                 }
 
-                StateHasChanged();
+                await InvokeAsync(StateHasChanged);
             }
         }
         catch (OperationCanceledException)
@@ -198,6 +241,18 @@
         catch (Exception ex)
         {
             logger.LogError(ex, "Error streaming events");
+        }
+        finally
+        {
+            // Cleanup SSE connection
+            try
+            {
+                await sseService.DisconnectAsync(sessionId);
+                logger.LogInformation("SSE connection closed for session {SessionId}", sessionId);
+            }
+            catch (Exception ex)
+            {                logger.LogError(ex, "Error closing SSE connection");
+            }
         }
     }
 
@@ -270,6 +325,7 @@
             if (currentSession != null)
             {
                 currentSession.RubricSummary = null;
+                lastEvaluation = null;
             }
 
             StateHasChanged();
@@ -298,9 +354,9 @@
 
         autoPopulatedRefinementText = $"What Needs Work:\n{concerns}\n\nNext Steps:\n{nextSteps}";
 
-        // If stage is already Complete, we must move it back to RefinementRequested
+        // If stage is already Complete, Rubric, or Evaluated, we must move it back to RefinementRequested
         // so the API allows the RefineAsync call.
-        if (currentSession.Stage == "Complete" || currentSession.Stage == "Evaluated")
+        if (currentSession.Stage == "Complete" || currentSession.Stage == "Evaluated" || currentSession.Stage == "Rubric")
         {
             currentSession.Stage = "RefinementRequested";
             StateHasChanged();
@@ -316,13 +372,50 @@
         {
             errorMessage = null;
             isRefining = true;
-            currentSession.Stage = "Refining"; // Update local state for immediate feedback
-            currentSession.IterationCount++; // Increment local iteration count
-            currentSession.RubricSummary = null; // Clear old rubric
-            autoPopulatedRefinementText = null; // Clear auto-populated text
+
+            // Clear previous results to return to "writing" phase view
+            lastEvaluation = null;
+            streamEvents.Clear();
+            streamingContent = string.Empty;
+            currentStreamingPhase = null;
+
+            if (currentSession != null)
+            {
+                currentSession.Stage = "Refining"; // Update local state for immediate feedback
+                currentSession.IterationCount++; // Increment local iteration count
+                currentSession.RubricSummary = null; // Clear old rubric
+                autoPopulatedRefinementText = null; // Clear auto-populated text
+            }
             StateHasChanged();
 
-            var response = await sessionService.RefineAsync(currentSession.SessionId, request);
+            // Start SSE stream for refinement
+            if (streamCts != null)
+            {
+                await streamCts.CancelAsync();
+                streamCts.Dispose();
+
+                // Add a small delay to allow JS to process the disconnect
+                await Task.Delay(100);
+            }
+
+            streamCts = new CancellationTokenSource();
+            var cts = streamCts; // Capture locally
+            _ = Task.Run(async () =>
+            {
+                try
+                {
+                    await StreamEventsAsync(currentSession!.SessionId);
+                }
+                catch (Exception ex)
+                {
+                    if (!cts.IsCancellationRequested)
+                    {
+                        logger.LogError(ex, "Error in StreamEventsAsync for refinement of session {SessionId}", currentSession?.SessionId);
+                    }
+                }
+            });
+
+            var response = await sessionService.RefineAsync(currentSession!.SessionId, request);
 
             // Sync with server iteration count if possible
             if (response != null && response.IterationCount > 0)
@@ -451,6 +544,9 @@
         {
             errorMessage = null;
             isRefining = true;
+
+            // Update stage to show spinner
+            currentSession.Stage = "GeneratingRubric";
             StateHasChanged();
 
             // Call rubric generation endpoint
@@ -504,7 +600,10 @@
         {
             currentSession = await sessionService.GetSessionAsync(sessionId);
 
-            if (currentSession.LastEvaluationReport != null)
+            // Only update lastEvaluation if it's not null in the response,
+            // or if we are NOT in the Refining stage.
+            // This prevents the polling from bringing back old evaluations during refinement.
+            if (currentSession.LastEvaluationReport != null || currentSession.Stage != "Refining")
             {
                 lastEvaluation = currentSession.LastEvaluationReport;
             }
