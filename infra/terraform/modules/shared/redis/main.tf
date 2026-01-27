@@ -105,6 +105,10 @@ resource "azurerm_redis_cache" "shared" {
   }
 
   tags = local.common_tags
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 # Redis Firewall Rules (allow Azure services)

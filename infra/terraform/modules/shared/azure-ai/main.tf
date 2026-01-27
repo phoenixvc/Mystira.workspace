@@ -133,6 +133,7 @@ resource "azurerm_cognitive_account" "ai_foundry" {
   tags = local.common_tags
 
   lifecycle {
+    prevent_destroy = true
     ignore_changes = [
       # Ignore changes to tags that might be added by Azure
       tags["hidden-link:*"],
@@ -323,6 +324,7 @@ resource "azurerm_cognitive_account" "ai_foundry_uksouth" {
   })
 
   lifecycle {
+    prevent_destroy = true
     ignore_changes = [
       tags["hidden-link:*"],
     ]
@@ -472,6 +474,7 @@ resource "azurerm_cognitive_account" "ai_foundry_eastus" {
   })
 
   lifecycle {
+    prevent_destroy = true
     ignore_changes = [
       tags["hidden-link:*"],
     ]
@@ -556,6 +559,7 @@ resource "azurerm_cognitive_account" "ai_foundry_swedencentral" {
   })
 
   lifecycle {
+    prevent_destroy = true
     ignore_changes = [
       tags["hidden-link:*"],
     ]
@@ -689,6 +693,7 @@ resource "azurerm_cognitive_account" "ai_foundry_northcentralus" {
   })
 
   lifecycle {
+    prevent_destroy = true
     ignore_changes = [
       tags["hidden-link:*"],
     ]

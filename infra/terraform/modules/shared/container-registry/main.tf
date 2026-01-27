@@ -108,6 +108,10 @@ resource "azurerm_container_registry" "shared" {
   # Retention is now managed via azurerm_container_registry_task or lifecycle policies
 
   tags = local.common_tags
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 # Outputs

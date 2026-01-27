@@ -186,6 +186,10 @@ resource "azurerm_dns_zone" "main" {
   resource_group_name = var.resource_group_name
 
   tags = local.common_tags
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 # A Record for publisher (when NOT using Front Door)

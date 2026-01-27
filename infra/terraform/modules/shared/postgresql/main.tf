@@ -140,6 +140,10 @@ resource "azurerm_private_dns_zone" "postgres" {
   resource_group_name = var.resource_group_name
 
   tags = local.common_tags
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 # Private DNS Zone Virtual Network Link
@@ -174,6 +178,10 @@ resource "azurerm_postgresql_flexible_server" "shared" {
   geo_redundant_backup_enabled = var.geo_redundant_backup_enabled
 
   tags = local.common_tags
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 # Random password for PostgreSQL (if not provided)

@@ -145,6 +145,10 @@ resource "azurerm_cosmosdb_account" "shared" {
   }
 
   tags = local.common_tags
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 # Cosmos DB SQL Databases

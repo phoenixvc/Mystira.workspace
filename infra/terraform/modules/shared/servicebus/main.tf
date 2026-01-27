@@ -99,6 +99,10 @@ resource "azurerm_servicebus_namespace" "shared" {
   # Note: zone_redundant was removed in AzureRM 4.0 - zone redundancy is now automatic for Premium
 
   tags = local.common_tags
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 # Dynamic queues based on variable

@@ -97,6 +97,10 @@ resource "azurerm_log_analytics_workspace" "main" {
   retention_in_days   = var.log_retention_days
 
   tags = local.common_tags
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 # =============================================================================
@@ -114,6 +118,10 @@ resource "azurerm_application_insights" "main" {
   daily_data_cap_in_gb = var.daily_quota_gb
 
   tags = local.common_tags
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 # =============================================================================
@@ -141,6 +149,10 @@ resource "azurerm_key_vault" "main" {
   }
 
   tags = local.common_tags
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 # Key Vault access policy for App Service managed identity
@@ -181,6 +193,10 @@ resource "azurerm_storage_account" "main" {
   }
 
   tags = local.common_tags
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 # Primary media container (hot tier - frequently accessed content)
@@ -401,6 +417,10 @@ resource "azurerm_cosmosdb_account" "main" {
   }
 
   tags = local.common_tags
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 resource "azurerm_cosmosdb_sql_database" "main" {
@@ -441,6 +461,10 @@ resource "azurerm_service_plan" "main" {
   sku_name            = var.app_service_sku
 
   tags = local.common_tags
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 # =============================================================================
@@ -515,6 +539,10 @@ resource "azurerm_linux_web_app" "api" {
   }
 
   tags = local.common_tags
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 # Store secrets in Key Vault
@@ -616,6 +644,10 @@ resource "azurerm_static_web_app" "main" {
   sku_size            = var.static_web_app_sku
 
   tags = local.common_tags
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 # Custom domain for Static Web App
@@ -648,6 +680,10 @@ resource "azurerm_communication_service" "main" {
   data_location       = "Africa"  # Data residency
 
   tags = local.common_tags
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 resource "azurerm_email_communication_service" "main" {
@@ -658,6 +694,10 @@ resource "azurerm_email_communication_service" "main" {
   data_location       = "Africa"
 
   tags = local.common_tags
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 # =============================================================================
@@ -769,6 +809,10 @@ resource "azurerm_redis_cache" "main" {
   }
 
   tags = local.common_tags
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 # Store Redis connection string in Key Vault

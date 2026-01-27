@@ -132,6 +132,10 @@ resource "azurerm_application_insights" "admin_api" {
   application_type    = "web"
 
   tags = local.common_tags
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 # Key Vault for Admin-API Secrets
@@ -172,6 +176,10 @@ resource "azurerm_key_vault" "admin_api" {
   }
 
   tags = local.common_tags
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 # Outputs

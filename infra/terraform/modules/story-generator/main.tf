@@ -228,6 +228,10 @@ resource "azurerm_postgresql_flexible_server" "story_generator" {
   geo_redundant_backup_enabled = var.environment == "prod"
 
   tags = local.common_tags
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 # Private DNS Zone for PostgreSQL (if not using shared)
@@ -285,6 +289,10 @@ resource "azurerm_redis_cache" "story_generator" {
   }
 
   tags = local.common_tags
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 # Log Analytics Workspace (if not using shared)
@@ -297,6 +305,10 @@ resource "azurerm_log_analytics_workspace" "story_generator" {
   retention_in_days   = var.environment == "prod" ? 90 : 30
 
   tags = local.common_tags
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 # Application Insights for Story-Generator Monitoring
@@ -308,6 +320,10 @@ resource "azurerm_application_insights" "story_generator" {
   application_type    = "other"
 
   tags = local.common_tags
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 # Key Vault for Story-Generator Secrets
@@ -348,6 +364,10 @@ resource "azurerm_key_vault" "story_generator" {
   }
 
   tags = local.common_tags
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 data "azurerm_client_config" "current" {}
@@ -390,6 +410,10 @@ resource "azurerm_static_web_app" "story_generator" {
     Component = "story-generator-web"
     Type      = "static-web-app"
   })
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 # Custom domain for Static Web App

@@ -106,6 +106,10 @@ resource "azurerm_static_web_app" "admin_ui" {
     Component = "admin-ui"
     Type      = "static-web-app"
   })
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 # Custom domain for Static Web App (optional)
