@@ -46,6 +46,11 @@ jobs:
 
       - name: Build application
         run: pnpm build
+        env:
+          VITE_API_BASE_URL: http://localhost:8080/api
+          VITE_PUBLIC_API_URL: http://localhost:8080/public
+          VITE_GRPC_ENDPOINT: http://localhost:9090
+          VITE_ENABLE_MOCK_API: "true"
 
       - name: Run E2E tests with Cypress
         uses: cypress-io/github-action@v6
@@ -58,6 +63,7 @@ jobs:
           headed: false
         env:
           CYPRESS_BASE_URL: http://localhost:3000
+          VITE_ENABLE_MOCK_API: "true"
 
       - name: Upload Cypress screenshots
         uses: actions/upload-artifact@v4
