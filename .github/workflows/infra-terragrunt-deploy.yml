@@ -1,0 +1,300 @@
+name: "[CD] Infrastructure - Terragrunt Deploy"
+
+# Terragrunt Deployment: Deploys product-based Terraform infrastructure
+# Uses OIDC authentication to Azure
+# Supports targeted product deployment or full deployment
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Environment to deploy"
+        required: true
+        type: choice
+        options:
+          - dev
+          - staging
+          - prod
+      product:
+        description: "Product to deploy (or 'all' for full deployment)"
+        required: true
+        type: choice
+        options:
+          - all
+          - shared-infra
+          - mystira-app
+          - story-generator
+          - admin
+          - publisher
+          - chain
+      action:
+        description: "Action to perform"
+        required: true
+        type: choice
+        options:
+          - plan
+          - apply
+          - destroy-plan
+      auto_approve:
+        description: "Auto-approve apply (for CI automation)"
+        required: false
+        type: boolean
+        default: false
+
+env:
+  TF_VERSION: "1.5.0"
+  TERRAGRUNT_VERSION: "0.55.0"
+  ARM_USE_OIDC: true
+  ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+  ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+  ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+
+permissions:
+  id-token: write
+  contents: read
+  pull-requests: write
+
+jobs:
+  # ============================================
+  # Setup and Plan
+  # ============================================
+  plan:
+    name: Plan - ${{ inputs.product }} (${{ inputs.environment }})
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    outputs:
+      plan-exitcode: ${{ steps.plan.outputs.exitcode }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          submodules: recursive
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      - name: Setup Terragrunt
+        run: |
+          wget -O terragrunt https://github.com/gruntwork-io/terragrunt/releases/download/v${{ env.TERRAGRUNT_VERSION }}/terragrunt_linux_amd64
+          chmod +x terragrunt
+          sudo mv terragrunt /usr/local/bin/
+
+      - name: Azure Login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Get Plan Directory
+        id: get-dir
+        run: |
+          if [[ "${{ inputs.product }}" == "all" ]]; then
+            echo "dir=infra/terraform" >> $GITHUB_OUTPUT
+            echo "mode=run-all" >> $GITHUB_OUTPUT
+          elif [[ "${{ inputs.product }}" == "shared-infra" ]]; then
+            echo "dir=infra/terraform/shared-infra/environments/${{ inputs.environment }}" >> $GITHUB_OUTPUT
+            echo "mode=single" >> $GITHUB_OUTPUT
+          else
+            echo "dir=infra/terraform/products/${{ inputs.product }}/environments/${{ inputs.environment }}" >> $GITHUB_OUTPUT
+            echo "mode=single" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Terragrunt Init
+        run: |
+          cd ${{ steps.get-dir.outputs.dir }}
+          if [[ "${{ steps.get-dir.outputs.mode }}" == "run-all" ]]; then
+            terragrunt run-all init --terragrunt-non-interactive
+          else
+            terragrunt init --terragrunt-non-interactive
+          fi
+        env:
+          TF_VAR_environment: ${{ inputs.environment }}
+
+      - name: Terragrunt Plan
+        id: plan
+        run: |
+          cd ${{ steps.get-dir.outputs.dir }}
+          PLAN_CMD="plan -out=tfplan -detailed-exitcode"
+          if [[ "${{ inputs.action }}" == "destroy-plan" ]]; then
+            PLAN_CMD="plan -destroy -out=tfplan -detailed-exitcode"
+          fi
+
+          if [[ "${{ steps.get-dir.outputs.mode }}" == "run-all" ]]; then
+            terragrunt run-all $PLAN_CMD --terragrunt-non-interactive || exitcode=$?
+          else
+            terragrunt $PLAN_CMD --terragrunt-non-interactive || exitcode=$?
+          fi
+
+          echo "exitcode=${exitcode:-0}" >> $GITHUB_OUTPUT
+
+          # Exit code 2 means changes detected (not an error)
+          if [[ ${exitcode:-0} -eq 2 ]]; then
+            echo "Changes detected in plan"
+            exit 0
+          fi
+        env:
+          TF_VAR_environment: ${{ inputs.environment }}
+
+      - name: Upload Plan Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: tfplan-${{ inputs.product }}-${{ inputs.environment }}
+          path: ${{ steps.get-dir.outputs.dir }}/**/tfplan
+          retention-days: 7
+
+      - name: Plan Summary
+        run: |
+          echo "## Terragrunt Plan Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Product**: ${{ inputs.product }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Environment**: ${{ inputs.environment }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Action**: ${{ inputs.action }}" >> $GITHUB_STEP_SUMMARY
+          if [[ "${{ steps.plan.outputs.exitcode }}" == "2" ]]; then
+            echo "- **Status**: ⚠️ Changes detected" >> $GITHUB_STEP_SUMMARY
+          elif [[ "${{ steps.plan.outputs.exitcode }}" == "0" ]]; then
+            echo "- **Status**: ✅ No changes" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "- **Status**: ❌ Error" >> $GITHUB_STEP_SUMMARY
+          fi
+
+  # ============================================
+  # Apply (requires approval for prod)
+  # ============================================
+  apply:
+    name: Apply - ${{ inputs.product }} (${{ inputs.environment }})
+    runs-on: ubuntu-latest
+    needs: plan
+    if: inputs.action == 'apply' && (needs.plan.outputs.plan-exitcode == '2' || inputs.auto_approve)
+    environment:
+      name: ${{ inputs.environment }}-deploy
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          submodules: recursive
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      - name: Setup Terragrunt
+        run: |
+          wget -O terragrunt https://github.com/gruntwork-io/terragrunt/releases/download/v${{ env.TERRAGRUNT_VERSION }}/terragrunt_linux_amd64
+          chmod +x terragrunt
+          sudo mv terragrunt /usr/local/bin/
+
+      - name: Azure Login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Download Plan Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: tfplan-${{ inputs.product }}-${{ inputs.environment }}
+          path: infra/terraform
+
+      - name: Get Apply Directory
+        id: get-dir
+        run: |
+          if [[ "${{ inputs.product }}" == "all" ]]; then
+            echo "dir=infra/terraform" >> $GITHUB_OUTPUT
+            echo "mode=run-all" >> $GITHUB_OUTPUT
+          elif [[ "${{ inputs.product }}" == "shared-infra" ]]; then
+            echo "dir=infra/terraform/shared-infra/environments/${{ inputs.environment }}" >> $GITHUB_OUTPUT
+            echo "mode=single" >> $GITHUB_OUTPUT
+          else
+            echo "dir=infra/terraform/products/${{ inputs.product }}/environments/${{ inputs.environment }}" >> $GITHUB_OUTPUT
+            echo "mode=single" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Terragrunt Apply
+        run: |
+          cd ${{ steps.get-dir.outputs.dir }}
+          if [[ "${{ steps.get-dir.outputs.mode }}" == "run-all" ]]; then
+            terragrunt run-all apply tfplan --terragrunt-non-interactive
+          else
+            terragrunt apply tfplan --terragrunt-non-interactive
+          fi
+        env:
+          TF_VAR_environment: ${{ inputs.environment }}
+
+      - name: Apply Summary
+        run: |
+          echo "## Terragrunt Apply Complete" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "✅ Successfully applied changes to **${{ inputs.product }}** in **${{ inputs.environment }}**" >> $GITHUB_STEP_SUMMARY
+
+  # ============================================
+  # Ordered Deployment (for 'all' product)
+  # ============================================
+  deploy-ordered:
+    name: Deploy All (Ordered)
+    runs-on: ubuntu-latest
+    if: inputs.product == 'all' && inputs.action == 'apply'
+    environment:
+      name: ${{ inputs.environment }}-deploy
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          submodules: recursive
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      - name: Setup Terragrunt
+        run: |
+          wget -O terragrunt https://github.com/gruntwork-io/terragrunt/releases/download/v${{ env.TERRAGRUNT_VERSION }}/terragrunt_linux_amd64
+          chmod +x terragrunt
+          sudo mv terragrunt /usr/local/bin/
+
+      - name: Azure Login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Deploy with Dependency Order
+        run: |
+          cd infra/terraform
+
+          echo "=== Deploying shared-infra first ==="
+          cd shared-infra/environments/${{ inputs.environment }}
+          terragrunt init --terragrunt-non-interactive
+          terragrunt apply -auto-approve --terragrunt-non-interactive
+          cd ../../..
+
+          echo "=== Deploying products in parallel ==="
+          for product in mystira-app story-generator admin publisher chain; do
+            product_dir="products/${product}/environments/${{ inputs.environment }}"
+            if [[ -d "$product_dir" ]]; then
+              echo "Deploying ${product}..."
+              cd "$product_dir"
+              terragrunt init --terragrunt-non-interactive
+              terragrunt apply -auto-approve --terragrunt-non-interactive
+              cd ../../../..
+            fi
+          done
+        env:
+          TF_VAR_environment: ${{ inputs.environment }}
+
+      - name: Deployment Summary
+        run: |
+          echo "## Full Deployment Complete" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "✅ Successfully deployed all products to **${{ inputs.environment }}**" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Deployment order:" >> $GITHUB_STEP_SUMMARY
+          echo "1. shared-infra" >> $GITHUB_STEP_SUMMARY
+          echo "2. mystira-app" >> $GITHUB_STEP_SUMMARY
+          echo "3. story-generator" >> $GITHUB_STEP_SUMMARY
+          echo "4. admin" >> $GITHUB_STEP_SUMMARY
+          echo "5. publisher" >> $GITHUB_STEP_SUMMARY
+          echo "6. chain" >> $GITHUB_STEP_SUMMARY

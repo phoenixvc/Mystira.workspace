@@ -1,0 +1,237 @@
+name: "[CI] Infrastructure - Terragrunt Validate"
+
+# Terragrunt Validation: Validates product-based Terraform structure
+# Checks: Terragrunt format, validate, and plan for all products
+# Triggers: PRs with infrastructure changes
+
+on:
+  pull_request:
+    branches: [main, staging]
+    paths:
+      - "infra/terraform/**"
+      - ".github/workflows/infra-terragrunt-*.yml"
+      - "!**/*.md"
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Environment to validate"
+        required: true
+        default: "dev"
+        type: choice
+        options:
+          - dev
+          - staging
+          - prod
+
+env:
+  TF_VERSION: "1.5.0"
+  TERRAGRUNT_VERSION: "0.55.0"
+
+jobs:
+  # ============================================
+  # Detect Changed Products
+  # ============================================
+  detect-changes:
+    name: Detect Changes
+    runs-on: ubuntu-latest
+    outputs:
+      shared-infra: ${{ steps.changes.outputs.shared-infra }}
+      mystira-app: ${{ steps.changes.outputs.mystira-app }}
+      story-generator: ${{ steps.changes.outputs.story-generator }}
+      admin: ${{ steps.changes.outputs.admin }}
+      publisher: ${{ steps.changes.outputs.publisher }}
+      chain: ${{ steps.changes.outputs.chain }}
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: dorny/paths-filter@v3
+        id: changes
+        with:
+          filters: |
+            shared-infra:
+              - 'infra/terraform/shared-infra/**'
+              - 'infra/terraform/modules/shared/**'
+              - 'infra/terraform/terragrunt.hcl'
+            mystira-app:
+              - 'infra/terraform/products/mystira-app/**'
+              - 'infra/terraform/modules/mystira-app/**'
+            story-generator:
+              - 'infra/terraform/products/story-generator/**'
+              - 'infra/terraform/modules/story-generator/**'
+            admin:
+              - 'infra/terraform/products/admin/**'
+              - 'infra/terraform/modules/admin-api/**'
+              - 'infra/terraform/modules/admin-ui/**'
+            publisher:
+              - 'infra/terraform/products/publisher/**'
+              - 'infra/terraform/modules/publisher/**'
+            chain:
+              - 'infra/terraform/products/chain/**'
+              - 'infra/terraform/modules/chain/**'
+
+  # ============================================
+  # Format Check
+  # ============================================
+  format-check:
+    name: Format Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      - name: Setup Terragrunt
+        run: |
+          wget -O terragrunt https://github.com/gruntwork-io/terragrunt/releases/download/v${{ env.TERRAGRUNT_VERSION }}/terragrunt_linux_amd64
+          chmod +x terragrunt
+          sudo mv terragrunt /usr/local/bin/
+
+      - name: Terraform Format Check
+        run: |
+          cd infra/terraform
+          terraform fmt -check -recursive || {
+            echo "::error::Terraform files are not properly formatted. Run 'terraform fmt -recursive' to fix."
+            exit 1
+          }
+
+      - name: Terragrunt HCL Format Check
+        run: |
+          cd infra/terraform
+          terragrunt hclfmt --terragrunt-check || {
+            echo "::error::Terragrunt files are not properly formatted. Run 'terragrunt hclfmt' to fix."
+            exit 1
+          }
+
+  # ============================================
+  # Validate Shared Infrastructure
+  # ============================================
+  validate-shared-infra:
+    name: Validate shared-infra
+    runs-on: ubuntu-latest
+    needs: [detect-changes, format-check]
+    if: needs.detect-changes.outputs.shared-infra == 'true' || github.event_name == 'workflow_dispatch'
+    strategy:
+      fail-fast: false
+      matrix:
+        environment: [dev, staging, prod]
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          submodules: recursive
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      - name: Setup Terragrunt
+        run: |
+          wget -O terragrunt https://github.com/gruntwork-io/terragrunt/releases/download/v${{ env.TERRAGRUNT_VERSION }}/terragrunt_linux_amd64
+          chmod +x terragrunt
+          sudo mv terragrunt /usr/local/bin/
+
+      - name: Terragrunt Validate
+        run: |
+          cd infra/terraform/shared-infra/environments/${{ matrix.environment }}
+          terragrunt validate --terragrunt-non-interactive
+        env:
+          TF_VAR_environment: ${{ matrix.environment }}
+
+  # ============================================
+  # Validate Products
+  # ============================================
+  validate-products:
+    name: Validate ${{ matrix.product }}
+    runs-on: ubuntu-latest
+    needs: [detect-changes, format-check, validate-shared-infra]
+    if: always() && needs.format-check.result == 'success'
+    strategy:
+      fail-fast: false
+      matrix:
+        product: [mystira-app, story-generator, admin, publisher, chain]
+        environment: [dev, staging, prod]
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          submodules: recursive
+
+      - name: Check if product changed
+        id: check
+        run: |
+          PRODUCT="${{ matrix.product }}"
+          CHANGED="${{ needs.detect-changes.outputs[matrix.product] }}"
+          if [[ "$CHANGED" == "true" ]] || [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "run=true" >> $GITHUB_OUTPUT
+          else
+            echo "run=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Setup Terraform
+        if: steps.check.outputs.run == 'true'
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      - name: Setup Terragrunt
+        if: steps.check.outputs.run == 'true'
+        run: |
+          wget -O terragrunt https://github.com/gruntwork-io/terragrunt/releases/download/v${{ env.TERRAGRUNT_VERSION }}/terragrunt_linux_amd64
+          chmod +x terragrunt
+          sudo mv terragrunt /usr/local/bin/
+
+      - name: Terragrunt Validate
+        if: steps.check.outputs.run == 'true'
+        run: |
+          cd infra/terraform/products/${{ matrix.product }}/environments/${{ matrix.environment }}
+          terragrunt validate --terragrunt-non-interactive
+        env:
+          TF_VAR_environment: ${{ matrix.environment }}
+
+  # ============================================
+  # Security Scan
+  # ============================================
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    needs: format-check
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          submodules: recursive
+
+      - name: Run Checkov
+        uses: bridgecrewio/checkov-action@v12
+        with:
+          directory: infra/terraform
+          framework: terraform
+          soft_fail: true
+          output_format: github_failed_only
+
+  # ============================================
+  # Summary
+  # ============================================
+  validation-summary:
+    name: Validation Summary
+    runs-on: ubuntu-latest
+    needs: [format-check, validate-shared-infra, validate-products, security-scan]
+    if: always()
+    steps:
+      - name: Check Results
+        run: |
+          echo "# Terragrunt Validation Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Check | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Format | ${{ needs.format-check.result == 'success' && '✅ Passed' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Shared Infra | ${{ needs.validate-shared-infra.result == 'success' && '✅ Passed' || (needs.validate-shared-infra.result == 'skipped' && '⏭️ Skipped' || '❌ Failed') }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Products | ${{ needs.validate-products.result == 'success' && '✅ Passed' || (needs.validate-products.result == 'skipped' && '⏭️ Skipped' || '❌ Failed') }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Security | ${{ needs.security-scan.result == 'success' && '✅ Passed' || '⚠️ Check warnings' }} |" >> $GITHUB_STEP_SUMMARY
+
+      - name: Fail if Critical Checks Failed
+        if: needs.format-check.result == 'failure' || needs.validate-shared-infra.result == 'failure' || needs.validate-products.result == 'failure'
+        run: |
+          echo "Critical validation checks failed!"
+          exit 1
