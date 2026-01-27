@@ -30,14 +30,10 @@ jobs:
           node-version: "20"
           cache: "pnpm"
 
-      - name: Get Cypress cache directory
-        id: cypress-cache
-        run: echo "dir=$(pnpm exec cypress cache path)" >> $GITHUB_OUTPUT
-
       - name: Cache Cypress binary
         uses: actions/cache@v4
         with:
-          path: ${{ steps.cypress-cache.outputs.dir }}
+          path: ~/.cache/Cypress
           key: cypress-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
           restore-keys: |
             cypress-${{ runner.os }}-
@@ -46,7 +42,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Install Cypress binary
-        run: pnpm exec cypress install
+        run: pnpm exec cypress install --force
 
       - name: Build application
         run: pnpm build
