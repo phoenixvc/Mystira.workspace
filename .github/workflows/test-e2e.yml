@@ -48,6 +48,7 @@ jobs:
         run: pnpm build
         env:
           VITE_API_BASE_URL: http://localhost:8080/api
+          VITE_ADMIN_API_BASE_URL: http://localhost:8080/admin
           VITE_PUBLIC_API_URL: http://localhost:8080/public
           VITE_GRPC_ENDPOINT: http://localhost:9090
           VITE_ENABLE_MOCK_API: "true"
