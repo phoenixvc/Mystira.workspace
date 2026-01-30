@@ -114,7 +114,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v5
         with:
-          dotnet-version: "9.0.x"
+          dotnet-version: "8.0.x"
 
       - name: Install wasm-tools workload
         run: dotnet workload install wasm-tools
@@ -123,7 +123,8 @@ jobs:
         run: dotnet restore src/Mystira.StoryGenerator.Web/Mystira.StoryGenerator.Web.csproj
 
       - name: Build Blazor WASM
-        run: dotnet publish src/Mystira.StoryGenerator.Web/Mystira.StoryGenerator.Web.csproj -c Release -o publish
+        run: |
+          dotnet publish src/Mystira.StoryGenerator.Web/Mystira.StoryGenerator.Web.csproj -c Release -o publish
 
       - name: Deploy to Azure Static Web Apps
         id: swa-deploy
@@ -133,6 +134,7 @@ jobs:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           action: upload
           app_location: publish/wwwroot
+          output_location: ""
           skip_app_build: true
 
   # ============================================
