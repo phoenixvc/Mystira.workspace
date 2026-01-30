@@ -15,7 +15,7 @@
     </ItemGroup>
     <Move SourceFiles="@(WwwrootFiles)" DestinationFiles="@(WwwrootFiles->'$(PublishDir)%(RecursiveDir)%(Filename)%(Extension)')" />
     <ItemGroup>
-      <FilesToDelete Include="$(PublishDir)**\*" Exclude="@(WwwrootFiles->'$(PublishDir)%(RecursiveDir)%(Filename)%(Extension)')" />
+      <FilesToDelete Include="$(PublishDir)**\*" Exclude="@(WwwrootFiles->'$(PublishDir)%(RecursiveDir)%(Filename)%(Extension)');$(PublishDir)web.config" />
     </ItemGroup>
     <Delete Files="@(FilesToDelete)" />
     <RemoveDir Directories="$(PublishDir)wwwroot" />
