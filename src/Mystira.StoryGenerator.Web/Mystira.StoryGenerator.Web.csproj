@@ -4,7 +4,27 @@
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <!-- Ensure publish output goes to a clear location and simplify for Rider/Azure -->
+    <PublishDir>publish\</PublishDir>
   </PropertyGroup>
+
+  <Target Name="MoveWwwrootContents" AfterTargets="Publish">
+    <Message Text="Moving wwwroot contents to publish root for Rider deployment..." Importance="high" />
+    <ItemGroup>
+      <WwwrootFiles Include="$(PublishDir)wwwroot\**\*" />
+    </ItemGroup>
+    <Move SourceFiles="@(WwwrootFiles)" DestinationFiles="@(WwwrootFiles->'$(PublishDir)%(RecursiveDir)%(Filename)%(Extension)')" />
+    <ItemGroup>
+      <FilesToDelete Include="$(PublishDir)**\*" Exclude="@(WwwrootFiles->'$(PublishDir)%(RecursiveDir)%(Filename)%(Extension)')" />
+    </ItemGroup>
+    <Delete Files="@(FilesToDelete)" />
+    <RemoveDir Directories="$(PublishDir)wwwroot" />
+    <!-- Also delete the .pdb files that might still be there if not in wwwroot -->
+    <ItemGroup>
+      <PdbFiles Include="$(PublishDir)*.pdb" />
+    </ItemGroup>
+    <Delete Files="@(PdbFiles)" />
+  </Target>
 
   <ItemGroup>
     <PackageReference Include="Blazored.LocalStorage" Version="4.5.0" />
@@ -20,6 +40,12 @@
     <ProjectReference Include="..\Mystira.StoryGenerator.Application\Mystira.StoryGenerator.Application.csproj" />
     <ProjectReference Include="..\Mystira.StoryGenerator.Contracts\Mystira.StoryGenerator.Contracts.csproj" />
     <ProjectReference Include="..\Mystira.StoryGenerator.Domain\Mystira.StoryGenerator.Domain.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="wwwroot\staticwebapp.config.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>
