@@ -126,6 +126,15 @@ jobs:
         run: |
           dotnet publish src/Mystira.StoryGenerator.Web/Mystira.StoryGenerator.Web.csproj -c Release -o publish
 
+      - name: Debug - List publish output
+        run: |
+          echo "=== Contents of publish/wwwroot ==="
+          ls -la publish/wwwroot/
+          echo "=== Checking for staticwebapp.config.json ==="
+          cat publish/wwwroot/staticwebapp.config.json || echo "FILE NOT FOUND!"
+          echo "=== Checking for index.html ==="
+          head -20 publish/wwwroot/index.html || echo "FILE NOT FOUND!"
+
       - name: Deploy to Azure Static Web Apps
         id: swa-deploy
         uses: Azure/static-web-apps-deploy@v1
