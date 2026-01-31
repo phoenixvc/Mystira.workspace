@@ -141,8 +141,11 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: tfplan-${{ inputs.product }}-${{ inputs.environment }}
-          path: ${{ steps.get-dir.outputs.dir }}/**/tfplan
+          path: |
+            ${{ steps.get-dir.outputs.dir }}/**/tfplan
+            ${{ steps.get-dir.outputs.dir }}/**/.terraform.lock.hcl
           retention-days: 7
+          include-hidden-files: true
 
       - name: Plan Summary
         run: |
@@ -192,12 +195,6 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-      - name: Download Plan Artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: tfplan-${{ inputs.product }}-${{ inputs.environment }}
-          path: infra/terraform
-
       - name: Get Apply Directory
         id: get-dir
         run: |
@@ -212,13 +209,38 @@ jobs:
             echo "mode=single" >> $GITHUB_OUTPUT
           fi
 
-      - name: Terragrunt Apply
+      - name: Download Plan Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: tfplan-${{ inputs.product }}-${{ inputs.environment }}
+          path: ${{ steps.get-dir.outputs.dir }}
+
+      - name: Terragrunt Init (for providers)
         run: |
           cd ${{ steps.get-dir.outputs.dir }}
           if [[ "${{ steps.get-dir.outputs.mode }}" == "run-all" ]]; then
-            terragrunt run-all apply tfplan --terragrunt-non-interactive
+            terragrunt run-all init --terragrunt-non-interactive
           else
-            terragrunt apply tfplan --terragrunt-non-interactive
+            terragrunt init --terragrunt-non-interactive
+          fi
+        env:
+          TF_VAR_environment: ${{ inputs.environment }}
+
+      - name: Terragrunt Apply
+        run: |
+          cd ${{ steps.get-dir.outputs.dir }}
+          # Find and apply tfplan file
+          if [[ "${{ steps.get-dir.outputs.mode }}" == "run-all" ]]; then
+            # For run-all, re-plan and apply (artifacts don't preserve structure well)
+            terragrunt run-all apply -auto-approve --terragrunt-non-interactive
+          else
+            # For single product, apply the saved plan
+            if [[ -f "tfplan" ]]; then
+              terragrunt apply tfplan --terragrunt-non-interactive
+            else
+              echo "Plan file not found, re-planning and applying..."
+              terragrunt apply -auto-approve --terragrunt-non-interactive
+            fi
           fi
         env:
           TF_VAR_environment: ${{ inputs.environment }}

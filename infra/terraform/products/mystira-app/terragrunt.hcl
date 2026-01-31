@@ -11,13 +11,20 @@
 #   - shared-infra (PostgreSQL, Redis, Storage, Monitoring)
 # =============================================================================
 
+locals {
+  # Extract environment from the path (e.g., "environments/dev" -> "dev")
+  # This works when running from products/mystira-app/environments/{env}/
+  env_from_path = element(split("/", path_relative_to_include()), length(split("/", path_relative_to_include())) - 1)
+  environment   = local.env_from_path != "" ? local.env_from_path : get_env("TF_VAR_environment", "dev")
+}
+
 include "root" {
   path = find_in_parent_folders()
 }
 
 # Dependency on shared infrastructure
 dependency "shared" {
-  config_path = "../../shared-infra/environments/${get_env("TF_VAR_environment", "dev")}"
+  config_path = "${get_parent_terragrunt_dir()}/shared-infra/environments/${local.environment}"
 
   # Mock outputs for `terragrunt plan` when shared-infra hasn't been applied
   mock_outputs = {
