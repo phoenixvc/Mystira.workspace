@@ -86,7 +86,8 @@ Static class with generic algorithms implemented as extension methods on `Direct
 - `DepthFirst(...)`
 - `TopologicalSort()`
 - `HasCycle()`
-- `EnumeratePaths(...)`
+- `EnumeratePaths(...)` (handles cycles by terminating at the first repeated node)
+- `GetImmediateDominators(start)` (Lengauer-Tarjan algorithm for any directed graph)
 
 Example:
 

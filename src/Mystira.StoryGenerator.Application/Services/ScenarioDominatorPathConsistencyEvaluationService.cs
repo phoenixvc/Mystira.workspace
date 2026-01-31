@@ -37,7 +37,7 @@ public class ScenarioDominatorPathConsistencyEvaluationService : IScenarioDomina
             var graph = ScenarioGraph.FromScenario(scenario);
 
             // Get compressed paths based on dominators
-            var compressedPaths = graph.GetCompressedPaths().ToList();
+            var compressedPaths = graph.GetDominatorPaths(compress: true).ToList();
 
             _logger.LogDebug("Generated {PathCount} compressed paths for scenario {ScenarioId}", compressedPaths.Count, scenario.Id);
 
