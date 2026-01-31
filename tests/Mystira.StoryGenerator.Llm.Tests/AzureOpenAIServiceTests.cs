@@ -280,4 +280,30 @@ public class AzureOpenAIServiceTests
         // Assert
         Assert.Equal(_aiSettings.AzureOpenAI.ApiKey, result);
     }
+
+    [Fact]
+    public void ResolveEndpoint_WithRegionalDeployment_ReturnsRegionalEndpoint()
+    {
+        // Arrange
+        var regionalEndpoint = "https://sweden-test.openai.azure.com/";
+        var regionalDeploymentName = "gpt-5.1-2";
+        _aiSettings.AzureOpenAIRegions["Sweden"] = new AzureOpenAISettings
+        {
+            Endpoint = regionalEndpoint,
+            ApiKey = "some-key",
+            Deployments = new List<AzureOpenAIDeployment>
+            {
+                new() { Name = regionalDeploymentName, DisplayName = "GPT-5.1.2 Sweden" }
+            }
+        };
+        var service = new AzureOpenAIService(_optionsMock.Object, _loggerMock.Object);
+
+        // Act
+        var result = typeof(AzureOpenAIService)
+            .GetMethod("ResolveEndpoint", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+            ?.Invoke(service, new object[] { regionalDeploymentName });
+
+        // Assert
+        Assert.Equal(regionalEndpoint, result);
+    }
 }

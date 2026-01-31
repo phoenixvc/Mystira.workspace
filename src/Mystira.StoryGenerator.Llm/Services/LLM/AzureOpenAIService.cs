@@ -37,9 +37,9 @@ public class AzureOpenAIService : ILLMService
 
     public bool IsAvailable()
     {
-        return !string.IsNullOrWhiteSpace(_settings.AzureOpenAI.ApiKey) &&
-               !string.IsNullOrWhiteSpace(_settings.AzureOpenAI.Endpoint) &&
-               !string.IsNullOrWhiteSpace(_settings.AzureOpenAI.DeploymentName);
+        // Service is available if primary is configured OR at least one region is configured
+        return IsRegionAvailable(_settings.AzureOpenAI) ||
+               (_settings.AzureOpenAIRegions?.Values.Any(IsRegionAvailable) ?? false);
     }
 
     public IEnumerable<ChatModelInfo> GetAvailableModels()
@@ -52,8 +52,11 @@ public class AzureOpenAIService : ILLMService
         var allModels = new List<ChatModelInfo>();
 
         // Collect models from the primary AzureOpenAI configuration
-        var primaryModels = GetModelsFromRegion(_settings.AzureOpenAI);
-        allModels.AddRange(primaryModels);
+        if (IsRegionAvailable(_settings.AzureOpenAI))
+        {
+            var primaryModels = GetModelsFromRegion(_settings.AzureOpenAI);
+            allModels.AddRange(primaryModels);
+        }
 
         // Collect models from all regional configurations (e.g., SouthAfrica, Sweden)
         if (_settings.AzureOpenAIRegions != null && _settings.AzureOpenAIRegions.Any())
@@ -75,6 +78,12 @@ public class AzureOpenAIService : ILLMService
             .Select(g => g.First())
             .ToList();
 
+        // Log models from all regions to help debug resolution
+        foreach (var model in allModels)
+        {
+            _logger.LogDebug("Discovered Azure OpenAI model: {ModelId} ({DisplayName})", model.Id, model.DisplayName);
+        }
+
         _logger.LogInformation("Total available Azure OpenAI models: {Count}", uniqueModels.Count);
         return uniqueModels;
     }
@@ -83,8 +92,8 @@ public class AzureOpenAIService : ILLMService
     {
         return !string.IsNullOrWhiteSpace(regionSettings.ApiKey) &&
                !string.IsNullOrWhiteSpace(regionSettings.Endpoint) &&
-               regionSettings.Deployments != null &&
-               regionSettings.Deployments.Any();
+               ((regionSettings.Deployments != null && regionSettings.Deployments.Any()) ||
+                !string.IsNullOrWhiteSpace(regionSettings.DeploymentName));
     }
 
     private IEnumerable<ChatModelInfo> GetModelsFromRegion(AzureOpenAISettings regionSettings)
@@ -156,6 +165,16 @@ public class AzureOpenAIService : ILLMService
 
             // Resolve the API key for the deployment
             var apiKey = ResolveApiKey(deploymentName);
+
+            if (string.IsNullOrWhiteSpace(endpoint) || string.IsNullOrWhiteSpace(apiKey))
+            {
+                _logger.LogWarning("Missing configuration for Azure OpenAI deployment {Deployment}. Endpoint: {Endpoint}, Key: {KeyStatus}",
+                    deploymentName, endpoint ?? "null", string.IsNullOrWhiteSpace(apiKey) ? "missing" : "present");
+            }
+            else
+            {
+                _logger.LogInformation("Using Azure OpenAI endpoint: {Endpoint} for deployment: {Deployment}", endpoint, deploymentName);
+            }
 
             var azureClient = new AzureOpenAIClient(
                 new Uri(endpoint),
@@ -270,14 +289,31 @@ public class AzureOpenAIService : ILLMService
             {
                 foreach (var (regionName, regionSettings) in _settings.AzureOpenAIRegions)
                 {
+                    // Check deployments list
                     if (regionSettings.Deployments != null)
                     {
                         var deployment = regionSettings.Deployments.FirstOrDefault(d => d.Name == deploymentName);
-                        if (deployment != null && !string.IsNullOrWhiteSpace(deployment.Endpoint))
+                        if (deployment != null)
                         {
-                            _logger.LogDebug("Resolved endpoint for deployment {Deployment} from region {Region}", deploymentName, regionName);
-                            return deployment.Endpoint;
+                            if (!string.IsNullOrWhiteSpace(deployment.Endpoint))
+                            {
+                                _logger.LogDebug("Resolved endpoint for deployment {Deployment} from region {Region} (deployment-specific)", deploymentName, regionName);
+                                return deployment.Endpoint;
+                            }
+
+                            if (!string.IsNullOrWhiteSpace(regionSettings.Endpoint))
+                            {
+                                _logger.LogDebug("Resolved endpoint for deployment {Deployment} from region {Region} (region-default)", deploymentName, regionName);
+                                return regionSettings.Endpoint;
+                            }
                         }
+                    }
+
+                    // Check primary deployment name for the region
+                    if (regionSettings.DeploymentName == deploymentName && !string.IsNullOrWhiteSpace(regionSettings.Endpoint))
+                    {
+                        _logger.LogDebug("Resolved endpoint for deployment {Deployment} from region {Region} (via deployment name)", deploymentName, regionName);
+                        return regionSettings.Endpoint;
                     }
                 }
             }
@@ -300,14 +336,18 @@ public class AzureOpenAIService : ILLMService
             {
                 foreach (var (regionName, regionSettings) in _settings.AzureOpenAIRegions)
                 {
-                    if (regionSettings.Deployments != null)
+                    // Check deployments list
+                    if (regionSettings.Deployments != null && regionSettings.Deployments.Any(d => d.Name == deploymentName))
                     {
-                        var deployment = regionSettings.Deployments.FirstOrDefault(d => d.Name == deploymentName);
-                        if (deployment != null)
-                        {
-                            _logger.LogDebug("Resolved ApiKey for deployment {Deployment} from region {Region}", deploymentName, regionName);
-                            return regionSettings.ApiKey;
-                        }
+                        _logger.LogDebug("Resolved ApiKey for deployment {Deployment} from region {Region} (via deployments list)", deploymentName, regionName);
+                        return regionSettings.ApiKey;
+                    }
+
+                    // Check primary deployment name for the region
+                    if (regionSettings.DeploymentName == deploymentName)
+                    {
+                        _logger.LogDebug("Resolved ApiKey for deployment {Deployment} from region {Region} (via deployment name)", deploymentName, regionName);
+                        return regionSettings.ApiKey;
                     }
                 }
             }

@@ -81,7 +81,24 @@ public class ChatOrchestrationService : IChatOrchestrationService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error in chat orchestration");
+            try
+            {
+                _logger.LogError(ex, "Error in chat orchestration");
+            }
+            catch (Exception logEx)
+            {
+                // Fallback for when logging fails (e.g. StackTrace.ToString() SecurityException)
+                try
+                {
+                    _logger.LogError("Error in chat orchestration: {ErrorMessage}. (Logging full exception failed: {LogErrorMessage})",
+                        ex.Message, logEx.Message);
+                }
+                catch
+                {
+                    // Last resort - we can't even log the error message safely
+                }
+            }
+
             return new ChatOrchestrationResponse
             {
                 Success = false,
@@ -142,7 +159,23 @@ public class ChatOrchestrationService : IChatOrchestrationService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error routing to command for instruction type: {InstructionType}", instructionType);
+            try
+            {
+                _logger.LogError(ex, "Error routing to command for instruction type: {InstructionType}", instructionType);
+            }
+            catch (Exception logEx)
+            {
+                try
+                {
+                    _logger.LogError("Error routing to command for instruction type: {InstructionType}. Message: {ErrorMessage}. (Logging full exception failed: {LogErrorMessage})",
+                        instructionType, ex.Message, logEx.Message);
+                }
+                catch
+                {
+                    // Ignore
+                }
+            }
+
             return new ChatOrchestrationResponse
             {
                 Success = false,
