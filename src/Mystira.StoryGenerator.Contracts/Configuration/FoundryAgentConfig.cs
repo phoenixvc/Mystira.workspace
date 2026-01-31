@@ -51,7 +51,7 @@ public class FoundryAgentConfig
     /// <summary>
     /// Maximum number of iterations for story generation.
     /// </summary>
-    public int MaxIterations { get; set; } = 5;
+    public int MaxIterations { get; set; } = 50;
 
     /// <summary>
     /// Timeout for agent runs.

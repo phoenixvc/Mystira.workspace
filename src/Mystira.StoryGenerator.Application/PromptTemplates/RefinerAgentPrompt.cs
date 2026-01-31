@@ -114,7 +114,8 @@ If the input story violates this, fix it (e.g. adjust branches or insert an inte
 6.  Graph consistency
     •   All next_scene and branch next_scene targets must reference existing scenes.
     •   Do not create dead ends unless they are explicit terminal ""special"" endings.
-    •   Important: Do not ever create loop structures in the story. The story must be a Directed Acyclic Graph.
+    •   Important: Do not ever create loop structures in the story, unless the user specifically asks for it.
+        The story must generally be a Directed Acyclic Graph.
     •   Keep the story coherent: updated descriptions and outcomes must remain consistent with earlier scenes, character traits, and established facts.
 
 ## JSON Schema & ID Rules

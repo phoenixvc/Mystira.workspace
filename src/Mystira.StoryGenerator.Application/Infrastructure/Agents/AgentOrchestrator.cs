@@ -1,6 +1,7 @@
 using System.Text.Json;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Mystira.StoryGenerator.Application.Services;
 using Mystira.StoryGenerator.Application.Services.Prompting;
 using Mystira.StoryGenerator.Contracts.Agents;
 using Mystira.StoryGenerator.Contracts.Configuration;
@@ -23,6 +24,7 @@ public partial class AgentOrchestrator : IAgentOrchestrator
     private readonly StorySchemaValidator _schemaValidator;
     private readonly IKnowledgeProvider _knowledgeProvider;
     private readonly IStorySchemaProvider _schemaProvider;
+    private readonly IStoryMediaProcessor _mediaProcessor;
     private readonly FoundryAgentConfig _config;
 
     public AgentOrchestrator(
@@ -34,6 +36,7 @@ public partial class AgentOrchestrator : IAgentOrchestrator
         StorySchemaValidator schemaValidator,
         IKnowledgeProvider knowledgeProvider,
         IStorySchemaProvider schemaProvider,
+        IStoryMediaProcessor mediaProcessor,
         IOptions<FoundryAgentConfig> config)
     {
         _logger = logger;
@@ -44,6 +47,7 @@ public partial class AgentOrchestrator : IAgentOrchestrator
         _schemaValidator = schemaValidator;
         _knowledgeProvider = knowledgeProvider;
         _schemaProvider = schemaProvider;
+        _mediaProcessor = mediaProcessor;
         _config = config.Value;
     }
 
@@ -232,6 +236,8 @@ public partial class AgentOrchestrator : IAgentOrchestrator
             }
 
             // Store as current version and add to history
+            storyJson = _mediaProcessor.ProcessMediaIds(storyJson);
+
             var versionSnapshot = new StoryVersionSnapshot
             {
                 VersionNumber = session.StoryVersions.Count + 1,
@@ -254,7 +260,7 @@ public partial class AgentOrchestrator : IAgentOrchestrator
             {
                 Type = AgentStreamEvent.EventType.GenerationComplete,
                 Phase = "Writing",
-                Payload = new { StoryJson = storyJson, TokenUsage = completionResult.RunId },
+                Payload = new { StoryJson = storyJson, StoryYaml = session.CurrentStoryYaml, TokenUsage = completionResult.RunId },
                 IterationNumber = session.IterationCount
             });
 
@@ -578,6 +584,8 @@ public partial class AgentOrchestrator : IAgentOrchestrator
             }
 
             // Store new version
+            refinedStoryJson = _mediaProcessor.ProcessMediaIds(refinedStoryJson);
+
             var versionSnapshot = new StoryVersionSnapshot
             {
                 VersionNumber = session.StoryVersions.Count + 1,
@@ -613,7 +621,7 @@ public partial class AgentOrchestrator : IAgentOrchestrator
             {
                 Type = AgentStreamEvent.EventType.RefinementComplete,
                 Phase = "Refining",
-                Payload = new { RefinedStoryJson = refinedStoryJson, TokenUsage = completionResult.RunId },
+                Payload = new { RefinedStoryJson = refinedStoryJson, RefinedStoryYaml = session.CurrentStoryYaml, TokenUsage = completionResult.RunId },
                 IterationNumber = session.IterationCount
             });
 

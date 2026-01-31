@@ -200,12 +200,13 @@
         </div>
     }
 
-    @if (Events.Any())
+
+    @if (Events.Any(e => e.Type != AgentStreamEvent.EventType.StreamingUpdate && e.Type != AgentStreamEvent.EventType.TokenUsageUpdate))
     {
         <div class="event-log">
             <h4>Progress Log</h4>
             <div class="events">
-                @foreach (var evt in Events.TakeLast(10).Reverse())
+                @foreach (var evt in Events.Where(e => e.Type != AgentStreamEvent.EventType.StreamingUpdate && e.Type != AgentStreamEvent.EventType.TokenUsageUpdate).TakeLast(10).Reverse())
                 {
                     <div class="event @evt.Type.ToString().ToLower()">
                         <span class="timestamp">@evt.Timestamp.ToString("HH:mm:ss")</span>
@@ -214,9 +215,9 @@
                         {
                             <span class="phase">@evt.Phase</span>
                         }
-                        @if (evt.Type == AgentStreamEvent.EventType.StreamingUpdate && !string.IsNullOrEmpty(evt.Message))
+                        @if (evt.Type == AgentStreamEvent.EventType.Error && !string.IsNullOrEmpty(evt.Message))
                         {
-                            <span class="message-preview">@GetMessagePreview(evt.Message)</span>
+                            <span class="message" style="color: #dc3545; margin-left: 0.5rem;">@evt.Message</span>
                         }
                     </div>
                 }
@@ -226,9 +227,6 @@
 
     @if (Session != null)
     {
-        <div class="metadata">
-            Iteration: @Session.IterationCount | Tokens: ~@(Session.IterationCount * 1500)
-        </div>
 
         @if (Session.Stage == "Failed" && !string.IsNullOrEmpty(Session.ErrorMessage))
         {
@@ -319,8 +317,11 @@
         if (string.IsNullOrEmpty(message))
             return string.Empty;
 
+        // Strip any JSON-like structures or quotes if it's a long message
+        var cleaned = message.Trim().Trim('"');
+
         // Show first 50 characters of the message
-        var preview = message.Length > 50 ? message.Substring(0, 50) + "..." : message;
+        var preview = cleaned.Length > 50 ? cleaned.Substring(0, 50) + "..." : cleaned;
         return $"\"{preview}\"";
     }
 

@@ -103,12 +103,14 @@ Narrative (""narrative""):
     •   Used to move the story forward without a choice.
     •   Must have a next_scene pointing to a valid scene.
     •   Must not be used for final endings.
+    •   Must not have echo_log. Narrative scenes should not include echo logs.
 
 Choice (""choice""):
     •   Must have a branches array with at least two options.
     •   Each branch includes:
         o   A clear player-facing choice description.
         o   A next_scene id.
+    •   Must not have echo_log in any branch. Choice scenes should not include echo logs.
 
 Roll (""roll""):
     •   Must have roll_requirements describing the mechanic (thresholds, difficulty) for a D20 dice.
@@ -119,6 +121,7 @@ Special (""special""):
     •   Used for endings, major reveals, or meta moments.
     •   Ending specials: no further transitions (next_scene omitted or null).
     •   Non-ending specials may use next_scene but must keep story flow coherent.
+    •   Must not have echo_log in any branch. Special scenes should not include echo logs.
 
 ## Branch uniqueness (critical)
 For every ""choice"" or ""roll"" scene:
@@ -141,6 +144,8 @@ For every ""choice"" or ""roll"" scene:
     •   Language, content, and themes must be age-appropriate for age_group and minimum_age.
     •   Forbidden: profanity, slurs, sexual content, self-harm, graphic violence, humiliation, cruelty-based humor, or ""punching down"".
     •   Mild peril is allowed but must resolve in emotionally safe ways.
+    •   Never refer to inappropriate body parts like boobs, breasts, bum, inner thighs, genitals, lower back, or anything
+        that would imply one of these body parts in context
 
 ## NARRATIVE QUALITY STANDARDS
 - Characters must have consistent motivations across scenes
