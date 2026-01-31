@@ -12,6 +12,10 @@ on:
       - "!**/*.md"
       - "!infra/terraform/.tflint.hcl"
 
+concurrency:
+  group: infra-cost-estimation-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
   pull-requests: write

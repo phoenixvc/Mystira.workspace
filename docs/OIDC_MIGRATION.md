@@ -18,9 +18,14 @@ OIDC (OpenID Connect) authentication, also known as Workload Identity Federation
 
 ## Migration Status
 
-All production workflows have been migrated to OIDC authentication. The reusable workflow `_azure-login.yml` supports both methods for backwards compatibility during transition.
+All production workflows have been migrated to OIDC authentication using direct `azure/login@v2` with OIDC parameters (`client-id`, `tenant-id`, `subscription-id`).
 
-### Migrated Workflows
+A reusable workflow `_azure-login.yml` is also available for:
+- Backwards compatibility during transition (supports both OIDC and legacy service principal)
+- Centralized authentication logic for new workflows
+- Automatic Terraform environment variable configuration
+
+### Migrated Workflows (Direct OIDC)
 
 - `production-release.yml`
 - `staging-release.yml`
