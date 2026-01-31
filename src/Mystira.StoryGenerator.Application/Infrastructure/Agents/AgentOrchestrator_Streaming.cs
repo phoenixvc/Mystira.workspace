@@ -137,6 +137,8 @@ public partial class AgentOrchestrator
             }
 
             // Store as current version and add to history
+            storyJson = _mediaProcessor.ProcessMediaIds(storyJson);
+
             var versionSnapshot = new StoryVersionSnapshot
             {
                 VersionNumber = session.StoryVersions.Count + 1,
@@ -159,7 +161,7 @@ public partial class AgentOrchestrator
             {
                 Type = AgentStreamEvent.EventType.GenerationComplete,
                 Phase = "Writing",
-                Payload = new { StoryJson = storyJson, RunId = runId },
+                Payload = new { StoryJson = storyJson, StoryYaml = session.CurrentStoryYaml, RunId = runId },
                 IterationNumber = session.IterationCount
             });
 
@@ -284,6 +286,8 @@ public partial class AgentOrchestrator
                         Payload = new { UpdateType = updateType, RunId = runId },
                         IterationNumber = session.IterationCount
                     });
+
+                    _logger.LogDebug("Published StreamingUpdate event for session {SessionId}", sessionId);
                 }
             }
 
@@ -315,6 +319,8 @@ public partial class AgentOrchestrator
             }
 
             // Store new version
+            refinedStoryJson = _mediaProcessor.ProcessMediaIds(refinedStoryJson);
+
             var versionSnapshot = new StoryVersionSnapshot
             {
                 VersionNumber = session.StoryVersions.Count + 1,
@@ -350,7 +356,7 @@ public partial class AgentOrchestrator
             {
                 Type = AgentStreamEvent.EventType.RefinementComplete,
                 Phase = "Refining",
-                Payload = new { RefinedStoryJson = refinedStoryJson, RunId = runId },
+                Payload = new { RefinedStoryJson = refinedStoryJson, RefinedStoryYaml = session.CurrentStoryYaml, RunId = runId },
                 IterationNumber = session.IterationCount
             });
 

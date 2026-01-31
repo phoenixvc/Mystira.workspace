@@ -7,6 +7,7 @@ using Mystira.StoryGenerator.Contracts.Stories;
 using Mystira.StoryGenerator.Domain.Commands;
 using Mystira.StoryGenerator.Domain.Commands.Stories;
 using Mystira.StoryGenerator.Domain.Services;
+using Mystira.StoryGenerator.Application.Services;
 using Mystira.StoryGenerator.Application.Utilities;
 
 namespace Mystira.StoryGenerator.Application.Handlers.Stories;
@@ -18,6 +19,7 @@ public class GenerateStoryCommandHandler : ICommandHandler<GenerateStoryCommand,
     private readonly IStorySchemaProvider _schemaProvider;
     private readonly IInstructionBlockService _instructionBlockService;
     private readonly ILlmIntentLlmClassificationService _llmIntentLlmClassificationService;
+    private readonly IStoryMediaProcessor _mediaProcessor;
     private readonly ILogger<GenerateStoryCommandHandler> _logger;
 
     public GenerateStoryCommandHandler(
@@ -26,6 +28,7 @@ public class GenerateStoryCommandHandler : ICommandHandler<GenerateStoryCommand,
         IStorySchemaProvider schemaProvider,
         IInstructionBlockService instructionBlockService,
         ILlmIntentLlmClassificationService llmIntentLlmClassificationService,
+        IStoryMediaProcessor mediaProcessor,
         ILogger<GenerateStoryCommandHandler> logger)
     {
         _llmFactory = llmFactory;
@@ -33,6 +36,7 @@ public class GenerateStoryCommandHandler : ICommandHandler<GenerateStoryCommand,
         _schemaProvider = schemaProvider;
         _instructionBlockService = instructionBlockService;
         _llmIntentLlmClassificationService = llmIntentLlmClassificationService;
+        _mediaProcessor = mediaProcessor;
         _logger = logger;
     }
 
@@ -98,6 +102,11 @@ public class GenerateStoryCommandHandler : ICommandHandler<GenerateStoryCommand,
             }
 
             var story = StoryTextSanitizer.CollapseNewlinesToSpace(response.Content);
+
+            if (!string.IsNullOrWhiteSpace(story))
+            {
+                story = _mediaProcessor.ProcessMediaIds(story);
+            }
 
             return new GenerateJsonStoryResponse
             {

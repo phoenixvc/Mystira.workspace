@@ -2,6 +2,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Mystira.StoryGenerator.Application.Infrastructure.Agents;
+using Mystira.StoryGenerator.Application.Services;
 using Mystira.StoryGenerator.Application.Services.Prompting;
 using Mystira.StoryGenerator.Contracts.Configuration;
 using Mystira.StoryGenerator.Domain.Agents;
@@ -12,19 +13,16 @@ namespace Mystira.StoryGenerator.Application;
 public static class FoundryServiceCollectionExtensions
 {
     public static IServiceCollection AddFoundryAgentServices(
-        this IServiceCollection services,
-        FoundryAgentConfig foundryConfig)
+        this IServiceCollection services)
     {
-        // Validate agent IDs are properly configured (not placeholder values)
-        FoundryAgentConfigValidator.ValidateAgentIds(foundryConfig);
-
-        services.AddSingleton(foundryConfig);
-        services.AddSingleton(Options.Create(foundryConfig));
-
         services.AddSingleton<FoundryAgentClient>(sp =>
         {
             var logger = sp.GetRequiredService<ILogger<FoundryAgentClient>>();
+            var foundryConfig = sp.GetRequiredService<IOptions<FoundryAgentConfig>>().Value;
             var client = new FoundryAgentClient(logger);
+
+            // Validate agent IDs are properly configured (not placeholder values)
+            FoundryAgentConfigValidator.ValidateAgentIds(foundryConfig);
 
             var clientConfig = new FoundryAgentClientConfig
             {
@@ -45,11 +43,13 @@ public static class FoundryServiceCollectionExtensions
             return client;
         });
 
-        if (foundryConfig.KnowledgeMode.Equals("AISearch", StringComparison.OrdinalIgnoreCase))
+        services.AddScoped<IKnowledgeProvider>(sp =>
         {
-            services.AddScoped<IKnowledgeProvider>(sp =>
+            var client = sp.GetRequiredService<FoundryAgentClient>();
+            var foundryConfig = sp.GetRequiredService<IOptions<FoundryAgentConfig>>().Value;
+
+            if (foundryConfig.KnowledgeMode.Equals("AISearch", StringComparison.OrdinalIgnoreCase))
             {
-                var client = sp.GetRequiredService<FoundryAgentClient>();
                 var logger = sp.GetRequiredService<ILogger<AISearchKnowledgeProvider>>();
 
                 // Use new nested config if available, otherwise fall back to legacy config
@@ -68,17 +68,13 @@ public static class FoundryServiceCollectionExtensions
                 };
 
                 return new AISearchKnowledgeProvider(client, aiSearchConfig, logger);
-            });
-        }
-        else
-        {
-            services.AddScoped<IKnowledgeProvider>(sp =>
+            }
+            else
             {
-                var client = sp.GetRequiredService<FoundryAgentClient>();
                 var logger = sp.GetRequiredService<ILogger<FileSearchKnowledgeProvider>>();
 
                 // Prefer new agent-specific config, fall back to legacy config
-                #pragma warning disable CS0618 // Type or member is obsolete
+#pragma warning disable CS0618 // Type or member is obsolete
                 var fileSearchConfig = new FileSearchKnowledgeProvider.FileSearchConfiguration
                 {
                     VectorStoresByAgentAndAge = foundryConfig.FileSearch?.VectorStoresByAgentAndAge
@@ -88,13 +84,14 @@ public static class FoundryServiceCollectionExtensions
                     MaxFiles = foundryConfig.FileSearch?.MaxFiles,
                     MaxTokens = foundryConfig.FileSearch?.MaxTokens
                 };
-                #pragma warning restore CS0618 // Type or member is obsolete
+#pragma warning restore CS0618 // Type or member is obsolete
 
                 return new FileSearchKnowledgeProvider(client, fileSearchConfig, logger);
-            });
-        }
+            }
+        });
 
         services.AddSingleton<IProjectGuidelinesService, ProjectGuidelinesService>();
+        services.AddScoped<IStoryMediaProcessor, StoryMediaProcessor>();
         services.AddScoped<IPromptGenerator, PromptGenerator>();
         services.AddSingleton<StorySchemaValidator>();
 
@@ -104,9 +101,31 @@ public static class FoundryServiceCollectionExtensions
             var options = sp.GetRequiredService<IOptions<CosmosDbConfig>>();
             var cosmosConfig = options.Value;
 
+            if (string.IsNullOrEmpty(cosmosConfig.Endpoint))
+            {
+                logger.LogError("Cosmos DB endpoint is not configured. Check CosmosDb:Endpoint setting.");
+                throw new InvalidOperationException("Cosmos DB endpoint is required.");
+            }
+
+            var rawKey = cosmosConfig.ApiKey ?? string.Empty;
+            // Remove all whitespace including hidden non-breaking spaces
+            var apiKey = new string(rawKey.Where(c => !char.IsWhiteSpace(c)).ToArray());
+
+            if (string.IsNullOrEmpty(apiKey))
+            {
+                logger.LogError("Cosmos DB API Key is not configured. Check CosmosDb:ApiKey setting. Current Environment: {Environment}", Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT"));
+                throw new InvalidOperationException($"Cosmos DB API Key is required. Environment: {Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")}");
+            }
+
+            // Safe diagnostic logging (don't log the full key)
+            var keyLength = apiKey.Length;
+            var prefix = apiKey.Length >= 3 ? apiKey.Substring(0, 3) : "...";
+            var suffix = apiKey.Length >= 3 ? apiKey.Substring(apiKey.Length - 3) : "...";
+            logger.LogInformation("Initializing CosmosClient. Key Length: {Length}, Prefix: {Prefix}, Suffix: {Suffix}", keyLength, prefix, suffix);
+
             var cosmosClient = new Microsoft.Azure.Cosmos.Fluent.CosmosClientBuilder(
                 cosmosConfig.Endpoint,
-                cosmosConfig.ApiKey)
+                apiKey)
                 .WithSystemTextJsonSerializerOptions(new System.Text.Json.JsonSerializerOptions
                 {
                     PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase,
@@ -125,10 +144,8 @@ public static class FoundryServiceCollectionExtensions
     }
 
     public static IServiceCollection AddCosmosDbConfiguration(
-        this IServiceCollection services,
-        CosmosDbConfig cosmosConfig)
+        this IServiceCollection services)
     {
-        services.AddSingleton(Options.Create(cosmosConfig));
         return services;
     }
 }

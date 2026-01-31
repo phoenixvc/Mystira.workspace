@@ -6,6 +6,7 @@ using Mystira.StoryGenerator.Contracts.Stories;
 using Mystira.StoryGenerator.Domain.Commands;
 using Mystira.StoryGenerator.Domain.Commands.Stories;
 using Mystira.StoryGenerator.Domain.Services;
+using Mystira.StoryGenerator.Application.Services;
 using Mystira.StoryGenerator.Application.Utilities;
 
 namespace Mystira.StoryGenerator.Application.Handlers.Stories;
@@ -17,6 +18,7 @@ public class RefineStoryCommandHandler : ICommandHandler<RefineStoryCommand, Gen
     private readonly IStorySchemaProvider _schemaProvider;
     private readonly ILlmIntentLlmClassificationService _llmIntentLlmClassificationService;
     private readonly IInstructionBlockService _instructionBlockService;
+    private readonly IStoryMediaProcessor _mediaProcessor;
     private readonly ILogger<RefineStoryCommandHandler> _logger;
 
     public RefineStoryCommandHandler(
@@ -25,6 +27,7 @@ public class RefineStoryCommandHandler : ICommandHandler<RefineStoryCommand, Gen
         IStorySchemaProvider schemaProvider,
         ILlmIntentLlmClassificationService llmIntentLlmClassificationService,
         IInstructionBlockService instructionBlockService,
+        IStoryMediaProcessor mediaProcessor,
         ILogger<RefineStoryCommandHandler> logger)
     {
         _llmFactory = llmFactory;
@@ -32,6 +35,7 @@ public class RefineStoryCommandHandler : ICommandHandler<RefineStoryCommand, Gen
         _schemaProvider = schemaProvider;
         _llmIntentLlmClassificationService = llmIntentLlmClassificationService;
         _instructionBlockService = instructionBlockService;
+        _mediaProcessor = mediaProcessor;
         _logger = logger;
     }
 
@@ -91,10 +95,17 @@ public class RefineStoryCommandHandler : ICommandHandler<RefineStoryCommand, Gen
                 };
             }
 
+            var story = StoryTextSanitizer.CollapseNewlinesToSpace(response.Content);
+
+            if (!string.IsNullOrWhiteSpace(story))
+            {
+                story = _mediaProcessor.ProcessMediaIds(story);
+            }
+
             return new GenerateJsonStoryResponse
             {
                 Success = true,
-                Json = StoryTextSanitizer.CollapseNewlinesToSpace(response.Content) ?? string.Empty,
+                Json = story ?? string.Empty,
                 Provider = response.Provider ?? service.ProviderName,
                 Model = response.Model ?? resolvedModelName ?? string.Empty,
                 ModelId = response.ModelId ?? resolvedModelId,

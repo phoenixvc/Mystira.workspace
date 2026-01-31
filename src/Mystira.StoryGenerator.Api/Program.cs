@@ -156,11 +156,11 @@ builder.Services.AddSingleton<IContinuityBackgroundQueue, ContinuityBackgroundQu
 builder.Services.AddHostedService<ContinuityWorker>();
 
 // Register Azure AI Foundry Agent services
-var foundryConfig = builder.Configuration.GetSection(FoundryAgentConfig.SectionName).Get<FoundryAgentConfig>() ?? new FoundryAgentConfig();
-builder.Services.AddFoundryAgentServices(foundryConfig);
+builder.Services.Configure<FoundryAgentConfig>(builder.Configuration.GetSection(FoundryAgentConfig.SectionName));
+builder.Services.AddFoundryAgentServices();
 
-var cosmosConfig = builder.Configuration.GetSection("CosmosDb").Get<CosmosDbConfig>() ?? new CosmosDbConfig();
-builder.Services.AddCosmosDbConfiguration(cosmosConfig);
+builder.Services.Configure<CosmosDbConfig>(builder.Configuration.GetSection(CosmosDbConfig.SectionName));
+builder.Services.AddCosmosDbConfiguration();
 
 // Register Agent Orchestrator services
 var isDevelopment = builder.Environment.IsDevelopment();
@@ -182,11 +182,15 @@ var app = builder.Build();
 
 app.UseCors("AllowFrontend");
 
-if (app.Environment.IsDevelopment())
+app.UseSwagger();
+app.UseSwaggerUI(c =>
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Story Generator Agent API V1");
+    c.RoutePrefix = "swagger";
+});
+
+// Redirect root to swagger
+app.MapGet("/", () => Results.Redirect("/swagger"));
 
 app.UseHttpsRedirection();
 
