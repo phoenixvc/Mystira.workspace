@@ -80,6 +80,9 @@ Scene variety
     •   Distribute scene types across narrative, choice, and roll; avoid clustering all choices or all rolls.
     •   ""special"" scenes are mainly for endings or big reveals and should be used sparingly.
 
+Echo Logs (CRITICAL):
+    •   Scenes must NEVER have furnished information for echo_log. This is a legacy field which is not supported anymore.
+
 ## STRUCTURE AND BRANCHING
 Scene count
     •   Generate an appropriate number of scenes for the story complexity and age group.
@@ -121,7 +124,7 @@ Special (""special""):
     •   Used for endings, major reveals, or meta moments.
     •   Ending specials: no further transitions (next_scene omitted or null).
     •   Non-ending specials may use next_scene but must keep story flow coherent.
-    •   Must not have echo_log in any branch. Special scenes should not include echo logs.
+    •   Must not have echo_log. Special scenes should not include echo logs.
 
 ## Branch uniqueness (critical)
 For every ""choice"" or ""roll"" scene:
