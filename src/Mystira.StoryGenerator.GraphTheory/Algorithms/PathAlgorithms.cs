@@ -112,7 +112,11 @@ public static class PathAlgorithms
             if (onCurrentPath.Contains(child))
             {
                 // We reached a cycle. We yield the path as-is (ending at 'node') and continue to next successor
-                yield return path.ToArray();
+                // unless we already yielded this path (e.g. if 'node' was already terminal)
+                if (!isTerm)
+                {
+                    yield return path.ToArray();
+                }
                 continue;
             }
 

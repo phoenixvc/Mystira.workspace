@@ -48,20 +48,35 @@ public sealed class ScenarioGraph : IScenarioGraph
         return CreateScenarioPaths(root, compressedPaths);
     }
 
+    /// <summary>
+    /// Generates paths through the scenario based on dominator analysis.
+    /// This method supports graphs with cycles.
+    /// </summary>
+    /// <param name="compress">If true, compresses paths by removing redundant suffixes.</param>
     public IEnumerable<ScenarioPath> GetDominatorPaths(bool compress = false)
     {
         var roots = Roots().ToArray();
-        var root = roots.Length switch
+        Scene root;
+        if (roots.Length == 1)
         {
-            0 => throw new InvalidOperationException("Could not find any starting scenes"),
-            > 1 => throw new InvalidOperationException("Found more than one starting scene"),
-            _ => roots[0]
-        };
+            root = roots[0];
+        }
+        else if (roots.Length == 0 && Nodes.Any())
+        {
+            // In a pure cycle, there are no roots. Pick the first node as a synthetic root.
+            root = Nodes.First();
+        }
+        else
+        {
+            throw new InvalidOperationException(roots.Length == 0
+                ? "Could not find any scenes in the scenario"
+                : "Found more than one starting scene");
+        }
 
         var idoms = this.GetImmediateDominators(root);
         var terminalNodes = Terminals().ToList();
 
-        if (terminalNodes.Count == 0)
+        if (terminalNodes.Count == 0 && Nodes.Count > 0)
         {
             // If no terminals (e.g. pure cycle), use all nodes as potential endpoints for coverage
             terminalNodes = Nodes.ToList();
@@ -104,6 +119,13 @@ public sealed class ScenarioGraph : IScenarioGraph
             dominatorPaths.AddRange(currentTerminalPaths.Where(p => p.Count > 0));
         }
 
+        if (dominatorPaths.Count == 0 && Nodes.Count > 0)
+        {
+            // If we still have no paths (e.g. root is the only node or root is part of a pure cycle and it was its own terminal)
+            // Just return the root as a single scene path
+            return new[] { new ScenarioPath(new[] { root.Id ?? "root" }, root.Description ?? "") };
+        }
+
         var finalPaths = compress
             ? PathAlgorithms.CompressBySharedSuffixes(dominatorPaths.Select(p => {
                 var nodes = new List<Scene> { root };
@@ -142,7 +164,7 @@ public sealed class ScenarioGraph : IScenarioGraph
 
         var results = new List<List<IEdge<Scene, string>>>();
         var currentPath = new List<IEdge<Scene, string>>();
-        var visited = new HashSet<Scene>();
+        var onStack = new HashSet<Scene>();
 
         void Backtrack(Scene current)
         {
@@ -152,17 +174,19 @@ public sealed class ScenarioGraph : IScenarioGraph
                 return;
             }
 
-            visited.Add(current);
+            onStack.Add(current);
             foreach (var edge in GetOutgoingEdges(current))
             {
-                if (!visited.Contains(edge.To))
+                // To support cycles, we avoid revisiting nodes on the current recursion stack.
+                // This ensures we don't loop infinitely while still finding all simple paths.
+                if (!onStack.Contains(edge.To))
                 {
                     currentPath.Add(edge);
                     Backtrack(edge.To);
                     currentPath.RemoveAt(currentPath.Count - 1);
                 }
             }
-            visited.Remove(current);
+            onStack.Remove(current);
         }
 
         Backtrack(start);
