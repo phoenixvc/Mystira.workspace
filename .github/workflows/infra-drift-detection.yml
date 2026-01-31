@@ -1,0 +1,242 @@
+name: "[Scheduled] Infrastructure - Drift Detection"
+
+# Drift Detection: Identifies configuration drift between Terraform state and actual resources
+# Runs on schedule and can be triggered manually
+# Creates GitHub issues when drift is detected
+
+on:
+  schedule:
+    # Run daily at 6 AM UTC
+    - cron: "0 6 * * *"
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Environment to check"
+        required: true
+        default: "dev"
+        type: choice
+        options:
+          - dev
+          - staging
+          - prod
+          - all
+
+env:
+  TF_VERSION: "1.5.0"
+  TERRAGRUNT_VERSION: "0.55.0"
+  ARM_USE_OIDC: true
+  ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+  ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+  ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+
+permissions:
+  id-token: write
+  contents: read
+  issues: write
+
+jobs:
+  detect-drift:
+    name: Detect Drift - ${{ matrix.environment }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        environment: ${{ github.event_name == 'workflow_dispatch' && (inputs.environment == 'all' && fromJson('["dev", "staging", "prod"]') || fromJson(format('["{0}"]', inputs.environment))) || fromJson('["dev", "staging", "prod"]') }}
+        product: [shared-infra, mystira-app, story-generator, admin, publisher, chain]
+    outputs:
+      drift-detected: ${{ steps.check-drift.outputs.drift }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          submodules: recursive
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      - name: Setup Terragrunt
+        run: |
+          wget -O terragrunt https://github.com/gruntwork-io/terragrunt/releases/download/v${{ env.TERRAGRUNT_VERSION }}/terragrunt_linux_amd64
+          chmod +x terragrunt
+          sudo mv terragrunt /usr/local/bin/
+
+      - name: Azure Login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Get Product Directory
+        id: get-dir
+        run: |
+          if [[ "${{ matrix.product }}" == "shared-infra" ]]; then
+            echo "dir=infra/terraform/shared-infra/environments/${{ matrix.environment }}" >> $GITHUB_OUTPUT
+          else
+            echo "dir=infra/terraform/products/${{ matrix.product }}/environments/${{ matrix.environment }}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Check Directory Exists
+        id: check-dir
+        run: |
+          if [[ -d "${{ steps.get-dir.outputs.dir }}" ]]; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Terragrunt Init
+        if: steps.check-dir.outputs.exists == 'true'
+        run: |
+          cd ${{ steps.get-dir.outputs.dir }}
+          terragrunt init --terragrunt-non-interactive
+        env:
+          TF_VAR_environment: ${{ matrix.environment }}
+
+      - name: Terragrunt Plan (Drift Check)
+        id: check-drift
+        if: steps.check-dir.outputs.exists == 'true'
+        run: |
+          cd ${{ steps.get-dir.outputs.dir }}
+
+          # Run plan and capture output
+          set +e
+          terragrunt plan -detailed-exitcode -out=drift.tfplan --terragrunt-non-interactive 2>&1 | tee plan_output.txt
+          EXITCODE=$?
+          set -e
+
+          # Exit code 2 means changes detected (drift)
+          if [[ $EXITCODE -eq 2 ]]; then
+            echo "drift=true" >> $GITHUB_OUTPUT
+            echo "DRIFT DETECTED in ${{ matrix.product }} (${{ matrix.environment }})"
+
+            # Save drift details
+            terragrunt show -no-color drift.tfplan > drift_details.txt 2>&1 || true
+          elif [[ $EXITCODE -eq 0 ]]; then
+            echo "drift=false" >> $GITHUB_OUTPUT
+            echo "No drift detected in ${{ matrix.product }} (${{ matrix.environment }})"
+          else
+            echo "drift=error" >> $GITHUB_OUTPUT
+            echo "Error checking drift in ${{ matrix.product }} (${{ matrix.environment }})"
+          fi
+        env:
+          TF_VAR_environment: ${{ matrix.environment }}
+
+      - name: Upload Drift Report
+        if: steps.check-drift.outputs.drift == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: drift-report-${{ matrix.product }}-${{ matrix.environment }}
+          path: |
+            ${{ steps.get-dir.outputs.dir }}/plan_output.txt
+            ${{ steps.get-dir.outputs.dir }}/drift_details.txt
+          retention-days: 7
+
+  # Create issue if drift detected
+  create-drift-issue:
+    name: Create Drift Issue
+    runs-on: ubuntu-latest
+    needs: detect-drift
+    if: always()
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Download all drift reports
+        uses: actions/download-artifact@v4
+        with:
+          path: drift-reports
+        continue-on-error: true
+
+      - name: Check for drift and create issue
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+
+            // Check if any drift reports exist
+            const reportsDir = 'drift-reports';
+            let driftFound = false;
+            let driftDetails = [];
+
+            if (fs.existsSync(reportsDir)) {
+              const reports = fs.readdirSync(reportsDir);
+              for (const report of reports) {
+                if (report.startsWith('drift-report-')) {
+                  driftFound = true;
+                  const [, , product, environment] = report.split('-');
+                  driftDetails.push({ product, environment, report });
+                }
+              }
+            }
+
+            if (!driftFound) {
+              console.log('No drift detected across all products and environments');
+              return;
+            }
+
+            // Create or update drift issue
+            const title = `[Infrastructure Drift] Detected on ${new Date().toISOString().split('T')[0]}`;
+
+            let body = `## Infrastructure Drift Detected\n\n`;
+            body += `Drift was detected in the following products:\n\n`;
+
+            for (const drift of driftDetails) {
+              body += `- **${drift.product}** (${drift.environment})\n`;
+            }
+
+            body += `\n### Action Required\n\n`;
+            body += `Please review the drift and take one of the following actions:\n`;
+            body += `1. **Accept the drift**: Update Terraform code to match actual state\n`;
+            body += `2. **Remediate the drift**: Run \`terragrunt apply\` to restore desired state\n`;
+            body += `3. **Investigate**: Manual changes may have been made outside Terraform\n\n`;
+            body += `### Artifacts\n\n`;
+            body += `Detailed drift reports are available as workflow artifacts.\n\n`;
+            body += `---\n`;
+            body += `*This issue was automatically created by the drift detection workflow.*`;
+
+            // Check for existing open drift issue
+            const { data: issues } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: 'infrastructure-drift'
+            });
+
+            if (issues.length > 0) {
+              // Update existing issue
+              await github.rest.issues.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issues[0].number,
+                body: body
+              });
+              console.log(`Updated existing drift issue #${issues[0].number}`);
+            } else {
+              // Create new issue
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: title,
+                body: body,
+                labels: ['infrastructure-drift', 'automated']
+              });
+              console.log('Created new drift issue');
+            }
+
+  # Summary
+  drift-summary:
+    name: Drift Summary
+    runs-on: ubuntu-latest
+    needs: [detect-drift, create-drift-issue]
+    if: always()
+    steps:
+      - name: Generate Summary
+        run: |
+          echo "## Infrastructure Drift Detection Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Product | Environment | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|---------|-------------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Check the workflow jobs for detailed status of each product." >> $GITHUB_STEP_SUMMARY

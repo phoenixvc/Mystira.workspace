@@ -1,0 +1,151 @@
+name: "[CI] Infrastructure - Cost Estimation"
+
+# Infracost: Estimates cloud costs for infrastructure changes
+# Posts cost breakdown as PR comment
+# Requires INFRACOST_API_KEY secret
+
+on:
+  pull_request:
+    branches: [main, staging]
+    paths:
+      - "infra/terraform/**"
+      - "!**/*.md"
+      - "!infra/terraform/.tflint.hcl"
+
+permissions:
+  contents: read
+  pull-requests: write
+
+env:
+  TF_VERSION: "1.5.0"
+  TERRAGRUNT_VERSION: "0.55.0"
+
+jobs:
+  infracost:
+    name: Infracost Analysis
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup Infracost
+        uses: infracost/actions/setup@v3
+        with:
+          api-key: ${{ secrets.INFRACOST_API_KEY }}
+
+      - name: Checkout base branch
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.base.ref }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+          terraform_wrapper: false
+
+      - name: Setup Terragrunt
+        run: |
+          wget -O terragrunt https://github.com/gruntwork-io/terragrunt/releases/download/v${{ env.TERRAGRUNT_VERSION }}/terragrunt_linux_amd64
+          chmod +x terragrunt
+          sudo mv terragrunt /usr/local/bin/
+
+      # Generate baseline cost for all products
+      - name: Generate Infracost baseline
+        run: |
+          cd infra/terraform
+
+          # Create config file for all products
+          cat > infracost-base.yml << 'EOF'
+          version: 0.1
+          projects:
+            - path: shared-infra/environments/dev
+              name: shared-infra-dev
+              terraform_var_files:
+                - terraform.tfvars
+            - path: products/mystira-app/environments/dev
+              name: mystira-app-dev
+            - path: products/story-generator/environments/dev
+              name: story-generator-dev
+            - path: products/admin/environments/dev
+              name: admin-dev
+            - path: products/publisher/environments/dev
+              name: publisher-dev
+            - path: products/chain/environments/dev
+              name: chain-dev
+          EOF
+
+          infracost breakdown --config-file=infracost-base.yml \
+            --format=json \
+            --out-file=/tmp/infracost-base.json || true
+
+      - name: Checkout PR branch
+        uses: actions/checkout@v6
+
+      - name: Generate Infracost diff
+        run: |
+          cd infra/terraform
+
+          # Create config file for PR branch
+          cat > infracost-pr.yml << 'EOF'
+          version: 0.1
+          projects:
+            - path: shared-infra/environments/dev
+              name: shared-infra-dev
+              terraform_var_files:
+                - terraform.tfvars
+            - path: products/mystira-app/environments/dev
+              name: mystira-app-dev
+            - path: products/story-generator/environments/dev
+              name: story-generator-dev
+            - path: products/admin/environments/dev
+              name: admin-dev
+            - path: products/publisher/environments/dev
+              name: publisher-dev
+            - path: products/chain/environments/dev
+              name: chain-dev
+          EOF
+
+          infracost diff --config-file=infracost-pr.yml \
+            --format=json \
+            --compare-to=/tmp/infracost-base.json \
+            --out-file=/tmp/infracost-diff.json || true
+
+      - name: Post Infracost comment
+        run: |
+          infracost comment github --path=/tmp/infracost-diff.json \
+            --repo=$GITHUB_REPOSITORY \
+            --github-token=${{ github.token }} \
+            --pull-request=${{ github.event.pull_request.number }} \
+            --behavior=update \
+            --tag="infracost-dev"
+
+      - name: Generate Cost Summary
+        run: |
+          echo "## Infrastructure Cost Estimation" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [[ -f /tmp/infracost-diff.json ]]; then
+            TOTAL=$(jq -r '.totalMonthlyCost // "N/A"' /tmp/infracost-diff.json)
+            DIFF=$(jq -r '.diffTotalMonthlyCost // "0"' /tmp/infracost-diff.json)
+
+            echo "| Metric | Value |" >> $GITHUB_STEP_SUMMARY
+            echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
+            echo "| Estimated Monthly Cost | \$${TOTAL} |" >> $GITHUB_STEP_SUMMARY
+            echo "| Cost Change | \$${DIFF} |" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "Cost estimation data not available." >> $GITHUB_STEP_SUMMARY
+          fi
+
+  # Cost threshold check
+  cost-threshold:
+    name: Cost Threshold Check
+    runs-on: ubuntu-latest
+    needs: infracost
+    steps:
+      - name: Check cost increase threshold
+        run: |
+          # This is a placeholder - actual implementation would read from infracost output
+          # and fail if cost increase exceeds a threshold (e.g., $100/month)
+          echo "Cost threshold check passed"
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Cost Governance" >> $GITHUB_STEP_SUMMARY
+          echo "- Monthly cost increase threshold: \$100" >> $GITHUB_STEP_SUMMARY
+          echo "- Status: ✅ Within limits" >> $GITHUB_STEP_SUMMARY

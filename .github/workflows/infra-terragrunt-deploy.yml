@@ -320,3 +320,36 @@ jobs:
           echo "4. admin" >> $GITHUB_STEP_SUMMARY
           echo "5. publisher" >> $GITHUB_STEP_SUMMARY
           echo "6. chain" >> $GITHUB_STEP_SUMMARY
+
+  # ============================================
+  # Notifications
+  # ============================================
+  notify-success:
+    name: Notify Success
+    needs: [apply, deploy-ordered]
+    if: always() && (needs.apply.result == 'success' || needs.deploy-ordered.result == 'success')
+    uses: ./.github/workflows/_infra-notify.yml
+    with:
+      status: success
+      environment: ${{ inputs.environment }}
+      product: ${{ inputs.product }}
+      action: ${{ inputs.action }}
+      message: "Infrastructure deployment completed successfully"
+    secrets:
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+      TEAMS_WEBHOOK_URL: ${{ secrets.TEAMS_WEBHOOK_URL }}
+
+  notify-failure:
+    name: Notify Failure
+    needs: [plan, apply, deploy-ordered]
+    if: always() && (needs.plan.result == 'failure' || needs.apply.result == 'failure' || needs.deploy-ordered.result == 'failure')
+    uses: ./.github/workflows/_infra-notify.yml
+    with:
+      status: failure
+      environment: ${{ inputs.environment }}
+      product: ${{ inputs.product }}
+      action: ${{ inputs.action }}
+      message: "Infrastructure deployment failed - check workflow logs"
+    secrets:
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+      TEAMS_WEBHOOK_URL: ${{ secrets.TEAMS_WEBHOOK_URL }}
