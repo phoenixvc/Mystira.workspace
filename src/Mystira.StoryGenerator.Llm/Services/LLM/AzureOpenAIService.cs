@@ -154,9 +154,12 @@ public class AzureOpenAIService : ILLMService
             // Resolve the endpoint for the deployment
             var endpoint = ResolveEndpoint(deploymentName);
 
+            // Resolve the API key for the deployment
+            var apiKey = ResolveApiKey(deploymentName);
+
             var azureClient = new AzureOpenAIClient(
                 new Uri(endpoint),
-                new ApiKeyCredential(_settings.AzureOpenAI.ApiKey),
+                new ApiKeyCredential(apiKey),
                 new AzureOpenAIClientOptions
                 {
                     NetworkTimeout = new TimeSpan(0, 0, 5, 0)
@@ -282,6 +285,36 @@ public class AzureOpenAIService : ILLMService
 
         // Fallback to primary endpoint
         return _settings.AzureOpenAI.Endpoint;
+    }
+
+    private string ResolveApiKey(string deploymentName)
+    {
+        // Priority order:
+        // 1. ApiKey from a regional configuration if the deployment is found there
+        // 2. Default ApiKey from primary AzureOpenAI settings
+
+        if (!string.IsNullOrWhiteSpace(deploymentName))
+        {
+            // Check regional configurations
+            if (_settings.AzureOpenAIRegions != null && _settings.AzureOpenAIRegions.Any())
+            {
+                foreach (var (regionName, regionSettings) in _settings.AzureOpenAIRegions)
+                {
+                    if (regionSettings.Deployments != null)
+                    {
+                        var deployment = regionSettings.Deployments.FirstOrDefault(d => d.Name == deploymentName);
+                        if (deployment != null)
+                        {
+                            _logger.LogDebug("Resolved ApiKey for deployment {Deployment} from region {Region}", deploymentName, regionName);
+                            return regionSettings.ApiKey;
+                        }
+                    }
+                }
+            }
+        }
+
+        // Fallback to primary ApiKey
+        return _settings.AzureOpenAI.ApiKey;
     }
 
     // Exposed for unit testing to validate option construction when a JsonSchemaFormat is provided.

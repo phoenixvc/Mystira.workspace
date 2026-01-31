@@ -225,4 +225,59 @@ public class AzureOpenAIServiceTests
         // Assert
         Assert.Equal(_aiSettings.AzureOpenAI.Endpoint, result);
     }
+
+    [Fact]
+    public void ResolveApiKey_WithRegionalDeployment_ReturnsRegionalApiKey()
+    {
+        // Arrange
+        var regionalKey = "regional-test-key";
+        var regionalDeploymentName = "gpt-5.1-2";
+        _aiSettings.AzureOpenAIRegions["Sweden"] = new AzureOpenAISettings
+        {
+            ApiKey = regionalKey,
+            Deployments = new List<AzureOpenAIDeployment>
+            {
+                new() { Name = regionalDeploymentName, DisplayName = "GPT-5.1.2 Sweden" }
+            }
+        };
+        var service = new AzureOpenAIService(_optionsMock.Object, _loggerMock.Object);
+
+        // Act
+        var result = typeof(AzureOpenAIService)
+            .GetMethod("ResolveApiKey", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+            ?.Invoke(service, new object[] { regionalDeploymentName });
+
+        // Assert
+        Assert.Equal(regionalKey, result);
+    }
+
+    [Fact]
+    public void ResolveApiKey_WithPrimaryDeployment_ReturnsPrimaryApiKey()
+    {
+        // Arrange
+        var service = new AzureOpenAIService(_optionsMock.Object, _loggerMock.Object);
+
+        // Act
+        var result = typeof(AzureOpenAIService)
+            .GetMethod("ResolveApiKey", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+            ?.Invoke(service, new object[] { "gpt-4" });
+
+        // Assert
+        Assert.Equal(_aiSettings.AzureOpenAI.ApiKey, result);
+    }
+
+    [Fact]
+    public void ResolveApiKey_WithUnknownDeployment_ReturnsPrimaryApiKey()
+    {
+        // Arrange
+        var service = new AzureOpenAIService(_optionsMock.Object, _loggerMock.Object);
+
+        // Act
+        var result = typeof(AzureOpenAIService)
+            .GetMethod("ResolveApiKey", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+            ?.Invoke(service, new object[] { "unknown-deployment" });
+
+        // Assert
+        Assert.Equal(_aiSettings.AzureOpenAI.ApiKey, result);
+    }
 }
