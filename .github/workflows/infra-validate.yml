@@ -27,6 +27,10 @@ on:
       - "!**/README.md"
   workflow_dispatch:
 
+env:
+  # Security scan settings - set CHECKOV_SOFT_FAIL to 'false' to enforce strict security
+  CHECKOV_SOFT_FAIL: "true"
+
 jobs:
   # ============================================
   # Validate Terraform Configuration
@@ -162,7 +166,7 @@ jobs:
         with:
           directory: infra/terraform
           framework: terraform
-          soft_fail: true
+          soft_fail: ${{ vars.CHECKOV_SOFT_FAIL != 'false' }}
           output_format: github_failed_only
 
       - name: Scan for Secrets

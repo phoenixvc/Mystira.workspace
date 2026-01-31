@@ -28,6 +28,10 @@ permissions:
   security-events: write
   actions: read
 
+env:
+  # Security scan settings - set CHECKOV_SOFT_FAIL to 'false' to enforce strict security
+  CHECKOV_SOFT_FAIL: "true"
+
 jobs:
   # Admin API (.NET)
   admin-api:
@@ -146,7 +150,7 @@ jobs:
           framework: terraform
           output_format: sarif
           output_file_path: checkov-results.sarif
-          soft_fail: true
+          soft_fail: ${{ vars.CHECKOV_SOFT_FAIL != 'false' }}
 
       - name: Upload checkov results
         uses: github/codeql-action/upload-sarif@v4

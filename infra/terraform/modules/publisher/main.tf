@@ -1,5 +1,10 @@
 # Mystira Publisher Infrastructure Module - Azure
 # Terraform module for deploying Mystira.Publisher service infrastructure on Azure
+#
+# Module structure:
+#   - variables.tf: Input variable definitions
+#   - outputs.tf: Output value definitions
+#   - main.tf: Resource and data source definitions (this file)
 
 terraform {
   required_version = ">= 1.5.0"
@@ -9,78 +14,6 @@ terraform {
       version = "~> 4.0"  # 4.x required for .NET 9.0 support
     }
   }
-}
-
-variable "environment" {
-  description = "Deployment environment (dev, staging, prod)"
-  type        = string
-}
-
-variable "location" {
-  description = "Azure region for deployment"
-  type        = string
-  default     = "eastus"
-}
-
-variable "region_code" {
-  description = "Short region code (eus, euw, etc.) - defaults to 'eus' for eastus"
-  type        = string
-  default     = "eus"
-}
-
-variable "resource_group_name" {
-  description = "Name of the resource group"
-  type        = string
-}
-
-variable "publisher_replica_count" {
-  description = "Number of publisher service replicas"
-  type        = number
-  default     = 2
-}
-
-variable "vnet_id" {
-  description = "Virtual Network ID for publisher deployment"
-  type        = string
-}
-
-variable "subnet_id" {
-  description = "Subnet ID for publisher service"
-  type        = string
-}
-
-variable "chain_rpc_endpoint" {
-  description = "RPC endpoint for Mystira Chain"
-  type        = string
-}
-
-variable "tags" {
-  description = "Tags to apply to all resources"
-  type        = map(string)
-  default     = {}
-}
-
-variable "shared_log_analytics_workspace_id" {
-  description = "ID of shared Log Analytics workspace (from shared monitoring module)"
-  type        = string
-}
-
-variable "use_shared_servicebus" {
-  description = "Use shared Service Bus namespace instead of creating one"
-  type        = bool
-  default     = false
-}
-
-variable "shared_servicebus_namespace_id" {
-  description = "ID of shared Service Bus namespace (required when use_shared_servicebus = true)"
-  type        = string
-  default     = null
-}
-
-variable "shared_servicebus_queue_name" {
-  description = "Name of the publisher queue in shared Service Bus (required when use_shared_servicebus = true)"
-  type        = string
-  default     = "publisher-events"
 }
 
 locals {
@@ -94,6 +27,8 @@ locals {
     Project     = "Mystira"
   })
 }
+
+data "azurerm_client_config" "current" {}
 
 # Network Security Group for Publisher Service
 resource "azurerm_network_security_group" "publisher" {
@@ -220,8 +155,6 @@ resource "azurerm_key_vault" "publisher" {
   tags = local.common_tags
 }
 
-data "azurerm_client_config" "current" {}
-
 # Store Chain RPC Endpoint in Key Vault
 resource "azurerm_key_vault_secret" "chain_rpc_endpoint" {
   name         = "chain-rpc-endpoint"
@@ -246,45 +179,4 @@ resource "azurerm_redis_cache" "publisher" {
   }
 
   tags = local.common_tags
-}
-
-output "nsg_id" {
-  description = "Network Security Group ID for publisher service"
-  value       = azurerm_network_security_group.publisher.id
-}
-
-output "identity_id" {
-  description = "Managed Identity ID for publisher service"
-  value       = azurerm_user_assigned_identity.publisher.id
-}
-
-output "identity_principal_id" {
-  description = "Managed Identity Principal ID"
-  value       = azurerm_user_assigned_identity.publisher.principal_id
-}
-
-output "servicebus_namespace" {
-  description = "Service Bus namespace for publisher events"
-  value       = var.use_shared_servicebus ? null : azurerm_servicebus_namespace.publisher[0].name
-}
-
-output "servicebus_queue_name" {
-  description = "Service Bus queue name for publisher events"
-  value       = var.use_shared_servicebus ? var.shared_servicebus_queue_name : azurerm_servicebus_queue.publisher_events[0].name
-}
-
-output "application_insights_id" {
-  description = "Application Insights ID for publisher monitoring"
-  value       = azurerm_application_insights.publisher.id
-}
-
-output "app_insights_connection_string" {
-  description = "Application Insights connection string"
-  value       = azurerm_application_insights.publisher.connection_string
-  sensitive   = true
-}
-
-output "key_vault_id" {
-  description = "Key Vault ID for publisher secrets"
-  value       = azurerm_key_vault.publisher.id
 }

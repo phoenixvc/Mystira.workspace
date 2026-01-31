@@ -9,9 +9,16 @@ name: "[Reusable] Azure OIDC Login"
 # - More secure - no secret exposure risk
 # - Simplified secret management
 #
-# Migration from MYSTIRA_AZURE_CREDENTIALS:
-# Replace: creds: ${{ secrets.MYSTIRA_AZURE_CREDENTIALS }}
-# With: Uses this reusable workflow
+# USAGE PATTERNS:
+# 1. For Terraform-only workflows: Call this workflow to get ARM_* env vars
+# 2. For Azure CLI workflows: Use direct azure/login@v2 in each job
+#    (login sessions don't persist across jobs)
+# 3. For hybrid workflows: Use this for the initial login job, then
+#    re-authenticate in subsequent jobs using the same OIDC pattern
+#
+# Note: Most production workflows use direct azure/login@v2 calls for simplicity.
+# This reusable workflow is ideal for Terraform deployments that need consistent
+# ARM_* environment variable setup.
 #
 # Prerequisites:
 # 1. Azure AD App Registration with Federated Credentials configured
