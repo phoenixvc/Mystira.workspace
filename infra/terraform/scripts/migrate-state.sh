@@ -8,9 +8,9 @@ set -euo pipefail
 
 # Configuration
 ENVIRONMENT="${1:-dev}"
-STORAGE_ACCOUNT="myssharedtfstatesan"
-CONTAINER="tfstate"
-RESOURCE_GROUP="mys-shared-terraform-rg-san"
+STORAGE_ACCOUNT="${STORAGE_ACCOUNT:-mysterraformstate}"
+CONTAINER="${CONTAINER:-tfstate}"
+RESOURCE_GROUP="${RESOURCE_GROUP:-mys-terraform-state}"
 
 # Colors for output
 RED='\033[0;31m'
@@ -126,32 +126,86 @@ generate_move_commands() {
 
     cat > "$MOVE_SCRIPT" << 'HEADER'
 #!/bin/bash
-# Auto-generated state move commands
-# Review before executing!
+# Auto-generated state migration commands
+# This script uses the import-based approach for Azure remote state
+#
+# IMPORTANT: Review before executing!
+# The approach:
+#   1. Pull source state to local file
+#   2. For each product, init and import resources
+#   3. Remove resources from source state
+#   4. Push updated source state
 
 set -euo pipefail
 
 ENVIRONMENT="${1:-dev}"
-SOURCE_STATE="environments/${ENVIRONMENT}/terraform.tfstate"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+TERRAFORM_DIR="$(dirname "$SCRIPT_DIR")"
+
+cd "$TERRAFORM_DIR"
+
+# Pull current state to local file
+echo "Pulling current state..."
+cd "environments/${ENVIRONMENT}"
+terraform state pull > "../${ENVIRONMENT}_current.tfstate"
+cd ../..
 
 HEADER
 
-    # Generate moves for each product
-    for product_file in .shared_infra_resources.txt .story_generator_resources.txt .admin_resources.txt .publisher_resources.txt .chain_resources.txt; do
-        product_name=$(basename "$product_file" _resources.txt | sed 's/^\.//')
+    # Generate import commands for each product
+    for product_file in .shared_infra_resources.txt .mystira_app_resources.txt .story_generator_resources.txt .admin_resources.txt .publisher_resources.txt .chain_resources.txt; do
+        [[ ! -f "$product_file" ]] && continue
+
+        product_name=$(basename "$product_file" _resources.txt | sed 's/^\.//' | sed 's/_/-/g')
 
         if [[ -s "$product_file" ]]; then
-            echo "" >> "$MOVE_SCRIPT"
-            echo "# === ${product_name} ===" >> "$MOVE_SCRIPT"
-            echo "echo 'Moving resources to ${product_name}...'" >> "$MOVE_SCRIPT"
+            cat >> "$MOVE_SCRIPT" << EOF
+
+# =============================================================================
+# ${product_name}
+# =============================================================================
+echo "Processing ${product_name}..."
+
+if [[ -d "products/${product_name}/environments/\${ENVIRONMENT}" ]] || [[ -d "shared-infra/environments/\${ENVIRONMENT}" ]]; then
+    PRODUCT_DIR="\$([ '${product_name}' = 'shared-infra' ] && echo 'shared-infra' || echo 'products/${product_name}')/environments/\${ENVIRONMENT}"
+    cd "\$PRODUCT_DIR"
+
+    # Initialize with backend
+    terragrunt init --terragrunt-non-interactive
+
+    # Import each resource (you'll need to map resource addresses to Azure IDs)
+    echo "Resources to import for ${product_name}:"
+EOF
 
             while IFS= read -r resource; do
-                # Skip empty lines
                 [[ -z "$resource" ]] && continue
-                echo "terraform state mv -state=\$SOURCE_STATE -state-out=products/${product_name}/environments/\${ENVIRONMENT}/terraform.tfstate '${resource}' '${resource}' || true" >> "$MOVE_SCRIPT"
+                echo "    echo \"  - ${resource}\"" >> "$MOVE_SCRIPT"
+                echo "    # terragrunt import '${resource}' '<AZURE_RESOURCE_ID>'" >> "$MOVE_SCRIPT"
             done < "$product_file"
+
+            echo "" >> "$MOVE_SCRIPT"
+            echo "    cd \"\$TERRAFORM_DIR\"" >> "$MOVE_SCRIPT"
+            echo "fi" >> "$MOVE_SCRIPT"
         fi
     done
+
+    cat >> "$MOVE_SCRIPT" << 'FOOTER'
+
+echo ""
+echo "=============================================="
+echo "Migration commands generated!"
+echo ""
+echo "MANUAL STEPS REQUIRED:"
+echo "1. Get Azure resource IDs for each resource using:"
+echo "   az resource list --query \"[?contains(name,'mystira')].{name:name,id:id}\""
+echo ""
+echo "2. Replace '<AZURE_RESOURCE_ID>' placeholders with actual IDs"
+echo ""
+echo "3. Run terragrunt import commands for each product"
+echo ""
+echo "4. Verify with: terragrunt run-all plan"
+echo "=============================================="
+FOOTER
 
     chmod +x "$MOVE_SCRIPT"
     log_info "Move commands generated: $MOVE_SCRIPT"
@@ -163,7 +217,7 @@ HEADER
 validate_states() {
     log_info "=== Wave 5: Validating new state structure ==="
 
-    PRODUCTS=("shared-infra" "story-generator" "admin" "publisher" "chain")
+    PRODUCTS=("shared-infra" "mystira-app" "story-generator" "admin" "publisher" "chain")
 
     for product in "${PRODUCTS[@]}"; do
         product_dir="products/${product}/environments/${ENVIRONMENT}"

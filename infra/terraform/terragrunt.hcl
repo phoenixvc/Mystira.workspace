@@ -140,12 +140,9 @@ terraform {
   # Run terraform fmt before plan/apply
   before_hook "terraform_fmt" {
     commands = ["plan", "apply"]
-    execute  = ["terraform", "fmt", "-recursive"]
+    execute  = ["terraform", "fmt", "-recursive", "-write=false", "-diff"]
   }
 
-  # Validate terraform files before plan/apply
-  before_hook "terraform_validate" {
-    commands = ["plan", "apply"]
-    execute  = ["terraform", "validate"]
-  }
+  # NOTE: terraform validate is NOT included as a before_hook because
+  # it requires initialization. Validation is handled by CI/CD after init.
 }
