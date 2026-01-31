@@ -42,9 +42,22 @@ jobs:
   notify-slack:
     name: Notify Slack
     runs-on: ubuntu-latest
-    if: ${{ secrets.SLACK_WEBHOOK_URL != '' }}
+    # Note: Can't check secrets in 'if' for reusable workflows - use step condition instead
     steps:
+      - name: Check if Slack is configured
+        id: check
+        run: |
+          if [[ -n "$SLACK_WEBHOOK_URL" ]]; then
+            echo "configured=true" >> $GITHUB_OUTPUT
+          else
+            echo "configured=false" >> $GITHUB_OUTPUT
+            echo "::notice::Slack webhook not configured - skipping notification"
+          fi
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
       - name: Send Slack notification
+        if: steps.check.outputs.configured == 'true'
         uses: slackapi/slack-github-action@v1.26.0
         with:
           payload: |
@@ -108,9 +121,22 @@ jobs:
   notify-teams:
     name: Notify Teams
     runs-on: ubuntu-latest
-    if: ${{ secrets.TEAMS_WEBHOOK_URL != '' }}
+    # Note: Can't check secrets in 'if' for reusable workflows - use step condition instead
     steps:
+      - name: Check if Teams is configured
+        id: check
+        run: |
+          if [[ -n "$TEAMS_WEBHOOK_URL" ]]; then
+            echo "configured=true" >> $GITHUB_OUTPUT
+          else
+            echo "configured=false" >> $GITHUB_OUTPUT
+            echo "::notice::Teams webhook not configured - skipping notification"
+          fi
+        env:
+          TEAMS_WEBHOOK_URL: ${{ secrets.TEAMS_WEBHOOK_URL }}
+
       - name: Send Teams notification
+        if: steps.check.outputs.configured == 'true'
         run: |
           STATUS_COLOR="${{ inputs.status == 'success' && '00FF00' || inputs.status == 'failure' && 'FF0000' || 'FFFF00' }}"
           STATUS_EMOJI="${{ inputs.status == 'success' && '✅' || inputs.status == 'failure' && '❌' || '⚠️' }}"

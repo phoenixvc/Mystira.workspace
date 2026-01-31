@@ -2,7 +2,7 @@ name: "[CI] Infrastructure - Cost Estimation"
 
 # Infracost: Estimates cloud costs for infrastructure changes
 # Posts cost breakdown as PR comment
-# Requires INFRACOST_API_KEY secret
+# Requires INFRACOST_API_KEY secret (optional - workflow skips if not configured)
 
 on:
   pull_request:
@@ -19,11 +19,35 @@ permissions:
 env:
   TF_VERSION: "1.5.0"
   TERRAGRUNT_VERSION: "0.55.0"
+  # Feature toggle: set to 'false' to disable cost estimation
+  ENABLE_COST_ESTIMATION: "true"
 
 jobs:
+  # Check if Infracost is configured
+  check-config:
+    name: Check Configuration
+    runs-on: ubuntu-latest
+    outputs:
+      enabled: ${{ steps.check.outputs.enabled }}
+    steps:
+      - name: Check if Infracost API key is configured
+        id: check
+        run: |
+          if [[ "${{ env.ENABLE_COST_ESTIMATION }}" != "true" ]]; then
+            echo "enabled=false" >> $GITHUB_OUTPUT
+            echo "::notice::Cost estimation is disabled via ENABLE_COST_ESTIMATION"
+          elif [[ -z "${{ secrets.INFRACOST_API_KEY }}" ]]; then
+            echo "enabled=false" >> $GITHUB_OUTPUT
+            echo "::warning::INFRACOST_API_KEY not configured - skipping cost estimation"
+          else
+            echo "enabled=true" >> $GITHUB_OUTPUT
+          fi
+
   infracost:
     name: Infracost Analysis
     runs-on: ubuntu-latest
+    needs: check-config
+    if: needs.check-config.outputs.enabled == 'true'
     steps:
       - name: Setup Infracost
         uses: infracost/actions/setup@v3
@@ -117,6 +141,14 @@ jobs:
             --behavior=update \
             --tag="infracost-dev"
 
+      - name: Upload Infracost output
+        uses: actions/upload-artifact@v4
+        with:
+          name: infracost-output
+          path: /tmp/infracost-diff.json
+          retention-days: 1
+        continue-on-error: true
+
       - name: Generate Cost Summary
         run: |
           echo "## Infrastructure Cost Estimation" >> $GITHUB_STEP_SUMMARY
@@ -139,13 +171,65 @@ jobs:
     name: Cost Threshold Check
     runs-on: ubuntu-latest
     needs: infracost
+    env:
+      # Configurable cost threshold (in dollars)
+      COST_THRESHOLD: "100"
     steps:
+      - name: Download Infracost output
+        uses: actions/download-artifact@v4
+        with:
+          name: infracost-output
+          path: /tmp
+        continue-on-error: true
+
       - name: Check cost increase threshold
+        id: threshold
         run: |
-          # This is a placeholder - actual implementation would read from infracost output
-          # and fail if cost increase exceeds a threshold (e.g., $100/month)
-          echo "Cost threshold check passed"
+          THRESHOLD="${{ env.COST_THRESHOLD }}"
+
+          if [[ ! -f /tmp/infracost-diff.json ]]; then
+            echo "::warning::No Infracost output found - skipping threshold check"
+            echo "status=skip" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          # Extract diff cost (handle null/missing values)
+          DIFF=$(jq -r '.diffTotalMonthlyCost // "0"' /tmp/infracost-diff.json | tr -d '"')
+
+          # Handle empty or non-numeric values
+          if [[ -z "$DIFF" || "$DIFF" == "null" ]]; then
+            DIFF="0"
+          fi
+
+          # Remove any currency symbols and convert to number
+          DIFF_NUM=$(echo "$DIFF" | sed 's/[^0-9.-]//g')
+
+          echo "Cost change: \$$DIFF_NUM"
+          echo "Threshold: \$$THRESHOLD"
+
+          # Compare (using bc for float comparison)
+          if (( $(echo "$DIFF_NUM > $THRESHOLD" | bc -l) )); then
+            echo "::error::Cost increase (\$$DIFF_NUM) exceeds threshold (\$$THRESHOLD)"
+            echo "status=fail" >> $GITHUB_OUTPUT
+          else
+            echo "Cost change within threshold"
+            echo "status=pass" >> $GITHUB_OUTPUT
+          fi
+
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Cost Governance" >> $GITHUB_STEP_SUMMARY
-          echo "- Monthly cost increase threshold: \$100" >> $GITHUB_STEP_SUMMARY
-          echo "- Status: ✅ Within limits" >> $GITHUB_STEP_SUMMARY
+          echo "| Metric | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Monthly cost increase threshold | \$$THRESHOLD |" >> $GITHUB_STEP_SUMMARY
+          echo "| Actual cost change | \$$DIFF_NUM |" >> $GITHUB_STEP_SUMMARY
+          if [[ "${{ steps.threshold.outputs.status }}" == "fail" ]]; then
+            echo "| Status | ❌ **Exceeds threshold** |" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "| Status | ✅ Within limits |" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Fail if threshold exceeded
+        if: steps.threshold.outputs.status == 'fail'
+        run: |
+          echo "Cost threshold exceeded - failing check"
+          exit 1
