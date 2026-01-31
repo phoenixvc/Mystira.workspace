@@ -44,6 +44,7 @@ jobs:
   check-credentials:
     name: Check Azure Credentials
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     outputs:
       configured: ${{ steps.check.outputs.configured }}
     steps:
@@ -60,6 +61,7 @@ jobs:
   detect-drift:
     name: Detect Drift - ${{ matrix.environment }}
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     needs: check-credentials
     if: needs.check-credentials.outputs.configured == 'true'
     strategy:
@@ -161,6 +163,7 @@ jobs:
   create-drift-issue:
     name: Create Drift Issue
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     needs: detect-drift
     if: always()
     steps:
@@ -253,6 +256,7 @@ jobs:
   drift-summary:
     name: Drift Summary
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     needs: [detect-drift, create-drift-issue]
     if: always()
     steps:

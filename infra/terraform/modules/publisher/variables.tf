@@ -5,6 +5,11 @@
 variable "environment" {
   description = "Deployment environment (dev, staging, prod)"
   type        = string
+
+  validation {
+    condition     = contains(["dev", "staging", "prod"], var.environment)
+    error_message = "Environment must be one of: dev, staging, prod."
+  }
 }
 
 variable "location" {
@@ -28,6 +33,11 @@ variable "publisher_replica_count" {
   description = "Number of publisher service replicas"
   type        = number
   default     = 2
+
+  validation {
+    condition     = var.publisher_replica_count >= 1 && var.publisher_replica_count <= 20
+    error_message = "Publisher replica count must be between 1 and 20."
+  }
 }
 
 variable "vnet_id" {

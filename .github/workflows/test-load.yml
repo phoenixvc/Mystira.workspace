@@ -48,6 +48,7 @@ jobs:
   setup:
     name: Setup Load Test
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     outputs:
       environment: ${{ steps.config.outputs.environment }}
       api_url: ${{ steps.config.outputs.api_url }}
@@ -74,6 +75,7 @@ jobs:
   load-test:
     name: Run Load Test
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     needs: [setup]
     steps:
       - uses: actions/checkout@v6
@@ -269,6 +271,7 @@ jobs:
   compare-baseline:
     name: Compare with Baseline
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     needs: [setup, load-test]
     if: always() && needs.load-test.result == 'success'
     steps:

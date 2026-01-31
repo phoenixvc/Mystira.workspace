@@ -44,6 +44,7 @@ jobs:
   detect-changes:
     name: Detect Changes
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     outputs:
       shared-infra: ${{ steps.changes.outputs.shared-infra }}
       mystira-app: ${{ steps.changes.outputs.mystira-app }}
@@ -85,6 +86,7 @@ jobs:
   format-check:
     name: Format Check
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v6
 
@@ -121,6 +123,7 @@ jobs:
   tflint:
     name: TFLint
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     if: ${{ vars.ENABLE_TFLINT != 'false' }}
     steps:
       - uses: actions/checkout@v6
@@ -163,6 +166,7 @@ jobs:
   tfsec:
     name: TFSec Security Scan
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     if: ${{ vars.ENABLE_TFSEC != 'false' }}
     steps:
       - uses: actions/checkout@v6
@@ -194,6 +198,7 @@ jobs:
   validate-shared-infra:
     name: Validate shared-infra
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     needs: [detect-changes, format-check]
     if: needs.detect-changes.outputs.shared-infra == 'true' || github.event_name == 'workflow_dispatch'
     strategy:
@@ -236,6 +241,7 @@ jobs:
   validate-products:
     name: Validate ${{ matrix.product }}
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     needs: [detect-changes, format-check, validate-shared-infra]
     if: always() && needs.format-check.result == 'success'
     strategy:
@@ -294,6 +300,7 @@ jobs:
   security-scan:
     name: Security Scan (Checkov)
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     needs: format-check
     if: ${{ vars.ENABLE_CHECKOV != 'false' }}
     steps:
@@ -315,6 +322,7 @@ jobs:
   validation-summary:
     name: Validation Summary
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     needs: [format-check, tflint, tfsec, validate-shared-infra, validate-products, security-scan]
     if: always()
     steps:

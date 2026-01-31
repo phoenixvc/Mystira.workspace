@@ -122,6 +122,7 @@ jobs:
     name: Infrastructure Security Scan
     if: github.event.inputs.component == 'all' || github.event_name == 'schedule'
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     steps:
       - name: Checkout repository
@@ -164,6 +165,7 @@ jobs:
     needs: [admin-api, admin-ui, chain, devhub, publisher, story-generator, infrastructure]
     if: always()
     runs-on: ubuntu-latest
+    timeout-minutes: 5
 
     steps:
       - name: Generate summary

@@ -5,7 +5,7 @@ kind: Ingress
 metadata:
   name: mys-story-generator-ingress
   labels:
-    app: mystira-story-generator
+    app: mys-story-generator
     component: story-generator-api
   annotations:
     cert-manager.io/cluster-issuer: "letsencrypt-prod"

@@ -31,6 +31,7 @@ jobs:
   check-config:
     name: Check Configuration
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     outputs:
       enabled: ${{ steps.check.outputs.enabled }}
     steps:
@@ -50,6 +51,7 @@ jobs:
   infracost:
     name: Infracost Analysis
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     needs: check-config
     if: needs.check-config.outputs.enabled == 'true'
     steps:
@@ -174,6 +176,7 @@ jobs:
   cost-threshold:
     name: Cost Threshold Check
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     needs: infracost
     env:
       # Configurable cost threshold (in dollars)

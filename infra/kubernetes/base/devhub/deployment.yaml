@@ -28,6 +28,12 @@ spec:
         - name: devhub
           image: myssharedacr.azurecr.io/devhub:v0.0.0
           imagePullPolicy: IfNotPresent
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
           ports:
             - name: http
               containerPort: 3000
@@ -104,3 +110,15 @@ spec:
         target:
           type: Utilization
           averageUtilization: 70
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: mys-devhub-pdb
+  labels:
+    app: mys-devhub
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: mys-devhub

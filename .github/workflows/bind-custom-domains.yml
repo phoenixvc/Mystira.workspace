@@ -43,6 +43,7 @@ jobs:
   check-dns:
     name: Check DNS Propagation
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     if: ${{ github.event.inputs.skip_dns_check != 'true' }}
     permissions:
       id-token: write
@@ -127,6 +128,7 @@ jobs:
   bind-domains:
     name: Bind Custom Domains
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     needs: [check-dns]
     if: |
       always() &&
@@ -242,6 +244,7 @@ jobs:
   dns-not-ready:
     name: DNS Not Ready
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     needs: [check-dns]
     if: |
       needs.check-dns.outputs.dns-ready == 'false' &&

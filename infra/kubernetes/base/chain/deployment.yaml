@@ -34,6 +34,12 @@ spec:
         - name: chain
           image: myssharedacr.azurecr.io/chain:v0.0.0
           imagePullPolicy: IfNotPresent
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: false
+            capabilities:
+              drop:
+                - ALL
           ports:
             - name: rpc
               containerPort: 8545
@@ -148,3 +154,15 @@ data:
   rpc_enabled: "true"
   ws_enabled: "true"
   key_vault_url: "<OVERRIDE_IN_OVERLAY>"
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: mys-chain-pdb
+  labels:
+    app: mys-chain
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: mys-chain

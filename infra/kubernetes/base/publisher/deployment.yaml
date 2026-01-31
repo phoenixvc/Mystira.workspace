@@ -30,8 +30,14 @@ spec:
         workload: publisher
       containers:
         - name: publisher
-          image: mystiraacr.azurecr.io/publisher:v0.0.0
+          image: myssharedacr.azurecr.io/publisher:v0.0.0
           imagePullPolicy: IfNotPresent
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
           ports:
             - name: http
               containerPort: 3000
@@ -142,3 +148,15 @@ spec:
         target:
           type: Utilization
           averageUtilization: 80
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: mys-publisher-pdb
+  labels:
+    app: mys-publisher
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: mys-publisher

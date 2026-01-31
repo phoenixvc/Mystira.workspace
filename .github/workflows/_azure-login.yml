@@ -126,7 +126,11 @@ jobs:
             ARM_SUBSCRIPTION_ID=$(echo '${{ secrets.MYSTIRA_AZURE_CREDENTIALS }}' | jq -r '.subscriptionId')
             ARM_TENANT_ID=$(echo '${{ secrets.MYSTIRA_AZURE_CREDENTIALS }}' | jq -r '.tenantId')
 
+            # Mask all sensitive values to prevent accidental exposure in logs
+            echo "::add-mask::$ARM_CLIENT_ID"
             echo "::add-mask::$ARM_CLIENT_SECRET"
+            echo "::add-mask::$ARM_SUBSCRIPTION_ID"
+            echo "::add-mask::$ARM_TENANT_ID"
 
             echo "ARM_USE_CLI=false" >> $GITHUB_ENV
             echo "ARM_CLIENT_ID=$ARM_CLIENT_ID" >> $GITHUB_ENV

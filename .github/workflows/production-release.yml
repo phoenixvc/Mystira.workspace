@@ -18,6 +18,7 @@ jobs:
   validate-confirmation:
     name: Validate Confirmation
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - name: Check confirmation
         if: github.event.inputs.confirm != 'DEPLOY TO PRODUCTION'
@@ -28,6 +29,7 @@ jobs:
   deploy-infrastructure:
     name: Deploy Infrastructure to Production
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     needs: [validate-confirmation]
     environment:
       name: production
@@ -93,6 +95,7 @@ jobs:
   deploy-services:
     name: Deploy Services to Production
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     needs: [deploy-infrastructure]
     environment:
       name: production
@@ -179,6 +182,7 @@ jobs:
   smoke-tests:
     name: Run Smoke Tests
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     needs: [deploy-services]
     environment: production
     steps:
@@ -198,7 +202,9 @@ jobs:
           if [ "$RESPONSE" = "200" ]; then
             echo "| Publisher API | ✅ Healthy ($RESPONSE) |" >> $GITHUB_STEP_SUMMARY
           else
-            echo "| Publisher API | ⚠️ Response: $RESPONSE |" >> $GITHUB_STEP_SUMMARY
+            echo "| Publisher API | ❌ Failed ($RESPONSE) |" >> $GITHUB_STEP_SUMMARY
+            echo "::error::Publisher API health check failed with response: $RESPONSE"
+            exit 1
           fi
 
       - name: Health Check - Story Generator API
@@ -211,7 +217,9 @@ jobs:
           if [ "$RESPONSE" = "200" ]; then
             echo "| Story Generator API | ✅ Healthy ($RESPONSE) |" >> $GITHUB_STEP_SUMMARY
           else
-            echo "| Story Generator API | ⚠️ Response: $RESPONSE |" >> $GITHUB_STEP_SUMMARY
+            echo "| Story Generator API | ❌ Failed ($RESPONSE) |" >> $GITHUB_STEP_SUMMARY
+            echo "::error::Story Generator API health check failed with response: $RESPONSE"
+            exit 1
           fi
 
       - name: Health Check - Admin API
@@ -224,11 +232,14 @@ jobs:
           if [ "$RESPONSE" = "200" ]; then
             echo "| Admin API | ✅ Healthy ($RESPONSE) |" >> $GITHUB_STEP_SUMMARY
           else
-            echo "| Admin API | ⚠️ Response: $RESPONSE |" >> $GITHUB_STEP_SUMMARY
+            echo "| Admin API | ❌ Failed ($RESPONSE) |" >> $GITHUB_STEP_SUMMARY
+            echo "::error::Admin API health check failed with response: $RESPONSE"
+            exit 1
           fi
 
       - name: Frontend Accessibility Check
         run: |
+          FAILED=0
           # Check that SWAs are accessible
           for URL in "https://mystira.app" "https://admin.mystira.app" "https://story.mystira.app"; do
             echo "Testing: $URL"
@@ -238,9 +249,16 @@ jobs:
             if [ "$RESPONSE" = "200" ] || [ "$RESPONSE" = "304" ]; then
               echo "| $SERVICE | ✅ Accessible ($RESPONSE) |" >> $GITHUB_STEP_SUMMARY
             else
-              echo "| $SERVICE | ⚠️ Response: $RESPONSE |" >> $GITHUB_STEP_SUMMARY
+              echo "| $SERVICE | ❌ Failed ($RESPONSE) |" >> $GITHUB_STEP_SUMMARY
+              echo "::warning::Frontend $SERVICE check failed with response: $RESPONSE"
+              FAILED=1
             fi
           done
+
+          if [ "$FAILED" = "1" ]; then
+            echo "::error::One or more frontend accessibility checks failed"
+            exit 1
+          fi
 
       - name: Summary
         run: |
@@ -250,6 +268,7 @@ jobs:
   notify:
     name: Notify Deployment Status
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     needs: [deploy-services, smoke-tests]
     if: always()
     steps:

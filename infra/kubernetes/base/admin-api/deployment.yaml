@@ -30,6 +30,12 @@ spec:
         - name: admin-api
           image: myssharedacr.azurecr.io/admin-api:v0.0.0
           imagePullPolicy: IfNotPresent
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
           ports:
             - name: http
               containerPort: 8080
@@ -147,3 +153,15 @@ spec:
         target:
           type: Utilization
           averageUtilization: 80
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: mys-admin-api-pdb
+  labels:
+    app: mys-admin-api
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: mys-admin-api

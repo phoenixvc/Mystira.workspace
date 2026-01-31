@@ -110,7 +110,7 @@ resource "azurerm_storage_account" "chain" {
   account_kind                  = "FileStorage"
   https_traffic_only_enabled    = true
   min_tls_version               = "TLS1_2"
-  public_network_access_enabled = true
+  public_network_access_enabled = false  # Secure: No public internet access
 
   tags = local.common_tags
 }
@@ -183,6 +183,10 @@ resource "azurerm_application_insights" "chain" {
   application_type    = "other"
 
   tags = local.common_tags
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 # Key Vault for Chain Secrets

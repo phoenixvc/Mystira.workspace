@@ -56,6 +56,7 @@ jobs:
   validate-promotion:
     name: Validate Promotion Path
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     outputs:
       valid: ${{ steps.validate.outputs.valid }}
     steps:
@@ -83,6 +84,7 @@ jobs:
   compare-configs:
     name: Compare Configurations
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     needs: validate-promotion
     if: needs.validate-promotion.outputs.valid == 'true'
     steps:
@@ -142,6 +144,7 @@ jobs:
   plan-promotion:
     name: Plan - ${{ matrix.product }}
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     needs: [validate-promotion, compare-configs]
     strategy:
       fail-fast: false
@@ -213,6 +216,7 @@ jobs:
   apply-promotion:
     name: Apply - ${{ matrix.product }}
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     needs: plan-promotion
     if: inputs.dry_run == false
     strategy:
@@ -283,6 +287,7 @@ jobs:
   promotion-summary:
     name: Promotion Summary
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     needs: [plan-promotion, apply-promotion]
     if: always()
     steps:

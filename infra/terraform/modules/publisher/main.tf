@@ -108,6 +108,10 @@ resource "azurerm_application_insights" "publisher" {
   application_type    = "Node.JS"
 
   tags = local.common_tags
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 # Key Vault for Publisher Secrets

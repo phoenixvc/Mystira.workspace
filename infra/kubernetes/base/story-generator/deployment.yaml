@@ -38,6 +38,12 @@ spec:
         - name: story-generator
           image: myssharedacr.azurecr.io/story-generator:v0.0.0
           imagePullPolicy: IfNotPresent
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
           ports:
             - name: http
               containerPort: 8080
@@ -153,3 +159,15 @@ spec:
         target:
           type: Utilization
           averageUtilization: 80
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: mys-story-generator-pdb
+  labels:
+    app: mys-story-generator
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: mys-story-generator

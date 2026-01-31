@@ -69,6 +69,7 @@ jobs:
   deploy:
     name: Deploy ${{ github.event.action || inputs.service }} to Dev
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     environment: dev
     outputs:
       submodule_path: ${{ steps.target.outputs.submodule_path }}

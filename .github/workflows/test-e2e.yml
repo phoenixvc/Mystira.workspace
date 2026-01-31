@@ -51,6 +51,7 @@ jobs:
   setup:
     name: Determine Environment
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     outputs:
       environment: ${{ steps.env.outputs.environment }}
       base_url: ${{ steps.env.outputs.base_url }}
@@ -161,8 +162,11 @@ jobs:
               ;;
           esac
 
+          set -o pipefail
           pnpm exec playwright test $TEST_ARGS --reporter=html,github 2>&1 | tee e2e-output.txt
-          echo "exit_code=$?" >> $GITHUB_OUTPUT
+          EXIT_CODE=${PIPESTATUS[0]}
+          echo "exit_code=$EXIT_CODE" >> $GITHUB_OUTPUT
+          exit $EXIT_CODE
 
       - name: Upload test report
         if: always()
@@ -195,6 +199,7 @@ jobs:
   notify-failure:
     name: Notify on Failure
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     needs: [setup, e2e-tests]
     if: failure() && needs.setup.outputs.environment == 'staging'
     steps:

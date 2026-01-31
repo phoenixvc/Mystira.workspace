@@ -50,6 +50,7 @@ jobs:
   validate-specs:
     name: Validate OpenAPI Specs
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v6
 
@@ -71,6 +72,7 @@ jobs:
   generate-typescript:
     name: Generate TypeScript Types
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     needs: validate-specs
     steps:
       - uses: actions/checkout@v6
@@ -114,6 +116,7 @@ jobs:
   generate-csharp:
     name: Generate C# Types
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     needs: validate-specs
     steps:
       - uses: actions/checkout@v6
@@ -165,6 +168,7 @@ jobs:
   build-core:
     name: Build Mystira.Core
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v6
 
@@ -182,6 +186,7 @@ jobs:
   build-core-types:
     name: Build @mystira/core-types
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v6
 
@@ -203,6 +208,7 @@ jobs:
   commit-changes:
     name: Commit Generated Changes
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     needs: [generate-typescript, generate-csharp, build-core, build-core-types]
     if: |
       github.event_name == 'push' ||
@@ -267,6 +273,7 @@ jobs:
   summary:
     name: Generation Summary
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     needs: [generate-typescript, generate-csharp, build-core, build-core-types]
     if: always()
     steps:

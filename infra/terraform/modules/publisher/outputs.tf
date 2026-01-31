@@ -42,3 +42,13 @@ output "key_vault_id" {
   description = "Key Vault ID for publisher secrets"
   value       = azurerm_key_vault.publisher.id
 }
+
+output "key_vault_uri" {
+  description = "Key Vault URI for publisher secrets"
+  value       = azurerm_key_vault.publisher.vault_uri
+}
+
+output "identity_client_id" {
+  description = "Managed Identity Client ID (for workload identity configuration)"
+  value       = azurerm_user_assigned_identity.publisher.client_id
+}

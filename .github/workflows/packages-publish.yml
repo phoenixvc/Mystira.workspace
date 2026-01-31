@@ -79,6 +79,7 @@ jobs:
   detect-changes:
     name: Detect Changes
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     outputs:
       domain_changed: ${{ steps.changes.outputs.domain }}
       contracts_changed: ${{ steps.changes.outputs.contracts }}
@@ -153,6 +154,7 @@ jobs:
   publish-domain:
     name: Publish Domain
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     needs: detect-changes
     if: needs.detect-changes.outputs.domain_changed == 'true'
     outputs:
@@ -209,6 +211,7 @@ jobs:
   publish-contracts:
     name: Publish Contracts
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     needs: [detect-changes, publish-domain]
     if: always() && needs.detect-changes.outputs.contracts_changed == 'true' && (needs.publish-domain.result == 'success' || needs.publish-domain.result == 'skipped')
     outputs:
@@ -278,6 +281,7 @@ jobs:
   publish-ai:
     name: Publish Ai
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     needs: [detect-changes, publish-contracts]
     if: always() && needs.detect-changes.outputs.ai_changed == 'true' && (needs.publish-contracts.result == 'success' || needs.publish-contracts.result == 'skipped')
     outputs:
@@ -349,6 +353,7 @@ jobs:
   publish-shared:
     name: Publish Shared
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     needs: [detect-changes, publish-domain, publish-contracts]
     if: always() && needs.detect-changes.outputs.shared_changed == 'true' && (needs.publish-contracts.result == 'success' || needs.publish-contracts.result == 'skipped')
     outputs:
@@ -420,6 +425,7 @@ jobs:
   publish-authoring:
     name: Publish Authoring
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     needs: [detect-changes, publish-shared, publish-ai]
     if: always() && needs.detect-changes.outputs.authoring_changed == 'true' && (needs.publish-shared.result == 'success' || needs.publish-shared.result == 'skipped') && (needs.publish-ai.result == 'success' || needs.publish-ai.result == 'skipped')
     outputs:
@@ -498,6 +504,7 @@ jobs:
   publish-application:
     name: Publish Application
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     needs: [detect-changes, publish-domain, publish-contracts, publish-shared]
     if: always() && needs.detect-changes.outputs.application_changed == 'true' && (needs.publish-shared.result == 'success' || needs.publish-shared.result == 'skipped')
     outputs:
@@ -566,6 +573,7 @@ jobs:
   publish-infrastructure:
     name: Publish Infrastructure
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     needs: [detect-changes, publish-application]
     if: always() && needs.detect-changes.outputs.infrastructure_changed == 'true' && (needs.publish-application.result == 'success' || needs.publish-application.result == 'skipped')
     outputs:
@@ -649,6 +657,7 @@ jobs:
   summary:
     name: Generate Summary
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     needs: [detect-changes, publish-domain, publish-contracts, publish-ai, publish-shared, publish-authoring, publish-application, publish-infrastructure]
     if: always()
     steps:

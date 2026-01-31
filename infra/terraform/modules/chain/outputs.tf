@@ -37,3 +37,13 @@ output "key_vault_id" {
   description = "Key Vault ID for chain secrets"
   value       = azurerm_key_vault.chain.id
 }
+
+output "key_vault_uri" {
+  description = "Key Vault URI for chain secrets"
+  value       = azurerm_key_vault.chain.vault_uri
+}
+
+output "identity_client_id" {
+  description = "Managed Identity Client ID (for workload identity configuration)"
+  value       = azurerm_user_assigned_identity.chain.client_id
+}

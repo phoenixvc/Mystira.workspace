@@ -22,6 +22,7 @@ jobs:
   check-links:
     name: Check Markdown Links
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     # Don't fail PR builds during alpha - link checking is advisory
     continue-on-error: ${{ github.event_name == 'pull_request' }}
     steps:

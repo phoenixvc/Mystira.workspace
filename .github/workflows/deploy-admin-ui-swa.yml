@@ -41,6 +41,7 @@ jobs:
   build-and-deploy:
     name: Build and Deploy Admin UI
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     environment: ${{ github.event.inputs.environment || 'dev' }}
     permissions:
       id-token: write
