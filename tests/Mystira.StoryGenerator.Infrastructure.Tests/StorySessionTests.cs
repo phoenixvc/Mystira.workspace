@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 using Moq;
 using Mystira.StoryGenerator.Application.Infrastructure.Agents;
+using Mystira.StoryGenerator.Contracts.Agents;
 using Mystira.StoryGenerator.Domain.Agents;
 
 namespace Mystira.StoryGenerator.Infrastructure.Tests;
@@ -24,7 +25,7 @@ public class StorySessionRepositoryTests
         Assert.Equal(string.Empty, session.SessionId);
         Assert.Null(session.ThreadId);
         Assert.Equal(KnowledgeMode.FileSearch, session.KnowledgeMode);
-        Assert.Equal(StorySessionStage.Generating, session.Stage);
+        Assert.Equal(StorySessionStage.Uninitialized, session.Stage);
         Assert.Equal(0, session.IterationCount);
         Assert.Equal(string.Empty, session.CurrentStoryVersion);
         Assert.NotNull(session.StoryVersions);
@@ -229,13 +230,20 @@ public class StorySessionRepositoryTests
     [Fact]
     public void StorySessionStage_Enum_ShouldHaveExpectedValues()
     {
-        // Assert
-        Assert.Equal(0, (int)StorySessionStage.Generating);
-        Assert.Equal(1, (int)StorySessionStage.Validating);
-        Assert.Equal(2, (int)StorySessionStage.Evaluating);
-        Assert.Equal(3, (int)StorySessionStage.RefinementRequested);
-        Assert.Equal(4, (int)StorySessionStage.Refined);
-        Assert.Equal(5, (int)StorySessionStage.Complete);
+        // Assert - Verify enum values match the current definition
+        Assert.Equal(0, (int)StorySessionStage.Uninitialized);
+        Assert.Equal(1, (int)StorySessionStage.Generating);
+        Assert.Equal(2, (int)StorySessionStage.Validating);
+        Assert.Equal(3, (int)StorySessionStage.Evaluating);
+        Assert.Equal(4, (int)StorySessionStage.Evaluated);
+        Assert.Equal(5, (int)StorySessionStage.RefinementRequested);
+        Assert.Equal(6, (int)StorySessionStage.Refined);
+        Assert.Equal(7, (int)StorySessionStage.RequiresRefinement);
+        Assert.Equal(8, (int)StorySessionStage.Refining);
+        Assert.Equal(9, (int)StorySessionStage.GeneratingRubric);
+        Assert.Equal(10, (int)StorySessionStage.Complete);
+        Assert.Equal(11, (int)StorySessionStage.Failed);
+        Assert.Equal(12, (int)StorySessionStage.StuckNeedsReview);
     }
 
     [Fact]

@@ -1,9 +1,13 @@
+using System.Text.Json;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Moq;
 using Mystira.StoryGenerator.Application.Infrastructure.Agents;
+using Mystira.StoryGenerator.Application.Services.Prompting;
 using Mystira.StoryGenerator.Contracts.Configuration;
+using Mystira.StoryGenerator.Contracts.Agents;
 using Mystira.StoryGenerator.Domain.Agents;
+using Mystira.StoryGenerator.Domain.Services;
 using Mystira.StoryGenerator.Infrastructure.Agents;
 using Xunit;
 
@@ -19,6 +23,10 @@ public class AgentOrchestratorIntegrationTests : IDisposable
     private readonly Mock<IStorySessionRepository> _mockSessionRepository;
     private readonly Mock<FoundryAgentClient> _mockFoundryClient;
     private readonly Mock<IKnowledgeProvider> _mockKnowledgeProvider;
+    private readonly Mock<IPromptGenerator> _mockPromptGenerator;
+    private readonly Mock<StorySchemaValidator> _mockSchemaValidator;
+    private readonly Mock<IStorySchemaProvider> _mockSchemaProvider;
+    private readonly Mock<IStoryMediaProcessor> _mockMediaProcessor;
     private readonly Mock<IOptions<FoundryAgentConfig>> _mockConfig;
     private readonly AgentOrchestrator _orchestrator;
     private readonly FoundryAgentConfig _testConfig;
@@ -30,6 +38,10 @@ public class AgentOrchestratorIntegrationTests : IDisposable
         _mockSessionRepository = new Mock<IStorySessionRepository>();
         _mockFoundryClient = new Mock<FoundryAgentClient>();
         _mockKnowledgeProvider = new Mock<IKnowledgeProvider>();
+        _mockPromptGenerator = new Mock<IPromptGenerator>();
+        _mockSchemaValidator = new Mock<StorySchemaValidator>();
+        _mockSchemaProvider = new Mock<IStorySchemaProvider>();
+        _mockMediaProcessor = new Mock<IStoryMediaProcessor>();
         _mockConfig = new Mock<IOptions<FoundryAgentConfig>>();
 
         _testConfig = new FoundryAgentConfig
@@ -47,7 +59,11 @@ public class AgentOrchestratorIntegrationTests : IDisposable
             _mockEventPublisher.Object,
             _mockSessionRepository.Object,
             _mockFoundryClient.Object,
+            _mockPromptGenerator.Object,
+            _mockSchemaValidator.Object,
             _mockKnowledgeProvider.Object,
+            _mockSchemaProvider.Object,
+            _mockMediaProcessor.Object,
             _mockConfig.Object);
     }
 
@@ -63,10 +79,6 @@ public class AgentOrchestratorIntegrationTests : IDisposable
         _mockFoundryClient
             .Setup(x => x.CreateThreadAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new ThreadCreationResult { ThreadId = expectedThreadId });
-
-        _mockKnowledgeProvider
-            .Setup(x => x.SearchAsync(It.IsAny<string>(), It.IsAny<List<string>>()))
-            .ReturnsAsync(new { Results = new List<object>() });
 
         StorySession? savedSession = null;
         _mockSessionRepository
@@ -744,5 +756,9 @@ public class AgentOrchestratorIntegrationTests : IDisposable
         _mockFoundryClient.Reset();
         _mockSessionRepository.Reset();
         _mockEventPublisher.Reset();
+        _mockPromptGenerator.Reset();
+        _mockSchemaValidator.Reset();
+        _mockSchemaProvider.Reset();
+        _mockMediaProcessor.Reset();
     }
 }

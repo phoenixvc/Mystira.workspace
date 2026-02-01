@@ -5,6 +5,8 @@ using Mystira.StoryGenerator.Application.Infrastructure.Agents;
 using Mystira.StoryGenerator.Contracts.Configuration;
 using Mystira.StoryGenerator.Domain.Agents;
 using Mystira.StoryGenerator.Infrastructure.Agents;
+using Mystira.StoryGenerator.Application.Services.Prompting;
+using Mystira.StoryGenerator.Domain.Services;
 using Xunit;
 using Azure;
 using Azure.Core;
@@ -22,6 +24,10 @@ public class ErrorHandlingTests : IDisposable
     private readonly Mock<IStorySessionRepository> _mockSessionRepository;
     private readonly Mock<FoundryAgentClient> _mockFoundryClient;
     private readonly Mock<IKnowledgeProvider> _mockKnowledgeProvider;
+    private readonly Mock<IPromptGenerator> _mockPromptGenerator;
+    private readonly Mock<StorySchemaValidator> _mockSchemaValidator;
+    private readonly Mock<IStorySchemaProvider> _mockSchemaProvider;
+    private readonly Mock<IStoryMediaProcessor> _mockMediaProcessor;
     private readonly Mock<IOptions<FoundryAgentConfig>> _mockConfig;
     private readonly AgentOrchestrator _orchestrator;
     private readonly FoundryAgentConfig _testConfig;
@@ -33,6 +39,10 @@ public class ErrorHandlingTests : IDisposable
         _mockSessionRepository = new Mock<IStorySessionRepository>();
         _mockFoundryClient = new Mock<FoundryAgentClient>();
         _mockKnowledgeProvider = new Mock<IKnowledgeProvider>();
+        _mockPromptGenerator = new Mock<IPromptGenerator>();
+        _mockSchemaValidator = new Mock<StorySchemaValidator>();
+        _mockSchemaProvider = new Mock<IStorySchemaProvider>();
+        _mockMediaProcessor = new Mock<IStoryMediaProcessor>();
         _mockConfig = new Mock<IOptions<FoundryAgentConfig>>();
 
         _testConfig = new FoundryAgentConfig
@@ -50,19 +60,24 @@ public class ErrorHandlingTests : IDisposable
             _mockEventPublisher.Object,
             _mockSessionRepository.Object,
             _mockFoundryClient.Object,
+            _mockPromptGenerator.Object,
+            _mockSchemaValidator.Object,
             _mockKnowledgeProvider.Object,
+            _mockSchemaProvider.Object,
+            _mockMediaProcessor.Object,
             _mockConfig.Object);
     }
 
     [Fact]
     public async Task InitializeSessionAsync_Foundry_API_Timeout_Should_Handle_Backoff_And_Retry()
     {
-        // Arrange
+        // This test needs to be re-designed since InitializeSessionAsync no longer calls SearchAsync
+        // The test should verify timeout/retry behavior on CreateThreadAsync instead
+
         var sessionId = "test-session-timeout";
         var knowledgeMode = "AISearch";
         var ageGroup = "6-9";
 
-        // Simulate timeout on first call, success on retry
         var callCount = 0;
         _mockFoundryClient
             .Setup(x => x.CreateThreadAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
@@ -75,10 +90,6 @@ public class ErrorHandlingTests : IDisposable
                 }
                 return await Task.FromResult(new ThreadCreationResult { ThreadId = "thread-retry-success" });
             });
-
-        _mockKnowledgeProvider
-            .Setup(x => x.SearchAsync(It.IsAny<string>(), It.IsAny<List<string>>()))
-            .ReturnsAsync(new { Results = new List<object>() });
 
         // Act & Assert - Should eventually succeed with retry
         var result = await _orchestrator.InitializeSessionAsync(sessionId, knowledgeMode, ageGroup);
@@ -501,5 +512,9 @@ public class ErrorHandlingTests : IDisposable
         _mockSessionRepository.Reset();
         _mockEventPublisher.Reset();
         _mockLogger.Reset();
+        _mockPromptGenerator.Reset();
+        _mockSchemaValidator.Reset();
+        _mockSchemaProvider.Reset();
+        _mockMediaProcessor.Reset();
     }
 }
