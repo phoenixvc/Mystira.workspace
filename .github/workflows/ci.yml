@@ -333,7 +333,7 @@ jobs:
 
     services:
       postgres:
-        image: postgres:16
+        image: postgres:16@sha256:f992505e18f114c1e5102ac4dcf00f791b44462f6a423d899320f0bbf80e386f
         env:
           POSTGRES_USER: test
           POSTGRES_PASSWORD: test
@@ -347,7 +347,7 @@ jobs:
           --health-retries 5
 
       redis:
-        image: redis:7-alpine
+        image: redis:7-alpine@sha256:02f2cc4882f8bf87c79a220ac958f58c700bdec0dfb9b9ea61b62fb0e8f1bfcf
         ports:
           - 6379:6379
         options: >-
