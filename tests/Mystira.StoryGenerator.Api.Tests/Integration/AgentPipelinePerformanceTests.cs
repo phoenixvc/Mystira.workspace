@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using Mystira.StoryGenerator.Application.Infrastructure.Agents;
@@ -443,7 +444,7 @@ public class AgentPipelinePerformanceTests : IClassFixture<WebApplicationFactory
             await Task.CompletedTask;
         }
 
-        public async IAsyncEnumerable<AgentStreamEvent> SubscribeAsync(string sessionId, CancellationToken ct = default)
+        public async IAsyncEnumerable<AgentStreamEvent> SubscribeAsync(string sessionId, [EnumeratorCancellation] CancellationToken ct = default)
         {
             // Yield events immediately for performance testing
             yield return new AgentStreamEvent
