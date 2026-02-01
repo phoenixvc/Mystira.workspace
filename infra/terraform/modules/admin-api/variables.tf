@@ -54,3 +54,16 @@ variable "tags" {
   type        = map(string)
   default     = {}
 }
+
+# Scaling configuration
+variable "min_replicas" {
+  description = "Minimum number of API replicas"
+  type        = number
+  default     = 1
+}
+
+variable "max_replicas" {
+  description = "Maximum number of API replicas"
+  type        = number
+  default     = 3
+}

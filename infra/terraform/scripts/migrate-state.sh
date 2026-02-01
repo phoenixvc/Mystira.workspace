@@ -87,6 +87,14 @@ list_resources_by_product() {
     grep -E "^azurerm_resource_group\.story" ../../.state_resources.txt >> ../../.story_generator_resources.txt 2>/dev/null || true
     grep -E "^azurerm_key_vault_secret\.story" ../../.state_resources.txt >> ../../.story_generator_resources.txt 2>/dev/null || true
 
+    # Mystira App
+    grep -E "^module\.mystira_app" ../../.state_resources.txt > ../../.mystira_app_resources.txt 2>/dev/null || true
+    grep -E "^module\.mystira" ../../.state_resources.txt >> ../../.mystira_app_resources.txt 2>/dev/null || true
+    grep -E "^azurerm_resource_group\.mystira" ../../.state_resources.txt >> ../../.mystira_app_resources.txt 2>/dev/null || true
+    grep -E "^azurerm_key_vault_secret\.mystira" ../../.state_resources.txt >> ../../.mystira_app_resources.txt 2>/dev/null || true
+    grep -E "^azurerm_static_site\.mystira" ../../.state_resources.txt >> ../../.mystira_app_resources.txt 2>/dev/null || true
+    grep -E "^azurerm_communication_service\.mystira" ../../.state_resources.txt >> ../../.mystira_app_resources.txt 2>/dev/null || true
+
     # Admin (API + UI)
     grep -E "^module\.admin_(api|ui)" ../../.state_resources.txt > ../../.admin_resources.txt 2>/dev/null || true
     grep -E "^module\.entra_id" ../../.state_resources.txt >> ../../.admin_resources.txt 2>/dev/null || true
@@ -110,6 +118,7 @@ list_resources_by_product() {
 
     log_info "Resource categorization complete:"
     log_info "  Shared Infra: $(wc -l < .shared_infra_resources.txt) resources"
+    log_info "  Mystira App: $(wc -l < .mystira_app_resources.txt) resources"
     log_info "  Story Generator: $(wc -l < .story_generator_resources.txt) resources"
     log_info "  Admin: $(wc -l < .admin_resources.txt) resources"
     log_info "  Publisher: $(wc -l < .publisher_resources.txt) resources"
