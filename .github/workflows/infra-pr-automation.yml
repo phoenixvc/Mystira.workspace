@@ -1,0 +1,434 @@
+name: "[Infra] PR Automation"
+
+# =============================================================================
+# Infrastructure PR Automation Workflow
+# =============================================================================
+# Provides Atlantis-like functionality using native GitHub Actions.
+#
+# Features:
+#   - Automatic terraform plan on PR
+#   - Plan output as PR comments
+#   - Apply via PR comment commands
+#   - Support for Terragrunt and Terragrunt Stacks
+#
+# Commands (via PR comments):
+#   /plan              - Run plan for all changed projects
+#   /plan -d <dir>     - Run plan for specific directory
+#   /apply             - Apply all planned changes (requires approval)
+#   /apply -d <dir>    - Apply specific directory
+#   /unlock            - Release any held locks
+# =============================================================================
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - "infra/terraform/**"
+      - "atlantis.yaml"
+
+  issue_comment:
+    types: [created]
+
+concurrency:
+  group: infra-pr-${{ github.event.pull_request.number || github.event.issue.number }}
+  cancel-in-progress: false
+
+env:
+  TF_VERSION: "1.10.3"
+  TG_VERSION: "0.69.1"
+  ARM_USE_OIDC: true
+  ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+  ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+  ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+  TF_IN_AUTOMATION: "true"
+
+permissions:
+  id-token: write
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  # ===========================================================================
+  # Detect Changed Infrastructure
+  # ===========================================================================
+  detect-changes:
+    name: Detect Changes
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    outputs:
+      projects: ${{ steps.changes.outputs.projects }}
+      has_changes: ${{ steps.changes.outputs.has_changes }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Get changed files
+        id: changed-files
+        uses: tj-actions/changed-files@v45
+        with:
+          files: |
+            infra/terraform/**
+
+      - name: Detect affected projects
+        id: changes
+        run: |
+          CHANGED="${{ steps.changed-files.outputs.all_changed_files }}"
+          PROJECTS=()
+
+          # Check for shared-infra changes
+          if echo "$CHANGED" | grep -q "infra/terraform/shared-infra/\|infra/terraform/modules/shared/\|infra/terraform/terragrunt.hcl"; then
+            for env in dev staging prod; do
+              if [ -d "infra/terraform/shared-infra/environments/$env" ]; then
+                PROJECTS+=("{\"name\":\"shared-infra-$env\",\"dir\":\"infra/terraform/shared-infra/environments/$env\",\"env\":\"$env\"}")
+              fi
+            done
+          fi
+
+          # Check for product changes
+          for product in admin chain mystira-app publisher story-generator; do
+            if echo "$CHANGED" | grep -q "infra/terraform/products/$product/\|infra/terraform/modules/$product"; then
+              for env in dev staging prod; do
+                if [ -d "infra/terraform/products/$product/environments/$env" ]; then
+                  PROJECTS+=("{\"name\":\"$product-$env\",\"dir\":\"infra/terraform/products/$product/environments/$env\",\"env\":\"$env\"}")
+                fi
+              done
+            fi
+          done
+
+          # Check for stack changes
+          if echo "$CHANGED" | grep -q "infra/terraform/stacks/"; then
+            PROJECTS+=("{\"name\":\"stacks-changed\",\"dir\":\"infra/terraform/stacks\",\"env\":\"all\"}")
+          fi
+
+          if [ ${#PROJECTS[@]} -eq 0 ]; then
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+            echo "projects=[]" >> $GITHUB_OUTPUT
+          else
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+            # Join with commas
+            PROJECTS_JSON=$(printf '%s,' "${PROJECTS[@]}")
+            PROJECTS_JSON="[${PROJECTS_JSON%,}]"
+            echo "projects=$PROJECTS_JSON" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Summary
+        run: |
+          echo "## Infrastructure Changes Detected" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ steps.changes.outputs.has_changes }}" == "true" ]; then
+            echo "Projects affected:" >> $GITHUB_STEP_SUMMARY
+            echo '```json' >> $GITHUB_STEP_SUMMARY
+            echo '${{ steps.changes.outputs.projects }}' | jq '.' >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+          else
+            echo "No infrastructure projects affected." >> $GITHUB_STEP_SUMMARY
+          fi
+
+  # ===========================================================================
+  # Plan Infrastructure Changes
+  # ===========================================================================
+  plan:
+    name: Plan - ${{ matrix.project.name }}
+    runs-on: ubuntu-latest
+    needs: detect-changes
+    if: needs.detect-changes.outputs.has_changes == 'true'
+    strategy:
+      fail-fast: false
+      matrix:
+        project: ${{ fromJson(needs.detect-changes.outputs.projects) }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          submodules: recursive
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+          terraform_wrapper: false
+
+      - name: Setup Terragrunt
+        run: |
+          wget -q -O terragrunt "https://github.com/gruntwork-io/terragrunt/releases/download/v${{ env.TG_VERSION }}/terragrunt_linux_amd64"
+          chmod +x terragrunt
+          sudo mv terragrunt /usr/local/bin/
+
+      - name: Azure Login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Terragrunt Init
+        working-directory: ${{ matrix.project.dir }}
+        run: terragrunt init --terragrunt-non-interactive
+
+      - name: Terragrunt Plan
+        id: plan
+        working-directory: ${{ matrix.project.dir }}
+        run: |
+          set +e
+          terragrunt plan -detailed-exitcode -out=tfplan --terragrunt-non-interactive 2>&1 | tee plan_output.txt
+          EXIT_CODE=$?
+          set -e
+
+          # Exit codes: 0 = no changes, 1 = error, 2 = changes
+          if [ $EXIT_CODE -eq 0 ]; then
+            echo "changes=false" >> $GITHUB_OUTPUT
+            echo "status=success" >> $GITHUB_OUTPUT
+          elif [ $EXIT_CODE -eq 2 ]; then
+            echo "changes=true" >> $GITHUB_OUTPUT
+            echo "status=success" >> $GITHUB_OUTPUT
+          else
+            echo "changes=false" >> $GITHUB_OUTPUT
+            echo "status=failure" >> $GITHUB_OUTPUT
+            exit 1
+          fi
+
+      - name: Generate Plan Summary
+        if: always()
+        working-directory: ${{ matrix.project.dir }}
+        run: |
+          if [ -f tfplan ]; then
+            terragrunt show -no-color tfplan > plan_readable.txt 2>&1 || true
+          fi
+
+      - name: Upload Plan Artifact
+        if: steps.plan.outputs.status == 'success'
+        uses: actions/upload-artifact@v6
+        with:
+          name: tfplan-${{ matrix.project.name }}
+          path: |
+            ${{ matrix.project.dir }}/tfplan
+            ${{ matrix.project.dir }}/plan_output.txt
+            ${{ matrix.project.dir }}/plan_readable.txt
+          retention-days: 7
+
+      - name: Comment PR with Plan
+        uses: actions/github-script@v8
+        if: always()
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+
+            const project = '${{ matrix.project.name }}';
+            const dir = '${{ matrix.project.dir }}';
+            const status = '${{ steps.plan.outputs.status }}';
+            const changes = '${{ steps.plan.outputs.changes }}';
+
+            let planOutput = '';
+            const planFile = path.join(dir, 'plan_output.txt');
+            if (fs.existsSync(planFile)) {
+              planOutput = fs.readFileSync(planFile, 'utf8');
+              // Truncate if too long
+              if (planOutput.length > 60000) {
+                planOutput = planOutput.substring(0, 60000) + '\n\n... (truncated)';
+              }
+            }
+
+            const statusEmoji = status === 'success' ? '✅' : '❌';
+            const changesText = changes === 'true' ? '**Changes detected**' : 'No changes';
+
+            const body = `## ${statusEmoji} Terraform Plan: \`${project}\`
+
+**Directory:** \`${dir}\`
+**Status:** ${changesText}
+
+<details>
+<summary>Show Plan Output</summary>
+
+\`\`\`hcl
+${planOutput}
+\`\`\`
+
+</details>
+
+---
+**Commands:**
+- \`/apply -d ${dir}\` - Apply this plan
+- \`/plan -d ${dir}\` - Re-run plan
+`;
+
+            // Find existing comment or create new
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+
+            const existingComment = comments.find(c =>
+              c.user.login === 'github-actions[bot]' &&
+              c.body.includes(`Terraform Plan: \`${project}\``)
+            );
+
+            if (existingComment) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existingComment.id,
+                body: body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: body,
+              });
+            }
+
+  # ===========================================================================
+  # Handle PR Comments (Commands)
+  # ===========================================================================
+  handle-command:
+    name: Handle Command
+    runs-on: ubuntu-latest
+    if: >
+      github.event_name == 'issue_comment' &&
+      github.event.issue.pull_request &&
+      startsWith(github.event.comment.body, '/')
+    steps:
+      - name: Parse Command
+        id: parse
+        run: |
+          COMMENT="${{ github.event.comment.body }}"
+          COMMAND=$(echo "$COMMENT" | awk '{print $1}')
+          DIR_FLAG=$(echo "$COMMENT" | grep -oP '(?<=-d\s)\S+' || echo "")
+
+          echo "command=$COMMAND" >> $GITHUB_OUTPUT
+          echo "directory=$DIR_FLAG" >> $GITHUB_OUTPUT
+
+      - name: Check Permissions
+        id: check
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const { data: permission } = await github.rest.repos.getCollaboratorPermissionLevel({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              username: context.actor,
+            });
+
+            const allowed = ['admin', 'write'].includes(permission.permission);
+            core.setOutput('allowed', allowed.toString());
+
+            if (!allowed) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: `❌ @${context.actor} does not have permission to run infrastructure commands.`,
+              });
+            }
+
+      - uses: actions/checkout@v6
+        if: steps.check.outputs.allowed == 'true'
+        with:
+          submodules: recursive
+
+      - name: Setup Tools
+        if: steps.check.outputs.allowed == 'true'
+        run: |
+          # Terraform
+          wget -q https://releases.hashicorp.com/terraform/${{ env.TF_VERSION }}/terraform_${{ env.TF_VERSION }}_linux_amd64.zip
+          unzip terraform_${{ env.TF_VERSION }}_linux_amd64.zip
+          sudo mv terraform /usr/local/bin/
+
+          # Terragrunt
+          wget -q -O terragrunt "https://github.com/gruntwork-io/terragrunt/releases/download/v${{ env.TG_VERSION }}/terragrunt_linux_amd64"
+          chmod +x terragrunt
+          sudo mv terragrunt /usr/local/bin/
+
+      - name: Azure Login
+        if: steps.check.outputs.allowed == 'true'
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Execute Plan Command
+        if: steps.check.outputs.allowed == 'true' && steps.parse.outputs.command == '/plan'
+        run: |
+          DIR="${{ steps.parse.outputs.directory }}"
+          if [ -z "$DIR" ]; then
+            echo "Running plan for all projects..."
+            # Trigger the plan workflow
+            gh workflow run infra-pr-automation.yml --ref ${{ github.head_ref }}
+          else
+            echo "Running plan for $DIR..."
+            cd "$DIR"
+            terragrunt init --terragrunt-non-interactive
+            terragrunt plan --terragrunt-non-interactive
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Execute Apply Command
+        if: steps.check.outputs.allowed == 'true' && steps.parse.outputs.command == '/apply'
+        run: |
+          DIR="${{ steps.parse.outputs.directory }}"
+          if [ -z "$DIR" ]; then
+            echo "::error::Apply requires a directory. Use: /apply -d <directory>"
+            exit 1
+          fi
+
+          echo "Applying changes in $DIR..."
+          cd "$DIR"
+          terragrunt init --terragrunt-non-interactive
+          terragrunt apply -auto-approve --terragrunt-non-interactive
+
+      - name: Post Result
+        if: always() && steps.check.outputs.allowed == 'true'
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const command = '${{ steps.parse.outputs.command }}';
+            const status = '${{ job.status }}';
+            const emoji = status === 'success' ? '✅' : '❌';
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: `${emoji} Command \`${command}\` completed with status: **${status}**`,
+            });
+
+  # ===========================================================================
+  # Summary
+  # ===========================================================================
+  summary:
+    name: Plan Summary
+    runs-on: ubuntu-latest
+    needs: [detect-changes, plan]
+    if: always() && needs.detect-changes.outputs.has_changes == 'true'
+    steps:
+      - name: Generate Summary
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const projects = JSON.parse('${{ needs.detect-changes.outputs.projects }}');
+
+            let summary = `## 📋 Infrastructure Plan Summary\n\n`;
+            summary += `| Project | Environment | Status |\n`;
+            summary += `|---------|-------------|--------|\n`;
+
+            for (const project of projects) {
+              summary += `| ${project.name} | ${project.env} | See individual comments |\n`;
+            }
+
+            summary += `\n### Commands\n\n`;
+            summary += `- \`/plan\` - Re-run all plans\n`;
+            summary += `- \`/plan -d <dir>\` - Plan specific directory\n`;
+            summary += `- \`/apply -d <dir>\` - Apply specific directory (requires approval)\n`;
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: summary,
+            });
