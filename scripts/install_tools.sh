@@ -103,13 +103,33 @@ if ! command -v node &> /dev/null || [[ "$(node --version | cut -d'.' -f1 | tr -
             NODE_PREFIX="$(dirname "$BIN_DIR")"
         fi
 
+        # Check if NODE_PREFIX is writable when SUDO is not set
+        if [ -z "$SUDO" ]; then
+            mkdir -p "$NODE_PREFIX" 2>/dev/null || true
+            if ! touch "$NODE_PREFIX/.write_test" 2>/dev/null; then
+                echo "  NODE_PREFIX ($NODE_PREFIX) is not writable, falling back to \$HOME/.local"
+                NODE_PREFIX="$HOME/.local"
+                BIN_DIR="$HOME/.local/bin"
+                mkdir -p "$NODE_PREFIX" "$BIN_DIR"
+                # Ensure BIN_DIR is in PATH
+                if [[ ":$PATH:" != *":$BIN_DIR:"* ]]; then
+                    export PATH="$BIN_DIR:$PATH"
+                fi
+            else
+                rm -f "$NODE_PREFIX/.write_test"
+            fi
+        fi
+
         # Extract to the computed prefix
         echo "  Installing Node.js to ${NODE_PREFIX}..."
         mkdir -p "$NODE_PREFIX"
         if [ -n "$SUDO" ]; then
             $SUDO tar -xJf "/tmp/${NODE_ARCHIVE}" -C "$NODE_PREFIX" --strip-components=1
         else
-            tar -xJf "/tmp/${NODE_ARCHIVE}" -C "$NODE_PREFIX" --strip-components=1
+            tar -xJf "/tmp/${NODE_ARCHIVE}" -C "$NODE_PREFIX" --strip-components=1 || {
+                echo "ERROR: Failed to extract Node.js. Aborting."
+                exit 1
+            }
         fi
         rm "/tmp/${NODE_ARCHIVE}"
     fi

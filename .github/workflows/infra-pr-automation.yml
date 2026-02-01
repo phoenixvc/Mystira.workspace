@@ -66,7 +66,7 @@ jobs:
 
       - name: Get changed files
         id: changed-files
-        uses: tj-actions/changed-files@v45
+        uses: tj-actions/changed-files@2f7c5bfce28377bc069a65ba478de0a74aa0ca32  # v46 - pinned SHA for security
         with:
           files: |
             infra/terraform/**
@@ -314,10 +314,12 @@ ${planOutput}
     steps:
       - name: Parse Command
         id: parse
+        env:
+          COMMENT: ${{ github.event.comment.body }}
         run: |
-          COMMENT="${{ github.event.comment.body }}"
-          COMMAND=$(echo "$COMMENT" | awk '{print $1}')
-          DIR_FLAG=$(echo "$COMMENT" | grep -oP '(?<=-d\s)\S+' || echo "")
+          # Safely parse command without shell injection
+          COMMAND=$(printf '%s' "$COMMENT" | awk '{print $1}')
+          DIR_FLAG=$(printf '%s' "$COMMENT" | grep -oP '(?<=-d\s)\S+' || echo "")
 
           echo "command=$COMMAND" >> $GITHUB_OUTPUT
           echo "directory=$DIR_FLAG" >> $GITHUB_OUTPUT
@@ -404,14 +406,29 @@ ${planOutput}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
+      - name: Get PR Head Ref
+        id: pr-ref
+        if: steps.check.outputs.allowed == 'true'
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const prNumber = context.issue.number;
+            const { data: pr } = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: prNumber,
+            });
+            core.setOutput('head_ref', pr.head.ref);
+
       - name: Execute Plan Command
         if: steps.check.outputs.allowed == 'true' && steps.parse.outputs.command == '/plan'
         run: |
           DIR="${{ steps.parse.outputs.directory }}"
+          REF="${{ steps.pr-ref.outputs.head_ref }}"
           if [ -z "$DIR" ]; then
             echo "Running plan for all projects..."
             # Trigger the plan workflow
-            gh workflow run infra-pr-automation.yml --ref ${{ github.head_ref }}
+            gh workflow run infra-pr-automation.yml --ref "$REF"
           else
             echo "Running plan for $DIR..."
             cd "$DIR"
@@ -420,6 +437,14 @@ ${planOutput}
           fi
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Download Plan Artifact
+        if: steps.check.outputs.allowed == 'true' && steps.parse.outputs.command == '/apply'
+        uses: actions/download-artifact@v6
+        with:
+          pattern: tfplan-*
+          path: ./plans
+        continue-on-error: true
 
       - name: Execute Apply Command
         if: steps.check.outputs.allowed == 'true' && steps.parse.outputs.command == '/apply'
@@ -433,7 +458,18 @@ ${planOutput}
           echo "Applying changes in $DIR..."
           cd "$DIR"
           terragrunt init --terragrunt-non-interactive
-          terragrunt apply -auto-approve --terragrunt-non-interactive
+
+          # Check for downloaded plan artifact
+          PROJECT_NAME=$(basename "$(dirname "$(dirname "$DIR")")")-$(basename "$DIR")
+          PLAN_FILE="../../../plans/tfplan-${PROJECT_NAME}/tfplan"
+
+          if [ -f "$PLAN_FILE" ]; then
+            echo "Using saved plan artifact..."
+            terragrunt apply "$PLAN_FILE" --terragrunt-non-interactive
+          else
+            echo "::warning::No saved plan found, running fresh apply..."
+            terragrunt apply -auto-approve --terragrunt-non-interactive
+          fi
 
       - name: Post Result
         if: always() && steps.check.outputs.allowed == 'true'

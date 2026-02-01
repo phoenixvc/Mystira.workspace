@@ -207,9 +207,11 @@ jobs:
       - name: Trivy Summary
         if: always()
         run: |
-          echo "## Trivy IaC Security Scan" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "Security scan completed. Check the Security tab for detailed findings." >> $GITHUB_STEP_SUMMARY
+          cat >> "$GITHUB_STEP_SUMMARY" << 'EOF'
+          ## Trivy IaC Security Scan
+
+          Security scan completed. Check the Security tab for detailed findings.
+          EOF
 
   # ============================================
   # Validate Shared Infrastructure
