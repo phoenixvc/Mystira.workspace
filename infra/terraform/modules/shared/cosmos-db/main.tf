@@ -197,6 +197,10 @@ resource "azurerm_cosmosdb_sql_database" "databases" {
   name                = each.key
   resource_group_name = var.resource_group_name
   account_name        = azurerm_cosmosdb_account.shared.name
+
+  # Provisioned throughput (only applies when serverless = false)
+  # Serverless mode doesn't support manual throughput settings
+  throughput = var.serverless ? null : var.throughput
 }
 
 # Cosmos DB SQL Containers

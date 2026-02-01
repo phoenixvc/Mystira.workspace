@@ -144,9 +144,12 @@ jobs:
           cd ${{ steps.get-dir.outputs.dir }}
 
           # Run plan and capture output
+          # Use pipefail to capture terragrunt exit code, not tee
           set +e
+          set -o pipefail
           terragrunt plan -detailed-exitcode -out=drift.tfplan --terragrunt-non-interactive 2>&1 | tee plan_output.txt
           EXITCODE=$?
+          set +o pipefail
           set -e
 
           # Exit code 2 means changes detected (drift)

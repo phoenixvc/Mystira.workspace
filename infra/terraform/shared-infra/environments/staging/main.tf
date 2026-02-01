@@ -206,7 +206,7 @@ output "cosmos_db_account_id" {
 }
 
 output "cosmos_db_connection_string" {
-  value     = module.cosmos_db.primary_connection_string
+  value     = module.cosmos_db.primary_sql_connection_string
   sensitive = true
 }
 
