@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using Mystira.StoryGenerator.Application.Infrastructure.Agents;
@@ -624,7 +625,7 @@ public class AgentPipelineE2ETests : IClassFixture<WebApplicationFactory<Program
             await Task.CompletedTask;
         }
 
-        public async IAsyncEnumerable<AgentStreamEvent> SubscribeAsync(string sessionId, CancellationToken ct = default)
+        public async IAsyncEnumerable<AgentStreamEvent> SubscribeAsync(string sessionId, [EnumeratorCancellation] CancellationToken ct = default)
         {
             yield break;
         }

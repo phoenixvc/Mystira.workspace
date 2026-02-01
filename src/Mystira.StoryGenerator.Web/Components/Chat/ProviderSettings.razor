@@ -125,7 +125,7 @@
                  // Clear selected model when provider changes
                  _selectedModel = string.Empty;
              }
-             NotifySettingsChanged();
+             _ = NotifySettingsChanged();
          }
      }
 
@@ -146,7 +146,7 @@
                      MaxTokens = modelInfo.MaxTokens;
                  }
              }
-             NotifySettingsChanged();
+             _ = NotifySettingsChanged();
          }
      }
 
@@ -157,7 +157,7 @@
          set
          {
              _temperature = value;
-             NotifySettingsChanged();
+             _ = NotifySettingsChanged();
          }
      }
 
@@ -168,7 +168,7 @@
          set
          {
              _maxTokens = value;
-             NotifySettingsChanged();
+             _ = NotifySettingsChanged();
          }
      }
 
@@ -179,7 +179,7 @@
          set
          {
              _systemPrompt = value;
-             NotifySettingsChanged();
+             _ = NotifySettingsChanged();
          }
      }
 

@@ -177,7 +177,7 @@ public static class JsonYamlConverter
             var node = JsonNode.Parse(trimmed);
             if (node == null) return trimmed;
             var sanitized = SanitizeJsonNodeStrings(node);
-            return sanitized.ToJsonString(new JsonSerializerOptions { WriteIndented = false });
+            return sanitized?.ToJsonString(new JsonSerializerOptions { WriteIndented = false }) ?? trimmed;
         }
         catch
         {

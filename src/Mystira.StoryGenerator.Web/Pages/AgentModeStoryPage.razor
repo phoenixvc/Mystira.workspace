@@ -34,7 +34,7 @@
                 OnRefineRequested="HandleRefineFromRubric"
                 OnCompleteRequested="HandleComplete" />
 
-            @if (currentSession.Stage == "Evaluated" || currentSession.Stage == "RefinementRequested" || currentSession.Stage == "Complete")
+            @if (currentSession?.Stage == "Evaluated" || currentSession?.Stage == "RefinementRequested" || currentSession?.Stage == "Complete")
             {
                 <AgentModeRefinementPanel
                     Session="currentSession"

@@ -3,6 +3,7 @@ using Moq;
 using Mystira.StoryGenerator.Application.Infrastructure.Agents;
 using Mystira.StoryGenerator.Contracts.Agents;
 using Mystira.StoryGenerator.Domain.Agents;
+using Mystira.StoryGenerator.Infrastructure.Agents;
 
 namespace Mystira.StoryGenerator.Infrastructure.Tests;
 

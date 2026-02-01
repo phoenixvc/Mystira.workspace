@@ -200,7 +200,7 @@ public class AnthropicAIService : ILLMService
                     TotalTokens = (int)(response.Usage.InputTokens + response.Usage.OutputTokens)
                 } : null,
                 Success = true,
-                FinishReason = finishReason,
+                FinishReason = finishReason?.ToString(),
                 IsIncomplete = isIncomplete
             };
 

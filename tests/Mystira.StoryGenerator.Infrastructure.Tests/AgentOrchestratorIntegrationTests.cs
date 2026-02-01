@@ -177,7 +177,7 @@ public class AgentOrchestratorIntegrationTests : IDisposable
             .ReturnsAsync(session);
 
         _mockFoundryClient
-            .Setup(x => x.CreateRunAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .Setup(x => x.CreateRunAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<BinaryData?>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new RunSubmissionResult { RunId = "run-123", Status = "running" });
 
         _mockFoundryClient
@@ -420,7 +420,7 @@ public class AgentOrchestratorIntegrationTests : IDisposable
             .ReturnsAsync(session);
 
         _mockFoundryClient
-            .Setup(x => x.CreateRunAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .Setup(x => x.CreateRunAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<BinaryData?>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new RunSubmissionResult { RunId = "run-refine-123", Status = "running" });
 
         _mockFoundryClient
@@ -627,18 +627,18 @@ public class AgentOrchestratorIntegrationTests : IDisposable
             .ReturnsAsync(session);
 
         _mockFoundryClient
-            .Setup(x => x.CreateRunAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .Setup(x => x.CreateRunAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<BinaryData?>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new RunSubmissionResult { RunId = $"run-{callCount}", Status = "running" });
 
         _mockFoundryClient
             .Setup(x => x.WaitForRunCompletionAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<TimeSpan?>(), It.IsAny<TimeSpan?>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync((string threadId, string runId, TimeSpan? pollInterval, TimeSpan? maxWait, CancellationToken ct) =>
+            .Returns((string threadId, string runId, TimeSpan? pollInterval, TimeSpan? maxWait, CancellationToken ct) =>
             {
                 callCount++;
                 var content = callCount switch
                 {
                     1 => refinedStory, // Refiner response
-                    2 => passingEvaluationReport, // Judge response  
+                    2 => passingEvaluationReport, // Judge response
                     _ => "{}"
                 };
 
@@ -711,7 +711,7 @@ public class AgentOrchestratorIntegrationTests : IDisposable
             .ReturnsAsync(session);
 
         _mockFoundryClient
-            .Setup(x => x.CreateRunAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .Setup(x => x.CreateRunAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<BinaryData?>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new RunSubmissionResult { RunId = "run-max", Status = "running" });
 
         _mockFoundryClient

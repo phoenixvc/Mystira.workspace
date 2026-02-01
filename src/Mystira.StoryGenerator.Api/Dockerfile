@@ -1,5 +1,6 @@
 # Build stage
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+# Using specific variant tag for reproducibility (.NET 9 is STS - support ends May 2026)
+FROM mcr.microsoft.com/dotnet/sdk:9.0-bookworm-slim AS build
 WORKDIR /src
 
 # Copy solution and project files for restore
@@ -23,7 +24,8 @@ WORKDIR /src/src/Mystira.StoryGenerator.Api
 RUN dotnet publish -c Release -o /app/publish --no-restore
 
 # Runtime stage
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
+# Using specific variant tag for reproducibility (.NET 9 is STS - support ends May 2026)
+FROM mcr.microsoft.com/dotnet/aspnet:9.0-bookworm-slim AS runtime
 WORKDIR /app
 
 # Create non-root user for security

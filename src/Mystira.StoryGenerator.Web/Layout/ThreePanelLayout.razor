@@ -667,7 +667,9 @@
     private double selectedTemperature = FallbackModelSettings.Temperature;
     private int settingsOpenVersion; // increments each time the modal opens to reinitialize child component
     private bool isSavingSettings;
+#pragma warning disable CS0414 // Field is assigned but never used
     private string? settingsError;
+#pragma warning restore CS0414
     private Components.Chat.ProviderSettings? providerSettingsRef;
 
     protected override async Task OnInitializedAsync()
@@ -1426,7 +1428,7 @@
         try
         {
             // Build chat completion request using conversation history
-            var messages = MapToContractMessages(CurrentChat);
+            var messages = CurrentChat != null ? MapToContractMessages(CurrentChat) : new List<MystiraChatMessage>();
             if (ShouldIncludeYamlContext(message) && !string.IsNullOrWhiteSpace(YamlContent))
             {
                 var currentJson = JsonYamlConverter.ToJson(YamlContent);
@@ -2548,9 +2550,9 @@
             showImportMenu = false;
             var result = await JSRuntime.InvokeAsync<dynamic>("mystiraClipboard.readText");
 
-            if (result != null && (bool)result["success"] == true)
+            if (result != null && result["success"] == true)
             {
-                var yamlContent = (string?)result["text"];
+                var yamlContent = (string?)result["text"]?.ToString();
                 if (yamlContent != null)
                 {
                     importResult = await YamlImportService.ImportYamlAsync(yamlContent);

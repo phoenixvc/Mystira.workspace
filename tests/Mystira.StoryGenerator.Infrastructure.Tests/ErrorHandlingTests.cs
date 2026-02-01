@@ -2,6 +2,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Moq;
 using Mystira.StoryGenerator.Application.Infrastructure.Agents;
+using Mystira.StoryGenerator.Contracts.Agents;
 using Mystira.StoryGenerator.Contracts.Configuration;
 using Mystira.StoryGenerator.Domain.Agents;
 using Mystira.StoryGenerator.Infrastructure.Agents;
@@ -125,7 +126,7 @@ public class ErrorHandlingTests : IDisposable
         // Simulate timeout on CreateRunAsync
         var callCount = 0;
         _mockFoundryClient
-            .Setup(x => x.CreateRunAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .Setup(x => x.CreateRunAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<BinaryData?>(), It.IsAny<CancellationToken>()))
             .Returns(async () =>
             {
                 callCount++;
@@ -191,7 +192,7 @@ public class ErrorHandlingTests : IDisposable
         var rateLimitException = new RequestFailedException(429, "Rate limit exceeded", "TooManyRequests", null);
         
         _mockFoundryClient
-            .Setup(x => x.CreateRunAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .Setup(x => x.CreateRunAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<BinaryData?>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(rateLimitException);
 
         // Act & Assert
@@ -232,7 +233,7 @@ public class ErrorHandlingTests : IDisposable
         var malformedResponse = "This is not valid JSON {{{ invalid json response";
         
         _mockFoundryClient
-            .Setup(x => x.CreateRunAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .Setup(x => x.CreateRunAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<BinaryData?>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new RunSubmissionResult { RunId = "run-malformed", Status = "running" });
 
         _mockFoundryClient
@@ -402,7 +403,7 @@ public class ErrorHandlingTests : IDisposable
         // Simulate run failure with specific error
         var runErrorMessage = "Agent encountered an internal error: Invalid prompt format";
         _mockFoundryClient
-            .Setup(x => x.CreateRunAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .Setup(x => x.CreateRunAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<BinaryData?>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new RunSubmissionResult { RunId = "run-failure", Status = "failed" });
 
         _mockFoundryClient
@@ -461,7 +462,7 @@ public class ErrorHandlingTests : IDisposable
             .ReturnsAsync(session);
 
         _mockFoundryClient
-            .Setup(x => x.CreateRunAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .Setup(x => x.CreateRunAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<BinaryData?>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new RunSubmissionResult { RunId = "run-logging", Status = "running" });
 
         _mockFoundryClient

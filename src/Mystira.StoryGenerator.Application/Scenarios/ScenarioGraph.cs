@@ -73,6 +73,6 @@ public sealed class ScenarioGraph : IScenarioGraph
     private string GetCharactersString()
     {
         return "The main player characters are: " +
-               string.Join(",", _scenario.Characters.Select(x => x.Name));
+               string.Join(",", _scenario.Characters?.Select(x => x.Name) ?? []);
     }
 }

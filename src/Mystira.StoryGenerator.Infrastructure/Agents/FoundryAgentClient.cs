@@ -72,7 +72,7 @@ public class FoundryAgentClientConfig
 /// Azure AI Foundry Agent Client Wrapper.
 /// Provides a thread-safe singleton pattern for interacting with Azure AI Foundry Agent Service.
 /// </summary>
-public sealed class FoundryAgentClient : IDisposable
+public class FoundryAgentClient : IDisposable
 {
     private static FoundryAgentClient? _instance;
     private static readonly object _lock = new();
@@ -147,7 +147,7 @@ public sealed class FoundryAgentClient : IDisposable
     /// <param name="agentId">The agent ID to associate with the thread.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>The thread creation result.</returns>
-    public async Task<ThreadCreationResult> CreateThreadAsync(
+    public virtual async Task<ThreadCreationResult> CreateThreadAsync(
         string agentId,
         CancellationToken cancellationToken = default)
     {
@@ -183,7 +183,7 @@ public sealed class FoundryAgentClient : IDisposable
     /// <param name="vectorStoreIds">Vector store IDs to attach for file search.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>The thread creation result.</returns>
-    public async Task<ThreadCreationResult> CreateThreadWithVectorStoresAsync(
+    public virtual async Task<ThreadCreationResult> CreateThreadWithVectorStoresAsync(
         string agentId,
         IEnumerable<string> vectorStoreIds,
         CancellationToken cancellationToken = default)
@@ -234,7 +234,7 @@ public sealed class FoundryAgentClient : IDisposable
     /// <param name="threadId">The thread ID.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>The thread details or null if not found.</returns>
-    public async Task<PersistentAgentThread?> GetThreadAsync(
+    public virtual async Task<PersistentAgentThread?> GetThreadAsync(
         string threadId,
         CancellationToken cancellationToken = default)
     {
@@ -268,7 +268,7 @@ public sealed class FoundryAgentClient : IDisposable
     /// <param name="limit">Maximum number of messages to retrieve.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>List of messages.</returns>
-    public async Task<List<Message>> RetrieveThreadMessagesAsync(
+    public virtual async Task<List<Message>> RetrieveThreadMessagesAsync(
         string threadId,
         int limit = 100,
         CancellationToken cancellationToken = default)
@@ -321,7 +321,7 @@ public sealed class FoundryAgentClient : IDisposable
     /// <param name="toolOutputs">The tool outputs to submit.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>The run submission result.</returns>
-    public async Task<RunSubmissionResult> SubmitToolOutputsAsync(
+    public virtual async Task<RunSubmissionResult> SubmitToolOutputsAsync(
         string threadId,
         string runId,
         List<FoundryToolOutput> toolOutputs,
@@ -368,7 +368,7 @@ public sealed class FoundryAgentClient : IDisposable
     /// <param name="maxWait">Maximum wait time (default: 5 minutes).</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>The run completion result.</returns>
-    public async Task<RunCompletionResult> WaitForRunCompletionAsync(
+    public virtual async Task<RunCompletionResult> WaitForRunCompletionAsync(
         string threadId,
         string runId,
         TimeSpan? pollInterval = null,
@@ -480,7 +480,7 @@ public sealed class FoundryAgentClient : IDisposable
     /// <param name="responseFormat">Optional response format specification (e.g., JSON schema for structured outputs).</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>The run submission result.</returns>
-    public async Task<RunSubmissionResult> CreateRunAsync(
+    public virtual async Task<RunSubmissionResult> CreateRunAsync(
         string threadId,
         string agentId,
         string instructions,
@@ -552,7 +552,7 @@ public sealed class FoundryAgentClient : IDisposable
     /// <param name="threadId">The thread ID.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>True if deleted successfully.</returns>
-    public async Task<bool> DeleteThreadAsync(
+    public virtual async Task<bool> DeleteThreadAsync(
         string threadId,
         CancellationToken cancellationToken = default)
     {
