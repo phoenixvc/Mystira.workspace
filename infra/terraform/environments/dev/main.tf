@@ -629,9 +629,10 @@ module "github_oidc" {
 
     # Workspace (for infra and orchestration)
     "workspace" = {
-      name        = "Mystira.workspace"
-      branches    = ["dev", "main"]
-      enable_tags = true # For release deployments
+      name                 = "Mystira.workspace"
+      branches             = ["dev", "main"]
+      enable_tags          = true # For release deployments
+      enable_pull_requests = true # For PR automation workflows
     }
   }
 
