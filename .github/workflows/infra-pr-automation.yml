@@ -29,6 +29,17 @@ on:
   issue_comment:
     types: [created]
 
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: 'PR number to run plan for'
+        required: false
+        type: string
+      head_ref:
+        description: 'Branch ref to checkout'
+        required: false
+        type: string
+
 concurrency:
   group: infra-pr-${{ github.event.pull_request.number || github.event.issue.number }}
   cancel-in-progress: false
@@ -253,25 +264,27 @@ jobs:
             const statusEmoji = status === 'success' ? '✅' : '❌';
             const changesText = changes === 'true' ? '**Changes detected**' : 'No changes';
 
-            const body = `## ${statusEmoji} Terraform Plan: \`${project}\`
-
-**Directory:** \`${dir}\`
-**Status:** ${changesText}
-
-<details>
-<summary>Show Plan Output</summary>
-
-\`\`\`hcl
-${planOutput}
-\`\`\`
-
-</details>
-
----
-**Commands:**
-- \`/apply -d ${dir}\` - Apply this plan
-- \`/plan -d ${dir}\` - Re-run plan
-`;
+            const bodyLines = [
+              `## ${statusEmoji} Terraform Plan: \`${project}\``,
+              '',
+              `**Directory:** \`${dir}\``,
+              `**Status:** ${changesText}`,
+              '',
+              '<details>',
+              '<summary>Show Plan Output</summary>',
+              '',
+              '```hcl',
+              planOutput,
+              '```',
+              '',
+              '</details>',
+              '',
+              '---',
+              '**Commands:**',
+              `- \`/apply -d ${dir}\` - Apply this plan`,
+              `- \`/plan -d ${dir}\` - Re-run plan`
+            ];
+            const body = bodyLines.join('\n');
 
             // Find existing comment or create new
             const { data: comments } = await github.rest.issues.listComments({
@@ -347,9 +360,24 @@ ${planOutput}
               });
             }
 
+      - name: Get PR Head Ref
+        id: pr-ref
+        if: steps.check.outputs.allowed == 'true'
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const prNumber = context.issue.number;
+            const { data: pr } = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: prNumber,
+            });
+            core.setOutput('head_ref', pr.head.ref);
+
       - uses: actions/checkout@v6
         if: steps.check.outputs.allowed == 'true'
         with:
+          ref: ${{ steps.pr-ref.outputs.head_ref }}
           submodules: recursive
 
       - name: Setup Tools
@@ -405,20 +433,6 @@ ${planOutput}
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-
-      - name: Get PR Head Ref
-        id: pr-ref
-        if: steps.check.outputs.allowed == 'true'
-        uses: actions/github-script@v8
-        with:
-          script: |
-            const prNumber = context.issue.number;
-            const { data: pr } = await github.rest.pulls.get({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              pull_number: prNumber,
-            });
-            core.setOutput('head_ref', pr.head.ref);
 
       - name: Execute Plan Command
         if: steps.check.outputs.allowed == 'true' && steps.parse.outputs.command == '/plan'

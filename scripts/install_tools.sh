@@ -75,7 +75,7 @@ fi
 # Node.js 24 LTS + pnpm
 # -----------------------------------------------------------------------------
 NODE_VERSION="v24.0.0"
-NODE_CHECKSUM="c5edd9e977d83cadf09ad5c74faa9e5f8962beae3c4c1de9c24c7d84d3e7f3a8"
+NODE_CHECKSUM="59b8af617dccd7f9f68cc8451b2aee1e86d6bd5cb92cd51dd6216a31b707efd7"
 echo "Installing Node.js 24..."
 if ! command -v node &> /dev/null || [[ "$(node --version | cut -d'.' -f1 | tr -d 'v')" -lt 24 ]]; then
     # Install Node.js via nvm or direct download with checksum verification
@@ -178,7 +178,7 @@ fi
 # TFLint (pinned version with checksum verification)
 # -----------------------------------------------------------------------------
 TFLINT_VERSION="v0.60.0"
-TFLINT_CHECKSUM="bc5bc9789d8f1cd0a3aeae4a10b16c0b0ef1c5b59f1be2f0b02a5ebf0efca04f"
+TFLINT_CHECKSUM="3476ceedcf0c4f9f2bed35e92988e1411bec2caa543c9387bffaa720df9efaf7"
 echo "Installing TFLint ${TFLINT_VERSION}..."
 if ! command -v tflint &> /dev/null; then
     TFLINT_ARCHIVE="tflint_linux_amd64.zip"
@@ -208,7 +208,7 @@ fi
 # Kustomize (pinned version with checksum verification)
 # -----------------------------------------------------------------------------
 KUSTOMIZE_VERSION="v5.8.0"
-KUSTOMIZE_CHECKSUM="6e7b2c2c2a7fc3f2f2b6a8f3b8f2e6d8b8c9a0e1d2c3b4a5f6e7d8c9b0a1e2f3"
+KUSTOMIZE_CHECKSUM="4dfa8307358dd9284aa4d2b1d5596766a65b93433e8fa3f9f74498941f01c5ef"
 echo "Installing Kustomize ${KUSTOMIZE_VERSION}..."
 if ! command -v kustomize &> /dev/null; then
     KUSTOMIZE_ARCHIVE="kustomize_${KUSTOMIZE_VERSION}_linux_amd64.tar.gz"
