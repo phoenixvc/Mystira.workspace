@@ -30,7 +30,7 @@ patchesStrategicMerge:
     apiVersion: v1
     kind: Namespace
     metadata:
-      name: mystira
+      name: mys-staging
       labels:
         istio-injection: enabled
   - |-

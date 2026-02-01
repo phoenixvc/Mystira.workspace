@@ -15,9 +15,9 @@ The service mesh configuration provides:
 ### 1. Install Istio
 
 ```bash
-# Download Istio
-curl -L https://istio.io/downloadIstio | ISTIO_VERSION=1.20.0 sh -
-cd istio-1.20.0
+# Download Istio (using currently supported 1.24.x LTS release)
+curl -L https://istio.io/downloadIstio | ISTIO_VERSION=1.24.2 sh -
+cd istio-1.24.2
 export PATH=$PWD/bin:$PATH
 
 # Install Istio with the default profile
@@ -179,6 +179,44 @@ metadata:
 spec:
   mtls:
     mode: STRICT  # Only accept mTLS
+```
+
+### Rollback: Reverting to Permissive Mode
+
+If services experience connectivity issues after enabling STRICT mTLS, follow these emergency rollback steps:
+
+```bash
+# 1. Revert PeerAuthentication to PERMISSIVE mode
+kubectl patch peerauthentication default -n mys-prod --type='merge' \
+  -p '{"spec":{"mtls":{"mode":"PERMISSIVE"}}}'
+
+# 2. Verify the current mode
+kubectl get peerauthentication default -n mys-prod -o jsonpath='{.spec.mtls.mode}'
+
+# 3. Monitor istio-proxy sidecar logs for recovery
+kubectl logs -l app=mys-admin-api -c istio-proxy -n mys-prod --tail=50
+
+# 4. Check for certificate or configuration issues
+istioctl analyze -n mys-prod
+```
+
+**Root Cause Analysis:**
+- Check if all pods have sidecars injected: `kubectl get pods -n mys-prod -o jsonpath='{.items[*].spec.containers[*].name}' | tr ' ' '\n' | grep istio-proxy`
+- Verify AuthorizationPolicies aren't blocking traffic
+- Ensure service accounts have proper Istio certificates
+
+**Full Rollback (Disable mTLS Injection):**
+If issues persist, temporarily disable automatic sidecar injection and redeploy:
+
+```bash
+# Remove istio-injection label from namespace
+kubectl label namespace mys-prod istio-injection-
+
+# Redeploy affected services (pods will restart without sidecars)
+kubectl rollout restart deployment -n mys-prod
+
+# Re-enable once fixed
+kubectl label namespace mys-prod istio-injection=enabled
 ```
 
 ## Troubleshooting

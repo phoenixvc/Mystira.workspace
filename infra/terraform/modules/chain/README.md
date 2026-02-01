@@ -8,14 +8,14 @@ Mystira Chain is a private blockchain network used for content authenticity and 
 
 ## Resources Created
 
-| Resource | Purpose |
-|----------|---------|
-| User Assigned Managed Identity | Workload identity for AKS, Key Vault access |
-| Network Security Group | Network rules for P2P, RPC, and WebSocket traffic |
-| Storage Account (Premium FileStorage) | Persistent storage for chain data |
-| Azure File Shares | Per-node file shares for chain state |
-| Application Insights | Monitoring and telemetry |
-| Key Vault | Secure storage for chain secrets |
+| Resource                              | Purpose                                       |
+| ------------------------------------- | --------------------------------------------- |
+| User Assigned Managed Identity        | Workload identity for AKS, Key Vault access   |
+| Network Security Group                | Network rules for P2P, RPC, and WebSocket traffic |
+| Storage Account (Premium FileStorage) | Persistent storage for chain data             |
+| Azure File Shares                     | Per-node file shares for chain state          |
+| Application Insights                  | Monitoring and telemetry                      |
+| Key Vault                             | Secure storage for chain secrets              |
 
 ## Usage
 
@@ -42,11 +42,11 @@ module "chain" {
 
 ## Network Security Rules
 
-| Rule | Port | Protocol | Purpose |
-|------|------|----------|---------|
-| AllowChainP2P | 30303 | TCP/UDP | P2P communication between nodes |
-| AllowRPC | 8545 | TCP | JSON-RPC endpoint (internal only) |
-| AllowWebSocket | 8546 | TCP | WebSocket endpoint (internal only) |
+| Rule           | Port  | Protocol | Purpose                            |
+| -------------- | ----- | -------- | ---------------------------------- |
+| AllowChainP2P  | 30303 | TCP/UDP  | P2P communication between nodes    |
+| AllowRPC       | 8545  | TCP      | JSON-RPC endpoint (internal only)  |
+| AllowWebSocket | 8546  | TCP      | WebSocket endpoint (internal only) |
 
 ## Storage Configuration
 
@@ -75,15 +75,15 @@ workload_identities = {
 
 ## Outputs
 
-| Output | Description |
-|--------|-------------|
-| `nsg_id` | Network Security Group ID |
-| `identity_id` | Managed Identity resource ID |
-| `identity_principal_id` | Managed Identity principal ID (for RBAC) |
-| `storage_account_name` | Storage account name for chain data |
-| `application_insights_id` | Application Insights resource ID |
+| Output                                   | Description                                |
+| ---------------------------------------- | ------------------------------------------ |
+| `nsg_id`                                 | Network Security Group ID                  |
+| `identity_id`                            | Managed Identity resource ID               |
+| `identity_principal_id`                  | Managed Identity principal ID (for RBAC)   |
+| `storage_account_name`                   | Storage account name for chain data        |
+| `application_insights_id`                | Application Insights resource ID           |
 | `application_insights_connection_string` | App Insights connection string (sensitive) |
-| `key_vault_id` | Key Vault resource ID |
+| `key_vault_id`                           | Key Vault resource ID                      |
 
 ## Security Considerations
 
@@ -145,8 +145,8 @@ linkerd inject deployment.yaml | kubectl apply -f -
 
 ### Recommendations by Environment
 
-| Environment | Security Level | Recommendation |
-|-------------|---------------|----------------|
-| dev | Basic | NetworkPolicies + external TLS |
-| staging | Enhanced | NetworkPolicies + service mesh (permissive) |
-| prod | Maximum | Service mesh with strict mTLS |
+| Environment | Security Level | Recommendation                              |
+| ----------- | -------------- | ------------------------------------------- |
+| dev         | Basic          | NetworkPolicies + external TLS              |
+| staging     | Enhanced       | NetworkPolicies + service mesh (permissive) |
+| prod        | Maximum        | Service mesh with strict mTLS               |

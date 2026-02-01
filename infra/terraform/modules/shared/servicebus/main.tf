@@ -117,6 +117,39 @@ locals {
   })
 }
 
+# =============================================================================
+# Validation: Private Endpoint Configuration
+# =============================================================================
+# These checks ensure valid configuration at plan time rather than apply time.
+
+check "private_endpoint_requires_premium_sku" {
+  assert {
+    condition     = !var.private_endpoint_enabled || var.sku == "Premium"
+    error_message = "Private endpoints require Premium SKU. Set sku = \"Premium\" when private_endpoint_enabled = true."
+  }
+}
+
+check "private_endpoint_requires_subnet" {
+  assert {
+    condition     = !var.private_endpoint_enabled || (var.private_endpoint_subnet_id != null && var.private_endpoint_subnet_id != "")
+    error_message = "private_endpoint_subnet_id is required when private_endpoint_enabled = true."
+  }
+}
+
+check "private_endpoint_dns_requires_vnet" {
+  assert {
+    condition     = !var.private_endpoint_enabled || var.private_dns_zone_id != null || var.virtual_network_id != null
+    error_message = "virtual_network_id is required when private_endpoint_enabled = true and private_dns_zone_id = null (to link the created private DNS zone)."
+  }
+}
+
+check "network_access_validation" {
+  assert {
+    condition     = var.public_network_access_enabled || var.private_endpoint_enabled
+    error_message = "Service Bus namespace must have at least one access path: enable public_network_access_enabled OR private_endpoint_enabled."
+  }
+}
+
 # Service Bus Namespace
 resource "azurerm_servicebus_namespace" "shared" {
   name                = replace("${local.name_prefix}-sb-${local.region_code}", "-", "")

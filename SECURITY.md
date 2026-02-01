@@ -97,11 +97,11 @@ For detailed authentication architecture, see:
 
 #### Internal Service-to-Service Security
 
-| Service | Current | Target |
-|---------|---------|--------|
-| Chain RPC (8545) | HTTP + NetworkPolicy | mTLS via service mesh |
-| Chain WebSocket (8546) | HTTP + NetworkPolicy | mTLS via service mesh |
-| Inter-service API calls | HTTP + NetworkPolicy | mTLS via service mesh |
+| Service                   | Current              | Target                |
+| ------------------------- | -------------------- | --------------------- |
+| Chain RPC (8545)          | HTTP + NetworkPolicy | mTLS via service mesh |
+| Chain WebSocket (8546)    | HTTP + NetworkPolicy | mTLS via service mesh |
+| Inter-service API calls   | HTTP + NetworkPolicy | mTLS via service mesh |
 
 **Current Protections:**
 - Kubernetes NetworkPolicies restrict pod-to-pod communication
@@ -114,6 +114,27 @@ For production deployments requiring zero-trust internal networking:
 2. Enable automatic mTLS injection
 3. Set `PeerAuthentication` to STRICT mode
 4. See [Chain Module README](infra/terraform/modules/chain/README.md) for implementation details
+
+**mTLS Rollback Procedures:**
+If mTLS causes service connectivity issues:
+
+1. **Immediate Relief**: Set PeerAuthentication to PERMISSIVE mode to allow both plain and mTLS traffic:
+   ```bash
+   kubectl patch peerauthentication default -n <namespace> --type='merge' \
+     -p '{"spec":{"mtls":{"mode":"PERMISSIVE"}}}'
+   ```
+
+2. **Verify Connectivity**: Test service-to-service communication is restored
+
+3. **Investigate**: Check Istio/Linkerd sidecar logs for certificate or injection issues:
+   ```bash
+   kubectl logs <pod-name> -c istio-proxy -n <namespace>
+   istioctl analyze -n <namespace>
+   ```
+
+4. **Re-enable STRICT**: Once root cause is fixed, return to STRICT mode
+
+5. **Full Rollback** (if needed): Disable automatic mTLS injection by removing the `istio-injection=enabled` label from the namespace and redeploying affected services
 
 ### Data Protection
 
