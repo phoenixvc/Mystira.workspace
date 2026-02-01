@@ -68,9 +68,16 @@ module "story_generator" {
 # =============================================================================
 
 output "static_web_app_url" {
-  value = module.story_generator.static_web_app_default_hostname
+  description = "Static Web App URL"
+  value       = module.story_generator.static_web_app_url
 }
 
-output "api_url" {
-  value = module.story_generator.api_url
+output "static_web_app_hostname" {
+  description = "Static Web App default hostname"
+  value       = module.story_generator.static_web_app_default_hostname
+}
+
+output "key_vault_uri" {
+  description = "Key Vault URI for secrets"
+  value       = module.story_generator.key_vault_uri
 }

@@ -46,6 +46,25 @@ variable "shared_application_insights_connection_string" {
 # =============================================================================
 # Story Generator Module
 # =============================================================================
+#
+# PRODUCTION PROMOTION CHECKLIST:
+# Before applying this configuration to production, ensure:
+#
+# 1. Staging Validation:
+#    - [ ] Staging environment terraform apply completed successfully
+#    - [ ] Staging smoke tests passed (API health, story generation flow)
+#    - [ ] No configuration drift detected in staging
+#
+# 2. Required CI/CD Gates:
+#    - [ ] infra-terragrunt-validate.yml passed for this change
+#    - [ ] infra-drift-detection.yml shows no unexpected drift
+#    - [ ] Manual approval obtained for production deployment
+#
+# 3. Rollback Plan:
+#    - [ ] Previous working state identified in tfstate history
+#    - [ ] Rollback procedure documented (see infra/README.md)
+#
+# =============================================================================
 
 module "story_generator" {
   source = "../../../../modules/story-generator"
@@ -68,9 +87,16 @@ module "story_generator" {
 # =============================================================================
 
 output "static_web_app_url" {
-  value = module.story_generator.static_web_app_default_hostname
+  description = "Static Web App URL"
+  value       = module.story_generator.static_web_app_url
 }
 
-output "api_url" {
-  value = module.story_generator.api_url
+output "static_web_app_hostname" {
+  description = "Static Web App default hostname"
+  value       = module.story_generator.static_web_app_default_hostname
+}
+
+output "key_vault_uri" {
+  description = "Key Vault URI for secrets"
+  value       = module.story_generator.key_vault_uri
 }

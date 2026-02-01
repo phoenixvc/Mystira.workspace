@@ -79,9 +79,11 @@ module "mystira_app" {
 # =============================================================================
 
 output "static_web_app_url" {
-  value = module.mystira_app.static_web_app_default_hostname
+  description = "Static Web App URL"
+  value       = module.mystira_app.static_web_app_url
 }
 
 output "api_url" {
-  value = module.mystira_app.api_url
+  description = "API service URL"
+  value       = module.mystira_app.app_service_url
 }
