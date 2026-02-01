@@ -6,7 +6,7 @@ name: "[CI] Infrastructure - Terragrunt Validate"
 
 on:
   pull_request:
-    branches: [main, staging]
+    branches: [main, staging, dev]
     paths:
       - "infra/terraform/**"
       - ".github/workflows/infra-terragrunt-*.yml"
