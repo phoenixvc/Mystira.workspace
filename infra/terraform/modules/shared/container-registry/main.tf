@@ -91,6 +91,11 @@ variable "private_dns_zone_id" {
   description = "Private DNS zone ID for ACR (azurecr.io). If null, a new zone will be created."
   type        = string
   default     = null
+
+  validation {
+    condition     = var.private_dns_zone_id == null || length(trimspace(var.private_dns_zone_id)) > 0
+    error_message = "private_dns_zone_id must be either null or a non-empty string. Empty strings are not allowed."
+  }
 }
 
 variable "virtual_network_id" {

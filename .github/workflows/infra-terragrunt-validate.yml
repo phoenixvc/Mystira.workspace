@@ -217,7 +217,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     needs: [detect-changes, format-check]
-    if: needs.detect-changes.outputs.shared-infra == 'true' || github.event_name == 'workflow_dispatch'
+    if: needs['detect-changes'].outputs['shared-infra'] == 'true' || github.event_name == 'workflow_dispatch'
     strategy:
       fail-fast: false
       matrix:

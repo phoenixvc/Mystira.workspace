@@ -52,10 +52,10 @@ jobs:
         id: check
         run: |
           if [[ -z "${{ secrets.AZURE_CLIENT_ID }}" ]] || [[ -z "${{ secrets.AZURE_TENANT_ID }}" ]] || [[ -z "${{ secrets.AZURE_SUBSCRIPTION_ID }}" ]]; then
-            echo "configured=false" >> $GITHUB_OUTPUT
+            echo "configured=false" >> "$GITHUB_OUTPUT"
             echo "::warning::Azure OIDC credentials not configured - drift detection requires AZURE_CLIENT_ID, AZURE_TENANT_ID, and AZURE_SUBSCRIPTION_ID secrets"
           else
-            echo "configured=true" >> $GITHUB_OUTPUT
+            echo "configured=true" >> "$GITHUB_OUTPUT"
           fi
 
   detect-drift:
@@ -115,24 +115,25 @@ jobs:
         id: get-dir
         run: |
           if [[ "${{ matrix.product }}" == "shared-infra" ]]; then
-            echo "dir=infra/terraform/shared-infra/environments/${{ matrix.environment }}" >> $GITHUB_OUTPUT
+            echo "dir=infra/terraform/shared-infra/environments/${{ matrix.environment }}" >> "$GITHUB_OUTPUT"
           else
-            echo "dir=infra/terraform/products/${{ matrix.product }}/environments/${{ matrix.environment }}" >> $GITHUB_OUTPUT
+            echo "dir=infra/terraform/products/${{ matrix.product }}/environments/${{ matrix.environment }}" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Check Directory Exists
         id: check-dir
         run: |
-          if [[ -d "${{ steps.get-dir.outputs.dir }}" ]]; then
-            echo "exists=true" >> $GITHUB_OUTPUT
+          DIR="${{ steps.get-dir.outputs.dir }}"
+          if [[ -d "$DIR" ]]; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
           else
-            echo "exists=false" >> $GITHUB_OUTPUT
+            echo "exists=false" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Terragrunt Init
         if: steps.check-dir.outputs.exists == 'true'
         run: |
-          cd ${{ steps.get-dir.outputs.dir }}
+          cd "${{ steps.get-dir.outputs.dir }}"
           terragrunt init --terragrunt-non-interactive
         env:
           TF_VAR_environment: ${{ matrix.environment }}
@@ -141,7 +142,7 @@ jobs:
         id: check-drift
         if: steps.check-dir.outputs.exists == 'true'
         run: |
-          cd ${{ steps.get-dir.outputs.dir }}
+          cd "${{ steps.get-dir.outputs.dir }}"
 
           # Run plan and capture output
           # Use pipefail to capture terragrunt exit code, not tee
@@ -154,16 +155,16 @@ jobs:
 
           # Exit code 2 means changes detected (drift)
           if [[ $EXITCODE -eq 2 ]]; then
-            echo "drift=true" >> $GITHUB_OUTPUT
+            echo "drift=true" >> "$GITHUB_OUTPUT"
             echo "DRIFT DETECTED in ${{ matrix.product }} (${{ matrix.environment }})"
 
             # Save drift details
             terragrunt show -no-color drift.tfplan > drift_details.txt 2>&1 || true
           elif [[ $EXITCODE -eq 0 ]]; then
-            echo "drift=false" >> $GITHUB_OUTPUT
+            echo "drift=false" >> "$GITHUB_OUTPUT"
             echo "No drift detected in ${{ matrix.product }} (${{ matrix.environment }})"
           else
-            echo "drift=error" >> $GITHUB_OUTPUT
+            echo "drift=error" >> "$GITHUB_OUTPUT"
             echo "Error checking drift in ${{ matrix.product }} (${{ matrix.environment }})"
           fi
         env:
@@ -299,9 +300,16 @@ jobs:
           echo "| Product | Environment | Status |" >> $GITHUB_STEP_SUMMARY
           echo "|---------|-------------|--------|" >> $GITHUB_STEP_SUMMARY
 
-          # Define all products and environments
+          # Define all products
           PRODUCTS="shared-infra mystira-app story-generator admin publisher chain"
-          ENVIRONMENTS="dev staging prod"
+
+          # Derive ENVIRONMENTS from workflow input (if workflow_dispatch) or use all
+          INPUT_ENV="${{ github.event.inputs.environment }}"
+          if [[ -n "$INPUT_ENV" && "$INPUT_ENV" != "all" ]]; then
+            ENVIRONMENTS="$INPUT_ENV"
+          else
+            ENVIRONMENTS="dev staging prod"
+          fi
 
           # Check for drift reports and populate table
           for product in $PRODUCTS; do

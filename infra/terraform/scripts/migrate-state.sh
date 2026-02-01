@@ -303,7 +303,7 @@ main() {
     log_info "  2. Review resource categorization (.*.txt files)"
     log_info "  3. Execute: ./scripts/execute_state_moves.sh ${ENVIRONMENT}"
     log_info "  4. Run: terragrunt run-all plan (verify no changes)"
-    log_info "  5. If issues, restore from: $(cat .last_backup_dir)"
+    log_info "  5. If issues, restore from: $(cat "${TERRAFORM_DIR}/.last_backup_dir")"
 }
 
 # Run main function
