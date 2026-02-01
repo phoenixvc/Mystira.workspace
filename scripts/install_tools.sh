@@ -147,28 +147,72 @@ else
 fi
 
 # -----------------------------------------------------------------------------
-# Terraform 1.10.3
+# Azure CLI
 # -----------------------------------------------------------------------------
-echo "Installing Terraform 1.10.3..."
+echo "Installing Azure CLI..."
+if ! command -v az &> /dev/null; then
+    # Install via Microsoft's official script (handles dependencies)
+    curl -sL https://aka.ms/InstallAzureCLIDeb | $SUDO bash 2>/dev/null || {
+        # Fallback: install via pip if the script fails
+        echo "  Falling back to pip installation..."
+        pip3 install --user azure-cli 2>/dev/null || pip install --user azure-cli 2>/dev/null || {
+            echo "WARNING: Could not install Azure CLI"
+        }
+    }
+    if command -v az &> /dev/null; then
+        echo "  Azure CLI installed: $(az version --query '\"azure-cli\"' -o tsv 2>/dev/null || az --version | head -1)"
+    fi
+else
+    echo "  Azure CLI already installed: $(az version --query '\"azure-cli\"' -o tsv 2>/dev/null || az --version | head -1)"
+fi
+
+# -----------------------------------------------------------------------------
+# Terraform (pinned version with checksum verification)
+# -----------------------------------------------------------------------------
 TF_VERSION="1.10.3"
+TF_CHECKSUM="ea3020db6b53c25a4a84e40cdc36c1a86df26967d718219ab4c71b44435da81e"
+echo "Installing Terraform ${TF_VERSION}..."
 if ! command -v terraform &> /dev/null || [[ "$(terraform version -json 2>/dev/null | jq -r '.terraform_version' 2>/dev/null)" != "$TF_VERSION" ]]; then
-    wget -q "https://releases.hashicorp.com/terraform/${TF_VERSION}/terraform_${TF_VERSION}_linux_amd64.zip" -O /tmp/terraform.zip
-    $SUDO unzip -o /tmp/terraform.zip -d "$BIN_DIR/"
-    rm /tmp/terraform.zip
+    TF_ARCHIVE="terraform_${TF_VERSION}_linux_amd64.zip"
+    TF_URL="https://releases.hashicorp.com/terraform/${TF_VERSION}/${TF_ARCHIVE}"
+
+    echo "  Downloading Terraform ${TF_VERSION}..."
+    wget -q "${TF_URL}" -O "/tmp/${TF_ARCHIVE}"
+
+    # Verify checksum
+    if ! verify_checksum "/tmp/${TF_ARCHIVE}" "$TF_CHECKSUM"; then
+        echo "ERROR: Terraform checksum verification failed. Aborting."
+        exit 1
+    fi
+
+    $SUDO unzip -o -q "/tmp/${TF_ARCHIVE}" -d "$BIN_DIR/"
+    rm "/tmp/${TF_ARCHIVE}"
     echo "  Terraform installed: $(terraform version | head -1)"
 else
     echo "  Terraform already installed: $(terraform version | head -1)"
 fi
 
 # -----------------------------------------------------------------------------
-# Terragrunt 0.69.1
+# Terragrunt (pinned version with checksum verification)
 # -----------------------------------------------------------------------------
-echo "Installing Terragrunt 0.69.1..."
 TG_VERSION="0.69.1"
+TG_CHECKSUM="eb0e3558bb453241301126a15a9eeee3592817d8013ddd44793aeac168da9ad1"
+echo "Installing Terragrunt ${TG_VERSION}..."
 if ! command -v terragrunt &> /dev/null; then
-    wget -q "https://github.com/gruntwork-io/terragrunt/releases/download/v${TG_VERSION}/terragrunt_linux_amd64" -O /tmp/terragrunt
-    chmod +x /tmp/terragrunt
-    $SUDO mv /tmp/terragrunt "$BIN_DIR/"
+    TG_BINARY="terragrunt_linux_amd64"
+    TG_URL="https://github.com/gruntwork-io/terragrunt/releases/download/v${TG_VERSION}/${TG_BINARY}"
+
+    echo "  Downloading Terragrunt ${TG_VERSION}..."
+    wget -q "${TG_URL}" -O "/tmp/${TG_BINARY}"
+
+    # Verify checksum
+    if ! verify_checksum "/tmp/${TG_BINARY}" "$TG_CHECKSUM"; then
+        echo "ERROR: Terragrunt checksum verification failed. Aborting."
+        exit 1
+    fi
+
+    chmod +x "/tmp/${TG_BINARY}"
+    $SUDO mv "/tmp/${TG_BINARY}" "$BIN_DIR/terragrunt"
     echo "  Terragrunt installed: $(terragrunt --version | head -1)"
 else
     echo "  Terragrunt already installed: $(terragrunt --version | head -1)"
