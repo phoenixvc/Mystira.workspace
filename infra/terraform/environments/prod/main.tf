@@ -15,7 +15,7 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~> 4.0"  # 4.x required for .NET 9.0 support
+      version = "~> 4.0" # 4.x required for .NET 9.0 support
     }
     azuread = {
       source  = "hashicorp/azuread"
@@ -23,7 +23,7 @@ terraform {
     }
     azapi = {
       source  = "Azure/azapi"
-      version = "~> 2.0"  # Required for AI Foundry projects and catalog models
+      version = "~> 2.0" # Required for AI Foundry projects and catalog models
     }
   }
 }
@@ -31,6 +31,7 @@ terraform {
 provider "azapi" {}
 
 provider "azurerm" {
+  subscription_id = var.subscription_id
   features {
     key_vault {
       purge_soft_delete_on_destroy = false
@@ -40,6 +41,12 @@ provider "azurerm" {
 
 # Get current Azure client configuration
 data "azurerm_client_config" "current" {}
+
+variable "subscription_id" {
+  description = "Azure subscription ID. If not set, uses the current Azure CLI subscription."
+  type        = string
+  default     = null
+}
 
 variable "location" {
   description = "Azure region for deployment"
@@ -413,6 +420,16 @@ module "shared_azure_ai" {
   location            = var.location
   region_code         = local.region_code
   resource_group_name = azurerm_resource_group.main.name
+  # Security: Disable public network access for production
+  # TODO(#SEC-142): Configure azurerm_private_endpoint for Azure AI Foundry
+  # - Create private endpoint in aks-subnet
+  # - Link private DNS zone (privatelink.cognitiveservices.azure.com)
+  # - Update AKS pods to use private endpoint
+  # Validate in staging before promoting to prod
+  public_network_access_enabled = false
+  enable_private_endpoint       = true
+  private_endpoint_subnet_id    = azurerm_subnet.aks.id
+  vnet_id                       = azurerm_virtual_network.main.id
 
   # Enable AI Foundry project for workload isolation
   enable_project = true # Uses AzAPI to enable allowProjectManagement on account
@@ -483,8 +500,8 @@ module "story_generator" {
 
   # Static Web App (Blazor WASM frontend) - same pattern as Mystira.App
   enable_static_web_app    = true
-  static_web_app_sku       = "Standard"  # Standard tier for production
-  fallback_location        = "eastus2"   # SWA not available in South Africa North
+  static_web_app_sku       = "Standard" # Standard tier for production
+  fallback_location        = "eastus2"  # SWA not available in South Africa North
   github_repository_url    = "https://github.com/phoenixvc/Mystira.StoryGenerator"
   github_branch            = "main"
   enable_swa_custom_domain = true
@@ -537,9 +554,9 @@ module "entra_external_id" {
   source = "../../modules/entra-external-id"
   count  = var.external_id_tenant_id != "" ? 1 : 0
 
-  environment   = "prod"
-  tenant_id     = var.external_id_tenant_id
-  tenant_name   = "mystira"
+  environment = "prod"
+  tenant_id   = var.external_id_tenant_id
+  tenant_name = "mystira"
 
   pwa_redirect_uris = [
     # Production environment
@@ -790,14 +807,14 @@ resource "azurerm_kubernetes_cluster" "main" {
   kubernetes_version  = "1.28"
 
   default_node_pool {
-    name                = "system"
-    node_count          = 3
-    vm_size             = "Standard_D4s_v3"
-    vnet_subnet_id      = azurerm_subnet.aks.id
+    name                 = "system"
+    node_count           = 3
+    vm_size              = "Standard_D4s_v3"
+    vnet_subnet_id       = azurerm_subnet.aks.id
     auto_scaling_enabled = true
-    min_count           = 3
-    max_count           = 10
-    zones               = ["1", "2", "3"]
+    min_count            = 3
+    max_count            = 10
+    zones                = ["1", "2", "3"]
   }
 
   identity {

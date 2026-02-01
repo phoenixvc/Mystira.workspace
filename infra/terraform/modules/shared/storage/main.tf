@@ -123,6 +123,10 @@ resource "azurerm_storage_account" "shared" {
   }
 
   tags = local.common_tags
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 # Storage Containers

@@ -28,6 +28,10 @@ permissions:
   security-events: write
   actions: read
 
+env:
+  # Security scan settings - Checkov will soft fail (warn only) by default
+  CHECKOV_SOFT_FAIL: "true"
+
 jobs:
   # Admin API (.NET)
   admin-api:
@@ -118,6 +122,7 @@ jobs:
     name: Infrastructure Security Scan
     if: github.event.inputs.component == 'all' || github.event_name == 'schedule'
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     steps:
       - name: Checkout repository
@@ -146,7 +151,7 @@ jobs:
           framework: terraform
           output_format: sarif
           output_file_path: checkov-results.sarif
-          soft_fail: true
+          soft_fail: ${{ env.CHECKOV_SOFT_FAIL != 'false' }}
 
       - name: Upload checkov results
         uses: github/codeql-action/upload-sarif@v4
@@ -160,6 +165,7 @@ jobs:
     needs: [admin-api, admin-ui, chain, devhub, publisher, story-generator, infrastructure]
     if: always()
     runs-on: ubuntu-latest
+    timeout-minutes: 5
 
     steps:
       - name: Generate summary

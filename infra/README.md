@@ -11,6 +11,246 @@ This directory contains all infrastructure components for the Mystira platform:
 - **Docker** - Containerization for all microservices
 - **Scripts** - Deployment automation and utilities
 
+## Infrastructure Tools: Terragrunt vs Harness GitOps
+
+Mystira uses a **two-tier deployment model** with complementary tools for different layers:
+
+```text
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                         MYSTIRA DEPLOYMENT STACK                            │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  ┌───────────────────────────────────────────────────────────────────────┐  │
+│  │                    APPLICATION LAYER (Harness GitOps)                 │  │
+│  │  • Kubernetes Deployments, Services, ConfigMaps                       │  │
+│  │  • Application rollouts and rollbacks                                 │  │
+│  │  • GitOps sync from Git → Kubernetes                                  │  │
+│  │  • Canary/Blue-Green deployments                                      │  │
+│  └───────────────────────────────────────────────────────────────────────┘  │
+│                                    ▲                                        │
+│                                    │ deploys to                             │
+│                                    │                                        │
+│  ┌───────────────────────────────────────────────────────────────────────┐  │
+│  │                   INFRASTRUCTURE LAYER (Terragrunt)                   │  │
+│  │  • AKS clusters, PostgreSQL, Redis, Storage                          │  │
+│  │  • Virtual Networks, Subnets, NSGs                                    │  │
+│  │  • Azure AI, Key Vault, Service Bus                                   │  │
+│  │  • DNS zones, SSL certificates infrastructure                         │  │
+│  └───────────────────────────────────────────────────────────────────────┘  │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+### Tool Comparison
+
+| Aspect               | Terragrunt/Terraform             | Harness GitOps                       |
+| -------------------- | -------------------------------- | ------------------------------------ |
+| **What it manages**  | Cloud resources (Azure)          | Application deployments (K8s)        |
+| **State**            | Terraform state files            | Git as source of truth               |
+| **Change frequency** | Infrequent (infra changes)       | Frequent (app releases)              |
+| **Rollback**         | `terraform apply` previous state | Git revert + sync                    |
+| **Trigger**          | CI/CD workflow or manual         | Automatic on Git push                |
+| **Config location**  | `infra/terraform/`               | `infra/kubernetes/`, `infra/gitops/` |
+
+### Why Two Tools? (Not Overlap)
+
+**Terragrunt (Infrastructure)**:
+- Provisions the "where" - creates AKS cluster, databases, networking
+- Runs infrequently (when infrastructure changes)
+- Changes require careful planning (destroy = downtime)
+- CI/CD triggered: `.github/workflows/infra-*.yml`
+
+**Harness GitOps (Applications)**:
+- Deploys the "what" - your .NET apps to the infrastructure
+- Runs continuously (watches Git, auto-syncs)
+- Changes are safe (rolling updates, instant rollback)
+- GitOps triggered: Push to `infra/kubernetes/` or `infra/gitops/applications/`
+
+### Typical Workflow
+
+1. **Initial Setup** (once): Terragrunt creates AKS, PostgreSQL, Redis
+2. **App Development** (daily): Code changes trigger image builds
+3. **App Deployment** (continuous): Harness syncs K8s manifests from Git
+4. **Infrastructure Updates** (rare): Terragrunt modifies cloud resources
+
+### When to Use Each
+
+| Task                     | Tool                             |
+| ------------------------ | -------------------------------- |
+| Add a new Azure database | Terragrunt                       |
+| Deploy new app version   | Harness GitOps                   |
+| Scale AKS node pool      | Terragrunt                       |
+| Scale app replicas       | Harness GitOps (HPA or manifest) |
+| Add new subnet/NSG       | Terragrunt                       |
+| Add new K8s Service      | Harness GitOps                   |
+| Change PostgreSQL SKU    | Terragrunt                       |
+| Update app ConfigMap     | Harness GitOps                   |
+
+### Rollback Procedures
+
+Detailed rollback procedures for both infrastructure and application layers.
+
+#### Terragrunt/Terraform Rollback
+
+Use this when you need to revert infrastructure changes (AKS configuration, database settings, networking).
+
+##### 1. Identify the Previous State
+
+```bash
+# List state versions in Azure Storage
+az storage blob list \
+  --account-name mystfstatesanorth \
+  --container-name tfstate \
+  --query "[].{name:name, lastModified:properties.lastModified}" \
+  --output table
+
+# Or check Terraform state history
+cd infra/terraform/products/<product>/environments/<env>
+terragrunt state list
+```
+
+##### 2. Rollback Commands
+
+```bash
+# Option A: Revert Git and re-apply (safest)
+git log --oneline infra/terraform/
+git checkout <previous-commit> -- infra/terraform/products/<product>/
+git commit -m "Rollback <product> infrastructure to <commit>"
+git push
+
+# Then apply via CI/CD or manually:
+cd infra/terraform/products/<product>/environments/<env>
+terragrunt plan   # Review changes
+terragrunt apply  # Apply rollback
+
+# Option B: Target specific resources
+terragrunt plan -target=module.<module_name>
+terragrunt apply -target=module.<module_name>
+```
+
+##### 3. Verification Steps
+
+```bash
+# Verify state matches expected
+terragrunt state show <resource_address>
+
+# Check Azure resource status
+az resource show --ids <resource_id>
+
+# Run drift detection
+terragrunt plan  # Should show "No changes"
+```
+
+##### 4. Emergency Rollback (Critical Issues)
+
+```bash
+# If infrastructure is broken and blocking:
+# 1. Restore from Azure state backup
+az storage blob download \
+  --account-name mystfstatesanorth \
+  --container-name tfstate \
+  --name "<product>/<env>.tfstate.backup" \
+  --file terraform.tfstate.backup
+
+# 2. Force unlock if state is locked
+terragrunt force-unlock <lock-id>
+
+# 3. Apply previous known-good state
+terragrunt apply -refresh-only
+```
+
+#### Harness GitOps Rollback
+
+Use this when you need to revert application deployments (Kubernetes manifests, ConfigMaps, deployments).
+
+##### 1. Git Revert Workflow
+
+```bash
+# Find the commit to revert
+git log --oneline infra/kubernetes/overlays/<env>/
+git log --oneline infra/gitops/applications/
+
+# Revert the problematic commit
+git revert <commit-sha>
+git push origin main
+
+# Or revert to a specific version
+git checkout <previous-commit> -- infra/kubernetes/overlays/<env>/
+git commit -m "Rollback <app> to version <version>"
+git push origin main
+```
+
+##### 2. Trigger Harness Sync
+
+```bash
+# Option A: Automatic - Harness watches Git and auto-syncs
+
+# Option B: Manual trigger via Harness UI
+# Navigate to: Harness → GitOps → Applications → <app> → Sync
+
+# Option C: API trigger
+curl -X POST \
+  "https://app.harness.io/gateway/gitops/api/v1/agents/${HARNESS_AGENT_ID}/sync" \
+  -H "x-api-key: ${HARNESS_API_KEY}" \
+  -H "Content-Type: application/json" \
+  -d '{"applications": ["<app-name>"]}'
+```
+
+##### 3. Health Checks
+
+```bash
+# Check application sync status
+kubectl get applications -n harness-gitops
+
+# Verify pods are running
+kubectl get pods -n mys-<env> -l app=<app-name>
+
+# Check deployment rollout status
+kubectl rollout status deployment/<deployment-name> -n mys-<env>
+
+# View recent events
+kubectl get events -n mys-<env> --sort-by='.lastTimestamp' | head -20
+```
+
+##### 4. Emergency Rollback (Critical Issues)
+
+```bash
+# Immediate Kubernetes rollback (bypasses GitOps)
+kubectl rollout undo deployment/<deployment-name> -n mys-<env>
+
+# Scale down problematic pods
+kubectl scale deployment/<deployment-name> --replicas=0 -n mys-<env>
+
+# Then fix Git and let Harness reconcile
+git revert <commit>
+git push
+```
+
+#### Decision Guide: When to Use Each Rollback
+
+| Scenario                          | Tool to Rollback      | Priority |
+| --------------------------------- | --------------------- | -------- |
+| Bad app deployment causing errors | Harness GitOps        | High     |
+| Database SKU change causing perf  | Terragrunt            | Medium   |
+| Network config blocking traffic   | Terragrunt            | Critical |
+| ConfigMap with wrong values       | Harness GitOps        | High     |
+| AKS node pool misconfiguration    | Terragrunt            | Medium   |
+| Broken Kubernetes manifest        | Harness GitOps        | High     |
+
+#### Emergency Rollback Checklist
+
+- [ ] Identify the scope: Infrastructure (Terragrunt) or Application (Harness)?
+- [ ] Check monitoring: Is the issue confirmed in logs/metrics?
+- [ ] Communicate: Notify team of rollback in progress
+- [ ] Execute rollback using appropriate procedure above
+- [ ] Verify: Run health checks to confirm resolution
+- [ ] Document: Create incident report with root cause
+
+### Related Documentation
+
+- [GitOps Setup](./gitops/README.md) - Harness agent installation and app definitions
+- [Terraform Structure](./terraform/README.md) - Module organization and environments
+
 ## Structure
 
 ```

@@ -73,10 +73,39 @@ variable "enable_free_tier" {
   default     = false
 }
 
+variable "throughput" {
+  description = "Provisioned throughput for the Cosmos DB account (only used when serverless = false)"
+  type        = number
+  default     = 400
+}
+
+variable "multi_region" {
+  description = "Enable multi-region geo-replication for high availability"
+  type        = bool
+  default     = false
+}
+
+variable "fallback_location" {
+  description = "Secondary region for geo-replication (required when multi_region = true)"
+  type        = string
+  default     = null
+}
+
 variable "tags" {
   description = "Tags to apply to all resources"
   type        = map(string)
   default     = {}
+}
+
+# =============================================================================
+# Validation
+# =============================================================================
+
+check "multi_region_requires_fallback_location" {
+  assert {
+    condition     = !var.multi_region || var.fallback_location != null
+    error_message = "fallback_location is required when multi_region = true."
+  }
 }
 
 locals {
@@ -139,12 +168,26 @@ resource "azurerm_cosmosdb_account" "shared" {
     consistency_level = var.consistency_level
   }
 
+  # Primary region
   geo_location {
     location          = var.location
     failover_priority = 0
   }
 
+  # Secondary region for geo-replication (production only)
+  dynamic "geo_location" {
+    for_each = var.multi_region && var.fallback_location != null ? [1] : []
+    content {
+      location          = var.fallback_location
+      failover_priority = 1
+    }
+  }
+
   tags = local.common_tags
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 # Cosmos DB SQL Databases
@@ -154,6 +197,10 @@ resource "azurerm_cosmosdb_sql_database" "databases" {
   name                = each.key
   resource_group_name = var.resource_group_name
   account_name        = azurerm_cosmosdb_account.shared.name
+
+  # Provisioned throughput (only applies when serverless = false)
+  # Serverless mode doesn't support manual throughput settings
+  throughput = var.serverless ? null : var.throughput
 }
 
 # Cosmos DB SQL Containers

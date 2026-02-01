@@ -36,6 +36,7 @@ jobs:
   health-check:
     name: Health Check (${{ matrix.environment }})
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     strategy:
       fail-fast: false
       matrix:
@@ -142,6 +143,7 @@ jobs:
   dependency-health:
     name: Check Dependencies
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - name: Check external dependencies
         run: |
@@ -161,6 +163,7 @@ jobs:
   summary:
     name: Health Summary
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     needs: [health-check, dependency-health]
     if: always()
     steps:

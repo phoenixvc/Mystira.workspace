@@ -1,0 +1,160 @@
+name: "[Reusable] Azure OIDC Login"
+
+# Reusable workflow for Azure authentication using OIDC (Workload Identity Federation)
+# This is the recommended approach over service principal secrets
+#
+# Benefits of OIDC:
+# - No long-lived secrets to rotate
+# - Credentials are short-lived (automatically expire)
+# - More secure - no secret exposure risk
+# - Simplified secret management
+#
+# USAGE PATTERNS:
+# 1. For Terraform-only workflows: Call this workflow to get ARM_* env vars
+# 2. For Azure CLI workflows: Use direct azure/login@v2 in each job
+#    (login sessions don't persist across jobs)
+# 3. For hybrid workflows: Use this for the initial login job, then
+#    re-authenticate in subsequent jobs using the same OIDC pattern
+#
+# Note: Most production workflows use direct azure/login@v2 calls for simplicity.
+# This reusable workflow is ideal for Terraform deployments that need consistent
+# ARM_* environment variable setup.
+#
+# Prerequisites:
+# 1. Azure AD App Registration with Federated Credentials configured
+# 2. GitHub secrets: AZURE_CLIENT_ID, AZURE_TENANT_ID, AZURE_SUBSCRIPTION_ID
+# See: docs/OIDC_MIGRATION.md for setup instructions
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+        description: "GitHub environment for deployment (enables environment protection rules)"
+        required: false
+        type: string
+        default: ""
+      set_terraform_env:
+        description: "Set ARM_* environment variables for Terraform"
+        required: false
+        type: boolean
+        default: true
+      azure_cli_version:
+        description: "Azure CLI version to use"
+        required: false
+        type: string
+        default: "latest"
+    outputs:
+      logged_in:
+        description: "Whether Azure login was successful"
+        value: ${{ jobs.azure-login.outputs.logged_in }}
+      subscription_id:
+        description: "Azure Subscription ID"
+        value: ${{ jobs.azure-login.outputs.subscription_id }}
+    secrets:
+      # Support both OIDC (preferred) and legacy service principal
+      AZURE_CLIENT_ID:
+        required: false
+      AZURE_TENANT_ID:
+        required: false
+      AZURE_SUBSCRIPTION_ID:
+        required: false
+      # Legacy support - will be deprecated
+      MYSTIRA_AZURE_CREDENTIALS:
+        required: false
+
+jobs:
+  azure-login:
+    name: Azure Login
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    permissions:
+      id-token: write
+      contents: read
+    outputs:
+      logged_in: ${{ steps.login.outputs.logged_in }}
+      subscription_id: ${{ steps.login.outputs.subscription_id }}
+      auth_method: ${{ steps.detect.outputs.method }}
+    steps:
+      - name: Detect authentication method
+        id: detect
+        run: |
+          if [[ -n "${{ secrets.AZURE_CLIENT_ID }}" ]] && [[ -n "${{ secrets.AZURE_TENANT_ID }}" ]] && [[ -n "${{ secrets.AZURE_SUBSCRIPTION_ID }}" ]]; then
+            echo "method=oidc" >> $GITHUB_OUTPUT
+            echo "::notice::Using OIDC authentication (recommended)"
+          elif [[ -n "${{ secrets.MYSTIRA_AZURE_CREDENTIALS }}" ]]; then
+            echo "method=service_principal" >> $GITHUB_OUTPUT
+            echo "::warning::Using legacy service principal authentication. Please migrate to OIDC. See docs/OIDC_MIGRATION.md"
+          else
+            echo "method=none" >> $GITHUB_OUTPUT
+            echo "::error::No Azure credentials configured. Set AZURE_CLIENT_ID, AZURE_TENANT_ID, AZURE_SUBSCRIPTION_ID for OIDC."
+          fi
+
+      # OIDC Authentication (Preferred)
+      - name: Azure Login (OIDC)
+        if: steps.detect.outputs.method == 'oidc'
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      # Legacy Service Principal Authentication (Deprecated)
+      - name: Azure Login (Service Principal)
+        if: steps.detect.outputs.method == 'service_principal'
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.MYSTIRA_AZURE_CREDENTIALS }}
+
+      - name: Set Terraform environment variables
+        id: login
+        if: inputs.set_terraform_env && steps.detect.outputs.method != 'none'
+        run: |
+          if [[ "${{ steps.detect.outputs.method }}" == "oidc" ]]; then
+            # OIDC - use federated identity
+            echo "ARM_USE_OIDC=true" >> $GITHUB_ENV
+            echo "ARM_CLIENT_ID=${{ secrets.AZURE_CLIENT_ID }}" >> $GITHUB_ENV
+            echo "ARM_SUBSCRIPTION_ID=${{ secrets.AZURE_SUBSCRIPTION_ID }}" >> $GITHUB_ENV
+            echo "ARM_TENANT_ID=${{ secrets.AZURE_TENANT_ID }}" >> $GITHUB_ENV
+
+            echo "logged_in=true" >> $GITHUB_OUTPUT
+            echo "subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}" >> $GITHUB_OUTPUT
+
+          elif [[ "${{ steps.detect.outputs.method }}" == "service_principal" ]]; then
+            # Legacy - parse service principal JSON
+            ARM_CLIENT_ID=$(echo '${{ secrets.MYSTIRA_AZURE_CREDENTIALS }}' | jq -r '.clientId')
+            ARM_CLIENT_SECRET=$(echo '${{ secrets.MYSTIRA_AZURE_CREDENTIALS }}' | jq -r '.clientSecret')
+            ARM_SUBSCRIPTION_ID=$(echo '${{ secrets.MYSTIRA_AZURE_CREDENTIALS }}' | jq -r '.subscriptionId')
+            ARM_TENANT_ID=$(echo '${{ secrets.MYSTIRA_AZURE_CREDENTIALS }}' | jq -r '.tenantId')
+
+            # Mask all sensitive values to prevent accidental exposure in logs
+            echo "::add-mask::$ARM_CLIENT_ID"
+            echo "::add-mask::$ARM_CLIENT_SECRET"
+            echo "::add-mask::$ARM_SUBSCRIPTION_ID"
+            echo "::add-mask::$ARM_TENANT_ID"
+
+            echo "ARM_USE_CLI=false" >> $GITHUB_ENV
+            echo "ARM_CLIENT_ID=$ARM_CLIENT_ID" >> $GITHUB_ENV
+            echo "ARM_CLIENT_SECRET=$ARM_CLIENT_SECRET" >> $GITHUB_ENV
+            echo "ARM_SUBSCRIPTION_ID=$ARM_SUBSCRIPTION_ID" >> $GITHUB_ENV
+            echo "ARM_TENANT_ID=$ARM_TENANT_ID" >> $GITHUB_ENV
+
+            echo "logged_in=true" >> $GITHUB_OUTPUT
+            echo "subscription_id=$ARM_SUBSCRIPTION_ID" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Verify Azure connection
+        if: steps.detect.outputs.method != 'none'
+        run: |
+          echo "## Azure Authentication" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Setting | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|---------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Method | ${{ steps.detect.outputs.method == 'oidc' && '✅ OIDC (Workload Identity)' || '⚠️ Service Principal (Legacy)' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Subscription | $(az account show --query name -o tsv) |" >> $GITHUB_STEP_SUMMARY
+          echo "| Subscription ID | $(az account show --query id -o tsv | cut -c1-8)... |" >> $GITHUB_STEP_SUMMARY
+
+      - name: Fail if no credentials
+        if: steps.detect.outputs.method == 'none'
+        run: |
+          echo "::error::Azure credentials not configured"
+          exit 1

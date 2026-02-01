@@ -15,7 +15,7 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~> 4.0"  # 4.x required for .NET 9.0 support
+      version = "~> 4.0" # 4.x required for .NET 9.0 support
     }
     azuread = {
       source  = "hashicorp/azuread"
@@ -23,7 +23,7 @@ terraform {
     }
     azapi = {
       source  = "Azure/azapi"
-      version = "~> 2.0"  # Required for AI Foundry projects and catalog models
+      version = "~> 2.0" # Required for AI Foundry projects and catalog models
     }
     time = {
       source  = "hashicorp/time"
@@ -170,7 +170,7 @@ resource "azurerm_subnet" "aks" {
   name                 = "aks-subnet"
   resource_group_name  = azurerm_resource_group.main.name
   virtual_network_name = azurerm_virtual_network.main.name
-  address_prefixes     = ["10.1.8.0/22"]  # /22 requires 4-byte aligned address
+  address_prefixes     = ["10.1.8.0/22"] # /22 requires 4-byte aligned address
 }
 
 resource "azurerm_subnet" "postgresql" {
@@ -400,6 +400,8 @@ module "shared_azure_ai" {
   location            = var.location
   region_code         = local.region_code
   resource_group_name = azurerm_resource_group.main.name
+  # TODO: Disable public access and configure private endpoints
+  public_network_access_enabled = true
 
   # Enable AI Foundry project for workload isolation
   enable_project = true # Uses AzAPI to enable allowProjectManagement on account
@@ -449,6 +451,8 @@ module "shared_azure_search" {
   location            = var.location
   region_code         = local.region_code
   resource_group_name = azurerm_resource_group.main.name
+  # TODO: Disable public access and configure private endpoints
+  public_network_access_enabled = true
 
   # Use standard tier for staging (semantic search available)
   sku                 = "standard"
@@ -484,9 +488,9 @@ module "story_generator" {
   # Static Web App (Blazor WASM frontend) - same pattern as Mystira.App
   enable_static_web_app    = true
   static_web_app_sku       = "Free"
-  fallback_location        = "eastus2"  # SWA not available in South Africa North
+  fallback_location        = "eastus2" # SWA not available in South Africa North
   github_repository_url    = "https://github.com/phoenixvc/Mystira.StoryGenerator"
-  github_branch            = "main"  # staging uses main branch
+  github_branch            = "main" # staging uses main branch
   enable_swa_custom_domain = false  # Disabled until CNAME DNS records are created
   swa_custom_domain        = "staging.story.mystira.app"
 
@@ -534,9 +538,9 @@ module "entra_external_id" {
   source = "../../modules/entra-external-id"
   count  = var.external_id_tenant_id != "" ? 1 : 0
 
-  environment   = "staging"
-  tenant_id     = var.external_id_tenant_id
-  tenant_name   = "mystirastaging"
+  environment = "staging"
+  tenant_id   = var.external_id_tenant_id
+  tenant_name = "mystirastaging"
 
   pwa_redirect_uris = [
     # Staging environment
@@ -977,4 +981,43 @@ output "servicebus_connection_string" {
   description = "Shared Service Bus primary connection string"
   value       = module.shared_servicebus.default_primary_connection_string
   sensitive   = true
+}
+
+# =============================================================================
+# ACR Outputs (using shared ACR)
+# =============================================================================
+
+output "acr_login_server" {
+  description = "Shared ACR login server"
+  value       = data.azurerm_container_registry.shared.login_server
+}
+
+output "acr_name" {
+  description = "Shared ACR name"
+  value       = data.azurerm_container_registry.shared.name
+}
+
+# =============================================================================
+# DNS Outputs
+# =============================================================================
+
+# DNS Zone data source - shared DNS zone created by CI/CD bootstrap
+data "azurerm_dns_zone" "mystira" {
+  name                = "mystira.app"
+  resource_group_name = "mys-shared-terraform-rg-san"
+}
+
+output "dns_name_servers" {
+  description = "Name servers for DNS zone - configure these in your domain registrar"
+  value       = data.azurerm_dns_zone.mystira.name_servers
+}
+
+output "publisher_domain" {
+  description = "Publisher service domain"
+  value       = "staging.publisher.mystira.app"
+}
+
+output "chain_domain" {
+  description = "Chain service domain"
+  value       = "staging.chain.mystira.app"
 }

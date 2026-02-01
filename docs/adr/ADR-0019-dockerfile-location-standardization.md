@@ -1,6 +1,6 @@
 # ADR-0019: Dockerfile Location Standardization
 
-**Status**: Proposed
+**Status**: Accepted
 **Date**: 2024-12-24
 **Decision Makers**: DevOps, Platform Team
 

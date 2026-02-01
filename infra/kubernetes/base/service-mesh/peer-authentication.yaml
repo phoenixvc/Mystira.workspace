@@ -1,0 +1,89 @@
+# Istio PeerAuthentication Policies for mTLS
+# These policies enforce mutual TLS for service-to-service communication
+
+---
+# Namespace-wide STRICT mTLS policy
+# All services in the mystira namespace require mTLS
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
+metadata:
+  name: default
+  namespace: mystira
+spec:
+  mtls:
+    mode: STRICT
+
+---
+# Chain service - STRICT mTLS for RPC endpoints
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
+metadata:
+  name: mys-chain-mtls
+  namespace: mystira
+spec:
+  selector:
+    matchLabels:
+      app: mys-chain
+  mtls:
+    mode: STRICT
+  portLevelMtls:
+    "8545":  # RPC port
+      mode: STRICT
+    "8546":  # WebSocket port
+      mode: STRICT
+
+---
+# Admin API - STRICT mTLS
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
+metadata:
+  name: mys-admin-api-mtls
+  namespace: mystira
+spec:
+  selector:
+    matchLabels:
+      app: mys-admin-api
+  mtls:
+    mode: STRICT
+
+---
+# Publisher service - STRICT mTLS
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
+metadata:
+  name: mys-publisher-mtls
+  namespace: mystira
+spec:
+  selector:
+    matchLabels:
+      app: mys-publisher
+  mtls:
+    mode: STRICT
+
+---
+# Story Generator service - STRICT mTLS
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
+metadata:
+  name: mys-story-generator-mtls
+  namespace: mystira
+spec:
+  selector:
+    matchLabels:
+      app: mys-story-generator
+  mtls:
+    mode: STRICT
+
+---
+# DevHub service - STRICT mTLS
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
+metadata:
+  name: mys-devhub-mtls
+  namespace: mystira
+spec:
+  selector:
+    matchLabels:
+      app: mys-devhub
+  mtls:
+    mode: STRICT

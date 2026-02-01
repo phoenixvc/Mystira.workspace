@@ -37,6 +37,7 @@ jobs:
   validate-rollback:
     name: Validate Rollback Request
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     outputs:
       rollback_id: ${{ steps.generate_id.outputs.rollback_id }}
     steps:
@@ -72,6 +73,7 @@ jobs:
   pre-rollback-snapshot:
     name: Capture Pre-Rollback State
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     needs: [validate-rollback]
     permissions:
       contents: read
@@ -79,10 +81,12 @@ jobs:
     outputs:
       pre_health_status: ${{ steps.health.outputs.status }}
     steps:
-      - name: Azure Login
+      - name: Azure Login (OIDC)
         uses: azure/login@v2
         with:
-          creds: ${{ secrets.MYSTIRA_AZURE_CREDENTIALS }}
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - name: Capture production health status
         id: health
@@ -125,6 +129,7 @@ jobs:
   execute-rollback:
     name: Execute Slot Swap Rollback
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     needs: [validate-rollback, pre-rollback-snapshot]
     environment:
       name: production-rollback
@@ -133,10 +138,12 @@ jobs:
       contents: read
       id-token: write
     steps:
-      - name: Azure Login
+      - name: Azure Login (OIDC)
         uses: azure/login@v2
         with:
-          creds: ${{ secrets.MYSTIRA_AZURE_CREDENTIALS }}
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - name: Execute slot swap (rollback)
         id: swap
@@ -164,6 +171,7 @@ jobs:
   verify-rollback:
     name: Verify Rollback Success
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     needs: [execute-rollback]
     if: ${{ github.event.inputs.skip_verification != 'true' }}
     steps:
@@ -220,6 +228,7 @@ jobs:
   post-rollback-actions:
     name: Post-Rollback Actions
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     needs: [validate-rollback, execute-rollback, verify-rollback]
     if: always() && needs.execute-rollback.result == 'success'
     steps:

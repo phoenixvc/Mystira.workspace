@@ -3,7 +3,7 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~> 4.0"  # 4.x required for .NET 9.0 support
+      version = "~> 4.0" # 4.x required for .NET 9.0 support
     }
   }
 }
@@ -607,7 +607,7 @@ resource "azurerm_cdn_frontdoor_origin_group" "story_generator_swa" {
   count                    = var.enable_story_generator ? 1 : 0
   name                     = "story-generator-swa-origin-group"
   cdn_frontdoor_profile_id = azurerm_cdn_frontdoor_profile.main.id
-  session_affinity_enabled = false  # SWA is stateless
+  session_affinity_enabled = false # SWA is stateless
 
   load_balancing {
     sample_size                        = 4
@@ -616,7 +616,7 @@ resource "azurerm_cdn_frontdoor_origin_group" "story_generator_swa" {
   }
 
   health_probe {
-    path                = "/"  # SWA health check at root
+    path                = "/" # SWA health check at root
     request_type        = "HEAD"
     protocol            = "Https"
     interval_in_seconds = var.health_probe_interval
@@ -773,7 +773,7 @@ resource "azurerm_cdn_frontdoor_origin_group" "mystira_app_swa" {
   count                    = var.enable_mystira_app ? 1 : 0
   name                     = "mystira-app-swa-origin-group"
   cdn_frontdoor_profile_id = azurerm_cdn_frontdoor_profile.main.id
-  session_affinity_enabled = false  # SWA/PWA is stateless
+  session_affinity_enabled = false # SWA/PWA is stateless
 
   load_balancing {
     sample_size                        = 4
@@ -782,7 +782,7 @@ resource "azurerm_cdn_frontdoor_origin_group" "mystira_app_swa" {
   }
 
   health_probe {
-    path                = "/"  # SWA health check at root
+    path                = "/" # SWA health check at root
     request_type        = "HEAD"
     protocol            = "Https"
     interval_in_seconds = var.health_probe_interval

@@ -77,7 +77,7 @@ module "shared_comms" {
 
   resource_group_name = azurerm_resource_group.shared_comms.name
   location            = azurerm_resource_group.shared_comms.location
-  name_prefix         = "mys-staging"  # Environment-specific prefix to avoid name conflicts
+  name_prefix         = "mys-staging" # Environment-specific prefix to avoid name conflicts
 
   tags = local.common_tags
 }
@@ -91,7 +91,7 @@ module "mystira_app" {
 
   environment         = "staging"
   location            = var.location
-  fallback_location   = "eastus2"  # Static Web Apps not available in South Africa North
+  fallback_location   = "eastus2" # Static Web Apps not available in South Africa North
   resource_group_name = azurerm_resource_group.app.name
   project_name        = "mystira"
   org                 = "mys"

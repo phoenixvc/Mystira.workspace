@@ -43,15 +43,21 @@ jobs:
   check-dns:
     name: Check DNS Propagation
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     if: ${{ github.event.inputs.skip_dns_check != 'true' }}
+    permissions:
+      id-token: write
+      contents: read
     outputs:
       dns-ready: ${{ steps.check.outputs.ready }}
       ingress-ip: ${{ steps.get-ingress-ip.outputs.ip }}
     steps:
-      - name: Azure Login
+      - name: Azure Login (OIDC)
         uses: azure/login@v2
         with:
-          creds: ${{ secrets.MYSTIRA_AZURE_CREDENTIALS }}
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - name: Get K8s Ingress IP
         id: get-ingress-ip
@@ -122,12 +128,16 @@ jobs:
   bind-domains:
     name: Bind Custom Domains
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     needs: [check-dns]
     if: |
       always() &&
       (needs.check-dns.result == 'success' || needs.check-dns.result == 'skipped') &&
       (needs.check-dns.outputs.dns-ready == 'true' || github.event.inputs.skip_dns_check == 'true')
     environment: ${{ github.event.inputs.environment }}
+    permissions:
+      id-token: write
+      contents: read
     steps:
       - uses: actions/checkout@v6
 
@@ -137,24 +147,20 @@ jobs:
           terraform_version: ${{ env.TF_VERSION }}
           terraform_wrapper: false
 
-      - name: Azure Login
+      - name: Azure Login (OIDC)
         uses: azure/login@v2
         with:
-          creds: ${{ secrets.MYSTIRA_AZURE_CREDENTIALS }}
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-      - name: Set Azure credentials for Terraform
+      - name: Set Terraform environment variables
         run: |
-          ARM_CLIENT_ID=$(echo '${{ secrets.MYSTIRA_AZURE_CREDENTIALS }}' | jq -r '.clientId')
-          ARM_CLIENT_SECRET=$(echo '${{ secrets.MYSTIRA_AZURE_CREDENTIALS }}' | jq -r '.clientSecret')
-          ARM_SUBSCRIPTION_ID=$(echo '${{ secrets.MYSTIRA_AZURE_CREDENTIALS }}' | jq -r '.subscriptionId')
-          ARM_TENANT_ID=$(echo '${{ secrets.MYSTIRA_AZURE_CREDENTIALS }}' | jq -r '.tenantId')
-          echo "::add-mask::$ARM_CLIENT_SECRET"
           {
-            echo "ARM_CLIENT_ID=$ARM_CLIENT_ID"
-            echo "ARM_CLIENT_SECRET=$ARM_CLIENT_SECRET"
-            echo "ARM_SUBSCRIPTION_ID=$ARM_SUBSCRIPTION_ID"
-            echo "ARM_TENANT_ID=$ARM_TENANT_ID"
-            echo "ARM_USE_CLI=false"
+            echo "ARM_CLIENT_ID=${{ secrets.AZURE_CLIENT_ID }}"
+            echo "ARM_SUBSCRIPTION_ID=${{ secrets.AZURE_SUBSCRIPTION_ID }}"
+            echo "ARM_TENANT_ID=${{ secrets.AZURE_TENANT_ID }}"
+            echo "ARM_USE_OIDC=true"
           } >> "$GITHUB_ENV"
 
       - name: Get K8s Ingress IP
@@ -238,6 +244,7 @@ jobs:
   dns-not-ready:
     name: DNS Not Ready
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     needs: [check-dns]
     if: |
       needs.check-dns.outputs.dns-ready == 'false' &&

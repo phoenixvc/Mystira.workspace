@@ -3,7 +3,7 @@ kind: Ingress
 metadata:
   name: mys-admin-api-ingress
   labels:
-    app: mystira-admin-api
+    app: mys-admin-api
   annotations:
     cert-manager.io/cluster-issuer: "letsencrypt-prod"
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
@@ -22,6 +22,6 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: mystira-admin-api
+                name: mys-admin-api
                 port:
                   number: 8080

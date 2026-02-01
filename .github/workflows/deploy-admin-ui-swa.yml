@@ -41,7 +41,11 @@ jobs:
   build-and-deploy:
     name: Build and Deploy Admin UI
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     environment: ${{ github.event.inputs.environment || 'dev' }}
+    permissions:
+      id-token: write
+      contents: read
 
     steps:
       - name: Checkout repository
@@ -87,10 +91,12 @@ jobs:
           VITE_AZURE_CLIENT_ID: ${{ env.VITE_AZURE_CLIENT_ID }}
           VITE_API_SCOPE: ${{ env.VITE_API_SCOPE }}
 
-      - name: Azure Login
+      - name: Azure Login (OIDC)
         uses: azure/login@v2
         with:
-          creds: ${{ secrets.MYSTIRA_AZURE_CREDENTIALS }}
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - name: Get SWA deployment token
         id: swa-token

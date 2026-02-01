@@ -34,6 +34,7 @@ jobs:
   terraform-validate:
     name: Validate Terraform
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     strategy:
       fail-fast: false
       matrix:
@@ -78,6 +79,7 @@ jobs:
   kubernetes-validate:
     name: Validate Kubernetes
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     strategy:
       fail-fast: false
       matrix:
@@ -123,6 +125,7 @@ jobs:
   docker-validate:
     name: Validate Dockerfiles
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v6
         with:
@@ -152,6 +155,7 @@ jobs:
   security-scan:
     name: Security Scan
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v6
         with:
@@ -180,6 +184,7 @@ jobs:
   cost-estimate:
     name: Cost Estimate
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     if: github.event_name == 'pull_request'
     steps:
       - uses: actions/checkout@v6
@@ -206,6 +211,7 @@ jobs:
   validation-summary:
     name: Validation Summary
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     needs: [terraform-validate, kubernetes-validate, docker-validate, security-scan]
     if: always()
     steps:

@@ -1,12 +1,16 @@
 # Mystira Chain Infrastructure Module - Azure
 # Terraform module for deploying Mystira.Chain blockchain infrastructure on Azure
+#
+# See also:
+#   - variables.tf for input variable definitions
+#   - outputs.tf for output definitions
 
 terraform {
   required_version = ">= 1.5.0"
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~> 4.0"  # 4.x required for .NET 9.0 support
+      version = "~> 4.0" # 4.x required for .NET 9.0 support
     }
     azuread = {
       source  = "hashicorp/azuread"
@@ -23,72 +27,6 @@ terraform {
   }
 }
 
-variable "environment" {
-  description = "Deployment environment (dev, staging, prod)"
-  type        = string
-}
-
-variable "location" {
-  description = "Azure region for deployment"
-  type        = string
-  default     = "eastus"
-}
-
-variable "region_code" {
-  description = "Short region code (eus, euw, etc.) - defaults to 'eus' for eastus"
-  type        = string
-  default     = "eus"
-}
-
-variable "resource_group_name" {
-  description = "Name of the resource group"
-  type        = string
-}
-
-variable "chain_node_count" {
-  description = "Number of chain nodes to deploy"
-  type        = number
-  default     = 3
-}
-
-variable "chain_vm_size" {
-  description = "Azure VM size for chain nodes"
-  type        = string
-  default     = "Standard_D2s_v3"
-}
-
-variable "chain_storage_size_gb" {
-  description = "Storage size in GB for chain data (minimum 100 GB for Premium file shares)"
-  type        = number
-  default     = 100
-
-  validation {
-    condition     = var.chain_storage_size_gb >= 100
-    error_message = "Premium file shares require a minimum quota of 100 GB."
-  }
-}
-
-variable "vnet_id" {
-  description = "Virtual Network ID for chain deployment"
-  type        = string
-}
-
-variable "subnet_id" {
-  description = "Subnet ID for chain nodes"
-  type        = string
-}
-
-variable "tags" {
-  description = "Tags to apply to all resources"
-  type        = map(string)
-  default     = {}
-}
-
-variable "shared_log_analytics_workspace_id" {
-  description = "ID of shared Log Analytics workspace (from shared monitoring module)"
-  type        = string
-}
-
 locals {
   name_prefix = "mys-${var.environment}-chain"
   region_code = var.region_code
@@ -102,6 +40,10 @@ locals {
     Project     = "Mystira"
   })
 }
+
+# Retrieve current Azure client configuration to obtain tenant ID and object ID
+# for provisioning Key Vault access policies and related role assignments
+data "azurerm_client_config" "current" {}
 
 # Network Security Group for Chain Nodes
 resource "azurerm_network_security_group" "chain" {
@@ -170,7 +112,7 @@ resource "azurerm_storage_account" "chain" {
   account_kind                  = "FileStorage"
   https_traffic_only_enabled    = true
   min_tls_version               = "TLS1_2"
-  public_network_access_enabled = true
+  public_network_access_enabled = false # Secure: No public internet access
 
   tags = local.common_tags
 }
@@ -243,6 +185,10 @@ resource "azurerm_application_insights" "chain" {
   application_type    = "other"
 
   tags = local.common_tags
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 # Key Vault for Chain Secrets
@@ -283,42 +229,4 @@ resource "azurerm_key_vault" "chain" {
   }
 
   tags = local.common_tags
-}
-
-data "azurerm_client_config" "current" {}
-
-output "nsg_id" {
-  description = "Network Security Group ID for chain nodes"
-  value       = azurerm_network_security_group.chain.id
-}
-
-output "identity_id" {
-  description = "Managed Identity ID for chain nodes"
-  value       = azurerm_user_assigned_identity.chain.id
-}
-
-output "identity_principal_id" {
-  description = "Managed Identity Principal ID"
-  value       = azurerm_user_assigned_identity.chain.principal_id
-}
-
-output "storage_account_name" {
-  description = "Storage account name for chain data"
-  value       = azurerm_storage_account.chain.name
-}
-
-output "application_insights_id" {
-  description = "Application Insights ID for chain monitoring"
-  value       = azurerm_application_insights.chain.id
-}
-
-output "application_insights_connection_string" {
-  description = "Application Insights connection string"
-  value       = azurerm_application_insights.chain.connection_string
-  sensitive   = true
-}
-
-output "key_vault_id" {
-  description = "Key Vault ID for chain secrets"
-  value       = azurerm_key_vault.chain.id
 }

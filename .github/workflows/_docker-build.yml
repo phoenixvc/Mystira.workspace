@@ -2,6 +2,10 @@ name: "[Build] Docker"
 
 # Reusable workflow for building and pushing Docker images to Azure Container Registry
 # Usage: Call from other workflows with workflow_call trigger
+#
+# Configuration:
+#   Set repository variable ACR_NAME to override the default ACR name.
+#   If not set, falls back to 'myssharedacr' (legacy default).
 
 on:
   workflow_call:
@@ -25,10 +29,10 @@ on:
         type: string
         default: "dev"
       acr_name:
-        description: "Azure Container Registry name"
+        description: "Azure Container Registry name (defaults to vars.ACR_NAME or 'myssharedacr')"
         required: false
         type: string
-        default: "myssharedacr"
+        default: ""
       push:
         description: "Whether to push the image to ACR"
         required: false
@@ -53,6 +57,9 @@ jobs:
   build:
     name: Build ${{ inputs.image_name }}
     runs-on: ubuntu-latest
+    env:
+      # Resolve ACR name: input > repository variable > hardcoded default
+      ACR_NAME: ${{ inputs.acr_name || vars.ACR_NAME || 'myssharedacr' }}
     outputs:
       image_tag: ${{ steps.meta.outputs.tags }}
       digest: ${{ steps.build.outputs.digest }}
@@ -72,13 +79,13 @@ jobs:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
       - name: Login to ACR
-        run: az acr login --name ${{ inputs.acr_name }}
+        run: az acr login --name ${{ env.ACR_NAME }}
 
       - name: Extract metadata
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ inputs.acr_name }}.azurecr.io/${{ inputs.image_name }}
+          images: ${{ env.ACR_NAME }}.azurecr.io/${{ inputs.image_name }}
           tags: |
             type=raw,value=${{ inputs.environment }}
             type=sha,prefix=
@@ -102,7 +109,7 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "| Property | Value |" >> $GITHUB_STEP_SUMMARY
           echo "|----------|-------|" >> $GITHUB_STEP_SUMMARY
-          echo "| Image | ${{ inputs.acr_name }}.azurecr.io/${{ inputs.image_name }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Image | ${{ env.ACR_NAME }}.azurecr.io/${{ inputs.image_name }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Tags | ${{ steps.meta.outputs.tags }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Pushed | ${{ inputs.push }} |" >> $GITHUB_STEP_SUMMARY
           if [ "${{ inputs.push }}" == "true" ]; then

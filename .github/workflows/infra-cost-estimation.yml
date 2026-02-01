@@ -1,0 +1,264 @@
+name: "[CI] Infrastructure - Cost Estimation"
+
+# Infracost: Estimates cloud costs for infrastructure changes
+# Posts cost breakdown as PR comment
+# Requires INFRACOST_API_KEY secret (optional - workflow skips if not configured)
+
+on:
+  pull_request:
+    branches: [main, staging]
+    paths:
+      - "infra/terraform/**"
+      - "!**/*.md"
+      - "!infra/terraform/.tflint.hcl"
+
+concurrency:
+  group: infra-cost-estimation-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: write
+
+env:
+  TF_VERSION: "1.5.0"
+  TERRAGRUNT_VERSION: "0.55.0"
+  # Feature toggle: set to 'false' to disable cost estimation
+  ENABLE_COST_ESTIMATION: "true"
+
+jobs:
+  # Check if Infracost is configured
+  check-config:
+    name: Check Configuration
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      enabled: ${{ steps.check.outputs.enabled }}
+    steps:
+      - name: Check if Infracost API key is configured
+        id: check
+        run: |
+          if [[ "${{ env.ENABLE_COST_ESTIMATION }}" != "true" ]]; then
+            echo "enabled=false" >> $GITHUB_OUTPUT
+            echo "::notice::Cost estimation is disabled via ENABLE_COST_ESTIMATION"
+          elif [[ -z "${{ secrets.INFRACOST_API_KEY }}" ]]; then
+            echo "enabled=false" >> $GITHUB_OUTPUT
+            echo "::warning::INFRACOST_API_KEY not configured - skipping cost estimation"
+          else
+            echo "enabled=true" >> $GITHUB_OUTPUT
+          fi
+
+  infracost:
+    name: Infracost Analysis
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: check-config
+    if: needs.check-config.outputs.enabled == 'true'
+    steps:
+      - name: Setup Infracost
+        uses: infracost/actions/setup@v3
+        with:
+          api-key: ${{ secrets.INFRACOST_API_KEY }}
+
+      - name: Checkout base branch
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.base.ref }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+          terraform_wrapper: false
+
+      - name: Setup Terragrunt
+        run: |
+          wget -O terragrunt https://github.com/gruntwork-io/terragrunt/releases/download/v${{ env.TERRAGRUNT_VERSION }}/terragrunt_linux_amd64
+          chmod +x terragrunt
+          sudo mv terragrunt /usr/local/bin/
+
+      # Generate baseline cost for all products
+      - name: Generate Infracost baseline
+        run: |
+          cd infra/terraform
+
+          # Create config file for all products (strip heredoc indentation)
+          cat > infracost-base.yml << 'EOF'
+          version: 0.1
+          projects:
+            - path: shared-infra/environments/dev
+              name: shared-infra-dev
+              terraform_var_files:
+                - terraform.tfvars
+            - path: products/mystira-app/environments/dev
+              name: mystira-app-dev
+            - path: products/story-generator/environments/dev
+              name: story-generator-dev
+            - path: products/admin/environments/dev
+              name: admin-dev
+            - path: products/publisher/environments/dev
+              name: publisher-dev
+            - path: products/chain/environments/dev
+              name: chain-dev
+          EOF
+          # Strip 10 leading spaces from heredoc (YAML indentation causes leading spaces)
+          sed -i 's/^[[:space:]]\{10\}//' infracost-base.yml
+
+          # Run breakdown and handle failures
+          if ! infracost breakdown --config-file=infracost-base.yml \
+            --format=json \
+            --out-file=/tmp/infracost-base.json; then
+            echo "::warning::Infracost baseline generation failed"
+          fi
+
+      - name: Checkout PR branch
+        uses: actions/checkout@v6
+
+      - name: Generate Infracost diff
+        run: |
+          cd infra/terraform
+
+          # Create config file for PR branch
+          cat > infracost-pr.yml << 'EOF'
+          version: 0.1
+          projects:
+            - path: shared-infra/environments/dev
+              name: shared-infra-dev
+              terraform_var_files:
+                - terraform.tfvars
+            - path: products/mystira-app/environments/dev
+              name: mystira-app-dev
+            - path: products/story-generator/environments/dev
+              name: story-generator-dev
+            - path: products/admin/environments/dev
+              name: admin-dev
+            - path: products/publisher/environments/dev
+              name: publisher-dev
+            - path: products/chain/environments/dev
+              name: chain-dev
+          EOF
+          # Strip 10 leading spaces from heredoc (YAML indentation causes leading spaces)
+          sed -i 's/^[[:space:]]\{10\}//' infracost-pr.yml
+
+          # Run diff and handle failures
+          if ! infracost diff --config-file=infracost-pr.yml \
+            --format=json \
+            --compare-to=/tmp/infracost-base.json \
+            --out-file=/tmp/infracost-diff.json; then
+            echo "::warning::Infracost diff generation failed"
+          fi
+
+      - name: Post Infracost comment
+        run: |
+          infracost comment github --path=/tmp/infracost-diff.json \
+            --repo=$GITHUB_REPOSITORY \
+            --github-token=${{ github.token }} \
+            --pull-request=${{ github.event.pull_request.number }} \
+            --behavior=update \
+            --tag="infracost-dev"
+
+      - name: Upload Infracost output
+        uses: actions/upload-artifact@v4
+        with:
+          name: infracost-output
+          path: /tmp/infracost-diff.json
+          retention-days: 1
+        continue-on-error: true
+
+      - name: Generate Cost Summary
+        run: |
+          echo "## Infrastructure Cost Estimation" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [[ -f /tmp/infracost-diff.json ]]; then
+            TOTAL=$(jq -r '.totalMonthlyCost // "N/A"' /tmp/infracost-diff.json)
+            DIFF=$(jq -r '.diffTotalMonthlyCost // "0"' /tmp/infracost-diff.json)
+
+            echo "| Metric | Value |" >> $GITHUB_STEP_SUMMARY
+            echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
+            echo "| Estimated Monthly Cost | \$${TOTAL} |" >> $GITHUB_STEP_SUMMARY
+            echo "| Cost Change | \$${DIFF} |" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "Cost estimation data not available." >> $GITHUB_STEP_SUMMARY
+          fi
+
+  # Cost threshold check
+  cost-threshold:
+    name: Cost Threshold Check
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    needs: infracost
+    env:
+      # Configurable cost threshold (in dollars)
+      COST_THRESHOLD: "100"
+    steps:
+      - name: Download Infracost output
+        uses: actions/download-artifact@v4
+        with:
+          name: infracost-output
+          path: /tmp
+        continue-on-error: true
+
+      - name: Check cost increase threshold
+        id: threshold
+        run: |
+          THRESHOLD="${{ env.COST_THRESHOLD }}"
+
+          if [[ ! -f /tmp/infracost-diff.json ]]; then
+            echo "::warning::No Infracost output found - skipping threshold check"
+            echo "status=skip" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          # Extract diff cost (handle null/missing values)
+          DIFF=$(jq -r '.diffTotalMonthlyCost // "0"' /tmp/infracost-diff.json | tr -d '"')
+
+          # Handle empty or non-numeric values
+          if [[ -z "$DIFF" || "$DIFF" == "null" ]]; then
+            DIFF="0"
+          fi
+
+          # Remove any currency symbols and convert to number
+          DIFF_NUM=$(echo "$DIFF" | sed 's/[^0-9.-]//g')
+
+          # Validate DIFF_NUM is a valid number (handles N/A, empty, or malformed values)
+          if [[ -z "$DIFF_NUM" ]] || ! [[ "$DIFF_NUM" =~ ^-?[0-9]*\.?[0-9]+$ ]]; then
+            echo "::warning::Could not parse cost difference value: '$DIFF' -> '$DIFF_NUM'. Defaulting to 0."
+            DIFF_NUM="0"
+          fi
+
+          echo "Cost change: \$$DIFF_NUM"
+          echo "Threshold: \$$THRESHOLD"
+
+          # Compare (using bc for float comparison)
+          if (( $(echo "$DIFF_NUM > $THRESHOLD" | bc -l) )); then
+            echo "::error::Cost increase (\$$DIFF_NUM) exceeds threshold (\$$THRESHOLD)"
+            THRESHOLD_STATUS="fail"
+          else
+            echo "Cost change within threshold"
+            THRESHOLD_STATUS="pass"
+          fi
+
+          # Write output for downstream steps
+          echo "status=$THRESHOLD_STATUS" >> $GITHUB_OUTPUT
+
+          # Generate summary using local variable (not step output which isn't available yet)
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Cost Governance" >> $GITHUB_STEP_SUMMARY
+          echo "| Metric | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Monthly cost increase threshold | \$$THRESHOLD |" >> $GITHUB_STEP_SUMMARY
+          echo "| Actual cost change | \$$DIFF_NUM |" >> $GITHUB_STEP_SUMMARY
+
+          # Status row using local variable
+          if [[ "$THRESHOLD_STATUS" == "fail" ]]; then
+            echo "| Status | ❌ **Exceeds threshold** |" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "| Status | ✅ Within limits |" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Fail if threshold exceeded
+        if: steps.threshold.outputs.status == 'fail'
+        run: |
+          echo "Cost threshold exceeded - failing check"
+          exit 1

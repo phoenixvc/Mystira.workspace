@@ -74,9 +74,9 @@ variable "semantic_search_sku" {
 # =============================================================================
 
 variable "public_network_access_enabled" {
-  description = "Enable public network access"
+  description = "Enable public network access (set to true only if private endpoints not configured)"
   type        = bool
-  default     = true
+  default     = false
 }
 
 variable "local_authentication_enabled" {

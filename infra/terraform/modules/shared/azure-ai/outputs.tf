@@ -333,8 +333,8 @@ output "connection_config_northcentralus" {
 output "deployment_health" {
   description = "Deployment health summary for monitoring"
   value = {
-    primary_region   = var.location
-    primary_endpoint = azurerm_cognitive_account.ai_foundry.endpoint
+    primary_region                    = var.location
+    primary_endpoint                  = azurerm_cognitive_account.ai_foundry.endpoint
     openai_model_count_primary        = length(azurerm_cognitive_deployment.openai_models)
     openai_model_count_eastus         = length(azurerm_cognitive_deployment.openai_models_eastus)
     openai_model_count_swedencentral  = length(azurerm_cognitive_deployment.openai_models_swedencentral)
@@ -349,12 +349,12 @@ output "deployment_health" {
       length(azapi_resource.catalog_models) +
       length(azapi_resource.catalog_models_uksouth)
     )
-    uksouth_enabled        = local.needs_uksouth
-    uksouth_endpoint       = local.needs_uksouth ? azurerm_cognitive_account.ai_foundry_uksouth[0].endpoint : null
-    eastus_enabled         = local.needs_eastus
-    eastus_endpoint        = local.needs_eastus ? azurerm_cognitive_account.ai_foundry_eastus[0].endpoint : null
-    swedencentral_enabled  = local.needs_swedencentral
-    swedencentral_endpoint = local.needs_swedencentral ? azurerm_cognitive_account.ai_foundry_swedencentral[0].endpoint : null
+    uksouth_enabled         = local.needs_uksouth
+    uksouth_endpoint        = local.needs_uksouth ? azurerm_cognitive_account.ai_foundry_uksouth[0].endpoint : null
+    eastus_enabled          = local.needs_eastus
+    eastus_endpoint         = local.needs_eastus ? azurerm_cognitive_account.ai_foundry_eastus[0].endpoint : null
+    swedencentral_enabled   = local.needs_swedencentral
+    swedencentral_endpoint  = local.needs_swedencentral ? azurerm_cognitive_account.ai_foundry_swedencentral[0].endpoint : null
     northcentralus_enabled  = local.needs_northcentralus
     northcentralus_endpoint = local.needs_northcentralus ? azurerm_cognitive_account.ai_foundry_northcentralus[0].endpoint : null
   }

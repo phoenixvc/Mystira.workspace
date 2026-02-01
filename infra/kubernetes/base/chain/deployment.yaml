@@ -30,10 +30,32 @@ spec:
           operator: "Equal"
           value: "chain"
           effect: "NoSchedule"
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    app: mys-chain
+                topologyKey: kubernetes.io/hostname
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: topology.kubernetes.io/zone
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              app: mys-chain
       containers:
         - name: chain
           image: myssharedacr.azurecr.io/chain:v0.0.0
           imagePullPolicy: IfNotPresent
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: false
+            capabilities:
+              drop:
+                - ALL
           ports:
             - name: rpc
               containerPort: 8545
@@ -88,6 +110,13 @@ spec:
               port: 8545
             initialDelaySeconds: 30
             periodSeconds: 10
+          startupProbe:
+            httpGet:
+              path: /health
+              port: 8545
+            initialDelaySeconds: 0
+            periodSeconds: 3
+            failureThreshold: 20
   volumeClaimTemplates:
     - metadata:
         name: chain-data
@@ -148,3 +177,15 @@ data:
   rpc_enabled: "true"
   ws_enabled: "true"
   key_vault_url: "<OVERRIDE_IN_OVERLAY>"
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: mys-chain-pdb
+  labels:
+    app: mys-chain
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: mys-chain

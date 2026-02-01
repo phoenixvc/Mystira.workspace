@@ -3,7 +3,7 @@ kind: Ingress
 metadata:
   name: mys-publisher-ingress
   labels:
-    app: mystira-publisher
+    app: mys-publisher
   annotations:
     cert-manager.io/cluster-issuer: "letsencrypt-prod"
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
@@ -22,6 +22,6 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: mystira-publisher
+                name: mys-publisher
                 port:
                   number: 3000

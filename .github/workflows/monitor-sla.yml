@@ -32,6 +32,7 @@ jobs:
   collect-metrics:
     name: Collect SLA Metrics
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     permissions:
       id-token: write
       contents: read
@@ -97,6 +98,7 @@ jobs:
   validate-sla:
     name: Validate Against SLOs
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     needs: [collect-metrics]
     outputs:
       sla_met: ${{ steps.validate.outputs.sla_met }}
@@ -136,7 +138,10 @@ jobs:
   generate-report:
     name: Generate SLA Report
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     needs: [collect-metrics, validate-sla]
+    permissions:
+      issues: write
     steps:
       - name: Generate report
         run: |

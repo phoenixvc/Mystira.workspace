@@ -62,9 +62,9 @@ variable "model_deployments" {
     model_format    = optional(string, "OpenAI") # OpenAI, Anthropic, Cohere, Meta, Mistral, DeepSeek, AI21, xAI
     sku_name        = optional(string, "Standard")
     capacity        = optional(number, 10)
-    rai_policy_name = optional(string, null)   # Responsible AI policy name
-    location        = optional(string, null)   # Override region for models not available in primary region
-    enabled         = optional(bool, true)     # Set to false to skip deploying this model
+    rai_policy_name = optional(string, null) # Responsible AI policy name
+    location        = optional(string, null) # Override region for models not available in primary region
+    enabled         = optional(bool, true)   # Set to false to skip deploying this model
   }))
 
   validation {
@@ -449,9 +449,9 @@ variable "allowed_ip_ranges" {
 }
 
 variable "public_network_access_enabled" {
-  description = "Enable public network access"
+  description = "Enable public network access (set to true only if private endpoints not configured)"
   type        = bool
-  default     = true
+  default     = false
 }
 
 variable "disable_local_auth" {
@@ -469,6 +469,20 @@ variable "enable_private_endpoint" {
   type        = bool
   default     = false
 }
+
+# =============================================================================
+# Cross-Variable Validation
+# =============================================================================
+# Note: Variable validation blocks can't reference other variables.
+# Use a check block in main.tf to ensure at least one access path is configured:
+#
+#   check "network_access_validation" {
+#     assert {
+#       condition     = var.public_network_access_enabled || var.enable_private_endpoint
+#       error_message = "Azure AI account must have at least one access path."
+#     }
+#   }
+#
 
 variable "private_endpoint_subnet_id" {
   description = "Subnet ID for private endpoint"

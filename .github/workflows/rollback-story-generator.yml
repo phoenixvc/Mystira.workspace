@@ -31,6 +31,7 @@ jobs:
   validate-confirmation:
     name: Validate Confirmation
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - name: Check confirmation
         if: github.event.inputs.confirm != 'ROLLBACK'

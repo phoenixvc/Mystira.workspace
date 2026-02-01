@@ -21,9 +21,9 @@ module "shared_cosmos_db" {
 
   environment         = "dev"
   location            = var.location
-  resource_group_name = azurerm_resource_group.main.name  # core-rg
+  resource_group_name = azurerm_resource_group.main.name # core-rg
 
-  serverless        = true  # Cost-effective for dev
+  serverless        = true # Cost-effective for dev
   consistency_level = "Session"
 
   databases = {
@@ -49,7 +49,7 @@ module "shared_storage" {
 
   environment         = "dev"
   location            = var.location
-  resource_group_name = azurerm_resource_group.main.name  # core-rg
+  resource_group_name = azurerm_resource_group.main.name # core-rg
 
   storage_sku = "Standard_LRS"
 
@@ -86,18 +86,18 @@ module "mystira_app" {
 
   environment         = "dev"
   location            = var.location
-  fallback_location   = "eastus2"  # Static Web Apps not available in South Africa North
-  resource_group_name = azurerm_resource_group.app.name  # app-rg for app-specific resources
+  fallback_location   = "eastus2"                       # Static Web Apps not available in South Africa North
+  resource_group_name = azurerm_resource_group.app.name # app-rg for app-specific resources
   project_name        = "mystira"
   org                 = "mys"
 
   # -----------------------------------------------------------------------------
   # Cosmos DB Configuration - USE SHARED
   # -----------------------------------------------------------------------------
-  skip_cosmos_creation           = true
+  skip_cosmos_creation              = true
   existing_cosmos_connection_string = module.shared_cosmos_db.primary_sql_connection_string
-  shared_cosmos_endpoint         = module.shared_cosmos_db.endpoint
-  shared_cosmos_database_name    = "MystiraAppDb"
+  shared_cosmos_endpoint            = module.shared_cosmos_db.endpoint
+  shared_cosmos_database_name       = "MystiraAppDb"
 
   # -----------------------------------------------------------------------------
   # App Service Configuration (API Backend)
@@ -142,7 +142,7 @@ module "mystira_app" {
   # -----------------------------------------------------------------------------
   # Communication Services - USE SHARED (cross-environment)
   # -----------------------------------------------------------------------------
-  enable_communication_services = false  # Use shared
+  enable_communication_services = false # Use shared
   shared_acs_connection_string  = module.shared_comms.communication_service_primary_connection_string
   sender_email                  = "DoNotReply@mystira.app"
 
@@ -160,12 +160,12 @@ module "mystira_app" {
   shared_application_insights_id                = module.shared_monitoring.application_insights_id
   shared_application_insights_connection_string = module.shared_monitoring.application_insights_connection_string
 
-  enable_alerts = false  # Disabled for dev to reduce noise
+  enable_alerts = false # Disabled for dev to reduce noise
 
   # -----------------------------------------------------------------------------
   # Budget Configuration
   # -----------------------------------------------------------------------------
-  enable_budget       = false  # Enable in prod
+  enable_budget       = false # Enable in prod
   monthly_budget      = 50
   budget_alert_emails = []
 

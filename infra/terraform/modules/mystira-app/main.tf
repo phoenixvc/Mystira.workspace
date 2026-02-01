@@ -20,7 +20,7 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~> 4.0"  # 4.x required for .NET 9.0 support
+      version = "~> 4.0"
     }
   }
 }
@@ -79,7 +79,7 @@ locals {
   ]
 
   # Resolved monitoring resource references (shared or created)
-  log_analytics_workspace_id       = var.use_shared_monitoring ? var.shared_log_analytics_workspace_id : azurerm_log_analytics_workspace.main[0].id
+  log_analytics_workspace_id             = var.use_shared_monitoring ? var.shared_log_analytics_workspace_id : azurerm_log_analytics_workspace.main[0].id
   application_insights_connection_string = var.use_shared_monitoring ? var.shared_application_insights_connection_string : azurerm_application_insights.main[0].connection_string
 }
 
@@ -97,6 +97,10 @@ resource "azurerm_log_analytics_workspace" "main" {
   retention_in_days   = var.log_retention_days
 
   tags = local.common_tags
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 # =============================================================================
@@ -114,6 +118,10 @@ resource "azurerm_application_insights" "main" {
   daily_data_cap_in_gb = var.daily_quota_gb
 
   tags = local.common_tags
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 # =============================================================================
@@ -141,6 +149,10 @@ resource "azurerm_key_vault" "main" {
   }
 
   tags = local.common_tags
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 # Key Vault access policy for App Service managed identity
@@ -181,6 +193,10 @@ resource "azurerm_storage_account" "main" {
   }
 
   tags = local.common_tags
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 # Primary media container (hot tier - frequently accessed content)
@@ -225,7 +241,7 @@ resource "azurerm_storage_container" "archives" {
 
   name                  = "archives"
   storage_account_id    = azurerm_storage_account.main[0].id
-  container_access_type = "private"  # Private - accessed via SAS tokens
+  container_access_type = "private" # Private - accessed via SAS tokens
 }
 
 # Temporary uploads container (hot tier - transient content)
@@ -277,8 +293,8 @@ resource "azurerm_storage_management_policy" "tiering" {
 
     actions {
       base_blob {
-        tier_to_cool_after_days_since_modification_greater_than    = 14  # 2 weeks
-        tier_to_archive_after_days_since_modification_greater_than = 60  # 2 months
+        tier_to_cool_after_days_since_modification_greater_than    = 14 # 2 weeks
+        tier_to_archive_after_days_since_modification_greater_than = 60 # 2 months
       }
     }
   }
@@ -363,8 +379,8 @@ resource "azurerm_storage_management_policy" "tiering" {
 
     actions {
       base_blob {
-        tier_to_cool_after_days_since_modification_greater_than    = 90   # 3 months
-        tier_to_archive_after_days_since_modification_greater_than = 365  # 1 year
+        tier_to_cool_after_days_since_modification_greater_than    = 90  # 3 months
+        tier_to_archive_after_days_since_modification_greater_than = 365 # 1 year
       }
     }
   }
@@ -401,6 +417,10 @@ resource "azurerm_cosmosdb_account" "main" {
   }
 
   tags = local.common_tags
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 resource "azurerm_cosmosdb_sql_database" "main" {
@@ -418,7 +438,7 @@ resource "azurerm_cosmosdb_sql_container" "containers" {
   resource_group_name = var.resource_group_name
   account_name        = azurerm_cosmosdb_account.main[0].name
   database_name       = azurerm_cosmosdb_sql_database.main[0].name
-  partition_key_paths = [each.value.partition_key]  # Updated: partition_key_path deprecated in AzureRM 4.0
+  partition_key_paths = [each.value.partition_key] # Updated: partition_key_path deprecated in AzureRM 4.0
 
   indexing_policy {
     indexing_mode = "consistent"
@@ -441,6 +461,10 @@ resource "azurerm_service_plan" "main" {
   sku_name            = var.app_service_sku
 
   tags = local.common_tags
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 # =============================================================================
@@ -474,8 +498,8 @@ resource "azurerm_linux_web_app" "api" {
 
   app_settings = {
     # Core Settings
-    "ASPNETCORE_ENVIRONMENT"                     = var.environment == "prod" ? "Production" : (var.environment == "staging" ? "Staging" : "Development")
-    "WEBSITES_ENABLE_APP_SERVICE_STORAGE"        = "false"
+    "ASPNETCORE_ENVIRONMENT"              = var.environment == "prod" ? "Production" : (var.environment == "staging" ? "Staging" : "Development")
+    "WEBSITES_ENABLE_APP_SERVICE_STORAGE" = "false"
 
     # Application Insights
     "APPLICATIONINSIGHTS_CONNECTION_STRING"      = local.application_insights_connection_string
@@ -483,11 +507,11 @@ resource "azurerm_linux_web_app" "api" {
     "XDT_MicrosoftApplicationInsights_Mode"      = "recommended"
 
     # Connection Strings (matching Bicep naming) - Always use Key Vault references
-    "ConnectionStrings__CosmosDb"      = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault.main.vault_uri}secrets/cosmos-connection-string/)"
-    "ConnectionStrings__AzureStorage"  = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault.main.vault_uri}secrets/storage-connection-string/)"
+    "ConnectionStrings__CosmosDb"     = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault.main.vault_uri}secrets/cosmos-connection-string/)"
+    "ConnectionStrings__AzureStorage" = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault.main.vault_uri}secrets/storage-connection-string/)"
 
     # Azure Resource Settings (matching Bicep naming)
-    "Azure__CosmosDb__DatabaseName"    = var.skip_cosmos_creation ? var.shared_cosmos_database_name : "MystiraAppDb"
+    "Azure__CosmosDb__DatabaseName"     = var.skip_cosmos_creation ? var.shared_cosmos_database_name : "MystiraAppDb"
     "Azure__BlobStorage__ContainerName" = "mystira-app-media"
 
     # CORS Settings
@@ -515,6 +539,10 @@ resource "azurerm_linux_web_app" "api" {
   }
 
   tags = local.common_tags
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 # Store secrets in Key Vault
@@ -610,12 +638,16 @@ resource "azurerm_static_web_app" "main" {
   count = var.enable_static_web_app ? 1 : 0
 
   name                = "${local.name_prefix}-swa-${local.fallback_region_code}"
-  location            = var.fallback_location  # Static Web Apps not available in South Africa North
+  location            = var.fallback_location # Static Web Apps not available in South Africa North
   resource_group_name = var.resource_group_name
   sku_tier            = var.static_web_app_sku
   sku_size            = var.static_web_app_sku
 
   tags = local.common_tags
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 # Custom domain for Static Web App
@@ -645,9 +677,13 @@ resource "azurerm_communication_service" "main" {
 
   name                = "${local.name_prefix}-acs-${local.region_code}"
   resource_group_name = var.resource_group_name
-  data_location       = "Africa"  # Data residency
+  data_location       = "Africa" # Data residency
 
   tags = local.common_tags
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 resource "azurerm_email_communication_service" "main" {
@@ -658,6 +694,10 @@ resource "azurerm_email_communication_service" "main" {
   data_location       = "Africa"
 
   tags = local.common_tags
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 # =============================================================================
@@ -755,20 +795,24 @@ resource "azurerm_key_vault_secret" "postgresql_connection_string" {
 resource "azurerm_redis_cache" "main" {
   count = var.enable_redis ? 1 : 0
 
-  name                = "${local.name_prefix}-redis-${local.region_code}"
-  location            = var.location
-  resource_group_name = var.resource_group_name
-  capacity            = var.redis_capacity
-  family              = var.redis_family
-  sku_name            = var.redis_sku
-  non_ssl_port_enabled = false  # Renamed from enable_non_ssl_port in AzureRM 4.x
-  minimum_tls_version = "1.2"
+  name                 = "${local.name_prefix}-redis-${local.region_code}"
+  location             = var.location
+  resource_group_name  = var.resource_group_name
+  capacity             = var.redis_capacity
+  family               = var.redis_family
+  sku_name             = var.redis_sku
+  non_ssl_port_enabled = false # Renamed from enable_non_ssl_port in AzureRM 4.x
+  minimum_tls_version  = "1.2"
 
   redis_configuration {
     maxmemory_policy = "volatile-lru"
   }
 
   tags = local.common_tags
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 # Store Redis connection string in Key Vault

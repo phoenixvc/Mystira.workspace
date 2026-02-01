@@ -29,6 +29,18 @@ terraform {
   }
 }
 
+# =============================================================================
+# Validation: Ensure at least one access path is configured
+# =============================================================================
+# This prevents provisioning an unreachable Azure AI account by requiring
+# either public network access OR private endpoint to be enabled.
+check "network_access_validation" {
+  assert {
+    condition     = var.public_network_access_enabled || var.enable_private_endpoint
+    error_message = "Azure AI account must have at least one access path: enable public_network_access_enabled OR enable_private_endpoint."
+  }
+}
+
 # Local variables
 locals {
   # Naming: mys-shared-ai-{region_code} (shared resource pattern)
@@ -133,6 +145,7 @@ resource "azurerm_cognitive_account" "ai_foundry" {
   tags = local.common_tags
 
   lifecycle {
+    prevent_destroy = true
     ignore_changes = [
       # Ignore changes to tags that might be added by Azure
       tags["hidden-link:*"],
@@ -323,6 +336,7 @@ resource "azurerm_cognitive_account" "ai_foundry_uksouth" {
   })
 
   lifecycle {
+    prevent_destroy = true
     ignore_changes = [
       tags["hidden-link:*"],
     ]
@@ -472,6 +486,7 @@ resource "azurerm_cognitive_account" "ai_foundry_eastus" {
   })
 
   lifecycle {
+    prevent_destroy = true
     ignore_changes = [
       tags["hidden-link:*"],
     ]
@@ -556,6 +571,7 @@ resource "azurerm_cognitive_account" "ai_foundry_swedencentral" {
   })
 
   lifecycle {
+    prevent_destroy = true
     ignore_changes = [
       tags["hidden-link:*"],
     ]
@@ -689,6 +705,7 @@ resource "azurerm_cognitive_account" "ai_foundry_northcentralus" {
   })
 
   lifecycle {
+    prevent_destroy = true
     ignore_changes = [
       tags["hidden-link:*"],
     ]

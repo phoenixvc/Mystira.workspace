@@ -1,13 +1,13 @@
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: mystira-admin-api-network-policy
+  name: mys-admin-api-network-policy
   labels:
-    app: mystira-admin-api
+    app: mys-admin-api
 spec:
   podSelector:
     matchLabels:
-      app: mystira-admin-api
+      app: mys-admin-api
   policyTypes:
     - Ingress
     - Egress
@@ -26,7 +26,7 @@ spec:
     - from:
         - podSelector:
             matchLabels:
-              app: mystira-admin-ui
+              app: mys-admin-ui
       ports:
         - protocol: TCP
           port: 8080

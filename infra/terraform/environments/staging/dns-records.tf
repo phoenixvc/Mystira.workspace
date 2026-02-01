@@ -14,7 +14,7 @@ variable "bind_custom_domains" {
 variable "k8s_ingress_ip" {
   description = "Kubernetes NGINX ingress controller external IP (get with: kubectl get svc -n ingress-nginx)"
   type        = string
-  default     = ""  # Set after AKS is deployed
+  default     = "" # Set after AKS is deployed
 }
 
 variable "create_dns_records" {
@@ -321,9 +321,9 @@ data "azurerm_cdn_frontdoor_profile" "nonprod" {
 }
 
 data "azurerm_cdn_frontdoor_endpoint" "nonprod_primary" {
-  name                     = "mystira-nonprod"
-  profile_name             = data.azurerm_cdn_frontdoor_profile.nonprod.name
-  resource_group_name      = "mys-dev-core-rg-san"
+  name                = "mystira-nonprod"
+  profile_name        = data.azurerm_cdn_frontdoor_profile.nonprod.name
+  resource_group_name = "mys-dev-core-rg-san"
 }
 
 # CNAME for staging.publisher.mystira.app -> Front Door
@@ -404,13 +404,13 @@ output "dns_zone_name_servers" {
 output "staging_dns_records_created" {
   description = "List of DNS records created for staging"
   value = {
-    app         = "staging.mystira.app"
-    api         = "staging.api.mystira.app"
-    admin       = "staging.admin.mystira.app"
-    story       = "staging.story.mystira.app"
-    story_api   = "staging.story-api.mystira.app"
-    publisher   = var.k8s_ingress_ip != "" ? "staging.publisher.mystira.app" : "Not created (no k8s_ingress_ip)"
-    chain       = var.k8s_ingress_ip != "" ? "staging.chain.mystira.app" : "Not created (no k8s_ingress_ip)"
+    app       = "staging.mystira.app"
+    api       = "staging.api.mystira.app"
+    admin     = "staging.admin.mystira.app"
+    story     = "staging.story.mystira.app"
+    story_api = "staging.story-api.mystira.app"
+    publisher = var.k8s_ingress_ip != "" ? "staging.publisher.mystira.app" : "Not created (no k8s_ingress_ip)"
+    chain     = var.k8s_ingress_ip != "" ? "staging.chain.mystira.app" : "Not created (no k8s_ingress_ip)"
   }
 }
 

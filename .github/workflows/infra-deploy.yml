@@ -52,8 +52,11 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  TF_VERSION: "1.5.0"
+  # Terraform 1.10.x is latest stable (CVE-2023-4782 patched in 1.5.7+)
+  TF_VERSION: "1.10.3"
   ENVIRONMENT: ${{ github.event.inputs.environment || 'dev' }}
+  # OIDC Authentication (preferred over service principal)
+  ARM_USE_OIDC: true
 
   # ==========================================================================
   # Resource Groups (ADR-0017: Resource Group Organization Strategy)
@@ -89,16 +92,21 @@ jobs:
     name: Validate Prerequisites
     runs-on: ubuntu-latest
     if: ${{ github.event.inputs.skip_validation != 'true' }}
+    permissions:
+      id-token: write
+      contents: read
     outputs:
       backend-exists: ${{ steps.check-backend.outputs.exists }}
       acr-exists: ${{ steps.check-acr.outputs.exists }}
       dns-zone-exists: ${{ steps.check-dns.outputs.exists }}
       aks-exists: ${{ steps.check-aks.outputs.exists }}
     steps:
-      - name: Azure Login
+      - name: Azure Login (OIDC)
         uses: azure/login@v2
         with:
-          creds: ${{ secrets.MYSTIRA_AZURE_CREDENTIALS }}
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - name: Check Terraform Backend
         id: check-backend
@@ -150,8 +158,8 @@ jobs:
           echo "Checking service principal permissions..."
           PERMISSION_ISSUES=""
 
-          # Get service principal info
-          SP_CLIENT_ID=$(echo '${{ secrets.MYSTIRA_AZURE_CREDENTIALS }}' | jq -r '.clientId')
+          # Get service principal info (using OIDC client ID)
+          SP_CLIENT_ID="${{ secrets.AZURE_CLIENT_ID }}"
           SP_OBJECT_ID=$(az ad sp show --id "$SP_CLIENT_ID" --query id -o tsv 2>/dev/null || echo "")
           SUBSCRIPTION_ID=$(az account show --query id -o tsv)
 
@@ -277,13 +285,18 @@ jobs:
       (needs.validate.outputs.backend-exists != 'true' ||
        needs.validate.outputs.acr-exists != 'true' ||
        needs.validate.outputs.dns-zone-exists != 'true')
+    permissions:
+      id-token: write
+      contents: read
     steps:
       - uses: actions/checkout@v6
 
-      - name: Azure Login
+      - name: Azure Login (OIDC)
         uses: azure/login@v2
         with:
-          creds: ${{ secrets.MYSTIRA_AZURE_CREDENTIALS }}
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - name: Create Terraform Resource Group
         if: needs.validate.outputs.backend-exists != 'true'
@@ -347,8 +360,8 @@ jobs:
 
       - name: Grant Storage Account Permissions
         run: |
-          # Grant service principal access to Terraform state storage
-          SP_CLIENT_ID=$(echo '${{ secrets.MYSTIRA_AZURE_CREDENTIALS }}' | jq -r '.clientId')
+          # Grant service principal access to Terraform state storage (using OIDC client ID)
+          SP_CLIENT_ID="${{ secrets.AZURE_CLIENT_ID }}"
           SP_OBJECT_ID=$(az ad sp show --id "$SP_CLIENT_ID" --query id -o tsv)
           if [ -z "$SP_OBJECT_ID" ]; then
             echo "::error::Could not find service principal object ID"
@@ -414,24 +427,20 @@ jobs:
           terraform_version: ${{ env.TF_VERSION }}
           terraform_wrapper: false
 
-      - name: Azure Login
+      - name: Azure Login (OIDC)
         uses: azure/login@v2
         with:
-          creds: ${{ secrets.MYSTIRA_AZURE_CREDENTIALS }}
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-      - name: Set Azure credentials for Terraform
+      - name: Set Terraform environment variables
         run: |
-          ARM_CLIENT_ID=$(echo '${{ secrets.MYSTIRA_AZURE_CREDENTIALS }}' | jq -r '.clientId')
-          ARM_CLIENT_SECRET=$(echo '${{ secrets.MYSTIRA_AZURE_CREDENTIALS }}' | jq -r '.clientSecret')
-          ARM_SUBSCRIPTION_ID=$(echo '${{ secrets.MYSTIRA_AZURE_CREDENTIALS }}' | jq -r '.subscriptionId')
-          ARM_TENANT_ID=$(echo '${{ secrets.MYSTIRA_AZURE_CREDENTIALS }}' | jq -r '.tenantId')
-          echo "::add-mask::$ARM_CLIENT_SECRET"
           {
-            echo "ARM_CLIENT_ID=$ARM_CLIENT_ID"
-            echo "ARM_CLIENT_SECRET=$ARM_CLIENT_SECRET"
-            echo "ARM_SUBSCRIPTION_ID=$ARM_SUBSCRIPTION_ID"
-            echo "ARM_TENANT_ID=$ARM_TENANT_ID"
-            echo "ARM_USE_CLI=false"
+            echo "ARM_CLIENT_ID=${{ secrets.AZURE_CLIENT_ID }}"
+            echo "ARM_SUBSCRIPTION_ID=${{ secrets.AZURE_SUBSCRIPTION_ID }}"
+            echo "ARM_TENANT_ID=${{ secrets.AZURE_TENANT_ID }}"
+            echo "ARM_USE_OIDC=true"
           } >> "$GITHUB_ENV"
 
       - name: Terraform Init
@@ -661,7 +670,8 @@ jobs:
         with:
           name: terraform-plan-${{ env.ENVIRONMENT }}
           path: infra/terraform/environments/${{ env.ENVIRONMENT }}/tfplan
-          retention-days: 5
+          # Retain artifacts longer for production (30 days) vs dev/staging (7 days)
+          retention-days: ${{ env.ENVIRONMENT == 'prod' && 30 || 7 }}
 
       - name: Check AKS Cluster (for downstream jobs)
         id: check-aks-plan
@@ -708,24 +718,20 @@ jobs:
           terraform_version: ${{ env.TF_VERSION }}
           terraform_wrapper: false
 
-      - name: Azure Login
+      - name: Azure Login (OIDC)
         uses: azure/login@v2
         with:
-          creds: ${{ secrets.MYSTIRA_AZURE_CREDENTIALS }}
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-      - name: Set Azure credentials for Terraform
+      - name: Set Terraform environment variables
         run: |
-          ARM_CLIENT_ID=$(echo '${{ secrets.MYSTIRA_AZURE_CREDENTIALS }}' | jq -r '.clientId')
-          ARM_CLIENT_SECRET=$(echo '${{ secrets.MYSTIRA_AZURE_CREDENTIALS }}' | jq -r '.clientSecret')
-          ARM_SUBSCRIPTION_ID=$(echo '${{ secrets.MYSTIRA_AZURE_CREDENTIALS }}' | jq -r '.subscriptionId')
-          ARM_TENANT_ID=$(echo '${{ secrets.MYSTIRA_AZURE_CREDENTIALS }}' | jq -r '.tenantId')
-          echo "::add-mask::$ARM_CLIENT_SECRET"
           {
-            echo "ARM_CLIENT_ID=$ARM_CLIENT_ID"
-            echo "ARM_CLIENT_SECRET=$ARM_CLIENT_SECRET"
-            echo "ARM_SUBSCRIPTION_ID=$ARM_SUBSCRIPTION_ID"
-            echo "ARM_TENANT_ID=$ARM_TENANT_ID"
-            echo "ARM_USE_CLI=false"
+            echo "ARM_CLIENT_ID=${{ secrets.AZURE_CLIENT_ID }}"
+            echo "ARM_SUBSCRIPTION_ID=${{ secrets.AZURE_SUBSCRIPTION_ID }}"
+            echo "ARM_TENANT_ID=${{ secrets.AZURE_TENANT_ID }}"
+            echo "ARM_USE_OIDC=true"
           } >> "$GITHUB_ENV"
 
       - name: Download Plan
@@ -880,14 +886,19 @@ jobs:
       github.event.inputs.skip_ai_deployment != 'true' &&
       (github.event.inputs.components == 'all' || github.event.inputs.components == 'terraform-only' || github.event.inputs.components == '')
     environment: ${{ github.event.inputs.environment || 'dev' }}
+    permissions:
+      id-token: write
+      contents: read
     continue-on-error: true  # Don't fail the whole pipeline if Claude deployment fails
     steps:
       - uses: actions/checkout@v6
 
-      - name: Azure Login
+      - name: Azure Login (OIDC)
         uses: azure/login@v2
         with:
-          creds: ${{ secrets.MYSTIRA_AZURE_CREDENTIALS }}
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - name: Install Azure ML Extension
         run: |
@@ -948,6 +959,9 @@ jobs:
       (github.event.inputs.components == 'all' || github.event.inputs.components == 'terraform-only' || github.event.inputs.components == '') &&
       github.event.inputs.environment != 'staging'
     environment: ${{ github.event.inputs.environment || 'dev' }}
+    permissions:
+      id-token: write
+      contents: read
     steps:
       - uses: actions/checkout@v6
 
@@ -957,24 +971,20 @@ jobs:
           terraform_version: ${{ env.TF_VERSION }}
           terraform_wrapper: false
 
-      - name: Azure Login
+      - name: Azure Login (OIDC)
         uses: azure/login@v2
         with:
-          creds: ${{ secrets.MYSTIRA_AZURE_CREDENTIALS }}
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-      - name: Set Azure credentials for Terraform
+      - name: Set Terraform environment variables
         run: |
-          ARM_CLIENT_ID=$(echo '${{ secrets.MYSTIRA_AZURE_CREDENTIALS }}' | jq -r '.clientId')
-          ARM_CLIENT_SECRET=$(echo '${{ secrets.MYSTIRA_AZURE_CREDENTIALS }}' | jq -r '.clientSecret')
-          ARM_SUBSCRIPTION_ID=$(echo '${{ secrets.MYSTIRA_AZURE_CREDENTIALS }}' | jq -r '.subscriptionId')
-          ARM_TENANT_ID=$(echo '${{ secrets.MYSTIRA_AZURE_CREDENTIALS }}' | jq -r '.tenantId')
-          echo "::add-mask::$ARM_CLIENT_SECRET"
           {
-            echo "ARM_CLIENT_ID=$ARM_CLIENT_ID"
-            echo "ARM_CLIENT_SECRET=$ARM_CLIENT_SECRET"
-            echo "ARM_SUBSCRIPTION_ID=$ARM_SUBSCRIPTION_ID"
-            echo "ARM_TENANT_ID=$ARM_TENANT_ID"
-            echo "ARM_USE_CLI=false"
+            echo "ARM_CLIENT_ID=${{ secrets.AZURE_CLIENT_ID }}"
+            echo "ARM_SUBSCRIPTION_ID=${{ secrets.AZURE_SUBSCRIPTION_ID }}"
+            echo "ARM_TENANT_ID=${{ secrets.AZURE_TENANT_ID }}"
+            echo "ARM_USE_OIDC=true"
           } >> "$GITHUB_ENV"
 
       - name: Get Front Door Endpoints and Validation Tokens
@@ -1298,11 +1308,16 @@ jobs:
       needs.deploy-kubernetes.result == 'success' &&
       needs.deploy-kubernetes.outputs.ingress-ip != ''
     environment: ${{ github.event.inputs.environment || 'dev' }}
+    permissions:
+      id-token: write
+      contents: read
     steps:
-      - name: Azure Login
+      - name: Azure Login (OIDC)
         uses: azure/login@v2
         with:
-          creds: ${{ secrets.MYSTIRA_AZURE_CREDENTIALS }}
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - name: Configure DNS A Records
         run: |
@@ -1425,10 +1440,12 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - name: Azure Login
+      - name: Azure Login (OIDC)
         uses: azure/login@v2
         with:
-          creds: ${{ secrets.MYSTIRA_AZURE_CREDENTIALS }}
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - name: Setup kubectl
         uses: azure/setup-kubectl@v4
@@ -1544,6 +1561,26 @@ jobs:
             echo "missing_images=false" >> $GITHUB_OUTPUT
           fi
 
+      - name: Validate Workload Identity Client IDs
+        run: |
+          # Pre-deploy validation: Fail if placeholder UUIDs are detected
+          # This prevents accidental deployment with unconfigured workload identities
+          OVERLAY_DIR="infra/kubernetes/overlays/${{ env.ENVIRONMENT }}"
+
+          echo "Checking for placeholder workload identity client IDs..."
+          if grep -r -E '00000000-0000-0000-0000-00000000000[0-9]' "$OVERLAY_DIR" 2>/dev/null; then
+            echo "::error::Placeholder workload identity client IDs detected in $OVERLAY_DIR"
+            echo "::error::Replace placeholder UUIDs with actual Azure Managed Identity client IDs from Terraform outputs"
+            echo ""
+            echo "To get the correct client IDs, run:"
+            echo "  terraform output -json | jq -r '.admin_api_identity_client_id.value'"
+            echo ""
+            echo "See the kustomization.yaml comments for more details."
+            exit 1
+          fi
+
+          echo "✅ No placeholder workload identity client IDs detected"
+
       - name: Clean up deployments with incompatible selectors
         run: |
           # Delete existing deployments/statefulsets to avoid selector immutability errors
@@ -1603,7 +1640,10 @@ jobs:
     name: Deployment Summary
     runs-on: ubuntu-latest
     needs: [validate, bootstrap, plan-terraform, apply-terraform, deploy-claude-models, configure-front-door-dns, deploy-kubernetes, configure-dns]
+    # Always run summary job to report status regardless of previous job outcomes
     if: always()
+    permissions:
+      contents: read
     steps:
       - name: Final Summary
         run: |

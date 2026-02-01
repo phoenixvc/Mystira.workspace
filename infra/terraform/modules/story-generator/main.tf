@@ -7,139 +7,24 @@
 #
 # StoryGenerator follows the same deployment pattern as Mystira.App.
 # See ADR-0019 for architecture documentation.
+#
+# Module Structure:
+#   - variables.tf : Input variable definitions
+#   - outputs.tf   : Output value definitions
+#   - main.tf      : Resource and data source definitions (this file)
 
 terraform {
   required_version = ">= 1.5.0"
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~> 4.0"  # 4.x required for .NET 9.0 support
+      version = "~> 4.0"
     }
     random = {
       source  = "hashicorp/random"
       version = "~> 3.5"
     }
   }
-}
-
-variable "environment" {
-  description = "Deployment environment (dev, staging, prod)"
-  type        = string
-}
-
-variable "location" {
-  description = "Azure region for deployment"
-  type        = string
-  default     = "eastus"
-}
-
-variable "region_code" {
-  description = "Short region code (eus, euw, etc.) - defaults to 'eus' for eastus"
-  type        = string
-  default     = "eus"
-}
-
-variable "resource_group_name" {
-  description = "Name of the resource group"
-  type        = string
-}
-
-variable "vnet_id" {
-  description = "Virtual Network ID for story-generator deployment"
-  type        = string
-}
-
-variable "subnet_id" {
-  description = "Subnet ID for story-generator service"
-  type        = string
-}
-
-variable "shared_postgresql_server_id" {
-  description = "ID of shared PostgreSQL server (from shared/postgresql module)"
-  type        = string
-  default     = null
-}
-
-variable "shared_redis_cache_id" {
-  description = "ID of shared Redis cache (from shared/redis module)"
-  type        = string
-  default     = null
-}
-
-variable "shared_log_analytics_workspace_id" {
-  description = "ID of shared Log Analytics workspace for monitoring integration"
-  type        = string
-  default     = null
-}
-
-variable "use_shared_postgresql" {
-  description = "Whether to use shared PostgreSQL instead of creating dedicated one"
-  type        = bool
-  default     = false
-}
-
-variable "use_shared_redis" {
-  description = "Whether to use shared Redis instead of creating dedicated one"
-  type        = bool
-  default     = false
-}
-
-variable "use_shared_log_analytics" {
-  description = "Whether to use shared Log Analytics instead of creating dedicated one"
-  type        = bool
-  default     = false
-}
-
-variable "tags" {
-  description = "Tags to apply to all resources"
-  type        = map(string)
-  default     = {}
-}
-
-# -----------------------------------------------------------------------------
-# Static Web App Settings (Blazor WASM Frontend)
-# -----------------------------------------------------------------------------
-
-variable "enable_static_web_app" {
-  description = "Deploy Static Web App for Blazor WASM frontend"
-  type        = bool
-  default     = false
-}
-
-variable "static_web_app_sku" {
-  description = "SKU for Static Web App (Free or Standard)"
-  type        = string
-  default     = "Free"
-}
-
-variable "fallback_location" {
-  description = "Fallback region for resources not available in primary location (e.g., Static Web Apps not available in South Africa North)"
-  type        = string
-  default     = "eastus2"
-}
-
-variable "github_repository_url" {
-  description = "GitHub repository URL for Static Web App deployment (optional - for GitHub integration)"
-  type        = string
-  default     = ""
-}
-
-variable "github_branch" {
-  description = "GitHub branch for Static Web App deployment"
-  type        = string
-  default     = "dev"
-}
-
-variable "swa_custom_domain" {
-  description = "Custom domain for Static Web App (e.g., story.mystira.app)"
-  type        = string
-  default     = ""
-}
-
-variable "enable_swa_custom_domain" {
-  description = "Enable custom domain for Static Web App"
-  type        = bool
-  default     = false
 }
 
 locals {
@@ -163,6 +48,35 @@ locals {
     Project     = "Mystira"
   })
 }
+
+# =============================================================================
+# Lifecycle Protection Validation
+# =============================================================================
+# Note: Terraform lifecycle blocks require literal boolean values - variables
+# cannot be used directly. This check ensures the var.enable_prevent_destroy
+# flag aligns with the hardcoded lifecycle settings.
+#
+# For non-production environments where you need to destroy resources:
+# 1. Set enable_prevent_destroy = false in tfvars
+# 2. The check will warn but not block
+# 3. Use terraform state rm or -target to manage specific resources
+
+check "prevent_destroy_alignment" {
+  assert {
+    condition     = var.enable_prevent_destroy == true
+    error_message = "Warning: enable_prevent_destroy is false but lifecycle blocks have prevent_destroy = true. To destroy resources in non-prod, use 'terraform state rm' or modify the module directly."
+  }
+}
+
+# =============================================================================
+# Data Sources
+# =============================================================================
+
+data "azurerm_client_config" "current" {}
+
+# =============================================================================
+# Network Security Group
+# =============================================================================
 
 # Network Security Group for Story-Generator Service
 resource "azurerm_network_security_group" "story_generator" {
@@ -199,6 +113,10 @@ resource "azurerm_network_security_group" "story_generator" {
   tags = local.common_tags
 }
 
+# =============================================================================
+# Managed Identity
+# =============================================================================
+
 # Managed Identity for Story-Generator Service
 resource "azurerm_user_assigned_identity" "story_generator" {
   name                = "${local.name_prefix}-identity-${local.region_code}"
@@ -207,6 +125,10 @@ resource "azurerm_user_assigned_identity" "story_generator" {
 
   tags = local.common_tags
 }
+
+# =============================================================================
+# PostgreSQL Database
+# =============================================================================
 
 # PostgreSQL Database (if not using shared)
 resource "azurerm_postgresql_flexible_server" "story_generator" {
@@ -228,6 +150,10 @@ resource "azurerm_postgresql_flexible_server" "story_generator" {
   geo_redundant_backup_enabled = var.environment == "prod"
 
   tags = local.common_tags
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 # Private DNS Zone for PostgreSQL (if not using shared)
@@ -267,6 +193,10 @@ resource "random_password" "postgres" {
   special = true
 }
 
+# =============================================================================
+# Redis Cache
+# =============================================================================
+
 # Redis Cache (if not using shared)
 resource "azurerm_redis_cache" "story_generator" {
   count                = var.use_shared_redis ? 0 : 1
@@ -285,7 +215,15 @@ resource "azurerm_redis_cache" "story_generator" {
   }
 
   tags = local.common_tags
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
+
+# =============================================================================
+# Monitoring
+# =============================================================================
 
 # Log Analytics Workspace (if not using shared)
 resource "azurerm_log_analytics_workspace" "story_generator" {
@@ -297,6 +235,10 @@ resource "azurerm_log_analytics_workspace" "story_generator" {
   retention_in_days   = var.environment == "prod" ? 90 : 30
 
   tags = local.common_tags
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 # Application Insights for Story-Generator Monitoring
@@ -308,7 +250,15 @@ resource "azurerm_application_insights" "story_generator" {
   application_type    = "other"
 
   tags = local.common_tags
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
+
+# =============================================================================
+# Key Vault
+# =============================================================================
 
 # Key Vault for Story-Generator Secrets
 resource "azurerm_key_vault" "story_generator" {
@@ -348,9 +298,11 @@ resource "azurerm_key_vault" "story_generator" {
   }
 
   tags = local.common_tags
-}
 
-data "azurerm_client_config" "current" {}
+  lifecycle {
+    prevent_destroy = true
+  }
+}
 
 # Store PostgreSQL connection string in Key Vault
 # Note: When using shared PostgreSQL, connection string must be provided via environment outputs
@@ -381,7 +333,7 @@ resource "azurerm_static_web_app" "story_generator" {
   count = var.enable_static_web_app ? 1 : 0
 
   name                = "${local.name_prefix}-swa-${local.fallback_region_code}"
-  location            = var.fallback_location  # SWA not available in all regions
+  location            = var.fallback_location # SWA not available in all regions
   resource_group_name = var.resource_group_name
   sku_tier            = var.static_web_app_sku
   sku_size            = var.static_web_app_sku
@@ -390,6 +342,10 @@ resource "azurerm_static_web_app" "story_generator" {
     Component = "story-generator-web"
     Type      = "static-web-app"
   })
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 # Custom domain for Static Web App
@@ -400,99 +356,3 @@ resource "azurerm_static_web_app_custom_domain" "story_generator" {
   domain_name       = var.swa_custom_domain
   validation_type   = "cname-delegation"
 }
-
-# =============================================================================
-# Outputs
-# =============================================================================
-
-output "nsg_id" {
-  description = "Network Security Group ID for story-generator service"
-  value       = azurerm_network_security_group.story_generator.id
-}
-
-output "identity_id" {
-  description = "Managed Identity ID for story-generator service"
-  value       = azurerm_user_assigned_identity.story_generator.id
-}
-
-output "identity_principal_id" {
-  description = "Managed Identity Principal ID"
-  value       = azurerm_user_assigned_identity.story_generator.principal_id
-}
-
-output "postgresql_server_id" {
-  description = "PostgreSQL server ID (shared or dedicated)"
-  value       = var.use_shared_postgresql ? var.shared_postgresql_server_id : azurerm_postgresql_flexible_server.story_generator[0].id
-}
-
-output "postgresql_database_name" {
-  description = "PostgreSQL database name"
-  value       = var.use_shared_postgresql ? "storygenerator" : azurerm_postgresql_flexible_server_database.story_generator[0].name
-}
-
-output "redis_cache_id" {
-  description = "Redis cache ID (shared or dedicated)"
-  value       = var.use_shared_redis ? var.shared_redis_cache_id : azurerm_redis_cache.story_generator[0].id
-}
-
-output "log_analytics_workspace_id" {
-  description = "Log Analytics Workspace ID (shared or dedicated)"
-  value       = var.use_shared_log_analytics ? var.shared_log_analytics_workspace_id : azurerm_log_analytics_workspace.story_generator[0].id
-}
-
-output "app_insights_connection_string" {
-  description = "Application Insights connection string"
-  value       = azurerm_application_insights.story_generator.connection_string
-  sensitive   = true
-}
-
-output "key_vault_id" {
-  description = "Key Vault ID for story-generator secrets"
-  value       = azurerm_key_vault.story_generator.id
-}
-
-output "key_vault_uri" {
-  description = "Key Vault URI for story-generator secrets"
-  value       = azurerm_key_vault.story_generator.vault_uri
-}
-
-output "identity_client_id" {
-  description = "Managed Identity Client ID (for workload identity)"
-  value       = azurerm_user_assigned_identity.story_generator.client_id
-}
-
-# -----------------------------------------------------------------------------
-# Static Web App Outputs
-# -----------------------------------------------------------------------------
-
-output "static_web_app_id" {
-  description = "Static Web App ID"
-  value       = var.enable_static_web_app ? azurerm_static_web_app.story_generator[0].id : null
-}
-
-output "static_web_app_name" {
-  description = "Static Web App name"
-  value       = var.enable_static_web_app ? azurerm_static_web_app.story_generator[0].name : null
-}
-
-output "static_web_app_default_hostname" {
-  description = "Static Web App default hostname"
-  value       = var.enable_static_web_app ? azurerm_static_web_app.story_generator[0].default_host_name : null
-}
-
-output "static_web_app_url" {
-  description = "Static Web App URL"
-  value       = var.enable_static_web_app ? "https://${azurerm_static_web_app.story_generator[0].default_host_name}" : null
-}
-
-output "static_web_app_api_key" {
-  description = "Static Web App API key for deployments"
-  value       = var.enable_static_web_app ? azurerm_static_web_app.story_generator[0].api_key : null
-  sensitive   = true
-}
-
-output "swa_custom_domain" {
-  description = "Static Web App custom domain (if enabled)"
-  value       = var.enable_swa_custom_domain && var.swa_custom_domain != "" ? var.swa_custom_domain : null
-}
-

@@ -129,7 +129,7 @@ variable "bind_custom_domains" {
 variable "k8s_ingress_ip" {
   description = "Kubernetes NGINX ingress controller external IP (get with: kubectl get svc -n ingress-nginx)"
   type        = string
-  default     = ""  # Set after AKS is deployed
+  default     = "" # Set after AKS is deployed
 }
 
 # Reference existing DNS Zone (created by CI/CD bootstrap in shared terraform RG)

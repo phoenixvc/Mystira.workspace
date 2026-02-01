@@ -69,6 +69,7 @@ jobs:
   deploy:
     name: Deploy ${{ github.event.action || inputs.service }} to Dev
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     environment: dev
     outputs:
       submodule_path: ${{ steps.target.outputs.submodule_path }}
@@ -113,10 +114,12 @@ jobs:
             exit 1
           fi
 
-      - name: Azure Login
+      - name: Azure Login (OIDC)
         uses: azure/login@v2
         with:
-          creds: ${{ secrets.MYSTIRA_AZURE_CREDENTIALS }}
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - name: Setup kubectl
         uses: azure/setup-kubectl@v4

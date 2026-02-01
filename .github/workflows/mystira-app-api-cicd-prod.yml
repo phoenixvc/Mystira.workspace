@@ -44,6 +44,7 @@ jobs:
   validate-confirmation:
     name: Validate Confirmation
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     outputs:
       deployment_id: ${{ steps.generate_id.outputs.deployment_id }}
     steps:
@@ -63,6 +64,7 @@ jobs:
   deploy-to-staging-slot:
     name: Deploy to Staging Slot
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     needs: [validate-confirmation]
     environment:
       name: production-staging
@@ -78,10 +80,12 @@ jobs:
           submodules: recursive
           ref: main
 
-      - name: Azure Login
+      - name: Azure Login (OIDC)
         uses: azure/login@v2
         with:
-          creds: ${{ secrets.MYSTIRA_AZURE_CREDENTIALS }}
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v5
@@ -118,6 +122,7 @@ jobs:
   health-check-staging:
     name: Health Check Staging Slot
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     needs: [deploy-to-staging-slot]
     if: ${{ github.event.inputs.skip_health_check != 'true' }}
     steps:
@@ -189,6 +194,7 @@ jobs:
   swap-to-production:
     name: Swap Staging to Production
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     needs: [validate-confirmation, deploy-to-staging-slot, health-check-staging]
     if: ${{ always() && needs.deploy-to-staging-slot.result == 'success' && (needs.health-check-staging.result == 'success' || needs.health-check-staging.result == 'skipped') }}
     environment:
@@ -198,10 +204,12 @@ jobs:
       contents: read
       id-token: write
     steps:
-      - name: Azure Login
+      - name: Azure Login (OIDC)
         uses: azure/login@v2
         with:
-          creds: ${{ secrets.MYSTIRA_AZURE_CREDENTIALS }}
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - name: Record pre-swap state
         id: pre_swap
@@ -262,6 +270,7 @@ jobs:
   post-deployment-monitoring:
     name: Post-Deployment Monitoring
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     needs: [swap-to-production]
     steps:
       - name: Monitor error rates
@@ -302,6 +311,7 @@ jobs:
   notify:
     name: Deployment Notification
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     needs: [validate-confirmation, deploy-to-staging-slot, health-check-staging, swap-to-production, post-deployment-monitoring]
     if: always()
     steps:

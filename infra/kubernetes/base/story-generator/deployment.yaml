@@ -34,10 +34,36 @@ spec:
       securityContext:
         runAsUser: 1000
         runAsNonRoot: true
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    app: mys-story-generator
+                topologyKey: kubernetes.io/hostname
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: topology.kubernetes.io/zone
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              app: mys-story-generator
       containers:
         - name: story-generator
           image: myssharedacr.azurecr.io/story-generator:v0.0.0
           imagePullPolicy: IfNotPresent
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+          # ASP.NET Core requires writable temp storage for Data Protection keys
+          volumeMounts:
+            - name: tmp-volume
+              mountPath: /tmp
           ports:
             - name: http
               containerPort: 8080
@@ -103,6 +129,16 @@ spec:
               port: 8081
             initialDelaySeconds: 30
             periodSeconds: 5
+          startupProbe:
+            httpGet:
+              path: /health
+              port: 8081
+            initialDelaySeconds: 0
+            periodSeconds: 5
+            failureThreshold: 30
+      volumes:
+        - name: tmp-volume
+          emptyDir: {}
 ---
 apiVersion: v1
 kind: Service
@@ -153,3 +189,19 @@ spec:
         target:
           type: Utilization
           averageUtilization: 80
+---
+# PodDisruptionBudget: Ensures at least 1 pod remains available during voluntary
+# disruptions (node drains, cluster upgrades, etc.) to maintain story-generator
+# service availability. This supports our SLA requirements for the AI story
+# generation API by preventing complete service interruption during maintenance.
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: mys-story-generator-pdb
+  labels:
+    app: mys-story-generator
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: mys-story-generator

@@ -5,6 +5,7 @@ using Moq;
 using Mystira.Application.Ports.Messaging;
 using Mystira.Infrastructure.Teams.Configuration;
 using Mystira.Infrastructure.Teams.Services;
+using Xunit;
 
 namespace Mystira.Infrastructure.Teams.Tests;
 

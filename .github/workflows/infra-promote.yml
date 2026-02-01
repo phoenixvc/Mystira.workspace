@@ -1,0 +1,469 @@
+name: "[CD] Infrastructure - Environment Promotion"
+
+# Environment Promotion: Promotes infrastructure configuration from one environment to another
+# Ensures consistent deployments across dev -> staging -> prod
+
+on:
+  workflow_dispatch:
+    inputs:
+      source_environment:
+        description: "Source environment"
+        required: true
+        type: choice
+        options:
+          - dev
+          - staging
+      target_environment:
+        description: "Target environment"
+        required: true
+        type: choice
+        options:
+          - staging
+          - prod
+      product:
+        description: "Product to promote (or 'all' for all products)"
+        required: true
+        type: choice
+        options:
+          - all
+          - shared-infra
+          - mystira-app
+          - story-generator
+          - admin
+          - publisher
+          - chain
+      dry_run:
+        description: "Dry run (plan only, no apply)"
+        required: false
+        type: boolean
+        default: true
+
+env:
+  TF_VERSION: "1.5.0"
+  TERRAGRUNT_VERSION: "0.55.0"
+  ARM_USE_OIDC: true
+  ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+  ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+  ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  # Validate promotion path
+  validate-promotion:
+    name: Validate Promotion Path
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      valid: ${{ steps.validate.outputs.valid }}
+    steps:
+      - name: Validate promotion path
+        id: validate
+        run: |
+          SOURCE="${{ inputs.source_environment }}"
+          TARGET="${{ inputs.target_environment }}"
+
+          # Valid promotion paths: dev -> staging, staging -> prod
+          if [[ "$SOURCE" == "dev" && "$TARGET" == "staging" ]]; then
+            echo "valid=true" >> $GITHUB_OUTPUT
+            echo "✅ Valid promotion: dev -> staging"
+          elif [[ "$SOURCE" == "staging" && "$TARGET" == "prod" ]]; then
+            echo "valid=true" >> $GITHUB_OUTPUT
+            echo "✅ Valid promotion: staging -> prod"
+          else
+            echo "valid=false" >> $GITHUB_OUTPUT
+            echo "❌ Invalid promotion path: $SOURCE -> $TARGET"
+            echo "   Valid paths: dev -> staging, staging -> prod"
+            exit 1
+          fi
+
+  # Compare configurations
+  compare-configs:
+    name: Compare Configurations
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: validate-promotion
+    if: needs.validate-promotion.outputs.valid == 'true'
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Compare environment configurations
+        run: |
+          echo "## Configuration Comparison" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Comparing **${{ inputs.source_environment }}** → **${{ inputs.target_environment }}**" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          cd infra/terraform
+
+          PRODUCTS="${{ inputs.product }}"
+          if [[ "$PRODUCTS" == "all" ]]; then
+            PRODUCTS="shared-infra mystira-app story-generator admin publisher chain"
+          fi
+
+          for product in $PRODUCTS; do
+            if [[ "$product" == "shared-infra" ]]; then
+              SOURCE_DIR="shared-infra/environments/${{ inputs.source_environment }}"
+              TARGET_DIR="shared-infra/environments/${{ inputs.target_environment }}"
+            else
+              SOURCE_DIR="products/$product/environments/${{ inputs.source_environment }}"
+              TARGET_DIR="products/$product/environments/${{ inputs.target_environment }}"
+            fi
+
+            echo "### $product" >> $GITHUB_STEP_SUMMARY
+
+            if [[ -d "$SOURCE_DIR" && -d "$TARGET_DIR" ]]; then
+              # Compare main.tf files
+              if [[ -f "$SOURCE_DIR/main.tf" && -f "$TARGET_DIR/main.tf" ]]; then
+                if diff -q "$SOURCE_DIR/main.tf" "$TARGET_DIR/main.tf" > /dev/null 2>&1; then
+                  echo "- main.tf: ✅ Identical" >> $GITHUB_STEP_SUMMARY
+                else
+                  echo "- main.tf: ⚠️ Different (expected for environment-specific settings)" >> $GITHUB_STEP_SUMMARY
+                fi
+              fi
+
+              # Compare terragrunt.hcl files
+              if [[ -f "$SOURCE_DIR/terragrunt.hcl" && -f "$TARGET_DIR/terragrunt.hcl" ]]; then
+                if diff -q "$SOURCE_DIR/terragrunt.hcl" "$TARGET_DIR/terragrunt.hcl" > /dev/null 2>&1; then
+                  echo "- terragrunt.hcl: ✅ Identical" >> $GITHUB_STEP_SUMMARY
+                else
+                  echo "- terragrunt.hcl: ⚠️ Different (environment-specific inputs)" >> $GITHUB_STEP_SUMMARY
+                fi
+              fi
+            else
+              echo "- ⚠️ Directory missing" >> $GITHUB_STEP_SUMMARY
+            fi
+
+            echo "" >> $GITHUB_STEP_SUMMARY
+          done
+
+  # Plan shared-infra first (when 'all' is selected or shared-infra is the target)
+  plan-shared-infra:
+    name: Plan - shared-infra
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: [validate-promotion, compare-configs]
+    if: inputs.product == 'all' || inputs.product == 'shared-infra'
+    environment: ${{ inputs.target_environment }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          submodules: recursive
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      - name: Setup Terragrunt
+        run: |
+          # Download Terragrunt binary and checksums
+          wget -q -O terragrunt https://github.com/gruntwork-io/terragrunt/releases/download/v${{ env.TERRAGRUNT_VERSION }}/terragrunt_linux_amd64
+          wget -q -O SHA256SUMS https://github.com/gruntwork-io/terragrunt/releases/download/v${{ env.TERRAGRUNT_VERSION }}/SHA256SUMS
+
+          # Verify checksum
+          EXPECTED_CHECKSUM=$(grep "terragrunt_linux_amd64" SHA256SUMS | awk '{print $1}')
+          ACTUAL_CHECKSUM=$(sha256sum terragrunt | awk '{print $1}')
+          if [ "$EXPECTED_CHECKSUM" != "$ACTUAL_CHECKSUM" ]; then
+            echo "::error::Terragrunt checksum verification failed!"
+            echo "Expected: $EXPECTED_CHECKSUM"
+            echo "Actual: $ACTUAL_CHECKSUM"
+            exit 1
+          fi
+          echo "Terragrunt checksum verified successfully"
+
+          chmod +x terragrunt
+          sudo mv terragrunt /usr/local/bin/
+          rm -f SHA256SUMS
+
+      - name: Azure Login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Terragrunt Init
+        run: |
+          cd infra/terraform/shared-infra/environments/${{ inputs.target_environment }}
+          terragrunt init --terragrunt-non-interactive
+        env:
+          TF_VAR_environment: ${{ inputs.target_environment }}
+
+      - name: Terragrunt Plan
+        id: plan
+        run: |
+          cd infra/terraform/shared-infra/environments/${{ inputs.target_environment }}
+          terragrunt plan -out=promote.tfplan --terragrunt-non-interactive | tee plan_output.txt
+
+          # Check if there are changes
+          if grep -q "No changes" plan_output.txt; then
+            echo "changes=false" >> $GITHUB_OUTPUT
+          else
+            echo "changes=true" >> $GITHUB_OUTPUT
+          fi
+        env:
+          TF_VAR_environment: ${{ inputs.target_environment }}
+
+      - name: Upload Plan
+        uses: actions/upload-artifact@v4
+        with:
+          name: promote-plan-shared-infra-${{ inputs.target_environment }}
+          path: infra/terraform/shared-infra/environments/${{ inputs.target_environment }}/promote.tfplan
+          retention-days: 1
+
+  # Plan other products (after shared-infra when 'all' is selected)
+  plan-products:
+    name: Plan - ${{ matrix.product }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: [validate-promotion, compare-configs, plan-shared-infra]
+    if: always() && needs.validate-promotion.outputs.valid == 'true' && needs.compare-configs.result == 'success' && (inputs.product == 'all' || (inputs.product != 'shared-infra' && inputs.product != 'all'))
+    strategy:
+      fail-fast: false
+      matrix:
+        product: ${{ inputs.product == 'all' && fromJson('["mystira-app", "story-generator", "admin", "publisher", "chain"]') || fromJson(format('["{0}"]', inputs.product)) }}
+    environment: ${{ inputs.target_environment }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          submodules: recursive
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      - name: Setup Terragrunt
+        run: |
+          # Download Terragrunt binary and checksums
+          wget -q -O terragrunt https://github.com/gruntwork-io/terragrunt/releases/download/v${{ env.TERRAGRUNT_VERSION }}/terragrunt_linux_amd64
+          wget -q -O SHA256SUMS https://github.com/gruntwork-io/terragrunt/releases/download/v${{ env.TERRAGRUNT_VERSION }}/SHA256SUMS
+
+          # Verify checksum
+          EXPECTED_CHECKSUM=$(grep "terragrunt_linux_amd64" SHA256SUMS | awk '{print $1}')
+          ACTUAL_CHECKSUM=$(sha256sum terragrunt | awk '{print $1}')
+          if [ "$EXPECTED_CHECKSUM" != "$ACTUAL_CHECKSUM" ]; then
+            echo "::error::Terragrunt checksum verification failed!"
+            echo "Expected: $EXPECTED_CHECKSUM"
+            echo "Actual: $ACTUAL_CHECKSUM"
+            exit 1
+          fi
+          echo "Terragrunt checksum verified successfully"
+
+          chmod +x terragrunt
+          sudo mv terragrunt /usr/local/bin/
+          rm -f SHA256SUMS
+
+      - name: Azure Login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Terragrunt Init
+        run: |
+          cd infra/terraform/products/${{ matrix.product }}/environments/${{ inputs.target_environment }}
+          terragrunt init --terragrunt-non-interactive
+        env:
+          TF_VAR_environment: ${{ inputs.target_environment }}
+
+      - name: Terragrunt Plan
+        id: plan
+        run: |
+          cd infra/terraform/products/${{ matrix.product }}/environments/${{ inputs.target_environment }}
+          terragrunt plan -out=promote.tfplan --terragrunt-non-interactive | tee plan_output.txt
+
+          # Check if there are changes
+          if grep -q "No changes" plan_output.txt; then
+            echo "changes=false" >> $GITHUB_OUTPUT
+          else
+            echo "changes=true" >> $GITHUB_OUTPUT
+          fi
+        env:
+          TF_VAR_environment: ${{ inputs.target_environment }}
+
+      - name: Upload Plan
+        uses: actions/upload-artifact@v4
+        with:
+          name: promote-plan-${{ matrix.product }}-${{ inputs.target_environment }}
+          path: infra/terraform/products/${{ matrix.product }}/environments/${{ inputs.target_environment }}/promote.tfplan
+          retention-days: 1
+
+  # Apply shared-infra first (if not dry run)
+  apply-shared-infra:
+    name: Apply - shared-infra
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: [plan-shared-infra, plan-products]
+    if: always() && inputs.dry_run == false && (inputs.product == 'all' || inputs.product == 'shared-infra') && needs.plan-shared-infra.result == 'success'
+    environment:
+      name: ${{ inputs.target_environment }}-deploy
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          submodules: recursive
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      - name: Setup Terragrunt
+        run: |
+          # Download Terragrunt binary and checksums
+          wget -q -O terragrunt https://github.com/gruntwork-io/terragrunt/releases/download/v${{ env.TERRAGRUNT_VERSION }}/terragrunt_linux_amd64
+          wget -q -O SHA256SUMS https://github.com/gruntwork-io/terragrunt/releases/download/v${{ env.TERRAGRUNT_VERSION }}/SHA256SUMS
+
+          # Verify checksum
+          EXPECTED_CHECKSUM=$(grep "terragrunt_linux_amd64" SHA256SUMS | awk '{print $1}')
+          ACTUAL_CHECKSUM=$(sha256sum terragrunt | awk '{print $1}')
+          if [ "$EXPECTED_CHECKSUM" != "$ACTUAL_CHECKSUM" ]; then
+            echo "::error::Terragrunt checksum verification failed!"
+            echo "Expected: $EXPECTED_CHECKSUM"
+            echo "Actual: $ACTUAL_CHECKSUM"
+            exit 1
+          fi
+          echo "Terragrunt checksum verified successfully"
+
+          chmod +x terragrunt
+          sudo mv terragrunt /usr/local/bin/
+          rm -f SHA256SUMS
+
+      - name: Azure Login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Download Plan
+        uses: actions/download-artifact@v4
+        with:
+          name: promote-plan-shared-infra-${{ inputs.target_environment }}
+          path: infra/terraform/shared-infra/environments/${{ inputs.target_environment }}
+
+      - name: Terragrunt Init
+        run: |
+          cd infra/terraform/shared-infra/environments/${{ inputs.target_environment }}
+          terragrunt init --terragrunt-non-interactive
+        env:
+          TF_VAR_environment: ${{ inputs.target_environment }}
+
+      - name: Terragrunt Apply
+        run: |
+          cd infra/terraform/shared-infra/environments/${{ inputs.target_environment }}
+          terragrunt apply promote.tfplan --terragrunt-non-interactive
+        env:
+          TF_VAR_environment: ${{ inputs.target_environment }}
+
+      - name: Apply Summary
+        run: |
+          echo "## Promotion Applied" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "✅ **shared-infra** promoted to **${{ inputs.target_environment }}**" >> $GITHUB_STEP_SUMMARY
+
+  # Apply other products (after shared-infra, if not dry run)
+  apply-products:
+    name: Apply - ${{ matrix.product }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: [plan-products, apply-shared-infra]
+    if: always() && inputs.dry_run == false && (needs.plan-products.result == 'success' || needs.plan-products.result == 'skipped') && (needs.apply-shared-infra.result == 'success' || needs.apply-shared-infra.result == 'skipped')
+    strategy:
+      fail-fast: false
+      matrix:
+        product: ${{ inputs.product == 'all' && fromJson('["mystira-app", "story-generator", "admin", "publisher", "chain"]') || fromJson(format('["{0}"]', inputs.product)) }}
+    environment:
+      name: ${{ inputs.target_environment }}-deploy
+    steps:
+      - name: Skip if not applicable
+        if: inputs.product != 'all' && inputs.product == 'shared-infra'
+        run: echo "Skipping - shared-infra already applied"
+
+      - uses: actions/checkout@v6
+        if: inputs.product == 'all' || inputs.product != 'shared-infra'
+        with:
+          submodules: recursive
+
+      - name: Setup Terraform
+        if: inputs.product == 'all' || inputs.product != 'shared-infra'
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      - name: Setup Terragrunt
+        if: inputs.product == 'all' || inputs.product != 'shared-infra'
+        run: |
+          wget -O terragrunt https://github.com/gruntwork-io/terragrunt/releases/download/v${{ env.TERRAGRUNT_VERSION }}/terragrunt_linux_amd64
+          chmod +x terragrunt
+          sudo mv terragrunt /usr/local/bin/
+
+      - name: Azure Login (OIDC)
+        if: inputs.product == 'all' || inputs.product != 'shared-infra'
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Download Plan
+        if: inputs.product == 'all' || inputs.product != 'shared-infra'
+        uses: actions/download-artifact@v4
+        with:
+          name: promote-plan-${{ matrix.product }}-${{ inputs.target_environment }}
+          path: infra/terraform/products/${{ matrix.product }}/environments/${{ inputs.target_environment }}
+
+      - name: Terragrunt Init
+        if: inputs.product == 'all' || inputs.product != 'shared-infra'
+        run: |
+          cd infra/terraform/products/${{ matrix.product }}/environments/${{ inputs.target_environment }}
+          terragrunt init --terragrunt-non-interactive
+        env:
+          TF_VAR_environment: ${{ inputs.target_environment }}
+
+      - name: Terragrunt Apply
+        if: inputs.product == 'all' || inputs.product != 'shared-infra'
+        run: |
+          cd infra/terraform/products/${{ matrix.product }}/environments/${{ inputs.target_environment }}
+          terragrunt apply promote.tfplan --terragrunt-non-interactive
+        env:
+          TF_VAR_environment: ${{ inputs.target_environment }}
+
+      - name: Apply Summary
+        if: inputs.product == 'all' || inputs.product != 'shared-infra'
+        run: |
+          echo "## Promotion Applied" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "✅ **${{ matrix.product }}** promoted to **${{ inputs.target_environment }}**" >> $GITHUB_STEP_SUMMARY
+
+  # Final summary
+  promotion-summary:
+    name: Promotion Summary
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    needs: [plan-shared-infra, plan-products, apply-shared-infra, apply-products]
+    if: always()
+    steps:
+      - name: Generate Summary
+        run: |
+          echo "## Environment Promotion Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Setting | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|---------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Source | ${{ inputs.source_environment }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Target | ${{ inputs.target_environment }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Product | ${{ inputs.product }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Dry Run | ${{ inputs.dry_run }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [[ "${{ inputs.dry_run }}" == "true" ]]; then
+            echo "ℹ️ This was a **dry run**. No changes were applied." >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "To apply the promotion, re-run with **Dry run** unchecked." >> $GITHUB_STEP_SUMMARY
+          else
+            echo "✅ Promotion completed successfully." >> $GITHUB_STEP_SUMMARY
+          fi
