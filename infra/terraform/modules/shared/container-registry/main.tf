@@ -74,6 +74,31 @@ variable "tags" {
   default     = {}
 }
 
+# Private Endpoint Configuration
+variable "private_endpoint_enabled" {
+  description = "Enable private endpoint for ACR (requires Premium SKU)"
+  type        = bool
+  default     = false
+}
+
+variable "private_endpoint_subnet_id" {
+  description = "Subnet ID for the private endpoint (required if private_endpoint_enabled is true)"
+  type        = string
+  default     = null
+}
+
+variable "private_dns_zone_id" {
+  description = "Private DNS zone ID for ACR (azurecr.io). If null, a new zone will be created."
+  type        = string
+  default     = null
+}
+
+variable "virtual_network_id" {
+  description = "Virtual network ID for DNS zone link (required if creating new private DNS zone)"
+  type        = string
+  default     = null
+}
+
 locals {
   common_tags = merge(var.tags, {
     Component   = "container-registry"
@@ -114,6 +139,53 @@ resource "azurerm_container_registry" "shared" {
   }
 }
 
+# Private DNS Zone for ACR (optional - created if not provided)
+resource "azurerm_private_dns_zone" "acr" {
+  count = var.private_endpoint_enabled && var.private_dns_zone_id == null ? 1 : 0
+
+  name                = "privatelink.azurecr.io"
+  resource_group_name = var.resource_group_name
+  tags                = local.common_tags
+}
+
+# Link private DNS zone to VNet
+resource "azurerm_private_dns_zone_virtual_network_link" "acr" {
+  count = var.private_endpoint_enabled && var.private_dns_zone_id == null && var.virtual_network_id != null ? 1 : 0
+
+  name                  = "${var.acr_name}-dns-link"
+  resource_group_name   = var.resource_group_name
+  private_dns_zone_name = azurerm_private_dns_zone.acr[0].name
+  virtual_network_id    = var.virtual_network_id
+  registration_enabled  = false
+  tags                  = local.common_tags
+}
+
+# Private Endpoint for ACR
+resource "azurerm_private_endpoint" "acr" {
+  count = var.private_endpoint_enabled ? 1 : 0
+
+  name                = "${var.acr_name}-pe"
+  location            = var.location
+  resource_group_name = var.resource_group_name
+  subnet_id           = var.private_endpoint_subnet_id
+
+  private_service_connection {
+    name                           = "${var.acr_name}-psc"
+    private_connection_resource_id = azurerm_container_registry.shared.id
+    is_manual_connection           = false
+    subresource_names              = ["registry"]
+  }
+
+  private_dns_zone_group {
+    name = "acr-dns-zone-group"
+    private_dns_zone_ids = [
+      var.private_dns_zone_id != null ? var.private_dns_zone_id : azurerm_private_dns_zone.acr[0].id
+    ]
+  }
+
+  tags = local.common_tags
+}
+
 # Outputs
 output "acr_id" {
   description = "Container Registry ID"
@@ -140,4 +212,19 @@ output "acr_admin_password" {
   description = "Container Registry admin password"
   value       = azurerm_container_registry.shared.admin_password
   sensitive   = true
+}
+
+output "private_endpoint_id" {
+  description = "Private endpoint ID (if enabled)"
+  value       = var.private_endpoint_enabled ? azurerm_private_endpoint.acr[0].id : null
+}
+
+output "private_endpoint_ip" {
+  description = "Private endpoint IP address (if enabled)"
+  value       = var.private_endpoint_enabled ? azurerm_private_endpoint.acr[0].private_service_connection[0].private_ip_address : null
+}
+
+output "private_dns_zone_id" {
+  description = "Private DNS zone ID (if created by module)"
+  value       = var.private_endpoint_enabled && var.private_dns_zone_id == null ? azurerm_private_dns_zone.acr[0].id : var.private_dns_zone_id
 }

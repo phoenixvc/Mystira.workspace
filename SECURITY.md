@@ -95,6 +95,26 @@ For detailed authentication architecture, see:
 | Cosmos DB | Private Endpoint |
 | Redis | Private Endpoint |
 
+#### Internal Service-to-Service Security
+
+| Service | Current | Target |
+|---------|---------|--------|
+| Chain RPC (8545) | HTTP + NetworkPolicy | mTLS via service mesh |
+| Chain WebSocket (8546) | HTTP + NetworkPolicy | mTLS via service mesh |
+| Inter-service API calls | HTTP + NetworkPolicy | mTLS via service mesh |
+
+**Current Protections:**
+- Kubernetes NetworkPolicies restrict pod-to-pod communication
+- Services use ClusterIP (not exposed externally)
+- External traffic uses TLS via Ingress
+
+**mTLS Roadmap:**
+For production deployments requiring zero-trust internal networking:
+1. Deploy Istio or Linkerd service mesh
+2. Enable automatic mTLS injection
+3. Set `PeerAuthentication` to STRICT mode
+4. See [Chain Module README](infra/terraform/modules/chain/README.md) for implementation details
+
 ### Data Protection
 
 #### Encryption

@@ -84,3 +84,69 @@ workload_identities = {
 | `application_insights_id` | Application Insights resource ID |
 | `application_insights_connection_string` | App Insights connection string (sensitive) |
 | `key_vault_id` | Key Vault resource ID |
+
+## Security Considerations
+
+### Current Security Measures
+
+1. **External TLS**: All external traffic is encrypted via TLS at the Ingress level (cert-manager with Let's Encrypt)
+2. **Network Policies**: Kubernetes NetworkPolicies restrict which pods can access chain RPC endpoints
+3. **Network Security Groups**: Azure NSGs limit RPC/WS access to VirtualNetwork sources only
+4. **Private Storage**: Chain storage account has `public_network_access_enabled = false`
+5. **Workload Identity**: Pods use Azure Managed Identity (no credentials in code)
+
+### Internal RPC Security (mTLS Roadmap)
+
+The chain RPC currently uses HTTP for internal cluster communication. While protected by:
+- Kubernetes NetworkPolicies (only authorized pods can connect)
+- ClusterIP services (not exposed outside the cluster)
+- Azure NSG rules (VNet-only access)
+
+For enhanced security, consider implementing mTLS for internal communication:
+
+#### Option 1: Service Mesh (Recommended for production)
+
+```bash
+# Install Istio with strict mTLS
+istioctl install --set profile=default
+kubectl label namespace mystira istio-injection=enabled
+
+# Enable strict mTLS for the namespace
+kubectl apply -f - <<EOF
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
+metadata:
+  name: default
+  namespace: mystira
+spec:
+  mtls:
+    mode: STRICT
+EOF
+```
+
+#### Option 2: Application-Level TLS
+
+Configure the chain application to use TLS with certificates from Key Vault:
+
+```yaml
+# In chain ConfigMap
+tls_enabled: "true"
+tls_cert_secret: "chain-tls-cert"
+tls_key_secret: "chain-tls-key"
+```
+
+#### Option 3: Linkerd (Lightweight alternative)
+
+```bash
+# Install Linkerd
+linkerd install | kubectl apply -f -
+linkerd inject deployment.yaml | kubectl apply -f -
+```
+
+### Recommendations by Environment
+
+| Environment | Security Level | Recommendation |
+|-------------|---------------|----------------|
+| dev | Basic | NetworkPolicies + external TLS |
+| staging | Enhanced | NetworkPolicies + service mesh (permissive) |
+| prod | Maximum | Service mesh with strict mTLS |
