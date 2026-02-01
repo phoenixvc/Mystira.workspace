@@ -114,27 +114,27 @@ jobs:
           fi
 
           if [ ${#PROJECTS[@]} -eq 0 ]; then
-            echo "has_changes=false" >> $GITHUB_OUTPUT
-            echo "projects=[]" >> $GITHUB_OUTPUT
+            echo "has_changes=false" >> "$GITHUB_OUTPUT"
+            echo "projects=[]" >> "$GITHUB_OUTPUT"
           else
-            echo "has_changes=true" >> $GITHUB_OUTPUT
+            echo "has_changes=true" >> "$GITHUB_OUTPUT"
             # Join with commas
             PROJECTS_JSON=$(printf '%s,' "${PROJECTS[@]}")
             PROJECTS_JSON="[${PROJECTS_JSON%,}]"
-            echo "projects=$PROJECTS_JSON" >> $GITHUB_OUTPUT
+            echo "projects=$PROJECTS_JSON" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Summary
         run: |
-          echo "## Infrastructure Changes Detected" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## Infrastructure Changes Detected" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
           if [ "${{ steps.changes.outputs.has_changes }}" == "true" ]; then
-            echo "Projects affected:" >> $GITHUB_STEP_SUMMARY
-            echo '```json' >> $GITHUB_STEP_SUMMARY
-            echo '${{ steps.changes.outputs.projects }}' | jq '.' >> $GITHUB_STEP_SUMMARY
-            echo '```' >> $GITHUB_STEP_SUMMARY
+            echo "Projects affected:" >> "$GITHUB_STEP_SUMMARY"
+            echo '```json' >> "$GITHUB_STEP_SUMMARY"
+            echo '${{ steps.changes.outputs.projects }}' | jq '.' >> "$GITHUB_STEP_SUMMARY"
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
           else
-            echo "No infrastructure projects affected." >> $GITHUB_STEP_SUMMARY
+            echo "No infrastructure projects affected." >> "$GITHUB_STEP_SUMMARY"
           fi
 
   # ===========================================================================
@@ -202,20 +202,21 @@ jobs:
         working-directory: ${{ matrix.project.dir }}
         run: |
           set +e
+          set -o pipefail
           terragrunt plan -detailed-exitcode -out=tfplan --terragrunt-non-interactive 2>&1 | tee plan_output.txt
-          EXIT_CODE=$?
+          EXIT_CODE=${PIPESTATUS[0]}
           set -e
 
           # Exit codes: 0 = no changes, 1 = error, 2 = changes
           if [ $EXIT_CODE -eq 0 ]; then
-            echo "changes=false" >> $GITHUB_OUTPUT
-            echo "status=success" >> $GITHUB_OUTPUT
+            echo "changes=false" >> "$GITHUB_OUTPUT"
+            echo "status=success" >> "$GITHUB_OUTPUT"
           elif [ $EXIT_CODE -eq 2 ]; then
-            echo "changes=true" >> $GITHUB_OUTPUT
-            echo "status=success" >> $GITHUB_OUTPUT
+            echo "changes=true" >> "$GITHUB_OUTPUT"
+            echo "status=success" >> "$GITHUB_OUTPUT"
           else
-            echo "changes=false" >> $GITHUB_OUTPUT
-            echo "status=failure" >> $GITHUB_OUTPUT
+            echo "changes=false" >> "$GITHUB_OUTPUT"
+            echo "status=failure" >> "$GITHUB_OUTPUT"
             exit 1
           fi
 
@@ -473,15 +474,18 @@ jobs:
           cd "$DIR"
           terragrunt init --terragrunt-non-interactive
 
-          # Check for downloaded plan artifact
-          PROJECT_NAME=$(basename "$(dirname "$(dirname "$DIR")")")-$(basename "$DIR")
-          PLAN_FILE="../../../plans/tfplan-${PROJECT_NAME}/tfplan"
+          # Compute project name matching detect-changes output format
+          # e.g., infra/terraform/shared-infra/environments/dev -> shared-infra-dev
+          # e.g., infra/terraform/products/mystira-app/environments/dev -> mystira-app-dev
+          PROJECT_NAME="$(basename "$(dirname "$(dirname "$DIR")")")-$(basename "$DIR")"
+          PLAN_FILE="${GITHUB_WORKSPACE}/plans/tfplan-${PROJECT_NAME}/tfplan"
 
+          echo "Looking for plan artifact: $PLAN_FILE"
           if [ -f "$PLAN_FILE" ]; then
             echo "Using saved plan artifact..."
             terragrunt apply "$PLAN_FILE" --terragrunt-non-interactive
           else
-            echo "::warning::No saved plan found, running fresh apply..."
+            echo "::warning::No saved plan found at $PLAN_FILE, running fresh apply..."
             terragrunt apply -auto-approve --terragrunt-non-interactive
           fi
 
