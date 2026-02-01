@@ -43,7 +43,7 @@ jobs:
           dotnet-version: '9.0.x'
           source-url: https://nuget.pkg.github.com/phoenixvc/index.json
         env:
-          NUGET_AUTH_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN }}
+          NUGET_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build Mystira.Authoring.Abstractions
         run: dotnet build packages/authoring/Mystira.Authoring.Abstractions --configuration Release
@@ -81,7 +81,7 @@ jobs:
           dotnet-version: '9.0.x'
           source-url: https://nuget.pkg.github.com/phoenixvc/index.json
         env:
-          NUGET_AUTH_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN }}
+          NUGET_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Restore packages
         run: |
