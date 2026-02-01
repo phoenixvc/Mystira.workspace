@@ -92,7 +92,7 @@ jobs:
           if echo "$CHANGED" | grep -q "infra/terraform/shared-infra/\|infra/terraform/modules/shared/\|infra/terraform/terragrunt.hcl"; then
             for env in dev staging prod; do
               if [ -d "infra/terraform/shared-infra/environments/$env" ]; then
-                PROJECTS+=("{\"name\":\"shared-infra-$env\",\"dir\":\"infra/terraform/shared-infra/environments/$env\",\"env\":\"$env\"}")
+                PROJECTS+=("{\"name\":\"shared-infra-$env\",\"dir\":\"infra/terraform/shared-infra/environments/$env\",\"env\":\"$env\",\"type\":\"terragrunt\"}")
               fi
             done
           fi
@@ -102,15 +102,21 @@ jobs:
             if echo "$CHANGED" | grep -q "infra/terraform/products/$product/\|infra/terraform/modules/$product"; then
               for env in dev staging prod; do
                 if [ -d "infra/terraform/products/$product/environments/$env" ]; then
-                  PROJECTS+=("{\"name\":\"$product-$env\",\"dir\":\"infra/terraform/products/$product/environments/$env\",\"env\":\"$env\"}")
+                  PROJECTS+=("{\"name\":\"$product-$env\",\"dir\":\"infra/terraform/products/$product/environments/$env\",\"env\":\"$env\",\"type\":\"terragrunt\"}")
                 fi
               done
             fi
           done
 
-          # Check for stack changes
+          # Check for stack changes - stacks use different commands (terragrunt stack)
           if echo "$CHANGED" | grep -q "infra/terraform/stacks/"; then
-            PROJECTS+=("{\"name\":\"stacks-changed\",\"dir\":\"infra/terraform/stacks\",\"env\":\"all\"}")
+            # Add each stack file as a separate project
+            for stack_file in infra/terraform/stacks/*.stack.hcl; do
+              if [ -f "$stack_file" ] && [ "$stack_file" != "infra/terraform/stacks/terragrunt.stack.hcl" ]; then
+                stack_name=$(basename "$stack_file" .stack.hcl)
+                PROJECTS+=("{\"name\":\"stack-$stack_name\",\"dir\":\"infra/terraform/stacks\",\"env\":\"$stack_name\",\"type\":\"stack\",\"stack_file\":\"$stack_file\"}")
+              fi
+            done
           fi
 
           if [ ${#PROJECTS[@]} -eq 0 ]; then
@@ -194,11 +200,20 @@ jobs:
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - name: Terragrunt Init
+        if: matrix.project.type != 'stack'
         working-directory: ${{ matrix.project.dir }}
         run: terragrunt init --terragrunt-non-interactive
 
+      - name: Terragrunt Stack Init
+        if: matrix.project.type == 'stack'
+        working-directory: ${{ matrix.project.dir }}
+        run: |
+          # Stacks use 'terragrunt stack' commands
+          terragrunt stack init --stack-file ${{ matrix.project.env }}.stack.hcl --terragrunt-non-interactive
+
       - name: Terragrunt Plan
         id: plan
+        if: matrix.project.type != 'stack'
         working-directory: ${{ matrix.project.dir }}
         run: |
           set +e
@@ -220,8 +235,29 @@ jobs:
             exit 1
           fi
 
+      - name: Terragrunt Stack Plan
+        id: stack-plan
+        if: matrix.project.type == 'stack'
+        working-directory: ${{ matrix.project.dir }}
+        run: |
+          set +e
+          set -o pipefail
+          terragrunt stack plan --stack-file ${{ matrix.project.env }}.stack.hcl --terragrunt-non-interactive 2>&1 | tee plan_output.txt
+          EXIT_CODE=${PIPESTATUS[0]}
+          set -e
+
+          # For stacks, exit code 0 = success (stacks don't use -detailed-exitcode)
+          if [ $EXIT_CODE -eq 0 ]; then
+            echo "changes=true" >> "$GITHUB_OUTPUT"
+            echo "status=success" >> "$GITHUB_OUTPUT"
+          else
+            echo "changes=false" >> "$GITHUB_OUTPUT"
+            echo "status=failure" >> "$GITHUB_OUTPUT"
+            exit 1
+          fi
+
       - name: Generate Plan Summary
-        if: always()
+        if: always() && matrix.project.type != 'stack'
         working-directory: ${{ matrix.project.dir }}
         run: |
           if [ -f tfplan ]; then
@@ -229,7 +265,7 @@ jobs:
           fi
 
       - name: Upload Plan Artifact
-        if: steps.plan.outputs.status == 'success'
+        if: (steps.plan.outputs.status == 'success' || steps.stack-plan.outputs.status == 'success')
         uses: actions/upload-artifact@v6
         with:
           name: tfplan-${{ matrix.project.name }}
@@ -249,8 +285,10 @@ jobs:
 
             const project = '${{ matrix.project.name }}';
             const dir = '${{ matrix.project.dir }}';
-            const status = '${{ steps.plan.outputs.status }}';
-            const changes = '${{ steps.plan.outputs.changes }}';
+            const projectType = '${{ matrix.project.type }}';
+            // Use stack-plan outputs for stacks, plan outputs for regular
+            const status = projectType === 'stack' ? '${{ steps.stack-plan.outputs.status }}' : '${{ steps.plan.outputs.status }}';
+            const changes = projectType === 'stack' ? '${{ steps.stack-plan.outputs.changes }}' : '${{ steps.plan.outputs.changes }}';
 
             let planOutput = '';
             const planFile = path.join(dir, 'plan_output.txt');
