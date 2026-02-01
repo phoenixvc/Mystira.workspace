@@ -75,7 +75,7 @@ jobs:
           dotnet-version: ${{ inputs.dotnet_version }}
           source-url: https://nuget.pkg.github.com/phoenixvc/index.json
         env:
-          NUGET_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NUGET_AUTH_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN }}
 
       - name: Restore dependencies
         run: |

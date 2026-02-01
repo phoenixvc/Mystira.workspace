@@ -37,7 +37,7 @@ jobs:
           dotnet-version: '9.0.x'
           source-url: https://nuget.pkg.github.com/phoenixvc/index.json
         env:
-          NUGET_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NUGET_AUTH_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN }}
 
       - name: Build Mystira.Shared
         run: dotnet build packages/shared/Mystira.Shared --configuration Release
@@ -72,7 +72,7 @@ jobs:
           dotnet-version: '9.0.x'
           source-url: https://nuget.pkg.github.com/phoenixvc/index.json
         env:
-          NUGET_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NUGET_AUTH_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN }}
 
       - name: Restore packages
         run: dotnet restore packages/shared/Mystira.Shared

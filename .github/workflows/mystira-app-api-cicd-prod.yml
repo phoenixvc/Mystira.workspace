@@ -93,7 +93,7 @@ jobs:
           dotnet-version: '9.0.x'
           source-url: https://nuget.pkg.github.com/phoenixvc/index.json
         env:
-          NUGET_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NUGET_AUTH_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN }}
 
       - name: Build Application
         run: |
@@ -102,7 +102,7 @@ jobs:
           dotnet build --configuration Release --no-restore
           dotnet publish --configuration Release --no-build --output ./publish
         env:
-          NUGET_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NUGET_AUTH_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN }}
 
       - name: Deploy to Staging Slot
         id: deploy
