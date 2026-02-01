@@ -151,9 +151,29 @@ jobs:
 
       - name: Setup Terragrunt
         run: |
-          wget -q -O terragrunt "https://github.com/gruntwork-io/terragrunt/releases/download/v${{ env.TG_VERSION }}/terragrunt_linux_amd64"
+          TG_VERSION="${{ env.TG_VERSION }}"
+          TG_URL="https://github.com/gruntwork-io/terragrunt/releases/download/v${TG_VERSION}/terragrunt_linux_amd64"
+          TG_SHA_URL="https://github.com/gruntwork-io/terragrunt/releases/download/v${TG_VERSION}/SHA256SUMS"
+
+          # Download binary and checksums
+          wget -q -O terragrunt "$TG_URL"
+          wget -q -O SHA256SUMS "$TG_SHA_URL"
+
+          # Verify checksum
+          EXPECTED_CHECKSUM=$(grep "terragrunt_linux_amd64" SHA256SUMS | awk '{print $1}')
+          ACTUAL_CHECKSUM=$(sha256sum terragrunt | awk '{print $1}')
+
+          if [ "$EXPECTED_CHECKSUM" != "$ACTUAL_CHECKSUM" ]; then
+            echo "ERROR: Terragrunt checksum verification failed!"
+            echo "Expected: $EXPECTED_CHECKSUM"
+            echo "Actual:   $ACTUAL_CHECKSUM"
+            exit 1
+          fi
+
+          echo "Terragrunt checksum verified successfully"
           chmod +x terragrunt
           sudo mv terragrunt /usr/local/bin/
+          rm SHA256SUMS
 
       - name: Azure Login (OIDC)
         uses: azure/login@v2
@@ -333,15 +353,48 @@ ${planOutput}
       - name: Setup Tools
         if: steps.check.outputs.allowed == 'true'
         run: |
-          # Terraform
-          wget -q https://releases.hashicorp.com/terraform/${{ env.TF_VERSION }}/terraform_${{ env.TF_VERSION }}_linux_amd64.zip
-          unzip terraform_${{ env.TF_VERSION }}_linux_amd64.zip
-          sudo mv terraform /usr/local/bin/
+          TF_VERSION="${{ env.TF_VERSION }}"
+          TG_VERSION="${{ env.TG_VERSION }}"
 
-          # Terragrunt
-          wget -q -O terragrunt "https://github.com/gruntwork-io/terragrunt/releases/download/v${{ env.TG_VERSION }}/terragrunt_linux_amd64"
+          # Terraform with checksum verification
+          TF_ZIP="terraform_${TF_VERSION}_linux_amd64.zip"
+          TF_SHA_URL="https://releases.hashicorp.com/terraform/${TF_VERSION}/terraform_${TF_VERSION}_SHA256SUMS"
+
+          wget -q "https://releases.hashicorp.com/terraform/${TF_VERSION}/${TF_ZIP}"
+          wget -q -O terraform_SHA256SUMS "$TF_SHA_URL"
+
+          EXPECTED_TF_CHECKSUM=$(grep "${TF_ZIP}" terraform_SHA256SUMS | awk '{print $1}')
+          ACTUAL_TF_CHECKSUM=$(sha256sum "${TF_ZIP}" | awk '{print $1}')
+
+          if [ "$EXPECTED_TF_CHECKSUM" != "$ACTUAL_TF_CHECKSUM" ]; then
+            echo "ERROR: Terraform checksum verification failed!"
+            exit 1
+          fi
+          echo "Terraform checksum verified successfully"
+
+          unzip -q "${TF_ZIP}"
+          sudo mv terraform /usr/local/bin/
+          rm "${TF_ZIP}" terraform_SHA256SUMS
+
+          # Terragrunt with checksum verification
+          TG_URL="https://github.com/gruntwork-io/terragrunt/releases/download/v${TG_VERSION}/terragrunt_linux_amd64"
+          TG_SHA_URL="https://github.com/gruntwork-io/terragrunt/releases/download/v${TG_VERSION}/SHA256SUMS"
+
+          wget -q -O terragrunt "$TG_URL"
+          wget -q -O SHA256SUMS "$TG_SHA_URL"
+
+          EXPECTED_TG_CHECKSUM=$(grep "terragrunt_linux_amd64" SHA256SUMS | awk '{print $1}')
+          ACTUAL_TG_CHECKSUM=$(sha256sum terragrunt | awk '{print $1}')
+
+          if [ "$EXPECTED_TG_CHECKSUM" != "$ACTUAL_TG_CHECKSUM" ]; then
+            echo "ERROR: Terragrunt checksum verification failed!"
+            exit 1
+          fi
+          echo "Terragrunt checksum verified successfully"
+
           chmod +x terragrunt
           sudo mv terragrunt /usr/local/bin/
+          rm SHA256SUMS
 
       - name: Azure Login
         if: steps.check.outputs.allowed == 'true'

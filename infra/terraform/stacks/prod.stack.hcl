@@ -79,10 +79,9 @@ unit "admin" {
   }
 
   inputs = {
-    environment    = local.environment
-    min_replicas   = local.config.min_replicas
-    max_replicas   = local.config.max_replicas
-    zone_redundant = local.config.zone_redundant
+    environment  = local.environment
+    min_replicas = local.config.min_replicas
+    max_replicas = local.config.max_replicas
   }
 }
 
@@ -96,10 +95,9 @@ unit "chain" {
   }
 
   inputs = {
-    environment    = local.environment
-    min_replicas   = local.config.min_replicas
-    max_replicas   = local.config.max_replicas
-    zone_redundant = local.config.zone_redundant
+    environment  = local.environment
+    min_replicas = local.config.min_replicas
+    max_replicas = local.config.max_replicas
   }
 }
 
@@ -113,10 +111,9 @@ unit "mystira-app" {
   }
 
   inputs = {
-    environment    = local.environment
-    min_replicas   = local.config.min_replicas
-    max_replicas   = local.config.max_replicas
-    zone_redundant = local.config.zone_redundant
+    environment  = local.environment
+    min_replicas = local.config.min_replicas
+    max_replicas = local.config.max_replicas
   }
 }
 
@@ -130,10 +127,9 @@ unit "publisher" {
   }
 
   inputs = {
-    environment    = local.environment
-    min_replicas   = local.config.min_replicas
-    max_replicas   = local.config.max_replicas
-    zone_redundant = local.config.zone_redundant
+    environment  = local.environment
+    min_replicas = local.config.min_replicas
+    max_replicas = local.config.max_replicas
   }
 }
 
@@ -147,9 +143,8 @@ unit "story-generator" {
   }
 
   inputs = {
-    environment    = local.environment
-    min_replicas   = local.config.min_replicas
-    max_replicas   = local.config.max_replicas
-    zone_redundant = local.config.zone_redundant
+    environment  = local.environment
+    min_replicas = local.config.min_replicas
+    max_replicas = local.config.max_replicas
   }
 }

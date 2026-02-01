@@ -96,14 +96,20 @@ if ! command -v node &> /dev/null || [[ "$(node --version | cut -d'.' -f1 | tr -
             exit 1
         fi
 
-        # Extract to BIN_DIR parent or user location
+        # Compute install prefix from BIN_DIR (strip trailing /bin)
+        NODE_PREFIX="${BIN_DIR%/bin}"
+        if [ "$NODE_PREFIX" = "$BIN_DIR" ]; then
+            # BIN_DIR doesn't end with /bin, use parent directory
+            NODE_PREFIX="$(dirname "$BIN_DIR")"
+        fi
+
+        # Extract to the computed prefix
+        echo "  Installing Node.js to ${NODE_PREFIX}..."
+        mkdir -p "$NODE_PREFIX"
         if [ -n "$SUDO" ]; then
-            $SUDO tar -xJf "/tmp/${NODE_ARCHIVE}" -C /usr/local --strip-components=1
+            $SUDO tar -xJf "/tmp/${NODE_ARCHIVE}" -C "$NODE_PREFIX" --strip-components=1
         else
-            # Extract to user-local directory
-            mkdir -p "$HOME/.local"
-            tar -xJf "/tmp/${NODE_ARCHIVE}" -C "$HOME/.local" --strip-components=1
-            # Ensure .local/bin is in PATH (already handled by BIN_DIR setup)
+            tar -xJf "/tmp/${NODE_ARCHIVE}" -C "$NODE_PREFIX" --strip-components=1
         fi
         rm "/tmp/${NODE_ARCHIVE}"
     fi

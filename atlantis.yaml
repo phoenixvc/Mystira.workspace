@@ -59,6 +59,9 @@ workflows:
         - env:
             name: TF_IN_AUTOMATION
             value: "true"
+        - env:
+            name: STACK_CONFIG
+            value: "stacks/${ATLANTIS_TERRAFORM_WORKSPACE:-dev}.stack.hcl"
         - run: |
             terragrunt stack run plan \
               --stack-config $STACK_CONFIG \
@@ -69,6 +72,9 @@ workflows:
         - env:
             name: TF_IN_AUTOMATION
             value: "true"
+        - env:
+            name: STACK_CONFIG
+            value: "stacks/${ATLANTIS_TERRAFORM_WORKSPACE:-dev}.stack.hcl"
         - run: |
             terragrunt stack run apply \
               --stack-config $STACK_CONFIG \
@@ -164,6 +170,9 @@ projects:
         - "*.tf"
         - "*.tfvars"
         - "terragrunt.hcl"
+        - "../../terragrunt.hcl"
+        - "../../../../modules/admin-*/**"
+        - "../../../../terragrunt.hcl"
       enabled: true
     apply_requirements:
       - approved
@@ -179,6 +188,9 @@ projects:
         - "*.tf"
         - "*.tfvars"
         - "terragrunt.hcl"
+        - "../../terragrunt.hcl"
+        - "../../../../modules/admin-*/**"
+        - "../../../../terragrunt.hcl"
       enabled: true
     apply_requirements:
       - approved
@@ -198,6 +210,9 @@ projects:
         - "*.tf"
         - "*.tfvars"
         - "terragrunt.hcl"
+        - "../../terragrunt.hcl"
+        - "../../../../modules/chain/**"
+        - "../../../../terragrunt.hcl"
       enabled: true
     apply_requirements:
       - approved
@@ -212,6 +227,9 @@ projects:
         - "*.tf"
         - "*.tfvars"
         - "terragrunt.hcl"
+        - "../../terragrunt.hcl"
+        - "../../../../modules/chain/**"
+        - "../../../../terragrunt.hcl"
       enabled: true
     apply_requirements:
       - approved
@@ -227,6 +245,9 @@ projects:
         - "*.tf"
         - "*.tfvars"
         - "terragrunt.hcl"
+        - "../../terragrunt.hcl"
+        - "../../../../modules/chain/**"
+        - "../../../../terragrunt.hcl"
       enabled: true
     apply_requirements:
       - approved
@@ -246,6 +267,9 @@ projects:
         - "*.tf"
         - "*.tfvars"
         - "terragrunt.hcl"
+        - "../../terragrunt.hcl"
+        - "../../../../modules/mystira-app/**"
+        - "../../../../terragrunt.hcl"
       enabled: true
     apply_requirements:
       - approved
@@ -260,6 +284,9 @@ projects:
         - "*.tf"
         - "*.tfvars"
         - "terragrunt.hcl"
+        - "../../terragrunt.hcl"
+        - "../../../../modules/mystira-app/**"
+        - "../../../../terragrunt.hcl"
       enabled: true
     apply_requirements:
       - approved
@@ -275,6 +302,9 @@ projects:
         - "*.tf"
         - "*.tfvars"
         - "terragrunt.hcl"
+        - "../../terragrunt.hcl"
+        - "../../../../modules/mystira-app/**"
+        - "../../../../terragrunt.hcl"
       enabled: true
     apply_requirements:
       - approved
@@ -294,6 +324,9 @@ projects:
         - "*.tf"
         - "*.tfvars"
         - "terragrunt.hcl"
+        - "../../terragrunt.hcl"
+        - "../../../../modules/publisher/**"
+        - "../../../../terragrunt.hcl"
       enabled: true
     apply_requirements:
       - approved
@@ -308,6 +341,9 @@ projects:
         - "*.tf"
         - "*.tfvars"
         - "terragrunt.hcl"
+        - "../../terragrunt.hcl"
+        - "../../../../modules/publisher/**"
+        - "../../../../terragrunt.hcl"
       enabled: true
     apply_requirements:
       - approved
@@ -323,6 +359,9 @@ projects:
         - "*.tf"
         - "*.tfvars"
         - "terragrunt.hcl"
+        - "../../terragrunt.hcl"
+        - "../../../../modules/publisher/**"
+        - "../../../../terragrunt.hcl"
       enabled: true
     apply_requirements:
       - approved
@@ -342,6 +381,9 @@ projects:
         - "*.tf"
         - "*.tfvars"
         - "terragrunt.hcl"
+        - "../../terragrunt.hcl"
+        - "../../../../modules/story-generator/**"
+        - "../../../../terragrunt.hcl"
       enabled: true
     apply_requirements:
       - approved
@@ -356,6 +398,9 @@ projects:
         - "*.tf"
         - "*.tfvars"
         - "terragrunt.hcl"
+        - "../../terragrunt.hcl"
+        - "../../../../modules/story-generator/**"
+        - "../../../../terragrunt.hcl"
       enabled: true
     apply_requirements:
       - approved
@@ -371,6 +416,9 @@ projects:
         - "*.tf"
         - "*.tfvars"
         - "terragrunt.hcl"
+        - "../../terragrunt.hcl"
+        - "../../../../modules/story-generator/**"
+        - "../../../../terragrunt.hcl"
       enabled: true
     apply_requirements:
       - approved
