@@ -398,6 +398,8 @@ jobs:
           ConnectionStrings__PostgreSQL: "Host=localhost;Database=mystira_test;Username=test;Password=test"
           ConnectionStrings__Redis: "localhost:6379"
           ASPNETCORE_ENVIRONMENT: Testing
+          # Required for NuGet package restore from GitHub Packages (especially for submodule packages)
+          NUGET_AUTH_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN }}
         run: |
           # Find and run all integration tests
           echo "Running integration tests..."
