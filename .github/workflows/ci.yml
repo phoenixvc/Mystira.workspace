@@ -410,7 +410,10 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     needs: [lint, test, build, build-dotnet, integration-tests]
+    # Always run summary job to report status regardless of previous job outcomes
     if: always()
+    permissions:
+      contents: read
     steps:
       - name: Generate Summary
         run: |

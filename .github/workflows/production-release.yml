@@ -19,6 +19,8 @@ jobs:
     name: Validate Confirmation
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    permissions:
+      contents: read
     steps:
       - name: Check confirmation
         if: github.event.inputs.confirm != 'DEPLOY TO PRODUCTION'
@@ -185,6 +187,8 @@ jobs:
     timeout-minutes: 15
     needs: [deploy-services]
     environment: production
+    permissions:
+      contents: read
     steps:
       - name: Health Check - Publisher API
         run: |
@@ -269,8 +273,11 @@ jobs:
     name: Notify Deployment Status
     runs-on: ubuntu-latest
     timeout-minutes: 5
-    needs: [deploy-services, smoke-tests]
+    needs: [deploy-infrastructure, deploy-services, smoke-tests]
+    # Always run notification job to report status regardless of previous job outcomes
     if: always()
+    permissions:
+      contents: read
     steps:
       - name: Deployment Summary
         run: |

@@ -659,7 +659,10 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     needs: [detect-changes, publish-domain, publish-contracts, publish-ai, publish-shared, publish-authoring, publish-application, publish-infrastructure]
+    # Always run summary job to report status regardless of previous job outcomes
     if: always()
+    permissions:
+      contents: read
     steps:
       - name: Generate summary
         run: |
