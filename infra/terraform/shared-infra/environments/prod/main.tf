@@ -1,7 +1,7 @@
 # =============================================================================
-# Shared Infrastructure - Dev Environment
+# Shared Infrastructure - Production Environment
 # =============================================================================
-# This file instantiates all shared modules for the dev environment.
+# This file instantiates all shared modules for the production environment.
 # Terragrunt generates the backend and provider configuration.
 # =============================================================================
 
@@ -38,6 +38,11 @@ variable "postgresql_backup_retention" {
   type = number
 }
 
+variable "postgresql_geo_redundant_backup" {
+  type    = bool
+  default = false
+}
+
 # Redis variables
 variable "redis_sku" {
   type = string
@@ -54,6 +59,16 @@ variable "redis_capacity" {
 # Cosmos DB variables
 variable "cosmos_serverless" {
   type = bool
+}
+
+variable "cosmos_throughput" {
+  type    = number
+  default = 400
+}
+
+variable "cosmos_multi_region" {
+  type    = bool
+  default = false
 }
 
 # Azure AI variables

@@ -1,5 +1,5 @@
 # =============================================================================
-# Chain - Dev Environment
+# Chain - Production Environment
 # =============================================================================
 # Blockchain integration service
 # =============================================================================
@@ -42,6 +42,37 @@ variable "shared_log_analytics_workspace_id" {
 variable "shared_application_insights_connection_string" {
   type      = string
   sensitive = true
+}
+
+# Production-specific variables
+variable "api_min_replicas" {
+  type    = number
+  default = 2
+}
+
+variable "api_max_replicas" {
+  type    = number
+  default = 10
+}
+
+variable "enable_auto_scaling" {
+  type    = bool
+  default = true
+}
+
+variable "use_shared_cosmos" {
+  type    = bool
+  default = true
+}
+
+variable "use_shared_servicebus" {
+  type    = bool
+  default = true
+}
+
+variable "use_shared_log_analytics" {
+  type    = bool
+  default = true
 }
 
 # =============================================================================

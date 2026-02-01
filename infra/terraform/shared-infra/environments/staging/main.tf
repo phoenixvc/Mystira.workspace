@@ -1,7 +1,7 @@
 # =============================================================================
-# Shared Infrastructure - Dev Environment
+# Shared Infrastructure - Staging Environment
 # =============================================================================
-# This file instantiates all shared modules for the dev environment.
+# This file instantiates all shared modules for the staging environment.
 # Terragrunt generates the backend and provider configuration.
 # =============================================================================
 
@@ -54,6 +54,11 @@ variable "redis_capacity" {
 # Cosmos DB variables
 variable "cosmos_serverless" {
   type = bool
+}
+
+variable "cosmos_throughput" {
+  type    = number
+  default = 400
 }
 
 # Azure AI variables
