@@ -5,6 +5,11 @@
 variable "environment" {
   description = "Deployment environment (dev, staging, prod)"
   type        = string
+
+  validation {
+    condition     = contains(["dev", "staging", "prod"], var.environment)
+    error_message = "Environment must be one of: dev, staging, prod."
+  }
 }
 
 variable "location" {
@@ -28,6 +33,11 @@ variable "chain_node_count" {
   description = "Number of chain nodes to deploy"
   type        = number
   default     = 3
+
+  validation {
+    condition     = var.chain_node_count >= 1 && var.chain_node_count <= 10
+    error_message = "Chain node count must be between 1 and 10."
+  }
 }
 
 variable "chain_vm_size" {

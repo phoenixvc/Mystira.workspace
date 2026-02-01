@@ -18,6 +18,11 @@ terraform {
 variable "environment" {
   description = "Deployment environment (dev, staging, prod)"
   type        = string
+
+  validation {
+    condition     = contains(["dev", "staging", "prod"], var.environment)
+    error_message = "Environment must be one of: dev, staging, prod."
+  }
 }
 
 variable "location" {
@@ -68,21 +73,36 @@ variable "postgres_version" {
 }
 
 variable "sku_name" {
-  description = "PostgreSQL SKU name"
+  description = "PostgreSQL SKU name (e.g., B_Standard_B1ms, GP_Standard_D2s_v3, MO_Standard_E2s_v3)"
   type        = string
   default     = null
+
+  validation {
+    condition = var.sku_name == null || can(regex("^(B_Standard_B[12](ms|s)|GP_Standard_D(2|4|8|16|32|48|64)s_v3|MO_Standard_E(2|4|8|16|20|32|48|64)s_v3)$", var.sku_name))
+    error_message = "SKU name must be a valid PostgreSQL Flexible Server SKU: Burstable (B_Standard_B1ms, B_Standard_B2s), General Purpose (GP_Standard_D*s_v3), or Memory Optimized (MO_Standard_E*s_v3)."
+  }
 }
 
 variable "storage_mb" {
-  description = "Storage size in MB"
+  description = "Storage size in MB (minimum 32768 MB / 32 GB)"
   type        = number
   default     = 32768
+
+  validation {
+    condition     = var.storage_mb >= 32768
+    error_message = "Storage size must be at least 32768 MB (32 GB)."
+  }
 }
 
 variable "backup_retention_days" {
-  description = "Backup retention in days"
+  description = "Backup retention in days (7-35)"
   type        = number
   default     = 7
+
+  validation {
+    condition     = var.backup_retention_days >= 7 && var.backup_retention_days <= 35
+    error_message = "Backup retention days must be between 7 and 35."
+  }
 }
 
 variable "geo_redundant_backup_enabled" {

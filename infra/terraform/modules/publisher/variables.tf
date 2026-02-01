@@ -35,8 +35,8 @@ variable "publisher_replica_count" {
   default     = 2
 
   validation {
-    condition     = var.publisher_replica_count >= 1 && var.publisher_replica_count <= 20
-    error_message = "Publisher replica count must be between 1 and 20."
+    condition     = var.publisher_replica_count >= 1 && var.publisher_replica_count <= 10
+    error_message = "Publisher replica count must be between 1 and 10."
   }
 }
 
