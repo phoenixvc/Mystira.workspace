@@ -50,6 +50,25 @@ locals {
 }
 
 # =============================================================================
+# Lifecycle Protection Validation
+# =============================================================================
+# Note: Terraform lifecycle blocks require literal boolean values - variables
+# cannot be used directly. This check ensures the var.enable_prevent_destroy
+# flag aligns with the hardcoded lifecycle settings.
+#
+# For non-production environments where you need to destroy resources:
+# 1. Set enable_prevent_destroy = false in tfvars
+# 2. The check will warn but not block
+# 3. Use terraform state rm or -target to manage specific resources
+
+check "prevent_destroy_alignment" {
+  assert {
+    condition     = var.enable_prevent_destroy == true
+    error_message = "Warning: enable_prevent_destroy is false but lifecycle blocks have prevent_destroy = true. To destroy resources in non-prod, use 'terraform state rm' or modify the module directly."
+  }
+}
+
+# =============================================================================
 # Data Sources
 # =============================================================================
 

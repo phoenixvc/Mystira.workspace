@@ -264,11 +264,42 @@ jobs:
     needs: [detect-drift, create-drift-issue]
     if: always()
     steps:
+      - name: Download all drift reports
+        uses: actions/download-artifact@v4
+        with:
+          path: drift-reports
+        continue-on-error: true
+
       - name: Generate Summary
         run: |
           echo "## Infrastructure Drift Detection Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "| Product | Environment | Status |" >> $GITHUB_STEP_SUMMARY
           echo "|---------|-------------|--------|" >> $GITHUB_STEP_SUMMARY
+
+          # Define all products and environments
+          PRODUCTS="shared-infra mystira-app story-generator admin publisher chain"
+          ENVIRONMENTS="dev staging prod"
+
+          # Check for drift reports and populate table
+          for product in $PRODUCTS; do
+            for env in $ENVIRONMENTS; do
+              REPORT_DIR="drift-reports/drift-report-${product}-${env}"
+              if [[ -d "$REPORT_DIR" ]]; then
+                echo "| $product | $env | ⚠️ **Drift detected** |" >> $GITHUB_STEP_SUMMARY
+              else
+                echo "| $product | $env | ✅ No drift |" >> $GITHUB_STEP_SUMMARY
+              fi
+            done
+          done
+
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "Check the workflow jobs for detailed status of each product." >> $GITHUB_STEP_SUMMARY
+
+          # Count drift instances
+          DRIFT_COUNT=$(find drift-reports -maxdepth 1 -type d -name "drift-report-*" 2>/dev/null | wc -l)
+          if [[ "$DRIFT_COUNT" -gt 0 ]]; then
+            echo "**⚠️ Drift detected in $DRIFT_COUNT product/environment combinations.**" >> $GITHUB_STEP_SUMMARY
+            echo "Review the drift issue for details and remediation steps." >> $GITHUB_STEP_SUMMARY
+          else
+            echo "**✅ No drift detected across all products and environments.**" >> $GITHUB_STEP_SUMMARY
+          fi

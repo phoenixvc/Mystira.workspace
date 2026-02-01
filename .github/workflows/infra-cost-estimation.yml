@@ -217,12 +217,16 @@ jobs:
           # Compare (using bc for float comparison)
           if (( $(echo "$DIFF_NUM > $THRESHOLD" | bc -l) )); then
             echo "::error::Cost increase (\$$DIFF_NUM) exceeds threshold (\$$THRESHOLD)"
-            echo "status=fail" >> $GITHUB_OUTPUT
+            THRESHOLD_STATUS="fail"
           else
             echo "Cost change within threshold"
-            echo "status=pass" >> $GITHUB_OUTPUT
+            THRESHOLD_STATUS="pass"
           fi
 
+          # Write output for downstream steps
+          echo "status=$THRESHOLD_STATUS" >> $GITHUB_OUTPUT
+
+          # Generate summary using local variable (not step output which isn't available yet)
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Cost Governance" >> $GITHUB_STEP_SUMMARY
           echo "| Metric | Value |" >> $GITHUB_STEP_SUMMARY
@@ -230,12 +234,9 @@ jobs:
           echo "| Monthly cost increase threshold | \$$THRESHOLD |" >> $GITHUB_STEP_SUMMARY
           echo "| Actual cost change | \$$DIFF_NUM |" >> $GITHUB_STEP_SUMMARY
 
-      - name: Generate threshold summary
-        run: |
-          if [[ "${{ steps.threshold.outputs.status }}" == "fail" ]]; then
+          # Status row using local variable
+          if [[ "$THRESHOLD_STATUS" == "fail" ]]; then
             echo "| Status | ❌ **Exceeds threshold** |" >> $GITHUB_STEP_SUMMARY
-          elif [[ "${{ steps.threshold.outputs.status }}" == "skip" ]]; then
-            echo "| Status | ⏭️ Skipped |" >> $GITHUB_STEP_SUMMARY
           else
             echo "| Status | ✅ Within limits |" >> $GITHUB_STEP_SUMMARY
           fi
