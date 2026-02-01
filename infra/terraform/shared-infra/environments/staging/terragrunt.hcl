@@ -17,13 +17,13 @@ terraform {
 # Staging-specific inputs
 inputs = {
   # PostgreSQL Configuration
-  postgresql_sku_name         = "GP_Standard_D2s_v3"  # General Purpose for staging
-  postgresql_storage_mb       = 65536
+  postgresql_sku_name = "GP_Standard_D2s_v3" # General Purpose for staging
+  postgresql_storage_mb = 65536
   postgresql_backup_retention = 14
 
   # Redis Configuration
-  redis_sku      = "Standard"
-  redis_family   = "C"
+  redis_sku = "Standard"
+  redis_family = "C"
   redis_capacity = 1
 
   # Cosmos DB Configuration
@@ -34,7 +34,7 @@ inputs = {
   azure_ai_sku = "S0"
 
   # Storage Configuration
-  storage_sku = "Standard_GRS"  # Geo-redundant for staging
+  storage_sku = "Standard_GRS" # Geo-redundant for staging
 
   # Service Bus Configuration
   servicebus_sku = "Standard"
