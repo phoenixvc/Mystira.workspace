@@ -39,7 +39,7 @@ locals {
     log_retention_days = 90
 
     # High availability
-    ha_enabled    = true
+    ha_enabled     = true
     zone_redundant = true
   }
 }
