@@ -17,9 +17,9 @@ terraform {
 # Production-specific inputs
 inputs = {
   # PostgreSQL Configuration
-  postgresql_sku_name         = "GP_Standard_D4s_v3"  # General Purpose for prod
-  postgresql_storage_mb       = 131072
-  postgresql_backup_retention = 35
+  postgresql_sku_name             = "GP_Standard_D4s_v3"  # General Purpose for prod
+  postgresql_storage_mb           = 131072
+  postgresql_backup_retention     = 35
   postgresql_geo_redundant_backup = true
 
   # Redis Configuration
@@ -28,8 +28,8 @@ inputs = {
   redis_capacity = 1
 
   # Cosmos DB Configuration
-  cosmos_serverless = false
-  cosmos_throughput = 1000
+  cosmos_serverless   = false
+  cosmos_throughput   = 1000
   cosmos_multi_region = true
 
   # Azure AI Configuration

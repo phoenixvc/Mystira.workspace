@@ -35,9 +35,9 @@ dependency "shared" {
 
 inputs = {
   # Inherited from shared-infra dependency
-  shared_cosmos_db_connection_string       = dependency.shared.outputs.cosmos_db_connection_string
-  shared_servicebus_connection_string      = dependency.shared.outputs.servicebus_connection_string
-  shared_storage_connection_string         = dependency.shared.outputs.storage_connection_string
-  shared_log_analytics_workspace_id        = dependency.shared.outputs.log_analytics_workspace_id
+  shared_cosmos_db_connection_string            = dependency.shared.outputs.cosmos_db_connection_string
+  shared_servicebus_connection_string           = dependency.shared.outputs.servicebus_connection_string
+  shared_storage_connection_string              = dependency.shared.outputs.storage_connection_string
+  shared_log_analytics_workspace_id             = dependency.shared.outputs.log_analytics_workspace_id
   shared_application_insights_connection_string = dependency.shared.outputs.application_insights_connection_string
 }

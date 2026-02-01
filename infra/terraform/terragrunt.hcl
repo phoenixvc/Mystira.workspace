@@ -65,9 +65,7 @@ remote_state {
     storage_account_name = local.state_storage_account
     container_name       = local.state_container
     key                  = "${local.product}/${local.environment}.tfstate"
-
-    # Enable state locking
-    use_azuread_auth = true
+    use_azuread_auth     = true # Enable state locking
   }
 
   generate = {

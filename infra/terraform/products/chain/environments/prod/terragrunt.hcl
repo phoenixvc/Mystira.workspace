@@ -17,8 +17,8 @@ terraform {
 # Production-specific configuration
 inputs = {
   # Chain API
-  api_min_replicas = 2
-  api_max_replicas = 10
+  api_min_replicas    = 2
+  api_max_replicas    = 10
   enable_auto_scaling = true
 
   # Use shared resources

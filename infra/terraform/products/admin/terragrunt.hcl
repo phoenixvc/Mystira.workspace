@@ -33,7 +33,7 @@ dependency "shared" {
 
 inputs = {
   # Inherited from shared-infra dependency
-  shared_postgresql_server_id              = dependency.shared.outputs.postgresql_server_id
-  shared_log_analytics_workspace_id        = dependency.shared.outputs.log_analytics_workspace_id
+  shared_postgresql_server_id                   = dependency.shared.outputs.postgresql_server_id
+  shared_log_analytics_workspace_id             = dependency.shared.outputs.log_analytics_workspace_id
   shared_application_insights_connection_string = dependency.shared.outputs.application_insights_connection_string
 }

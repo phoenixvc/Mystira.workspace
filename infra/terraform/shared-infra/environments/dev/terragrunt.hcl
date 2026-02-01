@@ -18,8 +18,8 @@ terraform {
 # Dev-specific inputs
 inputs = {
   # PostgreSQL Configuration
-  postgresql_sku_name        = "B_Standard_B1ms"  # Burstable for dev
-  postgresql_storage_mb      = 32768
+  postgresql_sku_name         = "B_Standard_B1ms"  # Burstable for dev
+  postgresql_storage_mb       = 32768
   postgresql_backup_retention = 7
 
   # Redis Configuration

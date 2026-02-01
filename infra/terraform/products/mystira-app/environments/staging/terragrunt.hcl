@@ -23,9 +23,9 @@ inputs = {
   static_web_app_sku = "Standard"
 
   # Use shared resources
-  use_shared_cosmos       = true
-  use_shared_redis        = true
-  use_shared_storage      = true
+  use_shared_cosmos        = true
+  use_shared_redis         = true
+  use_shared_storage       = true
   use_shared_log_analytics = true
 
   # Custom domains

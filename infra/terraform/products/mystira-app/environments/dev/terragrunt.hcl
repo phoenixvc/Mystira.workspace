@@ -17,20 +17,20 @@ terraform {
 # Dev-specific configuration
 inputs = {
   # App Service
-  app_service_sku = "B1"  # Basic tier for dev
+  app_service_sku = "B1" # Basic tier for dev
 
   # Static Web App
   enable_static_web_app = true
   static_web_app_sku    = "Free"
 
   # Use shared resources (cost optimization for dev)
-  use_shared_cosmos       = true
-  use_shared_storage      = true
-  use_shared_monitoring   = true
-  use_shared_postgresql   = true
+  use_shared_cosmos     = true
+  use_shared_storage    = true
+  use_shared_monitoring = true
+  use_shared_postgresql = true
 
   # Communication Services
-  enable_communication_services = false  # Disabled for dev
+  enable_communication_services = false # Disabled for dev
 
   # Custom domains
   enable_app_custom_domain = false
