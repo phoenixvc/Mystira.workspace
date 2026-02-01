@@ -27,9 +27,9 @@ spec:
   mtls:
     mode: STRICT
   portLevelMtls:
-    8545:  # RPC port
+    "8545":  # RPC port
       mode: STRICT
-    8546:  # WebSocket port
+    "8546":  # WebSocket port
       mode: STRICT
 
 ---
