@@ -50,7 +50,12 @@ locals {
 # =============================================================================
 # Remote State Configuration
 # =============================================================================
-# Each product/environment gets its own state file for isolation
+# Each product/environment gets its own state file for isolation.
+#
+# STATE LOCKING: Azure Blob Storage provides automatic state locking via blob
+# leases when use_azuread_auth is enabled. This prevents concurrent operations
+# that could corrupt state. If a lock is held for >15 minutes, it will timeout.
+# To force unlock: terragrunt force-unlock <LOCK_ID>
 
 remote_state {
   backend = "azurerm"

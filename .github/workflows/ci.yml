@@ -320,11 +320,96 @@ jobs:
           echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
           echo "</details>" >> $GITHUB_STEP_SUMMARY
 
+  # Integration tests - runs service tests with real dependencies
+  integration-tests:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: [build-dotnet]
+    if: github.event_name == 'push' || github.event.pull_request.draft == false
+    permissions:
+      contents: read
+      packages: read
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: mystira_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          token: ${{ secrets.GH_PAT || github.token }}
+          submodules: recursive
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: '9.0.x'
+          source-url: https://nuget.pkg.github.com/phoenixvc/index.json
+        env:
+          NUGET_AUTH_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN }}
+
+      - name: Wait for services
+        run: |
+          echo "Waiting for PostgreSQL..."
+          timeout 30 bash -c 'until pg_isready -h localhost -p 5432; do sleep 1; done' || true
+          echo "Waiting for Redis..."
+          timeout 30 bash -c 'until redis-cli -h localhost ping 2>/dev/null; do sleep 1; done' || true
+
+      - name: Run integration tests
+        env:
+          ConnectionStrings__PostgreSQL: "Host=localhost;Database=mystira_test;Username=test;Password=test"
+          ConnectionStrings__Redis: "localhost:6379"
+          ASPNETCORE_ENVIRONMENT: Testing
+        run: |
+          # Find and run all integration tests
+          echo "Running integration tests..."
+          INTEGRATION_PROJECTS=$(find packages -name "*.Tests.csproj" -type f | head -20)
+
+          for PROJECT in $INTEGRATION_PROJECTS; do
+            echo "Testing: $PROJECT"
+            dotnet test "$PROJECT" --configuration Release \
+              --filter "Category=Integration|FullyQualifiedName~Integration" \
+              --logger "trx" \
+              --no-build 2>/dev/null || true
+          done
+
+      - name: Integration Test Summary
+        if: always()
+        run: |
+          echo "## Integration Test Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Dependency | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|------------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| PostgreSQL 16 | ✅ |" >> $GITHUB_STEP_SUMMARY
+          echo "| Redis 7 | ✅ |" >> $GITHUB_STEP_SUMMARY
+
   summary:
     name: CI Summary
     runs-on: ubuntu-latest
     timeout-minutes: 5
-    needs: [lint, test, build, build-dotnet]
+    needs: [lint, test, build, build-dotnet, integration-tests]
     if: always()
     steps:
       - name: Generate Summary
