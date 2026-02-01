@@ -70,6 +70,7 @@ jobs:
     outputs:
       projects: ${{ steps.changes.outputs.projects }}
       has_changes: ${{ steps.changes.outputs.has_changes }}
+      stacks_changed: ${{ steps.changes.outputs.stacks_changed }}
     steps:
       - uses: actions/checkout@v6
         with:
@@ -108,16 +109,14 @@ jobs:
             fi
           done
 
-          # Check for stack changes - stacks use different commands (terragrunt stack)
+          # Check for stack changes - stacks are experimental and handled separately
+          # Terragrunt Stacks require special deployment via infra-terragrunt-deploy.yml
+          STACKS_CHANGED="false"
           if echo "$CHANGED" | grep -q "infra/terraform/stacks/"; then
-            # Add each stack file as a separate project
-            for stack_file in infra/terraform/stacks/*.stack.hcl; do
-              if [ -f "$stack_file" ] && [ "$stack_file" != "infra/terraform/stacks/terragrunt.stack.hcl" ]; then
-                stack_name=$(basename "$stack_file" .stack.hcl)
-                PROJECTS+=("{\"name\":\"stack-$stack_name\",\"dir\":\"infra/terraform/stacks\",\"env\":\"$stack_name\",\"type\":\"stack\",\"stack_file\":\"$stack_file\"}")
-              fi
-            done
+            STACKS_CHANGED="true"
+            echo "::warning::Terragrunt Stacks changes detected. Stacks must be deployed separately using the infra-terragrunt-deploy workflow."
           fi
+          echo "stacks_changed=$STACKS_CHANGED" >> "$GITHUB_OUTPUT"
 
           if [ ${#PROJECTS[@]} -eq 0 ]; then
             echo "has_changes=false" >> "$GITHUB_OUTPUT"
@@ -135,12 +134,19 @@ jobs:
           echo "## Infrastructure Changes Detected" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
           if [ "${{ steps.changes.outputs.has_changes }}" == "true" ]; then
-            echo "Projects affected:" >> "$GITHUB_STEP_SUMMARY"
+            echo "### Projects affected:" >> "$GITHUB_STEP_SUMMARY"
             echo '```json' >> "$GITHUB_STEP_SUMMARY"
             echo '${{ steps.changes.outputs.projects }}' | jq '.' >> "$GITHUB_STEP_SUMMARY"
             echo '```' >> "$GITHUB_STEP_SUMMARY"
           else
             echo "No infrastructure projects affected." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+          if [ "${{ steps.changes.outputs.stacks_changed }}" == "true" ]; then
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            echo "### ⚠️ Terragrunt Stacks Changes" >> "$GITHUB_STEP_SUMMARY"
+            echo "Stacks changes detected but not included in this PR workflow." >> "$GITHUB_STEP_SUMMARY"
+            echo "Deploy stacks using the **infra-terragrunt-deploy** workflow after merge." >> "$GITHUB_STEP_SUMMARY"
           fi
 
   # ===========================================================================
@@ -200,20 +206,11 @@ jobs:
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - name: Terragrunt Init
-        if: matrix.project.type != 'stack'
         working-directory: ${{ matrix.project.dir }}
         run: terragrunt init --terragrunt-non-interactive
 
-      - name: Terragrunt Stack Init
-        if: matrix.project.type == 'stack'
-        working-directory: ${{ matrix.project.dir }}
-        run: |
-          # Stacks use 'terragrunt stack' commands
-          terragrunt stack init --stack-file ${{ matrix.project.env }}.stack.hcl --terragrunt-non-interactive
-
       - name: Terragrunt Plan
         id: plan
-        if: matrix.project.type != 'stack'
         working-directory: ${{ matrix.project.dir }}
         run: |
           set +e
@@ -235,29 +232,8 @@ jobs:
             exit 1
           fi
 
-      - name: Terragrunt Stack Plan
-        id: stack-plan
-        if: matrix.project.type == 'stack'
-        working-directory: ${{ matrix.project.dir }}
-        run: |
-          set +e
-          set -o pipefail
-          terragrunt stack plan --stack-file ${{ matrix.project.env }}.stack.hcl --terragrunt-non-interactive 2>&1 | tee plan_output.txt
-          EXIT_CODE=${PIPESTATUS[0]}
-          set -e
-
-          # For stacks, exit code 0 = success (stacks don't use -detailed-exitcode)
-          if [ $EXIT_CODE -eq 0 ]; then
-            echo "changes=true" >> "$GITHUB_OUTPUT"
-            echo "status=success" >> "$GITHUB_OUTPUT"
-          else
-            echo "changes=false" >> "$GITHUB_OUTPUT"
-            echo "status=failure" >> "$GITHUB_OUTPUT"
-            exit 1
-          fi
-
       - name: Generate Plan Summary
-        if: always() && matrix.project.type != 'stack'
+        if: always()
         working-directory: ${{ matrix.project.dir }}
         run: |
           if [ -f tfplan ]; then
@@ -265,7 +241,7 @@ jobs:
           fi
 
       - name: Upload Plan Artifact
-        if: (steps.plan.outputs.status == 'success' || steps.stack-plan.outputs.status == 'success')
+        if: steps.plan.outputs.status == 'success'
         uses: actions/upload-artifact@v6
         with:
           name: tfplan-${{ matrix.project.name }}
@@ -285,10 +261,8 @@ jobs:
 
             const project = '${{ matrix.project.name }}';
             const dir = '${{ matrix.project.dir }}';
-            const projectType = '${{ matrix.project.type }}';
-            // Use stack-plan outputs for stacks, plan outputs for regular
-            const status = projectType === 'stack' ? '${{ steps.stack-plan.outputs.status }}' : '${{ steps.plan.outputs.status }}';
-            const changes = projectType === 'stack' ? '${{ steps.stack-plan.outputs.changes }}' : '${{ steps.plan.outputs.changes }}';
+            const status = '${{ steps.plan.outputs.status }}';
+            const changes = '${{ steps.plan.outputs.changes }}';
 
             let planOutput = '';
             const planFile = path.join(dir, 'plan_output.txt');
