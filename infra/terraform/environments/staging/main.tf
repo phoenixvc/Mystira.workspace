@@ -982,3 +982,42 @@ output "servicebus_connection_string" {
   value       = module.shared_servicebus.default_primary_connection_string
   sensitive   = true
 }
+
+# =============================================================================
+# ACR Outputs (using shared ACR)
+# =============================================================================
+
+output "acr_login_server" {
+  description = "Shared ACR login server"
+  value       = data.azurerm_container_registry.shared.login_server
+}
+
+output "acr_name" {
+  description = "Shared ACR name"
+  value       = data.azurerm_container_registry.shared.name
+}
+
+# =============================================================================
+# DNS Outputs
+# =============================================================================
+
+# DNS Zone data source - shared DNS zone created by CI/CD bootstrap
+data "azurerm_dns_zone" "mystira" {
+  name                = "mystira.app"
+  resource_group_name = "mys-shared-terraform-rg-san"
+}
+
+output "dns_name_servers" {
+  description = "Name servers for DNS zone - configure these in your domain registrar"
+  value       = data.azurerm_dns_zone.mystira.name_servers
+}
+
+output "publisher_domain" {
+  description = "Publisher service domain"
+  value       = "staging.publisher.mystira.app"
+}
+
+output "chain_domain" {
+  description = "Chain service domain"
+  value       = "staging.chain.mystira.app"
+}

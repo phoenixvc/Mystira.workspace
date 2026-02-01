@@ -1253,3 +1253,28 @@ output "github_oidc_credential_count" {
   description = "Number of federated credentials created"
   value       = module.github_oidc.credential_count
 }
+
+# =============================================================================
+# DNS Outputs
+# =============================================================================
+
+# DNS Zone data source - shared DNS zone created by CI/CD bootstrap
+data "azurerm_dns_zone" "mystira" {
+  name                = "mystira.app"
+  resource_group_name = "mys-shared-terraform-rg-san"
+}
+
+output "dns_name_servers" {
+  description = "Name servers for DNS zone - configure these in your domain registrar"
+  value       = data.azurerm_dns_zone.mystira.name_servers
+}
+
+output "publisher_domain" {
+  description = "Publisher service domain"
+  value       = "dev.publisher.mystira.app"
+}
+
+output "chain_domain" {
+  description = "Chain service domain"
+  value       = "dev.chain.mystira.app"
+}
