@@ -75,15 +75,86 @@ workload_identities = {
 
 ## Outputs
 
-| Output                                   | Description                                |
-| ---------------------------------------- | ------------------------------------------ |
-| `nsg_id`                                 | Network Security Group ID                  |
-| `identity_id`                            | Managed Identity resource ID               |
-| `identity_principal_id`                  | Managed Identity principal ID (for RBAC)   |
-| `storage_account_name`                   | Storage account name for chain data        |
-| `application_insights_id`                | Application Insights resource ID           |
-| `application_insights_connection_string` | App Insights connection string (sensitive) |
-| `key_vault_id`                           | Key Vault resource ID                      |
+| Output                                   | Description                                          |
+| ---------------------------------------- | ---------------------------------------------------- |
+| `nsg_id`                                 | Network Security Group ID                            |
+| `identity_id`                            | Managed Identity resource ID                         |
+| `identity_principal_id`                  | Managed Identity principal ID (for RBAC)             |
+| `identity_client_id`                     | Managed Identity client ID (for workload identity)   |
+| `storage_account_name`                   | Storage account name for chain data                  |
+| `application_insights_id`                | Application Insights resource ID                     |
+| `application_insights_connection_string` | App Insights connection string (sensitive)           |
+| `key_vault_id`                           | Key Vault resource ID                                |
+| `key_vault_uri`                          | Key Vault URI for accessing secrets                  |
+
+## Rollback Procedures
+
+### Terraform State Rollback
+
+If a deployment fails or causes issues, you can rollback using the following procedures:
+
+1. **Identify the previous state version**:
+   ```bash
+   az storage blob list \
+     --account-name mystfstate \
+     --container-name tfstate \
+     --prefix "chain/" \
+     --query "[].{name:name, lastModified:properties.lastModified}" \
+     --output table
+   ```
+
+2. **Download the previous state file**:
+   ```bash
+   az storage blob download \
+     --account-name mystfstate \
+     --container-name tfstate \
+     --name "chain/<environment>.tfstate" \
+     --file previous.tfstate \
+     --snapshot "<snapshot-datetime>"
+   ```
+
+3. **Apply the previous state** (caution - this may cause drift):
+   ```bash
+   terraform state push previous.tfstate
+   terraform apply -refresh-only
+   ```
+
+### Kubernetes Rollback
+
+For chain StatefulSet rollback:
+
+```bash
+# View rollout history
+kubectl rollout history statefulset/mys-chain -n mys-<environment>
+
+# Rollback to previous revision
+kubectl rollout undo statefulset/mys-chain -n mys-<environment>
+
+# Rollback to specific revision
+kubectl rollout undo statefulset/mys-chain -n mys-<environment> --to-revision=<revision>
+
+# Verify rollback status
+kubectl rollout status statefulset/mys-chain -n mys-<environment>
+```
+
+### Emergency Procedures
+
+In case of chain node corruption or consensus failure:
+
+1. **Scale down to prevent further damage**:
+   ```bash
+   kubectl scale statefulset/mys-chain -n mys-<environment> --replicas=0
+   ```
+
+2. **Backup current chain data** (from Azure File Share):
+   ```bash
+   az storage file download-batch \
+     --source chain-data-0 \
+     --destination ./backup \
+     --account-name <storage-account>
+   ```
+
+3. **Restore from known-good snapshot** and scale back up.
 
 ## Security Considerations
 

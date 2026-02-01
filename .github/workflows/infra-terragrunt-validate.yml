@@ -28,8 +28,8 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  TF_VERSION: "1.5.0"
-  TERRAGRUNT_VERSION: "0.55.0"
+  TF_VERSION: "1.10.3"
+  TERRAGRUNT_VERSION: "0.69.1"
   # Feature toggles - set to 'false' to disable specific checks
   ENABLE_TFLINT: "true"
   ENABLE_TFSEC: "true"
@@ -97,9 +97,23 @@ jobs:
 
       - name: Setup Terragrunt
         run: |
-          wget -O terragrunt https://github.com/gruntwork-io/terragrunt/releases/download/v${{ env.TERRAGRUNT_VERSION }}/terragrunt_linux_amd64
+          TG_VERSION="${{ env.TERRAGRUNT_VERSION }}"
+          TG_URL="https://github.com/gruntwork-io/terragrunt/releases/download/v${TG_VERSION}"
+
+          wget -q -O terragrunt "${TG_URL}/terragrunt_linux_amd64"
+          wget -q -O terragrunt_SHA256SUMS "${TG_URL}/SHA256SUMS"
+
+          # Verify checksum
+          EXPECTED=$(grep "terragrunt_linux_amd64" terragrunt_SHA256SUMS | awk '{print $1}')
+          ACTUAL=$(sha256sum terragrunt | awk '{print $1}')
+          if [[ "$EXPECTED" != "$ACTUAL" ]]; then
+            echo "::error::Terragrunt checksum verification failed"
+            exit 1
+          fi
+
           chmod +x terragrunt
           sudo mv terragrunt /usr/local/bin/
+          rm -f terragrunt_SHA256SUMS
 
       - name: Terraform Format Check
         run: |
@@ -124,7 +138,10 @@ jobs:
     name: TFLint
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    if: env.ENABLE_TFLINT != 'false'
+    # Note: ENABLE_TFLINT toggle is defined in env but not used at job-level
+    # (env context unavailable in job-level if conditions)
+    # To disable, set ENABLE_TFLINT=false in repository variables (vars context)
+    if: ${{ vars.ENABLE_TFLINT != 'false' }}
     steps:
       - uses: actions/checkout@v6
 
@@ -167,7 +184,7 @@ jobs:
     name: TFSec Security Scan
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    if: env.ENABLE_TFSEC != 'false'
+    if: ${{ vars.ENABLE_TFSEC != 'false' }}
     steps:
       - uses: actions/checkout@v6
 
@@ -217,9 +234,23 @@ jobs:
 
       - name: Setup Terragrunt
         run: |
-          wget -O terragrunt https://github.com/gruntwork-io/terragrunt/releases/download/v${{ env.TERRAGRUNT_VERSION }}/terragrunt_linux_amd64
+          TG_VERSION="${{ env.TERRAGRUNT_VERSION }}"
+          TG_URL="https://github.com/gruntwork-io/terragrunt/releases/download/v${TG_VERSION}"
+
+          wget -q -O terragrunt "${TG_URL}/terragrunt_linux_amd64"
+          wget -q -O terragrunt_SHA256SUMS "${TG_URL}/SHA256SUMS"
+
+          # Verify checksum
+          EXPECTED=$(grep "terragrunt_linux_amd64" terragrunt_SHA256SUMS | awk '{print $1}')
+          ACTUAL=$(sha256sum terragrunt | awk '{print $1}')
+          if [[ "$EXPECTED" != "$ACTUAL" ]]; then
+            echo "::error::Terragrunt checksum verification failed"
+            exit 1
+          fi
+
           chmod +x terragrunt
           sudo mv terragrunt /usr/local/bin/
+          rm -f terragrunt_SHA256SUMS
 
       - name: Terragrunt Init
         run: |
@@ -274,9 +305,23 @@ jobs:
       - name: Setup Terragrunt
         if: steps.check.outputs.run == 'true'
         run: |
-          wget -O terragrunt https://github.com/gruntwork-io/terragrunt/releases/download/v${{ env.TERRAGRUNT_VERSION }}/terragrunt_linux_amd64
+          TG_VERSION="${{ env.TERRAGRUNT_VERSION }}"
+          TG_URL="https://github.com/gruntwork-io/terragrunt/releases/download/v${TG_VERSION}"
+
+          wget -q -O terragrunt "${TG_URL}/terragrunt_linux_amd64"
+          wget -q -O terragrunt_SHA256SUMS "${TG_URL}/SHA256SUMS"
+
+          # Verify checksum
+          EXPECTED=$(grep "terragrunt_linux_amd64" terragrunt_SHA256SUMS | awk '{print $1}')
+          ACTUAL=$(sha256sum terragrunt | awk '{print $1}')
+          if [[ "$EXPECTED" != "$ACTUAL" ]]; then
+            echo "::error::Terragrunt checksum verification failed"
+            exit 1
+          fi
+
           chmod +x terragrunt
           sudo mv terragrunt /usr/local/bin/
+          rm -f terragrunt_SHA256SUMS
 
       - name: Terragrunt Init
         if: steps.check.outputs.run == 'true'
@@ -302,7 +347,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     needs: format-check
-    if: env.ENABLE_CHECKOV != 'false'
+    if: ${{ vars.ENABLE_CHECKOV != 'false' }}
     steps:
       - uses: actions/checkout@v6
         with:

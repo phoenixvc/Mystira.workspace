@@ -73,7 +73,7 @@ jobs:
           RESULT=$(dotnet list packages/contracts/dotnet/Mystira.Contracts package --vulnerable --include-transitive 2>&1)
           EXIT_CODE=$?
 
-          if [ $EXIT_CODE -ne 0 ]; then
+          if [ "$EXIT_CODE" -ne 0 ]; then
             echo "::error::Failed to check vulnerabilities in Mystira.Contracts"
             echo "### ❌ Command Failed" >> $GITHUB_STEP_SUMMARY
             echo '```' >> $GITHUB_STEP_SUMMARY

@@ -136,6 +136,15 @@ check "network_access_validation" {
   }
 }
 
+check "dns_zone_requires_vnet" {
+  assert {
+    # If creating a new private DNS zone (private_endpoint_enabled && private_dns_zone_id == null),
+    # virtual_network_id must be provided to link the zone for DNS resolution
+    condition     = !(var.private_endpoint_enabled && var.private_dns_zone_id == null) || (var.virtual_network_id != null && var.virtual_network_id != "")
+    error_message = "virtual_network_id is required when creating a new private DNS zone (private_endpoint_enabled = true and private_dns_zone_id = null). Provide the VNet ID to link the DNS zone for proper resolution."
+  }
+}
+
 # Container Registry
 resource "azurerm_container_registry" "shared" {
   name                          = var.acr_name

@@ -22,8 +22,8 @@ on:
           - all
 
 env:
-  TF_VERSION: "1.14.4"
-  TERRAGRUNT_VERSION: "0.99.1"
+  TF_VERSION: "1.10.3"
+  TERRAGRUNT_VERSION: "0.69.1"
   ARM_USE_OIDC: true
   ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
   ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
@@ -81,9 +81,28 @@ jobs:
 
       - name: Setup Terragrunt
         run: |
-          wget -O terragrunt https://github.com/gruntwork-io/terragrunt/releases/download/v${{ env.TERRAGRUNT_VERSION }}/terragrunt_linux_amd64
+          # Download Terragrunt binary and SHA256 checksum for verification
+          TG_VERSION="${{ env.TERRAGRUNT_VERSION }}"
+          TG_URL="https://github.com/gruntwork-io/terragrunt/releases/download/v${TG_VERSION}"
+
+          wget -q -O terragrunt "${TG_URL}/terragrunt_linux_amd64"
+          wget -q -O terragrunt_SHA256SUMS "${TG_URL}/SHA256SUMS"
+
+          # Verify checksum before installing
+          EXPECTED_CHECKSUM=$(grep "terragrunt_linux_amd64" terragrunt_SHA256SUMS | awk '{print $1}')
+          ACTUAL_CHECKSUM=$(sha256sum terragrunt | awk '{print $1}')
+
+          if [[ "$EXPECTED_CHECKSUM" != "$ACTUAL_CHECKSUM" ]]; then
+            echo "::error::Terragrunt checksum verification failed!"
+            echo "Expected: $EXPECTED_CHECKSUM"
+            echo "Actual:   $ACTUAL_CHECKSUM"
+            exit 1
+          fi
+
+          echo "✅ Terragrunt checksum verified"
           chmod +x terragrunt
           sudo mv terragrunt /usr/local/bin/
+          rm -f terragrunt_SHA256SUMS
 
       - name: Azure Login (OIDC)
         uses: azure/login@v2

@@ -6,6 +6,10 @@
 
 set -euo pipefail
 
+# Resolve script directory (handles symlinks correctly)
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+TERRAFORM_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
+
 # Configuration
 ENVIRONMENT="${1:-dev}"
 STORAGE_ACCOUNT="${STORAGE_ACCOUNT:-mysterraformstate}"
@@ -28,18 +32,21 @@ log_error() { echo -e "${RED}[ERROR]${NC} $1"; }
 backup_state() {
     log_info "=== Wave 1: Backing up current state ==="
 
-    BACKUP_DIR="backups/$(date +%Y%m%d_%H%M%S)"
+    BACKUP_DIR="${TERRAFORM_DIR}/backups/$(date +%Y%m%d_%H%M%S)"
     mkdir -p "$BACKUP_DIR"
 
-    cd "environments/${ENVIRONMENT}"
+    local env_dir="${TERRAFORM_DIR}/environments/${ENVIRONMENT}"
+    if [[ ! -d "$env_dir" ]]; then
+        log_error "Environment directory not found: $env_dir"
+        exit 1
+    fi
 
     log_info "Pulling current state..."
-    terraform state pull > "../../${BACKUP_DIR}/${ENVIRONMENT}_backup.tfstate"
+    (cd "$env_dir" && terraform state pull > "${BACKUP_DIR}/${ENVIRONMENT}_backup.tfstate")
 
     log_info "State backed up to ${BACKUP_DIR}/${ENVIRONMENT}_backup.tfstate"
-    cd ../..
 
-    echo "$BACKUP_DIR" > ".last_backup_dir"
+    echo "$BACKUP_DIR" > "${TERRAFORM_DIR}/.last_backup_dir"
 }
 
 # =============================================================================
@@ -67,62 +74,61 @@ create_state_containers() {
 list_resources_by_product() {
     log_info "=== Wave 3: Analyzing resources by product ==="
 
-    cd "environments/${ENVIRONMENT}"
+    local env_dir="${TERRAFORM_DIR}/environments/${ENVIRONMENT}"
+    local state_file="${TERRAFORM_DIR}/.state_resources.txt"
 
     log_info "Getting current state resources..."
-    terraform state list > ../../.state_resources.txt
+    (cd "$env_dir" && terraform state list > "$state_file")
 
     # Categorize resources
     log_info "Categorizing resources..."
 
     # Shared Infrastructure
-    grep -E "^module\.(shared_|identity)" ../../.state_resources.txt > ../../.shared_infra_resources.txt 2>/dev/null || true
-    grep -E "^azurerm_resource_group\.(main|shared)" ../../.state_resources.txt >> ../../.shared_infra_resources.txt 2>/dev/null || true
-    grep -E "^azurerm_virtual_network\." ../../.state_resources.txt >> ../../.shared_infra_resources.txt 2>/dev/null || true
-    grep -E "^azurerm_subnet\." ../../.state_resources.txt >> ../../.shared_infra_resources.txt 2>/dev/null || true
-    grep -E "^azurerm_kubernetes_cluster\." ../../.state_resources.txt >> ../../.shared_infra_resources.txt 2>/dev/null || true
+    grep -E '^module\.(shared_|identity)' "$state_file" > "${TERRAFORM_DIR}/.shared_infra_resources.txt" 2>/dev/null || true
+    grep -E '^azurerm_resource_group\.(main|shared)' "$state_file" >> "${TERRAFORM_DIR}/.shared_infra_resources.txt" 2>/dev/null || true
+    grep -E '^azurerm_virtual_network\.' "$state_file" >> "${TERRAFORM_DIR}/.shared_infra_resources.txt" 2>/dev/null || true
+    grep -E '^azurerm_subnet\.' "$state_file" >> "${TERRAFORM_DIR}/.shared_infra_resources.txt" 2>/dev/null || true
+    grep -E '^azurerm_kubernetes_cluster\.' "$state_file" >> "${TERRAFORM_DIR}/.shared_infra_resources.txt" 2>/dev/null || true
 
     # Story Generator
-    grep -E "^module\.story_generator" ../../.state_resources.txt > ../../.story_generator_resources.txt 2>/dev/null || true
-    grep -E "^azurerm_resource_group\.story" ../../.state_resources.txt >> ../../.story_generator_resources.txt 2>/dev/null || true
-    grep -E "^azurerm_key_vault_secret\.story" ../../.state_resources.txt >> ../../.story_generator_resources.txt 2>/dev/null || true
+    grep -E '^module\.story_generator' "$state_file" > "${TERRAFORM_DIR}/.story_generator_resources.txt" 2>/dev/null || true
+    grep -E '^azurerm_resource_group\.story' "$state_file" >> "${TERRAFORM_DIR}/.story_generator_resources.txt" 2>/dev/null || true
+    grep -E '^azurerm_key_vault_secret\.story' "$state_file" >> "${TERRAFORM_DIR}/.story_generator_resources.txt" 2>/dev/null || true
 
     # Mystira App
-    grep -E "^module\.mystira_app" ../../.state_resources.txt > ../../.mystira_app_resources.txt 2>/dev/null || true
-    grep -E "^module\.mystira" ../../.state_resources.txt >> ../../.mystira_app_resources.txt 2>/dev/null || true
-    grep -E "^azurerm_resource_group\.mystira" ../../.state_resources.txt >> ../../.mystira_app_resources.txt 2>/dev/null || true
-    grep -E "^azurerm_key_vault_secret\.mystira" ../../.state_resources.txt >> ../../.mystira_app_resources.txt 2>/dev/null || true
-    grep -E "^azurerm_static_site\.mystira" ../../.state_resources.txt >> ../../.mystira_app_resources.txt 2>/dev/null || true
-    grep -E "^azurerm_communication_service\.mystira" ../../.state_resources.txt >> ../../.mystira_app_resources.txt 2>/dev/null || true
+    grep -E '^module\.mystira_app' "$state_file" > "${TERRAFORM_DIR}/.mystira_app_resources.txt" 2>/dev/null || true
+    grep -E '^module\.mystira[^_]' "$state_file" >> "${TERRAFORM_DIR}/.mystira_app_resources.txt" 2>/dev/null || true
+    grep -E '^azurerm_resource_group\.mystira' "$state_file" >> "${TERRAFORM_DIR}/.mystira_app_resources.txt" 2>/dev/null || true
+    grep -E '^azurerm_key_vault_secret\.mystira' "$state_file" >> "${TERRAFORM_DIR}/.mystira_app_resources.txt" 2>/dev/null || true
+    grep -E '^azurerm_static_site\.mystira' "$state_file" >> "${TERRAFORM_DIR}/.mystira_app_resources.txt" 2>/dev/null || true
+    grep -E '^azurerm_communication_service\.mystira' "$state_file" >> "${TERRAFORM_DIR}/.mystira_app_resources.txt" 2>/dev/null || true
 
     # Admin (API + UI)
-    grep -E "^module\.admin_(api|ui)" ../../.state_resources.txt > ../../.admin_resources.txt 2>/dev/null || true
-    grep -E "^module\.entra_id" ../../.state_resources.txt >> ../../.admin_resources.txt 2>/dev/null || true
-    grep -E "^azurerm_resource_group\.admin" ../../.state_resources.txt >> ../../.admin_resources.txt 2>/dev/null || true
-    grep -E "^azurerm_key_vault_secret\.admin" ../../.state_resources.txt >> ../../.admin_resources.txt 2>/dev/null || true
+    grep -E '^module\.admin_(api|ui)' "$state_file" > "${TERRAFORM_DIR}/.admin_resources.txt" 2>/dev/null || true
+    grep -E '^module\.entra_id' "$state_file" >> "${TERRAFORM_DIR}/.admin_resources.txt" 2>/dev/null || true
+    grep -E '^azurerm_resource_group\.admin' "$state_file" >> "${TERRAFORM_DIR}/.admin_resources.txt" 2>/dev/null || true
+    grep -E '^azurerm_key_vault_secret\.admin' "$state_file" >> "${TERRAFORM_DIR}/.admin_resources.txt" 2>/dev/null || true
 
     # Publisher
-    grep -E "^module\.publisher" ../../.state_resources.txt > ../../.publisher_resources.txt 2>/dev/null || true
-    grep -E "^azurerm_resource_group\.publisher" ../../.state_resources.txt >> ../../.publisher_resources.txt 2>/dev/null || true
-    grep -E "^azurerm_key_vault_secret\.publisher" ../../.state_resources.txt >> ../../.publisher_resources.txt 2>/dev/null || true
+    grep -E '^module\.publisher' "$state_file" > "${TERRAFORM_DIR}/.publisher_resources.txt" 2>/dev/null || true
+    grep -E '^azurerm_resource_group\.publisher' "$state_file" >> "${TERRAFORM_DIR}/.publisher_resources.txt" 2>/dev/null || true
+    grep -E '^azurerm_key_vault_secret\.publisher' "$state_file" >> "${TERRAFORM_DIR}/.publisher_resources.txt" 2>/dev/null || true
 
     # Chain
-    grep -E "^module\.chain" ../../.state_resources.txt > ../../.chain_resources.txt 2>/dev/null || true
-    grep -E "^azurerm_resource_group\.chain" ../../.state_resources.txt >> ../../.chain_resources.txt 2>/dev/null || true
-    grep -E "^azurerm_key_vault_secret\.chain" ../../.state_resources.txt >> ../../.chain_resources.txt 2>/dev/null || true
+    grep -E '^module\.chain' "$state_file" > "${TERRAFORM_DIR}/.chain_resources.txt" 2>/dev/null || true
+    grep -E '^azurerm_resource_group\.chain' "$state_file" >> "${TERRAFORM_DIR}/.chain_resources.txt" 2>/dev/null || true
+    grep -E '^azurerm_key_vault_secret\.chain' "$state_file" >> "${TERRAFORM_DIR}/.chain_resources.txt" 2>/dev/null || true
 
     # GitHub OIDC (stays with shared-infra as it's cross-cutting)
-    grep -E "^module\.github_oidc" ../../.state_resources.txt >> ../../.shared_infra_resources.txt 2>/dev/null || true
-
-    cd ../..
+    grep -E '^module\.github_oidc' "$state_file" >> "${TERRAFORM_DIR}/.shared_infra_resources.txt" 2>/dev/null || true
 
     log_info "Resource categorization complete:"
-    log_info "  Shared Infra: $(wc -l < .shared_infra_resources.txt) resources"
-    log_info "  Mystira App: $(wc -l < .mystira_app_resources.txt) resources"
-    log_info "  Story Generator: $(wc -l < .story_generator_resources.txt) resources"
-    log_info "  Admin: $(wc -l < .admin_resources.txt) resources"
-    log_info "  Publisher: $(wc -l < .publisher_resources.txt) resources"
-    log_info "  Chain: $(wc -l < .chain_resources.txt) resources"
+    log_info "  Shared Infra: $(wc -l < "${TERRAFORM_DIR}/.shared_infra_resources.txt") resources"
+    log_info "  Mystira App: $(wc -l < "${TERRAFORM_DIR}/.mystira_app_resources.txt") resources"
+    log_info "  Story Generator: $(wc -l < "${TERRAFORM_DIR}/.story_generator_resources.txt") resources"
+    log_info "  Admin: $(wc -l < "${TERRAFORM_DIR}/.admin_resources.txt") resources"
+    log_info "  Publisher: $(wc -l < "${TERRAFORM_DIR}/.publisher_resources.txt") resources"
+    log_info "  Chain: $(wc -l < "${TERRAFORM_DIR}/.chain_resources.txt") resources"
 }
 
 # =============================================================================
@@ -131,7 +137,7 @@ list_resources_by_product() {
 generate_move_commands() {
     log_info "=== Wave 4: Generating state move commands ==="
 
-    MOVE_SCRIPT="scripts/execute_state_moves.sh"
+    MOVE_SCRIPT="${SCRIPT_DIR}/execute_state_moves.sh"
 
     cat > "$MOVE_SCRIPT" << 'HEADER'
 #!/bin/bash
@@ -162,7 +168,7 @@ cd ../..
 HEADER
 
     # Generate import commands for each product
-    for product_file in .shared_infra_resources.txt .mystira_app_resources.txt .story_generator_resources.txt .admin_resources.txt .publisher_resources.txt .chain_resources.txt; do
+    for product_file in "${TERRAFORM_DIR}/.shared_infra_resources.txt" "${TERRAFORM_DIR}/.mystira_app_resources.txt" "${TERRAFORM_DIR}/.story_generator_resources.txt" "${TERRAFORM_DIR}/.admin_resources.txt" "${TERRAFORM_DIR}/.publisher_resources.txt" "${TERRAFORM_DIR}/.chain_resources.txt"; do
         [[ ! -f "$product_file" ]] && continue
 
         product_name=$(basename "$product_file" _resources.txt | sed 's/^\.//' | sed 's/_/-/g')
@@ -175,8 +181,14 @@ HEADER
 # =============================================================================
 echo "Processing ${product_name}..."
 
-if [[ -d "products/${product_name}/environments/\${ENVIRONMENT}" ]] || [[ -d "shared-infra/environments/\${ENVIRONMENT}" ]]; then
-    PRODUCT_DIR="\$([ '${product_name}' = 'shared-infra' ] && echo 'shared-infra' || echo 'products/${product_name}')/environments/\${ENVIRONMENT}"
+# Determine product directory
+if [[ "${product_name}" == "shared-infra" ]]; then
+    PRODUCT_DIR="\${TERRAFORM_DIR}/shared-infra/environments/\${ENVIRONMENT}"
+else
+    PRODUCT_DIR="\${TERRAFORM_DIR}/products/${product_name}/environments/\${ENVIRONMENT}"
+fi
+
+if [[ -d "\$PRODUCT_DIR" ]]; then
     cd "\$PRODUCT_DIR"
 
     # Initialize with backend
@@ -194,6 +206,8 @@ EOF
 
             echo "" >> "$MOVE_SCRIPT"
             echo "    cd \"\$TERRAFORM_DIR\"" >> "$MOVE_SCRIPT"
+            echo "else" >> "$MOVE_SCRIPT"
+            echo "    echo \"Warning: Product directory not found: \$PRODUCT_DIR\"" >> "$MOVE_SCRIPT"
             echo "fi" >> "$MOVE_SCRIPT"
         fi
     done
@@ -226,25 +240,23 @@ FOOTER
 validate_states() {
     log_info "=== Wave 5: Validating new state structure ==="
 
-    PRODUCTS=("shared-infra" "mystira-app" "story-generator" "admin" "publisher" "chain")
+    local products=("shared-infra" "mystira-app" "story-generator" "admin" "publisher" "chain")
 
-    for product in "${PRODUCTS[@]}"; do
+    for product in "${products[@]}"; do
+        local product_dir
         # Handle shared-infra differently from other products
         if [[ "$product" == "shared-infra" ]]; then
-            product_dir="shared-infra/environments/${ENVIRONMENT}"
+            product_dir="${TERRAFORM_DIR}/shared-infra/environments/${ENVIRONMENT}"
         else
-            product_dir="products/${product}/environments/${ENVIRONMENT}"
+            product_dir="${TERRAFORM_DIR}/products/${product}/environments/${ENVIRONMENT}"
         fi
 
         if [[ -d "$product_dir" ]]; then
             log_info "Validating ${product}..."
-            cd "$product_dir"
 
-            if [[ -f "terragrunt.hcl" ]]; then
-                terragrunt validate || log_warn "Validation issues in ${product}"
+            if [[ -f "${product_dir}/terragrunt.hcl" ]]; then
+                (cd "$product_dir" && terragrunt validate) || log_warn "Validation issues in ${product}"
             fi
-
-            cd - > /dev/null
         else
             log_warn "Directory not found: ${product_dir}"
         fi

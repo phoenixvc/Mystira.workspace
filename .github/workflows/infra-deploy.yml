@@ -1561,6 +1561,26 @@ jobs:
             echo "missing_images=false" >> $GITHUB_OUTPUT
           fi
 
+      - name: Validate Workload Identity Client IDs
+        run: |
+          # Pre-deploy validation: Fail if placeholder UUIDs are detected
+          # This prevents accidental deployment with unconfigured workload identities
+          OVERLAY_DIR="infra/kubernetes/overlays/${{ env.ENVIRONMENT }}"
+
+          echo "Checking for placeholder workload identity client IDs..."
+          if grep -r -E '00000000-0000-0000-0000-00000000000[0-9]' "$OVERLAY_DIR" 2>/dev/null; then
+            echo "::error::Placeholder workload identity client IDs detected in $OVERLAY_DIR"
+            echo "::error::Replace placeholder UUIDs with actual Azure Managed Identity client IDs from Terraform outputs"
+            echo ""
+            echo "To get the correct client IDs, run:"
+            echo "  terraform output -json | jq -r '.admin_api_identity_client_id.value'"
+            echo ""
+            echo "See the kustomization.yaml comments for more details."
+            exit 1
+          fi
+
+          echo "✅ No placeholder workload identity client IDs detected"
+
       - name: Clean up deployments with incompatible selectors
         run: |
           # Delete existing deployments/statefulsets to avoid selector immutability errors
