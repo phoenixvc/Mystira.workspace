@@ -84,6 +84,8 @@
     <PackageReference Include="WolverineFx.EntityFrameworkCore" Version="5.10.0" />
     <!-- CodeAnalysis version alignment: All pinned to 4.14.0 for JasperFx.RuntimeCompiler compatibility -->
     <PackageReference Include="Microsoft.CodeAnalysis" Version="4.14.0" />
+    <!-- Pin Microsoft.Build.Tasks.Core to patched version (CVE-2025-26646, CVE-2025-55247 fixes) -->
+    <PackageReference Include="Microsoft.Build.Tasks.Core" Version="17.14.28" />
     <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="4.14.0" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.14.0" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.14.0" />
