@@ -175,7 +175,8 @@ jobs:
     name: Apply - ${{ inputs.product }} (${{ inputs.environment }})
     runs-on: ubuntu-latest
     needs: plan
-    if: inputs.action == 'apply' && (needs.plan.outputs.plan-exitcode == '2' || inputs.auto_approve)
+    # Note: Exclude 'all' products - those use the deploy-ordered job instead
+    if: inputs.action == 'apply' && inputs.product != 'all' && (needs.plan.outputs.plan-exitcode == '2' || inputs.auto_approve)
     environment:
       name: ${{ inputs.environment }}-deploy
     steps:
