@@ -12,10 +12,6 @@ variable "location" {
   type = string
 }
 
-variable "fallback_location" {
-  type = string
-}
-
 variable "resource_group_name" {
   type = string
 }
@@ -42,37 +38,6 @@ variable "shared_log_analytics_workspace_id" {
 variable "shared_application_insights_connection_string" {
   type      = string
   sensitive = true
-}
-
-# Production-specific variables
-variable "api_min_replicas" {
-  type    = number
-  default = 2
-}
-
-variable "api_max_replicas" {
-  type    = number
-  default = 10
-}
-
-variable "enable_auto_scaling" {
-  type    = bool
-  default = true
-}
-
-variable "use_shared_cosmos" {
-  type    = bool
-  default = true
-}
-
-variable "use_shared_servicebus" {
-  type    = bool
-  default = true
-}
-
-variable "use_shared_log_analytics" {
-  type    = bool
-  default = true
 }
 
 # =============================================================================

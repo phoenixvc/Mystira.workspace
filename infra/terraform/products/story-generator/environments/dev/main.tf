@@ -12,10 +12,6 @@ variable "location" {
   type = string
 }
 
-variable "fallback_location" {
-  type = string
-}
-
 variable "resource_group_name" {
   type = string
 }
@@ -25,15 +21,7 @@ variable "tags" {
 }
 
 # Shared infrastructure inputs
-variable "shared_postgresql_server_id" {
-  type = string
-}
-
 variable "shared_postgresql_server_fqdn" {
-  type = string
-}
-
-variable "shared_redis_cache_id" {
   type = string
 }
 

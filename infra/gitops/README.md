@@ -4,7 +4,7 @@ This directory contains the Harness GitOps agent configuration and GitOps applic
 
 ## Structure
 
-```
+```text
 infra/gitops/
 ├── harness-agent.yaml      # Agent configuration (one-time setup)
 ├── README.md               # This file
@@ -12,7 +12,7 @@ infra/gitops/
 │   ├── admin-api.yaml
 │   ├── publisher.yaml
 │   └── story-generator.yaml
-└── bootstrap-gitops.sh     # One-time setup script
+└── ../scripts/bootstrap-gitops.sh  # One-time setup script
 ```
 
 ## Why Not in CI/CD?
@@ -109,6 +109,51 @@ See `.github/workflows/gitops-apps.yml` for an example workflow that validates m
 - Direct `kubectl apply` of agent YAML
 - Agent token management
 
+## Rollback Procedures
+
+### Removing/Reinstalling the GitOps Agent
+
+To remove and reinstall the GitOps agent:
+
+1. **Delete the agent manifest**:
+   ```bash
+   kubectl delete -f infra/gitops/harness-agent.yaml -n harness-gitops
+   ```
+
+2. **Or delete the entire namespace** (removes all GitOps resources):
+   ```bash
+   kubectl delete namespace harness-gitops
+   ```
+
+3. **Reinstall** by running the bootstrap script:
+   ```bash
+   ./infra/scripts/bootstrap-gitops.sh
+   ```
+
+### Rolling Back GitOps Applications
+
+To roll back an application to a previous state:
+
+1. **Revert the Git commit** for the affected application:
+   ```bash
+   git log --oneline infra/gitops/applications/
+   git checkout <previous-commit> -- infra/gitops/applications/<app>.yaml
+   git commit -m "Rollback <app> to previous version"
+   git push
+   ```
+
+2. **Verify in Harness UI** that the application syncs to the reverted state
+
+3. **For immediate rollback**, trigger a manual sync in the Harness platform
+
+### Verification Steps
+
+Before reapplying changes after a rollback:
+
+1. Check agent status: `kubectl get pods -n harness-gitops`
+2. Check app sync status in Harness UI
+3. Review application logs: `kubectl logs -l app.kubernetes.io/name=argocd-application-controller -n harness-gitops`
+
 ## Troubleshooting
 
 ### Agent not connecting
@@ -122,7 +167,7 @@ See `.github/workflows/gitops-apps.yml` for an example workflow that validates m
 2. Verify token is correct:
 
    ```bash
-   kubectl get secret gitops-agent -n harness-gitops -o jsonpath='{.data.GITOPS_AGENT_TOKEN}' | base64 -d
+   kubectl get secret harness-gitops-agent -n harness-gitops -o jsonpath='{.data.HARNESS_AGENT_TOKEN}' | base64 -d
    ```
 
 3. Check network policies allow agent communication

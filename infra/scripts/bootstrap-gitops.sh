@@ -25,8 +25,14 @@ fi
 
 # Check if envsubst is available (for secret substitution)
 if ! command -v envsubst &> /dev/null; then
+    if [ -n "$HARNESS_AGENT_TOKEN" ]; then
+        echo "❌ envsubst is not installed but HARNESS_AGENT_TOKEN is set."
+        echo "   Cannot substitute secrets in $AGENT_YAML without envsubst."
+        echo "   Install envsubst (part of gettext) or unset HARNESS_AGENT_TOKEN."
+        exit 1
+    fi
     echo "⚠️  envsubst not found. Secrets will not be substituted."
-    echo "   Make sure HARNESS_AGENT_TOKEN is set if needed"
+    echo "   Set HARNESS_AGENT_TOKEN if secret substitution is needed."
 fi
 
 echo "🚀 Bootstrapping Harness GitOps agent..."

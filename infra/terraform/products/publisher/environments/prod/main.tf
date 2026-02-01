@@ -1,5 +1,5 @@
 # =============================================================================
-# Publisher - Dev Environment
+# Publisher - Production Environment
 # =============================================================================
 # Publishing service for content distribution
 # =============================================================================
@@ -9,10 +9,6 @@ variable "environment" {
 }
 
 variable "location" {
-  type = string
-}
-
-variable "fallback_location" {
   type = string
 }
 

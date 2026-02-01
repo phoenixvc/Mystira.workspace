@@ -31,6 +31,7 @@ terraform {
 provider "azapi" {}
 
 provider "azurerm" {
+  subscription_id = var.subscription_id
   features {
     key_vault {
       purge_soft_delete_on_destroy = false
@@ -40,6 +41,12 @@ provider "azurerm" {
 
 # Get current Azure client configuration
 data "azurerm_client_config" "current" {}
+
+variable "subscription_id" {
+  description = "Azure subscription ID. If not set, uses the current Azure CLI subscription."
+  type        = string
+  default     = null
+}
 
 variable "location" {
   description = "Azure region for deployment"
@@ -421,8 +428,8 @@ module "shared_azure_ai" {
   # Validate in staging before promoting to prod
   public_network_access_enabled = false
   enable_private_endpoint       = true
-  private_endpoint_subnet_id    = module.shared_infra.aks_subnet_id
-  vnet_id                       = module.shared_infra.vnet_id
+  private_endpoint_subnet_id    = azurerm_subnet.aks.id
+  vnet_id                       = azurerm_virtual_network.main.id
 
   # Enable AI Foundry project for workload isolation
   enable_project = true # Uses AzAPI to enable allowProjectManagement on account

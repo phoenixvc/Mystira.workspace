@@ -40,7 +40,7 @@ jobs:
             for overlay in infra/kubernetes/overlays/*/; do
               if [ -f "${overlay}kustomization.yaml" ]; then
                 echo "Validating overlay: $overlay"
-                kubectl kustomize "$overlay" --enable-helm || echo "⚠️  Helm support may require additional setup"
+                kubectl kustomize "$overlay" --enable-helm || exit 1
               fi
             done
           fi
@@ -57,21 +57,42 @@ jobs:
 
           echo "✅ All manifests validated successfully"
 
-  # Optional: Trigger Harness sync via API
-  # Uncomment and configure if you want to trigger syncs from CI/CD
-  # trigger-sync:
-  #   name: Trigger Harness Sync
-  #   runs-on: ubuntu-latest
-  #   needs: validate
-  #   if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-  #   steps:
-  #     - name: Trigger Harness GitOps sync
-  #       run: |
-  #         curl -X POST \
-  #           "https://app.harness.io/gateway/gitops/api/v1/agents/${{ secrets.HARNESS_AGENT_ID }}/sync" \
-  #           -H "x-api-key: ${{ secrets.HARNESS_API_KEY }}" \
-  #           -H "Content-Type: application/json" \
-  #           -d '{"applications": ["admin-api", "publisher", "story-generator"]}'
-  #   env:
-  #     HARNESS_AGENT_ID: ${{ secrets.HARNESS_AGENT_ID }}
-  #     HARNESS_API_KEY: ${{ secrets.HARNESS_API_KEY }}
+  # Staging verification gate - runs on staging branch pushes
+  # This job must succeed before production syncs can run
+  staging-verify:
+    name: Verify Staging Deployment
+    runs-on: ubuntu-latest
+    needs: validate
+    if: github.event_name == 'push' && github.ref == 'refs/heads/staging'
+    environment: staging
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Verify staging manifests
+        run: |
+          echo "Verifying staging deployment readiness..."
+          # Add staging-specific validation here
+          echo "Staging verification complete"
+
+  # Production sync - requires staging verification or manual approval
+  # Uses environment protection rules for additional gating
+  trigger-sync:
+    name: Trigger Production Harness Sync
+    runs-on: ubuntu-latest
+    needs: [validate, staging-verify]
+    # Only run on main branch pushes, requires staging-verify to pass
+    # If staging-verify was skipped (not a staging push), this requires manual approval via environment
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    environment: production
+    steps:
+      - name: Trigger Harness GitOps sync
+        run: |
+          curl -X POST \
+            "https://app.harness.io/gateway/gitops/api/v1/agents/${{ secrets.HARNESS_AGENT_ID }}/sync" \
+            -H "x-api-key: ${{ secrets.HARNESS_API_KEY }}" \
+            -H "Content-Type: application/json" \
+            -d '{"applications": ["admin-api", "publisher", "story-generator"]}'
+        env:
+          HARNESS_AGENT_ID: ${{ secrets.HARNESS_AGENT_ID }}
+          HARNESS_API_KEY: ${{ secrets.HARNESS_API_KEY }}

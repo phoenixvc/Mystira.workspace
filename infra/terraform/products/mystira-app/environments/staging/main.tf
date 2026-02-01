@@ -1,5 +1,5 @@
 # =============================================================================
-# Mystira App - Dev Environment
+# Mystira App - Staging Environment
 # =============================================================================
 # Consumer-facing Blazor WASM PWA with .NET API backend
 # =============================================================================
@@ -9,10 +9,6 @@ variable "environment" {
 }
 
 variable "location" {
-  type = string
-}
-
-variable "fallback_location" {
   type = string
 }
 
@@ -33,26 +29,14 @@ variable "shared_postgresql_server_fqdn" {
   type = string
 }
 
-variable "shared_redis_cache_id" {
-  type = string
-}
-
 variable "shared_redis_connection_string" {
   type      = string
   sensitive = true
 }
 
-variable "shared_cosmos_db_account_id" {
-  type = string
-}
-
 variable "shared_cosmos_db_connection_string" {
   type      = string
   sensitive = true
-}
-
-variable "shared_storage_account_id" {
-  type = string
 }
 
 variable "shared_storage_connection_string" {
