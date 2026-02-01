@@ -12,6 +12,11 @@ variable "location" {
   type = string
 }
 
+variable "fallback_location" {
+  type    = string
+  default = "eastus2"
+}
+
 variable "resource_group_name" {
   type = string
 }
@@ -20,27 +25,20 @@ variable "tags" {
   type = map(string)
 }
 
-# Shared infrastructure inputs
-variable "shared_postgresql_server_fqdn" {
-  type = string
+# Shared infrastructure inputs (optional - use defaults when not provided)
+variable "shared_postgresql_server_id" {
+  type    = string
+  default = null
 }
 
-variable "shared_redis_connection_string" {
-  type      = string
-  sensitive = true
-}
-
-variable "shared_azure_ai_endpoint" {
-  type = string
+variable "shared_redis_cache_id" {
+  type    = string
+  default = null
 }
 
 variable "shared_log_analytics_workspace_id" {
-  type = string
-}
-
-variable "shared_application_insights_connection_string" {
-  type      = string
-  sensitive = true
+  type    = string
+  default = null
 }
 
 # =============================================================================
@@ -71,15 +69,14 @@ module "story_generator" {
 
   environment         = var.environment
   location            = var.location
+  fallback_location   = var.fallback_location
   resource_group_name = var.resource_group_name
   tags                = var.tags
 
   # Pass shared infrastructure references
-  postgresql_server_fqdn                 = var.shared_postgresql_server_fqdn
-  redis_connection_string                = var.shared_redis_connection_string
-  azure_ai_endpoint                      = var.shared_azure_ai_endpoint
-  log_analytics_workspace_id             = var.shared_log_analytics_workspace_id
-  application_insights_connection_string = var.shared_application_insights_connection_string
+  shared_postgresql_server_id       = var.shared_postgresql_server_id
+  shared_redis_cache_id             = var.shared_redis_cache_id
+  shared_log_analytics_workspace_id = var.shared_log_analytics_workspace_id
 }
 
 # =============================================================================

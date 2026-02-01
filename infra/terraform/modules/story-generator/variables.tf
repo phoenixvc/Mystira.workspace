@@ -29,11 +29,13 @@ variable "resource_group_name" {
 variable "vnet_id" {
   description = "Virtual Network ID for story-generator deployment"
   type        = string
+  default     = null
 }
 
 variable "subnet_id" {
   description = "Subnet ID for story-generator service"
   type        = string
+  default     = null
 }
 
 variable "shared_postgresql_server_id" {

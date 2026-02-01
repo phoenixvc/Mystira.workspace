@@ -60,11 +60,13 @@ variable "chain_storage_size_gb" {
 variable "vnet_id" {
   description = "Virtual Network ID for chain deployment"
   type        = string
+  default     = null
 }
 
 variable "subnet_id" {
   description = "Subnet ID for chain nodes"
   type        = string
+  default     = null
 }
 
 variable "tags" {
@@ -76,4 +78,5 @@ variable "tags" {
 variable "shared_log_analytics_workspace_id" {
   description = "ID of shared Log Analytics workspace (from shared monitoring module)"
   type        = string
+  default     = null
 }

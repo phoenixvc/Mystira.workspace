@@ -31,16 +31,19 @@ variable "resource_group_name" {
 variable "vnet_id" {
   description = "Virtual Network ID for admin-api deployment"
   type        = string
+  default     = null
 }
 
 variable "subnet_id" {
   description = "Subnet ID for admin-api service"
   type        = string
+  default     = null
 }
 
 variable "shared_log_analytics_workspace_id" {
   description = "ID of shared Log Analytics workspace (from shared monitoring module)"
   type        = string
+  default     = null
 }
 
 variable "shared_postgresql_server_id" {

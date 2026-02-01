@@ -13,7 +13,8 @@ variable "location" {
 }
 
 variable "fallback_location" {
-  type = string
+  type    = string
+  default = "eastus2"
 }
 
 variable "resource_group_name" {
@@ -24,29 +25,10 @@ variable "tags" {
   type = map(string)
 }
 
-# Shared infrastructure inputs
-variable "shared_cosmos_db_connection_string" {
-  type      = string
-  sensitive = true
-}
-
-variable "shared_servicebus_connection_string" {
-  type      = string
-  sensitive = true
-}
-
-variable "shared_storage_connection_string" {
-  type      = string
-  sensitive = true
-}
-
+# Shared infrastructure inputs (optional)
 variable "shared_log_analytics_workspace_id" {
-  type = string
-}
-
-variable "shared_application_insights_connection_string" {
-  type      = string
-  sensitive = true
+  type    = string
+  default = null
 }
 
 # =============================================================================
@@ -61,17 +43,24 @@ module "publisher" {
   resource_group_name = var.resource_group_name
   tags                = var.tags
 
-  cosmos_db_connection_string            = var.shared_cosmos_db_connection_string
-  servicebus_connection_string           = var.shared_servicebus_connection_string
-  storage_connection_string              = var.shared_storage_connection_string
-  log_analytics_workspace_id             = var.shared_log_analytics_workspace_id
-  application_insights_connection_string = var.shared_application_insights_connection_string
+  shared_log_analytics_workspace_id = var.shared_log_analytics_workspace_id
 }
 
 # =============================================================================
 # Outputs
 # =============================================================================
 
-output "publisher_api_url" {
-  value = module.publisher.api_url
+output "key_vault_uri" {
+  description = "Key Vault URI for publisher secrets"
+  value       = module.publisher.key_vault_uri
+}
+
+output "identity_client_id" {
+  description = "Managed Identity Client ID"
+  value       = module.publisher.identity_client_id
+}
+
+output "servicebus_queue_name" {
+  description = "Service Bus queue name"
+  value       = module.publisher.servicebus_queue_name
 }

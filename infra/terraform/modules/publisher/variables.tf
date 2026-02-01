@@ -43,17 +43,20 @@ variable "publisher_replica_count" {
 variable "vnet_id" {
   description = "Virtual Network ID for publisher deployment"
   type        = string
+  default     = null
 }
 
 variable "subnet_id" {
   description = "Subnet ID for publisher service"
   type        = string
+  default     = null
 }
 
 variable "chain_rpc_endpoint" {
   description = "RPC endpoint for Mystira Chain"
   type        = string
   sensitive   = true
+  default     = null
 }
 
 variable "tags" {
@@ -65,6 +68,7 @@ variable "tags" {
 variable "shared_log_analytics_workspace_id" {
   description = "ID of shared Log Analytics workspace (from shared monitoring module)"
   type        = string
+  default     = null
 }
 
 variable "use_shared_servicebus" {

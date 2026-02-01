@@ -40,3 +40,8 @@ output "key_vault_uri" {
   description = "Key Vault URI for admin-api"
   value       = azurerm_key_vault.admin_api.vault_uri
 }
+
+output "api_url" {
+  description = "Admin API URL (placeholder - API service not yet implemented)"
+  value       = null
+}

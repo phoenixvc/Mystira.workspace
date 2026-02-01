@@ -12,6 +12,11 @@ variable "location" {
   type = string
 }
 
+variable "fallback_location" {
+  type    = string
+  default = "eastus2"
+}
+
 variable "resource_group_name" {
   type = string
 }
@@ -20,24 +25,10 @@ variable "tags" {
   type = map(string)
 }
 
-# Shared infrastructure inputs
-variable "shared_cosmos_db_connection_string" {
-  type      = string
-  sensitive = true
-}
-
-variable "shared_servicebus_connection_string" {
-  type      = string
-  sensitive = true
-}
-
+# Shared infrastructure inputs (optional)
 variable "shared_log_analytics_workspace_id" {
-  type = string
-}
-
-variable "shared_application_insights_connection_string" {
-  type      = string
-  sensitive = true
+  type    = string
+  default = null
 }
 
 # =============================================================================
@@ -52,16 +43,19 @@ module "chain" {
   resource_group_name = var.resource_group_name
   tags                = var.tags
 
-  cosmos_db_connection_string            = var.shared_cosmos_db_connection_string
-  servicebus_connection_string           = var.shared_servicebus_connection_string
-  log_analytics_workspace_id             = var.shared_log_analytics_workspace_id
-  application_insights_connection_string = var.shared_application_insights_connection_string
+  shared_log_analytics_workspace_id = var.shared_log_analytics_workspace_id
 }
 
 # =============================================================================
 # Outputs
 # =============================================================================
 
-output "chain_api_url" {
-  value = module.chain.api_url
+output "key_vault_uri" {
+  description = "Key Vault URI for chain secrets"
+  value       = module.chain.key_vault_uri
+}
+
+output "identity_client_id" {
+  description = "Managed Identity Client ID"
+  value       = module.chain.identity_client_id
 }

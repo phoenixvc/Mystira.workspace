@@ -39,6 +39,7 @@ variable "resource_group_name" {
 variable "vnet_id" {
   description = "Virtual Network ID for PostgreSQL deployment"
   type        = string
+  default     = null
 }
 
 variable "subnet_id" {

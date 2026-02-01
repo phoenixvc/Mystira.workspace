@@ -93,7 +93,7 @@ variable "private_dns_zone_id" {
   default     = null
 
   validation {
-    condition     = var.private_dns_zone_id == null || length(trimspace(var.private_dns_zone_id)) > 0
+    condition     = var.private_dns_zone_id == null || can(length(trimspace(var.private_dns_zone_id)) > 0)
     error_message = "private_dns_zone_id must be either null or a non-empty string. Empty strings are not allowed."
   }
 }

@@ -95,7 +95,7 @@ module "monitoring" {
   environment         = var.environment
   location            = var.location
   resource_group_name = var.resource_group_name
-  log_retention_days  = var.log_retention_days
+  retention_in_days   = var.log_retention_days
   tags                = var.tags
 }
 
@@ -211,7 +211,7 @@ output "cosmos_db_connection_string" {
 }
 
 output "storage_account_id" {
-  value = module.storage.account_id
+  value = module.storage.storage_account_id
 }
 
 output "storage_connection_string" {
