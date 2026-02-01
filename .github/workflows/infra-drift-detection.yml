@@ -69,8 +69,6 @@ jobs:
       matrix:
         environment: ${{ github.event_name == 'workflow_dispatch' && (inputs.environment == 'all' && fromJson('["dev", "staging", "prod"]') || fromJson(format('["{0}"]', inputs.environment))) || fromJson('["dev", "staging", "prod"]') }}
         product: [shared-infra, mystira-app, story-generator, admin, publisher, chain]
-    outputs:
-      drift-detected: ${{ steps.check-drift.outputs.drift }}
     steps:
       - uses: actions/checkout@v6
         with:
@@ -192,7 +190,12 @@ jobs:
               for (const report of reports) {
                 if (report.startsWith('drift-report-')) {
                   driftFound = true;
-                  const [, , product, environment] = report.split('-');
+                  // Strip 'drift-report-' prefix and find the last hyphen to split product/environment
+                  // This handles hyphenated product names like 'shared-infra' correctly
+                  const remainder = report.replace('drift-report-', '');
+                  const lastHyphenIndex = remainder.lastIndexOf('-');
+                  const product = remainder.substring(0, lastHyphenIndex);
+                  const environment = remainder.substring(lastHyphenIndex + 1);
                   driftDetails.push({ product, environment, report });
                 }
               }

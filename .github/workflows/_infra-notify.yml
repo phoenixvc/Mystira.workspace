@@ -141,14 +141,15 @@ jobs:
           STATUS_COLOR="${{ inputs.status == 'success' && '00FF00' || inputs.status == 'failure' && 'FF0000' || 'FFFF00' }}"
           STATUS_EMOJI="${{ inputs.status == 'success' && '✅' || inputs.status == 'failure' && '❌' || '⚠️' }}"
 
-          cat > payload.json << 'EOF'
+          # Using unquoted EOF to allow shell variable expansion
+          cat > payload.json << EOF
           {
             "@type": "MessageCard",
             "@context": "http://schema.org/extensions",
-            "themeColor": "$STATUS_COLOR",
+            "themeColor": "${STATUS_COLOR}",
             "summary": "Infrastructure ${{ inputs.action }}: ${{ inputs.status }}",
             "sections": [{
-              "activityTitle": "$STATUS_EMOJI Infrastructure ${{ inputs.action }}: ${{ inputs.status }}",
+              "activityTitle": "${STATUS_EMOJI} Infrastructure ${{ inputs.action }}: ${{ inputs.status }}",
               "facts": [{
                 "name": "Product",
                 "value": "${{ inputs.product }}"
@@ -174,9 +175,5 @@ jobs:
             }]
           }
           EOF
-
-          # Replace variables in payload
-          sed -i "s/\$STATUS_COLOR/$STATUS_COLOR/g" payload.json
-          sed -i "s/\$STATUS_EMOJI/$STATUS_EMOJI/g" payload.json
 
           curl -H "Content-Type: application/json" -d @payload.json "${{ secrets.TEAMS_WEBHOOK_URL }}"

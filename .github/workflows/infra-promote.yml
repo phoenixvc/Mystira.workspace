@@ -140,16 +140,13 @@ jobs:
             echo "" >> $GITHUB_STEP_SUMMARY
           done
 
-  # Plan promotion
-  plan-promotion:
-    name: Plan - ${{ matrix.product }}
+  # Plan shared-infra first (when 'all' is selected or shared-infra is the target)
+  plan-shared-infra:
+    name: Plan - shared-infra
     runs-on: ubuntu-latest
     timeout-minutes: 20
     needs: [validate-promotion, compare-configs]
-    strategy:
-      fail-fast: false
-      matrix:
-        product: ${{ inputs.product == 'all' && fromJson('["shared-infra", "mystira-app", "story-generator", "admin", "publisher", "chain"]') || fromJson(format('["{0}"]', inputs.product)) }}
+    if: inputs.product == 'all' || inputs.product == 'shared-infra'
     environment: ${{ inputs.target_environment }}
     steps:
       - uses: actions/checkout@v6
@@ -174,18 +171,9 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-      - name: Get Target Directory
-        id: get-dir
-        run: |
-          if [[ "${{ matrix.product }}" == "shared-infra" ]]; then
-            echo "dir=infra/terraform/shared-infra/environments/${{ inputs.target_environment }}" >> $GITHUB_OUTPUT
-          else
-            echo "dir=infra/terraform/products/${{ matrix.product }}/environments/${{ inputs.target_environment }}" >> $GITHUB_OUTPUT
-          fi
-
       - name: Terragrunt Init
         run: |
-          cd ${{ steps.get-dir.outputs.dir }}
+          cd infra/terraform/shared-infra/environments/${{ inputs.target_environment }}
           terragrunt init --terragrunt-non-interactive
         env:
           TF_VAR_environment: ${{ inputs.target_environment }}
@@ -193,7 +181,71 @@ jobs:
       - name: Terragrunt Plan
         id: plan
         run: |
-          cd ${{ steps.get-dir.outputs.dir }}
+          cd infra/terraform/shared-infra/environments/${{ inputs.target_environment }}
+          terragrunt plan -out=promote.tfplan --terragrunt-non-interactive | tee plan_output.txt
+
+          # Check if there are changes
+          if grep -q "No changes" plan_output.txt; then
+            echo "changes=false" >> $GITHUB_OUTPUT
+          else
+            echo "changes=true" >> $GITHUB_OUTPUT
+          fi
+        env:
+          TF_VAR_environment: ${{ inputs.target_environment }}
+
+      - name: Upload Plan
+        uses: actions/upload-artifact@v4
+        with:
+          name: promote-plan-shared-infra-${{ inputs.target_environment }}
+          path: infra/terraform/shared-infra/environments/${{ inputs.target_environment }}/promote.tfplan
+          retention-days: 1
+
+  # Plan other products (after shared-infra when 'all' is selected)
+  plan-products:
+    name: Plan - ${{ matrix.product }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: [validate-promotion, compare-configs, plan-shared-infra]
+    if: always() && needs.validate-promotion.outputs.valid == 'true' && needs.compare-configs.result == 'success' && (inputs.product == 'all' || (inputs.product != 'shared-infra' && inputs.product != 'all'))
+    strategy:
+      fail-fast: false
+      matrix:
+        product: ${{ inputs.product == 'all' && fromJson('["mystira-app", "story-generator", "admin", "publisher", "chain"]') || fromJson(format('["{0}"]', inputs.product)) }}
+    environment: ${{ inputs.target_environment }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          submodules: recursive
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      - name: Setup Terragrunt
+        run: |
+          wget -O terragrunt https://github.com/gruntwork-io/terragrunt/releases/download/v${{ env.TERRAGRUNT_VERSION }}/terragrunt_linux_amd64
+          chmod +x terragrunt
+          sudo mv terragrunt /usr/local/bin/
+
+      - name: Azure Login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Terragrunt Init
+        run: |
+          cd infra/terraform/products/${{ matrix.product }}/environments/${{ inputs.target_environment }}
+          terragrunt init --terragrunt-non-interactive
+        env:
+          TF_VAR_environment: ${{ inputs.target_environment }}
+
+      - name: Terragrunt Plan
+        id: plan
+        run: |
+          cd infra/terraform/products/${{ matrix.product }}/environments/${{ inputs.target_environment }}
           terragrunt plan -out=promote.tfplan --terragrunt-non-interactive | tee plan_output.txt
 
           # Check if there are changes
@@ -209,20 +261,16 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: promote-plan-${{ matrix.product }}-${{ inputs.target_environment }}
-          path: ${{ steps.get-dir.outputs.dir }}/promote.tfplan
+          path: infra/terraform/products/${{ matrix.product }}/environments/${{ inputs.target_environment }}/promote.tfplan
           retention-days: 1
 
-  # Apply promotion (if not dry run)
-  apply-promotion:
-    name: Apply - ${{ matrix.product }}
+  # Apply shared-infra first (if not dry run)
+  apply-shared-infra:
+    name: Apply - shared-infra
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    needs: plan-promotion
-    if: inputs.dry_run == false
-    strategy:
-      fail-fast: false
-      matrix:
-        product: ${{ inputs.product == 'all' && fromJson('["shared-infra", "mystira-app", "story-generator", "admin", "publisher", "chain"]') || fromJson(format('["{0}"]', inputs.product)) }}
+    needs: [plan-shared-infra, plan-products]
+    if: always() && inputs.dry_run == false && (inputs.product == 'all' || inputs.product == 'shared-infra') && needs.plan-shared-infra.result == 'success'
     environment:
       name: ${{ inputs.target_environment }}-deploy
     steps:
@@ -248,36 +296,101 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-      - name: Get Target Directory
-        id: get-dir
-        run: |
-          if [[ "${{ matrix.product }}" == "shared-infra" ]]; then
-            echo "dir=infra/terraform/shared-infra/environments/${{ inputs.target_environment }}" >> $GITHUB_OUTPUT
-          else
-            echo "dir=infra/terraform/products/${{ matrix.product }}/environments/${{ inputs.target_environment }}" >> $GITHUB_OUTPUT
-          fi
-
       - name: Download Plan
         uses: actions/download-artifact@v4
         with:
-          name: promote-plan-${{ matrix.product }}-${{ inputs.target_environment }}
-          path: ${{ steps.get-dir.outputs.dir }}
+          name: promote-plan-shared-infra-${{ inputs.target_environment }}
+          path: infra/terraform/shared-infra/environments/${{ inputs.target_environment }}
 
       - name: Terragrunt Init
         run: |
-          cd ${{ steps.get-dir.outputs.dir }}
+          cd infra/terraform/shared-infra/environments/${{ inputs.target_environment }}
           terragrunt init --terragrunt-non-interactive
         env:
           TF_VAR_environment: ${{ inputs.target_environment }}
 
       - name: Terragrunt Apply
         run: |
-          cd ${{ steps.get-dir.outputs.dir }}
+          cd infra/terraform/shared-infra/environments/${{ inputs.target_environment }}
           terragrunt apply promote.tfplan --terragrunt-non-interactive
         env:
           TF_VAR_environment: ${{ inputs.target_environment }}
 
       - name: Apply Summary
+        run: |
+          echo "## Promotion Applied" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "✅ **shared-infra** promoted to **${{ inputs.target_environment }}**" >> $GITHUB_STEP_SUMMARY
+
+  # Apply other products (after shared-infra, if not dry run)
+  apply-products:
+    name: Apply - ${{ matrix.product }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: [plan-products, apply-shared-infra]
+    if: always() && inputs.dry_run == false && (needs.plan-products.result == 'success' || needs.plan-products.result == 'skipped') && (needs.apply-shared-infra.result == 'success' || needs.apply-shared-infra.result == 'skipped')
+    strategy:
+      fail-fast: false
+      matrix:
+        product: ${{ inputs.product == 'all' && fromJson('["mystira-app", "story-generator", "admin", "publisher", "chain"]') || fromJson(format('["{0}"]', inputs.product)) }}
+    environment:
+      name: ${{ inputs.target_environment }}-deploy
+    steps:
+      - name: Skip if not applicable
+        if: inputs.product != 'all' && inputs.product == 'shared-infra'
+        run: echo "Skipping - shared-infra already applied"
+
+      - uses: actions/checkout@v6
+        if: inputs.product == 'all' || inputs.product != 'shared-infra'
+        with:
+          submodules: recursive
+
+      - name: Setup Terraform
+        if: inputs.product == 'all' || inputs.product != 'shared-infra'
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      - name: Setup Terragrunt
+        if: inputs.product == 'all' || inputs.product != 'shared-infra'
+        run: |
+          wget -O terragrunt https://github.com/gruntwork-io/terragrunt/releases/download/v${{ env.TERRAGRUNT_VERSION }}/terragrunt_linux_amd64
+          chmod +x terragrunt
+          sudo mv terragrunt /usr/local/bin/
+
+      - name: Azure Login (OIDC)
+        if: inputs.product == 'all' || inputs.product != 'shared-infra'
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Download Plan
+        if: inputs.product == 'all' || inputs.product != 'shared-infra'
+        uses: actions/download-artifact@v4
+        with:
+          name: promote-plan-${{ matrix.product }}-${{ inputs.target_environment }}
+          path: infra/terraform/products/${{ matrix.product }}/environments/${{ inputs.target_environment }}
+
+      - name: Terragrunt Init
+        if: inputs.product == 'all' || inputs.product != 'shared-infra'
+        run: |
+          cd infra/terraform/products/${{ matrix.product }}/environments/${{ inputs.target_environment }}
+          terragrunt init --terragrunt-non-interactive
+        env:
+          TF_VAR_environment: ${{ inputs.target_environment }}
+
+      - name: Terragrunt Apply
+        if: inputs.product == 'all' || inputs.product != 'shared-infra'
+        run: |
+          cd infra/terraform/products/${{ matrix.product }}/environments/${{ inputs.target_environment }}
+          terragrunt apply promote.tfplan --terragrunt-non-interactive
+        env:
+          TF_VAR_environment: ${{ inputs.target_environment }}
+
+      - name: Apply Summary
+        if: inputs.product == 'all' || inputs.product != 'shared-infra'
         run: |
           echo "## Promotion Applied" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
@@ -288,7 +401,7 @@ jobs:
     name: Promotion Summary
     runs-on: ubuntu-latest
     timeout-minutes: 5
-    needs: [plan-promotion, apply-promotion]
+    needs: [plan-shared-infra, plan-products, apply-shared-infra, apply-products]
     if: always()
     steps:
       - name: Generate Summary

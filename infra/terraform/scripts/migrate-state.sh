@@ -229,7 +229,13 @@ validate_states() {
     PRODUCTS=("shared-infra" "mystira-app" "story-generator" "admin" "publisher" "chain")
 
     for product in "${PRODUCTS[@]}"; do
-        product_dir="products/${product}/environments/${ENVIRONMENT}"
+        # Handle shared-infra differently from other products
+        if [[ "$product" == "shared-infra" ]]; then
+            product_dir="shared-infra/environments/${ENVIRONMENT}"
+        else
+            product_dir="products/${product}/environments/${ENVIRONMENT}"
+        fi
+
         if [[ -d "$product_dir" ]]; then
             log_info "Validating ${product}..."
             cd "$product_dir"
@@ -239,6 +245,8 @@ validate_states() {
             fi
 
             cd - > /dev/null
+        else
+            log_warn "Directory not found: ${product_dir}"
         fi
     done
 

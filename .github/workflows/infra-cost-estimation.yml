@@ -229,8 +229,13 @@ jobs:
           echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
           echo "| Monthly cost increase threshold | \$$THRESHOLD |" >> $GITHUB_STEP_SUMMARY
           echo "| Actual cost change | \$$DIFF_NUM |" >> $GITHUB_STEP_SUMMARY
+
+      - name: Generate threshold summary
+        run: |
           if [[ "${{ steps.threshold.outputs.status }}" == "fail" ]]; then
             echo "| Status | ❌ **Exceeds threshold** |" >> $GITHUB_STEP_SUMMARY
+          elif [[ "${{ steps.threshold.outputs.status }}" == "skip" ]]; then
+            echo "| Status | ⏭️ Skipped |" >> $GITHUB_STEP_SUMMARY
           else
             echo "| Status | ✅ Within limits |" >> $GITHUB_STEP_SUMMARY
           fi

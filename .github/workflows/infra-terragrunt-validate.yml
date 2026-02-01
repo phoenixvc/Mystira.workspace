@@ -124,7 +124,7 @@ jobs:
     name: TFLint
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    if: ${{ vars.ENABLE_TFLINT != 'false' }}
+    if: env.ENABLE_TFLINT != 'false'
     steps:
       - uses: actions/checkout@v6
 
@@ -167,7 +167,7 @@ jobs:
     name: TFSec Security Scan
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    if: ${{ vars.ENABLE_TFSEC != 'false' }}
+    if: env.ENABLE_TFSEC != 'false'
     steps:
       - uses: actions/checkout@v6
 
@@ -302,7 +302,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     needs: format-check
-    if: ${{ vars.ENABLE_CHECKOV != 'false' }}
+    if: env.ENABLE_CHECKOV != 'false'
     steps:
       - uses: actions/checkout@v6
         with:
@@ -313,7 +313,7 @@ jobs:
         with:
           directory: infra/terraform
           framework: terraform
-          soft_fail: ${{ vars.CHECKOV_SOFT_FAIL != 'false' }}
+          soft_fail: ${{ env.CHECKOV_SOFT_FAIL != 'false' }}
           output_format: github_failed_only
 
   # ============================================
