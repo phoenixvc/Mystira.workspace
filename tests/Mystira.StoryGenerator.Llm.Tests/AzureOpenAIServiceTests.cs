@@ -220,7 +220,7 @@ public class AzureOpenAIServiceTests
         // Act
         var result = typeof(AzureOpenAIService)
             .GetMethod("ResolveEndpoint", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
-            ?.Invoke(service, new object[] { null });
+            ?.Invoke(service, new object?[] { null });
 
         // Assert
         Assert.Equal(_aiSettings.AzureOpenAI.Endpoint, result);

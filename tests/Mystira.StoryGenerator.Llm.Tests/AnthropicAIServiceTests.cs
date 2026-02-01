@@ -191,7 +191,7 @@ public class AnthropicAIServiceTests
 
         var result = typeof(AnthropicAIService)
             .GetMethod("ResolveEndpoint", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
-            ?.Invoke(service, new object[] { null });
+            ?.Invoke(service, new object?[] { null });
 
         Assert.Equal(string.Empty, result);
     }

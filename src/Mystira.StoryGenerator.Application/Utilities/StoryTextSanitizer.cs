@@ -32,7 +32,7 @@ public static class StoryTextSanitizer
                 if (node != null)
                 {
                     var sanitized = SanitizeJsonNodeStrings(node);
-                    return sanitized.ToJsonString(new JsonSerializerOptions { WriteIndented = false });
+                    return sanitized?.ToJsonString(new JsonSerializerOptions { WriteIndented = false }) ?? trimmed;
                 }
             }
             catch

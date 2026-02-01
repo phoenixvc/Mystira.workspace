@@ -107,7 +107,7 @@ public class WebStoryContinuityService
 
             // Fall back to the Location header (from AcceptedAtAction)
             var location = response.Headers?.Location?.ToString();
-            if (string.IsNullOrWhiteSpace(location) && response.Headers.TryGetValues("Location", out var values))
+            if (string.IsNullOrWhiteSpace(location) && response.Headers?.TryGetValues("Location", out var values) == true)
             {
                 location = values.FirstOrDefault();
             }

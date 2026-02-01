@@ -296,12 +296,13 @@ public class StoryAgentController : ControllerBase
             }
 
             // Create user refinement focus
+            var targetSceneIds = request.TargetSceneIds ?? new List<string>();
             var focus = new UserRefinementFocus
             {
-                TargetSceneIds = request.TargetSceneIds ?? new List<string>(),
+                TargetSceneIds = targetSceneIds,
                 Aspects = request.Aspects ?? new List<string>(),
                 Constraints = request.Constraints ?? string.Empty,
-                IsFullRewrite = request.TargetSceneIds.Count == 0
+                IsFullRewrite = targetSceneIds.Count == 0
             };
 
             // Set stage to Refining before starting the background task
@@ -593,9 +594,9 @@ public class StoryAgentController : ControllerBase
 
             // Set SSE headers
             Response.ContentType = "text/event-stream";
-            Response.Headers.Add("Cache-Control", "no-cache");
-            Response.Headers.Add("Connection", "keep-alive");
-            Response.Headers.Add("X-Accel-Buffering", "no"); // Disable nginx buffering
+            Response.Headers["Cache-Control"] = "no-cache";
+            Response.Headers["Connection"] = "keep-alive";
+            Response.Headers["X-Accel-Buffering"] = "no"; // Disable nginx buffering
 
             // Start streaming events
             await foreach (var evt in _streamPublisher.SubscribeAsync(sessionId, cancellationToken))

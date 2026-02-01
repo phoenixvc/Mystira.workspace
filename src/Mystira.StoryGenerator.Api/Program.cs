@@ -1,8 +1,9 @@
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.Extensions.Options;
-using Mystira.StoryGenerator.Api.Services;
-using Mystira.StoryGenerator.Application;
 using Mystira.StoryGenerator.Api.Infrastructure.Agents;
+using Mystira.StoryGenerator.Api.Services;
+using Mystira.StoryGenerator.Api.Services.ContinuityAsync;
+using Mystira.StoryGenerator.Application;
 using Mystira.StoryGenerator.Application.Infrastructure.Agents;
 using Mystira.StoryGenerator.Application.Scenarios;
 using Mystira.StoryGenerator.Application.Services;
@@ -14,8 +15,6 @@ using Mystira.StoryGenerator.Llm.Services.ConsistencyEvaluators;
 using Mystira.StoryGenerator.Llm.Services.LLM;
 using Mystira.StoryGenerator.Llm.Services.StoryInstructionsRag;
 using Mystira.StoryGenerator.Llm.Services.StoryIntentClassification;
-using Mystira.StoryGenerator.Api.Services;
-using Mystira.StoryGenerator.Api.Services.ContinuityAsync;
 
 var builder = WebApplication.CreateBuilder(args);
 

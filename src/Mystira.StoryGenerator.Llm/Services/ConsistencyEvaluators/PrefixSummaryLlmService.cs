@@ -443,15 +443,15 @@ The story so far covers only the early stages of their trip, with both friends a
     private class PrefixSummaryInput
     {
         [JsonProperty("prefix_scenes")]
-        public PrefixScene[] PrefixScenes { get; set; }
+        public PrefixScene[] PrefixScenes { get; set; } = [];
     }
 
     private class PrefixScene
     {
         [JsonProperty("id")]
-        public string Id { get; set; }
+        public string Id { get; set; } = string.Empty;
 
         [JsonProperty("description")]
-        public string Description { get; set; }
+        public string Description { get; set; } = string.Empty;
     }
 }
