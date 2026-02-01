@@ -11,12 +11,21 @@ resources:
   - ../../base/admin-api
   - ../../base/admin-ui
   - ../../base/cert-manager
+  - ../../base/service-mesh  # Istio mTLS configuration
 
 # ServiceAccount patches for workload identity client IDs
 # These values should be populated from Terraform outputs:
 #   terraform output -json | jq -r '.admin_api_identity_client_id.value'
 # TODO: Replace placeholder UUIDs with actual client IDs from Terraform
 patchesStrategicMerge:
+  # Enable Istio sidecar injection for the namespace
+  - |-
+    apiVersion: v1
+    kind: Namespace
+    metadata:
+      name: mystira
+      labels:
+        istio-injection: enabled
   - |-
     apiVersion: v1
     kind: ServiceAccount
