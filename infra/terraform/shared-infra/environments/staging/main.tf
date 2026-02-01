@@ -13,9 +13,8 @@ variable "location" {
   type = string
 }
 
-variable "fallback_location" {
-  type = string
-}
+# Note: fallback_location not used in staging (no geo-replication)
+# Kept for terragrunt input consistency with prod
 
 variable "resource_group_name" {
   type = string
@@ -56,10 +55,8 @@ variable "cosmos_serverless" {
   type = bool
 }
 
-variable "cosmos_throughput" {
-  type    = number
-  default = 400
-}
+# Note: cosmos_throughput not used when serverless = true
+# Kept for terragrunt input consistency with prod
 
 # Azure AI variables
 variable "azure_ai_sku" {
@@ -87,16 +84,10 @@ variable "log_retention_days" {
 }
 
 # =============================================================================
-# Data Sources
-# =============================================================================
-
-data "azurerm_resource_group" "main" {
-  name = var.resource_group_name
-}
-
-# =============================================================================
 # Shared Modules
 # =============================================================================
+# Note: data.azurerm_resource_group not needed in staging
+# (prod uses it for location validation)
 
 module "monitoring" {
   source = "../../../modules/shared/monitoring"

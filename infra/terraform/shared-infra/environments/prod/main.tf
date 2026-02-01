@@ -100,8 +100,20 @@ variable "log_retention_days" {
 # Data Sources
 # =============================================================================
 
+# Used for location validation and resource group attributes
 data "azurerm_resource_group" "main" {
   name = var.resource_group_name
+}
+
+# =============================================================================
+# Validation
+# =============================================================================
+
+check "resource_group_location_matches" {
+  assert {
+    condition     = data.azurerm_resource_group.main.location == var.location
+    error_message = "Resource group location (${data.azurerm_resource_group.main.location}) does not match var.location (${var.location})."
+  }
 }
 
 # =============================================================================
@@ -121,13 +133,14 @@ module "monitoring" {
 module "postgresql" {
   source = "../../../modules/shared/postgresql"
 
-  environment           = var.environment
-  location              = var.location
-  resource_group_name   = var.resource_group_name
-  sku_name              = var.postgresql_sku_name
-  storage_mb            = var.postgresql_storage_mb
-  backup_retention_days = var.postgresql_backup_retention
-  tags                  = var.tags
+  environment                  = var.environment
+  location                     = var.location
+  resource_group_name          = var.resource_group_name
+  sku_name                     = var.postgresql_sku_name
+  storage_mb                   = var.postgresql_storage_mb
+  backup_retention_days        = var.postgresql_backup_retention
+  geo_redundant_backup_enabled = var.postgresql_geo_redundant_backup
+  tags                         = var.tags
 }
 
 module "redis" {
@@ -149,6 +162,9 @@ module "cosmos_db" {
   location            = var.location
   resource_group_name = var.resource_group_name
   serverless          = var.cosmos_serverless
+  throughput          = var.cosmos_throughput
+  multi_region        = var.cosmos_multi_region
+  fallback_location   = var.fallback_location
   tags                = var.tags
 }
 
