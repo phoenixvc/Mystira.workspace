@@ -24,6 +24,15 @@ spec:
       securityContext:
         runAsUser: 1000
         runAsNonRoot: true
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    app: mys-devhub
+                topologyKey: kubernetes.io/hostname
       containers:
         - name: devhub
           image: myssharedacr.azurecr.io/devhub:v0.0.0

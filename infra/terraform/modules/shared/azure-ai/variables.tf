@@ -449,9 +449,9 @@ variable "allowed_ip_ranges" {
 }
 
 variable "public_network_access_enabled" {
-  description = "Enable public network access"
+  description = "Enable public network access (set to true only if private endpoints not configured)"
   type        = bool
-  default     = true
+  default     = false
 }
 
 variable "disable_local_auth" {

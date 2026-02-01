@@ -413,6 +413,8 @@ module "shared_azure_ai" {
   location            = var.location
   region_code         = local.region_code
   resource_group_name = azurerm_resource_group.main.name
+  # TODO: Disable public access and configure private endpoints
+  public_network_access_enabled = true
 
   # Enable AI Foundry project for workload isolation
   enable_project = true # Uses AzAPI to enable allowProjectManagement on account

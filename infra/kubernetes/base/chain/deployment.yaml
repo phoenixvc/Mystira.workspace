@@ -30,6 +30,15 @@ spec:
           operator: "Equal"
           value: "chain"
           effect: "NoSchedule"
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    app: mys-chain
+                topologyKey: kubernetes.io/hostname
       containers:
         - name: chain
           image: myssharedacr.azurecr.io/chain:v0.0.0

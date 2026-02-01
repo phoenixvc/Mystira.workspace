@@ -28,6 +28,15 @@ spec:
         runAsNonRoot: true
       nodeSelector:
         workload: publisher
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    app: mys-publisher
+                topologyKey: kubernetes.io/hostname
       containers:
         - name: publisher
           image: myssharedacr.azurecr.io/publisher:v0.0.0

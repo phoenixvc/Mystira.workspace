@@ -34,6 +34,15 @@ spec:
       securityContext:
         runAsUser: 1000
         runAsNonRoot: true
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    app: mys-story-generator
+                topologyKey: kubernetes.io/hostname
       containers:
         - name: story-generator
           image: myssharedacr.azurecr.io/story-generator:v0.0.0

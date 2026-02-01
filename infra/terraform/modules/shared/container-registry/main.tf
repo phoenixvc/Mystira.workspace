@@ -42,9 +42,9 @@ variable "admin_enabled" {
 }
 
 variable "public_network_access_enabled" {
-  description = "Allow public network access"
+  description = "Allow public network access (set to true only if private endpoints not available)"
   type        = bool
-  default     = true
+  default     = false
 }
 
 variable "zone_redundancy_enabled" {

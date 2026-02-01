@@ -24,6 +24,15 @@ spec:
       securityContext:
         runAsUser: 1000
         runAsNonRoot: true
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    app: mys-admin-ui
+                topologyKey: kubernetes.io/hostname
       containers:
         - name: admin-ui
           image: myssharedacr.azurecr.io/admin-ui:v0.0.0

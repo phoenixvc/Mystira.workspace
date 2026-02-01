@@ -4,12 +4,51 @@ kind: Kustomization
 namespace: mys-prod
 
 resources:
+  - ../../base
   - ../../base/chain
   - ../../base/publisher
   - ../../base/story-generator
   - ../../base/admin-api
   - ../../base/admin-ui
   - ../../base/cert-manager
+
+# ServiceAccount patches for workload identity client IDs
+# These values should be populated from Terraform outputs:
+#   terraform output -json | jq -r '.admin_api_identity_client_id.value'
+# TODO: Replace placeholder UUIDs with actual client IDs from Terraform
+patchesStrategicMerge:
+  - |-
+    apiVersion: v1
+    kind: ServiceAccount
+    metadata:
+      name: admin-api-sa
+      namespace: mys-prod
+      annotations:
+        azure.workload.identity/client-id: "00000000-0000-0000-0000-000000000001"
+  - |-
+    apiVersion: v1
+    kind: ServiceAccount
+    metadata:
+      name: story-generator-sa
+      namespace: mys-prod
+      annotations:
+        azure.workload.identity/client-id: "00000000-0000-0000-0000-000000000002"
+  - |-
+    apiVersion: v1
+    kind: ServiceAccount
+    metadata:
+      name: publisher-sa
+      namespace: mys-prod
+      annotations:
+        azure.workload.identity/client-id: "00000000-0000-0000-0000-000000000003"
+  - |-
+    apiVersion: v1
+    kind: ServiceAccount
+    metadata:
+      name: chain-sa
+      namespace: mys-prod
+      annotations:
+        azure.workload.identity/client-id: "00000000-0000-0000-0000-000000000004"
 
 labels:
   - pairs:
