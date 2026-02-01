@@ -70,7 +70,17 @@ jobs:
           echo "## Vulnerability Scan Results" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
 
-          RESULT=$(dotnet list packages/contracts/dotnet/Mystira.Contracts package --vulnerable --include-transitive 2>&1) || true
+          RESULT=$(dotnet list packages/contracts/dotnet/Mystira.Contracts package --vulnerable --include-transitive 2>&1)
+          EXIT_CODE=$?
+
+          if [ $EXIT_CODE -ne 0 ]; then
+            echo "::error::Failed to check vulnerabilities in Mystira.Contracts"
+            echo "### ❌ Command Failed" >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            echo "$RESULT" >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            exit 1
+          fi
 
           if echo "$RESULT" | grep -q "has the following vulnerable packages"; then
             echo "::error::Vulnerable packages detected in Mystira.Contracts"

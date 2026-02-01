@@ -53,6 +53,7 @@ variable "subnet_id" {
 variable "chain_rpc_endpoint" {
   description = "RPC endpoint for Mystira Chain"
   type        = string
+  sensitive   = true
 }
 
 variable "tags" {

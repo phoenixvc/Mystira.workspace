@@ -140,6 +140,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     needs: [collect-metrics, validate-sla]
+    permissions:
+      issues: write
     steps:
       - name: Generate report
         run: |

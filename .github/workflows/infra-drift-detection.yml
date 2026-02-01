@@ -22,8 +22,8 @@ on:
           - all
 
 env:
-  TF_VERSION: "1.5.0"
-  TERRAGRUNT_VERSION: "0.55.0"
+  TF_VERSION: "1.14.4"
+  TERRAGRUNT_VERSION: "0.99.1"
   ARM_USE_OIDC: true
   ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
   ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
@@ -235,11 +235,12 @@ jobs:
             });
 
             if (issues.length > 0) {
-              // Update existing issue
+              // Update existing issue with new title and body
               await github.rest.issues.update({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 issue_number: issues[0].number,
+                title: title,
                 body: body
               });
               console.log(`Updated existing drift issue #${issues[0].number}`);

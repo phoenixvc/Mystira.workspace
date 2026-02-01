@@ -14,8 +14,11 @@
 locals {
   # Extract environment from the path (e.g., "environments/dev" -> "dev")
   # This works when running from products/mystira-app/environments/{env}/
-  env_from_path = element(split("/", path_relative_to_include()), length(split("/", path_relative_to_include())) - 1)
-  environment   = local.env_from_path != "" ? local.env_from_path : get_env("TF_VAR_environment", "dev")
+  # Only derive from path if we're in an environments subdirectory
+  path_parts    = split("/", path_relative_to_include())
+  has_env_path  = length(local.path_parts) >= 2 && contains(local.path_parts, "environments")
+  env_from_path = local.has_env_path ? element(local.path_parts, length(local.path_parts) - 1) : ""
+  environment   = local.env_from_path != "" && local.env_from_path != "mystira-app" ? local.env_from_path : get_env("TF_VAR_environment", "dev")
 }
 
 include "root" {

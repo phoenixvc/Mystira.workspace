@@ -16,7 +16,7 @@ spec:
   tls:
     - hosts:
         - story-api.mystira.app
-      secretName: mystira-story-generator-tls
+      secretName: mys-story-generator-tls
   rules:
     - host: story-api.mystira.app
       http:

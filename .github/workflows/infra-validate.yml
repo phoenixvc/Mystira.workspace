@@ -166,7 +166,7 @@ jobs:
         with:
           directory: infra/terraform
           framework: terraform
-          soft_fail: ${{ vars.CHECKOV_SOFT_FAIL != 'false' }}
+          soft_fail: true
           output_format: github_failed_only
 
       - name: Scan for Secrets

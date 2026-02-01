@@ -123,3 +123,13 @@ variable "enable_swa_custom_domain" {
   type        = bool
   default     = false
 }
+
+# -----------------------------------------------------------------------------
+# Lifecycle Settings
+# -----------------------------------------------------------------------------
+
+variable "enable_prevent_destroy" {
+  description = "Enable prevent_destroy lifecycle rule on critical resources. Set to true for production."
+  type        = bool
+  default     = true
+}

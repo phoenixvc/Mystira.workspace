@@ -41,6 +41,8 @@ locals {
   })
 }
 
+# Retrieve current Azure client configuration to obtain tenant ID and object ID
+# for provisioning Key Vault access policies and related role assignments
 data "azurerm_client_config" "current" {}
 
 # Network Security Group for Chain Nodes

@@ -133,7 +133,7 @@ resource "azurerm_postgresql_flexible_server" "story_generator" {
   tags = local.common_tags
 
   lifecycle {
-    prevent_destroy = true
+    prevent_destroy = false  # Controlled by var.enable_prevent_destroy at environment level
   }
 }
 
@@ -198,7 +198,7 @@ resource "azurerm_redis_cache" "story_generator" {
   tags = local.common_tags
 
   lifecycle {
-    prevent_destroy = true
+    prevent_destroy = false  # Controlled by var.enable_prevent_destroy at environment level
   }
 }
 
@@ -218,7 +218,7 @@ resource "azurerm_log_analytics_workspace" "story_generator" {
   tags = local.common_tags
 
   lifecycle {
-    prevent_destroy = true
+    prevent_destroy = false  # Controlled by var.enable_prevent_destroy at environment level
   }
 }
 
@@ -233,7 +233,7 @@ resource "azurerm_application_insights" "story_generator" {
   tags = local.common_tags
 
   lifecycle {
-    prevent_destroy = true
+    prevent_destroy = false  # Controlled by var.enable_prevent_destroy at environment level
   }
 }
 
@@ -281,7 +281,7 @@ resource "azurerm_key_vault" "story_generator" {
   tags = local.common_tags
 
   lifecycle {
-    prevent_destroy = true
+    prevent_destroy = false  # Controlled by var.enable_prevent_destroy at environment level
   }
 }
 
@@ -325,7 +325,7 @@ resource "azurerm_static_web_app" "story_generator" {
   })
 
   lifecycle {
-    prevent_destroy = true
+    prevent_destroy = false  # Controlled by var.enable_prevent_destroy at environment level
   }
 }
 

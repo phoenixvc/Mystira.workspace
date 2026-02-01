@@ -258,7 +258,7 @@ jobs:
         id: check
         run: |
           PRODUCT="${{ matrix.product }}"
-          CHANGED="${{ needs.detect-changes.outputs[matrix.product] }}"
+          CHANGED="${{ needs['detect-changes'].outputs[matrix.product] }}"
           if [[ "$CHANGED" == "true" ]] || [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
             echo "run=true" >> $GITHUB_OUTPUT
           else

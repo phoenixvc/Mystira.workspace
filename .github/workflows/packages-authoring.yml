@@ -94,9 +94,21 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
 
           VULNERABLE=false
+          COMMAND_FAILED=false
 
           for PKG in "packages/authoring/Mystira.Authoring.Abstractions" "packages/authoring/Mystira.Authoring"; do
-            RESULT=$(dotnet list "$PKG" package --vulnerable --include-transitive 2>&1) || true
+            RESULT=$(dotnet list "$PKG" package --vulnerable --include-transitive 2>&1)
+            EXIT_CODE=$?
+
+            if [ $EXIT_CODE -ne 0 ]; then
+              echo "::error::Failed to check vulnerabilities in $PKG"
+              echo "### ❌ Command Failed for $(basename $PKG)" >> $GITHUB_STEP_SUMMARY
+              echo '```' >> $GITHUB_STEP_SUMMARY
+              echo "$RESULT" >> $GITHUB_STEP_SUMMARY
+              echo '```' >> $GITHUB_STEP_SUMMARY
+              COMMAND_FAILED=true
+              continue
+            fi
 
             if echo "$RESULT" | grep -q "has the following vulnerable packages"; then
               echo "::error::Vulnerable packages detected in $PKG"
@@ -108,7 +120,10 @@ jobs:
             fi
           done
 
-          if [ "$VULNERABLE" = "true" ]; then
+          if [ "$COMMAND_FAILED" = "true" ]; then
+            echo "::error::One or more vulnerability checks failed"
+            exit 1
+          elif [ "$VULNERABLE" = "true" ]; then
             exit 1
           else
             echo "### ✅ No Vulnerabilities Found" >> $GITHUB_STEP_SUMMARY

@@ -9,7 +9,7 @@ Mystira Publisher is a Node.js service responsible for publishing content to the
 ## Resources Created
 
 | Resource | Purpose |
-|----------|---------|
+| -------- | ------- |
 | User Assigned Managed Identity | Workload identity for AKS, Key Vault access |
 | Network Security Group | Network rules for HTTP API and health checks |
 | Service Bus Namespace (optional) | Event messaging for async processing |
@@ -59,7 +59,7 @@ module "publisher" {
 ## Network Security Rules
 
 | Rule | Port | Protocol | Purpose |
-|------|------|----------|---------|
+| ---- | ---- | -------- | ------- |
 | AllowHTTP | 3000 | TCP | HTTP API endpoint |
 | AllowHealthCheck | 3001 | TCP | Health check endpoint |
 
@@ -68,7 +68,7 @@ module "publisher" {
 The module stores the following secrets in Key Vault:
 
 | Secret | Description |
-|--------|-------------|
+| ------ | ----------- |
 | `chain-rpc-endpoint` | RPC endpoint for Mystira Chain |
 
 ## Workload Identity Setup
@@ -112,10 +112,64 @@ If you encounter this error during deployment:
 
 3. If not found, wait a few minutes and retry (Azure caching issue)
 
+## Rollback
+
+If a deployment fails or causes issues, follow these steps to rollback:
+
+### Revert Module Version
+
+1. Identify the last known good commit/tag for the publisher module
+2. Revert to the previous configuration:
+   ```bash
+   git checkout <previous-commit> -- infra/terraform/modules/publisher/
+   ```
+3. Re-run Terraform:
+   ```bash
+   cd infra/terraform/products/publisher/environments/<env>
+   terragrunt init
+   terragrunt plan
+   terragrunt apply
+   ```
+
+### Restore from State Backup
+
+If you have a saved Terraform state snapshot:
+
+1. Download the previous state version from Azure Storage
+2. Review and restore:
+   ```bash
+   terragrunt state push <backup-state-file>
+   ```
+
+### Key Vault Recovery
+
+If Key Vault secrets were modified:
+
+1. Check for soft-deleted secrets:
+   ```bash
+   az keyvault secret list-deleted --vault-name <vault-name>
+   ```
+2. Recover if needed:
+   ```bash
+   az keyvault secret recover --vault-name <vault-name> --name <secret-name>
+   ```
+
+### Post-Rollback Validation
+
+After rollback, verify:
+
+- [ ] Service health endpoints respond correctly
+- [ ] DNS records resolve to correct endpoints
+- [ ] IAM permissions are intact (check managed identity)
+- [ ] Application Insights shows healthy telemetry
+- [ ] Service Bus queues are processing messages
+
+If automated rollbacks fail, contact the on-call infrastructure team immediately.
+
 ## Outputs
 
 | Output | Description |
-|--------|-------------|
+| ------ | ----------- |
 | `nsg_id` | Network Security Group ID |
 | `identity_id` | Managed Identity resource ID |
 | `identity_principal_id` | Managed Identity principal ID (for RBAC) |
