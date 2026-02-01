@@ -6,7 +6,7 @@ This document outlines CI/CD best practices adopted in the Mystira infrastructur
 
 ### Authentication
 
-**OIDC Authentication (Implemented)**
+#### OIDC Authentication (Implemented)
 
 - All Azure authentication uses OIDC (Workload Identity Federation)
 - No long-lived secrets for Azure access
@@ -15,7 +15,7 @@ This document outlines CI/CD best practices adopted in the Mystira infrastructur
 
 ### Security Controls
 
-**Feature Toggles (Implemented)**
+#### Feature Toggles (Implemented)
 
 ```yaml
 # Repository variables for enabling/disabling features
@@ -25,13 +25,13 @@ ENABLE_CHECKOV: "true" # Policy-as-code checks
 ENABLE_COST_ESTIMATION: "true" # Infracost analysis
 ```
 
-**Graceful Degradation (Implemented)**
+#### Graceful Degradation (Implemented)
 
 - Workflows check for secret availability before using them
 - Missing optional secrets result in skipped steps, not failures
 - Pre-flight checks validate configuration before execution
 
-**Concurrency Controls (Implemented)**
+#### Concurrency Controls (Implemented)
 
 ```yaml
 concurrency:
@@ -41,7 +41,7 @@ concurrency:
 
 ### Infrastructure as Code
 
-**Terragrunt Product-Based Structure (Implemented)**
+#### Terragrunt Product-Based Structure (Implemented)
 
 ```
 infra/terraform/
@@ -55,7 +55,7 @@ infra/terraform/
 └── modules/               # Reusable Terraform modules
 ```
 
-**State Protection (Implemented)**
+#### State Protection (Implemented)
 
 - `prevent_destroy = true` on critical resources
 - Separate state per product and environment
@@ -63,13 +63,13 @@ infra/terraform/
 
 ### Monitoring and Alerts
 
-**Drift Detection (Implemented)**
+#### Drift Detection (Implemented)
 
 - Daily scheduled drift detection
 - Automatic issue creation when drift detected
 - Artifact retention for drift reports
 
-**Secret Rotation Monitoring (Implemented)**
+#### Secret Rotation Monitoring (Implemented)
 
 - Weekly secret health checks
 - Automated alerts for expiring credentials
