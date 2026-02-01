@@ -56,9 +56,9 @@ module "chain" {
   resource_group_name = var.resource_group_name
   tags                = var.tags
 
-  cosmos_db_connection_string        = var.shared_cosmos_db_connection_string
-  servicebus_connection_string       = var.shared_servicebus_connection_string
-  log_analytics_workspace_id         = var.shared_log_analytics_workspace_id
+  cosmos_db_connection_string            = var.shared_cosmos_db_connection_string
+  servicebus_connection_string           = var.shared_servicebus_connection_string
+  log_analytics_workspace_id             = var.shared_log_analytics_workspace_id
   application_insights_connection_string = var.shared_application_insights_connection_string
 }
 

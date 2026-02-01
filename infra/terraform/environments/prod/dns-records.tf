@@ -12,7 +12,7 @@ variable "bind_custom_domains" {
 variable "k8s_ingress_ip" {
   description = "Kubernetes NGINX ingress controller external IP (get with: kubectl get svc -n ingress-nginx)"
   type        = string
-  default     = ""  # Set after AKS is deployed
+  default     = "" # Set after AKS is deployed
 }
 
 # Reference existing DNS Zone (created by CI/CD bootstrap in shared terraform RG)
@@ -433,19 +433,19 @@ output "dns_zone_name_servers" {
 output "prod_dns_records_created" {
   description = "List of DNS records created for prod"
   value = {
-    apex_swa       = "mystira.app"
-    api            = "api.mystira.app"
-    admin          = "admin.mystira.app (via Front Door)"
-    admin_api      = "admin-api.mystira.app (via Front Door)"
-    story          = "story.mystira.app (via Front Door)"
-    story_api      = "story-api.mystira.app (via Front Door)"
-    publisher      = "publisher.mystira.app (via Front Door)"
-    chain          = "chain.mystira.app (via Front Door)"
-    publisher_k8s  = var.k8s_ingress_ip != "" ? "publisher-k8s.mystira.app" : "Not created (no k8s_ingress_ip)"
-    chain_k8s      = var.k8s_ingress_ip != "" ? "chain-k8s.mystira.app" : "Not created (no k8s_ingress_ip)"
-    admin_api_k8s  = var.k8s_ingress_ip != "" ? "admin-api-k8s.mystira.app" : "Not created (no k8s_ingress_ip)"
-    admin_k8s      = var.k8s_ingress_ip != "" ? "admin-k8s.mystira.app" : "Not created (no k8s_ingress_ip)"
-    story_api_k8s  = var.k8s_ingress_ip != "" ? "story-api-k8s.mystira.app" : "Not created (no k8s_ingress_ip)"
+    apex_swa      = "mystira.app"
+    api           = "api.mystira.app"
+    admin         = "admin.mystira.app (via Front Door)"
+    admin_api     = "admin-api.mystira.app (via Front Door)"
+    story         = "story.mystira.app (via Front Door)"
+    story_api     = "story-api.mystira.app (via Front Door)"
+    publisher     = "publisher.mystira.app (via Front Door)"
+    chain         = "chain.mystira.app (via Front Door)"
+    publisher_k8s = var.k8s_ingress_ip != "" ? "publisher-k8s.mystira.app" : "Not created (no k8s_ingress_ip)"
+    chain_k8s     = var.k8s_ingress_ip != "" ? "chain-k8s.mystira.app" : "Not created (no k8s_ingress_ip)"
+    admin_api_k8s = var.k8s_ingress_ip != "" ? "admin-api-k8s.mystira.app" : "Not created (no k8s_ingress_ip)"
+    admin_k8s     = var.k8s_ingress_ip != "" ? "admin-k8s.mystira.app" : "Not created (no k8s_ingress_ip)"
+    story_api_k8s = var.k8s_ingress_ip != "" ? "story-api-k8s.mystira.app" : "Not created (no k8s_ingress_ip)"
   }
 }
 

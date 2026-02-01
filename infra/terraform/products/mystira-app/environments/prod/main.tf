@@ -82,11 +82,11 @@ module "mystira_app" {
   tags                = var.tags
 
   # Pass shared infrastructure references
-  postgresql_server_fqdn            = var.shared_postgresql_server_fqdn
-  redis_connection_string           = var.shared_redis_connection_string
-  cosmos_db_connection_string       = var.shared_cosmos_db_connection_string
-  storage_connection_string         = var.shared_storage_connection_string
-  log_analytics_workspace_id        = var.shared_log_analytics_workspace_id
+  postgresql_server_fqdn                 = var.shared_postgresql_server_fqdn
+  redis_connection_string                = var.shared_redis_connection_string
+  cosmos_db_connection_string            = var.shared_cosmos_db_connection_string
+  storage_connection_string              = var.shared_storage_connection_string
+  log_analytics_workspace_id             = var.shared_log_analytics_workspace_id
   application_insights_connection_string = var.shared_application_insights_connection_string
 }
 

@@ -45,7 +45,7 @@ variable "storage_role" {
 variable "service_identities" {
   description = "Map of service identities and their resource access requirements"
   type = map(object({
-    principal_id               = string
+    principal_id = string
     # Static boolean flags to determine which role assignments to create
     # These must be known at plan time (not derived from resource attributes)
     enable_key_vault_access    = optional(bool, false)
@@ -71,7 +71,7 @@ variable "workload_identities" {
   description = "Map of workload identities for AKS federation"
   type = map(object({
     identity_id         = string
-    resource_group_name = string  # Resource group where the managed identity exists
+    resource_group_name = string # Resource group where the managed identity exists
     aks_oidc_issuer_url = string
     namespace           = string
     service_account     = string

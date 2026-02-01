@@ -68,10 +68,10 @@ module "story_generator" {
   tags                = var.tags
 
   # Pass shared infrastructure references
-  postgresql_server_fqdn            = var.shared_postgresql_server_fqdn
-  redis_connection_string           = var.shared_redis_connection_string
-  azure_ai_endpoint                 = var.shared_azure_ai_endpoint
-  log_analytics_workspace_id        = var.shared_log_analytics_workspace_id
+  postgresql_server_fqdn                 = var.shared_postgresql_server_fqdn
+  redis_connection_string                = var.shared_redis_connection_string
+  azure_ai_endpoint                      = var.shared_azure_ai_endpoint
+  log_analytics_workspace_id             = var.shared_log_analytics_workspace_id
   application_insights_connection_string = var.shared_application_insights_connection_string
 }
 

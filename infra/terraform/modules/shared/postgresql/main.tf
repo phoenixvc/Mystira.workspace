@@ -6,7 +6,7 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~> 4.0"  # 4.x required for .NET 9.0 support
+      version = "~> 4.0" # 4.x required for .NET 9.0 support
     }
     random = {
       source  = "hashicorp/random"
@@ -78,7 +78,7 @@ variable "sku_name" {
   default     = null
 
   validation {
-    condition = var.sku_name == null || can(regex("^(B_Standard_B[12](ms|s)|GP_Standard_D(2|4|8|16|32|48|64)s_v3|MO_Standard_E(2|4|8|16|20|32|48|64)s_v3)$", var.sku_name))
+    condition     = var.sku_name == null || can(regex("^(B_Standard_B[12](ms|s)|GP_Standard_D(2|4|8|16|32|48|64)s_v3|MO_Standard_E(2|4|8|16|20|32|48|64)s_v3)$", var.sku_name))
     error_message = "SKU name must be a valid PostgreSQL Flexible Server SKU: Burstable (B_Standard_B1ms, B_Standard_B2s), General Purpose (GP_Standard_D*s_v3), or Memory Optimized (MO_Standard_E*s_v3)."
   }
 }
@@ -127,7 +127,7 @@ variable "aad_admin_identities" {
   description = "Map of managed identities to add as Azure AD administrators. If principal_id is provided, it's used directly; otherwise principal_name is used to look up the identity."
   type = map(object({
     principal_name = string
-    principal_type = string # ServicePrincipal, User, or Group
+    principal_type = string           # ServicePrincipal, User, or Group
     principal_id   = optional(string) # If provided, skip data lookup (avoids circular dependencies)
   }))
   default = {}

@@ -14,11 +14,11 @@ variable "github_org" {
 variable "repositories" {
   description = "Map of repositories to configure federated credentials for"
   type = map(object({
-    name                 = string                       # GitHub repository name
-    branches             = list(string)                 # Branches to create credentials for
-    environments         = optional(list(string), [])   # GitHub environments
-    enable_tags          = optional(bool, false)        # Enable tag-based auth (for releases)
-    enable_pull_requests = optional(bool, false)        # Enable PR-based auth
+    name                 = string                     # GitHub repository name
+    branches             = list(string)               # Branches to create credentials for
+    environments         = optional(list(string), []) # GitHub environments
+    enable_tags          = optional(bool, false)      # Enable tag-based auth (for releases)
+    enable_pull_requests = optional(bool, false)      # Enable PR-based auth
   }))
   default = {}
 }

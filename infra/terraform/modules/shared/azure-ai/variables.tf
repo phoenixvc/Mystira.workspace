@@ -62,9 +62,9 @@ variable "model_deployments" {
     model_format    = optional(string, "OpenAI") # OpenAI, Anthropic, Cohere, Meta, Mistral, DeepSeek, AI21, xAI
     sku_name        = optional(string, "Standard")
     capacity        = optional(number, 10)
-    rai_policy_name = optional(string, null)   # Responsible AI policy name
-    location        = optional(string, null)   # Override region for models not available in primary region
-    enabled         = optional(bool, true)     # Set to false to skip deploying this model
+    rai_policy_name = optional(string, null) # Responsible AI policy name
+    location        = optional(string, null) # Override region for models not available in primary region
+    enabled         = optional(bool, true)   # Set to false to skip deploying this model
   }))
 
   validation {

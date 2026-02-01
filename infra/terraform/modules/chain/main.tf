@@ -10,7 +10,7 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~> 4.0"  # 4.x required for .NET 9.0 support
+      version = "~> 4.0" # 4.x required for .NET 9.0 support
     }
     azuread = {
       source  = "hashicorp/azuread"
@@ -112,7 +112,7 @@ resource "azurerm_storage_account" "chain" {
   account_kind                  = "FileStorage"
   https_traffic_only_enabled    = true
   min_tls_version               = "TLS1_2"
-  public_network_access_enabled = false  # Secure: No public internet access
+  public_network_access_enabled = false # Secure: No public internet access
 
   tags = local.common_tags
 }

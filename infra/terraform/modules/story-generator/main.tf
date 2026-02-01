@@ -18,7 +18,7 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~> 4.0"  # 4.x required for .NET 9.0 support
+      version = "~> 4.0" # 4.x required for .NET 9.0 support
     }
     random = {
       source  = "hashicorp/random"
@@ -333,7 +333,7 @@ resource "azurerm_static_web_app" "story_generator" {
   count = var.enable_static_web_app ? 1 : 0
 
   name                = "${local.name_prefix}-swa-${local.fallback_region_code}"
-  location            = var.fallback_location  # SWA not available in all regions
+  location            = var.fallback_location # SWA not available in all regions
   resource_group_name = var.resource_group_name
   sku_tier            = var.static_web_app_sku
   sku_size            = var.static_web_app_sku

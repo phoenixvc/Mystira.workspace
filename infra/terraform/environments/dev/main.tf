@@ -15,7 +15,7 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~> 4.0"  # 4.x required for .NET 9.0 support
+      version = "~> 4.0" # 4.x required for .NET 9.0 support
     }
     azuread = {
       source  = "hashicorp/azuread"
@@ -23,7 +23,7 @@ terraform {
     }
     azapi = {
       source  = "Azure/azapi"
-      version = "~> 2.0"  # Required for AI Foundry projects and catalog models
+      version = "~> 2.0" # Required for AI Foundry projects and catalog models
     }
     time = {
       source  = "hashicorp/time"
@@ -428,8 +428,8 @@ module "shared_monitoring" {
   location            = var.location
   resource_group_name = azurerm_resource_group.main.name
 
-  retention_in_days       = 30
-  alert_email_addresses   = var.alert_email_addresses
+  retention_in_days     = 30
+  alert_email_addresses = var.alert_email_addresses
 
   tags = {
     CostCenter = "development"
@@ -516,10 +516,10 @@ module "story_generator" {
   # Static Web App (Blazor WASM frontend) - same pattern as Mystira.App
   enable_static_web_app    = true
   static_web_app_sku       = "Free"
-  fallback_location        = "eastus2"  # SWA not available in South Africa North
+  fallback_location        = "eastus2" # SWA not available in South Africa North
   github_repository_url    = "https://github.com/phoenixvc/Mystira.StoryGenerator"
   github_branch            = "dev"
-  enable_swa_custom_domain = false  # Enable after DNS is configured
+  enable_swa_custom_domain = false # Enable after DNS is configured
   swa_custom_domain        = "dev.story.mystira.app"
 
   tags = {
@@ -877,9 +877,9 @@ module "entra_external_id" {
   source = "../../modules/entra-external-id"
   count  = var.external_id_tenant_id != "" ? 1 : 0
 
-  environment   = "dev"
-  tenant_id     = var.external_id_tenant_id
-  tenant_name   = "mystiradev"
+  environment = "dev"
+  tenant_id   = var.external_id_tenant_id
+  tenant_name = "mystiradev"
 
   pwa_redirect_uris = [
     # Localhost development

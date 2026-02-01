@@ -15,7 +15,7 @@ module "shared_cosmos_db" {
   location            = var.location
   resource_group_name = azurerm_resource_group.main.name
 
-  serverless        = false  # Provisioned throughput for production
+  serverless        = false # Provisioned throughput for production
   consistency_level = "Session"
 
   databases = {
@@ -43,7 +43,7 @@ module "shared_storage" {
   location            = var.location
   resource_group_name = azurerm_resource_group.main.name
 
-  storage_sku = "Standard_GRS"  # Geo-redundant for production
+  storage_sku = "Standard_GRS" # Geo-redundant for production
 
   cors_allowed_origins = [
     "https://mystira.app",
@@ -79,7 +79,7 @@ module "mystira_app" {
 
   environment         = "prod"
   location            = var.location
-  fallback_location   = "eastus2"  # Static Web Apps not available in South Africa North
+  fallback_location   = "eastus2" # Static Web Apps not available in South Africa North
   resource_group_name = azurerm_resource_group.app.name
   project_name        = "mystira"
   org                 = "mys"
@@ -91,7 +91,7 @@ module "mystira_app" {
   shared_cosmos_database_name       = "MystiraAppDb"
 
   # App Service Configuration - Production tier
-  app_service_sku = "P1v3"  # Premium for production
+  app_service_sku = "P1v3" # Premium for production
   dotnet_version  = "9.0"
 
   # Custom domain for prod API
@@ -100,7 +100,7 @@ module "mystira_app" {
 
   # Static Web App Configuration
   enable_static_web_app = true
-  static_web_app_sku    = "Standard"  # Standard tier for production
+  static_web_app_sku    = "Standard" # Standard tier for production
   github_repository_url = "https://github.com/phoenixvc/Mystira.App"
   github_branch         = "main"
 
@@ -125,7 +125,7 @@ module "mystira_app" {
   sender_email                  = "DoNotReply@mystira.app"
 
   # Azure Bot - Enable for production
-  enable_azure_bot     = false  # Enable when bot app ID is configured
+  enable_azure_bot     = false # Enable when bot app ID is configured
   bot_microsoft_app_id = ""
 
   # Monitoring - USE SHARED
