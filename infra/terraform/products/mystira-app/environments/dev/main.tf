@@ -65,7 +65,6 @@ module "mystira_app" {
   resource_group_name = var.resource_group_name
   tags                = var.tags
 
-  # Pass shared infrastructure references
   shared_postgresql_server_id                   = var.shared_postgresql_server_id
   shared_postgresql_server_fqdn                 = var.shared_postgresql_server_fqdn
   existing_cosmos_connection_string             = var.shared_cosmos_db_connection_string
