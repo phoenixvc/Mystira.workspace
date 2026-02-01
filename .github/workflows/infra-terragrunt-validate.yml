@@ -194,11 +194,11 @@ jobs:
           working_directory: infra/terraform
           soft_fail: true
           format: sarif
-          additional_args: --out tfsec-results.sarif
+          additional_args: --out ${{ github.workspace }}/tfsec-results.sarif
 
       - name: Upload SARIF file
         uses: github/codeql-action/upload-sarif@v4
-        if: always()
+        if: always() && hashFiles('tfsec-results.sarif') != ''
         with:
           sarif_file: tfsec-results.sarif
 
