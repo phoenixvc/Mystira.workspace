@@ -16,7 +16,14 @@ resources:
 # ServiceAccount patches for workload identity client IDs
 # These values should be populated from Terraform outputs:
 #   terraform output -json | jq -r '.admin_api_identity_client_id.value'
-# TODO: Replace placeholder UUIDs with actual client IDs from Terraform
+#
+# IMPORTANT: CI/CD pipeline should:
+# 1. Run `terraform output -json` and extract client IDs
+# 2. Use envsubst or sed to replace placeholder UUIDs before kubectl apply
+# 3. Pre-deploy validation should fail if any client-id matches pattern:
+#    grep -E '00000000-0000-0000-0000-00000000000[0-9]' kustomization.yaml && exit 1
+#
+# TODO(#INFRA-289): Migrate to kustomize vars/ConfigMapGenerator for dynamic injection
 patchesStrategicMerge:
   # Enable Istio sidecar injection for the namespace (STRICT mTLS)
   - |-

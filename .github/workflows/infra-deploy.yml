@@ -52,7 +52,8 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  TF_VERSION: "1.5.0"
+  # Terraform 1.10.x is latest stable (CVE-2023-4782 patched in 1.5.7+)
+  TF_VERSION: "1.10.3"
   ENVIRONMENT: ${{ github.event.inputs.environment || 'dev' }}
   # OIDC Authentication (preferred over service principal)
   ARM_USE_OIDC: true

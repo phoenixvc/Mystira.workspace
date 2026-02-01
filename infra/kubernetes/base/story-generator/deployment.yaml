@@ -60,6 +60,10 @@ spec:
             capabilities:
               drop:
                 - ALL
+          # ASP.NET Core requires writable temp storage for Data Protection keys
+          volumeMounts:
+            - name: tmp-volume
+              mountPath: /tmp
           ports:
             - name: http
               containerPort: 8080
@@ -132,6 +136,9 @@ spec:
             initialDelaySeconds: 0
             periodSeconds: 5
             failureThreshold: 30
+      volumes:
+        - name: tmp-volume
+          emptyDir: {}
 ---
 apiVersion: v1
 kind: Service
@@ -183,6 +190,10 @@ spec:
           type: Utilization
           averageUtilization: 80
 ---
+# PodDisruptionBudget: Ensures at least 1 pod remains available during voluntary
+# disruptions (node drains, cluster upgrades, etc.) to maintain story-generator
+# service availability. This supports our SLA requirements for the AI story
+# generation API by preventing complete service interruption during maintenance.
 apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:

@@ -413,8 +413,16 @@ module "shared_azure_ai" {
   location            = var.location
   region_code         = local.region_code
   resource_group_name = azurerm_resource_group.main.name
-  # TODO: Disable public access and configure private endpoints
-  public_network_access_enabled = true
+  # Security: Disable public network access for production
+  # TODO(#SEC-142): Configure azurerm_private_endpoint for Azure AI Foundry
+  # - Create private endpoint in aks-subnet
+  # - Link private DNS zone (privatelink.cognitiveservices.azure.com)
+  # - Update AKS pods to use private endpoint
+  # Validate in staging before promoting to prod
+  public_network_access_enabled = false
+  enable_private_endpoint       = true
+  private_endpoint_subnet_id    = module.shared_infra.aks_subnet_id
+  vnet_id                       = module.shared_infra.vnet_id
 
   # Enable AI Foundry project for workload isolation
   enable_project = true # Uses AzAPI to enable allowProjectManagement on account

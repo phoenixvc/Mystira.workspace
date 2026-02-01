@@ -470,6 +470,20 @@ variable "enable_private_endpoint" {
   default     = false
 }
 
+# =============================================================================
+# Cross-Variable Validation
+# =============================================================================
+# Note: Variable validation blocks can't reference other variables.
+# Use a check block in main.tf to ensure at least one access path is configured:
+#
+#   check "network_access_validation" {
+#     assert {
+#       condition     = var.public_network_access_enabled || var.enable_private_endpoint
+#       error_message = "Azure AI account must have at least one access path."
+#     }
+#   }
+#
+
 variable "private_endpoint_subnet_id" {
   description = "Subnet ID for private endpoint"
   type        = string
