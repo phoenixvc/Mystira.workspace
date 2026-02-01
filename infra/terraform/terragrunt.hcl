@@ -31,7 +31,7 @@ locals {
 
   # Azure configuration
   azure_subscription_id = get_env("ARM_SUBSCRIPTION_ID", "")
-  azure_tenant_id = get_env("ARM_TENANT_ID", "")
+  azure_tenant_id       = get_env("ARM_TENANT_ID", "")
 
   # State storage configuration
   state_resource_group  = "mys-terraform-state"
@@ -40,10 +40,10 @@ locals {
 
   # Common tags applied to all resources
   common_tags = {
-    ManagedBy = "terraform"
-    Project = "Mystira"
+    ManagedBy   = "terraform"
+    Project     = "Mystira"
     Environment = local.environment
-    Product = local.product
+    Product     = local.product
   }
 }
 
@@ -61,15 +61,15 @@ remote_state {
   backend = "azurerm"
 
   config = {
-    resource_group_name = local.state_resource_group
+    resource_group_name  = local.state_resource_group
     storage_account_name = local.state_storage_account
-    container_name = local.state_container
-    key = "${local.product}/${local.environment}.tfstate"
-    use_azuread_auth = true # Enable state locking
+    container_name       = local.state_container
+    key                  = "${local.product}/${local.environment}.tfstate"
+    use_azuread_auth     = true # Enable state locking
   }
 
   generate = {
-    path = "backend.tf"
+    path      = "backend.tf"
     if_exists = "overwrite_terragrunt"
   }
 }
@@ -80,7 +80,7 @@ remote_state {
 # Generate provider configuration for all child modules
 
 generate "provider" {
-  path = "provider.tf"
+  path      = "provider.tf"
   if_exists = "overwrite_terragrunt"
   contents  = <<EOF
 terraform {
@@ -127,10 +127,10 @@ EOF
 
 inputs = {
   environment = local.environment
-  tags = local.common_tags
+  tags        = local.common_tags
 
   # Location configuration
-  location = "southafricanorth"
+  location          = "southafricanorth"
   fallback_location = "eastus2" # For resources not available in primary region
 
   # Resource group naming
