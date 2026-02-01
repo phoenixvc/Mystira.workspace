@@ -11,6 +11,86 @@ This directory contains all infrastructure components for the Mystira platform:
 - **Docker** - Containerization for all microservices
 - **Scripts** - Deployment automation and utilities
 
+## Infrastructure Tools: Terragrunt vs Harness GitOps
+
+Mystira uses a **two-tier deployment model** with complementary tools for different layers:
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                         MYSTIRA DEPLOYMENT STACK                            │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  ┌───────────────────────────────────────────────────────────────────────┐  │
+│  │                    APPLICATION LAYER (Harness GitOps)                 │  │
+│  │  • Kubernetes Deployments, Services, ConfigMaps                       │  │
+│  │  • Application rollouts and rollbacks                                 │  │
+│  │  • GitOps sync from Git → Kubernetes                                  │  │
+│  │  • Canary/Blue-Green deployments                                      │  │
+│  └───────────────────────────────────────────────────────────────────────┘  │
+│                                    ▲                                        │
+│                                    │ deploys to                             │
+│                                    │                                        │
+│  ┌───────────────────────────────────────────────────────────────────────┐  │
+│  │                   INFRASTRUCTURE LAYER (Terragrunt)                   │  │
+│  │  • AKS clusters, PostgreSQL, Redis, Storage                          │  │
+│  │  • Virtual Networks, Subnets, NSGs                                    │  │
+│  │  • Azure AI, Key Vault, Service Bus                                   │  │
+│  │  • DNS zones, SSL certificates infrastructure                         │  │
+│  └───────────────────────────────────────────────────────────────────────┘  │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+### Tool Comparison
+
+| Aspect | Terragrunt/Terraform | Harness GitOps |
+|--------|---------------------|----------------|
+| **What it manages** | Cloud resources (Azure) | Application deployments (K8s) |
+| **State** | Terraform state files | Git as source of truth |
+| **Change frequency** | Infrequent (infra changes) | Frequent (app releases) |
+| **Rollback** | `terraform apply` previous state | Git revert + sync |
+| **Trigger** | CI/CD workflow or manual | Automatic on Git push |
+| **Config location** | `infra/terraform/` | `infra/kubernetes/`, `infra/gitops/` |
+
+### Why Two Tools? (Not Overlap)
+
+**Terragrunt (Infrastructure)**:
+- Provisions the "where" - creates AKS cluster, databases, networking
+- Runs infrequently (when infrastructure changes)
+- Changes require careful planning (destroy = downtime)
+- CI/CD triggered: `.github/workflows/infra-*.yml`
+
+**Harness GitOps (Applications)**:
+- Deploys the "what" - your .NET apps to the infrastructure
+- Runs continuously (watches Git, auto-syncs)
+- Changes are safe (rolling updates, instant rollback)
+- GitOps triggered: Push to `infra/kubernetes/` or `infra/gitops/applications/`
+
+### Typical Workflow
+
+1. **Initial Setup** (once): Terragrunt creates AKS, PostgreSQL, Redis
+2. **App Development** (daily): Code changes trigger image builds
+3. **App Deployment** (continuous): Harness syncs K8s manifests from Git
+4. **Infrastructure Updates** (rare): Terragrunt modifies cloud resources
+
+### When to Use Each
+
+| Task | Tool |
+|------|------|
+| Add a new Azure database | Terragrunt |
+| Deploy new app version | Harness GitOps |
+| Scale AKS node pool | Terragrunt |
+| Scale app replicas | Harness GitOps (HPA or manifest) |
+| Add new subnet/NSG | Terragrunt |
+| Add new K8s Service | Harness GitOps |
+| Change PostgreSQL SKU | Terragrunt |
+| Update app ConfigMap | Harness GitOps |
+
+### Related Documentation
+
+- [GitOps Setup](./gitops/README.md) - Harness agent installation and app definitions
+- [Terraform Structure](./terraform/README.md) - Module organization and environments
+
 ## Structure
 
 ```
