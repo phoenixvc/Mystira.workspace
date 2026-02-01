@@ -7,7 +7,7 @@ include "root" {
 }
 
 include "product" {
-  path = find_in_parent_folders("terragrunt.hcl", "${get_terragrunt_dir()}/../terragrunt.hcl")
+  path = find_in_parent_folders("terragrunt.hcl", "${get_terragrunt_dir()}/../../terragrunt.hcl")
 }
 
 # Terraform source - use the modules directly

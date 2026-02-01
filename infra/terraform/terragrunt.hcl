@@ -26,8 +26,8 @@ locals {
     length(local.path_parts) >= 2 ? local.path_parts[1] : "unknown"
   )
 
-  # Extract environment (dev, staging, prod)
-  environment = element(local.path_parts, length(local.path_parts) - 1)
+  # Extract environment (dev, staging, prod) with safe fallback
+  environment = length(local.path_parts) >= 2 ? element(local.path_parts, length(local.path_parts) - 1) : "default"
 
   # Azure configuration
   azure_subscription_id = get_env("ARM_SUBSCRIPTION_ID", "")
@@ -103,6 +103,8 @@ terraform {
 }
 
 provider "azurerm" {
+  subscription_id = "${local.azure_subscription_id}"
+
   features {
     key_vault {
       purge_soft_delete_on_destroy    = false

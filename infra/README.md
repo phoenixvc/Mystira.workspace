@@ -94,7 +94,7 @@ Detailed rollback procedures for both infrastructure and application layers.
 
 Use this when you need to revert infrastructure changes (AKS configuration, database settings, networking).
 
-**1. Identify the Previous State**
+##### 1. Identify the Previous State
 
 ```bash
 # List state versions in Azure Storage
@@ -109,7 +109,7 @@ cd infra/terraform/products/<product>/environments/<env>
 terragrunt state list
 ```
 
-**2. Rollback Commands**
+##### 2. Rollback Commands
 
 ```bash
 # Option A: Revert Git and re-apply (safest)
@@ -128,7 +128,7 @@ terragrunt plan -target=module.<module_name>
 terragrunt apply -target=module.<module_name>
 ```
 
-**3. Verification Steps**
+##### 3. Verification Steps
 
 ```bash
 # Verify state matches expected
@@ -141,7 +141,7 @@ az resource show --ids <resource_id>
 terragrunt plan  # Should show "No changes"
 ```
 
-**4. Emergency Rollback (Critical Issues)**
+##### 4. Emergency Rollback (Critical Issues)
 
 ```bash
 # If infrastructure is broken and blocking:
@@ -163,7 +163,7 @@ terragrunt apply -refresh-only
 
 Use this when you need to revert application deployments (Kubernetes manifests, ConfigMaps, deployments).
 
-**1. Git Revert Workflow**
+##### 1. Git Revert Workflow
 
 ```bash
 # Find the commit to revert
@@ -180,7 +180,7 @@ git commit -m "Rollback <app> to version <version>"
 git push origin main
 ```
 
-**2. Trigger Harness Sync**
+##### 2. Trigger Harness Sync
 
 ```bash
 # Option A: Automatic - Harness watches Git and auto-syncs
@@ -196,7 +196,7 @@ curl -X POST \
   -d '{"applications": ["<app-name>"]}'
 ```
 
-**3. Health Checks**
+##### 3. Health Checks
 
 ```bash
 # Check application sync status
@@ -212,7 +212,7 @@ kubectl rollout status deployment/<deployment-name> -n mys-<env>
 kubectl get events -n mys-<env> --sort-by='.lastTimestamp' | head -20
 ```
 
-**4. Emergency Rollback (Critical Issues)**
+##### 4. Emergency Rollback (Critical Issues)
 
 ```bash
 # Immediate Kubernetes rollback (bypasses GitOps)
