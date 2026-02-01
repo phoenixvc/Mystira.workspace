@@ -583,7 +583,7 @@ public class StoryAgentController : ControllerBase
             }
 
             // Check if session is already in terminal state
-            var terminalStates = new[] { StorySessionStage.StuckNeedsReview, StorySessionStage.Failed };
+            var terminalStates = new[] { StorySessionStage.Complete, StorySessionStage.StuckNeedsReview, StorySessionStage.Failed };
             if (terminalStates.Contains(session.Stage))
             {
                 _logger.LogInformation("SSE stream requested for session {SessionId} which is in terminal state {Stage}", sessionId, session.Stage);
