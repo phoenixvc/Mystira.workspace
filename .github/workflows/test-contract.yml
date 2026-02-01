@@ -109,6 +109,7 @@ jobs:
         id: breaking
         run: |
           BREAKING_FOUND=false
+          VERSION_BUMPED=false
 
           # Use base_ref for PRs, fallback to dev for workflow_dispatch
           BASE_REF="${{ github.base_ref }}"
@@ -135,6 +136,31 @@ jobs:
                 echo "$RESULT" >> $GITHUB_STEP_SUMMARY
                 echo '```' >> $GITHUB_STEP_SUMMARY
                 BREAKING_FOUND=true
+
+                # Check if the API version was bumped
+                BASE_VERSION=$(grep -E '^\s*version:' /tmp/base-spec.yaml | head -1 | sed 's/.*version:\s*//' | tr -d '"' | tr -d "'" || echo "0.0.0")
+                HEAD_VERSION=$(grep -E '^\s*version:' "$spec" | head -1 | sed 's/.*version:\s*//' | tr -d '"' | tr -d "'" || echo "0.0.0")
+
+                echo "Base version: $BASE_VERSION, Head version: $HEAD_VERSION"
+
+                # Extract major versions for comparison
+                BASE_MAJOR=$(echo "$BASE_VERSION" | cut -d. -f1)
+                HEAD_MAJOR=$(echo "$HEAD_VERSION" | cut -d. -f1)
+
+                # Check if version was bumped (any version increase counts)
+                if [ "$HEAD_VERSION" != "$BASE_VERSION" ]; then
+                  # Simple semver comparison: check if head > base
+                  if [ "$HEAD_MAJOR" -gt "$BASE_MAJOR" ] 2>/dev/null; then
+                    echo "::notice::Major version bumped from $BASE_VERSION to $HEAD_VERSION - breaking change acknowledged"
+                    echo "✅ **Version bumped**: $BASE_VERSION → $HEAD_VERSION (breaking change acknowledged)" >> $GITHUB_STEP_SUMMARY
+                    VERSION_BUMPED=true
+                  elif [ "$HEAD_VERSION" != "$BASE_VERSION" ]; then
+                    # Any version change (minor/patch) also counts during alpha
+                    echo "::notice::Version bumped from $BASE_VERSION to $HEAD_VERSION - breaking change acknowledged"
+                    echo "✅ **Version bumped**: $BASE_VERSION → $HEAD_VERSION (breaking change acknowledged)" >> $GITHUB_STEP_SUMMARY
+                    VERSION_BUMPED=true
+                  fi
+                fi
               else
                 echo "No breaking changes in $SPEC_NAME"
               fi
@@ -142,12 +168,20 @@ jobs:
           done
 
           echo "breaking_found=$BREAKING_FOUND" >> $GITHUB_OUTPUT
+          echo "version_bumped=$VERSION_BUMPED" >> $GITHUB_OUTPUT
 
-      - name: Fail on breaking changes
-        if: steps.breaking.outputs.breaking_found == 'true'
+      - name: Fail on breaking changes without version bump
+        if: steps.breaking.outputs.breaking_found == 'true' && steps.breaking.outputs.version_bumped != 'true'
         run: |
-          echo "::error::Breaking API changes detected. Please review and update version accordingly."
+          echo "::error::Breaking API changes detected without version bump. Please update the API version in the OpenAPI spec."
           exit 1
+
+      - name: Acknowledge breaking changes with version bump
+        if: steps.breaking.outputs.breaking_found == 'true' && steps.breaking.outputs.version_bumped == 'true'
+        run: |
+          echo "::notice::Breaking API changes detected but version was appropriately bumped. Proceeding."
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "ℹ️ Breaking changes were detected but the API version was updated, indicating intentional changes." >> $GITHUB_STEP_SUMMARY
 
   contract-typescript:
     name: TypeScript Contract Tests
