@@ -14,6 +14,9 @@ concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  NUGET_AUTH_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN }}
+
 defaults:
   run:
     working-directory: Mystira.DevHub
