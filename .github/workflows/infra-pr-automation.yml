@@ -78,12 +78,28 @@ jobs:
         id: changes
         run: |
           CHANGED="${{ steps.changed-files.outputs.all_changed_files }}"
+          BASE_REF="${{ github.base_ref }}"
           PROJECTS=()
           STACKS=()
 
+          echo "PR target branch: $BASE_REF"
+
+          # Determine which environments to plan based on target branch
+          # PR into dev → only dev environment
+          # PR into main/master → staging and prod environments
+          if [[ "$BASE_REF" == "dev" ]]; then
+            TARGET_ENVS="dev"
+          elif [[ "$BASE_REF" == "main" || "$BASE_REF" == "master" ]]; then
+            TARGET_ENVS="staging prod"
+          else
+            # Default: all environments for other branches
+            TARGET_ENVS="dev staging prod"
+          fi
+          echo "Target environments: $TARGET_ENVS"
+
           # Check for shared-infra changes
           if echo "$CHANGED" | grep -q "infra/terraform/shared-infra/\|infra/terraform/modules/shared/\|infra/terraform/terragrunt.hcl"; then
-            for env in dev staging prod; do
+            for env in $TARGET_ENVS; do
               if [ -d "infra/terraform/shared-infra/environments/$env" ]; then
                 PROJECTS+=("{\"name\":\"shared-infra-$env\",\"dir\":\"infra/terraform/shared-infra/environments/$env\",\"env\":\"$env\",\"type\":\"terragrunt\"}")
               fi
@@ -93,7 +109,7 @@ jobs:
           # Check for product changes
           for product in admin chain mystira-app publisher story-generator; do
             if echo "$CHANGED" | grep -q "infra/terraform/products/$product/\|infra/terraform/modules/$product"; then
-              for env in dev staging prod; do
+              for env in $TARGET_ENVS; do
                 if [ -d "infra/terraform/products/$product/environments/$env" ]; then
                   PROJECTS+=("{\"name\":\"$product-$env\",\"dir\":\"infra/terraform/products/$product/environments/$env\",\"env\":\"$env\",\"type\":\"terragrunt\"}")
                 fi
@@ -101,9 +117,9 @@ jobs:
             fi
           done
 
-          # Check for stack changes - now properly supported
+          # Check for stack changes - filter by target branch
           if echo "$CHANGED" | grep -q "infra/terraform/stacks/"; then
-            for env in dev staging prod; do
+            for env in $TARGET_ENVS; do
               if [ -f "infra/terraform/stacks/$env.stack.hcl" ]; then
                 STACKS+=("{\"name\":\"stack-$env\",\"env\":\"$env\",\"config\":\"stacks/$env.stack.hcl\"}")
               fi
@@ -134,8 +150,19 @@ jobs:
 
       - name: Summary
         run: |
+          BASE_REF="${{ github.base_ref }}"
           echo "## Infrastructure Changes Detected" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "**Target branch:** \`$BASE_REF\`" >> "$GITHUB_STEP_SUMMARY"
+          if [[ "$BASE_REF" == "dev" ]]; then
+            echo "**Environments:** dev only" >> "$GITHUB_STEP_SUMMARY"
+          elif [[ "$BASE_REF" == "main" || "$BASE_REF" == "master" ]]; then
+            echo "**Environments:** staging, prod" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "**Environments:** all (dev, staging, prod)" >> "$GITHUB_STEP_SUMMARY"
+          fi
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+
           if [ "${{ steps.changes.outputs.has_changes }}" == "true" ]; then
             echo "### Projects affected:" >> "$GITHUB_STEP_SUMMARY"
             echo '```json' >> "$GITHUB_STEP_SUMMARY"
