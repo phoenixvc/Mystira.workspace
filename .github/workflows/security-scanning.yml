@@ -45,7 +45,7 @@ jobs:
     name: Dependency Vulnerability Scan
     runs-on: ubuntu-latest
     env:
-      GH_PACKAGES_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN }}
+      NUGET_AUTH_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
@@ -114,7 +114,7 @@ jobs:
     name: CodeQL Analysis
     runs-on: ubuntu-latest
     env:
-      GH_PACKAGES_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN }}
+      NUGET_AUTH_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6

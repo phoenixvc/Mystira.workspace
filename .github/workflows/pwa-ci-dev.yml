@@ -30,7 +30,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Build and Validate
     env:
-      GH_PACKAGES_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN }}
+      NUGET_AUTH_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN }}
 
     steps:
       - name: Checkout repository
