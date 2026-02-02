@@ -279,13 +279,21 @@ jobs:
             }
 
             const statusEmoji = status === 'success' ? '✅' : '❌';
-            const changesText = changes === 'true' ? '**Changes detected**' : 'No changes';
+            // Show clear status: failed, changes detected, or no changes
+            let statusText;
+            if (status !== 'success') {
+              statusText = '❌ **Plan failed** - see output below';
+            } else if (changes === 'true') {
+              statusText = '⚠️ **Changes detected**';
+            } else {
+              statusText = '✅ No changes';
+            }
 
             const bodyLines = [
               `## ${statusEmoji} Terraform Plan: \`${project}\``,
               '',
               `**Directory:** \`${dir}\``,
-              `**Status:** ${changesText}`,
+              `**Status:** ${statusText}`,
               '',
               '<details>',
               '<summary>Show Plan Output</summary>',
@@ -386,14 +394,19 @@ jobs:
       - name: Terragrunt Stack Plan
         id: plan
         working-directory: infra/terraform
+        env:
+          # Enable experimental Terragrunt Stacks feature
+          TERRAGRUNT_EXPERIMENTAL_STACKS: "true"
         run: |
           set +e
+          set -o pipefail
           STACK_CONFIG="${{ matrix.stack.config }}"
-          echo "Running: terragrunt stack run plan --stack-config $STACK_CONFIG"
+          echo "Running: terragrunt stacks run plan --config $STACK_CONFIG"
 
           # Run stack plan and capture output
-          terragrunt stack run plan \
-            --stack-config "$STACK_CONFIG" \
+          # Note: experimental 'stacks' command requires TERRAGRUNT_EXPERIMENTAL_STACKS=true
+          terragrunt stacks run plan \
+            --config "$STACK_CONFIG" \
             --terragrunt-non-interactive 2>&1 | tee stack_plan_output.txt
           EXIT_CODE=${PIPESTATUS[0]}
           set -e
@@ -408,7 +421,7 @@ jobs:
             fi
             echo "status=success" >> "$GITHUB_OUTPUT"
           else
-            echo "changes=false" >> "$GITHUB_OUTPUT"
+            echo "changes=unknown" >> "$GITHUB_OUTPUT"
             echo "status=failure" >> "$GITHUB_OUTPUT"
             exit 1
           fi
@@ -436,14 +449,22 @@ jobs:
             }
 
             const statusEmoji = status === 'success' ? '✅' : '❌';
-            const changesText = changes === 'true' ? '**Changes detected**' : 'No changes';
+            // Show clear status: failed, changes detected, or no changes
+            let statusText;
+            if (status !== 'success') {
+              statusText = '❌ **Plan failed** - see output below';
+            } else if (changes === 'true') {
+              statusText = '⚠️ **Changes detected**';
+            } else {
+              statusText = '✅ No changes';
+            }
 
             const bodyLines = [
               `## ${statusEmoji} Terragrunt Stack Plan: \`${stack}\``,
               '',
               `**Environment:** \`${env}\``,
               `**Stack Config:** \`${config}\``,
-              `**Status:** ${changesText}`,
+              `**Status:** ${statusText}`,
               '',
               '<details>',
               '<summary>Show Plan Output</summary>',
@@ -735,6 +756,8 @@ jobs:
 
       - name: Execute Stack Plan Command
         if: steps.check.outputs.allowed == 'true' && steps.parse.outputs.command == '/plan-stack'
+        env:
+          TERRAGRUNT_EXPERIMENTAL_STACKS: "true"
         run: |
           ENV="${{ steps.parse.outputs.environment }}"
           if [ -z "$ENV" ]; then
@@ -750,12 +773,14 @@ jobs:
 
           echo "Running stack plan for $ENV..."
           cd infra/terraform
-          terragrunt stack run plan \
-            --stack-config "$STACK_CONFIG" \
+          terragrunt stacks run plan \
+            --config "$STACK_CONFIG" \
             --terragrunt-non-interactive
 
       - name: Execute Stack Apply Command
         if: steps.check.outputs.allowed == 'true' && steps.parse.outputs.command == '/apply-stack'
+        env:
+          TERRAGRUNT_EXPERIMENTAL_STACKS: "true"
         run: |
           ENV="${{ steps.parse.outputs.environment }}"
           if [ -z "$ENV" ]; then
@@ -771,8 +796,8 @@ jobs:
 
           echo "Applying stack for $ENV..."
           cd infra/terraform
-          terragrunt stack run apply \
-            --stack-config "$STACK_CONFIG" \
+          terragrunt stacks run apply \
+            --config "$STACK_CONFIG" \
             --terragrunt-non-interactive \
             --auto-approve
 
