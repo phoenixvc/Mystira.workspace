@@ -370,34 +370,21 @@ jobs:
         env:
           NUGET_AUTH_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN }}
 
-      # Configure NuGet credentials for GitHub Packages - this ensures auth works for ALL projects
-      # including submodules that may have their own nuget.config with different source names
-      - name: Configure NuGet credentials for submodules
+      # Configure NuGet credentials for GitHub Packages
+      # Remove submodule nuget.config files and create a single workspace config with credentials
+      - name: Configure NuGet for GitHub Packages
         env:
           GH_PACKAGES_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN }}
         run: |
-          # Create user-level NuGet config with credentials for GitHub Packages
-          # This provides credentials that work for ALL source names pointing to GitHub Packages
-          mkdir -p ~/.nuget/NuGet
+          echo "=== Removing any nuget.config files in submodules ==="
+          # Remove submodule configs that might override our authenticated config
+          find packages -name "nuget.config" -o -name "NuGet.config" -o -name "NuGet.Config" 2>/dev/null | while read f; do
+            echo "Removing: $f"
+            rm -f "$f"
+          done
 
-          cat > ~/.nuget/NuGet/NuGet.Config << EOF
-          <?xml version="1.0" encoding="utf-8"?>
-          <configuration>
-            <packageSources>
-              <add key="nuget.org" value="https://api.nuget.org/v3/index.json" protocolVersion="3" />
-              <add key="github" value="https://nuget.pkg.github.com/phoenixvc/index.json" />
-            </packageSources>
-            <packageSourceCredentials>
-              <github>
-                <add key="Username" value="phoenixvc" />
-                <add key="ClearTextPassword" value="${GH_PACKAGES_TOKEN}" />
-              </github>
-            </packageSourceCredentials>
-          </configuration>
-          EOF
-
-          # Also create a workspace-level config that overrides submodule configs
-          # by clearing sources and defining our own with proper auth
+          echo ""
+          echo "=== Creating authenticated nuget.config at workspace root ==="
           cat > nuget.config << EOF
           <?xml version="1.0" encoding="utf-8"?>
           <configuration>
@@ -415,11 +402,13 @@ jobs:
           </configuration>
           EOF
 
-          echo "Created nuget.config files with GitHub Packages credentials"
-          echo "User-level config: ~/.nuget/NuGet/NuGet.Config"
-          echo "Workspace config: ./nuget.config"
           echo ""
-          echo "Configured NuGet sources:"
+          echo "=== Verifying NuGet configuration ==="
+          echo "Workspace nuget.config created with GitHub Packages credentials"
+          cat nuget.config | grep -v ClearTextPassword
+
+          echo ""
+          echo "=== NuGet sources (should show github with auth) ==="
           dotnet nuget list source
 
       - name: Wait for services
