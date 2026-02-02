@@ -526,13 +526,17 @@ jobs:
           COMMENT: ${{ github.event.comment.body }}
         run: |
           # Safely parse command without shell injection
+          # Quote all variable expansions to handle spaces properly
           COMMAND=$(printf '%s' "$COMMENT" | awk '{print $1}')
           DIR_FLAG=$(printf '%s' "$COMMENT" | grep -oP '(?<=-d\s)\S+' || echo "")
           ENV_FLAG=$(printf '%s' "$COMMENT" | grep -oP '(?<=-e\s)\S+' || echo "")
 
-          echo "command=$COMMAND" >> $GITHUB_OUTPUT
-          echo "directory=$DIR_FLAG" >> $GITHUB_OUTPUT
-          echo "environment=$ENV_FLAG" >> $GITHUB_OUTPUT
+          # Use heredoc syntax for safe multi-line/special character handling
+          {
+            echo "command=${COMMAND}"
+            echo "directory=${DIR_FLAG}"
+            echo "environment=${ENV_FLAG}"
+          } >> "$GITHUB_OUTPUT"
 
       - name: Check Permissions
         id: check
@@ -728,6 +732,9 @@ jobs:
 
       - name: Execute Apply Command
         if: steps.check.outputs.allowed == 'true' && steps.parse.outputs.command == '/apply'
+        env:
+          # Set ALLOW_PROD_APPLY=true to bypass staging requirement for prod
+          ALLOW_PROD_APPLY: ${{ vars.ALLOW_PROD_APPLY || 'false' }}
         run: |
           DIR="${{ steps.parse.outputs.directory }}"
           if [ -z "$DIR" ]; then
@@ -745,6 +752,38 @@ jobs:
           PROJECT_NAME="$(basename "$(dirname "$(dirname "$DIR")")")-$(basename "$DIR")"
           PLAN_FILE="${GITHUB_WORKSPACE}/plans/tfplan-${PROJECT_NAME}/tfplan"
 
+          # Safety check: Require staging apply before prod apply
+          if [[ "$PROJECT_NAME" == *-prod ]]; then
+            STAGING_NAME="${PROJECT_NAME%-prod}-staging"
+            STAGING_SUCCESS_FILE="${GITHUB_WORKSPACE}/plans/tfplan-${STAGING_NAME}/staging-success"
+
+            if [[ "${ALLOW_PROD_APPLY}" == "true" ]]; then
+              echo "::warning::⚠️ ALLOW_PROD_APPLY is set - bypassing staging requirement for prod apply"
+              echo "::warning::Proceeding with direct prod apply for $PROJECT_NAME"
+            elif [[ -f "$STAGING_SUCCESS_FILE" ]]; then
+              echo "✅ Staging apply verified: $STAGING_NAME"
+            else
+              echo "::error::🚫 Production apply blocked: staging must be applied first"
+              echo "::error::Project: $PROJECT_NAME requires $STAGING_NAME to be applied"
+              echo "::error::Expected proof file: $STAGING_SUCCESS_FILE"
+              echo ""
+              echo "To apply to production:"
+              echo "  1. First run: /apply -d ${DIR/\/prod/\/staging}"
+              echo "  2. Then retry: /apply -d $DIR"
+              echo ""
+              echo "To bypass this check (emergency only):"
+              echo "  Set repository variable ALLOW_PROD_APPLY=true"
+              exit 1
+            fi
+          fi
+
+          # Create success marker for staging applies (used by prod safety check)
+          if [[ "$PROJECT_NAME" == *-staging ]]; then
+            mkdir -p "${GITHUB_WORKSPACE}/plans/tfplan-${PROJECT_NAME}"
+            touch "${GITHUB_WORKSPACE}/plans/tfplan-${PROJECT_NAME}/staging-success"
+            echo "📝 Created staging success marker for future prod applies"
+          fi
+
           echo "Looking for plan artifact: $PLAN_FILE"
           if [ -f "$PLAN_FILE" ]; then
             echo "Using saved plan artifact..."
@@ -752,6 +791,11 @@ jobs:
           else
             echo "::warning::No saved plan found at $PLAN_FILE, running fresh apply..."
             terragrunt apply -auto-approve --terragrunt-non-interactive
+          fi
+
+          # Update success marker after successful apply
+          if [[ "$PROJECT_NAME" == *-staging ]]; then
+            echo "$(date -u +%Y-%m-%dT%H:%M:%SZ)" > "${GITHUB_WORKSPACE}/plans/tfplan-${PROJECT_NAME}/staging-success"
           fi
 
       - name: Execute Stack Plan Command
@@ -781,6 +825,8 @@ jobs:
         if: steps.check.outputs.allowed == 'true' && steps.parse.outputs.command == '/apply-stack'
         env:
           TERRAGRUNT_EXPERIMENTAL_STACKS: "true"
+          # Set ALLOW_PROD_APPLY=true to bypass staging requirement for prod
+          ALLOW_PROD_APPLY: ${{ vars.ALLOW_PROD_APPLY || 'false' }}
         run: |
           ENV="${{ steps.parse.outputs.environment }}"
           if [ -z "$ENV" ]; then
@@ -794,12 +840,42 @@ jobs:
             exit 1
           fi
 
+          # Safety check: Require staging apply before prod apply
+          if [[ "$ENV" == "prod" ]]; then
+            STAGING_SUCCESS_FILE="${GITHUB_WORKSPACE}/plans/stack-staging-success"
+
+            if [[ "${ALLOW_PROD_APPLY}" == "true" ]]; then
+              echo "::warning::⚠️ ALLOW_PROD_APPLY is set - bypassing staging requirement for prod stack apply"
+            elif [[ -f "$STAGING_SUCCESS_FILE" ]]; then
+              echo "✅ Staging stack apply verified"
+            else
+              echo "::error::🚫 Production stack apply blocked: staging must be applied first"
+              echo "::error::Run '/apply-stack -e staging' before '/apply-stack -e prod'"
+              echo ""
+              echo "To bypass this check (emergency only):"
+              echo "  Set repository variable ALLOW_PROD_APPLY=true"
+              exit 1
+            fi
+          fi
+
+          # Create success marker for staging applies
+          if [[ "$ENV" == "staging" ]]; then
+            mkdir -p "${GITHUB_WORKSPACE}/plans"
+            touch "${GITHUB_WORKSPACE}/plans/stack-staging-success"
+            echo "📝 Created staging stack success marker for future prod applies"
+          fi
+
           echo "Applying stack for $ENV..."
           cd infra/terraform
           terragrunt stacks run apply \
             --config "$STACK_CONFIG" \
             --terragrunt-non-interactive \
             --auto-approve
+
+          # Update success marker after successful apply
+          if [[ "$ENV" == "staging" ]]; then
+            echo "$(date -u +%Y-%m-%dT%H:%M:%SZ)" > "${GITHUB_WORKSPACE}/plans/stack-staging-success"
+          fi
 
       - name: Post Result
         if: always() && steps.check.outputs.allowed == 'true'
