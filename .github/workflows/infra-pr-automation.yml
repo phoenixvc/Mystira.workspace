@@ -428,10 +428,12 @@ jobs:
           set +e
           STACK_CONFIG="${{ matrix.stack.config }}"
 
-          # Check if terragrunt stacks command is available
+          # Check if terragrunt stack command is available
           # The stacks feature is experimental and may not be available in all versions
+          # We test by running the command and checking for "no command named" error
           echo "Checking Terragrunt stacks support..."
-          if ! terragrunt --help 2>&1 | grep -q "stack"; then
+          STACK_CHECK=$(terragrunt stack --help 2>&1 || true)
+          if echo "$STACK_CHECK" | grep -q "no command named"; then
             echo "::warning::Terragrunt Stacks feature not available in this version (v${{ env.TG_VERSION }})"
             echo "::warning::Stack planning requires Terragrunt with experimental stacks support"
             echo "status=unsupported" >> "$GITHUB_OUTPUT"
