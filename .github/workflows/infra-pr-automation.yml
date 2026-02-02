@@ -29,19 +29,8 @@ on:
   issue_comment:
     types: [created]
 
-  workflow_dispatch:
-    inputs:
-      pr_number:
-        description: 'PR number to run plan for'
-        required: false
-        type: string
-      head_ref:
-        description: 'Branch ref to checkout'
-        required: false
-        type: string
-
 concurrency:
-  group: infra-pr-${{ github.event.pull_request.number || github.event.issue.number }}
+  group: infra-pr-${{ github.event.pull_request.number || github.event.issue.number || github.run_id }}
   cancel-in-progress: false
 
 env:
@@ -373,7 +362,7 @@ jobs:
               });
             }
 
-      - name: Get PR Head Ref
+      - name: Get PR Refs
         id: pr-ref
         if: steps.check.outputs.allowed == 'true'
         uses: actions/github-script@v8
@@ -386,11 +375,13 @@ jobs:
               pull_number: prNumber,
             });
             core.setOutput('head_ref', pr.head.ref);
+            core.setOutput('base_ref', pr.base.ref);
 
       - uses: actions/checkout@v6
         if: steps.check.outputs.allowed == 'true'
         with:
           ref: ${{ steps.pr-ref.outputs.head_ref }}
+          fetch-depth: 0  # Full history needed for git diff in /plan command
           submodules: recursive
 
       - name: Setup Tools
@@ -449,21 +440,88 @@ jobs:
 
       - name: Execute Plan Command
         if: steps.check.outputs.allowed == 'true' && steps.parse.outputs.command == '/plan'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           DIR="${{ steps.parse.outputs.directory }}"
-          REF="${{ steps.pr-ref.outputs.head_ref }}"
-          if [ -z "$DIR" ]; then
-            echo "Running plan for all projects..."
-            # Trigger the plan workflow
-            gh workflow run infra-pr-automation.yml --ref "$REF"
-          else
+
+          if [ -n "$DIR" ]; then
+            # Plan for specific directory
             echo "Running plan for $DIR..."
             cd "$DIR"
             terragrunt init --terragrunt-non-interactive
             terragrunt plan --terragrunt-non-interactive
+          else
+            # Plan for all changed projects - detect changes inline
+            echo "Detecting changed infrastructure projects..."
+
+            # Get changed files in this PR compared to base branch
+            BASE_REF="${{ steps.pr-ref.outputs.base_ref }}"
+            git fetch origin "$BASE_REF" --depth=1 2>/dev/null || true
+            CHANGED=$(git diff --name-only "origin/$BASE_REF"...HEAD -- infra/terraform/ 2>/dev/null || echo "")
+
+            if [ -z "$CHANGED" ]; then
+              echo "No infrastructure changes detected."
+              exit 0
+            fi
+
+            echo "Changed files:"
+            echo "$CHANGED"
+
+            PROJECTS=()
+
+            # Check for shared-infra changes
+            if echo "$CHANGED" | grep -q "infra/terraform/shared-infra/\|infra/terraform/modules/shared/\|infra/terraform/terragrunt.hcl"; then
+              for env in dev staging prod; do
+                if [ -d "infra/terraform/shared-infra/environments/$env" ]; then
+                  PROJECTS+=("infra/terraform/shared-infra/environments/$env")
+                fi
+              done
+            fi
+
+            # Check for product changes
+            for product in admin chain mystira-app publisher story-generator; do
+              if echo "$CHANGED" | grep -q "infra/terraform/products/$product/\|infra/terraform/modules/$product"; then
+                for env in dev staging prod; do
+                  if [ -d "infra/terraform/products/$product/environments/$env" ]; then
+                    PROJECTS+=("infra/terraform/products/$product/environments/$env")
+                  fi
+                done
+              fi
+            done
+
+            if [ ${#PROJECTS[@]} -eq 0 ]; then
+              echo "No infrastructure projects affected by changes."
+              exit 0
+            fi
+
+            echo ""
+            echo "Projects to plan: ${PROJECTS[*]}"
+            echo ""
+
+            # Run plan for each project
+            FAILED=0
+            for PROJECT_DIR in "${PROJECTS[@]}"; do
+              echo "=========================================="
+              echo "Planning: $PROJECT_DIR"
+              echo "=========================================="
+              cd "$GITHUB_WORKSPACE/$PROJECT_DIR"
+              if ! terragrunt init --terragrunt-non-interactive; then
+                echo "::error::Init failed for $PROJECT_DIR"
+                FAILED=1
+                continue
+              fi
+              if ! terragrunt plan --terragrunt-non-interactive; then
+                echo "::error::Plan failed for $PROJECT_DIR"
+                FAILED=1
+              fi
+            done
+
+            if [ $FAILED -ne 0 ]; then
+              echo "::error::One or more plans failed"
+              exit 1
+            fi
           fi
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Download Plan Artifact
         if: steps.check.outputs.allowed == 'true' && steps.parse.outputs.command == '/apply'
