@@ -320,47 +320,18 @@ jobs:
           echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
           echo "</details>" >> $GITHUB_STEP_SUMMARY
 
-  # Integration tests - runs service tests with real dependencies
   integration-tests:
     name: Integration Tests
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 15
     needs: [build-dotnet]
-    if: github.event_name == 'push' || github.event.pull_request.draft == false
     permissions:
       contents: read
       packages: read
-
-    services:
-      postgres:
-        image: postgres:16
-        env:
-          POSTGRES_USER: test
-          POSTGRES_PASSWORD: test
-          POSTGRES_DB: mystira_test
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-
-      redis:
-        image: redis:7-alpine
-        ports:
-          - 6379:6379
-        options: >-
-          --health-cmd "redis-cli ping"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-
     steps:
       - uses: actions/checkout@v6
         with:
           token: ${{ secrets.GH_PAT || github.token }}
-          submodules: recursive
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v5
@@ -370,76 +341,25 @@ jobs:
         env:
           NUGET_AUTH_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN }}
 
-      - name: Wait for services
+      - name: Run Integration Tests
         run: |
-          # Install redis-tools for redis-cli
-          sudo apt-get update && sudo apt-get install -y redis-tools
-
-          echo "Waiting for PostgreSQL..."
-          timeout 30 bash -c 'until pg_isready -h localhost -p 5432; do sleep 1; done'
-          PG_STATUS=$?
-
-          echo "Waiting for Redis..."
-          timeout 30 bash -c 'until redis-cli -h localhost ping 2>/dev/null; do sleep 1; done'
-          REDIS_STATUS=$?
-
-          # Export status for use in summary
-          echo "PG_READY=$([[ $PG_STATUS -eq 0 ]] && echo 'true' || echo 'false')" >> $GITHUB_ENV
-          echo "REDIS_READY=$([[ $REDIS_STATUS -eq 0 ]] && echo 'true' || echo 'false')" >> $GITHUB_ENV
-
-          # Fail if services didn't start
-          if [[ $PG_STATUS -ne 0 ]] || [[ $REDIS_STATUS -ne 0 ]]; then
-            echo "::error::Service dependencies failed to start"
-            exit 1
-          fi
-
-      - name: Run integration tests
-        env:
-          ConnectionStrings__PostgreSQL: "Host=localhost;Database=mystira_test;Username=test;Password=test"
-          ConnectionStrings__Redis: "localhost:6379"
-          ASPNETCORE_ENVIRONMENT: Testing
-        run: |
-          # Find and run all integration tests
           echo "Running integration tests..."
-          ALL_PROJECTS=$(find packages -name "*.Tests.csproj" -type f)
-          PROJECT_COUNT=$(echo "$ALL_PROJECTS" | wc -l)
-          MAX_PROJECTS=20
+          dotnet test packages/tests/Mystira.Integration.Tests \
+            --configuration Release \
+            --filter "Category=Integration" \
+            --collect:"XPlat Code Coverage" \
+            --results-directory ./coverage/integration \
+            -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=cobertura
 
-          if [ "$PROJECT_COUNT" -gt "$MAX_PROJECTS" ]; then
-            echo "::warning::Found $PROJECT_COUNT test projects, but limiting to $MAX_PROJECTS. Consider running in batches or increasing limit."
-            INTEGRATION_PROJECTS=$(echo "$ALL_PROJECTS" | head -$MAX_PROJECTS)
-          else
-            INTEGRATION_PROJECTS="$ALL_PROJECTS"
-          fi
-          TEST_FAILED=0
-
-          for PROJECT in $INTEGRATION_PROJECTS; do
-            echo "Testing: $PROJECT"
-            # Build is required since artifacts aren't shared between jobs
-            if ! dotnet test "$PROJECT" --configuration Release \
-              --filter "Category=Integration|FullyQualifiedName~Integration" \
-              --logger "trx" 2>/dev/null; then
-              TEST_FAILED=1
-              echo "::warning::Integration tests failed for $PROJECT"
-            fi
-          done
-
-          if [[ $TEST_FAILED -ne 0 ]]; then
-            echo "::error::One or more integration test projects failed"
-            exit 1
-          fi
-
-      - name: Integration Test Summary
-        if: always()
-        run: |
-          echo "## Integration Test Results" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "| Dependency | Status |" >> $GITHUB_STEP_SUMMARY
-          echo "|------------|--------|" >> $GITHUB_STEP_SUMMARY
-          PG_EMOJI=$([[ "${{ env.PG_READY }}" == "true" ]] && echo "✅" || echo "❌")
-          REDIS_EMOJI=$([[ "${{ env.REDIS_READY }}" == "true" ]] && echo "✅" || echo "❌")
-          echo "| PostgreSQL 16 | $PG_EMOJI |" >> $GITHUB_STEP_SUMMARY
-          echo "| Redis 7 | $REDIS_EMOJI |" >> $GITHUB_STEP_SUMMARY
+      - name: Upload Integration Tests coverage to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          flags: integration
+          directory: ./coverage/integration
+          files: "**/coverage.cobertura.xml"
+          fail_ci_if_error: false
+          verbose: true
 
   summary:
     name: CI Summary
@@ -464,11 +384,12 @@ jobs:
           echo "| Integration Tests | ${{ needs['integration-tests'].result == 'success' && '✅' || needs['integration-tests'].result == 'skipped' && '⏭️' || '❌' }} |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
 
-          # Overall status (integration-tests failure is a warning, not blocking)
+          # Overall status
           if [ "${{ needs.lint.result }}" == "success" ] && \
              [ "${{ needs.test.result }}" == "success" ] && \
              [ "${{ needs.build.result }}" == "success" ] && \
-             [ "${{ needs['build-dotnet'].result }}" == "success" ]; then
+             [ "${{ needs['build-dotnet'].result }}" == "success" ] && \
+             [ "${{ needs['integration-tests'].result }}" == "success" ]; then
             echo "## ✅ All checks passed!" >> $GITHUB_STEP_SUMMARY
           else
             echo "## ❌ Some checks failed" >> $GITHUB_STEP_SUMMARY

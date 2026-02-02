@@ -32,7 +32,7 @@ env:
   TERRAGRUNT_VERSION: "0.69.1"
   # Feature toggles - set to 'false' to disable specific checks
   ENABLE_TFLINT: "true"
-  ENABLE_TFSEC: "true"
+  ENABLE_TRIVY: "true"
   ENABLE_CHECKOV: "true"
   # Security scan settings - set CHECKOV_SOFT_FAIL to 'false' to enforce strict security
   CHECKOV_SOFT_FAIL: "true"
@@ -178,36 +178,43 @@ jobs:
           done
 
   # ============================================
-  # TFSec - Security Scanner
+  # Trivy - IaC Security Scanner
   # ============================================
-  tfsec:
-    name: TFSec Security Scan
+  trivy:
+    name: Trivy Security Scan
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    if: ${{ vars.ENABLE_TFSEC != 'false' }}
+    if: ${{ vars.ENABLE_TRIVY != 'false' }}
+    permissions:
+      contents: read
+      security-events: write
     steps:
       - uses: actions/checkout@v6
 
-      - name: Run TFSec
-        uses: aquasecurity/tfsec-action@v1.0.3
+      - name: Run Trivy IaC Scanner
+        uses: aquasecurity/trivy-action@b6643a29fecd7f34b3597bc6acb0a98b03d33ff8  # v0.33.1 - pinned SHA for security
         with:
-          working_directory: infra/terraform
-          soft_fail: true
-          format: sarif
-          sarif_file: tfsec-results.sarif
+          scan-type: 'config'
+          scan-ref: 'infra/terraform'
+          format: 'sarif'
+          output: 'trivy-iac-results.sarif'
+          exit-code: '0'
+          severity: 'CRITICAL,HIGH,MEDIUM'
 
       - name: Upload SARIF file
-        uses: github/codeql-action/upload-sarif@v3
-        if: always()
+        uses: github/codeql-action/upload-sarif@v4
+        if: always() && hashFiles('trivy-iac-results.sarif') != ''
         with:
-          sarif_file: tfsec-results.sarif
+          sarif_file: trivy-iac-results.sarif
 
-      - name: TFSec Summary
+      - name: Trivy Summary
         if: always()
         run: |
-          echo "## TFSec Security Scan" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "Security scan completed. Check the Security tab for detailed findings." >> $GITHUB_STEP_SUMMARY
+          cat >> "$GITHUB_STEP_SUMMARY" << 'EOF'
+          ## Trivy IaC Security Scan
+
+          Security scan completed. Check the Security tab for detailed findings.
+          EOF
 
   # ============================================
   # Validate Shared Infrastructure
@@ -368,7 +375,7 @@ jobs:
     name: Validation Summary
     runs-on: ubuntu-latest
     timeout-minutes: 5
-    needs: [format-check, tflint, tfsec, validate-shared-infra, validate-products, security-scan]
+    needs: [format-check, tflint, trivy, validate-shared-infra, validate-products, security-scan]
     if: always()
     steps:
       - name: Check Results
@@ -379,7 +386,7 @@ jobs:
           echo "|-------|--------|" >> $GITHUB_STEP_SUMMARY
           echo "| Format | ${{ needs.format-check.result == 'success' && '✅ Passed' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
           echo "| TFLint | ${{ needs.tflint.result == 'success' && '✅ Passed' || '⚠️ Check warnings' }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| TFSec | ${{ needs.tfsec.result == 'success' && '✅ Passed' || '⚠️ Check warnings' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Trivy | ${{ needs.trivy.result == 'success' && '✅ Passed' || '⚠️ Check warnings' }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Shared Infra | ${{ needs.validate-shared-infra.result == 'success' && '✅ Passed' || (needs.validate-shared-infra.result == 'skipped' && '⏭️ Skipped' || '❌ Failed') }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Products | ${{ needs.validate-products.result == 'success' && '✅ Passed' || (needs.validate-products.result == 'skipped' && '⏭️ Skipped' || '❌ Failed') }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Checkov | ${{ needs.security-scan.result == 'success' && '✅ Passed' || '⚠️ Check warnings' }} |" >> $GITHUB_STEP_SUMMARY

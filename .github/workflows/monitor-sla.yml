@@ -191,7 +191,7 @@ jobs:
 
       - name: Create issue on SLA breach
         if: needs.validate-sla.outputs.sla_met == 'false'
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             const violations = '${{ needs.validate-sla.outputs.violations }}'.trim().split(' ').filter(v => v);

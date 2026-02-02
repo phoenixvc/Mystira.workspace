@@ -256,7 +256,7 @@ jobs:
           dotnet build packages/contracts/dotnet/Mystira.Contracts -c Release --no-restore -p:Version=${{ steps.calc_version.outputs.version }}
           dotnet pack packages/contracts/dotnet/Mystira.Contracts -c Release --no-build -o ./nupkg -p:Version=${{ steps.calc_version.outputs.version }}
         env:
-          NUGET_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NUGET_AUTH_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN }}
 
       - name: Push to GitHub Packages
         id: pack
@@ -328,7 +328,7 @@ jobs:
           dotnet test packages/ai/Mystira.Ai.Tests -c Release --no-build
           dotnet pack packages/ai/Mystira.Ai -c Release --no-build -o ./nupkg -p:Version=${{ steps.calc_version.outputs.version }}
         env:
-          NUGET_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NUGET_AUTH_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN }}
 
       - name: Push to GitHub Packages
         id: pack
@@ -400,7 +400,7 @@ jobs:
           dotnet test packages/shared/Mystira.Shared.Tests -c Release --no-build
           dotnet pack packages/shared/Mystira.Shared -c Release --no-build -o ./nupkg -p:Version=${{ steps.calc_version.outputs.version }}
         env:
-          NUGET_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NUGET_AUTH_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN }}
 
       - name: Push to GitHub Packages
         id: pack
@@ -479,7 +479,7 @@ jobs:
           dotnet test packages/authoring/Mystira.Authoring.Tests -c Release --no-build
           dotnet pack packages/authoring/Mystira.Authoring -c Release --no-build -o ./nupkg -p:Version=$VERSION
         env:
-          NUGET_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NUGET_AUTH_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN }}
 
       - name: Push to GitHub Packages
         id: pack
@@ -548,7 +548,7 @@ jobs:
           dotnet build packages/application/Mystira.Application -c Release --no-restore -p:Version=${{ steps.calc_version.outputs.version }}
           dotnet pack packages/application/Mystira.Application -c Release --no-build -o ./nupkg -p:Version=${{ steps.calc_version.outputs.version }}
         env:
-          NUGET_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NUGET_AUTH_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN }}
 
       - name: Push to GitHub Packages
         id: pack
@@ -632,7 +632,7 @@ jobs:
             dotnet pack "$PKG" -c Release --no-build -o ./nupkg -p:Version=$VERSION
           done
         env:
-          NUGET_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NUGET_AUTH_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN }}
 
       - name: Push to GitHub Packages
         id: pack
