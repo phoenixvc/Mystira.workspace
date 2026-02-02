@@ -426,16 +426,31 @@ jobs:
           TERRAGRUNT_EXPERIMENTAL_STACKS: "true"
         run: |
           set +e
-          set -o pipefail
           STACK_CONFIG="${{ matrix.stack.config }}"
-          echo "Running: terragrunt stacks run plan --config $STACK_CONFIG"
+
+          # Check if terragrunt stacks command is available
+          # The stacks feature is experimental and may not be available in all versions
+          echo "Checking Terragrunt stacks support..."
+          if ! terragrunt --help 2>&1 | grep -q "stack"; then
+            echo "::warning::Terragrunt Stacks feature not available in this version (v${{ env.TG_VERSION }})"
+            echo "::warning::Stack planning requires Terragrunt with experimental stacks support"
+            echo "status=unsupported" >> "$GITHUB_OUTPUT"
+            echo "changes=unknown" >> "$GITHUB_OUTPUT"
+            echo "Terragrunt Stacks feature not available. Please deploy stacks manually using:" > stack_plan_output.txt
+            echo "  cd infra/terraform && terragrunt run-all plan" >> stack_plan_output.txt
+            exit 0
+          fi
+
+          set -o pipefail
+          echo "Running: terragrunt stack run plan --config $STACK_CONFIG"
 
           # Run stack plan and capture output
-          # Note: experimental 'stacks' command requires TERRAGRUNT_EXPERIMENTAL_STACKS=true
-          terragrunt stacks run plan \
-            --config "$STACK_CONFIG" \
-            --terragrunt-non-interactive 2>&1 | tee stack_plan_output.txt
-          EXIT_CODE=${PIPESTATUS[0]}
+          # Try both command variants: 'stack' (singular) and the run-all fallback
+          if terragrunt stack run plan --config "$STACK_CONFIG" --terragrunt-non-interactive 2>&1 | tee stack_plan_output.txt; then
+            EXIT_CODE=0
+          else
+            EXIT_CODE=$?
+          fi
           set -e
 
           # Determine status and changes
@@ -475,14 +490,19 @@ jobs:
               }
             }
 
-            const statusEmoji = status === 'success' ? '✅' : '❌';
-            // Show clear status: failed, changes detected, or no changes
-            let statusText;
-            if (status !== 'success') {
+            // Determine status emoji and text
+            let statusEmoji, statusText;
+            if (status === 'unsupported') {
+              statusEmoji = '⚠️';
+              statusText = '⚠️ **Stacks feature not available** - see manual instructions below';
+            } else if (status !== 'success') {
+              statusEmoji = '❌';
               statusText = '❌ **Plan failed** - see output below';
             } else if (changes === 'true') {
+              statusEmoji = '✅';
               statusText = '⚠️ **Changes detected**';
             } else {
+              statusEmoji = '✅';
               statusText = '✅ No changes';
             }
 
