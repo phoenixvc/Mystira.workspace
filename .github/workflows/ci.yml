@@ -370,6 +370,58 @@ jobs:
         env:
           NUGET_AUTH_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN }}
 
+      # Configure NuGet credentials for GitHub Packages - this ensures auth works for ALL projects
+      # including submodules that may have their own nuget.config with different source names
+      - name: Configure NuGet credentials for submodules
+        env:
+          GH_PACKAGES_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN }}
+        run: |
+          # Create user-level NuGet config with credentials for GitHub Packages
+          # This provides credentials that work for ALL source names pointing to GitHub Packages
+          mkdir -p ~/.nuget/NuGet
+
+          cat > ~/.nuget/NuGet/NuGet.Config << EOF
+          <?xml version="1.0" encoding="utf-8"?>
+          <configuration>
+            <packageSources>
+              <add key="nuget.org" value="https://api.nuget.org/v3/index.json" protocolVersion="3" />
+              <add key="github" value="https://nuget.pkg.github.com/phoenixvc/index.json" />
+            </packageSources>
+            <packageSourceCredentials>
+              <github>
+                <add key="Username" value="phoenixvc" />
+                <add key="ClearTextPassword" value="${GH_PACKAGES_TOKEN}" />
+              </github>
+            </packageSourceCredentials>
+          </configuration>
+          EOF
+
+          # Also create a workspace-level config that overrides submodule configs
+          # by clearing sources and defining our own with proper auth
+          cat > nuget.config << EOF
+          <?xml version="1.0" encoding="utf-8"?>
+          <configuration>
+            <packageSources>
+              <clear />
+              <add key="nuget.org" value="https://api.nuget.org/v3/index.json" protocolVersion="3" />
+              <add key="github" value="https://nuget.pkg.github.com/phoenixvc/index.json" />
+            </packageSources>
+            <packageSourceCredentials>
+              <github>
+                <add key="Username" value="phoenixvc" />
+                <add key="ClearTextPassword" value="${GH_PACKAGES_TOKEN}" />
+              </github>
+            </packageSourceCredentials>
+          </configuration>
+          EOF
+
+          echo "Created nuget.config files with GitHub Packages credentials"
+          echo "User-level config: ~/.nuget/NuGet/NuGet.Config"
+          echo "Workspace config: ./nuget.config"
+          echo ""
+          echo "Configured NuGet sources:"
+          dotnet nuget list source
+
       - name: Wait for services
         run: |
           # Install redis-tools for redis-cli
