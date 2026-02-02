@@ -26,6 +26,9 @@ jobs:
     name: Lint
     runs-on: ubuntu-latest
     if: github.event_name != 'pull_request' || !github.event.pull_request.draft
+    env:
+      # GH_PACKAGES_TOKEN: PAT with read:packages scope for cross-repo access
+      NUGET_AUTH_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN }}
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-dotnet@v5
@@ -33,7 +36,6 @@ jobs:
           dotnet-version: "9.0.x"
           source-url: https://nuget.pkg.github.com/phoenixvc/index.json
         env:
-          # GH_PACKAGES_TOKEN: PAT with read:packages scope for cross-repo access
           NUGET_AUTH_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN }}
       - run: dotnet restore
       - run: dotnet format --verify-no-changes --verbosity diagnostic
@@ -43,6 +45,8 @@ jobs:
     name: Build
     runs-on: ubuntu-latest
     needs: [lint]
+    env:
+      NUGET_AUTH_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN }}
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-dotnet@v5
