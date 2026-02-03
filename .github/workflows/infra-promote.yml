@@ -208,7 +208,7 @@ jobs:
           TF_VAR_environment: ${{ inputs.target_environment }}
 
       - name: Upload Plan
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: promote-plan-shared-infra-${{ inputs.target_environment }}
           path: infra/terraform/shared-infra/environments/${{ inputs.target_environment }}/promote.tfplan
@@ -287,7 +287,7 @@ jobs:
           TF_VAR_environment: ${{ inputs.target_environment }}
 
       - name: Upload Plan
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: promote-plan-${{ matrix.product }}-${{ inputs.target_environment }}
           path: infra/terraform/products/${{ matrix.product }}/environments/${{ inputs.target_environment }}/promote.tfplan
@@ -341,7 +341,7 @@ jobs:
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - name: Download Plan
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: promote-plan-shared-infra-${{ inputs.target_environment }}
           path: infra/terraform/shared-infra/environments/${{ inputs.target_environment }}
@@ -412,7 +412,7 @@ jobs:
 
       - name: Download Plan
         if: inputs.product == 'all' || inputs.product != 'shared-infra'
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: promote-plan-${{ matrix.product }}-${{ inputs.target_environment }}
           path: infra/terraform/products/${{ matrix.product }}/environments/${{ inputs.target_environment }}
