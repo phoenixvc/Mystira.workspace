@@ -31,25 +31,25 @@ public class UserProfileApiClient : BaseApiClient, IUserProfileApiClient
     {
         try
         {
-            Logger.LogInformation("Fetching profiles for account {AccountId} from API...", accountId);
+            Logger.LogInformation("Fetching profiles for account from API...");
 
             var response = await HttpClient.GetAsync($"api/userprofiles/account/{accountId}");
 
             if (response.IsSuccessStatusCode)
             {
                 var profiles = await response.Content.ReadFromJsonAsync<List<UserProfile>>(JsonOptions);
-                Logger.LogInformation("Successfully fetched {Count} profiles for account {AccountId}", profiles?.Count ?? 0, accountId);
+                Logger.LogInformation("Successfully fetched {Count} profiles for account", profiles?.Count ?? 0);
                 return profiles;
             }
             else
             {
-                Logger.LogWarning("Failed to fetch profiles with status: {StatusCode} for account: {AccountId}", response.StatusCode, accountId);
+                Logger.LogWarning("Failed to fetch profiles with status: {StatusCode}", response.StatusCode);
                 return null;
             }
         }
         catch (Exception ex)
         {
-            Logger.LogError(ex, "Error fetching profiles for account {AccountId} from API.", accountId);
+            Logger.LogError(ex, "Error fetching profiles for account from API.");
             return null;
         }
     }

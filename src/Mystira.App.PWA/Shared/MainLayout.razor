@@ -206,7 +206,7 @@
             isAuthenticated = await AuthService.IsAuthenticatedAsync();
             CurrentAccount = isAuthenticated ? await AuthService.GetCurrentAccountAsync() : null;
         }
-        catch
+        catch (Exception) // lgtm [cs/catch-of-all-exceptions] Intentional: fail-safe for UI authentication state
         {
             isAuthenticated = false;
             CurrentAccount = null;
@@ -274,7 +274,7 @@
         {
             await AuthService.LogoutAsync();
         }
-        catch
+        catch (Exception) // lgtm [cs/catch-of-all-exceptions] Intentional: fail-safe for logout
         {
             // Ignore errors during logout for now
         }

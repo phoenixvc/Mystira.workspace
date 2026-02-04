@@ -45,8 +45,8 @@ public static class GetInProgressSessionsQueryHandler
         if (meaningfulSessions.Count != ordered.Count)
         {
             logger.LogWarning(
-                "Filtered empty in-progress sessions for account {AccountId}: {OriginalCount} -> {FilteredCount}",
-                request.AccountId,
+                "Filtered empty in-progress sessions for account {AccountIdPrefix}: {OriginalCount} -> {FilteredCount}",
+                request.AccountId[..Math.Min(8, request.AccountId.Length)] + "...",
                 ordered.Count,
                 meaningfulSessions.Count);
         }
@@ -59,8 +59,8 @@ public static class GetInProgressSessionsQueryHandler
         if (uniqueSessions.Count != meaningfulSessions.Count)
         {
             logger.LogWarning(
-                "Deduplicated in-progress sessions for account {AccountId}: {OriginalCount} -> {UniqueCount}",
-                request.AccountId,
+                "Deduplicated in-progress sessions for account {AccountIdPrefix}: {OriginalCount} -> {UniqueCount}",
+                request.AccountId[..Math.Min(8, request.AccountId.Length)] + "...",
                 meaningfulSessions.Count,
                 uniqueSessions.Count);
         }
@@ -118,7 +118,7 @@ public static class GetInProgressSessionsQueryHandler
             };
         }).ToList();
 
-        logger.LogDebug("Retrieved {Count} in-progress sessions for account {AccountId}", response.Count, request.AccountId);
+        logger.LogDebug("Retrieved {Count} in-progress sessions for account {AccountIdPrefix}", response.Count, request.AccountId[..Math.Min(8, request.AccountId.Length)] + "...");
 
         return response;
     }

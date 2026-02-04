@@ -27,8 +27,8 @@ public static class GetProfilesByAccountQueryHandler
 
         var profiles = await repository.GetByAccountIdAsync(request.AccountId);
 
-        logger.LogDebug("Retrieved {Count} profiles for account {AccountId}",
-            profiles.Count(), request.AccountId);
+        logger.LogDebug("Retrieved {Count} profiles for account {AccountIdPrefix}",
+            profiles.Count(), request.AccountId[..Math.Min(8, request.AccountId.Length)] + "...");
 
         return profiles.ToList();
     }

@@ -21,7 +21,7 @@ public static class GetAccountQueryHandler
         CancellationToken ct)
     {
         var account = await repository.GetByIdAsync(query.AccountId);
-        logger.LogDebug("Retrieved account {AccountId}", query.AccountId);
+        logger.LogDebug("Retrieved account {AccountIdPrefix}", query.AccountId[..Math.Min(8, query.AccountId.Length)] + "...");
         return account;
     }
 }

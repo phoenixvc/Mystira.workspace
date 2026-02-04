@@ -21,7 +21,7 @@ public static class GetAccountByEmailQueryHandler
         CancellationToken ct)
     {
         var account = await repository.GetByEmailAsync(query.Email);
-        logger.LogDebug("Retrieved account by email {Email}", query.Email);
+        logger.LogDebug("Retrieved account by email lookup: {Found}", account != null ? "found" : "not found");
         return account;
     }
 }

@@ -24,7 +24,7 @@ public static class UpdateAccountCommandHandler
         var account = await repository.GetByIdAsync(command.AccountId);
         if (account == null)
         {
-            logger.LogWarning("Account not found: {AccountId}", command.AccountId);
+            logger.LogWarning("Account not found: {AccountIdPrefix}", command.AccountId[..Math.Min(8, command.AccountId.Length)] + "...");
             return null;
         }
 
@@ -51,7 +51,7 @@ public static class UpdateAccountCommandHandler
         await repository.UpdateAsync(account);
         await unitOfWork.SaveChangesAsync(ct);
 
-        logger.LogInformation("Updated account {AccountId}", account.Id);
+        logger.LogInformation("Updated account {AccountIdPrefix}", account.Id[..Math.Min(8, account.Id.Length)] + "...");
         return account;
     }
 }

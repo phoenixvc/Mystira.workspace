@@ -32,7 +32,7 @@ public class ProfileService : IProfileService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error getting profiles for account {AccountId}", accountId);
+            _logger.LogError(ex, "Error getting profiles for account");
             return null;
         }
     }
@@ -46,7 +46,7 @@ public class ProfileService : IProfileService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error checking if account {AccountId} has profiles", accountId);
+            _logger.LogError(ex, "Error checking if account has profiles");
             return false;
         }
     }

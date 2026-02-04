@@ -83,7 +83,7 @@ public static class GetSessionsByAccountQueryHandler
             };
         }).ToList();
 
-        logger.LogDebug("Retrieved {Count} sessions for account {AccountId}", response.Count, request.AccountId);
+        logger.LogDebug("Retrieved {Count} sessions for account", response.Count);
 
         return response;
     }
