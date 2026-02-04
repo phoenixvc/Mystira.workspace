@@ -69,7 +69,7 @@ jobs:
 
       - name: Get changed files
         id: changed-files
-        uses: tj-actions/changed-files@2f7c5bfce28377bc069a65ba478de0a74aa0ca32  # v46 - pinned SHA for security
+        uses: tj-actions/changed-files@24d32ffd492484c1d75e0c0b894501ddb9d30d62  # v47 - pinned SHA for security
         with:
           files: |
             infra/terraform/**
@@ -773,7 +773,7 @@ jobs:
 
       - name: Download Plan Artifact
         if: steps.check.outputs.allowed == 'true' && steps.parse.outputs.command == '/apply'
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           pattern: tfplan-*
           path: ./plans
