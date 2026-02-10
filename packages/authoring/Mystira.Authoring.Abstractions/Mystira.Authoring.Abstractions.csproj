@@ -27,7 +27,7 @@
 
   <ItemGroup>
     <!-- JSON serialization -->
-    <PackageReference Include="System.Text.Json" Version="10.0.2" />
+    <PackageReference Include="System.Text.Json" Version="9.0.12" />
     <!-- Note: System.ComponentModel.DataAnnotations is provided by the .NET 9.0 shared framework -->
 
     <!-- Project References -->
