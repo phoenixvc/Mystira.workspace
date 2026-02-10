@@ -121,8 +121,54 @@ public class ScenarioGraphTraversalTests
         // Should not throw or hang
         var result = ScenarioGraphTraversal.TraverseScenario(scenario);
 
-        // Cycle is detected, so incomplete path is not added
-        result.Should().BeEmpty();
+        // BUG-01 fix: Cycle detected but accumulated scores are preserved
+        result.Should().HaveCount(1);
+        result[0]["courage"].Should().Be(1.0);
+    }
+
+    [Fact]
+    public void TraverseScenario_WithCycleAfterMultipleScenes_PreservesAccumulatedScores()
+    {
+        var scenario = new Scenario
+        {
+            Id = "s1",
+            Scenes = new List<Scene>
+            {
+                new()
+                {
+                    Id = "scene-1",
+                    Branches = new List<Branch>
+                    {
+                        new()
+                        {
+                            Choice = "Go forward",
+                            NextSceneId = "scene-2",
+                            CompassChange = new CompassChange { Axis = "courage", Delta = 2.0 }
+                        }
+                    }
+                },
+                new()
+                {
+                    Id = "scene-2",
+                    Branches = new List<Branch>
+                    {
+                        new()
+                        {
+                            Choice = "Loop back to start",
+                            NextSceneId = "scene-1", // Cycle back to scene-1
+                            CompassChange = new CompassChange { Axis = "honesty", Delta = 3.0 }
+                        }
+                    }
+                }
+            }
+        };
+
+        var result = ScenarioGraphTraversal.TraverseScenario(scenario);
+
+        // Both accumulated scores should be preserved even though cycle is hit
+        result.Should().HaveCount(1);
+        result[0]["courage"].Should().Be(2.0);
+        result[0]["honesty"].Should().Be(3.0);
     }
 
     [Fact]

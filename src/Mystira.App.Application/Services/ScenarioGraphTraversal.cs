@@ -48,6 +48,12 @@ public static class ScenarioGraphTraversal
     {
         if (visited.Contains(currentScene.Id))
         {
+            // BUG-01 fix: Save accumulated scores when cycle is detected
+            // rather than silently dropping the path
+            if (currentPath.Any())
+            {
+                allPaths.Add(new Dictionary<string, double>(currentPath, StringComparer.OrdinalIgnoreCase));
+            }
             return;
         }
 

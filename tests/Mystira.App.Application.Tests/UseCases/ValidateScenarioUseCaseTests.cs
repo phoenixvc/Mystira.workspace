@@ -25,6 +25,18 @@ public class ValidateScenarioUseCaseTests
         SetupValidAxesAndArchetypes();
     }
 
+    #region Null Input Tests
+
+    [Fact]
+    public async Task ExecuteAsync_WithNullScenario_ThrowsNullReferenceException()
+    {
+        var act = () => _useCase.ExecuteAsync(null!);
+
+        await act.Should().ThrowAsync<NullReferenceException>();
+    }
+
+    #endregion
+
     #region Valid Scenario Tests
 
     [Fact]

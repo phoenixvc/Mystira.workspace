@@ -15,24 +15,14 @@ public class EchoTypeHandlerTests
     private readonly Mock<IEchoTypeRepository> _repository;
     private readonly Mock<IUnitOfWork> _unitOfWork;
     private readonly Mock<IQueryCacheInvalidationService> _cacheInvalidation;
-    private readonly Mock<ILogger<CreateEchoTypeCommand>> _createLogger;
-    private readonly Mock<ILogger<DeleteEchoTypeCommand>> _deleteLogger;
-    private readonly Mock<ILogger<UpdateEchoTypeCommand>> _updateLogger;
-    private readonly Mock<ILogger<GetAllEchoTypesQuery>> _getAllLogger;
-    private readonly Mock<ILogger<GetEchoTypeByIdQuery>> _getByIdLogger;
-    private readonly Mock<ILogger<ValidateEchoTypeQuery>> _validateLogger;
+    private readonly Mock<ILogger> _logger;
 
     public EchoTypeHandlerTests()
     {
         _repository = new Mock<IEchoTypeRepository>();
         _unitOfWork = new Mock<IUnitOfWork>();
         _cacheInvalidation = new Mock<IQueryCacheInvalidationService>();
-        _createLogger = new Mock<ILogger<CreateEchoTypeCommand>>();
-        _deleteLogger = new Mock<ILogger<DeleteEchoTypeCommand>>();
-        _updateLogger = new Mock<ILogger<UpdateEchoTypeCommand>>();
-        _getAllLogger = new Mock<ILogger<GetAllEchoTypesQuery>>();
-        _getByIdLogger = new Mock<ILogger<GetEchoTypeByIdQuery>>();
-        _validateLogger = new Mock<ILogger<ValidateEchoTypeQuery>>();
+        _logger = new Mock<ILogger>();
     }
 
     #region CreateEchoTypeCommandHandler Tests
@@ -44,7 +34,7 @@ public class EchoTypeHandlerTests
 
         var result = await CreateEchoTypeCommandHandler.Handle(
             command, _repository.Object, _unitOfWork.Object,
-            _cacheInvalidation.Object, _createLogger.Object, CancellationToken.None);
+            _cacheInvalidation.Object, _logger.Object, CancellationToken.None);
 
         result.Should().NotBeNull();
         result.Name.Should().Be("Whisper");
@@ -62,7 +52,7 @@ public class EchoTypeHandlerTests
 
         var act = () => CreateEchoTypeCommandHandler.Handle(
             command, _repository.Object, _unitOfWork.Object,
-            _cacheInvalidation.Object, _createLogger.Object, CancellationToken.None);
+            _cacheInvalidation.Object, _logger.Object, CancellationToken.None);
 
         await act.Should().ThrowAsync<ArgumentException>();
     }
@@ -80,7 +70,7 @@ public class EchoTypeHandlerTests
 
         var result = await DeleteEchoTypeCommandHandler.Handle(
             new DeleteEchoTypeCommand("echo-1"), _repository.Object, _unitOfWork.Object,
-            _cacheInvalidation.Object, _deleteLogger.Object, CancellationToken.None);
+            _cacheInvalidation.Object, _logger.Object, CancellationToken.None);
 
         result.Should().BeTrue();
         _repository.Verify(r => r.DeleteAsync("echo-1", It.IsAny<CancellationToken>()), Times.Once);
@@ -95,7 +85,7 @@ public class EchoTypeHandlerTests
 
         var result = await DeleteEchoTypeCommandHandler.Handle(
             new DeleteEchoTypeCommand("missing"), _repository.Object, _unitOfWork.Object,
-            _cacheInvalidation.Object, _deleteLogger.Object, CancellationToken.None);
+            _cacheInvalidation.Object, _logger.Object, CancellationToken.None);
 
         result.Should().BeFalse();
         _repository.Verify(r => r.DeleteAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
@@ -114,7 +104,7 @@ public class EchoTypeHandlerTests
 
         var result = await UpdateEchoTypeCommandHandler.Handle(
             new UpdateEchoTypeCommand("echo-1", "Updated", "New desc", "emotional"), _repository.Object, _unitOfWork.Object,
-            _cacheInvalidation.Object, _updateLogger.Object, CancellationToken.None);
+            _cacheInvalidation.Object, _logger.Object, CancellationToken.None);
 
         result.Should().NotBeNull();
         result!.Name.Should().Be("Updated");
@@ -130,7 +120,7 @@ public class EchoTypeHandlerTests
 
         var result = await UpdateEchoTypeCommandHandler.Handle(
             new UpdateEchoTypeCommand("missing", "Name", "Desc", "moral"), _repository.Object, _unitOfWork.Object,
-            _cacheInvalidation.Object, _updateLogger.Object, CancellationToken.None);
+            _cacheInvalidation.Object, _logger.Object, CancellationToken.None);
 
         result.Should().BeNull();
     }
@@ -151,7 +141,7 @@ public class EchoTypeHandlerTests
             .ReturnsAsync(echoTypes);
 
         var result = await GetAllEchoTypesQueryHandler.Handle(
-            new GetAllEchoTypesQuery(), _repository.Object, _getAllLogger.Object, CancellationToken.None);
+            new GetAllEchoTypesQuery(), _repository.Object, _logger.Object, CancellationToken.None);
 
         result.Should().HaveCount(2);
     }
@@ -168,7 +158,7 @@ public class EchoTypeHandlerTests
             .ReturnsAsync(echoType);
 
         var result = await GetEchoTypeByIdQueryHandler.Handle(
-            new GetEchoTypeByIdQuery("echo-1"), _repository.Object, _getByIdLogger.Object, CancellationToken.None);
+            new GetEchoTypeByIdQuery("echo-1"), _repository.Object, _logger.Object, CancellationToken.None);
 
         result.Should().NotBeNull();
         result!.Name.Should().Be("Whisper");
@@ -181,7 +171,7 @@ public class EchoTypeHandlerTests
             .ReturnsAsync(default(EchoTypeDefinition));
 
         var result = await GetEchoTypeByIdQueryHandler.Handle(
-            new GetEchoTypeByIdQuery("missing"), _repository.Object, _getByIdLogger.Object, CancellationToken.None);
+            new GetEchoTypeByIdQuery("missing"), _repository.Object, _logger.Object, CancellationToken.None);
 
         result.Should().BeNull();
     }
@@ -197,7 +187,7 @@ public class EchoTypeHandlerTests
             .ReturnsAsync(true);
 
         var result = await ValidateEchoTypeQueryHandler.Handle(
-            new ValidateEchoTypeQuery("Whisper"), _repository.Object, _validateLogger.Object, CancellationToken.None);
+            new ValidateEchoTypeQuery("Whisper"), _repository.Object, _logger.Object, CancellationToken.None);
 
         result.Should().BeTrue();
     }
@@ -209,7 +199,7 @@ public class EchoTypeHandlerTests
             .ReturnsAsync(false);
 
         var result = await ValidateEchoTypeQueryHandler.Handle(
-            new ValidateEchoTypeQuery("Unknown"), _repository.Object, _validateLogger.Object, CancellationToken.None);
+            new ValidateEchoTypeQuery("Unknown"), _repository.Object, _logger.Object, CancellationToken.None);
 
         result.Should().BeFalse();
     }
@@ -247,7 +237,7 @@ public class EchoTypeHandlerTests
 
         var act = () => CreateEchoTypeCommandHandler.Handle(
             command, _repository.Object, _unitOfWork.Object,
-            _cacheInvalidation.Object, _createLogger.Object, CancellationToken.None);
+            _cacheInvalidation.Object, _logger.Object, CancellationToken.None);
 
         await act.Should().ThrowAsync<ArgumentException>();
     }
@@ -265,7 +255,7 @@ public class EchoTypeHandlerTests
 
         var result = await CreateEchoTypeCommandHandler.Handle(
             command, _repository.Object, _unitOfWork.Object,
-            _cacheInvalidation.Object, _createLogger.Object, CancellationToken.None);
+            _cacheInvalidation.Object, _logger.Object, CancellationToken.None);
 
         result.Should().NotBeNull();
         result.Category.Should().Be(category);
@@ -281,7 +271,7 @@ public class EchoTypeHandlerTests
         var act = () => UpdateEchoTypeCommandHandler.Handle(
             new UpdateEchoTypeCommand("echo-1", "Echo", "Desc", "invalid_category"),
             _repository.Object, _unitOfWork.Object,
-            _cacheInvalidation.Object, _updateLogger.Object, CancellationToken.None);
+            _cacheInvalidation.Object, _logger.Object, CancellationToken.None);
 
         await act.Should().ThrowAsync<ArgumentException>();
     }
@@ -316,7 +306,7 @@ public class EchoTypeHandlerTests
 
         var result = await CreateEchoTypeCommandHandler.Handle(
             command, _repository.Object, _unitOfWork.Object,
-            _cacheInvalidation.Object, _createLogger.Object, CancellationToken.None);
+            _cacheInvalidation.Object, _logger.Object, CancellationToken.None);
 
         result.CreatedAt.Should().BeOnOrAfter(before);
         result.UpdatedAt.Should().BeOnOrAfter(before);
@@ -338,7 +328,7 @@ public class EchoTypeHandlerTests
         var result = await UpdateEchoTypeCommandHandler.Handle(
             new UpdateEchoTypeCommand("echo-1", "New", "Desc", "emotional"),
             _repository.Object, _unitOfWork.Object,
-            _cacheInvalidation.Object, _updateLogger.Object, CancellationToken.None);
+            _cacheInvalidation.Object, _logger.Object, CancellationToken.None);
 
         result!.UpdatedAt.Should().BeOnOrAfter(before);
     }
@@ -354,7 +344,7 @@ public class EchoTypeHandlerTests
             .ReturnsAsync(new List<EchoTypeDefinition>());
 
         var result = await GetAllEchoTypesQueryHandler.Handle(
-            new GetAllEchoTypesQuery(), _repository.Object, _getAllLogger.Object, CancellationToken.None);
+            new GetAllEchoTypesQuery(), _repository.Object, _logger.Object, CancellationToken.None);
 
         result.Should().BeEmpty();
     }

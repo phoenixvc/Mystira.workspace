@@ -96,4 +96,31 @@ public class ProfileAxisScoresControllerTests
         var response = okResult.Value.Should().BeOfType<ProfileAxisScoresController.AxisScoresResponse>().Subject;
         response.Items[0].AxisScores.Comparer.Should().Be(StringComparer.OrdinalIgnoreCase);
     }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("   ")]
+    public async Task Get_WithNullOrEmptyProfileId_ReturnsEmptyItems(string? profileId)
+    {
+        _scoreRepository.Setup(r => r.GetByProfileIdAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new List<PlayerScenarioScore>());
+
+        var result = await _controller.Get(profileId!);
+
+        var okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
+        var response = okResult.Value.Should().BeOfType<ProfileAxisScoresController.AxisScoresResponse>().Subject;
+        response.Items.Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task Get_WhenRepositoryThrows_PropagatesException()
+    {
+        _scoreRepository.Setup(r => r.GetByProfileIdAsync("profile-1", It.IsAny<CancellationToken>()))
+            .ThrowsAsync(new InvalidOperationException("Database error"));
+
+        var act = () => _controller.Get("profile-1");
+
+        await act.Should().ThrowAsync<InvalidOperationException>().WithMessage("Database error");
+    }
 }
