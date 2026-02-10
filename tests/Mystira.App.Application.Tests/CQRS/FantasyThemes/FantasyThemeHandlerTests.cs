@@ -204,4 +204,109 @@ public class FantasyThemeHandlerTests
     }
 
     #endregion
+
+    #region Cache Key Tests
+
+    [Fact]
+    public void GetAllFantasyThemesQuery_HasCorrectCacheKey()
+    {
+        var query = new GetAllFantasyThemesQuery();
+        query.CacheKey.Should().Be("MasterData:FantasyThemes:All");
+    }
+
+    [Fact]
+    public void GetFantasyThemeByIdQuery_HasCorrectCacheKey()
+    {
+        var query = new GetFantasyThemeByIdQuery("test-id");
+        query.CacheKey.Should().Be("MasterData:FantasyThemes:test-id");
+    }
+
+    #endregion
+
+    #region Timestamp Tests
+
+    [Fact]
+    public async Task Create_SetsTimestamps()
+    {
+        var before = DateTime.UtcNow;
+        var command = new CreateFantasyThemeCommand("Steampunk", "Victorian era with steam tech");
+
+        var result = await CreateFantasyThemeCommandHandler.Handle(
+            command, _repository.Object, _unitOfWork.Object,
+            _cacheInvalidation.Object, _logger.Object, CancellationToken.None);
+
+        result.CreatedAt.Should().BeOnOrAfter(before);
+        result.UpdatedAt.Should().BeOnOrAfter(before);
+    }
+
+    [Fact]
+    public async Task Update_SetsUpdatedTimestamp()
+    {
+        var existing = new FantasyThemeDefinition
+        {
+            Id = "ft-1", Name = "Old", UpdatedAt = DateTime.UtcNow.AddDays(-1)
+        };
+        _repository.Setup(r => r.GetByIdAsync("ft-1", It.IsAny<CancellationToken>()))
+            .ReturnsAsync(existing);
+
+        var before = DateTime.UtcNow;
+
+        var result = await UpdateFantasyThemeCommandHandler.Handle(
+            new UpdateFantasyThemeCommand("ft-1", "New", "Desc"),
+            _repository.Object, _unitOfWork.Object,
+            _cacheInvalidation.Object, _logger.Object, CancellationToken.None);
+
+        result!.UpdatedAt.Should().BeOnOrAfter(before);
+    }
+
+    #endregion
+
+    #region Empty Collection Tests
+
+    [Fact]
+    public async Task GetAll_WhenEmpty_ReturnsEmptyList()
+    {
+        _repository.Setup(r => r.GetAllAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new List<FantasyThemeDefinition>());
+
+        var result = await GetAllFantasyThemesQueryHandler.Handle(
+            new GetAllFantasyThemesQuery(), _repository.Object, _logger.Object, CancellationToken.None);
+
+        result.Should().BeEmpty();
+    }
+
+    #endregion
+
+    #region Cache Invalidation Tests
+
+    [Fact]
+    public async Task Update_InvalidatesCache()
+    {
+        var existing = new FantasyThemeDefinition { Id = "ft-1", Name = "Old" };
+        _repository.Setup(r => r.GetByIdAsync("ft-1", It.IsAny<CancellationToken>()))
+            .ReturnsAsync(existing);
+
+        await UpdateFantasyThemeCommandHandler.Handle(
+            new UpdateFantasyThemeCommand("ft-1", "New", "Desc"),
+            _repository.Object, _unitOfWork.Object,
+            _cacheInvalidation.Object, _logger.Object, CancellationToken.None);
+
+        _cacheInvalidation.Verify(c => c.InvalidateCacheByPrefix("MasterData:FantasyThemes"), Times.Once);
+    }
+
+    [Fact]
+    public async Task Delete_InvalidatesCache()
+    {
+        var existing = new FantasyThemeDefinition { Id = "ft-1", Name = "Theme" };
+        _repository.Setup(r => r.GetByIdAsync("ft-1", It.IsAny<CancellationToken>()))
+            .ReturnsAsync(existing);
+
+        await DeleteFantasyThemeCommandHandler.Handle(
+            new DeleteFantasyThemeCommand("ft-1"), _repository.Object, _unitOfWork.Object,
+            _cacheInvalidation.Object, _logger.Object, CancellationToken.None);
+
+        _cacheInvalidation.Verify(c => c.InvalidateCacheByPrefix("MasterData:FantasyThemes"), Times.Once);
+    }
+
+    #endregion
 }

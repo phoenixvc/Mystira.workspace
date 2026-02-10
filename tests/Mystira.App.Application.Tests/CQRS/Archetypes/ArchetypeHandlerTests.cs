@@ -229,4 +229,93 @@ public class ArchetypeHandlerTests
     }
 
     #endregion
+
+    #region Cache Key Tests
+
+    [Fact]
+    public void GetAllArchetypesQuery_HasCorrectCacheKey()
+    {
+        var query = new GetAllArchetypesQuery();
+        query.CacheKey.Should().Be("MasterData:Archetypes:All");
+    }
+
+    [Fact]
+    public void GetArchetypeByIdQuery_HasCorrectCacheKey()
+    {
+        var query = new GetArchetypeByIdQuery("test-id");
+        query.CacheKey.Should().Be("MasterData:Archetypes:test-id");
+    }
+
+    #endregion
+
+    #region Timestamp Tests
+
+    [Fact]
+    public async Task Create_SetsTimestamps()
+    {
+        var before = DateTime.UtcNow;
+        var command = new CreateArchetypeCommand("Mentor", "Wise guide");
+
+        var result = await CreateArchetypeCommandHandler.Handle(
+            command, _repository.Object, _unitOfWork.Object,
+            _cacheInvalidation.Object, _logger.Object, CancellationToken.None);
+
+        result.CreatedAt.Should().BeOnOrAfter(before);
+        result.UpdatedAt.Should().BeOnOrAfter(before);
+    }
+
+    [Fact]
+    public async Task Update_SetsUpdatedTimestamp()
+    {
+        var existing = new ArchetypeDefinition
+        {
+            Id = "arch-1", Name = "Old", UpdatedAt = DateTime.UtcNow.AddDays(-1)
+        };
+        _repository.Setup(r => r.GetByIdAsync("arch-1", It.IsAny<CancellationToken>()))
+            .ReturnsAsync(existing);
+
+        var before = DateTime.UtcNow;
+
+        var result = await UpdateArchetypeCommandHandler.Handle(
+            new UpdateArchetypeCommand("arch-1", "New", "Desc"),
+            _repository.Object, _unitOfWork.Object,
+            _cacheInvalidation.Object, _logger.Object, CancellationToken.None);
+
+        result!.UpdatedAt.Should().BeOnOrAfter(before);
+    }
+
+    #endregion
+
+    #region Cache Invalidation Tests
+
+    [Fact]
+    public async Task Update_InvalidatesCache()
+    {
+        var existing = new ArchetypeDefinition { Id = "arch-1", Name = "Old" };
+        _repository.Setup(r => r.GetByIdAsync("arch-1", It.IsAny<CancellationToken>()))
+            .ReturnsAsync(existing);
+
+        await UpdateArchetypeCommandHandler.Handle(
+            new UpdateArchetypeCommand("arch-1", "New", "Desc"),
+            _repository.Object, _unitOfWork.Object,
+            _cacheInvalidation.Object, _logger.Object, CancellationToken.None);
+
+        _cacheInvalidation.Verify(c => c.InvalidateCacheByPrefix("MasterData:Archetypes"), Times.Once);
+    }
+
+    [Fact]
+    public async Task Delete_InvalidatesCache()
+    {
+        var existing = new ArchetypeDefinition { Id = "arch-1", Name = "Hero" };
+        _repository.Setup(r => r.GetByIdAsync("arch-1", It.IsAny<CancellationToken>()))
+            .ReturnsAsync(existing);
+
+        await DeleteArchetypeCommandHandler.Handle(
+            new DeleteArchetypeCommand("arch-1"), _repository.Object, _unitOfWork.Object,
+            _cacheInvalidation.Object, _logger.Object, CancellationToken.None);
+
+        _cacheInvalidation.Verify(c => c.InvalidateCacheByPrefix("MasterData:Archetypes"), Times.Once);
+    }
+
+    #endregion
 }

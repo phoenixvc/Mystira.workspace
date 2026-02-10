@@ -215,4 +215,149 @@ public class EchoTypeHandlerTests
     }
 
     #endregion
+
+    #region EchoTypeCategories Tests
+
+    [Theory]
+    [InlineData("moral", true)]
+    [InlineData("emotional", true)]
+    [InlineData("behavioral", true)]
+    [InlineData("social", true)]
+    [InlineData("cognitive", true)]
+    [InlineData("meta", true)]
+    [InlineData("MORAL", true)]
+    [InlineData("Emotional", true)]
+    [InlineData("invalid", false)]
+    [InlineData("", false)]
+    [InlineData(null, false)]
+    [InlineData("physical", false)]
+    public void EchoTypeCategories_IsValid_ReturnsExpected(string? category, bool expected)
+    {
+        EchoTypeCategories.IsValid(category).Should().Be(expected);
+    }
+
+    #endregion
+
+    #region Category Validation Tests
+
+    [Fact]
+    public async Task Create_WithInvalidCategory_ThrowsArgumentException()
+    {
+        var command = new CreateEchoTypeCommand("Echo", "Description", "invalid_category");
+
+        var act = () => CreateEchoTypeCommandHandler.Handle(
+            command, _repository.Object, _unitOfWork.Object,
+            _cacheInvalidation.Object, _createLogger.Object, CancellationToken.None);
+
+        await act.Should().ThrowAsync<ArgumentException>();
+    }
+
+    [Theory]
+    [InlineData("moral")]
+    [InlineData("emotional")]
+    [InlineData("behavioral")]
+    [InlineData("social")]
+    [InlineData("cognitive")]
+    [InlineData("meta")]
+    public async Task Create_WithValidCategory_Succeeds(string category)
+    {
+        var command = new CreateEchoTypeCommand("Test Echo", "Description", category);
+
+        var result = await CreateEchoTypeCommandHandler.Handle(
+            command, _repository.Object, _unitOfWork.Object,
+            _cacheInvalidation.Object, _createLogger.Object, CancellationToken.None);
+
+        result.Should().NotBeNull();
+        result.Category.Should().Be(category);
+    }
+
+    [Fact]
+    public async Task Update_WithInvalidCategory_ThrowsArgumentException()
+    {
+        var existing = new EchoTypeDefinition { Id = "echo-1", Name = "Echo", Category = "moral" };
+        _repository.Setup(r => r.GetByIdAsync("echo-1", It.IsAny<CancellationToken>()))
+            .ReturnsAsync(existing);
+
+        var act = () => UpdateEchoTypeCommandHandler.Handle(
+            new UpdateEchoTypeCommand("echo-1", "Echo", "Desc", "invalid_category"),
+            _repository.Object, _unitOfWork.Object,
+            _cacheInvalidation.Object, _updateLogger.Object, CancellationToken.None);
+
+        await act.Should().ThrowAsync<ArgumentException>();
+    }
+
+    #endregion
+
+    #region Cache Key Tests
+
+    [Fact]
+    public void GetAllEchoTypesQuery_HasCorrectCacheKey()
+    {
+        var query = new GetAllEchoTypesQuery();
+        query.CacheKey.Should().Be("MasterData:EchoTypes:All");
+    }
+
+    [Fact]
+    public void GetEchoTypeByIdQuery_HasCorrectCacheKey()
+    {
+        var query = new GetEchoTypeByIdQuery("test-id");
+        query.CacheKey.Should().Be("MasterData:EchoTypes:test-id");
+    }
+
+    #endregion
+
+    #region Timestamp Tests
+
+    [Fact]
+    public async Task Create_SetsTimestamps()
+    {
+        var before = DateTime.UtcNow;
+        var command = new CreateEchoTypeCommand("Echo", "Desc", "moral");
+
+        var result = await CreateEchoTypeCommandHandler.Handle(
+            command, _repository.Object, _unitOfWork.Object,
+            _cacheInvalidation.Object, _createLogger.Object, CancellationToken.None);
+
+        result.CreatedAt.Should().BeOnOrAfter(before);
+        result.UpdatedAt.Should().BeOnOrAfter(before);
+    }
+
+    [Fact]
+    public async Task Update_SetsUpdatedTimestamp()
+    {
+        var existing = new EchoTypeDefinition
+        {
+            Id = "echo-1", Name = "Old", Category = "moral",
+            UpdatedAt = DateTime.UtcNow.AddDays(-1)
+        };
+        _repository.Setup(r => r.GetByIdAsync("echo-1", It.IsAny<CancellationToken>()))
+            .ReturnsAsync(existing);
+
+        var before = DateTime.UtcNow;
+
+        var result = await UpdateEchoTypeCommandHandler.Handle(
+            new UpdateEchoTypeCommand("echo-1", "New", "Desc", "emotional"),
+            _repository.Object, _unitOfWork.Object,
+            _cacheInvalidation.Object, _updateLogger.Object, CancellationToken.None);
+
+        result!.UpdatedAt.Should().BeOnOrAfter(before);
+    }
+
+    #endregion
+
+    #region Empty Collection Tests
+
+    [Fact]
+    public async Task GetAll_WhenEmpty_ReturnsEmptyList()
+    {
+        _repository.Setup(r => r.GetAllAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new List<EchoTypeDefinition>());
+
+        var result = await GetAllEchoTypesQueryHandler.Handle(
+            new GetAllEchoTypesQuery(), _repository.Object, _getAllLogger.Object, CancellationToken.None);
+
+        result.Should().BeEmpty();
+    }
+
+    #endregion
 }
