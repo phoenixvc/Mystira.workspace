@@ -27,6 +27,7 @@
     margin: 0;
     font-size: 1.5rem;
     font-weight: 700;
+    color: #7c3aed; /* Fallback color for browsers that don't support background-clip */
     background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;

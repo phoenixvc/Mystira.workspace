@@ -10,8 +10,19 @@
 @implements IDisposable
 
 <div class="container-fluid pb-4" id="adventures">
-    @* Filter & Bundles (hidden when not logged in) *@
-    @if (isAuthenticated && !isLoading)
+    @* Show loading indicator while data is being loaded *@
+    @if (isLoading || isLoadingBundles)
+    {
+        <div class="row justify-content-center my-5">
+            <div class="col-auto text-center">
+                <div class="loading-spinner mb-3"></div>
+                <p class="text-muted">Loading adventures...</p>
+            </div>
+        </div>
+    }
+    
+    @* Filter & Bundles (hidden when not logged in or loading) *@
+    @if (isAuthenticated && !isLoading && !isLoadingBundles)
     {
         <FilterSection
             AgeGroups="@(string.IsNullOrEmpty(selectedBundleId) ? availableAgeGroups.Take(3).ToArray() : availableAgeGroups)"
@@ -146,16 +157,8 @@
         </div>
     }
 
-    @if (isAuthenticated && ShouldShowCatalog && isLoading)
-    {
-        <div class="row justify-content-center">
-            <div class="col-auto text-center">
-                <div class="loading-spinner mb-3"></div>
-                <p class="text-muted">Loading adventures...</p>
-            </div>
-        </div>
-    }
-    else if (!string.IsNullOrEmpty(selectedBundleId) && filteredScenarios.Any())
+    @* Scenarios grid when a bundle is selected *@
+    @if (!string.IsNullOrEmpty(selectedBundleId) && filteredScenarios.Any() && !isLoading)
     {
         <div class="adventures-grid row">
             @foreach (var scenario in filteredScenarios)

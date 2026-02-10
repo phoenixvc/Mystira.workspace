@@ -22,6 +22,7 @@
 .navbar-brand {
     font-weight: 700;
     font-size: 1.5rem;
+    color: #a78bfa; /* Fallback color for browsers that don't support background-clip */
     background: linear-gradient(135deg, #a78bfa 0%, #c4b5fd 50%, #e9d5ff 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -31,6 +32,7 @@
 }
 
 .navbar-brand:hover {
+    color: #c4b5fd; /* Fallback color */
     background: linear-gradient(135deg, #c4b5fd 0%, #e9d5ff 50%, #f5f3ff 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -39,6 +41,7 @@
 }
 
 .navbar-brand i {
+    color: #a78bfa; /* Fallback color */
     background: linear-gradient(135deg, #a78bfa 0%, #c4b5fd 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -281,6 +284,28 @@ html[data-theme="light"] .navbar-brand:hover i {
     background-clip: text;
 }
 
+/* Ensure nav links, icons and spans have consistent color in light mode */
+html[data-theme="light"] .nav-link,
+html[data-theme="light"] .nav-link i,
+html[data-theme="light"] .nav-link span,
+html[data-theme="light"] .btn-link.nav-link,
+html[data-theme="light"] .btn-link.nav-link i,
+html[data-theme="light"] .btn-link.nav-link span,
+html[data-theme="light"] .dropdown-toggle,
+html[data-theme="light"] .dropdown-toggle i,
+html[data-theme="light"] .dropdown-toggle span {
+    color: var(--nav-link-color) !important;
+}
+
+html[data-theme="light"] .nav-link:hover,
+html[data-theme="light"] .nav-link:hover i,
+html[data-theme="light"] .nav-link:hover span,
+html[data-theme="light"] .btn-link.nav-link:hover,
+html[data-theme="light"] .btn-link.nav-link:hover i,
+html[data-theme="light"] .btn-link.nav-link:hover span {
+    color: var(--primary-color) !important;
+}
+
 /* Light mode via media query */
 @media (prefers-color-scheme: light) {
     .navbar-brand,
@@ -298,6 +323,28 @@ html[data-theme="light"] .navbar-brand:hover i {
         -webkit-text-fill-color: transparent;
         background-clip: text;
     }
+
+    /* Ensure nav links, icons and spans have consistent color in light mode */
+    .nav-link,
+    .nav-link i,
+    .nav-link span,
+    .btn-link.nav-link,
+    .btn-link.nav-link i,
+    .btn-link.nav-link span,
+    .dropdown-toggle,
+    .dropdown-toggle i,
+    .dropdown-toggle span {
+        color: var(--nav-link-color) !important;
+    }
+
+    .nav-link:hover,
+    .nav-link:hover i,
+    .nav-link:hover span,
+    .btn-link.nav-link:hover,
+    .btn-link.nav-link:hover i,
+    .btn-link.nav-link:hover span {
+        color: var(--primary-color) !important;
+    }
 }
 
 /* Navbar toggler icon for dark mode */
@@ -313,17 +360,22 @@ html[data-theme="light"] .navbar-brand:hover i {
     /* Ensure nav links and icons are visible in dark mode */
     .nav-link,
     .nav-link i,
+    .nav-link span,
     .btn-link.nav-link,
     .btn-link.nav-link i,
+    .btn-link.nav-link span,
     .dropdown-toggle,
-    .dropdown-toggle i {
+    .dropdown-toggle i,
+    .dropdown-toggle span {
         color: #e2e8f0 !important;
     }
 
     .nav-link:hover,
     .nav-link:hover i,
+    .nav-link:hover span,
     .btn-link.nav-link:hover,
-    .btn-link.nav-link:hover i {
+    .btn-link.nav-link:hover i,
+    .btn-link.nav-link:hover span {
         color: #a78bfa !important;
     }
 }
@@ -339,17 +391,22 @@ html[data-theme="dark"] .navbar-toggler-icon {
 /* Ensure nav links and icons are visible in dark mode (manual toggle) */
 html[data-theme="dark"] .nav-link,
 html[data-theme="dark"] .nav-link i,
+html[data-theme="dark"] .nav-link span,
 html[data-theme="dark"] .btn-link.nav-link,
 html[data-theme="dark"] .btn-link.nav-link i,
+html[data-theme="dark"] .btn-link.nav-link span,
 html[data-theme="dark"] .dropdown-toggle,
-html[data-theme="dark"] .dropdown-toggle i {
+html[data-theme="dark"] .dropdown-toggle i,
+html[data-theme="dark"] .dropdown-toggle span {
     color: #e2e8f0 !important;
 }
 
 html[data-theme="dark"] .nav-link:hover,
 html[data-theme="dark"] .nav-link:hover i,
+html[data-theme="dark"] .nav-link:hover span,
 html[data-theme="dark"] .btn-link.nav-link:hover,
-html[data-theme="dark"] .btn-link.nav-link:hover i {
+html[data-theme="dark"] .btn-link.nav-link:hover i,
+html[data-theme="dark"] .btn-link.nav-link:hover span {
     color: #a78bfa !important;
 }
 

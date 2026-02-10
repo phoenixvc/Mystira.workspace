@@ -90,7 +90,7 @@
 .profile-name {
     font-size: 1.25rem;
     font-weight: 700;
-    color: var(--fg, #111827);
+    color: #7c3aed; /* Fallback color for browsers that don't support background-clip */
     margin-bottom: 8px;
     background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
     -webkit-background-clip: text;
@@ -480,6 +480,7 @@ html[data-theme="light"] .btn-secondary:hover {
     }
 
     .profile-name {
+        color: #a5b4fc; /* Fallback color for browsers that don't support background-clip */
         background: linear-gradient(135deg, #a5b4fc 0%, #818cf8 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
@@ -557,6 +558,7 @@ html[data-theme="dark"] .guest-badge {
 }
 
 html[data-theme="dark"] .profile-name {
+    color: #a5b4fc; /* Fallback color for browsers that don't support background-clip */
     background: linear-gradient(135deg, #a5b4fc 0%, #818cf8 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -634,7 +636,7 @@ html[data-theme="light"] .guest-badge {
 }
 
 html[data-theme="light"] .profile-name {
-    color: #111827;
+    color: #7c3aed; /* Fallback color for browsers that don't support background-clip */
     background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
