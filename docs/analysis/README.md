@@ -8,6 +8,8 @@ This folder contains technical analysis documents that support architectural dec
 |----------|-------------|--------|
 | [App Components Extraction](app-components-extraction.md) | Analysis of Admin API vs Public API separation | Complete |
 | [Repository Role Analysis](repository-role-analysis.md) | Mystira.App's role in the workspace ecosystem | Complete |
+| [Project Analysis](project-analysis.md) | Strengths, risks & gaps, and improvement opportunities | Complete |
+| [.NET 9 Upgrade Verification](net9-upgrade-verification.md) | Upgrade checklist for all projects to .NET 9 | Complete |
 
 ## Purpose
 

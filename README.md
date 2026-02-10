@@ -1,407 +1,222 @@
 # Mystira Application Suite
 
 ![.NET 9](https://img.shields.io/badge/.NET-9.0-512BD4?logo=dotnet&logoColor=white)
-![Azure Cosmos DB](https://img.shields.io/badge/Azure-Cosmos%20DB-0089D6?logo=microsoftazure&logoColor=white)
 ![Blazor PWA](https://img.shields.io/badge/Client-Blazor%20PWA-5C2D91?logo=blazor&logoColor=white)
-![CI Ready](https://img.shields.io/badge/CI-GitHub%20Actions-2088FF?logo=githubactions&logoColor=white)
+![Azure Cosmos DB](https://img.shields.io/badge/Azure-Cosmos%20DB-0089D6?logo=microsoftazure&logoColor=white)
+![CI](https://img.shields.io/badge/CI-GitHub%20Actions-2088FF?logo=githubactions&logoColor=white)
 ![Repo Type](https://img.shields.io/badge/Repo-Monorepo-6f42c1?logo=github&logoColor=white)
-![Quality Gates](https://img.shields.io/badge/Tests-dotnet%20test,%20npm%20run%20lint-20C997?logo=github&logoColor=white)
 
-The Mystira repository hosts the full suite of services, libraries, and client applications that power the Mystira experience. It includes backend APIs, domain and infrastructure libraries, the Cosmos-analytical console tool, and the Blazor PWA front-end—all sharing a cohesive domain model and now standardised on .NET 9.
+Mystira is a narrative-driven gaming platform for choice-based storytelling with moral compass tracking. Players engage with branching-narrative scenarios, make moral choices tracked across multiple axes, earn age-appropriate achievements, and build their character profiles. The platform is built on .NET 9 with a Blazor WebAssembly PWA frontend, backed by Azure Cosmos DB and distributed across multiple integration channels including Discord, Teams, and WhatsApp.
 
-> **Why this matters:** Everything in the repo builds against the same runtime, which simplifies dependency management, improves security posture, and keeps developer tooling consistent.
+## Table of Contents
+
+- [Deployments](#deployments)
+- [Repository Structure](#repository-structure)
+- [Technology Stack](#technology-stack)
+- [Getting Started](#getting-started)
+- [Running with Docker](#running-with-docker)
+- [Testing](#testing)
+- [Architecture](#architecture)
+- [Documentation](#documentation)
+- [Contributing](#contributing)
 
 ## Deployments
 
 | Environment | Service | URL |
-|-------------|---------|-----|
-| **Production** | PWA | [mystira.app](https://mystira.app) |
-| **Production** | PWA (Azure) | [blue-water-0eab7991e.3.azurestaticapps.net](https://blue-water-0eab7991e.3.azurestaticapps.net) |
-| **Production** | API | [prod-wus-app-mystira-api.azurewebsites.net](https://prod-wus-app-mystira-api.azurewebsites.net) |
-| **Production** | Admin API | [prod-wus-app-mystira-api-admin.azurewebsites.net](https://prod-wus-app-mystira-api-admin.azurewebsites.net) |
-| **Development** | PWA | [mango-water-04fdb1c03.3.azurestaticapps.net](https://mango-water-04fdb1c03.3.azurestaticapps.net) |
-| **Development** | API | [dev-san-app-mystira-api.azurewebsites.net/swagger](https://dev-san-app-mystira-api.azurewebsites.net/swagger) |
-| **Development** | Admin API | [dev-san-app-mystira-admin-api.azurewebsites.net/swagger](https://dev-san-app-mystira-admin-api.azurewebsites.net/swagger) |
+|---|---|---|
+| Production | PWA | [mystira.app](https://mystira.app) |
+| Production | PWA (Azure) | [blue-water-0eab7991e.3.azurestaticapps.net](https://blue-water-0eab7991e.3.azurestaticapps.net) |
+| Production | API | [prod-wus-app-mystira-api.azurewebsites.net](https://prod-wus-app-mystira-api.azurewebsites.net) |
+| Development | PWA | [mango-water-04fdb1c03.3.azurestaticapps.net](https://mango-water-04fdb1c03.3.azurestaticapps.net) |
+| Development | API | [dev-san-app-mystira-api.azurewebsites.net/swagger](https://dev-san-app-mystira-api.azurewebsites.net/swagger) |
 
-## Contents
+## Repository Structure
 
-- [Mystira Application Suite](#mystira-application-suite)
-  - [Deployments](#deployments)
-  - [Contents](#contents)
-  - [Repository Overview](#repository-overview)
-  - [Technology Stack](#technology-stack)
-  - [Getting Started](#getting-started)
-    - [Prerequisites](#prerequisites)
-    - [Build](#build)
-    - [Setup Pre-commit Hooks](#setup-pre-commit-hooks)
-    - [Run Key Projects](#run-key-projects)
-  - [Upgrade Verification Checklist](#upgrade-verification-checklist)
-  - [Project Analysis](#project-analysis)
-    - [Strengths](#strengths)
-    - [Risks \& Gaps](#risks--gaps)
-    - [Opportunities](#opportunities)
-  - [🏗️ Architecture \& Design Patterns](#️-architecture--design-patterns)
-    - [Hexagonal Architecture (Ports \& Adapters)](#hexagonal-architecture-ports--adapters)
-    - [CQRS with MediatR](#cqrs-with-mediatr)
-    - [Query Caching Strategy](#query-caching-strategy)
-    - [Testing \& Verification](#testing--verification)
-    - [Documentation](#documentation)
-    - [Pattern Benefits](#pattern-benefits)
-  - [Recommendations](#recommendations)
-  - [Testing \& Quality Gates](#testing--quality-gates)
-  - [Contributing / PR Checklist](#contributing--pr-checklist)
-  - [Developer Quality of Life](#developer-quality-of-life)
-  - [Further Reading](#further-reading)
-  - [AI Assistant Integration](#ai-assistant-integration)
+```
+src/
+  Mystira.App.Domain/                  # Core domain models and business logic
+  Mystira.App.Application/             # CQRS commands, queries, and Wolverine handlers
+  Mystira.App.Api/                     # ASP.NET Core REST API
+  Mystira.App.PWA/                     # Blazor WebAssembly PWA frontend
+  Mystira.App.Infrastructure.Data/     # EF Core repositories (Cosmos DB, PostgreSQL)
+  Mystira.App.Infrastructure.Azure/    # Azure Blob Storage, email, health checks
+  Mystira.App.Infrastructure.Discord/  # Discord bot integration
+  Mystira.App.Infrastructure.Teams/    # Microsoft Teams integration
+  Mystira.App.Infrastructure.WhatsApp/ # WhatsApp integration
+  Mystira.App.Infrastructure.Payments/ # Payment and royalty processing
 
-## Repository Overview
+tests/
+  Mystira.App.Api.Tests/               # API controller tests
+  Mystira.App.Application.Tests/       # CQRS handler and caching integration tests
+  Mystira.App.Domain.Tests/            # Domain model tests
+  Mystira.App.Infrastructure.Data.Tests/
+  Mystira.App.Infrastructure.Discord.Tests/
+  Mystira.App.Infrastructure.Payments.Tests/
+  Mystira.App.Infrastructure.Teams.Tests/
+  Mystira.App.Infrastructure.WhatsApp.Tests/
+  Mystira.App.PWA.Tests/               # Frontend tests
 
-| Label         | Area                                   | Description                                                                             |
-| ------------- | -------------------------------------- | --------------------------------------------------------------------------------------- |
-| 🧠 Domain      | `src/Mystira.App.Domain`               | Core domain models, enumerations, and shared business logic reused across every layer.  |
-| ☁️ Azure Infra | `src/Mystira.App.Infrastructure.Azure` | Azure-specific configuration objects plus Cosmos DB & Blob Storage health checks.       |
-| 🌐 Public API  | `src/Mystira.App.Api`                  | ASP.NET Core API serving Mystira clients on top of Cosmos DB.                           |
-| 🛡️ Admin API   | `src/Mystira.App.Admin.Api`            | Internal-facing API surface for moderation, content workflows, and tooling.             |
-| 📱 PWA         | `src/Mystira.App.PWA`                  | Blazor WebAssembly PWA with offline assets, IndexedDB sync, audio helpers, and haptics. |
-| 📊 Ops Console | `tools/Mystira.App.CosmosConsole`    | Command-line utility for Cosmos DB exports, stats, and operational insights.            |
+docs/
+  architecture/                        # ADRs, CQRS migration guide, caching strategy
+  domain/                              # Badge system, domain model documentation
+  setup/                               # Environment setup and secrets management guides
+```
 
 ## Technology Stack
 
-- **Languages & Runtimes:** C# / ASP.NET Core on .NET 9 across APIs, console, and PWA host.
-- **Data Layer:** Azure Cosmos DB (EF Core provider) and Azure Blob Storage for binary assets.
-- **Architecture Patterns:** CQRS with MediatR (v12.4.1), Repository + Specification Pattern, Hexagonal Architecture (Ports & Adapters).
-- **Caching:** In-memory query caching with configurable TTL for frequently-accessed reference data.
-- **Client Enhancements:** Service workers, IndexedDB caching, audio/haptics JS interop, and dice utilities.
-- **Tooling:** CsvHelper (exports), System.CommandLine, Microsoft.Extensions.* configuration/logging, Azure health checks.
+| Category | Technologies |
+|---|---|
+| Runtime | .NET 9 (C# 13), SDK 9.0.310 |
+| API Framework | ASP.NET Core 9.0, Swagger/OpenAPI |
+| Messaging & CQRS | [Wolverine](https://wolverine.netlify.app/) v5.13.0 (event-driven messaging) |
+| Frontend | Blazor WebAssembly PWA with offline support, IndexedDB, service workers |
+| Primary Database | Azure Cosmos DB (EF Core provider) |
+| Secondary Database | PostgreSQL (Npgsql EF Core provider) |
+| Object Storage | Azure Blob Storage |
+| Validation | FluentValidation |
+| Object Mapping | Riok.Mapperly (compile-time) |
+| Resilience | Polly v8 |
+| Logging | Serilog + Application Insights |
+| Query Patterns | Ardalis Specification pattern, in-memory query caching |
+| Testing | xUnit, Moq, FluentAssertions, AutoFixture, Coverlet |
+| CI/CD | GitHub Actions (tests, deployments, security scanning, SLA monitoring) |
+| Dependency Management | Renovate (automated updates) |
 
 ## Getting Started
 
 ### Prerequisites
 
-- .NET 9 SDK (`dotnet --list-sdks` should show 9.x).
-- Node.js 18+ for PWA build tooling/service-worker bundling.
-- Azure resources (Cosmos DB account, Blob Storage) or emulators.
-- Repository secrets (connection strings, credentials) supplied via User Secrets, environment variables, or Azure Key Vault.
-  - **For CI/CD**: See [GitHub Secrets Configuration](docs/setup/GITHUB_SECRETS_VARIABLES.md) for complete setup instructions
-  - **For Local Development**: See [Secrets Management Guide](docs/setup/SECRETS_MANAGEMENT.md) for User Secrets setup
+- [.NET 9 SDK](https://dotnet.microsoft.com/download/dotnet/9.0) (`dotnet --list-sdks` should show 9.x)
+- [Node.js 18+](https://nodejs.org/) for PWA build tooling and service worker bundling
+- Azure resources (Cosmos DB, Blob Storage) or the [Azure Cosmos DB Emulator](https://learn.microsoft.com/en-us/azure/cosmos-db/local-emulator)
 
-### Build
+### Clone and Build
 
 ```bash
+git clone https://github.com/phoenixvc/Mystira.App.git
+cd Mystira.App
 dotnet build Mystira.App.sln
 ```
 
-### Setup Pre-commit Hooks
+### Set Up Pre-commit Hooks
 
-The repository uses Husky.Net to automatically format code before commits. After cloning, restore the dotnet tools and install the git hooks:
+The repository uses Husky.Net to run `dotnet format` before each commit:
 
 ```bash
-# Restore dotnet tools (includes Husky)
 dotnet tool restore
-
-# Install git hooks
 dotnet husky install
 ```
 
-This will automatically run `dotnet format` before each commit to ensure code style consistency.
+### Configure Secrets
 
-### Run Key Projects
+The application requires connection strings and credentials for Azure services. See the setup guides for details:
 
-**Option 1: Using DevHub (Recommended)**
+- [Secrets Management Guide](docs/setup/secrets-management.md) -- local development with User Secrets
+- [Quick Secrets Reference](docs/setup/quick-secrets-reference.md) -- cheat sheet
+- [GitHub Secrets Configuration](docs/setup/github-secrets-variables.md) -- CI/CD pipeline secrets
+- [Database Setup](docs/setup/database-setup.md) -- Cosmos DB and database configuration
+- [Email Setup](docs/setup/email-setup.md) -- Azure Communication Services
 
-DevHub is a unified desktop application that provides a modern interface for managing all development services, infrastructure operations, and data migrations. It's the recommended way to work with the Mystira application suite.
-
-```bash
-# Launch DevHub from repository root
-.\start.ps1    # Windows PowerShell
-# OR
-./start.ps1    # Cross-platform (if PowerShell Core installed)
-```
-
-**DevHub Features:**
-- 🚀 **Service Manager**: Start/stop all services with one click, view services in embedded webviews, monitor real-time console output
-- 📊 **Cosmos Explorer**: Export game sessions to CSV, view statistics and analytics
-- 🔄 **Migration Manager**: Multi-step wizard for migrating data between environments
-- ⚙️ **Infrastructure Panel**: Deploy, validate, and manage Azure infrastructure via GitHub Actions
-- 🏠 **Dashboard**: Quick actions and connection status monitoring
-
-**DevHub Documentation:**
-- 📘 **[Quick Start Guide](tools/Mystira.DevHub/QUICKSTART.md)** - Get up and running quickly
-- 📖 **[Full Documentation](tools/Mystira.DevHub/README.md)** - Complete feature reference and usage guide
-- ⚙️ **[Configuration Guide](tools/Mystira.DevHub/CONFIGURATION.md)** - Detailed configuration options
-- 🔒 **[Security Guide](tools/Mystira.DevHub/SECURITY.md)** - Security best practices
-
-**Prerequisites for DevHub:**
-- .NET 9 SDK
-- Node.js 18+
-- Rust (for Tauri backend)
-- GitHub CLI (`gh`) - for infrastructure operations
-- Azure CLI (`az`) - for resource management
-
-**Option 2: Manual Start (Traditional)**
-
-If you prefer to run services individually without DevHub:
+### Run the Application
 
 ```bash
-# Public API
+# API
 dotnet run --project src/Mystira.App.Api/Mystira.App.Api.csproj
 
-# Admin API
-dotnet run --project src/Mystira.App.Admin.Api/Mystira.App.Admin.Api.csproj
-
-# Cosmos console exports
-dotnet run --project tools/Mystira.App.CosmosConsole/Mystira.App.CosmosConsole.csproj -- export --output sessions.csv
-
-# Blazor PWA host
+# Blazor PWA
 dotnet run --project src/Mystira.App.PWA/Mystira.App.PWA.csproj
 ```
 
-Configure `appsettings.Development.json`, user secrets, or environment variables with Cosmos and Blob credentials before running services.
+## Running with Docker
 
-## Upgrade Verification Checklist
+A `docker-compose.yml` is provided for containerized local development:
 
-| Project File                                                 | Target Framework | Notes                                                                          |
-| ------------------------------------------------------------ | ---------------- | ------------------------------------------------------------------------------ |
-| `src/Mystira.App.Api/Mystira.App.Api.csproj`                 | `net9.0`         | Public API upgraded to .NET 9 for C# 12 features and ASP.NET Core perf.        |
-| `src/Mystira.App.Admin.Api/Mystira.App.Admin.Api.csproj`     | `net9.0`         | Admin API matches the public surface to avoid dependency drift.                |
-| `src/Mystira.App.PWA/Mystira.App.PWA.csproj`                 | `net9.0`         | Blazor host upgraded; WebAssembly assets continue to run on latest runtime.    |
-| `tools/Mystira.App.CosmosConsole/Mystira.App.CosmosConsole.csproj` | `net9.0`         | Operational tooling aligned so it benefits from the same SDK/tooling pipeline. |
+```bash
+# Copy the environment template and fill in your values
+cp .env.example .env
 
-> **Packages refreshed:** Blazor WebAssembly client libraries (`Microsoft.AspNetCore.Components.WebAssembly`, DevServer, `Microsoft.Extensions.Http`, `System.Text.Json`) now target version 9.0.0 to match the runtime upgrade.
- **Tip:** If you upgrade additional projects, run `dotnet workload update` to keep WebAssembly and MAUI workloads in sync with the 9.0 SDK.
-
-## Project Analysis
-
-### Strengths
-
-- **Clean Architecture:** Hexagonal architecture (Ports & Adapters) with zero Application → Infrastructure dependencies ensures testability and flexibility.
-- **CQRS Implementation:** Complete CQRS pattern with MediatR across all 8 domain entities, separating read and write operations for better performance and maintainability.
-- **Query Caching:** Intelligent caching strategy for frequently-accessed queries reduces database load by 95%+ for reference data.
-- **Comprehensive Testing:** 23+ integration tests covering Commands, Queries, and caching behaviors with full MediatR pipeline testing.
-- **Shared Domain Contracts:** Centralised models (`ClassificationTag`, `Modifier`, `Character`, etc.) keep APIs, console, and PWA aligned.
-- **Operational Tooling:** Cosmos console exports plus Azure health checks provide observability and data-access workflows.
-- **Offline-first Client:** IndexedDB caching, service workers, audio, dice haptics, and other device integrations deliver a richer PWA experience.
-
-### Risks & Gaps
-
-- **Configuration Duplication:** APIs and console each define Cosmos/Blob configuration blocks, risking drift.
-- **PII Handling:** Multiple components expose user PII (emails, aliases) without documented redaction/logging standards.
-- **Documentation Coverage:** Service-specific runbooks and environment guides are still sparse despite the new high-level README.
-
-### Opportunities
-
-- **Consolidated Configuration Package:** Extract shared options (CosmosDbOptions, BlobStorageOptions, email settings) into a reusable assembly.
-- **Automated Exports:** Enhance the console with date/scenario filters, scheduled runs, and automatic Blob uploads or Power BI triggers.
-- **Testing & Validation:** Add contract/integration tests for EF converters (classification tags, modifiers), IndexedDB abstractions, and Azure health checks.
-- **Security Posture:** Document Key Vault integration, standardise Managed Identity/Azure AD usage, and highlight PII-safe logging practices.
-- **Front-end Resilience:** Strengthen service-worker caching and IndexedDB migrations to improve offline robustness and release rollouts.
-
-## 🏗️ Architecture & Design Patterns
-
-**Status**: ✅ Completed | **Last Updated**: 2025-11-24
-
-The Mystira.App backend has been fully refactored to follow clean architecture principles with CQRS, ensuring testability, maintainability, and flexibility.
-
-### Hexagonal Architecture (Ports & Adapters)
-
-The application follows strict hexagonal architecture with proper dependency flow:
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│  Presentation Layer (API/Admin.Api)                         │
-│  • Controllers (HTTP concerns only)                         │
-│  • Authorization, routing, status codes                     │
-└────────────────────┬────────────────────────────────────────┘
-                     │ depends on
-                     ↓
-┌─────────────────────────────────────────────────────────────┐
-│  Application Layer                                          │
-│  • CQRS Commands & Queries (business logic)                 │
-│  • MediatR Handlers (orchestration)                         │
-│  • Ports/Interfaces (abstraction)                           │
-│  • Specifications (reusable query logic)                    │
-│  • Pipeline Behaviors (cross-cutting concerns)              │
-└────────────────────┬────────────────────────────────────────┘
-                     │ depends on
-                     ↓
-┌─────────────────────────────────────────────────────────────┐
-│  Domain Layer                                               │
-│  • Domain Models (entities)                                 │
-│  • Value Objects                                            │
-│  • Domain Events                                            │
-└─────────────────────────────────────────────────────────────┘
-                     ↑
-                     │ implements
-┌────────────────────┴────────────────────────────────────────┐
-│  Infrastructure Layer                                       │
-│  • EF Core Repositories (data access)                       │
-│  • Azure Services (blob, email)                             │
-│  • External Integrations                                    │
-└─────────────────────────────────────────────────────────────┘
+# Start the API service
+docker compose up -d
 ```
 
-**Key Achievement**: ✅ **Zero** Application → Infrastructure dependencies
+The API will be available at `http://localhost:5000` with a health check at `/health`. See `.env.example` for all configurable environment variables.
 
-### CQRS with MediatR
+## Testing
 
-All 8 domain entities use Command Query Responsibility Segregation:
+```bash
+# Run all tests
+dotnet test Mystira.App.sln
 
-**Migrated Entities:**
-1. ✅ **Scenario** - Content scenarios and story templates
-2. ✅ **ContentBundle** - Grouped scenario collections
-3. ✅ **GameSession** - Active gameplay sessions
-4. ✅ **UserProfile** - Player profiles and preferences
-5. ✅ **BadgeConfiguration** - Achievement definitions
-6. ✅ **MediaAsset** - Media metadata (images, audio)
-7. ✅ **Account** - User accounts and subscriptions
-8. ✅ **UserBadge** - Earned player achievements
+# Run CQRS integration tests only
+dotnet test tests/Mystira.App.Application.Tests/
 
-**Implementation Stats:**
-- 16 Commands with handlers (write operations)
-- 20 Queries with handlers (read operations)
-- 32 Specifications for reusable query logic
-- 104 files created across Application and Domain layers
-- 8 controllers migrated to IMediator
+# Code formatting (also enforced automatically via pre-commit hook)
+dotnet format Mystira.App.sln
+```
 
-### Query Caching Strategy
+**Test projects cover all layers:**
 
-Intelligent caching reduces database load for frequently-accessed reference data:
+| Test Project | Scope |
+|---|---|
+| `Api.Tests` | Controller and endpoint tests |
+| `Application.Tests` | CQRS handlers, caching, Wolverine pipeline |
+| `Domain.Tests` | Domain model validation |
+| `Infrastructure.Data.Tests` | Repository and EF Core |
+| `Infrastructure.Discord.Tests` | Discord bot integration |
+| `Infrastructure.Payments.Tests` | Payment processing |
+| `Infrastructure.Teams.Tests` | Teams integration |
+| `Infrastructure.WhatsApp.Tests` | WhatsApp integration |
+| `PWA.Tests` | Frontend component tests |
 
-**Cached Queries:**
-- `GetAllBadgeConfigurationsQuery` - 10 min cache (static reference data)
-- `GetBadgeConfigurationQuery` - 10 min cache (lookups)
-- `GetScenarioQuery` - 5 min cache (content data)
-- `GetMediaAssetQuery` - 5 min cache (metadata)
+CI runs tests, security scanning, and smoke tests automatically via GitHub Actions. See `.github/workflows/` for the full pipeline configuration.
 
-**Performance Impact:**
-- 95%+ reduction in response time for cache hits
-- Configurable TTL per query type
-- Opt-in caching via `ICacheableQuery` interface
-- Cache invalidation support for data consistency
+## Architecture
 
-### Testing & Verification
+The backend follows **hexagonal architecture** (ports and adapters) with **CQRS** for command/query separation, implemented through **Wolverine** for event-driven messaging.
 
-**Integration Tests (23 tests):**
-- Command handler tests (persistence, validation)
-- Query handler tests (filtering, ordering)
-- Cache behavior tests (hit/miss, invalidation)
-- Specification tests (query logic)
+```
+Presentation (API)  -->  Application (Commands/Queries/Handlers)  -->  Domain (Models)
+                                                                         ^
+Infrastructure (EF Core, Azure Services, Integrations)  ─────────────────┘
+```
 
-**Test Coverage:**
-- `BadgeConfigurationQueryTests` - 8 tests
-- `UserBadgeCommandTests` - 6 tests
-- `UserBadgeQueryTests` - 9 tests
+Key design decisions:
 
-### Documentation
+- Zero Application-to-Infrastructure dependencies
+- All domain entities use CQRS with dedicated command and query handlers
+- In-memory query caching with configurable TTL via the `ICacheableQuery` interface
+- Specification pattern for reusable, composable query logic
+- Multi-channel integration (Discord, Teams, WhatsApp) via separate infrastructure projects
 
-Comprehensive architectural documentation:
-- 📖 [Hexagonal Architecture Refactoring Summary](docs/architecture/HEXAGONAL_ARCHITECTURE_REFACTORING_SUMMARY.md)
-- 📖 [CQRS Migration Guide](docs/architecture/CQRS_MIGRATION_GUIDE.md) - 2,000+ line implementation guide
-- 📖 [Caching Strategy](docs/architecture/CACHING_STRATEGY.md) - Complete caching documentation
-- 📖 [ADR-0001: Adopt CQRS Pattern](docs/architecture/adr/ADR-0001-adopt-cqrs-pattern.md)
-- 📖 [ADR-0006: Phase 5 - Complete CQRS Migration](docs/architecture/adr/ADR-0006-phase-5-cqrs-migration.md)
-- 📖 [Integration Tests README](tests/Mystira.App.Application.Tests/README.md)
+For detailed architecture documentation, see:
 
-### Pattern Benefits
+- [Architecture Decision Records](docs/architecture/adr/) (ADR-0001 through ADR-0015)
+- [CQRS Migration Guide](docs/architecture/cqrs-migration-guide.md)
+- [Caching Strategy](docs/architecture/caching-strategy.md)
+- [Architectural Rules](docs/architecture/architectural-rules.md)
+- [Chat Bot Integration](docs/architecture/chat-bot-integration.md)
+- [Database Architecture Evaluation](docs/architecture/DATABASE_ARCHITECTURE_EVALUATION.md)
 
-**Testability:**
-- ✅ Unit test handlers without HTTP/database mocking
-- ✅ Integration tests with in-memory database
-- ✅ Full MediatR pipeline testing
+## Documentation
 
-**Maintainability:**
-- ✅ Business logic centralized in Application layer
-- ✅ Clear separation of concerns (reads vs. writes)
-- ✅ Consistent patterns across all entities
+| Topic | Link |
+|---|---|
+| Setup guides | [docs/setup/](docs/setup/) |
+| Architecture decisions | [docs/architecture/adr/](docs/architecture/adr/) |
+| Badge system | [docs/domain/badge-system-v2.md](docs/domain/badge-system-v2.md) |
+| Chat bot setup | [docs/setup/multi-platform-chat-bot-setup.md](docs/setup/multi-platform-chat-bot-setup.md) |
+| Integration test guide | [tests/Mystira.App.Application.Tests/README.md](tests/Mystira.App.Application.Tests/README.md) |
+| PR template | [.github/PULL_REQUEST_TEMPLATE.md](.github/PULL_REQUEST_TEMPLATE.md) |
 
-**Flexibility:**
-- ✅ Easy to swap implementations (database, cloud provider)
-- ✅ Can call use cases from CLI tools or background jobs
-- ✅ Supports future enhancements (event sourcing, distributed caching)
+## Contributing
 
-**Performance:**
-- ✅ Query caching reduces database load
-- ✅ Read/write separation enables independent scaling
-- ✅ Specification pattern optimizes database queries
+See [CONTRIBUTING.md](CONTRIBUTING.md) for the full contribution guide, including branching strategy, commit conventions, and PR requirements.
 
-## Recommendations
+Quick overview:
 
-1. **Unify Configuration & Secrets Management:** Ship a shared configuration package plus deployment guidance so every service consumes Cosmos/Blob/email credentials consistently (ideally via Key Vault or Managed Identity).
-2. **Document Service Runbooks:** Add `/docs` pages or per-project READMEs covering environment variables, local-debug steps, and smoke tests for App API, Admin API, and PWA.
-3. **Expand Automated Reporting:** Extend the console tool with filterable exports, scheduling hooks, and optional PII masking to integrate into analytics pipelines.
-4. **PII Governance:** Define redaction rules for logs/CSV exports, establish handling guidance (storage duration, secure transfer), and automate masking where possible.
-5. **Quality Gates:** Introduce CI-backed integration tests for shared domain conversions, Azure health checks, and PWA storage helpers to catch regressions early.
-
-## Testing & Quality Gates
-
-| Stage                    | Command                                                                                                         | Purpose                                                  |
-| ------------------------ | --------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------- |
-| Unit / Integration Tests | `dotnet test Mystira.App.sln`                                                                                       | Runs cross-project tests (APIs, domain, infrastructure). |
-| CQRS Integration Tests   | `dotnet test tests/Mystira.App.Application.Tests/`                                                             | Tests CQRS handlers, caching, and MediatR pipeline (23 tests). |
-| Formatting               | `dotnet format Mystira.App.sln` (automated via pre-commit hook)                                                     | Keeps C# style consistent before pushing a PR.           |
-| PWA Lint / Build         | `npm install` (once), `npm run lint` / `npm run build` (inside `src/Mystira.App.PWA` if JS assets are modified) | Ensures JS/service-worker assets remain valid.           |
-| Console Smoke Test       | `dotnet run --project tools/Mystira.App.CosmosConsole/... -- stats`                                             | Confirms Cosmos CLI still connects post-change.          |
-
-**Test Coverage:**
-- **API Tests:** Controller tests with mocked services (Api.Tests, Admin.Api.Tests)
-- **CQRS Integration Tests:** Full MediatR pipeline with in-memory database (Application.Tests)
-- **Infrastructure Tests:** Azure service integration tests (Infrastructure.Azure.Tests, Infrastructure.Discord.Tests)
-
-Wire these into CI (GitHub Actions/Azure DevOps) to block merges when quality gates fail. Note that formatting is automatically enforced via the Husky pre-commit hook, so manual `dotnet format` runs are typically unnecessary.
-
-## Contributing / PR Checklist
-
-1. **Create a feature branch** off `main`.
-2. **Update code + tests**, keeping target frameworks at `net9.0`.
-3. **Run quality gates** listed above.
-4. **Update documentation** (README or `/docs/*`) if behaviour/config changes.
-5. **Open a PR** describing:
-   - Motivation and scope.
-   - Testing performed (commands + outcomes).
-   - Any config/secret implications or follow-up tasks.
-6. **Request review** from at least one API maintainer and one client-side maintainer when changes cross boundaries.
-
-## Developer Quality of Life
-
-- **Dev Containers / Codespaces:** Base images should include the .NET 9 SDK, Node.js 18, and Azure CLI for parity with local builds.
-- **CI Hooks:** Ensure GitHub Actions (or equivalent) build the solution, run unit/integration tests, and execute the console tool’s smoke commands.
-- **Observability:** Leverage the existing health-check endpoints in deployment manifests and surface them in dashboards/alerts.
-
-## Further Reading
-
-### Development Tools
-
-- **[DevHub Documentation](tools/Mystira.DevHub/README.md)** – Complete guide to the unified development operations tool
-  - [Quick Start](tools/Mystira.DevHub/QUICKSTART.md) – Get started with DevHub in minutes
-  - [Configuration Guide](tools/Mystira.DevHub/CONFIGURATION.md) – Detailed configuration options
-  - [Security Guide](tools/Mystira.DevHub/SECURITY.md) – Security best practices
-
-### Architecture Documentation
-- [`docs/architecture/HEXAGONAL_ARCHITECTURE_REFACTORING_SUMMARY.md`](docs/architecture/HEXAGONAL_ARCHITECTURE_REFACTORING_SUMMARY.md) – Complete refactoring history and benefits
-- [`docs/architecture/CQRS_MIGRATION_GUIDE.md`](docs/architecture/CQRS_MIGRATION_GUIDE.md) – 2,000+ line guide for CQRS implementation
-- [`docs/architecture/CACHING_STRATEGY.md`](docs/architecture/CACHING_STRATEGY.md) – Query caching documentation and best practices
-- [`docs/architecture/adr/`](docs/architecture/adr/) – Architecture Decision Records (ADR-0001 through ADR-0006)
-
-### Testing Documentation
-- [`tests/Mystira.App.Application.Tests/README.md`](tests/Mystira.App.Application.Tests/README.md) – Integration test documentation and examples
-
-### Project Documentation
-- `docs/NEXT_ITERATION_PLAN.md` – Roadmap context and future iteration ideas
-- `src/*/Validation/ScenarioSchemaDefinitions.cs` – Schema enforcement shared across services
-- `src/Mystira.App.Infrastructure.Azure/HealthChecks` – Cosmos/Blob readiness probes used by the APIs
-
-### Badge System
-- [`docs/domain/badge-system-v2.md`](docs/domain/badge-system-v2.md) – Complete badge system v2 documentation
-- Badge configuration files: `src/Mystira.App.Domain/Data/Badges/*.json`
-- JSON schema: `src/Mystira.App.Domain/Schemas/badge-configuration.schema.json`
-
-The badge system supports age-appropriate achievements with tiered progression. Configuration files are validated against a JSON schema and automatically seeded into the database on startup.
-
-## AI Assistant Integration
-
-This repository includes configurations to enhance AI assistant capabilities:
-
-- **GitHub Copilot Instructions** (`.github/copilot-instructions.md`): Provides context-aware code suggestions aligned with project architecture and standards.
-- **Model Context Protocol (MCP)** (`.mcp/config.json`): Enables AI assistants to access repository tools, resources, and documentation.
-
-For setup instructions, see `.mcp/README.md`.
+1. Fork the repository and create a feature branch off `main`
+2. Follow [Conventional Commits](https://www.conventionalcommits.org/) for commit messages
+3. Keep the target framework at `net9.0`
+4. Add or update tests for any changes
+5. Run `dotnet test Mystira.App.sln` and `dotnet format Mystira.App.sln` before submitting
+6. Open a PR describing the motivation, scope, and testing performed
