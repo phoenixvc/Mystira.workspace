@@ -124,7 +124,9 @@ export class SignalRConnection implements ISignalRConnection {
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error));
       this._error = err;
-      throw new Error(`Failed to initialize SignalR: ${err.message}`);
+      throw new Error(`Failed to initialize SignalR: ${err.message}`, {
+        cause: error,
+      });
     }
   }
 
