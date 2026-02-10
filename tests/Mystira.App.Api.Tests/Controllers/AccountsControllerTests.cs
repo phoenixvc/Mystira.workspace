@@ -159,7 +159,7 @@ public class AccountsControllerTests
         var createdAccount = new Account { Id = "acc-new", Email = request.Email };
 
         _mockBus
-            .Setup(x => x.InvokeAsync<Account>(
+            .Setup(x => x.InvokeAsync<Account?>(
                 It.IsAny<CreateAccountCommand>(),
                 It.IsAny<CancellationToken>(),
                 It.IsAny<TimeSpan?>()))
@@ -223,11 +223,11 @@ public class AccountsControllerTests
         };
 
         _mockBus
-            .Setup(x => x.InvokeAsync<Account>(
+            .Setup(x => x.InvokeAsync<Account?>(
                 It.IsAny<CreateAccountCommand>(),
                 It.IsAny<CancellationToken>(),
                 It.IsAny<TimeSpan?>()))
-            .ThrowsAsync(new InvalidOperationException("Account already exists"));
+            .ReturnsAsync(default(Account));
 
         // Act
         var result = await _controller.CreateAccount(request);

@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using Mystira.App.Application.CQRS.MasterData;
 using Mystira.App.Application.Ports.Data;
 using Mystira.App.Application.Services;
 
@@ -14,25 +15,11 @@ public static class DeleteCompassAxisCommandHandler
         ICompassAxisRepository repository,
         IUnitOfWork unitOfWork,
         IQueryCacheInvalidationService cacheInvalidation,
-        ILogger<DeleteCompassAxisCommand> logger,
+        ILogger logger,
         CancellationToken ct)
     {
-        logger.LogInformation("Deleting compass axis with id: {Id}", command.Id);
-
-        var axis = await repository.GetByIdAsync(command.Id);
-        if (axis == null)
-        {
-            logger.LogWarning("Compass axis with id {Id} not found", command.Id);
-            return false;
-        }
-
-        await repository.DeleteAsync(command.Id);
-        await unitOfWork.SaveChangesAsync(ct);
-
-        // Invalidate cache
-        cacheInvalidation.InvalidateCacheByPrefix("MasterData:CompassAxes");
-
-        logger.LogInformation("Successfully deleted compass axis with id: {Id}", command.Id);
-        return true;
+        return await MasterDataCommandHelper.DeleteAsync(
+            command.Id, repository, unitOfWork, cacheInvalidation, logger,
+            "MasterData:CompassAxes", "Compass axis", ct);
     }
 }

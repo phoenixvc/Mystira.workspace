@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using Mystira.App.Application.CQRS.MasterData;
 using Mystira.App.Application.Ports.Data;
 using Mystira.App.Application.Services;
 
@@ -14,25 +15,11 @@ public static class DeleteEchoTypeCommandHandler
         IEchoTypeRepository repository,
         IUnitOfWork unitOfWork,
         IQueryCacheInvalidationService cacheInvalidation,
-        ILogger<DeleteEchoTypeCommand> logger,
+        ILogger logger,
         CancellationToken ct)
     {
-        logger.LogInformation("Deleting echo type with id: {Id}", command.Id);
-
-        var echoType = await repository.GetByIdAsync(command.Id);
-        if (echoType == null)
-        {
-            logger.LogWarning("Echo type with id {Id} not found", command.Id);
-            return false;
-        }
-
-        await repository.DeleteAsync(command.Id);
-        await unitOfWork.SaveChangesAsync(ct);
-
-        // Invalidate cache
-        cacheInvalidation.InvalidateCacheByPrefix("MasterData:EchoTypes");
-
-        logger.LogInformation("Successfully deleted echo type with id: {Id}", command.Id);
-        return true;
+        return await MasterDataCommandHelper.DeleteAsync(
+            command.Id, repository, unitOfWork, cacheInvalidation, logger,
+            "MasterData:EchoTypes", "Echo type", ct);
     }
 }

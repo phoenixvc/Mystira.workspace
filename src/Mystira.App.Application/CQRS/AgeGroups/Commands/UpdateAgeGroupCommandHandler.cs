@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using Mystira.App.Application.CQRS.MasterData;
 using Mystira.App.Application.Ports.Data;
 using Mystira.App.Application.Services;
 using Mystira.App.Domain.Models;
@@ -18,29 +19,17 @@ public static class UpdateAgeGroupCommandHandler
         ILogger logger,
         CancellationToken ct)
     {
-        logger.LogInformation("Updating age group with id: {Id}", command.Id);
-
-        var existingAgeGroup = await repository.GetByIdAsync(command.Id);
-        if (existingAgeGroup == null)
-        {
-            logger.LogWarning("Age group with id {Id} not found", command.Id);
-            return null;
-        }
-
-        existingAgeGroup.Name = command.Name;
-        existingAgeGroup.Value = command.Value;
-        existingAgeGroup.MinimumAge = command.MinimumAge;
-        existingAgeGroup.MaximumAge = command.MaximumAge;
-        existingAgeGroup.Description = command.Description;
-        existingAgeGroup.UpdatedAt = DateTime.UtcNow;
-
-        await repository.UpdateAsync(existingAgeGroup);
-        await unitOfWork.SaveChangesAsync(ct);
-
-        // Invalidate cache
-        cacheInvalidation.InvalidateCacheByPrefix("MasterData:AgeGroups");
-
-        logger.LogInformation("Successfully updated age group with id: {Id}", command.Id);
-        return existingAgeGroup;
+        return await MasterDataCommandHelper.UpdateAsync(
+            command.Id, repository, unitOfWork, cacheInvalidation, logger,
+            "MasterData:AgeGroups", "Age group",
+            existing =>
+            {
+                existing.Name = command.Name;
+                existing.Value = command.Value;
+                existing.MinimumAge = command.MinimumAge;
+                existing.MaximumAge = command.MaximumAge;
+                existing.Description = command.Description;
+                existing.UpdatedAt = DateTime.UtcNow;
+            }, ct);
     }
 }

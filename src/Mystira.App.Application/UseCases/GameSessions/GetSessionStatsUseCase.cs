@@ -47,7 +47,7 @@ public class GetSessionStatsUseCase
             {
                 PlayerId = p.PlayerId,
                 Axis = p.Axis,
-                Total = (int)p.Total
+                Total = (int)Math.Round(p.Total)
             })
             .ToList();
 

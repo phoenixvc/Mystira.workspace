@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using Mystira.App.Application.CQRS.MasterData;
 using Mystira.App.Application.Ports.Data;
 using Mystira.App.Application.Services;
 using Mystira.App.Domain.Models;
@@ -15,29 +16,22 @@ public static class UpdateEchoTypeCommandHandler
         IEchoTypeRepository repository,
         IUnitOfWork unitOfWork,
         IQueryCacheInvalidationService cacheInvalidation,
-        ILogger<UpdateEchoTypeCommand> logger,
+        ILogger logger,
         CancellationToken ct)
     {
-        logger.LogInformation("Updating echo type with id: {Id}", command.Id);
+        Guard.AgainstNullOrEmpty(command.Name, nameof(command.Name));
+        Guard.Against(!EchoTypeCategories.IsValid(command.Category),
+            $"Category must be one of: {string.Join(", ", EchoTypeCategories.Allowed)}");
 
-        var existingEchoType = await repository.GetByIdAsync(command.Id);
-        if (existingEchoType == null)
-        {
-            logger.LogWarning("Echo type with id {Id} not found", command.Id);
-            return null;
-        }
-
-        existingEchoType.Name = command.Name;
-        existingEchoType.Description = command.Description;
-        existingEchoType.UpdatedAt = DateTime.UtcNow;
-
-        await repository.UpdateAsync(existingEchoType);
-        await unitOfWork.SaveChangesAsync(ct);
-
-        // Invalidate cache
-        cacheInvalidation.InvalidateCacheByPrefix("MasterData:EchoTypes");
-
-        logger.LogInformation("Successfully updated echo type with id: {Id}", command.Id);
-        return existingEchoType;
+        return await MasterDataCommandHelper.UpdateAsync(
+            command.Id, repository, unitOfWork, cacheInvalidation, logger,
+            "MasterData:EchoTypes", "Echo type",
+            existing =>
+            {
+                existing.Name = command.Name;
+                existing.Description = command.Description;
+                existing.Category = command.Category;
+                existing.UpdatedAt = DateTime.UtcNow;
+            }, ct);
     }
 }

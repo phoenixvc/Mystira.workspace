@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using Mystira.App.Application.CQRS.MasterData;
 using Mystira.App.Application.Ports.Data;
 using Mystira.App.Application.Services;
 using Mystira.App.Domain.Models;
@@ -15,32 +16,21 @@ public static class CreateCompassAxisCommandHandler
         ICompassAxisRepository repository,
         IUnitOfWork unitOfWork,
         IQueryCacheInvalidationService cacheInvalidation,
-        ILogger<CreateCompassAxisCommand> logger,
+        ILogger logger,
         CancellationToken ct)
     {
-        logger.LogInformation("Creating compass axis: {Name}", command.Name);
+        Guard.AgainstNullOrEmpty(command.Name, nameof(command.Name));
 
-        if (string.IsNullOrWhiteSpace(command.Name))
-        {
-            throw new ArgumentException("Name is required");
-        }
-
-        var axis = new CompassAxis
-        {
-            Id = Guid.NewGuid().ToString(),
-            Name = command.Name,
-            Description = command.Description,
-            CreatedAt = DateTime.UtcNow,
-            UpdatedAt = DateTime.UtcNow
-        };
-
-        await repository.AddAsync(axis);
-        await unitOfWork.SaveChangesAsync(ct);
-
-        // Invalidate cache
-        cacheInvalidation.InvalidateCacheByPrefix("MasterData:CompassAxes");
-
-        logger.LogInformation("Successfully created compass axis with id: {Id}", axis.Id);
-        return axis;
+        return await MasterDataCommandHelper.CreateAsync(
+            repository, unitOfWork, cacheInvalidation, logger,
+            "MasterData:CompassAxes", $"compass axis '{command.Name}'",
+            () => new CompassAxis
+            {
+                Id = Guid.NewGuid().ToString(),
+                Name = command.Name,
+                Description = command.Description,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            }, ct);
     }
 }

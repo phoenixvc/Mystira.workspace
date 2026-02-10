@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using Mystira.App.Application.CQRS.MasterData;
 using Mystira.App.Application.Ports.Data;
 using Mystira.App.Application.Services;
 using Mystira.App.Domain.Models;
@@ -18,26 +19,14 @@ public static class UpdateArchetypeCommandHandler
         ILogger logger,
         CancellationToken ct)
     {
-        logger.LogInformation("Updating archetype with id: {Id}", command.Id);
-
-        var existingArchetype = await repository.GetByIdAsync(command.Id);
-        if (existingArchetype == null)
-        {
-            logger.LogWarning("Archetype with id {Id} not found", command.Id);
-            return null;
-        }
-
-        existingArchetype.Name = command.Name;
-        existingArchetype.Description = command.Description;
-        existingArchetype.UpdatedAt = DateTime.UtcNow;
-
-        await repository.UpdateAsync(existingArchetype);
-        await unitOfWork.SaveChangesAsync(ct);
-
-        // Invalidate cache
-        cacheInvalidation.InvalidateCacheByPrefix("MasterData:Archetypes");
-
-        logger.LogInformation("Successfully updated archetype with id: {Id}", command.Id);
-        return existingArchetype;
+        return await MasterDataCommandHelper.UpdateAsync(
+            command.Id, repository, unitOfWork, cacheInvalidation, logger,
+            "MasterData:Archetypes", "Archetype",
+            existing =>
+            {
+                existing.Name = command.Name;
+                existing.Description = command.Description;
+                existing.UpdatedAt = DateTime.UtcNow;
+            }, ct);
     }
 }

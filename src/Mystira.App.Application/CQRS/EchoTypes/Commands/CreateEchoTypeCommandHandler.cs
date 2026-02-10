@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using Mystira.App.Application.CQRS.MasterData;
 using Mystira.App.Application.Ports.Data;
 using Mystira.App.Application.Services;
 using Mystira.App.Domain.Models;
@@ -15,32 +16,24 @@ public static class CreateEchoTypeCommandHandler
         IEchoTypeRepository repository,
         IUnitOfWork unitOfWork,
         IQueryCacheInvalidationService cacheInvalidation,
-        ILogger<CreateEchoTypeCommand> logger,
+        ILogger logger,
         CancellationToken ct)
     {
-        logger.LogInformation("Creating echo type: {Name}", command.Name);
+        Guard.AgainstNullOrEmpty(command.Name, nameof(command.Name));
+        Guard.Against(!EchoTypeCategories.IsValid(command.Category),
+            $"Category must be one of: {string.Join(", ", EchoTypeCategories.Allowed)}");
 
-        if (string.IsNullOrWhiteSpace(command.Name))
-        {
-            throw new ArgumentException("Name is required");
-        }
-
-        var echoType = new EchoTypeDefinition
-        {
-            Id = Guid.NewGuid().ToString(),
-            Name = command.Name,
-            Description = command.Description,
-            CreatedAt = DateTime.UtcNow,
-            UpdatedAt = DateTime.UtcNow
-        };
-
-        await repository.AddAsync(echoType);
-        await unitOfWork.SaveChangesAsync(ct);
-
-        // Invalidate cache
-        cacheInvalidation.InvalidateCacheByPrefix("MasterData:EchoTypes");
-
-        logger.LogInformation("Successfully created echo type with id: {Id}", echoType.Id);
-        return echoType;
+        return await MasterDataCommandHelper.CreateAsync(
+            repository, unitOfWork, cacheInvalidation, logger,
+            "MasterData:EchoTypes", $"echo type '{command.Name}'",
+            () => new EchoTypeDefinition
+            {
+                Id = Guid.NewGuid().ToString(),
+                Name = command.Name,
+                Description = command.Description,
+                Category = command.Category,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            }, ct);
     }
 }

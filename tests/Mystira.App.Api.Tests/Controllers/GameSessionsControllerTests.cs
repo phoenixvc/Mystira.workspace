@@ -84,7 +84,7 @@ public class GameSessionsControllerTests
         var createdSession = new GameSession { Id = "session-1", ScenarioId = "scenario-1" };
 
         _mockBus
-            .Setup(x => x.InvokeAsync<GameSession>(
+            .Setup(x => x.InvokeAsync<GameSession?>(
                 It.IsAny<StartGameSessionCommand>(),
                 It.IsAny<CancellationToken>(),
                 It.IsAny<TimeSpan?>()))
@@ -115,17 +115,17 @@ public class GameSessionsControllerTests
     }
 
     [Fact]
-    public async Task StartSession_WhenArgumentExceptionThrown_ReturnsBadRequest()
+    public async Task StartSession_WhenHandlerReturnsNull_ReturnsBadRequest()
     {
         // Arrange
         var request = new StartGameSessionRequest { ScenarioId = "scenario-1" };
 
         _mockBus
-            .Setup(x => x.InvokeAsync<GameSession>(
+            .Setup(x => x.InvokeAsync<GameSession?>(
                 It.IsAny<StartGameSessionCommand>(),
                 It.IsAny<CancellationToken>(),
                 It.IsAny<TimeSpan?>()))
-            .ThrowsAsync(new ArgumentException("Invalid scenario"));
+            .ReturnsAsync(default(GameSession));
 
         // Act
         var result = await _controller.StartSession(request);
@@ -141,7 +141,7 @@ public class GameSessionsControllerTests
         var request = new StartGameSessionRequest { ScenarioId = "scenario-1" };
 
         _mockBus
-            .Setup(x => x.InvokeAsync<GameSession>(
+            .Setup(x => x.InvokeAsync<GameSession?>(
                 It.IsAny<StartGameSessionCommand>(),
                 It.IsAny<CancellationToken>(),
                 It.IsAny<TimeSpan?>()))

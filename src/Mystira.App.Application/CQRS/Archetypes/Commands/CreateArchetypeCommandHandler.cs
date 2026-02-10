@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using Mystira.App.Application.CQRS.MasterData;
 using Mystira.App.Application.Ports.Data;
 using Mystira.App.Application.Services;
 using Mystira.App.Domain.Models;
@@ -18,29 +19,18 @@ public static class CreateArchetypeCommandHandler
         ILogger logger,
         CancellationToken ct)
     {
-        logger.LogInformation("Creating archetype: {Name}", command.Name);
+        Guard.AgainstNullOrEmpty(command.Name, nameof(command.Name));
 
-        if (string.IsNullOrWhiteSpace(command.Name))
-        {
-            throw new ArgumentException("Name is required");
-        }
-
-        var archetype = new ArchetypeDefinition
-        {
-            Id = Guid.NewGuid().ToString(),
-            Name = command.Name,
-            Description = command.Description,
-            CreatedAt = DateTime.UtcNow,
-            UpdatedAt = DateTime.UtcNow
-        };
-
-        await repository.AddAsync(archetype);
-        await unitOfWork.SaveChangesAsync(ct);
-
-        // Invalidate cache
-        cacheInvalidation.InvalidateCacheByPrefix("MasterData:Archetypes");
-
-        logger.LogInformation("Successfully created archetype with id: {Id}", archetype.Id);
-        return archetype;
+        return await MasterDataCommandHelper.CreateAsync(
+            repository, unitOfWork, cacheInvalidation, logger,
+            "MasterData:Archetypes", $"archetype '{command.Name}'",
+            () => new ArchetypeDefinition
+            {
+                Id = Guid.NewGuid().ToString(),
+                Name = command.Name,
+                Description = command.Description,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            }, ct);
     }
 }

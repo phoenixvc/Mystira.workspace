@@ -98,12 +98,13 @@ public class AccountsController : ControllerBase
                 request.Subscription,
                 request.Settings);
 
-            var createdAccount = await _bus.InvokeAsync<Account>(command);
+            var createdAccount = await _bus.InvokeAsync<Account?>(command);
+            if (createdAccount == null)
+            {
+                return Conflict("Account with this email already exists");
+            }
+
             return CreatedAtAction(nameof(GetAccountById), new { accountId = createdAccount.Id }, createdAccount);
-        }
-        catch (InvalidOperationException ex)
-        {
-            return Conflict(ex.Message);
         }
         catch (Exception ex)
         {

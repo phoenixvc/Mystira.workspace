@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using Mystira.App.Application.CQRS.MasterData;
 using Mystira.App.Application.Ports.Data;
 using Mystira.App.Application.Services;
 using Mystira.App.Domain.Models;
@@ -18,37 +19,22 @@ public static class CreateAgeGroupCommandHandler
         ILogger logger,
         CancellationToken ct)
     {
-        logger.LogInformation("Creating age group: {Name}", command.Name);
+        Guard.AgainstNullOrEmpty(command.Name, nameof(command.Name));
+        Guard.AgainstNullOrEmpty(command.Value, nameof(command.Value));
 
-        if (string.IsNullOrWhiteSpace(command.Name))
-        {
-            throw new ArgumentException("Name is required");
-        }
-
-        if (string.IsNullOrWhiteSpace(command.Value))
-        {
-            throw new ArgumentException("Value is required");
-        }
-
-        var ageGroup = new AgeGroupDefinition
-        {
-            Id = Guid.NewGuid().ToString(),
-            Name = command.Name,
-            Value = command.Value,
-            MinimumAge = command.MinimumAge,
-            MaximumAge = command.MaximumAge,
-            Description = command.Description,
-            CreatedAt = DateTime.UtcNow,
-            UpdatedAt = DateTime.UtcNow
-        };
-
-        await repository.AddAsync(ageGroup);
-        await unitOfWork.SaveChangesAsync(ct);
-
-        // Invalidate cache
-        cacheInvalidation.InvalidateCacheByPrefix("MasterData:AgeGroups");
-
-        logger.LogInformation("Successfully created age group with id: {Id}", ageGroup.Id);
-        return ageGroup;
+        return await MasterDataCommandHelper.CreateAsync(
+            repository, unitOfWork, cacheInvalidation, logger,
+            "MasterData:AgeGroups", $"age group '{command.Name}'",
+            () => new AgeGroupDefinition
+            {
+                Id = Guid.NewGuid().ToString(),
+                Name = command.Name,
+                Value = command.Value,
+                MinimumAge = command.MinimumAge,
+                MaximumAge = command.MaximumAge,
+                Description = command.Description,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            }, ct);
     }
 }

@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using Mystira.App.Application.CQRS.GameSessions.Commands;
 using Mystira.App.Application.Ports.Data;
+using Mystira.App.Application.UseCases.GameSessions;
 using Mystira.App.Domain.Models;
 using Mystira.Contracts.App.Models;
 using Mystira.Contracts.App.Requests.GameSessions;
@@ -15,14 +16,22 @@ public class StartGameSessionCommandHandlerTests
     private readonly Mock<IGameSessionRepository> _sessionRepository;
     private readonly Mock<IScenarioRepository> _scenarioRepository;
     private readonly Mock<IUnitOfWork> _unitOfWork;
-    private readonly Mock<ILogger> _logger;
+    private readonly Mock<ILogger<CreateGameSessionUseCase>> _useCaseLogger;
+    private readonly Mock<ILogger> _handlerLogger;
+    private readonly CreateGameSessionUseCase _useCase;
 
     public StartGameSessionCommandHandlerTests()
     {
         _sessionRepository = new Mock<IGameSessionRepository>();
         _scenarioRepository = new Mock<IScenarioRepository>();
         _unitOfWork = new Mock<IUnitOfWork>();
-        _logger = new Mock<ILogger>();
+        _useCaseLogger = new Mock<ILogger<CreateGameSessionUseCase>>();
+        _handlerLogger = new Mock<ILogger>();
+        _useCase = new CreateGameSessionUseCase(
+            _sessionRepository.Object,
+            _scenarioRepository.Object,
+            _unitOfWork.Object,
+            _useCaseLogger.Object);
     }
 
     [Fact]
@@ -42,15 +51,13 @@ public class StartGameSessionCommandHandlerTests
         // Act
         var result = await StartGameSessionCommandHandler.Handle(
             command,
-            _sessionRepository.Object,
-            _scenarioRepository.Object,
-            _unitOfWork.Object,
-            _logger.Object,
+            _useCase,
+            _handlerLogger.Object,
             CancellationToken.None);
 
         // Assert
         result.Should().NotBeNull();
-        result.ScenarioId.Should().Be(request.ScenarioId);
+        result!.ScenarioId.Should().Be(request.ScenarioId);
         result.AccountId.Should().Be(request.AccountId);
         result.ProfileId.Should().Be(request.ProfileId);
         result.Status.Should().Be(SessionStatus.InProgress);
@@ -89,20 +96,18 @@ public class StartGameSessionCommandHandlerTests
         // Act
         var result = await StartGameSessionCommandHandler.Handle(
             command,
-            _sessionRepository.Object,
-            _scenarioRepository.Object,
-            _unitOfWork.Object,
-            _logger.Object,
+            _useCase,
+            _handlerLogger.Object,
             CancellationToken.None);
 
         // Assert
         result.Should().NotBeNull();
-        result.Id.Should().Be(existingSession.Id);
+        result!.Id.Should().Be(existingSession.Id);
         _sessionRepository.Verify(r => r.AddAsync(It.IsAny<GameSession>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
-    public async Task Handle_WithMissingScenarioId_ThrowsArgumentException()
+    public async Task Handle_WithMissingScenarioId_ReturnsNull()
     {
         // Arrange
         var request = CreateValidRequest();
@@ -110,21 +115,18 @@ public class StartGameSessionCommandHandlerTests
         var command = new StartGameSessionCommand(request);
 
         // Act
-        var act = () => StartGameSessionCommandHandler.Handle(
+        var result = await StartGameSessionCommandHandler.Handle(
             command,
-            _sessionRepository.Object,
-            _scenarioRepository.Object,
-            _unitOfWork.Object,
-            _logger.Object,
+            _useCase,
+            _handlerLogger.Object,
             CancellationToken.None);
 
         // Assert
-        await act.Should().ThrowAsync<ArgumentException>()
-            .WithMessage("*ScenarioId*");
+        result.Should().BeNull();
     }
 
     [Fact]
-    public async Task Handle_WithMissingAccountId_ThrowsArgumentException()
+    public async Task Handle_WithMissingAccountId_ReturnsNull()
     {
         // Arrange
         var request = CreateValidRequest();
@@ -132,21 +134,18 @@ public class StartGameSessionCommandHandlerTests
         var command = new StartGameSessionCommand(request);
 
         // Act
-        var act = () => StartGameSessionCommandHandler.Handle(
+        var result = await StartGameSessionCommandHandler.Handle(
             command,
-            _sessionRepository.Object,
-            _scenarioRepository.Object,
-            _unitOfWork.Object,
-            _logger.Object,
+            _useCase,
+            _handlerLogger.Object,
             CancellationToken.None);
 
         // Assert
-        await act.Should().ThrowAsync<ArgumentException>()
-            .WithMessage("*AccountId*");
+        result.Should().BeNull();
     }
 
     [Fact]
-    public async Task Handle_WithMissingProfileId_ThrowsArgumentException()
+    public async Task Handle_WithMissingProfileId_ReturnsNull()
     {
         // Arrange
         var request = CreateValidRequest();
@@ -154,21 +153,18 @@ public class StartGameSessionCommandHandlerTests
         var command = new StartGameSessionCommand(request);
 
         // Act
-        var act = () => StartGameSessionCommandHandler.Handle(
+        var result = await StartGameSessionCommandHandler.Handle(
             command,
-            _sessionRepository.Object,
-            _scenarioRepository.Object,
-            _unitOfWork.Object,
-            _logger.Object,
+            _useCase,
+            _handlerLogger.Object,
             CancellationToken.None);
 
         // Assert
-        await act.Should().ThrowAsync<ArgumentException>()
-            .WithMessage("*ProfileId*");
+        result.Should().BeNull();
     }
 
     [Fact]
-    public async Task Handle_WithNoPlayersOrAssignments_ThrowsArgumentException()
+    public async Task Handle_WithNoPlayersOrAssignments_ReturnsNull()
     {
         // Arrange
         var request = CreateValidRequest();
@@ -177,21 +173,18 @@ public class StartGameSessionCommandHandlerTests
         var command = new StartGameSessionCommand(request);
 
         // Act
-        var act = () => StartGameSessionCommandHandler.Handle(
+        var result = await StartGameSessionCommandHandler.Handle(
             command,
-            _sessionRepository.Object,
-            _scenarioRepository.Object,
-            _unitOfWork.Object,
-            _logger.Object,
+            _useCase,
+            _handlerLogger.Object,
             CancellationToken.None);
 
         // Assert
-        await act.Should().ThrowAsync<ArgumentException>()
-            .WithMessage("*player*character assignment*");
+        result.Should().BeNull();
     }
 
     [Fact]
-    public async Task Handle_WithScenarioAgeRestriction_ThrowsArgumentException()
+    public async Task Handle_WithScenarioAgeRestriction_ReturnsNull()
     {
         // Arrange
         var request = CreateValidRequest();
@@ -207,17 +200,14 @@ public class StartGameSessionCommandHandlerTests
         var command = new StartGameSessionCommand(request);
 
         // Act
-        var act = () => StartGameSessionCommandHandler.Handle(
+        var result = await StartGameSessionCommandHandler.Handle(
             command,
-            _sessionRepository.Object,
-            _scenarioRepository.Object,
-            _unitOfWork.Object,
-            _logger.Object,
+            _useCase,
+            _handlerLogger.Object,
             CancellationToken.None);
 
         // Assert
-        await act.Should().ThrowAsync<ArgumentException>()
-            .WithMessage("*minimum age*");
+        result.Should().BeNull();
     }
 
     [Fact]
@@ -250,14 +240,13 @@ public class StartGameSessionCommandHandlerTests
         // Act
         var result = await StartGameSessionCommandHandler.Handle(
             command,
-            _sessionRepository.Object,
-            _scenarioRepository.Object,
-            _unitOfWork.Object,
-            _logger.Object,
+            _useCase,
+            _handlerLogger.Object,
             CancellationToken.None);
 
         // Assert
-        result.PlayerNames.Should().Contain("TestPlayer");
+        result.Should().NotBeNull();
+        result!.PlayerNames.Should().Contain("TestPlayer");
         result.CharacterAssignments.Should().HaveCount(1);
         result.CharacterAssignments[0].CharacterName.Should().Be("Hero");
     }
@@ -284,14 +273,13 @@ public class StartGameSessionCommandHandlerTests
         // Act
         var result = await StartGameSessionCommandHandler.Handle(
             command,
-            _sessionRepository.Object,
-            _scenarioRepository.Object,
-            _unitOfWork.Object,
-            _logger.Object,
+            _useCase,
+            _handlerLogger.Object,
             CancellationToken.None);
 
         // Assert
-        result.CompassValues.Should().ContainKey("courage");
+        result.Should().NotBeNull();
+        result!.CompassValues.Should().ContainKey("courage");
         result.CompassValues.Should().ContainKey("wisdom");
         result.CompassValues["courage"].CurrentValue.Should().Be(0.0);
     }

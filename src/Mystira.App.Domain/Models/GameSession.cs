@@ -26,6 +26,7 @@ public class GameSession
     public TimeSpan ElapsedTime { get; set; }
     public bool IsPaused { get; set; }
     public DateTime? PausedAt { get; set; }
+    public TimeSpan AccumulatedPausedDuration { get; set; } = TimeSpan.Zero;
     public int SceneCount { get; set; }
 
     // Store as string for database compatibility, but provide AgeGroup access
@@ -58,6 +59,101 @@ public class GameSession
             totalTime += DateTime.UtcNow - StartTime;
         }
         return totalTime;
+    }
+
+    /// <summary>
+    /// Pauses the session, recording the pause timestamp.
+    /// Returns false if the session is not in progress.
+    /// </summary>
+    public bool Pause()
+    {
+        if (Status != SessionStatus.InProgress)
+            return false;
+
+        Status = SessionStatus.Paused;
+        IsPaused = true;
+        PausedAt = DateTime.UtcNow;
+        return true;
+    }
+
+    /// <summary>
+    /// Resumes the session from a paused state.
+    /// Accumulates the pause duration so elapsed time excludes paused periods.
+    /// Returns false if the session is not paused.
+    /// </summary>
+    public bool Resume()
+    {
+        if (Status != SessionStatus.Paused)
+            return false;
+
+        if (PausedAt.HasValue)
+        {
+            AccumulatedPausedDuration += DateTime.UtcNow - PausedAt.Value;
+        }
+
+        Status = SessionStatus.InProgress;
+        IsPaused = false;
+        PausedAt = null;
+        return true;
+    }
+
+    /// <summary>
+    /// Completes the session, recording the end time and pause-aware elapsed duration.
+    /// Returns false if the session is in a terminal state (Completed, Abandoned, or NotStarted).
+    /// </summary>
+    public bool Complete()
+    {
+        if (Status == SessionStatus.Completed || Status == SessionStatus.Abandoned || Status == SessionStatus.NotStarted)
+            return false;
+
+        // If completing while paused, accumulate the final pause interval
+        if (IsPaused && PausedAt.HasValue)
+        {
+            AccumulatedPausedDuration += DateTime.UtcNow - PausedAt.Value;
+        }
+
+        EndTime = DateTime.UtcNow;
+        ElapsedTime = (EndTime.Value - StartTime) - AccumulatedPausedDuration;
+        Status = SessionStatus.Completed;
+        IsPaused = false;
+        PausedAt = null;
+        return true;
+    }
+
+    /// <summary>
+    /// Marks the session as abandoned, recording end time and pause-aware elapsed duration.
+    /// Returns false if the session is in a terminal state (Completed, Abandoned, or NotStarted).
+    /// </summary>
+    public bool Abandon()
+    {
+        if (Status == SessionStatus.Completed || Status == SessionStatus.Abandoned || Status == SessionStatus.NotStarted)
+            return false;
+
+        // If abandoning while paused, accumulate the final pause interval
+        if (IsPaused && PausedAt.HasValue)
+        {
+            AccumulatedPausedDuration += DateTime.UtcNow - PausedAt.Value;
+        }
+
+        EndTime = DateTime.UtcNow;
+        ElapsedTime = (EndTime.Value - StartTime) - AccumulatedPausedDuration;
+        Status = SessionStatus.Abandoned;
+        IsPaused = false;
+        PausedAt = null;
+        return true;
+    }
+
+    /// <summary>
+    /// Determines if this session has no meaningful activity
+    /// (no scene, no choices, no echoes, no achievements).
+    /// </summary>
+    public bool IsEffectivelyEmpty()
+    {
+        var hasScene = !string.IsNullOrWhiteSpace(CurrentSceneId);
+        var hasChoices = ChoiceHistory?.Count > 0;
+        var hasEchoes = EchoHistory?.Count > 0;
+        var hasAchievements = Achievements?.Count > 0;
+        return !hasScene && !hasChoices && !hasEchoes && !hasAchievements;
     }
 
     public void RecalculateCompassProgressFromHistory()

@@ -65,17 +65,17 @@ public class GameSessionsController : ControllerBase
             }
 
             var command = new StartGameSessionCommand(request);
-            var session = await _bus.InvokeAsync<GameSession>(command);
-            return CreatedAtAction(nameof(GetSession), new { id = session.Id }, session);
-        }
-        catch (ArgumentException ex)
-        {
-            _logger.LogWarning(ex, "Validation error starting session");
-            return BadRequest(new ErrorResponse
+            var session = await _bus.InvokeAsync<GameSession?>(command);
+            if (session == null)
             {
-                Message = ex.Message,
-                TraceId = HttpContext.TraceIdentifier
-            });
+                return BadRequest(new ErrorResponse
+                {
+                    Message = "Failed to start game session. Check request parameters.",
+                    TraceId = HttpContext.TraceIdentifier
+                });
+            }
+
+            return CreatedAtAction(nameof(GetSession), new { id = session.Id }, session);
         }
         catch (Exception ex)
         {

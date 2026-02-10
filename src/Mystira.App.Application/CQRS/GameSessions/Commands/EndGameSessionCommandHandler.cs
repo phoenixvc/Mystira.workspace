@@ -6,15 +6,10 @@ namespace Mystira.App.Application.CQRS.GameSessions.Commands;
 
 /// <summary>
 /// Wolverine handler for EndGameSessionCommand.
-/// Marks a session as completed and sets the end time.
-/// Uses static method convention for cleaner, more testable code.
+/// Marks a session as completed using the domain method.
 /// </summary>
 public static class EndGameSessionCommandHandler
 {
-    /// <summary>
-    /// Handles the EndGameSessionCommand.
-    /// Wolverine injects dependencies as method parameters.
-    /// </summary>
     public static async Task<GameSession?> Handle(
         EndGameSessionCommand command,
         IGameSessionRepository repository,
@@ -29,18 +24,17 @@ public static class EndGameSessionCommandHandler
             return null;
         }
 
-        // Update session status
-        session.Status = SessionStatus.Completed;
-        session.EndTime = DateTime.UtcNow;
+        if (!session.Complete())
+        {
+            logger.LogWarning("Cannot complete session {SessionId} - invalid status for completion. Current status: {Status}",
+                command.SessionId, session.Status);
+            return null;
+        }
 
-        // Update in repository
         await repository.UpdateAsync(session);
-
-        // Persist changes
         await unitOfWork.SaveChangesAsync(ct);
 
         logger.LogInformation("Ended game session {SessionId}", session.Id);
-
         return session;
     }
 }

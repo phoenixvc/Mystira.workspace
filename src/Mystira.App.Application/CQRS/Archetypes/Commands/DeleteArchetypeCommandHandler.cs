@@ -1,6 +1,8 @@
 using Microsoft.Extensions.Logging;
+using Mystira.App.Application.CQRS.MasterData;
 using Mystira.App.Application.Ports.Data;
 using Mystira.App.Application.Services;
+using Mystira.App.Domain.Models;
 
 namespace Mystira.App.Application.CQRS.Archetypes.Commands;
 
@@ -17,22 +19,8 @@ public static class DeleteArchetypeCommandHandler
         ILogger logger,
         CancellationToken ct)
     {
-        logger.LogInformation("Deleting archetype with id: {Id}", command.Id);
-
-        var archetype = await repository.GetByIdAsync(command.Id);
-        if (archetype == null)
-        {
-            logger.LogWarning("Archetype with id {Id} not found", command.Id);
-            return false;
-        }
-
-        await repository.DeleteAsync(command.Id);
-        await unitOfWork.SaveChangesAsync(ct);
-
-        // Invalidate cache
-        cacheInvalidation.InvalidateCacheByPrefix("MasterData:Archetypes");
-
-        logger.LogInformation("Successfully deleted archetype with id: {Id}", command.Id);
-        return true;
+        return await MasterDataCommandHelper.DeleteAsync(
+            command.Id, repository, unitOfWork, cacheInvalidation, logger,
+            "MasterData:Archetypes", "Archetype", ct);
     }
 }

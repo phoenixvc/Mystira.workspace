@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using Mystira.App.Application.CQRS.Accounts.Commands;
 using Mystira.App.Application.Ports.Data;
+using Mystira.App.Application.UseCases.Accounts;
 using Mystira.App.Domain.Models;
 using Mystira.Shared.Data.Repositories;
 
@@ -13,12 +14,19 @@ public class CreateAccountCommandHandlerTests
     private readonly Mock<IAccountRepository> _repository;
     private readonly Mock<IUnitOfWork> _unitOfWork;
     private readonly Mock<ILogger> _logger;
+    private readonly Mock<ILogger<CreateAccountUseCase>> _useCaseLogger;
+    private readonly CreateAccountUseCase _useCase;
 
     public CreateAccountCommandHandlerTests()
     {
         _repository = new Mock<IAccountRepository>();
         _unitOfWork = new Mock<IUnitOfWork>();
         _logger = new Mock<ILogger>();
+        _useCaseLogger = new Mock<ILogger<CreateAccountUseCase>>();
+        _useCase = new CreateAccountUseCase(
+            _repository.Object,
+            _unitOfWork.Object,
+            _useCaseLogger.Object);
     }
 
     [Fact]
@@ -40,14 +48,13 @@ public class CreateAccountCommandHandlerTests
         // Act
         var result = await CreateAccountCommandHandler.Handle(
             command,
-            _repository.Object,
-            _unitOfWork.Object,
+            _useCase,
             _logger.Object,
             CancellationToken.None);
 
         // Assert
         result.Should().NotBeNull();
-        result.ExternalUserId.Should().Be("ext-123");
+        result!.ExternalUserId.Should().Be("ext-123");
         result.Email.Should().Be("test@example.com");
         result.DisplayName.Should().Be("Test User");
         result.Id.Should().NotBeNullOrEmpty();
@@ -76,17 +83,17 @@ public class CreateAccountCommandHandlerTests
         // Act
         var result = await CreateAccountCommandHandler.Handle(
             command,
-            _repository.Object,
-            _unitOfWork.Object,
+            _useCase,
             _logger.Object,
             CancellationToken.None);
 
         // Assert
-        result.DisplayName.Should().Be("johndoe");
+        result.Should().NotBeNull();
+        result!.DisplayName.Should().Be("johndoe");
     }
 
     [Fact]
-    public async Task Handle_WithExistingEmail_ThrowsInvalidOperationException()
+    public async Task Handle_WithExistingEmail_ReturnsNull()
     {
         // Arrange
         var existingAccount = new Account
@@ -109,17 +116,14 @@ public class CreateAccountCommandHandlerTests
             .ReturnsAsync(existingAccount);
 
         // Act
-        var act = () => CreateAccountCommandHandler.Handle(
+        var result = await CreateAccountCommandHandler.Handle(
             command,
-            _repository.Object,
-            _unitOfWork.Object,
+            _useCase,
             _logger.Object,
             CancellationToken.None);
 
         // Assert
-        await act.Should().ThrowAsync<InvalidOperationException>()
-            .WithMessage("*already exists*");
-
+        result.Should().BeNull();
         _repository.Verify(r => r.AddAsync(It.IsAny<Account>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
@@ -143,13 +147,13 @@ public class CreateAccountCommandHandlerTests
         // Act
         var result = await CreateAccountCommandHandler.Handle(
             command,
-            _repository.Object,
-            _unitOfWork.Object,
+            _useCase,
             _logger.Object,
             CancellationToken.None);
 
         // Assert
-        result.UserProfileIds.Should().BeEquivalentTo(profileIds);
+        result.Should().NotBeNull();
+        result!.UserProfileIds.Should().BeEquivalentTo(profileIds);
     }
 
     [Fact]
@@ -178,13 +182,13 @@ public class CreateAccountCommandHandlerTests
         // Act
         var result = await CreateAccountCommandHandler.Handle(
             command,
-            _repository.Object,
-            _unitOfWork.Object,
+            _useCase,
             _logger.Object,
             CancellationToken.None);
 
         // Assert
-        result.Subscription.Should().NotBeNull();
+        result.Should().NotBeNull();
+        result!.Subscription.Should().NotBeNull();
         result.Subscription.Tier.Should().Be("premium");
     }
 
@@ -213,13 +217,13 @@ public class CreateAccountCommandHandlerTests
         // Act
         var result = await CreateAccountCommandHandler.Handle(
             command,
-            _repository.Object,
-            _unitOfWork.Object,
+            _useCase,
             _logger.Object,
             CancellationToken.None);
 
         // Assert
-        result.Settings.Should().NotBeNull();
+        result.Should().NotBeNull();
+        result!.Settings.Should().NotBeNull();
         result.Settings.NotificationsEnabled.Should().BeTrue();
         result.Settings.PreferredLanguage.Should().Be("en");
     }
@@ -243,12 +247,12 @@ public class CreateAccountCommandHandlerTests
         // Act
         var result = await CreateAccountCommandHandler.Handle(
             command,
-            _repository.Object,
-            _unitOfWork.Object,
+            _useCase,
             _logger.Object,
             CancellationToken.None);
 
         // Assert
-        result.LastLoginAt.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(5));
+        result.Should().NotBeNull();
+        result!.LastLoginAt.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(5));
     }
 }

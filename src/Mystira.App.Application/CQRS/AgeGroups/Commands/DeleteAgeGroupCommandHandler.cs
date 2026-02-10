@@ -1,6 +1,8 @@
 using Microsoft.Extensions.Logging;
+using Mystira.App.Application.CQRS.MasterData;
 using Mystira.App.Application.Ports.Data;
 using Mystira.App.Application.Services;
+using Mystira.App.Domain.Models;
 
 namespace Mystira.App.Application.CQRS.AgeGroups.Commands;
 
@@ -17,22 +19,8 @@ public static class DeleteAgeGroupCommandHandler
         ILogger logger,
         CancellationToken ct)
     {
-        logger.LogInformation("Deleting age group with id: {Id}", command.Id);
-
-        var ageGroup = await repository.GetByIdAsync(command.Id);
-        if (ageGroup == null)
-        {
-            logger.LogWarning("Age group with id {Id} not found", command.Id);
-            return false;
-        }
-
-        await repository.DeleteAsync(command.Id);
-        await unitOfWork.SaveChangesAsync(ct);
-
-        // Invalidate cache
-        cacheInvalidation.InvalidateCacheByPrefix("MasterData:AgeGroups");
-
-        logger.LogInformation("Successfully deleted age group with id: {Id}", command.Id);
-        return true;
+        return await MasterDataCommandHelper.DeleteAsync(
+            command.Id, repository, unitOfWork, cacheInvalidation, logger,
+            "MasterData:AgeGroups", "Age group", ct);
     }
 }
