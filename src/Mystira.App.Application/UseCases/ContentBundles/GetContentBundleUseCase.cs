@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 using Mystira.App.Application.Ports.Data;
 using Mystira.App.Domain.Models;
+using System.Threading;
 
 namespace Mystira.App.Application.UseCases.ContentBundles;
 
@@ -20,14 +21,14 @@ public class GetContentBundleUseCase
         _logger = logger;
     }
 
-    public async Task<ContentBundle?> ExecuteAsync(string bundleId)
+    public async Task<ContentBundle?> ExecuteAsync(string bundleId, CancellationToken ct = default)
     {
         if (string.IsNullOrWhiteSpace(bundleId))
         {
             throw new ArgumentException("Bundle ID cannot be null or empty", nameof(bundleId));
         }
 
-        var bundle = await _repository.GetByIdAsync(bundleId);
+        var bundle = await _repository.GetByIdAsync(bundleId, ct);
 
         if (bundle == null)
         {

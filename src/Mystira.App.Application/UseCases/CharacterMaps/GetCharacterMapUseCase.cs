@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 using Mystira.App.Application.Ports.Data;
 using Mystira.App.Domain.Models;
+using System.Threading;
 
 namespace Mystira.App.Application.UseCases.CharacterMaps;
 
@@ -20,14 +21,14 @@ public class GetCharacterMapUseCase
         _logger = logger;
     }
 
-    public async Task<CharacterMap?> ExecuteAsync(string characterMapId)
+    public async Task<CharacterMap?> ExecuteAsync(string characterMapId, CancellationToken ct = default)
     {
         if (string.IsNullOrWhiteSpace(characterMapId))
         {
             throw new ArgumentException("Character map ID cannot be null or empty", nameof(characterMapId));
         }
 
-        var characterMap = await _repository.GetByIdAsync(characterMapId);
+        var characterMap = await _repository.GetByIdAsync(characterMapId, ct);
 
         if (characterMap == null)
         {

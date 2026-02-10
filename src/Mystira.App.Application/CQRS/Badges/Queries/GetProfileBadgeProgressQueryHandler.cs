@@ -21,7 +21,7 @@ public static class GetProfileBadgeProgressQueryHandler
         IUserProfileRepository profileRepository,
         CancellationToken ct)
     {
-        var profile = await profileRepository.GetByIdAsync(query.ProfileId);
+        var profile = await profileRepository.GetByIdAsync(query.ProfileId, ct);
         if (profile == null) return null;
 
         var ageGroupId = profile.AgeGroup?.Value ?? "6-9";
@@ -30,7 +30,7 @@ public static class GetProfileBadgeProgressQueryHandler
         // ORDER BY in the query which requires a composite index. To avoid runtime
         // failures when composite indexes are not yet deployed, always perform
         // ordering in-memory here.
-        var allBadges = await badgeRepository.GetByAgeGroupAsync(ageGroupId);
+        var allBadges = await badgeRepository.GetByAgeGroupAsync(ageGroupId, ct);
 
         var badgesByAxis = allBadges
             .GroupBy(b => b.CompassAxisId)
@@ -39,7 +39,7 @@ public static class GetProfileBadgeProgressQueryHandler
                 g => g.OrderBy(b => b.TierOrder).ToList()
             );
 
-        var userBadges = (await userBadgeRepository.GetByUserProfileIdAsync(query.ProfileId)).ToList();
+        var userBadges = (await userBadgeRepository.GetByUserProfileIdAsync(query.ProfileId, ct)).ToList();
 
         var axes = await axisRepository.GetAllAsync();
         var axisDictionary = axes.ToDictionary(a => a.Id, a => a);

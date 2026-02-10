@@ -5,6 +5,7 @@ using Mystira.App.Application.Mappers;
 using Mystira.Contracts.App.Requests.Scenarios;
 using Mystira.App.Domain.Models;
 using NJsonSchema;
+using System.Threading;
 
 namespace Mystira.App.Application.UseCases.Scenarios;
 
@@ -39,7 +40,7 @@ public class CreateScenarioUseCase
         _validateScenarioUseCase = validateScenarioUseCase;
     }
 
-    public async Task<Scenario> ExecuteAsync(CreateScenarioRequest request)
+    public async Task<Scenario> ExecuteAsync(CreateScenarioRequest request, CancellationToken ct = default)
     {
         ValidateAgainstSchema(request);
 
@@ -60,13 +61,13 @@ public class CreateScenarioUseCase
             CreatedAt = DateTime.UtcNow
         };
 
-        await _validateScenarioUseCase.ExecuteAsync(scenario);
+        await _validateScenarioUseCase.ExecuteAsync(scenario, ct);
 
-        await _repository.AddAsync(scenario);
+        await _repository.AddAsync(scenario, ct);
 
         try
         {
-            await _unitOfWork.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync(ct);
         }
         catch (Exception e)
         {

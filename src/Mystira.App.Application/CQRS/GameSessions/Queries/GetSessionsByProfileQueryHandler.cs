@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using Mystira.App.Application.Helpers;
 using Mystira.App.Application.Mappers;
 using Mystira.App.Application.Ports.Data;
 using Mystira.Contracts.App.Responses.GameSessions;
@@ -19,11 +20,11 @@ public static class GetSessionsByProfileQueryHandler
     {
         Guard.AgainstNullOrEmpty(request.ProfileId, nameof(request.ProfileId));
 
-        var sessions = await repository.GetByProfileIdAsync(request.ProfileId);
+        var sessions = await repository.GetByProfileIdAsync(request.ProfileId, ct);
         foreach (var s in sessions) { s.RecalculateCompassProgressFromHistory(); }
         var response = GameSessionMapper.ToResponseList(sessions);
 
-        logger.LogDebug("Retrieved {Count} sessions for profile {ProfileId}", response.Count, PiiMask.HashId(request.ProfileId));
+        logger.LogDebug("Retrieved {Count} sessions for profile {ProfileId}", response.Count, LogAnonymizer.HashId(request.ProfileId));
         return response;
     }
 }

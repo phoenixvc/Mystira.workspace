@@ -1,5 +1,5 @@
 @inherits LayoutComponentBase
-@implements IDisposable
+@implements IAsyncDisposable
 
 @inject IJSRuntime JSRuntime
 
@@ -142,12 +142,22 @@
     <DiscordWidget />
 
     <!-- Footer -->
-    <footer class="py-3 mt-4">
-        <div class="container-fluid text-center">
-            <small class="text-muted">
-                <span id="connection-status" class="text-success">Online</span>
-                <span class="version-indicator" id="app-version" title="Click for details"></span>
-            </small>
+    <footer class="py-2 mt-4">
+        <div class="container-fluid">
+            <div class="d-flex justify-content-between align-items-center">
+                <small>
+                    @if (!string.IsNullOrEmpty(_footerEnvironment) && _footerEnvironment != "Production")
+                    {
+                        <span class="environment-badge @_footerEnvClass me-2">
+                            <i class="@_footerEnvIcon me-1"></i>@_footerEnvironment
+                        </span>
+                    }
+                </small>
+                <small class="text-muted">
+                    <span id="connection-status" class="text-success">Online</span>
+                    <span class="version-indicator" id="app-version" title="Click for details"></span>
+                </small>
+            </div>
         </div>
     </footer>
 
@@ -169,6 +179,8 @@
     [Inject] private IAuthService AuthService { get; set; } = default!;
     [Inject] private NavigationManager Navigation { get; set; } = default!;
     [Inject] private ISettingsService SettingsService { get; set; } = default!;
+    [Inject] private IApiConfigurationService ApiConfigService { get; set; } = default!;
+    [Inject] private ILogger<MainLayout> Logger { get; set; } = default!;
 
     private GameSession? CurrentGameSession { get; set; }
     private Account? CurrentAccount { get; set; }
@@ -178,6 +190,11 @@
     private ElementReference profileMenuElement;
     private IJSObjectReference? outsideClickHandler;
 
+    // Footer environment display
+    private string _footerEnvironment = string.Empty;
+    private string _footerEnvClass = string.Empty;
+    private string _footerEnvIcon = string.Empty;
+
     protected override async Task OnInitializedAsync()
     {
         GameSessionService.GameSessionChanged += OnGameSessionChanged;
@@ -186,6 +203,62 @@
         AuthService.AuthenticationStateChanged += OnAuthenticationStateChanged;
 
         await LoadAuthenticationStateAsync();
+        await LoadEnvironmentAsync();
+    }
+
+    private async Task LoadEnvironmentAsync()
+    {
+        try
+        {
+            _footerEnvironment = await ApiConfigService.GetCurrentEnvironmentAsync();
+
+            if (string.IsNullOrWhiteSpace(_footerEnvironment))
+            {
+                _footerEnvironment = "Production";
+                _footerEnvClass = string.Empty;
+                _footerEnvIcon = string.Empty;
+                return;
+            }
+
+            switch (_footerEnvironment.ToLowerInvariant())
+            {
+                case "development":
+                case "dev":
+                    _footerEnvClass = "env-dev";
+                    _footerEnvIcon = "fas fa-code";
+                    _footerEnvironment = "Development";
+                    break;
+                case "staging":
+                case "stage":
+                    _footerEnvClass = "env-staging";
+                    _footerEnvIcon = "fas fa-flask";
+                    _footerEnvironment = "Staging";
+                    break;
+                case "local":
+                case "localhost":
+                    _footerEnvClass = "env-local";
+                    _footerEnvIcon = "fas fa-laptop-code";
+                    _footerEnvironment = "Local";
+                    break;
+                default:
+                    _footerEnvironment = "Production";
+                    _footerEnvClass = string.Empty;
+                    _footerEnvIcon = string.Empty;
+                    break;
+            }
+        }
+        catch (Exception ex)
+        {
+            if (ex is OperationCanceledException)
+            {
+                throw;
+            }
+
+            Logger.LogWarning(ex, "Failed to load environment configuration. Defaulting to Production.");
+            _footerEnvironment = "Production";
+            _footerEnvClass = string.Empty;
+            _footerEnvIcon = string.Empty;
+        }
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -206,8 +279,14 @@
             isAuthenticated = await AuthService.IsAuthenticatedAsync();
             CurrentAccount = isAuthenticated ? await AuthService.GetCurrentAccountAsync() : null;
         }
-        catch (Exception) // lgtm [cs/catch-of-all-exceptions] Intentional: fail-safe for UI authentication state
+        catch (Exception ex)
         {
+            if (ex is OperationCanceledException)
+            {
+                throw;
+            }
+
+            Logger.LogWarning(ex, "Failed to load authentication state. Defaulting to unauthenticated.");
             isAuthenticated = false;
             CurrentAccount = null;
         }
@@ -274,9 +353,9 @@
         {
             await AuthService.LogoutAsync();
         }
-        catch (Exception) // lgtm [cs/catch-of-all-exceptions] Intentional: fail-safe for logout
+        catch (Exception ex)
         {
-            // Ignore errors during logout for now
+            Logger.LogWarning(ex, "Error during sign out. Continuing with local cleanup.");
         }
         finally
         {
@@ -286,7 +365,7 @@
         }
     }
 
-    public async void Dispose()
+    public async ValueTask DisposeAsync()
     {
         GameSessionService.GameSessionChanged -= OnGameSessionChanged;
         AuthService.AuthenticationStateChanged -= OnAuthenticationStateChanged;

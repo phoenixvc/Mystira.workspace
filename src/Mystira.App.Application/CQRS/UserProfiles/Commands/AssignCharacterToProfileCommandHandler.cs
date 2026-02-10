@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using Mystira.App.Application.Helpers;
 using Mystira.App.Application.Ports.Data;
 
 namespace Mystira.App.Application.CQRS.UserProfiles.Commands;
@@ -25,7 +26,7 @@ public static class AssignCharacterToProfileCommandHandler
         var profile = await profileRepository.GetByIdAsync(command.ProfileId);
         if (profile == null)
         {
-            logger.LogWarning("Cannot assign character: Profile not found {ProfileId}", command.ProfileId);
+            logger.LogWarning("Cannot assign character: Profile not found {ProfileId}", LogAnonymizer.HashId(command.ProfileId));
             return false;
         }
 
@@ -45,7 +46,7 @@ public static class AssignCharacterToProfileCommandHandler
         await unitOfWork.SaveChangesAsync(ct);
 
         logger.LogInformation("Assigned character {CharacterId} to profile {ProfileId} (NPC: {IsNpc})",
-            command.CharacterId, command.ProfileId, command.IsNpc);
+            command.CharacterId, LogAnonymizer.HashId(command.ProfileId), command.IsNpc);
 
         return true;
     }

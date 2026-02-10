@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using Mystira.App.Application.Helpers;
 using Mystira.App.Application.Ports.Data;
 using Mystira.App.Domain.Models;
 
@@ -7,6 +8,7 @@ namespace Mystira.App.Application.CQRS.UserBadges.Commands;
 /// <summary>
 /// Wolverine handler for AwardBadgeCommand.
 /// Awards a badge to a user profile - this is a write operation that modifies state.
+/// Checks for duplicate badges and updates the user profile's EarnedBadges list.
 /// </summary>
 public static class AwardBadgeCommandHandler
 {
@@ -18,6 +20,7 @@ public static class AwardBadgeCommandHandler
         AwardBadgeCommand command,
         IUserBadgeRepository repository,
         IBadgeConfigurationRepository badgeConfigRepository,
+        IUserProfileRepository profileRepository,
         IUnitOfWork unitOfWork,
         ILogger logger,
         CancellationToken ct)
@@ -34,7 +37,17 @@ public static class AwardBadgeCommandHandler
             throw new ArgumentException("BadgeConfigurationId is required");
         }
 
-        var badgeConfig = await badgeConfigRepository.GetByIdAsync(request.BadgeConfigurationId);
+        // Check for duplicate badge - return existing if already earned
+        var existingBadge = await repository.GetByUserProfileIdAndBadgeConfigIdAsync(
+            request.UserProfileId, request.BadgeConfigurationId, ct);
+        if (existingBadge != null)
+        {
+            logger.LogWarning("User {UserProfileId} already has badge {BadgeConfigurationId}",
+                LogAnonymizer.HashId(request.UserProfileId), request.BadgeConfigurationId);
+            return existingBadge;
+        }
+
+        var badgeConfig = await badgeConfigRepository.GetByIdAsync(request.BadgeConfigurationId, ct);
         if (badgeConfig == null)
         {
             throw new ArgumentException($"Badge not found: {request.BadgeConfigurationId}");
@@ -57,11 +70,25 @@ public static class AwardBadgeCommandHandler
             EarnedAt = DateTime.UtcNow
         };
 
-        await repository.AddAsync(badge);
+        await repository.AddAsync(badge, ct);
+
+        // Update user profile's EarnedBadges list
+        var profile = await profileRepository.GetByIdAsync(request.UserProfileId, ct);
+        if (profile != null)
+        {
+            profile.AddEarnedBadge(badge);
+            await profileRepository.UpdateAsync(profile, ct);
+        }
+        else
+        {
+            logger.LogWarning("User profile {ProfileId} not found; badge {BadgeId} created but profile not updated",
+                LogAnonymizer.HashId(request.UserProfileId), badge.Id);
+        }
+
         await unitOfWork.SaveChangesAsync(ct);
 
         logger.LogInformation("Awarded badge {BadgeId} to user profile {UserProfileId}",
-            badge.Id, request.UserProfileId);
+            badge.Id, LogAnonymizer.HashId(request.UserProfileId));
 
         return badge;
     }

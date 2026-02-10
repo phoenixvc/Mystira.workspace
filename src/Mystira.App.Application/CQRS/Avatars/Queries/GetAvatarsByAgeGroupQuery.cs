@@ -10,5 +10,5 @@ public record GetAvatarsByAgeGroupQuery(string AgeGroup)
     : IQuery<AvatarConfigurationResponse?>, ICacheableQuery
 {
     public string CacheKey => $"Avatars:AgeGroup:{AgeGroup}";
-    public int CacheDurationSeconds => 600; // 10 minutes
+    public int CacheDurationSeconds => CacheDefaults.MediumSeconds;
 }

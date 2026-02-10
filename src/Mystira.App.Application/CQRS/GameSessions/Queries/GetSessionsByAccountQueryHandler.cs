@@ -19,7 +19,7 @@ public static class GetSessionsByAccountQueryHandler
     {
         Guard.AgainstNullOrEmpty(request.AccountId, nameof(request.AccountId));
 
-        var sessions = await repository.GetByAccountIdAsync(request.AccountId);
+        var sessions = await repository.GetByAccountIdAsync(request.AccountId, ct);
         foreach (var s in sessions) { s.RecalculateCompassProgressFromHistory(); }
         var response = GameSessionMapper.ToResponseList(sessions);
 

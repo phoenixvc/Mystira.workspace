@@ -21,7 +21,7 @@ public static class GetAchievementsQueryHandler
         ILogger logger,
         CancellationToken ct)
     {
-        var session = await repository.GetByIdAsync(request.SessionId);
+        var session = await repository.GetByIdAsync(request.SessionId, ct);
         if (session == null)
         {
             logger.LogWarning("Session not found: {SessionId}", request.SessionId);

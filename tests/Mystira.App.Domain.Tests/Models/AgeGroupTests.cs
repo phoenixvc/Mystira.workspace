@@ -61,6 +61,18 @@ public class AgeGroupTests
         ageGroup.MaximumAge.Should().Be(9);
     }
 
+    [Fact]
+    public void Default_ReturnsSixToNine()
+    {
+        // Act
+        var ageGroup = AgeGroup.Default;
+
+        // Assert
+        ageGroup.MinimumAge.Should().Be(6);
+        ageGroup.MaximumAge.Should().Be(9);
+        ageGroup.Value.Should().Be("6-9");
+    }
+
     #endregion
 
     #region IsAppropriateFor Tests

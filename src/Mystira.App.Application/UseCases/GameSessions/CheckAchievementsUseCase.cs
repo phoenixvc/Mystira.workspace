@@ -2,6 +2,7 @@ using Microsoft.Extensions.Logging;
 using Mystira.App.Application.Ports.Data;
 using Mystira.App.Domain.Models;
 using Mystira.Shared.Extensions;
+using System.Threading;
 
 namespace Mystira.App.Application.UseCases.GameSessions;
 
@@ -27,14 +28,14 @@ public class CheckAchievementsUseCase
         _logger = logger;
     }
 
-    public async Task<List<SessionAchievement>> ExecuteAsync(string sessionId)
+    public async Task<List<SessionAchievement>> ExecuteAsync(string sessionId, CancellationToken ct = default)
     {
         if (string.IsNullOrWhiteSpace(sessionId))
         {
             throw new ArgumentException("Session ID cannot be null or empty", nameof(sessionId));
         }
 
-        var session = await _repository.GetByIdAsync(sessionId);
+        var session = await _repository.GetByIdAsync(sessionId, ct);
         if (session == null)
         {
             _logger.LogWarning("Game session not found: {SessionId}", sessionId);
@@ -44,7 +45,7 @@ public class CheckAchievementsUseCase
         var achievements = new List<SessionAchievement>();
 
         // Fetch all badge configurations to check thresholds dynamically
-        var badgeConfigs = await _badgeRepository.GetAllAsync();
+        var badgeConfigs = await _badgeRepository.GetAllAsync(ct);
 
         // Check compass threshold achievements
         foreach (var compassTracking in session.CompassValues.Values)
@@ -119,8 +120,8 @@ public class CheckAchievementsUseCase
                 session.Achievements.Add(achievement);
             }
 
-            await _repository.UpdateAsync(session);
-            await _unitOfWork.SaveChangesAsync();
+            await _repository.UpdateAsync(session, ct);
+            await _unitOfWork.SaveChangesAsync(ct);
 
             _logger.LogInformation("Awarded {Count} achievements to session {SessionId}", achievements.Count, sessionId);
         }

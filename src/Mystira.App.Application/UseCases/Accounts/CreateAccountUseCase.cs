@@ -32,7 +32,7 @@ public class CreateAccountUseCase
         Guard.AgainstNullOrEmpty(command.ExternalUserId, nameof(command.ExternalUserId));
 
         // Check if account with email already exists
-        var existingAccount = await _repository.GetByEmailAsync(command.Email);
+        var existingAccount = await _repository.GetByEmailAsync(command.Email, ct);
         if (existingAccount != null)
         {
             _logger.LogWarning("Account already exists for email {Email}", PiiMask.MaskEmail(command.Email));
@@ -53,11 +53,10 @@ public class CreateAccountUseCase
             LastLoginAt = DateTime.UtcNow
         };
 
-        await _repository.AddAsync(account);
+        await _repository.AddAsync(account, ct);
         await _unitOfWork.SaveChangesAsync(ct);
 
-        _logger.LogInformation("Created new account: {AccountId} for {Email}", account.Id, PiiMask.MaskEmail(account.Email));
+        _logger.LogInformation("Created new account: {AccountId} for {Email}", PiiMask.HashId(account.Id), PiiMask.MaskEmail(account.Email));
         return UseCaseResult<Account>.Success(account);
     }
 }
-

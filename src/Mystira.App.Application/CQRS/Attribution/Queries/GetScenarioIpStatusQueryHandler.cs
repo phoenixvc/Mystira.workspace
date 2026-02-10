@@ -24,7 +24,7 @@ public static class GetScenarioIpStatusQueryHandler
             throw new ArgumentException("Scenario ID cannot be null or empty", nameof(request.ScenarioId));
         }
 
-        var scenario = await repository.GetByIdAsync(request.ScenarioId);
+        var scenario = await repository.GetByIdAsync(request.ScenarioId, ct);
 
         if (scenario == null)
         {

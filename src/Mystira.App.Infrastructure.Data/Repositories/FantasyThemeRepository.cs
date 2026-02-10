@@ -13,43 +13,43 @@ public class FantasyThemeRepository : IFantasyThemeRepository
         _context = context;
     }
 
-    public async Task<List<FantasyThemeDefinition>> GetAllAsync()
+    public async Task<List<FantasyThemeDefinition>> GetAllAsync(CancellationToken ct = default)
     {
         return await _context.FantasyThemeDefinitions
             .Where(x => !x.IsDeleted)
             .OrderBy(x => x.Name)
-            .ToListAsync();
+            .ToListAsync(ct);
     }
 
-    public async Task<FantasyThemeDefinition?> GetByIdAsync(string id)
+    public async Task<FantasyThemeDefinition?> GetByIdAsync(string id, CancellationToken ct = default)
     {
-        return await _context.FantasyThemeDefinitions.FirstOrDefaultAsync(x => x.Id == id && !x.IsDeleted);
+        return await _context.FantasyThemeDefinitions.FirstOrDefaultAsync(x => x.Id == id && !x.IsDeleted, ct);
     }
 
-    public async Task<FantasyThemeDefinition?> GetByNameAsync(string name)
+    public async Task<FantasyThemeDefinition?> GetByNameAsync(string name, CancellationToken ct = default)
     {
-        return await _context.FantasyThemeDefinitions.FirstOrDefaultAsync(x => x.Name.Equals(name, StringComparison.OrdinalIgnoreCase) && !x.IsDeleted);
+        return await _context.FantasyThemeDefinitions.FirstOrDefaultAsync(x => x.Name.ToLower() == name.ToLower() && !x.IsDeleted, ct);
     }
 
-    public async Task<bool> ExistsByNameAsync(string name)
+    public async Task<bool> ExistsByNameAsync(string name, CancellationToken ct = default)
     {
-        return await _context.FantasyThemeDefinitions.AnyAsync(x => x.Name.Equals(name, StringComparison.OrdinalIgnoreCase) && !x.IsDeleted);
+        return await _context.FantasyThemeDefinitions.AnyAsync(x => x.Name.ToLower() == name.ToLower() && !x.IsDeleted, ct);
     }
 
-    public async Task AddAsync(FantasyThemeDefinition fantasyTheme)
+    public async Task AddAsync(FantasyThemeDefinition fantasyTheme, CancellationToken ct = default)
     {
-        await _context.FantasyThemeDefinitions.AddAsync(fantasyTheme);
+        await _context.FantasyThemeDefinitions.AddAsync(fantasyTheme, ct);
     }
 
-    public Task UpdateAsync(FantasyThemeDefinition fantasyTheme)
+    public Task UpdateAsync(FantasyThemeDefinition fantasyTheme, CancellationToken ct = default)
     {
         _context.FantasyThemeDefinitions.Update(fantasyTheme);
         return Task.CompletedTask;
     }
 
-    public async Task DeleteAsync(string id)
+    public async Task DeleteAsync(string id, CancellationToken ct = default)
     {
-        var fantasyTheme = await _context.FantasyThemeDefinitions.FirstOrDefaultAsync(x => x.Id == id);
+        var fantasyTheme = await _context.FantasyThemeDefinitions.FirstOrDefaultAsync(x => x.Id == id, ct);
         if (fantasyTheme != null)
         {
             // Soft delete instead of hard delete

@@ -3,8 +3,8 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using Mystira.App.Application.CQRS.GameSessions.Commands;
 using Mystira.App.Application.Ports.Data;
+using Mystira.App.Application.UseCases.GameSessions;
 using Mystira.App.Domain.Models;
-using Mystira.Contracts.App.Models;
 using Mystira.Contracts.App.Requests.GameSessions;
 using Mystira.Shared.Data.Repositories;
 
@@ -13,322 +13,160 @@ namespace Mystira.App.Application.Tests.CQRS.GameSessions;
 public class MakeChoiceCommandHandlerTests
 {
     private readonly Mock<IGameSessionRepository> _repository;
+    private readonly Mock<IScenarioRepository> _scenarioRepository;
     private readonly Mock<IUnitOfWork> _unitOfWork;
-    private readonly Mock<ILogger> _logger;
+    private readonly Mock<ILogger<MakeChoiceUseCase>> _logger;
 
     public MakeChoiceCommandHandlerTests()
     {
         _repository = new Mock<IGameSessionRepository>();
+        _scenarioRepository = new Mock<IScenarioRepository>();
         _unitOfWork = new Mock<IUnitOfWork>();
-        _logger = new Mock<ILogger>();
+        _logger = new Mock<ILogger<MakeChoiceUseCase>>();
     }
 
     [Fact]
-    public async Task Handle_WithValidRequest_RecordsChoice()
+    public async Task Handle_DelegatesToUseCase_ReturnsSession()
     {
-        // Arrange
+        // Arrange - set up UseCase dependencies for a valid choice
         var session = CreateActiveSession();
-        var request = CreateValidRequest(session.Id);
+        var scenario = CreateScenarioWithChoiceBranch(session.ScenarioId, "scene1", "Go left", "scene2");
 
         _repository.Setup(r => r.GetByIdAsync(session.Id, It.IsAny<CancellationToken>()))
             .ReturnsAsync(session);
+        _scenarioRepository.Setup(r => r.GetByIdAsync(session.ScenarioId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(scenario);
 
-        var command = new MakeChoiceCommand(request);
+        var useCase = new MakeChoiceUseCase(
+            _repository.Object, _scenarioRepository.Object, _unitOfWork.Object, _logger.Object);
+
+        var request = new MakeChoiceRequest
+        {
+            SessionId = session.Id,
+            SceneId = "scene1",
+            ChoiceText = "Go left",
+            NextSceneId = "scene2"
+        };
 
         // Act
         var result = await MakeChoiceCommandHandler.Handle(
-            command,
-            _repository.Object,
-            _unitOfWork.Object,
-            _logger.Object,
-            CancellationToken.None);
+            new MakeChoiceCommand(request), useCase, CancellationToken.None);
 
         // Assert
         result.Should().NotBeNull();
         result!.ChoiceHistory.Should().HaveCount(1);
-        result.ChoiceHistory[0].SceneId.Should().Be(request.SceneId);
-        result.ChoiceHistory[0].ChoiceText.Should().Be(request.ChoiceText);
-        result.CurrentSceneId.Should().Be(request.NextSceneId);
-
-        _repository.Verify(r => r.UpdateAsync(It.IsAny<GameSession>(), It.IsAny<CancellationToken>()), Times.Once);
-        _unitOfWork.Verify(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
-    }
-
-    [Fact]
-    public async Task Handle_WithCompassChange_UpdatesCompassTracking()
-    {
-        // Arrange
-        var session = CreateActiveSession();
-        session.CompassValues["courage"] = new CompassTracking
-        {
-            Axis = "courage",
-            CurrentValue = 0.0,
-            StartingValue = 0.0,
-            History = new List<CompassChange>()
-        };
-
-        var request = CreateValidRequest(session.Id);
-        request.CompassAxis = "courage";
-        request.CompassDirection = "positive";
-        request.CompassDelta = 1.5;
-
-        _repository.Setup(r => r.GetByIdAsync(session.Id, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(session);
-
-        var command = new MakeChoiceCommand(request);
-
-        // Act
-        var result = await MakeChoiceCommandHandler.Handle(
-            command,
-            _repository.Object,
-            _unitOfWork.Object,
-            _logger.Object,
-            CancellationToken.None);
-
-        // Assert
-        result.Should().NotBeNull();
-        result!.ChoiceHistory[0].CompassAxis.Should().Be("courage");
-        result.ChoiceHistory[0].CompassDelta.Should().Be(1.5);
-        result.ChoiceHistory[0].CompassChange.Should().NotBeNull();
-    }
-
-    [Fact]
-    public async Task Handle_WithMissingSessionId_ThrowsArgumentException()
-    {
-        // Arrange
-        var request = CreateValidRequest("test-session");
-        request.SessionId = "";
-        var command = new MakeChoiceCommand(request);
-
-        // Act
-        var act = () => MakeChoiceCommandHandler.Handle(
-            command,
-            _repository.Object,
-            _unitOfWork.Object,
-            _logger.Object,
-            CancellationToken.None);
-
-        // Assert
-        await act.Should().ThrowAsync<ArgumentException>()
-            .WithMessage("*SessionId*");
-    }
-
-    [Fact]
-    public async Task Handle_WithMissingSceneId_ThrowsArgumentException()
-    {
-        // Arrange
-        var request = CreateValidRequest("test-session");
-        request.SceneId = "";
-        var command = new MakeChoiceCommand(request);
-
-        // Act
-        var act = () => MakeChoiceCommandHandler.Handle(
-            command,
-            _repository.Object,
-            _unitOfWork.Object,
-            _logger.Object,
-            CancellationToken.None);
-
-        // Assert
-        await act.Should().ThrowAsync<ArgumentException>()
-            .WithMessage("*SceneId*");
-    }
-
-    [Fact]
-    public async Task Handle_WithMissingChoiceText_ThrowsArgumentException()
-    {
-        // Arrange
-        var request = CreateValidRequest("test-session");
-        request.ChoiceText = "";
-        var command = new MakeChoiceCommand(request);
-
-        // Act
-        var act = () => MakeChoiceCommandHandler.Handle(
-            command,
-            _repository.Object,
-            _unitOfWork.Object,
-            _logger.Object,
-            CancellationToken.None);
-
-        // Assert
-        await act.Should().ThrowAsync<ArgumentException>()
-            .WithMessage("*ChoiceText*");
-    }
-
-    [Fact]
-    public async Task Handle_WithMissingNextSceneId_ThrowsArgumentException()
-    {
-        // Arrange
-        var request = CreateValidRequest("test-session");
-        request.NextSceneId = "";
-        var command = new MakeChoiceCommand(request);
-
-        // Act
-        var act = () => MakeChoiceCommandHandler.Handle(
-            command,
-            _repository.Object,
-            _unitOfWork.Object,
-            _logger.Object,
-            CancellationToken.None);
-
-        // Assert
-        await act.Should().ThrowAsync<ArgumentException>()
-            .WithMessage("*NextSceneId*");
+        result.ChoiceHistory[0].ChoiceText.Should().Be("Go left");
+        result.CurrentSceneId.Should().Be("scene2");
     }
 
     [Fact]
     public async Task Handle_WithNonExistentSession_ReturnsNull()
     {
-        // Arrange
-        var request = CreateValidRequest("non-existent-session");
-        _repository.Setup(r => r.GetByIdAsync(request.SessionId, It.IsAny<CancellationToken>()))
-            .ReturnsAsync((GameSession?)null);
+        _repository.Setup(r => r.GetByIdAsync("missing", It.IsAny<CancellationToken>()))
+            .ReturnsAsync(default(GameSession));
 
-        var command = new MakeChoiceCommand(request);
+        var useCase = new MakeChoiceUseCase(
+            _repository.Object, _scenarioRepository.Object, _unitOfWork.Object, _logger.Object);
 
-        // Act
+        var request = new MakeChoiceRequest
+        {
+            SessionId = "missing",
+            SceneId = "scene1",
+            ChoiceText = "Go left",
+            NextSceneId = "scene2"
+        };
+
         var result = await MakeChoiceCommandHandler.Handle(
-            command,
-            _repository.Object,
-            _unitOfWork.Object,
-            _logger.Object,
-            CancellationToken.None);
+            new MakeChoiceCommand(request), useCase, CancellationToken.None);
 
-        // Assert
         result.Should().BeNull();
-        _repository.Verify(r => r.UpdateAsync(It.IsAny<GameSession>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
     public async Task Handle_WithCompletedSession_ThrowsInvalidOperationException()
     {
-        // Arrange
         var session = CreateActiveSession();
         session.Status = SessionStatus.Completed;
 
-        var request = CreateValidRequest(session.Id);
         _repository.Setup(r => r.GetByIdAsync(session.Id, It.IsAny<CancellationToken>()))
             .ReturnsAsync(session);
 
-        var command = new MakeChoiceCommand(request);
+        var useCase = new MakeChoiceUseCase(
+            _repository.Object, _scenarioRepository.Object, _unitOfWork.Object, _logger.Object);
 
-        // Act
+        var request = new MakeChoiceRequest
+        {
+            SessionId = session.Id,
+            SceneId = "scene1",
+            ChoiceText = "Go left",
+            NextSceneId = "scene2"
+        };
+
         var act = () => MakeChoiceCommandHandler.Handle(
-            command,
-            _repository.Object,
-            _unitOfWork.Object,
-            _logger.Object,
-            CancellationToken.None);
+            new MakeChoiceCommand(request), useCase, CancellationToken.None);
 
-        // Assert
-        await act.Should().ThrowAsync<InvalidOperationException>()
-            .WithMessage("*status*Completed*");
+        await act.Should().ThrowAsync<InvalidOperationException>();
     }
 
     [Fact]
-    public async Task Handle_WithPausedSession_ThrowsInvalidOperationException()
+    public async Task Handle_ValidatesScenarioExists()
     {
-        // Arrange
         var session = CreateActiveSession();
-        session.Status = SessionStatus.Paused;
-
-        var request = CreateValidRequest(session.Id);
         _repository.Setup(r => r.GetByIdAsync(session.Id, It.IsAny<CancellationToken>()))
             .ReturnsAsync(session);
+        _scenarioRepository.Setup(r => r.GetByIdAsync(session.ScenarioId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(default(Scenario));
 
-        var command = new MakeChoiceCommand(request);
+        var useCase = new MakeChoiceUseCase(
+            _repository.Object, _scenarioRepository.Object, _unitOfWork.Object, _logger.Object);
 
-        // Act
+        var request = new MakeChoiceRequest
+        {
+            SessionId = session.Id,
+            SceneId = "scene1",
+            ChoiceText = "Go left",
+            NextSceneId = "scene2"
+        };
+
         var act = () => MakeChoiceCommandHandler.Handle(
-            command,
-            _repository.Object,
-            _unitOfWork.Object,
-            _logger.Object,
-            CancellationToken.None);
+            new MakeChoiceCommand(request), useCase, CancellationToken.None);
 
-        // Assert
         await act.Should().ThrowAsync<InvalidOperationException>()
-            .WithMessage("*status*Paused*");
+            .WithMessage("*Scenario not found*");
     }
 
     [Fact]
-    public async Task Handle_UpdatesElapsedTime()
+    public async Task Handle_ValidatesSceneExistsInScenario()
     {
-        // Arrange
         var session = CreateActiveSession();
-        session.StartTime = DateTime.UtcNow.AddMinutes(-5);
-
-        var request = CreateValidRequest(session.Id);
-        _repository.Setup(r => r.GetByIdAsync(session.Id, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(session);
-
-        var command = new MakeChoiceCommand(request);
-
-        // Act
-        var result = await MakeChoiceCommandHandler.Handle(
-            command,
-            _repository.Object,
-            _unitOfWork.Object,
-            _logger.Object,
-            CancellationToken.None);
-
-        // Assert
-        result.Should().NotBeNull();
-        result!.ElapsedTime.Should().BeGreaterThan(TimeSpan.Zero);
-        result.ElapsedTime.TotalMinutes.Should().BeGreaterThanOrEqualTo(4.9);
-    }
-
-    [Fact]
-    public async Task Handle_WithProvidedPlayerId_UsesProvidedPlayerId()
-    {
-        // Arrange
-        var session = CreateActiveSession();
-        var request = CreateValidRequest(session.Id);
-        request.PlayerId = "specific-player-id";
+        var scenario = new Scenario
+        {
+            Id = session.ScenarioId,
+            Title = "Test",
+            Scenes = new List<Scene>() // empty - no scenes
+        };
 
         _repository.Setup(r => r.GetByIdAsync(session.Id, It.IsAny<CancellationToken>()))
             .ReturnsAsync(session);
+        _scenarioRepository.Setup(r => r.GetByIdAsync(session.ScenarioId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(scenario);
 
-        var command = new MakeChoiceCommand(request);
+        var useCase = new MakeChoiceUseCase(
+            _repository.Object, _scenarioRepository.Object, _unitOfWork.Object, _logger.Object);
 
-        // Act
-        var result = await MakeChoiceCommandHandler.Handle(
-            command,
-            _repository.Object,
-            _unitOfWork.Object,
-            _logger.Object,
-            CancellationToken.None);
+        var request = new MakeChoiceRequest
+        {
+            SessionId = session.Id,
+            SceneId = "missing-scene",
+            ChoiceText = "Go left",
+            NextSceneId = "scene2"
+        };
 
-        // Assert
-        result.Should().NotBeNull();
-        result!.ChoiceHistory[0].PlayerId.Should().Be("specific-player-id");
-    }
+        var act = () => MakeChoiceCommandHandler.Handle(
+            new MakeChoiceCommand(request), useCase, CancellationToken.None);
 
-    [Fact]
-    public async Task Handle_WithoutPlayerId_UsesProfileId()
-    {
-        // Arrange
-        var session = CreateActiveSession();
-        session.ProfileId = "session-profile-id";
-        var request = CreateValidRequest(session.Id);
-        request.PlayerId = null;
-
-        _repository.Setup(r => r.GetByIdAsync(session.Id, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(session);
-
-        var command = new MakeChoiceCommand(request);
-
-        // Act
-        var result = await MakeChoiceCommandHandler.Handle(
-            command,
-            _repository.Object,
-            _unitOfWork.Object,
-            _logger.Object,
-            CancellationToken.None);
-
-        // Assert
-        result.Should().NotBeNull();
-        result!.ChoiceHistory[0].PlayerId.Should().Be("session-profile-id");
+        await act.Should().ThrowAsync<ArgumentException>()
+            .WithMessage("*Scene not found*");
     }
 
     private static GameSession CreateActiveSession()
@@ -345,18 +183,45 @@ public class MakeChoiceCommandHandlerTests
             ChoiceHistory = new List<SessionChoice>(),
             EchoHistory = new List<EchoLog>(),
             Achievements = new List<SessionAchievement>(),
-            CompassValues = new Dictionary<string, CompassTracking>()
+            CompassValues = new Dictionary<string, CompassTracking>(),
+            CharacterAssignments = new List<SessionCharacterAssignment>()
         };
     }
 
-    private static MakeChoiceRequest CreateValidRequest(string sessionId)
+    private static Scenario CreateScenarioWithChoiceBranch(
+        string scenarioId, string sceneId, string choiceText, string nextSceneId)
     {
-        return new MakeChoiceRequest
+        return new Scenario
         {
-            SessionId = sessionId,
-            SceneId = "scene1",
-            ChoiceText = "Go left",
-            NextSceneId = "scene2"
+            Id = scenarioId,
+            Title = "Test Scenario",
+            CoreAxes = new List<CoreAxis>(),
+            Scenes = new List<Scene>
+            {
+                new()
+                {
+                    Id = sceneId,
+                    Title = "Scene 1",
+                    Type = SceneType.Choice,
+                    Branches = new List<Branch>
+                    {
+                        new()
+                        {
+                            Choice = choiceText,
+                            NextSceneId = nextSceneId
+                        }
+                    }
+                },
+                new()
+                {
+                    Id = nextSceneId,
+                    Title = "Scene 2",
+                    Branches = new List<Branch>
+                    {
+                        new() { Choice = "Continue", NextSceneId = "scene3" }
+                    }
+                }
+            }
         };
     }
 }

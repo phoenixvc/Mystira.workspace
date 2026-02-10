@@ -17,7 +17,7 @@ public static class GetAllContentBundlesQueryHandler
         CancellationToken ct)
     {
         // Get all content bundles
-        var bundles = await repository.GetAllAsync();
+        var bundles = await repository.GetAllAsync(ct);
 
         logger.LogDebug("Retrieved {Count} content bundles", bundles.Count());
 

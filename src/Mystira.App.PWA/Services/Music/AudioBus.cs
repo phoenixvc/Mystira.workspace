@@ -85,7 +85,7 @@ public class AudioBus : IAudioBus, IAsyncDisposable
         await _module!.InvokeVoidAsync("setMusicVolume", volume, durationSeconds);
     }
 
-    public async Task DuckMusicAsync(bool duck, float duckVolume = 0.2f)
+    public async Task DuckMusicAsync(bool duck, float duckVolume = AudioDefaults.DuckVolume)
     {
         if (!await _settingsService.GetAudioEnabledAsync()) return;
 

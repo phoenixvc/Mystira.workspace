@@ -2,6 +2,7 @@ using Microsoft.Extensions.Logging;
 using Mystira.App.Application.Ports.Data;
 using Mystira.Contracts.App.Requests.UserProfiles;
 using Mystira.App.Domain.Models;
+using System.Threading;
 
 namespace Mystira.App.Application.UseCases.UserProfiles;
 
@@ -24,10 +25,10 @@ public class CreateUserProfileUseCase
         _logger = logger;
     }
 
-    public async Task<UserProfile> ExecuteAsync(CreateUserProfileRequest request)
+    public async Task<UserProfile> ExecuteAsync(CreateUserProfileRequest request, CancellationToken ct = default)
     {
         // Check if profile already exists (using Id from request)
-        var existingProfile = await _repository.GetByIdAsync(request.Id);
+        var existingProfile = await _repository.GetByIdAsync(request.Id, ct);
         if (existingProfile != null)
         {
             throw new ArgumentException($"Profile already exists for name: {request.Name}");
@@ -71,11 +72,11 @@ public class CreateUserProfileUseCase
             profile.UpdateAgeGroupFromBirthDate();
         }
 
-        await _repository.AddAsync(profile);
-        await _unitOfWork.SaveChangesAsync();
+        await _repository.AddAsync(profile, ct);
+        await _unitOfWork.SaveChangesAsync(ct);
 
         _logger.LogInformation("Created new user profile: {ProfileId} - {Name} (Guest: {IsGuest}, NPC: {IsNPC})",
-            profile.Id, profile.Name, profile.IsGuest, profile.IsNpc);
+            PiiMask.HashId(profile.Id), PiiMask.HashId(profile.Name), profile.IsGuest, profile.IsNpc);
         return profile;
     }
 }

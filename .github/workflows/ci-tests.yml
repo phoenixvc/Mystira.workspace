@@ -54,6 +54,8 @@ jobs:
         run: dotnet build --no-restore --configuration Release
 
       - name: Run tests with coverage
+        id: tests
+        continue-on-error: true
         run: |
           dotnet test --no-build --configuration Release \
             --collect:"XPlat Code Coverage" \
@@ -61,6 +63,34 @@ jobs:
             --settings coverlet.runsettings \
             --logger "trx;LogFileName=test-results.trx" \
             -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=cobertura
+
+      - name: Show test failures
+        if: steps.tests.outcome == 'failure'
+        run: |
+          echo "::error::Test run had failures. Parsing TRX files for details..."
+          python3 -c "
+          import xml.etree.ElementTree as ET, glob, sys
+          ns = {'t': 'http://microsoft.com/schemas/VisualStudio/TeamTest/2010'}
+          found = False
+          for trx in glob.glob('coverage/**/test-results.trx', recursive=True):
+              tree = ET.parse(trx)
+              for r in tree.findall('.//t:UnitTestResult[@outcome=\"Failed\"]', ns):
+                  found = True
+                  name = r.get('testName', '?')
+                  msg = r.find('t:Output/t:ErrorInfo/t:Message', ns)
+                  stk = r.find('t:Output/t:ErrorInfo/t:StackTrace', ns)
+                  print(f'::error::FAILED: {name}')
+                  if msg is not None and msg.text:
+                      for line in msg.text.strip().splitlines():
+                          print(f'  {line}')
+                  if stk is not None and stk.text:
+                      for line in stk.text.strip().splitlines()[:10]:
+                          print(f'  {line}')
+                  print()
+          if not found:
+              print('No failed tests found in TRX files.')
+          sys.exit(1)
+          "
 
       - name: Upload test results
         uses: actions/upload-artifact@v6

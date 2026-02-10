@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 using Mystira.App.Application.Ports.Data;
 using Mystira.App.Domain.Models;
+using System.Threading;
 
 namespace Mystira.App.Application.UseCases.Badges;
 
@@ -20,14 +21,14 @@ public class GetBadgeUseCase
         _logger = logger;
     }
 
-    public async Task<UserBadge?> ExecuteAsync(string badgeId)
+    public async Task<UserBadge?> ExecuteAsync(string badgeId, CancellationToken ct = default)
     {
         if (string.IsNullOrWhiteSpace(badgeId))
         {
             throw new ArgumentException("Badge ID cannot be null or empty", nameof(badgeId));
         }
 
-        var badge = await _repository.GetByIdAsync(badgeId);
+        var badge = await _repository.GetByIdAsync(badgeId, ct);
 
         if (badge == null)
         {

@@ -13,14 +13,13 @@ public class CharacterMapRepository : Repository<CharacterMap>, ICharacterMapRep
     {
     }
 
-    public async Task<CharacterMap?> GetByNameAsync(string name)
+    public async Task<CharacterMap?> GetByNameAsync(string name, CancellationToken ct = default)
     {
-        return await _dbSet.FirstOrDefaultAsync(c => c.Name == name);
+        return await _dbSet.FirstOrDefaultAsync(c => c.Name == name, ct);
     }
 
-    public async Task<bool> ExistsByNameAsync(string name)
+    public async Task<bool> ExistsByNameAsync(string name, CancellationToken ct = default)
     {
-        return await _dbSet.AnyAsync(c => c.Name == name);
+        return await _dbSet.AnyAsync(c => c.Name == name, ct);
     }
 }
-

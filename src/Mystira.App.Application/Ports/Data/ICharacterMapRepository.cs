@@ -8,7 +8,7 @@ namespace Mystira.App.Application.Ports.Data;
 /// </summary>
 public interface ICharacterMapRepository : IRepository<CharacterMap, string>
 {
-    Task<CharacterMap?> GetByNameAsync(string name);
-    Task<bool> ExistsByNameAsync(string name);
+    Task<CharacterMap?> GetByNameAsync(string name, CancellationToken ct = default);
+    Task<bool> ExistsByNameAsync(string name, CancellationToken ct = default);
 }
 

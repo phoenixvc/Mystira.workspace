@@ -8,7 +8,7 @@ namespace Mystira.App.Application.Ports.Data;
 /// </summary>
 public interface IAccountRepository : IRepository<Account, string>
 {
-    Task<Account?> GetByEmailAsync(string email);
-    Task<Account?> GetByExternalUserIdAsync(string externalUserId);
-    Task<bool> ExistsByEmailAsync(string email);
+    Task<Account?> GetByEmailAsync(string email, CancellationToken ct = default);
+    Task<Account?> GetByExternalUserIdAsync(string externalUserId, CancellationToken ct = default);
+    Task<bool> ExistsByEmailAsync(string email, CancellationToken ct = default);
 }

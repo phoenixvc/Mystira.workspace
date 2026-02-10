@@ -5,6 +5,7 @@
     overflow: visible;
     padding: 8px 4px; /* Space for shadows and transforms */
     margin: -8px -4px; /* Compensate for padding to maintain layout */
+    margin-top: 1rem; /* Add space between navbar and filter section */
     margin-bottom: calc(1.5rem - 8px); /* Maintain mb-4 spacing */
 }
 
@@ -176,6 +177,8 @@
 .completed-toggle-wrapper .form-check {
     margin: 0;
     padding: 0;
+    display: flex;
+    align-items: center;
 }
 
 /* Toggle Switch Styles */
@@ -184,8 +187,8 @@
     --switch-border-width: 1px;
     width: 44px !important;
     height: 24px !important;
-    margin-top: 0 !important;
-    margin-right: 10px;
+    margin: 0 !important;
+    flex-shrink: 0;
     cursor: pointer;
     border: 2px solid #cbd5e1;
     background-color: #e2e8f0;
@@ -237,6 +240,7 @@
     align-items: center;
     gap: 8px;
     margin: 0;
+    margin-left: 10px;
     font-weight: 600;
     font-size: 0.9rem;
 }

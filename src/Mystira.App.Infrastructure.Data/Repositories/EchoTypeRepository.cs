@@ -13,43 +13,43 @@ public class EchoTypeRepository : IEchoTypeRepository
         _context = context;
     }
 
-    public async Task<List<EchoTypeDefinition>> GetAllAsync()
+    public async Task<List<EchoTypeDefinition>> GetAllAsync(CancellationToken ct = default)
     {
         return await _context.EchoTypeDefinitions
             .Where(x => !x.IsDeleted)
             .OrderBy(x => x.Name)
-            .ToListAsync();
+            .ToListAsync(ct);
     }
 
-    public async Task<EchoTypeDefinition?> GetByIdAsync(string id)
+    public async Task<EchoTypeDefinition?> GetByIdAsync(string id, CancellationToken ct = default)
     {
-        return await _context.EchoTypeDefinitions.FirstOrDefaultAsync(x => x.Id == id && !x.IsDeleted);
+        return await _context.EchoTypeDefinitions.FirstOrDefaultAsync(x => x.Id == id && !x.IsDeleted, ct);
     }
 
-    public async Task<EchoTypeDefinition?> GetByNameAsync(string name)
+    public async Task<EchoTypeDefinition?> GetByNameAsync(string name, CancellationToken ct = default)
     {
-        return await _context.EchoTypeDefinitions.FirstOrDefaultAsync(x => x.Name.Equals(name, StringComparison.OrdinalIgnoreCase) && !x.IsDeleted);
+        return await _context.EchoTypeDefinitions.FirstOrDefaultAsync(x => x.Name.ToLower() == name.ToLower() && !x.IsDeleted, ct);
     }
 
-    public async Task<bool> ExistsByNameAsync(string name)
+    public async Task<bool> ExistsByNameAsync(string name, CancellationToken ct = default)
     {
-        return await _context.EchoTypeDefinitions.AnyAsync(x => x.Name.Equals(name, StringComparison.OrdinalIgnoreCase) && !x.IsDeleted);
+        return await _context.EchoTypeDefinitions.AnyAsync(x => x.Name.ToLower() == name.ToLower() && !x.IsDeleted, ct);
     }
 
-    public async Task AddAsync(EchoTypeDefinition echoType)
+    public async Task AddAsync(EchoTypeDefinition echoType, CancellationToken ct = default)
     {
-        await _context.EchoTypeDefinitions.AddAsync(echoType);
+        await _context.EchoTypeDefinitions.AddAsync(echoType, ct);
     }
 
-    public Task UpdateAsync(EchoTypeDefinition echoType)
+    public Task UpdateAsync(EchoTypeDefinition echoType, CancellationToken ct = default)
     {
         _context.EchoTypeDefinitions.Update(echoType);
         return Task.CompletedTask;
     }
 
-    public async Task DeleteAsync(string id)
+    public async Task DeleteAsync(string id, CancellationToken ct = default)
     {
-        var echoType = await _context.EchoTypeDefinitions.FirstOrDefaultAsync(x => x.Id == id);
+        var echoType = await _context.EchoTypeDefinitions.FirstOrDefaultAsync(x => x.Id == id, ct);
         if (echoType != null)
         {
             // Soft delete instead of hard delete

@@ -7,9 +7,9 @@ namespace Mystira.App.Application.Ports.Data;
 /// </summary>
 public interface IMasterDataRepository<T> where T : class
 {
-    Task<List<T>> GetAllAsync();
-    Task<T?> GetByIdAsync(string id);
-    Task AddAsync(T entity);
-    Task UpdateAsync(T entity);
-    Task DeleteAsync(string id);
+    Task<List<T>> GetAllAsync(CancellationToken ct = default);
+    Task<T?> GetByIdAsync(string id, CancellationToken ct = default);
+    Task AddAsync(T entity, CancellationToken ct = default);
+    Task UpdateAsync(T entity, CancellationToken ct = default);
+    Task DeleteAsync(string id, CancellationToken ct = default);
 }

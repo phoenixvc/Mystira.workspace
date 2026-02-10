@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 using Mystira.App.Application.Ports.Data;
 using Mystira.App.Domain.Models;
+using System.Threading;
 
 namespace Mystira.App.Application.UseCases.Scenarios;
 
@@ -23,12 +24,12 @@ public class ValidateScenarioUseCase
         _archetypeRepository = archetypeRepository;
     }
 
-    public async Task ExecuteAsync(Scenario scenario)
+    public async Task ExecuteAsync(Scenario scenario, CancellationToken ct = default)
     {
         // Validate CoreAxes against DB
         if (scenario.CoreAxes != null && scenario.CoreAxes.Count > 0)
         {
-            var validAxes = await _compassAxisRepository.GetAllAsync();
+            var validAxes = await _compassAxisRepository.GetAllAsync(ct);
             var validAxisNames = validAxes.Select(a => a.Name).ToHashSet(StringComparer.OrdinalIgnoreCase);
 
             foreach (var axis in scenario.CoreAxes)
@@ -43,7 +44,7 @@ public class ValidateScenarioUseCase
         // Validate Archetypes against DB
         if (scenario.Archetypes != null && scenario.Archetypes.Count > 0)
         {
-            var validArchetypes = await _archetypeRepository.GetAllAsync();
+            var validArchetypes = await _archetypeRepository.GetAllAsync(ct);
             var validArchetypeNames = validArchetypes.Select(a => a.Name).ToHashSet(StringComparer.OrdinalIgnoreCase);
 
             foreach (var archetype in scenario.Archetypes)
@@ -56,6 +57,11 @@ public class ValidateScenarioUseCase
         }
 
         // Validate scene references
+        if (scenario.Scenes == null || scenario.Scenes.Count == 0)
+        {
+            throw new ArgumentException("Scenario must have at least one scene");
+        }
+
         var sceneIds = scenario.Scenes.Select(s => s.Id).ToHashSet();
         var allReferencedScenes = new HashSet<string>();
 
@@ -107,11 +113,7 @@ public class ValidateScenarioUseCase
         }
 
         // Validate that all scenes are reachable (except the first scene)
-        var firstScene = scenario.Scenes.FirstOrDefault();
-        if (firstScene == null)
-        {
-            throw new ArgumentException("Scenario must have at least one scene");
-        }
+        var firstScene = scenario.Scenes.First();
 
         // Check for unreachable scenes (scenes that are never referenced)
         var unreachableScenes = sceneIds.Except(allReferencedScenes).Where(id => id != firstScene.Id).ToList();

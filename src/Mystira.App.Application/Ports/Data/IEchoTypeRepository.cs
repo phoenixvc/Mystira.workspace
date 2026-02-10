@@ -4,6 +4,6 @@ namespace Mystira.App.Application.Ports.Data;
 
 public interface IEchoTypeRepository : IMasterDataRepository<EchoTypeDefinition>
 {
-    Task<EchoTypeDefinition?> GetByNameAsync(string name);
-    Task<bool> ExistsByNameAsync(string name);
+    Task<EchoTypeDefinition?> GetByNameAsync(string name, CancellationToken ct = default);
+    Task<bool> ExistsByNameAsync(string name, CancellationToken ct = default);
 }

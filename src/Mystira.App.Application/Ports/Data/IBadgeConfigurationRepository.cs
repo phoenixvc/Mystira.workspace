@@ -8,5 +8,5 @@ namespace Mystira.App.Application.Ports.Data;
 /// </summary>
 public interface IBadgeConfigurationRepository : IRepository<BadgeConfiguration, string>
 {
-    Task<IEnumerable<BadgeConfiguration>> GetByAxisAsync(string axis);
+    Task<IEnumerable<BadgeConfiguration>> GetByAxisAsync(string axis, CancellationToken ct = default);
 }

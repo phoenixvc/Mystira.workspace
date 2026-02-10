@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 using Mystira.App.Application.Ports.Data;
 using Mystira.App.Domain.Models;
+using System.Threading;
 
 namespace Mystira.App.Application.UseCases.Accounts;
 
@@ -23,7 +24,7 @@ public class UpdateAccountSettingsUseCase
         _logger = logger;
     }
 
-    public async Task<Account> ExecuteAsync(string accountId, AccountSettings settings)
+    public async Task<Account> ExecuteAsync(string accountId, AccountSettings settings, CancellationToken ct = default)
     {
         if (string.IsNullOrWhiteSpace(accountId))
         {
@@ -35,17 +36,17 @@ public class UpdateAccountSettingsUseCase
             throw new ArgumentNullException(nameof(settings));
         }
 
-        var account = await _repository.GetByIdAsync(accountId);
+        var account = await _repository.GetByIdAsync(accountId, ct);
         if (account == null)
         {
             throw new ArgumentException($"Account not found: {accountId}", nameof(accountId));
         }
 
         account.Settings = settings;
-        await _repository.UpdateAsync(account);
-        await _unitOfWork.SaveChangesAsync();
+        await _repository.UpdateAsync(account, ct);
+        await _unitOfWork.SaveChangesAsync(ct);
 
-        _logger.LogInformation("Updated settings for account: {AccountId}", accountId);
+        _logger.LogInformation("Updated settings for account: {AccountId}", PiiMask.HashId(accountId));
         return account;
     }
 }

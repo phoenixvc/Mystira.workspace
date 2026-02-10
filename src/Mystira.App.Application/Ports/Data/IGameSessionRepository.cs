@@ -8,11 +8,11 @@ namespace Mystira.App.Application.Ports.Data;
 /// </summary>
 public interface IGameSessionRepository : IRepository<GameSession, string>
 {
-    Task<IEnumerable<GameSession>> GetByAccountIdAsync(string accountId);
-    Task<IEnumerable<GameSession>> GetByProfileIdAsync(string profileId);
-    Task<IEnumerable<GameSession>> GetInProgressSessionsAsync(string accountId);
-    Task<GameSession?> GetActiveSessionForScenarioAsync(string accountId, string scenarioId);
-    Task<IEnumerable<GameSession>> GetActiveSessionsByScenarioAndAccountAsync(string scenarioId, string accountId);
-    Task<int> GetActiveSessionsCountAsync();
+    Task<IEnumerable<GameSession>> GetByAccountIdAsync(string accountId, CancellationToken ct = default);
+    Task<IEnumerable<GameSession>> GetByProfileIdAsync(string profileId, CancellationToken ct = default);
+    Task<IEnumerable<GameSession>> GetInProgressSessionsAsync(string accountId, CancellationToken ct = default);
+    Task<GameSession?> GetActiveSessionForScenarioAsync(string accountId, string scenarioId, CancellationToken ct = default);
+    Task<IEnumerable<GameSession>> GetActiveSessionsByScenarioAndAccountAsync(string scenarioId, string accountId, CancellationToken ct = default);
+    Task<int> GetActiveSessionsCountAsync(CancellationToken ct = default);
 }
 

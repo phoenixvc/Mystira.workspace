@@ -2,6 +2,7 @@ using Microsoft.Extensions.Logging;
 using Mystira.App.Application.Ports.Data;
 using Mystira.App.Domain.Models;
 using YamlDotNet.Serialization;
+using System.Threading;
 
 namespace Mystira.App.Application.UseCases.CharacterMaps;
 
@@ -24,7 +25,7 @@ public class ImportCharacterMapUseCase
         _logger = logger;
     }
 
-    public async Task<List<CharacterMap>> ExecuteAsync(Stream yamlStream)
+    public async Task<List<CharacterMap>> ExecuteAsync(Stream yamlStream, CancellationToken ct = default)
     {
         if (yamlStream == null)
         {
@@ -61,17 +62,17 @@ public class ImportCharacterMapUseCase
             };
 
             // Check if it exists and replace
-            var existing = await _repository.GetByIdAsync(characterMap.Id);
+            var existing = await _repository.GetByIdAsync(characterMap.Id, ct);
             if (existing != null)
             {
-                await _repository.DeleteAsync(characterMap.Id);
+                await _repository.DeleteAsync(characterMap.Id, ct);
             }
 
-            await _repository.AddAsync(characterMap);
+            await _repository.AddAsync(characterMap, ct);
             importedCharacterMaps.Add(characterMap);
         }
 
-        await _unitOfWork.SaveChangesAsync();
+        await _unitOfWork.SaveChangesAsync(ct);
 
         _logger.LogInformation("Imported {Count} character maps from YAML", importedCharacterMaps.Count);
         return importedCharacterMaps;

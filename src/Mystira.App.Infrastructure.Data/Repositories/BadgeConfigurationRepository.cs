@@ -10,10 +10,10 @@ public class BadgeConfigurationRepository : Repository<BadgeConfiguration>, IBad
     {
     }
 
-    public async Task<IEnumerable<BadgeConfiguration>> GetByAxisAsync(string axis)
+    public async Task<IEnumerable<BadgeConfiguration>> GetByAxisAsync(string axis, CancellationToken ct = default)
     {
         return await _dbSet
             .Where(x => x.Axis == axis)
-            .ToListAsync();
+            .ToListAsync(ct);
     }
 }

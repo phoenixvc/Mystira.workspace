@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 using Mystira.App.Application.Ports.Data;
 using Mystira.App.Domain.Models;
+using System.Threading;
 
 namespace Mystira.App.Application.UseCases.Avatars;
 
@@ -23,7 +24,7 @@ public class AssignAvatarToAgeGroupUseCase
         _logger = logger;
     }
 
-    public async Task<AvatarConfigurationFile> ExecuteAsync(string ageGroup, List<string> mediaIds)
+    public async Task<AvatarConfigurationFile> ExecuteAsync(string ageGroup, List<string> mediaIds, CancellationToken ct = default)
     {
         if (string.IsNullOrWhiteSpace(ageGroup))
         {
@@ -35,7 +36,7 @@ public class AssignAvatarToAgeGroupUseCase
             throw new ArgumentNullException(nameof(mediaIds));
         }
 
-        var configFile = await _repository.GetAsync() ?? new AvatarConfigurationFile
+        var configFile = await _repository.GetAsync(ct) ?? new AvatarConfigurationFile
         {
             Id = "avatar-configuration",
             CreatedAt = DateTime.UtcNow,
@@ -50,8 +51,8 @@ public class AssignAvatarToAgeGroupUseCase
         configFile.AgeGroupAvatars[ageGroup] = mediaIds;
         configFile.UpdatedAt = DateTime.UtcNow;
 
-        var result = await _repository.AddOrUpdateAsync(configFile);
-        await _unitOfWork.SaveChangesAsync();
+        var result = await _repository.AddOrUpdateAsync(configFile, ct);
+        await _unitOfWork.SaveChangesAsync(ct);
 
         _logger.LogInformation("Assigned {Count} avatars to age group {AgeGroup}", mediaIds.Count, ageGroup);
         return result;

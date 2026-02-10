@@ -18,7 +18,7 @@ public static class GetBadgeDetailQueryHandler
         IBadgeRepository badgeRepository,
         CancellationToken ct)
     {
-        var badge = await badgeRepository.GetByIdAsync(query.BadgeId);
+        var badge = await badgeRepository.GetByIdAsync(query.BadgeId, ct);
         if (badge == null) return null;
 
         return new BadgeResponse

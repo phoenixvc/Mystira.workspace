@@ -64,11 +64,11 @@ public static class CreateScenarioCommandHandler
         await validateScenarioUseCase.ExecuteAsync(scenario);
 
         // Persist scenario
-        await repository.AddAsync(scenario);
+        await repository.AddAsync(scenario, ct);
 
         try
         {
-            await unitOfWork.SaveChangesAsync();
+            await unitOfWork.SaveChangesAsync(ct);
         }
         catch (Exception e)
         {

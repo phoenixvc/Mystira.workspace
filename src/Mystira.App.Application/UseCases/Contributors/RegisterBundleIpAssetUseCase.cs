@@ -3,6 +3,7 @@ using Mystira.App.Application.Ports;
 using Mystira.App.Application.Ports.Data;
 using Mystira.Contracts.App.Requests.Contributors;
 using Mystira.App.Domain.Models;
+using System.Threading;
 
 namespace Mystira.App.Application.UseCases.Contributors;
 
@@ -28,10 +29,10 @@ public class RegisterBundleIpAssetUseCase
         _logger = logger;
     }
 
-    public async Task<StoryProtocolMetadata> ExecuteAsync(string bundleId, RegisterIpAssetRequest request)
+    public async Task<StoryProtocolMetadata> ExecuteAsync(string bundleId, RegisterIpAssetRequest request, CancellationToken ct = default)
     {
         // Get the bundle
-        var bundle = await _bundleRepository.GetByIdAsync(bundleId);
+        var bundle = await _bundleRepository.GetByIdAsync(bundleId, ct);
         if (bundle == null)
         {
             throw new ArgumentException($"Content bundle not found: {bundleId}");
@@ -62,16 +63,17 @@ public class RegisterBundleIpAssetUseCase
             bundle.Title,
             bundle.StoryProtocol.Contributors,
             request.MetadataUri,
-            request.LicenseTermsId);
+            request.LicenseTermsId,
+            ct);
 
         // Update the bundle with Story Protocol metadata
         bundle.StoryProtocol = storyProtocolMetadata;
 
-        await _bundleRepository.UpdateAsync(bundle);
+        await _bundleRepository.UpdateAsync(bundle, ct);
 
         try
         {
-            await _unitOfWork.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync(ct);
         }
         catch (Exception e)
         {

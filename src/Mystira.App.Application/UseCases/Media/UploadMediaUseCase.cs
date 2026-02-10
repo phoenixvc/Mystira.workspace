@@ -6,6 +6,7 @@ using Mystira.App.Application.Ports.Storage;
 using Mystira.Contracts.App.Requests.Media;
 using Mystira.App.Domain.Models;
 using Mystira.Shared.Media;
+using System.Threading;
 
 namespace Mystira.App.Application.UseCases.Media;
 
@@ -34,15 +35,15 @@ public class UploadMediaUseCase
         _logger = logger;
     }
 
-    public async Task<MediaAsset> ExecuteAsync(UploadMediaRequest request)
+    public async Task<MediaAsset> ExecuteAsync(UploadMediaRequest request, CancellationToken ct = default)
     {
         ValidateMediaFile(request);
 
         // Validate that media metadata entry exists and resolve the media ID
-        var resolvedMediaId = await ValidateAndResolveMediaId(request.MediaId ?? string.Empty, request.FileName);
+        var resolvedMediaId = await ValidateAndResolveMediaId(request.MediaId ?? string.Empty, request.FileName, ct);
 
         // Check if media with this ID already exists
-        var existingMedia = await _repository.GetByMediaIdAsync(resolvedMediaId);
+        var existingMedia = await _repository.GetByMediaIdAsync(resolvedMediaId, ct);
         if (existingMedia != null)
         {
             throw new InvalidOperationException($"Media with ID '{resolvedMediaId}' already exists");
@@ -56,7 +57,7 @@ public class UploadMediaUseCase
         request.FileStream.Position = 0;
 
         // Upload to blob storage and get URL
-        var url = await _blobStorageService.UploadMediaAsync(request.FileStream, request.FileName, request.ContentType ?? GetMimeType(request.FileName));
+        var url = await _blobStorageService.UploadMediaAsync(request.FileStream, request.FileName, request.ContentType ?? GetMimeType(request.FileName), ct);
 
         // Create media asset record
         var mediaAsset = new MediaAsset
@@ -75,8 +76,8 @@ public class UploadMediaUseCase
             UpdatedAt = DateTime.UtcNow
         };
 
-        await _repository.AddAsync(mediaAsset);
-        await _unitOfWork.SaveChangesAsync();
+        await _repository.AddAsync(mediaAsset, ct);
+        await _unitOfWork.SaveChangesAsync(ct);
 
         _logger.LogInformation("Media uploaded successfully: {MediaId} at {Url}", resolvedMediaId, url);
 
@@ -108,10 +109,10 @@ public class UploadMediaUseCase
         }
     }
 
-    private async Task<string> ValidateAndResolveMediaId(string mediaId, string fileName)
+    private async Task<string> ValidateAndResolveMediaId(string mediaId, string fileName, CancellationToken ct)
     {
         // Get metadata file to validate and resolve media ID
-        var metadataFile = await _mediaMetadataService.GetMediaMetadataFileAsync();
+        var metadataFile = await _mediaMetadataService.GetMediaMetadataFileAsync(ct);
         if (metadataFile == null || metadataFile.Entries.Count == 0)
         {
             throw new InvalidOperationException("No media metadata file found. Media uploads require a valid media metadata file to be uploaded first.");

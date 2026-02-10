@@ -1,4 +1,3 @@
-@implements IDisposable
 @inject IJSRuntime jsRuntime
 
 <div class="loading-screen">
@@ -18,8 +17,6 @@
     [Parameter] public bool AutoStart { get; set; } = true;
     [Parameter] public EventCallback OnLoaded { get; set; }
 
-    private DotNetObjectReference<LoadingExperience>? selfReference;
-
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender && AutoStart)
@@ -32,10 +29,5 @@
                 await OnLoaded.InvokeAsync();
             }
         }
-    }
-
-    public void Dispose()
-    {
-        selfReference?.Dispose();
     }
 }

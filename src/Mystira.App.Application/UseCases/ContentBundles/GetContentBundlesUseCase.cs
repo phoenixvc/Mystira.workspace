@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 using Mystira.App.Application.Ports.Data;
 using Mystira.App.Domain.Models;
+using System.Threading;
 
 namespace Mystira.App.Application.UseCases.ContentBundles;
 
@@ -20,9 +21,9 @@ public class GetContentBundlesUseCase
         _logger = logger;
     }
 
-    public async Task<List<ContentBundle>> ExecuteAsync()
+    public async Task<List<ContentBundle>> ExecuteAsync(CancellationToken ct = default)
     {
-        var bundles = await _repository.GetAllAsync();
+        var bundles = await _repository.GetAllAsync(ct);
         var bundleList = bundles.ToList();
 
         _logger.LogInformation("Retrieved {Count} content bundles", bundleList.Count);

@@ -2,6 +2,7 @@ using Wolverine;
 using Microsoft.AspNetCore.Mvc;
 using Mystira.App.Application.CQRS.Attribution.Queries;
 using Mystira.App.Application.CQRS.Scenarios.Queries;
+using Mystira.App.Application.Helpers;
 using Mystira.Contracts.App.Requests.Scenarios;
 using Mystira.Contracts.App.Responses.Attribution;
 using Mystira.Contracts.App.Responses.Common;
@@ -144,7 +145,7 @@ public class ScenariosController : ControllerBase
     {
         try
         {
-            _logger.LogInformation("Fetching scenarios with game state for account: {AccountId}", accountId);
+            _logger.LogInformation("Fetching scenarios with game state for account: {AccountId}", LogAnonymizer.HashId(accountId));
 
             var query = new GetScenariosWithGameStateQuery(accountId);
             var result = await _bus.InvokeAsync<ScenarioGameStateResponse>(query);
@@ -153,7 +154,7 @@ public class ScenariosController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error getting scenarios with game state for account {AccountId}", accountId);
+            _logger.LogError(ex, "Error getting scenarios with game state for account {AccountId}", LogAnonymizer.HashId(accountId));
             return StatusCode(500, new ErrorResponse
             {
                 Message = "Internal server error while fetching scenarios with game state",

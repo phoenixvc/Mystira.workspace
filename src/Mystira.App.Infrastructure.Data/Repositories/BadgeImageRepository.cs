@@ -10,9 +10,9 @@ public class BadgeImageRepository : Repository<BadgeImage>, IBadgeImageRepositor
     {
     }
 
-    public async Task<BadgeImage?> GetByImageIdAsync(string imageId)
+    public async Task<BadgeImage?> GetByImageIdAsync(string imageId, CancellationToken ct = default)
     {
         return await _dbSet
-            .FirstOrDefaultAsync(x => x.ImageId == imageId);
+            .FirstOrDefaultAsync(x => x.ImageId == imageId, ct);
     }
 }

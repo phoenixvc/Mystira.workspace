@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Logging;
 using Mystira.App.Application.Ports.Data;
+using System.Threading;
 
 namespace Mystira.App.Application.UseCases.ContentBundles;
 
@@ -22,22 +23,22 @@ public class DeleteContentBundleUseCase
         _logger = logger;
     }
 
-    public async Task<bool> ExecuteAsync(string bundleId)
+    public async Task<bool> ExecuteAsync(string bundleId, CancellationToken ct = default)
     {
         if (string.IsNullOrWhiteSpace(bundleId))
         {
             throw new ArgumentException("Bundle ID cannot be null or empty", nameof(bundleId));
         }
 
-        var bundle = await _repository.GetByIdAsync(bundleId);
+        var bundle = await _repository.GetByIdAsync(bundleId, ct);
         if (bundle == null)
         {
             _logger.LogWarning("Content bundle not found for deletion: {BundleId}", bundleId);
             return false;
         }
 
-        await _repository.DeleteAsync(bundleId);
-        await _unitOfWork.SaveChangesAsync();
+        await _repository.DeleteAsync(bundleId, ct);
+        await _unitOfWork.SaveChangesAsync(ct);
 
         _logger.LogInformation("Deleted content bundle: {BundleId}", bundleId);
         return true;

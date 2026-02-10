@@ -78,4 +78,9 @@
     <Compile Remove="Services\IndexedDbService.cs" />
   </ItemGroup>
 
+  <!-- Expose internals to test project -->
+  <ItemGroup>
+    <InternalsVisibleTo Include="Mystira.App.PWA.Tests" />
+  </ItemGroup>
+
 </Project>

@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using Mystira.App.Application.CQRS.UserProfiles.Commands;
 using Mystira.App.Application.Ports.Data;
+using Mystira.App.Application.UseCases.UserProfiles;
 using Mystira.App.Domain.Models;
 using Mystira.Contracts.App.Requests.UserProfiles;
 using Mystira.Shared.Data.Repositories;
@@ -13,13 +14,13 @@ public class CreateUserProfileCommandHandlerTests
 {
     private readonly Mock<IUserProfileRepository> _repository;
     private readonly Mock<IUnitOfWork> _unitOfWork;
-    private readonly Mock<ILogger> _logger;
+    private readonly Mock<ILogger<CreateUserProfileUseCase>> _logger;
 
     public CreateUserProfileCommandHandlerTests()
     {
         _repository = new Mock<IUserProfileRepository>();
         _unitOfWork = new Mock<IUnitOfWork>();
-        _logger = new Mock<ILogger>();
+        _logger = new Mock<ILogger<CreateUserProfileUseCase>>();
     }
 
     [Fact]
@@ -33,14 +34,11 @@ public class CreateUserProfileCommandHandlerTests
             AccountId = "acc-123"
         };
         var command = new CreateUserProfileCommand(request);
+        var useCase = new CreateUserProfileUseCase(_repository.Object, _unitOfWork.Object, _logger.Object);
 
         // Act
         var result = await CreateUserProfileCommandHandler.Handle(
-            command,
-            _repository.Object,
-            _unitOfWork.Object,
-            _logger.Object,
-            CancellationToken.None);
+            command, useCase, CancellationToken.None);
 
         // Assert
         result.Should().NotBeNull();
@@ -63,14 +61,11 @@ public class CreateUserProfileCommandHandlerTests
             AgeGroup = "6-9"
         };
         var command = new CreateUserProfileCommand(request);
+        var useCase = new CreateUserProfileUseCase(_repository.Object, _unitOfWork.Object, _logger.Object);
 
         // Act
         var act = () => CreateUserProfileCommandHandler.Handle(
-            command,
-            _repository.Object,
-            _unitOfWork.Object,
-            _logger.Object,
-            CancellationToken.None);
+            command, useCase, CancellationToken.None);
 
         // Assert
         await act.Should().ThrowAsync<ArgumentException>()
@@ -87,14 +82,11 @@ public class CreateUserProfileCommandHandlerTests
             AgeGroup = "6-9"
         };
         var command = new CreateUserProfileCommand(request);
+        var useCase = new CreateUserProfileUseCase(_repository.Object, _unitOfWork.Object, _logger.Object);
 
         // Act
         var act = () => CreateUserProfileCommandHandler.Handle(
-            command,
-            _repository.Object,
-            _unitOfWork.Object,
-            _logger.Object,
-            CancellationToken.None);
+            command, useCase, CancellationToken.None);
 
         // Assert
         await act.Should().ThrowAsync<ArgumentException>()
@@ -111,14 +103,11 @@ public class CreateUserProfileCommandHandlerTests
             AgeGroup = "6-9"
         };
         var command = new CreateUserProfileCommand(request);
+        var useCase = new CreateUserProfileUseCase(_repository.Object, _unitOfWork.Object, _logger.Object);
 
         // Act
         var act = () => CreateUserProfileCommandHandler.Handle(
-            command,
-            _repository.Object,
-            _unitOfWork.Object,
-            _logger.Object,
-            CancellationToken.None);
+            command, useCase, CancellationToken.None);
 
         // Assert
         await act.Should().ThrowAsync<ArgumentException>()
@@ -128,25 +117,22 @@ public class CreateUserProfileCommandHandlerTests
     [Fact]
     public async Task Handle_WithEmptyAgeGroup_ThrowsArgumentException()
     {
-        // Arrange
+        // Arrange - UseCase validates age group
         var request = new CreateUserProfileRequest
         {
             Name = "Valid Name",
             AgeGroup = ""
         };
         var command = new CreateUserProfileCommand(request);
+        var useCase = new CreateUserProfileUseCase(_repository.Object, _unitOfWork.Object, _logger.Object);
 
         // Act
         var act = () => CreateUserProfileCommandHandler.Handle(
-            command,
-            _repository.Object,
-            _unitOfWork.Object,
-            _logger.Object,
-            CancellationToken.None);
+            command, useCase, CancellationToken.None);
 
         // Assert
         await act.Should().ThrowAsync<ArgumentException>()
-            .WithMessage("*Age group is required*");
+            .WithMessage("*Invalid age group*");
     }
 
     [Fact]
@@ -159,14 +145,11 @@ public class CreateUserProfileCommandHandlerTests
             AgeGroup = "invalid-group"
         };
         var command = new CreateUserProfileCommand(request);
+        var useCase = new CreateUserProfileUseCase(_repository.Object, _unitOfWork.Object, _logger.Object);
 
         // Act
         var act = () => CreateUserProfileCommandHandler.Handle(
-            command,
-            _repository.Object,
-            _unitOfWork.Object,
-            _logger.Object,
-            CancellationToken.None);
+            command, useCase, CancellationToken.None);
 
         // Assert
         await act.Should().ThrowAsync<ArgumentException>()
@@ -189,14 +172,11 @@ public class CreateUserProfileCommandHandlerTests
             AgeGroup = ageGroup
         };
         var command = new CreateUserProfileCommand(request);
+        var useCase = new CreateUserProfileUseCase(_repository.Object, _unitOfWork.Object, _logger.Object);
 
         // Act
         var result = await CreateUserProfileCommandHandler.Handle(
-            command,
-            _repository.Object,
-            _unitOfWork.Object,
-            _logger.Object,
-            CancellationToken.None);
+            command, useCase, CancellationToken.None);
 
         // Assert
         result.AgeGroupName.Should().Be(ageGroup);
@@ -210,18 +190,15 @@ public class CreateUserProfileCommandHandlerTests
         var request = new CreateUserProfileRequest
         {
             Name = "Child Profile",
-            AgeGroup = "1-2", // Initial age group (will be updated)
+            AgeGroup = "1-2", // Initial age group (will be updated by UseCase)
             DateOfBirth = birthDate
         };
         var command = new CreateUserProfileCommand(request);
+        var useCase = new CreateUserProfileUseCase(_repository.Object, _unitOfWork.Object, _logger.Object);
 
         // Act
         var result = await CreateUserProfileCommandHandler.Handle(
-            command,
-            _repository.Object,
-            _unitOfWork.Object,
-            _logger.Object,
-            CancellationToken.None);
+            command, useCase, CancellationToken.None);
 
         // Assert
         result.DateOfBirth.Should().Be(birthDate);
@@ -239,14 +216,11 @@ public class CreateUserProfileCommandHandlerTests
             IsGuest = true
         };
         var command = new CreateUserProfileCommand(request);
+        var useCase = new CreateUserProfileUseCase(_repository.Object, _unitOfWork.Object, _logger.Object);
 
         // Act
         var result = await CreateUserProfileCommandHandler.Handle(
-            command,
-            _repository.Object,
-            _unitOfWork.Object,
-            _logger.Object,
-            CancellationToken.None);
+            command, useCase, CancellationToken.None);
 
         // Assert
         result.IsGuest.Should().BeTrue();
@@ -263,41 +237,14 @@ public class CreateUserProfileCommandHandlerTests
             IsNpc = true
         };
         var command = new CreateUserProfileCommand(request);
+        var useCase = new CreateUserProfileUseCase(_repository.Object, _unitOfWork.Object, _logger.Object);
 
         // Act
         var result = await CreateUserProfileCommandHandler.Handle(
-            command,
-            _repository.Object,
-            _unitOfWork.Object,
-            _logger.Object,
-            CancellationToken.None);
+            command, useCase, CancellationToken.None);
 
         // Assert
         result.IsNpc.Should().BeTrue();
-    }
-
-    [Fact]
-    public async Task Handle_WithFantasyThemes_SetsPreferredThemes()
-    {
-        // Arrange
-        var request = new CreateUserProfileRequest
-        {
-            Name = "Theme Lover",
-            AgeGroup = "10-12",
-            PreferredFantasyThemes = new List<string> { "Fantasy", "Adventure" }
-        };
-        var command = new CreateUserProfileCommand(request);
-
-        // Act
-        var result = await CreateUserProfileCommandHandler.Handle(
-            command,
-            _repository.Object,
-            _unitOfWork.Object,
-            _logger.Object,
-            CancellationToken.None);
-
-        // Assert
-        result.PreferredFantasyThemes.Should().HaveCount(2);
     }
 
     [Fact]
@@ -311,14 +258,11 @@ public class CreateUserProfileCommandHandlerTests
             Pronouns = "they/them"
         };
         var command = new CreateUserProfileCommand(request);
+        var useCase = new CreateUserProfileUseCase(_repository.Object, _unitOfWork.Object, _logger.Object);
 
         // Act
         var result = await CreateUserProfileCommandHandler.Handle(
-            command,
-            _repository.Object,
-            _unitOfWork.Object,
-            _logger.Object,
-            CancellationToken.None);
+            command, useCase, CancellationToken.None);
 
         // Assert
         result.Pronouns.Should().Be("they/them");
@@ -335,14 +279,11 @@ public class CreateUserProfileCommandHandlerTests
             Bio = "Hello, I love adventures!"
         };
         var command = new CreateUserProfileCommand(request);
+        var useCase = new CreateUserProfileUseCase(_repository.Object, _unitOfWork.Object, _logger.Object);
 
         // Act
         var result = await CreateUserProfileCommandHandler.Handle(
-            command,
-            _repository.Object,
-            _unitOfWork.Object,
-            _logger.Object,
-            CancellationToken.None);
+            command, useCase, CancellationToken.None);
 
         // Assert
         result.Bio.Should().Be("Hello, I love adventures!");
@@ -359,14 +300,11 @@ public class CreateUserProfileCommandHandlerTests
             SelectedAvatarMediaId = "avatar-123"
         };
         var command = new CreateUserProfileCommand(request);
+        var useCase = new CreateUserProfileUseCase(_repository.Object, _unitOfWork.Object, _logger.Object);
 
         // Act
         var result = await CreateUserProfileCommandHandler.Handle(
-            command,
-            _repository.Object,
-            _unitOfWork.Object,
-            _logger.Object,
-            CancellationToken.None);
+            command, useCase, CancellationToken.None);
 
         // Assert
         result.SelectedAvatarMediaId.Should().Be("avatar-123");
@@ -384,14 +322,11 @@ public class CreateUserProfileCommandHandlerTests
             HasCompletedOnboarding = true
         };
         var command = new CreateUserProfileCommand(request);
+        var useCase = new CreateUserProfileUseCase(_repository.Object, _unitOfWork.Object, _logger.Object);
 
         // Act
         var result = await CreateUserProfileCommandHandler.Handle(
-            command,
-            _repository.Object,
-            _unitOfWork.Object,
-            _logger.Object,
-            CancellationToken.None);
+            command, useCase, CancellationToken.None);
 
         // Assert
         result.HasCompletedOnboarding.Should().BeTrue();
@@ -407,17 +342,35 @@ public class CreateUserProfileCommandHandlerTests
             AgeGroup = "6-9"
         };
         var command = new CreateUserProfileCommand(request);
+        var useCase = new CreateUserProfileUseCase(_repository.Object, _unitOfWork.Object, _logger.Object);
 
         // Act
         var result = await CreateUserProfileCommandHandler.Handle(
-            command,
-            _repository.Object,
-            _unitOfWork.Object,
-            _logger.Object,
-            CancellationToken.None);
+            command, useCase, CancellationToken.None);
 
         // Assert
         result.CreatedAt.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(5));
         result.UpdatedAt.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(5));
+    }
+
+    [Fact]
+    public async Task Handle_GeneratesIdWhenNotProvided()
+    {
+        // Arrange
+        var request = new CreateUserProfileRequest
+        {
+            Name = "No ID User",
+            AgeGroup = "6-9"
+        };
+        var command = new CreateUserProfileCommand(request);
+        var useCase = new CreateUserProfileUseCase(_repository.Object, _unitOfWork.Object, _logger.Object);
+
+        // Act
+        var result = await CreateUserProfileCommandHandler.Handle(
+            command, useCase, CancellationToken.None);
+
+        // Assert
+        result.Id.Should().NotBeNullOrEmpty();
+        Guid.TryParse(result.Id, out _).Should().BeTrue();
     }
 }

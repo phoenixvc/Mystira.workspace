@@ -24,7 +24,7 @@ public static class GetContentBundlesByAgeGroupQueryHandler
         }
 
         // Execute query using repository
-        var bundles = await repository.GetByAgeGroupAsync(request.AgeGroup);
+        var bundles = await repository.GetByAgeGroupAsync(request.AgeGroup, ct);
 
         logger.LogDebug("Retrieved {Count} bundles for age group {AgeGroup}",
             bundles.Count(), request.AgeGroup);

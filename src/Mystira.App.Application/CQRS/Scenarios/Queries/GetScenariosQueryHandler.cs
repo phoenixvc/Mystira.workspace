@@ -20,7 +20,7 @@ public static class GetScenariosQueryHandler
         ILogger logger,
         CancellationToken ct)
     {
-        var scenarios = await repository.GetAllAsync();
+        var scenarios = await repository.GetAllAsync(ct);
 
         logger.LogDebug("Retrieved {Count} scenarios", scenarios.Count());
 

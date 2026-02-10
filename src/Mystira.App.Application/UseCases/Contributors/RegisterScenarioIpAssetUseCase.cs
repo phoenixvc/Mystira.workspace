@@ -3,6 +3,7 @@ using Mystira.App.Application.Ports;
 using Mystira.App.Application.Ports.Data;
 using Mystira.Contracts.App.Requests.Contributors;
 using Mystira.App.Domain.Models;
+using System.Threading;
 
 namespace Mystira.App.Application.UseCases.Contributors;
 
@@ -28,10 +29,10 @@ public class RegisterScenarioIpAssetUseCase
         _logger = logger;
     }
 
-    public async Task<StoryProtocolMetadata> ExecuteAsync(string scenarioId, RegisterIpAssetRequest request)
+    public async Task<StoryProtocolMetadata> ExecuteAsync(string scenarioId, RegisterIpAssetRequest request, CancellationToken ct = default)
     {
         // Get the scenario
-        var scenario = await _scenarioRepository.GetByIdAsync(scenarioId);
+        var scenario = await _scenarioRepository.GetByIdAsync(scenarioId, ct);
         if (scenario == null)
         {
             throw new ArgumentException($"Scenario not found: {scenarioId}");
@@ -62,16 +63,17 @@ public class RegisterScenarioIpAssetUseCase
             scenario.Title,
             scenario.StoryProtocol.Contributors,
             request.MetadataUri,
-            request.LicenseTermsId);
+            request.LicenseTermsId,
+            ct);
 
         // Update the scenario with Story Protocol metadata
         scenario.StoryProtocol = storyProtocolMetadata;
 
-        await _scenarioRepository.UpdateAsync(scenario);
+        await _scenarioRepository.UpdateAsync(scenario, ct);
 
         try
         {
-            await _unitOfWork.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync(ct);
         }
         catch (Exception e)
         {

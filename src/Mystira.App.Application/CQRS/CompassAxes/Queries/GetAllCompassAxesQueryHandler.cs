@@ -16,7 +16,7 @@ public static class GetAllCompassAxesQueryHandler
         CancellationToken ct)
     {
         logger.LogInformation("Retrieving all compass axes");
-        var axes = await repository.GetAllAsync();
+        var axes = await repository.GetAllAsync(ct);
         logger.LogInformation("Retrieved {Count} compass axes", axes.Count);
         return axes;
     }

@@ -13,9 +13,8 @@ public class ContentBundleRepository : Repository<ContentBundle>, IContentBundle
     {
     }
 
-    public async Task<IEnumerable<ContentBundle>> GetByAgeGroupAsync(string ageGroup)
+    public async Task<IEnumerable<ContentBundle>> GetByAgeGroupAsync(string ageGroup, CancellationToken ct = default)
     {
-        return await _dbSet.Where(b => b.AgeGroup == ageGroup).ToListAsync();
+        return await _dbSet.Where(b => b.AgeGroup == ageGroup).ToListAsync(ct);
     }
 }
-

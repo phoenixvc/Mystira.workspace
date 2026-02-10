@@ -161,3 +161,38 @@ html[data-theme="dark"] .btn-retry:hover {
     border-color: #6366f1;
     box-shadow: 0 6px 16px rgba(99, 102, 241, 0.15);
 }
+
+/* Light mode support */
+html[data-theme="light"] .empty-state {
+    background: #ffffff;
+    border-color: rgba(147, 51, 234, 0.1);
+    box-shadow: 0 4px 24px rgba(124, 58, 237, 0.05);
+}
+
+html[data-theme="light"] .empty-state-icon {
+    color: #a78bfa;
+}
+
+html[data-theme="light"] .empty-state-title {
+    color: #1f2937;
+}
+
+html[data-theme="light"] .empty-state-message {
+    color: #6b7280;
+}
+
+html[data-theme="light"] .btn-clear-filters {
+    background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+    box-shadow: 0 6px 20px rgba(124, 58, 237, 0.3);
+}
+
+html[data-theme="light"] .btn-retry {
+    background: #ffffff;
+    color: #7c3aed;
+    border-color: rgba(124, 58, 237, 0.2);
+}
+
+html[data-theme="light"] .btn-retry:hover {
+    background: #f5f3ff;
+    border-color: #a78bfa;
+}

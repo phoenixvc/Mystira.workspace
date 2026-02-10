@@ -20,7 +20,7 @@ public static class GetScenariosByAgeGroupQueryHandler
         CancellationToken ct)
     {
         // Use domain repository method to query scenarios by age group
-        var scenarios = await repository.GetByAgeGroupAsync(query.AgeGroup);
+        var scenarios = await repository.GetByAgeGroupAsync(query.AgeGroup, ct);
 
         logger.LogDebug("Retrieved {Count} scenarios for age group: {AgeGroup}",
             scenarios.Count(), query.AgeGroup);

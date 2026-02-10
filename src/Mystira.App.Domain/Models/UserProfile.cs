@@ -38,7 +38,7 @@ public class UserProfile
     [JsonIgnore]
     public AgeGroup AgeGroup
     {
-        get => AgeGroup.Parse(_ageGroup) ?? new AgeGroup(6, 9);
+        get => AgeGroup.Parse(_ageGroup) ?? AgeGroup.Default;
         set => _ageGroup = value?.Value ?? "6-9";
     }
 
@@ -195,6 +195,11 @@ public class AgeGroup : StringEnum<AgeGroup>
         MinimumAge = minimumAge;
         MaximumAge = maximumAge;
     }
+
+    /// <summary>
+    /// Default age group (6-9) used as fallback throughout the application.
+    /// </summary>
+    public static AgeGroup Default => new(6, 9);
 
     public AgeGroup() : base("")
     {

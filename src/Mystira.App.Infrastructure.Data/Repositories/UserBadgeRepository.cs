@@ -18,7 +18,7 @@ public class UserBadgeRepository : Repository<UserBadge>, IUserBadgeRepository
         _isInMemory = context.Database.ProviderName == "Microsoft.EntityFrameworkCore.InMemory";
     }
 
-    public async Task<IEnumerable<UserBadge>> GetByUserProfileIdAsync(string userProfileId)
+    public async Task<IEnumerable<UserBadge>> GetByUserProfileIdAsync(string userProfileId, CancellationToken ct = default)
     {
         var badges = await QueryBadgesAsync(
             inMemoryQuery: () => _context.Set<UserBadge>()
@@ -27,28 +27,29 @@ public class UserBadgeRepository : Repository<UserBadge>, IUserBadgeRepository
             cosmosQuery: () => _context.Set<UserProfile>()
                 .AsNoTracking()
                 .Where(p => p.Id == userProfileId)
-                .SelectMany(p => p.EarnedBadges)
+                .SelectMany(p => p.EarnedBadges),
+            ct
         );
         return OrderByEarnedAtDescending(badges);
     }
 
-    public async Task<UserBadge?> GetByUserProfileIdAndBadgeConfigIdAsync(string userProfileId, string badgeConfigurationId)
+    public async Task<UserBadge?> GetByUserProfileIdAndBadgeConfigIdAsync(string userProfileId, string badgeConfigurationId, CancellationToken ct = default)
     {
         if (_isInMemory)
         {
             return await _context.Set<UserBadge>()
                 .AsNoTracking()
-                .FirstOrDefaultAsync(b => b.UserProfileId == userProfileId && b.BadgeConfigurationId == badgeConfigurationId);
+                .FirstOrDefaultAsync(b => b.UserProfileId == userProfileId && b.BadgeConfigurationId == badgeConfigurationId, ct);
         }
 
         return await _context.Set<UserProfile>()
             .AsNoTracking()
             .Where(p => p.Id == userProfileId)
             .SelectMany(p => p.EarnedBadges)
-            .FirstOrDefaultAsync(b => b.BadgeConfigurationId == badgeConfigurationId);
+            .FirstOrDefaultAsync(b => b.BadgeConfigurationId == badgeConfigurationId, ct);
     }
 
-    public async Task<IEnumerable<UserBadge>> GetByGameSessionIdAsync(string gameSessionId)
+    public async Task<IEnumerable<UserBadge>> GetByGameSessionIdAsync(string gameSessionId, CancellationToken ct = default)
     {
         var badges = await QueryBadgesAsync(
             inMemoryQuery: () => _context.Set<UserBadge>()
@@ -57,12 +58,13 @@ public class UserBadgeRepository : Repository<UserBadge>, IUserBadgeRepository
             cosmosQuery: () => _context.Set<UserProfile>()
                 .AsNoTracking()
                 .SelectMany(p => p.EarnedBadges)
-                .Where(b => b.GameSessionId == gameSessionId)
+                .Where(b => b.GameSessionId == gameSessionId),
+            ct
         );
         return OrderByEarnedAtDescending(badges);
     }
 
-    public async Task<IEnumerable<UserBadge>> GetByScenarioIdAsync(string scenarioId)
+    public async Task<IEnumerable<UserBadge>> GetByScenarioIdAsync(string scenarioId, CancellationToken ct = default)
     {
         var badges = await QueryBadgesAsync(
             inMemoryQuery: () => _context.Set<UserBadge>()
@@ -71,12 +73,13 @@ public class UserBadgeRepository : Repository<UserBadge>, IUserBadgeRepository
             cosmosQuery: () => _context.Set<UserProfile>()
                 .AsNoTracking()
                 .SelectMany(p => p.EarnedBadges)
-                .Where(b => b.ScenarioId == scenarioId)
+                .Where(b => b.ScenarioId == scenarioId),
+            ct
         );
         return OrderByEarnedAtDescending(badges);
     }
 
-    public async Task<IEnumerable<UserBadge>> GetByUserProfileIdAndAxisAsync(string userProfileId, string axis)
+    public async Task<IEnumerable<UserBadge>> GetByUserProfileIdAndAxisAsync(string userProfileId, string axis, CancellationToken ct = default)
     {
         var badges = await QueryBadgesAsync(
             inMemoryQuery: () => _context.Set<UserBadge>()
@@ -86,7 +89,8 @@ public class UserBadgeRepository : Repository<UserBadge>, IUserBadgeRepository
                 .AsNoTracking()
                 .Where(p => p.Id == userProfileId)
                 .SelectMany(p => p.EarnedBadges)
-                .Where(b => b.Axis == axis)
+                .Where(b => b.Axis == axis),
+            ct
         );
         return OrderByEarnedAtDescending(badges);
     }
@@ -119,10 +123,11 @@ public class UserBadgeRepository : Repository<UserBadge>, IUserBadgeRepository
     /// </summary>
     private async Task<List<UserBadge>> QueryBadgesAsync(
         Func<IQueryable<UserBadge>> inMemoryQuery,
-        Func<IQueryable<UserBadge>> cosmosQuery)
+        Func<IQueryable<UserBadge>> cosmosQuery,
+        CancellationToken ct = default)
     {
         var query = _isInMemory ? inMemoryQuery() : cosmosQuery();
-        return await query.ToListAsync();
+        return await query.ToListAsync(ct);
     }
 
     /// <summary>

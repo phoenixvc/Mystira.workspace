@@ -34,7 +34,7 @@ public static class GetScenariosWithGameStateQueryHandler
             .ToListAsync(ct);
 
         // 2. Get all game sessions for this account
-        var gameSessions = await gameSessionRepository.GetByAccountIdAsync(query.AccountId);
+        var gameSessions = await gameSessionRepository.GetByAccountIdAsync(query.AccountId, ct);
 
         // 3. Build response with game state
         var scenariosWithState = scenarios.Select(scenario =>

@@ -2,6 +2,7 @@ using Microsoft.Extensions.Logging;
 using Mystira.App.Application.Ports.Data;
 using Mystira.Contracts.App.Requests.CharacterMaps;
 using Mystira.App.Domain.Models;
+using System.Threading;
 
 namespace Mystira.App.Application.UseCases.CharacterMaps;
 
@@ -24,7 +25,7 @@ public class UpdateCharacterMapUseCase
         _logger = logger;
     }
 
-    public async Task<CharacterMap> ExecuteAsync(string characterMapId, UpdateCharacterMapRequest request)
+    public async Task<CharacterMap> ExecuteAsync(string characterMapId, UpdateCharacterMapRequest request, CancellationToken ct = default)
     {
         if (string.IsNullOrWhiteSpace(characterMapId))
         {
@@ -36,7 +37,7 @@ public class UpdateCharacterMapUseCase
             throw new ArgumentNullException(nameof(request));
         }
 
-        var characterMap = await _repository.GetByIdAsync(characterMapId);
+        var characterMap = await _repository.GetByIdAsync(characterMapId, ct);
         if (characterMap == null)
         {
             throw new ArgumentException($"Character map not found: {characterMapId}", nameof(characterMapId));
@@ -65,8 +66,8 @@ public class UpdateCharacterMapUseCase
 
         characterMap.UpdatedAt = DateTime.UtcNow;
 
-        await _repository.UpdateAsync(characterMap);
-        await _unitOfWork.SaveChangesAsync();
+        await _repository.UpdateAsync(characterMap, ct);
+        await _unitOfWork.SaveChangesAsync(ct);
 
         _logger.LogInformation("Updated character map: {CharacterMapId}", characterMapId);
         return characterMap;

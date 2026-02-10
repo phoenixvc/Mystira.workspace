@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 using Mystira.App.Application.Ports.Data;
 using Mystira.App.Domain.Models;
+using System.Threading;
 
 namespace Mystira.App.Application.UseCases.Accounts;
 
@@ -20,22 +21,22 @@ public class GetAccountByEmailUseCase
         _logger = logger;
     }
 
-    public async Task<Account?> ExecuteAsync(string email)
+    public async Task<Account?> ExecuteAsync(string email, CancellationToken ct = default)
     {
         if (string.IsNullOrWhiteSpace(email))
         {
             throw new ArgumentException("Email cannot be null or empty", nameof(email));
         }
 
-        var account = await _repository.GetByEmailAsync(email);
+        var account = await _repository.GetByEmailAsync(email, ct);
 
         if (account == null)
         {
-            _logger.LogWarning("Account not found for email: {Email}", email);
+            _logger.LogWarning("Account not found for email: {Email}", PiiMask.MaskEmail(email));
         }
         else
         {
-            _logger.LogDebug("Retrieved account by email: {Email}", email);
+            _logger.LogDebug("Retrieved account by email: {Email}", PiiMask.MaskEmail(email));
         }
 
         return account;

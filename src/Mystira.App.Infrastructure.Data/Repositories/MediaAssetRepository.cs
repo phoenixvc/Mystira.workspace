@@ -13,22 +13,22 @@ public class MediaAssetRepository : Repository<MediaAsset>, IMediaAssetRepositor
     {
     }
 
-    public async Task<MediaAsset?> GetByMediaIdAsync(string mediaId)
+    public async Task<MediaAsset?> GetByMediaIdAsync(string mediaId, CancellationToken ct = default)
     {
-        return await _dbSet.FirstOrDefaultAsync(m => m.MediaId == mediaId);
+        return await _dbSet.FirstOrDefaultAsync(m => m.MediaId == mediaId, ct);
     }
 
-    public async Task<bool> ExistsByMediaIdAsync(string mediaId)
+    public async Task<bool> ExistsByMediaIdAsync(string mediaId, CancellationToken ct = default)
     {
-        return await _dbSet.AnyAsync(m => m.MediaId == mediaId);
+        return await _dbSet.AnyAsync(m => m.MediaId == mediaId, ct);
     }
 
-    public async Task<IEnumerable<string>> GetMediaIdsAsync(IEnumerable<string> mediaIds)
+    public async Task<IEnumerable<string>> GetMediaIdsAsync(IEnumerable<string> mediaIds, CancellationToken ct = default)
     {
         return await _dbSet
             .Where(m => mediaIds.Contains(m.MediaId))
             .Select(m => m.MediaId)
-            .ToListAsync();
+            .ToListAsync(ct);
     }
 
     public IQueryable<MediaAsset> GetQueryable()
@@ -36,4 +36,3 @@ public class MediaAssetRepository : Repository<MediaAsset>, IMediaAssetRepositor
         return _dbSet.AsQueryable();
     }
 }
-

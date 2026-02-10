@@ -23,7 +23,7 @@ public class MediaMetadataService : IMediaMetadataService
         _logger = logger;
     }
 
-    public async Task<MediaMetadataFile?> GetMediaMetadataFileAsync()
+    public async Task<MediaMetadataFile?> GetMediaMetadataFileAsync(CancellationToken ct = default)
     {
         try
         {
@@ -41,7 +41,7 @@ public class MediaMetadataService : IMediaMetadataService
         }
     }
 
-    public async Task<MediaMetadataFile> UpdateMediaMetadataFileAsync(MediaMetadataFile metadataFile)
+    public async Task<MediaMetadataFile> UpdateMediaMetadataFileAsync(MediaMetadataFile metadataFile, CancellationToken ct = default)
     {
         try
         {
@@ -59,11 +59,11 @@ public class MediaMetadataService : IMediaMetadataService
         }
     }
 
-    public async Task<MediaMetadataFile> AddMediaMetadataEntryAsync(MediaMetadataEntry entry)
+    public async Task<MediaMetadataFile> AddMediaMetadataEntryAsync(MediaMetadataEntry entry, CancellationToken ct = default)
     {
         try
         {
-            var metadataFile = await GetMediaMetadataFileAsync();
+            var metadataFile = await GetMediaMetadataFileAsync(ct);
             if (metadataFile == null)
             {
                 metadataFile = new MediaMetadataFile
@@ -88,7 +88,7 @@ public class MediaMetadataService : IMediaMetadataService
             }
 
             metadataFile.Entries.Add(entry);
-            return await UpdateMediaMetadataFileAsync(metadataFile);
+            return await UpdateMediaMetadataFileAsync(metadataFile, ct);
         }
         catch (Exception ex)
         {
@@ -97,11 +97,11 @@ public class MediaMetadataService : IMediaMetadataService
         }
     }
 
-    public async Task<MediaMetadataFile> UpdateMediaMetadataEntryAsync(string entryId, MediaMetadataEntry entry)
+    public async Task<MediaMetadataFile> UpdateMediaMetadataEntryAsync(string entryId, MediaMetadataEntry entry, CancellationToken ct = default)
     {
         try
         {
-            var metadataFile = await GetMediaMetadataFileAsync();
+            var metadataFile = await GetMediaMetadataFileAsync(ct);
             if (metadataFile == null)
             {
                 throw new InvalidOperationException("Media metadata file not found");
@@ -122,7 +122,7 @@ public class MediaMetadataService : IMediaMetadataService
             entry.Id = entryId;
             metadataFile.Entries[index] = entry;
 
-            return await UpdateMediaMetadataFileAsync(metadataFile);
+            return await UpdateMediaMetadataFileAsync(metadataFile, ct);
         }
         catch (Exception ex)
         {
@@ -131,11 +131,11 @@ public class MediaMetadataService : IMediaMetadataService
         }
     }
 
-    public async Task<MediaMetadataFile> RemoveMediaMetadataEntryAsync(string entryId)
+    public async Task<MediaMetadataFile> RemoveMediaMetadataEntryAsync(string entryId, CancellationToken ct = default)
     {
         try
         {
-            var metadataFile = await GetMediaMetadataFileAsync();
+            var metadataFile = await GetMediaMetadataFileAsync(ct);
             if (metadataFile == null)
             {
                 throw new InvalidOperationException("Media metadata file not found");
@@ -153,7 +153,7 @@ public class MediaMetadataService : IMediaMetadataService
             }
 
             metadataFile.Entries.Remove(existingEntry);
-            return await UpdateMediaMetadataFileAsync(metadataFile);
+            return await UpdateMediaMetadataFileAsync(metadataFile, ct);
         }
         catch (Exception ex)
         {
@@ -162,11 +162,11 @@ public class MediaMetadataService : IMediaMetadataService
         }
     }
 
-    public async Task<MediaMetadataEntry?> GetMediaMetadataEntryAsync(string entryId)
+    public async Task<MediaMetadataEntry?> GetMediaMetadataEntryAsync(string entryId, CancellationToken ct = default)
     {
         try
         {
-            var metadataFile = await GetMediaMetadataFileAsync();
+            var metadataFile = await GetMediaMetadataFileAsync(ct);
             if (metadataFile == null || metadataFile.Entries == null)
             {
                 return null;
@@ -181,7 +181,7 @@ public class MediaMetadataService : IMediaMetadataService
         }
     }
 
-    public async Task<MediaMetadataFile> ImportMediaMetadataEntriesAsync(string jsonData, bool overwriteExisting = false)
+    public async Task<MediaMetadataFile> ImportMediaMetadataEntriesAsync(string jsonData, bool overwriteExisting = false, CancellationToken ct = default)
     {
         try
         {
@@ -200,7 +200,7 @@ public class MediaMetadataService : IMediaMetadataService
                 throw new ArgumentException("No valid media metadata entries found in data");
             }
 
-            var metadataFile = await GetMediaMetadataFileAsync();
+            var metadataFile = await GetMediaMetadataFileAsync(ct);
             if (metadataFile == null)
             {
                 metadataFile = new MediaMetadataFile
@@ -239,7 +239,7 @@ public class MediaMetadataService : IMediaMetadataService
                 }
             }
 
-            return await UpdateMediaMetadataFileAsync(metadataFile);
+            return await UpdateMediaMetadataFileAsync(metadataFile, ct);
         }
         catch (Exception ex)
         {
@@ -248,4 +248,3 @@ public class MediaMetadataService : IMediaMetadataService
         }
     }
 }
-

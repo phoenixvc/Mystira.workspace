@@ -2,6 +2,7 @@ using Microsoft.Extensions.Logging;
 using Mystira.App.Application.Ports.Data;
 using Mystira.Contracts.App.Requests.GameSessions;
 using Mystira.App.Domain.Models;
+using System.Threading;
 
 namespace Mystira.App.Application.UseCases.GameSessions;
 
@@ -27,9 +28,9 @@ public class ProgressSceneUseCase
         _logger = logger;
     }
 
-    public async Task<GameSession?> ExecuteAsync(ProgressSceneRequest request)
+    public async Task<GameSession?> ExecuteAsync(ProgressSceneRequest request, CancellationToken ct = default)
     {
-        var session = await _repository.GetByIdAsync(request.SessionId);
+        var session = await _repository.GetByIdAsync(request.SessionId, ct);
         if (session == null)
         {
             return null;
@@ -40,7 +41,7 @@ public class ProgressSceneUseCase
             throw new InvalidOperationException($"Cannot progress scene in session with status {session.Status}");
         }
 
-        var scenario = await _scenarioRepository.GetByIdAsync(session.ScenarioId);
+        var scenario = await _scenarioRepository.GetByIdAsync(session.ScenarioId, ct);
         if (scenario == null)
         {
             throw new InvalidOperationException("Scenario not found for session");
@@ -64,8 +65,8 @@ public class ProgressSceneUseCase
             session.PausedAt = null;
         }
 
-        await _repository.UpdateAsync(session);
-        await _unitOfWork.SaveChangesAsync();
+        await _repository.UpdateAsync(session, ct);
+        await _unitOfWork.SaveChangesAsync(ct);
 
         _logger.LogInformation("Progressed session {SessionId} to scene {SceneId}",
             session.Id, request.SceneId);

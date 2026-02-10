@@ -7,8 +7,8 @@ namespace Mystira.App.Application.Ports.Data;
 /// </summary>
 public interface IMediaMetadataFileRepository
 {
-    Task<MediaMetadataFile?> GetAsync();
-    Task<MediaMetadataFile> AddOrUpdateAsync(MediaMetadataFile entity);
-    Task DeleteAsync();
+    Task<MediaMetadataFile?> GetAsync(CancellationToken ct = default);
+    Task<MediaMetadataFile> AddOrUpdateAsync(MediaMetadataFile entity, CancellationToken ct = default);
+    Task DeleteAsync(CancellationToken ct = default);
 }
 

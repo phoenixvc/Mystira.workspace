@@ -18,7 +18,7 @@ public sealed class GetUserBadgesByAxisQueryHandler
 
     public async Task<List<UserBadge>> Handle(GetUserBadgesByAxisQuery request, CancellationToken cancellationToken)
     {
-        var badges = await _userBadgeRepository.GetByUserProfileIdAsync(request.UserProfileId);
+        var badges = await _userBadgeRepository.GetByUserProfileIdAsync(request.UserProfileId, cancellationToken);
         return badges
             .Where(b => string.Equals(b.Axis, request.Axis, StringComparison.OrdinalIgnoreCase))
             .OrderByDescending(b => b.EarnedAt)

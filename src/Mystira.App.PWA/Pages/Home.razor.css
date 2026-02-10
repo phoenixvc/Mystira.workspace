@@ -120,3 +120,47 @@ html[data-theme="dark"] .feature-card .card-title {
 html[data-theme="dark"] .feature-card .card-text {
     color: #94a3b8;
 }
+
+/* Light mode support */
+html[data-theme="light"] .section-header {
+    background: #ffffff;
+    border-color: rgba(147, 51, 234, 0.1);
+}
+
+html[data-theme="light"] .section-header h5,
+html[data-theme="light"] .section-header .section-title {
+    color: #1f2937;
+}
+
+html[data-theme="light"] .section-header h5 i,
+html[data-theme="light"] .section-header .section-title i {
+    color: #7c3aed;
+}
+
+html[data-theme="light"] .section-header .btn-outline-secondary {
+    background: #ffffff;
+    border-color: rgba(147, 51, 234, 0.2);
+    color: #7c3aed;
+}
+
+html[data-theme="light"] .section-header .btn-outline-secondary:hover {
+    background: #f5f3ff;
+    border-color: #a78bfa;
+}
+
+html[data-theme="light"] .feature-card {
+    background-color: #ffffff;
+    border-color: rgba(147, 51, 234, 0.1);
+}
+
+html[data-theme="light"] .feature-card:hover {
+    box-shadow: 0 12px 24px rgba(147, 51, 234, 0.1);
+}
+
+html[data-theme="light"] .feature-card .card-title {
+    color: #1f2937;
+}
+
+html[data-theme="light"] .feature-card .card-text {
+    color: #6b7280;
+}

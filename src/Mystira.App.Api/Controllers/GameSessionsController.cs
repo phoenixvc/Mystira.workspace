@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Mystira.App.Application.CQRS.Accounts.Commands;
 using Mystira.App.Application.CQRS.GameSessions.Commands;
 using Mystira.App.Application.CQRS.GameSessions.Queries;
+using Mystira.App.Application.Helpers;
 using Mystira.App.Application.Ports.Services;
 using Mystira.Contracts.App.Requests.GameSessions;
 using Mystira.Contracts.App.Requests.Scenarios;
@@ -263,7 +264,7 @@ public class GameSessionsController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error getting sessions for account {AccountId}", accountId);
+            _logger.LogError(ex, "Error getting sessions for account {AccountId}", LogAnonymizer.HashId(accountId));
             return StatusCode(500, new ErrorResponse
             {
                 Message = "Internal server error while fetching account sessions",
@@ -382,7 +383,7 @@ public class GameSessionsController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error getting sessions for profile {ProfileId}", profileId);
+            _logger.LogError(ex, "Error getting sessions for profile {ProfileId}", LogAnonymizer.HashId(profileId));
             return StatusCode(500, new ErrorResponse
             {
                 Message = "Internal server error while fetching profile sessions",
@@ -406,7 +407,7 @@ public class GameSessionsController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error getting in-progress sessions for account {AccountId}", accountId);
+            _logger.LogError(ex, "Error getting in-progress sessions for account {AccountId}", LogAnonymizer.HashId(accountId));
             return StatusCode(500, new ErrorResponse
             {
                 Message = "Internal server error while fetching in-progress sessions",
@@ -564,7 +565,7 @@ public class GameSessionsController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error completing scenario {ScenarioId} for account {AccountId}",
-                request.ScenarioId, request.AccountId);
+                request.ScenarioId, LogAnonymizer.HashId(request.AccountId));
             return StatusCode(500, new ErrorResponse
             {
                 Message = "Internal server error while completing scenario",

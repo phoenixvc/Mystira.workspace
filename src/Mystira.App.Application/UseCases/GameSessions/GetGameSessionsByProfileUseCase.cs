@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 using Mystira.App.Application.Ports.Data;
 using Mystira.App.Domain.Models;
+using System.Threading;
 
 namespace Mystira.App.Application.UseCases.GameSessions;
 
@@ -20,17 +21,17 @@ public class GetGameSessionsByProfileUseCase
         _logger = logger;
     }
 
-    public async Task<List<GameSession>> ExecuteAsync(string profileId)
+    public async Task<List<GameSession>> ExecuteAsync(string profileId, CancellationToken ct = default)
     {
         if (string.IsNullOrWhiteSpace(profileId))
         {
             throw new ArgumentException("Profile ID cannot be null or empty", nameof(profileId));
         }
 
-        var sessions = await _repository.GetByProfileIdAsync(profileId);
+        var sessions = await _repository.GetByProfileIdAsync(profileId, ct);
         var sessionList = sessions.ToList();
 
-        _logger.LogInformation("Retrieved {Count} game sessions for profile {ProfileId}", sessionList.Count, profileId);
+        _logger.LogInformation("Retrieved {Count} game sessions for profile {ProfileId}", sessionList.Count, PiiMask.HashId(profileId));
 
         return sessionList;
     }

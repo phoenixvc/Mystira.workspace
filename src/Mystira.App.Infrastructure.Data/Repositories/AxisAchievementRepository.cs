@@ -10,17 +10,17 @@ public class AxisAchievementRepository : Repository<AxisAchievement>, IAxisAchie
     {
     }
 
-    public async Task<IEnumerable<AxisAchievement>> GetByAgeGroupAsync(string ageGroupId)
+    public async Task<IEnumerable<AxisAchievement>> GetByAgeGroupAsync(string ageGroupId, CancellationToken ct = default)
     {
         return await _dbSet
             .Where(x => x.AgeGroupId == ageGroupId)
-            .ToListAsync();
+            .ToListAsync(ct);
     }
 
-    public async Task<IEnumerable<AxisAchievement>> GetByCompassAxisAsync(string compassAxisId)
+    public async Task<IEnumerable<AxisAchievement>> GetByCompassAxisAsync(string compassAxisId, CancellationToken ct = default)
     {
         return await _dbSet
             .Where(x => x.CompassAxisId == compassAxisId)
-            .ToListAsync();
+            .ToListAsync(ct);
     }
 }

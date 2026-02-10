@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 using Mystira.App.Application.Ports.Data;
 using Mystira.Contracts.App.Responses.Media;
+using System.Threading;
 
 namespace Mystira.App.Application.UseCases.Avatars;
 
@@ -20,14 +21,14 @@ public class GetAvatarsByAgeGroupUseCase
         _logger = logger;
     }
 
-    public async Task<AvatarConfigurationResponse> ExecuteAsync(string ageGroup)
+    public async Task<AvatarConfigurationResponse> ExecuteAsync(string ageGroup, CancellationToken ct = default)
     {
         if (string.IsNullOrWhiteSpace(ageGroup))
         {
             throw new ArgumentException("Age group cannot be null or empty", nameof(ageGroup));
         }
 
-        var configFile = await _repository.GetAsync();
+        var configFile = await _repository.GetAsync(ct);
 
         if (configFile == null || !configFile.AgeGroupAvatars.TryGetValue(ageGroup, out var avatars))
         {

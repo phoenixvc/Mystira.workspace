@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 using Mystira.App.Application.Ports.Data;
 using Mystira.App.Domain.Models;
+using System.Threading;
 
 namespace Mystira.App.Application.UseCases.GameSessions;
 
@@ -23,14 +24,14 @@ public class EndGameSessionUseCase
         _logger = logger;
     }
 
-    public async Task<GameSession> ExecuteAsync(string sessionId)
+    public async Task<GameSession> ExecuteAsync(string sessionId, CancellationToken ct = default)
     {
         if (string.IsNullOrWhiteSpace(sessionId))
         {
             throw new ArgumentException("Session ID cannot be null or empty", nameof(sessionId));
         }
 
-        var session = await _repository.GetByIdAsync(sessionId);
+        var session = await _repository.GetByIdAsync(sessionId, ct);
         if (session == null)
         {
             throw new ArgumentException($"Game session not found: {sessionId}", nameof(sessionId));
@@ -48,8 +49,8 @@ public class EndGameSessionUseCase
         session.IsPaused = false;
         session.PausedAt = null;
 
-        await _repository.UpdateAsync(session);
-        await _unitOfWork.SaveChangesAsync();
+        await _repository.UpdateAsync(session, ct);
+        await _unitOfWork.SaveChangesAsync(ct);
 
         _logger.LogInformation("Ended game session: {SessionId}", sessionId);
         return session;

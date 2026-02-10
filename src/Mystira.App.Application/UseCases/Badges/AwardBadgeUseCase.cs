@@ -2,6 +2,7 @@ using Microsoft.Extensions.Logging;
 using Mystira.App.Application.Ports.Data;
 using Mystira.Contracts.App.Requests.Badges;
 using Mystira.App.Domain.Models;
+using System.Threading;
 
 namespace Mystira.App.Application.UseCases.Badges;
 
@@ -27,7 +28,7 @@ public class AwardBadgeUseCase
         _logger = logger;
     }
 
-    public async Task<UserBadge> ExecuteAsync(AwardBadgeRequest request)
+    public async Task<UserBadge> ExecuteAsync(AwardBadgeRequest request, CancellationToken ct = default)
     {
         if (request == null)
         {
@@ -35,22 +36,22 @@ public class AwardBadgeUseCase
         }
 
         var existingBadge = await _badgeRepository.GetByUserProfileIdAndBadgeConfigIdAsync(
-            request.UserProfileId, request.BadgeConfigurationId);
+            request.UserProfileId, request.BadgeConfigurationId, ct);
 
         if (existingBadge != null)
         {
             _logger.LogWarning("User {UserProfileId} already has badge {BadgeId}",
-                request.UserProfileId, request.BadgeConfigurationId);
+                PiiMask.HashId(request.UserProfileId), request.BadgeConfigurationId);
             return existingBadge;
         }
 
-        var badge = await _newBadgeRepository.GetByIdAsync(request.BadgeConfigurationId);
+        var badge = await _newBadgeRepository.GetByIdAsync(request.BadgeConfigurationId, ct);
         if (badge == null)
         {
             throw new ArgumentException($"Badge not found: {request.BadgeConfigurationId}", nameof(request));
         }
 
-        var userProfile = await _userProfileRepository.GetByIdAsync(request.UserProfileId);
+        var userProfile = await _userProfileRepository.GetByIdAsync(request.UserProfileId, ct);
         if (userProfile == null)
         {
             throw new ArgumentException($"User profile not found: {request.UserProfileId}", nameof(request));
@@ -73,15 +74,15 @@ public class AwardBadgeUseCase
             EarnedAt = DateTime.UtcNow
         };
 
-        await _badgeRepository.AddAsync(newBadge);
+        await _badgeRepository.AddAsync(newBadge, ct);
 
         userProfile.AddEarnedBadge(newBadge);
-        await _userProfileRepository.UpdateAsync(userProfile);
+        await _userProfileRepository.UpdateAsync(userProfile, ct);
 
-        await _unitOfWork.SaveChangesAsync();
+        await _unitOfWork.SaveChangesAsync(ct);
 
         _logger.LogInformation("Awarded badge {BadgeName} to user {UserProfileId}",
-            badge.Title, request.UserProfileId);
+            badge.Title, PiiMask.HashId(request.UserProfileId));
 
         return newBadge;
     }

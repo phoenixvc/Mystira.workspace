@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 using Mystira.App.Application.Ports.Data;
 using Mystira.App.Domain.Models;
+using System.Threading;
 
 namespace Mystira.App.Application.UseCases.ContentBundles;
 
@@ -31,14 +32,15 @@ public class UpdateContentBundleUseCase
         string? imageId = null,
         List<BundlePrice>? prices = null,
         bool? isFree = null,
-        string? ageGroup = null)
+        string? ageGroup = null,
+        CancellationToken ct = default)
     {
         if (string.IsNullOrWhiteSpace(bundleId))
         {
             throw new ArgumentException("Bundle ID cannot be null or empty", nameof(bundleId));
         }
 
-        var bundle = await _repository.GetByIdAsync(bundleId);
+        var bundle = await _repository.GetByIdAsync(bundleId, ct);
         if (bundle == null)
         {
             throw new ArgumentException($"Content bundle not found: {bundleId}", nameof(bundleId));
@@ -80,8 +82,8 @@ public class UpdateContentBundleUseCase
             bundle.AgeGroup = ageGroup;
         }
 
-        await _repository.UpdateAsync(bundle);
-        await _unitOfWork.SaveChangesAsync();
+        await _repository.UpdateAsync(bundle, ct);
+        await _unitOfWork.SaveChangesAsync(ct);
 
         _logger.LogInformation("Updated content bundle: {BundleId}", bundleId);
         return bundle;

@@ -8,12 +8,12 @@ namespace Mystira.App.Application.Ports;
 /// </summary>
 public interface IMediaMetadataService
 {
-    Task<MediaMetadataFile?> GetMediaMetadataFileAsync();
-    Task<MediaMetadataFile> UpdateMediaMetadataFileAsync(MediaMetadataFile metadataFile);
-    Task<MediaMetadataFile> AddMediaMetadataEntryAsync(MediaMetadataEntry entry);
-    Task<MediaMetadataFile> UpdateMediaMetadataEntryAsync(string entryId, MediaMetadataEntry entry);
-    Task<MediaMetadataFile> RemoveMediaMetadataEntryAsync(string entryId);
-    Task<MediaMetadataEntry?> GetMediaMetadataEntryAsync(string entryId);
-    Task<MediaMetadataFile> ImportMediaMetadataEntriesAsync(string jsonData, bool overwriteExisting = false);
+    Task<MediaMetadataFile?> GetMediaMetadataFileAsync(CancellationToken ct = default);
+    Task<MediaMetadataFile> UpdateMediaMetadataFileAsync(MediaMetadataFile metadataFile, CancellationToken ct = default);
+    Task<MediaMetadataFile> AddMediaMetadataEntryAsync(MediaMetadataEntry entry, CancellationToken ct = default);
+    Task<MediaMetadataFile> UpdateMediaMetadataEntryAsync(string entryId, MediaMetadataEntry entry, CancellationToken ct = default);
+    Task<MediaMetadataFile> RemoveMediaMetadataEntryAsync(string entryId, CancellationToken ct = default);
+    Task<MediaMetadataEntry?> GetMediaMetadataEntryAsync(string entryId, CancellationToken ct = default);
+    Task<MediaMetadataFile> ImportMediaMetadataEntriesAsync(string jsonData, bool overwriteExisting = false, CancellationToken ct = default);
 }
 

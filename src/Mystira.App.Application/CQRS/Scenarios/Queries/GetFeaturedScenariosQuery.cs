@@ -11,5 +11,5 @@ namespace Mystira.App.Application.CQRS.Scenarios.Queries;
 public record GetFeaturedScenariosQuery : IQuery<List<Scenario>>, ICacheableQuery
 {
     public string CacheKey => "FeaturedScenarios";
-    public int CacheDurationSeconds => 600; // 10 minutes
+    public int CacheDurationSeconds => CacheDefaults.MediumSeconds;
 }

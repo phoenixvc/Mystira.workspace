@@ -2,6 +2,7 @@ using Microsoft.Extensions.Logging;
 using Mystira.App.Application.Ports.Data;
 using Mystira.Contracts.App.Responses.Media;
 using Mystira.App.Domain.Models;
+using System.Threading;
 
 namespace Mystira.App.Application.UseCases.Avatars;
 
@@ -21,9 +22,9 @@ public class GetAvatarConfigurationsUseCase
         _logger = logger;
     }
 
-    public async Task<AvatarResponse> ExecuteAsync()
+    public async Task<AvatarResponse> ExecuteAsync(CancellationToken ct = default)
     {
-        var configFile = await _repository.GetAsync();
+        var configFile = await _repository.GetAsync(ct);
 
         var response = new AvatarResponse
         {

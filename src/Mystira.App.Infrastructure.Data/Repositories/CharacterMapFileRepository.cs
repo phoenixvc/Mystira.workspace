@@ -18,14 +18,14 @@ public class CharacterMapFileRepository : ICharacterMapFileRepository
         _dbSet = context.Set<CharacterMapFile>();
     }
 
-    public async Task<CharacterMapFile?> GetAsync()
+    public async Task<CharacterMapFile?> GetAsync(CancellationToken ct = default)
     {
-        return await _dbSet.FirstOrDefaultAsync();
+        return await _dbSet.FirstOrDefaultAsync(ct);
     }
 
-    public async Task<CharacterMapFile> AddOrUpdateAsync(CharacterMapFile entity)
+    public async Task<CharacterMapFile> AddOrUpdateAsync(CharacterMapFile entity, CancellationToken ct = default)
     {
-        var existing = await GetAsync();
+        var existing = await GetAsync(ct);
         if (existing != null)
         {
             existing.Characters = entity.Characters;
@@ -35,17 +35,16 @@ public class CharacterMapFileRepository : ICharacterMapFileRepository
             return existing;
         }
 
-        await _dbSet.AddAsync(entity);
+        await _dbSet.AddAsync(entity, ct);
         return entity;
     }
 
-    public async Task DeleteAsync()
+    public async Task DeleteAsync(CancellationToken ct = default)
     {
-        var existing = await GetAsync();
+        var existing = await GetAsync(ct);
         if (existing != null)
         {
             _dbSet.Remove(existing);
         }
     }
 }
-

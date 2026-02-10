@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Logging;
 using Mystira.App.Application.Ports.Data;
+using System.Threading;
 
 namespace Mystira.App.Application.UseCases.UserProfiles;
 
@@ -25,25 +26,25 @@ public class DeleteUserProfileUseCase
         _logger = logger;
     }
 
-    public async Task<bool> ExecuteAsync(string id)
+    public async Task<bool> ExecuteAsync(string id, CancellationToken ct = default)
     {
-        var profile = await _repository.GetByIdAsync(id);
+        var profile = await _repository.GetByIdAsync(id, ct);
         if (profile == null)
         {
             return false;
         }
 
         // COPPA compliance: Also delete associated sessions, badges, and data
-        var sessions = await _gameSessionRepository.GetByProfileIdAsync(profile.Id);
+        var sessions = await _gameSessionRepository.GetByProfileIdAsync(profile.Id, ct);
         foreach (var session in sessions)
         {
-            await _gameSessionRepository.DeleteAsync(session.Id);
+            await _gameSessionRepository.DeleteAsync(session.Id, ct);
         }
 
-        await _repository.DeleteAsync(profile.Id);
-        await _unitOfWork.SaveChangesAsync();
+        await _repository.DeleteAsync(profile.Id, ct);
+        await _unitOfWork.SaveChangesAsync(ct);
 
-        _logger.LogInformation("Deleted user profile and associated data: {ProfileId} - {Name}", profile.Id, profile.Name);
+        _logger.LogInformation("Deleted user profile and associated data: {ProfileId} - {Name}", PiiMask.HashId(profile.Id), PiiMask.HashId(profile.Name));
         return true;
     }
 }

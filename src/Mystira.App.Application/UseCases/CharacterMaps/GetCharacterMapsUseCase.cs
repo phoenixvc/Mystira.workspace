@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 using Mystira.App.Application.Ports.Data;
 using Mystira.App.Domain.Models;
+using System.Threading;
 
 namespace Mystira.App.Application.UseCases.CharacterMaps;
 
@@ -20,9 +21,9 @@ public class GetCharacterMapsUseCase
         _logger = logger;
     }
 
-    public async Task<List<CharacterMap>> ExecuteAsync()
+    public async Task<List<CharacterMap>> ExecuteAsync(CancellationToken ct = default)
     {
-        var characterMaps = await _repository.GetAllAsync();
+        var characterMaps = await _repository.GetAllAsync(ct);
         var characterMapList = characterMaps.ToList();
 
         _logger.LogInformation("Retrieved {Count} character maps", characterMapList.Count);

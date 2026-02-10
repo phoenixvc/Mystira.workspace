@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 using Mystira.App.Application.Ports.Data;
 using Mystira.App.Domain.Models;
+using System.Threading;
 
 namespace Mystira.App.Application.UseCases.Avatars;
 
@@ -23,7 +24,7 @@ public class CreateAvatarConfigurationUseCase
         _logger = logger;
     }
 
-    public async Task<AvatarConfigurationFile> ExecuteAsync(Dictionary<string, List<string>> ageGroupAvatars)
+    public async Task<AvatarConfigurationFile> ExecuteAsync(Dictionary<string, List<string>> ageGroupAvatars, CancellationToken ct = default)
     {
         if (ageGroupAvatars == null)
         {
@@ -31,7 +32,7 @@ public class CreateAvatarConfigurationUseCase
         }
 
         // Check if configuration already exists
-        var existing = await _repository.GetAsync();
+        var existing = await _repository.GetAsync(ct);
         if (existing != null)
         {
             throw new InvalidOperationException("Avatar configuration file already exists. Use update instead.");
@@ -46,8 +47,8 @@ public class CreateAvatarConfigurationUseCase
             Version = "1.0"
         };
 
-        await _repository.AddOrUpdateAsync(configFile);
-        await _unitOfWork.SaveChangesAsync();
+        await _repository.AddOrUpdateAsync(configFile, ct);
+        await _unitOfWork.SaveChangesAsync(ct);
 
         _logger.LogInformation("Created avatar configuration file with {Count} age groups", ageGroupAvatars.Count);
         return configFile;

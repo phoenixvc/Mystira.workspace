@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using Mystira.App.Application.Helpers;
 using Mystira.App.Application.Ports.Data;
 using Mystira.App.Domain.Models;
 
@@ -21,10 +22,10 @@ public static class UpdateUserProfileCommandHandler
         ILogger logger,
         CancellationToken ct)
     {
-        var profile = await repository.GetByIdAsync(command.ProfileId);
+        var profile = await repository.GetByIdAsync(command.ProfileId, ct);
         if (profile == null)
         {
-            logger.LogWarning("Profile not found: {ProfileId}", command.ProfileId);
+            logger.LogWarning("Profile not found: {ProfileId}", LogAnonymizer.HashId(command.ProfileId));
             return null;
         }
 
@@ -92,12 +93,12 @@ public static class UpdateUserProfileCommandHandler
         profile.UpdatedAt = DateTime.UtcNow;
 
         // Update in repository
-        await repository.UpdateAsync(profile);
+        await repository.UpdateAsync(profile, ct);
 
         // Persist changes
         await unitOfWork.SaveChangesAsync(ct);
 
-        logger.LogInformation("Updated user profile {ProfileId}", profile.Id);
+        logger.LogInformation("Updated user profile {ProfileId}", LogAnonymizer.HashId(profile.Id));
 
         return profile;
     }

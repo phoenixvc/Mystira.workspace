@@ -21,21 +21,22 @@ public interface IStoryProtocolService
         string contentTitle,
         List<Contributor> contributors,
         string? metadataUri = null,
-        string? licenseTermsId = null);
+        string? licenseTermsId = null,
+        CancellationToken ct = default);
 
     /// <summary>
     /// Checks if content is already registered on Story Protocol
     /// </summary>
     /// <param name="contentId">ID of the scenario or bundle</param>
     /// <returns>True if registered, false otherwise</returns>
-    Task<bool> IsRegisteredAsync(string contentId);
+    Task<bool> IsRegisteredAsync(string contentId, CancellationToken ct = default);
 
     /// <summary>
     /// Gets the current royalty split configuration from Story Protocol
     /// </summary>
     /// <param name="ipAssetId">Story Protocol IP Asset ID</param>
     /// <returns>Current royalty configuration</returns>
-    Task<StoryProtocolMetadata?> GetRoyaltyConfigurationAsync(string ipAssetId);
+    Task<StoryProtocolMetadata?> GetRoyaltyConfigurationAsync(string ipAssetId, CancellationToken ct = default);
 
     /// <summary>
     /// Updates the royalty split for an existing IP Asset
@@ -44,7 +45,7 @@ public interface IStoryProtocolService
     /// <param name="ipAssetId">Story Protocol IP Asset ID</param>
     /// <param name="contributors">Updated list of contributors</param>
     /// <returns>Updated Story Protocol metadata</returns>
-    Task<StoryProtocolMetadata> UpdateRoyaltySplitAsync(string ipAssetId, List<Contributor> contributors);
+    Task<StoryProtocolMetadata> UpdateRoyaltySplitAsync(string ipAssetId, List<Contributor> contributors, CancellationToken ct = default);
 
     /// <summary>
     /// Pays royalties to an IP Asset, distributing to all contributors based on their splits
@@ -53,14 +54,14 @@ public interface IStoryProtocolService
     /// <param name="amount">Amount to pay (in WIP token smallest unit)</param>
     /// <param name="payerReference">Optional reference for the payment (e.g., order ID)</param>
     /// <returns>Transaction hash of the royalty payment</returns>
-    Task<RoyaltyPaymentResult> PayRoyaltyAsync(string ipAssetId, decimal amount, string? payerReference = null);
+    Task<RoyaltyPaymentResult> PayRoyaltyAsync(string ipAssetId, decimal amount, string? payerReference = null, CancellationToken ct = default);
 
     /// <summary>
     /// Gets the claimable royalty balance for an IP Asset
     /// </summary>
     /// <param name="ipAssetId">Story Protocol IP Asset ID</param>
     /// <returns>Claimable balance information</returns>
-    Task<RoyaltyBalance> GetClaimableRoyaltiesAsync(string ipAssetId);
+    Task<RoyaltyBalance> GetClaimableRoyaltiesAsync(string ipAssetId, CancellationToken ct = default);
 
     /// <summary>
     /// Claims accumulated royalties for a contributor wallet
@@ -68,5 +69,5 @@ public interface IStoryProtocolService
     /// <param name="ipAssetId">Story Protocol IP Asset ID</param>
     /// <param name="contributorWallet">Wallet address of the contributor claiming</param>
     /// <returns>Transaction hash of the claim</returns>
-    Task<string> ClaimRoyaltiesAsync(string ipAssetId, string contributorWallet);
+    Task<string> ClaimRoyaltiesAsync(string ipAssetId, string contributorWallet, CancellationToken ct = default);
 }

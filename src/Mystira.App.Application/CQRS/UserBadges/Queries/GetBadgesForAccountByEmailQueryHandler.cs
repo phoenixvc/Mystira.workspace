@@ -2,6 +2,7 @@ using Wolverine;
 using Microsoft.Extensions.Logging;
 using Mystira.App.Application.CQRS.Accounts.Queries;
 using Mystira.App.Application.CQRS.UserProfiles.Queries;
+using Mystira.App.Application.Helpers;
 using Mystira.App.Domain.Models;
 
 namespace Mystira.App.Application.CQRS.UserBadges.Queries;
@@ -23,7 +24,7 @@ public static class GetBadgesForAccountByEmailQueryHandler
         ILogger logger,
         CancellationToken ct)
     {
-        logger.LogInformation("Getting badges for account with email {Email}", query.Email);
+        logger.LogInformation("Getting badges for account with email {Email}", LogAnonymizer.HashEmail(query.Email));
 
         // Get account by email
         var accountQuery = new GetAccountByEmailQuery(query.Email);
@@ -31,7 +32,7 @@ public static class GetBadgesForAccountByEmailQueryHandler
 
         if (account == null)
         {
-            logger.LogWarning("Account not found for email {Email}", query.Email);
+            logger.LogWarning("Account not found for email {Email}", LogAnonymizer.HashEmail(query.Email));
             return new List<UserBadge>();
         }
 
@@ -46,7 +47,7 @@ public static class GetBadgesForAccountByEmailQueryHandler
         var allBadges = badgeResults.SelectMany(b => b).ToList();
 
         logger.LogInformation("Found {Count} total badges for account {Email}",
-            allBadges.Count, query.Email);
+            allBadges.Count, LogAnonymizer.HashEmail(query.Email));
 
         return allBadges;
     }

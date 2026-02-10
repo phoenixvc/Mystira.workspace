@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Mystira.App.Application.CQRS.UserProfiles.Commands;
 using Mystira.App.Application.CQRS.UserProfiles.Queries;
+using Mystira.App.Application.Helpers;
 using Mystira.Contracts.App.Requests.UserProfiles;
 using Mystira.App.Api.Models;
 using Mystira.App.Domain.Models;
@@ -82,7 +83,7 @@ public class UserProfilesController : ControllerBase
     {
         try
         {
-            _logger.LogInformation("Getting profiles for account {AccountId}", accountId);
+            _logger.LogInformation("Getting profiles for account {AccountId}", LogAnonymizer.HashId(accountId));
 
             var query = new GetProfilesByAccountQuery(accountId);
             var profiles = await _bus.InvokeAsync<List<UserProfile>>(query);
@@ -90,7 +91,7 @@ public class UserProfilesController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error getting profiles for account {AccountId}", accountId);
+            _logger.LogError(ex, "Error getting profiles for account {AccountId}", LogAnonymizer.HashId(accountId));
             return StatusCode(500, new ErrorResponse
             {
                 Message = "Internal server error while fetching profiles",
@@ -122,7 +123,7 @@ public class UserProfilesController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error getting profile {Id}", id);
+            _logger.LogError(ex, "Error getting profile {Id}", LogAnonymizer.HashId(id));
             return StatusCode(500, new ErrorResponse
             {
                 Message = "Internal server error while fetching profile",
@@ -167,7 +168,7 @@ public class UserProfilesController : ControllerBase
         }
         catch (ArgumentException ex)
         {
-            _logger.LogWarning(ex, "Validation error updating profile {Id}", id);
+            _logger.LogWarning(ex, "Validation error updating profile {Id}", LogAnonymizer.HashId(id));
             return BadRequest(new ErrorResponse
             {
                 Message = ex.Message,
@@ -176,7 +177,7 @@ public class UserProfilesController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error updating profile {Id}", id);
+            _logger.LogError(ex, "Error updating profile {Id}", LogAnonymizer.HashId(id));
             return StatusCode(500, new ErrorResponse
             {
                 Message = "Internal server error while updating profile",
@@ -221,7 +222,7 @@ public class UserProfilesController : ControllerBase
         }
         catch (ArgumentException ex)
         {
-            _logger.LogWarning(ex, "Validation error updating profile {ProfileId}", profileId);
+            _logger.LogWarning(ex, "Validation error updating profile {ProfileId}", LogAnonymizer.HashId(profileId));
             return BadRequest(new ErrorResponse
             {
                 Message = ex.Message,
@@ -230,7 +231,7 @@ public class UserProfilesController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error updating profile {ProfileId}", profileId);
+            _logger.LogError(ex, "Error updating profile {ProfileId}", LogAnonymizer.HashId(profileId));
             return StatusCode(500, new ErrorResponse
             {
                 Message = "Internal server error while updating profile",
@@ -262,7 +263,7 @@ public class UserProfilesController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error deleting profile {Id}", id);
+            _logger.LogError(ex, "Error deleting profile {Id}", LogAnonymizer.HashId(id));
             return StatusCode(500, new ErrorResponse
             {
                 Message = "Internal server error while deleting profile",
@@ -294,7 +295,7 @@ public class UserProfilesController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error completing onboarding for {Id}", id);
+            _logger.LogError(ex, "Error completing onboarding for {Id}", LogAnonymizer.HashId(id));
             return StatusCode(500, new ErrorResponse
             {
                 Message = "Internal server error while completing onboarding",
@@ -381,7 +382,7 @@ public class UserProfilesController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error assigning character {CharacterId} to profile {ProfileId}",
-                request.CharacterId, request.ProfileId);
+                request.CharacterId, LogAnonymizer.HashId(request.ProfileId));
             return StatusCode(500, new ErrorResponse
             {
                 Message = "Internal server error while assigning character",
@@ -415,7 +416,7 @@ public class UserProfilesController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error removing profile {ProfileId} from account", profileId);
+            _logger.LogError(ex, "Error removing profile {ProfileId} from account", LogAnonymizer.HashId(profileId));
             return StatusCode(500, new ErrorResponse
             {
                 Message = "Internal server error while removing profile from account",

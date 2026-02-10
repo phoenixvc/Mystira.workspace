@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using Mystira.App.Application.Helpers;
 using Mystira.App.Application.Ports.Data;
 
 namespace Mystira.App.Application.CQRS.UserProfiles.Commands;
@@ -20,10 +21,10 @@ public static class CompleteOnboardingCommandHandler
         ILogger logger,
         CancellationToken ct)
     {
-        var profile = await repository.GetByIdAsync(command.ProfileId);
+        var profile = await repository.GetByIdAsync(command.ProfileId, ct);
         if (profile == null)
         {
-            logger.LogWarning("Profile not found: {ProfileId}", command.ProfileId);
+            logger.LogWarning("Profile not found: {ProfileId}", LogAnonymizer.HashId(command.ProfileId));
             return false;
         }
 
@@ -32,12 +33,12 @@ public static class CompleteOnboardingCommandHandler
         profile.UpdatedAt = DateTime.UtcNow;
 
         // Update in repository
-        await repository.UpdateAsync(profile);
+        await repository.UpdateAsync(profile, ct);
 
         // Persist changes
         await unitOfWork.SaveChangesAsync(ct);
 
-        logger.LogInformation("Completed onboarding for profile {ProfileId}", command.ProfileId);
+        logger.LogInformation("Completed onboarding for profile {ProfileId}", LogAnonymizer.HashId(command.ProfileId));
 
         return true;
     }

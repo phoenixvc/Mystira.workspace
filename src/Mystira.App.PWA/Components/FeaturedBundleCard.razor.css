@@ -232,3 +232,50 @@ html[data-theme="dark"] .featured-pill.pill-free:hover {
     background: linear-gradient(135deg, rgba(16, 185, 129, 1) 0%, rgba(5, 150, 105, 1) 100%);
     box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
 }
+
+/* Light mode support */
+html[data-theme="light"] .featured-bundle-card .card {
+    background: #ffffff;
+    border-color: #eab308;
+}
+
+html[data-theme="light"] .featured-bundle-card .card-header {
+    background: linear-gradient(135deg, #eab308 0%, #ca8a04 100%);
+    color: #14122b;
+}
+
+html[data-theme="light"] .featured-bundle-card .card-body {
+    background: #ffffff;
+}
+
+html[data-theme="light"] .featured-bundle-card .card-title {
+    color: #1f2937;
+}
+
+html[data-theme="light"] .featured-bundle-card .card-text {
+    color: #6b7280;
+}
+
+html[data-theme="light"] .featured-pill.pill-adventures {
+    background: linear-gradient(135deg, rgba(147, 51, 234, 0.12) 0%, rgba(124, 58, 237, 0.12) 100%);
+    border-color: rgba(147, 51, 234, 0.25);
+    color: #7c3aed;
+}
+
+html[data-theme="light"] .featured-pill.pill-completed {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.12) 0%, rgba(5, 150, 105, 0.12) 100%);
+    border-color: rgba(16, 185, 129, 0.25);
+    color: #059669;
+}
+
+html[data-theme="light"] .featured-pill.pill-pending {
+    background: linear-gradient(135deg, rgba(107, 114, 128, 0.12) 0%, rgba(75, 85, 99, 0.12) 100%);
+    border-color: rgba(107, 114, 128, 0.25);
+    color: #6b7280;
+}
+
+html[data-theme="light"] .featured-pill.pill-age {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.12) 0%, rgba(37, 99, 235, 0.12) 100%);
+    border-color: rgba(59, 130, 246, 0.25);
+    color: #2563eb;
+}

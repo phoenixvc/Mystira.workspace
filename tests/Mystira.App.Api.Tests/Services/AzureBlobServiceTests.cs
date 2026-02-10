@@ -50,7 +50,7 @@ public class AzureBlobServiceTests
         var fileName = "test-image.jpg";
         var contentType = "image/jpeg";
         var content = "test content";
-        var fileStream = new MemoryStream(Encoding.UTF8.GetBytes(content));
+        using var fileStream = new MemoryStream(Encoding.UTF8.GetBytes(content));
 
         var mockResponse = Mock.Of<Response<BlobContentInfo>>();
         var expectedUrl = $"https://test.blob.core.windows.net/test-container/{fileName}";
@@ -59,7 +59,7 @@ public class AzureBlobServiceTests
         _mockContainerClient
             .Setup(x => x.CreateIfNotExistsAsync(
                 It.IsAny<PublicAccessType>(),
-                It.IsAny<Dictionary<string, string>>(), CancellationToken.None))
+                It.IsAny<Dictionary<string, string>>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Mock.Of<Response<BlobContainerInfo>>());
 
         _mockContainerClient
@@ -146,7 +146,7 @@ public class AzureBlobServiceTests
     {
         // Arrange
         var blobName = "non-existent-file.jpg";
-        var mockResponse = Mock.Of<Response<bool>>(r => r.Value == false);
+        var mockResponse = Mock.Of<Response<bool>>(r => !r.Value);
 
         _mockBlobClient
             .Setup(x => x.DeleteIfExistsAsync(
@@ -253,7 +253,7 @@ public class AzureBlobServiceTests
         // Arrange
         var blobName = "test-file.jpg";
         var content = "test file content";
-        var contentStream = new MemoryStream(Encoding.UTF8.GetBytes(content));
+        using var contentStream = new MemoryStream(Encoding.UTF8.GetBytes(content));
 
         // Setup ExistsAsync to return true
         _mockBlobClient
@@ -267,7 +267,7 @@ public class AzureBlobServiceTests
 
         _mockBlobClient
             .Setup(x => x.DownloadStreamingAsync(
-                It.IsAny<BlobDownloadOptions>(), CancellationToken.None))
+                It.IsAny<BlobDownloadOptions>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(mockStreamingResponse);
 
         // Act
@@ -292,7 +292,7 @@ public class AzureBlobServiceTests
         // Mock ExistsAsync to return false
         _mockBlobClient
             .Setup(x => x.ExistsAsync(It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Mock.Of<Response<bool>>(r => r.Value == false));
+            .ReturnsAsync(Mock.Of<Response<bool>>(r => !r.Value));
 
         // We don't need to setup DownloadStreamingAsync since it won't be called
 
@@ -310,13 +310,13 @@ public class AzureBlobServiceTests
         // Arrange
         var fileName = "test-image.jpg";
         var contentType = "image/jpeg";
-        var fileStream = new MemoryStream(Encoding.UTF8.GetBytes("test"));
+        using var fileStream = new MemoryStream(Encoding.UTF8.GetBytes("test"));
 
         // Setup container client
         _mockContainerClient
             .Setup(x => x.CreateIfNotExistsAsync(
                 It.IsAny<PublicAccessType>(),
-                It.IsAny<Dictionary<string, string>>(), CancellationToken.None))
+                It.IsAny<Dictionary<string, string>>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Mock.Of<Response<BlobContainerInfo>>());
 
         _mockContainerClient
@@ -351,11 +351,11 @@ public class AzureBlobServiceTests
 
     private static AsyncPageable<BlobItem> CreateMockPageable(BlobItem[] items)
     {
-        var mockPage = Mock.Of<Page<BlobItem>>(p =>
-            p.Values == items &&
-            p.ContinuationToken == null);
+        var mockPage = new Mock<Page<BlobItem>>();
+        mockPage.Setup(p => p.Values).Returns(items);
+        mockPage.Setup(p => p.ContinuationToken).Returns((string?)null);
 
-        var pages = new[] { mockPage };
+        var pages = new[] { mockPage.Object };
 
         var mockPageable = Mock.Of<AsyncPageable<BlobItem>>();
         Mock.Get(mockPageable)

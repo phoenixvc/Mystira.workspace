@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 using Mystira.App.Application.Ports.Data;
 using Mystira.App.Domain.Models;
+using System.Threading;
 
 namespace Mystira.App.Application.UseCases.Badges;
 
@@ -20,17 +21,17 @@ public class GetUserBadgesUseCase
         _logger = logger;
     }
 
-    public async Task<List<UserBadge>> ExecuteAsync(string userProfileId)
+    public async Task<List<UserBadge>> ExecuteAsync(string userProfileId, CancellationToken ct = default)
     {
         if (string.IsNullOrWhiteSpace(userProfileId))
         {
             throw new ArgumentException("User profile ID cannot be null or empty", nameof(userProfileId));
         }
 
-        var badges = await _repository.GetByUserProfileIdAsync(userProfileId);
+        var badges = await _repository.GetByUserProfileIdAsync(userProfileId, ct);
         var badgeList = badges.ToList();
 
-        _logger.LogInformation("Retrieved {Count} badges for user profile {UserProfileId}", badgeList.Count, userProfileId);
+        _logger.LogInformation("Retrieved {Count} badges for user profile {UserProfileId}", badgeList.Count, PiiMask.HashId(userProfileId));
         return badgeList;
     }
 }

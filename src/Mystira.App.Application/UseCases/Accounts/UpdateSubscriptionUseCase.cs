@@ -2,6 +2,7 @@ using Microsoft.Extensions.Logging;
 using Mystira.App.Application.Ports.Data;
 using Mystira.Contracts.App.Requests.Accounts;
 using Mystira.App.Domain.Models;
+using System.Threading;
 
 namespace Mystira.App.Application.UseCases.Accounts;
 
@@ -24,7 +25,7 @@ public class UpdateSubscriptionUseCase
         _logger = logger;
     }
 
-    public async Task<Account> ExecuteAsync(string accountId, UpdateSubscriptionRequest request)
+    public async Task<Account> ExecuteAsync(string accountId, UpdateSubscriptionRequest request, CancellationToken ct = default)
     {
         if (string.IsNullOrWhiteSpace(accountId))
         {
@@ -36,7 +37,7 @@ public class UpdateSubscriptionUseCase
             throw new ArgumentNullException(nameof(request));
         }
 
-        var account = await _repository.GetByIdAsync(accountId);
+        var account = await _repository.GetByIdAsync(accountId, ct);
         if (account == null)
         {
             throw new ArgumentException($"Account not found: {accountId}", nameof(accountId));
@@ -67,10 +68,10 @@ public class UpdateSubscriptionUseCase
 
         account.Subscription.LastVerified = DateTime.UtcNow;
 
-        await _repository.UpdateAsync(account);
-        await _unitOfWork.SaveChangesAsync();
+        await _repository.UpdateAsync(account, ct);
+        await _unitOfWork.SaveChangesAsync(ct);
 
-        _logger.LogInformation("Updated subscription for account: {AccountId}", accountId);
+        _logger.LogInformation("Updated subscription for account: {AccountId}", PiiMask.HashId(accountId));
         return account;
     }
 }

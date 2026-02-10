@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Logging;
 using Mystira.App.Application.Ports.Data;
+using System.Threading;
 
 namespace Mystira.App.Application.UseCases.GameSessions;
 
@@ -22,22 +23,22 @@ public class DeleteGameSessionUseCase
         _logger = logger;
     }
 
-    public async Task<bool> ExecuteAsync(string sessionId)
+    public async Task<bool> ExecuteAsync(string sessionId, CancellationToken ct = default)
     {
         if (string.IsNullOrWhiteSpace(sessionId))
         {
             throw new ArgumentException("Session ID cannot be null or empty", nameof(sessionId));
         }
 
-        var session = await _repository.GetByIdAsync(sessionId);
+        var session = await _repository.GetByIdAsync(sessionId, ct);
         if (session == null)
         {
             _logger.LogWarning("Game session not found for deletion: {SessionId}", sessionId);
             return false;
         }
 
-        await _repository.DeleteAsync(sessionId);
-        await _unitOfWork.SaveChangesAsync();
+        await _repository.DeleteAsync(sessionId, ct);
+        await _unitOfWork.SaveChangesAsync(ct);
 
         _logger.LogInformation("Deleted game session: {SessionId}", sessionId);
         return true;

@@ -8,17 +8,27 @@
 <div class="@ContainerClass">
     @if (!string.IsNullOrEmpty(MediaId))
     {
-        <img src="@_imageUrl"
-             alt="@Alt"
-             class="@ImageClass"
-             width="@Width"
-             height="@Height"
-             loading="@Loading" />
+        @if (_hasError)
+        {
+            <div class="cached-image-placeholder @ImageClass" style="width: @Width; height: @Height;" role="img" aria-label="@Alt">
+                <i class="fas fa-image fa-3x" aria-hidden="true"></i>
+            </div>
+        }
+        else
+        {
+            <img src="@_imageUrl"
+                 alt="@Alt"
+                 class="@ImageClass"
+                 width="@Width"
+                 height="@Height"
+                 loading="@Loading"
+                 @onerror="HandleImageError" />
+        }
     }
     else
     {
-        <div class="text-danger">
-            <small>No media ID specified</small>
+        <div class="cached-image-placeholder @ImageClass" style="width: @Width; height: @Height;" role="img" aria-label="@Alt">
+            <i class="fas fa-image fa-2x" aria-hidden="true"></i>
         </div>
     }
 </div>
@@ -31,16 +41,27 @@
     [Parameter] public string Width { get; set; } = "auto";
     [Parameter] public string Height { get; set; } = "auto";
     [Parameter] public string Loading { get; set; } = "lazy";
-    
+
     private string _imageUrl = string.Empty;
+    private bool _hasError = false;
+
+    private void HandleImageError()
+    {
+        Logger.LogWarning("Image failed to load for mediaId: {MediaId}", MediaId);
+        _hasError = true;
+        StateHasChanged();
+    }
     
     protected override async Task OnParametersSetAsync()
     {
+        // Reset error state when parameters change
+        _hasError = false;
+
         if (string.IsNullOrEmpty(MediaId))
         {
             return;
         }
-        
+
         // Get the original URL
         string originalUrl = GetFullImageUrl();
         

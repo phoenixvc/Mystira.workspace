@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Logging;
 using Mystira.App.Application.Ports.Data;
+using System.Threading;
 
 namespace Mystira.App.Application.UseCases.Avatars;
 
@@ -22,17 +23,17 @@ public class DeleteAvatarConfigurationUseCase
         _logger = logger;
     }
 
-    public async Task<bool> ExecuteAsync()
+    public async Task<bool> ExecuteAsync(CancellationToken ct = default)
     {
-        var configFile = await _repository.GetAsync();
+        var configFile = await _repository.GetAsync(ct);
         if (configFile == null)
         {
             _logger.LogWarning("Avatar configuration file not found for deletion");
             return false;
         }
 
-        await _repository.DeleteAsync();
-        await _unitOfWork.SaveChangesAsync();
+        await _repository.DeleteAsync(ct);
+        await _unitOfWork.SaveChangesAsync(ct);
 
         _logger.LogInformation("Deleted avatar configuration file");
         return true;

@@ -1,40 +1,33 @@
-using Microsoft.Extensions.Logging;
-using Mystira.App.Application.Ports.Data;
+using Mystira.App.Application.UseCases.GameSessions;
 using Mystira.App.Domain.Models;
 
 namespace Mystira.App.Application.CQRS.GameSessions.Commands;
 
 /// <summary>
 /// Wolverine handler for EndGameSessionCommand.
-/// Marks a session as completed using the domain method.
+/// Delegates to EndGameSessionUseCase which owns the full business logic including
+/// input validation, already-completed check, ElapsedTime calculation, and pause state cleanup.
 /// </summary>
 public static class EndGameSessionCommandHandler
 {
+    /// <summary>
+    /// Handles the EndGameSessionCommand by delegating to the UseCase.
+    /// Wolverine injects the UseCase as a method parameter.
+    /// </summary>
     public static async Task<GameSession?> Handle(
         EndGameSessionCommand command,
-        IGameSessionRepository repository,
-        IUnitOfWork unitOfWork,
-        ILogger logger,
+        EndGameSessionUseCase endGameSessionUseCase,
         CancellationToken ct)
     {
-        var session = await repository.GetByIdAsync(command.SessionId);
-        if (session == null)
+        try
         {
-            logger.LogWarning("Session not found: {SessionId}", command.SessionId);
+            return await endGameSessionUseCase.ExecuteAsync(command.SessionId, ct);
+        }
+        catch (ArgumentException)
+        {
+            // UseCase throws ArgumentException for not-found or empty session IDs.
+            // Handler preserves nullable return contract for backward compatibility.
             return null;
         }
-
-        if (!session.Complete())
-        {
-            logger.LogWarning("Cannot complete session {SessionId} - invalid status for completion. Current status: {Status}",
-                command.SessionId, session.Status);
-            return null;
-        }
-
-        await repository.UpdateAsync(session);
-        await unitOfWork.SaveChangesAsync(ct);
-
-        logger.LogInformation("Ended game session {SessionId}", session.Id);
-        return session;
     }
 }

@@ -2,6 +2,7 @@ using Microsoft.Extensions.Logging;
 using Mystira.App.Application.Ports.Data;
 using Mystira.Contracts.App.Requests.CharacterMaps;
 using Mystira.App.Domain.Models;
+using System.Threading;
 
 namespace Mystira.App.Application.UseCases.CharacterMaps;
 
@@ -24,7 +25,7 @@ public class CreateCharacterMapUseCase
         _logger = logger;
     }
 
-    public async Task<CharacterMap> ExecuteAsync(CreateCharacterMapRequest request)
+    public async Task<CharacterMap> ExecuteAsync(CreateCharacterMapRequest request, CancellationToken ct = default)
     {
         if (request == null)
         {
@@ -32,7 +33,7 @@ public class CreateCharacterMapUseCase
         }
 
         // Check if character map with ID already exists
-        var existingCharacterMap = await _repository.GetByIdAsync(request.Id);
+        var existingCharacterMap = await _repository.GetByIdAsync(request.Id, ct);
         if (existingCharacterMap != null)
         {
             throw new InvalidOperationException($"Character map with ID {request.Id} already exists");
@@ -49,8 +50,8 @@ public class CreateCharacterMapUseCase
             UpdatedAt = DateTime.UtcNow
         };
 
-        await _repository.AddAsync(characterMap);
-        await _unitOfWork.SaveChangesAsync();
+        await _repository.AddAsync(characterMap, ct);
+        await _unitOfWork.SaveChangesAsync(ct);
 
         _logger.LogInformation("Created character map: {CharacterMapId} - {Name}", characterMap.Id, characterMap.Name);
         return characterMap;

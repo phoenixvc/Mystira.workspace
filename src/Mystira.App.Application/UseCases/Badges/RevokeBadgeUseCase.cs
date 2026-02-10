@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Logging;
 using Mystira.App.Application.Ports.Data;
+using System.Threading;
 
 namespace Mystira.App.Application.UseCases.Badges;
 
@@ -25,14 +26,14 @@ public class RevokeBadgeUseCase
         _logger = logger;
     }
 
-    public async Task<bool> ExecuteAsync(string badgeId)
+    public async Task<bool> ExecuteAsync(string badgeId, CancellationToken ct = default)
     {
         if (string.IsNullOrWhiteSpace(badgeId))
         {
             throw new ArgumentException("Badge ID cannot be null or empty", nameof(badgeId));
         }
 
-        var badge = await _badgeRepository.GetByIdAsync(badgeId);
+        var badge = await _badgeRepository.GetByIdAsync(badgeId, ct);
         if (badge == null)
         {
             _logger.LogWarning("Badge not found for revocation: {BadgeId}", badgeId);
@@ -40,23 +41,23 @@ public class RevokeBadgeUseCase
         }
 
         // Remove from user profile's earned badges list
-        var userProfile = await _userProfileRepository.GetByIdAsync(badge.UserProfileId);
+        var userProfile = await _userProfileRepository.GetByIdAsync(badge.UserProfileId, ct);
         if (userProfile != null)
         {
             var badgeToRemove = userProfile.EarnedBadges.FirstOrDefault(b => b.Id == badgeId);
             if (badgeToRemove != null)
             {
                 userProfile.EarnedBadges.Remove(badgeToRemove);
-                await _userProfileRepository.UpdateAsync(userProfile);
+                await _userProfileRepository.UpdateAsync(userProfile, ct);
             }
         }
 
         // Delete the badge
-        await _badgeRepository.DeleteAsync(badgeId);
-        await _unitOfWork.SaveChangesAsync();
+        await _badgeRepository.DeleteAsync(badgeId, ct);
+        await _unitOfWork.SaveChangesAsync(ct);
 
         _logger.LogInformation("Revoked badge {BadgeId} from user profile {UserProfileId}",
-            badgeId, badge.UserProfileId);
+            badgeId, PiiMask.HashId(badge.UserProfileId));
         return true;
     }
 }

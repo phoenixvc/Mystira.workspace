@@ -19,31 +19,32 @@
                 </div>
             }
         </div>
+        @{
+            var totalInBundle = Bundle.ScenarioIds?.Count ?? 0;
+            var completedInBundle = CompletedScenarioIds.Count == 0
+                ? 0
+                : (Bundle.ScenarioIds?.Count(id => CompletedScenarioIds.Contains(id)) ?? 0);
+            var progressPercent = totalInBundle > 0 ? (completedInBundle * 100 / totalInBundle) : 0;
+        }
+
         <div class="card-body">
             <h6 class="card-title mb-1">@Bundle.Title</h6>
             <p class="card-text small text-muted">@Bundle.Description</p>
-            
-            @{
-                var totalInBundle = Bundle.ScenarioIds?.Count ?? 0;
-                var completedInBundle = CompletedScenarioIds.Count == 0 
-                    ? 0 
-                    : (Bundle.ScenarioIds?.Count(id => CompletedScenarioIds.Contains(id)) ?? 0);
-                var progressPercent = totalInBundle > 0 ? (completedInBundle * 100 / totalInBundle) : 0;
-            }
-            
+
             @* Progress Bar *@
             @if (ShowGameState && completedInBundle > 0)
             {
                 <div class="progress mb-2" style="height: 6px;">
-                    <div class="progress-bar bg-success" 
-                         role="progressbar" 
+                    <div class="progress-bar bg-success"
+                         role="progressbar"
                          style="width: @progressPercent%"
-                         aria-valuenow="@progressPercent" 
-                         aria-valuemin="0" 
+                         aria-valuenow="@progressPercent"
+                         aria-valuemin="0"
                          aria-valuemax="100"></div>
                 </div>
             }
-            
+        </div>
+        <div class="card-footer">
             <div class="bundle-pills">
                 <span class="bundle-pill pill-adventures" data-tooltip="@totalInBundle adventure@(totalInBundle != 1 ? "s" : "") included in this bundle">
                     <i class="fas fa-book"></i>
@@ -57,13 +58,11 @@
                         <span>@completedInBundle completed</span>
                     </span>
                 }
+                <span class="bundle-pill pill-age" data-tooltip="Recommended for children ages @Bundle.AgeGroup">
+                    <i class="fas fa-users"></i>
+                    <span>Ages @Bundle.AgeGroup</span>
+                </span>
             </div>
-        </div>
-        <div class="card-footer">
-            <span class="bundle-pill pill-age" data-tooltip="Recommended for children ages @Bundle.AgeGroup">
-                <i class="fas fa-users"></i>
-                <span>Ages @Bundle.AgeGroup</span>
-            </span>
             <span class="explore-link">
                 <span>Explore</span>
                 <i class="fas fa-arrow-right"></i>

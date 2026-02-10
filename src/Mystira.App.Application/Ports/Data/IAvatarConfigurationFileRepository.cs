@@ -7,8 +7,8 @@ namespace Mystira.App.Application.Ports.Data;
 /// </summary>
 public interface IAvatarConfigurationFileRepository
 {
-    Task<AvatarConfigurationFile?> GetAsync();
-    Task<AvatarConfigurationFile> AddOrUpdateAsync(AvatarConfigurationFile entity);
-    Task DeleteAsync();
+    Task<AvatarConfigurationFile?> GetAsync(CancellationToken ct = default);
+    Task<AvatarConfigurationFile> AddOrUpdateAsync(AvatarConfigurationFile entity, CancellationToken ct = default);
+    Task DeleteAsync(CancellationToken ct = default);
 }
 

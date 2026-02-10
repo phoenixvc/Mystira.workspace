@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Logging;
 using Mystira.App.Application.Ports.Data;
+using System.Threading;
 
 namespace Mystira.App.Application.UseCases.CharacterMaps;
 
@@ -22,22 +23,22 @@ public class DeleteCharacterMapUseCase
         _logger = logger;
     }
 
-    public async Task<bool> ExecuteAsync(string characterMapId)
+    public async Task<bool> ExecuteAsync(string characterMapId, CancellationToken ct = default)
     {
         if (string.IsNullOrWhiteSpace(characterMapId))
         {
             throw new ArgumentException("Character map ID cannot be null or empty", nameof(characterMapId));
         }
 
-        var characterMap = await _repository.GetByIdAsync(characterMapId);
+        var characterMap = await _repository.GetByIdAsync(characterMapId, ct);
         if (characterMap == null)
         {
             _logger.LogWarning("Character map not found for deletion: {CharacterMapId}", characterMapId);
             return false;
         }
 
-        await _repository.DeleteAsync(characterMapId);
-        await _unitOfWork.SaveChangesAsync();
+        await _repository.DeleteAsync(characterMapId, ct);
+        await _unitOfWork.SaveChangesAsync(ct);
 
         _logger.LogInformation("Deleted character map: {CharacterMapId}", characterMapId);
         return true;

@@ -18,14 +18,14 @@ public class AvatarConfigurationFileRepository : IAvatarConfigurationFileReposit
         _dbSet = context.Set<AvatarConfigurationFile>();
     }
 
-    public async Task<AvatarConfigurationFile?> GetAsync()
+    public async Task<AvatarConfigurationFile?> GetAsync(CancellationToken ct = default)
     {
-        return await _dbSet.FirstOrDefaultAsync();
+        return await _dbSet.FirstOrDefaultAsync(ct);
     }
 
-    public async Task<AvatarConfigurationFile> AddOrUpdateAsync(AvatarConfigurationFile entity)
+    public async Task<AvatarConfigurationFile> AddOrUpdateAsync(AvatarConfigurationFile entity, CancellationToken ct = default)
     {
-        var existing = await GetAsync();
+        var existing = await GetAsync(ct);
         if (existing != null)
         {
             existing.AgeGroupAvatars = entity.AgeGroupAvatars;
@@ -35,17 +35,16 @@ public class AvatarConfigurationFileRepository : IAvatarConfigurationFileReposit
             return existing;
         }
 
-        await _dbSet.AddAsync(entity);
+        await _dbSet.AddAsync(entity, ct);
         return entity;
     }
 
-    public async Task DeleteAsync()
+    public async Task DeleteAsync(CancellationToken ct = default)
     {
-        var existing = await GetAsync();
+        var existing = await GetAsync(ct);
         if (existing != null)
         {
             _dbSet.Remove(existing);
         }
     }
 }
-

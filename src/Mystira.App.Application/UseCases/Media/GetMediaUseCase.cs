@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 using Mystira.App.Application.Ports.Data;
 using Mystira.App.Domain.Models;
+using System.Threading;
 
 namespace Mystira.App.Application.UseCases.Media;
 
@@ -20,14 +21,14 @@ public class GetMediaUseCase
         _logger = logger;
     }
 
-    public async Task<MediaAsset?> ExecuteAsync(string mediaId)
+    public async Task<MediaAsset?> ExecuteAsync(string mediaId, CancellationToken ct = default)
     {
         if (string.IsNullOrWhiteSpace(mediaId))
         {
             throw new ArgumentException("Media ID is required", nameof(mediaId));
         }
 
-        var mediaAsset = await _repository.GetByMediaIdAsync(mediaId);
+        var mediaAsset = await _repository.GetByMediaIdAsync(mediaId, ct);
 
         if (mediaAsset == null)
         {

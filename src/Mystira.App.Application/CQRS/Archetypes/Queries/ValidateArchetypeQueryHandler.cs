@@ -15,7 +15,7 @@ public static class ValidateArchetypeQueryHandler
         CancellationToken ct)
     {
         logger.LogInformation("Validating archetype: {Name}", query.Name);
-        var isValid = await repository.ExistsByNameAsync(query.Name);
+        var isValid = await repository.ExistsByNameAsync(query.Name, ct);
         logger.LogInformation("Archetype '{Name}' is {Status}", query.Name, isValid ? "valid" : "invalid");
         return isValid;
     }

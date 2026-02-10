@@ -42,7 +42,7 @@ public class CreateAccountCommandHandlerTests
             Settings: null
         );
 
-        _repository.Setup(r => r.GetByEmailAsync(command.Email))
+        _repository.Setup(r => r.GetByEmailAsync(command.Email, It.IsAny<CancellationToken>()))
             .ReturnsAsync(default(Account));
 
         // Act
@@ -77,7 +77,7 @@ public class CreateAccountCommandHandlerTests
             Settings: null
         );
 
-        _repository.Setup(r => r.GetByEmailAsync(command.Email))
+        _repository.Setup(r => r.GetByEmailAsync(command.Email, It.IsAny<CancellationToken>()))
             .ReturnsAsync(default(Account));
 
         // Act
@@ -112,7 +112,7 @@ public class CreateAccountCommandHandlerTests
             Settings: null
         );
 
-        _repository.Setup(r => r.GetByEmailAsync(command.Email))
+        _repository.Setup(r => r.GetByEmailAsync(command.Email, It.IsAny<CancellationToken>()))
             .ReturnsAsync(existingAccount);
 
         // Act
@@ -141,7 +141,7 @@ public class CreateAccountCommandHandlerTests
             Settings: null
         );
 
-        _repository.Setup(r => r.GetByEmailAsync(command.Email))
+        _repository.Setup(r => r.GetByEmailAsync(command.Email, It.IsAny<CancellationToken>()))
             .ReturnsAsync(default(Account));
 
         // Act
@@ -176,7 +176,7 @@ public class CreateAccountCommandHandlerTests
             Settings: null
         );
 
-        _repository.Setup(r => r.GetByEmailAsync(command.Email))
+        _repository.Setup(r => r.GetByEmailAsync(command.Email, It.IsAny<CancellationToken>()))
             .ReturnsAsync(default(Account));
 
         // Act
@@ -211,7 +211,7 @@ public class CreateAccountCommandHandlerTests
             Settings: settings
         );
 
-        _repository.Setup(r => r.GetByEmailAsync(command.Email))
+        _repository.Setup(r => r.GetByEmailAsync(command.Email, It.IsAny<CancellationToken>()))
             .ReturnsAsync(default(Account));
 
         // Act
@@ -241,7 +241,7 @@ public class CreateAccountCommandHandlerTests
             Settings: null
         );
 
-        _repository.Setup(r => r.GetByEmailAsync(command.Email))
+        _repository.Setup(r => r.GetByEmailAsync(command.Email, It.IsAny<CancellationToken>()))
             .ReturnsAsync(default(Account));
 
         // Act

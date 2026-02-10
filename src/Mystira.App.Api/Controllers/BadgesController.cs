@@ -1,6 +1,7 @@
 using Wolverine;
 using Microsoft.AspNetCore.Mvc;
 using Mystira.App.Application.CQRS.Badges.Queries;
+using Mystira.App.Application.Helpers;
 using Mystira.Contracts.App.Responses.Badges;
 using Mystira.App.Api.Models;
 
@@ -140,7 +141,7 @@ public class BadgesController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error getting badge progress for profile {ProfileId}", profileId);
+            _logger.LogError(ex, "Error getting badge progress for profile {ProfileId}", LogAnonymizer.HashId(profileId));
             return StatusCode(500, new ErrorResponse
             {
                 Message = "Internal server error while fetching badge progress",

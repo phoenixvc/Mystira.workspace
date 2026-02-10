@@ -25,7 +25,7 @@ public static class DeleteScenarioCommandHandler
             throw new ArgumentException("Scenario ID cannot be null or empty", nameof(command.ScenarioId));
         }
 
-        var scenario = await repository.GetByIdAsync(command.ScenarioId);
+        var scenario = await repository.GetByIdAsync(command.ScenarioId, ct);
 
         if (scenario == null)
         {
@@ -33,11 +33,11 @@ public static class DeleteScenarioCommandHandler
             throw new InvalidOperationException($"Scenario not found: {command.ScenarioId}");
         }
 
-        await repository.DeleteAsync(command.ScenarioId);
+        await repository.DeleteAsync(command.ScenarioId, ct);
 
         try
         {
-            await unitOfWork.SaveChangesAsync();
+            await unitOfWork.SaveChangesAsync(ct);
         }
         catch (Exception e)
         {

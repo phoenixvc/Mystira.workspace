@@ -2,6 +2,7 @@ using Microsoft.Extensions.Logging;
 using Mystira.App.Application.Ports.Data;
 using Mystira.Contracts.App.Requests.Media;
 using Mystira.App.Domain.Models;
+using System.Threading;
 
 namespace Mystira.App.Application.UseCases.Media;
 
@@ -24,7 +25,7 @@ public class UpdateMediaMetadataUseCase
         _logger = logger;
     }
 
-    public async Task<MediaAsset> ExecuteAsync(string mediaId, MediaUpdateRequest updateData)
+    public async Task<MediaAsset> ExecuteAsync(string mediaId, MediaUpdateRequest updateData, CancellationToken ct = default)
     {
         if (string.IsNullOrWhiteSpace(mediaId))
         {
@@ -36,7 +37,7 @@ public class UpdateMediaMetadataUseCase
             throw new ArgumentNullException(nameof(updateData));
         }
 
-        var mediaAsset = await _repository.GetByMediaIdAsync(mediaId);
+        var mediaAsset = await _repository.GetByMediaIdAsync(mediaId, ct);
         if (mediaAsset == null)
         {
             throw new KeyNotFoundException($"Media with ID '{mediaId}' not found");
@@ -61,8 +62,8 @@ public class UpdateMediaMetadataUseCase
         mediaAsset.UpdatedAt = DateTime.UtcNow;
         mediaAsset.Version = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ");
 
-        await _repository.UpdateAsync(mediaAsset);
-        await _unitOfWork.SaveChangesAsync();
+        await _repository.UpdateAsync(mediaAsset, ct);
+        await _unitOfWork.SaveChangesAsync(ct);
 
         _logger.LogInformation("Media updated successfully: {MediaId}", mediaId);
 

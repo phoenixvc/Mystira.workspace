@@ -125,15 +125,7 @@ public class CharacterAssignmentService : ICharacterAssignmentService
                 {
                     _logger.LogInformation("Resolving media URLs for starting scene: {SceneId}", startingScene.Id);
                     // Resolve media URLs for the starting scene
-                    startingScene.AudioUrl = !string.IsNullOrEmpty(startingScene.Media?.Audio)
-                        ? await _apiClient.GetMediaUrlFromId(startingScene.Media.Audio)
-                        : null;
-                    startingScene.ImageUrl = !string.IsNullOrEmpty(startingScene.Media?.Image)
-                        ? await _apiClient.GetMediaUrlFromId(startingScene.Media.Image)
-                        : null;
-                    startingScene.VideoUrl = !string.IsNullOrEmpty(startingScene.Media?.Video)
-                        ? await _apiClient.GetMediaUrlFromId(startingScene.Media.Video)
-                        : null;
+                    await startingScene.ResolveMediaUrlsAsync(_apiClient);
                     _logger.LogInformation("Media URLs resolved");
 
                     // Create local game session

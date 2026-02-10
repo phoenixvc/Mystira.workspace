@@ -9,5 +9,5 @@ namespace Mystira.App.Application.CQRS.EchoTypes.Queries;
 public record GetAllEchoTypesQuery : IQuery<List<EchoTypeDefinition>>, ICacheableQuery
 {
     public string CacheKey => "MasterData:EchoTypes:All";
-    public int CacheDurationSeconds => 3600; // 1 hour - master data rarely changes
+    public int CacheDurationSeconds => CacheDefaults.MasterDataSeconds;
 }

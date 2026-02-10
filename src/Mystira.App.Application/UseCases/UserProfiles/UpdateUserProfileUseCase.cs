@@ -2,6 +2,7 @@ using Microsoft.Extensions.Logging;
 using Mystira.App.Application.Ports.Data;
 using Mystira.Contracts.App.Requests.UserProfiles;
 using Mystira.App.Domain.Models;
+using System.Threading;
 
 namespace Mystira.App.Application.UseCases.UserProfiles;
 
@@ -24,9 +25,9 @@ public class UpdateUserProfileUseCase
         _logger = logger;
     }
 
-    public async Task<UserProfile?> ExecuteAsync(string id, UpdateUserProfileRequest request)
+    public async Task<UserProfile?> ExecuteAsync(string id, UpdateUserProfileRequest request, CancellationToken ct = default)
     {
-        var profile = await _repository.GetByIdAsync(id);
+        var profile = await _repository.GetByIdAsync(id, ct);
         if (profile == null)
         {
             return null;
@@ -95,10 +96,10 @@ public class UpdateUserProfileUseCase
 
         profile.UpdatedAt = DateTime.UtcNow;
 
-        await _repository.UpdateAsync(profile);
-        await _unitOfWork.SaveChangesAsync();
+        await _repository.UpdateAsync(profile, ct);
+        await _unitOfWork.SaveChangesAsync(ct);
 
-        _logger.LogInformation("Updated user profile: {ProfileId} - {Name}", profile.Id, profile.Name);
+        _logger.LogInformation("Updated user profile: {ProfileId} - {Name}", PiiMask.HashId(profile.Id), PiiMask.HashId(profile.Name));
         return profile;
     }
 }

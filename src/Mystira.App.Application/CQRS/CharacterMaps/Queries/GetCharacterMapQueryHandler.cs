@@ -17,7 +17,7 @@ public static class GetCharacterMapQueryHandler
     {
         logger.LogInformation("Retrieving character map {CharacterMapId}", query.Id);
 
-        var characterMap = await repository.GetByIdAsync(query.Id);
+        var characterMap = await repository.GetByIdAsync(query.Id, ct);
 
         if (characterMap == null)
         {

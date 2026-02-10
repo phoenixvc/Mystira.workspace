@@ -35,7 +35,7 @@ public static class ProgressSceneCommandHandler
             throw new ArgumentException("SceneId is required");
         }
 
-        var session = await repository.GetByIdAsync(request.SessionId);
+        var session = await repository.GetByIdAsync(request.SessionId, ct);
         if (session == null)
         {
             logger.LogWarning("Session not found: {SessionId}", request.SessionId);
@@ -52,7 +52,7 @@ public static class ProgressSceneCommandHandler
         session.CurrentSceneId = request.SceneId;
 
         // Update in repository
-        await repository.UpdateAsync(session);
+        await repository.UpdateAsync(session, ct);
 
         // Persist changes
         await unitOfWork.SaveChangesAsync(ct);

@@ -9,5 +9,5 @@ namespace Mystira.App.Application.CQRS.CharacterMaps.Queries;
 public record GetCharacterMapQuery(string Id) : IQuery<CharacterMap?>, ICacheableQuery
 {
     public string CacheKey => $"CharacterMap:{Id}";
-    public int CacheDurationSeconds => 600; // 10 minutes
+    public int CacheDurationSeconds => CacheDefaults.MediumSeconds;
 }

@@ -25,7 +25,7 @@ public static class GetScenarioQueryHandler
             throw new ArgumentException("Scenario ID cannot be null or empty", nameof(query.ScenarioId));
         }
 
-        var scenario = await repository.GetByIdAsync(query.ScenarioId);
+        var scenario = await repository.GetByIdAsync(query.ScenarioId, ct);
 
         if (scenario == null)
         {

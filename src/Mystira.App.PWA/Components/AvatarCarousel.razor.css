@@ -204,3 +204,42 @@ html[data-theme="dark"] .avatar-carousel-container .alert-warning {
     color: #fef08a;
 }
 
+/* Light Mode Support */
+html[data-theme="light"] .avatar-display {
+    background: #f3f4f6;
+}
+
+html[data-theme="light"] .avatar-counter {
+    color: #6b7280;
+}
+
+html[data-theme="light"] .avatar-thumbnail {
+    background: #ffffff;
+    border-color: rgba(147, 51, 234, 0.2);
+}
+
+html[data-theme="light"] .avatar-thumbnail:hover {
+    border-color: #7c3aed;
+    box-shadow: 0 0 0 0.2rem rgba(147, 51, 234, 0.25);
+}
+
+html[data-theme="light"] .avatar-thumbnail.active {
+    border-color: #7c3aed;
+    background: rgba(147, 51, 234, 0.1);
+}
+
+html[data-theme="light"] .avatar-carousel-container .card {
+    background: #ffffff;
+    border-color: rgba(147, 51, 234, 0.2);
+}
+
+html[data-theme="light"] .avatar-carousel-container .card-title {
+    color: #1f2937;
+}
+
+html[data-theme="light"] .avatar-carousel-container .alert-warning {
+    background-color: rgba(234, 179, 8, 0.1);
+    border-color: #eab308;
+    color: #92400e;
+}
+

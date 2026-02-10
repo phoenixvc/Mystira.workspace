@@ -41,7 +41,7 @@ public class GameSession
     // Convenience property to get AgeGroup object
     public AgeGroup TargetAgeGroup
     {
-        get => AgeGroup.Parse(_targetAgeGroup) ?? new AgeGroup(6, 9);
+        get => AgeGroup.Parse(_targetAgeGroup) ?? AgeGroup.Default;
         set => _targetAgeGroup = value?.Value ?? "6-9";
     }
 
@@ -158,6 +158,9 @@ public class GameSession
 
     public void RecalculateCompassProgressFromHistory()
     {
+        if (ChoiceHistory == null || ChoiceHistory.Count == 0)
+            return;
+
         var validProfileIds = GetValidProfileIds();
 
         var totalsByPlayerAndAxis = new Dictionary<(string PlayerId, string Axis), double>();
@@ -243,7 +246,7 @@ public class GameSession
             profileIds.Add(ProfileId);
         }
 
-        foreach (var assignment in CharacterAssignments)
+        foreach (var assignment in CharacterAssignments ?? Enumerable.Empty<SessionCharacterAssignment>())
         {
             var profileId = assignment.PlayerAssignment?.ProfileId;
             if (!string.IsNullOrWhiteSpace(profileId))

@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using Mystira.App.Application.Ports.Data;
 using Mystira.Contracts.App.Requests.Media;
 using Mystira.Contracts.App.Responses.Media;
+using System.Threading;
 
 namespace Mystira.App.Application.UseCases.Media;
 
@@ -22,7 +23,7 @@ public class ListMediaUseCase
         _logger = logger;
     }
 
-    public async Task<MediaQueryResponse> ExecuteAsync(MediaQueryRequest request)
+    public async Task<MediaQueryResponse> ExecuteAsync(MediaQueryRequest request, CancellationToken ct = default)
     {
         var query = _repository.GetQueryable();
 
@@ -57,7 +58,7 @@ public class ListMediaUseCase
             _ => request.SortDescending ? query.OrderByDescending(m => m.CreatedAt) : query.OrderBy(m => m.CreatedAt)
         };
 
-        var totalCount = await query.CountAsync();
+        var totalCount = await query.CountAsync(ct);
         var totalPages = (int)Math.Ceiling((double)totalCount / request.PageSize);
 
         var media = await query
@@ -69,7 +70,7 @@ public class ListMediaUseCase
                 Url = m.Url,
                 MediaType = m.MediaType
             })
-            .ToListAsync();
+            .ToListAsync(ct);
 
         return new MediaQueryResponse
         {

@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using Mystira.App.Application.Helpers;
 using Mystira.App.Application.Ports.Data;
 using Mystira.App.Domain.Models;
 
@@ -20,8 +21,8 @@ public static class GetAccountQueryHandler
         ILogger logger,
         CancellationToken ct)
     {
-        var account = await repository.GetByIdAsync(query.AccountId);
-        logger.LogDebug("Retrieved account {AccountIdPrefix}", query.AccountId[..Math.Min(8, query.AccountId.Length)] + "...");
+        var account = await repository.GetByIdAsync(query.AccountId, ct);
+        logger.LogDebug("Retrieved account {AccountIdHash}", LogAnonymizer.HashId(query.AccountId));
         return account;
     }
 }

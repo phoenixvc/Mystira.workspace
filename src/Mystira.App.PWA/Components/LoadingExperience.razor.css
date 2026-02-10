@@ -90,3 +90,22 @@
         font-size: 1.75rem;
     }
 }
+
+/* Light mode */
+html[data-theme="light"] .loading-screen {
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 50%, #cbd5e1 100%);
+}
+
+html[data-theme="light"] .loading-title {
+    color: #1e1b4b;
+    text-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+}
+
+html[data-theme="light"] .loading-spinner {
+    border-color: rgba(147, 51, 234, 0.15);
+    border-top-color: #7c3aed;
+}
+
+html[data-theme="light"] .loading-message {
+    color: rgba(30, 27, 75, 0.6);
+}

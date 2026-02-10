@@ -53,7 +53,7 @@ public class CreateGameSessionUseCase
             return UseCaseResult<GameSession>.Success(existingSession);
 
         // --- Create new session ---
-        var scenarioEntity = await _scenarioRepository.GetByIdAsync(request.ScenarioId);
+        var scenarioEntity = await _scenarioRepository.GetByIdAsync(request.ScenarioId, ct);
         if (scenarioEntity == null)
         {
             _logger.LogWarning(
@@ -108,7 +108,7 @@ public class CreateGameSessionUseCase
 
         InitializeCompassTracking(session, scenarioEntity);
 
-        await _repository.AddAsync(session);
+        await _repository.AddAsync(session, ct);
         await _unitOfWork.SaveChangesAsync(ct);
 
         _logger.LogInformation(
@@ -126,7 +126,7 @@ public class CreateGameSessionUseCase
         StartGameSessionRequest request, CancellationToken ct)
     {
         var existingActiveSessions = (await _repository
-                .GetActiveSessionsByScenarioAndAccountAsync(request.ScenarioId, request.AccountId))
+                .GetActiveSessionsByScenarioAndAccountAsync(request.ScenarioId, request.AccountId, ct))
             .Where(s => string.Equals(s.ProfileId, request.ProfileId, StringComparison.OrdinalIgnoreCase))
             .OrderByDescending(s => s.StartTime)
             .ToList();
@@ -147,12 +147,12 @@ public class CreateGameSessionUseCase
             {
                 if (duplicate.IsEffectivelyEmpty())
                 {
-                    await _repository.DeleteAsync(duplicate.Id);
+                    await _repository.DeleteAsync(duplicate.Id, ct);
                 }
                 else
                 {
                     duplicate.Abandon();
-                    await _repository.UpdateAsync(duplicate);
+                    await _repository.UpdateAsync(duplicate, ct);
                 }
             }
 
@@ -163,7 +163,7 @@ public class CreateGameSessionUseCase
 
         if (string.IsNullOrWhiteSpace(primary.CurrentSceneId))
         {
-            var scenario = await _scenarioRepository.GetByIdAsync(request.ScenarioId);
+            var scenario = await _scenarioRepository.GetByIdAsync(request.ScenarioId, ct);
             if (scenario != null)
             {
                 primary.CurrentSceneId = DetermineStartingSceneId(scenario);
@@ -174,7 +174,7 @@ public class CreateGameSessionUseCase
 
         if (updated)
         {
-            await _repository.UpdateAsync(primary);
+            await _repository.UpdateAsync(primary, ct);
             await _unitOfWork.SaveChangesAsync(ct);
         }
 

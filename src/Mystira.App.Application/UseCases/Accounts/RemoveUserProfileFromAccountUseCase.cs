@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 using Mystira.App.Application.Ports.Data;
 using Mystira.App.Domain.Models;
+using System.Threading;
 
 namespace Mystira.App.Application.UseCases.Accounts;
 
@@ -26,7 +27,7 @@ public class RemoveUserProfileFromAccountUseCase
         _logger = logger;
     }
 
-    public async Task<Account> ExecuteAsync(string accountId, string profileId)
+    public async Task<Account> ExecuteAsync(string accountId, string profileId, CancellationToken ct = default)
     {
         if (string.IsNullOrWhiteSpace(accountId))
         {
@@ -38,13 +39,13 @@ public class RemoveUserProfileFromAccountUseCase
             throw new ArgumentException("Profile ID cannot be null or empty", nameof(profileId));
         }
 
-        var account = await _accountRepository.GetByIdAsync(accountId);
+        var account = await _accountRepository.GetByIdAsync(accountId, ct);
         if (account == null)
         {
             throw new ArgumentException($"Account not found: {accountId}", nameof(accountId));
         }
 
-        var profile = await _userProfileRepository.GetByIdAsync(profileId);
+        var profile = await _userProfileRepository.GetByIdAsync(profileId, ct);
         if (profile == null)
         {
             throw new ArgumentException($"User profile not found: {profileId}", nameof(profileId));
@@ -54,19 +55,19 @@ public class RemoveUserProfileFromAccountUseCase
         if (profile.AccountId == accountId)
         {
             profile.AccountId = null;
-            await _userProfileRepository.UpdateAsync(profile);
+            await _userProfileRepository.UpdateAsync(profile, ct);
         }
 
         // Remove profile ID from account's profile list
         if (account.UserProfileIds.Contains(profileId))
         {
             account.UserProfileIds.Remove(profileId);
-            await _accountRepository.UpdateAsync(account);
+            await _accountRepository.UpdateAsync(account, ct);
         }
 
-        await _unitOfWork.SaveChangesAsync();
+        await _unitOfWork.SaveChangesAsync(ct);
 
-        _logger.LogInformation("Unlinked profile {ProfileId} from account {AccountId}", profileId, accountId);
+        _logger.LogInformation("Unlinked profile {ProfileId} from account {AccountId}", PiiMask.HashId(profileId), PiiMask.HashId(accountId));
         return account;
     }
 }

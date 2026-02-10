@@ -8,9 +8,9 @@ namespace Mystira.App.Application.Ports.Data;
 /// </summary>
 public interface IMediaAssetRepository : IRepository<MediaAsset, string>
 {
-    Task<MediaAsset?> GetByMediaIdAsync(string mediaId);
-    Task<bool> ExistsByMediaIdAsync(string mediaId);
-    Task<IEnumerable<string>> GetMediaIdsAsync(IEnumerable<string> mediaIds);
+    Task<MediaAsset?> GetByMediaIdAsync(string mediaId, CancellationToken ct = default);
+    Task<bool> ExistsByMediaIdAsync(string mediaId, CancellationToken ct = default);
+    Task<IEnumerable<string>> GetMediaIdsAsync(IEnumerable<string> mediaIds, CancellationToken ct = default);
     IQueryable<MediaAsset> GetQueryable();
 }
 

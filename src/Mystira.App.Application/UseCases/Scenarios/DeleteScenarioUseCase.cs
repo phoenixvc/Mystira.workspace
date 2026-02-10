@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Logging;
 using Mystira.App.Application.Ports.Data;
+using System.Threading;
 
 namespace Mystira.App.Application.UseCases.Scenarios;
 
@@ -22,16 +23,16 @@ public class DeleteScenarioUseCase
         _logger = logger;
     }
 
-    public async Task<bool> ExecuteAsync(string id)
+    public async Task<bool> ExecuteAsync(string id, CancellationToken ct = default)
     {
-        var scenario = await _repository.GetByIdAsync(id);
+        var scenario = await _repository.GetByIdAsync(id, ct);
         if (scenario == null)
         {
             return false;
         }
 
-        await _repository.DeleteAsync(id);
-        await _unitOfWork.SaveChangesAsync();
+        await _repository.DeleteAsync(id, ct);
+        await _unitOfWork.SaveChangesAsync(ct);
 
         _logger.LogInformation("Deleted scenario: {ScenarioId} - {Title}", scenario.Id, scenario.Title);
         return true;

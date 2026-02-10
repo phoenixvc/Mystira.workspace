@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 using Mystira.App.Application.Ports.Data;
 using Mystira.App.Domain.Models;
+using System.Threading;
 
 namespace Mystira.App.Application.UseCases.Accounts;
 
@@ -20,22 +21,22 @@ public class GetAccountUseCase
         _logger = logger;
     }
 
-    public async Task<Account?> ExecuteAsync(string accountId)
+    public async Task<Account?> ExecuteAsync(string accountId, CancellationToken ct = default)
     {
         if (string.IsNullOrWhiteSpace(accountId))
         {
             throw new ArgumentException("Account ID cannot be null or empty", nameof(accountId));
         }
 
-        var account = await _repository.GetByIdAsync(accountId);
+        var account = await _repository.GetByIdAsync(accountId, ct);
 
         if (account == null)
         {
-            _logger.LogWarning("Account not found: {AccountId}", accountId);
+            _logger.LogWarning("Account not found: {AccountId}", PiiMask.HashId(accountId));
         }
         else
         {
-            _logger.LogDebug("Retrieved account: {AccountId}", accountId);
+            _logger.LogDebug("Retrieved account: {AccountId}", PiiMask.HashId(accountId));
         }
 
         return account;

@@ -18,14 +18,14 @@ public class CharacterMediaMetadataFileRepository : ICharacterMediaMetadataFileR
         _dbSet = context.Set<CharacterMediaMetadataFile>();
     }
 
-    public async Task<CharacterMediaMetadataFile?> GetAsync()
+    public async Task<CharacterMediaMetadataFile?> GetAsync(CancellationToken ct = default)
     {
-        return await _dbSet.FirstOrDefaultAsync();
+        return await _dbSet.FirstOrDefaultAsync(ct);
     }
 
-    public async Task<CharacterMediaMetadataFile> AddOrUpdateAsync(CharacterMediaMetadataFile entity)
+    public async Task<CharacterMediaMetadataFile> AddOrUpdateAsync(CharacterMediaMetadataFile entity, CancellationToken ct = default)
     {
-        var existing = await GetAsync();
+        var existing = await GetAsync(ct);
         if (existing != null)
         {
             existing.Entries = entity.Entries;
@@ -35,17 +35,16 @@ public class CharacterMediaMetadataFileRepository : ICharacterMediaMetadataFileR
             return existing;
         }
 
-        await _dbSet.AddAsync(entity);
+        await _dbSet.AddAsync(entity, ct);
         return entity;
     }
 
-    public async Task DeleteAsync()
+    public async Task DeleteAsync(CancellationToken ct = default)
     {
-        var existing = await GetAsync();
+        var existing = await GetAsync(ct);
         if (existing != null)
         {
             _dbSet.Remove(existing);
         }
     }
 }
-

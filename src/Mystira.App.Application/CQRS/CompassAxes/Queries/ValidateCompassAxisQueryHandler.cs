@@ -15,7 +15,7 @@ public static class ValidateCompassAxisQueryHandler
         CancellationToken ct)
     {
         logger.LogInformation("Validating compass axis: {Name}", query.Name);
-        var isValid = await repository.ExistsByNameAsync(query.Name);
+        var isValid = await repository.ExistsByNameAsync(query.Name, ct);
         logger.LogInformation("Compass axis '{Name}' is {Status}", query.Name, isValid ? "valid" : "invalid");
         return isValid;
     }

@@ -8,6 +8,6 @@ namespace Mystira.App.Application.Ports.Data;
 /// </summary>
 public interface IContentBundleRepository : IRepository<ContentBundle, string>
 {
-    Task<IEnumerable<ContentBundle>> GetByAgeGroupAsync(string ageGroup);
+    Task<IEnumerable<ContentBundle>> GetByAgeGroupAsync(string ageGroup, CancellationToken ct = default);
 }
 

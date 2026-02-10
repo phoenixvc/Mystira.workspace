@@ -2,6 +2,7 @@ using Microsoft.Extensions.Logging;
 using Mystira.App.Application.Ports.Data;
 using Mystira.App.Domain.Models;
 using YamlDotNet.Serialization;
+using System.Threading;
 
 namespace Mystira.App.Application.UseCases.CharacterMaps;
 
@@ -21,9 +22,9 @@ public class ExportCharacterMapUseCase
         _logger = logger;
     }
 
-    public async Task<string> ExecuteAsync()
+    public async Task<string> ExecuteAsync(CancellationToken ct = default)
     {
-        var characterMaps = await _repository.GetAllAsync();
+        var characterMaps = await _repository.GetAllAsync(ct);
         var characterMapList = characterMaps.ToList();
 
         var characterMapYaml = new CharacterMapYaml

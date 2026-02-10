@@ -9,5 +9,5 @@ namespace Mystira.App.Application.CQRS.AgeGroups.Queries;
 public record GetAgeGroupByIdQuery(string Id) : IQuery<AgeGroupDefinition?>, ICacheableQuery
 {
     public string CacheKey => $"MasterData:AgeGroups:{Id}";
-    public int CacheDurationSeconds => 3600; // 1 hour - master data rarely changes
+    public int CacheDurationSeconds => CacheDefaults.MasterDataSeconds;
 }

@@ -5,6 +5,6 @@ namespace Mystira.App.Application.Ports.Data;
 
 public interface IAxisAchievementRepository : IRepository<AxisAchievement, string>
 {
-    Task<IEnumerable<AxisAchievement>> GetByAgeGroupAsync(string ageGroupId);
-    Task<IEnumerable<AxisAchievement>> GetByCompassAxisAsync(string compassAxisId);
+    Task<IEnumerable<AxisAchievement>> GetByAgeGroupAsync(string ageGroupId, CancellationToken ct = default);
+    Task<IEnumerable<AxisAchievement>> GetByCompassAxisAsync(string compassAxisId, CancellationToken ct = default);
 }

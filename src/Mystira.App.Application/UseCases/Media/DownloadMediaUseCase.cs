@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Logging;
 using Mystira.App.Application.Ports.Data;
+using System.Threading;
 
 namespace Mystira.App.Application.UseCases.Media;
 
@@ -22,7 +23,7 @@ public class DownloadMediaUseCase
         _logger = logger;
     }
 
-    public async Task<(Stream stream, string contentType, string fileName)?> ExecuteAsync(string mediaId)
+    public async Task<(Stream stream, string contentType, string fileName)?> ExecuteAsync(string mediaId, CancellationToken ct = default)
     {
         if (string.IsNullOrWhiteSpace(mediaId))
         {
@@ -31,7 +32,7 @@ public class DownloadMediaUseCase
 
         try
         {
-            var mediaAsset = await _repository.GetByMediaIdAsync(mediaId);
+            var mediaAsset = await _repository.GetByMediaIdAsync(mediaId, ct);
             if (mediaAsset == null)
             {
                 _logger.LogWarning("Media asset not found: {MediaId}", mediaId);

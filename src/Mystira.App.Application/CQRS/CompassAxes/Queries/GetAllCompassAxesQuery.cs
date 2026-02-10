@@ -9,5 +9,5 @@ namespace Mystira.App.Application.CQRS.CompassAxes.Queries;
 public record GetAllCompassAxesQuery : IQuery<List<CompassAxis>>, ICacheableQuery
 {
     public string CacheKey => "MasterData:CompassAxes:All";
-    public int CacheDurationSeconds => 3600; // 1 hour - master data rarely changes
+    public int CacheDurationSeconds => CacheDefaults.MasterDataSeconds;
 }

@@ -8,8 +8,8 @@ namespace Mystira.App.Application.Ports.Data;
 /// </summary>
 public interface IUserProfileRepository : IRepository<UserProfile, string>
 {
-    Task<IEnumerable<UserProfile>> GetByAccountIdAsync(string accountId);
-    Task<IEnumerable<UserProfile>> GetGuestProfilesAsync();
-    Task<IEnumerable<UserProfile>> GetNonGuestProfilesAsync();
+    Task<IEnumerable<UserProfile>> GetByAccountIdAsync(string accountId, CancellationToken ct = default);
+    Task<IEnumerable<UserProfile>> GetGuestProfilesAsync(CancellationToken ct = default);
+    Task<IEnumerable<UserProfile>> GetNonGuestProfilesAsync(CancellationToken ct = default);
 }
 

@@ -4,6 +4,7 @@ using Mystira.App.Application.Ports.Data;
 using Mystira.Contracts.App.Requests.Scenarios;
 using Mystira.Contracts.App.Responses.Scenarios;
 using Mystira.App.Domain.Models;
+using System.Threading;
 
 namespace Mystira.App.Application.UseCases.Scenarios;
 
@@ -23,7 +24,7 @@ public class GetScenariosUseCase
         _logger = logger;
     }
 
-    public async Task<ScenarioListResponse> ExecuteAsync(ScenarioQueryRequest request)
+    public async Task<ScenarioListResponse> ExecuteAsync(ScenarioQueryRequest request, CancellationToken ct = default)
     {
         var query = _repository.GetQueryable();
 
@@ -68,7 +69,7 @@ public class GetScenariosUseCase
         }
 
         // Get total count before pagination
-        var totalCount = await query.CountAsync();
+        var totalCount = await query.CountAsync(ct);
 
         // Apply pagination
         var scenarios = await query
@@ -90,7 +91,7 @@ public class GetScenariosUseCase
                 CreatedAt = s.CreatedAt,
                 MusicPalette = s.MusicPalette != null ? s.MusicPalette.DefaultProfile.ToString() : null
             })
-            .ToListAsync();
+            .ToListAsync(ct);
 
         return new ScenarioListResponse
         {

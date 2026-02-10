@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 using Mystira.App.Application.Ports.Data;
 using Mystira.App.Domain.Models;
+using System.Threading;
 
 namespace Mystira.App.Application.UseCases.GameSessions;
 
@@ -23,7 +24,7 @@ public class SelectCharacterUseCase
         _logger = logger;
     }
 
-    public async Task<GameSession> ExecuteAsync(string sessionId, string characterId)
+    public async Task<GameSession> ExecuteAsync(string sessionId, string characterId, CancellationToken ct = default)
     {
         if (string.IsNullOrWhiteSpace(sessionId))
         {
@@ -35,15 +36,15 @@ public class SelectCharacterUseCase
             throw new ArgumentException("Character ID cannot be null or empty", nameof(characterId));
         }
 
-        var session = await _repository.GetByIdAsync(sessionId);
+        var session = await _repository.GetByIdAsync(sessionId, ct);
         if (session == null)
         {
             throw new ArgumentException($"Game session not found: {sessionId}", nameof(sessionId));
         }
 
         session.SelectedCharacterId = characterId;
-        await _repository.UpdateAsync(session);
-        await _unitOfWork.SaveChangesAsync();
+        await _repository.UpdateAsync(session, ct);
+        await _unitOfWork.SaveChangesAsync(ct);
 
         _logger.LogInformation("Selected character {CharacterId} for game session {SessionId}", characterId, sessionId);
         return session;

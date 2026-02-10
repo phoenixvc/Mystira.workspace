@@ -20,14 +20,14 @@ public static class DeleteAccountCommandHandler
         ILogger logger,
         CancellationToken ct)
     {
-        var account = await repository.GetByIdAsync(command.AccountId);
+        var account = await repository.GetByIdAsync(command.AccountId, ct);
         if (account == null)
         {
             logger.LogWarning("Account not found for deletion request");
             return false;
         }
 
-        await repository.DeleteAsync(account.Id);
+        await repository.DeleteAsync(account.Id, ct);
         await unitOfWork.SaveChangesAsync(ct);
 
         logger.LogInformation("Account deleted successfully");

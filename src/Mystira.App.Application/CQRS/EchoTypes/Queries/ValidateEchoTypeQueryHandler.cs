@@ -15,7 +15,7 @@ public static class ValidateEchoTypeQueryHandler
         CancellationToken ct)
     {
         logger.LogInformation("Validating echo type: {Name}", query.Name);
-        var isValid = await repository.ExistsByNameAsync(query.Name);
+        var isValid = await repository.ExistsByNameAsync(query.Name, ct);
         logger.LogInformation("Echo type '{Name}' is {Status}", query.Name, isValid ? "valid" : "invalid");
         return isValid;
     }

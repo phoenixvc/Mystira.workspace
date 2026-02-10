@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using Mystira.App.Application.Helpers;
 using Mystira.App.Application.Ports.Data;
 using Mystira.App.Domain.Models;
 
@@ -20,15 +21,15 @@ public static class GetUserProfileQueryHandler
         ILogger logger,
         CancellationToken ct)
     {
-        var profile = await repository.GetByIdAsync(query.ProfileId);
+        var profile = await repository.GetByIdAsync(query.ProfileId, ct);
 
         if (profile == null)
         {
-            logger.LogDebug("Profile not found: {ProfileId}", query.ProfileId);
+            logger.LogDebug("Profile not found: {ProfileId}", LogAnonymizer.HashId(query.ProfileId));
         }
         else
         {
-            logger.LogDebug("Retrieved profile {ProfileId}", query.ProfileId);
+            logger.LogDebug("Retrieved profile {ProfileId}", LogAnonymizer.HashId(query.ProfileId));
         }
 
         return profile;

@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 using Mystira.App.Application.Ports.Data;
 using Mystira.App.Domain.Models;
+using System.Threading;
 
 namespace Mystira.App.Application.UseCases.ContentBundles;
 
@@ -23,7 +24,7 @@ public class RemoveScenarioFromBundleUseCase
         _logger = logger;
     }
 
-    public async Task<ContentBundle> ExecuteAsync(string bundleId, string scenarioId)
+    public async Task<ContentBundle> ExecuteAsync(string bundleId, string scenarioId, CancellationToken ct = default)
     {
         if (string.IsNullOrWhiteSpace(bundleId))
         {
@@ -35,7 +36,7 @@ public class RemoveScenarioFromBundleUseCase
             throw new ArgumentException("Scenario ID cannot be null or empty", nameof(scenarioId));
         }
 
-        var bundle = await _repository.GetByIdAsync(bundleId);
+        var bundle = await _repository.GetByIdAsync(bundleId, ct);
         if (bundle == null)
         {
             throw new ArgumentException($"Content bundle not found: {bundleId}", nameof(bundleId));
@@ -44,8 +45,8 @@ public class RemoveScenarioFromBundleUseCase
         if (bundle.ScenarioIds != null && bundle.ScenarioIds.Contains(scenarioId))
         {
             bundle.ScenarioIds.Remove(scenarioId);
-            await _repository.UpdateAsync(bundle);
-            await _unitOfWork.SaveChangesAsync();
+            await _repository.UpdateAsync(bundle, ct);
+            await _unitOfWork.SaveChangesAsync(ct);
 
             _logger.LogInformation("Removed scenario {ScenarioId} from bundle {BundleId}", scenarioId, bundleId);
         }

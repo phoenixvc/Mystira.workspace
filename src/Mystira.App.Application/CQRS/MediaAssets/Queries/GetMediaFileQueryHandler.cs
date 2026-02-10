@@ -20,7 +20,7 @@ public static class GetMediaFileQueryHandler
         logger.LogInformation("Retrieving media file for MediaId: {MediaId}", request.MediaId);
 
         // 1. Get media asset metadata by external MediaId (not DB primary key)
-        var mediaAsset = await repository.GetByMediaIdAsync(request.MediaId);
+        var mediaAsset = await repository.GetByMediaIdAsync(request.MediaId, ct);
         if (mediaAsset == null)
         {
             logger.LogWarning("Media asset not found by MediaId: {MediaId}", request.MediaId);

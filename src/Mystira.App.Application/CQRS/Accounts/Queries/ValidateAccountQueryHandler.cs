@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using Mystira.App.Application.Helpers;
 using Mystira.App.Application.Ports.Data;
 
 namespace Mystira.App.Application.CQRS.Accounts.Queries;
@@ -29,15 +30,15 @@ public static class ValidateAccountQueryHandler
 
         try
         {
-            var account = await repository.GetByEmailAsync(query.Email);
+            var account = await repository.GetByEmailAsync(query.Email, ct);
             var isValid = account != null;
 
-            logger.LogInformation("Account validation for {Email}: {IsValid}", query.Email, isValid);
+            logger.LogInformation("Account validation for {EmailHash}: {IsValid}", LogAnonymizer.HashEmail(query.Email), isValid);
             return isValid;
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Error validating account for email {Email}", query.Email);
+            logger.LogError(ex, "Error validating account for email {EmailHash}", LogAnonymizer.HashEmail(query.Email));
             return false;
         }
     }

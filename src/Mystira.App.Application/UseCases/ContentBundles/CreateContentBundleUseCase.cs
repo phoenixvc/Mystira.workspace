@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 using Mystira.App.Application.Ports.Data;
 using Mystira.App.Domain.Models;
+using System.Threading;
 
 namespace Mystira.App.Application.UseCases.ContentBundles;
 
@@ -30,7 +31,8 @@ public class CreateContentBundleUseCase
         string imageId,
         List<BundlePrice> prices,
         bool isFree,
-        string ageGroup)
+        string ageGroup,
+        CancellationToken ct = default)
     {
         if (string.IsNullOrWhiteSpace(title))
         {
@@ -54,8 +56,8 @@ public class CreateContentBundleUseCase
             AgeGroup = ageGroup ?? string.Empty
         };
 
-        await _repository.AddAsync(bundle);
-        await _unitOfWork.SaveChangesAsync();
+        await _repository.AddAsync(bundle, ct);
+        await _unitOfWork.SaveChangesAsync(ct);
 
         _logger.LogInformation("Created content bundle: {BundleId} - {Title}", bundle.Id, bundle.Title);
         return bundle;

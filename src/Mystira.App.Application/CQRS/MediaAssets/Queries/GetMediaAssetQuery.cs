@@ -10,5 +10,5 @@ namespace Mystira.App.Application.CQRS.MediaAssets.Queries;
 public record GetMediaAssetQuery(string MediaId) : IQuery<MediaAsset?>, ICacheableQuery
 {
     public string CacheKey => $"MediaAsset:{MediaId}";
-    public int CacheDurationSeconds => 300; // 5 minutes
+    public int CacheDurationSeconds => CacheDefaults.ShortSeconds;
 };

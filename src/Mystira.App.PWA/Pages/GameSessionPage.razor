@@ -379,7 +379,6 @@ else
     [Inject] private IAwardsState AwardsState { get; set; } = default!;
     [Inject] private IJSRuntime JSRuntime { get; set; } = default!;
     [Inject] private Mystira.App.PWA.Services.Music.SceneAudioOrchestrator AudioOrchestrator { get; set; } = default!;
-    [Inject] private Mystira.App.PWA.Services.Music.IAudioBus AudioBus { get; set; } = default!;
 
     private sealed record PlayerOption(string Id, string DisplayName);
 
@@ -388,9 +387,6 @@ else
     private int? rollResult = null;
     private bool? lastRollSuccess = null;
     private string? lastRollMessage = null;
-#pragma warning disable CS0414 // Field is assigned but its value is never used
-    private bool hasNavigatedHome = false;
-#pragma warning restore CS0414
     private bool isMusicPaused = false;
 
     // Audio
@@ -500,7 +496,7 @@ else
         {
             try
             {
-                isMusicPaused = await AudioBus.IsMusicPausedAsync();
+                isMusicPaused = await AudioOrchestrator.IsMusicPausedAsync();
             }
             catch (Exception ex)
             {
@@ -531,19 +527,17 @@ else
         {
             if (isPlayingAudio == audioUrl)
             {
-                await AudioBus.StopSoundEffectAsync(audioUrl);
-                await AudioBus.DuckMusicAsync(false);
+                await AudioOrchestrator.StopNarrationAsync(audioUrl);
                 isPlayingAudio = null;
             }
             else
             {
                 if (!string.IsNullOrEmpty(isPlayingAudio))
                 {
-                    await AudioBus.StopSoundEffectAsync(isPlayingAudio);
+                    await AudioOrchestrator.StopNarrationAsync(isPlayingAudio, unduckMusic: false);
                 }
 
-                await AudioBus.DuckMusicAsync(true);
-                await AudioBus.PlaySoundEffectAsync(audioUrl);
+                await AudioOrchestrator.PlayNarrationAsync(audioUrl);
                 isPlayingAudio = audioUrl;
             }
         }
@@ -841,7 +835,7 @@ else
             {
                 Logger.LogInformation("Game session resumed");
                 // Sync music paused state
-                isMusicPaused = await AudioBus.IsMusicPausedAsync();
+                isMusicPaused = await AudioOrchestrator.IsMusicPausedAsync();
             }
         }
         catch (Exception ex)
@@ -859,20 +853,7 @@ else
     {
         try
         {
-            // Sync with actual state before toggling
-            isMusicPaused = await AudioBus.IsMusicPausedAsync();
-
-            if (isMusicPaused)
-            {
-                await AudioBus.ResumeMusicAsync();
-            }
-            else
-            {
-                await AudioBus.PauseMusicAsync();
-            }
-
-            // Update local state and trigger UI refresh
-            isMusicPaused = await AudioBus.IsMusicPausedAsync();
+            isMusicPaused = await AudioOrchestrator.ToggleMusicPauseAsync();
             StateHasChanged();
         }
         catch (Exception ex)
@@ -1029,7 +1010,6 @@ else
                     {
                         // Always show the Awards page if finalize succeeded, even when there are no new badges
                         AwardsState.Set(finalize!, gameSession.ScenarioId, gameSession.Scenario?.AgeGroup);
-                        hasNavigatedHome = true; // prevent other flows
                         // Navigate within the SPA so the scoped AwardsState is preserved
                         Navigation.NavigateTo("/game/awards");
                         return;
@@ -1091,7 +1071,6 @@ else
                     if (synthetic.Awards.Count > 0)
                     {
                         AwardsState.Set(synthetic, gameSession.ScenarioId, gameSession.Scenario?.AgeGroup);
-                        hasNavigatedHome = true;
                         Navigation.NavigateTo("/game/awards");
                         return;
                     }
@@ -1124,7 +1103,6 @@ else
             GameSessionService.ClearGameSession();
 
             // Navigate back to home
-            hasNavigatedHome = true;
             Navigation.NavigateTo("/", true);
         }
         catch (Exception ex)

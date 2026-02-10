@@ -33,7 +33,7 @@ public class GetAvatarsQueryHandlerTests
 
         var query = new GetAvatarsQuery();
 
-        _repository.Setup(r => r.GetAsync())
+        _repository.Setup(r => r.GetAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(configFile);
 
         // Act
@@ -56,7 +56,7 @@ public class GetAvatarsQueryHandlerTests
         // Arrange
         var query = new GetAvatarsQuery();
 
-        _repository.Setup(r => r.GetAsync())
+        _repository.Setup(r => r.GetAsync(It.IsAny<CancellationToken>()))
             .Returns(Task.FromResult<AvatarConfigurationFile?>(null));
 
         // Act
@@ -88,7 +88,7 @@ public class GetAvatarsQueryHandlerTests
 
         var query = new GetAvatarsQuery();
 
-        _repository.Setup(r => r.GetAsync())
+        _repository.Setup(r => r.GetAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(configFile);
 
         // Act
@@ -117,7 +117,7 @@ public class GetAvatarsQueryHandlerTests
 
         var query = new GetAvatarsQuery();
 
-        _repository.Setup(r => r.GetAsync())
+        _repository.Setup(r => r.GetAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(configFile);
 
         // Act
@@ -148,7 +148,7 @@ public class GetAvatarsQueryHandlerTests
 
         var query = new GetAvatarsQuery();
 
-        _repository.Setup(r => r.GetAsync())
+        _repository.Setup(r => r.GetAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(configFile);
 
         // Act

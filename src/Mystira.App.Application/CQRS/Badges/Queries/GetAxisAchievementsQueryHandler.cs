@@ -1,4 +1,5 @@
 using Mystira.App.Application.Ports.Data;
+using Mystira.App.Domain.Models;
 using Mystira.Contracts.App.Responses.Badges;
 
 namespace Mystira.App.Application.CQRS.Badges.Queries;
@@ -19,13 +20,17 @@ public static class GetAxisAchievementsQueryHandler
         ICompassAxisRepository axisRepository,
         CancellationToken ct)
     {
-        var achievements = await axisAchievementRepository.GetByAgeGroupAsync(query.AgeGroupId);
+        var achievements = await axisAchievementRepository.GetByAgeGroupAsync(query.AgeGroupId, ct);
         var axes = await axisRepository.GetAllAsync();
 
-        var axisLookup = axes
-            .SelectMany(a => new[] { (Key: a.Id, Value: a), (Key: a.Name, Value: a) })
-            .Where(x => !string.IsNullOrWhiteSpace(x.Key))
-            .ToDictionary(x => x.Key, x => x.Value, StringComparer.OrdinalIgnoreCase);
+        var axisLookup = new Dictionary<string, CompassAxis>(StringComparer.OrdinalIgnoreCase);
+        foreach (var a in axes)
+        {
+            if (!string.IsNullOrWhiteSpace(a.Id))
+                axisLookup.TryAdd(a.Id, a);
+            if (!string.IsNullOrWhiteSpace(a.Name))
+                axisLookup.TryAdd(a.Name, a);
+        }
 
         return achievements
             .OrderBy(a => a.CompassAxisId)

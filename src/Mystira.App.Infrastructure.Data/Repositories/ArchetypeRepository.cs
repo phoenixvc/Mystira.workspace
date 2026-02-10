@@ -13,43 +13,43 @@ public class ArchetypeRepository : IArchetypeRepository
         _context = context;
     }
 
-    public async Task<List<ArchetypeDefinition>> GetAllAsync()
+    public async Task<List<ArchetypeDefinition>> GetAllAsync(CancellationToken ct = default)
     {
         return await _context.ArchetypeDefinitions
             .Where(x => !x.IsDeleted)
             .OrderBy(x => x.Name)
-            .ToListAsync();
+            .ToListAsync(ct);
     }
 
-    public async Task<ArchetypeDefinition?> GetByIdAsync(string id)
+    public async Task<ArchetypeDefinition?> GetByIdAsync(string id, CancellationToken ct = default)
     {
-        return await _context.ArchetypeDefinitions.FirstOrDefaultAsync(x => x.Id == id && !x.IsDeleted);
+        return await _context.ArchetypeDefinitions.FirstOrDefaultAsync(x => x.Id == id && !x.IsDeleted, ct);
     }
 
-    public async Task<ArchetypeDefinition?> GetByNameAsync(string name)
+    public async Task<ArchetypeDefinition?> GetByNameAsync(string name, CancellationToken ct = default)
     {
-        return await _context.ArchetypeDefinitions.FirstOrDefaultAsync(x => x.Name.Equals(name, StringComparison.OrdinalIgnoreCase) && !x.IsDeleted);
+        return await _context.ArchetypeDefinitions.FirstOrDefaultAsync(x => x.Name.ToLower() == name.ToLower() && !x.IsDeleted, ct);
     }
 
-    public async Task<bool> ExistsByNameAsync(string name)
+    public async Task<bool> ExistsByNameAsync(string name, CancellationToken ct = default)
     {
-        return await _context.ArchetypeDefinitions.AnyAsync(x => x.Name.Equals(name, StringComparison.OrdinalIgnoreCase) && !x.IsDeleted);
+        return await _context.ArchetypeDefinitions.AnyAsync(x => x.Name.ToLower() == name.ToLower() && !x.IsDeleted, ct);
     }
 
-    public async Task AddAsync(ArchetypeDefinition archetype)
+    public async Task AddAsync(ArchetypeDefinition archetype, CancellationToken ct = default)
     {
-        await _context.ArchetypeDefinitions.AddAsync(archetype);
+        await _context.ArchetypeDefinitions.AddAsync(archetype, ct);
     }
 
-    public Task UpdateAsync(ArchetypeDefinition archetype)
+    public Task UpdateAsync(ArchetypeDefinition archetype, CancellationToken ct = default)
     {
         _context.ArchetypeDefinitions.Update(archetype);
         return Task.CompletedTask;
     }
 
-    public async Task DeleteAsync(string id)
+    public async Task DeleteAsync(string id, CancellationToken ct = default)
     {
-        var archetype = await _context.ArchetypeDefinitions.FirstOrDefaultAsync(x => x.Id == id);
+        var archetype = await _context.ArchetypeDefinitions.FirstOrDefaultAsync(x => x.Id == id, ct);
         if (archetype != null)
         {
             // Soft delete instead of hard delete

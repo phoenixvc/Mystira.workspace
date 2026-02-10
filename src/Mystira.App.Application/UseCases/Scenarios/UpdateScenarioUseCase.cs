@@ -5,6 +5,7 @@ using Mystira.App.Application.Mappers;
 using Mystira.Contracts.App.Requests.Scenarios;
 using Mystira.App.Domain.Models;
 using NJsonSchema;
+using System.Threading;
 
 namespace Mystira.App.Application.UseCases.Scenarios;
 
@@ -39,9 +40,9 @@ public class UpdateScenarioUseCase
         _validateScenarioUseCase = validateScenarioUseCase;
     }
 
-    public async Task<Scenario?> ExecuteAsync(string id, CreateScenarioRequest request)
+    public async Task<Scenario?> ExecuteAsync(string id, CreateScenarioRequest request, CancellationToken ct = default)
     {
-        var scenario = await _repository.GetByIdAsync(id);
+        var scenario = await _repository.GetByIdAsync(id, ct);
         if (scenario == null)
         {
             return null;
@@ -61,10 +62,10 @@ public class UpdateScenarioUseCase
         scenario.Characters = request.Characters?.Select(ScenarioMapper.ToScenarioCharacter).ToList() ?? new List<ScenarioCharacter>();
         scenario.Scenes = request.Scenes?.Select(ScenarioMapper.ToScene).ToList() ?? new List<Scene>();
 
-        await _validateScenarioUseCase.ExecuteAsync(scenario);
+        await _validateScenarioUseCase.ExecuteAsync(scenario, ct);
 
-        await _repository.UpdateAsync(scenario);
-        await _unitOfWork.SaveChangesAsync();
+        await _repository.UpdateAsync(scenario, ct);
+        await _unitOfWork.SaveChangesAsync(ct);
 
         _logger.LogInformation("Updated scenario: {ScenarioId} - {Title}", scenario.Id, scenario.Title);
         return scenario;

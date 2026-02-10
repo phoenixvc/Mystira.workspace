@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 using Mystira.App.Application.Ports.Data;
 using Mystira.App.Application.Ports.Storage;
+using System.Threading;
 
 namespace Mystira.App.Application.UseCases.Media;
 
@@ -26,14 +27,14 @@ public class DeleteMediaUseCase
         _logger = logger;
     }
 
-    public async Task<bool> ExecuteAsync(string mediaId)
+    public async Task<bool> ExecuteAsync(string mediaId, CancellationToken ct = default)
     {
         if (string.IsNullOrWhiteSpace(mediaId))
         {
             throw new ArgumentException("Media ID is required", nameof(mediaId));
         }
 
-        var mediaAsset = await _repository.GetByMediaIdAsync(mediaId);
+        var mediaAsset = await _repository.GetByMediaIdAsync(mediaId, ct);
         if (mediaAsset == null)
         {
             _logger.LogWarning("Media asset not found for deletion: {MediaId}", mediaId);
@@ -49,7 +50,7 @@ public class DeleteMediaUseCase
                 {
                     var uri = new Uri(mediaAsset.Url);
                     var blobName = Path.GetFileName(uri.LocalPath);
-                    await _blobStorageService.DeleteMediaAsync(blobName);
+                    await _blobStorageService.DeleteMediaAsync(blobName, ct);
                 }
                 catch (Exception ex)
                 {
@@ -59,8 +60,8 @@ public class DeleteMediaUseCase
             }
 
             // Delete from database
-            await _repository.DeleteAsync(mediaAsset.Id);
-            await _unitOfWork.SaveChangesAsync();
+            await _repository.DeleteAsync(mediaAsset.Id, ct);
+            await _unitOfWork.SaveChangesAsync(ct);
 
             _logger.LogInformation("Media deleted successfully: {MediaId}", mediaId);
             return true;

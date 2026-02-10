@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using Mystira.App.Application.Helpers;
 using Mystira.App.Application.Mappers;
 using Mystira.App.Application.Ports.Data;
 using Mystira.Contracts.App.Responses.GameSessions;
@@ -20,7 +21,7 @@ public static class GetInProgressSessionsQueryHandler
     {
         Guard.AgainstNullOrEmpty(request.AccountId, nameof(request.AccountId));
 
-        var sessions = await repository.GetInProgressSessionsAsync(request.AccountId);
+        var sessions = await repository.GetInProgressSessionsAsync(request.AccountId, ct);
 
         // Defensive: if historical data contains duplicates, only return the most recent active
         // session per (ScenarioId, ProfileId) pair.
@@ -36,8 +37,8 @@ public static class GetInProgressSessionsQueryHandler
         if (meaningfulSessions.Count != ordered.Count)
         {
             logger.LogWarning(
-                "Filtered empty in-progress sessions for account {AccountIdPrefix}: {OriginalCount} -> {FilteredCount}",
-                request.AccountId[..Math.Min(8, request.AccountId.Length)] + "...",
+                "Filtered empty in-progress sessions for account {AccountId}: {OriginalCount} -> {FilteredCount}",
+                LogAnonymizer.HashId(request.AccountId),
                 ordered.Count,
                 meaningfulSessions.Count);
         }
@@ -50,8 +51,8 @@ public static class GetInProgressSessionsQueryHandler
         if (uniqueSessions.Count != meaningfulSessions.Count)
         {
             logger.LogWarning(
-                "Deduplicated in-progress sessions for account {AccountIdPrefix}: {OriginalCount} -> {UniqueCount}",
-                request.AccountId[..Math.Min(8, request.AccountId.Length)] + "...",
+                "Deduplicated in-progress sessions for account {AccountId}: {OriginalCount} -> {UniqueCount}",
+                LogAnonymizer.HashId(request.AccountId),
                 meaningfulSessions.Count,
                 uniqueSessions.Count);
         }
@@ -59,8 +60,8 @@ public static class GetInProgressSessionsQueryHandler
         uniqueSessions.ForEach(s => s.RecalculateCompassProgressFromHistory());
         var response = GameSessionMapper.ToResponseList(uniqueSessions);
 
-        logger.LogDebug("Retrieved {Count} in-progress sessions for account {AccountIdPrefix}",
-            response.Count, request.AccountId[..Math.Min(8, request.AccountId.Length)] + "...");
+        logger.LogDebug("Retrieved {Count} in-progress sessions for account {AccountId}",
+            response.Count, LogAnonymizer.HashId(request.AccountId));
 
         return response;
     }

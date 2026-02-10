@@ -7,8 +7,8 @@ namespace Mystira.App.Application.Ports.Data;
 /// </summary>
 public interface ICharacterMapFileRepository
 {
-    Task<CharacterMapFile?> GetAsync();
-    Task<CharacterMapFile> AddOrUpdateAsync(CharacterMapFile entity);
-    Task DeleteAsync();
+    Task<CharacterMapFile?> GetAsync(CancellationToken ct = default);
+    Task<CharacterMapFile> AddOrUpdateAsync(CharacterMapFile entity, CancellationToken ct = default);
+    Task DeleteAsync(CancellationToken ct = default);
 }
 

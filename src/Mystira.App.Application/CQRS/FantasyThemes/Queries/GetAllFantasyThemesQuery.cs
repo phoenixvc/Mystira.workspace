@@ -9,5 +9,5 @@ namespace Mystira.App.Application.CQRS.FantasyThemes.Queries;
 public record GetAllFantasyThemesQuery : IQuery<List<FantasyThemeDefinition>>, ICacheableQuery
 {
     public string CacheKey => "MasterData:FantasyThemes:All";
-    public int CacheDurationSeconds => 3600; // 1 hour - master data rarely changes
+    public int CacheDurationSeconds => CacheDefaults.MasterDataSeconds;
 }

@@ -2,6 +2,7 @@ using Wolverine;
 using Microsoft.AspNetCore.Mvc;
 using Mystira.App.Application.CQRS.UserBadges.Commands;
 using Mystira.App.Application.CQRS.UserBadges.Queries;
+using Mystira.App.Application.Helpers;
 using Mystira.Contracts.App.Requests.Badges;
 using Mystira.App.Api.Models;
 using Mystira.App.Domain.Models;
@@ -88,7 +89,7 @@ public class UserBadgesController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error getting badges for user {UserProfileId}", userProfileId);
+            _logger.LogError(ex, "Error getting badges for user {UserProfileId}", LogAnonymizer.HashId(userProfileId));
             return StatusCode(500, new ErrorResponse
             {
                 Message = "Internal server error while fetching badges",
@@ -112,7 +113,7 @@ public class UserBadgesController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error getting badges for user {UserProfileId} and axis {Axis}",
-                userProfileId, axis);
+                LogAnonymizer.HashId(userProfileId), LogAnonymizer.SanitizeForLog(axis));
             return StatusCode(500, new ErrorResponse
             {
                 Message = "Internal server error while fetching badges for axis",
@@ -136,7 +137,7 @@ public class UserBadgesController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error checking if user {UserProfileId} has badge {BadgeId}",
-                userProfileId, badgeConfigurationId);
+                LogAnonymizer.HashId(userProfileId), LogAnonymizer.SanitizeForLog(badgeConfigurationId));
             return StatusCode(500, new ErrorResponse
             {
                 Message = "Internal server error while checking badge status",
@@ -159,7 +160,7 @@ public class UserBadgesController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error getting badge statistics for user {UserProfileId}", userProfileId);
+            _logger.LogError(ex, "Error getting badge statistics for user {UserProfileId}", LogAnonymizer.HashId(userProfileId));
             return StatusCode(500, new ErrorResponse
             {
                 Message = "Internal server error while fetching badge statistics",
@@ -183,7 +184,7 @@ public class UserBadgesController : ControllerBase
             {
                 return NotFound(new ErrorResponse
                 {
-                    Message = $"Account with email {email} not found or has no badges",
+                    Message = "Account not found or has no badges",
                     TraceId = HttpContext.TraceIdentifier
                 });
             }

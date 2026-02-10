@@ -13,43 +13,43 @@ public class CompassAxisRepository : ICompassAxisRepository
         _context = context;
     }
 
-    public async Task<List<CompassAxis>> GetAllAsync()
+    public async Task<List<CompassAxis>> GetAllAsync(CancellationToken ct = default)
     {
         return await _context.CompassAxes
             .Where(x => !x.IsDeleted)
             .OrderBy(x => x.Name)
-            .ToListAsync();
+            .ToListAsync(ct);
     }
 
-    public async Task<CompassAxis?> GetByIdAsync(string id)
+    public async Task<CompassAxis?> GetByIdAsync(string id, CancellationToken ct = default)
     {
-        return await _context.CompassAxes.FirstOrDefaultAsync(x => x.Id == id && !x.IsDeleted);
+        return await _context.CompassAxes.FirstOrDefaultAsync(x => x.Id == id && !x.IsDeleted, ct);
     }
 
-    public async Task<CompassAxis?> GetByNameAsync(string name)
+    public async Task<CompassAxis?> GetByNameAsync(string name, CancellationToken ct = default)
     {
-        return await _context.CompassAxes.FirstOrDefaultAsync(x => x.Name.Equals(name, StringComparison.OrdinalIgnoreCase) && !x.IsDeleted);
+        return await _context.CompassAxes.FirstOrDefaultAsync(x => x.Name.ToLower() == name.ToLower() && !x.IsDeleted, ct);
     }
 
-    public async Task<bool> ExistsByNameAsync(string name)
+    public async Task<bool> ExistsByNameAsync(string name, CancellationToken ct = default)
     {
-        return await _context.CompassAxes.AnyAsync(x => x.Name.Equals(name, StringComparison.OrdinalIgnoreCase) && !x.IsDeleted);
+        return await _context.CompassAxes.AnyAsync(x => x.Name.ToLower() == name.ToLower() && !x.IsDeleted, ct);
     }
 
-    public async Task AddAsync(CompassAxis axis)
+    public async Task AddAsync(CompassAxis axis, CancellationToken ct = default)
     {
-        await _context.CompassAxes.AddAsync(axis);
+        await _context.CompassAxes.AddAsync(axis, ct);
     }
 
-    public Task UpdateAsync(CompassAxis axis)
+    public Task UpdateAsync(CompassAxis axis, CancellationToken ct = default)
     {
         _context.CompassAxes.Update(axis);
         return Task.CompletedTask;
     }
 
-    public async Task DeleteAsync(string id)
+    public async Task DeleteAsync(string id, CancellationToken ct = default)
     {
-        var axis = await _context.CompassAxes.FirstOrDefaultAsync(x => x.Id == id);
+        var axis = await _context.CompassAxes.FirstOrDefaultAsync(x => x.Id == id, ct);
         if (axis != null)
         {
             // Soft delete instead of hard delete

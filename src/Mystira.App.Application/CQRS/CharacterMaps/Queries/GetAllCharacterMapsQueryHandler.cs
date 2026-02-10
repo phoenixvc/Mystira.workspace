@@ -19,13 +19,13 @@ public static class GetAllCharacterMapsQueryHandler
     {
         logger.LogInformation("Retrieving all character maps");
 
-        var characterMaps = (await repository.GetAllAsync()).ToList();
+        var characterMaps = (await repository.GetAllAsync(ct)).ToList();
 
         // Initialize with default data if empty
         if (!characterMaps.Any())
         {
             await InitializeDefaultCharacterMapsAsync(repository, unitOfWork, logger, ct);
-            characterMaps = (await repository.GetAllAsync()).ToList();
+            characterMaps = (await repository.GetAllAsync(ct)).ToList();
         }
 
         logger.LogInformation("Found {Count} character maps", characterMaps.Count);
@@ -78,8 +78,8 @@ public static class GetAllCharacterMapsQueryHandler
             UpdatedAt = DateTime.UtcNow
         };
 
-        await repository.AddAsync(elarion);
-        await repository.AddAsync(grubb);
+        await repository.AddAsync(elarion, ct);
+        await repository.AddAsync(grubb, ct);
         await unitOfWork.SaveChangesAsync(ct);
 
         logger.LogInformation("Initialized 2 default character maps");

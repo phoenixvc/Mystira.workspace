@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 using Mystira.App.Application.Ports.Data;
 using Mystira.App.Domain.Models;
+using System.Threading;
 
 namespace Mystira.App.Application.UseCases.Badges;
 
@@ -20,7 +21,7 @@ public class GetBadgesByAxisUseCase
         _logger = logger;
     }
 
-    public async Task<List<UserBadge>> ExecuteAsync(string userProfileId, string axis)
+    public async Task<List<UserBadge>> ExecuteAsync(string userProfileId, string axis, CancellationToken ct = default)
     {
         if (string.IsNullOrWhiteSpace(userProfileId))
         {
@@ -32,11 +33,11 @@ public class GetBadgesByAxisUseCase
             throw new ArgumentException("Axis cannot be null or empty", nameof(axis));
         }
 
-        var badges = await _repository.GetByUserProfileIdAndAxisAsync(userProfileId, axis);
+        var badges = await _repository.GetByUserProfileIdAndAxisAsync(userProfileId, axis, ct);
         var badgeList = badges.ToList();
 
         _logger.LogInformation("Retrieved {Count} badges for user profile {UserProfileId} on axis {Axis}",
-            badgeList.Count, userProfileId, axis);
+            badgeList.Count, PiiMask.HashId(userProfileId), axis);
         return badgeList;
     }
 }

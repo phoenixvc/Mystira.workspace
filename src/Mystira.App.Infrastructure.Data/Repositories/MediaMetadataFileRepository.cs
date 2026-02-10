@@ -18,14 +18,14 @@ public class MediaMetadataFileRepository : IMediaMetadataFileRepository
         _dbSet = context.Set<MediaMetadataFile>();
     }
 
-    public async Task<MediaMetadataFile?> GetAsync()
+    public async Task<MediaMetadataFile?> GetAsync(CancellationToken ct = default)
     {
-        return await _dbSet.FirstOrDefaultAsync();
+        return await _dbSet.FirstOrDefaultAsync(ct);
     }
 
-    public async Task<MediaMetadataFile> AddOrUpdateAsync(MediaMetadataFile entity)
+    public async Task<MediaMetadataFile> AddOrUpdateAsync(MediaMetadataFile entity, CancellationToken ct = default)
     {
-        var existing = await GetAsync();
+        var existing = await GetAsync(ct);
         if (existing != null)
         {
             existing.Entries = entity.Entries;
@@ -35,17 +35,16 @@ public class MediaMetadataFileRepository : IMediaMetadataFileRepository
             return existing;
         }
 
-        await _dbSet.AddAsync(entity);
+        await _dbSet.AddAsync(entity, ct);
         return entity;
     }
 
-    public async Task DeleteAsync()
+    public async Task DeleteAsync(CancellationToken ct = default)
     {
-        var existing = await GetAsync();
+        var existing = await GetAsync(ct);
         if (existing != null)
         {
             _dbSet.Remove(existing);
         }
     }
 }
-

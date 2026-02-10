@@ -22,7 +22,7 @@ public sealed class GetAllBadgeConfigurationsQueryHandler
 
     public async Task<List<BadgeConfiguration>> Handle(GetAllBadgeConfigurationsQuery request, CancellationToken cancellationToken)
     {
-        var all = await _repository.GetAllAsync();
+        var all = await _repository.GetAllAsync(cancellationToken);
         // Stable ordering by Name for deterministic results in tests/clients
         return all.OrderBy(b => b.Name).ToList();
     }

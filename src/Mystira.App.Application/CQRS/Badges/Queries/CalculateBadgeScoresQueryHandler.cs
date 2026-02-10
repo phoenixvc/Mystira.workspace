@@ -39,7 +39,7 @@ public static class CalculateBadgeScoresQueryHandler
         }
 
         // Load the content bundle
-        var bundle = await bundleRepository.GetByIdAsync(query.ContentBundleId);
+        var bundle = await bundleRepository.GetByIdAsync(query.ContentBundleId, ct);
         if (bundle == null)
         {
             throw new InvalidOperationException($"Content bundle not found: {query.ContentBundleId}");
@@ -54,7 +54,7 @@ public static class CalculateBadgeScoresQueryHandler
         var scenarios = new List<Scenario>();
         foreach (var scenarioId in bundle.ScenarioIds)
         {
-            var scenario = await scenarioRepository.GetByIdAsync(scenarioId);
+            var scenario = await scenarioRepository.GetByIdAsync(scenarioId, ct);
             if (scenario != null)
             {
                 scenarios.Add(scenario);

@@ -44,7 +44,7 @@ public class SceneAudioOrchestrator
             {
                 // Update energy from intent
                 var intent = _resolver.GetEffectiveIntent(scene);
-                var energy = intent.Energy ?? 0.45; // Default middle energy if not specified
+                var energy = intent.Energy ?? AudioDefaults.DefaultEnergy;
                 _context.CurrentEnergy = energy;
 
                 await _audioBus.PlayMusicAsync(result.TrackId, result.Transition, (float)energy);
@@ -62,7 +62,7 @@ public class SceneAudioOrchestrator
                 var intent = _resolver.GetEffectiveIntent(scene);
                 var energy = intent.Energy ?? _context.CurrentEnergy;
 
-                if (Math.Abs(energy - _context.CurrentEnergy) > 0.05)
+                if (Math.Abs(energy - _context.CurrentEnergy) > AudioDefaults.EnergyChangeThreshold)
                 {
                     await _audioBus.SetMusicVolumeAsync((float)energy);
                 }
@@ -133,4 +133,49 @@ public class SceneAudioOrchestrator
             await _audioBus.StopSoundEffectAsync(track);
         }
     }
+
+    /// <summary>
+    /// Plays a narration/audio clip, ducking background music if requested.
+    /// </summary>
+    public async Task PlayNarrationAsync(string audioUrl, bool duckMusic = true)
+    {
+        if (duckMusic)
+        {
+            await _audioBus.DuckMusicAsync(true);
+        }
+        await _audioBus.PlaySoundEffectAsync(audioUrl);
+    }
+
+    /// <summary>
+    /// Stops a narration/audio clip and restores music volume.
+    /// </summary>
+    public async Task StopNarrationAsync(string audioUrl, bool unduckMusic = true)
+    {
+        await _audioBus.StopSoundEffectAsync(audioUrl);
+        if (unduckMusic)
+        {
+            await _audioBus.DuckMusicAsync(false);
+        }
+    }
+
+    /// <summary>
+    /// Toggles background music pause/resume state.
+    /// </summary>
+    /// <returns>True if music is now paused, false if resumed.</returns>
+    public async Task<bool> ToggleMusicPauseAsync()
+    {
+        if (await _audioBus.IsMusicPausedAsync())
+        {
+            await _audioBus.ResumeMusicAsync();
+            return false;
+        }
+
+        await _audioBus.PauseMusicAsync();
+        return true;
+    }
+
+    /// <summary>
+    /// Returns whether background music is currently paused.
+    /// </summary>
+    public Task<bool> IsMusicPausedAsync() => _audioBus.IsMusicPausedAsync();
 }

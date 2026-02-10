@@ -9,5 +9,5 @@ namespace Mystira.App.Application.CQRS.Archetypes.Queries;
 public record GetArchetypeByIdQuery(string Id) : IQuery<ArchetypeDefinition?>, ICacheableQuery
 {
     public string CacheKey => $"MasterData:Archetypes:{Id}";
-    public int CacheDurationSeconds => 3600; // 1 hour - master data rarely changes
+    public int CacheDurationSeconds => CacheDefaults.MasterDataSeconds;
 }

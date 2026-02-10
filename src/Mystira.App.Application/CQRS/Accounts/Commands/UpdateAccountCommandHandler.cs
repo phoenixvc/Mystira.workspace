@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using Mystira.App.Application.Helpers;
 using Mystira.App.Application.Ports.Data;
 using Mystira.App.Domain.Models;
 
@@ -21,10 +22,10 @@ public static class UpdateAccountCommandHandler
         ILogger logger,
         CancellationToken ct)
     {
-        var account = await repository.GetByIdAsync(command.AccountId);
+        var account = await repository.GetByIdAsync(command.AccountId, ct);
         if (account == null)
         {
-            logger.LogWarning("Account not found: {AccountIdPrefix}", command.AccountId[..Math.Min(8, command.AccountId.Length)] + "...");
+            logger.LogWarning("Account not found: {AccountId}", LogAnonymizer.HashId(command.AccountId));
             return null;
         }
 
@@ -48,10 +49,10 @@ public static class UpdateAccountCommandHandler
             account.Settings = command.Settings;
         }
 
-        await repository.UpdateAsync(account);
+        await repository.UpdateAsync(account, ct);
         await unitOfWork.SaveChangesAsync(ct);
 
-        logger.LogInformation("Updated account {AccountIdPrefix}", account.Id[..Math.Min(8, account.Id.Length)] + "...");
+        logger.LogInformation("Updated account {AccountId}", LogAnonymizer.HashId(account.Id));
         return account;
     }
 }

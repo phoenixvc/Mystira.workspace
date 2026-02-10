@@ -11,23 +11,23 @@ public class PlayerScenarioScoreRepository : Repository<PlayerScenarioScore>, IP
     {
     }
 
-    public async Task<PlayerScenarioScore?> GetByProfileAndScenarioAsync(string profileId, string scenarioId)
+    public async Task<PlayerScenarioScore?> GetByProfileAndScenarioAsync(string profileId, string scenarioId, CancellationToken ct = default)
     {
         return await ((MystiraAppDbContext)_context).PlayerScenarioScores
-            .FirstOrDefaultAsync(x => x.ProfileId == profileId && x.ScenarioId == scenarioId);
+            .FirstOrDefaultAsync(x => x.ProfileId == profileId && x.ScenarioId == scenarioId, ct);
     }
 
-    public async Task<IEnumerable<PlayerScenarioScore>> GetByProfileIdAsync(string profileId)
+    public async Task<IEnumerable<PlayerScenarioScore>> GetByProfileIdAsync(string profileId, CancellationToken ct = default)
     {
         return await ((MystiraAppDbContext)_context).PlayerScenarioScores
             .Where(x => x.ProfileId == profileId)
             .OrderByDescending(x => x.CreatedAt)
-            .ToListAsync();
+            .ToListAsync(ct);
     }
 
-    public async Task<bool> IsScenarioScoredAsync(string profileId, string scenarioId)
+    public async Task<bool> IsScenarioScoredAsync(string profileId, string scenarioId, CancellationToken ct = default)
     {
         return await ((MystiraAppDbContext)_context).PlayerScenarioScores
-            .AnyAsync(x => x.ProfileId == profileId && x.ScenarioId == scenarioId);
+            .AnyAsync(x => x.ProfileId == profileId && x.ScenarioId == scenarioId, ct);
     }
 }

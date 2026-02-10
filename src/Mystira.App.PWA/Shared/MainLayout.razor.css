@@ -127,7 +127,33 @@ footer {
     background-color: var(--card, rgba(255,255,255,0.85)) !important;
     border-top: 1px solid var(--border, rgba(17,24,39,0.08));
     color: var(--fg, #111827) !important;
-    margin-bottom: 32px; /* Add space for environment indicator when present */
+}
+
+/* Environment Badge in Footer */
+.environment-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.environment-badge.env-dev {
+    background: linear-gradient(135deg, #059669, #10b981);
+    color: white;
+}
+
+.environment-badge.env-staging {
+    background: linear-gradient(135deg, #d97706, #f59e0b);
+    color: white;
+}
+
+.environment-badge.env-local {
+    background: linear-gradient(135deg, #7c3aed, #8b5cf6);
+    color: white;
 }
 
 .profile-menu-dropdown {
@@ -204,6 +230,40 @@ html[data-theme="dark"] .profile-menu-dropdown .dropdown-item:hover i {
     color: #a5b4fc;
 }
 
+/* Light Mode Support for Profile Dropdown Menu */
+html[data-theme="light"] .profile-menu-dropdown {
+    background: #ffffff;
+    border: 1px solid rgba(147, 51, 234, 0.15);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+html[data-theme="light"] .profile-menu-dropdown .dropdown-header {
+    color: #6b7280;
+    background: transparent;
+}
+
+html[data-theme="light"] .profile-menu-dropdown .dropdown-divider {
+    border-top-color: rgba(147, 51, 234, 0.1);
+}
+
+html[data-theme="light"] .profile-menu-dropdown .dropdown-item {
+    color: #374151;
+}
+
+html[data-theme="light"] .profile-menu-dropdown .dropdown-item:hover,
+html[data-theme="light"] .profile-menu-dropdown .dropdown-item:focus {
+    background: #f5f3ff;
+    color: #7c3aed;
+}
+
+html[data-theme="light"] .profile-menu-dropdown .dropdown-item i {
+    color: #7c3aed;
+}
+
+html[data-theme="light"] .profile-menu-dropdown .dropdown-item:hover i {
+    color: #6d28d9;
+}
+
 /* Navbar brand for light mode - use darker gradient */
 html[data-theme="light"] .navbar-brand,
 html[data-theme="light"] .navbar-brand i {
@@ -249,6 +309,23 @@ html[data-theme="light"] .navbar-brand:hover i {
     .navbar-toggler-icon {
         background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28241, 245, 249, 0.9%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
     }
+
+    /* Ensure nav links and icons are visible in dark mode */
+    .nav-link,
+    .nav-link i,
+    .btn-link.nav-link,
+    .btn-link.nav-link i,
+    .dropdown-toggle,
+    .dropdown-toggle i {
+        color: #e2e8f0 !important;
+    }
+
+    .nav-link:hover,
+    .nav-link:hover i,
+    .btn-link.nav-link:hover,
+    .btn-link.nav-link:hover i {
+        color: #a78bfa !important;
+    }
 }
 
 html[data-theme="dark"] .navbar-toggler {
@@ -257,6 +334,23 @@ html[data-theme="dark"] .navbar-toggler {
 
 html[data-theme="dark"] .navbar-toggler-icon {
     background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28241, 245, 249, 0.9%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+}
+
+/* Ensure nav links and icons are visible in dark mode (manual toggle) */
+html[data-theme="dark"] .nav-link,
+html[data-theme="dark"] .nav-link i,
+html[data-theme="dark"] .btn-link.nav-link,
+html[data-theme="dark"] .btn-link.nav-link i,
+html[data-theme="dark"] .dropdown-toggle,
+html[data-theme="dark"] .dropdown-toggle i {
+    color: #e2e8f0 !important;
+}
+
+html[data-theme="dark"] .nav-link:hover,
+html[data-theme="dark"] .nav-link:hover i,
+html[data-theme="dark"] .btn-link.nav-link:hover,
+html[data-theme="dark"] .btn-link.nav-link:hover i {
+    color: #a78bfa !important;
 }
 
 /* Current Adventure Indicator - Dark Mode */

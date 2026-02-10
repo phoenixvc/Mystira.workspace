@@ -98,9 +98,7 @@ public partial class GameSessionService : IGameSessionService
                 return false;
             }
 
-            startingScene.AudioUrl = !string.IsNullOrEmpty(startingScene.Media?.Audio) ? await _apiClient.GetMediaUrlFromId(startingScene.Media.Audio) : null;
-            startingScene.ImageUrl = !string.IsNullOrEmpty(startingScene.Media?.Image) ? await _apiClient.GetMediaUrlFromId(startingScene.Media.Image) : null;
-            startingScene.VideoUrl = !string.IsNullOrEmpty(startingScene.Media?.Video) ? await _apiClient.GetMediaUrlFromId(startingScene.Media.Video) : null;
+            await startingScene.ResolveMediaUrlsAsync(_apiClient);
 
             // Create local game session with API session data
             CurrentGameSession = new GameSession
@@ -189,9 +187,7 @@ public partial class GameSessionService : IGameSessionService
             }
 
             // Resolve Media URLs
-            scene.AudioUrl = !string.IsNullOrEmpty(scene.Media?.Audio) ? await _apiClient.GetMediaUrlFromId(scene.Media.Audio) : null;
-            scene.ImageUrl = !string.IsNullOrEmpty(scene.Media?.Image) ? await _apiClient.GetMediaUrlFromId(scene.Media.Image) : null;
-            scene.VideoUrl = !string.IsNullOrEmpty(scene.Media?.Video) ? await _apiClient.GetMediaUrlFromId(scene.Media.Video) : null;
+            await scene.ResolveMediaUrlsAsync(_apiClient);
 
             CurrentGameSession.CurrentScene = scene;
             CurrentGameSession.CurrentSceneId = sceneId;

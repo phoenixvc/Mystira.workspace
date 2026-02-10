@@ -22,7 +22,7 @@ public static class GetBundleAttributionQueryHandler
             throw new ArgumentException("Bundle ID cannot be null or empty", nameof(request.BundleId));
         }
 
-        var bundle = await repository.GetByIdAsync(request.BundleId);
+        var bundle = await repository.GetByIdAsync(request.BundleId, ct);
 
         if (bundle == null)
         {

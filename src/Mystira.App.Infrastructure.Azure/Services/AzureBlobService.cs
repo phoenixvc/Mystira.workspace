@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
@@ -21,12 +22,12 @@ public class AzureBlobService : IBlobService
         _logger = logger;
     }
 
-    public async Task<string> UploadMediaAsync(Stream fileStream, string fileName, string contentType)
+    public async Task<string> UploadMediaAsync(Stream fileStream, string fileName, string contentType, CancellationToken ct = default)
     {
         try
         {
             var containerClient = _blobServiceClient.GetBlobContainerClient(_containerName);
-            await containerClient.CreateIfNotExistsAsync(PublicAccessType.BlobContainer);
+            await containerClient.CreateIfNotExistsAsync(PublicAccessType.BlobContainer, cancellationToken: ct);
 
             // Generate unique blob name to avoid conflicts
             var blobName = $"{Guid.NewGuid()}-{fileName}";
@@ -40,7 +41,7 @@ public class AzureBlobService : IBlobService
             await blobClient.UploadAsync(fileStream, new BlobUploadOptions
             {
                 HttpHeaders = blobHttpHeaders
-            });
+            }, ct);
 
             var uri = blobClient.Uri.ToString();
             _logger.LogInformation("Uploaded media file: {BlobName} to {uri}", blobName, uri);
@@ -53,7 +54,7 @@ public class AzureBlobService : IBlobService
         }
     }
 
-    public Task<string> GetMediaUrlAsync(string blobName)
+    public Task<string> GetMediaUrlAsync(string blobName, CancellationToken ct = default)
     {
         try
         {
@@ -70,14 +71,14 @@ public class AzureBlobService : IBlobService
         }
     }
 
-    public async Task<bool> DeleteMediaAsync(string blobName)
+    public async Task<bool> DeleteMediaAsync(string blobName, CancellationToken ct = default)
     {
         try
         {
             var containerClient = _blobServiceClient.GetBlobContainerClient(_containerName);
             var blobClient = containerClient.GetBlobClient(blobName);
 
-            var response = await blobClient.DeleteIfExistsAsync();
+            var response = await blobClient.DeleteIfExistsAsync(cancellationToken: ct);
 
             if (response.Value)
             {
@@ -97,14 +98,14 @@ public class AzureBlobService : IBlobService
         }
     }
 
-    public async Task<List<string>> ListMediaAsync(string prefix = "")
+    public async Task<List<string>> ListMediaAsync(string prefix = "", CancellationToken ct = default)
     {
         try
         {
             var containerClient = _blobServiceClient.GetBlobContainerClient(_containerName);
             var blobNames = new List<string>();
 
-            await foreach (var blobItem in containerClient.GetBlobsAsync(BlobTraits.None, BlobStates.None, prefix, default))
+            await foreach (var blobItem in containerClient.GetBlobsAsync(BlobTraits.None, BlobStates.None, prefix, ct))
             {
                 blobNames.Add(blobItem.Name);
             }
@@ -118,16 +119,16 @@ public class AzureBlobService : IBlobService
         }
     }
 
-    public async Task<Stream?> DownloadMediaAsync(string blobName)
+    public async Task<Stream?> DownloadMediaAsync(string blobName, CancellationToken ct = default)
     {
         try
         {
             var containerClient = _blobServiceClient.GetBlobContainerClient(_containerName);
             var blobClient = containerClient.GetBlobClient(blobName);
 
-            if (await blobClient.ExistsAsync())
+            if (await blobClient.ExistsAsync(ct))
             {
-                var response = await blobClient.DownloadStreamingAsync();
+                var response = await blobClient.DownloadStreamingAsync(cancellationToken: ct);
                 return response.Value.Content;
             }
 

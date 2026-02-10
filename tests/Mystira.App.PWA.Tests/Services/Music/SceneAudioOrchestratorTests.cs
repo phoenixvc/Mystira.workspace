@@ -160,6 +160,104 @@ public class SceneAudioOrchestratorTests
         _audioBusMock.Verify(x => x.PlayMusicAsync("track1", MusicTransitionHint.CrossfadeNormal, 0.5f), Times.Once);
     }
 
+    #region Narration Tests
+
+    [Fact]
+    public async Task PlayNarrationAsync_ShouldDuckMusicAndPlaySfx()
+    {
+        // Act
+        await _sut.PlayNarrationAsync("narration-clip.mp3");
+
+        // Assert
+        _audioBusMock.Verify(x => x.DuckMusicAsync(true, AudioDefaults.DuckVolume), Times.Once);
+        _audioBusMock.Verify(x => x.PlaySoundEffectAsync("narration-clip.mp3", false, 1.0f), Times.Once);
+    }
+
+    [Fact]
+    public async Task PlayNarrationAsync_WithDuckMusicFalse_ShouldNotDuck()
+    {
+        // Act
+        await _sut.PlayNarrationAsync("clip.mp3", duckMusic: false);
+
+        // Assert
+        _audioBusMock.Verify(x => x.DuckMusicAsync(It.IsAny<bool>(), It.IsAny<float>()), Times.Never);
+        _audioBusMock.Verify(x => x.PlaySoundEffectAsync("clip.mp3", false, 1.0f), Times.Once);
+    }
+
+    [Fact]
+    public async Task StopNarrationAsync_ShouldStopSfxAndUnduck()
+    {
+        // Act
+        await _sut.StopNarrationAsync("narration-clip.mp3");
+
+        // Assert
+        _audioBusMock.Verify(x => x.StopSoundEffectAsync("narration-clip.mp3"), Times.Once);
+        _audioBusMock.Verify(x => x.DuckMusicAsync(false, AudioDefaults.DuckVolume), Times.Once);
+    }
+
+    [Fact]
+    public async Task StopNarrationAsync_WithUnduckFalse_ShouldNotUnduck()
+    {
+        // Act
+        await _sut.StopNarrationAsync("clip.mp3", unduckMusic: false);
+
+        // Assert
+        _audioBusMock.Verify(x => x.StopSoundEffectAsync("clip.mp3"), Times.Once);
+        _audioBusMock.Verify(x => x.DuckMusicAsync(It.IsAny<bool>(), It.IsAny<float>()), Times.Never);
+    }
+
+    #endregion
+
+    #region Music Pause/Resume Tests
+
+    [Fact]
+    public async Task ToggleMusicPauseAsync_WhenPlaying_ShouldPauseAndReturnTrue()
+    {
+        // Arrange
+        _audioBusMock.Setup(x => x.IsMusicPausedAsync()).ReturnsAsync(false);
+
+        // Act
+        var result = await _sut.ToggleMusicPauseAsync();
+
+        // Assert
+        result.Should().BeTrue();
+        _audioBusMock.Verify(x => x.PauseMusicAsync(), Times.Once);
+        _audioBusMock.Verify(x => x.ResumeMusicAsync(), Times.Never);
+    }
+
+    [Fact]
+    public async Task ToggleMusicPauseAsync_WhenPaused_ShouldResumeAndReturnFalse()
+    {
+        // Arrange
+        _audioBusMock.Setup(x => x.IsMusicPausedAsync()).ReturnsAsync(true);
+
+        // Act
+        var result = await _sut.ToggleMusicPauseAsync();
+
+        // Assert
+        result.Should().BeFalse();
+        _audioBusMock.Verify(x => x.ResumeMusicAsync(), Times.Once);
+        _audioBusMock.Verify(x => x.PauseMusicAsync(), Times.Never);
+    }
+
+    [Fact]
+    public async Task IsMusicPausedAsync_ShouldDelegateToAudioBus()
+    {
+        // Arrange
+        _audioBusMock.Setup(x => x.IsMusicPausedAsync()).ReturnsAsync(true);
+
+        // Act
+        var result = await _sut.IsMusicPausedAsync();
+
+        // Assert
+        result.Should().BeTrue();
+        _audioBusMock.Verify(x => x.IsMusicPausedAsync(), Times.Once);
+    }
+
+    #endregion
+
+    #region Scene Action Tests
+
     [Fact]
     public async Task OnSceneActionAsync_ShouldPauseAll_WhenActionIsActive()
     {
@@ -179,4 +277,6 @@ public class SceneAudioOrchestratorTests
         // Assert
         _audioBusMock.Verify(x => x.ResumeAllAsync(), Times.Once);
     }
+
+    #endregion
 }

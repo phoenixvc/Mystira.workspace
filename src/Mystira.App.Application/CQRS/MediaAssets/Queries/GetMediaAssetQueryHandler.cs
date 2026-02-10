@@ -16,7 +16,7 @@ public static class GetMediaAssetQueryHandler
         CancellationToken ct)
     {
         // MediaId is an external identifier stored in the MediaAsset document; do not use the DB primary key.
-        var media = await repository.GetByMediaIdAsync(request.MediaId);
+        var media = await repository.GetByMediaIdAsync(request.MediaId, ct);
         if (media == null)
         {
             logger.LogDebug("Media asset not found by MediaId {MediaId}", request.MediaId);

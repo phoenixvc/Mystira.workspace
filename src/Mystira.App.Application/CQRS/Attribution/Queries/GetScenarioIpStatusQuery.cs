@@ -10,5 +10,5 @@ namespace Mystira.App.Application.CQRS.Attribution.Queries;
 public record GetScenarioIpStatusQuery(string ScenarioId) : IQuery<IpVerificationResponse?>, ICacheableQuery
 {
     public string CacheKey => $"ScenarioIpStatus:{ScenarioId}";
-    public int CacheDurationSeconds => 600; // 10 minutes
+    public int CacheDurationSeconds => CacheDefaults.MediumSeconds;
 }

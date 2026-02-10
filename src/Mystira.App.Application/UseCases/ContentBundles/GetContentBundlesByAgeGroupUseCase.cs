@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 using Mystira.App.Application.Ports.Data;
 using Mystira.App.Domain.Models;
+using System.Threading;
 
 namespace Mystira.App.Application.UseCases.ContentBundles;
 
@@ -20,14 +21,14 @@ public class GetContentBundlesByAgeGroupUseCase
         _logger = logger;
     }
 
-    public async Task<List<ContentBundle>> ExecuteAsync(string ageGroup)
+    public async Task<List<ContentBundle>> ExecuteAsync(string ageGroup, CancellationToken ct = default)
     {
         if (string.IsNullOrWhiteSpace(ageGroup))
         {
             throw new ArgumentException("Age group cannot be null or empty", nameof(ageGroup));
         }
 
-        var bundles = await _repository.GetByAgeGroupAsync(ageGroup);
+        var bundles = await _repository.GetByAgeGroupAsync(ageGroup, ct);
         var bundleList = bundles.ToList();
 
         _logger.LogInformation("Retrieved {Count} content bundles for age group {AgeGroup}", bundleList.Count, ageGroup);

@@ -2,6 +2,7 @@ using Microsoft.Extensions.Logging;
 using Mystira.App.Application.Ports;
 using Mystira.App.Application.Ports.Data;
 using Mystira.App.Domain.Models;
+using System.Threading;
 
 namespace Mystira.App.Application.UseCases.Media;
 
@@ -24,7 +25,7 @@ public class GetMediaByFilenameUseCase
         _logger = logger;
     }
 
-    public async Task<MediaAsset?> ExecuteAsync(string fileName)
+    public async Task<MediaAsset?> ExecuteAsync(string fileName, CancellationToken ct = default)
     {
         if (string.IsNullOrWhiteSpace(fileName))
         {
@@ -34,7 +35,7 @@ public class GetMediaByFilenameUseCase
         try
         {
             // Get metadata file to resolve filename to media ID
-            var metadataFile = await _mediaMetadataService.GetMediaMetadataFileAsync();
+            var metadataFile = await _mediaMetadataService.GetMediaMetadataFileAsync(ct);
             if (metadataFile == null)
             {
                 _logger.LogWarning("Media metadata file not found");
@@ -50,7 +51,7 @@ public class GetMediaByFilenameUseCase
             }
 
             // Get the media asset by the resolved media ID
-            return await _repository.GetByMediaIdAsync(metadataEntry.Id);
+            return await _repository.GetByMediaIdAsync(metadataEntry.Id, ct);
         }
         catch (Exception ex)
         {

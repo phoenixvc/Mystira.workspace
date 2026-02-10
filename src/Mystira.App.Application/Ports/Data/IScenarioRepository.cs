@@ -9,10 +9,10 @@ namespace Mystira.App.Application.Ports.Data;
 /// </summary>
 public interface IScenarioRepository : IRepository<Scenario, string>
 {
-    Task<IEnumerable<Scenario>> GetByAgeGroupAsync(string ageGroup);
-    Task<Scenario?> GetByTitleAsync(string title);
-    Task<bool> ExistsByTitleAsync(string title);
+    Task<IEnumerable<Scenario>> GetByAgeGroupAsync(string ageGroup, CancellationToken ct = default);
+    Task<Scenario?> GetByTitleAsync(string title, CancellationToken ct = default);
+    Task<bool> ExistsByTitleAsync(string title, CancellationToken ct = default);
     IQueryable<Scenario> GetQueryable();
-    Task<int> CountAsync(Expression<Func<Scenario, bool>>? predicate = null);
+    Task<int> CountAsync(Expression<Func<Scenario, bool>>? predicate = null, CancellationToken ct = default);
 }
 

@@ -5,5 +5,5 @@ namespace Mystira.App.Application.Ports.Data;
 
 public interface IBadgeImageRepository : IRepository<BadgeImage, string>
 {
-    Task<BadgeImage?> GetByImageIdAsync(string imageId);
+    Task<BadgeImage?> GetByImageIdAsync(string imageId, CancellationToken ct = default);
 }

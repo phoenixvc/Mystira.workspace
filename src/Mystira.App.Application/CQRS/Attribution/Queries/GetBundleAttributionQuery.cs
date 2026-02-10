@@ -10,5 +10,5 @@ namespace Mystira.App.Application.CQRS.Attribution.Queries;
 public record GetBundleAttributionQuery(string BundleId) : IQuery<ContentAttributionResponse?>, ICacheableQuery
 {
     public string CacheKey => $"BundleAttribution:{BundleId}";
-    public int CacheDurationSeconds => 600; // 10 minutes
+    public int CacheDurationSeconds => CacheDefaults.MediumSeconds;
 }

@@ -17,7 +17,7 @@ public static class ResumeGameSessionCommandHandler
         ILogger logger,
         CancellationToken ct)
     {
-        var session = await repository.GetByIdAsync(command.SessionId);
+        var session = await repository.GetByIdAsync(command.SessionId, ct);
         if (session == null)
         {
             logger.LogWarning("Session not found: {SessionId}", command.SessionId);
@@ -31,7 +31,7 @@ public static class ResumeGameSessionCommandHandler
             return null;
         }
 
-        await repository.UpdateAsync(session);
+        await repository.UpdateAsync(session, ct);
         await unitOfWork.SaveChangesAsync(ct);
 
         logger.LogInformation("Resumed game session {SessionId}", session.Id);

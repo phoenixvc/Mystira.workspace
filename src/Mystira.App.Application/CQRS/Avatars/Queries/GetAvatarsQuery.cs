@@ -9,5 +9,5 @@ namespace Mystira.App.Application.CQRS.Avatars.Queries;
 public record GetAvatarsQuery : IQuery<AvatarResponse>, ICacheableQuery
 {
     public string CacheKey => "AllAvatars";
-    public int CacheDurationSeconds => 600; // 10 minutes
+    public int CacheDurationSeconds => CacheDefaults.MediumSeconds;
 }

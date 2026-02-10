@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using Mystira.App.Application.Helpers;
 using Mystira.App.Domain.Models;
 using Wolverine;
 
@@ -32,7 +33,7 @@ public static class CreateMultipleProfilesCommandHandler
                 createdProfiles.Add(profile);
 
                 logger.LogInformation("Created profile {ProfileId} with name {Name} in batch",
-                    profile.Id, profile.Name);
+                    LogAnonymizer.HashId(profile.Id), profile.Name);
             }
             catch (Exception ex)
             {

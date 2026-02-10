@@ -2,6 +2,7 @@ using Microsoft.Extensions.Logging;
 using Mystira.App.Application.Ports.Data;
 using Mystira.Contracts.App.Requests.GameSessions;
 using Mystira.App.Domain.Models;
+using System.Threading;
 
 namespace Mystira.App.Application.UseCases.GameSessions;
 
@@ -27,9 +28,9 @@ public class MakeChoiceUseCase
         _logger = logger;
     }
 
-    public async Task<GameSession?> ExecuteAsync(MakeChoiceRequest request)
+    public async Task<GameSession?> ExecuteAsync(MakeChoiceRequest request, CancellationToken ct = default)
     {
-        var session = await _repository.GetByIdAsync(request.SessionId);
+        var session = await _repository.GetByIdAsync(request.SessionId, ct);
         if (session == null)
         {
             return null;
@@ -40,7 +41,7 @@ public class MakeChoiceUseCase
             throw new InvalidOperationException($"Cannot make choice in session with status {session.Status}");
         }
 
-        var scenario = await _scenarioRepository.GetByIdAsync(session.ScenarioId);
+        var scenario = await _scenarioRepository.GetByIdAsync(session.ScenarioId, ct);
         if (scenario == null)
         {
             throw new InvalidOperationException("Scenario not found for session");
@@ -145,15 +146,15 @@ public class MakeChoiceUseCase
 
         session.RecalculateCompassProgressFromHistory();
 
-        await _repository.UpdateAsync(session);
-        await _unitOfWork.SaveChangesAsync();
+        await _repository.UpdateAsync(session, ct);
+        await _unitOfWork.SaveChangesAsync(ct);
 
         _logger.LogInformation(
             "Choice made in session {SessionId}: {ChoiceText} -> {NextScene} (PlayerId={PlayerId})",
             session.Id,
             request.ChoiceText,
             request.NextSceneId,
-            playerId);
+            PiiMask.HashId(playerId));
 
         return session;
     }
