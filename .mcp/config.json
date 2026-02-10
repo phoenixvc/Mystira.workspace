@@ -37,6 +37,16 @@
       "command": "npx",
       "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"],
       "description": "Structured problem-solving with stepwise reasoning and reflection"
+    },
+    "fetch": {
+      "command": "uvx",
+      "args": ["mcp-server-fetch"],
+      "description": "Fetch external web content for referencing documentation, API specs, and .NET/Azure reference material"
+    },
+    "docker": {
+      "command": "docker",
+      "args": ["run", "-i", "--rm", "mcp/docker"],
+      "description": "Manage Docker containers and images for local development (Cosmos DB emulator, API containers via docker-compose.yml)"
     }
   },
   "resources": {
@@ -69,6 +79,21 @@
       "uri": "file://./Mystira.App.sln",
       "name": "Solution File",
       "description": "Visual Studio solution containing all projects"
+    },
+    "copilot-instructions": {
+      "uri": "file://./.github/copilot-instructions.md",
+      "name": "GitHub Copilot Instructions",
+      "description": "AI assistant context including architecture rules, code patterns, and development guidelines"
+    },
+    "claude-settings": {
+      "uri": "file://./.claude/settings.json",
+      "name": "Claude Code Settings",
+      "description": "Claude Code project configuration including commands, hooks, permissions, and environment"
+    },
+    "product-requirements": {
+      "uri": "file://./docs/prd",
+      "name": "Product Requirements",
+      "description": "Product requirement documents including COPPA compliance, feature specs, and master PRD"
     }
   },
   "prompts": {
@@ -117,6 +142,60 @@
           "name": "description",
           "description": "What does this use case do?",
           "required": true
+        }
+      ]
+    },
+    "coppa-compliance-check": {
+      "name": "COPPA Compliance Check",
+      "description": "Audit code for COPPA compliance issues including PII handling, consent flows, data retention, and children's privacy protections",
+      "arguments": [
+        {
+          "name": "scope",
+          "description": "File path, feature name, or 'full' for complete audit",
+          "required": true
+        }
+      ]
+    },
+    "generate-tests": {
+      "name": "Generate Tests",
+      "description": "Generate xUnit tests with FluentAssertions and Moq following project conventions (MethodName_Scenario_ExpectedResult naming)",
+      "arguments": [
+        {
+          "name": "target",
+          "description": "File path or class name to generate tests for",
+          "required": true
+        },
+        {
+          "name": "type",
+          "description": "Test type: unit, integration, or e2e",
+          "required": false
+        }
+      ]
+    },
+    "security-review": {
+      "name": "Security Review",
+      "description": "Review code for OWASP Top 10 vulnerabilities, authentication bypass, injection attacks, secrets exposure, and security best practices",
+      "arguments": [
+        {
+          "name": "scope",
+          "description": "File path, feature name, or 'full' for complete review",
+          "required": true
+        }
+      ]
+    },
+    "blazor-component": {
+      "name": "Create Blazor Component",
+      "description": "Scaffold a Blazor WebAssembly component with scoped CSS, proper lifecycle methods, offline-first patterns, and WCAG 2.1 AA accessibility",
+      "arguments": [
+        {
+          "name": "name",
+          "description": "Component name (e.g., GameSessionCard, ParentDashboard)",
+          "required": true
+        },
+        {
+          "name": "type",
+          "description": "Component type: page, component, or layout",
+          "required": false
         }
       ]
     }

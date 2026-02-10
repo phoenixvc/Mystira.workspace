@@ -30,6 +30,40 @@
     "DOTNET_NOLOGO": "1",
     "ASPNETCORE_ENVIRONMENT": "Development"
   },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo 'Reminder: Verify hexagonal architecture compliance — no Infrastructure references in Application layer, no business logic in Controllers.'"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'FILE=\"$CLAUDE_FILE_PATH\"; if [[ \"$FILE\" == *.cs ]] && [[ -f \"$FILE\" ]]; then dotnet format Mystira.App.sln --include \"$FILE\" --verbosity quiet --no-restore 2>/dev/null; fi'"
+          }
+        ]
+      }
+    ],
+    "Notification": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'printf \"Claude Code notification: %s\\n\" \"$CLAUDE_NOTIFICATION\"'"
+          }
+        ]
+      }
+    ]
+  },
   "commands": {
     "build": "dotnet build Mystira.App.sln",
     "test": "dotnet test Mystira.App.sln --no-build",
