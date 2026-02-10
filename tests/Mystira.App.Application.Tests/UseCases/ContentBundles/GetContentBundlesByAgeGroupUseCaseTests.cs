@@ -1,0 +1,60 @@
+using FluentAssertions;
+using Microsoft.Extensions.Logging;
+using Moq;
+using Mystira.App.Application.Ports.Data;
+using Mystira.App.Application.UseCases.ContentBundles;
+using Mystira.App.Domain.Models;
+
+namespace Mystira.App.Application.Tests.UseCases.ContentBundles;
+
+public class GetContentBundlesByAgeGroupUseCaseTests
+{
+    private readonly Mock<IContentBundleRepository> _repository;
+    private readonly Mock<ILogger<GetContentBundlesByAgeGroupUseCase>> _logger;
+    private readonly GetContentBundlesByAgeGroupUseCase _useCase;
+
+    public GetContentBundlesByAgeGroupUseCaseTests()
+    {
+        _repository = new Mock<IContentBundleRepository>();
+        _logger = new Mock<ILogger<GetContentBundlesByAgeGroupUseCase>>();
+        _useCase = new GetContentBundlesByAgeGroupUseCase(_repository.Object, _logger.Object);
+    }
+
+    [Fact]
+    public async Task ExecuteAsync_WithExistingAgeGroup_ReturnsBundles()
+    {
+        var bundles = new List<ContentBundle>
+        {
+            new() { Id = "b1", Title = "Kids Bundle", AgeGroup = "6-8" }
+        };
+        _repository.Setup(r => r.GetByAgeGroupAsync("6-8", It.IsAny<CancellationToken>()))
+            .ReturnsAsync(bundles);
+
+        var result = await _useCase.ExecuteAsync("6-8");
+
+        result.Should().HaveCount(1);
+        result[0].AgeGroup.Should().Be("6-8");
+    }
+
+    [Fact]
+    public async Task ExecuteAsync_WithNoMatchingAgeGroup_ReturnsEmptyList()
+    {
+        _repository.Setup(r => r.GetByAgeGroupAsync("99-100", It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new List<ContentBundle>());
+
+        var result = await _useCase.ExecuteAsync("99-100");
+
+        result.Should().BeEmpty();
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("   ")]
+    public async Task ExecuteAsync_WithNullOrEmptyAgeGroup_ThrowsArgumentException(string? ageGroup)
+    {
+        var act = () => _useCase.ExecuteAsync(ageGroup!);
+
+        await act.Should().ThrowAsync<ArgumentException>();
+    }
+}
