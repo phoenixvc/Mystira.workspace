@@ -31,6 +31,17 @@
     "ASPNETCORE_ENVIRONMENT": "Development"
   },
   "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/session-start.sh",
+            "timeout": 120000
+          }
+        ]
+      }
+    ],
     "PreToolUse": [
       {
         "matcher": "Edit|Write",
