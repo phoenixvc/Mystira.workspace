@@ -5,7 +5,7 @@
 |----|-------------|----------|--------|--------|----------|--------|
 | **BUG-01** | DFS Cycle Logic Flaw: Recursion in `CalculateBadgeScoresQueryHandler` adds paths on cycle detection without leaf verification. | High | Med | M | `CalculateBadgeScoresQueryHandler.cs:204` | **FIXED** - Extracted to `ScenarioGraphTraversal`, cycle now preserves accumulated scores |
 | **BUG-02** | WhatsApp Template Param Mapping: Logic for template parameters is outdated for Azure SDK 1.1.0+. | Med | Low | S | `WhatsAppBotService.cs:372` | **RESOLVED** - SDK updated to 1.1.0, template parameter mapping modernized |
-| **BUG-03** | IP Asset Parsing: `StoryProtocolClient` lacks actual ABI and log parsing logic for IP Asset extraction. | High | High | L | `StoryProtocolClient.cs:73, 109` | Open - Requires Python sidecar microservice (ADR-0010) |
+| **BUG-03** | IP Asset Parsing: `StoryProtocolClient` lacks actual ABI and log parsing logic for IP Asset extraction. | High | High | L | `StoryProtocolClient.cs:73, 109` | **DEFERRED** → [AI prompt](deferred-action-prompts.md#1-bug-03-story-protocol-grpc-adapter-mystirachain-repo) for `Mystira.Chain` repo |
 | **BUG-04** | Handler Coupling: `StartGameSessionCommandHandler` and `CreateAccountCommandHandler` inject concrete use case classes instead of interfaces. | Low | Low | S | `StartGameSessionCommandHandler.cs:15` | **FIXED** - Extracted `ICreateGameSessionUseCase` and `ICreateAccountUseCase` interfaces |
 
 ## 2. Performance & Structural Improvements
@@ -18,14 +18,14 @@
 ## 3. UI/UX Improvements
 | ID | Description | Severity | Impact | Effort | Evidence |
 |----|-------------|----------|--------|--------|----------|
-| **UX-01** | Missing Loading States: Transition between music scenes in PWA lacks visual feedback. | Med | Med | S | `SceneAudioOrchestrator.cs` (logic gaps) |
-| **UX-02** | Feature Flagged UI: 'Golden Tubes' in `HeroSection.razor` are commented out/disabled. | Low | Low | S | `HeroSection.razor:12` |
+| **UX-01** | Missing Loading States: Transition between music scenes in PWA lacks visual feedback. | Med | Med | S | `SceneAudioOrchestrator.cs` (logic gaps) | **DEFERRED** → [AI prompt](deferred-action-prompts.md#2-ux-01--ux-02-pwa-visual-polish-mystiraapp-repo) |
+| **UX-02** | Feature Flagged UI: 'Golden Tubes' in `HeroSection.razor` are commented out/disabled. | Low | Low | S | `HeroSection.razor:12` | **DEFERRED** → [AI prompt](deferred-action-prompts.md#2-ux-01--ux-02-pwa-visual-polish-mystiraapp-repo) |
 
 ## 4. Refactoring Opportunities
 | ID | Description | Severity | Impact | Effort | Evidence |
 |----|-------------|----------|--------|--------|----------|
-| **REF-01** | Misleading Naming: `IndexedDbService` is transient, not persistent. Rename to `InMemoryStore`. | Med | Med | S | `IndexedDbService.cs` |
-| **REF-02** | Domain Mapping Duplication: Multiple `ToDomainModel` patterns in `YamlScenario.cs` could be simplified. | Low | Med | M | `YamlScenario.cs` |
+| **REF-01** | Misleading Naming: `IndexedDbService` is transient, not persistent. Rename to `InMemoryStore`. | Med | Med | S | `InMemoryStoreService.cs` | **DEFERRED** → [AI prompt](deferred-action-prompts.md#3-ref-01--ref-02-naming--mapping-cleanup-mystiraapp-repo) — already renamed, but orphaned (no callers) |
+| **REF-02** | Domain Mapping Duplication: Multiple `ToDomainModel` patterns in `YamlScenario.cs` could be simplified. | Low | Med | M | `YamlScenario.cs` | **DEFERRED** → [AI prompt](deferred-action-prompts.md#3-ref-01--ref-02-naming--mapping-cleanup-mystiraapp-repo) |
 
 ## 5. Resolved Items (2026-02-10)
 
