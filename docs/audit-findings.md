@@ -11,9 +11,9 @@
 ## 2. Performance & Structural Improvements
 | ID | Description | Severity | Impact | Effort | Evidence |
 |----|-------------|----------|--------|--------|----------|
-| **PERF-01** | Image Cache Bloat: `imageCacheManager.js` lacks eviction/TTL strategy for Blobs in IndexedDB. | Med | High | M | `imageCacheManager.js` |
-| **STR-01** | Hardcoded Badge Thresholds: `CheckAchievementsUseCase` uses constants instead of dynamic config. | Low | Med | S | `CheckAchievementsUseCase.cs:42` |
-| **STR-02** | Hardcoded Explorer URLs: IP Explorer URLs are hardcoded in handlers instead of injected via Options. | Low | Low | S | `GetBundleIpStatusQueryHandler.cs:16` |
+| **PERF-01** | Image Cache Bloat: `imageCacheManager.js` lacks eviction/TTL strategy for Blobs in IndexedDB. | Med | High | M | `imageCacheManager.js` | **FIXED** - Already had MAX_ITEMS (100) + TTL (7d) + pruneCache(). Added TTL check on cache read to prevent serving expired items. |
+| **STR-01** | Hardcoded Badge Thresholds: `CheckAchievementsUseCase` uses constants instead of dynamic config. | Low | Med | S | `CheckAchievementsUseCase.cs:42` | **RESOLVED** - Already loads thresholds dynamically from `IBadgeConfigurationRepository`; 3.0f is null-coalescing fallback only |
+| **STR-02** | Hardcoded Explorer URLs: IP Explorer URLs are hardcoded in handlers instead of injected via Options. | Low | Low | S | `GetBundleIpStatusQueryHandler.cs:16` | **RESOLVED** - Already uses `IOptions<StoryProtocolOptions>.ExplorerBaseUrl` |
 
 ## 3. UI/UX Improvements
 | ID | Description | Severity | Impact | Effort | Evidence |
@@ -62,6 +62,7 @@
 - API controller tests for Bundles, BadgeImages, ProfileAxisScores
 - Extracted service tests for PercentileCalculator and ScenarioGraphTraversal
 - Handler tests for StartGameSession and CreateAccount (enabled by BUG-04 fix)
+- PWA component tests (bUnit): EmptyState, SkeletonLoader, WarningModal, CoppaCompliancePill, ThemeToggle
 
 ## 6. New Features (High Value)
 | Feature | Value Proposition | Integration Point |

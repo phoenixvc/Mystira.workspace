@@ -142,10 +142,12 @@ window.imageCacheManager = (function () {
                 // Try from IndexedDB
                 const existing = await getRecord(db, mediaId);
                 if (existing && existing.blob) {
-                    const url = blobToObjectUrl(existing.blob);
-                    if (url) {
-                        // console.debug(`Image ${mediaId} served from IndexedDB`);
-                        return url;
+                    // Check TTL — skip expired records
+                    if (existing.timestamp && (Date.now() - existing.timestamp) < TTL_MS) {
+                        const url = blobToObjectUrl(existing.blob);
+                        if (url) {
+                            return url;
+                        }
                     }
                 }
 
