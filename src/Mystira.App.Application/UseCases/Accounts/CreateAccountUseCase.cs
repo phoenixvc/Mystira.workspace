@@ -9,7 +9,7 @@ namespace Mystira.App.Application.UseCases.Accounts;
 /// Use case for creating a new account.
 /// Called by CreateAccountCommandHandler to perform the core business logic.
 /// </summary>
-public class CreateAccountUseCase
+public class CreateAccountUseCase : ICreateAccountUseCase
 {
     private readonly IAccountRepository _repository;
     private readonly IUnitOfWork _unitOfWork;

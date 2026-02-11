@@ -4,9 +4,9 @@
 | ID | Description | Severity | Impact | Effort | Evidence | Status |
 |----|-------------|----------|--------|--------|----------|--------|
 | **BUG-01** | DFS Cycle Logic Flaw: Recursion in `CalculateBadgeScoresQueryHandler` adds paths on cycle detection without leaf verification. | High | Med | M | `CalculateBadgeScoresQueryHandler.cs:204` | **FIXED** - Extracted to `ScenarioGraphTraversal`, cycle now preserves accumulated scores |
-| **BUG-02** | WhatsApp Template Param Mapping: Logic for template parameters is outdated for Azure SDK 1.1.0+. | Med | Low | S | `WhatsAppBotService.cs:372` | Open |
-| **BUG-03** | IP Asset Parsing: `StoryProtocolClient` lacks actual ABI and log parsing logic for IP Asset extraction. | High | High | L | `StoryProtocolClient.cs:73, 109` | Open - Requires product decision |
-| **BUG-04** | MediatR Handler Injection: `StartGameSessionCommandHandler` uses `ILogger` but mapping logic is static/coupled. | Low | Low | S | `StartGameSessionCommandHandler.cs:76` | Open |
+| **BUG-02** | WhatsApp Template Param Mapping: Logic for template parameters is outdated for Azure SDK 1.1.0+. | Med | Low | S | `WhatsAppBotService.cs:372` | **RESOLVED** - SDK updated to 1.1.0, template parameter mapping modernized |
+| **BUG-03** | IP Asset Parsing: `StoryProtocolClient` lacks actual ABI and log parsing logic for IP Asset extraction. | High | High | L | `StoryProtocolClient.cs:73, 109` | Open - Requires Python sidecar microservice (ADR-0010) |
+| **BUG-04** | Handler Coupling: `StartGameSessionCommandHandler` and `CreateAccountCommandHandler` inject concrete use case classes instead of interfaces. | Low | Low | S | `StartGameSessionCommandHandler.cs:15` | **FIXED** - Extracted `ICreateGameSessionUseCase` and `ICreateAccountUseCase` interfaces |
 
 ## 2. Performance & Structural Improvements
 | ID | Description | Severity | Impact | Effort | Evidence |
@@ -41,10 +41,27 @@
 - **SEC-4** (PII logging): `PiiMask.MaskEmail()` and `LogAnonymizer.HashId()` used consistently throughout
 - **Rate limiting**: Configured — 100 req/min global, 5 req/15min for auth endpoints
 
+### BUG-04 Fixed (2026-02-11)
+- Extracted `ICreateGameSessionUseCase` and `ICreateAccountUseCase` interfaces
+- Updated `StartGameSessionCommandHandler` and `CreateAccountCommandHandler` to use interfaces (dependency inversion)
+- Updated DI registrations in `UseCaseExtensions.cs`
+- Added handler tests that were previously impossible due to concrete class injection
+
+### BUG-02 Verified Resolved (2026-02-11)
+- WhatsApp SDK already updated to Azure.Communication.Messages 1.1.0
+- Template parameter mapping modernized in WhatsAppBotService.cs (lines 368-376)
+- Only remaining: integration testing with actual Azure ACS
+
 ### Test Coverage Added
-- 40+ new test files covering Account, Scenario, ContentBundle, Badge, UserProfile, GameSession use cases
+- 60+ new test files covering Account, Scenario, ContentBundle, Badge, UserProfile, GameSession use cases
+- CharacterMap use case tests (7): Create, Update, Delete, Get, GetAll, Import, Export
+- Media use case tests (7): Upload, Download, Delete, Get, GetByFilename, List, UpdateMetadata
+- Avatar use case tests (6): Create, Update, Delete, GetConfigurations, GetByAgeGroup, AssignToAgeGroup
+- Infrastructure repository tests: GameSession, Account, Scenario, MediaAsset repositories + UnitOfWork
+- EF Core InMemory integration tests for IQueryable-based use cases (GetScenarios, ListMedia)
 - API controller tests for Bundles, BadgeImages, ProfileAxisScores
 - Extracted service tests for PercentileCalculator and ScenarioGraphTraversal
+- Handler tests for StartGameSession and CreateAccount (enabled by BUG-04 fix)
 
 ## 6. New Features (High Value)
 | Feature | Value Proposition | Integration Point |

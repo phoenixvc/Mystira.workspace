@@ -14,7 +14,7 @@ namespace Mystira.App.Application.UseCases.GameSessions;
 ///   - Cleans up duplicate/zombie sessions
 ///   - Maps character assignments and initializes compass tracking
 /// </summary>
-public class CreateGameSessionUseCase
+public class CreateGameSessionUseCase : ICreateGameSessionUseCase
 {
     private readonly IGameSessionRepository _repository;
     private readonly IScenarioRepository _scenarioRepository;
