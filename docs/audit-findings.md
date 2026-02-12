@@ -18,14 +18,14 @@
 ## 3. UI/UX Improvements
 | ID | Description | Severity | Impact | Effort | Evidence |
 |----|-------------|----------|--------|--------|----------|
-| **UX-01** | Missing Loading States: Transition between music scenes in PWA lacks visual feedback. | Med | Med | S | `SceneAudioOrchestrator.cs` (logic gaps) | **DEFERRED** → [AI prompt](deferred-action-prompts.md#2-ux-01--ux-02-pwa-visual-polish-mystiraapp-repo) |
-| **UX-02** | Feature Flagged UI: 'Golden Tubes' in `HeroSection.razor` are commented out/disabled. | Low | Low | S | `HeroSection.razor:12` | **DEFERRED** → [AI prompt](deferred-action-prompts.md#2-ux-01--ux-02-pwa-visual-polish-mystiraapp-repo) |
+| **UX-01** | Missing Loading States: Transition between music scenes in PWA lacks visual feedback. | Med | Med | S | `SceneAudioOrchestrator.cs` (logic gaps) | **FIXED** - Added `IsTransitioning`/`TransitionError` to `MusicContext`, wrapped `EnterSceneAsync` with try/finally transition tracking |
+| **UX-02** | Feature Flagged UI: 'Golden Tubes' in `HeroSection.razor` are commented out/disabled. | Low | Low | S | `HeroSection.razor:12` | **FIXED** - Added Golden Tubes SVG markup (4 bezier vine groups with glow filter) matching existing CSS animations |
 
 ## 4. Refactoring Opportunities
 | ID | Description | Severity | Impact | Effort | Evidence |
 |----|-------------|----------|--------|--------|----------|
-| **REF-01** | Misleading Naming: `IndexedDbService` is transient, not persistent. Rename to `InMemoryStore`. | Med | Med | S | `InMemoryStoreService.cs` | **DEFERRED** → [AI prompt](deferred-action-prompts.md#3-ref-01--ref-02-naming--mapping-cleanup-mystiraapp-repo) — already renamed, but orphaned (no callers) |
-| **REF-02** | Domain Mapping Duplication: Multiple `ToDomainModel` patterns in `YamlScenario.cs` could be simplified. | Low | Med | M | `YamlScenario.cs` | **DEFERRED** → [AI prompt](deferred-action-prompts.md#3-ref-01--ref-02-naming--mapping-cleanup-mystiraapp-repo) |
+| **REF-01** | Misleading Naming: `IndexedDbService` is transient, not persistent. Rename to `InMemoryStore`. | Med | Med | S | `InMemoryStoreService.cs` | **FIXED** - Removed orphaned `InMemoryStoreService` + `IInMemoryStoreService` + DI registration (dead code, zero callers) |
+| **REF-02** | Domain Mapping Duplication: Multiple `ToDomainModel` patterns in `YamlScenario.cs` could be simplified. | Low | Med | M | `YamlScenario.cs` | **FIXED** - Extracted `YamlMappingHelpers` with shared `ResolveLegacyAlias()` and `ParseEnum<T>()` |
 
 ## 5. Resolved Items (2026-02-10)
 
@@ -63,6 +63,12 @@
 - Extracted service tests for PercentileCalculator and ScenarioGraphTraversal
 - Handler tests for StartGameSession and CreateAccount (enabled by BUG-04 fix)
 - PWA component tests (bUnit): EmptyState, SkeletonLoader, WarningModal, CoppaCompliancePill, ThemeToggle
+
+### UX & Refactoring Resolved (2026-02-11)
+- **UX-01**: Added `IsTransitioning` and `TransitionError` properties to `MusicContext`; `EnterSceneAsync` now wraps all audio operations in try/finally transition state tracking
+- **UX-02**: Added Golden Tubes SVG to `HeroSection.razor` — 4 bezier vine groups with glow filter, using existing CSS animations (tubeFlow, tubePulse, twineTwirl)
+- **REF-01**: Removed orphaned `InMemoryStoreService.cs`, `IInMemoryStoreService.cs`, and DI registration from `Program.cs` (zero callers in codebase)
+- **REF-02**: Extracted `YamlMappingHelpers` static class with `ResolveLegacyAlias()` and `ParseEnum<T>()`; eliminated duplicate next-scene fallback logic in `YamlScene`/`YamlBranch` and private `ParseEnum` in `YamlSceneMusicSettings`
 
 ## 6. New Features (High Value)
 | Feature | Value Proposition | Integration Point |

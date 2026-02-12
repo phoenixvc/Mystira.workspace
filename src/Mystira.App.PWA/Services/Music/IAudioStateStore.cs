@@ -19,6 +19,8 @@ public class AudioStateStore : IAudioStateStore
         Context.CurrentTrackId = null;
         Context.CurrentProfile = MusicProfile.None;
         Context.CurrentEnergy = 0;
+        Context.IsTransitioning = false;
+        Context.TransitionError = null;
         Context.RecentTrackIds.Clear();
         ActiveLoopingSfx.Clear();
     }
