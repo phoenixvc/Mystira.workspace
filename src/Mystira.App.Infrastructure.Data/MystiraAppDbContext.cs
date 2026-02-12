@@ -54,6 +54,10 @@ public partial class MystiraAppDbContext : DbContext
     // Tracking and Analytics
     public DbSet<CompassTracking> CompassTrackings { get; set; }
 
+    // COPPA Compliance
+    public DbSet<ParentalConsent> ParentalConsents { get; set; }
+    public DbSet<DataDeletionRequest> DataDeletionRequests { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -883,6 +887,47 @@ public partial class MystiraAppDbContext : DbContext
                                   c1.Keys.All(k => c2.ContainsKey(k) && c1[k].SequenceEqual(c2[k])),
                       c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.Key.GetHashCode(), v.Value.Aggregate(0, (a2, s) => HashCode.Combine(a2, s.GetHashCode())))),
                       c => new Dictionary<string, List<string>>(c.ToDictionary(kvp => kvp.Key, kvp => new List<string>(kvp.Value)))));
+        });
+
+        // Configure ParentalConsent (COPPA compliance)
+        modelBuilder.Entity<ParentalConsent>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+
+            if (!isInMemoryDatabase)
+            {
+                entity.Property(e => e.Id).ToJsonProperty("id");
+                entity.ToContainer("ParentalConsents")
+                      .HasPartitionKey(e => e.ChildProfileId);
+            }
+
+            // DeletionAuditEntry is not embedded here - it's on DataDeletionRequest
+        });
+
+        // Configure DataDeletionRequest (COPPA compliance)
+        modelBuilder.Entity<DataDeletionRequest>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+
+            if (!isInMemoryDatabase)
+            {
+                entity.Property(e => e.Id).ToJsonProperty("id");
+                entity.ToContainer("DataDeletionRequests")
+                      .HasPartitionKey(e => e.ChildProfileId);
+            }
+
+            // Embed audit trail entries as owned collection
+            entity.OwnsMany(e => e.AuditTrail);
+
+            // Embed deletion scope as JSON
+            entity.Property(e => e.DeletionScope)
+                  .HasConversion(
+                      v => string.Join(',', v),
+                      v => v.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList())
+                  .Metadata.SetValueComparer(new ValueComparer<List<string>>(
+                      (c1, c2) => c1 != null && c2 != null && c1.SequenceEqual(c2),
+                      c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
+                      c => c.ToList()));
         });
 
         // Configure CompassTracking as a separate container for analytics

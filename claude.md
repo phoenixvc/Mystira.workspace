@@ -76,7 +76,7 @@
    - `/api/*` → User acting on their own resources
    - `/adminapi/*` → System-level or other users' data
 
-**ARCHITECTURAL VIOLATION ALERT:** `src/Mystira.App.Api/Services/*` violates these rules. Services should be in Application layer. See **PERF-4** in production review.
+**NOTE:** `src/Mystira.App.Api/Services/CurrentUserService.cs` is an infrastructure adapter (requires HttpContext) implementing the `ICurrentUserService` port. This is acceptable hexagonal architecture. UseCase registrations have been consolidated into `Application/DependencyInjection.cs` (PERF-4 resolved).
 
 ## Technology Stack
 
@@ -103,7 +103,7 @@
 
 ### **Integrations**
 - **Discord.Net 3.16.0** (bot integration)
-- **Story Protocol** (⚠️ stub implementation only)
+- **Story Protocol** (gRPC adapter + stub via feature flag `ChainService:UseGrpc`)
 
 ### **Tooling**
 - **Husky.Net** (pre-commit hooks - `dotnet format`)
@@ -118,13 +118,15 @@
    - User confirmed early dev environment, security items skipped
    - **Production Action:** Use Azure Key Vault before production launch
 
-2. **COPPA Compliance NOT Implemented** (FEAT-INC-1)
-   - **Location:** Documented but not implemented
-   - **Issue:** Operating children's platform without parental consent, age verification, or data controls
-   - **Risk:** $50,000+ FTC fines per violation, legal shutdown
-   - ✅ **PRD Completed:** `docs/prd/features/coppa-compliance.md` (706 lines)
-   - ✅ **Master PRD Created:** `docs/prd/master-prd.md` (comprehensive product requirements)
-   - **Action:** Implement age gate, parental consent system, parent dashboard (Wave 3)
+2. **COPPA Compliance** (FEAT-INC-1) - **PARTIALLY IMPLEMENTED**
+   - ✅ **Age Gate:** `POST /api/coppa/age-check` endpoint with age group classification
+   - ✅ **Parental Consent:** Request/Verify/Revoke workflow via `CoppaController`
+   - ✅ **Domain Models:** `ParentalConsent`, `DataDeletionRequest` with full lifecycle
+   - ✅ **Port Interfaces:** `ICoppaConsentRepository`, `IDataDeletionRepository`
+   - ✅ **CQRS Handlers:** RequestParentalConsent, VerifyParentalConsent, RevokeConsent, GetConsentStatus
+   - ✅ **Data Deletion:** 7-day soft delete workflow with audit trail
+   - 🔲 **Remaining:** Parent Dashboard UI, repository implementations (Cosmos DB), legal review
+   - **PRD:** `docs/prd/features/coppa-compliance.md` (706 lines)
 
 ### **🟡 HIGH Priority**
 
@@ -132,10 +134,11 @@
    - Only 22 test files for 591 source files
    - Action: Target 60%+ coverage, prioritize critical paths
 
-4. **Architectural Violations** (PERF-4)
-   - 80+ services in API layer violate hexagonal architecture
-   - Should be refactored to Application layer as use cases
-   - Action: Systematic refactoring in Wave 5
+4. **Architectural Violations** (PERF-4) - ✅ **RESOLVED**
+   - UseCase DI registration moved from API Configuration to Application DependencyInjection.cs
+   - 72 UseCases + 221 CQRS handlers already in Application layer
+   - StubStoryProtocolService registered for BUG-3 (prevents runtime DI failures)
+   - Polly v8 resilience added to API HttpClient (PERF-3)
 
 ### **✅ RECENTLY FIXED (November 24, 2025)**
 
@@ -332,7 +335,7 @@ Mystira.App/
 │   ├── Mystira.App.Infrastructure.Data/ # EF Core, Repositories
 │   ├── Mystira.App.Infrastructure.Azure/# Azure services (Blob, Email)
 │   ├── Mystira.App.Infrastructure.Discord/ # Discord bot
-│   ├── Mystira.App.Infrastructure.StoryProtocol/ # Story Protocol (stub)
+│   ├── Mystira.App.Infrastructure.Chain/  # Story Protocol gRPC adapter + stub
 │   ├── Mystira.App.Api/                 # Public API
 │   ├── Mystira.App.Admin.Api/           # Admin API
 │   └── Mystira.App.PWA/                 # Blazor WebAssembly
@@ -393,7 +396,7 @@ The codebase contains ~14 TODO comments indicating incomplete work:
 1. **Badge thresholds hardcoded** (should use BadgeConfigurationApiService)
 2. **Scenario validation relaxed** (master axis list not finalized)
 3. **Media management status check** not implemented
-4. **Story Protocol** entire service is stub (`TODO: Implement actual SDK integration`)
+4. **Story Protocol** gRPC adapter created (`Infrastructure.Chain`), feature-flagged with stub fallback
 5. **Character assignment persistence** not implemented
 
 ### **From Production Review**
@@ -694,4 +697,4 @@ Use this checklist from `docs/architecture/architectural-rules.md`:
 
 ---
 
-*Last Updated: 2025-12-10*
+*Last Updated: 2026-02-10*

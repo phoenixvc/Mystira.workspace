@@ -180,6 +180,11 @@ builder.Services.AddHttpClient<IBadgesApiClient, BadgesApiClient>(ConfigureApiHt
     .AddHttpMessageHandler<AuthHeaderHandler>()
     .AddResilienceHandler("BadgesApi", ConfigureStandardResilience("BadgesApi"));
 
+builder.Services.AddHttpClient<ICoppaApiClient, CoppaApiClient>(ConfigureApiHttpClient)
+    .AddHttpMessageHandler<ApiBaseAddressHandler>()
+    .AddHttpMessageHandler<AuthHeaderHandler>()
+    .AddResilienceHandler("CoppaApi", ConfigureStandardResilience("CoppaApi"));
+
 // Register main ApiClient that composes all domain clients
 builder.Services.AddScoped<IApiClient, ApiClient>();
 
@@ -274,7 +279,8 @@ static void SetDevelopmentModeForApiClients(IServiceProvider services, bool isDe
         typeof(ICharacterApiClient),
         typeof(IDiscordApiClient),
         typeof(IAttributionApiClient),
-        typeof(IBadgesApiClient)
+        typeof(IBadgesApiClient),
+        typeof(ICoppaApiClient)
         };
 
     foreach (var interfaceType in apiClientTypes)

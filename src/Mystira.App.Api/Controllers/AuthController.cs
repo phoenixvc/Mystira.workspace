@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace Mystira.App.Api.Controllers;
 
@@ -9,6 +10,7 @@ namespace Mystira.App.Api.Controllers;
 /// </summary>
 [Route("api/auth")]
 [ApiController]
+[EnableRateLimiting("auth")]
 public class AuthController : ControllerBase
 {
     private readonly ILogger<AuthController> _logger;

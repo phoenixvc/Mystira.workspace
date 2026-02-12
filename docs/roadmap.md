@@ -1,6 +1,6 @@
 # Mystira.App - Consolidated Roadmap
 
-**Last Updated**: 2025-12-10
+**Last Updated**: 2026-02-11
 **Status**: Active - Single source of truth for all pending improvements
 
 This document consolidates all pending improvements, technical debt, and future work from various analysis documents throughout the codebase.
@@ -28,8 +28,8 @@ This document consolidates all pending improvements, technical debt, and future 
 | SEC-2 | Remove hardcoded guest credentials from Admin API | Pending | BUG-NEW-2 |
 | SEC-3 | Guard Swagger in production (IsDevelopment check) | Pending | BUG-NEW-1 |
 | SEC-4 | Stop logging PII without redaction | Pending | BUG-4 |
-| COPPA-1 | Implement COPPA compliance - Age gate | Not Started | Legal requirement |
-| COPPA-2 | Implement parental consent system | Not Started | Legal requirement |
+| COPPA-1 | Implement COPPA compliance - Age gate | ✅ Done | AgeCheckController endpoint, age group classification |
+| COPPA-2 | Implement parental consent system | ✅ Done | Request/Verify/Revoke consent flow, domain models, CQRS handlers |
 
 ### Stability Fixes
 
@@ -57,9 +57,9 @@ This document consolidates all pending improvements, technical debt, and future 
 |----|------|--------|-------|
 | PERF-1 | Enable Blazor AOT compilation | Pending | 50% bundle size reduction |
 | PERF-2 | Enable IL linking | Pending | 30-50% size reduction |
-| PERF-3 | Implement circuit breakers (Polly) | Pending | |
-| PERF-4 | Setup CDN properly with cache headers | Pending | |
-| PERF-5 | Implement rate limiting on auth endpoints | Partial | Needs stricter limits |
+| PERF-3 | Implement circuit breakers (Polly) | ✅ Done | PWA + API standard resilience handler |
+| PERF-4 | Setup CDN properly with cache headers | ✅ Done | Response compression (Brotli+Gzip) + OutputCache middleware |
+| PERF-5 | Implement rate limiting on auth endpoints | ✅ Done | 100 req/min global, 5 req/15min auth |
 
 ### Testing & Quality
 
@@ -77,8 +77,8 @@ This document consolidates all pending improvements, technical debt, and future 
 
 | ID | Item | Status | Notes |
 |----|------|--------|-------|
-| COPPA-3 | Build Parent Dashboard | Not Started | Activity monitoring, privacy controls |
-| COPPA-4 | Implement data deletion workflows | Not Started | <7 days SLA |
+| COPPA-3 | Build Parent Dashboard | ✅ Done | ParentDashboard.razor + CoppaApiClient, consent status view, revoke flow |
+| COPPA-4 | Implement data deletion workflows | ✅ Done | DataDeletionRequest model, 7-day SLA, audit trail |
 | COPPA-5 | Legal review and certification | Not Started | |
 
 ### Architecture Refactoring
@@ -171,11 +171,11 @@ From `DEPRECATED_SERVICES_ANALYSIS.md` - Admin controllers still use deprecated 
 
 | ID | Item | Priority | Notes |
 |----|------|----------|-------|
-| DEBT-1 | Services in API layer (architectural violation) | High | 88 files |
+| DEBT-1 | Services in API layer (architectural violation) | ✅ Done | UseCases + CQRS in Application layer, DI consolidated |
 | DEBT-2 | Hardcoded config values in PasswordlessAuthService | Medium | Move to appsettings |
 | DEBT-3 | Duplicated CORS config | Low | Extract to shared class |
 | DEBT-4 | Long Program.cs files (400+ lines) | Low | Extract extension methods |
-| DEBT-5 | Story Protocol stub - complete or remove | Medium | Incomplete feature |
+| DEBT-5 | Story Protocol stub - complete or remove | ✅ Done | GrpcChainServiceAdapter + StubStoryProtocolService with feature flag |
 | DEBT-6 | Character assignment not persisted | Medium | Data lost on refresh |
 | DEBT-7 | Badge thresholds hardcoded | Low | Use BadgeConfigurationApiService |
 
@@ -247,4 +247,4 @@ This roadmap consolidates items from various analysis and planning documents tha
 ---
 
 **Maintained By**: Development Team
-**Last Updated**: 2025-12-10
+**Last Updated**: 2026-02-11

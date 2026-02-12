@@ -24,12 +24,34 @@ public static class RateLimitingExtensions
                     });
             });
 
-            options.AddFixedWindowLimiter("auth", limiterOptions =>
+            // Auth-specific limiter: 5 requests per 15 minutes per IP
+            options.AddPolicy("auth", context =>
             {
-                limiterOptions.PermitLimit = 5;
-                limiterOptions.Window = TimeSpan.FromMinutes(15);
-                limiterOptions.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
-                limiterOptions.QueueLimit = 0;
+                var ipAddress = context.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+                return RateLimitPartition.GetFixedWindowLimiter(ipAddress, _ =>
+                    new FixedWindowRateLimiterOptions
+                    {
+                        PermitLimit = 5,
+                        Window = TimeSpan.FromMinutes(15),
+                        QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+                        QueueLimit = 0
+                    });
+            });
+
+            // COPPA consent endpoint: 10 requests per 15 minutes per IP
+            // Prevents email spam abuse on unauthenticated consent request endpoint
+            options.AddPolicy("coppa", context =>
+            {
+                var ipAddress = context.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+                return RateLimitPartition.GetSlidingWindowLimiter(ipAddress, _ =>
+                    new SlidingWindowRateLimiterOptions
+                    {
+                        PermitLimit = 10,
+                        Window = TimeSpan.FromMinutes(15),
+                        SegmentsPerWindow = 3,
+                        QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+                        QueueLimit = 0
+                    });
             });
 
             options.OnRejected = async (context, cancellationToken) =>

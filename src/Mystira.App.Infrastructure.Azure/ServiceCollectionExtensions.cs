@@ -4,6 +4,7 @@ using Azure.Storage.Blobs;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Mystira.App.Application.Ports;
 using Mystira.App.Application.Ports.Media;
 using Mystira.App.Application.Ports.Storage;
 using Mystira.App.Infrastructure.Azure.Configuration;
@@ -142,6 +143,25 @@ public static class ServiceCollectionExtensions
         }
 
         services.AddScoped<IBlobService, AzureBlobService>();
+
+        return services;
+    }
+
+    /// <summary>
+    /// Add Azure Communication Services email
+    /// </summary>
+    public static IServiceCollection AddAzureEmailService(this IServiceCollection services, IConfiguration configuration)
+    {
+        var connectionString = configuration["AzureCommunicationServices:ConnectionString"];
+        if (!string.IsNullOrEmpty(connectionString))
+        {
+            services.AddScoped<IEmailService, AzureEmailService>();
+        }
+        else
+        {
+            // Register a no-op email service for development/testing
+            services.AddScoped<IEmailService, NoOpEmailService>();
+        }
 
         return services;
     }

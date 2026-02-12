@@ -55,4 +55,26 @@ public static class LogAnonymizer
 
         return sanitized.ToString();
     }
+
+    /// <summary>
+    /// Sanitizes exception messages before persisting to audit trails.
+    /// Strips URIs, connection strings, and truncates to prevent leaking sensitive infrastructure details.
+    /// </summary>
+    public static string SanitizeExceptionMessage(string? message)
+    {
+        if (string.IsNullOrWhiteSpace(message))
+            return "Unknown error";
+
+        // Strip URIs and connection strings
+        var sanitized = System.Text.RegularExpressions.Regex.Replace(
+            message, @"https?://\S+", "[redacted-uri]");
+        sanitized = System.Text.RegularExpressions.Regex.Replace(
+            sanitized, @"(AccountEndpoint|AccountKey|Server|Data Source|Password|Endpoint)=[^;""'\s]+", "[redacted-credential]");
+
+        // Truncate to 200 chars
+        if (sanitized.Length > 200)
+            sanitized = sanitized[..200] + "...";
+
+        return sanitized;
+    }
 }

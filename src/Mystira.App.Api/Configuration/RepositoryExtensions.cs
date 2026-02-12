@@ -1,3 +1,4 @@
+using Mystira.App.Application.Ports;
 using Mystira.App.Application.Ports.Data;
 using Mystira.App.Infrastructure.Data.Repositories;
 using Mystira.Shared.Data.Repositories;
@@ -31,6 +32,10 @@ public static class RepositoryExtensions
         services.AddScoped<IFantasyThemeRepository, FantasyThemeRepository>();
         services.AddScoped<IAgeGroupRepository, AgeGroupRepository>();
         services.AddScoped<IUnitOfWork, Infrastructure.Data.UnitOfWork.UnitOfWork>();
+
+        // COPPA compliance repositories
+        services.AddScoped<ICoppaConsentRepository, CoppaConsentRepository>();
+        services.AddScoped<IDataDeletionRepository, DataDeletionRepository>();
 
         return services;
     }

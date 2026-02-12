@@ -1,0 +1,182 @@
+syntax = "proto3";
+
+package mystira.chain.v1;
+
+option csharp_namespace = "Mystira.App.Infrastructure.Chain.Protos";
+
+import "google/protobuf/timestamp.proto";
+
+// Canonical Chain service definition matching Mystira.Chain repo
+// protos/mystira/chain/v1/chain_service.proto
+service ChainService {
+  // Collection management
+  rpc CreateCollection (CreateCollectionRequest) returns (CreateCollectionResponse);
+
+  // IP Asset registration (currently implemented in Mystira.Chain Python server)
+  rpc RegisterIpAsset (RegisterIpAssetRequest) returns (RegisterIpAssetResponse);
+  rpc RegisterIpAssetWithMetadata (RegisterIpAssetWithMetadataRequest) returns (RegisterIpAssetResponse);
+
+  // License management (planned)
+  rpc AttachLicenseTerms (AttachLicenseTermsRequest) returns (AttachLicenseTermsResponse);
+  rpc MintLicenseToken (MintLicenseTokenRequest) returns (MintLicenseTokenResponse);
+
+  // Derivative registration (planned)
+  rpc RegisterDerivative (RegisterDerivativeRequest) returns (RegisterDerivativeResponse);
+
+  // Queries
+  rpc GetIpAsset (GetIpAssetRequest) returns (GetIpAssetResponse);
+  rpc GetCollection (GetCollectionRequest) returns (GetCollectionResponse);
+}
+
+// Enums matching Mystira.Chain types.proto
+enum ContributorType {
+  CONTRIBUTOR_TYPE_UNSPECIFIED = 0;
+  AUTHOR = 1;
+  ARTIST = 2;
+  EDITOR = 3;
+  NARRATOR = 4;
+  TRANSLATOR = 5;
+  ILLUSTRATOR = 6;
+  COMPOSER = 7;
+  PRODUCER = 8;
+}
+
+enum IpAssetType {
+  IP_ASSET_TYPE_UNSPECIFIED = 0;
+  STORY = 1;
+  CHARACTER = 2;
+  ART = 3;
+  MUSIC = 4;
+  VIDEO = 5;
+}
+
+// Shared message types
+message Contributor {
+  string name = 1;
+  string address = 2;           // Wallet address (Ethereum)
+  ContributorType type = 3;
+  double share_percentage = 4;  // Royalty split percentage
+}
+
+message IpMetadata {
+  string title = 1;
+  string description = 2;
+  string content_hash = 3;
+  IpAssetType asset_type = 4;
+  map<string, string> attributes = 5;
+}
+
+message LicenseTerms {
+  bool commercial_use = 1;
+  bool derivatives_allowed = 2;
+  uint32 revenue_share = 3;     // Percentage (0-100)
+  string minting_fee = 4;       // In WIP token units
+}
+
+// Collection management
+message CreateCollectionRequest {
+  string name = 1;
+  string symbol = 2;
+}
+
+message CreateCollectionResponse {
+  string collection_address = 1;
+  string tx_hash = 2;
+  bool success = 3;
+  string error = 4;
+}
+
+// IP Asset registration
+message RegisterIpAssetRequest {
+  string collection_address = 1;
+  string content_id = 2;
+  IpMetadata metadata = 3;
+  repeated Contributor contributors = 4;
+}
+
+message RegisterIpAssetWithMetadataRequest {
+  string collection_address = 1;
+  string content_id = 2;
+  IpMetadata metadata = 3;
+  repeated Contributor contributors = 4;
+  string metadata_uri = 5;
+  string nft_metadata_uri = 6;
+}
+
+message RegisterIpAssetResponse {
+  string ip_asset_id = 1;
+  string token_id = 2;
+  string tx_hash = 3;
+  string ip_metadata_uri = 4;
+  string nft_metadata_uri = 5;
+  string explorer_url = 6;
+  bool success = 7;
+  string error = 8;
+}
+
+// License management
+message AttachLicenseTermsRequest {
+  string ip_asset_id = 1;
+  LicenseTerms terms = 2;
+}
+
+message AttachLicenseTermsResponse {
+  string license_terms_id = 1;
+  string tx_hash = 2;
+  bool success = 3;
+  string error = 4;
+}
+
+message MintLicenseTokenRequest {
+  string ip_asset_id = 1;
+  string license_terms_id = 2;
+  string receiver_address = 3;
+  uint32 amount = 4;
+}
+
+message MintLicenseTokenResponse {
+  string license_token_id = 1;
+  string tx_hash = 2;
+  bool success = 3;
+  string error = 4;
+}
+
+// Derivative registration
+message RegisterDerivativeRequest {
+  string child_ip_id = 1;
+  repeated string parent_ip_ids = 2;
+  repeated string license_terms_ids = 3;
+}
+
+message RegisterDerivativeResponse {
+  string tx_hash = 1;
+  bool success = 2;
+  string error = 3;
+}
+
+// Queries
+message GetIpAssetRequest {
+  string ip_asset_id = 1;
+}
+
+message GetIpAssetResponse {
+  string ip_asset_id = 1;
+  string owner = 2;
+  IpMetadata metadata = 3;
+  repeated Contributor contributors = 4;
+  string explorer_url = 5;
+  google.protobuf.Timestamp registered_at = 6;
+  bool found = 7;
+}
+
+message GetCollectionRequest {
+  string collection_address = 1;
+}
+
+message GetCollectionResponse {
+  string collection_address = 1;
+  string name = 2;
+  string symbol = 3;
+  uint32 total_supply = 4;
+  bool found = 5;
+}

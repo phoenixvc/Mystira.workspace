@@ -2,11 +2,10 @@ using Microsoft.ApplicationInsights.Extensibility;
 using Mystira.App.Api.Adapters;
 using Mystira.App.Api.Configuration;
 using Mystira.App.Api.Services;
-using Mystira.App.Application.Behaviors;
+using Mystira.App.Application;
 using Mystira.App.Application.Ports;
 using Mystira.App.Application.Ports.Media;
 using Mystira.App.Application.Ports.Messaging;
-using Mystira.App.Application.Services;
 using Mystira.App.Infrastructure.Azure;
 using Mystira.App.Infrastructure.Azure.HealthChecks;
 using Mystira.App.Infrastructure.Azure.Services;
@@ -14,8 +13,10 @@ using Mystira.App.Infrastructure.Data.Caching;
 using Mystira.App.Infrastructure.Data.Services;
 using Mystira.App.Infrastructure.Discord;
 using Mystira.App.Infrastructure.Discord.Services;
+using Mystira.App.Infrastructure.Chain;
 using Mystira.App.Infrastructure.Payments;
 using Mystira.Contracts.App.Ports.Health;
+using System.IO.Compression;
 using Mystira.Shared.Configuration;
 using Mystira.Shared.Middleware;
 using Mystira.Shared.Telemetry;
@@ -82,15 +83,39 @@ try
         {
             options.JsonSerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
         });
-    builder.Services.AddHttpClient();
+    builder.Services.AddHttpClient()
+        .ConfigureHttpClientDefaults(http =>
+        {
+            http.AddStandardResilienceHandler(options =>
+            {
+                // Retry: 3 attempts with exponential backoff (2s, 4s, 8s)
+                options.Retry.MaxRetryAttempts = 3;
+                options.Retry.Delay = TimeSpan.FromSeconds(2);
+                options.Retry.BackoffType = Polly.DelayBackoffType.Exponential;
+
+                // Circuit breaker: open after 50% failure rate over 30s window
+                options.CircuitBreaker.FailureRatio = 0.5;
+                options.CircuitBreaker.MinimumThroughput = 5;
+                options.CircuitBreaker.SamplingDuration = TimeSpan.FromSeconds(30);
+                options.CircuitBreaker.BreakDuration = TimeSpan.FromSeconds(30);
+
+                // Total request timeout: 30 seconds
+                options.TotalRequestTimeout.Timeout = TimeSpan.FromSeconds(30);
+
+                // Per-attempt timeout: 10 seconds
+                options.AttemptTimeout.Timeout = TimeSpan.FromSeconds(10);
+            });
+        });
 
     // Swagger, Database, Auth, Repos, UseCases, CORS, Rate Limiting
     builder.Services.AddMystiraSwagger();
     var (useCosmosDb, usePostgres) = builder.Services.AddMystiraDatabase(builder.Configuration);
 
     builder.Services.AddAzureBlobStorage(builder.Configuration);
+    builder.Services.AddAzureEmailService(builder.Configuration);
     builder.Services.Configure<AudioTranscodingOptions>(builder.Configuration.GetSection(AudioTranscodingOptions.SectionName));
     builder.Services.AddSingleton<IAudioTranscodingService, FfmpegAudioTranscodingService>();
+    builder.Services.AddSingleton<Mystira.App.Application.Services.ConsentEmailBuilder>();
     builder.Services.AddPaymentServices(builder.Configuration);
 
     builder.Services.AddMystiraAuthentication(builder.Configuration, builder.Environment);
@@ -100,12 +125,19 @@ try
 
     builder.Services.AddMystiraRepositories();
     builder.Services.AddScoped<MasterDataSeederService>();
-    builder.Services.AddMystiraUseCases();
 
-    // Application services
+    // Application layer services (use cases, validators, application services)
+    builder.Services.AddApplicationServices();
+
+    // Story Protocol / Chain service (feature flag: stub vs gRPC)
+    builder.Services.AddChainServices(builder.Configuration);
+
+    // COPPA data deletion service + background processor
+    builder.Services.AddScoped<Mystira.App.Application.Ports.IDataDeletionService, Mystira.App.Application.Services.DataDeletionService>();
+    builder.Services.AddHostedService<Mystira.App.Api.Services.DataDeletionBackgroundService>();
+
+    // Infrastructure adapters registered at host level
     builder.Services.AddScoped<IHealthCheckService, HealthCheckServiceAdapter>();
-    builder.Services.AddScoped<IAxisScoringService, AxisScoringService>();
-    builder.Services.AddScoped<IBadgeAwardingService, BadgeAwardingService>();
     builder.Services.AddScoped<IHealthCheckPort, HealthCheckPortAdapter>();
     builder.Services.AddScoped<IMediaMetadataService, MediaMetadataService>();
 
@@ -124,7 +156,6 @@ try
         opts.Discovery.IncludeAssembly(typeof(Mystira.Shared.CQRS.IQuery<>).Assembly);
         opts.Policies.UseDurableLocalQueues();
     });
-    builder.Services.AddSingleton<IQueryCacheInvalidationService, QueryCacheInvalidationService>();
 
     // Exception handling
     builder.Services.AddExceptionHandler<Mystira.App.Api.Middleware.GlobalExceptionHandler>();
@@ -174,6 +205,29 @@ try
 
     builder.Services.AddMystiraRateLimiting();
 
+    // Response compression (CDN/PERF-4)
+    builder.Services.AddResponseCompression(options =>
+    {
+        options.EnableForHttps = true;
+        options.Providers.Add<Microsoft.AspNetCore.ResponseCompression.BrotliCompressionProvider>();
+        options.Providers.Add<Microsoft.AspNetCore.ResponseCompression.GzipCompressionProvider>();
+    });
+    builder.Services.Configure<Microsoft.AspNetCore.ResponseCompression.BrotliCompressionProviderOptions>(options =>
+    {
+        options.Level = CompressionLevel.Fastest;
+    });
+
+    // Output caching for API responses
+    builder.Services.AddOutputCache(options =>
+    {
+        // Default: no caching
+        options.AddBasePolicy(builder => builder.NoCache());
+        // Static/reference data: cache 5 minutes
+        options.AddPolicy("ReferenceData", builder => builder.Expire(TimeSpan.FromMinutes(5)));
+        // Media metadata: cache 1 hour
+        options.AddPolicy("MediaCache", builder => builder.Expire(TimeSpan.FromHours(1)));
+    });
+
     // ═══════════════════════════════════════════════════════════════════════════════
     // BUILD & CONFIGURE HTTP PIPELINE
     // ═══════════════════════════════════════════════════════════════════════════════
@@ -199,6 +253,7 @@ try
     }
 
     app.UseExceptionHandler();
+    app.UseResponseCompression();
     app.UseSecurityHeaders();
     app.UseRateLimiter();
     app.UseCorrelationId();
@@ -221,9 +276,8 @@ try
     app.UseCors(CorsExtensions.PolicyName);
     app.UseAuthentication();
     app.UseAuthorization();
+    app.UseOutputCache();
     app.MapControllers();
-
-    app.MapGroup("/api/auth").RequireRateLimiting("auth");
 
     // Health endpoints
     app.MapHealthChecks("/health");
