@@ -4,6 +4,7 @@ using Moq;
 using Mystira.App.Application.Ports.Data;
 using Mystira.App.Application.UseCases.GameSessions;
 using Mystira.App.Domain.Models;
+using Mystira.Shared.Data.Repositories;
 
 namespace Mystira.App.Application.Tests.UseCases;
 
@@ -55,6 +56,8 @@ public class EndGameSessionUseCaseTests
         result.Status.Should().Be(SessionStatus.Completed);
         result.IsPaused.Should().BeFalse();
         result.PausedAt.Should().BeNull();
+        _repository.Verify(r => r.UpdateAsync(session, It.IsAny<CancellationToken>()), Times.Once);
+        _unitOfWork.Verify(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]

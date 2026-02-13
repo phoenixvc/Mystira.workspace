@@ -68,7 +68,7 @@ public class ThemeToggleTests : BunitContext
 
         cut.Find(".theme-toggle").Click();
 
-        _jsRuntime.Verify(js => js.InvokeAsync<Microsoft.JSInterop.IJSVoidResult>(
+        _jsRuntime.Verify(js => js.InvokeAsync<IJSVoidResult>(
             "localStorage.setItem",
             It.Is<object[]>(args => args.Length == 2 && (string)args[0] == "theme" && (string)args[1] == "dark")),
             Times.AtLeastOnce);

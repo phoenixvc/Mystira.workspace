@@ -9,7 +9,7 @@ Use these prompts in Claude Code sessions in the appropriate repo to execute eac
 > **Repo**: `justaghost/mystira.chain`
 > **Severity**: High | **Effort**: Large
 
-```
+```text
 Implement a gRPC Story Protocol service per ADR-0010 and ADR-0013 from Mystira.App.
 
 The .NET side already has:
@@ -37,7 +37,7 @@ The .NET consumer will call this via GrpcChainServiceAdapter (not yet implemente
 > **Repo**: `phoenixvc/Mystira.App`
 > **Severity**: Med/Low | **Effort**: Small
 
-```
+```text
 Fix two PWA visual issues:
 
 **UX-01: Add music transition loading state**
@@ -72,7 +72,7 @@ Fix:
 > **Repo**: `phoenixvc/Mystira.App`
 > **Severity**: Low/Med | **Effort**: Small/Medium
 
-```
+```text
 Fix two refactoring items:
 
 **REF-01: InMemoryStoreService is orphaned dead code**

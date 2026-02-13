@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using Mystira.App.Application.Ports.Data;
 using Mystira.App.Application.UseCases.Avatars;
+using Mystira.Shared.Data.Repositories;
 
 namespace Mystira.App.Application.Tests.UseCases.Avatars;
 

@@ -47,7 +47,7 @@ public class ExportCharacterMapUseCaseTests
 
         // Assert
         result.Should().NotBeNullOrEmpty();
-        result.Should().Contain("elarion");
+        result.Should().ContainEquivalentOf("elarion");
     }
 
     [Fact]

@@ -5,6 +5,7 @@ using Mystira.App.Application.Ports.Data;
 using Mystira.App.Application.UseCases.Badges;
 using Mystira.App.Domain.Models;
 using Mystira.Contracts.App.Requests.Badges;
+using Mystira.Shared.Data.Repositories;
 
 namespace Mystira.App.Application.Tests.UseCases.Badges;
 

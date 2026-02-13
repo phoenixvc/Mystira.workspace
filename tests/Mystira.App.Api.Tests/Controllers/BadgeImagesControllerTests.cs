@@ -33,11 +33,7 @@ public class BadgeImagesControllerTests
     public async Task GetBadgeImage_WithValidImageId_ReturnsFileResult()
     {
         var imageData = new byte[] { 0x89, 0x50, 0x4E, 0x47 }; // PNG header bytes
-        var result = new BadgeImageResult
-        {
-            ImageData = imageData,
-            ContentType = "image/png"
-        };
+        var result = new BadgeImageResult(imageData, "image/png");
 
         _mockBus.Setup(x => x.InvokeAsync<BadgeImageResult?>(
                 It.IsAny<GetBadgeImageQuery>(),
@@ -96,11 +92,7 @@ public class BadgeImagesControllerTests
     public async Task GetBadgeImage_SetsCacheControlHeader()
     {
         var imageData = new byte[] { 0x89, 0x50, 0x4E, 0x47 };
-        var badgeResult = new BadgeImageResult
-        {
-            ImageData = imageData,
-            ContentType = "image/png"
-        };
+        var badgeResult = new BadgeImageResult(imageData, "image/png");
 
         _mockBus.Setup(x => x.InvokeAsync<BadgeImageResult?>(
                 It.IsAny<GetBadgeImageQuery>(),

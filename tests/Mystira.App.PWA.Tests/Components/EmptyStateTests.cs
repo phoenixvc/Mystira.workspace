@@ -39,10 +39,9 @@ public class EmptyStateTests : BunitContext
     [Fact]
     public void EmptyState_WithClearButton_RendersClearButton()
     {
-        var cleared = false;
         var cut = Render<EmptyState>(parameters => parameters
             .Add(p => p.ShowClearButton, true)
-            .Add(p => p.OnClearFilters, () => cleared = true));
+            .Add(p => p.OnClearFilters, () => { }));
 
         var clearButton = cut.Find(".btn-clear-filters");
         clearButton.Should().NotBeNull();
@@ -65,10 +64,9 @@ public class EmptyStateTests : BunitContext
     [Fact]
     public void EmptyState_WithRetryButton_RendersRetryButton()
     {
-        var retried = false;
         var cut = Render<EmptyState>(parameters => parameters
             .Add(p => p.ShowRetryButton, true)
-            .Add(p => p.OnRetry, () => retried = true));
+            .Add(p => p.OnRetry, () => { }));
 
         var retryButton = cut.Find(".btn-retry");
         retryButton.Should().NotBeNull();

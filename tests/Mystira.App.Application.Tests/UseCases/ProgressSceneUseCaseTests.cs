@@ -3,8 +3,9 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using Mystira.App.Application.Ports.Data;
 using Mystira.App.Application.UseCases.GameSessions;
-using Mystira.Contracts.App.Requests.GameSessions;
 using Mystira.App.Domain.Models;
+using Mystira.Contracts.App.Requests.GameSessions;
+using Mystira.Shared.Data.Repositories;
 
 namespace Mystira.App.Application.Tests.UseCases;
 

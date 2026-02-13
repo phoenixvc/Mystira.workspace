@@ -101,16 +101,12 @@ public class ProfileAxisScoresControllerTests
     [InlineData(null)]
     [InlineData("")]
     [InlineData("   ")]
-    public async Task Get_WithNullOrEmptyProfileId_ReturnsEmptyItems(string? profileId)
+    public async Task Get_WithNullOrEmptyProfileId_ReturnsBadRequest(string? profileId)
     {
-        _scoreRepository.Setup(r => r.GetByProfileIdAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new List<PlayerScenarioScore>());
-
         var result = await _controller.Get(profileId!);
 
-        var okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
-        var response = okResult.Value.Should().BeOfType<ProfileAxisScoresController.AxisScoresResponse>().Subject;
-        response.Items.Should().BeEmpty();
+        result.Result.Should().BeOfType<BadRequestObjectResult>();
+        _scoreRepository.Verify(r => r.GetByProfileIdAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]

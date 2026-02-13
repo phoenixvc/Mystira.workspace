@@ -31,6 +31,11 @@ public class ProfileAxisScoresController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<AxisScoresResponse>> Get(string profileId)
     {
+        if (string.IsNullOrWhiteSpace(profileId))
+        {
+            return BadRequest("Profile ID is required.");
+        }
+
         var scores = await _scoreRepository.GetByProfileIdAsync(profileId);
         var items = scores.Select(s => new AxisScoreItem
         {
