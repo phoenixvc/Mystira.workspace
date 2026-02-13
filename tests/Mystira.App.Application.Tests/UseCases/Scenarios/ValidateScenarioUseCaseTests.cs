@@ -5,7 +5,7 @@ using Mystira.App.Application.Ports.Data;
 using Mystira.App.Application.UseCases.Scenarios;
 using Mystira.App.Domain.Models;
 
-namespace Mystira.App.Application.Tests.UseCases;
+namespace Mystira.App.Application.Tests.UseCases.Scenarios;
 
 public class ValidateScenarioUseCaseTests
 {
@@ -28,11 +28,11 @@ public class ValidateScenarioUseCaseTests
     #region Null Input Tests
 
     [Fact]
-    public async Task ExecuteAsync_WithNullScenario_ThrowsNullReferenceException()
+    public async Task ExecuteAsync_WithNullScenario_ThrowsArgumentNullException()
     {
         var act = () => _useCase.ExecuteAsync(null!);
 
-        await act.Should().ThrowAsync<NullReferenceException>();
+        await act.Should().ThrowAsync<ArgumentNullException>();
     }
 
     #endregion

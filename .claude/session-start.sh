@@ -24,8 +24,8 @@ for DOTNET_DIR in "$HOME/.dotnet" "/usr/share/dotnet" "/usr/local/share/dotnet";
 
             # Persist for subsequent tool calls in this session
             if [ -f "$HOME/.bashrc" ] && ! grep -q 'DOTNET_ROOT' "$HOME/.bashrc"; then
-                echo "export DOTNET_ROOT=\"$DOTNET_DIR\"" >> "$HOME/.bashrc"
-                echo "export PATH=\"$DOTNET_DIR:\$DOTNET_DIR/tools:\$PATH\"" >> "$HOME/.bashrc"
+                echo "export DOTNET_ROOT=\"\$HOME/.dotnet\"" >> "$HOME/.bashrc"
+                echo "export PATH=\"\$DOTNET_ROOT:\$DOTNET_ROOT/tools:\$PATH\"" >> "$HOME/.bashrc"
             fi
             exit 0
         fi

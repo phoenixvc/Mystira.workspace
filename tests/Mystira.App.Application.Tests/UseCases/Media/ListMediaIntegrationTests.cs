@@ -147,13 +147,21 @@ public class ListMediaIntegrationTests : IDisposable
 
     private static MediaAsset CreateMediaAsset(string id, string mediaId, string mediaType, string? description = null)
     {
+        var mimeType = mediaType switch
+        {
+            "image" => "image/jpeg",
+            "audio" => "audio/mpeg",
+            "video" => "video/mp4",
+            _ => "application/octet-stream"
+        };
+
         return new MediaAsset
         {
             Id = id,
             MediaId = mediaId,
             Url = $"https://storage.example.com/{mediaId}.jpg",
             MediaType = mediaType,
-            MimeType = $"{mediaType}/jpeg",
+            MimeType = mimeType,
             FileSizeBytes = 1024,
             Description = description,
             Tags = new List<string>(),

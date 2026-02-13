@@ -1,6 +1,7 @@
 # Core Audit Findings
 
 ## 1. Bugs (Logic & External Integrations)
+
 | ID | Description | Severity | Impact | Effort | Evidence | Status |
 |----|-------------|----------|--------|--------|----------|--------|
 | **BUG-01** | DFS Cycle Logic Flaw: Recursion in `CalculateBadgeScoresQueryHandler` adds paths on cycle detection without leaf verification. | High | Med | M | `CalculateBadgeScoresQueryHandler.cs:204` | **FIXED** - Extracted to `ScenarioGraphTraversal`, cycle now preserves accumulated scores |
@@ -9,21 +10,24 @@
 | **BUG-04** | Handler Coupling: `StartGameSessionCommandHandler` and `CreateAccountCommandHandler` inject concrete use case classes instead of interfaces. | Low | Low | S | `StartGameSessionCommandHandler.cs:15` | **FIXED** - Extracted `ICreateGameSessionUseCase` and `ICreateAccountUseCase` interfaces |
 
 ## 2. Performance & Structural Improvements
-| ID | Description | Severity | Impact | Effort | Evidence |
-|----|-------------|----------|--------|--------|----------|
+
+| ID | Description | Severity | Impact | Effort | Evidence | Status |
+|----|-------------|----------|--------|--------|----------|--------|
 | **PERF-01** | Image Cache Bloat: `imageCacheManager.js` lacks eviction/TTL strategy for Blobs in IndexedDB. | Med | High | M | `imageCacheManager.js` | **FIXED** - Already had MAX_ITEMS (100) + TTL (7d) + pruneCache(). Added TTL check on cache read to prevent serving expired items. |
 | **STR-01** | Hardcoded Badge Thresholds: `CheckAchievementsUseCase` uses constants instead of dynamic config. | Low | Med | S | `CheckAchievementsUseCase.cs:42` | **RESOLVED** - Already loads thresholds dynamically from `IBadgeConfigurationRepository`; 3.0f is null-coalescing fallback only |
 | **STR-02** | Hardcoded Explorer URLs: IP Explorer URLs are hardcoded in handlers instead of injected via Options. | Low | Low | S | `GetBundleIpStatusQueryHandler.cs:16` | **RESOLVED** - Already uses `IOptions<StoryProtocolOptions>.ExplorerBaseUrl` |
 
 ## 3. UI/UX Improvements
-| ID | Description | Severity | Impact | Effort | Evidence |
-|----|-------------|----------|--------|--------|----------|
+
+| ID | Description | Severity | Impact | Effort | Evidence | Status |
+|----|-------------|----------|--------|--------|----------|--------|
 | **UX-01** | Missing Loading States: Transition between music scenes in PWA lacks visual feedback. | Med | Med | S | `SceneAudioOrchestrator.cs` (logic gaps) | **FIXED** - Added `IsTransitioning`/`TransitionError` to `MusicContext`, wrapped `EnterSceneAsync` with try/finally transition tracking |
 | **UX-02** | Feature Flagged UI: 'Golden Tubes' in `HeroSection.razor` are commented out/disabled. | Low | Low | S | `HeroSection.razor:12` | **FIXED** - Added Golden Tubes SVG markup (4 bezier vine groups with glow filter) matching existing CSS animations |
 
 ## 4. Refactoring Opportunities
-| ID | Description | Severity | Impact | Effort | Evidence |
-|----|-------------|----------|--------|--------|----------|
+
+| ID | Description | Severity | Impact | Effort | Evidence | Status |
+|----|-------------|----------|--------|--------|----------|--------|
 | **REF-01** | Misleading Naming: `IndexedDbService` is transient, not persistent. Rename to `InMemoryStore`. | Med | Med | S | `InMemoryStoreService.cs` | **FIXED** - Removed orphaned `InMemoryStoreService` + `IInMemoryStoreService` + DI registration (dead code, zero callers) |
 | **REF-02** | Domain Mapping Duplication: Multiple `ToDomainModel` patterns in `YamlScenario.cs` could be simplified. | Low | Med | M | `YamlScenario.cs` | **FIXED** - Extracted `YamlMappingHelpers` with shared `ResolveLegacyAlias()` and `ParseEnum<T>()` |
 

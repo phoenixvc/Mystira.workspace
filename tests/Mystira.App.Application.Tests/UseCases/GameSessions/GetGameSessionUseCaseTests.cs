@@ -5,7 +5,7 @@ using Mystira.App.Application.Ports.Data;
 using Mystira.App.Application.UseCases.GameSessions;
 using Mystira.App.Domain.Models;
 
-namespace Mystira.App.Application.Tests.UseCases;
+namespace Mystira.App.Application.Tests.UseCases.GameSessions;
 
 public class GetGameSessionUseCaseTests
 {

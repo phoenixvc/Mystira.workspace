@@ -54,6 +54,29 @@ public class DeleteUserProfileUseCaseTests
         _repository.Verify(r => r.DeleteAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
+    [Fact]
+    public async Task ExecuteAsync_WithActiveSessions_DeletesSessionsAndProfile()
+    {
+        var profile = new UserProfile { Id = "p1", Name = "Player" };
+        var sessions = new List<GameSession>
+        {
+            new() { Id = "s1", AccountId = "a1", ScenarioId = "sc1", Status = SessionStatus.InProgress },
+            new() { Id = "s2", AccountId = "a1", ScenarioId = "sc2", Status = SessionStatus.Completed }
+        };
+        _repository.Setup(r => r.GetByIdAsync("p1", It.IsAny<CancellationToken>()))
+            .ReturnsAsync(profile);
+        _gameSessionRepository.Setup(r => r.GetByProfileIdAsync("p1", It.IsAny<CancellationToken>()))
+            .ReturnsAsync(sessions);
+
+        var result = await _useCase.ExecuteAsync("p1");
+
+        result.Should().BeTrue();
+        _gameSessionRepository.Verify(r => r.DeleteAsync("s1", It.IsAny<CancellationToken>()), Times.Once);
+        _gameSessionRepository.Verify(r => r.DeleteAsync("s2", It.IsAny<CancellationToken>()), Times.Once);
+        _repository.Verify(r => r.DeleteAsync("p1", It.IsAny<CancellationToken>()), Times.Once);
+        _unitOfWork.Verify(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
+    }
+
     [Theory]
     [InlineData(null)]
     [InlineData("")]

@@ -3,7 +3,6 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using Mystira.App.Application.Ports.Data;
 using Mystira.App.Application.UseCases.Scenarios;
-using Mystira.App.Domain.Models;
 using Mystira.Contracts.App.Requests.Scenarios;
 
 namespace Mystira.App.Application.Tests.UseCases.Scenarios;
@@ -13,20 +12,14 @@ public class CreateScenarioUseCaseTests
     private readonly Mock<IScenarioRepository> _repository;
     private readonly Mock<IUnitOfWork> _unitOfWork;
     private readonly Mock<ILogger<CreateScenarioUseCase>> _logger;
-    private readonly Mock<ValidateScenarioUseCase> _validateScenarioUseCase;
+    private readonly Mock<IValidateScenarioUseCase> _validateScenarioUseCase;
 
     public CreateScenarioUseCaseTests()
     {
         _repository = new Mock<IScenarioRepository>();
         _unitOfWork = new Mock<IUnitOfWork>();
         _logger = new Mock<ILogger<CreateScenarioUseCase>>();
-
-        // ValidateScenarioUseCase constructor: ILogger, ICompassAxisRepository, IArchetypeRepository
-        _validateScenarioUseCase = new Mock<ValidateScenarioUseCase>(
-            MockBehavior.Loose,
-            new Mock<ILogger<ValidateScenarioUseCase>>().Object,
-            new Mock<ICompassAxisRepository>().Object,
-            new Mock<IArchetypeRepository>().Object);
+        _validateScenarioUseCase = new Mock<IValidateScenarioUseCase>();
     }
 
     /// <summary>
@@ -52,17 +45,14 @@ public class CreateScenarioUseCaseTests
     }
 
     [Fact]
-    public async Task ExecuteAsync_WhenSaveFails_ThrowsAndLogs()
+    public async Task ExecuteAsync_WithInvalidRequest_ThrowsFromSchemaValidation()
     {
-        // Arrange - This tests the catch block in SaveChangesAsync
-        // ScenarioSchemaValidator is static and will run first, so this test
-        // verifies the error handling path after schema validation passes.
-        // We can verify the use case is properly wired.
+        // Arrange - empty request will fail at static ScenarioSchemaValidator
         var useCase = new CreateScenarioUseCase(
             _repository.Object, _unitOfWork.Object,
             _logger.Object, _validateScenarioUseCase.Object);
 
-        // Act - empty request will fail at schema validation
+        // Act - empty request fails schema validation
         var act = () => useCase.ExecuteAsync(new CreateScenarioRequest());
 
         // Assert - ScenarioSchemaValidator throws ArgumentException for invalid schema

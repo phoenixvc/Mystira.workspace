@@ -53,6 +53,7 @@ public static class DependencyInjection
         services.AddScoped<UpdateScenarioUseCase>();
         services.AddScoped<DeleteScenarioUseCase>();
         services.AddScoped<ValidateScenarioUseCase>();
+        services.AddScoped<IValidateScenarioUseCase>(sp => sp.GetRequiredService<ValidateScenarioUseCase>());
 
         // GameSession Use Cases
         services.AddScoped<ICreateGameSessionUseCase, CreateGameSessionUseCase>();

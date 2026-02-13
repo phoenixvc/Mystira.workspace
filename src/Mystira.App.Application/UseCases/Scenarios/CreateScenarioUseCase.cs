@@ -16,13 +16,13 @@ public class CreateScenarioUseCase
     private readonly IScenarioRepository _repository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<CreateScenarioUseCase> _logger;
-    private readonly ValidateScenarioUseCase _validateScenarioUseCase;
+    private readonly IValidateScenarioUseCase _validateScenarioUseCase;
 
     public CreateScenarioUseCase(
         IScenarioRepository repository,
         IUnitOfWork unitOfWork,
         ILogger<CreateScenarioUseCase> logger,
-        ValidateScenarioUseCase validateScenarioUseCase)
+        IValidateScenarioUseCase validateScenarioUseCase)
     {
         _repository = repository;
         _unitOfWork = unitOfWork;

@@ -25,6 +25,7 @@ public class ApplicationServicesRegistrationTests
         services.Should().Contain(d => d.ServiceType == typeof(CreateScenarioUseCase));
         services.Should().Contain(d => d.ServiceType == typeof(DeleteScenarioUseCase));
         services.Should().Contain(d => d.ServiceType == typeof(ValidateScenarioUseCase));
+        services.Should().Contain(d => d.ServiceType == typeof(IValidateScenarioUseCase));
     }
 
     [Fact]

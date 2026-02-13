@@ -2,6 +2,7 @@ using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Mystira.App.Application.CQRS.AgeGroups.Commands;
+using Mystira.App.Application.CQRS.AgeGroups.Queries;
 using Mystira.App.Application.Ports.Data;
 using Mystira.App.Application.Services;
 using Mystira.App.Domain.Models;
@@ -205,7 +206,7 @@ public class AgeGroupCommandHandlerTests
             .ReturnsAsync(true);
 
         var result = await ValidateAgeGroupQueryHandler.Handle(
-            new Application.CQRS.AgeGroups.Queries.ValidateAgeGroupQuery("6-9"),
+            new ValidateAgeGroupQuery("6-9"),
             _repository.Object, _logger.Object, CancellationToken.None);
 
         result.Should().BeTrue();
@@ -218,7 +219,7 @@ public class AgeGroupCommandHandlerTests
             .ReturnsAsync(false);
 
         var result = await ValidateAgeGroupQueryHandler.Handle(
-            new Application.CQRS.AgeGroups.Queries.ValidateAgeGroupQuery("unknown"),
+            new ValidateAgeGroupQuery("unknown"),
             _repository.Object, _logger.Object, CancellationToken.None);
 
         result.Should().BeFalse();

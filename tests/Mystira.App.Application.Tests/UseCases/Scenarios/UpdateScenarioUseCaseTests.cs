@@ -13,7 +13,7 @@ public class UpdateScenarioUseCaseTests
     private readonly Mock<IScenarioRepository> _repository;
     private readonly Mock<IUnitOfWork> _unitOfWork;
     private readonly Mock<ILogger<UpdateScenarioUseCase>> _logger;
-    private readonly Mock<ValidateScenarioUseCase> _validateScenarioUseCase;
+    private readonly Mock<IValidateScenarioUseCase> _validateScenarioUseCase;
     private readonly UpdateScenarioUseCase _useCase;
 
     public UpdateScenarioUseCaseTests()
@@ -21,12 +21,7 @@ public class UpdateScenarioUseCaseTests
         _repository = new Mock<IScenarioRepository>();
         _unitOfWork = new Mock<IUnitOfWork>();
         _logger = new Mock<ILogger<UpdateScenarioUseCase>>();
-        // ValidateScenarioUseCase constructor: ILogger, ICompassAxisRepository, IArchetypeRepository
-        _validateScenarioUseCase = new Mock<ValidateScenarioUseCase>(
-            MockBehavior.Loose,
-            new Mock<ILogger<ValidateScenarioUseCase>>().Object,
-            new Mock<ICompassAxisRepository>().Object,
-            new Mock<IArchetypeRepository>().Object);
+        _validateScenarioUseCase = new Mock<IValidateScenarioUseCase>();
         _useCase = new UpdateScenarioUseCase(
             _repository.Object, _unitOfWork.Object,
             _logger.Object, _validateScenarioUseCase.Object);

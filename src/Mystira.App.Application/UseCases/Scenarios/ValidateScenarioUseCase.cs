@@ -8,7 +8,7 @@ namespace Mystira.App.Application.UseCases.Scenarios;
 /// <summary>
 /// Use case for validating scenario business rules
 /// </summary>
-public class ValidateScenarioUseCase
+public class ValidateScenarioUseCase : IValidateScenarioUseCase
 {
     private readonly ILogger<ValidateScenarioUseCase> _logger;
     private readonly ICompassAxisRepository _compassAxisRepository;
@@ -24,8 +24,10 @@ public class ValidateScenarioUseCase
         _archetypeRepository = archetypeRepository;
     }
 
-    public async Task ExecuteAsync(Scenario scenario, CancellationToken ct = default)
+    public virtual async Task ExecuteAsync(Scenario scenario, CancellationToken ct = default)
     {
+        ArgumentNullException.ThrowIfNull(scenario);
+
         // Validate CoreAxes against DB
         if (scenario.CoreAxes != null && scenario.CoreAxes.Count > 0)
         {

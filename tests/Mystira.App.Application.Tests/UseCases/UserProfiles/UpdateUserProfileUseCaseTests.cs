@@ -34,7 +34,7 @@ public class UpdateUserProfileUseCaseTests
         {
             AgeGroup = "10-12",
             HasCompletedOnboarding = true,
-            Pronouns = "they/them"
+            Name = "Updated Name"
         };
 
         var result = await _useCase.ExecuteAsync("p1", request);

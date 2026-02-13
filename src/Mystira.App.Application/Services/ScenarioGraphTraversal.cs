@@ -21,7 +21,11 @@ public static class ScenarioGraphTraversal
             return allPaths;
         }
 
-        var sceneDict = scenario.Scenes.ToDictionary(s => s.Id, s => s);
+        var sceneDict = new Dictionary<string, Scene>();
+        foreach (var scene in scenario.Scenes)
+        {
+            sceneDict.TryAdd(scene.Id, scene);
+        }
         var startScene = scenario.Scenes.FirstOrDefault();
         if (startScene == null)
         {

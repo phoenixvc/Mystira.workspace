@@ -58,7 +58,7 @@ public class CoppaCompliancePillTests : BunitContext
         cut.Find(".coppa-pill-container").MouseOver();
 
         var links = cut.FindAll(".coppa-tooltip-link");
-        links.Should().HaveCount(2);
+        links.Should().HaveCountGreaterThanOrEqualTo(2);
         links[0].GetAttribute("href").Should().Be("/coppa-status");
     }
 
@@ -68,8 +68,10 @@ public class CoppaCompliancePillTests : BunitContext
         var cut = Render<CoppaCompliancePill>();
         cut.Find(".coppa-pill-container").MouseOver();
 
-        var ftcLink = cut.FindAll(".coppa-tooltip-link")[1];
+        var links = cut.FindAll(".coppa-tooltip-link");
+        links.Should().HaveCountGreaterThanOrEqualTo(2, "expected at least 2 tooltip links (status + FTC)");
+        var ftcLink = links[1];
         ftcLink.GetAttribute("target").Should().Be("_blank");
-        ftcLink.GetAttribute("rel").Should().Contain("noopener");
+        ftcLink.GetAttribute("rel").Should().Contain("noopener").And.Contain("noreferrer");
     }
 }

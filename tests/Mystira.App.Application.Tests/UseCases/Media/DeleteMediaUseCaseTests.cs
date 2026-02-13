@@ -86,6 +86,7 @@ public class DeleteMediaUseCaseTests
         // Assert
         result.Should().BeTrue();
         _repository.Verify(r => r.DeleteAsync("id-1", It.IsAny<CancellationToken>()), Times.Once);
+        _unitOfWork.Verify(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Theory]
