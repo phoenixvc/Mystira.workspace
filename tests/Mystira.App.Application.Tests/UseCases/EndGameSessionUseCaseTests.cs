@@ -84,8 +84,7 @@ public class EndGameSessionUseCaseTests
 
         var result = await _useCase.ExecuteAsync("session-1");
 
-        result.ElapsedTime.Should().NotBeNull();
-        result.ElapsedTime!.Value.TotalMinutes.Should().BeApproximately(30, 1);
+        result.ElapsedTime.TotalMinutes.Should().BeApproximately(30, 1);
     }
 
     [Fact]

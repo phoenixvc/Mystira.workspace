@@ -65,7 +65,6 @@ public class GetScenariosIntegrationTests : IDisposable
         result.TotalCount.Should().Be(5);
         result.Scenarios.Should().HaveCount(2);
         result.HasNextPage.Should().BeTrue();
-        result.TotalPages.Should().Be(3);
     }
 
     [Fact]

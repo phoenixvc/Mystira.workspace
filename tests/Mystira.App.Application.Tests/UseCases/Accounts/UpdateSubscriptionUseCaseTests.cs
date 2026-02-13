@@ -33,12 +33,12 @@ public class UpdateSubscriptionUseCaseTests
 
         var request = new UpdateSubscriptionRequest
         {
-            Type = Mystira.Contracts.App.Requests.Accounts.SubscriptionType.Monthly
+            Type = SubscriptionType.Monthly
         };
 
         var result = await _useCase.ExecuteAsync("acc-1", request);
 
-        result.Subscription.Type.Should().Be(Domain.Models.SubscriptionType.Monthly);
+        result.Subscription.Type.Should().Be(Mystira.App.Domain.Models.SubscriptionType.Monthly);
         _repository.Verify(r => r.UpdateAsync(account, It.IsAny<CancellationToken>()), Times.Once);
         _unitOfWork.Verify(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
@@ -60,7 +60,7 @@ public class UpdateSubscriptionUseCaseTests
 
         var request = new UpdateSubscriptionRequest
         {
-            Type = Mystira.Contracts.App.Requests.Accounts.SubscriptionType.Free,
+            Type = SubscriptionType.Free,
             ProductId = "new-product",
             ValidUntil = new DateTime(2027, 1, 1, 0, 0, 0, DateTimeKind.Utc)
         };
@@ -80,7 +80,7 @@ public class UpdateSubscriptionUseCaseTests
             .ReturnsAsync(account);
 
         var before = DateTime.UtcNow;
-        var request = new UpdateSubscriptionRequest { Type = Mystira.Contracts.App.Requests.Accounts.SubscriptionType.Free };
+        var request = new UpdateSubscriptionRequest { Type = SubscriptionType.Free };
 
         var result = await _useCase.ExecuteAsync("acc-1", request);
 
@@ -93,7 +93,7 @@ public class UpdateSubscriptionUseCaseTests
         _repository.Setup(r => r.GetByIdAsync("missing", It.IsAny<CancellationToken>()))
             .ReturnsAsync(default(Account));
 
-        var act = () => _useCase.ExecuteAsync("missing", new UpdateSubscriptionRequest { Type = Mystira.Contracts.App.Requests.Accounts.SubscriptionType.Free });
+        var act = () => _useCase.ExecuteAsync("missing", new UpdateSubscriptionRequest { Type = SubscriptionType.Free });
 
         await act.Should().ThrowAsync<ArgumentException>().WithMessage("*not found*");
     }
@@ -104,7 +104,7 @@ public class UpdateSubscriptionUseCaseTests
     [InlineData("   ")]
     public async Task ExecuteAsync_WithNullOrEmptyId_ThrowsArgumentException(string? accountId)
     {
-        var act = () => _useCase.ExecuteAsync(accountId!, new UpdateSubscriptionRequest { Type = Mystira.Contracts.App.Requests.Accounts.SubscriptionType.Free });
+        var act = () => _useCase.ExecuteAsync(accountId!, new UpdateSubscriptionRequest { Type = SubscriptionType.Free });
 
         await act.Should().ThrowAsync<ArgumentException>();
     }

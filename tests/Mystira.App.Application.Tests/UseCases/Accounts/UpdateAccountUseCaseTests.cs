@@ -5,7 +5,7 @@ using Mystira.App.Application.Ports.Data;
 using Mystira.App.Application.UseCases.Accounts;
 using Mystira.App.Domain.Models;
 using Mystira.Contracts.App.Requests.Accounts;
-using Mystira.Shared.Data.Repositories;
+using ContractAccountSettings = Mystira.Contracts.App.Models.AccountSettings;
 
 namespace Mystira.App.Application.Tests.UseCases.Accounts;
 
@@ -49,7 +49,7 @@ public class UpdateAccountUseCaseTests
 
         var request = new UpdateAccountRequest
         {
-            Settings = new AccountSettings
+            Settings = new ContractAccountSettings
             {
                 PreferredLanguage = "fr",
                 NotificationsEnabled = false,

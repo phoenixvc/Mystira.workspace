@@ -29,12 +29,7 @@ public class CreateAccountCommandHandlerTests
             ExternalUserId = "ext-1",
             DisplayName = "TestUser"
         };
-        var command = new CreateAccountCommand
-        {
-            Email = "test@example.com",
-            ExternalUserId = "ext-1",
-            DisplayName = "TestUser"
-        };
+        var command = new CreateAccountCommand("ext-1", "test@example.com", "TestUser", null, null, null);
 
         _useCase.Setup(u => u.ExecuteAsync(command, It.IsAny<CancellationToken>()))
             .ReturnsAsync(UseCaseResult<Account>.Success(account));
@@ -53,11 +48,7 @@ public class CreateAccountCommandHandlerTests
     public async Task Handle_WhenUseCaseFails_ReturnsNull()
     {
         // Arrange
-        var command = new CreateAccountCommand
-        {
-            Email = "existing@example.com",
-            ExternalUserId = "ext-1"
-        };
+        var command = new CreateAccountCommand("ext-1", "existing@example.com", null, null, null, null);
 
         _useCase.Setup(u => u.ExecuteAsync(command, It.IsAny<CancellationToken>()))
             .ReturnsAsync(UseCaseResult<Account>.Failure("Account with this email already exists"));
@@ -74,11 +65,7 @@ public class CreateAccountCommandHandlerTests
     public async Task Handle_WhenUseCaseFails_LogsWarning()
     {
         // Arrange
-        var command = new CreateAccountCommand
-        {
-            Email = "test@example.com",
-            ExternalUserId = "ext-1"
-        };
+        var command = new CreateAccountCommand("ext-1", "test@example.com", null, null, null, null);
 
         _useCase.Setup(u => u.ExecuteAsync(command, It.IsAny<CancellationToken>()))
             .ReturnsAsync(UseCaseResult<Account>.Failure("Email already exists"));

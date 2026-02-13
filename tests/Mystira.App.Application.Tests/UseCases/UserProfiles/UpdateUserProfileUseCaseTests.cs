@@ -33,8 +33,7 @@ public class UpdateUserProfileUseCaseTests
         var request = new UpdateUserProfileRequest
         {
             AgeGroup = "10-12",
-            HasCompletedOnboarding = true,
-            Name = "Updated Name"
+            HasCompletedOnboarding = true
         };
 
         var result = await _useCase.ExecuteAsync("p1", request);

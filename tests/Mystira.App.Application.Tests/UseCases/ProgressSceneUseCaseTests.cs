@@ -134,8 +134,7 @@ public class ProgressSceneUseCaseTests
 
         var result = await _useCase.ExecuteAsync(request);
 
-        result!.ElapsedTime.Should().NotBeNull();
-        result.ElapsedTime!.Value.TotalMinutes.Should().BeApproximately(15, 1);
+        result!.ElapsedTime.TotalMinutes.Should().BeApproximately(15, 1);
     }
 
     private void SetupRepositories(GameSession session, Scenario scenario)

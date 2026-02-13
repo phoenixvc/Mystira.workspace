@@ -47,7 +47,7 @@ public class AwardBadgeUseCaseTests
         {
             UserProfileId = "profile-1",
             BadgeConfigurationId = "badge-config-1",
-            TriggerValue = 7.5,
+            TriggerValue = 7.5f,
             GameSessionId = "gs-1",
             ScenarioId = "scen-1"
         };

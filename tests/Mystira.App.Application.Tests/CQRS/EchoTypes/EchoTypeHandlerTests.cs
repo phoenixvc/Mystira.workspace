@@ -16,6 +16,9 @@ public class EchoTypeHandlerTests
     private readonly Mock<IUnitOfWork> _unitOfWork;
     private readonly Mock<IQueryCacheInvalidationService> _cacheInvalidation;
     private readonly Mock<ILogger> _logger;
+    private readonly Mock<ILogger<GetAllEchoTypesQuery>> _getAllLogger;
+    private readonly Mock<ILogger<GetEchoTypeByIdQuery>> _getByIdLogger;
+    private readonly Mock<ILogger<ValidateEchoTypeQuery>> _validateLogger;
 
     public EchoTypeHandlerTests()
     {
@@ -23,6 +26,9 @@ public class EchoTypeHandlerTests
         _unitOfWork = new Mock<IUnitOfWork>();
         _cacheInvalidation = new Mock<IQueryCacheInvalidationService>();
         _logger = new Mock<ILogger>();
+        _getAllLogger = new Mock<ILogger<GetAllEchoTypesQuery>>();
+        _getByIdLogger = new Mock<ILogger<GetEchoTypeByIdQuery>>();
+        _validateLogger = new Mock<ILogger<ValidateEchoTypeQuery>>();
     }
 
     #region CreateEchoTypeCommandHandler Tests
@@ -141,7 +147,7 @@ public class EchoTypeHandlerTests
             .ReturnsAsync(echoTypes);
 
         var result = await GetAllEchoTypesQueryHandler.Handle(
-            new GetAllEchoTypesQuery(), _repository.Object, _logger.Object, CancellationToken.None);
+            new GetAllEchoTypesQuery(), _repository.Object, _getAllLogger.Object, CancellationToken.None);
 
         result.Should().HaveCount(2);
     }
@@ -158,7 +164,7 @@ public class EchoTypeHandlerTests
             .ReturnsAsync(echoType);
 
         var result = await GetEchoTypeByIdQueryHandler.Handle(
-            new GetEchoTypeByIdQuery("echo-1"), _repository.Object, _logger.Object, CancellationToken.None);
+            new GetEchoTypeByIdQuery("echo-1"), _repository.Object, _getByIdLogger.Object, CancellationToken.None);
 
         result.Should().NotBeNull();
         result!.Name.Should().Be("Whisper");
@@ -171,7 +177,7 @@ public class EchoTypeHandlerTests
             .ReturnsAsync(default(EchoTypeDefinition));
 
         var result = await GetEchoTypeByIdQueryHandler.Handle(
-            new GetEchoTypeByIdQuery("missing"), _repository.Object, _logger.Object, CancellationToken.None);
+            new GetEchoTypeByIdQuery("missing"), _repository.Object, _getByIdLogger.Object, CancellationToken.None);
 
         result.Should().BeNull();
     }
@@ -187,7 +193,7 @@ public class EchoTypeHandlerTests
             .ReturnsAsync(true);
 
         var result = await ValidateEchoTypeQueryHandler.Handle(
-            new ValidateEchoTypeQuery("Whisper"), _repository.Object, _logger.Object, CancellationToken.None);
+            new ValidateEchoTypeQuery("Whisper"), _repository.Object, _validateLogger.Object, CancellationToken.None);
 
         result.Should().BeTrue();
     }
@@ -199,7 +205,7 @@ public class EchoTypeHandlerTests
             .ReturnsAsync(false);
 
         var result = await ValidateEchoTypeQueryHandler.Handle(
-            new ValidateEchoTypeQuery("Unknown"), _repository.Object, _logger.Object, CancellationToken.None);
+            new ValidateEchoTypeQuery("Unknown"), _repository.Object, _validateLogger.Object, CancellationToken.None);
 
         result.Should().BeFalse();
     }
@@ -344,7 +350,7 @@ public class EchoTypeHandlerTests
             .ReturnsAsync(new List<EchoTypeDefinition>());
 
         var result = await GetAllEchoTypesQueryHandler.Handle(
-            new GetAllEchoTypesQuery(), _repository.Object, _logger.Object, CancellationToken.None);
+            new GetAllEchoTypesQuery(), _repository.Object, _getAllLogger.Object, CancellationToken.None);
 
         result.Should().BeEmpty();
     }

@@ -220,7 +220,7 @@ public class MakeChoiceUseCaseTests
             new()
             {
                 CharacterId = "hero",
-                PlayerAssignment = new PlayerAssignment
+                PlayerAssignment = new SessionPlayerAssignment
                 {
                     ProfileId = "profile-assigned",
                     ProfileName = "Assigned Player"
