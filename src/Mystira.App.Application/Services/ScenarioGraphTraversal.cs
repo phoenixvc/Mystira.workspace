@@ -77,9 +77,10 @@ public static class ScenarioGraphTraversal
                 }
             }
         }
-        else if (!string.IsNullOrWhiteSpace(currentScene.NextSceneId) && sceneDict.ContainsKey(currentScene.NextSceneId))
+        else if (!string.IsNullOrWhiteSpace(currentScene.NextSceneId) &&
+                 sceneDict.TryGetValue(currentScene.NextSceneId, out var nextScene))
         {
-            DepthFirstSearch(sceneDict[currentScene.NextSceneId], sceneDict, visited, currentPath, allPaths);
+            DepthFirstSearch(nextScene, sceneDict, visited, currentPath, allPaths);
         }
         else if (currentPath.Any())
         {

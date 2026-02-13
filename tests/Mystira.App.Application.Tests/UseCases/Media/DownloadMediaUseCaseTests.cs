@@ -52,7 +52,7 @@ public class DownloadMediaUseCaseTests
         _repository.Setup(r => r.GetByMediaIdAsync("media-1", It.IsAny<CancellationToken>()))
             .ReturnsAsync(asset);
 
-        var responseMessage = new HttpResponseMessage(HttpStatusCode.OK)
+        using var responseMessage = new HttpResponseMessage(HttpStatusCode.OK)
         {
             Content = new ByteArrayContent(new byte[] { 1, 2, 3 })
         };
@@ -64,7 +64,7 @@ public class DownloadMediaUseCaseTests
                 ItExpr.IsAny<CancellationToken>())
             .ReturnsAsync(responseMessage);
 
-        var httpClient = new HttpClient(mockHandler.Object);
+        using var httpClient = new HttpClient(mockHandler.Object);
         _httpClientFactory.Setup(f => f.CreateClient(It.IsAny<string>()))
             .Returns(httpClient);
 
@@ -73,8 +73,9 @@ public class DownloadMediaUseCaseTests
 
         // Assert
         result.Should().NotBeNull();
-        result!.Value.contentType.Should().Be("image/jpeg");
-        result.Value.fileName.Should().Be("test.jpg");
+        var nonNullResult = result!;
+        nonNullResult.Value.contentType.Should().Be("image/jpeg");
+        nonNullResult.Value.fileName.Should().Be("test.jpg");
     }
 
     [Fact]
@@ -91,7 +92,7 @@ public class DownloadMediaUseCaseTests
         _repository.Setup(r => r.GetByMediaIdAsync("media-1", It.IsAny<CancellationToken>()))
             .ReturnsAsync(asset);
 
-        var responseMessage = new HttpResponseMessage(HttpStatusCode.NotFound);
+        using var responseMessage = new HttpResponseMessage(HttpStatusCode.NotFound);
         var mockHandler = new Mock<HttpMessageHandler>();
         mockHandler.Protected()
             .Setup<Task<HttpResponseMessage>>(
@@ -100,7 +101,7 @@ public class DownloadMediaUseCaseTests
                 ItExpr.IsAny<CancellationToken>())
             .ReturnsAsync(responseMessage);
 
-        var httpClient = new HttpClient(mockHandler.Object);
+        using var httpClient = new HttpClient(mockHandler.Object);
         _httpClientFactory.Setup(f => f.CreateClient(It.IsAny<string>()))
             .Returns(httpClient);
 

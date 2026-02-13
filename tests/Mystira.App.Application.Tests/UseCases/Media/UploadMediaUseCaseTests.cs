@@ -64,9 +64,10 @@ public class UploadMediaUseCaseTests
     public async Task ExecuteAsync_WithZeroFileSize_ThrowsArgumentException()
     {
         // Arrange
+        using var stream = new MemoryStream(new byte[] { 1 });
         var request = new UploadMediaRequest
         {
-            FileStream = new MemoryStream(new byte[] { 1 }),
+            FileStream = stream,
             FileName = "test.jpg",
             MediaType = "image",
             FileSizeBytes = 0
@@ -96,9 +97,10 @@ public class UploadMediaUseCaseTests
         _repository.Setup(r => r.GetByMediaIdAsync("media-1", It.IsAny<CancellationToken>()))
             .ReturnsAsync(new MediaAsset { MediaId = "media-1" });
 
+        using var stream = new MemoryStream(new byte[] { 1, 2, 3 });
         var request = new UploadMediaRequest
         {
-            FileStream = new MemoryStream(new byte[] { 1, 2, 3 }),
+            FileStream = stream,
             FileName = "test.jpg",
             MediaType = "image",
             ContentType = "image/jpeg",
@@ -120,9 +122,10 @@ public class UploadMediaUseCaseTests
         _mediaMetadataService.Setup(s => s.GetMediaMetadataFileAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(default(MediaMetadataFile));
 
+        using var stream = new MemoryStream(new byte[] { 1, 2, 3 });
         var request = new UploadMediaRequest
         {
-            FileStream = new MemoryStream(new byte[] { 1, 2, 3 }),
+            FileStream = stream,
             FileName = "test.jpg",
             MediaType = "image",
             ContentType = "image/jpeg",
