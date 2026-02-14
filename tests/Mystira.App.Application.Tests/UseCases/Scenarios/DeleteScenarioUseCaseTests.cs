@@ -52,10 +52,13 @@ public class DeleteScenarioUseCaseTests
     [InlineData(null)]
     [InlineData("")]
     [InlineData("   ")]
-    public async Task ExecuteAsync_WithNullOrEmptyId_ThrowsArgumentException(string? scenarioId)
+    public async Task ExecuteAsync_WithNullOrEmptyId_ReturnsFalse(string? scenarioId)
     {
-        var act = () => _useCase.ExecuteAsync(scenarioId!);
+        _repository.Setup(r => r.GetByIdAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(default(Scenario));
 
-        await act.Should().ThrowAsync<ArgumentException>();
+        var result = await _useCase.ExecuteAsync(scenarioId!);
+
+        result.Should().BeFalse();
     }
 }

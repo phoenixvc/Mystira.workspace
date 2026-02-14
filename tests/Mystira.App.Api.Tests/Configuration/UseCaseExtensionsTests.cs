@@ -35,7 +35,7 @@ public class ApplicationServicesRegistrationTests
 
         services.AddApplicationServices();
 
-        services.Should().Contain(d => d.ServiceType == typeof(CreateGameSessionUseCase));
+        services.Should().Contain(d => d.ServiceType == typeof(ICreateGameSessionUseCase));
         services.Should().Contain(d => d.ServiceType == typeof(MakeChoiceUseCase));
         services.Should().Contain(d => d.ServiceType == typeof(EndGameSessionUseCase));
         services.Should().Contain(d => d.ServiceType == typeof(PauseGameSessionUseCase));
@@ -49,7 +49,7 @@ public class ApplicationServicesRegistrationTests
 
         services.AddApplicationServices();
 
-        services.Should().Contain(d => d.ServiceType == typeof(CreateAccountUseCase));
+        services.Should().Contain(d => d.ServiceType == typeof(ICreateAccountUseCase));
         services.Should().Contain(d => d.ServiceType == typeof(GetAccountUseCase));
         services.Should().Contain(d => d.ServiceType == typeof(AddCompletedScenarioUseCase));
     }
@@ -108,7 +108,7 @@ public class ApplicationServicesRegistrationTests
 
         services.AddApplicationServices();
 
-        var descriptor = services.Single(d => d.ServiceType == typeof(CreateAccountUseCase));
+        var descriptor = services.Single(d => d.ServiceType == typeof(AddCompletedScenarioUseCase));
         descriptor.Lifetime.Should().Be(ServiceLifetime.Scoped);
     }
 

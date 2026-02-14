@@ -21,7 +21,7 @@ public class CoppaCompliancePillTests : BunitContext
     {
         var cut = Render<CoppaCompliancePill>();
 
-        cut.Find(".coppa-pill-container").MouseOver();
+        cut.Find(".coppa-pill-container").MouseEnter();
 
         cut.Find(".coppa-tooltip").Should().NotBeNull();
         cut.Find(".coppa-tooltip-header").TextContent.Should().Contain("COPPA Compliance");
@@ -33,11 +33,11 @@ public class CoppaCompliancePillTests : BunitContext
         var cut = Render<CoppaCompliancePill>();
 
         // Show tooltip
-        cut.Find(".coppa-pill-container").MouseOver();
+        cut.Find(".coppa-pill-container").MouseEnter();
         cut.FindAll(".coppa-tooltip").Should().HaveCount(1);
 
         // Hide tooltip
-        cut.Find(".coppa-pill-container").MouseOut();
+        cut.Find(".coppa-pill-container").MouseLeave();
         cut.FindAll(".coppa-tooltip").Should().BeEmpty();
     }
 
@@ -45,7 +45,7 @@ public class CoppaCompliancePillTests : BunitContext
     public void CoppaCompliancePill_Tooltip_HasWarningMessage()
     {
         var cut = Render<CoppaCompliancePill>();
-        cut.Find(".coppa-pill-container").MouseOver();
+        cut.Find(".coppa-pill-container").MouseEnter();
 
         cut.Find(".coppa-tooltip-warning").TextContent
             .Should().Contain("Do not collect children's data");
@@ -55,7 +55,7 @@ public class CoppaCompliancePillTests : BunitContext
     public void CoppaCompliancePill_Tooltip_HasImplementationStatusLink()
     {
         var cut = Render<CoppaCompliancePill>();
-        cut.Find(".coppa-pill-container").MouseOver();
+        cut.Find(".coppa-pill-container").MouseEnter();
 
         var links = cut.FindAll(".coppa-tooltip-link");
         links.Should().HaveCountGreaterThanOrEqualTo(2);
@@ -66,7 +66,7 @@ public class CoppaCompliancePillTests : BunitContext
     public void CoppaCompliancePill_Tooltip_FtcLinkOpensInNewTab()
     {
         var cut = Render<CoppaCompliancePill>();
-        cut.Find(".coppa-pill-container").MouseOver();
+        cut.Find(".coppa-pill-container").MouseEnter();
 
         var links = cut.FindAll(".coppa-tooltip-link");
         links.Should().HaveCountGreaterThanOrEqualTo(2, "expected at least 2 tooltip links (status + FTC)");

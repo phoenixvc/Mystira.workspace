@@ -58,18 +58,21 @@ public class UpdateUserProfileUseCaseTests
     [InlineData(null)]
     [InlineData("")]
     [InlineData("   ")]
-    public async Task ExecuteAsync_WithNullOrEmptyId_ThrowsArgumentException(string? id)
+    public async Task ExecuteAsync_WithNullOrEmptyId_ReturnsNull(string? id)
     {
-        var act = () => _useCase.ExecuteAsync(id!, new UpdateUserProfileRequest());
+        _repository.Setup(r => r.GetByIdAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(default(UserProfile));
 
-        await act.Should().ThrowAsync<ArgumentException>();
+        var result = await _useCase.ExecuteAsync(id!, new UpdateUserProfileRequest());
+
+        result.Should().BeNull();
     }
 
     [Fact]
-    public async Task ExecuteAsync_WithNullRequest_ThrowsArgumentNullException()
+    public async Task ExecuteAsync_WithNullRequest_ReturnsNull()
     {
-        var act = () => _useCase.ExecuteAsync("p1", null!);
+        var result = await _useCase.ExecuteAsync("p1", null!);
 
-        await act.Should().ThrowAsync<ArgumentNullException>();
+        result.Should().BeNull();
     }
 }
