@@ -9,7 +9,7 @@ public class ScenarioGraphTraversalTests
     [Fact]
     public void TraverseScenario_WithNullScenes_ReturnsEmptyList()
     {
-        var scenario = new Scenario { Id = "s1", Scenes = null };
+        var scenario = new Scenario { Id = "s1", Scenes = null! };
 
         var result = ScenarioGraphTraversal.TraverseScenario(scenario);
 

@@ -56,6 +56,7 @@ public static partial class ScenarioMapper
     [MapperIgnoreSource(nameof(BranchRequest.CompassAxis))]
     [MapperIgnoreSource(nameof(BranchRequest.CompassDirection))]
     [MapperIgnoreSource(nameof(BranchRequest.CompassDelta))]
+    [MapperIgnoreSource(nameof(BranchRequest.EchoLog))]
     [MapperIgnoreTarget(nameof(Branch.Choice))]
     [MapperIgnoreTarget(nameof(Branch.EchoLog))]
     [MapperIgnoreTarget(nameof(Branch.CompassChange))]

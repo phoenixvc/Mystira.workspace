@@ -88,7 +88,7 @@ public class ValidateScenarioUseCaseTests
     public async Task ExecuteAsync_WithNullCoreAxes_DoesNotThrow()
     {
         var scenario = CreateValidScenario();
-        scenario.CoreAxes = null;
+        scenario.CoreAxes = null!;
 
         var act = () => _useCase.ExecuteAsync(scenario);
 
@@ -126,7 +126,7 @@ public class ValidateScenarioUseCaseTests
     public async Task ExecuteAsync_WithNullArchetypes_DoesNotThrow()
     {
         var scenario = CreateValidScenario();
-        scenario.Archetypes = null;
+        scenario.Archetypes = null!;
 
         var act = () => _useCase.ExecuteAsync(scenario);
 
@@ -158,7 +158,7 @@ public class ValidateScenarioUseCaseTests
         var scenario = new Scenario
         {
             Id = "s1",
-            Scenes = null
+            Scenes = null!
         };
 
         var act = () => _useCase.ExecuteAsync(scenario);
