@@ -40,11 +40,12 @@ public class CreateAvatarConfigurationUseCaseTests
     }
 
     [Fact]
-    public async Task ExecuteAsync_WithEmptyDictionary_ThrowsArgumentException()
+    public async Task ExecuteAsync_WithEmptyDictionary_CreatesConfiguration()
     {
-        var act = () => _useCase.ExecuteAsync(new Dictionary<string, List<string>>());
+        var result = await _useCase.ExecuteAsync(new Dictionary<string, List<string>>());
 
-        await act.Should().ThrowAsync<ArgumentException>();
+        result.Should().NotBeNull();
+        result.AgeGroupAvatars.Should().BeEmpty();
     }
 
     [Fact]

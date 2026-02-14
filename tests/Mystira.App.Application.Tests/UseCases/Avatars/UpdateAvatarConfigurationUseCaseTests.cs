@@ -25,6 +25,9 @@ public class UpdateAvatarConfigurationUseCaseTests
     [Fact]
     public async Task ExecuteAsync_WithValidInput_UpdatesConfiguration()
     {
+        _repository.Setup(r => r.AddOrUpdateAsync(It.IsAny<AvatarConfigurationFile>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((AvatarConfigurationFile config, CancellationToken _) => config);
+
         var ageGroupAvatars = new Dictionary<string, List<string>>
         {
             { "6-9", new List<string> { "new-avatar-1" } }

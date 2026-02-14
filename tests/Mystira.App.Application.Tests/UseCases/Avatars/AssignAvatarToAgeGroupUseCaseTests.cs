@@ -34,6 +34,8 @@ public class AssignAvatarToAgeGroupUseCaseTests
         };
         _repository.Setup(r => r.GetAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(existing);
+        _repository.Setup(r => r.AddOrUpdateAsync(It.IsAny<AvatarConfigurationFile>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((AvatarConfigurationFile config, CancellationToken _) => config);
 
         var mediaIds = new List<string> { "new-avatar-1", "new-avatar-2" };
 

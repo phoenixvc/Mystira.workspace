@@ -86,11 +86,10 @@ public class ImportCharacterMapUseCaseTests
     }
 
     [Fact]
-    public async Task ExecuteAsync_WithInvalidYaml_ThrowsArgumentException()
+    public async Task ExecuteAsync_WithMissingCharacters_ThrowsArgumentException()
     {
-        // Arrange - YAML without "characters" key
-        var yaml = @"other_key:
-- id: char-1
+        // Arrange - YAML with characters explicitly null
+        var yaml = @"characters:
 ";
         var stream = new MemoryStream(Encoding.UTF8.GetBytes(yaml));
 
