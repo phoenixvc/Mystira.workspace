@@ -82,10 +82,13 @@ public class DeleteUserProfileUseCaseTests
     [InlineData(null)]
     [InlineData("")]
     [InlineData("   ")]
-    public async Task ExecuteAsync_WithNullOrEmptyId_ThrowsArgumentException(string? id)
+    public async Task ExecuteAsync_WithNullOrEmptyId_ReturnsFalse(string? id)
     {
-        var act = () => _useCase.ExecuteAsync(id!);
+        _repository.Setup(r => r.GetByIdAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(default(UserProfile));
 
-        await act.Should().ThrowAsync<ArgumentException>();
+        var result = await _useCase.ExecuteAsync(id!);
+
+        result.Should().BeFalse();
     }
 }

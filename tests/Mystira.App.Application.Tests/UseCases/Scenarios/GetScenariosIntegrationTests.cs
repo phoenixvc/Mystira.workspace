@@ -1,49 +1,46 @@
 using FluentAssertions;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Moq;
+using Mystira.App.Application.Ports.Data;
+using Mystira.App.Application.Tests.TestUtilities;
 using Mystira.App.Application.UseCases.Scenarios;
 using Mystira.App.Domain.Models;
-using Mystira.App.Infrastructure.Data;
-using Mystira.App.Infrastructure.Data.Repositories;
 using Mystira.Contracts.App.Requests.Scenarios;
 
 namespace Mystira.App.Application.Tests.UseCases.Scenarios;
 
 /// <summary>
-/// Integration tests for GetScenariosUseCase using EF Core InMemory provider
-/// to properly support IQueryable with async LINQ operations.
+/// Tests for GetScenariosUseCase using mock repository with async queryable support.
+/// Uses TestAsyncEnumerable to avoid EF InMemory provider limitations with value object projections.
 /// </summary>
-public class GetScenariosIntegrationTests : IDisposable
+public class GetScenariosIntegrationTests
 {
-    private readonly MystiraAppDbContext _context;
-    private readonly ScenarioRepository _repository;
+    private readonly Mock<IScenarioRepository> _repository;
     private readonly GetScenariosUseCase _useCase;
 
     public GetScenariosIntegrationTests()
     {
-        var options = new DbContextOptionsBuilder<MystiraAppDbContext>()
-            .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
-            .Options;
-
-        _context = new MystiraAppDbContext(options);
-        _repository = new ScenarioRepository(_context);
-        _useCase = new GetScenariosUseCase(_repository, new Mock<ILogger<GetScenariosUseCase>>().Object);
+        _repository = new Mock<IScenarioRepository>();
+        _useCase = new GetScenariosUseCase(_repository.Object, new Mock<ILogger<GetScenariosUseCase>>().Object);
     }
 
-    public void Dispose() => _context.Dispose();
+    private void SetupScenarios(params Scenario[] scenarios)
+    {
+        var queryable = new TestAsyncEnumerable<Scenario>(scenarios.AsEnumerable());
+        _repository.Setup(r => r.GetQueryable()).Returns(queryable);
+    }
 
     [Fact]
     public async Task ExecuteAsync_WithNoFilters_ReturnsAllScenarios()
     {
-        // Arrange
-        await SeedScenarios(3);
+        SetupScenarios(
+            CreateScenario("s0", "Scenario 0", "6-9", 6),
+            CreateScenario("s1", "Scenario 1", "6-9", 6),
+            CreateScenario("s2", "Scenario 2", "6-9", 6));
         var request = new ScenarioQueryRequest { Page = 1, PageSize = 10 };
 
-        // Act
         var result = await _useCase.ExecuteAsync(request);
 
-        // Assert
         result.Should().NotBeNull();
         result.TotalCount.Should().Be(3);
         result.Scenarios.Should().HaveCount(3);
@@ -54,14 +51,16 @@ public class GetScenariosIntegrationTests : IDisposable
     [Fact]
     public async Task ExecuteAsync_WithPagination_ReturnsCorrectPage()
     {
-        // Arrange
-        await SeedScenarios(5);
+        SetupScenarios(
+            CreateScenario("s0", "Scenario 0", "6-9", 6),
+            CreateScenario("s1", "Scenario 1", "6-9", 6),
+            CreateScenario("s2", "Scenario 2", "6-9", 6),
+            CreateScenario("s3", "Scenario 3", "6-9", 6),
+            CreateScenario("s4", "Scenario 4", "6-9", 6));
         var request = new ScenarioQueryRequest { Page = 1, PageSize = 2 };
 
-        // Act
         var result = await _useCase.ExecuteAsync(request);
 
-        // Assert
         result.TotalCount.Should().Be(5);
         result.Scenarios.Should().HaveCount(2);
         result.HasNextPage.Should().BeTrue();
@@ -70,19 +69,14 @@ public class GetScenariosIntegrationTests : IDisposable
     [Fact]
     public async Task ExecuteAsync_WithAgeGroupFilter_ReturnsFiltered()
     {
-        // Arrange
-        await _context.Scenarios.AddRangeAsync(
+        SetupScenarios(
             CreateScenario("s1", "Kids Quest", "6-9", 6),
             CreateScenario("s2", "Teen Adventure", "10-13", 10),
             CreateScenario("s3", "Little Story", "6-9", 6));
-        await _context.SaveChangesAsync();
-
         var request = new ScenarioQueryRequest { Page = 1, PageSize = 10, AgeGroup = "6-9" };
 
-        // Act
         var result = await _useCase.ExecuteAsync(request);
 
-        // Assert
         result.TotalCount.Should().Be(2);
         result.Scenarios.Should().OnlyContain(s => s.AgeGroup == "6-9");
     }
@@ -90,19 +84,14 @@ public class GetScenariosIntegrationTests : IDisposable
     [Fact]
     public async Task ExecuteAsync_WithMinimumAgeFilter_ReturnsApplicable()
     {
-        // Arrange
-        await _context.Scenarios.AddRangeAsync(
+        SetupScenarios(
             CreateScenario("s1", "Young Kids", "3-5", 3),
             CreateScenario("s2", "School Age", "6-9", 6),
             CreateScenario("s3", "Teen", "10-13", 10));
-        await _context.SaveChangesAsync();
-
         var request = new ScenarioQueryRequest { Page = 1, PageSize = 10, MinimumAge = 7 };
 
-        // Act
         var result = await _useCase.ExecuteAsync(request);
 
-        // Assert
         result.TotalCount.Should().Be(2);
         result.Scenarios.Should().OnlyContain(s => s.MinimumAge <= 7);
     }
@@ -110,14 +99,13 @@ public class GetScenariosIntegrationTests : IDisposable
     [Fact]
     public async Task ExecuteAsync_WithNoMatches_ReturnsEmptyResponse()
     {
-        // Arrange
-        await SeedScenarios(2);
+        SetupScenarios(
+            CreateScenario("s0", "Scenario 0", "6-9", 6),
+            CreateScenario("s1", "Scenario 1", "6-9", 6));
         var request = new ScenarioQueryRequest { Page = 1, PageSize = 10, AgeGroup = "nonexistent" };
 
-        // Act
         var result = await _useCase.ExecuteAsync(request);
 
-        // Assert
         result.TotalCount.Should().Be(0);
         result.Scenarios.Should().BeEmpty();
         result.HasNextPage.Should().BeFalse();
@@ -126,31 +114,17 @@ public class GetScenariosIntegrationTests : IDisposable
     [Fact]
     public async Task ExecuteAsync_OrdersByCreatedAtDescending()
     {
-        // Arrange
         var older = CreateScenario("s1", "Older", "6-9", 6);
         older.CreatedAt = DateTime.UtcNow.AddDays(-2);
         var newer = CreateScenario("s2", "Newer", "6-9", 6);
         newer.CreatedAt = DateTime.UtcNow.AddDays(-1);
-        await _context.Scenarios.AddRangeAsync(older, newer);
-        await _context.SaveChangesAsync();
+        SetupScenarios(older, newer);
 
         var request = new ScenarioQueryRequest { Page = 1, PageSize = 10 };
 
-        // Act
         var result = await _useCase.ExecuteAsync(request);
 
-        // Assert
         result.Scenarios.First().Title.Should().Be("Newer");
-    }
-
-    private async Task SeedScenarios(int count)
-    {
-        for (int i = 0; i < count; i++)
-        {
-            await _context.Scenarios.AddAsync(
-                CreateScenario($"s{i}", $"Scenario {i}", "6-9", 6));
-        }
-        await _context.SaveChangesAsync();
     }
 
     private static Scenario CreateScenario(string id, string title, string ageGroup, int minAge)
