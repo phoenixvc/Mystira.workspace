@@ -5,6 +5,7 @@ using Mystira.App.Application.Ports.Data;
 using Mystira.App.Application.UseCases.Accounts;
 using Mystira.App.Domain.Models;
 using Mystira.Contracts.App.Requests.Accounts;
+using ContractSubscriptionType = Mystira.Contracts.App.Enums.SubscriptionType;
 using Mystira.Shared.Data.Repositories;
 
 namespace Mystira.App.Application.Tests.UseCases.Accounts;
@@ -33,7 +34,7 @@ public class UpdateSubscriptionUseCaseTests
 
         var request = new UpdateSubscriptionRequest
         {
-            Type = SubscriptionType.Monthly
+            Type = ContractSubscriptionType.Monthly
         };
 
         var result = await _useCase.ExecuteAsync("acc-1", request);
@@ -60,7 +61,7 @@ public class UpdateSubscriptionUseCaseTests
 
         var request = new UpdateSubscriptionRequest
         {
-            Type = SubscriptionType.Free,
+            Type = ContractSubscriptionType.Free,
             ProductId = "new-product",
             ValidUntil = new DateTime(2027, 1, 1, 0, 0, 0, DateTimeKind.Utc)
         };
@@ -80,7 +81,7 @@ public class UpdateSubscriptionUseCaseTests
             .ReturnsAsync(account);
 
         var before = DateTime.UtcNow;
-        var request = new UpdateSubscriptionRequest { Type = SubscriptionType.Free };
+        var request = new UpdateSubscriptionRequest { Type = ContractSubscriptionType.Free };
 
         var result = await _useCase.ExecuteAsync("acc-1", request);
 
@@ -93,7 +94,7 @@ public class UpdateSubscriptionUseCaseTests
         _repository.Setup(r => r.GetByIdAsync("missing", It.IsAny<CancellationToken>()))
             .ReturnsAsync(default(Account));
 
-        var act = () => _useCase.ExecuteAsync("missing", new UpdateSubscriptionRequest { Type = SubscriptionType.Free });
+        var act = () => _useCase.ExecuteAsync("missing", new UpdateSubscriptionRequest { Type = ContractSubscriptionType.Free });
 
         await act.Should().ThrowAsync<ArgumentException>().WithMessage("*not found*");
     }
@@ -104,7 +105,7 @@ public class UpdateSubscriptionUseCaseTests
     [InlineData("   ")]
     public async Task ExecuteAsync_WithNullOrEmptyId_ThrowsArgumentException(string? accountId)
     {
-        var act = () => _useCase.ExecuteAsync(accountId!, new UpdateSubscriptionRequest { Type = SubscriptionType.Free });
+        var act = () => _useCase.ExecuteAsync(accountId!, new UpdateSubscriptionRequest { Type = ContractSubscriptionType.Free });
 
         await act.Should().ThrowAsync<ArgumentException>();
     }
