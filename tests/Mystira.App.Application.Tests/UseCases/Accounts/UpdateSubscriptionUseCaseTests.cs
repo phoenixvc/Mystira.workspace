@@ -34,7 +34,7 @@ public class UpdateSubscriptionUseCaseTests
 
         var request = new UpdateSubscriptionRequest
         {
-            Type = ContractSubscriptionType.Monthly
+            Type = (ContractSubscriptionType)1 // Maps to domain SubscriptionType.Monthly via int cast
         };
 
         var result = await _useCase.ExecuteAsync("acc-1", request);
