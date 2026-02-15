@@ -2,6 +2,26 @@ using YamlDotNet.Serialization;
 
 namespace Mystira.App.Domain.Models;
 
+// Shared helpers for YAML → Domain mapping
+internal static class YamlMappingHelpers
+{
+    /// <summary>
+    /// Resolves a current field vs. its legacy alias, preferring the current value.
+    /// </summary>
+    internal static string? ResolveLegacyAlias(string? current, string? legacy)
+        => !string.IsNullOrWhiteSpace(current) ? current : legacy;
+
+    /// <summary>
+    /// Parses a snake_case YAML string to an enum value (removes underscores, case-insensitive).
+    /// </summary>
+    internal static T ParseEnum<T>(string? value) where T : struct
+    {
+        if (string.IsNullOrEmpty(value)) return default;
+        var clean = value.Replace("_", "");
+        return Enum.TryParse<T>(clean, true, out var result) ? result : default;
+    }
+}
+
 // YAML-specific models for scenario loading
 public class YamlScenario
 {
@@ -144,7 +164,7 @@ public class YamlScene
 
     public Scene ToDomainModel()
     {
-        var nextSceneId = !string.IsNullOrWhiteSpace(NextScene) ? NextScene : LegacyNextSceneId;
+        var nextSceneId = YamlMappingHelpers.ResolveLegacyAlias(NextScene, LegacyNextSceneId);
         var echoReveals = (EchoReveals?.Any() == true ? EchoReveals : LegacyEchoRevealReferences) ?? new List<YamlEchoRevealReference>();
 
         return new Scene
@@ -206,7 +226,7 @@ public class YamlBranch
 
     public Branch ToDomainModel()
     {
-        var nextSceneId = !string.IsNullOrWhiteSpace(NextScene) ? NextScene : LegacyNextSceneId;
+        var nextSceneId = YamlMappingHelpers.ResolveLegacyAlias(NextScene, LegacyNextSceneId);
 
         return new Branch
         {
@@ -307,10 +327,9 @@ public class YamlMusicPalette
 
     public MusicPalette ToDomainModel()
     {
-        Enum.TryParse<MusicProfile>(DefaultProfile, true, out var profile);
         return new MusicPalette
         {
-            DefaultProfile = profile,
+            DefaultProfile = YamlMappingHelpers.ParseEnum<MusicProfile>(DefaultProfile),
             TracksByProfile = TracksByProfile != null
                 ? new Dictionary<string, List<string>>(TracksByProfile, StringComparer.OrdinalIgnoreCase)
                 : new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase)
@@ -340,28 +359,15 @@ public class YamlSceneMusicSettings
 
     public SceneMusicSettings ToDomainModel()
     {
-        Enum.TryParse<MusicProfile>(Profile, true, out var profile);
-
         return new SceneMusicSettings
         {
-            Profile = profile,
+            Profile = YamlMappingHelpers.ParseEnum<MusicProfile>(Profile),
             Energy = Energy,
-            Continuity = ParseEnum<MusicContinuity>(Continuity),
-            TransitionHint = ParseEnum<MusicTransitionHint>(TransitionHint),
-            Priority = ParseEnum<MusicPriority>(Priority),
-            Ducking = ParseEnum<MusicDucking>(Ducking)
+            Continuity = YamlMappingHelpers.ParseEnum<MusicContinuity>(Continuity),
+            TransitionHint = YamlMappingHelpers.ParseEnum<MusicTransitionHint>(TransitionHint),
+            Priority = YamlMappingHelpers.ParseEnum<MusicPriority>(Priority),
+            Ducking = YamlMappingHelpers.ParseEnum<MusicDucking>(Ducking)
         };
-    }
-
-    private T ParseEnum<T>(string value) where T : struct
-    {
-        if (string.IsNullOrEmpty(value)) return default;
-        var clean = value.Replace("_", "");
-        if (Enum.TryParse<T>(clean, true, out var result))
-        {
-            return result;
-        }
-        return default;
     }
 }
 

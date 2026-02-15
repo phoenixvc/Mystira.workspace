@@ -4,7 +4,6 @@ using Mystira.App.Application.Validation;
 using Mystira.App.Application.Mappers;
 using Mystira.Contracts.App.Requests.Scenarios;
 using Mystira.App.Domain.Models;
-using NJsonSchema;
 using System.Threading;
 
 namespace Mystira.App.Application.UseCases.Scenarios;
@@ -17,22 +16,13 @@ public class CreateScenarioUseCase
     private readonly IScenarioRepository _repository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<CreateScenarioUseCase> _logger;
-    private readonly ValidateScenarioUseCase _validateScenarioUseCase;
-
-    private static readonly JsonSchema ScenarioJsonSchema = JsonSchema.FromJsonAsync(ScenarioSchemaDefinitions.StorySchema).GetAwaiter().GetResult();
-
-    private static readonly System.Text.Json.JsonSerializerOptions SchemaSerializerOptions = new()
-    {
-        PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.SnakeCaseLower,
-        DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull,
-        Converters = { new System.Text.Json.Serialization.JsonStringEnumConverter() }
-    };
+    private readonly IValidateScenarioUseCase _validateScenarioUseCase;
 
     public CreateScenarioUseCase(
         IScenarioRepository repository,
         IUnitOfWork unitOfWork,
         ILogger<CreateScenarioUseCase> logger,
-        ValidateScenarioUseCase validateScenarioUseCase)
+        IValidateScenarioUseCase validateScenarioUseCase)
     {
         _repository = repository;
         _unitOfWork = unitOfWork;
@@ -42,7 +32,7 @@ public class CreateScenarioUseCase
 
     public async Task<Scenario> ExecuteAsync(CreateScenarioRequest request, CancellationToken ct = default)
     {
-        ValidateAgainstSchema(request);
+        ScenarioSchemaValidator.ValidateAgainstSchema(request);
 
         var scenario = new Scenario
         {
@@ -78,18 +68,5 @@ public class CreateScenarioUseCase
         _logger.LogInformation("Created new scenario: {ScenarioId} - {Title}", scenario.Id, scenario.Title);
         return scenario;
     }
-
-    private void ValidateAgainstSchema(CreateScenarioRequest request)
-    {
-        var json = System.Text.Json.JsonSerializer.Serialize(request, SchemaSerializerOptions);
-        var errors = ScenarioJsonSchema.Validate(json);
-
-        if (errors.Count > 0)
-        {
-            var errorMessages = string.Join(", ", errors.Select(e => e.ToString()).ToList());
-            throw new ArgumentException($"Scenario validation failed: {errorMessages}");
-        }
-    }
-
 }
 

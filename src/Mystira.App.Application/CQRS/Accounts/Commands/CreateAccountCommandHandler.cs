@@ -12,7 +12,7 @@ public static class CreateAccountCommandHandler
 {
     public static async Task<Account?> Handle(
         CreateAccountCommand command,
-        CreateAccountUseCase useCase,
+        ICreateAccountUseCase useCase,
         ILogger logger,
         CancellationToken ct)
     {

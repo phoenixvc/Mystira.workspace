@@ -53,9 +53,10 @@ public static class DependencyInjection
         services.AddScoped<UpdateScenarioUseCase>();
         services.AddScoped<DeleteScenarioUseCase>();
         services.AddScoped<ValidateScenarioUseCase>();
+        services.AddScoped<IValidateScenarioUseCase>(sp => sp.GetRequiredService<ValidateScenarioUseCase>());
 
         // GameSession Use Cases
-        services.AddScoped<CreateGameSessionUseCase>();
+        services.AddScoped<ICreateGameSessionUseCase, CreateGameSessionUseCase>();
         services.AddScoped<GetGameSessionUseCase>();
         services.AddScoped<GetGameSessionsByAccountUseCase>();
         services.AddScoped<GetGameSessionsByProfileUseCase>();
@@ -73,7 +74,7 @@ public static class DependencyInjection
         // Account Use Cases
         services.AddScoped<GetAccountByEmailUseCase>();
         services.AddScoped<GetAccountUseCase>();
-        services.AddScoped<CreateAccountUseCase>();
+        services.AddScoped<ICreateAccountUseCase, CreateAccountUseCase>();
         services.AddScoped<UpdateAccountUseCase>();
         services.AddScoped<AddUserProfileToAccountUseCase>();
         services.AddScoped<RemoveUserProfileFromAccountUseCase>();

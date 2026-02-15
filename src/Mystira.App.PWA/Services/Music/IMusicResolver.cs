@@ -16,6 +16,8 @@ public class MusicContext
     public MusicProfile CurrentProfile { get; set; }
     public double CurrentEnergy { get; set; }
     public List<string> RecentTrackIds { get; set; } = new();
+    public bool IsTransitioning { get; set; }
+    public string? TransitionError { get; set; }
 }
 
 public class MusicResolutionResult

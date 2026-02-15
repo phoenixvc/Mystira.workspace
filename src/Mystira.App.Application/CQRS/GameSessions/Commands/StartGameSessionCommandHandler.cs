@@ -12,7 +12,7 @@ public static class StartGameSessionCommandHandler
 {
     public static async Task<GameSession?> Handle(
         StartGameSessionCommand command,
-        CreateGameSessionUseCase useCase,
+        ICreateGameSessionUseCase useCase,
         ILogger logger,
         CancellationToken ct)
     {

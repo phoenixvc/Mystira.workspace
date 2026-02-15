@@ -23,6 +23,11 @@ public class SceneAudioOrchestrator
 
     public async Task EnterSceneAsync(Scene scene, Scenario scenario)
     {
+        _context.IsTransitioning = true;
+        _context.TransitionError = null;
+
+        try
+        {
         // 1. Resolve Music
         var result = _resolver.ResolveMusic(scene, scenario, _context);
 
@@ -105,6 +110,16 @@ public class SceneAudioOrchestrator
                 // Always play one-shots on entry
                 await _audioBus.PlaySoundEffectAsync(sfx.Track, false, (float)sfx.Energy);
             }
+        }
+        }
+        catch (Exception ex)
+        {
+            _context.TransitionError = ex.Message;
+            throw;
+        }
+        finally
+        {
+            _context.IsTransitioning = false;
         }
     }
 
