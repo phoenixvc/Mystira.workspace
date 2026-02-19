@@ -51,9 +51,9 @@ public class PromptGeneratorTests
         IterationNumber = 1,
         OverallStatus = EvaluationStatus.Fail,
         SafetyGatePassed = true,
-        AxesAlignmentScore = 0.5,
-        DevPrinciplesScore = 0.5,
-        NarrativeLogicScore = 0.5,
+        AxesAlignmentScore = 0.5f,
+        DevPrinciplesScore = 0.5f,
+        NarrativeLogicScore = 0.5f,
         Findings = new Dictionary<string, List<string>>(),
         Recommendation = "Improve something"
     };
