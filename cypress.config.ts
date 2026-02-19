@@ -9,5 +9,17 @@ export default defineConfig({
     viewportHeight: 720,
     video: false,
     screenshotOnRunFailure: true,
+    setupNodeEvents(on) {
+      on('task', {
+        log(message: string) {
+          console.log(message);
+          return null;
+        },
+        table(message: unknown) {
+          console.table(message);
+          return null;
+        },
+      });
+    },
   },
 });
