@@ -110,8 +110,8 @@ export async function exportLogs(
   logs: ServiceLog[],
   formatTimestamp: (timestamp: number) => string
 ): Promise<void> {
-  const { save } = await import('@tauri-apps/api/dialog');
-  const { writeTextFile } = await import('@tauri-apps/api/fs');
+  const { save } = await import('@tauri-apps/plugin-dialog');
+  const { writeTextFile } = await import('@tauri-apps/plugin-fs');
 
   const filePath = await save({
     defaultPath: `${serviceName}-logs-${new Date().toISOString().replace(/[:.]/g, '-')}.txt`,

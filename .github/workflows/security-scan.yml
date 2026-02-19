@@ -145,7 +145,7 @@ jobs:
           fetch-depth: 0
 
       - name: TruffleHog Secret Scanning
-        uses: trufflesecurity/trufflehog@main
+        uses: trufflesecurity/trufflehog@v3.88.0
         with:
           extra_args: --only-verified
         continue-on-error: true
@@ -172,5 +172,5 @@ jobs:
         run: npm install -g license-checker
 
       - name: Check licenses
-        run: license-checker --summary --failOn "GPL-3.0;AGPL-3.0" || true
+        run: license-checker --summary --failOn "GPL-3.0;AGPL-3.0"
         continue-on-error: true

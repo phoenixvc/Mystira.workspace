@@ -36,9 +36,6 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Ensure coverage provider is available
-        run: npm ls @vitest/coverage-v8 || npm install --save-dev @vitest/coverage-v8
-
       - name: Run Vitest with coverage
         run: npm run test:coverage -- --reporter=verbose
 

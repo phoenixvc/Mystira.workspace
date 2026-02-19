@@ -51,12 +51,12 @@ jobs:
         run: npm run build
 
       - name: Install tauri-driver
-        run: cargo install tauri-driver
+        run: cargo install tauri-driver --version 2.0.1
 
       - name: Run E2E tests with WebDriver
         run: |
           xvfb-run --auto-servernum --server-args="-screen 0 1280x960x24" \
-            cargo test --manifest-path src-tauri/Cargo.toml --features e2e-test || true
+            cargo test --manifest-path src-tauri/Cargo.toml --features e2e-test
         continue-on-error: true
         env:
           TAURI_SKIP_DEVSERVER_CHECK: true
@@ -89,10 +89,10 @@ jobs:
         run: npm run build
 
       - name: Install tauri-driver
-        run: cargo install tauri-driver
+        run: cargo install tauri-driver --version 2.0.1
 
       - name: Run E2E tests
-        run: cargo test --manifest-path src-tauri/Cargo.toml --features e2e-test || true
+        run: cargo test --manifest-path src-tauri/Cargo.toml --features e2e-test
         continue-on-error: true
         env:
           TAURI_SKIP_DEVSERVER_CHECK: true
@@ -125,10 +125,10 @@ jobs:
         run: npm run build
 
       - name: Install tauri-driver
-        run: cargo install tauri-driver
+        run: cargo install tauri-driver --version 2.0.1
 
       - name: Run E2E tests
-        run: cargo test --manifest-path src-tauri/Cargo.toml --features e2e-test || exit 0
+        run: cargo test --manifest-path src-tauri/Cargo.toml --features e2e-test
         continue-on-error: true
         env:
           TAURI_SKIP_DEVSERVER_CHECK: true

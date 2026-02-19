@@ -30,8 +30,8 @@ jobs:
           cache: "npm"
           cache-dependency-path: Mystira.DevHub/package-lock.json
       - run: npm ci
-      - name: Check formatting (if prettier configured)
-        run: npx prettier --check "src/**/*.{ts,tsx,js,jsx,json,css}" || true
+      - name: Check formatting
+        run: npx prettier --check "src/**/*.{ts,tsx,js,jsx,json,css}"
         continue-on-error: true
 
   typecheck:
