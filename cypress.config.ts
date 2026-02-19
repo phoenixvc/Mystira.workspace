@@ -11,11 +11,11 @@ export default defineConfig({
     screenshotOnRunFailure: true,
     setupNodeEvents(on) {
       on('task', {
-        log(message: string) {
+        log(message) {
           console.log(message);
           return null;
         },
-        table(message: unknown) {
+        table(message) {
           console.table(message);
           return null;
         },
