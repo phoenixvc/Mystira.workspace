@@ -201,6 +201,22 @@
                                        @bind:event="oninput" />
                             </div>
 
+                            <!-- Library section -->
+                            <div>
+                                <span class="text-xs font-semibold uppercase tracking-wide text-gray-500">Library</span>
+                                <div class="mt-2 grid grid-cols-1 gap-2">
+                                    <NavLink class="w-full inline-flex items-center justify-between gap-2 rounded-md border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                                             href="/story-library"
+                                             Match="NavLinkMatch.Prefix"
+                                             title="Browse your generated stories">
+                                        <span class="inline-flex items-center gap-2">
+                                            <span class="bi bi-collection-fill" aria-hidden="true"></span>
+                                            <span>Story Library</span>
+                                        </span>
+                                    </NavLink>
+                                </div>
+                            </div>
+
                             <!-- Analysis section moved here -->
                             <div>
                                 <span class="text-xs font-semibold uppercase tracking-wide text-gray-500">Analysis</span>
@@ -512,7 +528,8 @@
         {
             var relative = NavManager.ToBaseRelativePath(NavManager.Uri).Trim('/');
             isAnalysisRoute = relative.StartsWith("story-continuity", StringComparison.OrdinalIgnoreCase)
-                              || relative.StartsWith("scenario-dominator-path-analysis", StringComparison.OrdinalIgnoreCase);
+                              || relative.StartsWith("scenario-dominator-path-analysis", StringComparison.OrdinalIgnoreCase)
+                              || relative.StartsWith("story-library", StringComparison.OrdinalIgnoreCase);
             isAgenticMode = relative.StartsWith("story/agent", StringComparison.OrdinalIgnoreCase);
         }
         catch
@@ -525,7 +542,55 @@
     private void HandleLocationChanged(object? sender, Microsoft.AspNetCore.Components.Routing.LocationChangedEventArgs e)
     {
         UpdateRouteState();
-        _ = InvokeAsync(StateHasChanged);
+        _ = InvokeAsync(async () =>
+        {
+            await ApplyPrePopulatedYamlIfNeededAsync();
+            StateHasChanged();
+        });
+    }
+
+    /// <summary>
+    /// After navigating from agent mode via "Complete &amp; Continue in Chat", the agent page stores
+    /// the finished story YAML under the "prePopulatedMessage" localStorage key and then redirects
+    /// here. We consume that key, attach the YAML to the current chat session, and display it in
+    /// the YAML preview panel so the user lands straight on the result.
+    /// </summary>
+    private async Task ApplyPrePopulatedYamlIfNeededAsync()
+    {
+        try
+        {
+            var yaml = await LocalStorage.GetItemAsStringAsync("prePopulatedMessage");
+            if (string.IsNullOrWhiteSpace(yaml))
+                return;
+
+            await LocalStorage.RemoveItemAsync("prePopulatedMessage");
+
+            if (CurrentChat == null)
+                return;
+
+            CurrentChat.YamlSnapshot = yaml;
+
+            var nextVersion = CurrentChat.YamlSnapshots.Count == 0
+                ? 1
+                : CurrentChat.YamlSnapshots.Max(s => s.Version) + 1;
+
+            CurrentChat.YamlSnapshots.Add(new YamlSnapshot
+            {
+                Version = nextVersion,
+                Content = yaml,
+                CreatedAt = DateTime.UtcNow
+            });
+
+            currentViewedVersion = nextVersion;
+            YamlContent = yaml;
+
+            await LocalStorage.SetItemAsync(ChatsStorageKey, ChatHistories);
+            await ChatSessionService.SaveYamlSnapshotAsync(yaml);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogWarning(ex, "Failed to apply pre-populated YAML from agent mode");
+        }
     }
 
     private async Task RefreshChatSessionAsync()
