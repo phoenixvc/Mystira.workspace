@@ -9,7 +9,7 @@
 use crate::types::ServiceInfo;
 use std::path::PathBuf;
 use std::process::Command;
-use tauri::{AppHandle, Manager};
+use tauri::{AppHandle, Emitter};
 use tokio::process::Command as TokioCommand;
 use tokio::io::{AsyncBufReadExt, BufReader as TokioBufReader};
 use std::process::Stdio;
@@ -112,7 +112,7 @@ pub fn setup_log_streaming(
             let reader = TokioBufReader::new(stdout_stream);
             let mut lines = reader.lines();
             while let Ok(Some(line)) = lines.next_line().await {
-                let _ = app_handle_stdout.emit_all(
+                let _ = app_handle_stdout.emit(
                     "service-log",
                     serde_json::json!({
                         "service": service_name_stdout,
@@ -138,7 +138,7 @@ pub fn setup_log_streaming(
             let reader = TokioBufReader::new(stderr_stream);
             let mut lines = reader.lines();
             while let Ok(Some(line)) = lines.next_line().await {
-                let _ = app_handle_stderr.emit_all(
+                let _ = app_handle_stderr.emit(
                     "service-log",
                     serde_json::json!({
                         "service": service_name_stderr,

@@ -1,4 +1,4 @@
-import { invoke } from '@tauri-apps/api/tauri';
+import { invoke } from '@tauri-apps/api/core';
 import { useState, useEffect } from 'react';
 import { ArrowRight, Cloud, Database, HardDrive, Loader2, RefreshCw, AlertTriangle, CheckCircle } from 'lucide-react';
 import { ENVIRONMENT_PRESETS, EnvironmentPreset } from './types';

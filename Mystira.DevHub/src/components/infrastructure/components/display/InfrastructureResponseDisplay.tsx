@@ -1,4 +1,4 @@
-import { invoke } from '@tauri-apps/api/tauri';
+import { invoke } from '@tauri-apps/api/core';
 import { useEffect, useState } from 'react';
 import type { CommandResponse, CosmosWarning, WhatIfChange } from '../../../../types';
 import { ConfirmDialog } from '../../../ConfirmDialog';

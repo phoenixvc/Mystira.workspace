@@ -1,4 +1,4 @@
-import { invoke } from '@tauri-apps/api/tauri';
+import { invoke } from '@tauri-apps/api/core';
 import { useState, useRef, useCallback } from 'react';
 import { MigrationConfig, MigrationResponse, MigrationResult, ResourceSelection } from '../types';
 

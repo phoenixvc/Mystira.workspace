@@ -51,7 +51,7 @@ describe('resourcesStore', () => {
     });
 
     it('should respect cache', async () => {
-      const { invoke } = vi.mocked(await import('@tauri-apps/api/tauri'));
+      const { invoke } = vi.mocked(await import('@tauri-apps/api/core'));
       const testResource = createTestResource();
       invoke.mockResolvedValue(mockAzureResourcesResponse([testResource]));
 
@@ -65,7 +65,7 @@ describe('resourcesStore', () => {
     });
 
     it('should bypass cache with forceRefresh', async () => {
-      const { invoke } = vi.mocked(await import('@tauri-apps/api/tauri'));
+      const { invoke } = vi.mocked(await import('@tauri-apps/api/core'));
       const testResource = createTestResource();
       invoke.mockResolvedValue(mockAzureResourcesResponse([testResource]));
 
@@ -79,7 +79,7 @@ describe('resourcesStore', () => {
     });
 
     it('should prevent duplicate concurrent requests', async () => {
-      const { invoke } = vi.mocked(await import('@tauri-apps/api/tauri'));
+      const { invoke } = vi.mocked(await import('@tauri-apps/api/core'));
       invoke.mockImplementation(() => new Promise(resolve => setTimeout(() => resolve(mockAzureResourcesResponse([])), 100)));
 
       // Start two fetches concurrently

@@ -378,13 +378,12 @@ pub async fn create_webview_window(
     title: String,
     app_handle: AppHandle,
 ) -> Result<(), String> {
-    // Create a new window with the URL using Tauri v1 API
     let window_label = format!("webview-{}", title.replace(" ", "-").to_lowercase());
-    
-    tauri::WindowBuilder::new(
+
+    tauri::WebviewWindowBuilder::new(
         &app_handle,
         &window_label,
-        tauri::WindowUrl::External(url.parse().map_err(|e| format!("Invalid URL: {}", e))?)
+        tauri::WebviewUrl::External(url.parse().map_err(|e| format!("Invalid URL: {}", e))?)
     )
     .title(&title)
     .inner_size(1200.0, 800.0)

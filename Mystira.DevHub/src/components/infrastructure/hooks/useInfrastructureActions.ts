@@ -1,4 +1,4 @@
-import { invoke } from '@tauri-apps/api/tauri';
+import { invoke } from '@tauri-apps/api/core';
 import { useCallback } from 'react';
 import type { CommandResponse, CosmosWarning, ResourceGroupConvention, TemplateConfig, WhatIfChange } from '../../../types';
 import { getModuleFromResourceType } from '../utils/getModuleFromResourceType';

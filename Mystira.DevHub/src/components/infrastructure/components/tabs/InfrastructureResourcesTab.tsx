@@ -1,4 +1,4 @@
-import { invoke } from '@tauri-apps/api/tauri';
+import { invoke } from '@tauri-apps/api/core';
 import type { CommandResponse } from '../../../../types';
 import { ResourceGrid } from '../../../resource-grid';
 import { useCliBuild } from '../../hooks';

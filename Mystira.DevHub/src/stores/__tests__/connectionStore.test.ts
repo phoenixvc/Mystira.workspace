@@ -58,7 +58,7 @@ describe('connectionStore', () => {
     });
 
     it('should handle exceptions gracefully', async () => {
-      const { invoke } = vi.mocked(await import('@tauri-apps/api/tauri'));
+      const { invoke } = vi.mocked(await import('@tauri-apps/api/core'));
       invoke.mockRejectedValueOnce(new Error('Network error'));
 
       await useConnectionStore.getState().testConnection('azurecli');
@@ -73,7 +73,7 @@ describe('connectionStore', () => {
 
   describe('testConnections', () => {
     it('should test all connections sequentially', async () => {
-      const { invoke } = vi.mocked(await import('@tauri-apps/api/tauri'));
+      const { invoke } = vi.mocked(await import('@tauri-apps/api/core'));
       invoke.mockResolvedValue(mockConnectionTestSuccess('test', {}));
 
       await useConnectionStore.getState().testConnections();
@@ -86,7 +86,7 @@ describe('connectionStore', () => {
     });
 
     it('should set isChecking during operation', async () => {
-      const { invoke } = vi.mocked(await import('@tauri-apps/api/tauri'));
+      const { invoke } = vi.mocked(await import('@tauri-apps/api/core'));
       let checkingDuringCall = false;
 
       invoke.mockImplementation(async () => {

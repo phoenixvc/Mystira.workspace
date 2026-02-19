@@ -1,4 +1,4 @@
-import { invoke } from '@tauri-apps/api/tauri';
+import { invoke } from '@tauri-apps/api/core';
 import { useEffect, useRef, useState } from 'react';
 import type { CommandResponse } from '../../types';
 import { formatTimeSince } from '../services/utils/serviceUtils';

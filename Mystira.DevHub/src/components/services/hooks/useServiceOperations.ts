@@ -1,4 +1,4 @@
-import { invoke } from '@tauri-apps/api/tauri';
+import { invoke } from '@tauri-apps/api/core';
 import type { ServiceConfig, ServiceStatus } from '../types';
 import { getServiceConfigs } from '../index';
 

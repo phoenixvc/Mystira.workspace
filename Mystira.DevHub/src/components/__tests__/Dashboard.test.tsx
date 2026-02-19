@@ -51,7 +51,7 @@ describe('Dashboard', () => {
   });
 
   it('should test connections on mount', async () => {
-    const { invoke } = vi.mocked(await import('@tauri-apps/api/tauri'));
+    const { invoke } = vi.mocked(await import('@tauri-apps/api/core'));
     invoke.mockResolvedValue(mockConnectionTestSuccess('test', {}));
 
     renderWithProviders(<Dashboard onNavigate={mockNavigate} />);

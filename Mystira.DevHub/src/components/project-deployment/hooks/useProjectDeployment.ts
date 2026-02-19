@@ -1,4 +1,4 @@
-import { invoke } from '@tauri-apps/api/tauri';
+import { invoke } from '@tauri-apps/api/core';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { CommandResponse } from '../../../types';
 import type { ProjectInfo } from '../ProjectDeploymentPlanner';
