@@ -24,13 +24,6 @@ public static class ScenarioExtensions
                 if (string.IsNullOrWhiteSpace(scene.Id))
                     continue;
 
-                if (!string.IsNullOrWhiteSpace(scene.NextSceneId))
-                {
-                    if (byId.TryGetValue(scene.NextSceneId!, out var to))
-                        yield return new Edge<Scene, string>(scene, to, "next");
-                    continue;
-                }
-
                 if (scene.Branches is { Count: > 0 })
                 {
                     foreach (var br in scene.Branches)
@@ -43,6 +36,13 @@ public static class ScenarioExtensions
                             yield return new Edge<Scene, string>(scene, to, label);
                         }
                     }
+                }
+                // No branches, so just a single outgoing edge
+                else if (!string.IsNullOrWhiteSpace(scene.NextSceneId))
+                {
+                    if (byId.TryGetValue(scene.NextSceneId!, out var to))
+                        yield return new Edge<Scene, string>(scene, to, "next");
+                    continue;
                 }
             }
         }

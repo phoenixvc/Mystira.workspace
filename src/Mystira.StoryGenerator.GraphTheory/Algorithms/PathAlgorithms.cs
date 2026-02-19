@@ -65,9 +65,11 @@ public static class PathAlgorithms
 
         var path = new List<TNode>();
         var stack = new Stack<(TNode Node, IEnumerator<TNode> Succ, int Depth)>();
+        var onCurrentPath = new HashSet<TNode>();
 
         // Initialize with root
         path.Add(start);
+        onCurrentPath.Add(start);
         var rootSucc = graph.GetSuccessors(start).GetEnumerator();
         stack.Push((start, rootSucc, 0));
 
@@ -86,6 +88,7 @@ public static class PathAlgorithms
                 // Backtrack
                 stack.Pop();
                 succEnum.Dispose();
+                onCurrentPath.Remove(path[^1]);
                 path.RemoveAt(path.Count - 1);
 
                 continue;
@@ -97,13 +100,28 @@ public static class PathAlgorithms
                 // No more successors: just backtrack without emitting; this node is not terminal.
                 stack.Pop();
                 succEnum.Dispose();
+                onCurrentPath.Remove(path[^1]);
                 path.RemoveAt(path.Count - 1);
                 continue;
             }
 
             // Go deeper to the child
             var child = succEnum.Current;
+
+            // CYCLE DETECTION: If child is already on current path, we stop and treat current node as terminal for this branch
+            if (onCurrentPath.Contains(child))
+            {
+                // We reached a cycle. We yield the path as-is (ending at 'node') and continue to next successor
+                // unless we already yielded this path (e.g. if 'node' was already terminal)
+                if (!isTerm)
+                {
+                    yield return path.ToArray();
+                }
+                continue;
+            }
+
             path.Add(child);
+            onCurrentPath.Add(child);
             var childSucc = graph.GetSuccessors(child).GetEnumerator();
             stack.Push((child, childSucc, depth + 1));
         }
