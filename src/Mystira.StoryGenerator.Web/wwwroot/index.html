@@ -14,6 +14,7 @@
 </head>
 
 <body>
+    <script>console.log("[DEBUG_JS] index.html: Body script start");</script>
     <div id="app">
         <svg class="loading-progress">
             <circle r="40%" cx="50%" cy="50%" />
@@ -33,7 +34,45 @@
     <script src="js/yamlPreview.js"></script>
     <script src="js/sseClient.js"></script>
     <script src="_content/Syncfusion.Blazor.Core/scripts/syncfusion-blazor.min.js" type="text/javascript"></script>
-    <script src="_framework/blazor.webassembly.js"></script>
+    <script>
+        console.log("[DEBUG_JS] index.html: Starting Blazor...");
+        window.addEventListener('error', function (e) {
+            console.error("[DEBUG_JS] Global error:", e.error);
+        });
+        window.addEventListener('unhandledrejection', function (e) {
+            console.error("[DEBUG_JS] Unhandled promise rejection:", e.reason);
+        });
+    </script>
+    <script src="_framework/blazor.webassembly.js" autostart="false"></script>
+    <script>
+        console.log("[DEBUG_JS] index.html: blazor.webassembly.js loaded, calling Blazor.start()...");
+        const blazorStartConfig = {
+            logLevel: 0, // Trace
+            loadBootResource: function (type, name, defaultUri, integrity) {
+                console.log(`[DEBUG_JS] Loading: ${type} - ${name}`);
+                return defaultUri;
+            },
+            configureRuntime: (builder) => {
+                console.log("[DEBUG_JS] Runtime builder configured");
+                builder.withConfig({
+                    logLevel: 0
+                });
+            }
+        };
+        console.log("[DEBUG_JS] index.html: Invoking Blazor.start()...");
+        Blazor.start(blazorStartConfig).then(() => {
+            console.log("[DEBUG_JS] index.html: Blazor.start() resolved.");
+        }).catch(err => {
+            console.error("[DEBUG_JS] index.html: Blazor.start() failed:", err);
+            if (err) {
+                console.error("[DEBUG_JS] Error Details:", {
+                    message: err.message,
+                    stack: err.stack,
+                    name: err.name
+                });
+            }
+        });
+    </script>
 </body>
 
 </html>
