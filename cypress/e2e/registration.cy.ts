@@ -47,7 +47,9 @@ describe('Story Registration Flow', () => {
 });
 
 describe('Accessibility', () => {
-  function logA11yViolations(violations: any[]) {
+  function logA11yViolations(
+    violations: { id: string; impact?: string; description: string; nodes: unknown[] }[],
+  ) {
     cy.task('log', `${violations.length} a11y violation(s) detected`);
     const violationData = violations.map(({ id, impact, description, nodes }) => ({
       id,
