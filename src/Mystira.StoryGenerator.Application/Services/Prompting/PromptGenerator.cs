@@ -51,10 +51,7 @@ public class PromptGenerator : IPromptGenerator
         try
         {
             using var doc = JsonDocument.Parse(storyJson);
-            if (!doc.RootElement.TryGetProperty("metadata", out var metadata))
-                return null;
-
-            if (!metadata.TryGetProperty("age_group", out var ageGroupProp))
+            if (!doc.RootElement.TryGetProperty("age_group", out var ageGroupProp))
                 return null;
 
             return ageGroupProp.GetString();
