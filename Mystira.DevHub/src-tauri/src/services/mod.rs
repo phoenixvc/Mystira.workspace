@@ -6,11 +6,10 @@
 //! - Port management in `ports.rs`
 //! - Shared utilities in `helpers.rs`
 
-pub mod lifecycle;
-pub mod status;
-pub mod ports;
 pub mod helpers;
+pub mod lifecycle;
+pub mod ports;
+pub mod status;
 
 // Note: Functions are imported directly from sub-modules in main.rs
 // Re-exports are not needed since main.rs imports from specific paths
-

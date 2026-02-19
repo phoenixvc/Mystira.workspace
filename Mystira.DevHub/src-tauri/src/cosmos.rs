@@ -10,8 +10,8 @@
 
 use crate::cli::execute_devhub_cli;
 use crate::types::CommandResponse;
-use std::process::Command;
 use serde::{Deserialize, Serialize};
+use std::process::Command;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct AzureLoginStatus {
@@ -118,14 +118,21 @@ pub async fn check_azure_cli_login() -> Result<AzureLoginStatus, String> {
 
     // Try to get current account info
     let output = Command::new("az")
-        .args(["account", "show", "--query", "{name:user.name,id:id}", "-o", "json"])
+        .args([
+            "account",
+            "show",
+            "--query",
+            "{name:user.name,id:id}",
+            "-o",
+            "json",
+        ])
         .output();
 
     match output {
         Ok(output) => {
             if output.status.success() {
                 let output_str = String::from_utf8_lossy(&output.stdout);
-                
+
                 // Try to parse JSON response
                 if let Ok(json) = serde_json::from_str::<serde_json::Value>(&output_str) {
                     status.is_logged_in = true;
@@ -136,11 +143,17 @@ pub async fn check_azure_cli_login() -> Result<AzureLoginStatus, String> {
                 }
             } else {
                 let error = String::from_utf8_lossy(&output.stderr).to_string();
-                status.error = Some(format!("Not logged in to Azure CLI. Please run 'az login'. Error: {}", error));
+                status.error = Some(format!(
+                    "Not logged in to Azure CLI. Please run 'az login'. Error: {}",
+                    error
+                ));
             }
         }
         Err(e) => {
-            status.error = Some(format!("Azure CLI not found or not installed. Error: {}", e));
+            status.error = Some(format!(
+                "Azure CLI not found or not installed. Error: {}",
+                e
+            ));
         }
     }
 
@@ -196,7 +209,11 @@ pub async fn fetch_environment_connections(
     // Step 1: Discover resource group from Cosmos account
     let resource_group = match discover_resource_group(&cosmos_account_name) {
         Some(rg) => {
-            tracing::info!("Discovered resource group: {} for Cosmos account: {}", rg, cosmos_account_name);
+            tracing::info!(
+                "Discovered resource group: {} for Cosmos account: {}",
+                rg,
+                cosmos_account_name
+            );
             result.resource_group = Some(rg.clone());
             rg
         }
@@ -283,7 +300,10 @@ pub async fn fetch_environment_connections(
             }
         }
     } else {
-        tracing::warn!("No storage account found in resource group: {}", resource_group);
+        tracing::warn!(
+            "No storage account found in resource group: {}",
+            resource_group
+        );
     }
 
     // Set error if cosmos connection failed (storage is optional)
@@ -296,4 +316,3 @@ pub async fn fetch_environment_connections(
 
     Ok(result)
 }
-

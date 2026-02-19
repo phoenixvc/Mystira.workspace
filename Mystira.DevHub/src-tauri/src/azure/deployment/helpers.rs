@@ -8,7 +8,10 @@
 //!
 //! These functions help reduce code duplication across deploy, validate, preview, and status commands.
 
-use crate::helpers::{check_azure_cli_installed, check_winget_available, get_azure_subscription_id, get_azure_cli_path};
+use crate::helpers::{
+    check_azure_cli_installed, check_winget_available, get_azure_cli_path,
+    get_azure_subscription_id,
+};
 use crate::types::CommandResponse;
 use std::process::Command;
 
@@ -55,12 +58,16 @@ pub fn check_azure_cli_or_error() -> Option<CommandResponse> {
 /// Set Azure subscription
 pub fn set_azure_subscription(sub_id: &str) -> Result<(), String> {
     let (az_path, use_direct_path) = get_azure_cli_path();
-    
+
     let result = if use_direct_path {
         Command::new("powershell")
             .arg("-NoProfile")
             .arg("-Command")
-            .arg(format!("& '{}' account set --subscription '{}'", az_path.replace("'", "''"), sub_id.replace("'", "''")))
+            .arg(format!(
+                "& '{}' account set --subscription '{}'",
+                az_path.replace("'", "''"),
+                sub_id.replace("'", "''")
+            ))
             .output()
     } else {
         Command::new("az")
@@ -86,12 +93,16 @@ pub fn set_azure_subscription(sub_id: &str) -> Result<(), String> {
 /// Check if resource group exists
 pub fn check_resource_group_exists(resource_group: &str) -> Result<bool, String> {
     let (az_path, use_direct_path) = get_azure_cli_path();
-    
+
     let result = if use_direct_path {
         Command::new("powershell")
             .arg("-NoProfile")
             .arg("-Command")
-            .arg(format!("& '{}' group exists --name '{}' --output 'tsv'", az_path.replace("'", "''"), resource_group.replace("'", "''")))
+            .arg(format!(
+                "& '{}' group exists --name '{}' --output 'tsv'",
+                az_path.replace("'", "''"),
+                resource_group.replace("'", "''")
+            ))
             .output()
     } else {
         Command::new("az")
@@ -109,19 +120,24 @@ pub fn check_resource_group_exists(resource_group: &str) -> Result<bool, String>
             let stdout = String::from_utf8_lossy(&output.stdout);
             Ok(stdout.trim().to_lowercase() == "true")
         }
-        Err(e) => Err(format!("Failed to check resource group: {}", e))
+        Err(e) => Err(format!("Failed to check resource group: {}", e)),
     }
 }
 
 /// Create resource group if it doesn't exist
 pub fn ensure_resource_group(resource_group: &str, location: &str) -> Result<(), String> {
     let (az_path, use_direct_path) = get_azure_cli_path();
-    
+
     let _result = if use_direct_path {
         Command::new("powershell")
             .arg("-NoProfile")
             .arg("-Command")
-            .arg(format!("& '{}' group create --name '{}' --location '{}' --output 'none'", az_path.replace("'", "''"), resource_group.replace("'", "''"), location.replace("'", "''")))
+            .arg(format!(
+                "& '{}' group create --name '{}' --location '{}' --output 'none'",
+                az_path.replace("'", "''"),
+                resource_group.replace("'", "''"),
+                location.replace("'", "''")
+            ))
             .output()
     } else {
         Command::new("az")
@@ -157,7 +173,7 @@ pub fn build_parameters_json(
 /// Check if logged into Azure
 pub fn check_azure_login() -> Result<(), CommandResponse> {
     let (az_path, use_direct_path) = get_azure_cli_path();
-    
+
     let account_check = if use_direct_path {
         Command::new("powershell")
             .arg("-NoProfile")
@@ -165,12 +181,9 @@ pub fn check_azure_login() -> Result<(), CommandResponse> {
             .arg(format!("& '{}' account show", az_path.replace("'", "''")))
             .output()
     } else {
-        Command::new("az")
-            .arg("account")
-            .arg("show")
-            .output()
+        Command::new("az").arg("account").arg("show").output()
     };
-    
+
     match account_check {
         Ok(output) => {
             if output.status.success() {
@@ -195,6 +208,6 @@ pub fn check_azure_login() -> Result<(), CommandResponse> {
 
 /// Get subscription ID with fallback
 pub fn get_subscription_id() -> String {
-    get_azure_subscription_id().unwrap_or_else(|_| "22f9eb18-6553-4b7d-9451-47d0195085fe".to_string())
+    get_azure_subscription_id()
+        .unwrap_or_else(|_| "22f9eb18-6553-4b7d-9451-47d0195085fe".to_string())
 }
-

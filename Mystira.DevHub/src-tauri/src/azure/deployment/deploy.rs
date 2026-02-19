@@ -1,16 +1,16 @@
 // Azure infrastructure deployment command
 
 use crate::azure::deployment::helpers::{
-    check_azure_cli_or_error, check_azure_login, get_deployment_path, get_resource_group_name,
-    get_subscription_id, set_azure_subscription, build_parameters_json,
-    check_resource_group_exists,
+    build_parameters_json, check_azure_cli_or_error, check_azure_login,
+    check_resource_group_exists, get_deployment_path, get_resource_group_name, get_subscription_id,
+    set_azure_subscription,
 };
 use crate::helpers::get_azure_cli_path;
 use crate::types::CommandResponse;
 use serde_json::Value;
 use std::fs;
 use std::process::Command;
-use tracing::{info, warn, error, debug};
+use tracing::{debug, error, info, warn};
 
 /// Create resource group (Tauri command)
 #[tauri::command]
@@ -20,14 +20,19 @@ pub async fn azure_create_resource_group(
 ) -> Result<CommandResponse, String> {
     use crate::helpers::get_azure_cli_path;
     use std::process::Command;
-    
+
     let (az_path, use_direct_path) = get_azure_cli_path();
-    
+
     let result = if use_direct_path {
         Command::new("powershell")
             .arg("-NoProfile")
             .arg("-Command")
-            .arg(format!("& '{}' group create --name '{}' --location '{}' --output 'none'", az_path.replace("'", "''"), resource_group.replace("'", "''"), location.replace("'", "''")))
+            .arg(format!(
+                "& '{}' group create --name '{}' --location '{}' --output 'none'",
+                az_path.replace("'", "''"),
+                resource_group.replace("'", "''"),
+                location.replace("'", "''")
+            ))
             .output()
     } else {
         Command::new("az")
@@ -51,7 +56,10 @@ pub async fn azure_create_resource_group(
                         "resourceGroup": resource_group,
                         "location": location
                     })),
-                    message: Some(format!("Resource group '{}' created successfully", resource_group)),
+                    message: Some(format!(
+                        "Resource group '{}' created successfully",
+                        resource_group
+                    )),
                     error: None,
                 })
             } else {
@@ -65,7 +73,10 @@ pub async fn azure_create_resource_group(
                             "location": location,
                             "alreadyExists": true
                         })),
-                        message: Some(format!("Resource group '{}' already exists", resource_group)),
+                        message: Some(format!(
+                            "Resource group '{}' already exists",
+                            resource_group
+                        )),
                         error: None,
                     })
                 } else {
@@ -78,14 +89,12 @@ pub async fn azure_create_resource_group(
                 }
             }
         }
-        Err(e) => {
-            Ok(CommandResponse {
-                success: false,
-                result: None,
-                message: None,
-                error: Some(format!("Failed to execute command: {}", e)),
-            })
-        }
+        Err(e) => Ok(CommandResponse {
+            success: false,
+            result: None,
+            message: None,
+            error: Some(format!("Failed to execute command: {}", e)),
+        }),
     }
 }
 
@@ -100,17 +109,23 @@ pub async fn azure_deploy_infrastructure(
     deploy_cosmos: Option<bool>,
     deploy_app_service: Option<bool>,
 ) -> Result<CommandResponse, String> {
-    info!("Starting Azure infrastructure deployment: env={}, repo_root={}", environment, repo_root);
-    
+    info!(
+        "Starting Azure infrastructure deployment: env={}, repo_root={}",
+        environment, repo_root
+    );
+
     let env = environment.as_str();
     let rg = resource_group.unwrap_or_else(|| get_resource_group_name(env));
     let loc = location.unwrap_or_else(|| "southafricanorth".to_string());
     let sub_id = get_subscription_id();
-    
-    debug!("Deployment config: resource_group={}, location={}, subscription={}", rg, loc, sub_id);
-    
+
+    debug!(
+        "Deployment config: resource_group={}, location={}, subscription={}",
+        rg, loc, sub_id
+    );
+
     let deployment_path = get_deployment_path(&repo_root, env);
-    
+
     // Check Azure CLI installation
     if let Some(error_response) = check_azure_cli_or_error() {
         error!("Azure CLI check failed for deployment");
@@ -133,11 +148,11 @@ pub async fn azure_deploy_infrastructure(
             error: Some(e),
         });
     }
-    
+
     // Check if resource group exists (frontend will prompt if it doesn't)
     debug!("Checking if resource group exists: {}", rg);
     let rg_exists = check_resource_group_exists(&rg).unwrap_or(false);
-    
+
     // If resource group doesn't exist, return early so frontend can prompt
     if !rg_exists {
         return Ok(CommandResponse {
@@ -152,7 +167,7 @@ pub async fn azure_deploy_infrastructure(
             error: Some(format!("Resource group '{}' does not exist. It will be created automatically if you proceed.", rg)),
         });
     }
-    
+
     // Deploy using bicep
     use std::time::{SystemTime, UNIX_EPOCH};
     let timestamp = SystemTime::now()
@@ -160,13 +175,16 @@ pub async fn azure_deploy_infrastructure(
         .unwrap()
         .as_secs();
     let deployment_name = format!("mystira-app-{}-{}", env, timestamp);
-    
+
     let deploy_storage = deploy_storage.unwrap_or(true);
     let deploy_cosmos = deploy_cosmos.unwrap_or(true);
     let deploy_app_service = deploy_app_service.unwrap_or(true);
-    
-    info!("Deployment components: storage={}, cosmos={}, app_service={}", deploy_storage, deploy_cosmos, deploy_app_service);
-    
+
+    info!(
+        "Deployment components: storage={}, cosmos={}, app_service={}",
+        deploy_storage, deploy_cosmos, deploy_app_service
+    );
+
     // Validate dependencies: App Service requires Cosmos and Storage
     if deploy_app_service && (!deploy_cosmos || !deploy_storage) {
         warn!("Dependency validation failed: App Service requires Cosmos DB and Storage");
@@ -177,11 +195,12 @@ pub async fn azure_deploy_infrastructure(
             error: Some("App Service requires Cosmos DB and Storage Account to be deployed. Please select all dependencies.".to_string()),
         });
     }
-    
+
     // Build parameters JSON string and write to temp file
-    let params_json = build_parameters_json(env, &loc, deploy_storage, deploy_cosmos, deploy_app_service);
+    let params_json =
+        build_parameters_json(env, &loc, deploy_storage, deploy_cosmos, deploy_app_service);
     let params_file = format!("{}/params-deploy.json", deployment_path);
-    
+
     if let Err(e) = fs::write(&params_file, &params_json) {
         return Ok(CommandResponse {
             success: false,
@@ -190,11 +209,14 @@ pub async fn azure_deploy_infrastructure(
             error: Some(format!("Failed to write parameters file: {}", e)),
         });
     }
-    
+
     let (az_path, use_direct_path) = get_azure_cli_path();
-    
-    info!("Starting Azure deployment: name={}, resource_group={}", deployment_name, rg);
-    
+
+    info!(
+        "Starting Azure deployment: name={}, resource_group={}",
+        deployment_name, rg
+    );
+
     // ⚠️ SAFETY: Always use Incremental mode to prevent accidental resource deletion
     let deploy_output = if use_direct_path {
         Command::new("powershell")
@@ -221,10 +243,10 @@ pub async fn azure_deploy_infrastructure(
             .current_dir(&deployment_path)
             .output()
     };
-    
+
     // Clean up temp file
     let _ = fs::remove_file(&params_file);
-    
+
     match deploy_output {
         Ok(output) => {
             if output.status.success() {
@@ -252,17 +274,20 @@ pub async fn azure_deploy_infrastructure(
                         .arg("json")
                         .output()
                 };
-                
+
                 let outputs_json = outputs
                     .ok()
                     .and_then(|o| String::from_utf8(o.stdout).ok())
                     .and_then(|s| serde_json::from_str::<Value>(&s).ok());
-                
-                info!("Azure deployment completed successfully: deployment={}, resource_group={}", deployment_name, rg);
-                
+
+                info!(
+                    "Azure deployment completed successfully: deployment={}, resource_group={}",
+                    deployment_name, rg
+                );
+
                 // Capture deployment logs (stdout contains the deployment output)
                 let deployment_logs = String::from_utf8_lossy(&output.stdout);
-                
+
                 Ok(CommandResponse {
                     success: true,
                     result: Some(serde_json::json!({
@@ -304,7 +329,6 @@ pub async fn azure_deploy_infrastructure(
                 message: None,
                 error: Some(format!("Failed to execute deployment: {}", e)),
             })
-        },
+        }
     }
 }
-

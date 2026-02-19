@@ -25,7 +25,7 @@ impl<T> CacheEntry<T> {
         let expires_at = SystemTime::now() + Duration::from_secs(ttl_seconds);
         CacheEntry { data, expires_at }
     }
-    
+
     fn is_expired(&self) -> bool {
         SystemTime::now() > self.expires_at
     }
@@ -46,46 +46,46 @@ impl StringCache {
             entries: Arc::new(Mutex::new(HashMap::new())),
         }
     }
-    
+
     pub fn get(&self, key: &str) -> Option<String> {
         let config = get_config();
         if !config.cache.enabled {
             return None;
         }
-        
+
         let mut entries = self.entries.lock().unwrap();
-        
+
         // Clean up expired entries
         entries.retain(|_, entry| !entry.is_expired());
-        
+
         let entry = entries.get(key)?;
         if entry.is_expired() {
             entries.remove(key);
             return None;
         }
-        
+
         Some(entry.data.clone())
     }
-    
+
     pub fn set(&self, key: String, value: String, ttl_seconds: u64) {
         let config = get_config();
         if !config.cache.enabled {
             return;
         }
-        
+
         let key_clone = key.clone();
         let mut entries = self.entries.lock().unwrap();
         entries.insert(key, CacheEntry::new(value, ttl_seconds));
         trace!("Cache entry set: {} (TTL: {}s)", key_clone, ttl_seconds);
     }
-    
+
     pub fn invalidate(&self, key: &str) {
         let mut entries = self.entries.lock().unwrap();
         if entries.remove(key).is_some() {
             debug!("Cache invalidated: {}", key);
         }
     }
-    
+
     #[allow(dead_code)] // Available for future use when cache needs to be manually cleared
     pub fn clear(&self) {
         let mut entries = self.entries.lock().unwrap();
@@ -115,4 +115,3 @@ pub fn get_cache_ttl(cache_type: &str) -> u64 {
         _ => config.cache.default_ttl,
     }
 }
-

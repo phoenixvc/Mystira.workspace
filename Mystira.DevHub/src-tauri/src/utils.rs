@@ -11,18 +11,21 @@
 //! These commands don't fit into specific domain modules and are commonly
 //! used across the application.
 
-use crate::types::CommandResponse;
 use crate::cli::execute_devhub_cli;
-use crate::helpers::{find_repo_root, get_cli_executable_path, check_azure_cli_installed};
-use std::process::Command;
-use std::path::PathBuf;
-use std::fs;
+use crate::helpers::{check_azure_cli_installed, find_repo_root, get_cli_executable_path};
+use crate::types::CommandResponse;
 use std::env;
+use std::fs;
+use std::path::PathBuf;
+use std::process::Command;
 use tauri::AppHandle;
 
 /// Test a connection (via CLI)
 #[tauri::command]
-pub async fn test_connection(connection_type: String, connection_string: Option<String>) -> Result<CommandResponse, String> {
+pub async fn test_connection(
+    connection_type: String,
+    connection_string: Option<String>,
+) -> Result<CommandResponse, String> {
     let args = serde_json::json!({
         "type": connection_type,
         "connectionString": connection_string
@@ -62,17 +65,17 @@ pub async fn get_cli_build_time() -> Result<Option<i64>, String> {
 pub async fn build_cli() -> Result<CommandResponse, String> {
     // Find repo root
     let repo_root = find_repo_root()?;
-    
+
     // Path to CLI project
     let cli_project_path = repo_root.join("tools/Mystira.DevHub.CLI/Mystira.DevHub.CLI.csproj");
-    
+
     if !cli_project_path.exists() {
         return Err(format!(
             "CLI project not found at: {}\n\nPlease ensure you're running from the repository root.",
             cli_project_path.display()
         ));
     }
-    
+
     // Build the CLI using dotnet build
     let output = Command::new("dotnet")
         .arg("build")
@@ -83,10 +86,10 @@ pub async fn build_cli() -> Result<CommandResponse, String> {
         .current_dir(repo_root.join("tools/Mystira.DevHub.CLI"))
         .output()
         .map_err(|e| format!("Failed to execute dotnet build: {}", e))?;
-    
+
     let stdout = String::from_utf8_lossy(&output.stdout);
     let stderr = String::from_utf8_lossy(&output.stderr);
-    
+
     // Combine stdout and stderr for full build output
     let full_output = if stderr.is_empty() {
         stdout.to_string()
@@ -95,17 +98,19 @@ pub async fn build_cli() -> Result<CommandResponse, String> {
     } else {
         format!("{}\n{}", stdout, stderr)
     };
-    
+
     if output.status.success() {
         // After successful build, get the build time from the file we just built
         // Use the repo_root we already found - the file is at:
         // repo_root/tools/Mystira.DevHub.CLI/bin/Debug/net9.0/Mystira.DevHub.CLI.exe (or .dll)
-        let exe_path = repo_root.join("tools/Mystira.DevHub.CLI/bin/Debug/net9.0/Mystira.DevHub.CLI.exe");
-        let dll_path = repo_root.join("tools/Mystira.DevHub.CLI/bin/Debug/net9.0/Mystira.DevHub.CLI.dll");
-        
+        let exe_path =
+            repo_root.join("tools/Mystira.DevHub.CLI/bin/Debug/net9.0/Mystira.DevHub.CLI.exe");
+        let dll_path =
+            repo_root.join("tools/Mystira.DevHub.CLI/bin/Debug/net9.0/Mystira.DevHub.CLI.dll");
+
         // Wait a moment for file system to sync
         tokio::time::sleep(tokio::time::Duration::from_millis(1500)).await;
-        
+
         // Try multiple times in case file system is slow
         let mut build_time = None;
         for attempt in 0..5 {
@@ -114,43 +119,47 @@ pub async fn build_cli() -> Result<CommandResponse, String> {
                 if path.exists() {
                     if let Ok(metadata) = std::fs::metadata(path) {
                         if let Ok(modified) = metadata.modified() {
-                            build_time = Some(modified
-                                .duration_since(std::time::UNIX_EPOCH)
-                                .unwrap_or_default()
-                                .as_millis() as i64);
+                            build_time = Some(
+                                modified
+                                    .duration_since(std::time::UNIX_EPOCH)
+                                    .unwrap_or_default()
+                                    .as_millis() as i64,
+                            );
                             break;
                         }
                     }
                 }
             }
-            
+
             if build_time.is_some() {
                 break;
             }
-            
+
             if attempt < 4 {
                 tokio::time::sleep(tokio::time::Duration::from_millis(500)).await;
             }
         }
-        
+
         // Final fallback: use get_cli_executable_path if we still haven't found it
         if build_time.is_none() {
             if let Ok(found_path) = get_cli_executable_path() {
                 if let Ok(metadata) = std::fs::metadata(&found_path) {
                     if let Ok(modified) = metadata.modified() {
-                        build_time = Some(modified
-                            .duration_since(std::time::UNIX_EPOCH)
-                            .unwrap_or_default()
-                            .as_millis() as i64);
+                        build_time = Some(
+                            modified
+                                .duration_since(std::time::UNIX_EPOCH)
+                                .unwrap_or_default()
+                                .as_millis() as i64,
+                        );
                     }
                 }
             }
         }
-        
+
         Ok(CommandResponse {
             success: true,
             message: Some(format!("CLI built successfully!")),
-            result: Some(serde_json::json!({ 
+            result: Some(serde_json::json!({
                 "output": full_output,
                 "buildTime": build_time
             })),
@@ -174,29 +183,40 @@ pub async fn build_cli() -> Result<CommandResponse, String> {
 pub async fn read_bicep_file(relative_path: String) -> Result<String, String> {
     // Find repo root
     let repo_root = find_repo_root()?;
-    
+
     // Normalize path separators (handle both / and \)
-    let normalized_path = relative_path.replace('/', std::path::MAIN_SEPARATOR.to_string().as_str());
-    
+    let normalized_path =
+        relative_path.replace('/', std::path::MAIN_SEPARATOR.to_string().as_str());
+
     // Resolve the file path relative to repo root
     let file_path = repo_root.join(&normalized_path);
-    
+
     // Check if file exists first (before canonicalizing)
     if !file_path.exists() {
-        return Err(format!("File not found: {} (resolved to: {})", relative_path, file_path.display()));
+        return Err(format!(
+            "File not found: {} (resolved to: {})",
+            relative_path,
+            file_path.display()
+        ));
     }
-    
+
     // Security: Ensure the path is within the repo root (prevent directory traversal)
     // Normalize paths to handle different separators and symlinks
-    let repo_root_canonical = repo_root.canonicalize()
+    let repo_root_canonical = repo_root
+        .canonicalize()
         .map_err(|e| format!("Failed to canonicalize repo root: {}", e))?;
-    let file_path_canonical = file_path.canonicalize()
-        .map_err(|e| format!("Failed to canonicalize file path: {} - {}", file_path.display(), e))?;
-    
+    let file_path_canonical = file_path.canonicalize().map_err(|e| {
+        format!(
+            "Failed to canonicalize file path: {} - {}",
+            file_path.display(),
+            e
+        )
+    })?;
+
     if !file_path_canonical.starts_with(&repo_root_canonical) {
         return Err(format!("Invalid path: path must be within repository root"));
     }
-    
+
     // Read the file
     fs::read_to_string(&file_path)
         .map_err(|e| format!("Failed to read file {}: {}", relative_path, e))
@@ -205,8 +225,7 @@ pub async fn read_bicep_file(relative_path: String) -> Result<String, String> {
 /// Get the repository root path
 #[tauri::command]
 pub async fn get_repo_root() -> Result<String, String> {
-    find_repo_root()
-        .map(|p| p.to_string_lossy().to_string())
+    find_repo_root().map(|p| p.to_string_lossy().to_string())
 }
 
 /// Get the current Git branch
@@ -217,11 +236,11 @@ pub async fn get_current_branch(repo_root: String) -> Result<String, String> {
         .current_dir(&repo_root)
         .output()
         .map_err(|e| format!("Failed to get current branch: {}", e))?;
-    
+
     if !output.status.success() {
         return Err("Not a git repository or git command failed".to_string());
     }
-    
+
     let branch = String::from_utf8_lossy(&output.stdout).trim().to_string();
     Ok(branch)
 }
@@ -241,15 +260,19 @@ pub async fn check_resource_health_endpoint(
             error: Some("Azure CLI is not installed".to_string()),
         });
     }
-    
-    let program_files = env::var("ProgramFiles").unwrap_or_else(|_| "C:\\Program Files".to_string());
-    let az_path = format!("{}\\Microsoft SDKs\\Azure\\CLI2\\wbin\\az.cmd", program_files);
+
+    let program_files =
+        env::var("ProgramFiles").unwrap_or_else(|_| "C:\\Program Files".to_string());
+    let az_path = format!(
+        "{}\\Microsoft SDKs\\Azure\\CLI2\\wbin\\az.cmd",
+        program_files
+    );
     let az_path_buf = PathBuf::from(&az_path);
     let use_direct_path = az_path_buf.exists();
-    
+
     let mut health_status = "unknown".to_string();
     let mut health_details = serde_json::json!({});
-    
+
     // Check App Service health endpoint
     if resource_type == "Microsoft.Web/sites" {
         // Get App Service URL
@@ -278,7 +301,7 @@ pub async fn check_resource_health_endpoint(
                 .arg("tsv")
                 .output()
         };
-        
+
         match output {
             Ok(result) => {
                 if result.status.success() {
@@ -288,10 +311,12 @@ pub async fn check_resource_health_endpoint(
                             success: false,
                             result: None,
                             message: None,
-                            error: Some("Failed to get App Service hostname: hostname is empty".to_string()),
+                            error: Some(
+                                "Failed to get App Service hostname: hostname is empty".to_string(),
+                            ),
                         });
                     }
-                    
+
                     // Validate hostname format (basic check - must contain a dot)
                     if !hostname.contains('.') {
                         return Ok(CommandResponse {
@@ -301,14 +326,14 @@ pub async fn check_resource_health_endpoint(
                             error: Some(format!("Invalid hostname format: {}", hostname)),
                         });
                     }
-                    
+
                     let health_url = format!("https://{}/health", hostname);
-                    
+
                     // Try to make HTTP request to health endpoint
                     let health_check = reqwest::Client::builder()
                         .timeout(std::time::Duration::from_secs(10))
                         .build();
-                    
+
                     if let Ok(client) = health_check {
                         match client.get(&health_url).send().await {
                             Ok(response) => {
@@ -356,10 +381,10 @@ pub async fn check_resource_health_endpoint(
             }
         }
     }
-    
+
     // For other resource types, we could add more checks here
     // For now, return the health status
-    
+
     Ok(CommandResponse {
         success: true,
         result: Some(serde_json::json!({
@@ -383,13 +408,13 @@ pub async fn create_webview_window(
     tauri::WebviewWindowBuilder::new(
         &app_handle,
         &window_label,
-        tauri::WebviewUrl::External(url.parse().map_err(|e| format!("Invalid URL: {}", e))?)
+        tauri::WebviewUrl::External(url.parse().map_err(|e| format!("Invalid URL: {}", e))?),
     )
     .title(&title)
     .inner_size(1200.0, 800.0)
     .resizable(true)
     .build()
     .map_err(|e| format!("Failed to create window: {}", e))?;
-    
+
     Ok(())
 }

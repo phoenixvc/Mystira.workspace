@@ -13,9 +13,9 @@
 
 use serde::{Deserialize, Serialize};
 use std::env;
-use std::path::PathBuf;
 use std::fs;
-use tracing::{info, debug};
+use std::path::PathBuf;
+use tracing::{debug, info};
 
 /// Application configuration structure
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -127,13 +127,13 @@ impl AppConfig {
     /// Load configuration from environment variables and config file
     pub fn load() -> Self {
         debug!("Loading application configuration");
-        
+
         // Start with defaults
         let mut config = AppConfig::default();
-        
+
         // Override from environment variables
         config.load_from_env();
-        
+
         // Override from config file if it exists
         if let Some(config_file) = Self::get_config_file_path() {
             if let Ok(file_config) = Self::load_from_file(&config_file) {
@@ -143,10 +143,10 @@ impl AppConfig {
                 debug!("No config file found at {:?}, using defaults", config_file);
             }
         }
-        
+
         config
     }
-    
+
     /// Load configuration from environment variables
     fn load_from_env(&mut self) {
         // Azure settings
@@ -156,7 +156,7 @@ impl AppConfig {
         if let Ok(loc) = env::var("MYSTIRA_AZURE_LOCATION") {
             self.azure.default_location = loc;
         }
-        
+
         // GitHub settings
         if let Ok(owner) = env::var("MYSTIRA_GITHUB_OWNER") {
             self.github.default_owner = Some(owner);
@@ -164,7 +164,7 @@ impl AppConfig {
         if let Ok(repo) = env::var("MYSTIRA_GITHUB_REPO") {
             self.github.default_repo = Some(repo);
         }
-        
+
         // Cache settings
         if let Ok(enabled) = env::var("MYSTIRA_CACHE_ENABLED") {
             self.cache.enabled = enabled.parse().unwrap_or(true);
@@ -174,7 +174,7 @@ impl AppConfig {
                 self.cache.default_ttl = ttl_val;
             }
         }
-        
+
         // Retry settings
         if let Ok(enabled) = env::var("MYSTIRA_RETRY_ENABLED") {
             self.retry.enabled = enabled.parse().unwrap_or(true);
@@ -184,24 +184,24 @@ impl AppConfig {
                 self.retry.max_retries = max_val;
             }
         }
-        
+
         // Rate limit settings
         if let Ok(enabled) = env::var("MYSTIRA_RATE_LIMIT_ENABLED") {
             self.rate_limit.enabled = enabled.parse().unwrap_or(true);
         }
     }
-    
+
     /// Load configuration from a JSON file
     fn load_from_file(path: &PathBuf) -> Result<AppConfig, String> {
-        let content = fs::read_to_string(path)
-            .map_err(|e| format!("Failed to read config file: {}", e))?;
-        
+        let content =
+            fs::read_to_string(path).map_err(|e| format!("Failed to read config file: {}", e))?;
+
         let config: AppConfig = serde_json::from_str(&content)
             .map_err(|e| format!("Failed to parse config file: {}", e))?;
-        
+
         Ok(config)
     }
-    
+
     /// Merge another configuration into this one (other takes precedence)
     fn merge(&mut self, other: AppConfig) {
         // Merge Azure config
@@ -214,7 +214,7 @@ impl AppConfig {
         if other.azure.resource_group_pattern.is_some() {
             self.azure.resource_group_pattern = other.azure.resource_group_pattern;
         }
-        
+
         // Merge GitHub config
         if other.github.default_owner.is_some() {
             self.github.default_owner = other.github.default_owner;
@@ -223,58 +223,66 @@ impl AppConfig {
             self.github.default_repo = other.github.default_repo;
         }
         self.github.api_rate_limit = other.github.api_rate_limit;
-        
+
         // Merge cache config
         self.cache = other.cache;
-        
+
         // Merge retry config
         self.retry = other.retry;
-        
+
         // Merge rate limit config
         self.rate_limit = other.rate_limit;
     }
-    
+
     /// Save configuration to file
     pub fn save(&self) -> Result<(), String> {
         let config_file = Self::get_config_file_path()
             .ok_or_else(|| "Could not determine config file path".to_string())?;
-        
+
         // Ensure directory exists
         if let Some(parent) = config_file.parent() {
             fs::create_dir_all(parent)
                 .map_err(|e| format!("Failed to create config directory: {}", e))?;
         }
-        
+
         let json = serde_json::to_string_pretty(self)
             .map_err(|e| format!("Failed to serialize config: {}", e))?;
-        
-        fs::write(&config_file, json)
-            .map_err(|e| format!("Failed to write config file: {}", e))?;
-        
+
+        fs::write(&config_file, json).map_err(|e| format!("Failed to write config file: {}", e))?;
+
         info!("Configuration saved to {:?}", config_file);
         Ok(())
     }
-    
+
     /// Get the path to the configuration file
     fn get_config_file_path() -> Option<PathBuf> {
         // Try to get app data directory from Tauri or use a default location
         if let Ok(app_data) = env::var("APPDATA") {
             // Windows: %APPDATA%\MystiraDevHub\config.json
-            Some(PathBuf::from(app_data).join("MystiraDevHub").join("config.json"))
+            Some(
+                PathBuf::from(app_data)
+                    .join("MystiraDevHub")
+                    .join("config.json"),
+            )
         } else if let Ok(home) = env::var("HOME") {
             // Unix-like: ~/.config/mystira-devhub/config.json
-            Some(PathBuf::from(home).join(".config").join("mystira-devhub").join("config.json"))
+            Some(
+                PathBuf::from(home)
+                    .join(".config")
+                    .join("mystira-devhub")
+                    .join("config.json"),
+            )
         } else {
             None
         }
     }
-    
+
     /// Get an environment variable with a default value
     #[allow(dead_code)]
     pub fn env_var_or(key: &str, default: &str) -> String {
         env::var(key).unwrap_or_else(|_| default.to_string())
     }
-    
+
     /// Get an optional environment variable
     #[allow(dead_code)]
     pub fn env_var_opt(key: &str) -> Option<String> {
@@ -305,4 +313,3 @@ pub fn save_app_config(config: AppConfig) -> Result<(), String> {
 pub fn reload_config() -> Result<AppConfig, String> {
     Ok(AppConfig::load())
 }
-

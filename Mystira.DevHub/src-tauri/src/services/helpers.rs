@@ -9,13 +9,16 @@
 use crate::types::ServiceInfo;
 use std::path::PathBuf;
 use std::process::Command;
-use tauri::{AppHandle, Emitter};
-use tokio::process::Command as TokioCommand;
-use tokio::io::{AsyncBufReadExt, BufReader as TokioBufReader};
 use std::process::Stdio;
+use tauri::{AppHandle, Emitter};
+use tokio::io::{AsyncBufReadExt, BufReader as TokioBufReader};
+use tokio::process::Command as TokioCommand;
 
 /// Get project path, port, and URL for a service
-pub fn get_service_paths(service_name: &str, repo_path: &PathBuf) -> Result<(PathBuf, u16, Option<String>), String> {
+pub fn get_service_paths(
+    service_name: &str,
+    repo_path: &PathBuf,
+) -> Result<(PathBuf, u16, Option<String>), String> {
     match service_name {
         "api" => Ok((
             repo_path.join("src").join("Mystira.App.Api"),
@@ -43,13 +46,13 @@ pub async fn kill_process_by_pid(pid: u32) {
         let _ = Command::new("taskkill")
             .args(&["/F", "/PID", &pid.to_string()])
             .output();
-        
+
         // Wait for process to terminate (up to 5 seconds)
         for _ in 0..50 {
             let check = Command::new("tasklist")
                 .args(&["/FI", &format!("PID eq {}", pid)])
                 .output();
-            
+
             if let Ok(output) = check {
                 let output_str = String::from_utf8_lossy(&output.stdout);
                 if !output_str.contains(&pid.to_string()) {
@@ -59,7 +62,7 @@ pub async fn kill_process_by_pid(pid: u32) {
             tokio::time::sleep(tokio::time::Duration::from_millis(100)).await;
         }
     }
-    
+
     #[cfg(not(target_os = "windows"))]
     {
         let _ = Command::new("kill")
@@ -107,7 +110,7 @@ pub fn setup_log_streaming(
         let app_handle_stdout = app_handle.clone();
         let service_name_stdout = service_name.clone();
         let source_stdout = source.to_string();
-        
+
         tokio::spawn(async move {
             let reader = TokioBufReader::new(stdout_stream);
             let mut lines = reader.lines();
@@ -133,7 +136,7 @@ pub fn setup_log_streaming(
         let app_handle_stderr = app_handle.clone();
         let service_name_stderr = service_name.clone();
         let source_stderr = source.to_string();
-        
+
         tokio::spawn(async move {
             let reader = TokioBufReader::new(stderr_stream);
             let mut lines = reader.lines();
@@ -172,10 +175,18 @@ pub async fn build_service(
 
     let stdout = build_child.stdout.take();
     let stderr = build_child.stderr.take();
-    
-    setup_log_streaming(stdout, stderr, app_handle, service_name.to_string(), "build");
 
-    let build_status = build_child.wait().await
+    setup_log_streaming(
+        stdout,
+        stderr,
+        app_handle,
+        service_name.to_string(),
+        "build",
+    );
+
+    let build_status = build_child
+        .wait()
+        .await
         .map_err(|e| format!("Failed to wait for build: {}", e))?;
 
     if !build_status.success() {
@@ -195,7 +206,7 @@ pub fn is_process_running(pid: u32) -> bool {
             .map(|o| String::from_utf8_lossy(&o.stdout).contains(&pid.to_string()))
             .unwrap_or(false)
     }
-    
+
     #[cfg(not(target_os = "windows"))]
     {
         std::process::Command::new("kill")
@@ -205,4 +216,3 @@ pub fn is_process_running(pid: u32) -> bool {
             .unwrap_or(false)
     }
 }
-

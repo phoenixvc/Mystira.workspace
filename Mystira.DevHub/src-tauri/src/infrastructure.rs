@@ -14,7 +14,10 @@ use crate::types::CommandResponse;
 
 /// Validate infrastructure via GitHub workflow
 #[tauri::command]
-pub async fn infrastructure_validate(workflow_file: String, repository: String) -> Result<CommandResponse, String> {
+pub async fn infrastructure_validate(
+    workflow_file: String,
+    repository: String,
+) -> Result<CommandResponse, String> {
     let args = serde_json::json!({
         "workflowFile": workflow_file,
         "repository": repository
@@ -24,7 +27,10 @@ pub async fn infrastructure_validate(workflow_file: String, repository: String) 
 
 /// Preview infrastructure changes via GitHub workflow
 #[tauri::command]
-pub async fn infrastructure_preview(workflow_file: String, repository: String) -> Result<CommandResponse, String> {
+pub async fn infrastructure_preview(
+    workflow_file: String,
+    repository: String,
+) -> Result<CommandResponse, String> {
     let args = serde_json::json!({
         "workflowFile": workflow_file,
         "repository": repository
@@ -34,7 +40,10 @@ pub async fn infrastructure_preview(workflow_file: String, repository: String) -
 
 /// Deploy infrastructure via GitHub workflow
 #[tauri::command]
-pub async fn infrastructure_deploy(workflow_file: String, repository: String) -> Result<CommandResponse, String> {
+pub async fn infrastructure_deploy(
+    workflow_file: String,
+    repository: String,
+) -> Result<CommandResponse, String> {
     let args = serde_json::json!({
         "workflowFile": workflow_file,
         "repository": repository
@@ -44,7 +53,11 @@ pub async fn infrastructure_deploy(workflow_file: String, repository: String) ->
 
 /// Destroy infrastructure via GitHub workflow
 #[tauri::command]
-pub async fn infrastructure_destroy(workflow_file: String, repository: String, confirm: bool) -> Result<CommandResponse, String> {
+pub async fn infrastructure_destroy(
+    workflow_file: String,
+    repository: String,
+    confirm: bool,
+) -> Result<CommandResponse, String> {
     let args = serde_json::json!({
         "workflowFile": workflow_file,
         "repository": repository,
@@ -55,11 +68,13 @@ pub async fn infrastructure_destroy(workflow_file: String, repository: String, c
 
 /// Get infrastructure deployment status via GitHub workflow
 #[tauri::command]
-pub async fn infrastructure_status(workflow_file: String, repository: String) -> Result<CommandResponse, String> {
+pub async fn infrastructure_status(
+    workflow_file: String,
+    repository: String,
+) -> Result<CommandResponse, String> {
     let args = serde_json::json!({
         "workflowFile": workflow_file,
         "repository": repository
     });
     execute_devhub_cli("infrastructure.status".to_string(), args).await
 }
-
