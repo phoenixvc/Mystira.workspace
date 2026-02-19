@@ -15,8 +15,12 @@ use std::process::Command;
 
 /// Get the path to the Azure CLI executable
 pub fn get_azure_cli_path() -> (String, bool) {
-    let program_files = env::var("ProgramFiles").unwrap_or_else(|_| "C:\\Program Files".to_string());
-    let az_path = format!("{}\\Microsoft SDKs\\Azure\\CLI2\\wbin\\az.cmd", program_files);
+    let program_files =
+        env::var("ProgramFiles").unwrap_or_else(|_| "C:\\Program Files".to_string());
+    let az_path = format!(
+        "{}\\Microsoft SDKs\\Azure\\CLI2\\wbin\\az.cmd",
+        program_files
+    );
     let az_path_buf = PathBuf::from(&az_path);
     let use_direct_path = az_path_buf.exists();
     (az_path, use_direct_path)
@@ -25,12 +29,15 @@ pub fn get_azure_cli_path() -> (String, bool) {
 /// Get current Azure subscription ID from CLI
 pub fn get_azure_subscription_id() -> Result<String, String> {
     let (az_path, use_direct_path) = get_azure_cli_path();
-    
+
     let output = if use_direct_path {
         Command::new("powershell")
             .arg("-NoProfile")
             .arg("-Command")
-            .arg(format!("& '{}' account show --query id --output tsv", az_path.replace("'", "''")))
+            .arg(format!(
+                "& '{}' account show --query id --output tsv",
+                az_path.replace("'", "''")
+            ))
             .output()
     } else {
         Command::new("az")
@@ -42,7 +49,7 @@ pub fn get_azure_subscription_id() -> Result<String, String> {
             .arg("tsv")
             .output()
     };
-    
+
     match output {
         Ok(result) => {
             if result.status.success() {
@@ -66,34 +73,28 @@ pub fn check_azure_cli_installed() -> bool {
     if use_direct_path {
         PathBuf::from(&az_path).exists()
     } else {
-        Command::new("az")
-            .arg("--version")
-            .output()
-            .is_ok()
+        Command::new("az").arg("--version").output().is_ok()
     }
 }
 
 /// Check if winget is available
 pub fn check_winget_available() -> bool {
-    Command::new("winget")
-        .arg("--version")
-        .output()
-        .is_ok()
+    Command::new("winget").arg("--version").output().is_ok()
 }
 
 /// Find the repository root by looking for .git directory
 pub fn find_repo_root() -> Result<PathBuf, String> {
-    let current_dir = env::current_dir()
-        .map_err(|e| format!("Failed to get current directory: {}", e))?;
-    
+    let current_dir =
+        env::current_dir().map_err(|e| format!("Failed to get current directory: {}", e))?;
+
     let mut search_dir = current_dir.clone();
-    
+
     loop {
         let git_dir = search_dir.join(".git");
         if git_dir.exists() {
             return Ok(search_dir);
         }
-        
+
         match search_dir.parent() {
             Some(parent) => search_dir = parent.to_path_buf(),
             None => return Err("Could not find repository root (.git directory)".to_string()),
@@ -104,7 +105,7 @@ pub fn find_repo_root() -> Result<PathBuf, String> {
 /// Get the path to the built .NET CLI executable
 pub fn get_cli_executable_path() -> Result<PathBuf, String> {
     let repo_root = find_repo_root()?;
-    
+
     let expected_exe = repo_root
         .join("tools")
         .join("Mystira.DevHub.CLI")
@@ -112,7 +113,7 @@ pub fn get_cli_executable_path() -> Result<PathBuf, String> {
         .join("Debug")
         .join("net9.0")
         .join("Mystira.DevHub.CLI.exe");
-    
+
     let expected_dll = repo_root
         .join("tools")
         .join("Mystira.DevHub.CLI")
@@ -120,7 +121,7 @@ pub fn get_cli_executable_path() -> Result<PathBuf, String> {
         .join("Debug")
         .join("net9.0")
         .join("Mystira.DevHub.CLI.dll");
-    
+
     if expected_exe.exists() {
         Ok(expected_exe)
     } else if expected_dll.exists() {
@@ -154,7 +155,10 @@ mod tests {
         // Naming convention: [org]-[env]-[project]-rg-[region]
         // Default region: South Africa North (san)
         assert_eq!(get_resource_group_name("dev"), "mys-dev-mystira-rg-san");
-        assert_eq!(get_resource_group_name("staging"), "mys-staging-mystira-rg-san");
+        assert_eq!(
+            get_resource_group_name("staging"),
+            "mys-staging-mystira-rg-san"
+        );
         assert_eq!(get_resource_group_name("prod"), "mys-prod-mystira-rg-san");
         assert_eq!(get_resource_group_name("test"), "mys-test-mystira-rg-san");
     }

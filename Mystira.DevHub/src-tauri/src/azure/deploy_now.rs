@@ -5,7 +5,7 @@ use crate::helpers::get_azure_cli_path;
 use crate::types::CommandResponse;
 use serde_json::json;
 use std::process::Command;
-use tracing::{info, warn, debug};
+use tracing::{debug, info, warn};
 
 /// Check Azure login status
 #[tauri::command]
@@ -109,9 +109,7 @@ pub async fn check_github_pat() -> Result<CommandResponse, String> {
 #[tauri::command]
 pub async fn check_swa_cli() -> Result<CommandResponse, String> {
     // Try multiple methods to find SWA CLI
-    let result = Command::new("swa")
-        .arg("--version")
-        .output();
+    let result = Command::new("swa").arg("--version").output();
 
     match result {
         Ok(output) if output.status.success() => {
@@ -171,9 +169,7 @@ pub async fn check_swa_cli() -> Result<CommandResponse, String> {
 /// Check if npm is installed
 #[tauri::command]
 pub async fn check_npm() -> Result<CommandResponse, String> {
-    let result = Command::new("npm")
-        .arg("--version")
-        .output();
+    let result = Command::new("npm").arg("--version").output();
 
     match result {
         Ok(output) if output.status.success() => {
@@ -301,9 +297,15 @@ pub async fn scan_existing_resources() -> Result<CommandResponse, String> {
             if let Ok(swas) = serde_json::from_str::<Vec<serde_json::Value>>(&stdout) {
                 for swa in swas {
                     let name = swa.get("name").and_then(|v| v.as_str()).unwrap_or("");
-                    let rg = swa.get("resourceGroup").and_then(|v| v.as_str()).unwrap_or("");
+                    let rg = swa
+                        .get("resourceGroup")
+                        .and_then(|v| v.as_str())
+                        .unwrap_or("");
                     let location = swa.get("location").and_then(|v| v.as_str()).unwrap_or("");
-                    let hostname = swa.get("defaultHostname").and_then(|v| v.as_str()).unwrap_or("");
+                    let hostname = swa
+                        .get("defaultHostname")
+                        .and_then(|v| v.as_str())
+                        .unwrap_or("");
 
                     static_web_apps.push(json!({
                         "name": name,
@@ -316,7 +318,11 @@ pub async fn scan_existing_resources() -> Result<CommandResponse, String> {
         }
     }
 
-    info!("Found {} resource groups and {} static web apps", resource_groups.len(), static_web_apps.len());
+    info!(
+        "Found {} resource groups and {} static web apps",
+        resource_groups.len(),
+        static_web_apps.len()
+    );
 
     Ok(CommandResponse {
         success: true,
@@ -506,7 +512,10 @@ pub async fn git_commit(repo_root: String, message: String) -> Result<CommandRes
 
 /// Create empty git commit
 #[tauri::command]
-pub async fn git_commit_empty(repo_root: String, message: String) -> Result<CommandResponse, String> {
+pub async fn git_commit_empty(
+    repo_root: String,
+    message: String,
+) -> Result<CommandResponse, String> {
     let result = Command::new("git")
         .arg("commit")
         .arg("--allow-empty")
@@ -641,7 +650,10 @@ pub async fn update_cors_settings(
 
     let cors_origins = "http://localhost:7000,https://localhost:7000,https://mystira.app,https://blue-water-0eab7991e.3.azurestaticapps.net,https://brave-meadow-0ecd87c03.3.azurestaticapps.net";
 
-    info!("Updating CORS settings for {} in {}", api_name, resource_group);
+    info!(
+        "Updating CORS settings for {} in {}",
+        api_name, resource_group
+    );
 
     // Update main API
     let result = if use_direct_path {
@@ -818,7 +830,10 @@ pub async fn disconnect_swa_cicd(
 ) -> Result<CommandResponse, String> {
     let (az_path, use_direct_path) = get_azure_cli_path();
 
-    info!("Disconnecting SWA CI/CD for {} in {}", swa_name, resource_group);
+    info!(
+        "Disconnecting SWA CI/CD for {} in {}",
+        swa_name, resource_group
+    );
 
     let result = if use_direct_path {
         Command::new("powershell")
@@ -884,7 +899,10 @@ pub async fn get_swa_deployment_token(
 ) -> Result<CommandResponse, String> {
     let (az_path, use_direct_path) = get_azure_cli_path();
 
-    info!("Getting deployment token for {} in {}", swa_name, resource_group);
+    info!(
+        "Getting deployment token for {} in {}",
+        swa_name, resource_group
+    );
 
     let result = if use_direct_path {
         Command::new("powershell")

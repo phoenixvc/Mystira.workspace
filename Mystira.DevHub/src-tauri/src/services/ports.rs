@@ -3,9 +3,9 @@
 //! This module provides functions for port discovery, availability checking,
 //! and port configuration in launchSettings.json files.
 
+use serde_json::Value;
 use std::fs;
 use std::process::Command;
-use serde_json::Value;
 
 /// Check if a port is available
 #[tauri::command]
@@ -19,12 +19,12 @@ pub async fn check_port_available(port: u16) -> Result<bool, String> {
             ])
             .output()
             .map_err(|e| format!("Failed to check port: {}", e))?;
-        
+
         let stdout = String::from_utf8_lossy(&output.stdout);
         let count: u32 = stdout.trim().parse().unwrap_or(0);
         Ok(count == 0)
     }
-    
+
     #[cfg(not(target_os = "windows"))]
     {
         use std::net::TcpListener;
@@ -39,18 +39,27 @@ pub async fn check_port_available(port: u16) -> Result<bool, String> {
 #[tauri::command]
 pub async fn get_service_port(service_name: String, repo_root: String) -> Result<u16, String> {
     let launch_settings_path = match service_name.as_str() {
-        "api" => format!("{}\\src\\Mystira.App.Api\\Properties\\launchSettings.json", repo_root),
-        "admin-api" => format!("{}\\src\\Mystira.App.Admin.Api\\Properties\\launchSettings.json", repo_root),
-        "pwa" => format!("{}\\src\\Mystira.App.PWA\\Properties\\launchSettings.json", repo_root),
+        "api" => format!(
+            "{}\\src\\Mystira.App.Api\\Properties\\launchSettings.json",
+            repo_root
+        ),
+        "admin-api" => format!(
+            "{}\\src\\Mystira.App.Admin.Api\\Properties\\launchSettings.json",
+            repo_root
+        ),
+        "pwa" => format!(
+            "{}\\src\\Mystira.App.PWA\\Properties\\launchSettings.json",
+            repo_root
+        ),
         _ => return Err(format!("Unknown service: {}", service_name)),
     };
 
     let content = fs::read_to_string(&launch_settings_path)
         .map_err(|e| format!("Failed to read launchSettings.json: {}", e))?;
-    
+
     let json: Value = serde_json::from_str(&content)
         .map_err(|e| format!("Failed to parse launchSettings.json: {}", e))?;
-    
+
     // Extract port from https profile
     if let Some(profiles) = json.get("profiles") {
         if let Some(https_profile) = profiles.get("https") {
@@ -66,26 +75,39 @@ pub async fn get_service_port(service_name: String, repo_root: String) -> Result
             }
         }
     }
-    
+
     Err("Could not find port in launchSettings.json".to_string())
 }
 
 /// Update the port configured for a service
 #[tauri::command]
-pub async fn update_service_port(service_name: String, repo_root: String, new_port: u16) -> Result<(), String> {
+pub async fn update_service_port(
+    service_name: String,
+    repo_root: String,
+    new_port: u16,
+) -> Result<(), String> {
     let launch_settings_path = match service_name.as_str() {
-        "api" => format!("{}\\src\\Mystira.App.Api\\Properties\\launchSettings.json", repo_root),
-        "admin-api" => format!("{}\\src\\Mystira.App.Admin.Api\\Properties\\launchSettings.json", repo_root),
-        "pwa" => format!("{}\\src\\Mystira.App.PWA\\Properties\\launchSettings.json", repo_root),
+        "api" => format!(
+            "{}\\src\\Mystira.App.Api\\Properties\\launchSettings.json",
+            repo_root
+        ),
+        "admin-api" => format!(
+            "{}\\src\\Mystira.App.Admin.Api\\Properties\\launchSettings.json",
+            repo_root
+        ),
+        "pwa" => format!(
+            "{}\\src\\Mystira.App.PWA\\Properties\\launchSettings.json",
+            repo_root
+        ),
         _ => return Err(format!("Unknown service: {}", service_name)),
     };
 
     let content = fs::read_to_string(&launch_settings_path)
         .map_err(|e| format!("Failed to read launchSettings.json: {}", e))?;
-    
+
     let mut json: Value = serde_json::from_str(&content)
         .map_err(|e| format!("Failed to parse launchSettings.json: {}", e))?;
-    
+
     // Update port in https profile
     if let Some(profiles) = json.get_mut("profiles") {
         if let Some(https_profile) = profiles.get_mut("https") {
@@ -99,21 +121,24 @@ pub async fn update_service_port(service_name: String, repo_root: String, new_po
                     } else {
                         "5260"
                     };
-                    
-                    let new_url = format!("https://localhost:{};http://localhost:{}", new_port, http_port);
+
+                    let new_url = format!(
+                        "https://localhost:{};http://localhost:{}",
+                        new_port, http_port
+                    );
                     *app_url = Value::String(new_url);
                 }
             }
         }
     }
-    
+
     // Write back to file
     let updated_content = serde_json::to_string_pretty(&json)
         .map_err(|e| format!("Failed to serialize launchSettings.json: {}", e))?;
-    
+
     fs::write(&launch_settings_path, updated_content)
         .map_err(|e| format!("Failed to write launchSettings.json: {}", e))?;
-    
+
     Ok(())
 }
 
@@ -129,4 +154,3 @@ pub async fn find_available_port(start_port: u16) -> Result<u16, String> {
     }
     Err("Could not find available port".to_string())
 }
-

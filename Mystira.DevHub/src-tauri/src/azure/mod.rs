@@ -26,7 +26,6 @@
 //! ```
 
 pub mod cli;
-pub mod deployment;
 pub mod deploy_now;
+pub mod deployment;
 pub mod resources;
-

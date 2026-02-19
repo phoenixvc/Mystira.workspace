@@ -17,15 +17,21 @@
 use crate::helpers::get_cli_executable_path;
 use crate::types::CommandRequest;
 use crate::types::CommandResponse;
-use std::process::{Command, Stdio};
 use std::io::Write;
+use std::process::{Command, Stdio};
 
 /// Execute a command via the DevHub CLI tool
-pub async fn execute_devhub_cli(command: String, args: serde_json::Value) -> Result<CommandResponse, String> {
+pub async fn execute_devhub_cli(
+    command: String,
+    args: serde_json::Value,
+) -> Result<CommandResponse, String> {
     // Validate command is not empty
     let command_trimmed = command.trim();
     if command_trimmed.is_empty() {
-        return Err(format!("Command cannot be empty. Received command: '{}'", command));
+        return Err(format!(
+            "Command cannot be empty. Received command: '{}'",
+            command
+        ));
     }
 
     let request = CommandRequest {
@@ -33,12 +39,16 @@ pub async fn execute_devhub_cli(command: String, args: serde_json::Value) -> Res
         args,
     };
 
-    let request_json = serde_json::to_string(&request)
-        .map_err(|e| format!("Failed to serialize request: {}. Command was: '{}'", e, command_trimmed))?;
+    let request_json = serde_json::to_string(&request).map_err(|e| {
+        format!(
+            "Failed to serialize request: {}. Command was: '{}'",
+            e, command_trimmed
+        )
+    })?;
 
     // Get the CLI executable path
     let cli_exe_path = get_cli_executable_path()?;
-    
+
     // Validate the executable exists
     if !cli_exe_path.exists() {
         return Err(format!(
@@ -69,7 +79,11 @@ pub async fn execute_devhub_cli(command: String, args: serde_json::Value) -> Res
                     cli_exe_path.display()
                 )
             } else {
-                format!("Failed to spawn process at {}: {}", cli_exe_path.display(), e)
+                format!(
+                    "Failed to spawn process at {}: {}",
+                    cli_exe_path.display(),
+                    e
+                )
             };
             error_msg
         })?;
@@ -92,13 +106,12 @@ pub async fn execute_devhub_cli(command: String, args: serde_json::Value) -> Res
     // Parse the response
     if output.status.success() {
         let stdout = String::from_utf8_lossy(&output.stdout);
-        let response: CommandResponse = serde_json::from_str(&stdout)
-            .map_err(|e| {
-                format!(
-                    "Failed to parse CLI response as JSON: {}. Raw output: {}",
-                    e, stdout
-                )
-            })?;
+        let response: CommandResponse = serde_json::from_str(&stdout).map_err(|e| {
+            format!(
+                "Failed to parse CLI response as JSON: {}. Raw output: {}",
+                e, stdout
+            )
+        })?;
         Ok(response)
     } else {
         let stderr = String::from_utf8_lossy(&output.stderr);
@@ -111,4 +124,3 @@ pub async fn execute_devhub_cli(command: String, args: serde_json::Value) -> Res
         ))
     }
 }
-

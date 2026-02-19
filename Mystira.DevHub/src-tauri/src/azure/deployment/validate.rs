@@ -1,8 +1,8 @@
 // Azure infrastructure validation command
 
 use crate::azure::deployment::helpers::{
-    check_azure_cli_or_error, get_deployment_path, get_resource_group_name,
-    set_azure_subscription, ensure_resource_group, build_parameters_json,
+    build_parameters_json, check_azure_cli_or_error, ensure_resource_group, get_deployment_path,
+    get_resource_group_name, set_azure_subscription,
 };
 use crate::helpers::get_azure_cli_path;
 use crate::types::CommandResponse;
@@ -22,28 +22,34 @@ pub async fn azure_validate_infrastructure(
     let env = environment.as_str();
     let rg = resource_group.unwrap_or_else(|| get_resource_group_name(env));
     let sub_id = "22f9eb18-6553-4b7d-9451-47d0195085fe";
-    
+
     let deployment_path = get_deployment_path(&repo_root, env);
-    
+
     // Check Azure CLI installation
     if let Some(error_response) = check_azure_cli_or_error() {
         return Ok(error_response);
     }
 
     let (az_path, use_direct_path) = get_azure_cli_path();
-    
+
     // Set subscription
     let _ = set_azure_subscription(sub_id);
-    
+
     // Create resource group if it doesn't exist (needed for validation)
     let _ = ensure_resource_group(&rg, "southafricanorth");
 
     let deploy_storage_val = deploy_storage.unwrap_or(true);
     let deploy_cosmos_val = deploy_cosmos.unwrap_or(true);
     let deploy_app_service_val = deploy_app_service.unwrap_or(true);
-    let params_json = build_parameters_json(env, "southafricanorth", deploy_storage_val, deploy_cosmos_val, deploy_app_service_val);
+    let params_json = build_parameters_json(
+        env,
+        "southafricanorth",
+        deploy_storage_val,
+        deploy_cosmos_val,
+        deploy_app_service_val,
+    );
     let params_file = format!("{}/params-validate.json", deployment_path);
-    
+
     if let Err(e) = fs::write(&params_file, &params_json) {
         return Ok(CommandResponse {
             success: false,
@@ -52,7 +58,7 @@ pub async fn azure_validate_infrastructure(
             error: Some(format!("Failed to write parameters file: {}", e)),
         });
     }
-    
+
     let validate_output = if use_direct_path {
         Command::new("powershell")
             .arg("-NoProfile")
@@ -74,21 +80,21 @@ pub async fn azure_validate_infrastructure(
             .current_dir(&deployment_path)
             .output()
     };
-    
+
     let _ = fs::remove_file(&params_file);
-    
+
     match validate_output {
         Ok(output) => {
             let stdout = String::from_utf8_lossy(&output.stdout);
             let stderr = String::from_utf8_lossy(&output.stderr);
-            
+
             if output.status.success() {
                 let warnings = if !stderr.trim().is_empty() {
                     Some(stderr.to_string())
                 } else {
                     None
                 };
-                
+
                 // Parse output to check for diagnostics/warnings in the JSON
                 let mut diagnostic_warnings = warnings.clone();
                 if let Ok(output_json) = serde_json::from_str::<serde_json::Value>(&stdout) {
@@ -98,7 +104,9 @@ pub async fn azure_validate_infrastructure(
                                 let diag_messages: Vec<String> = diag_array
                                     .iter()
                                     .filter_map(|d| {
-                                        d.get("message").and_then(|m| m.as_str()).map(|s| s.to_string())
+                                        d.get("message")
+                                            .and_then(|m| m.as_str())
+                                            .map(|s| s.to_string())
                                     })
                                     .collect();
                                 if !diag_messages.is_empty() {
@@ -112,7 +120,7 @@ pub async fn azure_validate_infrastructure(
                         }
                     }
                 }
-                
+
                 Ok(CommandResponse {
                     success: true,
                     result: Some(serde_json::json!({
@@ -133,7 +141,7 @@ pub async fn azure_validate_infrastructure(
                 } else {
                     stdout.to_string()
                 };
-                
+
                 Ok(CommandResponse {
                     success: false,
                     result: None,
@@ -154,7 +162,6 @@ pub async fn azure_validate_infrastructure(
                 message: None,
                 error: Some(error_msg),
             })
-        },
+        }
     }
 }
-

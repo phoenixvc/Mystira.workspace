@@ -13,19 +13,19 @@ pub async fn check_infrastructure_exists(
     resource_group: Option<String>,
 ) -> Result<CommandResponse, String> {
     let rg = resource_group.unwrap_or_else(|| get_resource_group_name(&environment));
-    
+
     let check_rg = Command::new("az")
         .arg("group")
         .arg("exists")
         .arg("--name")
         .arg(&rg)
         .output();
-    
+
     match check_rg {
         Ok(output) => {
             let stdout = String::from_utf8_lossy(&output.stdout);
             let exists = stdout.trim().to_lowercase() == "true";
-            
+
             if !exists {
                 return Ok(CommandResponse {
                     success: true,
@@ -38,7 +38,7 @@ pub async fn check_infrastructure_exists(
                     error: None,
                 });
             }
-            
+
             let check_resources = Command::new("az")
                 .arg("resource")
                 .arg("list")
@@ -47,40 +47,49 @@ pub async fn check_infrastructure_exists(
                 .arg("--output")
                 .arg("json")
                 .output();
-            
+
             match check_resources {
                 Ok(output) => {
                     let stdout = String::from_utf8_lossy(&output.stdout);
                     let resources: Result<Vec<Value>, _> = serde_json::from_str(&stdout);
-                    
+
                     if let Ok(resources) = resources {
                         let has_app_service = resources.iter().any(|r| {
-                            let resource_type = r.get("type").and_then(|t| t.as_str()).unwrap_or("");
-                            let provisioning_state = r.get("properties")
+                            let resource_type =
+                                r.get("type").and_then(|t| t.as_str()).unwrap_or("");
+                            let provisioning_state = r
+                                .get("properties")
                                 .and_then(|p| p.get("provisioningState"))
                                 .and_then(|v| v.as_str())
                                 .unwrap_or("");
-                            resource_type.contains("Microsoft.Web/sites") && provisioning_state == "Succeeded"
+                            resource_type.contains("Microsoft.Web/sites")
+                                && provisioning_state == "Succeeded"
                         });
                         let has_cosmos = resources.iter().any(|r| {
-                            let resource_type = r.get("type").and_then(|t| t.as_str()).unwrap_or("");
-                            let provisioning_state = r.get("properties")
+                            let resource_type =
+                                r.get("type").and_then(|t| t.as_str()).unwrap_or("");
+                            let provisioning_state = r
+                                .get("properties")
                                 .and_then(|p| p.get("provisioningState"))
                                 .and_then(|v| v.as_str())
                                 .unwrap_or("");
-                            resource_type.contains("Microsoft.DocumentDB") && provisioning_state == "Succeeded"
+                            resource_type.contains("Microsoft.DocumentDB")
+                                && provisioning_state == "Succeeded"
                         });
                         let has_storage = resources.iter().any(|r| {
-                            let resource_type = r.get("type").and_then(|t| t.as_str()).unwrap_or("");
-                            let provisioning_state = r.get("properties")
+                            let resource_type =
+                                r.get("type").and_then(|t| t.as_str()).unwrap_or("");
+                            let provisioning_state = r
+                                .get("properties")
                                 .and_then(|p| p.get("provisioningState"))
                                 .and_then(|v| v.as_str())
                                 .unwrap_or("");
-                            resource_type.contains("Microsoft.Storage") && provisioning_state == "Succeeded"
+                            resource_type.contains("Microsoft.Storage")
+                                && provisioning_state == "Succeeded"
                         });
-                        
+
                         let exists = has_app_service || has_cosmos || has_storage;
-                        
+
                         Ok(CommandResponse {
                             success: true,
                             result: Some(serde_json::json!({
@@ -94,7 +103,10 @@ pub async fn check_infrastructure_exists(
                             message: if exists {
                                 Some("Infrastructure exists".to_string())
                             } else {
-                                Some("Resource group exists but no infrastructure resources found".to_string())
+                                Some(
+                                    "Resource group exists but no infrastructure resources found"
+                                        .to_string(),
+                                )
                             },
                             error: None,
                         })
@@ -145,12 +157,17 @@ pub async fn check_infrastructure_status(
 
     let (az_path, use_direct_path) = get_azure_cli_path();
 
-    let sub_id = get_azure_subscription_id().unwrap_or_else(|_| "22f9eb18-6553-4b7d-9451-47d0195085fe".to_string());
+    let sub_id = get_azure_subscription_id()
+        .unwrap_or_else(|_| "22f9eb18-6553-4b7d-9451-47d0195085fe".to_string());
     let _ = if use_direct_path {
         Command::new("powershell")
             .arg("-NoProfile")
             .arg("-Command")
-            .arg(format!("& '{}' account set --subscription '{}'", az_path.replace("'", "''"), sub_id.replace("'", "''")))
+            .arg(format!(
+                "& '{}' account set --subscription '{}'",
+                az_path.replace("'", "''"),
+                sub_id.replace("'", "''")
+            ))
             .output()
     } else {
         Command::new("az")
@@ -165,7 +182,11 @@ pub async fn check_infrastructure_status(
         Command::new("powershell")
             .arg("-NoProfile")
             .arg("-Command")
-            .arg(format!("& '{}' resource list --resource-group '{}' --output json", az_path.replace("'", "''"), resource_group.replace("'", "''")))
+            .arg(format!(
+                "& '{}' resource list --resource-group '{}' --output json",
+                az_path.replace("'", "''"),
+                resource_group.replace("'", "''")
+            ))
             .output()
     } else {
         Command::new("az")
@@ -183,7 +204,7 @@ pub async fn check_infrastructure_status(
             if result.status.success() {
                 let stdout = String::from_utf8_lossy(&result.stdout);
                 let resources: Result<Vec<serde_json::Value>, _> = serde_json::from_str(&stdout);
-                
+
                 match resources {
                     Ok(resources_vec) => {
                         let mut status = serde_json::json!({
@@ -204,92 +225,131 @@ pub async fn check_infrastructure_status(
                         let mut keyvault_instances: Vec<serde_json::Value> = Vec::new();
 
                         for resource in &resources_vec {
-                            let resource_type = resource.get("type").and_then(|v| v.as_str()).unwrap_or("");
-                            let resource_name = resource.get("name").and_then(|v| v.as_str()).unwrap_or("");
-                            let resource_location = resource.get("location").and_then(|v| v.as_str()).unwrap_or("");
-                            let provisioning_state = resource.get("properties")
+                            let resource_type =
+                                resource.get("type").and_then(|v| v.as_str()).unwrap_or("");
+                            let resource_name =
+                                resource.get("name").and_then(|v| v.as_str()).unwrap_or("");
+                            let resource_location = resource
+                                .get("location")
+                                .and_then(|v| v.as_str())
+                                .unwrap_or("");
+                            let provisioning_state = resource
+                                .get("properties")
                                 .and_then(|p| p.get("provisioningState"))
                                 .and_then(|v| v.as_str())
                                 .unwrap_or("");
-                            
+
                             let mut runtime_status = "unknown".to_string();
                             let mut runtime_health = "unknown".to_string();
-                            
+
                             if resource_type == "Microsoft.Web/sites" {
                                 if let Some(properties) = resource.get("properties") {
                                     if let Some(state) = properties.get("state") {
-                                        runtime_status = state.as_str().unwrap_or("unknown").to_string();
+                                        runtime_status =
+                                            state.as_str().unwrap_or("unknown").to_string();
                                     }
                                 }
                                 runtime_health = match runtime_status.as_str() {
                                     "Running" => "healthy",
                                     "Stopped" => "unhealthy",
                                     "Starting" | "Stopping" => "degraded",
-                                    _ => "unknown"
-                                }.to_string();
+                                    _ => "unknown",
+                                }
+                                .to_string();
                             }
-                            
-                            let health = if resource_type == "Microsoft.Web/sites" && runtime_health != "unknown" {
+
+                            let health = if resource_type == "Microsoft.Web/sites"
+                                && runtime_health != "unknown"
+                            {
                                 runtime_health.as_str()
                             } else if provisioning_state == "Succeeded" {
                                 "healthy"
-                            } else if provisioning_state == "Failed" || provisioning_state == "Canceled" {
+                            } else if provisioning_state == "Failed"
+                                || provisioning_state == "Canceled"
+                            {
                                 "unhealthy"
-                            } else if provisioning_state == "Updating" || provisioning_state == "Creating" {
+                            } else if provisioning_state == "Updating"
+                                || provisioning_state == "Creating"
+                            {
                                 "degraded"
                             } else {
                                 "unknown"
                             };
-                            
+
                             let instance = serde_json::json!({
                                 "name": resource_name,
                                 "health": health,
                                 "location": resource_location,
                                 "status": if resource_type == "Microsoft.Web/sites" { runtime_status } else { provisioning_state.to_string() }
                             });
-                            
+
                             let is_provisioned = provisioning_state == "Succeeded";
-                            
-                            if resource_type == "Microsoft.Storage/storageAccounts" && is_provisioned {
+
+                            if resource_type == "Microsoft.Storage/storageAccounts"
+                                && is_provisioned
+                            {
                                 storage_instances.push(instance);
                                 status["resources"]["storage"]["exists"] = serde_json::json!(true);
                                 if storage_instances.len() == 1 {
-                                    status["resources"]["storage"]["name"] = serde_json::json!(resource_name);
-                                    status["resources"]["storage"]["health"] = serde_json::json!(health);
+                                    status["resources"]["storage"]["name"] =
+                                        serde_json::json!(resource_name);
+                                    status["resources"]["storage"]["health"] =
+                                        serde_json::json!(health);
                                 }
-                            } else if resource_type == "Microsoft.DocumentDB/databaseAccounts" && is_provisioned {
+                            } else if resource_type == "Microsoft.DocumentDB/databaseAccounts"
+                                && is_provisioned
+                            {
                                 cosmos_instances.push(instance);
                                 status["resources"]["cosmos"]["exists"] = serde_json::json!(true);
                                 if cosmos_instances.len() == 1 {
-                                    status["resources"]["cosmos"]["name"] = serde_json::json!(resource_name);
-                                    status["resources"]["cosmos"]["health"] = serde_json::json!(health);
+                                    status["resources"]["cosmos"]["name"] =
+                                        serde_json::json!(resource_name);
+                                    status["resources"]["cosmos"]["health"] =
+                                        serde_json::json!(health);
                                 }
                             } else if resource_type == "Microsoft.Web/sites" && is_provisioned {
                                 appservice_instances.push(instance);
-                                status["resources"]["appService"]["exists"] = serde_json::json!(true);
+                                status["resources"]["appService"]["exists"] =
+                                    serde_json::json!(true);
                                 if appservice_instances.len() == 1 {
-                                    status["resources"]["appService"]["name"] = serde_json::json!(resource_name);
-                                    status["resources"]["appService"]["health"] = serde_json::json!(health);
+                                    status["resources"]["appService"]["name"] =
+                                        serde_json::json!(resource_name);
+                                    status["resources"]["appService"]["health"] =
+                                        serde_json::json!(health);
                                 }
-                            } else if resource_type == "Microsoft.KeyVault/vaults" && is_provisioned {
+                            } else if resource_type == "Microsoft.KeyVault/vaults" && is_provisioned
+                            {
                                 keyvault_instances.push(instance);
                                 status["resources"]["keyVault"]["exists"] = serde_json::json!(true);
                                 if keyvault_instances.len() == 1 {
-                                    status["resources"]["keyVault"]["name"] = serde_json::json!(resource_name);
-                                    status["resources"]["keyVault"]["health"] = serde_json::json!(health);
+                                    status["resources"]["keyVault"]["name"] =
+                                        serde_json::json!(resource_name);
+                                    status["resources"]["keyVault"]["health"] =
+                                        serde_json::json!(health);
                                 }
                             }
                         }
-                        
-                        status["resources"]["storage"]["instances"] = serde_json::json!(storage_instances);
-                        status["resources"]["cosmos"]["instances"] = serde_json::json!(cosmos_instances);
-                        status["resources"]["appService"]["instances"] = serde_json::json!(appservice_instances);
-                        status["resources"]["keyVault"]["instances"] = serde_json::json!(keyvault_instances);
 
-                        let has_storage = status["resources"]["storage"]["exists"].as_bool().unwrap_or(false);
-                        let has_cosmos = status["resources"]["cosmos"]["exists"].as_bool().unwrap_or(false);
-                        let has_app_service = status["resources"]["appService"]["exists"].as_bool().unwrap_or(false);
-                        status["available"] = serde_json::json!(has_storage || has_cosmos || has_app_service);
+                        status["resources"]["storage"]["instances"] =
+                            serde_json::json!(storage_instances);
+                        status["resources"]["cosmos"]["instances"] =
+                            serde_json::json!(cosmos_instances);
+                        status["resources"]["appService"]["instances"] =
+                            serde_json::json!(appservice_instances);
+                        status["resources"]["keyVault"]["instances"] =
+                            serde_json::json!(keyvault_instances);
+
+                        let has_storage = status["resources"]["storage"]["exists"]
+                            .as_bool()
+                            .unwrap_or(false);
+                        let has_cosmos = status["resources"]["cosmos"]["exists"]
+                            .as_bool()
+                            .unwrap_or(false);
+                        let has_app_service = status["resources"]["appService"]["exists"]
+                            .as_bool()
+                            .unwrap_or(false);
+                        status["available"] =
+                            serde_json::json!(has_storage || has_cosmos || has_app_service);
 
                         Ok(CommandResponse {
                             success: true,
@@ -334,4 +394,3 @@ pub async fn check_infrastructure_status(
         }),
     }
 }
-
