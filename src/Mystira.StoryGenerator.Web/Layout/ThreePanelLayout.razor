@@ -674,10 +674,12 @@
 
     protected override async Task OnInitializedAsync()
     {
+        Logger.LogInformation("[DEBUG_LOG] ThreePanelLayout: OnInitializedAsync starting...");
         try
         {
             UpdateRouteState();
             NavManager.LocationChanged += HandleLocationChanged;
+            Logger.LogInformation("[DEBUG_LOG] ThreePanelLayout: Loading chat histories from LocalStorage...");
             var saved = await LocalStorage.GetItemAsync<List<StoryGeneratorChatHistory>>(ChatsStorageKey);
             ChatHistories = saved ?? new List<StoryGeneratorChatHistory>();
             CurrentChat = ChatHistories.FirstOrDefault();
@@ -685,15 +687,20 @@
             currentViewedVersion = CurrentChat?.YamlSnapshots.Count > 0
                ? CurrentChat.YamlSnapshots.Max(s => s.Version)
                : 1;
+            Logger.LogInformation("[DEBUG_LOG] ThreePanelLayout: Chat histories loaded. Count: {Count}", ChatHistories.Count);
         }
-        catch
+        catch (Exception ex)
         {
+            Logger.LogError(ex, "[DEBUG_LOG] ThreePanelLayout: Error during LocalStorage/Chat initialization");
             ChatHistories = new List<StoryGeneratorChatHistory>();
         }
 
+        Logger.LogInformation("[DEBUG_LOG] ThreePanelLayout: Ensuring model settings...");
         await EnsureModelSettingsAsync();
 
+        Logger.LogInformation("[DEBUG_LOG] ThreePanelLayout: OnInitializedAsync calling base...");
         await base.OnInitializedAsync();
+        Logger.LogInformation("[DEBUG_LOG] ThreePanelLayout: OnInitializedAsync completed.");
     }
 
     // Note: do not force the sidebar open on first render; allow user to toggle/collapse it freely.
@@ -762,23 +769,29 @@
             return;
         }
 
+        Logger.LogInformation("[DEBUG_LOG] ThreePanelLayout: Initializing ModelSettingsService...");
         try
         {
             await ModelSettingsService.InitializeAsync();
+            Logger.LogInformation("[DEBUG_LOG] ThreePanelLayout: ModelSettingsService initialized.");
             var models = await ModelSettingsService.GetAvailableModelsAsync();
             availableModels = models.OrderBy(m => m.DisplayName).ToList();
+            Logger.LogInformation("[DEBUG_LOG] ThreePanelLayout: Available models retrieved. Count: {Count}", availableModels.Count);
 
             await RefreshModelSettingsAsync();
+            Logger.LogInformation("[DEBUG_LOG] ThreePanelLayout: Model settings refreshed.");
 
             ModelSettingsService.SettingsChanged += HandleModelSettingsChanged;
         }
-        catch
+        catch (Exception ex)
         {
+            Logger.LogError(ex, "[DEBUG_LOG] ThreePanelLayout: Error in EnsureModelSettingsAsync");
             availableModels = new List<AiModelDefinition> { currentModelSettings.Definition };
         }
         finally
         {
             modelSettingsInitialized = true;
+            Logger.LogInformation("[DEBUG_LOG] ThreePanelLayout: EnsureModelSettingsAsync completed.");
         }
     }
 

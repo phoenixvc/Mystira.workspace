@@ -54,6 +54,7 @@ public class AiModelSettingsService : IAiModelSettingsService
             return;
         }
 
+        _logger.LogInformation("[DEBUG_LOG] AiModelSettingsService: Initializing...");
         await _initializationLock.WaitAsync();
         try
         {
@@ -62,29 +63,45 @@ public class AiModelSettingsService : IAiModelSettingsService
                 return;
             }
 
+            _logger.LogInformation("[DEBUG_LOG] AiModelSettingsService: Loading remote config...");
             var remoteConfig = await TryLoadRemoteConfigAsync();
             if (remoteConfig != null)
             {
+                _logger.LogInformation("[DEBUG_LOG] AiModelSettingsService: Remote config loaded.");
                 _configuration = remoteConfig;
                 await CacheConfigAsync(remoteConfig);
             }
             else
             {
+                _logger.LogInformation("[DEBUG_LOG] AiModelSettingsService: Remote config not found, checking cache...");
                 var cachedConfig = await TryLoadCachedConfigAsync();
                 if (cachedConfig != null)
                 {
+                    _logger.LogInformation("[DEBUG_LOG] AiModelSettingsService: Cached config loaded.");
                     _configuration = cachedConfig;
+                }
+                else
+                {
+                    _logger.LogInformation("[DEBUG_LOG] AiModelSettingsService: No config found, using fallback.");
                 }
             }
 
+            _logger.LogInformation("[DEBUG_LOG] AiModelSettingsService: Loading selection...");
             var storedSelection = await LoadSelectionAsync();
             if (!TryNormalizeSelection(storedSelection, out _selection))
             {
+                _logger.LogInformation("[DEBUG_LOG] AiModelSettingsService: Normalizing selection failed, creating default.");
                 _selection = CreateDefaultSelection(_configuration);
                 await SaveSelectionAsync(_selection);
             }
 
+            _logger.LogInformation("[DEBUG_LOG] AiModelSettingsService: Initialization finished.");
             _initialized = true;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "[DEBUG_LOG] AiModelSettingsService: Initialization failed");
+            throw;
         }
         finally
         {
@@ -167,12 +184,14 @@ public class AiModelSettingsService : IAiModelSettingsService
         try
         {
             var configUri = new Uri(new Uri(_navigationManager.BaseUri), ConfigPath);
+            _logger.LogInformation("[DEBUG_LOG] AiModelSettingsService: Fetching remote config from {Uri}", configUri);
             var config = await _httpClient.GetFromJsonAsync<AiModelConfiguration>(configUri, _jsonOptions);
+            _logger.LogInformation("[DEBUG_LOG] AiModelSettingsService: Remote config fetched successfully.");
             return NormalizeConfiguration(config);
         }
         catch (Exception ex)
         {
-            _logger.LogWarning(ex, "Failed to load AI model configuration from {ConfigPath}", ConfigPath);
+            _logger.LogWarning(ex, "[DEBUG_LOG] AiModelSettingsService: Failed to load AI model configuration from {ConfigPath}", ConfigPath);
             return null;
         }
     }

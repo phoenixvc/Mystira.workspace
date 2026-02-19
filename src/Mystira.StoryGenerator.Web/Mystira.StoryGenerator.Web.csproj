@@ -6,6 +6,15 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <!-- Ensure publish output goes to a clear location and simplify for Rider/Azure -->
     <PublishDir>publish\</PublishDir>
+    <WasmDebugLevel>0</WasmDebugLevel>
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <BlazorEnableTimeZoneSupport>false</BlazorEnableTimeZoneSupport>
+    <HybridGlobalization>false</HybridGlobalization>
+    <WasmRuntimeDebuggerSupport>false</WasmRuntimeDebuggerSupport>
+    <EnableRequestDelegateGenerator>false</EnableRequestDelegateGenerator>
+    <RunAOTCompilation>false</RunAOTCompilation>
+    <WasmEnableThreads>false</WasmEnableThreads>
+    <WasmEnableSIMD>false</WasmEnableSIMD>
   </PropertyGroup>
 
   <Target Name="MoveWwwrootContents" AfterTargets="Publish">
@@ -33,6 +42,7 @@
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="9.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="9.0.0" PrivateAssets="all" />
     <PackageReference Include="Syncfusion.Blazor.Navigations" Version="32.1.25" />
+    <PackageReference Include="Syncfusion.Blazor.Themes" Version="32.1.25" />
     <PackageReference Include="YamlDotNet" Version="16.3.0" />
   </ItemGroup>
 
