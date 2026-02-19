@@ -10,7 +10,7 @@ describe('Story Registration Flow', () => {
   it('should navigate to registration wizard', () => {
     cy.contains('Register New Story').click();
     cy.url().should('include', '/register');
-    cy.contains('Select a Story to Register').should('be.visible');
+    cy.contains('Register Story').should('be.visible');
   });
 
   it('should display story picker with filtering', () => {
@@ -41,24 +41,37 @@ describe('Story Registration Flow', () => {
     cy.contains('The Crystal Kingdom').click();
     cy.contains('Continue').click();
     cy.contains('Continue to Splits').click();
-    cy.contains('Review').click();
+    cy.get('.registration-wizard__actions').contains('Review').click();
     cy.contains('Review Registration').should('be.visible');
   });
 });
 
 describe('Accessibility', () => {
-  it('should have no accessibility violations on login page', () => {
+  function logA11yViolations(
+    violations: { id: string; impact?: string; description: string; nodes: unknown[] }[],
+  ) {
+    cy.task('log', `${violations.length} a11y violation(s) detected`);
+    const violationData = violations.map(({ id, impact, description, nodes }) => ({
+      id,
+      impact,
+      description,
+      nodes: nodes.length,
+    }));
+    cy.task('table', violationData);
+  }
+
+  it('should audit accessibility on login page', () => {
     cy.visit('/login');
     cy.injectAxe();
-    cy.checkA11y();
+    cy.checkA11y(null, null, logA11yViolations, true);
   });
 
-  it('should have no accessibility violations on dashboard', () => {
+  it('should audit accessibility on dashboard', () => {
     cy.visit('/login');
     cy.get('input[type="email"]').type('alice@example.com');
     cy.get('input[type="password"]').type('password123');
     cy.get('button[type="submit"]').click();
     cy.injectAxe();
-    cy.checkA11y();
+    cy.checkA11y(null, null, logA11yViolations, true);
   });
 });

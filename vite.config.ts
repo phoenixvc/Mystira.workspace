@@ -1,8 +1,8 @@
 import react from '@vitejs/plugin-react';
 import path from 'path';
-import { defineConfig } from 'vite';
+import { defineProject } from 'vitest/config';
 
-export default defineConfig({
+export default defineProject({
   plugins: [react()],
   resolve: {
     alias: {

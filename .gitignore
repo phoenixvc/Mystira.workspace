@@ -35,6 +35,10 @@ yarn-error.log*
 # TypeScript
 *.tsbuildinfo
 
+# Config build outputs
+vite.config.js
+vite.config.d.ts
+
 # Temporary files
 tmp/
 temp/
