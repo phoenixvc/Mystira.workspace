@@ -1,4 +1,4 @@
-import { open } from '@tauri-apps/plugin-shell';
+import { openUrl } from '@tauri-apps/plugin-opener';
 import { useEffect } from 'react';
 
 interface WebViewPanelProps {
@@ -13,7 +13,7 @@ function WebViewPanel({ url, title, onClose, embedded = false }: WebViewPanelPro
     if (!embedded) {
       // Open in external browser for now
       // TODO: In future, use Tauri's window API to create embedded webview windows
-      open(url).catch(console.error);
+      openUrl(url).catch(console.error);
       if (onClose) {
         onClose();
       }

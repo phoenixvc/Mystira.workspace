@@ -65,9 +65,7 @@ pub async fn kill_process_by_pid(pid: u32) {
 
     #[cfg(not(target_os = "windows"))]
     {
-        let _ = Command::new("kill")
-            .args(["-9", &pid.to_string()])
-            .output();
+        let _ = Command::new("kill").args(["-9", &pid.to_string()]).output();
         tokio::time::sleep(tokio::time::Duration::from_millis(1000)).await;
     }
 }

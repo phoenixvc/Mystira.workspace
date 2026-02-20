@@ -131,9 +131,6 @@ impl AppConfig {
         // Start with defaults
         let mut config = AppConfig::default();
 
-        // Override from environment variables
-        config.load_from_env();
-
         // Override from config file if it exists
         if let Some(config_file) = Self::get_config_file_path() {
             if let Ok(file_config) = Self::load_from_file(&config_file) {
@@ -143,6 +140,9 @@ impl AppConfig {
                 debug!("No config file found at {:?}, using defaults", config_file);
             }
         }
+
+        // Override from environment variables (highest priority)
+        config.load_from_env();
 
         config
     }

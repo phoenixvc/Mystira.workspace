@@ -403,12 +403,33 @@ pub async fn create_webview_window(
     title: String,
     app_handle: AppHandle,
 ) -> Result<(), String> {
-    let window_label = format!("webview-{}", title.replace(" ", "-").to_lowercase());
+    let window_label = format!(
+        "webview-{}",
+        title
+            .to_lowercase()
+            .chars()
+            .map(|c| {
+                if c.is_alphanumeric() || "-/:_".contains(c) {
+                    c
+                } else {
+                    '-'
+                }
+            })
+            .collect::<String>()
+    );
+
+    let parsed_url: url::Url = url.parse().map_err(|e| format!("Invalid URL: {}", e))?;
+    if parsed_url.scheme() != "https" && parsed_url.scheme() != "http" {
+        return Err(format!(
+            "Invalid URL scheme '{}': only http and https are allowed",
+            parsed_url.scheme()
+        ));
+    }
 
     tauri::WebviewWindowBuilder::new(
         &app_handle,
         &window_label,
-        tauri::WebviewUrl::External(url.parse().map_err(|e| format!("Invalid URL: {}", e))?),
+        tauri::WebviewUrl::External(parsed_url),
     )
     .title(&title)
     .inner_size(1200.0, 800.0)

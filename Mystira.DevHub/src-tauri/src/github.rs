@@ -53,7 +53,7 @@ pub async fn get_github_deployments(
 
     // If CLI command fails with "Unknown command", try direct GitHub CLI
     if let Err(ref e) = cli_result {
-        if e.contains("Unknown command") || e.contains("command") {
+        if e.contains("Unknown command") || e.contains("command not found") {
             // Fallback to direct GitHub CLI call
             let repo_parts: Vec<&str> = repository.split('/').collect();
             if repo_parts.len() != 2 {

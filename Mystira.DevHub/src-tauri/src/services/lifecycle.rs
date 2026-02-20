@@ -24,7 +24,9 @@ pub async fn prebuild_service(
     services: State<'_, ServiceManager>,
 ) -> Result<(), String> {
     if repo_root.is_empty() {
-        return Err("Repository root is empty. Please configure the repository root in DevHub.".to_string());
+        return Err(
+            "Repository root is empty. Please configure the repository root in DevHub.".to_string(),
+        );
     }
 
     let repo_path = PathBuf::from(&repo_root);
@@ -114,7 +116,9 @@ pub async fn start_service(
 
     if repo_root.is_empty() {
         error!("Repository root is empty for service: {}", service_name);
-        return Err("Repository root is empty. Please configure the repository root in DevHub.".to_string());
+        return Err(
+            "Repository root is empty. Please configure the repository root in DevHub.".to_string(),
+        );
     }
 
     let repo_path = PathBuf::from(&repo_root);
