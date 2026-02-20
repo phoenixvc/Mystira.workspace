@@ -1,4 +1,4 @@
-import { open } from '@tauri-apps/plugin-shell';
+import { openUrl } from '@tauri-apps/plugin-opener';
 import { invoke } from '@tauri-apps/api/core';
 import { useEffect, useState } from 'react';
 import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcut';
@@ -106,7 +106,7 @@ function ServiceManager() {
 
   const openInBrowser = async (url: string) => {
     try {
-      await open(url);
+      await openUrl(url);
     } catch (error) {
       console.error('Failed to open URL:', error);
       addToast('Failed to open URL in browser', 'error');

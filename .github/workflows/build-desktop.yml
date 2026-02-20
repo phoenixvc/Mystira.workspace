@@ -101,17 +101,20 @@ jobs:
         env:
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
+          APPLE_CERTIFICATE: ${{ (github.event_name != 'workflow_dispatch' || !inputs.skip_signing) && secrets.APPLE_CERTIFICATE || '' }}
+          APPLE_CERTIFICATE_PASSWORD: ${{ (github.event_name != 'workflow_dispatch' || !inputs.skip_signing) && secrets.APPLE_CERTIFICATE_PASSWORD || '' }}
+          APPLE_SIGNING_IDENTITY: ${{ (github.event_name != 'workflow_dispatch' || !inputs.skip_signing) && secrets.APPLE_SIGNING_IDENTITY || '' }}
+          APPLE_ID: ${{ (github.event_name != 'workflow_dispatch' || !inputs.skip_signing) && secrets.APPLE_ID || '' }}
+          APPLE_PASSWORD: ${{ (github.event_name != 'workflow_dispatch' || !inputs.skip_signing) && secrets.APPLE_PASSWORD || '' }}
+          APPLE_TEAM_ID: ${{ (github.event_name != 'workflow_dispatch' || !inputs.skip_signing) && secrets.APPLE_TEAM_ID || '' }}
 
-      - name: Sign macOS app
-        if: ${{ !inputs.skip_signing }}
-        env:
-          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
-          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
-          APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
-          APPLE_ID: ${{ secrets.APPLE_ID }}
-          APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
-          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
-        run: echo "Signing handled by Tauri bundler when secrets are configured"
+      - name: Zip macOS app bundle
+        run: |
+          cd src-tauri/target/universal-apple-darwin/release/bundle/macos
+          for app in *.app; do
+            [ -d "$app" ] && zip -r "${app}.zip" "$app"
+          done
+        continue-on-error: true
 
       - name: Upload macOS artifacts
         uses: actions/upload-artifact@v4
@@ -119,7 +122,7 @@ jobs:
           name: devhub-macos
           path: |
             Mystira.DevHub/src-tauri/target/universal-apple-darwin/release/bundle/dmg/*.dmg
-            Mystira.DevHub/src-tauri/target/universal-apple-darwin/release/bundle/macos/*.app
+            Mystira.DevHub/src-tauri/target/universal-apple-darwin/release/bundle/macos/*.app.zip
           retention-days: 14
           if-no-files-found: warn
 
@@ -186,6 +189,7 @@ jobs:
             artifacts/**/*.deb
             artifacts/**/*.AppImage
             artifacts/**/*.dmg
+            artifacts/**/*.app.zip
             artifacts/**/*.msi
             artifacts/**/*.exe
           generate_release_notes: true

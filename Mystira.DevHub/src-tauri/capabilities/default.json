@@ -6,6 +6,7 @@
   "permissions": [
     "core:default",
     "shell:allow-open",
+    "opener:allow-open-url",
     "dialog:default",
     "fs:default"
   ]

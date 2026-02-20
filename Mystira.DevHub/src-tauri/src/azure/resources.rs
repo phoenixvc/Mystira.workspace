@@ -203,8 +203,8 @@ pub async fn get_azure_resources(
                             result: None,
                             message: None,
                             error: Some(format!(
-                                "Failed to parse Azure CLI response: {}. Output: {}",
-                                e, stdout
+                                "Failed to parse Azure CLI response: {}. Output (truncated): {}",
+                                e, stdout.chars().take(200).collect::<String>()
                             )),
                         })
                     }
@@ -264,8 +264,7 @@ pub async fn delete_azure_resource(resource_id: String) -> Result<CommandRespons
         if part == &"resourceGroups" && i + 1 < parts.len() {
             resource_group = parts[i + 1].to_string();
         }
-        if i > 0 && parts[i - 1] == "providers" && i < parts.len()
-            && i + 1 < parts.len() {
+        if i > 0 && parts[i - 1] == "providers" && i < parts.len() && i + 1 < parts.len() {
             resource_name = parts[i + 1].to_string();
         }
     }

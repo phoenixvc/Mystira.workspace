@@ -1,5 +1,5 @@
 {
-  "$schema": "https://raw.githubusercontent.com/tauri-apps/tauri/dev/crates/tauri-cli/schema.json",
+  "$schema": "https://schema.tauri.app/config/2",
   "productName": "Mystira DevHub",
   "version": "0.1.0",
   "identifier": "com.mystira.devhub",
@@ -22,7 +22,7 @@
       }
     ],
     "security": {
-      "csp": null
+      "csp": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' https:"
     }
   },
   "bundle": {
