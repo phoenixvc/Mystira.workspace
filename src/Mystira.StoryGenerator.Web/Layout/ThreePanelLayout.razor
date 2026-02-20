@@ -565,8 +565,25 @@
 
             await LocalStorage.RemoveItemAsync("prePopulatedMessage");
 
+            // If no legacy chat session exists, create one so the YAML preview panel has content.
             if (CurrentChat == null)
-                return;
+            {
+                var title = ExtractTitleFromYaml(yaml) ?? "Completed Story";
+                CurrentChat = new StoryGeneratorChatHistory
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    Title = title,
+                    CreatedAt = DateTime.Now,
+                    Messages = new List<StoryGeneratorChatMessage>()
+                };
+                CurrentChat.Messages.Add(new StoryGeneratorChatMessage
+                {
+                    Role = "system",
+                    Content = "Story completed via Agentic Mode.",
+                    Timestamp = DateTime.Now
+                });
+                ChatHistories.Insert(0, CurrentChat);
+            }
 
             CurrentChat.YamlSnapshot = yaml;
 
@@ -585,12 +602,35 @@
             YamlContent = yaml;
 
             await LocalStorage.SetItemAsync(ChatsStorageKey, ChatHistories);
+
+            // Save to new-format session storage (Story Library).
+            // EnsureInitializedAsync first so _currentSession is populated if one exists.
+            await ChatSessionService.EnsureInitializedAsync();
+            if (ChatSessionService.CurrentSession == null)
+            {
+                await ChatSessionService.CreateNewSessionAsync(CurrentChat.Title);
+            }
             await ChatSessionService.SaveYamlSnapshotAsync(yaml);
         }
         catch (Exception ex)
         {
             Logger.LogWarning(ex, "Failed to apply pre-populated YAML from agent mode");
         }
+    }
+
+    private static string? ExtractTitleFromYaml(string yaml)
+    {
+        foreach (var line in yaml.Split('\n'))
+        {
+            var trimmed = line.Trim();
+            if (trimmed.StartsWith("title:", StringComparison.OrdinalIgnoreCase))
+            {
+                var value = trimmed["title:".Length..].Trim().Trim('"', '\'');
+                if (!string.IsNullOrWhiteSpace(value))
+                    return value.Length > 60 ? value[..60] : value;
+            }
+        }
+        return null;
     }
 
     private async Task RefreshChatSessionAsync()
