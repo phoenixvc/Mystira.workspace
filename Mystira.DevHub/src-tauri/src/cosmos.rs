@@ -162,6 +162,7 @@ pub async fn check_azure_cli_login() -> Result<AzureLoginStatus, String> {
 
 /// Run a migration between Cosmos DB instances
 #[tauri::command]
+#[allow(clippy::too_many_arguments)]
 pub async fn migration_run(
     migration_type: String,
     source_cosmos: Option<String>,

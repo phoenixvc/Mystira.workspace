@@ -264,10 +264,9 @@ pub async fn delete_azure_resource(resource_id: String) -> Result<CommandRespons
         if part == &"resourceGroups" && i + 1 < parts.len() {
             resource_group = parts[i + 1].to_string();
         }
-        if i > 0 && parts[i - 1] == "providers" && i < parts.len() {
-            if i + 1 < parts.len() {
-                resource_name = parts[i + 1].to_string();
-            }
+        if i > 0 && parts[i - 1] == "providers" && i < parts.len()
+            && i + 1 < parts.len() {
+            resource_name = parts[i + 1].to_string();
         }
     }
 
@@ -312,7 +311,7 @@ pub async fn delete_azure_resource(resource_id: String) -> Result<CommandRespons
                     result: Some(serde_json::json!({
                         "message": format!("Resource {} deleted successfully", resource_name)
                     })),
-                    message: Some(format!("Resource deleted successfully")),
+                    message: Some("Resource deleted successfully".to_string()),
                     error: None,
                 })
             } else {
