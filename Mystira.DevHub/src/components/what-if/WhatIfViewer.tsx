@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
-import type { WhatIfChange } from '../../types';
-import { WhatIfChangeItem, WhatIfSummary, WhatIfWarnings } from './components';
+import { useEffect, useState } from "react";
+import type { WhatIfChange } from "../../types";
+import { WhatIfChangeItem, WhatIfSummary, WhatIfWarnings } from "./components";
 
 interface WhatIfViewerProps {
   changes?: WhatIfChange[];
@@ -18,19 +18,27 @@ function WhatIfViewer({
   onSelectionChange,
   showSelection = false,
   compact = false,
-  defaultResourceGroup = 'mys-dev-mystira-rg-san',
+  defaultResourceGroup = "mys-dev-mystira-rg-san",
   resourceGroupMappings = {},
 }: WhatIfViewerProps) {
-  const [expandedResources, setExpandedResources] = useState<Set<string>>(new Set());
-  const [localChanges, setLocalChanges] = useState<WhatIfChange[]>(changes || []);
-  const [editingResourceGroup, setEditingResourceGroup] = useState<string | null>(null);
-  const [tempResourceGroup, setTempResourceGroup] = useState<string>('');
+  const [expandedResources, setExpandedResources] = useState<Set<string>>(
+    new Set(),
+  );
+  const [localChanges, setLocalChanges] = useState<WhatIfChange[]>(
+    changes || [],
+  );
+  const [editingResourceGroup, setEditingResourceGroup] = useState<
+    string | null
+  >(null);
+  const [tempResourceGroup, setTempResourceGroup] = useState<string>("");
 
   useEffect(() => {
     if (changes) {
       const withSelection = changes.map((c) => {
         const resourceGroup =
-          c.resourceGroup || resourceGroupMappings[c.resourceType] || defaultResourceGroup;
+          c.resourceGroup ||
+          resourceGroupMappings[c.resourceType] ||
+          defaultResourceGroup;
         return { ...c, selected: c.selected !== false, resourceGroup };
       });
       setLocalChanges(withSelection);
@@ -39,7 +47,9 @@ function WhatIfViewer({
 
   const toggleResourceSelection = (resourceName: string) => {
     const updated = localChanges.map((change) =>
-      change.resourceName === resourceName ? { ...change, selected: !change.selected } : change
+      change.resourceName === resourceName
+        ? { ...change, selected: !change.selected }
+        : change,
     );
     setLocalChanges(updated);
     if (onSelectionChange) {
@@ -49,7 +59,9 @@ function WhatIfViewer({
 
   const updateResourceGroup = (resourceName: string, resourceGroup: string) => {
     const updated = localChanges.map((change) =>
-      change.resourceName === resourceName ? { ...change, resourceGroup } : change
+      change.resourceName === resourceName
+        ? { ...change, resourceGroup }
+        : change,
     );
     setLocalChanges(updated);
     setEditingResourceGroup(null);
@@ -59,7 +71,10 @@ function WhatIfViewer({
   };
 
   const selectAll = () => {
-    const updated = localChanges.map((change) => ({ ...change, selected: true }));
+    const updated = localChanges.map((change) => ({
+      ...change,
+      selected: true,
+    }));
     setLocalChanges(updated);
     if (onSelectionChange) {
       onSelectionChange(updated);
@@ -67,7 +82,10 @@ function WhatIfViewer({
   };
 
   const deselectAll = () => {
-    const updated = localChanges.map((change) => ({ ...change, selected: false }));
+    const updated = localChanges.map((change) => ({
+      ...change,
+      selected: false,
+    }));
     setLocalChanges(updated);
     if (onSelectionChange) {
       onSelectionChange(updated);
@@ -87,19 +105,31 @@ function WhatIfViewer({
   };
 
   const selectedCount = localChanges.filter((c) => c.selected).length;
-  const createCount = localChanges.filter((c) => c.changeType === 'create').length;
-  const modifyCount = localChanges.filter((c) => c.changeType === 'modify').length;
-  const deleteCount = localChanges.filter((c) => c.changeType === 'delete').length;
-  const noChangeCount = localChanges.filter((c) => c.changeType === 'noChange').length;
+  const createCount = localChanges.filter(
+    (c) => c.changeType === "create",
+  ).length;
+  const modifyCount = localChanges.filter(
+    (c) => c.changeType === "modify",
+  ).length;
+  const deleteCount = localChanges.filter(
+    (c) => c.changeType === "delete",
+  ).length;
+  const noChangeCount = localChanges.filter(
+    (c) => c.changeType === "noChange",
+  ).length;
 
   if (loading) {
     return (
-      <div className={`border border-gray-200 dark:border-gray-700 rounded-lg ${compact ? 'p-4' : 'p-8'}`}>
+      <div
+        className={`border border-gray-200 dark:border-gray-700 rounded-lg ${compact ? "p-4" : "p-8"}`}
+      >
         <div className="flex items-center justify-center">
           <div
-            className={`animate-spin rounded-full ${compact ? 'h-6 w-6' : 'h-12 w-12'} border-b-2 border-blue-600 dark:border-blue-400 mr-3`}
+            className={`animate-spin rounded-full ${compact ? "h-6 w-6" : "h-12 w-12"} border-b-2 border-blue-600 dark:border-blue-400 mr-3`}
           ></div>
-          <div className={`text-gray-700 dark:text-gray-300 ${compact ? 'text-xs' : ''}`}>
+          <div
+            className={`text-gray-700 dark:text-gray-300 ${compact ? "text-xs" : ""}`}
+          >
             Analyzing infrastructure changes...
           </div>
         </div>
@@ -109,12 +139,18 @@ function WhatIfViewer({
 
   if (!localChanges || localChanges.length === 0) {
     return (
-      <div className={`border border-gray-200 dark:border-gray-700 rounded-lg ${compact ? 'p-4' : 'p-8'} text-center`}>
-        <div className={`${compact ? 'text-2xl' : 'text-4xl'} mb-3`}>📋</div>
-        <div className={`text-gray-700 dark:text-gray-300 font-medium ${compact ? 'text-xs' : 'mb-2'}`}>
+      <div
+        className={`border border-gray-200 dark:border-gray-700 rounded-lg ${compact ? "p-4" : "p-8"} text-center`}
+      >
+        <div className={`${compact ? "text-2xl" : "text-4xl"} mb-3`}>📋</div>
+        <div
+          className={`text-gray-700 dark:text-gray-300 font-medium ${compact ? "text-xs" : "mb-2"}`}
+        >
           No Changes Detected
         </div>
-        <div className={`${compact ? 'text-[10px]' : 'text-sm'} text-gray-500 dark:text-gray-400`}>
+        <div
+          className={`${compact ? "text-[10px]" : "text-sm"} text-gray-500 dark:text-gray-400`}
+        >
           Infrastructure is up to date with the template
         </div>
       </div>
@@ -122,22 +158,28 @@ function WhatIfViewer({
   }
 
   return (
-    <div className={`border border-gray-200 dark:border-gray-700 rounded-lg ${compact ? 'p-3' : 'p-6'} bg-white dark:bg-gray-800`}>
+    <div
+      className={`border border-gray-200 dark:border-gray-700 rounded-lg ${compact ? "p-3" : "p-6"} bg-white dark:bg-gray-800`}
+    >
       {showSelection && (
-        <div className={`flex items-center justify-between ${compact ? 'mb-2' : 'mb-4'}`}>
-          <div className={`${compact ? 'text-xs' : 'text-sm'} text-gray-600 dark:text-gray-400`}>
+        <div
+          className={`flex items-center justify-between ${compact ? "mb-2" : "mb-4"}`}
+        >
+          <div
+            className={`${compact ? "text-xs" : "text-sm"} text-gray-600 dark:text-gray-400`}
+          >
             {selectedCount} of {localChanges.length} selected
           </div>
           <div className="flex gap-2">
             <button
               onClick={selectAll}
-              className={`${compact ? 'text-[10px] px-2 py-1' : 'text-xs px-3 py-1.5'} bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors`}
+              className={`${compact ? "text-[10px] px-2 py-1" : "text-xs px-3 py-1.5"} bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors`}
             >
               Select All
             </button>
             <button
               onClick={deselectAll}
-              className={`${compact ? 'text-[10px] px-2 py-1' : 'text-xs px-3 py-1.5'} bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors`}
+              className={`${compact ? "text-[10px] px-2 py-1" : "text-xs px-3 py-1.5"} bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors`}
             >
               Deselect All
             </button>
@@ -153,7 +195,9 @@ function WhatIfViewer({
         compact={compact}
       />
 
-      <div className={`divide-y divide-gray-200 dark:divide-gray-700 ${compact ? 'max-h-48' : 'max-h-96'} overflow-y-auto`}>
+      <div
+        className={`divide-y divide-gray-200 dark:divide-gray-700 ${compact ? "max-h-48" : "max-h-96"} overflow-y-auto`}
+      >
         {localChanges.map((change, index) => (
           <WhatIfChangeItem
             key={index}
@@ -188,4 +232,3 @@ function WhatIfViewer({
 }
 
 export default WhatIfViewer;
-

@@ -1,6 +1,6 @@
-import type { WorkflowStatus } from '../../../types';
-import { formatTimeSince } from '../../services/utils/serviceUtils';
-import { CliBuildLogsViewer } from './CliBuildLogsViewer';
+import type { WorkflowStatus } from "../../../types";
+import { formatTimeSince } from "../../services/utils/serviceUtils";
+import { CliBuildLogsViewer } from "./CliBuildLogsViewer";
 
 interface InfrastructurePanelHeaderProps {
   environment: string;
@@ -15,21 +15,24 @@ interface InfrastructurePanelHeaderProps {
   onBuildCli: () => void;
 }
 
-const environmentColors: Record<string, { bg: string; text: string; border: string; warning?: boolean }> = {
+const environmentColors: Record<
+  string,
+  { bg: string; text: string; border: string; warning?: boolean }
+> = {
   dev: {
-    bg: 'bg-green-100 dark:bg-green-900/30',
-    text: 'text-green-700 dark:text-green-300',
-    border: 'border-green-200 dark:border-green-800',
+    bg: "bg-green-100 dark:bg-green-900/30",
+    text: "text-green-700 dark:text-green-300",
+    border: "border-green-200 dark:border-green-800",
   },
   staging: {
-    bg: 'bg-yellow-100 dark:bg-yellow-900/30',
-    text: 'text-yellow-700 dark:text-yellow-300',
-    border: 'border-yellow-200 dark:border-yellow-800',
+    bg: "bg-yellow-100 dark:bg-yellow-900/30",
+    text: "text-yellow-700 dark:text-yellow-300",
+    border: "border-yellow-200 dark:border-yellow-800",
   },
   prod: {
-    bg: 'bg-red-100 dark:bg-red-900/30',
-    text: 'text-red-700 dark:text-red-300',
-    border: 'border-red-200 dark:border-red-800',
+    bg: "bg-red-100 dark:bg-red-900/30",
+    text: "text-red-700 dark:text-red-300",
+    border: "border-red-200 dark:border-red-800",
     warning: true,
   },
 };
@@ -46,13 +49,15 @@ export function InfrastructurePanelHeader({
   onShowCliBuildLogs,
   onBuildCli,
 }: InfrastructurePanelHeaderProps) {
-  const handleEnvironmentChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
+  const handleEnvironmentChange = async (
+    e: React.ChangeEvent<HTMLSelectElement>,
+  ) => {
     const newEnv = e.target.value;
     await onEnvironmentChange(newEnv);
   };
 
   const envColors = environmentColors[environment] || environmentColors.dev;
-  const workflowSuccess = workflowStatus?.conclusion === 'success';
+  const workflowSuccess = workflowStatus?.conclusion === "success";
 
   return (
     <div className="mb-4">
@@ -62,7 +67,9 @@ export function InfrastructurePanelHeader({
             Infrastructure Control Panel
           </h2>
           <div className="flex items-center gap-2 flex-wrap">
-            <label className="text-sm text-gray-600 dark:text-gray-400">Environment:</label>
+            <label className="text-sm text-gray-600 dark:text-gray-400">
+              Environment:
+            </label>
             <div className="relative">
               <select
                 value={environment}
@@ -77,8 +84,18 @@ export function InfrastructurePanelHeader({
                 <option value="prod">prod</option>
               </select>
               <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
-                <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                <svg
+                  className="w-4 h-4 text-gray-500"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M19 9l-7 7-7-7"
+                  />
                 </svg>
               </div>
             </div>
@@ -99,26 +116,37 @@ export function InfrastructurePanelHeader({
         <div className="flex flex-row sm:flex-col items-center sm:items-end gap-2 sm:gap-3">
           {/* Workflow Status */}
           {workflowStatus?.updatedAt && (
-            <div className="flex items-center gap-2" title={`Last workflow: ${new Date(workflowStatus.updatedAt).toLocaleString()} - ${workflowStatus.conclusion || 'unknown'}`}>
-              <div className="text-xs text-gray-500 dark:text-gray-400 hidden sm:block">Workflow</div>
-              <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-mono font-semibold text-sm ${
-                workflowSuccess
-                  ? 'bg-green-900/20 dark:bg-green-900/30 text-green-600 dark:text-green-400'
-                  : 'bg-amber-900/20 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400'
-              }`}>
+            <div
+              className="flex items-center gap-2"
+              title={`Last workflow: ${new Date(workflowStatus.updatedAt).toLocaleString()} - ${workflowStatus.conclusion || "unknown"}`}
+            >
+              <div className="text-xs text-gray-500 dark:text-gray-400 hidden sm:block">
+                Workflow
+              </div>
+              <div
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-mono font-semibold text-sm ${
+                  workflowSuccess
+                    ? "bg-green-900/20 dark:bg-green-900/30 text-green-600 dark:text-green-400"
+                    : "bg-amber-900/20 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400"
+                }`}
+              >
                 {workflowSuccess ? (
                   <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
                 ) : (
                   <span className="w-2 h-2 rounded-full bg-amber-500" />
                 )}
-                {formatTimeSince(new Date(workflowStatus.updatedAt).getTime()) || 'Unknown'}
+                {formatTimeSince(
+                  new Date(workflowStatus.updatedAt).getTime(),
+                ) || "Unknown"}
               </div>
             </div>
           )}
 
           {/* CLI Build Status */}
           <div className="flex items-center gap-2">
-            <div className="text-xs text-gray-500 dark:text-gray-400 hidden sm:block">CLI</div>
+            <div className="text-xs text-gray-500 dark:text-gray-400 hidden sm:block">
+              CLI
+            </div>
             {cliBuildTime ? (
               <div className="flex items-center gap-2">
                 <div
@@ -126,7 +154,7 @@ export function InfrastructurePanelHeader({
                   title={`Last CLI build: ${new Date(cliBuildTime).toLocaleString()}`}
                 >
                   <span className="w-2 h-2 rounded-full bg-green-500" />
-                  {formatTimeSince(cliBuildTime) || 'Unknown'}
+                  {formatTimeSince(cliBuildTime) || "Unknown"}
                 </div>
                 <button
                   onClick={() => {
@@ -143,7 +171,9 @@ export function InfrastructurePanelHeader({
                       <span className="hidden sm:inline">Building...</span>
                     </>
                   ) : (
-                    <>🔨 <span className="hidden sm:inline">Rebuild</span></>
+                    <>
+                      🔨 <span className="hidden sm:inline">Rebuild</span>
+                    </>
                   )}
                 </button>
               </div>
@@ -168,7 +198,9 @@ export function InfrastructurePanelHeader({
                       <span className="hidden sm:inline">Building...</span>
                     </>
                   ) : (
-                    <>🔨 <span className="hidden sm:inline">Build CLI</span></>
+                    <>
+                      🔨 <span className="hidden sm:inline">Build CLI</span>
+                    </>
                   )}
                 </button>
               </div>
@@ -176,7 +208,7 @@ export function InfrastructurePanelHeader({
           </div>
         </div>
       </div>
-      
+
       {showCliBuildLogs && (
         <div className="mb-6">
           <CliBuildLogsViewer
@@ -190,4 +222,3 @@ export function InfrastructurePanelHeader({
     </div>
   );
 }
-

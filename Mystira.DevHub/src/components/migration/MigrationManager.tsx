@@ -1,54 +1,60 @@
-import { useState } from 'react';
-import { MigrationConfigForm } from './MigrationConfigForm';
-import { MigrationProgress } from './MigrationProgress';
-import { MigrationResults } from './MigrationResults';
-import { MigrationStepIndicator } from './MigrationStepIndicator';
-import { ResourceSelectionForm } from './ResourceSelectionForm';
-import { useMigration } from './hooks/useMigration';
-import { MigrationConfig, MigrationStep, ResourceSelection } from './types';
-import { ToastContainer, useToast } from '../ui';
+import { useState } from "react";
+import { MigrationConfigForm } from "./MigrationConfigForm";
+import { MigrationProgress } from "./MigrationProgress";
+import { MigrationResults } from "./MigrationResults";
+import { MigrationStepIndicator } from "./MigrationStepIndicator";
+import { ResourceSelectionForm } from "./ResourceSelectionForm";
+import { useMigration } from "./hooks/useMigration";
+import { MigrationConfig, MigrationStep, ResourceSelection } from "./types";
+import { ToastContainer, useToast } from "../ui";
 
 function MigrationManager() {
   const { toasts, showToast, dismissToast } = useToast();
-  const [currentStep, setCurrentStep] = useState<MigrationStep>('configure');
+  const [currentStep, setCurrentStep] = useState<MigrationStep>("configure");
   const [config, setConfig] = useState<MigrationConfig>({
-    sourceEnvironment: '',
-    destEnvironment: '',
-    sourceCosmosConnection: '',
-    destCosmosConnection: '',
-    sourceStorageConnection: '',
-    destStorageConnection: '',
-    sourceDatabaseName: 'MystiraAppDb',
-    destDatabaseName: 'MystiraAppDb',
-    containerName: 'media-assets',
+    sourceEnvironment: "",
+    destEnvironment: "",
+    sourceCosmosConnection: "",
+    destCosmosConnection: "",
+    sourceStorageConnection: "",
+    destStorageConnection: "",
+    sourceDatabaseName: "MystiraAppDb",
+    destDatabaseName: "MystiraAppDb",
+    containerName: "media-assets",
     dryRun: false,
   });
 
-  const [selectedResources, setSelectedResources] = useState<ResourceSelection>({
-    // Core content
-    scenarios: true,
-    bundles: true,
-    mediaMetadata: true,
-    // User data
-    userProfiles: true,
-    gameSessions: true,
-    accounts: true,
-    compassTrackings: true,
-    // Reference data
-    characterMaps: true,
-    characterMapFiles: true,
-    characterMediaMetadataFiles: true,
-    avatarConfigurationFiles: true,
-    badgeConfigurations: true,
-    // Master data
-    masterData: false,
-    // Storage
-    blobStorage: false,
-  });
+  const [selectedResources, setSelectedResources] = useState<ResourceSelection>(
+    {
+      // Core content
+      scenarios: true,
+      bundles: true,
+      mediaMetadata: true,
+      // User data
+      userProfiles: true,
+      gameSessions: true,
+      accounts: true,
+      compassTrackings: true,
+      // Reference data
+      characterMaps: true,
+      characterMapFiles: true,
+      characterMediaMetadataFiles: true,
+      avatarConfigurationFiles: true,
+      badgeConfigurations: true,
+      // Master data
+      masterData: false,
+      // Storage
+      blobStorage: false,
+    },
+  );
 
-  const { progress, migrationResults, validateConfig, runMigration } = useMigration();
+  const { progress, migrationResults, validateConfig, runMigration } =
+    useMigration();
 
-  const handleConfigChange = (field: keyof MigrationConfig, value: string | boolean) => {
+  const handleConfigChange = (
+    field: keyof MigrationConfig,
+    value: string | boolean,
+  ) => {
     setConfig((prev) => ({ ...prev, [field]: value }));
   };
 
@@ -97,27 +103,27 @@ function MigrationManager() {
   const startMigration = async () => {
     const validationError = validateConfig(config, selectedResources);
     if (validationError) {
-      showToast(validationError, 'error', { duration: 5000 });
+      showToast(validationError, "error", { duration: 5000 });
       return;
     }
 
-    setCurrentStep('running');
+    setCurrentStep("running");
     await runMigration(config, selectedResources);
-    setCurrentStep('complete');
+    setCurrentStep("complete");
   };
 
   const resetMigration = () => {
-    setCurrentStep('configure');
+    setCurrentStep("configure");
     setConfig({
-      sourceEnvironment: '',
-      destEnvironment: '',
-      sourceCosmosConnection: '',
-      destCosmosConnection: '',
-      sourceStorageConnection: '',
-      destStorageConnection: '',
-      sourceDatabaseName: 'MystiraAppDb',
-      destDatabaseName: 'MystiraAppDb',
-      containerName: 'media-assets',
+      sourceEnvironment: "",
+      destEnvironment: "",
+      sourceCosmosConnection: "",
+      destCosmosConnection: "",
+      sourceStorageConnection: "",
+      destStorageConnection: "",
+      sourceDatabaseName: "MystiraAppDb",
+      destDatabaseName: "MystiraAppDb",
+      containerName: "media-assets",
       dryRun: false,
     });
     setSelectedResources({
@@ -148,40 +154,46 @@ function MigrationManager() {
       <ToastContainer toasts={toasts} onClose={dismissToast} />
       <div className="max-w-6xl mx-auto">
         <div className="mb-8">
-          <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Migration Manager</h2>
+          <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+            Migration Manager
+          </h2>
           <p className="text-gray-600 dark:text-gray-400">
-            Migrate Cosmos DB data and Azure Blob Storage from old environments to new environments.
-            Select preset environments to auto-fetch connection strings from Azure.
+            Migrate Cosmos DB data and Azure Blob Storage from old environments
+            to new environments. Select preset environments to auto-fetch
+            connection strings from Azure.
           </p>
         </div>
 
         <MigrationStepIndicator currentStep={currentStep} />
 
-        {currentStep === 'configure' && (
+        {currentStep === "configure" && (
           <MigrationConfigForm
             config={config}
             onConfigChange={handleConfigChange}
-            onNext={() => setCurrentStep('select')}
+            onNext={() => setCurrentStep("select")}
           />
         )}
 
-        {currentStep === 'select' && (
+        {currentStep === "select" && (
           <ResourceSelectionForm
             selectedResources={selectedResources}
             onResourceToggle={handleResourceToggle}
             onSelectAll={selectAll}
             onSelectNone={selectNone}
-            onBack={() => setCurrentStep('configure')}
+            onBack={() => setCurrentStep("configure")}
             onStart={startMigration}
           />
         )}
 
-        {currentStep === 'running' && (
+        {currentStep === "running" && (
           <MigrationProgress currentOperation={progress.currentOperation} />
         )}
 
-        {currentStep === 'complete' && migrationResults && (
-          <MigrationResults results={migrationResults} onReset={resetMigration} />
+        {currentStep === "complete" && migrationResults && (
+          <MigrationResults
+            results={migrationResults}
+            onReset={resetMigration}
+          />
         )}
       </div>
     </div>

@@ -1,4 +1,4 @@
-import { invoke } from '@tauri-apps/api/core';
+import { invoke } from "@tauri-apps/api/core";
 
 interface RepositoryConfigProps {
   repoRoot: string;
@@ -17,30 +17,32 @@ export function RepositoryConfig({
 }: RepositoryConfigProps) {
   const handleBrowse = async () => {
     try {
-      const { open } = await import('@tauri-apps/plugin-dialog');
+      const { open } = await import("@tauri-apps/plugin-dialog");
       const selected = await open({
         directory: true,
         multiple: false,
         defaultPath: repoRoot || undefined,
       });
 
-      if (selected && typeof selected === 'string') {
+      if (selected && typeof selected === "string") {
         onRepoRootChange(selected);
         try {
-          await invoke<string>('get_current_branch', { repoRoot: selected });
+          await invoke<string>("get_current_branch", { repoRoot: selected });
         } catch (error) {
-          console.warn('Failed to get current branch:', error);
+          console.warn("Failed to get current branch:", error);
         }
       }
     } catch (error) {
-      console.error('Failed to pick repo root:', error);
+      console.error("Failed to pick repo root:", error);
     }
   };
 
   return (
     <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700 flex items-center gap-3 flex-wrap">
       <div className="flex items-center gap-2 flex-1 min-w-0">
-        <label className="text-xs font-medium text-gray-600 dark:text-gray-400 whitespace-nowrap">Repo:</label>
+        <label className="text-xs font-medium text-gray-600 dark:text-gray-400 whitespace-nowrap">
+          Repo:
+        </label>
         <input
           type="text"
           value={repoRoot}
@@ -57,7 +59,9 @@ export function RepositoryConfig({
       </div>
       {currentBranch && (
         <div className="flex items-center gap-2 flex-shrink-0">
-          <span className="text-xs text-gray-600 dark:text-gray-400">Branch:</span>
+          <span className="text-xs text-gray-600 dark:text-gray-400">
+            Branch:
+          </span>
           <span className="px-2 py-0.5 text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 rounded font-mono">
             {currentBranch}
           </span>
@@ -75,4 +79,3 @@ export function RepositoryConfig({
     </div>
   );
 }
-

@@ -4,35 +4,47 @@
 
 // Types
 export type {
-  Environment, EnvironmentConfig, EnvironmentHealthStatus, EnvironmentPreset, EnvironmentStatus, EnvironmentUrls, EnvironmentWarning
-} from './types';
+  Environment,
+  EnvironmentConfig,
+  EnvironmentHealthStatus,
+  EnvironmentPreset,
+  EnvironmentStatus,
+  EnvironmentUrls,
+  EnvironmentWarning,
+} from "./types";
 
-export { ENVIRONMENT_CONFIG, STATUS_INDICATORS } from './types';
+export { ENVIRONMENT_CONFIG, STATUS_INDICATORS } from "./types";
 
 // Components
-export { EnvironmentBanner } from './EnvironmentBanner';
+export { EnvironmentBanner } from "./EnvironmentBanner";
 // EnvironmentContextWarning only exports a utility function, not a component
-export { EnvironmentPresetSelector } from './EnvironmentPresetSelector';
+export { EnvironmentPresetSelector } from "./EnvironmentPresetSelector";
 export {
   DEFAULT_PRESETS,
   deletePreset,
   getAllPresets,
   getSavedPresets,
-  savePreset
-} from './EnvironmentPresets';
-export { EnvironmentSwitcher } from './EnvironmentSwitcher';
+  savePreset,
+} from "./EnvironmentPresets";
+export { EnvironmentSwitcher } from "./EnvironmentSwitcher";
 
 // Utils
-export { checkEnvironmentContext } from './EnvironmentContextWarning';
+export { checkEnvironmentContext } from "./EnvironmentContextWarning";
 
 // Hooks
-export { useEnvironmentManagement } from '../hooks/useEnvironmentManagement';
+export { useEnvironmentManagement } from "../hooks/useEnvironmentManagement";
 
 // =============================================================================
 // Helper Functions
 // =============================================================================
 
-import { ENVIRONMENT_CONFIG, Environment, EnvironmentWarning, STATUS_INDICATORS, type EnvironmentHealthStatus } from './types';
+import {
+  ENVIRONMENT_CONFIG,
+  Environment,
+  EnvironmentWarning,
+  STATUS_INDICATORS,
+  type EnvironmentHealthStatus,
+} from "./types";
 
 /**
  * Get the display configuration for an environment
@@ -44,21 +56,26 @@ export function getEnvironmentDisplay(env: Environment) {
 /**
  * Get the status indicator for a health status
  */
-export function getStatusIndicator(status: EnvironmentHealthStatus | undefined) {
-  return STATUS_INDICATORS[status || 'unknown'];
+export function getStatusIndicator(
+  status: EnvironmentHealthStatus | undefined,
+) {
+  return STATUS_INDICATORS[status || "unknown"];
 }
 
 /**
  * Check if an environment is dangerous (prod)
  */
 export function isDangerousEnvironment(env: Environment): boolean {
-  return env === 'prod';
+  return env === "prod";
 }
 
 /**
  * Get environment badge styles
  */
-export function getEnvironmentBadgeStyles(env: Environment, isActive: boolean = false): string {
+export function getEnvironmentBadgeStyles(
+  env: Environment,
+  isActive: boolean = false,
+): string {
   const config = ENVIRONMENT_CONFIG[env];
   if (isActive) {
     return config.activeBg;
@@ -78,7 +95,7 @@ export function formatEnvironmentWarning(warning: EnvironmentWarning): string {
  */
 export function getServicesOnEnvironment(
   serviceEnvironments: Record<string, Environment>,
-  targetEnv: Environment
+  targetEnv: Environment,
 ): string[] {
   return Object.entries(serviceEnvironments)
     .filter(([, env]) => env === targetEnv)
@@ -89,11 +106,11 @@ export function getServicesOnEnvironment(
  * Count services per environment
  */
 export function countServicesByEnvironment(
-  serviceEnvironments: Record<string, Environment>
+  serviceEnvironments: Record<string, Environment>,
 ): Record<Environment, number> {
   const counts: Record<Environment, number> = { local: 0, dev: 0, prod: 0 };
 
-  Object.values(serviceEnvironments).forEach(env => {
+  Object.values(serviceEnvironments).forEach((env) => {
     counts[env] = (counts[env] || 0) + 1;
   });
 
@@ -103,7 +120,9 @@ export function countServicesByEnvironment(
 /**
  * Generate environment summary text
  */
-export function getEnvironmentSummary(serviceEnvironments: Record<string, Environment>): string {
+export function getEnvironmentSummary(
+  serviceEnvironments: Record<string, Environment>,
+): string {
   const counts = countServicesByEnvironment(serviceEnvironments);
   const parts: string[] = [];
 
@@ -111,5 +130,5 @@ export function getEnvironmentSummary(serviceEnvironments: Record<string, Enviro
   if (counts.dev > 0) parts.push(`${counts.dev} Dev`);
   if (counts.prod > 0) parts.push(`${counts.prod} Prod`);
 
-  return parts.length > 0 ? parts.join(' | ') : 'All Local';
+  return parts.length > 0 ? parts.join(" | ") : "All Local";
 }

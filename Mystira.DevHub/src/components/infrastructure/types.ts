@@ -1,6 +1,6 @@
-export type ActionType = 'validate' | 'preview' | 'deploy' | 'destroy';
+export type ActionType = "validate" | "preview" | "deploy" | "destroy";
 
-export type ButtonVariant = 'primary' | 'warning' | 'success' | 'danger';
+export type ButtonVariant = "primary" | "warning" | "success" | "danger";
 
 export interface ActionButton {
   id: ActionType | string;

@@ -1,11 +1,11 @@
-import type { ResourceGroupConvention, WhatIfChange } from '../../../types';
-import { WhatIfViewer } from '../../what-if';
+import type { ResourceGroupConvention, WhatIfChange } from "../../../types";
+import { WhatIfViewer } from "../../what-if";
 
 interface WhatIfViewerSectionProps {
   whatIfChanges: WhatIfChange[];
   loading: boolean;
   hasPreviewed: boolean;
-  deploymentMethod: 'github' | 'azure-cli';
+  deploymentMethod: "github" | "azure-cli";
   resourceGroupConfig: ResourceGroupConvention;
   onWhatIfChangesChange: (changes: WhatIfChange[]) => void;
 }
@@ -29,7 +29,10 @@ export function WhatIfViewerSection({
         <div className="flex gap-2">
           <button
             onClick={() => {
-              const updated = whatIfChanges.map(c => ({ ...c, selected: true }));
+              const updated = whatIfChanges.map((c) => ({
+                ...c,
+                selected: true,
+              }));
               onWhatIfChangesChange(updated);
             }}
             className="px-3 py-1.5 text-xs bg-blue-100 dark:bg-blue-900 hover:bg-blue-200 dark:hover:bg-blue-800 text-blue-700 dark:text-blue-300 rounded"
@@ -38,7 +41,10 @@ export function WhatIfViewerSection({
           </button>
           <button
             onClick={() => {
-              const updated = whatIfChanges.map(c => ({ ...c, selected: false }));
+              const updated = whatIfChanges.map((c) => ({
+                ...c,
+                selected: false,
+              }));
               onWhatIfChangesChange(updated);
             }}
             className="px-3 py-1.5 text-xs bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded"
@@ -47,10 +53,10 @@ export function WhatIfViewerSection({
           </button>
         </div>
       </div>
-      <WhatIfViewer 
-        changes={whatIfChanges} 
+      <WhatIfViewer
+        changes={whatIfChanges}
         loading={loading}
-        showSelection={hasPreviewed && deploymentMethod === 'azure-cli'}
+        showSelection={hasPreviewed && deploymentMethod === "azure-cli"}
         onSelectionChange={onWhatIfChangesChange}
         defaultResourceGroup={resourceGroupConfig.defaultResourceGroup}
         resourceGroupMappings={resourceGroupConfig.resourceTypeMappings || {}}
@@ -58,4 +64,3 @@ export function WhatIfViewerSection({
     </div>
   );
 }
-

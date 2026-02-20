@@ -1,15 +1,19 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { useResourcesStore } from '../resourcesStore';
-import { mockTauriInvoke, mockAzureResourcesResponse, createTestResource } from '../../test/utils';
+import { describe, it, expect, beforeEach, vi } from "vitest";
+import { useResourcesStore } from "../resourcesStore";
+import {
+  mockTauriInvoke,
+  mockAzureResourcesResponse,
+  createTestResource,
+} from "../../test/utils";
 
-describe('resourcesStore', () => {
+describe("resourcesStore", () => {
   beforeEach(() => {
     useResourcesStore.getState().reset();
     vi.clearAllMocks();
   });
 
-  describe('initial state', () => {
-    it('should have empty resources', () => {
+  describe("initial state", () => {
+    it("should have empty resources", () => {
       const { resources, isLoading, error } = useResourcesStore.getState();
 
       expect(resources).toEqual([]);
@@ -18,10 +22,13 @@ describe('resourcesStore', () => {
     });
   });
 
-  describe('fetchResources', () => {
-    it('should fetch and map resources successfully', async () => {
+  describe("fetchResources", () => {
+    it("should fetch and map resources successfully", async () => {
       const testResource = createTestResource();
-      await mockTauriInvoke('get_azure_resources', mockAzureResourcesResponse([testResource]));
+      await mockTauriInvoke(
+        "get_azure_resources",
+        mockAzureResourcesResponse([testResource]),
+      );
 
       await useResourcesStore.getState().fetchResources();
 
@@ -30,15 +37,15 @@ describe('resourcesStore', () => {
       expect(isLoading).toBe(false);
       expect(error).toBeNull();
       expect(resources).toHaveLength(1);
-      expect(resources[0].name).toBe('testaccount');
-      expect(resources[0].type).toBe('Microsoft.Storage/storageAccounts');
-      expect(resources[0].region).toBe('eastus');
+      expect(resources[0].name).toBe("testaccount");
+      expect(resources[0].type).toBe("Microsoft.Storage/storageAccounts");
+      expect(resources[0].region).toBe("eastus");
     });
 
-    it('should set error on failure', async () => {
-      await mockTauriInvoke('get_azure_resources', {
+    it("should set error on failure", async () => {
+      await mockTauriInvoke("get_azure_resources", {
         success: false,
-        error: 'Authentication failed',
+        error: "Authentication failed",
       });
 
       await useResourcesStore.getState().fetchResources();
@@ -46,12 +53,12 @@ describe('resourcesStore', () => {
       const { resources, isLoading, error } = useResourcesStore.getState();
 
       expect(isLoading).toBe(false);
-      expect(error).toBe('Authentication failed');
+      expect(error).toBe("Authentication failed");
       expect(resources).toEqual([]);
     });
 
-    it('should respect cache', async () => {
-      const { invoke } = vi.mocked(await import('@tauri-apps/api/core'));
+    it("should respect cache", async () => {
+      const { invoke } = vi.mocked(await import("@tauri-apps/api/core"));
       const testResource = createTestResource();
       invoke.mockResolvedValue(mockAzureResourcesResponse([testResource]));
 
@@ -64,8 +71,8 @@ describe('resourcesStore', () => {
       expect(invoke).toHaveBeenCalledTimes(1); // Still 1, cache was used
     });
 
-    it('should bypass cache with forceRefresh', async () => {
-      const { invoke } = vi.mocked(await import('@tauri-apps/api/core'));
+    it("should bypass cache with forceRefresh", async () => {
+      const { invoke } = vi.mocked(await import("@tauri-apps/api/core"));
       const testResource = createTestResource();
       invoke.mockResolvedValue(mockAzureResourcesResponse([testResource]));
 
@@ -78,9 +85,14 @@ describe('resourcesStore', () => {
       expect(invoke).toHaveBeenCalledTimes(2); // Cache bypassed
     });
 
-    it('should prevent duplicate concurrent requests', async () => {
-      const { invoke } = vi.mocked(await import('@tauri-apps/api/core'));
-      invoke.mockImplementation(() => new Promise(resolve => setTimeout(() => resolve(mockAzureResourcesResponse([])), 100)));
+    it("should prevent duplicate concurrent requests", async () => {
+      const { invoke } = vi.mocked(await import("@tauri-apps/api/core"));
+      invoke.mockImplementation(
+        () =>
+          new Promise((resolve) =>
+            setTimeout(() => resolve(mockAzureResourcesResponse([])), 100),
+          ),
+      );
 
       // Start two fetches concurrently
       const promise1 = useResourcesStore.getState().fetchResources(true);
@@ -93,9 +105,12 @@ describe('resourcesStore', () => {
     });
   });
 
-  describe('clearCache', () => {
-    it('should clear cache timestamps', async () => {
-      await mockTauriInvoke('get_azure_resources', mockAzureResourcesResponse([createTestResource()]));
+  describe("clearCache", () => {
+    it("should clear cache timestamps", async () => {
+      await mockTauriInvoke(
+        "get_azure_resources",
+        mockAzureResourcesResponse([createTestResource()]),
+      );
       await useResourcesStore.getState().fetchResources();
 
       const { cacheValidUntil, lastFetched } = useResourcesStore.getState();
@@ -110,14 +125,18 @@ describe('resourcesStore', () => {
     });
   });
 
-  describe('reset', () => {
-    it('should reset to initial state', async () => {
-      await mockTauriInvoke('get_azure_resources', mockAzureResourcesResponse([createTestResource()]));
+  describe("reset", () => {
+    it("should reset to initial state", async () => {
+      await mockTauriInvoke(
+        "get_azure_resources",
+        mockAzureResourcesResponse([createTestResource()]),
+      );
       await useResourcesStore.getState().fetchResources();
 
       useResourcesStore.getState().reset();
 
-      const { resources, isLoading, error, lastFetched, cacheValidUntil } = useResourcesStore.getState();
+      const { resources, isLoading, error, lastFetched, cacheValidUntil } =
+        useResourcesStore.getState();
 
       expect(resources).toEqual([]);
       expect(isLoading).toBe(false);

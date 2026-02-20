@@ -1,8 +1,12 @@
-import type { ProjectInfo } from './ProjectDeploymentPlanner';
-import { ProjectDeploymentCard, ProjectDeploymentHeader } from './components';
-import { useProjectDeployment, type DeploymentError, type WorkflowDiscoveryStatus } from './hooks/useProjectDeployment';
+import type { ProjectInfo } from "./ProjectDeploymentPlanner";
+import { ProjectDeploymentCard, ProjectDeploymentHeader } from "./components";
+import {
+  useProjectDeployment,
+  type DeploymentError,
+  type WorkflowDiscoveryStatus,
+} from "./hooks/useProjectDeployment";
 
-export type { ProjectPipeline } from './types';
+export type { ProjectPipeline } from "./types";
 
 interface ProjectDeploymentProps {
   environment: string;
@@ -35,8 +39,9 @@ function ConfirmationDialog({
           Deploy Multiple Projects?
         </h3>
         <p className="text-gray-600 dark:text-gray-300 mb-6">
-          You are about to deploy <strong>{projectCount} projects</strong> simultaneously.
-          This will trigger {projectCount} GitHub Actions workflows.
+          You are about to deploy <strong>{projectCount} projects</strong>{" "}
+          simultaneously. This will trigger {projectCount} GitHub Actions
+          workflows.
         </p>
         <div className="flex gap-3 justify-end">
           <button
@@ -131,14 +136,23 @@ function WorkflowDiscoveryBanner({
           viewBox="0 0 24 24"
           aria-hidden="true"
         >
-          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+          <circle
+            className="opacity-25"
+            cx="12"
+            cy="12"
+            r="10"
+            stroke="currentColor"
+            strokeWidth="4"
+          />
           <path
             className="opacity-75"
             fill="currentColor"
             d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
           />
         </svg>
-        <span className="text-sm text-blue-700 dark:text-blue-300">Discovering available workflows...</span>
+        <span className="text-sm text-blue-700 dark:text-blue-300">
+          Discovering available workflows...
+        </span>
       </div>
     );
   }
@@ -151,13 +165,15 @@ function WorkflowDiscoveryBanner({
       >
         <div className="flex items-start justify-between">
           <div className="flex items-start gap-2">
-            <span className="text-yellow-500 flex-shrink-0" aria-hidden="true">⚠️</span>
+            <span className="text-yellow-500 flex-shrink-0" aria-hidden="true">
+              ⚠️
+            </span>
             <div>
               <p className="text-sm text-yellow-800 dark:text-yellow-200 font-medium">
                 Using default workflow list
               </p>
               <p className="text-xs text-yellow-700 dark:text-yellow-300 mt-0.5">
-                {status.error || 'Could not discover workflows from GitHub.'}
+                {status.error || "Could not discover workflows from GitHub."}
               </p>
             </div>
           </div>
@@ -209,7 +225,8 @@ function ProjectDeployment({
     refreshWorkflows,
   } = useProjectDeployment({ environment, projects });
 
-  const hasRetryableErrors = deploymentErrors.some(e => e.retryable) && failedProjects.size > 0;
+  const hasRetryableErrors =
+    deploymentErrors.some((e) => e.retryable) && failedProjects.size > 0;
 
   return (
     <div className="mb-8">
@@ -249,13 +266,19 @@ function ProjectDeployment({
           role="alert"
           className="mb-4 p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg flex items-start gap-3"
         >
-          <span className="text-yellow-500 flex-shrink-0 text-xl" aria-hidden="true">⚠️</span>
+          <span
+            className="text-yellow-500 flex-shrink-0 text-xl"
+            aria-hidden="true"
+          >
+            ⚠️
+          </span>
           <div>
             <p className="font-medium text-yellow-800 dark:text-yellow-200">
               Infrastructure Not Deployed
             </p>
             <p className="text-sm text-yellow-700 dark:text-yellow-300 mt-1">
-              Please complete Steps 1 and 2 to deploy infrastructure before deploying projects.
+              Please complete Steps 1 and 2 to deploy infrastructure before
+              deploying projects.
             </p>
           </div>
         </div>
@@ -274,9 +297,18 @@ function ProjectDeployment({
             isFailed={failedProjects.has(project.id)}
             availableWorkflows={availableWorkflows}
             onToggleSelection={() => toggleProjectSelection(project.id)}
-            onUpdatePipeline={(workflowFile) => updatePipeline(project.id, workflowFile)}
-            onToggleLogs={() => setShowLogs(prev => ({ ...prev, [project.id]: !prev[project.id] }))}
-            onRefSet={(el) => { logsEndRefs.current[project.id] = el; }}
+            onUpdatePipeline={(workflowFile) =>
+              updatePipeline(project.id, workflowFile)
+            }
+            onToggleLogs={() =>
+              setShowLogs((prev) => ({
+                ...prev,
+                [project.id]: !prev[project.id],
+              }))
+            }
+            onRefSet={(el) => {
+              logsEndRefs.current[project.id] = el;
+            }}
           />
         ))}
       </div>
@@ -291,7 +323,14 @@ function ProjectDeployment({
               fill="none"
               viewBox="0 0 24 24"
             >
-              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+              <circle
+                className="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                strokeWidth="4"
+              />
               <path
                 className="opacity-75"
                 fill="currentColor"
@@ -300,10 +339,12 @@ function ProjectDeployment({
             </svg>
             <div>
               <p className="font-medium text-blue-800 dark:text-blue-200">
-                Deploying {selectedProjects.size} project{selectedProjects.size > 1 ? 's' : ''}...
+                Deploying {selectedProjects.size} project
+                {selectedProjects.size > 1 ? "s" : ""}...
               </p>
               <p className="text-sm text-blue-700 dark:text-blue-300">
-                Workflows are being dispatched. Check the logs for real-time progress.
+                Workflows are being dispatched. Check the logs for real-time
+                progress.
               </p>
             </div>
           </div>

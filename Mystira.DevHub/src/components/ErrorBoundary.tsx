@@ -1,4 +1,4 @@
-import { Component, ErrorInfo, ReactNode } from 'react';
+import { Component, ErrorInfo, ReactNode } from "react";
 
 interface ErrorBoundaryProps {
   children: ReactNode;
@@ -26,7 +26,7 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
-    console.error('ErrorBoundary caught an error:', error, errorInfo);
+    console.error("ErrorBoundary caught an error:", error, errorInfo);
     this.setState({
       error,
       errorInfo,
@@ -104,7 +104,9 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
             </div>
 
             <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-              <h3 className="font-semibold text-blue-900 mb-2">ℹ️ What to do:</h3>
+              <h3 className="font-semibold text-blue-900 mb-2">
+                ℹ️ What to do:
+              </h3>
               <ul className="text-sm text-blue-800 space-y-1 list-disc list-inside">
                 <li>Click "Try Again" to attempt recovery</li>
                 <li>If the error persists, try reloading the page</li>

@@ -29,21 +29,18 @@ export function TreeItem({
           if (onClick) onClick();
         }}
         className={`flex items-center gap-1 w-full px-2 py-0.5 text-xs hover:bg-gray-700/50 ${
-          isSelected ? 'bg-gray-700 text-white' : 'text-gray-300'
+          isSelected ? "bg-gray-700 text-white" : "text-gray-300"
         }`}
         style={{ paddingLeft: `${8 + depth * 16}px` }}
       >
         {hasChildren && (
-          <span className="text-[10px] w-3">{isExpanded ? '▼' : '▶'}</span>
+          <span className="text-[10px] w-3">{isExpanded ? "▼" : "▶"}</span>
         )}
         {!hasChildren && <span className="w-3" />}
         {icon && <span className="text-sm">{icon}</span>}
         <span className="truncate">{label}</span>
       </button>
-      {isExpanded && children && (
-        <div>{children}</div>
-      )}
+      {isExpanded && children && <div>{children}</div>}
     </div>
   );
 }
-

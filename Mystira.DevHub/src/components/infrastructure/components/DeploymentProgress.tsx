@@ -16,4 +16,3 @@ export function DeploymentProgress({ progress }: DeploymentProgressProps) {
     </div>
   );
 }
-

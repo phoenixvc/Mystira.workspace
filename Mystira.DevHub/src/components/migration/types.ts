@@ -10,50 +10,52 @@ export interface EnvironmentPreset {
 
 export const ENVIRONMENT_PRESETS: EnvironmentPreset[] = [
   {
-    id: 'old-dev',
-    name: 'Old Dev Environment',
-    description: 'Legacy dev environment - resource group auto-discovered',
-    cosmosAccountName: 'dev-san-cosmos-mystira',
+    id: "old-dev",
+    name: "Old Dev Environment",
+    description: "Legacy dev environment - resource group auto-discovered",
+    cosmosAccountName: "dev-san-cosmos-mystira",
     isLegacy: true,
-    defaultDatabaseName: 'MystiraDb',
+    defaultDatabaseName: "MystiraDb",
   },
   {
-    id: 'old-prod',
-    name: 'Old Production Environment',
-    description: 'Legacy prod environment - resource group auto-discovered',
-    cosmosAccountName: 'prodwusappmystiracosmos',
+    id: "old-prod",
+    name: "Old Production Environment",
+    description: "Legacy prod environment - resource group auto-discovered",
+    cosmosAccountName: "prodwusappmystiracosmos",
     isLegacy: true,
-    defaultDatabaseName: 'MystiraDb',
+    defaultDatabaseName: "MystiraDb",
   },
   {
-    id: 'new-dev',
-    name: 'New Dev Environment',
-    description: 'Current development environment - resource group auto-discovered',
-    cosmosAccountName: 'mys-dev-mystira-cosmos-san',
+    id: "new-dev",
+    name: "New Dev Environment",
+    description:
+      "Current development environment - resource group auto-discovered",
+    cosmosAccountName: "mys-dev-mystira-cosmos-san",
     isLegacy: false,
-    defaultDatabaseName: 'MystiraAppDb',
+    defaultDatabaseName: "MystiraAppDb",
   },
   {
-    id: 'new-staging',
-    name: 'New Staging Environment',
-    description: 'Current staging environment - resource group auto-discovered',
-    cosmosAccountName: 'mys-staging-mystira-cosmos-san',
+    id: "new-staging",
+    name: "New Staging Environment",
+    description: "Current staging environment - resource group auto-discovered",
+    cosmosAccountName: "mys-staging-mystira-cosmos-san",
     isLegacy: false,
-    defaultDatabaseName: 'MystiraAppDb',
+    defaultDatabaseName: "MystiraAppDb",
   },
   {
-    id: 'new-prod',
-    name: 'New Production Environment',
-    description: 'Current production environment - resource group auto-discovered',
-    cosmosAccountName: 'mys-prod-mystira-cosmos-san',
+    id: "new-prod",
+    name: "New Production Environment",
+    description:
+      "Current production environment - resource group auto-discovered",
+    cosmosAccountName: "mys-prod-mystira-cosmos-san",
     isLegacy: false,
-    defaultDatabaseName: 'MystiraAppDb',
+    defaultDatabaseName: "MystiraAppDb",
   },
   {
-    id: 'custom',
-    name: 'Custom',
-    description: 'Enter connection strings manually',
-    cosmosAccountName: '',
+    id: "custom",
+    name: "Custom",
+    description: "Enter connection strings manually",
+    cosmosAccountName: "",
     isLegacy: false,
   },
 ];
@@ -124,5 +126,4 @@ export interface MigrationResponse {
   error?: string;
 }
 
-export type MigrationStep = 'configure' | 'select' | 'running' | 'complete';
-
+export type MigrationStep = "configure" | "select" | "running" | "complete";

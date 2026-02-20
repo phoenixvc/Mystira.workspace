@@ -1,12 +1,12 @@
-import { useState, useMemo } from 'react';
-import { getResourceIcon } from '../utils/resourceUtils';
-import { ResourceCard } from './ResourceCard';
+import { useState, useMemo } from "react";
+import { getResourceIcon } from "../utils/resourceUtils";
+import { ResourceCard } from "./ResourceCard";
 
 interface AzureResource {
   id: string;
   name: string;
   type: string;
-  status: 'running' | 'stopped' | 'warning' | 'failed' | 'unknown';
+  status: "running" | "stopped" | "warning" | "failed" | "unknown";
   region: string;
   costToday?: number;
   properties?: Record<string, string>;
@@ -25,12 +25,14 @@ export function ResourceGroupedView({
   onDelete,
   deletingResource,
 }: ResourceGroupedViewProps) {
-  const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set());
+  const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(
+    new Set(),
+  );
 
   const groupedResources = useMemo(() => {
     const groups: Record<string, AzureResource[]> = {};
     resources.forEach((resource) => {
-      const typeKey = resource.type.split('/').pop() || resource.type;
+      const typeKey = resource.type.split("/").pop() || resource.type;
       if (!groups[typeKey]) {
         groups[typeKey] = [];
       }
@@ -62,7 +64,9 @@ export function ResourceGroupedView({
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between mb-2">
-        <span className="text-xs text-gray-600 dark:text-gray-400">Grouped by type</span>
+        <span className="text-xs text-gray-600 dark:text-gray-400">
+          Grouped by type
+        </span>
         <div className="flex gap-1">
           <button
             onClick={collapseAll}
@@ -82,34 +86,51 @@ export function ResourceGroupedView({
       </div>
       {Object.entries(groupedResources).map(([typeKey, groupResources]) => {
         const isCollapsed = collapsedGroups.has(typeKey);
-        const runningCount = groupResources.filter((r) => r.status === 'running').length;
-        const failedCount = groupResources.filter((r) => r.status === 'failed').length;
+        const runningCount = groupResources.filter(
+          (r) => r.status === "running",
+        ).length;
+        const failedCount = groupResources.filter(
+          (r) => r.status === "failed",
+        ).length;
 
         return (
-          <div key={typeKey} className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+          <div
+            key={typeKey}
+            className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden"
+          >
             <button
               onClick={() => toggleGroupCollapse(typeKey)}
               className="w-full flex items-center justify-between px-4 py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
             >
               <div className="flex items-center gap-2">
-                <span className="text-sm">{isCollapsed ? '▶' : '▼'}</span>
+                <span className="text-sm">{isCollapsed ? "▶" : "▼"}</span>
                 <span className="text-lg">{getResourceIcon(typeKey)}</span>
-                <span className="font-medium text-gray-900 dark:text-white text-sm">{typeKey}</span>
-                <span className="text-xs text-gray-500 dark:text-gray-400">({groupResources.length})</span>
+                <span className="font-medium text-gray-900 dark:text-white text-sm">
+                  {typeKey}
+                </span>
+                <span className="text-xs text-gray-500 dark:text-gray-400">
+                  ({groupResources.length})
+                </span>
               </div>
               <div className="flex items-center gap-2">
                 {runningCount > 0 && (
-                  <span className="text-xs text-green-600 dark:text-green-400">✓ {runningCount}</span>
+                  <span className="text-xs text-green-600 dark:text-green-400">
+                    ✓ {runningCount}
+                  </span>
                 )}
                 {failedCount > 0 && (
-                  <span className="text-xs text-red-600 dark:text-red-400">✕ {failedCount}</span>
+                  <span className="text-xs text-red-600 dark:text-red-400">
+                    ✕ {failedCount}
+                  </span>
                 )}
               </div>
             </button>
             {!isCollapsed && (
               <div
                 className={`p-3 bg-white dark:bg-gray-800 grid ${
-                  compact ? 'grid-cols-2 md:grid-cols-3 gap-2' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3'
+                  compact
+                    ? "grid-cols-2 md:grid-cols-3 gap-2"
+                    : "grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3"
                 }`}
               >
                 {groupResources.map((resource) => (
@@ -129,4 +150,3 @@ export function ResourceGroupedView({
     </div>
   );
 }
-

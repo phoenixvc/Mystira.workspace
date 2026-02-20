@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { invoke } from '@tauri-apps/api/core';
+import { useState, useEffect } from "react";
+import { invoke } from "@tauri-apps/api/core";
 import {
   GitBranch,
   GitCommit,
@@ -11,8 +11,8 @@ import {
   FileEdit,
   ChevronDown,
   ChevronRight,
-} from 'lucide-react';
-import type { CommandResponse } from '../../../../types';
+} from "lucide-react";
+import type { CommandResponse } from "../../../../types";
 
 interface GitStatus {
   branch: string;
@@ -38,26 +38,31 @@ export function GitOperationsPanel({
   const [isLoading, setIsLoading] = useState(true);
   const [isPushing, setIsPushing] = useState(false);
   const [isCommitting, setIsCommitting] = useState(false);
-  const [commitMessage, setCommitMessage] = useState('Trigger deployment');
+  const [commitMessage, setCommitMessage] = useState("Trigger deployment");
   const [error, setError] = useState<string | null>(null);
   const [showUncommitted, setShowUncommitted] = useState(false);
-  const [pushResult, setPushResult] = useState<{ success: boolean; message: string } | null>(null);
+  const [pushResult, setPushResult] = useState<{
+    success: boolean;
+    message: string;
+  } | null>(null);
 
   const fetchGitStatus = async () => {
     setIsLoading(true);
     setError(null);
 
     try {
-      const response = await invoke<CommandResponse>('get_git_status', { repoRoot });
+      const response = await invoke<CommandResponse>("get_git_status", {
+        repoRoot,
+      });
 
       if (response.success && response.result) {
         const result = response.result as GitStatus;
         setGitStatus(result);
       } else {
-        setError(response.error || 'Failed to get git status');
+        setError(response.error || "Failed to get git status");
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to get git status');
+      setError(err instanceof Error ? err.message : "Failed to get git status");
     } finally {
       setIsLoading(false);
     }
@@ -75,22 +80,22 @@ export function GitOperationsPanel({
 
     try {
       // First stage all changes
-      await invoke<CommandResponse>('git_stage_all', { repoRoot });
+      await invoke<CommandResponse>("git_stage_all", { repoRoot });
 
       // Then commit
-      const response = await invoke<CommandResponse>('git_commit', {
+      const response = await invoke<CommandResponse>("git_commit", {
         repoRoot,
         message: commitMessage,
       });
 
       if (response.success) {
-        setCommitMessage('Trigger deployment');
+        setCommitMessage("Trigger deployment");
         await fetchGitStatus();
       } else {
-        setError(response.error || 'Failed to commit changes');
+        setError(response.error || "Failed to commit changes");
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to commit changes');
+      setError(err instanceof Error ? err.message : "Failed to commit changes");
     } finally {
       setIsCommitting(false);
     }
@@ -106,20 +111,25 @@ export function GitOperationsPanel({
     try {
       // If no commits ahead and allowEmpty, create an empty commit first
       if (gitStatus.aheadCount === 0 && allowEmpty) {
-        const emptyCommitResponse = await invoke<CommandResponse>('git_commit_empty', {
-          repoRoot,
-          message: commitMessage || 'Trigger deployment',
-        });
+        const emptyCommitResponse = await invoke<CommandResponse>(
+          "git_commit_empty",
+          {
+            repoRoot,
+            message: commitMessage || "Trigger deployment",
+          },
+        );
 
         if (!emptyCommitResponse.success) {
-          setError(emptyCommitResponse.error || 'Failed to create empty commit');
+          setError(
+            emptyCommitResponse.error || "Failed to create empty commit",
+          );
           setIsPushing(false);
           return;
         }
       }
 
       // Push to remote
-      const response = await invoke<CommandResponse>('git_push', {
+      const response = await invoke<CommandResponse>("git_push", {
         repoRoot,
         branch: gitStatus.branch,
       });
@@ -132,10 +142,10 @@ export function GitOperationsPanel({
         onDeployTriggered?.();
         await fetchGitStatus();
       } else {
-        setError(response.error || 'Failed to push');
+        setError(response.error || "Failed to push");
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to push');
+      setError(err instanceof Error ? err.message : "Failed to push");
     } finally {
       setIsPushing(false);
     }
@@ -148,7 +158,7 @@ export function GitOperationsPanel({
     setError(null);
 
     try {
-      const response = await invoke<CommandResponse>('git_sync', {
+      const response = await invoke<CommandResponse>("git_sync", {
         repoRoot,
         branch: gitStatus.branch,
       });
@@ -156,10 +166,10 @@ export function GitOperationsPanel({
       if (response.success) {
         await fetchGitStatus();
       } else {
-        setError(response.error || 'Failed to sync');
+        setError(response.error || "Failed to sync");
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to sync');
+      setError(err instanceof Error ? err.message : "Failed to sync");
     } finally {
       setIsLoading(false);
     }
@@ -170,7 +180,9 @@ export function GitOperationsPanel({
       <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
         <div className="flex items-center justify-center py-8">
           <Loader2 className="w-6 h-6 text-blue-500 animate-spin mr-2" />
-          <span className="text-gray-600 dark:text-gray-300">Loading git status...</span>
+          <span className="text-gray-600 dark:text-gray-300">
+            Loading git status...
+          </span>
         </div>
       </div>
     );
@@ -204,7 +216,9 @@ export function GitOperationsPanel({
             className="p-1 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 disabled:opacity-50"
             title="Refresh status"
           >
-            <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+            <RefreshCw
+              className={`w-4 h-4 ${isLoading ? "animate-spin" : ""}`}
+            />
           </button>
         </div>
       </div>
@@ -248,7 +262,8 @@ export function GitOperationsPanel({
               <div className="flex items-center gap-2">
                 <AlertCircle className="w-4 h-4 text-yellow-500" />
                 <span className="text-sm text-yellow-700 dark:text-yellow-300">
-                  Uncommitted changes ({gitStatus.uncommittedFiles.length} files)
+                  Uncommitted changes ({gitStatus.uncommittedFiles.length}{" "}
+                  files)
                 </span>
               </div>
               {showUncommitted ? (
@@ -260,7 +275,10 @@ export function GitOperationsPanel({
             {showUncommitted && gitStatus.uncommittedFiles.length > 0 && (
               <div className="p-3 max-h-32 overflow-auto bg-gray-50 dark:bg-gray-700">
                 {gitStatus.uncommittedFiles.slice(0, 10).map((file, idx) => (
-                  <div key={idx} className="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-300 py-0.5">
+                  <div
+                    key={idx}
+                    className="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-300 py-0.5"
+                  >
                     <FileEdit className="w-3 h-3" />
                     <span className="font-mono truncate">{file}</span>
                   </div>

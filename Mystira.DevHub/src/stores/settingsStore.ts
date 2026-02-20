@@ -1,13 +1,13 @@
-import { create } from 'zustand';
-import { persist, createJSONStorage } from 'zustand/middleware';
+import { create } from "zustand";
+import { persist, createJSONStorage } from "zustand/middleware";
 
 export interface Settings {
-  theme: 'light' | 'dark' | 'auto';
+  theme: "light" | "dark" | "auto";
   defaultExportPath: string;
   defaultLogsPath: string;
   notificationsEnabled: boolean;
   notificationSound: boolean;
-  logLevel: 'error' | 'warn' | 'info' | 'debug';
+  logLevel: "error" | "warn" | "info" | "debug";
   autoUpdate: boolean;
   cacheEnabled: boolean;
   cacheDuration: number; // in minutes
@@ -15,12 +15,12 @@ export interface Settings {
 
 interface SettingsState extends Settings {
   // Actions
-  setTheme: (theme: Settings['theme']) => void;
+  setTheme: (theme: Settings["theme"]) => void;
   setDefaultExportPath: (path: string) => void;
   setDefaultLogsPath: (path: string) => void;
   setNotificationsEnabled: (enabled: boolean) => void;
   setNotificationSound: (enabled: boolean) => void;
-  setLogLevel: (level: Settings['logLevel']) => void;
+  setLogLevel: (level: Settings["logLevel"]) => void;
   setAutoUpdate: (enabled: boolean) => void;
   setCacheEnabled: (enabled: boolean) => void;
   setCacheDuration: (duration: number) => void;
@@ -28,12 +28,12 @@ interface SettingsState extends Settings {
 }
 
 const defaultSettings: Settings = {
-  theme: 'light',
-  defaultExportPath: '',
-  defaultLogsPath: '',
+  theme: "light",
+  defaultExportPath: "",
+  defaultLogsPath: "",
   notificationsEnabled: true,
   notificationSound: false,
-  logLevel: 'info',
+  logLevel: "info",
   autoUpdate: true,
   cacheEnabled: true,
   cacheDuration: 5,
@@ -47,7 +47,8 @@ export const useSettingsStore = create<SettingsState>()(
       setTheme: (theme) => set({ theme }),
       setDefaultExportPath: (path) => set({ defaultExportPath: path }),
       setDefaultLogsPath: (path) => set({ defaultLogsPath: path }),
-      setNotificationsEnabled: (enabled) => set({ notificationsEnabled: enabled }),
+      setNotificationsEnabled: (enabled) =>
+        set({ notificationsEnabled: enabled }),
       setNotificationSound: (enabled) => set({ notificationSound: enabled }),
       setLogLevel: (level) => set({ logLevel: level }),
       setAutoUpdate: (enabled) => set({ autoUpdate: enabled }),
@@ -56,8 +57,8 @@ export const useSettingsStore = create<SettingsState>()(
       reset: () => set(defaultSettings),
     }),
     {
-      name: 'devhub-settings',
+      name: "devhub-settings",
       storage: createJSONStorage(() => localStorage),
-    }
-  )
+    },
+  ),
 );

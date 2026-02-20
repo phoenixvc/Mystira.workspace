@@ -41,7 +41,7 @@ export function ServiceCardControls({
           disabled={isLoading}
           className="px-2 py-0.5 bg-red-600 text-white rounded text-[10px] font-bold hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors uppercase"
         >
-          {isLoading ? 'STOPPING' : 'STOP'}
+          {isLoading ? "STOPPING" : "STOP"}
         </button>
       ) : (
         <button
@@ -53,14 +53,17 @@ export function ServiceCardControls({
           className="px-2 py-0.5 bg-green-600 text-white rounded text-[10px] font-bold hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors uppercase"
           title={
             isBuilding
-              ? 'Service is currently building. Please wait for the build to complete.'
-              : statusMsg || ''
+              ? "Service is currently building. Please wait for the build to complete."
+              : statusMsg || ""
           }
         >
-          {isLoading ? (statusMsg || 'STARTING') : isBuilding ? 'BUILDING' : 'START'}
+          {isLoading
+            ? statusMsg || "STARTING"
+            : isBuilding
+              ? "BUILDING"
+              : "START"}
         </button>
       )}
     </div>
   );
 }
-

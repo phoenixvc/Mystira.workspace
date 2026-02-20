@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { invoke } from '@tauri-apps/api/core';
+import { useState } from "react";
+import { invoke } from "@tauri-apps/api/core";
 import {
   Settings,
   Shield,
@@ -13,8 +13,8 @@ import {
   CheckCircle2,
   ChevronDown,
   ChevronRight,
-} from 'lucide-react';
-import type { CommandResponse } from '../../../../types';
+} from "lucide-react";
+import type { CommandResponse } from "../../../../types";
 
 interface ConfigurationPanelProps {
   resourceGroup: string;
@@ -54,7 +54,7 @@ export function ConfigurationPanel({
   };
 
   const toggleSection = (section: keyof typeof expandedSections) => {
-    setExpandedSections(prev => ({
+    setExpandedSections((prev) => ({
       ...prev,
       [section]: !prev[section],
     }));
@@ -64,28 +64,28 @@ export function ConfigurationPanel({
   const handleUpdateCors = async () => {
     if (!apiName) return;
 
-    setIsUpdating('cors');
+    setIsUpdating("cors");
     setOperationResult(null);
 
     try {
-      const response = await invoke<CommandResponse>('update_cors_settings', {
+      const response = await invoke<CommandResponse>("update_cors_settings", {
         resourceGroup,
         apiName,
         adminApiName,
       });
 
       setOperationResult({
-        type: 'cors',
+        type: "cors",
         success: response.success,
         message: response.success
-          ? 'CORS settings updated successfully'
-          : response.error || 'Failed to update CORS',
+          ? "CORS settings updated successfully"
+          : response.error || "Failed to update CORS",
       });
     } catch (err) {
       setOperationResult({
-        type: 'cors',
+        type: "cors",
         success: false,
-        message: err instanceof Error ? err.message : 'Failed to update CORS',
+        message: err instanceof Error ? err.message : "Failed to update CORS",
       });
     } finally {
       setIsUpdating(null);
@@ -96,28 +96,28 @@ export function ConfigurationPanel({
   const handleRestartApis = async () => {
     if (!apiName) return;
 
-    setIsUpdating('api');
+    setIsUpdating("api");
     setOperationResult(null);
 
     try {
-      const response = await invoke<CommandResponse>('restart_api_services', {
+      const response = await invoke<CommandResponse>("restart_api_services", {
         resourceGroup,
         apiName,
         adminApiName,
       });
 
       setOperationResult({
-        type: 'api',
+        type: "api",
         success: response.success,
         message: response.success
-          ? 'API services restarted successfully'
-          : response.error || 'Failed to restart APIs',
+          ? "API services restarted successfully"
+          : response.error || "Failed to restart APIs",
       });
     } catch (err) {
       setOperationResult({
-        type: 'api',
+        type: "api",
         success: false,
-        message: err instanceof Error ? err.message : 'Failed to restart APIs',
+        message: err instanceof Error ? err.message : "Failed to restart APIs",
       });
     } finally {
       setIsUpdating(null);
@@ -128,27 +128,27 @@ export function ConfigurationPanel({
   const handleDisconnectSwaCicd = async () => {
     if (!swaName) return;
 
-    setIsUpdating('disconnect');
+    setIsUpdating("disconnect");
     setOperationResult(null);
 
     try {
-      const response = await invoke<CommandResponse>('disconnect_swa_cicd', {
+      const response = await invoke<CommandResponse>("disconnect_swa_cicd", {
         resourceGroup,
         swaName,
       });
 
       setOperationResult({
-        type: 'swa',
+        type: "swa",
         success: response.success,
         message: response.success
-          ? 'SWA CI/CD disconnected. You can now use GitHub Actions.'
-          : response.error || 'Failed to disconnect SWA CI/CD',
+          ? "SWA CI/CD disconnected. You can now use GitHub Actions."
+          : response.error || "Failed to disconnect SWA CI/CD",
       });
     } catch (err) {
       setOperationResult({
-        type: 'swa',
+        type: "swa",
         success: false,
-        message: err instanceof Error ? err.message : 'Failed to disconnect',
+        message: err instanceof Error ? err.message : "Failed to disconnect",
       });
     } finally {
       setIsUpdating(null);
@@ -159,44 +159,53 @@ export function ConfigurationPanel({
   const handleGetDeploymentToken = async () => {
     if (!swaName) return;
 
-    setIsUpdating('token');
+    setIsUpdating("token");
     setOperationResult(null);
 
     try {
-      const response = await invoke<CommandResponse>('get_swa_deployment_token', {
-        resourceGroup,
-        swaName,
-      });
+      const response = await invoke<CommandResponse>(
+        "get_swa_deployment_token",
+        {
+          resourceGroup,
+          swaName,
+        },
+      );
 
       if (response.success && response.result) {
         const token = response.result as string;
         setDeploymentToken(token);
         setOperationResult({
-          type: 'token',
+          type: "token",
           success: true,
-          message: 'Deployment token retrieved. Add it to GitHub Secrets.',
+          message: "Deployment token retrieved. Add it to GitHub Secrets.",
         });
       } else {
         setOperationResult({
-          type: 'token',
+          type: "token",
           success: false,
-          message: response.error || 'Failed to get deployment token',
+          message: response.error || "Failed to get deployment token",
         });
       }
     } catch (err) {
       setOperationResult({
-        type: 'token',
+        type: "token",
         success: false,
-        message: err instanceof Error ? err.message : 'Failed to get token',
+        message: err instanceof Error ? err.message : "Failed to get token",
       });
     } finally {
       setIsUpdating(null);
     }
   };
 
-  const inferredApiName = apiName || `dev-${region === 'southafricanorth' ? 'san' : 'eus2'}-app-mystira-api`;
-  const inferredAdminApiName = adminApiName || `dev-${region === 'southafricanorth' ? 'san' : 'eus2'}-app-mystira-admin-api`;
-  const inferredSwaName = swaName || `dev-${region === 'southafricanorth' ? 'san' : 'eus2'}-swa-mystira-app`;
+  const inferredApiName =
+    apiName ||
+    `dev-${region === "southafricanorth" ? "san" : "eus2"}-app-mystira-api`;
+  const inferredAdminApiName =
+    adminApiName ||
+    `dev-${region === "southafricanorth" ? "san" : "eus2"}-app-mystira-admin-api`;
+  const inferredSwaName =
+    swaName ||
+    `dev-${region === "southafricanorth" ? "san" : "eus2"}-swa-mystira-app`;
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
@@ -215,7 +224,7 @@ export function ConfigurationPanel({
         {/* CORS Settings */}
         <div className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
           <button
-            onClick={() => toggleSection('cors')}
+            onClick={() => toggleSection("cors")}
             className="w-full flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 text-left"
           >
             <div className="flex items-center gap-2">
@@ -244,7 +253,7 @@ export function ConfigurationPanel({
                 disabled={isUpdating !== null || disabled}
                 className="w-full px-3 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
-                {isUpdating === 'cors' ? (
+                {isUpdating === "cors" ? (
                   <Loader2 className="w-4 h-4 animate-spin" />
                 ) : (
                   <Shield className="w-4 h-4" />
@@ -258,7 +267,7 @@ export function ConfigurationPanel({
         {/* API Services */}
         <div className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
           <button
-            onClick={() => toggleSection('api')}
+            onClick={() => toggleSection("api")}
             className="w-full flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 text-left"
           >
             <div className="flex items-center gap-2">
@@ -283,7 +292,7 @@ export function ConfigurationPanel({
                 disabled={isUpdating !== null || disabled}
                 className="w-full px-3 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
-                {isUpdating === 'api' ? (
+                {isUpdating === "api" ? (
                   <Loader2 className="w-4 h-4 animate-spin" />
                 ) : (
                   <RefreshCcw className="w-4 h-4" />
@@ -297,7 +306,7 @@ export function ConfigurationPanel({
         {/* Static Web App Settings */}
         <div className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
           <button
-            onClick={() => toggleSection('swa')}
+            onClick={() => toggleSection("swa")}
             className="w-full flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 text-left"
           >
             <div className="flex items-center gap-2">
@@ -327,7 +336,7 @@ export function ConfigurationPanel({
                   disabled={isUpdating !== null || disabled}
                   className="flex-1 px-3 py-2 text-sm font-medium text-white bg-orange-600 rounded-lg hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
-                  {isUpdating === 'disconnect' ? (
+                  {isUpdating === "disconnect" ? (
                     <Loader2 className="w-4 h-4 animate-spin" />
                   ) : (
                     <Link2Off className="w-4 h-4" />
@@ -339,7 +348,7 @@ export function ConfigurationPanel({
                   disabled={isUpdating !== null || disabled}
                   className="flex-1 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
-                  {isUpdating === 'token' ? (
+                  {isUpdating === "token" ? (
                     <Loader2 className="w-4 h-4 animate-spin" />
                   ) : (
                     <Key className="w-4 h-4" />
@@ -355,10 +364,10 @@ export function ConfigurationPanel({
                       Deployment Token
                     </span>
                     <button
-                      onClick={() => handleCopy(deploymentToken, 'token')}
+                      onClick={() => handleCopy(deploymentToken, "token")}
                       className="p-1 text-yellow-600 hover:text-yellow-800 dark:text-yellow-400 dark:hover:text-yellow-200"
                     >
-                      {copiedField === 'token' ? (
+                      {copiedField === "token" ? (
                         <Check className="w-4 h-4" />
                       ) : (
                         <Copy className="w-4 h-4" />
@@ -369,7 +378,8 @@ export function ConfigurationPanel({
                     {deploymentToken.substring(0, 50)}...
                   </div>
                   <p className="mt-2 text-xs text-yellow-600 dark:text-yellow-400">
-                    Add this to GitHub Secrets as: AZURE_STATIC_WEB_APPS_API_TOKEN_DEV_MYSTIRA_APP
+                    Add this to GitHub Secrets as:
+                    AZURE_STATIC_WEB_APPS_API_TOKEN_DEV_MYSTIRA_APP
                   </p>
                 </div>
               )}
@@ -382,8 +392,8 @@ export function ConfigurationPanel({
           <div
             className={`p-3 rounded-lg border ${
               operationResult.success
-                ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800'
-                : 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800'
+                ? "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800"
+                : "bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800"
             }`}
           >
             <div className="flex items-center gap-2 text-sm">
@@ -395,8 +405,8 @@ export function ConfigurationPanel({
               <span
                 className={
                   operationResult.success
-                    ? 'text-green-700 dark:text-green-300'
-                    : 'text-red-700 dark:text-red-300'
+                    ? "text-green-700 dark:text-green-300"
+                    : "text-red-700 dark:text-red-300"
                 }
               >
                 {operationResult.message}

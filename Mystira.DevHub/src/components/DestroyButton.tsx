@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState } from "react";
 
 interface DestroyButtonProps {
   onClick: () => void;
@@ -6,12 +6,16 @@ interface DestroyButtonProps {
   loading?: boolean;
 }
 
-export function DestroyButton({ onClick, disabled, loading }: DestroyButtonProps) {
+export function DestroyButton({
+  onClick,
+  disabled,
+  loading,
+}: DestroyButtonProps) {
   const [isHovered, setIsHovered] = useState(false);
 
   // Calculate particle positions and create CSS variables
   const outerParticles = [...Array(16)].map((_, i) => {
-    const angle = (i * 22.5) * (Math.PI / 180);
+    const angle = i * 22.5 * (Math.PI / 180);
     return {
       angle,
       x: 100 + Math.cos(angle) * 40,
@@ -22,7 +26,7 @@ export function DestroyButton({ onClick, disabled, loading }: DestroyButtonProps
   });
 
   const innerParticles = [...Array(8)].map((_, i) => {
-    const angle = (i * 45) * (Math.PI / 180);
+    const angle = i * 45 * (Math.PI / 180);
     return {
       angle,
       x: 100 + Math.cos(angle) * 25,
@@ -33,7 +37,7 @@ export function DestroyButton({ onClick, disabled, loading }: DestroyButtonProps
   });
 
   const sparkParticles = [...Array(24)].map((_, i) => {
-    const angle = (i * 15) * (Math.PI / 180);
+    const angle = i * 15 * (Math.PI / 180);
     return {
       angle,
       x: 100 + Math.cos(angle) * 35,
@@ -45,21 +49,30 @@ export function DestroyButton({ onClick, disabled, loading }: DestroyButtonProps
 
   // Create CSS variables string for SVG
   const svgStyle = {
-    ...outerParticles.reduce((acc, p, i) => {
-      acc[`--particle-outer-${i}-x`] = `${p.particleX}px`;
-      acc[`--particle-outer-${i}-y`] = `${p.particleY}px`;
-      return acc;
-    }, {} as Record<string, string>),
-    ...innerParticles.reduce((acc, p, i) => {
-      acc[`--particle-inner-${i}-x`] = `${p.particleX}px`;
-      acc[`--particle-inner-${i}-y`] = `${p.particleY}px`;
-      return acc;
-    }, {} as Record<string, string>),
-    ...sparkParticles.reduce((acc, p, i) => {
-      acc[`--particle-spark-${i}-x`] = `${p.particleX}px`;
-      acc[`--particle-spark-${i}-y`] = `${p.particleY}px`;
-      return acc;
-    }, {} as Record<string, string>),
+    ...outerParticles.reduce(
+      (acc, p, i) => {
+        acc[`--particle-outer-${i}-x`] = `${p.particleX}px`;
+        acc[`--particle-outer-${i}-y`] = `${p.particleY}px`;
+        return acc;
+      },
+      {} as Record<string, string>,
+    ),
+    ...innerParticles.reduce(
+      (acc, p, i) => {
+        acc[`--particle-inner-${i}-x`] = `${p.particleX}px`;
+        acc[`--particle-inner-${i}-y`] = `${p.particleY}px`;
+        return acc;
+      },
+      {} as Record<string, string>,
+    ),
+    ...sparkParticles.reduce(
+      (acc, p, i) => {
+        acc[`--particle-spark-${i}-x`] = `${p.particleX}px`;
+        acc[`--particle-spark-${i}-y`] = `${p.particleY}px`;
+        return acc;
+      },
+      {} as Record<string, string>,
+    ),
   } as React.CSSProperties;
 
   return (
@@ -190,7 +203,13 @@ export function DestroyButton({ onClick, disabled, loading }: DestroyButtonProps
 
           {/* Gradients */}
           <defs>
-            <linearGradient id="redGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <linearGradient
+              id="redGradient"
+              x1="0%"
+              y1="0%"
+              x2="100%"
+              y2="100%"
+            >
               <stop offset="0%" stopColor="#ef4444" stopOpacity="1" />
               <stop offset="100%" stopColor="#dc2626" stopOpacity="0.3" />
             </linearGradient>
@@ -221,7 +240,9 @@ export function DestroyButton({ onClick, disabled, loading }: DestroyButtonProps
         <div className="destroy-icon-epic text-5xl mb-2 transform transition-transform">
           💥
         </div>
-        <div className="text-lg font-bold text-red-600 dark:text-red-400">DESTROY</div>
+        <div className="text-lg font-bold text-red-600 dark:text-red-400">
+          DESTROY
+        </div>
         <div className="text-xs font-semibold text-red-500 dark:text-red-500 text-center mt-1 uppercase tracking-wider">
           Delete All Resources
         </div>
@@ -234,4 +255,3 @@ export function DestroyButton({ onClick, disabled, loading }: DestroyButtonProps
     </button>
   );
 }
-

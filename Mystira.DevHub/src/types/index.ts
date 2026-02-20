@@ -9,8 +9,8 @@ export interface CommandResponse<T = unknown> {
 // Connection Types
 export interface ConnectionStatus {
   name: string;
-  type: 'cosmos' | 'storage' | 'azurecli' | 'githubcli';
-  status: 'connected' | 'disconnected' | 'checking';
+  type: "cosmos" | "storage" | "azurecli" | "githubcli";
+  status: "connected" | "disconnected" | "checking";
   icon: string;
   details?: string;
   error?: string;
@@ -46,7 +46,7 @@ export interface AzureResourceMapped {
   id: string;
   name: string;
   type: string;
-  status: 'running' | 'stopped' | 'unknown';
+  status: "running" | "stopped" | "unknown";
   region: string;
   costToday: number;
   lastUpdated: string;
@@ -73,8 +73,8 @@ export interface GitHubWorkflowRun {
 export interface Deployment {
   id: string;
   timestamp: string;
-  action: 'deploy' | 'validate' | 'preview' | 'destroy';
-  status: 'success' | 'failed' | 'in_progress';
+  action: "deploy" | "validate" | "preview" | "destroy";
+  status: "success" | "failed" | "in_progress";
   duration: string;
   resourcesAffected?: number;
   user: string;
@@ -88,7 +88,7 @@ export interface RecentOperation {
   type: string;
   title: string;
   timestamp: string;
-  status: 'success' | 'failed' | 'in_progress';
+  status: "success" | "failed" | "in_progress";
   details?: string;
 }
 
@@ -106,7 +106,7 @@ export interface QuickAction {
 export interface WhatIfChange {
   resourceType: string;
   resourceName: string;
-  changeType: 'create' | 'modify' | 'delete' | 'noChange';
+  changeType: "create" | "modify" | "delete" | "noChange";
   changes?: string[];
   selected?: boolean; // For resource selection
   resourceId?: string; // Full Azure resource ID
@@ -135,7 +135,7 @@ export interface TemplateConfig {
 export interface ProjectInfo {
   id: string;
   name: string;
-  type: 'api' | 'admin-api' | 'pwa' | 'service';
+  type: "api" | "admin-api" | "pwa" | "service";
   description: string;
   infrastructure: {
     storage: boolean;
@@ -148,43 +148,43 @@ export interface ProjectInfo {
 
 export const DEFAULT_PROJECTS: ProjectInfo[] = [
   {
-    id: 'mystira-api',
-    name: 'Mystira.App.Api',
-    type: 'api',
-    description: 'Main REST API for client applications',
+    id: "mystira-api",
+    name: "Mystira.App.Api",
+    type: "api",
+    description: "Main REST API for client applications",
     infrastructure: {
       storage: true,
       cosmos: true,
       appService: true,
       keyVault: false,
     },
-    templateIds: ['storage', 'cosmos', 'appservice'],
+    templateIds: ["storage", "cosmos", "appservice"],
   },
   {
-    id: 'mystira-admin-api',
-    name: 'Mystira.App.Admin.Api',
-    type: 'admin-api',
-    description: 'Administrative API for content management',
+    id: "mystira-admin-api",
+    name: "Mystira.App.Admin.Api",
+    type: "admin-api",
+    description: "Administrative API for content management",
     infrastructure: {
       storage: true,
       cosmos: true,
       appService: true,
       keyVault: false,
     },
-    templateIds: ['storage', 'cosmos', 'appservice'],
+    templateIds: ["storage", "cosmos", "appservice"],
   },
   {
-    id: 'mystira-pwa',
-    name: 'Mystira.App.PWA',
-    type: 'pwa',
-    description: 'Progressive Web Application frontend',
+    id: "mystira-pwa",
+    name: "Mystira.App.PWA",
+    type: "pwa",
+    description: "Progressive Web Application frontend",
     infrastructure: {
       storage: false,
       cosmos: false,
       appService: true,
       keyVault: false,
     },
-    templateIds: ['appservice'],
+    templateIds: ["appservice"],
   },
 ];
 
@@ -198,7 +198,7 @@ export interface WorkflowStatus {
 
 // Cosmos DB Warning Types (for Azure what-if preview limitations)
 export interface CosmosWarning {
-  type: 'cosmos-whatif';
+  type: "cosmos-whatif";
   message: string;
   details: string;
   affectedResources: string[];
@@ -207,25 +207,25 @@ export interface CosmosWarning {
 
 // Storage Account Conflict Warning (resource exists in another resource group)
 export interface StorageAccountConflictWarning {
-  type: 'storage-account-conflict';
+  type: "storage-account-conflict";
   message: string;
   details: string;
   storageAccountName: string;
-  currentResourceGroup?: string;  // The resource group where the account currently exists
+  currentResourceGroup?: string; // The resource group where the account currently exists
   dismissed: boolean;
 }
 
 // Re-export constants for convenience
-export * from './constants';
+export * from "./constants";
 
 // Settings Types
 export interface Settings {
-  theme: 'light' | 'dark' | 'auto';
+  theme: "light" | "dark" | "auto";
   defaultExportPath: string;
   defaultLogsPath: string;
   notificationsEnabled: boolean;
   notificationSound: boolean;
-  logLevel: 'error' | 'warn' | 'info' | 'debug';
+  logLevel: "error" | "warn" | "info" | "debug";
   autoUpdate: boolean;
   cacheEnabled: boolean;
   cacheDuration: number;
@@ -260,6 +260,6 @@ export interface DeploymentHistoryProps {
 export interface BicepFile {
   name: string;
   path: string;
-  type: 'file' | 'directory';
+  type: "file" | "directory";
   children?: BicepFile[];
 }

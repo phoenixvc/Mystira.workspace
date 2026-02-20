@@ -1,2 +1,1 @@
-export { getChangeTypeColor, getChangeTypeIcon } from './whatIfUtils';
-
+export { getChangeTypeColor, getChangeTypeIcon } from "./whatIfUtils";

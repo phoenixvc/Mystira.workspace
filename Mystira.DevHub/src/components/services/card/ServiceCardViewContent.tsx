@@ -1,22 +1,25 @@
-import { LogsViewer } from '../LogsViewer';
-import { WebviewView } from '../components';
-import type { ServiceConfig, ServiceLog } from '../types';
+import { LogsViewer } from "../LogsViewer";
+import { WebviewView } from "../components";
+import type { ServiceConfig, ServiceLog } from "../types";
 
 interface ServiceCardViewContentProps {
   config: ServiceConfig;
   isBuilding: boolean;
   buildFailed: boolean;
   isRunning: boolean;
-  viewMode: 'logs' | 'webview' | 'split';
+  viewMode: "logs" | "webview" | "split";
   isMaximized: boolean;
   logs: ServiceLog[];
   filteredLogs: ServiceLog[];
-  filter: { search: string; type: 'all' | 'stdout' | 'stderr' };
+  filter: { search: string; type: "all" | "stdout" | "stderr" };
   isAutoScroll: boolean;
   maxLogs?: number;
   webviewError: boolean;
   containerClass: string;
-  onFilterChange: (filter: { search: string; type: 'all' | 'stdout' | 'stderr' }) => void;
+  onFilterChange: (filter: {
+    search: string;
+    type: "all" | "stdout" | "stderr";
+  }) => void;
   onAutoScrollChange: (enabled: boolean) => void;
   onClearLogs: () => void;
   onMaxLogsChange?: (limit: number) => void;
@@ -79,11 +82,11 @@ export function ServiceCardViewContent({
     return <LogsViewer {...logsViewProps} />;
   }
 
-  if (viewMode === 'logs') {
+  if (viewMode === "logs") {
     return <LogsViewer {...logsViewProps} />;
   }
 
-  if (viewMode === 'webview') {
+  if (viewMode === "webview") {
     return isRunning && config.url ? (
       <WebviewView {...webviewViewProps} />
     ) : (
@@ -91,9 +94,9 @@ export function ServiceCardViewContent({
     );
   }
 
-  if (viewMode === 'split') {
+  if (viewMode === "split") {
     return isRunning && config.url ? (
-      <div className={`flex flex-1 min-h-0 ${isMaximized ? 'h-full' : ''}`}>
+      <div className={`flex flex-1 min-h-0 ${isMaximized ? "h-full" : ""}`}>
         <div className="flex-1 border-r border-gray-200 dark:border-gray-700 min-w-0 flex flex-col">
           <LogsViewer {...logsViewProps} />
         </div>
@@ -108,4 +111,3 @@ export function ServiceCardViewContent({
 
   return <LogsViewer {...logsViewProps} />;
 }
-

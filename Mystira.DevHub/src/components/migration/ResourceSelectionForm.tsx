@@ -1,5 +1,5 @@
-import { Database, Users, FileText, HardDrive, Sparkles } from 'lucide-react';
-import { ResourceSelection } from './types';
+import { Database, Users, FileText, HardDrive, Sparkles } from "lucide-react";
+import { ResourceSelection } from "./types";
 
 interface ResourceSelectionFormProps {
   selectedResources: ResourceSelection;
@@ -17,7 +17,12 @@ interface ResourceItemProps {
   onChange: () => void;
 }
 
-function ResourceItem({ label, description, checked, onChange }: ResourceItemProps) {
+function ResourceItem({
+  label,
+  description,
+  checked,
+  onChange,
+}: ResourceItemProps) {
   return (
     <label className="flex items-center p-3 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer">
       <input
@@ -27,8 +32,12 @@ function ResourceItem({ label, description, checked, onChange }: ResourceItemPro
         className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
       />
       <div className="ml-3">
-        <div className="font-medium text-gray-900 dark:text-white text-sm">{label}</div>
-        <div className="text-xs text-gray-500 dark:text-gray-400">{description}</div>
+        <div className="font-medium text-gray-900 dark:text-white text-sm">
+          {label}
+        </div>
+        <div className="text-xs text-gray-500 dark:text-gray-400">
+          {description}
+        </div>
       </div>
     </label>
   );
@@ -48,7 +57,9 @@ export function ResourceSelectionForm({
   return (
     <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-xl font-semibold text-gray-900 dark:text-white">Select Resources to Migrate</h3>
+        <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+          Select Resources to Migrate
+        </h3>
         <span className="text-sm text-gray-500 dark:text-gray-400">
           {selectedCount} of {totalCount} selected
         </span>
@@ -74,26 +85,28 @@ export function ResourceSelectionForm({
         <div className="mb-6">
           <div className="flex items-center gap-2 mb-3">
             <Database className="w-4 h-4 text-blue-500" />
-            <h4 className="font-medium text-gray-900 dark:text-white">Core Content</h4>
+            <h4 className="font-medium text-gray-900 dark:text-white">
+              Core Content
+            </h4>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
             <ResourceItem
               label="Scenarios"
               description="Game scenarios and story content"
               checked={selectedResources.scenarios}
-              onChange={() => onResourceToggle('scenarios')}
+              onChange={() => onResourceToggle("scenarios")}
             />
             <ResourceItem
               label="Content Bundles"
               description="Packaged content bundles"
               checked={selectedResources.bundles}
-              onChange={() => onResourceToggle('bundles')}
+              onChange={() => onResourceToggle("bundles")}
             />
             <ResourceItem
               label="Media Assets"
               description="Media asset metadata records"
               checked={selectedResources.mediaMetadata}
-              onChange={() => onResourceToggle('mediaMetadata')}
+              onChange={() => onResourceToggle("mediaMetadata")}
             />
           </div>
         </div>
@@ -102,32 +115,34 @@ export function ResourceSelectionForm({
         <div className="mb-6">
           <div className="flex items-center gap-2 mb-3">
             <Users className="w-4 h-4 text-green-500" />
-            <h4 className="font-medium text-gray-900 dark:text-white">User Data</h4>
+            <h4 className="font-medium text-gray-900 dark:text-white">
+              User Data
+            </h4>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
             <ResourceItem
               label="User Profiles"
               description="User profile information"
               checked={selectedResources.userProfiles}
-              onChange={() => onResourceToggle('userProfiles')}
+              onChange={() => onResourceToggle("userProfiles")}
             />
             <ResourceItem
               label="Game Sessions"
               description="Player game session data"
               checked={selectedResources.gameSessions}
-              onChange={() => onResourceToggle('gameSessions')}
+              onChange={() => onResourceToggle("gameSessions")}
             />
             <ResourceItem
               label="Accounts"
               description="User account records"
               checked={selectedResources.accounts}
-              onChange={() => onResourceToggle('accounts')}
+              onChange={() => onResourceToggle("accounts")}
             />
             <ResourceItem
               label="Compass Trackings"
               description="User compass tracking data"
               checked={selectedResources.compassTrackings}
-              onChange={() => onResourceToggle('compassTrackings')}
+              onChange={() => onResourceToggle("compassTrackings")}
             />
           </div>
         </div>
@@ -136,38 +151,40 @@ export function ResourceSelectionForm({
         <div className="mb-6">
           <div className="flex items-center gap-2 mb-3">
             <FileText className="w-4 h-4 text-purple-500" />
-            <h4 className="font-medium text-gray-900 dark:text-white">Reference Data</h4>
+            <h4 className="font-medium text-gray-900 dark:text-white">
+              Reference Data
+            </h4>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
             <ResourceItem
               label="Character Maps"
               description="Character mapping definitions"
               checked={selectedResources.characterMaps}
-              onChange={() => onResourceToggle('characterMaps')}
+              onChange={() => onResourceToggle("characterMaps")}
             />
             <ResourceItem
               label="Character Map Files"
               description="Character map file data"
               checked={selectedResources.characterMapFiles}
-              onChange={() => onResourceToggle('characterMapFiles')}
+              onChange={() => onResourceToggle("characterMapFiles")}
             />
             <ResourceItem
               label="Character Media Files"
               description="Character media metadata files"
               checked={selectedResources.characterMediaMetadataFiles}
-              onChange={() => onResourceToggle('characterMediaMetadataFiles')}
+              onChange={() => onResourceToggle("characterMediaMetadataFiles")}
             />
             <ResourceItem
               label="Avatar Configurations"
               description="Avatar configuration files"
               checked={selectedResources.avatarConfigurationFiles}
-              onChange={() => onResourceToggle('avatarConfigurationFiles')}
+              onChange={() => onResourceToggle("avatarConfigurationFiles")}
             />
             <ResourceItem
               label="Badge Configurations"
               description="Badge configuration data"
               checked={selectedResources.badgeConfigurations}
-              onChange={() => onResourceToggle('badgeConfigurations')}
+              onChange={() => onResourceToggle("badgeConfigurations")}
             />
           </div>
         </div>
@@ -176,14 +193,16 @@ export function ResourceSelectionForm({
         <div className="mb-6">
           <div className="flex items-center gap-2 mb-3">
             <Sparkles className="w-4 h-4 text-amber-500" />
-            <h4 className="font-medium text-gray-900 dark:text-white">Master Data Seeding</h4>
+            <h4 className="font-medium text-gray-900 dark:text-white">
+              Master Data Seeding
+            </h4>
           </div>
           <div className="grid grid-cols-1 gap-2">
             <ResourceItem
               label="Seed Master Data"
               description="Populate reference data (archetypes, echo types, compass axes, etc.) in destination"
               checked={selectedResources.masterData}
-              onChange={() => onResourceToggle('masterData')}
+              onChange={() => onResourceToggle("masterData")}
             />
           </div>
         </div>
@@ -192,14 +211,16 @@ export function ResourceSelectionForm({
         <div className="mb-6">
           <div className="flex items-center gap-2 mb-3">
             <HardDrive className="w-4 h-4 text-orange-500" />
-            <h4 className="font-medium text-gray-900 dark:text-white">Blob Storage</h4>
+            <h4 className="font-medium text-gray-900 dark:text-white">
+              Blob Storage
+            </h4>
           </div>
           <div className="grid grid-cols-1 gap-2">
             <ResourceItem
               label="Blob Storage Files"
               description="Copy all blob files from source storage container to destination"
               checked={selectedResources.blobStorage}
-              onChange={() => onResourceToggle('blobStorage')}
+              onChange={() => onResourceToggle("blobStorage")}
             />
           </div>
         </div>

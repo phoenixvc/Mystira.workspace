@@ -1,10 +1,10 @@
-import { ServiceConfig } from '../types';
+import { ServiceConfig } from "../types";
 
 interface ViewModeSelectorProps {
   config: ServiceConfig;
-  currentMode: 'logs' | 'webview' | 'split';
+  currentMode: "logs" | "webview" | "split";
   isMaximized: boolean;
-  onModeChange: (mode: 'logs' | 'webview' | 'split') => void;
+  onModeChange: (mode: "logs" | "webview" | "split") => void;
   onMaximize: () => void;
   onOpenInBrowser: (url: string) => void;
   onOpenInTauriWindow: (url: string, title: string) => void;
@@ -23,18 +23,18 @@ export function ViewModeSelector({
   onClearLogs,
   hasLogs,
 }: ViewModeSelectorProps) {
-  const isHttps = config.url?.startsWith('https://');
-  
+  const isHttps = config.url?.startsWith("https://");
+
   return (
     <div className="mt-2 flex items-center gap-1.5 flex-wrap">
       {/* View Mode Toggle Group - Compact */}
       <div className="flex gap-0 border border-gray-300 dark:border-gray-600 rounded-md overflow-hidden shadow-sm">
         <button
-          onClick={() => onModeChange('logs')}
+          onClick={() => onModeChange("logs")}
           className={`px-2 py-1 text-xs font-medium transition-colors ${
-            currentMode === 'logs' || !currentMode
-              ? 'bg-gray-600 dark:bg-gray-500 text-white'
-              : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+            currentMode === "logs" || !currentMode
+              ? "bg-gray-600 dark:bg-gray-500 text-white"
+              : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
           }`}
           title="Show logs only"
         >
@@ -42,11 +42,11 @@ export function ViewModeSelector({
         </button>
         <div className="w-px bg-gray-300 dark:bg-gray-600"></div>
         <button
-          onClick={() => onModeChange('split')}
+          onClick={() => onModeChange("split")}
           className={`px-2 py-1 text-xs font-medium transition-colors ${
-            currentMode === 'split'
-              ? 'bg-gray-600 dark:bg-gray-500 text-white'
-              : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+            currentMode === "split"
+              ? "bg-gray-600 dark:bg-gray-500 text-white"
+              : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
           }`}
           title="Show logs and webview side by side"
         >
@@ -54,11 +54,11 @@ export function ViewModeSelector({
         </button>
         <div className="w-px bg-gray-300 dark:bg-gray-600"></div>
         <button
-          onClick={() => onModeChange('webview')}
+          onClick={() => onModeChange("webview")}
           className={`px-2 py-1 text-xs font-medium transition-colors ${
-            currentMode === 'webview'
-              ? 'bg-gray-600 dark:bg-gray-500 text-white'
-              : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+            currentMode === "webview"
+              ? "bg-gray-600 dark:bg-gray-500 text-white"
+              : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
           }`}
           title="Show webview only"
         >
@@ -86,11 +86,13 @@ export function ViewModeSelector({
                 }
               }}
               className="px-2 py-1 bg-green-500 text-white rounded text-xs font-medium hover:bg-green-600 transition-colors shadow-sm"
-              title={isHttps 
-                ? "Open in Tauri window (handles self-signed certificates)" 
-                : "Open in external browser"}
+              title={
+                isHttps
+                  ? "Open in Tauri window (handles self-signed certificates)"
+                  : "Open in external browser"
+              }
             >
-              {isHttps ? '🪟 Window' : '🌐 Open'}
+              {isHttps ? "🪟 Window" : "🌐 Open"}
             </button>
           </>
         )}
@@ -99,7 +101,7 @@ export function ViewModeSelector({
           className="px-2 py-1 bg-indigo-500 text-white rounded text-xs font-medium hover:bg-indigo-600 transition-colors shadow-sm"
           title={isMaximized ? "Restore view" : "Maximize view"}
         >
-          {isMaximized ? '↗ Restore' : '⛶ Max'}
+          {isMaximized ? "↗ Restore" : "⛶ Max"}
         </button>
         {hasLogs && (
           <button
@@ -114,4 +116,3 @@ export function ViewModeSelector({
     </div>
   );
 }
-

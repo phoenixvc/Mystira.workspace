@@ -1,4 +1,4 @@
-import type { ActivityBarItem } from '../types';
+import type { ActivityBarItem } from "../types";
 
 interface ActivityBarProps {
   items: ActivityBarItem[];
@@ -35,7 +35,7 @@ export function ActivityBar({
       style={{ width: activityBarWidth }}
     >
       <div className="flex-1 flex flex-col py-1">
-        {items.map(item => (
+        {items.map((item) => (
           <button
             key={item.id}
             onClick={() => {
@@ -46,8 +46,8 @@ export function ActivityBar({
             }}
             className={`relative w-full h-12 flex items-center justify-center transition-colors ${
               activeId === item.id
-                ? 'text-white border-l-2 border-blue-500 bg-gray-700/50'
-                : 'text-gray-400 hover:text-white border-l-2 border-transparent'
+                ? "text-white border-l-2 border-blue-500 bg-gray-700/50"
+                : "text-gray-400 hover:text-white border-l-2 border-transparent"
             }`}
             title={item.title}
           >
@@ -67,10 +67,14 @@ export function ActivityBar({
             onClick={onSecondarySidebarToggle}
             className={`w-full h-10 flex items-center justify-center transition-colors ${
               !secondarySidebarCollapsed
-                ? 'text-white'
-                : 'text-gray-400 hover:text-white'
+                ? "text-white"
+                : "text-gray-400 hover:text-white"
             }`}
-            title={secondarySidebarCollapsed ? 'Show Secondary Sidebar' : 'Hide Secondary Sidebar'}
+            title={
+              secondarySidebarCollapsed
+                ? "Show Secondary Sidebar"
+                : "Hide Secondary Sidebar"
+            }
           >
             <span className="text-lg">⊞</span>
           </button>
@@ -80,10 +84,10 @@ export function ActivityBar({
             onClick={onBottomPanelToggle}
             className={`w-full h-10 flex items-center justify-center transition-colors ${
               !bottomPanelCollapsed
-                ? 'text-white'
-                : 'text-gray-400 hover:text-white'
+                ? "text-white"
+                : "text-gray-400 hover:text-white"
             }`}
-            title={bottomPanelCollapsed ? 'Show Panel' : 'Hide Panel'}
+            title={bottomPanelCollapsed ? "Show Panel" : "Hide Panel"}
           >
             <span className="text-lg">⊟</span>
           </button>
@@ -92,4 +96,3 @@ export function ActivityBar({
     </div>
   );
 }
-

@@ -1,8 +1,8 @@
-import { invoke } from '@tauri-apps/api/core';
-import { useCallback, useEffect, useRef, useState } from 'react';
-import type { CommandResponse } from '../../../types';
-import type { ProjectInfo } from '../ProjectDeploymentPlanner';
-import type { ProjectPipeline, WorkflowRun } from '../types';
+import { invoke } from "@tauri-apps/api/core";
+import { useCallback, useEffect, useRef, useState } from "react";
+import type { CommandResponse } from "../../../types";
+import type { ProjectInfo } from "../ProjectDeploymentPlanner";
+import type { ProjectPipeline, WorkflowRun } from "../types";
 
 interface UseProjectDeploymentProps {
   environment: string;
@@ -10,7 +10,7 @@ interface UseProjectDeploymentProps {
 }
 
 export interface DeploymentError {
-  type: 'validation' | 'dispatch' | 'workflow' | 'network';
+  type: "validation" | "dispatch" | "workflow" | "network";
   message: string;
   projectId?: string;
   retryable?: boolean;
@@ -22,24 +22,38 @@ export interface WorkflowDiscoveryStatus {
   error: string | null;
 }
 
-export function useProjectDeployment({ environment, projects }: UseProjectDeploymentProps) {
-  const [selectedProjects, setSelectedProjects] = useState<Set<string>>(new Set());
-  const [projectPipelines, setProjectPipelines] = useState<Record<string, ProjectPipeline>>({});
+export function useProjectDeployment({
+  environment,
+  projects,
+}: UseProjectDeploymentProps) {
+  const [selectedProjects, setSelectedProjects] = useState<Set<string>>(
+    new Set(),
+  );
+  const [projectPipelines, setProjectPipelines] = useState<
+    Record<string, ProjectPipeline>
+  >({});
   const [deploying, setDeploying] = useState(false);
-  const [workflowRuns, setWorkflowRuns] = useState<Record<string, WorkflowRun>>({});
-  const [workflowLogs, setWorkflowLogs] = useState<Record<string, string[]>>({});
+  const [workflowRuns, setWorkflowRuns] = useState<Record<string, WorkflowRun>>(
+    {},
+  );
+  const [workflowLogs, setWorkflowLogs] = useState<Record<string, string[]>>(
+    {},
+  );
   const [showLogs, setShowLogs] = useState<Record<string, boolean>>({});
   const [availableWorkflows, setAvailableWorkflows] = useState<string[]>([]);
   const logsEndRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   // New UX states
-  const [deploymentErrors, setDeploymentErrors] = useState<DeploymentError[]>([]);
+  const [deploymentErrors, setDeploymentErrors] = useState<DeploymentError[]>(
+    [],
+  );
   const [validationError, setValidationError] = useState<string | null>(null);
-  const [workflowDiscoveryStatus, setWorkflowDiscoveryStatus] = useState<WorkflowDiscoveryStatus>({
-    loading: true,
-    usingFallback: false,
-    error: null,
-  });
+  const [workflowDiscoveryStatus, setWorkflowDiscoveryStatus] =
+    useState<WorkflowDiscoveryStatus>({
+      loading: true,
+      usingFallback: false,
+      error: null,
+    });
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [failedProjects, setFailedProjects] = useState<Set<string>>(new Set());
 
@@ -48,7 +62,11 @@ export function useProjectDeployment({ environment, projects }: UseProjectDeploy
   }, [environment]);
 
   const loadAvailableWorkflows = async () => {
-    setWorkflowDiscoveryStatus({ loading: true, usingFallback: false, error: null });
+    setWorkflowDiscoveryStatus({
+      loading: true,
+      usingFallback: false,
+      error: null,
+    });
 
     const fallbackWorkflows = [
       `mystira-app-api-cicd-${environment}.yml`,
@@ -58,19 +76,26 @@ export function useProjectDeployment({ environment, projects }: UseProjectDeploy
     ];
 
     try {
-      const response = await invoke<CommandResponse<string[]>>('list_github_workflows', {
-        environment,
-      });
+      const response = await invoke<CommandResponse<string[]>>(
+        "list_github_workflows",
+        {
+          environment,
+        },
+      );
 
       if (response.success && response.result) {
         setAvailableWorkflows(response.result);
-        setWorkflowDiscoveryStatus({ loading: false, usingFallback: false, error: null });
+        setWorkflowDiscoveryStatus({
+          loading: false,
+          usingFallback: false,
+          error: null,
+        });
       } else {
         setAvailableWorkflows(fallbackWorkflows);
         setWorkflowDiscoveryStatus({
           loading: false,
           usingFallback: true,
-          error: `Could not discover workflows: ${response.error || 'Unknown error'}. Using default workflow list.`
+          error: `Could not discover workflows: ${response.error || "Unknown error"}. Using default workflow list.`,
         });
       }
     } catch (error) {
@@ -78,7 +103,7 @@ export function useProjectDeployment({ environment, projects }: UseProjectDeploy
       setWorkflowDiscoveryStatus({
         loading: false,
         usingFallback: true,
-        error: `Failed to connect to GitHub API. Using default workflow list.`
+        error: `Failed to connect to GitHub API. Using default workflow list.`,
       });
     }
   };
@@ -90,24 +115,24 @@ export function useProjectDeployment({ environment, projects }: UseProjectDeploy
         const parsed = JSON.parse(saved);
         setProjectPipelines(parsed);
       } catch (e) {
-        console.error('Failed to parse saved pipelines:', e);
+        console.error("Failed to parse saved pipelines:", e);
       }
     } else {
       const defaults: Record<string, ProjectPipeline> = {};
-      projects.forEach(project => {
-        if (project.id === 'mystira-api') {
+      projects.forEach((project) => {
+        if (project.id === "mystira-api") {
           defaults[project.id] = {
             projectId: project.id,
             workflowFile: `mystira-app-api-cicd-${environment}.yml`,
             environment,
           };
-        } else if (project.id === 'mystira-admin-api') {
+        } else if (project.id === "mystira-admin-api") {
           defaults[project.id] = {
             projectId: project.id,
             workflowFile: `mystira-app-admin-api-cicd-${environment}.yml`,
             environment,
           };
-        } else if (project.id === 'mystira-pwa') {
+        } else if (project.id === "mystira-pwa") {
           defaults[project.id] = {
             projectId: project.id,
             workflowFile: `mystira-app-pwa-cicd-${environment}.yml`,
@@ -120,7 +145,10 @@ export function useProjectDeployment({ environment, projects }: UseProjectDeploy
   }, [environment, projects]);
 
   useEffect(() => {
-    localStorage.setItem(`projectPipelines_${environment}`, JSON.stringify(projectPipelines));
+    localStorage.setItem(
+      `projectPipelines_${environment}`,
+      JSON.stringify(projectPipelines),
+    );
   }, [projectPipelines, environment]);
 
   const toggleProjectSelection = (projectId: string) => {
@@ -134,7 +162,7 @@ export function useProjectDeployment({ environment, projects }: UseProjectDeploy
   };
 
   const updatePipeline = (projectId: string, workflowFile: string) => {
-    setProjectPipelines(prev => ({
+    setProjectPipelines((prev) => ({
       ...prev,
       [projectId]: {
         ...prev[projectId],
@@ -158,7 +186,7 @@ export function useProjectDeployment({ environment, projects }: UseProjectDeploy
   }, []);
 
   const dismissError = useCallback((index: number) => {
-    setDeploymentErrors(prev => prev.filter((_, i) => i !== index));
+    setDeploymentErrors((prev) => prev.filter((_, i) => i !== index));
   }, []);
 
   const requestDeploy = useCallback(() => {
@@ -167,7 +195,7 @@ export function useProjectDeployment({ environment, projects }: UseProjectDeploy
 
     // Validation
     if (selectedProjects.size === 0) {
-      setValidationError('Please select at least one project to deploy');
+      setValidationError("Please select at least one project to deploy");
       return;
     }
 
@@ -176,13 +204,15 @@ export function useProjectDeployment({ environment, projects }: UseProjectDeploy
     for (const projectId of selectedProjects) {
       const pipeline = projectPipelines[projectId];
       if (!pipeline?.workflowFile) {
-        const project = projects.find(p => p.id === projectId);
+        const project = projects.find((p) => p.id === projectId);
         missingWorkflows.push(project?.name || projectId);
       }
     }
 
     if (missingWorkflows.length > 0) {
-      setValidationError(`Please select a workflow for: ${missingWorkflows.join(', ')}`);
+      setValidationError(
+        `Please select a workflow for: ${missingWorkflows.join(", ")}`,
+      );
       return;
     }
 
@@ -217,9 +247,9 @@ export function useProjectDeployment({ environment, projects }: UseProjectDeploy
       for (const projectId of selectedProjects) {
         const pipeline = projectPipelines[projectId];
         if (!pipeline) {
-          const project = projects.find(p => p.id === projectId);
+          const project = projects.find((p) => p.id === projectId);
           newErrors.push({
-            type: 'validation',
+            type: "validation",
             message: `No pipeline configured for ${project?.name || projectId}`,
             projectId,
             retryable: false,
@@ -228,44 +258,52 @@ export function useProjectDeployment({ environment, projects }: UseProjectDeploy
         }
 
         try {
-          const dispatchResponse = await invoke<CommandResponse>('github_dispatch_workflow', {
-            workflowFile: pipeline.workflowFile,
-            inputs: pipeline.inputs || {},
-          });
+          const dispatchResponse = await invoke<CommandResponse>(
+            "github_dispatch_workflow",
+            {
+              workflowFile: pipeline.workflowFile,
+              inputs: pipeline.inputs || {},
+            },
+          );
 
           if (dispatchResponse.success && dispatchResponse.result) {
             const run = dispatchResponse.result as any;
             newWorkflowRuns[projectId] = {
               id: run.id,
               name: run.name || pipeline.workflowFile,
-              status: 'queued',
+              status: "queued",
               conclusion: null,
-              html_url: run.html_url || '',
+              html_url: run.html_url || "",
               created_at: run.created_at || new Date().toISOString(),
               updated_at: run.updated_at || new Date().toISOString(),
             };
-            newWorkflowLogs[projectId] = [`🚀 Dispatched workflow: ${pipeline.workflowFile}`];
-            setShowLogs(prev => ({ ...prev, [projectId]: true }));
+            newWorkflowLogs[projectId] = [
+              `🚀 Dispatched workflow: ${pipeline.workflowFile}`,
+            ];
+            setShowLogs((prev) => ({ ...prev, [projectId]: true }));
 
             const lastDeployedKey = `lastDeployed_${projectId}_${environment}`;
             localStorage.setItem(lastDeployedKey, Date.now().toString());
           } else {
-            const project = projects.find(p => p.id === projectId);
-            newWorkflowLogs[projectId] = [`❌ Failed to dispatch: ${dispatchResponse.error || 'Unknown error'}`];
+            const project = projects.find((p) => p.id === projectId);
+            newWorkflowLogs[projectId] = [
+              `❌ Failed to dispatch: ${dispatchResponse.error || "Unknown error"}`,
+            ];
             newErrors.push({
-              type: 'dispatch',
-              message: `Failed to deploy ${project?.name || projectId}: ${dispatchResponse.error || 'Unknown error'}`,
+              type: "dispatch",
+              message: `Failed to deploy ${project?.name || projectId}: ${dispatchResponse.error || "Unknown error"}`,
               projectId,
               retryable: true,
             });
             newFailedProjects.add(projectId);
           }
         } catch (error) {
-          const project = projects.find(p => p.id === projectId);
-          const errorMessage = error instanceof Error ? error.message : 'Network error';
+          const project = projects.find((p) => p.id === projectId);
+          const errorMessage =
+            error instanceof Error ? error.message : "Network error";
           newWorkflowLogs[projectId] = [`❌ Network error: ${errorMessage}`];
           newErrors.push({
-            type: 'network',
+            type: "network",
             message: `Network error deploying ${project?.name || projectId}: ${errorMessage}`,
             projectId,
             retryable: true,
@@ -274,8 +312,8 @@ export function useProjectDeployment({ environment, projects }: UseProjectDeploy
         }
       }
 
-      setWorkflowRuns(prev => ({ ...prev, ...newWorkflowRuns }));
-      setWorkflowLogs(prev => ({ ...prev, ...newWorkflowLogs }));
+      setWorkflowRuns((prev) => ({ ...prev, ...newWorkflowRuns }));
+      setWorkflowLogs((prev) => ({ ...prev, ...newWorkflowLogs }));
       setDeploymentErrors(newErrors);
       setFailedProjects(newFailedProjects);
 
@@ -283,12 +321,15 @@ export function useProjectDeployment({ environment, projects }: UseProjectDeploy
         pollWorkflowStatus(Object.keys(newWorkflowRuns));
       }
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      setDeploymentErrors([{
-        type: 'network',
-        message: `Deployment failed: ${errorMessage}`,
-        retryable: true,
-      }]);
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown error";
+      setDeploymentErrors([
+        {
+          type: "network",
+          message: `Deployment failed: ${errorMessage}`,
+          retryable: true,
+        },
+      ]);
     } finally {
       setDeploying(false);
     }
@@ -299,7 +340,9 @@ export function useProjectDeployment({ environment, projects }: UseProjectDeploy
     setSelectedProjects(failedProjects);
     setFailedProjects(new Set());
     // Clear errors for failed projects
-    setDeploymentErrors(prev => prev.filter(e => !e.projectId || !failedProjects.has(e.projectId)));
+    setDeploymentErrors((prev) =>
+      prev.filter((e) => !e.projectId || !failedProjects.has(e.projectId)),
+    );
   }, [failedProjects]);
 
   const pollWorkflowStatus = async (projectIds: string[]) => {
@@ -308,20 +351,23 @@ export function useProjectDeployment({ environment, projects }: UseProjectDeploy
 
       for (const projectId of projectIds) {
         const run = workflowRuns[projectId];
-        if (!run || (run.status === 'completed' || run.status === 'cancelled')) {
+        if (!run || run.status === "completed" || run.status === "cancelled") {
           continue;
         }
 
         allCompleted = false;
 
         try {
-          const statusResponse = await invoke<CommandResponse>('github_workflow_status', {
-            runId: run.id,
-          });
+          const statusResponse = await invoke<CommandResponse>(
+            "github_workflow_status",
+            {
+              runId: run.id,
+            },
+          );
 
           if (statusResponse.success && statusResponse.result) {
             const status = statusResponse.result as any;
-            setWorkflowRuns(prev => ({
+            setWorkflowRuns((prev) => ({
               ...prev,
               [projectId]: {
                 ...prev[projectId],
@@ -330,20 +376,26 @@ export function useProjectDeployment({ environment, projects }: UseProjectDeploy
                 updated_at: status.updated_at || prev[projectId].updated_at,
               },
             }));
-            
-            if (status.status === 'completed' && status.conclusion === 'success') {
+
+            if (
+              status.status === "completed" &&
+              status.conclusion === "success"
+            ) {
               const lastDeployedKey = `lastDeployed_${projectId}_${environment}`;
               localStorage.setItem(lastDeployedKey, Date.now().toString());
             }
 
-            if (status.status === 'in_progress' || status.status === 'queued') {
-              const logsResponse = await invoke<CommandResponse>('github_workflow_logs', {
-                runId: run.id,
-              });
+            if (status.status === "in_progress" || status.status === "queued") {
+              const logsResponse = await invoke<CommandResponse>(
+                "github_workflow_logs",
+                {
+                  runId: run.id,
+                },
+              );
 
               if (logsResponse.success && logsResponse.result) {
                 const logs = logsResponse.result as string[];
-                setWorkflowLogs(prev => ({
+                setWorkflowLogs((prev) => ({
                   ...prev,
                   [projectId]: logs,
                 }));
@@ -396,4 +448,3 @@ export function useProjectDeployment({ environment, projects }: UseProjectDeploy
     refreshWorkflows: loadAvailableWorkflows,
   };
 }
-

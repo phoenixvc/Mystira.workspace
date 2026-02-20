@@ -1,18 +1,32 @@
-import { useState } from 'react';
-import type { CommandResponse, CosmosWarning, ResourceGroupConvention, TemplateConfig, WhatIfChange, WorkflowStatus } from '../../../../types';
-import { DEFAULT_PROJECTS, type DeploymentMethod, type InfrastructureAction } from '../../../../types';
-import { ProjectDeployment, ProjectDeploymentPlanner } from '../../../project-deployment';
-import { TemplateEditor } from '../../../templates';
-import InfrastructureStatusComponent from '../../InfrastructureStatus';
-import ResourceGroupConfig from '../../ResourceGroupConfig';
-import { DeploymentProgress } from '../DeploymentProgress';
-import { InfrastructureActionButtons } from '../InfrastructureActionButtons';
-import { InfrastructureProgressStepper } from '../InfrastructureProgressStepper';
-import { InfrastructureResponseDisplay } from '../display/InfrastructureResponseDisplay';
-import { ReadyToDeployBanner } from '../display/ReadyToDeployBanner';
-import { StepSeparator } from '../StepSeparator';
-import { WhatIfViewerSection } from '../WhatIfViewerSection';
-import { WorkflowStatusDisplay } from '../display/WorkflowStatusDisplay';
+import { useState } from "react";
+import type {
+  CommandResponse,
+  CosmosWarning,
+  ResourceGroupConvention,
+  TemplateConfig,
+  WhatIfChange,
+  WorkflowStatus,
+} from "../../../../types";
+import {
+  DEFAULT_PROJECTS,
+  type DeploymentMethod,
+  type InfrastructureAction,
+} from "../../../../types";
+import {
+  ProjectDeployment,
+  ProjectDeploymentPlanner,
+} from "../../../project-deployment";
+import { TemplateEditor } from "../../../templates";
+import InfrastructureStatusComponent from "../../InfrastructureStatus";
+import ResourceGroupConfig from "../../ResourceGroupConfig";
+import { DeploymentProgress } from "../DeploymentProgress";
+import { InfrastructureActionButtons } from "../InfrastructureActionButtons";
+import { InfrastructureProgressStepper } from "../InfrastructureProgressStepper";
+import { InfrastructureResponseDisplay } from "../display/InfrastructureResponseDisplay";
+import { ReadyToDeployBanner } from "../display/ReadyToDeployBanner";
+import { StepSeparator } from "../StepSeparator";
+import { WhatIfViewerSection } from "../WhatIfViewerSection";
+import { WorkflowStatusDisplay } from "../display/WorkflowStatusDisplay";
 
 interface InfrastructureActionsTabProps {
   environment: string;
@@ -72,8 +86,10 @@ export default function InfrastructureActionsTab({
   deploymentProgress,
 }: InfrastructureActionsTabProps) {
   const [showResourceGroupConfig, setShowResourceGroupConfig] = useState(false);
-  const [editingTemplate, setEditingTemplate] = useState<TemplateConfig | null>(null);
-  const hasSelectedTemplates = templates.some(t => t.selected);
+  const [editingTemplate, setEditingTemplate] = useState<TemplateConfig | null>(
+    null,
+  );
+  const hasSelectedTemplates = templates.some((t) => t.selected);
 
   return (
     <div>
@@ -90,7 +106,9 @@ export default function InfrastructureActionsTab({
       <div className="mb-6">
         <InfrastructureStatusComponent
           environment={environment}
-          resourceGroup={resourceGroupConfig.defaultResourceGroup || `mys-dev-mystira-rg-san`}
+          resourceGroup={
+            resourceGroupConfig.defaultResourceGroup || `mys-dev-mystira-rg-san`
+          }
           onStatusChange={() => {
             onInfrastructureLoadingChange(false);
           }}
@@ -107,8 +125,8 @@ export default function InfrastructureActionsTab({
             templates={templates}
             onTemplatesChange={onTemplatesChange}
             onEditTemplate={setEditingTemplate}
-            region={resourceGroupConfig.region || 'san'}
-            projectName={resourceGroupConfig.projectName || 'mystira-app'}
+            region={resourceGroupConfig.region || "san"}
+            projectName={resourceGroupConfig.projectName || "mystira-app"}
             onProceedToStep2={() => onShowStep2Change(true)}
             infrastructureLoading={infrastructureLoading}
           />
@@ -190,10 +208,11 @@ export default function InfrastructureActionsTab({
           onSave={(config) => {
             onResourceGroupConfigChange(config);
             // Update existing whatIfChanges with new resource groups
-            const updated = whatIfChanges.map(change => ({
+            const updated = whatIfChanges.map((change) => ({
               ...change,
-              resourceGroup: change.resourceGroup || 
-                config.resourceTypeMappings?.[change.resourceType] || 
+              resourceGroup:
+                change.resourceGroup ||
+                config.resourceTypeMappings?.[change.resourceType] ||
                 config.defaultResourceGroup,
             }));
             onWhatIfChangesChange(updated);
@@ -210,11 +229,16 @@ export default function InfrastructureActionsTab({
           onSave={(template, saveAsNew) => {
             if (saveAsNew) {
               // Add as new template
-              const newTemplate = { ...template, id: `${template.id}-${Date.now()}` };
+              const newTemplate = {
+                ...template,
+                id: `${template.id}-${Date.now()}`,
+              };
               onTemplatesChange([...templates, newTemplate]);
             } else {
               // Update existing template
-              const updated = templates.map(t => t.id === template.id ? template : t);
+              const updated = templates.map((t) =>
+                t.id === template.id ? template : t,
+              );
               onTemplatesChange(updated);
             }
             setEditingTemplate(null);
@@ -228,4 +252,3 @@ export default function InfrastructureActionsTab({
     </div>
   );
 }
-

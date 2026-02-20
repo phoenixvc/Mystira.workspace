@@ -1,4 +1,10 @@
-import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 
 // =============================================================================
 // Types
@@ -10,7 +16,7 @@ export interface Tab {
   icon?: ReactNode;
   content: ReactNode;
   badge?: string | number;
-  badgeVariant?: 'default' | 'success' | 'error' | 'warning' | 'info';
+  badgeVariant?: "default" | "success" | "error" | "warning" | "info";
   disabled?: boolean;
 }
 
@@ -20,8 +26,8 @@ export interface TabbedPanelProps {
   activeTab?: string;
   onTabChange?: (tabId: string) => void;
   storageKey?: string;
-  variant?: 'default' | 'pills' | 'underline';
-  size?: 'sm' | 'md';
+  variant?: "default" | "pills" | "underline";
+  size?: "sm" | "md";
   className?: string;
   tabBarClassName?: string;
   contentClassName?: string;
@@ -33,16 +39,16 @@ export interface TabbedPanelProps {
 // =============================================================================
 
 const badgeVariants = {
-  default: 'bg-gray-500 text-white',
-  success: 'bg-green-500 text-white',
-  error: 'bg-red-500 text-white',
-  warning: 'bg-yellow-500 text-black',
-  info: 'bg-blue-500 text-white',
+  default: "bg-gray-500 text-white",
+  success: "bg-green-500 text-white",
+  error: "bg-red-500 text-white",
+  warning: "bg-yellow-500 text-black",
+  info: "bg-blue-500 text-white",
 };
 
 const tabSizes = {
-  sm: 'px-2 py-1 text-[10px] gap-1',
-  md: 'px-3 py-1.5 text-xs gap-1.5',
+  sm: "px-2 py-1 text-[10px] gap-1",
+  md: "px-3 py-1.5 text-xs gap-1.5",
 };
 
 // =============================================================================
@@ -55,11 +61,11 @@ export function TabbedPanel({
   activeTab: controlledActiveTab,
   onTabChange,
   storageKey,
-  variant = 'default',
-  size = 'sm',
-  className = '',
-  tabBarClassName = '',
-  contentClassName = '',
+  variant = "default",
+  size = "sm",
+  className = "",
+  tabBarClassName = "",
+  contentClassName = "",
   rightContent,
 }: TabbedPanelProps) {
   const isControlled = controlledActiveTab !== undefined;
@@ -67,11 +73,11 @@ export function TabbedPanel({
   const [internalActiveTab, setInternalActiveTab] = useState(() => {
     if (storageKey) {
       const saved = localStorage.getItem(`${storageKey}_activeTab`);
-      if (saved && tabs.some(t => t.id === saved)) {
+      if (saved && tabs.some((t) => t.id === saved)) {
         return saved;
       }
     }
-    return defaultTab || tabs[0]?.id || '';
+    return defaultTab || tabs[0]?.id || "";
   });
 
   const activeTab = isControlled ? controlledActiveTab : internalActiveTab;
@@ -93,28 +99,30 @@ export function TabbedPanel({
 
   const getTabStyles = (tab: Tab, isActive: boolean) => {
     const baseStyles = `flex items-center font-medium transition-colors whitespace-nowrap ${tabSizes[size]}`;
-    const disabledStyles = tab.disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer';
+    const disabledStyles = tab.disabled
+      ? "opacity-50 cursor-not-allowed"
+      : "cursor-pointer";
 
     switch (variant) {
-      case 'pills':
+      case "pills":
         return `${baseStyles} ${disabledStyles} rounded ${
           isActive
-            ? 'bg-blue-600 text-white dark:bg-blue-500'
-            : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
+            ? "bg-blue-600 text-white dark:bg-blue-500"
+            : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
         }`;
 
-      case 'underline':
+      case "underline":
         return `${baseStyles} ${disabledStyles} border-b-2 ${
           isActive
-            ? 'border-blue-600 text-blue-600 dark:border-blue-400 dark:text-blue-400'
-            : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+            ? "border-blue-600 text-blue-600 dark:border-blue-400 dark:text-blue-400"
+            : "border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200"
         }`;
 
       default:
         return `${baseStyles} ${disabledStyles} rounded-t ${
           isActive
-            ? 'bg-white dark:bg-gray-800 text-blue-600 dark:text-blue-400 border-t border-l border-r border-gray-200 dark:border-gray-600 -mb-px'
-            : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'
+            ? "bg-white dark:bg-gray-800 text-blue-600 dark:text-blue-400 border-t border-l border-r border-gray-200 dark:border-gray-600 -mb-px"
+            : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
         }`;
     }
   };
@@ -126,7 +134,7 @@ export function TabbedPanel({
         className={`flex items-center justify-between px-2 py-1 bg-gray-50 dark:bg-gray-800/50 border-b border-gray-200 dark:border-gray-700 ${tabBarClassName}`}
       >
         <div className="flex items-center gap-1 overflow-x-auto">
-          {tabs.map(tab => (
+          {tabs.map((tab) => (
             <button
               key={tab.id}
               onClick={() => !tab.disabled && handleTabClick(tab.id)}
@@ -138,7 +146,7 @@ export function TabbedPanel({
               {tab.badge !== undefined && (
                 <span
                   className={`ml-1 px-1.5 py-0.5 text-[9px] rounded-full ${
-                    badgeVariants[tab.badgeVariant || 'default']
+                    badgeVariants[tab.badgeVariant || "default"]
                   }`}
                 >
                   {tab.badge}
@@ -147,12 +155,14 @@ export function TabbedPanel({
             </button>
           ))}
         </div>
-        {rightContent && <div className="flex items-center gap-1 ml-2">{rightContent}</div>}
+        {rightContent && (
+          <div className="flex items-center gap-1 ml-2">{rightContent}</div>
+        )}
       </div>
 
       {/* Tab Content */}
       <div className={`flex-1 overflow-auto ${contentClassName}`}>
-        {tabs.find(t => t.id === activeTab)?.content}
+        {tabs.find((t) => t.id === activeTab)?.content}
       </div>
     </div>
   );
@@ -183,7 +193,7 @@ export function ResizablePanel({
   storageKey,
   header,
   onCollapseChange,
-  className = '',
+  className = "",
 }: ResizablePanelProps) {
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -207,7 +217,10 @@ export function ResizablePanel({
 
   useEffect(() => {
     if (storageKey) {
-      localStorage.setItem(`${storageKey}_collapsed`, JSON.stringify(isCollapsed));
+      localStorage.setItem(
+        `${storageKey}_collapsed`,
+        JSON.stringify(isCollapsed),
+      );
     }
   }, [isCollapsed, storageKey]);
 
@@ -217,28 +230,34 @@ export function ResizablePanel({
     }
   }, [height, storageKey]);
 
-  const handleMouseDown = useCallback((e: React.MouseEvent) => {
-    e.preventDefault();
-    setIsDragging(true);
+  const handleMouseDown = useCallback(
+    (e: React.MouseEvent) => {
+      e.preventDefault();
+      setIsDragging(true);
 
-    const startY = e.clientY;
-    const startHeight = height;
+      const startY = e.clientY;
+      const startHeight = height;
 
-    const handleMouseMove = (e: MouseEvent) => {
-      const deltaY = startY - e.clientY;
-      const newHeight = Math.max(minHeight, Math.min(maxHeight, startHeight + deltaY));
-      setHeight(newHeight);
-    };
+      const handleMouseMove = (e: MouseEvent) => {
+        const deltaY = startY - e.clientY;
+        const newHeight = Math.max(
+          minHeight,
+          Math.min(maxHeight, startHeight + deltaY),
+        );
+        setHeight(newHeight);
+      };
 
-    const handleMouseUp = () => {
-      setIsDragging(false);
-      document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseup', handleMouseUp);
-    };
+      const handleMouseUp = () => {
+        setIsDragging(false);
+        document.removeEventListener("mousemove", handleMouseMove);
+        document.removeEventListener("mouseup", handleMouseUp);
+      };
 
-    document.addEventListener('mousemove', handleMouseMove);
-    document.addEventListener('mouseup', handleMouseUp);
-  }, [height, minHeight, maxHeight]);
+      document.addEventListener("mousemove", handleMouseMove);
+      document.addEventListener("mouseup", handleMouseUp);
+    },
+    [height, minHeight, maxHeight],
+  );
 
   const toggleCollapse = useCallback(() => {
     setIsCollapsed((prev: boolean) => {
@@ -252,13 +271,13 @@ export function ResizablePanel({
     <div
       ref={containerRef}
       className={`flex flex-col border-t border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 ${className}`}
-      style={{ height: isCollapsed ? 'auto' : `${height}px` }}
+      style={{ height: isCollapsed ? "auto" : `${height}px` }}
     >
       {/* Resize Handle */}
       {!isCollapsed && (
         <div
           className={`h-1 cursor-ns-resize bg-gray-200 dark:bg-gray-700 hover:bg-blue-400 dark:hover:bg-blue-500 transition-colors ${
-            isDragging ? 'bg-blue-500 dark:bg-blue-400' : ''
+            isDragging ? "bg-blue-500 dark:bg-blue-400" : ""
           }`}
           onMouseDown={handleMouseDown}
           title="Drag to resize"
@@ -272,9 +291,9 @@ export function ResizablePanel({
           <button
             onClick={toggleCollapse}
             className="p-1 hover:bg-gray-200 dark:hover:bg-gray-600 rounded text-gray-500 dark:text-gray-400 text-xs"
-            title={isCollapsed ? 'Expand panel' : 'Collapse panel'}
+            title={isCollapsed ? "Expand panel" : "Collapse panel"}
           >
-            {isCollapsed ? '▲' : '▼'}
+            {isCollapsed ? "▲" : "▼"}
           </button>
         </div>
       )}
@@ -306,18 +325,20 @@ export function CollapsibleSection({
   children,
   actions,
   badge,
-  className = '',
+  className = "",
 }: CollapsibleSectionProps) {
   const [isExpanded, setIsExpanded] = useState(defaultExpanded);
 
   return (
-    <div className={`border-b border-gray-200 dark:border-gray-700 ${className}`}>
+    <div
+      className={`border-b border-gray-200 dark:border-gray-700 ${className}`}
+    >
       <button
         onClick={() => setIsExpanded(!isExpanded)}
         className="flex items-center justify-between w-full px-3 py-2 text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider hover:bg-gray-50 dark:hover:bg-gray-800/50"
       >
         <div className="flex items-center gap-2">
-          <span className="text-[10px]">{isExpanded ? '▼' : '▶'}</span>
+          <span className="text-[10px]">{isExpanded ? "▼" : "▶"}</span>
           {icon && <span>{icon}</span>}
           {title}
           {badge !== undefined && (
@@ -327,7 +348,10 @@ export function CollapsibleSection({
           )}
         </div>
         {actions && isExpanded && (
-          <div className="flex items-center gap-1" onClick={e => e.stopPropagation()}>
+          <div
+            className="flex items-center gap-1"
+            onClick={(e) => e.stopPropagation()}
+          >
             {actions}
           </div>
         )}

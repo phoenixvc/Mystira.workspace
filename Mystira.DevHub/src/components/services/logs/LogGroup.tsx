@@ -1,6 +1,6 @@
-import { ServiceLog } from '../types';
-import { LogLine } from './LogLine';
-import { isErrorMessage, isStackTraceLine } from './logUtils';
+import { ServiceLog } from "../types";
+import { LogLine } from "./LogLine";
+import { isErrorMessage, isStackTraceLine } from "./logUtils";
 
 interface LogGroupProps {
   group: { logs: ServiceLog[] };
@@ -8,7 +8,7 @@ interface LogGroupProps {
   filteredLogs: ServiceLog[];
   showLineNumbers: boolean;
   wordWrap: boolean;
-  timestampFormat: 'time' | 'full' | 'relative';
+  timestampFormat: "time" | "full" | "relative";
   filterSearch: string;
   errorIndices: number[];
   currentErrorIndex: number;
@@ -34,16 +34,17 @@ export function LogGroup({
   logLineRefs,
 }: LogGroupProps) {
   const firstLog = group.logs[0];
-  const isBuildLog = firstLog.source === 'build';
+  const isBuildLog = firstLog.source === "build";
   const messageLower = firstLog.message.toLowerCase();
-  
+
   // Use proper error detection (excludes count messages)
-  const isErrorMsg = firstLog.type === 'stderr' || isErrorMessage(firstLog.message);
-  const isWarning = !isErrorMsg && (
-    messageLower.includes('warning') || 
-    messageLower.includes('warn') || 
-    messageLower.includes('deprecated')
-  );
+  const isErrorMsg =
+    firstLog.type === "stderr" || isErrorMessage(firstLog.message);
+  const isWarning =
+    !isErrorMsg &&
+    (messageLower.includes("warning") ||
+      messageLower.includes("warn") ||
+      messageLower.includes("deprecated"));
 
   const isGroupCollapsed = collapsedGroups.has(groupIndex);
   const shouldShow = !isGroupCollapsed || group.logs.length === 1;
@@ -56,10 +57,11 @@ export function LogGroup({
         // Check if this is a stack trace continuation line
         const isStackTrace = isStackTraceLine(log.message);
         // Stack trace lines should be treated as errors (red, no timestamp)
-        const logIsError = isErrorMsg || (isStackTrace && logIndex > 0 && isErrorMsg);
+        const logIsError =
+          isErrorMsg || (isStackTrace && logIndex > 0 && isErrorMsg);
         // Don't show warning status for stack traces
         const logIsWarning = !logIsError && isWarning && !isStackTrace;
-        
+
         return (
           <div
             key={`${groupIndex}-${logIndex}`}
@@ -97,4 +99,3 @@ export function LogGroup({
     </div>
   );
 }
-

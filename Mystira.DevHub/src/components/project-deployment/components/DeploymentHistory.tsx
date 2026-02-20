@@ -1,11 +1,11 @@
-import { useState } from 'react';
-import { OperationStatusBadge } from '../../ui/feedback/components';
+import { useState } from "react";
+import { OperationStatusBadge } from "../../ui/feedback/components";
 
 interface DeploymentEvent {
   id: string;
   timestamp: string;
-  action: 'validate' | 'preview' | 'deploy' | 'destroy';
-  status: 'success' | 'failed' | 'in_progress';
+  action: "validate" | "preview" | "deploy" | "destroy";
+  status: "success" | "failed" | "in_progress";
   duration?: string;
   resourcesAffected?: number;
   user?: string;
@@ -21,35 +21,37 @@ interface DeploymentHistoryProps {
 
 function DeploymentHistory({ events, loading }: DeploymentHistoryProps) {
   const [expandedEvent, setExpandedEvent] = useState<string | null>(null);
-  const [filter, setFilter] = useState<'all' | 'deploy' | 'validate' | 'preview' | 'destroy'>('all');
+  const [filter, setFilter] = useState<
+    "all" | "deploy" | "validate" | "preview" | "destroy"
+  >("all");
 
   const getActionIcon = (action: string) => {
     switch (action) {
-      case 'validate':
-        return '🔍';
-      case 'preview':
-        return '👁️';
-      case 'deploy':
-        return '🚀';
-      case 'destroy':
-        return '💥';
+      case "validate":
+        return "🔍";
+      case "preview":
+        return "👁️";
+      case "deploy":
+        return "🚀";
+      case "destroy":
+        return "💥";
       default:
-        return '📋';
+        return "📋";
     }
   };
 
   const getActionColor = (action: string) => {
     switch (action) {
-      case 'validate':
-        return 'text-blue-700 bg-blue-50 border-blue-200';
-      case 'preview':
-        return 'text-purple-700 bg-purple-50 border-purple-200';
-      case 'deploy':
-        return 'text-green-700 bg-green-50 border-green-200';
-      case 'destroy':
-        return 'text-red-700 bg-red-50 border-red-200';
+      case "validate":
+        return "text-blue-700 bg-blue-50 border-blue-200";
+      case "preview":
+        return "text-purple-700 bg-purple-50 border-purple-200";
+      case "deploy":
+        return "text-green-700 bg-green-50 border-green-200";
+      case "destroy":
+        return "text-red-700 bg-red-50 border-red-200";
       default:
-        return 'text-gray-700 bg-gray-50 border-gray-200';
+        return "text-gray-700 bg-gray-50 border-gray-200";
     }
   };
 
@@ -57,14 +59,14 @@ function DeploymentHistory({ events, loading }: DeploymentHistoryProps) {
 
   const getActionLabel = (action: string) => {
     switch (action) {
-      case 'validate':
-        return 'Validate Templates';
-      case 'preview':
-        return 'Preview Changes';
-      case 'deploy':
-        return 'Deploy Infrastructure';
-      case 'destroy':
-        return 'Destroy Infrastructure';
+      case "validate":
+        return "Validate Templates";
+      case "preview":
+        return "Preview Changes";
+      case "deploy":
+        return "Deploy Infrastructure";
+      case "destroy":
+        return "Destroy Infrastructure";
       default:
         return action;
     }
@@ -72,12 +74,12 @@ function DeploymentHistory({ events, loading }: DeploymentHistoryProps) {
 
   const formatTimestamp = (timestamp: string) => {
     const date = new Date(timestamp);
-    return date.toLocaleString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
+    return date.toLocaleString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     });
   };
 
@@ -96,34 +98,41 @@ function DeploymentHistory({ events, loading }: DeploymentHistoryProps) {
     return (
       <div className="border border-gray-200 rounded-lg p-8 text-center">
         <div className="text-4xl mb-3">📜</div>
-        <div className="text-gray-700 font-medium mb-2">No Deployment History</div>
+        <div className="text-gray-700 font-medium mb-2">
+          No Deployment History
+        </div>
         <div className="text-gray-500 text-sm">
-          Deployment events will appear here once you start infrastructure operations
+          Deployment events will appear here once you start infrastructure
+          operations
         </div>
       </div>
     );
   }
 
-  const filteredEvents = filter === 'all' ? events : events.filter((e) => e.action === filter);
+  const filteredEvents =
+    filter === "all" ? events : events.filter((e) => e.action === filter);
 
   return (
     <div>
       {/* Filter Tabs */}
       <div className="flex gap-2 mb-4 border-b border-gray-200 pb-2">
-        {['all', 'deploy', 'validate', 'preview', 'destroy'].map((filterOption) => (
-          <button
-            key={filterOption}
-            onClick={() => setFilter(filterOption as any)}
-            className={`px-3 py-1 text-sm rounded-t transition-colors ${
-              filter === filterOption
-                ? 'bg-blue-600 text-white'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-            }`}
-          >
-            {filterOption.charAt(0).toUpperCase() + filterOption.slice(1)}
-            {filterOption !== 'all' && ` (${events.filter((e) => e.action === filterOption).length})`}
-          </button>
-        ))}
+        {["all", "deploy", "validate", "preview", "destroy"].map(
+          (filterOption) => (
+            <button
+              key={filterOption}
+              onClick={() => setFilter(filterOption as any)}
+              className={`px-3 py-1 text-sm rounded-t transition-colors ${
+                filter === filterOption
+                  ? "bg-blue-600 text-white"
+                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+              }`}
+            >
+              {filterOption.charAt(0).toUpperCase() + filterOption.slice(1)}
+              {filterOption !== "all" &&
+                ` (${events.filter((e) => e.action === filterOption).length})`}
+            </button>
+          ),
+        )}
       </div>
 
       {/* Timeline */}
@@ -143,7 +152,9 @@ function DeploymentHistory({ events, loading }: DeploymentHistoryProps) {
                   <div className="flex items-start space-x-3">
                     {/* Timeline Dot */}
                     <div className="relative">
-                      <div className="text-2xl">{getActionIcon(event.action)}</div>
+                      <div className="text-2xl">
+                        {getActionIcon(event.action)}
+                      </div>
                       {index < filteredEvents.length - 1 && (
                         <div className="absolute left-1/2 top-8 w-0.5 h-8 bg-gray-300 -ml-px"></div>
                       )}
@@ -160,12 +171,15 @@ function DeploymentHistory({ events, loading }: DeploymentHistoryProps) {
 
                       <div className="text-sm opacity-75 mb-2">
                         📅 {formatTimestamp(event.timestamp)}
-                        {event.duration && <span className="ml-3">⏱️ {event.duration}</span>}
+                        {event.duration && (
+                          <span className="ml-3">⏱️ {event.duration}</span>
+                        )}
                       </div>
 
                       {event.resourcesAffected !== undefined && (
                         <div className="text-sm">
-                          <strong>Resources Affected:</strong> {event.resourcesAffected}
+                          <strong>Resources Affected:</strong>{" "}
+                          {event.resourcesAffected}
                         </div>
                       )}
 
@@ -180,10 +194,12 @@ function DeploymentHistory({ events, loading }: DeploymentHistoryProps) {
                   {/* Expand Button */}
                   {hasDetails && (
                     <button
-                      onClick={() => setExpandedEvent(isExpanded ? null : event.id)}
+                      onClick={() =>
+                        setExpandedEvent(isExpanded ? null : event.id)
+                      }
                       className="ml-2 px-2 py-1 text-xs bg-white bg-opacity-50 hover:bg-opacity-75 rounded transition-colors"
                     >
-                      {isExpanded ? 'Less' : 'Details'}
+                      {isExpanded ? "Less" : "Details"}
                     </button>
                   )}
                 </div>
@@ -229,7 +245,7 @@ function DeploymentHistory({ events, loading }: DeploymentHistoryProps) {
       </div>
 
       {/* Summary Footer */}
-      {filteredEvents.length === 0 && filter !== 'all' && (
+      {filteredEvents.length === 0 && filter !== "all" && (
         <div className="text-center text-gray-500 text-sm py-8">
           No {filter} operations found in history
         </div>

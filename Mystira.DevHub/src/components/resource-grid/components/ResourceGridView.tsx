@@ -1,10 +1,10 @@
-import { ResourceCard } from './ResourceCard';
+import { ResourceCard } from "./ResourceCard";
 
 interface AzureResource {
   id: string;
   name: string;
   type: string;
-  status: 'running' | 'stopped' | 'warning' | 'failed' | 'unknown';
+  status: "running" | "stopped" | "warning" | "failed" | "unknown";
   region: string;
   costToday?: number;
   properties?: Record<string, string>;
@@ -27,8 +27,8 @@ export function ResourceGridView({
     <div
       className={`grid ${
         compact
-          ? 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2'
-          : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'
+          ? "grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2"
+          : "grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
       }`}
     >
       {resources.map((resource) => (
@@ -43,4 +43,3 @@ export function ResourceGridView({
     </div>
   );
 }
-

@@ -1,7 +1,7 @@
-import { useState } from 'react';
-import { ChevronDown, ChevronUp } from 'lucide-react';
-import { EnvironmentSelector } from './EnvironmentSelector';
-import { MigrationConfig } from './types';
+import { useState } from "react";
+import { ChevronDown, ChevronUp } from "lucide-react";
+import { EnvironmentSelector } from "./EnvironmentSelector";
+import { MigrationConfig } from "./types";
 
 interface MigrationConfigFormProps {
   config: MigrationConfig;
@@ -9,35 +9,46 @@ interface MigrationConfigFormProps {
   onNext: () => void;
 }
 
-export function MigrationConfigForm({ config, onConfigChange, onNext }: MigrationConfigFormProps) {
+export function MigrationConfigForm({
+  config,
+  onConfigChange,
+  onNext,
+}: MigrationConfigFormProps) {
   const [showManualEntry, setShowManualEntry] = useState(false);
-  const isCustomMode = config.sourceEnvironment === 'custom' || config.destEnvironment === 'custom';
+  const isCustomMode =
+    config.sourceEnvironment === "custom" ||
+    config.destEnvironment === "custom";
 
   const handleConnectionsFetched = (
     source: { cosmos: string; storage: string; databaseName: string },
-    dest: { cosmos: string; storage: string; databaseName: string }
+    dest: { cosmos: string; storage: string; databaseName: string },
   ) => {
-    onConfigChange('sourceCosmosConnection', source.cosmos);
-    onConfigChange('sourceStorageConnection', source.storage);
-    onConfigChange('sourceDatabaseName', source.databaseName);
-    onConfigChange('destCosmosConnection', dest.cosmos);
-    onConfigChange('destStorageConnection', dest.storage);
-    onConfigChange('destDatabaseName', dest.databaseName);
+    onConfigChange("sourceCosmosConnection", source.cosmos);
+    onConfigChange("sourceStorageConnection", source.storage);
+    onConfigChange("sourceDatabaseName", source.databaseName);
+    onConfigChange("destCosmosConnection", dest.cosmos);
+    onConfigChange("destStorageConnection", dest.storage);
+    onConfigChange("destDatabaseName", dest.databaseName);
   };
 
   const hasConnections =
-    config.sourceCosmosConnection || config.destCosmosConnection || config.sourceStorageConnection || config.destStorageConnection;
+    config.sourceCosmosConnection ||
+    config.destCosmosConnection ||
+    config.sourceStorageConnection ||
+    config.destStorageConnection;
 
   return (
     <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6">
-      <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Connection Configuration</h3>
+      <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+        Connection Configuration
+      </h3>
 
       {/* Environment Selector */}
       <EnvironmentSelector
         sourceEnvironment={config.sourceEnvironment}
         destEnvironment={config.destEnvironment}
-        onSourceChange={(id) => onConfigChange('sourceEnvironment', id)}
-        onDestChange={(id) => onConfigChange('destEnvironment', id)}
+        onSourceChange={(id) => onConfigChange("sourceEnvironment", id)}
+        onDestChange={(id) => onConfigChange("destEnvironment", id)}
         onConnectionsFetched={handleConnectionsFetched}
       />
 
@@ -47,10 +58,18 @@ export function MigrationConfigForm({ config, onConfigChange, onNext }: Migratio
           onClick={() => setShowManualEntry(!showManualEntry)}
           className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
         >
-          {showManualEntry ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-          {isCustomMode ? 'Connection String Entry (Required)' : 'Manual Connection String Entry'}
+          {showManualEntry ? (
+            <ChevronUp className="w-4 h-4" />
+          ) : (
+            <ChevronDown className="w-4 h-4" />
+          )}
+          {isCustomMode
+            ? "Connection String Entry (Required)"
+            : "Manual Connection String Entry"}
           {hasConnections && !isCustomMode && (
-            <span className="text-green-600 dark:text-green-400 text-xs ml-2">(Auto-filled)</span>
+            <span className="text-green-600 dark:text-green-400 text-xs ml-2">
+              (Auto-filled)
+            </span>
           )}
         </button>
       </div>
@@ -59,7 +78,9 @@ export function MigrationConfigForm({ config, onConfigChange, onNext }: Migratio
       {(showManualEntry || isCustomMode) && (
         <div className="mt-4 space-y-6">
           <div>
-            <h4 className="text-lg font-medium text-gray-900 dark:text-white mb-3">Cosmos DB Connections</h4>
+            <h4 className="text-lg font-medium text-gray-900 dark:text-white mb-3">
+              Cosmos DB Connections
+            </h4>
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -68,7 +89,9 @@ export function MigrationConfigForm({ config, onConfigChange, onNext }: Migratio
                 <input
                   type="password"
                   value={config.sourceCosmosConnection}
-                  onChange={(e) => onConfigChange('sourceCosmosConnection', e.target.value)}
+                  onChange={(e) =>
+                    onConfigChange("sourceCosmosConnection", e.target.value)
+                  }
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm"
                   placeholder="AccountEndpoint=https://source-account.documents.azure.com:443/;AccountKey=..."
                 />
@@ -81,7 +104,9 @@ export function MigrationConfigForm({ config, onConfigChange, onNext }: Migratio
                 <input
                   type="password"
                   value={config.destCosmosConnection}
-                  onChange={(e) => onConfigChange('destCosmosConnection', e.target.value)}
+                  onChange={(e) =>
+                    onConfigChange("destCosmosConnection", e.target.value)
+                  }
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm"
                   placeholder="AccountEndpoint=https://dest-account.documents.azure.com:443/;AccountKey=..."
                 />
@@ -89,21 +114,29 @@ export function MigrationConfigForm({ config, onConfigChange, onNext }: Migratio
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Source Database Name</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Source Database Name
+                  </label>
                   <input
                     type="text"
                     value={config.sourceDatabaseName}
-                    onChange={(e) => onConfigChange('sourceDatabaseName', e.target.value)}
+                    onChange={(e) =>
+                      onConfigChange("sourceDatabaseName", e.target.value)
+                    }
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     placeholder="MystiraDb"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Destination Database Name</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Destination Database Name
+                  </label>
                   <input
                     type="text"
                     value={config.destDatabaseName}
-                    onChange={(e) => onConfigChange('destDatabaseName', e.target.value)}
+                    onChange={(e) =>
+                      onConfigChange("destDatabaseName", e.target.value)
+                    }
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     placeholder="MystiraAppDb"
                   />
@@ -113,7 +146,9 @@ export function MigrationConfigForm({ config, onConfigChange, onNext }: Migratio
           </div>
 
           <div>
-            <h4 className="text-lg font-medium text-gray-900 dark:text-white mb-3">Blob Storage Connections</h4>
+            <h4 className="text-lg font-medium text-gray-900 dark:text-white mb-3">
+              Blob Storage Connections
+            </h4>
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -122,7 +157,9 @@ export function MigrationConfigForm({ config, onConfigChange, onNext }: Migratio
                 <input
                   type="password"
                   value={config.sourceStorageConnection}
-                  onChange={(e) => onConfigChange('sourceStorageConnection', e.target.value)}
+                  onChange={(e) =>
+                    onConfigChange("sourceStorageConnection", e.target.value)
+                  }
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm"
                   placeholder="DefaultEndpointsProtocol=https;AccountName=sourcestorage;..."
                 />
@@ -135,18 +172,24 @@ export function MigrationConfigForm({ config, onConfigChange, onNext }: Migratio
                 <input
                   type="password"
                   value={config.destStorageConnection}
-                  onChange={(e) => onConfigChange('destStorageConnection', e.target.value)}
+                  onChange={(e) =>
+                    onConfigChange("destStorageConnection", e.target.value)
+                  }
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm"
                   placeholder="DefaultEndpointsProtocol=https;AccountName=deststorage;..."
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Container Name</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Container Name
+                </label>
                 <input
                   type="text"
                   value={config.containerName}
-                  onChange={(e) => onConfigChange('containerName', e.target.value)}
+                  onChange={(e) =>
+                    onConfigChange("containerName", e.target.value)
+                  }
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   placeholder="media-assets"
                 />

@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef } from "react";
 
 interface CliBuildLogsViewerProps {
   isBuilding: boolean;
@@ -7,12 +7,17 @@ interface CliBuildLogsViewerProps {
   onClose: () => void;
 }
 
-export function CliBuildLogsViewer({ isBuilding, logs, showLogs, onClose }: CliBuildLogsViewerProps) {
+export function CliBuildLogsViewer({
+  isBuilding,
+  logs,
+  showLogs,
+  onClose,
+}: CliBuildLogsViewerProps) {
   const logsEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (logsEndRef.current && (isBuilding || logs.length > 0)) {
-      logsEndRef.current.scrollIntoView({ behavior: 'smooth' });
+      logsEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [logs, isBuilding]);
 
@@ -24,7 +29,9 @@ export function CliBuildLogsViewer({ isBuilding, logs, showLogs, onClose }: CliB
     <div className="mb-6 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
       <div className="bg-gray-50 dark:bg-gray-800 px-4 py-2 flex items-center justify-between border-b border-gray-200 dark:border-gray-700">
         <div className="flex items-center gap-2">
-          <h3 className="font-semibold text-gray-900 dark:text-white">CLI Build Logs</h3>
+          <h3 className="font-semibold text-gray-900 dark:text-white">
+            CLI Build Logs
+          </h3>
           {isBuilding && (
             <span className="inline-block animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></span>
           )}
@@ -54,4 +61,3 @@ export function CliBuildLogsViewer({ isBuilding, logs, showLogs, onClose }: CliB
     </div>
   );
 }
-
