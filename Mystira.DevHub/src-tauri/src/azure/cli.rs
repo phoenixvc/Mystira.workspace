@@ -1,5 +1,6 @@
 use crate::helpers::{check_azure_cli_installed, check_winget_available};
 use crate::types::CommandResponse;
+#[cfg(target_os = "windows")]
 use std::process::Command;
 
 /// Check if Azure CLI is installed

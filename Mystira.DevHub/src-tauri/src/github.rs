@@ -166,24 +166,22 @@ pub async fn list_github_workflows(environment: Option<String>) -> Result<Comman
 
     match fs::read_dir(&workflows_dir) {
         Ok(entries) => {
-            for entry in entries {
-                if let Ok(entry) = entry {
-                    let path = entry.path();
-                    if path.is_file() {
-                        if let Some(ext) = path.extension() {
-                            if ext == "yml" || ext == "yaml" {
-                                if let Some(file_name) = path.file_name() {
-                                    if let Some(file_name_str) = file_name.to_str() {
-                                        if let Some(env_filter) = &environment {
-                                            if file_name_str
-                                                .to_lowercase()
-                                                .contains(&env_filter.to_lowercase())
-                                            {
-                                                workflows.push(file_name_str.to_string());
-                                            }
-                                        } else {
+            for entry in entries.flatten() {
+                let path = entry.path();
+                if path.is_file() {
+                    if let Some(ext) = path.extension() {
+                        if ext == "yml" || ext == "yaml" {
+                            if let Some(file_name) = path.file_name() {
+                                if let Some(file_name_str) = file_name.to_str() {
+                                    if let Some(env_filter) = &environment {
+                                        if file_name_str
+                                            .to_lowercase()
+                                            .contains(&env_filter.to_lowercase())
+                                        {
                                             workflows.push(file_name_str.to_string());
                                         }
+                                    } else {
+                                        workflows.push(file_name_str.to_string());
                                     }
                                 }
                             }

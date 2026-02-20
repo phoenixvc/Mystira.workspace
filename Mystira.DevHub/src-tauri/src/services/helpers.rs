@@ -7,7 +7,7 @@
 //! - Build output streaming
 
 use crate::types::ServiceInfo;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::process::Command;
 use std::process::Stdio;
 use tauri::{AppHandle, Emitter};
@@ -17,7 +17,7 @@ use tokio::process::Command as TokioCommand;
 /// Get project path, port, and URL for a service
 pub fn get_service_paths(
     service_name: &str,
-    repo_path: &PathBuf,
+    repo_path: &Path,
 ) -> Result<(PathBuf, u16, Option<String>), String> {
     match service_name {
         "api" => Ok((
@@ -66,20 +66,20 @@ pub async fn kill_process_by_pid(pid: u32) {
     #[cfg(not(target_os = "windows"))]
     {
         let _ = Command::new("kill")
-            .args(&["-9", &pid.to_string()])
+            .args(["-9", &pid.to_string()])
             .output();
         tokio::time::sleep(tokio::time::Duration::from_millis(1000)).await;
     }
 }
 
 /// Kill a process by port (Windows only, fallback)
-pub async fn kill_process_by_port(port: u16) {
+pub async fn kill_process_by_port(_port: u16) {
     #[cfg(target_os = "windows")]
     {
         let _ = Command::new("powershell")
             .args(&[
                 "-Command",
-                &format!("Get-NetTCPConnection -LocalPort {} -ErrorAction SilentlyContinue | Select-Object -ExpandProperty OwningProcess | ForEach-Object {{ Stop-Process -Id $_ -Force }}", port)
+                &format!("Get-NetTCPConnection -LocalPort {} -ErrorAction SilentlyContinue | Select-Object -ExpandProperty OwningProcess | ForEach-Object {{ Stop-Process -Id $_ -Force }}", _port)
             ])
             .output();
         tokio::time::sleep(tokio::time::Duration::from_millis(2000)).await;
@@ -166,7 +166,7 @@ pub async fn build_service(
     app_handle: AppHandle,
 ) -> Result<(), String> {
     let mut build_child = TokioCommand::new("dotnet")
-        .args(&["build"])
+        .args(["build"])
         .current_dir(project_path)
         .stdout(Stdio::piped())
         .stderr(Stdio::piped())
@@ -210,7 +210,7 @@ pub fn is_process_running(pid: u32) -> bool {
     #[cfg(not(target_os = "windows"))]
     {
         std::process::Command::new("kill")
-            .args(&["-0", &pid.to_string()])
+            .args(["-0", &pid.to_string()])
             .output()
             .map(|o| o.status.success())
             .unwrap_or(false)

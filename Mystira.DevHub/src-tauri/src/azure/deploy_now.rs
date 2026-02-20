@@ -5,7 +5,7 @@ use crate::helpers::get_azure_cli_path;
 use crate::types::CommandResponse;
 use serde_json::json;
 use std::process::Command;
-use tracing::{debug, info, warn};
+use tracing::{info, warn};
 
 /// Check Azure login status
 #[tauri::command]
@@ -388,7 +388,7 @@ pub async fn get_git_status(repo_root: String) -> Result<CommandResponse, String
     let has_uncommitted = !uncommitted_files.is_empty();
 
     // Get ahead/behind counts
-    let fetch_result = Command::new("git")
+    let _fetch_result = Command::new("git")
         .arg("fetch")
         .arg("origin")
         .current_dir(&repo_root)

@@ -5,6 +5,7 @@
 
 use serde_json::Value;
 use std::fs;
+#[cfg(target_os = "windows")]
 use std::process::Command;
 
 /// Check if a port is available
@@ -66,7 +67,7 @@ pub async fn get_service_port(service_name: String, repo_root: String) -> Result
             if let Some(app_url) = https_profile.get("applicationUrl").and_then(|v| v.as_str()) {
                 // Parse "https://localhost:7096;http://localhost:5260"
                 if let Some(https_part) = app_url.split(';').next() {
-                    if let Some(port_str) = https_part.split(':').last() {
+                    if let Some(port_str) = https_part.split(':').next_back() {
                         if let Ok(port) = port_str.parse::<u16>() {
                             return Ok(port);
                         }
@@ -117,7 +118,7 @@ pub async fn update_service_port(
                     let parts: Vec<&str> = url_str.split(';').collect();
                     let http_part = if parts.len() > 1 { parts[1] } else { "" };
                     let http_port = if !http_part.is_empty() {
-                        http_part.split(':').last().unwrap_or("5260")
+                        http_part.split(':').next_back().unwrap_or("5260")
                     } else {
                         "5260"
                     };

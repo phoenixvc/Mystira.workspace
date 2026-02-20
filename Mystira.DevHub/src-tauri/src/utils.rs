@@ -158,7 +158,7 @@ pub async fn build_cli() -> Result<CommandResponse, String> {
 
         Ok(CommandResponse {
             success: true,
-            message: Some(format!("CLI built successfully!")),
+            message: Some("CLI built successfully!".to_string()),
             result: Some(serde_json::json!({
                 "output": full_output,
                 "buildTime": build_time
@@ -214,7 +214,7 @@ pub async fn read_bicep_file(relative_path: String) -> Result<String, String> {
     })?;
 
     if !file_path_canonical.starts_with(&repo_root_canonical) {
-        return Err(format!("Invalid path: path must be within repository root"));
+        return Err("Invalid path: path must be within repository root".to_string());
     }
 
     // Read the file
@@ -232,7 +232,7 @@ pub async fn get_repo_root() -> Result<String, String> {
 #[tauri::command]
 pub async fn get_current_branch(repo_root: String) -> Result<String, String> {
     let output = Command::new("git")
-        .args(&["rev-parse", "--abbrev-ref", "HEAD"])
+        .args(["rev-parse", "--abbrev-ref", "HEAD"])
         .current_dir(&repo_root)
         .output()
         .map_err(|e| format!("Failed to get current branch: {}", e))?;
