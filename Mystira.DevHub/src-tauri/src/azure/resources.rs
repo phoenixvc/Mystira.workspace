@@ -204,7 +204,8 @@ pub async fn get_azure_resources(
                             message: None,
                             error: Some(format!(
                                 "Failed to parse Azure CLI response: {}. Output (truncated): {}",
-                                e, stdout.chars().take(200).collect::<String>()
+                                e,
+                                stdout.chars().take(200).collect::<String>()
                             )),
                         })
                     }

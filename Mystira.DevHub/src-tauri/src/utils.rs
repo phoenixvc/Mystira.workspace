@@ -408,13 +408,17 @@ pub async fn create_webview_window(
         title
             .to_lowercase()
             .chars()
-            .map(|c| if c.is_alphanumeric() || "-/:_".contains(c) { c } else { '-' })
+            .map(|c| {
+                if c.is_alphanumeric() || "-/:_".contains(c) {
+                    c
+                } else {
+                    '-'
+                }
+            })
             .collect::<String>()
     );
 
-    let parsed_url: url::Url = url
-        .parse()
-        .map_err(|e| format!("Invalid URL: {}", e))?;
+    let parsed_url: url::Url = url.parse().map_err(|e| format!("Invalid URL: {}", e))?;
     if parsed_url.scheme() != "https" && parsed_url.scheme() != "http" {
         return Err(format!(
             "Invalid URL scheme '{}': only http and https are allowed",
