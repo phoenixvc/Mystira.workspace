@@ -13,9 +13,29 @@
                 <h1>My Story Library</h1>
                 <p>Browse and revisit your previously generated narratives</p>
             </div>
-            <a href="/story-generator" class="btn btn-primary">
-                <span>+</span> New Story
-            </a>
+            <div class="header-actions">
+                @if (showClearConfirm)
+                {
+                    <div class="confirm-clear">
+                        <span class="confirm-text">Delete all stories?</span>
+                        <button class="btn btn-danger" @onclick="ClearAllAsync" disabled="@isClearing">
+                            @(isClearing ? "Clearing..." : "Yes, delete all")
+                        </button>
+                        <button class="btn btn-secondary" @onclick="() => showClearConfirm = false" disabled="@isClearing">
+                            Cancel
+                        </button>
+                    </div>
+                }
+                else if (allSessions.Count > 0)
+                {
+                    <button class="btn btn-ghost" @onclick="() => showClearConfirm = true" title="Delete all story history">
+                        Clear History
+                    </button>
+                }
+                <a href="/story-generator" class="btn btn-primary">
+                    <span>+</span> New Story
+                </a>
+            </div>
         </div>
 
         <div class="safety-notice">
@@ -120,6 +140,8 @@
     private const int DisplayLimit = 10;
 
     private bool isLoading = true;
+    private bool isClearing = false;
+    private bool showClearConfirm = false;
     private string searchQuery = string.Empty;
     private List<SessionMetadata> allSessions = new();
     private string? loadingSessionId;
@@ -181,6 +203,23 @@
         if (e.Key == "Enter" || e.Key == " ")
         {
             await OpenStoryAsync(sessionId);
+        }
+    }
+
+    private async Task ClearAllAsync()
+    {
+        isClearing = true;
+        StateHasChanged();
+        try
+        {
+            await ChatSessionService.ClearAllSessionsAsync();
+            allSessions = new();
+        }
+        finally
+        {
+            isClearing = false;
+            showClearConfirm = false;
+            StateHasChanged();
         }
     }
 }
@@ -424,6 +463,31 @@
     }
 
     /* Buttons */
+    .header-actions {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+    }
+
+    .confirm-clear {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: #fef2f2;
+        border: 1px solid #fca5a5;
+        border-radius: 0.625rem;
+        padding: 0.375rem 0.75rem;
+    }
+
+    .confirm-text {
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: #991b1b;
+        white-space: nowrap;
+    }
+
     .btn {
         display: inline-flex;
         align-items: center;
@@ -439,6 +503,12 @@
         white-space: nowrap;
     }
 
+    .btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none !important;
+    }
+
     .btn-primary {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         color: #fff;
@@ -449,6 +519,43 @@
         transform: translateY(-1px);
         box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
         color: #fff;
+    }
+
+    .btn-danger {
+        background: #dc2626;
+        color: #fff;
+        font-size: 0.8125rem;
+        padding: 0.375rem 0.875rem;
+    }
+
+    .btn-danger:hover {
+        background: #b91c1c;
+        transform: translateY(-1px);
+    }
+
+    .btn-secondary {
+        background: #f3f4f6;
+        color: #374151;
+        font-size: 0.8125rem;
+        padding: 0.375rem 0.875rem;
+    }
+
+    .btn-secondary:hover {
+        background: #e5e7eb;
+    }
+
+    .btn-ghost {
+        background: transparent;
+        color: #9ca3af;
+        border: 1px solid #e5e7eb;
+        font-size: 0.875rem;
+        padding: 0.5rem 1rem;
+    }
+
+    .btn-ghost:hover {
+        background: #fef2f2;
+        color: #dc2626;
+        border-color: #fca5a5;
     }
 
     @@media (max-width: 640px) {

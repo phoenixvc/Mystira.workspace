@@ -552,8 +552,9 @@
     /// <summary>
     /// After navigating from agent mode via "Complete &amp; Continue in Chat", the agent page stores
     /// the finished story YAML under the "prePopulatedMessage" localStorage key and then redirects
-    /// here. We consume that key, attach the YAML to the current chat session, and display it in
-    /// the YAML preview panel so the user lands straight on the result.
+    /// here. We consume that key and attach the YAML to the current (or a new) legacy chat session
+    /// so the YAML preview panel shows the completed story immediately on landing.
+    /// Story Library persistence is handled by AgentModeStoryPage before navigation.
     /// </summary>
     private async Task ApplyPrePopulatedYamlIfNeededAsync()
     {
@@ -602,15 +603,6 @@
             YamlContent = yaml;
 
             await LocalStorage.SetItemAsync(ChatsStorageKey, ChatHistories);
-
-            // Save to new-format session storage (Story Library).
-            // EnsureInitializedAsync first so _currentSession is populated if one exists.
-            await ChatSessionService.EnsureInitializedAsync();
-            if (ChatSessionService.CurrentSession == null)
-            {
-                await ChatSessionService.CreateNewSessionAsync(CurrentChat.Title);
-            }
-            await ChatSessionService.SaveYamlSnapshotAsync(yaml);
         }
         catch (Exception ex)
         {
