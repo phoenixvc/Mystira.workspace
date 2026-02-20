@@ -1,0 +1,574 @@
+@page "/story-library"
+@using Mystira.StoryGenerator.Contracts.Chat
+@using Mystira.StoryGenerator.Web.Services
+@inject IChatSessionService ChatSessionService
+@inject NavigationManager NavigationManager
+
+<PageTitle>Story Library</PageTitle>
+
+<div class="library-container">
+    <div class="library-header">
+        <div class="library-title-row">
+            <div>
+                <h1>My Story Library</h1>
+                <p>Browse and revisit your previously generated narratives</p>
+            </div>
+            <div class="header-actions">
+                @if (showClearConfirm)
+                {
+                    <div class="confirm-clear">
+                        <span class="confirm-text">Delete all stories?</span>
+                        <button class="btn btn-danger" @onclick="ClearAllAsync" disabled="@isClearing">
+                            @(isClearing ? "Clearing..." : "Yes, delete all")
+                        </button>
+                        <button class="btn btn-secondary" @onclick="() => showClearConfirm = false" disabled="@isClearing">
+                            Cancel
+                        </button>
+                    </div>
+                }
+                else if (allSessions.Count > 0)
+                {
+                    <button class="btn btn-ghost" @onclick="() => showClearConfirm = true" title="Delete all story history">
+                        Clear History
+                    </button>
+                }
+                <a href="/story-generator" class="btn btn-primary">
+                    <span>+</span> New Story
+                </a>
+            </div>
+        </div>
+
+        <div class="safety-notice">
+            <span class="safety-icon">&#x1F6E1;</span>
+            Child safety filters are active on all historical content.
+        </div>
+
+        <div class="search-bar-wrapper">
+            <input type="search"
+                   class="search-input"
+                   placeholder="Search stories by title..."
+                   @bind="searchQuery"
+                   @bind:event="oninput" />
+        </div>
+    </div>
+
+    @if (isLoading)
+    {
+        <div class="loading-state">
+            <div class="spinner"></div>
+            <p>Loading your stories...</p>
+        </div>
+    }
+    else if (filteredSessions.Count == 0)
+    {
+        <div class="empty-state">
+            <div class="empty-icon">&#x1F4DA;</div>
+            @if (!string.IsNullOrWhiteSpace(searchQuery))
+            {
+                <h3>No stories found</h3>
+                <p>No stories match "@searchQuery". Try a different search term.</p>
+            }
+            else
+            {
+                <h3>No stories yet</h3>
+                <p>Your generated stories will appear here. Start by creating a new story!</p>
+                <a href="/story-generator" class="btn btn-primary" style="margin-top: 1.5rem;">
+                    Create Your First Story
+                </a>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="stories-grid">
+            @foreach (var session in filteredSessions)
+            {
+                <div class="story-card @(loadingSessionId == session.Id ? "loading" : "")"
+                     @onclick="() => OpenStoryAsync(session.Id)"
+                     role="button"
+                     tabindex="0"
+                     @onkeydown="(e) => HandleKeyDown(e, session.Id)"
+                     aria-label="Open story: @session.Title">
+                    <div class="story-card-header">
+                        <div class="story-icon">&#x1F4D6;</div>
+                        <div class="story-badges">
+                            @if (session.HasYamlSnapshot)
+                            {
+                                <span class="badge badge-story">Story</span>
+                            }
+                            <span class="badge badge-messages">@session.MessageCount msg@(session.MessageCount == 1 ? "" : "s")</span>
+                        </div>
+                    </div>
+                    <div class="story-card-body">
+                        <h3 class="story-title">@session.Title</h3>
+                        <p class="story-date">
+                            Created @session.CreatedAt.ToLocalTime().ToString("MMM d, yyyy")
+                        </p>
+                        @if (session.UpdatedAt != session.CreatedAt)
+                        {
+                            <p class="story-date">
+                                Updated @session.UpdatedAt.ToLocalTime().ToString("MMM d, yyyy h:mm tt")
+                            </p>
+                        }
+                    </div>
+                    <div class="story-card-footer">
+                        <span class="open-label">
+                            @if (loadingSessionId == session.Id)
+                            {
+                                <span>Opening...</span>
+                            }
+                            else
+                            {
+                                <span>Open Story &#x2192;</span>
+                            }
+                        </span>
+                    </div>
+                </div>
+            }
+        </div>
+
+        @if (totalStoriesCount > DisplayLimit)
+        {
+            <p class="showing-label">
+                Showing @filteredSessions.Count of @totalStoriesCount stories
+            </p>
+        }
+    }
+</div>
+
+@code {
+    private const int DisplayLimit = 10;
+
+    private bool isLoading = true;
+    private bool isClearing = false;
+    private bool showClearConfirm = false;
+    private string searchQuery = string.Empty;
+    private List<SessionMetadata> allSessions = new();
+    private string? loadingSessionId;
+
+    private int totalStoriesCount => allSessions.Count;
+
+    private List<SessionMetadata> filteredSessions
+    {
+        get
+        {
+            var filtered = string.IsNullOrWhiteSpace(searchQuery)
+                ? allSessions
+                : allSessions.Where(s => s.Title.Contains(searchQuery, StringComparison.OrdinalIgnoreCase)).ToList();
+
+            return filtered.Take(DisplayLimit).ToList();
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await ChatSessionService.EnsureInitializedAsync();
+        await LoadSessionsAsync();
+        isLoading = false;
+    }
+
+    private async Task LoadSessionsAsync()
+    {
+        var history = await ChatSessionService.GetSessionHistoryAsync();
+
+        // Prioritise sessions that have a generated story (YAML snapshot), then by most recently updated
+        allSessions = history
+            .OrderByDescending(s => s.HasYamlSnapshot)
+            .ThenByDescending(s => s.UpdatedAt)
+            .ToList();
+    }
+
+    private async Task OpenStoryAsync(string sessionId)
+    {
+        if (loadingSessionId != null)
+            return;
+
+        loadingSessionId = sessionId;
+        StateHasChanged();
+
+        try
+        {
+            await ChatSessionService.LoadSessionAsync(sessionId);
+            NavigationManager.NavigateTo("/story-generator");
+        }
+        catch
+        {
+            loadingSessionId = null;
+            StateHasChanged();
+        }
+    }
+
+    private async Task HandleKeyDown(KeyboardEventArgs e, string sessionId)
+    {
+        if (e.Key == "Enter" || e.Key == " ")
+        {
+            await OpenStoryAsync(sessionId);
+        }
+    }
+
+    private async Task ClearAllAsync()
+    {
+        isClearing = true;
+        StateHasChanged();
+        try
+        {
+            await ChatSessionService.ClearAllSessionsAsync();
+            allSessions = new();
+        }
+        finally
+        {
+            isClearing = false;
+            showClearConfirm = false;
+            StateHasChanged();
+        }
+    }
+}
+
+<style>
+    .library-container {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 2rem 1.5rem;
+        font-family: system-ui, -apple-system, sans-serif;
+    }
+
+    .library-header {
+        margin-bottom: 2rem;
+    }
+
+    .library-title-row {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .library-title-row h1 {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #1a1a2e;
+        margin: 0 0 0.25rem 0;
+    }
+
+    .library-title-row p {
+        color: #6b7280;
+        margin: 0;
+        font-size: 1rem;
+    }
+
+    .safety-notice {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: #ecfdf5;
+        border: 1px solid #6ee7b7;
+        color: #065f46;
+        border-radius: 0.5rem;
+        padding: 0.5rem 0.875rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+        margin-bottom: 1.25rem;
+    }
+
+    .safety-icon {
+        font-size: 1rem;
+    }
+
+    .search-bar-wrapper {
+        max-width: 420px;
+    }
+
+    .search-input {
+        width: 100%;
+        padding: 0.625rem 1rem;
+        border: 1px solid #d1d5db;
+        border-radius: 0.5rem;
+        font-size: 0.9375rem;
+        color: #111827;
+        background: #fff;
+        outline: none;
+        transition: border-color 0.15s, box-shadow 0.15s;
+        box-sizing: border-box;
+    }
+
+    .search-input:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
+    }
+
+    /* Stories grid */
+    .stories-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 1.25rem;
+    }
+
+    .story-card {
+        background: #fff;
+        border: 1px solid #e5e7eb;
+        border-radius: 0.875rem;
+        padding: 1.25rem;
+        cursor: pointer;
+        transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    }
+
+    .story-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 24px rgba(102, 126, 234, 0.15);
+        border-color: #a5b4fc;
+    }
+
+    .story-card:focus {
+        outline: 2px solid #667eea;
+        outline-offset: 2px;
+    }
+
+    .story-card.loading {
+        opacity: 0.65;
+        pointer-events: none;
+    }
+
+    .story-card-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .story-icon {
+        font-size: 2rem;
+        line-height: 1;
+    }
+
+    .story-badges {
+        display: flex;
+        gap: 0.375rem;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+    }
+
+    .badge {
+        font-size: 0.6875rem;
+        font-weight: 600;
+        padding: 0.2rem 0.55rem;
+        border-radius: 999px;
+        letter-spacing: 0.02em;
+        text-transform: uppercase;
+    }
+
+    .badge-story {
+        background: #ede9fe;
+        color: #5b21b6;
+    }
+
+    .badge-messages {
+        background: #f3f4f6;
+        color: #6b7280;
+    }
+
+    .story-card-body {
+        flex: 1;
+    }
+
+    .story-title {
+        font-size: 1.0625rem;
+        font-weight: 600;
+        color: #111827;
+        margin: 0 0 0.375rem 0;
+        line-height: 1.35;
+        word-break: break-word;
+    }
+
+    .story-date {
+        font-size: 0.8125rem;
+        color: #9ca3af;
+        margin: 0.125rem 0 0 0;
+    }
+
+    .story-card-footer {
+        border-top: 1px solid #f3f4f6;
+        padding-top: 0.75rem;
+    }
+
+    .open-label {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: #667eea;
+    }
+
+    /* Loading state */
+    .loading-state {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 5rem 1rem;
+        color: #9ca3af;
+        gap: 1rem;
+    }
+
+    .spinner {
+        width: 2.5rem;
+        height: 2.5rem;
+        border: 3px solid #e5e7eb;
+        border-top-color: #667eea;
+        border-radius: 50%;
+        animation: spin 0.75s linear infinite;
+    }
+
+    @@keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    /* Empty state */
+    .empty-state {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 5rem 1rem;
+        text-align: center;
+        color: #6b7280;
+    }
+
+    .empty-icon {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+
+    .empty-state h3 {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #374151;
+        margin: 0 0 0.5rem 0;
+    }
+
+    .empty-state p {
+        margin: 0;
+        font-size: 0.9375rem;
+    }
+
+    /* Showing label */
+    .showing-label {
+        text-align: center;
+        margin-top: 1.5rem;
+        color: #9ca3af;
+        font-size: 0.875rem;
+    }
+
+    /* Buttons */
+    .header-actions {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+    }
+
+    .confirm-clear {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: #fef2f2;
+        border: 1px solid #fca5a5;
+        border-radius: 0.625rem;
+        padding: 0.375rem 0.75rem;
+    }
+
+    .confirm-text {
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: #991b1b;
+        white-space: nowrap;
+    }
+
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.625rem 1.25rem;
+        border: none;
+        border-radius: 0.625rem;
+        font-weight: 600;
+        cursor: pointer;
+        text-decoration: none;
+        font-size: 0.9375rem;
+        transition: transform 0.15s, box-shadow 0.15s;
+        white-space: nowrap;
+    }
+
+    .btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none !important;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: #fff;
+        box-shadow: 0 3px 10px rgba(102, 126, 234, 0.3);
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+        color: #fff;
+    }
+
+    .btn-danger {
+        background: #dc2626;
+        color: #fff;
+        font-size: 0.8125rem;
+        padding: 0.375rem 0.875rem;
+    }
+
+    .btn-danger:hover {
+        background: #b91c1c;
+        transform: translateY(-1px);
+    }
+
+    .btn-secondary {
+        background: #f3f4f6;
+        color: #374151;
+        font-size: 0.8125rem;
+        padding: 0.375rem 0.875rem;
+    }
+
+    .btn-secondary:hover {
+        background: #e5e7eb;
+    }
+
+    .btn-ghost {
+        background: transparent;
+        color: #9ca3af;
+        border: 1px solid #e5e7eb;
+        font-size: 0.875rem;
+        padding: 0.5rem 1rem;
+    }
+
+    .btn-ghost:hover {
+        background: #fef2f2;
+        color: #dc2626;
+        border-color: #fca5a5;
+    }
+
+    @@media (max-width: 640px) {
+        .library-container {
+            padding: 1.25rem 1rem;
+        }
+
+        .library-title-row h1 {
+            font-size: 1.625rem;
+        }
+
+        .stories-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>

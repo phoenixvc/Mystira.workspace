@@ -201,6 +201,22 @@
                                        @bind:event="oninput" />
                             </div>
 
+                            <!-- Library section -->
+                            <div>
+                                <span class="text-xs font-semibold uppercase tracking-wide text-gray-500">Library</span>
+                                <div class="mt-2 grid grid-cols-1 gap-2">
+                                    <NavLink class="w-full inline-flex items-center justify-between gap-2 rounded-md border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                                             href="/story-library"
+                                             Match="NavLinkMatch.Prefix"
+                                             title="Browse your generated stories">
+                                        <span class="inline-flex items-center gap-2">
+                                            <span class="bi bi-collection-fill" aria-hidden="true"></span>
+                                            <span>Story Library</span>
+                                        </span>
+                                    </NavLink>
+                                </div>
+                            </div>
+
                             <!-- Analysis section moved here -->
                             <div>
                                 <span class="text-xs font-semibold uppercase tracking-wide text-gray-500">Analysis</span>
@@ -512,7 +528,8 @@
         {
             var relative = NavManager.ToBaseRelativePath(NavManager.Uri).Trim('/');
             isAnalysisRoute = relative.StartsWith("story-continuity", StringComparison.OrdinalIgnoreCase)
-                              || relative.StartsWith("scenario-dominator-path-analysis", StringComparison.OrdinalIgnoreCase);
+                              || relative.StartsWith("scenario-dominator-path-analysis", StringComparison.OrdinalIgnoreCase)
+                              || relative.StartsWith("story-library", StringComparison.OrdinalIgnoreCase);
             isAgenticMode = relative.StartsWith("story/agent", StringComparison.OrdinalIgnoreCase);
         }
         catch
@@ -525,7 +542,86 @@
     private void HandleLocationChanged(object? sender, Microsoft.AspNetCore.Components.Routing.LocationChangedEventArgs e)
     {
         UpdateRouteState();
-        _ = InvokeAsync(StateHasChanged);
+        _ = InvokeAsync(async () =>
+        {
+            await ApplyPrePopulatedYamlIfNeededAsync();
+            StateHasChanged();
+        });
+    }
+
+    /// <summary>
+    /// After navigating from agent mode via "Complete &amp; Continue in Chat", the agent page stores
+    /// the finished story YAML under the "prePopulatedMessage" localStorage key and then redirects
+    /// here. We consume that key and attach the YAML to the current (or a new) legacy chat session
+    /// so the YAML preview panel shows the completed story immediately on landing.
+    /// Story Library persistence is handled by AgentModeStoryPage before navigation.
+    /// </summary>
+    private async Task ApplyPrePopulatedYamlIfNeededAsync()
+    {
+        try
+        {
+            var yaml = await LocalStorage.GetItemAsStringAsync("prePopulatedMessage");
+            if (string.IsNullOrWhiteSpace(yaml))
+                return;
+
+            // If no legacy chat session exists, create one so the YAML preview panel has content.
+            if (CurrentChat == null)
+            {
+                var title = ExtractTitleFromYaml(yaml) ?? "Completed Story";
+                CurrentChat = new StoryGeneratorChatHistory
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    Title = title,
+                    CreatedAt = DateTime.Now,
+                    Messages = new List<StoryGeneratorChatMessage>()
+                };
+                CurrentChat.Messages.Add(new StoryGeneratorChatMessage
+                {
+                    Role = "system",
+                    Content = "Story completed via Agentic Mode.",
+                    Timestamp = DateTime.Now
+                });
+                ChatHistories.Insert(0, CurrentChat);
+            }
+
+            CurrentChat.YamlSnapshot = yaml;
+
+            var nextVersion = CurrentChat.YamlSnapshots.Count == 0
+                ? 1
+                : CurrentChat.YamlSnapshots.Max(s => s.Version) + 1;
+
+            CurrentChat.YamlSnapshots.Add(new YamlSnapshot
+            {
+                Version = nextVersion,
+                Content = yaml,
+                CreatedAt = DateTime.UtcNow
+            });
+
+            currentViewedVersion = nextVersion;
+            YamlContent = yaml;
+
+            await LocalStorage.SetItemAsync(ChatsStorageKey, ChatHistories);
+            await LocalStorage.RemoveItemAsync("prePopulatedMessage");
+        }
+        catch (Exception ex)
+        {
+            Logger.LogWarning(ex, "Failed to apply pre-populated YAML from agent mode");
+        }
+    }
+
+    private static string? ExtractTitleFromYaml(string yaml)
+    {
+        foreach (var line in yaml.Split('\n'))
+        {
+            var trimmed = line.Trim();
+            if (trimmed.StartsWith("title:", StringComparison.OrdinalIgnoreCase))
+            {
+                var value = trimmed["title:".Length..].Trim().Trim('"', '\'');
+                if (!string.IsNullOrWhiteSpace(value))
+                    return value.Length > 60 ? value[..60] : value;
+            }
+        }
+        return null;
     }
 
     private async Task RefreshChatSessionAsync()
@@ -674,10 +770,12 @@
 
     protected override async Task OnInitializedAsync()
     {
+        Logger.LogInformation("[DEBUG_LOG] ThreePanelLayout: OnInitializedAsync starting...");
         try
         {
             UpdateRouteState();
             NavManager.LocationChanged += HandleLocationChanged;
+            Logger.LogInformation("[DEBUG_LOG] ThreePanelLayout: Loading chat histories from LocalStorage...");
             var saved = await LocalStorage.GetItemAsync<List<StoryGeneratorChatHistory>>(ChatsStorageKey);
             ChatHistories = saved ?? new List<StoryGeneratorChatHistory>();
             CurrentChat = ChatHistories.FirstOrDefault();
@@ -685,15 +783,20 @@
             currentViewedVersion = CurrentChat?.YamlSnapshots.Count > 0
                ? CurrentChat.YamlSnapshots.Max(s => s.Version)
                : 1;
+            Logger.LogInformation("[DEBUG_LOG] ThreePanelLayout: Chat histories loaded. Count: {Count}", ChatHistories.Count);
         }
-        catch
+        catch (Exception ex)
         {
+            Logger.LogError(ex, "[DEBUG_LOG] ThreePanelLayout: Error during LocalStorage/Chat initialization");
             ChatHistories = new List<StoryGeneratorChatHistory>();
         }
 
+        Logger.LogInformation("[DEBUG_LOG] ThreePanelLayout: Ensuring model settings...");
         await EnsureModelSettingsAsync();
 
+        Logger.LogInformation("[DEBUG_LOG] ThreePanelLayout: OnInitializedAsync calling base...");
         await base.OnInitializedAsync();
+        Logger.LogInformation("[DEBUG_LOG] ThreePanelLayout: OnInitializedAsync completed.");
     }
 
     // Note: do not force the sidebar open on first render; allow user to toggle/collapse it freely.
@@ -762,23 +865,29 @@
             return;
         }
 
+        Logger.LogInformation("[DEBUG_LOG] ThreePanelLayout: Initializing ModelSettingsService...");
         try
         {
             await ModelSettingsService.InitializeAsync();
+            Logger.LogInformation("[DEBUG_LOG] ThreePanelLayout: ModelSettingsService initialized.");
             var models = await ModelSettingsService.GetAvailableModelsAsync();
             availableModels = models.OrderBy(m => m.DisplayName).ToList();
+            Logger.LogInformation("[DEBUG_LOG] ThreePanelLayout: Available models retrieved. Count: {Count}", availableModels.Count);
 
             await RefreshModelSettingsAsync();
+            Logger.LogInformation("[DEBUG_LOG] ThreePanelLayout: Model settings refreshed.");
 
             ModelSettingsService.SettingsChanged += HandleModelSettingsChanged;
         }
-        catch
+        catch (Exception ex)
         {
+            Logger.LogError(ex, "[DEBUG_LOG] ThreePanelLayout: Error in EnsureModelSettingsAsync");
             availableModels = new List<AiModelDefinition> { currentModelSettings.Definition };
         }
         finally
         {
             modelSettingsInitialized = true;
+            Logger.LogInformation("[DEBUG_LOG] ThreePanelLayout: EnsureModelSettingsAsync completed.");
         }
     }
 

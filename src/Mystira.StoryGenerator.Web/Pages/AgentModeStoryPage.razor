@@ -12,6 +12,7 @@
 @inject NavigationManager navigationManager
 @inject Blazored.LocalStorage.ILocalStorageService localStorage
 @inject IConfiguration configuration
+@inject Mystira.StoryGenerator.Web.Services.IChatSessionService ChatSessionService
 
 <PageTitle>AI Story Generator</PageTitle>
 
@@ -621,10 +622,15 @@
 
         try
         {
-            // Store the YAML in localStorage so the chat page can pick it up
+            // Save a dedicated Story Library entry for this completed agentic story.
+            var storyTitle = ExtractStoryTitle();
+            await ChatSessionService.EnsureInitializedAsync();
+            await ChatSessionService.CreateNewSessionAsync(storyTitle);
+            await ChatSessionService.SaveYamlSnapshotAsync(currentSession.CurrentStoryYaml);
+
+            // Pass the YAML to the chat page via localStorage so the YAML preview panel shows it.
             await localStorage.SetItemAsStringAsync("prePopulatedMessage", currentSession.CurrentStoryYaml);
 
-            // Navigate to the chat page
             navigationManager.NavigateTo("/story-generator");
         }
         catch (Exception ex)
@@ -632,6 +638,42 @@
             logger.LogError(ex, "Error navigating to chat");
             errorMessage = $"Failed to navigate to chat: {ex.Message}";
         }
+    }
+
+    private string ExtractStoryTitle()
+    {
+        // Try JSON first (most reliable)
+        if (!string.IsNullOrWhiteSpace(currentSession?.CurrentStoryJson))
+        {
+            try
+            {
+                using var doc = JsonDocument.Parse(currentSession.CurrentStoryJson);
+                if (doc.RootElement.TryGetProperty("title", out var titleProp))
+                {
+                    var t = titleProp.GetString();
+                    if (!string.IsNullOrWhiteSpace(t))
+                        return t.Length > 60 ? t[..60] : t;
+                }
+            }
+            catch { }
+        }
+
+        // Fallback: scan YAML for a title: line
+        if (!string.IsNullOrWhiteSpace(currentSession?.CurrentStoryYaml))
+        {
+            foreach (var line in currentSession.CurrentStoryYaml.Split('\n'))
+            {
+                var trimmed = line.Trim();
+                if (trimmed.StartsWith("title:", StringComparison.OrdinalIgnoreCase))
+                {
+                    var value = trimmed["title:".Length..].Trim().Trim('"', '\'');
+                    if (!string.IsNullOrWhiteSpace(value))
+                        return value.Length > 60 ? value[..60] : value;
+                }
+            }
+        }
+
+        return "Completed Story";
     }
 
     public void Dispose()

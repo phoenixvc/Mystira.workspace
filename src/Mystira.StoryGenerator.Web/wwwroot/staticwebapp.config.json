@@ -10,6 +10,8 @@
     ".dat": "application/octet-stream"
   },
   "globalHeaders": {
-    "Cache-Control": "no-cache"
+    "Cache-Control": "no-cache",
+    "Cross-Origin-Opener-Policy": "same-origin",
+    "Cross-Origin-Embedder-Policy": "require-corp"
   }
 }

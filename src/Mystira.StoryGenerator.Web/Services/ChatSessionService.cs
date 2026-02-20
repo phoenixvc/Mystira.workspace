@@ -21,6 +21,7 @@ public interface IChatSessionService
     Task SaveYamlSnapshotAsync(string yaml);
     Task UpdateProviderSettingsAsync(ProviderSettings settings);
     Task<List<SessionMetadata>> GetSessionHistoryAsync();
+    Task ClearAllSessionsAsync();
 }
 
 public class ChatSessionService : IChatSessionService
@@ -388,6 +389,21 @@ public class ChatSessionService : IChatSessionService
 
         await SaveSessionAsync(_currentSession);
         CurrentSessionChanged?.Invoke(_currentSession);
+    }
+
+    public async Task ClearAllSessionsAsync()
+    {
+        var sessionIds = _sessionHistory.Select(s => s.Id).ToList();
+        foreach (var id in sessionIds)
+        {
+            await _localStorage.RemoveItemAsync($"{SessionsKey}_{id}");
+        }
+
+        _currentSession = null;
+        await _localStorage.RemoveItemAsync(CurrentSessionKey);
+        CurrentSessionChanged?.Invoke(null);
+
+        await LoadSessionHistoryAsync();
     }
 
     public async Task<List<SessionMetadata>> GetSessionHistoryAsync()
