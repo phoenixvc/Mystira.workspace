@@ -1,5 +1,5 @@
-import type { WhatIfChange } from '../../../types';
-import { getChangeTypeColor, getChangeTypeIcon } from '../utils/whatIfUtils';
+import type { WhatIfChange } from "../../../types";
+import { getChangeTypeColor, getChangeTypeIcon } from "../utils/whatIfUtils";
 
 interface WhatIfChangeItemProps {
   change: WhatIfChange;
@@ -11,7 +11,10 @@ interface WhatIfChangeItemProps {
   tempResourceGroup: string;
   onToggle: (resourceName: string) => void;
   onToggleSelection: (resourceName: string) => void;
-  onStartEditResourceGroup: (resourceName: string, currentGroup: string) => void;
+  onStartEditResourceGroup: (
+    resourceName: string,
+    currentGroup: string,
+  ) => void;
   onUpdateResourceGroup: (resourceName: string, resourceGroup: string) => void;
   onCancelEditResourceGroup: () => void;
   onTempResourceGroupChange: (value: string) => void;
@@ -43,16 +46,18 @@ export function WhatIfChangeItem({
   return (
     <div
       key={index}
-      className={`${getChangeTypeColor(change.changeType)} border-l-4 ${!isSelected && showSelection ? 'opacity-50' : ''}`}
+      className={`${getChangeTypeColor(change.changeType)} border-l-4 ${!isSelected && showSelection ? "opacity-50" : ""}`}
     >
       <div className="flex items-start">
         {showSelection && (
-          <div className={`${compact ? 'px-2 py-1.5' : 'px-3 py-3'} flex items-center`}>
+          <div
+            className={`${compact ? "px-2 py-1.5" : "px-3 py-3"} flex items-center`}
+          >
             <input
               type="checkbox"
               checked={isSelected}
               onChange={() => onToggleSelection(change.resourceName)}
-              className={`${compact ? 'w-3 h-3' : 'w-4 h-4'} text-blue-600 border-gray-300 rounded focus:ring-blue-500`}
+              className={`${compact ? "w-3 h-3" : "w-4 h-4"} text-blue-600 border-gray-300 rounded focus:ring-blue-500`}
               onClick={(e) => e.stopPropagation()}
               aria-label={`Select ${change.resourceName} for deployment`}
             />
@@ -60,34 +65,49 @@ export function WhatIfChangeItem({
         )}
         <button
           onClick={() => hasDetails && onToggle(change.resourceName)}
-          className={`flex-1 ${compact ? 'px-2 py-1.5' : 'px-4 py-3'} text-left hover:bg-opacity-75 transition-colors`}
+          className={`flex-1 ${compact ? "px-2 py-1.5" : "px-4 py-3"} text-left hover:bg-opacity-75 transition-colors`}
         >
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
-              <span className={`font-mono ${compact ? 'text-sm' : 'text-lg'} font-bold`}>
+              <span
+                className={`font-mono ${compact ? "text-sm" : "text-lg"} font-bold`}
+              >
                 {getChangeTypeIcon(change.changeType)}
               </span>
               <div className="min-w-0 flex-1">
-                <div className={`font-medium ${compact ? 'text-xs truncate' : ''}`} title={change.resourceName}>
+                <div
+                  className={`font-medium ${compact ? "text-xs truncate" : ""}`}
+                  title={change.resourceName}
+                >
                   {change.resourceName}
                 </div>
-                <div className={`${compact ? 'text-[10px]' : 'text-sm'} opacity-75 truncate`} title={change.resourceType}>
+                <div
+                  className={`${compact ? "text-[10px]" : "text-sm"} opacity-75 truncate`}
+                  title={change.resourceType}
+                >
                   {change.resourceType}
                 </div>
                 {showSelection && !compact && (
                   <div className="text-xs mt-1 flex items-center gap-2">
-                    <span className="text-gray-600 dark:text-gray-400">Resource Group:</span>
+                    <span className="text-gray-600 dark:text-gray-400">
+                      Resource Group:
+                    </span>
                     {isEditing ? (
                       <div className="flex items-center gap-1">
                         <input
                           type="text"
                           value={tempResourceGroup}
-                          onChange={(e) => onTempResourceGroupChange(e.target.value)}
+                          onChange={(e) =>
+                            onTempResourceGroupChange(e.target.value)
+                          }
                           onKeyDown={(e) => {
-                            if (e.key === 'Enter') {
-                              onUpdateResourceGroup(change.resourceName, tempResourceGroup);
+                            if (e.key === "Enter") {
+                              onUpdateResourceGroup(
+                                change.resourceName,
+                                tempResourceGroup,
+                              );
                             }
-                            if (e.key === 'Escape') {
+                            if (e.key === "Escape") {
                               onCancelEditResourceGroup();
                             }
                           }}
@@ -96,7 +116,12 @@ export function WhatIfChangeItem({
                           placeholder="Resource group name"
                         />
                         <button
-                          onClick={() => onUpdateResourceGroup(change.resourceName, tempResourceGroup)}
+                          onClick={() =>
+                            onUpdateResourceGroup(
+                              change.resourceName,
+                              tempResourceGroup,
+                            )
+                          }
                           className="text-green-600 dark:text-green-400 hover:text-green-800 dark:hover:text-green-300"
                           title="Save resource group"
                         >
@@ -115,11 +140,14 @@ export function WhatIfChangeItem({
                         className="ml-2 font-mono cursor-pointer hover:underline"
                         onClick={(e) => {
                           e.stopPropagation();
-                          onStartEditResourceGroup(change.resourceName, change.resourceGroup || '');
+                          onStartEditResourceGroup(
+                            change.resourceName,
+                            change.resourceGroup || "",
+                          );
                         }}
                         title="Click to edit resource group"
                       >
-                        {change.resourceGroup || 'Not set'}
+                        {change.resourceGroup || "Not set"}
                       </span>
                     )}
                   </div>
@@ -127,22 +155,35 @@ export function WhatIfChangeItem({
               </div>
             </div>
             <div className="flex items-center space-x-2 flex-shrink-0">
-              <span className={`${compact ? 'text-[10px] px-1.5 py-0.5' : 'text-xs px-2 py-1'} font-semibold rounded`}>
+              <span
+                className={`${compact ? "text-[10px] px-1.5 py-0.5" : "text-xs px-2 py-1"} font-semibold rounded`}
+              >
                 {getChangeTypeLabel(change.changeType)}
               </span>
-              {hasDetails && <span className={compact ? 'text-xs' : 'text-sm'}>{isExpanded ? '▼' : '▶'}</span>}
+              {hasDetails && (
+                <span className={compact ? "text-xs" : "text-sm"}>
+                  {isExpanded ? "▼" : "▶"}
+                </span>
+              )}
             </div>
           </div>
         </button>
       </div>
 
       {isExpanded && hasDetails && (
-        <div className={compact ? 'px-2 pb-2 pt-1' : 'px-4 pb-3 pt-1'}>
-          <div className={`bg-white dark:bg-gray-900 bg-opacity-50 rounded ${compact ? 'p-2 text-[10px]' : 'p-3 text-sm'}`}>
-            <div className={`font-medium ${compact ? 'mb-1' : 'mb-2'}`}>Property Changes:</div>
+        <div className={compact ? "px-2 pb-2 pt-1" : "px-4 pb-3 pt-1"}>
+          <div
+            className={`bg-white dark:bg-gray-900 bg-opacity-50 rounded ${compact ? "p-2 text-[10px]" : "p-3 text-sm"}`}
+          >
+            <div className={`font-medium ${compact ? "mb-1" : "mb-2"}`}>
+              Property Changes:
+            </div>
             <ul className="space-y-0.5">
               {change.changes!.map((changeDetail, idx) => (
-                <li key={idx} className={`font-mono ${compact ? 'text-[10px] pl-2' : 'text-xs pl-4'} break-all`}>
+                <li
+                  key={idx}
+                  className={`font-mono ${compact ? "text-[10px] pl-2" : "text-xs pl-4"} break-all`}
+                >
                   • {changeDetail}
                 </li>
               ))}
@@ -153,4 +194,3 @@ export function WhatIfChangeItem({
     </div>
   );
 }
-

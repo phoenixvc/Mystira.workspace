@@ -1,43 +1,45 @@
-import { invoke } from '@tauri-apps/api/core';
-import { useEffect, useState } from 'react';
+import { invoke } from "@tauri-apps/api/core";
+import { useEffect, useState } from "react";
 
 interface InfrastructureStatus {
   dev: { exists: boolean; checking: boolean };
   prod: { exists: boolean; checking: boolean };
 }
 
-export function useInfrastructureStatus(serviceEnvironments: Record<string, 'local' | 'dev' | 'prod'>) {
+export function useInfrastructureStatus(
+  serviceEnvironments: Record<string, "local" | "dev" | "prod">,
+) {
   const [status, setStatus] = useState<InfrastructureStatus>({
     dev: { exists: false, checking: false },
     prod: { exists: false, checking: false },
   });
 
-  const checkStatus = async (environment: 'dev' | 'prod') => {
-    setStatus(prev => ({
+  const checkStatus = async (environment: "dev" | "prod") => {
+    setStatus((prev) => ({
       ...prev,
       [environment]: { ...prev[environment], checking: true },
     }));
 
     try {
-      const response = await invoke<{ success: boolean; result?: { exists: boolean } }>(
-        'check_infrastructure_exists',
-        { environment, resourceGroup: null }
-      );
+      const response = await invoke<{
+        success: boolean;
+        result?: { exists: boolean };
+      }>("check_infrastructure_exists", { environment, resourceGroup: null });
 
       if (response.success && response.result) {
-        setStatus(prev => ({
+        setStatus((prev) => ({
           ...prev,
           [environment]: { exists: response.result!.exists, checking: false },
         }));
       } else {
-        setStatus(prev => ({
+        setStatus((prev) => ({
           ...prev,
           [environment]: { exists: false, checking: false },
         }));
       }
     } catch (error) {
       console.error(`Failed to check ${environment} infrastructure:`, error);
-      setStatus(prev => ({
+      setStatus((prev) => ({
         ...prev,
         [environment]: { exists: false, checking: false },
       }));
@@ -45,17 +47,16 @@ export function useInfrastructureStatus(serviceEnvironments: Record<string, 'loc
   };
 
   useEffect(() => {
-    const hasDev = Object.values(serviceEnvironments).includes('dev');
-    const hasProd = Object.values(serviceEnvironments).includes('prod');
+    const hasDev = Object.values(serviceEnvironments).includes("dev");
+    const hasProd = Object.values(serviceEnvironments).includes("prod");
 
     if (hasDev && !status.dev.checking) {
-      checkStatus('dev');
+      checkStatus("dev");
     }
     if (hasProd && !status.prod.checking) {
-      checkStatus('prod');
+      checkStatus("prod");
     }
   }, [serviceEnvironments]);
 
   return { status, checkStatus };
 }
-

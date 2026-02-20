@@ -1,6 +1,6 @@
-import { DeploymentHistory } from '../../../project-deployment';
-import { useCliBuild } from '../../hooks';
-import { CliBuildLogsViewer } from '../CliBuildLogsViewer';
+import { DeploymentHistory } from "../../../project-deployment";
+import { useCliBuild } from "../../hooks";
+import { CliBuildLogsViewer } from "../CliBuildLogsViewer";
 
 interface InfrastructureHistoryTabProps {
   deployments: any[];
@@ -29,14 +29,20 @@ export default function InfrastructureHistoryTab({
       {deploymentsLoading && (
         <div className="bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-lg p-8 text-center">
           <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 dark:bg-blue-400 mb-3"></div>
-          <p className="text-blue-800 dark:text-blue-200">Loading deployment history...</p>
+          <p className="text-blue-800 dark:text-blue-200">
+            Loading deployment history...
+          </p>
         </div>
       )}
 
       {deploymentsError && (
         <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg p-6 mb-4">
-          <h3 className="text-lg font-semibold text-red-900 dark:text-red-300 mb-2">❌ Failed to Load Deployments</h3>
-          <p className="text-red-800 dark:text-red-200 mb-3 whitespace-pre-wrap">{deploymentsError}</p>
+          <h3 className="text-lg font-semibold text-red-900 dark:text-red-300 mb-2">
+            ❌ Failed to Load Deployments
+          </h3>
+          <p className="text-red-800 dark:text-red-200 mb-3 whitespace-pre-wrap">
+            {deploymentsError}
+          </p>
           <div className="flex gap-3">
             <button
               onClick={() => onFetchDeployments(true)}
@@ -44,9 +50,9 @@ export default function InfrastructureHistoryTab({
             >
               Retry
             </button>
-            {(deploymentsError.includes('Could not find Mystira.DevHub.CLI') ||
-              deploymentsError.includes('Program not found') ||
-              deploymentsError.includes('Failed to spawn process')) && (
+            {(deploymentsError.includes("Could not find Mystira.DevHub.CLI") ||
+              deploymentsError.includes("Program not found") ||
+              deploymentsError.includes("Failed to spawn process")) && (
               <button
                 onClick={handleBuildCli}
                 disabled={isBuilding}
@@ -58,7 +64,7 @@ export default function InfrastructureHistoryTab({
                     Building...
                   </>
                 ) : (
-                  '🔨 Rebuild CLI'
+                  "🔨 Rebuild CLI"
                 )}
               </button>
             )}
@@ -66,7 +72,9 @@ export default function InfrastructureHistoryTab({
         </div>
       )}
 
-      {!deploymentsLoading && !deploymentsError && <DeploymentHistory events={deployments} />}
+      {!deploymentsLoading && !deploymentsError && (
+        <DeploymentHistory events={deployments} />
+      )}
 
       {showLogs && (
         <CliBuildLogsViewer
@@ -79,4 +87,3 @@ export default function InfrastructureHistoryTab({
     </div>
   );
 }
-

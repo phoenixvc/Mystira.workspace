@@ -6,7 +6,7 @@ interface SidebarProps {
   onToggle: () => void;
   onStartResize: (e: React.MouseEvent) => void;
   resizing: boolean;
-  position: 'left' | 'right';
+  position: "left" | "right";
 }
 
 export function Sidebar({
@@ -21,25 +21,25 @@ export function Sidebar({
 }: SidebarProps) {
   return (
     <div
-      className={`flex flex-col bg-gray-800 border-${position === 'left' ? 'r' : 'l'} border-gray-700 relative transition-all duration-200 ${
-        collapsed ? 'w-0 overflow-hidden' : ''
+      className={`flex flex-col bg-gray-800 border-${position === "left" ? "r" : "l"} border-gray-700 relative transition-all duration-200 ${
+        collapsed ? "w-0 overflow-hidden" : ""
       }`}
       style={{ width: collapsed ? 0 : width }}
     >
       {!collapsed && (
         <>
-          {position === 'left' && (
+          {position === "left" && (
             <div
               className={`absolute top-0 right-0 w-1 h-full cursor-ew-resize hover:bg-blue-500 transition-colors ${
-                resizing ? 'bg-blue-500' : 'bg-transparent'
+                resizing ? "bg-blue-500" : "bg-transparent"
               }`}
               onMouseDown={onStartResize}
             />
           )}
-          {position === 'right' && (
+          {position === "right" && (
             <div
               className={`absolute top-0 left-0 w-1 h-full cursor-ew-resize hover:bg-blue-500 transition-colors ${
-                resizing ? 'bg-blue-500' : 'bg-transparent'
+                resizing ? "bg-blue-500" : "bg-transparent"
               }`}
               onMouseDown={onStartResize}
             />
@@ -60,12 +60,9 @@ export function Sidebar({
             </div>
           )}
 
-          <div className="flex-1 overflow-auto">
-            {children}
-          </div>
+          <div className="flex-1 overflow-auto">{children}</div>
         </>
       )}
     </div>
   );
 }
-

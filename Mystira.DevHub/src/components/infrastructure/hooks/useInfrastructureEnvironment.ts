@@ -1,6 +1,6 @@
-import { invoke } from '@tauri-apps/api/core';
-import { useCallback, useState } from 'react';
-import type { CommandResponse } from '../../../types';
+import { invoke } from "@tauri-apps/api/core";
+import { useCallback, useState } from "react";
+import type { CommandResponse } from "../../../types";
 
 interface UseInfrastructureEnvironmentParams {
   initialEnvironment: string;
@@ -15,32 +15,42 @@ export function useInfrastructureEnvironment({
 }: UseInfrastructureEnvironmentParams) {
   const [environment, setEnvironment] = useState<string>(initialEnvironment);
   const [showProdConfirm, setShowProdConfirm] = useState(false);
-  const [pendingEnvironment, setPendingEnvironment] = useState<string>(initialEnvironment);
+  const [pendingEnvironment, setPendingEnvironment] =
+    useState<string>(initialEnvironment);
 
-  const handleEnvironmentChange = useCallback(async (newEnv: string) => {
-    if (newEnv === 'prod') {
-      try {
-        const ownerCheck = await invoke<CommandResponse<{ isOwner: boolean; userName: string }>>('check_subscription_owner');
-        if (ownerCheck.success && ownerCheck.result?.isOwner) {
-          setPendingEnvironment(newEnv);
-          setShowProdConfirm(true);
-        } else {
-          alert('Access Denied: You must have Subscription Owner role to switch to production environment.\n\n' +
-                `Current user: ${ownerCheck.result?.userName || 'Unknown'}\n` +
-                'Please contact your subscription administrator.');
+  const handleEnvironmentChange = useCallback(
+    async (newEnv: string) => {
+      if (newEnv === "prod") {
+        try {
+          const ownerCheck = await invoke<
+            CommandResponse<{ isOwner: boolean; userName: string }>
+          >("check_subscription_owner");
+          if (ownerCheck.success && ownerCheck.result?.isOwner) {
+            setPendingEnvironment(newEnv);
+            setShowProdConfirm(true);
+          } else {
+            alert(
+              "Access Denied: You must have Subscription Owner role to switch to production environment.\n\n" +
+                `Current user: ${ownerCheck.result?.userName || "Unknown"}\n` +
+                "Please contact your subscription administrator.",
+            );
+            return;
+          }
+        } catch (error) {
+          console.error("Failed to check subscription owner:", error);
+          alert(
+            "Failed to verify subscription owner role. Cannot switch to production environment.",
+          );
           return;
         }
-      } catch (error) {
-        console.error('Failed to check subscription owner:', error);
-        alert('Failed to verify subscription owner role. Cannot switch to production environment.');
-        return;
+      } else {
+        setEnvironment(newEnv);
+        onEnvironmentChanged(newEnv);
+        onResetState();
       }
-    } else {
-      setEnvironment(newEnv);
-      onEnvironmentChanged(newEnv);
-      onResetState();
-    }
-  }, [onEnvironmentChanged, onResetState]);
+    },
+    [onEnvironmentChanged, onResetState],
+  );
 
   const confirmProdSwitch = useCallback(() => {
     const newEnv = pendingEnvironment;
@@ -64,4 +74,3 @@ export function useInfrastructureEnvironment({
     cancelProdSwitch,
   };
 }
-

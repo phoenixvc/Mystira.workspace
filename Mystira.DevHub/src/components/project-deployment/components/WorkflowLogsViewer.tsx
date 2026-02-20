@@ -1,5 +1,5 @@
-import { useRef, useEffect, useState } from 'react';
-import type { WorkflowRun } from '../types';
+import { useRef, useEffect, useState } from "react";
+import type { WorkflowRun } from "../types";
 
 interface WorkflowLogsViewerProps {
   projectId: string;
@@ -30,8 +30,12 @@ export function WorkflowLogsViewer({
 
   // Auto-scroll to bottom when new logs arrive (if autoScroll is enabled)
   useEffect(() => {
-    if (ref.current && autoScroll && (run?.status === 'in_progress' || run?.status === 'queued')) {
-      ref.current.scrollIntoView({ behavior: 'smooth', block: 'end' });
+    if (
+      ref.current &&
+      autoScroll &&
+      (run?.status === "in_progress" || run?.status === "queued")
+    ) {
+      ref.current.scrollIntoView({ behavior: "smooth", block: "end" });
     }
   }, [logs, run, autoScroll]);
 
@@ -46,10 +50,10 @@ export function WorkflowLogsViewer({
 
   if (logs.length === 0) return null;
 
-  const isRunning = run?.status === 'in_progress' || run?.status === 'queued';
-  const isCompleted = run?.status === 'completed';
-  const isSuccess = isCompleted && run?.conclusion === 'success';
-  const isFailed = isCompleted && run?.conclusion === 'failure';
+  const isRunning = run?.status === "in_progress" || run?.status === "queued";
+  const isCompleted = run?.status === "completed";
+  const isSuccess = isCompleted && run?.conclusion === "success";
+  const isFailed = isCompleted && run?.conclusion === "failure";
 
   const getStatusIndicator = () => {
     if (isRunning) {
@@ -72,10 +76,14 @@ export function WorkflowLogsViewer({
     return null;
   };
 
-  const maxHeight = isExpanded ? 'max-h-[600px]' : 'max-h-80';
+  const maxHeight = isExpanded ? "max-h-[600px]" : "max-h-80";
 
   return (
-    <div className="mt-3" role="region" aria-label={`Workflow logs for ${projectId}`}>
+    <div
+      className="mt-3"
+      role="region"
+      aria-label={`Workflow logs for ${projectId}`}
+    >
       <div className="flex items-center justify-between mb-2">
         <button
           onClick={onToggle}
@@ -83,8 +91,8 @@ export function WorkflowLogsViewer({
           aria-expanded={showLog}
           aria-controls={`logs-${projectId}`}
         >
-          <span aria-hidden="true">{showLog ? '▼' : '▶'}</span>
-          <span>{showLog ? 'Hide Logs' : 'Show Logs'}</span>
+          <span aria-hidden="true">{showLog ? "▼" : "▶"}</span>
+          <span>{showLog ? "Hide Logs" : "Show Logs"}</span>
           <span className="text-gray-400">({logs.length} lines)</span>
         </button>
 
@@ -96,20 +104,20 @@ export function WorkflowLogsViewer({
                 onClick={() => setAutoScroll(!autoScroll)}
                 className={`text-xs px-2 py-0.5 rounded transition-colors ${
                   autoScroll
-                    ? 'bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300'
-                    : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400'
+                    ? "bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300"
+                    : "bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400"
                 }`}
                 aria-pressed={autoScroll}
               >
-                Auto-scroll {autoScroll ? 'ON' : 'OFF'}
+                Auto-scroll {autoScroll ? "ON" : "OFF"}
               </button>
             )}
             <button
               onClick={() => setIsExpanded(!isExpanded)}
               className="text-xs text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
-              aria-label={isExpanded ? 'Collapse logs' : 'Expand logs'}
+              aria-label={isExpanded ? "Collapse logs" : "Expand logs"}
             >
-              {isExpanded ? '↙ Collapse' : '↗ Expand'}
+              {isExpanded ? "↙ Collapse" : "↗ Expand"}
             </button>
           </div>
         )}
@@ -119,13 +127,13 @@ export function WorkflowLogsViewer({
         <div
           id={`logs-${projectId}`}
           className={`border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden transition-all duration-200 ${
-            isFailed ? 'border-red-300 dark:border-red-800' : ''
+            isFailed ? "border-red-300 dark:border-red-800" : ""
           }`}
         >
           {/* Log header */}
           <div className="bg-gray-800 dark:bg-gray-900 px-3 py-1.5 border-b border-gray-700 flex items-center justify-between">
             <span className="text-xs text-gray-400 font-mono">
-              {run?.name || 'Workflow Logs'}
+              {run?.name || "Workflow Logs"}
             </span>
             {run?.html_url && (
               <a
@@ -151,18 +159,22 @@ export function WorkflowLogsViewer({
               <div
                 key={index}
                 className={`whitespace-pre-wrap py-0.5 ${
-                  line.includes('❌') || line.toLowerCase().includes('error')
-                    ? 'text-red-400 bg-red-900/20'
-                    : line.includes('✅') || line.toLowerCase().includes('success')
-                    ? 'text-green-400'
-                    : line.includes('⚠️') || line.toLowerCase().includes('warning')
-                    ? 'text-yellow-400'
-                    : line.includes('🚀')
-                    ? 'text-blue-400'
-                    : 'text-green-400'
+                  line.includes("❌") || line.toLowerCase().includes("error")
+                    ? "text-red-400 bg-red-900/20"
+                    : line.includes("✅") ||
+                        line.toLowerCase().includes("success")
+                      ? "text-green-400"
+                      : line.includes("⚠️") ||
+                          line.toLowerCase().includes("warning")
+                        ? "text-yellow-400"
+                        : line.includes("🚀")
+                          ? "text-blue-400"
+                          : "text-green-400"
                 }`}
               >
-                <span className="text-gray-500 select-none mr-3">{String(index + 1).padStart(3, ' ')}</span>
+                <span className="text-gray-500 select-none mr-3">
+                  {String(index + 1).padStart(3, " ")}
+                </span>
                 {line}
               </div>
             ))}
@@ -182,11 +194,13 @@ export function WorkflowLogsViewer({
             <div
               className={`px-3 py-2 text-xs font-medium ${
                 isSuccess
-                  ? 'bg-green-900/30 text-green-400 border-t border-green-800'
-                  : 'bg-red-900/30 text-red-400 border-t border-red-800'
+                  ? "bg-green-900/30 text-green-400 border-t border-green-800"
+                  : "bg-red-900/30 text-red-400 border-t border-red-800"
               }`}
             >
-              {isSuccess ? '✓ Workflow completed successfully' : '✗ Workflow failed'}
+              {isSuccess
+                ? "✓ Workflow completed successfully"
+                : "✗ Workflow failed"}
             </div>
           )}
         </div>

@@ -1,5 +1,5 @@
-import { BuildStatus, ServiceConfig, ServiceStatus } from '../types';
-import { formatTimeSince, getHealthIndicator } from '../utils/serviceUtils';
+import { BuildStatus, ServiceConfig, ServiceStatus } from "../types";
+import { formatTimeSince, getHealthIndicator } from "../utils/serviceUtils";
 
 interface ServiceCardCollapsedViewProps {
   config: ServiceConfig;
@@ -33,31 +33,39 @@ export function ServiceCardCollapsedView({
       <span
         className={`px-1 py-0.5 rounded text-[9px] font-bold uppercase ${
           isRunning
-            ? 'bg-green-600 text-white'
+            ? "bg-green-600 text-white"
             : isLoading && statusMsg
-            ? 'bg-yellow-600 text-white'
-            : 'bg-gray-600 text-white'
+              ? "bg-yellow-600 text-white"
+              : "bg-gray-600 text-white"
         }`}
       >
-        {isRunning ? 'RUN' : isLoading && statusMsg ? statusMsg.toUpperCase().substring(0, 6) : 'STOP'}
+        {isRunning
+          ? "RUN"
+          : isLoading && statusMsg
+            ? statusMsg.toUpperCase().substring(0, 6)
+            : "STOP"}
       </span>
       {isRunning && status?.health && (
         <span title={`Service is ${status.health}`} className="text-sm">
           {getHealthIndicator(status.health)}
         </span>
       )}
-      {config.port && <span className="text-gray-600 dark:text-gray-300">:{config.port}</span>}
-      {status?.portConflict && (
-        <span className="text-yellow-500 dark:text-yellow-400 text-[10px]">⚠ CONFLICT</span>
+      {config.port && (
+        <span className="text-gray-600 dark:text-gray-300">:{config.port}</span>
       )}
-      {build && build.status === 'building' && (
-        <span className="text-blue-500 dark:text-blue-400 text-[10px] animate-pulse">
-          {build.isManual ? '[REBUILDING]' : '[BUILDING]'}
+      {status?.portConflict && (
+        <span className="text-yellow-500 dark:text-yellow-400 text-[10px]">
+          ⚠ CONFLICT
         </span>
       )}
-      {build && build.status === 'failed' && (
+      {build && build.status === "building" && (
+        <span className="text-blue-500 dark:text-blue-400 text-[10px] animate-pulse">
+          {build.isManual ? "[REBUILDING]" : "[BUILDING]"}
+        </span>
+      )}
+      {build && build.status === "failed" && (
         <span className="text-red-500 dark:text-red-400 text-[10px]">
-          {build.isManual ? '[REBUILD FAIL]' : '[FAILED]'}
+          {build.isManual ? "[REBUILD FAIL]" : "[FAILED]"}
         </span>
       )}
       {build && build.lastBuildTime && (
@@ -76,28 +84,33 @@ export function ServiceCardCollapsedView({
           <span className="w-1.5 h-1.5 bg-blue-400 rounded-full"></span>
           {isBuilding
             ? build?.isManual
-              ? 'REBUILDING'
-              : 'BUILDING'
+              ? "REBUILDING"
+              : "BUILDING"
             : buildFailed
-            ? build?.isManual
-              ? 'REBUILD FAIL'
-              : 'FAILED'
-            : logsCount > 0
-            ? `${logsCount} logs`
-            : ''}
+              ? build?.isManual
+                ? "REBUILD FAIL"
+                : "FAILED"
+              : logsCount > 0
+                ? `${logsCount} logs`
+                : ""}
         </span>
       )}
       {errorCount > 0 && (
-        <span className="text-red-500 dark:text-red-400 text-[10px] font-bold" title="Error count">
+        <span
+          className="text-red-500 dark:text-red-400 text-[10px] font-bold"
+          title="Error count"
+        >
           🔴 {errorCount}
         </span>
       )}
       {warningCount > 0 && (
-        <span className="text-yellow-500 dark:text-yellow-400 text-[10px] font-bold" title="Warning count">
+        <span
+          className="text-yellow-500 dark:text-yellow-400 text-[10px] font-bold"
+          title="Warning count"
+        >
           ⚠️ {warningCount}
         </span>
       )}
     </div>
   );
 }
-

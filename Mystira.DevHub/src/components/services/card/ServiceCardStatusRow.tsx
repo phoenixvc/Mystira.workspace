@@ -1,5 +1,5 @@
-import { BuildStatus, ServiceConfig, ServiceStatus } from '../types';
-import { formatTimeSince, getHealthIndicator } from '../utils/serviceUtils';
+import { BuildStatus, ServiceConfig, ServiceStatus } from "../types";
+import { formatTimeSince, getHealthIndicator } from "../utils/serviceUtils";
 
 interface ServiceCardStatusRowProps {
   config: ServiceConfig;
@@ -30,17 +30,17 @@ export function ServiceCardStatusRow({
         <span
           className={`px-1.5 py-0.5 rounded text-[10px] font-bold uppercase ${
             isRunning
-              ? 'bg-green-600 text-white'
+              ? "bg-green-600 text-white"
               : isLoading && statusMsg
-              ? 'bg-yellow-600 text-white'
-              : 'bg-gray-600 text-white'
+                ? "bg-yellow-600 text-white"
+                : "bg-gray-600 text-white"
           }`}
         >
           {isRunning
-            ? 'RUN'
+            ? "RUN"
             : isLoading && statusMsg
-            ? statusMsg.toUpperCase().substring(0, 6)
-            : 'STOP'}
+              ? statusMsg.toUpperCase().substring(0, 6)
+              : "STOP"}
         </span>
         {build && build.lastBuildTime && (
           <span
@@ -69,7 +69,7 @@ export function ServiceCardStatusRow({
         {isRunning && (
           <span
             className="text-lg"
-            title={`Service is ${status?.health || 'unknown'}`}
+            title={`Service is ${status?.health || "unknown"}`}
           >
             {getHealthIndicator(status?.health)}
           </span>
@@ -104,7 +104,11 @@ export function ServiceCardStatusRow({
               }}
               disabled={isRunning}
               className="w-16 px-1.5 py-0.5 text-xs border border-gray-400 dark:border-gray-500 rounded bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 font-mono disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-1 focus:ring-blue-500"
-              title={isRunning ? 'Stop the service to change port' : 'Edit port number'}
+              title={
+                isRunning
+                  ? "Stop the service to change port"
+                  : "Edit port number"
+              }
             />
           </div>
         )}
@@ -112,4 +116,3 @@ export function ServiceCardStatusRow({
     </div>
   );
 }
-

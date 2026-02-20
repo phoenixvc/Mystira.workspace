@@ -1,5 +1,5 @@
-import { openUrl } from '@tauri-apps/plugin-opener';
-import { useEffect } from 'react';
+import { openUrl } from "@tauri-apps/plugin-opener";
+import { useEffect } from "react";
 
 interface WebViewPanelProps {
   url: string;
@@ -8,7 +8,12 @@ interface WebViewPanelProps {
   embedded?: boolean;
 }
 
-function WebViewPanel({ url, title, onClose, embedded = false }: WebViewPanelProps) {
+function WebViewPanel({
+  url,
+  title,
+  onClose,
+  embedded = false,
+}: WebViewPanelProps) {
   useEffect(() => {
     if (!embedded) {
       // Open in external browser for now
@@ -49,4 +54,3 @@ function WebViewPanel({ url, title, onClose, embedded = false }: WebViewPanelPro
 }
 
 export default WebViewPanel;
-

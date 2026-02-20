@@ -1,8 +1,8 @@
-import { invoke } from '@tauri-apps/api/core';
-import type { CommandResponse } from '../../../../types';
-import { ResourceGrid } from '../../../resource-grid';
-import { useCliBuild } from '../../hooks';
-import { CliBuildLogsViewer } from '../CliBuildLogsViewer';
+import { invoke } from "@tauri-apps/api/core";
+import type { CommandResponse } from "../../../../types";
+import { ResourceGrid } from "../../../resource-grid";
+import { useCliBuild } from "../../hooks";
+import { CliBuildLogsViewer } from "../CliBuildLogsViewer";
 
 interface InfrastructureResourcesTabProps {
   environment: string;
@@ -33,14 +33,20 @@ export default function InfrastructureResourcesTab({
       {resourcesLoading && (
         <div className="bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-lg p-8 text-center">
           <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 dark:bg-blue-400 mb-3"></div>
-          <p className="text-blue-800 dark:text-blue-200">Loading Azure resources...</p>
+          <p className="text-blue-800 dark:text-blue-200">
+            Loading Azure resources...
+          </p>
         </div>
       )}
 
       {resourcesError && (
         <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg p-6 mb-4">
-          <h3 className="text-lg font-semibold text-red-900 dark:text-red-300 mb-2">❌ Failed to Load Resources</h3>
-          <p className="text-red-800 dark:text-red-200 mb-3 whitespace-pre-wrap">{resourcesError}</p>
+          <h3 className="text-lg font-semibold text-red-900 dark:text-red-300 mb-2">
+            ❌ Failed to Load Resources
+          </h3>
+          <p className="text-red-800 dark:text-red-200 mb-3 whitespace-pre-wrap">
+            {resourcesError}
+          </p>
           <div className="flex gap-3 flex-wrap">
             <button
               onClick={() => onFetchResources(true, environment)}
@@ -48,16 +54,21 @@ export default function InfrastructureResourcesTab({
             >
               Retry
             </button>
-            {(resourcesError.includes('Azure CLI is not installed') ||
-              resourcesError.includes('Azure CLI not found')) && (
+            {(resourcesError.includes("Azure CLI is not installed") ||
+              resourcesError.includes("Azure CLI not found")) && (
               <button
                 onClick={async () => {
                   try {
-                    const response = await invoke<CommandResponse>('install_azure_cli');
+                    const response =
+                      await invoke<CommandResponse>("install_azure_cli");
                     if (response.success) {
-                      alert('Azure CLI installation started. Please restart the application after installation completes.');
+                      alert(
+                        "Azure CLI installation started. Please restart the application after installation completes.",
+                      );
                     } else {
-                      alert(`Failed to install Azure CLI: ${response.error || 'Unknown error'}`);
+                      alert(
+                        `Failed to install Azure CLI: ${response.error || "Unknown error"}`,
+                      );
                     }
                   } catch (error) {
                     alert(`Error installing Azure CLI: ${error}`);
@@ -68,9 +79,9 @@ export default function InfrastructureResourcesTab({
                 📦 Install Azure CLI
               </button>
             )}
-            {(resourcesError.includes('Could not find Mystira.DevHub.CLI') ||
-              resourcesError.includes('Program not found') ||
-              resourcesError.includes('Failed to spawn process')) && (
+            {(resourcesError.includes("Could not find Mystira.DevHub.CLI") ||
+              resourcesError.includes("Program not found") ||
+              resourcesError.includes("Failed to spawn process")) && (
               <button
                 onClick={handleBuildCli}
                 disabled={isBuilding}
@@ -82,7 +93,7 @@ export default function InfrastructureResourcesTab({
                     Building...
                   </>
                 ) : (
-                  '🔨 Rebuild CLI'
+                  "🔨 Rebuild CLI"
                 )}
               </button>
             )}
@@ -96,13 +107,16 @@ export default function InfrastructureResourcesTab({
           onRefresh={() => onFetchResources(true, environment)}
           onDelete={async (resourceId: string) => {
             try {
-              const response = await invoke<CommandResponse>('delete_azure_resource', {
-                resourceId,
-              });
+              const response = await invoke<CommandResponse>(
+                "delete_azure_resource",
+                {
+                  resourceId,
+                },
+              );
               if (response.success) {
                 onFetchResources(true, environment);
               } else {
-                throw new Error(response.error || 'Failed to delete resource');
+                throw new Error(response.error || "Failed to delete resource");
               }
             } catch (error) {
               throw error;
@@ -122,4 +136,3 @@ export default function InfrastructureResourcesTab({
     </div>
   );
 }
-

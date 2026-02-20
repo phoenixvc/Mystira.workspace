@@ -1,5 +1,5 @@
 interface InfrastructureStatusIndicatorProps {
-  serviceEnvironments: Record<string, 'local' | 'dev' | 'prod'>;
+  serviceEnvironments: Record<string, "local" | "dev" | "prod">;
   infrastructureStatus: {
     dev: { exists: boolean; checking: boolean };
     prod: { exists: boolean; checking: boolean };
@@ -10,8 +10,8 @@ export function InfrastructureStatusIndicator({
   serviceEnvironments,
   infrastructureStatus,
 }: InfrastructureStatusIndicatorProps) {
-  const hasDevServices = Object.values(serviceEnvironments).includes('dev');
-  const hasProdServices = Object.values(serviceEnvironments).includes('prod');
+  const hasDevServices = Object.values(serviceEnvironments).includes("dev");
+  const hasProdServices = Object.values(serviceEnvironments).includes("prod");
   const devStatus = infrastructureStatus.dev;
   const prodStatus = infrastructureStatus.prod;
 
@@ -20,7 +20,7 @@ export function InfrastructureStatusIndicator({
   }
 
   const handleDeploy = () => {
-    window.dispatchEvent(new CustomEvent('navigate-to-infrastructure'));
+    window.dispatchEvent(new CustomEvent("navigate-to-infrastructure"));
   };
 
   return (
@@ -30,18 +30,18 @@ export function InfrastructureStatusIndicator({
           className="flex items-center gap-1 px-2 py-1 rounded"
           style={{
             backgroundColor: devStatus.checking
-              ? '#fef3c7'
+              ? "#fef3c7"
               : devStatus.exists
-              ? '#d1fae5'
-              : '#fee2e2',
+                ? "#d1fae5"
+                : "#fee2e2",
             color: devStatus.checking
-              ? '#92400e'
+              ? "#92400e"
               : devStatus.exists
-              ? '#065f46'
-              : '#991b1b',
+                ? "#065f46"
+                : "#991b1b",
           }}
         >
-          {devStatus.checking ? '⏳' : devStatus.exists ? '✅' : '⚠️'}
+          {devStatus.checking ? "⏳" : devStatus.exists ? "✅" : "⚠️"}
           <span className="font-medium">DEV</span>
           {!devStatus.exists && !devStatus.checking && (
             <button
@@ -59,18 +59,18 @@ export function InfrastructureStatusIndicator({
           className="flex items-center gap-1 px-2 py-1 rounded"
           style={{
             backgroundColor: prodStatus.checking
-              ? '#fef3c7'
+              ? "#fef3c7"
               : prodStatus.exists
-              ? '#d1fae5'
-              : '#fee2e2',
+                ? "#d1fae5"
+                : "#fee2e2",
             color: prodStatus.checking
-              ? '#92400e'
+              ? "#92400e"
               : prodStatus.exists
-              ? '#065f46'
-              : '#991b1b',
+                ? "#065f46"
+                : "#991b1b",
           }}
         >
-          {prodStatus.checking ? '⏳' : prodStatus.exists ? '✅' : '⚠️'}
+          {prodStatus.checking ? "⏳" : prodStatus.exists ? "✅" : "⚠️"}
           <span className="font-medium">PROD</span>
           {!prodStatus.exists && !prodStatus.checking && (
             <button
@@ -86,4 +86,3 @@ export function InfrastructureStatusIndicator({
     </div>
   );
 }
-

@@ -1,10 +1,12 @@
-import type { WorkflowStatus } from '../../../../types';
+import type { WorkflowStatus } from "../../../../types";
 
 interface WorkflowStatusDisplayProps {
   workflowStatus: WorkflowStatus | null;
 }
 
-export function WorkflowStatusDisplay({ workflowStatus }: WorkflowStatusDisplayProps) {
+export function WorkflowStatusDisplay({
+  workflowStatus,
+}: WorkflowStatusDisplayProps) {
   if (!workflowStatus) return null;
 
   return (
@@ -17,31 +19,36 @@ export function WorkflowStatusDisplay({ workflowStatus }: WorkflowStatusDisplayP
         <div>
           <div className="text-sm text-gray-500 dark:text-gray-400">Status</div>
           <div className="text-lg font-semibold text-gray-900 dark:text-white">
-            {workflowStatus.status || 'Unknown'}
+            {workflowStatus.status || "Unknown"}
           </div>
         </div>
         <div>
-          <div className="text-sm text-gray-500 dark:text-gray-400">Conclusion</div>
+          <div className="text-sm text-gray-500 dark:text-gray-400">
+            Conclusion
+          </div>
           <div className="text-lg font-semibold text-gray-900 dark:text-white">
-            {workflowStatus.conclusion || 'N/A'}
+            {workflowStatus.conclusion || "N/A"}
           </div>
         </div>
         <div>
-          <div className="text-sm text-gray-500 dark:text-gray-400">Workflow</div>
+          <div className="text-sm text-gray-500 dark:text-gray-400">
+            Workflow
+          </div>
           <div className="text-lg font-semibold text-gray-900 dark:text-white">
-            {workflowStatus.workflowName || 'N/A'}
+            {workflowStatus.workflowName || "N/A"}
           </div>
         </div>
         <div>
-          <div className="text-sm text-gray-500 dark:text-gray-400">Updated</div>
+          <div className="text-sm text-gray-500 dark:text-gray-400">
+            Updated
+          </div>
           <div className="text-lg font-semibold text-gray-900 dark:text-white">
             {workflowStatus.updatedAt
               ? new Date(workflowStatus.updatedAt).toLocaleTimeString()
-              : 'N/A'}
+              : "N/A"}
           </div>
         </div>
       </div>
     </div>
   );
 }
-

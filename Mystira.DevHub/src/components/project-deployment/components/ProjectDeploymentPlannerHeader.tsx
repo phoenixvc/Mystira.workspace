@@ -1,4 +1,4 @@
-import { formatTimeSince } from '../../services/utils/serviceUtils';
+import { formatTimeSince } from "../../services/utils/serviceUtils";
 
 interface ProjectDeploymentPlannerHeaderProps {
   lastRefreshTime: number | null;
@@ -35,7 +35,8 @@ export function ProjectDeploymentPlannerHeader({
             </span>
           </h3>
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            Select infrastructure templates for each project that needs cloud deployment
+            Select infrastructure templates for each project that needs cloud
+            deployment
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -49,7 +50,7 @@ export function ProjectDeploymentPlannerHeader({
             disabled={loadingStatus}
             className="px-3 py-1.5 text-xs bg-blue-100 dark:bg-blue-900 hover:bg-blue-200 dark:hover:bg-blue-800 text-blue-700 dark:text-blue-300 rounded disabled:opacity-50 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900"
           >
-            {loadingStatus ? '🔄 Loading...' : '🔄 Refresh Status'}
+            {loadingStatus ? "🔄 Loading..." : "🔄 Refresh Status"}
           </button>
         </div>
       </div>
@@ -61,11 +62,15 @@ export function ProjectDeploymentPlannerHeader({
             <span className="text-sm text-gray-600 dark:text-gray-400">
               {selectedCount > 0 ? (
                 <>
-                  <span className="font-semibold text-blue-600 dark:text-blue-400">{selectedCount}</span>
+                  <span className="font-semibold text-blue-600 dark:text-blue-400">
+                    {selectedCount}
+                  </span>
                   <span> of {totalCount} templates selected</span>
                 </>
               ) : (
-                <span className="text-amber-600 dark:text-amber-400">No templates selected - select at least one to continue</span>
+                <span className="text-amber-600 dark:text-amber-400">
+                  No templates selected - select at least one to continue
+                </span>
               )}
             </span>
           </div>
@@ -96,4 +101,3 @@ export function ProjectDeploymentPlannerHeader({
     </div>
   );
 }
-

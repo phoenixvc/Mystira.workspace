@@ -1,10 +1,10 @@
-import { invoke } from '@tauri-apps/api/core';
-import { useEffect, useState } from 'react';
-import { useDeploymentsStore } from '../../stores/deploymentsStore';
-import { useResourcesStore } from '../../stores/resourcesStore';
-import type { CommandResponse, CosmosWarning, WhatIfChange } from '../../types';
-import { type InfrastructureStatus as InfrastructureStatusType } from './InfrastructureStatus';
-import ResourceGroupConfig from './ResourceGroupConfig';
+import { invoke } from "@tauri-apps/api/core";
+import { useEffect, useState } from "react";
+import { useDeploymentsStore } from "../../stores/deploymentsStore";
+import { useResourcesStore } from "../../stores/resourcesStore";
+import type { CommandResponse, CosmosWarning, WhatIfChange } from "../../types";
+import { type InfrastructureStatus as InfrastructureStatusType } from "./InfrastructureStatus";
+import ResourceGroupConfig from "./ResourceGroupConfig";
 import {
   InfrastructureActionsTab,
   InfrastructureConfirmDialogs,
@@ -15,37 +15,63 @@ import {
   InfrastructureTabs,
   InfrastructureTemplatesTab,
   SmartDeploymentPanel,
-} from './components';
-import { useCliBuild, useInfrastructureActions, useInfrastructureEnvironment, useResourceGroupConfig, useTemplates, useWorkflowStatus } from './hooks';
+} from "./components";
+import {
+  useCliBuild,
+  useInfrastructureActions,
+  useInfrastructureEnvironment,
+  useResourceGroupConfig,
+  useTemplates,
+  useWorkflowStatus,
+} from "./hooks";
 
-type Tab = 'actions' | 'smart-deploy' | 'templates' | 'resources' | 'history' | 'recommended-fixes';
+type Tab =
+  | "actions"
+  | "smart-deploy"
+  | "templates"
+  | "resources"
+  | "history"
+  | "recommended-fixes";
 
 function InfrastructurePanel() {
-  const [activeTab, setActiveTab] = useState<Tab>('actions');
+  const [activeTab, setActiveTab] = useState<Tab>("actions");
   const [loading, setLoading] = useState(false);
-  const [currentAction, setCurrentAction] = useState<'validate' | 'preview' | 'deploy' | 'destroy' | null>(null);
-  const [lastResponse, setLastResponse] = useState<CommandResponse | null>(null);
+  const [currentAction, setCurrentAction] = useState<
+    "validate" | "preview" | "deploy" | "destroy" | null
+  >(null);
+  const [lastResponse, setLastResponse] = useState<CommandResponse | null>(
+    null,
+  );
   const [whatIfChanges, setWhatIfChanges] = useState<WhatIfChange[]>([]);
   const [showDestroyConfirm, setShowDestroyConfirm] = useState(false);
-  const deploymentMethod: 'github' | 'azure-cli' = 'azure-cli';
-  const [repoRoot, setRepoRoot] = useState<string>('');
+  const deploymentMethod: "github" | "azure-cli" = "azure-cli";
+  const [repoRoot, setRepoRoot] = useState<string>("");
   const [hasValidated, setHasValidated] = useState(false);
   const [hasPreviewed, setHasPreviewed] = useState(false);
-  const [hasDeployedInfrastructure, setHasDeployedInfrastructure] = useState(false);
+  const [hasDeployedInfrastructure, setHasDeployedInfrastructure] =
+    useState(false);
   const [showDeployConfirm, setShowDeployConfirm] = useState(false);
   const [showOutputPanel, setShowOutputPanel] = useState(false);
-  const [deploymentProgress, setDeploymentProgress] = useState<string | null>(null);
-  const [showResourceGroupConfirm, setShowResourceGroupConfirm] = useState(false);
-  const [pendingResourceGroup, setPendingResourceGroup] = useState<{ resourceGroup: string; location: string } | null>(null);
+  const [deploymentProgress, setDeploymentProgress] = useState<string | null>(
+    null,
+  );
+  const [showResourceGroupConfirm, setShowResourceGroupConfirm] =
+    useState(false);
+  const [pendingResourceGroup, setPendingResourceGroup] = useState<{
+    resourceGroup: string;
+    location: string;
+  } | null>(null);
   const [showDestroySelect, setShowDestroySelect] = useState(false);
   const [showResourceGroupConfig, setShowResourceGroupConfig] = useState(false);
   const [step1Collapsed, setStep1Collapsed] = useState(false);
   const [showStep2, setShowStep2] = useState(false);
   const [infrastructureLoading, setInfrastructureLoading] = useState(true);
-  const [cosmosWarning, setCosmosWarning] = useState<CosmosWarning | null>(null);
+  const [cosmosWarning, setCosmosWarning] = useState<CosmosWarning | null>(
+    null,
+  );
 
-  const workflowFile = '.start-infrastructure-deploy-dev.yml';
-  const repository = 'phoenixvc/Mystira.App';
+  const workflowFile = ".start-infrastructure-deploy-dev.yml";
+  const repository = "phoenixvc/Mystira.App";
 
   const resetState = () => {
     setHasValidated(false);
@@ -60,15 +86,24 @@ function InfrastructurePanel() {
     confirmProdSwitch,
     cancelProdSwitch,
   } = useInfrastructureEnvironment({
-    initialEnvironment: 'dev',
+    initialEnvironment: "dev",
     onEnvironmentChanged: () => {},
     onResetState: resetState,
   });
 
   const { templates, setTemplates } = useTemplates(environment);
-  const { config: resourceGroupConfig, setConfig: setResourceGroupConfig } = useResourceGroupConfig(environment);
-  const { status: workflowStatus, fetchStatus: fetchWorkflowStatus } = useWorkflowStatus(workflowFile, repository);
-  const { isBuilding: isBuildingCli, buildTime: cliBuildTime, logs: cliBuildLogs, showLogs: showCliBuildLogs, setShowLogs: setShowCliBuildLogs, build: buildCli } = useCliBuild();
+  const { config: resourceGroupConfig, setConfig: setResourceGroupConfig } =
+    useResourceGroupConfig(environment);
+  const { status: workflowStatus, fetchStatus: fetchWorkflowStatus } =
+    useWorkflowStatus(workflowFile, repository);
+  const {
+    isBuilding: isBuildingCli,
+    buildTime: cliBuildTime,
+    logs: cliBuildLogs,
+    showLogs: showCliBuildLogs,
+    setShowLogs: setShowCliBuildLogs,
+    build: buildCli,
+  } = useCliBuild();
 
   const {
     resources,
@@ -87,28 +122,32 @@ function InfrastructurePanel() {
   useEffect(() => {
     const fetchRepoRoot = async () => {
       try {
-        const root = await invoke<string>('get_repo_root');
+        const root = await invoke<string>("get_repo_root");
         setRepoRoot(root);
       } catch (error) {
-        console.error('Failed to get repo root:', error);
+        console.error("Failed to get repo root:", error);
       }
     };
     fetchRepoRoot();
   }, []);
 
   useEffect(() => {
-    if (activeTab === 'resources') {
+    if (activeTab === "resources") {
       fetchResources(false, environment);
     }
   }, [activeTab, environment, fetchResources]);
 
   useEffect(() => {
-    if (activeTab === 'history') {
+    if (activeTab === "history") {
       fetchDeployments();
     }
   }, [activeTab, fetchDeployments]);
 
-  const { handleAction: handleActionFromHook, handleDestroyConfirm, handleDeployConfirm } = useInfrastructureActions({
+  const {
+    handleAction: handleActionFromHook,
+    handleDestroyConfirm,
+    handleDeployConfirm,
+  } = useInfrastructureActions({
     deploymentMethod,
     repoRoot,
     environment,
@@ -133,7 +172,11 @@ function InfrastructurePanel() {
     onSetCurrentAction: setCurrentAction,
     onSetHasDeployedInfrastructure: setHasDeployedInfrastructure,
     onSetDeploymentProgress: setDeploymentProgress,
-    onSetShowResourceGroupConfirm: (show: boolean, resourceGroup?: string, location?: string) => {
+    onSetShowResourceGroupConfirm: (
+      show: boolean,
+      resourceGroup?: string,
+      location?: string,
+    ) => {
       if (show && resourceGroup && location) {
         setPendingResourceGroup({ resourceGroup, location });
         setShowResourceGroupConfirm(true);
@@ -144,7 +187,9 @@ function InfrastructurePanel() {
     },
   });
 
-  const handleAction = async (action: 'validate' | 'preview' | 'deploy' | 'destroy') => {
+  const handleAction = async (
+    action: "validate" | "preview" | "deploy" | "destroy",
+  ) => {
     await handleActionFromHook(action);
   };
 
@@ -152,17 +197,21 @@ function InfrastructurePanel() {
     setShowDeployConfirm(false);
     await handleDeployConfirm(async () => {
       try {
-        const resourceGroup = resourceGroupConfig.defaultResourceGroup || `mys-dev-mystira-rg-san`;
-        const statusResponse = await invoke<any>('check_infrastructure_status', {
-          environment,
-          resourceGroup,
-        });
+        const resourceGroup =
+          resourceGroupConfig.defaultResourceGroup || `mys-dev-mystira-rg-san`;
+        const statusResponse = await invoke<any>(
+          "check_infrastructure_status",
+          {
+            environment,
+            resourceGroup,
+          },
+        );
         if (statusResponse.success && statusResponse.result) {
           const status = statusResponse.result as InfrastructureStatusType;
           setHasDeployedInfrastructure(status.available);
         }
       } catch (error) {
-        console.error('Failed to refresh infrastructure status:', error);
+        console.error("Failed to refresh infrastructure status:", error);
       }
     });
   };
@@ -211,7 +260,7 @@ function InfrastructurePanel() {
         onSetLastResponse={setLastResponse}
         onSetPendingResourceGroup={setPendingResourceGroup}
       />
-      
+
       <div className="p-8 flex-1 flex flex-col min-h-0 w-full">
         <InfrastructurePanelHeader
           environment={environment}
@@ -228,7 +277,7 @@ function InfrastructurePanel() {
 
         <InfrastructureTabs activeTab={activeTab} onTabChange={setActiveTab} />
 
-        {activeTab === 'actions' && (
+        {activeTab === "actions" && (
           <InfrastructureActionsTab
             environment={environment}
             templates={templates}
@@ -259,15 +308,15 @@ function InfrastructurePanel() {
           />
         )}
 
-        {activeTab === 'smart-deploy' && (
+        {activeTab === "smart-deploy" && (
           <SmartDeploymentPanel repoRoot={repoRoot} />
         )}
 
-        {activeTab === 'templates' && (
+        {activeTab === "templates" && (
           <InfrastructureTemplatesTab environment={environment} />
         )}
 
-        {activeTab === 'resources' && (
+        {activeTab === "resources" && (
           <InfrastructureResourcesTab
             environment={environment}
             resources={resources}
@@ -277,7 +326,7 @@ function InfrastructurePanel() {
           />
         )}
 
-        {activeTab === 'history' && (
+        {activeTab === "history" && (
           <InfrastructureHistoryTab
             deployments={deployments}
             deploymentsLoading={deploymentsLoading}
@@ -286,7 +335,7 @@ function InfrastructurePanel() {
           />
         )}
 
-        {activeTab === 'recommended-fixes' && (
+        {activeTab === "recommended-fixes" && (
           <InfrastructureRecommendedFixesTab environment={environment} />
         )}
 
@@ -295,10 +344,11 @@ function InfrastructurePanel() {
             environment={environment}
             onSave={(config) => {
               setResourceGroupConfig(config);
-              const updated = whatIfChanges.map(change => ({
+              const updated = whatIfChanges.map((change) => ({
                 ...change,
-                resourceGroup: change.resourceGroup || 
-                  config.resourceTypeMappings?.[change.resourceType] || 
+                resourceGroup:
+                  change.resourceGroup ||
+                  config.resourceTypeMappings?.[change.resourceType] ||
                   config.defaultResourceGroup,
               }));
               setWhatIfChanges(updated);
@@ -314,15 +364,15 @@ function InfrastructurePanel() {
           onClick={() => setShowOutputPanel(true)}
           className={`px-4 py-2 text-xs border-t border-gray-200 dark:border-gray-700 flex items-center gap-2 ${
             lastResponse.success
-              ? 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300'
-              : 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300'
+              ? "bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300"
+              : "bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300"
           }`}
         >
-          <span>{lastResponse.success ? '✓' : '✕'}</span>
+          <span>{lastResponse.success ? "✓" : "✕"}</span>
           <span>
             {lastResponse.success
-              ? (lastResponse.message || 'Operation completed')
-              : (lastResponse.error || 'Operation failed')}
+              ? lastResponse.message || "Operation completed"
+              : lastResponse.error || "Operation failed"}
           </span>
           <span className="ml-auto text-gray-400">Click to expand</span>
         </button>

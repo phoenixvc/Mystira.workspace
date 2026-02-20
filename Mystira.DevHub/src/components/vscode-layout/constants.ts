@@ -1,4 +1,4 @@
-import type { LayoutState } from './types';
+import type { LayoutState } from "./types";
 
 export const DEFAULT_LAYOUT: LayoutState = {
   primarySidebarWidth: 280,
@@ -7,7 +7,7 @@ export const DEFAULT_LAYOUT: LayoutState = {
   secondarySidebarCollapsed: true,
   bottomPanelHeight: 250,
   bottomPanelCollapsed: true,
-  activeBottomTab: '',
+  activeBottomTab: "",
 };
 
 export const MIN_SIZES = {
@@ -23,4 +23,3 @@ export const MAX_SIZES = {
 };
 
 export const ACTIVITY_BAR_WIDTH = 48;
-

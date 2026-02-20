@@ -1,13 +1,17 @@
-import { useEffect, useState } from 'react';
-import type { ProjectInfo, ResourceGroupConvention, TemplateConfig } from '../../types';
-import { DEFAULT_PROJECTS } from '../../types';
+import { useEffect, useState } from "react";
+import type {
+  ProjectInfo,
+  ResourceGroupConvention,
+  TemplateConfig,
+} from "../../types";
+import { DEFAULT_PROJECTS } from "../../types";
 import {
-    ProjectCard,
-    ProjectDeploymentPlannerHeader,
-    ProjectDeploymentSummary,
-} from './components';
-import { useDeploymentStatus } from './hooks/useDeploymentStatus';
-export type { DeploymentStatus } from './types';
+  ProjectCard,
+  ProjectDeploymentPlannerHeader,
+  ProjectDeploymentSummary,
+} from "./components";
+import { useDeploymentStatus } from "./hooks/useDeploymentStatus";
+export type { DeploymentStatus } from "./types";
 export type { ProjectInfo };
 
 interface ProjectDeploymentPlannerProps {
@@ -47,16 +51,22 @@ function ProjectDeploymentPlanner({
   });
 
   useEffect(() => {
-    const selectedTemplates = templates.filter(t => t.selected);
+    const selectedTemplates = templates.filter((t) => t.selected);
     const hasSelectedTemplates = selectedTemplates.length > 0;
-    
+
     if (!hasSelectedTemplates) {
-      onReadyToProceed?.(false, 'Please select at least one infrastructure template to deploy.');
+      onReadyToProceed?.(
+        false,
+        "Please select at least one infrastructure template to deploy.",
+      );
       return;
     }
-    
+
     if (infrastructureLoading || loadingStatus) {
-      onReadyToProceed?.(false, 'Please wait for infrastructure status to finish loading...');
+      onReadyToProceed?.(
+        false,
+        "Please wait for infrastructure status to finish loading...",
+      );
       return;
     }
 
@@ -64,7 +74,7 @@ function ProjectDeploymentPlanner({
   }, [templates, onReadyToProceed, infrastructureLoading, loadingStatus]);
 
   const toggleTemplateForProject = (_projectId: string, templateId: string) => {
-    const updatedTemplates = templates.map(t => {
+    const updatedTemplates = templates.map((t) => {
       if (t.id === templateId) {
         return { ...t, selected: !t.selected };
       }
@@ -75,22 +85,23 @@ function ProjectDeploymentPlanner({
   };
 
   const isTemplateSelected = (templateId: string) => {
-    const template = templates.find(t => t.id === templateId);
+    const template = templates.find((t) => t.id === templateId);
     return template?.selected || false;
   };
 
   const handleSelectAll = () => {
-    const updatedTemplates = templates.map(t => ({ ...t, selected: true }));
+    const updatedTemplates = templates.map((t) => ({ ...t, selected: true }));
     onTemplatesChange(updatedTemplates);
   };
 
   const handleDeselectAll = () => {
-    const updatedTemplates = templates.map(t => ({ ...t, selected: false }));
+    const updatedTemplates = templates.map((t) => ({ ...t, selected: false }));
     onTemplatesChange(updatedTemplates);
   };
 
-  const selectedTemplates = templates.filter(t => t.selected);
-  const readyToProceed = selectedTemplates.length > 0 && !infrastructureLoading && !loadingStatus;
+  const selectedTemplates = templates.filter((t) => t.selected);
+  const readyToProceed =
+    selectedTemplates.length > 0 && !infrastructureLoading && !loadingStatus;
 
   return (
     <div className="mb-8">

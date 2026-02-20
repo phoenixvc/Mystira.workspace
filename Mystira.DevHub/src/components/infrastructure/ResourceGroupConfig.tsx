@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import type { ResourceGroupConvention } from '../../types';
+import { useEffect, useState } from "react";
+import type { ResourceGroupConvention } from "../../types";
 
 interface ResourceGroupConfigProps {
   environment: string;
@@ -8,28 +8,62 @@ interface ResourceGroupConfigProps {
 }
 
 const AVAILABLE_VARIABLES = [
-  { key: '{env}', label: 'Environment', description: 'dev, prod, staging', example: 'dev' },
-    { key: '{region}', label: 'Region', description: 'san, euw, eus, wus', example: 'san' },
-  { key: '{project}', label: 'Project Name', description: 'mystira-app', example: 'mystira-app' },
-  { key: '{resource}', label: 'Resource Type', description: 'storage, cosmos, app', example: 'storage' },
-  { key: '{rg}', label: 'Resource Group', description: 'rg', example: 'rg' },
-  { key: '{subscription}', label: 'Subscription', description: 'subscription-id', example: 'sub-001' },
-  { key: '{app}', label: 'Application', description: 'app name', example: 'mystira' },
+  {
+    key: "{env}",
+    label: "Environment",
+    description: "dev, prod, staging",
+    example: "dev",
+  },
+  {
+    key: "{region}",
+    label: "Region",
+    description: "san, euw, eus, wus",
+    example: "san",
+  },
+  {
+    key: "{project}",
+    label: "Project Name",
+    description: "mystira-app",
+    example: "mystira-app",
+  },
+  {
+    key: "{resource}",
+    label: "Resource Type",
+    description: "storage, cosmos, app",
+    example: "storage",
+  },
+  { key: "{rg}", label: "Resource Group", description: "rg", example: "rg" },
+  {
+    key: "{subscription}",
+    label: "Subscription",
+    description: "subscription-id",
+    example: "sub-001",
+  },
+  {
+    key: "{app}",
+    label: "Application",
+    description: "app name",
+    example: "mystira",
+  },
 ];
 
-function ResourceGroupConfig({ environment, onSave, onClose }: ResourceGroupConfigProps) {
+function ResourceGroupConfig({
+  environment,
+  onSave,
+  onClose,
+}: ResourceGroupConfigProps) {
   const [config, setConfig] = useState<ResourceGroupConvention>({
-    pattern: '{env}-{region}-rg-{project}',
+    pattern: "{env}-{region}-rg-{project}",
     defaultResourceGroup: `${environment}-san-rg-mystira-app`,
     resourceTypeMappings: {},
     environment: environment,
-    region: 'san',
-    projectName: 'mystira-app',
+    region: "san",
+    projectName: "mystira-app",
   });
   const [editingMapping, setEditingMapping] = useState<string | null>(null);
-  const [newResourceType, setNewResourceType] = useState('');
-  const [newResourceGroup, setNewResourceGroup] = useState('');
-  const [previewPattern, setPreviewPattern] = useState('');
+  const [newResourceType, setNewResourceType] = useState("");
+  const [newResourceGroup, setNewResourceGroup] = useState("");
+  const [previewPattern, setPreviewPattern] = useState("");
 
   useEffect(() => {
     // Load saved config from localStorage
@@ -39,7 +73,7 @@ function ResourceGroupConfig({ environment, onSave, onClose }: ResourceGroupConf
         const parsed = JSON.parse(saved);
         setConfig(parsed);
       } catch (e) {
-        console.error('Failed to parse saved resource group config:', e);
+        console.error("Failed to parse saved resource group config:", e);
       }
     }
   }, [environment]);
@@ -48,30 +82,48 @@ function ResourceGroupConfig({ environment, onSave, onClose }: ResourceGroupConf
   useEffect(() => {
     let preview = config.pattern;
     preview = preview.replace(/{env}/g, config.environment || environment);
-    preview = preview.replace(/{region}/g, config.region || 'san');
-    preview = preview.replace(/{project}/g, config.projectName || 'mystira-app');
-    preview = preview.replace(/{resource}/g, 'storage');
-    preview = preview.replace(/{rg}/g, 'rg');
-    preview = preview.replace(/{subscription}/g, 'sub-001');
-    preview = preview.replace(/{app}/g, 'mystira');
+    preview = preview.replace(/{region}/g, config.region || "san");
+    preview = preview.replace(
+      /{project}/g,
+      config.projectName || "mystira-app",
+    );
+    preview = preview.replace(/{resource}/g, "storage");
+    preview = preview.replace(/{rg}/g, "rg");
+    preview = preview.replace(/{subscription}/g, "sub-001");
+    preview = preview.replace(/{app}/g, "mystira");
     setPreviewPattern(preview);
-    
+
     // Update default resource group based on pattern
     if (config.pattern) {
       let defaultRG = config.pattern;
-      defaultRG = defaultRG.replace(/{env}/g, config.environment || environment);
-      defaultRG = defaultRG.replace(/{region}/g, config.region || 'san');
-      defaultRG = defaultRG.replace(/{project}/g, config.projectName || 'mystira-app');
-      defaultRG = defaultRG.replace(/{resource}/g, 'mystira-app');
-      defaultRG = defaultRG.replace(/{rg}/g, 'rg');
-      defaultRG = defaultRG.replace(/{subscription}/g, '');
-      defaultRG = defaultRG.replace(/{app}/g, 'mystira');
-      setConfig(prev => ({ ...prev, defaultResourceGroup: defaultRG }));
+      defaultRG = defaultRG.replace(
+        /{env}/g,
+        config.environment || environment,
+      );
+      defaultRG = defaultRG.replace(/{region}/g, config.region || "san");
+      defaultRG = defaultRG.replace(
+        /{project}/g,
+        config.projectName || "mystira-app",
+      );
+      defaultRG = defaultRG.replace(/{resource}/g, "mystira-app");
+      defaultRG = defaultRG.replace(/{rg}/g, "rg");
+      defaultRG = defaultRG.replace(/{subscription}/g, "");
+      defaultRG = defaultRG.replace(/{app}/g, "mystira");
+      setConfig((prev) => ({ ...prev, defaultResourceGroup: defaultRG }));
     }
-  }, [config.pattern, config.environment, config.region, config.projectName, environment]);
+  }, [
+    config.pattern,
+    config.environment,
+    config.region,
+    config.projectName,
+    environment,
+  ]);
 
   const handleSave = () => {
-    localStorage.setItem(`resourceGroupConfig_${environment}`, JSON.stringify(config));
+    localStorage.setItem(
+      `resourceGroupConfig_${environment}`,
+      JSON.stringify(config),
+    );
     onSave(config);
     onClose();
   };
@@ -85,8 +137,8 @@ function ResourceGroupConfig({ environment, onSave, onClose }: ResourceGroupConf
           [newResourceType]: newResourceGroup,
         },
       });
-      setNewResourceType('');
-      setNewResourceGroup('');
+      setNewResourceType("");
+      setNewResourceGroup("");
     }
   };
 
@@ -99,7 +151,10 @@ function ResourceGroupConfig({ environment, onSave, onClose }: ResourceGroupConf
     });
   };
 
-  const updateResourceTypeMapping = (resourceType: string, resourceGroup: string) => {
+  const updateResourceTypeMapping = (
+    resourceType: string,
+    resourceGroup: string,
+  ) => {
     setConfig({
       ...config,
       resourceTypeMappings: {
@@ -118,7 +173,8 @@ function ResourceGroupConfig({ environment, onSave, onClose }: ResourceGroupConf
             Resource Group Configuration
           </h2>
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-            Configure resource group naming conventions for {environment} environment
+            Configure resource group naming conventions for {environment}{" "}
+            environment
           </p>
         </div>
 
@@ -150,7 +206,9 @@ function ResourceGroupConfig({ environment, onSave, onClose }: ResourceGroupConf
               </label>
               <select
                 value={config.environment || environment}
-                onChange={(e) => setConfig({ ...config, environment: e.target.value })}
+                onChange={(e) =>
+                  setConfig({ ...config, environment: e.target.value })
+                }
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
                 aria-label="Select environment"
               >
@@ -164,8 +222,10 @@ function ResourceGroupConfig({ environment, onSave, onClose }: ResourceGroupConf
                 Region
               </label>
               <select
-                value={config.region || 'san'}
-                onChange={(e) => setConfig({ ...config, region: e.target.value })}
+                value={config.region || "san"}
+                onChange={(e) =>
+                  setConfig({ ...config, region: e.target.value })
+                }
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
                 aria-label="Select region"
               >
@@ -183,8 +243,10 @@ function ResourceGroupConfig({ environment, onSave, onClose }: ResourceGroupConf
               </label>
               <input
                 type="text"
-                value={config.projectName || 'mystira-app'}
-                onChange={(e) => setConfig({ ...config, projectName: e.target.value })}
+                value={config.projectName || "mystira-app"}
+                onChange={(e) =>
+                  setConfig({ ...config, projectName: e.target.value })
+                }
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
                 placeholder="mystira-app"
               />
@@ -200,7 +262,9 @@ function ResourceGroupConfig({ environment, onSave, onClose }: ResourceGroupConf
               <input
                 type="text"
                 value={config.pattern}
-                onChange={(e) => setConfig({ ...config, pattern: e.target.value })}
+                onChange={(e) =>
+                  setConfig({ ...config, pattern: e.target.value })
+                }
                 className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white font-mono"
                 placeholder="{env}-{region}-rg-{project}"
               />
@@ -211,14 +275,16 @@ function ResourceGroupConfig({ environment, onSave, onClose }: ResourceGroupConf
                     if (selectedVar) {
                       const newPattern = config.pattern + selectedVar;
                       setConfig({ ...config, pattern: newPattern });
-                      e.target.value = '';
+                      e.target.value = "";
                     }
                   }}
                   className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white text-sm"
                   defaultValue=""
                   aria-label="Select variable to insert into pattern"
                 >
-                  <option value="" disabled>Insert Variable</option>
+                  <option value="" disabled>
+                    Insert Variable
+                  </option>
                   {AVAILABLE_VARIABLES.map((v) => (
                     <option key={v.key} value={v.key}>
                       {v.key} - {v.label}
@@ -229,17 +295,28 @@ function ResourceGroupConfig({ environment, onSave, onClose }: ResourceGroupConf
             </div>
             <div className="mb-2">
               <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
-                Preview: <span className="font-mono text-blue-600 dark:text-blue-400">{previewPattern}</span>
+                Preview:{" "}
+                <span className="font-mono text-blue-600 dark:text-blue-400">
+                  {previewPattern}
+                </span>
               </p>
             </div>
             <div className="bg-gray-50 dark:bg-gray-700 rounded-md p-3">
-              <p className="text-xs font-medium text-gray-700 dark:text-gray-300 mb-2">Available Variables:</p>
+              <p className="text-xs font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Available Variables:
+              </p>
               <div className="grid grid-cols-2 gap-2">
                 {AVAILABLE_VARIABLES.map((v) => (
                   <div key={v.key} className="text-xs">
-                    <span className="font-mono text-blue-600 dark:text-blue-400">{v.key}</span>
-                    <span className="text-gray-600 dark:text-gray-400 ml-1">- {v.label}</span>
-                    <span className="text-gray-500 dark:text-gray-500 ml-1">({v.description})</span>
+                    <span className="font-mono text-blue-600 dark:text-blue-400">
+                      {v.key}
+                    </span>
+                    <span className="text-gray-600 dark:text-gray-400 ml-1">
+                      - {v.label}
+                    </span>
+                    <span className="text-gray-500 dark:text-gray-500 ml-1">
+                      ({v.description})
+                    </span>
                   </div>
                 ))}
               </div>
@@ -252,53 +329,57 @@ function ResourceGroupConfig({ environment, onSave, onClose }: ResourceGroupConf
               Resource Type to Resource Group Mappings
             </label>
             <div className="space-y-2 mb-3">
-              {Object.entries(config.resourceTypeMappings || {}).map(([type, rg]) => (
-                <div
-                  key={type}
-                  className="flex items-center gap-2 p-2 bg-gray-50 dark:bg-gray-700 rounded border border-gray-200 dark:border-gray-600"
-                >
-                  {editingMapping === type ? (
-                    <>
-                      <input
-                        type="text"
-                        value={rg}
-                        onChange={(e) =>
-                          updateResourceTypeMapping(type, e.target.value)
-                        }
-                        className="flex-1 px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded dark:bg-gray-600 dark:text-white"
-                        autoFocus
-                      />
-                      <button
-                        onClick={() => setEditingMapping(null)}
-                        className="px-2 py-1 text-xs bg-gray-200 dark:bg-gray-600 hover:bg-gray-300 dark:hover:bg-gray-500 rounded"
-                      >
-                        Done
-                      </button>
-                    </>
-                  ) : (
-                    <>
-                      <div className="flex-1">
-                        <div className="text-xs font-mono text-gray-600 dark:text-gray-300">
-                          {type}
+              {Object.entries(config.resourceTypeMappings || {}).map(
+                ([type, rg]) => (
+                  <div
+                    key={type}
+                    className="flex items-center gap-2 p-2 bg-gray-50 dark:bg-gray-700 rounded border border-gray-200 dark:border-gray-600"
+                  >
+                    {editingMapping === type ? (
+                      <>
+                        <input
+                          type="text"
+                          value={rg}
+                          onChange={(e) =>
+                            updateResourceTypeMapping(type, e.target.value)
+                          }
+                          className="flex-1 px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded dark:bg-gray-600 dark:text-white"
+                          autoFocus
+                        />
+                        <button
+                          onClick={() => setEditingMapping(null)}
+                          className="px-2 py-1 text-xs bg-gray-200 dark:bg-gray-600 hover:bg-gray-300 dark:hover:bg-gray-500 rounded"
+                        >
+                          Done
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        <div className="flex-1">
+                          <div className="text-xs font-mono text-gray-600 dark:text-gray-300">
+                            {type}
+                          </div>
+                          <div className="text-sm text-gray-900 dark:text-white">
+                            {rg}
+                          </div>
                         </div>
-                        <div className="text-sm text-gray-900 dark:text-white">{rg}</div>
-                      </div>
-                      <button
-                        onClick={() => setEditingMapping(type)}
-                        className="px-2 py-1 text-xs bg-blue-100 dark:bg-blue-900 hover:bg-blue-200 dark:hover:bg-blue-800 rounded"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => removeResourceTypeMapping(type)}
-                        className="px-2 py-1 text-xs bg-red-100 dark:bg-red-900 hover:bg-red-200 dark:hover:bg-red-800 rounded"
-                      >
-                        Remove
-                      </button>
-                    </>
-                  )}
-                </div>
-              ))}
+                        <button
+                          onClick={() => setEditingMapping(type)}
+                          className="px-2 py-1 text-xs bg-blue-100 dark:bg-blue-900 hover:bg-blue-200 dark:hover:bg-blue-800 rounded"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => removeResourceTypeMapping(type)}
+                          className="px-2 py-1 text-xs bg-red-100 dark:bg-red-900 hover:bg-red-200 dark:hover:bg-red-800 rounded"
+                        >
+                          Remove
+                        </button>
+                      </>
+                    )}
+                  </div>
+                ),
+              )}
             </div>
 
             {/* Add new mapping */}
@@ -350,4 +431,3 @@ function ResourceGroupConfig({ environment, onSave, onClose }: ResourceGroupConf
 }
 
 export default ResourceGroupConfig;
-

@@ -16,4 +16,3 @@ export function StepSeparator({ label }: StepSeparatorProps) {
     </div>
   );
 }
-

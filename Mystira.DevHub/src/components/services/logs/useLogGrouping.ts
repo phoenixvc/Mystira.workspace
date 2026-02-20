@@ -1,13 +1,18 @@
-import { useMemo, useState } from 'react';
-import { ServiceLog } from '../types';
+import { useMemo, useState } from "react";
+import { ServiceLog } from "../types";
 
 interface GroupedLog {
   logs: ServiceLog[];
   lineNumber: number;
 }
 
-export function useLogGrouping(filteredLogs: ServiceLog[], collapseSimilar: boolean) {
-  const [collapsedGroups, setCollapsedGroups] = useState<Set<number>>(new Set());
+export function useLogGrouping(
+  filteredLogs: ServiceLog[],
+  collapseSimilar: boolean,
+) {
+  const [collapsedGroups, setCollapsedGroups] = useState<Set<number>>(
+    new Set(),
+  );
 
   const groupedLogs = useMemo(() => {
     if (!collapseSimilar) {
@@ -26,10 +31,10 @@ export function useLogGrouping(filteredLogs: ServiceLog[], collapseSimilar: bool
         currentGroup = [log];
       } else {
         const lastLog = currentGroup[currentGroup.length - 1];
-        const isSimilar = 
+        const isSimilar =
           log.message.substring(0, 50) === lastLog.message.substring(0, 50) &&
           Math.abs(log.timestamp - lastLog.timestamp) < 2000;
-        
+
         if (isSimilar) {
           currentGroup.push(log);
         } else {
@@ -48,7 +53,7 @@ export function useLogGrouping(filteredLogs: ServiceLog[], collapseSimilar: bool
   }, [filteredLogs, collapseSimilar, collapsedGroups]);
 
   const toggleGroup = (groupIndex: number) => {
-    setCollapsedGroups(prev => {
+    setCollapsedGroups((prev) => {
       const next = new Set(prev);
       if (next.has(groupIndex)) {
         next.delete(groupIndex);
@@ -61,4 +66,3 @@ export function useLogGrouping(filteredLogs: ServiceLog[], collapseSimilar: bool
 
   return { groupedLogs, collapsedGroups, toggleGroup };
 }
-

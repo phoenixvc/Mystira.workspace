@@ -1,18 +1,23 @@
-import { useEffect, useRef, useState } from 'react';
-import { BuildStatusIndicator } from './components';
-import type { DeploymentInfo } from './components';
-import { EnvironmentSwitcher } from './environment';
-import { ViewModeSelector } from './components';
+import { useEffect, useRef, useState } from "react";
+import { BuildStatusIndicator } from "./components";
+import type { DeploymentInfo } from "./components";
+import { EnvironmentSwitcher } from "./environment";
+import { ViewModeSelector } from "./components";
 import {
-    ServiceCardControls,
-    ServiceCardDeploymentInfo,
-    ServiceCardHeader,
-    ServiceCardStatusRow,
-    ServiceCardViewContent,
-    useServiceCardResize,
-} from './card';
-import type { BuildStatus, ServiceConfig, ServiceLog, ServiceStatus } from './types';
-import { formatTimeSince, getHealthIndicator } from './utils/serviceUtils';
+  ServiceCardControls,
+  ServiceCardDeploymentInfo,
+  ServiceCardHeader,
+  ServiceCardStatusRow,
+  ServiceCardViewContent,
+  useServiceCardResize,
+} from "./card";
+import type {
+  BuildStatus,
+  ServiceConfig,
+  ServiceLog,
+  ServiceStatus,
+} from "./types";
+import { formatTimeSince, getHealthIndicator } from "./utils/serviceUtils";
 
 interface ServiceCardProps {
   config: ServiceConfig;
@@ -23,29 +28,32 @@ interface ServiceCardProps {
   statusMsg?: string;
   serviceLogs: ServiceLog[];
   logs: ServiceLog[];
-  filter: { search: string; type: 'all' | 'stdout' | 'stderr' };
+  filter: { search: string; type: "all" | "stdout" | "stderr" };
   isAutoScroll: boolean;
-  viewMode: 'logs' | 'webview' | 'split';
+  viewMode: "logs" | "webview" | "split";
   isMaximized: boolean;
   webviewError: boolean;
-  currentEnv: 'local' | 'dev' | 'prod';
+  currentEnv: "local" | "dev" | "prod";
   envUrls: { dev?: string; prod?: string };
   environmentStatus?: {
-    dev?: 'online' | 'offline' | 'checking';
-    prod?: 'online' | 'offline' | 'checking';
+    dev?: "online" | "offline" | "checking";
+    prod?: "online" | "offline" | "checking";
   };
   deploymentInfo?: DeploymentInfo | null;
   onStart: () => void;
   onStop: () => void;
   onRebuild?: () => void;
   onPortChange: (port: number) => void;
-  onEnvironmentSwitch: (env: 'local' | 'dev' | 'prod') => void;
-  onViewModeChange: (mode: 'logs' | 'webview' | 'split') => void;
+  onEnvironmentSwitch: (env: "local" | "dev" | "prod") => void;
+  onViewModeChange: (mode: "logs" | "webview" | "split") => void;
   onMaximize: () => void;
   onOpenInBrowser: (url: string) => void;
   onOpenInTauriWindow: (url: string, title: string) => void;
   onClearLogs: () => void;
-  onFilterChange: (filter: { search: string; type: 'all' | 'stdout' | 'stderr' }) => void;
+  onFilterChange: (filter: {
+    search: string;
+    type: "all" | "stdout" | "stderr";
+  }) => void;
   onAutoScrollChange: (enabled: boolean) => void;
   onWebviewRetry: () => void;
   onWebviewError: () => void;
@@ -90,42 +98,49 @@ export function ServiceCard({
 }: ServiceCardProps) {
   const [isCollapsed, setIsCollapsed] = useState(() => {
     const saved = localStorage.getItem(`service-${config.name}-collapsed`);
-    return saved === 'true';
+    return saved === "true";
   });
   const scrollPositionRef = useRef<number>(0);
   const logContainerRef = useRef<HTMLDivElement | null>(null);
-  const { logHeight, resizeHandleRef, handleResizeStart } = useServiceCardResize(config.name);
+  const { logHeight, resizeHandleRef, handleResizeStart } =
+    useServiceCardResize(config.name);
 
-  const isBuilding = !!(build && build.status === 'building');
-  const buildFailed = !!(build && build.status === 'failed');
+  const isBuilding = !!(build && build.status === "building");
+  const buildFailed = !!(build && build.status === "failed");
   const hasImportantLogs = logs.length > 0 || isBuilding || buildFailed;
 
   const errorCount = serviceLogs.filter((log) => {
     const msg = log.message.toLowerCase();
     return (
-      log.type === 'stderr' ||
-      msg.includes('error') ||
-      msg.includes('failed') ||
-      msg.includes('exception') ||
-      msg.includes('fatal')
+      log.type === "stderr" ||
+      msg.includes("error") ||
+      msg.includes("failed") ||
+      msg.includes("exception") ||
+      msg.includes("fatal")
     );
   }).length;
 
   const warningCount = serviceLogs.filter((log) => {
     const msg = log.message.toLowerCase();
-    return msg.includes('warning') || msg.includes('warn') || msg.includes('deprecated');
+    return (
+      msg.includes("warning") ||
+      msg.includes("warn") ||
+      msg.includes("deprecated")
+    );
   }).length;
 
   useEffect(() => {
     if ((isBuilding || buildFailed) && !isCollapsed) {
-      onViewModeChange('logs');
+      onViewModeChange("logs");
     }
   }, [isBuilding, buildFailed, onViewModeChange, isCollapsed]);
 
   const toggleCollapse = () => {
     const newState = !isCollapsed;
     if (newState && !isCollapsed) {
-      const logContainer = logContainerRef.current?.querySelector('.overflow-y-auto') as HTMLElement;
+      const logContainer = logContainerRef.current?.querySelector(
+        ".overflow-y-auto",
+      ) as HTMLElement;
       if (logContainer) {
         scrollPositionRef.current = logContainer.scrollTop;
       }
@@ -134,7 +149,9 @@ export function ServiceCard({
     localStorage.setItem(`service-${config.name}-collapsed`, String(newState));
     if (!newState && isCollapsed && scrollPositionRef.current > 0) {
       setTimeout(() => {
-        const logContainer = logContainerRef.current?.querySelector('.overflow-y-auto') as HTMLElement;
+        const logContainer = logContainerRef.current?.querySelector(
+          ".overflow-y-auto",
+        ) as HTMLElement;
         if (logContainer) {
           logContainer.scrollTop = scrollPositionRef.current;
         }
@@ -142,25 +159,37 @@ export function ServiceCard({
     }
   };
 
-  const currentViewMode = isBuilding || buildFailed ? 'logs' : viewMode;
-  const containerClass = isMaximized ? 'h-[calc(100vh-60px)]' : 'flex-1 min-h-0';
-  const showView = hasImportantLogs || (isRunning && config.url) || isBuilding || buildFailed;
+  const currentViewMode = isBuilding || buildFailed ? "logs" : viewMode;
+  const containerClass = isMaximized
+    ? "h-[calc(100vh-60px)]"
+    : "flex-1 min-h-0";
+  const showView =
+    hasImportantLogs || (isRunning && config.url) || isBuilding || buildFailed;
 
   return (
     <div
       className={`border border-gray-300 dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-900 shadow-sm transition-all font-mono relative ${
-        currentEnv === 'prod'
-          ? 'border-l-4 border-red-500 bg-red-950/20 dark:bg-red-950/30'
-          : currentEnv === 'dev'
-          ? 'border-l-4 border-blue-500 bg-blue-950/20 dark:bg-blue-950/30'
-          : 'border-l-4 border-green-500 bg-green-950/10 dark:bg-green-950/20'
+        currentEnv === "prod"
+          ? "border-l-4 border-red-500 bg-red-950/20 dark:bg-red-950/30"
+          : currentEnv === "dev"
+            ? "border-l-4 border-blue-500 bg-blue-950/20 dark:bg-blue-950/30"
+            : "border-l-4 border-green-500 bg-green-950/10 dark:bg-green-950/20"
       }`}
     >
-      {build && (build.status === 'building' || build.status === 'failed' || build.lastBuildTime) && (
-        <BuildStatusIndicator build={build} formatTimeSince={formatTimeSince} />
-      )}
+      {build &&
+        (build.status === "building" ||
+          build.status === "failed" ||
+          build.lastBuildTime) && (
+          <BuildStatusIndicator
+            build={build}
+            formatTimeSince={formatTimeSince}
+          />
+        )}
 
-      <div className="absolute left-0 top-0 bottom-0 w-1 bg-gray-400 dark:bg-gray-600 hover:bg-blue-500 dark:hover:bg-blue-400 cursor-move opacity-0 hover:opacity-100 transition-opacity" title="Drag to reorder" />
+      <div
+        className="absolute left-0 top-0 bottom-0 w-1 bg-gray-400 dark:bg-gray-600 hover:bg-blue-500 dark:hover:bg-blue-400 cursor-move opacity-0 hover:opacity-100 transition-opacity"
+        title="Drag to reorder"
+      />
 
       <div className="p-3">
         <div className="flex items-center justify-between gap-2">
@@ -190,31 +219,41 @@ export function ServiceCard({
             <span
               className={`px-1 py-0.5 rounded text-[9px] font-bold uppercase ${
                 isRunning
-                  ? 'bg-green-600 text-white'
+                  ? "bg-green-600 text-white"
                   : isLoading && statusMsg
-                  ? 'bg-yellow-600 text-white'
-                  : 'bg-gray-600 text-white'
+                    ? "bg-yellow-600 text-white"
+                    : "bg-gray-600 text-white"
               }`}
             >
-              {isRunning ? 'RUN' : isLoading && statusMsg ? statusMsg.toUpperCase().substring(0, 6) : 'STOP'}
+              {isRunning
+                ? "RUN"
+                : isLoading && statusMsg
+                  ? statusMsg.toUpperCase().substring(0, 6)
+                  : "STOP"}
             </span>
             {isRunning && status?.health && (
               <span title={`Service is ${status.health}`} className="text-sm">
                 {getHealthIndicator(status.health)}
               </span>
             )}
-            {config.port && <span className="text-gray-600 dark:text-gray-300">:{config.port}</span>}
-            {status?.portConflict && (
-              <span className="text-yellow-500 dark:text-yellow-400 text-[10px]">⚠ CONFLICT</span>
-            )}
-            {build && build.status === 'building' && (
-              <span className="text-blue-500 dark:text-blue-400 text-[10px] animate-pulse">
-                {build.isManual ? '[REBUILDING]' : '[BUILDING]'}
+            {config.port && (
+              <span className="text-gray-600 dark:text-gray-300">
+                :{config.port}
               </span>
             )}
-            {build && build.status === 'failed' && (
+            {status?.portConflict && (
+              <span className="text-yellow-500 dark:text-yellow-400 text-[10px]">
+                ⚠ CONFLICT
+              </span>
+            )}
+            {build && build.status === "building" && (
+              <span className="text-blue-500 dark:text-blue-400 text-[10px] animate-pulse">
+                {build.isManual ? "[REBUILDING]" : "[BUILDING]"}
+              </span>
+            )}
+            {build && build.status === "failed" && (
               <span className="text-red-500 dark:text-red-400 text-[10px]">
-                {build.isManual ? '[REBUILD FAIL]' : '[FAILED]'}
+                {build.isManual ? "[REBUILD FAIL]" : "[FAILED]"}
               </span>
             )}
             {build && build.lastBuildTime && (
@@ -233,24 +272,30 @@ export function ServiceCard({
                 <span className="w-1.5 h-1.5 bg-blue-400 rounded-full"></span>
                 {isBuilding
                   ? build?.isManual
-                    ? 'REBUILDING'
-                    : 'BUILDING'
+                    ? "REBUILDING"
+                    : "BUILDING"
                   : buildFailed
-                  ? build?.isManual
-                    ? 'REBUILD FAIL'
-                    : 'FAILED'
-                  : logs.length > 0
-                  ? `${logs.length} logs`
-                  : ''}
+                    ? build?.isManual
+                      ? "REBUILD FAIL"
+                      : "FAILED"
+                    : logs.length > 0
+                      ? `${logs.length} logs`
+                      : ""}
               </span>
             )}
             {errorCount > 0 && (
-              <span className="text-red-500 dark:text-red-400 text-[10px] font-bold" title="Error count">
+              <span
+                className="text-red-500 dark:text-red-400 text-[10px] font-bold"
+                title="Error count"
+              >
                 🔴 {errorCount}
               </span>
             )}
             {warningCount > 0 && (
-              <span className="text-yellow-500 dark:text-yellow-400 text-[10px] font-bold" title="Warning count">
+              <span
+                className="text-yellow-500 dark:text-yellow-400 text-[10px] font-bold"
+                title="Warning count"
+              >
                 ⚠️ {warningCount}
               </span>
             )}
@@ -280,7 +325,11 @@ export function ServiceCard({
                 onSwitch={onEnvironmentSwitch}
               />
             </div>
-            <ServiceCardDeploymentInfo config={config} currentEnv={currentEnv} deploymentInfo={deploymentInfo} />
+            <ServiceCardDeploymentInfo
+              config={config}
+              currentEnv={currentEnv}
+              deploymentInfo={deploymentInfo}
+            />
             {(isBuilding || buildFailed || (isRunning && config.url)) && (
               <ViewModeSelector
                 config={config}
@@ -302,14 +351,21 @@ export function ServiceCard({
         <div
           ref={logContainerRef}
           className={`border-t border-gray-200 dark:border-gray-700 relative flex flex-col ${
-            isMaximized ? 'fixed inset-0 z-50 bg-white dark:bg-gray-900' : 'overflow-hidden'
+            isMaximized
+              ? "fixed inset-0 z-50 bg-white dark:bg-gray-900"
+              : "overflow-hidden"
           }`}
           style={!isMaximized ? { height: `${logHeight}px` } : undefined}
         >
           {isMaximized && (
             <div className="p-2 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between bg-gray-100 dark:bg-gray-800">
-              <h3 className="font-semibold text-gray-900 dark:text-white">{config.displayName} - Maximized View</h3>
-              <button onClick={onMaximize} className="px-3 py-1 bg-gray-500 text-white rounded text-sm hover:bg-gray-600">
+              <h3 className="font-semibold text-gray-900 dark:text-white">
+                {config.displayName} - Maximized View
+              </h3>
+              <button
+                onClick={onMaximize}
+                className="px-3 py-1 bg-gray-500 text-white rounded text-sm hover:bg-gray-600"
+              >
                 Restore
               </button>
             </div>
@@ -352,5 +408,3 @@ export function ServiceCard({
     </div>
   );
 }
-
-

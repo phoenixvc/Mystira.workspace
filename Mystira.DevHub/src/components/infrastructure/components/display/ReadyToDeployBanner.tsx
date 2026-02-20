@@ -1,11 +1,11 @@
-import type { TemplateConfig } from '../../../../types';
+import type { TemplateConfig } from "../../../../types";
 
 interface ReadyToDeployBannerProps {
   templates: TemplateConfig[];
 }
 
 export function ReadyToDeployBanner({ templates }: ReadyToDeployBannerProps) {
-  const selectedTemplates = templates.filter(t => t.selected);
+  const selectedTemplates = templates.filter((t) => t.selected);
 
   if (selectedTemplates.length === 0) return null;
 
@@ -15,10 +15,11 @@ export function ReadyToDeployBanner({ templates }: ReadyToDeployBannerProps) {
         Ready to Deploy
       </h3>
       <p className="text-sm text-blue-800 dark:text-blue-300 mb-3">
-        Preview completed. The following infrastructure will be deployed based on your selected templates:
+        Preview completed. The following infrastructure will be deployed based
+        on your selected templates:
       </p>
       <div className="flex flex-wrap gap-2">
-        {selectedTemplates.map(template => (
+        {selectedTemplates.map((template) => (
           <span
             key={template.id}
             className="px-3 py-1.5 bg-blue-100 dark:bg-blue-900/50 text-blue-800 dark:text-blue-200 rounded-md text-sm font-medium"
@@ -28,9 +29,9 @@ export function ReadyToDeployBanner({ templates }: ReadyToDeployBannerProps) {
         ))}
       </div>
       <p className="text-xs text-blue-700 dark:text-blue-400 mt-3">
-        Note: Cosmos DB nested resources (databases/containers) couldn't be previewed due to Azure limitations, but they will be deployed correctly.
+        Note: Cosmos DB nested resources (databases/containers) couldn't be
+        previewed due to Azure limitations, but they will be deployed correctly.
       </p>
     </div>
   );
 }
-

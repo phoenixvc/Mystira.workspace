@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState } from "react";
 import {
   Rocket,
   GitBranch,
@@ -7,10 +7,10 @@ import {
   CheckCircle2,
   Info,
   Zap,
-} from 'lucide-react';
-import type { ResourceGroup, StaticWebApp } from './ResourceDiscoveryPanel';
+} from "lucide-react";
+import type { ResourceGroup, StaticWebApp } from "./ResourceDiscoveryPanel";
 
-export type DeployMode = 'infrastructure' | 'code' | 'auto';
+export type DeployMode = "infrastructure" | "code" | "auto";
 
 interface SmartDeployDecisionProps {
   hasInfrastructure: boolean;
@@ -30,7 +30,9 @@ export function SmartDeployDecision({
   const [showInfo, setShowInfo] = useState(false);
 
   // Auto-suggest based on infrastructure state
-  const suggestedMode: DeployMode = hasInfrastructure ? 'code' : 'infrastructure';
+  const suggestedMode: DeployMode = hasInfrastructure
+    ? "code"
+    : "infrastructure";
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
@@ -54,38 +56,52 @@ export function SmartDeployDecision({
       {showInfo && (
         <div className="px-4 py-3 bg-blue-50 dark:bg-blue-900/20 border-b border-blue-100 dark:border-blue-800">
           <p className="text-sm text-blue-700 dark:text-blue-300">
-            <strong>Smart Deploy</strong> automatically determines the best deployment path:
+            <strong>Smart Deploy</strong> automatically determines the best
+            deployment path:
           </p>
           <ul className="mt-2 text-sm text-blue-600 dark:text-blue-400 space-y-1 ml-4 list-disc">
-            <li><strong>No infrastructure:</strong> Deploy infrastructure first using Bicep templates</li>
-            <li><strong>Infrastructure exists:</strong> Deploy code by pushing to trigger CI/CD</li>
+            <li>
+              <strong>No infrastructure:</strong> Deploy infrastructure first
+              using Bicep templates
+            </li>
+            <li>
+              <strong>Infrastructure exists:</strong> Deploy code by pushing to
+              trigger CI/CD
+            </li>
           </ul>
         </div>
       )}
 
       {/* Status Banner */}
-      <div className={`px-4 py-3 border-b ${
-        hasInfrastructure
-          ? 'bg-green-50 dark:bg-green-900/20 border-green-100 dark:border-green-800'
-          : 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-100 dark:border-yellow-800'
-      }`}>
+      <div
+        className={`px-4 py-3 border-b ${
+          hasInfrastructure
+            ? "bg-green-50 dark:bg-green-900/20 border-green-100 dark:border-green-800"
+            : "bg-yellow-50 dark:bg-yellow-900/20 border-yellow-100 dark:border-yellow-800"
+        }`}
+      >
         <div className="flex items-center gap-2">
-          <CheckCircle2 className={`w-4 h-4 ${
-            hasInfrastructure ? 'text-green-500' : 'text-yellow-500'
-          }`} />
-          <span className={`text-sm font-medium ${
-            hasInfrastructure
-              ? 'text-green-700 dark:text-green-300'
-              : 'text-yellow-700 dark:text-yellow-300'
-          }`}>
+          <CheckCircle2
+            className={`w-4 h-4 ${
+              hasInfrastructure ? "text-green-500" : "text-yellow-500"
+            }`}
+          />
+          <span
+            className={`text-sm font-medium ${
+              hasInfrastructure
+                ? "text-green-700 dark:text-green-300"
+                : "text-yellow-700 dark:text-yellow-300"
+            }`}
+          >
             {hasInfrastructure
-              ? 'Infrastructure is deployed. Ready to deploy code.'
-              : 'Infrastructure not deployed. Deploy infrastructure first.'}
+              ? "Infrastructure is deployed. Ready to deploy code."
+              : "Infrastructure not deployed. Deploy infrastructure first."}
           </span>
         </div>
         {selectedResourceGroup && (
           <div className="mt-1 text-xs text-gray-500 dark:text-gray-400 ml-6">
-            Selected: {selectedResourceGroup.name} ({selectedResourceGroup.location})
+            Selected: {selectedResourceGroup.name} (
+            {selectedResourceGroup.location})
           </div>
         )}
       </div>
@@ -94,28 +110,32 @@ export function SmartDeployDecision({
       <div className="p-4 space-y-3">
         {/* Deploy Infrastructure */}
         <button
-          onClick={() => onDeployModeSelect('infrastructure')}
+          onClick={() => onDeployModeSelect("infrastructure")}
           disabled={hasInfrastructure}
           className={`w-full p-4 rounded-lg border-2 transition-all text-left ${
-            selectedMode === 'infrastructure'
-              ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20'
+            selectedMode === "infrastructure"
+              ? "border-purple-500 bg-purple-50 dark:bg-purple-900/20"
               : hasInfrastructure
-              ? 'border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/50 opacity-50 cursor-not-allowed'
-              : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:border-purple-300 dark:hover:border-purple-700'
+                ? "border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/50 opacity-50 cursor-not-allowed"
+                : "border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:border-purple-300 dark:hover:border-purple-700"
           }`}
         >
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className={`p-2 rounded-lg ${
-                selectedMode === 'infrastructure'
-                  ? 'bg-purple-100 dark:bg-purple-800'
-                  : 'bg-gray-100 dark:bg-gray-700'
-              }`}>
-                <Server className={`w-5 h-5 ${
-                  selectedMode === 'infrastructure'
-                    ? 'text-purple-600 dark:text-purple-400'
-                    : 'text-gray-500 dark:text-gray-400'
-                }`} />
+              <div
+                className={`p-2 rounded-lg ${
+                  selectedMode === "infrastructure"
+                    ? "bg-purple-100 dark:bg-purple-800"
+                    : "bg-gray-100 dark:bg-gray-700"
+                }`}
+              >
+                <Server
+                  className={`w-5 h-5 ${
+                    selectedMode === "infrastructure"
+                      ? "text-purple-600 dark:text-purple-400"
+                      : "text-gray-500 dark:text-gray-400"
+                  }`}
+                />
               </div>
               <div>
                 <div className="font-medium text-gray-900 dark:text-white">
@@ -126,7 +146,7 @@ export function SmartDeployDecision({
                 </div>
               </div>
             </div>
-            {suggestedMode === 'infrastructure' && !hasInfrastructure && (
+            {suggestedMode === "infrastructure" && !hasInfrastructure && (
               <span className="px-2 py-1 text-xs font-medium text-purple-700 dark:text-purple-300 bg-purple-100 dark:bg-purple-800 rounded">
                 Recommended
               </span>
@@ -141,28 +161,32 @@ export function SmartDeployDecision({
 
         {/* Deploy Code */}
         <button
-          onClick={() => onDeployModeSelect('code')}
+          onClick={() => onDeployModeSelect("code")}
           disabled={!hasInfrastructure}
           className={`w-full p-4 rounded-lg border-2 transition-all text-left ${
-            selectedMode === 'code'
-              ? 'border-green-500 bg-green-50 dark:bg-green-900/20'
+            selectedMode === "code"
+              ? "border-green-500 bg-green-50 dark:bg-green-900/20"
               : !hasInfrastructure
-              ? 'border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/50 opacity-50 cursor-not-allowed'
-              : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:border-green-300 dark:hover:border-green-700'
+                ? "border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/50 opacity-50 cursor-not-allowed"
+                : "border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:border-green-300 dark:hover:border-green-700"
           }`}
         >
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className={`p-2 rounded-lg ${
-                selectedMode === 'code'
-                  ? 'bg-green-100 dark:bg-green-800'
-                  : 'bg-gray-100 dark:bg-gray-700'
-              }`}>
-                <GitBranch className={`w-5 h-5 ${
-                  selectedMode === 'code'
-                    ? 'text-green-600 dark:text-green-400'
-                    : 'text-gray-500 dark:text-gray-400'
-                }`} />
+              <div
+                className={`p-2 rounded-lg ${
+                  selectedMode === "code"
+                    ? "bg-green-100 dark:bg-green-800"
+                    : "bg-gray-100 dark:bg-gray-700"
+                }`}
+              >
+                <GitBranch
+                  className={`w-5 h-5 ${
+                    selectedMode === "code"
+                      ? "text-green-600 dark:text-green-400"
+                      : "text-gray-500 dark:text-gray-400"
+                  }`}
+                />
               </div>
               <div>
                 <div className="font-medium text-gray-900 dark:text-white">
@@ -173,7 +197,7 @@ export function SmartDeployDecision({
                 </div>
               </div>
             </div>
-            {suggestedMode === 'code' && hasInfrastructure && (
+            {suggestedMode === "code" && hasInfrastructure && (
               <span className="px-2 py-1 text-xs font-medium text-green-700 dark:text-green-300 bg-green-100 dark:bg-green-800 rounded">
                 Recommended
               </span>
