@@ -564,8 +564,6 @@
             if (string.IsNullOrWhiteSpace(yaml))
                 return;
 
-            await LocalStorage.RemoveItemAsync("prePopulatedMessage");
-
             // If no legacy chat session exists, create one so the YAML preview panel has content.
             if (CurrentChat == null)
             {
@@ -603,6 +601,7 @@
             YamlContent = yaml;
 
             await LocalStorage.SetItemAsync(ChatsStorageKey, ChatHistories);
+            await LocalStorage.RemoveItemAsync("prePopulatedMessage");
         }
         catch (Exception ex)
         {

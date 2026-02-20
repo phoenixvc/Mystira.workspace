@@ -6,15 +6,11 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <!-- Ensure publish output goes to a clear location and simplify for Rider/Azure -->
     <PublishDir>publish\</PublishDir>
-    <WasmDebugLevel>0</WasmDebugLevel>
     <InvariantGlobalization>true</InvariantGlobalization>
     <BlazorEnableTimeZoneSupport>false</BlazorEnableTimeZoneSupport>
     <HybridGlobalization>false</HybridGlobalization>
-    <WasmRuntimeDebuggerSupport>false</WasmRuntimeDebuggerSupport>
     <EnableRequestDelegateGenerator>false</EnableRequestDelegateGenerator>
     <RunAOTCompilation>false</RunAOTCompilation>
-    <WasmEnableThreads>false</WasmEnableThreads>
-    <WasmEnableSIMD>false</WasmEnableSIMD>
   </PropertyGroup>
 
   <Target Name="MoveWwwrootContents" AfterTargets="Publish">

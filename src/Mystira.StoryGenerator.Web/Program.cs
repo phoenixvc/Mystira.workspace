@@ -6,21 +6,29 @@ using Mystira.StoryGenerator.Web.Services;
 using Syncfusion.Blazor;
 using Syncfusion.Licensing;
 
+#if DEBUG
 Console.WriteLine("[DEBUG_LOG] Program.cs: Entering Program.cs");
 Console.WriteLine("[DEBUG_LOG] Program.cs: Starting WebAssemblyHost build...");
+#endif
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
+#if DEBUG
 Console.WriteLine("[DEBUG_LOG] Program.cs: Builder created.");
+#endif
 builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
 
+#if DEBUG
 Console.WriteLine("[DEBUG_LOG] Program.cs: Registering services...");
+#endif
 builder.Services.AddSingleton(builder.Configuration);
 
 // Register Syncfusion license
 var syncfusionLicenseKey = builder.Configuration["Syncfusion:LicenseKey"];
 if (!string.IsNullOrWhiteSpace(syncfusionLicenseKey))
 {
+#if DEBUG
     Console.WriteLine("[DEBUG_LOG] Program.cs: Registering Syncfusion license...");
+#endif
     SyncfusionLicenseProvider.RegisterLicense(syncfusionLicenseKey);
 }
 
@@ -67,7 +75,9 @@ builder.Services.AddScoped(sp =>
         apiBaseUrl = builder.HostEnvironment.BaseAddress;
     }
 
+#if DEBUG
     Console.WriteLine($"[DEBUG_LOG] Program.cs: HttpClient configured with BaseAddress: {apiBaseUrl}");
+#endif
 
     // Ensure long-running API calls (LLM operations) are not cut off by the default 100s timeout
     return new HttpClient
@@ -77,8 +87,14 @@ builder.Services.AddScoped(sp =>
     };
 });
 
+#if DEBUG
 Console.WriteLine("[DEBUG_LOG] Program.cs: Services registered. Building host...");
+#endif
 var host = builder.Build();
+#if DEBUG
 Console.WriteLine("[DEBUG_LOG] Program.cs: Host built. Running...");
+#endif
 await host.RunAsync();
+#if DEBUG
 Console.WriteLine("[DEBUG_LOG] Program.cs: RunAsync finished.");
+#endif
