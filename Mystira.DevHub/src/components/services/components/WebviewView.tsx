@@ -1,4 +1,4 @@
-import { ServiceConfig } from '../types';
+import { ServiceConfig } from "../types";
 
 interface WebviewViewProps {
   config: ServiceConfig;
@@ -21,23 +21,29 @@ export function WebviewView({
   onOpenInBrowser,
   onError,
 }: WebviewViewProps) {
-  const isHttps = config.url?.startsWith('https://');
-  
+  const isHttps = config.url?.startsWith("https://");
+
   // For HTTPS URLs, show a button to open in Tauri window instead of iframe
   if (isHttps) {
     return (
-      <div className={`flex flex-col items-center justify-center h-full p-8 bg-gray-50 dark:bg-gray-900 text-center ${isMaximized ? 'h-full flex-1 min-h-0' : containerClass}`}>
+      <div
+        className={`flex flex-col items-center justify-center h-full p-8 bg-gray-50 dark:bg-gray-900 text-center ${isMaximized ? "h-full flex-1 min-h-0" : containerClass}`}
+      >
         <div className="max-w-md">
           <div className="text-blue-500 text-5xl mb-4">🔒</div>
           <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">
             Open {config.displayName} in Secure Window
           </h3>
           <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
-            This service uses HTTPS with a self-signed certificate. Click the button below to open it in a Tauri window where you can accept the certificate.
+            This service uses HTTPS with a self-signed certificate. Click the
+            button below to open it in a Tauri window where you can accept the
+            certificate.
           </p>
           <div className="flex flex-col gap-3">
             <button
-              onClick={() => onOpenInTauriWindow(config.url!, config.displayName)}
+              onClick={() =>
+                onOpenInTauriWindow(config.url!, config.displayName)
+              }
               className="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 font-medium text-base shadow-lg transition-colors"
             >
               🪟 Open in Tauri Window
@@ -53,10 +59,12 @@ export function WebviewView({
       </div>
     );
   }
-  
+
   // For HTTP URLs, use iframe as normal
   return (
-    <div className={`flex flex-col ${isMaximized ? 'h-full flex-1 min-h-0' : containerClass}`}>
+    <div
+      className={`flex flex-col ${isMaximized ? "h-full flex-1 min-h-0" : containerClass}`}
+    >
       {hasError ? (
         <div className="flex flex-col items-center justify-center h-full p-8 bg-gray-50 dark:bg-gray-900 text-center">
           <div className="text-red-500 text-4xl mb-4">⚠️</div>
@@ -78,7 +86,9 @@ export function WebviewView({
               Retry
             </button>
             <button
-              onClick={() => onOpenInTauriWindow(config.url!, config.displayName)}
+              onClick={() =>
+                onOpenInTauriWindow(config.url!, config.displayName)
+              }
               className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
             >
               Open in Tauri Window
@@ -88,7 +98,7 @@ export function WebviewView({
       ) : (
         <iframe
           key={`webview-${config.name}`}
-          src={config.url || ''}
+          src={config.url || ""}
           className="w-full flex-1 border-0 min-h-0"
           title={`${config.displayName} Webview`}
           sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-modals"
@@ -98,4 +108,3 @@ export function WebviewView({
     </div>
   );
 }
-

@@ -1,64 +1,108 @@
-import { open } from '@tauri-apps/api/shell';
-import { invoke } from '@tauri-apps/api/tauri';
-import { useEffect, useState } from 'react';
-import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcut';
-import { ConfirmDialog } from '../ConfirmDialog';
+import { openUrl } from "@tauri-apps/plugin-opener";
+import { invoke } from "@tauri-apps/api/core";
+import { useEffect, useState } from "react";
+import { useKeyboardShortcuts } from "../../hooks/useKeyboardShortcut";
+import { ConfirmDialog } from "../ConfirmDialog";
 import {
-    ServiceList,
-    ServiceManagerHeader,
-    getServiceConfigs,
-    useBuildManagement,
-    useEnvironmentManagement,
-    useInfrastructureStatus,
-    usePortManagement,
-    useRepositoryConfig,
-    useServiceEnvironment,
-    useServiceLogs,
-    useServiceOperations,
-    useServiceRefresh,
-    useViewManagement,
-    type ServiceConfig,
-    type ServiceStatus,
-} from '../services';
-import { ToastContainer, useToast, type Toast } from '../ui';
+  ServiceList,
+  ServiceManagerHeader,
+  getServiceConfigs,
+  useBuildManagement,
+  useEnvironmentManagement,
+  useInfrastructureStatus,
+  usePortManagement,
+  useRepositoryConfig,
+  useServiceEnvironment,
+  useServiceLogs,
+  useServiceOperations,
+  useServiceRefresh,
+  useViewManagement,
+  type ServiceConfig,
+  type ServiceStatus,
+} from "../services";
+import { ToastContainer, useToast, type Toast } from "../ui";
 
 function ServiceManager() {
-  const [serviceEnvironments, setServiceEnvironments] = useState<Record<string, 'local' | 'dev' | 'prod'>>(() => {
-    const saved = localStorage.getItem('serviceEnvironments');
+  const [serviceEnvironments, setServiceEnvironments] = useState<
+    Record<string, "local" | "dev" | "prod">
+  >(() => {
+    const saved = localStorage.getItem("serviceEnvironments");
     return saved ? JSON.parse(saved) : {};
   });
   const { toasts, showToast, dismissToast } = useToast();
 
-  const addToast = (message: string, type: Toast['type'] = 'info', duration: number = 5000) => {
+  const addToast = (
+    message: string,
+    type: Toast["type"] = "info",
+    duration: number = 5000,
+  ) => {
     showToast(message, type, { duration });
   };
 
-  const { repoRoot, currentBranch, useCurrentBranch, setRepoRoot, setUseCurrentBranch } = useRepositoryConfig();
-  const { environmentStatus, getEnvironmentUrls, fetchEnvironmentUrls, checkEnvironmentHealth } = useEnvironmentManagement();
-  const { customPorts, updateServicePort, loadPortsFromFiles } = usePortManagement(
+  const {
     repoRoot,
-    serviceEnvironments,
+    currentBranch,
+    useCurrentBranch,
+    setRepoRoot,
+    setUseCurrentBranch,
+  } = useRepositoryConfig();
+  const {
+    environmentStatus,
     getEnvironmentUrls,
-    addToast
-  );
-  const { logs, logFilters, autoScroll, maxLogs, setLogFilters, setAutoScroll, getServiceLogs, clearLogs, updateMaxLogs } = useServiceLogs();
-  const { viewMode, maximizedService, webviewErrors, setViewModeForService, toggleMaximize, setWebviewErrors, setShowLogs } = useViewManagement();
-  const { buildStatus, prebuildService, prebuildAllServices } = useBuildManagement();
+    fetchEnvironmentUrls,
+    checkEnvironmentHealth,
+  } = useEnvironmentManagement();
+  const { customPorts, updateServicePort, loadPortsFromFiles } =
+    usePortManagement(
+      repoRoot,
+      serviceEnvironments,
+      getEnvironmentUrls,
+      addToast,
+    );
+  const {
+    logs,
+    logFilters,
+    autoScroll,
+    maxLogs,
+    setLogFilters,
+    setAutoScroll,
+    getServiceLogs,
+    clearLogs,
+    updateMaxLogs,
+  } = useServiceLogs();
+  const {
+    viewMode,
+    maximizedService,
+    webviewErrors,
+    setViewModeForService,
+    toggleMaximize,
+    setWebviewErrors,
+    setShowLogs,
+  } = useViewManagement();
+  const { buildStatus, prebuildService, prebuildAllServices } =
+    useBuildManagement();
   const { services, setServices, refreshServices } = useServiceRefresh();
-  const { infrastructureStatus, checkInfrastructureStatus } = useInfrastructureStatus({ serviceEnvironments });
-  
+  const { infrastructureStatus, checkInfrastructureStatus } =
+    useInfrastructureStatus({ serviceEnvironments });
+
   const handleShowLogs = (serviceName: string, show: boolean) => {
-    setShowLogs(prev => ({ ...prev, [serviceName]: show }));
+    setShowLogs((prev) => ({ ...prev, [serviceName]: show }));
   };
 
   const prebuildServiceWrapper = async (
     serviceName: string,
     repoRoot: string,
-    onViewModeChange: (serviceName: string, mode: 'logs') => void,
+    onViewModeChange: (serviceName: string, mode: "logs") => void,
     onShowLogs: (serviceName: string, show: boolean) => void,
-    isManual: boolean = false
+    isManual: boolean = false,
   ): Promise<boolean> => {
-    return prebuildService(serviceName, repoRoot, onViewModeChange, onShowLogs, isManual);
+    return prebuildService(
+      serviceName,
+      repoRoot,
+      onViewModeChange,
+      onShowLogs,
+      isManual,
+    );
   };
 
   const {
@@ -106,20 +150,23 @@ function ServiceManager() {
 
   const openInBrowser = async (url: string) => {
     try {
-      await open(url);
+      await openUrl(url);
     } catch (error) {
-      console.error('Failed to open URL:', error);
-      addToast('Failed to open URL in browser', 'error');
+      console.error("Failed to open URL:", error);
+      addToast("Failed to open URL in browser", "error");
     }
   };
 
   const openInTauriWindow = async (url: string, title: string) => {
     try {
-      await invoke('create_webview_window', { url, title });
-      addToast(`Opened ${title} in Tauri window`, 'success');
+      await invoke("create_webview_window", { url, title });
+      addToast(`Opened ${title} in Tauri window`, "success");
     } catch (error) {
-      console.error('Failed to create Tauri window:', error);
-      addToast('Failed to open Tauri window, opening in external browser instead', 'warning');
+      console.error("Failed to create Tauri window:", error);
+      addToast(
+        "Failed to open Tauri window, opening in external browser instead",
+        "warning",
+      );
       await openInBrowser(url);
     }
   };
@@ -129,46 +176,58 @@ function ServiceManager() {
       try {
         await loadPortsFromFiles(repoRoot);
         await refreshServices();
-        
-        checkInfrastructureStatus('dev');
-        checkInfrastructureStatus('prod');
-        
+
+        checkInfrastructureStatus("dev");
+        checkInfrastructureStatus("prod");
+
         setTimeout(() => {
           prebuildAllServices(
             repoRoot,
-            getServiceConfigs(customPorts, serviceEnvironments, getEnvironmentUrls),
+            getServiceConfigs(
+              customPorts,
+              serviceEnvironments,
+              getEnvironmentUrls,
+            ),
             useCurrentBranch,
             currentBranch,
             setViewModeForService,
-            handleShowLogs
+            handleShowLogs,
           );
         }, 1000);
-        
+
         fetchEnvironmentUrls().then(() => {
           setTimeout(() => {
-            getServiceConfigs(customPorts, serviceEnvironments, getEnvironmentUrls).forEach((config: ServiceConfig) => {
+            getServiceConfigs(
+              customPorts,
+              serviceEnvironments,
+              getEnvironmentUrls,
+            ).forEach((config: ServiceConfig) => {
               const envUrls = getEnvironmentUrls(config.name);
-              if (envUrls.dev) checkEnvironmentHealth(config.name, 'dev');
-              if (envUrls.prod) checkEnvironmentHealth(config.name, 'prod');
+              if (envUrls.dev) checkEnvironmentHealth(config.name, "dev");
+              if (envUrls.prod) checkEnvironmentHealth(config.name, "prod");
             });
           }, 1000);
         });
       } catch (error) {
-        console.error('Failed to initialize:', error);
-        addToast('Warning: Not running in Tauri. Please use the Tauri application window.', 'warning', 5000);
+        console.error("Failed to initialize:", error);
+        addToast(
+          "Warning: Not running in Tauri. Please use the Tauri application window.",
+          "warning",
+          5000,
+        );
       }
     };
-    
+
     initialize();
     const interval = setInterval(refreshServices, 2000);
     const healthCheckInterval = setInterval(() => {
-      ['api', 'admin-api', 'pwa'].forEach(name => {
+      ["api", "admin-api", "pwa"].forEach((name) => {
         const envUrls = getEnvironmentUrls(name);
-        if (envUrls.dev) checkEnvironmentHealth(name, 'dev');
-        if (envUrls.prod) checkEnvironmentHealth(name, 'prod');
+        if (envUrls.dev) checkEnvironmentHealth(name, "dev");
+        if (envUrls.prod) checkEnvironmentHealth(name, "prod");
       });
     }, 30000);
-    
+
     return () => {
       clearInterval(interval);
       clearInterval(healthCheckInterval);
@@ -176,19 +235,50 @@ function ServiceManager() {
   }, []);
 
   useKeyboardShortcuts([
-    { key: 'b', ctrl: true, shift: true, action: buildAllServices, description: 'Build all services' },
-    { key: 's', ctrl: true, shift: true, action: startAllServices, description: 'Start all services' },
-    { key: 'x', ctrl: true, shift: true, action: stopAllServices, description: 'Stop all services' },
-    { key: 'r', ctrl: true, action: refreshServices, description: 'Refresh services' },
+    {
+      key: "b",
+      ctrl: true,
+      shift: true,
+      action: buildAllServices,
+      description: "Build all services",
+    },
+    {
+      key: "s",
+      ctrl: true,
+      shift: true,
+      action: startAllServices,
+      description: "Start all services",
+    },
+    {
+      key: "x",
+      ctrl: true,
+      shift: true,
+      action: stopAllServices,
+      description: "Stop all services",
+    },
+    {
+      key: "r",
+      ctrl: true,
+      action: refreshServices,
+      description: "Refresh services",
+    },
   ]);
 
-  const serviceConfigs = getServiceConfigs(customPorts, serviceEnvironments, getEnvironmentUrls);
-  const allRunning = services.length === serviceConfigs.length && services.every((s: ServiceStatus) => s.running);
+  const serviceConfigs = getServiceConfigs(
+    customPorts,
+    serviceEnvironments,
+    getEnvironmentUrls,
+  );
+  const allRunning =
+    services.length === serviceConfigs.length &&
+    services.every((s: ServiceStatus) => s.running);
   const anyRunning = services.some((s: ServiceStatus) => s.running);
-  const anyBuilding = Object.values(buildStatus).some((status: any) => status?.status === 'building');
+  const anyBuilding = Object.values(buildStatus).some(
+    (status: any) => status?.status === "building",
+  );
 
   const handleApplyPreset = (preset: any) => {
-    addToast(`Applied preset: ${preset.name}`, 'success');
+    addToast(`Applied preset: ${preset.name}`, "success");
   };
 
   return (
@@ -197,9 +287,9 @@ function ServiceManager() {
 
       {/* Environment Context Warning Dialog */}
       <ConfirmDialog
-        isOpen={pendingConfirmation?.type === 'context'}
+        isOpen={pendingConfirmation?.type === "context"}
         title="Environment Context Warning"
-        message={pendingConfirmation?.message || ''}
+        message={pendingConfirmation?.message || ""}
         confirmText="Continue"
         cancelText="Cancel"
         confirmButtonClass="bg-yellow-600 hover:bg-yellow-700"
@@ -209,9 +299,9 @@ function ServiceManager() {
 
       {/* Production Environment Warning Dialog */}
       <ConfirmDialog
-        isOpen={pendingConfirmation?.type === 'production'}
+        isOpen={pendingConfirmation?.type === "production"}
         title="DANGER: PRODUCTION ENVIRONMENT"
-        message={pendingConfirmation?.message || ''}
+        message={pendingConfirmation?.message || ""}
         confirmText="Switch to Production"
         cancelText="Cancel"
         confirmButtonClass="bg-red-600 hover:bg-red-700"
@@ -222,9 +312,9 @@ function ServiceManager() {
 
       {/* Stop Service Before Environment Switch Dialog */}
       <ConfirmDialog
-        isOpen={pendingConfirmation?.type === 'stopService'}
+        isOpen={pendingConfirmation?.type === "stopService"}
         title="Stop Running Service"
-        message={pendingConfirmation?.message || ''}
+        message={pendingConfirmation?.message || ""}
         confirmText="Stop Service"
         cancelText="Cancel"
         confirmButtonClass="bg-orange-600 hover:bg-orange-700"
@@ -250,7 +340,7 @@ function ServiceManager() {
         anyRunning={anyRunning}
         onCheckEnvironmentHealth={checkEnvironmentHealth}
       />
-      
+
       <ServiceList
         serviceConfigs={serviceConfigs}
         services={services}
@@ -277,10 +367,18 @@ function ServiceManager() {
         onOpenInBrowser={openInBrowser}
         onOpenInTauriWindow={openInTauriWindow}
         onClearLogs={clearLogs}
-        onFilterChange={(name, filter) => setLogFilters(prev => ({ ...prev, [name]: filter }))}
-        onAutoScrollChange={(name, enabled) => setAutoScroll(prev => ({ ...prev, [name]: enabled }))}
-        onWebviewRetry={(name) => setWebviewErrors(prev => ({ ...prev, [name]: false }))}
-        onWebviewError={(name) => setWebviewErrors(prev => ({ ...prev, [name]: true }))}
+        onFilterChange={(name, filter) =>
+          setLogFilters((prev) => ({ ...prev, [name]: filter }))
+        }
+        onAutoScrollChange={(name, enabled) =>
+          setAutoScroll((prev) => ({ ...prev, [name]: enabled }))
+        }
+        onWebviewRetry={(name) =>
+          setWebviewErrors((prev) => ({ ...prev, [name]: false }))
+        }
+        onWebviewError={(name) =>
+          setWebviewErrors((prev) => ({ ...prev, [name]: true }))
+        }
         maxLogs={maxLogs}
         onMaxLogsChange={updateMaxLogs}
       />

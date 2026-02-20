@@ -1,10 +1,16 @@
-import { formatCost, getResourceIcon, getStatusColor, getStatusIcon, openInPortal } from '../utils/resourceUtils';
+import {
+  formatCost,
+  getResourceIcon,
+  getStatusColor,
+  getStatusIcon,
+  openInPortal,
+} from "../utils/resourceUtils";
 
 interface AzureResource {
   id: string;
   name: string;
   type: string;
-  status: 'running' | 'stopped' | 'warning' | 'failed' | 'unknown';
+  status: "running" | "stopped" | "warning" | "failed" | "unknown";
   region: string;
   costToday?: number;
 }
@@ -27,17 +33,34 @@ export function ResourceTableView({
       <table className="w-full text-xs">
         <thead className="bg-gray-50 dark:bg-gray-800">
           <tr>
-            <th className="px-3 py-2 text-left font-medium text-gray-700 dark:text-gray-300">Resource</th>
-            <th className="px-3 py-2 text-left font-medium text-gray-700 dark:text-gray-300">Type</th>
-            <th className="px-3 py-2 text-left font-medium text-gray-700 dark:text-gray-300">Status</th>
-            <th className="px-3 py-2 text-left font-medium text-gray-700 dark:text-gray-300">Region</th>
-            {!compact && <th className="px-3 py-2 text-left font-medium text-gray-700 dark:text-gray-300">Cost</th>}
-            <th className="px-3 py-2 text-right font-medium text-gray-700 dark:text-gray-300">Actions</th>
+            <th className="px-3 py-2 text-left font-medium text-gray-700 dark:text-gray-300">
+              Resource
+            </th>
+            <th className="px-3 py-2 text-left font-medium text-gray-700 dark:text-gray-300">
+              Type
+            </th>
+            <th className="px-3 py-2 text-left font-medium text-gray-700 dark:text-gray-300">
+              Status
+            </th>
+            <th className="px-3 py-2 text-left font-medium text-gray-700 dark:text-gray-300">
+              Region
+            </th>
+            {!compact && (
+              <th className="px-3 py-2 text-left font-medium text-gray-700 dark:text-gray-300">
+                Cost
+              </th>
+            )}
+            <th className="px-3 py-2 text-right font-medium text-gray-700 dark:text-gray-300">
+              Actions
+            </th>
           </tr>
         </thead>
         <tbody className="divide-y divide-gray-200 dark:divide-gray-700 bg-white dark:bg-gray-900">
           {resources.map((resource) => (
-            <tr key={resource.id} className="hover:bg-gray-50 dark:hover:bg-gray-800">
+            <tr
+              key={resource.id}
+              className="hover:bg-gray-50 dark:hover:bg-gray-800"
+            >
               <td className="px-3 py-2">
                 <div className="flex items-center gap-2">
                   <span>{getResourceIcon(resource.type)}</span>
@@ -53,7 +76,7 @@ export function ResourceTableView({
                 className="px-3 py-2 text-gray-600 dark:text-gray-400 truncate max-w-[120px]"
                 title={resource.type}
               >
-                {resource.type.split('/').pop()}
+                {resource.type.split("/").pop()}
               </td>
               <td className="px-3 py-2">
                 <span
@@ -62,10 +85,14 @@ export function ResourceTableView({
                   {getStatusIcon(resource.status)} {resource.status}
                 </span>
               </td>
-              <td className="px-3 py-2 text-gray-600 dark:text-gray-400">{resource.region}</td>
+              <td className="px-3 py-2 text-gray-600 dark:text-gray-400">
+                {resource.region}
+              </td>
               {!compact && (
                 <td className="px-3 py-2 text-gray-900 dark:text-white font-medium">
-                  {resource.costToday !== undefined ? formatCost(resource.costToday) : '-'}
+                  {resource.costToday !== undefined
+                    ? formatCost(resource.costToday)
+                    : "-"}
                 </td>
               )}
               <td className="px-3 py-2 text-right">
@@ -84,7 +111,7 @@ export function ResourceTableView({
                       className="text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 disabled:opacity-50 disabled:cursor-not-allowed"
                       title="Delete resource"
                     >
-                      {deletingResource === resource.id ? '⏳' : '🗑️'}
+                      {deletingResource === resource.id ? "⏳" : "🗑️"}
                     </button>
                   )}
                 </div>
@@ -96,4 +123,3 @@ export function ResourceTableView({
     </div>
   );
 }
-

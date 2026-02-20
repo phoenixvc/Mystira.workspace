@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { invoke } from '@tauri-apps/api/tauri';
+import { useState, useEffect } from "react";
+import { invoke } from "@tauri-apps/api/core";
 import {
   CheckCircle2,
   XCircle,
@@ -13,8 +13,8 @@ import {
   ChevronDown,
   ChevronRight,
   ExternalLink,
-} from 'lucide-react';
-import type { CommandResponse } from '../../../../types';
+} from "lucide-react";
+import type { CommandResponse } from "../../../../types";
 
 export interface ResourceGroup {
   name: string;
@@ -67,7 +67,7 @@ export function ResourceDiscoveryPanel({
 
     try {
       // Scan for existing resources
-      const response = await invoke<CommandResponse>('scan_existing_resources');
+      const response = await invoke<CommandResponse>("scan_existing_resources");
 
       if (response.success && response.result) {
         const result = response.result as {
@@ -84,10 +84,12 @@ export function ResourceDiscoveryPanel({
         setResources(discovered);
         onResourcesDiscovered?.(discovered);
       } else {
-        setScanError(response.error || 'Failed to scan resources');
+        setScanError(response.error || "Failed to scan resources");
       }
     } catch (error) {
-      setScanError(error instanceof Error ? error.message : 'Failed to scan resources');
+      setScanError(
+        error instanceof Error ? error.message : "Failed to scan resources",
+      );
     } finally {
       setIsScanning(false);
     }
@@ -98,7 +100,7 @@ export function ResourceDiscoveryPanel({
   }, []);
 
   const toggleSection = (section: keyof typeof expandedSections) => {
-    setExpandedSections(prev => ({
+    setExpandedSections((prev) => ({
       ...prev,
       [section]: !prev[section],
     }));
@@ -106,19 +108,20 @@ export function ResourceDiscoveryPanel({
 
   const getLocationDisplay = (location: string) => {
     const locationNames: Record<string, string> = {
-      southafricanorth: 'South Africa North',
-      eastus2: 'East US 2',
-      westus2: 'West US 2',
-      centralus: 'Central US',
-      westeurope: 'West Europe',
-      northeurope: 'North Europe',
-      eastasia: 'East Asia',
-      southeastasia: 'Southeast Asia',
+      southafricanorth: "South Africa North",
+      eastus2: "East US 2",
+      westus2: "West US 2",
+      centralus: "Central US",
+      westeurope: "West Europe",
+      northeurope: "North Europe",
+      eastasia: "East Asia",
+      southeastasia: "Southeast Asia",
     };
     return locationNames[location] || location;
   };
 
-  const hasResources = resources.resourceGroups.length > 0 || resources.staticWebApps.length > 0;
+  const hasResources =
+    resources.resourceGroups.length > 0 || resources.staticWebApps.length > 0;
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
@@ -131,7 +134,8 @@ export function ResourceDiscoveryPanel({
           </span>
           {hasResources && (
             <span className="text-xs text-gray-500 dark:text-gray-400">
-              ({resources.resourceGroups.length} RGs, {resources.staticWebApps.length} SWAs)
+              ({resources.resourceGroups.length} RGs,{" "}
+              {resources.staticWebApps.length} SWAs)
             </span>
           )}
         </div>
@@ -147,7 +151,9 @@ export function ResourceDiscoveryPanel({
             className="p-1 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 disabled:opacity-50"
             title="Rescan resources"
           >
-            <RefreshCw className={`w-4 h-4 ${isScanning ? 'animate-spin' : ''}`} />
+            <RefreshCw
+              className={`w-4 h-4 ${isScanning ? "animate-spin" : ""}`}
+            />
           </button>
         </div>
       </div>
@@ -157,7 +163,9 @@ export function ResourceDiscoveryPanel({
         {isScanning && !hasResources ? (
           <div className="flex items-center justify-center py-8">
             <Loader2 className="w-6 h-6 text-blue-500 animate-spin mr-2" />
-            <span className="text-gray-600 dark:text-gray-300">Scanning for existing resources...</span>
+            <span className="text-gray-600 dark:text-gray-300">
+              Scanning for existing resources...
+            </span>
           </div>
         ) : scanError ? (
           <div className="flex items-center gap-2 py-4 text-red-600 dark:text-red-400">
@@ -186,7 +194,7 @@ export function ResourceDiscoveryPanel({
             {resources.resourceGroups.length > 0 && (
               <div>
                 <button
-                  onClick={() => toggleSection('resourceGroups')}
+                  onClick={() => toggleSection("resourceGroups")}
                   className="flex items-center gap-2 w-full text-left mb-2"
                 >
                   {expandedSections.resourceGroups ? (
@@ -204,13 +212,15 @@ export function ResourceDiscoveryPanel({
                     {resources.resourceGroups.map((rg) => (
                       <button
                         key={rg.name}
-                        onClick={() => onResourceGroupSelected?.(
-                          selectedResourceGroup?.name === rg.name ? null : rg
-                        )}
+                        onClick={() =>
+                          onResourceGroupSelected?.(
+                            selectedResourceGroup?.name === rg.name ? null : rg,
+                          )
+                        }
                         className={`w-full text-left p-3 rounded-lg border transition-colors ${
                           selectedResourceGroup?.name === rg.name
-                            ? 'bg-blue-50 dark:bg-blue-900/30 border-blue-300 dark:border-blue-700'
-                            : 'bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-600'
+                            ? "bg-blue-50 dark:bg-blue-900/30 border-blue-300 dark:border-blue-700"
+                            : "bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-600"
                         }`}
                       >
                         <div className="flex items-center justify-between">
@@ -251,7 +261,7 @@ export function ResourceDiscoveryPanel({
             {resources.staticWebApps.length > 0 && (
               <div>
                 <button
-                  onClick={() => toggleSection('staticWebApps')}
+                  onClick={() => toggleSection("staticWebApps")}
                   className="flex items-center gap-2 w-full text-left mb-2"
                 >
                   {expandedSections.staticWebApps ? (

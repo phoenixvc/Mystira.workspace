@@ -1,13 +1,13 @@
-import { useState } from 'react';
-import type { Toast, FeedbackType } from '../types';
+import { useState } from "react";
+import type { Toast, FeedbackType } from "../types";
 
 export function useToast() {
   const [toasts, setToasts] = useState<Toast[]>([]);
 
   const showToast = (
     message: string,
-    type: FeedbackType = 'info',
-    options?: { duration?: number; action?: Toast['action'] }
+    type: FeedbackType = "info",
+    options?: { duration?: number; action?: Toast["action"] },
   ): Toast => {
     const toast: Toast = {
       id: `toast-${Date.now()}-${Math.random().toString(36).slice(2)}`,
@@ -33,10 +33,13 @@ export function useToast() {
     showToast,
     dismissToast,
     clearToasts,
-    success: (msg: string, opts?: { duration?: number }) => showToast(msg, 'success', opts),
-    error: (msg: string, opts?: { duration?: number }) => showToast(msg, 'error', opts),
-    warning: (msg: string, opts?: { duration?: number }) => showToast(msg, 'warning', opts),
-    info: (msg: string, opts?: { duration?: number }) => showToast(msg, 'info', opts),
+    success: (msg: string, opts?: { duration?: number }) =>
+      showToast(msg, "success", opts),
+    error: (msg: string, opts?: { duration?: number }) =>
+      showToast(msg, "error", opts),
+    warning: (msg: string, opts?: { duration?: number }) =>
+      showToast(msg, "warning", opts),
+    info: (msg: string, opts?: { duration?: number }) =>
+      showToast(msg, "info", opts),
   };
 }
-

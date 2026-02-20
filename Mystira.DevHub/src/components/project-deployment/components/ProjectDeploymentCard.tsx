@@ -1,7 +1,7 @@
-import type { ProjectInfo } from '../ProjectDeploymentPlanner';
-import type { ProjectPipeline, WorkflowRun } from '../types';
-import { getProjectTypeIcon, getStatusColor, getStatusIcon } from '../utils';
-import { WorkflowLogsViewer } from './WorkflowLogsViewer';
+import type { ProjectInfo } from "../ProjectDeploymentPlanner";
+import type { ProjectPipeline, WorkflowRun } from "../types";
+import { getProjectTypeIcon, getStatusColor, getStatusIcon } from "../utils";
+import { WorkflowLogsViewer } from "./WorkflowLogsViewer";
 
 interface ProjectDeploymentCardProps {
   project: ProjectInfo;
@@ -20,11 +20,13 @@ interface ProjectDeploymentCardProps {
 
 // Helper to get accessible status text
 function getStatusText(status: string, conclusion: string | null): string {
-  if (status === 'completed') {
-    return conclusion === 'success' ? 'Deployment succeeded' : 'Deployment failed';
+  if (status === "completed") {
+    return conclusion === "success"
+      ? "Deployment succeeded"
+      : "Deployment failed";
   }
-  if (status === 'in_progress') return 'Deployment in progress';
-  if (status === 'queued') return 'Deployment queued';
+  if (status === "in_progress") return "Deployment in progress";
+  if (status === "queued") return "Deployment queued";
   return `Status: ${status}`;
 }
 
@@ -49,10 +51,10 @@ export function ProjectDeploymentCard({
     <div
       className={`border-2 rounded-lg p-4 transition-all duration-200 ${
         isFailed
-          ? 'border-red-400 dark:border-red-600 bg-red-50 dark:bg-red-900/20 ring-2 ring-red-200 dark:ring-red-800'
+          ? "border-red-400 dark:border-red-600 bg-red-50 dark:bg-red-900/20 ring-2 ring-red-200 dark:ring-red-800"
           : isSelected
-          ? 'border-green-500 dark:border-green-600 bg-green-50 dark:bg-green-900/20 ring-2 ring-green-200 dark:ring-green-800'
-          : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:border-gray-300 dark:hover:border-gray-600'
+            ? "border-green-500 dark:border-green-600 bg-green-50 dark:bg-green-900/20 ring-2 ring-green-200 dark:ring-green-800"
+            : "border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:border-gray-300 dark:hover:border-gray-600"
       }`}
       role="article"
       aria-label={`${project.name} deployment card`}
@@ -73,7 +75,9 @@ export function ProjectDeploymentCard({
                 className="w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500 focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-gray-800"
                 aria-describedby={`project-desc-${project.id}`}
               />
-              <span className="font-semibold text-gray-900 dark:text-white">{project.name}</span>
+              <span className="font-semibold text-gray-900 dark:text-white">
+                {project.name}
+              </span>
             </label>
 
             {/* Status badge with accessible text */}
@@ -83,9 +87,11 @@ export function ProjectDeploymentCard({
                 role="status"
                 aria-label={statusText || undefined}
               >
-                <span aria-hidden="true">{getStatusIcon(run.status, run.conclusion)}</span>
+                <span aria-hidden="true">
+                  {getStatusIcon(run.status, run.conclusion)}
+                </span>
                 <span className="capitalize">{run.status}</span>
-                {run.conclusion && run.status === 'completed' && (
+                {run.conclusion && run.status === "completed" && (
                   <span className="text-xs opacity-75">({run.conclusion})</span>
                 )}
               </span>
@@ -118,27 +124,30 @@ export function ProjectDeploymentCard({
             >
               GitHub Workflow
               {!hasWorkflowSelected && isSelected && (
-                <span className="text-red-500 ml-1" aria-label="required">*</span>
+                <span className="text-red-500 ml-1" aria-label="required">
+                  *
+                </span>
               )}
             </label>
             <div className="relative">
               <select
                 id={`workflow-select-${project.id}`}
-                value={pipeline?.workflowFile || ''}
+                value={pipeline?.workflowFile || ""}
                 onChange={(e) => onUpdatePipeline(e.target.value)}
                 className={`w-full px-3 py-2 text-sm border rounded-md shadow-sm transition-colors
                   focus:ring-2 focus:ring-green-500 focus:border-green-500 focus:outline-none
                   dark:bg-gray-700 dark:text-white
-                  ${!hasWorkflowSelected && isSelected
-                    ? 'border-red-300 dark:border-red-600 bg-red-50 dark:bg-red-900/20'
-                    : 'border-gray-300 dark:border-gray-600'
+                  ${
+                    !hasWorkflowSelected && isSelected
+                      ? "border-red-300 dark:border-red-600 bg-red-50 dark:bg-red-900/20"
+                      : "border-gray-300 dark:border-gray-600"
                   }
                 `}
                 aria-describedby={`workflow-help-${project.id}`}
                 aria-invalid={!hasWorkflowSelected && isSelected}
               >
                 <option value="">Select a workflow...</option>
-                {availableWorkflows.map(workflow => (
+                {availableWorkflows.map((workflow) => (
                   <option key={workflow} value={workflow}>
                     {workflow}
                   </option>
@@ -152,7 +161,10 @@ export function ProjectDeploymentCard({
               Choose the GitHub Actions workflow to deploy this project
             </p>
             {!hasWorkflowSelected && isSelected && (
-              <p className="mt-1 text-xs text-red-600 dark:text-red-400" role="alert">
+              <p
+                className="mt-1 text-xs text-red-600 dark:text-red-400"
+                role="alert"
+              >
                 Please select a workflow to deploy this project
               </p>
             )}

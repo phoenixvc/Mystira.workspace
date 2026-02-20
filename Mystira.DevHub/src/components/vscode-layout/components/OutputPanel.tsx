@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from "react";
 
 interface OutputPanelProps {
   children: React.ReactNode;
@@ -6,7 +6,11 @@ interface OutputPanelProps {
   className?: string;
 }
 
-export function OutputPanel({ children, autoScroll = true, className = '' }: OutputPanelProps) {
+export function OutputPanel({
+  children,
+  autoScroll = true,
+  className = "",
+}: OutputPanelProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [isAtBottom, setIsAtBottom] = useState(true);
 
@@ -32,4 +36,3 @@ export function OutputPanel({ children, autoScroll = true, className = '' }: Out
     </div>
   );
 }
-

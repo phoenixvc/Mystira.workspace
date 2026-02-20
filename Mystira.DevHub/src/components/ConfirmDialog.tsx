@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 
 interface ConfirmDialogProps {
   isOpen: boolean;
@@ -16,18 +16,18 @@ export function ConfirmDialog({
   isOpen,
   title,
   message,
-  confirmText = 'Confirm',
-  cancelText = 'Cancel',
-  confirmButtonClass = 'bg-red-600 hover:bg-red-700',
+  confirmText = "Confirm",
+  cancelText = "Cancel",
+  confirmButtonClass = "bg-red-600 hover:bg-red-700",
   requireTextMatch,
   onConfirm,
   onCancel,
 }: ConfirmDialogProps) {
-  const [matchText, setMatchText] = useState('');
+  const [matchText, setMatchText] = useState("");
 
   useEffect(() => {
     if (!isOpen) {
-      setMatchText('');
+      setMatchText("");
     }
   }, [isOpen]);
 
@@ -42,14 +42,16 @@ export function ConfirmDialog({
           <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
             {title}
           </h3>
-          <p className="text-gray-600 dark:text-gray-400 mb-4">
-            {message}
-          </p>
+          <p className="text-gray-600 dark:text-gray-400 mb-4">{message}</p>
 
           {requireTextMatch && (
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Type <span className="font-mono font-bold text-red-600 dark:text-red-400">{requireTextMatch}</span> to confirm:
+                Type{" "}
+                <span className="font-mono font-bold text-red-600 dark:text-red-400">
+                  {requireTextMatch}
+                </span>{" "}
+                to confirm:
               </label>
               <input
                 type="text"
@@ -82,4 +84,3 @@ export function ConfirmDialog({
     </div>
   );
 }
-

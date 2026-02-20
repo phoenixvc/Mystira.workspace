@@ -5,8 +5,8 @@
 
 use crate::config::get_config;
 use std::time::Duration;
-use tracing::{debug, warn, error};
 use tokio::time::sleep;
+use tracing::{debug, error, warn};
 
 /// Retry policy configuration
 #[derive(Debug, Clone)]
@@ -42,15 +42,15 @@ where
 {
     let policy = policy.unwrap_or_default();
     let config = get_config();
-    
+
     if !config.retry.enabled {
         // If retries are disabled, just execute once
         return operation().await;
     }
-    
+
     let mut attempt = 0;
     let mut backoff_ms = policy.initial_backoff_ms;
-    
+
     loop {
         match operation().await {
             Ok(result) => {
@@ -64,14 +64,18 @@ where
                     error!("Operation failed after {} retries", attempt);
                     return Err(e);
                 }
-                
+
                 attempt += 1;
-                warn!("Operation failed (attempt {}/{}), retrying in {}ms...", 
-                    attempt, policy.max_retries + 1, backoff_ms);
-                
+                warn!(
+                    "Operation failed (attempt {}/{}), retrying in {}ms...",
+                    attempt,
+                    policy.max_retries + 1,
+                    backoff_ms
+                );
+
                 // Wait before retrying
                 sleep(Duration::from_millis(backoff_ms)).await;
-                
+
                 // Calculate next backoff (exponential with cap)
                 backoff_ms = ((backoff_ms as f64) * policy.backoff_multiplier) as u64;
                 backoff_ms = backoff_ms.min(policy.max_backoff_ms);
@@ -94,9 +98,11 @@ pub fn is_retryable_error(error_msg: &str) -> bool {
         "connection",
         "refused",
     ];
-    
+
     let error_lower = error_msg.to_lowercase();
-    retryable_patterns.iter().any(|pattern| error_lower.contains(pattern))
+    retryable_patterns
+        .iter()
+        .any(|pattern| error_lower.contains(pattern))
 }
 
 /// Execute with retry, but only retry on retryable errors
@@ -111,14 +117,14 @@ where
 {
     let policy = policy.unwrap_or_default();
     let config = get_config();
-    
+
     if !config.retry.enabled {
         return operation().await;
     }
-    
+
     let mut attempt = 0;
     let mut backoff_ms = policy.initial_backoff_ms;
-    
+
     loop {
         match operation().await {
             Ok(result) => {
@@ -133,18 +139,23 @@ where
                     // Not retryable, return immediately
                     return Err(e);
                 }
-                
+
                 if attempt >= policy.max_retries {
                     error!("Operation failed after {} retries: {}", attempt, e);
                     return Err(e);
                 }
-                
+
                 attempt += 1;
-                warn!("Retryable error (attempt {}/{}): {}, retrying in {}ms...", 
-                    attempt, policy.max_retries + 1, e, backoff_ms);
-                
+                warn!(
+                    "Retryable error (attempt {}/{}): {}, retrying in {}ms...",
+                    attempt,
+                    policy.max_retries + 1,
+                    e,
+                    backoff_ms
+                );
+
                 sleep(Duration::from_millis(backoff_ms)).await;
-                
+
                 // Exponential backoff
                 backoff_ms = ((backoff_ms as f64) * policy.backoff_multiplier) as u64;
                 backoff_ms = backoff_ms.min(policy.max_backoff_ms);
@@ -152,4 +163,3 @@ where
         }
     }
 }
-

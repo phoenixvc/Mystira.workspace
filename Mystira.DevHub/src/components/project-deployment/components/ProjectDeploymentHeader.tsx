@@ -59,10 +59,10 @@ export function ProjectDeploymentHeader({
 
   const getDisabledReason = () => {
     if (!hasDeployedInfrastructure) {
-      return 'Deploy infrastructure first';
+      return "Deploy infrastructure first";
     }
     if (deploying) {
-      return 'Deployment in progress';
+      return "Deployment in progress";
     }
     return null;
   };
@@ -85,24 +85,24 @@ export function ProjectDeploymentHeader({
             onClick={onDeploy}
             disabled={isDisabled}
             aria-disabled={isDisabled}
-            aria-describedby={disabledReason ? 'deploy-disabled-reason' : undefined}
+            aria-describedby={
+              disabledReason ? "deploy-disabled-reason" : undefined
+            }
             className={`
               px-5 py-2.5 rounded-lg font-medium transition-all duration-200
               focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500
               dark:focus:ring-offset-gray-900
-              ${isDisabled
-                ? 'bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed'
-                : 'bg-green-600 hover:bg-green-700 active:bg-green-800 text-white shadow-sm hover:shadow-md'
+              ${
+                isDisabled
+                  ? "bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed"
+                  : "bg-green-600 hover:bg-green-700 active:bg-green-800 text-white shadow-sm hover:shadow-md"
               }
             `}
           >
             {getButtonText()}
           </button>
           {disabledReason && (
-            <span
-              id="deploy-disabled-reason"
-              className="sr-only"
-            >
+            <span id="deploy-disabled-reason" className="sr-only">
               {disabledReason}
             </span>
           )}
@@ -116,8 +116,12 @@ export function ProjectDeploymentHeader({
           aria-live="polite"
           className="mt-3 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg flex items-start gap-2"
         >
-          <span className="text-red-500 flex-shrink-0" aria-hidden="true">⚠️</span>
-          <p className="text-sm text-red-700 dark:text-red-300">{validationError}</p>
+          <span className="text-red-500 flex-shrink-0" aria-hidden="true">
+            ⚠️
+          </span>
+          <p className="text-sm text-red-700 dark:text-red-300">
+            {validationError}
+          </p>
         </div>
       )}
     </div>

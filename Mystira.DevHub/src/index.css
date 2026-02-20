@@ -48,7 +48,7 @@ body {
 }
 
 .deploy-button-animated:not(:disabled)::before {
-  content: '';
+  content: "";
   position: absolute;
   top: -50%;
   left: -50%;
@@ -74,7 +74,8 @@ body {
 }
 
 @keyframes animate-gradient-x {
-  0%, 100% {
+  0%,
+  100% {
     background-position: 0% 50%;
   }
   50% {
@@ -88,7 +89,8 @@ body {
 }
 
 @keyframes float-1 {
-  0%, 100% {
+  0%,
+  100% {
     transform: translate(0, 0) scale(1);
     opacity: 0.6;
   }
@@ -99,7 +101,8 @@ body {
 }
 
 @keyframes float-2 {
-  0%, 100% {
+  0%,
+  100% {
     transform: translate(0, 0) scale(1);
     opacity: 0.5;
   }
@@ -110,7 +113,8 @@ body {
 }
 
 @keyframes float-3 {
-  0%, 100% {
+  0%,
+  100% {
     transform: translate(0, 0) scale(1);
     opacity: 0.7;
   }
@@ -121,7 +125,8 @@ body {
 }
 
 @keyframes float-4 {
-  0%, 100% {
+  0%,
+  100% {
     transform: translate(0, 0) scale(1);
     opacity: 0.6;
   }
@@ -149,7 +154,7 @@ body {
 
 .deploy-button-animated:not(:disabled):hover {
   transform: translateY(-2px);
-  box-shadow: 
+  box-shadow:
     0 4px 12px rgba(34, 197, 94, 0.3),
     0 8px 24px rgba(34, 197, 94, 0.2),
     0 0 0 2px rgba(34, 197, 94, 0.1);
@@ -165,7 +170,7 @@ body {
 /* Destroy Button INSANELY EXPLOSIVE Animation */
 .destroy-button-epic {
   animation: destroy-epic-pulse 1.5s ease-in-out infinite;
-  box-shadow: 
+  box-shadow:
     0 0 10px rgba(239, 68, 68, 0.8),
     0 0 20px rgba(239, 68, 68, 0.6),
     0 0 30px rgba(239, 68, 68, 0.4),
@@ -175,8 +180,10 @@ body {
 }
 
 .destroy-button-epic:hover {
-  animation: destroy-epic-explode 0.4s ease-in-out infinite, destroy-epic-shake 0.3s ease-in-out infinite;
-  box-shadow: 
+  animation:
+    destroy-epic-explode 0.4s ease-in-out infinite,
+    destroy-epic-shake 0.3s ease-in-out infinite;
+  box-shadow:
     0 0 20px rgba(239, 68, 68, 1),
     0 0 40px rgba(239, 68, 68, 0.8),
     0 0 60px rgba(239, 68, 68, 0.6),
@@ -313,26 +320,30 @@ body {
 
 .destroy-icon-epic {
   animation: icon-danger-pulse 1.2s ease-in-out infinite;
-  filter: drop-shadow(0 0 10px rgba(239, 68, 68, 1)) drop-shadow(0 0 20px rgba(239, 68, 68, 0.8));
+  filter: drop-shadow(0 0 10px rgba(239, 68, 68, 1))
+    drop-shadow(0 0 20px rgba(239, 68, 68, 0.8));
 }
 
 .destroy-button-epic:hover .destroy-icon-epic {
-  animation: icon-danger-explode 0.5s ease-in-out infinite, icon-danger-rotate 0.8s ease-in-out infinite;
-  filter: drop-shadow(0 0 15px rgba(239, 68, 68, 1)) 
-          drop-shadow(0 0 30px rgba(239, 68, 68, 1))
-          drop-shadow(0 0 45px rgba(251, 191, 36, 0.8));
+  animation:
+    icon-danger-explode 0.5s ease-in-out infinite,
+    icon-danger-rotate 0.8s ease-in-out infinite;
+  filter: drop-shadow(0 0 15px rgba(239, 68, 68, 1))
+    drop-shadow(0 0 30px rgba(239, 68, 68, 1))
+    drop-shadow(0 0 45px rgba(251, 191, 36, 0.8));
 }
 
 @keyframes destroy-epic-pulse {
-  0%, 100% {
-    box-shadow: 
+  0%,
+  100% {
+    box-shadow:
       0 0 10px rgba(239, 68, 68, 0.8),
       0 0 20px rgba(239, 68, 68, 0.6),
       0 0 30px rgba(239, 68, 68, 0.4);
     border-color: rgb(239, 68, 68);
   }
   50% {
-    box-shadow: 
+    box-shadow:
       0 0 15px rgba(239, 68, 68, 1),
       0 0 30px rgba(239, 68, 68, 0.8),
       0 0 45px rgba(239, 68, 68, 0.6);
@@ -341,15 +352,16 @@ body {
 }
 
 @keyframes destroy-epic-explode {
-  0%, 100% {
-    box-shadow: 
+  0%,
+  100% {
+    box-shadow:
       0 0 20px rgba(239, 68, 68, 1),
       0 0 40px rgba(239, 68, 68, 0.9),
       0 0 60px rgba(239, 68, 68, 0.7),
       0 0 80px rgba(239, 68, 68, 0.5);
   }
   50% {
-    box-shadow: 
+    box-shadow:
       0 0 30px rgba(239, 68, 68, 1),
       0 0 60px rgba(239, 68, 68, 1),
       0 0 90px rgba(251, 191, 36, 0.8),
@@ -358,7 +370,8 @@ body {
 }
 
 @keyframes destroy-epic-shake {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateX(0) translateY(0) rotate(0deg);
   }
   10% {
@@ -393,13 +406,13 @@ body {
 @keyframes destroy-epic-blast {
   0% {
     transform: scale(1);
-    box-shadow: 
+    box-shadow:
       0 0 30px rgba(239, 68, 68, 1),
       0 0 60px rgba(239, 68, 68, 1);
   }
   50% {
     transform: scale(0.95);
-    box-shadow: 
+    box-shadow:
       0 0 50px rgba(251, 191, 36, 1),
       0 0 100px rgba(239, 68, 68, 1);
   }
@@ -431,12 +444,14 @@ body {
 }
 
 @keyframes particle-float {
-  0%, 100% {
+  0%,
+  100% {
     transform: translate(0, 0) scale(1);
     opacity: 0.7;
   }
   50% {
-    transform: translate(var(--particle-x, 10px), var(--particle-y, -10px)) scale(1.2);
+    transform: translate(var(--particle-x, 10px), var(--particle-y, -10px))
+      scale(1.2);
     opacity: 1;
   }
 }
@@ -447,7 +462,11 @@ body {
     opacity: 1;
   }
   100% {
-    transform: translate(calc(var(--particle-x, 20px) * 3), calc(var(--particle-y, -20px) * 3)) scale(0.5);
+    transform: translate(
+        calc(var(--particle-x, 20px) * 3),
+        calc(var(--particle-y, -20px) * 3)
+      )
+      scale(0.5);
     opacity: 0;
   }
 }
@@ -458,7 +477,11 @@ body {
     opacity: 1;
   }
   100% {
-    transform: translate(calc(var(--particle-x, 15px) * 2.5), calc(var(--particle-y, -15px) * 2.5)) scale(0.6);
+    transform: translate(
+        calc(var(--particle-x, 15px) * 2.5),
+        calc(var(--particle-y, -15px) * 2.5)
+      )
+      scale(0.6);
     opacity: 0;
   }
 }
@@ -469,65 +492,214 @@ body {
     opacity: 1;
   }
   100% {
-    transform: translate(calc(var(--particle-x, 18px) * 2), calc(var(--particle-y, -18px) * 2)) scale(0.3);
+    transform: translate(
+        calc(var(--particle-x, 18px) * 2),
+        calc(var(--particle-y, -18px) * 2)
+      )
+      scale(0.3);
     opacity: 0;
   }
 }
 
 /* Set particle-specific CSS variables for each particle */
-.particle-outer-0 { --particle-x: var(--particle-outer-0-x); --particle-y: var(--particle-outer-0-y); }
-.particle-outer-1 { --particle-x: var(--particle-outer-1-x); --particle-y: var(--particle-outer-1-y); }
-.particle-outer-2 { --particle-x: var(--particle-outer-2-x); --particle-y: var(--particle-outer-2-y); }
-.particle-outer-3 { --particle-x: var(--particle-outer-3-x); --particle-y: var(--particle-outer-3-y); }
-.particle-outer-4 { --particle-x: var(--particle-outer-4-x); --particle-y: var(--particle-outer-4-y); }
-.particle-outer-5 { --particle-x: var(--particle-outer-5-x); --particle-y: var(--particle-outer-5-y); }
-.particle-outer-6 { --particle-x: var(--particle-outer-6-x); --particle-y: var(--particle-outer-6-y); }
-.particle-outer-7 { --particle-x: var(--particle-outer-7-x); --particle-y: var(--particle-outer-7-y); }
-.particle-outer-8 { --particle-x: var(--particle-outer-8-x); --particle-y: var(--particle-outer-8-y); }
-.particle-outer-9 { --particle-x: var(--particle-outer-9-x); --particle-y: var(--particle-outer-9-y); }
-.particle-outer-10 { --particle-x: var(--particle-outer-10-x); --particle-y: var(--particle-outer-10-y); }
-.particle-outer-11 { --particle-x: var(--particle-outer-11-x); --particle-y: var(--particle-outer-11-y); }
-.particle-outer-12 { --particle-x: var(--particle-outer-12-x); --particle-y: var(--particle-outer-12-y); }
-.particle-outer-13 { --particle-x: var(--particle-outer-13-x); --particle-y: var(--particle-outer-13-y); }
-.particle-outer-14 { --particle-x: var(--particle-outer-14-x); --particle-y: var(--particle-outer-14-y); }
-.particle-outer-15 { --particle-x: var(--particle-outer-15-x); --particle-y: var(--particle-outer-15-y); }
+.particle-outer-0 {
+  --particle-x: var(--particle-outer-0-x);
+  --particle-y: var(--particle-outer-0-y);
+}
+.particle-outer-1 {
+  --particle-x: var(--particle-outer-1-x);
+  --particle-y: var(--particle-outer-1-y);
+}
+.particle-outer-2 {
+  --particle-x: var(--particle-outer-2-x);
+  --particle-y: var(--particle-outer-2-y);
+}
+.particle-outer-3 {
+  --particle-x: var(--particle-outer-3-x);
+  --particle-y: var(--particle-outer-3-y);
+}
+.particle-outer-4 {
+  --particle-x: var(--particle-outer-4-x);
+  --particle-y: var(--particle-outer-4-y);
+}
+.particle-outer-5 {
+  --particle-x: var(--particle-outer-5-x);
+  --particle-y: var(--particle-outer-5-y);
+}
+.particle-outer-6 {
+  --particle-x: var(--particle-outer-6-x);
+  --particle-y: var(--particle-outer-6-y);
+}
+.particle-outer-7 {
+  --particle-x: var(--particle-outer-7-x);
+  --particle-y: var(--particle-outer-7-y);
+}
+.particle-outer-8 {
+  --particle-x: var(--particle-outer-8-x);
+  --particle-y: var(--particle-outer-8-y);
+}
+.particle-outer-9 {
+  --particle-x: var(--particle-outer-9-x);
+  --particle-y: var(--particle-outer-9-y);
+}
+.particle-outer-10 {
+  --particle-x: var(--particle-outer-10-x);
+  --particle-y: var(--particle-outer-10-y);
+}
+.particle-outer-11 {
+  --particle-x: var(--particle-outer-11-x);
+  --particle-y: var(--particle-outer-11-y);
+}
+.particle-outer-12 {
+  --particle-x: var(--particle-outer-12-x);
+  --particle-y: var(--particle-outer-12-y);
+}
+.particle-outer-13 {
+  --particle-x: var(--particle-outer-13-x);
+  --particle-y: var(--particle-outer-13-y);
+}
+.particle-outer-14 {
+  --particle-x: var(--particle-outer-14-x);
+  --particle-y: var(--particle-outer-14-y);
+}
+.particle-outer-15 {
+  --particle-x: var(--particle-outer-15-x);
+  --particle-y: var(--particle-outer-15-y);
+}
 
-.particle-inner-0 { --particle-x: var(--particle-inner-0-x); --particle-y: var(--particle-inner-0-y); }
-.particle-inner-1 { --particle-x: var(--particle-inner-1-x); --particle-y: var(--particle-inner-1-y); }
-.particle-inner-2 { --particle-x: var(--particle-inner-2-x); --particle-y: var(--particle-inner-2-y); }
-.particle-inner-3 { --particle-x: var(--particle-inner-3-x); --particle-y: var(--particle-inner-3-y); }
-.particle-inner-4 { --particle-x: var(--particle-inner-4-x); --particle-y: var(--particle-inner-4-y); }
-.particle-inner-5 { --particle-x: var(--particle-inner-5-x); --particle-y: var(--particle-inner-5-y); }
-.particle-inner-6 { --particle-x: var(--particle-inner-6-x); --particle-y: var(--particle-inner-6-y); }
-.particle-inner-7 { --particle-x: var(--particle-inner-7-x); --particle-y: var(--particle-inner-7-y); }
+.particle-inner-0 {
+  --particle-x: var(--particle-inner-0-x);
+  --particle-y: var(--particle-inner-0-y);
+}
+.particle-inner-1 {
+  --particle-x: var(--particle-inner-1-x);
+  --particle-y: var(--particle-inner-1-y);
+}
+.particle-inner-2 {
+  --particle-x: var(--particle-inner-2-x);
+  --particle-y: var(--particle-inner-2-y);
+}
+.particle-inner-3 {
+  --particle-x: var(--particle-inner-3-x);
+  --particle-y: var(--particle-inner-3-y);
+}
+.particle-inner-4 {
+  --particle-x: var(--particle-inner-4-x);
+  --particle-y: var(--particle-inner-4-y);
+}
+.particle-inner-5 {
+  --particle-x: var(--particle-inner-5-x);
+  --particle-y: var(--particle-inner-5-y);
+}
+.particle-inner-6 {
+  --particle-x: var(--particle-inner-6-x);
+  --particle-y: var(--particle-inner-6-y);
+}
+.particle-inner-7 {
+  --particle-x: var(--particle-inner-7-x);
+  --particle-y: var(--particle-inner-7-y);
+}
 
-.particle-spark-0 { --particle-x: var(--particle-spark-0-x); --particle-y: var(--particle-spark-0-y); }
-.particle-spark-1 { --particle-x: var(--particle-spark-1-x); --particle-y: var(--particle-spark-1-y); }
-.particle-spark-2 { --particle-x: var(--particle-spark-2-x); --particle-y: var(--particle-spark-2-y); }
-.particle-spark-3 { --particle-x: var(--particle-spark-3-x); --particle-y: var(--particle-spark-3-y); }
-.particle-spark-4 { --particle-x: var(--particle-spark-4-x); --particle-y: var(--particle-spark-4-y); }
-.particle-spark-5 { --particle-x: var(--particle-spark-5-x); --particle-y: var(--particle-spark-5-y); }
-.particle-spark-6 { --particle-x: var(--particle-spark-6-x); --particle-y: var(--particle-spark-6-y); }
-.particle-spark-7 { --particle-x: var(--particle-spark-7-x); --particle-y: var(--particle-spark-7-y); }
-.particle-spark-8 { --particle-x: var(--particle-spark-8-x); --particle-y: var(--particle-spark-8-y); }
-.particle-spark-9 { --particle-x: var(--particle-spark-9-x); --particle-y: var(--particle-spark-9-y); }
-.particle-spark-10 { --particle-x: var(--particle-spark-10-x); --particle-y: var(--particle-spark-10-y); }
-.particle-spark-11 { --particle-x: var(--particle-spark-11-x); --particle-y: var(--particle-spark-11-y); }
-.particle-spark-12 { --particle-x: var(--particle-spark-12-x); --particle-y: var(--particle-spark-12-y); }
-.particle-spark-13 { --particle-x: var(--particle-spark-13-x); --particle-y: var(--particle-spark-13-y); }
-.particle-spark-14 { --particle-x: var(--particle-spark-14-x); --particle-y: var(--particle-spark-14-y); }
-.particle-spark-15 { --particle-x: var(--particle-spark-15-x); --particle-y: var(--particle-spark-15-y); }
-.particle-spark-16 { --particle-x: var(--particle-spark-16-x); --particle-y: var(--particle-spark-16-y); }
-.particle-spark-17 { --particle-x: var(--particle-spark-17-x); --particle-y: var(--particle-spark-17-y); }
-.particle-spark-18 { --particle-x: var(--particle-spark-18-x); --particle-y: var(--particle-spark-18-y); }
-.particle-spark-19 { --particle-x: var(--particle-spark-19-x); --particle-y: var(--particle-spark-19-y); }
-.particle-spark-20 { --particle-x: var(--particle-spark-20-x); --particle-y: var(--particle-spark-20-y); }
-.particle-spark-21 { --particle-x: var(--particle-spark-21-x); --particle-y: var(--particle-spark-21-y); }
-.particle-spark-22 { --particle-x: var(--particle-spark-22-x); --particle-y: var(--particle-spark-22-y); }
-.particle-spark-23 { --particle-x: var(--particle-spark-23-x); --particle-y: var(--particle-spark-23-y); }
+.particle-spark-0 {
+  --particle-x: var(--particle-spark-0-x);
+  --particle-y: var(--particle-spark-0-y);
+}
+.particle-spark-1 {
+  --particle-x: var(--particle-spark-1-x);
+  --particle-y: var(--particle-spark-1-y);
+}
+.particle-spark-2 {
+  --particle-x: var(--particle-spark-2-x);
+  --particle-y: var(--particle-spark-2-y);
+}
+.particle-spark-3 {
+  --particle-x: var(--particle-spark-3-x);
+  --particle-y: var(--particle-spark-3-y);
+}
+.particle-spark-4 {
+  --particle-x: var(--particle-spark-4-x);
+  --particle-y: var(--particle-spark-4-y);
+}
+.particle-spark-5 {
+  --particle-x: var(--particle-spark-5-x);
+  --particle-y: var(--particle-spark-5-y);
+}
+.particle-spark-6 {
+  --particle-x: var(--particle-spark-6-x);
+  --particle-y: var(--particle-spark-6-y);
+}
+.particle-spark-7 {
+  --particle-x: var(--particle-spark-7-x);
+  --particle-y: var(--particle-spark-7-y);
+}
+.particle-spark-8 {
+  --particle-x: var(--particle-spark-8-x);
+  --particle-y: var(--particle-spark-8-y);
+}
+.particle-spark-9 {
+  --particle-x: var(--particle-spark-9-x);
+  --particle-y: var(--particle-spark-9-y);
+}
+.particle-spark-10 {
+  --particle-x: var(--particle-spark-10-x);
+  --particle-y: var(--particle-spark-10-y);
+}
+.particle-spark-11 {
+  --particle-x: var(--particle-spark-11-x);
+  --particle-y: var(--particle-spark-11-y);
+}
+.particle-spark-12 {
+  --particle-x: var(--particle-spark-12-x);
+  --particle-y: var(--particle-spark-12-y);
+}
+.particle-spark-13 {
+  --particle-x: var(--particle-spark-13-x);
+  --particle-y: var(--particle-spark-13-y);
+}
+.particle-spark-14 {
+  --particle-x: var(--particle-spark-14-x);
+  --particle-y: var(--particle-spark-14-y);
+}
+.particle-spark-15 {
+  --particle-x: var(--particle-spark-15-x);
+  --particle-y: var(--particle-spark-15-y);
+}
+.particle-spark-16 {
+  --particle-x: var(--particle-spark-16-x);
+  --particle-y: var(--particle-spark-16-y);
+}
+.particle-spark-17 {
+  --particle-x: var(--particle-spark-17-x);
+  --particle-y: var(--particle-spark-17-y);
+}
+.particle-spark-18 {
+  --particle-x: var(--particle-spark-18-x);
+  --particle-y: var(--particle-spark-18-y);
+}
+.particle-spark-19 {
+  --particle-x: var(--particle-spark-19-x);
+  --particle-y: var(--particle-spark-19-y);
+}
+.particle-spark-20 {
+  --particle-x: var(--particle-spark-20-x);
+  --particle-y: var(--particle-spark-20-y);
+}
+.particle-spark-21 {
+  --particle-x: var(--particle-spark-21-x);
+  --particle-y: var(--particle-spark-21-y);
+}
+.particle-spark-22 {
+  --particle-x: var(--particle-spark-22-x);
+  --particle-y: var(--particle-spark-22-y);
+}
+.particle-spark-23 {
+  --particle-x: var(--particle-spark-23-x);
+  --particle-y: var(--particle-spark-23-y);
+}
 
 @keyframes flame-flicker {
-  0%, 100% {
+  0%,
+  100% {
     transform: scale(1) rotate(0deg);
     opacity: 0.8;
   }
@@ -546,7 +718,8 @@ body {
 }
 
 @keyframes flame-explode {
-  0%, 100% {
+  0%,
+  100% {
     transform: scale(1) rotate(0deg);
     opacity: 1;
   }
@@ -565,7 +738,8 @@ body {
 }
 
 @keyframes core-pulse {
-  0%, 100% {
+  0%,
+  100% {
     r: 15;
     opacity: 1;
   }
@@ -576,7 +750,8 @@ body {
 }
 
 @keyframes core-explode {
-  0%, 100% {
+  0%,
+  100% {
     r: 15;
     opacity: 1;
   }
@@ -587,18 +762,21 @@ body {
 }
 
 @keyframes icon-danger-pulse {
-  0%, 100% {
+  0%,
+  100% {
     transform: scale(1) rotate(0deg);
     filter: drop-shadow(0 0 10px rgba(239, 68, 68, 1));
   }
   50% {
     transform: scale(1.15) rotate(5deg);
-    filter: drop-shadow(0 0 20px rgba(239, 68, 68, 1)) drop-shadow(0 0 30px rgba(251, 191, 36, 0.8));
+    filter: drop-shadow(0 0 20px rgba(239, 68, 68, 1))
+      drop-shadow(0 0 30px rgba(251, 191, 36, 0.8));
   }
 }
 
 @keyframes icon-danger-explode {
-  0%, 100% {
+  0%,
+  100% {
     transform: scale(1.1) rotate(0deg);
   }
   25% {
@@ -631,7 +809,8 @@ body {
 }
 
 @keyframes pulse-fast {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 0.2;
   }
   50% {
@@ -645,14 +824,14 @@ body {
 
 /* Dark mode adjustments */
 .dark .destroy-button-epic {
-  box-shadow: 
+  box-shadow:
     0 0 10px rgba(239, 68, 68, 0.9),
     0 0 20px rgba(239, 68, 68, 0.7),
     0 0 30px rgba(239, 68, 68, 0.5);
 }
 
 .dark .destroy-button-epic:hover {
-  box-shadow: 
+  box-shadow:
     0 0 25px rgba(239, 68, 68, 1),
     0 0 50px rgba(239, 68, 68, 1),
     0 0 75px rgba(251, 191, 36, 0.9),

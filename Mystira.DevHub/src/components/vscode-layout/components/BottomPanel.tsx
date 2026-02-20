@@ -1,4 +1,4 @@
-import type { BottomPanelTab } from '../types';
+import type { BottomPanelTab } from "../types";
 
 interface BottomPanelProps {
   tabs: BottomPanelTab[];
@@ -26,7 +26,7 @@ export function BottomPanel({
   return (
     <div
       className={`flex flex-col bg-gray-800 border-t border-gray-700 relative transition-all duration-200 ${
-        collapsed ? 'h-0 overflow-hidden' : ''
+        collapsed ? "h-0 overflow-hidden" : ""
       }`}
       style={{ height: collapsed ? 0 : height }}
     >
@@ -34,21 +34,21 @@ export function BottomPanel({
         <>
           <div
             className={`absolute top-0 left-0 right-0 h-1 cursor-ns-resize hover:bg-blue-500 transition-colors ${
-              resizing ? 'bg-blue-500' : 'bg-transparent'
+              resizing ? "bg-blue-500" : "bg-transparent"
             }`}
             onMouseDown={onStartResize}
           />
 
           <div className="flex items-center justify-between px-2 border-b border-gray-700 flex-shrink-0">
             <div className="flex items-center gap-1 overflow-x-auto py-1">
-              {tabs.map(tab => (
+              {tabs.map((tab) => (
                 <button
                   key={tab.id}
                   onClick={() => onTabChange(tab.id)}
                   className={`flex items-center gap-1.5 px-3 py-1 text-xs font-medium rounded transition-colors whitespace-nowrap ${
                     activeTab === tab.id
-                      ? 'bg-gray-700 text-white'
-                      : 'text-gray-400 hover:text-white hover:bg-gray-700/50'
+                      ? "bg-gray-700 text-white"
+                      : "text-gray-400 hover:text-white hover:bg-gray-700/50"
                   }`}
                 >
                   {tab.icon && <span>{tab.icon}</span>}
@@ -80,11 +80,10 @@ export function BottomPanel({
           </div>
 
           <div className="flex-1 overflow-auto">
-            {tabs.find(t => t.id === activeTab)?.content}
+            {tabs.find((t) => t.id === activeTab)?.content}
           </div>
         </>
       )}
     </div>
   );
 }
-

@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import type { TemplateConfig } from './TemplateSelector';
+import { useEffect, useState } from "react";
+import type { TemplateConfig } from "./TemplateSelector";
 
 interface TemplateEditorProps {
   template: TemplateConfig | null;
@@ -8,7 +8,9 @@ interface TemplateEditorProps {
 }
 
 function TemplateEditor({ template, onSave, onClose }: TemplateEditorProps) {
-  const [editedTemplate, setEditedTemplate] = useState<TemplateConfig | null>(null);
+  const [editedTemplate, setEditedTemplate] = useState<TemplateConfig | null>(
+    null,
+  );
   const [saveAsNew, setSaveAsNew] = useState(false);
 
   useEffect(() => {
@@ -38,9 +40,9 @@ function TemplateEditor({ template, onSave, onClose }: TemplateEditorProps) {
   };
 
   const addParameter = () => {
-    const key = prompt('Parameter name:');
+    const key = prompt("Parameter name:");
     if (key) {
-      updateParameter(key, '');
+      updateParameter(key, "");
     }
   };
 
@@ -74,7 +76,9 @@ function TemplateEditor({ template, onSave, onClose }: TemplateEditorProps) {
             <input
               type="text"
               value={editedTemplate.name}
-              onChange={(e) => setEditedTemplate({ ...editedTemplate, name: e.target.value })}
+              onChange={(e) =>
+                setEditedTemplate({ ...editedTemplate, name: e.target.value })
+              }
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
               aria-label="Template name"
             />
@@ -88,7 +92,12 @@ function TemplateEditor({ template, onSave, onClose }: TemplateEditorProps) {
             <input
               type="text"
               value={editedTemplate.resourceGroup}
-              onChange={(e) => setEditedTemplate({ ...editedTemplate, resourceGroup: e.target.value })}
+              onChange={(e) =>
+                setEditedTemplate({
+                  ...editedTemplate,
+                  resourceGroup: e.target.value,
+                })
+              }
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white font-mono text-sm"
               aria-label="Resource group"
             />
@@ -119,7 +128,9 @@ function TemplateEditor({ template, onSave, onClose }: TemplateEditorProps) {
                   />
                   <input
                     type="text"
-                    value={typeof value === 'string' ? value : JSON.stringify(value)}
+                    value={
+                      typeof value === "string" ? value : JSON.stringify(value)
+                    }
                     onChange={(e) => {
                       try {
                         const parsed = JSON.parse(e.target.value);
@@ -157,7 +168,10 @@ function TemplateEditor({ template, onSave, onClose }: TemplateEditorProps) {
               className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
               aria-label="Save as new template"
             />
-            <label htmlFor="saveAsNew" className="ml-2 text-sm text-gray-700 dark:text-gray-300">
+            <label
+              htmlFor="saveAsNew"
+              className="ml-2 text-sm text-gray-700 dark:text-gray-300"
+            >
               Save as new template configuration
             </label>
           </div>
@@ -174,7 +188,7 @@ function TemplateEditor({ template, onSave, onClose }: TemplateEditorProps) {
             onClick={handleSave}
             className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md"
           >
-            {saveAsNew ? 'Save As New' : 'Save Changes'}
+            {saveAsNew ? "Save As New" : "Save Changes"}
           </button>
         </div>
       </div>
@@ -183,4 +197,3 @@ function TemplateEditor({ template, onSave, onClose }: TemplateEditorProps) {
 }
 
 export default TemplateEditor;
-

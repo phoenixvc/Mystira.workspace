@@ -1,4 +1,4 @@
-import { MigrationResponse } from './types';
+import { MigrationResponse } from "./types";
 
 interface MigrationResultsProps {
   results: MigrationResponse;
@@ -8,7 +8,9 @@ interface MigrationResultsProps {
 export function MigrationResults({ results, onReset }: MigrationResultsProps) {
   return (
     <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6">
-      <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Migration Complete</h3>
+      <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+        Migration Complete
+      </h3>
 
       {results.success ? (
         <div className="bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 rounded-lg p-6 mb-6">
@@ -44,7 +46,9 @@ export function MigrationResults({ results, onReset }: MigrationResultsProps) {
               <h4 className="text-lg font-semibold text-red-900 dark:text-red-300 mb-2">
                 Migration Failed
               </h4>
-              <p className="text-red-800 dark:text-red-200">{results.error || 'An error occurred during migration'}</p>
+              <p className="text-red-800 dark:text-red-200">
+                {results.error || "An error occurred during migration"}
+              </p>
             </div>
           </div>
         </div>
@@ -52,32 +56,40 @@ export function MigrationResults({ results, onReset }: MigrationResultsProps) {
 
       {results.result && results.result.results.length > 0 && (
         <div className="mb-6">
-          <h4 className="font-semibold text-gray-900 dark:text-white mb-3">Detailed Results</h4>
+          <h4 className="font-semibold text-gray-900 dark:text-white mb-3">
+            Detailed Results
+          </h4>
           <div className="space-y-3">
             {results.result.results.map((result, index) => (
               <div
                 key={index}
                 className={`border rounded-lg p-4 ${
                   result.success
-                    ? 'border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-900/30'
-                    : 'border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/30'
+                    ? "border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-900/30"
+                    : "border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/30"
                 }`}
               >
                 <div className="flex justify-between items-start mb-2">
                   <div className="font-medium text-gray-900 dark:text-white">
-                    {result.success ? '✅' : '❌'} Migration {index + 1}
+                    {result.success ? "✅" : "❌"} Migration {index + 1}
                   </div>
-                  <div className="text-sm text-gray-600 dark:text-gray-400">{result.duration}</div>
+                  <div className="text-sm text-gray-600 dark:text-gray-400">
+                    {result.duration}
+                  </div>
                 </div>
                 <div className="text-sm text-gray-700 dark:text-gray-300 space-y-1">
                   <div>Total Items: {result.totalItems}</div>
                   <div>Successful: {result.successCount}</div>
                   {result.failureCount > 0 && (
-                    <div className="text-red-600 dark:text-red-400">Failed: {result.failureCount}</div>
+                    <div className="text-red-600 dark:text-red-400">
+                      Failed: {result.failureCount}
+                    </div>
                   )}
                   {result.errors.length > 0 && (
                     <div className="mt-2">
-                      <div className="font-medium text-red-600 dark:text-red-400">Errors:</div>
+                      <div className="font-medium text-red-600 dark:text-red-400">
+                        Errors:
+                      </div>
                       <ul className="list-disc list-inside text-xs space-y-1">
                         {result.errors.map((error, i) => (
                           <li key={i}>{error}</li>
@@ -103,4 +115,3 @@ export function MigrationResults({ results, onReset }: MigrationResultsProps) {
     </div>
   );
 }
-

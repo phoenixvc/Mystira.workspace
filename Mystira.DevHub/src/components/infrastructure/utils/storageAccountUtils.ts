@@ -34,24 +34,37 @@ export const extractStorageAccountName = (errorStr: string): string | null => {
  * Parses Azure CLI error to provide user-friendly message
  */
 export const parseAzureDeleteError = (error: string | undefined): string => {
-  if (!error) return 'Failed to delete storage account';
+  if (!error) return "Failed to delete storage account";
 
   const errorLower = error.toLowerCase();
 
   // Check for common error patterns
-  if (errorLower.includes('authorizationfailed') || errorLower.includes('does not have authorization')) {
+  if (
+    errorLower.includes("authorizationfailed") ||
+    errorLower.includes("does not have authorization")
+  ) {
     return 'Permission denied: You do not have permission to delete this storage account. Contact your Azure administrator to grant you the "Storage Account Contributor" role.';
   }
-  if (errorLower.includes('resourcenotfound') || errorLower.includes('was not found') || errorLower.includes('could not be found')) {
-    return 'Storage account no longer exists. It may have been deleted by another user. You can retry the preview now.';
+  if (
+    errorLower.includes("resourcenotfound") ||
+    errorLower.includes("was not found") ||
+    errorLower.includes("could not be found")
+  ) {
+    return "Storage account no longer exists. It may have been deleted by another user. You can retry the preview now.";
   }
-  if (errorLower.includes('resourcegroupnotfound')) {
-    return 'The resource group containing this storage account no longer exists.';
+  if (errorLower.includes("resourcegroupnotfound")) {
+    return "The resource group containing this storage account no longer exists.";
   }
-  if (errorLower.includes('scopelocked') || (errorLower.includes('cannot delete') && errorLower.includes('lock'))) {
-    return 'Storage account is locked and cannot be deleted. Remove the resource lock in Azure Portal first.';
+  if (
+    errorLower.includes("scopelocked") ||
+    (errorLower.includes("cannot delete") && errorLower.includes("lock"))
+  ) {
+    return "Storage account is locked and cannot be deleted. Remove the resource lock in Azure Portal first.";
   }
-  if (errorLower.includes('not logged in') || (errorLower.includes('please run') && errorLower.includes('az login'))) {
+  if (
+    errorLower.includes("not logged in") ||
+    (errorLower.includes("please run") && errorLower.includes("az login"))
+  ) {
     return 'Azure CLI session expired. Please run "az login" in your terminal and try again.';
   }
 

@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { invoke } from '@tauri-apps/api/tauri';
+import { useState, useEffect } from "react";
+import { invoke } from "@tauri-apps/api/core";
 import {
   CheckCircle2,
   XCircle,
@@ -13,12 +13,12 @@ import {
   Github,
   Cloud,
   Package,
-} from 'lucide-react';
-import type { CommandResponse } from '../../../../types';
+} from "lucide-react";
+import type { CommandResponse } from "../../../../types";
 
 interface PrerequisiteStatus {
   name: string;
-  status: 'checking' | 'available' | 'missing' | 'warning';
+  status: "checking" | "available" | "missing" | "warning";
   message?: string;
   helpUrl?: string;
   helpCommand?: string;
@@ -34,15 +34,18 @@ export function PrerequisitesCheckPanel({
   onAzureAccountChange,
 }: PrerequisitesCheckPanelProps) {
   const [prerequisites, setPrerequisites] = useState<PrerequisiteStatus[]>([
-    { name: 'Azure CLI', status: 'checking' },
-    { name: 'Azure Login', status: 'checking' },
-    { name: 'GitHub PAT', status: 'checking' },
-    { name: 'SWA CLI', status: 'checking' },
-    { name: 'Node.js/npm', status: 'checking' },
+    { name: "Azure CLI", status: "checking" },
+    { name: "Azure Login", status: "checking" },
+    { name: "GitHub PAT", status: "checking" },
+    { name: "SWA CLI", status: "checking" },
+    { name: "Node.js/npm", status: "checking" },
   ]);
   const [isChecking, setIsChecking] = useState(true);
   const [copiedField, setCopiedField] = useState<string | null>(null);
-  const [azureAccount, setAzureAccount] = useState<{ name: string; id: string } | null>(null);
+  const [azureAccount, setAzureAccount] = useState<{
+    name: string;
+    id: string;
+  } | null>(null);
   const [showDetails, setShowDetails] = useState(false);
 
   const handleCopy = async (value: string, field: string) => {
@@ -57,139 +60,140 @@ export function PrerequisitesCheckPanel({
 
     // Check Azure CLI
     try {
-      const azureCliResponse = await invoke<CommandResponse>('check_azure_cli');
+      const azureCliResponse = await invoke<CommandResponse>("check_azure_cli");
       if (azureCliResponse.success) {
         newPrereqs.push({
-          name: 'Azure CLI',
-          status: 'available',
-          message: 'Azure CLI is installed',
+          name: "Azure CLI",
+          status: "available",
+          message: "Azure CLI is installed",
         });
       } else {
         newPrereqs.push({
-          name: 'Azure CLI',
-          status: 'missing',
-          message: 'Azure CLI not found',
-          helpUrl: 'https://docs.microsoft.com/en-us/cli/azure/install-azure-cli',
+          name: "Azure CLI",
+          status: "missing",
+          message: "Azure CLI not found",
+          helpUrl:
+            "https://docs.microsoft.com/en-us/cli/azure/install-azure-cli",
         });
       }
     } catch {
       newPrereqs.push({
-        name: 'Azure CLI',
-        status: 'missing',
-        message: 'Failed to check Azure CLI',
-        helpUrl: 'https://docs.microsoft.com/en-us/cli/azure/install-azure-cli',
+        name: "Azure CLI",
+        status: "missing",
+        message: "Failed to check Azure CLI",
+        helpUrl: "https://docs.microsoft.com/en-us/cli/azure/install-azure-cli",
       });
     }
 
     // Check Azure Login
     try {
-      const loginResponse = await invoke<CommandResponse>('check_azure_login');
+      const loginResponse = await invoke<CommandResponse>("check_azure_login");
       if (loginResponse.success && loginResponse.result) {
         const account = loginResponse.result as { name: string; id: string };
         setAzureAccount(account);
         onAzureAccountChange?.(account);
         newPrereqs.push({
-          name: 'Azure Login',
-          status: 'available',
+          name: "Azure Login",
+          status: "available",
           message: `Logged in as: ${account.name}`,
         });
       } else {
         setAzureAccount(null);
         onAzureAccountChange?.(null);
         newPrereqs.push({
-          name: 'Azure Login',
-          status: 'missing',
-          message: 'Not logged in to Azure',
-          helpCommand: 'az login --use-device-code',
+          name: "Azure Login",
+          status: "missing",
+          message: "Not logged in to Azure",
+          helpCommand: "az login --use-device-code",
         });
       }
     } catch {
       setAzureAccount(null);
       onAzureAccountChange?.(null);
       newPrereqs.push({
-        name: 'Azure Login',
-        status: 'missing',
-        message: 'Failed to check Azure login',
-        helpCommand: 'az login --use-device-code',
+        name: "Azure Login",
+        status: "missing",
+        message: "Failed to check Azure login",
+        helpCommand: "az login --use-device-code",
       });
     }
 
     // Check GitHub PAT
     try {
-      const patResponse = await invoke<CommandResponse>('check_github_pat');
+      const patResponse = await invoke<CommandResponse>("check_github_pat");
       if (patResponse.success) {
         newPrereqs.push({
-          name: 'GitHub PAT',
-          status: 'available',
-          message: 'GitHub PAT is configured',
+          name: "GitHub PAT",
+          status: "available",
+          message: "GitHub PAT is configured",
         });
       } else {
         newPrereqs.push({
-          name: 'GitHub PAT',
-          status: 'warning',
-          message: 'No GitHub PAT found (optional for GitHub integration)',
-          helpUrl: 'https://github.com/settings/tokens',
+          name: "GitHub PAT",
+          status: "warning",
+          message: "No GitHub PAT found (optional for GitHub integration)",
+          helpUrl: "https://github.com/settings/tokens",
         });
       }
     } catch {
       newPrereqs.push({
-        name: 'GitHub PAT',
-        status: 'warning',
-        message: 'GitHub PAT not configured (optional)',
-        helpUrl: 'https://github.com/settings/tokens',
+        name: "GitHub PAT",
+        status: "warning",
+        message: "GitHub PAT not configured (optional)",
+        helpUrl: "https://github.com/settings/tokens",
       });
     }
 
     // Check SWA CLI
     try {
-      const swaResponse = await invoke<CommandResponse>('check_swa_cli');
+      const swaResponse = await invoke<CommandResponse>("check_swa_cli");
       if (swaResponse.success) {
         newPrereqs.push({
-          name: 'SWA CLI',
-          status: 'available',
-          message: 'SWA CLI is installed',
+          name: "SWA CLI",
+          status: "available",
+          message: "SWA CLI is installed",
         });
       } else {
         newPrereqs.push({
-          name: 'SWA CLI',
-          status: 'warning',
-          message: 'SWA CLI not found (optional)',
-          helpCommand: 'npm install -g @azure/static-web-apps-cli',
+          name: "SWA CLI",
+          status: "warning",
+          message: "SWA CLI not found (optional)",
+          helpCommand: "npm install -g @azure/static-web-apps-cli",
         });
       }
     } catch {
       newPrereqs.push({
-        name: 'SWA CLI',
-        status: 'warning',
-        message: 'SWA CLI not installed (optional)',
-        helpCommand: 'npm install -g @azure/static-web-apps-cli',
+        name: "SWA CLI",
+        status: "warning",
+        message: "SWA CLI not installed (optional)",
+        helpCommand: "npm install -g @azure/static-web-apps-cli",
       });
     }
 
     // Check npm
     try {
-      const npmResponse = await invoke<CommandResponse>('check_npm');
+      const npmResponse = await invoke<CommandResponse>("check_npm");
       if (npmResponse.success) {
         const version = npmResponse.result as string;
         newPrereqs.push({
-          name: 'Node.js/npm',
-          status: 'available',
+          name: "Node.js/npm",
+          status: "available",
           message: `npm v${version}`,
         });
       } else {
         newPrereqs.push({
-          name: 'Node.js/npm',
-          status: 'warning',
-          message: 'npm not found (needed for SWA CLI)',
-          helpUrl: 'https://nodejs.org/',
+          name: "Node.js/npm",
+          status: "warning",
+          message: "npm not found (needed for SWA CLI)",
+          helpUrl: "https://nodejs.org/",
         });
       }
     } catch {
       newPrereqs.push({
-        name: 'Node.js/npm',
-        status: 'warning',
-        message: 'npm not installed',
-        helpUrl: 'https://nodejs.org/',
+        name: "Node.js/npm",
+        status: "warning",
+        message: "npm not installed",
+        helpUrl: "https://nodejs.org/",
       });
     }
 
@@ -198,8 +202,8 @@ export function PrerequisitesCheckPanel({
 
     // Check if all required prerequisites are met (Azure CLI and Login are required)
     const allReady = newPrereqs
-      .filter(p => p.name === 'Azure CLI' || p.name === 'Azure Login')
-      .every(p => p.status === 'available');
+      .filter((p) => p.name === "Azure CLI" || p.name === "Azure Login")
+      .every((p) => p.status === "available");
     onAllReady?.(allReady);
   };
 
@@ -207,29 +211,29 @@ export function PrerequisitesCheckPanel({
     checkPrerequisites();
   }, []);
 
-  const getStatusIcon = (status: PrerequisiteStatus['status']) => {
+  const getStatusIcon = (status: PrerequisiteStatus["status"]) => {
     switch (status) {
-      case 'checking':
+      case "checking":
         return <Loader2 className="w-4 h-4 text-blue-500 animate-spin" />;
-      case 'available':
+      case "available":
         return <CheckCircle2 className="w-4 h-4 text-green-500" />;
-      case 'missing':
+      case "missing":
         return <XCircle className="w-4 h-4 text-red-500" />;
-      case 'warning':
+      case "warning":
         return <AlertTriangle className="w-4 h-4 text-yellow-500" />;
     }
   };
 
   const getPrereqIcon = (name: string) => {
     switch (name) {
-      case 'Azure CLI':
-      case 'Azure Login':
+      case "Azure CLI":
+      case "Azure Login":
         return <Cloud className="w-4 h-4" />;
-      case 'GitHub PAT':
+      case "GitHub PAT":
         return <Github className="w-4 h-4" />;
-      case 'SWA CLI':
+      case "SWA CLI":
         return <Terminal className="w-4 h-4" />;
-      case 'Node.js/npm':
+      case "Node.js/npm":
         return <Package className="w-4 h-4" />;
       default:
         return null;
@@ -237,7 +241,9 @@ export function PrerequisitesCheckPanel({
   };
 
   const requiredCount = prerequisites.filter(
-    p => (p.name === 'Azure CLI' || p.name === 'Azure Login') && p.status === 'available'
+    (p) =>
+      (p.name === "Azure CLI" || p.name === "Azure Login") &&
+      p.status === "available",
   ).length;
   const totalRequired = 2;
   const allRequiredMet = requiredCount === totalRequired;
@@ -250,7 +256,9 @@ export function PrerequisitesCheckPanel({
         onClick={() => setShowDetails(!showDetails)}
       >
         <div className="flex items-center gap-3">
-          <div className={`w-2 h-2 rounded-full ${allRequiredMet ? 'bg-green-500' : 'bg-yellow-500'}`} />
+          <div
+            className={`w-2 h-2 rounded-full ${allRequiredMet ? "bg-green-500" : "bg-yellow-500"}`}
+          />
           <span className="font-medium text-gray-900 dark:text-white text-sm">
             Prerequisites
           </span>
@@ -268,7 +276,9 @@ export function PrerequisitesCheckPanel({
             className="p-1 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 disabled:opacity-50"
             title="Refresh"
           >
-            <RefreshCw className={`w-4 h-4 ${isChecking ? 'animate-spin' : ''}`} />
+            <RefreshCw
+              className={`w-4 h-4 ${isChecking ? "animate-spin" : ""}`}
+            />
           </button>
         </div>
       </div>
@@ -280,13 +290,13 @@ export function PrerequisitesCheckPanel({
             <div
               key={prereq.name}
               className={`flex items-center justify-between p-3 rounded-lg border ${
-                prereq.status === 'available'
-                  ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800'
-                  : prereq.status === 'missing'
-                  ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800'
-                  : prereq.status === 'warning'
-                  ? 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800'
-                  : 'bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600'
+                prereq.status === "available"
+                  ? "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800"
+                  : prereq.status === "missing"
+                    ? "bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800"
+                    : prereq.status === "warning"
+                      ? "bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800"
+                      : "bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600"
               }`}
             >
               <div className="flex items-center gap-3">
@@ -334,8 +344,12 @@ export function PrerequisitesCheckPanel({
           {azureAccount && (
             <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
               <div className="text-sm">
-                <span className="text-blue-700 dark:text-blue-300 font-medium">Azure Account: </span>
-                <span className="text-blue-900 dark:text-blue-200">{azureAccount.name}</span>
+                <span className="text-blue-700 dark:text-blue-300 font-medium">
+                  Azure Account:{" "}
+                </span>
+                <span className="text-blue-900 dark:text-blue-200">
+                  {azureAccount.name}
+                </span>
               </div>
               <div className="text-xs text-blue-600 dark:text-blue-400 mt-1">
                 Subscription: {azureAccount.id}

@@ -4,7 +4,11 @@ export interface SuccessDisplayProps {
   className?: string;
 }
 
-export function SuccessDisplay({ message, details, className = '' }: SuccessDisplayProps) {
+export function SuccessDisplay({
+  message,
+  details,
+  className = "",
+}: SuccessDisplayProps) {
   if (!message) return null;
 
   return (
@@ -33,4 +37,3 @@ export function SuccessDisplay({ message, details, className = '' }: SuccessDisp
     </div>
   );
 }
-

@@ -48,4 +48,3 @@ export interface VSCodeLayoutProps {
   onLayoutChange?: (layout: LayoutState) => void;
   storageKey?: string;
 }
-

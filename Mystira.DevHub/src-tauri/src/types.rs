@@ -33,21 +33,16 @@ use serde::{Deserialize, Serialize};
 use std::fmt;
 
 /// Centralized error types for the application
-/// 
+///
 /// Note: Currently defined but not yet fully integrated across all modules.
 /// Functions can gradually migrate from `Result<T, String>` to `Result<T, AppError>`.
 #[allow(dead_code)]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum AppError {
     /// Azure CLI is not installed or not available
-    AzureCliMissing {
-        winget_available: bool,
-    },
+    AzureCliMissing { winget_available: bool },
     /// Command execution failed
-    CommandFailed {
-        command: String,
-        details: String,
-    },
+    CommandFailed { command: String, details: String },
     /// Invalid file or directory path
     InvalidPath(String),
     /// Network/HTTP request failed
@@ -144,5 +139,5 @@ pub struct ServiceInfo {
 }
 
 // Global service manager - store service info
-pub type ServiceManager = std::sync::Arc<std::sync::Mutex<std::collections::HashMap<String, ServiceInfo>>>;
-
+pub type ServiceManager =
+    std::sync::Arc<std::sync::Mutex<std::collections::HashMap<String, ServiceInfo>>>;

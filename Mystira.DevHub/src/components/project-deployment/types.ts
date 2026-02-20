@@ -20,8 +20,8 @@ export interface ProjectPipeline {
 export interface WorkflowRun {
   id: number;
   name: string;
-  status: 'queued' | 'in_progress' | 'completed' | 'cancelled';
-  conclusion: 'success' | 'failure' | 'cancelled' | null;
+  status: "queued" | "in_progress" | "completed" | "cancelled";
+  conclusion: "success" | "failure" | "cancelled" | null;
   html_url: string;
   created_at: string;
   updated_at: string;

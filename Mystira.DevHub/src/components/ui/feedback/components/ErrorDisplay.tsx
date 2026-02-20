@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState } from "react";
 
 export interface ErrorDisplayProps {
   error: string | null;
@@ -7,13 +7,18 @@ export interface ErrorDisplayProps {
   className?: string;
 }
 
-export function ErrorDisplay({ error, details, onCopy, className = '' }: ErrorDisplayProps) {
+export function ErrorDisplay({
+  error,
+  details,
+  onCopy,
+  className = "",
+}: ErrorDisplayProps) {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = async () => {
     const text = details
       ? `${error}\n\nDetails:\n${JSON.stringify(details, null, 2)}`
-      : error || '';
+      : error || "";
     await navigator.clipboard.writeText(text);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
@@ -33,7 +38,7 @@ export function ErrorDisplay({ error, details, onCopy, className = '' }: ErrorDi
           onClick={handleCopy}
           className="px-2 py-0.5 text-[10px] bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded text-gray-600 dark:text-gray-400 transition-colors"
         >
-          {copied ? '✓ Copied' : 'Copy'}
+          {copied ? "✓ Copied" : "Copy"}
         </button>
       </div>
 
@@ -56,4 +61,3 @@ export function ErrorDisplay({ error, details, onCopy, className = '' }: ErrorDi
     </div>
   );
 }
-

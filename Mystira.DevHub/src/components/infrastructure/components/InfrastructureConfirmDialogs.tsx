@@ -1,6 +1,10 @@
-import { invoke } from '@tauri-apps/api/tauri';
-import type { CommandResponse, TemplateConfig, WhatIfChange } from '../../../types';
-import { ConfirmDialog } from '../../ConfirmDialog';
+import { invoke } from "@tauri-apps/api/core";
+import type {
+  CommandResponse,
+  TemplateConfig,
+  WhatIfChange,
+} from "../../../types";
+import { ConfirmDialog } from "../../ConfirmDialog";
 
 interface InfrastructureConfirmDialogsProps {
   showDestroyConfirm: boolean;
@@ -21,10 +25,12 @@ interface InfrastructureConfirmDialogsProps {
   onResourceGroupConfirm: () => Promise<void>;
   onResourceGroupCancel: () => void;
   onSetLoading: (loading: boolean) => void;
-  onSetCurrentAction: (action: 'deploy' | null) => void;
+  onSetCurrentAction: (action: "deploy" | null) => void;
   onSetDeploymentProgress: (progress: string | null) => void;
   onSetLastResponse: (response: CommandResponse | null) => void;
-  onSetPendingResourceGroup: (rg: { resourceGroup: string; location: string } | null) => void;
+  onSetPendingResourceGroup: (
+    rg: { resourceGroup: string; location: string } | null,
+  ) => void;
 }
 
 export function InfrastructureConfirmDialogs({
@@ -53,30 +59,39 @@ export function InfrastructureConfirmDialogs({
 }: InfrastructureConfirmDialogsProps) {
   const handleResourceGroupConfirm = async () => {
     if (!pendingResourceGroup) return;
-    
+
     onResourceGroupCancel();
     onSetLoading(true);
-    onSetCurrentAction('deploy');
-    onSetDeploymentProgress(`Creating resource group '${pendingResourceGroup.resourceGroup}'...`);
-    
+    onSetCurrentAction("deploy");
+    onSetDeploymentProgress(
+      `Creating resource group '${pendingResourceGroup.resourceGroup}'...`,
+    );
+
     try {
-      const createRgResponse = await invoke<CommandResponse>('azure_create_resource_group', {
-        resourceGroup: pendingResourceGroup.resourceGroup,
-        location: pendingResourceGroup.location,
-      });
-      
+      const createRgResponse = await invoke<CommandResponse>(
+        "azure_create_resource_group",
+        {
+          resourceGroup: pendingResourceGroup.resourceGroup,
+          location: pendingResourceGroup.location,
+        },
+      );
+
       if (!createRgResponse.success) {
         onSetLastResponse({
           success: false,
-          error: createRgResponse.error || `Failed to create resource group '${pendingResourceGroup.resourceGroup}'`,
+          error:
+            createRgResponse.error ||
+            `Failed to create resource group '${pendingResourceGroup.resourceGroup}'`,
         });
         onSetLoading(false);
         onSetCurrentAction(null);
         onSetPendingResourceGroup(null);
         return;
       }
-      
-      onSetDeploymentProgress(`Deploying to ${pendingResourceGroup.resourceGroup}...`);
+
+      onSetDeploymentProgress(
+        `Deploying to ${pendingResourceGroup.resourceGroup}...`,
+      );
       await onResourceGroupConfirm();
     } catch (error) {
       onSetLastResponse({
@@ -91,12 +106,15 @@ export function InfrastructureConfirmDialogs({
   };
 
   const selectedDestroyResources = whatIfChanges.filter(
-    c => c.selected !== false && (c.changeType === 'delete' || c.selected === true)
+    (c) =>
+      c.selected !== false &&
+      (c.changeType === "delete" || c.selected === true),
   );
-  
-  const deployCount = whatIfChanges.length > 0
-    ? whatIfChanges.filter(c => c.selected !== false).length
-    : templates.filter(t => t.selected).length;
+
+  const deployCount =
+    whatIfChanges.length > 0
+      ? whatIfChanges.filter((c) => c.selected !== false).length
+      : templates.filter((t) => t.selected).length;
 
   return (
     <>
@@ -111,7 +129,7 @@ export function InfrastructureConfirmDialogs({
         onConfirm={onDestroyConfirm}
         onCancel={onDestroyCancel}
       />
-      
+
       <ConfirmDialog
         isOpen={showProdConfirm}
         title="⚠️ Production Environment Warning"
@@ -123,11 +141,11 @@ export function InfrastructureConfirmDialogs({
         onConfirm={onProdConfirm}
         onCancel={onProdCancel}
       />
-      
+
       <ConfirmDialog
         isOpen={showDestroySelect}
         title="💥 Destroy Selected Resources"
-        message={`⚠️ WARNING: You are about to permanently DELETE ${selectedDestroyResources.length} selected resource(s) from Azure.\n\nThis action CANNOT be undone and will permanently remove:\n${selectedDestroyResources.map(c => `  • ${c.resourceName} (${c.resourceType})`).join('\n')}\n\nType "DELETE" in the field below to confirm.`}
+        message={`⚠️ WARNING: You are about to permanently DELETE ${selectedDestroyResources.length} selected resource(s) from Azure.\n\nThis action CANNOT be undone and will permanently remove:\n${selectedDestroyResources.map((c) => `  • ${c.resourceName} (${c.resourceType})`).join("\n")}\n\nType "DELETE" in the field below to confirm.`}
         confirmText="Yes, Destroy Selected"
         cancelText="Cancel"
         confirmButtonClass="bg-red-600 hover:bg-red-700 dark:bg-red-500 dark:hover:bg-red-600"
@@ -135,24 +153,26 @@ export function InfrastructureConfirmDialogs({
         onConfirm={onDestroyConfirm}
         onCancel={onDestroyCancel}
       />
-      
+
       <ConfirmDialog
         isOpen={showDeployConfirm}
         title="🚀 Deploy Selected Resources"
-        message={`You are about to deploy ${deployCount} ${whatIfChanges.length > 0 ? 'selected resource(s)' : 'template(s)'} to ${environment} environment.`}
+        message={`You are about to deploy ${deployCount} ${whatIfChanges.length > 0 ? "selected resource(s)" : "template(s)"} to ${environment} environment.`}
         confirmText="Deploy Selected Resources"
         cancelText="Cancel"
         confirmButtonClass="bg-green-600 hover:bg-green-700"
         onConfirm={onDeployConfirm}
         onCancel={onDeployCancel}
       />
-      
+
       <ConfirmDialog
         isOpen={showResourceGroupConfirm}
         title="📦 Create Resource Group"
-        message={pendingResourceGroup 
-          ? `The resource group "${pendingResourceGroup.resourceGroup}" does not exist in location "${pendingResourceGroup.location}".\n\nWould you like to create it now? This is required before deploying infrastructure.`
-          : ''}
+        message={
+          pendingResourceGroup
+            ? `The resource group "${pendingResourceGroup.resourceGroup}" does not exist in location "${pendingResourceGroup.location}".\n\nWould you like to create it now? This is required before deploying infrastructure.`
+            : ""
+        }
         confirmText="Create Resource Group"
         cancelText="Cancel"
         confirmButtonClass="bg-blue-600 hover:bg-blue-700"
@@ -162,4 +182,3 @@ export function InfrastructureConfirmDialogs({
     </>
   );
 }
-

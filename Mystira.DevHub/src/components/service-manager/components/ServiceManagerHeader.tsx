@@ -1,12 +1,15 @@
-import { EnvironmentPresetSelector, type EnvironmentPreset } from '../../services';
-import { InfrastructureStatusIndicator } from './InfrastructureStatusIndicator';
-import { RepositoryConfig } from './RepositoryConfig';
+import {
+  EnvironmentPresetSelector,
+  type EnvironmentPreset,
+} from "../../services";
+import { InfrastructureStatusIndicator } from "./InfrastructureStatusIndicator";
+import { RepositoryConfig } from "./RepositoryConfig";
 
 interface ServiceManagerHeaderProps {
   repoRoot: string;
   currentBranch: string | null;
   useCurrentBranch: boolean;
-  serviceEnvironments: Record<string, 'local' | 'dev' | 'prod'>;
+  serviceEnvironments: Record<string, "local" | "dev" | "prod">;
   infrastructureStatus: {
     dev: { exists: boolean; checking: boolean };
     prod: { exists: boolean; checking: boolean };
@@ -42,9 +45,12 @@ export function ServiceManagerHeader({
     <div className="mb-4 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <div className="flex items-center gap-4 flex-1 min-w-0">
-          <h1 className="text-xl font-bold text-gray-900 dark:text-white font-mono">SERVICE MANAGER</h1>
+          <h1 className="text-xl font-bold text-gray-900 dark:text-white font-mono">
+            SERVICE MANAGER
+          </h1>
           <span className="text-xs text-gray-500 dark:text-gray-400 hidden sm:inline">
-            Ctrl+Shift+S (Start All) | Ctrl+Shift+X (Stop All) | Ctrl+R (Refresh)
+            Ctrl+Shift+S (Start All) | Ctrl+Shift+X (Stop All) | Ctrl+R
+            (Refresh)
           </span>
           <InfrastructureStatusIndicator
             serviceEnvironments={serviceEnvironments}
@@ -63,7 +69,7 @@ export function ServiceManagerHeader({
             className="px-3 py-1.5 bg-blue-600 text-white rounded text-sm hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed font-medium"
             title="Build all local services"
           >
-            {anyBuilding ? 'Building...' : 'Build All'}
+            {anyBuilding ? "Building..." : "Build All"}
           </button>
           {!allRunning && (
             <button
@@ -94,4 +100,3 @@ export function ServiceManagerHeader({
     </div>
   );
 }
-

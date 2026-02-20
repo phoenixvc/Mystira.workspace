@@ -1,11 +1,11 @@
-import Editor from '@monaco-editor/react';
-import { invoke } from '@tauri-apps/api/tauri';
-import { useEffect, useState } from 'react';
+import Editor from "@monaco-editor/react";
+import { invoke } from "@tauri-apps/api/core";
+import { useEffect, useState } from "react";
 
 interface TemplateFile {
   name: string;
   path: string;
-  type: 'bicep' | 'json' | 'yml';
+  type: "bicep" | "json" | "yml";
   description: string;
 }
 
@@ -14,18 +14,18 @@ interface TemplateInspectorProps {
 }
 
 function TemplateContentViewer({ filePath }: { filePath: string }) {
-  const [content, setContent] = useState<string>('');
+  const [content, setContent] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const [isDarkMode, setIsDarkMode] = useState(false);
 
   useEffect(() => {
     const checkDarkMode = () => {
-      setIsDarkMode(window.matchMedia('(prefers-color-scheme: dark)').matches);
+      setIsDarkMode(window.matchMedia("(prefers-color-scheme: dark)").matches);
     };
     checkDarkMode();
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    mediaQuery.addEventListener('change', checkDarkMode);
-    return () => mediaQuery.removeEventListener('change', checkDarkMode);
+    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+    mediaQuery.addEventListener("change", checkDarkMode);
+    return () => mediaQuery.removeEventListener("change", checkDarkMode);
   }, []);
 
   useEffect(() => {
@@ -35,10 +35,12 @@ function TemplateContentViewer({ filePath }: { filePath: string }) {
   const loadFile = async () => {
     setLoading(true);
     try {
-      const fileContent = await invoke<string>('read_bicep_file', { relativePath: filePath });
+      const fileContent = await invoke<string>("read_bicep_file", {
+        relativePath: filePath,
+      });
       setContent(fileContent);
     } catch (error) {
-      console.error('Failed to load file:', error);
+      console.error("Failed to load file:", error);
       setContent(`// Error loading file: ${error}`);
     } finally {
       setLoading(false);
@@ -59,12 +61,12 @@ function TemplateContentViewer({ filePath }: { filePath: string }) {
         height="100%"
         language="bicep"
         value={content}
-        theme={isDarkMode ? 'vs-dark' : 'vs'}
+        theme={isDarkMode ? "vs-dark" : "vs"}
         options={{
           readOnly: true,
           minimap: { enabled: true },
           fontSize: 14,
-          wordWrap: 'on',
+          wordWrap: "on",
         }}
       />
     </div>
@@ -87,34 +89,34 @@ function TemplateInspector({ environment }: TemplateInspectorProps) {
       const basePath = `src/Mystira.App.Infrastructure.Azure/Deployment/${environment}`;
       const templateFiles: TemplateFile[] = [
         {
-          name: 'main.bicep',
+          name: "main.bicep",
           path: `${basePath}/main.bicep`,
-          type: 'bicep',
-          description: 'Main deployment template orchestrating all modules',
+          type: "bicep",
+          description: "Main deployment template orchestrating all modules",
         },
         {
-          name: 'storage.bicep',
+          name: "storage.bicep",
           path: `${basePath}/storage.bicep`,
-          type: 'bicep',
-          description: 'Azure Storage Account with blob services',
+          type: "bicep",
+          description: "Azure Storage Account with blob services",
         },
         {
-          name: 'cosmos-db.bicep',
+          name: "cosmos-db.bicep",
           path: `${basePath}/cosmos-db.bicep`,
-          type: 'bicep',
-          description: 'Azure Cosmos DB account with database and containers',
+          type: "bicep",
+          description: "Azure Cosmos DB account with database and containers",
         },
         {
-          name: 'app-service.bicep',
+          name: "app-service.bicep",
           path: `${basePath}/app-service.bicep`,
-          type: 'bicep',
-          description: 'Azure App Service with Linux runtime',
+          type: "bicep",
+          description: "Azure App Service with Linux runtime",
         },
         {
-          name: 'key-vault.bicep',
+          name: "key-vault.bicep",
           path: `${basePath}/key-vault.bicep`,
-          type: 'bicep',
-          description: 'Azure Key Vault for secrets management',
+          type: "bicep",
+          description: "Azure Key Vault for secrets management",
         },
       ];
 
@@ -123,7 +125,7 @@ function TemplateInspector({ environment }: TemplateInspectorProps) {
         setSelectedTemplate(templateFiles[0].path);
       }
     } catch (error) {
-      console.error('Failed to load templates:', error);
+      console.error("Failed to load templates:", error);
     } finally {
       setLoading(false);
     }
@@ -131,21 +133,27 @@ function TemplateInspector({ environment }: TemplateInspectorProps) {
 
   const getFileIcon = (type: string) => {
     switch (type) {
-      case 'bicep': return '📄';
-      case 'json': return '📋';
-      case 'yml': return '⚙️';
-      default: return '📄';
+      case "bicep":
+        return "📄";
+      case "json":
+        return "📋";
+      case "yml":
+        return "⚙️";
+      default:
+        return "📄";
     }
   };
 
   const handleCopyTemplate = async (template: TemplateFile) => {
     try {
-      const content = await invoke<string>('read_bicep_file', { relativePath: template.path });
+      const content = await invoke<string>("read_bicep_file", {
+        relativePath: template.path,
+      });
       await navigator.clipboard.writeText(content);
       alert(`Template ${template.name} copied to clipboard!`);
     } catch (error) {
-      console.error('Failed to copy template:', error);
-      alert('Failed to copy template');
+      console.error("Failed to copy template:", error);
+      alert("Failed to copy template");
     }
   };
 
@@ -156,7 +164,8 @@ function TemplateInspector({ environment }: TemplateInspectorProps) {
           Template & Resource Inspector
         </h3>
         <p className="text-sm text-gray-500 dark:text-gray-400">
-          Inspect, modify, copy, and edit Bicep templates and infrastructure resources
+          Inspect, modify, copy, and edit Bicep templates and infrastructure
+          resources
         </p>
       </div>
 
@@ -167,7 +176,9 @@ function TemplateInspector({ environment }: TemplateInspectorProps) {
             Templates ({environment})
           </div>
           {loading ? (
-            <div className="text-sm text-gray-500 dark:text-gray-400">Loading...</div>
+            <div className="text-sm text-gray-500 dark:text-gray-400">
+              Loading...
+            </div>
           ) : (
             <div className="space-y-2">
               {templates.map((template) => (
@@ -176,12 +187,14 @@ function TemplateInspector({ environment }: TemplateInspectorProps) {
                   onClick={() => setSelectedTemplate(template.path)}
                   className={`p-3 rounded-lg cursor-pointer transition-colors ${
                     selectedTemplate === template.path
-                      ? 'bg-blue-100 dark:bg-blue-900 border-2 border-blue-500 dark:border-blue-600'
-                      : 'bg-gray-50 dark:bg-gray-700 border-2 border-transparent hover:bg-gray-100 dark:hover:bg-gray-600'
+                      ? "bg-blue-100 dark:bg-blue-900 border-2 border-blue-500 dark:border-blue-600"
+                      : "bg-gray-50 dark:bg-gray-700 border-2 border-transparent hover:bg-gray-100 dark:hover:bg-gray-600"
                   }`}
                 >
                   <div className="flex items-center gap-2 mb-1">
-                    <span className="text-lg">{getFileIcon(template.type)}</span>
+                    <span className="text-lg">
+                      {getFileIcon(template.type)}
+                    </span>
                     <span className="text-sm font-medium text-gray-900 dark:text-white">
                       {template.name}
                     </span>
@@ -204,7 +217,7 @@ function TemplateInspector({ environment }: TemplateInspectorProps) {
                       onClick={(e) => {
                         e.stopPropagation();
                         // TODO: Implement edit functionality
-                        alert('Edit functionality coming soon');
+                        alert("Edit functionality coming soon");
                       }}
                       className="px-2 py-1 text-xs bg-blue-200 dark:bg-blue-800 hover:bg-blue-300 dark:hover:bg-blue-700 text-blue-700 dark:text-blue-300 rounded"
                       title="Edit template"
@@ -234,4 +247,3 @@ function TemplateInspector({ environment }: TemplateInspectorProps) {
 }
 
 export default TemplateInspector;
-

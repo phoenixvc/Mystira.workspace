@@ -1,6 +1,6 @@
-import { useState } from 'react';
-import { invoke } from '@tauri-apps/api/tauri';
-import { save } from '@tauri-apps/api/dialog';
+import { useState } from "react";
+import { invoke } from "@tauri-apps/api/core";
+import { save } from "@tauri-apps/plugin-dialog";
 
 interface CommandResponse {
   success: boolean;
@@ -14,30 +14,34 @@ interface CommandResponse {
 
 function ExportPanel() {
   const [loading, setLoading] = useState(false);
-  const [lastResponse, setLastResponse] = useState<CommandResponse | null>(null);
-  const [outputPath, setOutputPath] = useState('');
+  const [lastResponse, setLastResponse] = useState<CommandResponse | null>(
+    null,
+  );
+  const [outputPath, setOutputPath] = useState("");
 
   const handleSelectOutputPath = async () => {
     try {
       const filePath = await save({
-        defaultPath: 'game-sessions.csv',
-        filters: [{
-          name: 'CSV',
-          extensions: ['csv']
-        }]
+        defaultPath: "game-sessions.csv",
+        filters: [
+          {
+            name: "CSV",
+            extensions: ["csv"],
+          },
+        ],
       });
 
       if (filePath) {
         setOutputPath(filePath);
       }
     } catch (error) {
-      console.error('Failed to select file:', error);
+      console.error("Failed to select file:", error);
     }
   };
 
   const handleExport = async () => {
     if (!outputPath) {
-      alert('Please select an output file path');
+      alert("Please select an output file path");
       return;
     }
 
@@ -45,7 +49,7 @@ function ExportPanel() {
     setLastResponse(null);
 
     try {
-      const response: CommandResponse = await invoke('cosmos_export', {
+      const response: CommandResponse = await invoke("cosmos_export", {
         outputPath,
       });
 
@@ -113,12 +117,19 @@ function ExportPanel() {
 
       {/* Export Information */}
       <div className="bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-6">
-        <h4 className="font-semibold text-blue-900 dark:text-blue-300 mb-2">ℹ️ Export Information</h4>
+        <h4 className="font-semibold text-blue-900 dark:text-blue-300 mb-2">
+          ℹ️ Export Information
+        </h4>
         <ul className="text-sm text-blue-800 dark:text-blue-200 space-y-1 list-disc list-inside">
           <li>Exports all game sessions with account information</li>
-          <li>Includes: Session ID, Scenario, Account details, Start/End times, Completion status</li>
+          <li>
+            Includes: Session ID, Scenario, Account details, Start/End times,
+            Completion status
+          </li>
           <li>Output format: CSV (comma-separated values)</li>
-          <li>Can be opened in Excel, Google Sheets, or any spreadsheet software</li>
+          <li>
+            Can be opened in Excel, Google Sheets, or any spreadsheet software
+          </li>
         </ul>
       </div>
 
@@ -127,7 +138,9 @@ function ExportPanel() {
         <div className="bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-6">
           <div className="flex items-center">
             <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600 dark:border-blue-400 mr-3"></div>
-            <span className="text-blue-800 dark:text-blue-200">Exporting game sessions...</span>
+            <span className="text-blue-800 dark:text-blue-200">
+              Exporting game sessions...
+            </span>
           </div>
         </div>
       )}
@@ -137,22 +150,26 @@ function ExportPanel() {
         <div
           className={`rounded-lg p-6 ${
             lastResponse.success
-              ? 'bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800'
-              : 'bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800'
+              ? "bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800"
+              : "bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800"
           }`}
         >
           <h3
             className={`text-lg font-semibold mb-2 ${
-              lastResponse.success ? 'text-green-900 dark:text-green-300' : 'text-red-900 dark:text-red-300'
+              lastResponse.success
+                ? "text-green-900 dark:text-green-300"
+                : "text-red-900 dark:text-red-300"
             }`}
           >
-            {lastResponse.success ? '✅ Export Successful' : '❌ Export Failed'}
+            {lastResponse.success ? "✅ Export Successful" : "❌ Export Failed"}
           </h3>
 
           {lastResponse.message && (
             <p
               className={`mb-3 ${
-                lastResponse.success ? 'text-green-800 dark:text-green-200' : 'text-red-800 dark:text-red-200'
+                lastResponse.success
+                  ? "text-green-800 dark:text-green-200"
+                  : "text-red-800 dark:text-red-200"
               }`}
             >
               {lastResponse.message}
@@ -163,13 +180,17 @@ function ExportPanel() {
             <div className="bg-green-100 dark:bg-green-900/50 p-4 rounded">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <div className="text-sm text-green-700 dark:text-green-300">Rows Exported</div>
+                  <div className="text-sm text-green-700 dark:text-green-300">
+                    Rows Exported
+                  </div>
                   <div className="text-2xl font-bold text-green-900 dark:text-green-200">
                     {lastResponse.result.rowCount || 0}
                   </div>
                 </div>
                 <div>
-                  <div className="text-sm text-green-700 dark:text-green-300">Output File</div>
+                  <div className="text-sm text-green-700 dark:text-green-300">
+                    Output File
+                  </div>
                   <div className="text-sm font-medium text-green-900 dark:text-green-200 break-all">
                     {lastResponse.result.outputPath || outputPath}
                   </div>
@@ -188,7 +209,9 @@ function ExportPanel() {
             <details className="mt-3">
               <summary
                 className={`cursor-pointer font-medium ${
-                  lastResponse.success ? 'text-green-700 dark:text-green-300' : 'text-red-700 dark:text-red-300'
+                  lastResponse.success
+                    ? "text-green-700 dark:text-green-300"
+                    : "text-red-700 dark:text-red-300"
                 }`}
               >
                 View Raw Response
@@ -196,8 +219,8 @@ function ExportPanel() {
               <pre
                 className={`mt-2 p-3 rounded text-sm overflow-auto ${
                   lastResponse.success
-                    ? 'bg-green-100 dark:bg-green-900/50 text-green-900 dark:text-green-200'
-                    : 'bg-red-100 dark:bg-red-900/50 text-red-900 dark:text-red-200'
+                    ? "bg-green-100 dark:bg-green-900/50 text-green-900 dark:text-green-200"
+                    : "bg-red-100 dark:bg-red-900/50 text-red-900 dark:text-red-200"
                 }`}
               >
                 {JSON.stringify(lastResponse.result, null, 2)}

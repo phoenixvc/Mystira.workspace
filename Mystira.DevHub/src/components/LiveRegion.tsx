@@ -1,10 +1,10 @@
-import { ReactNode } from 'react';
+import { ReactNode } from "react";
 
 interface LiveRegionProps {
   children: ReactNode;
-  role?: 'status' | 'alert' | 'log';
-  'aria-live'?: 'polite' | 'assertive' | 'off';
-  'aria-atomic'?: boolean;
+  role?: "status" | "alert" | "log";
+  "aria-live"?: "polite" | "assertive" | "off";
+  "aria-atomic"?: boolean;
 }
 
 /**
@@ -14,9 +14,9 @@ interface LiveRegionProps {
  */
 function LiveRegion({
   children,
-  role = 'status',
-  'aria-live': ariaLive = 'polite',
-  'aria-atomic': ariaAtomic = true,
+  role = "status",
+  "aria-live": ariaLive = "polite",
+  "aria-atomic": ariaAtomic = true,
 }: LiveRegionProps) {
   return (
     <div

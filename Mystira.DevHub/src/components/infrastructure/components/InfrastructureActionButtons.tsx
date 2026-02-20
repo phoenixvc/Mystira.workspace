@@ -1,4 +1,9 @@
-import { DEPLOYMENT_METHODS, INFRASTRUCTURE_ACTIONS, type DeploymentMethod, type InfrastructureAction } from '../../../types';
+import {
+  DEPLOYMENT_METHODS,
+  INFRASTRUCTURE_ACTIONS,
+  type DeploymentMethod,
+  type InfrastructureAction,
+} from "../../../types";
 
 interface InfrastructureActionButtonsProps {
   loading: boolean;
@@ -29,7 +34,9 @@ export function InfrastructureActionButtons({
 }: InfrastructureActionButtonsProps) {
   return (
     <div id="step-2-infrastructure-actions" className="mb-4">
-      <div className={`mb-4 ${hasSelectedTemplates ? 'sticky top-0 z-10 bg-white dark:bg-gray-900 pb-4 pt-2 -mt-2 border-b border-gray-200 dark:border-gray-700 mb-6 transition-all' : ''}`}>
+      <div
+        className={`mb-4 ${hasSelectedTemplates ? "sticky top-0 z-10 bg-white dark:bg-gray-900 pb-4 pt-2 -mt-2 border-b border-gray-200 dark:border-gray-700 mb-6 transition-all" : ""}`}
+      >
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
             Step 2: Infrastructure Actions
@@ -60,7 +67,11 @@ export function InfrastructureActionButtons({
             onClick={() => onAction(INFRASTRUCTURE_ACTIONS.PREVIEW)}
             disabled={loading || !hasValidated}
             className="px-4 py-3 bg-purple-600 dark:bg-purple-500 text-white rounded-lg hover:bg-purple-700 dark:hover:bg-purple-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
-            title={!hasValidated ? 'Please validate first' : 'Preview infrastructure changes'}
+            title={
+              !hasValidated
+                ? "Please validate first"
+                : "Preview infrastructure changes"
+            }
           >
             <span>👁️</span>
             {currentAction === INFRASTRUCTURE_ACTIONS.PREVIEW && (
@@ -72,7 +83,9 @@ export function InfrastructureActionButtons({
             onClick={() => onAction(INFRASTRUCTURE_ACTIONS.DEPLOY)}
             disabled={loading || !hasPreviewed}
             className="px-4 py-3 bg-green-600 dark:bg-green-500 text-white rounded-lg hover:bg-green-700 dark:hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
-            title={!hasPreviewed ? 'Please preview first' : 'Deploy infrastructure'}
+            title={
+              !hasPreviewed ? "Please preview first" : "Deploy infrastructure"
+            }
           >
             <span>🚀</span>
             {currentAction === INFRASTRUCTURE_ACTIONS.DEPLOY && (
@@ -82,7 +95,10 @@ export function InfrastructureActionButtons({
           </button>
           <button
             onClick={() => {
-              if (whatIfChangesLength > 0 && deploymentMethod === DEPLOYMENT_METHODS.AZURE_CLI) {
+              if (
+                whatIfChangesLength > 0 &&
+                deploymentMethod === DEPLOYMENT_METHODS.AZURE_CLI
+              ) {
                 onShowDestroySelect();
               } else {
                 onAction(INFRASTRUCTURE_ACTIONS.DESTROY);
@@ -106,4 +122,3 @@ export function InfrastructureActionButtons({
     </div>
   );
 }
-

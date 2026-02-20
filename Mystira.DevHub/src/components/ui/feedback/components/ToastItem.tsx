@@ -1,5 +1,5 @@
-import { useEffect } from 'react';
-import type { Toast, FeedbackType } from '../types';
+import { useEffect } from "react";
+import type { Toast, FeedbackType } from "../types";
 
 interface ToastItemProps {
   toast: Toast;
@@ -7,17 +7,17 @@ interface ToastItemProps {
 }
 
 const toastStyles: Record<FeedbackType, string> = {
-  success: 'bg-green-600 dark:bg-green-500',
-  error: 'bg-red-600 dark:bg-red-500',
-  warning: 'bg-yellow-500 dark:bg-yellow-400 text-black',
-  info: 'bg-blue-600 dark:bg-blue-500',
+  success: "bg-green-600 dark:bg-green-500",
+  error: "bg-red-600 dark:bg-red-500",
+  warning: "bg-yellow-500 dark:bg-yellow-400 text-black",
+  info: "bg-blue-600 dark:bg-blue-500",
 };
 
 const toastIcons: Record<FeedbackType, string> = {
-  success: '✓',
-  error: '✕',
-  warning: '⚠',
-  info: 'ℹ',
+  success: "✓",
+  error: "✕",
+  warning: "⚠",
+  info: "ℹ",
 };
 
 export function ToastItem({ toast, onClose }: ToastItemProps) {
@@ -38,7 +38,9 @@ export function ToastItem({ toast, onClose }: ToastItemProps) {
         flex items-center justify-between
         min-w-[300px] max-w-[500px]
         animate-slide-in
-      `.trim().replace(/\s+/g, ' ')}
+      `
+        .trim()
+        .replace(/\s+/g, " ")}
       role="alert"
     >
       <div className="flex items-center gap-2">
@@ -65,4 +67,3 @@ export function ToastItem({ toast, onClose }: ToastItemProps) {
     </div>
   );
 }
-

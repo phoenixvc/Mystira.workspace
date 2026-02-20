@@ -1,5 +1,10 @@
-import { ENVIRONMENTS, VIEWS, type Environment, type View } from '../../types/constants';
-import type { ServiceConfig } from '../services/types';
+import {
+  ENVIRONMENTS,
+  VIEWS,
+  type Environment,
+  type View,
+} from "../../types/constants";
+import type { ServiceConfig } from "../services/types";
 
 interface AppSidebarProps {
   currentView: View;
@@ -14,24 +19,24 @@ export function AppSidebar({
   serviceEnvironments,
   activityBarItems,
 }: AppSidebarProps) {
-  const currentItem = activityBarItems.find(a => a.id === currentView);
+  const currentItem = activityBarItems.find((a) => a.id === currentView);
 
   const getViewDescription = () => {
     switch (currentView) {
       case VIEWS.SERVICES:
-        return 'Manage local and deployed services';
+        return "Manage local and deployed services";
       case VIEWS.DASHBOARD:
-        return 'Overview and quick actions';
+        return "Overview and quick actions";
       case VIEWS.COSMOS:
-        return 'Explore Azure Cosmos DB';
+        return "Explore Azure Cosmos DB";
       case VIEWS.MIGRATION:
-        return 'Database migration tools';
+        return "Database migration tools";
       case VIEWS.INFRASTRUCTURE:
-        return 'Deploy and manage Azure resources';
+        return "Deploy and manage Azure resources";
       case VIEWS.TEST:
-        return 'Run and view test results';
+        return "Run and view test results";
       default:
-        return '';
+        return "";
     }
   };
 
@@ -45,9 +50,7 @@ export function AppSidebar({
             {currentItem?.title}
           </span>
         </div>
-        <p className="text-gray-400 text-[10px]">
-          {getViewDescription()}
-        </p>
+        <p className="text-gray-400 text-[10px]">{getViewDescription()}</p>
       </div>
 
       {/* Quick actions */}
@@ -117,18 +120,25 @@ export function AppSidebar({
           </div>
           <div className="space-y-0.5">
             {serviceConfigs.map((config) => {
-              const env = serviceEnvironments[config.name] || ENVIRONMENTS.LOCAL;
+              const env =
+                serviceEnvironments[config.name] || ENVIRONMENTS.LOCAL;
               return (
                 <div
                   key={config.name}
                   className="flex items-center justify-between px-2 py-1 rounded hover:bg-gray-700"
                 >
-                  <span className="truncate">{config.displayName || config.name}</span>
-                  <span className={`text-[9px] px-1.5 py-0.5 rounded ${
-                    env === ENVIRONMENTS.PROD ? 'bg-red-900/50 text-red-300' :
-                    env === ENVIRONMENTS.DEV ? 'bg-blue-900/50 text-blue-300' :
-                    'bg-gray-700 text-gray-400'
-                  }`}>
+                  <span className="truncate">
+                    {config.displayName || config.name}
+                  </span>
+                  <span
+                    className={`text-[9px] px-1.5 py-0.5 rounded ${
+                      env === ENVIRONMENTS.PROD
+                        ? "bg-red-900/50 text-red-300"
+                        : env === ENVIRONMENTS.DEV
+                          ? "bg-blue-900/50 text-blue-300"
+                          : "bg-gray-700 text-gray-400"
+                    }`}
+                  >
                     {env.toUpperCase()}
                   </span>
                 </div>
@@ -140,4 +150,3 @@ export function AppSidebar({
     </div>
   );
 }
-

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from "react";
 
 export function useServiceCardResize(serviceName: string) {
   const [logHeight, setLogHeight] = useState(() => {
@@ -18,23 +18,26 @@ export function useServiceCardResize(serviceName: string) {
       const maxHeight = window.innerHeight * 0.8;
       const clampedHeight = Math.max(minHeight, Math.min(maxHeight, newHeight));
       setLogHeight(clampedHeight);
-      localStorage.setItem(`service-${serviceName}-log-height`, clampedHeight.toString());
+      localStorage.setItem(
+        `service-${serviceName}-log-height`,
+        clampedHeight.toString(),
+      );
     };
 
     const handleMouseUp = () => {
       setIsResizing(false);
     };
 
-    document.addEventListener('mousemove', handleMouseMove);
-    document.addEventListener('mouseup', handleMouseUp);
-    document.body.style.cursor = 'ns-resize';
-    document.body.style.userSelect = 'none';
+    document.addEventListener("mousemove", handleMouseMove);
+    document.addEventListener("mouseup", handleMouseUp);
+    document.body.style.cursor = "ns-resize";
+    document.body.style.userSelect = "none";
 
     return () => {
-      document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseup', handleMouseUp);
-      document.body.style.cursor = '';
-      document.body.style.userSelect = '';
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseup", handleMouseUp);
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
     };
   }, [isResizing, serviceName]);
 
@@ -50,4 +53,3 @@ export function useServiceCardResize(serviceName: string) {
     handleResizeStart,
   };
 }
-

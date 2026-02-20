@@ -1,5 +1,6 @@
 use crate::helpers::{check_azure_cli_installed, check_winget_available};
 use crate::types::CommandResponse;
+#[cfg(target_os = "windows")]
 use std::process::Command;
 
 /// Check if Azure CLI is installed
@@ -7,7 +8,7 @@ use std::process::Command;
 pub async fn check_azure_cli() -> Result<CommandResponse, String> {
     let is_installed = check_azure_cli_installed();
     let winget_available = check_winget_available();
-    
+
     Ok(CommandResponse {
         success: true,
         result: Some(serde_json::json!({
@@ -37,7 +38,7 @@ pub async fn install_azure_cli() -> Result<CommandResponse, String> {
                 error: Some("winget is not available. Please install Azure CLI manually from https://aka.ms/installazurecliwindows".to_string()),
             });
         }
-        
+
         // Install Azure CLI via winget in a visible terminal window
         // Use cmd /c start to open a new visible PowerShell window that stays open
         let spawn_result = Command::new("cmd")
@@ -48,7 +49,7 @@ pub async fn install_azure_cli() -> Result<CommandResponse, String> {
             .arg("-Command")
             .arg("winget install Microsoft.AzureCLI --accept-package-agreements --accept-source-agreements; Write-Host 'Installation complete. You can close this window.'; pause")
             .spawn();
-        
+
         match spawn_result {
             Ok(_) => {
                 Ok(CommandResponse {
@@ -69,7 +70,7 @@ pub async fn install_azure_cli() -> Result<CommandResponse, String> {
             }),
         }
     }
-    
+
     #[cfg(not(target_os = "windows"))]
     {
         Ok(CommandResponse {
@@ -80,4 +81,3 @@ pub async fn install_azure_cli() -> Result<CommandResponse, String> {
         })
     }
 }
-

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState } from "react";
 
 interface TruncatedIdProps {
   id: string;
@@ -11,7 +11,7 @@ interface TruncatedIdProps {
   /** Additional CSS classes */
   className?: string;
   /** Text size class (default: text-xs) */
-  size?: 'xs' | 'sm' | 'base';
+  size?: "xs" | "sm" | "base";
 }
 
 /**
@@ -23,8 +23,8 @@ export function TruncatedId({
   showStart = 8,
   showEnd = 4,
   showFullOnHover = true,
-  className = '',
-  size = 'xs',
+  className = "",
+  size = "xs",
 }: TruncatedIdProps) {
   const [copied, setCopied] = useState(false);
   const [showFull, setShowFull] = useState(false);
@@ -43,14 +43,14 @@ export function TruncatedId({
       setCopied(true);
       setTimeout(() => setCopied(false), 1500);
     } catch (error) {
-      console.error('Failed to copy ID:', error);
+      console.error("Failed to copy ID:", error);
     }
   };
 
   const sizeClass = {
-    xs: 'text-[10px]',
-    sm: 'text-xs',
-    base: 'text-sm',
+    xs: "text-[10px]",
+    sm: "text-xs",
+    base: "text-sm",
   }[size];
 
   return (
@@ -67,7 +67,9 @@ export function TruncatedId({
         {showFull ? id : truncatedId}
       </code>
       {copied && (
-        <span className={`${sizeClass} text-green-600 dark:text-green-400 font-semibold`}>
+        <span
+          className={`${sizeClass} text-green-600 dark:text-green-400 font-semibold`}
+        >
           ✓
         </span>
       )}
@@ -92,15 +94,19 @@ interface AzureResourceIdProps {
   className?: string;
 }
 
-export function AzureResourceId({ resourceId, className = '' }: AzureResourceIdProps) {
+export function AzureResourceId({
+  resourceId,
+  className = "",
+}: AzureResourceIdProps) {
   const [copied, setCopied] = useState(false);
 
   if (!resourceId) return null;
 
   // Parse Azure Resource ID: /subscriptions/.../resourceGroups/.../providers/.../resourceType/resourceName
-  const parts = resourceId.split('/');
-  const rgIndex = parts.findIndex(p => p.toLowerCase() === 'resourcegroups');
-  const resourceGroup = rgIndex >= 0 && parts[rgIndex + 1] ? parts[rgIndex + 1] : null;
+  const parts = resourceId.split("/");
+  const rgIndex = parts.findIndex((p) => p.toLowerCase() === "resourcegroups");
+  const resourceGroup =
+    rgIndex >= 0 && parts[rgIndex + 1] ? parts[rgIndex + 1] : null;
   const resourceName = parts[parts.length - 1];
 
   const handleCopy = async () => {
@@ -109,7 +115,7 @@ export function AzureResourceId({ resourceId, className = '' }: AzureResourceIdP
       setCopied(true);
       setTimeout(() => setCopied(false), 1500);
     } catch (error) {
-      console.error('Failed to copy Resource ID:', error);
+      console.error("Failed to copy Resource ID:", error);
     }
   };
 

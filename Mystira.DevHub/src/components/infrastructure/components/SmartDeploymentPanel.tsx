@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 import {
   Square,
   SkipForward,
@@ -16,12 +16,12 @@ import {
   Check,
   Rocket,
   Settings2,
-} from 'lucide-react';
+} from "lucide-react";
 import {
   useSmartDeploymentStore,
   AZURE_REGIONS,
   type RegionStatus,
-} from '../../../stores/smartDeploymentStore';
+} from "../../../stores/smartDeploymentStore";
 import {
   PrerequisitesCheckPanel,
   ResourceDiscoveryPanel,
@@ -32,7 +32,7 @@ import {
   type StaticWebApp,
   type DiscoveredResources,
   type DeployMode,
-} from './deploy-now';
+} from "./deploy-now";
 
 interface SmartDeploymentPanelProps {
   repoRoot: string;
@@ -57,26 +57,34 @@ export function SmartDeploymentPanel({ repoRoot }: SmartDeploymentPanelProps) {
     reset,
   } = useSmartDeploymentStore();
 
-  const [_azureAccount, setAzureAccount] = useState<{ name: string; id: string } | null>(null);
+  const [_azureAccount, setAzureAccount] = useState<{
+    name: string;
+    id: string;
+  } | null>(null);
 
   const [copiedField, setCopiedField] = useState<string | null>(null);
   const [prerequisitesReady, setPrerequisitesReady] = useState(false);
-  const [discoveredResources, setDiscoveredResources] = useState<DiscoveredResources | null>(null);
-  const [selectedResourceGroup, setSelectedResourceGroup] = useState<ResourceGroup | null>(null);
-  const [selectedStaticWebApp, setSelectedStaticWebApp] = useState<StaticWebApp | null>(null);
-  const [deployMode, setDeployMode] = useState<DeployMode>('auto');
+  const [discoveredResources, setDiscoveredResources] =
+    useState<DiscoveredResources | null>(null);
+  const [selectedResourceGroup, setSelectedResourceGroup] =
+    useState<ResourceGroup | null>(null);
+  const [selectedStaticWebApp, setSelectedStaticWebApp] =
+    useState<StaticWebApp | null>(null);
+  const [deployMode, setDeployMode] = useState<DeployMode>("auto");
   const [showAdvancedConfig, setShowAdvancedConfig] = useState(false);
 
   // Determine if infrastructure exists
   const hasInfrastructure = Boolean(
     (selectedResourceGroup && selectedResourceGroup.hasResources) ||
     selectedStaticWebApp ||
-    (discoveredResources && (discoveredResources.resourceGroups.some(rg => rg.hasResources) || discoveredResources.staticWebApps.length > 0))
+    (discoveredResources &&
+      (discoveredResources.resourceGroups.some((rg) => rg.hasResources) ||
+        discoveredResources.staticWebApps.length > 0)),
   );
 
   // Auto-select deploy mode based on infrastructure state
   useEffect(() => {
-    if (deployMode === 'auto') {
+    if (deployMode === "auto") {
       // Don't auto-switch - let user decide
     }
   }, [hasInfrastructure]);
@@ -91,7 +99,9 @@ export function SmartDeploymentPanel({ repoRoot }: SmartDeploymentPanelProps) {
     setDiscoveredResources(resources);
     // Auto-select the first resource group with resources if none selected
     if (!selectedResourceGroup && resources.resourceGroups.length > 0) {
-      const rgWithResources = resources.resourceGroups.find(rg => rg.hasResources);
+      const rgWithResources = resources.resourceGroups.find(
+        (rg) => rg.hasResources,
+      );
       if (rgWithResources) {
         setSelectedResourceGroup(rgWithResources);
       }
@@ -102,8 +112,10 @@ export function SmartDeploymentPanel({ repoRoot }: SmartDeploymentPanelProps) {
   const currentStatus = regionStatuses.get(currentRegion);
 
   // Determine the current resource group and region for config panel
-  const currentResourceGroup = selectedResourceGroup?.name || `mys-dev-mystira-rg-san`;
-  const currentRegionCode = selectedResourceGroup?.location || 'southafricanorth';
+  const currentResourceGroup =
+    selectedResourceGroup?.name || `mys-dev-mystira-rg-san`;
+  const currentRegionCode =
+    selectedResourceGroup?.location || "southafricanorth";
 
   return (
     <div className="flex flex-col h-full bg-gray-50 dark:bg-gray-900">
@@ -124,7 +136,9 @@ export function SmartDeploymentPanel({ repoRoot }: SmartDeploymentPanelProps) {
           <div className="flex items-center gap-3">
             <select
               value={environment}
-              onChange={(e) => setEnvironment(e.target.value as 'dev' | 'staging' | 'prod')}
+              onChange={(e) =>
+                setEnvironment(e.target.value as "dev" | "staging" | "prod")
+              }
               disabled={isDeploying}
               className="px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-sm disabled:opacity-50"
             >
@@ -136,8 +150,8 @@ export function SmartDeploymentPanel({ repoRoot }: SmartDeploymentPanelProps) {
               onClick={() => setShowAdvancedConfig(!showAdvancedConfig)}
               className={`p-2 rounded-lg border transition-colors ${
                 showAdvancedConfig
-                  ? 'bg-blue-50 dark:bg-blue-900/30 border-blue-300 dark:border-blue-700 text-blue-600'
-                  : 'border-gray-300 dark:border-gray-600 text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-700'
+                  ? "bg-blue-50 dark:bg-blue-900/30 border-blue-300 dark:border-blue-700 text-blue-600"
+                  : "border-gray-300 dark:border-gray-600 text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-700"
               }`}
               title="Advanced Configuration"
             >
@@ -177,7 +191,7 @@ export function SmartDeploymentPanel({ repoRoot }: SmartDeploymentPanelProps) {
         )}
 
         {/* Mode-specific panels */}
-        {prerequisitesReady && deployMode === 'infrastructure' && (
+        {prerequisitesReady && deployMode === "infrastructure" && (
           <>
             {/* Region Priority for Infrastructure Deployment */}
             <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
@@ -186,11 +200,13 @@ export function SmartDeploymentPanel({ repoRoot }: SmartDeploymentPanelProps) {
                 <span className="font-medium text-gray-900 dark:text-white text-sm">
                   Region Priority
                 </span>
-                <span className="text-xs text-gray-500">(auto-fallback on failure)</span>
+                <span className="text-xs text-gray-500">
+                  (auto-fallback on failure)
+                </span>
               </div>
               <div className="p-4 space-y-2">
                 {regionPriority.map((regionId, index) => {
-                  const region = AZURE_REGIONS.find(r => r.id === regionId)!;
+                  const region = AZURE_REGIONS.find((r) => r.id === regionId)!;
                   const status = regionStatuses.get(regionId);
 
                   return (
@@ -199,9 +215,13 @@ export function SmartDeploymentPanel({ repoRoot }: SmartDeploymentPanelProps) {
                       region={region}
                       index={index}
                       status={status}
-                      isCurrentTarget={isDeploying && index === currentRegionIndex}
+                      isCurrentTarget={
+                        isDeploying && index === currentRegionIndex
+                      }
                       canMoveUp={index > 0 && !isDeploying}
-                      canMoveDown={index < regionPriority.length - 1 && !isDeploying}
+                      canMoveDown={
+                        index < regionPriority.length - 1 && !isDeploying
+                      }
                       onMoveUp={() => moveRegionUp(regionId)}
                       onMoveDown={() => moveRegionDown(regionId)}
                     />
@@ -217,7 +237,9 @@ export function SmartDeploymentPanel({ repoRoot }: SmartDeploymentPanelProps) {
                   <div className="flex items-center gap-3">
                     <Loader2 className="w-5 h-5 text-blue-600 dark:text-blue-400 animate-spin" />
                     <span className="font-medium text-blue-900 dark:text-blue-200">
-                      Deploying to {AZURE_REGIONS.find(r => r.id === currentRegion)?.name}...
+                      Deploying to{" "}
+                      {AZURE_REGIONS.find((r) => r.id === currentRegion)?.name}
+                      ...
                     </span>
                   </div>
 
@@ -258,31 +280,64 @@ export function SmartDeploymentPanel({ repoRoot }: SmartDeploymentPanelProps) {
 
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between items-center py-1 border-b border-green-200 dark:border-green-800">
-                    <span className="text-green-700 dark:text-green-300">Region:</span>
+                    <span className="text-green-700 dark:text-green-300">
+                      Region:
+                    </span>
                     <span className="font-mono text-green-900 dark:text-green-200">
-                      {AZURE_REGIONS.find(r => r.id === deploymentResult.region)?.name}
+                      {
+                        AZURE_REGIONS.find(
+                          (r) => r.id === deploymentResult.region,
+                        )?.name
+                      }
                     </span>
                   </div>
                   <div className="flex justify-between items-center py-1 border-b border-green-200 dark:border-green-800">
-                    <span className="text-green-700 dark:text-green-300">Resource Group:</span>
+                    <span className="text-green-700 dark:text-green-300">
+                      Resource Group:
+                    </span>
                     <div className="flex items-center gap-2">
                       <span className="font-mono text-green-900 dark:text-green-200">
                         {deploymentResult.resourceGroup}
                       </span>
-                      <button onClick={() => handleCopy(deploymentResult.resourceGroup, 'rg')} className="p-1 hover:bg-green-200 dark:hover:bg-green-800 rounded">
-                        {copiedField === 'rg' ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+                      <button
+                        onClick={() =>
+                          handleCopy(deploymentResult.resourceGroup, "rg")
+                        }
+                        className="p-1 hover:bg-green-200 dark:hover:bg-green-800 rounded"
+                      >
+                        {copiedField === "rg" ? (
+                          <Check className="w-3 h-3" />
+                        ) : (
+                          <Copy className="w-3 h-3" />
+                        )}
                       </button>
                     </div>
                   </div>
                   {deploymentResult.apiUrl && (
                     <div className="flex justify-between items-center py-1">
-                      <span className="text-green-700 dark:text-green-300">API URL:</span>
+                      <span className="text-green-700 dark:text-green-300">
+                        API URL:
+                      </span>
                       <div className="flex items-center gap-2">
-                        <a href={deploymentResult.apiUrl} target="_blank" rel="noopener noreferrer" className="font-mono text-green-900 dark:text-green-200 hover:underline">
+                        <a
+                          href={deploymentResult.apiUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="font-mono text-green-900 dark:text-green-200 hover:underline"
+                        >
                           {deploymentResult.apiUrl}
                         </a>
-                        <button onClick={() => handleCopy(deploymentResult.apiUrl!, 'api')} className="p-1 hover:bg-green-200 dark:hover:bg-green-800 rounded">
-                          {copiedField === 'api' ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+                        <button
+                          onClick={() =>
+                            handleCopy(deploymentResult.apiUrl!, "api")
+                          }
+                          className="p-1 hover:bg-green-200 dark:hover:bg-green-800 rounded"
+                        >
+                          {copiedField === "api" ? (
+                            <Check className="w-3 h-3" />
+                          ) : (
+                            <Copy className="w-3 h-3" />
+                          )}
                         </button>
                       </div>
                     </div>
@@ -292,7 +347,8 @@ export function SmartDeploymentPanel({ repoRoot }: SmartDeploymentPanelProps) {
                 {/* Next step suggestion */}
                 <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
                   <p className="text-sm text-blue-700 dark:text-blue-300">
-                    <strong>Next step:</strong> Switch to "Deploy Code" mode to push your application code.
+                    <strong>Next step:</strong> Switch to "Deploy Code" mode to
+                    push your application code.
                   </p>
                 </div>
               </div>
@@ -308,7 +364,8 @@ export function SmartDeploymentPanel({ repoRoot }: SmartDeploymentPanelProps) {
                   </span>
                 </div>
                 <p className="text-sm text-red-700 dark:text-red-300 mb-3">
-                  All regions have been exhausted. Check the logs below for details.
+                  All regions have been exhausted. Check the logs below for
+                  details.
                 </p>
                 <div className="flex gap-2">
                   <button
@@ -325,7 +382,7 @@ export function SmartDeploymentPanel({ repoRoot }: SmartDeploymentPanelProps) {
         )}
 
         {/* Code Deployment Mode */}
-        {prerequisitesReady && deployMode === 'code' && (
+        {prerequisitesReady && deployMode === "code" && (
           <GitOperationsPanel
             repoRoot={repoRoot}
             onDeployTriggered={() => {
@@ -348,12 +405,18 @@ export function SmartDeploymentPanel({ repoRoot }: SmartDeploymentPanelProps) {
         {(logs.length > 0 || isDeploying) && (
           <div className="bg-gray-900 rounded-lg overflow-hidden">
             <div className="px-4 py-2 bg-gray-800 border-b border-gray-700 flex items-center justify-between">
-              <span className="text-sm font-medium text-gray-300">Deployment Logs</span>
-              <span className="text-xs text-gray-500">{logs.length} entries</span>
+              <span className="text-sm font-medium text-gray-300">
+                Deployment Logs
+              </span>
+              <span className="text-xs text-gray-500">
+                {logs.length} entries
+              </span>
             </div>
             <div className="p-4 h-48 overflow-auto font-mono text-xs text-gray-300 space-y-1">
               {logs.length === 0 ? (
-                <span className="text-gray-500">Waiting for deployment to start...</span>
+                <span className="text-gray-500">
+                  Waiting for deployment to start...
+                </span>
               ) : (
                 logs.map((log, i) => (
                   <div key={i} className={getLogClass(log)}>
@@ -383,12 +446,16 @@ export function SmartDeploymentPanel({ repoRoot }: SmartDeploymentPanelProps) {
             ) : deploymentResult?.success ? (
               <span className="flex items-center gap-2 text-green-600 dark:text-green-400">
                 <CheckCircle2 className="w-4 h-4" />
-                Deployed to {AZURE_REGIONS.find(r => r.id === deploymentResult.region)?.name}
+                Deployed to{" "}
+                {
+                  AZURE_REGIONS.find((r) => r.id === deploymentResult.region)
+                    ?.name
+                }
               </span>
-            ) : deployMode === 'code' ? (
-              'Ready to deploy code via git push'
+            ) : deployMode === "code" ? (
+              "Ready to deploy code via git push"
             ) : (
-              'Ready to deploy infrastructure'
+              "Ready to deploy infrastructure"
             )}
           </div>
 
@@ -402,7 +469,7 @@ export function SmartDeploymentPanel({ repoRoot }: SmartDeploymentPanelProps) {
               </button>
             )}
 
-            {deployMode === 'infrastructure' && (
+            {deployMode === "infrastructure" && (
               <button
                 onClick={() => startDeployment(repoRoot)}
                 disabled={isDeploying || !prerequisitesReady}
@@ -430,7 +497,7 @@ export function SmartDeploymentPanel({ repoRoot }: SmartDeploymentPanelProps) {
 
 // Region row component
 interface RegionRowProps {
-  region: typeof AZURE_REGIONS[number];
+  region: (typeof AZURE_REGIONS)[number];
   index: number;
   status?: RegionStatus;
   isCurrentTarget: boolean;
@@ -452,32 +519,35 @@ function RegionRow({
 }: RegionRowProps) {
   const getStatusIcon = () => {
     switch (status?.status) {
-      case 'deploying':
+      case "deploying":
         return <Loader2 className="w-4 h-4 text-blue-500 animate-spin" />;
-      case 'success':
+      case "success":
         return <CheckCircle2 className="w-4 h-4 text-green-500" />;
-      case 'failed':
+      case "failed":
         return <XCircle className="w-4 h-4 text-red-500" />;
-      case 'skipped':
+      case "skipped":
         return <Clock className="w-4 h-4 text-gray-400" />;
       default:
-        return <div className="w-4 h-4 rounded-full border-2 border-gray-300 dark:border-gray-600" />;
+        return (
+          <div className="w-4 h-4 rounded-full border-2 border-gray-300 dark:border-gray-600" />
+        );
     }
   };
 
   const getRowClass = () => {
-    let base = 'flex items-center justify-between p-3 rounded-lg border transition-colors';
+    let base =
+      "flex items-center justify-between p-3 rounded-lg border transition-colors";
 
     if (isCurrentTarget) {
       return `${base} bg-blue-50 dark:bg-blue-900/30 border-blue-300 dark:border-blue-700`;
     }
-    if (status?.status === 'success') {
+    if (status?.status === "success") {
       return `${base} bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800`;
     }
-    if (status?.status === 'failed') {
+    if (status?.status === "failed") {
       return `${base} bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800`;
     }
-    if (status?.status === 'skipped') {
+    if (status?.status === "skipped") {
       return `${base} bg-gray-100 dark:bg-gray-800 border-gray-200 dark:border-gray-700 opacity-50`;
     }
 
@@ -503,14 +573,17 @@ function RegionRow({
 
       <div className="flex items-center gap-2">
         {status?.error && (
-          <div className="text-xs text-red-600 dark:text-red-400 max-w-48 truncate" title={status.error}>
+          <div
+            className="text-xs text-red-600 dark:text-red-400 max-w-48 truncate"
+            title={status.error}
+          >
             {status.isRetryable ? (
               <span className="flex items-center gap-1">
                 <AlertTriangle className="w-3 h-3" />
                 Region issue
               </span>
             ) : (
-              status.error.slice(0, 30) + '...'
+              status.error.slice(0, 30) + "..."
             )}
           </div>
         )}
@@ -537,19 +610,32 @@ function RegionRow({
 }
 
 function getLogClass(log: string): string {
-  if (log.includes('✓') || log.includes('successful') || log.includes('Success')) {
-    return 'text-green-400';
+  if (
+    log.includes("✓") ||
+    log.includes("successful") ||
+    log.includes("Success")
+  ) {
+    return "text-green-400";
   }
-  if (log.includes('✗') || log.includes('failed') || log.includes('Failed') || log.includes('Error')) {
-    return 'text-red-400';
+  if (
+    log.includes("✗") ||
+    log.includes("failed") ||
+    log.includes("Failed") ||
+    log.includes("Error")
+  ) {
+    return "text-red-400";
   }
-  if (log.includes('Attempting') || log.includes('Trying') || log.includes('...')) {
-    return 'text-blue-400';
+  if (
+    log.includes("Attempting") ||
+    log.includes("Trying") ||
+    log.includes("...")
+  ) {
+    return "text-blue-400";
   }
-  if (log.includes('Skip') || log.includes('Cancel')) {
-    return 'text-yellow-400';
+  if (log.includes("Skip") || log.includes("Cancel")) {
+    return "text-yellow-400";
   }
-  return 'text-gray-300';
+  return "text-gray-300";
 }
 
 export default SmartDeploymentPanel;

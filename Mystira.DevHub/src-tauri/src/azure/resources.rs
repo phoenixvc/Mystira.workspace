@@ -1,22 +1,33 @@
 // Azure resource management commands
 
-use crate::helpers::{check_azure_cli_installed, check_winget_available, get_azure_subscription_id, get_azure_cli_path};
-use crate::types::CommandResponse;
-use crate::cache::{AZURE_RESOURCES_CACHE, get_cache_ttl};
+use crate::cache::{get_cache_ttl, AZURE_RESOURCES_CACHE};
+use crate::helpers::{
+    check_azure_cli_installed, check_winget_available, get_azure_cli_path,
+    get_azure_subscription_id,
+};
 use crate::rate_limit::wait_azure_rate_limit;
+use crate::types::CommandResponse;
 use std::process::Command;
-use tracing::{info, warn, error, debug};
+use tracing::{debug, error, info, warn};
 
 /// Get Azure resources, optionally filtered by environment
 #[tauri::command]
-pub async fn get_azure_resources(subscription_id: Option<String>, environment: Option<String>) -> Result<CommandResponse, String> {
-    debug!("Fetching Azure resources: subscription={:?}, environment={:?}", subscription_id, environment);
-    
+pub async fn get_azure_resources(
+    subscription_id: Option<String>,
+    environment: Option<String>,
+) -> Result<CommandResponse, String> {
+    debug!(
+        "Fetching Azure resources: subscription={:?}, environment={:?}",
+        subscription_id, environment
+    );
+
     // Build cache key
-    let cache_key = format!("azure_resources:{}:{}", 
+    let cache_key = format!(
+        "azure_resources:{}:{}",
         subscription_id.as_ref().unwrap_or(&"default".to_string()),
-        environment.as_ref().unwrap_or(&"all".to_string()));
-    
+        environment.as_ref().unwrap_or(&"all".to_string())
+    );
+
     // Try cache first
     let ttl = get_cache_ttl("azure_resources");
     if let Some(cached) = AZURE_RESOURCES_CACHE.get(&cache_key) {
@@ -29,7 +40,7 @@ pub async fn get_azure_resources(subscription_id: Option<String>, environment: O
             }
         }
     }
-    
+
     if !check_azure_cli_installed() {
         warn!("Azure CLI not installed when fetching resources");
         let winget_available = check_winget_available();
@@ -38,7 +49,7 @@ pub async fn get_azure_resources(subscription_id: Option<String>, environment: O
         } else {
             "Azure CLI is not installed. Please install it from https://aka.ms/installazurecliwindows"
         };
-        
+
         return Ok(CommandResponse {
             success: false,
             result: Some(serde_json::json!({
@@ -52,7 +63,7 @@ pub async fn get_azure_resources(subscription_id: Option<String>, environment: O
 
     // Apply rate limiting
     wait_azure_rate_limit().await;
-    
+
     let (az_path, use_direct_path) = get_azure_cli_path();
 
     // Set subscription if provided
@@ -61,7 +72,11 @@ pub async fn get_azure_resources(subscription_id: Option<String>, environment: O
             Command::new("powershell")
                 .arg("-NoProfile")
                 .arg("-Command")
-                .arg(format!("& '{}' account set --subscription '{}'", az_path.replace("'", "''"), sub_id.replace("'", "''")))
+                .arg(format!(
+                    "& '{}' account set --subscription '{}'",
+                    az_path.replace("'", "''"),
+                    sub_id.replace("'", "''")
+                ))
                 .output()
         } else {
             Command::new("az")
@@ -78,7 +93,10 @@ pub async fn get_azure_resources(subscription_id: Option<String>, environment: O
         Command::new("powershell")
             .arg("-NoProfile")
             .arg("-Command")
-            .arg(format!("& '{}' resource list --output json", az_path.replace("'", "''")))
+            .arg(format!(
+                "& '{}' resource list --output json",
+                az_path.replace("'", "''")
+            ))
             .output()
     } else {
         Command::new("az")
@@ -93,31 +111,55 @@ pub async fn get_azure_resources(subscription_id: Option<String>, environment: O
         Ok(result) => {
             if result.status.success() {
                 let stdout = String::from_utf8_lossy(&result.stdout);
-                
+
                 let resources: Result<Vec<serde_json::Value>, _> = serde_json::from_str(&stdout);
-                
+
                 match resources {
                     Ok(resources_vec) => {
                         // Filter by environment if provided
                         let filter_applied = environment.is_some();
-                        let filtered_resources: Vec<&serde_json::Value> = if let Some(env) = &environment {
-                            resources_vec.iter().filter(|r| {
-                                let name = r.get("name").and_then(|v| v.as_str()).unwrap_or("").to_lowercase();
-                                let resource_group = r.get("resourceGroup").and_then(|v| v.as_str()).unwrap_or("").to_lowercase();
-                                
-                                let name_matches = name.contains(&env.to_lowercase()) || name.starts_with(&format!("{}-", env.to_lowercase()));
-                                let rg_matches = resource_group.contains(&env.to_lowercase()) || resource_group.starts_with(&format!("{}-", env.to_lowercase()));
-                                
-                                let tags_match = r.get("tags").and_then(|t| {
-                                    t.as_object().and_then(|tags_obj| {
-                                        tags_obj.values().find(|v| {
-                                            v.as_str().map(|s| s.to_lowercase().contains(&env.to_lowercase())).unwrap_or(false)
+                        let filtered_resources: Vec<&serde_json::Value> = if let Some(env) =
+                            &environment
+                        {
+                            resources_vec
+                                .iter()
+                                .filter(|r| {
+                                    let name = r
+                                        .get("name")
+                                        .and_then(|v| v.as_str())
+                                        .unwrap_or("")
+                                        .to_lowercase();
+                                    let resource_group = r
+                                        .get("resourceGroup")
+                                        .and_then(|v| v.as_str())
+                                        .unwrap_or("")
+                                        .to_lowercase();
+
+                                    let name_matches = name.contains(&env.to_lowercase())
+                                        || name.starts_with(&format!("{}-", env.to_lowercase()));
+                                    let rg_matches = resource_group.contains(&env.to_lowercase())
+                                        || resource_group
+                                            .starts_with(&format!("{}-", env.to_lowercase()));
+
+                                    let tags_match = r
+                                        .get("tags")
+                                        .and_then(|t| {
+                                            t.as_object().and_then(|tags_obj| {
+                                                tags_obj.values().find(|v| {
+                                                    v.as_str()
+                                                        .map(|s| {
+                                                            s.to_lowercase()
+                                                                .contains(&env.to_lowercase())
+                                                        })
+                                                        .unwrap_or(false)
+                                                })
+                                            })
                                         })
-                                    })
-                                }).is_some();
-                                
-                                name_matches || rg_matches || tags_match
-                            }).collect()
+                                        .is_some();
+
+                                    name_matches || rg_matches || tags_match
+                                })
+                                .collect()
                         } else {
                             resources_vec.iter().collect()
                         };
@@ -135,8 +177,8 @@ pub async fn get_azure_resources(subscription_id: Option<String>, environment: O
                             })
                         }).collect();
 
-                        info!("Successfully fetched {} Azure resources (filtered: {}, filter_applied: {})", 
-                            resources_vec.len(), 
+                        info!("Successfully fetched {} Azure resources (filtered: {}, filter_applied: {})",
+                            resources_vec.len(),
                             transformed.len(),
                             filter_applied);
 
@@ -146,7 +188,7 @@ pub async fn get_azure_resources(subscription_id: Option<String>, environment: O
                             message: Some(format!("Found {} resources", transformed.len())),
                             error: None,
                         };
-                        
+
                         // Cache the response
                         if let Ok(cached_json) = serde_json::to_string(&response) {
                             AZURE_RESOURCES_CACHE.set(cache_key.clone(), cached_json, ttl);
@@ -160,9 +202,13 @@ pub async fn get_azure_resources(subscription_id: Option<String>, environment: O
                             success: false,
                             result: None,
                             message: None,
-                            error: Some(format!("Failed to parse Azure CLI response: {}. Output: {}", e, stdout)),
+                            error: Some(format!(
+                                "Failed to parse Azure CLI response: {}. Output (truncated): {}",
+                                e,
+                                stdout.chars().take(200).collect::<String>()
+                            )),
                         })
-                    },
+                    }
                 }
             } else {
                 let stderr = String::from_utf8_lossy(&result.stderr);
@@ -184,7 +230,7 @@ pub async fn get_azure_resources(subscription_id: Option<String>, environment: O
                 message: None,
                 error: Some(format!("Failed to execute Azure CLI: {}", e)),
             })
-        },
+        }
     }
 }
 
@@ -198,7 +244,7 @@ pub async fn delete_azure_resource(resource_id: String) -> Result<CommandRespons
         } else {
             "Azure CLI is not installed. Please install it from https://aka.ms/installazurecliwindows"
         };
-        
+
         return Ok(CommandResponse {
             success: false,
             result: Some(serde_json::json!({
@@ -214,15 +260,13 @@ pub async fn delete_azure_resource(resource_id: String) -> Result<CommandRespons
     let parts: Vec<&str> = resource_id.split('/').collect();
     let mut resource_group = String::new();
     let mut resource_name = String::new();
-    
+
     for (i, part) in parts.iter().enumerate() {
         if part == &"resourceGroups" && i + 1 < parts.len() {
             resource_group = parts[i + 1].to_string();
         }
-        if i > 0 && parts[i - 1] == "providers" && i < parts.len() {
-            if i + 1 < parts.len() {
-                resource_name = parts[i + 1].to_string();
-            }
+        if i > 0 && parts[i - 1] == "providers" && i < parts.len() && i + 1 < parts.len() {
+            resource_name = parts[i + 1].to_string();
         }
     }
 
@@ -243,7 +287,11 @@ pub async fn delete_azure_resource(resource_id: String) -> Result<CommandRespons
         Command::new("powershell")
             .arg("-NoProfile")
             .arg("-Command")
-            .arg(format!("& '{}' resource delete --ids '{}'", az_path.replace("'", "''"), resource_id.replace("'", "''")))
+            .arg(format!(
+                "& '{}' resource delete --ids '{}'",
+                az_path.replace("'", "''"),
+                resource_id.replace("'", "''")
+            ))
             .output()
     } else {
         Command::new("az")
@@ -263,12 +311,15 @@ pub async fn delete_azure_resource(resource_id: String) -> Result<CommandRespons
                     result: Some(serde_json::json!({
                         "message": format!("Resource {} deleted successfully", resource_name)
                     })),
-                    message: Some(format!("Resource deleted successfully")),
+                    message: Some("Resource deleted successfully".to_string()),
                     error: None,
                 })
             } else {
                 let error_msg = String::from_utf8_lossy(&output.stderr);
-                error!("Failed to delete Azure resource {}: {}", resource_name, error_msg);
+                error!(
+                    "Failed to delete Azure resource {}: {}",
+                    resource_name, error_msg
+                );
                 Ok(CommandResponse {
                     success: false,
                     result: None,
@@ -285,7 +336,7 @@ pub async fn delete_azure_resource(resource_id: String) -> Result<CommandRespons
                 message: None,
                 error: Some(format!("Failed to delete resource: {}", e)),
             })
-        },
+        }
     }
 }
 
@@ -308,7 +359,10 @@ pub async fn check_subscription_owner() -> Result<CommandResponse, String> {
         Command::new("powershell")
             .arg("-NoProfile")
             .arg("-Command")
-            .arg(format!("& '{}' account show --query user.name --output tsv", az_path.replace("'", "''")))
+            .arg(format!(
+                "& '{}' account show --query user.name --output tsv",
+                az_path.replace("'", "''")
+            ))
             .output()
     } else {
         Command::new("az")
@@ -371,7 +425,10 @@ pub async fn check_subscription_owner() -> Result<CommandResponse, String> {
             .arg("--scope")
             .arg(format!("/subscriptions/{}", sub_id))
             .arg("--query")
-            .arg(format!("[?principalName=='{}' && roleDefinitionName=='Owner']", user_name))
+            .arg(format!(
+                "[?principalName=='{}' && roleDefinitionName=='Owner']",
+                user_name
+            ))
             .arg("--output")
             .arg("json")
             .output()
@@ -382,7 +439,7 @@ pub async fn check_subscription_owner() -> Result<CommandResponse, String> {
             if result.status.success() {
                 let stdout = String::from_utf8_lossy(&result.stdout);
                 let assignments: Result<Vec<serde_json::Value>, _> = serde_json::from_str(&stdout);
-                
+
                 match assignments {
                     Ok(assignments_vec) => {
                         let is_owner = !assignments_vec.is_empty();

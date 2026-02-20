@@ -1,13 +1,13 @@
-import { ReactElement } from 'react';
-import { render, RenderOptions } from '@testing-library/react';
-import { vi } from 'vitest';
+import { ReactElement } from "react";
+import { render, RenderOptions } from "@testing-library/react";
+import { vi } from "vitest";
 
 /**
  * Custom render function that wraps components with providers
  */
 export function renderWithProviders(
   ui: ReactElement,
-  options?: Omit<RenderOptions, 'wrapper'>
+  options?: Omit<RenderOptions, "wrapper">,
 ) {
   return render(ui, { ...options });
 }
@@ -16,7 +16,7 @@ export function renderWithProviders(
  * Mock Tauri invoke function
  */
 export async function mockTauriInvoke(command: string, response: any) {
-  const { invoke } = vi.mocked(await import('@tauri-apps/api/tauri'));
+  const { invoke } = vi.mocked(await import("@tauri-apps/api/core"));
   invoke.mockImplementation((cmd: string) => {
     if (cmd === command) {
       return Promise.resolve(response);
@@ -92,13 +92,13 @@ export function mockGitHubDeploymentsResponse(deployments: any[] = []) {
  */
 export function createTestResource(overrides: Partial<any> = {}) {
   return {
-    id: '/subscriptions/test/resourceGroups/test-rg/providers/Microsoft.Storage/storageAccounts/testaccount',
-    name: 'testaccount',
-    type: 'Microsoft.Storage/storageAccounts',
-    location: 'eastus',
-    resourceGroup: 'test-rg',
-    sku: { name: 'Standard_LRS' },
-    kind: 'StorageV2',
+    id: "/subscriptions/test/resourceGroups/test-rg/providers/Microsoft.Storage/storageAccounts/testaccount",
+    name: "testaccount",
+    type: "Microsoft.Storage/storageAccounts",
+    location: "eastus",
+    resourceGroup: "test-rg",
+    sku: { name: "Standard_LRS" },
+    kind: "StorageV2",
     ...overrides,
   };
 }
@@ -109,20 +109,20 @@ export function createTestResource(overrides: Partial<any> = {}) {
 export function createTestDeployment(overrides: Partial<any> = {}) {
   return {
     id: 123456,
-    name: 'Infrastructure Deploy',
-    display_title: 'Deploy infrastructure to dev',
-    status: 'completed',
-    conclusion: 'success',
+    name: "Infrastructure Deploy",
+    display_title: "Deploy infrastructure to dev",
+    status: "completed",
+    conclusion: "success",
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
-    html_url: 'https://github.com/test/repo/actions/runs/123456',
+    html_url: "https://github.com/test/repo/actions/runs/123456",
     actor: {
-      login: 'testuser',
+      login: "testuser",
     },
     ...overrides,
   };
 }
 
 // Re-export testing library utilities
-export * from '@testing-library/react';
-export { vi } from 'vitest';
+export * from "@testing-library/react";
+export { vi } from "vitest";
