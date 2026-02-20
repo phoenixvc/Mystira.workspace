@@ -54,6 +54,18 @@ public class Scene
     public List<Branch> Branches { get; set; } = new();
     public List<EchoReveal> EchoReveals { get; set; } = new();
     public int? Difficulty { get; set; }
+    public SceneMetadata? Metadata { get; set; }
+}
+
+public class SceneMetadata
+{
+    /// <summary>
+    /// Creative instruction for media/audio content creators.
+    /// Describes the scene's visual and audio atmosphere, especially for high-impact "Wow" moments
+    /// that should be brought to life through immersive production.
+    /// May be null or empty if no specific creative guidance is needed.
+    /// </summary>
+    public string? CreativeInstruction { get; set; }
 }
 
 public class Branch

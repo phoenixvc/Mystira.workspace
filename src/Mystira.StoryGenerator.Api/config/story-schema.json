@@ -75,7 +75,8 @@
           "difficulty",
           "media",
           "branches",
-          "echo_reveals"
+          "echo_reveals",
+          "metadata"
         ],
         "properties": {
           "id": { "type": "string", "description": "Unique scene ID (snake_case)" },
@@ -157,6 +158,18 @@
                 "max_age_scenes": { "type": ["integer", "null"], "description": "Optional max age in scenes" },
                 "reveal_mechanic": { "type": ["string", "null"], "description": "Reveal mechanic" },
                 "is_required": { "type": "boolean", "description": "If true, must trigger when conditions met" }
+              }
+            }
+          },
+          "metadata": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["creative_instruction"],
+            "description": "Scene metadata providing creative guidance for content production",
+            "properties": {
+              "creative_instruction": {
+                "type": ["string", "null"],
+                "description": "Instruction for creative content creators (media, audio, visual effects). Leave null or empty if no specific guidance is needed. For scenes with a 'Wow' factor, provide a rich, detailed description of the intended atmosphere, mood, visual drama, and audio landscape to inspire high-impact production."
               }
             }
           }

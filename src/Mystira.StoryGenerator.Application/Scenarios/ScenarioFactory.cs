@@ -121,6 +121,12 @@ public class ScenarioFactory : IScenarioFactory
         [JsonPropertyName("difficulty")]
         [JsonNumberHandling(JsonNumberHandling.AllowReadingFromString)]
         public int? Difficulty { get; set; }
+        [JsonPropertyName("metadata")] public SceneMetadataDto? Metadata { get; set; }
+    }
+
+    private sealed class SceneMetadataDto
+    {
+        [JsonPropertyName("creative_instruction")] public string? CreativeInstruction { get; set; }
     }
 
     private sealed class MediaDto
@@ -228,7 +234,11 @@ public class ScenarioFactory : IScenarioFactory
         },
         Branches = (s.Branches ?? new()).Select(Map).Where(b => !string.IsNullOrWhiteSpace(b.NextSceneId)).ToList(),
         EchoReveals = (s.EchoReveals ?? new()).Select(Map).ToList(),
-        Difficulty = s.Difficulty
+        Difficulty = s.Difficulty,
+        Metadata = s.Metadata == null ? null : new SceneMetadata
+        {
+            CreativeInstruction = s.Metadata.CreativeInstruction
+        }
     };
 
     private static Branch Map(BranchDto b) => new()
