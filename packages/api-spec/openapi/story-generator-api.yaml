@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Mystira Story Generator API
-  version: 1.1.0
+  version: 1.2.0
   description: |
     AI-powered story generation API for creating interactive narratives.
 

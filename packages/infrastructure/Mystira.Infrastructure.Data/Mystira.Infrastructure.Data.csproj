@@ -39,8 +39,7 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.Cosmos" Version="10.0.3" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="10.0.3" />
     <!-- PostgreSQL provider for polyglot persistence (per ADR-0013/0014) -->
-    <!-- Note: Npgsql 9.0.4 is the latest version compatible with .NET 9 (10.0.0+ requires .NET 10) -->
-    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.0" />
     <PackageReference Include="JsonSchema.Net" Version="9.1.0" />
     <!-- Ardalis.Specification EF Core integration (per workspace ADR-0014) -->
     <PackageReference Include="Ardalis.Specification.EntityFrameworkCore" Version="9.3.1" />
