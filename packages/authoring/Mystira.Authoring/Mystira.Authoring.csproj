@@ -35,7 +35,6 @@
     <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="10.0.3" />
 
     <!-- JSON serialization -->
-    <PackageReference Include="System.Text.Json" Version="9.0.12" />
 
     <!-- Project References -->
     <ProjectReference Include="../Mystira.Authoring.Abstractions/Mystira.Authoring.Abstractions.csproj" />
