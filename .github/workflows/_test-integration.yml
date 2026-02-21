@@ -58,7 +58,7 @@ jobs:
 
     services:
       postgres:
-        image: postgres:18@sha256:1090bc3a8ccfb0b55f78a494d76f8d603434f7e4553543d6e807bc7bd6bbd17f
+        image: postgres:18@sha256:b6b4d0b75c699a2c94dfc5a94fe09f38630f3b67ab0e1653ede1b7ac8e13c197
         env:
           POSTGRES_USER: test
           POSTGRES_PASSWORD: test
@@ -72,7 +72,7 @@ jobs:
           --health-retries 5
 
       redis:
-        image: redis:8-alpine@sha256:4eec4565e45aa0b3966554c866bc73211e281b0b3d89fe9a33c982e6faca809d
+        image: redis:8-alpine@sha256:fd83658b0e40e2164617d262f13c02ca9ee9e1e6b276fd2fa06617e09bd5c780
         ports:
           - 6379:6379
         options: >-
