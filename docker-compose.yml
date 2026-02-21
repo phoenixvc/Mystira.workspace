@@ -3,7 +3,7 @@ version: '3.8'
 services:
   # Local development database
   postgres:
-    image: postgres:18-alpine@sha256:b40d931bd0e7ce6eecc59a5a6ac3b3c04a01e559750e73e7086b6dbd7f8bf545
+    image: postgres:18-alpine@sha256:035b9ab53cfa147d7202b61f5f7782b939ae815b7d6bc81c96b7b42ff1fca950
     container_name: mystira-postgres
     environment:
       POSTGRES_USER: mystira
@@ -21,7 +21,7 @@ services:
 
   # Redis for caching and queues
   redis:
-    image: redis:8-alpine@sha256:4eec4565e45aa0b3966554c866bc73211e281b0b3d89fe9a33c982e6faca809d
+    image: redis:8-alpine@sha256:fd83658b0e40e2164617d262f13c02ca9ee9e1e6b276fd2fa06617e09bd5c780
     container_name: mystira-redis
     ports:
       - "6379:6379"
@@ -35,7 +35,7 @@ services:
 
   # Local blockchain node (Hardhat)
   hardhat:
-    image: node:24-alpine@sha256:cd6fb7efa6490f039f3471a189214d5f548c11df1ff9e5b181aa49e22c14383e
+    image: node:24-alpine@sha256:4f696fbf39f383c1e486030ba6b289a5d9af541642fc78ab197e584a113b9c03
     container_name: mystira-hardhat
     working_dir: /app
     volumes:

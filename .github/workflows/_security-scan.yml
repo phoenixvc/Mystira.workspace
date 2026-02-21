@@ -67,7 +67,7 @@ jobs:
         if: inputs.language == 'csharp'
         uses: actions/setup-dotnet@v5
         with:
-          dotnet-version: '9.0.x'
+          dotnet-version: '10.0.x'
 
       - name: Restore .NET packages
         if: inputs.language == 'csharp'
@@ -113,7 +113,7 @@ jobs:
         if: inputs.language == 'csharp'
         uses: actions/setup-dotnet@v5
         with:
-          dotnet-version: '9.0.x'
+          dotnet-version: '10.0.x'
 
       - name: Restore .NET packages
         if: inputs.language == 'csharp'
@@ -220,7 +220,7 @@ jobs:
         uses: actions/checkout@v6
 
       - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@0.33.1
+        uses: aquasecurity/trivy-action@0.34.1
         with:
           image-ref: ${{ inputs.container_image }}
           format: 'sarif'
@@ -245,7 +245,7 @@ jobs:
           esac
 
       - name: Trivy summary
-        uses: aquasecurity/trivy-action@0.33.1
+        uses: aquasecurity/trivy-action@0.34.1
         with:
           image-ref: ${{ inputs.container_image }}
           format: 'table'
@@ -265,7 +265,7 @@ jobs:
           fetch-depth: 0
 
       - name: TruffleHog Secret Scan
-        uses: trufflesecurity/trufflehog@v3.93.1
+        uses: trufflesecurity/trufflehog@v3.93.4
         with:
           path: ./
           base: ${{ github.event.repository.default_branch }}
