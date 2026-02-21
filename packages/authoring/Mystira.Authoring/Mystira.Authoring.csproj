@@ -2,7 +2,7 @@
   <!-- Mystira.Authoring: Story authoring services and graph-based scenario analysis -->
   <!-- Trigger: test publish workflow -->
   <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
@@ -35,7 +35,6 @@
     <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="10.0.3" />
 
     <!-- JSON serialization -->
-    <PackageReference Include="System.Text.Json" Version="10.0.2" />
 
     <!-- Project References -->
     <ProjectReference Include="../Mystira.Authoring.Abstractions/Mystira.Authoring.Abstractions.csproj" />
