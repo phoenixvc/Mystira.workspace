@@ -1,4 +1,4 @@
-# Multi-stage Dockerfile for Mystira Story Generator API (.NET 8)
+# Multi-stage Dockerfile for Mystira Story Generator API (.NET 10)
 #
 # IMPORTANT: This builds the API project (Mystira.StoryGenerator.Api), NOT the
 # Blazor WASM Web project (Mystira.StoryGenerator.Web).

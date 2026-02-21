@@ -54,13 +54,13 @@ verify_checksum() {
 }
 
 # -----------------------------------------------------------------------------
-# .NET SDK 9.0
+# .NET SDK 10.0
 # -----------------------------------------------------------------------------
-echo "Installing .NET SDK 9.0..."
-if ! command -v dotnet &> /dev/null; then
+echo "Installing .NET SDK 10.0..."
+if ! command -v dotnet &> /dev/null || [[ "$(dotnet --version 2>/dev/null | cut -d'.' -f1)" -lt 10 ]]; then
     wget -q https://dot.net/v1/dotnet-install.sh -O /tmp/dotnet-install.sh
     chmod +x /tmp/dotnet-install.sh
-    /tmp/dotnet-install.sh --channel 9.0 --install-dir "$HOME/.dotnet"
+    /tmp/dotnet-install.sh --channel 10.0 --install-dir "$HOME/.dotnet"
     export DOTNET_ROOT="$HOME/.dotnet"
     export PATH="$HOME/.dotnet:$PATH"
     echo 'export DOTNET_ROOT="$HOME/.dotnet"' >> "$HOME/.bashrc"
@@ -69,6 +69,15 @@ if ! command -v dotnet &> /dev/null; then
     echo "  .NET SDK installed: $(dotnet --version)"
 else
     echo "  .NET SDK already installed: $(dotnet --version)"
+fi
+
+# -----------------------------------------------------------------------------
+# .NET Restore (restore NuGet packages for the solution)
+# -----------------------------------------------------------------------------
+echo "Restoring .NET NuGet packages..."
+if command -v dotnet &> /dev/null && [ -f "$CLAUDE_PROJECT_DIR/Mystira.sln" ]; then
+    cd "$CLAUDE_PROJECT_DIR"
+    dotnet restore Mystira.sln --verbosity minimal 2>/dev/null && echo "  .NET packages restored" || echo "  WARNING: dotnet restore failed (may need authentication for private feeds)"
 fi
 
 # -----------------------------------------------------------------------------
