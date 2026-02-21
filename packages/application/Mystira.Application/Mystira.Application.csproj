@@ -2,7 +2,7 @@
   <!-- Trigger package publish - Domain types updated 2024-12-30 -->
 
   <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <LangVersion>latest</LangVersion>
@@ -38,14 +38,14 @@
 
   <ItemGroup>
     <!-- Wolverine for event-driven messaging (ADR-0015) -->
-    <PackageReference Include="WolverineFx" Version="5.14.0" />
+    <PackageReference Include="WolverineFx" Version="5.16.2" />
     <!-- Mapperly for compile-time object mapping -->
     <PackageReference Include="Riok.Mapperly" Version="4.3.1" />
     <!-- FluentValidation -->
     <PackageReference Include="FluentValidation" Version="12.1.1" />
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.1" />
     <!-- DI abstractions -->
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.12" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.3" />
     <!-- JSON Schema -->
     <PackageReference Include="NJsonSchema" Version="11.5.2" />
     <!-- Ardalis.Specification for composable query patterns (ADR-0014) -->
