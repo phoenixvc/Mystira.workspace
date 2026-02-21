@@ -34,6 +34,10 @@ public static class ServiceCollectionExtensions
 
         var options = chainSection.Get<ChainServiceOptions>() ?? new ChainServiceOptions();
 
+        // Preserve defaults for properties not explicitly overridden in config
+        // (.NET 10 configuration binding sets unspecified values to null)
+        options.GrpcEndpoint ??= new ChainServiceOptions().GrpcEndpoint;
+
         // Validate and register services
         ConfigureStoryProtocolServices(services, options);
 
