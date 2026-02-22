@@ -31,11 +31,11 @@ public class MediaAdminController : ControllerBase
     /// Gets all media assets with optional filtering
     /// </summary>
     [HttpGet]
-    public async Task<ActionResult<MediaQueryResponse>> GetMedia([FromQuery] MediaQueryRequest request)
+    public async Task<ActionResult<MediaQueryResponse>> GetMedia([FromQuery] MediaQueryRequest request, CancellationToken cancellationToken)
     {
         try
         {
-            var result = await _mediaService.GetMediaAsync(request);
+            var result = await _mediaService.GetMediaAsync(request, cancellationToken);
             return Ok(result);
         }
         catch (Exception ex)
@@ -53,11 +53,11 @@ public class MediaAdminController : ControllerBase
     /// Serves the actual media file content by ID
     /// </summary>
     [HttpGet("{mediaId}")]
-    public async Task<IActionResult> GetMediaFile(string mediaId)
+    public async Task<IActionResult> GetMediaFile(string mediaId, CancellationToken cancellationToken)
     {
         try
         {
-            var result = await _mediaService.GetMediaFileAsync(mediaId);
+            var result = await _mediaService.GetMediaFileAsync(mediaId, cancellationToken);
             if (result == null)
             {
                 return NotFound(new ErrorResponse
@@ -86,7 +86,7 @@ public class MediaAdminController : ControllerBase
     /// Media ID must match an existing entry in the media metadata file
     /// </summary>
     [HttpPost("upload")]
-    public async Task<ActionResult<MediaAsset>> UploadMedia(IFormFile file, [FromForm] string? mediaId = null, [FromForm] string? mediaType = null, [FromForm] string? description = null, [FromForm] string? tags = null)
+    public async Task<ActionResult<MediaAsset>> UploadMedia(IFormFile file, [FromForm] string? mediaId = null, [FromForm] string? mediaType = null, [FromForm] string? description = null, [FromForm] string? tags = null, CancellationToken cancellationToken = default)
     {
         try
         {
@@ -100,7 +100,7 @@ public class MediaAdminController : ControllerBase
             }
 
             // Get media metadata file to resolve media ID from filename if needed
-            var metadataFile = await _mediaMetadataService.GetMediaMetadataFileAsync();
+            var metadataFile = await _mediaMetadataService.GetMediaMetadataFileAsync(cancellationToken);
             if (metadataFile == null || metadataFile.Entries.Count == 0)
             {
                 return BadRequest(new ErrorResponse
@@ -148,7 +148,7 @@ public class MediaAdminController : ControllerBase
             }
 
             var tagsList = string.IsNullOrEmpty(tags) ? null : tags.Split(',').Select(t => t.Trim()).ToList();
-            var mediaAsset = await _mediaService.UploadMediaAsync(file, mediaId, mediaType, description, tagsList);
+            var mediaAsset = await _mediaService.UploadMediaAsync(file, mediaId, mediaType, description, tagsList, cancellationToken);
 
             return Ok(mediaAsset);
         }
@@ -168,7 +168,7 @@ public class MediaAdminController : ControllerBase
     /// Filenames must match entries in the existing media metadata file
     /// </summary>
     [HttpPost("bulk-upload")]
-    public async Task<ActionResult<BulkUploadResult>> BulkUploadMedia(IFormFile[] files, IFormFile? metadataFile = null, [FromForm] bool autoDetectType = true, [FromForm] bool overwriteExisting = false)
+    public async Task<ActionResult<BulkUploadResult>> BulkUploadMedia(IFormFile[] files, IFormFile? metadataFile = null, [FromForm] bool autoDetectType = true, [FromForm] bool overwriteExisting = false, CancellationToken cancellationToken = default)
     {
         try
         {
@@ -188,9 +188,9 @@ public class MediaAdminController : ControllerBase
                 {
                     using var stream = metadataFile.OpenReadStream();
                     using var reader = new StreamReader(stream);
-                    var jsonData = await reader.ReadToEndAsync();
+                    var jsonData = await reader.ReadToEndAsync(cancellationToken);
 
-                    await _mediaMetadataService.ImportMediaMetadataEntriesAsync(jsonData, overwriteExisting);
+                    await _mediaMetadataService.ImportMediaMetadataEntriesAsync(jsonData, overwriteExisting, cancellationToken);
                     _logger.LogInformation("Media metadata imported successfully from file: {FileName}", metadataFile.FileName);
                 }
                 catch (Exception ex)
@@ -204,7 +204,7 @@ public class MediaAdminController : ControllerBase
                 }
             }
 
-            var result = await _mediaService.BulkUploadMediaAsync(files, autoDetectType, overwriteExisting);
+            var result = await _mediaService.BulkUploadMediaAsync(files, autoDetectType, overwriteExisting, cancellationToken);
             return Ok(result);
         }
         catch (Exception ex)
@@ -222,11 +222,11 @@ public class MediaAdminController : ControllerBase
     /// Update a media asset
     /// </summary>
     [HttpPut("{mediaId}")]
-    public async Task<ActionResult<MediaAsset>> UpdateMedia(string mediaId, [FromBody] MediaUpdateRequest updateData)
+    public async Task<ActionResult<MediaAsset>> UpdateMedia(string mediaId, [FromBody] MediaUpdateRequest updateData, CancellationToken cancellationToken)
     {
         try
         {
-            var updatedMedia = await _mediaService.UpdateMediaAsync(mediaId, updateData);
+            var updatedMedia = await _mediaService.UpdateMediaAsync(mediaId, updateData, cancellationToken);
             return Ok(updatedMedia);
         }
         catch (KeyNotFoundException)
@@ -252,11 +252,11 @@ public class MediaAdminController : ControllerBase
     /// Delete a media asset (Admin authentication required)
     /// </summary>
     [HttpDelete("{mediaId}")]
-    public async Task<ActionResult> DeleteMedia(string mediaId)
+    public async Task<ActionResult> DeleteMedia(string mediaId, CancellationToken cancellationToken)
     {
         try
         {
-            var deleted = await _mediaService.DeleteMediaAsync(mediaId);
+            var deleted = await _mediaService.DeleteMediaAsync(mediaId, cancellationToken);
             if (!deleted)
             {
                 return NotFound(new ErrorResponse
@@ -283,11 +283,11 @@ public class MediaAdminController : ControllerBase
     /// Validate media references
     /// </summary>
     [HttpPost("validate")]
-    public async Task<ActionResult<MediaValidationResult>> ValidateMediaReferences([FromBody] List<string> mediaReferences)
+    public async Task<ActionResult<MediaValidationResult>> ValidateMediaReferences([FromBody] List<string> mediaReferences, CancellationToken cancellationToken)
     {
         try
         {
-            var result = await _mediaService.ValidateMediaReferencesAsync(mediaReferences);
+            var result = await _mediaService.ValidateMediaReferencesAsync(mediaReferences, cancellationToken);
             return Ok(result);
         }
         catch (Exception ex)
@@ -305,11 +305,11 @@ public class MediaAdminController : ControllerBase
     /// Get media usage statistics
     /// </summary>
     [HttpGet("statistics")]
-    public async Task<ActionResult<MediaUsageStats>> GetMediaStatistics()
+    public async Task<ActionResult<MediaUsageStats>> GetMediaStatistics(CancellationToken cancellationToken)
     {
         try
         {
-            var stats = await _mediaService.GetMediaUsageStatsAsync();
+            var stats = await _mediaService.GetMediaUsageStatsAsync(cancellationToken);
             return Ok(stats);
         }
         catch (Exception ex)
@@ -331,7 +331,8 @@ public class MediaAdminController : ControllerBase
     public async Task<ActionResult<ZipUploadResult>> UploadMediaZip(
         IFormFile zipFile,
         [FromForm] bool overwriteMetadata = false,
-        [FromForm] bool overwriteMedia = false)
+        [FromForm] bool overwriteMedia = false,
+        CancellationToken cancellationToken = default)
     {
         try
         {
@@ -353,7 +354,7 @@ public class MediaAdminController : ControllerBase
                 });
             }
 
-            var result = await _mediaService.UploadMediaFromZipAsync(zipFile, overwriteMetadata, overwriteMedia);
+            var result = await _mediaService.UploadMediaFromZipAsync(zipFile, overwriteMetadata, overwriteMedia, cancellationToken);
 
             if (result.Success)
             {

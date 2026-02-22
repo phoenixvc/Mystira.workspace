@@ -197,16 +197,16 @@ rm .github/workflows/mystira-app-pwa-cicd-dev.yml
 **Removed:** 11-15 duplicate/unnecessary workflows
 **Result:** Clear separation, no duplication, controlled releases
 
-## Related Repositories
+## Related Packages
 
 - **Mystira.workspace** (this repo) - Monorepo workspace, centralized releases
-- **Mystira.App** - App submodule with independent CI/CD
-- **Mystira.Admin.Api** - Admin API submodule (no CI/CD, uses workspace)
-- **Mystira.Admin.UI** - Admin UI submodule (no CI/CD, uses workspace)
-- **Mystira.Chain** - Chain submodule (no CI/CD, uses workspace)
-- **Mystira.DevHub** - DevHub submodule (no CI/CD, uses workspace)
-- **Mystira.Publisher** - Publisher submodule (no CI/CD, uses workspace)
-- **Mystira.StoryGenerator** - Story Generator submodule (no CI/CD, uses workspace)
+- **packages/Mystira.App** - App package with independent CI/CD
+- **packages/admin-api** - Admin API package (no CI/CD, uses workspace)
+- **packages/admin-ui** - Admin UI package (no CI/CD, uses workspace)
+- **packages/Mystira.Chain** - Chain package (no CI/CD, uses workspace)
+- **packages/Mystira.DevHub** - DevHub package (no CI/CD, uses workspace)
+- **packages/Mystira.Publisher** - Publisher package (no CI/CD, uses workspace)
+- **packages/Mystira.StoryGenerator** - Story Generator package (no CI/CD, uses workspace)
 
 ## Questions?
 
