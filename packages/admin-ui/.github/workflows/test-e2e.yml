@@ -1,0 +1,70 @@
+name: "[Test] E2E"
+
+# NOTE: This workflow requires @playwright/test to be installed.
+# To enable: pnpm add -D @playwright/test && pnpm exec playwright install
+# Then uncomment the push/pull_request triggers below.
+
+on:
+  # Disabled until Playwright is set up in the project
+  # push:
+  #   branches: [dev, main]
+  #   paths:
+  #     - "src/**"
+  #     - "e2e/**"
+  #     - "playwright.config.*"
+  #     - ".github/workflows/test-e2e.yml"
+  # pull_request:
+  #   branches: [dev, main]
+  workflow_dispatch:
+
+concurrency:
+  group: test-e2e-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: "24"
+
+jobs:
+  e2e-tests:
+    name: Playwright Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Playwright browsers
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Build application
+        run: pnpm build
+
+      - name: Run Playwright tests
+        run: pnpm exec playwright test
+        env:
+          CI: true
+
+      - name: Upload Playwright report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report
+          path: playwright-report
+          retention-days: 30
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-test-results
+          path: test-results
+          retention-days: 7

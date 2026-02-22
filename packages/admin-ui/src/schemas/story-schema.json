@@ -1,0 +1,564 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Mystira Story Schema",
+  "description": "Validation schema for Mystira story YAML/JSON payloads",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "title",
+    "description",
+    "tags",
+    "difficulty",
+    "session_length",
+    "age_group",
+    "minimum_age",
+    "core_axes",
+    "archetypes",
+    "characters",
+    "scenes"
+  ],
+  "definitions": {
+    "music_profile": {
+      "type": "string",
+      "description": "Music mood profile label used to select an allowed background track from the story music_palette.",
+      "enum": [
+        "none",
+        "neutral",
+        "cozy",
+        "playful",
+        "wonder",
+        "mystery",
+        "tense",
+        "action",
+        "sad",
+        "victory"
+      ]
+    },
+    "music_continuity": {
+      "type": "string",
+      "description": "How strongly this scene prefers to continue the current track vs switching to another track/profile.",
+      "enum": ["prefer_continue", "allow_change", "force_change", "force_silence"]
+    },
+    "music_transition_hint": {
+      "type": "string",
+      "description": "Hint for how to transition from the previous scene's music to this scene's music. 'auto' lets the engine decide based on scene type and mood change.",
+      "enum": ["auto", "keep", "crossfade_short", "crossfade_normal", "crossfade_long", "hard_cut"]
+    },
+    "music_priority": {
+      "type": "string",
+      "description": "Whether this scene's music intent can be overridden by other logic (background) or should win over other hints (important).",
+      "enum": ["background", "important"]
+    },
+    "music_ducking": {
+      "type": "string",
+      "description": "How the engine should reduce (duck) music volume when voice/narration or dialogue is present.",
+      "enum": ["none", "narration", "dialogue"]
+    },
+    "track_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200,
+      "pattern": "^[a-z0-9][a-z0-9_\\-]*$",
+      "description": "Track identifier in your media library. Use lowercase snake_case or kebab-case."
+    },
+    "scene_sound_effect": {
+      "type": "object",
+      "description": "A scene-level sound effect or ambience layer that can play alongside the scene's background music.",
+      "additionalProperties": false,
+      "required": ["track", "loopable", "energy"],
+      "properties": {
+        "track": {
+          "$ref": "#/definitions/track_id",
+          "description": "Sound effect / ambience track id."
+        },
+        "loopable": {
+          "type": "boolean",
+          "description": "If true, the client may loop this track for the duration of the scene; if false, it should be treated as one-shot (or single play)."
+        },
+        "energy": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0,
+          "description": "Optional intensity hint (0..1) used by the client to balance/choose layers (e.g., subtle rain=0.2, storm=0.8)."
+        }
+      }
+    }
+  },
+  "properties": {
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200,
+      "description": "The title of the story."
+    },
+    "description": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1000,
+      "description": "Brief description of the story."
+    },
+    "tags": {
+      "type": "array",
+      "items": { "type": "string" },
+      "minItems": 1,
+      "description": "Array of story tags/categories."
+    },
+    "difficulty": {
+      "type": "string",
+      "enum": ["Easy", "Medium", "Hard"],
+      "description": "Story difficulty level."
+    },
+    "session_length": {
+      "type": "string",
+      "enum": ["Short", "Medium", "Long"],
+      "description": "Expected session duration."
+    },
+    "age_group": {
+      "type": "string",
+      "enum": ["1-2", "3-5", "6-9", "10-12", "13-18", "19-150"],
+      "description": "Target age group band for the story."
+    },
+    "minimum_age": {
+      "type": "integer",
+      "enum": [1, 3, 6, 10, 13],
+      "description": "Minimum recommended age (also constrains allowed age_group bands)."
+    },
+    "core_axes": {
+      "type": "array",
+      "items": { "type": "string" },
+      "minItems": 1,
+      "description": "Core story themes/axes (e.g., empathy, cooperation, bravery)."
+    },
+    "archetypes": {
+      "type": "array",
+      "items": { "type": "string" },
+      "minItems": 1,
+      "description": "Character archetypes present in the story."
+    },
+    "image": {
+      "type": "string",
+      "description": "Image ID for the cover picture of the scenario."
+    },
+
+    "music_palette": {
+      "type": "object",
+      "description": "Optional: allowed background-music tracks grouped by mood profile for this story. The engine/resolver chooses the exact track per scene from these lists.",
+      "additionalProperties": false,
+      "properties": {
+        "default_profile": {
+          "$ref": "#/definitions/music_profile",
+          "description": "Fallback profile used when a scene does not specify music.profile."
+        },
+        "tracks_by_profile": {
+          "type": "object",
+          "description": "Lists of allowed track IDs grouped by profile. The engine may pick randomly (or round-robin) while avoiding repetition.",
+          "additionalProperties": false,
+          "properties": {
+            "none": {
+              "type": "array",
+              "description": "No music. If present, implies the engine may choose silence as a valid option.",
+              "items": { "$ref": "#/definitions/track_id" },
+              "uniqueItems": true
+            },
+            "neutral": {
+              "type": "array",
+              "description": "Neutral ambient bed suitable for many scenes (safe fallback).",
+              "items": { "$ref": "#/definitions/track_id" },
+              "uniqueItems": true
+            },
+            "cozy": {
+              "type": "array",
+              "description": "Warm, calm, comforting music for safe/happy scenes.",
+              "items": { "$ref": "#/definitions/track_id" },
+              "uniqueItems": true
+            },
+            "playful": {
+              "type": "array",
+              "description": "Light, bouncy, playful music for fun/curious moments.",
+              "items": { "$ref": "#/definitions/track_id" },
+              "uniqueItems": true
+            },
+            "wonder": {
+              "type": "array",
+              "description": "Awe, discovery, magical-feeling music for exploration/reveals.",
+              "items": { "$ref": "#/definitions/track_id" },
+              "uniqueItems": true
+            },
+            "mystery": {
+              "type": "array",
+              "description": "Curious, slightly suspenseful music for puzzles, secrets, clues.",
+              "items": { "$ref": "#/definitions/track_id" },
+              "uniqueItems": true
+            },
+            "tense": {
+              "type": "array",
+              "description": "Anxious or suspenseful music for stakes, danger, uncertainty.",
+              "items": { "$ref": "#/definitions/track_id" },
+              "uniqueItems": true
+            },
+            "action": {
+              "type": "array",
+              "description": "Higher-energy music for chases, timed moments, exciting obstacles.",
+              "items": { "$ref": "#/definitions/track_id" },
+              "uniqueItems": true
+            },
+            "sad": {
+              "type": "array",
+              "description": "Soft, gentle music for reflective or bittersweet moments.",
+              "items": { "$ref": "#/definitions/track_id" },
+              "uniqueItems": true
+            },
+            "victory": {
+              "type": "array",
+              "description": "Uplifting music for success, celebration, and happy endings.",
+              "items": { "$ref": "#/definitions/track_id" },
+              "uniqueItems": true
+            }
+          }
+        }
+      }
+    },
+
+    "characters": {
+      "type": "array",
+      "minItems": 1,
+      "description": "Array of story characters.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "name", "metadata"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z0-9_]+$",
+            "minLength": 1,
+            "description": "Character id (lowercase snake_case)."
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Character name shown to the player."
+          },
+          "image": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Image id for the character (optional usage depending on client)."
+          },
+          "audio": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Audio id for the character (optional usage depending on client)."
+          },
+          "metadata": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["role", "archetype", "species", "age", "traits", "backstory"],
+            "description": "Metadata used to keep characters consistent in generation and presentation.",
+            "properties": {
+              "role": {
+                "type": "array",
+                "items": { "type": "string" },
+                "minItems": 1,
+                "description": "Character's role(s) in the story."
+              },
+              "archetype": {
+                "type": "array",
+                "items": { "type": "string" },
+                "minItems": 0,
+                "description": "Character archetype(s) (optional list)."
+              },
+              "species": {
+                "type": "string",
+                "minLength": 1,
+                "description": "Character species/type (e.g., fox, robot, wizard)."
+              },
+              "age": {
+                "type": "integer",
+                "minimum": 1,
+                "description": "Character age in years (approximate is fine)."
+              },
+              "traits": {
+                "type": "array",
+                "items": { "type": "string" },
+                "minItems": 1,
+                "description": "Short trait descriptors used to guide consistent behavior."
+              },
+              "backstory": {
+                "type": "string",
+                "minLength": 1,
+                "description": "Brief backstory used to guide character motivation and consistency."
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "scenes": {
+      "type": "array",
+      "minItems": 1,
+      "description": "Array of story scenes. Scenes form a directed graph via next_scene and branches.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "title", "type", "description"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_]+$",
+            "minLength": 1,
+            "description": "Unique scene identifier (snake_case recommended; letters/numbers/_ allowed)."
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Scene title shown to the player/reader."
+          },
+          "type": {
+            "type": "string",
+            "enum": ["narrative", "choice", "roll", "special"],
+            "description": "Scene type: narrative (linear), choice (branching), roll (branching with difficulty), special (ending or special handling)."
+          },
+          "description": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Scene narrative text displayed to the player/reader."
+          },
+
+          "music": {
+            "type": "object",
+            "description": "Optional background-music intent for this scene. The engine chooses an actual track from story.music_palette.tracks_by_profile for the requested profile.",
+            "additionalProperties": false,
+            "properties": {
+              "profile": {
+                "$ref": "#/definitions/music_profile",
+                "description": "Desired mood profile for this scene. Use 'none' to explicitly request silence for this scene."
+              },
+              "energy": {
+                "type": "number",
+                "minimum": 0.0,
+                "maximum": 1.0,
+                "description": "Optional intensity hint (0..1). Used to decide whether to keep current track or switch, and/or to pick a more energetic track within the same profile."
+              },
+              "continuity": {
+                "$ref": "#/definitions/music_continuity",
+                "description": "Continuity preference for transitions into this scene (continue same track vs switch vs silence)."
+              },
+              "transition_hint": {
+                "$ref": "#/definitions/music_transition_hint",
+                "description": "Transition hint when entering this scene (e.g., crossfade_long for gentle mood shifts, hard_cut for sharp moments)."
+              },
+              "priority": {
+                "$ref": "#/definitions/music_priority",
+                "description": "How strongly this scene's music intent should be respected relative to other automatic rules."
+              },
+              "ducking": {
+                "$ref": "#/definitions/music_ducking",
+                "description": "How the engine should duck music during voice playback in this scene (narration/dialogue)."
+              }
+            },
+            "required": ["profile"]
+          },
+
+          "sound_effects": {
+            "type": "array",
+            "description": "Optional list of additional sound effects or ambience layers for this scene. These are independent tracks that can be looped (e.g., rain, forest ambience, crowd murmur) or played once (e.g., door knock).",
+            "minItems": 1,
+            "items": { "$ref": "#/definitions/scene_sound_effect" }
+          },
+
+          "next_scene": {
+            "anyOf": [
+              { "type": "string", "minLength": 1, "pattern": "^[A-Za-z0-9_]+$" },
+              { "type": "null" }
+            ],
+            "description": "Next scene id for linear flow. Must be null for final/special scenes."
+          },
+          "difficulty": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 20,
+            "description": "Scene difficulty target (required for roll scenes)."
+          },
+          "media": {
+            "type": "object",
+            "description": "Optional media attached to this scene; at least one of image/audio/video should be present.",
+            "additionalProperties": false,
+            "minProperties": 1,
+            "properties": {
+              "image": {
+                "type": "string",
+                "description": "Image id or path associated with this scene."
+              },
+              "audio": {
+                "type": "string",
+                "description": "Audio id or path associated with this scene."
+              },
+              "video": {
+                "type": "string",
+                "description": "Video id or path associated with this scene."
+              }
+            }
+          },
+
+          "branches": {
+            "type": "array",
+            "description": "Scene branches (required for choice and roll scenes). Each branch leads to a next_scene.",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["choice", "next_scene"],
+              "properties": {
+                "choice": {
+                  "type": "string",
+                  "minLength": 1,
+                  "description": "Branch choice text shown to the user (what they can choose to do)."
+                },
+                "next_scene": {
+                  "type": "string",
+                  "minLength": 1,
+                  "pattern": "^[A-Za-z0-9_]+$",
+                  "description": "The ID of the next scene navigated to when this branch is selected."
+                },
+                "echo_log": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "description": "Echo recorded by taking this branch (used for pattern/behavior tracking).",
+                  "required": ["echo_type", "description", "strength"],
+                  "properties": {
+                    "echo_type": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "The type/category of echo recorded."
+                    },
+                    "description": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Human-readable description of the echo."
+                    },
+                    "strength": {
+                      "type": "number",
+                      "minimum": -1.0,
+                      "maximum": 1.0,
+                      "description": "Strength of the echo (-1..1)."
+                    }
+                  }
+                },
+                "compass_change": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "description": "Optional compass axis change caused by this branch (developmental impact).",
+                  "required": ["axis", "delta"],
+                  "properties": {
+                    "axis": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Axis name to adjust."
+                    },
+                    "delta": {
+                      "type": "number",
+                      "description": "Change applied to the axis (positive or negative)."
+                    },
+                    "developmental_link": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "Reference/link into the developmental framework supporting this change."
+                    }
+                  }
+                }
+              }
+            }
+          },
+
+          "echo_reveals": {
+            "type": "array",
+            "description": "Echo reveal references used to surface past patterns when conditions are met.",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["echo_type", "min_strength", "trigger_scene_id"],
+              "properties": {
+                "echo_type": {
+                  "type": "string",
+                  "minLength": 1,
+                  "description": "Type/category of echo to reveal."
+                },
+                "min_strength": {
+                  "type": "number",
+                  "description": "Minimum strength required for the reveal to trigger."
+                },
+                "trigger_scene_id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "pattern": "^[A-Za-z0-9_]+$",
+                  "description": "Scene ID that triggers the reveal check."
+                },
+                "max_age_scenes": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "description": "Optional maximum age (in scenes) after which this reveal should no longer trigger."
+                },
+                "reveal_mechanic": {
+                  "type": "string",
+                  "minLength": 1,
+                  "description": "Mechanic used to reveal (e.g., 'memory_flashback', 'npc_comment')."
+                },
+                "required": {
+                  "type": "boolean",
+                  "description": "If true, this reveal must trigger when conditions are met."
+                }
+              }
+            }
+          }
+        },
+        "allOf": [
+          {
+            "if": { "properties": { "type": { "const": "roll" } } },
+            "then": { "required": ["difficulty", "branches"] }
+          },
+          {
+            "if": { "properties": { "type": { "const": "choice" } } },
+            "then": { "required": ["branches"] }
+          },
+          {
+            "if": { "properties": { "type": { "const": "narrative" } } },
+            "then": { "required": ["next_scene"] }
+          },
+          {
+            "if": { "properties": { "type": { "const": "special" } } },
+            "then": {
+              "required": ["next_scene"],
+              "properties": { "next_scene": { "type": "null" } }
+            }
+          }
+        ]
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "minimum_age": { "const": 1 } } },
+      "then": {
+        "properties": { "age_group": { "enum": ["1-2", "3-5", "6-9", "10-12", "13-18", "19-150"] } }
+      }
+    },
+    {
+      "if": { "properties": { "minimum_age": { "const": 3 } } },
+      "then": {
+        "properties": { "age_group": { "enum": ["3-5", "6-9", "10-12", "13-18", "19-150"] } }
+      }
+    },
+    {
+      "if": { "properties": { "minimum_age": { "const": 6 } } },
+      "then": { "properties": { "age_group": { "enum": ["6-9", "10-12", "13-18", "19-150"] } } }
+    },
+    {
+      "if": { "properties": { "minimum_age": { "const": 10 } } },
+      "then": { "properties": { "age_group": { "enum": ["10-12", "13-18", "19-150"] } } }
+    },
+    {
+      "if": { "properties": { "minimum_age": { "const": 13 } } },
+      "then": { "properties": { "age_group": { "enum": ["13-18", "19-150"] } } }
+    }
+  ]
+}
