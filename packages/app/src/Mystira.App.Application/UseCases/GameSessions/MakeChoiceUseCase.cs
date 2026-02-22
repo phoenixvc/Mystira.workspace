@@ -3,33 +3,48 @@ using Mystira.App.Application.Ports.Data;
 using Mystira.App.Domain.Exceptions;
 using Mystira.Contracts.App.Requests.GameSessions;
 using Mystira.App.Domain.Models;
+using Mystira.Shared.Locking;
 using System.Threading;
 
 namespace Mystira.App.Application.UseCases.GameSessions;
 
 /// <summary>
-/// Use case for making a choice in a game session
+/// Use case for making a choice in a game session.
+/// Uses distributed locking to prevent concurrent modifications to the same session.
 /// </summary>
 public class MakeChoiceUseCase
 {
     private readonly IGameSessionRepository _repository;
     private readonly IScenarioRepository _scenarioRepository;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly IDistributedLockService _lockService;
     private readonly ILogger<MakeChoiceUseCase> _logger;
 
     public MakeChoiceUseCase(
         IGameSessionRepository repository,
         IScenarioRepository scenarioRepository,
         IUnitOfWork unitOfWork,
+        IDistributedLockService lockService,
         ILogger<MakeChoiceUseCase> logger)
     {
         _repository = repository;
         _scenarioRepository = scenarioRepository;
         _unitOfWork = unitOfWork;
+        _lockService = lockService;
         _logger = logger;
     }
 
     public async Task<GameSession?> ExecuteAsync(MakeChoiceRequest request, CancellationToken ct = default)
+    {
+        return await _lockService.ExecuteWithLockAsync(
+            $"session:{request.SessionId}",
+            async token => await ExecuteInternalAsync(request, token),
+            expiry: TimeSpan.FromSeconds(30),
+            wait: TimeSpan.FromSeconds(10),
+            ct);
+    }
+
+    private async Task<GameSession?> ExecuteInternalAsync(MakeChoiceRequest request, CancellationToken ct)
     {
         var session = await _repository.GetByIdAsync(request.SessionId, ct);
         if (session == null)
@@ -51,13 +66,13 @@ public class MakeChoiceUseCase
         var currentScene = scenario.Scenes.FirstOrDefault(s => s.Id == request.SceneId);
         if (currentScene == null)
         {
-            throw new ArgumentException("Scene not found in scenario");
+            throw new ValidationException("input", "Scene not found in scenario");
         }
 
         var branch = currentScene.Branches.FirstOrDefault(b => b.Choice == request.ChoiceText);
         if (branch == null)
         {
-            throw new ArgumentException("Choice not found in scene");
+            throw new ValidationException("input", "Choice not found in scene");
         }
 
         // Resolve the player who made the decision for choice scenes using ActiveCharacter assignment

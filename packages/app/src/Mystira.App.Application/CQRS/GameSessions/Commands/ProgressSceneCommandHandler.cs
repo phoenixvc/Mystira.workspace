@@ -2,6 +2,7 @@ using Microsoft.Extensions.Logging;
 using Mystira.App.Application.Ports.Data;
 using Mystira.App.Domain.Exceptions;
 using Mystira.App.Domain.Models;
+using Mystira.Shared.Exceptions;
 
 namespace Mystira.App.Application.CQRS.GameSessions.Commands;
 
@@ -28,12 +29,12 @@ public static class ProgressSceneCommandHandler
         // Validate request
         if (string.IsNullOrEmpty(request.SessionId))
         {
-            throw new ArgumentException("SessionId is required");
+            throw new ValidationException("sessionId", "SessionId is required");
         }
 
         if (string.IsNullOrEmpty(request.SceneId))
         {
-            throw new ArgumentException("SceneId is required");
+            throw new ValidationException("sceneId", "SceneId is required");
         }
 
         var session = await repository.GetByIdAsync(request.SessionId, ct);

@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 using Mystira.App.Application.Ports.Data;
 using Mystira.App.Domain.Models;
+using Mystira.Shared.Exceptions;
 using System.Threading;
 
 namespace Mystira.App.Application.UseCases.GameSessions;
@@ -25,7 +26,7 @@ public class GetGameSessionsByProfileUseCase
     {
         if (string.IsNullOrWhiteSpace(profileId))
         {
-            throw new ArgumentException("Profile ID cannot be null or empty", nameof(profileId));
+            throw new ValidationException("profileId", "profileId is required");
         }
 
         var sessions = await _repository.GetByProfileIdAsync(profileId, ct);

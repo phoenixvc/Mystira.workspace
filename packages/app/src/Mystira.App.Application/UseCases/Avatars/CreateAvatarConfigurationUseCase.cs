@@ -29,7 +29,7 @@ public class CreateAvatarConfigurationUseCase
     {
         if (ageGroupAvatars == null)
         {
-            throw new ArgumentNullException(nameof(ageGroupAvatars));
+            throw new ValidationException("ageGroupAvatars", "ageGroupAvatars is required");
         }
 
         // Check if configuration already exists

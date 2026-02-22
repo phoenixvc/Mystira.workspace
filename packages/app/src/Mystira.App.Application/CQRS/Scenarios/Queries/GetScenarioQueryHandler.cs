@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 using Mystira.App.Application.Ports.Data;
 using Mystira.App.Domain.Models;
+using Mystira.Shared.Exceptions;
 
 namespace Mystira.App.Application.CQRS.Scenarios.Queries;
 
@@ -22,7 +23,7 @@ public static class GetScenarioQueryHandler
     {
         if (string.IsNullOrWhiteSpace(query.ScenarioId))
         {
-            throw new ArgumentException("Scenario ID cannot be null or empty", nameof(query.ScenarioId));
+            throw new ValidationException("scenarioId", "Scenario ID cannot be null or empty");
         }
 
         var scenario = await repository.GetByIdAsync(query.ScenarioId, ct);

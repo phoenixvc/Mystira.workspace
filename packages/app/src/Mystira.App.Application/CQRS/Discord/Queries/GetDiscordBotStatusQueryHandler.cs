@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Logging;
 using Mystira.App.Application.Ports.Messaging;
+using Mystira.Shared.Exceptions;
 
 namespace Mystira.App.Application.CQRS.Discord.Queries;
 
@@ -16,7 +17,7 @@ public static class GetDiscordBotStatusQueryHandler
         CancellationToken ct)
     {
         if (chatBotService == null)
-            throw new ArgumentNullException(nameof(chatBotService));
+            throw new ValidationException("chatBotService", "chatBotService is required");
 
         var status = chatBotService.GetStatus();
 

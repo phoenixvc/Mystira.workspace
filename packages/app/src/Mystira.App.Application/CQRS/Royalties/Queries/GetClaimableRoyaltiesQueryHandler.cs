@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 using Mystira.App.Application.Ports;
 using Mystira.App.Domain.Models;
+using Mystira.Shared.Exceptions;
 
 namespace Mystira.App.Application.CQRS.Royalties.Queries;
 
@@ -17,7 +18,7 @@ public static class GetClaimableRoyaltiesQueryHandler
     {
         if (string.IsNullOrWhiteSpace(request.IpAssetId))
         {
-            throw new ArgumentException("IP Asset ID cannot be null or empty", nameof(request.IpAssetId));
+            throw new ValidationException("ipAssetId", "IP Asset ID cannot be null or empty");
         }
 
         logger.LogInformation("Getting claimable royalties for IP Asset: {IpAssetId}", request.IpAssetId);

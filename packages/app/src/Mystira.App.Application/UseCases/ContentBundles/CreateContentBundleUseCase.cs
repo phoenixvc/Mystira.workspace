@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 using Mystira.App.Application.Ports.Data;
 using Mystira.App.Domain.Models;
+using Mystira.Shared.Exceptions;
 using System.Threading;
 
 namespace Mystira.App.Application.UseCases.ContentBundles;
@@ -36,12 +37,12 @@ public class CreateContentBundleUseCase
     {
         if (string.IsNullOrWhiteSpace(title))
         {
-            throw new ArgumentException("Title cannot be null or empty", nameof(title));
+            throw new ValidationException("title", "title is required");
         }
 
         if (scenarioIds == null)
         {
-            throw new ArgumentNullException(nameof(scenarioIds));
+            throw new ValidationException("scenarioIds", "scenarioIds is required");
         }
 
         var bundle = new ContentBundle

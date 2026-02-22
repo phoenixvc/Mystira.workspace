@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 using Mystira.App.Application.Ports.Data;
 using Mystira.App.Domain.Exceptions;
+using Mystira.Shared.Exceptions;
 
 namespace Mystira.App.Application.CQRS.Scenarios.Commands;
 
@@ -23,7 +24,7 @@ public static class DeleteScenarioCommandHandler
     {
         if (string.IsNullOrWhiteSpace(command.ScenarioId))
         {
-            throw new ArgumentException("Scenario ID cannot be null or empty", nameof(command.ScenarioId));
+            throw new ValidationException("scenarioId", "Scenario ID cannot be null or empty");
         }
 
         var scenario = await repository.GetByIdAsync(command.ScenarioId, ct);

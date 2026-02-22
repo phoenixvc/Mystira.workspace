@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 using Mystira.App.Application.Ports.Data;
 using Mystira.App.Domain.Models;
+using Mystira.Shared.Exceptions;
 
 namespace Mystira.App.Application.CQRS.ContentBundles.Queries;
 
@@ -20,7 +21,7 @@ public static class GetContentBundlesByAgeGroupQueryHandler
         if (string.IsNullOrWhiteSpace(request.AgeGroup))
         {
             logger.LogWarning("Age group cannot be null or empty");
-            throw new ArgumentException("Age group cannot be null or empty", nameof(request.AgeGroup));
+            throw new ValidationException("ageGroup", "Age group cannot be null or empty");
         }
 
         // Execute query using repository

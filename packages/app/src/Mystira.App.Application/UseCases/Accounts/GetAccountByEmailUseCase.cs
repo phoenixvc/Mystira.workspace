@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 using Mystira.App.Application.Ports.Data;
 using Mystira.App.Domain.Models;
+using Mystira.Shared.Exceptions;
 using System.Threading;
 
 namespace Mystira.App.Application.UseCases.Accounts;
@@ -25,7 +26,7 @@ public class GetAccountByEmailUseCase
     {
         if (string.IsNullOrWhiteSpace(email))
         {
-            throw new ArgumentException("Email cannot be null or empty", nameof(email));
+            throw new ValidationException("email", "email is required");
         }
 
         var account = await _repository.GetByEmailAsync(email, ct);

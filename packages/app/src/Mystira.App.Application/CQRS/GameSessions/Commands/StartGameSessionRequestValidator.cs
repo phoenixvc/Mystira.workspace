@@ -1,4 +1,5 @@
 using Mystira.Contracts.App.Requests.GameSessions;
+using Mystira.Shared.Exceptions;
 
 namespace Mystira.App.Application.CQRS.GameSessions.Commands;
 
@@ -9,34 +10,34 @@ namespace Mystira.App.Application.CQRS.GameSessions.Commands;
 public static class StartGameSessionRequestValidator
 {
     /// <summary>
-    /// Validates the request and throws ArgumentException if invalid.
+    /// Validates the request and throws ValidationException if invalid.
     /// </summary>
     public static void Validate(StartGameSessionRequest request)
     {
         if (request == null)
         {
-            throw new ArgumentNullException(nameof(request));
+            throw new ValidationException("request", "request is required");
         }
 
         if (string.IsNullOrEmpty(request.ScenarioId))
         {
-            throw new ArgumentException("ScenarioId is required", nameof(request));
+            throw new ValidationException("scenarioId", "ScenarioId is required");
         }
 
         if (string.IsNullOrEmpty(request.AccountId))
         {
-            throw new ArgumentException("AccountId is required", nameof(request));
+            throw new ValidationException("accountId", "AccountId is required");
         }
 
         if (string.IsNullOrEmpty(request.ProfileId))
         {
-            throw new ArgumentException("ProfileId is required", nameof(request));
+            throw new ValidationException("profileId", "ProfileId is required");
         }
 
         if ((request.PlayerNames == null || !request.PlayerNames.Any())
             && (request.CharacterAssignments == null || !request.CharacterAssignments.Any()))
         {
-            throw new ArgumentException("At least one player or character assignment is required", nameof(request));
+            throw new ValidationException("input", "At least one player or character assignment is required");
         }
     }
 
@@ -49,7 +50,7 @@ public static class StartGameSessionRequestValidator
 
         if (scenarioMinimumAge > targetAge.MinimumAge)
         {
-            throw new ArgumentException(
+            throw new ValidationException("input",
                 $"Scenario minimum age ({scenarioMinimumAge}) exceeds target age group ({targetAgeGroup})");
         }
     }

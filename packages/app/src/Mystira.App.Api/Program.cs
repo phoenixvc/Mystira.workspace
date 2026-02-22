@@ -18,6 +18,7 @@ using Mystira.App.Infrastructure.Payments;
 using Mystira.Contracts.App.Ports.Health;
 using System.IO.Compression;
 using Mystira.Shared.Configuration;
+using Mystira.Shared.Locking;
 using Mystira.Shared.Middleware;
 using Mystira.Shared.Telemetry;
 using OpenTelemetry.Resources;
@@ -148,6 +149,9 @@ try
         options.CompactionPercentage = 0.25;
     });
     builder.Services.AddRedisCaching(builder.Configuration);
+
+    // Distributed locking (requires Redis)
+    builder.Services.AddMystiraDistributedLocking(builder.Configuration);
 
     // Distributed tracing & Wolverine
     builder.Services.AddDistributedTracing("Mystira.App.Api", builder.Environment.EnvironmentName);

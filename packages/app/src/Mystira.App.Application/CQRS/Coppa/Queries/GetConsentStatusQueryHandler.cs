@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 using Mystira.App.Application.Ports;
 using Mystira.App.Domain.Models;
+using Mystira.Shared.Exceptions;
 
 namespace Mystira.App.Application.CQRS.Coppa.Queries;
 
@@ -16,7 +17,7 @@ public static class GetConsentStatusQueryHandler
         CancellationToken ct)
     {
         if (string.IsNullOrWhiteSpace(query.ChildProfileId))
-            throw new ArgumentException("Child profile ID is required", nameof(query.ChildProfileId));
+            throw new ValidationException("childProfileId", "Child profile ID is required");
 
         var consent = await consentRepository.GetByChildProfileIdAsync(query.ChildProfileId, ct);
         if (consent == null)

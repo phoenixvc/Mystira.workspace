@@ -1,4 +1,5 @@
 using Mystira.Contracts.App.Requests.Scenarios;
+using Mystira.Shared.Exceptions;
 using NJsonSchema;
 
 namespace Mystira.App.Application.Validation;
@@ -21,7 +22,7 @@ public static class ScenarioSchemaValidator
 
     /// <summary>
     /// Validates a scenario request against the JSON schema.
-    /// Throws ArgumentException if validation fails.
+    /// Throws ValidationException if validation fails.
     /// </summary>
     public static void ValidateAgainstSchema(CreateScenarioRequest request)
     {
@@ -31,7 +32,7 @@ public static class ScenarioSchemaValidator
         if (errors.Count > 0)
         {
             var errorMessages = string.Join(", ", errors.Select(e => e.ToString()).ToList());
-            throw new ArgumentException($"Scenario validation failed: {errorMessages}");
+            throw new ValidationException("scenario", $"Scenario validation failed: {errorMessages}");
         }
     }
 }

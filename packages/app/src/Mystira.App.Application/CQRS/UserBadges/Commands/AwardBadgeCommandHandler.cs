@@ -2,6 +2,7 @@ using Microsoft.Extensions.Logging;
 using Mystira.App.Application.Helpers;
 using Mystira.App.Application.Ports.Data;
 using Mystira.App.Domain.Models;
+using Mystira.Shared.Exceptions;
 
 namespace Mystira.App.Application.CQRS.UserBadges.Commands;
 
@@ -29,12 +30,12 @@ public static class AwardBadgeCommandHandler
 
         if (string.IsNullOrEmpty(request.UserProfileId))
         {
-            throw new ArgumentException("UserProfileId is required");
+            throw new ValidationException("userProfileId", "UserProfileId is required");
         }
 
         if (string.IsNullOrEmpty(request.BadgeConfigurationId))
         {
-            throw new ArgumentException("BadgeConfigurationId is required");
+            throw new ValidationException("badgeConfigurationId", "BadgeConfigurationId is required");
         }
 
         // Check for duplicate badge - return existing if already earned
@@ -50,7 +51,7 @@ public static class AwardBadgeCommandHandler
         var badgeConfig = await badgeConfigRepository.GetByIdAsync(request.BadgeConfigurationId, ct);
         if (badgeConfig == null)
         {
-            throw new ArgumentException($"Badge not found: {request.BadgeConfigurationId}");
+            throw new Mystira.Shared.Exceptions.NotFoundException("BadgeConfiguration", request.BadgeConfigurationId);
         }
 
         var badge = new UserBadge

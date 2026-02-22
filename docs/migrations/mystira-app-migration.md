@@ -4,7 +4,7 @@
 **Prerequisites**: Monorepo with ProjectReferences to shared packages
 **Estimated Effort**: 2-3 days
 **Last Updated**: February 2026
-**Status**: 🔄 In Progress (~85% complete)
+**Status**: ✅ Complete (~98%)
 
 ---
 
@@ -17,11 +17,11 @@ This guide covers migrating Mystira.App from its current infrastructure to the c
 3. MediatR → Wolverine migration (v5.15.0) — ✅ DONE (111 handlers converted)
 4. Custom resilience → Polly v8 — ✅ DONE
 5. IMemoryCache → IDistributedCache (Redis) — ✅ DONE (QueryCachingMiddleware migrated)
-6. Custom exceptions → `Mystira.Shared.Exceptions` — 🔄 85% done
-7. Repository pattern → Ardalis.Specification 9.3.1 — ✅ 95% done
-8. **Distributed locking** for concurrent operations — pending
-9. **Microsoft Entra External ID** authentication — pending
-10. **Source generators** for repositories and validators — pending
+6. Custom exceptions → `Mystira.Shared.Exceptions` — ✅ DONE (197 occurrences migrated across 107 files)
+7. Repository pattern → Ardalis.Specification 9.3.1 — ✅ DONE (46+ specs, 7 new spec classes added)
+8. **Distributed locking** for concurrent operations — ✅ DONE (Redis-backed, game session use cases)
+9. **Microsoft Entra External ID** authentication — ✅ DONE (already configured)
+10. **Source generators** for repositories and validators — ✅ DONE (enabled, available for new repos)
 
 > **Note**: With the monorepo migration complete, all shared packages are consumed via `<ProjectReference>` instead of NuGet `<PackageReference>`. No NuGet publishing is needed for internal packages.
 
@@ -372,7 +372,7 @@ builder.Services.AddMystiraCaching(builder.Configuration, options =>
 
 ---
 
-## Phase 5: Exception/Error Handling Migration
+## Phase 5: Exception/Error Handling Migration — ✅ DONE
 
 ### 5.1 Current State
 
@@ -417,7 +417,7 @@ app.UseExceptionHandler();
 
 ---
 
-## Phase 6: Ardalis.Specification 9.3.1 Migration
+## Phase 6: Ardalis.Specification 9.3.1 Migration — ✅ DONE
 
 ### 6.1 Create Specification Classes
 
@@ -539,7 +539,7 @@ using Mystira.Infrastructure.Data.Polyglot;  // For implementations
 
 ---
 
-## Phase 8: Distributed Locking
+## Phase 8: Distributed Locking — ✅ DONE
 
 ### 8.1 Setup
 
@@ -588,7 +588,7 @@ public class GameSessionService
 
 ---
 
-## Phase 9: Source Generators (Optional)
+## Phase 9: Source Generators (Optional) — ✅ DONE (Enabled)
 
 ### 9.1 Repository Generation
 

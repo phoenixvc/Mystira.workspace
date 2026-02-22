@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 using Mystira.App.Application.CQRS.Common.Responses;
 using Mystira.App.Application.Ports.Messaging;
+using Mystira.Shared.Exceptions;
 
 namespace Mystira.App.Application.CQRS.Discord.Commands;
 
@@ -17,7 +18,7 @@ public static class SendDiscordEmbedCommandHandler
         CancellationToken ct)
     {
         if (chatBotService == null)
-            throw new ArgumentNullException(nameof(chatBotService));
+            throw new ValidationException("chatBotService", "chatBotService is required");
 
         if (!chatBotService.IsConnected)
         {

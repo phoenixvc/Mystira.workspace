@@ -2,6 +2,7 @@ using Microsoft.Extensions.Logging;
 using Mystira.App.Application.Ports.Data;
 using Mystira.Contracts.App.Requests.UserProfiles;
 using Mystira.App.Domain.Models;
+using Mystira.Shared.Exceptions;
 using System.Threading;
 
 namespace Mystira.App.Application.UseCases.UserProfiles;
@@ -31,20 +32,20 @@ public class CreateUserProfileUseCase
         var existingProfile = await _repository.GetByIdAsync(request.Id, ct);
         if (existingProfile != null)
         {
-            throw new ArgumentException($"Profile already exists for name: {request.Name}");
+            throw new ConflictException($"Profile already exists for name: {request.Name}");
         }
 
         // Validate fantasy themes
         var invalidThemes = (request.PreferredFantasyThemes ?? Enumerable.Empty<string>()).Where(t => FantasyTheme.Parse(t) == null).ToList();
         if (invalidThemes.Any())
         {
-            throw new ArgumentException($"Invalid fantasy themes: {string.Join(", ", invalidThemes)}");
+            throw new ValidationException("preferredFantasyThemes", $"Invalid fantasy themes: {string.Join(", ", invalidThemes)}");
         }
 
         // Validate age group
         if (!AgeGroupConstants.AllAgeGroups.Contains(request.AgeGroup))
         {
-            throw new ArgumentException($"Invalid age group: {request.AgeGroup}. Must be one of: {string.Join(", ", AgeGroupConstants.AllAgeGroups)}");
+            throw new ValidationException("ageGroup", $"Invalid age group: {request.AgeGroup}. Must be one of: {string.Join(", ", AgeGroupConstants.AllAgeGroups)}");
         }
 
         var profile = new UserProfile

@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 using Mystira.App.Application.Ports.Data;
 using Mystira.App.Domain.Models;
+using Mystira.Shared.Exceptions;
 using System.Threading;
 
 namespace Mystira.App.Application.UseCases.ContentBundles;
@@ -28,18 +29,18 @@ public class RemoveScenarioFromBundleUseCase
     {
         if (string.IsNullOrWhiteSpace(bundleId))
         {
-            throw new ArgumentException("Bundle ID cannot be null or empty", nameof(bundleId));
+            throw new ValidationException("bundleId", "bundleId is required");
         }
 
         if (string.IsNullOrWhiteSpace(scenarioId))
         {
-            throw new ArgumentException("Scenario ID cannot be null or empty", nameof(scenarioId));
+            throw new ValidationException("scenarioId", "scenarioId is required");
         }
 
         var bundle = await _repository.GetByIdAsync(bundleId, ct);
         if (bundle == null)
         {
-            throw new ArgumentException($"Content bundle not found: {bundleId}", nameof(bundleId));
+            throw new NotFoundException("ContentBundle", bundleId);
         }
 
         if (bundle.ScenarioIds != null && bundle.ScenarioIds.Contains(scenarioId))

@@ -2,6 +2,7 @@ using Microsoft.Extensions.Logging;
 using Mystira.App.Application.Ports.Data;
 using Mystira.Contracts.App.Requests.Contributors;
 using Mystira.App.Domain.Models;
+using Mystira.Shared.Exceptions;
 using System.Threading;
 
 namespace Mystira.App.Application.UseCases.Contributors;
@@ -31,7 +32,7 @@ public class SetBundleContributorsUseCase
         var bundle = await _bundleRepository.GetByIdAsync(bundleId, ct);
         if (bundle == null)
         {
-            throw new ArgumentException($"Content bundle not found: {bundleId}");
+            throw new NotFoundException("ContentBundle", bundleId);
         }
 
         // Convert request to domain models
@@ -61,7 +62,7 @@ public class SetBundleContributorsUseCase
         {
             var errorMessage = string.Join("; ", errors);
             _logger.LogWarning("Invalid contributor splits for bundle {BundleId}: {Errors}", bundleId, errorMessage);
-            throw new ArgumentException($"Invalid contributor configuration: {errorMessage}");
+            throw new ValidationException("contributors", $"Invalid contributor configuration: {errorMessage}");
         }
 
         // Update the bundle

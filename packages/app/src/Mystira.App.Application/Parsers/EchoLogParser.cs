@@ -1,4 +1,5 @@
 using Mystira.App.Domain.Models;
+using Mystira.Shared.Exceptions;
 
 namespace Mystira.App.Application.Parsers;
 
@@ -21,7 +22,7 @@ public static class EchoLogParser
 
         if (!echoTypeFound || echoTypeObj == null)
         {
-            throw new ArgumentException("Required field 'echoType'/'type' is missing or null in echo log data");
+            throw new ValidationException("echoType", "Required field 'echoType'/'type' is missing or null in echo log data");
         }
 
         echoLog.EchoType = echoTypeObj.ToString() ?? string.Empty;
@@ -33,7 +34,7 @@ public static class EchoLogParser
 
         if (!descFound || descObj == null)
         {
-            throw new ArgumentException("Required field 'description'/'message' is missing or null in echo log data");
+            throw new ValidationException("description", "Required field 'description'/'message' is missing or null in echo log data");
         }
         echoLog.Description = descObj.ToString() ?? string.Empty;
 

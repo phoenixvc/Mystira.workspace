@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 using Mystira.App.Application.Ports.Data;
 using Mystira.App.Domain.Models;
+using Mystira.Shared.Exceptions;
 using System.Threading;
 
 namespace Mystira.App.Application.UseCases.Badges;
@@ -25,7 +26,7 @@ public class GetBadgeUseCase
     {
         if (string.IsNullOrWhiteSpace(badgeId))
         {
-            throw new ArgumentException("Badge ID cannot be null or empty", nameof(badgeId));
+            throw new ValidationException("badgeId", "badgeId is required");
         }
 
         var badge = await _repository.GetByIdAsync(badgeId, ct);

@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 using Mystira.App.Application.Ports.Data;
 using Mystira.App.Domain.Models;
+using Mystira.Shared.Exceptions;
 using System.Threading;
 
 namespace Mystira.App.Application.UseCases.Scenarios;
@@ -38,7 +39,7 @@ public class ValidateScenarioUseCase : IValidateScenarioUseCase
             {
                 if (!validAxisNames.Contains(axis.Value))
                 {
-                    throw new ArgumentException($"Invalid compass axis: '{axis.Value}'. Valid values: {string.Join(", ", validAxisNames)}");
+                    throw new ValidationException("coreAxes", $"Invalid compass axis: '{axis.Value}'. Valid values: {string.Join(", ", validAxisNames)}");
                 }
             }
         }
@@ -53,7 +54,7 @@ public class ValidateScenarioUseCase : IValidateScenarioUseCase
             {
                 if (!validArchetypeNames.Contains(archetype.Value))
                 {
-                    throw new ArgumentException($"Invalid archetype: '{archetype.Value}'. Valid values: {string.Join(", ", validArchetypeNames)}");
+                    throw new ValidationException("archetypes", $"Invalid archetype: '{archetype.Value}'. Valid values: {string.Join(", ", validArchetypeNames)}");
                 }
             }
         }
@@ -61,7 +62,7 @@ public class ValidateScenarioUseCase : IValidateScenarioUseCase
         // Validate scene references
         if (scenario.Scenes == null || scenario.Scenes.Count == 0)
         {
-            throw new ArgumentException("Scenario must have at least one scene");
+            throw new ValidationException("scenes", "Scenario must have at least one scene");
         }
 
         var sceneIds = scenario.Scenes.Select(s => s.Id).ToHashSet();
@@ -74,7 +75,7 @@ public class ValidateScenarioUseCase : IValidateScenarioUseCase
             {
                 if (!sceneIds.Contains(scene.NextSceneId))
                 {
-                    throw new ArgumentException($"Scene '{scene.Id}' references non-existent next scene '{scene.NextSceneId}'");
+                    throw new ValidationException("scenes", $"Scene '{scene.Id}' references non-existent next scene '{scene.NextSceneId}'");
                 }
 
                 allReferencedScenes.Add(scene.NextSceneId);
@@ -94,7 +95,7 @@ public class ValidateScenarioUseCase : IValidateScenarioUseCase
 
                     if (!sceneIds.Contains(branch.NextSceneId))
                     {
-                        throw new ArgumentException($"Scene '{scene.Id}' branch references non-existent scene '{branch.NextSceneId}'");
+                        throw new ValidationException("scenes", $"Scene '{scene.Id}' branch references non-existent scene '{branch.NextSceneId}'");
                     }
 
                     allReferencedScenes.Add(branch.NextSceneId);
@@ -108,7 +109,7 @@ public class ValidateScenarioUseCase : IValidateScenarioUseCase
                 {
                     if (!sceneIds.Contains(reveal.TriggerSceneId))
                     {
-                        throw new ArgumentException($"Scene '{scene.Id}' echo reveal references non-existent scene '{reveal.TriggerSceneId}'");
+                        throw new ValidationException("scenes", $"Scene '{scene.Id}' echo reveal references non-existent scene '{reveal.TriggerSceneId}'");
                     }
                 }
             }

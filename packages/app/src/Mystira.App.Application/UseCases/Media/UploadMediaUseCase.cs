@@ -89,24 +89,24 @@ public class UploadMediaUseCase
     {
         if (request == null || request.FileStream == null)
         {
-            throw new ArgumentException("File is required");
+            throw new ValidationException("file", "File is required");
         }
 
         if (request.FileSizeBytes == 0)
         {
-            throw new ArgumentException("File size must be greater than zero");
+            throw new ValidationException("fileSizeBytes", "File size must be greater than zero");
         }
 
         var maxSizeBytes = MimeTypeRegistry.GetMaxFileSizeBytes(request.MediaType);
         if (request.FileSizeBytes > maxSizeBytes)
         {
-            throw new ArgumentException($"File size exceeds maximum allowed size for {request.MediaType} files");
+            throw new ValidationException("fileSizeBytes", $"File size exceeds maximum allowed size for {request.MediaType} files");
         }
 
         if (!MimeTypeRegistry.IsValidExtension(request.FileName, request.MediaType))
         {
             var extension = Path.GetExtension(request.FileName);
-            throw new ArgumentException($"File extension '{extension}' is not allowed for {request.MediaType} files");
+            throw new ValidationException("fileName", $"File extension '{extension}' is not allowed for {request.MediaType} files");
         }
     }
 

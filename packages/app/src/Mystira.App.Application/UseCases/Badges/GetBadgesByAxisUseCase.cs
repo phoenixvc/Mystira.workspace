@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 using Mystira.App.Application.Ports.Data;
 using Mystira.App.Domain.Models;
+using Mystira.Shared.Exceptions;
 using System.Threading;
 
 namespace Mystira.App.Application.UseCases.Badges;
@@ -25,12 +26,12 @@ public class GetBadgesByAxisUseCase
     {
         if (string.IsNullOrWhiteSpace(userProfileId))
         {
-            throw new ArgumentException("User profile ID cannot be null or empty", nameof(userProfileId));
+            throw new ValidationException("userProfileId", "userProfileId is required");
         }
 
         if (string.IsNullOrWhiteSpace(axis))
         {
-            throw new ArgumentException("Axis cannot be null or empty", nameof(axis));
+            throw new ValidationException("axis", "axis is required");
         }
 
         var badges = await _repository.GetByUserProfileIdAndAxisAsync(userProfileId, axis, ct);

@@ -1,4 +1,5 @@
 using Mystira.App.Domain.Models;
+using Mystira.Shared.Exceptions;
 
 namespace Mystira.App.Application.Parsers;
 
@@ -11,12 +12,12 @@ public static class CharacterParser
     {
         if (!characterDict.TryGetValue("id", out var idObj) || idObj == null)
         {
-            throw new ArgumentException("Required field 'id' is missing or null in character data");
+            throw new ValidationException("id", "Required field 'id' is missing or null in character data");
         }
 
         if (!characterDict.TryGetValue("name", out var nameObj) || nameObj == null)
         {
-            throw new ArgumentException("Required field 'name' is missing or null in character data");
+            throw new ValidationException("name", "Required field 'name' is missing or null in character data");
         }
 
         var character = new ScenarioCharacter
@@ -37,7 +38,7 @@ public static class CharacterParser
 
         if (!characterDict.TryGetValue("metadata", out var metadataObj) || metadataObj is not IDictionary<object, object> metadataDict)
         {
-            throw new ArgumentException("Required field 'metadata' is missing or invalid in character data");
+            throw new ValidationException("metadata", "Required field 'metadata' is missing or invalid in character data");
         }
 
         character.Metadata = CharacterMetadataParser.Parse(metadataDict);

@@ -2,6 +2,7 @@ using Microsoft.Extensions.Logging;
 using Mystira.App.Application.Helpers;
 using Mystira.App.Application.Ports.Data;
 using Mystira.App.Domain.Models;
+using Mystira.Shared.Exceptions;
 
 namespace Mystira.App.Application.CQRS.UserProfiles.Queries;
 
@@ -23,7 +24,7 @@ public static class GetProfilesByAccountQueryHandler
     {
         if (string.IsNullOrEmpty(request.AccountId))
         {
-            throw new ArgumentException("AccountId is required");
+            throw new ValidationException("accountId", "AccountId is required");
         }
 
         var profiles = await repository.GetByAccountIdAsync(request.AccountId, ct);

@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Logging;
 using Mystira.App.Application.Ports.Data;
+using Mystira.Shared.Exceptions;
 using System.Threading;
 
 namespace Mystira.App.Application.UseCases.Media;
@@ -27,7 +28,7 @@ public class DownloadMediaUseCase
     {
         if (string.IsNullOrWhiteSpace(mediaId))
         {
-            throw new ArgumentException("Media ID is required", nameof(mediaId));
+            throw new ValidationException("mediaId", "mediaId is required");
         }
 
         try

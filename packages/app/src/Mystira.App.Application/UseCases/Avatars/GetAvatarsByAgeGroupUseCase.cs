@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 using Mystira.App.Application.Ports.Data;
 using Mystira.Contracts.App.Responses.Media;
+using Mystira.Shared.Exceptions;
 using System.Threading;
 
 namespace Mystira.App.Application.UseCases.Avatars;
@@ -25,7 +26,7 @@ public class GetAvatarsByAgeGroupUseCase
     {
         if (string.IsNullOrWhiteSpace(ageGroup))
         {
-            throw new ArgumentException("Age group cannot be null or empty", nameof(ageGroup));
+            throw new ValidationException("ageGroup", "ageGroup is required");
         }
 
         var configFile = await _repository.GetAsync(ct);

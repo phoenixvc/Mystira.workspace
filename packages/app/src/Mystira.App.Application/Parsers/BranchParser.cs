@@ -1,4 +1,5 @@
 using Mystira.App.Domain.Models;
+using Mystira.Shared.Exceptions;
 
 namespace Mystira.App.Application.Parsers;
 
@@ -18,7 +19,7 @@ public static class BranchParser
 
         if (!choiceFound || choiceObj == null)
         {
-            throw new ArgumentException("Required field 'choice'/'text' is missing or null in branch data");
+            throw new ValidationException("choice", "Required field 'choice'/'text' is missing or null in branch data");
         }
         branch.Choice = choiceObj.ToString() ?? string.Empty;
 

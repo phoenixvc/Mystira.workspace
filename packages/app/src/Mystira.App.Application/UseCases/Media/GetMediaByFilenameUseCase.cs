@@ -2,6 +2,7 @@ using Microsoft.Extensions.Logging;
 using Mystira.App.Application.Ports;
 using Mystira.App.Application.Ports.Data;
 using Mystira.App.Domain.Models;
+using Mystira.Shared.Exceptions;
 using System.Threading;
 
 namespace Mystira.App.Application.UseCases.Media;
@@ -29,7 +30,7 @@ public class GetMediaByFilenameUseCase
     {
         if (string.IsNullOrWhiteSpace(fileName))
         {
-            throw new ArgumentException("File name is required", nameof(fileName));
+            throw new ValidationException("fileName", "fileName is required");
         }
 
         try

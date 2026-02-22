@@ -5,6 +5,7 @@ using Mystira.App.Application.Ports;
 using Mystira.App.Application.Services;
 using Mystira.App.Domain.Models;
 using Mystira.Shared.Data.Repositories;
+using Mystira.Shared.Exceptions;
 
 namespace Mystira.App.Application.CQRS.Coppa.Commands;
 
@@ -24,9 +25,9 @@ public static class RequestParentalConsentCommandHandler
         CancellationToken ct)
     {
         if (string.IsNullOrWhiteSpace(command.ChildProfileId))
-            throw new ArgumentException("Child profile ID is required", nameof(command.ChildProfileId));
+            throw new ValidationException("childProfileId", "Child profile ID is required");
         if (string.IsNullOrWhiteSpace(command.ParentEmail))
-            throw new ArgumentException("Parent email is required", nameof(command.ParentEmail));
+            throw new ValidationException("parentEmail", "Parent email is required");
 
         // Check for existing consent - update if expired/denied, skip if active
         var existing = await consentRepository.GetByChildProfileIdAsync(command.ChildProfileId, ct);

@@ -226,6 +226,28 @@ public class ServiceUnavailableException : MystiraException
 }
 
 /// <summary>
+/// Exception for business rule violations.
+/// </summary>
+public class BusinessRuleException : MystiraException
+{
+    /// <summary>
+    /// The business rule that was violated.
+    /// </summary>
+    public string Rule { get; }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="BusinessRuleException"/> class.
+    /// </summary>
+    /// <param name="rule">The business rule that was violated.</param>
+    /// <param name="message">The error message.</param>
+    public BusinessRuleException(string rule, string message)
+        : base("BUSINESS_RULE_VIOLATION", message, HttpStatusCode.UnprocessableEntity)
+    {
+        Rule = rule;
+    }
+}
+
+/// <summary>
 /// Exception for rate limiting.
 /// </summary>
 public class RateLimitedException : MystiraException

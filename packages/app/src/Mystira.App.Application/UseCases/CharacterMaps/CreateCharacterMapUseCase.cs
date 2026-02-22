@@ -30,7 +30,7 @@ public class CreateCharacterMapUseCase
     {
         if (request == null)
         {
-            throw new ArgumentNullException(nameof(request));
+            throw new ValidationException("request", "request is required");
         }
 
         // Check if character map with ID already exists

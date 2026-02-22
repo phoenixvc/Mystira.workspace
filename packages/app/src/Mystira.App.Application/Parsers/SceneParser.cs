@@ -1,4 +1,5 @@
 using Mystira.App.Domain.Models;
+using Mystira.Shared.Exceptions;
 
 namespace Mystira.App.Application.Parsers;
 
@@ -14,19 +15,19 @@ public static class SceneParser
         // Parse required string properties (non-nullable)
         if (!sceneDict.TryGetValue("id", out var idObj) || idObj == null)
         {
-            throw new ArgumentException("Required field 'id' is missing or null in scene data");
+            throw new ValidationException("id", "Required field 'id' is missing or null in scene data");
         }
         scene.Id = idObj.ToString() ?? string.Empty;
 
         if (!sceneDict.TryGetValue("title", out var titleObj) || titleObj == null)
         {
-            throw new ArgumentException("Required field 'title' is missing or null in scene data");
+            throw new ValidationException("title", "Required field 'title' is missing or null in scene data");
         }
         scene.Title = titleObj.ToString() ?? string.Empty;
 
         if (!sceneDict.TryGetValue("description", out var descObj) || descObj == null)
         {
-            throw new ArgumentException("Required field 'description' is missing or null in scene data");
+            throw new ValidationException("description", "Required field 'description' is missing or null in scene data");
         }
         scene.Description = descObj.ToString() ?? string.Empty;
 
@@ -45,7 +46,7 @@ public static class SceneParser
             var typeStr = typeObj.ToString();
             if (!Enum.TryParse<SceneType>(typeStr, true, out var sceneType))
             {
-                throw new ArgumentException($"Invalid scene type: '{typeStr}'");
+                throw new ValidationException("type", $"Invalid scene type: '{typeStr}'");
             }
             scene.Type = sceneType;
         }

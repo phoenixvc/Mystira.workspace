@@ -1,5 +1,6 @@
 using Mystira.App.Domain.Models;
 using Mystira.Contracts.App.Requests.Scenarios;
+using Mystira.Shared.Exceptions;
 using Riok.Mapperly.Abstractions;
 
 namespace Mystira.App.Application.Mappers;
@@ -68,16 +69,16 @@ public static partial class ScenarioMapper
     /// </summary>
     /// <param name="requestDifficulty">The difficulty level from the request</param>
     /// <returns>The corresponding domain DifficultyLevel</returns>
-    /// <exception cref="ArgumentException">Thrown when the input value is not a valid DifficultyLevel</exception>
+    /// <exception cref="ValidationException">Thrown when the input value is not a valid DifficultyLevel</exception>
     public static DifficultyLevel MapDifficultyLevel(int requestDifficulty)
     {
         if (!Enum.IsDefined(typeof(DifficultyLevel), requestDifficulty))
         {
             var validValues = string.Join(", ", Enum.GetValues<DifficultyLevel>()
                 .Select(e => $"{e} ({(int)e})"));
-            throw new ArgumentException(
-                $"Invalid difficulty level: {requestDifficulty}. Valid values are: {validValues}",
-                nameof(requestDifficulty));
+            throw new ValidationException(
+                nameof(requestDifficulty),
+                $"Invalid difficulty level: {requestDifficulty}. Valid values are: {validValues}");
         }
 
         return (DifficultyLevel)requestDifficulty;
@@ -89,16 +90,16 @@ public static partial class ScenarioMapper
     /// </summary>
     /// <param name="requestSessionLength">The session length from the request</param>
     /// <returns>The corresponding domain SessionLength</returns>
-    /// <exception cref="ArgumentException">Thrown when the input value is not a valid SessionLength</exception>
+    /// <exception cref="ValidationException">Thrown when the input value is not a valid SessionLength</exception>
     public static SessionLength MapSessionLength(int requestSessionLength)
     {
         if (!Enum.IsDefined(typeof(SessionLength), requestSessionLength))
         {
             var validValues = string.Join(", ", Enum.GetValues<SessionLength>()
                 .Select(e => $"{e} ({(int)e})"));
-            throw new ArgumentException(
-                $"Invalid session length: {requestSessionLength}. Valid values are: {validValues}",
-                nameof(requestSessionLength));
+            throw new ValidationException(
+                nameof(requestSessionLength),
+                $"Invalid session length: {requestSessionLength}. Valid values are: {validValues}");
         }
 
         return (SessionLength)requestSessionLength;

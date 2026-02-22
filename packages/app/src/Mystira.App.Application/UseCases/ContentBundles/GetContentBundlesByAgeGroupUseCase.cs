@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 using Mystira.App.Application.Ports.Data;
 using Mystira.App.Domain.Models;
+using Mystira.Shared.Exceptions;
 using System.Threading;
 
 namespace Mystira.App.Application.UseCases.ContentBundles;
@@ -25,7 +26,7 @@ public class GetContentBundlesByAgeGroupUseCase
     {
         if (string.IsNullOrWhiteSpace(ageGroup))
         {
-            throw new ArgumentException("Age group cannot be null or empty", nameof(ageGroup));
+            throw new ValidationException("ageGroup", "ageGroup is required");
         }
 
         var bundles = await _repository.GetByAgeGroupAsync(ageGroup, ct);

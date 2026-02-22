@@ -1,5 +1,6 @@
 using Mystira.App.Application.UseCases.UserProfiles;
 using Mystira.App.Domain.Models;
+using Mystira.Shared.Exceptions;
 
 namespace Mystira.App.Application.CQRS.UserProfiles.Commands;
 
@@ -25,12 +26,12 @@ public static class CreateUserProfileCommandHandler
         // Handler-level name validation (UseCase trusts DataAnnotations on the request)
         if (string.IsNullOrWhiteSpace(request.Name))
         {
-            throw new ArgumentException("Profile name is required");
+            throw new ValidationException("name", "Profile name is required");
         }
 
         if (request.Name.Trim().Length < 2)
         {
-            throw new ArgumentException("Profile name must be at least 2 characters long");
+            throw new ValidationException("name", "Profile name must be at least 2 characters long");
         }
 
         // Pre-fill ID if not provided (handler generates IDs for new profiles)

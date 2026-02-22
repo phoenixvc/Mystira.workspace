@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 using Mystira.App.Application.Ports.Data;
 using Mystira.App.Domain.Models;
+using Mystira.Shared.Exceptions;
 using System.Threading;
 
 namespace Mystira.App.Application.UseCases.Avatars;
@@ -28,7 +29,7 @@ public class UpdateAvatarConfigurationUseCase
     {
         if (ageGroupAvatars == null)
         {
-            throw new ArgumentNullException(nameof(ageGroupAvatars));
+            throw new ValidationException("ageGroupAvatars", "ageGroupAvatars is required");
         }
 
         var configFile = await _repository.GetAsync(ct) ?? new AvatarConfigurationFile

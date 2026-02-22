@@ -5,6 +5,7 @@ using Mystira.App.Application.Validation;
 using Mystira.App.Application.Mappers;
 using Mystira.Contracts.App.Requests.Scenarios;
 using Mystira.App.Domain.Models;
+using Mystira.Shared.Exceptions;
 using NJsonSchema;
 
 namespace Mystira.App.Application.CQRS.Scenarios.Commands;
@@ -88,7 +89,7 @@ public static class CreateScenarioCommandHandler
         if (errors.Count > 0)
         {
             var errorMessages = string.Join(", ", errors.Select(e => e.ToString()).ToList());
-            throw new ArgumentException($"Scenario validation failed: {errorMessages}");
+            throw new ValidationException("scenario", $"Scenario validation failed: {errorMessages}");
         }
     }
 }

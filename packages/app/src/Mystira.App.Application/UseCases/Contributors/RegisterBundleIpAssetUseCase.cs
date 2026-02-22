@@ -36,7 +36,7 @@ public class RegisterBundleIpAssetUseCase
         var bundle = await _bundleRepository.GetByIdAsync(bundleId, ct);
         if (bundle == null)
         {
-            throw new ArgumentException($"Content bundle not found: {bundleId}");
+            throw new NotFoundException("ContentBundle", bundleId);
         }
 
         // Check if already registered
@@ -55,7 +55,7 @@ public class RegisterBundleIpAssetUseCase
         if (!bundle.StoryProtocol.ValidateContributorSplits(out var errors))
         {
             var errorMessage = string.Join("; ", errors);
-            throw new ArgumentException($"Invalid contributor configuration: {errorMessage}");
+            throw new ValidationException("contributors", $"Invalid contributor configuration: {errorMessage}");
         }
 
         // Register on Story Protocol

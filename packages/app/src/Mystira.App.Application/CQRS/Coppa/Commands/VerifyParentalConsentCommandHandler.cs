@@ -3,6 +3,7 @@ using Mystira.App.Application.Helpers;
 using Mystira.App.Application.Ports;
 using Mystira.App.Domain.Models;
 using Mystira.Shared.Data.Repositories;
+using Mystira.Shared.Exceptions;
 
 namespace Mystira.App.Application.CQRS.Coppa.Commands;
 
@@ -19,7 +20,7 @@ public static class VerifyParentalConsentCommandHandler
         CancellationToken ct)
     {
         if (string.IsNullOrWhiteSpace(command.VerificationToken))
-            throw new ArgumentException("Verification token is required", nameof(command.VerificationToken));
+            throw new ValidationException("verificationToken", "Verification token is required");
 
         var consent = await consentRepository.GetByVerificationTokenAsync(command.VerificationToken, ct);
         if (consent == null)

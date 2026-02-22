@@ -36,7 +36,7 @@ public class RegisterScenarioIpAssetUseCase
         var scenario = await _scenarioRepository.GetByIdAsync(scenarioId, ct);
         if (scenario == null)
         {
-            throw new ArgumentException($"Scenario not found: {scenarioId}");
+            throw new NotFoundException("Scenario", scenarioId);
         }
 
         // Check if already registered
@@ -55,7 +55,7 @@ public class RegisterScenarioIpAssetUseCase
         if (!scenario.StoryProtocol.ValidateContributorSplits(out var errors))
         {
             var errorMessage = string.Join("; ", errors);
-            throw new ArgumentException($"Invalid contributor configuration: {errorMessage}");
+            throw new ValidationException("contributors", $"Invalid contributor configuration: {errorMessage}");
         }
 
         // Register on Story Protocol

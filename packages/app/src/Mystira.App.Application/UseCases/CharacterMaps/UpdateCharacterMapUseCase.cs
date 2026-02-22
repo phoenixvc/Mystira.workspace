@@ -2,6 +2,7 @@ using Microsoft.Extensions.Logging;
 using Mystira.App.Application.Ports.Data;
 using Mystira.Contracts.App.Requests.CharacterMaps;
 using Mystira.App.Domain.Models;
+using Mystira.Shared.Exceptions;
 using System.Threading;
 
 namespace Mystira.App.Application.UseCases.CharacterMaps;
@@ -29,18 +30,18 @@ public class UpdateCharacterMapUseCase
     {
         if (string.IsNullOrWhiteSpace(characterMapId))
         {
-            throw new ArgumentException("Character map ID cannot be null or empty", nameof(characterMapId));
+            throw new ValidationException("characterMapId", "characterMapId is required");
         }
 
         if (request == null)
         {
-            throw new ArgumentNullException(nameof(request));
+            throw new ValidationException("request", "request is required");
         }
 
         var characterMap = await _repository.GetByIdAsync(characterMapId, ct);
         if (characterMap == null)
         {
-            throw new ArgumentException($"Character map not found: {characterMapId}", nameof(characterMapId));
+            throw new NotFoundException("CharacterMap", characterMapId);
         }
 
         // Update properties if provided

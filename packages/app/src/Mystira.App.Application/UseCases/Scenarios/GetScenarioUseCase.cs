@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 using Mystira.App.Application.Ports.Data;
 using Mystira.App.Domain.Models;
+using Mystira.Shared.Exceptions;
 using System.Threading;
 
 namespace Mystira.App.Application.UseCases.Scenarios;
@@ -25,7 +26,7 @@ public class GetScenarioUseCase
     {
         if (string.IsNullOrWhiteSpace(scenarioId))
         {
-            throw new ArgumentException("Scenario ID cannot be null or empty", nameof(scenarioId));
+            throw new ValidationException("scenarioId", "scenarioId is required");
         }
 
         var scenario = await _repository.GetByIdAsync(scenarioId, ct);

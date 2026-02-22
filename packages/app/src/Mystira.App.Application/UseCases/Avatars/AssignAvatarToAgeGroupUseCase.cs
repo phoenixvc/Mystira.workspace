@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 using Mystira.App.Application.Ports.Data;
 using Mystira.App.Domain.Models;
+using Mystira.Shared.Exceptions;
 using System.Threading;
 
 namespace Mystira.App.Application.UseCases.Avatars;
@@ -28,12 +29,12 @@ public class AssignAvatarToAgeGroupUseCase
     {
         if (string.IsNullOrWhiteSpace(ageGroup))
         {
-            throw new ArgumentException("Age group cannot be null or empty", nameof(ageGroup));
+            throw new ValidationException("ageGroup", "ageGroup is required");
         }
 
         if (mediaIds == null)
         {
-            throw new ArgumentNullException(nameof(mediaIds));
+            throw new ValidationException("mediaIds", "mediaIds is required");
         }
 
         var configFile = await _repository.GetAsync(ct) ?? new AvatarConfigurationFile

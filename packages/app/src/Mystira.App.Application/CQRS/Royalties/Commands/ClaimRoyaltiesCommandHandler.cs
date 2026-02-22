@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Logging;
 using Mystira.App.Application.Ports;
+using Mystira.Shared.Exceptions;
 
 namespace Mystira.App.Application.CQRS.Royalties.Commands;
 
@@ -16,12 +17,12 @@ public static class ClaimRoyaltiesCommandHandler
     {
         if (string.IsNullOrWhiteSpace(request.IpAssetId))
         {
-            throw new ArgumentException("IP Asset ID cannot be null or empty", nameof(request.IpAssetId));
+            throw new ValidationException("ipAssetId", "IP Asset ID cannot be null or empty");
         }
 
         if (string.IsNullOrWhiteSpace(request.ContributorWallet))
         {
-            throw new ArgumentException("Contributor wallet address cannot be null or empty", nameof(request.ContributorWallet));
+            throw new ValidationException("contributorWallet", "Contributor wallet address cannot be null or empty");
         }
 
         logger.LogInformation(

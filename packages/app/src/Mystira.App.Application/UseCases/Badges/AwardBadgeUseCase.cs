@@ -2,6 +2,7 @@ using Microsoft.Extensions.Logging;
 using Mystira.App.Application.Ports.Data;
 using Mystira.Contracts.App.Requests.Badges;
 using Mystira.App.Domain.Models;
+using Mystira.Shared.Exceptions;
 using System.Threading;
 
 namespace Mystira.App.Application.UseCases.Badges;
@@ -32,7 +33,7 @@ public class AwardBadgeUseCase
     {
         if (request == null)
         {
-            throw new ArgumentNullException(nameof(request));
+            throw new ValidationException("request", "request is required");
         }
 
         var existingBadge = await _badgeRepository.GetByUserProfileIdAndBadgeConfigIdAsync(
@@ -48,13 +49,13 @@ public class AwardBadgeUseCase
         var badge = await _newBadgeRepository.GetByIdAsync(request.BadgeConfigurationId, ct);
         if (badge == null)
         {
-            throw new ArgumentException($"Badge not found: {request.BadgeConfigurationId}", nameof(request));
+            throw new NotFoundException("Badge", request.BadgeConfigurationId);
         }
 
         var userProfile = await _userProfileRepository.GetByIdAsync(request.UserProfileId, ct);
         if (userProfile == null)
         {
-            throw new ArgumentException($"User profile not found: {request.UserProfileId}", nameof(request));
+            throw new NotFoundException("UserProfile", request.UserProfileId);
         }
 
         var newBadge = new UserBadge

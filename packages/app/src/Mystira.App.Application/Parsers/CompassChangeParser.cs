@@ -1,4 +1,5 @@
 using Mystira.App.Domain.Models;
+using Mystira.Shared.Exceptions;
 
 namespace Mystira.App.Application.Parsers;
 
@@ -18,7 +19,7 @@ public static class CompassChangeParser
 
         if (!axisFound || axisObj == null)
         {
-            throw new ArgumentException("Required field 'axis' is missing or null in compass change data");
+            throw new ValidationException("axis", "Required field 'axis' is missing or null in compass change data");
         }
         compassChange.Axis = axisObj.ToString() ?? string.Empty;
 
@@ -30,7 +31,7 @@ public static class CompassChangeParser
 
         if (!deltaFound || deltaObj == null || !double.TryParse(deltaObj.ToString(), out double delta))
         {
-            throw new ArgumentException("Required field 'delta'/'change'/'impact' is invalid or null in compass change data");
+            throw new ValidationException("delta", "Required field 'delta'/'change'/'impact' is invalid or null in compass change data");
         }
         // Validate delta is between -1.0 and 1.0
         compassChange.Delta = Math.Clamp(delta, -1.0, 1.0);

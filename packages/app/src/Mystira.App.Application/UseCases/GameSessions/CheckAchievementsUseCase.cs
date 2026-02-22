@@ -1,38 +1,54 @@
 using Microsoft.Extensions.Logging;
 using Mystira.App.Application.Ports.Data;
 using Mystira.App.Domain.Models;
+using Mystira.Shared.Exceptions;
 using Mystira.Shared.Extensions;
+using Mystira.Shared.Locking;
 using System.Threading;
 
 namespace Mystira.App.Application.UseCases.GameSessions;
 
 /// <summary>
-/// Use case for checking and awarding session achievements
+/// Use case for checking and awarding session achievements.
+/// Uses distributed locking to prevent duplicate achievement awards.
 /// </summary>
 public class CheckAchievementsUseCase
 {
     private readonly IGameSessionRepository _repository;
     private readonly IBadgeConfigurationRepository _badgeRepository;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly IDistributedLockService _lockService;
     private readonly ILogger<CheckAchievementsUseCase> _logger;
 
     public CheckAchievementsUseCase(
         IGameSessionRepository repository,
         IBadgeConfigurationRepository badgeRepository,
         IUnitOfWork unitOfWork,
+        IDistributedLockService lockService,
         ILogger<CheckAchievementsUseCase> logger)
     {
         _repository = repository;
         _badgeRepository = badgeRepository;
         _unitOfWork = unitOfWork;
+        _lockService = lockService;
         _logger = logger;
     }
 
     public async Task<List<SessionAchievement>> ExecuteAsync(string sessionId, CancellationToken ct = default)
     {
+        return await _lockService.ExecuteWithLockAsync(
+            $"achievements:{sessionId}",
+            async token => await ExecuteInternalAsync(sessionId, token),
+            expiry: TimeSpan.FromSeconds(30),
+            wait: TimeSpan.FromSeconds(10),
+            ct);
+    }
+
+    private async Task<List<SessionAchievement>> ExecuteInternalAsync(string sessionId, CancellationToken ct)
+    {
         if (string.IsNullOrWhiteSpace(sessionId))
         {
-            throw new ArgumentException("Session ID cannot be null or empty", nameof(sessionId));
+            throw new ValidationException("sessionId", "sessionId is required");
         }
 
         var session = await _repository.GetByIdAsync(sessionId, ct);

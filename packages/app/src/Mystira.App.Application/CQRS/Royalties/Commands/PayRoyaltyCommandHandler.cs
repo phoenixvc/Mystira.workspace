@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 using Mystira.App.Application.Ports;
 using Mystira.App.Domain.Models;
+using Mystira.Shared.Exceptions;
 
 namespace Mystira.App.Application.CQRS.Royalties.Commands;
 
@@ -17,12 +18,12 @@ public static class PayRoyaltyCommandHandler
     {
         if (string.IsNullOrWhiteSpace(request.IpAssetId))
         {
-            throw new ArgumentException("IP Asset ID cannot be null or empty", nameof(request.IpAssetId));
+            throw new ValidationException("ipAssetId", "IP Asset ID cannot be null or empty");
         }
 
         if (request.Amount <= 0)
         {
-            throw new ArgumentException("Amount must be greater than zero", nameof(request.Amount));
+            throw new ValidationException("amount", "Amount must be greater than zero");
         }
 
         logger.LogInformation(

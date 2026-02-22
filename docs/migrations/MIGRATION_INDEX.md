@@ -19,7 +19,7 @@
 | **@mystira/core-types**                | ✅ Complete    | 100%     | v0.2.0-alpha released                             |
 | **Domain Events**                      | ✅ Complete    | 100%     | 13 events defined                                 |
 | **API Domain Standardization**         | ✅ Complete    | 100%     | `{env}.{service}.mystira.app`                     |
-| **Service Migrations**                 | 🔄 In Progress | 45%      | App ~85%, StoryGenerator ~30%, others pending     |
+| **Service Migrations**                 | 🔄 In Progress | 55%      | App ~98%, StoryGenerator ~30%, others pending     |
 | **Monitoring & Alerts**                | ✅ Complete    | 100%     | App Insights, availability tests                  |
 
 ---
@@ -28,15 +28,15 @@
 
 Each service has a detailed migration guide for framework-level migrations:
 
-| Service                | Guide                                                                        | Priority | Status                                                    |
-| ---------------------- | ---------------------------------------------------------------------------- | -------- | --------------------------------------------------------- |
-| Mystira.App            | [mystira-app-migration.md](./mystira-app-migration.md)                       | High     | 🔄 ~85% (Wolverine done, caching done, exceptions 85%)    |
-| Mystira.Admin.Api      | [mystira-admin-migration.md](./mystira-admin-migration.md)                   | High     | 📋 Ready to start                                         |
-| Mystira.StoryGenerator | [mystira-storygenerator-migration.md](./mystira-storygenerator-migration.md) | Medium   | 🔄 ~30% (.NET 10 done, async fixes done, MediatR pending) |
-| Mystira.Publisher      | [mystira-publisher-migration.md](./mystira-publisher-migration.md)           | Medium   | 📋 Needs update                                           |
-| Mystira.Chain          | [mystira-chain-migration.md](./mystira-chain-migration.md)                   | Medium   | 📋 Planned                                                |
-| Mystira.DevHub         | [mystira-devhub-migration.md](./mystira-devhub-migration.md)                 | Low      | 📋 Planned                                                |
-| Admin UI               | [mystira-admin-ui-migration.md](./mystira-admin-ui-migration.md)             | Low      | 📋 Planned                                                |
+| Service                | Guide                                                                        | Priority | Status                                                                     |
+| ---------------------- | ---------------------------------------------------------------------------- | -------- | -------------------------------------------------------------------------- |
+| Mystira.App            | [mystira-app-migration.md](./mystira-app-migration.md)                       | High     | ✅ ~98% (all phases done, exceptions migrated, specs, locking, generators) |
+| Mystira.Admin.Api      | [mystira-admin-migration.md](./mystira-admin-migration.md)                   | High     | 📋 Ready to start                                                          |
+| Mystira.StoryGenerator | [mystira-storygenerator-migration.md](./mystira-storygenerator-migration.md) | Medium   | 🔄 ~30% (.NET 10 done, async fixes done, MediatR pending)                  |
+| Mystira.Publisher      | [mystira-publisher-migration.md](./mystira-publisher-migration.md)           | Medium   | 📋 Needs update                                                            |
+| Mystira.Chain          | [mystira-chain-migration.md](./mystira-chain-migration.md)                   | Medium   | 📋 Planned                                                                 |
+| Mystira.DevHub         | [mystira-devhub-migration.md](./mystira-devhub-migration.md)                 | Low      | 📋 Planned                                                                 |
+| Admin UI               | [mystira-admin-ui-migration.md](./mystira-admin-ui-migration.md)             | Low      | 📋 Planned                                                                 |
 
 ---
 

@@ -2,6 +2,7 @@ using Microsoft.Extensions.Logging;
 using Mystira.App.Application.Ports.Data;
 using Mystira.Contracts.App.Requests.UserProfiles;
 using Mystira.App.Domain.Models;
+using Mystira.Shared.Exceptions;
 using System.Threading;
 
 namespace Mystira.App.Application.UseCases.UserProfiles;
@@ -40,7 +41,7 @@ public class UpdateUserProfileUseCase
             var invalidThemes = request.PreferredFantasyThemes.Where(t => FantasyTheme.Parse(t) == null).ToList();
             if (invalidThemes.Any())
             {
-                throw new ArgumentException($"Invalid fantasy themes: {string.Join(", ", invalidThemes)}");
+                throw new ValidationException("preferredFantasyThemes", $"Invalid fantasy themes: {string.Join(", ", invalidThemes)}");
             }
 
             profile.PreferredFantasyThemes = request.PreferredFantasyThemes.Select(t => FantasyTheme.Parse(t)!).ToList();
@@ -51,7 +52,7 @@ public class UpdateUserProfileUseCase
             // Validate age group
             if (!AgeGroupConstants.AllAgeGroups.Contains(request.AgeGroup))
             {
-                throw new ArgumentException($"Invalid age group: {request.AgeGroup}. Must be one of: {string.Join(", ", AgeGroupConstants.AllAgeGroups)}");
+                throw new ValidationException("ageGroup", $"Invalid age group: {request.AgeGroup}. Must be one of: {string.Join(", ", AgeGroupConstants.AllAgeGroups)}");
             }
 
             profile.AgeGroupName = request.AgeGroup;

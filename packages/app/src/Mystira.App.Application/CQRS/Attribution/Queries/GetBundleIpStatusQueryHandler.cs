@@ -4,6 +4,7 @@ using Mystira.App.Application.Configuration.StoryProtocol;
 using Mystira.App.Application.Ports.Data;
 using Mystira.Contracts.App.Responses.Attribution;
 using Mystira.App.Domain.Models;
+using Mystira.Shared.Exceptions;
 
 namespace Mystira.App.Application.CQRS.Attribution.Queries;
 
@@ -21,7 +22,7 @@ public static class GetBundleIpStatusQueryHandler
     {
         if (string.IsNullOrWhiteSpace(request.BundleId))
         {
-            throw new ArgumentException("Bundle ID cannot be null or empty", nameof(request.BundleId));
+            throw new ValidationException("bundleId", "Bundle ID cannot be null or empty");
         }
 
         var bundle = await repository.GetByIdAsync(request.BundleId);

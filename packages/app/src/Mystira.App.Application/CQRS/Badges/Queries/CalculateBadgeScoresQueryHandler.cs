@@ -4,6 +4,7 @@ using Mystira.App.Application.Services;
 using Mystira.App.Domain.Exceptions;
 using Mystira.App.Domain.Models;
 using Mystira.Contracts.App.Responses.Badges;
+using Mystira.Shared.Exceptions;
 
 namespace Mystira.App.Application.CQRS.Badges.Queries;
 
@@ -61,17 +62,17 @@ public static class CalculateBadgeScoresQueryHandler
     {
         if (string.IsNullOrWhiteSpace(query.ContentBundleId))
         {
-            throw new ArgumentException("Content bundle ID cannot be null or empty", nameof(query.ContentBundleId));
+            throw new ValidationException("contentBundleId", "Content bundle ID cannot be null or empty");
         }
 
         if (query.Percentiles == null || !query.Percentiles.Any())
         {
-            throw new ArgumentException("Percentiles array cannot be null or empty", nameof(query.Percentiles));
+            throw new ValidationException("percentiles", "Percentiles array cannot be null or empty");
         }
 
         if (query.Percentiles.Any(p => p < 0 || p > 100))
         {
-            throw new ArgumentException("Percentiles must be between 0 and 100", nameof(query.Percentiles));
+            throw new ValidationException("percentiles", "Percentiles must be between 0 and 100");
         }
     }
 

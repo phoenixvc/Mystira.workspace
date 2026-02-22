@@ -2,6 +2,7 @@ using Microsoft.Extensions.Logging;
 using Mystira.App.Application.Ports.Data;
 using Mystira.Contracts.App.Requests.Contributors;
 using Mystira.App.Domain.Models;
+using Mystira.Shared.Exceptions;
 using System.Threading;
 
 namespace Mystira.App.Application.UseCases.Contributors;
@@ -31,7 +32,7 @@ public class SetScenarioContributorsUseCase
         var scenario = await _scenarioRepository.GetByIdAsync(scenarioId, ct);
         if (scenario == null)
         {
-            throw new ArgumentException($"Scenario not found: {scenarioId}");
+            throw new NotFoundException("Scenario", scenarioId);
         }
 
         // Convert request to domain models
@@ -61,7 +62,7 @@ public class SetScenarioContributorsUseCase
         {
             var errorMessage = string.Join("; ", errors);
             _logger.LogWarning("Invalid contributor splits for scenario {ScenarioId}: {Errors}", scenarioId, errorMessage);
-            throw new ArgumentException($"Invalid contributor configuration: {errorMessage}");
+            throw new ValidationException("contributors", $"Invalid contributor configuration: {errorMessage}");
         }
 
         // Update the scenario

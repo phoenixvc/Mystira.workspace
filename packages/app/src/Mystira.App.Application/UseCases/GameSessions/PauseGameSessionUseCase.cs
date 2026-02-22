@@ -29,13 +29,13 @@ public class PauseGameSessionUseCase
     {
         if (string.IsNullOrWhiteSpace(sessionId))
         {
-            throw new ArgumentException("Session ID cannot be null or empty", nameof(sessionId));
+            throw new ValidationException("sessionId", "sessionId is required");
         }
 
         var session = await _repository.GetByIdAsync(sessionId, ct);
         if (session == null)
         {
-            throw new ArgumentException($"Game session not found: {sessionId}", nameof(sessionId));
+            throw new NotFoundException("GameSession", sessionId);
         }
 
         if (session.Status != SessionStatus.InProgress)

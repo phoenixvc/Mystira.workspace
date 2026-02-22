@@ -2,6 +2,7 @@ using Microsoft.Extensions.Logging;
 using Mystira.App.Application.Helpers;
 using Mystira.App.Application.Ports.Data;
 using Mystira.App.Domain.Models;
+using Mystira.Shared.Exceptions;
 using System.Threading;
 
 namespace Mystira.App.Application.UseCases.Accounts;
@@ -29,18 +30,18 @@ public class AddCompletedScenarioUseCase
     {
         if (string.IsNullOrWhiteSpace(accountId))
         {
-            throw new ArgumentException("Account ID cannot be null or empty", nameof(accountId));
+            throw new ValidationException("accountId", "accountId is required");
         }
 
         if (string.IsNullOrWhiteSpace(scenarioId))
         {
-            throw new ArgumentException("Scenario ID cannot be null or empty", nameof(scenarioId));
+            throw new ValidationException("scenarioId", "scenarioId is required");
         }
 
         var account = await _repository.GetByIdAsync(accountId, ct);
         if (account == null)
         {
-            throw new ArgumentException($"Account not found: {LogAnonymizer.HashId(accountId)}", nameof(accountId));
+            throw new NotFoundException("Account", accountId);
         }
 
         if (account.CompletedScenarioIds == null)

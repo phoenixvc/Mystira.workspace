@@ -1,5 +1,6 @@
 using System.Collections;
 using Mystira.App.Domain.Models;
+using Mystira.Shared.Exceptions;
 
 namespace Mystira.App.Application.Parsers;
 
@@ -23,21 +24,21 @@ public static class CharacterMetadataParser
 
         if (!metadataDict.TryGetValue("species", out var speciesObj) || speciesObj == null)
         {
-            throw new ArgumentException("Required field 'species' is missing or null in character metadata");
+            throw new ValidationException("species", "Required field 'species' is missing or null in character metadata");
         }
 
         metadata.Species = speciesObj.ToString() ?? string.Empty;
 
         if (!metadataDict.TryGetValue("age", out var ageObj) || ageObj == null || !int.TryParse(ageObj.ToString(), out var age))
         {
-            throw new ArgumentException("Required field 'age' is missing or invalid in character metadata");
+            throw new ValidationException("age", "Required field 'age' is missing or invalid in character metadata");
         }
 
         metadata.Age = age;
 
         if (!metadataDict.TryGetValue("backstory", out var backstoryObj) || backstoryObj == null)
         {
-            throw new ArgumentException("Required field 'backstory' is missing or null in character metadata");
+            throw new ValidationException("backstory", "Required field 'backstory' is missing or null in character metadata");
         }
 
         metadata.Backstory = backstoryObj.ToString() ?? string.Empty;

@@ -1,8 +1,10 @@
+using Mystira.Shared.Exceptions;
+
 namespace Mystira.App.Application;
 
 /// <summary>
 /// Argument validation helper to reduce scattered validation boilerplate across handlers.
-/// Throws ArgumentException for failed preconditions.
+/// Throws ValidationException for failed preconditions.
 /// </summary>
 public static class Guard
 {
@@ -12,7 +14,7 @@ public static class Guard
     public static void AgainstNullOrEmpty(string? value, string parameterName)
     {
         if (string.IsNullOrWhiteSpace(value))
-            throw new ArgumentException($"{parameterName} is required", parameterName);
+            throw new ValidationException(parameterName, $"{parameterName} is required");
     }
 
     /// <summary>
@@ -21,7 +23,7 @@ public static class Guard
     public static void AgainstNull<T>(T? value, string parameterName) where T : class
     {
         if (value is null)
-            throw new ArgumentNullException(parameterName, $"{parameterName} is required");
+            throw new ValidationException(parameterName, $"{parameterName} is required");
     }
 
     /// <summary>
@@ -30,7 +32,7 @@ public static class Guard
     public static void AgainstNullOrEmptyCollection<T>(IEnumerable<T>? collection, string parameterName)
     {
         if (collection is null || !collection.Any())
-            throw new ArgumentException($"{parameterName} must contain at least one item", parameterName);
+            throw new ValidationException(parameterName, $"{parameterName} must contain at least one item");
     }
 
     /// <summary>
@@ -39,6 +41,6 @@ public static class Guard
     public static void Against(bool condition, string message)
     {
         if (condition)
-            throw new ArgumentException(message);
+            throw new ValidationException("input", message);
     }
 }

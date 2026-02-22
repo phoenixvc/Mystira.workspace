@@ -30,12 +30,12 @@ public class UpdateMediaMetadataUseCase
     {
         if (string.IsNullOrWhiteSpace(mediaId))
         {
-            throw new ArgumentException("Media ID is required", nameof(mediaId));
+            throw new ValidationException("mediaId", "mediaId is required");
         }
 
         if (updateData == null)
         {
-            throw new ArgumentNullException(nameof(updateData));
+            throw new ValidationException("updateData", "updateData is required");
         }
 
         var mediaAsset = await _repository.GetByMediaIdAsync(mediaId, ct);

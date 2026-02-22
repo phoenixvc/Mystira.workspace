@@ -1,4 +1,5 @@
 using Mystira.App.Domain.Models;
+using Mystira.Shared.Exceptions;
 
 namespace Mystira.App.Application.Parsers;
 
@@ -18,7 +19,7 @@ public static class EchoRevealParser
 
         if (!echoTypeFound || echoTypeObj == null)
         {
-            throw new ArgumentException("Required field 'echoType'/'type' is missing or null in echo reveal reference");
+            throw new ValidationException("echoType", "Required field 'echoType'/'type' is missing or null in echo reveal reference");
         }
 
         reveal.EchoType = echoTypeObj.ToString() ?? string.Empty;
@@ -40,7 +41,7 @@ public static class EchoRevealParser
 
         if (!triggerSceneFound || triggerSceneIdObj == null)
         {
-            throw new ArgumentException("Required field 'triggerSceneId'/'scene_id' is missing or null in echo reveal reference");
+            throw new ValidationException("triggerSceneId", "Required field 'triggerSceneId'/'scene_id' is missing or null in echo reveal reference");
         }
         reveal.TriggerSceneId = triggerSceneIdObj.ToString() ?? string.Empty;
 

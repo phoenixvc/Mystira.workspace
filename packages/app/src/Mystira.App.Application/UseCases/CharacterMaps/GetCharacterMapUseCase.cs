@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 using Mystira.App.Application.Ports.Data;
 using Mystira.App.Domain.Models;
+using Mystira.Shared.Exceptions;
 using System.Threading;
 
 namespace Mystira.App.Application.UseCases.CharacterMaps;
@@ -25,7 +26,7 @@ public class GetCharacterMapUseCase
     {
         if (string.IsNullOrWhiteSpace(characterMapId))
         {
-            throw new ArgumentException("Character map ID cannot be null or empty", nameof(characterMapId));
+            throw new ValidationException("characterMapId", "characterMapId is required");
         }
 
         var characterMap = await _repository.GetByIdAsync(characterMapId, ct);

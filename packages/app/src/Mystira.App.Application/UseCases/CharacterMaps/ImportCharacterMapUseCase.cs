@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 using Mystira.App.Application.Ports.Data;
 using Mystira.App.Domain.Models;
+using Mystira.Shared.Exceptions;
 using YamlDotNet.Serialization;
 using System.Threading;
 
@@ -29,7 +30,7 @@ public class ImportCharacterMapUseCase
     {
         if (yamlStream == null)
         {
-            throw new ArgumentNullException(nameof(yamlStream));
+            throw new ValidationException("yamlStream", "yamlStream is required");
         }
 
         var deserializer = new DeserializerBuilder()
@@ -43,7 +44,7 @@ public class ImportCharacterMapUseCase
         var characterMapYaml = deserializer.Deserialize<CharacterMapYaml>(yamlContent);
         if (characterMapYaml?.Characters == null)
         {
-            throw new ArgumentException("Invalid YAML format: missing characters array");
+            throw new ValidationException("input", "Invalid YAML format: missing characters array");
         }
 
         var importedCharacterMaps = new List<CharacterMap>();
