@@ -1,0 +1,27 @@
+<WarningModal ShowModal="ShowModal"
+    Title="Guest-Only Adventure"
+    Icon="exclamation-circle"
+    IconColor="text-warning"
+    CancelText="Back"
+    ContinueText="Start"
+    DontShowAgain="@DoNotShowAgain"
+    DontShowAgainChanged="@DoNotShowAgainChanged"
+    OnContinue="OnContinue"
+    OnCancel="OnCancel">
+    <BodyContent>
+        <p class="mb-3">
+            You've assigned only guest players to this adventure. Without user profiles, <strong>progress will not be tracked</strong> for this session.
+        </p>
+        <p class="text-muted mb-0">
+            Guest sessions are perfect for trying out adventures, but consider creating user profiles to save your progress.
+        </p>
+    </BodyContent>
+</WarningModal>
+
+@code {
+    [Parameter] public bool ShowModal { get; set; }
+    [Parameter] public EventCallback OnContinue { get; set; }
+    [Parameter] public EventCallback OnCancel { get; set; }
+    [Parameter] public bool DoNotShowAgain { get; set; }
+    [Parameter] public EventCallback<bool> DoNotShowAgainChanged { get; set; }
+}

@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <!-- Early theme initialization to prevent flash of unstyled content -->
+    <script>
+        (function() {
+            var savedTheme = localStorage.getItem('theme');
+            if (savedTheme) {
+                document.documentElement.setAttribute('data-theme', savedTheme);
+            } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            } else {
+                document.documentElement.setAttribute('data-theme', 'light');
+            }
+        })();
+    </script>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="cache-control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="pragma" content="no-cache" />
+    <meta http-equiv="expires" content="0" />
+    <title>Mystira</title>
+    <base href="/" />
+
+    <!-- Preload Critical Assets for Performance -->
+    <link rel="preload" href="images/mystira-logo.webp" as="image" />
+    <link rel="preload" href="css/app.css" as="style" />
+
+    <!-- PWA Meta Tags -->
+    <link rel="manifest" href="manifest.json" />
+    <meta name="theme-color" content="#8B5CF6" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Mystira" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="msapplication-TileColor" content="#8B5CF6" />
+    <meta name="msapplication-TileImage" content="icons/icon-192.png">
+    <meta name="msapplication-navbutton-color" content="#8B5CF6" />
+
+    <!-- Standard favicon -->
+    <link rel="icon" type="image/x-icon" href="icons/favicon.png">
+
+    <!-- Favicon and Apple Touch Icons -->
+    <link rel="icon" type="image/png" href="icons/icon-192.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="icons/apple-icon-180.png" />
+    <link rel="apple-touch-icon" sizes="192x192" href="icons/icon-192.png" />
+
+    <!-- Open Graph / Social Media Sharing -->
+    <meta property="og:title" content="Mystira - Adventures for Children" />
+    <meta property="og:description" content="An interactive storytelling app that helps kids grow through play" />
+    <meta property="og:image" content="https://mystira.app/icons/icon-512.png" />
+    <meta property="og:image:width" content="512" />
+    <meta property="og:image:height" content="512" />
+    <meta property="og:url" content="https://mystira.app" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Mystira" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Mystira - Adventures for Children" />
+    <meta name="twitter:description" content="An interactive storytelling app that helps kids grow through play" />
+    <meta name="twitter:image" content="https://mystira.app/icons/icon-512.png" />
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Cormorant+Garamond:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link href="css/app.css" rel="stylesheet" />
+    <!-- Blazor Scoped CSS Bundle (component-specific styles from .razor.css files) -->
+    <link href="Mystira.App.PWA.styles.css" rel="stylesheet" />
+    <link rel="icon" type="image/png" href="favicon.png" />
+
+    <!-- Scripts -->
+    <script src="js/imageCacheManager.js"></script>
+    <script src="js/loadingProgress.js"></script>
+    <script>
+        // Start loading progress as soon as the script is available
+        if (window.mystiraLoading) {
+            window.mystiraLoading.start();
+            // Automatically advance to checking connection after a short delay
+            setTimeout(() => {
+                if (window.mystiraLoading.getCurrentStage()?.id === 'initializing') {
+                    window.mystiraLoading.updateStage('checking-connection');
+                }
+            }, 800);
+        }
+    </script>
+
+    <!-- API Configuration Persistence (Read-only) -->
+    <!-- All write operations are handled by C# ApiConfigurationService via JSInterop -->
+    <script>
+        // Read persisted API configuration from localStorage BEFORE Blazor starts
+        // This allows early logging but all actual config management is done in C#
+        (function() {
+            var apiUrl = localStorage.getItem('mystira_api_base_url');
+            var env = localStorage.getItem('mystira_api_environment');
+
+            if (apiUrl) {
+                console.log('[MystiraConfig] Persisted endpoint:', apiUrl, '(' + (env || 'unknown') + ')');
+            } else {
+                console.log('[MystiraConfig] No persisted config, using appsettings default');
+            }
+        })();
+    </script>
+
+    <!-- Application Insights -->
+    <script type="text/javascript">
+        !function(T,l,y){
+            var S=T.location,
+                k="script",
+                D="instrumentationKey",
+                C="ingestionendpoint",
+                I="disableExceptionTracking",
+                E="ai.device.",
+                b="toLowerCase",
+                w="crossOrigin",
+                N="POST",
+                e="appInsightsSDK",
+                t=l.documentElement,
+                n=S.protocol==="https:"?"https:":"http:",
+                u=function(e){e.queue=[],e.version=2;var t=l.createElement(k);t.async=!0,t.src=n+"//js.monitor.azure.com/scripts/b/ai.2.min.js",t.setAttribute("crossorigin","anonymous");var i=l.getElementsByTagName(k)[0];i.parentNode.insertBefore(t,i)};var i={config:{connectionString:"InstrumentationKey=6c9db606-e0bd-4b74-ade5-68c3bf5b2865;IngestionEndpoint=https://westeurope-5.in.applicationinsights.azure.com/;LiveEndpoint=https://westeurope.livediagnostics.monitor.azure.com/;ApplicationId=009864dd-fb88-4dce-bc62-7a9b8df50c1f",enableAutoRouteTracking:!0}};var s=T[e]||function(e){function t(e){i[e]=function(){var t=arguments;i.queue.push(function(){i[e].apply(i,t)})}}var i={config:e};i.initialize=!0;var n=l.createElement(k);n.src=e.url||"https://js.monitor.azure.com/scripts/b/ai.2.min.js",l.getElementsByTagName(k)[0].parentNode.appendChild(n);try{i.cookie=l.cookie}catch(e){}i.queue=[],i.version=2;for(var a=["trackEvent","trackPageView","trackException","trackTrace","trackDependencyData","trackMetric","startTrackEvent","stopTrackEvent","startTrackPage","stopTrackPage","flush"],o=0;o<a.length;o++)t(a[o]);return i}(i.config);T[e]=s,s.queue&&0===s.queue.length?s.trackPageView({}):l.write("<"+'script src="https://js.monitor.azure.com/scripts/b/ai.2.min.js"><\/script>')
+        }(window,document);
+    </script>
+
+    <!-- Telemetry wrapper for Blazor JSInterop -->
+    <script>
+        window.mystiraTelemetry = {
+            isAvailable: function() {
+                return !!(window.appInsights && typeof window.appInsights.trackEvent === 'function');
+            },
+            trackEvent: function(eventName, properties) {
+                if (window.appInsights && window.appInsights.trackEvent) {
+                    window.appInsights.trackEvent({ name: eventName, properties: properties || {} });
+                }
+            },
+            trackException: function(properties) {
+                if (window.appInsights && window.appInsights.trackException) {
+                    window.appInsights.trackException({
+                        exception: new Error(properties.message || 'Unknown error'),
+                        properties: properties
+                    });
+                }
+            },
+            trackMetric: function(metricName, value, properties) {
+                if (window.appInsights && window.appInsights.trackMetric) {
+                    window.appInsights.trackMetric({
+                        name: metricName,
+                        average: value,
+                        properties: properties || {}
+                    });
+                }
+            }
+        };
+    </script>
+
+</head>
+
+<body>
+    <div id="app">
+        <!-- Static loading screen shown while Blazor starts -->
+        <div id="static-loading" style="
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f0f23 100%);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        ">
+            <div style="
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 1.5rem;
+                padding: 2rem;
+            ">
+                <img src="images/mystira-logo.webp" alt="Mystira"
+                     style="width: 150px; height: 150px; object-fit: contain; border-radius: 24px; filter: drop-shadow(0 8px 24px rgba(0,0,0,0.4));"
+                     onerror="this.src='icons/icon-512.png'" />
+                <h1 style="
+                    font-family: 'Cinzel', serif;
+                    font-size: 2.25rem;
+                    font-weight: 600;
+                    color: white;
+                    margin: 0;
+                    letter-spacing: 0.15em;
+                    text-shadow: 0 2px 12px rgba(0,0,0,0.5);
+                ">MYSTIRA</h1>
+                <div style="margin-top: 0.5rem; display: flex; flex-direction: column; align-items: center; gap: 1rem;">
+                    <div style="
+                        width: 40px;
+                        height: 40px;
+                        border: 3px solid rgba(255,255,255,0.15);
+                        border-top-color: #a855f7;
+                        border-radius: 50%;
+                        animation: spin 0.8s linear infinite;
+                    "></div>
+                    <p style="
+                        font-size: 0.95rem;
+                        color: rgba(255,255,255,0.6);
+                        margin: 0;
+                        letter-spacing: 0.05em;
+                    ">Loading...</p>
+                </div>
+            </div>
+        </div>
+        <style>
+            @keyframes spin { to { transform: rotate(360deg); } }
+        </style>
+    </div>
+
+    <!-- Error Display for Script Loading Issues -->
+    <div id="blazor-error-ui" style="display: none;">
+        <div class="alert alert-danger" role="alert">
+            <h4 class="alert-heading">Application Error</h4>
+            <p>An error has occurred. This application may no longer respond until reloaded.</p>
+            <div id="sri-error-message" style="display: none;">
+                <p><strong>SRI Integrity Error Detected</strong></p>
+                <p>This usually happens when the browser has cached an old version of the application. Please try the following steps:</p>
+                <ol>
+                    <li>Click "Clear Cache & Reload" below</li>
+                    <li>If that doesn't work, try a hard refresh (Ctrl+F5 or Cmd+Shift+R)</li>
+                    <li>As a last resort, clear your browser cache completely</li>
+                </ol>
+            </div>
+            <hr>
+            <button type="button" class="btn btn-outline-danger me-2" onclick="window.location.reload()">Reload</button>
+            <button type="button" class="btn btn-outline-warning" onclick="clearCacheAndReload()">Clear Cache & Reload</button>
+        </div>
+    </div>
+
+    <!-- Blazor WebAssembly Scripts -->
+    <script src="_framework/blazor.webassembly.js"></script>
+    <script src="js/outside-click-handler.js"></script>
+    <script src="js/particleBackground.js"></script>
+    <script src="js/logoIntroVideo.js"></script>
+    <!-- Dice Component Script -->
+    <script src="dice.js"></script>
+
+    <!-- SRI Error Detection and Cache Clearing -->
+    <script>
+        // Function to clear all caches and reload
+        async function clearCacheAndReload() {
+            console.log('Clearing all caches and reloading...');
+
+            try {
+                // Clear service worker caches
+                if ('caches' in window) {
+                    const cacheKeys = await caches.keys();
+                    await Promise.all(cacheKeys.map(key => caches.delete(key)));
+                    console.log('Cleared', cacheKeys.length, 'cache(s)');
+                }
+
+                // Unregister service workers
+                if ('serviceWorker' in navigator) {
+                    const registrations = await navigator.serviceWorker.getRegistrations();
+                    await Promise.all(registrations.map(registration => registration.unregister()));
+                    console.log('Unregistered', registrations.length, 'service worker(s)');
+                }
+
+                // Reload with a timestamp to bypass browser cache
+                const timestamp = new Date().getTime();
+                window.location.href = window.location.pathname + '?t=' + timestamp;
+            } catch (error) {
+                console.error('Error clearing cache:', error);
+                // Fallback to simple reload
+                window.location.reload(true);
+            }
+        }
+
+        // Detect SRI errors and show appropriate message
+        window.addEventListener('error', function(event) {
+            const errorMessage = event.message || '';
+            const errorUrl = event.filename || '';
+
+            if (errorMessage.includes('integrity') ||
+                errorMessage.includes('SRI') ||
+                errorMessage.includes('digest') ||
+                (errorUrl.includes('.wasm') && errorMessage.includes('Failed to fetch'))) {
+
+                console.log('SRI error detected:', errorMessage);
+
+                // Show SRI-specific error message
+                const errorUi = document.getElementById('blazor-error-ui');
+                const sriMessage = document.getElementById('sri-error-message');
+
+                if (errorUi) {
+                    errorUi.style.display = 'block';
+                    if (sriMessage) {
+                        sriMessage.style.display = 'block';
+                    }
+                }
+            }
+        }, true);
+
+        // Also listen for unhandled promise rejections
+        window.addEventListener('unhandledrejection', function(event) {
+            const errorMessage = event.reason?.message || '';
+
+            if (errorMessage.includes('integrity') ||
+                errorMessage.includes('SRI') ||
+                errorMessage.includes('digest') ||
+                errorMessage.includes('Mystira.App.Domain.wasm')) {
+
+                console.log('SRI promise rejection detected:', errorMessage);
+
+                // Show SRI-specific error message
+                const errorUi = document.getElementById('blazor-error-ui');
+                const sriMessage = document.getElementById('sri-error-message');
+
+                if (errorUi) {
+                    errorUi.style.display = 'block';
+                    if (sriMessage) {
+                        sriMessage.style.display = 'block';
+                    }
+                }
+            }
+        });
+    </script>
+
+    <!-- Update Notification Handler -->
+    <script>
+        // Reference to Blazor component for update notifications
+        let updateNotificationHandler = null;
+
+        function registerUpdateNotificationHandler(dotNetRef) {
+            updateNotificationHandler = dotNetRef;
+            console.log('[UpdateNotification] Handler registered');
+        }
+
+        function unregisterUpdateNotificationHandler() {
+            updateNotificationHandler = null;
+            console.log('[UpdateNotification] Handler unregistered');
+        }
+
+        // Listen for messages from service worker
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.addEventListener('message', (event) => {
+                console.log('[UpdateNotification] Received message from service worker:', event.data);
+
+                if (event.data?.type === 'VERSION_UPDATE' && updateNotificationHandler) {
+                    updateNotificationHandler.invokeMethodAsync('OnVersionUpdate',
+                        event.data.oldVersion || null,
+                        event.data.newVersion || null
+                    );
+                }
+
+                if (event.data?.type === 'CACHES_CLEARED') {
+                    console.log('[UpdateNotification] Caches cleared by service worker');
+                }
+            });
+        }
+    </script>
+
+    <!-- Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('service-worker.js')
+                    .then((registration) => {
+                        console.log('ServiceWorker registration successful with scope: ', registration.scope);
+
+                        // Store registration for later use
+                        window.swRegistration = registration;
+
+                        // Set up progress tracking integration
+                        if (window.mystiraLoading) {
+                            // Note: Cannot pass functions through postMessage, so we'll use a different approach
+                            console.log('[MystiraLoading] Progress tracking setup attempted');
+                        }
+
+                        // Check for service worker updates periodically
+                        registration.addEventListener('updatefound', () => {
+                            console.log('New service worker found, installing...');
+                            const newWorker = registration.installing;
+
+                            newWorker.addEventListener('statechange', () => {
+                                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                    // New worker is installed, we have an old worker controlling the page
+                                    console.log('New service worker ready, prompting user to refresh');
+
+                                    // Notify Blazor component if available
+                                    if (updateNotificationHandler) {
+                                        updateNotificationHandler.invokeMethodAsync('OnServiceWorkerUpdate');
+                                    }
+
+                                    // Also notify loading system
+                                    if (window.mystiraLoading) {
+                                        window.mystiraLoading.updateStage('service-worker-update');
+                                    }
+                                }
+                            });
+                        });
+
+                        // Only clear caches on first visit or when service worker updates
+                        // This prevents race conditions with WASM file loading and SRI checks
+                        if (!navigator.serviceWorker.controller) {
+                            console.log('First visit - waiting for service worker to activate');
+                        } else if (registration.active && registration.active !== registration.installing) {
+                            // Service worker was already active, trigger version check
+                            console.log('Service worker already active - checking for version updates');
+                            if (navigator.serviceWorker.controller) {
+                                navigator.serviceWorker.controller.postMessage({ type: 'CHECK_VERSION' });
+                            }
+                        }
+
+                        // Force update check to ensure latest version
+                        registration.update();
+
+                        // Periodic version check (every 5 minutes)
+                        setInterval(() => {
+                            registration.update();
+                            if (navigator.serviceWorker.controller) {
+                                navigator.serviceWorker.controller.postMessage({ type: 'CHECK_VERSION' });
+                            }
+                        }, 5 * 60 * 1000);
+                    })
+                    .catch((err) => {
+                        console.log('ServiceWorker registration failed: ', err);
+                    });
+            });
+        }
+    </script>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

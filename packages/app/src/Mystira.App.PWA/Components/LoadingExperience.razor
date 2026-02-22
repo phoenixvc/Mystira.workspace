@@ -1,0 +1,33 @@
+@inject IJSRuntime jsRuntime
+
+<div class="loading-screen">
+    <div class="loading-content">
+        <img src="images/mystira-logo.webp" alt="Mystira" class="loading-logo" />
+        <h1 class="loading-title">MYSTIRA</h1>
+
+        <div class="loading-status">
+            <div class="loading-spinner"></div>
+            <p class="loading-message">Loading...</p>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public string? CssClass { get; set; }
+    [Parameter] public bool AutoStart { get; set; } = true;
+    [Parameter] public EventCallback OnLoaded { get; set; }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && AutoStart)
+        {
+            // Brief delay for smooth transition
+            await Task.Delay(200);
+
+            if (OnLoaded.HasDelegate)
+            {
+                await OnLoaded.InvokeAsync();
+            }
+        }
+    }
+}

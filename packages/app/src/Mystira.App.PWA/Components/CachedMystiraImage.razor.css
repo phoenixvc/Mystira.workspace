@@ -1,0 +1,33 @@
+/* Cached Mystira Image Component Styles */
+
+/* Placeholder shown when image fails to load or no media ID specified */
+.cached-image-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, rgba(124, 58, 237, 0.1) 0%, rgba(139, 92, 246, 0.05) 100%);
+    border: 1px dashed rgba(124, 58, 237, 0.3);
+    border-radius: 8px;
+    min-height: 150px;
+    color: var(--muted, #6b7280);
+}
+
+.cached-image-placeholder i {
+    opacity: 0.5;
+}
+
+/* Dark mode placeholder */
+html[data-theme="dark"] .cached-image-placeholder {
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(79, 70, 229, 0.1) 100%);
+    border-color: rgba(99, 102, 241, 0.3);
+    color: var(--muted, #94a3b8);
+}
+
+@media (prefers-color-scheme: dark) {
+    .cached-image-placeholder {
+        background: linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(79, 70, 229, 0.1) 100%);
+        border-color: rgba(99, 102, 241, 0.3);
+        color: var(--muted, #94a3b8);
+    }
+}
+

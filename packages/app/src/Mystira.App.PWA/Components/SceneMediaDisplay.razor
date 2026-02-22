@@ -1,0 +1,91 @@
+@using Mystira.App.PWA.Models
+
+@if (HasMedia)
+{
+    <div class="media-container mb-4">
+        @if (!string.IsNullOrWhiteSpace(ImageUrl))
+        {
+            <FantasyMediaFrame MediaKind="image" Color="#165668" Rounded="true" Pulse="true">
+                <div class="image-overlay-container">
+                    <img src="@ImageUrl"
+                         alt="Scene media"
+                         @key="ImageUrl"
+                         class="img-fluid" />
+
+                    @if (!string.IsNullOrWhiteSpace(AudioUrl))
+                    {
+                        <button type="button"
+                                class="btn-audio-overlay @(IsPlayingAudio ? "playing" : "")"
+                                @onclick="HandleAudioClick"
+                                title="@(IsPlayingAudio ? "Stop audio" : "Play audio")">
+                            <i class="fa-solid @(IsPlayingAudio ? "fa-pause" : "fa-volume-high")"></i>
+                        </button>
+                    }
+                </div>
+            </FantasyMediaFrame>
+        }
+        else if (!string.IsNullOrWhiteSpace(VideoUrl))
+        {
+            <FantasyMediaFrame MediaKind="video" Color="#165668" Rounded="true" Pulse="true">
+                <video controls class="w-100" @key="VideoUrl"
+                       @onplay="() => OnMediaAction.InvokeAsync(true)"
+                       @onpause="() => OnMediaAction.InvokeAsync(false)"
+                       @onended="() => OnMediaAction.InvokeAsync(false)">
+                    <source src="@VideoUrl" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
+            </FantasyMediaFrame>
+        }
+
+        @if (!string.IsNullOrWhiteSpace(AudioUrl) &&
+             string.IsNullOrWhiteSpace(ImageUrl) &&
+             string.IsNullOrWhiteSpace(VideoUrl))
+        {
+            <FantasyMediaFrame MediaKind="audio" Color="#165668" Rounded="true" Pulse="true">
+                <div class="p-4 bg-dark text-center">
+                    <i class="fas fa-music fa-2x text-white mb-3"></i>
+                    <audio controls class="w-100" @key="AudioUrl"
+                           @onplay="() => OnMediaAction.InvokeAsync(true)"
+                           @onpause="() => OnMediaAction.InvokeAsync(false)"
+                           @onended="() => OnMediaAction.InvokeAsync(false)">
+                        <source src="@AudioUrl" type="audio/mpeg">
+                        Your browser does not support the audio element.
+                    </audio>
+                </div>
+            </FantasyMediaFrame>
+        }
+    </div>
+}
+
+@code {
+    [Parameter]
+    public string? ImageUrl { get; set; }
+
+    [Parameter]
+    public string? VideoUrl { get; set; }
+
+    [Parameter]
+    public string? AudioUrl { get; set; }
+
+    [Parameter]
+    public bool IsPlayingAudio { get; set; }
+
+    [Parameter]
+    public EventCallback<string> OnAudioPlay { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> OnMediaAction { get; set; }
+
+    private bool HasMedia =>
+        !string.IsNullOrWhiteSpace(ImageUrl) ||
+        !string.IsNullOrWhiteSpace(VideoUrl) ||
+        !string.IsNullOrWhiteSpace(AudioUrl);
+
+    private async Task HandleAudioClick()
+    {
+        if (!string.IsNullOrWhiteSpace(AudioUrl))
+        {
+            await OnAudioPlay.InvokeAsync(AudioUrl);
+        }
+    }
+}

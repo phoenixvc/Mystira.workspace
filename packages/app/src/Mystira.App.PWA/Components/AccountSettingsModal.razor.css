@@ -1,0 +1,183 @@
+.settings-section {
+    padding: 0.5rem 0;
+}
+
+.settings-title {
+    font-weight: 600;
+    color: var(--bs-body-color);
+    margin-bottom: 1rem;
+    font-size: 0.95rem;
+}
+
+.form-check {
+    /* Keep Bootstrap defaults that position the checkbox inside the container */
+    position: relative; /* ensure the absolute checkbox is positioned within */
+    margin-bottom: 1rem;
+    padding: 0.5rem 0;      /* vertical spacing */
+    padding-left: 1.75rem;  /* reserve space on the left for the checkbox */
+}
+
+.form-check-label {
+    font-weight: 500;
+    margin-bottom: 0.25rem;
+    color: var(--bs-body-color);
+}
+
+.form-check-input {
+    margin-top: 0.3rem;
+}
+
+.form-check-input:checked {
+    background-color: var(--bs-primary);
+    border-color: var(--bs-primary);
+}
+
+/* Dark mode via system preference */
+@media (prefers-color-scheme: dark) {
+    .modal-content {
+        background: linear-gradient(135deg, #1e1b4b 0%, #14122b 100%);
+        border-color: rgba(99, 102, 241, 0.3);
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        color: #f1f5f9;
+    }
+
+    .modal-header {
+        border-bottom-color: rgba(99, 102, 241, 0.2);
+    }
+
+    .modal-title {
+        color: #f1f5f9;
+    }
+
+    .modal-footer {
+        border-top-color: rgba(99, 102, 241, 0.2);
+    }
+
+    .btn-close {
+        filter: invert(1) grayscale(100%) brightness(200%);
+    }
+
+    .settings-title {
+        color: #a5b4fc;
+    }
+
+    .form-check-label {
+        color: #e2e8f0;
+    }
+
+    .form-check .text-muted {
+        color: #94a3b8 !important;
+    }
+
+    .form-check-input {
+        background-color: #14122b;
+        border-color: rgba(99, 102, 241, 0.4);
+    }
+
+    .form-check-input:checked {
+        background-color: #6366f1;
+        border-color: #6366f1;
+    }
+
+    .form-check-input:focus {
+        border-color: #818cf8;
+        box-shadow: 0 0 0 0.25rem rgba(99, 102, 241, 0.25);
+    }
+}
+
+/* Dark mode via manual toggle */
+html[data-theme="dark"] .modal-content {
+    background: linear-gradient(135deg, #1e1b4b 0%, #14122b 100%);
+    border-color: rgba(99, 102, 241, 0.3);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    color: #f1f5f9;
+}
+
+html[data-theme="dark"] .modal-header {
+    border-bottom-color: rgba(99, 102, 241, 0.2);
+}
+
+html[data-theme="dark"] .modal-title {
+    color: #f1f5f9;
+}
+
+html[data-theme="dark"] .modal-footer {
+    border-top-color: rgba(99, 102, 241, 0.2);
+}
+
+html[data-theme="dark"] .btn-close {
+    filter: invert(1) grayscale(100%) brightness(200%);
+}
+
+html[data-theme="dark"] .settings-title {
+    color: #a5b4fc;
+}
+
+html[data-theme="dark"] .form-check-label {
+    color: #e2e8f0;
+}
+
+html[data-theme="dark"] .form-check .text-muted {
+    color: #94a3b8 !important;
+}
+
+html[data-theme="dark"] .form-check-input {
+    background-color: #14122b;
+    border-color: rgba(99, 102, 241, 0.4);
+}
+
+html[data-theme="dark"] .form-check-input:checked {
+    background-color: #6366f1;
+    border-color: #6366f1;
+}
+
+html[data-theme="dark"] .form-check-input:focus {
+    border-color: #818cf8;
+    box-shadow: 0 0 0 0.25rem rgba(99, 102, 241, 0.25);
+}
+
+/* Light mode explicit styling */
+html[data-theme="light"] .modal-content {
+    background: #ffffff;
+    border-color: rgba(124, 58, 237, 0.15);
+    color: #111827;
+}
+
+html[data-theme="light"] .modal-header {
+    border-bottom-color: rgba(124, 58, 237, 0.1);
+}
+
+html[data-theme="light"] .modal-title {
+    color: #111827;
+}
+
+html[data-theme="light"] .modal-footer {
+    border-top-color: rgba(124, 58, 237, 0.1);
+}
+
+html[data-theme="light"] .settings-title {
+    color: #374151;
+}
+
+html[data-theme="light"] .form-check-label {
+    color: #111827;
+}
+
+html[data-theme="light"] .form-check .text-muted {
+    color: #6b7280 !important;
+}
+
+html[data-theme="light"] .form-check-input {
+    background-color: #ffffff;
+    border-color: #d1d5db;
+}
+
+html[data-theme="light"] .form-check-input:checked {
+    background-color: #7c3aed;
+    border-color: #7c3aed;
+}
+
+html[data-theme="light"] .form-check-input:focus {
+    border-color: #a78bfa;
+    box-shadow: 0 0 0 0.25rem rgba(124, 58, 237, 0.25);
+}

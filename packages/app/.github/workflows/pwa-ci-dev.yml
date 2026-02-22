@@ -1,0 +1,110 @@
+name: "[PWA] Build & Test (Dev)"
+
+# This workflow handles CI (build/test) only.
+# Deployment is handled by pwa-deploy-dev.yml
+
+on:
+  push:
+    branches: [dev]
+    paths:
+      - "src/Mystira.App.PWA/**"
+      - ".github/workflows/pwa-ci-dev.yml"
+  pull_request:
+    branches: [dev]
+    types: [opened, synchronize, reopened]
+    paths:
+      - "src/Mystira.App.PWA/**"
+      - ".github/workflows/pwa-ci-dev.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: read
+
+concurrency:
+  group: mystira-app-pwa-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    name: Build and Validate
+    env:
+      NUGET_AUTH_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          submodules: true
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: "9.0.x"
+
+      - name: Install wasm-tools workload
+        run: dotnet workload install wasm-tools
+
+      - name: Validate API Configuration
+        run: |
+          echo "Validating appsettings configuration for dev..."
+
+          # Check base config (dev uses the default appsettings.json)
+          DEFAULT_API_URL=$(jq -r '.ApiConfiguration.DefaultApiBaseUrl // empty' src/Mystira.App.PWA/wwwroot/appsettings.json)
+          if [ -z "$DEFAULT_API_URL" ]; then
+            echo "ERROR: Missing DefaultApiBaseUrl in appsettings.json"
+            exit 1
+          fi
+
+          # Validate URL format
+          if ! [[ "$DEFAULT_API_URL" =~ ^https:// ]]; then
+            echo "ERROR: API URL must use HTTPS: $DEFAULT_API_URL"
+            exit 1
+          fi
+
+          # Check that AvailableEndpoints exist and have valid URLs
+          ENDPOINTS=$(jq -r '.ApiConfiguration.AvailableEndpoints[]?.Url // empty' src/Mystira.App.PWA/wwwroot/appsettings.json)
+          if [ -z "$ENDPOINTS" ]; then
+            echo "ERROR: No AvailableEndpoints configured in appsettings.json"
+            exit 1
+          fi
+
+          # Validate each endpoint URL
+          VALIDATION_FAILED=0
+          while IFS= read -r url; do
+            if [ -n "$url" ] && ! [[ "$url" =~ ^https:// ]]; then
+              echo "ERROR: Endpoint URL must use HTTPS: $url"
+              VALIDATION_FAILED=1
+            fi
+          done <<< "$ENDPOINTS"
+
+          if [ "$VALIDATION_FAILED" -eq 1 ]; then
+            exit 1
+          fi
+
+          echo "✓ API configuration validation passed"
+          echo "  - Default API: $DEFAULT_API_URL"
+          echo "  - Available endpoints:"
+          jq -r '.ApiConfiguration.AvailableEndpoints[] | "    - \(.Name): \(.Url)"' src/Mystira.App.PWA/wwwroot/appsettings.json
+
+      - name: Build Blazor WASM
+        run: dotnet publish src/Mystira.App.PWA/Mystira.App.PWA.csproj -c Release -o publish
+
+      - name: Verify Build Output
+        run: |
+          echo "Verifying build output..."
+          if [ ! -d "publish/wwwroot" ]; then
+            echo "ERROR: Build output directory not found"
+            exit 1
+          fi
+          echo "Build output verified successfully"
+          ls -la publish/wwwroot
+
+      - name: Build Summary
+        run: |
+          echo "## PWA Build Complete" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Build and validation passed successfully." >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Note:** Deployment is handled by [pwa-deploy-dev.yml](.github/workflows/pwa-deploy-dev.yml)." >> $GITHUB_STEP_SUMMARY

@@ -1,0 +1,122 @@
+
+@inject IAuthService AuthService
+@inject ILogger<Home> Logger
+@page "/"
+@page "/home"
+@implements IDisposable
+
+<PageTitle>Mystira</PageTitle>
+
+<!-- Skip Navigation Link -->
+@if (isAuthenticated)
+{
+    <a href="#adventures" class="skip-link">Skip to adventures</a>
+}
+
+<div class="container-fluid pb-4" style="padding-top: 0; margin-top: 0;">
+    <!-- Hero Section -->
+    <HeroSection
+        ShowDescription="@(!isAuthenticated)"
+        ShowCallToActions="@(!isAuthenticated)" />
+
+    <!-- Feature Cards Section (shown when not authenticated) -->
+    @if (!isAuthenticated)
+    {
+        <div class="row g-4 mb-5">
+            <div class="col-md-4">
+                <div class="card feature-card h-100 border-0 shadow-sm">
+                    <div class="card-body p-4">
+                        <div class="text-center mb-3">
+                            <div class="feature-icon mb-3">
+                                <i class="fas fa-compass fa-3x text-primary-custom"></i>
+                            </div>
+                            <h5 class="card-title mb-3">Interactive Adventures</h5>
+                            <p class="card-text text-muted">
+                                Dive into guided quests that adapt to every group, helping facilitators lead unforgettable storytelling sessions with ease.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card feature-card h-100 border-0 shadow-sm">
+                    <div class="card-body p-4">
+                        <div class="text-center mb-3">
+                            <div class="feature-icon mb-3">
+                                <i class="fas fa-users fa-3x text-success"></i>
+                            </div>
+                            <h5 class="card-title mb-3">Built for Teamwork</h5>
+                            <p class="card-text text-muted">
+                                Foster empathy, cooperation, and problem-solving with collaborative prompts that keep every child engaged.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card feature-card h-100 border-0 shadow-sm">
+                    <div class="card-body p-4">
+                        <div class="text-center mb-3">
+                            <div class="feature-icon mb-3">
+                                <i class="fas fa-book-open fa-3x text-info"></i>
+                            </div>
+                            <h5 class="card-title mb-3">Guided Storytelling</h5>
+                            <p class="card-text text-muted">
+                                Use curated visuals, music, and facilitator tips to spark imagination anywhere—from living rooms to after-school clubs.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    @* Adventures section composed as a standalone component *@
+    <AdventuresSection />
+
+    <style>
+        .dice-roller-container {
+            max-width: 300px; /* Adjust this value to control the width */
+            margin: 0 auto; /* This centers the container horizontally */
+            padding: 15px;
+            /* Using a solid fallback to avoid unresolved custom prop errors */
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+
+</div> @* close container-fluid *@
+
+@code {
+    private bool isAuthenticated = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            Logger.LogInformation("Home component initializing...");
+            AuthService.AuthenticationStateChanged += OnAuthenticationStateChanged;
+            isAuthenticated = await AuthService.IsAuthenticatedAsync();
+            Logger.LogInformation("Auth initialized. IsAuthenticated: {IsAuthenticated}", isAuthenticated);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error during Home initialization");
+        }
+    }
+
+    private void OnAuthenticationStateChanged(object? sender, bool authenticated)
+    {
+        isAuthenticated = authenticated;
+        InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        if (AuthService != null)
+        {
+            AuthService.AuthenticationStateChanged -= OnAuthenticationStateChanged;
+        }
+    }
+}
