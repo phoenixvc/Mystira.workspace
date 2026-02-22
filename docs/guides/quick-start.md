@@ -11,7 +11,7 @@ node --version
 # Check pnpm version (should be 8+)
 pnpm --version
 
-# Check .NET SDK version (should be 9.0+, required for C# components)
+# Check .NET SDK version (should be 10.0+, required for C# components)
 dotnet --version
 
 # Check Docker (optional, for local services)
@@ -23,14 +23,8 @@ docker --version
 ## Step 1: Clone the Workspace
 
 ```bash
-git clone --recurse-submodules https://github.com/phoenixvc/Mystira.workspace.git
+git clone https://github.com/phoenixvc/Mystira.workspace.git
 cd Mystira.workspace
-```
-
-If you already cloned without submodules:
-
-```bash
-git submodule update --init --recursive
 ```
 
 ## Step 2: Install Dependencies
@@ -52,8 +46,8 @@ docker-compose ps
 ## Step 4: Set Up Environment Variables
 
 ```bash
-# Copy example environment files (if they exist in submodules)
-# Each submodule may have its own .env.example
+# Copy example environment files
+# Each package may have its own .env.example
 ```
 
 ## Step 5: Build and Run
@@ -86,12 +80,6 @@ pnpm format
 
 ## Troubleshooting
 
-### Submodules Not Initialized
-
-```bash
-git submodule update --init --recursive
-```
-
 ### Dependencies Issues
 
 ```bash
@@ -103,13 +91,13 @@ pnpm install
 ### Port Conflicts
 
 If ports are already in use:
+
 - Change ports in `docker-compose.yml`
 - Update environment variables accordingly
 
 ## Next Steps
 
 - Read [Setup Guide](./setup.md) for detailed setup instructions
-- Check [Submodules Guide](./submodules.md) for submodule management
 - Review [Architecture Overview](./architecture.md) for system overview
 - See [Environment Variables](./environment-variables.md) for environment variables
 
@@ -118,4 +106,3 @@ If ports are already in use:
 - Check existing issues on GitHub
 - Review documentation in `docs/` directory
 - Contact maintainers
-

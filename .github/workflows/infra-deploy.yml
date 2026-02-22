@@ -45,7 +45,7 @@ on:
         default: false
         type: boolean
 
-# Use shared K8s concurrency group for dev to prevent conflicts with submodule-deploy-dev
+# Use shared K8s concurrency group for dev to prevent conflicts
 # Other environments use isolated groups
 concurrency:
   group: ${{ (github.event.inputs.environment || 'dev') == 'dev' && 'k8s-deploy-dev' || format('infra-deploy-{0}', github.event.inputs.environment) }}
@@ -1416,7 +1416,7 @@ jobs:
   # ============================================
   # Deploy to Kubernetes
   # ============================================
-  # NOTE: Docker images are built by submodule CI/CD pipelines (see ADR-0019)
+  # NOTE: Docker images are built by component CI/CD pipelines (see ADR-0019)
   # This job deploys existing images from ACR
   deploy-kubernetes:
     name: Deploy to Kubernetes
@@ -1551,9 +1551,8 @@ jobs:
             echo "" >> $GITHUB_STEP_SUMMARY
             echo "**Deployments for these services will fail until images are built.**" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
-            echo "Images should be built by submodule CI/CD pipelines. See:" >> $GITHUB_STEP_SUMMARY
+            echo "Images should be built by component CI/CD pipelines. See:" >> $GITHUB_STEP_SUMMARY
             echo "- \`docs/adr/ADR-0019-dockerfile-location-standardization.md\`" >> $GITHUB_STEP_SUMMARY
-            echo "- \`docs/cicd/submodule-cicd-setup.md\`" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
             echo "::warning::Missing Docker images:${MISSING_IMAGES}"
             echo "missing_images=true" >> $GITHUB_OUTPUT

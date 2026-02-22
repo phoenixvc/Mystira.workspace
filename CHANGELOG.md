@@ -37,7 +37,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Infrastructure: Deploy, Validate
   - Deployment: Production, Staging
   - Workspace: CI, Release
-  - Utilities: Check Submodules
+  - Utilities: Link Checker
 - **ADR-0004**: Updated with complete list of current CI/CD workflows and cross-reference to ADR-0012
 - **Documentation Organization**: Consolidated and improved documentation structure across workspace
 - **Script Permissions**: Fixed executable permissions on all utility scripts (755)
@@ -52,9 +52,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
 
 - **Temporary Documentation**: Removed 24 outdated status and summary files:
-  - Root-level: 14 files (ADMIN_UI_*.md, CI_ISSUES_RESOLVED.md, COMPLETION_SUMMARY.md, etc.)
-  - Infra: 7 files (FRONT_DOOR_*.md, ENVIRONMENT_URLS_*.md, etc.)
-  - Docs: 2 files (DOCUMENTATION_*.md)
+  - Root-level: 14 files (ADMIN*UI*\*.md, CI_ISSUES_RESOLVED.md, COMPLETION_SUMMARY.md, etc.)
+  - Infra: 7 files (FRONT*DOOR*_.md, ENVIRONMENT*URLS*_.md, etc.)
+  - Docs: 2 files (DOCUMENTATION\_\*.md)
   - Scripts: 1 file (README-CERTIFICATES.md)
 - **Net Documentation Reduction**: ~6,400 lines of outdated/redundant documentation
 
@@ -66,7 +66,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - pnpm workspaces for package management
 - Turborepo for build orchestration
 - GitHub Actions CI/CD pipeline
-- Git submodule integration for all components
+- Monorepo structure with all components in packages/
 - Infrastructure as Code (Terraform + Kubernetes)
 - Docker containerization for all services
 - Azure deployment configuration

@@ -194,8 +194,6 @@ jobs:
         project: ${{ fromJson(needs.detect-changes.outputs.projects) }}
     steps:
       - uses: actions/checkout@v6
-        with:
-          submodules: recursive
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
@@ -380,8 +378,6 @@ jobs:
         stack: ${{ fromJson(needs.detect-changes.outputs.stacks) }}
     steps:
       - uses: actions/checkout@v6
-        with:
-          submodules: recursive
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
@@ -630,7 +626,6 @@ jobs:
         with:
           ref: ${{ steps.pr-ref.outputs.head_ref }}
           fetch-depth: 0  # Full history needed for git diff in /plan command
-          submodules: recursive
 
       - name: Setup Tools
         if: steps.check.outputs.allowed == 'true'
