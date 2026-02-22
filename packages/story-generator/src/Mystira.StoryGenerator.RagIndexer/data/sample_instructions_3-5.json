@@ -1,0 +1,49 @@
+{
+  "dataset": "mystira_preschool_story_template",
+  "version": "1.0",
+  "ageGroup": "3-5",
+  "chunks": [
+    {
+      "chunk_id": "preschool_core_requirements",
+      "section": "1.1",
+      "title": "Preschool Core Story Requirements",
+      "content": "Stories for ages 3-5 should have 5-8 scenes with simple branching. Use clear, concrete language avoiding abstract concepts. Include at least 2 characters children can identify with. Choices should be simple and limited to 2-3 options. Introduce basic cause and effect relationships. Keep scenes focused and visual. Include repetitive elements that help with recall and engagement.",
+      "category": "story_generation",
+      "subcategory": "core_story_rules",
+      "instructionType": "requirements",
+      "priority": "high",
+      "isMandatory": true,
+      "examples": "Stories about making friends, sharing toys, overcoming simple fears; simple adventures with clear cause-effect",
+      "tags": ["preschool_design", "simple_branching", "cause_effect"],
+      "keywords": ["preschool_design", "simple_branching", "cause_effect"]
+    },
+    {
+      "chunk_id": "preschool_developmental",
+      "section": "2.1",
+      "title": "Preschool Developmental Goals",
+      "content": "Focus on building confidence, independence within safe limits, and basic social skills. Stories should model sharing, taking turns, and making simple choices. Develop imagination and pretend play. Build language skills through storytelling. Support understanding of basic emotions and feelings. Encourage curiosity about the world.",
+      "category": "validation",
+      "subcategory": "developmental_goals",
+      "instructionType": "guidelines",
+      "priority": "high",
+      "isMandatory": true,
+      "examples": "Stories showing characters sharing, choosing between options, naming feelings, exploring with a trusted adult nearby",
+      "tags": ["developmental_goals", "confidence", "social_skills", "imagination"],
+      "keywords": ["developmental_goals", "confidence", "social_skills", "imagination"]
+    },
+    {
+      "chunk_id": "preschool_safety",
+      "section": "3.1",
+      "title": "Preschool Safety Guidelines",
+      "content": "Avoid scary or violent content. Keep peril mild and always resolved positively. Show trusted adults as helpers and protectors. No separation from caregivers without resolution. Use reassuring language throughout. Ensure all endings feel safe and happy. Model helpful, kind behavior.",
+      "category": "safety",
+      "subcategory": "emotional_safety",
+      "instructionType": "safety_policy",
+      "priority": "high",
+      "isMandatory": true,
+      "examples": "Stories where a character is scared but comforted, or where a small problem is solved with help from others",
+      "tags": ["safety", "comfort", "mild_peril"],
+      "keywords": ["safety", "comfort", "mild_peril"]
+    }
+  ]
+}

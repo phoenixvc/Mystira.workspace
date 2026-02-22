@@ -1,0 +1,34 @@
+﻿title: ''
+description: ''
+tags: []
+difficulty: Medium
+session_length: Medium
+age_group: 6-9
+minimum_age: 6
+core_axes: []
+archetypes: []
+characters: []
+scenes:
+  - id: scene_1
+    title: New Scene
+    type: choice
+    description: 'Grumble the bear is introduced'
+    branches:
+      - choice: ''
+        next_scene: scene_2
+      - choice: ''
+        next_scene: scene_3
+  - id: scene_2
+    title: New Scene
+    type: narrative
+    next_scene: scene_4
+    description: 'Larry the lynx is introduced'
+  - id: scene_3
+    title: New Scene
+    description: 'Cathy the cat is introduced'
+    type: narrative
+    next_scene: scene_4
+  - id: scene_4
+    title: New Scene
+    type: special
+    description: 'Larry takes a nap'

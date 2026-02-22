@@ -1,0 +1,11 @@
+@HostAddress = http://localhost:5113
+
+POST {{HostAddress}}/api/Stories/validate
+Content-Type: application/json
+
+{
+  "storyContent": "string",
+  "format": "string"
+}
+
+###

@@ -1,0 +1,18 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended"
+  ],
+  "packageRules": [
+    {
+      "description": "Ignore .NET 10 related updates - project targets .NET 8",
+      "matchManagers": ["nuget"],
+      "matchPackagePatterns": [
+        "^Microsoft\\.",
+        "^System\\.",
+        "^Swashbuckle\\.AspNetCore"
+      ],
+      "allowedVersions": "<10.0.0"
+    }
+  ]
+}

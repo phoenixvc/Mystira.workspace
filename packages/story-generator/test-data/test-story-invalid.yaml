@@ -1,0 +1,10 @@
+title: "Test Story"
+# Missing description, tags, and other required fields
+difficulty: "Hard"
+characters:
+  - name: "Hero"
+    # Missing required character fields
+scenes:
+  - id: "scene1"
+    type: "roll"
+    # Missing title, description, difficulty, branches for roll type scene

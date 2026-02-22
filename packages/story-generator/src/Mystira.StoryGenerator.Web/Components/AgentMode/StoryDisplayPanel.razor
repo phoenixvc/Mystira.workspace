@@ -1,0 +1,111 @@
+@using System.Text.Json
+
+<div class="story-display-panel">
+    <h3>✨ Generated Story</h3>
+    
+    @if (!string.IsNullOrWhiteSpace(ErrorMessage))
+    {
+        <div class="alert alert-warning">
+            <strong>Unable to parse story:</strong> @ErrorMessage
+        </div>
+        <pre class="story-json-raw">@Story</pre>
+    }
+    else if (storyData != null)
+    {
+        <div class="story-content">
+            @if (!string.IsNullOrEmpty(storyData.Title))
+            {
+                <h1 class="story-title">@storyData.Title</h1>
+            }
+
+            @if (!string.IsNullOrEmpty(storyData.TargetAgeGroup))
+            {
+                <p class="story-metadata"><strong>Age Group:</strong> @storyData.TargetAgeGroup</p>
+            }
+
+            @if (storyData.Scenes.Any())
+            {
+                <div class="story-scenes">
+                    @foreach (var scene in storyData.Scenes)
+                    {
+                        <div class="story-scene">
+                            <h4 class="scene-title">@scene.Title</h4>
+                            
+                            @if (!string.IsNullOrEmpty(scene.Setting))
+                            {
+                                <p class="scene-setting"><em>@scene.Setting</em></p>
+                            }
+
+                            <div class="scene-text">
+                                @((MarkupString)FormatText(scene.Text))
+                            </div>
+
+                            @if (scene.Characters.Any())
+                            {
+                                <p class="scene-characters">
+                                    <strong>Characters:</strong> @string.Join(", ", scene.Characters)
+                                </p>
+                            }
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public string Story { get; set; } = string.Empty;
+    
+    private StoryData? storyData;
+    private string? ErrorMessage;
+
+    protected override void OnParametersSet()
+    {
+        ErrorMessage = null;
+        storyData = null;
+
+        if (string.IsNullOrWhiteSpace(Story))
+        {
+            ErrorMessage = "No story content available";
+            return;
+        }
+
+        try
+        {
+            var options = new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            };
+            storyData = JsonSerializer.Deserialize<StoryData>(Story, options);
+        }
+        catch (JsonException ex)
+        {
+            ErrorMessage = ex.Message;
+        }
+    }
+
+    private string FormatText(string text)
+    {
+        if (string.IsNullOrWhiteSpace(text))
+            return string.Empty;
+
+        return text.Replace("\n", "<br />");
+    }
+
+    private class StoryData
+    {
+        public string Title { get; set; } = string.Empty;
+        public string TargetAgeGroup { get; set; } = string.Empty;
+        public List<SceneData> Scenes { get; set; } = new();
+    }
+
+    private class SceneData
+    {
+        public string SceneId { get; set; } = string.Empty;
+        public string Title { get; set; } = string.Empty;
+        public string Setting { get; set; } = string.Empty;
+        public string Text { get; set; } = string.Empty;
+        public List<string> Characters { get; set; } = new();
+    }
+}

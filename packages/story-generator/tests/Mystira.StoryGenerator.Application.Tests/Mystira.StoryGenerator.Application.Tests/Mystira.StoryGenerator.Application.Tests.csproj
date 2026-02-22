@@ -1,0 +1,34 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\..\src\Mystira.StoryGenerator.Application\Mystira.StoryGenerator.Application.csproj" />
+      <ProjectReference Include="..\..\..\src\Mystira.StoryGenerator.Contracts\Mystira.StoryGenerator.Contracts.csproj" />
+      <ProjectReference Include="..\..\..\src\Mystira.StoryGenerator.Domain\Mystira.StoryGenerator.Domain.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+      <PackageReference Include="coverlet.collector" Version="6.0.4" />
+      <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.0.1" />
+      <PackageReference Include="Moq" Version="4.20.72" />
+      <PackageReference Include="xunit" Version="2.9.3" />
+      <PackageReference Include="xunit.runner.visualstudio" Version="3.1.5" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Xunit" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="test_data\Test-Story-6-9.yaml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+</Project>

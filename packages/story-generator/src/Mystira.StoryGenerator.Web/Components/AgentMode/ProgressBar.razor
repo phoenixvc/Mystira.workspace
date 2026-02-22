@@ -1,0 +1,14 @@
+@* Simple progress bar component *@
+
+<div class="progress-bar-container">
+    <div class="progress-bar-fill" style="width: @PercentageWidth%"></div>
+    <span class="progress-bar-text">@FormattedValue</span>
+</div>
+
+@code {
+    [Parameter] public double Value { get; set; }
+    [Parameter] public double Max { get; set; } = 1.0;
+
+    private double PercentageWidth => Max > 0 ? (Value / Max) * 100 : 0;
+    private string FormattedValue => Value.ToString("P0");
+}

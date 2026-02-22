@@ -1,0 +1,49 @@
+{
+  "dataset": "mystira_preteen_story_template",
+  "version": "1.0",
+  "ageGroup": "10-12",
+  "chunks": [
+    {
+      "chunk_id": "preteen_core_requirements",
+      "section": "1.1",
+      "title": "Preteen Core Story Requirements",
+      "content": "Stories for ages 10-12 should have 12-20 scenes with complex branching and multiple decision points. Include at least 3-4 distinct characters with depth. Use sophisticated vocabulary while maintaining clarity. Include strategic choices with meaningful consequences. Implement at least 3-4 roll scenes with D20 mechanics. Create multiple endings (3-5) that reflect different choices and strategies. Include opportunities for planning and tactical thinking.",
+      "category": "story_generation",
+      "subcategory": "core_story_rules",
+      "instructionType": "requirements",
+      "priority": "high",
+      "isMandatory": true,
+      "examples": "Adventures with puzzles requiring planning, strategic team choices, skill-based challenges with meaningful consequences",
+      "tags": ["preteen_design", "strategy", "complex_branching", "skill_challenges"],
+      "keywords": ["preteen_design", "strategy", "complex_branching", "skill_challenges"]
+    },
+    {
+      "chunk_id": "preteen_developmental",
+      "section": "2.1",
+      "title": "Preteen Developmental Goals",
+      "content": "Support growing independence and decision-making skills. Develop critical thinking and problem-solving abilities. Build self-identity through exploration of values and choices. Foster teamwork and collaborative problem-solving. Encourage ethical reasoning and moral nuance. Build resilience through handling setbacks and learning from failures. Support peer relationships and standing up for beliefs.",
+      "category": "validation",
+      "subcategory": "developmental_goals",
+      "instructionType": "guidelines",
+      "priority": "high",
+      "isMandatory": true,
+      "examples": "Stories with moral dilemmas, strategic challenges requiring team input, situations showing how choices affect outcomes",
+      "tags": ["developmental_goals", "independence", "critical_thinking", "ethics"],
+      "keywords": ["developmental_goals", "independence", "critical_thinking", "ethics"]
+    },
+    {
+      "chunk_id": "preteen_safety",
+      "section": "3.1",
+      "title": "Preteen Safety and Appropriateness",
+      "content": "Avoid graphic violence, sexual content, or intense fear. Moderate peril is acceptable if shown as manageable challenges. Respect growing need for autonomy while maintaining emotional safety. Show consequences for choices without harshness. Include positive role models handling conflict and emotions maturely. Address real-world themes appropriately for age without cynicism.",
+      "category": "safety",
+      "subcategory": "emotional_safety",
+      "instructionType": "safety_policy",
+      "priority": "high",
+      "isMandatory": true,
+      "examples": "Stories with challenges that build confidence, failure that leads to learning, ethical dilemmas without traumatic outcomes",
+      "tags": ["safety", "age_appropriate_challenge", "resilience"],
+      "keywords": ["safety", "age_appropriate_challenge", "resilience"]
+    }
+  ]
+}
