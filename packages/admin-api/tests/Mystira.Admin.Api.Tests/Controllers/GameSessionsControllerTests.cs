@@ -25,7 +25,7 @@ public class GameSessionsControllerTests : ApiTestFixture
     public async Task StartSession_ReturnsBadRequest_WithInvalidRequest()
     {
         // Arrange - empty request body
-        var emptyContent = new StringContent("{}", System.Text.Encoding.UTF8, "application/json");
+        using var emptyContent = new StringContent("{}", System.Text.Encoding.UTF8, "application/json");
 
         // Act
         var response = await AnonymousClient.PostAsync(BaseUrl, emptyContent);

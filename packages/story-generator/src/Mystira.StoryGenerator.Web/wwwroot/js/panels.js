@@ -79,7 +79,6 @@
 
       function attachMove(type) {
         // snapshot starting values
-        const rect = container.getBoundingClientRect();
         startLeft = parseFloat(leftEl.style.width) || left;
         startCenter = parseFloat(centerEl.style.width) || center;
         startRight = parseFloat(rightEl.style.width) || right;
