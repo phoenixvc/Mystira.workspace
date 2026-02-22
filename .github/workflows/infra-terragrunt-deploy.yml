@@ -72,8 +72,6 @@ jobs:
       plan-exitcode: ${{ steps.plan.outputs.exitcode }}
     steps:
       - uses: actions/checkout@v6
-        with:
-          submodules: recursive
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
@@ -181,8 +179,6 @@ jobs:
       name: ${{ inputs.environment }}-deploy
     steps:
       - uses: actions/checkout@v6
-        with:
-          submodules: recursive
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
@@ -269,8 +265,6 @@ jobs:
       name: ${{ inputs.environment }}-deploy
     steps:
       - uses: actions/checkout@v6
-        with:
-          submodules: recursive
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3

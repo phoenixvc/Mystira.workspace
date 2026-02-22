@@ -262,8 +262,6 @@ jobs:
             path: packages/app
     steps:
       - uses: actions/checkout@v6
-        with:
-          submodules: recursive
 
       - uses: pnpm/action-setup@v4
 

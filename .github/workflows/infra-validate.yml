@@ -41,8 +41,6 @@ jobs:
         environment: [dev, staging, prod]
     steps:
       - uses: actions/checkout@v6
-        with:
-          submodules: recursive
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
@@ -86,8 +84,6 @@ jobs:
         environment: [dev, staging, prod]
     steps:
       - uses: actions/checkout@v6
-        with:
-          submodules: recursive
 
       - name: Setup kubectl
         uses: azure/setup-kubectl@v4
@@ -128,8 +124,6 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v6
-        with:
-          submodules: recursive
 
       - name: Install hadolint
         run: |
@@ -158,8 +152,6 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v6
-        with:
-          submodules: recursive
 
       - name: Run Checkov
         uses: bridgecrewio/checkov-action@v12
@@ -188,8 +180,6 @@ jobs:
     if: github.event_name == 'pull_request'
     steps:
       - uses: actions/checkout@v6
-        with:
-          submodules: recursive
 
       - name: Setup Infracost
         uses: infracost/actions/setup@v3

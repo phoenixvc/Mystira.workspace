@@ -1,40 +1,52 @@
+# Multi-stage Dockerfile for Mystira Story Generator API (.NET 10)
+# Build context: monorepo root (Mystira.workspace/)
+
 # Build stage
-# Using specific variant tag for reproducibility (.NET 9 is STS - support ends May 2026)
-FROM mcr.microsoft.com/dotnet/sdk:9.0-bookworm-slim AS build
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
 
-# Copy solution and project files for restore
-COPY Mystira.StoryGenerator.sln ./
-COPY src/Mystira.StoryGenerator.Api/Mystira.StoryGenerator.Api.csproj ./src/Mystira.StoryGenerator.Api/
-COPY src/Mystira.StoryGenerator.Application/Mystira.StoryGenerator.Application.csproj ./src/Mystira.StoryGenerator.Application/
-COPY src/Mystira.StoryGenerator.Contracts/Mystira.StoryGenerator.Contracts.csproj ./src/Mystira.StoryGenerator.Contracts/
-COPY src/Mystira.StoryGenerator.Domain/Mystira.StoryGenerator.Domain.csproj ./src/Mystira.StoryGenerator.Domain/
-COPY src/Mystira.StoryGenerator.GraphTheory/Mystira.StoryGenerator.GraphTheory.csproj ./src/Mystira.StoryGenerator.GraphTheory/
-COPY src/Mystira.StoryGenerator.Llm/Mystira.StoryGenerator.Llm.csproj ./src/Mystira.StoryGenerator.Llm/
+# Copy solution and global.json for SDK version pinning
+COPY global.json ./
+COPY Mystira.sln ./
 
-# Restore dependencies
-ARG NUGET_AUTH_TOKEN
-RUN dotnet restore src/Mystira.StoryGenerator.Api/Mystira.StoryGenerator.Api.csproj
+# Copy csproj files for restore (story-generator + all project-referenced packages)
+COPY packages/story-generator/src/Mystira.StoryGenerator.Api/Mystira.StoryGenerator.Api.csproj packages/story-generator/src/Mystira.StoryGenerator.Api/
+COPY packages/story-generator/src/Mystira.StoryGenerator.Application/Mystira.StoryGenerator.Application.csproj packages/story-generator/src/Mystira.StoryGenerator.Application/
+COPY packages/story-generator/src/Mystira.StoryGenerator.Contracts/Mystira.StoryGenerator.Contracts.csproj packages/story-generator/src/Mystira.StoryGenerator.Contracts/
+COPY packages/story-generator/src/Mystira.StoryGenerator.Domain/Mystira.StoryGenerator.Domain.csproj packages/story-generator/src/Mystira.StoryGenerator.Domain/
+COPY packages/story-generator/src/Mystira.StoryGenerator.GraphTheory/Mystira.StoryGenerator.GraphTheory.csproj packages/story-generator/src/Mystira.StoryGenerator.GraphTheory/
+COPY packages/story-generator/src/Mystira.StoryGenerator.Llm/Mystira.StoryGenerator.Llm.csproj packages/story-generator/src/Mystira.StoryGenerator.Llm/
+COPY packages/story-generator/src/Mystira.StoryGenerator.Infrastructure/Mystira.StoryGenerator.Infrastructure.csproj packages/story-generator/src/Mystira.StoryGenerator.Infrastructure/
+COPY packages/contracts/dotnet/Mystira.Contracts/Mystira.Contracts.csproj packages/contracts/dotnet/Mystira.Contracts/
+COPY packages/shared/Mystira.Shared/Mystira.Shared.csproj packages/shared/Mystira.Shared/
+COPY packages/core/Mystira.Core/Mystira.Core.csproj packages/core/Mystira.Core/
+COPY packages/domain/Mystira.Domain/Mystira.Domain.csproj packages/domain/Mystira.Domain/
+
+# Restore dependencies (no NuGet auth needed — internal packages are ProjectReferences)
+RUN dotnet restore "packages/story-generator/src/Mystira.StoryGenerator.Api/Mystira.StoryGenerator.Api.csproj"
 
 # Copy source code
-COPY src/ ./src/
+COPY packages/story-generator/src/ packages/story-generator/src/
+COPY packages/contracts/dotnet/ packages/contracts/dotnet/
+COPY packages/shared/ packages/shared/
+COPY packages/core/ packages/core/
+COPY packages/domain/ packages/domain/
 
 # Build and publish
-WORKDIR /src/src/Mystira.StoryGenerator.Api
-RUN dotnet publish -c Release -o /app/publish --no-restore
+WORKDIR "/src/packages/story-generator/src/Mystira.StoryGenerator.Api"
+RUN dotnet publish -c Release -o /app/publish --no-restore /p:UseAppHost=false
 
 # Runtime stage
-# Using specific variant tag for reproducibility (.NET 9 is STS - support ends May 2026)
-FROM mcr.microsoft.com/dotnet/aspnet:9.0-bookworm-slim AS runtime
+FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS final
 WORKDIR /app
 
 # Create non-root user for security
-RUN groupadd -r appgroup && useradd -r -g appgroup appuser
+RUN groupadd -r appuser && useradd -r -g appuser appuser
 
 COPY --from=build /app/publish .
 
 # Set ownership and switch to non-root user
-RUN chown -R appuser:appgroup /app
+RUN chown -R appuser:appuser /app
 USER appuser
 
 EXPOSE 8080

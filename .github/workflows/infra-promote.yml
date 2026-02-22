@@ -149,8 +149,6 @@ jobs:
     environment: ${{ inputs.target_environment }}
     steps:
       - uses: actions/checkout@v6
-        with:
-          submodules: recursive
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
@@ -228,8 +226,6 @@ jobs:
     environment: ${{ inputs.target_environment }}
     steps:
       - uses: actions/checkout@v6
-        with:
-          submodules: recursive
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
@@ -304,8 +300,6 @@ jobs:
       name: ${{ inputs.target_environment }}-deploy
     steps:
       - uses: actions/checkout@v6
-        with:
-          submodules: recursive
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
@@ -386,8 +380,6 @@ jobs:
 
       - uses: actions/checkout@v6
         if: inputs.product == 'all' || inputs.product != 'shared-infra'
-        with:
-          submodules: recursive
 
       - name: Setup Terraform
         if: inputs.product == 'all' || inputs.product != 'shared-infra'

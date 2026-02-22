@@ -71,8 +71,6 @@ jobs:
         product: [shared-infra, mystira-app, story-generator, admin, publisher, chain]
     steps:
       - uses: actions/checkout@v6
-        with:
-          submodules: recursive
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3

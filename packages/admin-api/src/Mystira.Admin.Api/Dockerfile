@@ -1,32 +1,46 @@
-# Use the official .NET 9.0 runtime as base image
-FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS base
+# Multi-stage Dockerfile for Mystira Admin API (.NET 10)
+# Build context: monorepo root (Mystira.workspace/)
+FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS base
 WORKDIR /app
 EXPOSE 80
 EXPOSE 443
 
-# Use the SDK image to build the app
-FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
+# Build stage
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
 
-# Copy csproj files and NuGet config
-# NOTE: Build context should be the repository root, so paths are relative to /
-# Dependencies are pulled from NuGet packages (Mystira.Shared, Mystira.Contracts, etc.)
-COPY ["src/Mystira.Admin.Api/Mystira.Admin.Api.csproj", "Mystira.Admin.Api/"]
-COPY ["NuGet.config", "."]
+# Copy solution and global.json for SDK version pinning
+COPY global.json ./
+COPY Mystira.sln ./
 
-# Restore dependencies using BuildKit secret for GitHub Packages authentication
-# The secret is mounted at /run/secrets/nuget_auth_token and used inline
-RUN --mount=type=secret,id=nuget_auth_token \
-    dotnet nuget update source github \
-        --username "docker-build" \
-        --password "$(cat /run/secrets/nuget_auth_token)" \
-        --store-password-in-clear-text \
-        --configfile NuGet.config && \
-    dotnet restore "Mystira.Admin.Api/Mystira.Admin.Api.csproj"
+# Copy csproj files for restore (admin-api + all project-referenced packages)
+COPY packages/admin-api/src/Mystira.Admin.Api/Mystira.Admin.Api.csproj packages/admin-api/src/Mystira.Admin.Api/
+COPY packages/domain/Mystira.Domain/Mystira.Domain.csproj packages/domain/Mystira.Domain/
+COPY packages/application/Mystira.Application/Mystira.Application.csproj packages/application/Mystira.Application/
+COPY packages/contracts/dotnet/Mystira.Contracts/Mystira.Contracts.csproj packages/contracts/dotnet/Mystira.Contracts/
+COPY packages/infrastructure/Mystira.Infrastructure.Azure/Mystira.Infrastructure.Azure.csproj packages/infrastructure/Mystira.Infrastructure.Azure/
+COPY packages/infrastructure/Mystira.Infrastructure.Data/Mystira.Infrastructure.Data.csproj packages/infrastructure/Mystira.Infrastructure.Data/
+COPY packages/infrastructure/Mystira.Infrastructure.Discord/Mystira.Infrastructure.Discord.csproj packages/infrastructure/Mystira.Infrastructure.Discord/
+COPY packages/infrastructure/Mystira.Infrastructure.StoryProtocol/Mystira.Infrastructure.StoryProtocol.csproj packages/infrastructure/Mystira.Infrastructure.StoryProtocol/
+COPY packages/shared/Mystira.Shared/Mystira.Shared.csproj packages/shared/Mystira.Shared/
+COPY packages/core/Mystira.Core/Mystira.Core.csproj packages/core/Mystira.Core/
 
-# Copy all source files from the src directory
-COPY src/ .
-WORKDIR "/src/Mystira.Admin.Api"
+# Restore dependencies (no NuGet auth needed — internal packages are ProjectReferences)
+RUN dotnet restore "packages/admin-api/src/Mystira.Admin.Api/Mystira.Admin.Api.csproj"
+
+# Copy all source files
+COPY packages/admin-api/src/ packages/admin-api/src/
+COPY packages/domain/ packages/domain/
+COPY packages/application/ packages/application/
+COPY packages/contracts/dotnet/ packages/contracts/dotnet/
+COPY packages/infrastructure/Mystira.Infrastructure.Azure/ packages/infrastructure/Mystira.Infrastructure.Azure/
+COPY packages/infrastructure/Mystira.Infrastructure.Data/ packages/infrastructure/Mystira.Infrastructure.Data/
+COPY packages/infrastructure/Mystira.Infrastructure.Discord/ packages/infrastructure/Mystira.Infrastructure.Discord/
+COPY packages/infrastructure/Mystira.Infrastructure.StoryProtocol/ packages/infrastructure/Mystira.Infrastructure.StoryProtocol/
+COPY packages/shared/ packages/shared/
+COPY packages/core/ packages/core/
+
+WORKDIR "/src/packages/admin-api/src/Mystira.Admin.Api"
 
 # Build the application
 RUN dotnet build "Mystira.Admin.Api.csproj" -c Release -o /app/build
@@ -39,10 +53,6 @@ RUN dotnet publish "Mystira.Admin.Api.csproj" -c Release -o /app/publish /p:UseA
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-
-# Copy appsettings files explicitly to ensure they're available at runtime
-# These should be overridden by environment variables or volume mounts in production
-COPY --from=build /src/Mystira.Admin.Api/appsettings.json .
 
 # Create a non-root user for security
 RUN adduser --disabled-password --gecos '' appuser && chown -R appuser /app

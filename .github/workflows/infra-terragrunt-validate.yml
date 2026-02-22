@@ -231,8 +231,6 @@ jobs:
         environment: [dev, staging, prod]
     steps:
       - uses: actions/checkout@v6
-        with:
-          submodules: recursive
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
@@ -289,8 +287,6 @@ jobs:
         environment: [dev, staging, prod]
     steps:
       - uses: actions/checkout@v6
-        with:
-          submodules: recursive
 
       - name: Check if product changed
         id: check
@@ -357,8 +353,6 @@ jobs:
     if: ${{ vars.ENABLE_CHECKOV != 'false' }}
     steps:
       - uses: actions/checkout@v6
-        with:
-          submodules: recursive
 
       - name: Run Checkov
         uses: bridgecrewio/checkov-action@v12
