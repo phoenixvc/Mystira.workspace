@@ -87,7 +87,7 @@ public class PeachPaymentsService : IPaymentService
             }
 
             // Create the checkout session
-            var content = new FormUrlEncodedContent(formData);
+            using var content = new FormUrlEncodedContent(formData);
 
             var response = await _httpClient.PostAsync("/v1/checkouts", content);
             var responseBody = await response.Content.ReadAsStringAsync();
@@ -148,7 +148,7 @@ public class PeachPaymentsService : IPaymentService
                 ["card.token"] = request.PaymentMethodToken
             };
 
-            var content = new FormUrlEncodedContent(formData);
+            using var content = new FormUrlEncodedContent(formData);
 
             var response = await _httpClient.PostAsync("/v1/payments", content);
             var responseBody = await response.Content.ReadAsStringAsync();
@@ -233,7 +233,7 @@ public class PeachPaymentsService : IPaymentService
         {
             _logger.LogInformation("Getting payment status for transaction {TransactionId}", transactionId);
 
-            var request = new HttpRequestMessage(HttpMethod.Get, $"/v1/payments/{transactionId}?entityId={_peachOptions.EntityId}");
+            using var request = new HttpRequestMessage(HttpMethod.Get, $"/v1/payments/{transactionId}?entityId={_peachOptions.EntityId}");
             request.Headers.Add("Authorization", $"Bearer {_peachOptions.AccessToken}");
 
             var response = await _httpClient.SendAsync(request);
@@ -277,7 +277,7 @@ public class PeachPaymentsService : IPaymentService
                 formData["amount"] = request.Amount.Value.ToString("F2");
             }
 
-            var content = new FormUrlEncodedContent(formData);
+            using var content = new FormUrlEncodedContent(formData);
 
             var response = await _httpClient.PostAsync($"/v1/payments/{request.TransactionId}", content);
             var responseBody = await response.Content.ReadAsStringAsync();
@@ -358,7 +358,7 @@ public class PeachPaymentsService : IPaymentService
         try
         {
             // Simple health check - verify we can reach the API
-            var request = new HttpRequestMessage(HttpMethod.Get, "/v1/");
+            using var request = new HttpRequestMessage(HttpMethod.Get, "/v1/");
             request.Headers.Add("Authorization", $"Bearer {_peachOptions.AccessToken}");
 
             var response = await _httpClient.SendAsync(request);

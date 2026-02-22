@@ -116,7 +116,7 @@ public class AuthControllerTests : ApiTestFixture
     public async Task Login_ReturnsBadRequest_WithEmptyBody()
     {
         // Arrange
-        var emptyContent = new StringContent("{}", System.Text.Encoding.UTF8, "application/json");
+        using var emptyContent = new StringContent("{}", System.Text.Encoding.UTF8, "application/json");
 
         // Act
         var response = await AnonymousClient.PostAsync($"{BaseUrl}/login", emptyContent);
