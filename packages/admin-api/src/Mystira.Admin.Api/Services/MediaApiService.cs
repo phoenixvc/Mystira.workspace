@@ -85,7 +85,7 @@ public class MediaApiService : IMediaApiService
     }
 
     /// <inheritdoc />
-    public async Task<MediaQueryResponse> GetMediaAsync(MediaQueryRequest request)
+    public async Task<MediaQueryResponse> GetMediaAsync(MediaQueryRequest request, CancellationToken cancellationToken = default)
     {
         // Convert Admin.Api.Models.MediaQueryRequest to Contracts.MediaQueryRequest
         var contractsRequest = new Mystira.Contracts.App.Requests.Media.MediaQueryRequest
@@ -130,25 +130,25 @@ public class MediaApiService : IMediaApiService
     }
 
     /// <inheritdoc />
-    public Task<MediaAsset?> GetMediaByIdAsync(string mediaId) =>
+    public Task<MediaAsset?> GetMediaByIdAsync(string mediaId, CancellationToken cancellationToken = default) =>
         _getMediaUseCase.ExecuteAsync(mediaId);
 
     /// <inheritdoc />
-    public async Task<MediaAsset> UploadMediaAsync(IFormFile file, string mediaId, string mediaType, string? description = null, List<string>? tags = null)
+    public async Task<MediaAsset> UploadMediaAsync(IFormFile file, string mediaId, string mediaType, string? description = null, List<string>? tags = null, CancellationToken cancellationToken = default)
     {
         ValidateMediaFile(file, mediaType);
 
         // Validate that media metadata entry exists and resolve the media ID
-        var resolvedMediaId = await ValidateAndResolveMediaId(mediaId, file.FileName);
+        var resolvedMediaId = await ValidateAndResolveMediaId(mediaId, file.FileName, cancellationToken);
 
         // Check if media with this ID already exists
-        var existingMedia = await GetMediaByIdAsync(resolvedMediaId);
+        var existingMedia = await GetMediaByIdAsync(resolvedMediaId, cancellationToken);
         if (existingMedia != null)
         {
             throw new InvalidOperationException($"Media with ID '{resolvedMediaId}' already exists");
         }
 
-        await using var processedStream = await PrepareMediaStreamAsync(file);
+        await using var processedStream = await PrepareMediaStreamAsync(file, cancellationToken);
 
         var fileSizeBytes = processedStream.Stream.Length;
         var hash = await CalculateStreamHashAsync(processedStream.Stream);
@@ -175,7 +175,7 @@ public class MediaApiService : IMediaApiService
         };
 
         _context.MediaAssets.Add(mediaAsset);
-        await _context.SaveChangesAsync();
+        await _context.SaveChangesAsync(cancellationToken);
 
         _logger.LogInformation("Media uploaded successfully: {MediaId} at {Url}", resolvedMediaId, url);
 
@@ -183,12 +183,12 @@ public class MediaApiService : IMediaApiService
     }
 
     /// <inheritdoc />
-    public async Task<BulkUploadResult> BulkUploadMediaAsync(IFormFile[] files, bool autoDetectType = true, bool overwriteExisting = false)
+    public async Task<BulkUploadResult> BulkUploadMediaAsync(IFormFile[] files, bool autoDetectType = true, bool overwriteExisting = false, CancellationToken cancellationToken = default)
     {
         var result = new BulkUploadResult { Success = true };
 
         // Pre-validate that media metadata file exists
-        var metadataFile = await _mediaMetadataService.GetMediaMetadataFileAsync();
+        var metadataFile = await _mediaMetadataService.GetMediaMetadataFileAsync(cancellationToken);
         if (metadataFile == null || metadataFile.Entries.Count == 0)
         {
             result.Success = false;
@@ -221,7 +221,7 @@ public class MediaApiService : IMediaApiService
                 }
 
                 // Check if exists and handle overwrite
-                var existingMedia = await GetMediaByIdAsync(mediaId);
+                var existingMedia = await GetMediaByIdAsync(mediaId, cancellationToken);
                 if (existingMedia != null && !overwriteExisting)
                 {
                     result.Errors.Add($"Media with ID '{mediaId}' already exists (skipped)");
@@ -231,10 +231,10 @@ public class MediaApiService : IMediaApiService
 
                 if (existingMedia != null && overwriteExisting)
                 {
-                    await DeleteMediaAsync(mediaId);
+                    await DeleteMediaAsync(mediaId, cancellationToken);
                 }
 
-                await UploadMediaAsync(file, mediaId, mediaType);
+                await UploadMediaAsync(file, mediaId, mediaType, cancellationToken: cancellationToken);
                 result.SuccessfulUploads.Add(mediaId);
                 result.UploadedCount++;
             }
@@ -253,7 +253,7 @@ public class MediaApiService : IMediaApiService
     }
 
     /// <inheritdoc />
-    public async Task<MediaAsset> UpdateMediaAsync(string mediaId, MediaUpdateRequest updateData)
+    public async Task<MediaAsset> UpdateMediaAsync(string mediaId, MediaUpdateRequest updateData, CancellationToken cancellationToken = default)
     {
         // Convert Admin.Api.Models.MediaUpdateRequest to Contracts.MediaUpdateRequest
         var contractsRequest = new Mystira.Contracts.App.Requests.Media.MediaUpdateRequest
@@ -267,11 +267,11 @@ public class MediaApiService : IMediaApiService
     }
 
     /// <inheritdoc />
-    public Task<bool> DeleteMediaAsync(string mediaId) =>
+    public Task<bool> DeleteMediaAsync(string mediaId, CancellationToken cancellationToken = default) =>
         _deleteMediaUseCase.ExecuteAsync(mediaId);
 
     /// <inheritdoc />
-    public async Task<MediaValidationResult> ValidateMediaReferencesAsync(List<string> mediaReferences)
+    public async Task<MediaValidationResult> ValidateMediaReferencesAsync(List<string> mediaReferences, CancellationToken cancellationToken = default)
     {
         var result = new MediaValidationResult();
 
@@ -285,7 +285,7 @@ public class MediaApiService : IMediaApiService
         var existingMediaIds = await _context.MediaAssets
             .Where(m => mediaReferences.Contains(m.MediaId))
             .Select(m => m.MediaId)
-            .ToListAsync();
+            .ToListAsync(cancellationToken);
 
         result.ValidMediaIds = existingMediaIds;
         result.MissingMediaIds = mediaReferences.Except(existingMediaIds).ToList();
@@ -304,11 +304,11 @@ public class MediaApiService : IMediaApiService
     }
 
     /// <inheritdoc />
-    public async Task<MediaUsageStats> GetMediaUsageStatsAsync()
+    public async Task<MediaUsageStats> GetMediaUsageStatsAsync(CancellationToken cancellationToken = default)
     {
         var stats = new MediaUsageStats();
 
-        var allMedia = await _context.MediaAssets.ToListAsync();
+        var allMedia = await _context.MediaAssets.ToListAsync(cancellationToken);
 
         stats.TotalMediaFiles = allMedia.Count;
         stats.AudioFiles = allMedia.Count(m => m.MediaType == "audio");
@@ -489,9 +489,9 @@ public class MediaApiService : IMediaApiService
     /// Validates that a media metadata entry exists for the given media ID and filename
     /// Returns the resolved media ID from metadata
     /// </summary>
-    private async Task<string> ValidateAndResolveMediaId(string mediaId, string fileName)
+    private async Task<string> ValidateAndResolveMediaId(string mediaId, string fileName, CancellationToken cancellationToken = default)
     {
-        var metadataFile = await _mediaMetadataService.GetMediaMetadataFileAsync();
+        var metadataFile = await _mediaMetadataService.GetMediaMetadataFileAsync(cancellationToken);
         if (metadataFile == null || metadataFile.Entries.Count == 0)
         {
             throw new InvalidOperationException("No media metadata file found. Media uploads require a valid media metadata file to be uploaded first.");
@@ -524,22 +524,22 @@ public class MediaApiService : IMediaApiService
         return mediaId;
     }
 
-    public Task<(Stream stream, string contentType, string fileName)?> GetMediaFileAsync(string mediaId) =>
+    public Task<(Stream stream, string contentType, string fileName)?> GetMediaFileAsync(string mediaId, CancellationToken cancellationToken = default) =>
         _downloadMediaUseCase.ExecuteAsync(mediaId);
 
     /// <inheritdoc />
-    public Task<MediaAsset?> GetMediaByFileNameAsync(string fileName) =>
+    public Task<MediaAsset?> GetMediaByFileNameAsync(string fileName, CancellationToken cancellationToken = default) =>
         _getMediaByFilenameUseCase.ExecuteAsync(fileName);
 
     /// <inheritdoc />
-    public async Task<string?> GetMediaUrlAsync(string fileName)
+    public async Task<string?> GetMediaUrlAsync(string fileName, CancellationToken cancellationToken = default)
     {
         var mediaAsset = await _getMediaByFilenameUseCase.ExecuteAsync(fileName);
         return mediaAsset?.Url;
     }
 
     /// <inheritdoc />
-    public async Task<ZipUploadResult> UploadMediaFromZipAsync(IFormFile zipFile, bool overwriteMetadata = false, bool overwriteMedia = false)
+    public async Task<ZipUploadResult> UploadMediaFromZipAsync(IFormFile zipFile, bool overwriteMetadata = false, bool overwriteMedia = false, CancellationToken cancellationToken = default)
     {
         var result = new ZipUploadResult { Success = false };
 
@@ -566,7 +566,7 @@ public class MediaApiService : IMediaApiService
                         using (var entryStream = entry.Open())
                         using (var reader = new StreamReader(entryStream))
                         {
-                            metadataJsonContent = await reader.ReadToEndAsync();
+                            metadataJsonContent = await reader.ReadToEndAsync(cancellationToken);
                         }
                     }
                     else if (!entry.FullName.EndsWith("/"))
@@ -574,7 +574,7 @@ public class MediaApiService : IMediaApiService
                         using (var entryStream = entry.Open())
                         using (var memoryStream = new MemoryStream())
                         {
-                            await entryStream.CopyToAsync(memoryStream);
+                            await entryStream.CopyToAsync(memoryStream, cancellationToken);
                             zipEntries[entry.Name] = memoryStream.ToArray();
                         }
                     }
@@ -591,7 +591,7 @@ public class MediaApiService : IMediaApiService
 
             try
             {
-                var importedMetadata = await _mediaMetadataService.ImportMediaMetadataEntriesAsync(metadataJsonContent, overwriteMetadata);
+                var importedMetadata = await _mediaMetadataService.ImportMediaMetadataEntriesAsync(metadataJsonContent, overwriteMetadata, cancellationToken);
 
                 result.MetadataResult = new MetadataImportResult
                 {
@@ -617,7 +617,7 @@ public class MediaApiService : IMediaApiService
             }
 
             // Step 2: Upload media files if metadata was successful
-            var metadataFile = await _mediaMetadataService.GetMediaMetadataFileAsync();
+            var metadataFile = await _mediaMetadataService.GetMediaMetadataFileAsync(cancellationToken);
             if (metadataFile == null || metadataFile.Entries.Count == 0)
             {
                 result.AllErrors.Add("Failed to retrieve imported metadata");
@@ -641,7 +641,7 @@ public class MediaApiService : IMediaApiService
                     var mediaType = metadataEntry.Type;
 
                     // Check if media already exists
-                    var existingMedia = await GetMediaByIdAsync(mediaId);
+                    var existingMedia = await GetMediaByIdAsync(mediaId, cancellationToken);
                     if (existingMedia != null && !overwriteMedia)
                     {
                         result.MediaErrors.Add($"Media with ID '{mediaId}' already exists (skipped)");
@@ -651,7 +651,7 @@ public class MediaApiService : IMediaApiService
 
                     if (existingMedia != null && overwriteMedia)
                     {
-                        await DeleteMediaAsync(mediaId);
+                        await DeleteMediaAsync(mediaId, cancellationToken);
                     }
 
                     // Create temporary IFormFile from bytes
@@ -683,7 +683,7 @@ public class MediaApiService : IMediaApiService
                         };
 
                         _context.MediaAssets.Add(mediaAsset);
-                        await _context.SaveChangesAsync();
+                        await _context.SaveChangesAsync(cancellationToken);
 
                         result.SuccessfulMediaUploads.Add(mediaId);
                         result.UploadedMediaCount++;

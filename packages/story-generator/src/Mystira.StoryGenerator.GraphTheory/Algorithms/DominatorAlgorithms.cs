@@ -15,7 +15,6 @@ public static class DominatorAlgorithms
         TNode start)
         where TNode : notnull
     {
-        var nodes = new List<TNode>();
         var dfnum = new Dictionary<TNode, int>();
         var vertex = new List<TNode>();
         var parent = new Dictionary<TNode, TNode>();

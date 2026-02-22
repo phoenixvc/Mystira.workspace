@@ -246,7 +246,7 @@ terraform plan
 terraform apply
 ```
 
-### 5. Deploy Production Environment (Optional)
+### 4. Deploy Production Environment (Optional)
 
 ```bash
 cd infra/terraform/environments/prod

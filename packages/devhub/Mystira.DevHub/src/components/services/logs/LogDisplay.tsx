@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { type JSX, useRef } from "react";
 import { ServiceLog } from "../types";
 import { isErrorMessage, isStackTraceLine } from "./logUtils";
 

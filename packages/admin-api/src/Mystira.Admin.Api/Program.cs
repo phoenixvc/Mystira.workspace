@@ -390,14 +390,15 @@ try
             if (!string.IsNullOrWhiteSpace(jwtRsaPublicKey))
             {
                 // Use RSA public key for asymmetric verification (recommended)
-                // Note: The RSA instance is intentionally not disposed here because RsaSecurityKey holds
-                // a reference to it for the lifetime of the application. Disposing it would break JWT validation.
-                // The RSA instance will be cleaned up when the application terminates.
+                // Import the PEM key, export the parameters, then dispose the RSA instance.
+                // RsaSecurityKey is initialized from the key parameters (not the RSA object),
+                // so it remains valid for the lifetime of the application.
                 try
                 {
-                    var rsa = System.Security.Cryptography.RSA.Create();
+                    using var rsa = System.Security.Cryptography.RSA.Create();
                     rsa.ImportFromPem(jwtRsaPublicKey);
-                    validationParameters.IssuerSigningKey = new RsaSecurityKey(rsa);
+                    var keyParameters = rsa.ExportParameters(false);
+                    validationParameters.IssuerSigningKey = new RsaSecurityKey(keyParameters);
                 }
                 catch (System.Security.Cryptography.CryptographicException ex)
                 {

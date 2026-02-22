@@ -24,14 +24,14 @@ public class MediaMetadataService : IMediaMetadataService
     /// <summary>
     /// Gets the media metadata file
     /// </summary>
-    public async Task<ApiModels.MediaMetadataFile?> GetMediaMetadataFileAsync()
+    public async Task<ApiModels.MediaMetadataFile?> GetMediaMetadataFileAsync(CancellationToken cancellationToken = default)
     {
         try
         {
             // Attempt with normal EF Core approach first
             try
             {
-                var domainFile = await _context.MediaMetadataFiles.FirstOrDefaultAsync();
+                var domainFile = await _context.MediaMetadataFiles.FirstOrDefaultAsync(cancellationToken);
                 if (domainFile != null)
                 {
                     // Ensure Entries is initialized
@@ -64,14 +64,14 @@ public class MediaMetadataService : IMediaMetadataService
     /// <summary>
     /// Updates the media metadata file
     /// </summary>
-    public async Task<ApiModels.MediaMetadataFile> UpdateMediaMetadataFileAsync(ApiModels.MediaMetadataFile metadataFile)
+    public async Task<ApiModels.MediaMetadataFile> UpdateMediaMetadataFileAsync(ApiModels.MediaMetadataFile metadataFile, CancellationToken cancellationToken = default)
     {
         try
         {
             var domainFile = ConvertToDomainModel(metadataFile);
             domainFile.UpdatedAt = DateTime.UtcNow;
 
-            var existingFile = await _context.MediaMetadataFiles.FirstOrDefaultAsync();
+            var existingFile = await _context.MediaMetadataFiles.FirstOrDefaultAsync(cancellationToken);
             if (existingFile != null)
             {
                 _context.Entry(existingFile).CurrentValues.SetValues(domainFile);
@@ -79,10 +79,10 @@ public class MediaMetadataService : IMediaMetadataService
             }
             else
             {
-                await _context.MediaMetadataFiles.AddAsync(domainFile);
+                await _context.MediaMetadataFiles.AddAsync(domainFile, cancellationToken);
             }
 
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync(cancellationToken);
             return ConvertToApiModel(domainFile);
         }
         catch (Exception ex)
@@ -95,11 +95,11 @@ public class MediaMetadataService : IMediaMetadataService
     /// <summary>
     /// Adds a new media metadata entry
     /// </summary>
-    public async Task<ApiModels.MediaMetadataFile> AddMediaMetadataEntryAsync(ApiModels.MediaMetadataEntry entry)
+    public async Task<ApiModels.MediaMetadataFile> AddMediaMetadataEntryAsync(ApiModels.MediaMetadataEntry entry, CancellationToken cancellationToken = default)
     {
         try
         {
-            var apiFile = await GetMediaMetadataFileAsync();
+            var apiFile = await GetMediaMetadataFileAsync(cancellationToken);
             var domainFile = apiFile == null ? new DomainModels.MediaMetadataFile() : ConvertToDomainModel(apiFile);
 
             // Check if entry already exists
@@ -111,7 +111,7 @@ public class MediaMetadataService : IMediaMetadataService
 
             // Add the entry
             domainFile.Entries.Add(ConvertToDomainEntry(entry));
-            return await UpdateMediaMetadataFileAsync(ConvertToApiModel(domainFile));
+            return await UpdateMediaMetadataFileAsync(ConvertToApiModel(domainFile), cancellationToken);
         }
         catch (Exception ex)
         {
@@ -123,11 +123,11 @@ public class MediaMetadataService : IMediaMetadataService
     /// <summary>
     /// Updates an existing media metadata entry
     /// </summary>
-    public async Task<ApiModels.MediaMetadataFile> UpdateMediaMetadataEntryAsync(string entryId, ApiModels.MediaMetadataEntry entry)
+    public async Task<ApiModels.MediaMetadataFile> UpdateMediaMetadataEntryAsync(string entryId, ApiModels.MediaMetadataEntry entry, CancellationToken cancellationToken = default)
     {
         try
         {
-            var apiFile = await GetMediaMetadataFileAsync();
+            var apiFile = await GetMediaMetadataFileAsync(cancellationToken);
             if (apiFile == null)
             {
                 throw new InvalidOperationException("Media metadata file not found");
@@ -145,7 +145,7 @@ public class MediaMetadataService : IMediaMetadataService
             entry.Id = entryId; // Ensure ID stays the same
             domainFile.Entries[index] = ConvertToDomainEntry(entry);
 
-            return await UpdateMediaMetadataFileAsync(ConvertToApiModel(domainFile));
+            return await UpdateMediaMetadataFileAsync(ConvertToApiModel(domainFile), cancellationToken);
         }
         catch (Exception ex)
         {
@@ -157,11 +157,11 @@ public class MediaMetadataService : IMediaMetadataService
     /// <summary>
     /// Removes a media metadata entry
     /// </summary>
-    public async Task<ApiModels.MediaMetadataFile> RemoveMediaMetadataEntryAsync(string entryId)
+    public async Task<ApiModels.MediaMetadataFile> RemoveMediaMetadataEntryAsync(string entryId, CancellationToken cancellationToken = default)
     {
         try
         {
-            var apiFile = await GetMediaMetadataFileAsync();
+            var apiFile = await GetMediaMetadataFileAsync(cancellationToken);
             if (apiFile == null)
             {
                 throw new InvalidOperationException("Media metadata file not found");
@@ -175,7 +175,7 @@ public class MediaMetadataService : IMediaMetadataService
             }
 
             domainFile.Entries.Remove(existingEntry);
-            return await UpdateMediaMetadataFileAsync(ConvertToApiModel(domainFile));
+            return await UpdateMediaMetadataFileAsync(ConvertToApiModel(domainFile), cancellationToken);
         }
         catch (Exception ex)
         {
@@ -187,11 +187,11 @@ public class MediaMetadataService : IMediaMetadataService
     /// <summary>
     /// Gets a specific media metadata entry by ID
     /// </summary>
-    public async Task<ApiModels.MediaMetadataEntry?> GetMediaMetadataEntryAsync(string entryId)
+    public async Task<ApiModels.MediaMetadataEntry?> GetMediaMetadataEntryAsync(string entryId, CancellationToken cancellationToken = default)
     {
         try
         {
-            var apiFile = await GetMediaMetadataFileAsync();
+            var apiFile = await GetMediaMetadataFileAsync(cancellationToken);
             if (apiFile == null)
             {
                 return null;
@@ -211,7 +211,7 @@ public class MediaMetadataService : IMediaMetadataService
     /// <summary>
     /// Imports media metadata entries from JSON or YAML data
     /// </summary>
-    public async Task<ApiModels.MediaMetadataFile> ImportMediaMetadataEntriesAsync(string data, bool overwriteExisting = false)
+    public async Task<ApiModels.MediaMetadataFile> ImportMediaMetadataEntriesAsync(string data, bool overwriteExisting = false, CancellationToken cancellationToken = default)
     {
         try
         {
@@ -235,7 +235,7 @@ public class MediaMetadataService : IMediaMetadataService
                 throw new ArgumentException("No valid media metadata entries found in data");
             }
 
-            var apiFile = await GetMediaMetadataFileAsync();
+            var apiFile = await GetMediaMetadataFileAsync(cancellationToken);
             var domainFile = apiFile == null ? new DomainModels.MediaMetadataFile() : ConvertToDomainModel(apiFile);
 
             foreach (var entry in importedEntries)
@@ -260,7 +260,7 @@ public class MediaMetadataService : IMediaMetadataService
                 }
             }
 
-            return await UpdateMediaMetadataFileAsync(ConvertToApiModel(domainFile));
+            return await UpdateMediaMetadataFileAsync(ConvertToApiModel(domainFile), cancellationToken);
         }
         catch (Exception ex)
         {

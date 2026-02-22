@@ -84,7 +84,6 @@ public class YamlImportService : IYamlImportService
             var lines = yamlContent.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
             var data = new Dictionary<string, object>();
             var currentKey = "";
-            var indentStack = new Stack<(int indent, string key)>();
 
             foreach (var line in lines)
             {

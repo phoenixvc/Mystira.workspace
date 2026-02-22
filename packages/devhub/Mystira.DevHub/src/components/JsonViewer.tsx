@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { type JSX, useCallback, useMemo, useState } from "react";
 
 interface JsonViewerProps {
   data: unknown;
@@ -80,14 +80,14 @@ function highlightJson(json: string): JSX.Element[] {
       // Add plain text before this token
       if (token.start > lastEnd) {
         lineElements.push(
-          <span key={key++}>{line.slice(lastEnd, token.start)}</span>,
+          <span key={key++}>{line.slice(lastEnd, token.start)}</span>
         );
       }
       // Add highlighted token
       lineElements.push(
         <span key={key++} className={token.className}>
           {line.slice(token.start, token.end)}
-        </span>,
+        </span>
       );
       lastEnd = token.end;
     });
@@ -101,7 +101,7 @@ function highlightJson(json: string): JSX.Element[] {
     elements.push(
       <div key={`line-${lineIndex}`} className="whitespace-pre">
         {lineElements.length > 0 ? lineElements : "\u00A0"}
-      </div>,
+      </div>
     );
   });
 

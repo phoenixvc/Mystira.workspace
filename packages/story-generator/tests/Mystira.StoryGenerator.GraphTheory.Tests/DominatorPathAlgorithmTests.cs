@@ -38,15 +38,6 @@ public class DominatorPathAlgorithmTests
             new() { Id = "v5", Description = "End", Type = SceneType.Narrative }
         };
 
-        var edges = new List<Edge<Scene, string>>
-        {
-            new(scenes[0], scenes[1], "left"),
-            new(scenes[0], scenes[2], "right"),
-            new(scenes[1], scenes[3], "to-merge"),
-            new(scenes[2], scenes[3], "to-merge"),
-            new(scenes[3], scenes[4], "to-end")
-        };
-
         var scenario = new Scenario { Scenes = scenes };
         // We need to set up NextSceneId or Branches for ToGraph() to work
         scenes[0].Branches = new List<Branch>
