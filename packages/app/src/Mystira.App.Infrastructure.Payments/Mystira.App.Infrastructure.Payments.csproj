@@ -20,6 +20,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Mystira.App.Application\Mystira.App.Application.csproj" />
-    <PackageReference Include="Mystira.Contracts" Version="0.6.0-alpha*" />
+    <ProjectReference Include="../../../../contracts/dotnet/Mystira.Contracts/Mystira.Contracts.csproj" />
   </ItemGroup>
 </Project>
