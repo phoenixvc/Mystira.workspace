@@ -42,7 +42,7 @@ public class ArchetypeHandlerTests
         result.Id.Should().NotBeNullOrEmpty();
         _repository.Verify(r => r.AddAsync(It.IsAny<ArchetypeDefinition>(), It.IsAny<CancellationToken>()), Times.Once);
         _unitOfWork.Verify(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
-        _cacheInvalidation.Verify(c => c.InvalidateCacheByPrefix("MasterData:Archetypes"), Times.Once);
+        _cacheInvalidation.Verify(c => c.InvalidateCacheByPrefixAsync("MasterData:Archetypes"), Times.Once);
     }
 
     [Fact]
@@ -77,7 +77,7 @@ public class ArchetypeHandlerTests
         result.Should().BeTrue();
         _repository.Verify(r => r.DeleteAsync("arch-1", It.IsAny<CancellationToken>()), Times.Once);
         _unitOfWork.Verify(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
-        _cacheInvalidation.Verify(c => c.InvalidateCacheByPrefix("MasterData:Archetypes"), Times.Once);
+        _cacheInvalidation.Verify(c => c.InvalidateCacheByPrefixAsync("MasterData:Archetypes"), Times.Once);
     }
 
     [Fact]
@@ -300,7 +300,7 @@ public class ArchetypeHandlerTests
             _repository.Object, _unitOfWork.Object,
             _cacheInvalidation.Object, _logger.Object, CancellationToken.None);
 
-        _cacheInvalidation.Verify(c => c.InvalidateCacheByPrefix("MasterData:Archetypes"), Times.Once);
+        _cacheInvalidation.Verify(c => c.InvalidateCacheByPrefixAsync("MasterData:Archetypes"), Times.Once);
     }
 
     [Fact]
@@ -314,7 +314,7 @@ public class ArchetypeHandlerTests
             new DeleteArchetypeCommand("arch-1"), _repository.Object, _unitOfWork.Object,
             _cacheInvalidation.Object, _logger.Object, CancellationToken.None);
 
-        _cacheInvalidation.Verify(c => c.InvalidateCacheByPrefix("MasterData:Archetypes"), Times.Once);
+        _cacheInvalidation.Verify(c => c.InvalidateCacheByPrefixAsync("MasterData:Archetypes"), Times.Once);
     }
 
     #endregion

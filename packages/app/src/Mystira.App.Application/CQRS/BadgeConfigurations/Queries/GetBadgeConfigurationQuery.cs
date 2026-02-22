@@ -11,18 +11,14 @@ public record GetBadgeConfigurationQuery(string Id)
     public string CacheKey => $"BadgeConfigurations:Id:{Id}";
 }
 
-public sealed class GetBadgeConfigurationQueryHandler
+public static class GetBadgeConfigurationQueryHandler
 {
-    private readonly IBadgeConfigurationRepository _repository;
-
-    public GetBadgeConfigurationQueryHandler(IBadgeConfigurationRepository repository)
+    public static async Task<BadgeConfiguration?> Handle(
+        GetBadgeConfigurationQuery request,
+        IBadgeConfigurationRepository repository,
+        CancellationToken cancellationToken)
     {
-        _repository = repository;
-    }
-
-    public async Task<BadgeConfiguration?> Handle(GetBadgeConfigurationQuery request, CancellationToken cancellationToken)
-    {
-        var entity = await _repository.GetByIdAsync(request.Id);
+        var entity = await repository.GetByIdAsync(request.Id);
         if (entity == null) return null;
         return Clone(entity);
     }

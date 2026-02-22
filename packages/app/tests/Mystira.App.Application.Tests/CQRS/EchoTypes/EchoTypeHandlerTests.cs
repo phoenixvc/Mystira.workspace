@@ -48,7 +48,7 @@ public class EchoTypeHandlerTests
         result.Id.Should().NotBeNullOrEmpty();
         _repository.Verify(r => r.AddAsync(It.IsAny<EchoTypeDefinition>(), It.IsAny<CancellationToken>()), Times.Once);
         _unitOfWork.Verify(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
-        _cacheInvalidation.Verify(c => c.InvalidateCacheByPrefix("MasterData:EchoTypes"), Times.Once);
+        _cacheInvalidation.Verify(c => c.InvalidateCacheByPrefixAsync("MasterData:EchoTypes"), Times.Once);
     }
 
     [Fact]

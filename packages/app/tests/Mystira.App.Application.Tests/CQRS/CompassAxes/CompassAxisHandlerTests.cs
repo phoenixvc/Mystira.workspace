@@ -50,7 +50,7 @@ public class CompassAxisHandlerTests
         result.Id.Should().NotBeNullOrEmpty();
         _repository.Verify(r => r.AddAsync(It.IsAny<CompassAxis>(), It.IsAny<CancellationToken>()), Times.Once);
         _unitOfWork.Verify(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
-        _cacheInvalidation.Verify(c => c.InvalidateCacheByPrefix("MasterData:CompassAxes"), Times.Once);
+        _cacheInvalidation.Verify(c => c.InvalidateCacheByPrefixAsync("MasterData:CompassAxes"), Times.Once);
     }
 
     [Fact]
@@ -83,7 +83,7 @@ public class CompassAxisHandlerTests
         result.Should().BeTrue();
         _repository.Verify(r => r.DeleteAsync("axis-1", It.IsAny<CancellationToken>()), Times.Once);
         _unitOfWork.Verify(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
-        _cacheInvalidation.Verify(c => c.InvalidateCacheByPrefix("MasterData:CompassAxes"), Times.Once);
+        _cacheInvalidation.Verify(c => c.InvalidateCacheByPrefixAsync("MasterData:CompassAxes"), Times.Once);
     }
 
     [Fact]
@@ -120,7 +120,7 @@ public class CompassAxisHandlerTests
         result.Description.Should().Be("New desc");
         _repository.Verify(r => r.UpdateAsync(existing, It.IsAny<CancellationToken>()), Times.Once);
         _unitOfWork.Verify(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
-        _cacheInvalidation.Verify(c => c.InvalidateCacheByPrefix("MasterData:CompassAxes"), Times.Once);
+        _cacheInvalidation.Verify(c => c.InvalidateCacheByPrefixAsync("MasterData:CompassAxes"), Times.Once);
     }
 
     [Fact]

@@ -12,7 +12,8 @@ namespace Mystira.StoryGenerator.Api.Services;
 
 public class StoryValidationService : IStoryValidationService
 {
-    private readonly JsonSchema? _schema;
+    private JsonSchema? _schema;
+    private bool _schemaLoaded;
     private readonly AiSettings _settings;
     private readonly IStorySchemaProvider _schemaProvider;
     private readonly ILogger<StoryValidationService> _logger;
@@ -22,7 +23,6 @@ public class StoryValidationService : IStoryValidationService
         _logger = logger;
         _settings = aiOptions.Value;
         _schemaProvider = schemaProvider;
-        _schema = LoadSchema();
     }
 
     public async Task<ValidationResponse> ValidateStoryAsync(ValidateStoryRequest request)
@@ -31,6 +31,12 @@ public class StoryValidationService : IStoryValidationService
 
         try
         {
+            if (!_schemaLoaded)
+            {
+                _schema = await LoadSchemaAsync();
+                _schemaLoaded = true;
+            }
+
             if (_schema == null)
             {
                 response.Errors.Add(new ValidationIssue
@@ -220,17 +226,17 @@ public class StoryValidationService : IStoryValidationService
         return result;
     }
 
-    private JsonSchema? LoadSchema()
+    private async Task<JsonSchema?> LoadSchemaAsync()
     {
         try
         {
-            var schemaContent = _schemaProvider.GetSchemaJsonAsync().Result;
+            var schemaContent = await _schemaProvider.GetSchemaJsonAsync();
             if (string.IsNullOrWhiteSpace(schemaContent))
             {
                 _logger.LogError("Story schema content is empty or missing");
                 return null;
             }
-            return JsonSchema.FromJsonAsync(schemaContent).Result;
+            return await JsonSchema.FromJsonAsync(schemaContent);
         }
         catch (Exception ex)
         {

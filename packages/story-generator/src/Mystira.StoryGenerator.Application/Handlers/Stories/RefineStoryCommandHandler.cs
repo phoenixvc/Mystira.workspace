@@ -79,7 +79,7 @@ public class RefineStoryCommandHandler : ICommandHandler<RefineStoryCommand, Gen
                 MaxTokens = maxTokens,
                 Messages = messages,
                 SystemPrompt = systemPrompt,
-                JsonSchemaFormat = LoadSchemaFormatSafe()
+                JsonSchemaFormat = await LoadSchemaFormatSafeAsync()
             };
 
             var response = await service.CompleteAsync(chatRequest, cancellationToken);
@@ -294,11 +294,11 @@ Output Format
         return messages;
     }
 
-    private JsonSchemaResponseFormat? LoadSchemaFormatSafe()
+    private async Task<JsonSchemaResponseFormat?> LoadSchemaFormatSafeAsync()
     {
         try
         {
-            var json = _schemaProvider.GetSchemaJsonAsync().Result;
+            var json = await _schemaProvider.GetSchemaJsonAsync();
             if (!string.IsNullOrWhiteSpace(json))
             {
                 return new JsonSchemaResponseFormat

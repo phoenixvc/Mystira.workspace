@@ -42,7 +42,7 @@ public class FantasyThemeHandlerTests
         result.Id.Should().NotBeNullOrEmpty();
         _repository.Verify(r => r.AddAsync(It.IsAny<FantasyThemeDefinition>(), It.IsAny<CancellationToken>()), Times.Once);
         _unitOfWork.Verify(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
-        _cacheInvalidation.Verify(c => c.InvalidateCacheByPrefix("MasterData:FantasyThemes"), Times.Once);
+        _cacheInvalidation.Verify(c => c.InvalidateCacheByPrefixAsync("MasterData:FantasyThemes"), Times.Once);
     }
 
     [Fact]
@@ -291,7 +291,7 @@ public class FantasyThemeHandlerTests
             _repository.Object, _unitOfWork.Object,
             _cacheInvalidation.Object, _logger.Object, CancellationToken.None);
 
-        _cacheInvalidation.Verify(c => c.InvalidateCacheByPrefix("MasterData:FantasyThemes"), Times.Once);
+        _cacheInvalidation.Verify(c => c.InvalidateCacheByPrefixAsync("MasterData:FantasyThemes"), Times.Once);
     }
 
     [Fact]
@@ -305,7 +305,7 @@ public class FantasyThemeHandlerTests
             new DeleteFantasyThemeCommand("ft-1"), _repository.Object, _unitOfWork.Object,
             _cacheInvalidation.Object, _logger.Object, CancellationToken.None);
 
-        _cacheInvalidation.Verify(c => c.InvalidateCacheByPrefix("MasterData:FantasyThemes"), Times.Once);
+        _cacheInvalidation.Verify(c => c.InvalidateCacheByPrefixAsync("MasterData:FantasyThemes"), Times.Once);
     }
 
     #endregion

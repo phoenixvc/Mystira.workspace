@@ -29,7 +29,7 @@ public static class MasterDataCommandHelper
         await repository.AddAsync(entity);
         await unitOfWork.SaveChangesAsync(ct);
 
-        cacheInvalidation.InvalidateCacheByPrefix(cachePrefix);
+        await cacheInvalidation.InvalidateCacheByPrefixAsync(cachePrefix);
 
         logger.LogInformation("Successfully created {EntityName}", entityName);
         return entity;
@@ -61,7 +61,7 @@ public static class MasterDataCommandHelper
         await repository.UpdateAsync(existing);
         await unitOfWork.SaveChangesAsync(ct);
 
-        cacheInvalidation.InvalidateCacheByPrefix(cachePrefix);
+        await cacheInvalidation.InvalidateCacheByPrefixAsync(cachePrefix);
 
         logger.LogInformation("Successfully updated {EntityName} with id: {Id}", entityName, id);
         return existing;
@@ -90,7 +90,7 @@ public static class MasterDataCommandHelper
         await repository.DeleteAsync(id);
         await unitOfWork.SaveChangesAsync(ct);
 
-        cacheInvalidation.InvalidateCacheByPrefix(cachePrefix);
+        await cacheInvalidation.InvalidateCacheByPrefixAsync(cachePrefix);
 
         logger.LogInformation("Successfully deleted {EntityName} with id: {Id}", entityName, id);
         return true;

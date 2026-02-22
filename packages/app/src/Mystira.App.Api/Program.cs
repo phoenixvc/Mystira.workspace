@@ -153,7 +153,8 @@ try
     builder.Services.AddDistributedTracing("Mystira.App.Api", builder.Environment.EnvironmentName);
     builder.Host.UseWolverine(opts =>
     {
-        opts.Discovery.IncludeAssembly(typeof(Mystira.Shared.CQRS.IQuery<>).Assembly);
+        // Discover handlers in the Application assembly (where all CQRS handlers live)
+        opts.Discovery.IncludeAssembly(typeof(Mystira.App.Application.CQRS.Accounts.Queries.GetAccountQuery).Assembly);
         opts.Policies.UseDurableLocalQueues();
     });
 

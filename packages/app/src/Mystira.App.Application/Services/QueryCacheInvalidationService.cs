@@ -1,4 +1,4 @@
-using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
 
 namespace Mystira.App.Application.Services;
@@ -12,13 +12,13 @@ public interface IQueryCacheInvalidationService
     /// <summary>
     /// Removes a specific cache entry by key.
     /// </summary>
-    void InvalidateCache(string cacheKey);
+    Task InvalidateCacheAsync(string cacheKey);
 
     /// <summary>
     /// Removes all cache entries matching a prefix.
-    /// Example: InvalidateCacheByPrefix("Scenario") removes all scenario-related caches.
+    /// Example: InvalidateCacheByPrefixAsync("Scenario") removes all scenario-related caches.
     /// </summary>
-    void InvalidateCacheByPrefix(string prefix);
+    Task InvalidateCacheByPrefixAsync(string prefix);
 
     /// <summary>
     /// Tracks a cache key for prefix-based invalidation.
@@ -28,27 +28,39 @@ public interface IQueryCacheInvalidationService
     /// <summary>
     /// Clears all tracked cache keys.
     /// </summary>
+    Task ClearTrackedKeysAsync();
+
+    // Synchronous overloads for backward compatibility
+    void InvalidateCache(string cacheKey);
+    void InvalidateCacheByPrefix(string prefix);
     void ClearTrackedKeys();
 }
 
 public class QueryCacheInvalidationService : IQueryCacheInvalidationService
 {
-    private readonly IMemoryCache _cache;
+    private readonly IDistributedCache _cache;
     private readonly ILogger<QueryCacheInvalidationService> _logger;
     private readonly HashSet<string> _cacheKeys = new();
     private readonly object _lock = new();
 
     public QueryCacheInvalidationService(
-        IMemoryCache cache,
+        IDistributedCache cache,
         ILogger<QueryCacheInvalidationService> logger)
     {
         _cache = cache;
         _logger = logger;
     }
 
-    public void InvalidateCache(string cacheKey)
+    public async Task InvalidateCacheAsync(string cacheKey)
     {
-        _cache.Remove(cacheKey);
+        try
+        {
+            await _cache.RemoveAsync(cacheKey);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Failed to remove cache entry: {CacheKey}", cacheKey);
+        }
 
         lock (_lock)
         {
@@ -58,7 +70,7 @@ public class QueryCacheInvalidationService : IQueryCacheInvalidationService
         _logger.LogDebug("Invalidated cache entry: {CacheKey}", cacheKey);
     }
 
-    public void InvalidateCacheByPrefix(string prefix)
+    public async Task InvalidateCacheByPrefixAsync(string prefix)
     {
         HashSet<string> keysToRemove;
 
@@ -71,17 +83,13 @@ public class QueryCacheInvalidationService : IQueryCacheInvalidationService
 
         foreach (var key in keysToRemove)
         {
-            InvalidateCache(key);
+            await InvalidateCacheAsync(key);
         }
 
         _logger.LogDebug("Invalidated {Count} cache entries with prefix: {Prefix}",
             keysToRemove.Count, prefix);
     }
 
-    /// <summary>
-    /// Internal method to track cache keys for prefix-based invalidation.
-    /// Called by QueryCachingBehavior when caching items.
-    /// </summary>
     public void TrackCacheKey(string cacheKey)
     {
         lock (_lock)
@@ -90,14 +98,41 @@ public class QueryCacheInvalidationService : IQueryCacheInvalidationService
         }
     }
 
-    /// <summary>
-    /// Clears all tracked cache keys. Should only be used for testing.
-    /// </summary>
-    public void ClearTrackedKeys()
+    public async Task ClearTrackedKeysAsync()
     {
+        HashSet<string> allKeys;
         lock (_lock)
         {
+            allKeys = new HashSet<string>(_cacheKeys);
             _cacheKeys.Clear();
         }
+
+        foreach (var key in allKeys)
+        {
+            try
+            {
+                await _cache.RemoveAsync(key);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to remove cache entry during clear: {CacheKey}", key);
+            }
+        }
+    }
+
+    // Synchronous overloads for backward compatibility
+    public void InvalidateCache(string cacheKey)
+    {
+        InvalidateCacheAsync(cacheKey).GetAwaiter().GetResult();
+    }
+
+    public void InvalidateCacheByPrefix(string prefix)
+    {
+        InvalidateCacheByPrefixAsync(prefix).GetAwaiter().GetResult();
+    }
+
+    public void ClearTrackedKeys()
+    {
+        ClearTrackedKeysAsync().GetAwaiter().GetResult();
     }
 }

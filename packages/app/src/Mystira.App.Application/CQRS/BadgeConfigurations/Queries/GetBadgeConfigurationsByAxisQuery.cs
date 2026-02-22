@@ -11,18 +11,14 @@ public record GetBadgeConfigurationsByAxisQuery(string Axis)
     public string CacheKey => $"BadgeConfigurations:Axis:{Axis}";
 }
 
-public sealed class GetBadgeConfigurationsByAxisQueryHandler
+public static class GetBadgeConfigurationsByAxisQueryHandler
 {
-    private readonly IBadgeConfigurationRepository _repository;
-
-    public GetBadgeConfigurationsByAxisQueryHandler(IBadgeConfigurationRepository repository)
+    public static async Task<List<BadgeConfiguration>> Handle(
+        GetBadgeConfigurationsByAxisQuery request,
+        IBadgeConfigurationRepository repository,
+        CancellationToken cancellationToken)
     {
-        _repository = repository;
-    }
-
-    public async Task<List<BadgeConfiguration>> Handle(GetBadgeConfigurationsByAxisQuery request, CancellationToken cancellationToken)
-    {
-        var list = await _repository.GetByAxisAsync(request.Axis, cancellationToken);
+        var list = await repository.GetByAxisAsync(request.Axis, cancellationToken);
         return list.OrderBy(b => b.Name).ToList();
     }
 }

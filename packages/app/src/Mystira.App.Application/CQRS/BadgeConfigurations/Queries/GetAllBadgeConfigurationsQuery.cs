@@ -11,18 +11,14 @@ public record GetAllBadgeConfigurationsQuery
     public string CacheKey => "BadgeConfigurations:All";
 }
 
-public sealed class GetAllBadgeConfigurationsQueryHandler
+public static class GetAllBadgeConfigurationsQueryHandler
 {
-    private readonly IBadgeConfigurationRepository _repository;
-
-    public GetAllBadgeConfigurationsQueryHandler(IBadgeConfigurationRepository repository)
+    public static async Task<List<BadgeConfiguration>> Handle(
+        GetAllBadgeConfigurationsQuery request,
+        IBadgeConfigurationRepository repository,
+        CancellationToken cancellationToken)
     {
-        _repository = repository;
-    }
-
-    public async Task<List<BadgeConfiguration>> Handle(GetAllBadgeConfigurationsQuery request, CancellationToken cancellationToken)
-    {
-        var all = await _repository.GetAllAsync(cancellationToken);
+        var all = await repository.GetAllAsync(cancellationToken);
         // Stable ordering by Name for deterministic results in tests/clients
         return all.OrderBy(b => b.Name).ToList();
     }

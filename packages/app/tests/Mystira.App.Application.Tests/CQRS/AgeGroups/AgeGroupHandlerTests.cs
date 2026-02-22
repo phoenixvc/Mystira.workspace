@@ -45,7 +45,7 @@ public class AgeGroupHandlerTests
         result.Id.Should().NotBeNullOrEmpty();
         _repository.Verify(r => r.AddAsync(It.IsAny<AgeGroupDefinition>(), It.IsAny<CancellationToken>()), Times.Once);
         _unitOfWork.Verify(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
-        _cacheInvalidation.Verify(c => c.InvalidateCacheByPrefix("MasterData:AgeGroups"), Times.Once);
+        _cacheInvalidation.Verify(c => c.InvalidateCacheByPrefixAsync("MasterData:AgeGroups"), Times.Once);
     }
 
     [Fact]
@@ -90,7 +90,7 @@ public class AgeGroupHandlerTests
         result.Should().BeTrue();
         _repository.Verify(r => r.DeleteAsync("ag-1", It.IsAny<CancellationToken>()), Times.Once);
         _unitOfWork.Verify(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
-        _cacheInvalidation.Verify(c => c.InvalidateCacheByPrefix("MasterData:AgeGroups"), Times.Once);
+        _cacheInvalidation.Verify(c => c.InvalidateCacheByPrefixAsync("MasterData:AgeGroups"), Times.Once);
     }
 
     [Fact]
@@ -135,7 +135,7 @@ public class AgeGroupHandlerTests
         result.Description.Should().Be("New desc");
         _repository.Verify(r => r.UpdateAsync(existing, It.IsAny<CancellationToken>()), Times.Once);
         _unitOfWork.Verify(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
-        _cacheInvalidation.Verify(c => c.InvalidateCacheByPrefix("MasterData:AgeGroups"), Times.Once);
+        _cacheInvalidation.Verify(c => c.InvalidateCacheByPrefixAsync("MasterData:AgeGroups"), Times.Once);
     }
 
     [Fact]
