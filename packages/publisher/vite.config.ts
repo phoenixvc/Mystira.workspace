@@ -1,12 +1,15 @@
-import react from '@vitejs/plugin-react';
-import path from 'path';
-import { defineProject } from 'vitest/config';
+import react from "@vitejs/plugin-react";
+import path from "path";
+import { fileURLToPath } from "url";
+import { defineConfig } from "vitest/config";
 
-export default defineProject({
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, './src'),
+      "@": path.resolve(__dirname, "./src"),
     },
   },
   server: {
@@ -14,12 +17,12 @@ export default defineProject({
     open: true,
   },
   build: {
-    outDir: 'dist',
+    outDir: "dist",
     sourcemap: true,
   },
   test: {
     globals: true,
-    environment: 'jsdom',
-    setupFiles: ['./src/tests/setup.ts'],
+    environment: "jsdom",
+    setupFiles: ["./src/tests/setup.ts"],
   },
 });
