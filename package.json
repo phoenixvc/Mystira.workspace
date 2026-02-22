@@ -16,14 +16,19 @@
   "scripts": {
     "build": "turbo run build",
     "dev": "turbo run dev",
+    "dev:ts": "turbo run dev --filter='./packages/publisher' --filter='./packages/admin-ui' --filter='./packages/devhub/Mystira.DevHub'",
+    "dev:admin": "turbo run dev --filter='./packages/admin-ui'",
+    "dev:publisher": "turbo run dev --filter='./packages/publisher'",
     "test": "turbo run test",
     "lint": "turbo run lint",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
     "clean": "turbo run clean && rm -rf node_modules",
+    "docker:up": "docker compose up -d postgres redis hardhat",
+    "docker:down": "docker compose down",
+    "setup": "pnpm install && pnpm docker:up",
     "prepare": "husky"
   },
   "devDependencies": {
-    "@changesets/cli": "^2.27.0",
     "@commitlint/cli": "^20.4.2",
     "@commitlint/config-conventional": "^20.4.2",
     "@eslint/js": "^10.0.0",

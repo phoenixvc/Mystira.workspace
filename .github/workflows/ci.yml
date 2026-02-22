@@ -31,9 +31,6 @@ jobs:
       NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN || 'dummy' }}
     steps:
       - uses: actions/checkout@v6
-        with:
-          token: ${{ secrets.GH_PAT || github.token }}
-          submodules: recursive
 
       - uses: pnpm/action-setup@v4
 
@@ -42,16 +39,8 @@ jobs:
           node-version: "24"
           cache: "pnpm"
 
-      - name: Setup submodule ESLint configurations
-        run: |
-          # Copy workspace ESLint configs to submodules (overrides their configs with proper globals)
-          cp configs/admin-ui.eslint.config.mjs packages/admin-ui/eslint.config.mjs
-          cp configs/admin-ui.eslint.config.mjs packages/publisher/eslint.config.mjs
-
       - name: Install dependencies
-        # Note: --frozen-lockfile is not used because all packages are git submodules
-        # with their own dependencies that can't be tracked in the workspace lockfile
-        run: pnpm install
+        run: pnpm install --frozen-lockfile
 
       - name: Run linting
         run: pnpm lint
@@ -66,9 +55,6 @@ jobs:
       NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN || 'dummy' }}
     steps:
       - uses: actions/checkout@v6
-        with:
-          token: ${{ secrets.GH_PAT || github.token }}
-          submodules: recursive
 
       - uses: pnpm/action-setup@v4
 
@@ -78,13 +64,7 @@ jobs:
           cache: "pnpm"
 
       - name: Install dependencies
-        # Note: --frozen-lockfile is not used because all packages are git submodules
-        run: pnpm install
-
-      - name: Setup submodule Vitest configurations
-        run: |
-          # Copy workspace Vitest configs to submodules (adds passWithNoTests for packages without tests)
-          cp configs/admin-ui.vite.config.ts packages/admin-ui/vite.config.ts
+        run: pnpm install --frozen-lockfile
 
       - name: Run tests with coverage
         run: pnpm test -- --coverage
@@ -109,9 +89,6 @@ jobs:
       NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN || 'dummy' }}
     steps:
       - uses: actions/checkout@v6
-        with:
-          token: ${{ secrets.GH_PAT || github.token }}
-          submodules: recursive
 
       - uses: pnpm/action-setup@v4
 
@@ -121,8 +98,7 @@ jobs:
           cache: "pnpm"
 
       - name: Install dependencies
-        # Note: --frozen-lockfile is not used because all packages are git submodules
-        run: pnpm install
+        run: pnpm install --frozen-lockfile
 
       - name: Build all packages
         run: pnpm build
@@ -136,16 +112,11 @@ jobs:
       packages: read
     steps:
       - uses: actions/checkout@v6
-        with:
-          token: ${{ secrets.GH_PAT || github.token }}
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v5
         with:
           dotnet-version: '10.0.x'
-          source-url: https://nuget.pkg.github.com/phoenixvc/index.json
-        env:
-          NUGET_AUTH_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN }}
 
       - name: Lint .NET (format check)
         id: lint-dotnet
@@ -330,16 +301,11 @@ jobs:
       packages: read
     steps:
       - uses: actions/checkout@v6
-        with:
-          token: ${{ secrets.GH_PAT || github.token }}
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v5
         with:
           dotnet-version: '10.0.x'
-          source-url: https://nuget.pkg.github.com/phoenixvc/index.json
-        env:
-          NUGET_AUTH_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN }}
 
       - name: Run Integration Tests
         run: |

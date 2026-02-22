@@ -37,9 +37,7 @@
     "url": "https://github.com/phoenixvc/Mystira.workspace.git",
     "directory": "packages/shared-utils"
   },
-  "publishConfig": {
-    "registry": "https://npm.pkg.github.com"
-  },
+  "private": true,
   "devDependencies": {
     "@eslint/js": "^10.0.0",
     "@types/node": "^24.0.0",

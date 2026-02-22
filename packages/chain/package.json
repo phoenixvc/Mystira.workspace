@@ -1,0 +1,12 @@
+{
+  "name": "@mystira/chain",
+  "version": "0.5.2-alpha",
+  "private": true,
+  "description": "Blockchain integration service for Story Protocol IP registration and royalties",
+  "scripts": {
+    "build": "echo 'Python build handled externally'",
+    "test": "python -m pytest",
+    "lint": "ruff check .",
+    "dev": "python -m mystira_chain"
+  }
+}
