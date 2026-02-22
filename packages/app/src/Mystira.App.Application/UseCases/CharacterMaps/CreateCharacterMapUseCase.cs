@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Logging;
 using Mystira.App.Application.Ports.Data;
+using Mystira.App.Domain.Exceptions;
 using Mystira.Contracts.App.Requests.CharacterMaps;
 using Mystira.App.Domain.Models;
 using System.Threading;
@@ -36,7 +37,7 @@ public class CreateCharacterMapUseCase
         var existingCharacterMap = await _repository.GetByIdAsync(request.Id, ct);
         if (existingCharacterMap != null)
         {
-            throw new InvalidOperationException($"Character map with ID {request.Id} already exists");
+            throw new ConflictException("CharacterMap", $"Character map with ID {request.Id} already exists");
         }
 
         var characterMap = new CharacterMap

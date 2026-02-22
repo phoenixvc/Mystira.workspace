@@ -2,7 +2,7 @@
 
 ## Status
 
-**Accepted** - 2025-12-22
+**Superseded** - 2025-12-22 (Superseded by [ADR-0024: True Monorepo Migration](./0024-true-monorepo-migration.md))
 
 ## Context
 

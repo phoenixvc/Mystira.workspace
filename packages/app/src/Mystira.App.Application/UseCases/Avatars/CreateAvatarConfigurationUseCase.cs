@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Logging;
 using Mystira.App.Application.Ports.Data;
+using Mystira.App.Domain.Exceptions;
 using Mystira.App.Domain.Models;
 using System.Threading;
 
@@ -35,7 +36,7 @@ public class CreateAvatarConfigurationUseCase
         var existing = await _repository.GetAsync(ct);
         if (existing != null)
         {
-            throw new InvalidOperationException("Avatar configuration file already exists. Use update instead.");
+            throw new ConflictException("AvatarConfiguration", "Avatar configuration file already exists. Use update instead.");
         }
 
         var configFile = new AvatarConfigurationFile

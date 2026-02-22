@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Logging;
 using Mystira.App.Application.Ports.Data;
+using Mystira.App.Domain.Exceptions;
 using Mystira.Contracts.App.Requests.GameSessions;
 using Mystira.App.Domain.Models;
 using System.Threading;
@@ -38,13 +39,13 @@ public class ProgressSceneUseCase
 
         if (session.Status != SessionStatus.InProgress && session.Status != SessionStatus.Paused)
         {
-            throw new InvalidOperationException($"Cannot progress scene in session with status {session.Status}");
+            throw new BusinessRuleException("SessionNotInProgress", $"Cannot progress scene in session with status {session.Status}");
         }
 
         var scenario = await _scenarioRepository.GetByIdAsync(session.ScenarioId, ct);
         if (scenario == null)
         {
-            throw new InvalidOperationException("Scenario not found for session");
+            throw new NotFoundException("Scenario", session.ScenarioId ?? "unknown");
         }
 
         var targetScene = scenario.Scenes.FirstOrDefault(s => s.Id == request.SceneId);

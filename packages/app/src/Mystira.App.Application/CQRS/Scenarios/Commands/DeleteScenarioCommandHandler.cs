@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Logging;
 using Mystira.App.Application.Ports.Data;
+using Mystira.App.Domain.Exceptions;
 
 namespace Mystira.App.Application.CQRS.Scenarios.Commands;
 
@@ -30,7 +31,7 @@ public static class DeleteScenarioCommandHandler
         if (scenario == null)
         {
             logger.LogWarning("Scenario not found: {ScenarioId}", command.ScenarioId);
-            throw new InvalidOperationException($"Scenario not found: {command.ScenarioId}");
+            throw new NotFoundException("Scenario", command.ScenarioId);
         }
 
         await repository.DeleteAsync(command.ScenarioId, ct);

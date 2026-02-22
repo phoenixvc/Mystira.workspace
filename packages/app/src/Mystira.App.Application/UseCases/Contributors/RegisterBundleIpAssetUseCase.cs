@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 using Mystira.App.Application.Ports;
 using Mystira.App.Application.Ports.Data;
+using Mystira.App.Domain.Exceptions;
 using Mystira.Contracts.App.Requests.Contributors;
 using Mystira.App.Domain.Models;
 using System.Threading;
@@ -41,13 +42,13 @@ public class RegisterBundleIpAssetUseCase
         // Check if already registered
         if (bundle.StoryProtocol?.IsRegistered ?? false)
         {
-            throw new InvalidOperationException($"Bundle {bundleId} is already registered on Story Protocol");
+            throw new ConflictException("ContentBundle", $"Bundle {bundleId} is already registered on Story Protocol");
         }
 
         // Ensure contributors are set
         if (bundle.StoryProtocol == null || !bundle.StoryProtocol.Contributors.Any())
         {
-            throw new InvalidOperationException("Contributors must be set before registering on Story Protocol");
+            throw new BusinessRuleException("ContributorsRequired", "Contributors must be set before registering on Story Protocol");
         }
 
         // Validate contributor splits

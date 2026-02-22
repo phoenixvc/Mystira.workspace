@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using Mystira.App.Application.Ports;
 using Mystira.App.Application.Ports.Data;
 using Mystira.App.Application.Ports.Storage;
+using Mystira.App.Domain.Exceptions;
 using Mystira.Contracts.App.Requests.Media;
 using Mystira.App.Domain.Models;
 using Mystira.Shared.Media;
@@ -46,7 +47,7 @@ public class UploadMediaUseCase
         var existingMedia = await _repository.GetByMediaIdAsync(resolvedMediaId, ct);
         if (existingMedia != null)
         {
-            throw new InvalidOperationException($"Media with ID '{resolvedMediaId}' already exists");
+            throw new ConflictException("Media", $"Media with ID '{resolvedMediaId}' already exists");
         }
 
         // Calculate file hash
@@ -115,7 +116,7 @@ public class UploadMediaUseCase
         var metadataFile = await _mediaMetadataService.GetMediaMetadataFileAsync(ct);
         if (metadataFile == null || metadataFile.Entries.Count == 0)
         {
-            throw new InvalidOperationException("No media metadata file found. Media uploads require a valid media metadata file to be uploaded first.");
+            throw new BusinessRuleException("MediaMetadataRequired", "No media metadata file found. Media uploads require a valid media metadata file to be uploaded first.");
         }
 
         // Try to find metadata entry by filename first
@@ -129,7 +130,7 @@ public class UploadMediaUseCase
         metadataEntry = metadataFile.Entries.FirstOrDefault(e => e.Id == mediaId);
         if (metadataEntry == null)
         {
-            throw new InvalidOperationException($"No metadata entry found for media ID '{mediaId}' or filename '{fileName}'");
+            throw new NotFoundException("MediaMetadata", mediaId);
         }
 
         return metadataEntry.Id;

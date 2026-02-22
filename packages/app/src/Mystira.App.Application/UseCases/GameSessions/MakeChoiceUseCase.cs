@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Logging;
 using Mystira.App.Application.Ports.Data;
+using Mystira.App.Domain.Exceptions;
 using Mystira.Contracts.App.Requests.GameSessions;
 using Mystira.App.Domain.Models;
 using System.Threading;
@@ -38,13 +39,13 @@ public class MakeChoiceUseCase
 
         if (session.Status != SessionStatus.InProgress)
         {
-            throw new InvalidOperationException($"Cannot make choice in session with status {session.Status}");
+            throw new BusinessRuleException("SessionNotInProgress", $"Cannot make choice in session with status {session.Status}");
         }
 
         var scenario = await _scenarioRepository.GetByIdAsync(session.ScenarioId, ct);
         if (scenario == null)
         {
-            throw new InvalidOperationException("Scenario not found for session");
+            throw new NotFoundException("Scenario", session.ScenarioId ?? "unknown");
         }
 
         var currentScene = scenario.Scenes.FirstOrDefault(s => s.Id == request.SceneId);

@@ -177,23 +177,20 @@ Length: ~800 words per branch.
 
 ---
 
-## Phase 1: .NET 9.0 Upgrade
+## Phase 1: .NET 10.0 Upgrade — ✅ DONE
 
 ### 1.1 Update All Project Files
 
 ```xml
-<!-- From -->
-<TargetFramework>net8.0</TargetFramework>
-
-<!-- To -->
-<TargetFramework>net9.0</TargetFramework>
+<!-- All .csproj files now target .NET 10 -->
+<TargetFramework>net10.0</TargetFramework>
 ```
 
 ### 1.2 Update Package Versions
 
 ```xml
-<!-- Update to .NET 9 compatible versions -->
-<PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.0" />
+<!-- Updated to .NET 10 compatible versions -->
+<PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.0" />
 ```
 
 ### 1.3 Test Build
@@ -214,25 +211,25 @@ dotnet test
 <!-- Remove -->
 <PackageReference Include="MediatR" Version="12.1.1" />
 
-<!-- Add -->
-<PackageReference Include="Mystira.Shared" Version="0.4.*" />
-<PackageReference Include="Ardalis.Specification" Version="8.0.0" />
-<PackageReference Include="Ardalis.Specification.EntityFrameworkCore" Version="8.0.0" />
+<!-- Add (ProjectReference in monorepo, not NuGet) -->
+<ProjectReference Include="../../shared/src/Mystira.Shared/Mystira.Shared.csproj" />
+<PackageReference Include="Ardalis.Specification" Version="9.3.1" />
+<PackageReference Include="Ardalis.Specification.EntityFrameworkCore" Version="9.3.1" />
 ```
 
 ### 2.2 Update Mystira.StoryGenerator.Application.csproj
 
 ```xml
-<!-- Add -->
-<PackageReference Include="Mystira.Shared" Version="0.4.*" />
-<PackageReference Include="Ardalis.Specification" Version="8.0.0" />
+<!-- Add (ProjectReference in monorepo) -->
+<ProjectReference Include="../../shared/src/Mystira.Shared/Mystira.Shared.csproj" />
+<PackageReference Include="Ardalis.Specification" Version="9.3.1" />
 ```
 
 ### 2.3 Update Mystira.StoryGenerator.RagIndexer.csproj
 
 ```xml
-<!-- Add for resilience -->
-<PackageReference Include="Mystira.Shared" Version="0.4.*" />
+<!-- Add for resilience (ProjectReference in monorepo) -->
+<ProjectReference Include="../../shared/src/Mystira.Shared/Mystira.Shared.csproj" />
 ```
 
 ### 2.4 Update Mystira.StoryGenerator.Domain.csproj
@@ -546,11 +543,11 @@ Move Dockerfile from workspace to submodule repo:
 
 ```dockerfile
 # packages/story-generator/Dockerfile (new location)
-FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS base
+FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS base
 WORKDIR /app
 EXPOSE 80
 
-FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
 COPY ["src/Mystira.StoryGenerator.Api/Mystira.StoryGenerator.Api.csproj", "src/Mystira.StoryGenerator.Api/"]
 # ... other project references
@@ -585,7 +582,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: "9.0.x"
+          dotnet-version: "10.0.x"
       - run: dotnet restore
       - run: dotnet build --configuration Release --no-restore
       - run: dotnet test --configuration Release --no-build
@@ -618,19 +615,19 @@ jobs:
 
 ## Migration Checklist
 
-### Pre-Migration
+### Pre-Migration — ✅ DONE
 
-- [ ] Ensure Mystira.Shared v0.4.\* is published
-- [ ] Create feature branch
-- [ ] Document current handler count
-- [ ] Backup Key Vault secrets
+- [x] Shared packages available via ProjectReferences (monorepo)
+- [x] Create feature branch
+- [x] Document current handler count (10 MediatR handlers)
+- [x] Fix blocking .Result calls (4 locations)
 
-### Phase 1: .NET 9.0 Upgrade
+### Phase 1: .NET 10.0 Upgrade — ✅ DONE
 
-- [ ] Update all csproj to net9.0
-- [ ] Update package versions
+- [x] Update all csproj to net10.0
+- [x] Update package versions
 - [ ] Add Ardalis.Specification packages
-- [ ] Verify build and tests pass
+- [x] Verify build succeeds
 
 ### Phase 2: Package Setup
 
@@ -712,7 +709,7 @@ jobs:
 
 | Change                 | Impact                | Mitigation                     |
 | ---------------------- | --------------------- | ------------------------------ |
-| .NET 8 → 9             | Runtime upgrade       | Test thoroughly in staging     |
+| .NET 9 → 10            | Runtime upgrade       | Test thoroughly in staging     |
 | MediatR → Wolverine    | Handler signatures    | Gradual migration              |
 | Polly v7 → v8          | Policy API changes    | Use new ResiliencePipeline API |
 | In-memory → Redis      | Requires Redis        | Feature flag                   |

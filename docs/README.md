@@ -43,7 +43,8 @@ For details, see [ADR-0002: Documentation Location Strategy](./architecture/adr/
   - [ADR-0013: Data Management and Storage Strategy](./architecture/adr/0013-data-management-and-storage-strategy.md)
   - [ADR-0014: Polyglot Persistence Framework Selection](./architecture/adr/0014-polyglot-persistence-framework-selection.md)
   - [ADR-0015: Event-Driven Architecture Framework](./architecture/adr/0015-event-driven-architecture-framework.md)
-  - [ADR-0016: Monorepo Tooling and Multi-Repository Strategy](./architecture/adr/0016-monorepo-tooling-and-multi-repository-strategy.md)
+  - [ADR-0016: Monorepo Tooling and Multi-Repository Strategy](./architecture/adr/0016-monorepo-tooling-and-multi-repository-strategy.md) _(Superseded by ADR-0024)_
+  - [ADR-0024: True Monorepo Migration](./architecture/adr/0024-true-monorepo-migration.md)
 
 ### Infrastructure Documentation
 

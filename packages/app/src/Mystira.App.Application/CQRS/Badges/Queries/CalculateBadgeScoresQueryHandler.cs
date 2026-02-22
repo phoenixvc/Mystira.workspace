@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 using Mystira.App.Application.Ports.Data;
 using Mystira.App.Application.Services;
+using Mystira.App.Domain.Exceptions;
 using Mystira.App.Domain.Models;
 using Mystira.Contracts.App.Responses.Badges;
 
@@ -29,7 +30,7 @@ public static class CalculateBadgeScoresQueryHandler
         var bundle = await bundleRepository.GetByIdAsync(query.ContentBundleId, ct);
         if (bundle == null)
         {
-            throw new InvalidOperationException($"Content bundle not found: {query.ContentBundleId}");
+            throw new NotFoundException("ContentBundle", query.ContentBundleId);
         }
 
         logger.LogInformation(

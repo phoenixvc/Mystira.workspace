@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Logging;
 using Mystira.App.Application.Ports.Data;
+using Mystira.App.Domain.Exceptions;
 using Mystira.App.Domain.Models;
 using System.Threading;
 
@@ -39,7 +40,7 @@ public class ResumeGameSessionUseCase
 
         if (session.Status != SessionStatus.Paused)
         {
-            throw new InvalidOperationException($"Can only resume paused sessions. Current status: {session.Status}");
+            throw new BusinessRuleException("SessionMustBePaused", $"Can only resume paused sessions. Current status: {session.Status}");
         }
 
         session.Status = SessionStatus.InProgress;

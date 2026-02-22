@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Logging;
 using Mystira.App.Application.Ports.Data;
+using Mystira.App.Domain.Exceptions;
 using Mystira.Contracts.App.Requests.Media;
 using Mystira.App.Domain.Models;
 using System.Threading;
@@ -40,7 +41,7 @@ public class UpdateMediaMetadataUseCase
         var mediaAsset = await _repository.GetByMediaIdAsync(mediaId, ct);
         if (mediaAsset == null)
         {
-            throw new KeyNotFoundException($"Media with ID '{mediaId}' not found");
+            throw new NotFoundException("Media", mediaId);
         }
 
         // Update properties

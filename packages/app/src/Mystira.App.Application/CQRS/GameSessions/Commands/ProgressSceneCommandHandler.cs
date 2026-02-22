@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Logging;
 using Mystira.App.Application.Ports.Data;
+using Mystira.App.Domain.Exceptions;
 using Mystira.App.Domain.Models;
 
 namespace Mystira.App.Application.CQRS.GameSessions.Commands;
@@ -45,7 +46,7 @@ public static class ProgressSceneCommandHandler
         // Verify session is in progress
         if (session.Status != SessionStatus.InProgress)
         {
-            throw new InvalidOperationException($"Cannot progress scene in session with status: {session.Status}");
+            throw new BusinessRuleException("SessionNotInProgress", $"Cannot progress scene in session with status: {session.Status}");
         }
 
         // Update current scene
