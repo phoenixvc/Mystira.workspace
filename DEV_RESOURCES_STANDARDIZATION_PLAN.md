@@ -423,15 +423,18 @@ module "publisher" {
 
 ## Implementation Plan
 
-### Phase 1: Update Terraform Code (No Infrastructure Changes)
+### Phase 1: Update Terraform Code (No Infrastructure Changes) ✅ COMPLETE
 
 1. ✅ Create branch: `claude/standardize-dev-resources-cT39Z`
-2. Update all module name prefixes to remove "mystira" redundancy
-3. Change shared modules from `mystira-shared-*` to `mys-{env}-core-*`
-4. Add `shared_log_analytics_workspace_id` parameter to chain and publisher modules
-5. Remove dedicated Log Analytics from chain and publisher modules
-6. Update dev environment configuration
-7. Run `terraform fmt` and validate
+2. ✅ Update all module name prefixes to remove "mystira" redundancy
+3. ✅ Change shared modules from `mystira-shared-*` to `mys-{env}-core-*`
+4. ✅ Add `shared_log_analytics_workspace_id` parameter to chain and publisher modules
+5. ✅ Remove dedicated Log Analytics from chain and publisher modules
+6. ✅ Update dev environment configuration
+7. ✅ Run `terraform fmt` and validate
+8. ✅ Update .NET version comments from 9.0 to 10.0 across all provider blocks
+9. ✅ Consolidate GitHub OIDC from individual repos to monorepo (`Mystira.workspace`)
+10. ✅ Update `github_repository_url` references across all environments
 
 ### Phase 2: Terraform Plan Review
 
@@ -499,10 +502,11 @@ module "publisher" {
 
 ## Next Steps
 
-Once you confirm the above questions, I'll:
+Phase 1 (Terraform code changes) is **complete**. All modules are v2.2 compliant. Next:
 
-1. Update all Terraform module files
-2. Run `terraform fmt` and `terraform validate`
-3. Generate a `terraform plan` for review
-4. Commit changes to the branch
-5. Await your approval before any `terraform apply`
+1. ✅ ~~Update all Terraform module files~~ — Done
+2. ✅ ~~Run `terraform fmt` and validate~~ — Done
+3. Run `terraform plan` to review infrastructure changes (Phase 2)
+4. Backup existing secrets and data (Phase 3)
+5. Apply changes with team approval (Phase 4)
+6. Validate and clean up (Phase 5)
