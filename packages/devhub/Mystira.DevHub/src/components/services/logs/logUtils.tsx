@@ -1,3 +1,4 @@
+import { type JSX } from "react";
 import { ServiceLog } from "../types";
 
 export function formatTimestamp(
