@@ -1,6 +1,7 @@
 {
-  "name": "mystira-devhub",
-  "version": "0.1.0",
+  "name": "@mystira/devhub",
+  "version": "0.5.2-alpha",
+  "private": true,
   "description": "Mystira DevHub - Development Operations Desktop Application",
   "type": "module",
   "scripts": {
