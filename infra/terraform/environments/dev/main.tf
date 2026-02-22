@@ -15,7 +15,7 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~> 4.0" # 4.x required for .NET 9.0 support
+      version = "~> 4.0" # 4.x required for .NET 10.0 support
     }
     azuread = {
       source  = "hashicorp/azuread"
@@ -517,7 +517,7 @@ module "story_generator" {
   enable_static_web_app    = true
   static_web_app_sku       = "Free"
   fallback_location        = "eastus2" # SWA not available in South Africa North
-  github_repository_url    = "https://github.com/phoenixvc/Mystira.StoryGenerator"
+  github_repository_url    = "https://github.com/phoenixvc/Mystira.workspace"
   github_branch            = "dev"
   enable_swa_custom_domain = false # Enable after DNS is configured
   swa_custom_domain        = "dev.story.mystira.app"
@@ -582,7 +582,7 @@ module "entra_id" {
 }
 
 # GitHub Actions OIDC Authentication
-# Creates federated credentials for all submodule repositories
+# Creates federated credentials for the monorepo (all services consolidated)
 module "github_oidc" {
   source = "../../modules/github-oidc"
 
@@ -593,41 +593,8 @@ module "github_oidc" {
   acr_id = module.shared_acr.acr_id
   aks_id = azurerm_kubernetes_cluster.main.id
 
-  # All Mystira submodule repositories
+  # Monorepo - all services deploy from Mystira.workspace
   repositories = {
-    # Kubernetes-deployed services
-    "admin-api" = {
-      name     = "Mystira.Admin.Api"
-      branches = ["dev", "main"]
-    }
-    "admin-ui" = {
-      name     = "Mystira.Admin.UI"
-      branches = ["dev", "main"]
-    }
-    "chain" = {
-      name     = "Mystira.Chain"
-      branches = ["dev", "main"]
-    }
-    "publisher" = {
-      name     = "Mystira.Publisher"
-      branches = ["dev", "main"]
-    }
-    "story-generator" = {
-      name     = "Mystira.StoryGenerator"
-      branches = ["dev", "main"]
-    }
-
-    # App Service / Static Web App services
-    "app" = {
-      name     = "Mystira.App"
-      branches = ["dev", "main"]
-    }
-    "devhub" = {
-      name     = "Mystira.DevHub"
-      branches = ["dev", "main"]
-    }
-
-    # Workspace (for infra and orchestration)
     "workspace" = {
       name                 = "Mystira.workspace"
       branches             = ["dev", "main"]

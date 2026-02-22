@@ -1,6 +1,6 @@
 # =============================================================================
 # Mystira.App Infrastructure Module
-# Converted from Bicep: https://github.com/phoenixvc/Mystira.App/infrastructure
+# Converted from Bicep: https://github.com/phoenixvc/Mystira.workspace/infrastructure
 # =============================================================================
 #
 # Resources deployed:
