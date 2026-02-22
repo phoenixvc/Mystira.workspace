@@ -9,5 +9,10 @@ fail-on-severity: high
 fail-on-scopes:
   - runtime
 
+# Report packages with low OpenSSF Scorecard scores as warnings rather than
+# failing the check. This matches the repository threshold of 3 but avoids
+# blocking PRs for transitive/dev dependencies with historically low scores.
+warn-on-openssf-scorecard-level: 3
+
 # Write a summary comment to the PR on failure
 comment-summary-in-pr: on-failure
