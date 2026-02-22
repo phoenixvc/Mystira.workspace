@@ -64,7 +64,7 @@ function DashboardPage() {
                     Total Scenarios
                   </div>
                   <div className="h5 mb-0 font-weight-bold text-gray-800">
-                    {isLoading ? "-" : stats.totalScenarios}
+                    {stats.totalScenarios}
                   </div>
                 </div>
                 <div className="col-auto">
@@ -84,7 +84,7 @@ function DashboardPage() {
                     Media Files
                   </div>
                   <div className="h5 mb-0 font-weight-bold text-gray-800">
-                    {isLoading ? "-" : stats.totalMedia}
+                    {stats.totalMedia}
                   </div>
                 </div>
                 <div className="col-auto">
