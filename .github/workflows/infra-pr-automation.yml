@@ -440,11 +440,10 @@ jobs:
           fi
 
           set -o pipefail
-          echo "Running: terragrunt stack run plan --config $STACK_CONFIG"
+          echo "Running: terragrunt stacks run plan --config $STACK_CONFIG"
 
           # Run stack plan and capture output
-          # Try both command variants: 'stack' (singular) and the run-all fallback
-          if terragrunt stack run plan --config "$STACK_CONFIG" --terragrunt-non-interactive 2>&1 | tee stack_plan_output.txt; then
+          if terragrunt stacks run plan --config "$STACK_CONFIG" --terragrunt-non-interactive 2>&1 | tee stack_plan_output.txt; then
             EXIT_CODE=0
           else
             EXIT_CODE=$?

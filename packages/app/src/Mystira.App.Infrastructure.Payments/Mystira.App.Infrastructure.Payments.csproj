@@ -15,11 +15,10 @@
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.3" />
     <PackageReference Include="Microsoft.Extensions.Options" Version="10.0.3" />
     <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="10.0.3" />
-    <PackageReference Include="System.Text.Json" Version="10.0.3" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Mystira.App.Application\Mystira.App.Application.csproj" />
-    <ProjectReference Include="../../../../contracts/dotnet/Mystira.Contracts/Mystira.Contracts.csproj" />
+    <ProjectReference Include="../../../contracts/dotnet/Mystira.Contracts/Mystira.Contracts.csproj" />
   </ItemGroup>
 </Project>

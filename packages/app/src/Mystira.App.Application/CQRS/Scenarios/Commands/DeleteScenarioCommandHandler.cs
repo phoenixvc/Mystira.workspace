@@ -2,6 +2,8 @@ using Microsoft.Extensions.Logging;
 using Mystira.App.Application.Ports.Data;
 using Mystira.App.Domain.Exceptions;
 using Mystira.Shared.Exceptions;
+using NotFoundException = Mystira.Shared.Exceptions.NotFoundException;
+using ValidationException = Mystira.Shared.Exceptions.ValidationException;
 
 namespace Mystira.App.Application.CQRS.Scenarios.Commands;
 

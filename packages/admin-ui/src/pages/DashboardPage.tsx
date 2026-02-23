@@ -1,27 +1,22 @@
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
 import { adminApi } from "../api/admin";
 import ErrorAlert from "../components/ErrorAlert";
 import LoadingSpinner from "../components/LoadingSpinner";
 
-function DashboardPage() {
-  const [stats, setStats] = useState({
-    totalScenarios: 0,
-    totalMedia: 0,
-    totalBadges: 0,
-    totalBundles: 0,
-  });
+const defaultStats = {
+  totalScenarios: 0,
+  totalMedia: 0,
+  totalBadges: 0,
+  totalBundles: 0,
+};
 
+function DashboardPage() {
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: ["admin", "stats"],
     queryFn: () => adminApi.getStats(),
   });
 
-  useEffect(() => {
-    if (data) {
-      setStats(data);
-    }
-  }, [data]);
+  const stats = data ?? defaultStats;
 
   const handleRefresh = () => {
     refetch();
@@ -83,9 +78,7 @@ function DashboardPage() {
                   <div className="text-xs font-weight-bold text-success text-uppercase mb-1">
                     Media Files
                   </div>
-                  <div className="h5 mb-0 font-weight-bold text-gray-800">
-                    {stats.totalMedia}
-                  </div>
+                  <div className="h5 mb-0 font-weight-bold text-gray-800">{stats.totalMedia}</div>
                 </div>
                 <div className="col-auto">
                   <i className="bi bi-image fa-2x text-gray-300"></i>
@@ -103,9 +96,7 @@ function DashboardPage() {
                   <div className="text-xs font-weight-bold text-info text-uppercase mb-1">
                     Badges
                   </div>
-                  <div className="h5 mb-0 font-weight-bold text-gray-800">
-                    {stats.totalBadges}
-                  </div>
+                  <div className="h5 mb-0 font-weight-bold text-gray-800">{stats.totalBadges}</div>
                 </div>
                 <div className="col-auto">
                   <i className="bi bi-award fa-2x text-gray-300"></i>
@@ -123,9 +114,7 @@ function DashboardPage() {
                   <div className="text-xs font-weight-bold text-warning text-uppercase mb-1">
                     Bundles
                   </div>
-                  <div className="h5 mb-0 font-weight-bold text-gray-800">
-                    {stats.totalBundles}
-                  </div>
+                  <div className="h5 mb-0 font-weight-bold text-gray-800">{stats.totalBundles}</div>
                 </div>
                 <div className="col-auto">
                   <i className="bi bi-box fa-2x text-gray-300"></i>
