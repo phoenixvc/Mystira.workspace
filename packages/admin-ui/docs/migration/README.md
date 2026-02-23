@@ -1,50 +1,19 @@
 # Migration Documentation
 
-This directory contains migration documentation for the Mystira Admin UI project.
+This directory contains migration documentation for the Mystira Admin UI.
 
 ## Contents
 
-- [Migration Phases](./phases.md) - Detailed migration progress tracking
-- [Migration Strategy](./strategy.md) - Technical approach and decisions
-- [Contracts Migration](./contracts-migration.md) - Guide for migrating to unified contracts packages
-- [Admin UI Migration](./admin-ui-migration.md) - Guide for shared packages, Node.js 22, and dark mode
-
-## Migration Overview
-
-The Admin UI is being migrated from the `Mystira.App` monorepo into an independent repository to enable:
-
-- Independent deployment and versioning
-- Modern frontend stack (React instead of Razor Pages)
-- Better separation of concerns
-- Improved developer experience
+- [Admin UI Migration](./admin-ui-migration.md) - Migration guide for shared packages and framework updates
 
 ## Current Status
 
-**Phase 3 (Code Migration): ~98% Complete**
+**Migration: ~98% Complete** - All core functionality migrated from Razor Pages to React SPA.
 
-See [phases.md](./phases.md) for detailed progress.
+## Centralized Documentation
 
-## Architecture
+See the workspace migration guides for cross-cutting migration documentation:
 
-### Before Migration
-
-```
-Mystira.App/
-├── src/Mystira.App.Admin.Api/Views/   ← Razor Pages (migrated from)
-├── src/Mystira.App.Admin.Api/wwwroot/ ← Static assets
-└── [Shared libraries]
-```
-
-### After Migration
-
-```
-Mystira.Admin.UI/          ← Modern React SPA (this repo)
-Mystira.Admin.Api/         ← Pure REST API
-Mystira.App/               ← Main app (Admin code to be removed)
-```
-
-## Related Documentation
-
-- [Implementation Roadmap](../planning/implementation-roadmap.md)
-- [Testing Checklist](../operations/TESTING_CHECKLIST.md)
-- [COMPLETION_STATUS.md](../../COMPLETION_STATUS.md)
+- [Migration Index](../../../../docs/migrations/MIGRATION_INDEX.md) - Overall migration status
+- [Admin UI Migration Guide](../../../../docs/migrations/mystira-admin-ui-migration.md) - Workspace-level guide
+- [Contracts Migration](../../../../docs/guides/contracts-migration.md) - Contracts package migration

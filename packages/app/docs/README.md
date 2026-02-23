@@ -28,24 +28,18 @@ Welcome to the Mystira.App documentation. This directory contains comprehensive 
   - Frontend integration
   - Security features
 
-### Architecture
-
-- **[Admin API Separation](features/ADMIN_API_SEPARATION.md)** - Admin and client API architecture
-  - Project structure
-  - API separation rationale
-  - Deployment strategies
-  - Endpoint documentation
-
 ## Project Structure
 
-``` text
+```text
 docs/
 ├── README.md                        # This file
 ├── setup/                           # Setup and configuration guides
-│   └── EMAIL_SETUP.md              # Email integration setup
-└── features/                        # Feature documentation
-    ├── PASSWORDLESS_SIGNUP.md      # Passwordless authentication
-    └── ADMIN_API_SEPARATION.md     # Admin API architecture
+├── features/                        # Feature documentation
+├── architecture/                    # Architecture docs and ADRs
+├── domain/                          # Domain model documentation
+├── usecases/                        # Use case documentation
+├── operations/                      # Runbooks and operational docs
+└── migration/                       # Migration status
 ```
 
 ## API Documentation
@@ -57,9 +51,9 @@ docs/
 ## Getting Started
 
 1. **New to Mystira?** Start with the [Main README](../README.md)
-2. **Setting up development?** Check [Email Setup](setup/EMAIL_SETUP.md) for local development
-3. **Understanding the architecture?** Read [Admin API Separation](features/ADMIN_API_SEPARATION.md)
-4. **Implementing authentication?** See [Passwordless Signup](features/PASSWORDLESS_SIGNUP.md)
+2. **Setting up development?** Check [Setup Guides](setup/)
+3. **Understanding the architecture?** See [Architecture](architecture/)
+4. **Implementing authentication?** See [Passwordless Signup](features/passwordless-signup.md)
 
 ## Contributing
 

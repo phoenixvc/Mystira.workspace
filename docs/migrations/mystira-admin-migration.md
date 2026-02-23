@@ -1,31 +1,33 @@
 # Mystira.Admin Migration Guide
 
-**Target**: Migrate Mystira.Admin.Api to use `Mystira.Shared` infrastructure
-**Prerequisites**: Mystira.Shared v0.4.* published to NuGet feed
+**Target**: Migrate Mystira.Admin.Api to use `Mystira.Shared` infrastructure patterns
+**Prerequisites**: Monorepo with ProjectReferences to shared packages (done)
 **Estimated Effort**: 1 day
-**Last Updated**: December 2025
-**Status**: 🔄 In Progress
+**Last Updated**: February 2026
+**Status**: 📋 Ready to start
 
-> **Note**: All infrastructure components (Polly v8.6.5, Wolverine 5.9.2, Ardalis.Specification 9.3.1) are already implemented in `Mystira.Shared`. This migration is about adopting the shared package.
+> **Note**: The monorepo migration is complete. Admin.Api already targets .NET 10 and uses ProjectReferences to all shared packages (`Mystira.Shared`, `Mystira.Domain`, `Mystira.Application`, `Mystira.Contracts`, `Mystira.Infrastructure.*`). This migration covers adopting the shared infrastructure patterns (resilience, specifications, exception handling, etc.).
 
 ---
 
 ## Overview
 
 Admin.Api is already well-positioned for migration with:
+
+- .NET 10.0 and ProjectReferences (done via monorepo migration)
 - Redis caching already configured
 - PostgreSQL + Cosmos DB support
 - Microsoft Identity Web for auth
 
-Migration focuses on:
-1. **.NET 9.0 upgrade** (required)
-2. Replace `Mystira.App.Shared` → `Mystira.Shared` (v0.4.*)
-3. Adopt `Mystira.Shared.Resilience` for HTTP policies (Polly v8.6.5)
-4. Adopt Ardalis.Specification 9.3.1 for data access (included in Mystira.Shared)
-5. Standardize exception handling
-6. (Optional) Add Wolverine 5.9.2 for future event handling (included in Mystira.Shared)
+Remaining migration focuses on:
+
+1. ~~.NET 10.0 upgrade~~ — ✅ DONE (monorepo migration)
+2. ~~ProjectReferences to shared packages~~ — ✅ DONE (monorepo migration)
+3. Adopt `Mystira.Shared.Resilience` for HTTP policies (Polly v8)
+4. Adopt Ardalis.Specification 9.3.1 for data access
+5. Standardize exception handling → `Mystira.Shared.Exceptions`
+6. (Optional) Add Wolverine for event handling
 7. (Optional) Add distributed locking for concurrent admin operations
-8. Migrate to Microsoft Entra External ID (if applicable)
 
 ---
 
@@ -33,14 +35,21 @@ Migration focuses on:
 
 ### Package Dependencies (Admin.Api)
 
-| Current Package | Action | Replacement |
-|-----------------|--------|-------------|
-| `Mystira.App.Shared` | Replace | `Mystira.Shared` |
-| `Microsoft.Extensions.Caching.StackExchangeRedis` | Keep | Already using Redis |
-| `Microsoft.Identity.Web` | Keep/Update | Auth still needed (update for Entra External ID) |
-| `Mystira.App.Contracts` | Replace | `Mystira.Contracts.App` |
+All internal Mystira packages are already referenced via `<ProjectReference>`:
+
+```xml
+<ProjectReference Include="../../../domain/Mystira.Domain/Mystira.Domain.csproj" />
+<ProjectReference Include="../../../application/Mystira.Application/Mystira.Application.csproj" />
+<ProjectReference Include="../../../contracts/dotnet/Mystira.Contracts/Mystira.Contracts.csproj" />
+<ProjectReference Include="../../../infrastructure/Mystira.Infrastructure.Azure/Mystira.Infrastructure.Azure.csproj" />
+<ProjectReference Include="../../../infrastructure/Mystira.Infrastructure.Data/Mystira.Infrastructure.Data.csproj" />
+<ProjectReference Include="../../../shared/Mystira.Shared/Mystira.Shared.csproj" />
+```
 
 ### What Admin.Api Already Has
+
+- .NET 10.0 target framework
+- ProjectReferences to all shared packages
 - Redis caching
 - PostgreSQL support
 - Cosmos DB support
@@ -49,43 +58,7 @@ Migration focuses on:
 
 ---
 
-## Phase 1: .NET 9.0 Upgrade & Package Updates
-
-### 1.1 Update Target Framework
-
-```xml
-<!-- Update in all .csproj files -->
-<TargetFramework>net9.0</TargetFramework>
-```
-
-### 1.2 Update Mystira.App.Admin.Api.csproj
-
-```xml
-<!-- Remove -->
-<PackageReference Include="Mystira.App.Shared" Version="1.0.0" />
-<PackageReference Include="Mystira.App.Contracts" Version="1.0.0" />
-
-<!-- Add -->
-<PackageReference Include="Mystira.Shared" Version="0.4.*" />
-<PackageReference Include="Mystira.Contracts" Version="0.4.*" />
-<PackageReference Include="Ardalis.Specification" Version="8.0.0" />
-<PackageReference Include="Ardalis.Specification.EntityFrameworkCore" Version="8.0.0" />
-<PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.0" />
-```
-
-### 1.3 Update Using Statements
-
-```csharp
-// From
-using Mystira.App.Shared.Auth;
-using Mystira.App.Shared.Extensions;
-
-// To
-using Mystira.Shared.Auth;
-using Mystira.Shared.Extensions;
-using Mystira.Shared.Resilience;
-using Ardalis.Specification;
-```
+## Phase 1: Resilience Policies (Polly v8)
 
 ---
 
@@ -177,9 +150,9 @@ builder.Services.AddResilientHttpClientV8<IExternalApiClient, ExternalApiClient>
 
 ### 3.3 Breaking Changes (Polly v7 → v8)
 
-| Before (v7) | After (v8) |
-|-------------|------------|
-| `IAsyncPolicy<T>` | `ResiliencePipeline<T>` |
+| Before (v7)          | After (v8)               |
+| -------------------- | ------------------------ |
+| `IAsyncPolicy<T>`    | `ResiliencePipeline<T>`  |
 | `AddPolicyHandler()` | `AddResilienceHandler()` |
 
 ---
@@ -345,49 +318,51 @@ builder.Host.UseWolverine(opts =>
 ## Migration Checklist
 
 ### Pre-Migration
-- [ ] Ensure Mystira.Shared v0.4.* is published
+
+- [x] .NET 10.0 upgrade (done via monorepo migration)
+- [x] ProjectReferences to shared packages (done via monorepo migration)
 - [ ] Create feature branch
 - [ ] Backup current appsettings.json
-- [ ] Backup Key Vault secrets
-
-### Phase 1: .NET 9.0 Upgrade
-- [ ] Update target framework to net9.0
-- [ ] Update csproj references
-- [ ] Add Ardalis.Specification packages
-- [ ] Update using statements
-- [ ] Verify build succeeds
 
 ### Phase 2: Caching
+
 - [ ] Add ICacheService registration
 - [ ] Update cache consumers to use ICacheService
 
 ### Phase 3: Resilience (Polly v8)
+
 - [ ] Add resilience configuration
 - [ ] Replace `AddPolicyHandler` with `AddResilienceHandler`
 - [ ] Add policies to HTTP clients
 
 ### Phase 4: Exceptions
+
 - [ ] Add GlobalExceptionHandler
 - [ ] Update exception throws to use Mystira.Shared types
 
 ### Phase 5: Specification Pattern
+
 - [ ] Create specification classes for data access
 - [ ] Update repositories to use Ardalis.Specification
 - [ ] Update service layer to use specifications
 
 ### Phase 6: Polyglot (Optional)
+
 - [ ] Add PolyglotRepository configuration
 - [ ] Annotate entities with DatabaseTarget
 
 ### Phase 7: Distributed Locking (Optional)
+
 - [ ] Add distributed locking configuration
 - [ ] Implement locks for concurrent admin operations
 
 ### Phase 8: Wolverine (Optional)
+
 - [ ] Add Wolverine for event handling
 - [ ] Configure Azure Service Bus integration
 
 ### Post-Migration
+
 - [ ] Run all tests
 - [ ] Test API endpoints
 - [ ] Verify health checks
@@ -398,13 +373,11 @@ builder.Host.UseWolverine(opts =>
 
 ## Breaking Changes
 
-| Change | Impact | Mitigation |
-|--------|--------|------------|
-| .NET 8 → .NET 9 | Runtime upgrade required | Test thoroughly in staging |
-| Namespace changes | Using statements | Find/replace |
-| Mystira.App.Contracts | Import paths | Update to Mystira.Contracts.App |
-| Polly v7 → v8 | Policy API changes | Use new ResiliencePipeline API |
-| Custom queries → Specifications | Query patterns change | Gradual migration |
+| Change                                        | Impact                 | Mitigation                                       |
+| --------------------------------------------- | ---------------------- | ------------------------------------------------ |
+| Polly v7 → v8                                 | Policy API changes     | Use new ResiliencePipeline API                   |
+| Custom queries → Specifications               | Query patterns change  | Gradual migration                                |
+| Custom exceptions → Mystira.Shared.Exceptions | Exception types change | Use NotFoundException, ValidationException, etc. |
 
 ---
 
@@ -422,7 +395,7 @@ npm install @mystira/shared-utils@0.2.0
 
 ```javascript
 // tailwind.config.js (if using Tailwind)
-const mystiraPreset = require('@mystira/design-tokens/tailwind/preset');
+const mystiraPreset = require("@mystira/design-tokens/tailwind/preset");
 
 module.exports = {
   presets: [mystiraPreset],
@@ -432,8 +405,8 @@ module.exports = {
 
 ```css
 /* Or import CSS variables */
-@import '@mystira/design-tokens/css/variables.css';
-@import '@mystira/design-tokens/css/dark-mode.css';
+@import "@mystira/design-tokens/css/variables.css";
+@import "@mystira/design-tokens/css/dark-mode.css";
 ```
 
 ---

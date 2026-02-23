@@ -85,7 +85,6 @@ All workflows follow the "Category: Name" naming convention for clarity.
 ### Development
 
 - 📝 [Commit Conventions](./guides/commit-conventions.md) - Commit message guidelines
-- 🏢 [Setup Status](./setup/setup-status.md) - Repository setup and NuGet implementation status
 
 ## Project Documentation
 

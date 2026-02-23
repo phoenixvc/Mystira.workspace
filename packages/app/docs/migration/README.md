@@ -1,82 +1,30 @@
-# Migration Plans
+# Migration Documentation
 
-This folder contains detailed migration plans for repository extractions, architectural changes, and infrastructure migrations.
+Migration documentation for the Mystira.App package.
 
-## Contents
+## Status
 
-| Document | Description | Status |
-|----------|-------------|--------|
-| [Admin API Extraction Plan](admin-api-extraction-plan.md) | Plan for extracting Admin API to separate repository | In Progress |
-| [Infrastructure Migration](../architecture/adr/migration-mystira-infra.md) | Migration to Mystira.Infra repository | In Progress |
+**Mystira.App Migration: ✅ 100% Complete**
 
-### Extracted Repositories
+All 10 migration phases are done:
 
-The following repositories have been created as part of the Admin API extraction:
+1. .NET 10.0 upgrade
+2. Infrastructure packages (ProjectReferences)
+3. MediatR → Wolverine (111 handlers)
+4. Custom resilience → Polly v8
+5. IMemoryCache → IDistributedCache (Redis)
+6. Custom exceptions → Mystira.Shared.Exceptions
+7. Repository pattern → Ardalis.Specification 9.3.1
+8. Distributed locking (Redis-backed)
+9. Microsoft Entra External ID authentication
+10. Source generators
 
-| Repository | Description | URL |
-|------------|-------------|-----|
-| Mystira.Admin.Api | Admin backend API (REST/gRPC) | https://github.com/phoenixvc/Mystira.Admin.Api |
-| Mystira.Admin.UI | Admin frontend (modern SPA) | https://github.com/phoenixvc/Mystira.Admin.UI |
+## Centralized Documentation
 
-## Related ADRs
+See the workspace migration guides:
 
-- [ADR-0005: Separate API and Admin API](../architecture/adr/ADR-0005-separate-api-and-admin-api.md)
-- [ADR-0011: Unified Workspace Orchestration](../architecture/adr/ADR-0011-unified-workspace-orchestration.md)
-- [ADR-0012: Infrastructure as Code](../architecture/adr/ADR-0012-infrastructure-as-code.md)
+- [Migration Index](../../../../docs/migrations/MIGRATION_INDEX.md) - Overall migration status
+- [Mystira.App Migration Guide](../../../../docs/migrations/mystira-app-migration.md) - Detailed migration guide
+- [Architecture ADRs](../../../../docs/architecture/adr/) - Decision records
 
-## Migration Principles
-
-1. **Zero Downtime**: All migrations maintain service availability
-2. **Rollback Strategy**: Every migration has a documented rollback plan
-3. **Incremental Approach**: Large migrations are broken into smaller phases
-4. **Verification**: Each phase includes validation steps
-5. **Documentation**: Migration steps are documented before execution
-
-## Migration Lifecycle
-
-```
-Proposal → Analysis → Planning → Execution → Verification → Cleanup
-```
-
-### Proposal
-- Identify the need for migration
-- Document current state and desired state
-- Get stakeholder buy-in
-
-### Analysis
-- Assess impact and dependencies
-- Identify risks and mitigations
-- Estimate effort and timeline
-
-### Planning
-- Create detailed migration plan
-- Define success criteria
-- Prepare rollback procedures
-
-### Execution
-- Execute migration steps
-- Monitor for issues
-- Document deviations
-
-### Verification
-- Validate success criteria
-- Run smoke tests
-- Get stakeholder sign-off
-
-### Cleanup
-- Remove deprecated code/resources
-- Archive documentation
-- Update references
-
----
-
-## Active Migrations
-
-| Migration | Phase | Owner | ETA |
-|-----------|-------|-------|-----|
-| Terraform Migration | Execution | DevOps | Q1 2025 |
-| Admin API Extraction | Proposal | Development Team | TBD |
-
----
-
-**Last Updated**: 2025-12-22
+**Last Updated**: February 2026

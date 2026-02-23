@@ -9,6 +9,7 @@ This pull request implements a complete SignalR WebSocket infrastructure for the
 ### ✅ 1. Comprehensive Documentation
 
 #### Implementation Guide (`docs/guides/signalr-websocket-implementation.md`)
+
 - **40+ pages** of detailed implementation instructions
 - Backend setup with ASP.NET Core SignalR
 - Frontend setup with React and TypeScript
@@ -17,6 +18,7 @@ This pull request implements a complete SignalR WebSocket infrastructure for the
 - Complete troubleshooting section
 
 #### Deployment Checklist (`docs/guides/signalr-deployment-checklist.md`)
+
 - Step-by-step deployment guide
 - Pre-deployment validation steps
 - Testing procedures
@@ -24,6 +26,7 @@ This pull request implements a complete SignalR WebSocket infrastructure for the
 - Success criteria
 
 #### Integration Guide (`docs/implementation/signalr/README.md`)
+
 - Quick start instructions
 - File locations and purposes
 - Example usage code
@@ -34,10 +37,12 @@ This pull request implements a complete SignalR WebSocket infrastructure for the
 All backend files are ready-to-use and located in `docs/implementation/signalr/backend/`:
 
 #### EventsHub (`Hubs/EventsHub.cs`)
+
 ```csharp
 [Authorize]
 public class EventsHub : Hub
 ```
+
 - **Authenticated** WebSocket connections
 - **Connection lifecycle** management
 - **Group management** for targeted broadcasts
@@ -45,6 +50,7 @@ public class EventsHub : Hub
 - **Comprehensive logging** for debugging
 
 #### Event Notification Service (`Services/EventNotificationService.cs`)
+
 ```csharp
 public interface IEventNotificationService
 {
@@ -55,16 +61,19 @@ public interface IEventNotificationService
     Task NotifyUserAsync(...);
 }
 ```
+
 - **Type-safe** event broadcasting
 - **Flexible targeting** (all, group, user)
 - **Error handling** and logging
 - **Cancellation token** support
 
 #### SignalR Configuration (`Configuration/SignalRConfiguration.cs`)
+
 ```csharp
 services.AddMystiraSignalR(configuration, environment);
 app.MapMystiraSignalRHubs();
 ```
+
 - **Redis backplane** for horizontal scaling
 - **Automatic reconnection** configuration
 - **CORS setup** for SignalR
@@ -75,20 +84,24 @@ app.MapMystiraSignalRHubs();
 All frontend code is integrated into `packages/shared-utils`:
 
 #### SignalR Types (`src/signalr.types.ts`)
+
 ```typescript
 export interface SignalROptions { ... }
 export interface ISignalRConnection { ... }
 export interface ScenarioUpdatedEvent { ... }
 ```
+
 - **Complete type definitions**
 - **Event interfaces**
 - **Configuration options**
 
 #### SignalR Client (`src/signalr.client.ts`)
+
 ```typescript
 export class SignalRConnection implements ISignalRConnection { ... }
 export function createSignalRConnection(options): ISignalRConnection
 ```
+
 - **Automatic reconnection** with exponential backoff
 - **Event handler** management
 - **Group management** APIs
@@ -112,15 +125,16 @@ Complete guide for configuring Front Door to support WebSocket/SignalR:
 ### ✅ 5. Example Usage Code
 
 #### Backend Example
+
 ```csharp
 public class ScenarioService
 {
     private readonly IEventNotificationService _eventService;
-    
+
     public async Task UpdateScenarioAsync(Scenario scenario)
     {
         await _repository.UpdateAsync(scenario);
-        
+
         // Real-time broadcast to all clients
         await _eventService.NotifyScenarioUpdatedAsync(
             scenario.Id,
@@ -131,15 +145,16 @@ public class ScenarioService
 ```
 
 #### Frontend Example
+
 ```typescript
 const connection = createSignalRConnection({
-  hubUrl: 'https://api.mystira.app/hubs/events',
+  hubUrl: "https://api.mystira.app/hubs/events",
   accessTokenFactory: () => getAuthToken(),
 });
 
-connection.on<ScenarioUpdatedEvent>('ScenarioUpdated', (event) => {
-  setScenarios(prev => 
-    prev.map(s => s.id === event.scenarioId ? { ...s, ...event.data } : s)
+connection.on<ScenarioUpdatedEvent>("ScenarioUpdated", (event) => {
+  setScenarios((prev) =>
+    prev.map((s) => (s.id === event.scenarioId ? { ...s, ...event.data } : s))
   );
 });
 ```
@@ -151,18 +166,21 @@ connection.on<ScenarioUpdatedEvent>('ScenarioUpdated', (event) => {
 **Answer:** SignalR WebSocket infrastructure should be implemented in **two places**:
 
 ### 1. **Admin API** (`packages/admin-api`) - **Backend Hub**
+
 - This is where the SignalR hub (`/hubs/events`) should be implemented
 - Admin API already has authentication, Redis, and monitoring configured
 - It's the central place for admin operations and content management
 - Files are ready in `docs/implementation/signalr/backend/`
 
 ### 2. **Shared Utils** (`packages/shared-utils`) - **Frontend Client** ✅ DONE
+
 - SignalR client utilities are already implemented here
 - Can be used by Admin UI, DevHub, or any React application
 - Provides consistent interface across all frontend apps
 - Files: `signalr.types.ts` and `signalr.client.ts`
 
 ### Optional: Story Generator (`packages/story-generator`)
+
 - If story generation needs real-time progress updates
 - Follow the same pattern as Admin API
 - Reuse the frontend utilities from shared-utils
@@ -172,6 +190,7 @@ connection.on<ScenarioUpdatedEvent>('ScenarioUpdated', (event) => {
 ### For Admin API (Backend)
 
 1. **Add NuGet packages:**
+
    ```bash
    dotnet add package Microsoft.AspNetCore.SignalR
    dotnet add package Microsoft.AspNetCore.SignalR.StackExchangeRedis
@@ -180,6 +199,7 @@ connection.on<ScenarioUpdatedEvent>('ScenarioUpdated', (event) => {
 2. **Copy implementation files** from `docs/implementation/signalr/backend/` to admin-api
 
 3. **Update Program.cs:**
+
    ```csharp
    builder.Services.AddMystiraSignalR(builder.Configuration, builder.Environment);
    app.MapMystiraSignalRHubs();
@@ -197,13 +217,15 @@ connection.on<ScenarioUpdatedEvent>('ScenarioUpdated', (event) => {
 ### For Admin UI (Frontend)
 
 1. **Install peer dependency:**
+
    ```bash
    npm install @microsoft/signalr
    ```
 
 2. **Use SignalR client:**
+
    ```typescript
-   import { createSignalRConnection } from '@mystira/shared-utils';
+   import { createSignalRConnection } from "@mystira/shared-utils";
    ```
 
 3. **Replace polling code** with SignalR event listeners
@@ -226,23 +248,27 @@ Detailed instructions with Azure CLI commands included.
 ## Benefits of This Implementation
 
 ### Performance
+
 - **Eliminates polling** overhead
 - **Instant updates** to clients
 - **Reduced server load** (no repeated requests)
 - **Lower bandwidth** consumption
 
 ### Scalability
+
 - **Redis backplane** for horizontal scaling
 - **Connection pooling** for efficiency
 - **Group-based** targeting for efficiency
 
 ### Developer Experience
+
 - **Type-safe** TypeScript interfaces
 - **Consistent API** across frontend apps
 - **Easy integration** with existing code
 - **Comprehensive documentation**
 
 ### User Experience
+
 - **Real-time updates** without page refresh
 - **Instant feedback** on actions
 - **Better responsiveness**
@@ -250,6 +276,7 @@ Detailed instructions with Azure CLI commands included.
 ## Testing Strategy
 
 ### Backend Testing
+
 ```bash
 cd packages/admin-api
 dotnet test
@@ -257,12 +284,14 @@ wscat -c ws://localhost:5000/hubs/events
 ```
 
 ### Frontend Testing
+
 ```bash
 cd packages/shared-utils
 npm test
 ```
 
 ### Integration Testing
+
 - Manual testing with browser DevTools
 - Load testing with Artillery
 - E2E testing with Playwright
@@ -329,7 +358,7 @@ packages/
 ✅ **How to deploy?** → Step-by-step checklist provided  
 ✅ **How to test?** → Testing procedures documented  
 ✅ **What about scaling?** → Redis backplane support included  
-✅ **Is it production-ready?** → Yes, with monitoring and error handling  
+✅ **Is it production-ready?** → Yes, with monitoring and error handling
 
 ## Files Changed
 
@@ -359,6 +388,7 @@ packages/
 This PR provides a **complete, production-ready SignalR WebSocket implementation** that answers the original question about where to implement SignalR, includes all necessary code, comprehensive documentation, deployment guides, and addresses all aspects of the Front Door configuration requirements.
 
 The implementation is:
+
 - **Fully documented** with 40+ pages of guides
 - **Ready to integrate** with step-by-step instructions
 - **Production-ready** with security and monitoring
