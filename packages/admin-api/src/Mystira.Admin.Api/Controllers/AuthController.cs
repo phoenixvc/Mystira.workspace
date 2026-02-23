@@ -170,7 +170,7 @@ public class AuthController : ControllerBase
     /// </summary>
     [HttpGet("status")]
     [AllowAnonymous]
-    public IActionResult GetAuthStatus()
+    public async Task<IActionResult> GetAuthStatus()
     {
         if (User.Identity?.IsAuthenticated == true)
         {
@@ -178,7 +178,7 @@ public class AuthController : ControllerBase
             DateTimeOffset? expiresAt = null;
 
             // Try to get expiration from auth properties
-            var authResult = HttpContext.AuthenticateAsync("Cookies").Result;
+            var authResult = await HttpContext.AuthenticateAsync("Cookies");
             if (authResult.Properties?.ExpiresUtc != null)
             {
                 expiresAt = authResult.Properties.ExpiresUtc;

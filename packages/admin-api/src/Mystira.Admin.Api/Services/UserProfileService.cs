@@ -4,6 +4,7 @@ using Mystira.Contracts.App.Requests.UserProfiles;
 using Mystira.Domain.Models;
 using Mystira.Domain.ValueObjects;
 using Mystira.Infrastructure.Data;
+using Mystira.Shared.Exceptions;
 
 namespace Mystira.Admin.Api.Services;
 
@@ -36,7 +37,7 @@ public class UserProfileService : IUserProfileService
             var invalidThemes = request.PreferredFantasyThemes.Where(t => FantasyTheme.Parse(t) == null).ToList();
             if (invalidThemes.Any())
             {
-                throw new ArgumentException($"Invalid fantasy themes: {string.Join(", ", invalidThemes)}");
+                throw new ValidationException("PreferredFantasyThemes", $"Invalid fantasy themes: {string.Join(", ", invalidThemes)}");
             }
 
             profile.PreferredFantasyThemes = request.PreferredFantasyThemes.ToList();
@@ -50,7 +51,7 @@ public class UserProfileService : IUserProfileService
         {
             if (AgeGroup.Parse(request.AgeGroup) == null)
             {
-                throw new ArgumentException($"Invalid age group: {request.AgeGroup}. Must be one of: {string.Join(", ", AgeGroup.All)}");
+                throw new ValidationException("AgeGroup", $"Invalid age group: {request.AgeGroup}. Must be one of: {string.Join(", ", AgeGroup.All)}");
             }
 
             // AgeGroup is derived from DateOfBirth - set a representative DOB for the age group
@@ -93,20 +94,20 @@ public class UserProfileService : IUserProfileService
         var existingProfile = await GetProfileAsync(request.Name);
         if (existingProfile != null)
         {
-            throw new ArgumentException($"Profile already exists for name: {request.Name}");
+            throw new ConflictException($"Profile already exists for name: {request.Name}");
         }
 
         // Validate fantasy themes
         var invalidThemes = request.PreferredFantasyThemes.Where(t => FantasyTheme.Parse(t) == null).ToList();
         if (invalidThemes.Any())
         {
-            throw new ArgumentException($"Invalid fantasy themes: {string.Join(", ", invalidThemes)}");
+            throw new ValidationException("PreferredFantasyThemes", $"Invalid fantasy themes: {string.Join(", ", invalidThemes)}");
         }
 
         // Validate age group
         if (AgeGroup.Parse(request.AgeGroup) == null)
         {
-            throw new ArgumentException($"Invalid age group: {request.AgeGroup}. Must be one of: {string.Join(", ", AgeGroup.All)}");
+            throw new ValidationException("AgeGroup", $"Invalid age group: {request.AgeGroup}. Must be one of: {string.Join(", ", AgeGroup.All)}");
         }
 
         // Determine DateOfBirth - use provided value or derive from age group
@@ -159,7 +160,7 @@ public class UserProfileService : IUserProfileService
         // Validate age group
         if (AgeGroup.Parse(request.AgeGroup) == null)
         {
-            throw new ArgumentException($"Invalid age group: {request.AgeGroup}. Must be one of: {string.Join(", ", AgeGroup.All)}");
+            throw new ValidationException("AgeGroup", $"Invalid age group: {request.AgeGroup}. Must be one of: {string.Join(", ", AgeGroup.All)}");
         }
 
         // Derive DateOfBirth from age group for guests
@@ -241,7 +242,7 @@ public class UserProfileService : IUserProfileService
             var invalidThemes = request.PreferredFantasyThemes.Where(t => FantasyTheme.Parse(t) == null).ToList();
             if (invalidThemes.Any())
             {
-                throw new ArgumentException($"Invalid fantasy themes: {string.Join(", ", invalidThemes)}");
+                throw new ValidationException("PreferredFantasyThemes", $"Invalid fantasy themes: {string.Join(", ", invalidThemes)}");
             }
 
             profile.PreferredFantasyThemes = request.PreferredFantasyThemes.ToList();
@@ -258,7 +259,7 @@ public class UserProfileService : IUserProfileService
             // Validate age group
             if (AgeGroup.Parse(request.AgeGroup) == null)
             {
-                throw new ArgumentException($"Invalid age group: {request.AgeGroup}. Must be one of: {string.Join(", ", AgeGroup.All)}");
+                throw new ValidationException("AgeGroup", $"Invalid age group: {request.AgeGroup}. Must be one of: {string.Join(", ", AgeGroup.All)}");
             }
 
             // AgeGroup is derived from DateOfBirth - set a representative DOB for the age group

@@ -1,6 +1,7 @@
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Mystira.Infrastructure.Data;
+using Mystira.Shared.Exceptions;
 using ApiModels = Mystira.Admin.Api.Models;
 using DomainModels = Mystira.Domain.Models;
 
@@ -101,7 +102,7 @@ public class CharacterMapFileService : ICharacterMapFileService
             var existingCharacter = domainFile.Characters.FirstOrDefault(c => c.Id == character.Id);
             if (existingCharacter != null)
             {
-                throw new InvalidOperationException($"Character with ID '{character.Id}' already exists");
+                throw new ConflictException($"Character with ID '{character.Id}' already exists");
             }
 
             domainFile.Characters.Add(ConvertToDomainCharacter(character));
@@ -127,7 +128,7 @@ public class CharacterMapFileService : ICharacterMapFileService
             var existingCharacter = domainFile.Characters.FirstOrDefault(c => c.Id == characterId);
             if (existingCharacter == null)
             {
-                throw new KeyNotFoundException($"Character with ID '{characterId}' not found");
+                throw new NotFoundException("Character", characterId);
             }
 
             // Update the character
@@ -157,7 +158,7 @@ public class CharacterMapFileService : ICharacterMapFileService
             var existingCharacter = domainFile.Characters.FirstOrDefault(c => c.Id == characterId);
             if (existingCharacter == null)
             {
-                throw new KeyNotFoundException($"Character with ID '{characterId}' not found");
+                throw new NotFoundException("Character", characterId);
             }
 
             domainFile.Characters.Remove(existingCharacter);
@@ -211,12 +212,12 @@ public class CharacterMapFileService : ICharacterMapFileService
 
             if (importData == null || !importData.TryGetValue("characters", out var importedCharacters))
             {
-                throw new ArgumentException("Invalid JSON format. Expected 'characters' array");
+                throw new ValidationException("characters", "Invalid JSON format. Expected 'characters' array");
             }
 
             if (importedCharacters == null || importedCharacters.Count == 0)
             {
-                throw new ArgumentException("No valid characters found in JSON data");
+                throw new ValidationException("characters", "No valid characters found in JSON data");
             }
 
             var apiFile = await GetCharacterMapFileAsync();

@@ -8,6 +8,7 @@ using Mystira.Domain.Models;
 using Mystira.Domain.ValueObjects;
 using Mystira.Infrastructure.Data;
 using NJsonSchema;
+using Mystira.Shared.Exceptions;
 using AgeGroupConstants = Mystira.Admin.Api.Models.AgeGroupConstants;
 
 namespace Mystira.Admin.Api.Services;
@@ -166,7 +167,7 @@ public class BadgeAdminService : IBadgeAdminService
         {
             if (request.TierOrder.Value < 1)
             {
-                throw new ArgumentException("Tier order must be greater than zero");
+                throw new ValidationException("TierOrder", "Tier order must be greater than zero");
             }
             badge.TierOrder = request.TierOrder.Value;
         }
@@ -175,7 +176,7 @@ public class BadgeAdminService : IBadgeAdminService
         {
             if (request.RequiredScore.Value <= 0)
             {
-                throw new ArgumentException("Required score must be greater than zero");
+                throw new ValidationException("RequiredScore", "Required score must be greater than zero");
             }
             badge.RequiredScore = (int)Math.Round(request.RequiredScore.Value);
         }
@@ -550,12 +551,12 @@ public class BadgeAdminService : IBadgeAdminService
     {
         if (file == null || file.Length == 0)
         {
-            throw new ArgumentException("Image upload failed: file is missing or empty");
+            throw new ValidationException("File", "Image upload failed: file is missing or empty");
         }
 
         if (file.Length > MaxImageSizeBytes)
         {
-            throw new ArgumentException($"Badge images must be smaller than {MaxImageSizeBytes / (1024 * 1024)} MB");
+            throw new ValidationException("File", $"Badge images must be smaller than {MaxImageSizeBytes / (1024 * 1024)} MB");
         }
 
         await using var memoryStream = new MemoryStream();
@@ -768,7 +769,7 @@ public class BadgeAdminService : IBadgeAdminService
         var ageGroup = await ResolveAgeGroupAsync(ageGroupId);
         if (ageGroup == null)
         {
-            throw new ArgumentException($"Age group '{ageGroupId}' does not exist.");
+            throw new NotFoundException("AgeGroup", ageGroupId);
         }
 
         return ageGroup;
@@ -779,7 +780,7 @@ public class BadgeAdminService : IBadgeAdminService
         var axis = await ResolveAxisAsync(axisId);
         if (axis == null)
         {
-            throw new ArgumentException($"Compass axis '{axisId}' does not exist.");
+            throw new NotFoundException("CompassAxis", axisId);
         }
 
         return axis;
@@ -834,12 +835,12 @@ public class BadgeAdminService : IBadgeAdminService
     {
         if (tierOrder < 1)
         {
-            throw new ArgumentException("Tier order must be greater than zero");
+            throw new ValidationException("TierOrder", "Tier order must be greater than zero");
         }
 
         if (requiredScore <= 0)
         {
-            throw new ArgumentException("Required score must be greater than zero");
+            throw new ValidationException("RequiredScore", "Required score must be greater than zero");
         }
     }
 
@@ -847,7 +848,7 @@ public class BadgeAdminService : IBadgeAdminService
     {
         if (string.IsNullOrWhiteSpace(tier))
         {
-            throw new ArgumentException("Tier is required");
+            throw new ValidationException("Tier", "Tier is required");
         }
 
         var match = TierOrder.FirstOrDefault(t => t.Equals(tier, StringComparison.OrdinalIgnoreCase));
@@ -859,7 +860,7 @@ public class BadgeAdminService : IBadgeAdminService
         var normalized = CultureInfo.InvariantCulture.TextInfo.ToTitleCase(tier.Trim().ToLowerInvariant());
         if (!TierLookup.Contains(normalized))
         {
-            throw new ArgumentException($"Tier '{tier}' is not supported. Valid tiers: {string.Join(", ", TierOrder)}");
+            throw new ValidationException("Tier", $"Tier '{tier}' is not supported. Valid tiers: {string.Join(", ", TierOrder)}");
         }
 
         return normalized;
@@ -875,7 +876,7 @@ public class BadgeAdminService : IBadgeAdminService
         var normalized = direction.Trim().ToLowerInvariant();
         if (!AxisDirectionLookup.Contains(normalized))
         {
-            throw new ArgumentException("Axis direction must be 'positive' or 'negative'");
+            throw new ValidationException("AxesDirection", "Axis direction must be 'positive' or 'negative'");
         }
 
         return normalized;

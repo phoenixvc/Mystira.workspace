@@ -34,6 +34,8 @@ using Mystira.Infrastructure.Data.Services;
 using Mystira.Infrastructure.Data.UnitOfWork;
 using Mystira.Infrastructure.Discord.Services;
 using Mystira.Infrastructure.StoryProtocol;
+using Mystira.Shared.Exceptions;
+using Mystira.Shared.Extensions;
 using Mystira.Shared.Middleware;
 using Mystira.Shared.Telemetry;
 
@@ -116,8 +118,19 @@ try
             options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
         });
 
-    // Add HttpClient factory for use cases that need to make HTTP requests
+    // Add global exception handler (Mystira.Shared.Exceptions)
+    builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+    builder.Services.AddProblemDetails();
+
+    // Add resilience policies (Polly v8) for HTTP clients
+    builder.Services.AddMystiraResilience(builder.Configuration);
+
+    // Add HttpClient factory with standard resilience handler for all clients
     builder.Services.AddHttpClient();
+    builder.Services.ConfigureHttpClientDefaults(http =>
+    {
+        http.AddStandardResilienceHandler();
+    });
 
     // Configure OpenAPI/Swagger
     builder.Services.AddEndpointsApiExplorer();
@@ -801,6 +814,9 @@ try
     var app = builder.Build();
 
     Log.Information(useCosmosDb ? "Using Azure Cosmos DB (Cloud Database)" : "Using In-Memory Database (Local Development)");
+
+    // Global exception handler (must be early in pipeline)
+    app.UseExceptionHandler();
 
     // Configure the HTTP request pipeline
     if (app.Environment.IsDevelopment())

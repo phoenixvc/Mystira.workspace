@@ -35,6 +35,9 @@
     <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="10.0.3" />
     <PackageReference Include="AspNetCore.HealthChecks.Redis" Version="9.0.0" />
 
+    <!-- Polly v8 resilience for HTTP clients -->
+    <PackageReference Include="Microsoft.Extensions.Http.Resilience" Version="10.3.0" />
+
     <!-- Microsoft Entra ID (Azure AD) authentication -->
     <PackageReference Include="Microsoft.Identity.Web" Version="4.3.0" />
 

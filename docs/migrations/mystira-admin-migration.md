@@ -4,7 +4,7 @@
 **Prerequisites**: Monorepo with ProjectReferences to shared packages (done)
 **Estimated Effort**: 1 day
 **Last Updated**: February 2026
-**Status**: 📋 Ready to start
+**Status**: 🔄 In progress (~60% — Phases 1-2 complete, Phase 3 in progress)
 
 > **Note**: The monorepo migration is complete. Admin.Api already targets .NET 10 and uses ProjectReferences to all shared packages (`Mystira.Shared`, `Mystira.Domain`, `Mystira.Application`, `Mystira.Contracts`, `Mystira.Infrastructure.*`). This migration covers adopting the shared infrastructure patterns (resilience, specifications, exception handling, etc.).
 
@@ -318,19 +318,21 @@ builder.Host.UseWolverine(opts =>
 
 - [x] .NET 10.0 upgrade (done via monorepo migration)
 - [x] ProjectReferences to shared packages (done via monorepo migration)
-- [ ] Create feature branch
-- [ ] Backup current appsettings.json
+- [x] Wolverine configured (handler discovery from Application assembly)
+- [x] Ardalis.Specification 9.3.1 referenced
 
 ### Phase 1: Resilience (Polly v8)
 
-- [ ] Add resilience configuration
-- [ ] Replace `AddPolicyHandler` with `AddResilienceHandler`
-- [ ] Add policies to HTTP clients
+- [x] Add `Microsoft.Extensions.Http.Resilience` package
+- [x] Add `AddMystiraResilience()` and resilience configuration
+- [x] Add `ConfigureHttpClientDefaults` with `AddStandardResilienceHandler()`
 
 ### Phase 2: Exceptions
 
-- [ ] Add GlobalExceptionHandler
-- [ ] Update exception throws to use Mystira.Shared types
+- [x] Add `GlobalExceptionHandler` from `Mystira.Shared.Exceptions`
+- [x] Add `UseExceptionHandler()` middleware
+- [x] Fix blocking async call in `AuthController.GetAuthStatus()` (`.Result` → `await`)
+- [x] Migrate service exception throws to Mystira.Shared.Exceptions types
 
 ### Phase 3: Specification Pattern
 
