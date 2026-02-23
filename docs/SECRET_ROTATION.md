@@ -10,30 +10,30 @@ With the migration to OIDC authentication, most Azure-related credentials no lon
 
 ### Secrets That DON'T Require Rotation (OIDC)
 
-| Secret | Reason |
-|--------|--------|
-| `AZURE_CLIENT_ID` | Not a secret - public identifier |
-| `AZURE_TENANT_ID` | Not a secret - public identifier |
+| Secret                  | Reason                           |
+| ----------------------- | -------------------------------- |
+| `AZURE_CLIENT_ID`       | Not a secret - public identifier |
+| `AZURE_TENANT_ID`       | Not a secret - public identifier |
 | `AZURE_SUBSCRIPTION_ID` | Not a secret - public identifier |
 
 These are static identifiers that don't expire. The actual authentication uses short-lived tokens issued by GitHub's OIDC provider.
 
 ### Secrets That MAY Require Rotation
 
-| Secret | Rotation Frequency | Notes |
-|--------|-------------------|-------|
-| `MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN` | 90 days (recommended) | GitHub PAT for submodule access |
-| `GH_PACKAGES_TOKEN` | 90 days (recommended) | GitHub PAT for package registry |
-| `INFRACOST_API_KEY` | Per provider policy | Infracost API key |
-| `SLACK_WEBHOOK_URL` | When compromised | Slack incoming webhook |
-| `TEAMS_WEBHOOK_URL` | When compromised | Microsoft Teams webhook |
-| `MS_TEAMS_WEBHOOK_URL` | When compromised | Legacy Teams webhook |
+| Secret                 | Rotation Frequency    | Notes                           |
+| ---------------------- | --------------------- | ------------------------------- |
+| `GH_PACKAGES_TOKEN`    | 90 days (recommended) | GitHub PAT for package registry |
+| `INFRACOST_API_KEY`    | Per provider policy   | Infracost API key               |
+| `SLACK_WEBHOOK_URL`    | When compromised      | Slack incoming webhook          |
+| `TEAMS_WEBHOOK_URL`    | When compromised      | Microsoft Teams webhook         |
+| `MS_TEAMS_WEBHOOK_URL` | When compromised      | Legacy Teams webhook            |
 
 ### Deprecated Secrets
 
-| Secret | Status | Migration Guide |
-|--------|--------|-----------------|
-| `MYSTIRA_AZURE_CREDENTIALS` | Deprecated | See [OIDC_MIGRATION.md](OIDC_MIGRATION.md) |
+| Secret                                  | Status     | Migration Guide                                             |
+| --------------------------------------- | ---------- | ----------------------------------------------------------- |
+| `MYSTIRA_AZURE_CREDENTIALS`             | Deprecated | See [OIDC_MIGRATION.md](OIDC_MIGRATION.md)                  |
+| `MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN` | Deprecated | No longer needed — monorepo migration eliminated submodules |
 
 ## Automated Monitoring
 
@@ -50,45 +50,16 @@ It creates GitHub issues when action is required.
 
 ### GitHub Personal Access Tokens (PATs)
 
-#### MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN
+#### MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN (Deprecated)
 
-This token is used to access private submodule repositories during checkout.
-
-**Required Scopes:**
-- `repo` (Full control of private repositories)
-
-**Rotation Steps:**
-
-1. **Create new token:**
-   ```
-   GitHub.com → Settings → Developer settings → Personal access tokens → Fine-grained tokens → Generate new token
-   ```
-
-2. **Configure token:**
-   - Name: `mystira-submodule-access-YYYY-MM`
-   - Expiration: 90 days
-   - Repository access: Select repositories (all Mystira.* repos)
-   - Permissions:
-     - Contents: Read-only
-     - Metadata: Read-only
-
-3. **Update GitHub secret:**
-   ```
-   Repository Settings → Secrets and variables → Actions → MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN → Update secret
-   ```
-
-4. **Verify:**
-   - Trigger a workflow that uses submodules
-   - Confirm checkout succeeds
-
-5. **Revoke old token:**
-   - After verification, revoke the previous token
+> **Deprecated**: This token was used for submodule checkout. Since the monorepo migration inlined all submodule code, this token is no longer needed. It can be safely removed from repository secrets.
 
 #### GH_PACKAGES_TOKEN
 
 This token accesses GitHub Packages for NuGet packages.
 
 **Required Scopes:**
+
 - `read:packages`
 - `write:packages` (if publishing)
 
@@ -111,6 +82,7 @@ Same as above, with different permissions configuration.
 ### Webhook URLs
 
 Webhook URLs don't expire but should be rotated if:
+
 - The URL is accidentally exposed
 - Team members with access leave
 - Security audit requires it
@@ -182,6 +154,7 @@ After rotation, verify:
 ### Automated Checks
 
 The `secret-rotation-check.yml` workflow:
+
 - Runs weekly on Monday at 9 AM UTC
 - Creates issues when rotation is needed
 - Sends Slack alerts for urgent items

@@ -26,8 +26,9 @@ Remaining migration focuses on:
 3. Adopt `Mystira.Shared.Resilience` for HTTP policies (Polly v8)
 4. Adopt Ardalis.Specification 9.3.1 for data access
 5. Standardize exception handling → `Mystira.Shared.Exceptions`
-6. (Optional) Add Wolverine for event handling
-7. (Optional) Add distributed locking for concurrent admin operations
+6. (Optional) Adopt `ICacheService` wrapper for caching consistency
+7. (Optional) Add Wolverine for event handling
+8. (Optional) Add distributed locking for concurrent admin operations
 
 ---
 
@@ -60,63 +61,7 @@ All internal Mystira packages are already referenced via `<ProjectReference>`:
 
 ## Phase 1: Resilience Policies (Polly v8)
 
----
-
-## Phase 2: Caching Integration
-
-Admin.Api already uses Redis. Optionally adopt `ICacheService` for consistency:
-
-### 2.1 Current State
-
-```csharp
-// Current: Direct IDistributedCache usage
-public class ContentService
-{
-    private readonly IDistributedCache _cache;
-
-    public async Task<Content?> GetContentAsync(string id)
-    {
-        var cached = await _cache.GetStringAsync($"content:{id}");
-        if (cached != null)
-            return JsonSerializer.Deserialize<Content>(cached);
-        // ...
-    }
-}
-```
-
-### 2.2 Target State (Optional)
-
-```csharp
-// Target: Use ICacheService wrapper
-using Mystira.Shared.Caching;
-
-public class ContentService
-{
-    private readonly ICacheService _cache;
-
-    public async Task<Content?> GetContentAsync(string id, CancellationToken ct)
-    {
-        return await _cache.GetOrSetAsync(
-            $"content:{id}",
-            async () => await _repository.GetByIdAsync(id, ct),
-            TimeSpan.FromMinutes(10),
-            ct);
-    }
-}
-```
-
-### 2.3 Registration
-
-```csharp
-// Program.cs
-builder.Services.AddMystiraCaching(builder.Configuration);
-```
-
----
-
-## Phase 3: Resilience Policies (Polly v8)
-
-### 3.1 Add HTTP Resilience
+### 1.1 Add HTTP Resilience
 
 ```csharp
 // Program.cs
@@ -132,7 +77,7 @@ builder.Services.AddResilientHttpClientV8<IExternalApiClient, ExternalApiClient>
     client => client.BaseAddress = new Uri("https://external-api.example.com"));
 ```
 
-### 3.2 Configuration
+### 1.2 Configuration
 
 ```json
 // appsettings.json
@@ -148,7 +93,7 @@ builder.Services.AddResilientHttpClientV8<IExternalApiClient, ExternalApiClient>
 }
 ```
 
-### 3.3 Breaking Changes (Polly v7 → v8)
+### 1.3 Breaking Changes (Polly v7 → v8)
 
 | Before (v7)          | After (v8)               |
 | -------------------- | ------------------------ |
@@ -157,9 +102,9 @@ builder.Services.AddResilientHttpClientV8<IExternalApiClient, ExternalApiClient>
 
 ---
 
-## Phase 4: Exception Handling
+## Phase 2: Exception Handling
 
-### 4.1 Add Global Exception Handler
+### 2.1 Add Global Exception Handler
 
 ```csharp
 // Program.cs
@@ -170,7 +115,7 @@ builder.Services.AddProblemDetails();
 app.UseExceptionHandler();
 ```
 
-### 4.2 Use Standard Exceptions
+### 2.2 Use Standard Exceptions
 
 ```csharp
 using Mystira.Shared.Exceptions;
@@ -183,9 +128,9 @@ throw new ConflictException("Content already exists");
 
 ---
 
-## Phase 5: Ardalis.Specification 8.0.0 Migration
+## Phase 3: Ardalis.Specification 9.3.1
 
-### 5.1 Create Specification Classes
+### 3.1 Create Specification Classes
 
 ```csharp
 using Ardalis.Specification;
@@ -216,7 +161,7 @@ public sealed class PublishedContentSpec : Specification<Content>
 }
 ```
 
-### 5.2 Update Repository Usage
+### 3.2 Update Repository Usage
 
 ```csharp
 public class ContentService
@@ -233,18 +178,70 @@ public class ContentService
 
 ---
 
-## Phase 6: Polyglot Repository (Optional)
+## Phase 4: Caching Integration (Optional)
+
+Admin.Api already uses Redis. Optionally adopt `ICacheService` for consistency:
+
+### 4.1 Current State
+
+```csharp
+// Current: Direct IDistributedCache usage
+public class ContentService
+{
+    private readonly IDistributedCache _cache;
+
+    public async Task<Content?> GetContentAsync(string id)
+    {
+        var cached = await _cache.GetStringAsync($"content:{id}");
+        if (cached != null)
+            return JsonSerializer.Deserialize<Content>(cached);
+        // ...
+    }
+}
+```
+
+### 4.2 Target State
+
+```csharp
+// Target: Use ICacheService wrapper
+using Mystira.Shared.Caching;
+
+public class ContentService
+{
+    private readonly ICacheService _cache;
+
+    public async Task<Content?> GetContentAsync(string id, CancellationToken ct)
+    {
+        return await _cache.GetOrSetAsync(
+            $"content:{id}",
+            async () => await _repository.GetByIdAsync(id, ct),
+            TimeSpan.FromMinutes(10),
+            ct);
+    }
+}
+```
+
+### 4.3 Registration
+
+```csharp
+// Program.cs
+builder.Services.AddMystiraCaching(builder.Configuration);
+```
+
+---
+
+## Phase 5: Polyglot Repository (Optional)
 
 Admin.Api already has dual-database support. Optionally adopt PolyglotRepository:
 
-### 6.1 Register Polyglot Persistence
+### 5.1 Register Polyglot Persistence
 
 ```csharp
 // Program.cs
 builder.Services.AddPolyglotPersistence<CosmosDbContext, PostgresDbContext>(builder.Configuration);
 ```
 
-### 6.2 Configuration
+### 5.2 Configuration
 
 ```json
 // appsettings.json
@@ -262,18 +259,18 @@ builder.Services.AddPolyglotPersistence<CosmosDbContext, PostgresDbContext>(buil
 
 ---
 
-## Phase 7: Distributed Locking (Optional)
+## Phase 6: Distributed Locking (Optional)
 
 For admin operations that require exclusive access:
 
-### 7.1 Setup
+### 6.1 Setup
 
 ```csharp
 // Program.cs
 builder.Services.AddMystiraDistributedLocking(builder.Configuration);
 ```
 
-### 7.2 Usage
+### 6.2 Usage
 
 ```csharp
 public class ContentPublishService
@@ -298,7 +295,7 @@ public class ContentPublishService
 
 ---
 
-## Phase 8: Wolverine (Optional - Future)
+## Phase 7: Wolverine (Optional — Future)
 
 If Admin.Api needs to handle events from other services:
 
@@ -324,39 +321,39 @@ builder.Host.UseWolverine(opts =>
 - [ ] Create feature branch
 - [ ] Backup current appsettings.json
 
-### Phase 2: Caching
-
-- [ ] Add ICacheService registration
-- [ ] Update cache consumers to use ICacheService
-
-### Phase 3: Resilience (Polly v8)
+### Phase 1: Resilience (Polly v8)
 
 - [ ] Add resilience configuration
 - [ ] Replace `AddPolicyHandler` with `AddResilienceHandler`
 - [ ] Add policies to HTTP clients
 
-### Phase 4: Exceptions
+### Phase 2: Exceptions
 
 - [ ] Add GlobalExceptionHandler
 - [ ] Update exception throws to use Mystira.Shared types
 
-### Phase 5: Specification Pattern
+### Phase 3: Specification Pattern
 
 - [ ] Create specification classes for data access
-- [ ] Update repositories to use Ardalis.Specification
+- [ ] Update repositories to use Ardalis.Specification 9.3.1
 - [ ] Update service layer to use specifications
 
-### Phase 6: Polyglot (Optional)
+### Phase 4: Caching (Optional)
+
+- [ ] Add ICacheService registration
+- [ ] Update cache consumers to use ICacheService
+
+### Phase 5: Polyglot (Optional)
 
 - [ ] Add PolyglotRepository configuration
 - [ ] Annotate entities with DatabaseTarget
 
-### Phase 7: Distributed Locking (Optional)
+### Phase 6: Distributed Locking (Optional)
 
 - [ ] Add distributed locking configuration
 - [ ] Implement locks for concurrent admin operations
 
-### Phase 8: Wolverine (Optional)
+### Phase 7: Wolverine (Optional)
 
 - [ ] Add Wolverine for event handling
 - [ ] Configure Azure Service Bus integration
@@ -383,14 +380,14 @@ builder.Host.UseWolverine(opts =>
 
 ## Admin-UI Changes
 
-Admin-UI (React) migration is separate - see [mystira-admin-ui-migration.md](./mystira-admin-ui-migration.md):
+Admin-UI (React) migration is separate — see [mystira-admin-ui-migration.md](./mystira-admin-ui-migration.md):
 
 ### Design Tokens Migration
 
 ```bash
 # In packages/admin-ui
-npm install @mystira/design-tokens@0.2.0
-npm install @mystira/shared-utils@0.2.0
+npm install @mystira/design-tokens@workspace:*
+npm install @mystira/shared-utils@workspace:*
 ```
 
 ```javascript
@@ -416,7 +413,7 @@ module.exports = {
 - [ADR-0014: Polyglot Persistence](../architecture/adr/0014-polyglot-persistence-framework-selection.md)
 - [ADR-0015: Wolverine Migration](../architecture/adr/0015-event-driven-architecture-framework.md)
 - [ADR-0017: Resource Group Organization](../architecture/adr/0017-resource-group-organization-strategy.md)
-- [Ardalis.Specification 8.0.0 Guide](../architecture/specifications/ardalis-specification-migration.md)
+- [Ardalis.Specification Migration Guide](../architecture/specifications/ardalis-specification-migration.md)
 - [Mystira.App Migration Guide](./mystira-app-migration.md)
 - [Mystira.Shared Migration Guide](../guides/mystira-shared-migration.md)
 - [Mystira.Shared README](../../packages/shared/Mystira.Shared/README.md)
