@@ -20,6 +20,7 @@
     "dev:admin": "turbo run dev --filter='./packages/admin-ui'",
     "dev:publisher": "turbo run dev --filter='./packages/publisher'",
     "test": "turbo run test",
+    "test:affected": "turbo run test --filter='...[HEAD~1]'",
     "lint": "turbo run lint",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
     "clean": "turbo run clean && rm -rf node_modules",
