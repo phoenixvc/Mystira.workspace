@@ -1,13 +1,12 @@
 using System.Text;
 using Microsoft.Extensions.Logging;
 using Mystira.StoryGenerator.Contracts.Chat;
-using Mystira.StoryGenerator.Domain.Commands;
 using Mystira.StoryGenerator.Domain.Commands.Chat;
 using Mystira.StoryGenerator.Domain.Services;
 
 namespace Mystira.StoryGenerator.Application.Handlers.Chat;
 
-public class SafetyPolicyCommandHandler : ICommandHandler<SafetyPolicyCommand, ChatCompletionResponse>
+public static class SafetyPolicyCommandHandler
 {
     private const string SafetyBaseline = @"Mystira Safety & Content Baseline:
 - Stories must remain emotionally safe for the declared age group.
@@ -17,32 +16,23 @@ public class SafetyPolicyCommandHandler : ICommandHandler<SafetyPolicyCommand, C
 - Highlight fairness, kindness, accountability, and inclusion; never punch down at any group.
 - Final scenes should leave the player encouraged, supported, and empowered.";
 
-    private readonly ILlmServiceFactory _llmFactory;
-    private readonly IInstructionBlockService _instructionBlockService;
-    private readonly ILogger<SafetyPolicyCommandHandler> _logger;
-
-    public SafetyPolicyCommandHandler(
+    public static async Task<ChatCompletionResponse> Handle(
+        SafetyPolicyCommand command,
         ILlmServiceFactory llmFactory,
         IInstructionBlockService instructionBlockService,
-        ILogger<SafetyPolicyCommandHandler> logger)
-    {
-        _llmFactory = llmFactory;
-        _instructionBlockService = instructionBlockService;
-        _logger = logger;
-    }
-
-    public async Task<ChatCompletionResponse> Handle(SafetyPolicyCommand command, CancellationToken cancellationToken)
+        ILogger logger,
+        CancellationToken cancellationToken)
     {
         try
         {
             var context = command.Context ?? throw new InvalidOperationException("Chat context is required");
-            var service = ResolveService(context);
+            var service = ResolveService(context, llmFactory);
             if (service is null)
             {
                 return Failure("No LLM services are currently available for safety guidance.");
             }
 
-            var ragBlock = await ResolveInstructionBlockAsync(command.UserQuery, context, cancellationToken);
+            var ragBlock = await ResolveInstructionBlockAsync(command.UserQuery, context, instructionBlockService, cancellationToken);
             var contextSummary = ChatContextSummaryBuilder.BuildContextSummary(context);
             var messages = new List<MystiraChatMessage>();
 
@@ -100,19 +90,23 @@ public class SafetyPolicyCommandHandler : ICommandHandler<SafetyPolicyCommand, C
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error answering safety policy question");
+            logger.LogError(ex, "Error answering safety policy question");
             return Failure("An unexpected error occurred while answering safety questions.");
         }
     }
 
-    private ILLMService? ResolveService(ChatContext context)
+    private static ILLMService? ResolveService(ChatContext context, ILlmServiceFactory llmFactory)
     {
         return !string.IsNullOrWhiteSpace(context.Provider)
-            ? _llmFactory.GetService(context.Provider!)
-            : _llmFactory.GetDefaultService();
+            ? llmFactory.GetService(context.Provider!)
+            : llmFactory.GetDefaultService();
     }
 
-    private async Task<string?> ResolveInstructionBlockAsync(string? userQuery, ChatContext context, CancellationToken cancellationToken)
+    private static async Task<string?> ResolveInstructionBlockAsync(
+        string? userQuery,
+        ChatContext context,
+        IInstructionBlockService instructionBlockService,
+        CancellationToken cancellationToken)
     {
         var query = string.IsNullOrWhiteSpace(userQuery)
             ? "Mystira safety policy overview"
@@ -129,14 +123,14 @@ public class SafetyPolicyCommandHandler : ICommandHandler<SafetyPolicyCommand, C
             AgeGroup = ageGroup
         };
 
-        return await _instructionBlockService.BuildInstructionBlockAsync(searchContext, cancellationToken);
+        return await instructionBlockService.BuildInstructionBlockAsync(searchContext, cancellationToken);
     }
 
     private static string? ExtractAgeGroupFromContext(ChatContext? context)
     {
         if (context?.CurrentStory == null)
             return null;
-        
+
         return ExtractAgeGroupFromJson(context.CurrentStory.Content);
     }
 

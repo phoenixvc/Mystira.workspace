@@ -2,35 +2,27 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Mystira.StoryGenerator.Contracts.Chat;
 using Mystira.StoryGenerator.Contracts.Configuration;
-using Mystira.StoryGenerator.Domain.Commands;
 using Mystira.StoryGenerator.Domain.Commands.Stories;
 using Mystira.StoryGenerator.Domain.Services;
 
 namespace Mystira.StoryGenerator.Application.Handlers.Stories;
 
-public class SummarizeStoryCommandHandler : ICommandHandler<SummarizeStoryCommand, ChatCompletionResponse>
+public static class SummarizeStoryCommandHandler
 {
-    private readonly ILlmServiceFactory _llmFactory;
-    private readonly AiSettings _settings;
-    private readonly ILogger<SummarizeStoryCommandHandler> _logger;
-
-    public SummarizeStoryCommandHandler(
+    public static async Task<ChatCompletionResponse> Handle(
+        SummarizeStoryCommand command,
         ILlmServiceFactory llmFactory,
         IOptions<AiSettings> aiOptions,
-        ILogger<SummarizeStoryCommandHandler> logger)
+        ILogger logger,
+        CancellationToken cancellationToken)
     {
-        _llmFactory = llmFactory;
-        _settings = aiOptions.Value;
-        _logger = logger;
-    }
+        var settings = aiOptions.Value;
 
-    public async Task<ChatCompletionResponse> Handle(SummarizeStoryCommand command, CancellationToken cancellationToken)
-    {
         try
         {
             var service = !string.IsNullOrWhiteSpace(command.Provider)
-                ? _llmFactory.GetService(command.Provider!, command.Model)
-                : _llmFactory.GetDefaultService();
+                ? llmFactory.GetService(command.Provider!, command.Model)
+                : llmFactory.GetDefaultService();
 
             if (service is null)
             {
@@ -42,8 +34,8 @@ public class SummarizeStoryCommandHandler : ICommandHandler<SummarizeStoryComman
             }
 
             var resolvedModelName = string.IsNullOrWhiteSpace(command.Model) ? null : command.Model;
-            var temperature = Math.Min(0.5, _settings.DefaultTemperature);
-            var maxTokens = Math.Max(500, _settings.DefaultMaxTokens);
+            var temperature = Math.Min(0.5, settings.DefaultTemperature);
+            var maxTokens = Math.Max(500, settings.DefaultMaxTokens);
 
             var systemPrompt = BuildSummarizationSystemPrompt();
             var messages = new List<MystiraChatMessage>
@@ -79,7 +71,7 @@ public class SummarizeStoryCommandHandler : ICommandHandler<SummarizeStoryComman
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error summarizing story");
+            logger.LogError(ex, "Error summarizing story");
             return new ChatCompletionResponse
             {
                 Success = false,

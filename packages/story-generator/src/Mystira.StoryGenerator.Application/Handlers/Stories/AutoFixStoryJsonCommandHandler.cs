@@ -3,39 +3,29 @@ using Microsoft.Extensions.Options;
 using Mystira.StoryGenerator.Contracts.Chat;
 using Mystira.StoryGenerator.Contracts.Configuration;
 using Mystira.StoryGenerator.Contracts.Stories;
-using Mystira.StoryGenerator.Domain.Commands;
 using Mystira.StoryGenerator.Domain.Commands.Stories;
 using Mystira.StoryGenerator.Domain.Services;
 using Mystira.StoryGenerator.Application.Utilities;
 
 namespace Mystira.StoryGenerator.Application.Handlers.Stories;
 
-public class AutoFixStoryJsonCommandHandler : ICommandHandler<AutoFixStoryJsonCommand, GenerateJsonStoryResponse>
+public static class AutoFixStoryJsonCommandHandler
 {
-    private readonly ILlmServiceFactory _llmFactory;
-    private readonly AiSettings _settings;
-    private readonly IStorySchemaProvider _schemaProvider;
-    private readonly ILogger<AutoFixStoryJsonCommandHandler> _logger;
-
-    public AutoFixStoryJsonCommandHandler(
+    public static async Task<GenerateJsonStoryResponse> Handle(
+        AutoFixStoryJsonCommand command,
         ILlmServiceFactory llmFactory,
         IOptions<AiSettings> aiOptions,
         IStorySchemaProvider schemaProvider,
-        ILogger<AutoFixStoryJsonCommandHandler> logger)
+        ILogger logger,
+        CancellationToken cancellationToken)
     {
-        _llmFactory = llmFactory;
-        _settings = aiOptions.Value;
-        _schemaProvider = schemaProvider;
-        _logger = logger;
-    }
+        var settings = aiOptions.Value;
 
-    public async Task<GenerateJsonStoryResponse> Handle(AutoFixStoryJsonCommand command, CancellationToken cancellationToken)
-    {
         try
         {
             var service = !string.IsNullOrWhiteSpace(command.Provider)
-                ? _llmFactory.GetService(command.Provider!, command.Model)
-                : _llmFactory.GetDefaultService();
+                ? llmFactory.GetService(command.Provider!, command.Model)
+                : llmFactory.GetDefaultService();
 
             if (service is null)
             {
@@ -48,8 +38,8 @@ public class AutoFixStoryJsonCommandHandler : ICommandHandler<AutoFixStoryJsonCo
 
             var resolvedModelId = string.IsNullOrWhiteSpace(command.Provider) ? null : command.Provider;
             var resolvedModelName = string.IsNullOrWhiteSpace(command.Model) ? null : command.Model;
-            var temperature = Math.Min(0.3, _settings.DefaultTemperature);
-            var maxTokens = Math.Max(2000, _settings.DefaultMaxTokens);
+            var temperature = Math.Min(0.3, settings.DefaultTemperature);
+            var maxTokens = Math.Max(2000, settings.DefaultMaxTokens);
 
             var systemPrompt = BuildAutoFixSystemPrompt();
             var messages = BuildAutoFixMessages(command.StoryJson);
@@ -62,7 +52,7 @@ public class AutoFixStoryJsonCommandHandler : ICommandHandler<AutoFixStoryJsonCo
                 MaxTokens = maxTokens,
                 Messages = messages,
                 SystemPrompt = systemPrompt,
-                JsonSchemaFormat = await LoadSchemaFormatSafeAsync()
+                JsonSchemaFormat = await LoadSchemaFormatSafeAsync(schemaProvider)
             };
 
             var response = await service.CompleteAsync(chatRequest, cancellationToken);
@@ -97,7 +87,7 @@ public class AutoFixStoryJsonCommandHandler : ICommandHandler<AutoFixStoryJsonCo
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error auto-fixing story JSON");
+            logger.LogError(ex, "Error auto-fixing story JSON");
             return new GenerateJsonStoryResponse
             {
                 Success = false,
@@ -139,18 +129,18 @@ Output must be a single valid JSON object.
         return messages;
     }
 
-    private async Task<JsonSchemaResponseFormat?> LoadSchemaFormatSafeAsync()
+    private static async Task<JsonSchemaResponseFormat?> LoadSchemaFormatSafeAsync(IStorySchemaProvider schemaProvider)
     {
         try
         {
-            var json = await _schemaProvider.GetSchemaJsonAsync();
+            var json = await schemaProvider.GetSchemaJsonAsync();
             if (!string.IsNullOrWhiteSpace(json))
             {
                 return new JsonSchemaResponseFormat
                 {
                     FormatName = "mystira-story-fixed",
                     SchemaJson = json,
-                    IsStrict = _schemaProvider.IsStrict
+                    IsStrict = schemaProvider.IsStrict
                 };
             }
         }

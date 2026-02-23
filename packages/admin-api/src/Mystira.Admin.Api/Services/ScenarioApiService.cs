@@ -12,6 +12,7 @@ using Mystira.Domain.Enums;
 using Mystira.Domain.Models;
 using Mystira.Domain.ValueObjects;
 using Mystira.Infrastructure.Data;
+using Mystira.Shared.Locking;
 
 using NJsonSchema;
 
@@ -41,6 +42,7 @@ public class ScenarioApiService : IScenarioApiService
     private readonly ICharacterMapFileService _characterService;
     private readonly IMediaMetadataService _mediaMetadataService;
     private readonly ICharacterMediaMetadataService _characterMetadataService;
+    private readonly IDistributedLockService _lockService;
 
     private static readonly JsonSchema ScenarioJsonSchema = JsonSchema.FromJsonAsync(ScenarioSchemaDefinitions.StorySchema).GetAwaiter().GetResult();
 
@@ -57,7 +59,8 @@ public class ScenarioApiService : IScenarioApiService
         IMediaApiService mediaService,
         ICharacterMapFileService characterService,
         IMediaMetadataService mediaMetadataService,
-        ICharacterMediaMetadataService characterMetadataService)
+        ICharacterMediaMetadataService characterMetadataService,
+        IDistributedLockService lockService)
     {
         _context = context;
         _logger = logger;
@@ -65,6 +68,7 @@ public class ScenarioApiService : IScenarioApiService
         _characterService = characterService;
         _mediaMetadataService = mediaMetadataService;
         _characterMetadataService = characterMetadataService;
+        _lockService = lockService;
     }
 
     public async Task<ScenarioListResponse> GetScenariosAsync(ScenarioQueryRequest request)
@@ -179,87 +183,101 @@ public class ScenarioApiService : IScenarioApiService
 
     public async Task<Scenario> CreateScenarioAsync(CreateScenarioRequest request)
     {
-        ValidateAgainstSchema(request);
+        return await _lockService.ExecuteWithLockAsync(
+            "admin:scenario:create",
+            async ct =>
+            {
+                ValidateAgainstSchema(request);
 
-        var scenario = new Scenario
-        {
-            Id = Guid.NewGuid().ToString(),
-            Title = request.Title,
-            Description = request.Description,
-            Tags = request.Tags ?? new List<string>(),
-            Difficulty = (DifficultyLevel)(int)request.Difficulty,
-            SessionLength = (SessionLength)(int)request.SessionLength,
-            Archetypes = ParseArchetypesOrThrow(request.Archetypes),
-            MinimumAge = request.MinimumAge,
-            // TODO: Add when Contracts package is updated
-            // IsFeatured = request.IsFeatured,
-            // Note: AgeGroup is read-only, derived from MinimumAge in domain model
-            CoreAxes = ParseCoreAxesOrThrow(request.CoreAxes),
-            Characters = MapCharactersFromRequest(request.Characters),
-            Scenes = MapScenesFromRequest(request.Scenes),
-            Image = request.Image,
-            // TODO: Add when Contracts package is updated
-            // ThumbnailUrl = request.ThumbnailUrl,
-            CreatedAt = DateTime.UtcNow
-        };
+                var scenario = new Scenario
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    Title = request.Title,
+                    Description = request.Description,
+                    Tags = request.Tags ?? new List<string>(),
+                    Difficulty = (DifficultyLevel)(int)request.Difficulty,
+                    SessionLength = (SessionLength)(int)request.SessionLength,
+                    Archetypes = ParseArchetypesOrThrow(request.Archetypes),
+                    MinimumAge = request.MinimumAge,
+                    // TODO: Add when Contracts package is updated
+                    // IsFeatured = request.IsFeatured,
+                    // Note: AgeGroup is read-only, derived from MinimumAge in domain model
+                    CoreAxes = ParseCoreAxesOrThrow(request.CoreAxes),
+                    Characters = MapCharactersFromRequest(request.Characters),
+                    Scenes = MapScenesFromRequest(request.Scenes),
+                    Image = request.Image,
+                    // TODO: Add when Contracts package is updated
+                    // ThumbnailUrl = request.ThumbnailUrl,
+                    CreatedAt = DateTime.UtcNow
+                };
 
-        _context.Scenarios.Add(scenario);
+                _context.Scenarios.Add(scenario);
 
-        // Validate the full scenario model before persisting
-        await ValidateScenarioAsync(scenario);
+                // Validate the full scenario model before persisting
+                await ValidateScenarioAsync(scenario);
 
-        try
-        {
-            await _context.SaveChangesAsync();
-        }
-        catch (Exception e)
-        {
-            _logger.LogError(e, "Error saving scenario: {ScenarioId}", scenario.Id);
-            throw;
-        }
+                try
+                {
+                    await _context.SaveChangesAsync(ct);
+                }
+                catch (Exception e)
+                {
+                    _logger.LogError(e, "Error saving scenario: {ScenarioId}", scenario.Id);
+                    throw;
+                }
 
-        _logger.LogInformation("Created new scenario: {ScenarioId} - {Title}", scenario.Id, scenario.Title);
-        return scenario;
+                _logger.LogInformation("Created new scenario: {ScenarioId} - {Title}", scenario.Id, scenario.Title);
+                return scenario;
+            },
+            expiry: TimeSpan.FromSeconds(30),
+            wait: TimeSpan.FromSeconds(10));
     }
 
     public async Task<Scenario?> UpdateScenarioAsync(string id, CreateScenarioRequest request)
     {
-        var scenario = await _context.Scenarios.FirstOrDefaultAsync(s => s.Id == id);
-        if (scenario == null)
-        {
-            return null;
-        }
+        return await _lockService.ExecuteWithLockAsync(
+            $"admin:scenario:{id}",
+            async ct =>
+            {
+                var scenario = await _context.Scenarios.FirstOrDefaultAsync(s => s.Id == id, ct);
+                if (scenario == null)
+                {
+                    return null;
+                }
 
-        ValidateAgainstSchema(request);
+                ValidateAgainstSchema(request);
 
-        scenario.Title = request.Title;
-        scenario.Description = request.Description;
-        scenario.Tags = request.Tags ?? new List<string>();
-        scenario.Difficulty = (DifficultyLevel)(int)request.Difficulty;
-        scenario.SessionLength = (SessionLength)(int)request.SessionLength;
-        scenario.Archetypes = ParseArchetypesOrThrow(request.Archetypes);
-        scenario.MinimumAge = request.MinimumAge;
-        // TODO: Add when Contracts package is updated
-        // scenario.IsFeatured = request.IsFeatured;
-        scenario.CoreAxes = ParseCoreAxesOrThrow(request.CoreAxes);
-        scenario.Characters = MapCharactersFromRequest(request.Characters);
-        scenario.Scenes = MapScenesFromRequest(request.Scenes);
-        scenario.Image = request.Image;
-        // TODO: Add when Contracts package is updated
-        // scenario.ThumbnailUrl = request.ThumbnailUrl;
+                scenario.Title = request.Title;
+                scenario.Description = request.Description;
+                scenario.Tags = request.Tags ?? new List<string>();
+                scenario.Difficulty = (DifficultyLevel)(int)request.Difficulty;
+                scenario.SessionLength = (SessionLength)(int)request.SessionLength;
+                scenario.Archetypes = ParseArchetypesOrThrow(request.Archetypes);
+                scenario.MinimumAge = request.MinimumAge;
+                // TODO: Add when Contracts package is updated
+                // scenario.IsFeatured = request.IsFeatured;
+                scenario.CoreAxes = ParseCoreAxesOrThrow(request.CoreAxes);
+                scenario.Characters = MapCharactersFromRequest(request.Characters);
+                scenario.Scenes = MapScenesFromRequest(request.Scenes);
+                scenario.Image = request.Image;
+                // TODO: Add when Contracts package is updated
+                // scenario.ThumbnailUrl = request.ThumbnailUrl;
 
-        // AgeGroup is immutable after creation; reject any attempt to change it
-        if (!string.IsNullOrEmpty(request.AgeGroup) && scenario.AgeGroup?.Value != request.AgeGroup)
-        {
-            throw new BusinessRuleException("ImmutableAgeGroup", $"AgeGroup cannot be changed after scenario creation. Current: {scenario.AgeGroup?.Value}, Requested: {request.AgeGroup}");
-        }
+                // AgeGroup is immutable after creation; reject any attempt to change it
+                if (!string.IsNullOrEmpty(request.AgeGroup) && scenario.AgeGroup?.Value != request.AgeGroup)
+                {
+                    throw new BusinessRuleException("ImmutableAgeGroup", $"AgeGroup cannot be changed after scenario creation. Current: {scenario.AgeGroup?.Value}, Requested: {request.AgeGroup}");
+                }
 
-        await ValidateScenarioAsync(scenario);
+                await ValidateScenarioAsync(scenario);
 
-        await _context.SaveChangesAsync();
+                await _context.SaveChangesAsync(ct);
 
-        _logger.LogInformation("Updated scenario: {ScenarioId} - {Title}", scenario.Id, scenario.Title);
-        return scenario;
+                _logger.LogInformation("Updated scenario: {ScenarioId} - {Title}", scenario.Id, scenario.Title);
+                return scenario;
+            },
+            expiry: TimeSpan.FromSeconds(30),
+            wait: TimeSpan.FromSeconds(10));
     }
 
     private static List<string> ParseArchetypesOrThrow(List<string>? values)
@@ -304,17 +322,24 @@ public class ScenarioApiService : IScenarioApiService
 
     public async Task<bool> DeleteScenarioAsync(string id)
     {
-        var scenario = await _context.Scenarios.FirstOrDefaultAsync(s => s.Id == id);
-        if (scenario == null)
-        {
-            return false;
-        }
+        return await _lockService.ExecuteWithLockAsync(
+            $"admin:scenario:{id}",
+            async ct =>
+            {
+                var scenario = await _context.Scenarios.FirstOrDefaultAsync(s => s.Id == id, ct);
+                if (scenario == null)
+                {
+                    return false;
+                }
 
-        _context.Scenarios.Remove(scenario);
-        await _context.SaveChangesAsync();
+                _context.Scenarios.Remove(scenario);
+                await _context.SaveChangesAsync(ct);
 
-        _logger.LogInformation("Deleted scenario: {ScenarioId} - {Title}", scenario.Id, scenario.Title);
-        return true;
+                _logger.LogInformation("Deleted scenario: {ScenarioId} - {Title}", scenario.Id, scenario.Title);
+                return true;
+            },
+            expiry: TimeSpan.FromSeconds(30),
+            wait: TimeSpan.FromSeconds(10));
     }
 
     public async Task<List<Scenario>> GetScenariosByAgeGroupAsync(string ageGroup)

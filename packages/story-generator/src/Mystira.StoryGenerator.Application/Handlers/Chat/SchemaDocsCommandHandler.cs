@@ -1,51 +1,39 @@
 using System.Text;
 using Microsoft.Extensions.Logging;
 using Mystira.StoryGenerator.Contracts.Chat;
-using Mystira.StoryGenerator.Domain.Commands;
 using Mystira.StoryGenerator.Domain.Commands.Chat;
 using Mystira.StoryGenerator.Domain.Services;
 
 namespace Mystira.StoryGenerator.Application.Handlers.Chat;
 
-public class SchemaDocsCommandHandler : ICommandHandler<SchemaDocsCommand, ChatCompletionResponse>
+public static class SchemaDocsCommandHandler
 {
     private const int SchemaSnippetLimit = 10000;
 
-    private readonly ILlmServiceFactory _llmFactory;
-    private readonly IInstructionBlockService _instructionBlockService;
-    private readonly IStorySchemaProvider _schemaProvider;
-    private readonly ILogger<SchemaDocsCommandHandler> _logger;
-
-    public SchemaDocsCommandHandler(
+    public static async Task<ChatCompletionResponse> Handle(
+        SchemaDocsCommand command,
         ILlmServiceFactory llmFactory,
         IInstructionBlockService instructionBlockService,
         IStorySchemaProvider schemaProvider,
-        ILogger<SchemaDocsCommandHandler> logger)
-    {
-        _llmFactory = llmFactory;
-        _instructionBlockService = instructionBlockService;
-        _schemaProvider = schemaProvider;
-        _logger = logger;
-    }
-
-    public async Task<ChatCompletionResponse> Handle(SchemaDocsCommand command, CancellationToken cancellationToken)
+        ILogger logger,
+        CancellationToken cancellationToken)
     {
         try
         {
             var context = command.Context ?? throw new InvalidOperationException("Chat context is required");
-            var service = ResolveService(context);
+            var service = ResolveService(context, llmFactory);
             if (service is null)
             {
                 return Failure("No LLM services are currently available for schema explanations.");
             }
 
-            var schemaJson = await _schemaProvider.GetSchemaJsonAsync(cancellationToken);
+            var schemaJson = await schemaProvider.GetSchemaJsonAsync(cancellationToken);
             if (string.IsNullOrWhiteSpace(schemaJson))
             {
                 return Failure("The Mystira story schema could not be loaded. Please verify the schema configuration.");
             }
 
-            var instructionBlock = await ResolveInstructionBlockAsync(command.UserQuery, context, cancellationToken);
+            var instructionBlock = await ResolveInstructionBlockAsync(command.UserQuery, context, instructionBlockService, cancellationToken);
             var messages = new List<MystiraChatMessage>();
 
             if (!string.IsNullOrWhiteSpace(instructionBlock))
@@ -93,19 +81,23 @@ public class SchemaDocsCommandHandler : ICommandHandler<SchemaDocsCommand, ChatC
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error answering schema documentation question");
+            logger.LogError(ex, "Error answering schema documentation question");
             return Failure("An unexpected error occurred while answering schema questions.");
         }
     }
 
-    private ILLMService? ResolveService(ChatContext context)
+    private static ILLMService? ResolveService(ChatContext context, ILlmServiceFactory llmFactory)
     {
         return !string.IsNullOrWhiteSpace(context.Provider)
-            ? _llmFactory.GetService(context.Provider!)
-            : _llmFactory.GetDefaultService();
+            ? llmFactory.GetService(context.Provider!)
+            : llmFactory.GetDefaultService();
     }
 
-    private async Task<string?> ResolveInstructionBlockAsync(string? userQuery, ChatContext context, CancellationToken cancellationToken)
+    private static async Task<string?> ResolveInstructionBlockAsync(
+        string? userQuery,
+        ChatContext context,
+        IInstructionBlockService instructionBlockService,
+        CancellationToken cancellationToken)
     {
         if (string.IsNullOrWhiteSpace(userQuery))
         {
@@ -123,14 +115,14 @@ public class SchemaDocsCommandHandler : ICommandHandler<SchemaDocsCommand, ChatC
             AgeGroup = ageGroup
         };
 
-        return await _instructionBlockService.BuildInstructionBlockAsync(searchContext, cancellationToken);
+        return await instructionBlockService.BuildInstructionBlockAsync(searchContext, cancellationToken);
     }
 
     private static string? ExtractAgeGroupFromContext(ChatContext? context)
     {
         if (context?.CurrentStory == null)
             return null;
-        
+
         return ExtractAgeGroupFromJson(context.CurrentStory.Content);
     }
 

@@ -1,41 +1,31 @@
 using System.Text;
 using Microsoft.Extensions.Logging;
 using Mystira.StoryGenerator.Contracts.Chat;
-using Mystira.StoryGenerator.Domain.Commands;
 using Mystira.StoryGenerator.Domain.Commands.Chat;
 using Mystira.StoryGenerator.Domain.Services;
 
 namespace Mystira.StoryGenerator.Application.Handlers.Chat;
 
-public class GuidelinesCommandHandler : ICommandHandler<GuidelinesCommand, ChatCompletionResponse>
+public static class GuidelinesCommandHandler
 {
-    private readonly ILlmServiceFactory _llmFactory;
-    private readonly IInstructionBlockService _instructionBlockService;
-    private readonly ILogger<GuidelinesCommandHandler> _logger;
-
-    public GuidelinesCommandHandler(
+    public static async Task<ChatCompletionResponse> Handle(
+        GuidelinesCommand command,
         ILlmServiceFactory llmFactory,
         IInstructionBlockService instructionBlockService,
-        ILogger<GuidelinesCommandHandler> logger)
-    {
-        _llmFactory = llmFactory;
-        _instructionBlockService = instructionBlockService;
-        _logger = logger;
-    }
-
-    public async Task<ChatCompletionResponse> Handle(GuidelinesCommand command, CancellationToken cancellationToken)
+        ILogger logger,
+        CancellationToken cancellationToken)
     {
         try
         {
             var context = command.Context ?? throw new InvalidOperationException("Chat context is required");
-            var service = ResolveService(context);
+            var service = ResolveService(context, llmFactory);
             if (service is null)
             {
                 return Failure("No LLM services are currently available for guidelines.");
             }
 
             var contextSummary = ChatContextSummaryBuilder.BuildContextSummary(context);
-            var ragBlock = await ResolveInstructionBlockAsync(command.UserQuery, contextSummary, context, cancellationToken);
+            var ragBlock = await ResolveInstructionBlockAsync(command.UserQuery, contextSummary, context, instructionBlockService, cancellationToken);
             var messages = new List<MystiraChatMessage>();
 
             if (!string.IsNullOrWhiteSpace(ragBlock))
@@ -85,19 +75,24 @@ public class GuidelinesCommandHandler : ICommandHandler<GuidelinesCommand, ChatC
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error answering guidelines question");
+            logger.LogError(ex, "Error answering guidelines question");
             return Failure("An unexpected error occurred while sharing guidelines.");
         }
     }
 
-    private ILLMService? ResolveService(ChatContext context)
+    private static ILLMService? ResolveService(ChatContext context, ILlmServiceFactory llmFactory)
     {
         return !string.IsNullOrWhiteSpace(context.Provider)
-            ? _llmFactory.GetService(context.Provider!)
-            : _llmFactory.GetDefaultService();
+            ? llmFactory.GetService(context.Provider!)
+            : llmFactory.GetDefaultService();
     }
 
-    private async Task<string?> ResolveInstructionBlockAsync(string? userQuery, string contextSummary, ChatContext context, CancellationToken cancellationToken)
+    private static async Task<string?> ResolveInstructionBlockAsync(
+        string? userQuery,
+        string contextSummary,
+        ChatContext context,
+        IInstructionBlockService instructionBlockService,
+        CancellationToken cancellationToken)
     {
         var builder = new StringBuilder();
         if (!string.IsNullOrWhiteSpace(userQuery))
@@ -122,14 +117,14 @@ public class GuidelinesCommandHandler : ICommandHandler<GuidelinesCommand, ChatC
             AgeGroup = ageGroup
         };
 
-        return await _instructionBlockService.BuildInstructionBlockAsync(searchContext, cancellationToken);
+        return await instructionBlockService.BuildInstructionBlockAsync(searchContext, cancellationToken);
     }
 
     private static string? ExtractAgeGroupFromContext(ChatContext? context)
     {
         if (context?.CurrentStory == null)
             return null;
-        
+
         return ExtractAgeGroupFromJson(context.CurrentStory.Content);
     }
 

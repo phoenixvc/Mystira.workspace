@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Mystira.Domain.Models;
 using Mystira.Infrastructure.Data;
+using Mystira.Shared.Locking;
 
 namespace Mystira.Admin.Api.Services;
 
@@ -8,11 +9,16 @@ public class ContentBundleAdminService : IContentBundleAdminService
 {
     private readonly MystiraAppDbContext _context;
     private readonly ILogger<ContentBundleAdminService> _logger;
+    private readonly IDistributedLockService _lockService;
 
-    public ContentBundleAdminService(MystiraAppDbContext context, ILogger<ContentBundleAdminService> logger)
+    public ContentBundleAdminService(
+        MystiraAppDbContext context,
+        ILogger<ContentBundleAdminService> logger,
+        IDistributedLockService lockService)
     {
         _context = context;
         _logger = logger;
+        _lockService = lockService;
     }
 
     public async Task<List<ContentBundle>> GetAllAsync()
@@ -27,45 +33,66 @@ public class ContentBundleAdminService : IContentBundleAdminService
 
     public async Task<ContentBundle> CreateAsync(ContentBundle bundle)
     {
-        if (string.IsNullOrWhiteSpace(bundle.Id))
-        {
-            bundle.Id = Guid.NewGuid().ToString("N");
-        }
-        _context.ContentBundles.Add(bundle);
-        await _context.SaveChangesAsync();
-        return bundle;
+        return await _lockService.ExecuteWithLockAsync(
+            $"admin:bundle:create",
+            async ct =>
+            {
+                if (string.IsNullOrWhiteSpace(bundle.Id))
+                {
+                    bundle.Id = Guid.NewGuid().ToString("N");
+                }
+                _context.ContentBundles.Add(bundle);
+                await _context.SaveChangesAsync(ct);
+                return bundle;
+            },
+            expiry: TimeSpan.FromSeconds(30),
+            wait: TimeSpan.FromSeconds(10));
     }
 
     public async Task<ContentBundle?> UpdateAsync(string id, ContentBundle bundle)
     {
-        var existing = await _context.ContentBundles.FindAsync(id);
-        if (existing == null)
-        {
-            return null;
-        }
+        return await _lockService.ExecuteWithLockAsync(
+            $"admin:bundle:{id}",
+            async ct =>
+            {
+                var existing = await _context.ContentBundles.FindAsync([id], ct);
+                if (existing == null)
+                {
+                    return null;
+                }
 
-        existing.Title = bundle.Title;
-        existing.Description = bundle.Description;
-        existing.ImageId = bundle.ImageId;
-        existing.ScenarioIds = bundle.ScenarioIds?.ToList() ?? new List<string>();
-        existing.Prices = bundle.Prices?.Select(p => new BundlePrice { Value = p.Value, Currency = p.Currency }).ToList() ?? new List<BundlePrice>();
-        // IsFree and AgeGroup are computed/read-only properties based on Prices and scenarios
-        // They cannot be directly set - the values are derived from the underlying data
+                existing.Title = bundle.Title;
+                existing.Description = bundle.Description;
+                existing.ImageId = bundle.ImageId;
+                existing.ScenarioIds = bundle.ScenarioIds?.ToList() ?? new List<string>();
+                existing.Prices = bundle.Prices?.Select(p => new BundlePrice { Value = p.Value, Currency = p.Currency }).ToList() ?? new List<BundlePrice>();
+                // IsFree and AgeGroup are computed/read-only properties based on Prices and scenarios
+                // They cannot be directly set - the values are derived from the underlying data
 
-        await _context.SaveChangesAsync();
-        return existing;
+                await _context.SaveChangesAsync(ct);
+                return existing;
+            },
+            expiry: TimeSpan.FromSeconds(30),
+            wait: TimeSpan.FromSeconds(10));
     }
 
     public async Task<bool> DeleteAsync(string id)
     {
-        var existing = await _context.ContentBundles.FindAsync(id);
-        if (existing == null)
-        {
-            return false;
-        }
+        return await _lockService.ExecuteWithLockAsync(
+            $"admin:bundle:{id}",
+            async ct =>
+            {
+                var existing = await _context.ContentBundles.FindAsync([id], ct);
+                if (existing == null)
+                {
+                    return false;
+                }
 
-        _context.ContentBundles.Remove(existing);
-        await _context.SaveChangesAsync();
-        return true;
+                _context.ContentBundles.Remove(existing);
+                await _context.SaveChangesAsync(ct);
+                return true;
+            },
+            expiry: TimeSpan.FromSeconds(30),
+            wait: TimeSpan.FromSeconds(10));
     }
 }

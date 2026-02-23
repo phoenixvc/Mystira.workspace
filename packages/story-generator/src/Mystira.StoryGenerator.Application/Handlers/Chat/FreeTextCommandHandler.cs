@@ -1,37 +1,25 @@
 using System.Text;
 using Microsoft.Extensions.Logging;
 using Mystira.StoryGenerator.Contracts.Chat;
-using Mystira.StoryGenerator.Domain.Commands;
 using Mystira.StoryGenerator.Domain.Commands.Chat;
 using Mystira.StoryGenerator.Domain.Services;
 
 namespace Mystira.StoryGenerator.Application.Handlers.Chat;
 
-public class FreeTextCommandHandler : ICommandHandler<FreeTextCommand, ChatCompletionResponse>
+public static class FreeTextCommandHandler
 {
-    private readonly ILlmServiceFactory _llmFactory;
-    private readonly IInstructionBlockService _instructionBlockService;
-    private readonly ILlmIntentLlmClassificationService _llmIntentLlmClassificationService;
-    private readonly ILogger<FreeTextCommandHandler> _logger;
-
-    public FreeTextCommandHandler(
+    public static async Task<ChatCompletionResponse> Handle(
+        FreeTextCommand command,
         ILlmServiceFactory llmFactory,
         IInstructionBlockService instructionBlockService,
         ILlmIntentLlmClassificationService llmIntentLlmClassificationService,
-        ILogger<FreeTextCommandHandler> logger)
-    {
-        _llmFactory = llmFactory;
-        _instructionBlockService = instructionBlockService;
-        _llmIntentLlmClassificationService = llmIntentLlmClassificationService;
-        _logger = logger;
-    }
-
-    public async Task<ChatCompletionResponse> Handle(FreeTextCommand command, CancellationToken cancellationToken)
+        ILogger logger,
+        CancellationToken cancellationToken)
     {
         try
         {
             var context = command.Context ?? throw new InvalidOperationException("Chat context is required");
-            var service = ResolveService(context);
+            var service = ResolveService(context, llmFactory);
             if (service is null)
             {
                 return Failure("No LLM services are currently available");
@@ -42,7 +30,7 @@ public class FreeTextCommandHandler : ICommandHandler<FreeTextCommand, ChatCompl
                 : new List<MystiraChatMessage>();
 
             var systemPrompt = BuildSystemPrompt(command.Intent, context.SystemPrompt);
-            var instructionBlock = await ResolveInstructionBlockAsync(context, command.Intent, cancellationToken);
+            var instructionBlock = await ResolveInstructionBlockAsync(context, command.Intent, instructionBlockService, llmIntentLlmClassificationService, logger, cancellationToken);
             if (!string.IsNullOrWhiteSpace(instructionBlock))
             {
                 messages.Insert(0, new MystiraChatMessage
@@ -74,19 +62,25 @@ public class FreeTextCommandHandler : ICommandHandler<FreeTextCommand, ChatCompl
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error handling free-text request");
+            logger.LogError(ex, "Error handling free-text request");
             return Failure("An unexpected error occurred while generating the response.");
         }
     }
 
-    private ILLMService? ResolveService(ChatContext context)
+    private static ILLMService? ResolveService(ChatContext context, ILlmServiceFactory llmFactory)
     {
         return !string.IsNullOrWhiteSpace(context.Provider)
-            ? _llmFactory.GetService(context.Provider!)
-            : _llmFactory.GetDefaultService();
+            ? llmFactory.GetService(context.Provider!)
+            : llmFactory.GetDefaultService();
     }
 
-    private async Task<string?> ResolveInstructionBlockAsync(ChatContext context, string? intent, CancellationToken cancellationToken)
+    private static async Task<string?> ResolveInstructionBlockAsync(
+        ChatContext context,
+        string? intent,
+        IInstructionBlockService instructionBlockService,
+        ILlmIntentLlmClassificationService llmIntentLlmClassificationService,
+        ILogger logger,
+        CancellationToken cancellationToken)
     {
         if (context.Messages == null || context.Messages.Count == 0)
         {
@@ -121,10 +115,10 @@ public class FreeTextCommandHandler : ICommandHandler<FreeTextCommand, ChatCompl
             : new[] { "guidelines" };
         var ageGroup = context?.CurrentStory?.AgeGroup ?? ExtractAgeGroupFromContext(context);
 
-        var classification = await _llmIntentLlmClassificationService.ClassifyAsync(queryText, cancellationToken);
+        var classification = await llmIntentLlmClassificationService.ClassifyAsync(queryText, cancellationToken);
         if (classification != null)
         {
-            _logger.LogInformation("Intent classified for free-text handler: {Categories} / {Types}", classification.Categories, classification.InstructionTypes);
+            logger.LogInformation("Intent classified for free-text handler: {Categories} / {Types}", classification.Categories, classification.InstructionTypes);
             categories = classification.Categories;
             instructionTypes = classification.InstructionTypes;
         }
@@ -138,7 +132,7 @@ public class FreeTextCommandHandler : ICommandHandler<FreeTextCommand, ChatCompl
             AgeGroup = ageGroup
         };
 
-        return await _instructionBlockService.BuildInstructionBlockAsync(searchContext, cancellationToken);
+        return await instructionBlockService.BuildInstructionBlockAsync(searchContext, cancellationToken);
     }
 
     private static string? ExtractAgeGroupFromContext(ChatContext? context)

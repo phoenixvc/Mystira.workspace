@@ -1,6 +1,6 @@
 using System.Text;
-using MediatR;
 using Microsoft.Extensions.Logging;
+using Wolverine;
 using Mystira.StoryGenerator.Contracts.Chat;
 using Mystira.StoryGenerator.Contracts.Stories;
 using Mystira.StoryGenerator.Domain.Commands.Chat;
@@ -11,23 +11,23 @@ namespace Mystira.StoryGenerator.Application.Services;
 
 /// <summary>
 /// Implementation of chat orchestration service that coordinates intent classification,
-/// command dispatch via MediatR, and response mapping
+/// command dispatch via Wolverine message bus, and response mapping
 /// </summary>
 public class ChatOrchestrationService : IChatOrchestrationService
 {
     private readonly ICommandRouter _commandRouter;
-    private readonly IMediator _mediator;
+    private readonly IMessageBus _bus;
     private readonly ILlmServiceFactory _llmServiceFactory;
     private readonly ILogger<ChatOrchestrationService> _logger;
 
     public ChatOrchestrationService(
         ICommandRouter commandRouter,
-        IMediator mediator,
+        IMessageBus bus,
         ILlmServiceFactory llmServiceFactory,
         ILogger<ChatOrchestrationService> logger)
     {
         _commandRouter = commandRouter;
-        _mediator = mediator;
+        _bus = bus;
         _llmServiceFactory = llmServiceFactory;
         _logger = logger;
     }
@@ -253,7 +253,7 @@ public class ChatOrchestrationService : IChatOrchestrationService
         };
 
         var command = new GenerateStoryCommand(request, userMessage, context.Messages);
-        var result = await _mediator.Send(command, cancellationToken);
+        var result = await _bus.InvokeAsync<GenerateJsonStoryResponse>(command, cancellationToken);
 
         if (result.Success && result.IsIncomplete)
         {
@@ -351,7 +351,7 @@ Respond with ONLY the title or 'NO_IDEA'.";
         };
 
         var command = new RefineStoryCommand(request, userMessage, userMessage, context.CurrentStory, context.Messages);
-        var result = await _mediator.Send(command, cancellationToken);
+        var result = await _bus.InvokeAsync<GenerateJsonStoryResponse>(command, cancellationToken);
 
         if (result.Success && result.IsIncomplete)
         {
@@ -402,7 +402,7 @@ Respond with ONLY the title or 'NO_IDEA'.";
         var refinementPrompt = "Continue generating the story from where you left off. Return ONLY the complete story JSON incorporating all the content provided below and completing it.";
 
         var command = new RefineStoryCommand(request, refinementPrompt, refinementPrompt, context.CurrentStory, context.Messages);
-        var result = await _mediator.Send(command, cancellationToken);
+        var result = await _bus.InvokeAsync<GenerateJsonStoryResponse>(command, cancellationToken);
 
         if (result.Success && result.IsIncomplete)
         {
@@ -449,7 +449,7 @@ Respond with ONLY the title or 'NO_IDEA'.";
         };
 
         var command = new ValidateStoryCommand(request, userMessage, history: context.Messages);
-        var result = await _mediator.Send(command, cancellationToken);
+        var result = await _bus.InvokeAsync<ValidationResponse>(command, cancellationToken);
 
         return new ChatOrchestrationResponse
         {
@@ -476,7 +476,7 @@ Respond with ONLY the title or 'NO_IDEA'.";
         }
 
         var command = new AutoFixStoryJsonCommand(storyContent, context.Provider, context.Model, userMessage, history: context.Messages);
-        var result = await _mediator.Send(command, cancellationToken);
+        var result = await _bus.InvokeAsync<GenerateJsonStoryResponse>(command, cancellationToken);
 
         return new ChatOrchestrationResponse
         {
@@ -504,7 +504,7 @@ Respond with ONLY the title or 'NO_IDEA'.";
         }
 
         var command = new SummarizeStoryCommand(storyContent, context.Provider, context.Model, userMessage, context.Messages);
-        var result = await _mediator.Send(command, cancellationToken);
+        var result = await _bus.InvokeAsync<ChatCompletionResponse>(command, cancellationToken);
 
         return new ChatOrchestrationResponse
         {
@@ -521,7 +521,7 @@ Respond with ONLY the title or 'NO_IDEA'.";
     {
         // Help command does not require an LLM service to be available; route directly to handler.
         var command = new HelpCommand(userMessage, context.Messages);
-        var result = await _mediator.Send(command, cancellationToken);
+        var result = await _bus.InvokeAsync<ChatCompletionResponse>(command, cancellationToken);
 
         return new ChatOrchestrationResponse
         {
@@ -536,7 +536,7 @@ Respond with ONLY the title or 'NO_IDEA'.";
     private async Task<ChatOrchestrationResponse> HandleSchemaDocsCommandAsync(string instructionType, string userMessage, ChatContext context, CancellationToken cancellationToken)
     {
         var command = new SchemaDocsCommand(context, userMessage, context.Messages);
-        var result = await _mediator.Send(command, cancellationToken);
+        var result = await _bus.InvokeAsync<ChatCompletionResponse>(command, cancellationToken);
 
         return new ChatOrchestrationResponse
         {
@@ -551,7 +551,7 @@ Respond with ONLY the title or 'NO_IDEA'.";
     private async Task<ChatOrchestrationResponse> HandleSafetyPolicyCommandAsync(string instructionType, string userMessage, ChatContext context, CancellationToken cancellationToken)
     {
         var command = new SafetyPolicyCommand(context, userMessage, context.Messages);
-        var result = await _mediator.Send(command, cancellationToken);
+        var result = await _bus.InvokeAsync<ChatCompletionResponse>(command, cancellationToken);
 
         return new ChatOrchestrationResponse
         {
@@ -566,7 +566,7 @@ Respond with ONLY the title or 'NO_IDEA'.";
     private async Task<ChatOrchestrationResponse> HandleRequirementsCommandAsync(string instructionType, string userMessage, ChatContext context, CancellationToken cancellationToken)
     {
         var command = new RequirementsCommand(context, userMessage, context.Messages);
-        var result = await _mediator.Send(command, cancellationToken);
+        var result = await _bus.InvokeAsync<ChatCompletionResponse>(command, cancellationToken);
 
         return new ChatOrchestrationResponse
         {
@@ -581,7 +581,7 @@ Respond with ONLY the title or 'NO_IDEA'.";
     private async Task<ChatOrchestrationResponse> HandleGuidelinesCommandAsync(string instructionType, string userMessage, ChatContext context, CancellationToken cancellationToken)
     {
         var command = new GuidelinesCommand(context, userMessage, context.Messages);
-        var result = await _mediator.Send(command, cancellationToken);
+        var result = await _bus.InvokeAsync<ChatCompletionResponse>(command, cancellationToken);
 
         return new ChatOrchestrationResponse
         {
@@ -596,7 +596,7 @@ Respond with ONLY the title or 'NO_IDEA'.";
     private async Task<ChatOrchestrationResponse> HandleFreeTextCommandAsync(string instructionType, ChatContext context, CancellationToken cancellationToken)
     {
         var command = new FreeTextCommand(context, instructionType, context.Messages);
-        var result = await _mediator.Send(command, cancellationToken);
+        var result = await _bus.InvokeAsync<ChatCompletionResponse>(command, cancellationToken);
 
         return new ChatOrchestrationResponse
         {

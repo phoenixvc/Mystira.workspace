@@ -1,11 +1,16 @@
-using MediatR;
-
 namespace Mystira.StoryGenerator.Domain.Commands;
 
-public interface ICommand<out TResponse> : IRequest<TResponse>
+/// <summary>
+/// Marker interface for commands with a response.
+/// Wolverine discovers handlers by convention (static Handle method).
+/// </summary>
+public interface ICommand<out TResponse>
 {
 }
 
-public interface ICommand : IRequest
+/// <summary>
+/// Marker interface for commands without a response.
+/// </summary>
+public interface ICommand
 {
 }

@@ -1,4 +1,3 @@
-using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Mystira.StoryGenerator.Contracts.Chat;
@@ -14,7 +13,7 @@ namespace Mystira.StoryGenerator.Api.Controllers;
 [Route("api/[controller]")]
 public class StoriesController : ControllerBase
 {
-    private readonly IMediator _mediator;
+    private readonly Wolverine.IMessageBus _bus;
     private readonly IStoryValidationService _validationService;
     private readonly ILlmServiceFactory _llmFactory;
     private readonly AiSettings _aiSettings;
@@ -22,14 +21,14 @@ public class StoriesController : ControllerBase
     private readonly ILogger<StoriesController> _logger;
 
     public StoriesController(
-        IMediator mediator,
+        Wolverine.IMessageBus bus,
         IStoryValidationService validationService,
         ILlmServiceFactory llmFactory,
         IStorySchemaProvider schemaProvider,
         IOptions<AiSettings> aiOptions,
         ILogger<StoriesController> logger)
     {
-        _mediator = mediator;
+        _bus = bus;
         _validationService = validationService;
         _llmFactory = llmFactory;
         _schemaProvider = schemaProvider;
@@ -59,7 +58,7 @@ public class StoriesController : ControllerBase
             }
 
             var command = new ValidateStoryCommand(request);
-            var result = await _mediator.Send(command, cancellationToken);
+            var result = await _bus.InvokeAsync<ValidationResponse>(command, cancellationToken);
             return Ok(result);
         }
         catch (Exception ex)

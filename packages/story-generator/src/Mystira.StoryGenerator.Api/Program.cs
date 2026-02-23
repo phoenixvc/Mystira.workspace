@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.Extensions.Options;
+using Wolverine;
 using Mystira.StoryGenerator.Api.Infrastructure.Agents;
 using Mystira.StoryGenerator.Api.Services;
 using Mystira.StoryGenerator.Api.Services.ContinuityAsync;
@@ -55,8 +56,12 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-builder.Services.AddMediatR(cfg =>
-    cfg.RegisterServicesFromAssemblyContaining(typeof(Mystira.StoryGenerator.Application.Handlers.Stories.GenerateStoryCommandHandler)));
+builder.Host.UseWolverine(opts =>
+{
+    opts.Discovery.IncludeAssembly(
+        typeof(Mystira.StoryGenerator.Application.Handlers.Stories.GenerateStoryCommandHandler).Assembly);
+    opts.Policies.UseDurableLocalQueues();
+});
 
 builder.Services.AddOptions<AiSettings>()
     .Bind(builder.Configuration.GetSection(AiSettings.SectionName))

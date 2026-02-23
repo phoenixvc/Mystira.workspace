@@ -4,7 +4,6 @@ using Microsoft.Extensions.Options;
 using Mystira.StoryGenerator.Contracts.Chat;
 using Mystira.StoryGenerator.Contracts.Configuration;
 using Mystira.StoryGenerator.Contracts.Stories;
-using Mystira.StoryGenerator.Domain.Commands;
 using Mystira.StoryGenerator.Domain.Commands.Stories;
 using Mystira.StoryGenerator.Domain.Services;
 using Mystira.StoryGenerator.Application.Services;
@@ -12,43 +11,28 @@ using Mystira.StoryGenerator.Application.Utilities;
 
 namespace Mystira.StoryGenerator.Application.Handlers.Stories;
 
-public class GenerateStoryCommandHandler : ICommandHandler<GenerateStoryCommand, GenerateJsonStoryResponse>
+public static class GenerateStoryCommandHandler
 {
-    private readonly ILlmServiceFactory _llmFactory;
-    private readonly AiSettings _settings;
-    private readonly IStorySchemaProvider _schemaProvider;
-    private readonly IInstructionBlockService _instructionBlockService;
-    private readonly ILlmIntentLlmClassificationService _llmIntentLlmClassificationService;
-    private readonly IStoryMediaProcessor _mediaProcessor;
-    private readonly ILogger<GenerateStoryCommandHandler> _logger;
-
-    public GenerateStoryCommandHandler(
+    public static async Task<GenerateJsonStoryResponse> Handle(
+        GenerateStoryCommand command,
         ILlmServiceFactory llmFactory,
         IOptions<AiSettings> aiOptions,
         IStorySchemaProvider schemaProvider,
         IInstructionBlockService instructionBlockService,
         ILlmIntentLlmClassificationService llmIntentLlmClassificationService,
         IStoryMediaProcessor mediaProcessor,
-        ILogger<GenerateStoryCommandHandler> logger)
+        ILogger logger,
+        CancellationToken cancellationToken)
     {
-        _llmFactory = llmFactory;
-        _settings = aiOptions.Value;
-        _schemaProvider = schemaProvider;
-        _instructionBlockService = instructionBlockService;
-        _llmIntentLlmClassificationService = llmIntentLlmClassificationService;
-        _mediaProcessor = mediaProcessor;
-        _logger = logger;
-    }
+        var settings = aiOptions.Value;
 
-    public async Task<GenerateJsonStoryResponse> Handle(GenerateStoryCommand command, CancellationToken cancellationToken)
-    {
         try
         {
             var request = command.Request;
             var userQuery = command.UserQuery;
             var service = !string.IsNullOrWhiteSpace(request.Provider)
-                ? _llmFactory.GetService(request.Provider!, request.Model)
-                : _llmFactory.GetDefaultService();
+                ? llmFactory.GetService(request.Provider!, request.Model)
+                : llmFactory.GetDefaultService();
 
             if (service is null)
             {
@@ -61,18 +45,18 @@ public class GenerateStoryCommandHandler : ICommandHandler<GenerateStoryCommand,
 
             var resolvedModelId = string.IsNullOrWhiteSpace(request.ModelId) ? null : request.ModelId;
             var resolvedModelName = string.IsNullOrWhiteSpace(request.Model) ? null : request.Model;
-            var temperature = _settings.DefaultTemperature;
-            var maxTokens = Math.Max(1200, _settings.DefaultMaxTokens);
+            var temperature = settings.DefaultTemperature;
+            var maxTokens = Math.Max(1200, settings.DefaultMaxTokens);
 
             var systemPrompt = BuildSystemPrompt();
-            var instructionBlock = await ResolveInstructionBlockAsync(command, cancellationToken);
+            var instructionBlock = await ResolveInstructionBlockAsync(command, llmIntentLlmClassificationService, instructionBlockService, logger, cancellationToken);
             if (instructionBlock is null)
             {
-                _logger.LogWarning("Instruction search is disabled because search or embedding clients return null");
+                logger.LogWarning("Instruction search is disabled because search or embedding clients return null");
             }
 
             // Extract story parameters from user query and history using LLM
-            await ExtractStoryParametersAsync(request, userQuery, command.History, cancellationToken);
+            await ExtractStoryParametersAsync(request, userQuery, command.History, llmFactory, logger, cancellationToken);
 
             var messages = BuildMessages(request, userQuery, instructionBlock);
 
@@ -85,7 +69,7 @@ public class GenerateStoryCommandHandler : ICommandHandler<GenerateStoryCommand,
                 MaxTokens = maxTokens,
                 Messages = messages,
                 SystemPrompt = systemPrompt,
-                JsonSchemaFormat = await LoadSchemaFormatSafeAsync()
+                JsonSchemaFormat = await LoadSchemaFormatSafeAsync(schemaProvider)
             };
 
             var response = await service.CompleteAsync(chatRequest, cancellationToken);
@@ -105,7 +89,7 @@ public class GenerateStoryCommandHandler : ICommandHandler<GenerateStoryCommand,
 
             if (!string.IsNullOrWhiteSpace(story))
             {
-                story = _mediaProcessor.ProcessMediaIds(story);
+                story = mediaProcessor.ProcessMediaIds(story);
             }
 
             return new GenerateJsonStoryResponse
@@ -128,7 +112,7 @@ public class GenerateStoryCommandHandler : ICommandHandler<GenerateStoryCommand,
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error generating story JSON");
+            logger.LogError(ex, "Error generating story JSON");
             return new GenerateJsonStoryResponse
             {
                 Success = false,
@@ -140,7 +124,7 @@ public class GenerateStoryCommandHandler : ICommandHandler<GenerateStoryCommand,
     private static string BuildSystemPrompt()
     {
         return @"
-You are the Mystira interactive storytelling engine for a kids’ online story app (with audio, media, and video). Generate branching adventure stories for young players.
+You are the Mystira interactive storytelling engine for a kids' online story app (with audio, media, and video). Generate branching adventure stories for young players.
 Use the provided context parameters (e.g. title, age_group, session_length, description, difficulty, minimum_age, core_axes, archetypes, character_count, minScenes, maxScenes. Treat them as authoritative.
 Your task:
 Create a complete tabletop-style RPG adventure with {minScenes}–{maxScenes} scenes, mixing exploration, dialogue, obstacles, and meaningful choices.
@@ -285,7 +269,12 @@ FINAL OUTPUT RULES
         return messages;
     }
 
-    private async Task<string?> ResolveInstructionBlockAsync(GenerateStoryCommand request, CancellationToken cancellationToken)
+    private static async Task<string?> ResolveInstructionBlockAsync(
+        GenerateStoryCommand request,
+        ILlmIntentLlmClassificationService llmIntentLlmClassificationService,
+        IInstructionBlockService instructionBlockService,
+        ILogger logger,
+        CancellationToken cancellationToken)
     {
         var queryText = "Generate a story ensuring that you include relevant requirements and guidelines, taking " +
                         "into account that the user provided the following prompt:\n" + request.UserQuery;
@@ -295,10 +284,10 @@ FINAL OUTPUT RULES
         var instructionTypes = new[] { "story_generate_initial" };
         var ageGroup = request.Request?.AgeGroup;
 
-        var intentClassification = await _llmIntentLlmClassificationService.ClassifyAsync(queryText, cancellationToken);
+        var intentClassification = await llmIntentLlmClassificationService.ClassifyAsync(queryText, cancellationToken);
         if (intentClassification != null)
         {
-            _logger.LogInformation(
+            logger.LogInformation(
                 "Intent classified for story generation: category={Category}, instructionType={InstructionType}",
                 intentClassification.Categories,
                 intentClassification.InstructionTypes);
@@ -308,7 +297,7 @@ FINAL OUTPUT RULES
         }
         else
         {
-            _logger.LogDebug("Using default categories and instruction types for story generation RAG query");
+            logger.LogDebug("Using default categories and instruction types for story generation RAG query");
         }
 
         var context = new InstructionSearchContext
@@ -320,7 +309,7 @@ FINAL OUTPUT RULES
             AgeGroup = ageGroup
         };
 
-        return await _instructionBlockService.BuildInstructionBlockAsync(context, cancellationToken);
+        return await instructionBlockService.BuildInstructionBlockAsync(context, cancellationToken);
     }
 
     private static string GetShortExampleJson()
@@ -369,12 +358,18 @@ FINAL OUTPUT RULES
         return JsonSerializer.Serialize(example, new JsonSerializerOptions { WriteIndented = true });
     }
 
-    private async Task ExtractStoryParametersAsync(GenerateJsonStoryRequest request, string? userQuery, IEnumerable<MystiraChatMessage> history, CancellationToken cancellationToken)
+    private static async Task ExtractStoryParametersAsync(
+        GenerateJsonStoryRequest request,
+        string? userQuery,
+        IEnumerable<MystiraChatMessage> history,
+        ILlmServiceFactory llmFactory,
+        ILogger logger,
+        CancellationToken cancellationToken)
     {
         // Get appropriate LLM service for parameter extraction
         var service = !string.IsNullOrWhiteSpace(request.Provider)
-            ? _llmFactory.GetService(request.Provider!, request.Model)
-            : _llmFactory.GetDefaultService();
+            ? llmFactory.GetService(request.Provider!, request.Model)
+            : llmFactory.GetDefaultService();
 
         if (service is null) return;
 
@@ -464,22 +459,22 @@ Ensure that minimum required parameters (title, ageGroup, minScenes, maxScenes) 
         }
         catch (Exception ex)
         {
-            _logger.LogWarning(ex, "Failed to parse extracted story parameters from LLM response");
+            logger.LogWarning(ex, "Failed to parse extracted story parameters from LLM response");
         }
     }
 
-    private async Task<JsonSchemaResponseFormat?> LoadSchemaFormatSafeAsync()
+    private static async Task<JsonSchemaResponseFormat?> LoadSchemaFormatSafeAsync(IStorySchemaProvider schemaProvider)
     {
         try
         {
-            var json = await _schemaProvider.GetSchemaJsonAsync();
+            var json = await schemaProvider.GetSchemaJsonAsync();
             if (!string.IsNullOrWhiteSpace(json))
             {
                 return new JsonSchemaResponseFormat
                 {
                     FormatName = "mystira-story-generated",
                     SchemaJson = json,
-                    IsStrict = _schemaProvider.IsStrict
+                    IsStrict = schemaProvider.IsStrict
                 };
             }
         }

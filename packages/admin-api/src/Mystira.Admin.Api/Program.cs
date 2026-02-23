@@ -36,6 +36,7 @@ using Mystira.Infrastructure.Discord.Services;
 using Mystira.Infrastructure.StoryProtocol;
 using Mystira.Shared.Exceptions;
 using Mystira.Shared.Extensions;
+using Mystira.Shared.Locking;
 using Mystira.Shared.Middleware;
 using Mystira.Shared.Telemetry;
 
@@ -545,6 +546,11 @@ try
     // CONTENT CACHING (Redis or In-Memory)
     // ═══════════════════════════════════════════════════════════════════════════════
     builder.Services.AddContentCaching(builder.Configuration);
+
+    // ═══════════════════════════════════════════════════════════════════════════════
+    // DISTRIBUTED LOCKING (Redis-backed, protects concurrent admin operations)
+    // ═══════════════════════════════════════════════════════════════════════════════
+    builder.Services.AddMystiraDistributedLocking(builder.Configuration);
 
     // Register application services - Admin API services
     builder.Services.AddScoped<IUserProfileService, UserProfileService>();

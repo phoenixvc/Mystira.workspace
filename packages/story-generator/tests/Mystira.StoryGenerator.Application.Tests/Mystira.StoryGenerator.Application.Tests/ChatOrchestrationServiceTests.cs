@@ -1,6 +1,6 @@
-using MediatR;
 using Microsoft.Extensions.Logging;
 using Moq;
+using Wolverine;
 using Mystira.StoryGenerator.Application.Services;
 using Mystira.StoryGenerator.Contracts.Chat;
 using Mystira.StoryGenerator.Contracts.Stories;
@@ -13,7 +13,7 @@ namespace Mystira.StoryGenerator.Application.Tests;
 public class ChatOrchestrationServiceTests
 {
     private readonly Mock<ICommandRouter> _mockCommandIntentRouter;
-    private readonly Mock<IMediator> _mockMediator;
+    private readonly Mock<IMessageBus> _mockMessageBus;
     private readonly Mock<ILlmServiceFactory> _mockLlmServiceFactory;
     private readonly Mock<ILogger<ChatOrchestrationService>> _mockLogger;
     private readonly ChatOrchestrationService _service;
@@ -21,13 +21,13 @@ public class ChatOrchestrationServiceTests
     public ChatOrchestrationServiceTests()
     {
         _mockCommandIntentRouter = new Mock<ICommandRouter>();
-        _mockMediator = new Mock<IMediator>();
+        _mockMessageBus = new Mock<IMessageBus>();
         _mockLlmServiceFactory = new Mock<ILlmServiceFactory>();
         _mockLogger = new Mock<ILogger<ChatOrchestrationService>>();
 
         _service = new ChatOrchestrationService(
             _mockCommandIntentRouter.Object,
-            _mockMediator.Object,
+            _mockMessageBus.Object,
             _mockLlmServiceFactory.Object,
             _mockLogger.Object);
     }
@@ -185,7 +185,7 @@ public class ChatOrchestrationServiceTests
             Success = true,
             Json = @"{""title"": ""Generated Story"", ""scenes"": []}"
         };
-        _mockMediator
+        _mockMessageBus
             .Setup(x => x.Send(It.IsAny<GenerateStoryCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(mockStoryResponse);
 
@@ -217,7 +217,7 @@ public class ChatOrchestrationServiceTests
 
         var helpResponse = new ChatCompletionResponse { Success = true, Content = "Help details" };
 
-        _mockMediator
+        _mockMessageBus
             .Setup(x => x.Send(It.IsAny<HelpCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(helpResponse);
 
@@ -246,7 +246,7 @@ public class ChatOrchestrationServiceTests
 
         var fallbackResponse = new ChatCompletionResponse { Success = true, Content = "fallback" };
 
-        _mockMediator
+        _mockMessageBus
             .Setup(x => x.Send(It.IsAny<FreeTextCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(fallbackResponse);
 

@@ -3,7 +3,6 @@ using Microsoft.Extensions.Options;
 using Mystira.StoryGenerator.Contracts.Chat;
 using Mystira.StoryGenerator.Contracts.Configuration;
 using Mystira.StoryGenerator.Contracts.Stories;
-using Mystira.StoryGenerator.Domain.Commands;
 using Mystira.StoryGenerator.Domain.Commands.Stories;
 using Mystira.StoryGenerator.Domain.Services;
 using Mystira.StoryGenerator.Application.Services;
@@ -11,42 +10,27 @@ using Mystira.StoryGenerator.Application.Utilities;
 
 namespace Mystira.StoryGenerator.Application.Handlers.Stories;
 
-public class RefineStoryCommandHandler : ICommandHandler<RefineStoryCommand, GenerateJsonStoryResponse>
+public static class RefineStoryCommandHandler
 {
-    private readonly ILlmServiceFactory _llmFactory;
-    private readonly AiSettings _settings;
-    private readonly IStorySchemaProvider _schemaProvider;
-    private readonly ILlmIntentLlmClassificationService _llmIntentLlmClassificationService;
-    private readonly IInstructionBlockService _instructionBlockService;
-    private readonly IStoryMediaProcessor _mediaProcessor;
-    private readonly ILogger<RefineStoryCommandHandler> _logger;
-
-    public RefineStoryCommandHandler(
+    public static async Task<GenerateJsonStoryResponse> Handle(
+        RefineStoryCommand command,
         ILlmServiceFactory llmFactory,
         IOptions<AiSettings> aiOptions,
         IStorySchemaProvider schemaProvider,
         ILlmIntentLlmClassificationService llmIntentLlmClassificationService,
         IInstructionBlockService instructionBlockService,
         IStoryMediaProcessor mediaProcessor,
-        ILogger<RefineStoryCommandHandler> logger)
+        ILogger logger,
+        CancellationToken cancellationToken)
     {
-        _llmFactory = llmFactory;
-        _settings = aiOptions.Value;
-        _schemaProvider = schemaProvider;
-        _llmIntentLlmClassificationService = llmIntentLlmClassificationService;
-        _instructionBlockService = instructionBlockService;
-        _mediaProcessor = mediaProcessor;
-        _logger = logger;
-    }
+        var settings = aiOptions.Value;
 
-    public async Task<GenerateJsonStoryResponse> Handle(RefineStoryCommand command, CancellationToken cancellationToken)
-    {
         try
         {
             var request = command.Request;
             var service = !string.IsNullOrWhiteSpace(request.Provider)
-                ? _llmFactory.GetService(request.Provider!, request.Model)
-                : _llmFactory.GetDefaultService();
+                ? llmFactory.GetService(request.Provider!, request.Model)
+                : llmFactory.GetDefaultService();
 
             if (service is null)
             {
@@ -59,14 +43,14 @@ public class RefineStoryCommandHandler : ICommandHandler<RefineStoryCommand, Gen
 
             var resolvedModelId = string.IsNullOrWhiteSpace(request.ModelId) ? null : request.ModelId;
             var resolvedModelName = string.IsNullOrWhiteSpace(request.Model) ? null : request.Model;
-            var temperature = _settings.DefaultTemperature;
-            var maxTokens = Math.Max(1200, _settings.DefaultMaxTokens);
+            var temperature = settings.DefaultTemperature;
+            var maxTokens = Math.Max(1200, settings.DefaultMaxTokens);
 
             var systemPrompt = BuildRefinementSystemPrompt();
-            var instructionBlock = await ResolveInstructionBlockAsync(command, cancellationToken);
+            var instructionBlock = await ResolveInstructionBlockAsync(command, llmIntentLlmClassificationService, instructionBlockService, logger, cancellationToken);
             if (instructionBlock is null)
             {
-                _logger.LogWarning("Instruction search is disabled because search or embedding clients return null");
+                logger.LogWarning("Instruction search is disabled because search or embedding clients return null");
             }
             var messages = BuildRefinementMessages(command.RefinementPrompt, command.CurrentStory, instructionBlock);
 
@@ -79,7 +63,7 @@ public class RefineStoryCommandHandler : ICommandHandler<RefineStoryCommand, Gen
                 MaxTokens = maxTokens,
                 Messages = messages,
                 SystemPrompt = systemPrompt,
-                JsonSchemaFormat = await LoadSchemaFormatSafeAsync()
+                JsonSchemaFormat = await LoadSchemaFormatSafeAsync(schemaProvider)
             };
 
             var response = await service.CompleteAsync(chatRequest, cancellationToken);
@@ -99,7 +83,7 @@ public class RefineStoryCommandHandler : ICommandHandler<RefineStoryCommand, Gen
 
             if (!string.IsNullOrWhiteSpace(story))
             {
-                story = _mediaProcessor.ProcessMediaIds(story);
+                story = mediaProcessor.ProcessMediaIds(story);
             }
 
             return new GenerateJsonStoryResponse
@@ -122,7 +106,7 @@ public class RefineStoryCommandHandler : ICommandHandler<RefineStoryCommand, Gen
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error refining story");
+            logger.LogError(ex, "Error refining story");
             return new GenerateJsonStoryResponse
             {
                 Success = false,
@@ -138,11 +122,11 @@ You are the Mystira interactive story refinement engine.
 Input: an existing branching adventure story in JSON plus user feedback.
 Output: a refined story as a single valid JSON object that still follows the Mystira schema and structure.
 Your goals:
-    •   Apply the user’s requested changes (tone, difficulty, developmental focus, length, etc.) without breaking structure.
+    •   Apply the user's requested changes (tone, difficulty, developmental focus, length, etc.) without breaking structure.
     •   Preserve child safety and developmental objectives.
     •   Produce JSON that is fully valid and ready to parse.
 Safety & Child Development
-    •   Keep language age-appropriate for the story’s age_group and minimum_age.
+    •   Keep language age-appropriate for the story's age_group and minimum_age.
     •   No profanity, slurs, sexual content, self-harm, or graphic violence.
     •   Avoid humiliation, cruelty-based humor, or demeaning stereotypes.
 Structural & Branching Rules (Must Maintain or Repair)
@@ -203,7 +187,7 @@ Refinement Phases (Internal – Do Not Describe in Output)
 
     •   Phase 2 – Apply the requested refinement:
         o   Make only the changes needed to:
-            - satisfy the user’s feedback (tone, difficulty, length, developmental focus, etc.); and
+            - satisfy the user's feedback (tone, difficulty, length, developmental focus, etc.); and
             - repair any structural or schema violations described above.
         o   Prefer local, minimal edits:
             - adjust only the specific scenes, branches, or fields directly affected;
@@ -229,7 +213,12 @@ Output Format
 ";
     }
 
-    private async Task<string?> ResolveInstructionBlockAsync(RefineStoryCommand request, CancellationToken cancellationToken)
+    private static async Task<string?> ResolveInstructionBlockAsync(
+        RefineStoryCommand request,
+        ILlmIntentLlmClassificationService llmIntentLlmClassificationService,
+        IInstructionBlockService instructionBlockService,
+        ILogger logger,
+        CancellationToken cancellationToken)
     {
         var queryText = "Refine a story ensuring that you include relevant requirements and guidelines, with the following request:\n" +
                         request.RefinementPrompt;
@@ -244,10 +233,10 @@ Output Format
         var ageGroup = request.Request?.AgeGroup;
         if (string.IsNullOrEmpty(ageGroup)) ageGroup = request.CurrentStory?.AgeGroup;
 
-        var intentClassification = await _llmIntentLlmClassificationService.ClassifyAsync(queryText, cancellationToken);
+        var intentClassification = await llmIntentLlmClassificationService.ClassifyAsync(queryText, cancellationToken);
         if (intentClassification != null)
         {
-            _logger.LogInformation(
+            logger.LogInformation(
                 "Intent classified for story refinement: category={Category}, instructionType={InstructionType}",
                 intentClassification.Categories,
                 intentClassification.InstructionTypes);
@@ -257,7 +246,7 @@ Output Format
         }
         else
         {
-            _logger.LogDebug("Using default categories and instruction types for story generation RAG query");
+            logger.LogDebug("Using default categories and instruction types for story generation RAG query");
         }
 
         var context = new InstructionSearchContext
@@ -269,7 +258,7 @@ Output Format
             AgeGroup = ageGroup
         };
 
-        return await _instructionBlockService.BuildInstructionBlockAsync(context, cancellationToken);
+        return await instructionBlockService.BuildInstructionBlockAsync(context, cancellationToken);
     }
 
     private static List<MystiraChatMessage> BuildRefinementMessages(string refinementPrompt,
@@ -294,18 +283,18 @@ Output Format
         return messages;
     }
 
-    private async Task<JsonSchemaResponseFormat?> LoadSchemaFormatSafeAsync()
+    private static async Task<JsonSchemaResponseFormat?> LoadSchemaFormatSafeAsync(IStorySchemaProvider schemaProvider)
     {
         try
         {
-            var json = await _schemaProvider.GetSchemaJsonAsync();
+            var json = await schemaProvider.GetSchemaJsonAsync();
             if (!string.IsNullOrWhiteSpace(json))
             {
                 return new JsonSchemaResponseFormat
                 {
                     FormatName = "mystira-story-refined",
                     SchemaJson = json,
-                    IsStrict = _schemaProvider.IsStrict
+                    IsStrict = schemaProvider.IsStrict
                 };
             }
         }

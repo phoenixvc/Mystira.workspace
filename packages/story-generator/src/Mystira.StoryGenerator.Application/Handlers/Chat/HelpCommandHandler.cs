@@ -1,13 +1,12 @@
 using System.Text;
 using Mystira.StoryGenerator.Contracts.Chat;
-using Mystira.StoryGenerator.Domain.Commands;
 using Mystira.StoryGenerator.Domain.Commands.Chat;
 
 namespace Mystira.StoryGenerator.Application.Handlers.Chat;
 
-public class HelpCommandHandler : ICommandHandler<HelpCommand, ChatCompletionResponse>
+public static class HelpCommandHandler
 {
-    public Task<ChatCompletionResponse> Handle(HelpCommand request, CancellationToken cancellationToken)
+    public static Task<ChatCompletionResponse> Handle(HelpCommand request, CancellationToken cancellationToken)
     {
         var response = new ChatCompletionResponse
         {
