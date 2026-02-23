@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 using Mystira.Admin.Api.Models;
 using Mystira.Admin.Api.Validation;
+using Mystira.Shared.Exceptions;
 using Mystira.Contracts.App.Requests.Scenarios;
 using Mystira.Contracts.App.Responses.Scenarios;
 using Mystira.Domain.Enums;
@@ -250,7 +251,7 @@ public class ScenarioApiService : IScenarioApiService
         // AgeGroup is immutable after creation; reject any attempt to change it
         if (!string.IsNullOrEmpty(request.AgeGroup) && scenario.AgeGroup?.Value != request.AgeGroup)
         {
-            throw new InvalidOperationException($"AgeGroup cannot be changed after scenario creation. Current: {scenario.AgeGroup?.Value}, Requested: {request.AgeGroup}");
+            throw new BusinessRuleException("ImmutableAgeGroup", $"AgeGroup cannot be changed after scenario creation. Current: {scenario.AgeGroup?.Value}, Requested: {request.AgeGroup}");
         }
 
         await ValidateScenarioAsync(scenario);
@@ -274,7 +275,7 @@ public class ScenarioApiService : IScenarioApiService
             var parsed = Archetype.Parse(v);
             if (parsed == null)
             {
-                throw new ArgumentException($"Unknown archetype '{v}'.");
+                throw new ValidationException("Archetypes", $"Unknown archetype '{v}'.");
             }
         }
 
@@ -294,7 +295,7 @@ public class ScenarioApiService : IScenarioApiService
             var parsed = CoreAxis.Parse(v);
             if (parsed == null)
             {
-                throw new ArgumentException($"Unknown core axis '{v}'.");
+                throw new ValidationException("CoreAxes", $"Unknown core axis '{v}'.");
             }
         }
 
@@ -709,7 +710,7 @@ public class ScenarioApiService : IScenarioApiService
             var scenario = await GetScenarioByIdAsync(scenarioId);
             if (scenario == null)
             {
-                throw new ArgumentException($"Scenario not found: {scenarioId}");
+                throw new NotFoundException("Scenario", scenarioId);
             }
 
             var validation = new ScenarioReferenceValidation

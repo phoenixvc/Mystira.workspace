@@ -1,6 +1,7 @@
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Mystira.Infrastructure.Data;
+using Mystira.Shared.Exceptions;
 using YamlDotNet.Serialization;
 using ApiModels = Mystira.Admin.Api.Models;
 using DomainModels = Mystira.Domain.Models;
@@ -83,7 +84,7 @@ public class CharacterMediaMetadataService : ICharacterMediaMetadataService
             var existingEntry = domainFile.Entries.FirstOrDefault(e => e.Id == entry.Id);
             if (existingEntry != null)
             {
-                throw new InvalidOperationException($"Character media metadata entry with ID '{entry.Id}' already exists");
+                throw new ConflictException($"Character media metadata entry with ID '{entry.Id}' already exists");
             }
 
             domainFile.Entries.Add(ConvertToDomainEntry(entry));
@@ -109,7 +110,7 @@ public class CharacterMediaMetadataService : ICharacterMediaMetadataService
             var existingEntry = domainFile.Entries.FirstOrDefault(e => e.Id == entryId);
             if (existingEntry == null)
             {
-                throw new KeyNotFoundException($"Character media metadata entry with ID '{entryId}' not found");
+                throw new NotFoundException("CharacterMediaMetadataEntry", entryId);
             }
 
             // Update the entry
@@ -139,7 +140,7 @@ public class CharacterMediaMetadataService : ICharacterMediaMetadataService
             var existingEntry = domainFile.Entries.FirstOrDefault(e => e.Id == entryId);
             if (existingEntry == null)
             {
-                throw new KeyNotFoundException($"Character media metadata entry with ID '{entryId}' not found");
+                throw new NotFoundException("CharacterMediaMetadataEntry", entryId);
             }
 
             domainFile.Entries.Remove(existingEntry);
@@ -200,7 +201,7 @@ public class CharacterMediaMetadataService : ICharacterMediaMetadataService
 
             if (importedEntries == null || importedEntries.Count == 0)
             {
-                throw new ArgumentException("No valid character media metadata entries found in data");
+                throw new ValidationException("data", "No valid character media metadata entries found in data");
             }
 
             var apiFile = await GetCharacterMediaMetadataFileAsync();

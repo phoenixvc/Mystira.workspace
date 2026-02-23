@@ -4,6 +4,7 @@ using Mystira.Application.Ports.Data;
 using Mystira.Contracts.App.Requests.Badges;
 using Mystira.Domain.Models;
 using Mystira.Infrastructure.Data;
+using Mystira.Shared.Exceptions;
 
 namespace Mystira.Admin.Api.Services;
 
@@ -43,7 +44,7 @@ public class UserBadgeApiService : IUserBadgeApiService
             var badge = await _badgeRepository.GetByIdAsync(request.BadgeConfigurationId);
             if (badge == null)
             {
-                throw new ArgumentException($"Badge configuration not found: {request.BadgeConfigurationId}");
+                throw new NotFoundException("BadgeConfiguration", request.BadgeConfigurationId);
             }
 
             // Verify user profile exists
@@ -51,7 +52,7 @@ public class UserBadgeApiService : IUserBadgeApiService
                 .FirstOrDefaultAsync(p => p.Id == request.UserProfileId);
             if (userProfile == null)
             {
-                throw new ArgumentException($"User profile not found: {request.UserProfileId}");
+                throw new NotFoundException("UserProfile", request.UserProfileId);
             }
 
             // Create new badge

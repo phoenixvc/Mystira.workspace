@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Mystira.Contracts.App.Requests.CharacterMaps;
 using Mystira.Domain.Models;
 using Mystira.Infrastructure.Data;
+using Mystira.Shared.Exceptions;
 
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
@@ -84,7 +85,7 @@ public class CharacterMapApiService : ICharacterMapApiService
         var existingCharacterMap = await _context.CharacterMaps.FirstOrDefaultAsync(cm => cm.Id == request.Id);
         if (existingCharacterMap != null)
         {
-            throw new ArgumentException($"Character map with ID {request.Id} already exists");
+            throw new ConflictException($"Character map with ID {request.Id} already exists");
         }
 
         var characterMap = new CharacterMap

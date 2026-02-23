@@ -4,6 +4,7 @@ using System.Text;
 
 using Mystira.Admin.Api.Models;
 using Mystira.Domain.Models;
+using Mystira.Shared.Exceptions;
 
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
@@ -258,7 +259,7 @@ public class BundleService : IBundleService
         var existingMedia = await _mediaService.GetMediaByIdAsync(mediaId);
         if (existingMedia != null && !overwriteExisting)
         {
-            throw new InvalidOperationException($"Media file already exists: {fileName}");
+            throw new ConflictException($"Media file already exists: {fileName}");
         }
 
         // Create a temporary file from the ZIP entry
@@ -301,7 +302,7 @@ public class BundleService : IBundleService
         var existingScenario = await _scenarioService.GetScenarioByIdAsync(scenario.Id);
         if (existingScenario != null && !overwriteExisting)
         {
-            throw new InvalidOperationException($"Scenario already exists: {scenario.Id}");
+            throw new ConflictException($"Scenario already exists: {scenario.Id}");
         }
 
         var createRequest = new CreateScenarioRequest

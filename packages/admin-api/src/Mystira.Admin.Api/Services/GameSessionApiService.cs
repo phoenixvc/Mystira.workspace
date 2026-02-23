@@ -4,6 +4,7 @@ using Mystira.Domain.Enums;
 using Mystira.Domain.Models;
 using Mystira.Domain.ValueObjects;
 using Mystira.Infrastructure.Data;
+using Mystira.Shared.Exceptions;
 
 using ContractsGameSessionResponse = Mystira.Contracts.App.Responses.GameSessions.GameSessionResponse;
 using ContractsMakeChoiceRequest = Mystira.Contracts.App.Requests.GameSessions.MakeChoiceRequest;
@@ -34,13 +35,13 @@ public class GameSessionApiService : IGameSessionApiService
         var scenario = await _scenarioService.GetScenarioByIdAsync(request.ScenarioId);
         if (scenario == null)
         {
-            throw new ArgumentException($"Scenario not found: {request.ScenarioId}");
+            throw new NotFoundException("Scenario", request.ScenarioId);
         }
 
         // Validate age appropriateness
         if (!IsAgeGroupCompatible(scenario.MinimumAge, request.TargetAgeGroup))
         {
-            throw new ArgumentException($"Scenario minimum age ({scenario.MinimumAge}) exceeds target age group ({request.TargetAgeGroup})");
+            throw new BusinessRuleException("AgeGroupCompatibility", $"Scenario minimum age ({scenario.MinimumAge}) exceeds target age group ({request.TargetAgeGroup})");
         }
 
         // Check for existing active sessions for this scenario and account
@@ -159,25 +160,25 @@ public class GameSessionApiService : IGameSessionApiService
 
         if (session.Status != SessionStatus.InProgress)
         {
-            throw new InvalidOperationException("Cannot make choice in non-active session");
+            throw new BusinessRuleException("ActiveSessionRequired", "Cannot make choice in non-active session");
         }
 
         var scenario = await _scenarioService.GetScenarioByIdAsync(session.ScenarioId);
         if (scenario == null)
         {
-            throw new InvalidOperationException("Scenario not found for session");
+            throw new NotFoundException("Scenario", session.ScenarioId);
         }
 
         var currentScene = scenario.Scenes.FirstOrDefault(s => s.Id == request.SceneId);
         if (currentScene == null)
         {
-            throw new ArgumentException("Scene not found in scenario");
+            throw new NotFoundException("Scene", request.SceneId);
         }
 
         var branch = currentScene.Branches.FirstOrDefault(b => b.Choice == request.ChoiceText);
         if (branch == null)
         {
-            throw new ArgumentException("Choice not found in scene");
+            throw new NotFoundException("Choice", request.ChoiceText);
         }
 
         var playerId = !string.IsNullOrWhiteSpace(request.PlayerId)
@@ -259,7 +260,7 @@ public class GameSessionApiService : IGameSessionApiService
 
         if (session.Status != SessionStatus.InProgress)
         {
-            throw new InvalidOperationException("Can only pause sessions in progress");
+            throw new BusinessRuleException("SessionInProgressRequired", "Can only pause sessions in progress");
         }
 
         session.Status = SessionStatus.Paused;
@@ -282,7 +283,7 @@ public class GameSessionApiService : IGameSessionApiService
 
         if (session.Status != SessionStatus.Paused)
         {
-            throw new InvalidOperationException("Can only resume paused sessions");
+            throw new BusinessRuleException("SessionPausedRequired", "Can only resume paused sessions");
         }
 
         session.Status = SessionStatus.InProgress;

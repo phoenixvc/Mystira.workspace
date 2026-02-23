@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Mystira.Domain.Models;
 using Mystira.Infrastructure.Data;
+using Mystira.Shared.Exceptions;
 
 namespace Mystira.Admin.Api.Services;
 
@@ -51,7 +52,7 @@ public class AccountApiService : IAccountApiService
             var existingAccount = await GetAccountByEmailAsync(account.Email);
             if (existingAccount != null)
             {
-                throw new InvalidOperationException($"Account with email {account.Email} already exists");
+                throw new ConflictException($"Account with email {account.Email} already exists");
             }
 
             // Ensure ID is set
@@ -83,7 +84,7 @@ public class AccountApiService : IAccountApiService
             var existingAccount = await GetAccountByIdAsync(account.Id);
             if (existingAccount == null)
             {
-                throw new InvalidOperationException($"Account with ID {account.Id} not found");
+                throw new NotFoundException("Account", account.Id);
             }
 
             // Update properties

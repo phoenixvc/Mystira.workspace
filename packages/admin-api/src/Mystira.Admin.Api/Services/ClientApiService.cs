@@ -1,6 +1,7 @@
 using System.Text.RegularExpressions;
 using Mystira.Contracts.App.Requests.Scenarios;
 using Mystira.Contracts.App.Responses.Client;
+using Mystira.Shared.Exceptions;
 
 namespace Mystira.Admin.Api.Services;
 
@@ -40,7 +41,7 @@ public class ClientApiService : IClientApiService
             // Validate client version format (semver)
             if (!IsValidSemVer(clientVersion))
             {
-                throw new ArgumentException("Invalid client_version format. Expected semver format (e.g., 1.2.3)");
+                throw new ValidationException("client_version", "Invalid client_version format. Expected semver format (e.g., 1.2.3)");
             }
 
             // Get version information

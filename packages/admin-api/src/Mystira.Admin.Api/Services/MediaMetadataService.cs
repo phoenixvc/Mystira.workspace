@@ -1,6 +1,7 @@
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Mystira.Infrastructure.Data;
+using Mystira.Shared.Exceptions;
 using YamlDotNet.Serialization;
 using ApiModels = Mystira.Admin.Api.Models;
 using DomainModels = Mystira.Domain.Models;
@@ -106,7 +107,7 @@ public class MediaMetadataService : IMediaMetadataService
             var existingEntry = domainFile.Entries.FirstOrDefault(e => e.Id == entry.Id);
             if (existingEntry != null)
             {
-                throw new InvalidOperationException($"Media metadata entry with ID '{entry.Id}' already exists");
+                throw new ConflictException($"Media metadata entry with ID '{entry.Id}' already exists");
             }
 
             // Add the entry
@@ -130,14 +131,14 @@ public class MediaMetadataService : IMediaMetadataService
             var apiFile = await GetMediaMetadataFileAsync(cancellationToken);
             if (apiFile == null)
             {
-                throw new InvalidOperationException("Media metadata file not found");
+                throw new NotFoundException("MediaMetadataFile", null);
             }
 
             var domainFile = ConvertToDomainModel(apiFile);
             var existingEntry = domainFile.Entries.FirstOrDefault(e => e.Id == entryId);
             if (existingEntry == null)
             {
-                throw new KeyNotFoundException($"Media metadata entry with ID '{entryId}' not found");
+                throw new NotFoundException("MediaMetadataEntry", entryId);
             }
 
             // Update the entry
@@ -164,14 +165,14 @@ public class MediaMetadataService : IMediaMetadataService
             var apiFile = await GetMediaMetadataFileAsync(cancellationToken);
             if (apiFile == null)
             {
-                throw new InvalidOperationException("Media metadata file not found");
+                throw new NotFoundException("MediaMetadataFile", null);
             }
 
             var domainFile = ConvertToDomainModel(apiFile);
             var existingEntry = domainFile.Entries.FirstOrDefault(e => e.Id == entryId);
             if (existingEntry == null)
             {
-                throw new KeyNotFoundException($"Media metadata entry with ID '{entryId}' not found");
+                throw new NotFoundException("MediaMetadataEntry", entryId);
             }
 
             domainFile.Entries.Remove(existingEntry);
@@ -232,7 +233,7 @@ public class MediaMetadataService : IMediaMetadataService
 
             if (importedEntries == null || importedEntries.Count == 0)
             {
-                throw new ArgumentException("No valid media metadata entries found in data");
+                throw new ValidationException("data", "No valid media metadata entries found in data");
             }
 
             var apiFile = await GetMediaMetadataFileAsync(cancellationToken);

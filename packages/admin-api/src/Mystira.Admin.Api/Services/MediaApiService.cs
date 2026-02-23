@@ -7,6 +7,7 @@ using Mystira.Application.Ports.Storage;
 using Mystira.Application.UseCases.Media;
 using Mystira.Domain.Models;
 using Mystira.Infrastructure.Data;
+using Mystira.Shared.Exceptions;
 
 namespace Mystira.Admin.Api.Services;
 
@@ -145,7 +146,7 @@ public class MediaApiService : IMediaApiService
         var existingMedia = await GetMediaByIdAsync(resolvedMediaId, cancellationToken);
         if (existingMedia != null)
         {
-            throw new InvalidOperationException($"Media with ID '{resolvedMediaId}' already exists");
+            throw new ConflictException($"Media with ID '{resolvedMediaId}' already exists");
         }
 
         await using var processedStream = await PrepareMediaStreamAsync(file, cancellationToken);
@@ -330,7 +331,7 @@ public class MediaApiService : IMediaApiService
     {
         if (file == null || file.Length == 0)
         {
-            throw new ArgumentException("File is required");
+            throw new ValidationException("File", "File is required");
         }
 
         var maxSizeBytes = mediaType switch
@@ -343,7 +344,7 @@ public class MediaApiService : IMediaApiService
 
         if (file.Length > maxSizeBytes)
         {
-            throw new ArgumentException($"File size exceeds maximum allowed size for {mediaType} files");
+            throw new ValidationException("File", $"File size exceeds maximum allowed size for {mediaType} files");
         }
 
         var extension = Path.GetExtension(file.FileName).ToLower();
@@ -357,7 +358,7 @@ public class MediaApiService : IMediaApiService
 
         if (!allowedExtensions.Contains(extension))
         {
-            throw new ArgumentException($"File extension '{extension}' is not allowed for {mediaType} files");
+            throw new ValidationException("File", $"File extension '{extension}' is not allowed for {mediaType} files");
         }
     }
 
@@ -430,7 +431,7 @@ public class MediaApiService : IMediaApiService
 
             if (conversion == null)
             {
-                throw new InvalidOperationException($"Failed to convert WhatsApp audio file '{file.FileName}'. Ensure ffmpeg is available on the host.");
+                throw new BusinessRuleException("AudioConversionFailed", $"Failed to convert WhatsApp audio file '{file.FileName}'. Ensure ffmpeg is available on the host.");
             }
 
             return new ProcessedMediaStream(conversion.Stream, conversion.FileName, conversion.ContentType, conversion);
@@ -494,7 +495,7 @@ public class MediaApiService : IMediaApiService
         var metadataFile = await _mediaMetadataService.GetMediaMetadataFileAsync(cancellationToken);
         if (metadataFile == null || metadataFile.Entries.Count == 0)
         {
-            throw new InvalidOperationException("No media metadata file found. Media uploads require a valid media metadata file to be uploaded first.");
+            throw new BusinessRuleException("MetadataFileRequired", "No media metadata file found. Media uploads require a valid media metadata file to be uploaded first.");
         }
 
         // Look for metadata entry by ID first, then by filename if ID is not found
@@ -513,7 +514,7 @@ public class MediaApiService : IMediaApiService
 
             if (metadataEntry == null)
             {
-                throw new InvalidOperationException($"No media metadata entry found for media ID '{mediaId}' or filename '{fileName}'. Please ensure the media metadata file contains an entry for this media before uploading.");
+                throw new NotFoundException("MediaMetadataEntry", $"{mediaId} (filename: {fileName})");
             }
 
             // Return the resolved media ID from metadata
