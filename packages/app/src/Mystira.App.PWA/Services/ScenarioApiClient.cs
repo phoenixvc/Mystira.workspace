@@ -21,7 +21,7 @@ public class ScenarioApiClient : BaseApiClient, IScenarioApiClient
         {
             // Scenarios endpoint is public - no auth required
             var url = "api/scenarios?page=1&pageSize=100";
-            var request = new HttpRequestMessage(HttpMethod.Get, url);
+            using var request = new HttpRequestMessage(HttpMethod.Get, url);
             request.SetBrowserRequestCredentials(BrowserRequestCredentials.Include);
 
             Logger.LogInformation("Fetching scenarios from API: {Url}", url);

@@ -473,7 +473,7 @@ internal class Program
         // Check if gh CLI is installed
         try
         {
-            var process = new System.Diagnostics.Process
+            using var process = new System.Diagnostics.Process
             {
                 StartInfo = new System.Diagnostics.ProcessStartInfo
                 {
@@ -511,7 +511,7 @@ internal class Program
         try
         {
             // Trigger the workflow
-            var process = new System.Diagnostics.Process
+            using var process = new System.Diagnostics.Process
             {
                 StartInfo = new System.Diagnostics.ProcessStartInfo
                 {
