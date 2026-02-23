@@ -1,4 +1,4 @@
-name: "[CI] Infrastructure - Terragrunt Validate"
+name: "[CI] Infra - Validate"
 
 # Terragrunt Validation: Validates product-based Terraform structure
 # Checks: Terragrunt format, validate, and plan for all products
@@ -220,7 +220,7 @@ jobs:
   # Validate Shared Infrastructure
   # ============================================
   validate-shared-infra:
-    name: Validate shared-infra
+    name: Validate shared-infra (${{ matrix.environment }})
     runs-on: ubuntu-latest
     timeout-minutes: 10
     needs: [detect-changes, format-check]
@@ -275,7 +275,7 @@ jobs:
   # Validate Products
   # ============================================
   validate-products:
-    name: Validate ${{ matrix.product }}
+    name: Validate ${{ matrix.product }} (${{ matrix.environment }})
     runs-on: ubuntu-latest
     timeout-minutes: 10
     needs: [detect-changes, format-check, validate-shared-infra]

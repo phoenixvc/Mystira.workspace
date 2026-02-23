@@ -17,7 +17,7 @@ locals {
 
 # Dependency on shared infrastructure
 dependency "shared" {
-  config_path = "${get_parent_terragrunt_dir()}/shared-infra/environments/${local.environment}"
+  config_path = "${get_repo_root()}/infra/terraform/shared-infra/environments/${local.environment}"
 
   mock_outputs = {
     cosmos_db_connection_string            = "mock-connection-string"

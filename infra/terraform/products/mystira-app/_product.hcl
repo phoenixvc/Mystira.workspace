@@ -23,7 +23,7 @@ locals {
 
 # Dependency on shared infrastructure
 dependency "shared" {
-  config_path = "${get_parent_terragrunt_dir()}/shared-infra/environments/${local.environment}"
+  config_path = "${get_repo_root()}/infra/terraform/shared-infra/environments/${local.environment}"
 
   # Mock outputs for `terragrunt plan` when shared-infra hasn't been applied
   # Note: Only include outputs that are actually used in inputs below

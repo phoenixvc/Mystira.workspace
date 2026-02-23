@@ -19,7 +19,7 @@ locals {
 
 # Dependency on shared infrastructure
 dependency "shared" {
-  config_path = "${get_parent_terragrunt_dir()}/shared-infra/environments/${local.environment}"
+  config_path = "${get_repo_root()}/infra/terraform/shared-infra/environments/${local.environment}"
 
   mock_outputs = {
     postgresql_server_id                   = "/subscriptions/xxx/resourceGroups/xxx/providers/Microsoft.DBforPostgreSQL/flexibleServers/mock"
