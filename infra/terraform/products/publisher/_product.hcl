@@ -15,10 +15,6 @@ locals {
   environment   = local.env_from_path != "" ? local.env_from_path : get_env("TF_VAR_environment", "dev")
 }
 
-include "root" {
-  path = find_in_parent_folders()
-}
-
 # Dependency on shared infrastructure
 dependency "shared" {
   config_path = "${get_parent_terragrunt_dir()}/shared-infra/environments/${local.environment}"
