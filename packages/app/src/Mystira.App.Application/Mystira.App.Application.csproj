@@ -33,7 +33,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Mystira.App.Domain\Mystira.App.Domain.csproj" />
-    <ProjectReference Include="../../../../contracts/dotnet/Mystira.Contracts/Mystira.Contracts.csproj" />
-    <ProjectReference Include="../../../../shared/Mystira.Shared/Mystira.Shared.csproj" />
+    <ProjectReference Include="../../../contracts/dotnet/Mystira.Contracts/Mystira.Contracts.csproj" />
+    <ProjectReference Include="../../../shared/Mystira.Shared/Mystira.Shared.csproj" />
   </ItemGroup>
 </Project>

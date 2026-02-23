@@ -5,6 +5,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <!-- Suppress XML doc comment warnings for specification classes -->
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
     <RootNamespace>Mystira.Domain</RootNamespace>
 
     <!-- Package metadata -->

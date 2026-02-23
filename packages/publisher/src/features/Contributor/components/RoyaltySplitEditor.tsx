@@ -1,8 +1,8 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { contributorsApi } from '@/api';
-import { Button, Alert, Card, CardBody, CardFooter } from '@/components';
-import { useContributors } from '../hooks/useContributors';
+import { useState, useMemo, useCallback } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { contributorsApi } from "@/api";
+import { Button, Alert, Card, CardBody, CardFooter } from "@/components";
+import { useContributors } from "../hooks/useContributors";
 
 interface RoyaltySplitEditorProps {
   storyId: string;
@@ -11,19 +11,22 @@ interface RoyaltySplitEditorProps {
 export function RoyaltySplitEditor({ storyId }: RoyaltySplitEditorProps) {
   const queryClient = useQueryClient();
   const { contributors, isLoading } = useContributors(storyId);
-  const [splits, setSplits] = useState<Record<string, number>>({});
-  const [isDirty, setIsDirty] = useState(false);
+  const [dirtySplits, setDirtySplits] = useState<Record<string, number> | null>(
+    null
+  );
 
-  // Initialize splits from contributors
-  useEffect(() => {
-    if (contributors && !isDirty) {
-      const initialSplits: Record<string, number> = {};
-      contributors.forEach(c => {
-        initialSplits[c.id] = c.split;
-      });
-      setSplits(initialSplits);
-    }
-  }, [contributors, isDirty]);
+  // Derive initial splits from contributors
+  const initialSplits = useMemo(() => {
+    if (!contributors) return {};
+    const result: Record<string, number> = {};
+    contributors.forEach((c) => {
+      result[c.id] = c.split;
+    });
+    return result;
+  }, [contributors]);
+
+  const splits = dirtySplits ?? initialSplits;
+  const isDirty = dirtySplits !== null;
 
   const totalSplit = useMemo(
     () => Object.values(splits).reduce((sum, val) => sum + val, 0),
@@ -39,15 +42,20 @@ export function RoyaltySplitEditor({ storyId }: RoyaltySplitEditorProps) {
       await Promise.all(updates);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['contributors', storyId] });
-      setIsDirty(false);
+      queryClient.invalidateQueries({ queryKey: ["contributors", storyId] });
+      setDirtySplits(null);
     },
   });
 
-  const handleSplitChange = useCallback((contributorId: string, value: number) => {
-    setSplits(prev => ({ ...prev, [contributorId]: value }));
-    setIsDirty(true);
-  }, []);
+  const handleSplitChange = useCallback(
+    (contributorId: string, value: number) => {
+      setDirtySplits((prev) => ({
+        ...(prev ?? initialSplits),
+        [contributorId]: value,
+      }));
+    },
+    [initialSplits]
+  );
 
   const distributeEvenly = useCallback(() => {
     if (!contributors) return;
@@ -58,8 +66,7 @@ export function RoyaltySplitEditor({ storyId }: RoyaltySplitEditorProps) {
     contributors.forEach((c, i) => {
       newSplits[c.id] = evenSplit + (i === 0 ? remainder : 0);
     });
-    setSplits(newSplits);
-    setIsDirty(true);
+    setDirtySplits(newSplits);
   }, [contributors]);
 
   if (isLoading) {
@@ -86,22 +93,30 @@ export function RoyaltySplitEditor({ storyId }: RoyaltySplitEditorProps) {
 
         <div className="royalty-split-editor__total">
           <span>Total:</span>
-          <span className={`royalty-split-editor__total-value ${isValid ? 'valid' : 'invalid'}`}>
+          <span
+            className={`royalty-split-editor__total-value ${isValid ? "valid" : "invalid"}`}
+          >
             {totalSplit}%
           </span>
           {!isValid && (
             <span className="royalty-split-editor__total-hint">
-              {totalSplit < 100 ? `${100 - totalSplit}% remaining` : `${totalSplit - 100}% over`}
+              {totalSplit < 100
+                ? `${100 - totalSplit}% remaining`
+                : `${totalSplit - 100}% over`}
             </span>
           )}
         </div>
 
         <ul className="royalty-split-editor__list">
-          {contributors.map(contributor => (
+          {contributors.map((contributor) => (
             <li key={contributor.id} className="royalty-split-editor__item">
               <div className="royalty-split-editor__contributor">
-                <span className="royalty-split-editor__name">{contributor.userId}</span>
-                <span className="royalty-split-editor__role">{formatRole(contributor.role)}</span>
+                <span className="royalty-split-editor__name">
+                  {contributor.userId}
+                </span>
+                <span className="royalty-split-editor__role">
+                  {formatRole(contributor.role)}
+                </span>
               </div>
               <div className="royalty-split-editor__input">
                 <input
@@ -109,7 +124,9 @@ export function RoyaltySplitEditor({ storyId }: RoyaltySplitEditorProps) {
                   min={0}
                   max={100}
                   value={splits[contributor.id] ?? 0}
-                  onChange={e => handleSplitChange(contributor.id, Number(e.target.value))}
+                  onChange={(e) =>
+                    handleSplitChange(contributor.id, Number(e.target.value))
+                  }
                   className="royalty-split-editor__slider"
                 />
                 <input
@@ -117,7 +134,9 @@ export function RoyaltySplitEditor({ storyId }: RoyaltySplitEditorProps) {
                   min={0}
                   max={100}
                   value={splits[contributor.id] ?? 0}
-                  onChange={e => handleSplitChange(contributor.id, Number(e.target.value))}
+                  onChange={(e) =>
+                    handleSplitChange(contributor.id, Number(e.target.value))
+                  }
                   className="royalty-split-editor__number"
                 />
                 <span>%</span>
@@ -148,7 +167,7 @@ export function RoyaltySplitEditor({ storyId }: RoyaltySplitEditorProps) {
 
 function formatRole(role: string): string {
   return role
-    .split('_')
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(' ');
+    .split("_")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
 }
