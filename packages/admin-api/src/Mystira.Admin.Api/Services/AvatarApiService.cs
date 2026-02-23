@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Mystira.Admin.Api.Models;
 using Mystira.Domain.Models;
 using Mystira.Infrastructure.Data;
+using Mystira.Shared.Exceptions;
 using ContractsAvatarConfigurationResponse = Mystira.Contracts.App.Responses.Avatars.AvatarConfigurationResponse;
 using ContractsAvatarResponse = Mystira.Contracts.App.Responses.Avatars.AvatarResponse;
 
@@ -159,7 +160,7 @@ public class AvatarApiService : IAvatarApiService
         {
             if (string.IsNullOrWhiteSpace(ageGroup))
             {
-                throw new ArgumentException("Age group is required", nameof(ageGroup));
+                throw new ValidationException("ageGroup", "Age group is required");
             }
 
             var configFile = await GetAvatarConfigurationFileAsync() ?? new AvatarConfigurationFile();
@@ -190,12 +191,12 @@ public class AvatarApiService : IAvatarApiService
         {
             if (string.IsNullOrWhiteSpace(ageGroup))
             {
-                throw new ArgumentException("Age group is required", nameof(ageGroup));
+                throw new ValidationException("ageGroup", "Age group is required");
             }
 
             if (string.IsNullOrWhiteSpace(mediaId))
             {
-                throw new ArgumentException("Media ID is required", nameof(mediaId));
+                throw new ValidationException("mediaId", "Media ID is required");
             }
 
             var configFile = await GetAvatarConfigurationFileAsync() ?? new AvatarConfigurationFile();
@@ -239,12 +240,12 @@ public class AvatarApiService : IAvatarApiService
         {
             if (string.IsNullOrWhiteSpace(ageGroup))
             {
-                throw new ArgumentException("Age group is required", nameof(ageGroup));
+                throw new ValidationException("ageGroup", "Age group is required");
             }
 
             if (string.IsNullOrWhiteSpace(mediaId))
             {
-                throw new ArgumentException("Media ID is required", nameof(mediaId));
+                throw new ValidationException("mediaId", "Media ID is required");
             }
 
             var configFile = await GetAvatarConfigurationFileAsync() ?? new AvatarConfigurationFile();
