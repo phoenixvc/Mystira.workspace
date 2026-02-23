@@ -26,7 +26,7 @@
     "clean": "turbo run clean && rm -rf node_modules",
     "docker:up": "docker compose up -d postgres redis hardhat",
     "docker:down": "docker compose down",
-    "setup": "pnpm install && pnpm docker:up",
+    "setup": "pnpm install && bash scripts/setup-env.sh && pnpm docker:up",
     "prepare": "husky"
   },
   "devDependencies": {
