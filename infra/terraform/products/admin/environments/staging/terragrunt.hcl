@@ -16,6 +16,10 @@ include "product" {
   merge_strategy = "deep"
 }
 
+terraform {
+  source = "${get_repo_root()}/infra/terraform//${path_relative_to_include("root")}"
+}
+
 # Staging-specific configuration
 inputs = {
   # Admin UI (Static Web App)

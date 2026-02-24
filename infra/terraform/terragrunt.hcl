@@ -142,11 +142,6 @@ inputs = {
 # =============================================================================
 
 terraform {
-  # Use // separator so Terragrunt caches the full infra/terraform directory.
-  # This ensures relative module paths (e.g. ../../../modules/) resolve
-  # correctly from within .terragrunt-cache.
-  source = "${get_repo_root()}/infra/terraform//${path_relative_to_include()}"
-
   # Run terraform fmt before plan/apply
   before_hook "terraform_fmt" {
     commands = ["plan", "apply"]

@@ -310,6 +310,7 @@ jobs:
             echo "=========================================="
 
             cd "$ENV_DIR"
+            export TF_VAR_environment="${env}"
             terragrunt init --terragrunt-non-interactive -backend=false || { FAILED=1; cd -; continue; }
             terragrunt validate --terragrunt-non-interactive || FAILED=1
             cd -
@@ -319,8 +320,6 @@ jobs:
             echo "::error::Validation failed for one or more environments"
             exit 1
           fi
-        env:
-          TF_VAR_environment: dev
 
       - name: Validation Summary
         if: always()
