@@ -101,7 +101,7 @@ public class AudioCacheService : IAudioCacheService
             // doesn't have open CORS headers for fetch (matching how <audio> elements work).
             // NOTE: In 'no-cors' mode, the response is 'opaque', meaning we can't read status or body,
             // but the browser still populates its cache.
-            var request = new HttpRequestMessage(HttpMethod.Get, url);
+            using var request = new HttpRequestMessage(HttpMethod.Get, url);
             request.SetBrowserRequestMode(BrowserRequestMode.NoCors);
             request.SetBrowserRequestCache(BrowserRequestCache.Default);
 

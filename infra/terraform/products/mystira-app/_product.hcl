@@ -21,13 +21,9 @@ locals {
   environment   = local.env_from_path != "" && local.env_from_path != "mystira-app" ? local.env_from_path : get_env("TF_VAR_environment", "dev")
 }
 
-include "root" {
-  path = find_in_parent_folders()
-}
-
 # Dependency on shared infrastructure
 dependency "shared" {
-  config_path = "${get_parent_terragrunt_dir()}/shared-infra/environments/${local.environment}"
+  config_path = "${get_repo_root()}/infra/terraform/shared-infra/environments/${local.environment}"
 
   # Mock outputs for `terragrunt plan` when shared-infra hasn't been applied
   # Note: Only include outputs that are actually used in inputs below
@@ -43,7 +39,10 @@ dependency "shared" {
     log_analytics_workspace_id             = "/subscriptions/xxx/resourceGroups/xxx/providers/Microsoft.OperationalInsights/workspaces/mock"
     application_insights_connection_string = "mock-connection-string"
   }
-  mock_outputs_allowed_terraform_commands = ["validate", "plan"]
+  mock_outputs_allowed_terraform_commands = ["init", "validate", "plan"]
+
+  # In CI, skip real output fetching to avoid backend initialization errors
+  skip_outputs = tobool(get_env("TERRAGRUNT_SKIP_OUTPUTS", "false"))
 }
 
 inputs = {

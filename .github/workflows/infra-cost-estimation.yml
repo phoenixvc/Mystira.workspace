@@ -1,4 +1,4 @@
-name: "[CI] Infrastructure - Cost Estimation"
+name: "[CI] Infra Cost Estimation"
 
 # Infracost: Estimates cloud costs for infrastructure changes
 # Posts cost breakdown as PR comment

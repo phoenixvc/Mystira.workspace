@@ -3,16 +3,13 @@
 # =============================================================================
 
 include "root" {
-  path = find_in_parent_folders()
+  path           = find_in_parent_folders()
+  merge_strategy = "deep"
 }
 
 include "product" {
-  path = find_in_parent_folders("terragrunt.hcl", "${get_terragrunt_dir()}/../../terragrunt.hcl")
-}
-
-# Terraform source - use the modules directly
-terraform {
-  source = "${get_terragrunt_dir()}/."
+  path           = find_in_parent_folders("_product.hcl")
+  merge_strategy = "deep"
 }
 
 # Dev-specific inputs

@@ -40,24 +40,6 @@ public class GameSessionApiClientTests
 
     private void SetupResponse(HttpStatusCode statusCode, object? content = null)
     {
-        var response = new HttpResponseMessage
-        {
-            StatusCode = statusCode
-        };
-
-        if (content != null)
-        {
-            response.Content = JsonContent.Create(content);
-        }
-        else if (statusCode != HttpStatusCode.OK)
-        {
-             response.Content = new StringContent("Error message");
-        }
-        else
-        {
-             response.Content = new StringContent("");
-        }
-
         _httpMessageHandlerMock
             .Protected()
             .Setup<Task<HttpResponseMessage>>(
@@ -65,7 +47,28 @@ public class GameSessionApiClientTests
                 ItExpr.IsAny<HttpRequestMessage>(),
                 ItExpr.IsAny<CancellationToken>()
             )
-            .ReturnsAsync(response);
+            .ReturnsAsync(() =>
+            {
+                var response = new HttpResponseMessage
+                {
+                    StatusCode = statusCode
+                };
+
+                if (content != null)
+                {
+                    response.Content = JsonContent.Create(content);
+                }
+                else if (statusCode != HttpStatusCode.OK)
+                {
+                    response.Content = new StringContent("Error message");
+                }
+                else
+                {
+                    response.Content = new StringContent("");
+                }
+
+                return response;
+            });
     }
     
     private void SetupException(Exception exception)

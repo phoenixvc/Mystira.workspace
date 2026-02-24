@@ -16,9 +16,5 @@
 # IMPORTANT: This layer must be deployed BEFORE any product layers.
 # =============================================================================
 
-# Include the root terragrunt.hcl
-include "root" {
-  path = find_in_parent_folders()
-}
-
 # No dependencies - this is the foundation layer
+# This file is included by environment configs via: include "product"

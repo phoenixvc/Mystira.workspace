@@ -5,7 +5,7 @@
 # IMPORTANT: This does NOT install or update the Harness GitOps agent.
 # The agent is installed once via bootstrap-gitops.sh and then manages deployments automatically.
 
-name: GitOps App Sync
+name: "[Ops] GitOps App Sync"
 
 on:
   push:

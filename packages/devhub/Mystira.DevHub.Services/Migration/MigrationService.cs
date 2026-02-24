@@ -214,7 +214,7 @@ public class MigrationService : IMigrationService
 
             // Migrate blobs with parallel processing and retry logic
             var tasks = new List<Task>();
-            var semaphore = new SemaphoreSlim(MaxConcurrentBlobOperations);
+            using var semaphore = new SemaphoreSlim(MaxConcurrentBlobOperations);
             int successCount = 0;
             int failureCount = 0;
 

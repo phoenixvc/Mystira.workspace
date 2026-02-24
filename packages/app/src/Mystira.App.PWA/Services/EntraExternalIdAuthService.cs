@@ -569,7 +569,7 @@ public class EntraExternalIdAuthService : IAuthService
 
             var tokenEndpoint = $"{baseAuthority}/oauth2/v2.0/token";
 
-            var content = new FormUrlEncodedContent(new Dictionary<string, string>
+            using var content = new FormUrlEncodedContent(new Dictionary<string, string>
             {
                 { "client_id", clientId },
                 { "grant_type", "authorization_code" },
