@@ -227,18 +227,22 @@ jobs:
           rm SHA256SUMS
 
       - name: Azure Login (OIDC)
+        id: azure-login
         uses: azure/login@v2
+        continue-on-error: true
         with:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - name: Terragrunt Init
+        if: steps.azure-login.outcome == 'success'
         working-directory: ${{ matrix.project.dir }}
         run: terragrunt init --terragrunt-non-interactive
 
       - name: Terragrunt Plan
         id: plan
+        if: steps.azure-login.outcome == 'success'
         working-directory: ${{ matrix.project.dir }}
         run: |
           set +e
@@ -261,7 +265,7 @@ jobs:
           fi
 
       - name: Generate Plan Summary
-        if: always()
+        if: always() && steps.azure-login.outcome == 'success'
         working-directory: ${{ matrix.project.dir }}
         run: |
           if [ -f tfplan ]; then
@@ -269,7 +273,7 @@ jobs:
           fi
 
       - name: Upload Plan Artifact
-        if: steps.plan.outputs.status == 'success'
+        if: steps.plan.outputs.status == 'success' && steps.azure-login.outcome == 'success'
         uses: actions/upload-artifact@v6
         with:
           name: tfplan-${{ matrix.project.name }}
@@ -289,6 +293,7 @@ jobs:
 
             const project = '${{ matrix.project.name }}';
             const dir = '${{ matrix.project.dir }}';
+            const azureLogin = '${{ steps.azure-login.outcome }}';
             const status = '${{ steps.plan.outputs.status }}';
             const changes = '${{ steps.plan.outputs.changes }}';
 
@@ -302,14 +307,19 @@ jobs:
               }
             }
 
-            const statusEmoji = status === 'success' ? '✅' : '❌';
-            // Show clear status: failed, changes detected, or no changes
-            let statusText;
-            if (status !== 'success') {
+            // Show clear status: no creds, failed, changes detected, or no changes
+            let statusEmoji, statusText;
+            if (azureLogin !== 'success') {
+              statusEmoji = '⚠️';
+              statusText = '⚠️ **Skipped** - Azure credentials not configured';
+            } else if (status !== 'success') {
+              statusEmoji = '❌';
               statusText = '❌ **Plan failed** - see output below';
             } else if (changes === 'true') {
+              statusEmoji = '⚠️';
               statusText = '⚠️ **Changes detected**';
             } else {
+              statusEmoji = '✅';
               statusText = '✅ No changes';
             }
 
@@ -406,7 +416,9 @@ jobs:
           rm SHA256SUMS
 
       - name: Azure Login (OIDC)
+        id: azure-login
         uses: azure/login@v2
+        continue-on-error: true
         with:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
@@ -414,6 +426,7 @@ jobs:
 
       - name: Terragrunt Stack Plan
         id: plan
+        if: steps.azure-login.outcome == 'success'
         working-directory: infra/terraform
         env:
           # Enable experimental Terragrunt Stacks feature
@@ -473,6 +486,7 @@ jobs:
             const stack = '${{ matrix.stack.name }}';
             const env = '${{ matrix.stack.env }}';
             const config = '${{ matrix.stack.config }}';
+            const azureLogin = '${{ steps.azure-login.outcome }}';
             const status = '${{ steps.plan.outputs.status }}';
             const changes = '${{ steps.plan.outputs.changes }}';
 
@@ -487,7 +501,10 @@ jobs:
 
             // Determine status emoji and text
             let statusEmoji, statusText;
-            if (status === 'unsupported') {
+            if (azureLogin !== 'success') {
+              statusEmoji = '⚠️';
+              statusText = '⚠️ **Skipped** - Azure credentials not configured';
+            } else if (status === 'unsupported') {
               statusEmoji = '⚠️';
               statusText = '⚠️ **Stacks feature not available** - see manual instructions below';
             } else if (status !== 'success') {
