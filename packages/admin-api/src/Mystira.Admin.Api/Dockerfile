@@ -1,12 +1,12 @@
 # Multi-stage Dockerfile for Mystira Admin API (.NET 10)
 # Build context: monorepo root (Mystira.workspace/)
-FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS base
+FROM mcr.microsoft.com/dotnet/aspnet:10.0@sha256:aec87aa74ddf129da573fa69f42f229a23c953a1c6fdecedea1aa6b1fe147d76 AS base
 WORKDIR /app
 EXPOSE 80
 EXPOSE 443
 
 # Build stage
-FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:10.0@sha256:e362a8dbcd691522456da26a5198b8f3ca1d7641c95624fadc5e3e82678bd08a AS build
 WORKDIR /src
 
 # Copy solution and global.json for SDK version pinning
