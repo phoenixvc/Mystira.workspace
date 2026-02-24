@@ -12,12 +12,6 @@ include "product" {
   merge_strategy = "deep"
 }
 
-# Use // so Terragrunt caches the full infra/terraform tree,
-# ensuring relative module paths (../../../modules/) resolve in .terragrunt-cache
-terraform {
-  source = "${get_repo_root()}/infra/terraform//${path_relative_to_include("root")}"
-}
-
 # Staging-specific inputs
 inputs = {
   # PostgreSQL Configuration (General Purpose for staging)
