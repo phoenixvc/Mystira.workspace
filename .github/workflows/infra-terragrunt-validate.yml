@@ -313,16 +313,21 @@ jobs:
             export TF_VAR_environment="${env}"
             terragrunt init --terragrunt-non-interactive -backend=false || { FAILED=1; cd -; continue; }
 
-            # Run terraform validate directly in the terragrunt cache directory.
-            # Using terragrunt validate re-triggers dependency resolution which
-            # tries to run "terraform output" on shared-infra, failing without
-            # Azure credentials. Running terraform directly bypasses this entirely.
-            TG_CACHE_DIR=$(find .terragrunt-cache -name ".terraform" -type d -printf "%h\n" 2>/dev/null | head -1)
-            if [[ -n "$TG_CACHE_DIR" ]]; then
-              terraform -chdir="$TG_CACHE_DIR" validate || FAILED=1
+            # Run terraform validate directly, bypassing terragrunt.
+            # terragrunt validate re-triggers dependency resolution (terraform output
+            # on shared-infra) which fails without Azure credentials.
+            # Stacks without a source block (shared-infra) init in the current dir;
+            # stacks with a source block (products) init inside .terragrunt-cache/.
+            if [[ -d ".terraform" ]]; then
+              terraform validate || FAILED=1
             else
-              echo "::error::Could not find initialized terraform directory for ${STACK} (${env})"
-              FAILED=1
+              TG_CACHE_DIR=$(find .terragrunt-cache -name ".terraform" -type d -printf "%h\n" 2>/dev/null | head -1)
+              if [[ -n "$TG_CACHE_DIR" ]]; then
+                terraform -chdir="$TG_CACHE_DIR" validate || FAILED=1
+              else
+                echo "::error::Could not find initialized terraform directory for ${STACK} (${env})"
+                FAILED=1
+              fi
             fi
             cd -
           done
