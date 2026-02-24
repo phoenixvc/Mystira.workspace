@@ -28,11 +28,11 @@ All packages across ecosystems follow a synchronized versioning approach:
 
 ### Version Synchronization
 
-| Package Type | Version Source | Synchronization |
-|--------------|----------------|-----------------|
-| NPM Packages | Changesets | Primary source of truth |
-| NuGet Packages | Triggered by NPM release | Follows NPM package versions |
-| Docker Images | Git SHA + environment tag | Tagged with release version |
+| Package Type   | Version Source            | Synchronization              |
+| -------------- | ------------------------- | ---------------------------- |
+| NPM Packages   | Changesets                | Primary source of truth      |
+| NuGet Packages | Triggered by NPM release  | Follows NPM package versions |
+| Docker Images  | Git SHA + environment tag | Tagged with release version  |
 
 ### Linked Packages
 
@@ -48,6 +48,7 @@ When an NPM package is released via Changesets, the corresponding NuGet package 
 The unified publishing system supports bidirectional synchronization:
 
 **Forward Flow (Changesets → NuGet):**
+
 ```
 ┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
 │   Changeset     │ ──▶ │  NPM Release    │ ──▶ │  NuGet Release  │
@@ -56,6 +57,7 @@ The unified publishing system supports bidirectional synchronization:
 ```
 
 **Reverse Flow (Submodule → Changeset):**
+
 ```
 ┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
 │   Submodule     │ ──▶ │  NuGet Release  │ ──▶ │  Auto-Changeset │
@@ -73,11 +75,11 @@ This ensures NPM packages stay in sync when their NuGet dependencies are updated
 
 ### Pre-release Strategy
 
-| Environment | NPM Version | NuGet Version | Docker Tag |
-|-------------|-------------|---------------|------------|
-| Development | `1.0.0-dev.N` | `1.0.0-dev.N` | `dev-{sha}` |
-| Staging | `1.0.0-rc.N` | `1.0.0-rc.N` | `staging-{sha}` |
-| Production | `1.0.0` | `1.0.0` | `prod-{sha}`, `latest` |
+| Environment | NPM Version   | NuGet Version | Docker Tag             |
+| ----------- | ------------- | ------------- | ---------------------- |
+| Development | `1.0.0-dev.N` | `1.0.0-dev.N` | `dev-{sha}`            |
+| Staging     | `1.0.0-rc.N`  | `1.0.0-rc.N`  | `staging-{sha}`        |
+| Production  | `1.0.0`       | `1.0.0`       | `prod-{sha}`, `latest` |
 
 ---
 
@@ -89,10 +91,10 @@ This ensures NPM packages stay in sync when their NuGet dependencies are updated
 
 ### Images Published
 
-| Image             | Source                     | Dockerfile                                | Notes |
-| ----------------- | -------------------------- | ----------------------------------------- | ----- |
-| `publisher`       | `packages/publisher`       | `infra/docker/publisher/Dockerfile`       | Node.js |
-| `chain`           | `packages/chain`           | `infra/docker/chain/Dockerfile`           | Python |
+| Image             | Source                     | Dockerfile                                | Notes                      |
+| ----------------- | -------------------------- | ----------------------------------------- | -------------------------- |
+| `publisher`       | `packages/publisher`       | `infra/docker/publisher/Dockerfile`       | Node.js                    |
+| `chain`           | `packages/chain`           | `infra/docker/chain/Dockerfile`           | Python                     |
 | `story-generator` | `packages/story-generator` | `infra/docker/story-generator/Dockerfile` | .NET API (not Blazor WASM) |
 
 > **Note**: The `story-generator` image builds `Mystira.StoryGenerator.Api`, following the same pattern as `Mystira.App` where API goes to Kubernetes and Web (Blazor WASM) would go to Static Web App.
@@ -169,11 +171,11 @@ Uses **Changesets** for versioning and publishing.
 
 NuGet packages are published through dedicated workflows with the "Packages - " prefix:
 
-| Workflow | File | Package | Status |
-|----------|------|---------|--------|
-| `Packages - Contracts: Publish NuGet` | `contracts-publish.yml` | `Mystira.Contracts` | ✅ Active |
-| `Packages - Shared: Publish NuGet` | `shared-publish.yml` | `Mystira.Shared` | ✅ Active |
-| `Packages - Legacy: Submodule NuGet` | `nuget-publish.yml` | Legacy packages | ⚠️ Deprecated |
+| Workflow                              | File                    | Package             | Status        |
+| ------------------------------------- | ----------------------- | ------------------- | ------------- |
+| `Packages - Contracts: Publish NuGet` | `contracts-publish.yml` | `Mystira.Contracts` | ✅ Active     |
+| `Packages - Shared: Publish NuGet`    | `shared-publish.yml`    | `Mystira.Shared`    | ✅ Active     |
+| `Packages - Legacy: Submodule NuGet`  | `nuget-publish.yml`     | Legacy packages     | ⚠️ Deprecated |
 
 ### Automatic Branch Publishing
 
@@ -197,19 +199,19 @@ Both `contracts-publish.yml` and `shared-publish.yml` trigger on pushes to dev o
 
 ### Packages Published
 
-| Package | NPM Counterpart | Description | Workflow |
-|---------|-----------------|-------------|----------|
-| `Mystira.Contracts` | `@mystira/contracts` | Unified API contracts | `contracts-publish.yml` |
-| `Mystira.Shared` | N/A | .NET shared utilities | `shared-publish.yml` |
-| `Mystira.App.Contracts` | `@mystira/app` | ⚠️ Deprecated | `nuget-publish.yml` |
-| `Mystira.StoryGenerator.Contracts` | `@mystira/story-generator` | ⚠️ Deprecated | `nuget-publish.yml` |
+| Package                            | NPM Counterpart            | Description           | Workflow                |
+| ---------------------------------- | -------------------------- | --------------------- | ----------------------- |
+| `Mystira.Contracts`                | `@mystira/contracts`       | Unified API contracts | `contracts-publish.yml` |
+| `Mystira.Shared`                   | N/A                        | .NET shared utilities | `shared-publish.yml`    |
+| `Mystira.App.Contracts`            | `@mystira/app`             | ⚠️ Deprecated         | `nuget-publish.yml`     |
+| `Mystira.StoryGenerator.Contracts` | `@mystira/story-generator` | ⚠️ Deprecated         | `nuget-publish.yml`     |
 
 ### Version Synchronization
 
-| Package | Version Source | Strategy |
-|---------|----------------|----------|
+| Package             | Version Source                    | Strategy                       |
+| ------------------- | --------------------------------- | ------------------------------ |
 | `Mystira.Contracts` | `packages/contracts/package.json` | Synced with NPM via Changesets |
-| `Mystira.Shared` | `.csproj` Version property | Independent versioning |
+| `Mystira.Shared`    | `.csproj` Version property        | Independent versioning         |
 
 ### Required Secrets
 
@@ -220,16 +222,17 @@ Both `contracts-publish.yml` and `shared-publish.yml` trigger on pushes to dev o
 
 ### Version Strategy
 
-| Branch/Trigger | Version Format | Destination |
-|----------------|----------------|-------------|
-| Push to `dev` | `{base}-dev.{run_number}` | GitHub Packages only |
-| Push to `main` | `{base}` (stable) | GitHub Packages + NuGet.org |
-| Changesets release | Matches NPM version | GitHub Packages + NuGet.org |
-| Manual dispatch | User-specified suffix | Configurable via checkbox |
+| Branch/Trigger     | Version Format            | Destination                 |
+| ------------------ | ------------------------- | --------------------------- |
+| Push to `dev`      | `{base}-dev.{run_number}` | GitHub Packages only        |
+| Push to `main`     | `{base}` (stable)         | GitHub Packages + NuGet.org |
+| Changesets release | Matches NPM version       | GitHub Packages + NuGet.org |
+| Manual dispatch    | User-specified suffix     | Configurable via checkbox   |
 
 ### Manual Trigger Options
 
 Both contracts and shared workflows support manual dispatch with:
+
 - **Version suffix** (optional): e.g., `beta.1`, `rc.1`
 - **Publish to NuGet.org** checkbox: Controls public registry publishing
 
@@ -298,20 +301,20 @@ Both contracts and shared workflows support manual dispatch with:
 
 ### Workflow Files
 
-| Workflow                              | Trigger                    | Action                                |
-| ------------------------------------- | -------------------------- | ------------------------------------- |
-| `publisher-ci.yml`                    | Push/PR to dev/main        | Lint, test, build, Docker push        |
-| `chain-ci.yml`                        | Push/PR to dev/main        | Lint, test, build, Docker push        |
-| `story-generator-ci.yml`              | Push/PR to dev/main        | Lint, test, build, Docker push        |
-| `submodule-deploy-dev.yml`            | `repository_dispatch`      | Deploy submodule to dev K8s           |
-| `submodule-deploy-dev-appservice.yml` | `repository_dispatch`      | Deploy Mystira.App to dev App Service |
-| `contracts-publish.yml`               | Push to dev/main, Changesets    | Publish Mystira.Contracts NuGet   |
-| `shared-publish.yml`                  | Push to dev/main                | Publish Mystira.Shared NuGet      |
-| `nuget-publish.yml`                   | `repository_dispatch`           | ⚠️ Legacy submodule packages      |
-| `release.yml`                         | Push to main                    | NPM + NuGet publish (Changesets)  |
-| `staging-release.yml`                 | Push to main               | Auto-deploy to staging AKS            |
-| `production-release.yml`              | Manual                     | Deploy to production AKS              |
-| `infra-deploy.yml`                    | Manual/Push                | Full infrastructure deployment        |
+| Workflow                              | Trigger                      | Action                                |
+| ------------------------------------- | ---------------------------- | ------------------------------------- |
+| `publisher-ci.yml`                    | Push/PR to dev/main          | Lint, test, build, Docker push        |
+| `chain-ci.yml`                        | Push/PR to dev/main          | Lint, test, build, Docker push        |
+| `story-generator-ci.yml`              | Push/PR to dev/main          | Lint, test, build, Docker push        |
+| `submodule-deploy-dev.yml`            | `repository_dispatch`        | Deploy submodule to dev K8s           |
+| `submodule-deploy-dev-appservice.yml` | `repository_dispatch`        | Deploy Mystira.App to dev App Service |
+| `contracts-publish.yml`               | Push to dev/main, Changesets | Publish Mystira.Contracts NuGet       |
+| `shared-publish.yml`                  | Push to dev/main             | Publish Mystira.Shared NuGet          |
+| `nuget-publish.yml`                   | `repository_dispatch`        | ⚠️ Legacy submodule packages          |
+| `release.yml`                         | Push to main                 | NPM + NuGet publish (Changesets)      |
+| `staging-release.yml`                 | Push to main                 | Auto-deploy to staging AKS            |
+| `production-release.yml`              | Manual                       | Deploy to production AKS              |
+| `infra-deploy.yml`                    | Manual/Push                  | Full infrastructure deployment        |
 
 ---
 
@@ -323,13 +326,13 @@ Submodule repositories (Admin.Api, Admin.UI, etc.) use `repository_dispatch` to 
 
 ### Trigger Behavior
 
-| Event | CI (lint/test/build) | Deploy to Dev |
-|-------|---------------------|---------------|
-| PR opened/updated | ✅ | ❌ |
-| Draft PR | ❌ skip | ❌ |
-| Push/merge to dev | ✅ | ✅ |
-| Push to main | ✅ | ❌ |
-| Manual dispatch | ✅ | ✅ |
+| Event             | CI (lint/test/build) | Deploy to Dev |
+| ----------------- | -------------------- | ------------- |
+| PR opened/updated | ✅                   | ❌            |
+| Draft PR          | ❌ skip              | ❌            |
+| Push/merge to dev | ✅                   | ✅            |
+| Push to main      | ✅                   | ❌            |
+| Manual dispatch   | ✅                   | ✅            |
 
 ### Flow Diagram
 
@@ -359,21 +362,22 @@ Submodule repositories (Admin.Api, Admin.UI, etc.) use `repository_dispatch` to 
 
 ### Supported Event Types
 
-| Event Type               | Target                      | Handler Workflow                      |
-| ------------------------ | --------------------------- | ------------------------------------- |
-| `admin-api-deploy`       | `mys-admin-api` (K8s)       | `submodule-deploy-dev.yml`            |
-| `admin-ui-deploy`        | `mys-admin-ui` (K8s)        | `submodule-deploy-dev.yml`            |
-| `story-generator-deploy` | `mys-story-generator` (K8s) | `submodule-deploy-dev.yml`            |
-| `publisher-deploy`       | `mys-publisher` (K8s)       | `submodule-deploy-dev.yml`            |
-| `chain-deploy`           | `mys-chain` (K8s)           | `submodule-deploy-dev.yml`            |
-| `app-deploy`             | App Service                 | `submodule-deploy-dev-appservice.yml` |
-| `app-swa-deploy`         | Static Web App              | `submodule-deploy-dev-appservice.yml` |
-| `devhub-deploy`          | Static Web App              | `submodule-deploy-dev-appservice.yml` |
-| `story-generator-swa-deploy` | Static Web App          | `submodule-deploy-dev-appservice.yml` |
-| `contracts-nuget-publish` | GitHub/NuGet.org           | `contracts-publish.yml`               |
-| `nuget-publish`          | GitHub/NuGet.org            | `nuget-publish.yml` (⚠️ legacy)       |
+| Event Type                   | Target                      | Handler Workflow                      |
+| ---------------------------- | --------------------------- | ------------------------------------- |
+| `admin-api-deploy`           | `mys-admin-api` (K8s)       | `submodule-deploy-dev.yml`            |
+| `admin-ui-deploy`            | `mys-admin-ui` (K8s)        | `submodule-deploy-dev.yml`            |
+| `story-generator-deploy`     | `mys-story-generator` (K8s) | `submodule-deploy-dev.yml`            |
+| `publisher-deploy`           | `mys-publisher` (K8s)       | `submodule-deploy-dev.yml`            |
+| `chain-deploy`               | `mys-chain` (K8s)           | `submodule-deploy-dev.yml`            |
+| `app-deploy`                 | App Service                 | `submodule-deploy-dev-appservice.yml` |
+| `app-swa-deploy`             | Static Web App              | `submodule-deploy-dev-appservice.yml` |
+| `devhub-deploy`              | Static Web App              | `submodule-deploy-dev-appservice.yml` |
+| `story-generator-swa-deploy` | Static Web App              | `submodule-deploy-dev-appservice.yml` |
+| `contracts-nuget-publish`    | GitHub/NuGet.org            | `contracts-publish.yml`               |
+| `nuget-publish`              | GitHub/NuGet.org            | `nuget-publish.yml` (⚠️ legacy)       |
 
 > **Note**: `Mystira.StoryGenerator` follows the same API/Web pattern as `Mystira.App`:
+>
 > - **API** (`Mystira.StoryGenerator.Api`) → Kubernetes via `story-generator-deploy`
 > - **Web** (`Mystira.StoryGenerator.Web`, Blazor WASM) → Static Web App via `story-generator-swa-deploy`
 
@@ -414,7 +418,7 @@ trigger-workspace-deploy:
       with:
         token: ${{ secrets.MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN }}
         repository: phoenixvc/Mystira.workspace
-        event-type: admin-api-deploy  # Change per service
+        event-type: admin-api-deploy # Change per service
         client-payload: |
           {
             "environment": "dev",
@@ -429,13 +433,13 @@ trigger-workspace-deploy:
 
 ### Required Secrets (Submodule Repositories)
 
-| Secret                               | Description                                      |
-| ------------------------------------ | ------------------------------------------------ |
+| Secret                                  | Description                                      |
+| --------------------------------------- | ------------------------------------------------ |
 | `MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN` | GitHub PAT with `repo` scope to trigger dispatch |
-| `AZURE_CLIENT_ID`                    | Azure service principal client ID                |
-| `AZURE_TENANT_ID`                    | Azure tenant ID                                  |
-| `AZURE_SUBSCRIPTION_ID`              | Azure subscription ID                            |
-| `GH_PACKAGES_TOKEN`                  | GitHub PAT for NuGet package restore             |
+| `AZURE_CLIENT_ID`                       | Azure service principal client ID                |
+| `AZURE_TENANT_ID`                       | Azure tenant ID                                  |
+| `AZURE_SUBSCRIPTION_ID`                 | Azure subscription ID                            |
+| `GH_PACKAGES_TOKEN`                     | GitHub PAT for NuGet package restore             |
 
 > **Token Setup**: `MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN` is the standard PAT used across all Mystira repositories. It must have `repo` scope to trigger `repository_dispatch` events in the workspace.
 
@@ -457,10 +461,10 @@ Submodules with shared contracts can trigger NuGet package publishing via the wo
 
 ### Version Strategy (Legacy)
 
-| Branch | Version | Destination |
-|--------|---------|-------------|
-| `dev`  | `1.0.0-dev.{run_number}` | GitHub Packages only |
-| `main` | `1.0.0` (stable) | GitHub Packages + NuGet.org |
+| Branch | Version                  | Destination                 |
+| ------ | ------------------------ | --------------------------- |
+| `dev`  | `1.0.0-dev.{run_number}` | GitHub Packages only        |
+| `main` | `1.0.0` (stable)         | GitHub Packages + NuGet.org |
 
 ### Triggering NuGet Publish (Legacy)
 
@@ -494,10 +498,10 @@ trigger-nuget-publish:
 
 ### Supported Legacy Packages
 
-| Package Name | Event Payload `package` Value |
-|--------------|-------------------------------|
-| Mystira.App.Contracts | `app-contracts` |
-| Mystira.StoryGenerator.Contracts | `story-generator-contracts` |
+| Package Name                     | Event Payload `package` Value |
+| -------------------------------- | ----------------------------- |
+| Mystira.App.Contracts            | `app-contracts`               |
+| Mystira.StoryGenerator.Contracts | `story-generator-contracts`   |
 
 > **Recommendation**: Migrate to `Mystira.Contracts` which consolidates both packages and is managed via Changesets.
 

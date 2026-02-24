@@ -24,22 +24,25 @@ yarn add @mystira/contracts
 ### Import Specific Modules
 
 ```typescript
-import { StoryRequest, StoryResponse } from '@mystira/contracts/app';
-import { GeneratorConfig, GeneratorResult } from '@mystira/contracts/story-generator';
+import { StoryRequest, StoryResponse } from "@mystira/contracts/app";
+import {
+  GeneratorConfig,
+  GeneratorResult,
+} from "@mystira/contracts/story-generator";
 ```
 
 ### Import via Namespaces
 
 ```typescript
-import { App, StoryGenerator } from '@mystira/contracts';
+import { App, StoryGenerator } from "@mystira/contracts";
 
 const request: App.StoryRequest = {
-  title: 'My Story',
-  content: 'Once upon a time...',
+  title: "My Story",
+  content: "Once upon a time...",
 };
 
 const config: StoryGenerator.GeneratorConfig = {
-  model: 'gpt-4',
+  model: "gpt-4",
   maxTokens: 2000,
 };
 ```
@@ -70,10 +73,10 @@ See the [Migration Guide](https://github.com/phoenixvc/Mystira.workspace/blob/ma
 
 ```typescript
 // Before
-import { StoryRequest } from '@mystira/app-contracts';
+import { StoryRequest } from "@mystira/app-contracts";
 
 // After
-import { StoryRequest } from '@mystira/contracts/app';
+import { StoryRequest } from "@mystira/contracts/app";
 ```
 
 ## NuGet Package

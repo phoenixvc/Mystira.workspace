@@ -11,12 +11,12 @@ This guide covers migrating from the legacy contracts packages to the unified `@
 
 We are consolidating scattered API contracts into unified packages:
 
-| Old Package | New Package | Status |
-|-------------|-------------|--------|
-| `@mystira/app-contracts` | `@mystira/contracts/app` | Deprecated |
+| Old Package                          | New Package                          | Status     |
+| ------------------------------------ | ------------------------------------ | ---------- |
+| `@mystira/app-contracts`             | `@mystira/contracts/app`             | Deprecated |
 | `@mystira/story-generator-contracts` | `@mystira/contracts/story-generator` | Deprecated |
-| `Mystira.App.Contracts` | `Mystira.Contracts.App` | Deprecated |
-| `Mystira.StoryGenerator.Contracts` | `Mystira.Contracts.StoryGenerator` | Deprecated |
+| `Mystira.App.Contracts`              | `Mystira.Contracts.App`              | Deprecated |
+| `Mystira.StoryGenerator.Contracts`   | `Mystira.Contracts.StoryGenerator`   | Deprecated |
 
 See [ADR-0020: Package Consolidation Strategy](../architecture/adr/0020-package-consolidation-strategy.md) for rationale.
 
@@ -52,18 +52,27 @@ yarn add @mystira/contracts
 #### Step 2: Update Imports
 
 **Before:**
+
 ```typescript
-import { StoryRequest, StoryResponse } from '@mystira/app-contracts';
-import { GeneratorConfig, GeneratorResult } from '@mystira/story-generator-contracts';
+import { StoryRequest, StoryResponse } from "@mystira/app-contracts";
+import {
+  GeneratorConfig,
+  GeneratorResult,
+} from "@mystira/story-generator-contracts";
 ```
 
 **After (Option 1 - Subpath imports):**
+
 ```typescript
-import { StoryRequest, StoryResponse } from '@mystira/contracts/app';
-import { GeneratorConfig, GeneratorResult } from '@mystira/contracts/story-generator';
+import { StoryRequest, StoryResponse } from "@mystira/contracts/app";
+import {
+  GeneratorConfig,
+  GeneratorResult,
+} from "@mystira/contracts/story-generator";
 ```
 
 **After (Option 2 - Namespace imports):**
+
 ```typescript
 import { App, StoryGenerator } from '@mystira/contracts';
 
@@ -102,12 +111,14 @@ dotnet add package Mystira.Contracts
 #### Step 2: Update Using Statements
 
 **Before:**
+
 ```csharp
 using Mystira.App.Contracts;
 using Mystira.StoryGenerator.Contracts;
 ```
 
 **After:**
+
 ```csharp
 using Mystira.Contracts.App;
 using Mystira.Contracts.StoryGenerator;
@@ -130,6 +141,7 @@ dotnet remove package Mystira.StoryGenerator.Contracts
 > Track progress: [GitHub Issue #TBD](https://github.com/phoenixvc/Mystira.workspace/issues)
 
 When available, the tooling will:
+
 - **TypeScript**: `npx @mystira/contracts-codemod` - Replace imports automatically
 - **C#**: Roslyn analyzer to update using statements
 
@@ -139,33 +151,33 @@ When available, the tooling will:
 
 ### App Contracts
 
-| Old Type | New Type |
-|----------|----------|
-| `StoryRequest` | `App.StoryRequest` or import from `/app` |
-| `StoryResponse` | `App.StoryResponse` or import from `/app` |
-| `ApiRequest` | `App.ApiRequest` or import from `/app` |
+| Old Type         | New Type                                   |
+| ---------------- | ------------------------------------------ |
+| `StoryRequest`   | `App.StoryRequest` or import from `/app`   |
+| `StoryResponse`  | `App.StoryResponse` or import from `/app`  |
+| `ApiRequest`     | `App.ApiRequest` or import from `/app`     |
 | `ApiResponse<T>` | `App.ApiResponse<T>` or import from `/app` |
-| `ApiError` | `App.ApiError` or import from `/app` |
+| `ApiError`       | `App.ApiError` or import from `/app`       |
 
 ### Story Generator Contracts
 
-| Old Type | New Type |
-|----------|----------|
-| `GeneratorConfig` | `StoryGenerator.GeneratorConfig` or import from `/story-generator` |
-| `GeneratorRequest` | `StoryGenerator.GeneratorRequest` or import from `/story-generator` |
-| `GeneratorResult` | `StoryGenerator.GeneratorResult` or import from `/story-generator` |
-| `GeneratorContext` | `StoryGenerator.GeneratorContext` or import from `/story-generator` |
+| Old Type            | New Type                                                             |
+| ------------------- | -------------------------------------------------------------------- |
+| `GeneratorConfig`   | `StoryGenerator.GeneratorConfig` or import from `/story-generator`   |
+| `GeneratorRequest`  | `StoryGenerator.GeneratorRequest` or import from `/story-generator`  |
+| `GeneratorResult`   | `StoryGenerator.GeneratorResult` or import from `/story-generator`   |
+| `GeneratorContext`  | `StoryGenerator.GeneratorContext` or import from `/story-generator`  |
 | `GeneratorMetadata` | `StoryGenerator.GeneratorMetadata` or import from `/story-generator` |
 
 ---
 
 ## Deprecation Timeline
 
-| Phase | Date | Action |
-|-------|------|--------|
-| Phase 1 | 2025-12-24 | New packages published, migration period begins |
-| Phase 2 | +2 versions | Deprecation warnings added to old packages |
-| Phase 3 | +4 versions | Old packages archived, no new versions |
+| Phase   | Date        | Action                                          |
+| ------- | ----------- | ----------------------------------------------- |
+| Phase 1 | 2025-12-24  | New packages published, migration period begins |
+| Phase 2 | +2 versions | Deprecation warnings added to old packages      |
+| Phase 3 | +4 versions | Old packages archived, no new versions          |
 
 ### Deprecation Warnings
 
@@ -192,6 +204,7 @@ Yes, during the migration period. After Phase 3, only critical security fixes wi
 ### Are there breaking changes in the new package?
 
 The types are identical. The only changes are:
+
 - Import paths
 - Namespace organization
 - Package name

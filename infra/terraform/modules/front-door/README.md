@@ -161,11 +161,13 @@ The module includes the following WAF rules:
 After deploying Front Door, you need to update your DNS:
 
 1. **Get CNAME targets from Terraform outputs:**
+
    ```bash
    terraform output dns_cname_targets
    ```
 
 2. **Update DNS records:**
+
    ```bash
    # For dev environment
    # Add CNAME: dev.publisher -> <endpoint>.azurefd.net
@@ -196,12 +198,14 @@ _dnsauth.dev.chain.mystira.app -> <validation_token>
 ## Caching Configuration
 
 ### Publisher Service
+
 - **Caching:** Enabled (for static assets)
 - **Compression:** Enabled
 - **Cache Duration:** Configurable (default: 1 hour)
 - **Content Types:** JS, CSS, HTML, JSON, XML
 
 ### Chain Service
+
 - **Caching:** Disabled (blockchain RPC needs real-time data)
 - **Compression:** Disabled
 - **Forwarding:** All requests forwarded to backend
@@ -241,7 +245,7 @@ Monitor Front Door metrics in Azure Portal:
 | Rules (7 custom)    | $2              |
 | **Total**           | **~$142/month** |
 
-*Costs scale with traffic volume*
+_Costs scale with traffic volume_
 
 ## Limitations
 

@@ -5,6 +5,7 @@
 **Accepted** - 2025-12-24
 
 Decision accepted to adopt Wolverine as the unified messaging framework, replacing MediatR during the Phase 4 package consolidation. Key factors:
+
 - MassTransit commercial licensing (Q3 2025 - Q1 2026)
 - Wolverine MIT license (free forever)
 - Unified in-process + distributed messaging

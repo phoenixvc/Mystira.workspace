@@ -319,9 +319,11 @@ Resource groups follow a 3-tier organization per [ADR-0017: Resource Group Organ
 ### Development
 
 **Tier 1: Core Resource Group** (shared infrastructure):
+
 - `mys-dev-core-rg-san` - VNet, AKS, PostgreSQL, Redis, Service Bus, Log Analytics
 
 **Tier 2: Service-Specific Resource Groups**:
+
 - `mys-dev-chain-rg-san` - Chain service (Identity, Key Vault, App Insights)
 - `mys-dev-publisher-rg-san` - Publisher service (Identity, Key Vault, App Insights)
 - `mys-dev-story-rg-san` - Story Generator (Identity, Key Vault, App Insights)
@@ -329,6 +331,7 @@ Resource groups follow a 3-tier organization per [ADR-0017: Resource Group Organ
 - `mys-dev-app-rg-san` - App (Static Web App, App Service)
 
 **Tier 3: Cross-Environment Shared** (created in dev, used by all):
+
 - `mys-shared-acr-rg-san` - Container Registry
 - `mys-shared-comms-rg-glob` - Communication Services, Email
 
@@ -343,6 +346,7 @@ Resource groups follow a 3-tier organization per [ADR-0017: Resource Group Organ
 **Tier 2**: `mys-prod-{service}-rg-san` - chain, publisher, story, admin, app
 
 **Production-specific**:
+
 - Premium Service Bus (zone redundant)
 - Higher capacity Redis and PostgreSQL
 - Dedicated node pools for chain and publisher workloads

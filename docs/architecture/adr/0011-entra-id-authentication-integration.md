@@ -71,12 +71,12 @@ Supported Account Types: Single tenant (organization only)
 
 **Exposed API Scopes**:
 
-| Scope | Description | Admin Consent |
-|-------|-------------|---------------|
-| `Admin.Read` | Read admin data | Yes |
-| `Admin.Write` | Modify admin data | Yes |
-| `Users.Manage` | Manage platform users | Yes |
-| `Content.Moderate` | Moderate content | Yes |
+| Scope              | Description           | Admin Consent |
+| ------------------ | --------------------- | ------------- |
+| `Admin.Read`       | Read admin data       | Yes           |
+| `Admin.Write`      | Modify admin data     | Yes           |
+| `Users.Manage`     | Manage platform users | Yes           |
+| `Content.Moderate` | Moderate content      | Yes           |
 
 **App Registration: `mystira-admin-ui`**
 
@@ -94,12 +94,12 @@ Supported Account Types: Single tenant
 
 **Sign-in Experience**:
 
-| Feature | Description |
-|---------|-------------|
-| Sign-up/Sign-in | Combined email/password and social provider authentication |
-| Password Reset | Self-service via email verification |
-| Profile Edit | User can update display name and avatar |
-| Social Providers | Google OAuth 2.0, Discord OpenID Connect |
+| Feature          | Description                                                |
+| ---------------- | ---------------------------------------------------------- |
+| Sign-up/Sign-in  | Combined email/password and social provider authentication |
+| Password Reset   | Self-service via email verification                        |
+| Profile Edit     | User can update display name and avatar                    |
+| Social Providers | Google OAuth 2.0, Discord OpenID Connect                   |
 
 **App Registration: `mystira-public-api`**
 
@@ -321,7 +321,7 @@ builder.Services.AddAuthorization(options =>
 **MSAL Configuration (authConfig.ts)**:
 
 ```typescript
-import { Configuration, LogLevel } from '@azure/msal-browser';
+import { Configuration, LogLevel } from "@azure/msal-browser";
 
 export const msalConfig: Configuration = {
   auth: {
@@ -331,7 +331,7 @@ export const msalConfig: Configuration = {
     postLogoutRedirectUri: import.meta.env.VITE_POST_LOGOUT_URI,
   },
   cache: {
-    cacheLocation: 'sessionStorage',
+    cacheLocation: "sessionStorage",
     storeAuthStateInCookie: false,
   },
   system: {
@@ -342,13 +342,16 @@ export const msalConfig: Configuration = {
 };
 
 export const loginRequest = {
-  scopes: ['api://mystira-admin-api/Admin.Read'],
+  scopes: ["api://mystira-admin-api/Admin.Read"],
 };
 
 export const apiScopes = {
-  admin: ['api://mystira-admin-api/Admin.Read', 'api://mystira-admin-api/Admin.Write'],
-  users: ['api://mystira-admin-api/Users.Manage'],
-  content: ['api://mystira-admin-api/Content.Moderate'],
+  admin: [
+    "api://mystira-admin-api/Admin.Read",
+    "api://mystira-admin-api/Admin.Write",
+  ],
+  users: ["api://mystira-admin-api/Users.Manage"],
+  content: ["api://mystira-admin-api/Content.Moderate"],
 };
 ```
 
@@ -376,21 +379,21 @@ function App() {
 
 Define in Azure Portal → App Registration → App roles:
 
-| Role | Value | Description | Allowed Members |
-|------|-------|-------------|-----------------|
-| Admin | `Admin` | Full admin access | Users, Groups |
-| SuperAdmin | `SuperAdmin` | System-level access | Users |
-| Moderator | `Moderator` | Content moderation | Users, Groups |
-| Viewer | `Viewer` | Read-only access | Users, Groups |
+| Role       | Value        | Description         | Allowed Members |
+| ---------- | ------------ | ------------------- | --------------- |
+| Admin      | `Admin`      | Full admin access   | Users, Groups   |
+| SuperAdmin | `SuperAdmin` | System-level access | Users           |
+| Moderator  | `Moderator`  | Content moderation  | Users, Groups   |
+| Viewer     | `Viewer`     | Read-only access    | Users, Groups   |
 
 #### Group-to-Role Mapping
 
-| Entra ID Group | App Role | Description |
-|----------------|----------|-------------|
-| `mystira-admins` | Admin | Platform administrators |
-| `mystira-superadmins` | SuperAdmin | System administrators |
-| `mystira-moderators` | Moderator | Content moderators |
-| `mystira-viewers` | Viewer | Read-only staff |
+| Entra ID Group        | App Role   | Description             |
+| --------------------- | ---------- | ----------------------- |
+| `mystira-admins`      | Admin      | Platform administrators |
+| `mystira-superadmins` | SuperAdmin | System administrators   |
+| `mystira-moderators`  | Moderator  | Content moderators      |
+| `mystira-viewers`     | Viewer     | Read-only staff         |
 
 ### 6. Conditional Access Policies
 
@@ -426,23 +429,23 @@ Access controls:
 
 #### Claims Mapping
 
-| Claim | Source | Usage |
-|-------|--------|-------|
-| `sub` | Object ID | User identifier |
-| `name` | Display name | UI display |
-| `email` | UPN or mail | Contact/notifications |
-| `roles` | App roles | Authorization |
-| `groups` | Group membership | Fine-grained access |
-| `tid` | Tenant ID | Multi-tenant routing |
+| Claim    | Source           | Usage                 |
+| -------- | ---------------- | --------------------- |
+| `sub`    | Object ID        | User identifier       |
+| `name`   | Display name     | UI display            |
+| `email`  | UPN or mail      | Contact/notifications |
+| `roles`  | App roles        | Authorization         |
+| `groups` | Group membership | Fine-grained access   |
+| `tid`    | Tenant ID        | Multi-tenant routing  |
 
 #### Token Lifetimes
 
-| Token | Lifetime | Refresh |
-|-------|----------|---------|
-| Access Token | 1 hour | Yes |
-| ID Token | 1 hour | No |
-| Refresh Token | 14 days | Rolling |
-| Session (Browser) | 8 hours | Sliding |
+| Token             | Lifetime | Refresh |
+| ----------------- | -------- | ------- |
+| Access Token      | 1 hour   | Yes     |
+| ID Token          | 1 hour   | No      |
+| Refresh Token     | 14 days  | Rolling |
+| Session (Browser) | 8 hours  | Sliding |
 
 ### 8. Environment Variables
 
@@ -709,109 +712,149 @@ Create custom HTML templates for full control over the UI.
 ```html
 <!DOCTYPE html>
 <html>
-<head>
+  <head>
     <title>Sign in to Mystira</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body {
-            font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .container {
-            background: white;
-            border-radius: 16px;
-            padding: 48px;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-            max-width: 420px;
-            width: 100%;
-        }
-        .logo { text-align: center; margin-bottom: 32px; }
-        .logo img { height: 48px; }
-        h1 { font-size: 24px; font-weight: 600; text-align: center; margin-bottom: 8px; }
-        .subtitle { color: #6b7280; text-align: center; margin-bottom: 32px; }
-        .social-buttons { display: flex; gap: 12px; margin-bottom: 24px; }
-        .social-btn {
-            flex: 1;
-            padding: 12px;
-            border: 1px solid #e5e7eb;
-            border-radius: 8px;
-            background: white;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            transition: all 0.2s;
-        }
-        .social-btn:hover { background: #f9fafb; border-color: #d1d5db; }
-        .divider {
-            display: flex;
-            align-items: center;
-            margin: 24px 0;
-            color: #9ca3af;
-        }
-        .divider::before, .divider::after {
-            content: '';
-            flex: 1;
-            height: 1px;
-            background: #e5e7eb;
-        }
-        .divider span { padding: 0 16px; font-size: 14px; }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        font-family: "Inter", sans-serif;
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .container {
+        background: white;
+        border-radius: 16px;
+        padding: 48px;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        max-width: 420px;
+        width: 100%;
+      }
+      .logo {
+        text-align: center;
+        margin-bottom: 32px;
+      }
+      .logo img {
+        height: 48px;
+      }
+      h1 {
+        font-size: 24px;
+        font-weight: 600;
+        text-align: center;
+        margin-bottom: 8px;
+      }
+      .subtitle {
+        color: #6b7280;
+        text-align: center;
+        margin-bottom: 32px;
+      }
+      .social-buttons {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 24px;
+      }
+      .social-btn {
+        flex: 1;
+        padding: 12px;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        background: white;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        transition: all 0.2s;
+      }
+      .social-btn:hover {
+        background: #f9fafb;
+        border-color: #d1d5db;
+      }
+      .divider {
+        display: flex;
+        align-items: center;
+        margin: 24px 0;
+        color: #9ca3af;
+      }
+      .divider::before,
+      .divider::after {
+        content: "";
+        flex: 1;
+        height: 1px;
+        background: #e5e7eb;
+      }
+      .divider span {
+        padding: 0 16px;
+        font-size: 14px;
+      }
 
-        /* B2C injects form here */
-        #api { /* B2C form container */ }
-        #api input {
-            width: 100%;
-            padding: 12px 16px;
-            border: 1px solid #e5e7eb;
-            border-radius: 8px;
-            font-size: 16px;
-            margin-bottom: 16px;
-        }
-        #api input:focus { outline: none; border-color: #6366f1; }
-        #api button {
-            width: 100%;
-            padding: 12px;
-            background: #6366f1;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-        #api button:hover { background: #4f46e5; }
+      /* B2C injects form here */
+      #api {
+        /* B2C form container */
+      }
+      #api input {
+        width: 100%;
+        padding: 12px 16px;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        font-size: 16px;
+        margin-bottom: 16px;
+      }
+      #api input:focus {
+        outline: none;
+        border-color: #6366f1;
+      }
+      #api button {
+        width: 100%;
+        padding: 12px;
+        background: #6366f1;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: background 0.2s;
+      }
+      #api button:hover {
+        background: #4f46e5;
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <div class="container">
-        <div class="logo">
-            <img src="https://mystira.app/logo.svg" alt="Mystira">
-        </div>
-        <h1>Welcome back</h1>
-        <p class="subtitle">Sign in to continue your adventure</p>
+      <div class="logo">
+        <img src="https://mystira.app/logo.svg" alt="Mystira" />
+      </div>
+      <h1>Welcome back</h1>
+      <p class="subtitle">Sign in to continue your adventure</p>
 
-        <div class="social-buttons">
-            <button class="social-btn" id="GoogleExchange">
-                <img src="https://www.google.com/favicon.ico" width="20"> Google
-            </button>
-            <button class="social-btn" id="DiscordExchange">
-                <img src="https://discord.com/assets/favicon.ico" width="20"> Discord
-            </button>
-        </div>
+      <div class="social-buttons">
+        <button class="social-btn" id="GoogleExchange">
+          <img src="https://www.google.com/favicon.ico" width="20" /> Google
+        </button>
+        <button class="social-btn" id="DiscordExchange">
+          <img src="https://discord.com/assets/favicon.ico" width="20" />
+          Discord
+        </button>
+      </div>
 
-        <div class="divider"><span>or continue with email</span></div>
+      <div class="divider"><span>or continue with email</span></div>
 
-        <!-- B2C injects the form here -->
-        <div id="api"></div>
+      <!-- B2C injects the form here -->
+      <div id="api"></div>
     </div>
-</body>
+  </body>
 </html>
 ```
 
@@ -834,70 +877,76 @@ Azure Portal → User flows → Page layouts → Custom page URI
 ```css
 /* B2C Custom CSS - upload via Company Branding */
 :root {
-    --mystira-primary: #6366f1;
-    --mystira-primary-hover: #4f46e5;
-    --mystira-bg: #1a1a2e;
-    --mystira-text: #1f2937;
-    --mystira-text-muted: #6b7280;
-    --mystira-border: #e5e7eb;
-    --mystira-radius: 8px;
+  --mystira-primary: #6366f1;
+  --mystira-primary-hover: #4f46e5;
+  --mystira-bg: #1a1a2e;
+  --mystira-text: #1f2937;
+  --mystira-text-muted: #6b7280;
+  --mystira-border: #e5e7eb;
+  --mystira-radius: 8px;
 }
 
 /* Override B2C defaults */
-.entry-item { margin-bottom: 16px; }
+.entry-item {
+  margin-bottom: 16px;
+}
 .entry-item input {
-    border-radius: var(--mystira-radius);
-    border-color: var(--mystira-border);
-    padding: 12px 16px;
+  border-radius: var(--mystira-radius);
+  border-color: var(--mystira-border);
+  padding: 12px 16px;
 }
 .buttons button {
-    background: var(--mystira-primary);
-    border-radius: var(--mystira-radius);
+  background: var(--mystira-primary);
+  border-radius: var(--mystira-radius);
 }
 .buttons button:hover {
-    background: var(--mystira-primary-hover);
+  background: var(--mystira-primary-hover);
 }
-.divider { margin: 24px 0; }
-.social button { border-radius: var(--mystira-radius); }
+.divider {
+  margin: 24px 0;
+}
+.social button {
+  border-radius: var(--mystira-radius);
+}
 ```
 
 #### JavaScript Customization
 
 ```javascript
 // B2C Custom JavaScript
-document.addEventListener('DOMContentLoaded', function() {
-    // Add loading states
-    const buttons = document.querySelectorAll('button[type="submit"]');
-    buttons.forEach(btn => {
-        btn.addEventListener('click', function() {
-            this.classList.add('loading');
-            this.disabled = true;
-        });
+document.addEventListener("DOMContentLoaded", function () {
+  // Add loading states
+  const buttons = document.querySelectorAll('button[type="submit"]');
+  buttons.forEach((btn) => {
+    btn.addEventListener("click", function () {
+      this.classList.add("loading");
+      this.disabled = true;
     });
+  });
 
-    // Password strength indicator
-    const passwordInput = document.getElementById('newPassword');
-    if (passwordInput) {
-        passwordInput.addEventListener('input', function() {
-            const strength = calculatePasswordStrength(this.value);
-            updateStrengthIndicator(strength);
-        });
-    }
+  // Password strength indicator
+  const passwordInput = document.getElementById("newPassword");
+  if (passwordInput) {
+    passwordInput.addEventListener("input", function () {
+      const strength = calculatePasswordStrength(this.value);
+      updateStrengthIndicator(strength);
+    });
+  }
 
-    // Auto-focus first input
-    const firstInput = document.querySelector('input:not([type="hidden"])');
-    if (firstInput) firstInput.focus();
+  // Auto-focus first input
+  const firstInput = document.querySelector('input:not([type="hidden"])');
+  if (firstInput) firstInput.focus();
 });
 
 function calculatePasswordStrength(password) {
-    let strength = 0;
-    if (password.length >= 8) strength++;
-    if (password.length >= 12) strength++;
-    if (/[A-Z]/.test(password)) strength++;
-    if (/[a-z]/.test(password)) strength++;
-    if (/[0-9]/.test(password)) strength++;
-    if (/[^A-Za-z0-9]/.test(password)) strength++;
-    return Math.min(strength, 4);
+  let strength = 0;
+  if (password.length >= 8) strength++;
+  if (password.length >= 12) strength++;
+  if (/[A-Z]/.test(password)) strength++;
+  if (/[a-z]/.test(password)) strength++;
+  if (/[0-9]/.test(password)) strength++;
+  if (/[^A-Za-z0-9]/.test(password)) strength++;
+  return Math.min(strength, 4);
 }
 ```
 
@@ -990,6 +1039,7 @@ module "shared_postgresql" {
 ```
 
 **Connection String** (no password):
+
 ```
 Host=<server>.postgres.database.azure.com;Database=adminapi;Username=mys-dev-admin-api-identity-san;Ssl Mode=Require
 ```

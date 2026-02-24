@@ -15,11 +15,11 @@ This directory contains documentation for infrastructure, deployment, and shared
 
 Per [ADR-0017](../architecture/adr/0017-resource-group-organization-strategy.md), Mystira uses a 3-tier resource group strategy:
 
-| Tier | Resource Groups | Purpose |
-|------|-----------------|---------|
-| **Tier 1: Core** | `mys-{env}-core-rg-san` | Shared infrastructure (VNet, AKS, PostgreSQL, Redis, Service Bus) |
-| **Tier 2: Services** | `mys-{env}-{service}-rg-san` | Service-specific resources (chain, publisher, story, admin, app) |
-| **Tier 3: Shared** | `mys-shared-{purpose}-rg-*` | Cross-environment (ACR, Communications, Terraform state) |
+| Tier                 | Resource Groups              | Purpose                                                           |
+| -------------------- | ---------------------------- | ----------------------------------------------------------------- |
+| **Tier 1: Core**     | `mys-{env}-core-rg-san`      | Shared infrastructure (VNet, AKS, PostgreSQL, Redis, Service Bus) |
+| **Tier 2: Services** | `mys-{env}-{service}-rg-san` | Service-specific resources (chain, publisher, story, admin, app)  |
+| **Tier 3: Shared**   | `mys-shared-{purpose}-rg-*`  | Cross-environment (ACR, Communications, Terraform state)          |
 
 ## Related Documentation
 

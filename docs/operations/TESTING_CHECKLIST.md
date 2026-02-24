@@ -479,9 +479,9 @@ This checklist ensures comprehensive testing of the Azure v2.2 naming convention
   ```
 
 - [ ] **Row Count Comparison**:
-  - [ ] chain*db: Old \*\** rows, New \_\*\* rows ✓ Match
-  - [ ] publisher*db: Old \*\** rows, New \_\*\* rows ✓ Match
-  - [ ] story*generator_db: Old \*\** rows, New \_\*\* rows ✓ Match
+  - [ ] chain\*db: Old \*\*\* rows, New \_\*\* rows ✓ Match
+  - [ ] publisher\*db: Old \*\*\* rows, New \_\*\* rows ✓ Match
+  - [ ] story\*generator_db: Old \*\*\* rows, New \_\*\* rows ✓ Match
 
 ### Application Deployment
 

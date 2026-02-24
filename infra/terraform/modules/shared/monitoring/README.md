@@ -63,6 +63,7 @@ module "publisher" {
 ```
 
 This provides:
+
 - Unified logging across all services
 - Centralized monitoring dashboards
 - Consistent retention policies
@@ -75,4 +76,3 @@ This provides:
 - **Production**: 90 days
 
 Custom retention can be configured via `retention_in_days` variable.
-

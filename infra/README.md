@@ -82,12 +82,12 @@ gh secret set MYSTIRA_AZURE_CREDENTIALS --body '{
 
 **Important:** The service principal needs additional permissions beyond Contributor:
 
-| Permission | Purpose |
-|------------|---------|
-| **User Access Administrator** | Assign RBAC roles to managed identities |
-| **Application.ReadWrite.All** | Manage app registrations (Entra External ID) |
-| **DelegatedPermissionGrant.ReadWrite.All** | Manage OAuth2 permission grants |
-| **Storage Blob Data Contributor** | Access Terraform state storage |
+| Permission                                 | Purpose                                      |
+| ------------------------------------------ | -------------------------------------------- |
+| **User Access Administrator**              | Assign RBAC roles to managed identities      |
+| **Application.ReadWrite.All**              | Manage app registrations (Entra External ID) |
+| **DelegatedPermissionGrant.ReadWrite.All** | Manage OAuth2 permission grants              |
+| **Storage Blob Data Contributor**          | Access Terraform state storage               |
 
 The deployment workflow includes automated permission validation. For complete setup instructions, see [Azure Setup Guide](./azure-setup.md#step-2-required-permissions).
 
@@ -140,12 +140,12 @@ kubectl apply -k ../../kubernetes/overlays/dev
 
 ### Service URLs
 
-| Service           | Dev                               | Staging                               | Production                    |
-| ----------------- | --------------------------------- | ------------------------------------- | ----------------------------- |
-| Publisher         | `dev.publisher.mystira.app`       | `staging.publisher.mystira.app`       | `publisher.mystira.app`       |
-| Chain             | `dev.chain.mystira.app`           | `staging.chain.mystira.app`           | `chain.mystira.app`           |
-| Story Generator   | `dev.story-api.mystira.app`       | `staging.story-api.mystira.app`       | `story-api.mystira.app`       |
-| Story Web (SWA)   | `dev.story.mystira.app`           | `staging.story.mystira.app`           | `story.mystira.app`           |
+| Service         | Dev                         | Staging                         | Production              |
+| --------------- | --------------------------- | ------------------------------- | ----------------------- |
+| Publisher       | `dev.publisher.mystira.app` | `staging.publisher.mystira.app` | `publisher.mystira.app` |
+| Chain           | `dev.chain.mystira.app`     | `staging.chain.mystira.app`     | `chain.mystira.app`     |
+| Story Generator | `dev.story-api.mystira.app` | `staging.story-api.mystira.app` | `story-api.mystira.app` |
+| Story Web (SWA) | `dev.story.mystira.app`     | `staging.story.mystira.app`     | `story.mystira.app`     |
 
 ## Infrastructure Components
 

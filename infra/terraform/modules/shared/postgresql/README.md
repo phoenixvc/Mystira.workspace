@@ -59,16 +59,16 @@ module "shared_postgresql" {
 
 ## Outputs
 
-| Name                        | Description                                        |
-| --------------------------- | -------------------------------------------------- |
-| server_id                   | PostgreSQL server ID                               |
-| server_fqdn                 | PostgreSQL server FQDN                             |
-| admin_login                 | PostgreSQL administrator login                     |
-| admin_password              | PostgreSQL administrator password                  |
-| private_dns_zone_id         | Private DNS Zone ID                                |
-| connection_strings          | Map of database names to connection strings        |
-| aad_connection_string_template | Connection string template for Azure AD auth    |
-| aad_admins                  | Map of Azure AD administrators configured          |
+| Name                           | Description                                  |
+| ------------------------------ | -------------------------------------------- |
+| server_id                      | PostgreSQL server ID                         |
+| server_fqdn                    | PostgreSQL server FQDN                       |
+| admin_login                    | PostgreSQL administrator login               |
+| admin_password                 | PostgreSQL administrator password            |
+| private_dns_zone_id            | Private DNS Zone ID                          |
+| connection_strings             | Map of database names to connection strings  |
+| aad_connection_string_template | Connection string template for Azure AD auth |
+| aad_admins                     | Map of Azure AD administrators configured    |
 
 ## Database Management
 
@@ -133,4 +133,3 @@ options.UseNpgsql(dataSourceBuilder.Build());
 2. The AKS pod runs with workload identity linked to the managed identity
 3. Azure SDK (DefaultAzureCredential) automatically obtains an Azure AD token
 4. Npgsql uses the token to authenticate to PostgreSQL
-

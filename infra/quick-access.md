@@ -6,16 +6,16 @@ Quick reference for accessing Mystira Publisher across environments.
 
 ### Publisher Service
 
-| Environment     | URL                                   | SSL Certificate            | Status Check                                        |
-| --------------- | ------------------------------------- | -------------------------- | --------------------------------------------------- |
+| Environment     | URL                                   | SSL Certificate             | Status Check                                        |
+| --------------- | ------------------------------------- | --------------------------- | --------------------------------------------------- |
 | **Development** | https://dev.publisher.mystira.app     | Let's Encrypt Staging ⚠️    | `curl https://dev.publisher.mystira.app/health`     |
 | **Staging**     | https://staging.publisher.mystira.app | Let's Encrypt Staging ⚠️    | `curl https://staging.publisher.mystira.app/health` |
 | **Production**  | https://publisher.mystira.app         | Let's Encrypt Production ✅ | `curl https://publisher.mystira.app/health`         |
 
 ### Chain Service
 
-| Environment     | URL                               | SSL Certificate            | Status Check                                     |
-| --------------- | --------------------------------- | -------------------------- | ------------------------------------------------ |
+| Environment     | URL                               | SSL Certificate             | Status Check                                     |
+| --------------- | --------------------------------- | --------------------------- | ------------------------------------------------ |
 | **Development** | https://dev.chain.mystira.app     | Let's Encrypt Staging ⚠️    | `curl -X POST https://dev.chain.mystira.app`     |
 | **Staging**     | https://staging.chain.mystira.app | Let's Encrypt Staging ⚠️    | `curl -X POST https://staging.chain.mystira.app` |
 | **Production**  | https://chain.mystira.app         | Let's Encrypt Production ✅ | `curl -X POST https://chain.mystira.app`         |
@@ -99,10 +99,8 @@ Simply open these URLs in your browser:
 
 - **Development:** https://dev.publisher.mystira.app
   - ⚠️ You'll see a security warning - click "Advanced" → "Proceed" (staging certificate)
-  
 - **Staging:** https://staging.publisher.mystira.app
   - ⚠️ You'll see a security warning - click "Advanced" → "Proceed" (staging certificate)
-  
 - **Production:** https://publisher.mystira.app
   - ✅ No warnings - fully trusted certificate
 
@@ -179,6 +177,7 @@ kubectl get endpoints -n mys-<env> mystira-publisher
 ## Need Help?
 
 For detailed setup instructions, see:
+
 - [ENVIRONMENT_URLS_SETUP.md](./ENVIRONMENT_URLS_SETUP.md) - Complete setup guide
 - [DNS_INGRESS_SETUP.md](./DNS_INGRESS_SETUP.md) - Original DNS/Ingress setup guide
 - [README.md](./README.md) - Infrastructure overview

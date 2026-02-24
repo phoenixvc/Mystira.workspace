@@ -482,21 +482,21 @@ public class StoryGeneratorClient
 
 The implementation automatically propagates these headers:
 
-| Header | Description | Example |
-|--------|-------------|---------|
-| `traceparent` | W3C Trace Context parent | `00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01` |
-| `tracestate` | W3C Trace Context state | `azure=xxx` |
-| `X-Trace-Id` | Trace ID (response header) | `4bf92f3577b34da6a3ce929d0e0e4736` |
-| `X-Span-Id` | Span ID (response header) | `00f067aa0ba902b7` |
+| Header        | Description                | Example                                                   |
+| ------------- | -------------------------- | --------------------------------------------------------- |
+| `traceparent` | W3C Trace Context parent   | `00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01` |
+| `tracestate`  | W3C Trace Context state    | `azure=xxx`                                               |
+| `X-Trace-Id`  | Trace ID (response header) | `4bf92f3577b34da6a3ce929d0e0e4736`                        |
+| `X-Span-Id`   | Span ID (response header)  | `00f067aa0ba902b7`                                        |
 
 ## Environment Variables
 
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `APPLICATIONINSIGHTS_CONNECTION_STRING` | Yes (prod) | Azure Application Insights connection |
-| `OTEL_EXPORTER_OTLP_ENDPOINT` | No | OTLP endpoint for local collectors |
-| `ASPNETCORE_ENVIRONMENT` | No | Environment name for resource attributes |
-| `AZURE_REGION` | No | Azure region for resource attributes |
+| Variable                                | Required   | Description                              |
+| --------------------------------------- | ---------- | ---------------------------------------- |
+| `APPLICATIONINSIGHTS_CONNECTION_STRING` | Yes (prod) | Azure Application Insights connection    |
+| `OTEL_EXPORTER_OTLP_ENDPOINT`           | No         | OTLP endpoint for local collectors       |
+| `ASPNETCORE_ENVIRONMENT`                | No         | Environment name for resource attributes |
+| `AZURE_REGION`                          | No         | Azure region for resource attributes     |
 
 ## Integration Checklist
 

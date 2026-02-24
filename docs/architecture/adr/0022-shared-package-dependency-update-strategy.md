@@ -11,6 +11,7 @@ When shared packages (like `Mystira.Contracts`) are updated in one repository, c
 ### Current State
 
 **Package Flow**:
+
 1. Developer changes contracts in `Mystira.workspace`
 2. PR merged → CI publishes new NuGet package version
 3. Developer manually updates package version in `mystira.app`
@@ -18,6 +19,7 @@ When shared packages (like `Mystira.Contracts`) are updated in one repository, c
 5. PR merged → Changes deployed
 
 **Problems**:
+
 - Manual process is error-prone and easy to forget
 - Delays between package publish and consumer updates
 - Breaking changes discovered late in the cycle
@@ -38,6 +40,7 @@ When shared packages (like `Mystira.Contracts`) are updated in one repository, c
 **Description**: Use automated tools to create PRs when dependencies update.
 
 **Flow**:
+
 1. Package published to NuGet feed
 2. Bot detects new version
 3. Bot creates PR in consuming repo with updated version
@@ -49,6 +52,7 @@ When shared packages (like `Mystira.Contracts`) are updated in one repository, c
 **Description**: Consolidate all repositories into a single monorepo.
 
 **Flow**:
+
 1. All code in one repository
 2. Changes to shared code are atomic with consumers
 3. Single PR contains all related changes
@@ -59,6 +63,7 @@ When shared packages (like `Mystira.Contracts`) are updated in one repository, c
 **Description**: Use git submodules and project references instead of packages.
 
 **Flow**:
+
 1. Consumer repos include shared code as submodule
 2. Use `<ProjectReference>` instead of `<PackageReference>`
 3. Update submodule pointer when shared code changes
@@ -69,6 +74,7 @@ When shared packages (like `Mystira.Contracts`) are updated in one repository, c
 **Description**: Custom CI workflow that triggers PRs in downstream repos.
 
 **Flow**:
+
 1. Package published
 2. CI workflow in source repo triggers workflow in consumer repos
 3. Consumer workflow creates PR with updated version
@@ -79,6 +85,7 @@ When shared packages (like `Mystira.Contracts`) are updated in one repository, c
 **Description**: Developers manually update package versions.
 
 **Flow**:
+
 1. Developer notices new package version
 2. Developer updates version in consuming project
 3. Developer creates PR
@@ -87,35 +94,35 @@ When shared packages (like `Mystira.Contracts`) are updated in one repository, c
 
 ### Criteria Weights
 
-| Criterion | Weight | Rationale |
-|-----------|--------|-----------|
-| **Automation** | 25% | Primary goal is reducing manual work |
-| **Time to Update** | 20% | Speed of propagating changes matters |
-| **Breaking Change Detection** | 20% | Catching issues early is critical |
-| **Setup Complexity** | 15% | Initial effort to implement |
-| **Maintenance Burden** | 10% | Ongoing effort to maintain |
-| **Flexibility** | 10% | Ability to customize per-package |
+| Criterion                     | Weight | Rationale                            |
+| ----------------------------- | ------ | ------------------------------------ |
+| **Automation**                | 25%    | Primary goal is reducing manual work |
+| **Time to Update**            | 20%    | Speed of propagating changes matters |
+| **Breaking Change Detection** | 20%    | Catching issues early is critical    |
+| **Setup Complexity**          | 15%    | Initial effort to implement          |
+| **Maintenance Burden**        | 10%    | Ongoing effort to maintain           |
+| **Flexibility**               | 10%    | Ability to customize per-package     |
 
 ### Scoring (1-5, higher is better)
 
-| Criterion | Weight | Renovate/Dependabot | Monorepo | Submodules | CI Chained | Manual |
-|-----------|--------|---------------------|----------|------------|------------|--------|
-| Automation | 25% | 5 | 5 | 3 | 4 | 1 |
-| Time to Update | 20% | 4 | 5 | 3 | 4 | 2 |
-| Breaking Change Detection | 20% | 4 | 5 | 4 | 4 | 2 |
-| Setup Complexity | 15% | 5 | 2 | 3 | 2 | 5 |
-| Maintenance Burden | 10% | 4 | 3 | 2 | 2 | 4 |
-| Flexibility | 10% | 5 | 2 | 3 | 4 | 5 |
+| Criterion                 | Weight | Renovate/Dependabot | Monorepo | Submodules | CI Chained | Manual |
+| ------------------------- | ------ | ------------------- | -------- | ---------- | ---------- | ------ |
+| Automation                | 25%    | 5                   | 5        | 3          | 4          | 1      |
+| Time to Update            | 20%    | 4                   | 5        | 3          | 4          | 2      |
+| Breaking Change Detection | 20%    | 4                   | 5        | 4          | 4          | 2      |
+| Setup Complexity          | 15%    | 5                   | 2        | 3          | 2          | 5      |
+| Maintenance Burden        | 10%    | 4                   | 3        | 2          | 2          | 4      |
+| Flexibility               | 10%    | 5                   | 2        | 3          | 4          | 5      |
 
 ### Weighted Scores
 
-| Option | Calculation | Total |
-|--------|-------------|-------|
+| Option                  | Calculation                                           | Total    |
+| ----------------------- | ----------------------------------------------------- | -------- |
 | **Renovate/Dependabot** | (5×0.25)+(4×0.20)+(4×0.20)+(5×0.15)+(4×0.10)+(5×0.10) | **4.50** |
-| **Monorepo** | (5×0.25)+(5×0.20)+(5×0.20)+(2×0.15)+(3×0.10)+(2×0.10) | **4.05** |
-| **Submodules** | (3×0.25)+(3×0.20)+(4×0.20)+(3×0.15)+(2×0.10)+(3×0.10) | **3.10** |
-| **CI Chained** | (4×0.25)+(4×0.20)+(4×0.20)+(2×0.15)+(2×0.10)+(4×0.10) | **3.50** |
-| **Manual** | (1×0.25)+(2×0.20)+(2×0.20)+(5×0.15)+(4×0.10)+(5×0.10) | **2.70** |
+| **Monorepo**            | (5×0.25)+(5×0.20)+(5×0.20)+(2×0.15)+(3×0.10)+(2×0.10) | **4.05** |
+| **Submodules**          | (3×0.25)+(3×0.20)+(4×0.20)+(3×0.15)+(2×0.10)+(3×0.10) | **3.10** |
+| **CI Chained**          | (4×0.25)+(4×0.20)+(4×0.20)+(2×0.15)+(2×0.10)+(4×0.10) | **3.50** |
+| **Manual**              | (1×0.25)+(2×0.20)+(2×0.20)+(5×0.15)+(4×0.10)+(5×0.10) | **2.70** |
 
 ### Ranking
 
@@ -131,56 +138,56 @@ Both tools automate dependency updates, but have significant differences.
 
 ### Feature Comparison
 
-| Feature | Dependabot | Renovate |
-|---------|------------|----------|
-| **Provider** | GitHub (built-in) | Mend (formerly WhiteSource) |
-| **Hosting** | GitHub-managed only | Self-hosted or Mend-hosted |
-| **Configuration** | YAML (`.github/dependabot.yml`) | JSON (`.renovate.json` or `renovate.json`) |
-| **Supported Ecosystems** | 16+ (npm, NuGet, Docker, etc.) | 90+ ecosystems |
-| **Automerge** | Via GitHub Actions only | Native support |
-| **Grouping** | Limited (same ecosystem only) | Advanced (regex, patterns) |
-| **Scheduling** | Basic (daily/weekly/monthly) | Cron expressions, timezone-aware |
-| **Custom Versioning** | Limited | Extensive regex support |
-| **Monorepo Support** | Basic | Advanced |
-| **Presets/Sharing** | None | Shareable config presets |
-| **Dashboard** | None | Dependency Dashboard issue |
-| **Replacement Rules** | None | Package replacement/renaming |
-| **Post-upgrade Commands** | None | Custom scripts after update |
-| **Vulnerability Alerts** | Integrated with GitHub Security | Via Mend platform |
-| **Rate Limiting** | Fixed limits | Configurable |
-| **PR Limits** | Configurable per ecosystem | Global and per-package |
+| Feature                   | Dependabot                      | Renovate                                   |
+| ------------------------- | ------------------------------- | ------------------------------------------ |
+| **Provider**              | GitHub (built-in)               | Mend (formerly WhiteSource)                |
+| **Hosting**               | GitHub-managed only             | Self-hosted or Mend-hosted                 |
+| **Configuration**         | YAML (`.github/dependabot.yml`) | JSON (`.renovate.json` or `renovate.json`) |
+| **Supported Ecosystems**  | 16+ (npm, NuGet, Docker, etc.)  | 90+ ecosystems                             |
+| **Automerge**             | Via GitHub Actions only         | Native support                             |
+| **Grouping**              | Limited (same ecosystem only)   | Advanced (regex, patterns)                 |
+| **Scheduling**            | Basic (daily/weekly/monthly)    | Cron expressions, timezone-aware           |
+| **Custom Versioning**     | Limited                         | Extensive regex support                    |
+| **Monorepo Support**      | Basic                           | Advanced                                   |
+| **Presets/Sharing**       | None                            | Shareable config presets                   |
+| **Dashboard**             | None                            | Dependency Dashboard issue                 |
+| **Replacement Rules**     | None                            | Package replacement/renaming               |
+| **Post-upgrade Commands** | None                            | Custom scripts after update                |
+| **Vulnerability Alerts**  | Integrated with GitHub Security | Via Mend platform                          |
+| **Rate Limiting**         | Fixed limits                    | Configurable                               |
+| **PR Limits**             | Configurable per ecosystem      | Global and per-package                     |
 
 ### Weighted Comparison: Renovate vs Dependabot
 
 #### Criteria Weights
 
-| Criterion | Weight | Rationale |
-|-----------|--------|-----------|
-| **Ecosystem Support** | 15% | More ecosystems = more coverage |
-| **Configuration Flexibility** | 20% | Customization is key for complex needs |
-| **Automerge Capability** | 15% | Reduces manual intervention |
-| **Grouping/Batching** | 15% | Reduces PR noise |
-| **Setup Simplicity** | 15% | Lower barrier to entry |
-| **Maintenance/Reliability** | 10% | Ongoing operational burden |
-| **Cost** | 10% | Budget considerations |
+| Criterion                     | Weight | Rationale                              |
+| ----------------------------- | ------ | -------------------------------------- |
+| **Ecosystem Support**         | 15%    | More ecosystems = more coverage        |
+| **Configuration Flexibility** | 20%    | Customization is key for complex needs |
+| **Automerge Capability**      | 15%    | Reduces manual intervention            |
+| **Grouping/Batching**         | 15%    | Reduces PR noise                       |
+| **Setup Simplicity**          | 15%    | Lower barrier to entry                 |
+| **Maintenance/Reliability**   | 10%    | Ongoing operational burden             |
+| **Cost**                      | 10%    | Budget considerations                  |
 
 #### Scoring (1-5, higher is better)
 
-| Criterion | Weight | Dependabot | Renovate |
-|-----------|--------|------------|----------|
-| Ecosystem Support | 15% | 3 | 5 |
-| Configuration Flexibility | 20% | 2 | 5 |
-| Automerge Capability | 15% | 3 | 5 |
-| Grouping/Batching | 15% | 2 | 5 |
-| Setup Simplicity | 15% | 5 | 3 |
-| Maintenance/Reliability | 10% | 5 | 4 |
-| Cost | 10% | 5 | 4 |
+| Criterion                 | Weight | Dependabot | Renovate |
+| ------------------------- | ------ | ---------- | -------- |
+| Ecosystem Support         | 15%    | 3          | 5        |
+| Configuration Flexibility | 20%    | 2          | 5        |
+| Automerge Capability      | 15%    | 3          | 5        |
+| Grouping/Batching         | 15%    | 2          | 5        |
+| Setup Simplicity          | 15%    | 5          | 3        |
+| Maintenance/Reliability   | 10%    | 5          | 4        |
+| Cost                      | 10%    | 5          | 4        |
 
 #### Weighted Scores
 
-| Tool | Calculation | Total |
-|------|-------------|-------|
-| **Renovate** | (5×0.15)+(5×0.20)+(5×0.15)+(5×0.15)+(3×0.15)+(4×0.10)+(4×0.10) | **4.35** |
+| Tool           | Calculation                                                    | Total    |
+| -------------- | -------------------------------------------------------------- | -------- |
+| **Renovate**   | (5×0.15)+(5×0.20)+(5×0.15)+(5×0.15)+(3×0.15)+(4×0.10)+(4×0.10) | **4.35** |
 | **Dependabot** | (3×0.15)+(2×0.20)+(3×0.15)+(2×0.15)+(5×0.15)+(5×0.10)+(5×0.10) | **3.15** |
 
 ### Detailed Analysis
@@ -222,16 +229,16 @@ Both tools automate dependency updates, but have significant differences.
 
 ### Use Case Recommendations
 
-| Scenario | Recommendation | Rationale |
-|----------|----------------|-----------|
-| Simple projects, few dependencies | **Dependabot** | Zero setup, good enough |
-| Monorepo with many packages | **Renovate** | Better grouping, dashboard |
-| Custom versioning schemes | **Renovate** | Regex versioning support |
-| Wanting automerge for patches | **Renovate** | Native automerge rules |
-| Multiple repos, shared config | **Renovate** | Preset sharing |
-| Security-focused, minimal config | **Dependabot** | Native GitHub Security integration |
-| Mixed ecosystems (NuGet + npm + Docker) | **Renovate** | Better cross-ecosystem grouping |
-| Enterprise with compliance needs | **Either** | Both support approval workflows |
+| Scenario                                | Recommendation | Rationale                          |
+| --------------------------------------- | -------------- | ---------------------------------- |
+| Simple projects, few dependencies       | **Dependabot** | Zero setup, good enough            |
+| Monorepo with many packages             | **Renovate**   | Better grouping, dashboard         |
+| Custom versioning schemes               | **Renovate**   | Regex versioning support           |
+| Wanting automerge for patches           | **Renovate**   | Native automerge rules             |
+| Multiple repos, shared config           | **Renovate**   | Preset sharing                     |
+| Security-focused, minimal config        | **Dependabot** | Native GitHub Security integration |
+| Mixed ecosystems (NuGet + npm + Docker) | **Renovate**   | Better cross-ecosystem grouping    |
+| Enterprise with compliance needs        | **Either**     | Both support approval workflows    |
 
 ## Decision
 
@@ -240,7 +247,7 @@ Both tools automate dependency updates, but have significant differences.
 **Rationale**:
 
 1. **Better for our multi-repo structure**: Shareable presets reduce duplication
-2. **Superior grouping**: Can group Mystira.* packages together
+2. **Superior grouping**: Can group Mystira.\* packages together
 3. **Native automerge**: Reduces manual work for patch/minor updates
 4. **Dependency Dashboard**: Central visibility into update status
 5. **Post-upgrade commands**: Can run `dotnet restore` or tests automatically
@@ -256,10 +263,7 @@ Both tools automate dependency updates, but have significant differences.
 // renovate-config.json (shared preset)
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": [
-    "config:recommended",
-    ":semanticCommits"
-  ],
+  "extends": ["config:recommended", ":semanticCommits"],
   "packageRules": [
     {
       "matchPackagePatterns": ["^Mystira\\."],
@@ -285,9 +289,7 @@ Both tools automate dependency updates, but have significant differences.
 ```json
 // renovate.json
 {
-  "extends": [
-    "github>phoenixvc/Mystira.workspace//renovate-config"
-  ]
+  "extends": ["github>phoenixvc/Mystira.workspace//renovate-config"]
 }
 ```
 

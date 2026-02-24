@@ -98,6 +98,7 @@ pnpm install
 ### Port Conflicts
 
 If ports are already in use:
+
 - Change ports in `docker-compose.yml`
 - Update environment variables accordingly
 
@@ -113,4 +114,3 @@ If ports are already in use:
 - Check existing issues on GitHub
 - Review documentation in `docs/` directory
 - Contact maintainers
-

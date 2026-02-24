@@ -394,12 +394,12 @@ After setup, configure environment variables as documented in [Environment Varia
 
 **Required Secrets in Azure Key Vault**:
 
-| Secret Name               | Description                             |
-| ------------------------- | --------------------------------------- |
-| `azure-ad-client-secret`  | Admin API client secret                 |
+| Secret Name               | Description                                     |
+| ------------------------- | ----------------------------------------------- |
+| `azure-ad-client-secret`  | Admin API client secret                         |
 | `azure-b2c-client-secret` | External ID API client secret (if confidential) |
-| `google-client-secret`    | Google OAuth client secret              |
-| `discord-client-secret`   | Discord OAuth client secret             |
+| `google-client-secret`    | Google OAuth client secret                      |
+| `discord-client-secret`   | Discord OAuth client secret                     |
 
 ### 4. Verify Setup
 

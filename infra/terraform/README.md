@@ -7,7 +7,9 @@ This directory contains Terraform configurations for Mystira's Azure infrastruct
 Per [ADR-0017](../../docs/architecture/adr/0017-resource-group-organization-strategy.md), resources are organized into a 3-tier structure:
 
 ### Tier 1: Core Resource Group (`mys-{env}-core-rg-san`)
+
 Shared infrastructure deployed per environment:
+
 - Virtual Network and Subnets
 - AKS Cluster
 - PostgreSQL Flexible Server (shared)
@@ -16,7 +18,9 @@ Shared infrastructure deployed per environment:
 - Log Analytics Workspace
 
 ### Tier 2: Service Resource Groups (`mys-{env}-{service}-rg-san`)
+
 Service-specific resources:
+
 - **chain-rg**: Chain service (Identity, Key Vault, App Insights)
 - **publisher-rg**: Publisher service (Identity, Key Vault, App Insights)
 - **story-rg**: Story Generator (Identity, Key Vault, App Insights)
@@ -24,7 +28,9 @@ Service-specific resources:
 - **app-rg**: App (Static Web App, App Service)
 
 ### Tier 3: Cross-Environment Shared
+
 Resources shared across all environments:
+
 - `mys-shared-acr-rg-san`: Container Registry
 - `mys-shared-comms-rg-glob`: Communication Services, Email
 - `mys-shared-terraform-rg-san`: Terraform state storage
@@ -61,6 +67,7 @@ terraform/
 ## Quick Start
 
 ### Prerequisites
+
 - Terraform >= 1.5.0
 - Azure CLI
 - Appropriate Azure subscription access

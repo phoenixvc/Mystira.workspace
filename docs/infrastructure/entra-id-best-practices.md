@@ -5,6 +5,7 @@ This guide provides best practices for configuring Microsoft Entra ID (Azure AD)
 ## Overview
 
 Mystira uses Microsoft Entra ID for:
+
 - **Admin authentication**: Internal staff accessing the Admin UI and API
 - **Consumer authentication**: End users via Entra External ID (separate tenant)
 - **Service-to-service**: Workload identity for AKS pods
@@ -15,13 +16,14 @@ Mystira uses Microsoft Entra ID for:
 
 Each environment (dev, staging, prod) has its own app registrations:
 
-| Environment | Admin API | Admin UI | Purpose |
-|-------------|-----------|----------|---------|
-| Dev | `Mystira Admin API (dev)` | `Mystira Admin UI (dev)` | Development testing |
-| Staging | `Mystira Admin API (staging)` | `Mystira Admin UI (staging)` | Pre-production validation |
-| Prod | `Mystira Admin API (prod)` | `Mystira Admin UI (prod)` | Production |
+| Environment | Admin API                     | Admin UI                     | Purpose                   |
+| ----------- | ----------------------------- | ---------------------------- | ------------------------- |
+| Dev         | `Mystira Admin API (dev)`     | `Mystira Admin UI (dev)`     | Development testing       |
+| Staging     | `Mystira Admin API (staging)` | `Mystira Admin UI (staging)` | Pre-production validation |
+| Prod        | `Mystira Admin API (prod)`    | `Mystira Admin UI (prod)`    | Production                |
 
 **Why separate registrations?**
+
 - Isolated redirect URIs prevent cross-environment token leakage
 - Environment-specific scopes and roles
 - Easier to audit and troubleshoot
@@ -49,11 +51,11 @@ module "entra_id" {
 
 ### Environment-Specific Redirect URIs
 
-| Environment | Redirect URIs |
-|-------------|---------------|
-| Dev | `http://localhost:*`, `https://admin.dev.mystira.app/*` |
-| Staging | `https://admin.staging.mystira.app/*` |
-| Prod | `https://admin.mystira.app/*` |
+| Environment | Redirect URIs                                           |
+| ----------- | ------------------------------------------------------- |
+| Dev         | `http://localhost:*`, `https://admin.dev.mystira.app/*` |
+| Staging     | `https://admin.staging.mystira.app/*`                   |
+| Prod        | `https://admin.mystira.app/*`                           |
 
 ## External Entities
 
@@ -86,11 +88,11 @@ resource "azuread_application" "partner_api" {
 
 For SaaS integrations (analytics, monitoring, etc.):
 
-| Integration Type | Auth Method | Example |
-|-----------------|-------------|---------|
-| Incoming webhooks | API key or token | Stripe webhooks |
-| Outgoing API calls | Managed identity or client credentials | Calling external APIs |
-| Data export | Service principal with limited scope | Export to data warehouse |
+| Integration Type   | Auth Method                            | Example                  |
+| ------------------ | -------------------------------------- | ------------------------ |
+| Incoming webhooks  | API key or token                       | Stripe webhooks          |
+| Outgoing API calls | Managed identity or client credentials | Calling external APIs    |
+| Data export        | Service principal with limited scope   | Export to data warehouse |
 
 **Best Practice**: Use workload identity where possible, avoiding stored secrets.
 
@@ -169,21 +171,21 @@ resource "azuread_application" "admin_ui" {
 
 ### Defined Scopes
 
-| Scope | Type | Description | Assigned To |
-|-------|------|-------------|-------------|
-| `Admin.Read` | Admin consent | Read admin data | Admin UI |
-| `Admin.Write` | Admin consent | Modify admin data | Admin UI |
-| `Users.Manage` | Admin consent | Manage users | Admin UI |
-| `Content.Moderate` | Admin consent | Moderate content | Admin UI |
+| Scope              | Type          | Description       | Assigned To |
+| ------------------ | ------------- | ----------------- | ----------- |
+| `Admin.Read`       | Admin consent | Read admin data   | Admin UI    |
+| `Admin.Write`      | Admin consent | Modify admin data | Admin UI    |
+| `Users.Manage`     | Admin consent | Manage users      | Admin UI    |
+| `Content.Moderate` | Admin consent | Moderate content  | Admin UI    |
 
 ### App Roles
 
-| Role | Description | Typical Users |
-|------|-------------|---------------|
-| `SuperAdmin` | Full system access | Platform administrators |
-| `Admin` | Standard admin access | Team leads, managers |
-| `Moderator` | Content moderation only | Content moderators |
-| `Viewer` | Read-only access | Auditors, support staff |
+| Role         | Description             | Typical Users           |
+| ------------ | ----------------------- | ----------------------- |
+| `SuperAdmin` | Full system access      | Platform administrators |
+| `Admin`      | Standard admin access   | Team leads, managers    |
+| `Moderator`  | Content moderation only | Content moderators      |
+| `Viewer`     | Read-only access        | Auditors, support staff |
 
 ### Assigning Roles
 
@@ -212,11 +214,11 @@ az rest --method POST \
 
 Recommended policies for production:
 
-| Policy | Target | Condition | Control |
-|--------|--------|-----------|---------|
-| Require MFA | Admin apps | All users | MFA required |
-| Block legacy auth | All apps | Legacy protocols | Block |
-| Sign-in risk | Admin apps | Medium/high risk | Block or MFA |
+| Policy            | Target     | Condition         | Control                 |
+| ----------------- | ---------- | ----------------- | ----------------------- |
+| Require MFA       | Admin apps | All users         | MFA required            |
+| Block legacy auth | All apps   | Legacy protocols  | Block                   |
+| Sign-in risk      | Admin apps | Medium/high risk  | Block or MFA            |
 | Device compliance | Admin apps | Unmanaged devices | Block or limited access |
 
 ### Secret Management
@@ -252,14 +254,14 @@ For end-user (consumer) authentication, Mystira uses Microsoft Entra External ID
 
 ### Entra ID vs External ID
 
-| Feature | Entra ID (Admin) | Entra External ID (Consumers) |
-|---------|------------------|-------------------------------|
-| Users | Internal staff | External customers |
-| Identity providers | Microsoft account | Social (Google, Facebook), local accounts |
-| Branding | Corporate | Fully customizable |
-| Authentication | Standard sign-in | Self-service sign-up/sign-in |
-| Scale | Thousands | Millions |
-| Login domain | `login.microsoftonline.com` | `*.ciamlogin.com` |
+| Feature            | Entra ID (Admin)            | Entra External ID (Consumers)             |
+| ------------------ | --------------------------- | ----------------------------------------- |
+| Users              | Internal staff              | External customers                        |
+| Identity providers | Microsoft account           | Social (Google, Facebook), local accounts |
+| Branding           | Corporate                   | Fully customizable                        |
+| Authentication     | Standard sign-in            | Self-service sign-up/sign-in              |
+| Scale              | Thousands                   | Millions                                  |
+| Login domain       | `login.microsoftonline.com` | `*.ciamlogin.com`                         |
 
 ### External ID Configuration
 
@@ -284,11 +286,11 @@ module "entra_external_id" {
 
 For complete isolation, create separate External ID tenants per environment:
 
-| Environment | Tenant Domain | Purpose |
-|-------------|---------------|---------|
-| Dev | `mystiradev.ciamlogin.com` | Development testing |
-| Staging | `mystirastaging.ciamlogin.com` | Pre-production validation |
-| Prod | `mystira.ciamlogin.com` | Production |
+| Environment | Tenant Domain                  | Purpose                   |
+| ----------- | ------------------------------ | ------------------------- |
+| Dev         | `mystiradev.ciamlogin.com`     | Development testing       |
+| Staging     | `mystirastaging.ciamlogin.com` | Pre-production validation |
+| Prod        | `mystira.ciamlogin.com`        | Production                |
 
 ### Setting Up External ID Tenant
 
@@ -314,14 +316,17 @@ See [Entra External ID Module Documentation](../../infra/terraform/modules/entra
 ### Common Issues
 
 **"AADSTS50011: Reply URL mismatch"**
+
 - Verify redirect URI matches exactly (including trailing slashes)
 - Check environment-specific configuration
 
 **"AADSTS65001: User needs to consent"**
+
 - Admin consent may be required for admin-scoped permissions
 - Grant consent via Azure portal or Graph API
 
 **"AADSTS700016: Application not found"**
+
 - Verify correct tenant ID
 - Check app registration exists in target tenant
 

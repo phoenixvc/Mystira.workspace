@@ -11,22 +11,22 @@ This runbook provides procedures for recovering the Mystira platform from catast
 
 ## Recovery Objectives
 
-| Metric | Target | Definition |
-|--------|--------|------------|
-| **RTO** (Recovery Time Objective) | 4 hours | Maximum acceptable downtime |
-| **RPO** (Recovery Point Objective) | 1 hour | Maximum acceptable data loss |
-| **MTTR** (Mean Time to Recovery) | 2 hours | Target average recovery time |
+| Metric                             | Target  | Definition                   |
+| ---------------------------------- | ------- | ---------------------------- |
+| **RTO** (Recovery Time Objective)  | 4 hours | Maximum acceptable downtime  |
+| **RPO** (Recovery Point Objective) | 1 hour  | Maximum acceptable data loss |
+| **MTTR** (Mean Time to Recovery)   | 2 hours | Target average recovery time |
 
 ## Disaster Scenarios
 
-| Scenario | Severity | RTO | RPO | Primary Recovery Method |
-|----------|----------|-----|-----|-------------------------|
-| Single service failure | Low | 15 min | 0 | Rollback/Restart |
-| AKS cluster failure | Medium | 1 hour | 0 | Cluster recreation |
-| Database failure | High | 2 hours | 1 hour | Point-in-time restore |
-| Complete region failure | Critical | 4 hours | 1 hour | Cross-region failover |
-| Data corruption | Critical | 4 hours | Varies | Backup restore |
-| Ransomware/Security breach | Critical | 4+ hours | Varies | Clean restore |
+| Scenario                   | Severity | RTO      | RPO    | Primary Recovery Method |
+| -------------------------- | -------- | -------- | ------ | ----------------------- |
+| Single service failure     | Low      | 15 min   | 0      | Rollback/Restart        |
+| AKS cluster failure        | Medium   | 1 hour   | 0      | Cluster recreation      |
+| Database failure           | High     | 2 hours  | 1 hour | Point-in-time restore   |
+| Complete region failure    | Critical | 4 hours  | 1 hour | Cross-region failover   |
+| Data corruption            | Critical | 4 hours  | Varies | Backup restore          |
+| Ransomware/Security breach | Critical | 4+ hours | Varies | Clean restore           |
 
 ---
 
@@ -417,27 +417,27 @@ After any disaster recovery:
 
 ## Backup Inventory
 
-| Resource | Backup Location | Retention | Recovery Method |
-|----------|-----------------|-----------|-----------------|
-| PostgreSQL | Azure-managed | 35 days | Point-in-time restore |
-| Blob Storage | GRS replication | Continuous | Failover / Copy |
-| Key Vault | Soft delete | 90 days | Recover deleted items |
-| Terraform State | Azure Storage | 30 versions | Version restore |
-| AKS Secrets | Key Vault refs | N/A | Redeploy from KV |
+| Resource        | Backup Location | Retention   | Recovery Method       |
+| --------------- | --------------- | ----------- | --------------------- |
+| PostgreSQL      | Azure-managed   | 35 days     | Point-in-time restore |
+| Blob Storage    | GRS replication | Continuous  | Failover / Copy       |
+| Key Vault       | Soft delete     | 90 days     | Recover deleted items |
+| Terraform State | Azure Storage   | 30 versions | Version restore       |
+| AKS Secrets     | Key Vault refs  | N/A         | Redeploy from KV      |
 
 ## Emergency Contacts
 
-| Role | Name | Phone | Email |
-|------|------|-------|-------|
-| Engineering Manager | [Name] | [Phone] | [Email] |
-| DBA Lead | [Name] | [Phone] | [Email] |
-| Security Lead | [Name] | [Phone] | [Email] |
-| Azure Support | - | - | [Support ticket] |
+| Role                | Name   | Phone   | Email            |
+| ------------------- | ------ | ------- | ---------------- |
+| Engineering Manager | [Name] | [Phone] | [Email]          |
+| DBA Lead            | [Name] | [Phone] | [Email]          |
+| Security Lead       | [Name] | [Phone] | [Email]          |
+| Azure Support       | -      | -       | [Support ticket] |
 
 ---
 
 ## Revision History
 
-| Version | Date | Author | Changes |
-|---------|------|--------|---------|
-| 1.0 | 2025-12-22 | Platform Team | Initial runbook |
+| Version | Date       | Author        | Changes         |
+| ------- | ---------- | ------------- | --------------- |
+| 1.0     | 2025-12-22 | Platform Team | Initial runbook |

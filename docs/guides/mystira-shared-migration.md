@@ -161,12 +161,12 @@ The new resilience system uses Polly v8's `ResiliencePipeline` instead of legacy
 
 #### Breaking Changes
 
-| Before (Polly v7) | After (Polly v8) |
-|-------------------|------------------|
-| `IAsyncPolicy<T>` | `ResiliencePipeline<T>` |
-| `Policy.WrapAsync()` | `ResiliencePipelineBuilder` |
-| `AddPolicyHandler()` | `AddResilienceHandler()` / `AddStandardResilienceHandler()` |
-| `PolicyFactory.CreateStandardHttpPolicy()` | `ResiliencePipelineFactory.CreateStandardHttpPipeline()` |
+| Before (Polly v7)                          | After (Polly v8)                                            |
+| ------------------------------------------ | ----------------------------------------------------------- |
+| `IAsyncPolicy<T>`                          | `ResiliencePipeline<T>`                                     |
+| `Policy.WrapAsync()`                       | `ResiliencePipelineBuilder`                                 |
+| `AddPolicyHandler()`                       | `AddResilienceHandler()` / `AddStandardResilienceHandler()` |
+| `PolicyFactory.CreateStandardHttpPolicy()` | `ResiliencePipelineFactory.CreateStandardHttpPipeline()`    |
 
 #### Migration Example
 
@@ -371,13 +371,13 @@ public class CircuitBreakerMonitor
 
 The following metrics are automatically exported:
 
-| Metric | Type | Description |
-|--------|------|-------------|
-| `mystira.circuit_breaker.state_changes` | Counter | Number of state transitions |
-| `mystira.circuit_breaker.rejections` | Counter | Requests rejected due to open circuit |
-| `mystira.circuit_breaker.successes` | Counter | Successful requests |
-| `mystira.circuit_breaker.failures` | Counter | Failed requests |
-| `mystira.circuit_breaker.state` | Gauge | Current state (0=Closed, 1=Open, 2=HalfOpen) |
+| Metric                                  | Type    | Description                                  |
+| --------------------------------------- | ------- | -------------------------------------------- |
+| `mystira.circuit_breaker.state_changes` | Counter | Number of state transitions                  |
+| `mystira.circuit_breaker.rejections`    | Counter | Requests rejected due to open circuit        |
+| `mystira.circuit_breaker.successes`     | Counter | Successful requests                          |
+| `mystira.circuit_breaker.failures`      | Counter | Failed requests                              |
+| `mystira.circuit_breaker.state`         | Gauge   | Current state (0=Closed, 1=Open, 2=HalfOpen) |
 
 ---
 
@@ -417,6 +417,7 @@ The following metrics are automatically exported:
 ### Source Generators Not Working
 
 1. Ensure the generator project is referenced correctly:
+
 ```xml
 <ProjectReference Include="...\Mystira.Shared.Generators.csproj"
                   OutputItemType="Analyzer"
@@ -429,19 +430,24 @@ The following metrics are automatically exported:
 ### Polly v8 Migration Issues
 
 **Error: `IAsyncPolicy` not found**
+
 - Update using statements to use `ResiliencePipeline<T>`
 - Replace `PolicyFactory` with `ResiliencePipelineFactory`
 
 **Error: `AddPolicyHandler` not found**
+
 - Replace with `AddStandardResilienceHandler()` or `AddResilienceHandler()`
 
 ### Distributed Lock Timeouts
+
 **DistributedLockException: Could not acquire lock**
+
 #### DistributedLockException: Could not acquire lock
 
 - Increase `DefaultWaitSeconds` in configuration
 - Check Redis connectivity
 - Verify no deadlocks in lock acquisition order
+
 ### Circuit Breaker Events Not Firing
 
 - Ensure `CircuitBreakerMetrics` is registered as singleton

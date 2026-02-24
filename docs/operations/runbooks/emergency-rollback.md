@@ -13,13 +13,13 @@ This runbook provides step-by-step procedures for performing an emergency rollba
 
 Use this runbook when ANY of the following conditions are met:
 
-| Condition | Threshold | Action |
-|-----------|-----------|--------|
-| HTTP 5xx error rate | > 10% for 5+ minutes | Immediate rollback |
-| Complete service outage | Any duration | Immediate rollback |
-| Data corruption detected | Any severity | Immediate rollback |
-| Security vulnerability exploited | Any severity | Immediate rollback |
-| P95 latency | > 3x normal for 10+ minutes | Evaluate for rollback |
+| Condition                        | Threshold                   | Action                |
+| -------------------------------- | --------------------------- | --------------------- |
+| HTTP 5xx error rate              | > 10% for 5+ minutes        | Immediate rollback    |
+| Complete service outage          | Any duration                | Immediate rollback    |
+| Data corruption detected         | Any severity                | Immediate rollback    |
+| Security vulnerability exploited | Any severity                | Immediate rollback    |
+| P95 latency                      | > 3x normal for 10+ minutes | Evaluate for rollback |
 
 ## Prerequisites
 
@@ -88,6 +88,7 @@ az monitor metrics list \
 ```
 
 **Expected Output (Healthy):**
+
 ```
 HTTP Status: 200
 Time: 0.150s
@@ -157,6 +158,7 @@ az webapp show \
 ```
 
 **Expected Output:**
+
 ```
 Running
 ```
@@ -177,6 +179,7 @@ done
 ```
 
 **Expected Output (Successful Rollback):**
+
 ```
 Check 1: Status: 200, Time: 0.145s
 Check 2: Status: 200, Time: 0.132s
@@ -219,11 +222,13 @@ After rollback, verify these items:
 If the rollback doesn't resolve the issue:
 
 1. **Check staging slot** - The problematic code is now in staging:
+
    ```bash
    curl -s https://mys-prod-app-api-san-staging.azurewebsites.net/health
    ```
 
 2. **Review staging logs**:
+
    ```bash
    az webapp log tail \
      --resource-group mys-prod-core-rg-san \
@@ -251,29 +256,35 @@ If the rollback doesn't resolve the issue:
 ## Incident Post-Mortem: [Date]
 
 ### Summary
+
 [One paragraph summary]
 
 ### Timeline
-| Time (UTC) | Event |
-|------------|-------|
-| HH:MM | Issue first detected |
-| HH:MM | Rollback initiated |
-| HH:MM | Rollback completed |
-| HH:MM | Service fully restored |
+
+| Time (UTC) | Event                  |
+| ---------- | ---------------------- |
+| HH:MM      | Issue first detected   |
+| HH:MM      | Rollback initiated     |
+| HH:MM      | Rollback completed     |
+| HH:MM      | Service fully restored |
 
 ### Impact
+
 - Duration: X minutes
 - Users affected: ~N
 - Error budget consumed: X minutes
 
 ### Root Cause
+
 [Description of root cause]
 
 ### Action Items
+
 - [ ] Action 1 - Owner - Due date
 - [ ] Action 2 - Owner - Due date
 
 ### Lessons Learned
+
 - What went well?
 - What could be improved?
 ```
@@ -313,6 +324,6 @@ If the rollback doesn't resolve the issue:
 
 ## Revision History
 
-| Version | Date | Author | Changes |
-|---------|------|--------|---------|
-| 1.0 | 2025-12-22 | Platform Team | Initial runbook |
+| Version | Date       | Author        | Changes         |
+| ------- | ---------- | ------------- | --------------- |
+| 1.0     | 2025-12-22 | Platform Team | Initial runbook |

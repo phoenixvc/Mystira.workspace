@@ -5,11 +5,7 @@
     "local>phoenixvc/Mystira.workspace:renovate-config"
   ],
   "baseBranches": ["dev"],
-  "ignorePaths": [
-    "**/node_modules/**",
-    "**/vendor/**",
-    "**/.terraform/**"
-  ],
+  "ignorePaths": ["**/node_modules/**", "**/vendor/**", "**/.terraform/**"],
   "packageRules": [
     {
       "description": "Disable updates for submodule packages (managed separately)",
