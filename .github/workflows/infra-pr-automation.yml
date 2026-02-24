@@ -236,7 +236,9 @@ jobs:
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - name: Terragrunt Init
+        id: tg-init
         if: steps.azure-login.outcome == 'success'
+        continue-on-error: true
         working-directory: ${{ matrix.project.dir }}
         run: terragrunt init --terragrunt-non-interactive
         env:
@@ -244,7 +246,7 @@ jobs:
 
       - name: Terragrunt Plan
         id: plan
-        if: steps.azure-login.outcome == 'success'
+        if: steps.azure-login.outcome == 'success' && steps.tg-init.outcome == 'success'
         working-directory: ${{ matrix.project.dir }}
         env:
           TERRAGRUNT_SKIP_OUTPUTS: "true"
@@ -269,7 +271,7 @@ jobs:
           fi
 
       - name: Generate Plan Summary
-        if: always() && steps.azure-login.outcome == 'success'
+        if: always() && steps.tg-init.outcome == 'success'
         working-directory: ${{ matrix.project.dir }}
         run: |
           if [ -f tfplan ]; then
@@ -277,7 +279,7 @@ jobs:
           fi
 
       - name: Upload Plan Artifact
-        if: steps.plan.outputs.status == 'success' && steps.azure-login.outcome == 'success'
+        if: steps.plan.outputs.status == 'success' && steps.tg-init.outcome == 'success'
         uses: actions/upload-artifact@v6
         with:
           name: tfplan-${{ matrix.project.name }}
@@ -298,6 +300,7 @@ jobs:
             const project = '${{ matrix.project.name }}';
             const dir = '${{ matrix.project.dir }}';
             const azureLogin = '${{ steps.azure-login.outcome }}';
+            const tgInit = '${{ steps.tg-init.outcome }}';
             const status = '${{ steps.plan.outputs.status }}';
             const changes = '${{ steps.plan.outputs.changes }}';
 
@@ -311,11 +314,14 @@ jobs:
               }
             }
 
-            // Show clear status: no creds, failed, changes detected, or no changes
+            // Show clear status: no creds, no backend, failed, changes detected, or no changes
             let statusEmoji, statusText;
             if (azureLogin !== 'success') {
               statusEmoji = '⚠️';
               statusText = '⚠️ **Skipped** - Azure credentials not configured';
+            } else if (tgInit !== 'success') {
+              statusEmoji = '⚠️';
+              statusText = '⚠️ **Skipped** - Terraform backend not provisioned yet (state storage account does not exist)';
             } else if (status !== 'success') {
               statusEmoji = '❌';
               statusText = '❌ **Plan failed** - see output below';
@@ -431,6 +437,7 @@ jobs:
       - name: Terragrunt Stack Plan
         id: plan
         if: steps.azure-login.outcome == 'success'
+        continue-on-error: true
         working-directory: infra/terraform
         env:
           # Enable experimental Terragrunt Stacks feature
