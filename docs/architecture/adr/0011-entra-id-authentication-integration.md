@@ -78,9 +78,12 @@ We implement a **Centralized Identity Service** with Microsoft Entra ID integrat
 
 **Authentication Flows**:
 
-1. **Magic Link**: Email-based authentication (primary consumer flow)
-2. **Entra ID**: Workforce authentication (admin/enterprise)
-3. **Hybrid**: Magic link + optional Entra social login
+| Scope              | Description           | Admin Consent |
+| ------------------ | --------------------- | ------------- |
+| `Admin.Read`       | Read admin data       | Yes           |
+| `Admin.Write`      | Modify admin data     | Yes           |
+| `Users.Manage`     | Manage platform users | Yes           |
+| `Content.Moderate` | Moderate content      | Yes           |
 
 ### 3. Client-Side Unified Authentication
 
@@ -92,7 +95,195 @@ We implement a **Centralized Identity Service** with Microsoft Entra ID integrat
 - Centralized auth state management
 - Event-driven auth state notifications
 
-**Implementation**: `packages/app/src/Mystira.App.PWA/Services/UnifiedAuthService.cs`
+**Microsoft Entra External ID Tenant: `mystira.ciamlogin.com`**
+
+**Sign-in Experience**:
+
+| Feature          | Description                                                |
+| ---------------- | ---------------------------------------------------------- |
+| Sign-up/Sign-in  | Combined email/password and social provider authentication |
+| Password Reset   | Self-service via email verification                        |
+| Profile Edit     | User can update display name and avatar                    |
+| Social Providers | Google OAuth 2.0, Discord OpenID Connect                   |
+
+**App Registration: `mystira-public-api`**
+
+```
+Display Name: Mystira Public API
+Application ID URI: api://mystira-api
+Supported Account Types: External ID tenant accounts (AzureADandPersonalMicrosoftAccount)
+```
+
+### 3. Authentication Flows
+
+#### Admin OIDC Flow (PKCE)
+
+```
+┌─────────┐     ┌──────────────┐     ┌─────────────┐     ┌──────────┐
+│Admin UI │     │   Entra ID   │     │  Admin API  │     │ Cosmos DB│
+└────┬────┘     └──────┬───────┘     └──────┬──────┘     └────┬─────┘
+     │                 │                    │                  │
+     │  1. Redirect to /authorize           │                  │
+     │────────────────▶│                    │                  │
+     │                 │                    │                  │
+     │  2. User signs in + MFA              │                  │
+     │◀────────────────│                    │                  │
+     │                 │                    │                  │
+     │  3. Auth code + code_verifier        │                  │
+     │────────────────▶│                    │                  │
+     │                 │                    │                  │
+     │  4. ID token + access token          │                  │
+     │◀────────────────│                    │                  │
+     │                 │                    │                  │
+     │  5. API request with access token    │                  │
+     │─────────────────────────────────────▶│                  │
+     │                 │                    │                  │
+     │                 │  6. Validate token │                  │
+     │                 │◀───────────────────│                  │
+     │                 │                    │                  │
+     │                 │                    │  7. Query data   │
+     │                 │                    │─────────────────▶│
+     │                 │                    │                  │
+     │  8. Response                         │◀─────────────────│
+     │◀─────────────────────────────────────│                  │
+```
+
+#### Service-to-Service (Managed Identity)
+
+```
+┌─────────────┐     ┌──────────────┐     ┌─────────────┐
+│  Admin API  │     │   Entra ID   │     │  Cosmos DB  │
+│ (App Svc)   │     │   (IMDS)     │     │             │
+└──────┬──────┘     └──────┬───────┘     └──────┬──────┘
+       │                   │                    │
+       │ 1. Request token  │                    │
+       │   (Managed ID)    │                    │
+       │──────────────────▶│                    │
+       │                   │                    │
+       │ 2. Access token   │                    │
+       │◀──────────────────│                    │
+       │                   │                    │
+       │ 3. Request with token                  │
+       │───────────────────────────────────────▶│
+       │                   │                    │
+       │ 4. Response       │                    │
+       │◀───────────────────────────────────────│
+```
+
+#### External ID Sign-Up/Sign-In Flow (Consumer)
+
+```
+┌─────────┐     ┌──────────────┐     ┌─────────────┐     ┌──────────┐
+│   PWA   │     │  External ID │     │  Public API │     │ Cosmos DB│
+│ (Blazor)│     │  (Consumer)  │     │             │     │          │
+└────┬────┘     └──────┬───────┘     └──────┬──────┘     └────┬─────┘
+     │                 │                    │                  │
+     │  1. User clicks "Sign In"            │                  │
+     │────────────────▶│                    │                  │
+     │                 │                    │                  │
+     │  2. Redirect to External ID login    │                  │
+     │◀────────────────│                    │                  │
+     │                 │                    │                  │
+     │  ┌──────────────────────────────┐    │                  │
+     │  │  External ID Hosted UI       │    │                  │
+     │  │  ┌────────────────────────┐  │    │                  │
+     │  │  │ Sign in with:         │  │    │                  │
+     │  │  │ [Google] [Discord]    │  │    │                  │
+     │  │  │ ─────────────────────  │  │    │                  │
+     │  │  │ Email: [          ]   │  │    │                  │
+     │  │  │ Password: [       ]   │  │    │                  │
+     │  │  │ [Sign In] [Sign Up]   │  │    │                  │
+     │  │  └────────────────────────┘  │    │                  │
+     │  └──────────────────────────────┘    │                  │
+     │                 │                    │                  │
+     │  3. User authenticates (email/social)│                  │
+     │────────────────▶│                    │                  │
+     │                 │                    │                  │
+     │  4. External ID validates user        │                  │
+     │                 │                    │                  │
+     │  5. Redirect with auth code          │                  │
+     │◀────────────────│                    │                  │
+     │                 │                    │                  │
+     │  6. Exchange code for tokens         │                  │
+     │────────────────▶│                    │                  │
+     │                 │                    │                  │
+     │  7. ID token + access token + refresh│                  │
+     │◀────────────────│                    │                  │
+     │                 │                    │                  │
+     │  8. API request with access token    │                  │
+     │─────────────────────────────────────▶│                  │
+     │                 │                    │                  │
+     │                 │  9. Validate External ID token        │
+     │                 │◀───────────────────│                  │
+     │                 │                    │                  │
+     │                 │                    │ 10. Query user   │
+     │                 │                    │─────────────────▶│
+     │                 │                    │                  │
+     │ 11. Response with user data          │◀─────────────────│
+     │◀─────────────────────────────────────│                  │
+```
+
+#### External ID Token Refresh Flow
+
+```
+┌─────────┐     ┌──────────────┐     ┌─────────────┐
+│   PWA   │     │  External ID │     │  Public API │
+│         │     │   (CIAM)     │     │             │
+└────┬────┘     └──────┬───────┘     └──────┬──────┘
+     │                 │                    │
+     │  1. Access token expired             │
+     │  (401 from API)                      │
+     │◀─────────────────────────────────────│
+     │                 │                    │
+     │  2. POST /token with refresh_token   │
+     │────────────────▶│                    │
+     │                 │                    │
+     │  3. Validate refresh token           │
+     │                 │                    │
+     │  4. New access token + refresh token │
+     │◀────────────────│                    │
+     │                 │                    │
+     │  5. Retry API request                │
+     │─────────────────────────────────────▶│
+     │                 │                    │
+     │  6. Success response                 │
+     │◀─────────────────────────────────────│
+```
+
+#### External ID Social Login Flow (Google/Discord)
+
+```
+┌─────────┐     ┌──────────┐     ┌──────────────┐     ┌─────────────┐
+│   PWA   │     │ Ext. ID  │     │   Identity   │     │  Public API │
+│         │     │   UI     │     │   Provider   │     │             │
+└────┬────┘     └────┬─────┘     └──────┬───────┘     └──────┬──────┘
+     │               │                  │                    │
+     │ 1. Click social login button     │                    │
+     │──────────────▶│                  │                    │
+     │               │                  │                    │
+     │               │ 2. Redirect to IdP                    │
+     │               │─────────────────▶│                    │
+     │               │                  │                    │
+     │               │ 3. User authenticates with IdP        │
+     │               │                  │                    │
+     │               │ 4. IdP returns auth code              │
+     │               │◀─────────────────│                    │
+     │               │                  │                    │
+     │               │ 5. Exchange for IdP tokens            │
+     │               │─────────────────▶│                    │
+     │               │                  │                    │
+     │               │ 6. IdP tokens (user info)             │
+     │               │◀─────────────────│                    │
+     │               │                  │                    │
+     │ 7. External ID creates/links user, issues tokens       │
+     │◀──────────────│                  │                    │
+     │               │                  │                    │
+     │ 8. API call with External ID token                    │
+     │──────────────────────────────────────────────────────▶│
+     │               │                  │                    │
+     │ 9. Success                       │                    │
+     │◀──────────────────────────────────────────────────────│
+```
 
 ### 4. Implementation Details
 
@@ -176,7 +367,7 @@ We implement a **Centralized Identity Service** with Microsoft Entra ID integrat
 
 **Key Features**:
 
-```csharp
+````csharp
 public class UnifiedAuthService : IAuthService
 {
     // Dual authentication providers
@@ -188,9 +379,60 @@ public class UnifiedAuthService : IAuthService
     public event EventHandler<bool>? AuthenticationStateChanged;
     public event EventHandler? TokenExpiryWarning;
 
-    // Provider switching
-    public async Task<bool> SwitchToEntraAsync();
-    public async Task<bool> SwitchToMagicAsync(string email);
+#### React Admin UI Configuration
+
+**MSAL Configuration (authConfig.ts)**:
+
+```typescript
+import { Configuration, LogLevel } from "@azure/msal-browser";
+
+export const msalConfig: Configuration = {
+  auth: {
+    clientId: import.meta.env.VITE_AZURE_CLIENT_ID,
+    authority: `https://login.microsoftonline.com/${import.meta.env.VITE_AZURE_TENANT_ID}`,
+    redirectUri: import.meta.env.VITE_REDIRECT_URI,
+    postLogoutRedirectUri: import.meta.env.VITE_POST_LOGOUT_URI,
+  },
+  cache: {
+    cacheLocation: "sessionStorage",
+    storeAuthStateInCookie: false,
+  },
+  system: {
+    loggerOptions: {
+      logLevel: LogLevel.Warning,
+    },
+  },
+};
+
+export const loginRequest = {
+  scopes: ["api://mystira-admin-api/Admin.Read"],
+};
+
+export const apiScopes = {
+  admin: [
+    "api://mystira-admin-api/Admin.Read",
+    "api://mystira-admin-api/Admin.Write",
+  ],
+  users: ["api://mystira-admin-api/Users.Manage"],
+  content: ["api://mystira-admin-api/Content.Moderate"],
+};
+````
+
+**Auth Provider (App.tsx)**:
+
+```typescript
+import { MsalProvider } from '@azure/msal-react';
+import { PublicClientApplication } from '@azure/msal-browser';
+import { msalConfig } from './authConfig';
+
+const msalInstance = new PublicClientApplication(msalConfig);
+
+function App() {
+  return (
+    <MsalProvider instance={msalInstance}>
+      <AuthenticatedApp />
+    </MsalProvider>
+  );
 }
 ```
 

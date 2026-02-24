@@ -378,12 +378,11 @@ reranked = cohere_client.rerank(
 | Property | Value                                       |
 | -------- | ------------------------------------------- |
 | Provider | DeepSeek                                    |
-| Model ID | `DeepSeek-V3.1`                             |
+| Model ID | `DeepSeek-V3`                               |
 | Context  | 64K tokens                                  |
 | Pricing  | ~$0.27 input / $1.10 output (per 1M tokens) |
-| Status   | **Deployed** in UK South                    |
 
-**Why Deployed**:
+**Why Consider**:
 
 - Near Claude/GPT reasoning at fraction of cost
 - Strong on math and logic
@@ -421,7 +420,7 @@ reranked = cohere_client.rerank(
 
 **Why Consider**:
 
-- Smaller and faster than full R1
+- Chain-of-thought reasoning
 - Cheaper alternative to o3-mini
 - Good for batch step-by-step analysis
 
@@ -536,22 +535,15 @@ reranked = cohere_client.rerank(
 
 ## Prioritization Matrix
 
-| Model                     | Priority | Phase   | Use Case                 | Status      | Monthly Est. |
-| ------------------------- | -------- | ------- | ------------------------ | ----------- | ------------ |
-| Cohere Rerank v3.5        | **High** | Phase 1 | RAG quality              | ✅ Deployed | $100         |
-| Codestral-2501            | **High** | Phase 1 | Code tasks               | ✅ Deployed | $50          |
-| DeepSeek-V3.1             | **High** | Phase 1 | Cost-effective reasoning | ✅ Deployed | $50          |
-| DeepSeek-R1               | **High** | Phase 1 | Chain-of-thought         | ✅ Deployed | $80          |
-| Grok-3                    | Medium   | Phase 2 | Alternative reasoning    | ✅ Deployed | $100         |
-| Jamba-1.5-Large           | Medium   | Phase 2 | Long docs (256K)         | ✅ Deployed | $100         |
-| Jamba-1.5-Mini            | Medium   | Phase 2 | Efficient long context   | ✅ Deployed | $30          |
-| Llama-4-Maverick          | Medium   | Phase 2 | Latest open-source       | ✅ Deployed | $50          |
-| Cohere Embed Multilingual | Medium   | Phase 2 | i18n                     | ✅ Deployed | $20          |
-| Grok-4                    | Low      | Phase 3 | Latest xAI               | Consider    | TBD          |
-| Sora                      | Low      | Phase 3 | Video generation         | Consider    | $200         |
-| Sora-2                    | Low      | Phase 3 | HD video                 | Consider    | $400         |
-| GPT-4o-Realtime           | Low      | Phase 3 | Real-time audio          | Consider    | $150         |
-| Llama-3.2-90B-Vision      | Low      | Future  | Image analysis           | Consider    | $50          |
+| Model                     | Priority | Phase   | Use Case       | Monthly Est. |
+| ------------------------- | -------- | ------- | -------------- | ------------ |
+| Cohere Rerank v3.5        | **High** | Phase 1 | RAG quality    | $100         |
+| Codestral-2501            | Medium   | Phase 2 | Code tasks     | $50          |
+| Jamba-1.5-Large           | Medium   | Phase 2 | Long docs      | $100         |
+| Llama-3.2-90B-Vision      | Low      | Phase 3 | Image analysis | $50          |
+| Llama-3.3-70B             | Low      | Phase 3 | Fallback       | $50          |
+| DeepSeek-V3               | Low      | Phase 3 | Cost savings   | $30          |
+| Cohere Embed Multilingual | Low      | Future  | i18n           | TBD          |
 
 ---
 
@@ -559,14 +551,21 @@ reranked = cohere_client.rerank(
 
 ### Completed (Phase 1) ✅
 
-All high-priority models have been deployed:
+Add **Cohere Rerank v3.5** to the Terraform configuration:
+
+- Critical for RAG search quality
+- Low cost ($2/1K queries)
+- Significant relevance improvement
 
 - **Cohere Rerank v3.5** - RAG search quality improvement
 - **Codestral-2501** - Cost-effective code generation (256K context)
 - **DeepSeek-V3.1** - Budget-friendly reasoning
 - **DeepSeek-R1** - Chain-of-thought reasoning
 
-### Completed (Phase 2) ✅
+Consider adding:
+
+1. **Codestral-2501** - If code generation costs become significant
+2. **Jamba-1.5-Large** - If full-story processing is needed
 
 Medium-priority models deployed:
 
@@ -579,10 +578,9 @@ Medium-priority models deployed:
 
 Evaluate based on usage patterns:
 
-- **Sora/Sora-2** - Video generation for story visualizations
-- **GPT-4o-Realtime** - Real-time audio interactions
-- **Grok-4** - Latest xAI flagship when available
-- **Vision models** - If image analysis demand grows
+- Vision models if image analysis demand grows
+- Llama models as cost-saving alternatives
+- DeepSeek for budget-conscious reasoning
 
 ---
 

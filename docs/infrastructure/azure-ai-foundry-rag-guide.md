@@ -427,7 +427,20 @@ Choose the right model for your use case based on capability, cost, and latency 
 
 ### Mystira Model Deployment
 
-_Last updated: December 2025 - See [ADR-0020](../adr/ADR-0020-ai-model-selection-strategy.md) for full details_
+| Model                  | Region   | SKU            | Use Case in Mystira                 |
+| ---------------------- | -------- | -------------- | ----------------------------------- |
+| gpt-4o                 | SAN      | GlobalStandard | General content generation          |
+| gpt-4o-mini            | SAN      | GlobalStandard | Chat, high-volume tasks             |
+| gpt-4.1                | SAN      | GlobalStandard | Structured data extraction          |
+| gpt-4.1-nano           | SAN      | GlobalStandard | Classification, routing             |
+| gpt-5-nano             | SAN      | GlobalStandard | Advanced reasoning (cost-effective) |
+| gpt-5.1                | UK South | GlobalStandard | Complex analysis (not in SAN)       |
+| gpt-5.1-codex          | UK South | GlobalStandard | Code generation/review              |
+| text-embedding-3-large | SAN      | GlobalStandard | Production RAG embeddings           |
+| text-embedding-3-small | SAN      | GlobalStandard | Draft/test embeddings               |
+| claude-haiku-4-5       | UK South | Standard       | High-volume analysis                |
+| claude-sonnet-4-5      | UK South | Standard       | Deep analysis, code review          |
+| claude-opus-4-5        | UK South | Standard       | Complex research tasks              |
 
 ---
 
@@ -693,15 +706,13 @@ response = client.chat.completions.create(
 
 ### Claude-Specific Features (Claude 4.5)
 
-| Feature                | Claude Advantage                                |
-| ---------------------- | ----------------------------------------------- |
-| **Context Window**     | 1M tokens (Sonnet 4.5) vs 400K for GPT-5.2      |
-| **Hybrid Reasoning**   | Auto/Fast/Thinking modes for flexible reasoning |
-| **Constitutional AI**  | Built-in safety guardrails                      |
-| **Artifacts**          | Can generate interactive components             |
-| **XML Handling**       | Excellent at structured XML output              |
-| **Long-form Analysis** | Superior at maintaining coherence               |
-| **SWE-bench**          | 77.2% (Sonnet 4.5), 73.3% (Haiku 4.5)           |
+| Feature                | Claude Advantage                    |
+| ---------------------- | ----------------------------------- |
+| **Context Window**     | 200K tokens (vs 128K for GPT-4)     |
+| **Constitutional AI**  | Built-in safety guardrails          |
+| **Artifacts**          | Can generate interactive components |
+| **XML Handling**       | Excellent at structured XML output  |
+| **Long-form Analysis** | Superior at maintaining coherence   |
 
 ### When to Route to Claude vs GPT vs Others
 
@@ -757,41 +768,31 @@ def select_model(task_type: str, complexity: str, volume: str, context_size: int
 
 ### Complete Model Inventory (32 Models)
 
-_Last updated: December 2025_
-
-| Model                     | Provider  | Category       | Region   | Primary Use Case                 |
-| ------------------------- | --------- | -------------- | -------- | -------------------------------- |
-| gpt-4o                    | OpenAI    | Flagship       | SAN      | General content generation       |
-| gpt-4o-mini               | OpenAI    | Cost-optimized | SAN      | High-volume chat                 |
-| gpt-4.1                   | OpenAI    | Reasoning      | SAN      | Structured extraction (1M ctx)   |
-| gpt-4.1-mini              | OpenAI    | Reasoning      | SAN      | Lightweight reasoning (1M ctx)   |
-| gpt-4.1-nano              | OpenAI    | Reasoning      | SAN      | Classification, routing (1M ctx) |
-| gpt-5-nano                | OpenAI    | Next-gen       | SAN      | Advanced reasoning               |
-| gpt-5.1                   | OpenAI    | Next-gen       | SAN      | Complex multi-step               |
-| gpt-5.1-codex             | OpenAI    | Code           | SAN      | Code generation                  |
-| gpt-5.2                   | OpenAI    | Latest         | SAN      | Smartest model (400K ctx)        |
-| o3                        | OpenAI    | Reasoning      | SAN      | Advanced chain-of-thought        |
-| o3-mini                   | OpenAI    | Reasoning      | SAN      | Chain-of-thought                 |
-| o4-mini                   | OpenAI    | Reasoning      | SAN      | Fast reasoning                   |
-| text-embedding-3-large    | OpenAI    | Embedding      | SAN      | Production RAG                   |
-| text-embedding-3-small    | OpenAI    | Embedding      | SAN      | Draft embeddings                 |
-| dall-e-3                  | OpenAI    | Image          | SAN      | Story illustrations              |
-| gpt-image-1               | OpenAI    | Image          | SAN      | Advanced image gen               |
-| whisper                   | OpenAI    | Audio          | SAN      | Speech-to-text                   |
-| tts / tts-hd              | OpenAI    | Audio          | SAN      | Text-to-speech                   |
-| claude-haiku-4-5          | Anthropic | Fast           | UK South | High-volume ($1/$5 per 1M)       |
-| claude-sonnet-4-5         | Anthropic | Balanced       | UK South | Deep analysis (1M ctx)           |
-| claude-opus-4-5           | Anthropic | Premium        | UK South | Complex research                 |
-| cohere-rerank-v3          | Cohere    | RAG            | UK South | Search reranking                 |
-| cohere-embed-multilingual | Cohere    | Embedding      | UK South | 100+ languages                   |
-| codestral-2501            | Mistral   | Code           | UK South | Code (256K context)              |
-| deepseek-v3.1             | DeepSeek  | Reasoning      | UK South | Budget reasoning                 |
-| deepseek-r1               | DeepSeek  | Reasoning      | UK South | Chain-of-thought                 |
-| deepseek-coder-v2         | DeepSeek  | Code           | UK South | Budget code                      |
-| jamba-1.5-large           | AI21      | Long-context   | UK South | 256K context                     |
-| jamba-1.5-mini            | AI21      | Long-context   | UK South | Budget long-context              |
-| grok-3                    | xAI       | Reasoning      | UK South | Alternative reasoning            |
-| llama-4-maverick          | Meta      | Next-gen       | UK South | Latest open-source               |
+| Model                     | Provider  | Category       | Region   | Primary Use Case           |
+| ------------------------- | --------- | -------------- | -------- | -------------------------- |
+| gpt-4o                    | OpenAI    | Flagship       | SAN      | General content generation |
+| gpt-4o-mini               | OpenAI    | Cost-optimized | SAN      | High-volume chat           |
+| gpt-4.1                   | OpenAI    | Reasoning      | SAN      | Structured extraction      |
+| gpt-4.1-mini              | OpenAI    | Reasoning      | SAN      | Lightweight reasoning      |
+| gpt-4.1-nano              | OpenAI    | Reasoning      | SAN      | Classification, routing    |
+| gpt-5-nano                | OpenAI    | Next-gen       | SAN      | Advanced reasoning         |
+| gpt-5.1                   | OpenAI    | Next-gen       | SAN      | Complex multi-step         |
+| gpt-5.1-codex             | OpenAI    | Code           | SAN      | Code generation            |
+| o3-mini                   | OpenAI    | Reasoning      | SAN      | Chain-of-thought           |
+| text-embedding-3-large    | OpenAI    | Embedding      | SAN      | Production RAG             |
+| text-embedding-3-small    | OpenAI    | Embedding      | SAN      | Draft embeddings           |
+| dall-e-3                  | OpenAI    | Image          | SAN      | Story illustrations        |
+| whisper                   | OpenAI    | Audio          | SAN      | Speech-to-text             |
+| tts / tts-hd              | OpenAI    | Audio          | SAN      | Text-to-speech             |
+| claude-haiku-4-5          | Anthropic | Fast           | UK South | High-volume analysis       |
+| claude-sonnet-4-5         | Anthropic | Balanced       | UK South | Deep analysis              |
+| claude-opus-4-5           | Anthropic | Premium        | UK South | Complex research           |
+| cohere-rerank-v3          | Cohere    | RAG            | UK South | Search reranking           |
+| cohere-embed-multilingual | Cohere    | Embedding      | UK South | 100+ languages             |
+| codestral-2501            | Mistral   | Code           | UK South | Code (256K context)        |
+| deepseek-coder-v2         | DeepSeek  | Code           | UK South | Budget code                |
+| jamba-1.5-large           | AI21      | Long-context   | UK South | 256K context               |
+| jamba-1.5-mini            | AI21      | Long-context   | UK South | Budget long-context        |
 
 ---
 
