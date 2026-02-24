@@ -76,8 +76,6 @@ jobs:
       id-token: write
     steps:
       - uses: actions/checkout@v6
-        with:
-          submodules: recursive
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
@@ -132,8 +130,6 @@ jobs:
       id-token: write
     steps:
       - uses: actions/checkout@v6
-        with:
-          submodules: recursive
 
       - name: Azure Login
         uses: azure/login@v2

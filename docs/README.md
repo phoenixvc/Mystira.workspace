@@ -19,7 +19,6 @@ For details, see [ADR-0002: Documentation Location Strategy](./architecture/adr/
 - 📚 [Quick Start Guide](./guides/quick-start.md) - Get started in 5 minutes
 - ⚙️ [Setup Guide](./guides/setup.md) - Detailed setup instructions
 - 🔧 [Environment Variables](./guides/environment-variables.md) - Environment configuration
-- 🔀 [Submodules Guide](./guides/submodules.md) - Working with git submodules
 
 ### Development Guides
 
@@ -62,7 +61,6 @@ For details, see [ADR-0002: Documentation Location Strategy](./architecture/adr/
 - 🔄 [CI/CD Documentation](./cicd/) - CI/CD pipelines and workflows
   - [CI/CD Setup](./cicd/cicd-setup.md) - CI/CD pipelines and branch protection
   - [Branch Protection](./cicd/branch-protection.md) - Branch protection rules
-  - [Submodule Access](./cicd/submodule-access.md) - Troubleshooting submodule access in CI/CD
   - [Workflow Permissions](./cicd/workflow-permissions.md) - GitHub workflow permissions
   - [Publishing Flow](./cicd/publishing-flow.md) - Package publishing workflows
 
@@ -72,21 +70,13 @@ For details, see [ADR-0002: Documentation Location Strategy](./architecture/adr/
 - **Infrastructure**: Deploy, Validate
 - **Deployment**: Production, Staging
 - **Workspace**: CI, Release
-- **Utilities**: Check Submodules
+- **Utilities**: Link Checker
 
 All workflows follow the "Category: Name" naming convention for clarity.
-
-### Repository Organization & Migration
-
-- 🔍 [Repository Extraction Analysis](./analysis/repository-extraction-analysis.md) - Analysis of all repositories and extraction recommendations
-- 📊 [App Components Extraction](./analysis/app-components-extraction.md) - Analysis of Admin API/Public API extraction
-- 🚚 [Migration Plans](./migration/) - Migration plans for repository extractions
-  - [Admin API Extraction Plan](./migration/admin-api-extraction-plan.md) - Detailed migration plan
 
 ### Planning & Roadmaps
 
 - 🗺️ [Implementation Roadmap](./planning/implementation-roadmap.md) - Strategic implementation plan
-- 📍 [Migration Phases](./migration/phases.md) - Migration phases and status
 
 ### Development
 

@@ -13,17 +13,11 @@ Thank you for your interest in contributing to the Mystira platform!
 
 ### Getting Started
 
-1. Fork and clone the repository with submodules:
+1. Fork and clone the repository:
 
    ```bash
-   git clone --recurse-submodules https://github.com/phoenixvc/Mystira.workspace.git
+   git clone https://github.com/phoenixvc/Mystira.workspace.git
    cd Mystira.workspace
-   ```
-
-   If already cloned:
-
-   ```bash
-   git submodule update --init --recursive
    ```
 
 2. Install dependencies:
@@ -41,16 +35,19 @@ Thank you for your interest in contributing to the Mystira platform!
 
 ## Project Structure
 
-This workspace integrates multiple repositories as git submodules, managed with pnpm workspaces and Turborepo. Each repository has its own README with specific instructions.
+This is a monorepo managed with pnpm workspaces and Turborepo. Each package has its own README with specific instructions.
 
-- `packages/chain/` - Mystira.Chain repository (blockchain and smart contracts)
-- `packages/app/` - Mystira.App repository (web and mobile applications)
-- `packages/story-generator/` - Mystira.StoryGenerator repository (AI story generation engine)
-- `packages/publisher/` - Mystira.Publisher repository (publisher web application)
-- `packages/devhub/` - Mystira.DevHub repository (development operations desktop app)
-- `infra/` - Mystira.Infra repository (infrastructure and DevOps)
-
-See [Submodules Guide](./docs/guides/submodules.md) for detailed information on working with git submodules.
+- `packages/chain/` - Blockchain and smart contracts (Python, gRPC)
+- `packages/app/` - Main storytelling application (.NET)
+- `packages/story-generator/` - AI story generation engine (.NET)
+- `packages/publisher/` - Publisher web application (TypeScript, React)
+- `packages/devhub/` - Developer portal and tools (TypeScript)
+- `packages/admin-api/` - Admin backend API (ASP.NET Core)
+- `packages/admin-ui/` - Admin dashboard frontend (TypeScript, React)
+- `packages/contracts/` - Shared contracts (TypeScript + .NET)
+- `packages/shared/` - Shared .NET libraries
+- `packages/shared-utils/` - Shared TypeScript utilities
+- `infra/` - Infrastructure as Code (Terraform, Kubernetes)
 
 ## Development Workflow
 
@@ -166,13 +163,13 @@ All workflows follow the "Category: Name" pattern for consistency. See [ADR-0012
 
 **Categories:**
 
-| Category         | Description                           | Example                       |
-| ---------------- | ------------------------------------- | ----------------------------- |
-| `Components:`    | CI workflows for individual services  | `Components: Admin API - CI`  |
-| `Infrastructure:`| Infrastructure provisioning           | `Infrastructure: Deploy`      |
-| `Deployment:`    | Environment deployments               | `Deployment: Staging`         |
-| `Workspace:`     | Workspace-level operations            | `Workspace: CI`               |
-| `Utilities:`     | Support and helper workflows          | `Utilities: Check Submodules` |
+| Category          | Description                          | Example                      |
+| ----------------- | ------------------------------------ | ---------------------------- |
+| `Components:`     | CI workflows for individual services | `Components: Admin API - CI` |
+| `Infrastructure:` | Infrastructure provisioning          | `Infrastructure: Deploy`     |
+| `Deployment:`     | Environment deployments              | `Deployment: Staging`        |
+| `Workspace:`      | Workspace-level operations           | `Workspace: CI`              |
+| `Utilities:`      | Support and helper workflows         | `Utilities: Link Checker`    |
 
 ### Adding New Components
 
