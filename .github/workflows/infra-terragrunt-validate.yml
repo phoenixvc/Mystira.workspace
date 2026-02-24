@@ -312,7 +312,7 @@ jobs:
             cd "$ENV_DIR"
             export TF_VAR_environment="${env}"
             terragrunt init --terragrunt-non-interactive -backend=false || { FAILED=1; cd -; continue; }
-            terragrunt validate --terragrunt-non-interactive || FAILED=1
+            terragrunt validate --terragrunt-non-interactive --terragrunt-no-auto-init || FAILED=1
             cd -
           done
 
@@ -322,10 +322,6 @@ jobs:
           fi
         env:
           TERRAGRUNT_SKIP_OUTPUTS: "true"
-          # Ensure ALL terraform init invocations skip backend setup.
-          # Terragrunt runs its own internal init before validate, which
-          # would otherwise try to initialize the Azure backend.
-          TF_CLI_ARGS_init: "-backend=false"
 
       - name: Validation Summary
         if: always()
