@@ -51,7 +51,6 @@ jobs:
     steps:
       - uses: actions/checkout@v6
         with:
-          submodules: recursive
           ref: main
 
       - name: Setup Terraform
@@ -117,7 +116,6 @@ jobs:
     steps:
       - uses: actions/checkout@v6
         with:
-          submodules: recursive
           ref: main
 
       - name: Azure Login

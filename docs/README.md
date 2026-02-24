@@ -75,12 +75,9 @@ For details, see [ADR-0002: Documentation Location Strategy](./architecture/adr/
 
 All workflows follow the "Category: Name" naming convention for clarity.
 
-### Migration & Roadmap
+### Planning & Roadmaps
 
-- 🗺️ [2026 Roadmap](../ROADMAP.md) - Single source of truth for planning
-- 📋 [Migration Index](./migrations/MIGRATION_INDEX.md) - Service migration status
-- 📚 [Service Migration Guides](./migrations/) - Per-service migration documentation
-- 🏛️ [Architecture Migrations](./architecture/migrations/) - Technical specifications
+- 🗺️ [Implementation Roadmap](./planning/implementation-roadmap.md) - Strategic implementation plan
 
 ### Development
 

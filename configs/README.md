@@ -1,30 +1,25 @@
-# Shared Configuration Presets
+# Workspace Configuration Overrides
 
-This directory contains shared config presets used by thin package-level
-wrappers across the monorepo.
+This directory contains configuration files that are copied to specific packages when needed (e.g., during CI).
 
 ## ESLint presets
 
-- `eslint/create-node-eslint-config.mjs`
-  - Shared Node + TypeScript flat-config factory.
-  - Used by non-React packages (for example `contracts`, `shared-utils`).
-- `eslint/create-react-eslint-config.mjs`
-  - Shared React + TypeScript flat-config factory.
-  - Used by frontend packages (for example `admin-ui`, `publisher`).
+Vite/Vitest configuration for `packages/admin-ui`. Copied to `packages/admin-ui/vite.config.ts` by CI before running tests.
 
-Package `eslint.config.mjs` files should stay as thin wrappers that only define
-package-specific ignores and rule tweaks.
+Adds `passWithNoTests: true` so Vitest passes gracefully when no test files exist yet.
 
-## TypeScript presets
+## admin-ui.eslint.config.mjs
 
-- `typescript/tsconfig.base.json`
-  - Common strictness and compiler safety defaults.
-- `typescript/tsconfig.lib.json`
-  - Baseline for TypeScript library packages.
-- `typescript/tsconfig.react-vite.json`
-  - Baseline for React/Vite app packages.
-- `typescript/tsconfig.vite-node.json`
-  - Baseline for Vite node-side config files (`tsconfig.node.json`).
+ESLint configuration for `packages/admin-ui` and `packages/publisher`. Copied by CI before running lint.
 
-Package `tsconfig*.json` files should prefer `extends` and only keep
-package-specific options (aliases, output paths, stricter linting toggles).
+Provides:
+
+- Browser environment for DOM APIs
+- ES2020 environment features
+- React Hooks linting rules
+- TypeScript support
+- Node.js environment for config files (vite.config.ts)
+
+## Future
+
+These overrides should be moved into the packages themselves once their configurations are finalized.

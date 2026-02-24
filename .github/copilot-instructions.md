@@ -2,11 +2,11 @@
 
 ## Project Overview
 
-Mystira is an AI-powered interactive storytelling platform combining blockchain technology, generative AI, and immersive narratives. This is a true monorepo workspace with all components in `packages/`, managed with pnpm workspaces and Turborepo.
+Mystira is an AI-powered interactive storytelling platform combining blockchain technology, generative AI, and immersive narratives. This is a monorepo managed with pnpm workspaces and Turborepo.
 
 ## Architecture
 
-The workspace consists of multiple packages:
+The monorepo contains the following packages:
 
 - **packages/chain** (Python, gRPC) - Blockchain integration & Story Protocol
 - **packages/app** (C#, .NET) - Main storytelling application
