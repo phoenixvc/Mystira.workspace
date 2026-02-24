@@ -26,6 +26,9 @@ dependency "shared" {
     application_insights_connection_string = "mock-connection-string"
   }
   mock_outputs_allowed_terraform_commands = ["init", "validate", "plan"]
+
+  # In CI, skip real output fetching to avoid backend initialization errors
+  skip_outputs = tobool(get_env("TERRAGRUNT_SKIP_OUTPUTS", "false"))
 }
 
 inputs = {

@@ -320,6 +320,8 @@ jobs:
             echo "::error::Validation failed for one or more environments"
             exit 1
           fi
+        env:
+          TERRAGRUNT_SKIP_OUTPUTS: "true"
 
       - name: Validation Summary
         if: always()
