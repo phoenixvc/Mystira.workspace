@@ -7,7 +7,7 @@
 # See ADR-0024 for monorepo migration details.
 
 # Stage 1: Build
-FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:10.0@sha256:e362a8dbcd691522456da26a5198b8f3ca1d7641c95624fadc5e3e82678bd08a AS build
 WORKDIR /src
 
 # Copy global.json for SDK version pinning
@@ -56,7 +56,7 @@ RUN dotnet publish "Mystira.App.Api.csproj" \
     /p:UseAppHost=false
 
 # Stage 3: Runtime
-FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS final
+FROM mcr.microsoft.com/dotnet/aspnet:10.0@sha256:aec87aa74ddf129da573fa69f42f229a23c953a1c6fdecedea1aa6b1fe147d76 AS final
 WORKDIR /app
 
 # Create non-root user for security
