@@ -12,11 +12,6 @@ include "product" {
   merge_strategy = "deep"
 }
 
-# Terraform source - use the modules directly
-terraform {
-  source = "${get_terragrunt_dir()}/."
-}
-
 # Dev-specific inputs
 inputs = {
   # PostgreSQL Configuration (Burstable for dev)

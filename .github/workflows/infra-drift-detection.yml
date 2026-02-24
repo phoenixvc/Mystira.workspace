@@ -1,4 +1,4 @@
-name: "[Scheduled] Infrastructure - Drift Detection"
+name: "[Ops] Infra Drift Detection"
 
 # Drift Detection: Identifies configuration drift between Terraform state and actual resources
 # Runs on schedule and can be triggered manually

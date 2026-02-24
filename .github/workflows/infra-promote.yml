@@ -1,4 +1,4 @@
-name: "[CD] Infra - Promote"
+name: "[CD] Infra Promote"
 
 # Environment Promotion: Promotes infrastructure configuration from one environment to another
 # Ensures consistent deployments across dev -> staging -> prod

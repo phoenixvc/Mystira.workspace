@@ -12,10 +12,6 @@ include "product" {
   merge_strategy = "deep"
 }
 
-terraform {
-  source = "${get_terragrunt_dir()}/."
-}
-
 # Production-specific configuration
 inputs = {
   # App Service Plan

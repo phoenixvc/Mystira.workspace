@@ -1,4 +1,4 @@
-name: "[CD] Infra - Deploy"
+name: "[CD] Infra Deploy"
 
 # Terragrunt Deployment: Deploys product-based Terraform infrastructure
 # Uses OIDC authentication to Azure

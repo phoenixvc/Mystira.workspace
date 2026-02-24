@@ -1,4 +1,4 @@
-name: "[Validate] Shared .NET Packages"
+name: "[CI] Shared .NET Packages"
 
 # Validates that all shared .NET library packages (Domain, Contracts, Shared,
 # Application, Infrastructure.*) build and test successfully.

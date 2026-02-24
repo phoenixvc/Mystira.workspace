@@ -12,10 +12,6 @@ include "product" {
   merge_strategy = "deep"
 }
 
-terraform {
-  source = "${get_terragrunt_dir()}/."
-}
-
 # Staging-specific inputs
 inputs = {
   # PostgreSQL Configuration (General Purpose for staging)
