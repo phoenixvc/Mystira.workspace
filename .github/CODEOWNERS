@@ -1,0 +1,34 @@
+# Mystira Monorepo CODEOWNERS
+# See: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Default owner for everything
+* @phoenixvc/mystira-core
+
+# TypeScript services
+/packages/publisher/       @phoenixvc/mystira-core
+/packages/admin-ui/        @phoenixvc/mystira-core
+/packages/devhub/          @phoenixvc/mystira-core
+
+# C# services
+/packages/admin-api/       @phoenixvc/mystira-core
+/packages/app/             @phoenixvc/mystira-core
+/packages/story-generator/ @phoenixvc/mystira-core
+
+# Python services
+/packages/chain/           @phoenixvc/mystira-core
+
+# Shared packages (broader review recommended)
+/packages/contracts/       @phoenixvc/mystira-core
+/packages/core-types/      @phoenixvc/mystira-core
+/packages/shared-utils/    @phoenixvc/mystira-core
+/packages/core/            @phoenixvc/mystira-core
+/packages/domain/          @phoenixvc/mystira-core
+/packages/application/     @phoenixvc/mystira-core
+/packages/infrastructure/  @phoenixvc/mystira-core
+
+# Infrastructure (require platform review)
+/infra/                    @phoenixvc/mystira-core
+/.github/workflows/        @phoenixvc/mystira-core
+
+# Protobuf definitions (affect multiple services)
+/protos/                   @phoenixvc/mystira-core

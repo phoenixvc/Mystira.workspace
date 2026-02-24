@@ -1,7 +1,7 @@
 # =============================================================================
 # Mystira.App Infrastructure
 # Blazor WASM PWA + ASP.NET Core API + Cosmos DB
-# Converted from Bicep: https://github.com/phoenixvc/Mystira.App/infrastructure
+# Converted from Bicep: https://github.com/phoenixvc/Mystira.workspace/infrastructure
 # =============================================================================
 #
 # Resource Distribution (per ADR-0017):
@@ -115,7 +115,7 @@ module "mystira_app" {
   # -----------------------------------------------------------------------------
   enable_static_web_app = true
   static_web_app_sku    = "Free"
-  github_repository_url = "https://github.com/phoenixvc/Mystira.App"
+  github_repository_url = "https://github.com/phoenixvc/Mystira.workspace"
   github_branch         = "dev"
 
   # Custom domain - DISABLED in module, created separately in dns-records.tf

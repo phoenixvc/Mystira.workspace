@@ -1,4 +1,4 @@
-name: "[Infra] PR Automation"
+name: "[CI] Infra PR Plan"
 
 # =============================================================================
 # Infrastructure PR Automation Workflow
@@ -187,15 +187,12 @@ jobs:
     name: Plan - ${{ matrix.project.name }}
     runs-on: ubuntu-latest
     needs: detect-changes
-    if: needs.detect-changes.outputs.has_changes == 'true'
     strategy:
       fail-fast: false
       matrix:
-        project: ${{ fromJson(needs.detect-changes.outputs.projects) }}
+        project: ${{ fromJson(needs.detect-changes.outputs.projects || '[]') }}
     steps:
       - uses: actions/checkout@v6
-        with:
-          submodules: recursive
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
@@ -230,19 +227,29 @@ jobs:
           rm SHA256SUMS
 
       - name: Azure Login (OIDC)
+        id: azure-login
         uses: azure/login@v2
+        continue-on-error: true
         with:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - name: Terragrunt Init
+        id: tg-init
+        if: steps.azure-login.outcome == 'success'
+        continue-on-error: true
         working-directory: ${{ matrix.project.dir }}
         run: terragrunt init --terragrunt-non-interactive
+        env:
+          TERRAGRUNT_SKIP_OUTPUTS: "true"
 
       - name: Terragrunt Plan
         id: plan
+        if: steps.azure-login.outcome == 'success' && steps.tg-init.outcome == 'success'
         working-directory: ${{ matrix.project.dir }}
+        env:
+          TERRAGRUNT_SKIP_OUTPUTS: "true"
         run: |
           set +e
           set -o pipefail
@@ -264,7 +271,7 @@ jobs:
           fi
 
       - name: Generate Plan Summary
-        if: always()
+        if: always() && steps.tg-init.outcome == 'success'
         working-directory: ${{ matrix.project.dir }}
         run: |
           if [ -f tfplan ]; then
@@ -272,7 +279,7 @@ jobs:
           fi
 
       - name: Upload Plan Artifact
-        if: steps.plan.outputs.status == 'success'
+        if: steps.plan.outputs.status == 'success' && steps.tg-init.outcome == 'success'
         uses: actions/upload-artifact@v6
         with:
           name: tfplan-${{ matrix.project.name }}
@@ -292,6 +299,8 @@ jobs:
 
             const project = '${{ matrix.project.name }}';
             const dir = '${{ matrix.project.dir }}';
+            const azureLogin = '${{ steps.azure-login.outcome }}';
+            const tgInit = '${{ steps.tg-init.outcome }}';
             const status = '${{ steps.plan.outputs.status }}';
             const changes = '${{ steps.plan.outputs.changes }}';
 
@@ -305,14 +314,22 @@ jobs:
               }
             }
 
-            const statusEmoji = status === 'success' ? '✅' : '❌';
-            // Show clear status: failed, changes detected, or no changes
-            let statusText;
-            if (status !== 'success') {
+            // Show clear status: no creds, no backend, failed, changes detected, or no changes
+            let statusEmoji, statusText;
+            if (azureLogin !== 'success') {
+              statusEmoji = '⚠️';
+              statusText = '⚠️ **Skipped** - Azure credentials not configured';
+            } else if (tgInit !== 'success') {
+              statusEmoji = '⚠️';
+              statusText = '⚠️ **Skipped** - Terraform backend not provisioned yet (state storage account does not exist)';
+            } else if (status !== 'success') {
+              statusEmoji = '❌';
               statusText = '❌ **Plan failed** - see output below';
             } else if (changes === 'true') {
+              statusEmoji = '⚠️';
               statusText = '⚠️ **Changes detected**';
             } else {
+              statusEmoji = '✅';
               statusText = '✅ No changes';
             }
 
@@ -373,15 +390,12 @@ jobs:
     name: Plan Stack - ${{ matrix.stack.name }}
     runs-on: ubuntu-latest
     needs: detect-changes
-    if: needs.detect-changes.outputs.has_stacks == 'true'
     strategy:
       fail-fast: false
       matrix:
-        stack: ${{ fromJson(needs.detect-changes.outputs.stacks) }}
+        stack: ${{ fromJson(needs.detect-changes.outputs.stacks || '[]') }}
     steps:
       - uses: actions/checkout@v6
-        with:
-          submodules: recursive
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
@@ -412,7 +426,9 @@ jobs:
           rm SHA256SUMS
 
       - name: Azure Login (OIDC)
+        id: azure-login
         uses: azure/login@v2
+        continue-on-error: true
         with:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
@@ -420,10 +436,13 @@ jobs:
 
       - name: Terragrunt Stack Plan
         id: plan
+        if: steps.azure-login.outcome == 'success'
+        continue-on-error: true
         working-directory: infra/terraform
         env:
           # Enable experimental Terragrunt Stacks feature
           TERRAGRUNT_EXPERIMENTAL_STACKS: "true"
+          TERRAGRUNT_SKIP_OUTPUTS: "true"
         run: |
           set +e
           STACK_CONFIG="${{ matrix.stack.config }}"
@@ -444,11 +463,10 @@ jobs:
           fi
 
           set -o pipefail
-          echo "Running: terragrunt stack run plan --config $STACK_CONFIG"
+          echo "Running: terragrunt stacks run plan --config $STACK_CONFIG"
 
           # Run stack plan and capture output
-          # Try both command variants: 'stack' (singular) and the run-all fallback
-          if terragrunt stack run plan --config "$STACK_CONFIG" --terragrunt-non-interactive 2>&1 | tee stack_plan_output.txt; then
+          if terragrunt stacks run plan --config "$STACK_CONFIG" --terragrunt-non-interactive 2>&1 | tee stack_plan_output.txt; then
             EXIT_CODE=0
           else
             EXIT_CODE=$?
@@ -480,6 +498,7 @@ jobs:
             const stack = '${{ matrix.stack.name }}';
             const env = '${{ matrix.stack.env }}';
             const config = '${{ matrix.stack.config }}';
+            const azureLogin = '${{ steps.azure-login.outcome }}';
             const status = '${{ steps.plan.outputs.status }}';
             const changes = '${{ steps.plan.outputs.changes }}';
 
@@ -494,7 +513,10 @@ jobs:
 
             // Determine status emoji and text
             let statusEmoji, statusText;
-            if (status === 'unsupported') {
+            if (azureLogin !== 'success') {
+              statusEmoji = '⚠️';
+              statusText = '⚠️ **Skipped** - Azure credentials not configured';
+            } else if (status === 'unsupported') {
               statusEmoji = '⚠️';
               statusText = '⚠️ **Stacks feature not available** - see manual instructions below';
             } else if (status !== 'success') {
@@ -630,7 +652,6 @@ jobs:
         with:
           ref: ${{ steps.pr-ref.outputs.head_ref }}
           fetch-depth: 0  # Full history needed for git diff in /plan command
-          submodules: recursive
 
       - name: Setup Tools
         if: steps.check.outputs.allowed == 'true'
@@ -690,6 +711,7 @@ jobs:
         if: steps.check.outputs.allowed == 'true' && steps.parse.outputs.command == '/plan'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TERRAGRUNT_SKIP_OUTPUTS: "true"
         run: |
           DIR="${{ steps.parse.outputs.directory }}"
 

@@ -6,7 +6,7 @@ This document explains the CI/CD workflow organization for the Mystira workspace
 
 The workspace uses a **hybrid approach** where:
 
-- **Development workflows** run in component submodules for fast feedback
+- **Development workflows** run per-package with path-based triggers for fast feedback
 - **Release and deployment workflows** run centrally from the workspace for controlled releases
 
 ## Workflow Categories
@@ -24,66 +24,12 @@ These workflows run when respective component files change in workspace PRs and 
 
 **Trigger:** Changes to `packages/{component}/**` on dev/main branches
 
-**Why in workspace?** These submodules have NO workflows in their own repositories. The workspace provides their only CI/CD.
+**Why in workspace?** All packages live in this monorepo. The workspace provides their CI/CD.
 
-### 📱 App Component (Special Case)
+### 📱 App Component
 
-**No workspace CI workflow** - The App submodule has its own CI/CD in ([Mystira.App](https://github.com/phoenixvc/Mystira.App)) repository:
-
-**App repo handles (KEEP these workflows):**
-
-- ✅ `ci-tests-codecov.yml` - CI tests & code coverage (runs on all App PRs)
-- ✅ `swa-preview-tests.yml` - Preview environment testing
-- ✅ `swa-cleanup-staging-environments.yml` - Preview cleanup
-- ✅ `infrastructure-deploy-dev.yml` - Dev infrastructure (optional, see below)
-- ✅ `mystira-app-*-dev.yml` - Dev deployments for API/PWA/Admin (optional, see below)
-
-**Workspace handles (for App):**
-
-- ✅ Staging releases (via `staging-release.yml`)
-- ✅ Production releases (via `production-release.yml`)
-- ✅ NuGet package publishing (centralized on workspace main)
-- ✅ Multi-service orchestration
-- ✅ Integration with other services
-
-**DELETE from App repo (11 workflows):**
-
-These workflows should be removed as workspace handles staging/prod releases:
-
-**Staging (6 workflows):**
-
-- ❌ `infrastructure-deploy-staging.yml`
-- ❌ `mystira-app-admin-api-cicd-staging.yml`
-- ❌ `mystira-app-api-cicd-staging.yml`
-- ❌ `mystira-app-pwa-cicd-staging.yml`
-- ❌ `mystira-app-pwa-cicd-staging.yml.disabled`
-- ❌ `staging-automated-setup.yml`
-
-**Production (4 workflows):**
-
-- ❌ `infrastructure-deploy-prod.yml`
-- ❌ `mystira-app-admin-api-cicd-prod.yml`
-- ❌ `mystira-app-api-cicd-prod.yml`
-- ❌ `mystira-app-pwa-cicd-prod.yml`
-
-**Package Publishing (1 workflow):**
-
-- ❌ `publish-shared-packages.yml` (move to workspace)
-
-**Dev Deployments (4 workflows - YOUR CHOICE):**
-
-Option A (Recommended): **KEEP** for fast dev iterations
-
-- ✅ `infrastructure-deploy-dev.yml`
-- ✅ `mystira-app-admin-api-cicd-dev.yml`
-- ✅ `mystira-app-api-cicd-dev.yml`
-- ✅ `mystira-app-pwa-cicd-dev.yml`
-
-Option B: **DELETE** for centralized control
-
-- ❌ Move all dev deployments to workspace
-
-**Rationale:** App has independent development lifecycle. Developers work in App repo with fast CI feedback. Staging/production releases are controlled from workspace to prevent accidental deployments and maintain consistency with other components.
+- **`app-ci.yml`** - App (C#, .NET) linting, testing, building
+- **Trigger:** Changes to `packages/app/**` on dev/main branches
 
 ### 🚀 Deployment Workflows
 
@@ -123,11 +69,6 @@ Option B: **DELETE** for centralized control
 
 ### 🔧 Utility Workflows
 
-- **`check-submodules.yml`** - Validates submodule commit references
-  - Checks: All submodule commits exist on their remotes
-  - Purpose: Prevents broken submodule references
-  - Triggers: All PRs and pushes to dev/main
-
 - **`utilities-link-checker.yml`** - Checks documentation links
   - Validates: All links in markdown files
   - Triggers: Changes to `**/*.md`, weekly schedule
@@ -145,11 +86,11 @@ Option B: **DELETE** for centralized control
 
 ### Working on App
 
-1. **Development:** Work in [Mystira.App](https://github.com/phoenixvc/Mystira.App) repository
-2. **CI runs:** App repo's workflows validate changes
-3. **Dev deployment:** App repo deploys to dev environment
-4. **Update workspace:** Update submodule reference in workspace
-5. **Release:** Workspace staging/production workflows deploy
+1. Make changes in workspace: `packages/app/`
+2. Create PR to workspace
+3. Workspace CI runs automatically
+4. Tests, linting, builds validate changes
+5. Merge to main triggers deployments (if configured)
 
 ### Releasing to Production
 
@@ -169,7 +110,6 @@ Option B: **DELETE** for centralized control
 | Infrastructure Deploy   | ✅ Main only     | -                | ✅      | -         |
 | Workspace CI            | ✅               | ✅               | ✅      | -         |
 | Workspace Release       | ✅ Main only     | -                | ✅      | -         |
-| Check Submodules        | ✅               | ✅               | ✅      | -         |
 | Link Checker            | ✅ Markdown only | ✅ Markdown only | ✅      | ✅ Weekly |
 
 ## Advantages of This Approach
@@ -178,7 +118,7 @@ Option B: **DELETE** for centralized control
 ✅ **Controlled releases** - Only workspace can deploy to staging/production
 ✅ **No duplication** - Clear separation of concerns by environment
 ✅ **Consistent CI** - Other 6 components have uniform CI from workspace
-✅ **Clear ownership** - Development in submodule, releases from workspace
+✅ **Clear ownership** - Development in packages, releases from workspace
 
 ## Migration Notes
 
@@ -257,16 +197,16 @@ rm .github/workflows/mystira-app-pwa-cicd-dev.yml
 **Removed:** 11-15 duplicate/unnecessary workflows
 **Result:** Clear separation, no duplication, controlled releases
 
-## Related Repositories
+## Related Packages
 
 - **Mystira.workspace** (this repo) - Monorepo workspace, centralized releases
-- **Mystira.App** - App submodule with independent CI/CD
-- **Mystira.Admin.Api** - Admin API submodule (no CI/CD, uses workspace)
-- **Mystira.Admin.UI** - Admin UI submodule (no CI/CD, uses workspace)
-- **Mystira.Chain** - Chain submodule (no CI/CD, uses workspace)
-- **Mystira.DevHub** - DevHub submodule (no CI/CD, uses workspace)
-- **Mystira.Publisher** - Publisher submodule (no CI/CD, uses workspace)
-- **Mystira.StoryGenerator** - Story Generator submodule (no CI/CD, uses workspace)
+- **packages/Mystira.App** - App package with independent CI/CD
+- **packages/admin-api** - Admin API package (no CI/CD, uses workspace)
+- **packages/admin-ui** - Admin UI package (no CI/CD, uses workspace)
+- **packages/Mystira.Chain** - Chain package (no CI/CD, uses workspace)
+- **packages/Mystira.DevHub** - DevHub package (no CI/CD, uses workspace)
+- **packages/Mystira.Publisher** - Publisher package (no CI/CD, uses workspace)
+- **packages/Mystira.StoryGenerator** - Story Generator package (no CI/CD, uses workspace)
 
 ## Questions?
 

@@ -1,12 +1,12 @@
 # Mystira.StoryGenerator Migration Guide
 
 **Target**: Migrate StoryGenerator to use `Mystira.Shared` infrastructure
-**Prerequisites**: Mystira.Shared v0.4.* published to NuGet feed
+**Prerequisites**: Monorepo with ProjectReferences to shared packages
 **Estimated Effort**: 2 days
-**Last Updated**: December 2025
-**Status**: 🔄 In Progress
+**Last Updated**: February 2026
+**Status**: 🔄 In Progress (~30% complete)
 
-> **Note**: All infrastructure components (Polly v8.6.5, Wolverine 5.9.2, Ardalis.Specification 9.3.1) are already implemented in `Mystira.Shared`. This migration is about adopting the shared package.
+> **Note**: With the monorepo migration complete, shared packages are consumed via ProjectReferences. The .NET 10 upgrade is done. The remaining work is framework-level migrations (MediatR → Wolverine, caching, resilience).
 
 ---
 
@@ -14,14 +14,14 @@
 
 StoryGenerator migration includes:
 
-1. **.NET 9.0 upgrade** (required for Mystira.Shared)
-2. MediatR → Wolverine migration (5.9.2, included in Mystira.Shared)
-3. Custom `RetryPolicyService` → `Mystira.Shared.Resilience` (Polly v8.6.5)
-4. In-memory stores → Redis caching
-5. Contracts migration to unified package
-6. **Ardalis.Specification 9.3.1** for data access (included in Mystira.Shared)
-7. **Distributed locking** for LLM operations
-8. **Dockerfile migration** to submodule repo (ADR-0019)
+1. **.NET 10.0 upgrade** — ✅ DONE (all .csproj files upgraded)
+2. MediatR → Wolverine migration — pending (still on MediatR 12.1.1)
+3. Custom `RetryPolicyService` → Polly v8 resilience — pending
+4. In-memory stores → Redis caching — pending
+5. Contracts migration to unified package — pending
+6. **Ardalis.Specification** for data access — pending
+7. **Distributed locking** for LLM operations — pending
+8. **Blocking .Result calls** — ✅ FIXED (4 locations converted to async/await)
 
 ---
 
@@ -29,23 +29,23 @@ StoryGenerator migration includes:
 
 ### Projects in StoryGenerator
 
-| Project | Purpose | Migration Impact |
-|---------|---------|------------------|
-| `Mystira.StoryGenerator.Api` | Web API | MediatR, .NET upgrade |
-| `Mystira.StoryGenerator.Application` | Business logic | MediatR handlers |
-| `Mystira.StoryGenerator.Domain` | Domain models | Minimal |
-| `Mystira.StoryGenerator.Llm` | LLM integration | Resilience policies |
-| `Mystira.StoryGenerator.RagIndexer` | RAG indexing | Custom retry → Polly |
-| `Mystira.StoryGenerator.Contracts` | API contracts | → Mystira.Contracts |
-| `Mystira.StoryGenerator.Web` | Blazor frontend | Design tokens |
+| Project                              | Purpose         | Migration Impact      |
+| ------------------------------------ | --------------- | --------------------- |
+| `Mystira.StoryGenerator.Api`         | Web API         | MediatR, .NET upgrade |
+| `Mystira.StoryGenerator.Application` | Business logic  | MediatR handlers      |
+| `Mystira.StoryGenerator.Domain`      | Domain models   | Minimal               |
+| `Mystira.StoryGenerator.Llm`         | LLM integration | Resilience policies   |
+| `Mystira.StoryGenerator.RagIndexer`  | RAG indexing    | Custom retry → Polly  |
+| `Mystira.StoryGenerator.Contracts`   | API contracts   | → Mystira.Contracts   |
+| `Mystira.StoryGenerator.Web`         | Blazor frontend | Design tokens         |
 
 ### Current Dependencies (Api)
 
-| Package | Version | Action |
-|---------|---------|--------|
-| `MediatR` | 12.1.1 | Replace with Wolverine |
-| `Azure.AI.OpenAI` | 2.5.0-beta.1 | Keep |
-| `Azure.Identity` | 1.17.0 | Keep |
+| Package           | Version      | Action                 |
+| ----------------- | ------------ | ---------------------- |
+| `MediatR`         | 12.1.1       | Replace with Wolverine |
+| `Azure.AI.OpenAI` | 2.5.0-beta.1 | Keep                   |
+| `Azure.Identity`  | 1.17.0       | Keep                   |
 
 ### Custom Infrastructure to Replace
 
@@ -69,17 +69,17 @@ public class StoryGenerationService
 {
     private readonly IMessageBus _messageBus;
     private readonly ILogger<StoryGenerationService> _logger;
-    
+
     public StoryGenerationService(
-        IMessageBus messageBus, 
+        IMessageBus messageBus,
         ILogger<StoryGenerationService> logger)
     {
         _messageBus = messageBus;
         _logger = logger;
     }
-    
+
     public async Task<StoryResult> GenerateStoryAsync(
-        string prompt, 
+        string prompt,
         StoryContext context,
         CancellationToken ct)
     {
@@ -91,7 +91,7 @@ public class StoryGenerationService
             Temperature = 0.7m, // Balance creativity and coherence
             Model = "gpt-4-turbo"
         };
-        
+
         return await _messageBus.InvokeAsync<StoryResult>(command, ct);
     }
 }
@@ -100,20 +100,23 @@ public class StoryGenerationService
 ### Example Prompts for Different Story Types
 
 **Adventure Story:**
+
 ```text
-Generate a fantasy adventure story about a young mage discovering an ancient artifact. 
-Include: 3 main characters, a quest structure, and a plot twist. 
+Generate a fantasy adventure story about a young mage discovering an ancient artifact.
+Include: 3 main characters, a quest structure, and a plot twist.
 Length: ~1500 words. Tone: Epic and mysterious.
 ```
 
 **Character-Driven Story:**
+
 ```text
-Write a character-focused drama about two estranged siblings reuniting after 10 years. 
+Write a character-focused drama about two estranged siblings reuniting after 10 years.
 Focus on dialogue and internal conflict. Include a resolution scene.
 Length: ~1000 words. Tone: Emotional and introspective.
 ```
 
 **Short-Form Narrative:**
+
 ```text
 Create a brief horror story set in an abandoned space station.
 Atmosphere: Tense and claustrophobic. Include a single protagonist.
@@ -121,6 +124,7 @@ Length: ~500 words. End with a cliffhanger.
 ```
 
 **Branching Narrative:**
+
 ```text
 Generate a choice-driven story segment where the protagonist faces a moral dilemma.
 Present 3 distinct choices with consequences. Style: Interactive fiction.
@@ -130,6 +134,7 @@ Length: ~800 words per branch.
 ### Recommended Model Configurations
 
 #### GPT-4 Turbo (Recommended for Production)
+
 - **Use Case**: High-quality, creative storytelling with complex narratives
 - **Parameters**:
   - `Temperature`: 0.7-0.8 (balanced creativity)
@@ -139,6 +144,7 @@ Length: ~800 words per branch.
 - **Deployment**: Azure OpenAI Service (recommended) or OpenAI API
 
 #### GPT-3.5 Turbo
+
 - **Use Case**: Faster generation for shorter stories or drafts
 - **Parameters**:
   - `Temperature`: 0.6-0.7
@@ -148,6 +154,7 @@ Length: ~800 words per branch.
 - **Deployment**: Azure OpenAI Service or OpenAI API
 
 #### Local LLMs (On-Premises/Self-Hosted)
+
 - **Models**: LLaMA 2 (13B/70B), Mistral (7B), or similar open-source models
 - **Use Case**: Data privacy requirements, cost optimization for high volume
 - **Infrastructure Notes**:
@@ -161,6 +168,7 @@ Length: ~800 words per branch.
 - **Trade-offs**: Infrastructure overhead, requires fine-tuning for quality, full control over data
 
 #### Integration Tips
+
 - Always set a **timeout** of at least 60 seconds for LLM calls (up to 300s for long-form content)
 - Use **streaming responses** for better UX when generating longer stories
 - Implement **prompt caching** (Azure OpenAI feature) to reduce costs for repeated context
@@ -169,23 +177,20 @@ Length: ~800 words per branch.
 
 ---
 
-## Phase 1: .NET 9.0 Upgrade
+## Phase 1: .NET 10.0 Upgrade — ✅ DONE
 
 ### 1.1 Update All Project Files
 
 ```xml
-<!-- From -->
-<TargetFramework>net8.0</TargetFramework>
-
-<!-- To -->
-<TargetFramework>net9.0</TargetFramework>
+<!-- All .csproj files now target .NET 10 -->
+<TargetFramework>net10.0</TargetFramework>
 ```
 
 ### 1.2 Update Package Versions
 
 ```xml
-<!-- Update to .NET 9 compatible versions -->
-<PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.0" />
+<!-- Updated to .NET 10 compatible versions -->
+<PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.0" />
 ```
 
 ### 1.3 Test Build
@@ -206,25 +211,25 @@ dotnet test
 <!-- Remove -->
 <PackageReference Include="MediatR" Version="12.1.1" />
 
-<!-- Add -->
-<PackageReference Include="Mystira.Shared" Version="0.4.*" />
-<PackageReference Include="Ardalis.Specification" Version="8.0.0" />
-<PackageReference Include="Ardalis.Specification.EntityFrameworkCore" Version="8.0.0" />
+<!-- Add (ProjectReference in monorepo, not NuGet) -->
+<ProjectReference Include="../../shared/src/Mystira.Shared/Mystira.Shared.csproj" />
+<PackageReference Include="Ardalis.Specification" Version="9.3.1" />
+<PackageReference Include="Ardalis.Specification.EntityFrameworkCore" Version="9.3.1" />
 ```
 
 ### 2.2 Update Mystira.StoryGenerator.Application.csproj
 
 ```xml
-<!-- Add -->
-<PackageReference Include="Mystira.Shared" Version="0.4.*" />
-<PackageReference Include="Ardalis.Specification" Version="8.0.0" />
+<!-- Add (ProjectReference in monorepo) -->
+<ProjectReference Include="../../shared/src/Mystira.Shared/Mystira.Shared.csproj" />
+<PackageReference Include="Ardalis.Specification" Version="9.3.1" />
 ```
 
 ### 2.3 Update Mystira.StoryGenerator.RagIndexer.csproj
 
 ```xml
-<!-- Add for resilience -->
-<PackageReference Include="Mystira.Shared" Version="0.4.*" />
+<!-- Add for resilience (ProjectReference in monorepo) -->
+<ProjectReference Include="../../shared/src/Mystira.Shared/Mystira.Shared.csproj" />
 ```
 
 ### 2.4 Update Mystira.StoryGenerator.Domain.csproj
@@ -367,9 +372,9 @@ builder.Services.AddHttpClient<IOpenAIClient, OpenAIClient>()
 
 ### 4.3 Breaking Changes (Polly v7 → v8)
 
-| Before (v7) | After (v8) |
-|-------------|------------|
-| `IAsyncPolicy<T>` | `ResiliencePipeline<T>` |
+| Before (v7)                              | After (v8)                                               |
+| ---------------------------------------- | -------------------------------------------------------- |
+| `IAsyncPolicy<T>`                        | `ResiliencePipeline<T>`                                  |
 | `PolicyFactory.CreateStandardPipeline()` | `ResiliencePipelineFactory.CreateStandardHttpPipeline()` |
 
 ---
@@ -443,11 +448,11 @@ using Mystira.Contracts.StoryGenerator;
 
 ```javascript
 // tailwind.config.js
-const mystiraPreset = require('@mystira/design-tokens/tailwind/preset');
+const mystiraPreset = require("@mystira/design-tokens/tailwind/preset");
 
 module.exports = {
   presets: [mystiraPreset],
-  content: ['./Pages/**/*.razor', './Shared/**/*.razor'],
+  content: ["./Pages/**/*.razor", "./Shared/**/*.razor"],
 };
 ```
 
@@ -455,8 +460,8 @@ module.exports = {
 
 ```css
 /* app.css */
-@import '@mystira/design-tokens/css/variables.css';
-@import '@mystira/design-tokens/css/dark-mode.css';
+@import "@mystira/design-tokens/css/variables.css";
+@import "@mystira/design-tokens/css/dark-mode.css";
 ```
 
 ---
@@ -538,11 +543,11 @@ Move Dockerfile from workspace to submodule repo:
 
 ```dockerfile
 # packages/story-generator/Dockerfile (new location)
-FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS base
+FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS base
 WORKDIR /app
 EXPOSE 80
 
-FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
 COPY ["src/Mystira.StoryGenerator.Api/Mystira.StoryGenerator.Api.csproj", "src/Mystira.StoryGenerator.Api/"]
 # ... other project references
@@ -577,7 +582,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '9.0.x'
+          dotnet-version: "10.0.x"
       - run: dotnet restore
       - run: dotnet build --configuration Release --no-restore
       - run: dotnet test --configuration Release --no-build
@@ -610,63 +615,75 @@ jobs:
 
 ## Migration Checklist
 
-### Pre-Migration
-- [ ] Ensure Mystira.Shared v0.4.* is published
-- [ ] Create feature branch
-- [ ] Document current handler count
-- [ ] Backup Key Vault secrets
+### Pre-Migration — ✅ DONE
 
-### Phase 1: .NET 9.0 Upgrade
-- [ ] Update all csproj to net9.0
-- [ ] Update package versions
+- [x] Shared packages available via ProjectReferences (monorepo)
+- [x] Create feature branch
+- [x] Document current handler count (10 MediatR handlers)
+- [x] Fix blocking .Result calls (4 locations)
+
+### Phase 1: .NET 10.0 Upgrade — ✅ DONE
+
+- [x] Update all csproj to net10.0
+- [x] Update package versions
 - [ ] Add Ardalis.Specification packages
-- [ ] Verify build and tests pass
+- [x] Verify build succeeds
 
 ### Phase 2: Package Setup
+
 - [ ] Add Mystira.Shared to Api, Application, RagIndexer, Domain
 - [ ] Verify build succeeds
 
 ### Phase 3: Wolverine
+
 - [ ] Add Wolverine to Program.cs
 - [ ] Convert query handlers
 - [ ] Convert command handlers
 - [ ] Remove MediatR package
 
 ### Phase 4: Resilience (Polly v8)
+
 - [ ] Delete RetryPolicyService.cs
 - [ ] Add Mystira.Shared.Resilience
 - [ ] Replace `IAsyncPolicy` with `ResiliencePipeline`
 - [ ] Update HTTP clients with extended timeouts for LLM
 
 ### Phase 5: Caching
+
 - [ ] Add Redis configuration
 - [ ] Replace in-memory stores
 - [ ] Test multi-instance scenarios
 
 ### Phase 6: Contracts
+
 - [ ] Update to Mystira.Contracts
 - [ ] Remove Mystira.StoryGenerator.Contracts project reference
 
 ### Phase 7: Web (Design Tokens)
+
 - [ ] Add design tokens
 - [ ] Add dark mode support
 - [ ] Update color variables
 
 ### Phase 8: Distributed Locking
+
 - [ ] Add distributed locking configuration
 - [ ] Implement locks for LLM operations
 - [ ] Test concurrent generation scenarios
 
 ### Phase 9: Specification Pattern
+
 - [ ] Create specification classes for data access
 - [ ] Update repositories to use Ardalis.Specification
 
 ### Phase 10: Dockerfile Migration
+
 - [ ] Create Dockerfile in submodule repo
 - [ ] Add CI/CD workflow
 - [ ] Remove Dockerfile from workspace
 
 ### Post-Migration
+
 - [ ] Run all unit tests
 - [ ] Run integration tests
 - [ ] Test API endpoints
@@ -678,25 +695,25 @@ jobs:
 
 ## Handler Conversion Reference
 
-| Handler | Type | Status |
-|---------|------|--------|
-| `GenerateStoryHandler` | Command | ⬜ Pending |
-| `GetStoryQueryHandler` | Query | ⬜ Pending |
+| Handler                     | Type    | Status     |
+| --------------------------- | ------- | ---------- |
+| `GenerateStoryHandler`      | Command | ⬜ Pending |
+| `GetStoryQueryHandler`      | Query   | ⬜ Pending |
 | `GenerateContinuityHandler` | Command | ⬜ Pending |
-| `IndexDocumentHandler` | Command | ⬜ Pending |
-| ... | ... | ... |
+| `IndexDocumentHandler`      | Command | ⬜ Pending |
+| ...                         | ...     | ...        |
 
 ---
 
 ## Breaking Changes
 
-| Change | Impact | Mitigation |
-|--------|--------|------------|
-| .NET 8 → 9 | Runtime upgrade | Test thoroughly in staging |
-| MediatR → Wolverine | Handler signatures | Gradual migration |
-| Polly v7 → v8 | Policy API changes | Use new ResiliencePipeline API |
-| In-memory → Redis | Requires Redis | Feature flag |
-| Custom specs → Ardalis | Query patterns change | Gradual migration |
+| Change                 | Impact                | Mitigation                     |
+| ---------------------- | --------------------- | ------------------------------ |
+| .NET 9 → 10            | Runtime upgrade       | Test thoroughly in staging     |
+| MediatR → Wolverine    | Handler signatures    | Gradual migration              |
+| Polly v7 → v8          | Policy API changes    | Use new ResiliencePipeline API |
+| In-memory → Redis      | Requires Redis        | Feature flag                   |
+| Custom specs → Ardalis | Query patterns change | Gradual migration              |
 
 ---
 

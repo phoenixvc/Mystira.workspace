@@ -24,7 +24,7 @@
     <!-- Build configuration -->
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
-    <IsPackable>true</IsPackable>
+    <IsPackable>false</IsPackable>
   </PropertyGroup>
 
   <!-- Source Link for debugging -->
@@ -100,9 +100,14 @@
   </ItemGroup>
 
   <ItemGroup>
-    <!-- Domain package: ProjectReference for local build, PackageReference for NuGet pack -->
-    <ProjectReference Include="../../domain/Mystira.Domain/Mystira.Domain.csproj" PrivateAssets="all" />
-    <PackageReference Include="Mystira.Domain" Version="0.6.0-alpha" />
+    <ProjectReference Include="../../domain/Mystira.Domain/Mystira.Domain.csproj" />
+  </ItemGroup>
+
+  <!-- Source Generators (Phase 9): auto-generate repository implementations from [GenerateRepository] interfaces -->
+  <ItemGroup>
+    <ProjectReference Include="..\Mystira.Shared.Generators\Mystira.Shared.Generators.csproj"
+                      OutputItemType="Analyzer"
+                      ReferenceOutputAssembly="false" />
   </ItemGroup>
 
   <!--
@@ -120,20 +125,16 @@
     See: docs/guides/entity-and-repository-guide.md
 
     ==========================================================================
-    SOURCE GENERATORS: Experimental (Commented Out)
+    SOURCE GENERATORS: Available (Phase 9 Migration)
     ==========================================================================
 
-    Source generators are available but NOT recommended for most cases.
-    Generic Repo + Specs covers 90% of use cases with less complexity.
+    Source generators provide auto-generated repository implementations from
+    interfaces decorated with [GenerateRepository]. For most cases, prefer
+    Generic Repo + Ardalis.Specification (Phase 6) which covers 90% of use
+    cases with less complexity.
 
-    Enable only if you have 20+ similar repositories with custom methods
-    that cannot be expressed as specifications.
-
-    <ItemGroup>
-      <ProjectReference Include="..\Mystira.Shared.Generators\Mystira.Shared.Generators.csproj"
-                        OutputItemType="Analyzer"
-                        ReferenceOutputAssembly="false" />
-    </ItemGroup>
+    Use generators for new repositories with custom methods that cannot be
+    expressed as specifications.
 
     ==========================================================================
     FUTURE: Potential AOP Alternatives

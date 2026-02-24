@@ -1,0 +1,11 @@
+﻿<Router AppAssembly="@typeof(App).Assembly">
+   <Found Context="routeData">
+       <RouteView RouteData="@routeData" DefaultLayout="@typeof(ThreePanelLayout)" />
+       <FocusOnNavigate RouteData="@routeData" Selector="h1" />
+   </Found>
+   <NotFound>
+       <PageTitle>Mystira Story Generator</PageTitle>
+       <LayoutView Layout="@typeof(ThreePanelLayout)">
+       </LayoutView>
+   </NotFound>
+</Router>

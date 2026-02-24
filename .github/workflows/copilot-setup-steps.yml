@@ -18,14 +18,11 @@ jobs:
     timeout-minutes: 30
 
     permissions:
-      # Required to clone the repository and its submodules.
       contents: read
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
-        with:
-          submodules: recursive
 
       # ── Node.js / TypeScript / pnpm setup ──────────────────────────────────
       - name: Setup pnpm

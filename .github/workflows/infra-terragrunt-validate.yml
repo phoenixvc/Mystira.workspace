@@ -1,8 +1,10 @@
-name: "[CI] Infrastructure - Terragrunt Validate"
+name: "[CI] Infra Validate"
 
-# Terragrunt Validation: Validates product-based Terraform structure
-# Checks: Terragrunt format, validate, and plan for all products
-# Triggers: PRs with infrastructure changes
+# Terragrunt Validation Pipeline
+# Validates Terraform format, runs security scans, and validates all changed
+# infrastructure stacks across environments. Uses dynamic matrix to only
+# create jobs for stacks with actual changes.
+# Triggers: PRs with infrastructure changes, manual dispatch
 
 on:
   pull_request:
@@ -24,34 +26,25 @@ on:
           - prod
 
 concurrency:
-  group: infra-terragrunt-validate-${{ github.event.pull_request.number || github.run_id }}
+  group: infra-validate-${{ github.event.pull_request.number || github.run_id }}
   cancel-in-progress: true
 
 env:
   TF_VERSION: "1.10.3"
   TERRAGRUNT_VERSION: "0.69.1"
-  # Feature toggles - set to 'false' to disable specific checks
-  ENABLE_TFLINT: "true"
-  ENABLE_TRIVY: "true"
-  ENABLE_CHECKOV: "true"
-  # Security scan settings - set CHECKOV_SOFT_FAIL to 'false' to enforce strict security
   CHECKOV_SOFT_FAIL: "true"
 
 jobs:
   # ============================================
-  # Detect Changed Products
+  # Detect Changes & Build Dynamic Matrix
   # ============================================
   detect-changes:
     name: Detect Changes
     runs-on: ubuntu-latest
     timeout-minutes: 5
     outputs:
-      shared-infra: ${{ steps.changes.outputs.shared-infra }}
-      mystira-app: ${{ steps.changes.outputs.mystira-app }}
-      story-generator: ${{ steps.changes.outputs.story-generator }}
-      admin: ${{ steps.changes.outputs.admin }}
-      publisher: ${{ steps.changes.outputs.publisher }}
-      chain: ${{ steps.changes.outputs.chain }}
+      matrix: ${{ steps.build-matrix.outputs.matrix }}
+      has_changes: ${{ steps.build-matrix.outputs.has_changes }}
     steps:
       - uses: actions/checkout@v6
 
@@ -62,29 +55,72 @@ jobs:
             shared-infra:
               - 'infra/terraform/shared-infra/**'
               - 'infra/terraform/modules/shared/**'
+              - 'infra/terraform/modules/dns/**'
               - 'infra/terraform/terragrunt.hcl'
             mystira-app:
               - 'infra/terraform/products/mystira-app/**'
               - 'infra/terraform/modules/mystira-app/**'
+              - 'infra/terraform/terragrunt.hcl'
             story-generator:
               - 'infra/terraform/products/story-generator/**'
               - 'infra/terraform/modules/story-generator/**'
+              - 'infra/terraform/terragrunt.hcl'
             admin:
               - 'infra/terraform/products/admin/**'
               - 'infra/terraform/modules/admin-api/**'
               - 'infra/terraform/modules/admin-ui/**'
+              - 'infra/terraform/terragrunt.hcl'
             publisher:
               - 'infra/terraform/products/publisher/**'
               - 'infra/terraform/modules/publisher/**'
+              - 'infra/terraform/terragrunt.hcl'
             chain:
               - 'infra/terraform/products/chain/**'
               - 'infra/terraform/modules/chain/**'
+              - 'infra/terraform/terragrunt.hcl'
+
+      - name: Build validation matrix
+        id: build-matrix
+        run: |
+          STACKS=()
+
+          # For workflow_dispatch, validate all stacks
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            STACKS=("shared-infra" "mystira-app" "story-generator" "admin" "publisher" "chain")
+          else
+            # Only include stacks with changes
+            for stack in shared-infra mystira-app story-generator admin publisher chain; do
+              if [[ "${{ steps.changes.outputs[format('{0}', env.STACK_NAME)] }}" == "true" ]]; then
+                STACKS+=("$stack")
+              fi
+            done
+
+            # Re-check using individual outputs since dynamic env doesn't work
+            STACKS=()
+            [[ "${{ steps.changes.outputs.shared-infra }}" == "true" ]] && STACKS+=("shared-infra")
+            [[ "${{ steps.changes.outputs.mystira-app }}" == "true" ]] && STACKS+=("mystira-app")
+            [[ "${{ steps.changes.outputs.story-generator }}" == "true" ]] && STACKS+=("story-generator")
+            [[ "${{ steps.changes.outputs.admin }}" == "true" ]] && STACKS+=("admin")
+            [[ "${{ steps.changes.outputs.publisher }}" == "true" ]] && STACKS+=("publisher")
+            [[ "${{ steps.changes.outputs.chain }}" == "true" ]] && STACKS+=("chain")
+          fi
+
+          if [[ ${#STACKS[@]} -eq 0 ]]; then
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+            echo 'matrix={"stack":[]}' >> $GITHUB_OUTPUT
+          else
+            JSON=$(printf '"%s"\n' "${STACKS[@]}" | paste -sd, | sed 's/^/{\"stack\":[/;s/$/]}/')
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+            echo "matrix=${JSON}" >> $GITHUB_OUTPUT
+          fi
+
+          echo "Detected stacks: ${STACKS[*]:-none}"
 
   # ============================================
-  # Format Check
+  # Format Check (Terraform + Terragrunt)
   # ============================================
   format-check:
-    name: Format Check
+    name: Format
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -103,7 +139,6 @@ jobs:
           wget -q -O terragrunt "${TG_URL}/terragrunt_linux_amd64"
           wget -q -O terragrunt_SHA256SUMS "${TG_URL}/SHA256SUMS"
 
-          # Verify checksum
           EXPECTED=$(grep "terragrunt_linux_amd64" terragrunt_SHA256SUMS | awk '{print $1}')
           ACTUAL=$(sha256sum terragrunt | awk '{print $1}')
           if [[ "$EXPECTED" != "$ACTUAL" ]]; then
@@ -132,67 +167,47 @@ jobs:
           }
 
   # ============================================
-  # TFLint - Terraform Linter
+  # Lint & Security (TFLint + Trivy + Checkov)
   # ============================================
-  tflint:
-    name: TFLint
+  lint-and-security:
+    name: Lint & Security
     runs-on: ubuntu-latest
-    timeout-minutes: 10
-    # Note: ENABLE_TFLINT toggle is defined in env but not used at job-level
-    # (env context unavailable in job-level if conditions)
-    # To disable, set ENABLE_TFLINT=false in repository variables (vars context)
-    if: ${{ vars.ENABLE_TFLINT != 'false' }}
-    steps:
-      - uses: actions/checkout@v6
-
-      - name: Setup TFLint
-        uses: terraform-linters/setup-tflint@v6
-        with:
-          tflint_version: latest
-
-      - name: Init TFLint
-        run: tflint --init
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-
-      - name: Run TFLint on modules
-        run: |
-          cd infra/terraform
-          echo "## TFLint Results" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-
-          # Lint all module directories
-          for dir in modules/*/; do
-            if [[ -d "$dir" ]]; then
-              echo "Linting $dir..."
-              tflint --chdir="$dir" --format=compact || true
-            fi
-          done
-
-          # Lint shared modules
-          for dir in modules/shared/*/; do
-            if [[ -d "$dir" ]]; then
-              echo "Linting $dir..."
-              tflint --chdir="$dir" --format=compact || true
-            fi
-          done
-
-  # ============================================
-  # Trivy - IaC Security Scanner
-  # ============================================
-  trivy:
-    name: Trivy Security Scan
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    if: ${{ vars.ENABLE_TRIVY != 'false' }}
+    timeout-minutes: 15
+    if: ${{ vars.DISABLE_INFRA_SECURITY != 'true' }}
     permissions:
       contents: read
       security-events: write
     steps:
       - uses: actions/checkout@v6
 
+      # --- TFLint ---
+      - name: Setup TFLint
+        if: ${{ vars.ENABLE_TFLINT != 'false' }}
+        uses: terraform-linters/setup-tflint@v6
+        with:
+          tflint_version: latest
+
+      - name: Run TFLint
+        if: ${{ vars.ENABLE_TFLINT != 'false' }}
+        run: |
+          tflint --init
+          cd infra/terraform
+          echo "## TFLint Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          for dir in modules/*/ modules/shared/*/; do
+            if [[ -d "$dir" ]]; then
+              echo "Linting $dir..."
+              tflint --chdir="$dir" --format=compact || true
+            fi
+          done
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+
+      # --- Trivy ---
       - name: Run Trivy IaC Scanner
-        uses: aquasecurity/trivy-action@e368e328979b113139d6f9068e03accaed98a518  # 0.34.1 - pinned SHA for security
+        if: ${{ vars.ENABLE_TRIVY != 'false' }}
+        uses: aquasecurity/trivy-action@e368e328979b113139d6f9068e03accaed98a518
         with:
           scan-type: 'config'
           scan-ref: 'infra/terraform'
@@ -201,166 +216,15 @@ jobs:
           exit-code: '0'
           severity: 'CRITICAL,HIGH,MEDIUM'
 
-      - name: Upload SARIF file
+      - name: Upload Trivy SARIF
         uses: github/codeql-action/upload-sarif@v4
         if: always() && hashFiles('trivy-iac-results.sarif') != ''
         with:
           sarif_file: trivy-iac-results.sarif
 
-      - name: Trivy Summary
-        if: always()
-        run: |
-          cat >> "$GITHUB_STEP_SUMMARY" << 'EOF'
-          ## Trivy IaC Security Scan
-
-          Security scan completed. Check the Security tab for detailed findings.
-          EOF
-
-  # ============================================
-  # Validate Shared Infrastructure
-  # ============================================
-  validate-shared-infra:
-    name: Validate shared-infra
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    needs: [detect-changes, format-check]
-    if: needs['detect-changes'].outputs['shared-infra'] == 'true' || github.event_name == 'workflow_dispatch'
-    strategy:
-      fail-fast: false
-      matrix:
-        environment: [dev, staging, prod]
-    steps:
-      - uses: actions/checkout@v6
-        with:
-          submodules: recursive
-
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: ${{ env.TF_VERSION }}
-
-      - name: Setup Terragrunt
-        run: |
-          TG_VERSION="${{ env.TERRAGRUNT_VERSION }}"
-          TG_URL="https://github.com/gruntwork-io/terragrunt/releases/download/v${TG_VERSION}"
-
-          wget -q -O terragrunt "${TG_URL}/terragrunt_linux_amd64"
-          wget -q -O terragrunt_SHA256SUMS "${TG_URL}/SHA256SUMS"
-
-          # Verify checksum
-          EXPECTED=$(grep "terragrunt_linux_amd64" terragrunt_SHA256SUMS | awk '{print $1}')
-          ACTUAL=$(sha256sum terragrunt | awk '{print $1}')
-          if [[ "$EXPECTED" != "$ACTUAL" ]]; then
-            echo "::error::Terragrunt checksum verification failed"
-            exit 1
-          fi
-
-          chmod +x terragrunt
-          sudo mv terragrunt /usr/local/bin/
-          rm -f terragrunt_SHA256SUMS
-
-      - name: Terragrunt Init
-        run: |
-          cd infra/terraform/shared-infra/environments/${{ matrix.environment }}
-          terragrunt init --terragrunt-non-interactive -backend=false
-        env:
-          TF_VAR_environment: ${{ matrix.environment }}
-
-      - name: Terragrunt Validate
-        run: |
-          cd infra/terraform/shared-infra/environments/${{ matrix.environment }}
-          terragrunt validate --terragrunt-non-interactive
-        env:
-          TF_VAR_environment: ${{ matrix.environment }}
-
-  # ============================================
-  # Validate Products
-  # ============================================
-  validate-products:
-    name: Validate ${{ matrix.product }}
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    needs: [detect-changes, format-check, validate-shared-infra]
-    if: always() && needs.format-check.result == 'success'
-    strategy:
-      fail-fast: false
-      matrix:
-        product: [mystira-app, story-generator, admin, publisher, chain]
-        environment: [dev, staging, prod]
-    steps:
-      - uses: actions/checkout@v6
-        with:
-          submodules: recursive
-
-      - name: Check if product changed
-        id: check
-        run: |
-          PRODUCT="${{ matrix.product }}"
-          CHANGED="${{ needs['detect-changes'].outputs[matrix.product] }}"
-          if [[ "$CHANGED" == "true" ]] || [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-            echo "run=true" >> $GITHUB_OUTPUT
-          else
-            echo "run=false" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Setup Terraform
-        if: steps.check.outputs.run == 'true'
-        uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: ${{ env.TF_VERSION }}
-
-      - name: Setup Terragrunt
-        if: steps.check.outputs.run == 'true'
-        run: |
-          TG_VERSION="${{ env.TERRAGRUNT_VERSION }}"
-          TG_URL="https://github.com/gruntwork-io/terragrunt/releases/download/v${TG_VERSION}"
-
-          wget -q -O terragrunt "${TG_URL}/terragrunt_linux_amd64"
-          wget -q -O terragrunt_SHA256SUMS "${TG_URL}/SHA256SUMS"
-
-          # Verify checksum
-          EXPECTED=$(grep "terragrunt_linux_amd64" terragrunt_SHA256SUMS | awk '{print $1}')
-          ACTUAL=$(sha256sum terragrunt | awk '{print $1}')
-          if [[ "$EXPECTED" != "$ACTUAL" ]]; then
-            echo "::error::Terragrunt checksum verification failed"
-            exit 1
-          fi
-
-          chmod +x terragrunt
-          sudo mv terragrunt /usr/local/bin/
-          rm -f terragrunt_SHA256SUMS
-
-      - name: Terragrunt Init
-        if: steps.check.outputs.run == 'true'
-        run: |
-          cd infra/terraform/products/${{ matrix.product }}/environments/${{ matrix.environment }}
-          terragrunt init --terragrunt-non-interactive -backend=false
-        env:
-          TF_VAR_environment: ${{ matrix.environment }}
-
-      - name: Terragrunt Validate
-        if: steps.check.outputs.run == 'true'
-        run: |
-          cd infra/terraform/products/${{ matrix.product }}/environments/${{ matrix.environment }}
-          terragrunt validate --terragrunt-non-interactive
-        env:
-          TF_VAR_environment: ${{ matrix.environment }}
-
-  # ============================================
-  # Security Scan (Checkov)
-  # ============================================
-  security-scan:
-    name: Security Scan (Checkov)
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    needs: format-check
-    if: ${{ vars.ENABLE_CHECKOV != 'false' }}
-    steps:
-      - uses: actions/checkout@v6
-        with:
-          submodules: recursive
-
+      # --- Checkov ---
       - name: Run Checkov
+        if: ${{ vars.ENABLE_CHECKOV != 'false' }}
         uses: bridgecrewio/checkov-action@v12
         with:
           directory: infra/terraform
@@ -368,31 +232,146 @@ jobs:
           soft_fail: ${{ env.CHECKOV_SOFT_FAIL != 'false' }}
           output_format: github_failed_only
 
+      - name: Security Summary
+        if: always()
+        run: |
+          echo "## Infrastructure Security Scan" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "TFLint, Trivy, and Checkov scans completed." >> $GITHUB_STEP_SUMMARY
+          echo "Check the Security tab for detailed Trivy findings." >> $GITHUB_STEP_SUMMARY
+
+  # ============================================
+  # Validate Stacks (dynamic, per-stack)
+  # ============================================
+  validate:
+    name: Validate ${{ matrix.stack }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: [detect-changes, format-check]
+    if: needs.detect-changes.outputs.has_changes == 'true'
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.detect-changes.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      - name: Setup Terragrunt
+        run: |
+          TG_VERSION="${{ env.TERRAGRUNT_VERSION }}"
+          TG_URL="https://github.com/gruntwork-io/terragrunt/releases/download/v${TG_VERSION}"
+
+          wget -q -O terragrunt "${TG_URL}/terragrunt_linux_amd64"
+          wget -q -O terragrunt_SHA256SUMS "${TG_URL}/SHA256SUMS"
+
+          EXPECTED=$(grep "terragrunt_linux_amd64" terragrunt_SHA256SUMS | awk '{print $1}')
+          ACTUAL=$(sha256sum terragrunt | awk '{print $1}')
+          if [[ "$EXPECTED" != "$ACTUAL" ]]; then
+            echo "::error::Terragrunt checksum verification failed"
+            exit 1
+          fi
+
+          chmod +x terragrunt
+          sudo mv terragrunt /usr/local/bin/
+          rm -f terragrunt_SHA256SUMS
+
+      - name: Validate all environments
+        run: |
+          STACK="${{ matrix.stack }}"
+
+          if [[ "$STACK" == "shared-infra" ]]; then
+            BASE_DIR="infra/terraform/shared-infra/environments"
+          else
+            BASE_DIR="infra/terraform/products/${STACK}/environments"
+          fi
+
+          # For workflow_dispatch, only validate the selected environment
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            ENVIRONMENTS=("${{ inputs.environment }}")
+          else
+            ENVIRONMENTS=(dev staging prod)
+          fi
+
+          FAILED=0
+          for env in "${ENVIRONMENTS[@]}"; do
+            ENV_DIR="${BASE_DIR}/${env}"
+            if [[ ! -d "$ENV_DIR" ]]; then
+              echo "::warning::Directory ${ENV_DIR} not found, skipping"
+              continue
+            fi
+
+            echo ""
+            echo "=========================================="
+            echo "Validating ${STACK} (${env})"
+            echo "=========================================="
+
+            cd "$ENV_DIR"
+            export TF_VAR_environment="${env}"
+            terragrunt init --terragrunt-non-interactive -backend=false || { FAILED=1; cd -; continue; }
+
+            # Run terraform validate directly, bypassing terragrunt.
+            # terragrunt validate re-triggers dependency resolution (terraform output
+            # on shared-infra) which fails without Azure credentials.
+            # Stacks without a source block (shared-infra) init in the current dir;
+            # stacks with a source block (products) init inside .terragrunt-cache/.
+            if [[ -d ".terraform" ]]; then
+              terraform validate || FAILED=1
+            else
+              TG_CACHE_DIR=$(find .terragrunt-cache -name ".terraform" -type d -printf "%h\n" 2>/dev/null | head -1)
+              if [[ -n "$TG_CACHE_DIR" ]]; then
+                terraform -chdir="$TG_CACHE_DIR" validate || FAILED=1
+              else
+                echo "::error::Could not find initialized terraform directory for ${STACK} (${env})"
+                FAILED=1
+              fi
+            fi
+            cd -
+          done
+
+          if [[ $FAILED -ne 0 ]]; then
+            echo "::error::Validation failed for one or more environments"
+            exit 1
+          fi
+        env:
+          TERRAGRUNT_SKIP_OUTPUTS: "true"
+
+      - name: Validation Summary
+        if: always()
+        run: |
+          echo "## Validate: ${{ matrix.stack }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "Validated environment: **${{ inputs.environment }}**" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "Validated environments: **dev**, **staging**, **prod**" >> $GITHUB_STEP_SUMMARY
+          fi
+
   # ============================================
   # Summary
   # ============================================
   validation-summary:
-    name: Validation Summary
+    name: Summary
     runs-on: ubuntu-latest
     timeout-minutes: 5
-    needs: [format-check, tflint, trivy, validate-shared-infra, validate-products, security-scan]
+    needs: [format-check, lint-and-security, validate]
     if: always()
     steps:
       - name: Check Results
         run: |
-          echo "# Terragrunt Validation Summary" >> $GITHUB_STEP_SUMMARY
+          echo "# Infrastructure Validation Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "| Check | Status |" >> $GITHUB_STEP_SUMMARY
           echo "|-------|--------|" >> $GITHUB_STEP_SUMMARY
           echo "| Format | ${{ needs.format-check.result == 'success' && '✅ Passed' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| TFLint | ${{ needs.tflint.result == 'success' && '✅ Passed' || '⚠️ Check warnings' }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Trivy | ${{ needs.trivy.result == 'success' && '✅ Passed' || '⚠️ Check warnings' }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Shared Infra | ${{ needs.validate-shared-infra.result == 'success' && '✅ Passed' || (needs.validate-shared-infra.result == 'skipped' && '⏭️ Skipped' || '❌ Failed') }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Products | ${{ needs.validate-products.result == 'success' && '✅ Passed' || (needs.validate-products.result == 'skipped' && '⏭️ Skipped' || '❌ Failed') }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Checkov | ${{ needs.security-scan.result == 'success' && '✅ Passed' || '⚠️ Check warnings' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Lint & Security | ${{ needs.lint-and-security.result == 'success' && '✅ Passed' || (needs.lint-and-security.result == 'skipped' && '⏭️ Skipped' || '⚠️ Check warnings') }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Validate | ${{ needs.validate.result == 'success' && '✅ Passed' || (needs.validate.result == 'skipped' && '⏭️ No changes' || '❌ Failed') }} |" >> $GITHUB_STEP_SUMMARY
 
       - name: Fail if Critical Checks Failed
-        if: needs.format-check.result == 'failure' || needs.validate-shared-infra.result == 'failure' || needs.validate-products.result == 'failure'
+        if: needs.format-check.result == 'failure' || needs.validate.result == 'failure'
         run: |
           echo "Critical validation checks failed!"
           exit 1

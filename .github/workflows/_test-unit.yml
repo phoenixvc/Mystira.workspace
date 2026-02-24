@@ -56,8 +56,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v6
-        with:
-          submodules: recursive
 
       # TypeScript setup
       - name: Setup pnpm

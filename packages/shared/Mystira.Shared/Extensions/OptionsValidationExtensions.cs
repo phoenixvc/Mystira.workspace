@@ -2,7 +2,6 @@ using System.ComponentModel.DataAnnotations;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Mystira.Shared.Caching;
-using Mystira.Shared.Polyglot;
 using Mystira.Shared.Messaging;
 using Mystira.Shared.Resilience;
 
@@ -22,7 +21,6 @@ public static class OptionsValidationExtensions
         // Add validators
         services.AddSingleton<IValidateOptions<CacheOptions>, CacheOptionsValidator>();
         services.AddSingleton<IValidateOptions<ResilienceOptions>, ResilienceOptionsValidator>();
-        services.AddSingleton<IValidateOptions<PolyglotOptions>, PolyglotOptionsValidator>();
         services.AddSingleton<IValidateOptions<MessagingOptions>, MessagingOptionsValidator>();
 
         return services;
@@ -118,42 +116,6 @@ public class ResilienceOptionsValidator : IValidateOptions<ResilienceOptions>
         if (options.LongRunningTimeoutSeconds <= options.TimeoutSeconds)
         {
             errors.Add($"{nameof(options.LongRunningTimeoutSeconds)} ({options.LongRunningTimeoutSeconds}) should be greater than {nameof(options.TimeoutSeconds)} ({options.TimeoutSeconds})");
-        }
-
-        return errors.Count > 0
-            ? ValidateOptionsResult.Fail(errors)
-            : ValidateOptionsResult.Success;
-    }
-}
-
-/// <summary>
-/// Validator for PolyglotOptions.
-/// </summary>
-public class PolyglotOptionsValidator : IValidateOptions<PolyglotOptions>
-{
-    /// <inheritdoc />
-    public ValidateOptionsResult Validate(string? name, PolyglotOptions options)
-    {
-        var errors = new List<string>();
-
-        if (options.CacheExpirationSeconds <= 0)
-        {
-            errors.Add($"{nameof(options.CacheExpirationSeconds)} must be greater than 0. Current value: {options.CacheExpirationSeconds}");
-        }
-
-        // Validate entity routing contains valid type names
-        foreach (var (typeName, target) in options.EntityRouting)
-        {
-            if (string.IsNullOrWhiteSpace(typeName))
-            {
-                errors.Add("EntityRouting contains an empty type name key");
-            }
-
-            // Check if target is a valid enum value
-            if (!Enum.IsDefined(typeof(DatabaseTarget), target))
-            {
-                errors.Add($"EntityRouting[{typeName}] has invalid DatabaseTarget value: {target}");
-            }
         }
 
         return errors.Count > 0

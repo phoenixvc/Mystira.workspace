@@ -28,14 +28,6 @@ jobs:
       publishedPackages: ${{ steps.changesets.outputs.publishedPackages }}
     steps:
       - uses: actions/checkout@v6
-        with:
-          submodules: recursive
-          token: ${{ secrets.MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN }}
-
-      - name: Setup admin-ui submodule
-        uses: ./.github/actions/setup-admin-ui
-        with:
-          token: ${{ secrets.MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN }}
 
       - uses: pnpm/action-setup@v4
 

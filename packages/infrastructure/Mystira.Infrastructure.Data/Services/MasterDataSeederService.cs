@@ -3,17 +3,20 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Mystira.Domain.Models;
 using Mystira.Domain.ValueObjects;
+using Mystira.Shared.Locking;
 
 namespace Mystira.Infrastructure.Data.Services;
 
 /// <summary>
 /// Service for seeding master data (CompassAxes, Archetypes, EchoTypes, FantasyThemes, AgeGroups)
 /// from domain value objects into the database.
+/// Uses distributed locking to prevent duplicate seeding when multiple instances start simultaneously.
 /// </summary>
 public class MasterDataSeederService
 {
     private readonly IServiceProvider _serviceProvider;
     private readonly ILogger<MasterDataSeederService> _logger;
+    private readonly IDistributedLockService? _lockService;
 
     // Cosmos EF Core provider may translate Any/Exists into an unsupported EXISTS query.
     // Avoid constant projection + FirstOrDefault which can cause LIMIT/OFFSET in a subquery for Cosmos.
@@ -29,20 +32,41 @@ public class MasterDataSeederService
     /// </summary>
     /// <param name="serviceProvider">The service provider for creating scoped contexts.</param>
     /// <param name="logger">The logger instance.</param>
+    /// <param name="lockService">Optional distributed lock service for preventing concurrent seeding.</param>
     public MasterDataSeederService(
         IServiceProvider serviceProvider,
-        ILogger<MasterDataSeederService> logger)
+        ILogger<MasterDataSeederService> logger,
+        IDistributedLockService? lockService = null)
     {
         _serviceProvider = serviceProvider;
         _logger = logger;
+        _lockService = lockService;
     }
 
     /// <summary>
     /// Seeds all master data entities (CompassAxes, Archetypes, EchoTypes, FantasyThemes, AgeGroups)
     /// from domain value objects into the database. Skips seeding for entities that already exist.
+    /// Uses distributed locking to prevent race conditions when multiple instances start simultaneously.
     /// </summary>
     /// <returns>A task representing the asynchronous operation.</returns>
     public async Task SeedAllAsync()
+    {
+        if (_lockService is not null)
+        {
+            await _lockService.ExecuteWithLockAsync(
+                "admin:seed:master-data",
+                async ct => await SeedAllInternalAsync(),
+                expiry: TimeSpan.FromSeconds(120),
+                wait: TimeSpan.FromSeconds(60));
+        }
+        else
+        {
+            _logger.LogWarning("Distributed locking not available; seeding without lock protection");
+            await SeedAllInternalAsync();
+        }
+    }
+
+    private async Task SeedAllInternalAsync()
     {
         using var scope = _serviceProvider.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<MystiraAppDbContext>();

@@ -1,0 +1,398 @@
+using System.ClientModel;
+using System.Globalization;
+using System.Text;
+using Azure.AI.OpenAI;
+using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Logging;
+using Mystira.StoryGenerator.Contracts.Chat;
+using Mystira.StoryGenerator.Contracts.Configuration;
+using Mystira.StoryGenerator.Domain.Services;
+using Mystira.StoryGenerator.Contracts.Extensions;
+using OpenAI.Chat;
+
+namespace Mystira.StoryGenerator.Llm.Services.LLM;
+
+/// <summary>
+/// Azure OpenAI implementation of ILLMService
+/// </summary>
+public class AzureOpenAIService : ILLMService
+{
+    private readonly AiSettings _settings;
+    private readonly ILogger<AzureOpenAIService> _logger;
+    private string? _deploymentNameOrModelId;
+
+    public string ProviderName => "azure-openai";
+    public string? DeploymentNameOrModelId => _deploymentNameOrModelId;
+
+    public AzureOpenAIService(IOptions<AiSettings> options, ILogger<AzureOpenAIService> logger)
+    {
+        _settings = options.Value;
+        _logger = logger;
+    }
+
+    internal void SetDeploymentNameOrModelId(string? deploymentNameOrModelId)
+    {
+        _deploymentNameOrModelId = deploymentNameOrModelId;
+    }
+
+    public bool IsAvailable()
+    {
+        // Service is available if primary is configured OR at least one region is configured
+        return IsRegionAvailable(_settings.AzureOpenAI) ||
+               (_settings.AzureOpenAIRegions?.Values.Any(IsRegionAvailable) ?? false);
+    }
+
+    public IEnumerable<ChatModelInfo> GetAvailableModels()
+    {
+        if (!IsAvailable())
+        {
+            return Enumerable.Empty<ChatModelInfo>();
+        }
+
+        var allModels = new List<ChatModelInfo>();
+
+        // Collect models from the primary AzureOpenAI configuration
+        if (IsRegionAvailable(_settings.AzureOpenAI))
+        {
+            var primaryModels = GetModelsFromRegion(_settings.AzureOpenAI);
+            allModels.AddRange(primaryModels);
+        }
+
+        // Collect models from all regional configurations (e.g., SouthAfrica, Sweden)
+        if (_settings.AzureOpenAIRegions != null && _settings.AzureOpenAIRegions.Any())
+        {
+            foreach (var (regionName, regionSettings) in _settings.AzureOpenAIRegions)
+            {
+                if (IsRegionAvailable(regionSettings))
+                {
+                    var regionModels = GetModelsFromRegion(regionSettings);
+                    allModels.AddRange(regionModels);
+                    _logger.LogDebug("Loaded {Count} models from Azure OpenAI region: {Region}", regionModels.Count(), regionName);
+                }
+            }
+        }
+
+        // Remove duplicates based on model Id (in case same model is in multiple regions)
+        var uniqueModels = allModels
+            .GroupBy(m => m.Id)
+            .Select(g => g.First())
+            .ToList();
+
+        // Log models from all regions to help debug resolution
+        foreach (var model in allModels)
+        {
+            _logger.LogDebug("Discovered Azure OpenAI model: {ModelId} ({DisplayName})", model.Id, model.DisplayName);
+        }
+
+        _logger.LogInformation("Total available Azure OpenAI models: {Count}", uniqueModels.Count);
+        return uniqueModels;
+    }
+
+    private bool IsRegionAvailable(AzureOpenAISettings regionSettings)
+    {
+        return !string.IsNullOrWhiteSpace(regionSettings.ApiKey) &&
+               !string.IsNullOrWhiteSpace(regionSettings.Endpoint) &&
+               ((regionSettings.Deployments != null && regionSettings.Deployments.Any()) ||
+                !string.IsNullOrWhiteSpace(regionSettings.DeploymentName));
+    }
+
+    private IEnumerable<ChatModelInfo> GetModelsFromRegion(AzureOpenAISettings regionSettings)
+    {
+        var deployments = regionSettings.Deployments;
+        if (deployments == null || !deployments.Any())
+        {
+            // Fallback to legacy single deployment configuration
+            if (!string.IsNullOrWhiteSpace(regionSettings.DeploymentName))
+            {
+                var model = new ChatModelInfo
+                {
+                    Id = regionSettings.DeploymentName,
+                    DisplayName = GetDisplayNameForDeployment(regionSettings.DeploymentName),
+                    Description = "Azure OpenAI GPT model deployment",
+                    MaxTokens = 4096,
+                    DefaultTemperature = 0.7,
+                    MinTemperature = 0.0,
+                    MaxTemperature = 2.0,
+                    SupportsJsonSchema = true,
+                    Capabilities = new List<string> { "chat", "json-schema", "story-generation" }
+                };
+                return new List<ChatModelInfo> { model };
+            }
+            return Enumerable.Empty<ChatModelInfo>();
+        }
+
+        // Return all deployments from this region
+        return deployments.Select(deployment => new ChatModelInfo
+        {
+            Id = deployment.Name,
+            DisplayName = deployment.DisplayName,
+            Description = $"Azure OpenAI {deployment.DisplayName} deployment",
+            MaxTokens = deployment.MaxTokens,
+            DefaultTemperature = deployment.DefaultTemperature,
+            MinTemperature = 0.0,
+            MaxTemperature = 2.0,
+            SupportsJsonSchema = deployment.SupportsJsonSchema,
+            Capabilities = deployment.Capabilities ?? new List<string> { "chat", "story-generation" }
+        });
+    }
+
+    private static string GetDisplayNameForDeployment(string deploymentName)
+    {
+        // Convert deployment name to a more user-friendly display name
+        return deploymentName.ToLowerInvariant() switch
+        {
+            var name when name.Contains("gpt-4") => "GPT-4",
+            var name when name.Contains("gpt-5.1") => "GPT-5.1",
+            var name when name.Contains("gpt-5-nano") => "GPT-5-Nano",
+            var name when name.Contains("claude-sonnet-4-5") => "Claude-Sonnet-4.5",
+            var name when name.Contains("gpt-3.5") => "GPT-3.5 Turbo",
+            var name when name.Contains("gpt-35") => "GPT-3.5 Turbo",
+            _ => deploymentName
+        };
+    }
+
+    public async Task<ChatCompletionResponse> CompleteAsync(ChatCompletionRequest request, CancellationToken cancellationToken = default)
+    {
+        if (!IsAvailable()) return CreateErrorResponse("Azure OpenAI service is not properly configured");
+
+        try
+        {
+            // Determine which deployment to use
+            var deploymentName = ResolveDeploymentName(request);
+
+            // Resolve the endpoint for the deployment
+            var endpoint = ResolveEndpoint(deploymentName);
+
+            // Resolve the API key for the deployment
+            var apiKey = ResolveApiKey(deploymentName);
+
+            if (string.IsNullOrWhiteSpace(endpoint) || string.IsNullOrWhiteSpace(apiKey))
+            {
+                _logger.LogWarning("Missing configuration for Azure OpenAI deployment {Deployment}. Endpoint: {Endpoint}, Key: {KeyStatus}",
+                    deploymentName, endpoint ?? "null", string.IsNullOrWhiteSpace(apiKey) ? "missing" : "present");
+            }
+            else
+            {
+                _logger.LogInformation("Using Azure OpenAI endpoint: {Endpoint} for deployment: {Deployment}", endpoint, deploymentName);
+            }
+
+            var azureClient = new AzureOpenAIClient(
+                new Uri(endpoint),
+                new ApiKeyCredential(apiKey),
+                new AzureOpenAIClientOptions
+                {
+                    NetworkTimeout = new TimeSpan(0, 0, 5, 0)
+                });
+            var chatClient = azureClient.GetChatClient(deploymentName);
+
+            var messages = request.ToOpenAiChatMessages();
+
+            var options = BuildOptions(request, _logger);
+
+            var azureResponse = await chatClient.CompleteChatAsync(
+                messages,
+                options: options,
+                cancellationToken: cancellationToken);
+            var response = azureResponse.Value;
+
+            var content = response?.Content?.FirstOrDefault()?.Text ?? string.Empty;
+
+            var cleanContent = Sanitize(content);
+
+            var finishReason = response?.FinishReason.ToString();
+            var isIncomplete = finishReason == "Length"; // OpenAI uses PascalCase for FinishReason enum ToString() or specific strings
+
+            return new ChatCompletionResponse
+            {
+                Content = cleanContent ?? string.Empty,
+                Model = deploymentName,
+                Provider = ProviderName,
+                Usage = response?.Usage != null ? new ChatCompletionUsage
+                {
+                    PromptTokens = response.Usage.InputTokenCount,
+                    CompletionTokens = response.Usage.OutputTokenCount,
+                    TotalTokens = response.Usage.TotalTokenCount
+                } : null,
+                Success = true,
+                FinishReason = finishReason,
+                IsIncomplete = isIncomplete
+            };
+
+            string? Sanitize(string? input)
+            {
+                if (input == null) return null;
+
+                var sb = new StringBuilder(input.Length);
+                foreach (var ch in input)
+                {
+                    var cat = char.GetUnicodeCategory(ch);
+                    var isControl = cat == UnicodeCategory.Control;
+
+                    // Keep common whitespace controls, drop everything else
+                    if (isControl && ch != '\n' && ch != '\r' && ch != '\t')
+                        continue;
+
+                    sb.Append(ch);
+                }
+
+                return sb.ToString();
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error calling Azure OpenAI API");
+            return CreateErrorResponse($"Azure OpenAI service error: {ex.Message}");
+        }
+    }
+
+    private string ResolveDeploymentName(ChatCompletionRequest request)
+    {
+        // Priority order:
+        // 1. Deployment name specified in request
+        // 2. Stored deployment name
+        // 3. Default deployment name from settings
+
+        if (!string.IsNullOrEmpty(request.Model))
+        {
+            _deploymentNameOrModelId = request.Model;
+            return request.Model;
+        }
+
+        if (!string.IsNullOrWhiteSpace(_deploymentNameOrModelId)) return _deploymentNameOrModelId;
+
+        _deploymentNameOrModelId = _settings.AzureOpenAI.DeploymentName;
+        return _settings.AzureOpenAI.DeploymentName;
+    }
+
+    private string ResolveEndpoint(string deploymentName)
+    {
+        // Priority order:
+        // 1. Endpoint configured for the specific deployment in primary config
+        // 2. Endpoint configured for the specific deployment in any regional config
+        // 3. Default endpoint from primary settings
+
+        if (!string.IsNullOrWhiteSpace(deploymentName))
+        {
+            // Check primary AzureOpenAI configuration
+            if (_settings.AzureOpenAI.Deployments != null)
+            {
+                var deployment = _settings.AzureOpenAI.Deployments.FirstOrDefault(d => d.Name == deploymentName);
+                if (deployment != null && !string.IsNullOrWhiteSpace(deployment.Endpoint))
+                {
+                    _logger.LogDebug("Resolved endpoint for deployment {Deployment} from primary config", deploymentName);
+                    return deployment.Endpoint;
+                }
+            }
+
+            // Check regional configurations
+            if (_settings.AzureOpenAIRegions != null && _settings.AzureOpenAIRegions.Any())
+            {
+                foreach (var (regionName, regionSettings) in _settings.AzureOpenAIRegions)
+                {
+                    // Check deployments list
+                    if (regionSettings.Deployments != null)
+                    {
+                        var deployment = regionSettings.Deployments.FirstOrDefault(d => d.Name == deploymentName);
+                        if (deployment != null)
+                        {
+                            if (!string.IsNullOrWhiteSpace(deployment.Endpoint))
+                            {
+                                _logger.LogDebug("Resolved endpoint for deployment {Deployment} from region {Region} (deployment-specific)", deploymentName, regionName);
+                                return deployment.Endpoint;
+                            }
+
+                            if (!string.IsNullOrWhiteSpace(regionSettings.Endpoint))
+                            {
+                                _logger.LogDebug("Resolved endpoint for deployment {Deployment} from region {Region} (region-default)", deploymentName, regionName);
+                                return regionSettings.Endpoint;
+                            }
+                        }
+                    }
+
+                    // Check primary deployment name for the region
+                    if (regionSettings.DeploymentName == deploymentName && !string.IsNullOrWhiteSpace(regionSettings.Endpoint))
+                    {
+                        _logger.LogDebug("Resolved endpoint for deployment {Deployment} from region {Region} (via deployment name)", deploymentName, regionName);
+                        return regionSettings.Endpoint;
+                    }
+                }
+            }
+        }
+
+        // Fallback to primary endpoint
+        return _settings.AzureOpenAI.Endpoint;
+    }
+
+    private string ResolveApiKey(string deploymentName)
+    {
+        // Priority order:
+        // 1. ApiKey from a regional configuration if the deployment is found there
+        // 2. Default ApiKey from primary AzureOpenAI settings
+
+        if (!string.IsNullOrWhiteSpace(deploymentName))
+        {
+            // Check regional configurations
+            if (_settings.AzureOpenAIRegions != null && _settings.AzureOpenAIRegions.Any())
+            {
+                foreach (var (regionName, regionSettings) in _settings.AzureOpenAIRegions)
+                {
+                    // Check deployments list
+                    if (regionSettings.Deployments != null && regionSettings.Deployments.Any(d => d.Name == deploymentName))
+                    {
+                        _logger.LogDebug("Resolved ApiKey for deployment {Deployment} from region {Region} (via deployments list)", deploymentName, regionName);
+                        return regionSettings.ApiKey;
+                    }
+
+                    // Check primary deployment name for the region
+                    if (regionSettings.DeploymentName == deploymentName)
+                    {
+                        _logger.LogDebug("Resolved ApiKey for deployment {Deployment} from region {Region} (via deployment name)", deploymentName, regionName);
+                        return regionSettings.ApiKey;
+                    }
+                }
+            }
+        }
+
+        // Fallback to primary ApiKey
+        return _settings.AzureOpenAI.ApiKey;
+    }
+
+    // Exposed for unit testing to validate option construction when a JsonSchemaFormat is provided.
+    public static ChatCompletionOptions? BuildOptions(ChatCompletionRequest request, ILogger logger)
+    {
+        if (request.JsonSchemaFormat is not null &&
+            !string.IsNullOrWhiteSpace(request.JsonSchemaFormat.SchemaJson))
+        {
+            try
+            {
+                return new ChatCompletionOptions
+                {
+                    ResponseFormat = ChatResponseFormat.CreateJsonSchemaFormat(
+                        jsonSchemaFormatName: string.IsNullOrWhiteSpace(request.JsonSchemaFormat.FormatName)
+                            ? "mystira-json"
+                            : request.JsonSchemaFormat.FormatName,
+                        jsonSchema: BinaryData.FromString(request.JsonSchemaFormat.SchemaJson),
+                        jsonSchemaIsStrict: request.JsonSchemaFormat.IsStrict
+                    )
+                };
+            }
+            catch (Exception ex)
+            {
+                logger.LogWarning(ex, "Failed to configure JSON schema response format. Falling back to default response format.");
+                return null;
+            }
+        }
+
+        return null;
+    }
+
+    private static ChatCompletionResponse CreateErrorResponse(string error)
+    {
+        return new ChatCompletionResponse
+        {
+            Success = false,
+            Error = error,
+            Provider = "azure-openai"
+        };
+    }
+}

@@ -1,0 +1,17 @@
+﻿### Anthropic Messages API via Azure (.http request)
+POST https://dev-swe-ai-mystira-stor-resource.services.ai.azure.com/anthropic/v1/messages
+Content-Type: application/json
+x-api-key: Cwd34lGNv62pjKfXsp3QIT3xhkMAU8dVr9xhJSNPl7NnWBggDbF6JQQJ99BJACfhMk5XJ3w3AAAAACOGAyKw
+anthropic-version: 2023-06-01
+
+{
+  "max_tokens": 1000,
+  "temperature": 0.7,
+  "system": "You are a helpful assistant.",
+  "messages": [
+    { "role": "user", "content": "What are 3 things to visit in Seattle?" }
+  ],
+  "model": "claude-sonnet-4-5"
+}
+
+###

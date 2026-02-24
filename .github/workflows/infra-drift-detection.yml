@@ -1,4 +1,4 @@
-name: "[Scheduled] Infrastructure - Drift Detection"
+name: "[Ops] Infra Drift Detection"
 
 # Drift Detection: Identifies configuration drift between Terraform state and actual resources
 # Runs on schedule and can be triggered manually
@@ -71,8 +71,6 @@ jobs:
         product: [shared-infra, mystira-app, story-generator, admin, publisher, chain]
     steps:
       - uses: actions/checkout@v6
-        with:
-          submodules: recursive
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3

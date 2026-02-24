@@ -15,7 +15,7 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~> 4.0" # 4.x required for .NET 9.0 support
+      version = "~> 4.0" # 4.x required for .NET 10.0 support
     }
     azuread = {
       source  = "hashicorp/azuread"
@@ -502,7 +502,7 @@ module "story_generator" {
   enable_static_web_app    = true
   static_web_app_sku       = "Standard" # Standard tier for production
   fallback_location        = "eastus2"  # SWA not available in South Africa North
-  github_repository_url    = "https://github.com/phoenixvc/Mystira.StoryGenerator"
+  github_repository_url    = "https://github.com/phoenixvc/Mystira.workspace"
   github_branch            = "main"
   enable_swa_custom_domain = true
   swa_custom_domain        = "story.mystira.app"

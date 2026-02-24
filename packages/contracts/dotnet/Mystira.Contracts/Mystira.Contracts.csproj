@@ -24,7 +24,7 @@
     <!-- Build configuration -->
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
-    <IsPackable>true</IsPackable>
+    <IsPackable>false</IsPackable>
   </PropertyGroup>
 
   <!-- Source Link for debugging -->
@@ -43,9 +43,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <!-- Domain package: ProjectReference for local build, PackageReference for NuGet pack -->
-    <ProjectReference Include="../../../domain/Mystira.Domain/Mystira.Domain.csproj" PrivateAssets="all" />
-    <PackageReference Include="Mystira.Domain" Version="0.6.0-alpha" />
+    <ProjectReference Include="../../../domain/Mystira.Domain/Mystira.Domain.csproj" />
   </ItemGroup>
 
   <ItemGroup>

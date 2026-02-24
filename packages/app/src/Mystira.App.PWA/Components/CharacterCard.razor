@@ -1,0 +1,156 @@
+@using Mystira.App.PWA.Models
+
+<div class="col-md-6 col-lg-3">
+    <div class="card h-100 character-card @(Assignment.IsUnused ? "border-secondary bg-light" : "border-primary")">
+        <div class="card-body d-flex flex-column">
+            <!-- Character Info -->
+            <div class="text-center mb-3">
+                @if (!string.IsNullOrEmpty(Assignment.Image))
+                {
+                    <img src="@GetMediaUrl(Assignment.Image)"
+                        class="character-avatar mb-2" alt="@Assignment.CharacterName" />
+                }
+                else
+                {
+                    <div class="character-avatar-placeholder mb-2">
+                        <i class="fas fa-user fa-2x"></i>
+                    </div>
+                }
+                <h6 class="card-title mb-1">@Assignment.CharacterName</h6>
+                <small class="text-muted">@Assignment.DisplayInfo</small>
+            </div>
+
+            <!-- Media Controls -->
+            <div class="media-controls">
+                @if (!string.IsNullOrEmpty(Assignment.Image))
+                {
+                    <button class="btn-media btn-media-view"
+                        @onclick="() => OnImagePreview.InvokeAsync(GetMediaUrl(Assignment.Image))"
+                        @onclick:stopPropagation="true"
+                        title="View full image"
+                        aria-label="View full image">
+                        <i class="fas fa-expand"></i>
+                    </button>
+                }
+                @if (!string.IsNullOrEmpty(Assignment.Audio))
+                {
+                    <button class="btn-media btn-media-audio @(IsPlayingAudio ? "playing" : "")"
+                        @onclick="() => OnAudioPlay.InvokeAsync(GetMediaUrl(Assignment.Audio))"
+                        @onclick:stopPropagation="true"
+                        title="@(IsPlayingAudio ? "Stop audio" : "Play character voice")"
+                        aria-label="@(IsPlayingAudio ? "Stop audio" : "Play character voice")">
+                        <i class="fas @(IsPlayingAudio ? "fa-pause" : "fa-volume-up")"></i>
+                    </button>
+                }
+            </div>
+
+            <!-- Player Assignment -->
+            <div class="mt-auto">
+                @if (Assignment.IsUnused)
+                {
+                    <div class="text-center text-muted py-2">
+                        <i class="fas fa-minus-circle mb-1"></i>
+                        <small>Unused Character</small>
+                    </div>
+                }
+                else
+                {
+                    <div class="player-assignment">
+                        @if (Assignment.PlayerAssignment == null)
+                        {
+                            <button class="btn-assign-player"
+                                @onclick="() => OnAssignPlayer.InvokeAsync(CardIndex)"
+                                aria-label="Assign player to character slot @(CardIndex + 1)">
+                                <i class="fas fa-user-plus me-2"></i>Assign Player
+                            </button>
+                        }
+                        else
+                        {
+                            <div class="assigned-player-card">
+                                <div class="d-flex align-items-center">
+                                    @if (!string.IsNullOrEmpty(Assignment.PlayerAssignment.SelectedAvatarMediaId))
+                                    {
+                                        <div class="player-avatar me-2 player-avatar-large">
+                                            <CachedMystiraImage MediaId="@Assignment.PlayerAssignment.SelectedAvatarMediaId"
+                                                Alt="Player Avatar" Width="80" Height="80" />
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="player-avatar-placeholder me-2">
+                                            @if (Assignment.PlayerAssignment.Type == "AI")
+                                            {
+                                                <i class="fas fa-robot"></i>
+                                            }
+                                            else
+                                            {
+                                                <i class="fas fa-user"></i>
+                                            }
+                                        </div>
+                                    }
+                                    <div class="flex-grow-1">
+                                        <div class="fw-bold">@GetPlayerDisplayName()</div>
+                                        <small class="text-muted">
+                                            @if (Assignment.PlayerAssignment.Type == "AI")
+                                            {
+                                                <span class="ai-player-badge">AI Player</span>
+                                            }
+                                            else
+                                            {
+                                                @Assignment.PlayerAssignment.Type
+                                            }
+                                        </small>
+                                    </div>
+                                    <button class="btn btn-sm btn-outline-danger"
+                                        @onclick="() => OnRemovePlayer.InvokeAsync(CardIndex)" title="Remove"
+                                        aria-label="Remove player">
+                                        &#10060;
+                                    </button>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public CharacterAssignment Assignment { get; set; } = default!;
+
+    [Parameter]
+    public int CardIndex { get; set; }
+
+    [Parameter]
+    public bool IsPlayingAudio { get; set; }
+
+    [Parameter]
+    public Func<string, string> GetMediaUrl { get; set; } = url => url;
+
+    [Parameter]
+    public EventCallback<string> OnImagePreview { get; set; }
+
+    [Parameter]
+    public EventCallback<string> OnAudioPlay { get; set; }
+
+    [Parameter]
+    public EventCallback<int> OnAssignPlayer { get; set; }
+
+    [Parameter]
+    public EventCallback<int> OnRemovePlayer { get; set; }
+
+    private string GetPlayerDisplayName()
+    {
+        if (Assignment.PlayerAssignment == null) return string.Empty;
+
+        return Assignment.PlayerAssignment.Type switch
+        {
+            "Profile" => Assignment.PlayerAssignment.ProfileName ?? "Profile",
+            "Guest" => Assignment.PlayerAssignment.GuestName ?? "Guest",
+            "AI" => "AI Player",
+            _ => string.IsNullOrEmpty(Assignment.PlayerAssignment.Type) ? "Unknown Player" : Assignment.PlayerAssignment.Type
+        };
+    }
+}

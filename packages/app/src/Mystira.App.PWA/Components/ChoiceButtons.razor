@@ -1,0 +1,31 @@
+@using Mystira.App.PWA.Models
+
+<div class="text-center">
+    <h5 class="mb-4 text-muted">What do you choose?</h5>
+
+    <div class="d-flex flex-row flex-wrap justify-content-center gap-3">
+        @foreach (var choice in Choices.OrderBy(c => c.Order))
+        {
+            <button @key="choice.Id" class="btn btn-primary-custom btn-lg choice-button"
+                    @onclick="() => OnChoiceSelected.InvokeAsync(choice)"
+                    disabled="@IsProcessing">
+                @if (IsProcessing)
+                {
+                    <span class="spinner-border spinner-border-sm me-2"></span>
+                }
+                <MarkdownRenderer Content="@choice.Text" />
+            </button>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public IEnumerable<Choice> Choices { get; set; } = Enumerable.Empty<Choice>();
+
+    [Parameter]
+    public bool IsProcessing { get; set; }
+
+    [Parameter]
+    public EventCallback<Choice> OnChoiceSelected { get; set; }
+}

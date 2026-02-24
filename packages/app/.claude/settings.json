@@ -1,0 +1,123 @@
+{
+  "$schema": "https://claude.ai/schemas/claude-code-settings.json",
+  "permissions": {
+    "allow": [
+      "Bash(dotnet *)",
+      "Bash(git *)",
+      "Bash(make *)",
+      "Bash(docker *)",
+      "Bash(docker-compose *)",
+      "Bash(az *)",
+      "Bash(gh *)",
+      "Bash(npm *)",
+      "Bash(npx *)",
+      "Bash(curl *)",
+      "Bash(wget *)",
+      "Bash(ls *)",
+      "Bash(mkdir *)",
+      "Bash(rm -rf */bin)",
+      "Bash(rm -rf */obj)",
+      "Bash(rm -rf **/bin)",
+      "Bash(rm -rf **/obj)",
+      "Bash(rm -rf TestResults)",
+      "Bash(rm -rf TestResults/)",
+      "Bash(chmod +x *)"
+    ],
+    "deny": []
+  },
+  "env": {
+    "DOTNET_CLI_TELEMETRY_OPTOUT": "1",
+    "DOTNET_NOLOGO": "1",
+    "ASPNETCORE_ENVIRONMENT": "Development"
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/session-start.sh",
+            "timeout": 120000
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo 'Reminder: Verify hexagonal architecture compliance — no Infrastructure references in Application layer, no business logic in Controllers.'"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'FILE=\"$CLAUDE_FILE_PATH\"; if [[ \"$FILE\" == *.cs ]] && [[ -f \"$FILE\" ]]; then dotnet format Mystira.App.sln --include \"$FILE\" --verbosity quiet --no-restore 2>/dev/null; fi'"
+          }
+        ]
+      }
+    ],
+    "Notification": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'printf \"Claude Code notification: %s\\n\" \"$CLAUDE_NOTIFICATION\"'"
+          }
+        ]
+      }
+    ]
+  },
+  "commands": {
+    "build": "dotnet build Mystira.App.sln",
+    "test": "dotnet test Mystira.App.sln --no-build",
+    "test:coverage": "dotnet test Mystira.App.sln --collect:\"XPlat Code Coverage\" --settings coverlet.runsettings",
+    "clean": "dotnet clean Mystira.App.sln && find . -type d \\( -name bin -o -name obj \\) -exec rm -rf {} + 2>/dev/null; rm -rf TestResults",
+    "restore": "dotnet restore Mystira.App.sln",
+    "format": "dotnet format Mystira.App.sln",
+    "api:run": "dotnet run --project src/Mystira.App.Api/Mystira.App.Api.csproj",
+    "pwa:run": "dotnet run --project src/Mystira.App.PWA/Mystira.App.PWA.csproj",
+    "watch:api": "dotnet watch --project src/Mystira.App.Api/Mystira.App.Api.csproj",
+    "watch:pwa": "dotnet watch --project src/Mystira.App.PWA/Mystira.App.PWA.csproj"
+  },
+  "project": {
+    "type": "dotnet",
+    "framework": "net9.0",
+    "structure": {
+      "src": "src/",
+      "tests": "tests/",
+      "docs": "docs/"
+    },
+    "conventions": {
+      "testing": {
+        "framework": "xunit",
+        "assertions": "FluentAssertions",
+        "mocking": "Moq",
+        "naming": "MethodName_Scenario_ExpectedResult"
+      },
+      "cqrs": {
+        "framework": "Wolverine",
+        "pattern": "Static handler methods with dependency injection via parameters"
+      },
+      "css": {
+        "scoping": "Blazor component isolation with ::deep for theme selectors",
+        "variables": "CSS custom properties (--primary-color, --fg, --muted, --card, --border, etc.)"
+      }
+    }
+  },
+  "setup": {
+    "script": ".claude/install_tools.sh",
+    "requirements": [
+      ".NET SDK 9.0.310+",
+      "Docker (optional, for containerization)",
+      "Azure CLI (optional, for deployment)"
+    ]
+  }
+}

@@ -21,21 +21,21 @@ Thank you for your interest in contributing to the Mystira platform!
 
 ### Prerequisites
 
-| Tool | Version | Purpose |
-|------|---------|---------|
-| Node.js | 18.x+ (24 recommended) | JavaScript runtime |
-| pnpm | 8.x+ (10.27.0 recommended) | Package manager |
-| .NET SDK | 9.0+ | C# development |
-| Docker | Latest | Local services |
-| Git | Latest | Version control |
+| Tool     | Version                    | Purpose            |
+| -------- | -------------------------- | ------------------ |
+| Node.js  | 18.x+ (24 recommended)     | JavaScript runtime |
+| pnpm     | 8.x+ (10.27.0 recommended) | Package manager    |
+| .NET SDK | 10.0+                      | C# development     |
+| Docker   | Latest                     | Local services     |
+| Git      | Latest                     | Version control    |
 
 **Optional (for infrastructure work):**
 
-| Tool | Version | Purpose |
-|------|---------|---------|
-| Azure CLI | Latest | Azure resource management |
-| Terraform | 1.5.0+ | Infrastructure as Code |
-| kubectl | Latest | Kubernetes management |
+| Tool      | Version | Purpose                   |
+| --------- | ------- | ------------------------- |
+| Azure CLI | Latest  | Azure resource management |
+| Terraform | 1.5.0+  | Infrastructure as Code    |
+| kubectl   | Latest  | Kubernetes management     |
 
 ### Installing Prerequisites
 
@@ -47,30 +47,24 @@ nvm use 24
 # pnpm
 npm install -g pnpm@10.27.0
 
-# .NET SDK 9.0 (see https://dotnet.microsoft.com/download)
-# Windows: winget install Microsoft.DotNet.SDK.9
+# .NET SDK 10.0 (see https://dotnet.microsoft.com/download)
+# Windows: winget install Microsoft.DotNet.SDK.10
 # macOS: brew install dotnet-sdk
 # Linux: See https://learn.microsoft.com/en-us/dotnet/core/install/linux
 
 # Verify installations
 node --version    # Should be 18+
 pnpm --version    # Should be 8+
-dotnet --version  # Should be 9.0+
+dotnet --version  # Should be 10.0+
 ```
 
 ### Getting Started
 
-1. **Clone the repository with submodules:**
+1. **Clone the repository:**
 
    ```bash
-   git clone --recurse-submodules https://github.com/phoenixvc/Mystira.workspace.git
+   git clone https://github.com/phoenixvc/Mystira.workspace.git
    cd Mystira.workspace
-   ```
-
-   If already cloned without submodules:
-
-   ```bash
-   git submodule update --init --recursive
    ```
 
 2. **Install dependencies:**
@@ -107,51 +101,49 @@ dotnet --version  # Should be 9.0+
 
 ## Project Structure
 
-This workspace uses a hybrid approach: Git submodules for independent services and pnpm workspaces with Turborepo for shared packages.
+This is a true monorepo using pnpm workspaces with Turborepo. All components live in `packages/`.
 
-### Git Submodules
+### Application Packages
 
-| Submodule | Path | Technology | Description |
-|-----------|------|------------|-------------|
-| Mystira.Chain | `packages/chain/` | Python, gRPC | Blockchain service |
-| Mystira.App | `packages/app/` | .NET, Blazor | Main application |
-| Mystira.StoryGenerator | `packages/story-generator/` | .NET | AI story generation |
-| Mystira.Publisher | `packages/publisher/` | TypeScript, React | Content publishing |
-| Mystira.DevHub | `packages/devhub/` | TypeScript | Developer portal |
-| Mystira.Admin.Api | `packages/admin-api/` | .NET, ASP.NET Core | Admin backend |
-| Mystira.Admin.UI | `packages/admin-ui/` | TypeScript, React | Admin dashboard |
+| Package                | Path                        | Technology         | Description         |
+| ---------------------- | --------------------------- | ------------------ | ------------------- |
+| Mystira.Chain          | `packages/chain/`           | Python, gRPC       | Blockchain service  |
+| Mystira.App            | `packages/app/`             | .NET, Blazor       | Main application    |
+| Mystira.StoryGenerator | `packages/story-generator/` | .NET               | AI story generation |
+| Mystira.Publisher      | `packages/publisher/`       | TypeScript, React  | Content publishing  |
+| Mystira.DevHub         | `packages/devhub/`          | TypeScript         | Developer portal    |
+| Mystira.Admin.Api      | `packages/admin-api/`       | .NET, ASP.NET Core | Admin backend       |
+| Mystira.Admin.UI       | `packages/admin-ui/`        | TypeScript, React  | Admin dashboard     |
 
-See [Submodules Guide](./docs/guides/submodules.md) for detailed information.
+### Shared Packages
 
-### Workspace Packages
-
-| Package | Path | Type | Description |
-|---------|------|------|-------------|
-| Mystira.Contracts | `packages/contracts/` | NPM + NuGet | Shared API contracts |
-| Mystira.Shared | `packages/shared/` | NuGet | .NET shared infrastructure |
-| Mystira.Core | `packages/core/` | NuGet | Core functionality |
-| Mystira.Domain | `packages/domain/` | NuGet | Domain models |
-| Mystira.Application | `packages/application/` | NuGet | Application services |
-| @mystira/core-types | `packages/core-types/` | NPM | TypeScript types |
-| @mystira/shared-utils | `packages/shared-utils/` | NPM | Utility functions |
-| @mystira/design-tokens | `packages/design-tokens/` | NPM | Design system tokens |
-| @mystira/api-spec | `packages/api-spec/` | NPM | API specifications |
+| Package                | Path                      | Type        | Description                |
+| ---------------------- | ------------------------- | ----------- | -------------------------- |
+| Mystira.Contracts      | `packages/contracts/`     | NPM + NuGet | Shared API contracts       |
+| Mystira.Shared         | `packages/shared/`        | NuGet       | .NET shared infrastructure |
+| Mystira.Core           | `packages/core/`          | NuGet       | Core functionality         |
+| Mystira.Domain         | `packages/domain/`        | NuGet       | Domain models              |
+| Mystira.Application    | `packages/application/`   | NuGet       | Application services       |
+| @mystira/core-types    | `packages/core-types/`    | NPM         | TypeScript types           |
+| @mystira/shared-utils  | `packages/shared-utils/`  | NPM         | Utility functions          |
+| @mystira/design-tokens | `packages/design-tokens/` | NPM         | Design system tokens       |
+| @mystira/api-spec      | `packages/api-spec/`      | NPM         | API specifications         |
 
 ### Infrastructure Packages
 
-| Package | Path | Description |
-|---------|------|-------------|
-| Mystira.Infrastructure.Data | `packages/infrastructure/Mystira.Infrastructure.Data/` | Data access layer |
-| Mystira.Infrastructure.Azure | `packages/infrastructure/Mystira.Infrastructure.Azure/` | Azure integrations |
-| Mystira.Infrastructure.Discord | `packages/infrastructure/Mystira.Infrastructure.Discord/` | Discord integration |
-| Mystira.Infrastructure.Teams | `packages/infrastructure/Mystira.Infrastructure.Teams/` | Teams integration |
-| Mystira.Infrastructure.Payments | `packages/infrastructure/Mystira.Infrastructure.Payments/` | Payment processing |
-| Mystira.Infrastructure.WhatsApp | `packages/infrastructure/Mystira.Infrastructure.WhatsApp/` | WhatsApp integration |
-| Mystira.Infrastructure.StoryProtocol | `packages/infrastructure/Mystira.Infrastructure.StoryProtocol/` | Story Protocol |
+| Package                              | Path                                                            | Description          |
+| ------------------------------------ | --------------------------------------------------------------- | -------------------- |
+| Mystira.Infrastructure.Data          | `packages/infrastructure/Mystira.Infrastructure.Data/`          | Data access layer    |
+| Mystira.Infrastructure.Azure         | `packages/infrastructure/Mystira.Infrastructure.Azure/`         | Azure integrations   |
+| Mystira.Infrastructure.Discord       | `packages/infrastructure/Mystira.Infrastructure.Discord/`       | Discord integration  |
+| Mystira.Infrastructure.Teams         | `packages/infrastructure/Mystira.Infrastructure.Teams/`         | Teams integration    |
+| Mystira.Infrastructure.Payments      | `packages/infrastructure/Mystira.Infrastructure.Payments/`      | Payment processing   |
+| Mystira.Infrastructure.WhatsApp      | `packages/infrastructure/Mystira.Infrastructure.WhatsApp/`      | WhatsApp integration |
+| Mystira.Infrastructure.StoryProtocol | `packages/infrastructure/Mystira.Infrastructure.StoryProtocol/` | Story Protocol       |
 
 ### Infrastructure (IaC)
 
-The `infra/` directory is **not** a submodule. It contains infrastructure code directly in the workspace:
+The `infra/` directory contains infrastructure code directly in the workspace:
 
 - `infra/terraform/` - Terraform modules for Azure
 - `infra/kubernetes/` - Kubernetes manifests and overlays
@@ -223,7 +215,7 @@ To ensure NuGet resolves Mystira packages from GitHub (not nuget.org), add packa
 </packageSourceMapping>
 ```
 
-> **Note**: Without this mapping, you may see "Unable to resolve 'Mystira.*'" errors.
+> **Note**: Without this mapping, you may see "Unable to resolve 'Mystira.\*'" errors.
 
 **Verifying Access:**
 
@@ -247,14 +239,14 @@ dotnet restore
 
 Use descriptive branch names with prefixes:
 
-| Prefix | Purpose | Example |
-|--------|---------|---------|
-| `feature/` | New features | `feature/add-nft-marketplace` |
-| `fix/` | Bug fixes | `fix/auth-token-refresh` |
-| `docs/` | Documentation | `docs/update-setup-guide` |
-| `refactor/` | Code refactoring | `refactor/api-client` |
-| `test/` | Test additions | `test/add-payment-tests` |
-| `chore/` | Maintenance | `chore/update-dependencies` |
+| Prefix      | Purpose          | Example                       |
+| ----------- | ---------------- | ----------------------------- |
+| `feature/`  | New features     | `feature/add-nft-marketplace` |
+| `fix/`      | Bug fixes        | `fix/auth-token-refresh`      |
+| `docs/`     | Documentation    | `docs/update-setup-guide`     |
+| `refactor/` | Code refactoring | `refactor/api-client`         |
+| `test/`     | Test additions   | `test/add-payment-tests`      |
+| `chore/`    | Maintenance      | `chore/update-dependencies`   |
 
 ### Commit Messages
 
@@ -270,36 +262,36 @@ We use [Conventional Commits](https://www.conventionalcommits.org/) format, enfo
 
 **Types:**
 
-| Type | Description |
-|------|-------------|
-| `feat` | New feature |
-| `fix` | Bug fix |
-| `docs` | Documentation only |
-| `style` | Code style (formatting, semicolons, etc.) |
-| `refactor` | Code refactoring |
-| `perf` | Performance improvement |
-| `test` | Adding or updating tests |
-| `build` | Build system or dependencies |
-| `ci` | CI configuration |
-| `chore` | Other changes |
-| `revert` | Revert a previous commit |
+| Type       | Description                               |
+| ---------- | ----------------------------------------- |
+| `feat`     | New feature                               |
+| `fix`      | Bug fix                                   |
+| `docs`     | Documentation only                        |
+| `style`    | Code style (formatting, semicolons, etc.) |
+| `refactor` | Code refactoring                          |
+| `perf`     | Performance improvement                   |
+| `test`     | Adding or updating tests                  |
+| `build`    | Build system or dependencies              |
+| `ci`       | CI configuration                          |
+| `chore`    | Other changes                             |
+| `revert`   | Revert a previous commit                  |
 
 **Scopes:**
 
-| Scope | Repository/Package |
-|-------|-------------------|
-| `chain` | Mystira.Chain |
-| `app` | Mystira.App |
-| `story-generator` | Mystira.StoryGenerator |
-| `publisher` | Mystira.Publisher |
-| `devhub` | Mystira.DevHub |
-| `admin-api` | Mystira.Admin.Api |
-| `admin-ui` | Mystira.Admin.UI |
-| `contracts` | Mystira.Contracts |
-| `shared` | Mystira.Shared |
-| `infra` | Infrastructure |
-| `workspace` | Workspace configuration |
-| `deps` | Dependencies |
+| Scope             | Repository/Package      |
+| ----------------- | ----------------------- |
+| `chain`           | Mystira.Chain           |
+| `app`             | Mystira.App             |
+| `story-generator` | Mystira.StoryGenerator  |
+| `publisher`       | Mystira.Publisher       |
+| `devhub`          | Mystira.DevHub          |
+| `admin-api`       | Mystira.Admin.Api       |
+| `admin-ui`        | Mystira.Admin.UI        |
+| `contracts`       | Mystira.Contracts       |
+| `shared`          | Mystira.Shared          |
+| `infra`           | Infrastructure          |
+| `workspace`       | Workspace configuration |
+| `deps`            | Dependencies            |
 
 **Examples:**
 
@@ -404,11 +396,11 @@ pnpm changeset
 
 ### Version Bump Types
 
-| Type | When to Use | Example |
-|------|-------------|---------|
-| `patch` | Bug fixes, minor updates | `1.0.0` → `1.0.1` |
+| Type    | When to Use                       | Example           |
+| ------- | --------------------------------- | ----------------- |
+| `patch` | Bug fixes, minor updates          | `1.0.0` → `1.0.1` |
 | `minor` | New features, backward compatible | `1.0.0` → `1.1.0` |
-| `major` | Breaking changes | `1.0.0` → `2.0.0` |
+| `major` | Breaking changes                  | `1.0.0` → `2.0.0` |
 
 ### Release Process
 
@@ -430,14 +422,14 @@ All workflows follow the "Category: Name" pattern for consistency. See [ADR-0012
 
 **Categories:**
 
-| Category | Description | Example |
-|----------|-------------|---------|
-| `Components:` | CI workflows for individual services | `Components: Admin API - CI` |
-| `Infrastructure:` | Infrastructure provisioning | `Infrastructure: Deploy` |
-| `Deployment:` | Environment deployments | `Deployment: Staging` |
-| `Workspace:` | Workspace-level operations | `Workspace: CI` |
-| `Packages:` | Package publishing | `Packages - Contracts: Publish NuGet` |
-| `Utilities:` | Support and helper workflows | `Utilities: Check Submodules` |
+| Category          | Description                          | Example                               |
+| ----------------- | ------------------------------------ | ------------------------------------- |
+| `Components:`     | CI workflows for individual services | `Components: Admin API - CI`          |
+| `Infrastructure:` | Infrastructure provisioning          | `Infrastructure: Deploy`              |
+| `Deployment:`     | Environment deployments              | `Deployment: Staging`                 |
+| `Workspace:`      | Workspace-level operations           | `Workspace: CI`                       |
+| `Packages:`       | Package publishing                   | `Packages - Contracts: Publish NuGet` |
+| `Utilities:`      | Support and helper workflows         | `Utilities: Link Checker`             |
 
 ### Adding New Components
 
@@ -525,7 +517,7 @@ dotnet add package <PackageName>
 ### Mystira.App / Mystira.StoryGenerator (.NET)
 
 - Follow C# coding conventions
-- Use .NET 9.0 features where appropriate
+- Use .NET 10.0 features where appropriate
 - Implement unit and integration tests
 - Use dependency injection
 
@@ -569,7 +561,6 @@ Be respectful, inclusive, and professional. We're building something amazing tog
 
 - [Quick Start Guide](./docs/guides/quick-start.md)
 - [Comprehensive Setup Guide](./docs/guides/setup.md)
-- [Submodules Guide](./docs/guides/submodules.md)
 - [Environment Variables](./docs/guides/environment-variables.md)
 - [Package Releases](./docs/guides/package-releases.md)
 - [Commit Conventions](./docs/guides/commit-conventions.md)

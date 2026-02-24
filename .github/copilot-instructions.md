@@ -2,11 +2,11 @@
 
 ## Project Overview
 
-Mystira is an AI-powered interactive storytelling platform combining blockchain technology, generative AI, and immersive narratives. This is a monorepo workspace that integrates multiple components as git submodules, managed with pnpm workspaces and Turborepo.
+Mystira is an AI-powered interactive storytelling platform combining blockchain technology, generative AI, and immersive narratives. This is a true monorepo workspace with all components in `packages/`, managed with pnpm workspaces and Turborepo.
 
 ## Architecture
 
-The workspace consists of multiple independent repositories integrated as submodules:
+The workspace consists of multiple packages:
 
 - **Mystira.Chain** (Python, gRPC) - Blockchain integration & Story Protocol
 - **Mystira.App** (C#, .NET) - Main storytelling application
@@ -40,14 +40,6 @@ The workspace consists of multiple independent repositories integrated as submod
 - **Commitlint** - Commit message validation
 
 ## Development Workflow
-
-### Git Submodules
-
-This repository uses git submodules extensively. Each component in `packages/` is a separate repository:
-
-- Always initialize submodules after cloning: `git submodule update --init --recursive`
-- Update specific submodules: `git submodule update --remote packages/<component>`
-- See [Submodules Guide](../docs/guides/submodules.md) for details
 
 ### Branch Strategy
 
@@ -188,7 +180,7 @@ All GitHub Actions workflows follow the "Category: Name" pattern:
 - `Infrastructure:` - Infrastructure operations (e.g., `Infrastructure: Deploy`)
 - `Deployment:` - Environment deployments (e.g., `Deployment: Staging`)
 - `Workspace:` - Workspace-level operations (e.g., `Workspace: CI`)
-- `Utilities:` - Helper workflows (e.g., `Utilities: Check Submodules`)
+- `Utilities:` - Helper workflows (e.g., `Utilities: Link Checker`)
 
 ### CI Requirements
 
@@ -263,7 +255,6 @@ All PRs must pass:
 
 ## Common Pitfalls to Avoid
 
-- Don't forget to update submodules when needed
 - Don't commit `node_modules/`, `dist/`, or build artifacts
 - Don't bypass pre-commit hooks
 - Don't merge without PR approval
@@ -275,7 +266,6 @@ All PRs must pass:
 
 - [Quick Start Guide](../docs/guides/quick-start.md)
 - [Contributing Guide](../CONTRIBUTING.md)
-- [Submodules Guide](../docs/guides/submodules.md)
 - [Architecture Documentation](../docs/guides/architecture.md)
 - [CI/CD Documentation](../docs/cicd/)
 - [Infrastructure Guide](../docs/infrastructure/infrastructure.md)

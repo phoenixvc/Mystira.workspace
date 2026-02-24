@@ -113,7 +113,7 @@ module "mystira_app" {
   # Static Web App Configuration
   enable_static_web_app = true
   static_web_app_sku    = "Free"
-  github_repository_url = "https://github.com/phoenixvc/Mystira.App"
+  github_repository_url = "https://github.com/phoenixvc/Mystira.workspace"
   github_branch         = "main"
 
   # Custom domain for staging - managed by dns-records.tf

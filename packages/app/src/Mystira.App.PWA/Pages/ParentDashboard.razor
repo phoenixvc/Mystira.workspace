@@ -1,0 +1,400 @@
+@page "/parent-dashboard"
+@inject NavigationManager NavigationManager
+@inject IAuthService AuthService
+@inject IApiClient ApiClient
+@inject ICoppaApiClient CoppaApiClient
+@inject ILogger<ParentDashboard> Logger
+@using Account = Mystira.App.PWA.Models.Account
+@using UserProfile = Mystira.App.PWA.Models.UserProfile
+
+<PageTitle>Parent Dashboard - Mystira</PageTitle>
+
+@if (isLoading)
+{
+    <div class="d-flex justify-content-center align-items-center loading-container">
+        <div class="text-center">
+            <div class="spinner-border text-primary-custom mb-3" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="text-muted">Loading parent dashboard...</p>
+        </div>
+    </div>
+}
+else if (!isAuthenticated)
+{
+    <div class="d-flex justify-content-center align-items-center loading-container">
+        <div class="text-center">
+            <i class="fas fa-lock fa-3x text-warning mb-3"></i>
+            <h3>Authentication Required</h3>
+            <p class="text-muted mb-4">Please sign in to access the parent dashboard.</p>
+            <a href="/signin" class="btn btn-primary-custom">
+                <i class="fas fa-sign-in-alt me-2"></i>Sign In
+            </a>
+        </div>
+    </div>
+}
+else
+{
+    <div class="container-fluid py-4">
+        <!-- Header -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <div class="d-flex align-items-center">
+                        <button class="btn btn-outline-secondary me-3" aria-label="Back to home" @onclick="GoBack">
+                            <i class="fas fa-arrow-left"></i>
+                        </button>
+                        <div>
+                            <h2 class="mb-1">Parent Dashboard</h2>
+                            <p class="text-muted mb-0">Manage parental consent and review child profile status</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Messages -->
+        @if (!string.IsNullOrEmpty(successMessage))
+        {
+            <div class="row mb-3">
+                <div class="col-12">
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        <i class="fas fa-check-circle me-2"></i>
+                        @successMessage
+                        <button type="button" class="btn-close" aria-label="Close" @onclick="() => successMessage = string.Empty"></button>
+                    </div>
+                </div>
+            </div>
+        }
+
+        @if (!string.IsNullOrEmpty(errorMessage))
+        {
+            <div class="row mb-3">
+                <div class="col-12">
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <i class="fas fa-exclamation-circle me-2"></i>
+                        @errorMessage
+                        <button type="button" class="btn-close" aria-label="Close" @onclick="() => errorMessage = string.Empty"></button>
+                    </div>
+                </div>
+            </div>
+        }
+
+        <!-- Child Profiles List -->
+        @if (!childConsentEntries.Any())
+        {
+            <div class="row">
+                <div class="col-12">
+                    <div class="card text-center">
+                        <div class="card-body py-5">
+                            <i class="fas fa-child fa-3x text-muted mb-3"></i>
+                            <h5 class="card-title">No Child Profiles Found</h5>
+                            <p class="text-muted mb-4">There are no child profiles associated with your account that require parental consent.</p>
+                            <a href="/profiles" class="btn btn-primary-custom">
+                                <i class="fas fa-users me-2"></i>Manage Profiles
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="row g-4">
+                @foreach (var entry in childConsentEntries)
+                {
+                    <div class="col-md-6 col-lg-4" @key="entry.Profile.Id">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <!-- Profile Header -->
+                                <div class="d-flex align-items-center mb-3">
+                                    <div class="rounded-circle bg-light d-flex align-items-center justify-content-center me-3"
+                                         style="width: 48px; height: 48px;">
+                                        <i class="fas fa-child text-primary"></i>
+                                    </div>
+                                    <div>
+                                        <h5 class="card-title mb-0">@entry.Profile.Name</h5>
+                                        <small class="text-muted">@entry.Profile.DisplayAgeRange</small>
+                                    </div>
+                                </div>
+
+                                <!-- Consent Status -->
+                                <div class="mb-3">
+                                    <span class="fw-semibold me-2">Consent Status:</span>
+                                    @if (entry.ConsentStatus != null)
+                                    {
+                                        <span class="badge @GetStatusBadgeClass(entry.ConsentStatus.Status)">
+                                            @entry.ConsentStatus.Status
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary">Unknown</span>
+                                    }
+                                </div>
+
+                                <!-- Consent Details -->
+                                @if (entry.ConsentStatus != null && !string.IsNullOrEmpty(entry.ConsentStatus.Message))
+                                {
+                                    <p class="text-muted small mb-3">@entry.ConsentStatus.Message</p>
+                                }
+
+                                <!-- Profile Meta -->
+                                <div class="mb-3">
+                                    <div class="text-muted small">
+                                        <i class="fas fa-calendar-alt me-1"></i>
+                                        Created @FormatDate(entry.Profile.CreatedAt)
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Card Footer with Actions -->
+                            <div class="card-footer bg-transparent">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <a href="@($"/profiles/{entry.Profile.Id}")" class="btn btn-sm btn-outline-secondary">
+                                        <i class="fas fa-eye me-1"></i>View Profile
+                                    </a>
+                                    @if (entry.ConsentStatus != null && entry.ConsentStatus.Status == "Verified")
+                                    {
+                                        <button class="btn btn-sm btn-outline-danger"
+                                                @onclick="() => ConfirmRevoke(entry)">
+                                            <i class="fas fa-ban me-1"></i>Revoke Consent
+                                        </button>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+}
+
+<!-- Revoke Consent Confirmation Modal -->
+@if (showRevokeConfirm)
+{
+    <div class="modal fade show d-block modal-backdrop"
+         role="dialog"
+         aria-modal="true"
+         aria-labelledby="revokeModalTitle"
+         tabindex="0"
+         @onkeydown="HandleModalKeyDown">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="revokeModalTitle">Revoke Parental Consent</h5>
+                    <button type="button" class="btn-close" aria-label="Close" @onclick="CloseRevokeConfirm"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to revoke parental consent for <strong>@entryToRevoke?.Profile.Name</strong>?</p>
+                    <p class="text-muted small">
+                        This will restrict the child's access until consent is granted again.
+                        Any active sessions may be interrupted.
+                    </p>
+                    <div class="mb-3">
+                        <label class="form-label" for="revokeEmailInput">Confirm your email address</label>
+                        <input type="email" id="revokeEmailInput" class="form-control" @bind="revokeEmail"
+                               placeholder="Enter your email to confirm" />
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="CloseRevokeConfirm">Cancel</button>
+                    <button type="button" class="btn btn-danger" @onclick="RevokeConsent"
+                            disabled="@(isRevoking || string.IsNullOrWhiteSpace(revokeEmail))">
+                        @if (isRevoking)
+                        {
+                            <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+                            <span>Revoking...</span>
+                        }
+                        else
+                        {
+                            <span>Revoke Consent</span>
+                        }
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private Account? currentAccount;
+    private bool isLoading = true;
+    private bool isAuthenticated = false;
+
+    // Data
+    private readonly List<ChildConsentEntry> childConsentEntries = new();
+
+    // Revoke modal state
+    private bool showRevokeConfirm = false;
+    private bool isRevoking = false;
+    private ChildConsentEntry? entryToRevoke;
+    private string revokeEmail = string.Empty;
+
+    // Messages
+    private string successMessage = string.Empty;
+    private string errorMessage = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            Logger.LogInformation("Initializing Parent Dashboard");
+
+            currentAccount = await AuthService.GetCurrentAccountAsync();
+            if (currentAccount == null)
+            {
+                isAuthenticated = false;
+                isLoading = false;
+                StateHasChanged();
+                return;
+            }
+
+            isAuthenticated = true;
+            await LoadChildConsentData();
+        }
+        catch (OperationCanceledException) { /* navigation or disposal cancellation */ }
+        catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+        {
+            Logger.LogWarning(ex, "Unauthorized when loading parent dashboard, redirecting to sign-in");
+            NavigationManager.NavigateTo("/signin");
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error initializing parent dashboard");
+            errorMessage = "Failed to load parent dashboard. Please refresh the page.";
+        }
+        finally
+        {
+            isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task LoadChildConsentData()
+    {
+        try
+        {
+            Logger.LogInformation("Loading child consent data for account {AccountIdHash}", PiiHelper.AnonymizeId(currentAccount?.Id));
+
+            if (currentAccount == null) return;
+
+            var profiles = await ApiClient.GetProfilesByAccountAsync(currentAccount.Id) ?? new List<UserProfile>();
+
+            childConsentEntries.Clear();
+
+            foreach (var profile in profiles)
+            {
+                var consentStatus = await CoppaApiClient.GetConsentStatusAsync(profile.Id);
+                childConsentEntries.Add(new ChildConsentEntry
+                {
+                    Profile = profile,
+                    ConsentStatus = consentStatus
+                });
+            }
+
+            Logger.LogInformation("Loaded consent data for {Count} profiles", childConsentEntries.Count);
+        }
+        catch (OperationCanceledException) { /* navigation or disposal cancellation */ }
+        catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+        {
+            Logger.LogWarning(ex, "Unauthorized when loading consent data, redirecting to sign-in");
+            NavigationManager.NavigateTo("/signin");
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error loading child consent data");
+            errorMessage = "Failed to load consent data for child profiles.";
+        }
+    }
+
+    private void GoBack()
+    {
+        NavigationManager.NavigateTo("/home");
+    }
+
+    private void ConfirmRevoke(ChildConsentEntry entry)
+    {
+        entryToRevoke = entry;
+        revokeEmail = string.Empty;
+        showRevokeConfirm = true;
+    }
+
+    private void CloseRevokeConfirm()
+    {
+        showRevokeConfirm = false;
+        entryToRevoke = null;
+        revokeEmail = string.Empty;
+    }
+
+    private void HandleModalKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Escape")
+        {
+            CloseRevokeConfirm();
+        }
+    }
+
+    private async Task RevokeConsent()
+    {
+        try
+        {
+            if (entryToRevoke == null || string.IsNullOrWhiteSpace(revokeEmail)) return;
+
+            isRevoking = true;
+            StateHasChanged();
+
+            var result = await CoppaApiClient.RevokeConsentAsync(entryToRevoke.Profile.Id, revokeEmail);
+            if (result != null)
+            {
+                successMessage = $"Parental consent for '{entryToRevoke.Profile.Name}' has been revoked.";
+                CloseRevokeConfirm();
+                await LoadChildConsentData();
+            }
+            else
+            {
+                errorMessage = "Failed to revoke consent. Please verify your email and try again.";
+            }
+        }
+        catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+        {
+            Logger.LogWarning(ex, "Unauthorized when revoking consent, redirecting to sign-in");
+            NavigationManager.NavigateTo("/signin");
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error revoking consent");
+            errorMessage = "An error occurred while revoking consent.";
+        }
+        finally
+        {
+            isRevoking = false;
+            StateHasChanged();
+        }
+    }
+
+    private static string GetStatusBadgeClass(string status)
+    {
+        return status switch
+        {
+            "Verified" => "bg-success",
+            "Pending" => "bg-warning text-dark",
+            "Expired" => "bg-secondary",
+            "Revoked" => "bg-danger",
+            "Denied" => "bg-danger",
+            _ => "bg-secondary"
+        };
+    }
+
+    private static string FormatDate(DateTime? date)
+    {
+        return date?.ToString("MMM d, yyyy") ?? "Unknown";
+    }
+
+    private class ChildConsentEntry
+    {
+        public UserProfile Profile { get; set; } = new();
+        public ConsentStatusResponse? ConsentStatus { get; set; }
+    }
+}

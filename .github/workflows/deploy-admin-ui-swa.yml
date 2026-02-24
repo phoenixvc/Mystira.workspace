@@ -5,7 +5,7 @@ name: "[Deploy] Admin UI to SWA"
 # Triggers:
 #   - Push to dev branch (auto-deploy to dev environment)
 #   - Manual workflow dispatch
-#   - Repository dispatch from Admin.UI submodule
+#   - Repository dispatch
 
 on:
   push:
@@ -50,8 +50,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
-        with:
-          submodules: recursive
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4

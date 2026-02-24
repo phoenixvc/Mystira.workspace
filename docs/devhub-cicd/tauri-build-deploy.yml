@@ -1,7 +1,7 @@
 name: "[Build & Deploy] Dev"
 
 # Builds Tauri app on push to dev branch
-# Triggers workspace notification for submodule tracking
+# Triggers workspace notification
 
 on:
   push:
@@ -154,4 +154,4 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Artifacts built:** Linux, Windows, macOS" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "Workspace notified for submodule tracking." >> $GITHUB_STEP_SUMMARY
+          echo "Workspace notified." >> $GITHUB_STEP_SUMMARY

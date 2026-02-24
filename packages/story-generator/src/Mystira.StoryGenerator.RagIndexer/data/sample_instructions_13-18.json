@@ -1,0 +1,49 @@
+{
+  "dataset": "mystira_teen_story_template",
+  "version": "1.0",
+  "ageGroup": "13-18",
+  "chunks": [
+    {
+      "chunk_id": "teen_core_requirements",
+      "section": "1.1",
+      "title": "Teen Core Story Requirements",
+      "content": "Stories for ages 13-18 should have 15-25 scenes with intricate branching and meaningful choices. Include 4-5+ characters with distinct personalities and motivations. Use mature vocabulary and complex narrative structures. Include multiple quest lines and sub-plots. Implement 4-6 roll scenes with tactical complexity. Create 4-7 distinct endings reflecting different paths and philosophies. Support player agency in shaping story direction and outcome. Include optional content for exploration and discovery.",
+      "category": "story_generation",
+      "subcategory": "core_story_rules",
+      "instructionType": "requirements",
+      "priority": "high",
+      "isMandatory": true,
+      "examples": "Epic adventures with political intrigue, morally complex quests, character-driven narratives with real consequences",
+      "tags": ["teen_design", "agency", "narrative_complexity", "multiple_endings"],
+      "keywords": ["teen_design", "agency", "narrative_complexity", "multiple_endings"]
+    },
+    {
+      "chunk_id": "teen_developmental",
+      "section": "2.1",
+      "title": "Teen Developmental Goals",
+      "content": "Support identity formation and self-discovery. Develop abstract thinking and philosophical reasoning. Build leadership and responsibility skills. Foster understanding of complex social dynamics and group dynamics. Encourage exploration of personal values and ethical frameworks. Support healthy autonomy and decision-making. Build resilience through navigating ambiguity and real-world complexity.",
+      "category": "validation",
+      "subcategory": "developmental_goals",
+      "instructionType": "guidelines",
+      "priority": "high",
+      "isMandatory": true,
+      "examples": "Stories exploring identity, systemic issues, leadership challenges, complex moral questions with multiple valid perspectives",
+      "tags": ["developmental_goals", "identity", "philosophy", "leadership"],
+      "keywords": ["developmental_goals", "identity", "philosophy", "leadership"]
+    },
+    {
+      "chunk_id": "teen_safety",
+      "section": "3.1",
+      "title": "Teen Safety and Appropriateness",
+      "content": "Serious themes and peril appropriate to age can be explored. Avoid graphic violence, sexual content, or gratuitous suffering. Address real-world challenges (prejudice, loss, injustice) authentically without exploitation. Include resources or perspective on serious topics. Show healthy coping mechanisms and support systems. Avoid romanticizing harmful behaviors. Present multiple viewpoints on complex issues.",
+      "category": "safety",
+      "subcategory": "emotional_safety",
+      "instructionType": "safety_policy",
+      "priority": "high",
+      "isMandatory": true,
+      "examples": "Stories addressing real challenges with nuance, showing character growth through adversity, exploring multiple perspectives on complex issues",
+      "tags": ["safety", "authentic_content", "perspective_building"],
+      "keywords": ["safety", "authentic_content", "perspective_building"]
+    }
+  ]
+}

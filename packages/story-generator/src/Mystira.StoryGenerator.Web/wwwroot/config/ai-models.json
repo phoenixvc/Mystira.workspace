@@ -1,0 +1,27 @@
+{
+  "defaultModelId": "gpt-5.1-2",
+  "models": [
+    {
+      "id": "gpt-5.1-2",
+      "displayName": "GPT-5.1.2",
+      "provider": "azure-openai",
+      "deployment": "gpt-5.1-2",
+      "defaultMaxTokens": 2000,
+      "defaultTemperature": 0.7,
+      "maxTokensLimit": 25000,
+      "minTemperature": 0.0,
+      "maxTemperature": 1.0
+    },
+    {
+      "id": "gpt-4.1",
+      "displayName": "GPT-4.1",
+      "provider": "azure-openai",
+      "deployment": "gpt-4.1",
+      "defaultMaxTokens": 2000,
+      "defaultTemperature": 0.7,
+      "maxTokensLimit": 25000,
+      "minTemperature": 0.0,
+      "maxTemperature": 1.0
+    }
+  ]
+}

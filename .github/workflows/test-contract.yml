@@ -170,11 +170,11 @@ jobs:
           echo "breaking_found=$BREAKING_FOUND" >> $GITHUB_OUTPUT
           echo "version_bumped=$VERSION_BUMPED" >> $GITHUB_OUTPUT
 
-      - name: Fail on breaking changes without version bump
+      - name: Warn on breaking changes without version bump
         if: steps.breaking.outputs.breaking_found == 'true' && steps.breaking.outputs.version_bumped != 'true'
         run: |
-          echo "::error::Breaking API changes detected without version bump. Please update the API version in the OpenAPI spec."
-          exit 1
+          echo "::warning::Breaking API changes detected. In the monorepo, version bumps are managed via Changesets - please add a changeset entry for any intentional breaking changes."
+          echo "⚠️ **Breaking changes detected**: Add a changeset entry (`pnpm changeset`) to document intentional breaking changes." >> $GITHUB_STEP_SUMMARY
 
       - name: Acknowledge breaking changes with version bump
         if: steps.breaking.outputs.breaking_found == 'true' && steps.breaking.outputs.version_bumped == 'true'
@@ -262,8 +262,6 @@ jobs:
             path: packages/app
     steps:
       - uses: actions/checkout@v6
-        with:
-          submodules: recursive
 
       - uses: pnpm/action-setup@v4
 
