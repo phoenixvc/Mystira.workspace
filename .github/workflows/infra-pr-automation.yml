@@ -239,11 +239,15 @@ jobs:
         if: steps.azure-login.outcome == 'success'
         working-directory: ${{ matrix.project.dir }}
         run: terragrunt init --terragrunt-non-interactive
+        env:
+          TERRAGRUNT_SKIP_OUTPUTS: "true"
 
       - name: Terragrunt Plan
         id: plan
         if: steps.azure-login.outcome == 'success'
         working-directory: ${{ matrix.project.dir }}
+        env:
+          TERRAGRUNT_SKIP_OUTPUTS: "true"
         run: |
           set +e
           set -o pipefail
@@ -431,6 +435,7 @@ jobs:
         env:
           # Enable experimental Terragrunt Stacks feature
           TERRAGRUNT_EXPERIMENTAL_STACKS: "true"
+          TERRAGRUNT_SKIP_OUTPUTS: "true"
         run: |
           set +e
           STACK_CONFIG="${{ matrix.stack.config }}"
@@ -699,6 +704,7 @@ jobs:
         if: steps.check.outputs.allowed == 'true' && steps.parse.outputs.command == '/plan'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TERRAGRUNT_SKIP_OUTPUTS: "true"
         run: |
           DIR="${{ steps.parse.outputs.directory }}"
 
