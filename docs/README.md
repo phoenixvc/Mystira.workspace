@@ -76,12 +76,12 @@ All workflows follow the "Category: Name" naming convention for clarity.
 
 ### Planning & Roadmaps
 
-- 🗺️ [Implementation Roadmap](./planning/implementation-roadmap.md) - Strategic implementation plan
+- [Workspace Backlog](../BACKLOG.md) - Single consolidated open-work tracker for planning and documentation
 
 ### Development
 
 - 📝 [Commit Conventions](./guides/commit-conventions.md) - Commit message guidelines
-- 🏢 [Setup Status](./setup/setup-status.md) - Repository setup and NuGet implementation status
+- 🏢 [Setup Guide](./guides/setup.md) - Current repository and development setup
 
 ## Project Documentation
 

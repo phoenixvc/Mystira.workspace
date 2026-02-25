@@ -1,76 +1,62 @@
-# Workflow Organization Strategy
+# Workflow Inventory
 
-This document explains the CI/CD workflow organization for the Mystira monorepo.
+This document tracks the current GitHub Actions workflows in this repo.
+It reflects the workflow files present under `.github/workflows/`.
 
-## Overview
+## Current workflows (13)
 
-All code lives in a single monorepo. CI, linting, testing, building, and deployments are managed centrally via GitHub Actions workflows in this repository.
+### Deployment
 
-## Workflow Categories
+- `deploy-app-api-production.yml` - App API blue/green production deploy
+- `deploy-app-api-rollback.yml` - App API manual rollback
+- `deploy-production.yml` - Full production deployment (manual confirmation)
+- `deploy-staging.yml` - Staging deployment
 
-### 🔧 Component CI Workflows
+### Infrastructure
 
-Per-package CI workflows trigger on path-based changes:
+- `infra-deploy.yml` - Terraform apply + infra deployment pipeline
+- `infra-validate.yml` - Terraform/K8s/Docker/security validation
 
-- **`admin-api-ci.yml`** - Admin API (.NET) linting, testing, building
-- **`admin-ui-ci.yml`** - Admin UI (React/TypeScript) linting, testing, building
-- **`chain-ci.yml`** - Chain (Python) linting, testing, Docker builds, K8s validation
-- **`devhub-ci.yml`** - Devhub (Node.js) linting, testing, building
-- **`publisher-ci.yml`** - Publisher (Node.js) linting, testing, Docker builds, K8s validation
-- **`story-generator-ci.yml`** - Story Generator (.NET) linting, testing, Docker builds, NuGet publishing
+### Reusable workflow templates
 
-**Trigger:** Changes to `packages/{component}/**` on dev/main branches
+- `reusable-docker-build.yml`
+- `reusable-security-scan.yml`
+- `reusable-terraform.yml`
 
-### 🚀 Deployment Workflows
+### Security
 
-- **`staging-release.yml`** - Deploys all services to staging
-  - Triggers: Pushes to main with infra/package changes
-  - Environment: <https://staging.mystira.app>
+- `security-keyvault-secrets.yml` - Key Vault secret sync/validation (manual)
+- `security-scan-scheduled.yml` - Weekly security scan + on-demand run
 
-- **`production-release.yml`** - Deploys all services to production
-  - Triggers: Manual only (requires typing "DEPLOY TO PRODUCTION")
-  - Environment: <https://mystira.app>
+### Utilities
 
-- **`mystira-app-api-cicd-prod.yml`** - Blue-green production deployment for App API
+- `utilities-link-checker.yml` - Markdown link checking
 
-### 🏗️ Infrastructure Workflows
+### Workspace
 
-- **`infra-validate.yml`** - Validates Terraform, K8s manifests, Dockerfiles, security scans
-- **`infra-deploy.yml`** - Deploys infrastructure (Terraform apply, Docker builds, K8s)
+- `workspace-ci.yml` - Main workspace CI for dev/main
 
-### 📋 Workspace-Level Workflows
+## Trigger summary
 
-- **`ci.yml`** - Workspace-wide CI (lint, test, build across all packages)
-- **`release.yml`** - NPM package releases via Changesets
+| Workflow                        | Push                              | Pull Request                      | Manual | Schedule | Reusable        |
+| ------------------------------- | --------------------------------- | --------------------------------- | ------ | -------- | --------------- |
+| `workspace-ci.yml`              | `dev`, `main`                     | `dev`, `main`                     | Yes    | -        | -               |
+| `deploy-staging.yml`            | `main` (path-filtered)            | -                                 | Yes    | -        | -               |
+| `deploy-production.yml`         | -                                 | -                                 | Yes    | -        | -               |
+| `deploy-app-api-production.yml` | -                                 | -                                 | Yes    | -        | -               |
+| `deploy-app-api-rollback.yml`   | -                                 | -                                 | Yes    | -        | -               |
+| `infra-validate.yml`            | `main`, `staging` (path-filtered) | `main`, `staging` (path-filtered) | Yes    | -        | -               |
+| `infra-deploy.yml`              | `main` (path-filtered)            | -                                 | Yes    | -        | -               |
+| `security-scan-scheduled.yml`   | -                                 | -                                 | Yes    | Weekly   | -               |
+| `security-keyvault-secrets.yml` | -                                 | -                                 | Yes    | -        | -               |
+| `utilities-link-checker.yml`    | `main` (markdown paths)           | `dev`, `main` (markdown paths)    | Yes    | Weekly   | -               |
+| `reusable-docker-build.yml`     | -                                 | -                                 | -      | -        | `workflow_call` |
+| `reusable-security-scan.yml`    | -                                 | -                                 | -      | -        | `workflow_call` |
+| `reusable-terraform.yml`        | -                                 | -                                 | -      | -        | `workflow_call` |
 
-### 🔧 Utility Workflows
+## Usage notes
 
-- **`utilities-link-checker.yml`** - Validates markdown links (weekly + on changes)
-
-## Development Workflow
-
-1. Make changes in `packages/{component}/`
-2. Create PR to dev/main
-3. CI runs automatically (path-filtered)
-4. Merge to main triggers staging deployment
-5. Production deployment via manual workflow dispatch
-
-## Trigger Summary
-
-| Workflow                | Push (dev/main) | Pull Request  | Manual | Schedule |
-| ----------------------- | --------------- | ------------- | ------ | -------- |
-| Component CIs           | Path-based      | Path-based    | Yes    | -        |
-| Staging Release         | Main only       | -             | Yes    | -        |
-| Production Release      | -               | -             | Yes    | -        |
-| Infrastructure Validate | Path-based      | Path-based    | Yes    | -        |
-| Infrastructure Deploy   | Main only       | -             | Yes    | -        |
-| Workspace CI            | Yes             | Yes           | Yes    | -        |
-| Workspace Release       | Main only       | -             | Yes    | -        |
-| Link Checker            | Markdown only   | Markdown only | Yes    | Weekly   |
-
-## Adding New Component Workflows
-
-1. **Name format**: `Components: {Component Name} - CI`
-2. **File naming**: `{component-name}-ci.yml`
-3. **Include standard jobs**: lint, test, build
-4. **Add path filters** to only trigger on relevant changes
+1. Prefer reusing `reusable-*` templates for shared CI logic.
+2. Use path filters to avoid unnecessary workflow runs.
+3. Require explicit confirmations for production-impacting workflows.
+4. Keep workflow names in `Category: Name` format for consistency.

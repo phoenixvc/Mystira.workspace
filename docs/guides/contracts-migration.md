@@ -221,5 +221,5 @@ Use the label: `contracts-migration`
 
 - [Package Releases Guide](./package-releases.md)
 - [ADR-0020: Package Consolidation Strategy](../architecture/adr/0020-package-consolidation-strategy.md)
-- [Package Inventory](../analysis/package-inventory.md)
+- [ADR-0020 Consolidation Matrix](../architecture/adr/0020-package-consolidation-strategy.md#comprehensive-consolidation-matrix)
 - [Publishing Flow](../cicd/publishing-flow.md)

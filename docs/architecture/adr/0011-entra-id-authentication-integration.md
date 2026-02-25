@@ -1016,7 +1016,7 @@ builder.Services.AddMsalAuthentication(options =>
 - [Kubernetes ServiceAccounts](../../../infra/kubernetes/README.md) - Workload identity for pods
 - [Admin API Module](../../../infra/terraform/modules/admin-api/README.md) - Admin API managed identity
 - [PostgreSQL Module](../../../infra/terraform/modules/shared/postgresql/README.md) - Database with Azure AD auth
-- [Implementation Roadmap - Phase 5.0](../../planning/implementation-roadmap.md#phase-50-authentication-implementation-entra-id--b2c) - Implementation status
+- [Workspace Backlog](../../../BACKLOG.md) - Current implementation status and open work
 
 ### PostgreSQL Azure AD Authentication
 

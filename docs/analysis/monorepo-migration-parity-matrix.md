@@ -90,4 +90,4 @@ Notes:
 - `docs/analysis/evidence/github-manifests/*-legacy-workflows.json`
 - `docs/analysis/evidence/github-manifests/*-monorepo-target.json`
 - `docs/analysis/evidence/github-manifests/mystira-workspace-workflows.json`
-- `docs/app-workflow-cleanup.md` (workflow centralization rationale)
+- `.github/workflows/README.md` (current workflow inventory and trigger model)

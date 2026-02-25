@@ -640,4 +640,4 @@ public class ActiveAccountsSpecTests
 - [Ardalis.Specification Documentation](https://specification.ardalis.com/)
 - [Ardalis.Specification GitHub](https://github.com/ardalis/Specification)
 - [ADR-0014: Polyglot Persistence Framework Selection](../adr/0014-polyglot-persistence-framework-selection.md)
-- [Master Implementation Checklist](../../planning/master-implementation-checklist.md)
+- [Workspace Backlog](../../../BACKLOG.md)

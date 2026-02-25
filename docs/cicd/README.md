@@ -2,6 +2,9 @@
 
 This directory contains documentation for CI/CD pipelines, GitHub Actions workflows, and DevOps practices.
 
+> Source of truth for current workflow file inventory and trigger matrix:
+> `.github/workflows/README.md`.
+
 ## Contents
 
 - [Publishing & Deployment Flow](./publishing-flow.md) - **Complete guide to package publishing and deployment**

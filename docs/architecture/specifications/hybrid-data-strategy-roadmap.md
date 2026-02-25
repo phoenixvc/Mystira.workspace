@@ -525,7 +525,4 @@ public record ScenarioPurchasedEvent(string AccountId, string ScenarioId, decima
 - [ADR-0013: Data Management and Storage Strategy](../architecture/adr/0013-data-management-and-storage-strategy.md)
 - [ADR-0014: Polyglot Persistence Framework Selection](../architecture/adr/0014-polyglot-persistence-framework-selection.md)
 - [ADR-0015: Event-Driven Architecture Framework](../architecture/adr/0015-event-driven-architecture-framework.md)
-- [Repository Architecture](../architecture/migrations/repository-architecture.md)
-- [Mystira.App API Migration](../architecture/migrations/subprojects/mystira-app-api-migration.md)
-- [Mystira.App Admin API Migration](../architecture/migrations/subprojects/mystira-app-admin-api-migration.md)
-- [Code Review Improvements](../architecture/migrations/code-review-improvements.md)
+- [Workspace Backlog](../../../BACKLOG.md) - Implementation status and open technical debt
