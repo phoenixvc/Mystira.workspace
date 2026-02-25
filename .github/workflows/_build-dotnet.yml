@@ -15,40 +15,40 @@ on:
   workflow_call:
     inputs:
       projects:
-        description: 'Comma-separated list of project paths to build'
+        description: "Comma-separated list of project paths to build"
         required: true
         type: string
       test_projects:
-        description: 'Comma-separated list of test project paths (optional)'
+        description: "Comma-separated list of test project paths (optional)"
         required: false
         type: string
-        default: ''
+        default: ""
       configuration:
-        description: 'Build configuration (Release, Debug)'
+        description: "Build configuration (Release, Debug)"
         required: false
         type: string
-        default: 'Release'
+        default: "Release"
       upload_coverage:
-        description: 'Upload coverage to Codecov'
+        description: "Upload coverage to Codecov"
         required: false
         type: boolean
         default: true
       coverage_flags:
-        description: 'Codecov flags'
+        description: "Codecov flags"
         required: false
         type: string
-        default: 'dotnet'
+        default: "dotnet"
       dotnet_version:
-        description: '.NET SDK version'
+        description: ".NET SDK version"
         required: false
         type: string
-        default: '10.0.x'
+        default: "10.0.x"
     outputs:
       build_result:
-        description: 'Build result: success, failure'
+        description: "Build result: success, failure"
         value: ${{ jobs.build.outputs.result }}
       test_result:
-        description: 'Test result: success, failure, skipped'
+        description: "Test result: success, failure, skipped"
         value: ${{ jobs.build.outputs.test_result }}
 
 env:
@@ -73,9 +73,6 @@ jobs:
         uses: actions/setup-dotnet@v5
         with:
           dotnet-version: ${{ inputs.dotnet_version }}
-          source-url: https://nuget.pkg.github.com/phoenixvc/index.json
-        env:
-          NUGET_AUTH_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN }}
 
       - name: Restore dependencies
         run: |

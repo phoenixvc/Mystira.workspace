@@ -39,7 +39,9 @@
         "infra",
         "workspace",
         "deps",
-        "ci"
+        "ci",
+        "workflows",
+        "docs"
       ]
     ],
     "scope-empty": [0],

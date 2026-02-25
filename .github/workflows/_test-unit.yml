@@ -15,35 +15,35 @@ on:
   workflow_call:
     inputs:
       language:
-        description: 'Language/framework: typescript, dotnet'
+        description: "Language/framework: typescript, dotnet"
         required: true
         type: string
       working_directory:
-        description: 'Working directory for tests'
+        description: "Working directory for tests"
         required: false
         type: string
-        default: '.'
+        default: "."
       coverage_threshold:
-        description: 'Minimum coverage percentage (0-100)'
+        description: "Minimum coverage percentage (0-100)"
         required: false
         type: number
         default: 0
       test_filter:
-        description: 'Test filter pattern (dotnet) or test name pattern (vitest)'
+        description: "Test filter pattern (dotnet) or test name pattern (vitest)"
         required: false
         type: string
-        default: ''
+        default: ""
       upload_coverage:
-        description: 'Upload coverage to Codecov'
+        description: "Upload coverage to Codecov"
         required: false
         type: boolean
         default: true
     outputs:
       test_result:
-        description: 'Test result: success, failure, skipped'
+        description: "Test result: success, failure, skipped"
         value: ${{ jobs.unit-tests.outputs.result }}
       coverage_percent:
-        description: 'Coverage percentage achieved'
+        description: "Coverage percentage achieved"
         value: ${{ jobs.unit-tests.outputs.coverage }}
 
 jobs:
@@ -80,10 +80,7 @@ jobs:
         if: inputs.language == 'dotnet'
         uses: actions/setup-dotnet@v5
         with:
-          dotnet-version: '10.0.x'
-          source-url: https://nuget.pkg.github.com/phoenixvc/index.json
-        env:
-          NUGET_AUTH_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN }}
+          dotnet-version: "10.0.x"
 
       # Run TypeScript unit tests
       - name: Run TypeScript unit tests

@@ -17,12 +17,12 @@ on:
         required: true
         type: string
       skip_health_check:
-        description: 'Skip health checks (emergency only)'
+        description: "Skip health checks (emergency only)"
         required: false
         type: boolean
         default: false
       warm_up_seconds:
-        description: 'Warm-up time in seconds before swap'
+        description: "Warm-up time in seconds before swap"
         required: false
         type: number
         default: 60
@@ -89,10 +89,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v5
         with:
-          dotnet-version: '10.0.x'
-          source-url: https://nuget.pkg.github.com/phoenixvc/index.json
-        env:
-          NUGET_AUTH_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN }}
+          dotnet-version: "10.0.x"
 
       - name: Build Application
         run: |
@@ -100,8 +97,6 @@ jobs:
           dotnet restore
           dotnet build --configuration Release --no-restore
           dotnet publish --configuration Release --no-build --output ./publish
-        env:
-          NUGET_AUTH_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN }}
 
       - name: Deploy to Staging Slot
         id: deploy
@@ -311,7 +306,14 @@ jobs:
     name: Deployment Notification
     runs-on: ubuntu-latest
     timeout-minutes: 5
-    needs: [validate-confirmation, deploy-to-staging-slot, health-check-staging, swap-to-production, post-deployment-monitoring]
+    needs:
+      [
+        validate-confirmation,
+        deploy-to-staging-slot,
+        health-check-staging,
+        swap-to-production,
+        post-deployment-monitoring,
+      ]
     if: always()
     steps:
       - name: Generate deployment summary

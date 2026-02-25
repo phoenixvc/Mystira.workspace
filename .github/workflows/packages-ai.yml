@@ -3,19 +3,19 @@ name: "[CI] Mystira.Ai"
 on:
   push:
     paths:
-      - 'packages/ai/**'
-      - 'packages/contracts/**'
-      - 'packages/domain/**'
-      - '.github/workflows/packages-ai.yml'
+      - "packages/ai/**"
+      - "packages/contracts/**"
+      - "packages/domain/**"
+      - ".github/workflows/packages-ai.yml"
     branches:
       - main
-      - 'release/**'
+      - "release/**"
   pull_request:
     paths:
-      - 'packages/ai/**'
-      - 'packages/contracts/**'
-      - 'packages/domain/**'
-      - '.github/workflows/packages-ai.yml'
+      - "packages/ai/**"
+      - "packages/contracts/**"
+      - "packages/domain/**"
+      - ".github/workflows/packages-ai.yml"
 
 concurrency:
   group: packages-ai-${{ github.ref }}
@@ -36,10 +36,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v5
         with:
-          dotnet-version: '10.0.x'
-          source-url: https://nuget.pkg.github.com/phoenixvc/index.json
-        env:
-          NUGET_AUTH_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN }}
+          dotnet-version: "10.0.x"
 
       - name: Build Mystira.Ai
         run: dotnet build packages/ai/Mystira.Ai --configuration Release
@@ -71,10 +68,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v5
         with:
-          dotnet-version: '10.0.x'
-          source-url: https://nuget.pkg.github.com/phoenixvc/index.json
-        env:
-          NUGET_AUTH_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN }}
+          dotnet-version: "10.0.x"
 
       - name: Restore packages
         run: dotnet restore packages/ai/Mystira.Ai
@@ -112,4 +106,4 @@ jobs:
         if: github.event_name == 'pull_request'
         uses: actions/dependency-review-action@v4
         with:
-          config-file: '.github/dependency-review-config.yml'
+          config-file: ".github/dependency-review-config.yml"

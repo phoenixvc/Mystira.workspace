@@ -2,18 +2,20 @@
 
 **Last Updated**: 2025-12-24
 
-This guide covers how to release packages in the Mystira workspace, including NPM packages, NuGet packages, and Docker images.
+This guide covers how to release packages in the Mystira workspace, including **NPM packages** and **Docker images**.
+
+> **Note**: NuGet packages are no longer published. All .NET packages are consumed via `ProjectReference` within the monorepo (see [ADR-0024: True Monorepo Migration](../architecture/adr/0024-true-monorepo-migration.md)).
 
 ---
 
 ## Quick Reference
 
-| Action | Command |
-|--------|---------|
-| Create a changeset | `pnpm changeset` |
-| Check pending changesets | `pnpm changeset status` |
-| Preview version bumps | `pnpm changeset version --dry-run` |
-| Publish (CI only) | Automatic on merge to `main` |
+| Action                   | Command                            |
+| ------------------------ | ---------------------------------- |
+| Create a changeset       | `pnpm changeset`                   |
+| Check pending changesets | `pnpm changeset status`            |
+| Preview version bumps    | `pnpm changeset version --dry-run` |
+| Publish (CI only)        | Automatic on merge to `main`       |
 
 ---
 
@@ -68,11 +70,11 @@ Use arrow keys and space to select packages that were modified:
 
 For each selected package, choose the appropriate bump:
 
-| Type | When to Use | Example |
-|------|-------------|---------|
-| `patch` | Bug fixes, minor updates | `1.0.0` → `1.0.1` |
+| Type    | When to Use                       | Example           |
+| ------- | --------------------------------- | ----------------- |
+| `patch` | Bug fixes, minor updates          | `1.0.0` → `1.0.1` |
 | `minor` | New features, backward compatible | `1.0.0` → `1.1.0` |
-| `major` | Breaking changes | `1.0.0` → `2.0.0` |
+| `major` | Breaking changes                  | `1.0.0` → `2.0.0` |
 
 ```
 🦋  Which packages should have a major bump?
@@ -145,11 +147,11 @@ Add user preferences API endpoint and client types.
 
 Some packages are "linked" - they always share the same version:
 
-| Group | Packages |
-|-------|----------|
-| App | `@mystira/app`, `@mystira/app-contracts` |
+| Group           | Packages                                                         |
+| --------------- | ---------------------------------------------------------------- |
+| App             | `@mystira/app`, `@mystira/app-contracts`                         |
 | Story Generator | `@mystira/story-generator`, `@mystira/story-generator-contracts` |
-| Publisher | `@mystira/publisher`, `@mystira/shared-utils` |
+| Publisher       | `@mystira/publisher`, `@mystira/shared-utils`                    |
 
 When you bump one package in a linked group, all packages in that group receive the same bump.
 
@@ -168,6 +170,7 @@ When you bump one package in a linked group, all packages in that group receive 
 ### Version Packages PR
 
 The automated PR:
+
 - Bumps versions in `package.json` files
 - Updates `CHANGELOG.md` files
 - Removes consumed changeset files
@@ -176,9 +179,9 @@ The automated PR:
 
 ### What Gets Published
 
-| Trigger | NPM Packages | NuGet Packages | Docker Images |
-|---------|--------------|----------------|---------------|
-| Version PR merged | Published to npmjs.org | Triggered automatically | Tagged on next build |
+| Trigger           | NPM Packages           | Docker Images        |
+| ----------------- | ---------------------- | -------------------- |
+| Version PR merged | Published to npmjs.org | Tagged on next build |
 
 ---
 
@@ -201,11 +204,11 @@ pnpm changeset pre exit
 
 ### Pre-release Tags
 
-| Mode | Version Format | Use Case |
-|------|---------------|----------|
-| `alpha` | `1.0.0-alpha.0` | Early development |
-| `beta` | `1.0.0-beta.0` | Feature complete, testing |
-| `rc` | `1.0.0-rc.0` | Release candidate |
+| Mode    | Version Format  | Use Case                  |
+| ------- | --------------- | ------------------------- |
+| `alpha` | `1.0.0-alpha.0` | Early development         |
+| `beta`  | `1.0.0-beta.0`  | Feature complete, testing |
+| `rc`    | `1.0.0-rc.0`    | Release candidate         |
 
 ---
 
@@ -215,24 +218,25 @@ NuGet packages are released through dedicated publish workflows with automatic d
 
 ### Workflows
 
-| Workflow | Package | Version Source |
-|----------|---------|----------------|
-| `Packages - Contracts: Publish NuGet` | `Mystira.Contracts` | `package.json` (Changesets) |
-| `Packages - Shared: Publish NuGet` | `Mystira.Shared` | `.csproj` file |
-| `Packages - Legacy: Submodule NuGet` | Legacy submodule packages | ⚠️ Deprecated |
+| Workflow                              | Package                   | Version Source              |
+| ------------------------------------- | ------------------------- | --------------------------- |
+| `Packages - Contracts: Publish NuGet` | `Mystira.Contracts`       | `package.json` (Changesets) |
+| `Packages - Shared: Publish NuGet`    | `Mystira.Shared`          | `.csproj` file              |
+| `Packages - Legacy: Submodule NuGet`  | Legacy submodule packages | ⚠️ Deprecated               |
 
 ### Automatic Branch Publishing
 
 Both `contracts-publish.yml` and `shared-publish.yml` automatically publish on pushes to dev or main:
 
-| Branch | Version Format | Destination | Example |
-|--------|---------------|-------------|---------|
-| `dev` | `{base}-dev.{run_number}` | GitHub Packages only | `0.1.0-dev.123` |
-| `main` | `{base}` (stable) | GitHub Packages + NuGet.org | `0.1.0` |
+| Branch | Version Format            | Destination                 | Example         |
+| ------ | ------------------------- | --------------------------- | --------------- |
+| `dev`  | `{base}-dev.{run_number}` | GitHub Packages only        | `0.1.0-dev.123` |
+| `main` | `{base}` (stable)         | GitHub Packages + NuGet.org | `0.1.0`         |
 
 ### Manual Trigger
 
 Both workflows support manual dispatch with:
+
 - **Version suffix** (optional): e.g., `beta.1`, `rc.1`
 - **Publish to NuGet.org** checkbox: Controls whether to publish to public registry
 
@@ -244,10 +248,10 @@ When `@mystira/contracts` NPM package is published via Changesets, the correspon
 
 ### Version Synchronization
 
-| Package | Version Source | Strategy |
-|---------|----------------|----------|
+| Package             | Version Source                    | Strategy                       |
+| ------------------- | --------------------------------- | ------------------------------ |
 | `Mystira.Contracts` | `packages/contracts/package.json` | Synced with NPM via Changesets |
-| `Mystira.Shared` | `.csproj` Version property | Independent versioning |
+| `Mystira.Shared`    | `.csproj` Version property        | Independent versioning         |
 
 ### Legacy Submodule Dispatch
 
@@ -277,11 +281,11 @@ Docker images are built and pushed by service-specific CI workflows.
 
 ### Tagging Strategy
 
-| Environment | Tags |
-|-------------|------|
-| Development | `dev`, `dev-{sha}` |
-| Staging | `staging`, `staging-{sha}` |
-| Production | `prod`, `prod-{sha}`, `latest` |
+| Environment | Tags                           |
+| ----------- | ------------------------------ |
+| Development | `dev`, `dev-{sha}`             |
+| Staging     | `staging`, `staging-{sha}`     |
+| Production  | `prod`, `prod-{sha}`, `latest` |
 
 ### Manual Build
 
@@ -311,16 +315,27 @@ pnpm changeset version --dry-run
 
 ### Published Packages
 
-```bash
+````bash
 # Check NPM package
 npm view @mystira/publisher versions
 
-# Check NuGet package
-dotnet package search Mystira.StoryGenerator --source github
+### Checking .NET Packages
+
+Since .NET packages are no longer published (consumed via `ProjectReference`):
+
+```bash
+# Build and verify packages locally
+dotnet build packages/shared/Mystira.Shared
+dotnet build packages/contracts/dotnet/Mystira.Contracts
+````
+
+> See [packages-publish.yml](../../.github/workflows/packages-publish.yml) for CI validation.
 
 # Check Docker images
+
 az acr repository show-tags --name myssharedacr --repository publisher
-```
+
+````
 
 ### GitHub Actions
 
@@ -347,13 +362,14 @@ Monitor releases at: `https://github.com/phoenixvc/Mystira.workspace/actions`
 git status  # Check for untracked files in .changeset/
 git add .changeset/*.md
 git commit -m "chore: add changeset"
-```
+````
 
 ### Version PR Not Created
 
 **Problem**: Merged to main but no Version PR appeared
 
 **Possible causes**:
+
 1. No changesets in the merge
 2. Workflow failed (check Actions tab)
 3. All changesets were for ignored packages
@@ -363,6 +379,7 @@ git commit -m "chore: add changeset"
 **Problem**: Version PR merged but package not on npm
 
 **Check**:
+
 1. `NPM_TOKEN` secret is valid
 2. Package `access` is set to `public` in config
 3. No npm publish errors in workflow logs
@@ -372,6 +389,7 @@ git commit -m "chore: add changeset"
 **Problem**: NuGet package not appearing after release
 
 **Check**:
+
 1. `NUGET_API_KEY` secret is valid
 2. Package version doesn't already exist
 3. Check workflow logs:
@@ -400,11 +418,13 @@ git commit -m "chore: add changeset"
 ### Changeset Summary Examples
 
 **Good**:
+
 ```
 Add retry logic to API client for improved reliability under network issues.
 ```
 
 **Bad**:
+
 ```
 fix: refactor ApiClient.ts to use async/await with try/catch
 ```
@@ -415,18 +435,18 @@ fix: refactor ApiClient.ts to use async/await with try/catch
 
 ### Current Packages
 
-| Package | Type | Location | Purpose |
-|---------|------|----------|---------|
-| `@mystira/app` | NPM | `packages/app` | Core app package |
-| `@mystira/app-contracts` | NPM | `packages/app` | App API types |
-| `@mystira/story-generator` | NPM | `packages/story-generator` | Story generator package |
-| `@mystira/story-generator-contracts` | NPM | `packages/story-generator` | Story generator API types |
-| `@mystira/publisher` | NPM | `packages/publisher` | Publishing service |
-| `@mystira/shared-utils` | NPM | `packages/publisher` | Shared utilities |
-| `Mystira.Contracts` | NuGet | `packages/contracts/dotnet` | Unified .NET API contracts |
-| `Mystira.Shared` | NuGet | `packages/shared` | .NET shared utilities |
-| `Mystira.App.Contracts` | NuGet | `packages/app` | ⚠️ Deprecated - use Mystira.Contracts |
-| `Mystira.StoryGenerator.Contracts` | NuGet | `packages/story-generator` | ⚠️ Deprecated - use Mystira.Contracts |
+| Package                              | Type  | Location                    | Purpose                               |
+| ------------------------------------ | ----- | --------------------------- | ------------------------------------- |
+| `@mystira/app`                       | NPM   | `packages/app`              | Core app package                      |
+| `@mystira/app-contracts`             | NPM   | `packages/app`              | App API types                         |
+| `@mystira/story-generator`           | NPM   | `packages/story-generator`  | Story generator package               |
+| `@mystira/story-generator-contracts` | NPM   | `packages/story-generator`  | Story generator API types             |
+| `@mystira/publisher`                 | NPM   | `packages/publisher`        | Publishing service                    |
+| `@mystira/shared-utils`              | NPM   | `packages/publisher`        | Shared utilities                      |
+| `Mystira.Contracts`                  | NuGet | `packages/contracts/dotnet` | Unified .NET API contracts            |
+| `Mystira.Shared`                     | NuGet | `packages/shared`           | .NET shared utilities                 |
+| `Mystira.App.Contracts`              | NuGet | `packages/app`              | ⚠️ Deprecated - use Mystira.Contracts |
+| `Mystira.StoryGenerator.Contracts`   | NuGet | `packages/story-generator`  | ⚠️ Deprecated - use Mystira.Contracts |
 
 ### Linked Packages
 
@@ -442,12 +462,12 @@ Group 3: @mystira/publisher ↔ @mystira/shared-utils
 
 **Phase 1 Complete** - New unified packages are available:
 
-| New Package | Replaces | Status |
-|-------------|----------|--------|
-| `@mystira/contracts` (NPM) | `@mystira/app-contracts`, `@mystira/story-generator-contracts` | ✅ Available |
-| `Mystira.Contracts` (NuGet) | `Mystira.App.Contracts`, `Mystira.StoryGenerator.Contracts` | ✅ Available |
-| `Mystira.Shared` (NuGet) | N/A (new shared utilities) | ✅ Available |
-| `@mystira/shared-utils` | (moved from Publisher) | ✅ Available |
+| New Package                 | Replaces                                                       | Status       |
+| --------------------------- | -------------------------------------------------------------- | ------------ |
+| `@mystira/contracts` (NPM)  | `@mystira/app-contracts`, `@mystira/story-generator-contracts` | ✅ Available |
+| `Mystira.Contracts` (NuGet) | `Mystira.App.Contracts`, `Mystira.StoryGenerator.Contracts`    | ✅ Available |
+| `Mystira.Shared` (NuGet)    | N/A (new shared utilities)                                     | ✅ Available |
+| `@mystira/shared-utils`     | (moved from Publisher)                                         | ✅ Available |
 
 **Migration Period Active** - Old packages still work but are deprecated.
 
@@ -455,11 +475,11 @@ Group 3: @mystira/publisher ↔ @mystira/shared-utils
 
 All NuGet workflows use the "Packages - " prefix for grouping in GitHub Actions UI:
 
-| Workflow Name | Purpose |
-|---------------|---------|
-| `Packages - Contracts: Publish NuGet` | Unified contracts package |
-| `Packages - Shared: Publish NuGet` | Shared utilities package |
-| `Packages - Legacy: Submodule NuGet` | ⚠️ Deprecated submodule packages |
+| Workflow Name                         | Purpose                          |
+| ------------------------------------- | -------------------------------- |
+| `Packages - Contracts: Publish NuGet` | Unified contracts package        |
+| `Packages - Shared: Publish NuGet`    | Shared utilities package         |
+| `Packages - Legacy: Submodule NuGet`  | ⚠️ Deprecated submodule packages |
 
 See [Contracts Migration Guide](./contracts-migration.md) for upgrade instructions.
 

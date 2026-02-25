@@ -3,17 +3,17 @@ name: "[CI] Mystira.Shared"
 on:
   push:
     paths:
-      - 'packages/shared/**'
-      - 'packages/domain/**'
-      - '.github/workflows/packages-shared.yml'
+      - "packages/shared/**"
+      - "packages/domain/**"
+      - ".github/workflows/packages-shared.yml"
     branches:
       - main
-      - 'release/**'
+      - "release/**"
   pull_request:
     paths:
-      - 'packages/shared/**'
-      - 'packages/domain/**'
-      - '.github/workflows/packages-shared.yml'
+      - "packages/shared/**"
+      - "packages/domain/**"
+      - ".github/workflows/packages-shared.yml"
 
 concurrency:
   group: packages-shared-${{ github.ref }}
@@ -34,10 +34,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v5
         with:
-          dotnet-version: '10.0.x'
-          source-url: https://nuget.pkg.github.com/phoenixvc/index.json
-        env:
-          NUGET_AUTH_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN }}
+          dotnet-version: "10.0.x"
 
       - name: Build Mystira.Shared
         run: dotnet build packages/shared/Mystira.Shared --configuration Release
@@ -69,10 +66,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v5
         with:
-          dotnet-version: '10.0.x'
-          source-url: https://nuget.pkg.github.com/phoenixvc/index.json
-        env:
-          NUGET_AUTH_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN }}
+          dotnet-version: "10.0.x"
 
       - name: Restore packages
         run: dotnet restore packages/shared/Mystira.Shared
@@ -100,4 +94,4 @@ jobs:
         if: github.event_name == 'pull_request'
         uses: actions/dependency-review-action@v4
         with:
-          config-file: '.github/dependency-review-config.yml'
+          config-file: ".github/dependency-review-config.yml"

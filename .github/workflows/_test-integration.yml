@@ -16,32 +16,32 @@ on:
   workflow_call:
     inputs:
       service:
-        description: 'Service to test (admin-api, story-generator, chain, publisher)'
+        description: "Service to test (admin-api, story-generator, chain, publisher)"
         required: true
         type: string
       compose_file:
-        description: 'Docker Compose file for test dependencies'
+        description: "Docker Compose file for test dependencies"
         required: false
         type: string
-        default: 'docker-compose.test.yml'
+        default: "docker-compose.test.yml"
       working_directory:
-        description: 'Working directory for tests'
+        description: "Working directory for tests"
         required: false
         type: string
-        default: '.'
+        default: "."
       test_timeout:
-        description: 'Test timeout in minutes'
+        description: "Test timeout in minutes"
         required: false
         type: number
         default: 15
       language:
-        description: 'Language/framework: typescript, dotnet, python'
+        description: "Language/framework: typescript, dotnet, python"
         required: false
         type: string
-        default: 'dotnet'
+        default: "dotnet"
     outputs:
       test_result:
-        description: 'Test result: success, failure'
+        description: "Test result: success, failure"
         value: ${{ jobs.integration-tests.outputs.result }}
 
 env:
@@ -89,10 +89,7 @@ jobs:
         if: inputs.language == 'dotnet'
         uses: actions/setup-dotnet@v5
         with:
-          dotnet-version: '10.0.x'
-          source-url: https://nuget.pkg.github.com/phoenixvc/index.json
-        env:
-          NUGET_AUTH_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN }}
+          dotnet-version: "10.0.x"
 
       # TypeScript setup
       - name: Setup pnpm
@@ -117,7 +114,7 @@ jobs:
         if: inputs.language == 'python'
         uses: actions/setup-python@v6
         with:
-          python-version: '3.14'
+          python-version: "3.14"
 
       - name: Install dependencies (Python)
         if: inputs.language == 'python'

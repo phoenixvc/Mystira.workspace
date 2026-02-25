@@ -10,22 +10,22 @@ on:
   push:
     branches: [dev, main]
     paths:
-      - 'packages/api-spec/openapi/**'
-      - 'packages/contracts/**'
-      - 'packages/*/src/**/*.ts'
-      - 'packages/*/**/*.cs'
-      - '.github/workflows/test-contract.yml'
+      - "packages/api-spec/openapi/**"
+      - "packages/contracts/**"
+      - "packages/*/src/**/*.ts"
+      - "packages/*/**/*.cs"
+      - ".github/workflows/test-contract.yml"
 
   pull_request:
     branches: [dev, main]
     paths:
-      - 'packages/api-spec/openapi/**'
-      - 'packages/contracts/**'
+      - "packages/api-spec/openapi/**"
+      - "packages/contracts/**"
 
   workflow_dispatch:
     inputs:
       validate_breaking:
-        description: 'Check for breaking changes'
+        description: "Check for breaking changes"
         required: false
         type: boolean
         default: true
@@ -232,10 +232,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v5
         with:
-          dotnet-version: '10.0.x'
-          source-url: https://nuget.pkg.github.com/phoenixvc/index.json
-        env:
-          NUGET_AUTH_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN }}
+          dotnet-version: "10.0.x"
 
       - name: Build Mystira.Contracts
         run: |
@@ -291,7 +288,13 @@ jobs:
     name: Contract Test Summary
     runs-on: ubuntu-latest
     timeout-minutes: 5
-    needs: [validate-openapi, contract-typescript, contract-dotnet, consumer-contract-tests]
+    needs:
+      [
+        validate-openapi,
+        contract-typescript,
+        contract-dotnet,
+        consumer-contract-tests,
+      ]
     if: always()
     steps:
       - name: Generate Summary
