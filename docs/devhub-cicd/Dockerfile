@@ -4,7 +4,7 @@
 # ============================================
 # Stage 1: Build the application
 # ============================================
-FROM rust:1.93-slim-bookworm@sha256:9eb3d4c46eec8564bbecb6dba21861497989df0c74743d040ea356b3615ab187 AS builder
+FROM rust:1.93-slim-bookworm@sha256:5b9332190bb3b9ece73b810cd1f1e9f06343b294ce184bcb067f0747d7d333ea AS builder
 
 # Install build dependencies
 RUN apt-get update && apt-get install -y \
