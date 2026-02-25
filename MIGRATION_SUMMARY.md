@@ -14,18 +14,21 @@ All infrastructure resources have been updated to comply with Azure Naming Conve
 ## 📋 Recent Updates (December 2025)
 
 ### Environment Alignment
+
 - **Staging/Prod aligned with Dev**: Added missing admin-api module, subnets, PostgreSQL AAD auth
 - **Workload Identity**: All services (story-generator, publisher, chain, admin-api) now have `workload_identities` configured
 - **Microsoft Entra External ID**: Module added to staging/prod (disabled until External ID tenant created)
 - **PostgreSQL AAD Auth**: `aad_auth_enabled` and `aad_admin_identities` added for passwordless database access
 
 ### Kubernetes Standardization
+
 - **Resource Naming**: All K8s resources standardized to `mys-*` prefix (deployments, services, configmaps, HPAs)
 - **Kustomization Patches**: Fixed all overlay patch targets to match actual resource names in dev/staging/prod
 - **ServiceAccounts**: Consolidated to `service-accounts.yaml`, removed duplicates from deployment files
 - **Image Registry**: Updated to `myssharedacr.azurecr.io` across all manifests
 
 ### New Terraform Modules
+
 - **Admin API Module** (`infra/terraform/modules/admin-api/`): Managed identity, Key Vault, Application Insights
 
 ---
@@ -81,7 +84,7 @@ All CI/CD pipelines updated:
 - **Component CI Workflows** (`chain-ci.yml`, `publisher-ci.yml`, `story-generator-ci.yml`)
   - Updated: ACR name `mysprodacr` → `myssharedacr`
 
-- **Release Workflows** (`production-release.yml`, `staging-release.yml`)
+- **Release Workflows** (`deploy-production.yml`, `deploy-staging.yml`)
   - Updated: Resource groups and AKS cluster names
   - Region: Changed from `eastus` → `southafricanorth`
 
