@@ -14,16 +14,9 @@ This directory contains getting started guides and development documentation for
 
 | Guide                                         | Description                          |
 | --------------------------------------------- | ------------------------------------ |
-| [Submodules Guide](./submodules.md)           | Working with git submodules          |
+| [Setup Guide](./setup.md)                     | Working with monorepo packages       |
 | [Commit Conventions](./commit-conventions.md) | Commit message format and guidelines |
 | [Architecture Overview](./architecture.md)    | System architecture and design       |
-
-## Releases & Publishing
-
-| Guide                                         | Description                                   |
-| --------------------------------------------- | --------------------------------------------- |
-| [Package Releases](./package-releases.md)     | How to create changesets and release packages |
-| [Publishing Flow](../cicd/publishing-flow.md) | Complete publishing & deployment overview     |
 
 ## Quick Links
 

@@ -30,15 +30,15 @@
 | `@mystira/contracts`    | `packages/contracts`    | ✅ Active | Unified API types with subpath exports |
 | `@mystira/shared-utils` | `packages/shared-utils` | ✅ Active | Retry, logging, validation utilities   |
 
-### NPM Packages (Submodules)
+### NPM Packages (Monorepo Packages)
 
-| Package                              | Current Location                       | Type | Could Combine?   | Optimal Destination                      | Notes                                |
-| ------------------------------------ | -------------------------------------- | ---- | ---------------- | ---------------------------------------- | ------------------------------------ |
-| `@mystira/app`                       | `packages/app` (submodule)             | NPM  | ❌ Keep separate | Submodule                                | Core app - linked with contracts     |
-| `@mystira/app-contracts`             | `packages/app` (submodule)             | NPM  | ⏳ Deprecated    | Use `@mystira/contracts/app`             | Migrating to unified contracts       |
-| `@mystira/story-generator`           | `packages/story-generator` (submodule) | NPM  | ❌ Keep separate | Submodule                                | Core service - linked with contracts |
-| `@mystira/story-generator-contracts` | `packages/story-generator` (submodule) | NPM  | ⏳ Deprecated    | Use `@mystira/contracts/story-generator` | Migrating to unified contracts       |
-| `@mystira/publisher`                 | `packages/publisher` (submodule)       | NPM  | ❌ Keep separate | Submodule                                | Independent service                  |
+| Package                              | Current Location           | Type | Could Combine?   | Optimal Destination                      | Notes                                |
+| ------------------------------------ | -------------------------- | ---- | ---------------- | ---------------------------------------- | ------------------------------------ |
+| `@mystira/app`                       | `packages/app`             | NPM  | ❌ Keep separate | Monorepo package                         | Core app - linked with contracts     |
+| `@mystira/app-contracts`             | `packages/app`             | NPM  | ⏳ Deprecated    | Use `@mystira/contracts/app`             | Migrating to unified contracts       |
+| `@mystira/story-generator`           | `packages/story-generator` | NPM  | ❌ Keep separate | Monorepo package                         | Core service - linked with contracts |
+| `@mystira/story-generator-contracts` | `packages/story-generator` | NPM  | ⏳ Deprecated    | Use `@mystira/contracts/story-generator` | Migrating to unified contracts       |
+| `@mystira/publisher`                 | `packages/publisher`       | NPM  | ❌ Keep separate | Monorepo package                         | Independent service                  |
 
 ### NuGet Packages (Workspace Level)
 
@@ -47,37 +47,37 @@
 | `Mystira.Contracts` | `packages/contracts/dotnet`      | ✅ Active | Unified .NET contracts         |
 | `Mystira.Shared`    | `packages/shared/Mystira.Shared` | ✅ Active | Auth, authorization, telemetry |
 
-### NuGet Packages (Submodules)
+### NuGet Packages (Monorepo Packages)
 
 | Package                            | Current Location                | Type  | Could Combine? | Optimal Destination                    | Notes                                         |
 | ---------------------------------- | ------------------------------- | ----- | -------------- | -------------------------------------- | --------------------------------------------- |
-| `Mystira.App.Domain`               | `packages/app/src/`             | NuGet | ❌ Keep        | Submodule                              | Core domain - consumed by Admin.Api via NuGet |
-| `Mystira.App.Application`          | `packages/app/src/`             | NuGet | ❌ Keep        | Submodule                              | Application layer - consumed by Admin.Api     |
+| `Mystira.App.Domain`               | `packages/app/src/`             | NuGet | ❌ Keep        | Monorepo package                       | Core domain - consumed by Admin.Api via NuGet |
+| `Mystira.App.Application`          | `packages/app/src/`             | NuGet | ❌ Keep        | Monorepo package                       | Application layer - consumed by Admin.Api     |
 | `Mystira.App.Shared`               | `packages/app/src/`             | NuGet | ⏳ Deprecated  | Use `Mystira.Shared`                   | Migrating to workspace-level shared           |
 | `Mystira.App.Contracts`            | `packages/app/src/`             | NuGet | ⏳ Deprecated  | Use `Mystira.Contracts.App`            | Migrating to unified contracts                |
 | `Mystira.StoryGenerator.Contracts` | `packages/story-generator/src/` | NuGet | ⏳ Deprecated  | Use `Mystira.Contracts.StoryGenerator` | Migrating to unified contracts                |
 
 ### Docker Images
 
-| Image             | Current Location                | Could Combine? | Optimal Destination          | Notes                       |
-| ----------------- | ------------------------------- | -------------- | ---------------------------- | --------------------------- |
-| `publisher`       | `infra/docker/publisher/`       | ❌ Keep        | Move to submodule (ADR-0019) | Independent service         |
-| `chain`           | `infra/docker/chain/`           | ❌ Keep        | Move to submodule (ADR-0019) | Independent service         |
-| `story-generator` | `infra/docker/story-generator/` | ❌ Keep        | Move to submodule (ADR-0019) | Independent service         |
-| `admin-api`       | Submodule                       | ❌ Keep        | Submodule                    | Already in correct location |
+| Image             | Current Location                | Could Combine? | Optimal Destination      | Notes                       |
+| ----------------- | ------------------------------- | -------------- | ------------------------ | --------------------------- |
+| `publisher`       | `infra/docker/publisher/`       | ❌ Keep        | Monorepo infra directory | Independent service         |
+| `chain`           | `infra/docker/chain/`           | ❌ Keep        | Monorepo infra directory | Independent service         |
+| `story-generator` | `infra/docker/story-generator/` | ❌ Keep        | Monorepo infra directory | Independent service         |
+| `admin-api`       | `packages/admin-api`            | ❌ Keep        | Monorepo package         | Already in correct location |
 
 ### Services (Non-Package)
 
 | Service                    | Current Location           | Could Combine? | Optimal Destination | Notes                          |
 | -------------------------- | -------------------------- | -------------- | ------------------- | ------------------------------ |
-| Mystira.App.Api            | `packages/app`             | ❌ Keep        | Submodule           | Public API - Azure App Service |
-| Mystira.App.PWA            | `packages/app`             | ❌ Keep        | Submodule           | Blazor WASM - Static Web App   |
-| Mystira.StoryGenerator.Api | `packages/story-generator` | ❌ Keep        | Submodule           | API service - Kubernetes       |
-| Mystira.StoryGenerator.Web | `packages/story-generator` | ❌ Keep        | Submodule           | Blazor WASM - Static Web App   |
-| Mystira.Admin.Api          | `packages/admin-api`       | ❌ Keep        | Separate submodule  | Security isolation required    |
-| Mystira.Admin.UI           | `packages/admin-ui`        | ❌ Keep        | Separate submodule  | Security isolation required    |
-| Mystira.Chain              | `packages/chain`           | ❌ Keep        | Submodule           | Blockchain - Kubernetes        |
-| Mystira.DevHub             | `packages/devhub`          | ❌ Keep        | Submodule           | Developer portal               |
+| Mystira.App.Api            | `packages/app`             | ❌ Keep        | Monorepo package    | Public API - Azure App Service |
+| Mystira.App.PWA            | `packages/app`             | ❌ Keep        | Monorepo package    | Blazor WASM - Static Web App   |
+| Mystira.StoryGenerator.Api | `packages/story-generator` | ❌ Keep        | Monorepo package    | API service - Kubernetes       |
+| Mystira.StoryGenerator.Web | `packages/story-generator` | ❌ Keep        | Monorepo package    | Blazor WASM - Static Web App   |
+| Mystira.Admin.Api          | `packages/admin-api`       | ❌ Keep        | Monorepo package    | Security isolation required    |
+| Mystira.Admin.UI           | `packages/admin-ui`        | ❌ Keep        | Monorepo package    | Security isolation required    |
+| Mystira.Chain              | `packages/chain`           | ❌ Keep        | Monorepo package    | Blockchain - Kubernetes        |
+| Mystira.DevHub             | `packages/devhub`          | ❌ Keep        | Monorepo package    | Developer portal               |
 
 ---
 
@@ -129,7 +129,7 @@ packages/
 
 ```
 packages/
-└── contracts/           # NEW workspace package (or separate submodule)
+└── contracts/           # Workspace package
     └── src/
         └── Mystira.Contracts/
             ├── App/     # App contracts
@@ -139,7 +139,7 @@ packages/
 
 #### 3. Move `@mystira/shared-utils` to Workspace
 
-**Current:** Inside `packages/publisher` submodule
+**Current:** Inside `packages/publisher`
 **Optimal:** Workspace-level `packages/shared-utils`
 
 **Benefits:**
@@ -189,21 +189,21 @@ packages/
 
 ```
 packages/
-├── app/                          # Submodule (Mystira.App)
+├── app/                          # Monorepo package (Mystira.App)
 │   └── src/
 │       ├── Mystira.App.Contracts/  ← Could extract
 │       └── ...
-├── story-generator/              # Submodule (Mystira.StoryGenerator)
+├── story-generator/              # Monorepo package (Mystira.StoryGenerator)
 │   └── src/
 │       ├── Mystira.StoryGenerator.Contracts/  ← Could extract
 │       └── ...
-├── publisher/                    # Submodule (Mystira.Publisher)
+├── publisher/                    # Monorepo package (Mystira.Publisher)
 │   └── packages/
 │       └── shared-utils/         ← Could move to workspace
-├── admin-api/                    # Submodule
-├── admin-ui/                     # Submodule
-├── chain/                        # Submodule
-└── devhub/                       # Submodule
+├── admin-api/                    # Monorepo package
+├── admin-ui/                     # Monorepo package
+├── chain/                        # Monorepo package
+└── devhub/                       # Monorepo package
 ```
 
 ### Proposed State (After Consolidation)
@@ -227,13 +227,13 @@ packages/
 │   ├── package.json              # @mystira/shared-utils
 │   └── src/
 │
-├── app/                          # Submodule (unchanged structure)
-├── story-generator/              # Submodule (unchanged structure)
-├── publisher/                    # Submodule (remove shared-utils)
-├── admin-api/                    # Submodule
-├── admin-ui/                     # Submodule
-├── chain/                        # Submodule
-└── devhub/                       # Submodule
+├── app/                          # Monorepo package (unchanged structure)
+├── story-generator/              # Monorepo package (unchanged structure)
+├── publisher/                    # Monorepo package (remove shared-utils)
+├── admin-api/                    # Monorepo package
+├── admin-ui/                     # Monorepo package
+├── chain/                        # Monorepo package
+└── devhub/                       # Monorepo package
 ```
 
 ---
@@ -248,7 +248,7 @@ packages/
 | **NuGet Consumers**    | Update package reference to `Mystira.Contracts`                         |
 | **Changesets Config**  | Update linked packages                                                  |
 | **Release Workflow**   | Simplify - single contracts package instead of multiple                 |
-| **Submodule Dispatch** | Update to trigger `contracts-publish` instead of separate events        |
+| **Workspace Dispatch** | Update to trigger `contracts-publish` instead of separate events        |
 
 ### Versioning After Consolidation
 
@@ -285,7 +285,7 @@ packages/
 
 ## Infrastructure Pattern Analysis (Phase 4)
 
-Detailed code-level analysis of App and StoryGenerator submodules identified shared patterns that could be consolidated into `Mystira.Shared`.
+Detailed code-level analysis of App and StoryGenerator packages identified shared patterns that could be consolidated into `Mystira.Shared`.
 
 ### Pattern Comparison
 
@@ -356,9 +356,9 @@ public async Task<T> ExecuteWithRetryAsync<T>(
 - `ContinuityBackgroundQueue` using `Channel<T>`
 - Not suitable for multi-instance deployments
 
-### Submodule Initialization Status
+### Package Analysis Status
 
-| Submodule                  | Status         | Analysis                                              |
+| Package                    | Status         | Analysis                                              |
 | -------------------------- | -------------- | ----------------------------------------------------- |
 | `packages/app`             | ✅ Initialized | Full analysis completed                               |
 | `packages/story-generator` | ✅ Initialized | Full analysis completed                               |
@@ -511,14 +511,14 @@ See [ADR-0020](../architecture/adr/0020-package-consolidation-strategy.md#compre
 ### Completed ✅
 
 1. ~~**Create `packages/contracts`** workspace package~~ ✅
-2. ~~**Migrate TypeScript types** from submodules~~ ✅
-3. ~~**Migrate NuGet contracts** from submodules~~ ✅
+2. ~~**Migrate TypeScript types** from workspace packages~~ ✅
+3. ~~**Migrate NuGet contracts** from workspace packages~~ ✅
 4. ~~**Move `shared-utils`** to workspace level~~ ✅
 5. ~~**Update Changesets config** for new package structure~~ ✅
 6. ~~**Update CI/CD workflows** for unified contracts publishing~~ ✅
 7. ~~**Create `Mystira.Shared`** with auth infrastructure~~ ✅
 8. ~~**Analyze App and StoryGenerator for consolidation**~~ ✅
-9. ~~**Initialize all submodules**~~ ✅ (admin-api, admin-ui, publisher, devhub, chain)
+9. ~~**Analyze all package directories**~~ ✅ (admin-api, admin-ui, publisher, devhub, chain)
 10. ~~**Analyze design tokens and UI/UX assets**~~ ✅
 
 ### Phase 4: .NET Backend Consolidation ✅
@@ -552,8 +552,6 @@ See [ADR-0020](../architecture/adr/0020-package-consolidation-strategy.md#compre
 
 ## Related Documentation
 
-- [Publishing Flow](../cicd/publishing-flow.md)
-- [Package Releases Guide](../guides/package-releases.md)
 - [ADR-0007: NuGet Feed Strategy](../architecture/adr/0007-nuget-feed-strategy-for-shared-libraries.md)
 - [ADR-0009: App Segregation Strategy](../architecture/adr/0009-further-app-segregation-strategy.md)
 - [ADR-0015: Event-Driven Architecture (Wolverine)](../architecture/adr/0015-event-driven-architecture-framework.md)
